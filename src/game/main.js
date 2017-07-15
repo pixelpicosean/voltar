@@ -1,26 +1,28 @@
-import * as PIXI from 'engine';
-import scene_tree from './SceneTree';
+import * as V from 'engine';
 
 
-PIXI.loader
+V.settings.SCALE_MODE = V.SCALE_MODES.NEAREST;
+
+
+V.loader
     .add('pickup', 'media/health-pack.png');
 
-const tex = PIXI.utils.TextureCache;
+const tex = V.utils.TextureCache;
 
-class Scene extends PIXI.Container {
+class Scene extends V.Node2D {
     static instance() {
         const s = new Scene();
         s.init();
         return s;
     }
     init() {
-        PIXI.loader.on('progress', (loader, resource) => {
+        V.loader.on('progress', (loader, resource) => {
             console.log(`loading: ${resource.url}`);
             console.log(`progress: ${loader.progress}%`);
         });
 
-        PIXI.loader.load(() => {
-            const spr = new PIXI.Sprite(tex['pickup']);
+        V.loader.load(() => {
+            const spr = new V.Sprite(tex['pickup']);
             spr.anchor.set(0.5, 0.5);
             spr.position.set(128, 128);
             spr.scale.set(4);
@@ -39,7 +41,7 @@ class Scene extends PIXI.Container {
     _process(delta) {}
 }
 
-scene_tree.init({
+V.scene_tree.init({
     width: 256,
     height: 256,
 

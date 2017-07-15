@@ -14,6 +14,7 @@ import * as loaders from './loaders';
 import * as mesh from './mesh';
 import * as particles from './particles';
 import * as prepare from './prepare';
+import SceneTree from './SceneTree';
 
 // handle mixins now, after all code has been added
 import { utils } from './core';
@@ -39,3 +40,5 @@ export {
     prepare,
     loader,
 };
+
+export const scene_tree = new SceneTree();

@@ -1,5 +1,4 @@
-import * as PIXI from 'engine';
-import visual_server from './VisualServer';
+import VisualServer from './VisualServer';
 
 
 export const STRETCH_MODE_DISABLED = 0;
@@ -25,7 +24,10 @@ const DefaultConfig = {
 };
 
 
-export class SceneTree {
+const visual_server = new VisualServer();
+
+
+export default class SceneTree {
     constructor() {
         this.paused = false;
         this.debug_collisions_hint = false;
@@ -69,6 +71,7 @@ export class SceneTree {
     is_paused() {}
     is_debugging_collisions_hint() {}
 
+    queue_delete(node) {}
     get_nodes_in_group() {}
 
     change_scene_to(scene_class) {}
@@ -184,6 +187,3 @@ export class SceneTree {
         cancelAnimationFrame(this._loop_id);
     }
 }
-
-
-export default new SceneTree();

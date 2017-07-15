@@ -1,5 +1,4 @@
-import * as PIXI from 'engine';
-window.PIXI = PIXI;
+import { autoDetectRenderer } from './core/autoDetectRenderer';
 
 const DefaultConfig = {
     width: 640,
@@ -13,21 +12,25 @@ const DefaultConfig = {
     roundPixels: true,
 };
 
-export class VisualServer {
+export default class VisualServer {
     constructor() {
         this._config = {};
+        this.is_initialized = false;
 
         this.renderer = null;
     }
 
     init(config) {
+        if (this.is_initialized) {
+            return;
+        }
+        this.is_initialized = true;
+
         this._config = Object.assign(this._config, DefaultConfig, config);
 
-        this.renderer = PIXI.autoDetectRenderer(this._config);
+        this.renderer = autoDetectRenderer(this._config);
     }
     render(scene) {
         this.renderer.render(scene);
     }
 }
-
-export default new VisualServer();
