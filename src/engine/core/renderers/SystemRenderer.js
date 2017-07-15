@@ -2,7 +2,7 @@ import { sayHello, hex2string, hex2rgb } from '../utils';
 import { Matrix, Rectangle } from '../math';
 import { RENDERER_TYPE } from '../const';
 import settings from '../settings';
-import Node2D from '../display/Node2D';
+import Node2D from '../scene/Node2D';
 import RenderTexture from '../textures/RenderTexture';
 import EventEmitter from 'eventemitter3';
 

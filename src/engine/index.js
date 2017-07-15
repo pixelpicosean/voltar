@@ -7,12 +7,9 @@ export * from './core';
 // export libs
 import * as accessibility from './accessibility';
 import * as extract from './extract';
-import * as extras from './extras';
 import * as filters from './filters';
 import * as interaction from './interaction';
 import * as loaders from './loaders';
-import * as mesh from './mesh';
-import * as particles from './particles';
 import * as prepare from './prepare';
 import SceneTree from './SceneTree';
 
@@ -31,12 +28,9 @@ const loader = loaders.shared || null;
 export {
     accessibility,
     extract,
-    extras,
     filters,
     interaction,
     loaders,
-    mesh,
-    particles,
     prepare,
     loader,
 };

@@ -28,6 +28,16 @@ class Scene extends V.Node2D {
             spr.scale.set(4);
             this.addChild(spr);
 
+            const gfx = new V.Graphics();
+            gfx.beginFill(0xffffff);
+            gfx.drawRect(0, 0, 32, 32);
+            gfx.endFill();
+            this.addChild(gfx);
+
+            const txt = new V.Text();
+            txt.text = 'Hello';
+            this.addChild(txt);
+
             console.log('load complete')
         });
     }
