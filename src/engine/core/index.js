@@ -45,4 +45,3 @@ export { default as RenderTarget } from './renderers/webgl/utils/RenderTarget';
 export { default as Quad } from './renderers/webgl/utils/Quad';
 export { default as SpriteMaskFilter } from './renderers/webgl/filters/spriteMask/SpriteMaskFilter';
 export { default as Filter } from './renderers/webgl/filters/Filter';
-export { autoDetectRenderer } from './autoDetectRenderer';

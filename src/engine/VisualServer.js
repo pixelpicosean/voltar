@@ -1,4 +1,6 @@
-import { autoDetectRenderer } from './core/autoDetectRenderer';
+import { isWebGLSupported } from './core/utils';
+import CanvasRenderer from './core/renderers/canvas/CanvasRenderer';
+import WebGLRenderer from './core/renderers/webgl/WebGLRenderer';
 
 const DefaultConfig = {
     width: 640,
@@ -10,6 +12,8 @@ const DefaultConfig = {
     antialias: false,
     transparent: false,
     roundPixels: true,
+
+    force_canvas: false,
 };
 
 export default class VisualServer {
@@ -28,7 +32,12 @@ export default class VisualServer {
 
         this._config = Object.assign(this._config, DefaultConfig, config);
 
-        this.renderer = autoDetectRenderer(this._config);
+        if (!this._config.force_canvas && isWebGLSupported()) {
+            this.renderer = new WebGLRenderer(this._config);
+        }
+        else {
+            this.renderer = new CanvasRenderer(this._config);
+        }
     }
     render(scene) {
         this.renderer.render(scene);
