@@ -1,4 +1,5 @@
 import * as V from 'engine';
+import settings from './settings';
 
 
 V.settings.SCALE_MODE = V.SCALE_MODES.NEAREST;
@@ -51,9 +52,5 @@ class Scene extends V.Node2D {
     _process(delta) {}
 }
 
-V.scene_tree.init({
-    width: 256,
-    height: 256,
-
-    main_scene: Scene,
-});
+settings.application.main_scene = Scene;
+V.scene_tree.init(settings);

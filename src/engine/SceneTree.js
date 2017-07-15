@@ -11,16 +11,38 @@ export const STRETCH_ASPECT_KEEP_WIDTH = 2;
 export const STRETCH_ASPECT_KEEP_HEIGHT = 3;
 
 
-const DefaultConfig = {
-    view: 'game',
-    container: 'container',
+const DefaultSettings = {
+    application: {
+        name: 'Voltar',
+        main_scene: null,
+    },
+    rendering: {
+        resolution: 1,
 
-    width: 256,
-    height: 256,
+        antialias: false,
+        forceFXAA: false,
+        autoResize: false,
+        transparent: false,
+        backgroundColor: 0x000000,
+        clearBeforeRender: true,
+        preserveDrawingBuffer: false,
 
-    FPS: 60,
+        pixel_snap: true,
 
-    main_scene: null,
+        force_canvas: false,
+    },
+    display: {
+        view: 'game',
+        container: 'container',
+
+        width: 256,
+        height: 256,
+
+        FPS: 60,
+
+        stretch_mode: STRETCH_MODE_DISABLED,
+        stretch_aspect: STRETCH_ASPECT_IGNORE,
+    },
 };
 
 
@@ -42,7 +64,9 @@ export default class SceneTree {
         this.view = null;
         this.container = null;
 
-        this._config = {};
+        this.time_scale = 1;
+
+        this._settings = {};
         this._tick = this._tick.bind(this);
         this._loop_id = 0;
         this._initialize = this._initialize.bind(this);
@@ -59,10 +83,10 @@ export default class SceneTree {
             count: 0,
         };
     }
-    init(config) {
-        this._config = Object.assign(this._config, DefaultConfig, config);
+    init(settings) {
+        this._settings = Object.assign(this._settings, DefaultSettings, settings);
 
-        this._next_scene_ctor = this._config.main_scene;
+        this._next_scene_ctor = this._settings.application.main_scene;
 
         window.addEventListener('load', this._initialize, false);
         document.addEventListener('DOMContentLoaded', this._initialize, false);
@@ -79,6 +103,9 @@ export default class SceneTree {
     reload_current_scene() {}
 
     set_pause(pause) {}
+    set_time_scale(scale) {
+        this.time_scale = Math.max(0, scale);
+    }
 
     set_screen_stretch(mode, aspect, minsize) {}
 
@@ -89,21 +116,15 @@ export default class SceneTree {
         window.removeEventListener('load', this._initialize);
         document.removeEventListener('DOMContentLoaded', this._initialize);
 
-        this.view = document.getElementById(this._config.view);
-        this.container_view = document.getElementById(this._config.container);
+        this.view = document.getElementById(this._settings.display.view);
+        this.container_view = document.getElementById(this._settings.display.container);
 
         // TODO: move all these configs to project settings, the same as Godot
-        visual_server.init({
-            width: this._config.width,
-            height: this._config.height,
-            resolution: window.deivcePixelRatio,
-
+        visual_server.init(Object.assign({
+            width: this._settings.display.width,
+            height: this._settings.display.height,
             view: this.view,
-
-            antialias: false,
-            transparent: false,
-            roundPixels: true,
-        });
+        }, this._settings.rendering));
 
         this._start_loop();
     }
@@ -143,9 +164,9 @@ export default class SceneTree {
             }
             else {
               // Step size
-              _process_tmp.step = 1000.0 / this._config.FPS;
-              _process_tmp.slow_step = _process_tmp.step * 1;
-              _process_tmp.slow_step_sec = _process_tmp.step * 0.001 * 1;
+              _process_tmp.step = 1000.0 / this._settings.display.FPS;
+              _process_tmp.slow_step = _process_tmp.step * this.time_scale;
+              _process_tmp.slow_step_sec = _process_tmp.step * 0.001 * this.time_scale;
 
               // Accumulate time until the step threshold is met or exceeded... up to a limit of 3 catch-up frames at step intervals
               _process_tmp.delta_time += Math.max(Math.min(_process_tmp.step * 3, _process_tmp.real_delta), 0);
