@@ -1,22 +1,22 @@
 /**
  * This namespace contains WebGL-only display filters that can be applied
- * to DisplayObjects using the {@link PIXI.DisplayObject#filters filters} property.
+ * to Node2Ds using the {@link V.Node2D#filters filters} property.
  * @example
  * // Create a new application
- * const app = new PIXI.Application();
+ * const app = new V.Application();
  *
  * // Draw a green rectangle
- * const rect = new PIXI.Graphics()
+ * const rect = new V.Graphics()
  *     .beginFill(0x00ff00)
  *     .drawRect(40, 40, 200, 200);
  *
  * // Add a blur filter
- * rect.filters = [new PIXI.filters.BlurFilter()];
+ * rect.filters = [new V.filters.BlurFilter()];
  *
  * // Display rectangle
  * app.stage.addChild(rect);
  * document.body.appendChild(app.view);
- * @namespace PIXI.filters
+ * @namespace V.filters
  */
 export { default as FXAAFilter } from './fxaa/FXAAFilter';
 export { default as NoiseFilter } from './noise/NoiseFilter';

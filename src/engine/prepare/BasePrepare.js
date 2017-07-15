@@ -6,7 +6,7 @@ const SharedTicker = core.ticker.shared;
  * Default number of uploads per frame using prepare plugin.
  *
  * @static
- * @memberof PIXI.settings
+ * @memberof V.settings
  * @name UPLOADS_PER_FRAME
  * @type {number}
  * @default 4
@@ -15,12 +15,12 @@ core.settings.UPLOADS_PER_FRAME = 4;
 
 /**
  * The prepare manager provides functionality to upload content to the GPU. BasePrepare handles
- * basic queuing functionality and is extended by {@link PIXI.prepare.WebGLPrepare} and {@link PIXI.prepare.CanvasPrepare}
+ * basic queuing functionality and is extended by {@link V.prepare.WebGLPrepare} and {@link V.prepare.CanvasPrepare}
  * to provide preparation capabilities specific to their respective renderers.
  *
  * @example
  * // Create a sprite
- * const sprite = new PIXI.Sprite.fromImage('something.png');
+ * const sprite = new V.Sprite.fromImage('something.png');
  *
  * // Load object into GPU
  * app.renderer.plugins.prepare.upload(sprite, () => {
@@ -32,24 +32,24 @@ core.settings.UPLOADS_PER_FRAME = 4;
  *
  * @abstract
  * @class
- * @memberof PIXI.prepare
+ * @memberof V.prepare
  */
 export default class BasePrepare
 {
     /**
-     * @param {PIXI.SystemRenderer} renderer - A reference to the current renderer
+     * @param {V.SystemRenderer} renderer - A reference to the current renderer
      */
     constructor(renderer)
     {
         /**
          * The limiter to be used to control how quickly items are prepared.
-         * @type {PIXI.prepare.CountLimiter|PIXI.prepare.TimeLimiter}
+         * @type {V.prepare.CountLimiter|V.prepare.TimeLimiter}
          */
         this.limiter = new CountLimiter(core.settings.UPLOADS_PER_FRAME);
 
         /**
          * Reference to the renderer.
-         * @type {PIXI.SystemRenderer}
+         * @type {V.SystemRenderer}
          * @protected
          */
         this.renderer = renderer;
@@ -57,7 +57,7 @@ export default class BasePrepare
         /**
          * The only real difference between CanvasPrepare and WebGLPrepare is what they pass
          * to upload hooks. That different parameter is stored here.
-         * @type {PIXI.prepare.CanvasPrepare|PIXI.WebGLRenderer}
+         * @type {V.prepare.CanvasPrepare|V.WebGLRenderer}
          * @protected
          */
         this.uploadHookHelper = null;
@@ -127,7 +127,7 @@ export default class BasePrepare
     /**
      * Upload all the textures and graphics to the GPU.
      *
-     * @param {Function|PIXI.DisplayObject|PIXI.Container|PIXI.BaseTexture|PIXI.Texture|PIXI.Graphics|PIXI.Text} item -
+     * @param {Function|V.Node2D|V.Node2D|V.BaseTexture|V.Texture|V.Graphics|V.Text} item -
      *        Either the container or display object to search for items to upload, the items to upload themselves,
      *        or the callback function, if items have been added using `prepare.add`.
      * @param {Function} [done] - Optional callback when all queued uploads have completed
@@ -237,7 +237,7 @@ export default class BasePrepare
      *
      * @param {Function} addHook - Function call that takes two parameters: `item:*, queue:Array`
      *          function must return `true` if it was able to add item to the queue.
-     * @return {PIXI.BasePrepare} Instance of plugin for chaining.
+     * @return {V.BasePrepare} Instance of plugin for chaining.
      */
     registerFindHook(addHook)
     {
@@ -254,7 +254,7 @@ export default class BasePrepare
      *
      * @param {Function} uploadHook - Function call that takes two parameters: `prepare:CanvasPrepare, item:*` and
      *          function must return `true` if it was able to handle upload of item.
-     * @return {PIXI.BasePrepare} Instance of plugin for chaining.
+     * @return {V.BasePrepare} Instance of plugin for chaining.
      */
     registerUploadHook(uploadHook)
     {
@@ -269,9 +269,9 @@ export default class BasePrepare
     /**
      * Manually add an item to the uploading queue.
      *
-     * @param {PIXI.DisplayObject|PIXI.Container|PIXI.BaseTexture|PIXI.Texture|PIXI.Graphics|PIXI.Text|*} item - Object to
+     * @param {V.Node2D|V.Node2D|V.BaseTexture|V.Texture|V.Graphics|V.Text|*} item - Object to
      *        add to the queue
-     * @return {PIXI.CanvasPrepare} Instance of plugin for chaining.
+     * @return {V.CanvasPrepare} Instance of plugin for chaining.
      */
     add(item)
     {
@@ -286,7 +286,7 @@ export default class BasePrepare
         }
 
         // Get childen recursively
-        if (item instanceof core.Container)
+        if (item instanceof core.Node2D)
         {
             for (let i = item.children.length - 1; i >= 0; i--)
             {
@@ -323,9 +323,9 @@ export default class BasePrepare
  * Built-in hook to find multiple textures from objects like AnimatedSprites.
  *
  * @private
- * @param {PIXI.DisplayObject} item - Display object to check
+ * @param {V.Node2D} item - Display object to check
  * @param {Array<*>} queue - Collection of items to upload
- * @return {boolean} if a PIXI.Texture object was found.
+ * @return {boolean} if a V.Texture object was found.
  */
 function findMultipleBaseTextures(item, queue)
 {
@@ -356,9 +356,9 @@ function findMultipleBaseTextures(item, queue)
  * Built-in hook to find BaseTextures from Sprites.
  *
  * @private
- * @param {PIXI.DisplayObject} item - Display object to check
+ * @param {V.Node2D} item - Display object to check
  * @param {Array<*>} queue - Collection of items to upload
- * @return {boolean} if a PIXI.Texture object was found.
+ * @return {boolean} if a V.Texture object was found.
  */
 function findBaseTexture(item, queue)
 {
@@ -380,9 +380,9 @@ function findBaseTexture(item, queue)
  * Built-in hook to find textures from objects.
  *
  * @private
- * @param {PIXI.DisplayObject} item - Display object to check
+ * @param {V.Node2D} item - Display object to check
  * @param {Array<*>} queue - Collection of items to upload
- * @return {boolean} if a PIXI.Texture object was found.
+ * @return {boolean} if a V.Texture object was found.
  */
 function findTexture(item, queue)
 {
@@ -402,11 +402,11 @@ function findTexture(item, queue)
 }
 
 /**
- * Built-in hook to draw PIXI.Text to its texture.
+ * Built-in hook to draw V.Text to its texture.
  *
  * @private
- * @param {PIXI.WebGLRenderer|PIXI.CanvasPrepare} helper - Not used by this upload handler
- * @param {PIXI.DisplayObject} item - Item to check
+ * @param {V.WebGLRenderer|V.CanvasPrepare} helper - Not used by this upload handler
+ * @param {V.Node2D} item - Item to check
  * @return {boolean} If item was uploaded.
  */
 function drawText(helper, item)
@@ -423,11 +423,11 @@ function drawText(helper, item)
 }
 
 /**
- * Built-in hook to calculate a text style for a PIXI.Text object.
+ * Built-in hook to calculate a text style for a V.Text object.
  *
  * @private
- * @param {PIXI.WebGLRenderer|PIXI.CanvasPrepare} helper - Not used by this upload handler
- * @param {PIXI.DisplayObject} item - Item to check
+ * @param {V.WebGLRenderer|V.CanvasPrepare} helper - Not used by this upload handler
+ * @param {V.Node2D} item - Item to check
  * @return {boolean} If item was uploaded.
  */
 function calculateTextStyle(helper, item)
@@ -448,9 +448,9 @@ function calculateTextStyle(helper, item)
  * Built-in hook to find Text objects.
  *
  * @private
- * @param {PIXI.DisplayObject} item - Display object to check
+ * @param {V.Node2D} item - Display object to check
  * @param {Array<*>} queue - Collection of items to upload
- * @return {boolean} if a PIXI.Text object was found.
+ * @return {boolean} if a V.Text object was found.
  */
 function findText(item, queue)
 {
@@ -484,9 +484,9 @@ function findText(item, queue)
  * Built-in hook to find TextStyle objects.
  *
  * @private
- * @param {PIXI.TextStyle} item - Display object to check
+ * @param {V.TextStyle} item - Display object to check
  * @param {Array<*>} queue - Collection of items to upload
- * @return {boolean} if a PIXI.TextStyle object was found.
+ * @return {boolean} if a V.TextStyle object was found.
  */
 function findTextStyle(item, queue)
 {

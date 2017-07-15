@@ -9,12 +9,12 @@ const BYTES_PER_PIXEL = 4;
  * An instance of this class is automatically created by default, and can be found at renderer.plugins.extract
  *
  * @class
- * @memberof PIXI.extract
+ * @memberof V.extract
  */
 export default class WebGLExtract
 {
     /**
-     * @param {PIXI.WebGLRenderer} renderer - A reference to the current renderer
+     * @param {V.WebGLRenderer} renderer - A reference to the current renderer
      */
     constructor(renderer)
     {
@@ -22,9 +22,9 @@ export default class WebGLExtract
         /**
          * Collection of methods for extracting data (image, pixels, etc.) from a display object or render texture
          *
-         * @member {PIXI.extract.WebGLExtract} extract
-         * @memberof PIXI.WebGLRenderer#
-         * @see PIXI.extract.WebGLExtract
+         * @member {V.extract.WebGLExtract} extract
+         * @memberof V.WebGLRenderer#
+         * @see V.extract.WebGLExtract
          */
         renderer.extract = this;
     }
@@ -32,7 +32,7 @@ export default class WebGLExtract
     /**
      * Will return a HTML Image of the target
      *
-     * @param {PIXI.DisplayObject|PIXI.RenderTexture} target - A displayObject or renderTexture
+     * @param {V.Node2D|V.RenderTexture} target - A displayObject or renderTexture
      *  to convert. If left empty will use use the main renderer
      * @return {HTMLImageElement} HTML Image of the target
      */
@@ -49,7 +49,7 @@ export default class WebGLExtract
      * Will return a a base64 encoded string of this target. It works by calling
      *  `WebGLExtract.getCanvas` and then running toDataURL on that.
      *
-     * @param {PIXI.DisplayObject|PIXI.RenderTexture} target - A displayObject or renderTexture
+     * @param {V.Node2D|V.RenderTexture} target - A displayObject or renderTexture
      *  to convert. If left empty will use use the main renderer
      * @return {string} A base64 encoded string of the texture.
      */
@@ -61,7 +61,7 @@ export default class WebGLExtract
     /**
      * Creates a Canvas element, renders this target to it and then returns it.
      *
-     * @param {PIXI.DisplayObject|PIXI.RenderTexture} target - A displayObject or renderTexture
+     * @param {V.Node2D|V.RenderTexture} target - A displayObject or renderTexture
      *  to convert. If left empty will use use the main renderer
      * @return {HTMLCanvasElement} A Canvas element with the texture rendered on.
      */
@@ -153,7 +153,7 @@ export default class WebGLExtract
      * Will return a one-dimensional array containing the pixel data of the entire texture in RGBA
      * order, with integer values between 0 and 255 (included).
      *
-     * @param {PIXI.DisplayObject|PIXI.RenderTexture} target - A displayObject or renderTexture
+     * @param {V.Node2D|V.RenderTexture} target - A displayObject or renderTexture
      *  to convert. If left empty will use use the main renderer
      * @return {Uint8ClampedArray} One-dimensional array containing the pixel data of the entire texture
      */

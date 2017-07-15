@@ -1,9 +1,9 @@
 /**
- * DisplayObjects with the {@link PIXI.interaction.interactiveTarget} mixin use this class to track interactions
+ * Node2Ds with the {@link V.interaction.interactiveTarget} mixin use this class to track interactions
  *
  * @class
  * @private
- * @memberof PIXI.interaction
+ * @memberof V.interaction
  */
 export default class InteractionTrackingData
 {
@@ -49,7 +49,7 @@ export default class InteractionTrackingData
      * State of the tracking data, expressed as bit flags
      *
      * @member {number}
-     * @memberof PIXI.interaction.InteractionTrackingData#
+     * @memberof V.interaction.InteractionTrackingData#
      */
     get flags()
     {
@@ -70,7 +70,7 @@ export default class InteractionTrackingData
      * Is the tracked event inactive (not over or down)?
      *
      * @member {number}
-     * @memberof PIXI.interaction.InteractionTrackingData#
+     * @memberof V.interaction.InteractionTrackingData#
      */
     get none()
     {
@@ -78,10 +78,10 @@ export default class InteractionTrackingData
     }
 
     /**
-     * Is the tracked event over the DisplayObject?
+     * Is the tracked event over the Node2D?
      *
      * @member {boolean}
-     * @memberof PIXI.interaction.InteractionTrackingData#
+     * @memberof V.interaction.InteractionTrackingData#
      */
     get over()
     {
@@ -99,10 +99,10 @@ export default class InteractionTrackingData
     }
 
     /**
-     * Did the right mouse button come down in the DisplayObject?
+     * Did the right mouse button come down in the Node2D?
      *
      * @member {boolean}
-     * @memberof PIXI.interaction.InteractionTrackingData#
+     * @memberof V.interaction.InteractionTrackingData#
      */
     get rightDown()
     {
@@ -120,10 +120,10 @@ export default class InteractionTrackingData
     }
 
     /**
-     * Did the left mouse button come down in the DisplayObject?
+     * Did the left mouse button come down in the Node2D?
      *
      * @member {boolean}
-     * @memberof PIXI.interaction.InteractionTrackingData#
+     * @memberof V.interaction.InteractionTrackingData#
      */
     get leftDown()
     {

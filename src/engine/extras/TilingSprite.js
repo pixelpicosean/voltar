@@ -8,13 +8,13 @@ const tempPoint = new core.Point();
  * A tiling sprite is a fast way of rendering a tiling image
  *
  * @class
- * @extends PIXI.Sprite
- * @memberof PIXI.extras
+ * @extends V.Sprite
+ * @memberof V.extras
  */
 export default class TilingSprite extends core.Sprite
 {
     /**
-     * @param {PIXI.Texture} texture - the texture of the tiling sprite
+     * @param {V.Texture} texture - the texture of the tiling sprite
      * @param {number} [width=100] - the width of the tiling sprite
      * @param {number} [height=100] - the height of the tiling sprite
      */
@@ -25,7 +25,7 @@ export default class TilingSprite extends core.Sprite
         /**
          * Tile transform
          *
-         * @member {PIXI.TransformStatic}
+         * @member {V.TransformStatic}
          */
         this.tileTransform = new core.TransformStatic();
 
@@ -58,7 +58,7 @@ export default class TilingSprite extends core.Sprite
         /**
          * transform that is applied to UV to get the texture coords
          *
-         * @member {PIXI.extras.TextureTransform}
+         * @member {V.extras.TextureTransform}
          */
         this.uvTransform = texture.transform || new TextureTransform(texture);
 
@@ -100,7 +100,7 @@ export default class TilingSprite extends core.Sprite
     /**
      * The scaling of the image that is being tiled
      *
-     * @member {PIXI.ObservablePoint}
+     * @member {V.ObservablePoint}
      */
     get tileScale()
     {
@@ -115,7 +115,7 @@ export default class TilingSprite extends core.Sprite
     /**
      * The offset of the image that is being tiled
      *
-     * @member {PIXI.ObservablePoint}
+     * @member {V.ObservablePoint}
      */
     get tilePosition()
     {
@@ -142,7 +142,7 @@ export default class TilingSprite extends core.Sprite
      * Renders the object using the WebGL renderer
      *
      * @private
-     * @param {PIXI.WebGLRenderer} renderer - The renderer
+     * @param {V.WebGLRenderer} renderer - The renderer
      */
     _renderWebGL(renderer)
     {
@@ -165,7 +165,7 @@ export default class TilingSprite extends core.Sprite
      * Renders the object using the Canvas renderer
      *
      * @private
-     * @param {PIXI.CanvasRenderer} renderer - a reference to the canvas renderer
+     * @param {V.CanvasRenderer} renderer - a reference to the canvas renderer
      */
     _renderCanvas(renderer)
     {
@@ -268,8 +268,8 @@ export default class TilingSprite extends core.Sprite
     /**
      * Gets the local bounds of the sprite object.
      *
-     * @param {PIXI.Rectangle} rect - The output rectangle.
-     * @return {PIXI.Rectangle} The bounds.
+     * @param {V.Rectangle} rect - The output rectangle.
+     * @return {V.Rectangle} The bounds.
      */
     getLocalBounds(rect)
     {
@@ -300,7 +300,7 @@ export default class TilingSprite extends core.Sprite
     /**
      * Checks if a point is inside this tiling sprite.
      *
-     * @param {PIXI.Point} point - the point to check
+     * @param {V.Point} point - the point to check
      * @return {boolean} Whether or not the sprite contains the point.
      */
     containsPoint(point)
@@ -347,10 +347,10 @@ export default class TilingSprite extends core.Sprite
      * The source can be - frame id, image url, video url, canvas element, video element, base texture
      *
      * @static
-     * @param {number|string|PIXI.BaseTexture|HTMLCanvasElement|HTMLVideoElement} source - Source to create texture from
+     * @param {number|string|V.BaseTexture|HTMLCanvasElement|HTMLVideoElement} source - Source to create texture from
      * @param {number} width - the width of the tiling sprite
      * @param {number} height - the height of the tiling sprite
-     * @return {PIXI.Texture} The newly created texture
+     * @return {V.Texture} The newly created texture
      */
     static from(source, width, height)
     {
@@ -365,7 +365,7 @@ export default class TilingSprite extends core.Sprite
      * @param {string} frameId - The frame Id of the texture in the cache
      * @param {number} width - the width of the tiling sprite
      * @param {number} height - the height of the tiling sprite
-     * @return {PIXI.extras.TilingSprite} A new TilingSprite using a texture from the texture cache matching the frameId
+     * @return {V.extras.TilingSprite} A new TilingSprite using a texture from the texture cache matching the frameId
      */
     static fromFrame(frameId, width, height)
     {
@@ -388,9 +388,9 @@ export default class TilingSprite extends core.Sprite
      * @param {number} width - the width of the tiling sprite
      * @param {number} height - the height of the tiling sprite
      * @param {boolean} [crossorigin] - if you want to specify the cross-origin parameter
-     * @param {number} [scaleMode=PIXI.settings.SCALE_MODE] - if you want to specify the scale mode,
-     *  see {@link PIXI.SCALE_MODES} for possible values
-     * @return {PIXI.extras.TilingSprite} A new TilingSprite using a texture from the texture cache matching the image id
+     * @param {number} [scaleMode=V.settings.SCALE_MODE] - if you want to specify the scale mode,
+     *  see {@link V.SCALE_MODES} for possible values
+     * @return {V.extras.TilingSprite} A new TilingSprite using a texture from the texture cache matching the image id
      */
     static fromImage(imageId, width, height, crossorigin, scaleMode)
     {

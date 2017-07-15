@@ -9,7 +9,7 @@ import { hex2rgb } from '../../../utils';
  *
  * @ignore
  * @private
- * @param {PIXI.WebGLGraphicsData} graphicsData - The graphics object to draw
+ * @param {V.WebGLGraphicsData} graphicsData - The graphics object to draw
  * @param {object} webGLData - an object containing all the webGL-specific information to create this shape
  * @param {object} webGLDataNativeLines - an object containing all the webGL-specific information to create nativeLines
  */

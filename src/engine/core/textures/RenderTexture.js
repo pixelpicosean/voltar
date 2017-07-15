@@ -4,15 +4,15 @@ import Texture from './Texture';
 /**
  * A RenderTexture is a special texture that allows any Pixi display object to be rendered to it.
  *
- * __Hint__: All DisplayObjects (i.e. Sprites) that render to a RenderTexture should be preloaded
+ * __Hint__: All Node2Ds (i.e. Sprites) that render to a RenderTexture should be preloaded
  * otherwise black rectangles will be drawn instead.
  *
  * A RenderTexture takes a snapshot of any Display Object given to its render method. For example:
  *
  * ```js
- * let renderer = PIXI.autoDetectRenderer(1024, 1024, { view: canvas, ratio: 1 });
- * let renderTexture = PIXI.RenderTexture.create(800, 600);
- * let sprite = PIXI.Sprite.fromImage("spinObj_01.png");
+ * let renderer = V.autoDetectRenderer(1024, 1024, { view: canvas, ratio: 1 });
+ * let renderTexture = V.RenderTexture.create(800, 600);
+ * let sprite = V.Sprite.fromImage("spinObj_01.png");
  *
  * sprite.position.x = 800/2;
  * sprite.position.y = 600/2;
@@ -29,20 +29,20 @@ import Texture from './Texture';
  *
  * sprite.setTransform()
  *
- * let renderTexture = new PIXI.RenderTexture.create(100, 100);
+ * let renderTexture = new V.RenderTexture.create(100, 100);
  *
  * renderer.render(sprite, renderTexture);  // Renders to center of RenderTexture
  * ```
  *
  * @class
- * @extends PIXI.Texture
- * @memberof PIXI
+ * @extends V.Texture
+ * @memberof V
  */
 export default class RenderTexture extends Texture
 {
     /**
-     * @param {PIXI.BaseRenderTexture} baseRenderTexture - The renderer used for this RenderTexture
-     * @param {PIXI.Rectangle} [frame] - The rectangle frame of the texture to show
+     * @param {V.BaseRenderTexture} baseRenderTexture - The renderer used for this RenderTexture
+     * @param {V.Rectangle} [frame] - The rectangle frame of the texture to show
      */
     constructor(baseRenderTexture, frame)
     {
@@ -116,9 +116,9 @@ export default class RenderTexture extends Texture
      *
      * @param {number} [width=100] - The width of the render texture
      * @param {number} [height=100] - The height of the render texture
-     * @param {number} [scaleMode=PIXI.settings.SCALE_MODE] - See {@link PIXI.SCALE_MODES} for possible values
+     * @param {number} [scaleMode=V.settings.SCALE_MODE] - See {@link V.SCALE_MODES} for possible values
      * @param {number} [resolution=1] - The resolution / device pixel ratio of the texture being generated
-     * @return {PIXI.RenderTexture} The new render texture
+     * @return {V.RenderTexture} The new render texture
      */
     static create(width, height, scaleMode, resolution)
     {

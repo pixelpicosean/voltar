@@ -11,13 +11,13 @@ import { UPDATE_PRIORITY } from '../const';
  * This can be used in several ways, such as:
  *
  * ```js
- * let texture = PIXI.VideoBaseTexture.fromUrl('http://mydomain.com/video.mp4');
+ * let texture = V.VideoBaseTexture.fromUrl('http://mydomain.com/video.mp4');
  *
- * let texture = PIXI.VideoBaseTexture.fromUrl({ src: 'http://mydomain.com/video.mp4', mime: 'video/mp4' });
+ * let texture = V.VideoBaseTexture.fromUrl({ src: 'http://mydomain.com/video.mp4', mime: 'video/mp4' });
  *
- * let texture = PIXI.VideoBaseTexture.fromUrls(['/video.webm', '/video.mp4']);
+ * let texture = V.VideoBaseTexture.fromUrls(['/video.webm', '/video.mp4']);
  *
- * let texture = PIXI.VideoBaseTexture.fromUrls([
+ * let texture = V.VideoBaseTexture.fromUrls([
  *     { src: '/video.webm', mime: 'video/webm' },
  *     { src: '/video.mp4', mime: 'video/mp4' }
  * ]);
@@ -26,14 +26,14 @@ import { UPDATE_PRIORITY } from '../const';
  * See the ["deus" demo](http://www.goodboydigital.com/pixijs/examples/deus/).
  *
  * @class
- * @extends PIXI.BaseTexture
- * @memberof PIXI
+ * @extends V.BaseTexture
+ * @memberof V
  */
 export default class VideoBaseTexture extends BaseTexture
 {
     /**
      * @param {HTMLVideoElement} source - Video source
-     * @param {number} [scaleMode=PIXI.settings.SCALE_MODE] - See {@link PIXI.SCALE_MODES} for possible values
+     * @param {number} [scaleMode=V.settings.SCALE_MODE] - See {@link V.SCALE_MODES} for possible values
      */
     constructor(source, scaleMode)
     {
@@ -205,8 +205,8 @@ export default class VideoBaseTexture extends BaseTexture
      *
      * @static
      * @param {HTMLVideoElement} video - Video to create texture from
-     * @param {number} [scaleMode=PIXI.settings.SCALE_MODE] - See {@link PIXI.SCALE_MODES} for possible values
-     * @return {PIXI.VideoBaseTexture} Newly created VideoBaseTexture
+     * @param {number} [scaleMode=V.settings.SCALE_MODE] - See {@link V.SCALE_MODES} for possible values
+     * @return {V.VideoBaseTexture} Newly created VideoBaseTexture
      */
     static fromVideo(video, scaleMode)
     {
@@ -235,8 +235,8 @@ export default class VideoBaseTexture extends BaseTexture
      * @param {string} [videoSrc.src] - One of the source urls for the video
      * @param {string} [videoSrc.mime] - The mimetype of the video (e.g. 'video/mp4'). If not specified
      *  the url's extension will be used as the second part of the mime type.
-     * @param {number} scaleMode - See {@link PIXI.SCALE_MODES} for possible values
-     * @return {PIXI.VideoBaseTexture} Newly created VideoBaseTexture
+     * @param {number} scaleMode - See {@link V.SCALE_MODES} for possible values
+     * @return {V.VideoBaseTexture} Newly created VideoBaseTexture
      */
     static fromUrl(videoSrc, scaleMode)
     {

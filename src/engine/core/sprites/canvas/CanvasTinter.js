@@ -5,14 +5,14 @@ import canUseNewCanvasBlendModes from '../../renderers/canvas/utils/canUseNewCan
  * Utility methods for Sprite/Texture tinting.
  *
  * @class
- * @memberof PIXI
+ * @memberof V
  */
 const CanvasTinter = {
     /**
      * Basically this method just needs a sprite and a color and tints the sprite with the given color.
      *
-     * @memberof PIXI.CanvasTinter
-     * @param {PIXI.Sprite} sprite - the sprite to tint
+     * @memberof V.CanvasTinter
+     * @param {V.Sprite} sprite - the sprite to tint
      * @param {number} color - the color to use to tint the sprite with
      * @return {HTMLCanvasElement} The tinted canvas
      */
@@ -70,8 +70,8 @@ const CanvasTinter = {
     /**
      * Tint a texture using the 'multiply' operation.
      *
-     * @memberof PIXI.CanvasTinter
-     * @param {PIXI.Texture} texture - the texture to tint
+     * @memberof V.CanvasTinter
+     * @param {V.Texture} texture - the texture to tint
      * @param {number} color - the color to use to tint the sprite with
      * @param {HTMLCanvasElement} canvas - the current canvas
      */
@@ -125,8 +125,8 @@ const CanvasTinter = {
     /**
      * Tint a texture using the 'overlay' operation.
      *
-     * @memberof PIXI.CanvasTinter
-     * @param {PIXI.Texture} texture - the texture to tint
+     * @memberof V.CanvasTinter
+     * @param {V.Texture} texture - the texture to tint
      * @param {number} color - the color to use to tint the sprite with
      * @param {HTMLCanvasElement} canvas - the current canvas
      */
@@ -167,8 +167,8 @@ const CanvasTinter = {
     /**
      * Tint a texture pixel per pixel.
      *
-     * @memberof PIXI.CanvasTinter
-     * @param {PIXI.Texture} texture - the texture to tint
+     * @memberof V.CanvasTinter
+     * @param {V.Texture} texture - the texture to tint
      * @param {number} color - the color to use to tint the sprite with
      * @param {HTMLCanvasElement} canvas - the current canvas
      */
@@ -221,7 +221,7 @@ const CanvasTinter = {
     /**
      * Rounds the specified color according to the CanvasTinter.cacheStepsPerColorChannel.
      *
-     * @memberof PIXI.CanvasTinter
+     * @memberof V.CanvasTinter
      * @param {number} color - the color to round, should be a hex color
      * @return {number} The rounded color.
      */
@@ -241,7 +241,7 @@ const CanvasTinter = {
     /**
      * Number of steps which will be used as a cap when rounding colors.
      *
-     * @memberof PIXI.CanvasTinter
+     * @memberof V.CanvasTinter
      * @type {number}
      */
     cacheStepsPerColorChannel: 8,
@@ -249,7 +249,7 @@ const CanvasTinter = {
     /**
      * Tint cache boolean flag.
      *
-     * @memberof PIXI.CanvasTinter
+     * @memberof V.CanvasTinter
      * @type {boolean}
      */
     convertTintToImage: false,
@@ -257,7 +257,7 @@ const CanvasTinter = {
     /**
      * Whether or not the Canvas BlendModes are supported, consequently the ability to tint using the multiply method.
      *
-     * @memberof PIXI.CanvasTinter
+     * @memberof V.CanvasTinter
      * @type {boolean}
      */
     canUseMultiply: canUseNewCanvasBlendModes(),
@@ -265,7 +265,7 @@ const CanvasTinter = {
     /**
      * The tinting method that will be used.
      *
-     * @memberof PIXI.CanvasTinter
+     * @memberof V.CanvasTinter
      * @type {tintMethodFunctionType}
      */
     tintMethod: 0,
@@ -276,9 +276,9 @@ CanvasTinter.tintMethod = CanvasTinter.canUseMultiply ? CanvasTinter.tintWithMul
 /**
  * The tintMethod type.
  *
- * @memberof PIXI.CanvasTinter
+ * @memberof V.CanvasTinter
  * @callback tintMethodFunctionType
- * @param texture {PIXI.Texture} the texture to tint
+ * @param texture {V.Texture} the texture to tint
  * @param color {number} the color to use to tint the sprite with
  * @param canvas {HTMLCanvasElement} the current canvas
  */

@@ -6,13 +6,13 @@ import { join } from 'path';
  * The SpriteMaskFilter class
  *
  * @class
- * @extends PIXI.Filter
- * @memberof PIXI
+ * @extends V.Filter
+ * @memberof V
  */
 export default class SpriteMaskFilter extends Filter
 {
     /**
-     * @param {PIXI.Sprite} sprite - the target sprite
+     * @param {V.Sprite} sprite - the target sprite
      */
     constructor(sprite)
     {
@@ -32,9 +32,9 @@ export default class SpriteMaskFilter extends Filter
     /**
      * Applies the filter
      *
-     * @param {PIXI.FilterManager} filterManager - The renderer to retrieve the filter from
-     * @param {PIXI.RenderTarget} input - The input render target.
-     * @param {PIXI.RenderTarget} output - The target to output to.
+     * @param {V.FilterManager} filterManager - The renderer to retrieve the filter from
+     * @param {V.RenderTarget} input - The input render target.
+     * @param {V.RenderTarget} output - The target to output to.
      */
     apply(filterManager, input, output)
     {

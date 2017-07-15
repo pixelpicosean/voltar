@@ -22,12 +22,12 @@ const canvasRenderWorldTransform = new Matrix();
  *
  * @class
  * @private
- * @memberof PIXI
+ * @memberof V
  */
 export default class CanvasSpriteRenderer
 {
     /**
-     * @param {PIXI.WebGLRenderer} renderer -The renderer sprite this batch works for.
+     * @param {V.WebGLRenderer} renderer -The renderer sprite this batch works for.
      */
     constructor(renderer)
     {
@@ -37,7 +37,7 @@ export default class CanvasSpriteRenderer
     /**
      * Renders the sprite object.
      *
-     * @param {PIXI.Sprite} sprite - the sprite to render when using this spritebatch
+     * @param {V.Sprite} sprite - the sprite to render when using this spritebatch
      */
     render(sprite)
     {

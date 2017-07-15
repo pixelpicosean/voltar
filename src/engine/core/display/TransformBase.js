@@ -4,7 +4,7 @@ import { Matrix } from '../math';
  * Generic class to deal with traditional 2D matrix transforms
  *
  * @class
- * @memberof PIXI
+ * @memberof V
  */
 export default class TransformBase
 {
@@ -16,14 +16,14 @@ export default class TransformBase
         /**
          * The global matrix transform. It can be swapped temporarily by some functions like getLocalBounds()
          *
-         * @member {PIXI.Matrix}
+         * @member {V.Matrix}
          */
         this.worldTransform = new Matrix();
 
         /**
          * The local matrix transform
          *
-         * @member {PIXI.Matrix}
+         * @member {V.Matrix}
          */
         this.localTransform = new Matrix();
 
@@ -42,7 +42,7 @@ export default class TransformBase
     /**
      * Updates the values of the object and applies the parent's transform.
      *
-     * @param {PIXI.TransformBase} parentTransform - The transform of the parent of this object
+     * @param {V.TransformBase} parentTransform - The transform of the parent of this object
      */
     updateTransform(parentTransform)
     {
@@ -65,7 +65,7 @@ export default class TransformBase
 
 /**
  * Updates the values of the object and applies the parent's transform.
- * @param  parentTransform {PIXI.Transform} The transform of the parent of this object
+ * @param  parentTransform {V.Transform} The transform of the parent of this object
  *
  */
 TransformBase.prototype.updateWorldTransform = TransformBase.prototype.updateTransform;

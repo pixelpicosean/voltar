@@ -3,7 +3,7 @@
  * the horizontal axis and y represents the vertical axis.
  *
  * @class
- * @memberof PIXI
+ * @memberof V
  */
 export default class Point
 {
@@ -29,7 +29,7 @@ export default class Point
     /**
      * Creates a clone of this point
      *
-     * @return {PIXI.Point} a copy of the point
+     * @return {V.Point} a copy of the point
      */
     clone()
     {
@@ -39,7 +39,7 @@ export default class Point
     /**
      * Copies x and y from the given point
      *
-     * @param {PIXI.Point} p - The point to copy.
+     * @param {V.Point} p - The point to copy.
      */
     copy(p)
     {
@@ -49,7 +49,7 @@ export default class Point
     /**
      * Returns true if the given point is equal to this point
      *
-     * @param {PIXI.Point} p - The point to check
+     * @param {V.Point} p - The point to check
      * @returns {boolean} Whether the given point equal to this point
      */
     equals(p)

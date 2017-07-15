@@ -3,7 +3,7 @@ import { BLEND_MODES } from '../const';
 /**
  * Corrects pixi blend, takes premultiplied alpha into account
  *
- * @memberof PIXI
+ * @memberof V
  * @function mapPremultipliedBlendModes
  * @private
  * @param {Array<number[]>} [array] - The array to output into.

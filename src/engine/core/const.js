@@ -1,9 +1,9 @@
 /**
- * String of the current PIXI version.
+ * String of the current V version.
  *
  * @static
  * @constant
- * @memberof PIXI
+ * @memberof V
  * @name VERSION
  * @type {string}
  */
@@ -14,7 +14,7 @@ export const VERSION = '4.5.3';
  *
  * @static
  * @constant
- * @memberof PIXI
+ * @memberof V
  * @type {number}
  */
 export const PI_2 = Math.PI * 2;
@@ -24,7 +24,7 @@ export const PI_2 = Math.PI * 2;
  *
  * @static
  * @constant
- * @memberof PIXI
+ * @memberof V
  * @type {number}
  */
 export const RAD_TO_DEG = 180 / Math.PI;
@@ -34,7 +34,7 @@ export const RAD_TO_DEG = 180 / Math.PI;
  *
  * @static
  * @constant
- * @memberof PIXI
+ * @memberof V
  * @type {number}
  */
 export const DEG_TO_RAD = Math.PI / 180;
@@ -44,7 +44,7 @@ export const DEG_TO_RAD = Math.PI / 180;
  *
  * @static
  * @constant
- * @memberof PIXI
+ * @memberof V
  * @name RENDERER_TYPE
  * @type {object}
  * @property {number} UNKNOWN - Unknown render type.
@@ -58,14 +58,14 @@ export const RENDERER_TYPE = {
 };
 
 /**
- * Various blend modes supported by PIXI.
+ * Various blend modes supported by V.
  *
  * IMPORTANT - The WebGL renderer only supports the NORMAL, ADD, MULTIPLY and SCREEN blend modes.
  * Anything else will silently act like NORMAL.
  *
  * @static
  * @constant
- * @memberof PIXI
+ * @memberof V
  * @name BLEND_MODES
  * @type {object}
  * @property {number} NORMAL
@@ -115,7 +115,7 @@ export const BLEND_MODES = {
  *
  * @static
  * @constant
- * @memberof PIXI
+ * @memberof V
  * @name DRAW_MODES
  * @type {object}
  * @property {number} POINTS
@@ -139,12 +139,12 @@ export const DRAW_MODES = {
 /**
  * The scale modes that are supported by pixi.
  *
- * The {@link PIXI.settings.SCALE_MODE} scale mode affects the default scaling mode of future operations.
+ * The {@link V.settings.SCALE_MODE} scale mode affects the default scaling mode of future operations.
  * It can be re-assigned to either LINEAR or NEAREST, depending upon suitability.
  *
  * @static
  * @constant
- * @memberof PIXI
+ * @memberof V
  * @name SCALE_MODES
  * @type {object}
  * @property {number} LINEAR Smooth scaling
@@ -158,7 +158,7 @@ export const SCALE_MODES = {
 /**
  * The wrap modes that are supported by pixi.
  *
- * The {@link PIXI.settings.WRAP_MODE} wrap mode affects the default wraping mode of future operations.
+ * The {@link V.settings.WRAP_MODE} wrap mode affects the default wraping mode of future operations.
  * It can be re-assigned to either CLAMP or REPEAT, depending upon suitability.
  * If the texture is non power of two then clamp will be used regardless as webGL can
  * only use REPEAT if the texture is po2.
@@ -168,7 +168,7 @@ export const SCALE_MODES = {
  * @static
  * @constant
  * @name WRAP_MODES
- * @memberof PIXI
+ * @memberof V
  * @type {object}
  * @property {number} CLAMP - The textures uvs are clamped
  * @property {number} REPEAT - The texture uvs tile and repeat
@@ -183,7 +183,7 @@ export const WRAP_MODES = {
 /**
  * The gc modes that are supported by pixi.
  *
- * The {@link PIXI.settings.GC_MODE} Garbage Collection mode for pixi textures is AUTO
+ * The {@link V.settings.GC_MODE} Garbage Collection mode for pixi textures is AUTO
  * If set to GC_MODE, the renderer will occasionally check textures usage. If they are not
  * used for a specified period of time they will be removed from the GPU. They will of course
  * be uploaded again when they are required. This is a silent behind the scenes process that
@@ -195,7 +195,7 @@ export const WRAP_MODES = {
  * @static
  * @constant
  * @name GC_MODES
- * @memberof PIXI
+ * @memberof V
  * @type {object}
  * @property {number} AUTO - Garbage collection will happen periodically automatically
  * @property {number} MANUAL - Garbage collection will need to be called manually
@@ -210,7 +210,7 @@ export const GC_MODES = {
  *
  * @static
  * @constant
- * @memberof PIXI
+ * @memberof V
  * @type {RegExp|string}
  * @example `image.png`
  */
@@ -223,7 +223,7 @@ export const URL_FILE_EXTENSION = /\.(\w{3,4})(?:$|\?|#)/i;
  * @static
  * @constant
  * @name DATA_URI
- * @memberof PIXI
+ * @memberof V
  * @type {RegExp|string}
  * @example data:image/png;base64
  */
@@ -235,7 +235,7 @@ export const DATA_URI = /^\s*data:(?:([\w-]+)\/([\w+.-]+))?(?:;(charset=[\w-]+|b
  * @static
  * @constant
  * @name SVG_SIZE
- * @memberof PIXI
+ * @memberof V
  * @type {RegExp|string}
  * @example &lt;svg width="100" height="100"&gt;&lt;/svg&gt;
  */
@@ -247,7 +247,7 @@ export const SVG_SIZE = /<svg[^>]*(?:\s(width|height)=('|")(\d*(?:\.\d+)?)(?:px)
  * @static
  * @constant
  * @name SHAPES
- * @memberof PIXI
+ * @memberof V
  * @type {object}
  * @property {number} POLY Polygon
  * @property {number} RECT Rectangle
@@ -269,7 +269,7 @@ export const SHAPES = {
  * @static
  * @constant
  * @name PRECISION
- * @memberof PIXI
+ * @memberof V
  * @type {object}
  * @property {string} LOW='lowp'
  * @property {string} MEDIUM='mediump'
@@ -287,7 +287,7 @@ export const PRECISION = {
  * @static
  * @constant
  * @name TRANSFORM_MODE
- * @memberof PIXI
+ * @memberof V
  * @type {object}
  * @property {number} STATIC
  * @property {number} DYNAMIC
@@ -303,7 +303,7 @@ export const TRANSFORM_MODE = {
  * @static
  * @constant
  * @name TEXT_GRADIENT
- * @memberof PIXI
+ * @memberof V
  * @type {object}
  * @property {number} LINEAR_VERTICAL Vertical gradient
  * @property {number} LINEAR_HORIZONTAL Linear gradient
@@ -314,20 +314,20 @@ export const TEXT_GRADIENT = {
 };
 
 /**
- * Represents the update priorities used by internal PIXI classes when registered with
- * the {@link PIXI.ticker.Ticker} object. Higher priority items are updated first and lower
+ * Represents the update priorities used by internal V classes when registered with
+ * the {@link V.ticker.Ticker} object. Higher priority items are updated first and lower
  * priority items, such as render, should go later.
  *
  * @static
  * @constant
  * @name UPDATE_PRIORITY
- * @memberof PIXI
+ * @memberof V
  * @type {object}
- * @property {number} INTERACTION=50 Highest priority, used for {@link PIXI.interaction.InteractionManager}
- * @property {number} HIGH=25 High priority updating, {@link PIXI.VideoBaseTexture} and {@link PIXI.extras.AnimatedSprite}
- * @property {number} NORMAL=0 Default priority for ticker events, see {@link PIXI.ticker.Ticker#add}.
- * @property {number} LOW=-25 Low priority used for {@link PIXI.Application} rendering.
- * @property {number} UTILITY=-50 Lowest priority used for {@link PIXI.prepare.BasePrepare} utility.
+ * @property {number} INTERACTION=50 Highest priority, used for {@link V.interaction.InteractionManager}
+ * @property {number} HIGH=25 High priority updating, {@link V.VideoBaseTexture} and {@link V.extras.AnimatedSprite}
+ * @property {number} NORMAL=0 Default priority for ticker events, see {@link V.ticker.Ticker#add}.
+ * @property {number} LOW=-25 Low priority used for {@link V.Application} rendering.
+ * @property {number} UTILITY=-50 Lowest priority used for {@link V.prepare.BasePrepare} utility.
  */
 export const UPDATE_PRIORITY = {
     INTERACTION: 50,

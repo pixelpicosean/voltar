@@ -6,13 +6,13 @@ const tempMat = new Matrix();
  * class controls uv transform and frame clamp for texture
  *
  * @class
- * @memberof PIXI.extras
+ * @memberof V.extras
  */
 export default class TextureTransform
 {
     /**
      *
-     * @param {PIXI.Texture} texture observed texture
+     * @param {V.Texture} texture observed texture
      * @param {number} [clampMargin] Changes frame clamping, 0.5 by default. Use -0.5 for extra border.
      * @constructor
      */
@@ -51,7 +51,7 @@ export default class TextureTransform
 
     /**
      * texture property
-     * @member {PIXI.Texture}
+     * @member {V.Texture}
      */
     get texture()
     {

@@ -1,7 +1,7 @@
 /**
  * Mixes all enumerable properties and methods from a source object to a target object.
  *
- * @memberof PIXI.utils.mixins
+ * @memberof V.utils.mixins
  * @function mixin
  * @param {object} target The prototype or instance that properties and methods should be added to.
  * @param {object} source The source of properties and methods to mix in.
@@ -28,10 +28,10 @@ export function mixin(target, source)
 const mixins = [];
 
 /**
- * Queues a mixin to be handled towards the end of the initialization of PIXI, so that deprecation
+ * Queues a mixin to be handled towards the end of the initialization of V, so that deprecation
  * can take effect.
  *
- * @memberof PIXI.utils.mixins
+ * @memberof V.utils.mixins
  * @function delayMixin
  * @private
  * @param {object} target The prototype or instance that properties and methods should be added to.
@@ -45,7 +45,7 @@ export function delayMixin(target, source)
 /**
  * Handles all mixins queued via delayMixin().
  *
- * @memberof PIXI.utils.mixins
+ * @memberof V.utils.mixins
  * @function performMixins
  * @private
  */

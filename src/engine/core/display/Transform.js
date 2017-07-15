@@ -6,8 +6,8 @@ import TransformBase from './TransformBase';
  * local transformation is calculated from position,scale,skew and rotation
  *
  * @class
- * @extends PIXI.TransformBase
- * @memberof PIXI
+ * @extends V.TransformBase
+ * @memberof V
  */
 export default class Transform extends TransformBase
 {
@@ -21,28 +21,28 @@ export default class Transform extends TransformBase
          /**
          * The coordinate of the object relative to the local coordinates of the parent.
          *
-         * @member {PIXI.Point}
+         * @member {V.Point}
          */
         this.position = new Point(0, 0);
 
         /**
          * The scale factor of the object.
          *
-         * @member {PIXI.Point}
+         * @member {V.Point}
          */
         this.scale = new Point(1, 1);
 
         /**
          * The skew amount, on the x and y axis.
          *
-         * @member {PIXI.ObservablePoint}
+         * @member {V.ObservablePoint}
          */
         this.skew = new ObservablePoint(this.updateSkew, this, 0, 0);
 
         /**
          * The pivot point of the displayObject that it rotates around
          *
-         * @member {PIXI.Point}
+         * @member {V.Point}
          */
         this.pivot = new Point(0, 0);
 
@@ -92,7 +92,7 @@ export default class Transform extends TransformBase
     /**
      * Updates the values of the object and applies the parent's transform.
      *
-     * @param {PIXI.Transform} parentTransform - The transform of the parent of this object
+     * @param {V.Transform} parentTransform - The transform of the parent of this object
      */
     updateTransform(parentTransform)
     {
@@ -123,7 +123,7 @@ export default class Transform extends TransformBase
     /**
      * Decomposes a matrix and sets the transforms properties based on it.
      *
-     * @param {PIXI.Matrix} matrix - The matrix to decompose
+     * @param {V.Matrix} matrix - The matrix to decompose
      */
     setFromMatrix(matrix)
     {

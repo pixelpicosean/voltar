@@ -9,13 +9,13 @@ import { join } from 'path';
  * is used to offset the y.
  *
  * @class
- * @extends PIXI.Filter
- * @memberof PIXI.filters
+ * @extends V.Filter
+ * @memberof V.filters
  */
 export default class DisplacementFilter extends core.Filter
 {
     /**
-     * @param {PIXI.Sprite} sprite - The sprite used for the displacement map. (make sure its added to the scene!)
+     * @param {V.Sprite} sprite - The sprite used for the displacement map. (make sure its added to the scene!)
      * @param {number} scale - The scale of the displacement
      */
     constructor(sprite, scale)
@@ -49,9 +49,9 @@ export default class DisplacementFilter extends core.Filter
     /**
      * Applies the filter.
      *
-     * @param {PIXI.FilterManager} filterManager - The manager.
-     * @param {PIXI.RenderTarget} input - The input target.
-     * @param {PIXI.RenderTarget} output - The output target.
+     * @param {V.FilterManager} filterManager - The manager.
+     * @param {V.RenderTarget} input - The input target.
+     * @param {V.RenderTarget} output - The output target.
      */
     apply(filterManager, input, output)
     {
@@ -68,7 +68,7 @@ export default class DisplacementFilter extends core.Filter
     /**
      * The texture used for the displacement map. Must be power of 2 sized texture.
      *
-     * @member {PIXI.Texture}
+     * @member {V.Texture}
      */
     get map()
     {

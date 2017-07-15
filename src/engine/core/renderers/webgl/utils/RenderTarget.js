@@ -5,7 +5,7 @@ import { GLFramebuffer } from 'pixi-gl-core';
 
 /**
  * @class
- * @memberof PIXI
+ * @memberof V
  */
 export default class RenderTarget
 {
@@ -13,7 +13,7 @@ export default class RenderTarget
      * @param {WebGLRenderingContext} gl - The current WebGL drawing context
      * @param {number} [width=0] - the horizontal range of the filter
      * @param {number} [height=0] - the vertical range of the filter
-     * @param {number} [scaleMode=PIXI.settings.SCALE_MODE] - See {@link PIXI.SCALE_MODES} for possible values
+     * @param {number} [scaleMode=V.settings.SCALE_MODE] - See {@link V.SCALE_MODES} for possible values
      * @param {number} [resolution=1] - The current resolution / device pixel ratio
      * @param {boolean} [root=false] - Whether this object is the root element or not
      */
@@ -33,14 +33,14 @@ export default class RenderTarget
         /**
          * A frame buffer
          *
-         * @member {PIXI.glCore.GLFramebuffer}
+         * @member {V.glCore.GLFramebuffer}
          */
         this.frameBuffer = null;
 
         /**
          * The texture
          *
-         * @member {PIXI.glCore.GLTexture}
+         * @member {V.glCore.GLTexture}
          */
         this.texture = null;
 
@@ -54,7 +54,7 @@ export default class RenderTarget
         /**
          * The size of the object as a rectangle
          *
-         * @member {PIXI.Rectangle}
+         * @member {V.Rectangle}
          */
         this.size = new Rectangle(0, 0, 1, 1);
 
@@ -69,21 +69,21 @@ export default class RenderTarget
         /**
          * The projection matrix
          *
-         * @member {PIXI.Matrix}
+         * @member {V.Matrix}
          */
         this.projectionMatrix = new Matrix();
 
         /**
          * The object's transform
          *
-         * @member {PIXI.Matrix}
+         * @member {V.Matrix}
          */
         this.transform = null;
 
         /**
          * The frame.
          *
-         * @member {PIXI.Rectangle}
+         * @member {V.Rectangle}
          */
         this.frame = null;
 
@@ -106,7 +106,7 @@ export default class RenderTarget
         /**
          * The data structure for the stencil masks
          *
-         * @member {PIXI.Graphics[]}
+         * @member {V.Graphics[]}
          */
         this.stencilMaskStack = [];
 
@@ -121,8 +121,8 @@ export default class RenderTarget
          * The scale mode.
          *
          * @member {number}
-         * @default PIXI.settings.SCALE_MODE
-         * @see PIXI.SCALE_MODES
+         * @default V.settings.SCALE_MODE
+         * @see V.SCALE_MODES
          */
         this.scaleMode = scaleMode !== undefined ? scaleMode : settings.SCALE_MODE;
 

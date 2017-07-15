@@ -28,7 +28,7 @@ function checkPrecision(src, def)
  *
  * @class
  * @extends GLShader
- * @memberof PIXI
+ * @memberof V
  */
 export default class Shader extends GLShader
 {

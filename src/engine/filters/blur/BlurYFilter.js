@@ -7,8 +7,8 @@ import getMaxBlurKernelSize from './getMaxBlurKernelSize';
  * The BlurYFilter applies a horizontal Gaussian blur to an object.
  *
  * @class
- * @extends PIXI.Filter
- * @memberof PIXI.filters
+ * @extends V.Filter
+ * @memberof V.filters
  */
 export default class BlurYFilter extends core.Filter
 {
@@ -44,9 +44,9 @@ export default class BlurYFilter extends core.Filter
     /**
      * Applies the filter.
      *
-     * @param {PIXI.FilterManager} filterManager - The manager.
-     * @param {PIXI.RenderTarget} input - The input target.
-     * @param {PIXI.RenderTarget} output - The output target.
+     * @param {V.FilterManager} filterManager - The manager.
+     * @param {V.RenderTarget} input - The input target.
+     * @param {V.RenderTarget} output - The output target.
      * @param {boolean} clear - Should the output be cleared before rendering?
      */
     apply(filterManager, input, output, clear)

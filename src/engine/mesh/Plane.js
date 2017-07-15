@@ -5,20 +5,20 @@ import Mesh from './Mesh';
  *
  *```js
  * for (let i = 0; i < 20; i++) {
- *     points.push(new PIXI.Point(i * 50, 0));
+ *     points.push(new V.Point(i * 50, 0));
  * };
- * let Plane = new PIXI.Plane(PIXI.Texture.fromImage("snake.png"), points);
+ * let Plane = new V.Plane(V.Texture.fromImage("snake.png"), points);
  *  ```
  *
  * @class
- * @extends PIXI.mesh.Mesh
- * @memberof PIXI.mesh
+ * @extends V.mesh.Mesh
+ * @memberof V.mesh
  *
  */
 export default class Plane extends Mesh
 {
     /**
-     * @param {PIXI.Texture} texture - The texture to use on the Plane.
+     * @param {V.Texture} texture - The texture to use on the Plane.
      * @param {number} verticesX - The number of vertices in the x-axis
      * @param {number} verticesY - The number of vertices in the y-axis
      */

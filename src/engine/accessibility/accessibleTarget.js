@@ -1,15 +1,15 @@
 /**
  * Default property values of accessible objects
- * used by {@link PIXI.accessibility.AccessibilityManager}.
+ * used by {@link V.accessibility.AccessibilityManager}.
  *
  * @function accessibleTarget
- * @memberof PIXI.accessibility
+ * @memberof V.accessibility
  * @example
  *      function MyObject() {}
  *
  *      Object.assign(
  *          MyObject.prototype,
- *          PIXI.accessibility.accessibleTarget
+ *          V.accessibility.accessibleTarget
  *      );
  */
 export default {

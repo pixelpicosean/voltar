@@ -8,8 +8,8 @@ const SOURCE_KEY_MAP = {};
 // let math = require('../../../math');
 /**
  * @class
- * @memberof PIXI
- * @extends PIXI.Shader
+ * @memberof V
+ * @extends V.Shader
  */
 export default class Filter
 {
@@ -100,9 +100,9 @@ export default class Filter
     /**
      * Applies the filter
      *
-     * @param {PIXI.FilterManager} filterManager - The renderer to retrieve the filter from
-     * @param {PIXI.RenderTarget} input - The input render target.
-     * @param {PIXI.RenderTarget} output - The target to output to.
+     * @param {V.FilterManager} filterManager - The renderer to retrieve the filter from
+     * @param {V.RenderTarget} input - The input render target.
+     * @param {V.RenderTarget} output - The target to output to.
      * @param {boolean} clear - Should the output be cleared before rendering to it
      * @param {object} [currentState] - It's current state of filter.
      *        There are some useful properties in the currentState :

@@ -6,7 +6,7 @@ import { Rectangle } from '../math';
  * It is not a shape! Its mutable thing, no 'EMPTY' or that kind of problems
  *
  * @class
- * @memberof PIXI
+ * @memberof V
  */
 export default class Bounds
 {
@@ -70,8 +70,8 @@ export default class Bounds
      * Can return Rectangle.EMPTY constant, either construct new rectangle, either use your rectangle
      * It is not guaranteed that it will return tempRect
      *
-     * @param {PIXI.Rectangle} rect - temporary object will be used if AABB is not empty
-     * @returns {PIXI.Rectangle} A rectangle of the bounds
+     * @param {V.Rectangle} rect - temporary object will be used if AABB is not empty
+     * @returns {V.Rectangle} A rectangle of the bounds
      */
     getRectangle(rect)
     {
@@ -93,7 +93,7 @@ export default class Bounds
     /**
      * This function should be inlined when its possible.
      *
-     * @param {PIXI.Point} point - The point to add.
+     * @param {V.Point} point - The point to add.
      */
     addPoint(point)
     {
@@ -153,7 +153,7 @@ export default class Bounds
     /**
      * Adds sprite frame, transformed.
      *
-     * @param {PIXI.TransformBase} transform - TODO
+     * @param {V.TransformBase} transform - TODO
      * @param {number} x0 - TODO
      * @param {number} y0 - TODO
      * @param {number} x1 - TODO
@@ -212,7 +212,7 @@ export default class Bounds
     /**
      * Add an array of vertices
      *
-     * @param {PIXI.TransformBase} transform - TODO
+     * @param {V.TransformBase} transform - TODO
      * @param {Float32Array} vertices - TODO
      * @param {number} beginOffset - TODO
      * @param {number} endOffset - TODO
@@ -254,7 +254,7 @@ export default class Bounds
     /**
      * Adds other Bounds
      *
-     * @param {PIXI.Bounds} bounds - TODO
+     * @param {V.Bounds} bounds - TODO
      */
     addBounds(bounds)
     {
@@ -272,8 +272,8 @@ export default class Bounds
     /**
      * Adds other Bounds, masked with Bounds
      *
-     * @param {PIXI.Bounds} bounds - TODO
-     * @param {PIXI.Bounds} mask - TODO
+     * @param {V.Bounds} bounds - TODO
+     * @param {V.Bounds} mask - TODO
      */
     addBoundsMask(bounds, mask)
     {
@@ -299,8 +299,8 @@ export default class Bounds
     /**
      * Adds other Bounds, masked with Rectangle
      *
-     * @param {PIXI.Bounds} bounds - TODO
-     * @param {PIXI.Rectangle} area - TODO
+     * @param {V.Bounds} bounds - TODO
+     * @param {V.Rectangle} area - TODO
      */
     addBoundsArea(bounds, area)
     {

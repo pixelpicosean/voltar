@@ -7,14 +7,14 @@ import { join } from 'path';
  * with a new set of RGBA color and alpha values. It's pretty powerful!
  *
  * ```js
- *  let colorMatrix = new PIXI.ColorMatrixFilter();
+ *  let colorMatrix = new V.ColorMatrixFilter();
  *  container.filters = [colorMatrix];
  *  colorMatrix.contrast(2);
  * ```
  * @author Clément Chenebault <clement@goodboydigital.com>
  * @class
- * @extends PIXI.Filter
- * @memberof PIXI.filters
+ * @extends V.Filter
+ * @memberof V.filters
  */
 export default class ColorMatrixFilter extends core.Filter
 {

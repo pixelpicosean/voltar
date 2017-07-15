@@ -4,8 +4,8 @@ import WebGLManager from '../managers/WebGLManager';
  * Base for a common object renderer that can be used as a system renderer plugin.
  *
  * @class
- * @extends PIXI.WebGLManager
- * @memberof PIXI
+ * @extends V.WebGLManager
+ * @memberof V
  */
 export default class ObjectRenderer extends WebGLManager
 {
@@ -39,7 +39,7 @@ export default class ObjectRenderer extends WebGLManager
     /**
      * Renders an object
      *
-     * @param {PIXI.DisplayObject} object - The object to render.
+     * @param {V.Node2D} object - The object to render.
      */
     render(object) // eslint-disable-line no-unused-vars
     {

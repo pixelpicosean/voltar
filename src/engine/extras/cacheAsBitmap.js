@@ -3,11 +3,11 @@ import Texture from '../core/textures/Texture';
 import BaseTexture from '../core/textures/BaseTexture';
 import { uid } from '../core/utils';
 
-const DisplayObject = core.DisplayObject;
+const Node2D = core.Node2D;
 const _tempMatrix = new core.Matrix();
 
-DisplayObject.prototype._cacheAsBitmap = false;
-DisplayObject.prototype._cacheData = false;
+Node2D.prototype._cacheAsBitmap = false;
+Node2D.prototype._cacheData = false;
 
 // figured theres no point adding ALL the extra variables to prototype.
 // this model can hold the information needed. This can also be generated on demand as
@@ -39,7 +39,7 @@ class CacheData
     }
 }
 
-Object.defineProperties(DisplayObject.prototype, {
+Object.defineProperties(Node2D.prototype, {
     /**
      * Set this to true if you want this display object to be cached as a bitmap.
      * This basically takes a snap shot of the display object as it is at that moment. It can
@@ -50,7 +50,7 @@ Object.defineProperties(DisplayObject.prototype, {
      * as it will take a snapshot of what is currently there. If the textures have not loaded then they will not appear.
      *
      * @member {boolean}
-     * @memberof PIXI.DisplayObject#
+     * @memberof V.Node2D#
      */
     cacheAsBitmap: {
         get()
@@ -102,7 +102,7 @@ Object.defineProperties(DisplayObject.prototype, {
 
                 if (data.sprite)
                 {
-                    this._destroyCachedDisplayObject();
+                    this._destroyCachedNode2D();
                 }
 
                 this.renderWebGL = data.originalRenderWebGL;
@@ -126,17 +126,17 @@ Object.defineProperties(DisplayObject.prototype, {
  * Renders a cached version of the sprite with WebGL
  *
  * @private
- * @memberof PIXI.DisplayObject#
- * @param {PIXI.WebGLRenderer} renderer - the WebGL renderer
+ * @memberof V.Node2D#
+ * @param {V.WebGLRenderer} renderer - the WebGL renderer
  */
-DisplayObject.prototype._renderCachedWebGL = function _renderCachedWebGL(renderer)
+Node2D.prototype._renderCachedWebGL = function _renderCachedWebGL(renderer)
 {
     if (!this.visible || this.worldAlpha <= 0 || !this.renderable)
     {
         return;
     }
 
-    this._initCachedDisplayObject(renderer);
+    this._initCachedNode2D(renderer);
 
     this._cacheData.sprite._transformID = -1;
     this._cacheData.sprite.worldAlpha = this.worldAlpha;
@@ -147,10 +147,10 @@ DisplayObject.prototype._renderCachedWebGL = function _renderCachedWebGL(rendere
  * Prepares the WebGL renderer to cache the sprite
  *
  * @private
- * @memberof PIXI.DisplayObject#
- * @param {PIXI.WebGLRenderer} renderer - the WebGL renderer
+ * @memberof V.Node2D#
+ * @param {V.WebGLRenderer} renderer - the WebGL renderer
  */
-DisplayObject.prototype._initCachedDisplayObject = function _initCachedDisplayObject(renderer)
+Node2D.prototype._initCachedNode2D = function _initCachedNode2D(renderer)
 {
     if (this._cacheData && this._cacheData.sprite)
     {
@@ -186,7 +186,7 @@ DisplayObject.prototype._initCachedDisplayObject = function _initCachedDisplayOb
     // We also store the filter stack - I will definitely look to change how this works a little later down the line.
     const stack = renderer.filterManager.filterStack;
 
-    // this renderTexture will be used to store the cached DisplayObject
+    // this renderTexture will be used to store the cached Node2D
 
     const renderTexture = core.RenderTexture.create(bounds.width | 0, bounds.height | 0);
 
@@ -241,7 +241,7 @@ DisplayObject.prototype._initCachedDisplayObject = function _initCachedDisplayOb
     // restore the transform of the cached sprite to avoid the nasty flicker..
     if (!this.parent)
     {
-        this.parent = renderer._tempDisplayObjectParent;
+        this.parent = renderer._tempNode2DParent;
         this.updateTransform();
         this.parent = null;
     }
@@ -258,17 +258,17 @@ DisplayObject.prototype._initCachedDisplayObject = function _initCachedDisplayOb
  * Renders a cached version of the sprite with canvas
  *
  * @private
- * @memberof PIXI.DisplayObject#
- * @param {PIXI.WebGLRenderer} renderer - the WebGL renderer
+ * @memberof V.Node2D#
+ * @param {V.WebGLRenderer} renderer - the WebGL renderer
  */
-DisplayObject.prototype._renderCachedCanvas = function _renderCachedCanvas(renderer)
+Node2D.prototype._renderCachedCanvas = function _renderCachedCanvas(renderer)
 {
     if (!this.visible || this.worldAlpha <= 0 || !this.renderable)
     {
         return;
     }
 
-    this._initCachedDisplayObjectCanvas(renderer);
+    this._initCachedNode2DCanvas(renderer);
 
     this._cacheData.sprite.worldAlpha = this.worldAlpha;
 
@@ -280,10 +280,10 @@ DisplayObject.prototype._renderCachedCanvas = function _renderCachedCanvas(rende
  * Prepares the Canvas renderer to cache the sprite
  *
  * @private
- * @memberof PIXI.DisplayObject#
- * @param {PIXI.WebGLRenderer} renderer - the WebGL renderer
+ * @memberof V.Node2D#
+ * @param {V.WebGLRenderer} renderer - the WebGL renderer
  */
-DisplayObject.prototype._initCachedDisplayObjectCanvas = function _initCachedDisplayObjectCanvas(renderer)
+Node2D.prototype._initCachedNode2DCanvas = function _initCachedNode2DCanvas(renderer)
 {
     if (this._cacheData && this._cacheData.sprite)
     {
@@ -344,7 +344,7 @@ DisplayObject.prototype._initCachedDisplayObjectCanvas = function _initCachedDis
 
     if (!this.parent)
     {
-        this.parent = renderer._tempDisplayObjectParent;
+        this.parent = renderer._tempNode2DParent;
         this.updateTransform();
         this.parent = null;
     }
@@ -365,7 +365,7 @@ DisplayObject.prototype._initCachedDisplayObjectCanvas = function _initCachedDis
  *
  * @private
  */
-DisplayObject.prototype._calculateCachedBounds = function _calculateCachedBounds()
+Node2D.prototype._calculateCachedBounds = function _calculateCachedBounds()
 {
     this._cacheData.sprite._calculateBounds();
 };
@@ -376,7 +376,7 @@ DisplayObject.prototype._calculateCachedBounds = function _calculateCachedBounds
  * @private
  * @return {Rectangle} The local bounds.
  */
-DisplayObject.prototype._getCachedLocalBounds = function _getCachedLocalBounds()
+Node2D.prototype._getCachedLocalBounds = function _getCachedLocalBounds()
 {
     return this._cacheData.sprite.getLocalBounds();
 };
@@ -386,7 +386,7 @@ DisplayObject.prototype._getCachedLocalBounds = function _getCachedLocalBounds()
  *
  * @private
  */
-DisplayObject.prototype._destroyCachedDisplayObject = function _destroyCachedDisplayObject()
+Node2D.prototype._destroyCachedNode2D = function _destroyCachedNode2D()
 {
     this._cacheData.sprite._texture.destroy(true);
     this._cacheData.sprite = null;
@@ -403,9 +403,9 @@ DisplayObject.prototype._destroyCachedDisplayObject = function _destroyCachedDis
  * @private
  * @param {object|boolean} [options] - Options parameter. A boolean will act as if all options
  *  have been set to that value.
- *  Used when destroying containers, see the Container.destroy method.
+ *  Used when destroying containers, see the Node2D.destroy method.
  */
-DisplayObject.prototype._cacheAsBitmapDestroy = function _cacheAsBitmapDestroy(options)
+Node2D.prototype._cacheAsBitmapDestroy = function _cacheAsBitmapDestroy(options)
 {
     this.cacheAsBitmap = false;
     this.destroy(options);

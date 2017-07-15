@@ -10,7 +10,7 @@ import TickerListener from './TickerListener';
  * e.g. When the ticker is started and the emitter has listeners.
  *
  * @class
- * @memberof PIXI.ticker
+ * @memberof V.ticker
  */
 export default class Ticker
 {
@@ -41,7 +41,7 @@ export default class Ticker
 
         /**
          * Whether or not this ticker should invoke the method
-         * {@link PIXI.ticker.Ticker#start} automatically
+         * {@link V.ticker.Ticker#start} automatically
          * when a listener is added.
          *
          * @member {boolean}
@@ -51,8 +51,8 @@ export default class Ticker
 
         /**
          * Scalar time value from last frame to this frame.
-         * This value is capped by setting {@link PIXI.ticker.Ticker#minFPS}
-         * and is scaled with {@link PIXI.ticker.Ticker#speed}.
+         * This value is capped by setting {@link V.ticker.Ticker#minFPS}
+         * and is scaled with {@link V.ticker.Ticker#speed}.
          * **Note:** The cap may be exceeded by scaling.
          *
          * @member {number}
@@ -62,7 +62,7 @@ export default class Ticker
 
         /**
          * Time elapsed in milliseconds from last frame to this frame.
-         * Opposed to what the scalar {@link PIXI.ticker.Ticker#deltaTime}
+         * Opposed to what the scalar {@link V.ticker.Ticker#deltaTime}
          * is based, this value is neither capped nor scaled.
          * If the platform supports DOMHighResTimeStamp,
          * this value will have a precision of 1 µs.
@@ -74,7 +74,7 @@ export default class Ticker
         this.elapsedMS = 1 / settings.TARGET_FPMS;
 
         /**
-         * The last time {@link PIXI.ticker.Ticker#update} was invoked.
+         * The last time {@link V.ticker.Ticker#update} was invoked.
          * This value is also reset internally outside of invoking
          * update, but only when a new animation frame is requested.
          * If the platform supports DOMHighResTimeStamp,
@@ -86,7 +86,7 @@ export default class Ticker
         this.lastTime = 0;
 
         /**
-         * Factor of current {@link PIXI.ticker.Ticker#deltaTime}.
+         * Factor of current {@link V.ticker.Ticker#deltaTime}.
          * @example
          * // Scales ticker.deltaTime to what would be
          * // the equivalent of approximately 120 FPS
@@ -99,10 +99,10 @@ export default class Ticker
 
         /**
          * Whether or not this ticker has been started.
-         * `true` if {@link PIXI.ticker.Ticker#start} has been called.
-         * `false` if {@link PIXI.ticker.Ticker#stop} has been called.
+         * `true` if {@link V.ticker.Ticker#start} has been called.
+         * `false` if {@link V.ticker.Ticker#stop} has been called.
          * While `false`, this value may change to `true` in the
-         * event of {@link PIXI.ticker.Ticker#autoStart} being `true`
+         * event of {@link V.ticker.Ticker#autoStart} being `true`
          * and a listener is added.
          *
          * @member {boolean}
@@ -197,8 +197,8 @@ export default class Ticker
      *
      * @param {Function} fn - The listener function to be added for updates
      * @param {Function} [context] - The listener context
-     * @param {number} [priority=PIXI.UPDATE_PRIORITY.NORMAL] - The priority for emitting
-     * @returns {PIXI.ticker.Ticker} This instance of a ticker
+     * @param {number} [priority=V.UPDATE_PRIORITY.NORMAL] - The priority for emitting
+     * @returns {V.ticker.Ticker} This instance of a ticker
      */
     add(fn, context, priority = UPDATE_PRIORITY.NORMAL)
     {
@@ -210,8 +210,8 @@ export default class Ticker
      *
      * @param {Function} fn - The listener function to be added for one update
      * @param {Function} [context] - The listener context
-     * @param {number} [priority=PIXI.UPDATE_PRIORITY.NORMAL] - The priority for emitting
-     * @returns {PIXI.ticker.Ticker} This instance of a ticker
+     * @param {number} [priority=V.UPDATE_PRIORITY.NORMAL] - The priority for emitting
+     * @returns {V.ticker.Ticker} This instance of a ticker
      */
     addOnce(fn, context, priority = UPDATE_PRIORITY.NORMAL)
     {
@@ -225,7 +225,7 @@ export default class Ticker
      *
      * @private
      * @param {TickerListener} listener - Current listener being added.
-     * @returns {PIXI.ticker.Ticker} This instance of a ticker
+     * @returns {V.ticker.Ticker} This instance of a ticker
      */
     _addListener(listener)
     {
@@ -270,7 +270,7 @@ export default class Ticker
      *
      * @param {Function} fn - The listener function to be removed
      * @param {Function} [context] - The listener context to be removed
-     * @returns {PIXI.ticker.Ticker} This instance of a ticker
+     * @returns {V.ticker.Ticker} This instance of a ticker
      */
     remove(fn, context)
     {
@@ -346,10 +346,10 @@ export default class Ticker
 
     /**
      * Triggers an update. An update entails setting the
-     * current {@link PIXI.ticker.Ticker#elapsedMS},
-     * the current {@link PIXI.ticker.Ticker#deltaTime},
+     * current {@link V.ticker.Ticker#elapsedMS},
+     * the current {@link V.ticker.Ticker#deltaTime},
      * invoking all listeners with current deltaTime,
-     * and then finally setting {@link PIXI.ticker.Ticker#lastTime}
+     * and then finally setting {@link V.ticker.Ticker#lastTime}
      * with the value of currentTime that was provided.
      * This method will be called automatically by animation
      * frame callbacks if the ticker instance has been started
@@ -418,8 +418,8 @@ export default class Ticker
      * The frames per second at which this ticker is running.
      * The default is approximately 60 in most modern browsers.
      * **Note:** This does not factor in the value of
-     * {@link PIXI.ticker.Ticker#speed}, which is specific
-     * to scaling {@link PIXI.ticker.Ticker#deltaTime}.
+     * {@link V.ticker.Ticker#speed}, which is specific
+     * to scaling {@link V.ticker.Ticker#deltaTime}.
      *
      * @member {number}
      * @readonly
@@ -431,11 +431,11 @@ export default class Ticker
 
     /**
      * Manages the maximum amount of milliseconds allowed to
-     * elapse between invoking {@link PIXI.ticker.Ticker#update}.
-     * This value is used to cap {@link PIXI.ticker.Ticker#deltaTime},
-     * but does not effect the measured value of {@link PIXI.ticker.Ticker#FPS}.
+     * elapse between invoking {@link V.ticker.Ticker#update}.
+     * This value is used to cap {@link V.ticker.Ticker#deltaTime},
+     * but does not effect the measured value of {@link V.ticker.Ticker#FPS}.
      * When setting this property it is clamped to a value between
-     * `0` and `PIXI.settings.TARGET_FPMS * 1000`.
+     * `0` and `V.settings.TARGET_FPMS * 1000`.
      *
      * @member {number}
      * @default 10

@@ -5,9 +5,9 @@ import InteractionTrackingData from './InteractionTrackingData';
 import EventEmitter from 'eventemitter3';
 import interactiveTarget from './interactiveTarget';
 
-// Mix interactiveTarget into core.DisplayObject.prototype, after deprecation has been handled
+// Mix interactiveTarget into core.Node2D.prototype, after deprecation has been handled
 core.utils.mixins.delayMixin(
-    core.DisplayObject.prototype,
+    core.Node2D.prototype,
     interactiveTarget
 );
 
@@ -22,7 +22,7 @@ const hitTestEvent = {
 };
 
 /**
- * The interaction manager deals with mouse, touch and pointer events. Any DisplayObject can be interactive
+ * The interaction manager deals with mouse, touch and pointer events. Any Node2D can be interactive
  * if its interactive parameter is set to true
  * This manager also supports multitouch.
  *
@@ -30,12 +30,12 @@ const hitTestEvent = {
  *
  * @class
  * @extends EventEmitter
- * @memberof PIXI.interaction
+ * @memberof V.interaction
  */
 export default class InteractionManager extends EventEmitter
 {
     /**
-     * @param {PIXI.CanvasRenderer|PIXI.WebGLRenderer} renderer - A reference to the current renderer
+     * @param {V.CanvasRenderer|V.WebGLRenderer} renderer - A reference to the current renderer
      * @param {object} [options] - The options for the manager.
      * @param {boolean} [options.autoPreventDefault=true] - Should the manager automatically prevent default browser actions.
      * @param {number} [options.interactionFrequency=10] - Frequency increases the interaction events will be checked.
@@ -49,7 +49,7 @@ export default class InteractionManager extends EventEmitter
         /**
          * The renderer this interaction manager works for.
          *
-         * @member {PIXI.SystemRenderer}
+         * @member {V.SystemRenderer}
          */
         this.renderer = renderer;
 
@@ -75,7 +75,7 @@ export default class InteractionManager extends EventEmitter
         /**
          * The mouse data
          *
-         * @member {PIXI.interaction.InteractionData}
+         * @member {V.interaction.InteractionData}
          */
         this.mouse = new InteractionData();
         this.mouse.identifier = MOUSE_POINTER_ID;
@@ -88,7 +88,7 @@ export default class InteractionManager extends EventEmitter
          * Actively tracked InteractionData
          *
          * @private
-         * @member {Object.<number,PIXI.interation.InteractionData>}
+         * @member {Object.<number,V.interation.InteractionData>}
          */
         this.activeInteractionData = {};
         this.activeInteractionData[MOUSE_POINTER_ID] = this.mouse;
@@ -97,7 +97,7 @@ export default class InteractionManager extends EventEmitter
          * Pool of unused InteractionData
          *
          * @private
-         * @member {PIXI.interation.InteractionData[]}
+         * @member {V.interation.InteractionData[]}
          */
         this.interactionDataPool = [];
 
@@ -238,7 +238,7 @@ export default class InteractionManager extends EventEmitter
          * Internal cached let.
          *
          * @private
-         * @member {PIXI.Point}
+         * @member {V.Point}
          */
         this._tempPoint = new core.Point();
 
@@ -256,403 +256,403 @@ export default class InteractionManager extends EventEmitter
          * Fired when a pointer device button (usually a mouse left-button) is pressed on the display
          * object.
          *
-         * @event PIXI.interaction.InteractionManager#mousedown
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.interaction.InteractionManager#mousedown
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device secondary button (usually a mouse right-button) is pressed
          * on the display object.
          *
-         * @event PIXI.interaction.InteractionManager#rightdown
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.interaction.InteractionManager#rightdown
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device button (usually a mouse left-button) is released over the display
          * object.
          *
-         * @event PIXI.interaction.InteractionManager#mouseup
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.interaction.InteractionManager#mouseup
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device secondary button (usually a mouse right-button) is released
          * over the display object.
          *
-         * @event PIXI.interaction.InteractionManager#rightup
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.interaction.InteractionManager#rightup
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device button (usually a mouse left-button) is pressed and released on
          * the display object.
          *
-         * @event PIXI.interaction.InteractionManager#click
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.interaction.InteractionManager#click
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device secondary button (usually a mouse right-button) is pressed
          * and released on the display object.
          *
-         * @event PIXI.interaction.InteractionManager#rightclick
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.interaction.InteractionManager#rightclick
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device button (usually a mouse left-button) is released outside the
          * display object that initially registered a
-         * [mousedown]{@link PIXI.interaction.InteractionManager#event:mousedown}.
+         * [mousedown]{@link V.interaction.InteractionManager#event:mousedown}.
          *
-         * @event PIXI.interaction.InteractionManager#mouseupoutside
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.interaction.InteractionManager#mouseupoutside
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device secondary button (usually a mouse right-button) is released
          * outside the display object that initially registered a
-         * [rightdown]{@link PIXI.interaction.InteractionManager#event:rightdown}.
+         * [rightdown]{@link V.interaction.InteractionManager#event:rightdown}.
          *
-         * @event PIXI.interaction.InteractionManager#rightupoutside
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.interaction.InteractionManager#rightupoutside
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device (usually a mouse) is moved while over the display object
          *
-         * @event PIXI.interaction.InteractionManager#mousemove
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.interaction.InteractionManager#mousemove
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device (usually a mouse) is moved onto the display object
          *
-         * @event PIXI.interaction.InteractionManager#mouseover
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.interaction.InteractionManager#mouseover
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device (usually a mouse) is moved off the display object
          *
-         * @event PIXI.interaction.InteractionManager#mouseout
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.interaction.InteractionManager#mouseout
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device button is pressed on the display object.
          *
-         * @event PIXI.interaction.InteractionManager#pointerdown
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.interaction.InteractionManager#pointerdown
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device button is released over the display object.
          *
-         * @event PIXI.interaction.InteractionManager#pointerup
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.interaction.InteractionManager#pointerup
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when the operating system cancels a pointer event
          *
-         * @event PIXI.interaction.InteractionManager#pointercancel
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.interaction.InteractionManager#pointercancel
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device button is pressed and released on the display object.
          *
-         * @event PIXI.interaction.InteractionManager#pointertap
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.interaction.InteractionManager#pointertap
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device button is released outside the display object that initially
-         * registered a [pointerdown]{@link PIXI.interaction.InteractionManager#event:pointerdown}.
+         * registered a [pointerdown]{@link V.interaction.InteractionManager#event:pointerdown}.
          *
-         * @event PIXI.interaction.InteractionManager#pointerupoutside
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.interaction.InteractionManager#pointerupoutside
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device is moved while over the display object
          *
-         * @event PIXI.interaction.InteractionManager#pointermove
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.interaction.InteractionManager#pointermove
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device is moved onto the display object
          *
-         * @event PIXI.interaction.InteractionManager#pointerover
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.interaction.InteractionManager#pointerover
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device is moved off the display object
          *
-         * @event PIXI.interaction.InteractionManager#pointerout
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.interaction.InteractionManager#pointerout
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a touch point is placed on the display object.
          *
-         * @event PIXI.interaction.InteractionManager#touchstart
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.interaction.InteractionManager#touchstart
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a touch point is removed from the display object.
          *
-         * @event PIXI.interaction.InteractionManager#touchend
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.interaction.InteractionManager#touchend
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when the operating system cancels a touch
          *
-         * @event PIXI.interaction.InteractionManager#touchcancel
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.interaction.InteractionManager#touchcancel
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a touch point is placed and removed from the display object.
          *
-         * @event PIXI.interaction.InteractionManager#tap
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.interaction.InteractionManager#tap
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a touch point is removed outside of the display object that initially
-         * registered a [touchstart]{@link PIXI.interaction.InteractionManager#event:touchstart}.
+         * registered a [touchstart]{@link V.interaction.InteractionManager#event:touchstart}.
          *
-         * @event PIXI.interaction.InteractionManager#touchendoutside
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.interaction.InteractionManager#touchendoutside
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a touch point is moved along the display object.
          *
-         * @event PIXI.interaction.InteractionManager#touchmove
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.interaction.InteractionManager#touchmove
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device button (usually a mouse left-button) is pressed on the display.
-         * object. DisplayObject's `interactive` property must be set to `true` to fire event.
+         * object. Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event PIXI.DisplayObject#mousedown
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.Node2D#mousedown
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device secondary button (usually a mouse right-button) is pressed
-         * on the display object. DisplayObject's `interactive` property must be set to `true` to fire event.
+         * on the display object. Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event PIXI.DisplayObject#rightdown
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.Node2D#rightdown
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device button (usually a mouse left-button) is released over the display
-         * object. DisplayObject's `interactive` property must be set to `true` to fire event.
+         * object. Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event PIXI.DisplayObject#mouseup
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.Node2D#mouseup
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device secondary button (usually a mouse right-button) is released
-         * over the display object. DisplayObject's `interactive` property must be set to `true` to fire event.
+         * over the display object. Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event PIXI.DisplayObject#rightup
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.Node2D#rightup
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device button (usually a mouse left-button) is pressed and released on
-         * the display object. DisplayObject's `interactive` property must be set to `true` to fire event.
+         * the display object. Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event PIXI.DisplayObject#click
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.Node2D#click
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device secondary button (usually a mouse right-button) is pressed
-         * and released on the display object. DisplayObject's `interactive` property must be set to `true` to fire event.
+         * and released on the display object. Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event PIXI.DisplayObject#rightclick
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.Node2D#rightclick
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device button (usually a mouse left-button) is released outside the
          * display object that initially registered a
-         * [mousedown]{@link PIXI.DisplayObject#event:mousedown}.
-         * DisplayObject's `interactive` property must be set to `true` to fire event.
+         * [mousedown]{@link V.Node2D#event:mousedown}.
+         * Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event PIXI.DisplayObject#mouseupoutside
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.Node2D#mouseupoutside
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device secondary button (usually a mouse right-button) is released
          * outside the display object that initially registered a
-         * [rightdown]{@link PIXI.DisplayObject#event:rightdown}.
-         * DisplayObject's `interactive` property must be set to `true` to fire event.
+         * [rightdown]{@link V.Node2D#event:rightdown}.
+         * Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event PIXI.DisplayObject#rightupoutside
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.Node2D#rightupoutside
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device (usually a mouse) is moved while over the display object.
-         * DisplayObject's `interactive` property must be set to `true` to fire event.
+         * Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event PIXI.DisplayObject#mousemove
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.Node2D#mousemove
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device (usually a mouse) is moved onto the display object.
-         * DisplayObject's `interactive` property must be set to `true` to fire event.
+         * Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event PIXI.DisplayObject#mouseover
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.Node2D#mouseover
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device (usually a mouse) is moved off the display object.
-         * DisplayObject's `interactive` property must be set to `true` to fire event.
+         * Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event PIXI.DisplayObject#mouseout
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.Node2D#mouseout
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device button is pressed on the display object.
-         * DisplayObject's `interactive` property must be set to `true` to fire event.
+         * Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event PIXI.DisplayObject#pointerdown
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.Node2D#pointerdown
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device button is released over the display object.
-         * DisplayObject's `interactive` property must be set to `true` to fire event.
+         * Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event PIXI.DisplayObject#pointerup
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.Node2D#pointerup
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when the operating system cancels a pointer event.
-         * DisplayObject's `interactive` property must be set to `true` to fire event.
+         * Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event PIXI.DisplayObject#pointercancel
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.Node2D#pointercancel
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device button is pressed and released on the display object.
-         * DisplayObject's `interactive` property must be set to `true` to fire event.
+         * Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event PIXI.DisplayObject#pointertap
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.Node2D#pointertap
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device button is released outside the display object that initially
-         * registered a [pointerdown]{@link PIXI.DisplayObject#event:pointerdown}.
-         * DisplayObject's `interactive` property must be set to `true` to fire event.
+         * registered a [pointerdown]{@link V.Node2D#event:pointerdown}.
+         * Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event PIXI.DisplayObject#pointerupoutside
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.Node2D#pointerupoutside
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device is moved while over the display object.
-         * DisplayObject's `interactive` property must be set to `true` to fire event.
+         * Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event PIXI.DisplayObject#pointermove
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.Node2D#pointermove
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device is moved onto the display object.
-         * DisplayObject's `interactive` property must be set to `true` to fire event.
+         * Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event PIXI.DisplayObject#pointerover
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.Node2D#pointerover
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device is moved off the display object.
-         * DisplayObject's `interactive` property must be set to `true` to fire event.
+         * Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event PIXI.DisplayObject#pointerout
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.Node2D#pointerout
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a touch point is placed on the display object.
-         * DisplayObject's `interactive` property must be set to `true` to fire event.
+         * Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event PIXI.DisplayObject#touchstart
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.Node2D#touchstart
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a touch point is removed from the display object.
-         * DisplayObject's `interactive` property must be set to `true` to fire event.
+         * Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event PIXI.DisplayObject#touchend
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.Node2D#touchend
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when the operating system cancels a touch.
-         * DisplayObject's `interactive` property must be set to `true` to fire event.
+         * Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event PIXI.DisplayObject#touchcancel
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.Node2D#touchcancel
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a touch point is placed and removed from the display object.
-         * DisplayObject's `interactive` property must be set to `true` to fire event.
+         * Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event PIXI.DisplayObject#tap
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.Node2D#tap
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a touch point is removed outside of the display object that initially
-         * registered a [touchstart]{@link PIXI.DisplayObject#event:touchstart}.
-         * DisplayObject's `interactive` property must be set to `true` to fire event.
+         * registered a [touchstart]{@link V.Node2D#event:touchstart}.
+         * Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event PIXI.DisplayObject#touchendoutside
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.Node2D#touchendoutside
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a touch point is moved along the display object.
-         * DisplayObject's `interactive` property must be set to `true` to fire event.
+         * Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event PIXI.DisplayObject#touchmove
-         * @param {PIXI.interaction.InteractionEvent} event - Interaction event
+         * @event V.Node2D#touchmove
+         * @param {V.interaction.InteractionEvent} event - Interaction event
          */
     }
 
     /**
      * Hit tests a point against the display tree, returning the first interactive object that is hit.
      *
-     * @param {PIXI.Point} globalPoint - A point to hit test with, in global space.
-     * @param {PIXI.Container} [root] - The root display object to start from. If omitted, defaults
+     * @param {V.Point} globalPoint - A point to hit test with, in global space.
+     * @param {V.Node2D} [root] - The root display object to start from. If omitted, defaults
      * to the last rendered root of the associated renderer.
-     * @return {PIXI.DisplayObject} The hit display object, if any.
+     * @return {V.Node2D} The hit display object, if any.
      */
     hitTest(globalPoint, root)
     {
@@ -812,7 +812,7 @@ export default class InteractionManager extends EventEmitter
 
     /**
      * Updates the state of interactive objects.
-     * Invoked by a throttled ticker update from {@link PIXI.ticker.shared}.
+     * Invoked by a throttled ticker update from {@link V.ticker.shared}.
      *
      * @param {number} deltaTime - time delta since last tick
      */
@@ -922,7 +922,7 @@ export default class InteractionManager extends EventEmitter
     /**
      * Dispatches an event on the display object that was interacted with
      *
-     * @param {PIXI.Container|PIXI.Sprite|PIXI.extras.TilingSprite} displayObject - the display object in question
+     * @param {V.Node2D|V.Sprite|V.extras.TilingSprite} displayObject - the display object in question
      * @param {string} eventString - the name of the event (e.g, mousedown)
      * @param {object} eventData - the event data object
      * @private
@@ -948,7 +948,7 @@ export default class InteractionManager extends EventEmitter
      * resulting value is stored in the point. This takes into account the fact that the DOM
      * element could be scaled and positioned anywhere on the screen.
      *
-     * @param  {PIXI.Point} point - the point that the result will be stored in
+     * @param  {V.Point} point - the point that the result will be stored in
      * @param  {number} x - the x coord of the position to map
      * @param  {number} y - the y coord of the position to map
      */
@@ -978,9 +978,9 @@ export default class InteractionManager extends EventEmitter
      * testing the interactive objects and passes the hit across in the function.
      *
      * @private
-     * @param {PIXI.interaction.InteractionEvent} interactionEvent - event containing the point that
+     * @param {V.interaction.InteractionEvent} interactionEvent - event containing the point that
      *  is tested for collision
-     * @param {PIXI.Container|PIXI.Sprite|PIXI.extras.TilingSprite} displayObject - the displayObject
+     * @param {V.Node2D|V.Sprite|V.extras.TilingSprite} displayObject - the displayObject
      *  that will be hit test (recursively crawls its children)
      * @param {Function} [func] - the function that will be called on each interactive object. The
      *  interactionEvent, displayObject and hit will be passed to the function
@@ -1175,8 +1175,8 @@ export default class InteractionManager extends EventEmitter
      * Processes the result of the pointer down check and dispatches the event if need be
      *
      * @private
-     * @param {PIXI.interaction.InteractionEvent} interactionEvent - The interaction event wrapping the DOM event
-     * @param {PIXI.Container|PIXI.Sprite|PIXI.extras.TilingSprite} displayObject - The display object that was tested
+     * @param {V.interaction.InteractionEvent} interactionEvent - The interaction event wrapping the DOM event
+     * @param {V.Node2D|V.Sprite|V.extras.TilingSprite} displayObject - The display object that was tested
      * @param {boolean} hit - the result of the hit test on the display object
      */
     processPointerDown(interactionEvent, displayObject, hit)
@@ -1279,8 +1279,8 @@ export default class InteractionManager extends EventEmitter
      * Processes the result of the pointer cancel check and dispatches the event if need be
      *
      * @private
-     * @param {PIXI.interaction.InteractionEvent} interactionEvent - The interaction event wrapping the DOM event
-     * @param {PIXI.Container|PIXI.Sprite|PIXI.extras.TilingSprite} displayObject - The display object that was tested
+     * @param {V.interaction.InteractionEvent} interactionEvent - The interaction event wrapping the DOM event
+     * @param {V.Node2D|V.Sprite|V.extras.TilingSprite} displayObject - The display object that was tested
      */
     processPointerCancel(interactionEvent, displayObject)
     {
@@ -1318,8 +1318,8 @@ export default class InteractionManager extends EventEmitter
      * Processes the result of the pointer up check and dispatches the event if need be
      *
      * @private
-     * @param {PIXI.interaction.InteractionEvent} interactionEvent - The interaction event wrapping the DOM event
-     * @param {PIXI.Container|PIXI.Sprite|PIXI.extras.TilingSprite} displayObject - The display object that was tested
+     * @param {V.interaction.InteractionEvent} interactionEvent - The interaction event wrapping the DOM event
+     * @param {V.Node2D|V.Sprite|V.extras.TilingSprite} displayObject - The display object that was tested
      * @param {boolean} hit - the result of the hit test on the display object
      */
     processPointerUp(interactionEvent, displayObject, hit)
@@ -1459,8 +1459,8 @@ export default class InteractionManager extends EventEmitter
      * Processes the result of the pointer move check and dispatches the event if need be
      *
      * @private
-     * @param {PIXI.interaction.InteractionEvent} interactionEvent - The interaction event wrapping the DOM event
-     * @param {PIXI.Container|PIXI.Sprite|PIXI.extras.TilingSprite} displayObject - The display object that was tested
+     * @param {V.interaction.InteractionEvent} interactionEvent - The interaction event wrapping the DOM event
+     * @param {V.Node2D|V.Sprite|V.extras.TilingSprite} displayObject - The display object that was tested
      * @param {boolean} hit - the result of the hit test on the display object
      */
     processPointerMove(interactionEvent, displayObject, hit)
@@ -1531,8 +1531,8 @@ export default class InteractionManager extends EventEmitter
      * Processes the result of the pointer over/out check and dispatches the event if need be
      *
      * @private
-     * @param {PIXI.interaction.InteractionEvent} interactionEvent - The interaction event wrapping the DOM event
-     * @param {PIXI.Container|PIXI.Sprite|PIXI.extras.TilingSprite} displayObject - The display object that was tested
+     * @param {V.interaction.InteractionEvent} interactionEvent - The interaction event wrapping the DOM event
+     * @param {V.Node2D|V.Sprite|V.extras.TilingSprite} displayObject - The display object that was tested
      * @param {boolean} hit - the result of the hit test on the display object
      */
     processPointerOverOut(interactionEvent, displayObject, hit)
@@ -1624,7 +1624,7 @@ export default class InteractionManager extends EventEmitter
      *
      * @private
      * @param {PointerEvent} event - Normalized pointer event, output from normalizeToPointerData
-     * @return {PIXI.interaction.InteractionData} - Interaction data for the given pointer identifier
+     * @return {V.interaction.InteractionData} - Interaction data for the given pointer identifier
      */
     getInteractionDataForPointerId(event)
     {
@@ -1675,11 +1675,11 @@ export default class InteractionManager extends EventEmitter
      * Configure an InteractionEvent to wrap a DOM PointerEvent and InteractionData
      *
      * @private
-     * @param {PIXI.interaction.InteractionEvent} interactionEvent - The event to be configured
+     * @param {V.interaction.InteractionEvent} interactionEvent - The event to be configured
      * @param {PointerEvent} pointerEvent - The DOM event that will be paired with the InteractionEvent
-     * @param {PIXI.interaction.InteractionData} interactionData - The InteractionData that will be paired
+     * @param {V.interaction.InteractionData} interactionData - The InteractionData that will be paired
      *        with the InteractionEvent
-     * @return {PIXI.interaction.InteractionEvent} the interaction event that was passed in
+     * @return {V.interaction.InteractionEvent} the interaction event that was passed in
      */
     configureInteractionEventForDOMEvent(interactionEvent, pointerEvent, interactionData)
     {

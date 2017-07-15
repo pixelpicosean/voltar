@@ -10,8 +10,8 @@ import { join } from 'path';
  * @see https://github.com/mitsuhiko/webgl-meincraft
  *
  * @class
- * @extends PIXI.Filter
- * @memberof PIXI.filters
+ * @extends V.Filter
+ * @memberof V.filters
  *
  */
 export default class FXAAFilter extends core.Filter

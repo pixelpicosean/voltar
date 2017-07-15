@@ -1,5 +1,5 @@
 /**
- * @namespace PIXI.mesh
+ * @namespace V.mesh
  */
 export { default as Mesh } from './Mesh';
 export { default as MeshRenderer } from './webgl/MeshRenderer';

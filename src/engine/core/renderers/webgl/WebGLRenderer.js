@@ -23,8 +23,8 @@ let CONTEXT_UID = 0;
  * Don't forget to add the view to your DOM or you will not see anything :)
  *
  * @class
- * @memberof PIXI
- * @extends PIXI.SystemRenderer
+ * @memberof V
+ * @extends V.SystemRenderer
  */
 export default class WebGLRenderer extends SystemRenderer
 {
@@ -70,7 +70,7 @@ export default class WebGLRenderer extends SystemRenderer
          * The type of this renderer as a standardised const
          *
          * @member {number}
-         * @see PIXI.RENDERER_TYPE
+         * @see V.RENDERER_TYPE
          */
         this.type = RENDERER_TYPE.WEBGL;
 
@@ -99,28 +99,28 @@ export default class WebGLRenderer extends SystemRenderer
         /**
          * Manages the masks using the stencil buffer.
          *
-         * @member {PIXI.MaskManager}
+         * @member {V.MaskManager}
          */
         this.maskManager = new MaskManager(this);
 
         /**
          * Manages the stencil buffer.
          *
-         * @member {PIXI.StencilManager}
+         * @member {V.StencilManager}
          */
         this.stencilManager = new StencilManager(this);
 
         /**
          * An empty renderer.
          *
-         * @member {PIXI.ObjectRenderer}
+         * @member {V.ObjectRenderer}
          */
         this.emptyRenderer = new ObjectRenderer(this);
 
         /**
          * The currently active ObjectRenderer.
          *
-         * @member {PIXI.ObjectRenderer}
+         * @member {V.ObjectRenderer}
          */
         this.currentRenderer = this.emptyRenderer;
 
@@ -145,7 +145,7 @@ export default class WebGLRenderer extends SystemRenderer
         /**
          * The currently active ObjectRenderer.
          *
-         * @member {PIXI.WebGLState}
+         * @member {V.WebGLState}
          */
         this.state = new WebGLState(this.gl);
 
@@ -160,7 +160,7 @@ export default class WebGLRenderer extends SystemRenderer
         /**
          * Holds the current shader
          *
-         * @member {PIXI.Shader}
+         * @member {V.Shader}
          */
         this._activeShader = null;
 
@@ -169,7 +169,7 @@ export default class WebGLRenderer extends SystemRenderer
         /**
          * Holds the current render target
          *
-         * @member {PIXI.RenderTarget}
+         * @member {V.RenderTarget}
          */
         this._activeRenderTarget = null;
 
@@ -178,7 +178,7 @@ export default class WebGLRenderer extends SystemRenderer
         /**
          * Manages the filters.
          *
-         * @member {PIXI.FilterManager}
+         * @member {V.FilterManager}
          */
         this.filterManager = new FilterManager(this);
         // map some webGL blend and drawmodes..
@@ -191,19 +191,19 @@ export default class WebGLRenderer extends SystemRenderer
         /**
          * Fired after rendering finishes.
          *
-         * @event PIXI.WebGLRenderer#postrender
+         * @event V.WebGLRenderer#postrender
          */
 
         /**
          * Fired before rendering starts.
          *
-         * @event PIXI.WebGLRenderer#prerender
+         * @event V.WebGLRenderer#prerender
          */
 
         /**
          * Fired when the WebGL context is set.
          *
-         * @event PIXI.WebGLRenderer#context
+         * @event V.WebGLRenderer#context
          * @param {WebGLRenderingContext} gl - WebGL context.
          */
     }
@@ -269,10 +269,10 @@ export default class WebGLRenderer extends SystemRenderer
     /**
      * Renders the object to its webGL view
      *
-     * @param {PIXI.DisplayObject} displayObject - the object to be rendered
-     * @param {PIXI.RenderTexture} renderTexture - The render texture to render to.
+     * @param {V.Node2D} displayObject - the object to be rendered
+     * @param {V.RenderTexture} renderTexture - The render texture to render to.
      * @param {boolean} [clear] - Should the canvas be cleared before the new render
-     * @param {PIXI.Transform} [transform] - A transform to apply to the render texture before rendering.
+     * @param {V.Transform} [transform] - A transform to apply to the render texture before rendering.
      * @param {boolean} [skipUpdateTransform] - Should we skip the update transform pass?
      */
     render(displayObject, renderTexture, clear, transform, skipUpdateTransform)
@@ -300,7 +300,7 @@ export default class WebGLRenderer extends SystemRenderer
             // update the scene graph
             const cacheParent = displayObject.parent;
 
-            displayObject.parent = this._tempDisplayObjectParent;
+            displayObject.parent = this._tempNode2DParent;
             displayObject.updateTransform();
             displayObject.parent = cacheParent;
            // displayObject.hitArea = //TODO add a temp hit area
@@ -330,7 +330,7 @@ export default class WebGLRenderer extends SystemRenderer
     /**
      * Changes the current renderer to the one given in parameter
      *
-     * @param {PIXI.ObjectRenderer} objectRenderer - The object renderer to use.
+     * @param {V.ObjectRenderer} objectRenderer - The object renderer to use.
      */
     setObjectRenderer(objectRenderer)
     {
@@ -402,7 +402,7 @@ export default class WebGLRenderer extends SystemRenderer
     /**
      * Sets the transform of the active render target to the given matrix
      *
-     * @param {PIXI.Matrix} matrix - The transformation matrix
+     * @param {V.Matrix} matrix - The transformation matrix
      */
     setTransform(matrix)
     {
@@ -412,9 +412,9 @@ export default class WebGLRenderer extends SystemRenderer
     /**
      * Erases the render texture and fills the drawing area with a colour
      *
-     * @param {PIXI.RenderTexture} renderTexture - The render texture to clear
+     * @param {V.RenderTexture} renderTexture - The render texture to clear
      * @param {number} [clearColor] - The colour
-     * @return {PIXI.WebGLRenderer} Returns itself.
+     * @return {V.WebGLRenderer} Returns itself.
      */
     clearRenderTexture(renderTexture, clearColor)
     {
@@ -432,9 +432,9 @@ export default class WebGLRenderer extends SystemRenderer
     /**
      * Binds a render texture for rendering
      *
-     * @param {PIXI.RenderTexture} renderTexture - The render texture to render
-     * @param {PIXI.Transform} transform - The transform to be applied to the render texture
-     * @return {PIXI.WebGLRenderer} Returns itself.
+     * @param {V.RenderTexture} renderTexture - The render texture to render
+     * @param {V.Transform} transform - The transform to be applied to the render texture
+     * @return {V.WebGLRenderer} Returns itself.
      */
     bindRenderTexture(renderTexture, transform)
     {
@@ -469,8 +469,8 @@ export default class WebGLRenderer extends SystemRenderer
     /**
      * Changes the current render target to the one given in parameter
      *
-     * @param {PIXI.RenderTarget} renderTarget - the new render target
-     * @return {PIXI.WebGLRenderer} Returns itself.
+     * @param {V.RenderTarget} renderTarget - the new render target
+     * @return {V.WebGLRenderer} Returns itself.
      */
     bindRenderTarget(renderTarget)
     {
@@ -493,9 +493,9 @@ export default class WebGLRenderer extends SystemRenderer
     /**
      * Changes the current shader to the one given in parameter
      *
-     * @param {PIXI.Shader} shader - the new shader
+     * @param {V.Shader} shader - the new shader
      * @param {boolean} [autoProject=true] - Whether automatically set the projection matrix
-     * @return {PIXI.WebGLRenderer} Returns itself.
+     * @return {V.WebGLRenderer} Returns itself.
      */
     bindShader(shader, autoProject)
     {
@@ -524,7 +524,7 @@ export default class WebGLRenderer extends SystemRenderer
      * needless binding of textures. For example if the texture is already bound it will return the
      * current location of the texture instead of the one provided. To bypass this use force location
      *
-     * @param {PIXI.Texture} texture - the new texture
+     * @param {V.Texture} texture - the new texture
      * @param {number} location - the suggested texture location
      * @param {boolean} forceLocation - force the location
      * @return {number} bound texture location
@@ -580,8 +580,8 @@ export default class WebGLRenderer extends SystemRenderer
      /**
      * unbinds the texture ...
      *
-     * @param {PIXI.Texture} texture - the texture to unbind
-     * @return {PIXI.WebGLRenderer} Returns itself.
+     * @param {V.Texture} texture - the texture to unbind
+     * @return {V.WebGLRenderer} Returns itself.
      */
     unbindTexture(texture)
     {
@@ -616,8 +616,8 @@ export default class WebGLRenderer extends SystemRenderer
     /**
      * Changes the current Vao to the one given in parameter
      *
-     * @param {PIXI.VertexArrayObject} vao - the new Vao
-     * @return {PIXI.WebGLRenderer} Returns itself.
+     * @param {V.VertexArrayObject} vao - the new Vao
+     * @return {V.WebGLRenderer} Returns itself.
      */
     bindVao(vao)
     {
@@ -644,7 +644,7 @@ export default class WebGLRenderer extends SystemRenderer
     /**
      * Resets the WebGL state so you can render things however you fancy!
      *
-     * @return {PIXI.WebGLRenderer} Returns itself.
+     * @return {V.WebGLRenderer} Returns itself.
      */
     reset()
     {
@@ -732,22 +732,22 @@ export default class WebGLRenderer extends SystemRenderer
 }
 
 /**
- * Collection of installed plugins. These are included by default in PIXI, but can be excluded
+ * Collection of installed plugins. These are included by default in V, but can be excluded
  * by creating a custom build. Consult the README for more information about creating custom
  * builds and excluding plugins.
- * @name PIXI.WebGLRenderer#plugins
+ * @name V.WebGLRenderer#plugins
  * @type {object}
  * @readonly
- * @property {PIXI.accessibility.AccessibilityManager} accessibility Support tabbing interactive elements.
- * @property {PIXI.extract.WebGLExtract} extract Extract image data from renderer.
- * @property {PIXI.interaction.InteractionManager} interaction Handles mouse, touch and pointer events.
- * @property {PIXI.prepare.WebGLPrepare} prepare Pre-render display objects.
+ * @property {V.accessibility.AccessibilityManager} accessibility Support tabbing interactive elements.
+ * @property {V.extract.WebGLExtract} extract Extract image data from renderer.
+ * @property {V.interaction.InteractionManager} interaction Handles mouse, touch and pointer events.
+ * @property {V.prepare.WebGLPrepare} prepare Pre-render display objects.
  */
 
 /**
  * Adds a plugin to the renderer.
  *
- * @method PIXI.WebGLRenderer#registerPlugin
+ * @method V.WebGLRenderer#registerPlugin
  * @param {string} pluginName - The name of the plugin.
  * @param {Function} ctor - The constructor function or class for the plugin.
  */

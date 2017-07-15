@@ -8,12 +8,12 @@ const TEMP_RECT = new core.Rectangle();
  * An instance of this class is automatically created by default, and can be found at renderer.plugins.extract
  *
  * @class
- * @memberof PIXI.extract
+ * @memberof V.extract
  */
 export default class CanvasExtract
 {
     /**
-     * @param {PIXI.CanvasRenderer} renderer - A reference to the current renderer
+     * @param {V.CanvasRenderer} renderer - A reference to the current renderer
      */
     constructor(renderer)
     {
@@ -21,9 +21,9 @@ export default class CanvasExtract
         /**
          * Collection of methods for extracting data (image, pixels, etc.) from a display object or render texture
          *
-         * @member {PIXI.extract.CanvasExtract} extract
-         * @memberof PIXI.CanvasRenderer#
-         * @see PIXI.extract.CanvasExtract
+         * @member {V.extract.CanvasExtract} extract
+         * @memberof V.CanvasRenderer#
+         * @see V.extract.CanvasExtract
          */
         renderer.extract = this;
     }
@@ -31,7 +31,7 @@ export default class CanvasExtract
     /**
      * Will return a HTML Image of the target
      *
-     * @param {PIXI.DisplayObject|PIXI.RenderTexture} target - A displayObject or renderTexture
+     * @param {V.Node2D|V.RenderTexture} target - A displayObject or renderTexture
      *  to convert. If left empty will use use the main renderer
      * @return {HTMLImageElement} HTML Image of the target
      */
@@ -48,7 +48,7 @@ export default class CanvasExtract
      * Will return a a base64 encoded string of this target. It works by calling
      *  `CanvasExtract.getCanvas` and then running toDataURL on that.
      *
-     * @param {PIXI.DisplayObject|PIXI.RenderTexture} target - A displayObject or renderTexture
+     * @param {V.Node2D|V.RenderTexture} target - A displayObject or renderTexture
      *  to convert. If left empty will use use the main renderer
      * @return {string} A base64 encoded string of the texture.
      */
@@ -60,7 +60,7 @@ export default class CanvasExtract
     /**
      * Creates a Canvas element, renders this target to it and then returns it.
      *
-     * @param {PIXI.DisplayObject|PIXI.RenderTexture} target - A displayObject or renderTexture
+     * @param {V.Node2D|V.RenderTexture} target - A displayObject or renderTexture
      *  to convert. If left empty will use use the main renderer
      * @return {HTMLCanvasElement} A Canvas element with the texture rendered on.
      */
@@ -115,7 +115,7 @@ export default class CanvasExtract
      * Will return a one-dimensional array containing the pixel data of the entire texture in RGBA
      * order, with integer values between 0 and 255 (included).
      *
-     * @param {PIXI.DisplayObject|PIXI.RenderTexture} target - A displayObject or renderTexture
+     * @param {V.Node2D|V.RenderTexture} target - A displayObject or renderTexture
      *  to convert. If left empty will use use the main renderer
      * @return {Uint8ClampedArray} One-dimensional array containing the pixel data of the entire texture
      */

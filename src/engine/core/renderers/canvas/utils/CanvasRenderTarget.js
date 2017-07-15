@@ -4,7 +4,7 @@ import settings from '../../../settings';
  * Creates a Canvas element of the given size.
  *
  * @class
- * @memberof PIXI
+ * @memberof V
  */
 export default class CanvasRenderTarget
 {

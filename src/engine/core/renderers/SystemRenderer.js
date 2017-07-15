@@ -2,20 +2,20 @@ import { sayHello, hex2string, hex2rgb } from '../utils';
 import { Matrix, Rectangle } from '../math';
 import { RENDERER_TYPE } from '../const';
 import settings from '../settings';
-import Container from '../display/Container';
+import Node2D from '../display/Node2D';
 import RenderTexture from '../textures/RenderTexture';
 import EventEmitter from 'eventemitter3';
 
 const tempMatrix = new Matrix();
 
 /**
- * The SystemRenderer is the base for a Pixi Renderer. It is extended by the {@link PIXI.CanvasRenderer}
- * and {@link PIXI.WebGLRenderer} which can be used for rendering a Pixi scene.
+ * The SystemRenderer is the base for a Pixi Renderer. It is extended by the {@link V.CanvasRenderer}
+ * and {@link V.WebGLRenderer} which can be used for rendering a Pixi scene.
  *
  * @abstract
  * @class
  * @extends EventEmitter
- * @memberof PIXI
+ * @memberof V
  */
 export default class SystemRenderer extends EventEmitter
 {
@@ -70,8 +70,8 @@ export default class SystemRenderer extends EventEmitter
          * The type of the renderer.
          *
          * @member {number}
-         * @default PIXI.RENDERER_TYPE.UNKNOWN
-         * @see PIXI.RENDERER_TYPE
+         * @default V.RENDERER_TYPE.UNKNOWN
+         * @see V.RENDERER_TYPE
          */
         this.type = RENDERER_TYPE.UNKNOWN;
 
@@ -80,7 +80,7 @@ export default class SystemRenderer extends EventEmitter
          *
          * Its safe to use as filterArea or hitArea for whole stage
          *
-         * @member {PIXI.Rectangle}
+         * @member {V.Rectangle}
          */
         this.screen = new Rectangle(0, 0, options.width, options.height);
 
@@ -177,18 +177,18 @@ export default class SystemRenderer extends EventEmitter
         /**
          * This temporary display object used as the parent of the currently being rendered item
          *
-         * @member {PIXI.DisplayObject}
+         * @member {V.Node2D}
          * @private
          */
-        this._tempDisplayObjectParent = new Container();
+        this._tempNode2DParent = new Node2D();
 
         /**
          * The last root object that the renderer tried to render.
          *
-         * @member {PIXI.DisplayObject}
+         * @member {V.Node2D}
          * @private
          */
-        this._lastObjectRendered = this._tempDisplayObjectParent;
+        this._lastObjectRendered = this._tempNode2DParent;
     }
 
     /**
@@ -241,10 +241,10 @@ export default class SystemRenderer extends EventEmitter
      * Useful function that returns a texture of the display object that can then be used to create sprites
      * This can be quite useful if your displayObject is complicated and needs to be reused multiple times.
      *
-     * @param {PIXI.DisplayObject} displayObject - The displayObject the object will be generated from
+     * @param {V.Node2D} displayObject - The displayObject the object will be generated from
      * @param {number} scaleMode - Should be one of the scaleMode consts
      * @param {number} resolution - The resolution / device pixel ratio of the texture being generated
-     * @return {PIXI.Texture} a texture of the graphics object
+     * @return {V.Texture} a texture of the graphics object
      */
     generateTexture(displayObject, scaleMode, resolution)
     {
@@ -297,7 +297,7 @@ export default class SystemRenderer extends EventEmitter
         this._backgroundColorRgba = null;
         this._backgroundColorString = null;
 
-        this._tempDisplayObjectParent = null;
+        this._tempNode2DParent = null;
         this._lastObjectRendered = null;
     }
 

@@ -20,10 +20,10 @@ import { utils } from './core';
 utils.mixins.performMixins();
 
 /**
- * Alias for {@link PIXI.loaders.shared}.
+ * Alias for {@link V.loaders.shared}.
  * @name loader
- * @memberof PIXI
- * @type {PIXI.loader.Loader}
+ * @memberof V
+ * @type {V.loader.Loader}
  */
 const loader = loaders.shared || null;
 

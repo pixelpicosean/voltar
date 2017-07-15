@@ -17,13 +17,13 @@ let TEXTURE_TICK = 0;
  *
  * @class
  * @private
- * @memberof PIXI
- * @extends PIXI.ObjectRenderer
+ * @memberof V
+ * @extends V.ObjectRenderer
  */
 export default class SpriteRenderer extends ObjectRenderer
 {
     /**
-     * @param {PIXI.WebGLRenderer} renderer - The renderer this sprite batch works for.
+     * @param {V.WebGLRenderer} renderer - The renderer this sprite batch works for.
      */
     constructor(renderer)
     {
@@ -71,7 +71,7 @@ export default class SpriteRenderer extends ObjectRenderer
          * The default shaders that is used if a sprite doesn't have a more specific one.
          * there is a shader for each number of textures that can be rendererd.
          * These shaders will also be generated on the fly as required.
-         * @member {PIXI.Shader[]}
+         * @member {V.Shader[]}
          */
         this.shader = null;
 
@@ -167,7 +167,7 @@ export default class SpriteRenderer extends ObjectRenderer
     /**
      * Renders the sprite object.
      *
-     * @param {PIXI.Sprite} sprite - the sprite to render when using this spritebatch
+     * @param {V.Sprite} sprite - the sprite to render when using this spritebatch
      */
     render(sprite)
     {

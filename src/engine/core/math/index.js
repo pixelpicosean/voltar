@@ -1,7 +1,7 @@
 /**
- * Math classes and utilities mixed into PIXI namespace.
+ * Math classes and utilities mixed into V namespace.
  *
- * @lends PIXI
+ * @lends V
  */
 export { default as Point } from './Point';
 export { default as ObservablePoint } from './ObservablePoint';

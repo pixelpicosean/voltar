@@ -4,7 +4,7 @@ import accessibleTarget from './accessibleTarget';
 
 // add some extra variables to the container..
 core.utils.mixins.delayMixin(
-    core.DisplayObject.prototype,
+    core.Node2D.prototype,
     accessibleTarget
 );
 
@@ -25,18 +25,18 @@ const DIV_HOOK_ZINDEX = 2;
  * readers. This is very important as it can possibly help people with disabilities access pixi
  * content.
  *
- * Much like interaction any DisplayObject can be made accessible. This manager will map the
+ * Much like interaction any Node2D can be made accessible. This manager will map the
  * events as if the mouse was being used, minimizing the effort required to implement.
  *
  * An instance of this class is automatically created by default, and can be found at renderer.plugins.accessibility
  *
  * @class
- * @memberof PIXI.accessibility
+ * @memberof V.accessibility
  */
 export default class AccessibilityManager
 {
     /**
-     * @param {PIXI.CanvasRenderer|PIXI.WebGLRenderer} renderer - A reference to the current renderer
+     * @param {V.CanvasRenderer|V.WebGLRenderer} renderer - A reference to the current renderer
      */
     constructor(renderer)
     {
@@ -89,7 +89,7 @@ export default class AccessibilityManager
         /**
          * The renderer this accessibility manager works for.
          *
-         * @member {PIXI.SystemRenderer}
+         * @member {V.SystemRenderer}
          */
         this.renderer = renderer;
 
@@ -205,7 +205,7 @@ export default class AccessibilityManager
      * This recursive function will run through the scene graph and add any new accessible objects to the DOM layer.
      *
      * @private
-     * @param {PIXI.Container} displayObject - The DisplayObject to check.
+     * @param {V.Node2D} displayObject - The Node2D to check.
      */
     updateAccessibleObjects(displayObject)
     {
@@ -233,7 +233,7 @@ export default class AccessibilityManager
     }
 
     /**
-     * Before each render this function will ensure that all divs are mapped correctly to their DisplayObjects.
+     * Before each render this function will ensure that all divs are mapped correctly to their Node2Ds.
      *
      * @private
      */
@@ -343,10 +343,10 @@ export default class AccessibilityManager
     }
 
     /**
-     * Adds a DisplayObject to the accessibility manager
+     * Adds a Node2D to the accessibility manager
      *
      * @private
-     * @param {DisplayObject} displayObject - The child to make accessible.
+     * @param {Node2D} displayObject - The child to make accessible.
      */
     addChild(displayObject)
     {

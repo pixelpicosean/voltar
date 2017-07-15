@@ -14,13 +14,13 @@ import buildCircle from './utils/buildCircle';
  * Renders the graphics object.
  *
  * @class
- * @memberof PIXI
- * @extends PIXI.ObjectRenderer
+ * @memberof V
+ * @extends V.ObjectRenderer
  */
 export default class GraphicsRenderer extends ObjectRenderer
 {
     /**
-     * @param {PIXI.WebGLRenderer} renderer - The renderer this object renderer works for.
+     * @param {V.WebGLRenderer} renderer - The renderer this object renderer works for.
      */
     constructor(renderer)
     {
@@ -68,7 +68,7 @@ export default class GraphicsRenderer extends ObjectRenderer
     /**
      * Renders a graphics object.
      *
-     * @param {PIXI.Graphics} graphics - The graphics object to render.
+     * @param {V.Graphics} graphics - The graphics object to render.
      */
     render(graphics)
     {
@@ -118,7 +118,7 @@ export default class GraphicsRenderer extends ObjectRenderer
      * Updates the graphics object
      *
      * @private
-     * @param {PIXI.Graphics} graphics - The graphics object to update
+     * @param {V.Graphics} graphics - The graphics object to update
      */
     updateGraphics(graphics)
     {

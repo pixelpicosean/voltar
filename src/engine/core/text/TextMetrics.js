@@ -2,13 +2,13 @@
  * The TextMetrics object represents the measurement of a block of text with a specified style.
  *
  * @class
- * @memberOf PIXI
+ * @memberOf V
  */
 export default class TextMetrics
 {
     /**
      * @param {string} text - the text that was measured
-     * @param {PIXI.TextStyle} style - the style that was measured
+     * @param {V.TextStyle} style - the style that was measured
      * @param {number} width - the measured width of the text
      * @param {number} height - the measured height of the text
      * @param {array} lines - an array of the lines of text broken by new lines and wrapping if specified in style
@@ -34,10 +34,10 @@ export default class TextMetrics
      * Measures the supplied string of text and returns a Rectangle.
      *
      * @param {string} text - the text to measure.
-     * @param {PIXI.TextStyle} style - the text style to use for measuring
+     * @param {V.TextStyle} style - the text style to use for measuring
      * @param {boolean} [wordWrap] - optional override for if word-wrap should be applied to the text.
      * @param {HTMLCanvasElement} [canvas] - optional specification of the canvas to use for measuring.
-     * @return {PIXI.TextMetrics} measured width and height of the text.
+     * @return {V.TextMetrics} measured width and height of the text.
      */
     static measureText(text, style, wordWrap, canvas = TextMetrics._canvas)
     {
@@ -95,7 +95,7 @@ export default class TextMetrics
      *
      * @private
      * @param {string} text - String to apply word wrapping to
-     * @param {PIXI.TextStyle} style - the style to use when wrapping
+     * @param {V.TextStyle} style - the style to use when wrapping
      * @param {HTMLCanvasElement} [canvas] - optional specification of the canvas to use for measuring.
      * @return {string} New string with new lines applied where required
      */
@@ -189,7 +189,7 @@ export default class TextMetrics
      *
      * @static
      * @param {string} font - String representing the style of the font
-     * @return {PIXI.TextMetrics~FontMetrics} Font properties object
+     * @return {V.TextMetrics~FontMetrics} Font properties object
      */
     static measureFont(font)
     {
@@ -290,9 +290,9 @@ export default class TextMetrics
 }
 
 /**
- * Internal return object for {@link PIXI.TextMetrics.measureFont `TextMetrics.measureFont`}.
+ * Internal return object for {@link V.TextMetrics.measureFont `TextMetrics.measureFont`}.
  * @class FontMetrics
- * @memberof PIXI.TextMetrics~
+ * @memberof V.TextMetrics~
  * @property {number} ascent - The ascent distance
  * @property {number} descent - The descent distance
  * @property {number} fontSize - Font size from ascent to descent
@@ -304,7 +304,7 @@ canvas.width = canvas.height = 10;
 
 /**
  * Cached canvas element for measuring text
- * @memberof PIXI.TextMetrics
+ * @memberof V.TextMetrics
  * @type {HTMLCanvasElement}
  * @private
  */
@@ -312,15 +312,15 @@ TextMetrics._canvas = canvas;
 
 /**
  * Cache for context to use.
- * @memberof PIXI.TextMetrics
+ * @memberof V.TextMetrics
  * @type {CanvasRenderingContext2D}
  * @private
  */
 TextMetrics._context = canvas.getContext('2d');
 
 /**
- * Cache of PIXI.TextMetrics~FontMetrics objects.
- * @memberof PIXI.TextMetrics
+ * Cache of V.TextMetrics~FontMetrics objects.
+ * @memberof V.TextMetrics
  * @type {Object}
  * @private
  */

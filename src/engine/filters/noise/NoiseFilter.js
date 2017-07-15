@@ -10,8 +10,8 @@ import { join } from 'path';
  * A Noise effect filter.
  *
  * @class
- * @extends PIXI.Filter
- * @memberof PIXI.filters
+ * @extends V.Filter
+ * @memberof V.filters
  */
 export default class NoiseFilter extends core.Filter
 {

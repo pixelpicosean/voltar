@@ -7,13 +7,13 @@ const tempPolygon = new core.Polygon();
 /**
  * Base mesh class
  * @class
- * @extends PIXI.Container
- * @memberof PIXI.mesh
+ * @extends V.Node2D
+ * @memberof V.mesh
  */
-export default class Mesh extends core.Container
+export default class Mesh extends core.Node2D
 {
     /**
-     * @param {PIXI.Texture} texture - The texture to use
+     * @param {V.Texture} texture - The texture to use
      * @param {Float32Array} [vertices] - if you want to specify the vertices
      * @param {Float32Array} [uvs] - if you want to specify the uvs
      * @param {Uint16Array} [indices] - if you want to specify the indices
@@ -26,7 +26,7 @@ export default class Mesh extends core.Container
         /**
          * The texture of the Mesh
          *
-         * @member {PIXI.Texture}
+         * @member {V.Texture}
          * @private
          */
         this._texture = texture;
@@ -76,12 +76,12 @@ export default class Mesh extends core.Container
         this.indexDirty = 0;
 
         /**
-         * The blend mode to be applied to the sprite. Set to `PIXI.BLEND_MODES.NORMAL` to remove
+         * The blend mode to be applied to the sprite. Set to `V.BLEND_MODES.NORMAL` to remove
          * any blend mode.
          *
          * @member {number}
-         * @default PIXI.BLEND_MODES.NORMAL
-         * @see PIXI.BLEND_MODES
+         * @default V.BLEND_MODES.NORMAL
+         * @see V.BLEND_MODES
          */
         this.blendMode = core.BLEND_MODES.NORMAL;
 
@@ -94,17 +94,17 @@ export default class Mesh extends core.Container
         this.canvasPadding = 0;
 
         /**
-         * The way the Mesh should be drawn, can be any of the {@link PIXI.mesh.Mesh.DRAW_MODES} consts
+         * The way the Mesh should be drawn, can be any of the {@link V.mesh.Mesh.DRAW_MODES} consts
          *
          * @member {number}
-         * @see PIXI.mesh.Mesh.DRAW_MODES
+         * @see V.mesh.Mesh.DRAW_MODES
          */
         this.drawMode = drawMode || Mesh.DRAW_MODES.TRIANGLE_MESH;
 
         /**
          * The default shader that is used if a mesh doesn't have a more specific one.
          *
-         * @member {PIXI.Shader}
+         * @member {V.Shader}
          */
         this.shader = null;
 
@@ -129,7 +129,7 @@ export default class Mesh extends core.Container
          * its updated independently from texture uvTransform
          * updates of uvs are tied to that thing
          *
-         * @member {PIXI.extras.TextureTransform}
+         * @member {V.extras.TextureTransform}
          * @private
          */
         this._uvTransform = new TextureTransform(texture);
@@ -156,7 +156,7 @@ export default class Mesh extends core.Container
      * Renders the object using the WebGL renderer
      *
      * @private
-     * @param {PIXI.WebGLRenderer} renderer - a reference to the WebGL renderer
+     * @param {V.WebGLRenderer} renderer - a reference to the WebGL renderer
      */
     _renderWebGL(renderer)
     {
@@ -169,7 +169,7 @@ export default class Mesh extends core.Container
      * Renders the object using the Canvas renderer
      *
      * @private
-     * @param {PIXI.CanvasRenderer} renderer - The canvas renderer.
+     * @param {V.CanvasRenderer} renderer - The canvas renderer.
      */
     _renderCanvas(renderer)
     {
@@ -237,7 +237,7 @@ export default class Mesh extends core.Container
     /**
      * Tests if a point is inside this mesh. Works only for TRIANGLE_MESH
      *
-     * @param {PIXI.Point} point - the point to test
+     * @param {V.Point} point - the point to test
      * @return {boolean} the result of the test
      */
     containsPoint(point)
@@ -280,7 +280,7 @@ export default class Mesh extends core.Container
     /**
      * The texture that the mesh uses.
      *
-     * @member {PIXI.Texture}
+     * @member {V.Texture}
      */
     get texture()
     {

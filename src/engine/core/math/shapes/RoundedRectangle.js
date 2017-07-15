@@ -5,7 +5,7 @@ import { SHAPES } from '../../const';
  * top-left corner point (x, y) and by its width and its height and its radius.
  *
  * @class
- * @memberof PIXI
+ * @memberof V
  */
 export default class RoundedRectangle
 {
@@ -53,8 +53,8 @@ export default class RoundedRectangle
          *
          * @member {number}
          * @readonly
-         * @default PIXI.SHAPES.RREC
-         * @see PIXI.SHAPES
+         * @default V.SHAPES.RREC
+         * @see V.SHAPES
          */
         this.type = SHAPES.RREC;
     }
@@ -62,7 +62,7 @@ export default class RoundedRectangle
     /**
      * Creates a clone of this Rounded Rectangle
      *
-     * @return {PIXI.RoundedRectangle} a copy of the rounded rectangle
+     * @return {V.RoundedRectangle} a copy of the rounded rectangle
      */
     clone()
     {

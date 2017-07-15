@@ -7,9 +7,9 @@ import { BitmapText } from '../extras';
  * Register a BitmapText font from loader resource.
  *
  * @function parseBitmapFontData
- * @memberof PIXI.loaders
- * @param {PIXI.loaders.Resource} resource - Loader resource.
- * @param {PIXI.Texture} texture - Reference to texture.
+ * @memberof V.loaders
+ * @param {V.loaders.Resource} resource - Loader resource.
+ * @param {V.Texture} texture - Reference to texture.
  */
 export function parse(resource, texture)
 {

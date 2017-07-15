@@ -1,4 +1,4 @@
-import Container from '../display/Container';
+import Node2D from '../display/Node2D';
 import RenderTexture from '../textures/RenderTexture';
 import Texture from '../textures/Texture';
 import GraphicsData from './GraphicsData';
@@ -21,10 +21,10 @@ const tempColor2 = new Float32Array(4);
  * rectangles to the display, and to color and fill them.
  *
  * @class
- * @extends PIXI.Container
- * @memberof PIXI
+ * @extends V.Node2D
+ * @memberof V
  */
-export default class Graphics extends Container
+export default class Graphics extends Node2D
 {
     /**
      *
@@ -68,7 +68,7 @@ export default class Graphics extends Container
         /**
          * Graphics data
          *
-         * @member {PIXI.GraphicsData[]}
+         * @member {V.GraphicsData[]}
          * @private
          */
         this.graphicsData = [];
@@ -94,18 +94,18 @@ export default class Graphics extends Container
 
         /**
          * The blend mode to be applied to the graphic shape. Apply a value of
-         * `PIXI.BLEND_MODES.NORMAL` to reset the blend mode.
+         * `V.BLEND_MODES.NORMAL` to reset the blend mode.
          *
          * @member {number}
-         * @default PIXI.BLEND_MODES.NORMAL;
-         * @see PIXI.BLEND_MODES
+         * @default V.BLEND_MODES.NORMAL;
+         * @see V.BLEND_MODES
          */
         this.blendMode = BLEND_MODES.NORMAL;
 
         /**
          * Current path
          *
-         * @member {PIXI.GraphicsData}
+         * @member {V.GraphicsData}
          * @private
          */
         this.currentPath = null;
@@ -136,7 +136,7 @@ export default class Graphics extends Container
         /**
          * A cache of the local bounds to prevent recalculation.
          *
-         * @member {PIXI.Rectangle}
+         * @member {V.Rectangle}
          * @private
          */
         this._localBounds = new Bounds();
@@ -188,7 +188,7 @@ export default class Graphics extends Container
          *
          * @name cacheAsBitmap
          * @member {boolean}
-         * @memberof PIXI.Graphics#
+         * @memberof V.Graphics#
          * @default false
          */
     }
@@ -197,7 +197,7 @@ export default class Graphics extends Container
      * Creates a new Graphics object with the same values as this one.
      * Note that the only the properties of the object are cloned, not its transform (position,scale,etc)
      *
-     * @return {PIXI.Graphics} A clone of the graphics object
+     * @return {V.Graphics} A clone of the graphics object
      */
     clone()
     {
@@ -234,7 +234,7 @@ export default class Graphics extends Container
      * @param {number} [lineWidth=0] - width of the line to draw, will update the objects stored style
      * @param {number} [color=0] - color of the line to draw, will update the objects stored style
      * @param {number} [alpha=1] - alpha of the line to draw, will update the objects stored style
-     * @return {PIXI.Graphics} This Graphics object. Good for chaining method calls
+     * @return {V.Graphics} This Graphics object. Good for chaining method calls
      */
     lineStyle(lineWidth = 0, color = 0, alpha = 1)
     {
@@ -270,7 +270,7 @@ export default class Graphics extends Container
      *
      * @param {number} x - the X coordinate to move to
      * @param {number} y - the Y coordinate to move to
-     * @return {PIXI.Graphics} This Graphics object. Good for chaining method calls
+     * @return {V.Graphics} This Graphics object. Good for chaining method calls
      */
     moveTo(x, y)
     {
@@ -288,7 +288,7 @@ export default class Graphics extends Container
      *
      * @param {number} x - the X coordinate to draw to
      * @param {number} y - the Y coordinate to draw to
-     * @return {PIXI.Graphics} This Graphics object. Good for chaining method calls
+     * @return {V.Graphics} This Graphics object. Good for chaining method calls
      */
     lineTo(x, y)
     {
@@ -306,7 +306,7 @@ export default class Graphics extends Container
      * @param {number} cpY - Control point y
      * @param {number} toX - Destination point x
      * @param {number} toY - Destination point y
-     * @return {PIXI.Graphics} This Graphics object. Good for chaining method calls
+     * @return {V.Graphics} This Graphics object. Good for chaining method calls
      */
     quadraticCurveTo(cpX, cpY, toX, toY)
     {
@@ -360,7 +360,7 @@ export default class Graphics extends Container
      * @param {number} cpY2 - Second Control point y
      * @param {number} toX - Destination point x
      * @param {number} toY - Destination point y
-     * @return {PIXI.Graphics} This Graphics object. Good for chaining method calls
+     * @return {V.Graphics} This Graphics object. Good for chaining method calls
      */
     bezierCurveTo(cpX, cpY, cpX2, cpY2, toX, toY)
     {
@@ -400,7 +400,7 @@ export default class Graphics extends Container
      * @param {number} x2 - The x-coordinate of the end of the arc
      * @param {number} y2 - The y-coordinate of the end of the arc
      * @param {number} radius - The radius of the arc
-     * @return {PIXI.Graphics} This Graphics object. Good for chaining method calls
+     * @return {V.Graphics} This Graphics object. Good for chaining method calls
      */
     arcTo(x1, y1, x2, y2, radius)
     {
@@ -470,7 +470,7 @@ export default class Graphics extends Container
      * @param {boolean} [anticlockwise=false] - Specifies whether the drawing should be
      *  counter-clockwise or clockwise. False is default, and indicates clockwise, while true
      *  indicates counter-clockwise.
-     * @return {PIXI.Graphics} This Graphics object. Good for chaining method calls
+     * @return {V.Graphics} This Graphics object. Good for chaining method calls
      */
     arc(cx, cy, radius, startAngle, endAngle, anticlockwise = false)
     {
@@ -551,7 +551,7 @@ export default class Graphics extends Container
      *
      * @param {number} [color=0] - the color of the fill
      * @param {number} [alpha=1] - the alpha of the fill
-     * @return {PIXI.Graphics} This Graphics object. Good for chaining method calls
+     * @return {V.Graphics} This Graphics object. Good for chaining method calls
      */
     beginFill(color = 0, alpha = 1)
     {
@@ -575,7 +575,7 @@ export default class Graphics extends Container
     /**
      * Applies a fill to the lines and shapes that were added since the last call to the beginFill() method.
      *
-     * @return {PIXI.Graphics} This Graphics object. Good for chaining method calls
+     * @return {V.Graphics} This Graphics object. Good for chaining method calls
      */
     endFill()
     {
@@ -592,7 +592,7 @@ export default class Graphics extends Container
      * @param {number} y - The Y coord of the top-left of the rectangle
      * @param {number} width - The width of the rectangle
      * @param {number} height - The height of the rectangle
-     * @return {PIXI.Graphics} This Graphics object. Good for chaining method calls
+     * @return {V.Graphics} This Graphics object. Good for chaining method calls
      */
     drawRect(x, y, width, height)
     {
@@ -608,7 +608,7 @@ export default class Graphics extends Container
      * @param {number} width - The width of the rectangle
      * @param {number} height - The height of the rectangle
      * @param {number} radius - Radius of the rectangle corners
-     * @return {PIXI.Graphics} This Graphics object. Good for chaining method calls
+     * @return {V.Graphics} This Graphics object. Good for chaining method calls
      */
     drawRoundedRect(x, y, width, height, radius)
     {
@@ -623,7 +623,7 @@ export default class Graphics extends Container
      * @param {number} x - The X coordinate of the center of the circle
      * @param {number} y - The Y coordinate of the center of the circle
      * @param {number} radius - The radius of the circle
-     * @return {PIXI.Graphics} This Graphics object. Good for chaining method calls
+     * @return {V.Graphics} This Graphics object. Good for chaining method calls
      */
     drawCircle(x, y, radius)
     {
@@ -639,7 +639,7 @@ export default class Graphics extends Container
      * @param {number} y - The Y coordinate of the center of the ellipse
      * @param {number} width - The half width of the ellipse
      * @param {number} height - The half height of the ellipse
-     * @return {PIXI.Graphics} This Graphics object. Good for chaining method calls
+     * @return {V.Graphics} This Graphics object. Good for chaining method calls
      */
     drawEllipse(x, y, width, height)
     {
@@ -651,8 +651,8 @@ export default class Graphics extends Container
     /**
      * Draws a polygon using the given path.
      *
-     * @param {number[]|PIXI.Point[]} path - The path data used to construct the polygon.
-     * @return {PIXI.Graphics} This Graphics object. Good for chaining method calls
+     * @param {number[]|V.Point[]} path - The path data used to construct the polygon.
+     * @return {V.Graphics} This Graphics object. Good for chaining method calls
      */
     drawPolygon(path)
     {
@@ -692,7 +692,7 @@ export default class Graphics extends Container
     /**
      * Clears the graphics that were drawn to this Graphics object, and resets fill and line style settings.
      *
-     * @return {PIXI.Graphics} This Graphics object. Good for chaining method calls
+     * @return {V.Graphics} This Graphics object. Good for chaining method calls
      */
     clear()
     {
@@ -730,7 +730,7 @@ export default class Graphics extends Container
      * Renders the object using the WebGL renderer
      *
      * @private
-     * @param {PIXI.WebGLRenderer} renderer - The renderer
+     * @param {V.WebGLRenderer} renderer - The renderer
      */
     _renderWebGL(renderer)
     {
@@ -757,7 +757,7 @@ export default class Graphics extends Container
      * Renders a sprite rectangle.
      *
      * @private
-     * @param {PIXI.WebGLRenderer} renderer - The renderer
+     * @param {V.WebGLRenderer} renderer - The renderer
      */
     _renderSpriteRect(renderer)
     {
@@ -807,7 +807,7 @@ export default class Graphics extends Container
      * Renders the object using the Canvas renderer
      *
      * @private
-     * @param {PIXI.CanvasRenderer} renderer - The renderer
+     * @param {V.CanvasRenderer} renderer - The renderer
      */
     _renderCanvas(renderer)
     {
@@ -842,7 +842,7 @@ export default class Graphics extends Container
     /**
      * Tests if a point is inside this graphics object
      *
-     * @param {PIXI.Point} point - the point to test
+     * @param {V.Point} point - the point to test
      * @return {boolean} the result of the test
      */
     containsPoint(point)
@@ -1016,8 +1016,8 @@ export default class Graphics extends Container
     /**
      * Draws the given shape to this Graphics object. Can be any of Circle, Rectangle, Ellipse, Line or Polygon.
      *
-     * @param {PIXI.Circle|PIXI.Ellipse|PIXI.Polygon|PIXI.Rectangle|PIXI.RoundedRectangle} shape - The shape object to draw.
-     * @return {PIXI.GraphicsData} The generated GraphicsData object.
+     * @param {V.Circle|V.Ellipse|V.Polygon|V.Rectangle|V.RoundedRectangle} shape - The shape object to draw.
+     * @return {V.GraphicsData} The generated GraphicsData object.
      */
     drawShape(shape)
     {
@@ -1061,7 +1061,7 @@ export default class Graphics extends Container
      *
      * @param {number} scaleMode - The scale mode of the texture.
      * @param {number} resolution - The resolution of the texture.
-     * @return {PIXI.Texture} The new texture.
+     * @return {V.Texture} The new texture.
      */
     generateCanvasTexture(scaleMode, resolution = 1)
     {
@@ -1095,7 +1095,7 @@ export default class Graphics extends Container
     /**
      * Closes the current path.
      *
-     * @return {PIXI.Graphics} Returns itself.
+     * @return {V.Graphics} Returns itself.
      */
     closePath()
     {
@@ -1113,7 +1113,7 @@ export default class Graphics extends Container
     /**
      * Adds a hole in the current path.
      *
-     * @return {PIXI.Graphics} Returns itself.
+     * @return {V.Graphics} Returns itself.
      */
     addHole()
     {

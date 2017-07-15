@@ -1,11 +1,11 @@
 import Shader from '../../../Shader';
 
 /**
- * This shader is used to draw simple primitive shapes for {@link PIXI.Graphics}.
+ * This shader is used to draw simple primitive shapes for {@link V.Graphics}.
  *
  * @class
- * @memberof PIXI
- * @extends PIXI.Shader
+ * @memberof V
+ * @extends V.Shader
  */
 export default class PrimitiveShader extends Shader
 {

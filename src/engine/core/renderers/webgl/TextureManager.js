@@ -7,19 +7,19 @@ import { removeItems } from '../../utils';
  * Helper class to create a webGL Texture
  *
  * @class
- * @memberof PIXI
+ * @memberof V
  */
 export default class TextureManager
 {
     /**
-     * @param {PIXI.WebGLRenderer} renderer - A reference to the current renderer
+     * @param {V.WebGLRenderer} renderer - A reference to the current renderer
      */
     constructor(renderer)
     {
         /**
          * A reference to the current renderer
          *
-         * @member {PIXI.WebGLRenderer}
+         * @member {V.WebGLRenderer}
          */
         this.renderer = renderer;
 
@@ -60,7 +60,7 @@ export default class TextureManager
     /**
      * Updates and/or Creates a WebGL texture for the renderer's context.
      *
-     * @param {PIXI.BaseTexture|PIXI.Texture} texture - the texture to update
+     * @param {V.BaseTexture|V.Texture} texture - the texture to update
      * @param {number} location - the location the texture will be bound to.
      * @return {GLTexture} The gl texture.
      */
@@ -186,7 +186,7 @@ export default class TextureManager
     /**
      * Deletes the texture from WebGL
      *
-     * @param {PIXI.BaseTexture|PIXI.Texture} texture - the texture to destroy
+     * @param {V.BaseTexture|V.Texture} texture - the texture to destroy
      * @param {boolean} [skipRemove=false] - Whether to skip removing the texture from the TextureManager.
      */
     destroyTexture(texture, skipRemove)

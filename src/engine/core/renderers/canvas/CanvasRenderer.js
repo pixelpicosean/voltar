@@ -12,8 +12,8 @@ import settings from '../../settings';
  * your DOM or you will not see anything :)
  *
  * @class
- * @memberof PIXI
- * @extends PIXI.SystemRenderer
+ * @memberof V
+ * @extends V.SystemRenderer
  */
 export default class CanvasRenderer extends SystemRenderer
 {
@@ -67,7 +67,7 @@ export default class CanvasRenderer extends SystemRenderer
         /**
          * Instance of a CanvasMaskManager, handles masking when using the canvas renderer.
          *
-         * @member {PIXI.CanvasMaskManager}
+         * @member {V.CanvasMaskManager}
          */
         this.maskManager = new CanvasMaskManager(this);
 
@@ -110,24 +110,24 @@ export default class CanvasRenderer extends SystemRenderer
         /**
          * Fired after rendering finishes.
          *
-         * @event PIXI.CanvasRenderer#postrender
+         * @event V.CanvasRenderer#postrender
          */
 
         /**
          * Fired before rendering starts.
          *
-         * @event PIXI.CanvasRenderer#prerender
+         * @event V.CanvasRenderer#prerender
          */
     }
 
     /**
      * Renders the object to this canvas view
      *
-     * @param {PIXI.DisplayObject} displayObject - The object to be rendered
-     * @param {PIXI.RenderTexture} [renderTexture] - A render texture to be rendered to.
+     * @param {V.Node2D} displayObject - The object to be rendered
+     * @param {V.RenderTexture} [renderTexture] - A render texture to be rendered to.
      *  If unset, it will render to the root context.
      * @param {boolean} [clear=false] - Whether to clear the canvas before drawing
-     * @param {PIXI.Transform} [transform] - A transformation to be applied
+     * @param {V.Transform} [transform] - A transformation to be applied
      * @param {boolean} [skipUpdateTransform=false] - Whether to skip the update transform
      */
     render(displayObject, renderTexture, clear, transform, skipUpdateTransform)
@@ -178,21 +178,21 @@ export default class CanvasRenderer extends SystemRenderer
         {
             // update the scene graph
             const cacheParent = displayObject.parent;
-            const tempWt = this._tempDisplayObjectParent.transform.worldTransform;
+            const tempWt = this._tempNode2DParent.transform.worldTransform;
 
             if (transform)
             {
                 transform.copy(tempWt);
 
                 // lets not forget to flag the parent transform as dirty...
-                this._tempDisplayObjectParent.transform._worldID = -1;
+                this._tempNode2DParent.transform._worldID = -1;
             }
             else
             {
                 tempWt.identity();
             }
 
-            displayObject.parent = this._tempDisplayObjectParent;
+            displayObject.parent = this._tempNode2DParent;
 
             displayObject.updateTransform();
             displayObject.parent = cacheParent;
@@ -264,7 +264,7 @@ export default class CanvasRenderer extends SystemRenderer
     /**
      * Sets the blend mode of the renderer.
      *
-     * @param {number} blendMode - See {@link PIXI.BLEND_MODES} for valid values.
+     * @param {number} blendMode - See {@link V.BLEND_MODES} for valid values.
      */
     setBlendMode(blendMode)
     {
@@ -302,7 +302,7 @@ export default class CanvasRenderer extends SystemRenderer
     /**
      * Resizes the canvas view to the specified width and height.
      *
-     * @extends PIXI.SystemRenderer#resize
+     * @extends V.SystemRenderer#resize
      *
      * @param {number} screenWidth - the new width of the screen
      * @param {number} screenHeight - the new height of the screen
@@ -321,22 +321,22 @@ export default class CanvasRenderer extends SystemRenderer
 }
 
 /**
- * Collection of installed plugins. These are included by default in PIXI, but can be excluded
+ * Collection of installed plugins. These are included by default in V, but can be excluded
  * by creating a custom build. Consult the README for more information about creating custom
  * builds and excluding plugins.
- * @name PIXI.CanvasRenderer#plugins
+ * @name V.CanvasRenderer#plugins
  * @type {object}
  * @readonly
- * @property {PIXI.accessibility.AccessibilityManager} accessibility Support tabbing interactive elements.
- * @property {PIXI.extract.CanvasExtract} extract Extract image data from renderer.
- * @property {PIXI.interaction.InteractionManager} interaction Handles mouse, touch and pointer events.
- * @property {PIXI.prepare.CanvasPrepare} prepare Pre-render display objects.
+ * @property {V.accessibility.AccessibilityManager} accessibility Support tabbing interactive elements.
+ * @property {V.extract.CanvasExtract} extract Extract image data from renderer.
+ * @property {V.interaction.InteractionManager} interaction Handles mouse, touch and pointer events.
+ * @property {V.prepare.CanvasPrepare} prepare Pre-render display objects.
  */
 
 /**
  * Adds a plugin to the renderer.
  *
- * @method PIXI.CanvasRenderer#registerPlugin
+ * @method V.CanvasRenderer#registerPlugin
  * @param {string} pluginName - The name of the plugin.
  * @param {Function} ctor - The constructor function or class for the plugin.
  */

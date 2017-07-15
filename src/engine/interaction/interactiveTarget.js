@@ -1,32 +1,32 @@
 /**
  * Default property values of interactive objects
- * Used by {@link PIXI.interaction.InteractionManager} to automatically give all DisplayObjects these properties
+ * Used by {@link V.interaction.InteractionManager} to automatically give all Node2Ds these properties
  *
  * @private
  * @name interactiveTarget
- * @memberof PIXI.interaction
+ * @memberof V.interaction
  * @example
  *      function MyObject() {}
  *
  *      Object.assign(
- *          core.DisplayObject.prototype,
- *          PIXI.interaction.interactiveTarget
+ *          core.Node2D.prototype,
+ *          V.interaction.interactiveTarget
  *      );
  */
 export default {
 
     /**
-     * Enable interaction events for the DisplayObject. Touch, pointer and mouse
+     * Enable interaction events for the Node2D. Touch, pointer and mouse
      * events will not be emitted unless `interactive` is set to `true`.
      *
      * @example
-     * const sprite = new PIXI.Sprite(texture);
+     * const sprite = new V.Sprite(texture);
      * sprite.interactive = true;
      * sprite.on('tap', (event) => {
      *    //handle event
      * });
      * @member {boolean}
-     * @memberof PIXI.DisplayObject#
+     * @memberof V.Node2D#
      */
     interactive: false,
 
@@ -35,7 +35,7 @@ export default {
      * Setting this to false allows pixi to bypass a recursive `hitTest` function
      *
      * @member {boolean}
-     * @memberof PIXI.Container#
+     * @memberof V.Node2D#
      */
     interactiveChildren: true,
 
@@ -44,11 +44,11 @@ export default {
      * Setting this will cause this shape to be checked in hit tests rather than the displayObject's bounds.
      *
      * @example
-     * const sprite = new PIXI.Sprite(texture);
+     * const sprite = new V.Sprite(texture);
      * sprite.interactive = true;
-     * sprite.hitArea = new PIXI.Rectangle(0, 0, 100, 100);
-     * @member {PIXI.Rectangle|PIXI.Circle|PIXI.Ellipse|PIXI.Polygon|PIXI.RoundedRectangle}
-     * @memberof PIXI.DisplayObject#
+     * sprite.hitArea = new V.Rectangle(0, 0, 100, 100);
+     * @member {V.Rectangle|V.Circle|V.Ellipse|V.Polygon|V.RoundedRectangle}
+     * @memberof V.Node2D#
      */
     hitArea: null,
 
@@ -57,11 +57,11 @@ export default {
      * Setting this changes the 'cursor' property to `'pointer'`.
      *
      * @example
-     * const sprite = new PIXI.Sprite(texture);
+     * const sprite = new V.Sprite(texture);
      * sprite.interactive = true;
      * sprite.buttonMode = true;
      * @member {boolean}
-     * @memberof PIXI.DisplayObject#
+     * @memberof V.Node2D#
      */
     get buttonMode()
     {
@@ -84,13 +84,13 @@ export default {
      * is hovered over the displayObject.
      *
      * @example
-     * const sprite = new PIXI.Sprite(texture);
+     * const sprite = new V.Sprite(texture);
      * sprite.interactive = true;
      * sprite.cursor = 'wait';
      * @see https://developer.mozilla.org/en/docs/Web/CSS/cursor
      *
      * @member {string}
-     * @memberof PIXI.DisplayObject#
+     * @memberof V.Node2D#
      */
     cursor: null,
 
@@ -98,7 +98,7 @@ export default {
      * Internal set of all active pointers, by identifier
      *
      * @member {Map<number, InteractionTrackingData>}
-     * @memberof PIXI.DisplayObject#
+     * @memberof V.Node2D#
      * @private
      */
     get trackedPointers()

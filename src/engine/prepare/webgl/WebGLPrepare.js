@@ -7,13 +7,13 @@ import BasePrepare from '../BasePrepare';
  * An instance of this class is automatically created by default, and can be found at renderer.plugins.prepare
  *
  * @class
- * @extends PIXI.prepare.BasePrepare
- * @memberof PIXI.prepare
+ * @extends V.prepare.BasePrepare
+ * @memberof V.prepare
  */
 export default class WebGLPrepare extends BasePrepare
 {
     /**
-     * @param {PIXI.WebGLRenderer} renderer - A reference to the current renderer
+     * @param {V.WebGLRenderer} renderer - A reference to the current renderer
      */
     constructor(renderer)
     {
@@ -28,11 +28,11 @@ export default class WebGLPrepare extends BasePrepare
     }
 }
 /**
- * Built-in hook to upload PIXI.Texture objects to the GPU.
+ * Built-in hook to upload V.Texture objects to the GPU.
  *
  * @private
- * @param {PIXI.WebGLRenderer} renderer - instance of the webgl renderer
- * @param {PIXI.DisplayObject} item - Item to check
+ * @param {V.WebGLRenderer} renderer - instance of the webgl renderer
+ * @param {V.Node2D} item - Item to check
  * @return {boolean} If item was uploaded.
  */
 function uploadBaseTextures(renderer, item)
@@ -54,11 +54,11 @@ function uploadBaseTextures(renderer, item)
 }
 
 /**
- * Built-in hook to upload PIXI.Graphics to the GPU.
+ * Built-in hook to upload V.Graphics to the GPU.
  *
  * @private
- * @param {PIXI.WebGLRenderer} renderer - instance of the webgl renderer
- * @param {PIXI.DisplayObject} item - Item to check
+ * @param {V.WebGLRenderer} renderer - instance of the webgl renderer
+ * @param {V.Node2D} item - Item to check
  * @return {boolean} If item was uploaded.
  */
 function uploadGraphics(renderer, item)
@@ -82,9 +82,9 @@ function uploadGraphics(renderer, item)
  * Built-in hook to find graphics.
  *
  * @private
- * @param {PIXI.DisplayObject} item - Display object to check
+ * @param {V.Node2D} item - Display object to check
  * @param {Array<*>} queue - Collection of items to upload
- * @return {boolean} if a PIXI.Graphics object was found.
+ * @return {boolean} if a V.Graphics object was found.
  */
 function findGraphics(item, queue)
 {

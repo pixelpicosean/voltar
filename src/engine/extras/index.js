@@ -1,6 +1,6 @@
 /**
- * Additional PIXI DisplayObjects for animation, tiling and bitmap text.
- * @namespace PIXI.extras
+ * Additional V Node2Ds for animation, tiling and bitmap text.
+ * @namespace V.extras
  */
 export { default as AnimatedSprite } from './AnimatedSprite';
 export { default as TextureTransform } from './TextureTransform';

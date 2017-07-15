@@ -2,13 +2,13 @@ import Shader from '../../core/Shader';
 
 /**
  * @class
- * @extends PIXI.Shader
- * @memberof PIXI
+ * @extends V.Shader
+ * @memberof V
  */
 export default class ParticleShader extends Shader
 {
     /**
-     * @param {PIXI.Shader} gl - The webgl shader manager this shader works for.
+     * @param {V.Shader} gl - The webgl shader manager this shader works for.
      */
     constructor(gl)
     {

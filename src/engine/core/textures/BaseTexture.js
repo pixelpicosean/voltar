@@ -12,13 +12,13 @@ import bitTwiddle from 'bit-twiddle';
  *
  * @class
  * @extends EventEmitter
- * @memberof PIXI
+ * @memberof V
  */
 export default class BaseTexture extends EventEmitter
 {
     /**
      * @param {HTMLImageElement|HTMLCanvasElement} [source] - the source object of the texture.
-     * @param {number} [scaleMode=PIXI.settings.SCALE_MODE] - See {@link PIXI.SCALE_MODES} for possible values
+     * @param {number} [scaleMode=V.settings.SCALE_MODE] - See {@link V.SCALE_MODES} for possible values
      * @param {number} [resolution=1] - The resolution / device pixel ratio of the texture
      */
     constructor(source, scaleMode, resolution)
@@ -74,8 +74,8 @@ export default class BaseTexture extends EventEmitter
          * The scale mode to apply when scaling this texture
          *
          * @member {number}
-         * @default PIXI.settings.SCALE_MODE
-         * @see PIXI.SCALE_MODES
+         * @default V.settings.SCALE_MODE
+         * @see V.SCALE_MODES
          */
         this.scaleMode = scaleMode !== undefined ? scaleMode : settings.SCALE_MODE;
 
@@ -172,7 +172,7 @@ export default class BaseTexture extends EventEmitter
          * Also the texture must be a power of two size to work
          *
          * @member {boolean}
-         * @see PIXI.MIPMAP_TEXTURES
+         * @see V.MIPMAP_TEXTURES
          */
         this.mipmap = settings.MIPMAP_TEXTURES;
 
@@ -181,7 +181,7 @@ export default class BaseTexture extends EventEmitter
          * WebGL Texture wrap mode
          *
          * @member {number}
-         * @see PIXI.WRAP_MODES
+         * @see V.WRAP_MODES
          */
         this.wrapMode = settings.WRAP_MODE;
 
@@ -224,39 +224,39 @@ export default class BaseTexture extends EventEmitter
          * Fired when a not-immediately-available source finishes loading.
          *
          * @protected
-         * @event PIXI.BaseTexture#loaded
-         * @param {PIXI.BaseTexture} baseTexture - Resource loaded.
+         * @event V.BaseTexture#loaded
+         * @param {V.BaseTexture} baseTexture - Resource loaded.
          */
 
         /**
          * Fired when a not-immediately-available source fails to load.
          *
          * @protected
-         * @event PIXI.BaseTexture#error
-         * @param {PIXI.BaseTexture} baseTexture - Resource errored.
+         * @event V.BaseTexture#error
+         * @param {V.BaseTexture} baseTexture - Resource errored.
          */
 
         /**
          * Fired when BaseTexture is updated.
          *
          * @protected
-         * @event PIXI.BaseTexture#update
-         * @param {PIXI.BaseTexture} baseTexture - Instance of texture being updated.
+         * @event V.BaseTexture#update
+         * @param {V.BaseTexture} baseTexture - Instance of texture being updated.
          */
 
         /**
          * Fired when BaseTexture is destroyed.
          *
          * @protected
-         * @event PIXI.BaseTexture#dispose
-         * @param {PIXI.BaseTexture} baseTexture - Instance of texture being destroyed.
+         * @event V.BaseTexture#dispose
+         * @param {V.BaseTexture} baseTexture - Instance of texture being destroyed.
          */
     }
 
     /**
      * Updates the texture on all the webgl renderers, this also assumes the src has changed.
      *
-     * @fires PIXI.BaseTexture#update
+     * @fires V.BaseTexture#update
      */
     update()
     {
@@ -549,7 +549,7 @@ export default class BaseTexture extends EventEmitter
      *
      * @param  {string} svgString SVG source as string
      *
-     * @fires PIXI.BaseTexture#loaded
+     * @fires V.BaseTexture#loaded
      */
     _loadSvgSourceUsingString(svgString)
     {
@@ -638,7 +638,7 @@ export default class BaseTexture extends EventEmitter
      * This means you can still use the texture later which will upload it to GPU
      * memory again.
      *
-     * @fires PIXI.BaseTexture#dispose
+     * @fires V.BaseTexture#dispose
      */
     dispose()
     {
@@ -665,9 +665,9 @@ export default class BaseTexture extends EventEmitter
      * @static
      * @param {string} imageUrl - The image url of the texture
      * @param {boolean} [crossorigin=(auto)] - Should use anonymous CORS? Defaults to true if the URL is not a data-URI.
-     * @param {number} [scaleMode=PIXI.settings.SCALE_MODE] - See {@link PIXI.SCALE_MODES} for possible values
+     * @param {number} [scaleMode=V.settings.SCALE_MODE] - See {@link V.SCALE_MODES} for possible values
      * @param {number} [sourceScale=(auto)] - Scale for the original image, used with Svg images.
-     * @return {PIXI.BaseTexture} The new base texture.
+     * @return {V.BaseTexture} The new base texture.
      */
     static fromImage(imageUrl, crossorigin, scaleMode, sourceScale)
     {
@@ -712,9 +712,9 @@ export default class BaseTexture extends EventEmitter
      *
      * @static
      * @param {HTMLCanvasElement} canvas - The canvas element source of the texture
-     * @param {number} scaleMode - See {@link PIXI.SCALE_MODES} for possible values
+     * @param {number} scaleMode - See {@link V.SCALE_MODES} for possible values
      * @param {string} [origin='canvas'] - A string origin of who created the base texture
-     * @return {PIXI.BaseTexture} The new base texture.
+     * @return {V.BaseTexture} The new base texture.
      */
     static fromCanvas(canvas, scaleMode, origin = 'canvas')
     {
@@ -740,9 +740,9 @@ export default class BaseTexture extends EventEmitter
      *
      * @static
      * @param {string|HTMLImageElement|HTMLCanvasElement} source - The source to create base texture from.
-     * @param {number} [scaleMode=PIXI.settings.SCALE_MODE] - See {@link PIXI.SCALE_MODES} for possible values
+     * @param {number} [scaleMode=V.settings.SCALE_MODE] - See {@link V.SCALE_MODES} for possible values
      * @param {number} [sourceScale=(auto)] - Scale for the original image, used with Svg images.
-     * @return {PIXI.BaseTexture} The new base texture.
+     * @return {V.BaseTexture} The new base texture.
      */
     static from(source, scaleMode, sourceScale)
     {
@@ -783,10 +783,10 @@ export default class BaseTexture extends EventEmitter
     }
 
     /**
-     * Adds a BaseTexture to the global BaseTextureCache. This cache is shared across the whole PIXI object.
+     * Adds a BaseTexture to the global BaseTextureCache. This cache is shared across the whole V object.
      *
      * @static
-     * @param {PIXI.BaseTexture} baseTexture - The BaseTexture to add to the cache.
+     * @param {V.BaseTexture} baseTexture - The BaseTexture to add to the cache.
      * @param {string} id - The id that the BaseTexture will be stored against.
      */
     static addToCache(baseTexture, id)
@@ -815,8 +815,8 @@ export default class BaseTexture extends EventEmitter
      * Remove a BaseTexture from the global BaseTextureCache.
      *
      * @static
-     * @param {string|PIXI.BaseTexture} baseTexture - id of a BaseTexture to be removed, or a BaseTexture instance itself.
-     * @return {PIXI.BaseTexture|null} The BaseTexture that was removed.
+     * @param {string|V.BaseTexture} baseTexture - id of a BaseTexture to be removed, or a BaseTexture instance itself.
+     * @return {V.BaseTexture|null} The BaseTexture that was removed.
      */
     static removeFromCache(baseTexture)
     {

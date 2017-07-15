@@ -6,12 +6,12 @@ import { default as Mesh } from '../Mesh';
  *
  * @class
  * @private
- * @memberof PIXI
+ * @memberof V
  */
 export default class MeshSpriteRenderer
 {
     /**
-     * @param {PIXI.CanvasRenderer} renderer - The renderer this downport works for
+     * @param {V.CanvasRenderer} renderer - The renderer this downport works for
      */
     constructor(renderer)
     {
@@ -21,7 +21,7 @@ export default class MeshSpriteRenderer
     /**
      * Renders the Mesh
      *
-     * @param {PIXI.mesh.Mesh} mesh - the Mesh to render
+     * @param {V.mesh.Mesh} mesh - the Mesh to render
      */
     render(mesh)
     {
@@ -70,7 +70,7 @@ export default class MeshSpriteRenderer
      * Draws the object in Triangle Mesh mode
      *
      * @private
-     * @param {PIXI.mesh.Mesh} mesh - the Mesh to render
+     * @param {V.mesh.Mesh} mesh - the Mesh to render
      */
     _renderTriangleMesh(mesh)
     {
@@ -90,7 +90,7 @@ export default class MeshSpriteRenderer
      * Draws the object in triangle mode using canvas
      *
      * @private
-     * @param {PIXI.mesh.Mesh} mesh - the current mesh
+     * @param {V.mesh.Mesh} mesh - the current mesh
      */
     _renderTriangles(mesh)
     {
@@ -113,7 +113,7 @@ export default class MeshSpriteRenderer
      * Draws one of the triangles that from the Mesh
      *
      * @private
-     * @param {PIXI.mesh.Mesh} mesh - the current mesh
+     * @param {V.mesh.Mesh} mesh - the current mesh
      * @param {number} index0 - the index of the first vertex
      * @param {number} index1 - the index of the second vertex
      * @param {number} index2 - the index of the third vertex
@@ -250,7 +250,7 @@ export default class MeshSpriteRenderer
      * Renders a flat Mesh
      *
      * @private
-     * @param {PIXI.mesh.Mesh} mesh - The Mesh to render
+     * @param {V.mesh.Mesh} mesh - The Mesh to render
      */
     renderMeshFlat(mesh)
     {

@@ -7,7 +7,7 @@
  *      pluginTarget.mixin(MyObject);
  *
  * @mixin
- * @memberof PIXI.utils
+ * @memberof V.utils
  * @param {object} obj - The object to mix into.
  */
 function pluginTarget(obj)

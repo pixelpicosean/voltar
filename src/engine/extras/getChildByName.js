@@ -3,19 +3,19 @@ import * as core from '../core';
 /**
  * The instance name of the object.
  *
- * @memberof PIXI.DisplayObject#
+ * @memberof V.Node2D#
  * @member {string}
  */
-core.DisplayObject.prototype.name = null;
+core.Node2D.prototype.name = null;
 
 /**
  * Returns the display object in the container
  *
- * @memberof PIXI.Container#
+ * @memberof V.Node2D#
  * @param {string} name - instance name
- * @return {PIXI.DisplayObject} The child with the specified name.
+ * @return {V.Node2D} The child with the specified name.
  */
-core.Container.prototype.getChildByName = function getChildByName(name)
+core.Node2D.prototype.getChildByName = function getChildByName(name)
 {
     for (let i = 0; i < this.children.length; i++)
     {

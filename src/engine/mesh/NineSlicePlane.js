@@ -7,7 +7,7 @@ const DEFAULT_BORDER_SIZE = 10;
  * for buttons with rounded corners for example) and the other areas will be scaled horizontally and or vertically
  *
  *```js
- * let Plane9 = new PIXI.NineSlicePlane(PIXI.Texture.fromImage('BoxWithRoundedCorners.png'), 15, 15, 15, 15);
+ * let Plane9 = new V.NineSlicePlane(V.Texture.fromImage('BoxWithRoundedCorners.png'), 15, 15, 15, 15);
  *  ```
  * <pre>
  *      A                          B
@@ -29,14 +29,14 @@ const DEFAULT_BORDER_SIZE = 10;
  * </pre>
  *
  * @class
- * @extends PIXI.mesh.Plane
- * @memberof PIXI.mesh
+ * @extends V.mesh.Plane
+ * @memberof V.mesh
  *
  */
 export default class NineSlicePlane extends Plane
 {
     /**
-     * @param {PIXI.Texture} texture - The texture to use on the NineSlicePlane.
+     * @param {V.Texture} texture - The texture to use on the NineSlicePlane.
      * @param {int} [leftWidth=10] size of the left vertical bar (A)
      * @param {int} [topHeight=10] size of the top horizontal bar (C)
      * @param {int} [rightWidth=10] size of the right vertical bar (B)
@@ -53,7 +53,7 @@ export default class NineSlicePlane extends Plane
          * The width of the NineSlicePlane, setting this will actually modify the vertices and UV's of this plane
          *
          * @member {number}
-         * @memberof PIXI.NineSlicePlane#
+         * @memberof V.NineSlicePlane#
          * @override
          */
         this._width = this._origWidth;
@@ -62,7 +62,7 @@ export default class NineSlicePlane extends Plane
          * The height of the NineSlicePlane, setting this will actually modify the vertices and UV's of this plane
          *
          * @member {number}
-         * @memberof PIXI.NineSlicePlane#
+         * @memberof V.NineSlicePlane#
          * @override
          */
         this._height = this._origHeight;
@@ -71,7 +71,7 @@ export default class NineSlicePlane extends Plane
          * The width of the left column (a)
          *
          * @member {number}
-         * @memberof PIXI.NineSlicePlane#
+         * @memberof V.NineSlicePlane#
          * @override
          */
         this.leftWidth = typeof leftWidth !== 'undefined' ? leftWidth : DEFAULT_BORDER_SIZE;
@@ -80,7 +80,7 @@ export default class NineSlicePlane extends Plane
          * The width of the right column (b)
          *
          * @member {number}
-         * @memberof PIXI.NineSlicePlane#
+         * @memberof V.NineSlicePlane#
          * @override
          */
         this.rightWidth = typeof rightWidth !== 'undefined' ? rightWidth : DEFAULT_BORDER_SIZE;
@@ -89,7 +89,7 @@ export default class NineSlicePlane extends Plane
          * The height of the top row (c)
          *
          * @member {number}
-         * @memberof PIXI.NineSlicePlane#
+         * @memberof V.NineSlicePlane#
          * @override
          */
         this.topHeight = typeof topHeight !== 'undefined' ? topHeight : DEFAULT_BORDER_SIZE;
@@ -98,7 +98,7 @@ export default class NineSlicePlane extends Plane
          * The height of the bottom row (d)
          *
          * @member {number}
-         * @memberof PIXI.NineSlicePlane#
+         * @memberof V.NineSlicePlane#
          * @override
          */
         this.bottomHeight = typeof bottomHeight !== 'undefined' ? bottomHeight : DEFAULT_BORDER_SIZE;
@@ -136,7 +136,7 @@ export default class NineSlicePlane extends Plane
      * Renders the object using the Canvas renderer
      *
      * @private
-     * @param {PIXI.CanvasRenderer} renderer - The canvas renderer to render with.
+     * @param {V.CanvasRenderer} renderer - The canvas renderer to render with.
      */
     _renderCanvas(renderer)
     {

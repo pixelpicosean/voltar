@@ -6,12 +6,12 @@ import settings from '../../settings';
  * up with textures that are no longer being used.
  *
  * @class
- * @memberof PIXI
+ * @memberof V
  */
 export default class TextureGarbageCollector
 {
     /**
-     * @param {PIXI.WebGLRenderer} renderer - The renderer this manager works for.
+     * @param {V.WebGLRenderer} renderer - The renderer this manager works for.
      */
     constructor(renderer)
     {
@@ -89,7 +89,7 @@ export default class TextureGarbageCollector
     /**
      * Removes all the textures within the specified displayObject and its children from the GPU
      *
-     * @param {PIXI.DisplayObject} displayObject - the displayObject to remove the textures from.
+     * @param {V.Node2D} displayObject - the displayObject to remove the textures from.
      */
     unload(displayObject)
     {

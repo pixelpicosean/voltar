@@ -1,18 +1,18 @@
 /**
  * @class
- * @memberof PIXI
+ * @memberof V
  */
 export default class WebGLManager
 {
     /**
-     * @param {PIXI.WebGLRenderer} renderer - The renderer this manager works for.
+     * @param {V.WebGLRenderer} renderer - The renderer this manager works for.
      */
     constructor(renderer)
     {
         /**
          * The renderer this manager works for.
          *
-         * @member {PIXI.WebGLRenderer}
+         * @member {V.WebGLRenderer}
          */
         this.renderer = renderer;
 

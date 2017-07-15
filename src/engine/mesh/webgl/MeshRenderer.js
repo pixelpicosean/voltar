@@ -9,8 +9,8 @@ const matrixIdentity = core.Matrix.IDENTITY;
  * WebGL renderer plugin for tiling sprites
  *
  * @class
- * @memberof PIXI
- * @extends PIXI.ObjectRenderer
+ * @memberof V
+ * @extends V.ObjectRenderer
  */
 export default class MeshRenderer extends core.ObjectRenderer
 {
@@ -44,7 +44,7 @@ export default class MeshRenderer extends core.ObjectRenderer
     /**
      * renders mesh
      *
-     * @param {PIXI.mesh.Mesh} mesh mesh instance
+     * @param {V.mesh.Mesh} mesh mesh instance
      */
     render(mesh)
     {

@@ -7,8 +7,8 @@ import BlurYFilter from './BlurYFilter';
  * The strength of the blur can be set for x- and y-axis separately.
  *
  * @class
- * @extends PIXI.Filter
- * @memberof PIXI.filters
+ * @extends V.Filter
+ * @memberof V.filters
  */
 export default class BlurFilter extends core.Filter
 {
@@ -34,9 +34,9 @@ export default class BlurFilter extends core.Filter
     /**
      * Applies the filter.
      *
-     * @param {PIXI.FilterManager} filterManager - The manager.
-     * @param {PIXI.RenderTarget} input - The input target.
-     * @param {PIXI.RenderTarget} output - The output target.
+     * @param {V.FilterManager} filterManager - The manager.
+     * @param {V.RenderTarget} input - The input target.
+     * @param {V.RenderTarget} output - The output target.
      */
     apply(filterManager, input, output)
     {

@@ -8,7 +8,7 @@ import { hex2rgb } from '../../../utils';
  *
  * @ignore
  * @private
- * @param {PIXI.WebGLGraphicsData} graphicsData - The graphics object containing all the necessary properties
+ * @param {V.WebGLGraphicsData} graphicsData - The graphics object containing all the necessary properties
  * @param {object} webGLData - an object containing all the webGL-specific information to create this shape
  * @param {object} webGLDataNativeLines - an object containing all the webGL-specific information to create nativeLines
  */
@@ -31,7 +31,7 @@ export default function (graphicsData, webGLData, webGLDataNativeLines)
  *
  * @ignore
  * @private
- * @param {PIXI.WebGLGraphicsData} graphicsData - The graphics object containing all the necessary properties
+ * @param {V.WebGLGraphicsData} graphicsData - The graphics object containing all the necessary properties
  * @param {object} webGLData - an object containing all the webGL-specific information to create this shape
  */
 function buildLine(graphicsData, webGLData)
@@ -255,7 +255,7 @@ function buildLine(graphicsData, webGLData)
  *
  * @ignore
  * @private
- * @param {PIXI.WebGLGraphicsData} graphicsData - The graphics object containing all the necessary properties
+ * @param {V.WebGLGraphicsData} graphicsData - The graphics object containing all the necessary properties
  * @param {object} webGLData - an object containing all the webGL-specific information to create this shape
  */
 function buildNativeLine(graphicsData, webGLData)

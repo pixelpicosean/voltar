@@ -5,7 +5,7 @@ import { SHAPES } from '../../const';
  * point (x, y) and by its width and its height.
  *
  * @class
- * @memberof PIXI
+ * @memberof V
  */
 export default class Rectangle
 {
@@ -46,8 +46,8 @@ export default class Rectangle
          *
          * @member {number}
          * @readOnly
-         * @default PIXI.SHAPES.RECT
-         * @see PIXI.SHAPES
+         * @default V.SHAPES.RECT
+         * @see V.SHAPES
          */
         this.type = SHAPES.RECT;
     }
@@ -106,7 +106,7 @@ export default class Rectangle
     /**
      * Creates a clone of this Rectangle
      *
-     * @return {PIXI.Rectangle} a copy of the rectangle
+     * @return {V.Rectangle} a copy of the rectangle
      */
     clone()
     {
@@ -116,8 +116,8 @@ export default class Rectangle
     /**
      * Copies another rectangle to this one.
      *
-     * @param {PIXI.Rectangle} rectangle - The rectangle to copy.
-     * @return {PIXI.Rectangle} Returns itself.
+     * @param {V.Rectangle} rectangle - The rectangle to copy.
+     * @return {V.Rectangle} Returns itself.
      */
     copy(rectangle)
     {
@@ -175,7 +175,7 @@ export default class Rectangle
     /**
      * Fits this rectangle around the passed one.
      *
-     * @param {PIXI.Rectangle} rectangle - The rectangle to fit.
+     * @param {V.Rectangle} rectangle - The rectangle to fit.
      */
     fit(rectangle)
     {
@@ -222,7 +222,7 @@ export default class Rectangle
     /**
      * Enlarges this rectangle to include the passed rectangle.
      *
-     * @param {PIXI.Rectangle} rectangle - The rectangle to include.
+     * @param {V.Rectangle} rectangle - The rectangle to include.
      */
     enlarge(rectangle)
     {

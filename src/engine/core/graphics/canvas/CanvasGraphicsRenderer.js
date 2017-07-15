@@ -18,12 +18,12 @@ import { SHAPES } from '../../const';
  *
  * @class
  * @private
- * @memberof PIXI
+ * @memberof V
  */
 export default class CanvasGraphicsRenderer
 {
     /**
-     * @param {PIXI.CanvasRenderer} renderer - The current PIXI renderer.
+     * @param {V.CanvasRenderer} renderer - The current V renderer.
      */
     constructor(renderer)
     {
@@ -33,7 +33,7 @@ export default class CanvasGraphicsRenderer
     /**
      * Renders a Graphics object to a canvas.
      *
-     * @param {PIXI.Graphics} graphics - the actual graphics object to render
+     * @param {V.Graphics} graphics - the actual graphics object to render
      */
     render(graphics)
     {
@@ -221,7 +221,7 @@ export default class CanvasGraphicsRenderer
      * Updates the tint of a graphics object
      *
      * @private
-     * @param {PIXI.Graphics} graphics - the graphics that will have its tint updated
+     * @param {V.Graphics} graphics - the graphics that will have its tint updated
      */
     updateGraphicsTint(graphics)
     {
@@ -256,7 +256,7 @@ export default class CanvasGraphicsRenderer
     /**
      * Renders a polygon.
      *
-     * @param {PIXI.Point[]} points - The points to render
+     * @param {V.Point[]} points - The points to render
      * @param {boolean} close - Should the polygon be closed
      * @param {CanvasRenderingContext2D} context - The rendering context to use
      */

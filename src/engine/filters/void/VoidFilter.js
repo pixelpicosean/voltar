@@ -5,8 +5,8 @@ import { join } from 'path';
  * Does nothing. Very handy.
  *
  * @class
- * @extends PIXI.Filter
- * @memberof PIXI.filters
+ * @extends V.Filter
+ * @memberof V.filters
  */
 export default class VoidFilter extends core.Filter
 {

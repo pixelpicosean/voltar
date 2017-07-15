@@ -2,19 +2,19 @@ import * as core from '../core';
 import { hex2rgb } from '../core/utils';
 
 /**
- * The ParticleContainer class is a really fast version of the Container built solely for speed,
- * so use when you need a lot of sprites or particles. The tradeoff of the ParticleContainer is that advanced
- * functionality will not work. ParticleContainer implements only the basic object transform (position, scale, rotation).
+ * The ParticleNode2D class is a really fast version of the Node2D built solely for speed,
+ * so use when you need a lot of sprites or particles. The tradeoff of the ParticleNode2D is that advanced
+ * functionality will not work. ParticleNode2D implements only the basic object transform (position, scale, rotation).
  * Any other functionality like tinting, masking, etc will not work on sprites in this batch.
  *
  * It's extremely easy to use :
  *
  * ```js
- * let container = new ParticleContainer();
+ * let container = new ParticleNode2D();
  *
  * for (let i = 0; i < 100; ++i)
  * {
- *     let sprite = new PIXI.Sprite.fromImage("myImage.png");
+ *     let sprite = new V.Sprite.fromImage("myImage.png");
  *     container.addChild(sprite);
  * }
  * ```
@@ -22,10 +22,10 @@ import { hex2rgb } from '../core/utils';
  * And here you have a hundred sprites that will be renderer at the speed of light.
  *
  * @class
- * @extends PIXI.Container
- * @memberof PIXI.particles
+ * @extends V.Node2D
+ * @memberof V.particles
  */
-export default class ParticleContainer extends core.Container
+export default class ParticleNode2D extends core.Node2D
 {
     /**
      * @param {number} [maxSize=15000] - The maximum number of particles that can be renderer by the container.
@@ -95,12 +95,12 @@ export default class ParticleContainer extends core.Container
         this.interactiveChildren = false;
 
         /**
-         * The blend mode to be applied to the sprite. Apply a value of `PIXI.BLEND_MODES.NORMAL`
+         * The blend mode to be applied to the sprite. Apply a value of `V.BLEND_MODES.NORMAL`
          * to reset the blend mode.
          *
          * @member {number}
-         * @default PIXI.BLEND_MODES.NORMAL
-         * @see PIXI.BLEND_MODES
+         * @default V.BLEND_MODES.NORMAL
+         * @see V.BLEND_MODES
          */
         this.blendMode = core.BLEND_MODES.NORMAL;
 
@@ -162,7 +162,7 @@ export default class ParticleContainer extends core.Container
     {
         // TODO don't need to!
         this.displayObjectUpdateTransform();
-        //  PIXI.Container.prototype.updateTransform.call( this );
+        //  V.Node2D.prototype.updateTransform.call( this );
     }
 
     /**
@@ -187,7 +187,7 @@ export default class ParticleContainer extends core.Container
      * Renders the container using the WebGL renderer
      *
      * @private
-     * @param {PIXI.WebGLRenderer} renderer - The webgl renderer
+     * @param {V.WebGLRenderer} renderer - The webgl renderer
      */
     renderWebGL(renderer)
     {
@@ -229,7 +229,7 @@ export default class ParticleContainer extends core.Container
      * Renders the object using the Canvas renderer
      *
      * @private
-     * @param {PIXI.CanvasRenderer} renderer - The canvas renderer
+     * @param {V.CanvasRenderer} renderer - The canvas renderer
      */
     renderCanvas(renderer)
     {

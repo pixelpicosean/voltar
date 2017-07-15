@@ -8,8 +8,8 @@ const tempMat = new core.Matrix();
  * WebGL renderer plugin for tiling sprites
  *
  * @class
- * @memberof PIXI.extras
- * @extends PIXI.ObjectRenderer
+ * @memberof V.extras
+ * @extends V.ObjectRenderer
  */
 export default class TilingSpriteRenderer extends core.ObjectRenderer
 {
@@ -51,7 +51,7 @@ export default class TilingSpriteRenderer extends core.ObjectRenderer
 
     /**
      *
-     * @param {PIXI.extras.TilingSprite} ts tilingSprite to be rendered
+     * @param {V.extras.TilingSprite} ts tilingSprite to be rendered
      */
     render(ts)
     {

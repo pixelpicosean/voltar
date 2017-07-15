@@ -18,7 +18,7 @@ import createIndicesForQuads from '../../core/utils/createIndicesForQuads';
  *
  * @class
  * @private
- * @memberof PIXI
+ * @memberof V
  */
 export default class ParticleBuffer
 {
@@ -190,7 +190,7 @@ export default class ParticleBuffer
     /**
      * Uploads the dynamic properties.
      *
-     * @param {PIXI.DisplayObject[]} children - The children to upload.
+     * @param {V.Node2D[]} children - The children to upload.
      * @param {number} startIndex - The index to start at.
      * @param {number} amount - The number to upload.
      */
@@ -209,7 +209,7 @@ export default class ParticleBuffer
     /**
      * Uploads the static properties.
      *
-     * @param {PIXI.DisplayObject[]} children - The children to upload.
+     * @param {V.Node2D[]} children - The children to upload.
      * @param {number} startIndex - The index to start at.
      * @param {number} amount - The number to upload.
      */

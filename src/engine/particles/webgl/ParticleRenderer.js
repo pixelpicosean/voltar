@@ -18,12 +18,12 @@ import ParticleBuffer from './ParticleBuffer';
  *
  * @class
  * @private
- * @memberof PIXI
+ * @memberof V
  */
 export default class ParticleRenderer extends core.ObjectRenderer
 {
     /**
-     * @param {PIXI.WebGLRenderer} renderer - The renderer this sprite batch works for.
+     * @param {V.WebGLRenderer} renderer - The renderer this sprite batch works for.
      */
     constructor(renderer)
     {
@@ -38,7 +38,7 @@ export default class ParticleRenderer extends core.ObjectRenderer
         /**
          * The default shader that is used if a sprite doesn't have a more specific one.
          *
-         * @member {PIXI.Shader}
+         * @member {V.Shader}
          */
         this.shader = null;
 
@@ -116,7 +116,7 @@ export default class ParticleRenderer extends core.ObjectRenderer
     /**
      * Renders the particle container object.
      *
-     * @param {PIXI.ParticleContainer} container - The container to render using this ParticleRenderer
+     * @param {V.ParticleNode2D} container - The container to render using this ParticleRenderer
      */
     render(container)
     {
@@ -192,8 +192,8 @@ export default class ParticleRenderer extends core.ObjectRenderer
     /**
      * Creates one particle buffer for each child in the container we want to render and updates internal properties
      *
-     * @param {PIXI.ParticleContainer} container - The container to render using this ParticleRenderer
-     * @return {PIXI.ParticleBuffer[]} The buffers
+     * @param {V.ParticleNode2D} container - The container to render using this ParticleRenderer
+     * @return {V.ParticleBuffer[]} The buffers
      */
     generateBuffers(container)
     {
@@ -214,7 +214,7 @@ export default class ParticleRenderer extends core.ObjectRenderer
     /**
      * Uploads the verticies.
      *
-     * @param {PIXI.DisplayObject[]} children - the array of display objects to render
+     * @param {V.Node2D[]} children - the array of display objects to render
      * @param {number} startIndex - the index to start from in the children array
      * @param {number} amount - the amount of children that will have their vertices uploaded
      * @param {number[]} array - The vertices to upload.
@@ -274,7 +274,7 @@ export default class ParticleRenderer extends core.ObjectRenderer
 
     /**
      *
-     * @param {PIXI.DisplayObject[]} children - the array of display objects to render
+     * @param {V.Node2D[]} children - the array of display objects to render
      * @param {number} startIndex - the index to start from in the children array
      * @param {number} amount - the amount of children that will have their positions uploaded
      * @param {number[]} array - The vertices to upload.
@@ -305,7 +305,7 @@ export default class ParticleRenderer extends core.ObjectRenderer
 
     /**
      *
-     * @param {PIXI.DisplayObject[]} children - the array of display objects to render
+     * @param {V.Node2D[]} children - the array of display objects to render
      * @param {number} startIndex - the index to start from in the children array
      * @param {number} amount - the amount of children that will have their rotation uploaded
      * @param {number[]} array - The vertices to upload.
@@ -329,7 +329,7 @@ export default class ParticleRenderer extends core.ObjectRenderer
 
     /**
      *
-     * @param {PIXI.DisplayObject[]} children - the array of display objects to render
+     * @param {V.Node2D[]} children - the array of display objects to render
      * @param {number} startIndex - the index to start from in the children array
      * @param {number} amount - the amount of children that will have their rotation uploaded
      * @param {number[]} array - The vertices to upload.
@@ -380,7 +380,7 @@ export default class ParticleRenderer extends core.ObjectRenderer
 
     /**
      *
-     * @param {PIXI.DisplayObject[]} children - the array of display objects to render
+     * @param {V.Node2D[]} children - the array of display objects to render
      * @param {number} startIndex - the index to start from in the children array
      * @param {number} amount - the amount of children that will have their rotation uploaded
      * @param {number[]} array - The vertices to upload.

@@ -2,7 +2,7 @@
  * A GraphicsData object.
  *
  * @class
- * @memberof PIXI
+ * @memberof V
  */
 export default class GraphicsData
 {
@@ -15,7 +15,7 @@ export default class GraphicsData
      * @param {number} fillAlpha - the alpha of the fill
      * @param {boolean} fill - whether or not the shape is filled with a colour
      * @param {boolean} nativeLines - the method for drawing lines
-     * @param {PIXI.Circle|PIXI.Rectangle|PIXI.Ellipse|PIXI.Polygon} shape - The shape object to draw.
+     * @param {V.Circle|V.Rectangle|V.Ellipse|V.Polygon} shape - The shape object to draw.
      */
     constructor(lineWidth, lineColor, lineAlpha, fillColor, fillAlpha, fill, nativeLines, shape)
     {
@@ -66,7 +66,7 @@ export default class GraphicsData
         this.holes = [];
 
         /**
-         * @member {PIXI.Circle|PIXI.Ellipse|PIXI.Polygon|PIXI.Rectangle|PIXI.RoundedRectangle} The shape object to draw.
+         * @member {V.Circle|V.Ellipse|V.Polygon|V.Rectangle|V.RoundedRectangle} The shape object to draw.
          */
         this.shape = shape;
 
@@ -79,7 +79,7 @@ export default class GraphicsData
     /**
      * Creates a new GraphicsData object with the same values as this one.
      *
-     * @return {PIXI.GraphicsData} Cloned GraphicsData object
+     * @return {V.GraphicsData} Cloned GraphicsData object
      */
     clone()
     {
@@ -98,7 +98,7 @@ export default class GraphicsData
     /**
      * Adds a hole to the shape.
      *
-     * @param {PIXI.Rectangle|PIXI.Circle} shape - The shape of the hole.
+     * @param {V.Rectangle|V.Circle} shape - The shape of the hole.
      */
     addHole(shape)
     {

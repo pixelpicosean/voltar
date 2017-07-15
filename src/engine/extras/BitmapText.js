@@ -10,17 +10,17 @@ import settings from '../core/settings';
  *
  * ```js
  * // in this case the font is in a file called 'desyrel.fnt'
- * let bitmapText = new PIXI.extras.BitmapText("text using a fancy font!", {font: "35px Desyrel", align: "right"});
+ * let bitmapText = new V.extras.BitmapText("text using a fancy font!", {font: "35px Desyrel", align: "right"});
  * ```
  *
  * http://www.angelcode.com/products/bmfont/ for windows or
  * http://www.bmglyph.com/ for mac.
  *
  * @class
- * @extends PIXI.Container
- * @memberof PIXI.extras
+ * @extends V.Node2D
+ * @memberof V.extras
  */
-export default class BitmapText extends core.Container
+export default class BitmapText extends core.Node2D
 {
     /**
      * @param {string} text - The copy that you would like the text to display
@@ -56,7 +56,7 @@ export default class BitmapText extends core.Container
         /**
          * Private tracker for the letter sprite pool.
          *
-         * @member {PIXI.Sprite[]}
+         * @member {V.Sprite[]}
          * @private
          */
         this._glyphs = [];
@@ -112,7 +112,7 @@ export default class BitmapText extends core.Container
         /**
          * Text anchor. read-only
          *
-         * @member {PIXI.ObservablePoint}
+         * @member {V.ObservablePoint}
          * @private
          */
         this._anchor = new ObservablePoint(() => { this.dirty = true; }, this, 0, 0);
@@ -296,7 +296,7 @@ export default class BitmapText extends core.Container
     /**
      * Validates text before calling parent's getLocalBounds
      *
-     * @return {PIXI.Rectangle} The rectangular bounding area
+     * @return {V.Rectangle} The rectangular bounding area
      */
     getLocalBounds()
     {
@@ -360,7 +360,7 @@ export default class BitmapText extends core.Container
      * Setting the anchor to 0.5,0.5 means the text's origin is centered
      * Setting the anchor to 1,1 would mean the text's origin point will be the bottom right corner
      *
-     * @member {PIXI.Point | number}
+     * @member {V.Point | number}
      */
     get anchor()
     {
@@ -502,7 +502,7 @@ export default class BitmapText extends core.Container
      *
      * @static
      * @param {XMLDocument} xml - The XML document data.
-     * @param {PIXI.Texture} texture - Texture with all symbols.
+     * @param {V.Texture} texture - Texture with all symbols.
      * @return {Object} Result font object with font, size, lineHeight and char fields.
      */
     static registerFont(xml, texture)

@@ -1,9 +1,9 @@
 /**
- * TimeLimiter limits the number of items handled by a {@link PIXI.BasePrepare} to a specified
+ * TimeLimiter limits the number of items handled by a {@link V.BasePrepare} to a specified
  * number of milliseconds per frame.
  *
  * @class
- * @memberof PIXI
+ * @memberof V
  */
 export default class TimeLimiter
 {

@@ -1,5 +1,5 @@
 /**
- * @namespace PIXI
+ * @namespace V
  */
 export * from './const';
 export * from './math';
@@ -15,8 +15,7 @@ export { settings, utils, ticker, CanvasRenderer, WebGLRenderer };
 export { default as glCore } from 'pixi-gl-core';
 
 export { default as Bounds } from './display/Bounds';
-export { default as DisplayObject } from './display/DisplayObject';
-export { default as Container } from './display/Container';
+export { default as Node2D } from './display/Node2D';
 export { default as Transform } from './display/Transform';
 export { default as TransformStatic } from './display/TransformStatic';
 export { default as TransformBase } from './display/TransformBase';
@@ -46,5 +45,4 @@ export { default as RenderTarget } from './renderers/webgl/utils/RenderTarget';
 export { default as Quad } from './renderers/webgl/utils/Quad';
 export { default as SpriteMaskFilter } from './renderers/webgl/filters/spriteMask/SpriteMaskFilter';
 export { default as Filter } from './renderers/webgl/filters/Filter';
-export { default as Application } from './Application';
 export { autoDetectRenderer } from './autoDetectRenderer';

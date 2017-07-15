@@ -2,7 +2,7 @@ import { Point, ObservablePoint, Rectangle } from '../math';
 import { sign, TextureCache } from '../utils';
 import { BLEND_MODES } from '../const';
 import Texture from '../textures/Texture';
-import Container from '../display/Container';
+import Node2D from '../display/Node2D';
 
 const tempPoint = new Point();
 
@@ -12,17 +12,17 @@ const tempPoint = new Point();
  * A sprite can be created directly from an image like this:
  *
  * ```js
- * let sprite = new PIXI.Sprite.fromImage('assets/image.png');
+ * let sprite = new V.Sprite.fromImage('assets/image.png');
  * ```
  *
  * @class
- * @extends PIXI.Container
- * @memberof PIXI
+ * @extends V.Node2D
+ * @memberof V
  */
-export default class Sprite extends Container
+export default class Sprite extends Node2D
 {
     /**
-     * @param {PIXI.Texture} texture - The texture for this sprite
+     * @param {V.Texture} texture - The texture for this sprite
      */
     constructor(texture)
     {
@@ -34,7 +34,7 @@ export default class Sprite extends Container
          * Setting the anchor to 0.5,0.5 means the texture's origin is centered
          * Setting the anchor to 1,1 would mean the texture's origin point will be the bottom right corner
          *
-         * @member {PIXI.ObservablePoint}
+         * @member {V.ObservablePoint}
          * @private
          */
         this._anchor = new ObservablePoint(this._onAnchorUpdate, this);
@@ -43,7 +43,7 @@ export default class Sprite extends Container
          * The texture that the sprite is using
          *
          * @private
-         * @member {PIXI.Texture}
+         * @member {V.Texture}
          */
         this._texture = null;
 
@@ -75,18 +75,18 @@ export default class Sprite extends Container
         this.tint = 0xFFFFFF;
 
         /**
-         * The blend mode to be applied to the sprite. Apply a value of `PIXI.BLEND_MODES.NORMAL` to reset the blend mode.
+         * The blend mode to be applied to the sprite. Apply a value of `V.BLEND_MODES.NORMAL` to reset the blend mode.
          *
          * @member {number}
-         * @default PIXI.BLEND_MODES.NORMAL
-         * @see PIXI.BLEND_MODES
+         * @default V.BLEND_MODES.NORMAL
+         * @see V.BLEND_MODES
          */
         this.blendMode = BLEND_MODES.NORMAL;
 
         /**
          * The shader that will be used to render the sprite. Set to null to remove a current shader.
          *
-         * @member {PIXI.Filter|PIXI.Shader}
+         * @member {V.Filter|V.Shader}
          */
         this.shader = null;
 
@@ -297,7 +297,7 @@ export default class Sprite extends Container
     * Renders the object using the WebGL renderer
     *
     * @private
-    * @param {PIXI.WebGLRenderer} renderer - The webgl renderer to use.
+    * @param {V.WebGLRenderer} renderer - The webgl renderer to use.
     */
     _renderWebGL(renderer)
     {
@@ -311,7 +311,7 @@ export default class Sprite extends Container
     * Renders the object using the Canvas renderer
     *
     * @private
-    * @param {PIXI.CanvasRenderer} renderer - The renderer
+    * @param {V.CanvasRenderer} renderer - The renderer
     */
     _renderCanvas(renderer)
     {
@@ -346,8 +346,8 @@ export default class Sprite extends Container
     /**
      * Gets the local bounds of the sprite object.
      *
-     * @param {PIXI.Rectangle} rect - The output rectangle.
-     * @return {PIXI.Rectangle} The bounds.
+     * @param {V.Rectangle} rect - The output rectangle.
+     * @return {V.Rectangle} The bounds.
      */
     getLocalBounds(rect)
     {
@@ -378,7 +378,7 @@ export default class Sprite extends Container
     /**
      * Tests if a point is inside this sprite
      *
-     * @param {PIXI.Point} point - the point to test
+     * @param {V.Point} point - the point to test
      * @return {boolean} the result of the test
      */
     containsPoint(point)
@@ -439,8 +439,8 @@ export default class Sprite extends Container
      * The source can be - frame id, image url, video url, canvas element, video element, base texture
      *
      * @static
-     * @param {number|string|PIXI.BaseTexture|HTMLCanvasElement|HTMLVideoElement} source Source to create texture from
-     * @return {PIXI.Sprite} The newly created sprite
+     * @param {number|string|V.BaseTexture|HTMLCanvasElement|HTMLVideoElement} source Source to create texture from
+     * @return {V.Sprite} The newly created sprite
      */
     static from(source)
     {
@@ -453,7 +453,7 @@ export default class Sprite extends Container
      *
      * @static
      * @param {string} frameId - The frame Id of the texture in the cache
-     * @return {PIXI.Sprite} A new Sprite using a texture from the texture cache matching the frameId
+     * @return {V.Sprite} A new Sprite using a texture from the texture cache matching the frameId
      */
     static fromFrame(frameId)
     {
@@ -474,9 +474,9 @@ export default class Sprite extends Container
      * @static
      * @param {string} imageId - The image url of the texture
      * @param {boolean} [crossorigin=(auto)] - if you want to specify the cross-origin parameter
-     * @param {number} [scaleMode=PIXI.settings.SCALE_MODE] - if you want to specify the scale mode,
-     *  see {@link PIXI.SCALE_MODES} for possible values
-     * @return {PIXI.Sprite} A new Sprite using a texture from the texture cache matching the image id
+     * @param {number} [scaleMode=V.settings.SCALE_MODE] - if you want to specify the scale mode,
+     *  see {@link V.SCALE_MODES} for possible values
+     * @return {V.Sprite} A new Sprite using a texture from the texture cache matching the image id
      */
     static fromImage(imageId, crossorigin, scaleMode)
     {
@@ -525,7 +525,7 @@ export default class Sprite extends Container
      * Setting the anchor to 0.5,0.5 means the texture's origin is centered
      * Setting the anchor to 1,1 would mean the texture's origin point will be the bottom right corner
      *
-     * @member {PIXI.ObservablePoint}
+     * @member {V.ObservablePoint}
      */
     get anchor()
     {
@@ -558,7 +558,7 @@ export default class Sprite extends Container
     /**
      * The texture that the sprite is using
      *
-     * @member {PIXI.Texture}
+     * @member {V.Texture}
      */
     get texture()
     {

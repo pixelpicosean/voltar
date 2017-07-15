@@ -5,7 +5,7 @@ import { SHAPES } from '../../const';
  * The Circle object can be used to specify a hit area for displayObjects
  *
  * @class
- * @memberof PIXI
+ * @memberof V
  */
 export default class Circle
 {
@@ -39,8 +39,8 @@ export default class Circle
          *
          * @member {number}
          * @readOnly
-         * @default PIXI.SHAPES.CIRC
-         * @see PIXI.SHAPES
+         * @default V.SHAPES.CIRC
+         * @see V.SHAPES
          */
         this.type = SHAPES.CIRC;
     }
@@ -48,7 +48,7 @@ export default class Circle
     /**
      * Creates a clone of this Circle instance
      *
-     * @return {PIXI.Circle} a copy of the Circle
+     * @return {V.Circle} a copy of the Circle
      */
     clone()
     {
@@ -82,7 +82,7 @@ export default class Circle
     /**
     * Returns the framing rectangle of the circle as a Rectangle object
     *
-    * @return {PIXI.Rectangle} the framing rectangle
+    * @return {V.Rectangle} the framing rectangle
     */
     getBounds()
     {

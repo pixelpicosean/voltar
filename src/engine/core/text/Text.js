@@ -22,18 +22,18 @@ const defaultDestroyOptions = {
  * A Text can be created directly from a string and a style object
  *
  * ```js
- * let text = new PIXI.Text('This is a pixi text',{fontFamily : 'Arial', fontSize: 24, fill : 0xff1010, align : 'center'});
+ * let text = new V.Text('This is a pixi text',{fontFamily : 'Arial', fontSize: 24, fill : 0xff1010, align : 'center'});
  * ```
  *
  * @class
- * @extends PIXI.Sprite
- * @memberof PIXI
+ * @extends V.Sprite
+ * @memberof V
  */
 export default class Text extends Sprite
 {
     /**
      * @param {string} text - The string that you would like the text to display
-     * @param {object|PIXI.TextStyle} [style] - The style parameters
+     * @param {object|V.TextStyle} [style] - The style parameters
      * @param {HTMLCanvasElement} [canvas] - The canvas element for drawing text
      */
     constructor(text, style, canvas)
@@ -355,7 +355,7 @@ export default class Text extends Sprite
     /**
      * Renders the object using the WebGL renderer
      *
-     * @param {PIXI.WebGLRenderer} renderer - The renderer
+     * @param {V.WebGLRenderer} renderer - The renderer
      */
     renderWebGL(renderer)
     {
@@ -374,7 +374,7 @@ export default class Text extends Sprite
      * Renders the object using the Canvas renderer
      *
      * @private
-     * @param {PIXI.CanvasRenderer} renderer - The renderer
+     * @param {V.CanvasRenderer} renderer - The renderer
      */
     _renderCanvas(renderer)
     {
@@ -609,7 +609,7 @@ export default class Text extends Sprite
      * Set the style of the text. Set up an event listener to listen for changes on the style
      * object and mark the text as dirty.
      *
-     * @member {object|PIXI.TextStyle}
+     * @member {object|V.TextStyle}
      */
     get style()
     {

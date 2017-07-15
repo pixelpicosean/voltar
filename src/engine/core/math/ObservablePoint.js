@@ -4,7 +4,7 @@
  * An observable point is a point that triggers a callback when the point's position is changed.
  *
  * @class
- * @memberof PIXI
+ * @memberof V
  */
 export default class ObservablePoint
 {
@@ -46,7 +46,7 @@ export default class ObservablePoint
     /**
      * Copies the data from another point
      *
-     * @param {PIXI.Point|PIXI.ObservablePoint} point - point to copy from
+     * @param {V.Point|V.ObservablePoint} point - point to copy from
      */
     copy(point)
     {

@@ -3,7 +3,7 @@ import * as core from '../core';
 /**
  * @typedef FrameObject
  * @type {object}
- * @property {PIXI.Texture} texture - The {@link PIXI.Texture} of the frame
+ * @property {V.Texture} texture - The {@link V.Texture} of the frame
  * @property {number} time - the duration of the frame in ms
  */
 
@@ -16,23 +16,23 @@ import * as core from '../core';
  *
  * for (let i=0; i < 4; i++)
  * {
- *      let texture = PIXI.Texture.fromImage(alienImages[i]);
+ *      let texture = V.Texture.fromImage(alienImages[i]);
  *      textureArray.push(texture);
  * };
  *
- * let mc = new PIXI.AnimatedSprite(textureArray);
+ * let mc = new V.AnimatedSprite(textureArray);
  * ```
  *
  * @class
- * @extends PIXI.Sprite
- * @memberof PIXI.extras
+ * @extends V.Sprite
+ * @memberof V.extras
  */
 export default class AnimatedSprite extends core.Sprite
 {
     /**
-     * @param {PIXI.Texture[]|FrameObject[]} textures - an array of {@link PIXI.Texture} or frame
+     * @param {V.Texture[]|FrameObject[]} textures - an array of {@link V.Texture} or frame
      *  objects that make up the animation
-     * @param {boolean} [autoUpdate=true] - Whether use PIXI.ticker.shared to auto update animation time.
+     * @param {boolean} [autoUpdate=true] - Whether use V.ticker.shared to auto update animation time.
      */
     constructor(textures, autoUpdate)
     {
@@ -51,7 +51,7 @@ export default class AnimatedSprite extends core.Sprite
         this.textures = textures;
 
         /**
-         * `true` uses PIXI.ticker.shared to auto update animation time.
+         * `true` uses V.ticker.shared to auto update animation time.
          * @type {boolean}
          * @default true
          * @private
@@ -348,7 +348,7 @@ export default class AnimatedSprite extends core.Sprite
     /**
      * The array of textures used for this AnimatedSprite
      *
-     * @member {PIXI.Texture[]}
+     * @member {V.Texture[]}
      */
     get textures()
     {

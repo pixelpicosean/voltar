@@ -5,7 +5,7 @@ import createIndicesForQuads from '../../../utils/createIndicesForQuads';
  * Helper class to create a quad
  *
  * @class
- * @memberof PIXI
+ * @memberof V
  */
 export default class Quad
 {
@@ -88,7 +88,7 @@ export default class Quad
     /**
      * Initialises the vaos and uses the shader.
      *
-     * @param {PIXI.Shader} shader - the shader to use
+     * @param {V.Shader} shader - the shader to use
      */
     initVao(shader)
     {
@@ -101,9 +101,9 @@ export default class Quad
     /**
      * Maps two Rectangle to the quad.
      *
-     * @param {PIXI.Rectangle} targetTextureFrame - the first rectangle
-     * @param {PIXI.Rectangle} destinationFrame - the second rectangle
-     * @return {PIXI.Quad} Returns itself.
+     * @param {V.Rectangle} targetTextureFrame - the first rectangle
+     * @param {V.Rectangle} destinationFrame - the second rectangle
+     * @return {V.Quad} Returns itself.
      */
     map(targetTextureFrame, destinationFrame)
     {
@@ -143,7 +143,7 @@ export default class Quad
     /**
      * Binds the buffer and uploads the data
      *
-     * @return {PIXI.Quad} Returns itself.
+     * @return {V.Quad} Returns itself.
      */
     upload()
     {

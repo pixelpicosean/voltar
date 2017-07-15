@@ -6,7 +6,7 @@ import { getResolutionOfUrl } from '../utils';
  * of Textures on a single Spritesheet.
  *
  * @class
- * @memberof PIXI
+ * @memberof V
  */
 export default class Spritesheet
 {
@@ -22,7 +22,7 @@ export default class Spritesheet
     }
 
     /**
-     * @param {PIXI.BaseTexture} baseTexture Reference to the source BaseTexture object.
+     * @param {V.BaseTexture} baseTexture Reference to the source BaseTexture object.
      * @param {Object} data - Spritesheet image data.
      * @param {string} [resolutionFilename] - The filename to consider when determining
      *        the resolution of the spritesheet. If not provided, the imageUrl will
@@ -32,7 +32,7 @@ export default class Spritesheet
     {
         /**
          * Reference to ths source texture
-         * @type {PIXI.BaseTexture}
+         * @type {V.BaseTexture}
          */
         this.baseTexture = baseTexture;
 

@@ -5,21 +5,21 @@ import Mesh from './Mesh';
  *
  *```js
  * for (let i = 0; i < 20; i++) {
- *     points.push(new PIXI.Point(i * 50, 0));
+ *     points.push(new V.Point(i * 50, 0));
  * };
- * let rope = new PIXI.Rope(PIXI.Texture.fromImage("snake.png"), points);
+ * let rope = new V.Rope(V.Texture.fromImage("snake.png"), points);
  *  ```
  *
  * @class
- * @extends PIXI.mesh.Mesh
- * @memberof PIXI.mesh
+ * @extends V.mesh.Mesh
+ * @memberof V.mesh
  *
  */
 export default class Rope extends Mesh
 {
     /**
-     * @param {PIXI.Texture} texture - The texture to use on the rope.
-     * @param {PIXI.Point[]} points - An array of {@link PIXI.Point} objects to construct this rope.
+     * @param {V.Texture} texture - The texture to use on the rope.
+     * @param {V.Point[]} points - An array of {@link V.Point} objects to construct this rope.
      */
     constructor(texture, points)
     {
@@ -28,7 +28,7 @@ export default class Rope extends Mesh
         /**
          * An array of points that determine the rope
          *
-         * @member {PIXI.Point[]}
+         * @member {V.Point[]}
          */
         this.points = points;
 

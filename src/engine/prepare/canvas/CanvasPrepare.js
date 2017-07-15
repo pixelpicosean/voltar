@@ -12,13 +12,13 @@ const CANVAS_START_SIZE = 16;
  * An instance of this class is automatically created by default, and can be found at renderer.plugins.prepare
  *
  * @class
- * @extends PIXI.prepare.BasePrepare
- * @memberof PIXI.prepare
+ * @extends V.prepare.BasePrepare
+ * @memberof V.prepare
  */
 export default class CanvasPrepare extends BasePrepare
 {
     /**
-     * @param {PIXI.CanvasRenderer} renderer - A reference to the current renderer
+     * @param {V.CanvasRenderer} renderer - A reference to the current renderer
      */
     constructor(renderer)
     {
@@ -60,7 +60,7 @@ export default class CanvasPrepare extends BasePrepare
 }
 
 /**
- * Built-in hook to upload PIXI.Texture objects to the GPU.
+ * Built-in hook to upload V.Texture objects to the GPU.
  *
  * @private
  * @param {*} prepare - Instance of CanvasPrepare

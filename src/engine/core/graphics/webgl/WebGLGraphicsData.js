@@ -5,13 +5,13 @@ import glCore from 'pixi-gl-core';
  *
  * @class
  * @private
- * @memberof PIXI
+ * @memberof V
  */
 export default class WebGLGraphicsData
 {
     /**
      * @param {WebGLRenderingContext} gl - The current WebGL drawing context
-     * @param {PIXI.Shader} shader - The shader
+     * @param {V.Shader} shader - The shader
      * @param {object} attribsState - The state for the VAO
      */
     constructor(gl, shader, attribsState)
@@ -32,7 +32,7 @@ export default class WebGLGraphicsData
 
         /**
          * An array of points to draw
-         * @member {PIXI.Point[]}
+         * @member {V.Point[]}
          */
         this.points = [];
 
@@ -70,7 +70,7 @@ export default class WebGLGraphicsData
 
         /**
          *
-         * @member {PIXI.Shader}
+         * @member {V.Shader}
          */
         this.shader = shader;
 
