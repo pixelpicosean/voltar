@@ -67,7 +67,7 @@ function uploadGraphics(renderer, item)
     {
         // if the item is not dirty and already has webgl data, then it got prepared or rendered
         // before now and we shouldn't waste time updating it again
-        if (item.dirty || item.clearDirty || !item._webGL[renderer.plugins.graphics.CONTEXT_UID])
+        if (item.dirty || item.clear_dirty || !item._webGL[renderer.plugins.graphics.CONTEXT_UID])
         {
             renderer.plugins.graphics.updateGraphics(item);
         }

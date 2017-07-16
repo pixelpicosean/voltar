@@ -8,25 +8,25 @@ import { hex2rgb } from '../../../../utils';
  *
  * @ignore
  * @private
- * @param {V.WebGLGraphicsData} graphicsData - The graphics object containing all the necessary properties
+ * @param {V.WebGLGraphicsData} graphics_data - The graphics object containing all the necessary properties
  * @param {object} webGLData - an object containing all the webGL-specific information to create this shape
- * @param {object} webGLDataNativeLines - an object containing all the webGL-specific information to create nativeLines
+ * @param {object} webGLDataNativeLines - an object containing all the webGL-specific information to create native_lines
  */
-export default function buildRectangle(graphicsData, webGLData, webGLDataNativeLines)
+export default function buildRectangle(graphics_data, webGLData, webGLDataNativeLines)
 {
     // --- //
     // need to convert points to a nice regular data
     //
-    const rectData = graphicsData.shape;
+    const rectData = graphics_data.shape;
     const x = rectData.x;
     const y = rectData.y;
     const width = rectData.width;
     const height = rectData.height;
 
-    if (graphicsData.fill)
+    if (graphics_data.fill)
     {
-        const color = hex2rgb(graphicsData.fillColor);
-        const alpha = graphicsData.fillAlpha;
+        const color = hex2rgb(graphics_data.fillColor);
+        const alpha = graphics_data.fill_alpha;
 
         const r = color[0] * alpha;
         const g = color[1] * alpha;
@@ -54,18 +54,18 @@ export default function buildRectangle(graphicsData, webGLData, webGLDataNativeL
         indices.push(vertPos, vertPos, vertPos + 1, vertPos + 2, vertPos + 3, vertPos + 3);
     }
 
-    if (graphicsData.lineWidth)
+    if (graphics_data.line_width)
     {
-        const tempPoints = graphicsData.points;
+        const tempPoints = graphics_data.points;
 
-        graphicsData.points = [x, y,
+        graphics_data.points = [x, y,
             x + width, y,
             x + width, y + height,
             x, y + height,
             x, y];
 
-        buildLine(graphicsData, webGLData, webGLDataNativeLines);
+        buildLine(graphics_data, webGLData, webGLDataNativeLines);
 
-        graphicsData.points = tempPoints;
+        graphics_data.points = tempPoints;
     }
 }

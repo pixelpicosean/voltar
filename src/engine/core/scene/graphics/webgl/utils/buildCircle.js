@@ -9,21 +9,21 @@ import { hex2rgb } from '../../../../utils';
  *
  * @ignore
  * @private
- * @param {V.WebGLGraphicsData} graphicsData - The graphics object to draw
+ * @param {V.WebGLGraphicsData} graphics_data - The graphics object to draw
  * @param {object} webGLData - an object containing all the webGL-specific information to create this shape
- * @param {object} webGLDataNativeLines - an object containing all the webGL-specific information to create nativeLines
+ * @param {object} webGLDataNativeLines - an object containing all the webGL-specific information to create native_lines
  */
-export default function buildCircle(graphicsData, webGLData, webGLDataNativeLines)
+export default function buildCircle(graphics_data, webGLData, webGLDataNativeLines)
 {
     // need to convert points to a nice regular data
-    const circleData = graphicsData.shape;
+    const circleData = graphics_data.shape;
     const x = circleData.x;
     const y = circleData.y;
     let width;
     let height;
 
     // TODO - bit hacky??
-    if (graphicsData.type === SHAPES.CIRC)
+    if (graphics_data.type === SHAPES.CIRC)
     {
         width = circleData.radius;
         height = circleData.radius;
@@ -44,10 +44,10 @@ export default function buildCircle(graphicsData, webGLData, webGLDataNativeLine
 
     const seg = (Math.PI * 2) / totalSegs;
 
-    if (graphicsData.fill)
+    if (graphics_data.fill)
     {
-        const color = hex2rgb(graphicsData.fillColor);
-        const alpha = graphicsData.fillAlpha;
+        const color = hex2rgb(graphics_data.fillColor);
+        const alpha = graphics_data.fill_alpha;
 
         const r = color[0] * alpha;
         const g = color[1] * alpha;
@@ -76,22 +76,22 @@ export default function buildCircle(graphicsData, webGLData, webGLDataNativeLine
         indices.push(vecPos - 1);
     }
 
-    if (graphicsData.lineWidth)
+    if (graphics_data.line_width)
     {
-        const tempPoints = graphicsData.points;
+        const tempPoints = graphics_data.points;
 
-        graphicsData.points = [];
+        graphics_data.points = [];
 
         for (let i = 0; i < totalSegs + 1; i++)
         {
-            graphicsData.points.push(
+            graphics_data.points.push(
                 x + (Math.sin(seg * i) * width),
                 y + (Math.cos(seg * i) * height)
             );
         }
 
-        buildLine(graphicsData, webGLData, webGLDataNativeLines);
+        buildLine(graphics_data, webGLData, webGLDataNativeLines);
 
-        graphicsData.points = tempPoints;
+        graphics_data.points = tempPoints;
     }
 }

@@ -66,7 +66,7 @@ export default class WebGLState
             attribState: new Array(this.maxAttribs),
         };
 
-        this.blendModes = mapWebGLBlendModesToPixi(gl);
+        this.blend_modes = mapWebGLBlendModesToPixi(gl);
 
         // check we have vao..
         this.nativeVaoExtension = (
@@ -155,7 +155,7 @@ export default class WebGLState
 
         this.activeState[BLEND_FUNC] = value;
 
-        const mode = this.blendModes[value];
+        const mode = this.blend_modes[value];
 
         if (mode.length === 2)
         {

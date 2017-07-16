@@ -148,7 +148,7 @@ export default class ParticleRenderer extends ObjectRenderer
         const baseTexture = children[0]._texture.baseTexture;
 
         // if the uvs have not updated then no point rendering just yet!
-        this.renderer.setBlendMode(utils.correctBlendMode(container.blendMode, baseTexture.premultipliedAlpha));
+        this.renderer.setBlendMode(utils.correctBlendMode(container.blend_mode, baseTexture.premultipliedAlpha));
 
         const gl = renderer.gl;
 

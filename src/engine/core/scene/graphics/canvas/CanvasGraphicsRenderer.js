@@ -49,7 +49,7 @@ export default class CanvasGraphicsRenderer
             this.dirty = true;
         }
 
-        context.set_transform(
+        context.setTransform(
             transform.a * resolution,
             transform.b * resolution,
             transform.c * resolution,
@@ -64,17 +64,17 @@ export default class CanvasGraphicsRenderer
             graphics.dirty = false;
         }
 
-        renderer.setBlendMode(graphics.blendMode);
+        renderer.setBlendMode(graphics.blend_mode);
 
-        for (let i = 0; i < graphics.graphicsData.length; i++)
+        for (let i = 0; i < graphics.graphics_data.length; i++)
         {
-            const data = graphics.graphicsData[i];
+            const data = graphics.graphics_data[i];
             const shape = data.shape;
 
             const fillColor = data._fillTint;
-            const lineColor = data._lineTint;
+            const line_color = data._lineTint;
 
-            context.lineWidth = data.lineWidth;
+            context.lineWidth = data.line_width;
 
             if (data.type === SHAPES.POLY)
             {
@@ -89,14 +89,14 @@ export default class CanvasGraphicsRenderer
 
                 if (data.fill)
                 {
-                    context.globalAlpha = data.fillAlpha * world_alpha;
+                    context.globalAlpha = data.fill_alpha * world_alpha;
                     context.fillStyle = `#${(`00000${(fillColor | 0).toString(16)}`).substr(-6)}`;
                     context.fill();
                 }
-                if (data.lineWidth)
+                if (data.line_width)
                 {
-                    context.globalAlpha = data.lineAlpha * world_alpha;
-                    context.strokeStyle = `#${(`00000${(lineColor | 0).toString(16)}`).substr(-6)}`;
+                    context.globalAlpha = data.line_alpha * world_alpha;
+                    context.strokeStyle = `#${(`00000${(line_color | 0).toString(16)}`).substr(-6)}`;
                     context.stroke();
                 }
             }
@@ -104,14 +104,14 @@ export default class CanvasGraphicsRenderer
             {
                 if (data.fillColor || data.fillColor === 0)
                 {
-                    context.globalAlpha = data.fillAlpha * world_alpha;
+                    context.globalAlpha = data.fill_alpha * world_alpha;
                     context.fillStyle = `#${(`00000${(fillColor | 0).toString(16)}`).substr(-6)}`;
                     context.fillRect(shape.x, shape.y, shape.width, shape.height);
                 }
-                if (data.lineWidth)
+                if (data.line_width)
                 {
-                    context.globalAlpha = data.lineAlpha * world_alpha;
-                    context.strokeStyle = `#${(`00000${(lineColor | 0).toString(16)}`).substr(-6)}`;
+                    context.globalAlpha = data.line_alpha * world_alpha;
+                    context.strokeStyle = `#${(`00000${(line_color | 0).toString(16)}`).substr(-6)}`;
                     context.strokeRect(shape.x, shape.y, shape.width, shape.height);
                 }
             }
@@ -124,14 +124,14 @@ export default class CanvasGraphicsRenderer
 
                 if (data.fill)
                 {
-                    context.globalAlpha = data.fillAlpha * world_alpha;
+                    context.globalAlpha = data.fill_alpha * world_alpha;
                     context.fillStyle = `#${(`00000${(fillColor | 0).toString(16)}`).substr(-6)}`;
                     context.fill();
                 }
-                if (data.lineWidth)
+                if (data.line_width)
                 {
-                    context.globalAlpha = data.lineAlpha * world_alpha;
-                    context.strokeStyle = `#${(`00000${(lineColor | 0).toString(16)}`).substr(-6)}`;
+                    context.globalAlpha = data.line_alpha * world_alpha;
+                    context.strokeStyle = `#${(`00000${(line_color | 0).toString(16)}`).substr(-6)}`;
                     context.stroke();
                 }
             }
@@ -165,14 +165,14 @@ export default class CanvasGraphicsRenderer
 
                 if (data.fill)
                 {
-                    context.globalAlpha = data.fillAlpha * world_alpha;
+                    context.globalAlpha = data.fill_alpha * world_alpha;
                     context.fillStyle = `#${(`00000${(fillColor | 0).toString(16)}`).substr(-6)}`;
                     context.fill();
                 }
-                if (data.lineWidth)
+                if (data.line_width)
                 {
-                    context.globalAlpha = data.lineAlpha * world_alpha;
-                    context.strokeStyle = `#${(`00000${(lineColor | 0).toString(16)}`).substr(-6)}`;
+                    context.globalAlpha = data.line_alpha * world_alpha;
+                    context.strokeStyle = `#${(`00000${(line_color | 0).toString(16)}`).substr(-6)}`;
                     context.stroke();
                 }
             }
@@ -202,15 +202,15 @@ export default class CanvasGraphicsRenderer
 
                 if (data.fillColor || data.fillColor === 0)
                 {
-                    context.globalAlpha = data.fillAlpha * world_alpha;
+                    context.globalAlpha = data.fill_alpha * world_alpha;
                     context.fillStyle = `#${(`00000${(fillColor | 0).toString(16)}`).substr(-6)}`;
                     context.fill();
                 }
 
-                if (data.lineWidth)
+                if (data.line_width)
                 {
-                    context.globalAlpha = data.lineAlpha * world_alpha;
-                    context.strokeStyle = `#${(`00000${(lineColor | 0).toString(16)}`).substr(-6)}`;
+                    context.globalAlpha = data.line_alpha * world_alpha;
+                    context.strokeStyle = `#${(`00000${(line_color | 0).toString(16)}`).substr(-6)}`;
                     context.stroke();
                 }
             }
@@ -231,12 +231,12 @@ export default class CanvasGraphicsRenderer
         const tintG = ((graphics.tint >> 8) & 0xFF) / 255;
         const tintB = (graphics.tint & 0xFF) / 255;
 
-        for (let i = 0; i < graphics.graphicsData.length; ++i)
+        for (let i = 0; i < graphics.graphics_data.length; ++i)
         {
-            const data = graphics.graphicsData[i];
+            const data = graphics.graphics_data[i];
 
             const fillColor = data.fillColor | 0;
-            const lineColor = data.lineColor | 0;
+            const line_color = data.line_color | 0;
 
             // super inline cos im an optimization NAZI :)
             data._fillTint = (
@@ -246,9 +246,9 @@ export default class CanvasGraphicsRenderer
             );
 
             data._lineTint = (
-                (((lineColor >> 16) & 0xFF) / 255 * tintR * 255 << 16)
-                + (((lineColor >> 8) & 0xFF) / 255 * tintG * 255 << 8)
-                + (((lineColor & 0xFF) / 255) * tintB * 255)
+                (((line_color >> 16) & 0xFF) / 255 * tintR * 255 << 16)
+                + (((line_color >> 8) & 0xFF) / 255 * tintG * 255 << 8)
+                + (((line_color & 0xFF) / 255) * tintB * 255)
             );
         }
     }

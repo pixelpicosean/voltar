@@ -86,7 +86,7 @@ export default class Mesh extends Node2D
          * @default V.BLEND_MODES.NORMAL
          * @see V.BLEND_MODES
          */
-        this.blendMode = BLEND_MODES.NORMAL;
+        this.blend_mode = BLEND_MODES.NORMAL;
 
         /**
          * Triangles in canvas mode are automatically antialiased, use this value to force triangles
@@ -243,7 +243,7 @@ export default class Mesh extends Node2D
      * @param {V.Point} point - the point to test
      * @return {boolean} the result of the test
      */
-    containsPoint(point)
+    contains_point(point)
     {
         if (!this.get_bounds().contains(point.x, point.y))
         {

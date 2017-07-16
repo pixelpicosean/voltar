@@ -10,8 +10,8 @@
  *
  * // Draw a red circle
  * const graphics = new V.Graphics()
- *     .beginFill(0xFF0000)
- *     .drawCircle(0, 0, 50);
+ *     .begin_fill(0xFF0000)
+ *     .draw_circle(0, 0, 50);
  *
  * // Render the graphics as an HTMLImageElement
  * const image = app.renderer.plugins.extract.image(graphics);

@@ -81,7 +81,7 @@ export default class Sprite extends Node2D
          * @default V.BLEND_MODES.NORMAL
          * @see V.BLEND_MODES
          */
-        this.blendMode = BLEND_MODES.NORMAL;
+        this.blend_mode = BLEND_MODES.NORMAL;
 
         /**
          * The shader that will be used to render the sprite. Set to null to remove a current shader.
@@ -381,7 +381,7 @@ export default class Sprite extends Node2D
      * @param {V.Point} point - the point to test
      * @return {boolean} the result of the test
      */
-    containsPoint(point)
+    contains_point(point)
     {
         this.world_transform.applyInverse(point, tempPoint);
 

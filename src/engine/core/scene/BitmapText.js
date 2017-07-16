@@ -142,7 +142,7 @@ export default class BitmapText extends Node2D
         const scale = this._font.size / data.size;
         const pos = new Point();
         const chars = [];
-        const lineWidths = [];
+        const line_widths = [];
 
         let prevCharCode = null;
         let lastLineWidth = 0;
@@ -165,7 +165,7 @@ export default class BitmapText extends Node2D
 
             if (/(?:\r\n|\r|\n)/.test(this.text.charAt(i)))
             {
-                lineWidths.push(lastLineWidth);
+                line_widths.push(lastLineWidth);
                 maxLineWidth = Math.max(maxLineWidth, lastLineWidth);
                 line++;
 
@@ -182,7 +182,7 @@ export default class BitmapText extends Node2D
                 lastSpace = -1;
                 ++spacesRemoved;
 
-                lineWidths.push(lastSpaceWidth);
+                line_widths.push(lastSpaceWidth);
                 maxLineWidth = Math.max(maxLineWidth, lastSpaceWidth);
                 line++;
 
@@ -216,7 +216,7 @@ export default class BitmapText extends Node2D
             prevCharCode = charCode;
         }
 
-        lineWidths.push(lastLineWidth);
+        line_widths.push(lastLineWidth);
         maxLineWidth = Math.max(maxLineWidth, lastLineWidth);
 
         const lineAlignOffsets = [];
@@ -227,11 +227,11 @@ export default class BitmapText extends Node2D
 
             if (this._font.align === 'right')
             {
-                alignOffset = maxLineWidth - lineWidths[i];
+                alignOffset = maxLineWidth - line_widths[i];
             }
             else if (this._font.align === 'center')
             {
-                alignOffset = (maxLineWidth - lineWidths[i]) / 2;
+                alignOffset = (maxLineWidth - line_widths[i]) / 2;
             }
 
             lineAlignOffsets.push(alignOffset);

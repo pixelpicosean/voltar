@@ -8,40 +8,40 @@ export default class GraphicsData
 {
     /**
      *
-     * @param {number} lineWidth - the width of the line to draw
-     * @param {number} lineColor - the color of the line to draw
-     * @param {number} lineAlpha - the alpha of the line to draw
+     * @param {number} line_width - the width of the line to draw
+     * @param {number} line_color - the color of the line to draw
+     * @param {number} line_alpha - the alpha of the line to draw
      * @param {number} fillColor - the color of the fill
-     * @param {number} fillAlpha - the alpha of the fill
+     * @param {number} fill_alpha - the alpha of the fill
      * @param {boolean} fill - whether or not the shape is filled with a colour
-     * @param {boolean} nativeLines - the method for drawing lines
+     * @param {boolean} native_lines - the method for drawing lines
      * @param {V.Circle|V.Rectangle|V.Ellipse|V.Polygon} shape - The shape object to draw.
      */
-    constructor(lineWidth, lineColor, lineAlpha, fillColor, fillAlpha, fill, nativeLines, shape)
+    constructor(line_width, line_color, line_alpha, fillColor, fill_alpha, fill, native_lines, shape)
     {
         /**
          * @member {number} the width of the line to draw
          */
-        this.lineWidth = lineWidth;
+        this.line_width = line_width;
         /**
          * @member {boolean} if true the liens will be draw using LINES instead of TRIANGLE_STRIP
          */
-        this.nativeLines = nativeLines;
+        this.native_lines = native_lines;
 
         /**
          * @member {number} the color of the line to draw
          */
-        this.lineColor = lineColor;
+        this.line_color = line_color;
 
         /**
          * @member {number} the alpha of the line to draw
          */
-        this.lineAlpha = lineAlpha;
+        this.line_alpha = line_alpha;
 
         /**
          * @member {number} cached tint of the line to draw
          */
-        this._lineTint = lineColor;
+        this._lineTint = line_color;
 
         /**
          * @member {number} the color of the fill
@@ -51,7 +51,7 @@ export default class GraphicsData
         /**
          * @member {number} the alpha of the fill
          */
-        this.fillAlpha = fillAlpha;
+        this.fill_alpha = fill_alpha;
 
         /**
          * @member {number} cached tint of the fill
@@ -84,13 +84,13 @@ export default class GraphicsData
     clone()
     {
         return new GraphicsData(
-            this.lineWidth,
-            this.lineColor,
-            this.lineAlpha,
+            this.line_width,
+            this.line_color,
+            this.line_alpha,
             this.fillColor,
-            this.fillAlpha,
+            this.fill_alpha,
             this.fill,
-            this.nativeLines,
+            this.native_lines,
             this.shape
         );
     }
@@ -100,7 +100,7 @@ export default class GraphicsData
      *
      * @param {V.Rectangle|V.Circle} shape - The shape of the hole.
      */
-    addHole(shape)
+    add_hole(shape)
     {
         this.holes.push(shape);
     }

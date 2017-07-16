@@ -227,12 +227,12 @@ export default class SpriteRenderer extends ObjectRenderer
         let currentGroup = groups[0];
         let vertexData;
         let uvs;
-        let blendMode = premultiplyBlendMode[
-            sprites[0]._texture.baseTexture.premultipliedAlpha ? 1 : 0][sprites[0].blendMode];
+        let blend_mode = premultiplyBlendMode[
+            sprites[0]._texture.baseTexture.premultipliedAlpha ? 1 : 0][sprites[0].blend_mode];
 
         currentGroup.textureCount = 0;
         currentGroup.start = 0;
-        currentGroup.blend = blendMode;
+        currentGroup.blend = blend_mode;
 
         TICK++;
 
@@ -253,12 +253,12 @@ export default class SpriteRenderer extends ObjectRenderer
 
             nextTexture = sprite._texture.baseTexture;
 
-            const spriteBlendMode = premultiplyBlendMode[Number(nextTexture.premultipliedAlpha)][sprite.blendMode];
+            const spriteBlendMode = premultiplyBlendMode[Number(nextTexture.premultipliedAlpha)][sprite.blend_mode];
 
-            if (blendMode !== spriteBlendMode)
+            if (blend_mode !== spriteBlendMode)
             {
                 // finish a group..
-                blendMode = spriteBlendMode;
+                blend_mode = spriteBlendMode;
 
                 // force the batch to break!
                 currentTexture = null;
@@ -281,7 +281,7 @@ export default class SpriteRenderer extends ObjectRenderer
                         textureCount = 0;
 
                         currentGroup = groups[groupCount++];
-                        currentGroup.blend = blendMode;
+                        currentGroup.blend = blend_mode;
                         currentGroup.textureCount = 0;
                         currentGroup.start = i;
                     }

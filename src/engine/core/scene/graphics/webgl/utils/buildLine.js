@@ -8,19 +8,19 @@ import { hex2rgb } from '../../../../utils';
  *
  * @ignore
  * @private
- * @param {V.WebGLGraphicsData} graphicsData - The graphics object containing all the necessary properties
+ * @param {V.WebGLGraphicsData} graphics_data - The graphics object containing all the necessary properties
  * @param {object} webGLData - an object containing all the webGL-specific information to create this shape
- * @param {object} webGLDataNativeLines - an object containing all the webGL-specific information to create nativeLines
+ * @param {object} webGLDataNativeLines - an object containing all the webGL-specific information to create native_lines
  */
-export default function (graphicsData, webGLData, webGLDataNativeLines)
+export default function (graphics_data, webGLData, webGLDataNativeLines)
 {
-    if (graphicsData.nativeLines)
+    if (graphics_data.native_lines)
     {
-        buildNativeLine(graphicsData, webGLDataNativeLines);
+        buildNativeLine(graphics_data, webGLDataNativeLines);
     }
     else
     {
-        buildLine(graphicsData, webGLData);
+        buildLine(graphics_data, webGLData);
     }
 }
 
@@ -31,13 +31,13 @@ export default function (graphicsData, webGLData, webGLDataNativeLines)
  *
  * @ignore
  * @private
- * @param {V.WebGLGraphicsData} graphicsData - The graphics object containing all the necessary properties
+ * @param {V.WebGLGraphicsData} graphics_data - The graphics object containing all the necessary properties
  * @param {object} webGLData - an object containing all the webGL-specific information to create this shape
  */
-function buildLine(graphicsData, webGLData)
+function buildLine(graphics_data, webGLData)
 {
     // TODO OPTIMISE!
-    let points = graphicsData.points;
+    let points = graphics_data.points;
 
     if (points.length === 0)
     {
@@ -45,7 +45,7 @@ function buildLine(graphicsData, webGLData)
     }
     // if the line width is an odd number add 0.5 to align to a whole pixel
     // commenting this out fixes #711 and #1620
-    // if (graphicsData.lineWidth%2)
+    // if (graphics_data.line_width%2)
     // {
     //     for (i = 0; i < points.length; i++)
     //     {
@@ -82,11 +82,11 @@ function buildLine(graphicsData, webGLData)
     let indexStart = verts.length / 6;
 
     // DRAW the Line
-    const width = graphicsData.lineWidth / 2;
+    const width = graphics_data.line_width / 2;
 
     // sort color
-    const color = hex2rgb(graphicsData.lineColor);
-    const alpha = graphicsData.lineAlpha;
+    const color = hex2rgb(graphics_data.line_color);
+    const alpha = graphics_data.line_alpha;
     const r = color[0] * alpha;
     const g = color[1] * alpha;
     const b = color[2] * alpha;
@@ -255,13 +255,13 @@ function buildLine(graphicsData, webGLData)
  *
  * @ignore
  * @private
- * @param {V.WebGLGraphicsData} graphicsData - The graphics object containing all the necessary properties
+ * @param {V.WebGLGraphicsData} graphics_data - The graphics object containing all the necessary properties
  * @param {object} webGLData - an object containing all the webGL-specific information to create this shape
  */
-function buildNativeLine(graphicsData, webGLData)
+function buildNativeLine(graphics_data, webGLData)
 {
     let i = 0;
-    const points = graphicsData.points;
+    const points = graphics_data.points;
 
     if (points.length === 0) return;
 
@@ -269,8 +269,8 @@ function buildNativeLine(graphicsData, webGLData)
     const length = points.length / 2;
 
     // sort color
-    const color = hex2rgb(graphicsData.lineColor);
-    const alpha = graphicsData.lineAlpha;
+    const color = hex2rgb(graphics_data.line_color);
+    const alpha = graphics_data.line_alpha;
     const r = color[0] * alpha;
     const g = color[1] * alpha;
     const b = color[2] * alpha;

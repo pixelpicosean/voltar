@@ -6,7 +6,7 @@ import Sprite from '../sprites/Sprite';
 import { Matrix, Point, Rectangle, RoundedRectangle, Ellipse, Polygon, Circle, Bounds } from '../../math';
 import { hex2rgb, rgb2hex } from '../../utils';
 import { SHAPES, BLEND_MODES } from '../../const';
-import bezierCurveTo from './utils/bezierCurveTo';
+import bezier_curve_to from './utils/bezier_curve_to';
 import CanvasRenderer from '../../renderers/canvas/CanvasRenderer';
 
 let canvasRenderer;
@@ -27,9 +27,9 @@ export default class Graphics extends Node2D
 {
     /**
      *
-     * @param {boolean} [nativeLines=false] - If true the lines will be draw using LINES instead of TRIANGLE_STRIP
+     * @param {boolean} [native_lines=false] - If true the lines will be draw using LINES instead of TRIANGLE_STRIP
      */
-    constructor(nativeLines = false)
+    constructor(native_lines = false)
     {
         super();
 
@@ -39,7 +39,7 @@ export default class Graphics extends Node2D
          * @member {number}
          * @default 1
          */
-        this.fillAlpha = 1;
+        this.fill_alpha = 1;
 
         /**
          * The width (thickness) of any lines drawn.
@@ -47,14 +47,14 @@ export default class Graphics extends Node2D
          * @member {number}
          * @default 0
          */
-        this.lineWidth = 0;
+        this.line_width = 0;
 
         /**
          * If true the lines will be draw using LINES instead of TRIANGLE_STRIP
          *
          * @member {boolean}
          */
-        this.nativeLines = nativeLines;
+        this.native_lines = native_lines;
 
         /**
          * The color of any lines drawn.
@@ -62,7 +62,7 @@ export default class Graphics extends Node2D
          * @member {string}
          * @default 0
          */
-        this.lineColor = 0;
+        this.line_color = 0;
 
         /**
          * Graphics data
@@ -70,7 +70,7 @@ export default class Graphics extends Node2D
          * @member {V.GraphicsData[]}
          * @private
          */
-        this.graphicsData = [];
+        this.graphics_data = [];
 
         /**
          * The tint applied to the graphic shape. This is a hex value. Apply a value of 0xFFFFFF to
@@ -99,7 +99,7 @@ export default class Graphics extends Node2D
          * @default V.BLEND_MODES.NORMAL;
          * @see V.BLEND_MODES
          */
-        this.blendMode = BLEND_MODES.NORMAL;
+        this.blend_mode = BLEND_MODES.NORMAL;
 
         /**
          * Current path
@@ -107,7 +107,7 @@ export default class Graphics extends Node2D
          * @member {V.GraphicsData}
          * @private
          */
-        this.currentPath = null;
+        this.current_path = null;
 
         /**
          * Array containing some WebGL-related properties used by the WebGL renderer.
@@ -123,14 +123,14 @@ export default class Graphics extends Node2D
          *
          * @member {boolean}
          */
-        this.isMask = false;
+        this.is_mask = false;
 
         /**
          * The bounds' padding used for bounds calculation.
          *
          * @member {number}
          */
-        this.boundsPadding = 0;
+        this.bounds_padding = 0;
 
         /**
          * A cache of the local bounds to prevent recalculation.
@@ -153,19 +153,19 @@ export default class Graphics extends Node2D
          * Used to detect if we need to do a fast rect check using the id compare method
          * @type {Number}
          */
-        this.fastRectDirty = -1;
+        this.fast_rect_dirty = -1;
 
         /**
          * Used to detect if we clear the graphics webGL data
          * @type {Number}
          */
-        this.clearDirty = 0;
+        this.clear_dirty = 0;
 
         /**
          * Used to detect if we we need to recalculate local bounds
          * @type {Number}
          */
-        this.boundsDirty = -1;
+        this.bounds_dirty = -1;
 
         /**
          * Used to detect if the cached sprite object needs to be updated.
@@ -173,7 +173,7 @@ export default class Graphics extends Node2D
          * @member {boolean}
          * @private
          */
-        this.cachedSpriteDirty = false;
+        this.cached_sprite_dirty = false;
 
         this._spriteRect = null;
         this._fastRect = false;
@@ -203,61 +203,61 @@ export default class Graphics extends Node2D
         const clone = new Graphics();
 
         clone.renderable = this.renderable;
-        clone.fillAlpha = this.fillAlpha;
-        clone.lineWidth = this.lineWidth;
-        clone.lineColor = this.lineColor;
+        clone.fill_alpha = this.fill_alpha;
+        clone.line_width = this.line_width;
+        clone.line_color = this.line_color;
         clone.tint = this.tint;
-        clone.blendMode = this.blendMode;
-        clone.isMask = this.isMask;
-        clone.boundsPadding = this.boundsPadding;
+        clone.blend_mode = this.blend_mode;
+        clone.is_mask = this.is_mask;
+        clone.bounds_padding = this.bounds_padding;
         clone.dirty = 0;
-        clone.cachedSpriteDirty = this.cachedSpriteDirty;
+        clone.cached_sprite_dirty = this.cached_sprite_dirty;
 
         // copy graphics data
-        for (let i = 0; i < this.graphicsData.length; ++i)
+        for (let i = 0; i < this.graphics_data.length; ++i)
         {
-            clone.graphicsData.push(this.graphicsData[i].clone());
+            clone.graphics_data.push(this.graphics_data[i].clone());
         }
 
-        clone.currentPath = clone.graphicsData[clone.graphicsData.length - 1];
+        clone.current_path = clone.graphics_data[clone.graphics_data.length - 1];
 
-        clone.updateLocalBounds();
+        clone.update_local_bounds();
 
         return clone;
     }
 
     /**
-     * Specifies the line style used for subsequent calls to Graphics methods such as the lineTo()
-     * method or the drawCircle() method.
+     * Specifies the line style used for subsequent calls to Graphics methods such as the line_to()
+     * method or the draw_circle() method.
      *
-     * @param {number} [lineWidth=0] - width of the line to draw, will update the objects stored style
+     * @param {number} [line_width=0] - width of the line to draw, will update the objects stored style
      * @param {number} [color=0] - color of the line to draw, will update the objects stored style
      * @param {number} [alpha=1] - alpha of the line to draw, will update the objects stored style
      * @return {V.Graphics} This Graphics object. Good for chaining method calls
      */
-    lineStyle(lineWidth = 0, color = 0, alpha = 1)
+    set_line_style(line_width = 0, color = 0, alpha = 1)
     {
-        this.lineWidth = lineWidth;
-        this.lineColor = color;
-        this.lineAlpha = alpha;
+        this.line_width = line_width;
+        this.line_color = color;
+        this.line_alpha = alpha;
 
-        if (this.currentPath)
+        if (this.current_path)
         {
-            if (this.currentPath.shape.points.length)
+            if (this.current_path.shape.points.length)
             {
                 // halfway through a line? start a new one!
-                const shape = new Polygon(this.currentPath.shape.points.slice(-2));
+                const shape = new Polygon(this.current_path.shape.points.slice(-2));
 
                 shape.closed = false;
 
-                this.drawShape(shape);
+                this.draw_shape(shape);
             }
             else
             {
                 // otherwise its empty so lets just set the line properties
-                this.currentPath.lineWidth = this.lineWidth;
-                this.currentPath.lineColor = this.lineColor;
-                this.currentPath.lineAlpha = this.lineAlpha;
+                this.current_path.line_width = this.line_width;
+                this.current_path.line_color = this.line_color;
+                this.current_path.line_alpha = this.line_alpha;
             }
         }
 
@@ -271,12 +271,12 @@ export default class Graphics extends Node2D
      * @param {number} y - the Y coordinate to move to
      * @return {V.Graphics} This Graphics object. Good for chaining method calls
      */
-    moveTo(x, y)
+    move_to(x, y)
     {
         const shape = new Polygon([x, y]);
 
         shape.closed = false;
-        this.drawShape(shape);
+        this.draw_shape(shape);
 
         return this;
     }
@@ -289,9 +289,9 @@ export default class Graphics extends Node2D
      * @param {number} y - the Y coordinate to draw to
      * @return {V.Graphics} This Graphics object. Good for chaining method calls
      */
-    lineTo(x, y)
+    line_to(x, y)
     {
-        this.currentPath.shape.points.push(x, y);
+        this.current_path.shape.points.push(x, y);
         this.dirty++;
 
         return this;
@@ -307,28 +307,28 @@ export default class Graphics extends Node2D
      * @param {number} toY - Destination point y
      * @return {V.Graphics} This Graphics object. Good for chaining method calls
      */
-    quadraticCurveTo(cpX, cpY, toX, toY)
+    quadratic_curve_to(cpX, cpY, toX, toY)
     {
-        if (this.currentPath)
+        if (this.current_path)
         {
-            if (this.currentPath.shape.points.length === 0)
+            if (this.current_path.shape.points.length === 0)
             {
-                this.currentPath.shape.points = [0, 0];
+                this.current_path.shape.points = [0, 0];
             }
         }
         else
         {
-            this.moveTo(0, 0);
+            this.move_to(0, 0);
         }
 
         const n = 20;
-        const points = this.currentPath.shape.points;
+        const points = this.current_path.shape.points;
         let xa = 0;
         let ya = 0;
 
         if (points.length === 0)
         {
-            this.moveTo(0, 0);
+            this.move_to(0, 0);
         }
 
         const fromX = points[points.length - 2];
@@ -361,28 +361,28 @@ export default class Graphics extends Node2D
      * @param {number} toY - Destination point y
      * @return {V.Graphics} This Graphics object. Good for chaining method calls
      */
-    bezierCurveTo(cpX, cpY, cpX2, cpY2, toX, toY)
+    bezier_curve_to(cpX, cpY, cpX2, cpY2, toX, toY)
     {
-        if (this.currentPath)
+        if (this.current_path)
         {
-            if (this.currentPath.shape.points.length === 0)
+            if (this.current_path.shape.points.length === 0)
             {
-                this.currentPath.shape.points = [0, 0];
+                this.current_path.shape.points = [0, 0];
             }
         }
         else
         {
-            this.moveTo(0, 0);
+            this.move_to(0, 0);
         }
 
-        const points = this.currentPath.shape.points;
+        const points = this.current_path.shape.points;
 
         const fromX = points[points.length - 2];
         const fromY = points[points.length - 1];
 
         points.length -= 2;
 
-        bezierCurveTo(fromX, fromY, cpX, cpY, cpX2, cpY2, toX, toY, points);
+        bezier_curve_to(fromX, fromY, cpX, cpY, cpX2, cpY2, toX, toY, points);
 
         this.dirty++;
 
@@ -401,21 +401,21 @@ export default class Graphics extends Node2D
      * @param {number} radius - The radius of the arc
      * @return {V.Graphics} This Graphics object. Good for chaining method calls
      */
-    arcTo(x1, y1, x2, y2, radius)
+    arc_to(x1, y1, x2, y2, radius)
     {
-        if (this.currentPath)
+        if (this.current_path)
         {
-            if (this.currentPath.shape.points.length === 0)
+            if (this.current_path.shape.points.length === 0)
             {
-                this.currentPath.shape.points.push(x1, y1);
+                this.current_path.shape.points.push(x1, y1);
             }
         }
         else
         {
-            this.moveTo(x1, y1);
+            this.move_to(x1, y1);
         }
 
-        const points = this.currentPath.shape.points;
+        const points = this.current_path.shape.points;
         const fromX = points[points.length - 2];
         const fromY = points[points.length - 1];
         const a1 = fromY - y1;
@@ -498,8 +498,8 @@ export default class Graphics extends Node2D
         const startX = cx + (Math.cos(startAngle) * radius);
         const startY = cy + (Math.sin(startAngle) * radius);
 
-        // If the currentPath exists, take its points. Otherwise call `moveTo` to start a path.
-        let points = this.currentPath ? this.currentPath.shape.points : null;
+        // If the current_path exists, take its points. Otherwise call `move_to` to start a path.
+        let points = this.current_path ? this.current_path.shape.points : null;
 
         if (points)
         {
@@ -510,8 +510,8 @@ export default class Graphics extends Node2D
         }
         else
         {
-            this.moveTo(startX, startY);
-            points = this.currentPath.shape.points;
+            this.move_to(startX, startY);
+            points = this.current_path.shape.points;
         }
 
         const theta = sweep / (segs * 2);
@@ -546,25 +546,25 @@ export default class Graphics extends Node2D
 
     /**
      * Specifies a simple one-color fill that subsequent calls to other Graphics methods
-     * (such as lineTo() or drawCircle()) use when drawing.
+     * (such as line_to() or draw_circle()) use when drawing.
      *
      * @param {number} [color=0] - the color of the fill
      * @param {number} [alpha=1] - the alpha of the fill
      * @return {V.Graphics} This Graphics object. Good for chaining method calls
      */
-    beginFill(color = 0, alpha = 1)
+    begin_fill(color = 0, alpha = 1)
     {
         this.filling = true;
         this.fillColor = color;
-        this.fillAlpha = alpha;
+        this.fill_alpha = alpha;
 
-        if (this.currentPath)
+        if (this.current_path)
         {
-            if (this.currentPath.shape.points.length <= 2)
+            if (this.current_path.shape.points.length <= 2)
             {
-                this.currentPath.fill = this.filling;
-                this.currentPath.fillColor = this.fillColor;
-                this.currentPath.fillAlpha = this.fillAlpha;
+                this.current_path.fill = this.filling;
+                this.current_path.fillColor = this.fillColor;
+                this.current_path.fill_alpha = this.fill_alpha;
             }
         }
 
@@ -572,15 +572,15 @@ export default class Graphics extends Node2D
     }
 
     /**
-     * Applies a fill to the lines and shapes that were added since the last call to the beginFill() method.
+     * Applies a fill to the lines and shapes that were added since the last call to the begin_fill() method.
      *
      * @return {V.Graphics} This Graphics object. Good for chaining method calls
      */
-    endFill()
+    end_fill()
     {
         this.filling = false;
         this.fillColor = null;
-        this.fillAlpha = 1;
+        this.fill_alpha = 1;
 
         return this;
     }
@@ -593,9 +593,9 @@ export default class Graphics extends Node2D
      * @param {number} height - The height of the rectangle
      * @return {V.Graphics} This Graphics object. Good for chaining method calls
      */
-    drawRect(x, y, width, height)
+    draw_rect(x, y, width, height)
     {
-        this.drawShape(new Rectangle(x, y, width, height));
+        this.draw_shape(new Rectangle(x, y, width, height));
 
         return this;
     }
@@ -609,9 +609,9 @@ export default class Graphics extends Node2D
      * @param {number} radius - Radius of the rectangle corners
      * @return {V.Graphics} This Graphics object. Good for chaining method calls
      */
-    drawRoundedRect(x, y, width, height, radius)
+    draw_rounded_rect(x, y, width, height, radius)
     {
-        this.drawShape(new RoundedRectangle(x, y, width, height, radius));
+        this.draw_shape(new RoundedRectangle(x, y, width, height, radius));
 
         return this;
     }
@@ -624,9 +624,9 @@ export default class Graphics extends Node2D
      * @param {number} radius - The radius of the circle
      * @return {V.Graphics} This Graphics object. Good for chaining method calls
      */
-    drawCircle(x, y, radius)
+    draw_circle(x, y, radius)
     {
-        this.drawShape(new Circle(x, y, radius));
+        this.draw_shape(new Circle(x, y, radius));
 
         return this;
     }
@@ -640,9 +640,9 @@ export default class Graphics extends Node2D
      * @param {number} height - The half height of the ellipse
      * @return {V.Graphics} This Graphics object. Good for chaining method calls
      */
-    drawEllipse(x, y, width, height)
+    draw_ellipse(x, y, width, height)
     {
-        this.drawShape(new Ellipse(x, y, width, height));
+        this.draw_shape(new Ellipse(x, y, width, height));
 
         return this;
     }
@@ -653,7 +653,7 @@ export default class Graphics extends Node2D
      * @param {number[]|V.Point[]} path - The path data used to construct the polygon.
      * @return {V.Graphics} This Graphics object. Good for chaining method calls
      */
-    drawPolygon(path)
+    draw_polygon(path)
     {
         // prevents an argument assignment deopt
         // see section 3.1: https://github.com/petkaantonov/bluebird/wiki/Optimization-killers#3-managing-arguments
@@ -683,7 +683,7 @@ export default class Graphics extends Node2D
 
         shape.closed = closed;
 
-        this.drawShape(shape);
+        this.draw_shape(shape);
 
         return this;
     }
@@ -695,18 +695,18 @@ export default class Graphics extends Node2D
      */
     clear()
     {
-        if (this.lineWidth || this.filling || this.graphicsData.length > 0)
+        if (this.line_width || this.filling || this.graphics_data.length > 0)
         {
-            this.lineWidth = 0;
+            this.line_width = 0;
             this.filling = false;
 
-            this.boundsDirty = -1;
+            this.bounds_dirty = -1;
             this.dirty++;
-            this.clearDirty++;
-            this.graphicsData.length = 0;
+            this.clear_dirty++;
+            this.graphics_data.length = 0;
         }
 
-        this.currentPath = null;
+        this.current_path = null;
         this._spriteRect = null;
 
         return this;
@@ -718,11 +718,11 @@ export default class Graphics extends Node2D
      *
      * @returns {boolean} True if only 1 rect.
      */
-    isFastRect()
+    is_fast_rect()
     {
-        return this.graphicsData.length === 1
-            && this.graphicsData[0].shape.type === SHAPES.RECT
-            && !this.graphicsData[0].lineWidth;
+        return this.graphics_data.length === 1
+            && this.graphics_data[0].shape.type === SHAPES.RECT
+            && !this.graphics_data[0].line_width;
     }
 
     /**
@@ -734,10 +734,10 @@ export default class Graphics extends Node2D
     _render_webGL(renderer)
     {
         // if the sprite is not visible or the alpha is 0 then no need to render this element
-        if (this.dirty !== this.fastRectDirty)
+        if (this.dirty !== this.fast_rect_dirty)
         {
-            this.fastRectDirty = this.dirty;
-            this._fastRect = this.isFastRect();
+            this.fast_rect_dirty = this.dirty;
+            this._fastRect = this.is_fast_rect();
         }
 
         // TODO this check can be moved to dirty?
@@ -760,7 +760,7 @@ export default class Graphics extends Node2D
      */
     _renderSpriteRect(renderer)
     {
-        const rect = this.graphicsData[0].shape;
+        const rect = this.graphics_data[0].shape;
 
         if (!this._spriteRect)
         {
@@ -771,14 +771,14 @@ export default class Graphics extends Node2D
 
         if (this.tint === 0xffffff)
         {
-            sprite.tint = this.graphicsData[0].fillColor;
+            sprite.tint = this.graphics_data[0].fillColor;
         }
         else
         {
             const t1 = tempColor1;
             const t2 = tempColor2;
 
-            hex2rgb(this.graphicsData[0].fillColor, t1);
+            hex2rgb(this.graphics_data[0].fillColor, t1);
             hex2rgb(this.tint, t2);
 
             t1[0] *= t2[0];
@@ -787,9 +787,9 @@ export default class Graphics extends Node2D
 
             sprite.tint = rgb2hex(t1);
         }
-        sprite.alpha = this.graphicsData[0].fillAlpha;
+        sprite.alpha = this.graphics_data[0].fill_alpha;
         sprite.world_alpha = this.world_alpha * sprite.alpha;
-        sprite.blendMode = this.blendMode;
+        sprite.blend_mode = this.blend_mode;
 
         sprite._texture._frame.width = rect.width;
         sprite._texture._frame.height = rect.height;
@@ -810,7 +810,7 @@ export default class Graphics extends Node2D
      */
     _render_canvas(renderer)
     {
-        if (this.isMask === true)
+        if (this.is_mask === true)
         {
             return;
         }
@@ -825,12 +825,12 @@ export default class Graphics extends Node2D
      */
     _calculate_bounds()
     {
-        if (this.boundsDirty !== this.dirty)
+        if (this.bounds_dirty !== this.dirty)
         {
-            this.boundsDirty = this.dirty;
-            this.updateLocalBounds();
+            this.bounds_dirty = this.dirty;
+            this.update_local_bounds();
 
-            this.cachedSpriteDirty = true;
+            this.cached_sprite_dirty = true;
         }
 
         const lb = this._localBounds;
@@ -844,15 +844,15 @@ export default class Graphics extends Node2D
      * @param {V.Point} point - the point to test
      * @return {boolean} the result of the test
      */
-    containsPoint(point)
+    contains_point(point)
     {
         this.world_transform.applyInverse(point, tempPoint);
 
-        const graphicsData = this.graphicsData;
+        const graphics_data = this.graphics_data;
 
-        for (let i = 0; i < graphicsData.length; ++i)
+        for (let i = 0; i < graphics_data.length; ++i)
         {
-            const data = graphicsData[i];
+            const data = graphics_data[i];
 
             if (!data.fill)
             {
@@ -889,7 +889,7 @@ export default class Graphics extends Node2D
      * Update the bounds of the object
      *
      */
-    updateLocalBounds()
+    update_local_bounds()
     {
         let minX = Infinity;
         let maxX = -Infinity;
@@ -897,7 +897,7 @@ export default class Graphics extends Node2D
         let minY = Infinity;
         let maxY = -Infinity;
 
-        if (this.graphicsData.length)
+        if (this.graphics_data.length)
         {
             let shape = 0;
             let x = 0;
@@ -905,20 +905,20 @@ export default class Graphics extends Node2D
             let w = 0;
             let h = 0;
 
-            for (let i = 0; i < this.graphicsData.length; i++)
+            for (let i = 0; i < this.graphics_data.length; i++)
             {
-                const data = this.graphicsData[i];
+                const data = this.graphics_data[i];
                 const type = data.type;
-                const lineWidth = data.lineWidth;
+                const line_width = data.line_width;
 
                 shape = data.shape;
 
                 if (type === SHAPES.RECT || type === SHAPES.RREC)
                 {
-                    x = shape.x - (lineWidth / 2);
-                    y = shape.y - (lineWidth / 2);
-                    w = shape.width + lineWidth;
-                    h = shape.height + lineWidth;
+                    x = shape.x - (line_width / 2);
+                    y = shape.y - (line_width / 2);
+                    w = shape.width + line_width;
+                    h = shape.height + line_width;
 
                     minX = x < minX ? x : minX;
                     maxX = x + w > maxX ? x + w : maxX;
@@ -930,8 +930,8 @@ export default class Graphics extends Node2D
                 {
                     x = shape.x;
                     y = shape.y;
-                    w = shape.radius + (lineWidth / 2);
-                    h = shape.radius + (lineWidth / 2);
+                    w = shape.radius + (line_width / 2);
+                    h = shape.radius + (line_width / 2);
 
                     minX = x - w < minX ? x - w : minX;
                     maxX = x + w > maxX ? x + w : maxX;
@@ -943,8 +943,8 @@ export default class Graphics extends Node2D
                 {
                     x = shape.x;
                     y = shape.y;
-                    w = shape.width + (lineWidth / 2);
-                    h = shape.height + (lineWidth / 2);
+                    w = shape.width + (line_width / 2);
+                    h = shape.height + (line_width / 2);
 
                     minX = x - w < minX ? x - w : minX;
                     maxX = x + w > maxX ? x + w : maxX;
@@ -973,7 +973,7 @@ export default class Graphics extends Node2D
                         y2 = points[j + 3];
                         dx = Math.abs(x2 - x);
                         dy = Math.abs(y2 - y);
-                        h = lineWidth;
+                        h = line_width;
                         w = Math.sqrt((dx * dx) + (dy * dy));
 
                         if (w < 1e-9)
@@ -1003,7 +1003,7 @@ export default class Graphics extends Node2D
             maxY = 0;
         }
 
-        const padding = this.boundsPadding;
+        const padding = this.bounds_padding;
 
         this._localBounds.minX = minX - padding;
         this._localBounds.maxX = maxX + padding;
@@ -1018,36 +1018,36 @@ export default class Graphics extends Node2D
      * @param {V.Circle|V.Ellipse|V.Polygon|V.Rectangle|V.RoundedRectangle} shape - The shape object to draw.
      * @return {V.GraphicsData} The generated GraphicsData object.
      */
-    drawShape(shape)
+    draw_shape(shape)
     {
-        if (this.currentPath)
+        if (this.current_path)
         {
             // check current path!
-            if (this.currentPath.shape.points.length <= 2)
+            if (this.current_path.shape.points.length <= 2)
             {
-                this.graphicsData.pop();
+                this.graphics_data.pop();
             }
         }
 
-        this.currentPath = null;
+        this.current_path = null;
 
         const data = new GraphicsData(
-            this.lineWidth,
-            this.lineColor,
-            this.lineAlpha,
+            this.line_width,
+            this.line_color,
+            this.line_alpha,
             this.fillColor,
-            this.fillAlpha,
+            this.fill_alpha,
             this.filling,
-            this.nativeLines,
+            this.native_lines,
             shape
         );
 
-        this.graphicsData.push(data);
+        this.graphics_data.push(data);
 
         if (data.type === SHAPES.POLY)
         {
             data.shape.closed = data.shape.closed || this.filling;
-            this.currentPath = data;
+            this.current_path = data;
         }
 
         this.dirty++;
@@ -1062,7 +1062,7 @@ export default class Graphics extends Node2D
      * @param {number} resolution - The resolution of the texture.
      * @return {V.Texture} The new texture.
      */
-    generateCanvasTexture(scaleMode, resolution = 1)
+    generate_canvas_texture(scaleMode, resolution = 1)
     {
         const bounds = this.get_local_Bounds();
 
@@ -1096,14 +1096,14 @@ export default class Graphics extends Node2D
      *
      * @return {V.Graphics} Returns itself.
      */
-    closePath()
+    close_path()
     {
         // ok so close path assumes next one is a hole!
-        const currentPath = this.currentPath;
+        const current_path = this.current_path;
 
-        if (currentPath && currentPath.shape)
+        if (current_path && current_path.shape)
         {
-            currentPath.shape.close();
+            current_path.shape.close();
         }
 
         return this;
@@ -1114,15 +1114,15 @@ export default class Graphics extends Node2D
      *
      * @return {V.Graphics} Returns itself.
      */
-    addHole()
+    add_hole()
     {
         // this is a hole!
-        const hole = this.graphicsData.pop();
+        const hole = this.graphics_data.pop();
 
-        this.currentPath = this.graphicsData[this.graphicsData.length - 1];
+        this.current_path = this.graphics_data[this.graphics_data.length - 1];
 
-        this.currentPath.addHole(hole.shape);
-        this.currentPath = null;
+        this.current_path.add_hole(hole.shape);
+        this.current_path = null;
 
         return this;
     }
@@ -1144,9 +1144,9 @@ export default class Graphics extends Node2D
         super.destroy(options);
 
         // destroy each of the GraphicsData objects
-        for (let i = 0; i < this.graphicsData.length; ++i)
+        for (let i = 0; i < this.graphics_data.length; ++i)
         {
-            this.graphicsData[i].destroy();
+            this.graphics_data[i].destroy();
         }
 
         // for each webgl data entry, destroy the WebGLGraphicsData
@@ -1163,9 +1163,9 @@ export default class Graphics extends Node2D
             this._spriteRect.destroy();
         }
 
-        this.graphicsData = null;
+        this.graphics_data = null;
 
-        this.currentPath = null;
+        this.current_path = null;
         this._webgl = null;
         this._localBounds = null;
     }

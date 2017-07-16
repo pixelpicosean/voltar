@@ -34,7 +34,7 @@ export default class Filter
          */
         this.fragmentSrc = fragmentSrc || Filter.defaultFragmentSrc;
 
-        this.blendMode = BLEND_MODES.NORMAL;
+        this.blend_mode = BLEND_MODES.NORMAL;
 
         this.uniformData = uniforms || extractUniformsFromSrc(this.vertexSrc, this.fragmentSrc, 'projectionMatrix|uSampler');
 

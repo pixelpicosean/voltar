@@ -103,7 +103,7 @@ export default class ParticleNode2D extends Node2D
          * @default V.BLEND_MODES.NORMAL
          * @see V.BLEND_MODES
          */
-        this.blendMode = BLEND_MODES.NORMAL;
+        this.blend_mode = BLEND_MODES.NORMAL;
 
         /**
          * Used for canvas renderering. If true then the elements will be positioned at the
@@ -249,7 +249,7 @@ export default class ParticleNode2D extends Node2D
         let finalWidth = 0;
         let finalHeight = 0;
 
-        const compositeOperation = renderer.blendModes[this.blendMode];
+        const compositeOperation = renderer.blend_modes[this.blend_mode];
 
         if (compositeOperation !== context.globalCompositeOperation)
         {

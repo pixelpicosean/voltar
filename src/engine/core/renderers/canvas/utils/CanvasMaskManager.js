@@ -31,7 +31,7 @@ export default class CanvasMaskManager
         const transform = maskData.transform.world_transform;
         const resolution = renderer.resolution;
 
-        renderer.context.set_transform(
+        renderer.context.setTransform(
             transform.a * resolution,
             transform.b * resolution,
             transform.c * resolution,
@@ -59,7 +59,7 @@ export default class CanvasMaskManager
     renderGraphicsShape(graphics)
     {
         const context = this.renderer.context;
-        const len = graphics.graphicsData.length;
+        const len = graphics.graphics_data.length;
 
         if (len === 0)
         {
@@ -70,7 +70,7 @@ export default class CanvasMaskManager
 
         for (let i = 0; i < len; i++)
         {
-            const data = graphics.graphicsData[i];
+            const data = graphics.graphics_data[i];
             const shape = data.shape;
 
             if (data.type === SHAPES.POLY)

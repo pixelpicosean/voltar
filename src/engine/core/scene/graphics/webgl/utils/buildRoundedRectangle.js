@@ -9,13 +9,13 @@ import { hex2rgb } from '../../../../utils';
  *
  * @ignore
  * @private
- * @param {V.WebGLGraphicsData} graphicsData - The graphics object containing all the necessary properties
+ * @param {V.WebGLGraphicsData} graphics_data - The graphics object containing all the necessary properties
  * @param {object} webGLData - an object containing all the webGL-specific information to create this shape
- * @param {object} webGLDataNativeLines - an object containing all the webGL-specific information to create nativeLines
+ * @param {object} webGLDataNativeLines - an object containing all the webGL-specific information to create native_lines
  */
-export default function buildRoundedRectangle(graphicsData, webGLData, webGLDataNativeLines)
+export default function buildRoundedRectangle(graphics_data, webGLData, webGLDataNativeLines)
 {
-    const rrectData = graphicsData.shape;
+    const rrectData = graphics_data.shape;
     const x = rrectData.x;
     const y = rrectData.y;
     const width = rrectData.width;
@@ -34,10 +34,10 @@ export default function buildRoundedRectangle(graphicsData, webGLData, webGLData
     // this tiny number deals with the issue that occurs when points overlap and earcut fails to triangulate the item.
     // TODO - fix this properly, this is not very elegant.. but it works for now.
 
-    if (graphicsData.fill)
+    if (graphics_data.fill)
     {
-        const color = hex2rgb(graphicsData.fillColor);
-        const alpha = graphicsData.fillAlpha;
+        const color = hex2rgb(graphics_data.fillColor);
+        const alpha = graphics_data.fill_alpha;
 
         const r = color[0] * alpha;
         const g = color[1] * alpha;
@@ -65,15 +65,15 @@ export default function buildRoundedRectangle(graphicsData, webGLData, webGLData
         }
     }
 
-    if (graphicsData.lineWidth)
+    if (graphics_data.line_width)
     {
-        const tempPoints = graphicsData.points;
+        const tempPoints = graphics_data.points;
 
-        graphicsData.points = recPoints;
+        graphics_data.points = recPoints;
 
-        buildLine(graphicsData, webGLData, webGLDataNativeLines);
+        buildLine(graphics_data, webGLData, webGLDataNativeLines);
 
-        graphicsData.points = tempPoints;
+        graphics_data.points = tempPoints;
     }
 }
 

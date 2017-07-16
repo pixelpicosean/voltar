@@ -14,8 +14,8 @@
  *
  * // create a display object
  * const rect = new V.Graphics()
- *     .beginFill(0x00ff00)
- *     .drawRect(40, 40, 200, 200);
+ *     .begin_fill(0x00ff00)
+ *     .draw_rect(40, 40, 200, 200);
  *
  * // Add to the stage
  * app.stage.add_child(rect);

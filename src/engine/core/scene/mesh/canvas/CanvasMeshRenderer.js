@@ -54,7 +54,7 @@ export default class MeshSpriteRenderer
             );
         }
 
-        renderer.setBlendMode(mesh.blendMode);
+        renderer.setBlendMode(mesh.blend_mode);
 
         if (mesh.drawMode === Mesh.DRAW_MODES.TRIANGLE_MESH)
         {
@@ -276,7 +276,7 @@ export default class MeshSpriteRenderer
             const x2 = vertices[index + 4];
             const y2 = vertices[index + 5];
 
-            context.moveTo(x0, y0);
+            context.move_to(x0, y0);
             context.lineTo(x1, y1);
             context.lineTo(x2, y2);
         }

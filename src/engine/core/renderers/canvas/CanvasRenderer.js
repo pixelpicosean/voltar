@@ -100,7 +100,7 @@ export default class CanvasRenderer extends SystemRenderer
 
         this.initPlugins();
 
-        this.blendModes = mapCanvasBlendModesToPixi();
+        this.blend_modes = mapCanvasBlendModesToPixi();
         this._activeBlendMode = null;
 
         this.renderingToScreen = false;
@@ -199,9 +199,9 @@ export default class CanvasRenderer extends SystemRenderer
             // displayObject.hitArea = //TODO add a temp hit area
         }
 
-        context.set_transform(1, 0, 0, 1, 0, 0);
+        context.setTransform(1, 0, 0, 1, 0, 0);
         context.globalAlpha = 1;
-        context.globalCompositeOperation = this.blendModes[BLEND_MODES.NORMAL];
+        context.globalCompositeOperation = this.blend_modes[BLEND_MODES.NORMAL];
 
         if (navigator.isCocoonJS && this.view.screencanvas)
         {
@@ -264,17 +264,17 @@ export default class CanvasRenderer extends SystemRenderer
     /**
      * Sets the blend mode of the renderer.
      *
-     * @param {number} blendMode - See {@link V.BLEND_MODES} for valid values.
+     * @param {number} blend_mode - See {@link V.BLEND_MODES} for valid values.
      */
-    setBlendMode(blendMode)
+    setBlendMode(blend_mode)
     {
-        if (this._activeBlendMode === blendMode)
+        if (this._activeBlendMode === blend_mode)
         {
             return;
         }
 
-        this._activeBlendMode = blendMode;
-        this.context.globalCompositeOperation = this.blendModes[blendMode];
+        this._activeBlendMode = blend_mode;
+        this.context.globalCompositeOperation = this.blend_modes[blend_mode];
     }
 
     /**

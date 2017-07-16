@@ -225,7 +225,7 @@ export default class TilingSprite extends Sprite
                            transform.tx * resolution,
                            transform.ty * resolution);
 
-        renderer.setBlendMode(this.blendMode);
+        renderer.setBlendMode(this.blend_mode);
 
         // fill the pattern!
         context.fillStyle = this._canvasPattern;
@@ -307,7 +307,7 @@ export default class TilingSprite extends Sprite
      * @param {V.Point} point - the point to check
      * @return {boolean} Whether or not the sprite contains the point.
      */
-    containsPoint(point)
+    contains_point(point)
     {
         this.world_transform.applyInverse(point, tempPoint);
 

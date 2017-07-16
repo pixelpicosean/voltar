@@ -382,11 +382,11 @@ export default class WebGLRenderer extends SystemRenderer
     /**
      * Resizes the webGL view to the specified width and height.
      *
-     * @param {number} blendMode - the desired blend mode
+     * @param {number} blend_mode - the desired blend mode
      */
-    setBlendMode(blendMode)
+    setBlendMode(blend_mode)
     {
-        this.state.setBlendMode(blendMode);
+        this.state.setBlendMode(blend_mode);
     }
 
     /**

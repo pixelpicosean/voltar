@@ -46,7 +46,7 @@ export default class MaskManager extends WebGLManager
             && !this.scissor
             && this.renderer._activeRenderTarget.root
             && !this.renderer.stencilManager.stencilMaskStack.length
-            && maskData.isFastRect())
+            && maskData.is_fast_rect())
         {
             const matrix = maskData.world_transform;
 

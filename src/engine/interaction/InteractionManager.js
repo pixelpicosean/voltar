@@ -1023,7 +1023,7 @@ export default class InteractionManager extends EventEmitter
         // it has a mask! Then lets hit test that before continuing
         else if (hitTest && displayObject._mask)
         {
-            if (!displayObject._mask.containsPoint(point))
+            if (!displayObject._mask.contains_point(point))
             {
                 hitTest = false;
             }
@@ -1090,9 +1090,9 @@ export default class InteractionManager extends EventEmitter
                         hit = true;
                     }
                 }
-                else if (displayObject.containsPoint)
+                else if (displayObject.contains_point)
                 {
-                    if (displayObject.containsPoint(point))
+                    if (displayObject.contains_point(point))
                     {
                         hit = true;
                     }

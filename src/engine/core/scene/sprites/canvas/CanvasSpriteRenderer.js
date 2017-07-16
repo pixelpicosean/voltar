@@ -56,7 +56,7 @@ export default class CanvasSpriteRenderer
             return;
         }
 
-        renderer.setBlendMode(sprite.blendMode);
+        renderer.setBlendMode(sprite.blend_mode);
 
         //  Ignore null sources
         if (texture.valid)
@@ -98,7 +98,7 @@ export default class CanvasSpriteRenderer
             // Allow for pixel rounding
             if (renderer.pixel_snap)
             {
-                renderer.context.set_transform(
+                renderer.context.setTransform(
                     wt.a,
                     wt.b,
                     wt.c,

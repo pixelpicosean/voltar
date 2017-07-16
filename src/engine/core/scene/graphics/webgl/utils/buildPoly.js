@@ -9,21 +9,21 @@ import earcut from 'earcut';
  *
  * @ignore
  * @private
- * @param {V.WebGLGraphicsData} graphicsData - The graphics object containing all the necessary properties
+ * @param {V.WebGLGraphicsData} graphics_data - The graphics object containing all the necessary properties
  * @param {object} webGLData - an object containing all the webGL-specific information to create this shape
- * @param {object} webGLDataNativeLines - an object containing all the webGL-specific information to create nativeLines
+ * @param {object} webGLDataNativeLines - an object containing all the webGL-specific information to create native_lines
  */
-export default function buildPoly(graphicsData, webGLData, webGLDataNativeLines)
+export default function buildPoly(graphics_data, webGLData, webGLDataNativeLines)
 {
-    graphicsData.points = graphicsData.shape.points.slice();
+    graphics_data.points = graphics_data.shape.points.slice();
 
-    let points = graphicsData.points;
+    let points = graphics_data.points;
 
-    if (graphicsData.fill && points.length >= 6)
+    if (graphics_data.fill && points.length >= 6)
     {
         const holeArray = [];
         // Process holes..
-        const holes = graphicsData.holes;
+        const holes = graphics_data.holes;
 
         for (let i = 0; i < holes.length; i++)
         {
@@ -41,8 +41,8 @@ export default function buildPoly(graphicsData, webGLData, webGLDataNativeLines)
         const length = points.length / 2;
 
         // sort color
-        const color = hex2rgb(graphicsData.fillColor);
-        const alpha = graphicsData.fillAlpha;
+        const color = hex2rgb(graphics_data.fillColor);
+        const alpha = graphics_data.fill_alpha;
         const r = color[0] * alpha;
         const g = color[1] * alpha;
         const b = color[2] * alpha;
@@ -72,8 +72,8 @@ export default function buildPoly(graphicsData, webGLData, webGLDataNativeLines)
         }
     }
 
-    if (graphicsData.lineWidth > 0)
+    if (graphics_data.line_width > 0)
     {
-        buildLine(graphicsData, webGLData, webGLDataNativeLines);
+        buildLine(graphics_data, webGLData, webGLDataNativeLines);
     }
 }

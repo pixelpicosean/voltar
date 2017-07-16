@@ -380,22 +380,22 @@ export function clearTextureCache()
 /**
  * @memberof V.utils
  * @const premultiplyBlendMode
- * @type {Array<number[]>} maps premultiply flag and blendMode to adjusted blendMode
+ * @type {Array<number[]>} maps premultiply flag and blend_mode to adjusted blend_mode
  */
 export const premultiplyBlendMode = mapPremultipliedBlendModes();
 
 /**
- * changes blendMode according to texture format
+ * changes blend_mode according to texture format
  *
  * @memberof V.utils
  * @function correctBlendMode
- * @param {number} blendMode supposed blend mode
+ * @param {number} blend_mode supposed blend mode
  * @param {boolean} premultiplied  whether source is premultiplied
  * @returns {number} true blend mode for this texture
  */
-export function correctBlendMode(blendMode, premultiplied)
+export function correctBlendMode(blend_mode, premultiplied)
 {
-    return premultiplyBlendMode[premultiplied ? 1 : 0][blendMode];
+    return premultiplyBlendMode[premultiplied ? 1 : 0][blend_mode];
 }
 
 /**

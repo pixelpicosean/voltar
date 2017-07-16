@@ -118,7 +118,7 @@ export default class SystemRenderer extends EventEmitter
          *
          * @member {object<string, mixed>}
          */
-        this.blendModes = null;
+        this.blend_modes = null;
 
         /**
          * The value of the preserve_drawing_buffer flag affects whether or not the contents of
@@ -284,7 +284,7 @@ export default class SystemRenderer extends EventEmitter
 
         this.auto_resize = false;
 
-        this.blendModes = null;
+        this.blend_modes = null;
 
         this.options = null;
 

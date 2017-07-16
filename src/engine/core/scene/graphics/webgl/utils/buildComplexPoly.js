@@ -7,13 +7,13 @@ import { hex2rgb } from '../../../../utils';
  *
  * @ignore
  * @private
- * @param {V.Graphics} graphicsData - The graphics object containing all the necessary properties
+ * @param {V.Graphics} graphics_data - The graphics object containing all the necessary properties
  * @param {object} webGLData - an object containing all the webGL-specific information to create this shape
  */
-export default function buildComplexPoly(graphicsData, webGLData)
+export default function buildComplexPoly(graphics_data, webGLData)
 {
     // TODO - no need to copy this as it gets turned into a Float32Array anyways..
-    const points = graphicsData.points.slice();
+    const points = graphics_data.points.slice();
 
     if (points.length < 6)
     {
@@ -24,8 +24,8 @@ export default function buildComplexPoly(graphicsData, webGLData)
     const indices = webGLData.indices;
 
     webGLData.points = points;
-    webGLData.alpha = graphicsData.fillAlpha;
-    webGLData.color = hex2rgb(graphicsData.fillColor);
+    webGLData.alpha = graphics_data.fill_alpha;
+    webGLData.color = hex2rgb(graphics_data.fillColor);
 
     // calculate the bounds..
     let minX = Infinity;

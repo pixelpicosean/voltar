@@ -266,7 +266,7 @@ export default class FilterManager extends WebGLManager
         // this syncs the pixi filters  uniforms with glsl uniforms
         this.syncUniforms(shader, filter);
 
-        renderer.state.setBlendMode(filter.blendMode);
+        renderer.state.setBlendMode(filter.blend_mode);
 
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, input.texture.texture);

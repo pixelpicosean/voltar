@@ -30,9 +30,12 @@ class Scene extends V.Node2D {
             this.add_child(spr);
 
             const gfx = new V.Graphics();
-            gfx.beginFill(0xffffff);
-            gfx.drawRect(0, 0, 32, 32);
-            gfx.endFill();
+            gfx.set_line_style(4, 0xff0000);
+            gfx.move_to(0, 0);
+            gfx.line_to(40, 40);
+            gfx.begin_fill(0xffffff);
+            gfx.draw_rect(0, 0, 32, 32);
+            gfx.end_fill();
             this.add_child(gfx);
 
             const txt = new V.Text();

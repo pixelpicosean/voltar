@@ -7,8 +7,8 @@
  *
  * // Draw a green rectangle
  * const rect = new V.Graphics()
- *     .beginFill(0x00ff00)
- *     .drawRect(40, 40, 200, 200);
+ *     .begin_fill(0x00ff00)
+ *     .draw_rect(40, 40, 200, 200);
  *
  * // Add a blur filter
  * rect.filters = [new V.filters.BlurFilter()];

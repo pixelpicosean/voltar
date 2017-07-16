@@ -15,7 +15,7 @@
  * @param {number[]} [path=[]] - Path array to push points into
  * @return {number[]} Array of points of the curve
  */
-export default function bezierCurveTo(fromX, fromY, cpX, cpY, cpX2, cpY2, toX, toY, path = [])
+export default function bezier_curve_to(fromX, fromY, cpX, cpY, cpX2, cpY2, toX, toY, path = [])
 {
     const n = 20;
     let dt = 0;
