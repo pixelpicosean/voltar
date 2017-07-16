@@ -7,7 +7,7 @@ import Mesh from './Mesh';
  * for (let i = 0; i < 20; i++) {
  *     points.push(new V.Point(i * 50, 0));
  * };
- * let Plane = new V.Plane(V.Texture.fromImage("snake.png"), points);
+ * let Plane = new V.Plane(V.Texture.from_image("snake.png"), points);
  *  ```
  *
  * @class

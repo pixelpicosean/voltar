@@ -337,7 +337,7 @@ export default class CanvasRenderer extends SystemRenderer
  * Adds a plugin to the renderer.
  *
  * @method V.CanvasRenderer#registerPlugin
- * @param {string} pluginName - The name of the plugin.
+ * @param {string} plugin_name - The name of the plugin.
  * @param {Function} ctor - The constructor function or class for the plugin.
  */
 

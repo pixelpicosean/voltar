@@ -13,7 +13,7 @@ import settings from '../settings';
  * ```js
  * let renderer = V.autoDetectRenderer(1024, 1024, { view: canvas, ratio: 1 });
  * let baseRenderTexture = new V.BaseRenderTexture(renderer, 800, 600);
- * let sprite = V.Sprite.fromImage("spinObj_01.png");
+ * let sprite = V.Sprite.from_image("spinObj_01.png");
  *
  * sprite.position.x = 800/2;
  * sprite.position.y = 600/2;

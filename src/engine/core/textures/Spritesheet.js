@@ -206,7 +206,7 @@ export default class Spritesheet
                     this._frames[i].rotated ? 2 : 0
                 );
 
-                // lets also add the frame to pixi's global cache for fromFrame and fromImage functions
+                // lets also add the frame to pixi's global cache for from_frame and from_image functions
                 Texture.addToCache(this.textures[i], i);
             }
 

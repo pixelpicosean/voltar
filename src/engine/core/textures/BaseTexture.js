@@ -290,7 +290,7 @@ export default class BaseTexture extends EventEmitter
      * downloaded, then the 'loaded' or 'error' event will be dispatched in the future
      * and `hasLoaded` will remain false after this call.
      *
-     * The logic state after calling `loadSource` directly or indirectly (eg. `fromImage`, `new BaseTexture`) is:
+     * The logic state after calling `loadSource` directly or indirectly (eg. `from_image`, `new BaseTexture`) is:
      *
      *     if (texture.hasLoaded) {
      *        // texture ready for use
@@ -669,7 +669,7 @@ export default class BaseTexture extends EventEmitter
      * @param {number} [sourceScale=(auto)] - Scale for the original image, used with Svg images.
      * @return {V.BaseTexture} The new base texture.
      */
-    static fromImage(imageUrl, crossorigin, scaleMode, sourceScale)
+    static from_image(imageUrl, crossorigin, scaleMode, sourceScale)
     {
         let baseTexture = BaseTextureCache[imageUrl];
 
@@ -748,7 +748,7 @@ export default class BaseTexture extends EventEmitter
     {
         if (typeof source === 'string')
         {
-            return BaseTexture.fromImage(source, undefined, scaleMode, sourceScale);
+            return BaseTexture.from_image(source, undefined, scaleMode, sourceScale);
         }
         else if (source instanceof HTMLImageElement)
         {

@@ -20,7 +20,7 @@ core.settings.UPLOADS_PER_FRAME = 4;
  *
  * @example
  * // Create a sprite
- * const sprite = new V.Sprite.fromImage('something.png');
+ * const sprite = new V.Sprite.from_image('something.png');
  *
  * // Load object into GPU
  * app.renderer.plugins.prepare.upload(sprite, () => {

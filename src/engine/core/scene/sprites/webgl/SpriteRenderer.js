@@ -225,7 +225,7 @@ export default class SpriteRenderer extends ObjectRenderer
         let groupCount = 1;
         let textureCount = 0;
         let currentGroup = groups[0];
-        let vertexData;
+        let vertex_data;
         let uvs;
         let blend_mode = premultiplyBlendMode[
             sprites[0]._texture.baseTexture.premultipliedAlpha ? 1 : 0][sprites[0].blend_mode];
@@ -318,7 +318,7 @@ export default class SpriteRenderer extends ObjectRenderer
                 }
             }
 
-            vertexData = sprite.vertexData;
+            vertex_data = sprite.vertex_data;
 
             // TODO this sum does not need to be set each frame..
             uvs = sprite._texture._uvs.uvsUint32;
@@ -328,38 +328,38 @@ export default class SpriteRenderer extends ObjectRenderer
                 const resolution = this.renderer.resolution;
 
                 // xy
-                float32View[index] = ((vertexData[0] * resolution) | 0) / resolution;
-                float32View[index + 1] = ((vertexData[1] * resolution) | 0) / resolution;
+                float32View[index] = ((vertex_data[0] * resolution) | 0) / resolution;
+                float32View[index + 1] = ((vertex_data[1] * resolution) | 0) / resolution;
 
                 // xy
-                float32View[index + 5] = ((vertexData[2] * resolution) | 0) / resolution;
-                float32View[index + 6] = ((vertexData[3] * resolution) | 0) / resolution;
+                float32View[index + 5] = ((vertex_data[2] * resolution) | 0) / resolution;
+                float32View[index + 6] = ((vertex_data[3] * resolution) | 0) / resolution;
 
                 // xy
-                float32View[index + 10] = ((vertexData[4] * resolution) | 0) / resolution;
-                float32View[index + 11] = ((vertexData[5] * resolution) | 0) / resolution;
+                float32View[index + 10] = ((vertex_data[4] * resolution) | 0) / resolution;
+                float32View[index + 11] = ((vertex_data[5] * resolution) | 0) / resolution;
 
                 // xy
-                float32View[index + 15] = ((vertexData[6] * resolution) | 0) / resolution;
-                float32View[index + 16] = ((vertexData[7] * resolution) | 0) / resolution;
+                float32View[index + 15] = ((vertex_data[6] * resolution) | 0) / resolution;
+                float32View[index + 16] = ((vertex_data[7] * resolution) | 0) / resolution;
             }
             else
             {
                 // xy
-                float32View[index] = vertexData[0];
-                float32View[index + 1] = vertexData[1];
+                float32View[index] = vertex_data[0];
+                float32View[index + 1] = vertex_data[1];
 
                 // xy
-                float32View[index + 5] = vertexData[2];
-                float32View[index + 6] = vertexData[3];
+                float32View[index + 5] = vertex_data[2];
+                float32View[index + 6] = vertex_data[3];
 
                 // xy
-                float32View[index + 10] = vertexData[4];
-                float32View[index + 11] = vertexData[5];
+                float32View[index + 10] = vertex_data[4];
+                float32View[index + 11] = vertex_data[5];
 
                 // xy
-                float32View[index + 15] = vertexData[6];
-                float32View[index + 16] = vertexData[7];
+                float32View[index + 15] = vertex_data[6];
+                float32View[index + 16] = vertex_data[7];
             }
 
             uint32View[index + 2] = uvs[0];

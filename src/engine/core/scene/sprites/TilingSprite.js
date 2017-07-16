@@ -73,7 +73,7 @@ export default class TilingSprite extends Sprite
          * @member {string}
          * @default 'tilingSprite'
          */
-        this.pluginName = 'tilingSprite';
+        this.plugin_name = 'tilingSprite';
 
         /**
          * Whether or not anchor affects uvs
@@ -161,8 +161,8 @@ export default class TilingSprite extends Sprite
         this.tileTransform.updateLocalTransform();
         this.uvTransform.update();
 
-        renderer.setObjectRenderer(renderer.plugins[this.pluginName]);
-        renderer.plugins[this.pluginName].render(this);
+        renderer.setObjectRenderer(renderer.plugins[this.plugin_name]);
+        renderer.plugins[this.plugin_name].render(this);
     }
 
     /**
@@ -200,9 +200,9 @@ export default class TilingSprite extends Sprite
             // Tint the tiling sprite
             if (this.tint !== 0xFFFFFF)
             {
-                if (this.cachedTint !== this.tint)
+                if (this.cached_tint !== this.tint)
                 {
-                    this.cachedTint = this.tint;
+                    this.cached_tint = this.tint;
 
                     this.tintedTexture = CanvasTinter.getTintedTexture(this, this.tint);
                 }
@@ -371,7 +371,7 @@ export default class TilingSprite extends Sprite
      * @param {number} height - the height of the tiling sprite
      * @return {V.extras.TilingSprite} A new TilingSprite using a texture from the texture cache matching the frameId
      */
-    static fromFrame(frameId, width, height)
+    static from_frame(frameId, width, height)
     {
         const texture = utils.TextureCache[frameId];
 
@@ -396,9 +396,9 @@ export default class TilingSprite extends Sprite
      *  see {@link V.SCALE_MODES} for possible values
      * @return {V.extras.TilingSprite} A new TilingSprite using a texture from the texture cache matching the image id
      */
-    static fromImage(imageId, width, height, crossorigin, scaleMode)
+    static from_image(imageId, width, height, crossorigin, scaleMode)
     {
-        return new TilingSprite(Texture.fromImage(imageId, crossorigin, scaleMode), width, height);
+        return new TilingSprite(Texture.from_image(imageId, crossorigin, scaleMode), width, height);
     }
 
     /**

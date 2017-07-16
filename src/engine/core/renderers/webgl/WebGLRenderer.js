@@ -748,7 +748,7 @@ export default class WebGLRenderer extends SystemRenderer
  * Adds a plugin to the renderer.
  *
  * @method V.WebGLRenderer#registerPlugin
- * @param {string} pluginName - The name of the plugin.
+ * @param {string} plugin_name - The name of the plugin.
  * @param {Function} ctor - The constructor function or class for the plugin.
  */
 

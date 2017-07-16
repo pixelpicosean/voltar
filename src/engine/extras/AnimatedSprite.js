@@ -16,7 +16,7 @@ import * as core from '../core';
  *
  * for (let i=0; i < 4; i++)
  * {
- *      let texture = V.Texture.fromImage(alienImages[i]);
+ *      let texture = V.Texture.from_image(alienImages[i]);
  *      textureArray.push(texture);
  * };
  *
@@ -301,13 +301,13 @@ export default class AnimatedSprite extends core.Sprite
      * @param {string[]} frames - The array of frames ids the movieclip will use as its texture frames
      * @return {AnimatedSprite} The new animated sprite with the specified frames.
      */
-    static fromFrames(frames)
+    static from_frames(frames)
     {
         const textures = [];
 
         for (let i = 0; i < frames.length; ++i)
         {
-            textures.push(core.Texture.fromFrame(frames[i]));
+            textures.push(core.Texture.from_frame(frames[i]));
         }
 
         return new AnimatedSprite(textures);
@@ -320,13 +320,13 @@ export default class AnimatedSprite extends core.Sprite
      * @param {string[]} images - the array of image urls the movieclip will use as its texture frames
      * @return {AnimatedSprite} The new animate sprite with the specified images as frames.
      */
-    static fromImages(images)
+    static from_images(images)
     {
         const textures = [];
 
         for (let i = 0; i < images.length; ++i)
         {
-            textures.push(core.Texture.fromImage(images[i]));
+            textures.push(core.Texture.from_image(images[i]));
         }
 
         return new AnimatedSprite(textures);

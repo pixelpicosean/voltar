@@ -408,9 +408,9 @@ export default class Text extends Sprite
     _calculate_bounds()
     {
         this.updateText(true);
-        this.calculateVertices();
+        this.calculate_vertices();
         // if we have already done this on THIS frame.
-        this._bounds.addQuad(this.vertexData);
+        this._bounds.addQuad(this.vertex_data);
     }
 
     /**

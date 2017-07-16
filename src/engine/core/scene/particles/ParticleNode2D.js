@@ -15,7 +15,7 @@ import { hex2rgb } from '../../utils';
  *
  * for (let i = 0; i < 100; ++i)
  * {
- *     let sprite = new V.Sprite.fromImage("myImage.png");
+ *     let sprite = new V.Sprite.from_image("myImage.png");
  *     container.add_child(sprite);
  * }
  * ```

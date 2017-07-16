@@ -14,7 +14,7 @@ import settings from '../settings';
  * You can directly create a texture from an image and then reuse it multiple times like this :
  *
  * ```js
- * let texture = V.Texture.fromImage('assets/image.png');
+ * let texture = V.Texture.from_image('assets/image.png');
  * let sprite1 = new V.Sprite(texture);
  * let sprite2 = new V.Sprite(texture);
  * ```
@@ -22,7 +22,7 @@ import settings from '../settings';
  * Textures made from SVGs, loaded or not, cannot be used before the file finishes processing.
  * You can check for this by checking the sprite's _textureID property.
  * ```js
- * var texture = V.Texture.fromImage('assets/image.svg');
+ * var texture = V.Texture.from_image('assets/image.svg');
  * var sprite1 = new V.Sprite(texture);
  * //sprite1._textureID should not be undefined if the texture has finished processing the SVG file
  * ```
@@ -293,13 +293,13 @@ export default class Texture extends EventEmitter
      * @param {number} [sourceScale=(auto)] - Scale for the original image, used with SVG images.
      * @return {V.Texture} The newly created texture
      */
-    static fromImage(imageUrl, crossorigin, scaleMode, sourceScale)
+    static from_image(imageUrl, crossorigin, scaleMode, sourceScale)
     {
         let texture = TextureCache[imageUrl];
 
         if (!texture)
         {
-            texture = new Texture(BaseTexture.fromImage(imageUrl, crossorigin, scaleMode, sourceScale));
+            texture = new Texture(BaseTexture.from_image(imageUrl, crossorigin, scaleMode, sourceScale));
             Texture.addToCache(texture, imageUrl);
         }
 
@@ -314,7 +314,7 @@ export default class Texture extends EventEmitter
      * @param {string} frameId - The frame Id of the texture in the cache
      * @return {V.Texture} The newly created texture
      */
-    static fromFrame(frameId)
+    static from_frame(frameId)
     {
         const texture = TextureCache[frameId];
 
@@ -398,7 +398,7 @@ export default class Texture extends EventEmitter
                     return Texture.fromVideoUrl(source);
                 }
 
-                return Texture.fromImage(source);
+                return Texture.from_image(source);
             }
 
             return texture;
@@ -447,7 +447,7 @@ export default class Texture extends EventEmitter
             name = imageUrl;
         }
 
-        // lets also add the frame to pixi's global cache for fromFrame and fromImage fucntions
+        // lets also add the frame to pixi's global cache for from_frame and from_image fucntions
         BaseTexture.addToCache(texture.baseTexture, name);
         Texture.addToCache(texture, name);
 

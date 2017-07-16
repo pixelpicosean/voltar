@@ -152,7 +152,7 @@ export default class Mesh extends Node2D
          * @member {string}
          * @default 'mesh'
          */
-        this.pluginName = 'mesh';
+        this.plugin_name = 'mesh';
     }
 
     /**
@@ -164,8 +164,8 @@ export default class Mesh extends Node2D
     _render_webGL(renderer)
     {
         this.refresh();
-        renderer.setObjectRenderer(renderer.plugins[this.pluginName]);
-        renderer.plugins[this.pluginName].render(this);
+        renderer.setObjectRenderer(renderer.plugins[this.plugin_name]);
+        renderer.plugins[this.plugin_name].render(this);
     }
 
     /**
@@ -177,7 +177,7 @@ export default class Mesh extends Node2D
     _render_canvas(renderer)
     {
         this.refresh();
-        renderer.plugins[this.pluginName].render(this);
+        renderer.plugins[this.plugin_name].render(this);
     }
 
     /**

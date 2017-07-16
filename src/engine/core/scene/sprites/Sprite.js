@@ -12,7 +12,7 @@ const tempPoint = new Point();
  * A sprite can be created directly from an image like this:
  *
  * ```js
- * let sprite = new V.Sprite.fromImage('assets/image.png');
+ * let sprite = new V.Sprite.from_image('assets/image.png');
  * ```
  *
  * @class
@@ -97,7 +97,7 @@ export default class Sprite extends Node2D
          * @member {number}
          * @default 0xFFFFFF
          */
-        this.cachedTint = 0xFFFFFF;
+        this.cached_tint = 0xFFFFFF;
 
         // call texture setter
         this.texture = texture || Texture.EMPTY;
@@ -108,7 +108,7 @@ export default class Sprite extends Node2D
          * @private
          * @member {Float32Array}
          */
-        this.vertexData = new Float32Array(8);
+        this.vertex_data = new Float32Array(8);
 
         /**
          * This is used to calculate the bounds of the object IF it is a trimmed sprite
@@ -116,7 +116,7 @@ export default class Sprite extends Node2D
          * @private
          * @member {Float32Array}
          */
-        this.vertexTrimmedData = null;
+        this.vertex_trimmed_data = null;
 
         this._transformID = -1;
         this._textureID = -1;
@@ -131,7 +131,7 @@ export default class Sprite extends Node2D
          * @member {string}
          * @default 'sprite'
          */
-        this.pluginName = 'sprite';
+        this.plugin_name = 'sprite';
     }
 
     /**
@@ -168,9 +168,9 @@ export default class Sprite extends Node2D
     }
 
     /**
-     * calculates world_transform * vertices, store it in vertexData
+     * calculates world_transform * vertices, store it in vertex_data
      */
-    calculateVertices()
+    calculate_vertices()
     {
         if (this._transformID === this.transform._worldID && this._textureID === this._texture._updateID)
         {
@@ -190,7 +190,7 @@ export default class Sprite extends Node2D
         const d = wt.d;
         const tx = wt.tx;
         const ty = wt.ty;
-        const vertexData = this.vertexData;
+        const vertex_data = this.vertex_data;
         const trim = texture.trim;
         const orig = texture.orig;
         const anchor = this._anchor;
@@ -220,31 +220,31 @@ export default class Sprite extends Node2D
         }
 
         // xy
-        vertexData[0] = (a * w1) + (c * h1) + tx;
-        vertexData[1] = (d * h1) + (b * w1) + ty;
+        vertex_data[0] = (a * w1) + (c * h1) + tx;
+        vertex_data[1] = (d * h1) + (b * w1) + ty;
 
         // xy
-        vertexData[2] = (a * w0) + (c * h1) + tx;
-        vertexData[3] = (d * h1) + (b * w0) + ty;
+        vertex_data[2] = (a * w0) + (c * h1) + tx;
+        vertex_data[3] = (d * h1) + (b * w0) + ty;
 
          // xy
-        vertexData[4] = (a * w0) + (c * h0) + tx;
-        vertexData[5] = (d * h0) + (b * w0) + ty;
+        vertex_data[4] = (a * w0) + (c * h0) + tx;
+        vertex_data[5] = (d * h0) + (b * w0) + ty;
 
         // xy
-        vertexData[6] = (a * w1) + (c * h0) + tx;
-        vertexData[7] = (d * h0) + (b * w1) + ty;
+        vertex_data[6] = (a * w1) + (c * h0) + tx;
+        vertex_data[7] = (d * h0) + (b * w1) + ty;
     }
 
     /**
-     * calculates world_transform * vertices for a non texture with a trim. store it in vertexTrimmedData
+     * calculates world_transform * vertices for a non texture with a trim. store it in vertex_trimmed_data
      * This is used to ensure that the true width and height of a trimmed texture is respected
      */
-    calculateTrimmedVertices()
+    calculate_trimmed_vertices()
     {
-        if (!this.vertexTrimmedData)
+        if (!this.vertex_trimmed_data)
         {
-            this.vertexTrimmedData = new Float32Array(8);
+            this.vertex_trimmed_data = new Float32Array(8);
         }
         else if (this._transformTrimmedID === this.transform._worldID && this._textureTrimmedID === this._texture._updateID)
         {
@@ -256,7 +256,7 @@ export default class Sprite extends Node2D
 
         // lets do some special trim code!
         const texture = this._texture;
-        const vertexData = this.vertexTrimmedData;
+        const vertex_data = this.vertex_trimmed_data;
         const orig = texture.orig;
         const anchor = this._anchor;
 
@@ -276,20 +276,20 @@ export default class Sprite extends Node2D
         const h0 = h1 + orig.height;
 
         // xy
-        vertexData[0] = (a * w1) + (c * h1) + tx;
-        vertexData[1] = (d * h1) + (b * w1) + ty;
+        vertex_data[0] = (a * w1) + (c * h1) + tx;
+        vertex_data[1] = (d * h1) + (b * w1) + ty;
 
         // xy
-        vertexData[2] = (a * w0) + (c * h1) + tx;
-        vertexData[3] = (d * h1) + (b * w0) + ty;
+        vertex_data[2] = (a * w0) + (c * h1) + tx;
+        vertex_data[3] = (d * h1) + (b * w0) + ty;
 
         // xy
-        vertexData[4] = (a * w0) + (c * h0) + tx;
-        vertexData[5] = (d * h0) + (b * w0) + ty;
+        vertex_data[4] = (a * w0) + (c * h0) + tx;
+        vertex_data[5] = (d * h0) + (b * w0) + ty;
 
         // xy
-        vertexData[6] = (a * w1) + (c * h0) + tx;
-        vertexData[7] = (d * h0) + (b * w1) + ty;
+        vertex_data[6] = (a * w1) + (c * h0) + tx;
+        vertex_data[7] = (d * h0) + (b * w1) + ty;
     }
 
     /**
@@ -301,10 +301,10 @@ export default class Sprite extends Node2D
     */
     _render_webGL(renderer)
     {
-        this.calculateVertices();
+        this.calculate_vertices();
 
-        renderer.setObjectRenderer(renderer.plugins[this.pluginName]);
-        renderer.plugins[this.pluginName].render(this);
+        renderer.setObjectRenderer(renderer.plugins[this.plugin_name]);
+        renderer.plugins[this.plugin_name].render(this);
     }
 
     /**
@@ -315,7 +315,7 @@ export default class Sprite extends Node2D
     */
     _render_canvas(renderer)
     {
-        renderer.plugins[this.pluginName].render(this);
+        renderer.plugins[this.plugin_name].render(this);
     }
 
     /**
@@ -332,14 +332,14 @@ export default class Sprite extends Node2D
         if (!trim || (trim.width === orig.width && trim.height === orig.height))
         {
             // no trim! lets use the usual calculations..
-            this.calculateVertices();
-            this._bounds.addQuad(this.vertexData);
+            this.calculate_vertices();
+            this._bounds.addQuad(this.vertex_data);
         }
         else
         {
             // lets calculate a special trimmed bounds...
-            this.calculateTrimmedVertices();
-            this._bounds.addQuad(this.vertexTrimmedData);
+            this.calculate_trimmed_vertices();
+            this._bounds.addQuad(this.vertex_trimmed_data);
         }
     }
 
@@ -455,7 +455,7 @@ export default class Sprite extends Node2D
      * @param {string} frameId - The frame Id of the texture in the cache
      * @return {V.Sprite} A new Sprite using a texture from the texture cache matching the frameId
      */
-    static fromFrame(frameId)
+    static from_frame(frameId)
     {
         const texture = TextureCache[frameId];
 
@@ -478,9 +478,9 @@ export default class Sprite extends Node2D
      *  see {@link V.SCALE_MODES} for possible values
      * @return {V.Sprite} A new Sprite using a texture from the texture cache matching the image id
      */
-    static fromImage(imageId, crossorigin, scaleMode)
+    static from_image(imageId, crossorigin, scaleMode)
     {
-        return new Sprite(Texture.fromImage(imageId, crossorigin, scaleMode));
+        return new Sprite(Texture.from_image(imageId, crossorigin, scaleMode));
     }
 
     /**
@@ -573,7 +573,7 @@ export default class Sprite extends Node2D
         }
 
         this._texture = value;
-        this.cachedTint = 0xFFFFFF;
+        this.cached_tint = 0xFFFFFF;
 
         this._textureID = -1;
         this._textureTrimmedID = -1;
