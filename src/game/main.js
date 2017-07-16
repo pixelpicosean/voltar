@@ -6,7 +6,8 @@ V.settings.SCALE_MODE = V.SCALE_MODES.NEAREST;
 
 
 V.loader
-    .add('pickup', 'media/health-pack.png');
+    .add('pickup', 'media/health-pack.png')
+    .add('explo', 'media/explode.mp3')
 
 const tex = V.utils.TextureCache;
 
@@ -43,6 +44,8 @@ class Scene extends V.Node2D {
             const txt = new V.Text();
             txt.text = 'Hello';
             this.add_child(txt);
+
+            V.sound.play('explo');
 
             console.log('load complete')
         });
