@@ -35,13 +35,13 @@ import settings from '../settings';
 export default class Texture extends EventEmitter
 {
     /**
-     * @param {V.BaseTexture} baseTexture - The base texture source to create the texture from
+     * @param {V.BaseTexture} base_texture - The base texture source to create the texture from
      * @param {V.Rectangle} [frame] - The rectangle frame of the texture to show
      * @param {V.Rectangle} [orig] - The area of original texture
      * @param {V.Rectangle} [trim] - Trimmed rectangle of original texture
      * @param {number} [rotate] - indicates how the texture was rotated by texture packer. See {@link V.GroupD8}
      */
-    constructor(baseTexture, frame, orig, trim, rotate)
+    constructor(base_texture, frame, orig, trim, rotate)
     {
         super();
 
@@ -58,9 +58,9 @@ export default class Texture extends EventEmitter
             frame = new Rectangle(0, 0, 1, 1);
         }
 
-        if (baseTexture instanceof Texture)
+        if (base_texture instanceof Texture)
         {
-            baseTexture = baseTexture.baseTexture;
+            base_texture = base_texture.base_texture;
         }
 
         /**
@@ -68,7 +68,7 @@ export default class Texture extends EventEmitter
          *
          * @member {V.BaseTexture}
          */
-        this.baseTexture = baseTexture;
+        this.base_texture = base_texture;
 
         /**
          * This is the area of the BaseTexture image to actually copy to the Canvas / WebGL when rendering,
@@ -126,24 +126,24 @@ export default class Texture extends EventEmitter
             throw new Error('attempt to use diamond-shaped UVs. If you are sure, set rotation manually');
         }
 
-        if (baseTexture.hasLoaded)
+        if (base_texture.hasLoaded)
         {
             if (this.noFrame)
             {
-                frame = new Rectangle(0, 0, baseTexture.width, baseTexture.height);
+                frame = new Rectangle(0, 0, base_texture.width, base_texture.height);
 
                 // if there is no frame we should monitor for any base texture changes..
-                baseTexture.on('update', this.onBaseTextureUpdated, this);
+                base_texture.on('update', this.onBaseTextureUpdated, this);
             }
             this.frame = frame;
         }
         else
         {
-            baseTexture.once('loaded', this.onBaseTextureLoaded, this);
+            base_texture.once('loaded', this.onBaseTextureLoaded, this);
         }
 
         /**
-         * Fired when the texture is updated. This happens if the frame or the baseTexture is updated.
+         * Fired when the texture is updated. This happens if the frame or the base_texture is updated.
          *
          * @event V.Texture#update
          * @protected
@@ -174,30 +174,30 @@ export default class Texture extends EventEmitter
      */
     update()
     {
-        this.baseTexture.update();
+        this.base_texture.update();
     }
 
     /**
      * Called when the base texture is loaded
      *
      * @private
-     * @param {V.BaseTexture} baseTexture - The base texture.
+     * @param {V.BaseTexture} base_texture - The base texture.
      */
-    onBaseTextureLoaded(baseTexture)
+    onBaseTextureLoaded(base_texture)
     {
         this._updateID++;
 
         // TODO this code looks confusing.. boo to abusing getters and setters!
         if (this.noFrame)
         {
-            this.frame = new Rectangle(0, 0, baseTexture.width, baseTexture.height);
+            this.frame = new Rectangle(0, 0, base_texture.width, base_texture.height);
         }
         else
         {
             this.frame = this._frame;
         }
 
-        this.baseTexture.on('update', this.onBaseTextureUpdated, this);
+        this.base_texture.on('update', this.onBaseTextureUpdated, this);
         this.emit('update', this);
     }
 
@@ -205,14 +205,14 @@ export default class Texture extends EventEmitter
      * Called when the base texture is updated
      *
      * @private
-     * @param {V.BaseTexture} baseTexture - The base texture.
+     * @param {V.BaseTexture} base_texture - The base texture.
      */
-    onBaseTextureUpdated(baseTexture)
+    onBaseTextureUpdated(base_texture)
     {
         this._updateID++;
 
-        this._frame.width = baseTexture.width;
-        this._frame.height = baseTexture.height;
+        this._frame.width = base_texture.width;
+        this._frame.height = base_texture.height;
 
         this.emit('update', this);
     }
@@ -224,24 +224,24 @@ export default class Texture extends EventEmitter
      */
     destroy(destroyBase)
     {
-        if (this.baseTexture)
+        if (this.base_texture)
         {
             if (destroyBase)
             {
                 // delete the texture if it exists in the texture cache..
                 // this only needs to be removed if the base texture is actually destroyed too..
-                if (TextureCache[this.baseTexture.imageUrl])
+                if (TextureCache[this.base_texture.imageUrl])
                 {
-                    Texture.removeFromCache(this.baseTexture.imageUrl);
+                    Texture.removeFromCache(this.base_texture.imageUrl);
                 }
 
-                this.baseTexture.destroy();
+                this.base_texture.destroy();
             }
 
-            this.baseTexture.off('update', this.onBaseTextureUpdated, this);
-            this.baseTexture.off('loaded', this.onBaseTextureLoaded, this);
+            this.base_texture.off('update', this.onBaseTextureUpdated, this);
+            this.base_texture.off('loaded', this.onBaseTextureLoaded, this);
 
-            this.baseTexture = null;
+            this.base_texture = null;
         }
 
         this._frame = null;
@@ -262,7 +262,7 @@ export default class Texture extends EventEmitter
      */
     clone()
     {
-        return new Texture(this.baseTexture, this.frame, this.orig, this.trim, this.rotate);
+        return new Texture(this.base_texture, this.frame, this.orig, this.trim, this.rotate);
     }
 
     /**
@@ -277,7 +277,7 @@ export default class Texture extends EventEmitter
             this._uvs = new TextureUvs();
         }
 
-        this._uvs.set(this._frame, this.baseTexture, this.rotate);
+        this._uvs.set(this._frame, this.base_texture, this.rotate);
 
         this._updateID++;
     }
@@ -436,10 +436,10 @@ export default class Texture extends EventEmitter
      */
     static fromLoader(source, imageUrl, name)
     {
-        const baseTexture = new BaseTexture(source, undefined, getResolutionOfUrl(imageUrl));
-        const texture = new Texture(baseTexture);
+        const base_texture = new BaseTexture(source, undefined, getResolutionOfUrl(imageUrl));
+        const texture = new Texture(base_texture);
 
-        baseTexture.imageUrl = imageUrl;
+        base_texture.imageUrl = imageUrl;
 
         // No name, use imageUrl instead
         if (!name)
@@ -448,13 +448,13 @@ export default class Texture extends EventEmitter
         }
 
         // lets also add the frame to pixi's global cache for from_frame and from_image fucntions
-        BaseTexture.add_to_cache(texture.baseTexture, name);
+        BaseTexture.add_to_cache(texture.base_texture, name);
         Texture.add_to_cache(texture, name);
 
         // also add references by url if they are different.
         if (name !== imageUrl)
         {
-            BaseTexture.add_to_cache(texture.baseTexture, imageUrl);
+            BaseTexture.add_to_cache(texture.base_texture, imageUrl);
             Texture.add_to_cache(texture, imageUrl);
         }
 
@@ -548,15 +548,15 @@ export default class Texture extends EventEmitter
 
         this.noFrame = false;
 
-        if (frame.x + frame.width > this.baseTexture.width || frame.y + frame.height > this.baseTexture.height)
+        if (frame.x + frame.width > this.base_texture.width || frame.y + frame.height > this.base_texture.height)
         {
             throw new Error('Texture Error: frame does not fit inside the base Texture dimensions: '
-                + `X: ${frame.x} + ${frame.width} > ${this.baseTexture.width} `
-                + `Y: ${frame.y} + ${frame.height} > ${this.baseTexture.height}`);
+                + `X: ${frame.x} + ${frame.width} > ${this.base_texture.width} `
+                + `Y: ${frame.y} + ${frame.height} > ${this.base_texture.height}`);
         }
 
-        // this.valid = frame && frame.width && frame.height && this.baseTexture.source && this.baseTexture.hasLoaded;
-        this.valid = frame && frame.width && frame.height && this.baseTexture.hasLoaded;
+        // this.valid = frame && frame.width && frame.height && this.base_texture.source && this.base_texture.hasLoaded;
+        this.valid = frame && frame.width && frame.height && this.base_texture.hasLoaded;
 
         if (!this.trim && !this.rotate)
         {
@@ -645,7 +645,7 @@ function removeAllHandlers(tex)
  */
 Texture.EMPTY = new Texture(new BaseTexture());
 removeAllHandlers(Texture.EMPTY);
-removeAllHandlers(Texture.EMPTY.baseTexture);
+removeAllHandlers(Texture.EMPTY.base_texture);
 
 /**
  * A white texture of 10x10 size, used for graphics and other things
@@ -656,4 +656,4 @@ removeAllHandlers(Texture.EMPTY.baseTexture);
  */
 Texture.WHITE = createWhiteTexture();
 removeAllHandlers(Texture.WHITE);
-removeAllHandlers(Texture.WHITE.baseTexture);
+removeAllHandlers(Texture.WHITE.base_texture);

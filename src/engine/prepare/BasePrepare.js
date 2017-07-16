@@ -338,11 +338,11 @@ function findMultipleBaseTextures(item, queue)
         {
             if (item._textures[i] instanceof core.Texture)
             {
-                const baseTexture = item._textures[i].baseTexture;
+                const base_texture = item._textures[i].base_texture;
 
-                if (queue.indexOf(baseTexture) === -1)
+                if (queue.indexOf(base_texture) === -1)
                 {
-                    queue.push(baseTexture);
+                    queue.push(base_texture);
                     result = true;
                 }
             }
@@ -388,7 +388,7 @@ function findTexture(item, queue)
 {
     if (item._texture && item._texture instanceof core.Texture)
     {
-        const texture = item._texture.baseTexture;
+        const texture = item._texture.base_texture;
 
         if (queue.indexOf(texture) === -1)
         {
@@ -467,7 +467,7 @@ function findText(item, queue)
             queue.push(item);
         }
         // also push the Text's texture for upload to GPU
-        const texture = item._texture.baseTexture;
+        const texture = item._texture.base_texture;
 
         if (queue.indexOf(texture) === -1)
         {

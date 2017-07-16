@@ -286,7 +286,7 @@ export default class AnimatedSprite extends core.Sprite
      * @param {boolean} [options.children=false] - if set to true, all the children will have their destroy
      *      method called as well. 'options' will be passed on to those calls.
      * @param {boolean} [options.texture=false] - Should it destroy the current texture of the sprite as well
-     * @param {boolean} [options.baseTexture=false] - Should it destroy the base texture of the sprite as well
+     * @param {boolean} [options.base_texture=false] - Should it destroy the base texture of the sprite as well
      */
     destroy(options)
     {

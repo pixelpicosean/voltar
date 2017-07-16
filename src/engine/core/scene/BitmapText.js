@@ -514,7 +514,7 @@ export default class BitmapText extends Node2D
         const data = {};
         const info = xml.getElementsByTagName('info')[0];
         const common = xml.getElementsByTagName('common')[0];
-        const res = texture.baseTexture.resolution || settings.RESOLUTION;
+        const res = texture.base_texture.resolution || settings.RESOLUTION;
 
         data.font = info.getAttribute('face');
         data.size = parseInt(info.getAttribute('size'), 10);
@@ -541,7 +541,7 @@ export default class BitmapText extends Node2D
                 yOffset: parseInt(letter.getAttribute('yoffset'), 10) / res,
                 xAdvance: parseInt(letter.getAttribute('xadvance'), 10) / res,
                 kerning: {},
-                texture: new Texture(texture.baseTexture, textureRect),
+                texture: new Texture(texture.base_texture, textureRect),
 
             };
         }

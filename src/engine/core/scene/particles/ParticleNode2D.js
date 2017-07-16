@@ -93,7 +93,7 @@ export default class ParticleNode2D extends Node2D
          * @member {boolean}
          *
          */
-        this.interactiveChildren = false;
+        this.interactive_children = false;
 
         /**
          * The blend mode to be applied to the sprite. Apply a value of `V.BLEND_MODES.NORMAL`
@@ -120,9 +120,9 @@ export default class ParticleNode2D extends Node2D
          * @readonly
          * @member {BaseTexture}
          */
-        this.baseTexture = null;
+        this.base_texture = null;
 
-        this.setProperties(properties);
+        this.set_properties(properties);
 
         /**
          * The tint applied to the container.
@@ -133,7 +133,7 @@ export default class ParticleNode2D extends Node2D
          * @default 0xFFFFFF
          */
         this._tint = 0;
-        this.tintRgb = new Float32Array(4);
+        this.tint_rgb = new Float32Array(4);
         this.tint = 0xFFFFFF;
     }
 
@@ -142,7 +142,7 @@ export default class ParticleNode2D extends Node2D
      *
      * @param {object} properties - The properties to be uploaded
      */
-    setProperties(properties)
+    set_properties(properties)
     {
         if (properties)
         {
@@ -181,7 +181,7 @@ export default class ParticleNode2D extends Node2D
     set tint(value) // eslint-disable-line require-jsdoc
     {
         this._tint = value;
-        hex2rgb(value, this.tintRgb);
+        hex2rgb(value, this.tint_rgb);
     }
 
     /**
@@ -197,12 +197,12 @@ export default class ParticleNode2D extends Node2D
             return;
         }
 
-        if (!this.baseTexture)
+        if (!this.base_texture)
         {
-            this.baseTexture = this.children[0]._texture.baseTexture;
-            if (!this.baseTexture.hasLoaded)
+            this.base_texture = this.children[0]._texture.base_texture;
+            if (!this.base_texture.hasLoaded)
             {
-                this.baseTexture.once('update', () => this.on_children_change(0));
+                this.base_texture.once('update', () => this.on_children_change(0));
             }
         }
 
@@ -337,10 +337,10 @@ export default class ParticleNode2D extends Node2D
                 finalHeight = frame.height;
             }
 
-            const resolution = child._texture.baseTexture.resolution;
+            const resolution = child._texture.base_texture.resolution;
 
             context.drawImage(
-                child._texture.baseTexture.source,
+                child._texture.base_texture.source,
                 frame.x * resolution,
                 frame.y * resolution,
                 frame.width * resolution,
@@ -362,7 +362,7 @@ export default class ParticleNode2D extends Node2D
      *  destroy method called as well. 'options' will be passed on to those calls.
      * @param {boolean} [options.texture=false] - Only used for child Sprites if options.children is set to true
      *  Should it destroy the texture of the child sprite
-     * @param {boolean} [options.baseTexture=false] - Only used for child Sprites if options.children is set to true
+     * @param {boolean} [options.base_texture=false] - Only used for child Sprites if options.children is set to true
      *  Should it destroy the base texture of the child sprite
      */
     destroy(options)

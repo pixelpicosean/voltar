@@ -82,7 +82,7 @@ export default class TilingSpriteRenderer extends core.ObjectRenderer
         quad.upload();
 
         const tex = ts._texture;
-        const baseTex = tex.baseTexture;
+        const baseTex = tex.base_texture;
         const lt = ts.tile_transform.local_transform;
         const uv = ts.uv_transform;
         let isSimple = baseTex.isPowerOfTwo

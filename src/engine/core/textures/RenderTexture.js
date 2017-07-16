@@ -93,7 +93,7 @@ export default class RenderTexture extends Texture
      *
      * @param {number} width - The width to resize to.
      * @param {number} height - The height to resize to.
-     * @param {boolean} doNotResizeBaseTexture - Should the baseTexture.width and height values be resized as well?
+     * @param {boolean} doNotResizeBaseTexture - Should the base_texture.width and height values be resized as well?
      */
     resize(width, height, doNotResizeBaseTexture)
     {
@@ -105,7 +105,7 @@ export default class RenderTexture extends Texture
 
         if (!doNotResizeBaseTexture)
         {
-            this.baseTexture.resize(width, height);
+            this.base_texture.resize(width, height);
         }
 
         this._updateUvs();

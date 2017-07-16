@@ -130,7 +130,7 @@ export default class MeshSpriteRenderer
             return;
         }
 
-        const base = texture.baseTexture;
+        const base = texture.base_texture;
         const textureSource = base.source;
         const textureWidth = base.width;
         const textureHeight = base.height;

@@ -175,7 +175,7 @@ export default class TilingSprite extends Sprite
     {
         const texture = this._texture;
 
-        if (!texture.baseTexture.hasLoaded)
+        if (!texture.base_texture.hasLoaded)
         {
             return;
         }
@@ -183,10 +183,10 @@ export default class TilingSprite extends Sprite
         const context = renderer.context;
         const transform = this.world_transform;
         const resolution = renderer.resolution;
-        const baseTexture = texture.baseTexture;
-        const baseTextureResolution = baseTexture.resolution;
-        const modX = ((this.tile_position.x / this.tile_scale.x) % texture._frame.width) * baseTextureResolution;
-        const modY = ((this.tile_position.y / this.tile_scale.y) % texture._frame.height) * baseTextureResolution;
+        const base_texture = texture.base_texture;
+        const base_textureResolution = base_texture.resolution;
+        const modX = ((this.tile_position.x / this.tile_scale.x) % texture._frame.width) * base_textureResolution;
+        const modY = ((this.tile_position.y / this.tile_scale.y) % texture._frame.height) * base_textureResolution;
 
         // create a nice shiny pattern!
         // TODO this needs to be refreshed if texture changes..
@@ -195,7 +195,7 @@ export default class TilingSprite extends Sprite
             // cut an object from a spritesheet..
             const tempCanvas = new CanvasRenderTarget(texture._frame.width,
                                                         texture._frame.height,
-                                                        baseTextureResolution);
+                                                        base_textureResolution);
 
             // Tint the tiling sprite
             if (this.tint !== 0xFFFFFF)
@@ -210,8 +210,8 @@ export default class TilingSprite extends Sprite
             }
             else
             {
-                tempCanvas.context.drawImage(baseTexture.source,
-                    -texture._frame.x * baseTextureResolution, -texture._frame.y * baseTextureResolution);
+                tempCanvas.context.drawImage(base_texture.source,
+                    -texture._frame.x * base_textureResolution, -texture._frame.y * base_textureResolution);
             }
             this._canvasPattern = tempCanvas.context.createPattern(tempCanvas.canvas, 'repeat');
         }
@@ -231,7 +231,7 @@ export default class TilingSprite extends Sprite
         context.fillStyle = this._canvasPattern;
 
         // TODO - this should be rolled into the set_transform above..
-        context.scale(this.tile_scale.x / baseTextureResolution, this.tile_scale.y / baseTextureResolution);
+        context.scale(this.tile_scale.x / base_textureResolution, this.tile_scale.y / base_textureResolution);
 
         const anchorX = this.anchor.x * -this._width;
         const anchorY = this.anchor.y * -this._height;
@@ -241,16 +241,16 @@ export default class TilingSprite extends Sprite
             context.translate(modX, modY);
 
             context.fillRect(-modX + anchorX, -modY + anchorY,
-                this._width / this.tile_scale.x * baseTextureResolution,
-                this._height / this.tile_scale.y * baseTextureResolution);
+                this._width / this.tile_scale.x * base_textureResolution,
+                this._height / this.tile_scale.y * base_textureResolution);
         }
         else
         {
             context.translate(modX + anchorX, modY + anchorY);
 
             context.fillRect(-modX, -modY,
-                this._width / this.tile_scale.x * baseTextureResolution,
-                this._height / this.tile_scale.y * baseTextureResolution);
+                this._width / this.tile_scale.x * base_textureResolution,
+                this._height / this.tile_scale.y * base_textureResolution);
         }
     }
 
@@ -336,7 +336,7 @@ export default class TilingSprite extends Sprite
      * @param {boolean} [options.children=false] - if set to true, all the children will have their destroy
      *      method called as well. 'options' will be passed on to those calls.
      * @param {boolean} [options.texture=false] - Should it destroy the current texture of the sprite as well
-     * @param {boolean} [options.baseTexture=false] - Should it destroy the base texture of the sprite as well
+     * @param {boolean} [options.base_texture=false] - Should it destroy the base texture of the sprite as well
      */
     destroy(options)
     {

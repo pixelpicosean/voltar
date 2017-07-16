@@ -117,7 +117,7 @@ export default class Mesh extends Node2D
          *
          * @member {number}
          */
-        this.tintRgb = new Float32Array([1, 1, 1]);
+        this.tint_rgb = new Float32Array([1, 1, 1]);
 
         /**
          * A map of renderer IDs to webgl render data
@@ -302,7 +302,7 @@ export default class Mesh extends Node2D
         if (value)
         {
             // wait for the texture to load
-            if (value.baseTexture.hasLoaded)
+            if (value.base_texture.hasLoaded)
             {
                 this._onTextureUpdate();
             }
@@ -321,12 +321,12 @@ export default class Mesh extends Node2D
      */
     get tint()
     {
-        return utils.rgb2hex(this.tintRgb);
+        return utils.rgb2hex(this.tint_rgb);
     }
 
     set tint(value) // eslint-disable-line require-jsdoc
     {
-        this.tintRgb = utils.hex2rgb(value, this.tintRgb);
+        this.tint_rgb = utils.hex2rgb(value, this.tint_rgb);
     }
 }
 

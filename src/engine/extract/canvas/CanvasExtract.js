@@ -86,8 +86,8 @@ export default class CanvasExtract
 
         if (renderTexture)
         {
-            context = renderTexture.baseTexture._canvasRenderTarget.context;
-            resolution = renderTexture.baseTexture._canvasRenderTarget.resolution;
+            context = renderTexture.base_texture._canvasRenderTarget.context;
+            resolution = renderTexture.base_texture._canvasRenderTarget.resolution;
             frame = renderTexture.frame;
         }
         else
@@ -141,8 +141,8 @@ export default class CanvasExtract
 
         if (renderTexture)
         {
-            context = renderTexture.baseTexture._canvasRenderTarget.context;
-            resolution = renderTexture.baseTexture._canvasRenderTarget.resolution;
+            context = renderTexture.base_texture._canvasRenderTarget.context;
+            resolution = renderTexture.base_texture._canvasRenderTarget.resolution;
             frame = renderTexture.frame;
         }
         else

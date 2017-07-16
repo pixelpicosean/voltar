@@ -411,7 +411,7 @@ export default class Sprite extends Node2D
      * @param {boolean} [options.children=false] - if set to true, all the children will have their destroy
      *      method called as well. 'options' will be passed on to those calls.
      * @param {boolean} [options.texture=false] - Should it destroy the current texture of the sprite as well
-     * @param {boolean} [options.baseTexture=false] - Should it destroy the base texture of the sprite as well
+     * @param {boolean} [options.base_texture=false] - Should it destroy the base texture of the sprite as well
      */
     destroy(options)
     {
@@ -423,7 +423,7 @@ export default class Sprite extends Node2D
 
         if (destroyTexture)
         {
-            const destroyBaseTexture = typeof options === 'boolean' ? options : options && options.baseTexture;
+            const destroyBaseTexture = typeof options === 'boolean' ? options : options && options.base_texture;
 
             this._texture.destroy(!!destroyBaseTexture);
         }
@@ -581,7 +581,7 @@ export default class Sprite extends Node2D
         if (value)
         {
             // wait for the texture to load
-            if (value.baseTexture.hasLoaded)
+            if (value.base_texture.hasLoaded)
             {
                 this._onTextureUpdate();
             }

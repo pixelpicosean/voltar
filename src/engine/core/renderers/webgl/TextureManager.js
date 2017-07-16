@@ -67,7 +67,7 @@ export default class TextureManager
     update_texture(texture, location)
     {
         // assume it good!
-        // texture = texture.baseTexture || texture;
+        // texture = texture.base_texture || texture;
 
         const gl = this.gl;
 
@@ -191,7 +191,7 @@ export default class TextureManager
      */
     destroyTexture(texture, skipRemove)
     {
-        texture = texture.baseTexture || texture;
+        texture = texture.base_texture || texture;
 
         if (!texture.hasLoaded)
         {

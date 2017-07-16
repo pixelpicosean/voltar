@@ -225,7 +225,7 @@ export default class BaseTexture extends EventEmitter
          *
          * @protected
          * @event V.BaseTexture#loaded
-         * @param {V.BaseTexture} baseTexture - Resource loaded.
+         * @param {V.BaseTexture} base_texture - Resource loaded.
          */
 
         /**
@@ -233,7 +233,7 @@ export default class BaseTexture extends EventEmitter
          *
          * @protected
          * @event V.BaseTexture#error
-         * @param {V.BaseTexture} baseTexture - Resource errored.
+         * @param {V.BaseTexture} base_texture - Resource errored.
          */
 
         /**
@@ -241,7 +241,7 @@ export default class BaseTexture extends EventEmitter
          *
          * @protected
          * @event V.BaseTexture#update
-         * @param {V.BaseTexture} baseTexture - Instance of texture being updated.
+         * @param {V.BaseTexture} base_texture - Instance of texture being updated.
          */
 
         /**
@@ -249,7 +249,7 @@ export default class BaseTexture extends EventEmitter
          *
          * @protected
          * @event V.BaseTexture#dispose
-         * @param {V.BaseTexture} baseTexture - Instance of texture being destroyed.
+         * @param {V.BaseTexture} base_texture - Instance of texture being destroyed.
          */
     }
 
@@ -671,9 +671,9 @@ export default class BaseTexture extends EventEmitter
      */
     static from_image(imageUrl, crossorigin, scaleMode, sourceScale)
     {
-        let baseTexture = BaseTextureCache[imageUrl];
+        let base_texture = BaseTextureCache[imageUrl];
 
-        if (!baseTexture)
+        if (!base_texture)
         {
             // new Image() breaks tex loading in some versions of Chrome.
             // See https://code.google.com/p/chromium/issues/detail?id=238071
@@ -688,23 +688,23 @@ export default class BaseTexture extends EventEmitter
                 image.crossOrigin = typeof crossorigin === 'string' ? crossorigin : 'anonymous';
             }
 
-            baseTexture = new BaseTexture(image, scaleMode);
-            baseTexture.imageUrl = imageUrl;
+            base_texture = new BaseTexture(image, scaleMode);
+            base_texture.imageUrl = imageUrl;
 
             if (sourceScale)
             {
-                baseTexture.sourceScale = sourceScale;
+                base_texture.sourceScale = sourceScale;
             }
 
             // if there is an @2x at the end of the url we are going to assume its a highres image
-            baseTexture.resolution = getResolutionOfUrl(imageUrl);
+            base_texture.resolution = getResolutionOfUrl(imageUrl);
 
             image.src = imageUrl; // Setting this triggers load
 
-            BaseTexture.add_to_cache(baseTexture, imageUrl);
+            BaseTexture.add_to_cache(base_texture, imageUrl);
         }
 
-        return baseTexture;
+        return base_texture;
     }
 
     /**
@@ -723,15 +723,15 @@ export default class BaseTexture extends EventEmitter
             canvas._pixiId = `${origin}_${uid()}`;
         }
 
-        let baseTexture = BaseTextureCache[canvas._pixiId];
+        let base_texture = BaseTextureCache[canvas._pixiId];
 
-        if (!baseTexture)
+        if (!base_texture)
         {
-            baseTexture = new BaseTexture(canvas, scaleMode);
-            BaseTexture.add_to_cache(baseTexture, canvas._pixiId);
+            base_texture = new BaseTexture(canvas, scaleMode);
+            BaseTexture.add_to_cache(base_texture, canvas._pixiId);
         }
 
-        return baseTexture;
+        return base_texture;
     }
 
     /**
@@ -753,25 +753,25 @@ export default class BaseTexture extends EventEmitter
         else if (source instanceof HTMLImageElement)
         {
             const imageUrl = source.src;
-            let baseTexture = BaseTextureCache[imageUrl];
+            let base_texture = BaseTextureCache[imageUrl];
 
-            if (!baseTexture)
+            if (!base_texture)
             {
-                baseTexture = new BaseTexture(source, scaleMode);
-                baseTexture.imageUrl = imageUrl;
+                base_texture = new BaseTexture(source, scaleMode);
+                base_texture.imageUrl = imageUrl;
 
                 if (sourceScale)
                 {
-                    baseTexture.sourceScale = sourceScale;
+                    base_texture.sourceScale = sourceScale;
                 }
 
                 // if there is an @2x at the end of the url we are going to assume its a highres image
-                baseTexture.resolution = getResolutionOfUrl(imageUrl);
+                base_texture.resolution = getResolutionOfUrl(imageUrl);
 
-                BaseTexture.add_to_cache(baseTexture, imageUrl);
+                BaseTexture.add_to_cache(base_texture, imageUrl);
             }
 
-            return baseTexture;
+            return base_texture;
         }
         else if (source instanceof HTMLCanvasElement)
         {
@@ -786,16 +786,16 @@ export default class BaseTexture extends EventEmitter
      * Adds a BaseTexture to the global BaseTextureCache. This cache is shared across the whole V object.
      *
      * @static
-     * @param {V.BaseTexture} baseTexture - The BaseTexture to add to the cache.
+     * @param {V.BaseTexture} base_texture - The BaseTexture to add to the cache.
      * @param {string} id - The id that the BaseTexture will be stored against.
      */
-    static add_to_cache(baseTexture, id)
+    static add_to_cache(base_texture, id)
     {
         if (id)
         {
-            if (baseTexture.textureCacheIds.indexOf(id) === -1)
+            if (base_texture.textureCacheIds.indexOf(id) === -1)
             {
-                baseTexture.textureCacheIds.push(id);
+                base_texture.textureCacheIds.push(id);
             }
 
             // @if DEBUG
@@ -807,7 +807,7 @@ export default class BaseTexture extends EventEmitter
             /* eslint-enable no-console */
             // @endif
 
-            BaseTextureCache[id] = baseTexture;
+            BaseTextureCache[id] = base_texture;
         }
     }
 
@@ -815,39 +815,39 @@ export default class BaseTexture extends EventEmitter
      * Remove a BaseTexture from the global BaseTextureCache.
      *
      * @static
-     * @param {string|V.BaseTexture} baseTexture - id of a BaseTexture to be removed, or a BaseTexture instance itself.
+     * @param {string|V.BaseTexture} base_texture - id of a BaseTexture to be removed, or a BaseTexture instance itself.
      * @return {V.BaseTexture|null} The BaseTexture that was removed.
      */
-    static removeFromCache(baseTexture)
+    static removeFromCache(base_texture)
     {
-        if (typeof baseTexture === 'string')
+        if (typeof base_texture === 'string')
         {
-            const baseTextureFromCache = BaseTextureCache[baseTexture];
+            const base_textureFromCache = BaseTextureCache[base_texture];
 
-            if (baseTextureFromCache)
+            if (base_textureFromCache)
             {
-                const index = baseTextureFromCache.textureCacheIds.indexOf(baseTexture);
+                const index = base_textureFromCache.textureCacheIds.indexOf(base_texture);
 
                 if (index > -1)
                 {
-                    baseTextureFromCache.textureCacheIds.splice(index, 1);
+                    base_textureFromCache.textureCacheIds.splice(index, 1);
                 }
 
-                delete BaseTextureCache[baseTexture];
+                delete BaseTextureCache[base_texture];
 
-                return baseTextureFromCache;
+                return base_textureFromCache;
             }
         }
-        else if (baseTexture && baseTexture.textureCacheIds)
+        else if (base_texture && base_texture.textureCacheIds)
         {
-            for (let i = 0; i < baseTexture.textureCacheIds.length; ++i)
+            for (let i = 0; i < base_texture.textureCacheIds.length; ++i)
             {
-                delete BaseTextureCache[baseTexture.textureCacheIds[i]];
+                delete BaseTextureCache[base_texture.textureCacheIds[i]];
             }
 
-            baseTexture.textureCacheIds.length = 0;
+            base_texture.textureCacheIds.length = 0;
 
-            return baseTexture;
+            return base_texture;
         }
 
         return null;

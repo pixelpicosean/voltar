@@ -11,7 +11,7 @@ import { Matrix } from '../../../math';
 export function calculateScreenSpaceMatrix(outputMatrix, filter_area, textureSize)
 {
      // let world_transform = sprite.world_transform.copy(Matrix.TEMP_MATRIX),
-    // let texture = {width:1136, height:700};//sprite._texture.baseTexture;
+    // let texture = {width:1136, height:700};//sprite._texture.base_texture;
 
     // TODO unwrap?
     const mappedMatrix = outputMatrix.identity();
@@ -41,7 +41,7 @@ export function calculateNormalizedScreenSpaceMatrix(outputMatrix, filter_area, 
 export function calculateSpriteMatrix(outputMatrix, filter_area, textureSize, sprite)
 {
     const world_transform = sprite.world_transform.copy(Matrix.TEMP_MATRIX);
-    const texture = sprite._texture.baseTexture;
+    const texture = sprite._texture.base_texture;
 
     // TODO unwrap?
     const mappedMatrix = outputMatrix.identity();

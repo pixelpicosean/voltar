@@ -228,7 +228,7 @@ export default class SpriteRenderer extends ObjectRenderer
         let vertex_data;
         let uvs;
         let blend_mode = premultiplyBlendMode[
-            sprites[0]._texture.baseTexture.premultipliedAlpha ? 1 : 0][sprites[0].blend_mode];
+            sprites[0]._texture.base_texture.premultipliedAlpha ? 1 : 0][sprites[0].blend_mode];
 
         currentGroup.textureCount = 0;
         currentGroup.start = 0;
@@ -251,7 +251,7 @@ export default class SpriteRenderer extends ObjectRenderer
             // they have all ready been calculated so we just need to push them into the buffer.
             const sprite = sprites[i];
 
-            nextTexture = sprite._texture.baseTexture;
+            nextTexture = sprite._texture.base_texture;
 
             const spriteBlendMode = premultiplyBlendMode[Number(nextTexture.premultipliedAlpha)][sprite.blend_mode];
 

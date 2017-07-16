@@ -79,7 +79,7 @@ const CanvasTinter = {
     {
         const context = canvas.getContext('2d');
         const crop = texture._frame.clone();
-        const resolution = texture.baseTexture.resolution;
+        const resolution = texture.base_texture.resolution;
 
         crop.x *= resolution;
         crop.y *= resolution;
@@ -96,7 +96,7 @@ const CanvasTinter = {
         context.globalCompositeOperation = 'multiply';
 
         context.drawImage(
-            texture.baseTexture.source,
+            texture.base_texture.source,
             crop.x,
             crop.y,
             crop.width,
@@ -110,7 +110,7 @@ const CanvasTinter = {
         context.globalCompositeOperation = 'destination-atop';
 
         context.drawImage(
-            texture.baseTexture.source,
+            texture.base_texture.source,
             crop.x,
             crop.y,
             crop.width,
@@ -134,7 +134,7 @@ const CanvasTinter = {
     {
         const context = canvas.getContext('2d');
         const crop = texture._frame.clone();
-        const resolution = texture.baseTexture.resolution;
+        const resolution = texture.base_texture.resolution;
 
         crop.x *= resolution;
         crop.y *= resolution;
@@ -150,7 +150,7 @@ const CanvasTinter = {
 
         context.globalCompositeOperation = 'destination-atop';
         context.drawImage(
-            texture.baseTexture.source,
+            texture.base_texture.source,
             crop.x,
             crop.y,
             crop.width,
@@ -176,7 +176,7 @@ const CanvasTinter = {
     {
         const context = canvas.getContext('2d');
         const crop = texture._frame.clone();
-        const resolution = texture.baseTexture.resolution;
+        const resolution = texture.base_texture.resolution;
 
         crop.x *= resolution;
         crop.y *= resolution;
@@ -188,7 +188,7 @@ const CanvasTinter = {
 
         context.globalCompositeOperation = 'copy';
         context.drawImage(
-            texture.baseTexture.source,
+            texture.base_texture.source,
             crop.x,
             crop.y,
             crop.width,

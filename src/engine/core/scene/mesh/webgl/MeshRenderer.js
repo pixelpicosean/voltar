@@ -106,7 +106,7 @@ export default class MeshRenderer extends ObjectRenderer
 
         glData.shader.uniforms.uSampler = renderer.bindTexture(texture);
 
-        renderer.state.setBlendMode(utils.correctBlendMode(mesh.blend_mode, texture.baseTexture.premultipliedAlpha));
+        renderer.state.setBlendMode(utils.correctBlendMode(mesh.blend_mode, texture.base_texture.premultipliedAlpha));
 
         if (glData.shader.uniforms.uTransform)
         {
@@ -121,8 +121,8 @@ export default class MeshRenderer extends ObjectRenderer
         }
         glData.shader.uniforms.translationMatrix = mesh.world_transform.toArray(true);
 
-        glData.shader.uniforms.uColor = utils.premultiplyRgba(mesh.tintRgb,
-            mesh.world_alpha, glData.shader.uniforms.uColor, texture.baseTexture.premultipliedAlpha);
+        glData.shader.uniforms.uColor = utils.premultiplyRgba(mesh.tint_rgb,
+            mesh.world_alpha, glData.shader.uniforms.uColor, texture.base_texture.premultipliedAlpha);
 
         const drawMode = mesh.drawMode === Mesh.DRAW_MODES.TRIANGLE_MESH ? gl.TRIANGLE_STRIP : gl.TRIANGLES;
 

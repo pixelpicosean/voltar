@@ -146,7 +146,7 @@ export default class CanvasRenderer extends SystemRenderer
 
         if (renderTexture)
         {
-            renderTexture = renderTexture.baseTexture || renderTexture;
+            renderTexture = renderTexture.base_texture || renderTexture;
 
             if (!renderTexture._canvasRenderTarget)
             {

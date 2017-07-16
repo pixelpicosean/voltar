@@ -37,7 +37,7 @@ export default {
      * @member {boolean}
      * @memberof V.Node2D#
      */
-    interactiveChildren: true,
+    interactive_children: true,
 
     /**
      * Interaction shape. Children will be hit first, then this shape will be checked.

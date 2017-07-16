@@ -1030,9 +1030,9 @@ export default class InteractionManager extends EventEmitter
         }
 
         // ** FREE TIP **! If an object is not interactive or has no buttons in it
-        // (such as a game scene!) set interactiveChildren to false for that displayObject.
+        // (such as a game scene!) set interactive_children to false for that displayObject.
         // This will allow pixi to completely ignore and bypass checking the displayObjects children.
-        if (displayObject.interactiveChildren && displayObject.children)
+        if (displayObject.interactive_children && displayObject.children)
         {
             const children = displayObject.children;
 

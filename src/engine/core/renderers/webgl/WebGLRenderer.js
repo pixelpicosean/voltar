@@ -418,8 +418,8 @@ export default class WebGLRenderer extends SystemRenderer
      */
     clearRenderTexture(renderTexture, clearColor)
     {
-        const baseTexture = renderTexture.baseTexture;
-        const renderTarget = baseTexture._glRenderTargets[this.CONTEXT_UID];
+        const base_texture = renderTexture.base_texture;
+        const renderTarget = base_texture._glRenderTargets[this.CONTEXT_UID];
 
         if (renderTarget)
         {
@@ -442,17 +442,17 @@ export default class WebGLRenderer extends SystemRenderer
 
         if (renderTexture)
         {
-            const baseTexture = renderTexture.baseTexture;
+            const base_texture = renderTexture.base_texture;
 
-            if (!baseTexture._glRenderTargets[this.CONTEXT_UID])
+            if (!base_texture._glRenderTargets[this.CONTEXT_UID])
             {
                 // bind the current texture
-                this.textureManager.update_texture(baseTexture, 0);
+                this.textureManager.update_texture(base_texture, 0);
             }
 
-            this.unbindTexture(baseTexture);
+            this.unbindTexture(base_texture);
 
-            renderTarget = baseTexture._glRenderTargets[this.CONTEXT_UID];
+            renderTarget = base_texture._glRenderTargets[this.CONTEXT_UID];
             renderTarget.setFrame(renderTexture.frame);
         }
         else
@@ -532,7 +532,7 @@ export default class WebGLRenderer extends SystemRenderer
     bindTexture(texture, location, forceLocation)
     {
         texture = texture || this.emptyTextures[location];
-        texture = texture.baseTexture || texture;
+        texture = texture.base_texture || texture;
         texture.touched = this.textureGC.count;
 
         if (!forceLocation)
@@ -587,7 +587,7 @@ export default class WebGLRenderer extends SystemRenderer
     {
         const gl = this.gl;
 
-        texture = texture.baseTexture || texture;
+        texture = texture.base_texture || texture;
 
         for (let i = 0; i < this.boundTextures.length; i++)
         {

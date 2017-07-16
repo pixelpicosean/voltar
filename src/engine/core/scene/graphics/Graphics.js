@@ -1083,10 +1083,10 @@ export default class Graphics extends Node2D
 
         canvasRenderer.render(this, canvasBuffer, true, tempMatrix);
 
-        const texture = Texture.from_canvas(canvasBuffer.baseTexture._canvasRenderTarget.canvas, scaleMode, 'graphics');
+        const texture = Texture.from_canvas(canvasBuffer.base_texture._canvasRenderTarget.canvas, scaleMode, 'graphics');
 
-        texture.baseTexture.resolution = resolution;
-        texture.baseTexture.update();
+        texture.base_texture.resolution = resolution;
+        texture.base_texture.update();
 
         return texture;
     }
@@ -1136,7 +1136,7 @@ export default class Graphics extends Node2D
      *  their destroy method called as well. 'options' will be passed on to those calls.
      * @param {boolean} [options.texture=false] - Only used for child Sprites if options.children is set to true
      *  Should it destroy the texture of the child sprite
-     * @param {boolean} [options.baseTexture=false] - Only used for child Sprites if options.children is set to true
+     * @param {boolean} [options.base_texture=false] - Only used for child Sprites if options.children is set to true
      *  Should it destroy the base texture of the child sprite
      */
     destroy(options)

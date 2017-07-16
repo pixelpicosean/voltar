@@ -88,7 +88,7 @@ export default class WebGLExtract
 
         if (renderTexture)
         {
-            textureBuffer = renderTexture.baseTexture._glRenderTargets[this.renderer.CONTEXT_UID];
+            textureBuffer = renderTexture.base_texture._glRenderTargets[this.renderer.CONTEXT_UID];
             resolution = textureBuffer.resolution;
             frame = renderTexture.frame;
             flipY = false;
@@ -179,7 +179,7 @@ export default class WebGLExtract
 
         if (renderTexture)
         {
-            textureBuffer = renderTexture.baseTexture._glRenderTargets[this.renderer.CONTEXT_UID];
+            textureBuffer = renderTexture.base_texture._glRenderTargets[this.renderer.CONTEXT_UID];
             resolution = textureBuffer.resolution;
             frame = renderTexture.frame;
         }

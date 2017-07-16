@@ -170,7 +170,7 @@ export default class NineSlicePlane extends Plane
             );
         }
 
-        const base = this._texture.baseTexture;
+        const base = this._texture.base_texture;
         const textureSource = base.source;
         const w = base.width;
         const h = base.height;

@@ -33,7 +33,7 @@ export default function ()
         this.add(imageResourceName, resourcePath, loadOptions, function onImageLoad(res)
         {
             const spritesheet = new Spritesheet(
-                res.texture.baseTexture,
+                res.texture.base_texture,
                 resource.data,
                 resource.url
             );

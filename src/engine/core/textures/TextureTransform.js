@@ -127,7 +127,7 @@ export default class TextureTransform
             this.mapCoord.append(tempMat);
         }
 
-        const texBase = tex.baseTexture;
+        const texBase = tex.base_texture;
         const frame = this.uClampFrame;
         const margin = this.clamp_margin / texBase.resolution;
         const offset = this.clampOffset;

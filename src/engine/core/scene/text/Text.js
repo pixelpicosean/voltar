@@ -12,7 +12,7 @@ import trimCanvas from '../../utils/trimCanvas';
 const defaultDestroyOptions = {
     texture: true,
     children: false,
-    baseTexture: true,
+    base_texture: true,
 };
 
 /**
@@ -51,7 +51,7 @@ export default class Text extends Sprite
         super(texture);
 
         // base texture is already automatically added to the cache, now adding the actual texture
-        Texture.add_to_cache(this._texture, this._texture.baseTexture.textureCacheIds[0]);
+        Texture.add_to_cache(this._texture, this._texture.base_texture.textureCacheIds[0]);
 
         /**
          * The canvas element that everything is drawn to
@@ -326,15 +326,15 @@ export default class Text extends Sprite
         const texture = this._texture;
         const style = this._style;
         const padding = style.trim ? 0 : style.padding;
-        const baseTexture = texture.baseTexture;
+        const base_texture = texture.base_texture;
 
-        baseTexture.hasLoaded = true;
-        baseTexture.resolution = this.resolution;
+        base_texture.hasLoaded = true;
+        base_texture.resolution = this.resolution;
 
-        baseTexture.realWidth = canvas.width;
-        baseTexture.realHeight = canvas.height;
-        baseTexture.width = canvas.width / this.resolution;
-        baseTexture.height = canvas.height / this.resolution;
+        base_texture.realWidth = canvas.width;
+        base_texture.realHeight = canvas.height;
+        base_texture.width = canvas.width / this.resolution;
+        base_texture.height = canvas.height / this.resolution;
 
         texture.trim.width = texture._frame.width = canvas.width / this.resolution;
         texture.trim.height = texture._frame.height = canvas.height / this.resolution;
@@ -347,7 +347,7 @@ export default class Text extends Sprite
         // call sprite onTextureUpdate to update scale if _width or _height were set
         this._onTextureUpdate();
 
-        baseTexture.emit('update', baseTexture);
+        base_texture.emit('update', base_texture);
 
         this.dirty = false;
     }
@@ -533,7 +533,7 @@ export default class Text extends Sprite
 
     /**
      * Destroys this text object.
-     * Note* Unlike a Sprite, a Text object will automatically destroy its baseTexture and texture as
+     * Note* Unlike a Sprite, a Text object will automatically destroy its base_texture and texture as
      * the majority of the time the texture will not be shared with any other Sprites.
      *
      * @param {object|boolean} [options] - Options parameter. A boolean will act as if all options
@@ -541,7 +541,7 @@ export default class Text extends Sprite
      * @param {boolean} [options.children=false] - if set to true, all the children will have their
      *  destroy method called as well. 'options' will be passed on to those calls.
      * @param {boolean} [options.texture=true] - Should it destroy the current texture of the sprite as well
-     * @param {boolean} [options.baseTexture=true] - Should it destroy the base texture of the sprite as well
+     * @param {boolean} [options.base_texture=true] - Should it destroy the base texture of the sprite as well
      */
     destroy(options)
     {

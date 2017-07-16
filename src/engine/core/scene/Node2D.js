@@ -436,7 +436,7 @@ export default class Node2D extends EventEmitter
         this.filter_area = null;
 
         this.interactive = false;
-        this.interactiveChildren = false;
+        this.interactive_children = false;
 
         this._destroyed = true;
     }
@@ -1206,7 +1206,7 @@ export default class Node2D extends EventEmitter
      *  method called as well. 'options' will be passed on to those calls.
      * @param {boolean} [options.texture=false] - Only used for child Sprites if options.children is set to true
      *  Should it destroy the texture of the child sprite
-     * @param {boolean} [options.baseTexture=false] - Only used for child Sprites if options.children is set to true
+     * @param {boolean} [options.base_texture=false] - Only used for child Sprites if options.children is set to true
      *  Should it destroy the base texture of the child sprite
      */
     destroy(options)

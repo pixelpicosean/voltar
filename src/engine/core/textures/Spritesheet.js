@@ -22,19 +22,19 @@ export default class Spritesheet
     }
 
     /**
-     * @param {V.BaseTexture} baseTexture Reference to the source BaseTexture object.
+     * @param {V.BaseTexture} base_texture Reference to the source BaseTexture object.
      * @param {Object} data - Spritesheet image data.
      * @param {string} [resolutionFilename] - The filename to consider when determining
      *        the resolution of the spritesheet. If not provided, the imageUrl will
      *        be used on the BaseTexture.
      */
-    constructor(baseTexture, data, resolutionFilename = null)
+    constructor(base_texture, data, resolutionFilename = null)
     {
         /**
          * Reference to ths source texture
          * @type {V.BaseTexture}
          */
-        this.baseTexture = baseTexture;
+        this.base_texture = base_texture;
 
         /**
          * Map of spritesheet textures.
@@ -53,7 +53,7 @@ export default class Spritesheet
          * @type {number}
          */
         this.resolution = this._updateResolution(
-            resolutionFilename || this.baseTexture.imageUrl
+            resolutionFilename || this.base_texture.imageUrl
         );
 
         /**
@@ -108,11 +108,11 @@ export default class Spritesheet
             resolution = scale !== undefined ? parseFloat(scale) : 1;
         }
 
-        // For non-1 resolutions, update baseTexture
+        // For non-1 resolutions, update base_texture
         if (resolution !== 1)
         {
-            this.baseTexture.resolution = resolution;
-            this.baseTexture.update();
+            this.base_texture.resolution = resolution;
+            this.base_texture.update();
         }
 
         return resolution;
@@ -199,7 +199,7 @@ export default class Spritesheet
                 }
 
                 this.textures[i] = new Texture(
-                    this.baseTexture,
+                    this.base_texture,
                     frame,
                     orig,
                     trim,
@@ -267,8 +267,8 @@ export default class Spritesheet
         this.textures = null;
         if (destroyBase)
         {
-            this.baseTexture.destroy();
+            this.base_texture.destroy();
         }
-        this.baseTexture = null;
+        this.base_texture = null;
     }
 }

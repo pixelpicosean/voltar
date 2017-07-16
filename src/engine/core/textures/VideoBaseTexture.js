@@ -215,15 +215,15 @@ export default class VideoBaseTexture extends BaseTexture
             video._pixiId = `video_${uid()}`;
         }
 
-        let baseTexture = BaseTextureCache[video._pixiId];
+        let base_texture = BaseTextureCache[video._pixiId];
 
-        if (!baseTexture)
+        if (!base_texture)
         {
-            baseTexture = new VideoBaseTexture(video, scaleMode);
-            BaseTexture.add_to_cache(baseTexture, video._pixiId);
+            base_texture = new VideoBaseTexture(video, scaleMode);
+            BaseTexture.add_to_cache(base_texture, video._pixiId);
         }
 
-        return baseTexture;
+        return base_texture;
     }
 
     /**
