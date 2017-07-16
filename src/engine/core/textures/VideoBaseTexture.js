@@ -11,13 +11,13 @@ import { UPDATE_PRIORITY } from '../const';
  * This can be used in several ways, such as:
  *
  * ```js
- * let texture = V.VideoBaseTexture.fromUrl('http://mydomain.com/video.mp4');
+ * let texture = V.VideoBaseTexture.from_url('http://mydomain.com/video.mp4');
  *
- * let texture = V.VideoBaseTexture.fromUrl({ src: 'http://mydomain.com/video.mp4', mime: 'video/mp4' });
+ * let texture = V.VideoBaseTexture.from_url({ src: 'http://mydomain.com/video.mp4', mime: 'video/mp4' });
  *
- * let texture = V.VideoBaseTexture.fromUrls(['/video.webm', '/video.mp4']);
+ * let texture = V.VideoBaseTexture.from_urls(['/video.webm', '/video.mp4']);
  *
- * let texture = V.VideoBaseTexture.fromUrls([
+ * let texture = V.VideoBaseTexture.from_urls([
  *     { src: '/video.webm', mime: 'video/webm' },
  *     { src: '/video.mp4', mime: 'video/mp4' }
  * ]);
@@ -33,9 +33,9 @@ export default class VideoBaseTexture extends BaseTexture
 {
     /**
      * @param {HTMLVideoElement} source - Video source
-     * @param {number} [scaleMode=V.settings.SCALE_MODE] - See {@link V.SCALE_MODES} for possible values
+     * @param {number} [scale_mode=V.settings.SCALE_MODE] - See {@link V.SCALE_MODES} for possible values
      */
-    constructor(source, scaleMode)
+    constructor(source, scale_mode)
     {
         if (!source)
         {
@@ -51,7 +51,7 @@ export default class VideoBaseTexture extends BaseTexture
             source.complete = true;
         }
 
-        super(source, scaleMode);
+        super(source, scale_mode);
 
         this.width = source.videoWidth;
         this.height = source.videoHeight;
@@ -66,14 +66,14 @@ export default class VideoBaseTexture extends BaseTexture
          * @member {boolean}
          * @default true
          */
-        this.autoPlay = true;
+        this.auto_play = true;
 
         this.update = this.update.bind(this);
         this._onCanPlay = this._onCanPlay.bind(this);
 
         source.addEventListener('play', this._onPlayStart.bind(this));
         source.addEventListener('pause', this._onPlayStop.bind(this));
-        this.hasLoaded = false;
+        this.has_loaded = false;
         this.__loaded = false;
 
         if (!this._isSourceReady())
@@ -119,7 +119,7 @@ export default class VideoBaseTexture extends BaseTexture
     _onPlayStart()
     {
         // Just in case the video has not received its can play even yet..
-        if (!this.hasLoaded)
+        if (!this.has_loaded)
         {
             this._onCanPlay();
         }
@@ -152,7 +152,7 @@ export default class VideoBaseTexture extends BaseTexture
      */
     _onCanPlay()
     {
-        this.hasLoaded = true;
+        this.has_loaded = true;
 
         if (this.source)
         {
@@ -173,7 +173,7 @@ export default class VideoBaseTexture extends BaseTexture
             {
                 this._onPlayStart();
             }
-            else if (this.autoPlay)
+            else if (this.auto_play)
             {
                 this.source.play();
             }
@@ -193,7 +193,7 @@ export default class VideoBaseTexture extends BaseTexture
 
         if (this.source && this.source._pixiId)
         {
-            BaseTexture.removeFromCache(this.source._pixiId);
+            BaseTexture.remove_from_cache(this.source._pixiId);
             delete this.source._pixiId;
         }
 
@@ -205,10 +205,10 @@ export default class VideoBaseTexture extends BaseTexture
      *
      * @static
      * @param {HTMLVideoElement} video - Video to create texture from
-     * @param {number} [scaleMode=V.settings.SCALE_MODE] - See {@link V.SCALE_MODES} for possible values
+     * @param {number} [scale_mode=V.settings.SCALE_MODE] - See {@link V.SCALE_MODES} for possible values
      * @return {V.VideoBaseTexture} Newly created VideoBaseTexture
      */
-    static fromVideo(video, scaleMode)
+    static from_video(video, scale_mode)
     {
         if (!video._pixiId)
         {
@@ -219,7 +219,7 @@ export default class VideoBaseTexture extends BaseTexture
 
         if (!base_texture)
         {
-            base_texture = new VideoBaseTexture(video, scaleMode);
+            base_texture = new VideoBaseTexture(video, scale_mode);
             BaseTexture.add_to_cache(base_texture, video._pixiId);
         }
 
@@ -235,10 +235,10 @@ export default class VideoBaseTexture extends BaseTexture
      * @param {string} [videoSrc.src] - One of the source urls for the video
      * @param {string} [videoSrc.mime] - The mimetype of the video (e.g. 'video/mp4'). If not specified
      *  the url's extension will be used as the second part of the mime type.
-     * @param {number} scaleMode - See {@link V.SCALE_MODES} for possible values
+     * @param {number} scale_mode - See {@link V.SCALE_MODES} for possible values
      * @return {V.VideoBaseTexture} Newly created VideoBaseTexture
      */
-    static fromUrl(videoSrc, scaleMode)
+    static from_url(videoSrc, scale_mode)
     {
         const video = document.createElement('video');
 
@@ -250,18 +250,18 @@ export default class VideoBaseTexture extends BaseTexture
         {
             for (let i = 0; i < videoSrc.length; ++i)
             {
-                video.appendChild(createSource(videoSrc[i].src || videoSrc[i], videoSrc[i].mime));
+                video.appendChild(create_source(videoSrc[i].src || videoSrc[i], videoSrc[i].mime));
             }
         }
         // single object or string
         else
         {
-            video.appendChild(createSource(videoSrc.src || videoSrc, videoSrc.mime));
+            video.appendChild(create_source(videoSrc.src || videoSrc, videoSrc.mime));
         }
 
         video.load();
 
-        return VideoBaseTexture.fromVideo(video, scaleMode);
+        return VideoBaseTexture.from_video(video, scale_mode);
     }
 
     /**
@@ -294,9 +294,9 @@ export default class VideoBaseTexture extends BaseTexture
     }
 }
 
-VideoBaseTexture.fromUrls = VideoBaseTexture.fromUrl;
+VideoBaseTexture.from_urls = VideoBaseTexture.from_url;
 
-function createSource(path, type)
+function create_source(path, type)
 {
     if (!type)
     {

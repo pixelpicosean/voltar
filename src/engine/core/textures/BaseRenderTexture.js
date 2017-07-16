@@ -45,23 +45,23 @@ export default class BaseRenderTexture extends BaseTexture
     /**
      * @param {number} [width=100] - The width of the base render texture
      * @param {number} [height=100] - The height of the base render texture
-     * @param {number} [scaleMode=V.settings.SCALE_MODE] - See {@link V.SCALE_MODES} for possible values
+     * @param {number} [scale_mode=V.settings.SCALE_MODE] - See {@link V.SCALE_MODES} for possible values
      * @param {number} [resolution=1] - The resolution / device pixel ratio of the texture being generated
      */
-    constructor(width = 100, height = 100, scaleMode, resolution)
+    constructor(width = 100, height = 100, scale_mode, resolution)
     {
-        super(null, scaleMode);
+        super(null, scale_mode);
 
         this.resolution = resolution || settings.RESOLUTION;
 
         this.width = width;
         this.height = height;
 
-        this.realWidth = this.width * this.resolution;
-        this.realHeight = this.height * this.resolution;
+        this.real_width = this.width * this.resolution;
+        this.real_height = this.height * this.resolution;
 
-        this.scaleMode = scaleMode !== undefined ? scaleMode : settings.SCALE_MODE;
-        this.hasLoaded = true;
+        this.scale_mode = scale_mode !== undefined ? scale_mode : settings.SCALE_MODE;
+        this.has_loaded = true;
 
         /**
          * A map of renderer IDs to webgl renderTargets
@@ -105,8 +105,8 @@ export default class BaseRenderTexture extends BaseTexture
         this.width = width;
         this.height = height;
 
-        this.realWidth = this.width * this.resolution;
-        this.realHeight = this.height * this.resolution;
+        this.real_width = this.width * this.resolution;
+        this.real_height = this.height * this.resolution;
 
         if (!this.valid)
         {

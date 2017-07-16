@@ -175,7 +175,7 @@ export default class TilingSprite extends Sprite
     {
         const texture = this._texture;
 
-        if (!texture.base_texture.hasLoaded)
+        if (!texture.base_texture.has_loaded)
         {
             return;
         }
@@ -218,7 +218,7 @@ export default class TilingSprite extends Sprite
 
         // set context state..
         context.globalAlpha = this.world_alpha;
-        context.set_transform(transform.a * resolution,
+        context.setTransform(transform.a * resolution,
                            transform.b * resolution,
                            transform.c * resolution,
                            transform.d * resolution,
@@ -392,13 +392,13 @@ export default class TilingSprite extends Sprite
      * @param {number} width - the width of the tiling sprite
      * @param {number} height - the height of the tiling sprite
      * @param {boolean} [crossorigin] - if you want to specify the cross-origin parameter
-     * @param {number} [scaleMode=V.settings.SCALE_MODE] - if you want to specify the scale mode,
+     * @param {number} [scale_mode=V.settings.SCALE_MODE] - if you want to specify the scale mode,
      *  see {@link V.SCALE_MODES} for possible values
      * @return {V.extras.TilingSprite} A new TilingSprite using a texture from the texture cache matching the image id
      */
-    static from_image(imageId, width, height, crossorigin, scaleMode)
+    static from_image(imageId, width, height, crossorigin, scale_mode)
     {
-        return new TilingSprite(Texture.from_image(imageId, crossorigin, scaleMode), width, height);
+        return new TilingSprite(Texture.from_image(imageId, crossorigin, scale_mode), width, height);
     }
 
     /**

@@ -242,15 +242,15 @@ export default class SystemRenderer extends EventEmitter
      * This can be quite useful if your displayObject is complicated and needs to be reused multiple times.
      *
      * @param {V.Node2D} displayObject - The displayObject the object will be generated from
-     * @param {number} scaleMode - Should be one of the scaleMode consts
+     * @param {number} scale_mode - Should be one of the scale_mode consts
      * @param {number} resolution - The resolution / device pixel ratio of the texture being generated
      * @return {V.Texture} a texture of the graphics object
      */
-    generate_texture(displayObject, scaleMode, resolution)
+    generate_texture(displayObject, scale_mode, resolution)
     {
         const bounds = displayObject.get_local_Bounds();
 
-        const renderTexture = RenderTexture.create(bounds.width | 0, bounds.height | 0, scaleMode, resolution);
+        const renderTexture = RenderTexture.create(bounds.width | 0, bounds.height | 0, scale_mode, resolution);
 
         tempMatrix.tx = -bounds.x;
         tempMatrix.ty = -bounds.y;

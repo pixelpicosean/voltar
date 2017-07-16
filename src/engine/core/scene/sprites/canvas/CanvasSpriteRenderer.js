@@ -64,7 +64,7 @@ export default class CanvasSpriteRenderer
             renderer.context.globalAlpha = sprite.world_alpha;
 
             // If smoothingEnabled is supported and we need to change the smoothing property for sprite texture
-            const smoothingEnabled = texture.base_texture.scaleMode === SCALE_MODES.LINEAR;
+            const smoothingEnabled = texture.base_texture.scale_mode === SCALE_MODES.LINEAR;
 
             if (renderer.smoothProperty && renderer.context[renderer.smoothProperty] !== smoothingEnabled)
             {
@@ -112,7 +112,7 @@ export default class CanvasSpriteRenderer
             }
             else
             {
-                renderer.context.set_transform(
+                renderer.context.setTransform(
                     wt.a,
                     wt.b,
                     wt.c,

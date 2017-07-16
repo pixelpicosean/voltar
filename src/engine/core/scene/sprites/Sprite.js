@@ -474,13 +474,13 @@ export default class Sprite extends Node2D
      * @static
      * @param {string} imageId - The image url of the texture
      * @param {boolean} [crossorigin=(auto)] - if you want to specify the cross-origin parameter
-     * @param {number} [scaleMode=V.settings.SCALE_MODE] - if you want to specify the scale mode,
+     * @param {number} [scale_mode=V.settings.SCALE_MODE] - if you want to specify the scale mode,
      *  see {@link V.SCALE_MODES} for possible values
      * @return {V.Sprite} A new Sprite using a texture from the texture cache matching the image id
      */
-    static from_image(imageId, crossorigin, scaleMode)
+    static from_image(imageId, crossorigin, scale_mode)
     {
-        return new Sprite(Texture.from_image(imageId, crossorigin, scaleMode));
+        return new Sprite(Texture.from_image(imageId, crossorigin, scale_mode));
     }
 
     /**
@@ -581,7 +581,7 @@ export default class Sprite extends Node2D
         if (value)
         {
             // wait for the texture to load
-            if (value.base_texture.hasLoaded)
+            if (value.base_texture.has_loaded)
             {
                 this._onTextureUpdate();
             }

@@ -302,7 +302,7 @@ export default class Mesh extends Node2D
         if (value)
         {
             // wait for the texture to load
-            if (value.base_texture.hasLoaded)
+            if (value.base_texture.has_loaded)
             {
                 this._onTextureUpdate();
             }

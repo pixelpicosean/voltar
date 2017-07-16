@@ -148,7 +148,7 @@ export default class ParticleRenderer extends ObjectRenderer
         const base_texture = children[0]._texture.base_texture;
 
         // if the uvs have not updated then no point rendering just yet!
-        this.renderer.setBlendMode(utils.correctBlendMode(container.blend_mode, base_texture.premultipliedAlpha));
+        this.renderer.setBlendMode(utils.correctBlendMode(container.blend_mode, base_texture.premultiplied_alpha));
 
         const gl = renderer.gl;
 
@@ -159,7 +159,7 @@ export default class ParticleRenderer extends ObjectRenderer
         this.shader.uniforms.projectionMatrix = m.to_array(true);
 
         this.shader.uniforms.uColor = utils.premultiplyRgba(container.tint_rgb,
-            container.world_alpha, this.shader.uniforms.uColor, base_texture.premultipliedAlpha);
+            container.world_alpha, this.shader.uniforms.uColor, base_texture.premultiplied_alpha);
 
         // make sure the texture is bound..
         this.shader.uniforms.uSampler = renderer.bindTexture(base_texture);

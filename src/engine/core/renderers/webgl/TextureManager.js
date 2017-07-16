@@ -73,7 +73,7 @@ export default class TextureManager
 
         const isRenderTexture = !!texture._glRenderTargets;
 
-        if (!texture.hasLoaded)
+        if (!texture.has_loaded)
         {
             return null;
         }
@@ -113,7 +113,7 @@ export default class TextureManager
                     this.gl,
                     texture.width,
                     texture.height,
-                    texture.scaleMode,
+                    texture.scale_mode,
                     texture.resolution
                 );
 
@@ -136,18 +136,18 @@ export default class TextureManager
 
             this._managedTextures.push(texture);
 
-            if (texture.isPowerOfTwo)
+            if (texture.is_power_of_two)
             {
                 if (texture.mipmap)
                 {
                     glTexture.enableMipmap();
                 }
 
-                if (texture.wrapMode === WRAP_MODES.CLAMP)
+                if (texture.wrap_mode === WRAP_MODES.CLAMP)
                 {
                     glTexture.enableWrapClamp();
                 }
-                else if (texture.wrapMode === WRAP_MODES.REPEAT)
+                else if (texture.wrap_mode === WRAP_MODES.REPEAT)
                 {
                     glTexture.enableWrapRepeat();
                 }
@@ -161,7 +161,7 @@ export default class TextureManager
                 glTexture.enableWrapClamp();
             }
 
-            if (texture.scaleMode === SCALE_MODES.NEAREST)
+            if (texture.scale_mode === SCALE_MODES.NEAREST)
             {
                 glTexture.enableNearestScaling();
             }
@@ -193,7 +193,7 @@ export default class TextureManager
     {
         texture = texture.base_texture || texture;
 
-        if (!texture.hasLoaded)
+        if (!texture.has_loaded)
         {
             return;
         }

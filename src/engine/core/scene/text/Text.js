@@ -51,7 +51,7 @@ export default class Text extends Sprite
         super(texture);
 
         // base texture is already automatically added to the cache, now adding the actual texture
-        Texture.add_to_cache(this._texture, this._texture.base_texture.textureCacheIds[0]);
+        Texture.add_to_cache(this._texture, this._texture.base_texture.texture_cache_ids[0]);
 
         /**
          * The canvas element that everything is drawn to
@@ -328,11 +328,11 @@ export default class Text extends Sprite
         const padding = style.trim ? 0 : style.padding;
         const base_texture = texture.base_texture;
 
-        base_texture.hasLoaded = true;
+        base_texture.has_loaded = true;
         base_texture.resolution = this.resolution;
 
-        base_texture.realWidth = canvas.width;
-        base_texture.realHeight = canvas.height;
+        base_texture.real_width = canvas.width;
+        base_texture.real_height = canvas.height;
         base_texture.width = canvas.width / this.resolution;
         base_texture.height = canvas.height / this.resolution;
 

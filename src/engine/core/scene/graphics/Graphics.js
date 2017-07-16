@@ -1058,15 +1058,15 @@ export default class Graphics extends Node2D
     /**
      * Generates a canvas texture.
      *
-     * @param {number} scaleMode - The scale mode of the texture.
+     * @param {number} scale_mode - The scale mode of the texture.
      * @param {number} resolution - The resolution of the texture.
      * @return {V.Texture} The new texture.
      */
-    generate_canvas_texture(scaleMode, resolution = 1)
+    generate_canvas_texture(scale_mode, resolution = 1)
     {
         const bounds = this.get_local_Bounds();
 
-        const canvasBuffer = RenderTexture.create(bounds.width, bounds.height, scaleMode, resolution);
+        const canvasBuffer = RenderTexture.create(bounds.width, bounds.height, scale_mode, resolution);
 
         if (!canvasRenderer)
         {
@@ -1083,7 +1083,7 @@ export default class Graphics extends Node2D
 
         canvasRenderer.render(this, canvasBuffer, true, tempMatrix);
 
-        const texture = Texture.from_canvas(canvasBuffer.base_texture._canvasRenderTarget.canvas, scaleMode, 'graphics');
+        const texture = Texture.from_canvas(canvasBuffer.base_texture._canvasRenderTarget.canvas, scale_mode, 'graphics');
 
         texture.base_texture.resolution = resolution;
         texture.base_texture.update();

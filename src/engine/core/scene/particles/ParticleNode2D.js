@@ -200,7 +200,7 @@ export default class ParticleNode2D extends Node2D
         if (!this.base_texture)
         {
             this.base_texture = this.children[0]._texture.base_texture;
-            if (!this.base_texture.hasLoaded)
+            if (!this.base_texture.has_loaded)
             {
                 this.base_texture.once('update', () => this.on_children_change(0));
             }
@@ -278,7 +278,7 @@ export default class ParticleNode2D extends Node2D
                 // this is the fastest  way to optimise! - if rotation is 0 then we can avoid any kind of set_transform call
                 if (isRotated)
                 {
-                    context.set_transform(
+                    context.setTransform(
                         transform.a,
                         transform.b,
                         transform.c,
@@ -309,7 +309,7 @@ export default class ParticleNode2D extends Node2D
 
                 if (renderer.pixel_snap)
                 {
-                    context.set_transform(
+                    context.setTransform(
                         childTransform.a,
                         childTransform.b,
                         childTransform.c,
@@ -320,7 +320,7 @@ export default class ParticleNode2D extends Node2D
                 }
                 else
                 {
-                    context.set_transform(
+                    context.setTransform(
                         childTransform.a,
                         childTransform.b,
                         childTransform.c,

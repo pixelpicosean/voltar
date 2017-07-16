@@ -18,10 +18,10 @@ export default class BaseTexture extends EventEmitter
 {
     /**
      * @param {HTMLImageElement|HTMLCanvasElement} [source] - the source object of the texture.
-     * @param {number} [scaleMode=V.settings.SCALE_MODE] - See {@link V.SCALE_MODES} for possible values
+     * @param {number} [scale_mode=V.settings.SCALE_MODE] - See {@link V.SCALE_MODES} for possible values
      * @param {number} [resolution=1] - The resolution / device pixel ratio of the texture
      */
-    constructor(source, scaleMode, resolution)
+    constructor(source, scale_mode, resolution)
     {
         super();
 
@@ -61,14 +61,14 @@ export default class BaseTexture extends EventEmitter
          * @readonly
          * @member {number}
          */
-        this.realWidth = 100;
+        this.real_width = 100;
         /**
          * Used to store the actual height of the source of this texture
          *
          * @readonly
          * @member {number}
          */
-        this.realHeight = 100;
+        this.real_height = 100;
 
         /**
          * The scale mode to apply when scaling this texture
@@ -77,7 +77,7 @@ export default class BaseTexture extends EventEmitter
          * @default V.settings.SCALE_MODE
          * @see V.SCALE_MODES
          */
-        this.scaleMode = scaleMode !== undefined ? scaleMode : settings.SCALE_MODE;
+        this.scale_mode = scale_mode !== undefined ? scale_mode : settings.SCALE_MODE;
 
         /**
          * Set to true once the base texture has successfully loaded.
@@ -87,7 +87,7 @@ export default class BaseTexture extends EventEmitter
          * @readonly
          * @member {boolean}
          */
-        this.hasLoaded = false;
+        this.has_loaded = false;
 
         /**
          * Set to true if the source is currently loading.
@@ -99,17 +99,17 @@ export default class BaseTexture extends EventEmitter
          * @readonly
          * @member {boolean}
          */
-        this.isLoading = false;
+        this.is_loading = false;
 
         /**
          * The image source that is used to create the texture.
          *
-         * TODO: Make this a setter that calls loadSource();
+         * TODO: Make this a setter that calls load_source();
          *
          * @readonly
          * @member {HTMLImageElement|HTMLCanvasElement}
          */
-        this.source = null; // set in loadSource, if at all
+        this.source = null; // set in load_source, if at all
 
         /**
          * The image source that is used to create the texture. This is used to
@@ -120,7 +120,7 @@ export default class BaseTexture extends EventEmitter
          * @readonly
          * @member {Image}
          */
-        this.origSource = null; // set in loadSvg, if at all
+        this.origin_source = null; // set in loadSvg, if at all
 
         /**
          * Type of image defined in source, eg. `png` or `svg`
@@ -128,7 +128,7 @@ export default class BaseTexture extends EventEmitter
          * @readonly
          * @member {string}
          */
-        this.imageType = null; // set in updateImageType
+        this.image_type = null; // set in updateImageType
 
         /**
          * Scale for source image. Used with Svg images to scale them before rasterization.
@@ -136,7 +136,7 @@ export default class BaseTexture extends EventEmitter
          * @readonly
          * @member {number}
          */
-        this.sourceScale = 1.0;
+        this.source_scale = 1.0;
 
         /**
          * Controls if RGB channels should be pre-multiplied by Alpha  (WebGL only)
@@ -145,14 +145,14 @@ export default class BaseTexture extends EventEmitter
          * @member {boolean}
          * @default true
          */
-        this.premultipliedAlpha = true;
+        this.premultiplied_alpha = true;
 
         /**
          * The image url of the texture
          *
          * @member {string}
          */
-        this.imageUrl = null;
+        this.image_url = null;
 
         /**
          * Whether or not the texture is a power of two, try to use power of two textures as much
@@ -161,7 +161,7 @@ export default class BaseTexture extends EventEmitter
          * @private
          * @member {boolean}
          */
-        this.isPowerOfTwo = false;
+        this.is_power_of_two = false;
 
         // used for webGL
 
@@ -183,7 +183,7 @@ export default class BaseTexture extends EventEmitter
          * @member {number}
          * @see V.WRAP_MODES
          */
-        this.wrapMode = settings.WRAP_MODE;
+        this.wrap_mode = settings.WRAP_MODE;
 
         /**
          * A map of renderer IDs to webgl textures
@@ -212,12 +212,12 @@ export default class BaseTexture extends EventEmitter
          *
          * @member {string[]}
          */
-        this.textureCacheIds = [];
+        this.texture_cache_ids = [];
 
         // if no source passed don't try to load
         if (source)
         {
-            this.loadSource(source);
+            this.load_source(source);
         }
 
         /**
@@ -261,10 +261,10 @@ export default class BaseTexture extends EventEmitter
     update()
     {
         // Svg size is handled during load
-        if (this.imageType !== 'svg')
+        if (this.image_type !== 'svg')
         {
-            this.realWidth = this.source.naturalWidth || this.source.videoWidth || this.source.width;
-            this.realHeight = this.source.naturalHeight || this.source.videoHeight || this.source.height;
+            this.real_width = this.source.naturalWidth || this.source.videoWidth || this.source.width;
+            this.real_height = this.source.naturalHeight || this.source.videoHeight || this.source.height;
 
             this._updateDimensions();
         }
@@ -277,10 +277,10 @@ export default class BaseTexture extends EventEmitter
      */
     _updateDimensions()
     {
-        this.width = this.realWidth / this.resolution;
-        this.height = this.realHeight / this.resolution;
+        this.width = this.real_width / this.resolution;
+        this.height = this.real_height / this.resolution;
 
-        this.isPowerOfTwo = bitTwiddle.isPow2(this.realWidth) && bitTwiddle.isPow2(this.realHeight);
+        this.is_power_of_two = bitTwiddle.isPow2(this.real_width) && bitTwiddle.isPow2(this.real_height);
     }
 
     /**
@@ -288,13 +288,13 @@ export default class BaseTexture extends EventEmitter
      *
      * If the source is not-immediately-available, such as an image that needs to be
      * downloaded, then the 'loaded' or 'error' event will be dispatched in the future
-     * and `hasLoaded` will remain false after this call.
+     * and `has_loaded` will remain false after this call.
      *
-     * The logic state after calling `loadSource` directly or indirectly (eg. `from_image`, `new BaseTexture`) is:
+     * The logic state after calling `load_source` directly or indirectly (eg. `from_image`, `new BaseTexture`) is:
      *
-     *     if (texture.hasLoaded) {
+     *     if (texture.has_loaded) {
      *        // texture ready for use
-     *     } else if (texture.isLoading) {
+     *     } else if (texture.is_loading) {
      *        // listen to 'loaded' and/or 'error' events on texture
      *     } else {
      *        // not loading, not going to load UNLESS the source is reloaded
@@ -304,12 +304,12 @@ export default class BaseTexture extends EventEmitter
      * @protected
      * @param {HTMLImageElement|HTMLCanvasElement} source - the source object of the texture.
      */
-    loadSource(source)
+    load_source(source)
     {
-        const wasLoading = this.isLoading;
+        const wasLoading = this.is_loading;
 
-        this.hasLoaded = false;
-        this.isLoading = false;
+        this.has_loaded = false;
+        this.is_loading = false;
 
         if (wasLoading && this.source)
         {
@@ -326,7 +326,7 @@ export default class BaseTexture extends EventEmitter
         {
             this._updateImageType();
 
-            if (this.imageType === 'svg')
+            if (this.image_type === 'svg')
             {
                 this._loadSvgSource();
             }
@@ -344,7 +344,7 @@ export default class BaseTexture extends EventEmitter
         else if (!source.getContext)
         {
             // Image fail / not ready
-            this.isLoading = true;
+            this.is_loading = true;
 
             const scope = this;
 
@@ -354,15 +354,15 @@ export default class BaseTexture extends EventEmitter
                 source.onload = null;
                 source.onerror = null;
 
-                if (!scope.isLoading)
+                if (!scope.is_loading)
                 {
                     return;
                 }
 
-                scope.isLoading = false;
+                scope.is_loading = false;
                 scope._sourceLoaded();
 
-                if (scope.imageType === 'svg')
+                if (scope.image_type === 'svg')
                 {
                     scope._loadSvgSource();
 
@@ -377,12 +377,12 @@ export default class BaseTexture extends EventEmitter
                 source.onload = null;
                 source.onerror = null;
 
-                if (!scope.isLoading)
+                if (!scope.is_loading)
                 {
                     return;
                 }
 
-                scope.isLoading = false;
+                scope.is_loading = false;
                 scope.emit('error', scope);
             };
 
@@ -396,14 +396,14 @@ export default class BaseTexture extends EventEmitter
                 source.onload = null;
                 source.onerror = null;
 
-                if (scope.imageType === 'svg')
+                if (scope.image_type === 'svg')
                 {
                     scope._loadSvgSource();
 
                     return;
                 }
 
-                this.isLoading = false;
+                this.is_loading = false;
 
                 if (source.width && source.height)
                 {
@@ -429,37 +429,37 @@ export default class BaseTexture extends EventEmitter
      */
     _updateImageType()
     {
-        if (!this.imageUrl)
+        if (!this.image_url)
         {
             return;
         }
 
-        const dataUri = decomposeDataUri(this.imageUrl);
-        let imageType;
+        const dataUri = decomposeDataUri(this.image_url);
+        let image_type;
 
         if (dataUri && dataUri.mediaType === 'image')
         {
             // Check for subType validity
             const firstSubType = dataUri.subType.split('+')[0];
 
-            imageType = getUrlFileExtension(`.${firstSubType}`);
+            image_type = getUrlFileExtension(`.${firstSubType}`);
 
-            if (!imageType)
+            if (!image_type)
             {
                 throw new Error('Invalid image type in data URI.');
             }
         }
         else
         {
-            imageType = getUrlFileExtension(this.imageUrl);
+            image_type = getUrlFileExtension(this.image_url);
 
-            if (!imageType)
+            if (!image_type)
             {
-                imageType = 'png';
+                image_type = 'png';
             }
         }
 
-        this.imageType = imageType;
+        this.image_type = image_type;
     }
 
     /**
@@ -468,13 +468,13 @@ export default class BaseTexture extends EventEmitter
      */
     _loadSvgSource()
     {
-        if (this.imageType !== 'svg')
+        if (this.image_type !== 'svg')
         {
             // Do nothing if source is not svg
             return;
         }
 
-        const dataUri = decomposeDataUri(this.imageUrl);
+        const dataUri = decomposeDataUri(this.image_url);
 
         if (dataUri)
         {
@@ -513,7 +513,7 @@ export default class BaseTexture extends EventEmitter
     }
 
     /**
-     * Loads an SVG string from `imageUrl` using XHR and then calls `_loadSvgSourceUsingString`.
+     * Loads an SVG string from `image_url` using XHR and then calls `_loadSvgSourceUsingString`.
      */
     _loadSvgSourceUsingXhr()
     {
@@ -538,13 +538,13 @@ export default class BaseTexture extends EventEmitter
 
         svgXhr.onerror = () => this.emit('error', this);
 
-        svgXhr.open('GET', this.imageUrl, true);
+        svgXhr.open('GET', this.image_url, true);
         svgXhr.send();
     }
 
     /**
-     * Loads texture using an SVG string. The original SVG Image is stored as `origSource` and the
-     * created canvas is the new `source`. The SVG is scaled using `sourceScale`. Called by
+     * Loads texture using an SVG string. The original SVG Image is stored as `origin_source` and the
+     * created canvas is the new `source`. The SVG is scaled using `source_scale`. Called by
      * `_loadSvgSourceUsingXhr` or `_loadSvgSourceUsingDataUri`.
      *
      * @param  {string} svgString SVG source as string
@@ -563,32 +563,32 @@ export default class BaseTexture extends EventEmitter
             throw new Error('The SVG image must have width and height defined (in pixels), canvas API needs them.');
         }
 
-        // Scale realWidth and realHeight
-        this.realWidth = Math.round(svgWidth * this.sourceScale);
-        this.realHeight = Math.round(svgHeight * this.sourceScale);
+        // Scale real_width and real_height
+        this.real_width = Math.round(svgWidth * this.source_scale);
+        this.real_height = Math.round(svgHeight * this.source_scale);
 
         this._updateDimensions();
 
         // Create a canvas element
         const canvas = document.createElement('canvas');
 
-        canvas.width = this.realWidth;
-        canvas.height = this.realHeight;
+        canvas.width = this.real_width;
+        canvas.height = this.real_height;
         canvas._pixiId = `canvas_${uid()}`;
 
         // Draw the Svg to the canvas
         canvas
             .getContext('2d')
-            .drawImage(this.source, 0, 0, svgWidth, svgHeight, 0, 0, this.realWidth, this.realHeight);
+            .drawImage(this.source, 0, 0, svgWidth, svgHeight, 0, 0, this.real_width, this.real_height);
 
         // Replace the original source image with the canvas
-        this.origSource = this.source;
+        this.origin_source = this.source;
         this.source = canvas;
 
-        // Add also the canvas in cache (destroy clears by `imageUrl` and `source._pixiId`)
+        // Add also the canvas in cache (destroy clears by `image_url` and `source._pixiId`)
         BaseTexture.add_to_cache(this, canvas._pixiId);
 
-        this.isLoading = false;
+        this.is_loading = false;
         this._sourceLoaded();
         this.emit('loaded', this);
     }
@@ -601,7 +601,7 @@ export default class BaseTexture extends EventEmitter
      */
     _sourceLoaded()
     {
-        this.hasLoaded = true;
+        this.has_loaded = true;
         this.update();
     }
 
@@ -611,11 +611,11 @@ export default class BaseTexture extends EventEmitter
      */
     destroy()
     {
-        if (this.imageUrl)
+        if (this.image_url)
         {
-            delete TextureCache[this.imageUrl];
+            delete TextureCache[this.image_url];
 
-            this.imageUrl = null;
+            this.image_url = null;
 
             if (!navigator.isCocoonJS)
             {
@@ -627,8 +627,8 @@ export default class BaseTexture extends EventEmitter
 
         this.dispose();
 
-        BaseTexture.removeFromCache(this);
-        this.textureCacheIds = null;
+        BaseTexture.remove_from_cache(this);
+        this.texture_cache_ids = null;
 
         this._destroyed = true;
     }
@@ -651,11 +651,11 @@ export default class BaseTexture extends EventEmitter
      *
      * @param {string} newSrc - the path of the image
      */
-    updateSourceImage(newSrc)
+    update_source_image(newSrc)
     {
         this.source.src = newSrc;
 
-        this.loadSource(this.source);
+        this.load_source(this.source);
     }
 
     /**
@@ -663,15 +663,15 @@ export default class BaseTexture extends EventEmitter
      * If the image is not in the base texture cache it will be created and loaded.
      *
      * @static
-     * @param {string} imageUrl - The image url of the texture
+     * @param {string} image_url - The image url of the texture
      * @param {boolean} [crossorigin=(auto)] - Should use anonymous CORS? Defaults to true if the URL is not a data-URI.
-     * @param {number} [scaleMode=V.settings.SCALE_MODE] - See {@link V.SCALE_MODES} for possible values
-     * @param {number} [sourceScale=(auto)] - Scale for the original image, used with Svg images.
+     * @param {number} [scale_mode=V.settings.SCALE_MODE] - See {@link V.SCALE_MODES} for possible values
+     * @param {number} [source_scale=(auto)] - Scale for the original image, used with Svg images.
      * @return {V.BaseTexture} The new base texture.
      */
-    static from_image(imageUrl, crossorigin, scaleMode, sourceScale)
+    static from_image(image_url, crossorigin, scale_mode, source_scale)
     {
-        let base_texture = BaseTextureCache[imageUrl];
+        let base_texture = BaseTextureCache[image_url];
 
         if (!base_texture)
         {
@@ -679,29 +679,29 @@ export default class BaseTexture extends EventEmitter
             // See https://code.google.com/p/chromium/issues/detail?id=238071
             const image = new Image();// document.createElement('img');
 
-            if (crossorigin === undefined && imageUrl.indexOf('data:') !== 0)
+            if (crossorigin === undefined && image_url.indexOf('data:') !== 0)
             {
-                image.crossOrigin = determineCrossOrigin(imageUrl);
+                image.crossOrigin = determineCrossOrigin(image_url);
             }
             else if (crossorigin)
             {
                 image.crossOrigin = typeof crossorigin === 'string' ? crossorigin : 'anonymous';
             }
 
-            base_texture = new BaseTexture(image, scaleMode);
-            base_texture.imageUrl = imageUrl;
+            base_texture = new BaseTexture(image, scale_mode);
+            base_texture.image_url = image_url;
 
-            if (sourceScale)
+            if (source_scale)
             {
-                base_texture.sourceScale = sourceScale;
+                base_texture.source_scale = source_scale;
             }
 
             // if there is an @2x at the end of the url we are going to assume its a highres image
-            base_texture.resolution = getResolutionOfUrl(imageUrl);
+            base_texture.resolution = getResolutionOfUrl(image_url);
 
-            image.src = imageUrl; // Setting this triggers load
+            image.src = image_url; // Setting this triggers load
 
-            BaseTexture.add_to_cache(base_texture, imageUrl);
+            BaseTexture.add_to_cache(base_texture, image_url);
         }
 
         return base_texture;
@@ -712,11 +712,11 @@ export default class BaseTexture extends EventEmitter
      *
      * @static
      * @param {HTMLCanvasElement} canvas - The canvas element source of the texture
-     * @param {number} scaleMode - See {@link V.SCALE_MODES} for possible values
+     * @param {number} scale_mode - See {@link V.SCALE_MODES} for possible values
      * @param {string} [origin='canvas'] - A string origin of who created the base texture
      * @return {V.BaseTexture} The new base texture.
      */
-    static from_canvas(canvas, scaleMode, origin = 'canvas')
+    static from_canvas(canvas, scale_mode, origin = 'canvas')
     {
         if (!canvas._pixiId)
         {
@@ -727,7 +727,7 @@ export default class BaseTexture extends EventEmitter
 
         if (!base_texture)
         {
-            base_texture = new BaseTexture(canvas, scaleMode);
+            base_texture = new BaseTexture(canvas, scale_mode);
             BaseTexture.add_to_cache(base_texture, canvas._pixiId);
         }
 
@@ -740,42 +740,42 @@ export default class BaseTexture extends EventEmitter
      *
      * @static
      * @param {string|HTMLImageElement|HTMLCanvasElement} source - The source to create base texture from.
-     * @param {number} [scaleMode=V.settings.SCALE_MODE] - See {@link V.SCALE_MODES} for possible values
-     * @param {number} [sourceScale=(auto)] - Scale for the original image, used with Svg images.
+     * @param {number} [scale_mode=V.settings.SCALE_MODE] - See {@link V.SCALE_MODES} for possible values
+     * @param {number} [source_scale=(auto)] - Scale for the original image, used with Svg images.
      * @return {V.BaseTexture} The new base texture.
      */
-    static from(source, scaleMode, sourceScale)
+    static from(source, scale_mode, source_scale)
     {
         if (typeof source === 'string')
         {
-            return BaseTexture.from_image(source, undefined, scaleMode, sourceScale);
+            return BaseTexture.from_image(source, undefined, scale_mode, source_scale);
         }
         else if (source instanceof HTMLImageElement)
         {
-            const imageUrl = source.src;
-            let base_texture = BaseTextureCache[imageUrl];
+            const image_url = source.src;
+            let base_texture = BaseTextureCache[image_url];
 
             if (!base_texture)
             {
-                base_texture = new BaseTexture(source, scaleMode);
-                base_texture.imageUrl = imageUrl;
+                base_texture = new BaseTexture(source, scale_mode);
+                base_texture.image_url = image_url;
 
-                if (sourceScale)
+                if (source_scale)
                 {
-                    base_texture.sourceScale = sourceScale;
+                    base_texture.source_scale = source_scale;
                 }
 
                 // if there is an @2x at the end of the url we are going to assume its a highres image
-                base_texture.resolution = getResolutionOfUrl(imageUrl);
+                base_texture.resolution = getResolutionOfUrl(image_url);
 
-                BaseTexture.add_to_cache(base_texture, imageUrl);
+                BaseTexture.add_to_cache(base_texture, image_url);
             }
 
             return base_texture;
         }
         else if (source instanceof HTMLCanvasElement)
         {
-            return BaseTexture.from_canvas(source, scaleMode);
+            return BaseTexture.from_canvas(source, scale_mode);
         }
 
         // lets assume its a base texture!
@@ -793,9 +793,9 @@ export default class BaseTexture extends EventEmitter
     {
         if (id)
         {
-            if (base_texture.textureCacheIds.indexOf(id) === -1)
+            if (base_texture.texture_cache_ids.indexOf(id) === -1)
             {
-                base_texture.textureCacheIds.push(id);
+                base_texture.texture_cache_ids.push(id);
             }
 
             // @if DEBUG
@@ -818,7 +818,7 @@ export default class BaseTexture extends EventEmitter
      * @param {string|V.BaseTexture} base_texture - id of a BaseTexture to be removed, or a BaseTexture instance itself.
      * @return {V.BaseTexture|null} The BaseTexture that was removed.
      */
-    static removeFromCache(base_texture)
+    static remove_from_cache(base_texture)
     {
         if (typeof base_texture === 'string')
         {
@@ -826,11 +826,11 @@ export default class BaseTexture extends EventEmitter
 
             if (base_textureFromCache)
             {
-                const index = base_textureFromCache.textureCacheIds.indexOf(base_texture);
+                const index = base_textureFromCache.texture_cache_ids.indexOf(base_texture);
 
                 if (index > -1)
                 {
-                    base_textureFromCache.textureCacheIds.splice(index, 1);
+                    base_textureFromCache.texture_cache_ids.splice(index, 1);
                 }
 
                 delete BaseTextureCache[base_texture];
@@ -838,14 +838,14 @@ export default class BaseTexture extends EventEmitter
                 return base_textureFromCache;
             }
         }
-        else if (base_texture && base_texture.textureCacheIds)
+        else if (base_texture && base_texture.texture_cache_ids)
         {
-            for (let i = 0; i < base_texture.textureCacheIds.length; ++i)
+            for (let i = 0; i < base_texture.texture_cache_ids.length; ++i)
             {
-                delete BaseTextureCache[base_texture.textureCacheIds[i]];
+                delete BaseTextureCache[base_texture.texture_cache_ids[i]];
             }
 
-            base_texture.textureCacheIds.length = 0;
+            base_texture.texture_cache_ids.length = 0;
 
             return base_texture;
         }

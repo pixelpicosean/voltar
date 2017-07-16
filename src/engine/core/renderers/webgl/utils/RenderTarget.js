@@ -13,11 +13,11 @@ export default class RenderTarget
      * @param {WebGLRenderingContext} gl - The current WebGL drawing context
      * @param {number} [width=0] - the horizontal range of the filter
      * @param {number} [height=0] - the vertical range of the filter
-     * @param {number} [scaleMode=V.settings.SCALE_MODE] - See {@link V.SCALE_MODES} for possible values
+     * @param {number} [scale_mode=V.settings.SCALE_MODE] - See {@link V.SCALE_MODES} for possible values
      * @param {number} [resolution=1] - The current resolution / device pixel ratio
      * @param {boolean} [root=false] - Whether this object is the root element or not
      */
-    constructor(gl, width, height, scaleMode, resolution, root)
+    constructor(gl, width, height, scale_mode, resolution, root)
     {
         // TODO Resolution could go here ( eg low res blurs )
 
@@ -124,7 +124,7 @@ export default class RenderTarget
          * @default V.settings.SCALE_MODE
          * @see V.SCALE_MODES
          */
-        this.scaleMode = scaleMode !== undefined ? scaleMode : settings.SCALE_MODE;
+        this.scale_mode = scale_mode !== undefined ? scale_mode : settings.SCALE_MODE;
 
         /**
          * Whether this object is the root element or not
@@ -137,7 +137,7 @@ export default class RenderTarget
         {
             this.frameBuffer = GLFramebuffer.createRGBA(gl, 100, 100);
 
-            if (this.scaleMode === SCALE_MODES.NEAREST)
+            if (this.scale_mode === SCALE_MODES.NEAREST)
             {
                 this.frameBuffer.texture.enableNearestScaling();
             }

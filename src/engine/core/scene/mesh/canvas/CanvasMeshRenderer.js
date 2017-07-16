@@ -33,7 +33,7 @@ export default class MeshSpriteRenderer
 
         if (renderer.pixel_snap)
         {
-            context.set_transform(
+            context.setTransform(
                 transform.a * res,
                 transform.b * res,
                 transform.c * res,
@@ -44,7 +44,7 @@ export default class MeshSpriteRenderer
         }
         else
         {
-            context.set_transform(
+            context.setTransform(
                 transform.a * res,
                 transform.b * res,
                 transform.c * res,
@@ -144,7 +144,7 @@ export default class MeshSpriteRenderer
 
         if (mesh.upload_uv_transform)
         {
-            const ut = mesh._uv_transform.mapCoord;
+            const ut = mesh._uv_transform.map_coord;
 
             u0 = ((uvs[index0] * ut.a) + (uvs[index0 + 1] * ut.c) + ut.tx) * base.width;
             u1 = ((uvs[index1] * ut.a) + (uvs[index1 + 1] * ut.c) + ut.tx) * base.width;

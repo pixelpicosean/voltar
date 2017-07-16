@@ -228,7 +228,7 @@ export default class SpriteRenderer extends ObjectRenderer
         let vertex_data;
         let uvs;
         let blend_mode = premultiplyBlendMode[
-            sprites[0]._texture.base_texture.premultipliedAlpha ? 1 : 0][sprites[0].blend_mode];
+            sprites[0]._texture.base_texture.premultiplied_alpha ? 1 : 0][sprites[0].blend_mode];
 
         currentGroup.textureCount = 0;
         currentGroup.start = 0;
@@ -253,7 +253,7 @@ export default class SpriteRenderer extends ObjectRenderer
 
             nextTexture = sprite._texture.base_texture;
 
-            const spriteBlendMode = premultiplyBlendMode[Number(nextTexture.premultipliedAlpha)][sprite.blend_mode];
+            const spriteBlendMode = premultiplyBlendMode[Number(nextTexture.premultiplied_alpha)][sprite.blend_mode];
 
             if (blend_mode !== spriteBlendMode)
             {
@@ -321,7 +321,7 @@ export default class SpriteRenderer extends ObjectRenderer
             vertex_data = sprite.vertex_data;
 
             // TODO this sum does not need to be set each frame..
-            uvs = sprite._texture._uvs.uvsUint32;
+            uvs = sprite._texture._uvs.uvs_uint32;
 
             if (this.renderer.pixel_snap)
             {
@@ -369,7 +369,7 @@ export default class SpriteRenderer extends ObjectRenderer
             /* eslint-disable max-len */
             const alpha = Math.min(sprite.world_alpha, 1.0);
             // we dont call extra function if alpha is 1.0, that's faster
-            const argb = alpha < 1.0 && nextTexture.premultipliedAlpha ? premultiplyTint(sprite._tintRGB, alpha)
+            const argb = alpha < 1.0 && nextTexture.premultiplied_alpha ? premultiplyTint(sprite._tintRGB, alpha)
                 : sprite._tintRGB + (alpha * 255 << 24);
 
             uint32View[index + 3] = uint32View[index + 8] = uint32View[index + 13] = uint32View[index + 18] = argb;

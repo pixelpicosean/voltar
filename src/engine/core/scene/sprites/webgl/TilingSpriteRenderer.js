@@ -85,22 +85,22 @@ export default class TilingSpriteRenderer extends core.ObjectRenderer
         const baseTex = tex.base_texture;
         const lt = ts.tile_transform.local_transform;
         const uv = ts.uv_transform;
-        let isSimple = baseTex.isPowerOfTwo
+        let isSimple = baseTex.is_power_of_two
             && tex.frame.width === baseTex.width && tex.frame.height === baseTex.height;
 
-        // auto, force repeat wrapMode for big tiling textures
+        // auto, force repeat wrap_mode for big tiling textures
         if (isSimple)
         {
             if (!baseTex._glTextures[renderer.CONTEXT_UID])
             {
-                if (baseTex.wrapMode === WRAP_MODES.CLAMP)
+                if (baseTex.wrap_mode === WRAP_MODES.CLAMP)
                 {
-                    baseTex.wrapMode = WRAP_MODES.REPEAT;
+                    baseTex.wrap_mode = WRAP_MODES.REPEAT;
                 }
             }
             else
             {
-                isSimple = baseTex.wrapMode !== WRAP_MODES.CLAMP;
+                isSimple = baseTex.wrap_mode !== WRAP_MODES.CLAMP;
             }
         }
 
@@ -129,23 +129,23 @@ export default class TilingSpriteRenderer extends core.ObjectRenderer
         tempMat.invert();
         if (isSimple)
         {
-            tempMat.prepend(uv.mapCoord);
+            tempMat.prepend(uv.map_coord);
         }
         else
         {
-            shader.uniforms.uMapCoord = uv.mapCoord.to_array(true);
-            shader.uniforms.uClampFrame = uv.uClampFrame;
-            shader.uniforms.uClampOffset = uv.uClampOffset;
+            shader.uniforms.uMapCoord = uv.map_coord.to_array(true);
+            shader.uniforms.u_clamp_frame = uv.u_clamp_frame;
+            shader.uniforms.u_clamp_offset = uv.u_clamp_offset;
         }
 
         shader.uniforms.uTransform = tempMat.to_array(true);
         shader.uniforms.uColor = core.utils.premultiplyTintToRgba(ts.tint, ts.world_alpha,
-            shader.uniforms.uColor, baseTex.premultipliedAlpha);
+            shader.uniforms.uColor, baseTex.premultiplied_alpha);
         shader.uniforms.translationMatrix = ts.transform.world_transform.to_array(true);
 
         shader.uniforms.uSampler = renderer.bindTexture(tex);
 
-        renderer.setBlendMode(core.utils.correctBlendMode(ts.blend_mode, baseTex.premultipliedAlpha));
+        renderer.setBlendMode(core.utils.correctBlendMode(ts.blend_mode, baseTex.premultiplied_alpha));
 
         quad.vao.draw(this.renderer.gl.TRIANGLES, 6, 0);
     }

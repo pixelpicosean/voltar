@@ -50,11 +50,11 @@ export default class Texture extends EventEmitter
          *
          * @member {boolean}
          */
-        this.noFrame = false;
+        this.no_frame = false;
 
         if (!frame)
         {
-            this.noFrame = true;
+            this.no_frame = true;
             frame = new Rectangle(0, 0, 1, 1);
         }
 
@@ -97,7 +97,7 @@ export default class Texture extends EventEmitter
          *
          * @member {boolean}
          */
-        this.requiresUpdate = false;
+        this.requires_update = false;
 
         /**
          * The WebGL UV data cache.
@@ -126,20 +126,20 @@ export default class Texture extends EventEmitter
             throw new Error('attempt to use diamond-shaped UVs. If you are sure, set rotation manually');
         }
 
-        if (base_texture.hasLoaded)
+        if (base_texture.has_loaded)
         {
-            if (this.noFrame)
+            if (this.no_frame)
             {
                 frame = new Rectangle(0, 0, base_texture.width, base_texture.height);
 
                 // if there is no frame we should monitor for any base texture changes..
-                base_texture.on('update', this.onBaseTextureUpdated, this);
+                base_texture.on('update', this.on_base_texture_updated, this);
             }
             this.frame = frame;
         }
         else
         {
-            base_texture.once('loaded', this.onBaseTextureLoaded, this);
+            base_texture.once('loaded', this.on_base_texture_loaded, this);
         }
 
         /**
@@ -165,7 +165,7 @@ export default class Texture extends EventEmitter
          *
          * @member {string[]}
          */
-        this.textureCacheIds = [];
+        this.texture_cache_ids = [];
     }
 
     /**
@@ -183,12 +183,12 @@ export default class Texture extends EventEmitter
      * @private
      * @param {V.BaseTexture} base_texture - The base texture.
      */
-    onBaseTextureLoaded(base_texture)
+    on_base_texture_loaded(base_texture)
     {
         this._updateID++;
 
         // TODO this code looks confusing.. boo to abusing getters and setters!
-        if (this.noFrame)
+        if (this.no_frame)
         {
             this.frame = new Rectangle(0, 0, base_texture.width, base_texture.height);
         }
@@ -197,7 +197,7 @@ export default class Texture extends EventEmitter
             this.frame = this._frame;
         }
 
-        this.base_texture.on('update', this.onBaseTextureUpdated, this);
+        this.base_texture.on('update', this.on_base_texture_updated, this);
         this.emit('update', this);
     }
 
@@ -207,7 +207,7 @@ export default class Texture extends EventEmitter
      * @private
      * @param {V.BaseTexture} base_texture - The base texture.
      */
-    onBaseTextureUpdated(base_texture)
+    on_base_texture_updated(base_texture)
     {
         this._updateID++;
 
@@ -230,16 +230,16 @@ export default class Texture extends EventEmitter
             {
                 // delete the texture if it exists in the texture cache..
                 // this only needs to be removed if the base texture is actually destroyed too..
-                if (TextureCache[this.base_texture.imageUrl])
+                if (TextureCache[this.base_texture.image_url])
                 {
-                    Texture.removeFromCache(this.base_texture.imageUrl);
+                    Texture.remove_from_cache(this.base_texture.image_url);
                 }
 
                 this.base_texture.destroy();
             }
 
-            this.base_texture.off('update', this.onBaseTextureUpdated, this);
-            this.base_texture.off('loaded', this.onBaseTextureLoaded, this);
+            this.base_texture.off('update', this.on_base_texture_updated, this);
+            this.base_texture.off('loaded', this.on_base_texture_loaded, this);
 
             this.base_texture = null;
         }
@@ -251,8 +251,8 @@ export default class Texture extends EventEmitter
 
         this.valid = false;
 
-        Texture.removeFromCache(this);
-        this.textureCacheIds = null;
+        Texture.remove_from_cache(this);
+        this.texture_cache_ids = null;
     }
 
     /**
@@ -287,20 +287,20 @@ export default class Texture extends EventEmitter
      * If the image is not in the texture cache it will be  created and loaded.
      *
      * @static
-     * @param {string} imageUrl - The image url of the texture
+     * @param {string} image_url - The image url of the texture
      * @param {boolean} [crossorigin] - Whether requests should be treated as crossorigin
-     * @param {number} [scaleMode=V.settings.SCALE_MODE] - See {@link V.SCALE_MODES} for possible values
-     * @param {number} [sourceScale=(auto)] - Scale for the original image, used with SVG images.
+     * @param {number} [scale_mode=V.settings.SCALE_MODE] - See {@link V.SCALE_MODES} for possible values
+     * @param {number} [source_scale=(auto)] - Scale for the original image, used with SVG images.
      * @return {V.Texture} The newly created texture
      */
-    static from_image(imageUrl, crossorigin, scaleMode, sourceScale)
+    static from_image(image_url, crossorigin, scale_mode, source_scale)
     {
-        let texture = TextureCache[imageUrl];
+        let texture = TextureCache[image_url];
 
         if (!texture)
         {
-            texture = new Texture(BaseTexture.from_image(imageUrl, crossorigin, scaleMode, sourceScale));
-            Texture.add_to_cache(texture, imageUrl);
+            texture = new Texture(BaseTexture.from_image(image_url, crossorigin, scale_mode, source_scale));
+            Texture.add_to_cache(texture, image_url);
         }
 
         return texture;
@@ -331,13 +331,13 @@ export default class Texture extends EventEmitter
      *
      * @static
      * @param {HTMLCanvasElement} canvas - The canvas element source of the texture
-     * @param {number} [scaleMode=V.settings.SCALE_MODE] - See {@link V.SCALE_MODES} for possible values
+     * @param {number} [scale_mode=V.settings.SCALE_MODE] - See {@link V.SCALE_MODES} for possible values
      * @param {string} [origin='canvas'] - A string origin of who created the base texture
      * @return {V.Texture} The newly created texture
      */
-    static from_canvas(canvas, scaleMode, origin = 'canvas')
+    static from_canvas(canvas, scale_mode, origin = 'canvas')
     {
-        return new Texture(BaseTexture.from_canvas(canvas, scaleMode, origin));
+        return new Texture(BaseTexture.from_canvas(canvas, scale_mode, origin));
     }
 
     /**
@@ -345,17 +345,17 @@ export default class Texture extends EventEmitter
      *
      * @static
      * @param {HTMLVideoElement|string} video - The URL or actual element of the video
-     * @param {number} [scaleMode=V.settings.SCALE_MODE] - See {@link V.SCALE_MODES} for possible values
+     * @param {number} [scale_mode=V.settings.SCALE_MODE] - See {@link V.SCALE_MODES} for possible values
      * @return {V.Texture} The newly created texture
      */
-    static fromVideo(video, scaleMode)
+    static from_video(video, scale_mode)
     {
         if (typeof video === 'string')
         {
-            return Texture.fromVideoUrl(video, scaleMode);
+            return Texture.from_video_url(video, scale_mode);
         }
 
-        return new Texture(VideoBaseTexture.fromVideo(video, scaleMode));
+        return new Texture(VideoBaseTexture.from_video(video, scale_mode));
     }
 
     /**
@@ -363,12 +363,12 @@ export default class Texture extends EventEmitter
      *
      * @static
      * @param {string} videoUrl - URL of the video
-     * @param {number} [scaleMode=V.settings.SCALE_MODE] - See {@link V.SCALE_MODES} for possible values
+     * @param {number} [scale_mode=V.settings.SCALE_MODE] - See {@link V.SCALE_MODES} for possible values
      * @return {V.Texture} The newly created texture
      */
-    static fromVideoUrl(videoUrl, scaleMode)
+    static from_video_url(videoUrl, scale_mode)
     {
-        return new Texture(VideoBaseTexture.fromUrl(videoUrl, scaleMode));
+        return new Texture(VideoBaseTexture.from_url(videoUrl, scale_mode));
     }
 
     /**
@@ -395,7 +395,7 @@ export default class Texture extends EventEmitter
 
                 if (isVideo)
                 {
-                    return Texture.fromVideoUrl(source);
+                    return Texture.from_video_url(source);
                 }
 
                 return Texture.from_image(source);
@@ -413,7 +413,7 @@ export default class Texture extends EventEmitter
         }
         else if (source instanceof HTMLVideoElement)
         {
-            return Texture.fromVideo(source);
+            return Texture.from_video(source);
         }
         else if (source instanceof BaseTexture)
         {
@@ -429,22 +429,22 @@ export default class Texture extends EventEmitter
      *
      * @static
      * @param {HTMLImageElement|HTMLCanvasElement} source - The input source.
-     * @param {String} imageUrl - File name of texture, for cache and resolving resolution.
+     * @param {String} image_url - File name of texture, for cache and resolving resolution.
      * @param {String} [name] - Human readible name for the texture cache. If no name is
-     *        specified, only `imageUrl` will be used as the cache ID.
+     *        specified, only `image_url` will be used as the cache ID.
      * @return {V.Texture} Output texture
      */
-    static fromLoader(source, imageUrl, name)
+    static from_loader(source, image_url, name)
     {
-        const base_texture = new BaseTexture(source, undefined, getResolutionOfUrl(imageUrl));
+        const base_texture = new BaseTexture(source, undefined, getResolutionOfUrl(image_url));
         const texture = new Texture(base_texture);
 
-        base_texture.imageUrl = imageUrl;
+        base_texture.image_url = image_url;
 
-        // No name, use imageUrl instead
+        // No name, use image_url instead
         if (!name)
         {
-            name = imageUrl;
+            name = image_url;
         }
 
         // lets also add the frame to pixi's global cache for from_frame and from_image fucntions
@@ -452,10 +452,10 @@ export default class Texture extends EventEmitter
         Texture.add_to_cache(texture, name);
 
         // also add references by url if they are different.
-        if (name !== imageUrl)
+        if (name !== image_url)
         {
-            BaseTexture.add_to_cache(texture.base_texture, imageUrl);
-            Texture.add_to_cache(texture, imageUrl);
+            BaseTexture.add_to_cache(texture.base_texture, image_url);
+            Texture.add_to_cache(texture, image_url);
         }
 
         return texture;
@@ -472,9 +472,9 @@ export default class Texture extends EventEmitter
     {
         if (id)
         {
-            if (texture.textureCacheIds.indexOf(id) === -1)
+            if (texture.texture_cache_ids.indexOf(id) === -1)
             {
-                texture.textureCacheIds.push(id);
+                texture.texture_cache_ids.push(id);
             }
 
             // @if DEBUG
@@ -497,7 +497,7 @@ export default class Texture extends EventEmitter
      * @param {string|V.Texture} texture - id of a Texture to be removed, or a Texture instance itself
      * @return {V.Texture|null} The Texture that was removed
      */
-    static removeFromCache(texture)
+    static remove_from_cache(texture)
     {
         if (typeof texture === 'string')
         {
@@ -505,11 +505,11 @@ export default class Texture extends EventEmitter
 
             if (textureFromCache)
             {
-                const index = textureFromCache.textureCacheIds.indexOf(texture);
+                const index = textureFromCache.texture_cache_ids.indexOf(texture);
 
                 if (index > -1)
                 {
-                    textureFromCache.textureCacheIds.splice(index, 1);
+                    textureFromCache.texture_cache_ids.splice(index, 1);
                 }
 
                 delete TextureCache[texture];
@@ -517,14 +517,14 @@ export default class Texture extends EventEmitter
                 return textureFromCache;
             }
         }
-        else if (texture && texture.textureCacheIds)
+        else if (texture && texture.texture_cache_ids)
         {
-            for (let i = 0; i < texture.textureCacheIds.length; ++i)
+            for (let i = 0; i < texture.texture_cache_ids.length; ++i)
             {
-                delete TextureCache[texture.textureCacheIds[i]];
+                delete TextureCache[texture.texture_cache_ids[i]];
             }
 
-            texture.textureCacheIds.length = 0;
+            texture.texture_cache_ids.length = 0;
 
             return texture;
         }
@@ -546,7 +546,7 @@ export default class Texture extends EventEmitter
     {
         this._frame = frame;
 
-        this.noFrame = false;
+        this.no_frame = false;
 
         if (frame.x + frame.width > this.base_texture.width || frame.y + frame.height > this.base_texture.height)
         {
@@ -555,8 +555,8 @@ export default class Texture extends EventEmitter
                 + `Y: ${frame.y} + ${frame.height} > ${this.base_texture.height}`);
         }
 
-        // this.valid = frame && frame.width && frame.height && this.base_texture.source && this.base_texture.hasLoaded;
-        this.valid = frame && frame.width && frame.height && this.base_texture.hasLoaded;
+        // this.valid = frame && frame.width && frame.height && this.base_texture.source && this.base_texture.has_loaded;
+        this.valid = frame && frame.width && frame.height && this.base_texture.has_loaded;
 
         if (!this.trim && !this.rotate)
         {
@@ -613,7 +613,7 @@ export default class Texture extends EventEmitter
     }
 }
 
-function createWhiteTexture()
+function create_white_texture()
 {
     const canvas = document.createElement('canvas');
 
@@ -628,7 +628,7 @@ function createWhiteTexture()
     return new Texture(new BaseTexture(canvas));
 }
 
-function removeAllHandlers(tex)
+function remove_all_handlers(tex)
 {
     tex.destroy = function _emptyDestroy() { /* empty */ };
     tex.on = function _emptyOn() { /* empty */ };
@@ -644,8 +644,8 @@ function removeAllHandlers(tex)
  * @constant
  */
 Texture.EMPTY = new Texture(new BaseTexture());
-removeAllHandlers(Texture.EMPTY);
-removeAllHandlers(Texture.EMPTY.base_texture);
+remove_all_handlers(Texture.EMPTY);
+remove_all_handlers(Texture.EMPTY.base_texture);
 
 /**
  * A white texture of 10x10 size, used for graphics and other things
@@ -654,6 +654,6 @@ removeAllHandlers(Texture.EMPTY.base_texture);
  * @static
  * @constant
  */
-Texture.WHITE = createWhiteTexture();
-removeAllHandlers(Texture.WHITE);
-removeAllHandlers(Texture.WHITE.base_texture);
+Texture.WHITE = create_white_texture();
+remove_all_handlers(Texture.WHITE);
+remove_all_handlers(Texture.WHITE.base_texture);

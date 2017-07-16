@@ -14,7 +14,7 @@ uniform vec4 filter_area;
 
 varying vec2 vTextureCoord;
 
-vec2 mapCoord( vec2 coord )
+vec2 map_coord( vec2 coord )
 {
     coord *= filter_area.xy;
     coord += filter_area.zw;
@@ -22,7 +22,7 @@ vec2 mapCoord( vec2 coord )
     return coord;
 }
 
-vec2 unmapCoord( vec2 coord )
+vec2 unmap_coord( vec2 coord )
 {
     coord -= filter_area.zw;
     coord /= filter_area.xy;

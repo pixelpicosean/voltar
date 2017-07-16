@@ -149,7 +149,7 @@ export default class NineSlicePlane extends Plane
 
         if (renderer.pixel_snap)
         {
-            context.set_transform(
+            context.setTransform(
                 transform.a * res,
                 transform.b * res,
                 transform.c * res,
@@ -160,7 +160,7 @@ export default class NineSlicePlane extends Plane
         }
         else
         {
-            context.set_transform(
+            context.setTransform(
                 transform.a * res,
                 transform.b * res,
                 transform.c * res,

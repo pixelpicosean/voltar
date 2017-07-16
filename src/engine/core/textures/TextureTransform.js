@@ -20,11 +20,11 @@ export default class TextureTransform
     {
         this._texture = texture;
 
-        this.mapCoord = new Matrix();
+        this.map_coord = new Matrix();
 
-        this.uClampFrame = new Float32Array(4);
+        this.u_clamp_frame = new Float32Array(4);
 
-        this.uClampOffset = new Float32Array(2);
+        this.u_clamp_offset = new Float32Array(2);
 
         this._lastTextureID = -1;
 
@@ -36,7 +36,7 @@ export default class TextureTransform
          * @default 0
          * @member {number}
          */
-        this.clampOffset = 0;
+        this.clamp_offset = 0;
 
         /**
          * Changes frame clamping
@@ -77,7 +77,7 @@ export default class TextureTransform
             out = uvs;
         }
 
-        const mat = this.mapCoord;
+        const mat = this.map_coord;
 
         for (let i = 0; i < uvs.length; i += 2)
         {
@@ -115,7 +115,7 @@ export default class TextureTransform
 
         const uvs = tex._uvs;
 
-        this.mapCoord.set(uvs.x1 - uvs.x0, uvs.y1 - uvs.y0, uvs.x3 - uvs.x0, uvs.y3 - uvs.y0, uvs.x0, uvs.y0);
+        this.map_coord.set(uvs.x1 - uvs.x0, uvs.y1 - uvs.y0, uvs.x3 - uvs.x0, uvs.y3 - uvs.y0, uvs.x0, uvs.y0);
 
         const orig = tex.orig;
         const trim = tex.trim;
@@ -124,20 +124,20 @@ export default class TextureTransform
         {
             tempMat.set(orig.width / trim.width, 0, 0, orig.height / trim.height,
                 -trim.x / trim.width, -trim.y / trim.height);
-            this.mapCoord.append(tempMat);
+            this.map_coord.append(tempMat);
         }
 
         const texBase = tex.base_texture;
-        const frame = this.uClampFrame;
+        const frame = this.u_clamp_frame;
         const margin = this.clamp_margin / texBase.resolution;
-        const offset = this.clampOffset;
+        const offset = this.clamp_offset;
 
         frame[0] = (tex._frame.x + margin + offset) / texBase.width;
         frame[1] = (tex._frame.y + margin + offset) / texBase.height;
         frame[2] = (tex._frame.x + tex._frame.width - margin + offset) / texBase.width;
         frame[3] = (tex._frame.y + tex._frame.height - margin + offset) / texBase.height;
-        this.uClampOffset[0] = offset / texBase.realWidth;
-        this.uClampOffset[1] = offset / texBase.realHeight;
+        this.u_clamp_offset[0] = offset / texBase.real_width;
+        this.u_clamp_offset[1] = offset / texBase.real_height;
 
         return true;
     }

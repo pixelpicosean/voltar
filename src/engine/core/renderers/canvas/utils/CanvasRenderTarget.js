@@ -41,7 +41,7 @@ export default class CanvasRenderTarget
      */
     clear()
     {
-        this.context.set_transform(1, 0, 0, 1, 0, 0);
+        this.context.setTransform(1, 0, 0, 1, 0, 0);
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
 

@@ -47,23 +47,23 @@ export default class RenderTexture extends Texture
     constructor(baseRenderTexture, frame)
     {
         // support for legacy..
-        let _legacyRenderer = null;
+        let _legacy_renderer = null;
 
         if (!(baseRenderTexture instanceof BaseRenderTexture))
         {
             /* eslint-disable prefer-rest-params, no-console */
             const width = arguments[1];
             const height = arguments[2];
-            const scaleMode = arguments[3];
+            const scale_mode = arguments[3];
             const resolution = arguments[4];
 
             // we have an old render texture..
             console.warn(`Please use RenderTexture.create(${width}, ${height}) instead of the ctor directly.`);
-            _legacyRenderer = arguments[0];
+            _legacy_renderer = arguments[0];
             /* eslint-enable prefer-rest-params, no-console */
 
             frame = null;
-            baseRenderTexture = new BaseRenderTexture(width, height, scaleMode, resolution);
+            baseRenderTexture = new BaseRenderTexture(width, height, scale_mode, resolution);
         }
 
         /**
@@ -76,7 +76,7 @@ export default class RenderTexture extends Texture
             frame
         );
 
-        this.legacyRenderer = _legacyRenderer;
+        this.legacy_renderer = _legacy_renderer;
 
         /**
          * This will let the renderer know if the texture is valid. If it's not then it cannot be rendered.
@@ -116,12 +116,12 @@ export default class RenderTexture extends Texture
      *
      * @param {number} [width=100] - The width of the render texture
      * @param {number} [height=100] - The height of the render texture
-     * @param {number} [scaleMode=V.settings.SCALE_MODE] - See {@link V.SCALE_MODES} for possible values
+     * @param {number} [scale_mode=V.settings.SCALE_MODE] - See {@link V.SCALE_MODES} for possible values
      * @param {number} [resolution=1] - The resolution / device pixel ratio of the texture being generated
      * @return {V.RenderTexture} The new render texture
      */
-    static create(width, height, scaleMode, resolution)
+    static create(width, height, scale_mode, resolution)
     {
-        return new RenderTexture(new BaseRenderTexture(width, height, scaleMode, resolution));
+        return new RenderTexture(new BaseRenderTexture(width, height, scale_mode, resolution));
     }
 }

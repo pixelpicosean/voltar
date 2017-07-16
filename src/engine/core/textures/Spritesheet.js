@@ -25,7 +25,7 @@ export default class Spritesheet
      * @param {V.BaseTexture} base_texture Reference to the source BaseTexture object.
      * @param {Object} data - Spritesheet image data.
      * @param {string} [resolutionFilename] - The filename to consider when determining
-     *        the resolution of the spritesheet. If not provided, the imageUrl will
+     *        the resolution of the spritesheet. If not provided, the image_url will
      *        be used on the BaseTexture.
      */
     constructor(base_texture, data, resolutionFilename = null)
@@ -53,7 +53,7 @@ export default class Spritesheet
          * @type {number}
          */
         this.resolution = this._updateResolution(
-            resolutionFilename || this.base_texture.imageUrl
+            resolutionFilename || this.base_texture.image_url
         );
 
         /**
