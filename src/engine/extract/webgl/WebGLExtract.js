@@ -82,7 +82,7 @@ export default class WebGLExtract
             }
             else
             {
-                renderTexture = this.renderer.generateTexture(target);
+                renderTexture = this.renderer.generate_texture(target);
             }
         }
 
@@ -173,7 +173,7 @@ export default class WebGLExtract
             }
             else
             {
-                renderTexture = this.renderer.generateTexture(target);
+                renderTexture = this.renderer.generate_texture(target);
             }
         }
 

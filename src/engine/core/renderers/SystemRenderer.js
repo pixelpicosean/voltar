@@ -246,7 +246,7 @@ export default class SystemRenderer extends EventEmitter
      * @param {number} resolution - The resolution / device pixel ratio of the texture being generated
      * @return {V.Texture} a texture of the graphics object
      */
-    generateTexture(displayObject, scaleMode, resolution)
+    generate_texture(displayObject, scaleMode, resolution)
     {
         const bounds = displayObject.get_local_Bounds();
 

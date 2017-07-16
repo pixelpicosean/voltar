@@ -80,7 +80,7 @@ export default class CanvasExtract
             }
             else
             {
-                renderTexture = renderer.generateTexture(target);
+                renderTexture = renderer.generate_texture(target);
             }
         }
 
@@ -135,7 +135,7 @@ export default class CanvasExtract
             }
             else
             {
-                renderTexture = renderer.generateTexture(target);
+                renderTexture = renderer.generate_texture(target);
             }
         }
 

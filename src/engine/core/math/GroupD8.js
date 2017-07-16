@@ -85,10 +85,10 @@ const GroupD8 = {
     NE: 7,
     MIRROR_VERTICAL: 8,
     MIRROR_HORIZONTAL: 12,
-    uX: (ind) => ux[ind],
-    uY: (ind) => uy[ind],
-    vX: (ind) => vx[ind],
-    vY: (ind) => vy[ind],
+    u_x: (ind) => ux[ind],
+    u_y: (ind) => uy[ind],
+    v_x: (ind) => vx[ind],
+    v_y: (ind) => vy[ind],
     inv: (rotation) =>
     {
         if (rotation & 8)
@@ -117,7 +117,7 @@ const GroupD8 = {
      * @param {number} rotation - The number to check.
      * @returns {boolean} Whether or not the width/height should be swapped.
      */
-    isSwapWidthHeight: (rotation) => (rotation & 3) === 2,
+    is_swap_width_height: (rotation) => (rotation & 3) === 2,
 
     /**
      * @memberof V.GroupD8
@@ -126,7 +126,7 @@ const GroupD8 = {
      *
      * @return {number} TODO
      */
-    byDirection: (dx, dy) =>
+    by_direction: (dx, dy) =>
     {
         if (Math.abs(dx) * 2 <= Math.abs(dy))
         {
@@ -172,7 +172,7 @@ const GroupD8 = {
      * @param {number} tx - sprite anchoring
      * @param {number} ty - sprite anchoring
      */
-    matrixAppendRotationInv: (matrix, rotation, tx = 0, ty = 0) =>
+    matrix_append_rotation_inv: (matrix, rotation, tx = 0, ty = 0) =>
     {
         // Packer used "rotation", we use "inv(rotation)"
         const mat = tempMatrices[GroupD8.inv(rotation)];

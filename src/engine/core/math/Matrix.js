@@ -73,7 +73,7 @@ export default class Matrix
      *
      * @param {number[]} array - The array that the matrix will be populated from.
      */
-    fromArray(array)
+    from_array(array)
     {
         this.a = array[0];
         this.b = array[1];
@@ -114,7 +114,7 @@ export default class Matrix
      * @param {Float32Array} [out=new Float32Array(9)] - If provided the array will be assigned to out
      * @return {number[]} the newly created array which contains the matrix
      */
-    toArray(transpose, out)
+    to_array(transpose, out)
     {
         if (!this.array)
         {
@@ -180,7 +180,7 @@ export default class Matrix
      * @param {V.Point} [newPos] - The point that the new position is assigned to (allowed to be same as input)
      * @return {V.Point} The new point, inverse-transformed through this matrix
      */
-    applyInverse(pos, newPos)
+    apply_inverse(pos, newPos)
     {
         newPos = newPos || new Point();
 

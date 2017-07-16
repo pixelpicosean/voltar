@@ -158,7 +158,7 @@ export default class TilingSprite extends Sprite
             return;
         }
 
-        this.tile_transform.updateLocalTransform();
+        this.tile_transform.update_local_transform();
         this.uv_transform.update();
 
         renderer.setObjectRenderer(renderer.plugins[this.plugin_name]);
@@ -261,12 +261,12 @@ export default class TilingSprite extends Sprite
      */
     _calculate_bounds()
     {
-        const minX = this._width * -this._anchor._x;
-        const minY = this._height * -this._anchor._y;
-        const maxX = this._width * (1 - this._anchor._x);
-        const maxY = this._height * (1 - this._anchor._y);
+        const min_x = this._width * -this._anchor._x;
+        const min_y = this._height * -this._anchor._y;
+        const max_x = this._width * (1 - this._anchor._x);
+        const max_y = this._height * (1 - this._anchor._y);
 
-        this._bounds.addFrame(this.transform, minX, minY, maxX, maxY);
+        this._bounds.add_frame(this.transform, min_x, min_y, max_x, max_y);
     }
 
     /**
@@ -280,10 +280,10 @@ export default class TilingSprite extends Sprite
         // we can do a fast local bounds if the sprite has no children!
         if (this.children.length === 0)
         {
-            this._bounds.minX = this._width * -this._anchor._x;
-            this._bounds.minY = this._height * -this._anchor._y;
-            this._bounds.maxX = this._width * (1 - this._anchor._x);
-            this._bounds.maxY = this._height * (1 - this._anchor._x);
+            this._bounds.min_x = this._width * -this._anchor._x;
+            this._bounds.min_y = this._height * -this._anchor._y;
+            this._bounds.max_x = this._width * (1 - this._anchor._x);
+            this._bounds.max_y = this._height * (1 - this._anchor._x);
 
             if (!rect)
             {
@@ -295,7 +295,7 @@ export default class TilingSprite extends Sprite
                 rect = this._localBoundsRect;
             }
 
-            return this._bounds.getRectangle(rect);
+            return this._bounds.get_rectangle(rect);
         }
 
         return super.get_local_Bounds.call(this, rect);
@@ -309,7 +309,7 @@ export default class TilingSprite extends Sprite
      */
     contains_point(point)
     {
-        this.world_transform.applyInverse(point, tempPoint);
+        this.world_transform.apply_inverse(point, tempPoint);
 
         const width = this._width;
         const height = this._height;

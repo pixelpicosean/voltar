@@ -156,7 +156,7 @@ export default class ParticleRenderer extends ObjectRenderer
 
         m.prepend(renderer._activeRenderTarget.projectionMatrix);
 
-        this.shader.uniforms.projectionMatrix = m.toArray(true);
+        this.shader.uniforms.projectionMatrix = m.to_array(true);
 
         this.shader.uniforms.uColor = utils.premultiplyRgba(container.tint_rgb,
             container.world_alpha, this.shader.uniforms.uColor, base_texture.premultipliedAlpha);

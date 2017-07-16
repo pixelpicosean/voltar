@@ -374,7 +374,7 @@ export default class WebGLRenderer extends SystemRenderer
 
             if (this._activeShader)
             {
-                this._activeShader.uniforms.projectionMatrix = this.rootRenderTarget.projectionMatrix.toArray(true);
+                this._activeShader.uniforms.projectionMatrix = this.rootRenderTarget.projectionMatrix.to_array(true);
             }
         }
     }
@@ -481,7 +481,7 @@ export default class WebGLRenderer extends SystemRenderer
 
             if (this._activeShader)
             {
-                this._activeShader.uniforms.projectionMatrix = renderTarget.projectionMatrix.toArray(true);
+                this._activeShader.uniforms.projectionMatrix = renderTarget.projectionMatrix.to_array(true);
             }
 
             this.stencilManager.setMaskStack(renderTarget.stencilMaskStack);
@@ -511,7 +511,7 @@ export default class WebGLRenderer extends SystemRenderer
             if (autoProject !== false)
             {
                 // automatically set the projection matrix
-                shader.uniforms.projectionMatrix = this._activeRenderTarget.projectionMatrix.toArray(true);
+                shader.uniforms.projectionMatrix = this._activeRenderTarget.projectionMatrix.to_array(true);
             }
         }
 

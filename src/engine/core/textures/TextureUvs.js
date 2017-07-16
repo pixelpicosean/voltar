@@ -53,20 +53,20 @@ export default class TextureUvs
             const cY = (frame.y / th) + h2;
 
             rotate = GroupD8.add(rotate, GroupD8.NW); // NW is top-left corner
-            this.x0 = cX + (w2 * GroupD8.uX(rotate));
-            this.y0 = cY + (h2 * GroupD8.uY(rotate));
+            this.x0 = cX + (w2 * GroupD8.u_x(rotate));
+            this.y0 = cY + (h2 * GroupD8.u_y(rotate));
 
             rotate = GroupD8.add(rotate, 2); // rotate 90 degrees clockwise
-            this.x1 = cX + (w2 * GroupD8.uX(rotate));
-            this.y1 = cY + (h2 * GroupD8.uY(rotate));
+            this.x1 = cX + (w2 * GroupD8.u_x(rotate));
+            this.y1 = cY + (h2 * GroupD8.u_y(rotate));
 
             rotate = GroupD8.add(rotate, 2);
-            this.x2 = cX + (w2 * GroupD8.uX(rotate));
-            this.y2 = cY + (h2 * GroupD8.uY(rotate));
+            this.x2 = cX + (w2 * GroupD8.u_x(rotate));
+            this.y2 = cY + (h2 * GroupD8.u_y(rotate));
 
             rotate = GroupD8.add(rotate, 2);
-            this.x3 = cX + (w2 * GroupD8.uX(rotate));
-            this.y3 = cY + (h2 * GroupD8.uY(rotate));
+            this.x3 = cX + (w2 * GroupD8.u_x(rotate));
+            this.y3 = cY + (h2 * GroupD8.u_y(rotate));
         }
         else
         {

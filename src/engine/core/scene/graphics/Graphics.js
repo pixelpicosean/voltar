@@ -835,7 +835,7 @@ export default class Graphics extends Node2D
 
         const lb = this._localBounds;
 
-        this._bounds.addFrame(this.transform, lb.minX, lb.minY, lb.maxX, lb.maxY);
+        this._bounds.add_frame(this.transform, lb.min_x, lb.min_y, lb.max_x, lb.max_y);
     }
 
     /**
@@ -846,7 +846,7 @@ export default class Graphics extends Node2D
      */
     contains_point(point)
     {
-        this.world_transform.applyInverse(point, tempPoint);
+        this.world_transform.apply_inverse(point, tempPoint);
 
         const graphics_data = this.graphics_data;
 
@@ -891,11 +891,11 @@ export default class Graphics extends Node2D
      */
     update_local_bounds()
     {
-        let minX = Infinity;
-        let maxX = -Infinity;
+        let min_x = Infinity;
+        let max_x = -Infinity;
 
-        let minY = Infinity;
-        let maxY = -Infinity;
+        let min_y = Infinity;
+        let max_y = -Infinity;
 
         if (this.graphics_data.length)
         {
@@ -920,11 +920,11 @@ export default class Graphics extends Node2D
                     w = shape.width + line_width;
                     h = shape.height + line_width;
 
-                    minX = x < minX ? x : minX;
-                    maxX = x + w > maxX ? x + w : maxX;
+                    min_x = x < min_x ? x : min_x;
+                    max_x = x + w > max_x ? x + w : max_x;
 
-                    minY = y < minY ? y : minY;
-                    maxY = y + h > maxY ? y + h : maxY;
+                    min_y = y < min_y ? y : min_y;
+                    max_y = y + h > max_y ? y + h : max_y;
                 }
                 else if (type === SHAPES.CIRC)
                 {
@@ -933,11 +933,11 @@ export default class Graphics extends Node2D
                     w = shape.radius + (line_width / 2);
                     h = shape.radius + (line_width / 2);
 
-                    minX = x - w < minX ? x - w : minX;
-                    maxX = x + w > maxX ? x + w : maxX;
+                    min_x = x - w < min_x ? x - w : min_x;
+                    max_x = x + w > max_x ? x + w : max_x;
 
-                    minY = y - h < minY ? y - h : minY;
-                    maxY = y + h > maxY ? y + h : maxY;
+                    min_y = y - h < min_y ? y - h : min_y;
+                    max_y = y + h > max_y ? y + h : max_y;
                 }
                 else if (type === SHAPES.ELIP)
                 {
@@ -946,11 +946,11 @@ export default class Graphics extends Node2D
                     w = shape.width + (line_width / 2);
                     h = shape.height + (line_width / 2);
 
-                    minX = x - w < minX ? x - w : minX;
-                    maxX = x + w > maxX ? x + w : maxX;
+                    min_x = x - w < min_x ? x - w : min_x;
+                    max_x = x + w > max_x ? x + w : max_x;
 
-                    minY = y - h < minY ? y - h : minY;
-                    maxY = y + h > maxY ? y + h : maxY;
+                    min_y = y - h < min_y ? y - h : min_y;
+                    max_y = y + h > max_y ? y + h : max_y;
                 }
                 else
                 {
@@ -986,30 +986,30 @@ export default class Graphics extends Node2D
                         cx = (x2 + x) / 2;
                         cy = (y2 + y) / 2;
 
-                        minX = cx - rw < minX ? cx - rw : minX;
-                        maxX = cx + rw > maxX ? cx + rw : maxX;
+                        min_x = cx - rw < min_x ? cx - rw : min_x;
+                        max_x = cx + rw > max_x ? cx + rw : max_x;
 
-                        minY = cy - rh < minY ? cy - rh : minY;
-                        maxY = cy + rh > maxY ? cy + rh : maxY;
+                        min_y = cy - rh < min_y ? cy - rh : min_y;
+                        max_y = cy + rh > max_y ? cy + rh : max_y;
                     }
                 }
             }
         }
         else
         {
-            minX = 0;
-            maxX = 0;
-            minY = 0;
-            maxY = 0;
+            min_x = 0;
+            max_x = 0;
+            min_y = 0;
+            max_y = 0;
         }
 
         const padding = this.bounds_padding;
 
-        this._localBounds.minX = minX - padding;
-        this._localBounds.maxX = maxX + padding;
+        this._localBounds.min_x = min_x - padding;
+        this._localBounds.max_x = max_x + padding;
 
-        this._localBounds.minY = minY - padding;
-        this._localBounds.maxY = maxY + padding;
+        this._localBounds.min_y = min_y - padding;
+        this._localBounds.max_y = max_y + padding;
     }
 
     /**
@@ -1073,7 +1073,7 @@ export default class Graphics extends Node2D
             canvasRenderer = new CanvasRenderer();
         }
 
-        this.transform.updateLocalTransform();
+        this.transform.update_local_transform();
         this.transform.local_transform.copy(tempMatrix);
 
         tempMatrix.invert();

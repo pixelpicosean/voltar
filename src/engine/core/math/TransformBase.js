@@ -34,7 +34,7 @@ export default class TransformBase
     /**
      * TransformBase does not have decomposition, so this function wont do anything
      */
-    updateLocalTransform()
+    update_local_transform()
     {
         // empty
     }
@@ -68,6 +68,6 @@ export default class TransformBase
  * @param  parentTransform {V.Transform} The transform of the parent of this object
  *
  */
-TransformBase.prototype.updateWorldTransform = TransformBase.prototype.update_transform;
+TransformBase.prototype.update_world_transform = TransformBase.prototype.update_transform;
 
 TransformBase.IDENTITY = new TransformBase();

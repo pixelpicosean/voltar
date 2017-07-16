@@ -410,7 +410,7 @@ export default class Text extends Sprite
         this.update_text(true);
         this.calculate_vertices();
         // if we have already done this on THIS frame.
-        this._bounds.addQuad(this.vertex_data);
+        this._bounds.add_quad(this.vertex_data);
     }
 
     /**

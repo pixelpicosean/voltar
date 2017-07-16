@@ -38,7 +38,7 @@ export default class Transform extends TransformBase
          *
          * @member {V.ObservablePoint}
          */
-        this.skew = new ObservablePoint(this.updateSkew, this, 0, 0);
+        this.skew = new ObservablePoint(this.update_skew, this, 0, 0);
 
         /**
          * The pivot point of the displayObject that it rotates around
@@ -66,7 +66,7 @@ export default class Transform extends TransformBase
      *
      * @private
      */
-    updateSkew()
+    update_skew()
     {
         this._cx = Math.cos(this._rotation + this.skew._y);
         this._sx = Math.sin(this._rotation + this.skew._y);
@@ -77,7 +77,7 @@ export default class Transform extends TransformBase
     /**
      * Updates only local matrix
      */
-    updateLocalTransform()
+    update_local_transform()
     {
         const lt = this.local_transform;
 
@@ -126,7 +126,7 @@ export default class Transform extends TransformBase
      *
      * @param {V.Matrix} matrix - The matrix to decompose
      */
-    setFromMatrix(matrix)
+    set_from_matrix(matrix)
     {
         matrix.decompose(this);
     }
@@ -144,6 +144,6 @@ export default class Transform extends TransformBase
     set rotation(value) // eslint-disable-line require-jsdoc
     {
         this._rotation = value;
-        this.updateSkew();
+        this.update_skew();
     }
 }

@@ -133,15 +133,15 @@ export default class TilingSpriteRenderer extends core.ObjectRenderer
         }
         else
         {
-            shader.uniforms.uMapCoord = uv.mapCoord.toArray(true);
+            shader.uniforms.uMapCoord = uv.mapCoord.to_array(true);
             shader.uniforms.uClampFrame = uv.uClampFrame;
             shader.uniforms.uClampOffset = uv.uClampOffset;
         }
 
-        shader.uniforms.uTransform = tempMat.toArray(true);
+        shader.uniforms.uTransform = tempMat.to_array(true);
         shader.uniforms.uColor = core.utils.premultiplyTintToRgba(ts.tint, ts.world_alpha,
             shader.uniforms.uColor, baseTex.premultipliedAlpha);
-        shader.uniforms.translationMatrix = ts.transform.world_transform.toArray(true);
+        shader.uniforms.translationMatrix = ts.transform.world_transform.to_array(true);
 
         shader.uniforms.uSampler = renderer.bindTexture(tex);
 

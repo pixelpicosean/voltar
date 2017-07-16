@@ -86,7 +86,7 @@ export default class CanvasSpriteRenderer
             {
                 wt.copy(canvasRenderWorldTransform);
                 wt = canvasRenderWorldTransform;
-                GroupD8.matrixAppendRotationInv(wt, texture.rotate, dx, dy);
+                GroupD8.matrix_append_rotation_inv(wt, texture.rotate, dx, dy);
                 // the anchor has already been applied above, so lets set it to zero
                 dx = 0;
                 dy = 0;

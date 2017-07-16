@@ -253,7 +253,7 @@ export default class Node2D extends EventEmitter
             rect = this._boundsRect;
         }
 
-        return this._bounds.getRectangle(rect);
+        return this._bounds.get_rectangle(rect);
     }
 
     /**
@@ -359,7 +359,7 @@ export default class Node2D extends EventEmitter
         }
 
         // simply apply the matrix..
-        return this.world_transform.applyInverse(position, point);
+        return this.world_transform.apply_inverse(position, point);
     }
 
     /**
@@ -1015,15 +1015,15 @@ export default class Node2D extends EventEmitter
             if (child._mask)
             {
                 child._mask.calculate_bounds();
-                this._bounds.addBoundsMask(child._bounds, child._mask._bounds);
+                this._bounds.add_bounds_mask(child._bounds, child._mask._bounds);
             }
             else if (child.filter_area)
             {
-                this._bounds.addBoundsArea(child._bounds, child.filter_area);
+                this._bounds.add_bounds_area(child._bounds, child.filter_area);
             }
             else
             {
-                this._bounds.addBounds(child._bounds);
+                this._bounds.add_bounds(child._bounds);
             }
         }
 

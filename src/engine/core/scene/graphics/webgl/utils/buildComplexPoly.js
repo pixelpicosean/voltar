@@ -28,11 +28,11 @@ export default function buildComplexPoly(graphics_data, webGLData)
     webGLData.color = hex2rgb(graphics_data.fillColor);
 
     // calculate the bounds..
-    let minX = Infinity;
-    let maxX = -Infinity;
+    let min_x = Infinity;
+    let max_x = -Infinity;
 
-    let minY = Infinity;
-    let maxY = -Infinity;
+    let min_y = Infinity;
+    let max_y = -Infinity;
 
     let x = 0;
     let y = 0;
@@ -43,18 +43,18 @@ export default function buildComplexPoly(graphics_data, webGLData)
         x = points[i];
         y = points[i + 1];
 
-        minX = x < minX ? x : minX;
-        maxX = x > maxX ? x : maxX;
+        min_x = x < min_x ? x : min_x;
+        max_x = x > max_x ? x : max_x;
 
-        minY = y < minY ? y : minY;
-        maxY = y > maxY ? y : maxY;
+        min_y = y < min_y ? y : min_y;
+        max_y = y > max_y ? y : max_y;
     }
 
     // add a quad to the end cos there is no point making another buffer!
-    points.push(minX, minY,
-                maxX, minY,
-                maxX, maxY,
-                minX, maxY);
+    points.push(min_x, min_y,
+                max_x, min_y,
+                max_x, max_y,
+                min_x, max_y);
 
     // push a quad onto the end..
 

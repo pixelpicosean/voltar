@@ -234,7 +234,7 @@ export default class Mesh extends Node2D
     _calculate_bounds()
     {
         // TODO - we can cache local bounds and use them if they are dirty (like graphics)
-        this._bounds.addVertices(this.transform, this.vertices, 0, this.vertices.length);
+        this._bounds.add_vertices(this.transform, this.vertices, 0, this.vertices.length);
     }
 
     /**
@@ -250,7 +250,7 @@ export default class Mesh extends Node2D
             return false;
         }
 
-        this.world_transform.applyInverse(point, tempPoint);
+        this.world_transform.apply_inverse(point, tempPoint);
 
         const vertices = this.vertices;
         const points = tempPolygon.points;

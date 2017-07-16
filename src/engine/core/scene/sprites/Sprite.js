@@ -333,13 +333,13 @@ export default class Sprite extends Node2D
         {
             // no trim! lets use the usual calculations..
             this.calculate_vertices();
-            this._bounds.addQuad(this.vertex_data);
+            this._bounds.add_quad(this.vertex_data);
         }
         else
         {
             // lets calculate a special trimmed bounds...
             this.calculate_trimmed_vertices();
-            this._bounds.addQuad(this.vertex_trimmed_data);
+            this._bounds.add_quad(this.vertex_trimmed_data);
         }
     }
 
@@ -354,10 +354,10 @@ export default class Sprite extends Node2D
         // we can do a fast local bounds if the sprite has no children!
         if (this.children.length === 0)
         {
-            this._bounds.minX = this._texture.orig.width * -this._anchor._x;
-            this._bounds.minY = this._texture.orig.height * -this._anchor._y;
-            this._bounds.maxX = this._texture.orig.width * (1 - this._anchor._x);
-            this._bounds.maxY = this._texture.orig.height * (1 - this._anchor._x);
+            this._bounds.min_x = this._texture.orig.width * -this._anchor._x;
+            this._bounds.min_y = this._texture.orig.height * -this._anchor._y;
+            this._bounds.max_x = this._texture.orig.width * (1 - this._anchor._x);
+            this._bounds.max_y = this._texture.orig.height * (1 - this._anchor._x);
 
             if (!rect)
             {
@@ -369,7 +369,7 @@ export default class Sprite extends Node2D
                 rect = this._localBoundsRect;
             }
 
-            return this._bounds.getRectangle(rect);
+            return this._bounds.get_rectangle(rect);
         }
 
         return super.get_local_Bounds.call(this, rect);
@@ -383,7 +383,7 @@ export default class Sprite extends Node2D
      */
     contains_point(point)
     {
-        this.world_transform.applyInverse(point, tempPoint);
+        this.world_transform.apply_inverse(point, tempPoint);
 
         const width = this._texture.orig.width;
         const height = this._texture.orig.height;

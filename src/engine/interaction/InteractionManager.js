@@ -1084,7 +1084,7 @@ export default class InteractionManager extends EventEmitter
             {
                 if (displayObject.hitArea)
                 {
-                    displayObject.world_transform.applyInverse(point, this._tempPoint);
+                    displayObject.world_transform.apply_inverse(point, this._tempPoint);
                     if (displayObject.hitArea.contains(this._tempPoint.x, this._tempPoint.y))
                     {
                         hit = true;

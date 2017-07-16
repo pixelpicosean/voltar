@@ -357,7 +357,7 @@ export default class FilterManager extends WebGLManager
                 // check if its pixi matrix..
                 if (uniforms[i].a !== undefined)
                 {
-                    shader.uniforms[i] = uniforms[i].toArray(true);
+                    shader.uniforms[i] = uniforms[i].to_array(true);
                 }
                 else
                 {
