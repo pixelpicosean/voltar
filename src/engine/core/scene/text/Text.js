@@ -43,7 +43,7 @@ export default class Text extends Sprite
         canvas.width = 3;
         canvas.height = 3;
 
-        const texture = Texture.fromCanvas(canvas, settings.SCALE_MODE, 'text');
+        const texture = Texture.from_canvas(canvas, settings.SCALE_MODE, 'text');
 
         texture.orig = new Rectangle();
         texture.trim = new Rectangle();
@@ -51,7 +51,7 @@ export default class Text extends Sprite
         super(texture);
 
         // base texture is already automatically added to the cache, now adding the actual texture
-        Texture.addToCache(this._texture, this._texture.baseTexture.textureCacheIds[0]);
+        Texture.add_to_cache(this._texture, this._texture.baseTexture.textureCacheIds[0]);
 
         /**
          * The canvas element that everything is drawn to
@@ -107,7 +107,7 @@ export default class Text extends Sprite
         this.text = text;
         this.style = style;
 
-        this.localStyleID = -1;
+        this.local_style_id = -1;
     }
 
     /**
@@ -116,15 +116,15 @@ export default class Text extends Sprite
      * @private
      * @param {boolean} respectDirty - Whether to abort updating the text if the Text isn't dirty and the function is called.
      */
-    updateText(respectDirty)
+    update_text(respectDirty)
     {
         const style = this._style;
 
         // check if style has changed..
-        if (this.localStyleID !== style.styleID)
+        if (this.local_style_id !== style.styleID)
         {
             this.dirty = true;
-            this.localStyleID = style.styleID;
+            this.local_style_id = style.styleID;
         }
 
         if (!this.dirty && respectDirty)
@@ -191,7 +191,7 @@ export default class Text extends Sprite
 
                 if (style.fill)
                 {
-                    this.drawLetterSpacing(
+                    this.draw_letter_spacing(
                         lines[i],
                         linePositionX + xShadowOffset + style.padding, linePositionY + yShadowOffset + style.padding
                     );
@@ -199,7 +199,7 @@ export default class Text extends Sprite
                     if (style.stroke && style.strokeThickness)
                     {
                         context.strokeStyle = style.dropShadowColor;
-                        this.drawLetterSpacing(
+                        this.draw_letter_spacing(
                             lines[i],
                             linePositionX + xShadowOffset + style.padding, linePositionY + yShadowOffset + style.padding,
                             true
@@ -234,7 +234,7 @@ export default class Text extends Sprite
 
             if (style.stroke && style.strokeThickness)
             {
-                this.drawLetterSpacing(
+                this.draw_letter_spacing(
                     lines[i],
                     linePositionX + style.padding,
                     linePositionY + style.padding,
@@ -244,7 +244,7 @@ export default class Text extends Sprite
 
             if (style.fill)
             {
-                this.drawLetterSpacing(
+                this.draw_letter_spacing(
                     lines[i],
                     linePositionX + style.padding,
                     linePositionY + style.padding
@@ -252,7 +252,7 @@ export default class Text extends Sprite
             }
         }
 
-        this.updateTexture();
+        this.update_texture();
     }
 
     /**
@@ -264,7 +264,7 @@ export default class Text extends Sprite
      *  text? If not, it's for the inside fill
      * @private
      */
-    drawLetterSpacing(text, x, y, isStroke = false)
+    draw_letter_spacing(text, x, y, isStroke = false)
     {
         const style = this._style;
 
@@ -310,7 +310,7 @@ export default class Text extends Sprite
      *
      * @private
      */
-    updateTexture()
+    update_texture()
     {
         const canvas = this.canvas;
 
@@ -365,7 +365,7 @@ export default class Text extends Sprite
             this.dirty = true;
         }
 
-        this.updateText(true);
+        this.update_text(true);
 
         super.render_webGL(renderer);
     }
@@ -384,7 +384,7 @@ export default class Text extends Sprite
             this.dirty = true;
         }
 
-        this.updateText(true);
+        this.update_text(true);
 
         super._render_canvas(renderer);
     }
@@ -397,7 +397,7 @@ export default class Text extends Sprite
      */
     get_local_Bounds(rect)
     {
-        this.updateText(true);
+        this.update_text(true);
 
         return super.get_local_Bounds.call(this, rect);
     }
@@ -407,7 +407,7 @@ export default class Text extends Sprite
      */
     _calculate_bounds()
     {
-        this.updateText(true);
+        this.update_text(true);
         this.calculate_vertices();
         // if we have already done this on THIS frame.
         this._bounds.addQuad(this.vertex_data);
@@ -568,14 +568,14 @@ export default class Text extends Sprite
      */
     get width()
     {
-        this.updateText(true);
+        this.update_text(true);
 
         return Math.abs(this.scale.x) * this._texture.orig.width;
     }
 
     set width(value) // eslint-disable-line require-jsdoc
     {
-        this.updateText(true);
+        this.update_text(true);
 
         const s = sign(this.scale.x) || 1;
 
@@ -590,14 +590,14 @@ export default class Text extends Sprite
      */
     get height()
     {
-        this.updateText(true);
+        this.update_text(true);
 
         return Math.abs(this.scale.y) * this._texture.orig.height;
     }
 
     set height(value) // eslint-disable-line require-jsdoc
     {
-        this.updateText(true);
+        this.update_text(true);
 
         const s = sign(this.scale.y) || 1;
 
@@ -629,7 +629,7 @@ export default class Text extends Sprite
             this._style = new TextStyle(style);
         }
 
-        this.localStyleID = -1;
+        this.local_style_id = -1;
         this.dirty = true;
     }
 

@@ -414,7 +414,7 @@ function drawText(helper, item)
     if (item instanceof core.Text)
     {
         // updating text will return early if it is not dirty
-        item.updateText(true);
+        item.update_text(true);
 
         return true;
     }

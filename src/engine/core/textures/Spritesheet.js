@@ -207,7 +207,7 @@ export default class Spritesheet
                 );
 
                 // lets also add the frame to pixi's global cache for from_frame and from_image functions
-                Texture.addToCache(this.textures[i], i);
+                Texture.add_to_cache(this.textures[i], i);
             }
 
             frameIndex++;

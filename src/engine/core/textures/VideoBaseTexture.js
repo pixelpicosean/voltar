@@ -220,7 +220,7 @@ export default class VideoBaseTexture extends BaseTexture
         if (!baseTexture)
         {
             baseTexture = new VideoBaseTexture(video, scaleMode);
-            BaseTexture.addToCache(baseTexture, video._pixiId);
+            BaseTexture.add_to_cache(baseTexture, video._pixiId);
         }
 
         return baseTexture;

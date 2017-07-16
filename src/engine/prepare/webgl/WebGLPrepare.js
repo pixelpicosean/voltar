@@ -44,7 +44,7 @@ function uploadBaseTextures(renderer, item)
         // reuploads the texture without need for preparing it again
         if (!item._glTextures[renderer.CONTEXT_UID])
         {
-            renderer.textureManager.updateTexture(item);
+            renderer.textureManager.update_texture(item);
         }
 
         return true;

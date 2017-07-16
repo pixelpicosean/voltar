@@ -64,7 +64,7 @@ export default class TextureManager
      * @param {number} location - the location the texture will be bound to.
      * @return {GLTexture} The gl texture.
      */
-    updateTexture(texture, location)
+    update_texture(texture, location)
     {
         // assume it good!
         // texture = texture.baseTexture || texture;
@@ -131,7 +131,7 @@ export default class TextureManager
 
             texture._glTextures[this.renderer.CONTEXT_UID] = glTexture;
 
-            texture.on('update', this.updateTexture, this);
+            texture.on('update', this.update_texture, this);
             texture.on('dispose', this.destroyTexture, this);
 
             this._managedTextures.push(texture);
@@ -203,7 +203,7 @@ export default class TextureManager
             this.renderer.unbindTexture(texture);
 
             texture._glTextures[this.renderer.CONTEXT_UID].destroy();
-            texture.off('update', this.updateTexture, this);
+            texture.off('update', this.update_texture, this);
             texture.off('dispose', this.destroyTexture, this);
 
             delete texture._glTextures[this.renderer.CONTEXT_UID];
@@ -249,7 +249,7 @@ export default class TextureManager
 
             this.destroyTexture(texture, true);
 
-            texture.off('update', this.updateTexture, this);
+            texture.off('update', this.update_texture, this);
             texture.off('dispose', this.destroyTexture, this);
         }
 

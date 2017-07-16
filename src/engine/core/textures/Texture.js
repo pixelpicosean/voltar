@@ -160,7 +160,7 @@ export default class Texture extends EventEmitter
 
         /**
          * The ids under which this Texture has been added to the texture cache. This is
-         * automatically set as long as Texture.addToCache is used, but may not be set if a
+         * automatically set as long as Texture.add_to_cache is used, but may not be set if a
          * Texture is added directly to the TextureCache array.
          *
          * @member {string[]}
@@ -300,7 +300,7 @@ export default class Texture extends EventEmitter
         if (!texture)
         {
             texture = new Texture(BaseTexture.from_image(imageUrl, crossorigin, scaleMode, sourceScale));
-            Texture.addToCache(texture, imageUrl);
+            Texture.add_to_cache(texture, imageUrl);
         }
 
         return texture;
@@ -335,9 +335,9 @@ export default class Texture extends EventEmitter
      * @param {string} [origin='canvas'] - A string origin of who created the base texture
      * @return {V.Texture} The newly created texture
      */
-    static fromCanvas(canvas, scaleMode, origin = 'canvas')
+    static from_canvas(canvas, scaleMode, origin = 'canvas')
     {
-        return new Texture(BaseTexture.fromCanvas(canvas, scaleMode, origin));
+        return new Texture(BaseTexture.from_canvas(canvas, scaleMode, origin));
     }
 
     /**
@@ -409,7 +409,7 @@ export default class Texture extends EventEmitter
         }
         else if (source instanceof HTMLCanvasElement)
         {
-            return Texture.fromCanvas(source, settings.SCALE_MODE, 'HTMLCanvasElement');
+            return Texture.from_canvas(source, settings.SCALE_MODE, 'HTMLCanvasElement');
         }
         else if (source instanceof HTMLVideoElement)
         {
@@ -448,14 +448,14 @@ export default class Texture extends EventEmitter
         }
 
         // lets also add the frame to pixi's global cache for from_frame and from_image fucntions
-        BaseTexture.addToCache(texture.baseTexture, name);
-        Texture.addToCache(texture, name);
+        BaseTexture.add_to_cache(texture.baseTexture, name);
+        Texture.add_to_cache(texture, name);
 
         // also add references by url if they are different.
         if (name !== imageUrl)
         {
-            BaseTexture.addToCache(texture.baseTexture, imageUrl);
-            Texture.addToCache(texture, imageUrl);
+            BaseTexture.add_to_cache(texture.baseTexture, imageUrl);
+            Texture.add_to_cache(texture, imageUrl);
         }
 
         return texture;
@@ -468,7 +468,7 @@ export default class Texture extends EventEmitter
      * @param {V.Texture} texture - The Texture to add to the cache.
      * @param {string} id - The id that the Texture will be stored against.
      */
-    static addToCache(texture, id)
+    static add_to_cache(texture, id)
     {
         if (id)
         {

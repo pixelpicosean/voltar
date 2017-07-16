@@ -447,7 +447,7 @@ export default class WebGLRenderer extends SystemRenderer
             if (!baseTexture._glRenderTargets[this.CONTEXT_UID])
             {
                 // bind the current texture
-                this.textureManager.updateTexture(baseTexture, 0);
+                this.textureManager.update_texture(baseTexture, 0);
             }
 
             this.unbindTexture(baseTexture);
@@ -564,7 +564,7 @@ export default class WebGLRenderer extends SystemRenderer
         if (!glTexture)
         {
             // this will also bind the texture..
-            this.textureManager.updateTexture(texture, location);
+            this.textureManager.update_texture(texture, location);
         }
         else
         {

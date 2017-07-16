@@ -163,7 +163,7 @@ export default class AnimatedSprite extends core.Sprite
 
         if (previousFrame !== this.currentFrame)
         {
-            this.updateTexture();
+            this.update_texture();
         }
     }
 
@@ -180,7 +180,7 @@ export default class AnimatedSprite extends core.Sprite
 
         if (previousFrame !== this.currentFrame)
         {
-            this.updateTexture();
+            this.update_texture();
         }
 
         this.play();
@@ -258,7 +258,7 @@ export default class AnimatedSprite extends core.Sprite
                 }
             }
 
-            this.updateTexture();
+            this.update_texture();
         }
     }
 
@@ -267,7 +267,7 @@ export default class AnimatedSprite extends core.Sprite
      *
      * @private
      */
-    updateTexture()
+    update_texture()
     {
         this._texture = this._textures[this.currentFrame];
         this._textureID = -1;
@@ -374,7 +374,7 @@ export default class AnimatedSprite extends core.Sprite
             }
         }
         this.gotoAndStop(0);
-        this.updateTexture();
+        this.update_texture();
     }
 
     /**

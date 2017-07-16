@@ -128,7 +128,7 @@ export default class BitmapText extends Node2D
          */
         this.dirty = false;
 
-        this.updateText();
+        this.update_text();
     }
 
     /**
@@ -136,7 +136,7 @@ export default class BitmapText extends Node2D
      *
      * @private
      */
-    updateText()
+    update_text()
     {
         const data = BitmapText.fonts[this._font.name];
         const scale = this._font.size / data.size;
@@ -318,7 +318,7 @@ export default class BitmapText extends Node2D
     {
         if (this.dirty)
         {
-            this.updateText();
+            this.update_text();
             this.dirty = false;
         }
     }

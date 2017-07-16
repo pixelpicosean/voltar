@@ -207,7 +207,7 @@ export default class BaseTexture extends EventEmitter
 
         /**
          * The ids under which this BaseTexture has been added to the base texture cache. This is
-         * automatically set as long as BaseTexture.addToCache is used, but may not be set if a
+         * automatically set as long as BaseTexture.add_to_cache is used, but may not be set if a
          * BaseTexture is added directly to the BaseTextureCache array.
          *
          * @member {string[]}
@@ -586,7 +586,7 @@ export default class BaseTexture extends EventEmitter
         this.source = canvas;
 
         // Add also the canvas in cache (destroy clears by `imageUrl` and `source._pixiId`)
-        BaseTexture.addToCache(this, canvas._pixiId);
+        BaseTexture.add_to_cache(this, canvas._pixiId);
 
         this.isLoading = false;
         this._sourceLoaded();
@@ -701,7 +701,7 @@ export default class BaseTexture extends EventEmitter
 
             image.src = imageUrl; // Setting this triggers load
 
-            BaseTexture.addToCache(baseTexture, imageUrl);
+            BaseTexture.add_to_cache(baseTexture, imageUrl);
         }
 
         return baseTexture;
@@ -716,7 +716,7 @@ export default class BaseTexture extends EventEmitter
      * @param {string} [origin='canvas'] - A string origin of who created the base texture
      * @return {V.BaseTexture} The new base texture.
      */
-    static fromCanvas(canvas, scaleMode, origin = 'canvas')
+    static from_canvas(canvas, scaleMode, origin = 'canvas')
     {
         if (!canvas._pixiId)
         {
@@ -728,7 +728,7 @@ export default class BaseTexture extends EventEmitter
         if (!baseTexture)
         {
             baseTexture = new BaseTexture(canvas, scaleMode);
-            BaseTexture.addToCache(baseTexture, canvas._pixiId);
+            BaseTexture.add_to_cache(baseTexture, canvas._pixiId);
         }
 
         return baseTexture;
@@ -768,14 +768,14 @@ export default class BaseTexture extends EventEmitter
                 // if there is an @2x at the end of the url we are going to assume its a highres image
                 baseTexture.resolution = getResolutionOfUrl(imageUrl);
 
-                BaseTexture.addToCache(baseTexture, imageUrl);
+                BaseTexture.add_to_cache(baseTexture, imageUrl);
             }
 
             return baseTexture;
         }
         else if (source instanceof HTMLCanvasElement)
         {
-            return BaseTexture.fromCanvas(source, scaleMode);
+            return BaseTexture.from_canvas(source, scaleMode);
         }
 
         // lets assume its a base texture!
@@ -789,7 +789,7 @@ export default class BaseTexture extends EventEmitter
      * @param {V.BaseTexture} baseTexture - The BaseTexture to add to the cache.
      * @param {string} id - The id that the BaseTexture will be stored against.
      */
-    static addToCache(baseTexture, id)
+    static add_to_cache(baseTexture, id)
     {
         if (id)
         {
