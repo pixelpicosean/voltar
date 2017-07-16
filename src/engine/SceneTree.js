@@ -136,14 +136,15 @@ export default class SceneTree {
 
         if (this._next_scene_ctor) {
             if (this.current_scene) {
-                this.current_scene._exit_tree();
-                this.current_scene.free();
+                this.current_scene._propagate_exit_tree();
+                this.current_scene.scene_tree = null;
                 this.current_scene = null;
             }
 
             this.current_scene = this._next_scene_ctor.instance();
-            this.current_scene._enter_tree();
-            this.current_scene._ready();
+            this.current_scene.scene_tree = this;
+            this.current_scene._propagate_enter_tree();
+            this.current_scene._propagate_ready();
 
             this._next_scene_ctor = null;
         }
