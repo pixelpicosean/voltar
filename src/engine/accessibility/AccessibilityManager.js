@@ -1,11 +1,11 @@
 import * as core from '../core';
 import Device from 'ismobilejs';
-import accessibleTarget from './accessibleTarget';
+import accessible_target from './accessible_target';
 
 // add some extra variables to the container..
 core.utils.mixins.delayMixin(
     core.Node2D.prototype,
-    accessibleTarget
+    accessible_target
 );
 
 const KEY_CODE_TAB = 9;
@@ -42,7 +42,7 @@ export default class AccessibilityManager
     {
         if ((Device.tablet || Device.phone) && !navigator.isCocoonJS)
         {
-            this.createTouchHook();
+            this.create_touch_hook();
         }
 
         // first we create a div that will sit over the pixi element. This is where the div overlays will go.
@@ -77,7 +77,7 @@ export default class AccessibilityManager
          * @type {Number}
          * @private
          */
-        this.renderId = 0;
+        this.render_id = 0;
 
         /**
          * Setting this to true will visually show the divs.
@@ -115,8 +115,8 @@ export default class AccessibilityManager
          * @member {Array<*>}
          * @private
          */
-        this.isActive = false;
-        this.isMobileAccessabillity = false;
+        this.is_active = false;
+        this.is_mobile_accessabillity = false;
 
         // let listen for tab.. once pressed we can fire up and show the accessibility layer
         window.addEventListener('keydown', this._onKeyDown, false);
@@ -126,7 +126,7 @@ export default class AccessibilityManager
      * Creates the touch hooks.
      *
      */
-    createTouchHook()
+    create_touch_hook()
     {
         const hookDiv = document.createElement('button');
 
@@ -141,7 +141,7 @@ export default class AccessibilityManager
 
         hookDiv.addEventListener('focus', () =>
         {
-            this.isMobileAccessabillity = true;
+            this.is_mobile_accessabillity = true;
             this.activate();
             document.body.removeChild(hookDiv);
         });
@@ -157,12 +157,12 @@ export default class AccessibilityManager
      */
     activate()
     {
-        if (this.isActive)
+        if (this.is_active)
         {
             return;
         }
 
-        this.isActive = true;
+        this.is_active = true;
 
         window.document.addEventListener('mousemove', this._onMouseMove, true);
         window.removeEventListener('keydown', this._onKeyDown, false);
@@ -183,12 +183,12 @@ export default class AccessibilityManager
      */
     deactivate()
     {
-        if (!this.isActive || this.isMobileAccessabillity)
+        if (!this.is_active || this.is_mobile_accessabillity)
         {
             return;
         }
 
-        this.isActive = false;
+        this.is_active = false;
 
         window.document.removeEventListener('mousemove', this._onMouseMove);
         window.addEventListener('keydown', this._onKeyDown, false);
@@ -207,7 +207,7 @@ export default class AccessibilityManager
      * @private
      * @param {V.Node2D} displayObject - The Node2D to check.
      */
-    updateAccessibleObjects(displayObject)
+    update_accessible_objects(displayObject)
     {
         if (!displayObject.visible)
         {
@@ -221,14 +221,14 @@ export default class AccessibilityManager
                 this.add_child(displayObject);
             }
 
-            displayObject.renderId = this.renderId;
+            displayObject.render_id = this.render_id;
         }
 
         const children = displayObject.children;
 
         for (let i = children.length - 1; i >= 0; i--)
         {
-            this.updateAccessibleObjects(children[i]);
+            this.update_accessible_objects(children[i]);
         }
     }
 
@@ -245,7 +245,7 @@ export default class AccessibilityManager
         }
 
         // update children...
-        this.updateAccessibleObjects(this.renderer._lastObjectRendered);
+        this.update_accessible_objects(this.renderer._lastObjectRendered);
 
         const rect = this.renderer.view.getBoundingClientRect();
         const sx = rect.width / this.renderer.width;
@@ -262,7 +262,7 @@ export default class AccessibilityManager
         {
             const child = this.children[i];
 
-            if (child.renderId !== this.renderId)
+            if (child.render_id !== this.render_id)
             {
                 child._accessibleActive = false;
 
@@ -297,7 +297,7 @@ export default class AccessibilityManager
                 {
                     hitArea = child.get_bounds();
 
-                    this.capHitArea(hitArea);
+                    this.cap_hit_area(hitArea);
 
                     div.style.left = `${hitArea.x * sx}px`;
                     div.style.top = `${hitArea.y * sy}px`;
@@ -309,7 +309,7 @@ export default class AccessibilityManager
         }
 
         // increment the render id..
-        this.renderId++;
+        this.render_id++;
     }
 
     /**
@@ -317,7 +317,7 @@ export default class AccessibilityManager
      *
      * @param {Rectangle} hitArea - TODO docs
      */
-    capHitArea(hitArea)
+    cap_hit_area(hitArea)
     {
         if (hitArea.x < 0)
         {

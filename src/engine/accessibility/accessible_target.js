@@ -2,14 +2,14 @@
  * Default property values of accessible objects
  * used by {@link V.accessibility.AccessibilityManager}.
  *
- * @function accessibleTarget
+ * @function accessible_target
  * @memberof V.accessibility
  * @example
  *      function MyObject() {}
  *
  *      Object.assign(
  *          MyObject.prototype,
- *          V.accessibility.accessibleTarget
+ *          V.accessibility.accessible_target
  *      );
  */
 export default {

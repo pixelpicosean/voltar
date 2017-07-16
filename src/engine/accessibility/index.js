@@ -6,5 +6,5 @@
  * See {@link V.CanvasRenderer#plugins} or {@link V.WebGLRenderer#plugins}.
  * @namespace V.accessibility
  */
-export { default as accessibleTarget } from './accessibleTarget';
+export { default as accessible_target } from './accessible_target';
 export { default as AccessibilityManager } from './AccessibilityManager';
