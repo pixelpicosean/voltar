@@ -27,6 +27,8 @@ class Scene extends V.Node2D {
             spr.anchor.set(0.5, 0.5);
             spr.position.set(128, 128);
             spr.scale.set(4);
+            spr.interactive = true;
+            spr.on('pointerdown', () => console.log('pointer down'));
             this.add_child(spr);
 
             const gfx = new V.Graphics();
