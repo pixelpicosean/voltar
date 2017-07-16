@@ -80,6 +80,8 @@ export default class Node2D extends EventEmitter
          */
         this.parent = null;
 
+        this.scene_tree = null;
+
         /**
          * The multiplied alpha of the displayObject
          *
@@ -173,7 +175,7 @@ export default class Node2D extends EventEmitter
         this.name = name;
 
         if (this.parent) {
-            this._validate_name();
+            this.parent._validate_child_name(this);
         }
     }
 
@@ -717,14 +719,15 @@ export default class Node2D extends EventEmitter
         }
 
         child.parent = this;
+        child.scene_tree = this.scene_tree;
         // ensure child transform will be recalculated
         child.transform._parentID = -1;
 
         this.children.push(child);
 
         // add to name hash
-        if (this.name.length > 0) {
-            this._validate_name();
+        if (child.name.length > 0) {
+            this._validate_child_name(child);
         }
 
         // ensure bounds will be recalculated
@@ -758,14 +761,15 @@ export default class Node2D extends EventEmitter
         }
 
         child.parent = this;
+        child.scene_tree = this.scene_tree;
         // ensure child transform will be recalculated
         child.transform._parentID = -1;
 
         this.children.splice(index, 0, child);
 
         // add to name hash
-        if (this.name.length > 0) {
-            this._validate_name();
+        if (child.name.length > 0) {
+            this._validate_child_name(child);
         }
 
         // ensure bounds will be recalculated
@@ -868,6 +872,7 @@ export default class Node2D extends EventEmitter
         if (index === -1) return null;
 
         child.parent = null;
+        child.scene_tree = null;
         // ensure child transform will be recalculated
         child.transform._parentID = -1;
         removeItems(this.children, index, 1);
@@ -900,6 +905,7 @@ export default class Node2D extends EventEmitter
 
         // ensure child transform will be recalculated..
         child.parent = null;
+        child.scene_tree = null;
         child.transform._parentID = -1;
         removeItems(this.children, index, 1);
 
@@ -940,6 +946,7 @@ export default class Node2D extends EventEmitter
             for (let i = 0; i < removed.length; ++i)
             {
                 removed[i].parent = null;
+                child.scene_tree = null;
                 if (removed[i].transform)
                 {
                     removed[i].transform._parentID = -1;
@@ -965,6 +972,43 @@ export default class Node2D extends EventEmitter
         }
 
         throw new RangeError('remove_children: numeric values are outside the acceptable range.');
+    }
+
+    get_tree() {
+        return this.scene_tree;
+    }
+
+    get_node(path) {
+        const list = path.split('/');
+
+        // Find the base node
+        let base = (list[0].length === 0) ? this.scene_tree.current_scene : this;
+
+        let name;
+        while (list.length > 0) {
+            name = list[0];
+            switch (name) {
+                case '.':
+                    list.shift();
+                    break;
+                case '..':
+                    base = base.parent;
+                    if (!base) {
+                        return null;
+                    }
+                    list.shift();
+                    break;
+                default:
+                    base = base.named_children[name];
+                    if (!base) {
+                        return null;
+                    }
+                    list.shift();
+                    break;
+            }
+        }
+
+        return base;
     }
 
     /**
@@ -1040,14 +1084,14 @@ export default class Node2D extends EventEmitter
         // FILL IN//
     }
 
-    _validate_name() {
-        let n = this.name;
+    _validate_child_name(child) {
+        let n = child.name;
         let i = 2;
-        while (this.parent.named_children[n]) {
+        while (this.named_children[n]) {
             n = `${name}_${i}`;
         }
-        this.name = n;
-        this.parent.named_children[n] = this;
+        child.name = n;
+        this.named_children[n] = child;
     }
 
     /**
