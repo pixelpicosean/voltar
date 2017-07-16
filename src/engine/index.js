@@ -11,6 +11,7 @@ import * as filters from './filters';
 import * as interaction from './interaction';
 import * as loaders from './loaders';
 import * as prepare from './prepare';
+import * as audio from './audio';
 
 // handle mixins now, after all code has been added
 import { utils } from './core';
@@ -24,6 +25,8 @@ utils.mixins.perform_mixins();
  */
 const loader = loaders.shared || null;
 
+const sound = audio.SoundLibrary.init(loaders);
+
 export {
     accessibility,
     extract,
@@ -32,6 +35,8 @@ export {
     loaders,
     prepare,
     loader,
+    audio,
+    sound,
 };
 
 import SceneTree from './SceneTree';
