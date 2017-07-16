@@ -65,7 +65,7 @@ export default class Rope extends Mesh
          * @member {boolean}
          * @default true
          */
-        this.autoUpdate = true;
+        this.auto_update = true;
 
         this.refresh();
     }
@@ -134,16 +134,16 @@ export default class Rope extends Mesh
 
         // ensure that the changes are uploaded
         this.dirty++;
-        this.indexDirty++;
+        this.index_dirty++;
 
-        this.multiplyUvs();
-        this.refreshVertices();
+        this.multiply_uvs();
+        this.refresh_vertices();
     }
 
     /**
      * refreshes vertices of Rope mesh
      */
-    refreshVertices()
+    refresh_vertices()
     {
         const points = this.points;
 
@@ -211,9 +211,9 @@ export default class Rope extends Mesh
      */
     update_transform()
     {
-        if (this.autoUpdate)
+        if (this.auto_update)
         {
-            this.refreshVertices();
+            this.refresh_vertices();
         }
         this.node2d_update_transform();
     }

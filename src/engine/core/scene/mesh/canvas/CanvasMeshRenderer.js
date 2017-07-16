@@ -56,7 +56,7 @@ export default class MeshSpriteRenderer
 
         renderer.setBlendMode(mesh.blend_mode);
 
-        if (mesh.drawMode === Mesh.DRAW_MODES.TRIANGLE_MESH)
+        if (mesh.draw_mode === Mesh.DRAW_MODES.TRIANGLE_MESH)
         {
             this._renderTriangleMesh(mesh);
         }
@@ -142,7 +142,7 @@ export default class MeshSpriteRenderer
         let v1;
         let v2;
 
-        if (mesh.uploadUvTransform)
+        if (mesh.upload_uv_transform)
         {
             const ut = mesh._uv_transform.mapCoord;
 
@@ -170,10 +170,10 @@ export default class MeshSpriteRenderer
         let y1 = vertices[index1 + 1];
         let y2 = vertices[index2 + 1];
 
-        if (mesh.canvasPadding > 0)
+        if (mesh.canvas_padding > 0)
         {
-            const paddingX = mesh.canvasPadding / mesh.world_transform.a;
-            const paddingY = mesh.canvasPadding / mesh.world_transform.d;
+            const paddingX = mesh.canvas_padding / mesh.world_transform.a;
+            const paddingY = mesh.canvas_padding / mesh.world_transform.d;
             const centerX = (x0 + x1 + x2) / 3;
             const centerY = (y0 + y1 + y2) / 3;
 

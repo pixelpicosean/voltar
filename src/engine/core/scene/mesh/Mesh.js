@@ -20,9 +20,9 @@ export default class Mesh extends Node2D
      * @param {Float32Array} [vertices] - if you want to specify the vertices
      * @param {Float32Array} [uvs] - if you want to specify the uvs
      * @param {Uint16Array} [indices] - if you want to specify the indices
-     * @param {number} [drawMode] - the drawMode, can be any of the Mesh.DRAW_MODES consts
+     * @param {number} [draw_mode] - the draw_mode, can be any of the Mesh.DRAW_MODES consts
      */
-    constructor(texture, vertices, uvs, indices, drawMode)
+    constructor(texture, vertices, uvs, indices, draw_mode)
     {
         super();
 
@@ -76,7 +76,7 @@ export default class Mesh extends Node2D
          *
          * @member {number}
          */
-        this.indexDirty = 0;
+        this.index_dirty = 0;
 
         /**
          * The blend mode to be applied to the sprite. Set to `V.BLEND_MODES.NORMAL` to remove
@@ -94,7 +94,7 @@ export default class Mesh extends Node2D
          *
          * @member {number}
          */
-        this.canvasPadding = 0;
+        this.canvas_padding = 0;
 
         /**
          * The way the Mesh should be drawn, can be any of the {@link V.mesh.Mesh.DRAW_MODES} consts
@@ -102,7 +102,7 @@ export default class Mesh extends Node2D
          * @member {number}
          * @see V.mesh.Mesh.DRAW_MODES
          */
-        this.drawMode = drawMode || Mesh.DRAW_MODES.TRIANGLE_MESH;
+        this.draw_mode = draw_mode || Mesh.DRAW_MODES.TRIANGLE_MESH;
 
         /**
          * The default shader that is used if a mesh doesn't have a more specific one.
@@ -144,7 +144,7 @@ export default class Mesh extends Node2D
          * @member {boolean}
          * @default false
          */
-        this.uploadUvTransform = false;
+        this.upload_uv_transform = false;
 
         /**
          * Plugin that is responsible for rendering this element.
@@ -192,15 +192,15 @@ export default class Mesh extends Node2D
     }
 
     /**
-     * multiplies uvs only if uploadUvTransform is false
+     * multiplies uvs only if upload_uv_transform is false
      * call it after you change uvs manually
      * make sure that texture is valid
      */
-    multiplyUvs()
+    multiply_uvs()
     {
-        if (!this.uploadUvTransform)
+        if (!this.upload_uv_transform)
         {
-            this._uv_transform.multiplyUvs(this.uvs);
+            this._uv_transform.multiply_uvs(this.uvs);
         }
     }
 
@@ -256,7 +256,7 @@ export default class Mesh extends Node2D
         const points = tempPolygon.points;
         const indices = this.indices;
         const len = this.indices.length;
-        const step = this.drawMode === Mesh.DRAW_MODES.TRIANGLES ? 3 : 1;
+        const step = this.draw_mode === Mesh.DRAW_MODES.TRIANGLES ? 3 : 1;
 
         for (let i = 0; i + 2 < len; i += step)
         {

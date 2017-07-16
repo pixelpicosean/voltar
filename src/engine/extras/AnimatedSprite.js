@@ -32,9 +32,9 @@ export default class AnimatedSprite extends core.Sprite
     /**
      * @param {V.Texture[]|FrameObject[]} textures - an array of {@link V.Texture} or frame
      *  objects that make up the animation
-     * @param {boolean} [autoUpdate=true] - Whether use V.ticker.shared to auto update animation time.
+     * @param {boolean} [auto_update=true] - Whether use V.ticker.shared to auto update animation time.
      */
-    constructor(textures, autoUpdate)
+    constructor(textures, auto_update)
     {
         super(textures[0] instanceof core.Texture ? textures[0] : textures[0].texture);
 
@@ -56,7 +56,7 @@ export default class AnimatedSprite extends core.Sprite
          * @default true
          * @private
          */
-        this._autoUpdate = autoUpdate !== false;
+        this._auto_update = auto_update !== false;
 
         /**
          * The speed that the AnimatedSprite will play at. Higher is faster, lower is slower
@@ -124,7 +124,7 @@ export default class AnimatedSprite extends core.Sprite
         }
 
         this.playing = false;
-        if (this._autoUpdate)
+        if (this._auto_update)
         {
             core.ticker.shared.remove(this.update, this);
         }
@@ -142,7 +142,7 @@ export default class AnimatedSprite extends core.Sprite
         }
 
         this.playing = true;
-        if (this._autoUpdate)
+        if (this._auto_update)
         {
             core.ticker.shared.add(this.update, this, core.UPDATE_PRIORITY.HIGH);
         }

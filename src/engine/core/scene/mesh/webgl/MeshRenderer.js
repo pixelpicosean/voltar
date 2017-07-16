@@ -74,7 +74,7 @@ export default class MeshRenderer extends ObjectRenderer
                 // build the vao object that will render..
                 vao: null,
                 dirty: mesh.dirty,
-                indexDirty: mesh.indexDirty,
+                index_dirty: mesh.index_dirty,
             };
 
             // build the vao object that will render..
@@ -94,9 +94,9 @@ export default class MeshRenderer extends ObjectRenderer
             glData.uvBuffer.upload(mesh.uvs);
         }
 
-        if (mesh.indexDirty !== glData.indexDirty)
+        if (mesh.index_dirty !== glData.index_dirty)
         {
-            glData.indexDirty = mesh.indexDirty;
+            glData.index_dirty = mesh.index_dirty;
             glData.indexBuffer.upload(mesh.indices);
         }
 
@@ -110,7 +110,7 @@ export default class MeshRenderer extends ObjectRenderer
 
         if (glData.shader.uniforms.uTransform)
         {
-            if (mesh.uploadUvTransform)
+            if (mesh.upload_uv_transform)
             {
                 glData.shader.uniforms.uTransform = mesh._uv_transform.mapCoord.toArray(true);
             }
@@ -124,9 +124,9 @@ export default class MeshRenderer extends ObjectRenderer
         glData.shader.uniforms.uColor = utils.premultiplyRgba(mesh.tint_rgb,
             mesh.world_alpha, glData.shader.uniforms.uColor, texture.base_texture.premultipliedAlpha);
 
-        const drawMode = mesh.drawMode === Mesh.DRAW_MODES.TRIANGLE_MESH ? gl.TRIANGLE_STRIP : gl.TRIANGLES;
+        const draw_mode = mesh.draw_mode === Mesh.DRAW_MODES.TRIANGLE_MESH ? gl.TRIANGLE_STRIP : gl.TRIANGLES;
 
-        glData.vao.draw(drawMode, mesh.indices.length, 0);
+        glData.vao.draw(draw_mode, mesh.indices.length, 0);
     }
 }
 

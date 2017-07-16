@@ -19,10 +19,10 @@ export default class Plane extends Mesh
 {
     /**
      * @param {V.Texture} texture - The texture to use on the Plane.
-     * @param {number} verticesX - The number of vertices in the x-axis
-     * @param {number} verticesY - The number of vertices in the y-axis
+     * @param {number} vertices_x - The number of vertices in the x-axis
+     * @param {number} vertices_y - The number of vertices in the y-axis
      */
-    constructor(texture, verticesX, verticesY)
+    constructor(texture, vertices_x, vertices_y)
     {
         super(texture);
 
@@ -35,10 +35,10 @@ export default class Plane extends Mesh
          */
         this._ready = true;
 
-        this.verticesX = verticesX || 10;
-        this.verticesY = verticesY || 10;
+        this.vertices_x = vertices_x || 10;
+        this.vertices_y = vertices_y || 10;
 
-        this.drawMode = Mesh.DRAW_MODES.TRIANGLES;
+        this.draw_mode = Mesh.DRAW_MODES.TRIANGLES;
         this.refresh();
     }
 
@@ -49,22 +49,22 @@ export default class Plane extends Mesh
     _refresh()
     {
         const texture = this._texture;
-        const total = this.verticesX * this.verticesY;
+        const total = this.vertices_x * this.vertices_y;
         const verts = [];
         const colors = [];
         const uvs = [];
         const indices = [];
 
-        const segmentsX = this.verticesX - 1;
-        const segmentsY = this.verticesY - 1;
+        const segmentsX = this.vertices_x - 1;
+        const segmentsY = this.vertices_y - 1;
 
         const sizeX = texture.width / segmentsX;
         const sizeY = texture.height / segmentsY;
 
         for (let i = 0; i < total; i++)
         {
-            const x = (i % this.verticesX);
-            const y = ((i / this.verticesX) | 0);
+            const x = (i % this.vertices_x);
+            const y = ((i / this.vertices_x) | 0);
 
             verts.push(x * sizeX, y * sizeY);
 
@@ -80,10 +80,10 @@ export default class Plane extends Mesh
             const xpos = i % segmentsX;
             const ypos = (i / segmentsX) | 0;
 
-            const value = (ypos * this.verticesX) + xpos;
-            const value2 = (ypos * this.verticesX) + xpos + 1;
-            const value3 = ((ypos + 1) * this.verticesX) + xpos;
-            const value4 = ((ypos + 1) * this.verticesX) + xpos + 1;
+            const value = (ypos * this.vertices_x) + xpos;
+            const value2 = (ypos * this.vertices_x) + xpos + 1;
+            const value3 = ((ypos + 1) * this.vertices_x) + xpos;
+            const value4 = ((ypos + 1) * this.vertices_x) + xpos + 1;
 
             indices.push(value, value2, value3);
             indices.push(value2, value4, value3);
@@ -94,9 +94,9 @@ export default class Plane extends Mesh
         this.uvs = new Float32Array(uvs);
         this.colors = new Float32Array(colors);
         this.indices = new Uint16Array(indices);
-        this.indexDirty = true;
+        this.index_dirty = true;
 
-        this.multiplyUvs();
+        this.multiply_uvs();
     }
 
     /**

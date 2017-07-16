@@ -56,7 +56,7 @@ export default class VideoBaseTexture extends BaseTexture
         this.width = source.videoWidth;
         this.height = source.videoHeight;
 
-        this._autoUpdate = true;
+        this._auto_update = true;
         this._isAutoUpdating = false;
 
         /**
@@ -124,7 +124,7 @@ export default class VideoBaseTexture extends BaseTexture
             this._onCanPlay();
         }
 
-        if (!this._isAutoUpdating && this.autoUpdate)
+        if (!this._isAutoUpdating && this.auto_update)
         {
             shared.add(this.update, this, UPDATE_PRIORITY.HIGH);
             this._isAutoUpdating = true;
@@ -269,23 +269,23 @@ export default class VideoBaseTexture extends BaseTexture
      *
      * @member {boolean}
      */
-    get autoUpdate()
+    get auto_update()
     {
-        return this._autoUpdate;
+        return this._auto_update;
     }
 
-    set autoUpdate(value) // eslint-disable-line require-jsdoc
+    set auto_update(value) // eslint-disable-line require-jsdoc
     {
-        if (value !== this._autoUpdate)
+        if (value !== this._auto_update)
         {
-            this._autoUpdate = value;
+            this._auto_update = value;
 
-            if (!this._autoUpdate && this._isAutoUpdating)
+            if (!this._auto_update && this._isAutoUpdating)
             {
                 shared.remove(this.update, this);
                 this._isAutoUpdating = false;
             }
-            else if (this._autoUpdate && !this._isAutoUpdating)
+            else if (this._auto_update && !this._isAutoUpdating)
             {
                 shared.add(this.update, this, UPDATE_PRIORITY.HIGH);
                 this._isAutoUpdating = true;

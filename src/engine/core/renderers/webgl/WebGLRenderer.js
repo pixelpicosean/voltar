@@ -182,7 +182,7 @@ export default class WebGLRenderer extends SystemRenderer
          */
         this.filterManager = new FilterManager(this);
         // map some webGL blend and drawmodes..
-        this.drawModes = mapWebGLDrawModesToPixi(this.gl);
+        this.draw_modes = mapWebGLDrawModesToPixi(this.gl);
 
         this._nextTextureLocation = 0;
 

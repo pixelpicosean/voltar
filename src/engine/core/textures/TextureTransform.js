@@ -70,7 +70,7 @@ export default class TextureTransform
      * @param {Float32Array} [out=uvs] output
      * @returns {Float32Array} output
      */
-    multiplyUvs(uvs, out)
+    multiply_uvs(uvs, out)
     {
         if (out === undefined)
         {

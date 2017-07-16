@@ -110,7 +110,7 @@ export const BLEND_MODES = {
 };
 
 /**
- * Various webgl draw modes. These can be used to specify which GL drawMode to use
+ * Various webgl draw modes. These can be used to specify which GL draw_mode to use
  * under certain situations and renderers.
  *
  * @static

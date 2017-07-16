@@ -37,12 +37,12 @@ export default class NineSlicePlane extends Plane
 {
     /**
      * @param {V.Texture} texture - The texture to use on the NineSlicePlane.
-     * @param {int} [leftWidth=10] size of the left vertical bar (A)
-     * @param {int} [topHeight=10] size of the top horizontal bar (C)
-     * @param {int} [rightWidth=10] size of the right vertical bar (B)
-     * @param {int} [bottomHeight=10] size of the bottom horizontal bar (D)
+     * @param {int} [left_width=10] size of the left vertical bar (A)
+     * @param {int} [top_height=10] size of the top horizontal bar (C)
+     * @param {int} [right_width=10] size of the right vertical bar (B)
+     * @param {int} [bottom_height=10] size of the bottom horizontal bar (D)
      */
-    constructor(texture, leftWidth, topHeight, rightWidth, bottomHeight)
+    constructor(texture, left_width, top_height, right_width, bottom_height)
     {
         super(texture, 4, 4);
 
@@ -74,7 +74,7 @@ export default class NineSlicePlane extends Plane
          * @memberof V.NineSlicePlane#
          * @override
          */
-        this.leftWidth = typeof leftWidth !== 'undefined' ? leftWidth : DEFAULT_BORDER_SIZE;
+        this.left_width = typeof left_width !== 'undefined' ? left_width : DEFAULT_BORDER_SIZE;
 
         /**
          * The width of the right column (b)
@@ -83,7 +83,7 @@ export default class NineSlicePlane extends Plane
          * @memberof V.NineSlicePlane#
          * @override
          */
-        this.rightWidth = typeof rightWidth !== 'undefined' ? rightWidth : DEFAULT_BORDER_SIZE;
+        this.right_width = typeof right_width !== 'undefined' ? right_width : DEFAULT_BORDER_SIZE;
 
         /**
          * The height of the top row (c)
@@ -92,7 +92,7 @@ export default class NineSlicePlane extends Plane
          * @memberof V.NineSlicePlane#
          * @override
          */
-        this.topHeight = typeof topHeight !== 'undefined' ? topHeight : DEFAULT_BORDER_SIZE;
+        this.top_height = typeof top_height !== 'undefined' ? top_height : DEFAULT_BORDER_SIZE;
 
         /**
          * The height of the bottom row (d)
@@ -101,7 +101,7 @@ export default class NineSlicePlane extends Plane
          * @memberof V.NineSlicePlane#
          * @override
          */
-        this.bottomHeight = typeof bottomHeight !== 'undefined' ? bottomHeight : DEFAULT_BORDER_SIZE;
+        this.bottom_height = typeof bottom_height !== 'undefined' ? bottom_height : DEFAULT_BORDER_SIZE;
 
         this.refresh(true);
     }
@@ -110,12 +110,12 @@ export default class NineSlicePlane extends Plane
      * Updates the horizontal vertices.
      *
      */
-    updateHorizontalVertices()
+    update_horizontal_vertices()
     {
         const vertices = this.vertices;
 
-        vertices[9] = vertices[11] = vertices[13] = vertices[15] = this._topHeight;
-        vertices[17] = vertices[19] = vertices[21] = vertices[23] = this._height - this._bottomHeight;
+        vertices[9] = vertices[11] = vertices[13] = vertices[15] = this._top_height;
+        vertices[17] = vertices[19] = vertices[21] = vertices[23] = this._height - this._bottom_height;
         vertices[25] = vertices[27] = vertices[29] = vertices[31] = this._height;
     }
 
@@ -123,12 +123,12 @@ export default class NineSlicePlane extends Plane
      * Updates the vertical vertices.
      *
      */
-    updateVerticalVertices()
+    update_vertical_vertices()
     {
         const vertices = this.vertices;
 
-        vertices[2] = vertices[10] = vertices[18] = vertices[26] = this._leftWidth;
-        vertices[4] = vertices[12] = vertices[20] = vertices[28] = this._width - this._rightWidth;
+        vertices[2] = vertices[10] = vertices[18] = vertices[26] = this._left_width;
+        vertices[4] = vertices[12] = vertices[20] = vertices[28] = this._width - this._right_width;
         vertices[6] = vertices[14] = vertices[22] = vertices[30] = this._width;
     }
 
@@ -175,15 +175,15 @@ export default class NineSlicePlane extends Plane
         const w = base.width;
         const h = base.height;
 
-        this.drawSegment(context, textureSource, w, h, 0, 1, 10, 11);
-        this.drawSegment(context, textureSource, w, h, 2, 3, 12, 13);
-        this.drawSegment(context, textureSource, w, h, 4, 5, 14, 15);
-        this.drawSegment(context, textureSource, w, h, 8, 9, 18, 19);
-        this.drawSegment(context, textureSource, w, h, 10, 11, 20, 21);
-        this.drawSegment(context, textureSource, w, h, 12, 13, 22, 23);
-        this.drawSegment(context, textureSource, w, h, 16, 17, 26, 27);
-        this.drawSegment(context, textureSource, w, h, 18, 19, 28, 29);
-        this.drawSegment(context, textureSource, w, h, 20, 21, 30, 31);
+        this.draw_segment(context, textureSource, w, h, 0, 1, 10, 11);
+        this.draw_segment(context, textureSource, w, h, 2, 3, 12, 13);
+        this.draw_segment(context, textureSource, w, h, 4, 5, 14, 15);
+        this.draw_segment(context, textureSource, w, h, 8, 9, 18, 19);
+        this.draw_segment(context, textureSource, w, h, 10, 11, 20, 21);
+        this.draw_segment(context, textureSource, w, h, 12, 13, 22, 23);
+        this.draw_segment(context, textureSource, w, h, 16, 17, 26, 27);
+        this.draw_segment(context, textureSource, w, h, 18, 19, 28, 29);
+        this.draw_segment(context, textureSource, w, h, 20, 21, 30, 31);
     }
 
     /**
@@ -201,7 +201,7 @@ export default class NineSlicePlane extends Plane
      * @param {number} x2 - x index 2
      * @param {number} y2 - y index 2
      */
-    drawSegment(context, textureSource, w, h, x1, y1, x2, y2)
+    draw_segment(context, textureSource, w, h, x1, y1, x2, y2)
     {
         // otherwise you get weird results when using slices of that are 0 wide or high.
         const uvs = this.uvs;
@@ -275,14 +275,14 @@ export default class NineSlicePlane extends Plane
      *
      * @member {number}
      */
-    get leftWidth()
+    get left_width()
     {
-        return this._leftWidth;
+        return this._left_width;
     }
 
-    set leftWidth(value) // eslint-disable-line require-jsdoc
+    set left_width(value) // eslint-disable-line require-jsdoc
     {
-        this._leftWidth = value;
+        this._left_width = value;
         this._refresh();
     }
 
@@ -291,14 +291,14 @@ export default class NineSlicePlane extends Plane
      *
      * @member {number}
      */
-    get rightWidth()
+    get right_width()
     {
-        return this._rightWidth;
+        return this._right_width;
     }
 
-    set rightWidth(value) // eslint-disable-line require-jsdoc
+    set right_width(value) // eslint-disable-line require-jsdoc
     {
-        this._rightWidth = value;
+        this._right_width = value;
         this._refresh();
     }
 
@@ -307,14 +307,14 @@ export default class NineSlicePlane extends Plane
      *
      * @member {number}
      */
-    get topHeight()
+    get top_height()
     {
-        return this._topHeight;
+        return this._top_height;
     }
 
-    set topHeight(value) // eslint-disable-line require-jsdoc
+    set top_height(value) // eslint-disable-line require-jsdoc
     {
-        this._topHeight = value;
+        this._top_height = value;
         this._refresh();
     }
 
@@ -323,14 +323,14 @@ export default class NineSlicePlane extends Plane
      *
      * @member {number}
      */
-    get bottomHeight()
+    get bottom_height()
     {
-        return this._bottomHeight;
+        return this._bottom_height;
     }
 
-    set bottomHeight(value) // eslint-disable-line require-jsdoc
+    set bottom_height(value) // eslint-disable-line require-jsdoc
     {
-        this._bottomHeight = value;
+        this._bottom_height = value;
         this._refresh();
     }
 
@@ -355,16 +355,16 @@ export default class NineSlicePlane extends Plane
         uvs[6] = uvs[14] = uvs[22] = uvs[30] = 1;
         uvs[25] = uvs[27] = uvs[29] = uvs[31] = 1;
 
-        uvs[2] = uvs[10] = uvs[18] = uvs[26] = _uvw * this._leftWidth;
-        uvs[4] = uvs[12] = uvs[20] = uvs[28] = 1 - (_uvw * this._rightWidth);
-        uvs[9] = uvs[11] = uvs[13] = uvs[15] = _uvh * this._topHeight;
-        uvs[17] = uvs[19] = uvs[21] = uvs[23] = 1 - (_uvh * this._bottomHeight);
+        uvs[2] = uvs[10] = uvs[18] = uvs[26] = _uvw * this._left_width;
+        uvs[4] = uvs[12] = uvs[20] = uvs[28] = 1 - (_uvw * this._right_width);
+        uvs[9] = uvs[11] = uvs[13] = uvs[15] = _uvh * this._top_height;
+        uvs[17] = uvs[19] = uvs[21] = uvs[23] = 1 - (_uvh * this._bottom_height);
 
-        this.updateHorizontalVertices();
-        this.updateVerticalVertices();
+        this.update_horizontal_vertices();
+        this.update_vertical_vertices();
 
         this.dirty = true;
 
-        this.multiplyUvs();
+        this.multiply_uvs();
     }
 }
