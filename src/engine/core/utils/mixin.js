@@ -32,24 +32,24 @@ const mixins = [];
  * can take effect.
  *
  * @memberof V.utils.mixins
- * @function delayMixin
+ * @function delay_mixin
  * @private
  * @param {object} target The prototype or instance that properties and methods should be added to.
  * @param {object} source The source of properties and methods to mix in.
  */
-export function delayMixin(target, source)
+export function delay_mixin(target, source)
 {
     mixins.push(target, source);
 }
 
 /**
- * Handles all mixins queued via delayMixin().
+ * Handles all mixins queued via delay_mixin().
  *
  * @memberof V.utils.mixins
- * @function performMixins
+ * @function perform_mixins
  * @private
  */
-export function performMixins()
+export function perform_mixins()
 {
     for (let i = 0; i < mixins.length; i += 2)
     {

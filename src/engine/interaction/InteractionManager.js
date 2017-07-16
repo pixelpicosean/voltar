@@ -6,7 +6,7 @@ import EventEmitter from 'eventemitter3';
 import interactive_target from './interactive_target';
 
 // Mix interactive_target into core.Node2D.prototype, after deprecation has been handled
-core.utils.mixins.delayMixin(
+core.utils.mixins.delay_mixin(
     core.Node2D.prototype,
     interactive_target
 );

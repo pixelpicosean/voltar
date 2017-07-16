@@ -14,7 +14,7 @@ import * as prepare from './prepare';
 
 // handle mixins now, after all code has been added
 import { utils } from './core';
-utils.mixins.performMixins();
+utils.mixins.perform_mixins();
 
 /**
  * Alias for {@link V.loaders.shared}.

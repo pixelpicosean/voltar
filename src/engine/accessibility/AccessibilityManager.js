@@ -3,7 +3,7 @@ import Device from 'ismobilejs';
 import accessible_target from './accessible_target';
 
 // add some extra variables to the container..
-core.utils.mixins.delayMixin(
+core.utils.mixins.delay_mixin(
     core.Node2D.prototype,
     accessible_target
 );
