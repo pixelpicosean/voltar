@@ -190,11 +190,11 @@ export default class AnimatedSprite extends core.Sprite
      * Updates the object transform for rendering.
      *
      * @private
-     * @param {number} deltaTime - Time since last tick.
+     * @param {number} delta_time - Time since last tick.
      */
-    update(deltaTime)
+    update(delta_time)
     {
-        const elapsed = this.animationSpeed * deltaTime;
+        const elapsed = this.animationSpeed * delta_time;
         const previousFrame = this.currentFrame;
 
         if (this._durations !== null)
@@ -209,7 +209,7 @@ export default class AnimatedSprite extends core.Sprite
                 lag += this._durations[this.currentFrame];
             }
 
-            const sign = Math.sign(this.animationSpeed * deltaTime);
+            const sign = Math.sign(this.animationSpeed * delta_time);
 
             this._currentTime = Math.floor(this._currentTime);
 

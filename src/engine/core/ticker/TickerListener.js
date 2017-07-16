@@ -77,20 +77,20 @@ export default class TickerListener
 
     /**
      * Emit by calling the current function.
-     * @param {number} deltaTime - time since the last emit.
+     * @param {number} delta_time - time since the last emit.
      * @return {TickerListener} Next ticker
      */
-    emit(deltaTime)
+    emit(delta_time)
     {
         if (this.fn)
         {
             if (this.context)
             {
-                this.fn.call(this.context, deltaTime);
+                this.fn.call(this.context, delta_time);
             }
             else
             {
-                this.fn(deltaTime);
+                this.fn(delta_time);
             }
         }
 

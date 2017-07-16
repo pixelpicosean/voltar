@@ -33,7 +33,7 @@ export default class Ticker
         this._requestId = null;
 
         /**
-         * Internal value managed by minFPS property setter and getter.
+         * Internal value managed by min_FPS property setter and getter.
          * This is the maximum allowed milliseconds between updates.
          * @private
          */
@@ -47,22 +47,22 @@ export default class Ticker
          * @member {boolean}
          * @default false
          */
-        this.autoStart = false;
+        this.auto_start = false;
 
         /**
          * Scalar time value from last frame to this frame.
-         * This value is capped by setting {@link V.ticker.Ticker#minFPS}
+         * This value is capped by setting {@link V.ticker.Ticker#min_FPS}
          * and is scaled with {@link V.ticker.Ticker#speed}.
          * **Note:** The cap may be exceeded by scaling.
          *
          * @member {number}
          * @default 1
          */
-        this.deltaTime = 1;
+        this.delta_time = 1;
 
         /**
          * Time elapsed in milliseconds from last frame to this frame.
-         * Opposed to what the scalar {@link V.ticker.Ticker#deltaTime}
+         * Opposed to what the scalar {@link V.ticker.Ticker#delta_time}
          * is based, this value is neither capped nor scaled.
          * If the platform supports DOMHighResTimeStamp,
          * this value will have a precision of 1 µs.
@@ -71,7 +71,7 @@ export default class Ticker
          * @member {number}
          * @default 16.66
          */
-        this.elapsedMS = 1 / settings.TARGET_FPMS;
+        this.elapsed_ms = 1 / settings.TARGET_FPMS;
 
         /**
          * The last time {@link V.ticker.Ticker#update} was invoked.
@@ -83,12 +83,12 @@ export default class Ticker
          * @member {number}
          * @default 0
          */
-        this.lastTime = 0;
+        this.last_time = 0;
 
         /**
-         * Factor of current {@link V.ticker.Ticker#deltaTime}.
+         * Factor of current {@link V.ticker.Ticker#delta_time}.
          * @example
-         * // Scales ticker.deltaTime to what would be
+         * // Scales ticker.delta_time to what would be
          * // the equivalent of approximately 120 FPS
          * ticker.speed = 2;
          *
@@ -102,7 +102,7 @@ export default class Ticker
          * `true` if {@link V.ticker.Ticker#start} has been called.
          * `false` if {@link V.ticker.Ticker#stop} has been called.
          * While `false`, this value may change to `true` in the
-         * event of {@link V.ticker.Ticker#autoStart} being `true`
+         * event of {@link V.ticker.Ticker#auto_start} being `true`
          * and a listener is added.
          *
          * @member {boolean}
@@ -150,7 +150,7 @@ export default class Ticker
         if (this._requestId === null && this._head.next)
         {
             // ensure callbacks get correct delta
-            this.lastTime = performance.now();
+            this.last_time = performance.now();
             this._requestId = requestAnimationFrame(this._tick);
         }
     }
@@ -174,7 +174,7 @@ export default class Ticker
      * If the ticker has been started it checks if a frame has not already
      * been requested, and if the internal emitter has listeners. If these
      * conditions are met, a new frame is requested. If the ticker has not
-     * been started, but autoStart is `true`, then the ticker starts now,
+     * been started, but auto_start is `true`, then the ticker starts now,
      * and continues with the previous conditions to request a new frame.
      *
      * @private
@@ -185,7 +185,7 @@ export default class Ticker
         {
             this._requestIfNeeded();
         }
-        else if (this.autoStart)
+        else if (this.auto_start)
         {
             this.start();
         }
@@ -213,7 +213,7 @@ export default class Ticker
      * @param {number} [priority=V.UPDATE_PRIORITY.NORMAL] - The priority for emitting
      * @returns {V.ticker.Ticker} This instance of a ticker
      */
-    addOnce(fn, context, priority = UPDATE_PRIORITY.NORMAL)
+    add_once(fn, context, priority = UPDATE_PRIORITY.NORMAL)
     {
         return this._addListener(new TickerListener(fn, context, priority, true));
     }
@@ -346,10 +346,10 @@ export default class Ticker
 
     /**
      * Triggers an update. An update entails setting the
-     * current {@link V.ticker.Ticker#elapsedMS},
-     * the current {@link V.ticker.Ticker#deltaTime},
-     * invoking all listeners with current deltaTime,
-     * and then finally setting {@link V.ticker.Ticker#lastTime}
+     * current {@link V.ticker.Ticker#elapsed_ms},
+     * the current {@link V.ticker.Ticker#delta_time},
+     * invoking all listeners with current delta_time,
+     * and then finally setting {@link V.ticker.Ticker#last_time}
      * with the value of currentTime that was provided.
      * This method will be called automatically by animation
      * frame callbacks if the ticker instance has been started
@@ -359,7 +359,7 @@ export default class Ticker
      */
     update(currentTime = performance.now())
     {
-        let elapsedMS;
+        let elapsed_ms;
 
         // If the difference in time is zero or negative, we ignore most of the work done here.
         // If there is no valid difference, then should be no reason to let anyone know about it.
@@ -370,24 +370,24 @@ export default class Ticker
         // on the current JavaScript engine event loop, and when the ticker's start method is invoked
         // (which invokes the internal _requestIfNeeded method). If a frame is requested before
         // _requestIfNeeded is invoked, then the callback for the animation frame the ticker requests,
-        // can receive a time argument that can be less than the lastTime value that was set within
+        // can receive a time argument that can be less than the last_time value that was set within
         // _requestIfNeeded. This difference is in microseconds, but this is enough to cause problems.
         //
         // This check covers this browser engine timing issue, as well as if consumers pass an invalid
-        // currentTime value. This may happen if consumers opt-out of the autoStart, and update themselves.
+        // currentTime value. This may happen if consumers opt-out of the auto_start, and update themselves.
 
-        if (currentTime > this.lastTime)
+        if (currentTime > this.last_time)
         {
-            // Save uncapped elapsedMS for measurement
-            elapsedMS = this.elapsedMS = currentTime - this.lastTime;
+            // Save uncapped elapsed_ms for measurement
+            elapsed_ms = this.elapsed_ms = currentTime - this.last_time;
 
-            // cap the milliseconds elapsed used for deltaTime
-            if (elapsedMS > this._maxElapsedMS)
+            // cap the milliseconds elapsed used for delta_time
+            if (elapsed_ms > this._maxElapsedMS)
             {
-                elapsedMS = this._maxElapsedMS;
+                elapsed_ms = this._maxElapsedMS;
             }
 
-            this.deltaTime = elapsedMS * settings.TARGET_FPMS * this.speed;
+            this.delta_time = elapsed_ms * settings.TARGET_FPMS * this.speed;
 
             // Cache a local reference, in-case ticker is destroyed
             // during the emit, we can still check for head.next
@@ -398,7 +398,7 @@ export default class Ticker
 
             while (listener)
             {
-                listener = listener.emit(this.deltaTime);
+                listener = listener.emit(this.delta_time);
             }
 
             if (!head.next)
@@ -408,10 +408,10 @@ export default class Ticker
         }
         else
         {
-            this.deltaTime = this.elapsedMS = 0;
+            this.delta_time = this.elapsed_ms = 0;
         }
 
-        this.lastTime = currentTime;
+        this.last_time = currentTime;
     }
 
     /**
@@ -419,20 +419,20 @@ export default class Ticker
      * The default is approximately 60 in most modern browsers.
      * **Note:** This does not factor in the value of
      * {@link V.ticker.Ticker#speed}, which is specific
-     * to scaling {@link V.ticker.Ticker#deltaTime}.
+     * to scaling {@link V.ticker.Ticker#delta_time}.
      *
      * @member {number}
      * @readonly
      */
     get FPS()
     {
-        return 1000 / this.elapsedMS;
+        return 1000 / this.elapsed_ms;
     }
 
     /**
      * Manages the maximum amount of milliseconds allowed to
      * elapse between invoking {@link V.ticker.Ticker#update}.
-     * This value is used to cap {@link V.ticker.Ticker#deltaTime},
+     * This value is used to cap {@link V.ticker.Ticker#delta_time},
      * but does not effect the measured value of {@link V.ticker.Ticker#FPS}.
      * When setting this property it is clamped to a value between
      * `0` and `V.settings.TARGET_FPMS * 1000`.
@@ -440,12 +440,12 @@ export default class Ticker
      * @member {number}
      * @default 10
      */
-    get minFPS()
+    get min_FPS()
     {
         return 1000 / this._maxElapsedMS;
     }
 
-    set minFPS(fps) // eslint-disable-line require-jsdoc
+    set min_FPS(fps) // eslint-disable-line require-jsdoc
     {
         // Clamp: 0 to TARGET_FPMS
         const minFPMS = Math.min(Math.max(0, fps) / 1000, settings.TARGET_FPMS);

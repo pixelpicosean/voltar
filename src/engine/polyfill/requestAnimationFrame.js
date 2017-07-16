@@ -34,7 +34,7 @@ if (!(global.performance && global.performance.now))
 }
 
 // requestAnimationFrame
-let lastTime = Date.now();
+let last_time = Date.now();
 const vendors = ['ms', 'moz', 'webkit', 'o'];
 
 for (let x = 0; x < vendors.length && !global.requestAnimationFrame; ++x)
@@ -55,18 +55,18 @@ if (!global.requestAnimationFrame)
         }
 
         const currentTime = Date.now();
-        let delay = ONE_FRAME_TIME + lastTime - currentTime;
+        let delay = ONE_FRAME_TIME + last_time - currentTime;
 
         if (delay < 0)
         {
             delay = 0;
         }
 
-        lastTime = currentTime;
+        last_time = currentTime;
 
         return setTimeout(() =>
         {
-            lastTime = Date.now();
+            last_time = Date.now();
             callback(performance.now());
         }, delay);
     };

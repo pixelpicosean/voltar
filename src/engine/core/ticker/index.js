@@ -3,7 +3,7 @@ import Ticker from './Ticker';
 /**
  * The shared ticker instance used by {@link V.extras.AnimatedSprite}.
  * and by {@link V.interaction.InteractionManager}.
- * The property {@link V.ticker.Ticker#autoStart} is set to `true`
+ * The property {@link V.ticker.Ticker#auto_start} is set to `true`
  * for this instance. Please follow the examples for usage, including
  * how to opt-out of auto-starting the shared ticker.
  *
@@ -11,7 +11,7 @@ import Ticker from './Ticker';
  * let ticker = V.ticker.shared;
  * // Set this to prevent starting this ticker when listeners are added.
  * // By default this is true only for the V.ticker.shared instance.
- * ticker.autoStart = false;
+ * ticker.auto_start = false;
  * // FYI, call this to ensure the ticker is stopped. It should be stopped
  * // if you have not attempted to render anything yet.
  * ticker.stop();
@@ -30,7 +30,7 @@ import Ticker from './Ticker';
  *
  * @example
  * // Or you can just update it manually.
- * ticker.autoStart = false;
+ * ticker.auto_start = false;
  * ticker.stop();
  * function animate(time) {
  *     ticker.update(time);
@@ -44,7 +44,7 @@ import Ticker from './Ticker';
  */
 const shared = new Ticker();
 
-shared.autoStart = true;
+shared.auto_start = true;
 shared.destroy = () =>
 {
     // protect destroying shared ticker
@@ -60,7 +60,7 @@ shared.destroy = () =>
  * @example
  * const ticker = new V.ticker.Ticker();
  * ticker.stop();
- * ticker.add((deltaTime) => {
+ * ticker.add((delta_time) => {
  *   // do something every frame
  * });
  * ticker.start();

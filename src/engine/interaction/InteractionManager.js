@@ -814,18 +814,18 @@ export default class InteractionManager extends EventEmitter
      * Updates the state of interactive objects.
      * Invoked by a throttled ticker update from {@link V.ticker.shared}.
      *
-     * @param {number} deltaTime - time delta since last tick
+     * @param {number} delta_time - time delta since last tick
      */
-    update(deltaTime)
+    update(delta_time)
     {
-        this._deltaTime += deltaTime;
+        this._delta_time += delta_time;
 
-        if (this._deltaTime < this.interactionFrequency)
+        if (this._delta_time < this.interactionFrequency)
         {
             return;
         }
 
-        this._deltaTime = 0;
+        this._delta_time = 0;
 
         if (!this.interactionDOMElement)
         {
