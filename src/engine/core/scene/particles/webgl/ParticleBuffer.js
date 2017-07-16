@@ -1,5 +1,5 @@
 import glCore from 'pixi-gl-core';
-import createIndicesForQuads from '../../../utils/createIndicesForQuads';
+import create_indices_for_quads from '../../../utils/create_indices_for_quads';
 
 /**
  * @author Mat Groves
@@ -121,7 +121,7 @@ export default class ParticleBuffer
          *
          * @member {Uint16Array}
          */
-        this.indices = createIndicesForQuads(this.size);
+        this.indices = create_indices_for_quads(this.size);
         this.indexBuffer = glCore.GLBuffer.createIndexBuffer(gl, this.indices, gl.STATIC_DRAW);
 
         this.dynamicStride = 0;

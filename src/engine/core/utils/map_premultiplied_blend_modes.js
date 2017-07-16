@@ -4,13 +4,13 @@ import { BLEND_MODES } from '../const';
  * Corrects pixi blend, takes premultiplied alpha into account
  *
  * @memberof V
- * @function mapPremultipliedBlendModes
+ * @function map_premultiplied_blend_modes
  * @private
  * @param {Array<number[]>} [array] - The array to output into.
  * @return {Array<number[]>} Mapped modes.
  */
 
-export default function mapPremultipliedBlendModes()
+export default function map_premultiplied_blend_modes()
 {
     const pm = [];
     const npm = [];

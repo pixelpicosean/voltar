@@ -1,11 +1,11 @@
 import { DATA_URI, URL_FILE_EXTENSION, SVG_SIZE, VERSION } from '../const';
 import settings from '../settings';
 import EventEmitter from 'eventemitter3';
-import pluginTarget from './pluginTarget';
+import plugin_target from './plugin_target';
 import * as mixins from './mixin';
 import * as isMobile from 'ismobilejs';
 import removeItems from 'remove-array-items';
-import mapPremultipliedBlendModes from './mapPremultipliedBlendModes';
+import map_premultiplied_blend_modes from './map_premultiplied_blend_modes';
 
 let nextUid = 0;
 let saidHello = false;
@@ -56,10 +56,10 @@ export {
     EventEmitter,
     /**
      * @memberof V.utils
-     * @function pluginTarget
+     * @function plugin_target
      * @type {mixin}
      */
-    pluginTarget,
+    plugin_target,
     mixins,
 };
 
@@ -382,7 +382,7 @@ export function clearTextureCache()
  * @const premultiplyBlendMode
  * @type {Array<number[]>} maps premultiply flag and blend_mode to adjusted blend_mode
  */
-export const premultiplyBlendMode = mapPremultipliedBlendModes();
+export const premultiplyBlendMode = map_premultiplied_blend_modes();
 
 /**
  * changes blend_mode according to texture format

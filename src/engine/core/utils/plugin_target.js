@@ -4,13 +4,13 @@
  * @example
  *      function MyObject() {}
  *
- *      pluginTarget.mixin(MyObject);
+ *      plugin_target.mixin(MyObject);
  *
  * @mixin
  * @memberof V.utils
  * @param {object} obj - The object to mix into.
  */
-function pluginTarget(obj)
+function plugin_target(obj)
 {
     obj.__plugins = {};
 
@@ -57,12 +57,12 @@ function pluginTarget(obj)
 
 export default {
     /**
-     * Mixes in the properties of the pluginTarget into another object
+     * Mixes in the properties of the plugin_target into another object
      *
      * @param {object} obj - The obj to mix into
      */
     mixin: function mixin(obj)
     {
-        pluginTarget(obj);
+        plugin_target(obj);
     },
 };

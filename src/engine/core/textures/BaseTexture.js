@@ -4,7 +4,7 @@ import {
 } from '../utils';
 import settings from '../settings';
 import EventEmitter from 'eventemitter3';
-import determineCrossOrigin from '../utils/determineCrossOrigin';
+import determine_cross_origin from '../utils/determine_cross_origin';
 import bitTwiddle from 'bit-twiddle';
 
 /**
@@ -681,7 +681,7 @@ export default class BaseTexture extends EventEmitter
 
             if (crossorigin === undefined && image_url.indexOf('data:') !== 0)
             {
-                image.crossOrigin = determineCrossOrigin(image_url);
+                image.crossOrigin = determine_cross_origin(image_url);
             }
             else if (crossorigin)
             {

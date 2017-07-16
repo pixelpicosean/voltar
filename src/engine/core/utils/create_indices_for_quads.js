@@ -2,12 +2,12 @@
  * Generic Mask Stack data structure
  *
  * @memberof V
- * @function createIndicesForQuads
+ * @function create_indices_for_quads
  * @private
  * @param {number} size - Number of quads
  * @return {Uint16Array} indices
  */
-export default function createIndicesForQuads(size)
+export default function create_indices_for_quads(size)
 {
     // the total number of indices in our array, there are 6 points per quad.
 

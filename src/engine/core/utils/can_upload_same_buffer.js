@@ -1,4 +1,4 @@
-export default function canUploadSameBuffer()
+export default function can_upload_same_buffer()
 {
 	// Uploading the same buffer multiple times in a single frame can cause perf issues.
 	// Apparent on IOS so only check for that at the moment

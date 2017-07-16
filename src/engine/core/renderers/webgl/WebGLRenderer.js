@@ -10,7 +10,7 @@ import TextureGarbageCollector from './TextureGarbageCollector';
 import WebGLState from './WebGLState';
 import mapWebGLDrawModesToPixi from './utils/mapWebGLDrawModesToPixi';
 import validateContext from './utils/validateContext';
-import { pluginTarget } from '../../utils';
+import { plugin_target } from '../../utils';
 import glCore from 'pixi-gl-core';
 import { RENDERER_TYPE } from '../../const';
 
@@ -752,4 +752,4 @@ export default class WebGLRenderer extends SystemRenderer
  * @param {Function} ctor - The constructor function or class for the plugin.
  */
 
-pluginTarget.mixin(WebGLRenderer);
+plugin_target.mixin(WebGLRenderer);

@@ -1,5 +1,5 @@
 import glCore from 'pixi-gl-core';
-import createIndicesForQuads from '../../../utils/createIndicesForQuads';
+import create_indices_for_quads from '../../../utils/create_indices_for_quads';
 
 /**
  * Helper class to create a quad
@@ -61,7 +61,7 @@ export default class Quad
          *
          * @member {Uint16Array}
          */
-        this.indices = createIndicesForQuads(1);
+        this.indices = create_indices_for_quads(1);
 
         /**
          * The vertex buffer

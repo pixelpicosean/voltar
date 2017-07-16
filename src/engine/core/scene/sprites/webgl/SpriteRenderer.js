@@ -1,6 +1,6 @@
 import ObjectRenderer from '../../../renderers/webgl/utils/ObjectRenderer';
 import WebGLRenderer from '../../../renderers/webgl/WebGLRenderer';
-import createIndicesForQuads from '../../../utils/createIndicesForQuads';
+import create_indices_for_quads from '../../../utils/create_indices_for_quads';
 import generateMultiTextureShader from './generateMultiTextureShader';
 import checkMaxIfStatmentsInShader from '../../../renderers/webgl/utils/checkMaxIfStatmentsInShader';
 import Buffer from './BatchBuffer';
@@ -65,7 +65,7 @@ export default class SpriteRenderer extends ObjectRenderer
          *
          * @member {Uint16Array}
          */
-        this.indices = createIndicesForQuads(this.size);
+        this.indices = create_indices_for_quads(this.size);
 
         /**
          * The default shaders that is used if a sprite doesn't have a more specific one.

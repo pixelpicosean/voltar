@@ -7,7 +7,7 @@ import { TEXT_GRADIENT } from '../../const';
 import settings from '../../settings';
 import TextStyle from './TextStyle';
 import TextMetrics from './TextMetrics';
-import trimCanvas from '../../utils/trimCanvas';
+import trim_canvas from '../../utils/trim_canvas';
 
 const defaultDestroyOptions = {
     texture: true,
@@ -316,7 +316,7 @@ export default class Text extends Sprite
 
         if (this._style.trim)
         {
-            const trimmed = trimCanvas(canvas);
+            const trimmed = trim_canvas(canvas);
 
             canvas.width = trimmed.width;
             canvas.height = trimmed.height;

@@ -2,12 +2,12 @@
  * Trim transparent borders from a canvas
  *
  * @memberof V
- * @function trimCanvas
+ * @function trim_canvas
  * @private
  * @param {HTMLCanvasElement} canvas - the canvas to trim
  * @returns {object} Trim data
  */
-export default function trimCanvas(canvas)
+export default function trim_canvas(canvas)
 {
     // https://gist.github.com/remy/784508
 

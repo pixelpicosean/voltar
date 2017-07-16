@@ -1,6 +1,6 @@
 import Device from 'ismobilejs';
 
-export default function maxRecommendedTextures(max)
+export default function max_recommended_textures(max)
 {
     if (Device.tablet || Device.phone)
     {

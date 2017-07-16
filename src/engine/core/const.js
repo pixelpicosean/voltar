@@ -7,7 +7,7 @@
  * @name VERSION
  * @type {string}
  */
-export const VERSION = '4.5.3';
+export const VERSION = '2.0.0 - Pixi.js(4.5.3)';
 
 /**
  * Two Pi.

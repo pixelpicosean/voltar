@@ -1,5 +1,5 @@
-import maxRecommendedTextures from './utils/maxRecommendedTextures';
-import canUploadSameBuffer from './utils/canUploadSameBuffer';
+import max_recommended_textures from './utils/max_recommended_textures';
+import can_upload_same_buffer from './utils/can_upload_same_buffer';
 
 /**
  * User's customizable globals for overriding the default V settings, such
@@ -64,7 +64,7 @@ export default {
      * @type {number}
      * @default 32
      */
-    SPRITE_MAX_TEXTURES: maxRecommendedTextures(32),
+    SPRITE_MAX_TEXTURES: max_recommended_textures(32),
 
     // TODO: maybe change to SPRITE.BATCH_SIZE: 2000
     // TODO: maybe add PARTICLE.BATCH_SIZE: 15000
@@ -217,6 +217,6 @@ export default {
      * @memberof V
      * @type {boolean}
      */
-    CAN_UPLOAD_SAME_BUFFER: canUploadSameBuffer(),
+    CAN_UPLOAD_SAME_BUFFER: can_upload_same_buffer(),
 
 };
