@@ -982,33 +982,39 @@ export default class Node2D extends EventEmitter
         const list = path.split('/');
 
         // Find the base node
-        let base = (list[0].length === 0) ? this.scene_tree.current_scene : this;
+        let node = this;
 
-        let name;
-        while (list.length > 0) {
-            name = list[0];
+        let i = 0, l = list.length, name;
+
+        // '/absolute/node/path' start from current scene
+        if (list[0].length === 0) {
+            node = this.scene_tree.current_scene;
+            i = 1;
+        }
+
+        for (; i < l; i++) {
+            name = list[i];
             switch (name) {
                 case '.':
-                    list.shift();
                     break;
                 case '..':
-                    base = base.parent;
-                    if (!base) {
+                    node = node.parent;
+                    if (!node) {
+                        console.log('no parent node exists');
                         return null;
                     }
-                    list.shift();
                     break;
                 default:
-                    base = base.named_children[name];
-                    if (!base) {
+                    node = node.named_children[name];
+                    if (!node) {
+                        console.log(`node called "${name}" does not exist`);
                         return null;
                     }
-                    list.shift();
                     break;
             }
         }
 
-        return base;
+        return node;
     }
 
     /**
