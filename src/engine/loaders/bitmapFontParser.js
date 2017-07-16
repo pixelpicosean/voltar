@@ -13,7 +13,7 @@ import BitmapText from '../core/scene/BitmapText';
  */
 export function parse(resource, texture)
 {
-    resource.bitmapFont = BitmapText.registerFont(resource.data, texture);
+    resource.bitmapFont = BitmapText.register_font(resource.data, texture);
 }
 
 export default function ()
