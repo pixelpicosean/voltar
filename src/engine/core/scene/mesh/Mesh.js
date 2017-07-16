@@ -129,16 +129,16 @@ export default class Mesh extends Node2D
 
         /**
          * transform that is applied to UV to get the texture coords
-         * its updated independently from texture uvTransform
+         * its updated independently from texture uv_transform
          * updates of uvs are tied to that thing
          *
          * @member {V.extras.TextureTransform}
          * @private
          */
-        this._uvTransform = new TextureTransform(texture);
+        this._uv_transform = new TextureTransform(texture);
 
         /**
-         * whether or not upload uvTransform to shader
+         * whether or not upload uv_transform to shader
          * if its false, then uvs should be pre-multiplied
          * if you change it for generated mesh, please call 'refresh(true)'
          * @member {boolean}
@@ -187,7 +187,7 @@ export default class Mesh extends Node2D
      */
     _onTextureUpdate()
     {
-        this._uvTransform.texture = this._texture;
+        this._uv_transform.texture = this._texture;
         this.refresh();
     }
 
@@ -200,7 +200,7 @@ export default class Mesh extends Node2D
     {
         if (!this.uploadUvTransform)
         {
-            this._uvTransform.multiplyUvs(this.uvs);
+            this._uv_transform.multiplyUvs(this.uvs);
         }
     }
 
@@ -212,7 +212,7 @@ export default class Mesh extends Node2D
      */
     refresh(forceUpdate)
     {
-        if (this._uvTransform.update(forceUpdate))
+        if (this._uv_transform.update(forceUpdate))
         {
             this._refresh();
         }

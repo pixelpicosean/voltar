@@ -68,7 +68,7 @@ export default class TilingSpriteRenderer extends core.ObjectRenderer
         vertices[2] = vertices[4] = (ts._width) * (1.0 - ts.anchor.x);
         vertices[5] = vertices[7] = ts._height * (1.0 - ts.anchor.y);
 
-        if (ts.uvRespectAnchor)
+        if (ts.uv_respect_anchor)
         {
             vertices = quad.uvs;
 
@@ -83,8 +83,8 @@ export default class TilingSpriteRenderer extends core.ObjectRenderer
 
         const tex = ts._texture;
         const baseTex = tex.baseTexture;
-        const lt = ts.tileTransform.local_transform;
-        const uv = ts.uvTransform;
+        const lt = ts.tile_transform.local_transform;
+        const uv = ts.uv_transform;
         let isSimple = baseTex.isPowerOfTwo
             && tex.frame.width === baseTex.width && tex.frame.height === baseTex.height;
 

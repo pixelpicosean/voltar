@@ -112,7 +112,7 @@ export default class MeshRenderer extends ObjectRenderer
         {
             if (mesh.uploadUvTransform)
             {
-                glData.shader.uniforms.uTransform = mesh._uvTransform.mapCoord.toArray(true);
+                glData.shader.uniforms.uTransform = mesh._uv_transform.mapCoord.toArray(true);
             }
             else
             {

@@ -13,10 +13,10 @@ export default class TextureTransform
     /**
      *
      * @param {V.Texture} texture observed texture
-     * @param {number} [clampMargin] Changes frame clamping, 0.5 by default. Use -0.5 for extra border.
+     * @param {number} [clamp_margin] Changes frame clamping, 0.5 by default. Use -0.5 for extra border.
      * @constructor
      */
-    constructor(texture, clampMargin)
+    constructor(texture, clamp_margin)
     {
         this._texture = texture;
 
@@ -46,7 +46,7 @@ export default class TextureTransform
          * @default 0.5
          * @member {number}
          */
-        this.clampMargin = (typeof clampMargin === 'undefined') ? 0.5 : clampMargin;
+        this.clamp_margin = (typeof clamp_margin === 'undefined') ? 0.5 : clamp_margin;
     }
 
     /**
@@ -129,7 +129,7 @@ export default class TextureTransform
 
         const texBase = tex.baseTexture;
         const frame = this.uClampFrame;
-        const margin = this.clampMargin / texBase.resolution;
+        const margin = this.clamp_margin / texBase.resolution;
         const offset = this.clampOffset;
 
         frame[0] = (tex._frame.x + margin + offset) / texBase.width;

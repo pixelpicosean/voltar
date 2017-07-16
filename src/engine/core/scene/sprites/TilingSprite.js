@@ -31,7 +31,7 @@ export default class TilingSprite extends Sprite
          *
          * @member {V.TransformStatic}
          */
-        this.tileTransform = new TransformStatic();
+        this.tile_transform = new TransformStatic();
 
         // /// private
 
@@ -64,7 +64,7 @@ export default class TilingSprite extends Sprite
          *
          * @member {V.extras.TextureTransform}
          */
-        this.uvTransform = texture.transform || new TextureTransform(texture);
+        this.uv_transform = texture.transform || new TextureTransform(texture);
 
         /**
          * Plugin that is responsible for rendering this element.
@@ -81,7 +81,7 @@ export default class TilingSprite extends Sprite
          * @member {boolean}
          * @default false
          */
-        this.uvRespectAnchor = false;
+        this.uv_respect_anchor = false;
     }
     /**
      * Changes frame clamping in corresponding textureTransform, shortcut
@@ -90,15 +90,15 @@ export default class TilingSprite extends Sprite
      * @default 0.5
      * @member {number}
      */
-    get clampMargin()
+    get clamp_margin()
     {
-        return this.uvTransform.clampMargin;
+        return this.uv_transform.clamp_margin;
     }
 
-    set clampMargin(value) // eslint-disable-line require-jsdoc
+    set clamp_margin(value) // eslint-disable-line require-jsdoc
     {
-        this.uvTransform.clampMargin = value;
-        this.uvTransform.update(true);
+        this.uv_transform.clamp_margin = value;
+        this.uv_transform.update(true);
     }
 
     /**
@@ -106,14 +106,14 @@ export default class TilingSprite extends Sprite
      *
      * @member {V.ObservablePoint}
      */
-    get tileScale()
+    get tile_scale()
     {
-        return this.tileTransform.scale;
+        return this.tile_transform.scale;
     }
 
-    set tileScale(value) // eslint-disable-line require-jsdoc
+    set tile_scale(value) // eslint-disable-line require-jsdoc
     {
-        this.tileTransform.scale.copy(value);
+        this.tile_transform.scale.copy(value);
     }
 
     /**
@@ -121,14 +121,14 @@ export default class TilingSprite extends Sprite
      *
      * @member {V.ObservablePoint}
      */
-    get tilePosition()
+    get tile_position()
     {
-        return this.tileTransform.position;
+        return this.tile_transform.position;
     }
 
-    set tilePosition(value) // eslint-disable-line require-jsdoc
+    set tile_position(value) // eslint-disable-line require-jsdoc
     {
-        this.tileTransform.position.copy(value);
+        this.tile_transform.position.copy(value);
     }
 
     /**
@@ -136,9 +136,9 @@ export default class TilingSprite extends Sprite
      */
     _onTextureUpdate()
     {
-        if (this.uvTransform)
+        if (this.uv_transform)
         {
-            this.uvTransform.texture = this._texture;
+            this.uv_transform.texture = this._texture;
         }
     }
 
@@ -158,8 +158,8 @@ export default class TilingSprite extends Sprite
             return;
         }
 
-        this.tileTransform.updateLocalTransform();
-        this.uvTransform.update();
+        this.tile_transform.updateLocalTransform();
+        this.uv_transform.update();
 
         renderer.setObjectRenderer(renderer.plugins[this.plugin_name]);
         renderer.plugins[this.plugin_name].render(this);
@@ -185,8 +185,8 @@ export default class TilingSprite extends Sprite
         const resolution = renderer.resolution;
         const baseTexture = texture.baseTexture;
         const baseTextureResolution = baseTexture.resolution;
-        const modX = ((this.tilePosition.x / this.tileScale.x) % texture._frame.width) * baseTextureResolution;
-        const modY = ((this.tilePosition.y / this.tileScale.y) % texture._frame.height) * baseTextureResolution;
+        const modX = ((this.tile_position.x / this.tile_scale.x) % texture._frame.width) * baseTextureResolution;
+        const modY = ((this.tile_position.y / this.tile_scale.y) % texture._frame.height) * baseTextureResolution;
 
         // create a nice shiny pattern!
         // TODO this needs to be refreshed if texture changes..
@@ -231,26 +231,26 @@ export default class TilingSprite extends Sprite
         context.fillStyle = this._canvasPattern;
 
         // TODO - this should be rolled into the set_transform above..
-        context.scale(this.tileScale.x / baseTextureResolution, this.tileScale.y / baseTextureResolution);
+        context.scale(this.tile_scale.x / baseTextureResolution, this.tile_scale.y / baseTextureResolution);
 
         const anchorX = this.anchor.x * -this._width;
         const anchorY = this.anchor.y * -this._height;
 
-        if (this.uvRespectAnchor)
+        if (this.uv_respect_anchor)
         {
             context.translate(modX, modY);
 
             context.fillRect(-modX + anchorX, -modY + anchorY,
-                this._width / this.tileScale.x * baseTextureResolution,
-                this._height / this.tileScale.y * baseTextureResolution);
+                this._width / this.tile_scale.x * baseTextureResolution,
+                this._height / this.tile_scale.y * baseTextureResolution);
         }
         else
         {
             context.translate(modX + anchorX, modY + anchorY);
 
             context.fillRect(-modX, -modY,
-                this._width / this.tileScale.x * baseTextureResolution,
-                this._height / this.tileScale.y * baseTextureResolution);
+                this._width / this.tile_scale.x * baseTextureResolution,
+                this._height / this.tile_scale.y * baseTextureResolution);
         }
     }
 
@@ -342,8 +342,8 @@ export default class TilingSprite extends Sprite
     {
         super.destroy(options);
 
-        this.tileTransform = null;
-        this.uvTransform = null;
+        this.tile_transform = null;
+        this.uv_transform = null;
     }
 
     /**
