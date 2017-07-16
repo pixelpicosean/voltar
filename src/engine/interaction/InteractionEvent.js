@@ -20,7 +20,7 @@ export default class InteractionEvent
 
         /**
          * The object which caused this event to be dispatched.
-         * For listener callback see {@link V.interaction.InteractionEvent.currentTarget}.
+         * For listener callback see {@link V.interaction.InteractionEvent.current_target}.
          *
          * @member {V.Node2D}
          */
@@ -31,7 +31,7 @@ export default class InteractionEvent
          *
          * @member {V.Node2D}
          */
-        this.currentTarget = null;
+        this.current_target = null;
 
         /**
          * Type of the event
@@ -52,7 +52,7 @@ export default class InteractionEvent
      * Prevents event from reaching any objects other than the current object.
      *
      */
-    stopPropagation()
+    stop_propagation()
     {
         this.stopped = true;
     }
@@ -65,7 +65,7 @@ export default class InteractionEvent
     _reset()
     {
         this.stopped = false;
-        this.currentTarget = null;
+        this.current_target = null;
         this.target = null;
     }
 }

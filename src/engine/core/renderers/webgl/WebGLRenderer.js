@@ -303,7 +303,7 @@ export default class WebGLRenderer extends SystemRenderer
             displayObject.parent = this._tempNode2DParent;
             displayObject.update_transform();
             displayObject.parent = cacheParent;
-           // displayObject.hitArea = //TODO add a temp hit area
+           // displayObject.hit_area = //TODO add a temp hit area
         }
 
         this.bindRenderTexture(renderTexture, transform);

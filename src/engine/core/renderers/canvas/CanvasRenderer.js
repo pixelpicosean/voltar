@@ -196,7 +196,7 @@ export default class CanvasRenderer extends SystemRenderer
 
             displayObject.update_transform();
             displayObject.parent = cacheParent;
-            // displayObject.hitArea = //TODO add a temp hit area
+            // displayObject.hit_area = //TODO add a temp hit area
         }
 
         context.setTransform(1, 0, 0, 1, 0, 0);

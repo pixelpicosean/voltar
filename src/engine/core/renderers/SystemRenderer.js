@@ -78,7 +78,7 @@ export default class SystemRenderer extends EventEmitter
         /**
          * Measurements of the screen. (0, 0, screenWidth, screenHeight)
          *
-         * Its safe to use as filter_area or hitArea for whole stage
+         * Its safe to use as filter_area or hit_area for whole stage
          *
          * @member {V.Rectangle}
          */

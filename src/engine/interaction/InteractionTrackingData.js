@@ -8,11 +8,11 @@
 export default class InteractionTrackingData
 {
     /**
-     * @param {number} pointerId - Unique pointer id of the event
+     * @param {number} pointer_id - Unique pointer id of the event
      */
-    constructor(pointerId)
+    constructor(pointer_id)
     {
-        this._pointerId = pointerId;
+        this._pointer_id = pointer_id;
         this._flags = InteractionTrackingData.FLAGS.NONE;
     }
 
@@ -40,9 +40,9 @@ export default class InteractionTrackingData
      * @readonly
      * @member {number}
      */
-    get pointerId()
+    get pointer_id()
     {
-        return this._pointerId;
+        return this._pointer_id;
     }
 
     /**
@@ -104,7 +104,7 @@ export default class InteractionTrackingData
      * @member {boolean}
      * @memberof V.interaction.InteractionTrackingData#
      */
-    get rightDown()
+    get right_down()
     {
         return (this._flags & this.constructor.FLAGS.RIGHT_DOWN) !== 0;
     }
@@ -114,7 +114,7 @@ export default class InteractionTrackingData
      *
      * @param {boolean} yn - Is the right mouse button down?
      */
-    set rightDown(yn)
+    set right_down(yn)
     {
         this._doSet(this.constructor.FLAGS.RIGHT_DOWN, yn);
     }
@@ -125,7 +125,7 @@ export default class InteractionTrackingData
      * @member {boolean}
      * @memberof V.interaction.InteractionTrackingData#
      */
-    get leftDown()
+    get left_down()
     {
         return (this._flags & this.constructor.FLAGS.LEFT_DOWN) !== 0;
     }
@@ -135,7 +135,7 @@ export default class InteractionTrackingData
      *
      * @param {boolean} yn - Is the left mouse button down?
      */
-    set leftDown(yn)
+    set left_down(yn)
     {
         this._doSet(this.constructor.FLAGS.LEFT_DOWN, yn);
     }

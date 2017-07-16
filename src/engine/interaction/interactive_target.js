@@ -32,7 +32,7 @@ export default {
 
     /**
      * Determines if the children to the displayObject can be clicked/touched
-     * Setting this to false allows pixi to bypass a recursive `hitTest` function
+     * Setting this to false allows pixi to bypass a recursive `hit_test` function
      *
      * @member {boolean}
      * @memberof V.Node2D#
@@ -46,11 +46,11 @@ export default {
      * @example
      * const sprite = new V.Sprite(texture);
      * sprite.interactive = true;
-     * sprite.hitArea = new V.Rectangle(0, 0, 100, 100);
+     * sprite.hit_area = new V.Rectangle(0, 0, 100, 100);
      * @member {V.Rectangle|V.Circle|V.Ellipse|V.Polygon|V.RoundedRectangle}
      * @memberof V.Node2D#
      */
-    hitArea: null,
+    hit_area: null,
 
     /**
      * If enabled, the mouse cursor use the pointer behavior when hovered over the displayObject if it is interactive
@@ -59,15 +59,15 @@ export default {
      * @example
      * const sprite = new V.Sprite(texture);
      * sprite.interactive = true;
-     * sprite.buttonMode = true;
+     * sprite.button_mode = true;
      * @member {boolean}
      * @memberof V.Node2D#
      */
-    get buttonMode()
+    get button_mode()
     {
         return this.cursor === 'pointer';
     },
-    set buttonMode(value)
+    set button_mode(value)
     {
         if (value)
         {
@@ -101,18 +101,18 @@ export default {
      * @memberof V.Node2D#
      * @private
      */
-    get trackedPointers()
+    get tracked_pointers()
     {
-        if (this._trackedPointers === undefined) this._trackedPointers = {};
+        if (this._tracked_pointers === undefined) this._tracked_pointers = {};
 
-        return this._trackedPointers;
+        return this._tracked_pointers;
     },
 
     /**
-     * Map of all tracked pointers, by identifier. Use trackedPointers to access.
+     * Map of all tracked pointers, by identifier. Use tracked_pointers to access.
      *
      * @private
      * @type {Map<number, InteractionTrackingData>}
      */
-    _trackedPointers: undefined,
+    _tracked_pointers: undefined,
 };

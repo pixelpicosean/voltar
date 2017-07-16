@@ -282,28 +282,28 @@ export default class AccessibilityManager
             {
                 // map div to display..
                 div = child._accessibleDiv;
-                let hitArea = child.hitArea;
+                let hit_area = child.hit_area;
                 const wt = child.world_transform;
 
-                if (child.hitArea)
+                if (child.hit_area)
                 {
-                    div.style.left = `${(wt.tx + (hitArea.x * wt.a)) * sx}px`;
-                    div.style.top = `${(wt.ty + (hitArea.y * wt.d)) * sy}px`;
+                    div.style.left = `${(wt.tx + (hit_area.x * wt.a)) * sx}px`;
+                    div.style.top = `${(wt.ty + (hit_area.y * wt.d)) * sy}px`;
 
-                    div.style.width = `${hitArea.width * wt.a * sx}px`;
-                    div.style.height = `${hitArea.height * wt.d * sy}px`;
+                    div.style.width = `${hit_area.width * wt.a * sx}px`;
+                    div.style.height = `${hit_area.height * wt.d * sy}px`;
                 }
                 else
                 {
-                    hitArea = child.get_bounds();
+                    hit_area = child.get_bounds();
 
-                    this.cap_hit_area(hitArea);
+                    this.cap_hit_area(hit_area);
 
-                    div.style.left = `${hitArea.x * sx}px`;
-                    div.style.top = `${hitArea.y * sy}px`;
+                    div.style.left = `${hit_area.x * sx}px`;
+                    div.style.top = `${hit_area.y * sy}px`;
 
-                    div.style.width = `${hitArea.width * sx}px`;
-                    div.style.height = `${hitArea.height * sy}px`;
+                    div.style.width = `${hit_area.width * sx}px`;
+                    div.style.height = `${hit_area.height * sy}px`;
                 }
             }
         }
@@ -315,30 +315,30 @@ export default class AccessibilityManager
     /**
      * TODO: docs.
      *
-     * @param {Rectangle} hitArea - TODO docs
+     * @param {Rectangle} hit_area - TODO docs
      */
-    cap_hit_area(hitArea)
+    cap_hit_area(hit_area)
     {
-        if (hitArea.x < 0)
+        if (hit_area.x < 0)
         {
-            hitArea.width += hitArea.x;
-            hitArea.x = 0;
+            hit_area.width += hit_area.x;
+            hit_area.x = 0;
         }
 
-        if (hitArea.y < 0)
+        if (hit_area.y < 0)
         {
-            hitArea.height += hitArea.y;
-            hitArea.y = 0;
+            hit_area.height += hit_area.y;
+            hit_area.y = 0;
         }
 
-        if (hitArea.x + hitArea.width > this.renderer.width)
+        if (hit_area.x + hit_area.width > this.renderer.width)
         {
-            hitArea.width = this.renderer.width - hitArea.x;
+            hit_area.width = this.renderer.width - hit_area.x;
         }
 
-        if (hitArea.y + hitArea.height > this.renderer.height)
+        if (hit_area.y + hit_area.height > this.renderer.height)
         {
-            hitArea.height = this.renderer.height - hitArea.y;
+            hit_area.height = this.renderer.height - hit_area.y;
         }
     }
 
@@ -405,7 +405,7 @@ export default class AccessibilityManager
     {
         const interactionManager = this.renderer.plugins.interaction;
 
-        interactionManager.dispatchEvent(e.target.displayObject, 'click', interactionManager.eventData);
+        interactionManager.dispatch_event(e.target.displayObject, 'click', interactionManager.event_data);
     }
 
     /**
@@ -418,7 +418,7 @@ export default class AccessibilityManager
     {
         const interactionManager = this.renderer.plugins.interaction;
 
-        interactionManager.dispatchEvent(e.target.displayObject, 'mouseover', interactionManager.eventData);
+        interactionManager.dispatch_event(e.target.displayObject, 'mouseover', interactionManager.event_data);
     }
 
     /**
@@ -431,7 +431,7 @@ export default class AccessibilityManager
     {
         const interactionManager = this.renderer.plugins.interaction;
 
-        interactionManager.dispatchEvent(e.target.displayObject, 'mouseout', interactionManager.eventData);
+        interactionManager.dispatch_event(e.target.displayObject, 'mouseout', interactionManager.event_data);
     }
 
     /**

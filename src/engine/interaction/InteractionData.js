@@ -35,7 +35,7 @@ export default class InteractionData
          * @see https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent
          * @member {MouseEvent|TouchEvent|PointerEvent}
          */
-        this.originalEvent = null;
+        this.original_event = null;
 
         /**
          * Unique identifier for this interaction
@@ -46,10 +46,10 @@ export default class InteractionData
 
         /**
          * Indicates whether or not the pointer device that created the event is the primary pointer.
-         * @see https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/isPrimary
+         * @see https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/is_primary
          * @type {Boolean}
          */
-        this.isPrimary = false;
+        this.is_primary = false;
 
         /**
          * Indicates which button was pressed on the mouse or pointer device to trigger the event.
@@ -86,21 +86,21 @@ export default class InteractionData
          * @see https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/tiltX
          * @type {number}
          */
-        this.tiltX = 0;
+        this.tilt_x = 0;
 
         /**
          * The angle, in degrees, between the pointer device and the screen.
          * @see https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/tiltY
          * @type {number}
          */
-        this.tiltY = 0;
+        this.tilt_y = 0;
 
         /**
          * The type of pointer that triggered the event.
          * @see https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/pointerType
          * @type {string}
          */
-        this.pointerType = null;
+        this.pointer_type = null;
 
         /**
          * Pressure applied by the pointing device during the event. A Touch's force property
@@ -111,11 +111,11 @@ export default class InteractionData
         this.pressure = 0;
 
         /**
-         * From TouchEvents (not PointerEvents triggered by touches), the rotationAngle of the Touch.
+         * From TouchEvents (not PointerEvents triggered by touches), the rotation_angle of the Touch.
          * @see https://developer.mozilla.org/en-US/docs/Web/API/Touch/rotationAngle
          * @type {number}
          */
-        this.rotationAngle = 0;
+        this.rotation_angle = 0;
 
         /**
          * Twist of a stylus pointer.
@@ -129,16 +129,16 @@ export default class InteractionData
          * @see https://w3c.github.io/pointerevents/#pointerevent-interface
          * @type {number}
          */
-        this.tangentialPressure = 0;
+        this.tangential_pressure = 0;
     }
 
     /**
      * The unique identifier of the pointer. It will be the same as `identifier`.
      * @readonly
      * @member {number}
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/pointerId
+     * @see https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/pointer_id
      */
-    get pointerId()
+    get pointer_id()
     {
         return this.identifier;
     }
@@ -155,7 +155,7 @@ export default class InteractionData
      * @return {V.Point} A point containing the coordinates of the InteractionData position relative
      *  to the Node2D
      */
-    getLocalPosition(displayObject, point, globalPos)
+    get_local_position(displayObject, point, globalPos)
     {
         return displayObject.world_transform.apply_inverse(globalPos || this.global, point);
     }
@@ -168,24 +168,24 @@ export default class InteractionData
      */
     _copyEvent(event)
     {
-        // isPrimary should only change on touchstart/pointerdown, so we don't want to overwrite
+        // is_primary should only change on touchstart/pointerdown, so we don't want to overwrite
         // it with "false" on later events when our shim for it on touch events might not be
         // accurate
-        if (event.isPrimary)
+        if (event.is_primary)
         {
-            this.isPrimary = true;
+            this.is_primary = true;
         }
         this.button = event.button;
         this.buttons = event.buttons;
         this.width = event.width;
         this.height = event.height;
-        this.tiltX = event.tiltX;
-        this.tiltY = event.tiltY;
-        this.pointerType = event.pointerType;
+        this.tilt_x = event.tiltX;
+        this.tilt_y = event.tiltY;
+        this.pointer_type = event.pointerType;
         this.pressure = event.pressure;
-        this.rotationAngle = event.rotationAngle;
+        this.rotation_angle = event.rotationAngle;
         this.twist = event.twist || 0;
-        this.tangentialPressure = event.tangentialPressure || 0;
+        this.tangential_pressure = event.tangentialPressure || 0;
     }
 
     /**
@@ -195,8 +195,8 @@ export default class InteractionData
      */
     _reset()
     {
-        // isPrimary is the only property that we really need to reset - everything else is
+        // is_primary is the only property that we really need to reset - everything else is
         // guaranteed to be overwritten
-        this.isPrimary = false;
+        this.is_primary = false;
     }
 }
