@@ -86,7 +86,7 @@ export default class TransformStatic extends TransformBase
      */
     updateLocalTransform()
     {
-        const lt = this.localTransform;
+        const lt = this.local_transform;
 
         if (this._localID !== this._currentLocalID)
         {
@@ -110,9 +110,9 @@ export default class TransformStatic extends TransformBase
      *
      * @param {V.Transform} parentTransform - The transform of the parent of this object
      */
-    updateTransform(parentTransform)
+    update_transform(parentTransform)
     {
-        const lt = this.localTransform;
+        const lt = this.local_transform;
 
         if (this._localID !== this._currentLocalID)
         {
@@ -133,8 +133,8 @@ export default class TransformStatic extends TransformBase
         if (this._parentID !== parentTransform._worldID)
         {
             // concat the parent matrix with the objects transform.
-            const pt = parentTransform.worldTransform;
-            const wt = this.worldTransform;
+            const pt = parentTransform.world_transform;
+            const wt = this.world_transform;
 
             wt.a = (lt.a * pt.a) + (lt.b * pt.c);
             wt.b = (lt.a * pt.b) + (lt.b * pt.d);

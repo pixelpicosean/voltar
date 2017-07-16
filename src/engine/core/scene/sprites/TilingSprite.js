@@ -68,7 +68,7 @@ export default class TilingSprite extends Sprite
 
         /**
          * Plugin that is responsible for rendering this element.
-         * Allows to customize the rendering process without overriding '_renderWebGL' method.
+         * Allows to customize the rendering process without overriding '_render_webGL' method.
          *
          * @member {string}
          * @default 'tilingSprite'
@@ -148,7 +148,7 @@ export default class TilingSprite extends Sprite
      * @private
      * @param {V.WebGLRenderer} renderer - The renderer
      */
-    _renderWebGL(renderer)
+    _render_webGL(renderer)
     {
         // tweak our texture temporarily..
         const texture = this._texture;
@@ -171,7 +171,7 @@ export default class TilingSprite extends Sprite
      * @private
      * @param {V.CanvasRenderer} renderer - a reference to the canvas renderer
      */
-    _renderCanvas(renderer)
+    _render_canvas(renderer)
     {
         const texture = this._texture;
 
@@ -181,7 +181,7 @@ export default class TilingSprite extends Sprite
         }
 
         const context = renderer.context;
-        const transform = this.worldTransform;
+        const transform = this.world_transform;
         const resolution = renderer.resolution;
         const baseTexture = texture.baseTexture;
         const baseTextureResolution = baseTexture.resolution;
@@ -217,8 +217,8 @@ export default class TilingSprite extends Sprite
         }
 
         // set context state..
-        context.globalAlpha = this.worldAlpha;
-        context.setTransform(transform.a * resolution,
+        context.globalAlpha = this.world_alpha;
+        context.set_transform(transform.a * resolution,
                            transform.b * resolution,
                            transform.c * resolution,
                            transform.d * resolution,
@@ -230,7 +230,7 @@ export default class TilingSprite extends Sprite
         // fill the pattern!
         context.fillStyle = this._canvasPattern;
 
-        // TODO - this should be rolled into the setTransform above..
+        // TODO - this should be rolled into the set_transform above..
         context.scale(this.tileScale.x / baseTextureResolution, this.tileScale.y / baseTextureResolution);
 
         const anchorX = this.anchor.x * -this._width;
@@ -259,7 +259,7 @@ export default class TilingSprite extends Sprite
      *
      * @private
      */
-    _calculateBounds()
+    _calculate_bounds()
     {
         const minX = this._width * -this._anchor._x;
         const minY = this._height * -this._anchor._y;
@@ -275,7 +275,7 @@ export default class TilingSprite extends Sprite
      * @param {V.Rectangle} rect - The output rectangle.
      * @return {V.Rectangle} The bounds.
      */
-    getLocalBounds(rect)
+    get_local_Bounds(rect)
     {
         // we can do a fast local bounds if the sprite has no children!
         if (this.children.length === 0)
@@ -298,7 +298,7 @@ export default class TilingSprite extends Sprite
             return this._bounds.getRectangle(rect);
         }
 
-        return super.getLocalBounds.call(this, rect);
+        return super.get_local_Bounds.call(this, rect);
     }
 
     /**
@@ -309,7 +309,7 @@ export default class TilingSprite extends Sprite
      */
     containsPoint(point)
     {
-        this.worldTransform.applyInverse(point, tempPoint);
+        this.world_transform.applyInverse(point, tempPoint);
 
         const width = this._width;
         const height = this._height;

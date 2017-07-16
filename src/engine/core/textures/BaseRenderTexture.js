@@ -28,7 +28,7 @@ import settings from '../settings';
  *
  * ```js
  *
- * sprite.setTransform()
+ * sprite.set_transform()
  *
  * let baseRenderTexture = new V.BaseRenderTexture(100, 100);
  * let renderTexture = new V.RenderTexture(baseRenderTexture);

@@ -48,7 +48,7 @@ export default class MaskManager extends WebGLManager
             && !this.renderer.stencilManager.stencilMaskStack.length
             && maskData.isFastRect())
         {
-            const matrix = maskData.worldTransform;
+            const matrix = maskData.world_transform;
 
             let rot = Math.atan2(matrix.b, matrix.a);
 
@@ -111,7 +111,7 @@ export default class MaskManager extends WebGLManager
         alphaMaskFilter[0].maskSprite = maskData;
 
         // TODO - may cause issues!
-        target.filterArea = maskData.getBounds(true);
+        target.filter_area = maskData.get_bounds(true);
 
         this.renderer.filterManager.pushFilter(target, alphaMaskFilter);
 
@@ -160,7 +160,7 @@ export default class MaskManager extends WebGLManager
 
         const renderTarget = this.renderer._activeRenderTarget;
 
-        const bounds = maskData.getBounds();
+        const bounds = maskData.get_bounds();
 
         bounds.fit(renderTarget.size);
         maskData.renderable = false;

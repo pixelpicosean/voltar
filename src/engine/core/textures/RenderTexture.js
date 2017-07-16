@@ -27,7 +27,7 @@ import Texture from './Texture';
  *
  * ```js
  *
- * sprite.setTransform()
+ * sprite.set_transform()
  *
  * let renderTexture = new V.RenderTexture.create(100, 100);
  *

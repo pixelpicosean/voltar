@@ -28,10 +28,10 @@ export default class CanvasMaskManager
         renderer.context.save();
 
         const cacheAlpha = maskData.alpha;
-        const transform = maskData.transform.worldTransform;
+        const transform = maskData.transform.world_transform;
         const resolution = renderer.resolution;
 
-        renderer.context.setTransform(
+        renderer.context.set_transform(
             transform.a * resolution,
             transform.b * resolution,
             transform.c * resolution,
@@ -48,7 +48,7 @@ export default class CanvasMaskManager
             renderer.context.clip();
         }
 
-        maskData.worldAlpha = cacheAlpha;
+        maskData.world_alpha = cacheAlpha;
     }
 
     /**

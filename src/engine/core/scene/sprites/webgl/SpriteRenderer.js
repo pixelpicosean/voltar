@@ -323,7 +323,7 @@ export default class SpriteRenderer extends ObjectRenderer
             // TODO this sum does not need to be set each frame..
             uvs = sprite._texture._uvs.uvsUint32;
 
-            if (this.renderer.roundPixels)
+            if (this.renderer.pixel_snap)
             {
                 const resolution = this.renderer.resolution;
 
@@ -367,7 +367,7 @@ export default class SpriteRenderer extends ObjectRenderer
             uint32View[index + 12] = uvs[2];
             uint32View[index + 17] = uvs[3];
             /* eslint-disable max-len */
-            const alpha = Math.min(sprite.worldAlpha, 1.0);
+            const alpha = Math.min(sprite.world_alpha, 1.0);
             // we dont call extra function if alpha is 1.0, that's faster
             const argb = alpha < 1.0 && nextTexture.premultipliedAlpha ? premultiplyTint(sprite._tintRGB, alpha)
                 : sprite._tintRGB + (alpha * 255 << 24);

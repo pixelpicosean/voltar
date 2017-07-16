@@ -14,18 +14,18 @@ export default class TransformBase
     constructor()
     {
         /**
-         * The global matrix transform. It can be swapped temporarily by some functions like getLocalBounds()
+         * The global matrix transform. It can be swapped temporarily by some functions like get_local_Bounds()
          *
          * @member {V.Matrix}
          */
-        this.worldTransform = new Matrix();
+        this.world_transform = new Matrix();
 
         /**
          * The local matrix transform
          *
          * @member {V.Matrix}
          */
-        this.localTransform = new Matrix();
+        this.local_transform = new Matrix();
 
         this._worldID = 0;
         this._parentID = 0;
@@ -44,11 +44,11 @@ export default class TransformBase
      *
      * @param {V.TransformBase} parentTransform - The transform of the parent of this object
      */
-    updateTransform(parentTransform)
+    update_transform(parentTransform)
     {
-        const pt = parentTransform.worldTransform;
-        const wt = this.worldTransform;
-        const lt = this.localTransform;
+        const pt = parentTransform.world_transform;
+        const wt = this.world_transform;
+        const lt = this.local_transform;
 
         // concat the parent matrix with the objects transform.
         wt.a = (lt.a * pt.a) + (lt.b * pt.c);
@@ -68,6 +68,6 @@ export default class TransformBase
  * @param  parentTransform {V.Transform} The transform of the parent of this object
  *
  */
-TransformBase.prototype.updateWorldTransform = TransformBase.prototype.updateTransform;
+TransformBase.prototype.updateWorldTransform = TransformBase.prototype.update_transform;
 
 TransformBase.IDENTITY = new TransformBase();

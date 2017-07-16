@@ -39,8 +39,8 @@ export default class CanvasGraphicsRenderer
     {
         const renderer = this.renderer;
         const context = renderer.context;
-        const worldAlpha = graphics.worldAlpha;
-        const transform = graphics.transform.worldTransform;
+        const world_alpha = graphics.world_alpha;
+        const transform = graphics.transform.world_transform;
         const resolution = renderer.resolution;
 
          // if the tint has changed, set the graphics object to dirty.
@@ -49,7 +49,7 @@ export default class CanvasGraphicsRenderer
             this.dirty = true;
         }
 
-        context.setTransform(
+        context.set_transform(
             transform.a * resolution,
             transform.b * resolution,
             transform.c * resolution,
@@ -89,13 +89,13 @@ export default class CanvasGraphicsRenderer
 
                 if (data.fill)
                 {
-                    context.globalAlpha = data.fillAlpha * worldAlpha;
+                    context.globalAlpha = data.fillAlpha * world_alpha;
                     context.fillStyle = `#${(`00000${(fillColor | 0).toString(16)}`).substr(-6)}`;
                     context.fill();
                 }
                 if (data.lineWidth)
                 {
-                    context.globalAlpha = data.lineAlpha * worldAlpha;
+                    context.globalAlpha = data.lineAlpha * world_alpha;
                     context.strokeStyle = `#${(`00000${(lineColor | 0).toString(16)}`).substr(-6)}`;
                     context.stroke();
                 }
@@ -104,13 +104,13 @@ export default class CanvasGraphicsRenderer
             {
                 if (data.fillColor || data.fillColor === 0)
                 {
-                    context.globalAlpha = data.fillAlpha * worldAlpha;
+                    context.globalAlpha = data.fillAlpha * world_alpha;
                     context.fillStyle = `#${(`00000${(fillColor | 0).toString(16)}`).substr(-6)}`;
                     context.fillRect(shape.x, shape.y, shape.width, shape.height);
                 }
                 if (data.lineWidth)
                 {
-                    context.globalAlpha = data.lineAlpha * worldAlpha;
+                    context.globalAlpha = data.lineAlpha * world_alpha;
                     context.strokeStyle = `#${(`00000${(lineColor | 0).toString(16)}`).substr(-6)}`;
                     context.strokeRect(shape.x, shape.y, shape.width, shape.height);
                 }
@@ -124,13 +124,13 @@ export default class CanvasGraphicsRenderer
 
                 if (data.fill)
                 {
-                    context.globalAlpha = data.fillAlpha * worldAlpha;
+                    context.globalAlpha = data.fillAlpha * world_alpha;
                     context.fillStyle = `#${(`00000${(fillColor | 0).toString(16)}`).substr(-6)}`;
                     context.fill();
                 }
                 if (data.lineWidth)
                 {
-                    context.globalAlpha = data.lineAlpha * worldAlpha;
+                    context.globalAlpha = data.lineAlpha * world_alpha;
                     context.strokeStyle = `#${(`00000${(lineColor | 0).toString(16)}`).substr(-6)}`;
                     context.stroke();
                 }
@@ -165,13 +165,13 @@ export default class CanvasGraphicsRenderer
 
                 if (data.fill)
                 {
-                    context.globalAlpha = data.fillAlpha * worldAlpha;
+                    context.globalAlpha = data.fillAlpha * world_alpha;
                     context.fillStyle = `#${(`00000${(fillColor | 0).toString(16)}`).substr(-6)}`;
                     context.fill();
                 }
                 if (data.lineWidth)
                 {
-                    context.globalAlpha = data.lineAlpha * worldAlpha;
+                    context.globalAlpha = data.lineAlpha * world_alpha;
                     context.strokeStyle = `#${(`00000${(lineColor | 0).toString(16)}`).substr(-6)}`;
                     context.stroke();
                 }
@@ -202,14 +202,14 @@ export default class CanvasGraphicsRenderer
 
                 if (data.fillColor || data.fillColor === 0)
                 {
-                    context.globalAlpha = data.fillAlpha * worldAlpha;
+                    context.globalAlpha = data.fillAlpha * world_alpha;
                     context.fillStyle = `#${(`00000${(fillColor | 0).toString(16)}`).substr(-6)}`;
                     context.fill();
                 }
 
                 if (data.lineWidth)
                 {
-                    context.globalAlpha = data.lineAlpha * worldAlpha;
+                    context.globalAlpha = data.lineAlpha * world_alpha;
                     context.strokeStyle = `#${(`00000${(lineColor | 0).toString(16)}`).substr(-6)}`;
                     context.stroke();
                 }

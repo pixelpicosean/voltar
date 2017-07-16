@@ -42,7 +42,7 @@ export default class SpriteMaskFilter extends Filter
 
         this.uniforms.mask = maskSprite._texture;
         this.uniforms.otherMatrix = filterManager.calculateSpriteMatrix(this.maskMatrix, maskSprite);
-        this.uniforms.alpha = maskSprite.worldAlpha;
+        this.uniforms.alpha = maskSprite.world_alpha;
 
         filterManager.applyFilter(this, input, output);
     }

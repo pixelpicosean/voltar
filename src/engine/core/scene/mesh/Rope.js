@@ -61,7 +61,7 @@ export default class Rope extends Mesh
         this.indices = new Uint16Array(points.length * 2);
 
         /**
-         * refreshes vertices on every updateTransform
+         * refreshes vertices on every update_transform
          * @member {boolean}
          * @default true
          */
@@ -209,13 +209,13 @@ export default class Rope extends Mesh
      *
      * @private
      */
-    updateTransform()
+    update_transform()
     {
         if (this.autoUpdate)
         {
             this.refreshVertices();
         }
-        this.containerUpdateTransform();
+        this.node2d_update_transform();
     }
 
 }

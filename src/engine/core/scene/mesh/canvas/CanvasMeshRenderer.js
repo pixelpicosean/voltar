@@ -28,12 +28,12 @@ export default class MeshSpriteRenderer
         const renderer = this.renderer;
         const context = renderer.context;
 
-        const transform = mesh.worldTransform;
+        const transform = mesh.world_transform;
         const res = renderer.resolution;
 
-        if (renderer.roundPixels)
+        if (renderer.pixel_snap)
         {
-            context.setTransform(
+            context.set_transform(
                 transform.a * res,
                 transform.b * res,
                 transform.c * res,
@@ -44,7 +44,7 @@ export default class MeshSpriteRenderer
         }
         else
         {
-            context.setTransform(
+            context.set_transform(
                 transform.a * res,
                 transform.b * res,
                 transform.c * res,
@@ -172,8 +172,8 @@ export default class MeshSpriteRenderer
 
         if (mesh.canvasPadding > 0)
         {
-            const paddingX = mesh.canvasPadding / mesh.worldTransform.a;
-            const paddingY = mesh.canvasPadding / mesh.worldTransform.d;
+            const paddingX = mesh.canvasPadding / mesh.world_transform.a;
+            const paddingY = mesh.canvasPadding / mesh.world_transform.d;
             const centerX = (x0 + x1 + x2) / 3;
             const centerY = (y0 + y1 + y2) / 3;
 

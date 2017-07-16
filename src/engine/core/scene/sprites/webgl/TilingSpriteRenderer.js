@@ -83,7 +83,7 @@ export default class TilingSpriteRenderer extends core.ObjectRenderer
 
         const tex = ts._texture;
         const baseTex = tex.baseTexture;
-        const lt = ts.tileTransform.localTransform;
+        const lt = ts.tileTransform.local_transform;
         const uv = ts.uvTransform;
         let isSimple = baseTex.isPowerOfTwo
             && tex.frame.width === baseTex.width && tex.frame.height === baseTex.height;
@@ -139,9 +139,9 @@ export default class TilingSpriteRenderer extends core.ObjectRenderer
         }
 
         shader.uniforms.uTransform = tempMat.toArray(true);
-        shader.uniforms.uColor = core.utils.premultiplyTintToRgba(ts.tint, ts.worldAlpha,
+        shader.uniforms.uColor = core.utils.premultiplyTintToRgba(ts.tint, ts.world_alpha,
             shader.uniforms.uColor, baseTex.premultipliedAlpha);
-        shader.uniforms.translationMatrix = ts.transform.worldTransform.toArray(true);
+        shader.uniforms.translationMatrix = ts.transform.world_transform.toArray(true);
 
         shader.uniforms.uSampler = renderer.bindTexture(tex);
 

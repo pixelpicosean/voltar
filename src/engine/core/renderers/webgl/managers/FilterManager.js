@@ -92,14 +92,14 @@ export default class FilterManager extends WebGLManager
         // for now we go off the filter of the first resolution..
         const resolution = filters[0].resolution;
         const padding = filters[0].padding | 0;
-        const targetBounds = target.filterArea || target.getBounds(true);
+        const target_bounds = target.filter_area || target.get_bounds(true);
         const sourceFrame = currentState.sourceFrame;
         const destinationFrame = currentState.destinationFrame;
 
-        sourceFrame.x = ((targetBounds.x * resolution) | 0) / resolution;
-        sourceFrame.y = ((targetBounds.y * resolution) | 0) / resolution;
-        sourceFrame.width = ((targetBounds.width * resolution) | 0) / resolution;
-        sourceFrame.height = ((targetBounds.height * resolution) | 0) / resolution;
+        sourceFrame.x = ((target_bounds.x * resolution) | 0) / resolution;
+        sourceFrame.y = ((target_bounds.y * resolution) | 0) / resolution;
+        sourceFrame.width = ((target_bounds.width * resolution) | 0) / resolution;
+        sourceFrame.height = ((target_bounds.height * resolution) | 0) / resolution;
 
         if (filterData.stack[0].renderTarget.transform)
         { //
@@ -291,24 +291,24 @@ export default class FilterManager extends WebGLManager
         let textureCount = 1;
         let currentState;
 
-        // filterArea and filterClamp that are handled by FilterManager directly
+        // filter_area and filterClamp that are handled by FilterManager directly
         // they must not appear in uniformData
 
-        if (shader.uniforms.filterArea)
+        if (shader.uniforms.filter_area)
         {
             currentState = this.filterData.stack[this.filterData.index];
 
-            const filterArea = shader.uniforms.filterArea;
+            const filter_area = shader.uniforms.filter_area;
 
-            filterArea[0] = currentState.renderTarget.size.width;
-            filterArea[1] = currentState.renderTarget.size.height;
-            filterArea[2] = currentState.sourceFrame.x;
-            filterArea[3] = currentState.sourceFrame.y;
+            filter_area[0] = currentState.renderTarget.size.width;
+            filter_area[1] = currentState.renderTarget.size.height;
+            filter_area[2] = currentState.sourceFrame.x;
+            filter_area[3] = currentState.sourceFrame.y;
 
-            shader.uniforms.filterArea = filterArea;
+            shader.uniforms.filter_area = filter_area;
         }
 
-        // use this to clamp displaced texture coords so they belong to filterArea
+        // use this to clamp displaced texture coords so they belong to filter_area
         // see displacementFilter fragment shader for an example
         if (shader.uniforms.filterClamp)
         {
@@ -447,7 +447,7 @@ export default class FilterManager extends WebGLManager
     }
 
     /**
-     * Multiply vTextureCoord to this matrix to achieve (0,0,1,1) for filterArea
+     * Multiply vTextureCoord to this matrix to achieve (0,0,1,1) for filter_area
      *
      * @param {V.Matrix} outputMatrix - The matrix to output to.
      * @return {V.Matrix} The mapped matrix.

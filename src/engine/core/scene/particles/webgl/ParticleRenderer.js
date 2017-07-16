@@ -152,14 +152,14 @@ export default class ParticleRenderer extends ObjectRenderer
 
         const gl = renderer.gl;
 
-        const m = container.worldTransform.copy(this.tempMatrix);
+        const m = container.world_transform.copy(this.tempMatrix);
 
         m.prepend(renderer._activeRenderTarget.projectionMatrix);
 
         this.shader.uniforms.projectionMatrix = m.toArray(true);
 
         this.shader.uniforms.uColor = utils.premultiplyRgba(container.tintRgb,
-            container.worldAlpha, this.shader.uniforms.uColor, baseTexture.premultipliedAlpha);
+            container.world_alpha, this.shader.uniforms.uColor, baseTexture.premultipliedAlpha);
 
         // make sure the texture is bound..
         this.shader.uniforms.uSampler = renderer.bindTexture(baseTexture);

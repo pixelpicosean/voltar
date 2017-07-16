@@ -292,7 +292,7 @@ export default class Matrix
      * @param {number} skewY - Skew on the y axis
      * @return {V.Matrix} This matrix. Good for chaining method calls.
      */
-    setTransform(x, y, pivotX, pivotY, scaleX, scaleY, rotation, skewX, skewY)
+    set_transform(x, y, pivotX, pivotY, scaleX, scaleY, rotation, skewX, skewY)
     {
         const sr = Math.sin(rotation);
         const cr = Math.cos(rotation);

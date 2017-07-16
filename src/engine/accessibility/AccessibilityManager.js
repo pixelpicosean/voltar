@@ -218,7 +218,7 @@ export default class AccessibilityManager
         {
             if (!displayObject._accessibleActive)
             {
-                this.addChild(displayObject);
+                this.add_child(displayObject);
             }
 
             displayObject.renderId = this.renderId;
@@ -283,7 +283,7 @@ export default class AccessibilityManager
                 // map div to display..
                 div = child._accessibleDiv;
                 let hitArea = child.hitArea;
-                const wt = child.worldTransform;
+                const wt = child.world_transform;
 
                 if (child.hitArea)
                 {
@@ -295,7 +295,7 @@ export default class AccessibilityManager
                 }
                 else
                 {
-                    hitArea = child.getBounds();
+                    hitArea = child.get_bounds();
 
                     this.capHitArea(hitArea);
 
@@ -348,7 +348,7 @@ export default class AccessibilityManager
      * @private
      * @param {Node2D} displayObject - The child to make accessible.
      */
-    addChild(displayObject)
+    add_child(displayObject)
     {
         //    this.activate();
 

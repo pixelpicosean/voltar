@@ -18,7 +18,7 @@
  *     .drawRect(40, 40, 200, 200);
  *
  * // Add to the stage
- * app.stage.addChild(rect);
+ * app.stage.add_child(rect);
  *
  * // Don't start rendering until the graphic is uploaded to the GPU
  * app.renderer.plugins.prepare.upload(app.stage, () => {

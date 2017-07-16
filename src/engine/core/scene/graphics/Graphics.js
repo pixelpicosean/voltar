@@ -731,7 +731,7 @@ export default class Graphics extends Node2D
      * @private
      * @param {V.WebGLRenderer} renderer - The renderer
      */
-    _renderWebGL(renderer)
+    _render_webGL(renderer)
     {
         // if the sprite is not visible or the alpha is 0 then no need to render this element
         if (this.dirty !== this.fastRectDirty)
@@ -788,18 +788,18 @@ export default class Graphics extends Node2D
             sprite.tint = rgb2hex(t1);
         }
         sprite.alpha = this.graphicsData[0].fillAlpha;
-        sprite.worldAlpha = this.worldAlpha * sprite.alpha;
+        sprite.world_alpha = this.world_alpha * sprite.alpha;
         sprite.blendMode = this.blendMode;
 
         sprite._texture._frame.width = rect.width;
         sprite._texture._frame.height = rect.height;
 
-        sprite.transform.worldTransform = this.transform.worldTransform;
+        sprite.transform.world_transform = this.transform.world_transform;
 
         sprite.anchor.set(-rect.x / rect.width, -rect.y / rect.height);
         sprite._onAnchorUpdate();
 
-        sprite._renderWebGL(renderer);
+        sprite._render_webGL(renderer);
     }
 
     /**
@@ -808,7 +808,7 @@ export default class Graphics extends Node2D
      * @private
      * @param {V.CanvasRenderer} renderer - The renderer
      */
-    _renderCanvas(renderer)
+    _render_canvas(renderer)
     {
         if (this.isMask === true)
         {
@@ -823,7 +823,7 @@ export default class Graphics extends Node2D
      *
      * @private
      */
-    _calculateBounds()
+    _calculate_bounds()
     {
         if (this.boundsDirty !== this.dirty)
         {
@@ -846,7 +846,7 @@ export default class Graphics extends Node2D
      */
     containsPoint(point)
     {
-        this.worldTransform.applyInverse(point, tempPoint);
+        this.world_transform.applyInverse(point, tempPoint);
 
         const graphicsData = this.graphicsData;
 
@@ -1064,7 +1064,7 @@ export default class Graphics extends Node2D
      */
     generateCanvasTexture(scaleMode, resolution = 1)
     {
-        const bounds = this.getLocalBounds();
+        const bounds = this.get_local_Bounds();
 
         const canvasBuffer = RenderTexture.create(bounds.width, bounds.height, scaleMode, resolution);
 
@@ -1074,7 +1074,7 @@ export default class Graphics extends Node2D
         }
 
         this.transform.updateLocalTransform();
-        this.transform.localTransform.copy(tempMatrix);
+        this.transform.local_transform.copy(tempMatrix);
 
         tempMatrix.invert();
 

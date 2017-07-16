@@ -47,7 +47,7 @@ export default class CanvasSpriteRenderer
         const width = texture._frame.width;
         const height = texture._frame.height;
 
-        let wt = sprite.transform.worldTransform;
+        let wt = sprite.transform.world_transform;
         let dx = 0;
         let dy = 0;
 
@@ -61,7 +61,7 @@ export default class CanvasSpriteRenderer
         //  Ignore null sources
         if (texture.valid)
         {
-            renderer.context.globalAlpha = sprite.worldAlpha;
+            renderer.context.globalAlpha = sprite.world_alpha;
 
             // If smoothingEnabled is supported and we need to change the smoothing property for sprite texture
             const smoothingEnabled = texture.baseTexture.scaleMode === SCALE_MODES.LINEAR;
@@ -96,9 +96,9 @@ export default class CanvasSpriteRenderer
             dy -= height / 2;
 
             // Allow for pixel rounding
-            if (renderer.roundPixels)
+            if (renderer.pixel_snap)
             {
-                renderer.context.setTransform(
+                renderer.context.set_transform(
                     wt.a,
                     wt.b,
                     wt.c,
@@ -112,7 +112,7 @@ export default class CanvasSpriteRenderer
             }
             else
             {
-                renderer.context.setTransform(
+                renderer.context.set_transform(
                     wt.a,
                     wt.b,
                     wt.c,

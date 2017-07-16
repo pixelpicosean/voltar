@@ -14,7 +14,7 @@
  * rect.filters = [new V.filters.BlurFilter()];
  *
  * // Display rectangle
- * app.stage.addChild(rect);
+ * app.stage.add_child(rect);
  * document.body.appendChild(app.view);
  * @namespace V.filters
  */

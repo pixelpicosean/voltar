@@ -16,7 +16,7 @@ import { hex2rgb } from '../../utils';
  * for (let i = 0; i < 100; ++i)
  * {
  *     let sprite = new V.Sprite.fromImage("myImage.png");
- *     container.addChild(sprite);
+ *     container.add_child(sprite);
  * }
  * ```
  *
@@ -112,7 +112,7 @@ export default class ParticleNode2D extends Node2D
          * @member {boolean}
          * @default true;
          */
-        this.roundPixels = true;
+        this.pixel_snap = true;
 
         /**
          * The texture used to render the children.
@@ -159,11 +159,11 @@ export default class ParticleNode2D extends Node2D
      *
      * @private
      */
-    updateTransform()
+    update_transform()
     {
         // TODO don't need to!
         this.displayObjectUpdateTransform();
-        //  V.Node2D.prototype.updateTransform.call( this );
+        //  V.Node2D.prototype.update_transform.call( this );
     }
 
     /**
@@ -190,9 +190,9 @@ export default class ParticleNode2D extends Node2D
      * @private
      * @param {V.WebGLRenderer} renderer - The webgl renderer
      */
-    renderWebGL(renderer)
+    render_webGL(renderer)
     {
-        if (!this.visible || this.worldAlpha <= 0 || !this.children.length || !this.renderable)
+        if (!this.visible || this.world_alpha <= 0 || !this.children.length || !this.renderable)
         {
             return;
         }
@@ -202,7 +202,7 @@ export default class ParticleNode2D extends Node2D
             this.baseTexture = this.children[0]._texture.baseTexture;
             if (!this.baseTexture.hasLoaded)
             {
-                this.baseTexture.once('update', () => this.onChildrenChange(0));
+                this.baseTexture.once('update', () => this.on_children_change(0));
             }
         }
 
@@ -216,7 +216,7 @@ export default class ParticleNode2D extends Node2D
      * @private
      * @param {number} smallestChildIndex - The smallest child index
      */
-    onChildrenChange(smallestChildIndex)
+    on_children_change(smallestChildIndex)
     {
         const bufferIndex = Math.floor(smallestChildIndex / this._batchSize);
 
@@ -232,15 +232,15 @@ export default class ParticleNode2D extends Node2D
      * @private
      * @param {V.CanvasRenderer} renderer - The canvas renderer
      */
-    renderCanvas(renderer)
+    render_canvas(renderer)
     {
-        if (!this.visible || this.worldAlpha <= 0 || !this.children.length || !this.renderable)
+        if (!this.visible || this.world_alpha <= 0 || !this.children.length || !this.renderable)
         {
             return;
         }
 
         const context = renderer.context;
-        const transform = this.worldTransform;
+        const transform = this.world_transform;
         let isRotated = true;
 
         let positionX = 0;
@@ -256,7 +256,7 @@ export default class ParticleNode2D extends Node2D
             context.globalCompositeOperation = compositeOperation;
         }
 
-        context.globalAlpha = this.worldAlpha;
+        context.globalAlpha = this.world_alpha;
 
         this.displayObjectUpdateTransform();
 
@@ -271,14 +271,14 @@ export default class ParticleNode2D extends Node2D
 
             const frame = child._texture.frame;
 
-            context.globalAlpha = this.worldAlpha * child.alpha;
+            context.globalAlpha = this.world_alpha * child.alpha;
 
             if (child.rotation % (Math.PI * 2) === 0)
             {
-                // this is the fastest  way to optimise! - if rotation is 0 then we can avoid any kind of setTransform call
+                // this is the fastest  way to optimise! - if rotation is 0 then we can avoid any kind of set_transform call
                 if (isRotated)
                 {
-                    context.setTransform(
+                    context.set_transform(
                         transform.a,
                         transform.b,
                         transform.c,
@@ -305,11 +305,11 @@ export default class ParticleNode2D extends Node2D
 
                 child.displayObjectUpdateTransform();
 
-                const childTransform = child.worldTransform;
+                const childTransform = child.world_transform;
 
-                if (renderer.roundPixels)
+                if (renderer.pixel_snap)
                 {
-                    context.setTransform(
+                    context.set_transform(
                         childTransform.a,
                         childTransform.b,
                         childTransform.c,
@@ -320,7 +320,7 @@ export default class ParticleNode2D extends Node2D
                 }
                 else
                 {
-                    context.setTransform(
+                    context.set_transform(
                         childTransform.a,
                         childTransform.b,
                         childTransform.c,

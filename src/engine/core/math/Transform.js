@@ -79,7 +79,7 @@ export default class Transform extends TransformBase
      */
     updateLocalTransform()
     {
-        const lt = this.localTransform;
+        const lt = this.local_transform;
 
         lt.a = this._cx * this.scale.x;
         lt.b = this._sx * this.scale.x;
@@ -95,9 +95,9 @@ export default class Transform extends TransformBase
      *
      * @param {V.Transform} parentTransform - The transform of the parent of this object
      */
-    updateTransform(parentTransform)
+    update_transform(parentTransform)
     {
-        const lt = this.localTransform;
+        const lt = this.local_transform;
 
         lt.a = this._cx * this.scale.x;
         lt.b = this._sx * this.scale.x;
@@ -108,8 +108,8 @@ export default class Transform extends TransformBase
         lt.ty = this.position.y - ((this.pivot.x * lt.b) + (this.pivot.y * lt.d));
 
         // concat the parent matrix with the objects transform.
-        const pt = parentTransform.worldTransform;
-        const wt = this.worldTransform;
+        const pt = parentTransform.world_transform;
+        const wt = this.world_transform;
 
         wt.a = (lt.a * pt.a) + (lt.b * pt.c);
         wt.b = (lt.a * pt.b) + (lt.b * pt.d);

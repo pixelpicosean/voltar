@@ -24,17 +24,17 @@ export default class CanvasRenderer extends SystemRenderer
      * @param {number} [options.height=600] - the height of the screen
      * @param {HTMLCanvasElement} [options.view] - the canvas to use as a view, optional
      * @param {boolean} [options.transparent=false] - If the render view is transparent, default false
-     * @param {boolean} [options.autoResize=false] - If the render view is automatically resized, default false
+     * @param {boolean} [options.auto_resize=false] - If the render view is automatically resized, default false
      * @param {boolean} [options.antialias=false] - sets antialias (only applicable in chrome at the moment)
      * @param {number} [options.resolution=1] - The resolution / device pixel ratio of the renderer. The
      *  resolution of the renderer retina would be 2.
-     * @param {boolean} [options.preserveDrawingBuffer=false] - enables drawing buffer preservation,
+     * @param {boolean} [options.preserve_drawing_buffer=false] - enables drawing buffer preservation,
      *  enable this if you need to call toDataUrl on the webgl context.
-     * @param {boolean} [options.clearBeforeRender=true] - This sets if the renderer will clear the canvas or
+     * @param {boolean} [options.clear_before_render=true] - This sets if the renderer will clear the canvas or
      *      not before the new render pass.
-     * @param {number} [options.backgroundColor=0x000000] - The background color of the rendered area
+     * @param {number} [options.background_color=0x000000] - The background color of the rendered area
      *  (shown if not transparent).
-     * @param {boolean} [options.roundPixels=false] - If true Pixi will Math.floor() x/y values when rendering,
+     * @param {boolean} [options.pixel_snap=false] - If true Pixi will Math.floor() x/y values when rendering,
      *  stopping pixel interpolation.
      */
     constructor(options, arg2, arg3)
@@ -178,7 +178,7 @@ export default class CanvasRenderer extends SystemRenderer
         {
             // update the scene graph
             const cacheParent = displayObject.parent;
-            const tempWt = this._tempNode2DParent.transform.worldTransform;
+            const tempWt = this._tempNode2DParent.transform.world_transform;
 
             if (transform)
             {
@@ -194,12 +194,12 @@ export default class CanvasRenderer extends SystemRenderer
 
             displayObject.parent = this._tempNode2DParent;
 
-            displayObject.updateTransform();
+            displayObject.update_transform();
             displayObject.parent = cacheParent;
             // displayObject.hitArea = //TODO add a temp hit area
         }
 
-        context.setTransform(1, 0, 0, 1, 0, 0);
+        context.set_transform(1, 0, 0, 1, 0, 0);
         context.globalAlpha = 1;
         context.globalCompositeOperation = this.blendModes[BLEND_MODES.NORMAL];
 
@@ -209,7 +209,7 @@ export default class CanvasRenderer extends SystemRenderer
             context.clear();
         }
 
-        if (clear !== undefined ? clear : this.clearBeforeRender)
+        if (clear !== undefined ? clear : this.clear_before_render)
         {
             if (this.renderingToScreen)
             {
@@ -219,7 +219,7 @@ export default class CanvasRenderer extends SystemRenderer
                 }
                 else
                 {
-                    context.fillStyle = this._backgroundColorString;
+                    context.fillStyle = this._background_colorString;
                     context.fillRect(0, 0, this.width, this.height);
                 }
             } // else {
@@ -231,7 +231,7 @@ export default class CanvasRenderer extends SystemRenderer
         const tempContext = this.context;
 
         this.context = context;
-        displayObject.renderCanvas(this);
+        displayObject.render_canvas(this);
         this.context = tempContext;
 
         this.resolution = rootResolution;
@@ -248,7 +248,7 @@ export default class CanvasRenderer extends SystemRenderer
     {
         const context = this.context;
 
-        clearColor = clearColor || this._backgroundColorString;
+        clearColor = clearColor || this._background_colorString;
 
         if (!this.transparent && clearColor)
         {

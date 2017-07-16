@@ -36,21 +36,21 @@ export default class WebGLRenderer extends SystemRenderer
      * @param {number} [options.height=600] - the height of the screen
      * @param {HTMLCanvasElement} [options.view] - the canvas to use as a view, optional
      * @param {boolean} [options.transparent=false] - If the render view is transparent, default false
-     * @param {boolean} [options.autoResize=false] - If the render view is automatically resized, default false
+     * @param {boolean} [options.auto_resize=false] - If the render view is automatically resized, default false
      * @param {boolean} [options.antialias=false] - sets antialias. If not available natively then FXAA
      *  antialiasing is used
-     * @param {boolean} [options.forceFXAA=false] - forces FXAA antialiasing to be used over native.
+     * @param {boolean} [options.force_fxaa=false] - forces FXAA antialiasing to be used over native.
      *  FXAA is faster, but may not always look as great
      * @param {number} [options.resolution=1] - The resolution / device pixel ratio of the renderer.
      *  The resolution of the renderer retina would be 2.
-     * @param {boolean} [options.clearBeforeRender=true] - This sets if the renderer will clear
+     * @param {boolean} [options.clear_before_render=true] - This sets if the renderer will clear
      *  the canvas or not before the new render pass. If you wish to set this to false, you *must* set
-     *  preserveDrawingBuffer to `true`.
-     * @param {boolean} [options.preserveDrawingBuffer=false] - enables drawing buffer preservation,
+     *  preserve_drawing_buffer to `true`.
+     * @param {boolean} [options.preserve_drawing_buffer=false] - enables drawing buffer preservation,
      *  enable this if you need to call toDataUrl on the webgl context.
-     * @param {boolean} [options.roundPixels=false] - If true Pixi will Math.floor() x/y values when
+     * @param {boolean} [options.pixel_snap=false] - If true Pixi will Math.floor() x/y values when
      *  rendering, stopping pixel interpolation.
-     * @param {number} [options.backgroundColor=0x000000] - The background color of the rendered area
+     * @param {number} [options.background_color=0x000000] - The background color of the rendered area
      *  (shown if not transparent).
      * @param {boolean} [options.legacy=false] - If true Pixi will aim to ensure compatibility
      * with older / less advanced devices. If you experiance unexplained flickering try setting this to true.
@@ -91,10 +91,10 @@ export default class WebGLRenderer extends SystemRenderer
             antialias: this.options.antialias,
             premultipliedAlpha: this.transparent && this.transparent !== 'notMultiplied',
             stencil: true,
-            preserveDrawingBuffer: this.options.preserveDrawingBuffer,
+            preserve_drawing_buffer: this.options.preserve_drawing_buffer,
         };
 
-        this._backgroundColorRgba[3] = this.transparent ? 0 : 1;
+        this._background_colorRgba[3] = this.transparent ? 0 : 1;
 
         /**
          * Manages the masks using the stencil buffer.
@@ -238,7 +238,7 @@ export default class WebGLRenderer extends SystemRenderer
         this.state.resetToDefault();
 
         this.rootRenderTarget = new RenderTarget(gl, this.width, this.height, null, this.resolution, true);
-        this.rootRenderTarget.clearColor = this._backgroundColorRgba;
+        this.rootRenderTarget.clearColor = this._background_colorRgba;
 
         this.bindRenderTarget(this.rootRenderTarget);
 
@@ -301,7 +301,7 @@ export default class WebGLRenderer extends SystemRenderer
             const cacheParent = displayObject.parent;
 
             displayObject.parent = this._tempNode2DParent;
-            displayObject.updateTransform();
+            displayObject.update_transform();
             displayObject.parent = cacheParent;
            // displayObject.hitArea = //TODO add a temp hit area
         }
@@ -310,12 +310,12 @@ export default class WebGLRenderer extends SystemRenderer
 
         this.currentRenderer.start();
 
-        if (clear !== undefined ? clear : this.clearBeforeRender)
+        if (clear !== undefined ? clear : this.clear_before_render)
         {
             this._activeRenderTarget.clear();
         }
 
-        displayObject.renderWebGL(this);
+        displayObject.render_webGL(this);
 
         // apply transform..
         this.currentRenderer.flush();
@@ -404,7 +404,7 @@ export default class WebGLRenderer extends SystemRenderer
      *
      * @param {V.Matrix} matrix - The transformation matrix
      */
-    setTransform(matrix)
+    set_transform(matrix)
     {
         this._activeRenderTarget.transform = matrix;
     }

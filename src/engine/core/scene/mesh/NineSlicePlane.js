@@ -138,18 +138,18 @@ export default class NineSlicePlane extends Plane
      * @private
      * @param {V.CanvasRenderer} renderer - The canvas renderer to render with.
      */
-    _renderCanvas(renderer)
+    _render_canvas(renderer)
     {
         const context = renderer.context;
 
-        context.globalAlpha = this.worldAlpha;
+        context.globalAlpha = this.world_alpha;
 
-        const transform = this.worldTransform;
+        const transform = this.world_transform;
         const res = renderer.resolution;
 
-        if (renderer.roundPixels)
+        if (renderer.pixel_snap)
         {
-            context.setTransform(
+            context.set_transform(
                 transform.a * res,
                 transform.b * res,
                 transform.c * res,
@@ -160,7 +160,7 @@ export default class NineSlicePlane extends Plane
         }
         else
         {
-            context.setTransform(
+            context.set_transform(
                 transform.a * res,
                 transform.b * res,
                 transform.c * res,

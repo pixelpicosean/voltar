@@ -20,12 +20,12 @@ const DefaultSettings = {
         resolution: 1,
 
         antialias: false,
-        forceFXAA: false,
-        autoResize: false,
+        force_fxaa: false,
+        auto_resize: false,
         transparent: false,
-        backgroundColor: 0x000000,
-        clearBeforeRender: true,
-        preserveDrawingBuffer: false,
+        background_color: 0x000000,
+        clear_before_render: true,
+        preserve_drawing_buffer: false,
 
         pixel_snap: true,
 
@@ -179,7 +179,7 @@ export default class SceneTree {
                 _process_tmp.delta_time -= _process_tmp.step;
 
                 // Fixed update
-                this.current_scene._process(_process_tmp.slow_step_sec);
+                this.current_scene._propagate_process(_process_tmp.slow_step_sec);
 
                 _process_tmp.count += 1;
               }

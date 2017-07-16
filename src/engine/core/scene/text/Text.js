@@ -357,7 +357,7 @@ export default class Text extends Sprite
      *
      * @param {V.WebGLRenderer} renderer - The renderer
      */
-    renderWebGL(renderer)
+    render_webGL(renderer)
     {
         if (this.resolution !== renderer.resolution)
         {
@@ -367,7 +367,7 @@ export default class Text extends Sprite
 
         this.updateText(true);
 
-        super.renderWebGL(renderer);
+        super.render_webGL(renderer);
     }
 
     /**
@@ -376,7 +376,7 @@ export default class Text extends Sprite
      * @private
      * @param {V.CanvasRenderer} renderer - The renderer
      */
-    _renderCanvas(renderer)
+    _render_canvas(renderer)
     {
         if (this.resolution !== renderer.resolution)
         {
@@ -386,7 +386,7 @@ export default class Text extends Sprite
 
         this.updateText(true);
 
-        super._renderCanvas(renderer);
+        super._render_canvas(renderer);
     }
 
     /**
@@ -395,17 +395,17 @@ export default class Text extends Sprite
      * @param {Rectangle} rect - The output rectangle.
      * @return {Rectangle} The bounds.
      */
-    getLocalBounds(rect)
+    get_local_Bounds(rect)
     {
         this.updateText(true);
 
-        return super.getLocalBounds.call(this, rect);
+        return super.get_local_Bounds.call(this, rect);
     }
 
     /**
-     * calculates the bounds of the Text as a rectangle. The bounds calculation takes the worldTransform into account.
+     * calculates the bounds of the Text as a rectangle. The bounds calculation takes the world_transform into account.
      */
-    _calculateBounds()
+    _calculate_bounds()
     {
         this.updateText(true);
         this.calculateVertices();

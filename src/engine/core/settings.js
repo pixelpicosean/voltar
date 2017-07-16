@@ -103,13 +103,13 @@ export default {
      * @property {HTMLCanvasElement} view=null
      * @property {number} resolution=1
      * @property {boolean} antialias=false
-     * @property {boolean} forceFXAA=false
-     * @property {boolean} autoResize=false
+     * @property {boolean} force_fxaa=false
+     * @property {boolean} auto_resize=false
      * @property {boolean} transparent=false
-     * @property {number} backgroundColor=0x000000
-     * @property {boolean} clearBeforeRender=true
-     * @property {boolean} preserveDrawingBuffer=false
-     * @property {boolean} roundPixels=false
+     * @property {number} background_color=0x000000
+     * @property {boolean} clear_before_render=true
+     * @property {boolean} preserve_drawing_buffer=false
+     * @property {boolean} pixel_snap=false
      * @property {number} width=800
      * @property {number} height=600
      * @property {boolean} legacy=false
@@ -117,13 +117,13 @@ export default {
     RENDER_OPTIONS: {
         view: null,
         antialias: false,
-        forceFXAA: false,
-        autoResize: false,
+        force_fxaa: false,
+        auto_resize: false,
         transparent: false,
-        backgroundColor: 0x000000,
-        clearBeforeRender: true,
-        preserveDrawingBuffer: false,
-        roundPixels: false,
+        background_color: 0x000000,
+        clear_before_render: true,
+        preserve_drawing_buffer: false,
+        pixel_snap: false,
         width: 800,
         height: 600,
         legacy: false,

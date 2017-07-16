@@ -126,7 +126,7 @@ export default class Sprite extends Node2D
 
         /**
          * Plugin that is responsible for rendering this element.
-         * Allows to customize the rendering process without overriding '_renderWebGL' & '_renderCanvas' methods.
+         * Allows to customize the rendering process without overriding '_render_webGL' & '_render_canvas' methods.
          *
          * @member {string}
          * @default 'sprite'
@@ -168,7 +168,7 @@ export default class Sprite extends Node2D
     }
 
     /**
-     * calculates worldTransform * vertices, store it in vertexData
+     * calculates world_transform * vertices, store it in vertexData
      */
     calculateVertices()
     {
@@ -183,7 +183,7 @@ export default class Sprite extends Node2D
         // set the vertex data
 
         const texture = this._texture;
-        const wt = this.transform.worldTransform;
+        const wt = this.transform.world_transform;
         const a = wt.a;
         const b = wt.b;
         const c = wt.c;
@@ -237,7 +237,7 @@ export default class Sprite extends Node2D
     }
 
     /**
-     * calculates worldTransform * vertices for a non texture with a trim. store it in vertexTrimmedData
+     * calculates world_transform * vertices for a non texture with a trim. store it in vertexTrimmedData
      * This is used to ensure that the true width and height of a trimmed texture is respected
      */
     calculateTrimmedVertices()
@@ -261,7 +261,7 @@ export default class Sprite extends Node2D
         const anchor = this._anchor;
 
         // lets calculate the new untrimmed bounds..
-        const wt = this.transform.worldTransform;
+        const wt = this.transform.world_transform;
         const a = wt.a;
         const b = wt.b;
         const c = wt.c;
@@ -299,7 +299,7 @@ export default class Sprite extends Node2D
     * @private
     * @param {V.WebGLRenderer} renderer - The webgl renderer to use.
     */
-    _renderWebGL(renderer)
+    _render_webGL(renderer)
     {
         this.calculateVertices();
 
@@ -313,7 +313,7 @@ export default class Sprite extends Node2D
     * @private
     * @param {V.CanvasRenderer} renderer - The renderer
     */
-    _renderCanvas(renderer)
+    _render_canvas(renderer)
     {
         renderer.plugins[this.pluginName].render(this);
     }
@@ -323,7 +323,7 @@ export default class Sprite extends Node2D
      *
      * @private
      */
-    _calculateBounds()
+    _calculate_bounds()
     {
         const trim = this._texture.trim;
         const orig = this._texture.orig;
@@ -349,7 +349,7 @@ export default class Sprite extends Node2D
      * @param {V.Rectangle} rect - The output rectangle.
      * @return {V.Rectangle} The bounds.
      */
-    getLocalBounds(rect)
+    get_local_Bounds(rect)
     {
         // we can do a fast local bounds if the sprite has no children!
         if (this.children.length === 0)
@@ -372,7 +372,7 @@ export default class Sprite extends Node2D
             return this._bounds.getRectangle(rect);
         }
 
-        return super.getLocalBounds.call(this, rect);
+        return super.get_local_Bounds.call(this, rect);
     }
 
     /**
@@ -383,7 +383,7 @@ export default class Sprite extends Node2D
      */
     containsPoint(point)
     {
-        this.worldTransform.applyInverse(point, tempPoint);
+        this.world_transform.applyInverse(point, tempPoint);
 
         const width = this._texture.orig.width;
         const height = this._texture.orig.height;

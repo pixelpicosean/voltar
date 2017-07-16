@@ -91,7 +91,7 @@ export default class Ellipse
      *
      * @return {V.Rectangle} the framing rectangle
      */
-    getBounds()
+    get_bounds()
     {
         return new Rectangle(this.x - this.width, this.y - this.height, this.width, this.height);
     }

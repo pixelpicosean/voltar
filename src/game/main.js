@@ -27,29 +27,37 @@ class Scene extends V.Node2D {
             spr.anchor.set(0.5, 0.5);
             spr.position.set(128, 128);
             spr.scale.set(4);
-            this.addChild(spr);
+            this.add_child(spr);
 
             const gfx = new V.Graphics();
             gfx.beginFill(0xffffff);
             gfx.drawRect(0, 0, 32, 32);
             gfx.endFill();
-            this.addChild(gfx);
+            this.add_child(gfx);
 
             const txt = new V.Text();
             txt.text = 'Hello';
-            this.addChild(txt);
+            this.add_child(txt);
 
             console.log('load complete')
         });
     }
 
-    free() {}
     queue_free() {}
 
-    _enter_tree() {}
-    _ready() {}
-    _exit_tree() {}
-    _process(delta) {}
+    _enter_tree() {
+        console.log('_enter_tree');
+    }
+    _ready() {
+        console.log('_ready');
+        this.set_process(false);
+    }
+    _exit_tree() {
+        console.log('_exit_tree');
+    }
+    _process(delta) {
+        console.log('_process');
+    }
 }
 
 settings.application.main_scene = Scene;

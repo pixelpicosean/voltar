@@ -84,7 +84,7 @@ export default class Circle
     *
     * @return {V.Rectangle} the framing rectangle
     */
-    getBounds()
+    get_bounds()
     {
         return new Rectangle(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
     }

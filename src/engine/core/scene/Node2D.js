@@ -10,7 +10,7 @@ import { removeItems } from '../utils';
  *
  *```js
  * let container = new V.Node2D();
- * container.addChild(sprite);
+ * container.add_child(sprite);
  * ```
  *
  * @class
@@ -30,6 +30,12 @@ export default class Node2D extends EventEmitter
 
         this.tempNode2DParent = null;
 
+        this.name = '';
+
+        this.is_inside_tree = false;
+
+        this.idle_process = false;
+
         // TODO: need to create Transform from factory
         /**
          * World transform and local transform of this object.
@@ -48,16 +54,16 @@ export default class Node2D extends EventEmitter
 
         /**
          * The visibility of the object. If false the object will not be drawn, and
-         * the updateTransform function will not be called.
+         * the update_transform function will not be called.
          *
-         * Only affects recursive calls from parent. You can ask for bounds or call updateTransform manually
+         * Only affects recursive calls from parent. You can ask for bounds or call update_transform manually
          *
          * @member {boolean}
          */
         this.visible = true;
 
         /**
-         * Can this object be rendered, if false the object will not be drawn but the updateTransform
+         * Can this object be rendered, if false the object will not be drawn but the update_transform
          * methods will still be called.
          *
          * Only affects recursive calls from parent. You can ask for bounds manually
@@ -80,7 +86,7 @@ export default class Node2D extends EventEmitter
          * @member {number}
          * @readonly
          */
-        this.worldAlpha = 1;
+        this.world_alpha = 1;
 
         /**
          * The area the filter is applied to. This is used as more of an optimisation
@@ -90,7 +96,7 @@ export default class Node2D extends EventEmitter
          *
          * @member {V.Rectangle}
          */
-        this.filterArea = null;
+        this.filter_area = null;
 
         this._filters = null;
         this._enabledFilters = null;
@@ -132,6 +138,8 @@ export default class Node2D extends EventEmitter
          */
         this.children = [];
 
+        this.named_children = {};
+
         /**
          * Fired when this Node2D is added to a Node2D.
          *
@@ -161,34 +169,46 @@ export default class Node2D extends EventEmitter
         return this.tempNode2DParent;
     }
 
+    set_name(name) {
+        this.name = name;
+
+        if (this.parent) {
+            this._validate_name();
+        }
+    }
+
+    set_process(p) {
+        this.idle_process = !!p;
+    }
+
     /**
      * Updates the object transform for rendering
      *
      * TODO - Optimization pass!
      */
-    _updateTransform()
+    _update_transform()
     {
-        this.transform.updateTransform(this.parent.transform);
+        this.transform.update_transform(this.parent.transform);
         // multiply the alphas..
-        this.worldAlpha = this.alpha * this.parent.worldAlpha;
+        this.world_alpha = this.alpha * this.parent.world_alpha;
 
         this._bounds.updateID++;
     }
 
     /**
      * recursively updates transform of all objects from the root to this one
-     * internal function for toLocal()
+     * internal function for to_local()
      */
-    _recursivePostUpdateTransform()
+    _recursive_post_update_transform()
     {
         if (this.parent)
         {
-            this.parent._recursivePostUpdateTransform();
-            this.transform.updateTransform(this.parent.transform);
+            this.parent._recursive_post_update_transform();
+            this.transform.update_transform(this.parent.transform);
         }
         else
         {
-            this.transform.updateTransform(this._tempNode2DParent.transform);
+            this.transform.update_transform(this._tempNode2DParent.transform);
         }
     }
 
@@ -201,26 +221,26 @@ export default class Node2D extends EventEmitter
      * @param {V.Rectangle} rect - Optional rectangle to store the result of the bounds calculation
      * @return {V.Rectangle} the rectangular bounding area
      */
-    getBounds(skipUpdate, rect)
+    get_bounds(skipUpdate, rect)
     {
         if (!skipUpdate)
         {
             if (!this.parent)
             {
                 this.parent = this._tempNode2DParent;
-                this.updateTransform();
+                this.update_transform();
                 this.parent = null;
             }
             else
             {
-                this._recursivePostUpdateTransform();
-                this.updateTransform();
+                this._recursive_post_update_transform();
+                this.update_transform();
             }
         }
 
         if (this._boundsID !== this._lastBoundsID)
         {
-            this.calculateBounds();
+            this.calculate_bounds();
         }
 
         if (!rect)
@@ -242,7 +262,7 @@ export default class Node2D extends EventEmitter
      * @param {V.Rectangle} [rect] - Optional rectangle to store the result of the bounds calculation
      * @return {V.Rectangle} the rectangular bounding area
      */
-    getLocalBounds(rect)
+    get_local_Bounds(rect)
     {
         const transformRef = this.transform;
         const parentRef = this.parent;
@@ -260,7 +280,7 @@ export default class Node2D extends EventEmitter
             rect = this._localBoundsRect;
         }
 
-        const bounds = this.getBounds(false, rect);
+        const bounds = this.get_bounds(false, rect);
 
         this.parent = parentRef;
         this.transform = transformRef;
@@ -277,11 +297,11 @@ export default class Node2D extends EventEmitter
      * @param {boolean} [skipUpdate=false] - Should we skip the update transform.
      * @return {V.Point} A point object representing the position of this object
      */
-    toGlobal(position, point, skipUpdate = false)
+    to_global(position, point, skipUpdate = false)
     {
         if (!skipUpdate)
         {
-            this._recursivePostUpdateTransform();
+            this._recursive_post_update_transform();
 
             // this parent check is for just in case the item is a root object.
             // If it is we need to give it a temporary parent so that displayObjectUpdateTransform works correctly
@@ -299,7 +319,7 @@ export default class Node2D extends EventEmitter
         }
 
         // don't need to update the lot
-        return this.worldTransform.apply(position, point);
+        return this.world_transform.apply(position, point);
     }
 
     /**
@@ -312,16 +332,16 @@ export default class Node2D extends EventEmitter
      * @param {boolean} [skipUpdate=false] - Should we skip the update transform
      * @return {V.Point} A point object representing the position of this object
      */
-    toLocal(position, from, point, skipUpdate)
+    to_local(position, from, point, skipUpdate)
     {
         if (from)
         {
-            position = from.toGlobal(position, point, skipUpdate);
+            position = from.to_global(position, point, skipUpdate);
         }
 
         if (!skipUpdate)
         {
-            this._recursivePostUpdateTransform();
+            this._recursive_post_update_transform();
 
             // this parent check is for just in case the item is a root object.
             // If it is we need to give it a temporary parent so that displayObjectUpdateTransform works correctly
@@ -339,7 +359,7 @@ export default class Node2D extends EventEmitter
         }
 
         // simply apply the matrix..
-        return this.worldTransform.applyInverse(position, point);
+        return this.world_transform.applyInverse(position, point);
     }
 
     /**
@@ -347,7 +367,7 @@ export default class Node2D extends EventEmitter
      *
      * @param {V.WebGLRenderer} renderer - The renderer
      */
-    renderWebGL(renderer) // eslint-disable-line no-unused-vars
+    render_webGL(renderer) // eslint-disable-line no-unused-vars
     {
         // OVERWRITE;
     }
@@ -357,27 +377,9 @@ export default class Node2D extends EventEmitter
      *
      * @param {V.CanvasRenderer} renderer - The renderer
      */
-    renderCanvas(renderer) // eslint-disable-line no-unused-vars
+    render_canvas(renderer) // eslint-disable-line no-unused-vars
     {
         // OVERWRITE;
-    }
-
-    /**
-     * Set the parent Node2D of this Node2D
-     *
-     * @param {V.Node2D} container - The Node2D to add this Node2D to
-     * @return {V.Node2D} The Node2D that this Node2D was added to
-     */
-    setParent(container)
-    {
-        if (!container || !container.addChild)
-        {
-            throw new Error('setParent: Argument must be a Node2D');
-        }
-
-        container.addChild(this);
-
-        return container;
     }
 
     /**
@@ -394,7 +396,7 @@ export default class Node2D extends EventEmitter
      * @param {number} [pivotY=0] - The Y pivot value
      * @return {V.Node2D} The Node2D instance
      */
-    setTransform(x = 0, y = 0, scaleX = 1, scaleY = 1, rotation = 0, skewX = 0, skewY = 0, pivotX = 0, pivotY = 0)
+    set_transform(x = 0, y = 0, scaleX = 1, scaleY = 1, rotation = 0, skewX = 0, skewY = 0, pivotX = 0, pivotY = 0)
     {
         this.position.x = x;
         this.position.y = y;
@@ -421,7 +423,7 @@ export default class Node2D extends EventEmitter
         this.removeAllListeners();
         if (this.parent)
         {
-            this.parent.removeChild(this);
+            this.parent.remove_child(this);
         }
         this.transform = null;
 
@@ -431,7 +433,7 @@ export default class Node2D extends EventEmitter
         this._currentBounds = null;
         this._mask = null;
 
-        this.filterArea = null;
+        this.filter_area = null;
 
         this.interactive = false;
         this.interactiveChildren = false;
@@ -477,9 +479,9 @@ export default class Node2D extends EventEmitter
      * @member {V.Matrix}
      * @readonly
      */
-    get worldTransform()
+    get world_transform()
     {
-        return this.transform.worldTransform;
+        return this.transform.world_transform;
     }
 
     /**
@@ -488,9 +490,9 @@ export default class Node2D extends EventEmitter
      * @member {V.Matrix}
      * @readonly
      */
-    get localTransform()
+    get local_transform()
     {
-        return this.transform.localTransform;
+        return this.transform.local_transform;
     }
 
     /**
@@ -578,7 +580,7 @@ export default class Node2D extends EventEmitter
      * @member {boolean}
      * @readonly
      */
-    get worldVisible()
+    get world_visible()
     {
         let item = this;
 
@@ -642,12 +644,58 @@ export default class Node2D extends EventEmitter
         this._filters = value && value.slice();
     }
 
+    _enter_tree() {}
+    _ready() {}
+    _process(delta) {}
+    _exit_tree() {}
+
+    queue_free() {}
+
+    _propagate_enter_tree() {
+        if (this.is_inside_tree) {
+            return;
+        }
+
+        this.is_inside_tree = true;
+
+        this._enter_tree();
+
+        for (let i = 0, l = this.children.length; i < l; i++) {
+            this.children[i]._propagate_enter_tree();
+        }
+    }
+
+    _propagate_ready() {
+        for (let i = 0, l = this.children.length; i < l; i++) {
+            this.children[i]._propagate_ready();
+        }
+
+        this._ready();
+    }
+
+    _propagate_process(delta) {
+        if (this.idle_process) this._process(delta);
+
+        for (let i = 0, l = this.children.length; i < l; i++) {
+            this.children[i]._propagate_process();
+        }
+    }
+
+    _propagate_exit_tree() {
+        this.is_inside_tree = false;
+        for (let i = 0, l = this.children.length; i < l; i++) {
+            this.children[i]._propagate_exit_tree();
+        }
+
+        this._exit_tree();
+    }
+
     /**
      * Overridable method that can be used by Node2D subclasses whenever the children array is modified
      *
      * @private
      */
-    onChildrenChange()
+    on_children_change()
     {
         /* empty */
     }
@@ -655,46 +703,37 @@ export default class Node2D extends EventEmitter
     /**
      * Adds one or more children to the container.
      *
-     * Multiple items can be added like so: `myNode2D.addChild(thingOne, thingTwo, thingThree)`
+     * Multiple items can be added like so: `myNode2D.add_child(thingOne, thingTwo, thingThree)`
      *
      * @param {...V.Node2D} child - The Node2D(s) to add to the container
      * @return {V.Node2D} The first child that was added.
      */
-    addChild(child)
+    add_child(child)
     {
-        const argumentsLength = arguments.length;
-
-        // if there is only one argument we can bypass looping through the them
-        if (argumentsLength > 1)
+        // if the child has a parent then lets remove it as Pixi objects can only exist in one place
+        if (child.parent)
         {
-            // loop through the arguments property and add all children
-            // use it the right way (.length and [i]) so that this function can still be optimised by JS runtimes
-            for (let i = 0; i < argumentsLength; i++)
-            {
-                this.addChild(arguments[i]);
-            }
+            child.parent.remove_child(child);
         }
-        else
-        {
-            // if the child has a parent then lets remove it as Pixi objects can only exist in one place
-            if (child.parent)
-            {
-                child.parent.removeChild(child);
-            }
 
-            child.parent = this;
-            // ensure child transform will be recalculated
-            child.transform._parentID = -1;
+        child.parent = this;
+        // ensure child transform will be recalculated
+        child.transform._parentID = -1;
 
-            this.children.push(child);
+        this.children.push(child);
 
-            // ensure bounds will be recalculated
-            this._boundsID++;
-
-            // TODO - lets either do all callbacks or all events.. not both!
-            this.onChildrenChange(this.children.length - 1);
-            child.emit('added', this);
+        // add to name hash
+        if (this.name.length > 0) {
+            this._validate_name();
         }
+
+        // ensure bounds will be recalculated
+        this._boundsID++;
+
+        child._propagate_enter_tree();
+
+        // TODO - lets either do all callbacks or all events.. not both!
+        this.on_children_change(this.children.length - 1);
 
         return child;
     }
@@ -706,16 +745,16 @@ export default class Node2D extends EventEmitter
      * @param {number} index - The index to place the child in
      * @return {V.Node2D} The child that was added.
      */
-    addChildAt(child, index)
+    add_child_at(child, index)
     {
         if (index < 0 || index > this.children.length)
         {
-            throw new Error(`${child}addChildAt: The index ${index} supplied is out of bounds ${this.children.length}`);
+            throw new Error(`${child}add_child_at: The index ${index} supplied is out of bounds ${this.children.length}`);
         }
 
         if (child.parent)
         {
-            child.parent.removeChild(child);
+            child.parent.remove_child(child);
         }
 
         child.parent = this;
@@ -724,12 +763,18 @@ export default class Node2D extends EventEmitter
 
         this.children.splice(index, 0, child);
 
+        // add to name hash
+        if (this.name.length > 0) {
+            this._validate_name();
+        }
+
         // ensure bounds will be recalculated
         this._boundsID++;
 
+        child._propagate_enter_tree();
+
         // TODO - lets either do all callbacks or all events.. not both!
-        this.onChildrenChange(index);
-        child.emit('added', this);
+        this.on_children_change(index);
 
         return child;
     }
@@ -740,19 +785,19 @@ export default class Node2D extends EventEmitter
      * @param {V.Node2D} child - First display object to swap
      * @param {V.Node2D} child2 - Second display object to swap
      */
-    swapChildren(child, child2)
+    swap_children(child, child2)
     {
         if (child === child2)
         {
             return;
         }
 
-        const index1 = this.getChildIndex(child);
-        const index2 = this.getChildIndex(child2);
+        const index1 = this.get_child_index(child);
+        const index2 = this.get_child_index(child2);
 
         this.children[index1] = child2;
         this.children[index2] = child;
-        this.onChildrenChange(index1 < index2 ? index1 : index2);
+        this.on_children_change(index1 < index2 ? index1 : index2);
     }
 
     /**
@@ -761,7 +806,7 @@ export default class Node2D extends EventEmitter
      * @param {V.Node2D} child - The Node2D instance to identify
      * @return {number} The index position of the child display object to identify
      */
-    getChildIndex(child)
+    get_child_index(child)
     {
         const index = this.children.indexOf(child);
 
@@ -779,19 +824,19 @@ export default class Node2D extends EventEmitter
      * @param {V.Node2D} child - The child Node2D instance for which you want to change the index number
      * @param {number} index - The resulting index number for the child display object
      */
-    setChildIndex(child, index)
+    set_child_index(child, index)
     {
         if (index < 0 || index >= this.children.length)
         {
             throw new Error('The supplied index is out of bounds');
         }
 
-        const currentIndex = this.getChildIndex(child);
+        const currentIndex = this.get_child_index(child);
 
         removeItems(this.children, currentIndex, 1); // remove from old position
         this.children.splice(index, 0, child); // add at new position
 
-        this.onChildrenChange(index);
+        this.on_children_change(index);
     }
 
     /**
@@ -800,11 +845,11 @@ export default class Node2D extends EventEmitter
      * @param {number} index - The index to get the child at
      * @return {V.Node2D} The child at the given index, if any.
      */
-    getChildAt(index)
+    get_child(index)
     {
         if (index < 0 || index >= this.children.length)
         {
-            throw new Error(`getChildAt: Index (${index}) does not exist.`);
+            throw new Error(`get_child: Index (${index}) does not exist.`);
         }
 
         return this.children[index];
@@ -816,38 +861,29 @@ export default class Node2D extends EventEmitter
      * @param {...V.Node2D} child - The Node2D(s) to remove
      * @return {V.Node2D} The first child that was removed.
      */
-    removeChild(child)
+    remove_child(child)
     {
-        const argumentsLength = arguments.length;
+        const index = this.children.indexOf(child);
 
-        // if there is only one argument we can bypass looping through the them
-        if (argumentsLength > 1)
-        {
-            // loop through the arguments property and add all children
-            // use it the right way (.length and [i]) so that this function can still be optimised by JS runtimes
-            for (let i = 0; i < argumentsLength; i++)
-            {
-                this.removeChild(arguments[i]);
-            }
+        if (index === -1) return null;
+
+        child.parent = null;
+        // ensure child transform will be recalculated
+        child.transform._parentID = -1;
+        removeItems(this.children, index, 1);
+
+        // remove from name hash
+        if (child.name.length > 0) {
+            this.named_children[child.name] = undefined;
         }
-        else
-        {
-            const index = this.children.indexOf(child);
 
-            if (index === -1) return null;
+        // ensure bounds will be recalculated
+        this._boundsID++;
 
-            child.parent = null;
-            // ensure child transform will be recalculated
-            child.transform._parentID = -1;
-            removeItems(this.children, index, 1);
+        child._propagate_exit_tree();
 
-            // ensure bounds will be recalculated
-            this._boundsID++;
-
-            // TODO - lets either do all callbacks or all events.. not both!
-            this.onChildrenChange(index);
-            child.emit('removed', this);
-        }
+        // TODO - lets either do all callbacks or all events.. not both!
+        this.on_children_change(index);
 
         return child;
     }
@@ -858,21 +894,27 @@ export default class Node2D extends EventEmitter
      * @param {number} index - The index to get the child from
      * @return {V.Node2D} The child that was removed.
      */
-    removeChildAt(index)
+    remove_child_at(index)
     {
-        const child = this.getChildAt(index);
+        const child = this.get_child(index);
 
         // ensure child transform will be recalculated..
         child.parent = null;
         child.transform._parentID = -1;
         removeItems(this.children, index, 1);
 
+        // remove from name hash
+        if (child.name.length > 0) {
+            this.named_children[child.name] = undefined;
+        }
+
         // ensure bounds will be recalculated
         this._boundsID++;
 
+        child._propagate_exit_tree();
+
         // TODO - lets either do all callbacks or all events.. not both!
-        this.onChildrenChange(index);
-        child.emit('removed', this);
+        this.on_children_change(index);
 
         return child;
     }
@@ -884,7 +926,7 @@ export default class Node2D extends EventEmitter
      * @param {number} [endIndex=this.children.length] - The ending position. Default value is size of the container.
      * @returns {Node2D[]} List of removed children
      */
-    removeChildren(beginIndex = 0, endIndex)
+    remove_children(beginIndex = 0, endIndex)
     {
         const begin = beginIndex;
         const end = typeof endIndex === 'number' ? endIndex : this.children.length;
@@ -902,16 +944,18 @@ export default class Node2D extends EventEmitter
                 {
                     removed[i].transform._parentID = -1;
                 }
+
+                // remove from name hash
+                if (removed[i].name.length > 0) {
+                    this.named_children[removed[i].name] = undefined;
+                }
+
+                removed[i]._propagate_exit_tree();
             }
 
             this._boundsID++;
 
-            this.onChildrenChange(beginIndex);
-
-            for (let i = 0; i < removed.length; ++i)
-            {
-                removed[i].emit('removed', this);
-            }
+            this.on_children_change(beginIndex);
 
             return removed;
         }
@@ -920,20 +964,20 @@ export default class Node2D extends EventEmitter
             return [];
         }
 
-        throw new RangeError('removeChildren: numeric values are outside the acceptable range.');
+        throw new RangeError('remove_children: numeric values are outside the acceptable range.');
     }
 
     /**
      * Updates the transform on all children of this container for rendering
      */
-    updateTransform()
+    update_transform()
     {
         this._boundsID++;
 
-        this.transform.updateTransform(this.parent.transform);
+        this.transform.update_transform(this.parent.transform);
 
         // TODO: check render flags, how to process stuff here
-        this.worldAlpha = this.alpha * this.parent.worldAlpha;
+        this.world_alpha = this.alpha * this.parent.world_alpha;
 
         for (let i = 0, j = this.children.length; i < j; ++i)
         {
@@ -941,7 +985,7 @@ export default class Node2D extends EventEmitter
 
             if (child.visible)
             {
-                child.updateTransform();
+                child.update_transform();
             }
         }
     }
@@ -950,11 +994,11 @@ export default class Node2D extends EventEmitter
      * Recalculates the bounds of the container.
      *
      */
-    calculateBounds()
+    calculate_bounds()
     {
         this._bounds.clear();
 
-        this._calculateBounds();
+        this._calculate_bounds();
 
         for (let i = 0; i < this.children.length; i++)
         {
@@ -965,17 +1009,17 @@ export default class Node2D extends EventEmitter
                 continue;
             }
 
-            child.calculateBounds();
+            child.calculate_bounds();
 
             // TODO: filter+mask, need to mask both somehow
             if (child._mask)
             {
-                child._mask.calculateBounds();
+                child._mask.calculate_bounds();
                 this._bounds.addBoundsMask(child._bounds, child._mask._bounds);
             }
-            else if (child.filterArea)
+            else if (child.filter_area)
             {
-                this._bounds.addBoundsArea(child._bounds, child.filterArea);
+                this._bounds.addBoundsArea(child._bounds, child.filter_area);
             }
             else
             {
@@ -991,9 +1035,19 @@ export default class Node2D extends EventEmitter
      * calculate the bounds of the specific object (not including children).
      *
      */
-    _calculateBounds()
+    _calculate_bounds()
     {
         // FILL IN//
+    }
+
+    _validate_name() {
+        let n = this.name;
+        let i = 2;
+        while (this.parent.named_children[n]) {
+            n = `${name}_${i}`;
+        }
+        this.name = n;
+        this.parent.named_children[n] = this;
     }
 
     /**
@@ -1001,10 +1055,10 @@ export default class Node2D extends EventEmitter
      *
      * @param {V.WebGLRenderer} renderer - The renderer
      */
-    renderWebGL(renderer)
+    render_webGL(renderer)
     {
         // if the object is not visible or the alpha is 0 then no need to render this element
-        if (!this.visible || this.worldAlpha <= 0 || !this.renderable)
+        if (!this.visible || this.world_alpha <= 0 || !this.renderable)
         {
             return;
         }
@@ -1012,16 +1066,16 @@ export default class Node2D extends EventEmitter
         // do a quick check to see if this element has a mask or a filter.
         if (this._mask || this._filters)
         {
-            this.renderAdvancedWebGL(renderer);
+            this.render_advanced_webGL(renderer);
         }
         else
         {
-            this._renderWebGL(renderer);
+            this._render_webGL(renderer);
 
             // simple render children!
             for (let i = 0, j = this.children.length; i < j; ++i)
             {
-                this.children[i].renderWebGL(renderer);
+                this.children[i].render_webGL(renderer);
             }
         }
     }
@@ -1032,7 +1086,7 @@ export default class Node2D extends EventEmitter
      * @private
      * @param {V.WebGLRenderer} renderer - The renderer
      */
-    renderAdvancedWebGL(renderer)
+    render_advanced_webGL(renderer)
     {
         renderer.flush();
 
@@ -1069,12 +1123,12 @@ export default class Node2D extends EventEmitter
         }
 
         // add this object to the batch, only rendered if it has a texture.
-        this._renderWebGL(renderer);
+        this._render_webGL(renderer);
 
         // now loop through the children and make sure they get rendered
         for (let i = 0, j = this.children.length; i < j; i++)
         {
-            this.children[i].renderWebGL(renderer);
+            this.children[i].render_webGL(renderer);
         }
 
         renderer.flush();
@@ -1096,7 +1150,7 @@ export default class Node2D extends EventEmitter
      * @private
      * @param {V.WebGLRenderer} renderer - The renderer
      */
-    _renderWebGL(renderer) // eslint-disable-line no-unused-vars
+    _render_webGL(renderer) // eslint-disable-line no-unused-vars
     {
         // this is where content itself gets rendered...
     }
@@ -1107,7 +1161,7 @@ export default class Node2D extends EventEmitter
      * @private
      * @param {V.CanvasRenderer} renderer - The renderer
      */
-    _renderCanvas(renderer) // eslint-disable-line no-unused-vars
+    _render_canvas(renderer) // eslint-disable-line no-unused-vars
     {
         // this is where content itself gets rendered...
     }
@@ -1117,10 +1171,10 @@ export default class Node2D extends EventEmitter
      *
      * @param {V.CanvasRenderer} renderer - The renderer
      */
-    renderCanvas(renderer)
+    render_canvas(renderer)
     {
         // if not visible or the alpha is 0 then no need to render this
-        if (!this.visible || this.worldAlpha <= 0 || !this.renderable)
+        if (!this.visible || this.world_alpha <= 0 || !this.renderable)
         {
             return;
         }
@@ -1130,10 +1184,10 @@ export default class Node2D extends EventEmitter
             renderer.maskManager.pushMask(this._mask);
         }
 
-        this._renderCanvas(renderer);
+        this._render_canvas(renderer);
         for (let i = 0, j = this.children.length; i < j; ++i)
         {
-            this.children[i].renderCanvas(renderer);
+            this.children[i].render_canvas(renderer);
         }
 
         if (this._mask)
@@ -1161,7 +1215,7 @@ export default class Node2D extends EventEmitter
 
         const destroyChildren = typeof options === 'boolean' ? options : options && options.children;
 
-        const oldChildren = this.removeChildren(0, this.children.length);
+        const oldChildren = this.remove_children(0, this.children.length);
 
         if (destroyChildren)
         {
@@ -1179,12 +1233,12 @@ export default class Node2D extends EventEmitter
      */
     get width()
     {
-        return this.scale.x * this.getLocalBounds().width;
+        return this.scale.x * this.get_local_Bounds().width;
     }
 
     set width(value) // eslint-disable-line require-jsdoc
     {
-        const width = this.getLocalBounds().width;
+        const width = this.get_local_Bounds().width;
 
         if (width !== 0)
         {
@@ -1205,12 +1259,12 @@ export default class Node2D extends EventEmitter
      */
     get height()
     {
-        return this.scale.y * this.getLocalBounds().height;
+        return this.scale.y * this.get_local_Bounds().height;
     }
 
     set height(value) // eslint-disable-line require-jsdoc
     {
-        const height = this.getLocalBounds().height;
+        const height = this.get_local_Bounds().height;
 
         if (height !== 0)
         {
@@ -1226,4 +1280,4 @@ export default class Node2D extends EventEmitter
 }
 
 // performance increase to avoid using call.. (10x faster)
-Node2D.prototype.containerUpdateTransform = Node2D.prototype._updateTransform;
+Node2D.prototype.node2d_update_transform = Node2D.prototype._update_transform;

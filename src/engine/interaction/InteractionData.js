@@ -157,7 +157,7 @@ export default class InteractionData
      */
     getLocalPosition(displayObject, point, globalPos)
     {
-        return displayObject.worldTransform.applyInverse(globalPos || this.global, point);
+        return displayObject.world_transform.applyInverse(globalPos || this.global, point);
     }
 
     /**

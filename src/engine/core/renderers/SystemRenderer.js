@@ -27,17 +27,17 @@ export default class SystemRenderer extends EventEmitter
      * @param {number} [options.height=600] - the height of the screen
      * @param {HTMLCanvasElement} [options.view] - the canvas to use as a view, optional
      * @param {boolean} [options.transparent=false] - If the render view is transparent, default false
-     * @param {boolean} [options.autoResize=false] - If the render view is automatically resized, default false
+     * @param {boolean} [options.auto_resize=false] - If the render view is automatically resized, default false
      * @param {boolean} [options.antialias=false] - sets antialias (only applicable in chrome at the moment)
      * @param {number} [options.resolution=1] - The resolution / device pixel ratio of the renderer. The
      *  resolution of the renderer retina would be 2.
-     * @param {boolean} [options.preserveDrawingBuffer=false] - enables drawing buffer preservation,
+     * @param {boolean} [options.preserve_drawing_buffer=false] - enables drawing buffer preservation,
      *  enable this if you need to call toDataUrl on the webgl context.
-     * @param {boolean} [options.clearBeforeRender=true] - This sets if the renderer will clear the canvas or
+     * @param {boolean} [options.clear_before_render=true] - This sets if the renderer will clear the canvas or
      *      not before the new render pass.
-     * @param {number} [options.backgroundColor=0x000000] - The background color of the rendered area
+     * @param {number} [options.background_color=0x000000] - The background color of the rendered area
      *  (shown if not transparent).
-     * @param {boolean} [options.roundPixels=false] - If true Pixi will Math.floor() x/y values when rendering,
+     * @param {boolean} [options.pixel_snap=false] - If true Pixi will Math.floor() x/y values when rendering,
      *  stopping pixel interpolation.
      */
     constructor(system, options, arg2, arg3)
@@ -78,7 +78,7 @@ export default class SystemRenderer extends EventEmitter
         /**
          * Measurements of the screen. (0, 0, screenWidth, screenHeight)
          *
-         * Its safe to use as filterArea or hitArea for whole stage
+         * Its safe to use as filter_area or hitArea for whole stage
          *
          * @member {V.Rectangle}
          */
@@ -111,7 +111,7 @@ export default class SystemRenderer extends EventEmitter
          *
          * @member {boolean}
          */
-        this.autoResize = options.autoResize || false;
+        this.auto_resize = options.auto_resize || false;
 
         /**
          * Tracks the blend modes useful for this renderer.
@@ -121,12 +121,12 @@ export default class SystemRenderer extends EventEmitter
         this.blendModes = null;
 
         /**
-         * The value of the preserveDrawingBuffer flag affects whether or not the contents of
+         * The value of the preserve_drawing_buffer flag affects whether or not the contents of
          * the stencil buffer is retained after rendering.
          *
          * @member {boolean}
          */
-        this.preserveDrawingBuffer = options.preserveDrawingBuffer;
+        this.preserve_drawing_buffer = options.preserve_drawing_buffer;
 
         /**
          * This sets if the CanvasRenderer will clear the canvas or not before the new render pass.
@@ -138,7 +138,7 @@ export default class SystemRenderer extends EventEmitter
          * @member {boolean}
          * @default
          */
-        this.clearBeforeRender = options.clearBeforeRender;
+        this.clear_before_render = options.clear_before_render;
 
         /**
          * If true Pixi will Math.floor() x/y values when rendering, stopping pixel interpolation.
@@ -146,7 +146,7 @@ export default class SystemRenderer extends EventEmitter
          *
          * @member {boolean}
          */
-        this.roundPixels = options.roundPixels;
+        this.pixel_snap = options.pixel_snap;
 
         /**
          * The background color as a number.
@@ -154,7 +154,7 @@ export default class SystemRenderer extends EventEmitter
          * @member {number}
          * @private
          */
-        this._backgroundColor = 0x000000;
+        this._background_color = 0x000000;
 
         /**
          * The background color as an [R, G, B] array.
@@ -162,7 +162,7 @@ export default class SystemRenderer extends EventEmitter
          * @member {number[]}
          * @private
          */
-        this._backgroundColorRgba = [0, 0, 0, 0];
+        this._background_colorRgba = [0, 0, 0, 0];
 
         /**
          * The background color as a string.
@@ -170,9 +170,9 @@ export default class SystemRenderer extends EventEmitter
          * @member {string}
          * @private
          */
-        this._backgroundColorString = '#000000';
+        this._background_colorString = '#000000';
 
-        this.backgroundColor = options.backgroundColor || this._backgroundColor; // run bg color setter
+        this.background_color = options.background_color || this._background_color; // run bg color setter
 
         /**
          * This temporary display object used as the parent of the currently being rendered item
@@ -230,7 +230,7 @@ export default class SystemRenderer extends EventEmitter
         this.view.width = screenWidth * this.resolution;
         this.view.height = screenHeight * this.resolution;
 
-        if (this.autoResize)
+        if (this.auto_resize)
         {
             this.view.style.width = `${screenWidth}px`;
             this.view.style.height = `${screenHeight}px`;
@@ -248,7 +248,7 @@ export default class SystemRenderer extends EventEmitter
      */
     generateTexture(displayObject, scaleMode, resolution)
     {
-        const bounds = displayObject.getLocalBounds();
+        const bounds = displayObject.get_local_Bounds();
 
         const renderTexture = RenderTexture.create(bounds.width | 0, bounds.height | 0, scaleMode, resolution);
 
@@ -269,7 +269,7 @@ export default class SystemRenderer extends EventEmitter
     {
         if (removeView && this.view.parentNode)
         {
-            this.view.parentNode.removeChild(this.view);
+            this.view.parentNode.remove_child(this.view);
         }
 
         this.type = RENDERER_TYPE.UNKNOWN;
@@ -282,20 +282,20 @@ export default class SystemRenderer extends EventEmitter
 
         this.transparent = false;
 
-        this.autoResize = false;
+        this.auto_resize = false;
 
         this.blendModes = null;
 
         this.options = null;
 
-        this.preserveDrawingBuffer = false;
-        this.clearBeforeRender = false;
+        this.preserve_drawing_buffer = false;
+        this.clear_before_render = false;
 
-        this.roundPixels = false;
+        this.pixel_snap = false;
 
-        this._backgroundColor = 0;
-        this._backgroundColorRgba = null;
-        this._backgroundColorString = null;
+        this._background_color = 0;
+        this._background_colorRgba = null;
+        this._background_colorString = null;
 
         this._tempNode2DParent = null;
         this._lastObjectRendered = null;
@@ -306,15 +306,15 @@ export default class SystemRenderer extends EventEmitter
      *
      * @member {number}
      */
-    get backgroundColor()
+    get background_color()
     {
-        return this._backgroundColor;
+        return this._background_color;
     }
 
-    set backgroundColor(value) // eslint-disable-line require-jsdoc
+    set background_color(value) // eslint-disable-line require-jsdoc
     {
-        this._backgroundColor = value;
-        this._backgroundColorString = hex2string(value);
-        hex2rgb(value, this._backgroundColorRgba);
+        this._background_color = value;
+        this._background_colorString = hex2string(value);
+        hex2rgb(value, this._background_colorRgba);
     }
 }

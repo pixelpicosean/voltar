@@ -148,7 +148,7 @@ export default class Mesh extends Node2D
 
         /**
          * Plugin that is responsible for rendering this element.
-         * Allows to customize the rendering process without overriding '_renderWebGL' & '_renderCanvas' methods.
+         * Allows to customize the rendering process without overriding '_render_webGL' & '_render_canvas' methods.
          * @member {string}
          * @default 'mesh'
          */
@@ -161,7 +161,7 @@ export default class Mesh extends Node2D
      * @private
      * @param {V.WebGLRenderer} renderer - a reference to the WebGL renderer
      */
-    _renderWebGL(renderer)
+    _render_webGL(renderer)
     {
         this.refresh();
         renderer.setObjectRenderer(renderer.plugins[this.pluginName]);
@@ -174,7 +174,7 @@ export default class Mesh extends Node2D
      * @private
      * @param {V.CanvasRenderer} renderer - The canvas renderer.
      */
-    _renderCanvas(renderer)
+    _render_canvas(renderer)
     {
         this.refresh();
         renderer.plugins[this.pluginName].render(this);
@@ -228,10 +228,10 @@ export default class Mesh extends Node2D
     }
 
     /**
-     * Returns the bounds of the mesh as a rectangle. The bounds calculation takes the worldTransform into account.
+     * Returns the bounds of the mesh as a rectangle. The bounds calculation takes the world_transform into account.
      *
      */
-    _calculateBounds()
+    _calculate_bounds()
     {
         // TODO - we can cache local bounds and use them if they are dirty (like graphics)
         this._bounds.addVertices(this.transform, this.vertices, 0, this.vertices.length);
@@ -245,12 +245,12 @@ export default class Mesh extends Node2D
      */
     containsPoint(point)
     {
-        if (!this.getBounds().contains(point.x, point.y))
+        if (!this.get_bounds().contains(point.x, point.y))
         {
             return false;
         }
 
-        this.worldTransform.applyInverse(point, tempPoint);
+        this.world_transform.applyInverse(point, tempPoint);
 
         const vertices = this.vertices;
         const points = tempPolygon.points;

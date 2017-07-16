@@ -26,7 +26,7 @@ core.settings.UPLOADS_PER_FRAME = 4;
  * app.renderer.plugins.prepare.upload(sprite, () => {
  *
  *     //Texture(s) has been uploaded to GPU
- *     app.stage.addChild(sprite);
+ *     app.stage.add_child(sprite);
  *
  * })
  *

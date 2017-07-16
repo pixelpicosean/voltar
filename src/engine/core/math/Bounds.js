@@ -161,7 +161,7 @@ export default class Bounds
      */
     addFrame(transform, x0, y0, x1, y1)
     {
-        const matrix = transform.worldTransform;
+        const matrix = transform.world_transform;
         const a = matrix.a;
         const b = matrix.b;
         const c = matrix.c;
@@ -219,7 +219,7 @@ export default class Bounds
      */
     addVertices(transform, vertices, beginOffset, endOffset)
     {
-        const matrix = transform.worldTransform;
+        const matrix = transform.world_transform;
         const a = matrix.a;
         const b = matrix.b;
         const c = matrix.c;

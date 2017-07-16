@@ -10,22 +10,22 @@ varying vec2 v_rgbSW;
 varying vec2 v_rgbSE;
 varying vec2 v_rgbM;
 
-uniform vec4 filterArea;
+uniform vec4 filter_area;
 
 varying vec2 vTextureCoord;
 
 vec2 mapCoord( vec2 coord )
 {
-    coord *= filterArea.xy;
-    coord += filterArea.zw;
+    coord *= filter_area.xy;
+    coord += filter_area.zw;
 
     return coord;
 }
 
 vec2 unmapCoord( vec2 coord )
 {
-    coord -= filterArea.zw;
-    coord /= filterArea.xy;
+    coord -= filter_area.zw;
+    coord /= filter_area.xy;
 
     return coord;
 }
@@ -48,7 +48,7 @@ void main(void) {
 
    vTextureCoord = aTextureCoord;
 
-   vec2 fragCoord = vTextureCoord * filterArea.xy;
+   vec2 fragCoord = vTextureCoord * filter_area.xy;
 
-   texcoords(fragCoord, filterArea.xy, v_rgbNW, v_rgbNE, v_rgbSW, v_rgbSE, v_rgbM);
+   texcoords(fragCoord, filter_area.xy, v_rgbNW, v_rgbNE, v_rgbSW, v_rgbSE, v_rgbM);
 }

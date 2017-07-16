@@ -261,14 +261,14 @@ export default class BitmapText extends Node2D
 
             if (!c.parent)
             {
-                this.addChild(c);
+                this.add_child(c);
             }
         }
 
         // remove unnecessary children.
         for (let i = lenChars; i < this._glyphs.length; ++i)
         {
-            this.removeChild(this._glyphs[i]);
+            this.remove_child(this._glyphs[i]);
         }
 
         this._textWidth = maxLineWidth * scale;
@@ -291,22 +291,22 @@ export default class BitmapText extends Node2D
      *
      * @private
      */
-    updateTransform()
+    update_transform()
     {
         this.validate();
-        this.containerUpdateTransform();
+        this.node2d_update_transform();
     }
 
     /**
-     * Validates text before calling parent's getLocalBounds
+     * Validates text before calling parent's get_local_Bounds
      *
      * @return {V.Rectangle} The rectangular bounding area
      */
-    getLocalBounds()
+    get_local_Bounds()
     {
         this.validate();
 
-        return super.getLocalBounds();
+        return super.get_local_Bounds();
     }
 
     /**
