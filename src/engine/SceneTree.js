@@ -1,4 +1,5 @@
 import VisualServer from './VisualServer';
+import PhysicsServer from './PhysicsServer';
 
 
 export const STRETCH_MODE_DISABLED = 0;
@@ -47,6 +48,7 @@ const DefaultSettings = {
 
 
 const visual_server = new VisualServer();
+const physics_server = new PhysicsServer();
 
 
 export default class SceneTree {
@@ -125,6 +127,8 @@ export default class SceneTree {
             height: this._settings.display.height,
             view: this.view,
         }, this._settings.rendering));
+
+        physics_server.init();
 
         this._start_loop();
     }
