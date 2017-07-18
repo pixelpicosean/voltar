@@ -4,6 +4,7 @@
  * @lends V
  */
 export { default as Point } from './Point';
+export { default as Vector } from './Point';
 export { default as ObservablePoint } from './ObservablePoint';
 export { default as Matrix } from './Matrix';
 export { default as GroupD8 } from './GroupD8';
