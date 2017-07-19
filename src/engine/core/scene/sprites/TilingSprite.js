@@ -26,6 +26,8 @@ export default class TilingSprite extends Sprite
     {
         super(texture);
 
+        this.type = 'TilingSprite';
+
         /**
          * Tile transform
          *

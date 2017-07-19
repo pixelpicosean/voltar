@@ -33,6 +33,8 @@ export default class Graphics extends Node2D
     {
         super();
 
+        this.type = 'Graphics';
+
         /**
          * The alpha value used when filling the Graphics object.
          *

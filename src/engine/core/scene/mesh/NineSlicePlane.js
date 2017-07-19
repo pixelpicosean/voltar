@@ -46,6 +46,8 @@ export default class NineSlicePlane extends Plane
     {
         super(texture, 4, 4);
 
+        this.type = 'NineSlicePlane';
+
         this._origWidth = texture.orig.width;
         this._origHeight = texture.orig.height;
 

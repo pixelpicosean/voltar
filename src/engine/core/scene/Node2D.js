@@ -31,6 +31,7 @@ export default class Node2D extends EventEmitter
         this.tempNode2DParent = null;
 
         this.name = '';
+        this.type = 'Node2D';
 
         this.is_inside_tree = false;
 

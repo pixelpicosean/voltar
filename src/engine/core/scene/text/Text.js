@@ -38,6 +38,8 @@ export default class Text extends Sprite
      */
     constructor(text, style, canvas)
     {
+        this.type = 'Text';
+
         canvas = canvas || document.createElement('canvas');
 
         canvas.width = 3;

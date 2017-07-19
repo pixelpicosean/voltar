@@ -26,6 +26,8 @@ export default class Plane extends Mesh
     {
         super(texture);
 
+        this.type = 'Plane';
+
         /**
          * Tracker for if the Plane is ready to be drawn. Needed because Mesh ctor can
          * call _onTextureUpdated which could call refresh too early.

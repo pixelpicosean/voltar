@@ -25,6 +25,8 @@ export default class Rope extends Mesh
     {
         super(texture);
 
+        this.type = 'Rope';
+
         /**
          * An array of points that determine the rope
          *

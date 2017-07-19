@@ -26,6 +26,8 @@ export default class Mesh extends Node2D
     {
         super();
 
+        this.type = 'Mesh';
+
         /**
          * The texture of the Mesh
          *

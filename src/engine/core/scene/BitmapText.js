@@ -41,6 +41,8 @@ export default class BitmapText extends Node2D
     {
         super();
 
+        this.type = 'BitmapText';
+
         /**
          * Private tracker for the width of the overall text
          *
