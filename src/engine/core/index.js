@@ -41,6 +41,11 @@ export { default as NineSlicePlane } from './scene/mesh/NineSlicePlane';
 export { default as Plane } from './scene/mesh/Plane';
 export { default as Rope } from './scene/mesh/Rope';
 
+export { default as RectangleShape2D } from './scene/physics/RectangleShape2D';
+export { default as CollisionObject2D } from './scene/physics/CollisionObject2D';
+export { default as Area2D } from './scene/physics/Area2D';
+export { default as PhysicsBody2D } from './scene/physics/PhysicsBody2D';
+
 export { default as Spritesheet } from './textures/Spritesheet';
 export { default as Texture } from './textures/Texture';
 export { default as BaseTexture } from './textures/BaseTexture';

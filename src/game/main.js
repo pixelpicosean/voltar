@@ -2,174 +2,47 @@ import * as v from 'engine';
 import settings from './settings';
 
 
-class RectangleShape2D {
-    constructor(extent_x = 4, extent_y = 4) {
-        this.extents = new v.Vector(extent_x, extent_y);
-    }
-}
-
-
-class CollisionObject2D extends v.Node2D {
-    get_shape() {
-        return this._shape;
-    }
-    set_shape(s) {
-        this._shape = s;
-
+class CustomArea extends v.Area2D {
+    _enter_tree() {
+        this._debug_shape = new v.Graphics();
         this._debug_shape.clear();
         this._debug_shape.begin_fill(0xffffff);
-        this._debug_shape.draw_rect(-s.extents.x, -s.extents.y, s.extents.x * 2, s.extents.y * 2);
+        this._debug_shape.draw_rect(-this._shape.extents.x, -this._shape.extents.y, this._shape.extents.x * 2, this._shape.extents.y * 2);
         this._debug_shape.end_fill();
-    }
-
-    get_collision_layer() {
-        return this.collision_layer;
-    }
-    get_collision_layer_bit(bit) {
-        return this.collision_layer & (1 << bit);
-    }
-    set_collision_layer(layer) {
-        thsi.collision_layer = layer;
-    }
-    set_collision_layer_bit(bit, value) {
-        if (value) {
-            this.collision_layer |= 1 << bit;
-        }
-        else {
-            this.collision_layer &= ~(1 << bit);
-        }
-    }
-
-    get_collision_mask() {
-        return this.collision_mask;
-    }
-    get_collision_mask_bit(bit) {
-        return this.collision_mask & (1 << bit);
-    }
-    set_collision_mask(mask) {
-        this.collision_mask = mask;
-    }
-    set_collision_mask_bit(bit, value) {
-        if (value) {
-            this.collision_mask |= 1 << bit;
-        }
-        else {
-            this.collision_mask &= ~(1 << bit);
-        }
-    }
-
-    constructor() {
-        super();
-
-        this.collision_layer = 0;
-        this.collision_mask = 0;
-
-        this.left = 0;
-        this.right = 0;
-        this.top = 0;
-        this.bottom = 0;
-
-        this._shape = null;
-        this._debug_shape = new v.Graphics();
         this.add_child(this._debug_shape);
     }
-
-    _enter_tree() {}
-    _ready() {}
-    _process(delta) {}
-    _exit_tree() {}
 }
 
 
-class Area2D extends CollisionObject2D {
-    constructor() {
-        super();
-
-        this.type = 'Area2D';
-
-        this.area_map = {};
-        this.body_map = {};
-
-        this.area_entered = new v.Signal();
-        this.area_exited = new v.Signal();
-        this.body_entered = new v.Signal();
-        this.body_exited = new v.Signal();
-    }
-    area_enter(area) {}
-    area_exit(area) {}
-    body_enter(body) {}
-    body_exit(body) {}
-
-    _area_inout(is_in, area) {
-        if (is_in) {
-            if (!this.area_map[area.id]) {
-                this.area_map[area.id] = area;
-                this.area_enter(area);
-                this.area_entered.dispatch(area);
-
-                area.tree_exited.once(() => delete this.area_map[area.id]);
-            }
-        }
-        else {
-            delete this.area_map[area.id];
-            this.area_exit(area);
-            this.area_exited.dispatch(area);
-        }
-    }
-    _body_inout(is_in, body) {
-        if (is_in) {
-            if (!this.body_map[body.id]) {
-                this.body_map[body.id] = body;
-                this.body_enter(body);
-                this.body_entered.dispatch(body);
-
-                body.tree_exited.once(() => delete this.body_map[body.id]);
-            }
-        }
-        else {
-            delete this.body_map[body.id];
-            this.body_exit(body);
-            this.body_exited.dispatch(body);
-        }
+class StaticBody extends v.PhysicsBody2D {
+    _enter_tree() {
+        this._debug_shape = new v.Graphics();
+        this._debug_shape.clear();
+        this._debug_shape.begin_fill(0xffffff);
+        this._debug_shape.draw_rect(-this._shape.extents.x, -this._shape.extents.y, this._shape.extents.x * 2, this._shape.extents.y * 2);
+        this._debug_shape.end_fill();
+        this.add_child(this._debug_shape);
     }
 }
 
 
-class PhysicsBody2D extends CollisionObject2D {
-    constructor() {
-        super();
-
-        this.type = 'PhysicsBody2D';
-
-        this.collision_exceptions = [];
-    }
-    _collide(body, res) {
-        return true;
-    }
-
-    add_collision_exception_with(body) {
-        if (this.collision_exceptions.indexOf(body) < 0) {
-            this.collision_exceptions.push(body);
-            body.tree_exited.once(this._collision_exception_freed.bind(this, this.collision_exceptions.length - 1));
-        }
-    }
-
-    _collision_exception_freed(idx) {
-        console.log(`exception[${idx}] is freed`);
-        v.utils.removeItems(this.collision_exceptions, idx, 1);
-    }
-}
-
-class CustomBody extends PhysicsBody2D {
+class CustomBody extends v.PhysicsBody2D {
     constructor() {
         super();
 
         this.velocity = new v.Vector(0, 0);
     }
     _enter_tree() {
-        this.set_shape(new RectangleShape2D(10, 10));
+        this.set_shape(new v.RectangleShape2D(10, 10));
         this.set_collision_layer_bit(3, true);
         this.set_collision_mask_bit(2, true);
+
+        this._debug_shape = new v.Graphics();
+        this._debug_shape.clear();
+        this._debug_shape.begin_fill(0xffffff);
+        this._debug_shape.draw_rect(-this._shape.extents.x, -this._shape.extents.y, this._shape.extents.x * 2, this._shape.extents.y * 2);
+        this._debug_shape.end_fill();
+        this.add_child(this._debug_shape);
     }
     _ready() {
         this.set_process(true);
@@ -203,10 +76,10 @@ class Scene extends v.Node2D {
         });
         this.add_child(this.info);
 
-        const a = new Area2D();
+        const a = new CustomArea();
         a.name = 'a';
         a.position.set(100, 200);
-        a.set_shape(new RectangleShape2D(16, 16));
+        a.set_shape(new v.RectangleShape2D(16, 16));
         a.set_collision_layer_bit(1, true);
         a.set_collision_mask_bit(2, true);
         a.body_entered.add((who) => console.log(`${who.name} enter`));
@@ -214,10 +87,10 @@ class Scene extends v.Node2D {
         this.add_child(a);
         this.a = a;
 
-        const b = new PhysicsBody2D();
+        const b = new StaticBody();
         b.name = 'b';
         b.position.set(300, 200);
-        b.set_shape(new RectangleShape2D(40, 20));
+        b.set_shape(new v.RectangleShape2D(40, 20));
         b.set_collision_layer_bit(2, true);
         b.collide = () => false;
         this.add_child(b);
