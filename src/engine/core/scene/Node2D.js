@@ -3,6 +3,7 @@ import { TRANSFORM_MODE } from '../const';
 import settings from '../settings';
 import { TransformStatic, Transform, Bounds, Rectangle } from '../math';
 import { removeItems } from '../utils';
+import Signal from 'engine/Signal';
 
 /**
  * A Node2D represents a collection of display objects.
@@ -156,6 +157,9 @@ export default class Node2D extends EventEmitter
          * @event V.Node2D#removed
          * @param {V.Node2D} container - The container removed from.
          */
+
+        this.tree_entered = new Signal();
+        this.tree_exited = new Signal();
     }
 
     /**
@@ -514,6 +518,17 @@ export default class Node2D extends EventEmitter
         this.transform.position.copy(value);
     }
 
+    get_position() {
+        return this.transform.position;
+    }
+    set_position(value) {
+        this.transform.position.copy(value);
+    }
+
+    get_global_position() {
+        return this.transform.world_transform.position;
+    }
+
     /**
      * The scale factor of the object.
      * Assignment by value since pixi-v4.
@@ -530,6 +545,17 @@ export default class Node2D extends EventEmitter
         this.transform.scale.copy(value);
     }
 
+    get_scale() {
+        return this.transform.scale;
+    }
+    set_scale(value) {
+        this.transform.scale.copy(value);
+    }
+
+    get_global_scale() {
+        return this.transform.world_transform.scale;
+    }
+
     /**
      * The pivot point of the displayObject that it rotates around
      * Assignment by value since pixi-v4.
@@ -543,6 +569,13 @@ export default class Node2D extends EventEmitter
 
     set pivot(value) // eslint-disable-line require-jsdoc
     {
+        this.transform.pivot.copy(value);
+    }
+
+    get_pivot() {
+        return this.transform.pivot;
+    }
+    set_pivot(value) {
         this.transform.pivot.copy(value);
     }
 
@@ -562,6 +595,13 @@ export default class Node2D extends EventEmitter
         this.transform.skew.copy(value);
     }
 
+    get_skew() {
+        return this.transform.skew;
+    }
+    set_skew(value) {
+        this.transform.skew.copy(value);
+    }
+
     /**
      * The rotation of the object in radians.
      *
@@ -575,6 +615,17 @@ export default class Node2D extends EventEmitter
     set rotation(value) // eslint-disable-line require-jsdoc
     {
         this.transform.rotation = value;
+    }
+
+    get_rotation() {
+        return this.transform.rotation;
+    }
+    set_rotation(value) {
+        this.transform.rotation.copy(value);
+    }
+
+    get_global_rotation() {
+        return this.transform.world_transform.rotation;
     }
 
     /**
@@ -663,6 +714,8 @@ export default class Node2D extends EventEmitter
 
         this._enter_tree();
 
+        this.tree_entered.dispatch();
+
         for (let i = 0, l = this.children.length; i < l; i++) {
             this.children[i]._propagate_enter_tree();
         }
@@ -691,6 +744,8 @@ export default class Node2D extends EventEmitter
         }
 
         this._exit_tree();
+
+        this.tree_exited.dispatch();
     }
 
     /**
