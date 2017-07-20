@@ -12,6 +12,7 @@ import * as interaction from './interaction';
 import * as loaders from './loaders';
 import * as prepare from './prepare';
 import * as audio from './audio';
+import Signal from './Signal';
 
 // handle mixins now, after all code has been added
 import { utils } from './core';
@@ -37,6 +38,7 @@ export {
     loader,
     audio,
     sound,
+    Signal,
 };
 
 import SceneTree from './SceneTree';
