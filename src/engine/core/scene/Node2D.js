@@ -709,7 +709,15 @@ export default class Node2D extends EventEmitter
     _process(delta) {}
     _exit_tree() {}
 
-    queue_free() {}
+    queue_free() {
+        if (!this.is_inside_tree) {
+            return;
+        }
+
+        if (this.scene_tree) {
+            this.scene_tree.queue_delete(this);
+        }
+    }
 
     _propagate_enter_tree() {
         if (this.is_inside_tree) {

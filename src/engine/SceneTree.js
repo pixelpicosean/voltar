@@ -57,6 +57,7 @@ export default class SceneTree {
         this.debug_collisions_hint = false;
 
         this.grouped_nodes = {};
+        this.delete_queue = [];
 
         this.current_scene = null;
 
@@ -97,7 +98,10 @@ export default class SceneTree {
     is_paused() {}
     is_debugging_collisions_hint() {}
 
-    queue_delete(node) {}
+    queue_delete(node) {
+        node.is_queued_for_deletion = true;
+        this.delete_queue.push(node);
+    }
     get_nodes_in_group() {}
 
     change_scene_to(scene_class) {}
@@ -187,6 +191,8 @@ export default class SceneTree {
                 this.current_scene._propagate_process(_process_tmp.slow_step_sec);
                 physics_server.solve_collision(this.current_scene);
 
+                this._flush_delete_queue();
+
                 _process_tmp.count += 1;
               }
 
@@ -212,5 +218,16 @@ export default class SceneTree {
     }
     _end_loop() {
         cancelAnimationFrame(this._loop_id);
+    }
+
+    _flush_delete_queue() {
+        let i, n;
+        for (i = 0; i < this.delete_queue.length; i++) {
+            n = this.delete_queue[i];
+            if (n.parent) {
+                n.parent.remove_child(n);
+            }
+        }
+        this.delete_queue.length = 0;
     }
 }
