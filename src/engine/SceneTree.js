@@ -185,6 +185,7 @@ export default class SceneTree {
 
                 // Fixed update
                 this.current_scene._propagate_process(_process_tmp.slow_step_sec);
+                physics_server.solve_collision(this.current_scene);
 
                 _process_tmp.count += 1;
               }
