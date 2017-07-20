@@ -17,6 +17,12 @@ const put_array = (arr) => {
     Arrays.push(arr);
 };
 
+const res = {
+    overlap: 0,
+    overlap_n: new Vector(),
+    overlap_v: new Vector(),
+};
+
 
 export default class PhysicsServer {
     constructor() {
@@ -142,11 +148,156 @@ export default class PhysicsServer {
                         if (a_is_area && b_is_area) {
                             if (!coll.area_map[coll2.id]) {
                                 coll.area_map[coll2.id] = coll2;
+                                coll.area_enter(coll2);
                                 coll.area_entered.dispatch(coll2);
                             }
                             if (!coll2.area_map[coll.id]) {
                                 coll2.area_map[coll.id] = coll;
+                                coll2.area_enter(coll);
                                 coll2.area_entered.dispatch(coll);
+                            }
+                        }
+                        // Area vs Body
+                        else if (a_is_area && !b_is_area) {
+                            if (!coll.body_map[coll2.id]) {
+                                coll.body_map[coll2.id] = coll2;
+                                coll.body_entered.dispatch(coll2);
+                            }
+                        }
+                        // Body vs Area
+                        else if (!a_is_area && b_is_area) {
+                            if (!coll2.body_map[coll.id]) {
+                                coll2.body_map[coll.id] = coll;
+                                coll2.body_entered.dispatch(coll);
+                            }
+                        }
+                        // Body vs Body
+                        else {
+                            let push_a = false, push_b = false;
+                            let a_is_left = true, a_is_top = true;
+                            let overlap_x = Infinity, overlap_y = Infinity, half_overlap;
+                            if (coll.x < coll2.x) {
+                                a_is_left = true;
+                                overlap_x = coll.right - coll2.left;
+                            }
+                            else if (coll.x > coll2.x) {
+                                a_is_left = false;
+                                overlap_x = coll2.right - coll.left;
+                            }
+                            if (coll.y < coll2.y) {
+                                a_is_top = true;
+                                overlap_y = coll.bottom - coll2.top;
+                            }
+                            else if (coll.y > coll2.y) {
+                                a_is_top = false;
+                                overlap_y = coll2.bottom - coll.top;
+                            }
+
+                            // No overlap at all
+                            if (overlap_x === 0 && overlap_y === 0) {
+                                continue;
+                            }
+
+                            if (overlap_x < overlap_y) {
+                                res.overlap = overlap_x;
+
+                                if (a_is_left) {
+                                    res.overlap_n.set(-1, 0);
+                                    res.overlap_v.set(-overlap_x, 0);
+                                    push_a = (a2b && coll._collide(coll2, res));
+
+                                    res.overlap_n.set(1, 0);
+                                    res.overlap_v.set(overlap_x, 0);
+                                    push_b = (b2a && coll2._collide(coll, res));
+                                }
+                                else {
+                                    res.overlap_n.set(1, 0);
+                                    res.overlap_v.set(overlap_x, 0);
+                                    push_a = (a2b && coll._collide(coll2, res));
+
+                                    res.overlap_n.set(-1, 0);
+                                    res.overlap_v.set(-overlap_x, 0);
+                                    push_b = (b2a && coll2._collide(coll, res));
+                                }
+
+                                if (push_a && !push_b) {
+                                    if (a_is_left) {
+                                        coll.x -= overlap_x;
+                                    }
+                                    else {
+                                        coll.x += overlap_x;
+                                    }
+                                }
+                                else if (!push_a && push_b) {
+                                    if (a_is_left) {
+                                        coll2.x += overlap_x;
+                                    }
+                                    else {
+                                        coll2.x -= overlap_x;
+                                    }
+                                }
+                                else if (push_a && push_b) {
+                                    half_overlap = overlap_x * 0.5;
+
+                                    if (a_is_left) {
+                                        coll.x -= half_overlap;
+                                        coll2.x += half_overlap;
+                                    }
+                                    else {
+                                        coll2.x -= half_overlap;
+                                        coll.x += half_overlap;
+                                    }
+                                }
+                            }
+                            else {
+                                res.overlap = overlap_y;
+
+                                if (a_is_top) {
+                                    res.overlap_n.set(0, -1);
+                                    res.overlap_v.set(0, -overlap_y);
+                                    push_a = (a2b && coll._collide(coll2, res));
+
+                                    res.overlap_n.set(0, 1);
+                                    res.overlap_v.set(0, overlap_y);
+                                    push_b = (b2a && coll2._collide(coll, res));
+                                }
+                                else {
+                                    res.overlap_n.set(0, 1);
+                                    res.overlap_v.set(0, overlap_y);
+                                    push_a = (a2b && coll._collide(coll2, res));
+
+                                    res.overlap_n.set(0, -1);
+                                    res.overlap_v.set(0, -overlap_y);
+                                    push_b = (b2a && coll2._collide(coll, res));
+                                }
+
+                                if (push_a && !push_b) {
+                                    if (a_is_top) {
+                                        coll.y -= overlap_y;
+                                    }
+                                    else {
+                                        coll.y += overlap_y;
+                                    }
+                                }
+                                else if (!push_a && push_b) {
+                                    if (a_is_top) {
+                                        coll2.y += overlap_y;
+                                    }
+                                    else {
+                                        coll2.y -= overlap_y;
+                                    }
+                                }
+                                else if (push_a && push_b) {
+                                    half_overlap = overlap_y * 0.5;
+                                    if (a_is_top) {
+                                        coll.y -= half_overlap;
+                                        coll2.y += half_overlap;
+                                    }
+                                    else {
+                                        coll.y += half_overlap;
+                                        coll2.y -= half_overlap;
+                                    }
+                                }
                             }
                         }
                     }
@@ -168,6 +319,7 @@ export default class PhysicsServer {
                   a.right <= b.left
                 ) {
                     delete a.area_map[k];
+                    a.area_exit(b);
                     a.area_exited.dispatch(b);
                 }
             }

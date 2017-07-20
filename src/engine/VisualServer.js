@@ -22,7 +22,7 @@ export default class VisualServer {
             this.renderer = new CanvasRenderer(settings);
         }
     }
-    render(scene) {
-        this.renderer.render(scene);
+    render(scene, skip_transform) {
+        this.renderer.render(scene, undefined, undefined, undefined, skip_transform);
     }
 }

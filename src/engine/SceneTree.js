@@ -188,7 +188,13 @@ export default class SceneTree {
                 _process_tmp.delta_time -= _process_tmp.step;
 
                 // Fixed update
+                // - process nodes
                 this.current_scene._propagate_process(_process_tmp.slow_step_sec);
+                // - update transforms
+                this.current_scene.parent = this.current_scene._tempNode2DParent;
+                this.current_scene.update_transform();
+                this.current_scene.parent = null;
+                // - solve collision
                 physics_server.solve_collision(this.current_scene);
 
                 this._flush_delete_queue();
@@ -213,7 +219,7 @@ export default class SceneTree {
             // this.current_scene._process(_process_tmp.real_delta * 0.001);
 
             // Render
-            visual_server.render(this.current_scene);
+            visual_server.render(this.current_scene, true);
         }
     }
     _end_loop() {
