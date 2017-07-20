@@ -95,6 +95,10 @@ class Area2D extends CollisionObject2D {
         this.body_entered = new v.Signal();
         this.body_exited = new v.Signal();
     }
+    area_enter(area) {}
+    area_exit(area) {}
+    body_enter(body) {}
+    body_exit(body) {}
 }
 
 
@@ -106,11 +110,43 @@ class PhysicsBody2D extends CollisionObject2D {
 
         this.collision_exceptions = [];
     }
+    _collide(body, res) {
+        return true;
+    }
 
     add_collision_exception_with(body) {
         if (this.collision_exceptions.indexOf(body) < 0) {
             this.collision_exceptions.push(body);
         }
+    }
+}
+
+class CustomBody extends PhysicsBody2D {
+    constructor() {
+        super();
+
+        this.velocity = new v.Vector(0, 40);
+    }
+    _enter_tree() {
+        this.set_shape(new RectangleShape2D(10, 10));
+        this.set_collision_layer_bit(3, true);
+        this.set_collision_mask_bit(2, true);
+    }
+    _ready() {
+        this.set_process(true);
+    }
+    _process(delta) {
+        // this.velocity.y += 40 * delta;
+
+        this.x += this.velocity.x * delta;
+        this.y += this.velocity.y * delta;
+    }
+
+    _collide(body, res) {
+        console.log(`before: (${this.velocity.y.toFixed(2)}) - (y: ${this.bottom.toFixed(2)}) - (${body.top})`);
+        this.velocity.bounce(res.overlap_n);
+        console.log(`after: (${this.velocity.y.toFixed(2)}) - (y: ${(this.bottom - res.overlap).toFixed(2)}) - (${body.top})`);
+        return true;
     }
 }
 
@@ -128,22 +164,30 @@ class Scene extends v.Node2D {
 
         const a = new Area2D();
         a.name = 'a';
-        a.position.set(100, 125);
+        a.position.set(100, 200);
         a.set_shape(new RectangleShape2D(16, 16));
         a.set_collision_layer_bit(1, true);
         a.set_collision_mask_bit(2, true);
-        a.area_entered.add((who) => console.log(`${who.name} enter`));
-        a.area_exited.add((who) => console.log(`${who.name} exit`));
+        a.body_entered.add((who) => console.log(`${who.name} enter`));
+        a.body_exited.add((who) => console.log(`${who.name} exit`));
         this.add_child(a);
         this.a = a;
 
-        const b = new Area2D();
+        const b = new PhysicsBody2D();
         b.name = 'b';
-        b.position.set(300, 125);
-        b.set_shape(new RectangleShape2D(64, 64));
+        b.position.set(300, 200);
+        b.set_shape(new RectangleShape2D(40, 20));
         b.set_collision_layer_bit(2, true);
+        b.collide = () => false;
         this.add_child(b);
         this.b = b;
+
+        const c = new CustomBody();
+        c.name = 'c';
+        c.position.set(300, 100);
+        this.add_child(c);
+        this.c = c;
+        window.c = c;
     }
     _ready() {
         this.set_process(true);
