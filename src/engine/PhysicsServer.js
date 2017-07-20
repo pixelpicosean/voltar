@@ -116,8 +116,8 @@ export default class PhysicsServer {
                         continue;
                     }
 
-                    const a2b = !!(coll.collision_mask & coll2.collision_layer);
-                    const b2a = !!(coll2.collision_mask & coll.collision_layer);
+                    let a2b = !!(coll.collision_mask & coll2.collision_layer);
+                    let b2a = !!(coll2.collision_mask & coll.collision_layer);
 
                     // Pass: never collide with each other
                     if (!a2b && !b2a) {
@@ -146,33 +146,22 @@ export default class PhysicsServer {
                     ) {
                         // Area vs Area
                         if (a_is_area && b_is_area) {
-                            if (!coll.area_map[coll2.id]) {
-                                coll.area_map[coll2.id] = coll2;
-                                coll.area_enter(coll2);
-                                coll.area_entered.dispatch(coll2);
-                            }
-                            if (!coll2.area_map[coll.id]) {
-                                coll2.area_map[coll.id] = coll;
-                                coll2.area_enter(coll);
-                                coll2.area_entered.dispatch(coll);
-                            }
+                            coll._area_inout(true, coll2);
+                            coll2._area_inout(true, coll);
                         }
                         // Area vs Body
                         else if (a_is_area && !b_is_area) {
-                            if (!coll.body_map[coll2.id]) {
-                                coll.body_map[coll2.id] = coll2;
-                                coll.body_entered.dispatch(coll2);
-                            }
+                            coll._body_inout(true, coll2);
                         }
                         // Body vs Area
                         else if (!a_is_area && b_is_area) {
-                            if (!coll2.body_map[coll.id]) {
-                                coll2.body_map[coll.id] = coll;
-                                coll2.body_entered.dispatch(coll);
-                            }
+                            coll2._body_inout(true, coll);
                         }
                         // Body vs Body
                         else {
+                            a2b = a2b && (coll.collision_exceptions.indexOf(coll2) < 0);
+                            b2a = b2a && (coll2.collision_exceptions.indexOf(coll) < 0);
+
                             let push_a = false, push_b = false;
                             let a_is_left = true, a_is_top = true;
                             let overlap_x = Infinity, overlap_y = Infinity, half_overlap;
@@ -318,9 +307,7 @@ export default class PhysicsServer {
                   a.left >= b.right ||
                   a.right <= b.left
                 ) {
-                    delete a.area_map[k];
-                    a.area_exit(b);
-                    a.area_exited.dispatch(b);
+                    a._area_inout(false, b);
                 }
             }
         }

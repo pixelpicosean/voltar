@@ -99,6 +99,39 @@ class Area2D extends CollisionObject2D {
     area_exit(area) {}
     body_enter(body) {}
     body_exit(body) {}
+
+    _area_inout(is_in, area) {
+        if (is_in) {
+            if (!this.area_map[area.id]) {
+                this.area_map[area.id] = area;
+                this.area_enter(area);
+                this.area_entered.dispatch(area);
+
+                area.tree_exited.once(() => delete this.area_map[area.id]);
+            }
+        }
+        else {
+            delete this.area_map[area.id];
+            this.area_exit(area);
+            this.area_exited.dispatch(area);
+        }
+    }
+    _body_inout(is_in, body) {
+        if (is_in) {
+            if (!this.body_map[body.id]) {
+                this.body_map[body.id] = body;
+                this.body_enter(body);
+                this.body_entered.dispatch(body);
+
+                body.tree_exited.once(() => delete this.body_map[body.id]);
+            }
+        }
+        else {
+            delete this.body_map[body.id];
+            this.body_exit(body);
+            this.body_exited.dispatch(body);
+        }
+    }
 }
 
 
@@ -117,7 +150,13 @@ class PhysicsBody2D extends CollisionObject2D {
     add_collision_exception_with(body) {
         if (this.collision_exceptions.indexOf(body) < 0) {
             this.collision_exceptions.push(body);
+            body.tree_exited.once(this._collision_exception_freed.bind(this, this.collision_exceptions.length - 1));
         }
+    }
+
+    _collision_exception_freed(idx) {
+        console.log(`exception[${idx}] is freed`);
+        v.utils.removeItems(this.collision_exceptions, idx, 1);
     }
 }
 
@@ -125,7 +164,7 @@ class CustomBody extends PhysicsBody2D {
     constructor() {
         super();
 
-        this.velocity = new v.Vector(0, 40);
+        this.velocity = new v.Vector(0, 0);
     }
     _enter_tree() {
         this.set_shape(new RectangleShape2D(10, 10));
@@ -136,16 +175,18 @@ class CustomBody extends PhysicsBody2D {
         this.set_process(true);
     }
     _process(delta) {
-        // this.velocity.y += 40 * delta;
+        this.velocity.y += 40 * delta;
 
         this.x += this.velocity.x * delta;
         this.y += this.velocity.y * delta;
     }
 
     _collide(body, res) {
-        console.log(`before: (${this.velocity.y.toFixed(2)}) - (y: ${this.bottom.toFixed(2)}) - (${body.top})`);
+        // this.velocity.slide(res.overlap_n);
         this.velocity.bounce(res.overlap_n);
-        console.log(`after: (${this.velocity.y.toFixed(2)}) - (y: ${(this.bottom - res.overlap).toFixed(2)}) - (${body.top})`);
+
+        this.add_collision_exception_with(body);
+
         return true;
     }
 }
