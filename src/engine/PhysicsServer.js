@@ -311,6 +311,23 @@ export default class PhysicsServer {
                 }
             }
         }
+        // Body exit test
+        if (a_is_area) {
+            let a = coll;
+            for (let k in a.body_map) {
+                let b = a.body_map[k];
+
+                // No longer overlap?
+                if (
+                  a.bottom <= b.top ||
+                  a.top >= b.bottom ||
+                  a.left >= b.right ||
+                  a.right <= b.left
+                ) {
+                    a._body_inout(false, b);
+                }
+            }
+        }
 
         // Test child nodes
         for (let i = 0; i < node.children.length; i++) {
