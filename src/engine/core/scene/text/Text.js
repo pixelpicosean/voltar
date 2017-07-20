@@ -38,8 +38,6 @@ export default class Text extends Sprite
      */
     constructor(text, style, canvas)
     {
-        this.type = 'Text';
-
         canvas = canvas || document.createElement('canvas');
 
         canvas.width = 3;
@@ -51,6 +49,8 @@ export default class Text extends Sprite
         texture.trim = new Rectangle();
 
         super(texture);
+
+        this.type = 'Text';
 
         // base texture is already automatically added to the cache, now adding the actual texture
         Texture.add_to_cache(this._texture, this._texture.base_texture.texture_cache_ids[0]);
