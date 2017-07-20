@@ -1,7 +1,7 @@
 import EventEmitter from 'eventemitter3';
 import { TRANSFORM_MODE } from '../const';
 import settings from '../settings';
-import { TransformStatic, Transform, Bounds, Rectangle } from '../math';
+import { TransformStatic, Transform, Point, Bounds, Rectangle } from '../math';
 import { removeItems } from '../utils';
 import Signal from 'engine/Signal';
 
@@ -121,6 +121,7 @@ export default class Node2D extends EventEmitter
         this._lastBoundsID = -1;
         this._boundsRect = null;
         this._localBoundsRect = null;
+        this._world_position = new Point();
 
         /**
          * The original, cached mask of the object
@@ -531,7 +532,7 @@ export default class Node2D extends EventEmitter
     }
 
     get_global_position() {
-        return this.transform.world_transform.position;
+        return this._world_position;
     }
 
     /**
@@ -1089,6 +1090,8 @@ export default class Node2D extends EventEmitter
 
         // TODO: check render flags, how to process stuff here
         this.world_alpha = this.alpha * this.parent.world_alpha;
+
+        this._world_position.set(this.transform.world_transform.tx, this.transform.world_transform.ty);
 
         for (let i = 0, j = this.children.length; i < j; ++i)
         {
