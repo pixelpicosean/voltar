@@ -5,6 +5,8 @@ import { TransformStatic, Transform, Bounds, Rectangle } from '../math';
 import { removeItems } from '../utils';
 import Signal from 'engine/Signal';
 
+let uid = 0;
+
 /**
  * A Node2D represents a collection of display objects.
  * It is the base class of all display objects that act as a container for other objects.
@@ -31,10 +33,13 @@ export default class Node2D extends EventEmitter
 
         this.tempNode2DParent = null;
 
+        this.id = uid++;
+
         this.name = '';
         this.type = 'Node2D';
 
         this.is_inside_tree = false;
+        this.is_queued_for_deletion = false;
 
         this.idle_process = false;
 
