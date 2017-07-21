@@ -22,7 +22,7 @@ const tempPoint = new Point();
 export default class Sprite extends Node2D
 {
     /**
-     * @param {V.Texture} texture - The texture for this sprite
+     * @param {V.Texture|string} texture - The texture for this sprite
      */
     constructor(texture)
     {
@@ -48,6 +48,14 @@ export default class Sprite extends Node2D
          * @member {V.Texture}
          */
         this._texture = null;
+
+        /**
+         * The key of the texture that the sprite is using
+         *
+         * @private
+         * @member {string|null}
+         */
+        this._texture_key = null;
 
         /**
          * The width of the sprite (this is initially set by the texture)
@@ -102,7 +110,18 @@ export default class Sprite extends Node2D
         this.cached_tint = 0xFFFFFF;
 
         // call texture setter
-        this.texture = texture || Texture.EMPTY;
+        if (texture) {
+            if (typeof(texture) === 'string') {
+                this._texture_key = texture;
+                this.texture = Texture.EMPTY;
+            }
+            else {
+                this.texture = texture;
+            }
+        }
+        else {
+            this.texture = Texture.EMPTY;
+        }
 
         /**
          * this is used to store the vertex data of the sprite (basically a quad)
@@ -134,6 +153,15 @@ export default class Sprite extends Node2D
          * @default 'sprite'
          */
         this.plugin_name = 'sprite';
+    }
+
+    _propagate_enter_tree() {
+        if (this._texture_key) {
+            this.texture = TextureCache[this._texture_key];
+            this._texture_key = null;
+        }
+
+        super._propagate_enter_tree();
     }
 
     /**
@@ -567,11 +595,17 @@ export default class Sprite extends Node2D
         return this._texture;
     }
 
-    set texture(value) // eslint-disable-line require-jsdoc
+    set texture(p_value) // eslint-disable-line require-jsdoc
     {
+        let value = p_value;
+
         if (this._texture === value)
         {
             return;
+        }
+
+        if (typeof(p_value) === 'string') {
+            value = TextureCache[p_value];
         }
 
         this._texture = value;
