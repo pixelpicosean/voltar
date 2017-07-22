@@ -16,7 +16,7 @@ class Anim {
 
 export class SpriteFrames {
     constructor(data) {
-        this.animations = {};
+        this.animations = Object.create(null);
 
         if (data) {
             this.load_data(data);
@@ -44,7 +44,7 @@ export class SpriteFrames {
         this.animations[anim] = a;
     }
     has_animation(anim) {
-        return this.animations.hasOwnProperty(anim);
+        return anim in this.animations;
     }
     remove_animation(anim) {
         delete this.animations[anim];

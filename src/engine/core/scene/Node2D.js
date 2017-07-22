@@ -148,7 +148,7 @@ export default class Node2D extends EventEmitter
          */
         this.children = [];
 
-        this.named_children = {};
+        this.named_children = Object.create(null);
 
         /**
          * Fired when this Node2D is added to a Node2D.

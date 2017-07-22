@@ -29,8 +29,8 @@ export default class PhysicsServer {
         this.is_initialized = false;
 
         this.spatial_shift = 5;
-        this.hash = {};
-        this.checks = {};
+        this.hash = null;
+        this.checks = null;
         this.collision_checks = 0;
     }
 
@@ -42,8 +42,8 @@ export default class PhysicsServer {
     }
     solve_collision(node) {
         // Reset hash and checks
-        this.hash = {};
-        this.checks = {};
+        this.hash = Object.create(null);
+        this.checks = Object.create(null);
         this.collision_checks = 0;
 
         this._test_node(node);
@@ -92,7 +92,7 @@ export default class PhysicsServer {
             for (let x = sx; x <= ex; x++) {
                 // Find or create the list
                 if (!this.hash[x]) {
-                    this.hash[x] = {};
+                    this.hash[x] = Object.create(null);
                 }
                 if (!this.hash[x][y]) {
                     this.hash[x][y] = get_array();
