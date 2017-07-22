@@ -2,13 +2,21 @@
     "name": "Loading",
     "children": [
         {
-            "type": "Text",
+            "name": "area",
+            "type": "Area2D",
             "x": 100,
-            "y": 50,
-            "text": "Voltar",
-            "style": {
-                "fill": "white"
-            }
+            "y": 100,
+            "children": [
+                {
+                    "type": "Text",
+                    "x": 100,
+                    "y": 50,
+                    "text": "Voltar",
+                    "style": {
+                        "fill": "white"
+                    }
+                }
+            ]
         }
     ]
 }

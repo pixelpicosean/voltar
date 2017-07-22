@@ -57,4 +57,33 @@ export default class CollisionObject2D extends Node2D {
 
         this._shape = null;
     }
+
+    _load_data(data) {
+        for (let k in data) {
+            switch (k) {
+                // Directly set
+                // - Node2D
+                case 'name':
+                case 'x':
+                case 'y':
+                case 'collision_layer':
+                case 'collision_mask':
+                    this[k] = data[k];
+                    break;
+
+                // Set vector
+                // - Node2D
+                case 'position':
+                    this[k].x = data[k].x || 0;
+                    this[k].y = data[k].y || 0;
+                    break;
+
+                // - Node2D
+                case 'scale':
+                    this[k].x = data[k].x || 1;
+                    this[k].y = data[k].y || 1;
+                    break;
+            }
+        }
+    }
 }

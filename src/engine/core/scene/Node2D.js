@@ -168,6 +168,41 @@ export default class Node2D extends EventEmitter
         this.tree_exited = new Signal();
     }
 
+    _load_data(data) {
+        for (let k in data) {
+            switch (k) {
+                // Directly set
+                // - Node2D
+                case 'name':
+                case 'alpha':
+                case 'width':
+                case 'height':
+                case 'rotation':
+                case 'visible':
+                case 'x':
+                case 'y':
+                case 'interactive':
+                    this[k] = data[k];
+                    break;
+
+                // Set vector
+                // - Node2D
+                case 'pivot':
+                case 'position':
+                case 'skew':
+                    this[k].x = data[k].x || 0;
+                    this[k].y = data[k].y || 0;
+                    break;
+
+                // - Node2D
+                case 'scale':
+                    this[k].x = data[k].x || 1;
+                    this[k].y = data[k].y || 1;
+                    break;
+            }
+        }
+    }
+
     /**
      * @private
      * @member {V.Node2D}

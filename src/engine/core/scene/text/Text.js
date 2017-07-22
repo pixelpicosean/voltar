@@ -3,7 +3,7 @@ import Sprite from '../sprites/Sprite';
 import Texture from '../../textures/Texture';
 import { Rectangle } from '../../math';
 import { sign } from '../../utils';
-import { TEXT_GRADIENT } from '../../const';
+import { TEXT_GRADIENT, BLEND_MODES } from '../../const';
 import settings from '../../settings';
 import TextStyle from './TextStyle';
 import TextMetrics from './TextMetrics';
@@ -110,6 +110,53 @@ export default class Text extends Sprite
         this.style = style;
 
         this.local_style_id = -1;
+    }
+
+    _load_data(data) {
+        for (let k in data) {
+            switch (k) {
+                // Directly set
+                // - Node2D
+                case 'name':
+                case 'alpha':
+                case 'width':
+                case 'height':
+                case 'rotation':
+                case 'visible':
+                case 'x':
+                case 'y':
+                case 'interactive':
+                // - Sprite
+                case 'tint':
+                // - Text
+                case 'text':
+                case 'style':
+                    this[k] = data[k];
+                    break;
+
+                // Set vector
+                // - Node2D
+                case 'pivot':
+                case 'position':
+                case 'skew':
+                // - Sprite
+                case 'anchor':
+                    this[k].x = data[k].x || 0;
+                    this[k].y = data[k].y || 0;
+                    break;
+
+                // - Node2D
+                case 'scale':
+                    this[k].x = data[k].x || 1;
+                    this[k].y = data[k].y || 1;
+                    break;
+
+                // Blend modes
+                case 'blend_mode':
+                    this.blend_mode = BLEND_MODES[data[k]];
+                    break;
+            }
+        }
     }
 
     /**
