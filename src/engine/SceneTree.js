@@ -89,7 +89,7 @@ export default class SceneTree {
     init(settings) {
         this._settings = Object.assign(this._settings, DefaultSettings, settings);
 
-        this._next_scene_ctor = this._settings.application.main_scene;
+        this.change_scene_to(this._settings.application.main_scene);
 
         window.addEventListener('load', this._initialize, false);
         document.addEventListener('DOMContentLoaded', this._initialize, false);
@@ -104,7 +104,9 @@ export default class SceneTree {
     }
     get_nodes_in_group() {}
 
-    change_scene_to(scene_class) {}
+    change_scene_to(scene_path) {
+        this._next_scene_ctor = require(`game/${scene_path}`).default;
+    }
     get_current_scene() {}
     reload_current_scene() {}
 
