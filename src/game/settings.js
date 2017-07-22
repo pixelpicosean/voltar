@@ -3,7 +3,7 @@ import * as V from 'engine';
 export default {
     application: {
         name: 'Voltar',
-        main_scene: null,
+        main_scene: 'TestScene',
     },
     rendering: {
         resolution: 1,

@@ -1,0 +1,14 @@
+{
+    "name": "Loading",
+    "children": [
+        {
+            "type": "Text",
+            "x": 100,
+            "y": 50,
+            "text": "Voltar",
+            "style": {
+                "fill": "white"
+            }
+        }
+    ]
+}
