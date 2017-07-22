@@ -2,6 +2,7 @@
 export * from './polyfill';
 
 // export core
+import * as core from './core';
 export * from './core';
 
 // export libs
@@ -45,3 +46,33 @@ import SceneTree from './SceneTree';
 
 export * from './SceneTree';
 export const scene_tree = new SceneTree();
+
+
+function assemble_node(node, children) {
+    if (!children || children.length === 0) {
+        return;
+    }
+
+    let i, data, inst;
+    for (i = 0; i < children.length; i++) {
+        data = children[i];
+
+        inst = new (core[data.type])();
+        inst._load_data(data);
+
+        assemble_node(inst, data.children);
+
+        node.add_child(inst);
+    }
+}
+export function assemble_scene(scn, data) {
+    if (data.name) {
+        scn.name = name;
+    }
+    if (data.children) {
+        for (let i = 0; i < data.children.length; i++) {
+            assemble_node(scn, data.children);
+        }
+    }
+    return scn;
+}
