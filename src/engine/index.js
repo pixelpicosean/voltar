@@ -70,9 +70,7 @@ export function assemble_scene(scn, data) {
         scn.name = name;
     }
     if (data.children) {
-        for (let i = 0; i < data.children.length; i++) {
-            assemble_node(scn, data.children);
-        }
+        assemble_node(scn, data.children);
     }
     return scn;
 }
