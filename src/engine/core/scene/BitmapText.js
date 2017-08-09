@@ -133,6 +133,21 @@ export default class BitmapText extends Node2D
         this.update_text();
     }
 
+    _load_data(data) {
+        super._load_data(data);
+
+        for (let k in data) {
+            switch (k) {
+                case 'font':
+                case 'text':
+                case 'max_width':
+                case 'max_line_height':
+                    this[k] = data[k];
+                    break;
+            }
+        }
+    }
+
     /**
      * Renders text and updates it when needed
      *

@@ -36,6 +36,7 @@ export { default as GraphicsData } from './scene/graphics/GraphicsData';
 export { default as GraphicsRenderer } from './scene/graphics/webgl/GraphicsRenderer';
 export { default as CanvasGraphicsRenderer } from './scene/graphics/canvas/CanvasGraphicsRenderer';
 
+export { default as BitmapText } from './scene/BitmapText';
 export { default as Text } from './scene/text/Text';
 export { default as TextStyle } from './scene/text/TextStyle';
 export { default as TextMetrics } from './scene/text/TextMetrics';
