@@ -156,39 +156,21 @@ export default class Sprite extends Node2D
     }
 
     _load_data(data) {
+        super._load_data(data);
+
         for (let k in data) {
             switch (k) {
                 // Directly set
-                // - Node2D
-                case 'name':
-                case 'alpha':
-                case 'width':
-                case 'height':
-                case 'rotation':
-                case 'visible':
-                case 'x':
-                case 'y':
-                case 'interactive':
                 // - Sprite
                 case 'tint':
                     this[k] = data[k];
                     break;
 
                 // Set vector
-                // - Node2D
-                case 'pivot':
-                case 'position':
-                case 'skew':
                 // - Sprite
                 case 'anchor':
                     this[k].x = data[k].x || 0;
                     this[k].y = data[k].y || 0;
-                    break;
-
-                // - Node2D
-                case 'scale':
-                    this[k].x = data[k].x || 1;
-                    this[k].y = data[k].y || 1;
                     break;
 
                 // Blend modes
