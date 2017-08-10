@@ -18,6 +18,7 @@ export { default as glCore } from 'pixi-gl-core';
 
 
 export { default as Node2D } from './scene/Node2D';
+export { default as Timer } from './scene/Timer';
 
 export * from './rnd';
 
