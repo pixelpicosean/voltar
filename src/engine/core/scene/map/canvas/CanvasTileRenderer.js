@@ -1,5 +1,6 @@
 import CanvasRenderer from '../../../renderers/canvas/CanvasRenderer';
 
+
 export default class CanvasTileRenderer {
     constructor(renderer) {
         this.renderer = renderer;

@@ -1,6 +1,7 @@
 import Node2D from '../Node2D';
 
 import { TextureCache } from '../../utils';
+import './canvas/CanvasTileRenderer';
 import './webgl/TileRenderer';
 
 
@@ -30,7 +31,6 @@ export default class BackgroundMap extends Node2D {
                 this.textures = [TextureCache[textures]];
             }
         }
-        this.visible = false;
     }
 
     clear() {
@@ -95,8 +95,19 @@ export default class BackgroundMap extends Node2D {
         }
     }
 
-    render_canvas(renderer) {
+    _render_canvas(renderer) {
         if (this.textures.length === 0) return;
+
+        var wt = this.world_transform;
+        renderer.context.setTransform(
+            wt.a,
+            wt.b,
+            wt.c,
+            wt.d,
+            wt.tx * renderer.resolution,
+            wt.ty * renderer.resolution
+        );
+
         var points = this.pointsBuf;
         renderer.context.fillStyle = '#000000';
         for (var i = 0, n = points.length; i < n; i += 9) {
