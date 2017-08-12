@@ -1,13 +1,16 @@
 import Node2D from '../Node2D';
 
 import { TextureCache } from '../../utils';
+import { Matrix } from '../../math';
 import './canvas/CanvasTileRenderer';
 import './webgl/TileRenderer';
 
 
 export default class BackgroundMap extends Node2D {
-    constructor(textures) {
+    constructor(textures, useSquare = false) {
         super();
+
+        this.useSquare = useSquare;
 
         this.pointsBuf = [];
         this._tempSize = new Float32Array([0, 0]);
@@ -19,6 +22,9 @@ export default class BackgroundMap extends Node2D {
         this.vbBuffer = null;
         this.vbArray = null;
         this.vbInts = null;
+
+        this._globalMat = new Matrix();
+        this._tempScale = [0, 0];
 
         if (!textures) {
             this.textures = [];
@@ -128,17 +134,32 @@ export default class BackgroundMap extends Node2D {
         }
     }
 
-    render_webGL(renderer, useSquare = false) {
+    _render_webGL(renderer) {
+        var gl = renderer.gl;
+        var shader = renderer.plugins.tilemap.getShader(this.useSquare);
+        renderer.setObjectRenderer(renderer.plugins.tilemap);
+        renderer.bindShader(shader);
+        renderer._activeRenderTarget.projectionMatrix.copy(this._globalMat).append(this.world_transform);
+        shader.uniforms.projectionMatrix = this._globalMat.to_array(true);
+        if (this.useSquare) {
+            var tempScale = this._tempScale;
+            tempScale[0] = this._globalMat.a >= 0 ? 1 : -1;
+            tempScale[1] = this._globalMat.d < 0 ? 1 : -1;
+            var ps = shader.uniforms.pointScale = tempScale;
+            shader.uniforms.projectionScale = Math.abs(this.world_transform.a) * renderer.resolution;
+        }
+        // var af = shader.uniforms.animationFrame = renderer.plugins.tilemap.tileAnim;
+        //shader.syncUniform(shader.uniforms.animationFrame);
+
         var points = this.pointsBuf;
         if (points.length === 0) return;
         var rectsCount = points.length / 9;
         var tile = renderer.plugins.tilemap;
         var gl = renderer.gl;
-        if (!useSquare) {
+        if (!this.useSquare) {
             tile.checkIndexBuffer(rectsCount);
         }
 
-        var shader = tile.getShader(useSquare);
         var textures = this.textures;
         if (textures.length === 0) return;
         var len = textures.length;
@@ -158,7 +179,7 @@ export default class BackgroundMap extends Node2D {
         //lost context! recover!
         var vb = tile.getVb(this.vbId);
         if (!vb) {
-            vb = tile.createVb(useSquare);
+            vb = tile.createVb(this.useSquare);
             this.vbId = vb.id;
             this.vbBuffer = null;
             this.modificationMarker = 0;
@@ -190,7 +211,7 @@ export default class BackgroundMap extends Node2D {
             var sz = 0;
             //var tint = 0xffffffff;
             var textureId, shiftU, shiftV;
-            if (useSquare) {
+            if (this.useSquare) {
                 for (i = 0; i < points.length; i += 9) {
                     textureId = (points[i + 8] >> 2);
                     shiftU = 1024 * (points[i + 8] & 1);
@@ -269,7 +290,7 @@ export default class BackgroundMap extends Node2D {
             //     vb.upload(view, 0);
             // }
         }
-        if (useSquare)
+        if (this.useSquare)
             gl.drawArrays(gl.POINTS, 0, vertices);
         else
             gl.drawElements(gl.TRIANGLES, rectsCount * 6, gl.UNSIGNED_SHORT, 0);

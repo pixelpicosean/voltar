@@ -2,7 +2,6 @@ varying vec2 vTextureCoord;
 varying float vSize;
 varying float vTextureId;
 
-uniform vec4 shadowColor;
 uniform sampler2D uSamplers[%count%];
 uniform vec2 uSamplerSize[%count%];
 uniform vec2 pointScale;

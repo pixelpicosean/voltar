@@ -27,7 +27,7 @@ export function generateSampleSrc(maxTextures) {
     src += '\n';
 
     src += 'if(vTextureId <= -1.0) {';
-    src += '\n\tcolor = shadowColor;';
+    src += '\n\tcolor = vec4(0.0, 0.0, 0.0, 0.5);';
     src += '\n}';
 
     for (var i = 0; i < maxTextures; i++)

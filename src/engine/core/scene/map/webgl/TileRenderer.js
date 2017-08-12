@@ -3,7 +3,7 @@ import ObjectRenderer from '../../../renderers/webgl/utils/ObjectRenderer';
 import WebGLRenderer from '../../../renderers/webgl/WebGLRenderer';
 import RenderTexture from '../../../textures/RenderTexture';
 import Sprite from '../../sprites/Sprite';
-import { SCALE_MODES, WRAP_MODES, BLEND_MODES } from '../../../const';
+import { WRAP_MODES, BLEND_MODES } from '../../../const';
 
 import { GLBuffer } from 'pixi-gl-core';
 
@@ -77,7 +77,6 @@ export default class TileRenderer extends ObjectRenderer {
         for (let i = 0; i < this.maxTextures; i++) {
             const rt = RenderTexture.create(2048, 2048);
             rt.base_texture.premultipliedAlpha = true;
-            rt.base_texture.scale_mode = TileRenderer.SCALE_MODE;
             rt.base_texture.wrap_mode = WRAP_MODES.CLAMP;
             this.renderer.textureManager.update_texture(rt);
 
@@ -234,7 +233,6 @@ export default class TileRenderer extends ObjectRenderer {
 }
 
 TileRenderer.vbAutoincrement = 0;
-TileRenderer.SCALE_MODE = SCALE_MODES.LINEAR;
 TileRenderer.DO_CLEAR = false;
 
 WebGLRenderer.registerPlugin('tilemap', TileRenderer);
