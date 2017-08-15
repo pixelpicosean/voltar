@@ -7,10 +7,15 @@ import './webgl/TileRenderer';
 
 
 export default class BackgroundMap extends Node2D {
-    constructor(textures, useSquare = false) {
+    constructor(tile_width, tile_height, data, texture) {
         super();
 
-        this.useSquare = useSquare;
+        this.data = data;
+
+        this.tile_width = tile_width;
+        this.tile_height = tile_height;
+
+        this.use_square = (tile_width === tile_height);
 
         this.pointsBuf = [];
         this._tempSize = new Float32Array([0, 0]);
@@ -26,17 +31,19 @@ export default class BackgroundMap extends Node2D {
         this._globalMat = new Matrix();
         this._tempScale = [0, 0];
 
-        if (!textures) {
+        if (!texture) {
             this.textures = [];
         }
-        else if (!Array.isArray(textures)) {
-            if (textures.base_texture) {
-                this.textures = [textures];
+        else if (!Array.isArray(texture)) {
+            if (texture.base_texture) {
+                this.textures = [texture];
             }
             else {
-                this.textures = [TextureCache[textures]];
+                this.textures = [TextureCache[texture]];
             }
         }
+
+        this._needs_redraw = true;
     }
 
     clear() {
@@ -45,46 +52,55 @@ export default class BackgroundMap extends Node2D {
         this.hasAnim = false;
     }
 
-    addRect(textureId, u, v, x, y, tileWidth, tileHeight, animX = 0, animY = 0) {
+    get_tile(x, y) {
+        return this.data[y][x];
+    }
+    set_tile(x, y, tile) {
+        this.data[y][x] = tile;
+
+        this._needs_redraw = true;
+    }
+
+    _push_tile(u, v, x, y, animX, animY) {
         var pb = this.pointsBuf;
         this.hasAnim = this.hasAnim || animX > 0 || animY > 0;
-        if (tileWidth === tileHeight) {
+        if (this.use_square) {
             pb.push(u);
             pb.push(v);
             pb.push(x);
             pb.push(y);
-            pb.push(tileWidth);
-            pb.push(tileHeight);
+            pb.push(this.tile_width);
+            pb.push(this.tile_height);
             pb.push(animX | 0);
             pb.push(animY | 0);
-            pb.push(textureId);
+            pb.push(0);
         } else {
             var i;
-            if (tileWidth % tileHeight === 0) {
+            if (this.tile_width % this.tile_height === 0) {
                 //horizontal line on squares
-                for (i = 0; i < tileWidth / tileHeight; i++) {
-                    pb.push(u + i * tileHeight);
+                for (i = 0; i < this.tile_width / this.tile_height; i++) {
+                    pb.push(u + i * this.tile_height);
                     pb.push(v);
-                    pb.push(x + i * tileHeight);
+                    pb.push(x + i * this.tile_height);
                     pb.push(y);
-                    pb.push(tileHeight);
-                    pb.push(tileHeight);
+                    pb.push(this.tile_height);
+                    pb.push(this.tile_height);
                     pb.push(animX | 0);
                     pb.push(animY | 0);
-                    pb.push(textureId);
+                    pb.push(0);
                 }
-            } else if (tileHeight % tileWidth === 0) {
+            } else if (this.tile_height % this.tile_width === 0) {
                 //vertical line on squares
-                for (i = 0; i < tileHeight / tileWidth; i++) {
+                for (i = 0; i < this.tile_height / this.tile_width; i++) {
                     pb.push(u);
-                    pb.push(v + i * tileWidth);
+                    pb.push(v + i * this.tile_width);
                     pb.push(x);
-                    pb.push(y + i * tileWidth);
-                    pb.push(tileWidth);
-                    pb.push(tileWidth);
+                    pb.push(y + i * this.tile_width);
+                    pb.push(this.tile_width);
+                    pb.push(this.tile_width);
                     pb.push(animX | 0);
                     pb.push(animY | 0);
-                    pb.push(textureId);
+                    pb.push(0);
                 }
             } else {
                 //ok, ok, lets use rectangle. but its not working with square shader yet
@@ -92,11 +108,28 @@ export default class BackgroundMap extends Node2D {
                 pb.push(v);
                 pb.push(x);
                 pb.push(y);
-                pb.push(tileWidth);
-                pb.push(tileHeight);
+                pb.push(this.tile_width);
+                pb.push(this.tile_height);
                 pb.push(animX | 0);
                 pb.push(animY | 0);
-                pb.push(textureId);
+                pb.push(0);
+            }
+        }
+    }
+
+    _draw_tiles() {
+        let r, q, row, c, u, v;
+        const tile_per_row = Math.floor(this.textures[0].width / this.tile_width);
+
+        for (r = 0; r < this.data.length; r++) {
+            row = this.data[r];
+            for (q = 0; q < row.length; q++) {
+                c = row[q];
+
+                u = Math.floor(c % tile_per_row) * this.tile_width;
+                v = Math.floor(c / tile_per_row) * this.tile_height;
+
+                this._push_tile(u, v, q * this.tile_width, r * this.tile_height, this.tile_width, this.tile_height, 0, 0);
             }
         }
     }
@@ -104,6 +137,14 @@ export default class BackgroundMap extends Node2D {
     _render_canvas(renderer) {
         if (this.textures.length === 0) return;
 
+        // Check whether we need to redraw the whole map
+        if (this._needs_redraw) {
+            this._needs_redraw = false;
+            this.clear();
+            this._draw_tiles();
+        }
+
+        // Start to render
         var wt = this.world_transform;
         renderer.context.setTransform(
             wt.a,
@@ -135,13 +176,21 @@ export default class BackgroundMap extends Node2D {
     }
 
     _render_webGL(renderer) {
+        // Check whether we need to redraw the whole map
+        if (this._needs_redraw) {
+            this._needs_redraw = false;
+            this.clear();
+            this._draw_tiles();
+        }
+
+        // Start to render
         var gl = renderer.gl;
-        var shader = renderer.plugins.tilemap.getShader(this.useSquare);
+        var shader = renderer.plugins.tilemap.getShader(this.use_square);
         renderer.setObjectRenderer(renderer.plugins.tilemap);
         renderer.bindShader(shader);
         renderer._activeRenderTarget.projectionMatrix.copy(this._globalMat).append(this.world_transform);
         shader.uniforms.projectionMatrix = this._globalMat.to_array(true);
-        if (this.useSquare) {
+        if (this.use_square) {
             var tempScale = this._tempScale;
             tempScale[0] = this._globalMat.a >= 0 ? 1 : -1;
             tempScale[1] = this._globalMat.d < 0 ? 1 : -1;
@@ -156,7 +205,7 @@ export default class BackgroundMap extends Node2D {
         var rectsCount = points.length / 9;
         var tile = renderer.plugins.tilemap;
         var gl = renderer.gl;
-        if (!this.useSquare) {
+        if (!this.use_square) {
             tile.checkIndexBuffer(rectsCount);
         }
 
@@ -179,7 +228,7 @@ export default class BackgroundMap extends Node2D {
         //lost context! recover!
         var vb = tile.getVb(this.vbId);
         if (!vb) {
-            vb = tile.createVb(this.useSquare);
+            vb = tile.createVb(this.use_square);
             this.vbId = vb.id;
             this.vbBuffer = null;
             this.modificationMarker = 0;
@@ -211,7 +260,7 @@ export default class BackgroundMap extends Node2D {
             var sz = 0;
             //var tint = 0xffffffff;
             var textureId, shiftU, shiftV;
-            if (this.useSquare) {
+            if (this.use_square) {
                 for (i = 0; i < points.length; i += 9) {
                     textureId = (points[i + 8] >> 2);
                     shiftU = 1024 * (points[i + 8] & 1);
@@ -290,7 +339,7 @@ export default class BackgroundMap extends Node2D {
             //     vb.upload(view, 0);
             // }
         }
-        if (this.useSquare)
+        if (this.use_square)
             gl.drawArrays(gl.POINTS, 0, vertices);
         else
             gl.drawElements(gl.TRIANGLES, rectsCount * 6, gl.UNSIGNED_SHORT, 0);
