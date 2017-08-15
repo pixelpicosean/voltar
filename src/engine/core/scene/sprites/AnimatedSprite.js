@@ -316,8 +316,10 @@ export default class AnimatedSprite extends Sprite {
         if (typeof(tex) === 'string') {
             tex = TextureCache[tex];
         }
-        this._texture = tex;
-        this._textureID = -1;
+        else if (tex.base_texture) {
+            this._texture = tex;
+            this._textureID = -1;
+        }
     }
 
     /**
