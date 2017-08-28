@@ -1,35 +1,29 @@
-import * as V from 'engine';
+import * as v from 'engine';
+
+// v.settings.SCALE_MODE = v.SCALE_MODES.NEAREST;
 
 export default {
     application: {
         name: 'Voltar',
         main_scene: 'boot/scene',
     },
-    rendering: {
-        resolution: 1,
-
-        antialias: false,
-        force_fxaa: false,
-        auto_resize: false,
-        transparent: false,
-        background_color: 0x000000,
-        clear_before_render: true,
-        preserve_drawing_buffer: false,
-
-        pixel_snap: true,
-
-        force_canvas: false,
-    },
     display: {
         view: 'game',
         container: 'container',
 
-        width: 400,
-        height: 250,
+        width: 256,
+        height: 256,
+        resolution: 1,
+
+        background_color: 0x00AAC9,
+
+        force_canvas: false,
+        antialias: false,
+        pixel_snap: true,
 
         FPS: 60,
 
-        stretch_mode: V.STRETCH_MODE_DISABLED,
-        stretch_aspect: V.STRETCH_ASPECT_IGNORE,
+        stretch_mode: v.STRETCH_MODE_VIEWPORT,
+        stretch_aspect: v.STRETCH_ASPECT_KEEP_HEIGHT,
     },
 };

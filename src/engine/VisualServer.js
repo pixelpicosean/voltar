@@ -2,6 +2,7 @@ import { isWebGLSupported } from './core/utils';
 import CanvasRenderer from './core/renderers/canvas/CanvasRenderer';
 import WebGLRenderer from './core/renderers/webgl/WebGLRenderer';
 
+
 export default class VisualServer {
     constructor() {
         this.is_initialized = false;
@@ -22,7 +23,7 @@ export default class VisualServer {
             this.renderer = new CanvasRenderer(settings);
         }
     }
-    render(scene, skip_transform) {
-        this.renderer.render(scene, undefined, undefined, undefined, skip_transform);
+    render(viewport) {
+        this.renderer.render(viewport, undefined, undefined, undefined, true);
     }
 }

@@ -1,48 +1,36 @@
 import VisualServer from './VisualServer';
 import PhysicsServer from './PhysicsServer';
+import { Node2D } from './core';
 
+import * as c from './const';
 
-export const STRETCH_MODE_DISABLED = 0;
-export const STRETCH_MODE_2D = 1;
-export const STRETCH_MODE_VIEWPORT = 2;
-
-export const STRETCH_ASPECT_IGNORE = 0;
-export const STRETCH_ASPECT_KEEP = 1;
-export const STRETCH_ASPECT_KEEP_WIDTH = 2;
-export const STRETCH_ASPECT_KEEP_HEIGHT = 3;
+import { outer_box_resize } from './resize';
 
 
 const DefaultSettings = {
     application: {
         name: 'Voltar',
-        main_scene: null,
-    },
-    rendering: {
-        resolution: 1,
-
-        antialias: false,
-        force_fxaa: false,
-        auto_resize: false,
-        transparent: false,
-        background_color: 0x000000,
-        clear_before_render: true,
-        preserve_drawing_buffer: false,
-
-        pixel_snap: true,
-
-        force_canvas: false,
+        main_scene: 'boot/scene',
     },
     display: {
         view: 'game',
         container: 'container',
 
-        width: 256,
-        height: 256,
+        width: 400,
+        height: 250,
+        resolution: 1,
+
+        background_color: 0x000000,
+
+        force_canvas: false,
+        antialias: false,
+        pixel_snap: true,
+
 
         FPS: 60,
 
-        stretch_mode: STRETCH_MODE_DISABLED,
-        stretch_aspect: STRETCH_ASPECT_IGNORE,
+        stretch_mode: c.STRETCH_MODE_DISABLED,
+        stretch_aspect: c.STRETCH_ASPECT_IGNORE,
     },
 };
 
@@ -60,9 +48,10 @@ export default class SceneTree {
         this.delete_queue = [];
 
         this.current_scene = null;
+        this.viewport = new Node2D();
 
-        this.stretch_mode = STRETCH_MODE_DISABLED;
-        this.stretch_aspect = STRETCH_ASPECT_IGNORE;
+        this.stretch_mode = c.STRETCH_MODE_DISABLED;
+        this.stretch_aspect = c.STRETCH_ASPECT_IGNORE;
 
         this.view = null;
         this.container = null;
@@ -128,14 +117,126 @@ export default class SceneTree {
         this.container_view = document.getElementById(this._settings.display.container);
 
         // TODO: move all these configs to project settings, the same as Godot
-        visual_server.init(Object.assign({
+        visual_server.init({
+            view: this.view,
+
             width: this._settings.display.width,
             height: this._settings.display.height,
-            view: this.view,
-        }, this._settings.rendering));
+            resolution: this._settings.display.resolution,
+
+            background_color: this._settings.display.background_color,
+
+            force_canvas: this._settings.display.force_canvas,
+            antialias: this._settings.display.antialias,
+            pixel_snap: this._settings.display.pixel_snap,
+
+            auto_resize: false,
+            transparent: false,
+            force_fxaa: false,
+            clear_before_render: true,
+            preserve_drawing_buffer: false,
+        });
 
         physics_server.init();
 
+        // Listen to the resize and orientation events
+        const on_window_resize = () => {
+            let result;
+            switch (this._settings.display.stretch_mode) {
+                case c.STRETCH_MODE_DISABLED:
+                    visual_server.renderer.resize(window.innerWidth, window.innerHeight);
+                    this.view.width = window.innerWidth * visual_server.renderer.resolution;
+                    this.view.height = window.innerHeight * visual_server.renderer.resolution;
+                    this.view.style.width = `${window.innerWidth}px`;
+                    this.view.style.height = `${window.innerHeight}px`;
+                    break;
+                case c.STRETCH_MODE_2D:
+                    visual_server.renderer.resize(window.innerWidth, window.innerHeight);
+                    this.view.width = window.innerWidth * visual_server.renderer.resolution;
+                    this.view.height = window.innerHeight * visual_server.renderer.resolution;
+                    if (this.current_scene) {
+                        this.current_scene.scale.set(window.innerWidth / this._settings.display.width, window.innerHeight / this._settings.display.height);
+                    }
+                    switch (this._settings.display.stretch_aspect) {
+                        case c.STRETCH_ASPECT_IGNORE:
+                            this.view.style.width = `${window.innerWidth}px`;
+                            this.view.style.height = `${window.innerHeight}px`;
+                            break;
+                        case c.STRETCH_ASPECT_KEEP:
+                            result = outer_box_resize(window.innerWidth, window.innerHeight, this._settings.display.width, this._settings.display.height);
+                            this.view.style.width = `${this._settings.display.width * result.scale}px`;
+                            this.view.style.height = `${this._settings.display.height * result.scale}px`;
+                            this.view.style.marginLeft = `${result.left}px`;
+                            this.view.style.marginTop = `${result.top}px`;
+                            break;
+                        case c.STRETCH_ASPECT_KEEP_WIDTH:
+                            if (window.innerWidth / window.innerHeight > this._settings.display.width / this._settings.display.height) {
+                                let scale = window.innerHeight / this._settings.display.height;
+                                this.view.style.marginLeft = `${(window.innerWidth - this._settings.display.width * scale) * 0.5}px`;
+                            }
+                            break;
+                        case c.STRETCH_ASPECT_KEEP_HEIGHT:
+                            break;
+                    }
+                    break;
+                case c.STRETCH_MODE_VIEWPORT:
+                    switch (this._settings.display.stretch_aspect) {
+                        case c.STRETCH_ASPECT_IGNORE:
+                            this.view.style.width = `${window.innerWidth}px`;
+                            this.view.style.height = `${window.innerHeight}px`;
+                            break;
+                        case c.STRETCH_ASPECT_KEEP:
+                            result = outer_box_resize(window.innerWidth, window.innerHeight, this._settings.display.width, this._settings.display.height);
+                            this.view.style.width = `${this._settings.display.width * result.scale}px`;
+                            this.view.style.height = `${this._settings.display.height * result.scale}px`;
+                            this.view.style.marginLeft = `${result.left}px`;
+                            this.view.style.marginTop = `${result.top}px`;
+                            break;
+                        case c.STRETCH_ASPECT_KEEP_WIDTH:
+                            if (window.innerWidth / window.innerHeight > this._settings.display.width / this._settings.display.height) {
+                                let scale = window.innerHeight / this._settings.display.height;
+                                let width = this._settings.display.width * scale;
+                                this.view.style.width = `${width}px`;
+                                this.view.style.height = `${width * (this._settings.display.height / this._settings.display.width)}px`;
+                                this.view.style.marginLeft = `${(window.innerWidth - width) * 0.5}px`;
+                            }
+                            else {
+                                let scale = this._settings.display.width / window.innerWidth;
+                                visual_server.renderer.resize(this._settings.display.width, window.innerHeight * scale);
+                                this.view.style.width = `${window.innerWidth}px`;
+                                this.view.style.height = `${window.innerHeight}px`;
+                                this.view.style.marginLeft = `0px`;
+                                this.view.style.marginTop = `0px`;
+                            }
+                            break;
+                        case c.STRETCH_ASPECT_KEEP_HEIGHT:
+                            if (window.innerWidth / window.innerHeight < this._settings.display.width / this._settings.display.height) {
+                                let scale = window.innerWidth / this._settings.display.width;
+                                let height = this._settings.display.height * scale;
+                                this.view.style.width = `${height * (this._settings.display.height / this._settings.display.width)}px`;
+                                this.view.style.height = `${height}px`;
+                                this.view.style.marginTop = `${(window.innerHeight - height) * 0.5}px`;
+                            }
+                            else {
+                                let scale = this._settings.display.height / window.innerHeight;
+                                visual_server.renderer.resize(window.innerWidth * scale, this._settings.display.height);
+                                this.view.style.width = `${window.innerWidth}px`;
+                                this.view.style.height = `${window.innerHeight}px`;
+                                this.view.style.marginLeft = `0px`;
+                                this.view.style.marginTop = `0px`;
+                            }
+                            break;
+                    }
+                    break;
+            }
+        };
+        window.addEventListener('resize', on_window_resize, false);
+        window.addEventListener('orientationchange', on_window_resize, false);
+
+        // Resize for the first tiem
+        setTimeout(on_window_resize, 1);
+
+        // Start the main loop
         this._start_loop();
     }
     _start_loop() {
@@ -148,11 +249,13 @@ export default class SceneTree {
             if (this.current_scene) {
                 this.current_scene._propagate_exit_tree();
                 this.current_scene.scene_tree = null;
+                this.viewport.remove_children();
                 this.current_scene = null;
             }
 
             this.current_scene = this._next_scene_ctor.instance();
             this.current_scene.scene_tree = this;
+            this.viewport.add_child(this.current_scene);
             this.current_scene._propagate_enter_tree();
             this.current_scene._propagate_ready();
 
@@ -221,7 +324,7 @@ export default class SceneTree {
             // this.current_scene._process(_process_tmp.real_delta * 0.001);
 
             // Render
-            visual_server.render(this.current_scene, true);
+            visual_server.render(this.viewport);
         }
     }
     _end_loop() {
