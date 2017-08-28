@@ -24,6 +24,6 @@ export default {
         FPS: 60,
 
         stretch_mode: v.STRETCH_MODE_VIEWPORT,
-        stretch_aspect: v.STRETCH_ASPECT_KEEP_HEIGHT,
+        stretch_aspect: v.STRETCH_ASPECT_KEEP,
     },
 };
