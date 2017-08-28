@@ -411,26 +411,6 @@ export default class Node2D extends EventEmitter
     }
 
     /**
-     * Renders the object using the WebGL renderer
-     *
-     * @param {V.WebGLRenderer} renderer - The renderer
-     */
-    render_webGL(renderer) // eslint-disable-line no-unused-vars
-    {
-        // OVERWRITE;
-    }
-
-    /**
-     * Renders the object using the Canvas renderer
-     *
-     * @param {V.CanvasRenderer} renderer - The renderer
-     */
-    render_canvas(renderer) // eslint-disable-line no-unused-vars
-    {
-        // OVERWRITE;
-    }
-
-    /**
      * Convenience function to set the position, scale, skew and pivot at once.
      *
      * @param {number} [x=0] - The X position
