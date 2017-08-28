@@ -10,12 +10,16 @@ export default class BackgroundMap extends Node2D {
     constructor(tile_width, tile_height, data, texture) {
         super();
 
+        this.type = 'BackgroundMap';
+
         this.data = data;
 
         this.tile_width = tile_width;
         this.tile_height = tile_height;
 
-        this.use_square = (tile_width === tile_height);
+        // Fix/remove square rendering mode
+        // this.use_square = (tile_width === tile_height);
+        this.use_square = false;
 
         this.pointsBuf = [];
         this._tempSize = new Float32Array([0, 0]);
@@ -47,6 +51,8 @@ export default class BackgroundMap extends Node2D {
     }
 
     clear() {
+        this.data = [[]];
+
         this.pointsBuf.length = 0;
         this.modificationMarker = 0;
         this.hasAnim = false;
@@ -140,7 +146,9 @@ export default class BackgroundMap extends Node2D {
         // Check whether we need to redraw the whole map
         if (this._needs_redraw) {
             this._needs_redraw = false;
-            this.clear();
+            this.pointsBuf.length = 0;
+            this.modificationMarker = 0;
+            this.hasAnim = false;
             this._draw_tiles();
         }
 
@@ -179,7 +187,9 @@ export default class BackgroundMap extends Node2D {
         // Check whether we need to redraw the whole map
         if (this._needs_redraw) {
             this._needs_redraw = false;
-            this.clear();
+            this.pointsBuf.length = 0;
+            this.modificationMarker = 0;
+            this.hasAnim = false;
             this._draw_tiles();
         }
 
