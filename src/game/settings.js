@@ -20,10 +20,11 @@ export default {
         force_canvas: false,
         antialias: false,
         pixel_snap: true,
+        scale_mode: 'nearest',
 
         FPS: 60,
 
-        stretch_mode: v.STRETCH_MODE_VIEWPORT,
-        stretch_aspect: v.STRETCH_ASPECT_KEEP,
+        stretch_mode: 'viewport',
+        stretch_aspect: 'keep',
     },
 };

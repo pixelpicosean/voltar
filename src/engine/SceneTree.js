@@ -2,8 +2,6 @@ import VisualServer from './VisualServer';
 import PhysicsServer from './PhysicsServer';
 import { Node2D } from './core';
 
-import * as c from './const';
-
 import { outer_box_resize } from './resize';
 
 
@@ -25,12 +23,13 @@ const DefaultSettings = {
         force_canvas: false,
         antialias: false,
         pixel_snap: true,
+        scale_mode: 'linear',
 
 
         FPS: 60,
 
-        stretch_mode: c.STRETCH_MODE_DISABLED,
-        stretch_aspect: c.STRETCH_ASPECT_IGNORE,
+        stretch_mode: 'viewport',
+        stretch_aspect: 'keep',
     },
 };
 
@@ -50,8 +49,8 @@ export default class SceneTree {
         this.current_scene = null;
         this.viewport = new Node2D();
 
-        this.stretch_mode = c.STRETCH_MODE_DISABLED;
-        this.stretch_aspect = c.STRETCH_ASPECT_IGNORE;
+        this.stretch_mode = 'viewport';
+        this.stretch_aspect = 'keep';
 
         this.view = null;
         this.container = null;
@@ -152,16 +151,16 @@ export default class SceneTree {
         const on_window_resize = () => {
             let result;
             switch (this._settings.display.stretch_mode) {
-                case c.STRETCH_MODE_DISABLED:
+                case 'disabled':
                     visual_server.renderer.resize(window.innerWidth, window.innerHeight);
                     this.view.width = window.innerWidth * visual_server.renderer.resolution;
                     this.view.height = window.innerHeight * visual_server.renderer.resolution;
                     this.view.style.width = `${window.innerWidth}px`;
                     this.view.style.height = `${window.innerHeight}px`;
                     break;
-                case c.STRETCH_MODE_2D:
+                case '2D':
                     switch (this._settings.display.stretch_aspect) {
-                        case c.STRETCH_ASPECT_IGNORE:
+                        case 'ignore':
                             visual_server.renderer.resize(window.innerWidth, window.innerHeight);
                             this.view.width = window.innerWidth * visual_server.renderer.resolution;
                             this.view.height = window.innerHeight * visual_server.renderer.resolution;
@@ -169,7 +168,7 @@ export default class SceneTree {
                             this.view.style.width = `${window.innerWidth}px`;
                             this.view.style.height = `${window.innerHeight}px`;
                             break;
-                        case c.STRETCH_ASPECT_KEEP:
+                        case 'keep':
                             result = outer_box_resize(window.innerWidth, window.innerHeight, this._settings.display.width, this._settings.display.height);
                             let width = this._settings.display.width * result.scale;
                             let height = this._settings.display.height * result.scale;
@@ -182,7 +181,7 @@ export default class SceneTree {
                             this.view.style.marginLeft = `${result.left}px`;
                             this.view.style.marginTop = `${result.top}px`;
                             break;
-                        case c.STRETCH_ASPECT_KEEP_WIDTH:
+                        case 'keep_width':
                             if (window.innerWidth / window.innerHeight > this._settings.display.width / this._settings.display.height) {
                                 let scale = window.innerHeight / this._settings.display.height;
                                 let width = this._settings.display.width * scale;
@@ -209,7 +208,7 @@ export default class SceneTree {
                                 this.view.style.marginTop = `0px`;
                             }
                             break;
-                        case c.STRETCH_ASPECT_KEEP_HEIGHT:
+                        case 'keep_height':
                             if (window.innerWidth / window.innerHeight < this._settings.display.width / this._settings.display.height) {
                                 let scale = window.innerWidth / this._settings.display.width;
                                 let height = this._settings.display.height * scale;
@@ -236,20 +235,20 @@ export default class SceneTree {
                             break;
                     }
                     break;
-                case c.STRETCH_MODE_VIEWPORT:
+                case 'viewport':
                     switch (this._settings.display.stretch_aspect) {
-                        case c.STRETCH_ASPECT_IGNORE:
+                        case 'ignore':
                             this.view.style.width = `${window.innerWidth}px`;
                             this.view.style.height = `${window.innerHeight}px`;
                             break;
-                        case c.STRETCH_ASPECT_KEEP:
+                        case 'keep':
                             result = outer_box_resize(window.innerWidth, window.innerHeight, this._settings.display.width, this._settings.display.height);
                             this.view.style.width = `${this._settings.display.width * result.scale}px`;
                             this.view.style.height = `${this._settings.display.height * result.scale}px`;
                             this.view.style.marginLeft = `${result.left}px`;
                             this.view.style.marginTop = `${result.top}px`;
                             break;
-                        case c.STRETCH_ASPECT_KEEP_WIDTH:
+                        case 'keep_width':
                             if (window.innerWidth / window.innerHeight > this._settings.display.width / this._settings.display.height) {
                                 let scale = window.innerHeight / this._settings.display.height;
                                 let width = this._settings.display.width * scale;
@@ -266,7 +265,7 @@ export default class SceneTree {
                                 this.view.style.marginTop = `0px`;
                             }
                             break;
-                        case c.STRETCH_ASPECT_KEEP_HEIGHT:
+                        case 'keep_height':
                             if (window.innerWidth / window.innerHeight < this._settings.display.width / this._settings.display.height) {
                                 let scale = window.innerWidth / this._settings.display.width;
                                 let height = this._settings.display.height * scale;
