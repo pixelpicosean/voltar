@@ -24,6 +24,6 @@ export default class VisualServer {
         }
     }
     render(viewport) {
-        this.renderer.render(viewport, undefined, undefined, undefined, true);
+        this.renderer.render(viewport, undefined, true, undefined, true);
     }
 }

@@ -4,6 +4,7 @@ export * from './polyfill';
 // export core
 import * as core from './core';
 export * from './core';
+export * from './const';
 
 // export libs
 import * as accessibility from './accessibility';
