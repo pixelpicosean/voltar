@@ -1044,7 +1044,7 @@ export default class Node2D extends EventEmitter
             for (let i = 0; i < removed.length; ++i)
             {
                 removed[i].parent = null;
-                child.scene_tree = null;
+                removed[i].scene_tree = null;
                 if (removed[i].transform)
                 {
                     removed[i].transform._parentID = -1;
