@@ -88,17 +88,12 @@ class CustomBody extends v.PhysicsBody2D {
 }
 
 
-export default class TestScene extends v.Node2D {
+export default class PhysicsScene extends v.Node2D {
     static instance() {
-        return new TestScene();
+        return new PhysicsScene();
     }
 
     _enter_tree() {
-        this.info = new v.Text('', {
-            fill: 'white',
-        });
-        this.add_child(this.info);
-
         const a = new CustomArea();
         a.name = 'a';
         a.position.set(100, 200);
@@ -116,19 +111,12 @@ export default class TestScene extends v.Node2D {
         c.position.set(300, 100);
         this.add_child(c);
         this.c = c;
-
-        this.timer = 0;
     }
     _ready() {
         this.set_process(true);
     }
     _process(delta) {
         this.a.x += 20 * delta;
-
-        this.timer += delta;
-        if (this.timer > 2) {
-            v.scene_tree.change_scene_to('loading/scene');
-        }
     }
     _exit_tree() {}
 }

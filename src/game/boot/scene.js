@@ -2,15 +2,19 @@ import * as v from 'engine';
 import data from './data.json';
 
 
+// Which test to run after resources load
+const test = 'physics';
+
+
 export default class Boot extends v.Node2D {
     static instance() {
         return v.assemble_scene(new Boot(), data);
     }
 
-    _enter_tree() {}
-    _ready() {
+    _enter_tree() {
         let progress_bind = undefined;
-        const bar = this.get_node("bar");
+        const bar = this.get_node('bar');
+        bar.scale.x = 0;
 
         const load_progress = () => {
             bar.scale.x = v.loader.progress * 0.01;
@@ -20,6 +24,8 @@ export default class Boot extends v.Node2D {
             if (progress_bind) {
                 progress_bind.detach();
             }
+
+            v.scene_tree.change_scene_to(`test/${test}`);
         }
 
         if (v.loader._queue._tasks.length > 0) {
@@ -30,6 +36,7 @@ export default class Boot extends v.Node2D {
             load_complete();
         }
     }
+    _ready() {}
     _process(delta) {}
     _exit_tree() {}
 }
