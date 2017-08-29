@@ -35,7 +35,7 @@ const DefaultSettings = {
 
 
 export default class SceneTree {
-    constructor() {
+    constructor(input) {
         this.paused = false;
         this.debug_collisions_hint = false;
 
@@ -55,6 +55,7 @@ export default class SceneTree {
 
         this.visual_server = new VisualServer();
         this.physics_server = new PhysicsServer();
+        this.input = input;
 
         this._settings = {};
         this._tick = this._tick.bind(this);
@@ -291,6 +292,9 @@ export default class SceneTree {
         // Resize for the first tiem
         setTimeout(on_window_resize, 1);
 
+        // Init input
+        this.input._init();
+
         // Start the main loop
         this._start_loop();
     }
@@ -359,6 +363,9 @@ export default class SceneTree {
                 this.physics_server.solve_collision(this.current_scene);
 
                 this._flush_delete_queue();
+
+                // - input
+                this.input._process(_process_tmp.slow_step_sec);
 
                 _process_tmp.count += 1;
               }

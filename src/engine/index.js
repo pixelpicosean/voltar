@@ -42,10 +42,13 @@ export {
     Signal,
 };
 
+import Input from './input';
+export const input = new Input();
+
 import SceneTree from './SceneTree';
 
 export * from './SceneTree';
-export const scene_tree = new SceneTree();
+export const scene_tree = new SceneTree(input);
 
 
 function assemble_node(node, children) {
