@@ -1,4 +1,5 @@
 import { Vector } from './core';
+import remove_items from 'remove-array-items';
 
 
 const Arrays = new Array(20);
@@ -23,6 +24,24 @@ const res = {
     overlap_v: new Vector(),
 };
 
+const tmp_vec = new Vector();
+
+const tmp_res = {
+    collision: {
+        x: false,
+        y: false,
+        slope: false,
+    },
+    pos: {
+        x: 0,
+        y: 0,
+    },
+    tile: {
+        x: 0,
+        y: 0,
+    },
+};
+
 
 export default class PhysicsServer {
     constructor() {
@@ -32,6 +51,8 @@ export default class PhysicsServer {
         this.hash = null;
         this.checks = null;
         this.collision_checks = 0;
+
+        this.collision_maps = [];
     }
 
     init() {
@@ -56,6 +77,46 @@ export default class PhysicsServer {
           }
         }
     }
+    trace_node(node, vec) {
+        if (this.collision_maps.length > 0 && node._shape) {
+            // Update bounds
+            const pos = node._world_position;
+            const scale = node._world_scale;
+
+            const half_width = node._shape.extents.x * scale.x;
+            const half_height = node._shape.extents.y * scale.x;
+
+            node.left = pos.x - half_width;
+            node.right = pos.x + half_width;
+            node.top = pos.y - half_height;
+            node.bottom = pos.y + half_height;
+
+            for (let i = 0; i < this.collision_maps.length; i++) {
+                tmp_res.collision.x = false;
+                tmp_res.collision.y = false;
+                tmp_res.collision.slope = false;
+                tmp_res.pos.x = node.left;
+                tmp_res.pos.y = node.top;
+                tmp_res.tile.x = 0;
+                tmp_res.tile.y = 0;
+
+                this.collision_maps[i].trace(node.left, node.top, vec.x, vec.y, half_width * 2, half_height * 2, tmp_res);
+                if (tmp_res.collision.x || tmp_res.collision.y || tmp_res.collision.slope) {
+                    return tmp_res;
+                }
+            }
+        }
+        return null;
+    }
+
+    collision_map_entered(c) {
+        if (this.collision_maps.indexOf(c) < 0) {
+            this.collision_maps.push(c);
+        }
+    }
+    collision_map_exited(c) {
+        removeItems(this.collision_maps, this.collision_maps.indexOf(c), 1);
+    }
 
     _test_node(node) {
         if (node.type !== 'Area2D' && node.type !== 'PhysicsBody2D') {
@@ -69,8 +130,8 @@ export default class PhysicsServer {
 
         // Update bounds
         if (coll._shape) {
-            const half_width = coll._shape.extents.x;
-            const half_height = coll._shape.extents.y;
+            const half_width = coll._shape.extents.x * node.scale.x;
+            const half_height = coll._shape.extents.y * node.scale.x;
 
             const pos = coll.get_global_position();
 

@@ -34,10 +34,6 @@ const DefaultSettings = {
 };
 
 
-const visual_server = new VisualServer();
-const physics_server = new PhysicsServer();
-
-
 export default class SceneTree {
     constructor() {
         this.paused = false;
@@ -56,6 +52,9 @@ export default class SceneTree {
         this.container = null;
 
         this.time_scale = 1;
+
+        this.visual_server = new VisualServer();
+        this.physics_server = new PhysicsServer();
 
         this._settings = {};
         this._tick = this._tick.bind(this);
@@ -125,7 +124,7 @@ export default class SceneTree {
         this.container_view = document.getElementById(this._settings.display.container);
 
         // TODO: move all these configs to project settings, the same as Godot
-        visual_server.init({
+        this.visual_server.init({
             view: this.view,
 
             width: this._settings.display.width,
@@ -145,25 +144,25 @@ export default class SceneTree {
             preserve_drawing_buffer: false,
         });
 
-        physics_server.init();
+        this.physics_server.init();
 
         // Listen to the resize and orientation events
         const on_window_resize = () => {
             let result;
             switch (this._settings.display.stretch_mode) {
                 case 'disabled':
-                    visual_server.renderer.resize(window.innerWidth, window.innerHeight);
-                    this.view.width = window.innerWidth * visual_server.renderer.resolution;
-                    this.view.height = window.innerHeight * visual_server.renderer.resolution;
+                    this.visual_server.renderer.resize(window.innerWidth, window.innerHeight);
+                    this.view.width = window.innerWidth * this.visual_server.renderer.resolution;
+                    this.view.height = window.innerHeight * this.visual_server.renderer.resolution;
                     this.view.style.width = `${window.innerWidth}px`;
                     this.view.style.height = `${window.innerHeight}px`;
                     break;
                 case '2D':
                     switch (this._settings.display.stretch_aspect) {
                         case 'ignore':
-                            visual_server.renderer.resize(window.innerWidth, window.innerHeight);
-                            this.view.width = window.innerWidth * visual_server.renderer.resolution;
-                            this.view.height = window.innerHeight * visual_server.renderer.resolution;
+                            this.visual_server.renderer.resize(window.innerWidth, window.innerHeight);
+                            this.view.width = window.innerWidth * this.visual_server.renderer.resolution;
+                            this.view.height = window.innerHeight * this.visual_server.renderer.resolution;
                             this.viewport.scale.set(window.innerWidth / this._settings.display.width, window.innerHeight / this._settings.display.height);
                             this.view.style.width = `${window.innerWidth}px`;
                             this.view.style.height = `${window.innerHeight}px`;
@@ -172,10 +171,10 @@ export default class SceneTree {
                             result = outer_box_resize(window.innerWidth, window.innerHeight, this._settings.display.width, this._settings.display.height);
                             let width = this._settings.display.width * result.scale;
                             let height = this._settings.display.height * result.scale;
-                            visual_server.renderer.resize(width, height);
+                            this.visual_server.renderer.resize(width, height);
                             this.viewport.scale.set(result.scale, result.scale);
-                            this.view.width = width * visual_server.renderer.resolution;
-                            this.view.height = height * visual_server.renderer.resolution;
+                            this.view.width = width * this.visual_server.renderer.resolution;
+                            this.view.height = height * this.visual_server.renderer.resolution;
                             this.view.style.width = `${width}px`;
                             this.view.style.height = `${height}px`;
                             this.view.style.marginLeft = `${result.left}px`;
@@ -186,10 +185,10 @@ export default class SceneTree {
                                 let scale = window.innerHeight / this._settings.display.height;
                                 let width = this._settings.display.width * scale;
                                 let height = width * (this._settings.display.height / this._settings.display.width);
-                                visual_server.renderer.resize(width, height);
+                                this.visual_server.renderer.resize(width, height);
                                 this.viewport.scale.set(scale, scale);
-                                this.view.width = width * visual_server.renderer.resolution;
-                                this.view.height = height * visual_server.renderer.resolution;
+                                this.view.width = width * this.visual_server.renderer.resolution;
+                                this.view.height = height * this.visual_server.renderer.resolution;
                                 this.view.style.width = `${width}px`;
                                 this.view.style.height = `${height}px`;
                                 this.view.style.marginLeft = `${(window.innerWidth - width) * 0.5}px`;
@@ -198,10 +197,10 @@ export default class SceneTree {
                                 let scale = window.innerWidth / this._settings.display.width;
                                 let width = window.innerWidth;
                                 let height = window.innerHeight;
-                                visual_server.renderer.resize(width, height);
+                                this.visual_server.renderer.resize(width, height);
                                 this.viewport.scale.set(scale, scale);
-                                this.view.width = width * visual_server.renderer.resolution;
-                                this.view.height = height * visual_server.renderer.resolution;
+                                this.view.width = width * this.visual_server.renderer.resolution;
+                                this.view.height = height * this.visual_server.renderer.resolution;
                                 this.view.style.width = `${width}px`;
                                 this.view.style.height = `${height}px`;
                                 this.view.style.marginLeft = `0px`;
@@ -213,7 +212,7 @@ export default class SceneTree {
                                 let scale = window.innerWidth / this._settings.display.width;
                                 let height = this._settings.display.height * scale;
                                 let width = height * (this._settings.display.height / this._settings.display.width);
-                                visual_server.renderer.resize(width, height);
+                                this.visual_server.renderer.resize(width, height);
                                 this.viewport.scale.set(scale, scale);
                                 this.view.style.width = `${width}px`;
                                 this.view.style.height = `${height}px`;
@@ -223,10 +222,10 @@ export default class SceneTree {
                                 let scale = window.innerHeight / this._settings.display.height;
                                 let height = window.innerHeight;
                                 let width = window.innerWidth;
-                                visual_server.renderer.resize(width, height);
+                                this.visual_server.renderer.resize(width, height);
                                 this.viewport.scale.set(scale, scale);
-                                this.view.width = width * visual_server.renderer.resolution;
-                                this.view.height = height * visual_server.renderer.resolution;
+                                this.view.width = width * this.visual_server.renderer.resolution;
+                                this.view.height = height * this.visual_server.renderer.resolution;
                                 this.view.style.width = `${width}px`;
                                 this.view.style.height = `${height}px`;
                                 this.view.style.marginLeft = `0px`;
@@ -258,7 +257,7 @@ export default class SceneTree {
                             }
                             else {
                                 let scale = this._settings.display.width / window.innerWidth;
-                                visual_server.renderer.resize(this._settings.display.width, window.innerHeight * scale);
+                                this.visual_server.renderer.resize(this._settings.display.width, window.innerHeight * scale);
                                 this.view.style.width = `${window.innerWidth}px`;
                                 this.view.style.height = `${window.innerHeight}px`;
                                 this.view.style.marginLeft = `0px`;
@@ -275,7 +274,7 @@ export default class SceneTree {
                             }
                             else {
                                 let scale = this._settings.display.height / window.innerHeight;
-                                visual_server.renderer.resize(window.innerWidth * scale, this._settings.display.height);
+                                this.visual_server.renderer.resize(window.innerWidth * scale, this._settings.display.height);
                                 this.view.style.width = `${window.innerWidth}px`;
                                 this.view.style.height = `${window.innerHeight}px`;
                                 this.view.style.marginLeft = `0px`;
@@ -310,8 +309,8 @@ export default class SceneTree {
             }
 
             this.current_scene = this._next_scene_ctor.instance();
-            this.current_scene.scene_tree = this;
             this.viewport.add_child(this.current_scene);
+            this.current_scene.scene_tree = this;
             this.current_scene._propagate_enter_tree();
             this.current_scene._propagate_ready();
 
@@ -357,7 +356,7 @@ export default class SceneTree {
                 this.viewport.update_transform();
                 this.viewport.parent = null;
                 // - solve collision
-                physics_server.solve_collision(this.current_scene);
+                this.physics_server.solve_collision(this.current_scene);
 
                 this._flush_delete_queue();
 
@@ -381,7 +380,7 @@ export default class SceneTree {
             // this.current_scene._process(_process_tmp.real_delta * 0.001);
 
             // Render
-            visual_server.render(this.viewport);
+            this.visual_server.render(this.viewport);
         }
     }
     _end_loop() {

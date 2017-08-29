@@ -48,6 +48,8 @@ export { default as Plane } from './scene/mesh/Plane';
 export { default as Rope } from './scene/mesh/Rope';
 
 export { default as BackgroundMap } from './scene/map/BackgroundMap';
+export { default as CollisionMap } from './scene/map/CollisionMap';
+
 export { default as RectangleShape2D } from './scene/physics/RectangleShape2D';
 export { default as CollisionObject2D } from './scene/physics/CollisionObject2D';
 export { default as Area2D } from './scene/physics/Area2D';

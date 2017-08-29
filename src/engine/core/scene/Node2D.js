@@ -122,6 +122,7 @@ export default class Node2D extends EventEmitter
         this._boundsRect = null;
         this._localBoundsRect = null;
         this._world_position = new Point();
+        this._world_scale = new Point();
 
         /**
          * The original, cached mask of the object
@@ -139,6 +140,8 @@ export default class Node2D extends EventEmitter
          * @readonly
          */
         this._destroyed = false;
+
+        this._is_ready = false;
 
         /**
          * The array of children of this container.
@@ -574,7 +577,7 @@ export default class Node2D extends EventEmitter
     }
 
     get_global_scale() {
-        return this.transform.world_transform.scale;
+        return this._world_scale;
     }
 
     /**
@@ -746,6 +749,7 @@ export default class Node2D extends EventEmitter
         this.tree_entered.dispatch();
 
         for (let i = 0, l = this.children.length; i < l; i++) {
+            this.children[i].scene_tree = this.scene_tree;
             this.children[i]._propagate_enter_tree();
         }
     }
@@ -754,6 +758,8 @@ export default class Node2D extends EventEmitter
         for (let i = 0, l = this.children.length; i < l; i++) {
             this.children[i]._propagate_ready();
         }
+
+        this._is_ready = true;
 
         this._ready();
     }
@@ -770,7 +776,10 @@ export default class Node2D extends EventEmitter
         this.is_inside_tree = false;
         for (let i = 0, l = this.children.length; i < l; i++) {
             this.children[i]._propagate_exit_tree();
+            this.children[i].scene_tree = null;
         }
+
+        this._is_ready = false;
 
         this._exit_tree();
 
@@ -822,6 +831,10 @@ export default class Node2D extends EventEmitter
 
         // TODO - lets either do all callbacks or all events.. not both!
         this.on_children_change(this.children.length - 1);
+
+        if (this._is_ready) {
+            child._propagate_ready();
+        }
 
         return child;
     }
@@ -1114,7 +1127,9 @@ export default class Node2D extends EventEmitter
         // TODO: check render flags, how to process stuff here
         this.world_alpha = this.alpha * this.parent.world_alpha;
 
-        this._world_position.set(this.transform.world_transform.tx, this.transform.world_transform.ty);
+        let t = this.transform.world_transform;
+        this._world_position.set(t.tx, t.ty);
+        this._world_scale.set(Math.sqrt((t.a * t.a) + (t.b * t.b)), Math.sqrt((t.c * t.c) + (t.d * t.d)));
 
         for (let i = 0, j = this.children.length; i < j; ++i)
         {
