@@ -45,6 +45,8 @@ export default class SceneTree {
         this.current_scene = null;
         this.viewport = new Node2D();
         this.viewport.scene_tree = this;
+        this.viewport.is_inside_tree = true;
+        this.viewport._is_ready = true;
 
         this.stretch_mode = 'viewport';
         this.stretch_aspect = 'keep';
