@@ -3,6 +3,7 @@ import Texture from '../../textures/Texture';
 import { TextureCache } from '../../utils';
 import Signal from 'engine/Signal';
 import remove_items from 'remove-array-items';
+import { Rectangle } from '../../math';
 
 
 class Anim {
@@ -14,28 +15,90 @@ class Anim {
     }
 };
 
+function normalize_frame_list(frames) {
+    let result = new Array(frames.length);
+    for (let i = 0; i < result.length; i++) {
+        result[i] = (frames[i].base_texture ? frames[i].base_texture : TextureCache[frames[i]]);
+    }
+    return result;
+};
+
+/**
+ * Create textures for tiles in a tileset. Can also be used to extract
+ * grid based sprite-sheets.
+ * @param  {Texture} tilesetp   Tileset texture.
+ * @param  {Number} width       Width of a single tile.
+ * @param  {Number} height      Height of a single tile.
+ * @return {Array<Texture>}     List of textures.
+ */
+function filmstrip(tileset, width, height) {
+    let strip = [];
+
+    let w = tileset.width;
+    let h = tileset.height;
+    let orig = tileset.orig;
+
+    let sheet = tileset.base_texture;
+
+    let cols = Math.floor(w / width);
+    let rows = Math.floor(h / height);
+
+    let q = 0, r = 0;
+    for (r = 0; r < rows; r++) {
+        for (q = 0; q < cols; q++) {
+            strip.push(new Texture(sheet, new Rectangle(q * width + orig.x, r * height + orig.y, width, height)));
+        }
+    }
+
+    return strip;
+};
+
+const SheetStripCache = Object.create(null);
+const SheetSubStripCache = Object.create(null);
+
+function parse_sheet_frames(sheet) {
+    const tex = sheet.sheet.base_texture ? sheet.sheet : TextureCache[sheet.sheet];
+    const key = `@${tex.uid}+${sheet.width}+${sheet.height}`;
+    let list = SheetStripCache[key];
+
+    // Create a new strip list if not exist
+    if (!Array.isArray(list)) {
+        list = filmstrip(tex, sheet.width, sheet.height);
+        Object.freeze(list);
+        SheetStripCache[key] = list;
+    }
+
+    // Create sequence for this anim
+    const sub_key = `${key}_${sheet.sequence.toString()}`;
+    let seq = SheetSubStripCache[sub_key];
+    if (!Array.isArray(seq)) {
+        seq = new Array(sheet.sequence.length);
+        for (let i = 0; i < sheet.sequence.length; i++) {
+            seq[i] = list[sheet.sequence[i]];
+        }
+        SheetSubStripCache[sub_key] = seq;
+    }
+
+    return seq;
+};
+
 export class SpriteFrames {
     constructor(data) {
         this.animations = Object.create(null);
+        this.data = data;
 
-        if (data) {
-            this.load_data(data);
-        }
-    }
-    load_data(data) {
         let name, pack;
-        for (name in data) {
+        for (name in this.data) {
             const anim = new Anim();
-            pack = data[name];
+            pack = this.data[name];
 
             anim.speed = pack.speed;
             anim.loop = pack.loop;
-            anim.frames = pack.frames;
+            anim.frames = pack.frames.sheet ? parse_sheet_frames(pack.frames) : pack.frames;
             anim.name = name;
 
             this.animations[name] = anim;
         }
-        return this;
     }
 
     add_animation(anim) {
@@ -112,14 +175,14 @@ export class SpriteFrames {
  */
 export default class AnimatedSprite extends Sprite {
     /**
-     * @param {SpriteFrames[]} frames - frame and animation data
+     * @param {SpriteFrames|Object} frames - frame and animation data
      */
     constructor(frames) {
         super(undefined);
 
         this.type = 'AnimatedSprite';
 
-        this.frames = frames;
+        this.frames = (frames instanceof SpriteFrames) ? frames : new SpriteFrames(frames);
 
         /**
          * Indicates if the AnimatedSprite is currently playing
@@ -136,19 +199,6 @@ export default class AnimatedSprite extends Sprite {
 
         this.animation_finished = new Signal();
         this.frame_changed = new Signal();
-    }
-
-    _load_data(data) {
-        super._load_data(data);
-
-        for (let k in data) {
-            switch (k) {
-                // AnimatedSprite
-                case 'frames':
-                    this.set_sprite_frames(new SpriteFrames(require(`game/${data[k]}`)));
-                    break;
-            }
-        }
     }
 
     play(anim) {
@@ -203,17 +253,9 @@ export default class AnimatedSprite extends Sprite {
         return this.frames;
     }
     set_sprite_frames(frames) {
-        this.frames = frames;
+        this.frames = (frames instanceof SpriteFrames) ? frames : new SpriteFrames(frames);
 
-        if (!this.frames) {
-            this.frame = 0;
-        }
-        else {
-            this.set_frame(this.frame);
-        }
-
-        this._reset_timeout();
-        this._update_texture();
+        this.set_frame(this.frame);
     }
 
     _reset_timeout() {
@@ -312,7 +354,8 @@ export default class AnimatedSprite extends Sprite {
      * @private
      */
     _update_texture() {
-        let tex = this.frames.animations[this.animation].frames[this.frame];
+        // let tex = this.frames.animations[this.animation].frames[this.frame];
+        let tex = this.frames.get_frame(this.animation, this.frame);
         // Frame texture is texture instance
         if (tex.base_texture) {
             this._texture = tex;

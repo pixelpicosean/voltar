@@ -3,7 +3,7 @@ import VideoBaseTexture from './VideoBaseTexture';
 import TextureUvs from './TextureUvs';
 import EventEmitter from 'eventemitter3';
 import { Rectangle } from '../math';
-import { TextureCache, getResolutionOfUrl } from '../utils';
+import { uid, TextureCache, getResolutionOfUrl } from '../utils';
 import settings from '../settings';
 
 /**
@@ -44,6 +44,8 @@ export default class Texture extends EventEmitter
     constructor(base_texture, frame, orig, trim, rotate)
     {
         super();
+
+        this.uid = uid();
 
         /**
          * Does this Texture have any frame data assigned to it?
