@@ -3,7 +3,12 @@ import data from './data.json';
 
 
 // Which test to run after resources load
-const test = 'physics';
+import AnimatedSpirteTest from 'game/test/animated-sprite';
+import InputTest from 'game/test/input';
+import PhysicsTest from 'game/test/physics';
+
+
+const Test = AnimatedSpirteTest;
 
 
 export default class Boot extends v.Node2D {
@@ -25,7 +30,7 @@ export default class Boot extends v.Node2D {
                 progress_bind.detach();
             }
 
-            v.scene_tree.change_scene_to(`test/${test}`);
+            v.scene_tree.change_scene_to(Test);
         }
 
         if (v.loader._queue._tasks.length > 0) {
