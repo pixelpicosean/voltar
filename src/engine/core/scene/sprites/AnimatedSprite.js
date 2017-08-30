@@ -313,11 +313,14 @@ export default class AnimatedSprite extends Sprite {
      */
     _update_texture() {
         let tex = this.frames.animations[this.animation].frames[this.frame];
-        if (typeof(tex) === 'string') {
-            tex = TextureCache[tex];
-        }
-        else if (tex.base_texture) {
+        // Frame texture is texture instance
+        if (tex.base_texture) {
             this._texture = tex;
+            this._textureID = -1;
+        }
+        // Frame texture is string
+        else {
+            this._texture = TextureCache[tex];
             this._textureID = -1;
         }
     }
