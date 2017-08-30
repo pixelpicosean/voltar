@@ -828,7 +828,9 @@ export default class Node2D extends EventEmitter
         // ensure bounds will be recalculated
         this._boundsID++;
 
-        child._propagate_enter_tree();
+        if (this.is_inside_tree) {
+            child._propagate_enter_tree();
+        }
 
         // TODO - lets either do all callbacks or all events.. not both!
         this.on_children_change(this.children.length - 1);
