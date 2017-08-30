@@ -44,6 +44,7 @@ export default class SceneTree {
 
         this.current_scene = null;
         this.viewport = new Node2D();
+        this.viewport.scene_tree = this;
 
         this.stretch_mode = 'viewport';
         this.stretch_aspect = 'keep';
@@ -58,7 +59,7 @@ export default class SceneTree {
         this.input = input;
 
         this._settings = {};
-        this._tick = this._tick.bind(this);
+        this._tick_bind = this._tick.bind(this);
         this._loop_id = 0;
         this._initialize = this._initialize.bind(this);
         this._next_scene_ctor = null;
@@ -78,7 +79,7 @@ export default class SceneTree {
     init(settings) {
         this._settings = Object.assign(this._settings, DefaultSettings, settings);
 
-        this.change_scene_to(this._settings.application.main_scene);
+        this.change_scene_to(require(`game/${this._settings.application.main_scene}`).default);
 
         window.addEventListener('load', this._initialize, false);
         document.addEventListener('DOMContentLoaded', this._initialize, false);
@@ -97,8 +98,8 @@ export default class SceneTree {
         return this.viewport;
     }
 
-    change_scene_to(scene_path) {
-        this._next_scene_ctor = require(`game/${scene_path}`).default;
+    change_scene_to(scene_ctor) {
+        this._next_scene_ctor = scene_ctor;
     }
     get_current_scene() {
         return this.current_scene;
@@ -299,24 +300,20 @@ export default class SceneTree {
         this._start_loop();
     }
     _start_loop() {
-        this._loop_id = requestAnimationFrame(this._tick);
+        this._loop_id = requestAnimationFrame(this._tick_bind);
     }
     _tick(timestamp) {
-        this._loop_id = requestAnimationFrame(this._tick);
+        this._loop_id = requestAnimationFrame(this._tick_bind);
 
         if (this._next_scene_ctor) {
             if (this.current_scene) {
-                this.current_scene._propagate_exit_tree();
-                this.current_scene.scene_tree = null;
                 this.viewport.remove_children();
                 this.current_scene = null;
             }
 
             this.current_scene = this._next_scene_ctor.instance();
-            this.viewport.add_child(this.current_scene);
             this.current_scene.scene_tree = this;
-            this.current_scene._propagate_enter_tree();
-            this.current_scene._propagate_ready();
+            this.viewport.add_child(this.current_scene);
 
             this._current_scene_ctor = this._next_scene_ctor;
             this._next_scene_ctor = null;

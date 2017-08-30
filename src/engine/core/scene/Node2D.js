@@ -774,6 +774,7 @@ export default class Node2D extends EventEmitter
 
     _propagate_exit_tree() {
         this.is_inside_tree = false;
+        this.scene_tree = null;
         for (let i = 0, l = this.children.length; i < l; i++) {
             this.children[i]._propagate_exit_tree();
             this.children[i].scene_tree = null;
