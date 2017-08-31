@@ -2,7 +2,7 @@ import EventEmitter from 'eventemitter3';
 import { TRANSFORM_MODE } from '../const';
 import settings from '../settings';
 import { TransformStatic, Transform, Point, Bounds, Rectangle } from '../math';
-import { removeItems } from '../utils';
+import remove_items from 'remove-array-items';
 import Signal from 'engine/Signal';
 
 let uid = 0;
@@ -153,6 +153,8 @@ export default class Node2D extends EventEmitter
 
         this.named_children = Object.create(null);
 
+        this.groups = [];
+
         /**
          * Fired when this Node2D is added to a Node2D.
          *
@@ -230,6 +232,26 @@ export default class Node2D extends EventEmitter
 
     set_process(p) {
         this.idle_process = !!p;
+    }
+
+    add_to_group(group) {
+        if (this.groups.indexOf(group) < 0) {
+            this.groups.push(group);
+
+            if (this.is_inside_tree) {
+                this.scene_tree.add_node_to_group(this, group);
+            }
+        }
+    }
+    remove_from_group(group) {
+        let idx = this.groups.indexOf(group);
+        if (idx >= 0) {
+            remove_items(this.groups, idx, 1);
+
+            if (this.is_inside_tree) {
+                this.scene_tree.remove_node_from_group(this, group);
+            }
+        }
     }
 
     /**
@@ -744,6 +766,13 @@ export default class Node2D extends EventEmitter
 
         this.is_inside_tree = true;
 
+        // Add to scene tree groups
+        if (this.groups.length > 0) {
+            for (let i = 0; i < this.groups.length; i++) {
+                this.scene_tree.add_node_to_group(this, this.groups[i]);
+            }
+        }
+
         this._enter_tree();
 
         this.tree_entered.dispatch();
@@ -773,6 +802,14 @@ export default class Node2D extends EventEmitter
     }
 
     _propagate_exit_tree() {
+        // Remove from scene tree groups
+        if (this.groups.length > 0) {
+            for (let i = 0; i < this.groups.length; i++) {
+                this.scene_tree.remove_node_from_group(this, this.groups[i]);
+            }
+        }
+
+        // Let children exit tree
         this.is_inside_tree = false;
         this.scene_tree = null;
         for (let i = 0, l = this.children.length; i < l; i++) {
@@ -938,7 +975,7 @@ export default class Node2D extends EventEmitter
 
         const currentIndex = this.get_child_index(child);
 
-        removeItems(this.children, currentIndex, 1); // remove from old position
+        remove_items(this.children, currentIndex, 1); // remove from old position
         this.children.splice(index, 0, child); // add at new position
 
         this.on_children_change(index);
@@ -976,7 +1013,7 @@ export default class Node2D extends EventEmitter
         child.scene_tree = null;
         // ensure child transform will be recalculated
         child.transform._parentID = -1;
-        removeItems(this.children, index, 1);
+        remove_items(this.children, index, 1);
 
         // remove from name hash
         if (child.name.length > 0) {
@@ -1008,7 +1045,7 @@ export default class Node2D extends EventEmitter
         child.parent = null;
         child.scene_tree = null;
         child.transform._parentID = -1;
-        removeItems(this.children, index, 1);
+        remove_items(this.children, index, 1);
 
         // remove from name hash
         if (child.name.length > 0) {

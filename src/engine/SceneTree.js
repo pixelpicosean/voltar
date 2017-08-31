@@ -3,6 +3,7 @@ import PhysicsServer from './PhysicsServer';
 import { Node2D } from './core';
 
 import { outer_box_resize } from './resize';
+import remove_items from 'remove-array-items';
 
 
 const DefaultSettings = {
@@ -39,7 +40,7 @@ export default class SceneTree {
         this.paused = false;
         this.debug_collisions_hint = false;
 
-        this.grouped_nodes = {};
+        this.grouped_nodes = Object.create(null);
         this.delete_queue = [];
 
         this.current_scene = null;
@@ -94,7 +95,27 @@ export default class SceneTree {
         node.is_queued_for_deletion = true;
         this.delete_queue.push(node);
     }
-    get_nodes_in_group() {}
+    get_nodes_in_group(group) {
+
+    }
+    add_node_to_group(node, group_p) {
+        let group = this.grouped_nodes[group_p];
+        if (!group) {
+            group = this.grouped_nodes[group_p] = [];
+        }
+        if (group.indexOf(node) < 0) {
+            group.push(node);
+        }
+    }
+    remove_node_from_group(node, group_p) {
+        let group = this.grouped_nodes[group_p];
+        if (group) {
+            let idx = group.indexOf(node);
+            if (idx >= 0) {
+                remove_items(group, idx, 1);
+            }
+        }
+    }
 
     get_root() {
         return this.viewport;
