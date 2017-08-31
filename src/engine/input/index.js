@@ -4,12 +4,8 @@ import keyboard from './keyboard';
 
 /**
  * Input system which provides key bindings.
- * @class Input
  */
 export default class Input {
-    /**
-     * @constructor
-     */
     constructor() {
         this.bindings = {};
         this.key_list = [];
@@ -36,11 +32,9 @@ export default class Input {
 
     /**
      * Bind a key to a specific action.
-     * @memberof Input#
-     * @method bind
      * @param  {String} key    Key to bind
      * @param  {String} action Action name
-     * @return {Input}   Self for chaining
+     * @return {Input} Self for chaining
      */
     bind(key, action) {
         if (Array.isArray(this.bindings[key])) {
@@ -61,8 +55,6 @@ export default class Input {
     }
     /**
      * Unbind an action from a key.
-     * @memberof Input#
-     * @method unbind
      * @param  {String} key    Key to unbind
      * @param  {String} action Action to unbind
      * @return {Input}   Self for chaining
@@ -82,7 +74,6 @@ export default class Input {
     }
     /**
      * Unbind all the actions.
-     * @memberof Input#
      * @method unbindAll
      */
     unbind_all() {
@@ -98,38 +89,39 @@ export default class Input {
 
     /**
      * Whether an action is currently pressed.
-     * @memberof Input#
-     * @method state
      * @param  {String} action Action name
      * @return {Boolean}       Pressed or not
      */
-    state(action) {
+    is_action_pressed(action) {
         return !!this.actions[action];
     }
     /**
      * Whether an action is just pressed.
-     * @memberof Input#
-     * @method pressed
      * @param  {String} action Action name
      * @return {Boolean}       Pressed or not
      */
-    pressed(action) {
+    is_action_just_pressed(action) {
         return !!this.last_pressed[action];
     }
     /**
      * Whether an action is just released.
-     * @memberof Input#
-     * @method released
      * @param  {String} action Action name
      * @return {Boolean}       Released or not
      */
-    released(action) {
+    is_action_just_released(action) {
         return !!this.last_released[action];
+    }
+    action_press(action) {
+        this.actions[action] = true;
+        this.last_pressed[action] = true;
+    }
+    action_release(action) {
+        this.actions[action] = false;
+        this.last_released[action] = true;
     }
 
     /**
      * Key down listener
-     * @memberof Input#
      * @param {String} k Name of the key
      * @private
      */
@@ -144,7 +136,6 @@ export default class Input {
     }
     /**
      * Key up listener
-     * @memberof Input#
      * @param {String} k Name of the key
      * @private
      */
