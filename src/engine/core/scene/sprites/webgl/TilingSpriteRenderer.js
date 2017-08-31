@@ -1,8 +1,15 @@
-import * as core from '../../core';
-import { WRAP_MODES } from '../../core/const';
+import ObjectRenderer from '../../../renderers/webgl/utils/ObjectRenderer';
+import WebGLRenderer from '../../../renderers/webgl/WebGLRenderer';
+import { WRAP_MODES } from '../../../const';
 import { join } from 'path';
+import { Matrix } from '../../../math';
+import * as utils from '../../../utils';
+import Shader from '../../../Shader';
+import Quad from '../../../renderers/webgl/utils/Quad';
 
-const tempMat = new core.Matrix();
+
+const tempMat = new Matrix();
+
 
 /**
  * WebGL renderer plugin for tiling sprites
@@ -11,7 +18,7 @@ const tempMat = new core.Matrix();
  * @memberof V.extras
  * @extends V.ObjectRenderer
  */
-export default class TilingSpriteRenderer extends core.ObjectRenderer
+export default class TilingSpriteRenderer extends ObjectRenderer
 {
 
     /**
@@ -37,15 +44,15 @@ export default class TilingSpriteRenderer extends core.ObjectRenderer
     {
         const gl = this.renderer.gl;
 
-        this.shader = new core.Shader(gl,
+        this.shader = new Shader(gl,
             require('./tilingSprite.vert'),
             require('./tilingSprite.frag'));
-        this.simpleShader = new core.Shader(gl,
+        this.simpleShader = new Shader(gl,
             require('./tilingSprite.vert'),
             require('./tilingSprite_simple.frag'));
 
         this.renderer.bindVao(null);
-        this.quad = new core.Quad(gl, this.renderer.state.attribState);
+        this.quad = new Quad(gl, this.renderer.state.attribState);
         this.quad.initVao(this.shader);
     }
 
@@ -139,16 +146,16 @@ export default class TilingSpriteRenderer extends core.ObjectRenderer
         }
 
         shader.uniforms.uTransform = tempMat.to_array(true);
-        shader.uniforms.uColor = core.utils.premultiplyTintToRgba(ts.tint, ts.world_alpha,
+        shader.uniforms.uColor = utils.premultiplyTintToRgba(ts.tint, ts.world_alpha,
             shader.uniforms.uColor, baseTex.premultiplied_alpha);
         shader.uniforms.translationMatrix = ts.transform.world_transform.to_array(true);
 
         shader.uniforms.uSampler = renderer.bindTexture(tex);
 
-        renderer.setBlendMode(core.utils.correctBlendMode(ts.blend_mode, baseTex.premultiplied_alpha));
+        renderer.setBlendMode(utils.correctBlendMode(ts.blend_mode, baseTex.premultiplied_alpha));
 
         quad.vao.draw(this.renderer.gl.TRIANGLES, 6, 0);
     }
 }
 
-core.WebGLRenderer.registerPlugin('tilingSprite', TilingSpriteRenderer);
+WebGLRenderer.registerPlugin('tilingSprite', TilingSpriteRenderer);
