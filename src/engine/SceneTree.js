@@ -96,7 +96,7 @@ export default class SceneTree {
         this.delete_queue.push(node);
     }
     get_nodes_in_group(group) {
-
+        return this.grouped_nodes[group];
     }
     add_node_to_group(node, group_p) {
         let group = this.grouped_nodes[group_p];
