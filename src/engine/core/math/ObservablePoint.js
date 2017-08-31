@@ -1,3 +1,6 @@
+import Point from './Point';
+
+
 /**
  * The Point object represents a location in a two-dimensional coordinate system, where x represents
  * the horizontal axis and y represents the vertical axis.
@@ -94,5 +97,189 @@ export default class ObservablePoint
             this._y = value;
             this.cb.call(this.scope);
         }
+    }
+
+    clone() {
+        return new Point(this._x, this._y);
+    }
+    random(scale) {
+        // TODO: requires random module
+    }
+    normalized() {
+        return this.clone().normalize();
+    }
+    clamped(length) {
+        const len = this.length();
+        const v = this.clone();
+        if (len > 0 && length < len) {
+            v.scale(length / len);
+        }
+        return v;
+    }
+    rotated(a) {
+        return this.clone().rotate(a);
+    }
+    snapped(by) {}
+
+    equals(b) {
+        const a0 = this._x, a1 = this._y;
+        const b0 = b.x, b1 = b.y;
+        return (Math.abs(a0 - b0) <= EPSILON * Math.max(1.0, Math.abs(a0), Math.abs(b0)) &&
+                Math.abs(a1 - b1) <= EPSILON * Math.max(1.0, Math.abs(a1), Math.abs(b1)));
+    }
+    exact_equals(b) {
+        return (this._x === b.x) && (this._y === b.y);
+    }
+
+    add(b) {
+        this.x += b.x;
+        this.y += b.y;
+        return this;
+    }
+    subtract(b) {
+        this.x -= b.x;
+        this.y -= b.y;
+        return this;
+    }
+    multiply(b) {
+        this.x *= b.x;
+        this.y *= b.y;
+        return this;
+    }
+    divide(b) {
+        this.x /= b.x;
+        this.y /= b.y;
+        return this;
+    }
+    dot(b) {
+        return this._x * b.x + this._y * b.y;
+    }
+    cross(b) {
+        return this._x * b.y - this._y * b.x;
+    }
+
+    abs() {
+        this.x = Math.abs(this._x);
+        this.y = Math.abs(this._y);
+        return this;
+    }
+    ceil() {
+        this.x = Math.ceil(this._x);
+        this.y = Math.ceil(this._y);
+        return this;
+    }
+    floor() {
+        this.x = Math.floor(this._x);
+        this.y = Math.floor(this._y);
+        return this;
+    }
+    round() {
+        this.x = Math.round(this._x);
+        this.y = Math.round(this._y);
+        return this;
+    }
+
+    scale(b) {
+        this.x *= b;
+        this.y *= b;
+        return this;
+    }
+    negate() {
+        this.x = -this._x;
+        this.y = -this._y;
+        return this;
+    }
+    inverse() {
+        this.x = 1.0 / this._x;
+        this.y = 1.0 / this._y;
+        return this;
+    }
+    normalize() {
+        const x = this._x, y = this._y;
+        let len = x * x + y * y;
+        if (len > 0) {
+            len = 1 / Math.sqrt(len);
+            this.x *= len;
+            this.y *= len;
+        }
+        return this;
+    }
+    rotate(a) {
+        const x = this._x, y = this._y;
+        const c = Math.cos(a), s = Math.sin(a);
+        this.x = x * c - y * s;
+        this.y = x * s + y * c;
+        return this;
+    }
+    project(other) {
+      const amt = this.dot(other) / other.length_squared();
+      this.x = amt * other.x;
+      this.y = amt * other.y;
+      return this;
+    }
+    project_n(other) {
+        const amt = this.dot(other);
+        this.x = amt * other.x;
+        this.y = amt * other.y;
+        return this;
+    }
+    reflect(axis) {
+        const x = this._x;
+        const y = this._y;
+        this.project(axis).scale(2);
+        this.x -= x;
+        this.y -= y;
+        return this;
+    }
+    reflect_n(axis) {
+        const x = this._x;
+        const y = this._y;
+        this.project_n(axis).scale(2);
+        return this;
+    }
+    bounce(axis) {
+        const x = this._x;
+        const y = this._y;
+        this.project(axis).scale(2);
+        this.x = x - this.x;
+        this.y = y - this.y;
+        return this;
+    }
+    slide(n) {
+        this.subtract(n.scale(this.dot(n)));
+        return this;
+    }
+
+    length() {
+        const x = this._x;
+        const y = this._y;
+        return Math.sqrt(x * x + y * y);
+    }
+    length_squared() {
+        const x = this._x;
+        const y = this._y;
+        return x * x + y * y;
+    }
+    angle() {
+        return Math.atan2(this._y, this._x);
+    }
+    angle_to(b) {
+        return Math.atan2(this.cross(b), this.dot(b));
+    }
+    angle_to_point(b) {
+        return Math.atan2(this._y - b.y, this._x - b.x);
+    }
+    distance_to(b) {
+        const x = b.x - this._x;
+        const y = b.y - this._y;
+        return Math.sqrt(x * x + y * y);
+    }
+    distance_squared_to(b) {
+        const x = b.x - this._x;
+        const y = b.y - this._y;
+        return x * x + y * y;
+    }
+    tangent() {
+        return new Point(this._y, -this._x);
     }
 }
