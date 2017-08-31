@@ -1010,7 +1010,7 @@ export default class Node2D extends EventEmitter
         if (index === -1) return null;
 
         child.parent = null;
-        child.scene_tree = null;
+
         // ensure child transform will be recalculated
         child.transform._parentID = -1;
         remove_items(this.children, index, 1);
