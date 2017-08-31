@@ -1,6 +1,6 @@
 import VisualServer from './VisualServer';
 import PhysicsServer from './PhysicsServer';
-import { Node2D } from './core';
+import { Node2D, Vector } from './core';
 
 import { outer_box_resize } from './resize';
 import remove_items from 'remove-array-items';
@@ -48,6 +48,10 @@ export default class SceneTree {
         this.viewport.scene_tree = this;
         this.viewport.is_inside_tree = true;
         this.viewport._is_ready = true;
+        this.viewport_rect = {
+            position: new Vector(0, 0),
+            size: new Vector(1, 1),
+        };
 
         this.stretch_mode = 'viewport';
         this.stretch_aspect = 'keep';
@@ -181,6 +185,8 @@ export default class SceneTree {
                     this.view.height = window.innerHeight * this.visual_server.renderer.resolution;
                     this.view.style.width = `${window.innerWidth}px`;
                     this.view.style.height = `${window.innerHeight}px`;
+                    this.viewport_rect.size.set(window.innerWidth, window.innerHeight);
+                    this.viewport_rect.position.set(0, 0);
                     break;
                 case '2D':
                     switch (this._settings.display.stretch_aspect) {
@@ -191,6 +197,8 @@ export default class SceneTree {
                             this.viewport.scale.set(window.innerWidth / this._settings.display.width, window.innerHeight / this._settings.display.height);
                             this.view.style.width = `${window.innerWidth}px`;
                             this.view.style.height = `${window.innerHeight}px`;
+                            this.viewport_rect.size.set(window.innerWidth, window.innerHeight);
+                            this.viewport_rect.position.set(0, 0);
                             break;
                         case 'keep':
                             result = outer_box_resize(window.innerWidth, window.innerHeight, this._settings.display.width, this._settings.display.height);
@@ -204,6 +212,8 @@ export default class SceneTree {
                             this.view.style.height = `${height}px`;
                             this.view.style.marginLeft = `${result.left}px`;
                             this.view.style.marginTop = `${result.top}px`;
+                            this.viewport_rect.size.set(width, height);
+                            this.viewport_rect.position.set(result.left, result.top);
                             break;
                         case 'keep_width':
                             if (window.innerWidth / window.innerHeight > this._settings.display.width / this._settings.display.height) {
@@ -217,6 +227,8 @@ export default class SceneTree {
                                 this.view.style.width = `${width}px`;
                                 this.view.style.height = `${height}px`;
                                 this.view.style.marginLeft = `${(window.innerWidth - width) * 0.5}px`;
+                                this.viewport_rect.size.set(width, height);
+                                this.viewport_rect.position.set((window.innerWidth - width) * 0.5, 0);
                             }
                             else {
                                 let scale = window.innerWidth / this._settings.display.width;
@@ -230,6 +242,8 @@ export default class SceneTree {
                                 this.view.style.height = `${height}px`;
                                 this.view.style.marginLeft = `0px`;
                                 this.view.style.marginTop = `0px`;
+                                this.viewport_rect.size.set(width, height);
+                                this.viewport_rect.position.set(0, 0);
                             }
                             break;
                         case 'keep_height':
@@ -242,6 +256,8 @@ export default class SceneTree {
                                 this.view.style.width = `${width}px`;
                                 this.view.style.height = `${height}px`;
                                 this.view.style.marginTop = `${(window.innerHeight - height) * 0.5}px`;
+                                this.viewport_rect.size.set(width, height);
+                                this.viewport_rect.position.set(0, (window.innerHeight - height) * 0.5);
                             }
                             else {
                                 let scale = window.innerHeight / this._settings.display.height;
@@ -255,6 +271,8 @@ export default class SceneTree {
                                 this.view.style.height = `${height}px`;
                                 this.view.style.marginLeft = `0px`;
                                 this.view.style.marginTop = `0px`;
+                                this.viewport_rect.size.set(width, height);
+                                this.viewport_rect.position.set(0, 0);
                             }
                             break;
                     }
@@ -264,6 +282,8 @@ export default class SceneTree {
                         case 'ignore':
                             this.view.style.width = `${window.innerWidth}px`;
                             this.view.style.height = `${window.innerHeight}px`;
+                            this.viewport_rect.size.set(this._settings.display.width, this._settings.display.height);
+                            this.viewport_rect.position.set(0, 0);
                             break;
                         case 'keep':
                             result = outer_box_resize(window.innerWidth, window.innerHeight, this._settings.display.width, this._settings.display.height);
@@ -271,6 +291,8 @@ export default class SceneTree {
                             this.view.style.height = `${this._settings.display.height * result.scale}px`;
                             this.view.style.marginLeft = `${result.left}px`;
                             this.view.style.marginTop = `${result.top}px`;
+                            this.viewport_rect.size.set(this._settings.display.width, this._settings.display.height);
+                            this.viewport_rect.position.set(result.left, result.top);
                             break;
                         case 'keep_width':
                             if (window.innerWidth / window.innerHeight > this._settings.display.width / this._settings.display.height) {
@@ -279,6 +301,8 @@ export default class SceneTree {
                                 this.view.style.width = `${width}px`;
                                 this.view.style.height = `${width * (this._settings.display.height / this._settings.display.width)}px`;
                                 this.view.style.marginLeft = `${(window.innerWidth - width) * 0.5}px`;
+                            this.viewport_rect.size.set(this._settings.display.width, this._settings.display.height);
+                                this.viewport_rect.position.set((window.innerWidth - width) * 0.5, 0);
                             }
                             else {
                                 let scale = this._settings.display.width / window.innerWidth;
@@ -287,6 +311,8 @@ export default class SceneTree {
                                 this.view.style.height = `${window.innerHeight}px`;
                                 this.view.style.marginLeft = `0px`;
                                 this.view.style.marginTop = `0px`;
+                                this.viewport_rect.size.set(this._settings.display.width, window.innerHeight * scale);
+                                this.viewport_rect.position.set(0, 0);
                             }
                             break;
                         case 'keep_height':
@@ -296,6 +322,8 @@ export default class SceneTree {
                                 this.view.style.width = `${height * (this._settings.display.height / this._settings.display.width)}px`;
                                 this.view.style.height = `${height}px`;
                                 this.view.style.marginTop = `${(window.innerHeight - height) * 0.5}px`;
+                                this.viewport_rect.size.set(this._settings.display.width, this._settings.display.height);
+                                this.viewport_rect.position.set(0, (window.innerHeight - health) * 0.5);
                             }
                             else {
                                 let scale = this._settings.display.height / window.innerHeight;
@@ -304,6 +332,8 @@ export default class SceneTree {
                                 this.view.style.height = `${window.innerHeight}px`;
                                 this.view.style.marginLeft = `0px`;
                                 this.view.style.marginTop = `0px`;
+                                this.viewport_rect.size.set(window.innerWidth * scale, this._settings.display.height);
+                                this.viewport_rect.position.set(0, 0);
                             }
                             break;
                     }
