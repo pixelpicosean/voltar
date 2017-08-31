@@ -5,8 +5,11 @@ import { Point, TransformStatic, Rectangle } from '../../math';
 import Sprite from './Sprite';
 import CanvasRenderTarget from '../../renderers/canvas/utils/CanvasRenderTarget';
 import * as utils from '../../utils';
+import './webgl/TilingSpriteRenderer';
+
 
 const tempPoint = new Point();
+
 
 /**
  * A tiling sprite is a fast way of rendering a tiling image
