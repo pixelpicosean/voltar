@@ -32,7 +32,7 @@ const tmp_res = {
         y: false,
         slope: false,
     },
-    pos: {
+    position: {
         x: 0,
         y: 0,
     },
@@ -95,13 +95,15 @@ export default class PhysicsServer {
                 tmp_res.collision.x = false;
                 tmp_res.collision.y = false;
                 tmp_res.collision.slope = false;
-                tmp_res.pos.x = node.left;
-                tmp_res.pos.y = node.top;
+                tmp_res.position.x = node.left;
+                tmp_res.position.y = node.top;
                 tmp_res.tile.x = 0;
                 tmp_res.tile.y = 0;
 
                 this.collision_maps[i].trace(node.left, node.top, vec.x, vec.y, half_width * 2, half_height * 2, tmp_res);
                 if (tmp_res.collision.x || tmp_res.collision.y || tmp_res.collision.slope) {
+                    tmp_res.position.x += node._shape.extents.x * node._world_scale.x;
+                    tmp_res.position.y += node._shape.extents.y * node._world_scale.y;
                     return tmp_res;
                 }
             }

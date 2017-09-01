@@ -83,8 +83,8 @@ export default class CollisionMap extends Node2D {
         for (var i = 0; i < steps && (sx || sy); i++) {
           this._trace_step(res, x, y, sx, sy, object_width, object_height, vx, vy, i);
 
-          x = res.pos.x;
-          y = res.pos.y;
+          x = res.position.x;
+          y = res.position.y;
           if (res.collision.x) {
             sx = 0;
             vx = 0;
@@ -111,8 +111,8 @@ export default class CollisionMap extends Node2D {
     _trace_step(res, x, y, vx, vy, width, height, rvx, rvy, step) {
       var tileX, tileY;
 
-      res.pos.x += vx;
-      res.pos.y += vy;
+      res.position.x += vx;
+      res.position.y += vy;
 
       var t = 0;
 
@@ -123,7 +123,7 @@ export default class CollisionMap extends Node2D {
 
         var firstTileY = Math.max(Math.floor(y / this.tilesize), 0);
         var lastTileY = Math.min(Math.ceil((y + height) / this.tilesize), this.height);
-        tileX = Math.floor((res.pos.x + pxOffsetX) / this.tilesize);
+        tileX = Math.floor((res.position.x + pxOffsetX) / this.tilesize);
 
         // We need to test the new tile position as well as the current one, as we
         // could still collide with the current tile if it's a line def.
@@ -159,7 +159,7 @@ export default class CollisionMap extends Node2D {
                 // full tile collision!
               res.collision.x = true;
               res.tile.x = t;
-              x = res.pos.x = tileX * this.tilesize - pxOffsetX + tileOffsetX;
+              x = res.position.x = tileX * this.tilesize - pxOffsetX + tileOffsetX;
               rvx = 0;
               break;
             }
@@ -172,9 +172,9 @@ export default class CollisionMap extends Node2D {
         var pxOffsetY = (vy > 0 ? height : 0);
         var tileOffsetY = (vy < 0 ? this.tilesize : 0);
 
-        var firstTileX = Math.max(Math.floor(res.pos.x / this.tilesize), 0);
-        var lastTileX = Math.min(Math.ceil((res.pos.x + width) / this.tilesize), this.width);
-        tileY = Math.floor((res.pos.y + pxOffsetY) / this.tilesize);
+        var firstTileX = Math.max(Math.floor(res.position.x / this.tilesize), 0);
+        var lastTileX = Math.min(Math.ceil((res.position.x + width) / this.tilesize), this.width);
+        tileY = Math.floor((res.position.y + pxOffsetY) / this.tilesize);
 
         var prevTileY = Math.floor((y + pxOffsetY) / this.tilesize);
         if (step > 0 || tileY == prevTileY || prevTileY < 0 || prevTileY >= this.height) {
@@ -205,7 +205,7 @@ export default class CollisionMap extends Node2D {
               // full tile collision!
               res.collision.y = true;
               res.tile.y = t;
-              res.pos.y = tileY * this.tilesize - pxOffsetY + tileOffsetY;
+              res.position.y = tileY * this.tilesize - pxOffsetY + tileOffsetY;
               break;
             }
           }
@@ -257,8 +257,8 @@ export default class CollisionMap extends Node2D {
           return solid || (lvx * (ty - vy) - lvy * (tx - vx) < 0.5);
         }
 
-        res.pos.x = x + vx - px;
-        res.pos.y = y + vy - py;
+        res.position.x = x + vx - px;
+        res.position.y = y + vy - py;
         res.collision.slope = {
           x: lvx,
           y: lvy,
