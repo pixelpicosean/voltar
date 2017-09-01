@@ -132,6 +132,11 @@ export default class BackgroundMap extends Node2D {
             for (q = 0; q < row.length; q++) {
                 c = row[q];
 
+                if (c === 0)
+                  continue;
+                else
+                  c -= 1;
+
                 u = Math.floor(c % tile_per_row) * this.tile_width;
                 v = Math.floor(c / tile_per_row) * this.tile_height;
 
