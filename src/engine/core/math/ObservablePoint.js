@@ -44,6 +44,8 @@ export default class ObservablePoint
             this._y = _y;
             this.cb.call(this.scope);
         }
+
+        return this;
     }
 
     /**
@@ -59,6 +61,8 @@ export default class ObservablePoint
             this._y = point.y;
             this.cb.call(this.scope);
         }
+
+        return this;
     }
 
     /**
