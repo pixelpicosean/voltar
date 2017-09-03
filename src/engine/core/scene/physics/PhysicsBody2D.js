@@ -11,21 +11,22 @@ export default class PhysicsBody2D extends CollisionObject2D {
 
         this.collision_exceptions = [];
     }
-    _collide(body, res) {
+    _collide_body(body, res) {
         return true;
     }
-    _handle_movement_trace(vec, res) {
-        if (res) {
-            this.position.copy(res.position);
-        }
-        else {
-            this.position.add(vec);
-        }
+    _collide_map(res) {
+        this.position.copy(res.position);
     }
 
     move(vec) {
         if (this.scene_tree) {
-            this._handle_movement_trace(vec, this.scene_tree.physics_server.trace_node(this, vec));
+            let res = this.scene_tree.physics_server.test_node_against_map(this, vec);
+            if (res) {
+                this._collide_map(res);
+            }
+            else {
+                this.position.add(vec);
+            }
         }
         else {
             this.position.add(vec);

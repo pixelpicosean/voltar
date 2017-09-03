@@ -156,9 +156,10 @@ export default class CollisionMap extends Node2D {
                 break;
               }
 
-                // full tile collision!
+              // full tile collision!
               res.collision.x = true;
               res.tile.x = t;
+              res.normal.x = vx < 0 ? 1 : -1;
               x = res.position.x = tileX * this.tilesize - pxOffsetX + tileOffsetX;
               rvx = 0;
               break;
@@ -205,6 +206,7 @@ export default class CollisionMap extends Node2D {
               // full tile collision!
               res.collision.y = true;
               res.tile.y = t;
+              res.normal.y = vy < 0 ? 1 : -1;
               res.position.y = tileY * this.tilesize - pxOffsetY + tileOffsetY;
               break;
             }
@@ -213,6 +215,7 @@ export default class CollisionMap extends Node2D {
       }
 
       // res is changed in place, nothing to return
+      res.normal.normalize();
     }
 
     _check_tile_def(res, t, x, y, vx, vy, width, height, tileX, tileY) {
@@ -227,44 +230,65 @@ export default class CollisionMap extends Node2D {
         lvy = (def[3] - def[1]) * this.tilesize,
         solid = def[4];
 
-        // Find the box corner to test, relative to the line
+      // Find the box corner to test, relative to the line
       var tx = x + vx + (lvy < 0 ? width : 0) - lx,
         ty = y + vy + (lvx > 0 ? height : 0) - ly;
 
-        // Is the box corner behind the line?
+      // Is the box corner behind the line?
       if (lvx * ty - lvy * tx > 0) {
 
-          // Lines are only solid from one side - find the dot product of
-          // line normal and movement vector and dismiss if wrong side
+        // Lines are only solid from one side - find the dot product of
+        // line normal and movement vector and dismiss if wrong side
         if (vx * -lvy + vy * lvx < 0) {
           return solid;
         }
 
-          // Find the line normal
+        // Find the line normal
         var length = Math.sqrt(lvx * lvx + lvy * lvy);
         var nx = lvy / length,
           ny = -lvx / length;
 
-          // Project out of the line
+        // Project out of the line
         var proj = tx * nx + ty * ny;
         var px = nx * proj,
           py = ny * proj;
 
-          // If we project further out than we moved in, then this is a full
-          // tile collision for solid tiles.
-          // For non-solid tiles, make sure we were in front of the line.
+        // If we project further out than we moved in, then this is a full
+        // tile collision for solid tiles.
+        // For non-solid tiles, make sure we were in front of the line.
         if (px * px + py * py >= vx * vx + vy * vy) {
           return solid || (lvx * (ty - vy) - lvy * (tx - vx) < 0.5);
         }
 
-        res.position.x = x + vx - px;
-        res.position.y = y + vy - py;
+        // Project the point back to motion direction,
+        // so we will get more precise result. Further more,
+        // we can stop the the unwilling slope slide behavior
+        let mx = px, my = py;
+        if (true) {
+          let len = Math.sqrt(vx * vx + vy * vy);
+          let n_vx = vx / len, n_vy = vy / len;
+          let angle = Math.acos(-nx * n_vx + -ny * n_vy);
+          let len_f = Math.sqrt(px * px + py * py) / Math.cos(angle);
+          mx = len_f * n_vx;
+          my = len_f * n_vy;
+        }
+
+        res.travel.x = vx - mx;
+        res.travel.y = vy - my;
+
+        res.remainder.x = mx;
+        res.remainder.y = my;
+
+        res.position.x = x + (vx - mx);
+        res.position.y = y + (vy - my);
+
         res.collision.slope = {
           x: lvx,
           y: lvy,
-          nx: nx,
-          ny: ny,
         };
+
+        res.normal.set(nx, ny);
+
         return true;
       }
 

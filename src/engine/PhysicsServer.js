@@ -30,16 +30,16 @@ const tmp_res = {
     collision: {
         x: false,
         y: false,
-        slope: false,
+        slope: undefined,
     },
-    position: {
-        x: 0,
-        y: 0,
-    },
-    tile: {
-        x: 0,
-        y: 0,
-    },
+
+    tile: new Vector(),
+    collider: undefined,
+
+    position: new Vector(),
+    normal: new Vector(),
+    travel: new Vector(),
+    remainder: new Vector(),
 };
 
 
@@ -77,7 +77,7 @@ export default class PhysicsServer {
           }
         }
     }
-    trace_node(node, vec) {
+    test_node_against_map(node, vec) {
         if (this.collision_maps.length > 0 && node._shape) {
             // Update bounds
             const pos = node._world_position;
@@ -94,16 +94,21 @@ export default class PhysicsServer {
             for (let i = 0; i < this.collision_maps.length; i++) {
                 tmp_res.collision.x = false;
                 tmp_res.collision.y = false;
-                tmp_res.collision.slope = false;
-                tmp_res.position.x = node.left;
-                tmp_res.position.y = node.top;
-                tmp_res.tile.x = 0;
-                tmp_res.tile.y = 0;
+                tmp_res.collision.slope = undefined;
+                tmp_res.tile.set(0);
+                tmp_res.normal.set(0);
+                tmp_res.travel.set(0);
+                tmp_res.remainder.set(0);
+                tmp_res.collider = undefined;
 
-                this.collision_maps[i].trace(node.left, node.top, vec.x, vec.y, half_width * 2, half_height * 2, tmp_res);
+                tmp_res.position.set(node.left - this.collision_maps[i]._world_position.x, node.top - this.collision_maps[i]._world_position.y);
+
+                let curr_x = tmp_res.position.x, curr_y = tmp_res.position.y;
+                this.collision_maps[i].trace(tmp_res.position.x, tmp_res.position.y, vec.x, vec.y, half_width * 2, half_height * 2, tmp_res);
                 if (tmp_res.collision.x || tmp_res.collision.y || tmp_res.collision.slope) {
-                    tmp_res.position.x += node._shape.extents.x * node._world_scale.x;
-                    tmp_res.position.y += node._shape.extents.y * node._world_scale.y;
+                    tmp_res.position.x += half_width;
+                    tmp_res.position.y += half_height;
+
                     return tmp_res;
                 }
             }
