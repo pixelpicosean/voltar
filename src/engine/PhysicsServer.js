@@ -92,6 +92,10 @@ export default class PhysicsServer {
             node.bottom = pos.y + half_height;
 
             for (let i = 0; i < this.collision_maps.length; i++) {
+                if (!(node.collision_mask & this.collision_maps[i].collision_layer)) {
+                    continue;
+                }
+
                 tmp_res.collision.x = false;
                 tmp_res.collision.y = false;
                 tmp_res.collision.slope = undefined;

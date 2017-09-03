@@ -108,6 +108,8 @@ export default class CollisionMap extends Node2D {
             this._trace_step(res, x, y, vx, vy, object_width, object_height, vx, vy, 0);
         }
 
+        res.collider = this;
+
         return res;
     }
 
