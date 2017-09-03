@@ -10,7 +10,7 @@ class Me extends v.PhysicsBody2D {
         super();
 
         this.set_shape(new v.RectangleShape2D(8, 8));
-        this.scale.set(2);
+        this.scale.set(1.5);
 
         this.gfx = new v.Sprite();
         this.gfx.texture = 'icon';
@@ -30,16 +30,16 @@ class Me extends v.PhysicsBody2D {
     }
     _process(delta) {
         this.vec.set(0);
-        if (v.input.state('left')) {
+        if (v.input.is_action_pressed('left')) {
             this.vec.x -= 10;
         }
-        if (v.input.state('right')) {
+        if (v.input.is_action_pressed('right')) {
             this.vec.x += 10;
         }
-        if (v.input.state('up')) {
+        if (v.input.is_action_pressed('up')) {
             this.vec.y -= 10;
         }
-        if (v.input.state('down')) {
+        if (v.input.is_action_pressed('down')) {
             this.vec.y += 10;
         }
         this.move(this.vec.scale(delta));
@@ -54,10 +54,10 @@ export default class InputScene extends v.Node2D {
 
     _enter_tree() {
         const t = new v.BackgroundMap(16, 16, [
-            [  0,  1,  2,  3,  4 ],
-            [  5,  6,  7,  8,  9 ],
-            [ 10, 11, 12, 13, 14 ],
-            [ 15, 16, 17, 18, 19 ],
+            [  1,  2,  3,  4,  5 ],
+            [  6,  7,  8,  9, 10 ],
+            [ 11, 12, 13, 14, 15 ],
+            [ 16, 17, 18, 19, 20 ],
         ], 'tileset');
         t.scale.set(2);
         this.add_child(t);
@@ -71,7 +71,7 @@ export default class InputScene extends v.Node2D {
         this.add_child(c);
 
         this.s = new Me();
-        this.s.position.set(64, 64);
+        this.s.position.set(48, 48);
         this.add_child(this.s);
     }
     _ready() {}
