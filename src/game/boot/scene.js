@@ -6,9 +6,10 @@ import data from './data.json';
 import AnimatedSpirteTest from 'game/test/animated-sprite';
 import InputTest from 'game/test/input';
 import PhysicsTest from 'game/test/physics';
+import TilemapTest from 'game/test/tilemap';
 
 
-const Test = AnimatedSpirteTest;
+const Test = TilemapTest;
 
 
 export default class Boot extends v.Node2D {
