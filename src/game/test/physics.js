@@ -42,7 +42,7 @@ class StaticBody extends v.PhysicsBody2D {
         this._debug_shape.end_fill();
         this.add_child(this._debug_shape);
     }
-    collide(body, res) {
+    _collide_body(body, res) {
         return false;
     }
 }
@@ -77,7 +77,7 @@ class CustomBody extends v.PhysicsBody2D {
         this.y += this.velocity.y * delta;
     }
 
-    _collide(body, res) {
+    _collide_body(body, res) {
         // this.velocity.slide(res.overlap_n);
         this.velocity.bounce(res.overlap_n);
 
@@ -96,19 +96,19 @@ export default class PhysicsScene extends v.Node2D {
     _enter_tree() {
         const a = new CustomArea();
         a.name = 'a';
-        a.position.set(100, 200);
+        a.position.set(10, 128);
         this.add_child(a);
         this.a = a;
 
         const b = new StaticBody();
         b.name = 'b';
-        b.position.set(300, 200);
+        b.position.set(128, 128);
         this.add_child(b);
         this.b = b;
 
         const c = new CustomBody();
         c.name = 'c';
-        c.position.set(300, 100);
+        c.position.set(128, 10);
         this.add_child(c);
         this.c = c;
     }
