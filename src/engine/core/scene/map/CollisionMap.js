@@ -1,6 +1,10 @@
 import Node2D from '../Node2D';
 
 
+const HALF_PI = Math.PI * 0.5;
+const SLOPE_ANGLE_DIFF_MIN = 0.001;
+
+
 export default class CollisionMap extends Node2D {
     get_collision_layer() {
         return this.collision_layer;
@@ -264,10 +268,10 @@ export default class CollisionMap extends Node2D {
         // so we will get more precise result. Further more,
         // we can stop the the unwilling slope slide behavior
         let mx = px, my = py;
-        if (true) {
-          let len = Math.sqrt(vx * vx + vy * vy);
-          let n_vx = vx / len, n_vy = vy / len;
-          let angle = Math.acos(-nx * n_vx + -ny * n_vy);
+        let len = Math.sqrt(vx * vx + vy * vy);
+        let n_vx = vx / len, n_vy = vy / len;
+        let angle = Math.acos(-nx * n_vx + -ny * n_vy);
+        if (Math.abs(angle - HALF_PI) > SLOPE_ANGLE_DIFF_MIN) {
           let len_f = Math.sqrt(px * px + py * py) / Math.cos(angle);
           mx = len_f * n_vx;
           my = len_f * n_vy;
