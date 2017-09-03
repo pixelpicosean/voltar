@@ -261,20 +261,20 @@ export default class PhysicsServer {
                                 if (a_is_left) {
                                     res.overlap_n.set(-1, 0);
                                     res.overlap_v.set(-overlap_x, 0);
-                                    push_a = (a2b && coll._collide(coll2, res));
+                                    push_a = (a2b && coll._collide_body(coll2, res));
 
                                     res.overlap_n.set(1, 0);
                                     res.overlap_v.set(overlap_x, 0);
-                                    push_b = (b2a && coll2._collide(coll, res));
+                                    push_b = (b2a && coll2._collide_body(coll, res));
                                 }
                                 else {
                                     res.overlap_n.set(1, 0);
                                     res.overlap_v.set(overlap_x, 0);
-                                    push_a = (a2b && coll._collide(coll2, res));
+                                    push_a = (a2b && coll._collide_body(coll2, res));
 
                                     res.overlap_n.set(-1, 0);
                                     res.overlap_v.set(-overlap_x, 0);
-                                    push_b = (b2a && coll2._collide(coll, res));
+                                    push_b = (b2a && coll2._collide_body(coll, res));
                                 }
 
                                 if (push_a && !push_b) {
@@ -312,20 +312,20 @@ export default class PhysicsServer {
                                 if (a_is_top) {
                                     res.overlap_n.set(0, -1);
                                     res.overlap_v.set(0, -overlap_y);
-                                    push_a = (a2b && coll._collide(coll2, res));
+                                    push_a = (a2b && coll._collide_body(coll2, res));
 
                                     res.overlap_n.set(0, 1);
                                     res.overlap_v.set(0, overlap_y);
-                                    push_b = (b2a && coll2._collide(coll, res));
+                                    push_b = (b2a && coll2._collide_body(coll, res));
                                 }
                                 else {
                                     res.overlap_n.set(0, 1);
                                     res.overlap_v.set(0, overlap_y);
-                                    push_a = (a2b && coll._collide(coll2, res));
+                                    push_a = (a2b && coll._collide_body(coll2, res));
 
                                     res.overlap_n.set(0, -1);
                                     res.overlap_v.set(0, -overlap_y);
-                                    push_b = (b2a && coll2._collide(coll, res));
+                                    push_b = (b2a && coll2._collide_body(coll, res));
                                 }
 
                                 if (push_a && !push_b) {
