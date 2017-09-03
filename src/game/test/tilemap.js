@@ -5,11 +5,18 @@ v.loader.add('collisiontiles', 'media/collisiontiles-64.png');
 v.loader.add('hero', 'media/hero.png');
 
 
+const SOLID = 1;
+const HERO = 2;
+const ENEMY = 3;
+
+
 class Me extends v.PhysicsBody2D {
     constructor() {
         super();
 
         this.set_shape(new v.RectangleShape2D(8, 12));
+        this.set_collision_layer_bit(HERO, true);
+        this.set_collision_mask_bit(SOLID, true);
 
         this.gfx = new v.AnimatedSprite({
             idle: {
@@ -115,6 +122,7 @@ export default class TilemapScene extends v.Node2D {
         this.add_child(t);
 
         const c = new v.CollisionMap(32, data);
+        c.set_collision_layer_bit(SOLID, true);
         this.add_child(c);
 
         this.s = new Me();
