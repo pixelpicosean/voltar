@@ -14,7 +14,7 @@ class Me extends v.PhysicsBody2D {
     constructor() {
         super();
 
-        this.set_shape(new v.RectangleShape2D(8, 12));
+        this.set_shape(new v.RectangleShape2D(6, 12));
         this.set_collision_layer_bit(HERO, true);
         this.set_collision_mask_bit(SOLID, true);
 
