@@ -9,6 +9,9 @@ import PhysicsTest from 'game/test/physics';
 import TilemapTest from 'game/test/tilemap';
 
 
+v.loader.add('media/04b03.fnt');
+
+
 const Test = TilemapTest;
 
 
