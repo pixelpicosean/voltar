@@ -9,7 +9,7 @@ import remove_items from 'remove-array-items';
 const DefaultSettings = {
     application: {
         name: 'Voltar',
-        main_scene: 'boot/scene',
+        main_scene: undefined,
     },
     display: {
         view: 'game',
@@ -86,7 +86,7 @@ export default class SceneTree {
     init(settings) {
         this._settings = Object.assign(this._settings, DefaultSettings, settings);
 
-        this.change_scene_to(require(`game/${this._settings.application.main_scene}`).default);
+        this.change_scene_to(this._settings.application.main_scene);
 
         window.addEventListener('load', this._initialize, false);
         document.addEventListener('DOMContentLoaded', this._initialize, false);
