@@ -197,7 +197,7 @@ export default class SceneTree {
                             this.viewport.scale.set(window.innerWidth / this._settings.display.width, window.innerHeight / this._settings.display.height);
                             this.view.style.width = `${window.innerWidth}px`;
                             this.view.style.height = `${window.innerHeight}px`;
-                            this.viewport_rect.size.set(window.innerWidth, window.innerHeight);
+                            this.viewport_rect.size.set(this._settings.display.width, this._settings.display.height);
                             this.viewport_rect.position.set(0, 0);
                             break;
                         case 'keep':
@@ -282,6 +282,8 @@ export default class SceneTree {
                         case 'ignore':
                             this.view.style.width = `${window.innerWidth}px`;
                             this.view.style.height = `${window.innerHeight}px`;
+                            this.view.style.marginLeft = `0`;
+                            this.view.style.marginTop = `0`;
                             this.viewport_rect.size.set(this._settings.display.width, this._settings.display.height);
                             this.viewport_rect.position.set(0, 0);
                             break;
