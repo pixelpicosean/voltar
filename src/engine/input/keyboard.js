@@ -48,8 +48,10 @@ export default {
             return;
         }
 
-        this.pressed_keys[KEYS[event.keyCode]] = true;
-        this.manager._keydown(KEYS[event.keyCode], this.down('SHIFT'), this.down('CTRL'), this.down('ALT'));
+        if (!this.pressed_keys[KEYS[event.keyCode]]) {
+            this.pressed_keys[KEYS[event.keyCode]] = true;
+            this.manager._keydown(KEYS[event.keyCode], this.down('SHIFT'), this.down('CTRL'), this.down('ALT'));
+        }
     },
 
     /**
@@ -59,13 +61,13 @@ export default {
      * @private
      */
     _keyup(event) {
-        this.pressed_keys[KEYS[event.keyCode]] = false;
-        this.manager._keyup(KEYS[event.keyCode]);
+        if (this.pressed_keys[KEYS[event.keyCode]]) {
+            this.pressed_keys[KEYS[event.keyCode]] = false;
+            this.manager._keyup(KEYS[event.keyCode]);
+        }
     },
 
-    _process(delta) {
-        this._reset_keys();
-    },
+    _process(delta) {},
 
     _reset_keys() {
         for (var key in this.pressed_keys) {
