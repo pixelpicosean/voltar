@@ -26,7 +26,7 @@ export * from './scene/particles';
 
 export { default as Sprite } from './scene/sprites/Sprite';
 export { default as AnimatedSprite } from './scene/sprites/AnimatedSprite';
-export { SpriteFrames } from './scene/sprites/AnimatedSprite';
+export { SpriteFrames, filmstrip } from './scene/sprites/AnimatedSprite';
 export { default as TilingSprite } from './scene/sprites/TilingSprite';
 export { default as CanvasTinter } from './scene/sprites/canvas/CanvasTinter';
 export { default as SpriteRenderer } from './scene/sprites/webgl/SpriteRenderer';

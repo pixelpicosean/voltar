@@ -31,7 +31,7 @@ function normalize_frame_list(frames) {
  * @param  {Number} height      Height of a single tile.
  * @return {Array<Texture>}     List of textures.
  */
-function filmstrip(tileset, width, height) {
+export function filmstrip(tileset, width, height) {
     let strip = [];
 
     let w = tileset.width;
