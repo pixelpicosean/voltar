@@ -83,8 +83,8 @@ export default class PhysicsServer {
             const pos = node._world_position;
             const scale = node._world_scale;
 
-            const half_width = node._shape.extents.x * scale.x;
-            const half_height = node._shape.extents.y * scale.x;
+            const half_width = Math.abs(node._shape.extents.x * scale.x);
+            const half_height = Math.abs(node._shape.extents.y * scale.x);
 
             node.left = pos.x - half_width;
             node.right = pos.x + half_width;
@@ -141,8 +141,8 @@ export default class PhysicsServer {
 
         // Update bounds
         if (coll._shape) {
-            const half_width = coll._shape.extents.x * node.scale.x;
-            const half_height = coll._shape.extents.y * node.scale.x;
+            const half_width = Math.abs(coll._shape.extents.x * node.scale.x);
+            const half_height = Math.abs(coll._shape.extents.y * node.scale.x);
 
             const pos = coll.get_global_position();
 

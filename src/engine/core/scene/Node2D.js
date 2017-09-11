@@ -122,7 +122,7 @@ export default class Node2D extends EventEmitter
         this._boundsRect = null;
         this._localBoundsRect = null;
         this._world_position = new Point();
-        this._world_scale = new Point();
+        this._world_scale = new Point(1, 1);
 
         /**
          * The original, cached mask of the object
@@ -1169,7 +1169,8 @@ export default class Node2D extends EventEmitter
 
         let t = this.transform.world_transform;
         this._world_position.set(t.tx, t.ty);
-        this._world_scale.set(Math.sqrt((t.a * t.a) + (t.b * t.b)), Math.sqrt((t.c * t.c) + (t.d * t.d)));
+        this._world_scale.copy(this.parent._world_scale)
+            .multiply(this.scale);
 
         for (let i = 0, j = this.children.length; i < j; ++i)
         {
