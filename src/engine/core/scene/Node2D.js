@@ -1472,4 +1472,4 @@ export default class Node2D extends EventEmitter
 }
 
 // performance increase to avoid using call.. (10x faster)
-Node2D.prototype.node2d_update_transform = Node2D.prototype._update_transform;
+Node2D.prototype.node2d_update_transform = Node2D.prototype.update_transform;
