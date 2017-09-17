@@ -1,4 +1,5 @@
 import remove_items from 'remove-array-items';
+import { Vector } from 'engine/core';
 import keyboard from './keyboard';
 
 
@@ -12,10 +13,31 @@ export default class Input {
         this.actions = {};
         this.last_pressed = {};
         this.last_released = {};
+
+        this.mouse = new Vector(0, 0);
     }
-    _init() {
+    _init(viewport) {
         // Keyboard
         keyboard._init(this);
+
+        // Mouse
+        viewport.interactive = true;
+        viewport.contains_point = () => true;
+        viewport.on('pointerdown', (e) => {
+            this.mouse.copy(e.data.global);
+            this._keydown('MOUSE');
+        });
+        viewport.on('pointermove', (e) => {
+            this.mouse.copy(e.data.global);
+        });
+        viewport.on('pointerup', (e) => {
+            this.mouse.copy(e.data.global);
+            this._keyup('MOUSE');
+        });
+        viewport.on('pointerupoutside', (e) => {
+            this.mouse.copy(e.data.global);
+            this._keyup('MOUSE');
+        });
     }
     _process(delta) {
         keyboard._process(delta);

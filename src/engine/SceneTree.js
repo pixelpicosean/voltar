@@ -349,7 +349,7 @@ export default class SceneTree {
         setTimeout(on_window_resize, 1);
 
         // Init input
-        this.input._init();
+        this.input._init(this.viewport);
 
         // Start the main loop
         this._start_loop();
