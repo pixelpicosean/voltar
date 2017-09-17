@@ -20,6 +20,9 @@ export { default as Polygon } from './shapes/Polygon';
 export { default as Rectangle } from './shapes/Rectangle';
 export { default as RoundedRectangle } from './shapes/RoundedRectangle';
 
+export const PI = Math.PI;
+export const PI2 = Math.PI * 2;
+
 /**
  * Force a value within the boundaries by clamping `x` to the range `[a, b]`.
  *
@@ -43,11 +46,21 @@ export function clamp(x, a, b) {
  * @param {number}  max largest valid value
  * @return {number} result
  */
-export function wrap(value, min, max) {
-  if (value < min) {return max + (value % max);}
-  if (value >= max) {return value % max;}
-  return value;
-}
+export const wrap = (value, min, max) => (value - min) % (max - min) + min;
+
+export const mod = (a, n) => (a % n + n) % n;
+
+export const lerp = (a, b, fct) => a + (b - a) * fct;
+
+/**
+ * wrap to [-PI, +PI]
+ */
+export const wrap_angle = (a) => (a + PI) % PI2 - PI;
+
+/**
+ * Minimal difference between 2 angles
+ */
+export const angle_difference = (a, b) => mod((b - a + PI), PI2) - PI;
 
 export function ease(p_x, p_c) {
     if (p_x < 0) {
