@@ -405,12 +405,12 @@ export default class SceneTree {
                 _process_tmp.delta_time -= _process_tmp.step;
 
                 // Fixed update
-                // - process nodes
-                this.current_scene._propagate_process(_process_tmp.slow_step_sec);
                 // - update transforms
                 this.viewport.parent = this.viewport._tempNode2DParent;
                 this.viewport.update_transform();
                 this.viewport.parent = null;
+                // - process nodes
+                this.current_scene._propagate_process(_process_tmp.slow_step_sec);
                 // - solve collision
                 this.physics_server.solve_collision(this.current_scene);
 
