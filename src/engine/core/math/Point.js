@@ -123,6 +123,13 @@ export default class Point {
         this.y = Math.round(this.y);
         return this;
     }
+    clamp(length) {
+        const len = this.length();
+        if (len > 0 && length < len) {
+            this.scale(length / len);
+        }
+        return this;
+    }
 
     scale(b) {
         this.x *= b;
