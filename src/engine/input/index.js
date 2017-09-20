@@ -88,6 +88,8 @@ export default class Input {
                 remove_items(this.bindings[key], idx, 1);
             }
 
+            this.actions[action] = false;
+
             delete this.last_pressed[action];
             delete this.last_released[action];
         }
@@ -105,6 +107,7 @@ export default class Input {
             }
         }
 
+        this.actions = {};
         this.last_pressed = {};
         this.last_released = {};
     }
