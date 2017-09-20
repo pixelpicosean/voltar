@@ -126,7 +126,7 @@ export default class PhysicsServer {
         }
     }
     collision_map_exited(c) {
-        removeItems(this.collision_maps, this.collision_maps.indexOf(c), 1);
+        remove_items(this.collision_maps, this.collision_maps.indexOf(c), 1);
     }
 
     _test_node(node) {
