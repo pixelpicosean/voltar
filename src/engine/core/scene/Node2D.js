@@ -810,18 +810,19 @@ export default class Node2D extends EventEmitter
         }
 
         // Let children exit tree
-        this.is_inside_tree = false;
-        this.scene_tree = null;
         for (let i = 0, l = this.children.length; i < l; i++) {
             this.children[i]._propagate_exit_tree();
             this.children[i].scene_tree = null;
         }
 
-        this._is_ready = false;
-
         this._exit_tree();
 
         this.tree_exited.dispatch();
+
+        // Reset flags
+        this._is_ready = false;
+        this.is_inside_tree = false;
+        this.scene_tree = null;
     }
 
     /**
