@@ -5,70 +5,63 @@
 // https://gist.github.com/timhall/4078614
 // https://github.com/Financial-Times/polyfill-service/tree/master/polyfills/requestAnimationFrame
 
-const ONE_FRAME_TIME = 16;
+var ONE_FRAME_TIME = 16;
 
 // Date.now
-if (!(Date.now && Date.prototype.getTime))
-{
-    Date.now = function now()
-    {
+if (!(Date.now && Date.prototype.getTime)) {
+    Date.now = function now() {
         return new Date().getTime();
     };
 }
 
 // performance.now
-if (!(window.performance && window.performance.now))
-{
-    const startTime = Date.now();
+if (!(window.performance && window.performance.now)) {
+    var startTime = Date.now();
 
-    if (!window.performance)
-    {
+    if (!window.performance) {
         window.performance = {};
     }
 
-    window.performance.now = () => Date.now() - startTime;
+    window.performance.now = function() {
+        return Date.now() - startTime;
+    };
 }
 
 // requestAnimationFrame
-let last_time = Date.now();
-const vendors = ['ms', 'moz', 'webkit', 'o'];
+var last_time = Date.now();
+var vendors = ['ms', 'moz', 'webkit', 'o'];
 
-for (let x = 0; x < vendors.length && !window.requestAnimationFrame; ++x)
-{
-    const p = vendors[x];
+for (var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+    var p = vendors[x];
 
-    window.requestAnimationFrame = window[`${p}RequestAnimationFrame`];
-    window.cancelAnimationFrame = window[`${p}CancelAnimationFrame`] || window[`${p}CancelRequestAnimationFrame`];
+    window.requestAnimationFrame = window[p + 'RequestAnimationFrame'];
+    window.cancelAnimationFrame = window[p + 'CancelAnimationFrame'] || window[p + 'CancelRequestAnimationFrame'];
 }
 
-if (!window.requestAnimationFrame)
-{
-    window.requestAnimationFrame = (callback) =>
-    {
-        if (typeof callback !== 'function')
-        {
-            throw new TypeError(`${callback}is not a function`);
+if (!window.requestAnimationFrame) {
+    window.requestAnimationFrame = function(callback) {
+        if (typeof callback !== 'function') {
+            throw new TypeError(callback + ' is not a function');
         }
 
-        const currentTime = Date.now();
-        let delay = ONE_FRAME_TIME + last_time - currentTime;
+        var currentTime = Date.now();
+        var delay = ONE_FRAME_TIME + last_time - currentTime;
 
-        if (delay < 0)
-        {
+        if (delay < 0) {
             delay = 0;
         }
 
         last_time = currentTime;
 
-        return setTimeout(() =>
-        {
+        return setTimeout(function() {
             last_time = Date.now();
             callback(performance.now());
         }, delay);
     };
 }
 
-if (!window.cancelAnimationFrame)
-{
-    window.cancelAnimationFrame = (id) => clearTimeout(id);
+if (!window.cancelAnimationFrame) {
+    window.cancelAnimationFrame = function(id) {
+        clearTimeout(id);
+    };
 }
