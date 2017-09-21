@@ -1,5 +1,6 @@
 import './Object.assign';
 import './Math.sign';
+import './raf';
 
 if (!window.ArrayBuffer)
 {
