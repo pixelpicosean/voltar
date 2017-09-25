@@ -868,6 +868,7 @@ export default class Node2D extends EventEmitter
 
         if (this.is_inside_tree) {
             child._propagate_enter_tree();
+            child.update_transform();
         }
 
         // TODO - lets either do all callbacks or all events.. not both!
