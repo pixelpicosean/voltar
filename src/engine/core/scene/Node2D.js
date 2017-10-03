@@ -763,6 +763,15 @@ export default class Node2D extends EventEmitter
             this.scene_tree.queue_delete(this);
         }
     }
+    call_deferred(method, args) {
+        if (!this.is_inside_tree) {
+            return;
+        }
+
+        if (this.scene_tree) {
+            this.scene_tree.message_queue.push_call(this, method, args);
+        }
+    }
 
     _propagate_enter_tree() {
         if (this.is_inside_tree) {

@@ -1,5 +1,6 @@
 import VisualServer from './VisualServer';
 import PhysicsServer from './PhysicsServer';
+import MessageQueue from './MessageQueue';
 import { Node2D, Vector } from './core';
 
 import { outer_box_resize } from './resize';
@@ -63,6 +64,7 @@ export default class SceneTree {
 
         this.visual_server = new VisualServer();
         this.physics_server = new PhysicsServer();
+        this.message_queue = new MessageQueue();
         this.input = input;
 
         this._settings = {};
@@ -413,6 +415,8 @@ export default class SceneTree {
                 this.current_scene._propagate_process(_process_tmp.slow_step_sec);
                 // - solve collision
                 this.physics_server.solve_collision(this.current_scene);
+                // - message queue
+                this.message_queue.flush();
 
                 this._flush_delete_queue();
 
