@@ -18,6 +18,7 @@ export default class AnimationTest extends v.Node2D {
         tween.tween_completed.add(() => {
             console.log('animation end');
         });
+        tween.interpolate_method(this, 'fly', 0, 100, 5, 'Quadratic.InOut');
         tween.interpolate_deferred_callback(this, 3, 'deferred_greet', 'Sean');
         tween.interpolate_callback(this, 3, 'greet', 'Sean');
         tween.start();
@@ -30,5 +31,9 @@ export default class AnimationTest extends v.Node2D {
     }
     deferred_greet(name) {
         console.log(`[deferred] hello, ${name}`);
+    }
+
+    fly(num) {
+        console.log(`fly: ${num | 0}`);
     }
 }

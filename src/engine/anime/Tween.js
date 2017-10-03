@@ -153,6 +153,49 @@ export default class Tween {
         this.interpolates.push(data);
         return true;
     }
+    interpolate_method(obj, method, initial_val, final_val, duration, p_easing, delay = 0) {
+        if (this.pending_update !== 0) {
+            this._add_pending_command('interpolate_method', [
+                obj, method, initial_val, final_val, duration, p_easing, delay,
+            ]);
+            return true;
+        }
+
+        let easing = p_easing.split('.');
+        let easing_func = Easing[easing[0]][easing[1]];
+
+        let data = new InterpolateData();
+        data.active = true;
+        data.type = INTER_METHOD;
+        data.finish = false;
+        data.elapsed = 0;
+
+        data.id = obj;
+        data.key = method;
+        data.initial_val = initial_val;
+        data.final_val = final_val;
+        data.duration = duration;
+        data.easing = easing_func;
+        data.delay = delay;
+        switch (typeof(data.final_val)) {
+            case 'number':
+                data.val_type = NUMBER;
+                break;
+            case 'boolean':
+                data.val_type = BOOL;
+                break;
+            case 'string':
+                data.val_type = STRING;
+                break;
+        }
+
+        if (!this._calc_delta_val(data.initial_val, data.final_val, data)) {
+            return false;
+        }
+
+        this.interpolates.push(data);
+        return true;
+    }
     interpolate_callback(obj, duration, callback, args) {
         if (this.pending_update !== 0) {
             this._add_pending_command('interpolate_callback', [
@@ -414,7 +457,7 @@ export default class Tween {
             case INTER_METHOD:
             case FOLLOW_METHOD:
             case TARGETING_METHOD:
-                get_property(obj, data.key)(value);
+                obj[data.key](value);
                 break;
 
             case INTER_CALLBACK:
