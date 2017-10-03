@@ -163,6 +163,19 @@ export default class Point {
         this.y = x * s + y * c;
         return this;
     }
+    /**
+     * Change this vector to be perpendicular to what it was before. (Effectively
+     * roatates it 90 degrees in a clockwise direction)
+     * @method perp
+     * @memberof Vector#
+     * @return {Vector} Self for chaining.
+     */
+    perp() {
+        const x = this.x;
+        this.x = this.y;
+        this.y = -x;
+        return this;
+    }
     project(other) {
       const amt = this.dot(other) / other.length_squared();
       this.x = amt * other.x;
