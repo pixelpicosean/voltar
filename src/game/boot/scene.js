@@ -12,7 +12,7 @@ import TilemapTest from 'game/test/tilemap';
 v.loader.add('media/04b03.fnt');
 
 
-const Test = TilemapTest;
+const Test = PhysicsTest;
 
 
 export default class Boot extends v.Node2D {
