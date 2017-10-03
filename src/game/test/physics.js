@@ -143,6 +143,7 @@ export default class PhysicsScene extends v.Node2D {
 
         const a = new CustomArea(16, 16);
         a.name = 'a';
+        a.rotation = Math.PI * 0.25;
         a.position.set(10, 128);
         this.add_child(a);
         this.a = a;
