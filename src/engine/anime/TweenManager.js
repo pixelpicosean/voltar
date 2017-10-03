@@ -1,23 +1,12 @@
 import Tween from './Tween';
 
 
-// Object recycle
-const pool = [];
-for (let i = 0; i < 20; i++) {
-    pool.push(new Tween(null));
-}
-
 export default class TweenManager {
     constructor() {
         this.tweens = [];
     }
-    create() {
-        let tween = pool.pop();
-        if (!tween) tween = new Tween();
-
+    add(tween) {
         this.tweens.push(tween);
-
-        return tween._init();
     }
     remove(tween) {
         tween.active = false;
@@ -36,18 +25,21 @@ export default class TweenManager {
                     remove_items(this.tweens, i--, 1);
 
                     tween.clear_events();
-                    pool.push(tween);
+                    tween.remove_all();
+                    tween = null;
                 }
             }
         }
     }
     _stop_all() {
         let i = 0, tween;
-        for (let i = 0; i < this.tweens.length; i++) {
+        for (i = 0; i < this.tweens.length; i++) {
             tween = this.tweens[i];
+
             tween.clear_events();
-            pool.push(tween);
+            tween.remove_all();
+            tween = null;
         }
-        pool.length = 0;
+        this.tweens.length = 0;
     }
 }

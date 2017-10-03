@@ -1,3 +1,4 @@
+import remove_items from 'remove-array-items';
 import Signal from 'engine/Signal';
 import { clamp } from 'engine/core/math';
 import flatten_key_url from './flatten_key_url';
@@ -40,6 +41,9 @@ function set_property(obj, key, value) {
 
 class InterpolateData {
     constructor() {
+        this._init();
+    }
+    _init() {
         this.active = false;
         this.finish = false;
 
@@ -47,14 +51,14 @@ class InterpolateData {
         this.delay = 0.0;
         this.elapsed = 0.0;
 
-        this.type = -1;
+        this.type = 0;
         this.val_type = NUMBER;
         this.easing = Easing.Linear.None;
 
-        this.id = 0;
+        this.id = null;
         this.key = null;
         this._key = '';
-        this.target_id = 0;
+        this.target_id = null;
         this.target_key = null;
         this._target_key = '';
 
@@ -64,7 +68,16 @@ class InterpolateData {
 
         this.call_deferred = false;
         this.args = null;
+
+        return this;
     }
+};
+
+const pool = [];
+const create_interpolate = () => {
+    let data = pool.pop();
+    if (!data) data = new InterpolateData();
+    return data._init();
 };
 
 // TODO: better easing support (https://github.com/rezoner/ease)
@@ -180,6 +193,7 @@ export default class Tween {
             data = this.interpolates[i];
             if (data.id === obj && (data._key === key || key.length === 0)) {
                 remove_items(this.interpolates, i--, 1);
+                pool.push(data);
                 if (first_only) {
                     break;
                 }
@@ -189,7 +203,12 @@ export default class Tween {
     }
     remove_all() {
         this.active = false;
+
+        for (let i = 0; i < this.interpolates.length; i++) {
+            pool.push(this.interpolates[i]);
+        }
         this.interpolates.length = 0;
+
         return this;
     }
 
@@ -246,7 +265,7 @@ export default class Tween {
         let easing = p_easing.split('.');
         let easing_func = Easing[easing[0]][easing[1]];
 
-        let data = new InterpolateData();
+        let data = create_interpolate();
         data.active = true;
         data.type = INTER_PROPERTY;
         data.finish = false;
@@ -283,7 +302,7 @@ export default class Tween {
         let easing = p_easing.split('.');
         let easing_func = Easing[easing[0]][easing[1]];
 
-        let data = new InterpolateData();
+        let data = create_interpolate();
         data.active = true;
         data.type = INTER_METHOD;
         data.finish = false;
@@ -316,7 +335,7 @@ export default class Tween {
         return true;
     }
     interpolate_callback(obj, duration, callback, args) {
-        let data = new InterpolateData();
+        let data = create_interpolate();
         data.active = true;
         data.type = INTER_CALLBACK;
         data.finish = false;
@@ -334,7 +353,7 @@ export default class Tween {
         return this;
     }
     interpolate_deferred_callback(obj, duration, callback, args) {
-        let data = new InterpolateData();
+        let data = create_interpolate();
         data.active = true;
         data.type = INTER_CALLBACK;
         data.finish = false;
@@ -416,7 +435,7 @@ export default class Tween {
                 case INTER_PROPERTY:
                 case INTER_METHOD: {
                     let result = this._run_equation(data);
-                    this.tween_step.dispatch(data.key, data.elapsed, result);
+                    this.tween_step.dispatch(data._key, data.elapsed, result);
                     this._apply_tween_value(data, result);
                     if (data.finish) {
                         this._apply_tween_value(data, data.final_val);
@@ -436,9 +455,9 @@ export default class Tween {
             }
 
             if (data.finish) {
-                this.tween_completed.dispatch(data.key);
+                this.tween_completed.dispatch(data._key);
                 if (!this.repeat) {
-                    this.remove(data.key);
+                    this.remove(data.id, data._key, true);
                 }
             }
         }
