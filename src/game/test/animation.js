@@ -18,13 +18,17 @@ export default class AnimationTest extends v.Node2D {
         tween.tween_completed.add(() => {
             console.log('animation end');
         });
-        tween.interpolate_callback({
-            greet(name) {
-                console.log(`hello, ${name}`);
-            }
-        }, 3, 'greet', 'Sean');
+        tween.interpolate_deferred_callback(this, 3, 'deferred_greet', 'Sean');
+        tween.interpolate_callback(this, 3, 'greet', 'Sean');
         tween.start();
     }
     _process(delta) {}
     _exit_tree() {}
+
+    greet(name) {
+        console.log(`hello, ${name}`);
+    }
+    deferred_greet(name) {
+        console.log(`[deferred] hello, ${name}`);
+    }
 }

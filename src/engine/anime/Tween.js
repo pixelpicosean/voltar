@@ -180,6 +180,33 @@ export default class Tween {
         this.pending_update--;
         return true;
     }
+    interpolate_deferred_callback(obj, duration, callback, args) {
+        if (this.pending_update !== 0) {
+            this._add_pending_command('interpolate_deferred_callback', [
+                obj, duration, callback,
+            ]);
+            return true;
+        }
+
+        let data = new InterpolateData();
+        data.active = true;
+        data.type = INTER_CALLBACK;
+        data.finish = false;
+        data.call_deferred = true;
+        data.elapsed = 0;
+
+        data.id = obj;
+        data.key = callback;
+        data.duration = duration;
+        data.delay = 0;
+
+        data.args = args;
+
+        this.pending_update++;
+        this.interpolates.push(data);
+        this.pending_update--;
+        return true;
+    }
 
     _init() {
         this.is_removed = false;
@@ -252,7 +279,7 @@ export default class Tween {
                 case INTER_CALLBACK:
                     if (data.finish) {
                         if (data.call_deferred) {
-                            // TODO: call deferred
+                            data.id.call_deferred(data.key, data.args);
                         }
                         else {
                             data.id[data.key](data.args);
