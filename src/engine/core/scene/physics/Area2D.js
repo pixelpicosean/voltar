@@ -2,6 +2,23 @@ import CollisionObject2D from './CollisionObject2D';
 import Signal from 'engine/Signal';
 
 export default class Area2D extends CollisionObject2D {
+    set rotation(value) {
+        this.transform.rotation = value;
+        if (this._shape) {
+            this._shape._dirty = true;
+        }
+    }
+    get rotation() {
+        return this.transform.rotation;
+    }
+
+    set_rotation(value) {
+        this.transform.rotation = value;
+        if (this._shape) {
+            this._shape._dirty = true;
+        }
+    }
+
     constructor() {
         super();
 
@@ -19,6 +36,14 @@ export default class Area2D extends CollisionObject2D {
     area_exit(area) {}
     body_enter(body) {}
     body_exit(body) {}
+
+    update_transform() {
+        this.node2d_update_transform();
+
+        if (this._shape) {
+            this._shape.calculate_points(this);
+        }
+    }
 
     _area_inout(is_in, area) {
         if (is_in) {

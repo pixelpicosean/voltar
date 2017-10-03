@@ -2,8 +2,10 @@ import { Vector } from './core';
 import remove_items from 'remove-array-items';
 
 
+let i = 0;
+
 const Arrays = new Array(20);
-for (let i = 0; i < 20; i++) {
+for (i = 0; i < 20; i++) {
     Arrays[i] = [];
 }
 const get_array = () => {
@@ -40,6 +42,176 @@ const tmp_res = {
     normal: new Vector(),
     travel: new Vector(),
     remainder: new Vector(),
+};
+
+/**
+ * A pool of `Vector` objects that are used in calculations to avoid
+ * allocating memory.
+ * @type {array<Vector>}
+ * @private
+ */
+const T_VECTORS = new Array(10);
+for (i = 0; i < 10; i++) { T_VECTORS[i] = new Vector() }
+
+/**
+ * A pool of arrays of numbers used in calculations to avoid allocating
+ * memory.
+ * @type {array<array<number>>}
+ * @private
+ */
+const T_ARRAYS = new Array(5);
+for (i = 0; i < 5; i++) { T_ARRAYS[i] = [] }
+
+/**
+ * Flattens the specified array of points onto a unit vector axis,
+ * resulting in a one dimensional range of the minimum and
+ * maximum value on that axis.
+ * @private
+ * @param {array<Vector>} points The points to flatten
+ * @param {Vector} normal The unit vector axis to flatten on
+ * @param {array<Number>} result An array.  After calling this function,
+ *   result[0] will be the minimum value,
+ *   result[1] will be the maximum value
+ */
+function flatten_points_on(points, normal, result) {
+    let min = +Number.MAX_VALUE;
+    let max = -Number.MAX_VALUE;
+    let len = points.length;
+    let i = 0, dot;
+    for (i = 0; i < len; i++) {
+        // The magnitude of the projection of the point onto the normal
+        dot = points[i].dot(normal);
+        if (dot < min) { min = dot; }
+        if (dot > max) { max = dot; }
+    }
+    result[0] = min;
+    result[1] = max;
+}
+
+/**
+ * Check whether two convex polygons are separated by the specified
+ * axis (must be a unit vector).
+ * @private
+ * @param {Vector} aPos The position of the first polygon
+ * @param {Vector} bPos The position of the second polygon
+ * @param {array<Vector>} aPoints The points in the first polygon
+ * @param {array<Vector>} bPoints The points in the second polygon
+ * @param {Vector} axis The axis (unit sized) to test against. The points of both polygons
+ *   will be projected onto this axis
+ * @param {Response=} response A Response object (optional) which will be populated
+ *   if the axis is not a separating axis
+ * @return {boolean} true if it is a separating axis, false otherwise.  If false,
+ *   and a response is passed in, information about how much overlap and
+ *   the direction of the overlap will be populated
+ */
+function is_separating_axis(aPos, bPos, aPoints, bPoints, axis, response) {
+    var rangeA = T_ARRAYS.pop();
+    var rangeB = T_ARRAYS.pop();
+    // The magnitude of the offset between the two polygons
+    var offsetV = T_VECTORS.pop().copy(bPos).subtract(aPos);
+    var projectedOffset = offsetV.dot(axis);
+    // Project the polygons onto the axis.
+    flatten_points_on(aPoints, axis, rangeA);
+    flatten_points_on(bPoints, axis, rangeB);
+    // Move B's range to its position relative to A.
+    rangeB[0] += projectedOffset;
+    rangeB[1] += projectedOffset;
+    // Check if there is a gap. If there is, this is a separating axis and we can stop
+    if (rangeA[0] > rangeB[1] || rangeB[0] > rangeA[1]) {
+        T_VECTORS.push(offsetV);
+        T_ARRAYS.push(rangeA);
+        T_ARRAYS.push(rangeB);
+        return true;
+    }
+    // This is not a separating axis. If we're calculating a response, calculate the overlap.
+    if (response) {
+        var overlap = 0;
+        // A starts further left than B
+        if (rangeA[0] < rangeB[0]) {
+            response.aInB = false;
+            // A ends before B does. We have to pull A out of B
+            if (rangeA[1] < rangeB[1]) {
+                overlap = rangeA[1] - rangeB[0];
+                response.bInA = false;
+                // B is fully inside A.  Pick the shortest way out.
+            }
+            else {
+                var option1 = rangeA[1] - rangeB[0];
+                var option2 = rangeB[1] - rangeA[0];
+                overlap = option1 < option2 ? option1 : -option2;
+            }
+            // B starts further left than A
+        }
+        else {
+            response.bInA = false;
+            // B ends before A ends. We have to push A out of B
+            if (rangeA[1] > rangeB[1]) {
+                overlap = rangeA[0] - rangeB[1];
+                response.aInB = false;
+                // A is fully inside B.  Pick the shortest way out.
+            }
+            else {
+                var option1 = rangeA[1] - rangeB[0];
+                var option2 = rangeB[1] - rangeA[0];
+                overlap = option1 < option2 ? option1 : -option2;
+            }
+        }
+        // If this is the smallest amount of overlap we've seen so far, set it as the minimum overlap.
+        var absOverlap = Math.abs(overlap);
+        if (absOverlap < response.overlap) {
+            response.overlap = absOverlap;
+            response.overlapN.copy(axis);
+            if (overlap < 0) {
+                response.overlapN.reverse();
+            }
+        }
+    }
+    T_VECTORS.push(offsetV);
+    T_ARRAYS.push(rangeA);
+    T_ARRAYS.push(rangeB);
+
+    return false;
+}
+
+const test_overlap = (a, b, a_is_area, b_is_area) => {
+    // AABB overlap
+    if (!(
+        a.bottom <= b.top ||
+        a.top >= b.bottom ||
+        a.left >= b.right ||
+        a.right <= b.left)
+    ) {
+        // body vs body: no need to test any more, since we don't support rotated body collision
+        if (!a_is_area && !b_is_area) {
+            return true;
+        }
+        // area vs body: TODO
+        else if ((a_is_area && !b_is_area) || (!a_is_area && b_is_area)) {
+            return true;
+        }
+        // area vs area: SAT algrithm come to save
+        else {
+            let a_pos = a.position, b_pos = b.position;
+            let a_points = a._shape.calc_points, b_points = b._shape.calc_points;
+            let i = 0;
+            // If any of the edge normals of A is a separating axis, no intersection.
+            for (i = 0; i < 4; i++) {
+                if (is_separating_axis(a_pos, b_pos, a_points, b_points, a._shape.normals[i], undefined)) {
+                    return false;
+                }
+            }
+            // If any of the edge normals of B is a separating axis, no intersection.
+            for (i = 0; i < 4; i++) {
+                if (is_separating_axis(a_pos, b_pos, a_points, b_points, b._shape.normals[i], undefined)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+    else {
+        return false;
+    }
 };
 
 
@@ -141,15 +313,14 @@ export default class PhysicsServer {
 
         // Update bounds
         if (coll._shape) {
-            const half_width = Math.abs(coll._shape.extents.x * node.scale.x);
-            const half_height = Math.abs(coll._shape.extents.y * node.scale.x);
-
             const pos = coll.get_global_position();
 
-            coll.left = pos.x - half_width;
-            coll.right = pos.x + half_width;
-            coll.top = pos.y - half_height;
-            coll.bottom = pos.y + half_height;
+            coll.left = pos.x + coll._shape.left;
+            coll.right = pos.x + coll._shape.right;
+            coll.top = pos.y + coll._shape.top;
+            coll.bottom = pos.y + coll._shape.bottom;
+
+            coll._shape.calculate_points(coll);
         }
 
         // Insert the hash and test collisions
@@ -210,12 +381,9 @@ export default class PhysicsServer {
                     const b_is_area = coll2.type === 'Area2D';
 
                     // AABB overlap
-                    if (!(
-                        coll.bottom <= coll2.top ||
-                        coll.top >= coll2.bottom ||
-                        coll.left >= coll2.right ||
-                        coll.right <= coll2.left)
-                    ) {
+                    coll._shape.calculate_points(coll);
+                    coll2._shape.calculate_points(coll2);
+                    if (test_overlap(coll, coll2, a_is_area, b_is_area)) {
                         // Area vs Area
                         if (a_is_area && b_is_area) {
                             coll._area_inout(true, coll2);
