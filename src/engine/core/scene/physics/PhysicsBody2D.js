@@ -4,6 +4,12 @@ import { Vector } from '../../math';
 
 
 export default class PhysicsBody2D extends CollisionObject2D {
+    set_shape(s) {
+        this._shape = s;
+        this._shape._dirty = true;
+        this._shape.calculate_points(this);
+    }
+
     constructor() {
         super();
 

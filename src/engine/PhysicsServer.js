@@ -185,11 +185,7 @@ const test_overlap = (a, b, a_is_area, b_is_area) => {
         if (!a_is_area && !b_is_area) {
             return true;
         }
-        // area vs body: TODO
-        else if ((a_is_area && !b_is_area) || (!a_is_area && b_is_area)) {
-            return true;
-        }
-        // area vs area: SAT algrithm come to save
+        // area vs body or area vs area: SAT algorithm come to save
         else {
             let a_pos = a.position, b_pos = b.position;
             let a_points = a._shape.calc_points, b_points = b._shape.calc_points;
