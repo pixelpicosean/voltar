@@ -6,7 +6,12 @@ export default class AnimationTest extends v.Node2D {
         return new AnimationTest();
     }
 
-    _enter_tree() {}
+    _enter_tree() {
+        this.label = this.add_child(new v.BitmapText('', {
+            font: '32px 04b03',
+        }));
+        this.label.x = 100;
+    }
     _ready() {
         let icon = this.add_child(new v.Sprite('icon'));
         icon.position.set(50, 100);
@@ -15,8 +20,8 @@ export default class AnimationTest extends v.Node2D {
         tween.interpolate_property(icon, 'position.x', 50, 150, 1, 'Quadratic.InOut', 2);
         tween.interpolate_property(icon, 'position.x', 150, 50, 1, 'Quadratic.InOut', 3);
         tween.interpolate_property(icon, 'tint', 0x000000, 0xFFFFFF, 2, 'Quadratic.InOut', 2);
-        tween.tween_completed.add(() => {
-            console.log('animation end');
+        tween.tween_completed.add((key) => {
+            console.log(`animation [${key}] end`);
         });
         tween.interpolate_method(this, 'fly', 0, 100, 5, 'Quadratic.InOut');
         tween.interpolate_deferred_callback(this, 3, 'deferred_greet', 'Sean');
@@ -36,6 +41,6 @@ export default class AnimationTest extends v.Node2D {
     }
 
     fly(num) {
-        // console.log(`fly: ${num | 0}`);
+        this.label.text = `fly: ${num | 0}`;
     }
 }
