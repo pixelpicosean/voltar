@@ -4,6 +4,7 @@ import data from './data.json';
 
 // Which test to run after resources load
 import AnimatedSpirteTest from 'game/test/animated-sprite';
+import AnimationTest from 'game/test/animation';
 import InputTest from 'game/test/input';
 import PhysicsTest from 'game/test/physics';
 import TilemapTest from 'game/test/tilemap';
@@ -12,7 +13,7 @@ import TilemapTest from 'game/test/tilemap';
 v.loader.add('media/04b03.fnt');
 
 
-const Test = PhysicsTest;
+const Test = AnimationTest;
 
 
 export default class Boot extends v.Node2D {
