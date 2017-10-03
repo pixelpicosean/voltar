@@ -90,10 +90,8 @@ export default class Tween {
         this.active = false;
         this.repeat = false;
         this.speed_scale = 1;
-        this.pending_update = 0;
 
         this.interpolates = [];
-        this.pending_commands = [];
     }
 
     set_active(active) {
@@ -107,7 +105,6 @@ export default class Tween {
         this.active = true;
     }
     reset(obj, key) {
-        this.pending_update++;
         let i = 0, data;
         for (i = 0; i < this.interpolates.length; i++) {
             data = this.interpolates[i];
@@ -119,11 +116,9 @@ export default class Tween {
                 }
             }
         }
-        this.pending_update--;
-        return true;
+        return this;
     }
     reset_all() {
-        this.pending_update++;
         let i = 0, data;
         for (i = 0; i < this.interpolates.length; i++) {
             data = this.interpolates[i];
@@ -133,8 +128,7 @@ export default class Tween {
                 this._apply_tween_value(data, data.initial_val);
             }
         }
-        this.pending_update--;
-        return true;
+        return this;
     }
 
     stop(obj, key) {
@@ -146,23 +140,21 @@ export default class Tween {
                 console.log('find and stop')
             }
         }
+        return this;
     }
     stop_all() {
         this.active = false;
 
-        this.pending_update++;
         let i = 0;
         for (i = 0; i < this.interpolates.length; i++) {
             this.interpolates[i].active = false;
         }
-        this.pending_update--;
-        return true;
+        return this;
     }
 
     resume(obj, key) {
         this.active = true;
 
-        this.pending_update++;
         let i = 0, data;
         for (i = 0; i < this.interpolates.length; i++) {
             data = this.interpolates[i];
@@ -170,19 +162,16 @@ export default class Tween {
                 data.active = true;
             }
         }
-        this.pending_update--;
-        return true;
+        return this;
     }
     resume_all() {
         this.active = true;
 
-        this.pending_update++;
         let i = 0;
         for (i = 0; i < this.interpolates.length; i++) {
             this.interpolates[i].active = true;
         }
-        this.pending_update--;
-        return true;
+        return this;
     }
 
     remove(obj, key, first_only = true) {
@@ -196,10 +185,12 @@ export default class Tween {
                 }
             }
         }
+        return this;
     }
     remove_all() {
         this.active = false;
         this.interpolates.length = 0;
+        return this;
     }
 
     seek(p_time) {
@@ -230,38 +221,28 @@ export default class Tween {
 
             this._apply_tween_value(data, this._run_equation(data));
         }
+        return this;
     }
 
     tell() {
-        this.pending_update++;
         let pos = 0, data;
         for (let i = 0; i < this.interpolates.length; i++) {
             data = this.interpolates[i];
             pos = (data.elapsed > pos) ? data.elapsed : pos;
         }
-        this.pending_update--;
         return pos;
     }
     get_runtime() {
-        this.pending_update++;
         let runtime = 0, t = 0, data;
         for (let i = 0; i < this.interpolates.length; i++) {
             data = this.interpolates[i];
             t = data.delay + data.duration;
             runtime = (t > runtime) ? t : runtime;
         }
-        this.pending_update--;
         return runtime;
     }
 
     interpolate_property(obj, property, initial_val, final_val, duration, p_easing, delay = 0) {
-        if (this.pending_update !== 0) {
-            this._add_pending_command('interpolate_property', [
-                obj, property, initial_val, final_val, duration, p_easing, delay,
-            ]);
-            return true;
-        }
-
         let easing = p_easing.split('.');
         let easing_func = Easing[easing[0]][easing[1]];
 
@@ -299,13 +280,6 @@ export default class Tween {
         return true;
     }
     interpolate_method(obj, method, initial_val, final_val, duration, p_easing, delay = 0) {
-        if (this.pending_update !== 0) {
-            this._add_pending_command('interpolate_method', [
-                obj, method, initial_val, final_val, duration, p_easing, delay,
-            ]);
-            return true;
-        }
-
         let easing = p_easing.split('.');
         let easing_func = Easing[easing[0]][easing[1]];
 
@@ -342,13 +316,6 @@ export default class Tween {
         return true;
     }
     interpolate_callback(obj, duration, callback, args) {
-        if (this.pending_update !== 0) {
-            this._add_pending_command('interpolate_callback', [
-                obj, duration, callback,
-            ]);
-            return true;
-        }
-
         let data = new InterpolateData();
         data.active = true;
         data.type = INTER_CALLBACK;
@@ -363,19 +330,10 @@ export default class Tween {
 
         data.args = args;
 
-        this.pending_update++;
         this.interpolates.push(data);
-        this.pending_update--;
-        return true;
+        return this;
     }
     interpolate_deferred_callback(obj, duration, callback, args) {
-        if (this.pending_update !== 0) {
-            this._add_pending_command('interpolate_deferred_callback', [
-                obj, duration, callback,
-            ]);
-            return true;
-        }
-
         let data = new InterpolateData();
         data.active = true;
         data.type = INTER_CALLBACK;
@@ -390,10 +348,8 @@ export default class Tween {
 
         data.args = args;
 
-        this.pending_update++;
         this.interpolates.push(data);
-        this.pending_update--;
-        return true;
+        return this;
     }
 
     clear_events() {
@@ -408,21 +364,16 @@ export default class Tween {
         this.active = false;
         this.repeat = false;
         this.speed_scale = 1;
-        this.pending_update = 0;
 
         this.clear_events();
 
         return this;
     }
     _propagate_process(p_delta) {
-        this._process_pending_commands();
-
         if (this.speed_scale === 0) {
             return;
         }
         let delta = p_delta * this.speed_scale;
-
-        this.pending_update++;
 
         let i = 0, data;
         if (this.repeat) {
@@ -491,20 +442,8 @@ export default class Tween {
                 }
             }
         }
-        this.pending_update--;
     }
 
-    _add_pending_command(key, args) {
-        this.pending_commands.push({ key, args });
-    }
-    _process_pending_commands() {
-        let i = 0, cmd;
-        for (i = 0; i < this.pending_commands.length; i++) {
-            cmd = this.pending_commands[i];
-            this[cmd.key].apply(this, cmd.args);
-        }
-        this.pending_commands.length = 0;
-    }
     _get_initial_val(p_data) {
         switch (p_data.type) {
             case INTER_PROPERTY:
@@ -579,23 +518,19 @@ export default class Tween {
     _run_equation(data) {
         let initial_val = this._get_initial_val(data);
         let delta_val = this._get_delta_val(data);
-        let result = undefined;
 
         let mod = data.easing(clamp((data.elapsed - data.delay) / data.duration, 0, 1));
 
         switch (data.val_type) {
             case BOOL:
-                result = mod > 0.5;
-                break;
+                return mod > 0.5;
             case NUMBER:
-                result = initial_val + delta_val * mod;
-                break;
+                return initial_val + delta_val * mod;
             case STRING:
-                result = data.final_val.slice(0, Math.floor(delta_val * mod));
-                break;
+                return data.final_val.slice(0, Math.floor(delta_val * mod));
+            default:
+                return undefined;
         }
-
-        return result;
     }
     _apply_tween_value(data, value) {
         let obj = data.id;
