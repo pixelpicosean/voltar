@@ -16,6 +16,10 @@ export default class AnimationTest extends v.Node2D {
         let icon = this.add_child(new v.Sprite('icon'));
         icon.position.set(50, 100);
 
+        let icon2 = this.add_child(new v.Sprite('icon'));
+        icon2.scale.set(0.5);
+        icon2.position.set(100, 180);
+
         let tween = new v.Tween();
         tween.interpolate_property(icon, 'position.x', 50, 150, 1, 'Quadratic.InOut', 2);
         tween.interpolate_property(icon, 'position.x', 150, 50, 1, 'Quadratic.InOut', 3);
@@ -26,6 +30,7 @@ export default class AnimationTest extends v.Node2D {
         tween.interpolate_method(this, 'fly', 0, 100, 5, 'Quadratic.InOut');
         tween.interpolate_deferred_callback(this, 3, 'deferred_greet', 'Sean');
         tween.interpolate_callback(this, 3, 'greet', 'Sean');
+        tween.follow_property(icon2, 'x', 100, icon, 'x', 4, 'Linear.None', 0);
         tween.start();
 
         icon.tweens.add(tween);
