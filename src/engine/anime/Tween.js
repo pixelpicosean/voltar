@@ -1,6 +1,6 @@
 import Signal from 'engine/Signal';
 import { clamp } from 'engine/core/math';
-import get_target_and_key from './get_target_and_key';
+import flatten_key_url from './flatten_key_url';
 import { Easing } from './easing';
 
 
@@ -18,6 +18,24 @@ const INTER_CALLBACK = 6;
 const NUMBER = 0;
 const BOOL = 1;
 const STRING = 2;
+
+
+function get_property(obj, key) {
+    let idx = 0, res = obj;
+    while (idx < key.length) {
+        res = res[key[idx]];
+        idx++;
+    }
+    return res;
+}
+function set_property(obj, key, value) {
+    let idx = 0, res = obj;
+    while (idx < key.length - 1) {
+        res = res[key[idx]];
+        idx++;
+    }
+    res[key[key.length - 1]] = value;
+}
 
 
 class InterpolateData {
@@ -109,7 +127,7 @@ export default class Tween {
         data.elapsed = 0;
 
         data.id = obj;
-        data.key = property;
+        data.key = flatten_key_url(property);
         data.initial_val = initial_val;
         data.final_val = final_val;
         data.duration = duration;
@@ -209,7 +227,7 @@ export default class Tween {
                             // TODO: call deferred
                         }
                         else {
-                            data.target_id[data.target_key].apply(data.target_id, data.args);
+                            get_property(data.target_id, data.target_key).apply(data.target_id, data.args);
                         }
                     }
                     break;
@@ -249,16 +267,12 @@ export default class Tween {
                 let obj = p_data.target_id;
                 let initial_val = undefined;
                 if (p_data.type === TARGETING_PROPERTY) {
-                    let pair = get_target_and_key(obj, p_data.target_key);
-
-                    // Update context and key
-                    p_data.target_id = pair[0];
-                    p_data.target_key = pair[1];
-
-                    initial_val = obj[pair[1]];
+                    // Flatten and cache the key
+                    p_data.target_key = flatten_key_url(p_data.target_key);
+                    initial_val = get_property(obj, p_data.target_key);
                 }
                 else {
-                    initial_val = obj[p_data.target_key]();
+                    initial_val = get_property(obj, p_data.target_key)();
                 }
                 return initial_val;
             } break;
@@ -278,10 +292,10 @@ export default class Tween {
                 let final_val = undefined;
                 if (p_data.type === FOLLOW_PROPERTY) {
                     let valid = false;
-                    final_val = obj[p_data.target_key];
+                    final_val = get_property(obj, p_data.target_key);
                 }
                 else {
-                    final_val = obj[p_data.target_key]();
+                    final_val = get_property(obj, p_data.target_key)();
                 }
             } break;
 
@@ -336,13 +350,13 @@ export default class Tween {
             case INTER_PROPERTY:
             case FOLLOW_PROPERTY:
             case TARGETING_PROPERTY:
-                obj[data.key] = value;
+                set_property(obj, data.key, value);
                 break;
 
             case INTER_METHOD:
             case FOLLOW_METHOD:
             case TARGETING_METHOD:
-                obj[data.key](value);
+                get_property(obj, data.key)(value);
                 break;
 
             case INTER_CALLBACK:
