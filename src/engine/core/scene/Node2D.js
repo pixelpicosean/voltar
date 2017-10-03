@@ -123,6 +123,7 @@ export default class Node2D extends EventEmitter
         this._localBoundsRect = null;
         this._world_position = new Point();
         this._world_scale = new Point(1, 1);
+        this._world_rotation = 0;
 
         /**
          * The original, cached mask of the object
@@ -667,11 +668,11 @@ export default class Node2D extends EventEmitter
         return this.transform.rotation;
     }
     set_rotation(value) {
-        this.transform.rotation.copy(value);
+        this.transform.rotation = value;
     }
 
     get_global_rotation() {
-        return this.transform.world_transform.rotation;
+        return this._world_rotation;
     }
 
     /**
@@ -1173,13 +1174,12 @@ export default class Node2D extends EventEmitter
         this._world_position.set(t.tx, t.ty);
         this._world_scale.copy(this.parent._world_scale)
             .multiply(this.scale);
+        this._world_rotation = this.parent._world_rotation + this.transform.rotation;
 
-        for (let i = 0, j = this.children.length; i < j; ++i)
-        {
+        for (let i = 0, j = this.children.length; i < j; ++i) {
             const child = this.children[i];
 
-            if (child.visible)
-            {
+            if (child.visible) {
                 child.update_transform();
             }
         }
