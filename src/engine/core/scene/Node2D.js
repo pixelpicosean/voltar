@@ -4,6 +4,8 @@ import settings from '../settings';
 import { TransformStatic, Transform, Point, Bounds, Rectangle } from '../math';
 import remove_items from 'remove-array-items';
 import Signal from 'engine/Signal';
+import TweenManager from 'engine/anime/TweenManager';
+
 
 let uid = 0;
 
@@ -155,6 +157,8 @@ export default class Node2D extends EventEmitter
         this.named_children = Object.create(null);
 
         this.groups = [];
+
+        this.tweens = new TweenManager(this);
 
         /**
          * Fired when this Node2D is added to a Node2D.
@@ -800,9 +804,14 @@ export default class Node2D extends EventEmitter
         for (let i = 0, l = this.children.length; i < l; i++) {
             this.children[i]._propagate_process(delta);
         }
+
+        this.tweens._process(delta);
     }
 
     _propagate_exit_tree() {
+        // Stop animations
+        this.tweens._stop_all();
+
         // Remove from scene tree groups
         if (this.groups.length > 0) {
             for (let i = 0; i < this.groups.length; i++) {
