@@ -318,6 +318,9 @@ export default class Tween {
             case NUMBER:
                 data.delta_val = final_val - initial_val;
                 break;
+            case STRING:
+                data.delta_val = final_val.length;
+                break;
         }
         return true;
     }
@@ -337,7 +340,7 @@ export default class Tween {
                 result = initial_val + delta_val * mod;
                 break;
             case STRING:
-                result = initial_val + delta_val * mod;
+                result = data.final_val.slice(0, Math.floor(delta_val * mod));
                 break;
         }
 
