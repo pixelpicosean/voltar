@@ -41,21 +41,28 @@ function set_property(obj, key, value) {
 class InterpolateData {
     constructor() {
         this.active = false;
-        this.type = -1;
         this.finish = false;
-        this.call_deferred = false;
+
+        this.duration = 0.0;
+        this.delay = 0.0;
         this.elapsed = 0.0;
+
+        this.type = -1;
+        this.val_type = NUMBER;
+        this.easing = Easing.Linear.None;
+
         this.id = 0;
-        this.key = '';
+        this.key = null;
+        this._key = '';
+        this.target_id = 0;
+        this.target_key = null;
+        this._target_key = '';
+
         this.initial_val = undefined;
         this.delta_val = undefined;
         this.final_val = undefined;
-        this.target_id = 0;
-        this.target_key = '';
-        this.duration = 0.0;
-        this.easing = Easing.Linear.None;
-        this.delay = 0.0;
-        this.val_type = NUMBER;
+
+        this.call_deferred = false;
         this.args = null;
     }
 };
@@ -89,26 +96,163 @@ export default class Tween {
         this.pending_commands = [];
     }
 
+    set_active(active) {
+        this.active = active;
+    }
+    set_speed_scale(scale) {
+        this.speed_scale = scale;
+    }
+
     start() {
         this.active = true;
+    }
+    reset(obj, key) {
+        this.pending_update++;
+        let i = 0, data;
+        for (i = 0; i < this.interpolates.length; i++) {
+            data = this.interpolates[i];
+            if (data.id === obj && (data._key === key || key.length === 0)) {
+                data.elapsed = 0;
+                data.finish = false;
+                if (data.delay === 0) {
+                    this._apply_tween_value(data, data.initial_val);
+                }
+            }
+        }
+        this.pending_update--;
         return true;
     }
-    reset() {}
-    reset_all() {}
+    reset_all() {
+        this.pending_update++;
+        let i = 0, data;
+        for (i = 0; i < this.interpolates.length; i++) {
+            data = this.interpolates[i];
+            data.elapsed = 0;
+            data.finish = false;
+            if (data.delay === 0) {
+                this._apply_tween_value(data, data.initial_val);
+            }
+        }
+        this.pending_update--;
+        return true;
+    }
 
-    stop() {}
-    stop_all() {}
+    stop(obj, key) {
+        let i = 0, data;
+        for (i = 0; i < this.interpolates.length; i++) {
+            data = this.interpolates[i];
+            if (data.id === obj && (data._key === key || key.length === 0)) {
+                data.active = false;
+                console.log('find and stop')
+            }
+        }
+    }
+    stop_all() {
+        this.active = false;
 
-    resume() {}
-    resume_all() {}
+        this.pending_update++;
+        let i = 0;
+        for (i = 0; i < this.interpolates.length; i++) {
+            this.interpolates[i].active = false;
+        }
+        this.pending_update--;
+        return true;
+    }
 
-    remove() {}
-    remove_all() {}
+    resume(obj, key) {
+        this.active = true;
 
-    seek(p_time) {}
+        this.pending_update++;
+        let i = 0, data;
+        for (i = 0; i < this.interpolates.length; i++) {
+            data = this.interpolates[i];
+            if (data.id === obj && (data._key === key || key.length === 0)) {
+                data.active = true;
+            }
+        }
+        this.pending_update--;
+        return true;
+    }
+    resume_all() {
+        this.active = true;
 
-    tell() {}
-    get_runtime() {}
+        this.pending_update++;
+        let i = 0;
+        for (i = 0; i < this.interpolates.length; i++) {
+            this.interpolates[i].active = true;
+        }
+        this.pending_update--;
+        return true;
+    }
+
+    remove(obj, key, first_only = true) {
+        let i = 0, data;
+        for (i = 0; i < this.interpolates.length; i++) {
+            data = this.interpolates[i];
+            if (data.id === obj && (data._key === key || key.length === 0)) {
+                remove_items(this.interpolates, i--, 1);
+                if (first_only) {
+                    break;
+                }
+            }
+        }
+    }
+    remove_all() {
+        this.active = false;
+        this.interpolates.length = 0;
+    }
+
+    seek(p_time) {
+        let i = 0, data;
+        for (i = 0; i < this.interpolates.length; i++) {
+            data = this.interpolates[i];
+
+            data.elapsed = p_time;
+            if (data.elapsed < data.delay) {
+                data.finish = false;
+                continue;
+            }
+            else if (data.elapsed >= (data.delay + data.duration)) {
+                data.finish = true;
+                data.elapsed = data.delay + data.duration;
+            }
+            else {
+                data.finish = false;
+            }
+
+            switch (data.type) {
+                case INTER_PROPERTY:
+                case INTER_METHOD:
+                    break;
+                case INTER_CALLBACK:
+                    continue;
+            }
+
+            this._apply_tween_value(data, this._run_equation(data));
+        }
+    }
+
+    tell() {
+        this.pending_update++;
+        let pos = 0, data;
+        for (let i = 0; i < this.interpolates.length; i++) {
+            data = this.interpolates[i];
+            pos = (data.elapsed > pos) ? data.elapsed : pos;
+        }
+        this.pending_update--;
+        return pos;
+    }
+    get_runtime() {
+        this.pending_update++;
+        let runtime = 0, t = 0, data;
+        for (let i = 0; i < this.interpolates.length; i++) {
+            data = this.interpolates[i];
+            t = data.delay + data.duration;
+            runtime = (t > runtime) ? t : runtime;
+        }
+        this.pending_update--;
+        return runtime;
+    }
 
     interpolate_property(obj, property, initial_val, final_val, duration, p_easing, delay = 0) {
         if (this.pending_update !== 0) {
@@ -128,6 +272,7 @@ export default class Tween {
         data.elapsed = 0;
 
         data.id = obj;
+        data._key = property;
         data.key = flatten_key_url(property);
         data.initial_val = initial_val;
         data.final_val = final_val;
@@ -251,6 +396,12 @@ export default class Tween {
         return true;
     }
 
+    clear_events() {
+        this.tween_completed.detach_all();
+        this.tween_started.detach_all();
+        this.tween_step.detach_all();
+    }
+
     _init() {
         this.is_removed = false;
 
@@ -258,6 +409,8 @@ export default class Tween {
         this.repeat = false;
         this.speed_scale = 1;
         this.pending_update = 0;
+
+        this.clear_events();
 
         return this;
     }
@@ -464,11 +617,5 @@ export default class Tween {
                 break;
         }
         return true;
-    }
-
-    clear_events() {
-        this.tween_completed.detach_all();
-        this.tween_started.detach_all();
-        this.tween_step.detach_all();
     }
 }

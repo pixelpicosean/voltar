@@ -33,8 +33,10 @@ export default class TweenManager {
                 tween._propagate_process(delta);
 
                 if (tween.is_removed) {
-                    pool.push(tween);
                     remove_items(this.tweens, i--, 1);
+
+                    tween.clear_events();
+                    pool.push(tween);
                 }
             }
         }
