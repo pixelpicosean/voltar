@@ -56,6 +56,7 @@ class InterpolateData {
         this.easing = Easing.Linear.None;
         this.delay = 0.0;
         this.val_type = NUMBER;
+        this.args = null;
     }
 };
 
@@ -152,6 +153,33 @@ export default class Tween {
         this.interpolates.push(data);
         return true;
     }
+    interpolate_callback(obj, duration, callback, args) {
+        if (this.pending_update !== 0) {
+            this._add_pending_command('interpolate_callback', [
+                obj, duration, callback,
+            ]);
+            return true;
+        }
+
+        let data = new InterpolateData();
+        data.active = true;
+        data.type = INTER_CALLBACK;
+        data.finish = false;
+        data.call_deferred = false;
+        data.elapsed = 0;
+
+        data.id = obj;
+        data.key = callback;
+        data.duration = duration;
+        data.delay = 0;
+
+        data.args = args;
+
+        this.pending_update++;
+        this.interpolates.push(data);
+        this.pending_update--;
+        return true;
+    }
 
     _init() {
         this.is_removed = false;
@@ -227,7 +255,7 @@ export default class Tween {
                             // TODO: call deferred
                         }
                         else {
-                            get_property(data.target_id, data.target_key).apply(data.target_id, data.args);
+                            data.id[data.key](data.args);
                         }
                     }
                     break;
