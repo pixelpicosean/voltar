@@ -415,13 +415,12 @@ export default class SceneTree {
                 this.current_scene._propagate_process(_process_tmp.slow_step_sec);
                 // - solve collision
                 this.physics_server.solve_collision(this.current_scene);
-                // - message queue
-                this.message_queue.flush();
-
+                // - remove nodes to be freed
                 this._flush_delete_queue();
-
-                // - input
+                // - update inputs
                 this.input._process(_process_tmp.slow_step_sec);
+                // - dispatch deferred messages
+                this.message_queue.flush();
 
                 _process_tmp.count += 1;
               }
