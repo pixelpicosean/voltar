@@ -55,12 +55,12 @@ class InterpolateData {
         this.val_type = NUMBER;
         this.easing = Easing.Linear.None;
 
-        this.id = null;
-        this.key = null;
-        this._key = '';
-        this.target_id = null;
-        this.target_key = null;
-        this._target_key = '';
+        this.obj = null;
+        this.key = '';
+        this.flat_key = null;
+        this.target_obj = null;
+        this.target_key = '';
+        this.flat_target_key = null;
 
         this.initial_val = undefined;
         this.delta_val = undefined;
@@ -121,7 +121,7 @@ export default class Tween {
         let i = 0, data;
         for (i = 0; i < this.interpolates.length; i++) {
             data = this.interpolates[i];
-            if (data.id === obj && (data._key === key || key.length === 0)) {
+            if (data.obj === obj && (data.key === key || key.length === 0)) {
                 data.elapsed = 0;
                 data.finish = false;
                 if (data.delay === 0) {
@@ -148,7 +148,7 @@ export default class Tween {
         let i = 0, data;
         for (i = 0; i < this.interpolates.length; i++) {
             data = this.interpolates[i];
-            if (data.id === obj && (data._key === key || key.length === 0)) {
+            if (data.obj === obj && (data.key === key || key.length === 0)) {
                 data.active = false;
             }
         }
@@ -170,7 +170,7 @@ export default class Tween {
         let i = 0, data;
         for (i = 0; i < this.interpolates.length; i++) {
             data = this.interpolates[i];
-            if (data.id === obj && (data._key === key || key.length === 0)) {
+            if (data.obj === obj && (data.key === key || key.length === 0)) {
                 data.active = true;
             }
         }
@@ -190,7 +190,7 @@ export default class Tween {
         let i = 0, data;
         for (i = 0; i < this.interpolates.length; i++) {
             data = this.interpolates[i];
-            if (data.id === obj && (data._key === key || key.length === 0)) {
+            if (data.obj === obj && (data.key === key || key.length === 0)) {
                 remove_items(this.interpolates, i--, 1);
                 pool.push(data);
                 if (first_only) {
@@ -270,9 +270,9 @@ export default class Tween {
         data.finish = false;
         data.elapsed = 0;
 
-        data.id = obj;
-        data._key = property;
-        data.key = flatten_key_url(property);
+        data.obj = obj;
+        data.key = property;
+        data.flat_key = flatten_key_url(property);
         data.initial_val = initial_val;
         data.final_val = final_val;
         data.duration = duration;
@@ -307,9 +307,9 @@ export default class Tween {
         data.finish = false;
         data.elapsed = 0;
 
-        data.id = obj;
-        data._key = method;
-        data.key = [method];
+        data.obj = obj;
+        data.key = method;
+        data.flat_key = [method];
         data.initial_val = initial_val;
         data.final_val = final_val;
         data.duration = duration;
@@ -342,8 +342,8 @@ export default class Tween {
         data.call_deferred = false;
         data.elapsed = 0;
 
-        data.id = obj;
-        data._key = callback;
+        data.obj = obj;
+        data.key = callback;
         data.duration = duration;
         data.delay = 0;
 
@@ -360,8 +360,8 @@ export default class Tween {
         data.call_deferred = true;
         data.elapsed = 0;
 
-        data.id = obj;
-        data._key = callback;
+        data.obj = obj;
+        data.key = callback;
         data.duration = duration;
         data.delay = 0;
 
@@ -420,7 +420,7 @@ export default class Tween {
                 continue;
             }
             else if (prev_delaying) {
-                this.tween_started.dispatch(data.key);
+                this.tween_started.dispatch(data.flat_key);
                 this._apply_tween_value(data, data.initial_val);
             }
 
@@ -433,7 +433,7 @@ export default class Tween {
                 case INTER_PROPERTY:
                 case INTER_METHOD: {
                     let result = this._run_equation(data);
-                    this.tween_step.dispatch(data._key, data.elapsed, result);
+                    this.tween_step.dispatch(data.key, data.elapsed, result);
                     this._apply_tween_value(data, result);
                     if (data.finish) {
                         this._apply_tween_value(data, data.final_val);
@@ -443,19 +443,19 @@ export default class Tween {
                 case INTER_CALLBACK:
                     if (data.finish) {
                         if (data.call_deferred) {
-                            data.id.call_deferred(data._key, data.args);
+                            data.obj.call_deferred(data.key, data.args);
                         }
                         else {
-                            data.id[data._key](data.args);
+                            data.obj[data.key](data.args);
                         }
                     }
                     break;
             }
 
             if (data.finish) {
-                this.tween_completed.dispatch(data._key);
+                this.tween_completed.dispatch(data.key);
                 if (!this.repeat) {
-                    this.remove(data.id, data._key, true);
+                    this.remove(data.obj, data.key, true);
                 }
             }
         }
@@ -471,15 +471,15 @@ export default class Tween {
 
             case TARGETING_PROPERTY:
             case TARGETING_METHOD: {
-                let obj = p_data.target_id;
+                let obj = p_data.target_obj;
                 let initial_val = undefined;
                 if (p_data.type === TARGETING_PROPERTY) {
                     // Flatten and cache the key
-                    p_data.target_key = flatten_key_url(p_data.target_key);
-                    initial_val = get_property(obj, p_data.target_key);
+                    p_data.flat_target_key = flatten_key_url(p_data.flat_target_key);
+                    initial_val = get_property(obj, p_data.flat_target_key);
                 }
                 else {
-                    initial_val = get_property(obj, p_data.target_key)();
+                    initial_val = get_property(obj, p_data.flat_target_key)();
                 }
                 return initial_val;
             } break;
@@ -495,14 +495,14 @@ export default class Tween {
 
             case FOLLOW_PROPERTY:
             case FOLLOW_METHOD: {
-                let obj = p_data.target_id;
+                let obj = p_data.target_obj;
                 let final_val = undefined;
                 if (p_data.type === FOLLOW_PROPERTY) {
                     let valid = false;
-                    final_val = get_property(obj, p_data.target_key);
+                    final_val = get_property(obj, p_data.flat_target_key);
                 }
                 else {
-                    final_val = get_property(obj, p_data.target_key)();
+                    final_val = get_property(obj, p_data.flat_target_key)();
                 }
             } break;
 
@@ -550,19 +550,19 @@ export default class Tween {
         }
     }
     _apply_tween_value(data, value) {
-        let obj = data.id;
+        let obj = data.obj;
 
         switch (data.type) {
             case INTER_PROPERTY:
             case FOLLOW_PROPERTY:
             case TARGETING_PROPERTY:
-                set_property(obj, data.key, value);
+                set_property(obj, data.flat_key, value);
                 break;
 
             case INTER_METHOD:
             case FOLLOW_METHOD:
             case TARGETING_METHOD:
-                obj[data.key](value);
+                obj[data.flat_key](value);
                 break;
 
             case INTER_CALLBACK:
