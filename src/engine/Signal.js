@@ -188,12 +188,12 @@ export default class MiniSignal {
   }
 
   /**
-  * Detach all listeners.
-  *
-  * @returns {MiniSignal} The instance on which this method was called.
-  * @public
-  */
-  detachAll() {
+   * Detach all listeners.
+   *
+   * @returns {MiniSignal} The instance on which this method was called.
+   * @public
+   */
+  detach_all() {
     let node = this._head;
     if (!node) {return this;}
 
