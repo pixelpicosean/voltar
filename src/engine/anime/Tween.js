@@ -150,7 +150,6 @@ export default class Tween {
             data = this.interpolates[i];
             if (data.id === obj && (data._key === key || key.length === 0)) {
                 data.active = false;
-                console.log('find and stop')
             }
         }
         return this;
@@ -309,7 +308,8 @@ export default class Tween {
         data.elapsed = 0;
 
         data.id = obj;
-        data.key = method;
+        data._key = method;
+        data.key = [method];
         data.initial_val = initial_val;
         data.final_val = final_val;
         data.duration = duration;
@@ -343,7 +343,7 @@ export default class Tween {
         data.elapsed = 0;
 
         data.id = obj;
-        data.key = callback;
+        data._key = callback;
         data.duration = duration;
         data.delay = 0;
 
@@ -361,7 +361,7 @@ export default class Tween {
         data.elapsed = 0;
 
         data.id = obj;
-        data.key = callback;
+        data._key = callback;
         data.duration = duration;
         data.delay = 0;
 
@@ -383,8 +383,6 @@ export default class Tween {
         this.active = false;
         this.repeat = false;
         this.speed_scale = 1;
-
-        this.clear_events();
 
         return this;
     }
@@ -445,10 +443,10 @@ export default class Tween {
                 case INTER_CALLBACK:
                     if (data.finish) {
                         if (data.call_deferred) {
-                            data.id.call_deferred(data.key, data.args);
+                            data.id.call_deferred(data._key, data.args);
                         }
                         else {
-                            data.id[data.key](data.args);
+                            data.id[data._key](data.args);
                         }
                     }
                     break;
