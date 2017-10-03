@@ -14,11 +14,7 @@ export default class AnimationTest extends v.Node2D {
         let tween = icon.tweens.create();
         tween.interpolate_property(icon, 'position.x', 50, 150, 1, 'Quadratic.InOut', 2);
         tween.interpolate_property(icon, 'position.x', 150, 50, 1, 'Quadratic.InOut', 3);
-        tween.interpolate_property(icon, 'visible', true, false, 0.2, 'Quadratic.InOut', 0);
-        tween.interpolate_property(icon, 'visible', false, true, 0.2, 'Quadratic.InOut', 0.2);
-        tween.tween_step.add((key, elapsed, result) => {
-            console.log(`${key}: [${elapsed}] - [${result}]`);
-        });
+        tween.interpolate_property(icon, 'tint', 0x000000, 0xFFFFFF, 2, 'Quadratic.InOut', 2);
         tween.tween_completed.add(() => {
             console.log('animation end');
         });
