@@ -542,6 +542,54 @@ export default class Tween {
         this.interpolates.push(data);
         return true;
     }
+    targeting_method(obj, method, initial, initial_method, final_val, duration, p_easing, delay = 0) {
+        let easing = p_easing.split('.');
+        let easing_func = Easing[easing[0]][easing[1]];
+
+        let data = create_interpolate();
+        data.active = true;
+        data.type = TARGETING_METHOD;
+        data.finish = false;
+        data.elapsed = 0;
+
+        data.obj = obj;
+        data.key = method;
+        data.flat_key = [method]
+        data.final_val = final_val;
+        data.target_obj = initial;
+        data.target_key = initial_method;
+        data.flat_target_key = [initial_method];
+        data.duration = duration;
+        data.easing = easing_func;
+        data.delay = delay;
+        let initial_val = initial[initial_method]();
+        switch (typeof(final_val)) {
+            case 'number':
+                data.val_type = NUMBER;
+                break;
+            case 'boolean':
+                data.val_type = BOOL;
+                break;
+            case 'string':
+                data.val_type = STRING;
+                break;
+            case 'object':
+                if (('x' in initial_val) && ('y' in initial_val)) {
+                    data.initial_val = create_vector(initial_val.x, initial_val.y);
+                    data.final_val = create_vector(final_val.x, final_val.y);
+                    data.delta_val = create_vector(0, 0);
+                    data.val_type = VECTOR2;
+                }
+                break;
+        }
+
+        if (!this._calc_delta_val(data.initial_val, data.final_val, data)) {
+            return false;
+        }
+
+        this.interpolates.push(data);
+        return true;
+    }
 
     clear_events() {
         this.tween_completed.detach_all();
@@ -615,7 +663,8 @@ export default class Tween {
                 case INTER_METHOD:
                 case FOLLOW_PROPERTY:
                 case FOLLOW_METHOD:
-                case TARGETING_PROPERTY: {
+                case TARGETING_PROPERTY:
+                case TARGETING_METHOD: {
                     let result = this._run_equation(data);
                     this.tween_step.dispatch(data.key, data.elapsed, result);
                     this._apply_tween_value(data, result);

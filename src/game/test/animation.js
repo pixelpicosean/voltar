@@ -32,7 +32,8 @@ export default class AnimationTest extends v.Node2D {
         tween.interpolate_callback(this, 3, 'greet', 'Sean');
         tween.follow_property(icon2, 'x', 0, icon, 'x', 1, 'Linear.None', 1);
         tween.follow_method(icon2, 'set_position', { x: 50, y: icon2.y }, icon, 'get_position', 2, 'Linear.None', 2);
-        tween.targeting_property(icon2, 'x', icon, 'x', 0, 1, 'Linear.None', 0);
+        // tween.targeting_property(icon2, 'x', icon, 'x', 0, 1, 'Linear.None', 0);
+        tween.targeting_method(icon2, 'set_position', icon, 'get_position', { x: 0, y: 0 }, 1, 'Linear.None', 0);
         tween.start();
 
         icon.tweens.add(tween);
