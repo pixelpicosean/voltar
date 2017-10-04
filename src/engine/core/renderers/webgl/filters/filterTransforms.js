@@ -40,36 +40,13 @@ export function calculateNormalizedScreenSpaceMatrix(outputMatrix, filter_area, 
 // this will map the filter coord so that a texture can be used based on the transform of a sprite
 export function calculateSpriteMatrix(outputMatrix, filter_area, textureSize, sprite)
 {
-    const world_transform = sprite.world_transform.copy(Matrix.TEMP_MATRIX);
     const texture = sprite._texture.base_texture;
+    const mappedMatrix = outputMatrix.set(textureSize.width, 0, 0, textureSize.height, filterArea.x, filterArea.y);
+    const worldTransform = sprite.world_transform.copy(Matrix.TEMP_MATRIX);
 
-    // TODO unwrap?
-    const mappedMatrix = outputMatrix.identity();
-
-    // scale..
-    const ratio = textureSize.height / textureSize.width;
-
-    mappedMatrix.translate(filter_area.x / textureSize.width, filter_area.y / textureSize.height);
-
-    mappedMatrix.scale(1, ratio);
-
-    const translateScaleX = (textureSize.width / texture.width);
-    const translateScaleY = (textureSize.height / texture.height);
-
-    world_transform.tx /= texture.width * translateScaleX;
-
-    // this...?  free beer for anyone who can explain why this makes sense!
-    world_transform.ty /= texture.width * translateScaleX;
-    // world_transform.ty /= texture.height * translateScaleY;
-
-    world_transform.invert();
-    mappedMatrix.prepend(world_transform);
-
-    // apply inverse scale..
-    mappedMatrix.scale(1, 1 / ratio);
-
-    mappedMatrix.scale(translateScaleX, translateScaleY);
-
+    worldTransform.invert();
+    mappedMatrix.prepend(worldTransform);
+    mappedMatrix.scale(1.0 / texture.width, 1.0 / texture.height);
     mappedMatrix.translate(sprite.anchor.x, sprite.anchor.y);
 
     return mappedMatrix;

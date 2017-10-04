@@ -154,6 +154,7 @@ export default class TilingSprite extends Sprite
         {
             this.uv_transform.texture = this._texture;
         }
+        this.cached_tint = 0xFFFFFF;
     }
 
     /**
@@ -198,35 +199,31 @@ export default class TilingSprite extends Sprite
         const transform = this.world_transform;
         const resolution = renderer.resolution;
         const base_texture = texture.base_texture;
-        const base_textureResolution = base_texture.resolution;
-        const modX = ((this.tile_position.x / this.tile_scale.x) % texture._frame.width) * base_textureResolution;
-        const modY = ((this.tile_position.y / this.tile_scale.y) % texture._frame.height) * base_textureResolution;
+        const base_texture_resolution = base_texture.resolution;
+        const modX = ((this.tile_position.x / this.tile_scale.x) % texture._frame.width) * base_texture_resolution;
+        const modY = ((this.tile_position.y / this.tile_scale.y) % texture._frame.height) * base_texture_resolution;
 
         // create a nice shiny pattern!
-        // TODO this needs to be refreshed if texture changes..
-        if (!this._canvasPattern)
+        if (this._textureID !== this._texture._updateID || this.cached_tint !== this.tint)
         {
+            this._textureID = this._texture._updateID;
             // cut an object from a spritesheet..
-            const tempCanvas = new CanvasRenderTarget(texture._frame.width,
+            const tempCanvas = new core.CanvasRenderTarget(texture._frame.width,
                                                         texture._frame.height,
-                                                        base_textureResolution);
+                                                        base_texture_resolution);
 
             // Tint the tiling sprite
             if (this.tint !== 0xFFFFFF)
             {
-                if (this.cached_tint !== this.tint)
-                {
-                    this.cached_tint = this.tint;
-
-                    this.tintedTexture = CanvasTinter.getTintedTexture(this, this.tint);
-                }
+                this.tintedTexture = CanvasTinter.getTintedTexture(this, this.tint);
                 tempCanvas.context.drawImage(this.tintedTexture, 0, 0);
             }
             else
             {
                 tempCanvas.context.drawImage(base_texture.source,
-                    -texture._frame.x * base_textureResolution, -texture._frame.y * base_textureResolution);
+                    -texture._frame.x * base_texture_resolution, -texture._frame.y * base_texture_resolution);
             }
+            this.cached_tint = this.tint;
             this._canvasPattern = tempCanvas.context.createPattern(tempCanvas.canvas, 'repeat');
         }
 
@@ -245,7 +242,7 @@ export default class TilingSprite extends Sprite
         context.fillStyle = this._canvasPattern;
 
         // TODO - this should be rolled into the set_transform above..
-        context.scale(this.tile_scale.x / base_textureResolution, this.tile_scale.y / base_textureResolution);
+        context.scale(this.tile_scale.x / base_texture_resolution, this.tile_scale.y / base_texture_resolution);
 
         const anchorX = this.anchor.x * -this._width;
         const anchorY = this.anchor.y * -this._height;
@@ -255,16 +252,16 @@ export default class TilingSprite extends Sprite
             context.translate(modX, modY);
 
             context.fillRect(-modX + anchorX, -modY + anchorY,
-                this._width / this.tile_scale.x * base_textureResolution,
-                this._height / this.tile_scale.y * base_textureResolution);
+                this._width / this.tile_scale.x * base_texture_resolution,
+                this._height / this.tile_scale.y * base_texture_resolution);
         }
         else
         {
             context.translate(modX + anchorX, modY + anchorY);
 
             context.fillRect(-modX, -modY,
-                this._width / this.tile_scale.x * base_textureResolution,
-                this._height / this.tile_scale.y * base_textureResolution);
+                this._width / this.tile_scale.x * base_texture_resolution,
+                this._height / this.tile_scale.y * base_texture_resolution);
         }
     }
 

@@ -29,16 +29,18 @@ import { hex2rgb } from '../../utils';
 export default class ParticleNode2D extends Node2D
 {
     /**
-     * @param {number} [maxSize=15000] - The maximum number of particles that can be renderer by the container.
+     * @param {number} [maxSize=1500] - The maximum number of particles that can be renderer by the container.
      * @param {object} [properties] - The properties of children that should be uploaded to the gpu and applied.
      * @param {boolean} [properties.scale=false] - When true, scale be uploaded and applied.
      * @param {boolean} [properties.position=true] - When true, position be uploaded and applied.
      * @param {boolean} [properties.rotation=false] - When true, rotation be uploaded and applied.
      * @param {boolean} [properties.uvs=false] - When true, uvs be uploaded and applied.
      * @param {boolean} [properties.alpha=false] - When true, alpha be uploaded and applied.
-     * @param {number} [batchSize=15000] - Number of particles per batch.
+     * @param {number} [batch_size=15000] - Number of particles per batch.
+     * @param {boolean} [auto_resize=true] If true, container allocates more batches in case
+     *  there are more than `maxSize` particles.
      */
-    constructor(maxSize = 1500, properties, batchSize = 16384)
+    constructor(maxSize = 1500, properties, batch_size = 16384, auto_resize = false)
     {
         super();
 
@@ -49,14 +51,14 @@ export default class ParticleNode2D extends Node2D
         // so max number of particles is 65536 / 4 = 16384
         const maxBatchSize = 16384;
 
-        if (batchSize > maxBatchSize)
+        if (batch_size > maxBatchSize)
         {
-            batchSize = maxBatchSize;
+            batch_size = maxBatchSize;
         }
 
-        if (batchSize > maxSize)
+        if (batch_size > maxSize)
         {
-            batchSize = maxSize;
+            batch_size = maxSize;
         }
 
         /**
@@ -77,7 +79,7 @@ export default class ParticleNode2D extends Node2D
          * @member {number}
          * @private
          */
-        this._batchSize = batchSize;
+        this._batchSize = batch_size;
 
         /**
          * @member {object<number, WebGLBuffer>}
@@ -106,6 +108,13 @@ export default class ParticleNode2D extends Node2D
          * @see V.BLEND_MODES
          */
         this.blend_mode = BLEND_MODES.NORMAL;
+
+        /**
+         * If true, container allocates more batches in case there are more than `maxSize` particles.
+         * @member {boolean}
+         * @default false
+         */
+        this.auto_resize = auto_resize;
 
         /**
          * Used for canvas renderering. If true then the elements will be positioned at the
@@ -152,7 +161,8 @@ export default class ParticleNode2D extends Node2D
             this._properties[1] = 'position' in properties ? !!properties.position : this._properties[1];
             this._properties[2] = 'rotation' in properties ? !!properties.rotation : this._properties[2];
             this._properties[3] = 'uvs' in properties ? !!properties.uvs : this._properties[3];
-            this._properties[4] = 'alpha' in properties ? !!properties.alpha : this._properties[4];
+            this._properties[4] = 'alpha' in properties || 'tint' in properties
+                ? !!properties.alpha || !!properties.tint : this._properties[4];
         }
     }
 
@@ -251,12 +261,7 @@ export default class ParticleNode2D extends Node2D
         let finalWidth = 0;
         let finalHeight = 0;
 
-        const compositeOperation = renderer.blend_modes[this.blend_mode];
-
-        if (compositeOperation !== context.globalCompositeOperation)
-        {
-            context.globalCompositeOperation = compositeOperation;
-        }
+        renderer.setBlendMode(this.blend_mode);
 
         context.globalAlpha = this.world_alpha;
 

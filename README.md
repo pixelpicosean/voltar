@@ -1,10 +1,4 @@
-Voltar (WIP)
+Voltar
 =============
 
-
-Next version of LesserPanda framework.
-
-
-### License ###
-
-This content is released under the (http://opensource.org/licenses/MIT) MIT License.
+Next generation of LesserPanda framework.

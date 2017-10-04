@@ -34,7 +34,7 @@ export default class Filter
          */
         this.fragmentSrc = fragmentSrc || Filter.defaultFragmentSrc;
 
-        this.blend_mode = BLEND_MODES.NORMAL;
+        this._blend_mode = BLEND_MODES.NORMAL;
 
         this.uniformData = uniforms || extractUniformsFromSrc(this.vertexSrc, this.fragmentSrc, 'projectionMatrix|uSampler');
 
@@ -50,6 +50,10 @@ export default class Filter
         for (const i in this.uniformData)
         {
             this.uniforms[i] = this.uniformData[i].value;
+            if (this.uniformData[i].type)
+            {
+                this.uniformData[i].type = this.uniformData[i].type.toLowerCase();
+            }
         }
 
         // this is where we store shader references..
@@ -118,6 +122,22 @@ export default class Filter
         filterManager.applyFilter(this, input, output, clear);
 
         // or just do a regular render..
+    }
+
+    /**
+     * Sets the blendmode of the filter
+     *
+     * @member {number}
+     * @default PIXI.BLEND_MODES.NORMAL
+     */
+    get blend_mode()
+    {
+        return this._blend_mode;
+    }
+
+    set blend_mode(value) // eslint-disable-line require-jsdoc
+    {
+        this._blend_mode = value;
     }
 
     /**

@@ -199,6 +199,7 @@ export default class Sprite extends Node2D
     {
         this._textureID = -1;
         this._textureTrimmedID = -1;
+        this.cached_tint = 0xFFFFFF;
 
         // so if _width is 0 then width was not set..
         if (this._width)
@@ -405,7 +406,7 @@ export default class Sprite extends Node2D
      * @param {V.Rectangle} rect - The output rectangle.
      * @return {V.Rectangle} The bounds.
      */
-    get_local_Bounds(rect)
+    get_local_bounds(rect)
     {
         // we can do a fast local bounds if the sprite has no children!
         if (this.children.length === 0)
@@ -413,7 +414,7 @@ export default class Sprite extends Node2D
             this._bounds.min_x = this._texture.orig.width * -this._anchor._x;
             this._bounds.min_y = this._texture.orig.height * -this._anchor._y;
             this._bounds.max_x = this._texture.orig.width * (1 - this._anchor._x);
-            this._bounds.max_y = this._texture.orig.height * (1 - this._anchor._x);
+            this._bounds.max_y = this._texture.orig.height * (1 - this._anchor._y);
 
             if (!rect)
             {
@@ -428,7 +429,7 @@ export default class Sprite extends Node2D
             return this._bounds.get_rectangle(rect);
         }
 
-        return super.get_local_Bounds.call(this, rect);
+        return super.get_local_bounds.call(this, rect);
     }
 
     /**

@@ -81,9 +81,9 @@ export default class Ticker
          * this value will have a precision of 1 µs.
          *
          * @member {number}
-         * @default 0
+         * @default -1
          */
-        this.last_time = 0;
+        this.last_time = -1;
 
         /**
          * Factor of current {@link V.ticker.Ticker#delta_time}.

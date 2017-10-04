@@ -244,6 +244,7 @@ export default class MeshSpriteRenderer
         );
 
         context.restore();
+        this.renderer.invalidate_blend_mode();
     }
 
     /**

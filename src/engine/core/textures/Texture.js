@@ -523,7 +523,11 @@ export default class Texture extends EventEmitter
         {
             for (let i = 0; i < texture.texture_cache_ids.length; ++i)
             {
-                delete TextureCache[texture.texture_cache_ids[i]];
+                // Check that texture matches the one being passed in before deleting it from the cache.
+                if (TextureCache[texture.texture_cache_ids[i]] === texture)
+                {
+                    delete TextureCache[texture.texture_cache_ids[i]];
+                }
             }
 
             texture.texture_cache_ids.length = 0;
@@ -550,15 +554,22 @@ export default class Texture extends EventEmitter
 
         this.no_frame = false;
 
-        if (frame.x + frame.width > this.base_texture.width || frame.y + frame.height > this.base_texture.height)
+        const { x, y, width, height } = frame;
+        const xNotFit = x + width > this.base_texture.width;
+        const yNotFit = y + height > this.base_texture.height;
+
+        if (xNotFit || yNotFit)
         {
+            const relationship = xNotFit && yNotFit ? 'and' : 'or';
+            const errorX = `X: ${x} + ${width} = ${x + width} > ${this.base_texture.width}`;
+            const errorY = `Y: ${y} + ${height} = ${y + height} > ${this.base_texture.height}`;
+
             throw new Error('Texture Error: frame does not fit inside the base Texture dimensions: '
-                + `X: ${frame.x} + ${frame.width} > ${this.base_texture.width} `
-                + `Y: ${frame.y} + ${frame.height} > ${this.base_texture.height}`);
+                + `${errorX} ${relationship} ${errorY}`);
         }
 
-        // this.valid = frame && frame.width && frame.height && this.base_texture.source && this.base_texture.has_loaded;
-        this.valid = frame && frame.width && frame.height && this.base_texture.has_loaded;
+        // this.valid = width && height && this.base_texture.source && this.base_texture.has_loaded;
+        this.valid = width && height && this.base_texture.has_loaded;
 
         if (!this.trim && !this.rotate)
         {
