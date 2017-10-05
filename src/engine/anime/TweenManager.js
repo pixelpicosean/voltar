@@ -7,6 +7,7 @@ export default class TweenManager {
     }
     add(tween) {
         this.tweens.push(tween);
+        return tween;
     }
     remove(tween) {
         tween.active = false;
