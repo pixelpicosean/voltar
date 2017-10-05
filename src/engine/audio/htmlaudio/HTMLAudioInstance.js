@@ -2,6 +2,7 @@ import EventEmitter from 'eventemitter3';
 let id = 0;
 /**
  * Instance which wraps the `<audio>` element playback.
+ * @private
  * @class HTMLAudioInstance
  * @memberof PIXI.sound.htmlaudio
  */
@@ -13,7 +14,7 @@ export default class HTMLAudioInstance extends EventEmitter {
     }
     /**
      * The current playback progress from 0 to 1.
-     * @type {Number}
+     * @type {number}
      * @name PIXI.sound.htmlaudio.HTMLAudioInstance#progress
      */
     get progress() {
@@ -22,42 +23,15 @@ export default class HTMLAudioInstance extends EventEmitter {
     }
     /**
      * Pauses the sound.
-     * @type {Boolean}
+     * @type {boolean}
      * @name PIXI.sound.htmlaudio.HTMLAudioInstance#paused
      */
     get paused() {
         return this._paused;
     }
     set paused(paused) {
-        const contextPaused = this._parent.context.paused;
-        if (paused === this._paused && contextPaused === this._paused) {
-            // Do nothing, no pause change
-            return;
-        }
         this._paused = paused;
-        if (paused || contextPaused) {
-            this._internalStop();
-            /**
-             * The sound is paused.
-             * @event PIXI.sound.htmlaudio.HTMLAudioInstance#paused
-             */
-            this.emit("paused");
-        }
-        else {
-            /**
-             * The sound is unpaused.
-             * @event PIXI.sound.htmlaudio.HTMLAudioInstance#resumed
-             */
-            this.emit("resumed");
-            // resume the playing with offset
-            this.play(this._source.currentTime, this._end, 1, this._source.loop, 0, 0);
-        }
-        /**
-         * The sound is paused or unpaused.
-         * @event PIXI.sound.htmlaudio.HTMLAudioInstance#pause
-         * @property {Boolean} paused If the instance was paused or not.
-         */
-        this.emit("pause", paused);
+        this.refreshPaused();
     }
     /**
      * Reference: http://stackoverflow.com/a/40370077
@@ -74,32 +48,18 @@ export default class HTMLAudioInstance extends EventEmitter {
     /**
      * Initialize the instance.
      * @method PIXI.sound.htmlaudio.HTMLAudioInstance#init
-     * @param {PIXI.sound.htmlaudio.HTMLAudioMedia} parent
+     * @param {PIXI.sound.htmlaudio.HTMLAudioMedia} media
      */
-    init(parent) {
+    init(media) {
         this._playing = false;
-        this._duration = parent.source.duration;
-        const source = this._source = parent.source.cloneNode(false);
-        source.src = parent.parent.url;
+        this._duration = media.source.duration;
+        const source = this._source = media.source.cloneNode(false);
+        source.src = media.parent.url;
         source.onplay = this._onPlay.bind(this);
         source.onpause = this._onPause.bind(this);
-        // Update on global volume changes
-        this._onVolumeChanged = () => {
-            let volume = parent.volume;
-            volume *= parent.context.volume;
-            volume *= parent.context.muted ? 0 : 1;
-            source.volume = volume;
-        };
-        this._onPausedChanged = () => {
-            this.paused = this.paused;
-        };
-        parent.on('volume', this._onVolumeChanged);
-        parent.context.on('volume', this._onVolumeChanged);
-        parent.context.on('muted', this._onVolumeChanged);
-        parent.context.on('paused', this._onPausedChanged);
-        this._parent = parent;
-        this._onPausedChanged();
-        this._onVolumeChanged();
+        media.context.on('refresh', this.refresh, this);
+        media.context.on('refreshPaused', this.refreshPaused, this);
+        this._media = media;
     }
     /**
      * Stop the sound playing
@@ -123,25 +83,131 @@ export default class HTMLAudioInstance extends EventEmitter {
         }
     }
     /**
+     * Set the instance speed from 0 to 1
+     * @member {number} PIXI.sound.htmlaudio.HTMLAudioInstance#speed
+     */
+    get speed() {
+        return this._speed;
+    }
+    set speed(speed) {
+        this._speed = speed;
+        this.refresh();
+    }
+    /**
+     * Get the set the volume for this instance from 0 to 1
+     * @member {number} PIXI.sound.htmlaudio.HTMLAudioInstance#volume
+     */
+    get volume() {
+        return this._volume;
+    }
+    set volume(volume) {
+        this._volume = volume;
+        this.refresh();
+    }
+    /**
+     * If the sound instance should loop playback
+     * @member {boolean} PIXI.sound.htmlaudio.HTMLAudioInstance#loop
+     */
+    get loop() {
+        return this._loop;
+    }
+    set loop(loop) {
+        this._loop = loop;
+        this.refresh();
+    }
+    /**
+     * `true` if the sound is muted
+     * @member {boolean} PIXI.sound.htmlaudio.HTMLAudioInstance#muted
+     */
+    get muted() {
+        return this._muted;
+    }
+    set muted(muted) {
+        this._muted = muted;
+        this.refresh();
+    }
+    /**
+     * Call whenever the loop, speed or volume changes
+     * @method PIXI.sound.htmlaudio.HTMLAudioInstance#refresh
+     */
+    refresh() {
+        const global = this._media.context;
+        const sound = this._media.parent;
+        // Update the looping
+        this._source.loop = this._loop || sound.loop;
+        // Update the volume
+        const globalVolume = global.volume * (global.muted ? 0 : 1);
+        const soundVolume = sound.volume * (sound.muted ? 0 : 1);
+        const instanceVolume = this._volume * (this._muted ? 0 : 1);
+        this._source.volume = instanceVolume * globalVolume * soundVolume;
+        // Update the speed
+        this._source.playbackRate = this._speed * global.speed * sound.speed;
+    }
+    /**
+     * Handle changes in paused state, either globally or sound or instance
+     * @method PIXI.sound.htmlaudio.HTMLAudioInstance#refreshPaused
+     */
+    refreshPaused() {
+        const global = this._media.context;
+        const sound = this._media.parent;
+        // Handle the paused state
+        const pausedReal = this._paused || sound.paused || global.paused;
+        if (pausedReal !== this._pausedReal) {
+            this._pausedReal = pausedReal;
+            if (pausedReal) {
+                this._internalStop();
+                /**
+                 * The sound is paused.
+                 * @event PIXI.sound.htmlaudio.HTMLAudioInstance#paused
+                 */
+                this.emit("paused");
+            }
+            else {
+                /**
+                 * The sound is unpaused.
+                 * @event PIXI.sound.htmlaudio.HTMLAudioInstance#resumed
+                 */
+                this.emit("resumed");
+                // resume the playing with offset
+                this.play({
+                    start: this._source.currentTime,
+                    end: this._end,
+                    volume: this._volume,
+                    speed: this._speed,
+                    loop: this._loop
+                });
+            }
+            /**
+             * The sound is paused or unpaused.
+             * @event PIXI.sound.htmlaudio.HTMLAudioInstance#pause
+             * @property {boolean} paused If the instance was paused or not.
+             */
+            this.emit("pause", pausedReal);
+        }
+    }
+    /**
      * Start playing the sound/
      * @method PIXI.sound.htmlaudio.HTMLAudioInstance#play
      */
-    play(start, end, speed, loop, fadeIn, fadeOut) {
+    play(options) {
+        const { start, end, speed, loop, volume, muted } = options;
         // @if DEBUG
         if (end) {
             console.assert(end > start, "End time is before start time");
         }
         // @endif
-        if (loop !== undefined) {
-            this._source.loop = loop;
-        }
+        this._speed = speed;
+        this._volume = volume;
+        this._loop = !!loop;
+        this._muted = muted;
+        this.refresh();
         // WebAudio doesn't support looping when a duration is set
         // we'll set this just for the heck of it
-        if (loop === true && end !== undefined) {
+        if (this.loop && end !== null) {
             // @if DEBUG
             console.warn('Looping not support when specifying an "end" time');
             // @endif
-            this._source.loop = false;
+            this.loop = false;
         }
         this._start = start;
         this._end = end || this._duration;
@@ -208,21 +274,21 @@ export default class HTMLAudioInstance extends EventEmitter {
             this._internalStop();
         }
         this._source = null;
-        this._end = 0;
+        this._speed = 1;
+        this._volume = 1;
+        this._loop = false;
+        this._end = null;
         this._start = 0;
         this._duration = 0;
         this._playing = false;
-        // Remove parent listener for volume changes
-        const parent = this._parent;
-        if (parent) {
-            parent.off('volume', this._onVolumeChanged);
-            parent.context.off('muted', this._onVolumeChanged);
-            parent.context.off('volume', this._onVolumeChanged);
-            parent.context.off('paused', this._onPausedChanged);
+        this._pausedReal = false;
+        this._paused = false;
+        this._muted = false;
+        if (this._media) {
+            this._media.context.off('refresh', this.refresh, this);
+            this._media.context.off('refreshPaused', this.refreshPaused, this);
+            this._media = null;
         }
-        this._parent = null;
-        this._onVolumeChanged = null;
-        this._onPausedChanged = null;
     }
     /**
      * To string method for instance.

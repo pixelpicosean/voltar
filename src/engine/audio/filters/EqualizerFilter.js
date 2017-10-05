@@ -260,70 +260,70 @@ export default class EqualizerFilter extends Filter {
 /**
  * Band at 32 Hz
  * @name PIXI.sound.filters.EqualizerFilter.F32
- * @type {Number}
+ * @type {number}
  * @readonly
  */
 EqualizerFilter.F32 = 32;
 /**
  * Band at 64 Hz
  * @name PIXI.sound.filters.EqualizerFilter.F64
- * @type {Number}
+ * @type {number}
  * @readonly
  */
 EqualizerFilter.F64 = 64;
 /**
  * Band at 125 Hz
  * @name PIXI.sound.filters.EqualizerFilter.F125
- * @type {Number}
+ * @type {number}
  * @readonly
  */
 EqualizerFilter.F125 = 125;
 /**
  * Band at 250 Hz
  * @name PIXI.sound.filters.EqualizerFilter.F250
- * @type {Number}
+ * @type {number}
  * @readonly
  */
 EqualizerFilter.F250 = 250;
 /**
  * Band at 500 Hz
  * @name PIXI.sound.filters.EqualizerFilter.F500
- * @type {Number}
+ * @type {number}
  * @readonly
  */
 EqualizerFilter.F500 = 500;
 /**
  * Band at 1000 Hz
  * @name PIXI.sound.filters.EqualizerFilter.F1K
- * @type {Number}
+ * @type {number}
  * @readonly
  */
 EqualizerFilter.F1K = 1000;
 /**
  * Band at 2000 Hz
  * @name PIXI.sound.filters.EqualizerFilter.F2K
- * @type {Number}
+ * @type {number}
  * @readonly
  */
 EqualizerFilter.F2K = 2000;
 /**
  * Band at 4000 Hz
  * @name PIXI.sound.filters.EqualizerFilter.F4K
- * @type {Number}
+ * @type {number}
  * @readonly
  */
 EqualizerFilter.F4K = 4000;
 /**
  * Band at 8000 Hz
  * @name PIXI.sound.filters.EqualizerFilter.F8K
- * @type {Number}
+ * @type {number}
  * @readonly
  */
 EqualizerFilter.F8K = 8000;
 /**
  * Band at 16000 Hz
  * @name PIXI.sound.filters.EqualizerFilter.F16K
- * @type {Number}
+ * @type {number}
  * @readonly
  */
 EqualizerFilter.F16K = 16000;

@@ -2,45 +2,57 @@ import Filterable from "./Filterable";
 import * as filters from "./filters";
 import * as htmlaudio from "./htmlaudio";
 import { HTMLAudioContext } from "./htmlaudio";
-import LoaderMiddleware from "./loader";
+import LoaderMiddleware from "./loader/LoaderMiddleware";
 import Sound from "./Sound";
 import SoundSprite from "./sprites/SoundSprite";
 import utils from "./utils/SoundUtils";
 import { WebAudioContext } from "./webaudio";
 import * as webaudio from "./webaudio";
 /**
- * Playing sound files with WebAudio API
- * @namespace PIXI.sound
+ * Contains all of the functionality for using the **pixi-sound** library.
+ * This is deisnged to play audio with WebAudio and fallback to HTML5.
+ * @namespace v.sound
  */
 /**
  * @description Manages the playback of sounds.
  * @class SoundLibrary
- * @memberof PIXI.sound
+ * @memberof v.sound
  * @private
  */
 export default class SoundLibrary {
     constructor(loaders) {
         this.loaders = loaders;
+        this.init();
+    }
+    /**
+     * Re-initialize the sound library, this will
+     * recreate the AudioContext. If there's a hardware-failure
+     * call `close` and then `init`.
+     * @method v.sound#init
+     * @return {v.sound} Sound instance
+     */
+    init() {
         if (this.supported) {
             this._webAudioContext = new WebAudioContext();
         }
         this._htmlAudioContext = new HTMLAudioContext();
         this._sounds = {};
         this.useLegacy = !this.supported;
+        return this;
     }
     /**
      * The global context to use.
-     * @name PIXI.sound#context
+     * @name v.sound#context
      * @readonly
-     * @type {PIXI.sound.webaudio.WebAudioContext}
+     * @type {v.sound.IMediaContext}
      */
     get context() {
         return this._context;
     }
     /**
      * Initialize the singleton of the library
-     * @method PIXI.sound.SoundLibrary.init
-     * @return {PIXI.sound}
+     * @method v.sound.SoundLibrary.init
+     * @return {v.sound}
      */
     static init(loaders) {
         if (SoundLibrary.instance) {
@@ -52,51 +64,10 @@ export default class SoundLibrary {
         if (typeof loaders !== "undefined") {
             this.loaders = loaders;
             // Install the middleware to support
-            // PIXI.loader and new PIXI.loaders.Loader
+            // v.loader and new v.loaders.Loader
             LoaderMiddleware.install(instance, loaders);
         }
-        // Remove the global namespace created by rollup
-        // makes it possible for users to opt-in to exposing
-        // the library globally
-        if (typeof window.__pixiSound === "undefined") {
-            delete window.__pixiSound;
-        }
-        // Webpack and NodeJS-like environments will not expose
-        // the library to the window by default, user must opt-in
-        if (typeof module === "undefined") {
-            instance.global();
-        }
         return instance;
-    }
-    /**
-     * Set the `PIXI.sound` window namespace object. By default
-     * the global namespace is disabled in environments that use
-     * require/module (e.g. Webpack), so `PIXI.sound` would not
-     * be accessible these environments. Window environments
-     * will automatically expose the window object, calling this
-     * method will do nothing.
-     * @method PIXI.sound#global
-     * @example
-     * import {sound} from 'pixi-sound';
-     * sound.global(); // Now can use PIXI.sound
-     */
-    global() {
-        const PixiJS = PIXI;
-        if (!PixiJS.sound) {
-            Object.defineProperty(PixiJS, "sound", {
-                get() { return SoundLibrary.instance; },
-            });
-            Object.defineProperties(SoundLibrary.instance, {
-                filters: { get() { return filters; } },
-                htmlaudio: { get() { return htmlaudio; } },
-                webaudio: { get() { return webaudio; } },
-                utils: { get() { return utils; } },
-                Sound: { get() { return Sound; } },
-                SoundSprite: { get() { return SoundSprite; } },
-                Filterable: { get() { return Filterable; } },
-                SoundLibrary: { get() { return SoundLibrary; } },
-            });
-        }
     }
     /**
      * Apply filters to all sounds. Can be useful
@@ -104,11 +75,11 @@ export default class SoundLibrary {
      * **Only supported with WebAudio.**
      * @example
      * // Adds a filter to pan all output left
-     * PIXI.sound.filtersAll = [
-     *     new PIXI.sound.filters.StereoFilter(-1)
+     * v.sound.filtersAll = [
+     *     new v.sound.filters.StereoFilter(-1)
      * ];
-     * @name PIXI.sound#filtersAll
-     * @type {PIXI.sound.filters.Filter[]}
+     * @name v.sound#filtersAll
+     * @type {v.sound.filters.Filter[]}
      */
     get filtersAll() {
         if (!this.useLegacy) {
@@ -123,9 +94,9 @@ export default class SoundLibrary {
     }
     /**
      * `true` if WebAudio is supported on the current browser.
-     * @name PIXI.sound#supported
+     * @name v.sound#supported
      * @readonly
-     * @type {Boolean}
+     * @type {boolean}
      */
     get supported() {
         return WebAudioContext.AudioContext !== null;
@@ -158,7 +129,7 @@ export default class SoundLibrary {
     }
     /**
      * Internal methods for getting the options object
-     * @method PIXI.sound#_getOptions
+     * @method v.sound#_getOptions
      * @private
      * @param {string|ArrayBuffer|HTMLAudioElement|Object} source The source options
      * @param {Object} [overrides] Override default options
@@ -178,9 +149,9 @@ export default class SoundLibrary {
         return Object.assign(options, overrides || {});
     }
     /**
-     * Do not use WebAudio, force the use of legacy.
-     * @name PIXI.sound#useLegacy
-     * @type {Boolean}
+     * Do not use WebAudio, force the use of legacy. This **must** be called before loading any files.
+     * @name v.sound#useLegacy
+     * @type {boolean}
      */
     get useLegacy() {
         return false;
@@ -197,9 +168,9 @@ export default class SoundLibrary {
     }
     /**
      * Removes a sound by alias.
-     * @method PIXI.sound#remove
+     * @method v.sound#remove
      * @param {String} alias The sound alias reference.
-     * @return {PIXI.sound} Instance for chaining.
+     * @return {v.sound} Instance for chaining.
      */
     remove(alias) {
         this.exists(alias, true);
@@ -208,72 +179,89 @@ export default class SoundLibrary {
         return this;
     }
     /**
-     * Set the global volume for all sounds. To set per-sound volume see {@link PIXI.sound#volume}.
-     * @name PIXI.sound#volumeAll
-     * @type {Number}
+     * Set the global volume for all sounds. To set per-sound volume see {@link v.sound#volume}.
+     * @name v.sound#volumeAll
+     * @type {number}
      */
     get volumeAll() {
         return this._context.volume;
     }
     set volumeAll(volume) {
         this._context.volume = volume;
+        this._context.refresh();
+    }
+    /**
+     * Set the global speed for all sounds. To set per-sound speed see {@link v.sound#speed}.
+     * @name v.sound#speedAll
+     * @type {number}
+     */
+    get speedAll() {
+        return this._context.speed;
+    }
+    set speedAll(speed) {
+        this._context.speed = speed;
+        this._context.refresh();
     }
     /**
      * Toggle paused property for all sounds.
-     * @method PIXI.sound#togglePauseAll
-     * @return {Boolean} `true` if all sounds are paused.
+     * @method v.sound#togglePauseAll
+     * @return {boolean} `true` if all sounds are paused.
      */
     togglePauseAll() {
         return this._context.togglePause();
     }
     /**
      * Pauses any playing sounds.
-     * @method PIXI.sound#pauseAll
-     * @return {PIXI.sound} Instance for chaining.
+     * @method v.sound#pauseAll
+     * @return {v.sound} Instance for chaining.
      */
     pauseAll() {
         this._context.paused = true;
+        this._context.refresh();
         return this;
     }
     /**
      * Resumes any sounds.
-     * @method PIXI.sound#resumeAll
-     * @return {PIXI.sound} Instance for chaining.
+     * @method v.sound#resumeAll
+     * @return {v.sound} Instance for chaining.
      */
     resumeAll() {
         this._context.paused = false;
+        this._context.refresh();
         return this;
     }
     /**
      * Toggle muted property for all sounds.
-     * @method PIXI.sound#toggleMuteAll
-     * @return {Boolean} `true` if all sounds are muted.
+     * @method v.sound#toggleMuteAll
+     * @return {boolean} `true` if all sounds are muted.
      */
     toggleMuteAll() {
         return this._context.toggleMute();
     }
     /**
      * Mutes all playing sounds.
-     * @method PIXI.sound#muteAll
-     * @return {PIXI.sound} Instance for chaining.
+     * @method v.sound#muteAll
+     * @return {v.sound} Instance for chaining.
      */
     muteAll() {
         this._context.muted = true;
+        this._context.refresh();
         return this;
     }
     /**
      * Unmutes all playing sounds.
-     * @method PIXI.sound#unmuteAll
-     * @return {PIXI.sound} Instance for chaining.
+     * @method v.sound#unmuteAll
+     * @return {v.sound} Instance for chaining.
      */
     unmuteAll() {
         this._context.muted = false;
+        this._context.refresh();
         return this;
     }
     /**
      * Stops and removes all sounds. They cannot be used after this.
-     * @method PIXI.sound#removeAll
-     * @return {PIXI.sound} Instance for chaining.
+     * @method v.sound#removeAll
+     * @return {v.sound} Instance for chaining.
      */
     removeAll() {
         for (const alias in this._sounds) {
@@ -284,8 +272,8 @@ export default class SoundLibrary {
     }
     /**
      * Stops all sounds.
-     * @method PIXI.sound#stopAll
-     * @return {PIXI.sound} Instance for chaining.
+     * @method v.sound#stopAll
+     * @return {v.sound} Instance for chaining.
      */
     stopAll() {
         for (const alias in this._sounds) {
@@ -295,9 +283,9 @@ export default class SoundLibrary {
     }
     /**
      * Checks if a sound by alias exists.
-     * @method PIXI.sound#exists
+     * @method v.sound#exists
      * @param {String} alias Check for alias.
-     * @return {Boolean} true if the sound exists.
+     * @return {boolean} true if the sound exists.
      */
     exists(alias, assert = false) {
         const exists = !!this._sounds[alias];
@@ -308,9 +296,9 @@ export default class SoundLibrary {
     }
     /**
      * Find a sound by alias.
-     * @method PIXI.sound#find
+     * @method v.sound#find
      * @param {String} alias The sound alias reference.
-     * @return {PIXI.sound.Sound} Sound object.
+     * @return {v.sound.Sound} Sound object.
      */
     find(alias) {
         this.exists(alias, true);
@@ -318,24 +306,24 @@ export default class SoundLibrary {
     }
     /**
      * Plays a sound.
-     * @method PIXI.sound#play
+     * @method v.sound#play
      * @param {String} alias The sound alias reference.
      * @param {String} sprite The alias of the sprite to play.
-     * @return {PIXI.sound.SoundInstance|null} The sound instance, this cannot be reused
+     * @return {v.sound.IMediaInstance|null} The sound instance, this cannot be reused
      *         after it is done playing. Returns `null` if the sound has not yet loaded.
      */
     /**
      * Plays a sound.
-     * @method PIXI.sound#play
+     * @method v.sound#play
      * @param {String} alias The sound alias reference.
      * @param {Object|Function} options The options or callback when done.
      * @param {Function} [options.complete] When completed.
      * @param {Function} [options.loaded] If not already preloaded, callback when finishes load.
-     * @param {Number} [options.start=0] Start time offset.
-     * @param {Number} [options.end] End time offset.
-     * @param {Number} [options.speed] Override default speed, default to the Sound's speed setting.
-     * @param {Boolean} [options.loop] Override default loop, default to the Sound's loop setting.
-     * @return {PIXI.sound.SoundInstance|Promise<PIXI.sound.SoundInstance>} The sound instance,
+     * @param {number} [options.start=0] Start time offset.
+     * @param {number} [options.end] End time offset.
+     * @param {number} [options.speed] Override default speed, default to the Sound's speed setting.
+     * @param {boolean} [options.loop] Override default loop, default to the Sound's loop setting.
+     * @return {v.sound.IMediaInstance|Promise<v.sound.IMediaInstance>} The sound instance,
      *        this cannot be reused after it is done playing. Returns a Promise if the sound
      *        has not yet loaded.
      */
@@ -344,37 +332,37 @@ export default class SoundLibrary {
     }
     /**
      * Stops a sound.
-     * @method PIXI.sound#stop
+     * @method v.sound#stop
      * @param {String} alias The sound alias reference.
-     * @return {PIXI.sound.Sound} Sound object.
+     * @return {v.sound.Sound} Sound object.
      */
     stop(alias) {
         return this.find(alias).stop();
     }
     /**
      * Pauses a sound.
-     * @method PIXI.sound#pause
+     * @method v.sound#pause
      * @param {String} alias The sound alias reference.
-     * @return {PIXI.sound.Sound} Sound object.
+     * @return {v.sound.Sound} Sound object.
      */
     pause(alias) {
         return this.find(alias).pause();
     }
     /**
      * Resumes a sound.
-     * @method PIXI.sound#resume
+     * @method v.sound#resume
      * @param {String} alias The sound alias reference.
-     * @return {PIXI.sound} Instance for chaining.
+     * @return {v.sound} Instance for chaining.
      */
     resume(alias) {
         return this.find(alias).resume();
     }
     /**
      * Get or set the volume for a sound.
-     * @method PIXI.sound#volume
+     * @method v.sound#volume
      * @param {String} alias The sound alias reference.
-     * @param {Number} [volume] Optional current volume to set.
-     * @return {Number} The current volume.
+     * @param {number} [volume] Optional current volume to set.
+     * @return {number} The current volume.
      */
     volume(alias, volume) {
         const sound = this.find(alias);
@@ -384,22 +372,47 @@ export default class SoundLibrary {
         return sound.volume;
     }
     /**
-     * Get the length of a sound in seconds.
-     * @method PIXI.sound#duration
+     * Get or set the speed for a sound.
+     * @method v.sound#speed
      * @param {String} alias The sound alias reference.
-     * @return {Number} The current duration in seconds.
+     * @param {number} [speed] Optional current speed to set.
+     * @return {number} The current speed.
+     */
+    speed(alias, speed) {
+        const sound = this.find(alias);
+        if (speed !== undefined) {
+            sound.speed = speed;
+        }
+        return sound.speed;
+    }
+    /**
+     * Get the length of a sound in seconds.
+     * @method v.sound#duration
+     * @param {String} alias The sound alias reference.
+     * @return {number} The current duration in seconds.
      */
     duration(alias) {
         return this.find(alias).duration;
     }
     /**
-     * Destroys the sound module.
-     * @method PIXI.sound#destroy
-     * @private
+     * Closes the sound library. This will release/destroy
+     * the AudioContext(s). Can be used safely if you want to
+     * initialize the sound library later. Use `init` method.
+     * @method v.sound#close
+     * @return {v.sound}
      */
-    destroy() {
+    close() {
         this.removeAll();
         this._sounds = null;
+        if (this._webAudioContext) {
+            this._webAudioContext.destroy();
+            this._webAudioContext = null;
+        }
+        if (this._htmlAudioContext) {
+            this._htmlAudioContext.destroy();
+            this._htmlAudioContext = null;
+        }
         this._context = null;
+        return this;
     }
 }

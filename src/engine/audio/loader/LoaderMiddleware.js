@@ -1,6 +1,8 @@
+import SoundUtils from "../utils/SoundUtils";
 /**
  * Sound middleware installation utilities for PIXI.loaders.Loader
- * @namespace PIXI.sound.loader
+ * @class
+ * @private
  */
 export default class LoaderMiddleware {
     /**
@@ -12,20 +14,25 @@ export default class LoaderMiddleware {
         LoaderMiddleware._sound = sound;
         LoaderMiddleware.set_legacy(sound.useLegacy, loaders);
         // Globally install middleware on all Loaders
+        // Note: `resolve` is not supported by default `Loader`
+        //  so this will not actually work.
         loaders.Loader.addPixiMiddleware(() => {
             return LoaderMiddleware.plugin;
         });
         // Install middleware on the default loader
         loaders.shared.use(LoaderMiddleware.plugin);
+        loaders.shared.pre(LoaderMiddleware.resolve);
     }
     /**
      * Set the legacy mode
      * @name PIXI.sound.loader.legacy
+     * @type {boolean}
+     * @private
      */
     static set_legacy(legacy, loaders) {
         // Configure PIXI Loader to handle audio files correctly
         const Resource = loaders.Resource;
-        const exts = LoaderMiddleware.EXTENSIONS;
+        const exts = SoundUtils.extensions;
         // Make sure we support webaudio
         if (!legacy) {
             // Load all audio files as ArrayBuffers
@@ -43,10 +50,17 @@ export default class LoaderMiddleware {
         }
     }
     /**
+     * Handle the preprocessing of file paths
+     */
+    static resolve(resource, next) {
+        SoundUtils.resolveUrl(resource);
+        next();
+    }
+    /**
      * Actual resource-loader middleware for sound class
      */
     static plugin(resource, next) {
-        if (resource.data && LoaderMiddleware.EXTENSIONS.indexOf(resource.extension) > -1) {
+        if (resource.data && SoundUtils.extensions.indexOf(resource.extension) > -1) {
             resource.sound = LoaderMiddleware._sound.add(resource.name, {
                 loaded: next,
                 preload: true,
@@ -59,10 +73,3 @@ export default class LoaderMiddleware {
         }
     }
 }
-/**
- * The collection of valid sound extensions
- * @name PIXI.sound.loader.EXTENSION
- * @type {String[]}
- * @static
- */
-LoaderMiddleware.EXTENSIONS = ["wav", "mp3", "ogg", "oga", "m4a"];
