@@ -8,12 +8,13 @@ import AnimationTest from 'game/test/animation';
 import InputTest from 'game/test/input';
 import PhysicsTest from 'game/test/physics';
 import TilemapTest from 'game/test/tilemap';
+import SoundTest from 'game/test/sound';
 
 
 v.loader.add('media/04b03.fnt');
 
 
-const Test = AnimationTest;
+const Test = SoundTest;
 
 
 export default class Boot extends v.Node2D {

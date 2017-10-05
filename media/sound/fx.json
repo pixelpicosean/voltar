@@ -1,0 +1,35 @@
+{
+  "resources": [
+    "fx.ogg",
+    "fx.m4a",
+    "fx.mp3",
+    "fx.ac3"
+  ],
+  "spritemap": {
+    "button": {
+      "start": 0,
+      "end": 0.5064852607709751,
+      "loop": false
+    },
+    "cash": {
+      "start": 2,
+      "end": 2.741587301587302,
+      "loop": false
+    },
+    "hiscore": {
+      "start": 4,
+      "end": 5.272743764172335,
+      "loop": false
+    },
+    "hit": {
+      "start": 7,
+      "end": 7.404897959183674,
+      "loop": false
+    },
+    "sound_toggle": {
+      "start": 9,
+      "end": 9.335238095238095,
+      "loop": false
+    }
+  }
+}
