@@ -66,7 +66,7 @@ export default class TileRenderer extends ObjectRenderer {
         const gl = this.renderer.gl;
         for (let i = 0; i < this.maxTextures; i++) {
             const rt = RenderTexture.create(2048, 2048);
-            rt.base_texture.premultipliedAlpha = true;
+            rt.base_texture.premultiplied_alpha = true;
             rt.base_texture.wrap_mode = WRAP_MODES.CLAMP;
             this.renderer.textureManager.update_texture(rt);
 
