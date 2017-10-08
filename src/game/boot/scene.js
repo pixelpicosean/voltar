@@ -14,7 +14,7 @@ import SoundTest from 'game/test/sound';
 v.loader.add('media/04b03.fnt');
 
 
-const Test = SoundTest;
+const Test = TilemapTest;
 
 
 export default class Boot extends v.Node2D {
