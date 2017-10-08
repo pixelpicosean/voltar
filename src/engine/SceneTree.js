@@ -1,7 +1,7 @@
 import VisualServer from './VisualServer';
 import PhysicsServer from './PhysicsServer';
 import MessageQueue from './MessageQueue';
-import { Node2D, Vector } from './core';
+import { Node2D, Vector, ticker } from './core';
 
 import { outer_box_resize } from './resize';
 import remove_items from 'remove-array-items';
@@ -357,6 +357,7 @@ export default class SceneTree {
         this._start_loop();
     }
     _start_loop() {
+        ticker.shared.start();
         this._loop_id = requestAnimationFrame(this._tick_bind);
     }
     _tick(timestamp) {
@@ -413,6 +414,8 @@ export default class SceneTree {
                 this.viewport.parent = null;
                 // - process nodes
                 this.current_scene._propagate_process(_process_tmp.slow_step_sec);
+                // - update shared ticker
+                ticker.shared.update(_process_tmp.slow_step);
                 // - solve collision
                 this.physics_server.solve_collision(this.current_scene);
                 // - remove nodes to be freed
@@ -446,6 +449,7 @@ export default class SceneTree {
         }
     }
     _end_loop() {
+        ticker.shared.stop();
         cancelAnimationFrame(this._loop_id);
     }
 

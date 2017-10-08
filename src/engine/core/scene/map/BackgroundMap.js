@@ -150,12 +150,12 @@ export default class BackgroundMap extends Node2D {
 
         var points = this.pointsBuf;
         renderer.context.fillStyle = '#000000';
-        for (var i = 0, n = points.length; i < n; i += 9) {
+        for (var i = 0, n = points.length; i < n; i += 7) {
             var x1 = points[i], y1 = points[i + 1];
             var x2 = points[i + 2], y2 = points[i + 3];
             var w = points[i + 4];
             var h = points[i + 5];
-            var textureId = points[i + 8];
+            var textureId = points[i + 6];
             if (textureId >= 0) {
                 renderer.context.drawImage(this.textures[textureId].base_texture.source, x1, y1, w, h, x2, y2, w, h);
             } else {
