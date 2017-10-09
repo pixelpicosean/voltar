@@ -9,9 +9,14 @@ export default class RectangleShape2D {
         this.top = 0;
         this.bottom = 0;
 
-        this.extents = new ObservablePoint(() => {
+        this.extents = new ObservablePoint(function() {
             this._dirty = true;
-        }, undefined, extent_x, extent_y);
+
+            this.points[0].set(-this.extents._x, -this.extents._y);
+            this.points[1].set( this.extents._x, -this.extents._y);
+            this.points[2].set( this.extents._x,  this.extents._y);
+            this.points[3].set(-this.extents._x,  this.extents._y);
+        }, this, extent_x, extent_y);
 
         this.points = [
             new Vector(-extent_x, -extent_y),
@@ -49,7 +54,7 @@ export default class RectangleShape2D {
         let points = this.points;
         let rotation = node.get_global_rotation();
         let i, calcPoint;
-        let left = Infinity, top = Infinity, right = -Infinity, bottom = -Infinity;
+        let left = 0, top = 0, right = 0, bottom = 0;
         for (i = 0; i < 4; i++) {
             calcPoint = calcPoints[i].copy(points[i]);
             if (rotation !== 0) {

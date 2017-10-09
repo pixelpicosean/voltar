@@ -309,14 +309,13 @@ export default class PhysicsServer {
 
         // Update bounds
         if (coll._shape) {
-            const pos = coll.get_global_position();
+            coll._shape.calculate_points(coll);
 
+            let pos = coll.get_global_position();
             coll.left = pos.x + coll._shape.left;
             coll.right = pos.x + coll._shape.right;
             coll.top = pos.y + coll._shape.top;
             coll.bottom = pos.y + coll._shape.bottom;
-
-            coll._shape.calculate_points(coll);
         }
 
         // Insert the hash and test collisions
