@@ -187,7 +187,7 @@ const test_overlap = (a, b, a_is_area, b_is_area) => {
         }
         // area vs body or area vs area: SAT algorithm come to save
         else {
-            let a_pos = a.position, b_pos = b.position;
+            let a_pos = a.get_global_position(), b_pos = b.get_global_position();
             let a_points = a._shape.calc_points, b_points = b._shape.calc_points;
             let i = 0;
             // If any of the edge normals of A is a separating axis, no intersection.
