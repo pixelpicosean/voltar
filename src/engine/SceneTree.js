@@ -88,8 +88,6 @@ export default class SceneTree {
     init(settings) {
         this._settings = Object.assign(this._settings, DefaultSettings, settings);
 
-        this.change_scene_to(this._settings.application.main_scene);
-
         window.addEventListener('load', this._initialize, false);
         document.addEventListener('DOMContentLoaded', this._initialize, false);
     }
@@ -348,7 +346,13 @@ export default class SceneTree {
         window.addEventListener('orientationchange', on_window_resize, false);
 
         // Resize for the first tiem
-        setTimeout(on_window_resize, 1);
+        setTimeout(() => {
+            // Resize window for the first time
+            on_window_resize();
+
+            // Boot the first scene
+            this.change_scene_to(this._settings.application.main_scene);
+        }, 1);
 
         // Init input
         this.input._init(this.viewport);

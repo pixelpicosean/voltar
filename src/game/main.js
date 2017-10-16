@@ -1,7 +1,9 @@
 import * as v from 'engine';
 
-import Boot from 'game/boot/scene';
+import Boot from 'game/boot';
 
+
+v.loader.add('media/04b03.fnt');
 
 v.scene_tree.init({
     application: {
