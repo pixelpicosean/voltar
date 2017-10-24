@@ -44,6 +44,8 @@ export default class Node2D extends EventEmitter
         this.is_queued_for_deletion = false;
 
         this.idle_process = false;
+        this.is_physics_object = false;
+        this._physics_children_count = 0;
 
         // TODO: need to create Transform from factory
         /**
@@ -875,6 +877,10 @@ export default class Node2D extends EventEmitter
         // ensure child transform will be recalculated
         child.transform._parentID = -1;
 
+        if (child.is_physics_object) {
+            this._physics_children_count += 1;
+        }
+
         this.children.push(child);
 
         // add to name hash
@@ -1032,6 +1038,10 @@ export default class Node2D extends EventEmitter
 
         child.parent = null;
 
+        if (child.is_physics_object) {
+            this._physics_children_count -= 1;
+        }
+
         // ensure child transform will be recalculated
         child.transform._parentID = -1;
         remove_items(this.children, index, 1);
@@ -1067,6 +1077,10 @@ export default class Node2D extends EventEmitter
         child.scene_tree = null;
         child.transform._parentID = -1;
         remove_items(this.children, index, 1);
+
+        if (child.is_physics_object) {
+            this._physics_children_count -= 1;
+        }
 
         // remove from name hash
         if (child.name.length > 0) {
@@ -1109,6 +1123,10 @@ export default class Node2D extends EventEmitter
                 if (removed[i].transform)
                 {
                     removed[i].transform._parentID = -1;
+                }
+
+                if (removed[i].is_physics_object) {
+                    this._physics_children_count -= 1;
                 }
 
                 // remove from name hash

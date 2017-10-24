@@ -235,7 +235,9 @@ export default class PhysicsServer {
         this.checks = Object.create(null);
         this.collision_checks = 0;
 
-        this._test_node(node);
+        if ((node.is_physics_object && node._shape) || node._physics_children_count > 0) {
+            this._test_node(node);
+        }
 
         // Recycle arrays in the hash
         for (let i in this.hash) {
@@ -298,9 +300,15 @@ export default class PhysicsServer {
     }
 
     _test_node(node) {
-        if (node.type !== 'Area2D' && node.type !== 'PhysicsBody2D') {
-            for (let i = 0; i < node.children.length; i++) {
-                this._test_node(node.children[i]);
+        if (!node.is_physics_object || !node._shape) {
+            if (node._physics_children_count > 0) {
+                let i = 0, c;
+                for (i = 0; i < node.children.length; i++) {
+                    c = node.children[i];
+                    if ((c.is_physics_object && c._shape) || c._physics_children_count > 0) {
+                        this._test_node(c);
+                    }
+                }
             }
             return;
         }
