@@ -117,8 +117,6 @@ export default class TilemapScene extends v.Node2D {
             [  1,  1,  1,  1,  1,  1,  1,  1 ],
         ];
 
-        this.add_child(new v.Sprite(new v.Texture(v.VideoBaseTexture.from_url('http://www.goodboydigital.com/pixijs/examples/deus/testVideo.mp4'))));
-
         const t = new v.BackgroundMap(64, 64, data, 'collisiontiles');
         t.scale.set(0.5);
         this.add_child(t);
