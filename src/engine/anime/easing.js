@@ -1,7 +1,5 @@
 /**
  * Easing and interpolation functions for variable lerping.
- *
- * @module engine/anime/easing
  */
 
 /**
@@ -9,20 +7,30 @@
  */
 export const Easing = {
     Linear: {
+        /**
+         * @param {number} k
+         */
         None: function(k) {
             return k;
         },
     },
 
     Quadratic: {
+        /**
+         * @param {number} k
+         */
         In: function(k) {
             return k * k;
         },
-
+        /**
+         * @param {number} k
+         */
         Out: function(k) {
             return k * (2 - k);
         },
-
+        /**
+         * @param {number} k
+         */
         InOut: function(k) {
             if ((k *= 2) < 1) {return 0.5 * k * k;}
             return -0.5 * (--k * (k - 2) - 1);
@@ -30,14 +38,21 @@ export const Easing = {
     },
 
     Cubic: {
+        /**
+         * @param {number} k
+         */
         In: function(k) {
             return k * k * k;
         },
-
+        /**
+         * @param {number} k
+         */
         Out: function(k) {
             return --k * k * k + 1;
         },
-
+        /**
+         * @param {number} k
+         */
         InOut: function(k) {
             if ((k *= 2) < 1) {return 0.5 * k * k * k;}
             return 0.5 * ((k -= 2) * k * k + 2);
@@ -45,14 +60,21 @@ export const Easing = {
     },
 
     Quartic: {
+        /**
+         * @param {number} k
+         */
         In: function(k) {
             return k * k * k * k;
         },
-
+        /**
+         * @param {number} k
+         */
         Out: function(k) {
             return 1 - (--k * k * k * k);
         },
-
+        /**
+         * @param {number} k
+         */
         InOut: function(k) {
             if ((k *= 2) < 1) {return 0.5 * k * k * k * k;}
             return -0.5 * ((k -= 2) * k * k * k - 2);
@@ -60,14 +82,21 @@ export const Easing = {
     },
 
     Quintic: {
+        /**
+         * @param {number} k
+         */
         In: function(k) {
             return k * k * k * k * k;
         },
-
+        /**
+         * @param {number} k
+         */
         Out: function(k) {
             return --k * k * k * k * k + 1;
         },
-
+        /**
+         * @param {number} k
+         */
         InOut: function(k) {
             if ((k *= 2) < 1) {return 0.5 * k * k * k * k * k;}
             return 0.5 * ((k -= 2) * k * k * k * k + 2);
@@ -75,28 +104,42 @@ export const Easing = {
     },
 
     Sinusoidal: {
+        /**
+         * @param {number} k
+         */
         In: function(k) {
             return 1 - Math.cos(k * Math.PI / 2);
         },
-
+        /**
+         * @param {number} k
+         */
         Out: function(k) {
             return Math.sin(k * Math.PI / 2);
         },
-
+        /**
+         * @param {number} k
+         */
         InOut: function(k) {
             return 0.5 * (1 - Math.cos(Math.PI * k));
         },
     },
 
     Exponential: {
+        /**
+         * @param {number} k
+         */
         In: function(k) {
             return k === 0 ? 0 : Math.pow(1024, k - 1);
         },
-
+        /**
+         * @param {number} k
+         */
         Out: function(k) {
             return k === 1 ? 1 : 1 - Math.pow(2, -10 * k);
         },
-
+        /**
+         * @param {number} k
+         */
         InOut: function(k) {
             if (k === 0) {return 0;}
             if (k === 1) {return 1;}
@@ -106,14 +149,21 @@ export const Easing = {
     },
 
     Circular: {
+        /**
+         * @param {number} k
+         */
         In: function(k) {
             return 1 - Math.sqrt(1 - k * k);
         },
-
+        /**
+         * @param {number} k
+         */
         Out: function(k) {
             return Math.sqrt(1 - (--k * k));
         },
-
+        /**
+         * @param {number} k
+         */
         InOut: function(k) {
             if ((k *= 2) < 1) {return -0.5 * (Math.sqrt(1 - k * k) - 1);}
             return 0.5 * (Math.sqrt(1 - (k -= 2) * k) + 1);
@@ -121,6 +171,9 @@ export const Easing = {
     },
 
     Elastic: {
+        /**
+         * @param {number} k
+         */
         In: function(k) {
             var s, a = 0.1,
                 p = 0.4;
@@ -133,7 +186,9 @@ export const Easing = {
             else {s = p * Math.asin(1 / a) / (2 * Math.PI);}
             return -(a * Math.pow(2, 10 * (k -= 1)) * Math.sin((k - s) * (2 * Math.PI) / p));
         },
-
+        /**
+         * @param {number} k
+         */
         Out: function(k) {
             var s, a = 0.1,
                 p = 0.4;
@@ -146,7 +201,9 @@ export const Easing = {
             else {s = p * Math.asin(1 / a) / (2 * Math.PI);}
             return (a * Math.pow(2, -10 * k) * Math.sin((k - s) * (2 * Math.PI) / p) + 1);
         },
-
+        /**
+         * @param {number} k
+         */
         InOut: function(k) {
             var s, a = 0.1,
                 p = 0.4;
@@ -163,16 +220,23 @@ export const Easing = {
     },
 
     Back: {
+        /**
+         * @param {number} k
+         */
         In: function(k) {
             var s = 1.70158;
             return k * k * ((s + 1) * k - s);
         },
-
+        /**
+         * @param {number} k
+         */
         Out: function(k) {
             var s = 1.70158;
             return --k * k * ((s + 1) * k + s) + 1;
         },
-
+        /**
+         * @param {number} k
+         */
         InOut: function(k) {
             var s = 1.70158 * 1.525;
             if ((k *= 2) < 1) {return 0.5 * (k * k * ((s + 1) * k - s));}
@@ -181,10 +245,15 @@ export const Easing = {
     },
 
     Bounce: {
+        /**
+         * @param {number} k
+         */
         In: function(k) {
             return 1 - Easing.Bounce.Out(1 - k);
         },
-
+        /**
+         * @param {number} k
+         */
         Out: function(k) {
             if (k < (1 / 2.75)) {
                 return 7.5625 * k * k;
@@ -199,7 +268,9 @@ export const Easing = {
                 return 7.5625 * (k -= (2.625 / 2.75)) * k + 0.984375;
             }
         },
-
+        /**
+         * @param {number} k
+         */
         InOut: function(k) {
             if (k < 0.5) {return Easing.Bounce.In(k * 2) * 0.5;}
             return Easing.Bounce.Out(k * 2 - 1) * 0.5 + 0.5;

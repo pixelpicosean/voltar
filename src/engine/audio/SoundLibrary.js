@@ -11,12 +11,10 @@ import * as webaudio from "./webaudio";
 /**
  * Contains all of the functionality for using the **pixi-sound** library.
  * This is deisnged to play audio with WebAudio and fallback to HTML5.
- * @namespace v.sound
  */
 /**
  * @description Manages the playback of sounds.
  * @class SoundLibrary
- * @memberof v.sound
  * @private
  */
 export default class SoundLibrary {
@@ -28,8 +26,7 @@ export default class SoundLibrary {
      * Re-initialize the sound library, this will
      * recreate the AudioContext. If there's a hardware-failure
      * call `close` and then `init`.
-     * @method v.sound#init
-     * @return {v.sound} Sound instance
+     * @return {SoundLibrary}
      */
     init() {
         if (this.supported) {
@@ -42,17 +39,14 @@ export default class SoundLibrary {
     }
     /**
      * The global context to use.
-     * @name v.sound#context
      * @readonly
-     * @type {v.sound.IMediaContext}
      */
     get context() {
         return this._context;
     }
     /**
      * Initialize the singleton of the library
-     * @method v.sound.SoundLibrary.init
-     * @return {v.sound}
+     * @return {Sound}
      */
     static init(loaders) {
         if (SoundLibrary.instance) {
@@ -78,8 +72,7 @@ export default class SoundLibrary {
      * v.sound.filtersAll = [
      *     new v.sound.filters.StereoFilter(-1)
      * ];
-     * @name v.sound#filtersAll
-     * @type {v.sound.filters.Filter[]}
+     * @type {Array<filters.Filter>}
      */
     get filtersAll() {
         if (!this.useLegacy) {
@@ -94,7 +87,6 @@ export default class SoundLibrary {
     }
     /**
      * `true` if WebAudio is supported on the current browser.
-     * @name v.sound#supported
      * @readonly
      * @type {boolean}
      */
@@ -129,10 +121,9 @@ export default class SoundLibrary {
     }
     /**
      * Internal methods for getting the options object
-     * @method v.sound#_getOptions
      * @private
      * @param {string|ArrayBuffer|HTMLAudioElement|Object} source The source options
-     * @param {Object} [overrides] Override default options
+     * @param {any} [overrides] Override default options
      * @return {Object} The construction options
      */
     _getOptions(source, overrides) {
@@ -150,7 +141,6 @@ export default class SoundLibrary {
     }
     /**
      * Do not use WebAudio, force the use of legacy. This **must** be called before loading any files.
-     * @name v.sound#useLegacy
      * @type {boolean}
      */
     get useLegacy() {
@@ -168,9 +158,8 @@ export default class SoundLibrary {
     }
     /**
      * Removes a sound by alias.
-     * @method v.sound#remove
-     * @param {String} alias The sound alias reference.
-     * @return {v.sound} Instance for chaining.
+     * @param {string} alias The sound alias reference.
+     * @return {SoundLibrary}
      */
     remove(alias) {
         this.exists(alias, true);
@@ -180,90 +169,81 @@ export default class SoundLibrary {
     }
     /**
      * Set the global volume for all sounds. To set per-sound volume see {@link v.sound#volume}.
-     * @name v.sound#volumeAll
      * @type {number}
      */
-    get volumeAll() {
+    get volume_all() {
         return this._context.volume;
     }
-    set volumeAll(volume) {
+    set volume_all(volume) {
         this._context.volume = volume;
         this._context.refresh();
     }
     /**
      * Set the global speed for all sounds. To set per-sound speed see {@link v.sound#speed}.
-     * @name v.sound#speedAll
      * @type {number}
      */
-    get speedAll() {
+    get speed_all() {
         return this._context.speed;
     }
-    set speedAll(speed) {
+    set speed_all(speed) {
         this._context.speed = speed;
         this._context.refresh();
     }
     /**
      * Toggle paused property for all sounds.
-     * @method v.sound#togglePauseAll
      * @return {boolean} `true` if all sounds are paused.
      */
-    togglePauseAll() {
-        return this._context.togglePause();
+    toggle_pause_all() {
+        return this._context.toggle_pause();
     }
     /**
      * Pauses any playing sounds.
-     * @method v.sound#pauseAll
-     * @return {v.sound} Instance for chaining.
+     * @return {SoundLibrary} Instance for chaining.
      */
-    pauseAll() {
+    pause_all() {
         this._context.paused = true;
         this._context.refresh();
         return this;
     }
     /**
      * Resumes any sounds.
-     * @method v.sound#resumeAll
-     * @return {v.sound} Instance for chaining.
+     * @return {SoundLibrary} Instance for chaining.
      */
-    resumeAll() {
+    resume_all() {
         this._context.paused = false;
         this._context.refresh();
         return this;
     }
     /**
      * Toggle muted property for all sounds.
-     * @method v.sound#toggleMuteAll
      * @return {boolean} `true` if all sounds are muted.
      */
-    toggleMuteAll() {
+    toggle_mute_all() {
         return this._context.toggleMute();
     }
     /**
      * Mutes all playing sounds.
-     * @method v.sound#muteAll
-     * @return {v.sound} Instance for chaining.
+     * @return {SoundLibrary}
      */
-    muteAll() {
+    mute_all() {
         this._context.muted = true;
         this._context.refresh();
         return this;
     }
     /**
      * Unmutes all playing sounds.
-     * @method v.sound#unmuteAll
-     * @return {v.sound} Instance for chaining.
+     * @return {SoundLibrary}
      */
-    unmuteAll() {
+    unmute_all() {
         this._context.muted = false;
         this._context.refresh();
         return this;
     }
     /**
      * Stops and removes all sounds. They cannot be used after this.
-     * @method v.sound#removeAll
-     * @return {v.sound} Instance for chaining.
+     * @return {SoundLibrary}
      */
-    removeAll() {
+    remove_all() {
         for (const alias in this._sounds) {
             this._sounds[alias].destroy();
             delete this._sounds[alias];
@@ -272,10 +252,9 @@ export default class SoundLibrary {
     }
     /**
      * Stops all sounds.
-     * @method v.sound#stopAll
-     * @return {v.sound} Instance for chaining.
+     * @return {SoundLibrary}
      */
-    stopAll() {
+    stop_all() {
         for (const alias in this._sounds) {
             this._sounds[alias].stop();
         }
@@ -283,8 +262,8 @@ export default class SoundLibrary {
     }
     /**
      * Checks if a sound by alias exists.
-     * @method v.sound#exists
-     * @param {String} alias Check for alias.
+     * @param {string} alias Check for alias.
+     * @param {boolean} [assert] Assert to console or not.
      * @return {boolean} true if the sound exists.
      */
     exists(alias, assert = false) {
@@ -296,9 +275,8 @@ export default class SoundLibrary {
     }
     /**
      * Find a sound by alias.
-     * @method v.sound#find
-     * @param {String} alias The sound alias reference.
-     * @return {v.sound.Sound} Sound object.
+     * @param {string} alias The sound alias reference.
+     * @return {Sound} Sound object.
      */
     find(alias) {
         this.exists(alias, true);
@@ -306,16 +284,14 @@ export default class SoundLibrary {
     }
     /**
      * Plays a sound.
-     * @method v.sound#play
      * @param {String} alias The sound alias reference.
      * @param {String} sprite The alias of the sprite to play.
-     * @return {v.sound.IMediaInstance|null} The sound instance, this cannot be reused
+     * @return {any} The sound instance, this cannot be reused
      *         after it is done playing. Returns `null` if the sound has not yet loaded.
      */
     /**
      * Plays a sound.
-     * @method v.sound#play
-     * @param {String} alias The sound alias reference.
+     * @param {string} alias The sound alias reference.
      * @param {Object|Function} options The options or callback when done.
      * @param {Function} [options.complete] When completed.
      * @param {Function} [options.loaded] If not already preloaded, callback when finishes load.
@@ -323,7 +299,7 @@ export default class SoundLibrary {
      * @param {number} [options.end] End time offset.
      * @param {number} [options.speed] Override default speed, default to the Sound's speed setting.
      * @param {boolean} [options.loop] Override default loop, default to the Sound's loop setting.
-     * @return {v.sound.IMediaInstance|Promise<v.sound.IMediaInstance>} The sound instance,
+     * @return {any} The sound instance,
      *        this cannot be reused after it is done playing. Returns a Promise if the sound
      *        has not yet loaded.
      */
@@ -332,35 +308,31 @@ export default class SoundLibrary {
     }
     /**
      * Stops a sound.
-     * @method v.sound#stop
-     * @param {String} alias The sound alias reference.
-     * @return {v.sound.Sound} Sound object.
+     * @param {string} alias The sound alias reference.
+     * @return {Sound} Sound object.
      */
     stop(alias) {
         return this.find(alias).stop();
     }
     /**
      * Pauses a sound.
-     * @method v.sound#pause
-     * @param {String} alias The sound alias reference.
-     * @return {v.sound.Sound} Sound object.
+     * @param {string} alias The sound alias reference.
+     * @return {Sound} Sound object.
      */
     pause(alias) {
         return this.find(alias).pause();
     }
     /**
      * Resumes a sound.
-     * @method v.sound#resume
-     * @param {String} alias The sound alias reference.
-     * @return {v.sound} Instance for chaining.
+     * @param {string} alias The sound alias reference.
+     * @return {Sound} Instance for chaining.
      */
     resume(alias) {
         return this.find(alias).resume();
     }
     /**
      * Get or set the volume for a sound.
-     * @method v.sound#volume
-     * @param {String} alias The sound alias reference.
+     * @param {string} alias The sound alias reference.
      * @param {number} [volume] Optional current volume to set.
      * @return {number} The current volume.
      */
@@ -373,8 +345,7 @@ export default class SoundLibrary {
     }
     /**
      * Get or set the speed for a sound.
-     * @method v.sound#speed
-     * @param {String} alias The sound alias reference.
+     * @param {string} alias The sound alias reference.
      * @param {number} [speed] Optional current speed to set.
      * @return {number} The current speed.
      */
@@ -387,8 +358,7 @@ export default class SoundLibrary {
     }
     /**
      * Get the length of a sound in seconds.
-     * @method v.sound#duration
-     * @param {String} alias The sound alias reference.
+     * @param {string} alias The sound alias reference.
      * @return {number} The current duration in seconds.
      */
     duration(alias) {
@@ -398,11 +368,10 @@ export default class SoundLibrary {
      * Closes the sound library. This will release/destroy
      * the AudioContext(s). Can be used safely if you want to
      * initialize the sound library later. Use `init` method.
-     * @method v.sound#close
-     * @return {v.sound}
+     * @return {SoundLibrary}
      */
     close() {
-        this.removeAll();
+        this.remove_all();
         this._sounds = null;
         if (this._webAudioContext) {
             this._webAudioContext.destroy();

@@ -21,8 +21,7 @@ import Texture from '../textures/Texture';
  * http://www.bmglyph.com/ for mac.
  *
  * @class
- * @extends V.Node2D
- * @memberof V.extras
+ * @extends Node2D
  */
 export default class BitmapText extends Node2D
 {
@@ -443,6 +442,9 @@ export default class BitmapText extends Node2D
         return this._text;
     }
 
+    /**
+     * @param {string}
+     */
     set text(value) // eslint-disable-line require-jsdoc
     {
         value = value.toString() || ' ';

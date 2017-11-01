@@ -7,6 +7,9 @@ export default class AnimationTest extends v.Node2D {
     }
 
     _enter_tree() {
+        /**
+         * @type {v.BitmapText}
+         */
         this.label = this.add_child(new v.BitmapText('', {
             font: '32px 04b03',
         }));

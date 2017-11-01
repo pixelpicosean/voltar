@@ -21,7 +21,11 @@ const BOOL = 1;
 const STRING = 2;
 const VECTOR2 = 3;
 
-
+/** 
+ * @param {any} obj
+ * @param {string} key
+ * @returns {any}
+ */
 function get_property(obj, key) {
     let idx = 0, res = obj;
     while (idx < key.length) {
@@ -30,6 +34,11 @@ function get_property(obj, key) {
     }
     return res;
 }
+/** 
+ * @param {any} obj
+ * @param {string} key
+ * @param {any} value
+ */
 function set_property(obj, key, value) {
     let idx = 0, res = obj;
     while (idx < key.length - 1) {
@@ -38,6 +47,11 @@ function set_property(obj, key, value) {
     }
     res[key[key.length - 1]] = value;
 }
+/**
+ * @param {any} obj 
+ * @param {string} key 
+ * @param {{x:number,y:number}} value 
+ */
 function set_vec_property(obj, key, value) {
     let idx = 0, res = obj;
     while (idx < key.length - 1) {
@@ -51,20 +65,33 @@ function set_vec_property(obj, key, value) {
 
 const _tmp_vec2 = new Vector();
 
+/**
+ * @type {Array<Vector>}
+ */
 const VECTOR_ARR = [];
+/**
+ * @param {number} x 
+ * @param {number} y 
+ * @returns {Vector}
+ */
 const create_vector = (x, y) => {
     let vec = VECTOR_ARR.pop();
     if (!vec) vec = new Vector(x, y);
     vec.set(x, y);
     return vec;
 };
-window.VECTOR_ARR = VECTOR_ARR;
 
 
+/**
+ * @private
+ */
 class InterpolateData {
     constructor() {
         this._init();
     }
+    /**
+     * @returns {InterpolateData}
+     */
     _init() {
         this.active = false;
         this.finish = false;
@@ -95,7 +122,13 @@ class InterpolateData {
     }
 };
 
+/**
+ * @type {Array<InterpolateData>}
+ */
 const pool = [];
+/**
+ * @returns {InterpolateData}
+ */
 const create_interpolate = () => {
     let data = pool.pop();
     if (!data) data = new InterpolateData();
@@ -106,12 +139,10 @@ const create_interpolate = () => {
 
 /**
  * @class Tween
- * @extends {EventEmitter}
  */
 export default class Tween {
     /**
      * @constructor
-     * @param {object} context Object to apply this tween to.
      */
     constructor() {
         this.tween_completed = new Signal();
@@ -129,16 +160,30 @@ export default class Tween {
         this.interpolates = [];
     }
 
+    /**
+     * @param {boolean} active
+     */
     set_active(active) {
         this.active = active;
     }
+    /**
+     * @param {number} scale
+     */
     set_speed_scale(scale) {
         this.speed_scale = scale;
     }
 
+    /**
+     * Start the tween
+     */
     start() {
         this.active = true;
     }
+    /**
+     * @param {any} obj Target
+     * @param {string} key Key
+     * @returns {Tween}
+     */
     reset(obj, key) {
         let i = 0, data;
         for (i = 0; i < this.interpolates.length; i++) {
@@ -153,6 +198,9 @@ export default class Tween {
         }
         return this;
     }
+    /**
+     * @returns {Tween}
+     */
     reset_all() {
         let i = 0, data;
         for (i = 0; i < this.interpolates.length; i++) {
@@ -166,6 +214,11 @@ export default class Tween {
         return this;
     }
 
+    /**
+     * @param {any} obj Target
+     * @param {string} key Key
+     * @returns {Tween}
+     */
     stop(obj, key) {
         let i = 0, data;
         for (i = 0; i < this.interpolates.length; i++) {
@@ -185,7 +238,11 @@ export default class Tween {
         }
         return this;
     }
-
+    /**
+     * @param {any} obj Target
+     * @param {string} key Key
+     * @returns {Tween}
+     */
     resume(obj, key) {
         this.active = true;
 
@@ -208,6 +265,12 @@ export default class Tween {
         return this;
     }
 
+    /**
+     * @param {any} obj Target
+     * @param {string} key Key
+     * @param {boolean} [first_only]
+     * @returns {Tween}
+     */
     remove(obj, key, first_only = true) {
         let i = 0, data;
         for (i = 0; i < this.interpolates.length; i++) {
@@ -233,6 +296,10 @@ export default class Tween {
         return this;
     }
 
+    /**
+     * @param {number} p_time
+     * @returns {Tween}
+     */
     seek(p_time) {
         let i = 0, data;
         for (i = 0; i < this.interpolates.length; i++) {
@@ -264,6 +331,9 @@ export default class Tween {
         return this;
     }
 
+    /**
+     * @returns {number}
+     */
     tell() {
         let pos = 0, data;
         for (let i = 0; i < this.interpolates.length; i++) {
@@ -272,6 +342,9 @@ export default class Tween {
         }
         return pos;
     }
+    /**
+     * @returns {number}
+     */
     get_runtime() {
         let runtime = 0, t = 0, data;
         for (let i = 0; i < this.interpolates.length; i++) {
@@ -282,6 +355,17 @@ export default class Tween {
         return runtime;
     }
 
+    /**
+     * Animate a property of an object
+     * @param {any} obj Target
+     * @param {string} property Property to be animated
+     * @param {number|boolean|string|{x:number,y:number}} initial_val Initial value
+     * @param {number|boolean|string|{x:number,y:number}} final_val Initial value
+     * @param {number} duration Duration of this animation
+     * @param {string} p_easing Easing function
+     * @param {number} [delay] Time before start
+     * @returns {boolean}
+     */
     interpolate_property(obj, property, initial_val, final_val, duration, p_easing, delay = 0) {
         let easing = p_easing.split('.');
         let easing_func = Easing[easing[0]][easing[1]];
@@ -597,6 +681,9 @@ export default class Tween {
         this.tween_step.detach_all();
     }
 
+    /**
+     * @private
+     */
     _init() {
         this.is_removed = false;
 
@@ -604,17 +691,16 @@ export default class Tween {
         this.repeat = false;
         this.speed_scale = 1;
 
-        if (this.val_type === VECTOR2) {
-            VECTOR_ARR.push(this.initial_val);
-            VECTOR_ARR.push(this.delta_val);
-            VECTOR_ARR.push(this.final_val);
-        }
-        this.initial_val = undefined;
-        this.delta_val = undefined;
-        this.final_val = undefined;
+        this.initial_val = null;
+        this.delta_val = null;
+        this.final_val = null;
 
         return this;
     }
+    /**
+     * @private
+     * @param {number} p_delta
+     */
     _propagate_process(p_delta) {
         if (this.speed_scale === 0) {
             return;
@@ -694,6 +780,10 @@ export default class Tween {
         }
     }
 
+    /**
+     * @private
+     * @param {InterpolateData} p_data
+     */
     _get_initial_val(p_data) {
         switch (p_data.type) {
             case INTER_PROPERTY:
@@ -719,11 +809,15 @@ export default class Tween {
                     p_data.initial_val = initial_val;
                 }
                 return initial_val;
-            } break;
+            }
         }
 
         return p_data.delta_val;
     }
+    /**
+     * @private
+     * @param {InterpolateData} p_data
+     */
     _get_delta_val(p_data) {
         switch (p_data.type) {
             case INTER_PROPERTY:
@@ -760,6 +854,13 @@ export default class Tween {
 
         return p_data.initial_val;
     }
+    /**
+     * @private
+     * @param {number|string|boolean|{x:number,y:number}} initial_val
+     * @param {number|string|boolean|{x:number,y:number}} final_val
+     * @param {InterpolateData} data
+     * @returns {boolean}
+     */
     _calc_delta_val(initial_val, final_val, data) {
         switch (data.val_type) {
             case BOOL:
@@ -779,6 +880,11 @@ export default class Tween {
         return true;
     }
 
+    /**
+     * @private
+     * @param {InterpolateData} data 
+     * @returns {number|string|boolean|{x:number,y:number}}
+     */
     _run_equation(data) {
         let initial_val = this._get_initial_val(data);
         let delta_val = this._get_delta_val(data);
@@ -801,6 +907,11 @@ export default class Tween {
                 return undefined;
         }
     }
+    /**
+     * @private
+     * @param {InterpolateData} data 
+     * @returns {boolean}
+     */
     _apply_tween_value(data, value) {
         switch (data.type) {
             case INTER_PROPERTY:
