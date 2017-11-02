@@ -1,4 +1,4 @@
-import { CharacterMap, Animation } from './Model';
+import { CharacterMap, Animation, Folder } from './Model';
 import { FrameDataCalculator } from './FrameData';
 
 export class TextureProvider {
@@ -10,6 +10,22 @@ export class TextureProvider {
         this.texture_tabel = {};
     }
     /**
+     * @param {Array<Folder>} folders 
+     */
+    load(folders) {
+        let folder_map = null;
+        for (let folder of folders) {
+            folder_map = this.texture_tabel[folder.id];
+            if (!folder_map) {
+                folder_map = this.texture_tabel[folder.id] = {};
+            }
+
+            for (let file of folder.file) {
+                folder_map[file.id] = file.name;
+            }
+        }
+    }
+    /**
      * Get texture with folder and file name
      * @param {number} folder
      * @param {number} file
@@ -17,19 +33,6 @@ export class TextureProvider {
      */
     get(folder, file) {
         return this.texture_tabel[folder][file];
-    }
-    /**
-     * Set texture
-     * @param {number} folder
-     * @param {number} file
-     * @param {string} texture
-     */
-    set(folder, file, texture) {
-        let folder_tabel = this.texture_tabel[folder];
-        if (!folder_tabel) {
-            this.texture_tabel[folder] = folder_tabel = {};
-        }
-        folder_tabel[file] = texture;
     }
 }
 

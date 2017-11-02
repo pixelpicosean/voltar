@@ -117,6 +117,9 @@ const adjust_time = (target_time, key_a, key_b, anim_length) => {
 
 export class FrameData {
     constructor() {
+        /**
+         * @type {Array<Obj>}
+         */
         this.sprite_data = [];
     }
 
@@ -155,7 +158,7 @@ export class FrameDataCalculator {
 
         let adjusted_time = adjust_time(target_time, key_a, key_b, animation.length);
 
-        let bone_infos = this.get_bone_infos(key_a, animation, adjust_time, parent_info);
+        let bone_infos = this.get_bone_infos(key_a, animation, adjusted_time, parent_info);
 
         if (!key_a.object_ref) {
             // TODO: recycle bone_infos

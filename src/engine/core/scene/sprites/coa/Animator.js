@@ -1,5 +1,6 @@
 import Signal from 'engine/Signal';
 import Sprite from '../Sprite';
+import Node2D from '../../Node2D';
 
 import { Entity, Animation, Obj } from './Model';
 import { FrameData } from './FrameData';
@@ -7,23 +8,22 @@ import { TextureProvider, FrameDataProvider } from './Provider';
 
 
 export default class Animator {
-    get progress() {
-        return this.time / this.length;
-    }
-    set progress(value) {
-        this.time = value * this.length;
-    }
-
     /**
-     * @param {Entity} entity 
+     * @param {Entity} entity
+     * @param {Node2D} node
      */
-    constructor(entity) {
+    constructor(entity, node) {
         this.animation_finished = new Signal();
 
         /**
          * @type {Entity}
          */
         this.entity = entity;
+
+        /**
+         * @type {Node2D}
+         */
+        this.node = node;
 
         /**
          * @type {Animation}
@@ -74,6 +74,19 @@ export default class Animator {
     }
 
     /**
+     * @returns {number}
+     */
+    get_progress() {
+        return this.time / this.length;
+    }
+    /**
+     * @param {number} value 
+     */
+    set_progress(value) {
+        this.time = value * this.length;
+    }
+
+    /**
      * @returns {Array<string>}
      */
     get_animations() {
@@ -85,7 +98,7 @@ export default class Animator {
      * @param {string} name 
      */
     play(name) {
-        this.progress = 0;
+        this.set_progress(0);
 
         this.current_animation = this.animations[name];
         this.name = name;
@@ -135,7 +148,7 @@ export default class Animator {
             this._transition_time += Math.abs(elapsed);
             this._factor = this._transition_time / this._total_transition_time;
             if (this._transition_time >= this._total_transition_time) {
-                let progress = this.progress;
+                // let progress = this.get_progress();
                 this.play(this.next_animation.name);
                 this.next_animation = null;
             }
@@ -174,32 +187,37 @@ export default class Animator {
      * @param {number} delta 
      */
     animate(delta) {
-        let frame_data = this.data_provider.get_frame_data(this.time, delta, this._factor, this.current_animation, this.next_animation);
+        let objs = this.data_provider.get_frame_data(this.time, delta, this._factor, this.current_animation, this.next_animation)
+            .sprite_data;
 
-        /**
-         * @type {number}
-         */
-        let i = 0;
+        if (this.node.children.length < objs.length) {
+            let len = objs.length - this.node.children.length;
+            for (let i = 0; i < len; i++) {
+                // TODO: recycle
+                this.node.add_child(new Sprite(undefined));
+            }
+        }
+        else {
+            // TODO: remove unused sprites
+        }
+
         /**
          * @type {Obj}
          */
-        let info;
+        let obj;
         /**
          * @type {Sprite}
          */
-        let sprite;
-        for (i = 0; i < frame_data.sprite_data.length; i++) {
-            info = frame_data.sprite_data[i];
-            sprite = this.sprite_provider.get(info.folder, info.file);
-            if (sprite) {
-                this.apply_sprite_transform(sprite, info);
-            }
+        let spr;
+        for (let i = 0; i < objs.length; i++) {
+            obj = objs[i];
+            spr = this.node.children[i];
+            spr.texture = this.sprite_provider.get(obj.folder, obj.file);
+            spr.x = obj.x;
+            spr.y = obj.y;
+            spr.rotation = obj.angle / 180 * Math.PI;
+            spr.scale.set(obj.scale_x, -obj.scale_y);
+            spr.alpha = obj.a;
         }
     }
-
-    /**
-     * @param {Sprite} sprite 
-     * @param {Obj} info
-     */
-    apply_sprite_transform(sprite, info) {}
 }

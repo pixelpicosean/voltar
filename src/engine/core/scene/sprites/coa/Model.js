@@ -308,6 +308,31 @@ export class Key extends Element {
          */
         this.c4 = 0;
     }
+    /**
+     * @returns {Key}
+     */
+    load(data) {
+        super.load(data);
+        if (data.time !== undefined) {
+            this.time = data.time;
+        }
+        if (data.curve_type !== undefined) {
+            this.curve_type = data.curve_type;
+        }
+        if (data.c1 !== undefined) {
+            this.c1 = data.c1;
+        }
+        if (data.c2 !== undefined) {
+            this.c2 = data.c2;
+        }
+        if (data.c3 !== undefined) {
+            this.c3 = data.c3;
+        }
+        if (data.c4 !== undefined) {
+            this.c4 = data.c4;
+        }
+        return this;
+    }
 }
 
 export class MainlineKey extends Key {
@@ -412,7 +437,9 @@ export class Timeline extends Element {
      */
     load(data) {
         super.load(data);
-        this.object_type = data.object_type;
+        if (data.object_type) {
+            this.object_type = data.object_type;
+        }
         this.obj = data.obj;
         let i = 0, list = data.key;
         for (i = 0; i < list.length; i++) {
@@ -493,12 +520,24 @@ export class Spatial {
      * @returns {Spatial}
      */
     load(data) {
-        this.x = data.x;
-        this.y = data.y;
-        this.angle = data.angle;
-        this.scale_x = data.scale_x;
-        this.scale_y = data.scale_y;
-        this.a = data.a;
+        if (data.x !== undefined) {
+            this.x = data.x;
+        }
+        if (data.y !== undefined) {
+            this.y = data.y;
+        }
+        if (data.angle !== undefined) {
+            this.angle = data.angle;
+        }
+        if (data.scale_x !== undefined) {
+            this.scale_x = data.scale_x;
+        }
+        if (data.scale_y !== undefined) {
+            this.scale_y = data.scale_y;
+        }
+        if (data.a !== undefined) {
+            this.a = data.a;
+        }
         return this;
     }
     /**
@@ -588,13 +627,27 @@ export class Obj extends Spatial {
      */
     load(data) {
         super.load(data);
-        this.animation = data.animation;
-        this.entity = data.entity;
-        this.folder = data.folder;
-        this.file = data.file;
-        this.pivot_x = data.pivot_x;
-        this.pivot_y = data.pivot_y;
-        this.t = data.t;
+        if (data.animation !== undefined) {
+            this.animation = data.animation;
+        }
+        if (data.entity !== undefined) {
+            this.entity = data.entity;
+        }
+        if (data.folder !== undefined) {
+            this.folder = data.folder;
+        }
+        if (data.file !== undefined) {
+            this.file = data.file;
+        }
+        if (data.pivot_x !== undefined) {
+            this.pivot_x = data.pivot_x;
+        }
+        if (data.pivot_y !== undefined) {
+            this.pivot_y = data.pivot_y;
+        }
+        if (data.t !== undefined) {
+            this.t = data.t;
+        }
         return this;
     }
     /**

@@ -1,7 +1,8 @@
 import * as v from 'engine';
 import { Model } from 'engine/core/scene/sprites/coa/Model';
-import Animator from 'engine/core/scene/sprites/coa/Animator';
+import CoaSprite from 'engine/core/scene/sprites/coa/CoaSprite';
 
+v.loader.add('media/commander.json');
 v.loader.add('cc', 'media/commander/commander.scon');
 
 
@@ -19,15 +20,13 @@ export default class CoaTest extends v.Node2D {
     _ready() {
         let data = JSON.parse(v.loader.resources.cc.data);
         let model = new Model().load(data);
-        this.animator = new Animator(model.entity[0]);
-        this.animator.play('idle');
-        // console.log(model);
+        
+        this.hero = this.add_child(new CoaSprite().load(model, model.entity[0]));
+        this.hero.position.set(100, 150);
+        this.hero.play('idle');
 
         this.set_process(true);
     }
-    _process(delta) {
-        this.animator.update(delta * 1000);
-        this.info.text = `${this.animator.progress.toFixed(2)}`;
-    }
+    _process(delta) {}
     _exit_tree() {}
 }
