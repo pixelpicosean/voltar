@@ -1,5 +1,5 @@
-import { CharacterMap, Animation, Folder } from './Model';
-import { FrameDataCalculator } from './FrameData';
+import { CharacterMap, Animation, Folder, Spatial, Obj } from './Model';
+import Sprite from '../sprites/Sprite';
 
 export class TextureProvider {
     constructor() {
@@ -10,7 +10,7 @@ export class TextureProvider {
         this.texture_tabel = {};
     }
     /**
-     * @param {Array<Folder>} folders 
+     * @param {Array<Folder>} folders
      */
     load(folders) {
         let folder_map = null;
@@ -36,18 +36,52 @@ export class TextureProvider {
     }
 }
 
-export class FrameDataProvider {
+export class ObjectProvider {
     constructor() {
-        this.calculator = new FrameDataCalculator();
+        /**
+         * @type {Array<Spatial>}
+         */
+        this.spatial_pool = [];
+        /**
+         * @type {Array<Obj>}
+         */
+        this.obj_pool = [];
+        /**
+         * @type {Array<Sprite>}
+         */
+        this.spr_pool = [];
     }
-    /**
-     * @param {number} time 
-     * @param {number} delta
-     * @param {number} factor
-     * @param {Animation} first 
-     * @param {Animation} [second] 
-     */
-    get_frame_data(time, delta, factor, first, second = null) {
-        return (!second) ? this.calculator.get_frame_data(first, time, delta) : this.calculator.get_frame_data(first, second, time, delta, factor);
+    put_spatial(spatial) {
+        this.obj_pool.push(spatial);
+    }
+    get_spatial(data) {
+        let spatial = this.spatial_pool.pop();
+        if (!spatial) {
+            spatial = new Spatial();
+        }
+        return spatial.init(data);
+    }
+    put_obj(obj) {
+        this.obj_pool.push(obj);
+    }
+    get_obj(data) {
+        let obj = this.obj_pool.pop();
+        if (!obj) {
+            obj = new Obj();
+        }
+        return obj.init(data);
+    }
+
+    put_spr(spr) {
+        this.spr_pool.push(spr);
+    }
+    get_spr() {
+        let spr = this.spr_pool.pop();
+        if (!spr) {
+            spr = new Sprite(undefined);
+        }
+        return spr;
     }
 }
+
+export const object_provider = new ObjectProvider();

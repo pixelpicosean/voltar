@@ -312,3 +312,5 @@ export class FrameDataCalculator {
         return so;
     }
 }
+
+export const frame_data_calculator = new FrameDataCalculator();

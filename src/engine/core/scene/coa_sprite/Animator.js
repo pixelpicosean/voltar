@@ -3,8 +3,8 @@ import Sprite from '../sprites/Sprite';
 import Node2D from '../Node2D';
 
 import { Entity, Animation, Obj } from './Model';
-import { FrameData } from './FrameData';
-import { TextureProvider, FrameDataProvider } from './Provider';
+import { FrameData, frame_data_calculator } from './FrameData';
+import { TextureProvider, object_provider } from './Provider';
 
 
 export default class Animator {
@@ -55,7 +55,6 @@ export default class Animator {
          */
         this.time = 0;
 
-        this.data_provider = new FrameDataProvider();
         this.sprite_provider = new TextureProvider();
 
         /**
@@ -187,14 +186,27 @@ export default class Animator {
      * @param {number} delta
      */
     animate(delta) {
-        let objs = this.data_provider.get_frame_data(this.time, delta, this._factor, this.current_animation, this.next_animation)
-            .sprite_data;
+        /**
+         * @type {FrameData}
+         */
+        let frame = null;
+        if (!this.next_animation) {
+            frame = frame_data_calculator.get_frame_data(this.current_animation, this.time, delta);
+        }
+        else {
+            frame = frame_data_calculator.get_frame_data_with_blend(this.current_animation, this.next_animation, this.time, delta, this._factor);
+        }
+
+        /**
+         * @type {Array<Obj>}
+         */
+        let objs = frame.sprite_data;
 
         if (this.node.children.length < objs.length) {
             let len = objs.length - this.node.children.length;
             for (let i = 0; i < len; i++) {
                 // TODO: recycle
-                this.node.add_child(new Sprite(undefined));
+                this.node.add_child(object_provider.get_spr());
             }
         }
         else {
@@ -219,5 +231,7 @@ export default class Animator {
             spr.scale.set(obj.scale_x, -obj.scale_y);
             spr.alpha = obj.a;
         }
+
+        // TODO: recycle `objs`
     }
 }
