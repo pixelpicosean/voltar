@@ -447,6 +447,9 @@ export default class SceneTree {
             // Idle update
             // FIX ME: do we need this process method?
             // this.current_scene._process(_process_tmp.real_delta * 0.001);
+            if (this.current_scene._render) {
+                this.current_scene._render(timestamp);
+            }
 
             // Render
             this.visual_server.render(this.viewport);
