@@ -1,4 +1,4 @@
-import Node2D from '../../Node2D';
+import Node2D from '../Node2D';
 import Animator from './Animator';
 import { Entity, Model } from './Model';
 
@@ -16,11 +16,15 @@ export default class CoaSprite extends Node2D {
     }
     /**
      * Load entity data from scon model
-     * @param {Model} model
-     * @param {Entity} entity
+     * @param {string} data key of the animation data
+     * @param {number} entity entity index in the animation data
      */
-    load(model, entity) {
-        this.animator = new Animator(entity, this);
+    load(data, entity) {
+        /**
+         * @type {Model}
+         */
+        let model = Data[data];
+        this.animator = new Animator(model.entity[entity], this);
         this.animator.sprite_provider.load(model.folder);
         return this;
     }
@@ -47,3 +51,5 @@ export default class CoaSprite extends Node2D {
         super._propagate_process(delta);
     }
 }
+
+export const Data = {};

@@ -4,6 +4,7 @@ import EventEmitter from 'eventemitter3';
 import textureParser from './textureParser';
 import spritesheetParser from './spritesheetParser';
 import bitmapFontParser from './bitmapFontParser';
+import coaParser from './coa';
 
 /**
  *
@@ -116,6 +117,8 @@ Loader._pixiMiddleware = [
     spritesheetParser,
     // parse bitmap font data into multiple textures
     bitmapFontParser,
+    // parse spriter scon data
+    coaParser,
 ];
 
 // Add custom extentions

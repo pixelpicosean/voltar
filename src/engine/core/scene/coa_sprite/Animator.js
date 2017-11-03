@@ -1,6 +1,6 @@
 import Signal from 'engine/Signal';
-import Sprite from '../Sprite';
-import Node2D from '../../Node2D';
+import Sprite from '../sprites/Sprite';
+import Node2D from '../Node2D';
 
 import { Entity, Animation, Obj } from './Model';
 import { FrameData } from './FrameData';
@@ -80,7 +80,7 @@ export default class Animator {
         return this.time / this.length;
     }
     /**
-     * @param {number} value 
+     * @param {number} value
      */
     set_progress(value) {
         this.time = value * this.length;
@@ -95,7 +95,7 @@ export default class Animator {
 
     /**
      * Play the animation with given name, from beginning
-     * @param {string} name 
+     * @param {string} name
      */
     play(name) {
         this.set_progress(0);
@@ -109,8 +109,8 @@ export default class Animator {
 
     /**
      * Transition to give animation oding a progressive blend
-     * @param {string} name 
-     * @param {number} total_transition_time 
+     * @param {string} name
+     * @param {number} total_transition_time
      */
     transition(name, total_transition_time) {
         this._total_transition_time = total_transition_time;
@@ -120,9 +120,9 @@ export default class Animator {
     }
 
     /**
-     * @param {string} first 
+     * @param {string} first
      * @param {string} second
-     * @param {number} factor 
+     * @param {number} factor
      */
     blend(first, second, factor) {
         this.play(first);
@@ -132,7 +132,7 @@ export default class Animator {
     }
 
     /**
-     * @param {number} delta 
+     * @param {number} delta
      */
     update(delta) {
         if (!this.current_animation) {
@@ -184,7 +184,7 @@ export default class Animator {
 
     /**
      * Apply transform to sprites
-     * @param {number} delta 
+     * @param {number} delta
      */
     animate(delta) {
         let objs = this.data_provider.get_frame_data(this.time, delta, this._factor, this.current_animation, this.next_animation)

@@ -23,33 +23,25 @@ export const CurveType = {
 };
 
 export class Model {
-    constructor() {
+    constructor(data) {
         /**
          * @type {Array<Folder>}
          */
-        this.folder = [];
+        this.folder = new Array(data.folder.length);
         /**
          * @type {Array<Entity>}
          */
-        this.entity = [];
-        /**
-         * @type {Array<Element>}
-         */
-        this.atlas = [];
-    }
-    load(data) {
+        this.entity = new Array(data.entity.length);
+
         let i = 0, list;
-        
         list = data.folder;
         for (i = 0; i < list.length; i++) {
-            this.folder.push(new Folder().load(list[i]));
+            this.folder[i] = new Folder().load(list[i]);
         }
         list = data.entity;
         for (i = 0; i < list.length; i++) {
-            this.entity.push(new Entity(this).load(list[i]));
+            this.entity[i] = new Entity(this).load(list[i]);
         }
-
-        return this;
     }
 }
 
@@ -76,8 +68,6 @@ export class Folder extends Element {
          * @type {Array<File>}
          */
         this.file = [];
-
-        this.atlas = -1;
     }
     /**
      * @returns {Folder}
@@ -541,10 +531,10 @@ export class Spatial {
         return this;
     }
     /**
-     * @param {Spatial} a 
-     * @param {Spatial} b 
-     * @param {number} factor 
-     * @param {number} spin 
+     * @param {Spatial} a
+     * @param {Spatial} b
+     * @param {number} factor
+     * @param {number} spin
      */
     interpolate(a, b, factor, spin) {
         this.angle = angle_linear(a.angle, b.angle, spin, factor);
@@ -554,7 +544,7 @@ export class Spatial {
         this.scale_y = linear(a.scale_y, b.scale_y, factor);
     }
     /**
-     * @param {Spatial} source 
+     * @param {Spatial} source
      */
     copy_spatial(source) {
         this.a = source.a;
@@ -565,7 +555,7 @@ export class Spatial {
         this.y = source.y;
     }
     /**
-     * @param {Spatial} parent 
+     * @param {Spatial} parent
      */
     apply_parent_transform(parent) {
         let px = parent.scale_x * this.x;
@@ -651,10 +641,10 @@ export class Obj extends Spatial {
         return this;
     }
     /**
-     * @param {Obj} a 
-     * @param {Obj} b 
-     * @param {number} factor 
-     * @param {number} spin 
+     * @param {Obj} a
+     * @param {Obj} b
+     * @param {number} factor
+     * @param {number} spin
      */
     interpolate(a, b, factor, spin) {
         this.angle = angle_linear(a.angle, b.angle, spin, factor);
@@ -672,7 +662,7 @@ export class Obj extends Spatial {
         this.t = linear(a.t, b.t, factor);
     }
     /**
-     * @param {Obj} source 
+     * @param {Obj} source
      */
     copy_obj(source) {
         this.copy_spatial(source);
