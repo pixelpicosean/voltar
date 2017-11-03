@@ -23,7 +23,7 @@ const get_next_key = (keys, first, looping) => {
 
 /**
  * @param {Array<Key>} keys
- * @param {number} target_time 
+ * @param {number} target_time
  * @returns {Key}
  */
 const get_last_key = (keys, target_time) => {
@@ -38,9 +38,9 @@ const get_last_key = (keys, target_time) => {
 
 /**
  * Calculate the interpolation factor of the given value
- * @param {number} a 
- * @param {number} b 
- * @param {number} v 
+ * @param {number} a
+ * @param {number} b
+ * @param {number} v
  * @returns {number}
  */
 const get_num_factor = (a, b, v) => {
@@ -49,8 +49,8 @@ const get_num_factor = (a, b, v) => {
 
 /**
  * Adjust the factor based on curve type of the key
- * @param {number} factor 
- * @param {Key} key 
+ * @param {number} factor
+ * @param {Key} key
  * @returns {number}
  */
 const adjust_factor = (factor, key) => {
@@ -82,10 +82,10 @@ const adjust_factor = (factor, key) => {
 
 /**
  * Calculate the interpolation factor of two keys.
- * @param {Key} key_a 
- * @param {Key} key_b 
+ * @param {Key} key_a
+ * @param {Key} key_b
  * @param {number} anim_length
- * @param {number} target_time 
+ * @param {number} target_time
  * @returns {number}
  */
 const get_factor = (key_a, key_b, anim_length, target_time) => {
@@ -104,10 +104,10 @@ const get_factor = (key_a, key_b, anim_length, target_time) => {
 };
 
 /**
- * @param {number} target_time 
- * @param {Key} key_a 
- * @param {Key} key_b 
- * @param {number} anim_length 
+ * @param {number} target_time
+ * @param {Key} key_a
+ * @param {Key} key_b
+ * @param {number} anim_length
  */
 const adjust_time = (target_time, key_a, key_b, anim_length) => {
     let next_time = key_b.time > key_a.time ? key_b.time : anim_length;
@@ -136,16 +136,16 @@ export class FrameDataCalculator {
          * @type {{a:MainlineKey, b:MainlineKey}}
          */
         this._key_group = {
-            a: null, 
+            a: null,
             b: null,
         };
     }
 
     /**
-     * @param {Animation} animation 
-     * @param {number} target_time 
-     * @param {number} delta 
-     * @param {Spatial} parent_info 
+     * @param {Animation} animation
+     * @param {number} target_time
+     * @param {number} delta
+     * @param {Spatial} parent_info
      * @returns {FrameData}
      */
     get_frame_data(animation, target_time, delta, parent_info = null) {
@@ -184,10 +184,10 @@ export class FrameDataCalculator {
     }
 
     /**
-     * @param {Obj} info 
-     * @param {Timeline} timeline 
-     * @param {Model} spriter 
-     * @param {number} delta 
+     * @param {Obj} info
+     * @param {Timeline} timeline
+     * @param {Model} spriter
+     * @param {number} delta
      */
     add_spatial_data(info, timeline, spriter, delta) {
         switch (timeline.object_type) {
@@ -203,10 +203,10 @@ export class FrameDataCalculator {
     }
 
     /**
-     * @param {MainlineKey} key 
-     * @param {Animation} animation 
-     * @param {number} target_time 
-     * @param {Spatial} parent 
+     * @param {MainlineKey} key
+     * @param {Animation} animation
+     * @param {number} target_time
+     * @param {Spatial} parent
      */
     get_bone_infos(key, animation, target_time, parent) {
         if (!key.bone_ref) {
@@ -229,9 +229,9 @@ export class FrameDataCalculator {
         return ret;
     }
     /**
-     * @param {Ref} ref 
-     * @param {Animation} animation 
-     * @param {number} target_time 
+     * @param {Ref} ref
+     * @param {Animation} animation
+     * @param {number} target_time
      */
     get_bone_info(ref, animation, target_time) {
         let keys = animation.timeline[ref.timeline].key;
@@ -239,7 +239,8 @@ export class FrameDataCalculator {
         let key_b = get_next_key(keys, key_a, animation.looping);
 
         if (!key_b) {
-            return this.copy_spatial(key_a.bone);
+            // TODO: recycle
+            return new Spatial(key_a.bone);
         }
 
         let factor = get_factor(key_a, key_b, animation.length, target_time);
@@ -247,7 +248,7 @@ export class FrameDataCalculator {
     }
 
     /**
-     * @param {Array<MainlineKey>} keys 
+     * @param {Array<MainlineKey>} keys
      * @param {number} target_time
      */
     get_mainline_keys(keys, target_time) {
@@ -266,7 +267,7 @@ export class FrameDataCalculator {
 
     /**
      * @param {Ref} ref
-     * @param {Animation} animation 
+     * @param {Animation} animation
      * @param {string} name
      * @returns {Obj}
      */
@@ -276,7 +277,8 @@ export class FrameDataCalculator {
         let key_b = get_next_key(keys, key_a, animation.looping);
 
         if (!key_b) {
-            return this.copy_obj(key_a.object);
+            // TODO: recycle
+            return new Obj(key_a.object);
         }
 
         let factor = get_factor(key_a, key_b, animation.length, target_time);
@@ -284,10 +286,10 @@ export class FrameDataCalculator {
     }
 
     /**
-     * @param {Spatial} a 
-     * @param {Spatial} b 
-     * @param {number} f 
-     * @param {number} spin 
+     * @param {Spatial} a
+     * @param {Spatial} b
+     * @param {number} f
+     * @param {number} spin
      * @returns {Spatial}
      */
     interpolate_spatial(a, b, f, spin) {
@@ -297,10 +299,10 @@ export class FrameDataCalculator {
         return ss;
     }
     /**
-     * @param {Obj} a 
-     * @param {Obj} b 
-     * @param {number} f 
-     * @param {number} spin 
+     * @param {Obj} a
+     * @param {Obj} b
+     * @param {number} f
+     * @param {number} spin
      * @returns {Obj}
      */
     interpolate_obj(a, b, f, spin) {
@@ -308,25 +310,5 @@ export class FrameDataCalculator {
         let so = new Obj();
         so.interpolate(a, b, f, spin);
         return so;
-    }
-    /**
-     * @param {Spatial} info 
-     * @returns {Spatial}
-     */
-    copy_spatial(info) {
-        // TODO: recycle
-        let copy = new Spatial();
-        copy.copy_spatial(info);
-        return copy;
-    }
-    /**
-     * @param {Obj} obj 
-     * @returns {Obj}
-     */
-    copy_obj(obj) {
-        // TODO: recycle
-        let copy = new Obj();
-        copy.copy_obj(obj);
-        return copy;
     }
 }

@@ -3,23 +3,23 @@ import { linear, angle_linear } from './math';
 const DegToRad = Math.PI / 180;
 
 export const ObjectType = {
-    sprite: 0,
-    bone: 1,
-    box: 2,
-    point: 3,
-    sound: 4,
-    entity: 5,
-    variable: 6,
+    sprite: 1,
+    bone: 2,
+    box: 3,
+    point: 4,
+    sound: 5,
+    entity: 6,
+    variable: 7,
 };
 
 export const CurveType = {
-    linear: 0,
-    instant: 1,
-    quadratic: 2,
-    cubic: 3,
-    quartic: 4,
-    quintic: 5,
-    bezier: 6,
+    linear: 1,
+    instant: 2,
+    quadratic: 3,
+    cubic: 4,
+    quartic: 5,
+    quintic: 6,
+    bezier: 7,
 };
 
 export class Model {
@@ -27,99 +27,59 @@ export class Model {
         /**
          * @type {Array<Folder>}
          */
-        this.folder = new Array(data.folder.length);
+        this.folder = data.folder.map(d => new Folder(d));
         /**
          * @type {Array<Entity>}
          */
-        this.entity = new Array(data.entity.length);
-
-        let i = 0, list;
-        list = data.folder;
-        for (i = 0; i < list.length; i++) {
-            this.folder[i] = new Folder().load(list[i]);
-        }
-        list = data.entity;
-        for (i = 0; i < list.length; i++) {
-            this.entity[i] = new Entity(this).load(list[i]);
-        }
+        this.entity = data.entity.map(d => new Entity(this, d));
     }
 }
 
 export class Element {
-    constructor() {
-        this.id = -1;
-        this.name = '';
-    }
-    /**
-     * @returns {Element}
-     */
-    load(data) {
+    constructor(data) {
         this.id = data.id;
         this.name = data.name;
-        return this;
     }
 }
 
 export class Folder extends Element {
-    constructor() {
-        super();
+    constructor(data) {
+        super(data);
 
         /**
          * @type {Array<File>}
          */
-        this.file = [];
-    }
-    /**
-     * @returns {Folder}
-     */
-    load(data) {
-        super.load(data);
-        let i = 0, list = data.file;
-        for (i = 0; i < list.length; i++) {
-            this.file.push(new File().load(list[i]));
-        }
-        return this;
+        this.file = data.file.map(d => new File(d));
     }
 }
 
 export class File extends Element {
-    constructor() {
-        super();
+    constructor(data) {
+        super(data);
 
         /**
          * @type {number}
          */
-        this.pivot_x = 0;
-        /**
-         * @type {number}
-         */
-        this.pivot_y = 1;
-
-        /**
-         * @type {number}
-         */
-        this.width = 0;
-        /**
-         * @type {number}
-         */
-        this.height = 0;
-    }
-    /**
-     * @returns {File}
-     */
-    load(data) {
-        super.load(data);
         this.pivot_x = data.pivot_x;
+        /**
+         * @type {number}
+         */
         this.pivot_y = data.pivot_y;
+
+        /**
+         * @type {number}
+         */
         this.width = data.width;
+        /**
+         * @type {number}
+         */
         this.height = data.height;
-        return this;
     }
 }
 
 export class Entity extends Element {
-    constructor(spriter) {
-        super();
+    constructor(spriter, data) {
+        super(data);
 
         /**
          * @type {Model}
@@ -129,39 +89,22 @@ export class Entity extends Element {
         /**
          * @type {Array<ObjectInfo>}
          */
-        this.obj_info = [];
+        this.obj_info = data.obj_info.map(d => new ObjectInfo(d));
 
         /**
          * @type {Array<CharacterMap>}
          */
-        this.character_map = [];
+        this.character_map = data.character_map.map(d => new CharacterMap(d));
 
+        this.animation_tabel = {};
         /**
          * @type {Array<Animation>}
          */
-        this.animation = [];
-        this.animation_tabel = {};
-    }
-    /**
-     * @returns {Entity}
-     */
-    load(data) {
-        super.load(data);
-        let i = 0, list = data.obj_info;
-        for (i = 0; i < list.length; i++) {
-            this.obj_info.push(new ObjectInfo().load(list[i]));
-        }
-        list = data.character_map;
-        for (i = 0; i < list.length; i++) {
-            this.character_map.push(new CharacterMap().load(list[i]));
-        }
-        list = data.animation; let anim;
-        for (i = 0; i < list.length; i++) {
-            anim = new Animation(this).load(list[i]);
-            this.animation.push(anim);
+        this.animation = data.animation.map(a => {
+            let anim = new Animation(this, a);
             this.animation_tabel[anim.name] = anim;
-        }
-        return this;
+            return anim;
+        });
     }
     /**
      * @returns {any}
@@ -172,51 +115,39 @@ export class Entity extends Element {
 }
 
 export class ObjectInfo extends Element {
-    constructor() {
-        super();
+    constructor(data) {
+        super(data);
 
         /**
          * @type {number}
          */
-        this.type = ObjectType.sprite;
-
-        /**
-         * @type {number}
-         */
-        this.w = 0;
-
-        /**
-         * @type {number}
-         */
-        this.h = 0;
-
-        /**
-         * @type {number}
-         */
-        this.pivot_x = 0;
-
-        /**
-         * @type {number}
-         */
-        this.pivot_y = 0;
-    }
-    /**
-     * @returns {ObjectInfo}
-     */
-    load(data) {
-        super.load(data);
         this.type = data.type;
+
+        /**
+         * @type {number}
+         */
         this.w = data.w;
+
+        /**
+         * @type {number}
+         */
         this.h = data.h;
+
+        /**
+         * @type {number}
+         */
         this.pivot_x = data.pivot_x;
+
+        /**
+         * @type {number}
+         */
         this.pivot_y = data.pivot_y;
-        return this;
     }
 }
 
 export class Animation extends Element {
-    constructor(entity) {
-        super();
+    constructor(entity, data) {
+        super(data);
 
         /**
          * @type {Entity}
@@ -226,309 +157,179 @@ export class Animation extends Element {
         /**
          * @type {number}
          */
-        this.length = 0;
+        this.length = data.length;
 
         /**
          * @type {boolean}
          */
-        this.looping = true;
+        this.looping = (data.looping !== undefined) ? data.looping : true;
 
         /**
          * @type {Array<MainlineKey>}
          */
-        this.mainline = [];
+        this.mainline = data.mainline.key.map(d => new MainlineKey(d));
 
         /**
          * @type {Array<Timeline>}
          */
-        this.timeline = [];
-    }
-    /**
-     * @returns {Animation}
-     */
-    load(data) {
-        super.load(data);
-        this.length = data.length;
-        if (data.looping !== undefined) {
-            this.looping = data.looping;
-        }
-        let i = 0, list = data.mainline.key;
-        for (i = 0; i < list.length; i++) {
-            this.mainline.push(new MainlineKey().load(list[i]));
-        }
-        list = data.timeline;
-        for (i = 0; i < list.length; i++) {
-            this.timeline.push(new Timeline().load(list[i]));
-        }
-        return this;
+        this.timeline = data.timeline.map(d => new Timeline(d));
     }
 }
 
 export class Key extends Element {
-    constructor() {
-        super();
+    constructor(data) {
+        super(data);
 
         /**
          * @type {number}
          */
-        this.time = 0;
+        this.time = (data.time !== undefined) ? data.time : 0;
 
         /**
          * @type {number}
          */
-        this.curve_type = CurveType.linear;
+        this.curve_type = (data.curve_type !== undefined) ? data.curve_type : CurveType.linear;
 
         /**
          * @type {number}
          */
-        this.c1 = 0;
+        this.c1 = (data.c1 !== undefined) ? data.c1 : 0;
 
         /**
          * @type {number}
          */
-        this.c2 = 0;
+        this.c2 = (data.c2 !== undefined) ? data.c2 : 0;
 
         /**
          * @type {number}
          */
-        this.c3 = 0;
+        this.c3 = (data.c3 !== undefined) ? data.c3 : 0;
 
         /**
          * @type {number}
          */
-        this.c4 = 0;
-    }
-    /**
-     * @returns {Key}
-     */
-    load(data) {
-        super.load(data);
-        if (data.time !== undefined) {
-            this.time = data.time;
-        }
-        if (data.curve_type !== undefined) {
-            this.curve_type = data.curve_type;
-        }
-        if (data.c1 !== undefined) {
-            this.c1 = data.c1;
-        }
-        if (data.c2 !== undefined) {
-            this.c2 = data.c2;
-        }
-        if (data.c3 !== undefined) {
-            this.c3 = data.c3;
-        }
-        if (data.c4 !== undefined) {
-            this.c4 = data.c4;
-        }
-        return this;
+        this.c4 = (data.c4 !== undefined) ? data.c4 : 0;
     }
 }
 
 export class MainlineKey extends Key {
-    constructor() {
-        super();
+    constructor(data) {
+        super(data);
 
         /**
          * @type {Array<Ref>}
          */
-        this.bone_ref = [];
+        this.bone_ref = data.bone_ref.map(d => new Ref(d));
 
         /**
          * @type {Array<ObjectRef>}
          */
-        this.object_ref = [];
-    }
-    /**
-     * @returns {MainlineKey}
-     */
-    load(data) {
-        super.load(data);
-        let i = 0, list = data.bone_ref;
-        for (i = 0; i < list.length; i++) {
-            this.bone_ref.push(new Ref().load(list[i]));
-        }
-        list = data.object_ref;
-        for (i = 0; i < list.length; i++) {
-            this.object_ref.push(new ObjectRef().load(list[i]));
-        }
-        return this;
+        this.object_ref = data.object_ref.map(d => new ObjectRef(d));
     }
 }
 
 export class Ref extends Element {
-    constructor() {
-        super();
+    constructor(data) {
+        super(data);
 
         /**
          * @type {number}
          */
-        this.parent = -1;
-
-        /**
-         * @type {number}
-         */
-        this.timeline = -1;
-
-        /**
-         * @type {number}
-         */
-        this.key = -1;
-    }
-    /**
-     * @returns {Ref}
-     */
-    load(data) {
-        super.load(data);
         this.parent = data.parent;
+
+        /**
+         * @type {number}
+         */
         this.timeline = data.timeline;
+
+        /**
+         * @type {number}
+         */
         this.key = data.key;
-        return this;
     }
 }
 
 export class ObjectRef extends Ref {
-    constructor() {
-        super();
+    constructor(data) {
+        super(data);
 
-        this.z_index = 0;
-    }
-    /**
-     * @returns {ObjectRef}
-     */
-    load(data) {
-        super.load(data);
         this.z_index = data.z_index;
-        return this;
     }
 }
 
 export class Timeline extends Element {
-    constructor() {
-        super();
+    constructor(data) {
+        super(data);
 
         /**
          * @type {number}
          */
-        this.object_type = ObjectType.sprite;
+        this.object_type = (data.object_type !== undefined) ? data.object_type : ObjectType.sprite;
 
         /**
          * @type {number}
          */
-        this.obj = -1;
+        this.obj = data.obj;
 
         /**
          * @type {Array<TimelineKey>}
          */
-        this.key = [];
-    }
-    /**
-     * @returns {Timeline}
-     */
-    load(data) {
-        super.load(data);
-        if (data.object_type) {
-            this.object_type = data.object_type;
-        }
-        this.obj = data.obj;
-        let i = 0, list = data.key;
-        for (i = 0; i < list.length; i++) {
-            this.key.push(new TimelineKey().load(list[i]));
-        }
-        return this;
+        this.key = data.key.map(d => new TimelineKey(d));
     }
 }
 
 export class TimelineKey extends Key {
-    constructor() {
-        super();
+    constructor(data) {
+        super(data);
 
         /**
          * @type {number}
          */
-        this.spin = 1;
+        this.spin = data.spin;
 
         /**
          * @type {Spatial}
          */
-        this.bone = null;
+        this.bone = (data.bone !== undefined) ? new Spatial(data.bone) : null;
 
         /**
          * @type {Obj}
          */
-        this.object = null;
-    }
-    /**
-     * @returns {TimelineKey}
-     */
-    load(data) {
-        super.load(data);
-        this.spin = data.spin;
-        if (data.bone) {
-            this.bone = new Spatial().load(data.bone);
-        }
-        if (data.object) {
-            this.object = new Obj().load(data.object);
-        }
-        return this;
+        this.object = (data.object !== undefined) ? new Obj(data.object) : true;;
     }
 }
 
 export class Spatial {
-    constructor() {
+    constructor(data = {}) {
         /**
          * @type {number}
          */
-        this.x = 0;
+        this.x = (data.x !== undefined) ? data.x : 0;
 
         /**
          * @type {number}
          */
-        this.y = 0;
+        this.y = (data.y !== undefined) ? data.y : 0;
 
         /**
          * @type {number}
          */
-        this.angle = 0;
+        this.angle = (data.angle !== undefined) ? data.angle : 0;
 
         /**
          * @type {number}
          */
-        this.scale_x = 1;
+        this.scale_x = (data.scale_x !== undefined) ? data.scale_x : 1;
 
         /**
          * @type {number}
          */
-        this.scale_y = 1;
+        this.scale_y = (data.scale_y !== undefined) ? data.scale_y : 1;
 
         /**
          * @type {number}
          */
-        this.a = 1;
-    }
-    /**
-     * @returns {Spatial}
-     */
-    load(data) {
-        if (data.x !== undefined) {
-            this.x = data.x;
-        }
-        if (data.y !== undefined) {
-            this.y = data.y;
-        }
-        if (data.angle !== undefined) {
-            this.angle = data.angle;
-        }
-        if (data.scale_x !== undefined) {
-            this.scale_x = data.scale_x;
-        }
-        if (data.scale_y !== undefined) {
-            this.scale_y = data.scale_y;
-        }
-        if (data.a !== undefined) {
-            this.a = data.a;
-        }
-        return this;
+        this.a = (data.a !== undefined) ? data.a : 1;
     }
     /**
      * @param {Spatial} a
@@ -542,17 +343,6 @@ export class Spatial {
         this.y = linear(a.y, b.y, factor);
         this.scale_x = linear(a.scale_x, b.scale_x, factor);
         this.scale_y = linear(a.scale_y, b.scale_y, factor);
-    }
-    /**
-     * @param {Spatial} source
-     */
-    copy_spatial(source) {
-        this.a = source.a;
-        this.angle = source.angle;
-        this.scale_x = source.scale_x;
-        this.scale_y = source.scale_y;
-        this.x = source.x;
-        this.y = source.y;
     }
     /**
      * @param {Spatial} parent
@@ -571,74 +361,59 @@ export class Spatial {
         this.angle = parent.angle + Math.sign(parent.scale_x * parent.scale_y) * this.angle;
         this.angle %= 360;
     }
+    /**
+     * @param {Spatial} source
+     * @returns {Spatial}
+     */
+    copy(source) {
+        this.x = source.x;
+        this.y = source.y;
+        this.angle = source.angle;
+        this.scale_x = source.scale_x;
+        this.scale_y = source.scale_y;
+        this.a = source.a;
+        return this;
+    }
 }
 
 export class Obj extends Spatial {
-    constructor() {
-        super();
+    constructor(data = {}) {
+        super(data);
 
         /**
          * @type {number}
          */
-        this.animation = -1;
+        this.animation = (data.animation !== undefined) ? data.animation : -1;
 
         /**
          * @type {number}
          */
-        this.entity = 0;
+        this.entity = (data.entity !== undefined) ? data.entity : 0;
 
         /**
          * @type {number}
          */
-        this.folder = 0;
+        this.folder = (data.folder !== undefined) ? data.folder : 0;
 
         /**
          * @type {number}
          */
-        this.file = 0;
+        this.file = (data.file !== undefined) ? data.file : 0;
 
         /**
          * @type {number}
          */
-        this.pivot_x = NaN;
+        this.pivot_x = (data.pivot_x !== undefined) ? data.pivot_x : NaN;
 
         /**
          * @type {number}
          */
-        this.pivot_y = NaN;
+        this.pivot_y = (data.pivot_y !== undefined) ? data.pivot_y : NaN;
 
         /**
          * @type {number}
          */
-        this.t = 0;
-    }
-    /**
-     * @returns {Obj}
-     */
-    load(data) {
-        super.load(data);
-        if (data.animation !== undefined) {
-            this.animation = data.animation;
-        }
-        if (data.entity !== undefined) {
-            this.entity = data.entity;
-        }
-        if (data.folder !== undefined) {
-            this.folder = data.folder;
-        }
-        if (data.file !== undefined) {
-            this.file = data.file;
-        }
-        if (data.pivot_x !== undefined) {
-            this.pivot_x = data.pivot_x;
-        }
-        if (data.pivot_y !== undefined) {
-            this.pivot_y = data.pivot_y;
-        }
-        if (data.t !== undefined) {
-            this.t = data.t;
-        }
-        return this;
+        this.t = (data.t !== undefined) ? data.t : 0;
     }
     /**
      * @param {Obj} a
@@ -663,9 +438,10 @@ export class Obj extends Spatial {
     }
     /**
      * @param {Obj} source
+     * @returns {Obj}
      */
-    copy_obj(source) {
-        this.copy_spatial(source);
+    copy(source) {
+        super.copy(source);
 
         this.animation = source.animation;
         this.entity = source.entity;
@@ -674,61 +450,42 @@ export class Obj extends Spatial {
         this.pivot_x = source.pivot_x;
         this.pivot_y = source.pivot_y;
         this.t = source.t;
+
+        return this;
     }
 }
 
 export class CharacterMap extends Element {
-    constructor() {
-        super();
+    constructor(data) {
+        super(data);
 
         /**
          * @type {Array<MapInstruction>}
          */
-        this.map = [];
-    }
-    /**
-     * @returns {CharacterMap}
-     */
-    load(data) {
-        super.load(data);
-        let i = 0, list = data.map;
-        for (i = 0; i < list.length; i++) {
-            this.map.push(new MapInstruction().load(list[i]));
-        }
-        return this;
+        this.map = data.map.map(d => new MapInstruction(d));
     }
 }
 
 export class MapInstruction {
-    constructor() {
+    constructor(data) {
         /**
          * @type {number}
          */
-        this.folder = -1;
-
-        /**
-         * @type {number}
-         */
-        this.file = -1;
-
-        /**
-         * @type {number}
-         */
-        this.target_folder = -1;
-
-        /**
-         * @type {number}
-         */
-        this.target_file = -1;
-    }
-    /**
-     * @returns {MapInstruction}
-     */
-    load(data) {
         this.folder = data.folder;
+
+        /**
+         * @type {number}
+         */
         this.file = data.file;
+
+        /**
+         * @type {number}
+         */
         this.target_folder = data.target_folder;
+
+        /**
+         * @type {number}
+         */
         this.target_file = data.target_file;
-        return this;
     }
 }
