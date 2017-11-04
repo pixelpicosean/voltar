@@ -1,5 +1,6 @@
 import { Ref, Obj, Key, MainlineKey, Timeline, Model, CurveType, ObjectType, Animation, Spatial, ObjectInfo } from './Model';
 import { linear, bezier2, bezier3, bezier4, bezier5, bezier2d } from './math';
+import { object_provider } from './Provider';
 
 /**
  * @param {Array<Key>} keys
@@ -124,6 +125,9 @@ export class FrameData {
     }
 
     clear() {
+        for (let obj of this.sprite_data) {
+            object_provider.put_obj(obj);
+        }
         this.sprite_data.length = 0;
     }
 }
@@ -161,7 +165,15 @@ export class FrameDataCalculator {
         let bone_infos = this.get_bone_infos(key_a, animation, adjusted_time, parent_info);
 
         if (!key_a.object_ref) {
-            // TODO: recycle bone_infos
+            // Recycle bone_infos
+            if (bone_infos && bone_infos.length > 0) {
+                for (let b of bone_infos) {
+                    object_provider.put_spatial(b);
+                }
+                bone_infos.length = 0;
+                bone_infos = null;
+            }
+
             return this.frame_data;
         }
 
@@ -178,8 +190,27 @@ export class FrameDataCalculator {
             this.add_spatial_data(interpolated, animation.timeline[obj_ref.timeline], animation.entity.spriter, delta);
         }
 
-        // TODO: recycle bone_infos
+        // Recycle bone_infos
+        if (bone_infos && bone_infos.length > 0) {
+            for (let b of bone_infos) {
+                object_provider.put_spatial(b);
+            }
+            bone_infos.length = 0;
+            bone_infos = null;
+        }
 
+        return this.frame_data;
+    }
+
+    /**
+     * @param {Animation} first
+     * @param {Animation} second
+     * @param {number} target_time
+     * @param {number} delta
+     * @param {number} factor
+     * @returns {FrameData}
+     */
+    get_frame_data_with_blend(first, second, target_time, delta, factor) {
         return this.frame_data;
     }
 
@@ -207,12 +238,12 @@ export class FrameDataCalculator {
      * @param {Animation} animation
      * @param {number} target_time
      * @param {Spatial} parent
+     * @returns {Array<Spatial>}
      */
     get_bone_infos(key, animation, target_time, parent) {
         if (!key.bone_ref) {
             return null;
         }
-        // TODO: recycle
         let ret = new Array(key.bone_ref.length);
         for (let i = 0; i < key.bone_ref.length; i++) {
             let r = key.bone_ref[i];
@@ -232,6 +263,7 @@ export class FrameDataCalculator {
      * @param {Ref} ref
      * @param {Animation} animation
      * @param {number} target_time
+     * @returns {Spatial}
      */
     get_bone_info(ref, animation, target_time) {
         let keys = animation.timeline[ref.timeline].key;
@@ -239,8 +271,7 @@ export class FrameDataCalculator {
         let key_b = get_next_key(keys, key_a, animation.looping);
 
         if (!key_b) {
-            // TODO: recycle
-            return new Spatial(key_a.bone);
+            return object_provider.get_spatial(key_a.bone);
         }
 
         let factor = get_factor(key_a, key_b, animation.length, target_time);
@@ -277,8 +308,7 @@ export class FrameDataCalculator {
         let key_b = get_next_key(keys, key_a, animation.looping);
 
         if (!key_b) {
-            // TODO: recycle
-            return new Obj(key_a.object);
+            return object_provider.get_obj(key_a.object);
         }
 
         let factor = get_factor(key_a, key_b, animation.length, target_time);
@@ -293,8 +323,7 @@ export class FrameDataCalculator {
      * @returns {Spatial}
      */
     interpolate_spatial(a, b, f, spin) {
-        // TODO: recycle
-        let ss = new Spatial();
+        let ss = object_provider.get_spatial(undefined);
         ss.interpolate(a, b, f, spin);
         return ss;
     }
@@ -306,8 +335,7 @@ export class FrameDataCalculator {
      * @returns {Obj}
      */
     interpolate_obj(a, b, f, spin) {
-        // TODO: recycle
-        let so = new Obj();
+        let so = object_provider.get_obj(undefined);
         so.interpolate(a, b, f, spin);
         return so;
     }

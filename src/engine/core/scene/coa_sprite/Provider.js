@@ -49,15 +49,20 @@ export class ObjectProvider {
         /**
          * @type {Array<Sprite>}
          */
-        this.spr_pool = [];
+        this.sprite_pool = [];
+
+        this.spatial_count = 0;
+        this.obj_count = 0;
+        this.sprite_count = 0;
     }
     put_spatial(spatial) {
-        this.obj_pool.push(spatial);
+        this.spatial_pool.push(spatial);
     }
     get_spatial(data) {
         let spatial = this.spatial_pool.pop();
         if (!spatial) {
             spatial = new Spatial();
+            this.spatial_count++;
         }
         return spatial.init(data);
     }
@@ -68,19 +73,26 @@ export class ObjectProvider {
         let obj = this.obj_pool.pop();
         if (!obj) {
             obj = new Obj();
+            this.obj_count++;
         }
         return obj.init(data);
     }
 
     put_spr(spr) {
-        this.spr_pool.push(spr);
+        this.sprite_pool.push(spr);
     }
     get_spr() {
-        let spr = this.spr_pool.pop();
+        let spr = this.sprite_pool.pop();
         if (!spr) {
             spr = new Sprite(undefined);
+            this.sprite_count++;
         }
         return spr;
+    }
+
+    // Debug
+    log() {
+        console.log(`spatial: ${this.spatial_count}, obj: ${this.obj_count}, sprite: ${this.sprite_count}`)
     }
 }
 

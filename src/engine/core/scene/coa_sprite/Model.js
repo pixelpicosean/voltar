@@ -290,46 +290,55 @@ export class TimelineKey extends Key {
         /**
          * @type {Spatial}
          */
-        this.bone = (data.bone !== undefined) ? new Spatial(data.bone) : null;
+        this.bone = (data.bone !== undefined) ? new Spatial().init(data.bone) : null;
 
         /**
          * @type {Obj}
          */
-        this.object = (data.object !== undefined) ? new Obj(data.object) : true;;
+        this.object = (data.object !== undefined) ? new Obj().init(data.object) : null;
     }
 }
 
 export class Spatial {
-    constructor(data = {}) {
+    constructor() {
         /**
          * @type {number}
          */
+        this.x = 0;
+
+        /**
+         * @type {number}
+         */
+        this.y = 0;
+
+        /**
+         * @type {number}
+         */
+        this.angle = 0;
+
+        /**
+         * @type {number}
+         */
+        this.scale_x = 1;
+
+        /**
+         * @type {number}
+         */
+        this.scale_y = 1;
+
+        /**
+         * @type {number}
+         */
+        this.a = 1;
+    }
+    init(data = {}) {
         this.x = (data.x !== undefined) ? data.x : 0;
-
-        /**
-         * @type {number}
-         */
         this.y = (data.y !== undefined) ? data.y : 0;
-
-        /**
-         * @type {number}
-         */
         this.angle = (data.angle !== undefined) ? data.angle : 0;
-
-        /**
-         * @type {number}
-         */
         this.scale_x = (data.scale_x !== undefined) ? data.scale_x : 1;
-
-        /**
-         * @type {number}
-         */
         this.scale_y = (data.scale_y !== undefined) ? data.scale_y : 1;
-
-        /**
-         * @type {number}
-         */
         this.a = (data.a !== undefined) ? data.a : 1;
+        return this;
     }
     /**
      * @param {Spatial} a
@@ -377,43 +386,54 @@ export class Spatial {
 }
 
 export class Obj extends Spatial {
-    constructor(data = {}) {
-        super(data);
+    constructor() {
+        super();
 
         /**
          * @type {number}
          */
+        this.animation = -1;
+
+        /**
+         * @type {number}
+         */
+        this.entity = 0;
+
+        /**
+         * @type {number}
+         */
+        this.folder = 0;
+
+        /**
+         * @type {number}
+         */
+        this.file = 0;
+
+        /**
+         * @type {number}
+         */
+        this.pivot_x = NaN;
+
+        /**
+         * @type {number}
+         */
+        this.pivot_y = NaN;
+
+        /**
+         * @type {number}
+         */
+        this.t = 0;
+    }
+    init(data = {}) {
+        super.init(data);
         this.animation = (data.animation !== undefined) ? data.animation : -1;
-
-        /**
-         * @type {number}
-         */
         this.entity = (data.entity !== undefined) ? data.entity : 0;
-
-        /**
-         * @type {number}
-         */
         this.folder = (data.folder !== undefined) ? data.folder : 0;
-
-        /**
-         * @type {number}
-         */
         this.file = (data.file !== undefined) ? data.file : 0;
-
-        /**
-         * @type {number}
-         */
         this.pivot_x = (data.pivot_x !== undefined) ? data.pivot_x : NaN;
-
-        /**
-         * @type {number}
-         */
         this.pivot_y = (data.pivot_y !== undefined) ? data.pivot_y : NaN;
-
-        /**
-         * @type {number}
-         */
         this.t = (data.t !== undefined) ? data.t : 0;
+        return this;
     }
     /**
      * @param {Obj} a
