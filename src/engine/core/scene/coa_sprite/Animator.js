@@ -234,7 +234,7 @@ export default class Animator {
             spr.y = obj.y;
             spr.anchor.x = obj.pivot_x + info.pivot_x;
             spr.anchor.y = (1 - obj.pivot_y) + (1 - info.pivot_y);
-            spr.rotation = obj.angle / 180 * Math.PI;
+            spr.rotation = obj.angle;
             spr.scale.set(obj.scale_x, -obj.scale_y);
             spr.alpha = obj.a;
         }

@@ -1,8 +1,10 @@
+const PI = Math.PI;
+
 /**
  * Linear interpolation of two values for the give factor
- * @param {number} a 
- * @param {number} b 
- * @param {number} f 
+ * @param {number} a
+ * @param {number} b
+ * @param {number} f
  * @returns {number}
  */
 export const linear = (a, b, f) => {
@@ -11,9 +13,9 @@ export const linear = (a, b, f) => {
 
 /**
  * @param {number} a
- * @param {number} b 
+ * @param {number} b
  * @param {number} spin
- * @param {number} f 
+ * @param {number} f
  * @returns { number}
  */
 export const angle_linear = (a, b, spin, f) => {
@@ -21,17 +23,17 @@ export const angle_linear = (a, b, spin, f) => {
         return a;
     }
     if (spin > 0 && (b - a) < 0) {
-        b += 360;
+        b += PI;
     }
     if (spin < 0 && (b - a) > 0) {
-        b -= 360;
+        b -= PI;
     }
     return linear(a, b, f);
 };
 
 /**
  * @param {number} c0
- * @param {number} c1 
+ * @param {number} c1
  * @param {number} c2
  * @param {number} f
  * @returns {number}
@@ -41,7 +43,7 @@ export const bezier2 = (c0, c1, c2, f) => {
 };
 /**
  * @param {number} c0
- * @param {number} c1 
+ * @param {number} c1
  * @param {number} c2
  * @param {number} c3
  * @param {number} f
@@ -52,7 +54,7 @@ export const bezier3 = (c0, c1, c2, c3, f) => {
 };
 /**
  * @param {number} c0
- * @param {number} c1 
+ * @param {number} c1
  * @param {number} c2
  * @param {number} c3
  * @param {number} c4
@@ -64,7 +66,7 @@ export const bezier4 = (c0, c1, c2, c3, c4, f) => {
 };
 /**
  * @param {number} c0
- * @param {number} c1 
+ * @param {number} c1
  * @param {number} c2
  * @param {number} c3
  * @param {number} c4
@@ -77,7 +79,7 @@ export const bezier5 = (c0, c1, c2, c3, c4, c5, f) => {
 };
 /**
  * @param {number} x1
- * @param {number} y1 
+ * @param {number} y1
  * @param {number} x2
  * @param {number} y2
  * @param {number} t

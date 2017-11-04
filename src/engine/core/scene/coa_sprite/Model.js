@@ -1,6 +1,7 @@
 import { linear, angle_linear } from './math';
 
 const DegToRad = Math.PI / 180;
+const PI2 = Math.PI * 2;
 
 export const ObjectType = {
     sprite: 1,
@@ -290,12 +291,22 @@ export class TimelineKey extends Key {
         /**
          * @type {Spatial}
          */
-        this.bone = (data.bone !== undefined) ? new Spatial().init(data.bone) : null;
+        this.bone = null;
+        if (data.bone !== undefined) {
+            // Convert angle from degree to radians
+            data.bone.angle *= DegToRad;
+            this.bone = new Spatial().init(data.bone);
+        }
 
         /**
          * @type {Obj}
          */
-        this.object = (data.object !== undefined) ? new Obj().init(data.object) : null;
+        this.object = null;
+        if (data.object !== undefined) {
+            // Convert angle from degree to radians
+            data.object.angle *= DegToRad;
+            this.object = new Obj().init(data.object);
+        }
     }
 }
 
@@ -359,16 +370,15 @@ export class Spatial {
     apply_parent_transform(parent) {
         let px = parent.scale_x * this.x;
         let py = parent.scale_y * this.y;
-        let angle_rad = parent.angle * DegToRad;
-        let s = Math.sin(angle_rad);
-        let c = Math.cos(angle_rad);
+        let c = Math.cos(parent.angle);
+        let s = Math.sin(parent.angle);
 
         this.x = px * c - py * s + parent.x;
         this.y = px * s + py * c + parent.y;
         this.scale_x *= parent.scale_x;
         this.scale_y *= parent.scale_y;
         this.angle = parent.angle + Math.sign(parent.scale_x * parent.scale_y) * this.angle;
-        this.angle %= 360;
+        this.angle %= PI2;
     }
     /**
      * @param {Spatial} source
