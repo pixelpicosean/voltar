@@ -412,12 +412,12 @@ export class Obj extends Spatial {
         /**
          * @type {number}
          */
-        this.pivot_x = NaN;
+        this.pivot_x = 0;
 
         /**
          * @type {number}
          */
-        this.pivot_y = NaN;
+        this.pivot_y = 1;
 
         /**
          * @type {number}
@@ -430,8 +430,8 @@ export class Obj extends Spatial {
         this.entity = (data.entity !== undefined) ? data.entity : 0;
         this.folder = (data.folder !== undefined) ? data.folder : 0;
         this.file = (data.file !== undefined) ? data.file : 0;
-        this.pivot_x = (data.pivot_x !== undefined) ? data.pivot_x : NaN;
-        this.pivot_y = (data.pivot_y !== undefined) ? data.pivot_y : NaN;
+        this.pivot_x = (data.pivot_x !== undefined) ? data.pivot_x : 0;
+        this.pivot_y = (data.pivot_y !== undefined) ? data.pivot_y : 1;
         this.t = (data.t !== undefined) ? data.t : 0;
         return this;
     }

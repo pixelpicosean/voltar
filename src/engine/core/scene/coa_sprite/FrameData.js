@@ -179,7 +179,7 @@ export class FrameDataCalculator {
 
         for (let i = 0; i < key_a.object_ref.length; i++) {
             let obj_ref = key_a.object_ref[i];
-            let interpolated = this.get_object_info(obj_ref, animation, adjust_time);
+            let interpolated = this.get_object_info(obj_ref, animation, adjusted_time);
             if (bone_infos && obj_ref.parent >= 0) {
                 interpolated.apply_parent_transform(bone_infos[obj_ref.parent]);
             }
@@ -299,7 +299,7 @@ export class FrameDataCalculator {
     /**
      * @param {Ref} ref
      * @param {Animation} animation
-     * @param {string} name
+     * @param {number} target_time
      * @returns {Obj}
      */
     get_object_info(ref, animation, target_time) {

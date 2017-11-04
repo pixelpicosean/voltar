@@ -1,6 +1,13 @@
 import { CharacterMap, Animation, Folder, Spatial, Obj } from './Model';
 import Sprite from '../sprites/Sprite';
 
+/**
+ * @typedef SpriteInfo
+ * @type {string} texture
+ * @type {number} pivot_x
+ * @type {number} pivot_y
+ */
+
 export class TextureProvider {
     constructor() {
         /**
@@ -21,7 +28,11 @@ export class TextureProvider {
             }
 
             for (let file of folder.file) {
-                folder_map[file.id] = file.name;
+                folder_map[file.id] = {
+                    texture: file.name,
+                    pivot_x: file.pivot_x,
+                    pivot_y: file.pivot_y,
+                };
             }
         }
     }
@@ -29,7 +40,7 @@ export class TextureProvider {
      * Get texture with folder and file name
      * @param {number} folder
      * @param {number} file
-     * @returns {string}
+     * @returns {SpriteInfo}
      */
     get(folder, file) {
         return this.texture_tabel[folder][file];
@@ -78,10 +89,10 @@ export class ObjectProvider {
         return obj.init(data);
     }
 
-    put_spr(spr) {
+    put_sprite(spr) {
         this.sprite_pool.push(spr);
     }
-    get_spr() {
+    get_sprite() {
         let spr = this.sprite_pool.pop();
         if (!spr) {
             spr = new Sprite(undefined);

@@ -205,12 +205,14 @@ export default class Animator {
         if (this.node.children.length < objs.length) {
             let len = objs.length - this.node.children.length;
             for (let i = 0; i < len; i++) {
-                // TODO: recycle
-                this.node.add_child(object_provider.get_spr());
+                this.node.add_child(object_provider.get_sprite());
             }
         }
-        else {
-            // TODO: remove unused sprites
+        else if (this.node.children.length > objs.length) {
+            let removes = this.remove_children(objs.length - 1);
+            for (let spr of removes) {
+                object_provider.put_sprite(spr);
+            }
         }
 
         /**
@@ -221,12 +223,17 @@ export default class Animator {
          * @type {Sprite}
          */
         let spr;
+        let info;
         for (let i = 0; i < objs.length; i++) {
             obj = objs[i];
+            info = this.sprite_provider.get(obj.folder, obj.file);
+
             spr = this.node.children[i];
-            spr.texture = this.sprite_provider.get(obj.folder, obj.file);
+            spr.texture = info.texture;
             spr.x = obj.x;
             spr.y = obj.y;
+            spr.anchor.x = obj.pivot_x + info.pivot_x;
+            spr.anchor.y = (1 - obj.pivot_y) + (1 - info.pivot_y);
             spr.rotation = obj.angle / 180 * Math.PI;
             spr.scale.set(obj.scale_x, -obj.scale_y);
             spr.alpha = obj.a;
