@@ -1,4 +1,5 @@
 import ResourceLoader from 'resource-loader';
+import { Resource } from 'resource-loader';
 import { blobMiddlewareFactory } from 'resource-loader/lib/middlewares/parsing/blob';
 import EventEmitter from 'eventemitter3';
 import textureParser from './textureParser';
@@ -52,10 +53,6 @@ import coaParser from './coa';
  * ```
  *
  * @see https://github.com/englercj/resource-loader
- *
- * @class
- * @extends module:resource-loader.ResourceLoader
- * @memberof V.loaders
  */
 export default class Loader extends ResourceLoader
 {
@@ -122,6 +119,4 @@ Loader._pixiMiddleware = [
 ];
 
 // Add custom extentions
-const Resource = ResourceLoader.Resource;
-
 Resource.setExtensionXhrType('fnt', Resource.XHR_RESPONSE_TYPE.DOCUMENT);

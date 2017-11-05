@@ -17,45 +17,45 @@ import { RENDERER_TYPE } from '../../const';
 let CONTEXT_UID = 0;
 
 /**
+ * @typedef RendererOption
+ * @property {number} [width=800] - the width of the screen
+ * @property {number} [height=600] - the height of the screen
+ * @property {HTMLCanvasElement} [view] - the canvas to use as a view, optional
+ * @property {boolean} [transparent=false] - If the render view is transparent, default false
+ * @property {boolean} [auto_resize=false] - If the render view is automatically resized, default false
+ * @property {boolean} [antialias=false] - sets antialias (only applicable in chrome at the moment)
+ * @property {number} [resolution=1] - The resolution / device pixel ratio of the renderer. The
+ *     resolution of the renderer retina would be 2.
+ * @property {boolean} [preserve_drawing_buffer=false] - enables drawing buffer preservation,
+ *     enable this if you need to call toDataUrl on the webgl context.
+ * @property {boolean} [clear_before_render=true] - This sets if the renderer will clear the canvas or
+ *     not before the new render pass.
+ * @property {number} [background_color=0x000000] - The background color of the rendered area
+ *     (shown if not transparent).
+ * @property {boolean} [pixel_snap=false] - If true Pixi will Math.floor() x/y values when rendering,
+ *     stopping pixel interpolation.
+ * @property {boolean} [round_pixels=false] - If true PixiJS will Math.floor() x/y values when
+ *     rendering, stopping pixel interpolation.
+ * @property {boolean} [legacy=false] - If true PixiJS will aim to ensure compatibility
+ *     with older / less advanced devices. If you experiance unexplained flickering try setting this to true.
+ * @property {string} [powerPreference] - Parameter passed to webgl context, set to "high-performance"
+ *     for devices with dual graphics card
+ */
+
+/**
  * The WebGLRenderer draws the scene and all its content onto a webGL enabled canvas. This renderer
  * should be used for browsers that support webGL. This Render works by automatically managing webGLBatchs.
  * So no need for Sprite Batches or Sprite Clouds.
  * Don't forget to add the view to your DOM or you will not see anything :)
  *
  * @class
- * @memberof V
- * @extends V.SystemRenderer
  */
 export default class WebGLRenderer extends SystemRenderer
 {
-    // eslint-disable-next-line valid-jsdoc
     /**
-     *
-     * @param {object} [options] - The optional renderer parameters
-     * @param {number} [options.width=800] - the width of the screen
-     * @param {number} [options.height=600] - the height of the screen
-     * @param {HTMLCanvasElement} [options.view] - the canvas to use as a view, optional
-     * @param {boolean} [options.transparent=false] - If the render view is transparent, default false
-     * @param {boolean} [options.auto_resize=false] - If the render view is automatically resized, default false
-     * @param {boolean} [options.antialias=false] - sets antialias. If not available natively then FXAA
-     *  antialiasing is used
-     * @param {boolean} [options.force_fxaa=false] - forces FXAA antialiasing to be used over native.
-     *  FXAA is faster, but may not always look as great
-     * @param {number} [options.resolution=1] - The resolution / device pixel ratio of the renderer.
-     *  The resolution of the renderer retina would be 2.
-     * @param {boolean} [options.clear_before_render=true] - This sets if the renderer will clear
-     *  the canvas or not before the new render pass. If you wish to set this to false, you *must* set
-     *  preserveDrawingBuffer to `true`.
-     * @param {boolean} [options.preserve_drawing_buffer=false] - enables drawing buffer preservation,
-     *  enable this if you need to call toDataUrl on the webgl context.
-     * @param {boolean} [options.round_pixels=false] - If true PixiJS will Math.floor() x/y values when
-     *  rendering, stopping pixel interpolation.
-     * @param {number} [options.background_color=0x000000] - The background color of the rendered area
-     *  (shown if not transparent).
-     * @param {boolean} [options.legacy=false] - If true PixiJS will aim to ensure compatibility
-     *  with older / less advanced devices. If you experiance unexplained flickering try setting this to true.
-     * @param {string} [options.powerPreference] - Parameter passed to webgl context, set to "high-performance"
-     *  for devices with dual graphics card
+     * @param {RendererOption} [options] - The optional renderer parameters
+     * @param {any} [arg2]
+     * @param {any} [arg3]
      */
     constructor(options, arg2, arg3)
     {
@@ -71,8 +71,8 @@ export default class WebGLRenderer extends SystemRenderer
         /**
          * The type of this renderer as a standardised const
          *
-         * @member {number}
-         * @see V.RENDERER_TYPE
+         * @type {number}
+         * @see RENDERER_TYPE
          */
         this.type = RENDERER_TYPE.WEBGL;
 
@@ -85,7 +85,7 @@ export default class WebGLRenderer extends SystemRenderer
         /**
          * The options passed in to create a new webgl context.
          *
-         * @member {object}
+         * @type {object}
          * @private
          */
         this._contextOptions = {
@@ -102,41 +102,41 @@ export default class WebGLRenderer extends SystemRenderer
         /**
          * Manages the masks using the stencil buffer.
          *
-         * @member {V.MaskManager}
+         * @type {MaskManager}
          */
         this.maskManager = new MaskManager(this);
 
         /**
          * Manages the stencil buffer.
          *
-         * @member {V.StencilManager}
+         * @type {StencilManager}
          */
         this.stencilManager = new StencilManager(this);
 
         /**
          * An empty renderer.
          *
-         * @member {V.ObjectRenderer}
+         * @type {ObjectRenderer}
          */
         this.emptyRenderer = new ObjectRenderer(this);
 
         /**
          * The currently active ObjectRenderer.
          *
-         * @member {V.ObjectRenderer}
+         * @type {ObjectRenderer}
          */
         this.currentRenderer = this.emptyRenderer;
 
         /**
          * Manages textures
-         * @member {PIXI.TextureManager}
+         * @type {TextureManager}
          */
         this.textureManager = null;
 
         /**
          * Manages the filters.
          *
-         * @member {PIXI.FilterManager}
+         * @type {FilterManager}
          */
         this.filterManager = null;
 
@@ -145,7 +145,7 @@ export default class WebGLRenderer extends SystemRenderer
         /**
          * The current WebGL rendering context, it is created here
          *
-         * @member {WebGLRenderingContext}
+         * @type {WebGLRenderingContext}
          */
         // initialize the context so it is ready for the managers.
         if (this.options.context)
@@ -161,7 +161,7 @@ export default class WebGLRenderer extends SystemRenderer
         /**
          * The currently active ObjectRenderer.
          *
-         * @member {V.WebGLState}
+         * @type {WebGLState}
          */
         this.state = new WebGLState(this.gl);
 
@@ -169,14 +169,14 @@ export default class WebGLRenderer extends SystemRenderer
 
         /**
          * Holds the current state of textures bound to the GPU.
-         * @type {Array}
+         * @type {Array<Texture>}
          */
         this.boundTextures = null;
 
         /**
          * Holds the current shader
          *
-         * @member {V.Shader}
+         * @type {Shader}
          */
         this._activeShader = null;
 
@@ -185,7 +185,7 @@ export default class WebGLRenderer extends SystemRenderer
         /**
          * Holds the current render target
          *
-         * @member {V.RenderTarget}
+         * @type {RenderTarget}
          */
         this._activeRenderTarget = null;
 
@@ -201,19 +201,19 @@ export default class WebGLRenderer extends SystemRenderer
         /**
          * Fired after rendering finishes.
          *
-         * @event V.WebGLRenderer#postrender
+         * @event WebGLRenderer#postrender
          */
 
         /**
          * Fired before rendering starts.
          *
-         * @event V.WebGLRenderer#prerender
+         * @event WebGLRenderer#prerender
          */
 
         /**
          * Fired when the WebGL context is set.
          *
-         * @event V.WebGLRenderer#context
+         * @event WebGLRenderer#context
          * @param {WebGLRenderingContext} gl - WebGL context.
          */
     }
@@ -280,10 +280,10 @@ export default class WebGLRenderer extends SystemRenderer
     /**
      * Renders the object to its webGL view
      *
-     * @param {V.Node2D} displayObject - the object to be rendered
-     * @param {V.RenderTexture} renderTexture - The render texture to render to.
+     * @param {Node2D} displayObject - the object to be rendered
+     * @param {RenderTexture} renderTexture - The render texture to render to.
      * @param {boolean} [clear] - Should the canvas be cleared before the new render
-     * @param {V.Transform} [transform] - A transform to apply to the render texture before rendering.
+     * @param {Transform} [transform] - A transform to apply to the render texture before rendering.
      * @param {boolean} [skipUpdateTransform] - Should we skip the update transform pass?
      */
     render(displayObject, renderTexture, clear, transform, skipUpdateTransform)
@@ -341,7 +341,7 @@ export default class WebGLRenderer extends SystemRenderer
     /**
      * Changes the current renderer to the one given in parameter
      *
-     * @param {V.ObjectRenderer} objectRenderer - The object renderer to use.
+     * @param {ObjectRenderer} objectRenderer - The object renderer to use.
      */
     setObjectRenderer(objectRenderer)
     {
@@ -413,7 +413,7 @@ export default class WebGLRenderer extends SystemRenderer
     /**
      * Sets the transform of the active render target to the given matrix
      *
-     * @param {V.Matrix} matrix - The transformation matrix
+     * @param {Matrix} matrix - The transformation matrix
      */
     set_transform(matrix)
     {
@@ -423,9 +423,9 @@ export default class WebGLRenderer extends SystemRenderer
     /**
      * Erases the render texture and fills the drawing area with a colour
      *
-     * @param {V.RenderTexture} renderTexture - The render texture to clear
+     * @param {RenderTexture} renderTexture - The render texture to clear
      * @param {number} [clearColor] - The colour
-     * @return {V.WebGLRenderer} Returns itself.
+     * @return {WebGLRenderer} Returns itself.
      */
     clearRenderTexture(renderTexture, clearColor)
     {
@@ -443,9 +443,9 @@ export default class WebGLRenderer extends SystemRenderer
     /**
      * Binds a render texture for rendering
      *
-     * @param {V.RenderTexture} renderTexture - The render texture to render
-     * @param {V.Transform} transform - The transform to be applied to the render texture
-     * @return {V.WebGLRenderer} Returns itself.
+     * @param {RenderTexture} renderTexture - The render texture to render
+     * @param {Transform} transform - The transform to be applied to the render texture
+     * @return {WebGLRenderer} Returns itself.
      */
     bindRenderTexture(renderTexture, transform)
     {
@@ -480,8 +480,8 @@ export default class WebGLRenderer extends SystemRenderer
     /**
      * Changes the current render target to the one given in parameter
      *
-     * @param {V.RenderTarget} renderTarget - the new render target
-     * @return {V.WebGLRenderer} Returns itself.
+     * @param {RenderTarget} renderTarget - the new render target
+     * @return {WebGLRenderer} Returns itself.
      */
     bindRenderTarget(renderTarget)
     {
@@ -504,9 +504,9 @@ export default class WebGLRenderer extends SystemRenderer
     /**
      * Changes the current shader to the one given in parameter
      *
-     * @param {V.Shader} shader - the new shader
+     * @param {Shader} shader - the new shader
      * @param {boolean} [autoProject=true] - Whether automatically set the projection matrix
-     * @return {V.WebGLRenderer} Returns itself.
+     * @return {WebGLRenderer} Returns itself.
      */
     bindShader(shader, autoProject)
     {
@@ -535,12 +535,12 @@ export default class WebGLRenderer extends SystemRenderer
      * needless binding of textures. For example if the texture is already bound it will return the
      * current location of the texture instead of the one provided. To bypass this use force location
      *
-     * @param {V.Texture} texture - the new texture
+     * @param {Texture} texture - the new texture
      * @param {number} location - the suggested texture location
-     * @param {boolean} forceLocation - force the location
+     * @param {boolean} [forceLocation=false] - force the location
      * @return {number} bound texture location
      */
-    bindTexture(texture, location, forceLocation)
+    bindTexture(texture, location, forceLocation = false)
     {
         texture = texture || this.emptyTextures[location];
         texture = texture.base_texture || texture;
@@ -591,8 +591,8 @@ export default class WebGLRenderer extends SystemRenderer
      /**
      * unbinds the texture ...
      *
-     * @param {V.Texture} texture - the texture to unbind
-     * @return {V.WebGLRenderer} Returns itself.
+     * @param {Texture} texture - the texture to unbind
+     * @return {WebGLRenderer} Returns itself.
      */
     unbindTexture(texture)
     {
@@ -617,7 +617,7 @@ export default class WebGLRenderer extends SystemRenderer
     /**
      * Creates a new VAO from this renderer's context and state.
      *
-     * @return {VertexArrayObject} The new VAO.
+     * @return {glCore.VertexArrayObject} The new VAO.
      */
     createVao()
     {
@@ -627,8 +627,8 @@ export default class WebGLRenderer extends SystemRenderer
     /**
      * Changes the current Vao to the one given in parameter
      *
-     * @param {V.VertexArrayObject} vao - the new Vao
-     * @return {V.WebGLRenderer} Returns itself.
+     * @param {glCore.VertexArrayObject} vao - the new Vao
+     * @return {WebGLRenderer} Returns itself.
      */
     bindVao(vao)
     {
@@ -655,7 +655,7 @@ export default class WebGLRenderer extends SystemRenderer
     /**
      * Resets the WebGL state so you can render things however you fancy!
      *
-     * @return {V.WebGLRenderer} Returns itself.
+     * @return {WebGLRenderer} Returns itself.
      */
     reset()
     {
@@ -753,19 +753,19 @@ export default class WebGLRenderer extends SystemRenderer
  * Collection of installed plugins. These are included by default in V, but can be excluded
  * by creating a custom build. Consult the README for more information about creating custom
  * builds and excluding plugins.
- * @name V.WebGLRenderer#plugins
+ * @name WebGLRenderer#plugins
  * @type {object}
  * @readonly
- * @property {V.accessibility.AccessibilityManager} accessibility Support tabbing interactive elements.
- * @property {V.extract.WebGLExtract} extract Extract image data from renderer.
- * @property {V.interaction.InteractionManager} interaction Handles mouse, touch and pointer events.
- * @property {V.prepare.WebGLPrepare} prepare Pre-render display objects.
+ * @property {accessibility.AccessibilityManager} accessibility Support tabbing interactive elements.
+ * @property {extract.WebGLExtract} extract Extract image data from renderer.
+ * @property {interaction.InteractionManager} interaction Handles mouse, touch and pointer events.
+ * @property {prepare.WebGLPrepare} prepare Pre-render display objects.
  */
 
 /**
  * Adds a plugin to the renderer.
  *
- * @method V.WebGLRenderer#registerPlugin
+ * @method WebGLRenderer#registerPlugin
  * @param {string} plugin_name - The name of the plugin.
  * @param {Function} ctor - The constructor function or class for the plugin.
  */

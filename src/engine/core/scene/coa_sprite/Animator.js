@@ -1,4 +1,4 @@
-import Signal from 'engine/Signal';
+import Signal from 'mini-signals';
 import Sprite from '../sprites/Sprite';
 import Node2D from '../Node2D';
 

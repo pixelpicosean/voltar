@@ -9,36 +9,37 @@ import EventEmitter from 'eventemitter3';
 const tempMatrix = new Matrix();
 
 /**
+ * @typedef RendererOption
+ * @property {number} [width=800] - the width of the screen
+ * @property {number} [height=600] - the height of the screen
+ * @property {HTMLCanvasElement} [view] - the canvas to use as a view, optional
+ * @property {boolean} [transparent=false] - If the render view is transparent, default false
+ * @property {boolean} [auto_resize=false] - If the render view is automatically resized, default false
+ * @property {boolean} [antialias=false] - sets antialias (only applicable in chrome at the moment)
+ * @property {number} [resolution=1] - The resolution / device pixel ratio of the renderer. The
+ *     resolution of the renderer retina would be 2.
+ * @property {boolean} [preserve_drawing_buffer=false] - enables drawing buffer preservation,
+ *     enable this if you need to call toDataUrl on the webgl context.
+ * @property {boolean} [clear_before_render=true] - This sets if the renderer will clear the canvas or
+ *     not before the new render pass.
+ * @property {number} [background_color=0x000000] - The background color of the rendered area
+ *     (shown if not transparent).
+ * @property {boolean} [pixel_snap=false] - If true Pixi will Math.floor() x/y values when rendering,
+ *     stopping pixel interpolation.
+ */
+
+/**
  * The SystemRenderer is the base for a Pixi Renderer. It is extended by the {@link V.CanvasRenderer}
  * and {@link V.WebGLRenderer} which can be used for rendering a Pixi scene.
  *
  * @abstract
  * @class
- * @extends EventEmitter
- * @memberof V
  */
 export default class SystemRenderer extends EventEmitter
 {
-    // eslint-disable-next-line valid-jsdoc
     /**
      * @param {string} system - The name of the system this renderer is for.
-     * @param {object} [options] - The optional renderer parameters
-     * @param {number} [options.width=800] - the width of the screen
-     * @param {number} [options.height=600] - the height of the screen
-     * @param {HTMLCanvasElement} [options.view] - the canvas to use as a view, optional
-     * @param {boolean} [options.transparent=false] - If the render view is transparent, default false
-     * @param {boolean} [options.auto_resize=false] - If the render view is automatically resized, default false
-     * @param {boolean} [options.antialias=false] - sets antialias (only applicable in chrome at the moment)
-     * @param {number} [options.resolution=1] - The resolution / device pixel ratio of the renderer. The
-     *  resolution of the renderer retina would be 2.
-     * @param {boolean} [options.preserve_drawing_buffer=false] - enables drawing buffer preservation,
-     *  enable this if you need to call toDataUrl on the webgl context.
-     * @param {boolean} [options.clear_before_render=true] - This sets if the renderer will clear the canvas or
-     *      not before the new render pass.
-     * @param {number} [options.background_color=0x000000] - The background color of the rendered area
-     *  (shown if not transparent).
-     * @param {boolean} [options.pixel_snap=false] - If true Pixi will Math.floor() x/y values when rendering,
-     *  stopping pixel interpolation.
+     * @param {RendererOption} [options] - The optional renderer parameters
      */
     constructor(system, options, arg2, arg3)
     {
@@ -61,7 +62,7 @@ export default class SystemRenderer extends EventEmitter
         /**
          * The supplied constructor options.
          *
-         * @member {Object}
+         * @type {RendererOption}
          * @readOnly
          */
         this.options = options;
@@ -69,9 +70,9 @@ export default class SystemRenderer extends EventEmitter
         /**
          * The type of the renderer.
          *
-         * @member {number}
-         * @default V.RENDERER_TYPE.UNKNOWN
-         * @see V.RENDERER_TYPE
+         * @type {number}
+         * @default RENDERER_TYPE.UNKNOWN
+         * @see RENDERER_TYPE
          */
         this.type = RENDERER_TYPE.UNKNOWN;
 
@@ -80,21 +81,21 @@ export default class SystemRenderer extends EventEmitter
          *
          * Its safe to use as filter_area or hit_area for whole stage
          *
-         * @member {V.Rectangle}
+         * @type {Rectangle}
          */
         this.screen = new Rectangle(0, 0, options.width, options.height);
 
         /**
          * The canvas element that everything is drawn to
          *
-         * @member {HTMLCanvasElement}
+         * @type {HTMLCanvasElement}
          */
         this.view = options.view || document.createElement('canvas');
 
         /**
          * The resolution / device pixel ratio of the renderer
          *
-         * @member {number}
+         * @type {number}
          * @default 1
          */
         this.resolution = options.resolution || settings.RESOLUTION;
@@ -102,21 +103,21 @@ export default class SystemRenderer extends EventEmitter
         /**
          * Whether the render view is transparent
          *
-         * @member {boolean}
+         * @type {boolean}
          */
         this.transparent = options.transparent;
 
         /**
          * Whether css dimensions of canvas view should be resized to screen dimensions automatically
          *
-         * @member {boolean}
+         * @type {boolean}
          */
         this.auto_resize = options.auto_resize || false;
 
         /**
          * Tracks the blend modes useful for this renderer.
          *
-         * @member {object<string, mixed>}
+         * @type {{key:string, mixed:number}}
          */
         this.blend_modes = null;
 
@@ -124,7 +125,7 @@ export default class SystemRenderer extends EventEmitter
          * The value of the preserve_drawing_buffer flag affects whether or not the contents of
          * the stencil buffer is retained after rendering.
          *
-         * @member {boolean}
+         * @type {boolean}
          */
         this.preserve_drawing_buffer = options.preserve_drawing_buffer;
 
@@ -135,7 +136,7 @@ export default class SystemRenderer extends EventEmitter
          * to clear the canvas every frame. Disable this by setting this to false. For example if
          * your game has a canvas filling background image you often don't need this set.
          *
-         * @member {boolean}
+         * @type {boolean}
          * @default
          */
         this.clear_before_render = options.clear_before_render;
@@ -144,14 +145,14 @@ export default class SystemRenderer extends EventEmitter
          * If true Pixi will Math.floor() x/y values when rendering, stopping pixel interpolation.
          * Handy for crisp pixel art and speed on legacy devices.
          *
-         * @member {boolean}
+         * @type {boolean}
          */
         this.pixel_snap = options.pixel_snap;
 
         /**
          * The background color as a number.
          *
-         * @member {number}
+         * @type {number}
          * @private
          */
         this._background_color = 0x000000;
@@ -159,7 +160,7 @@ export default class SystemRenderer extends EventEmitter
         /**
          * The background color as an [R, G, B] array.
          *
-         * @member {number[]}
+         * @type {Array<number>}
          * @private
          */
         this._background_colorRgba = [0, 0, 0, 0];
@@ -167,7 +168,7 @@ export default class SystemRenderer extends EventEmitter
         /**
          * The background color as a string.
          *
-         * @member {string}
+         * @type {string}
          * @private
          */
         this._background_colorString = '#000000';
@@ -177,7 +178,7 @@ export default class SystemRenderer extends EventEmitter
         /**
          * This temporary display object used as the parent of the currently being rendered item
          *
-         * @member {V.Node2D}
+         * @type {Node2D}
          * @private
          */
         this._tempNode2DParent = new Node2D();
@@ -185,7 +186,7 @@ export default class SystemRenderer extends EventEmitter
         /**
          * The last root object that the renderer tried to render.
          *
-         * @member {V.Node2D}
+         * @type {Node2D}
          * @private
          */
         this._lastObjectRendered = this._tempNode2DParent;
@@ -194,7 +195,7 @@ export default class SystemRenderer extends EventEmitter
     /**
      * Same as view.width, actual number of pixels in the canvas by horizontal
      *
-     * @member {number}
+     * @type {number}
      * @readonly
      * @default 800
      */
@@ -206,7 +207,7 @@ export default class SystemRenderer extends EventEmitter
     /**
      * Same as view.height, actual number of pixels in the canvas by vertical
      *
-     * @member {number}
+     * @type {number}
      * @readonly
      * @default 600
      */
@@ -241,10 +242,10 @@ export default class SystemRenderer extends EventEmitter
      * Useful function that returns a texture of the display object that can then be used to create sprites
      * This can be quite useful if your displayObject is complicated and needs to be reused multiple times.
      *
-     * @param {V.Node2D} displayObject - The displayObject the object will be generated from
+     * @param {Node2D} displayObject - The displayObject the object will be generated from
      * @param {number} scale_mode - Should be one of the scale_mode consts
      * @param {number} resolution - The resolution / device pixel ratio of the texture being generated
-     * @return {V.Texture} a texture of the graphics object
+     * @return {Texture} a texture of the graphics object
      */
     generate_texture(displayObject, scale_mode, resolution)
     {
@@ -269,7 +270,7 @@ export default class SystemRenderer extends EventEmitter
     {
         if (removeView && this.view.parentNode)
         {
-            this.view.parentNode.remove_child(this.view);
+            this.view.parentNode.removeChild(this.view);
         }
 
         this.type = RENDERER_TYPE.UNKNOWN;
@@ -304,7 +305,7 @@ export default class SystemRenderer extends EventEmitter
     /**
      * The background color to fill if not transparent
      *
-     * @member {number}
+     * @type {number}
      */
     get background_color()
     {

@@ -13,7 +13,7 @@ import * as interaction from './interaction';
 import * as loaders from './loaders';
 import * as prepare from './prepare';
 import * as audio from './audio';
-import Signal from './Signal';
+import Signal from 'mini-signals';
 import Tween from './anime/Tween';
 import TweenManager from './anime/TweenManager';
 
@@ -30,7 +30,7 @@ const loader = loaders.shared || null;
 /**
  * @type {audio.SoundLibrary}
  */
-const sound = audio.SoundLibrary.init(loaders);
+const sound = audio.SoundLibrary.init(loaders.Resource, loaders.Loader, loader);
 
 export {
     accessibility,
@@ -63,7 +63,7 @@ export const scene_tree = new SceneTree(input);
 
 
 /**
- * @param {core.Node2D} node 
+ * @param {core.Node2D} node
  * @param {any} children
  */
 function assemble_node(node, children) {

@@ -1,5 +1,5 @@
 import Node2D from './Node2D';
-import Signal from 'engine/Signal';
+import Signal from 'mini-signals';
 
 
 export default class Timer extends Node2D {

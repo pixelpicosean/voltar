@@ -7,31 +7,29 @@ import SoundUtils from "../utils/SoundUtils";
 export default class LoaderMiddleware {
     /**
      * Install the middleware
-     * @method PIXI.sound.loader.install
-     * @param {PIXI.sound.SoundLibrary} sound - Instance of sound library
+     * @param {SoundLibrary} sound - Instance of sound library
      */
-    static install(sound, loaders) {
+    static install(sound, Loader, Resource, shared) {
         LoaderMiddleware._sound = sound;
-        LoaderMiddleware.set_legacy(sound.useLegacy, loaders);
+        LoaderMiddleware.set_legacy(sound.useLegacy, Resource);
         // Globally install middleware on all Loaders
         // Note: `resolve` is not supported by default `Loader`
         //  so this will not actually work.
-        loaders.Loader.addPixiMiddleware(() => {
+        Loader.addPixiMiddleware(() => {
             return LoaderMiddleware.plugin;
         });
         // Install middleware on the default loader
-        loaders.shared.use(LoaderMiddleware.plugin);
-        loaders.shared.pre(LoaderMiddleware.resolve);
+        shared.use(LoaderMiddleware.plugin);
+        shared.pre(LoaderMiddleware.resolve);
     }
     /**
      * Set the legacy mode
-     * @name PIXI.sound.loader.legacy
+     * @name audio.loader.legacy
      * @type {boolean}
      * @private
      */
-    static set_legacy(legacy, loaders) {
+    static set_legacy(legacy, Resource) {
         // Configure PIXI Loader to handle audio files correctly
-        const Resource = loaders.Resource;
         const exts = SoundUtils.extensions;
         // Make sure we support webaudio
         if (!legacy) {

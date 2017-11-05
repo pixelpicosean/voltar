@@ -5,12 +5,6 @@ import settings from '../../../settings';
 
 const SOURCE_KEY_MAP = {};
 
-// let math = require('../../../math');
-/**
- * @class
- * @memberof V
- * @extends V.Shader
- */
 export default class Filter
 {
     /**
@@ -23,14 +17,14 @@ export default class Filter
         /**
          * The vertex shader.
          *
-         * @member {string}
+         * @type {string}
          */
         this.vertexSrc = vertexSrc || Filter.defaultVertexSrc;
 
         /**
          * The fragment shader.
          *
-         * @member {string}
+         * @type {string}
          */
         this.fragmentSrc = fragmentSrc || Filter.defaultFragmentSrc;
 
@@ -43,7 +37,7 @@ export default class Filter
          * @example <caption>Updating the value of a custom uniform</caption>
          * filter.uniforms.time = performance.now();
          *
-         * @member {object}
+         * @type {object}
          */
         this.uniforms = {};
 
@@ -73,7 +67,7 @@ export default class Filter
          * Increasing this will add extra width and height to the bounds of the object that the
          * filter is applied to.
          *
-         * @member {number}
+         * @type {number}
          */
         this.padding = 4;
 
@@ -81,14 +75,14 @@ export default class Filter
          * The resolution of the filter. Setting this to be lower will lower the quality but
          * increase the performance of the filter.
          *
-         * @member {number}
+         * @type {number}
          */
         this.resolution = settings.RESOLUTION;
 
         /**
          * If enabled is true the filter is applied, if false it will not.
          *
-         * @member {boolean}
+         * @type {boolean}
          */
         this.enabled = true;
 
@@ -96,7 +90,7 @@ export default class Filter
          * If enabled, pixi will fit the filter area into boundaries for better performance.
          * Switch it off if it does not work for specific shader.
          *
-         * @member {boolean}
+         * @type {boolean}
          */
         this.autoFit = true;
     }
@@ -104,9 +98,9 @@ export default class Filter
     /**
      * Applies the filter
      *
-     * @param {V.FilterManager} filterManager - The renderer to retrieve the filter from
-     * @param {V.RenderTarget} input - The input render target.
-     * @param {V.RenderTarget} output - The target to output to.
+     * @param {FilterManager} filterManager - The renderer to retrieve the filter from
+     * @param {RenderTarget} input - The input render target.
+     * @param {RenderTarget} output - The target to output to.
      * @param {boolean} clear - Should the output be cleared before rendering to it
      * @param {object} [currentState] - It's current state of filter.
      *        There are some useful properties in the currentState :
@@ -127,8 +121,8 @@ export default class Filter
     /**
      * Sets the blendmode of the filter
      *
-     * @member {number}
-     * @default PIXI.BLEND_MODES.NORMAL
+     * @type {number}
+     * @default BLEND_MODES.NORMAL
      */
     get blend_mode()
     {

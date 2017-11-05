@@ -3,7 +3,7 @@ import { TRANSFORM_MODE } from '../const';
 import settings from '../settings';
 import { TransformStatic, Transform, Point, Bounds, Rectangle } from '../math';
 import remove_items from 'remove-array-items';
-import Signal from 'engine/Signal';
+import Signal from 'mini-signals';
 import TweenManager from 'engine/anime/TweenManager';
 
 
@@ -239,7 +239,7 @@ export default class Node2D extends EventEmitter
          */
         this.tweens = new TweenManager();
 
-        
+
         this.tree_entered = new Signal();
         this.tree_exited = new Signal();
     }
@@ -295,7 +295,7 @@ export default class Node2D extends EventEmitter
 
     /**
      * Set name of this node
-     * @param {string} name 
+     * @param {string} name
      */
     set_name(name) {
         this.name = name;
@@ -306,14 +306,14 @@ export default class Node2D extends EventEmitter
     }
 
     /**
-     * @param {boolean} p 
+     * @param {boolean} p
      */
     set_process(p) {
         this.idle_process = !!p;
     }
 
     /**
-     * @param {number} group 
+     * @param {number} group
      */
     add_to_group(group) {
         if (this.groups.indexOf(group) < 0) {
@@ -325,7 +325,7 @@ export default class Node2D extends EventEmitter
         }
     }
     /**
-     * @param {number} group 
+     * @param {number} group
      */
     remove_from_group(group) {
         let idx = this.groups.indexOf(group);
@@ -356,7 +356,7 @@ export default class Node2D extends EventEmitter
     /**
      * recursively updates transform of all objects from the root to this one
      * internal function for to_local()
-     * 
+     *
      * @private
      */
     _recursive_post_update_transform()
@@ -753,7 +753,7 @@ export default class Node2D extends EventEmitter
         return this.transform.rotation;
     }
     /**
-     * @param {number} value 
+     * @param {number} value
      */
     set_rotation(value) {
         this.transform.rotation = value;
@@ -836,7 +836,7 @@ export default class Node2D extends EventEmitter
     _enter_tree() {}
     _ready() {}
     /**
-     * @param {number} delta 
+     * @param {number} delta
      */
     _process(delta) {}
     _exit_tree() {}
@@ -852,8 +852,8 @@ export default class Node2D extends EventEmitter
     }
     /**
      * Call the method at the beginning of next frame
-     * @param {string} method 
-     * @param {any} args 
+     * @param {string} method
+     * @param {any} args
      */
     call_deferred(method, args) {
         if (!this.is_inside_tree) {
@@ -1254,7 +1254,7 @@ export default class Node2D extends EventEmitter
     }
 
     /**
-     * @param {string} path 
+     * @param {string} path
      * @returns {Node2D}
      */
     get_node(path) {

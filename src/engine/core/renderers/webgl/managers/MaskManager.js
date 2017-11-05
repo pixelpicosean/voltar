@@ -1,15 +1,10 @@
 import WebGLManager from './WebGLManager';
 import AlphaMaskFilter from '../filters/spriteMask/SpriteMaskFilter';
 
-/**
- * @class
- * @extends V.WebGLManager
- * @memberof V
- */
 export default class MaskManager extends WebGLManager
 {
     /**
-     * @param {V.WebGLRenderer} renderer - The renderer this manager works for.
+     * @param {WebGLRenderer} renderer - The renderer this manager works for.
      */
     constructor(renderer)
     {
@@ -29,8 +24,8 @@ export default class MaskManager extends WebGLManager
     /**
      * Applies the Mask and adds it to the current filter stack.
      *
-     * @param {V.Node2D} target - Display Object to push the mask to
-     * @param {V.Sprite|V.Graphics} maskData - The masking data.
+     * @param {Node2D} target - Display Object to push the mask to
+     * @param {Sprite|Graphics} maskData - The masking data.
      */
     pushMask(target, maskData)
     {
@@ -72,31 +67,28 @@ export default class MaskManager extends WebGLManager
 
     /**
      * Removes the last mask from the mask stack and doesn't return it.
-     *
-     * @param {V.Node2D} target - Display Object to pop the mask from
-     * @param {V.Sprite|V.Graphics} maskData - The masking data.
      */
-    popMask(target, maskData)
+    popMask()
     {
         if (maskData.texture)
         {
-            this.popSpriteMask(target, maskData);
+            this.popSpriteMask();
         }
         else if (this.enableScissor && !this.renderer.stencilManager.stencilMaskStack.length)
         {
-            this.popScissorMask(target, maskData);
+            this.popScissorMask();
         }
         else
         {
-            this.popStencilMask(target, maskData);
+            this.popStencilMask();
         }
     }
 
     /**
      * Applies the Mask and adds it to the current filter stack.
      *
-     * @param {V.RenderTarget} target - Display Object to push the sprite mask to
-     * @param {V.Sprite} maskData - Sprite to be used as the mask
+     * @param {RenderTarget} target - Display Object to push the sprite mask to
+     * @param {Sprite} maskData - Sprite to be used as the mask
      */
     pushSpriteMask(target, maskData)
     {
@@ -131,7 +123,7 @@ export default class MaskManager extends WebGLManager
     /**
      * Applies the Mask and adds it to the current filter stack.
      *
-     * @param {V.Sprite|V.Graphics} maskData - The masking data.
+     * @param {Sprite|Graphics} maskData - The masking data.
      */
     pushStencilMask(maskData)
     {
@@ -141,7 +133,6 @@ export default class MaskManager extends WebGLManager
 
     /**
      * Removes the last filter from the filter stack and doesn't return it.
-     *
      */
     popStencilMask()
     {
@@ -150,9 +141,8 @@ export default class MaskManager extends WebGLManager
     }
 
     /**
-     *
-     * @param {V.Node2D} target - Display Object to push the mask to
-     * @param {V.Graphics} maskData - The masking data.
+     * @param {Node2D} target - Display Object to push the mask to
+     * @param {Graphics} maskData - The masking data.
      */
     pushScissorMask(target, maskData)
     {
@@ -181,10 +171,6 @@ export default class MaskManager extends WebGLManager
         this.scissor = true;
     }
 
-    /**
-     *
-     *
-     */
     popScissorMask()
     {
         this.scissorRenderTarget = null;

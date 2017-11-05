@@ -27,7 +27,6 @@ const DefaultSettings = {
         pixel_snap: true,
         scale_mode: 'linear',
 
-
         FPS: 60,
 
         stretch_mode: 'viewport',
