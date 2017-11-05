@@ -1,3 +1,5 @@
+import { loaders } from 'engine';
+
 declare module 'engine/audio' {
     export class SoundLibrary {
         context: IMediaContext;
@@ -6,6 +8,7 @@ declare module 'engine/audio' {
         volumeAll: number;
         speedAll: number;
         filtersAll: Filter[];
+        static instance: SoundLibrary;
         constructor(Resource: Function);
         static init(Resource: Function, Loader: Function, shared: loaders.Loader): SoundLibrary;
         add(alias: string, options: Options | string | ArrayBuffer | HTMLAudioElement | Sound): Sound;
