@@ -4,9 +4,6 @@
     "checkJs": true,
     "module": "ES6",
     "target": "ES5",
-    "lib": [
-        "ES5"
-    ],
     "baseUrl": "./src"
   }
 }
