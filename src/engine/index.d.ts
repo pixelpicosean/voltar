@@ -121,19 +121,17 @@ declare module 'resource-loader' {
 declare module 'mini-signals' {
     export default class MiniSignal {
         constructor();
-        handlers(exists: boolean): MiniSignal.MiniSignalBinding[];
-        has(node: MiniSignal.MiniSignalBinding): boolean;
-        dispatch(): boolean;
+        handlers(exists: boolean): MiniSignalBinding[];
+        has(node: MiniSignalBinding): boolean;
+        dispatch(...args: any[]);
         add(fn: Function, thisArg?: any): MiniSignalBinding;
         once(fn: Function, thisArg?: any): MiniSignalBinding;
-        detach(node: MiniSignal.MiniSignalBinding): MiniSignal;
+        detach(node: MiniSignalBinding): MiniSignal;
         detach_all(): MiniSignal;
     }
-    export namespace MiniSignal {
-        class MiniSignalBinding {
-            constructor(fn: Function, once: boolean, thisArg: any);
-            detach(): boolean;
-        }
+    export class MiniSignalBinding {
+        constructor(fn: Function, once: boolean, thisArg: any);
+        detach(): boolean;
     }
 }
 
