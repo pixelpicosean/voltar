@@ -6,7 +6,6 @@ import { Entity, Animation, Obj } from './Model';
 import { FrameData, frame_data_calculator } from './FrameData';
 import { TextureProvider, object_provider } from './Provider';
 
-
 export default class Animator {
     /**
      * @param {Entity} entity

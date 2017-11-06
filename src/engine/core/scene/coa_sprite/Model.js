@@ -1,7 +1,4 @@
-import { linear, angle_linear } from './math';
-
-const DegToRad = Math.PI / 180;
-const PI2 = Math.PI * 2;
+import { linear, angle_linear, PI, PI2, DegToRad } from './math';
 
 export const ObjectType = {
     sprite: 1,

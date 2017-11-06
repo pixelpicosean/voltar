@@ -1,5 +1,8 @@
-const PI = Math.PI;
-const PI2 = Math.PI * 2;
+export const PI = Math.PI;
+export const PI2 = PI * 2;
+
+export const DegToRad = Math.PI / 180;
+export const RadToDeg = 180 / Math.PI;
 
 /**
  * Linear interpolation of two values for the give factor
