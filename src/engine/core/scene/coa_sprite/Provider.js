@@ -3,9 +3,9 @@ import Sprite from '../sprites/Sprite';
 
 /**
  * @typedef SpriteInfo
- * @type {string} texture
- * @type {number} pivot_x
- * @type {number} pivot_y
+ * @property {string} texture
+ * @property {number} pivot_x
+ * @property {number} pivot_y
  */
 
 export class TextureProvider {
@@ -14,12 +14,18 @@ export class TextureProvider {
          * @type {CharacterMap}
          */
         this.character_map = null;
+        /**
+         * @type {{ [folder: number]: { [file: number]: SpriteInfo} }}
+         */
         this.texture_tabel = {};
     }
     /**
      * @param {Array<Folder>} folders
      */
     load(folders) {
+        /**
+         * @type {{ [file: number]: SpriteInfo }}
+         */
         let folder_map = null;
         for (let folder of folders) {
             folder_map = this.texture_tabel[folder.id];

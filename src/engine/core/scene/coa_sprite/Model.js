@@ -38,7 +38,13 @@ export class Model {
 
 export class Element {
     constructor(data) {
+        /**
+         * @type {number}
+         */
         this.id = data.id;
+        /**
+         * @type {string}
+         */
         this.name = data.name;
     }
 }

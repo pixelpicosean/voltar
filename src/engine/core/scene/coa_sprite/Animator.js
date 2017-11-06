@@ -107,7 +107,7 @@ export default class Animator {
     }
 
     /**
-     * Transition to give animation oding a progressive blend
+     * Transition to give animation doing a progressive blend
      * @param {string} name
      * @param {number} total_transition_time
      */
@@ -119,6 +119,8 @@ export default class Animator {
     }
 
     /**
+     * Blend two animations with the given weight factor.
+     * Factor ranges from 0.0f - 1.0f
      * @param {string} first
      * @param {string} second
      * @param {number} factor
@@ -209,7 +211,7 @@ export default class Animator {
             }
         }
         else if (this.node.children.length > objs.length) {
-            let removes = this.remove_children(objs.length - 1);
+            let removes = this.node.remove_children(objs.length - 1);
             for (let spr of removes) {
                 object_provider.put_sprite(spr);
             }

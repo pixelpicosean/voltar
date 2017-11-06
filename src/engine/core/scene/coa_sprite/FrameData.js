@@ -1,5 +1,5 @@
 import { Ref, Obj, Key, MainlineKey, Timeline, Model, CurveType, ObjectType, Animation, Spatial, ObjectInfo } from './Model';
-import { linear, bezier2, bezier3, bezier4, bezier5, bezier2d } from './math';
+import { closer_angle_linear, linear, bezier2, bezier3, bezier4, bezier5, bezier2d } from './math';
 import { object_provider } from './Provider';
 
 /**
@@ -116,6 +116,41 @@ const adjust_time = (target_time, key_a, key_b, anim_length) => {
     return linear(key_a.time, next_time, factor);
 };
 
+/**
+ * Checks if the given mainline keys are compatible for animation blending.
+ * @param {MainlineKey} first_key
+ * @param {MainlineKey} second_key
+ * @returns {boolean}
+ */
+const will_it_blend = (first_key, second_key) => {
+    // bone
+    if (first_key.bone_ref) {
+        if (!second_key.bone_ref) {
+            return false;
+        }
+        if (first_key.bone_ref.length !== second_key.bone_ref.length) {
+            return false;
+        }
+    }
+    else if (second_key.bone_ref) {
+        return false;
+    }
+    // object
+    if (first_key.object_ref) {
+        if (!second_key.object_ref) {
+            return false;
+        }
+        if (first_key.object_ref.length !== second_key.object_ref.length) {
+            return false;
+        }
+    }
+    else if (second_key.object_ref) {
+        return false;
+    }
+    // yes, we can blend now
+    return true;
+};
+
 export class FrameData {
     constructor() {
         /**
@@ -211,6 +246,99 @@ export class FrameDataCalculator {
      * @returns {FrameData}
      */
     get_frame_data_with_blend(first, second, target_time, delta, factor) {
+        this.frame_data.clear();
+
+        if (first === second) {
+            return this.get_frame_data(first, target_time, delta);
+        }
+
+        let target_time_second = target_time / first.length * second.length;
+
+        this.get_mainline_keys(first.mainline, target_time);
+        let first_key_a = this._key_group.a, first_key_b = this._key_group.b;
+
+        this.get_mainline_keys(second.mainline, target_time_second);
+        let second_key_a = this._key_group.a, second_key_b = this._key_group.b;
+
+        if (!will_it_blend(first_key_a, second_key_a) || !will_it_blend(first_key_b, second_key_b)) {
+            return this.get_frame_data(first, target_time, delta);
+        }
+
+        let adjusted_time_first = adjust_time(target_time, first_key_a, first_key_b, first.length);
+        let adjusted_time_second = adjust_time(target_time_second, second_key_a, second_key_b, second.length);
+
+        let bone_infos_a = this.get_bone_infos(first_key_a, first, adjusted_time_first);
+        let bone_infos_b = this.get_bone_infos(second_key_a, second, adjusted_time_second);
+        /**
+         * @type {Spatial[]}
+         */
+        let bone_infos = null;
+        if (bone_infos_a && bone_infos_b) {
+            // TODO: cache
+            bone_infos = new Array(bone_infos_a.length);
+            /** @type {Spatial} */
+            let bone_a;
+            /** @type {Spatial} */
+            let bone_b;
+            /** @type {Spatial} */
+            let interpolated;
+            for (let i = 0; i < bone_infos.length; i++) {
+                bone_a = bone_infos_a[i];
+                bone_b = bone_infos_b[i];
+                interpolated = this.interpolate_spatial(bone_a, bone_b, factor, 1);
+                interpolated.angle = closer_angle_linear(bone_a.angle, bone_b.angle, factor);
+                bone_infos[i] = interpolated;
+            }
+        }
+
+        let base_key = factor < 0.5 ? first_key_a : first_key_b;
+        let current_animation = factor < 0.5 ? first : second;
+
+        for (let i = 0; i < base_key.object_ref.length; i++) {
+            let obj_ref_first = base_key.object_ref[i];
+            let interpolated_first = this.get_object_info(obj_ref_first, first, adjusted_time_first);
+
+            let obj_ref_second = second_key_a.object_ref[i];
+            let interpolated_second = this.get_object_info(obj_ref_second, second, adjusted_time_second);
+
+            let info = this.interpolate_obj(interpolated_first, interpolated_second, factor, 1);
+            info.angle = closer_angle_linear(interpolated_first.angle, interpolated_second.angle, factor);
+            info.pivot_x = linear(interpolated_first.pivot_x, interpolated_second.pivot_x, factor);
+            info.pivot_y = linear(interpolated_first.pivot_y, interpolated_second.pivot_y, factor);
+
+            if (bone_infos && obj_ref_first.parent >= 0) {
+                info.apply_parent_transform(bone_infos[obj_ref_first.parent]);
+            }
+
+            this.add_spatial_data(info, current_animation.timeline[obj_ref_first.timeline], current_animation.entity.spriter, delta);
+
+            object_provider.put_obj(interpolated_first);
+            object_provider.put_obj(interpolated_second);
+        }
+
+        // Recycle bone info lists
+        if (bone_infos_a && bone_infos_a.length > 0) {
+            for (let b of bone_infos_a) {
+                object_provider.put_spatial(b);
+            }
+            bone_infos_a.length = 0;
+            bone_infos_a = null;
+        }
+        if (bone_infos_b && bone_infos_b.length > 0) {
+            for (let b of bone_infos_b) {
+                object_provider.put_spatial(b);
+            }
+            bone_infos_b.length = 0;
+            bone_infos_b = null;
+        }
+        if (bone_infos && bone_infos.length > 0) {
+            for (let b of bone_infos) {
+                object_provider.put_spatial(b);
+            }
+            bone_infos.length = 0;
+            bone_infos = null;
+        }
+
         return this.frame_data;
     }
 
@@ -237,7 +365,7 @@ export class FrameDataCalculator {
      * @param {MainlineKey} key
      * @param {Animation} animation
      * @param {number} target_time
-     * @param {Spatial} parent
+     * @param {Spatial} [parent]
      * @returns {Array<Spatial>}
      */
     get_bone_infos(key, animation, target_time, parent) {

@@ -1,4 +1,5 @@
 const PI = Math.PI;
+const PI2 = Math.PI * 2;
 
 /**
  * Linear interpolation of two values for the give factor
@@ -23,10 +24,29 @@ export const angle_linear = (a, b, spin, f) => {
         return a;
     }
     if (spin > 0 && (b - a) < 0) {
-        b += PI;
+        b += PI2;
     }
     if (spin < 0 && (b - a) > 0) {
-        b -= PI;
+        b -= PI2;
+    }
+    return linear(a, b, f);
+};
+
+/**
+ * Does a linear angle interpolation towards the closest direction
+ * @param {number} a
+ * @param {number} b
+ * @param {number} f
+ */
+export const closer_angle_linear = (a, b, f) => {
+    if (Math.abs(b - a) < PI) {
+        return linear(a, b, f);
+    }
+    if (a < b) {
+        a += PI2;
+    }
+    else {
+        b += PI2;
     }
     return linear(a, b, f);
 };
