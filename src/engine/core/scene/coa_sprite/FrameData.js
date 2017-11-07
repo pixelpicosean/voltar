@@ -8,7 +8,7 @@ import { object_provider } from './Provider';
  * @param {boolean} looping
  * @returns {Key}
  */
-const get_next_key = (keys, first, looping) => {
+function get_next_key(keys, first, looping) {
     if (keys.length === 1) {
         return null;
     }
@@ -20,14 +20,14 @@ const get_next_key = (keys, first, looping) => {
         key_id = 0;
     }
     return keys[key_id];
-};
+}
 
 /**
  * @param {Array<Key>} keys
  * @param {number} target_time
  * @returns {Key}
  */
-const get_last_key = (keys, target_time) => {
+function get_last_key(keys, target_time) {
     let current = null, key;
     for (let i = 0; i < keys.length; i++) {
         key = keys[i];
@@ -35,7 +35,7 @@ const get_last_key = (keys, target_time) => {
         current = key;
     }
     return current;
-};
+}
 
 /**
  * Calculate the interpolation factor of the given value
@@ -44,9 +44,9 @@ const get_last_key = (keys, target_time) => {
  * @param {number} v
  * @returns {number}
  */
-const get_num_factor = (a, b, v) => {
+function get_num_factor(a, b, v) {
     return (v - a) / (b - a);
-};
+}
 
 /**
  * Adjust the factor based on curve type of the key
@@ -54,7 +54,7 @@ const get_num_factor = (a, b, v) => {
  * @param {Key} key
  * @returns {number}
  */
-const adjust_factor = (factor, key) => {
+function adjust_factor(factor, key) {
     switch (key.curve_type) {
         case CurveType.instant:
             factor = 0;
@@ -74,12 +74,12 @@ const adjust_factor = (factor, key) => {
             factor = bezier5(0, key.c1, key.c2, key.c3, key.c4, 1, factor);
             break;
         case CurveType.bezier:
-            // factor = bezier2d(key.c1, key.c2, key.c3, key.c4, factor);
+            factor = bezier2d(key.c1, key.c2, key.c3, key.c4, factor);
             break;
     }
 
     return factor;
-};
+}
 
 /**
  * Calculate the interpolation factor of two keys.
@@ -89,7 +89,7 @@ const adjust_factor = (factor, key) => {
  * @param {number} target_time
  * @returns {number}
  */
-const get_factor = (key_a, key_b, anim_length, target_time) => {
+function get_factor(key_a, key_b, anim_length, target_time) {
     let time_a = key_a.time, time_b = key_b.time;
 
     if (time_a > time_b) {
@@ -102,7 +102,7 @@ const get_factor = (key_a, key_b, anim_length, target_time) => {
     let factor = get_num_factor(time_a, time_b, target_time);
     factor = adjust_factor(factor, key_a);
     return factor;
-};
+}
 
 /**
  * @param {number} target_time
@@ -110,11 +110,11 @@ const get_factor = (key_a, key_b, anim_length, target_time) => {
  * @param {Key} key_b
  * @param {number} anim_length
  */
-const adjust_time = (target_time, key_a, key_b, anim_length) => {
+function adjust_time(target_time, key_a, key_b, anim_length) {
     let next_time = key_b.time > key_a.time ? key_b.time : anim_length;
     let factor = get_factor(key_a, key_b, anim_length, target_time);
     return linear(key_a.time, next_time, factor);
-};
+}
 
 /**
  * Checks if the given mainline keys are compatible for animation blending.
@@ -122,7 +122,7 @@ const adjust_time = (target_time, key_a, key_b, anim_length) => {
  * @param {MainlineKey} second_key
  * @returns {boolean}
  */
-const will_it_blend = (first_key, second_key) => {
+function will_it_blend(first_key, second_key) {
     // bone
     if (first_key.bone_ref) {
         if (!second_key.bone_ref) {
@@ -149,7 +149,7 @@ const will_it_blend = (first_key, second_key) => {
     }
     // yes, we can blend now
     return true;
-};
+}
 
 export class FrameData {
     constructor() {
