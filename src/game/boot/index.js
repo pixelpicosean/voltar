@@ -12,7 +12,7 @@ import SoundTest from 'game/test/sound';
 import CoaTest from 'game/test/coa';
 
 
-const FirstScene = CoaTest;
+const FirstScene = TilemapTest;
 
 
 export default class Boot extends v.Node2D {
