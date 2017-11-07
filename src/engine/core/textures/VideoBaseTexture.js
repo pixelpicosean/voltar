@@ -2,6 +2,7 @@ import BaseTexture from './BaseTexture';
 import { uid, BaseTextureCache } from '../utils';
 import { shared } from '../ticker';
 import { UPDATE_PRIORITY } from '../const';
+import determine_cross_origin from '../utils/determine_cross_origin';
 
 /**
  * A texture of a [playing] Video.
@@ -236,14 +237,26 @@ export default class VideoBaseTexture extends BaseTexture
      * @param {string} [videoSrc.mime] - The mimetype of the video (e.g. 'video/mp4'). If not specified
      *  the url's extension will be used as the second part of the mime type.
      * @param {number} scale_mode - See {@link V.SCALE_MODES} for possible values
+     * @param {boolean} [crossorigin=(auto)] - Should use anonymous CORS? Defaults to true if the URL is not a data-URI.
      * @return {V.VideoBaseTexture} Newly created VideoBaseTexture
      */
-    static from_url(videoSrc, scale_mode)
+    static from_url(videoSrc, scale_mode, crossorigin)
     {
         const video = document.createElement('video');
 
         video.setAttribute('webkit-playsinline', '');
         video.setAttribute('playsinline', '');
+
+        const url = Array.isArray(videoSrc) ? (videoSrc[0].src || videoSrc[0]) : (videoSrc.src || videoSrc);
+
+        if (crossorigin === undefined && url.indexOf('data:') !== 0)
+        {
+            video.crossOrigin = determine_cross_origin(url);
+        }
+        else if (crossorigin)
+        {
+            video.crossOrigin = typeof crossorigin === 'string' ? crossorigin : 'anonymous';
+        }
 
         // array of objects or strings
         if (Array.isArray(videoSrc))
@@ -256,7 +269,7 @@ export default class VideoBaseTexture extends BaseTexture
         // single object or string
         else
         {
-            video.appendChild(create_source(videoSrc.src || videoSrc, videoSrc.mime));
+            video.appendChild(create_source(url, videoSrc.mime));
         }
 
         video.load();

@@ -1,6 +1,10 @@
 import * as core from '../core';
 import Device from 'ismobilejs';
 import accessible_target from './accessible_target';
+import SystemRenderer from '../core/renderers/SystemRenderer';
+import Node2D from '../core/scene/Node2D';
+import { Rectangle } from '../core/math';
+
 
 // add some extra variables to the container..
 core.utils.mixins.delay_mixin(
@@ -29,14 +33,11 @@ const DIV_HOOK_ZINDEX = 2;
  * events as if the mouse was being used, minimizing the effort required to implement.
  *
  * An instance of this class is automatically created by default, and can be found at renderer.plugins.accessibility
- *
- * @class
- * @memberof V.accessibility
  */
 export default class AccessibilityManager
 {
     /**
-     * @param {V.CanvasRenderer|V.WebGLRenderer} renderer - A reference to the current renderer
+     * @param {core.CanvasRenderer|core.WebGLRenderer} renderer - A reference to the current renderer
      */
     constructor(renderer)
     {
@@ -53,7 +54,7 @@ export default class AccessibilityManager
         div.style.position = 'absolute';
         div.style.top = `${DIV_TOUCH_POS_X}px`;
         div.style.left = `${DIV_TOUCH_POS_Y}px`;
-        div.style.zIndex = DIV_TOUCH_ZINDEX;
+        div.style.zIndex = `${DIV_TOUCH_ZINDEX}`;
 
         /**
          * This is the dom element that will sit over the pixi element. This is where the div overlays will go.
@@ -66,7 +67,7 @@ export default class AccessibilityManager
         /**
          * A simple pool for storing divs.
          *
-         * @type {*}
+         * @type {Array<HTMLElement>}
          * @private
          */
         this.pool = [];
@@ -74,7 +75,7 @@ export default class AccessibilityManager
         /**
          * This is a tick used to check if an object is no longer being rendered.
          *
-         * @type {Number}
+         * @type {number}
          * @private
          */
         this.render_id = 0;
@@ -89,14 +90,14 @@ export default class AccessibilityManager
         /**
          * The renderer this accessibility manager works for.
          *
-         * @member {V.SystemRenderer}
+         * @type {SystemRenderer}
          */
         this.renderer = renderer;
 
         /**
          * The array of currently active accessible items.
          *
-         * @member {Array<*>}
+         * @type {Array<Node2D>}
          * @private
          */
         this.children = [];
@@ -112,7 +113,6 @@ export default class AccessibilityManager
         /**
          * stores the state of the manager. If there are no accessible objects or the mouse is moving, this will be false.
          *
-         * @member {Array<*>}
          * @private
          */
         this.is_active = false;
@@ -135,7 +135,7 @@ export default class AccessibilityManager
         hookDiv.style.position = 'absolute';
         hookDiv.style.top = `${DIV_HOOK_POS_X}px`;
         hookDiv.style.left = `${DIV_HOOK_POS_Y}px`;
-        hookDiv.style.zIndex = DIV_HOOK_ZINDEX;
+        hookDiv.style.zIndex = `${DIV_HOOK_ZINDEX}`;
         hookDiv.style.backgroundColor = '#FF0000';
         hookDiv.title = 'HOOK DIV';
 
@@ -205,7 +205,7 @@ export default class AccessibilityManager
      * This recursive function will run through the scene graph and add any new accessible objects to the DOM layer.
      *
      * @private
-     * @param {V.Node2D} displayObject - The Node2D to check.
+     * @param {Node2D} displayObject - The Node2D to check.
      */
     update_accessible_objects(displayObject)
     {
@@ -362,7 +362,7 @@ export default class AccessibilityManager
             div.style.height = `${DIV_TOUCH_SIZE}px`;
             div.style.backgroundColor = this.debug ? 'rgba(255,0,0,0.5)' : 'transparent';
             div.style.position = 'absolute';
-            div.style.zIndex = DIV_TOUCH_ZINDEX;
+            div.style.zIndex = `${DIV_TOUCH_ZINDEX}`;
             div.style.borderStyle = 'none';
 
             div.addEventListener('click', this._onClick.bind(this));

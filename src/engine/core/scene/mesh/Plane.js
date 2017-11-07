@@ -96,6 +96,8 @@ export default class Plane extends Mesh
         this.uvs = new Float32Array(uvs);
         this.colors = new Float32Array(colors);
         this.indices = new Uint16Array(indices);
+
+        this.dirty++;
         this.index_dirty++;
 
         this.multiply_uvs();

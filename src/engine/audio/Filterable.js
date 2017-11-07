@@ -3,9 +3,10 @@
  * both extend. This provides the functionality for adding
  * dynamic filters.
  * @class Filterable
- * @memberof PIXI.sound
+ * @memberof v.sound
  * @param {AudioNode} source The source audio node
  * @param {AudioNode} destination The output audio node
+ * @private
  */
 export default class Filterable {
     constructor(input, output) {
@@ -14,7 +15,7 @@ export default class Filterable {
     }
     /**
      * The destination output audio node
-     * @name PIXI.sound.Filterable#destination
+     * @name v.sound.Filterable#destination
      * @type {AudioNode}
      * @readonly
      */
@@ -23,8 +24,8 @@ export default class Filterable {
     }
     /**
      * The collection of filters
-     * @name PIXI.sound.Filterable#filters
-     * @type {PIXI.sound.filters.Filter[]}
+     * @name v.sound.Filterable#filters
+     * @type {v.sound.filters.Filter[]}
      */
     get filters() {
         return this._filters;
@@ -62,7 +63,7 @@ export default class Filterable {
     }
     /**
      * Cleans up.
-     * @method PIXI.sound.Filterable#destroy
+     * @method v.sound.Filterable#destroy
      */
     destroy() {
         this.filters = null;

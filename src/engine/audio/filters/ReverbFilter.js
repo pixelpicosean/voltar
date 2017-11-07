@@ -6,9 +6,9 @@ import SoundLibrary from '../SoundLibrary';
  *
  * @class ReverbFilter
  * @memberof PIXI.sound.filters
- * @param {Number} [seconds=3] Seconds for reverb
- * @param {Number} [decay=2] The decay length
- * @param {Boolean} [reverse=false] Reverse reverb
+ * @param {number} [seconds=3] Seconds for reverb
+ * @param {number} [decay=2] The decay length
+ * @param {boolean} [reverse=false] Reverse reverb
  */
 export default class ReverbFilter extends Filter {
     constructor(seconds = 3, decay = 2, reverse = false) {
@@ -28,10 +28,10 @@ export default class ReverbFilter extends Filter {
      * Clamp a value
      * @method PIXI.sound.filters.ReverbFilter#_clamp
      * @private
-     * @param {Number} value
-     * @param {Number} min Minimum value
-     * @param {Number} max Maximum value
-     * @return {Number} Clamped number
+     * @param {number} value
+     * @param {number} min Minimum value
+     * @param {number} max Maximum value
+     * @return {number} Clamped number
      */
     _clamp(value, min, max) {
         return Math.min(max, Math.max(min, value));
@@ -39,7 +39,7 @@ export default class ReverbFilter extends Filter {
     /**
      * Length of reverb in seconds from 1 to 50
      * @name PIXI.sound.filters.ReverbFilter#decay
-     * @type {Number}
+     * @type {number}
      * @default 3
      */
     get seconds() {
@@ -52,7 +52,7 @@ export default class ReverbFilter extends Filter {
     /**
      * Decay value from 0 to 100
      * @name PIXI.sound.filters.ReverbFilter#decay
-     * @type {Number}
+     * @type {number}
      * @default 2
      */
     get decay() {
@@ -65,7 +65,7 @@ export default class ReverbFilter extends Filter {
     /**
      * Reverse value from 0 to 1
      * @name PIXI.sound.filters.ReverbFilter#reverse
-     * @type {Boolean}
+     * @type {boolean}
      * @default false
      */
     get reverse() {

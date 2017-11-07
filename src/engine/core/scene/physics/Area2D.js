@@ -1,5 +1,5 @@
 import CollisionObject2D from './CollisionObject2D';
-import Signal from 'engine/Signal';
+import Signal from 'mini-signals';
 
 export default class Area2D extends CollisionObject2D {
     set rotation(value) {

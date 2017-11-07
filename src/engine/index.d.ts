@@ -1,0 +1,2190 @@
+// https://github.com/primus/eventemitter3
+declare module 'eventemitter3' {
+    export default class EventEmitter {
+        listeners(event: string): Function[];
+        emit(event: string, ...args: any[]): boolean;
+        on(event: string, fn: Function, context?: any): EventEmitter;
+        once(event: string, fn: Function, context?: any): EventEmitter;
+        removeListener(event: string, fn: Function, context?: any, once?: boolean): EventEmitter;
+        removeAllListeners(event: string): EventEmitter;
+
+        off(event: string, fn: Function, context?: any, once?: boolean): EventEmitter;
+        addListener(event: string, fn: Function, context?: any): EventEmitter;
+    }
+}
+
+// remove-array-items
+declare module 'remove-array-items' {
+    export default function remove_items<T>(arr: T[], startIdx: number, removeCount: number): void;
+}
+
+// https://github.com/englercj/resource-loader/
+// v2.0.9
+declare module 'resource-loader' {
+    interface LoaderOptions {
+        crossOrigin?: boolean | string;
+        loadType?: number;
+        xhrType?: string;
+        metaData?: any;
+    }
+    interface ResourceDictionary {
+        [index: string]: Resource;
+    }
+    import MiniSignal from 'mini-signals';
+    export default class Loader {
+        baseUrl: string;
+        progress: number;
+        loading: boolean;
+        defaultQueryString: string;
+        resources: ResourceDictionary;
+
+        onProgress: MiniSignal;
+        onError: MiniSignal;
+        onLoad: MiniSignal;
+        onStart: MiniSignal;
+        onComplete: MiniSignal;
+
+        get concurrency(): number;
+        set concurrency(value: number): void;
+
+        constructor(baseUrl?: string, concurrency?: number);
+
+        add(name: string, url: string, options?: LoaderOptions, cb?: () => void): Loader;
+        add(url: string, options?: LoaderOptions, cb?: () => void): Loader;
+        //todo I am not sure of object literal notional (or its options) so just allowing any but would love to improve this
+        add(obj: any, options?: LoaderOptions, cb?: () => void): Loader;
+
+        before(fn: Function): Loader;
+        pre(fn: Function): Loader;
+
+        after(fn: Function): Loader;
+        use(fn: Function): Loader;
+
+        reset(): void;
+
+        load(cb?: (loader: Loader, object: any) => void): Loader;
+    }
+    interface TextureDictionary {
+        [index: string]: Texture;
+    }
+    class Resource {
+        isJson: boolean;
+        metadata: any;
+        spineData: any;
+        spineAtlas: any;
+
+        name: string;
+        texture: Texture;
+        textures: TextureDictionary;
+        url: string;
+        data: any;
+        crossOrigin: boolean | string;
+        loadType: number;
+        xhrType: string;
+        error: Error;
+        xhr: XMLHttpRequest;
+        SVGMetadataElement: any;
+
+        static setExtensionLoadType(extname: string, loadType: number): void;
+        static setExtensionXhrType(extname: string, xhrType: number): void;
+
+        constructor(name?: string, url?: string | string[], options?: LoaderOptions);
+
+        complete(): void;
+        load(cb?: () => void): void;
+    }
+    namespace Resource {
+        const LOAD_TYPE: {
+            XHR: number;
+            IMAGE: number;
+            AUDIO: number;
+            VIDEO: number;
+        };
+        const XHR_READ_STATE: {
+            UNSENT: number;
+            OPENED: number;
+            HEADERS_RECIEVED: number;
+            LOADING: number;
+            DONE: number;
+        };
+        const XHR_RESPONSE_TYPE: {
+            DEFAULT: number;
+            BUFFER: number;
+            BLOB: number;
+            DOCUMENT: number;
+            JSON: number;
+            TEXT: number;
+        };
+    }
+}
+
+declare module 'mini-signals' {
+    export default class MiniSignal {
+        constructor();
+        handlers(exists: boolean): MiniSignalBinding[];
+        has(node: MiniSignalBinding): boolean;
+        dispatch(...args: any[]);
+        add(fn: Function, thisArg?: any): MiniSignalBinding;
+        once(fn: Function, thisArg?: any): MiniSignalBinding;
+        detach(node: MiniSignalBinding): MiniSignal;
+        detach_all(): MiniSignal;
+    }
+    export class MiniSignalBinding {
+        constructor(fn: Function, once: boolean, thisArg: any);
+        detach(): boolean;
+    }
+}
+
+declare module 'ismobilejs' {
+    export const apple: {
+        phone: boolean,
+        ipod: boolean,
+        tablet: boolean,
+        device: string,
+    };
+    export const android: {
+        phone: boolean,
+        tablet: boolean,
+        device: string,
+    };
+    export const amazon: {
+        phone: boolean,
+        tablet: boolean,
+        device: string,
+    };
+    export const windows: {
+        phone: boolean,
+        tablet: boolean,
+        device: string,
+    };
+    export const seven_inch: boolean;
+    export const other: {
+        blackberry_10: boolean,
+        blackberry: boolean,
+        opera: boolean,
+        firefox: boolean,
+        chrome: boolean,
+        device: string,
+    };
+    export const any: boolean;
+    export const phone: boolean;
+    export const tablet: boolean;
+}
+
+declare module 'engine/anime/Tween' {
+    type Tweenable = string | number | boolean | { x: number, y: number };
+    class InterpolateData {
+        active: boolean;
+        finish: boolean;
+
+        duration: number;
+        delay: number;
+        elapsed: number;
+
+        type: number;
+        val_type: number;
+        easing: Function;
+
+        obj: any;
+        key: string;
+        flat_key: string;
+        target_obj: any;
+        target_key: string;
+        flat_target_key: string[];
+
+        initial_val: Tweenable;
+        delta_val: Tweenable;
+        final_val: Tweenable;
+
+        call_deferred: boolean;
+        args: any;
+
+        protected _init();
+    }
+    import MiniSignal from 'mini-signals';
+    export default class Tween {
+        tween_completed: MiniSignal;
+        tween_started: MiniSignal;
+        tween_step: MiniSignal;
+
+        is_removed: boolean;
+
+        autoplay: boolean;
+        active: boolean;
+        repeat: boolean;
+        speed_scale: number;
+
+        interpolates: InteractionData[];
+
+        constructor();
+
+        set_active(active: boolean);
+        set_speed_scale(scale: number);
+
+        start();
+        reset(obj: any, key: string): Tween;
+        reset_all();
+        stop(obj: any, key: string): Tween;
+        stop_all();
+        resume(obj: any, key: string): Tween;
+        resume_all();
+        remove(obj: any, key: string, first_only: boolean): Tween;
+        remove_all();
+
+        seek(p_time: number): Tween;
+        tell(): number;
+        get_runtime(): number;
+
+        interpolate_property(obj: any, property: string, initial_val: Tweenable, final_val: Tweenable, duration: number, p_easing: string, delay?: number);
+        interpolate_method(obj: any, method: string, initial_val: Tweenable, final_val: Tweenable, duration: number, p_easing: string, delay?: number);
+        interpolate_callback(obj: any, duration: number, callback: Function, args?: any);
+        interpolate_deferred_callback(obj: any, duration: number, callback: Function, args?: any);
+        follow_property(obj: any, property: string, initial_val: Tweenable, target: any, target_property: string, duration: number, p_easing: string, delay?: number);
+        follow_method(obj: any, method: string, initial_val: Tweenable, target: any, target_method: string, duration: number, p_easing: string, delay?: number);
+        targeting_property(obj: any, property: string, initial: Tweenable, initial_property: string, final_val: Tweenable, duration: number, p_easing: string, delay?: number);
+        targeting_method(obj: any, method: string, initial: Tweenable, initial_method: string, final_val: Tweenable, duration: number, p_easing: string, delay?: number);
+
+        clear_events();
+
+        protected _init();
+        protected _propagate_process(delta: number);
+        protected _get_initial_val(p_data: InterpolateData): Tweenable;
+        protected _get_delta_val(p_data: InterpolateData): Tweenable;
+        protected _calc_delta_val(initial_val: Tweenable, final_val: Tweenable, data: InteractionData): boolean;
+        protected _run_equation(data: InteractionData): Tweenable;
+        protected _apply_tween_value(data: InteractionData, value: Tweenable): boolean;
+    }
+}
+declare module 'engine/anime/TweenManager' {
+    import Tween from 'engine/anime/Tween';
+    export default class TweenManager {
+        tweens: Tween[];
+
+        constructor();
+
+        add(tween: Tween): Tween;
+        remove(tween: Tween);
+        create(): Tween;
+
+        protected _process(delta: number);
+        protected _stop_all();
+    }
+}
+
+declare module 'engine/filters' {
+    export class AsciiFilter extends AbstractFilter {
+        size: number;
+    }
+    export class BloomFilter extends AbstractFilter {
+        blur: number;
+        blurX: number;
+        blurY: number;
+    }
+    export class BlurFilter extends AbstractFilter {
+        protected blurXFilter: BlurXFilter;
+        protected blurYFilter: BlurYFilter;
+
+        blur: number;
+        passes: number;
+        blurX: number;
+        blurY: number;
+    }
+    export class BlurXFilter extends AbstractFilter {
+        passes: number;
+        strength: number;
+        blur: number;
+    }
+    export class BlurYFilter extends AbstractFilter {
+        passes: number;
+        strength: number;
+        blur: number;
+    }
+    export class SmartBlurFilter extends AbstractFilter {
+    }
+    export class ColorMatrixFilter extends AbstractFilter {
+        protected _loadMatrix(matrix: number[], multiply: boolean): void;
+        protected _multiply(out: number[], a: number[], b: number[]): void;
+        protected _colorMatrix(matrix: number[]): void;
+
+        matrix: number[];
+
+        brightness(b: number, multiply?: boolean): void;
+        greyscale(scale: number, multiply?: boolean): void;
+        blackAndWhite(multiply?: boolean): void;
+        hue(rotation: number, multiply?: boolean): void;
+        contrast(amount: number, multiply?: boolean): void;
+        saturate(amount: number, multiply?: boolean): void;
+        desaturate(multiply?: boolean): void;
+        negative(multiply?: boolean): void;
+        sepia(multiply?: boolean): void;
+        technicolor(multiply?: boolean): void;
+        polaroid(multiply?: boolean): void;
+        toBGR(multiply?: boolean): void;
+        kodachrome(multiply?: boolean): void;
+        browni(multiply?: boolean): void;
+        vintage(multiply?: boolean): void;
+        colorTone(desaturation: number, toned: number, lightColor: string, darkColor: string, multiply?: boolean): void;
+        night(intensity: number, multiply?: boolean): void;
+        predator(amount: number, multiply?: boolean): void;
+        lsd(multiply?: boolean): void;
+        reset(): void;
+    }
+    export class ColorStepFilter extends AbstractFilter {
+        step: number;
+    }
+    export class ConvolutionFilter extends AbstractFilter {
+        constructor(matrix: number[], width: number, height: number);
+
+        matrix: number[];
+        width: number;
+        height: number;
+    }
+    export class CrossHatchFilter extends AbstractFilter {
+    }
+    export class DisplacementFilter extends AbstractFilter {
+        constructor(sprite: Sprite, scale?: number);
+
+        map: Texture;
+
+        scale: Point;
+    }
+    export class DotScreenFilter extends AbstractFilter {
+        scale: number;
+        angle: number;
+    }
+    export class BlurYTintFilter extends AbstractFilter {
+        blur: number;
+    }
+    export class DropShadowFilter extends AbstractFilter {
+        blur: number;
+        blurX: number;
+        blurY: number;
+        color: number;
+        alpha: number;
+        distance: number;
+        angle: number;
+    }
+    export class GrayFilter extends AbstractFilter {
+        gray: number;
+    }
+    export class InvertFilter extends AbstractFilter {
+        invert: number;
+    }
+    export class NoiseFilter extends AbstractFilter {
+        noise: number;
+    }
+    export class PixelateFilter extends AbstractFilter {
+        size: Point;
+    }
+    export class RGBSplitFilter extends AbstractFilter {
+        red: Point;
+        green: Point;
+        blue: Point;
+    }
+    export class SepiaFilter extends AbstractFilter {
+        sepia: number;
+    }
+    export class ShockwaveFilter extends AbstractFilter {
+        center: number[];
+        params: any;
+        time: number;
+    }
+    export class TiltShiftAxisFilter extends AbstractFilter {
+        blur: number;
+        gradientBlur: number;
+        start: number;
+        end: number;
+
+        updateDelta(): void;
+    }
+    export class TiltShiftFilter extends AbstractFilter {
+        blur: number;
+        gradientBlur: number;
+        start: number;
+        end: number;
+    }
+    export class TiltShiftXFilter extends AbstractFilter {
+        updateDelta(): void;
+    }
+    export class TiltShiftYFilter extends AbstractFilter {
+        updateDelta(): void;
+    }
+    export class TwistFilter extends AbstractFilter {
+        offset: Point;
+        radius: number;
+        angle: number;
+    }
+}
+
+declare module 'engine/input' {
+    export default class Input {
+        bindings: { [key: string]: string};
+        key_list: string[];
+        actions: { [action: string]: boolean };
+        last_pressed: { [action: string]: boolean };
+        last_released: { [action: string]: boolean };
+
+        mouse: Vector;
+
+        protected _init(viewport: Node2D);
+        protected _process(delta: number);
+
+        bind(key: string, action: string): Input;
+        unbind(key: string, action: string): Input;
+        unbind_all();
+
+        is_action_pressed(action: string): boolean;
+        is_action_just_pressed(action: string): boolean;
+        is_action_just_released(action: string): boolean;
+        action_press(action: string);
+        action_release(action: string);
+
+        protected _keydown(k: string, shift: boolean, ctrl: boolean, alt: boolean);
+        protected _keyup(k: string);
+    }
+}
+
+declare module 'engine/interaction' {
+    export interface InteractionEvent {
+        stopped: boolean;
+        target: any;
+        type: string;
+        data: InteractionData;
+        stopPropagation(): void;
+    }
+    export class InteractionData {
+        global: Point;
+        target: Node2D;
+        originalEvent: Event;
+
+        getLocalPosition(displayObject: Node2D, point?: Point, globalPos?: Point): Point;
+    }
+    export class InteractionManager {
+        protected interactionDOMElement: HTMLElement;
+        protected eventsAdded: boolean;
+        protected moveWhenInside: boolean;
+        protected _tempPoint: Point;
+
+        protected setTargetElement(element: HTMLElement, resolution: number): void;
+        protected addEvents(): void;
+        protected removeEvents(): void;
+        protected dispatchEvent(displayObject: Node2D, eventString: string, eventData: any): void;
+        protected onMouseDown: (event: Event) => void;
+        protected processMouseDown: (displayObject: Node2D, hit: boolean) => void;
+        protected onMouseUp: (event: Event) => void;
+        protected processMouseUp: (displayObject: Node2D, hit: boolean) => void;
+        protected onMouseMove: (event: Event) => void;
+        protected processMouseMove: (displayObject: Node2D, hit: boolean) => void;
+        protected onMouseOut: (event: Event) => void;
+        protected processMouseOverOut: (displayObject: Node2D, hit: boolean) => void;
+        protected onTouchStart: (event: Event) => void;
+        protected processTouchStart: (Node2D: Node2D, hit: boolean) => void;
+        protected onTouchEnd: (event: Event) => void;
+        protected processTouchEnd: (displayObject: Node2D, hit: boolean) => void;
+        protected onTouchMove: (event: Event) => void;
+        protected processTouchMove: (displayObject: Node2D, hit: boolean) => void;
+        protected getTouchData(touchEvent: InteractionData): InteractionData;
+        protected returnTouchData(touchData: InteractionData): void;
+
+        constructor(renderer: CanvasRenderer | WebGLRenderer, options?: { autoPreventDefault?: boolean; interactionFrequence?: number; });
+
+        renderer: CanvasRenderer | WebGLRenderer;
+        autoPreventDefault: boolean;
+        interactionFrequency: number;
+        mouse: InteractionData;
+        eventData: {
+            stopped: boolean;
+            target: any;
+            type: any;
+            data: InteractionData;
+        };
+        interactiveDataPool: InteractionData[];
+        last: number;
+        currentCursorStyle: string;
+        resolution: number;
+        update(deltaTime: number): void;
+
+        mapPositionToPoint(point: Point, x: number, y: number): void;
+        processInteractive(point: Point, displayObject: Node2D, func: (displayObject: Node2D, hit: boolean) => void, hitTest: boolean, interactive: boolean): boolean;
+        destroy(): void;
+    }
+    export interface InteractiveTarget {
+        interactive: boolean;
+        buttonMode: boolean;
+        interactiveChildren: boolean;
+        defaultCursor: string;
+        hitArea: HitArea;
+    }
+}
+
+declare module 'engine/MessageQueue' {
+    class Message {
+        obj: any;
+        method: string;
+        args: null;
+    }
+    export default class MessageQueue {
+        messages: Message[];
+
+        push_call(obj: any, method: string, args?: any);
+        flush();
+    }
+}
+
+declare module 'engine/SceneTree' {
+    interface SceneTreeSetting {
+        application: {
+            name: string,
+            main_scene: Function,
+        },
+        display: {
+            view: string,
+            container: string,
+
+            width: number,
+            height: number,
+            resolution: number,
+
+            background_color: number,
+
+            force_canvas: boolean,
+            antialias: boolean,
+            pixel_snap: boolean,
+            scale_mode: string,
+
+            FPS: number,
+
+            stretch_mode: string,
+            stretch_aspect: string,
+        },
+    }
+    interface ProcessPack {
+        spiraling: number;
+        last: number;
+        real_delta: number;
+        last_count: number;
+        step: number;
+        slow_step: number;
+        slow_step_sec: number;
+        count: number;
+    }
+    export default class SceneTree {
+        paused: boolean;
+        debug_collisions_hint: boolean;
+
+        grouped_nodes: { [g: string]: Node2D };
+        delete_queue: Node2D[];
+
+        current_scene: Node2D;
+        viewport: Node2D;
+        viewport_rect: { position: Vector, size: Vector };
+
+        stretch_mode: 'string';
+        stretch_aspect: 'string';
+
+        view: HTMLCanvasElement;
+        container: HTMLElement;
+
+        time_scale: number;
+
+        visual_server: VisualServer;
+        physics_server: PhysicsServer;
+        message_queue: MessageQueue;
+        input: Input;
+
+        protected _settings: SceneTreeSetting;
+        protected _tick_bind: Function;
+        protected _loop_id: number;
+        protected _initialize: Function;
+        protected _next_scene_ctor: Function;
+        protected _current_scene_ctor: Function;
+        protected _process_tmp: ProcessPack;
+
+        init(settings: SceneTreeSetting);
+
+        is_paused(): boolean;
+        is_debugging_collisions_hint(): boolean;
+
+        queue_delete(node: Node2D);
+        get_nodes_in_group(group: number): Node2D;
+        add_node_to_group(node: Node2D, group_p: number);
+        remove_node_from_group(node: Node2D, group_p: number);
+
+        get_root(): Node2D;
+
+        change_scene_to(scene_ctor: Function);
+        get_current_scene(): Node2D;
+        reload_current_scene();
+
+        set_pause(pause: boolean);
+        set_time_scale(scale: number);
+
+        set_screen_stretch(mode: string, aspect: string, minsize: Vector);
+
+        set_debug_collisions_hint(enabled: boolean);
+
+        protected _initialize();
+        protected _start_loop();
+        protected _tick(timestamp: number);
+        protected _end_loop();
+
+        protected _flush_delete_queue();
+    }
+}
+
+declare module 'engine/VisualServer' {
+    export default class VisualServer {
+        is_initialized: boolean;
+        renderer: SystemRenderer;
+
+        init(config: any);
+        render(viewport: Node2D);
+    }
+}
+
+declare module 'engine' {
+    import EventEmitter from 'eventemitter3';
+    import Signal from 'mini-signals';
+
+    // accessibility
+    declare namespace accessibility {
+        export class AccessibilityManager {
+            protected div: HTMLElement;
+            protected pool: HTMLElement[];
+            protected renderId: number;
+            protected children: Node2D[];
+            protected isActive: boolean;
+
+            debug: boolean;
+            renderer: SystemRenderer;
+
+            constructor(renderer: SystemRenderer);
+
+            protected activate(): void;
+            protected deactivate(): void;
+            protected updateAccessibleObjects(displayObject: Node2D): void;
+            protected update(): void;
+            protected capHitArea(hitArea: any): void;
+            protected addChild(displayObject: Node2D): void;
+
+            destroy(): void;
+        }
+        export interface AccessibleTarget {
+            accessible: boolean;
+            accessibleTitle: string;
+            accessibleHint: string;
+            tabIndex: number;
+        }
+    }
+
+    // anime
+    export { default as Tween } from 'engine/anime/Tween';
+    export { default as TweenManager } from 'engine/anime/TweenManager';
+
+    // audio (@see engine/audio/index.d.ts)
+    export namespace audio {
+        export * from 'engine/audio';
+    }
+
+    // core
+    // - const
+    export const VERSION: string;
+    export const PI_2: number;
+    export const RAD_TO_DEG: number;
+    export const DEG_TO_RAD: number;
+    export const TARGET_FPMS: number;
+    export const RENDERER_TYPE: {
+        UNKNOWN: number;
+        WEBGL: number;
+        CANVAS: number;
+    };
+    export const BLEND_MODES: {
+        NORMAL: number;
+        ADD: number;
+        MULTIPLY: number;
+        SCREEN: number;
+        OVERLAY: number;
+        DARKEN: number;
+        LIGHTEN: number;
+        COLOR_DODGE: number;
+        COLOR_BURN: number;
+        HARD_LIGHT: number;
+        SOFT_LIGHT: number;
+        DIFFERENCE: number;
+        EXCLUSION: number;
+        HUE: number;
+        SATURATION: number;
+        COLOR: number;
+        LUMINOSITY: number;
+    };
+    export const DRAW_MODES: {
+        POINTS: number;
+        LINES: number;
+        LINE_LOOP: number;
+        LINE_STRIP: number;
+        TRIANGLES: number;
+        TRIANGLE_STRIP: number;
+        TRIANGLE_FAN: number;
+    };
+    export const SCALE_MODES: {
+        DEFAULT: number;
+        LINEAR: number;
+        NEAREST: number;
+    };
+    export const RETINA_PREFIX: RegExp;
+    export const RESOLUTION: number;
+    export const FILTER_RESOLUTION: number;
+    export const DEFAULT_RENDER_OPTIONS: {
+        view: HTMLCanvasElement;
+        resolution: number;
+        antialias: boolean;
+        forceFXAA: boolean;
+        autoResize: boolean;
+        transparent: boolean;
+        backgroundColor: number;
+        clearBeforeRender: boolean;
+        preserveDrawingBuffer: boolean;
+        roundPixels: boolean;
+    };
+    export const SHAPES: {
+        POLY: number;
+        RECT: number;
+        CIRC: number;
+        ELIP: number;
+        RREC: number;
+    };
+    export const SPRITE_BATCH_SIZE: number;
+
+    // - transform
+    export class TransformBase {
+        localTransform: Matrix;
+        position: Point;
+        protected _dirtyLocal: number;
+        protected _dirtyParentVersion: number;
+        protected _versionLocal: number;
+    }
+    export class TransformStatic extends TransformBase {}
+    export class Transform extends TransformBase {}
+
+    // - node
+    export class Node2D extends EventEmitter implements interaction.InteractiveTarget {
+        public transform: TransformBase;
+        public local_transform: Matrix;
+        update_transform(): void;
+        public node2d_update_transform: () => any;
+
+        protected _update_transform();
+        protected _recursive_post_update_transform();
+
+        protected _sr: number;
+        protected _cr: number;
+        protected _bounds: Rectangle;
+        protected _boundsID: number;
+        protected _lastBoundsID: number;
+        protected _boundsRect: Rectangle;
+        protected _localBoundsRect: Rectangle;
+        protected _currentBounds: Rectangle;
+        protected _mask: Graphics | Sprite;
+        protected _world_position: Point;
+        protected _world_scale: Point;
+        protected _world_rotation: number;
+        protected _destroyed: boolean;
+        protected _is_ready: boolean;
+
+        protected tempNode2DParent: Node2D;
+
+        protected _physics_children_count: number;
+        protected _filters: Filter[];
+        protected _enabledFilters: Filter[];
+
+        id: number;
+        name: string;
+        type: string;
+        position: Point;
+        scale: Point;
+        pivot: Point;
+        rotation: number;
+        renderable: boolean;
+        skew: Point;
+        alpha: number;
+        visible: boolean;
+        parent: Node2D;
+        world_alpha: number;
+        world_transform: Matrix;
+        filter_area: Rectangle;
+        width: number;
+        height: number;
+
+        x: number;
+        y: number;
+        world_visible: boolean;
+        mask: Graphics | Sprite;
+        filters: AbstractFilter[];
+
+        scene_tree: SceneTree;
+        children: Node2D[];
+        named_children: { [name: string]: Node2D };
+        groups: number[];
+        is_inside_tree: boolean;
+        is_queued_for_deletion: boolean;
+        idle_process: boolean;
+        is_physics_object: boolean;
+
+        tweens: TweenManager;
+
+        tree_entered: Signal;
+        tree_exited: Signal;
+
+        get_bounds(): Rectangle;
+        get_local_bounds(): Rectangle;
+        to_global(position: Point): Point;
+        to_local(position: Point, from?: Node2D, to?: Point): Point;
+        generate_texture(renderer: CanvasRenderer | WebGLRenderer, scaleMode: number, resolution: number): Texture;
+        set_parent(container: Node2D): Node2D;
+        set_transform(x?: number, y?: number, scaleX?: number, scaleY?: number, rotation?: number, skewX?: number, skewY?: number, pivotX?: number, pivotY?: number): Node2D;
+        destroy(): void;
+        get_global_position(point: Point): Point;
+
+        add_child(...child: Node2D[]): Node2D;
+        add_child_at(child: Node2D, index: number): Node2D;
+        swap_children(child: Node2D, child2: Node2D): void;
+        get_child_index(child: Node2D): number;
+        set_child_index(child: Node2D, index: number): void;
+        get_child_at(index: number): Node2D;
+        get_Child_by_name(name: string): Node2D;
+        remove_child(child: Node2D): Node2D;
+        remove_child_at(index: number): Node2D;
+        remove_children(beginIndex?: number, endIndex?: number): Node2D[];
+        destroy(destroyChildren?: boolean): void;
+        generate_texture(renderer: CanvasRenderer | WebGLRenderer, resolution?: number, scaleMode?: number): Texture;
+
+        set_name(name: string);
+        set_process(p: boolean);
+        add_to_group(group: number);
+        remove_from_group(group: number);
+
+        get_position(): Point;
+        set_position(value: Point);
+        get_global_position(): Point;
+        get_scale(): Point;
+        set_scale(value: Point);
+        get_global_scale(): Point;
+        get_pivot(): Point;
+        set_pivot(value: Point);
+        get_skew(): Point;
+        set_skew(value: Point);
+        get_rotation(): number;
+        set_rotation(value: number);
+        get_global_rotation(): number;
+        get_tree(): SceneTree;
+        get_node(path: string): Node2D;
+
+        renderWebGL(renderer: WebGLRenderer): void;
+        renderCanvas(renderer: CanvasRenderer): void;
+
+        _enter_tree();
+        _ready();
+        _process(delta: number);
+        _exit_tree();
+        queue_free();
+        call_deferred(method: string, args: any);
+
+        protected _propagate_enter_tree();
+        protected _propagate_ready();
+        protected _propagate_process(delta: number);
+        protected _propagate_exit_tree();
+
+        protected _load_data(data: any);
+
+        interactive: boolean;
+        button_mode: boolean;
+        interactive_children: boolean;
+        default_cursor: string;
+        hit_area: HitArea;
+        accessible: boolean;
+        accessible_title: string;
+        tab_index: number;
+
+        protected _render_webGL(renderer: WebGLRenderer): void;
+        protected _render_canvas(renderer: CanvasRenderer): void;
+
+        protected on_children_change: () => void;
+
+        // interaction
+        on(event: 'click', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        on(event: 'mousedown', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        on(event: 'mouseout', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        on(event: 'mouseover', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        on(event: 'mouseup', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        on(event: 'mouseclick', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        on(event: 'mouseupoutside', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        on(event: 'rightclick', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        on(event: 'rightdown', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        on(event: 'rightup', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        on(event: 'rightupoutside', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        on(event: 'tap', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        on(event: 'touchend', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        on(event: 'touchendoutside', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        on(event: 'touchmove', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        on(event: 'touchstart', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        on(event: 'pointerdown', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        on(event: 'pointermove', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        on(event: 'pointerup', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        on(event: string, fn: Function, context?: any): EventEmitter;
+
+        once(event: 'click', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        once(event: 'mousedown', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        once(event: 'mouseout', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        once(event: 'mouseover', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        once(event: 'mouseup', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        once(event: 'mouseclick', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        once(event: 'mouseupoutside', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        once(event: 'rightclick', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        once(event: 'rightdown', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        once(event: 'rightup', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        once(event: 'rightupoutside', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        once(event: 'tap', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        once(event: 'touchend', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        once(event: 'touchendoutside', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        once(event: 'touchmove', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        once(event: 'touchstart', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        once(event: 'pointerdown', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        once(event: 'pointermove', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        once(event: 'pointerup', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        once(event: string, fn: Function, context?: any): EventEmitter;
+
+        // remove/add
+        on(event: 'added', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        on(event: string, fn: Function, context?: any): EventEmitter;
+        on(event: 'removed', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        on(event: string, fn: Function, context?: any): EventEmitter;
+
+        once(event: 'added', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        once(event: string, fn: Function, context?: any): EventEmitter;
+        once(event: 'removed', fn: (event: interaction.InteractionEvent) => void, context?: any): EventEmitter;
+        once(event: string, fn: Function, context?: any): EventEmitter;
+    }
+
+    // - graphics
+    export class GraphicsData {
+        constructor(lineWidth: number, lineColor: number, lineAlpha: number, fillColor: number, fillAlpha: number, fill: boolean, shape: Circle | Rectangle | Ellipse | Polygon);
+
+        line_width: number;
+        line_color: number;
+        line_alpha: number;
+        fill_color: number;
+        fill_alpha: number;
+        fill: boolean;
+        shape: Circle | Rectangle | Ellipse | Polygon;
+        type: number;
+
+        clone(): GraphicsData;
+
+        protected _lineTint: number;
+        protected _fillTint: number;
+    }
+    export class Graphics extends Node2D {
+        protected boundsDirty: boolean;
+        protected dirty: boolean;
+        protected glDirty: boolean;
+
+        fill_alpha: number;
+        line_width: number;
+        line_color: number;
+        tint: number;
+        blend_mode: number;
+        is_mask: boolean;
+        bounds_padding: number;
+
+        clone(): Graphics;
+        set_line_style(lineWidth?: number, color?: number, alpha?: number): Graphics;
+        move_to(x: number, y: number): Graphics;
+        line_To(x: number, y: number): Graphics;
+        quadratic_Curve_To(cpX: number, cpY: number, toX: number, toY: number): Graphics;
+        bezier_Curve_To(cpX: number, cpY: number, cpX2: number, cpY2: number, toX: number, toY: number): Graphics;
+        arc_To(x1: number, y1: number, x2: number, y2: number, radius: number): Graphics;
+        arc(cx: number, cy: number, radius: number, startAngle: number, endAngle: number, anticlockwise?: boolean): Graphics;
+        begin_fill(color: number, alpha?: number): Graphics;
+        end_fill(): Graphics;
+        draw_rect(x: number, y: number, width: number, height: number): Graphics;
+        draw_rounded_rect(x: number, y: number, width: number, height: number, radius: number): Graphics;
+        draw_circle(x: number, y: number, radius: number): Graphics;
+        draw_ellipse(x: number, y: number, width: number, height: number): Graphics;
+        draw_polygon(path: number[] | Point[]): Graphics;
+        clear(): Graphics;
+        //todo
+        generate_texture(renderer: WebGLRenderer | CanvasRenderer, resolution?: number, scaleMode?: number): Texture;
+        get_bounds(matrix?: Matrix): Rectangle;
+        contains_point(point: Point): boolean;
+        update_local_bounds(): void;
+        draw_shape(shape: Circle | Rectangle | Ellipse | Polygon): GraphicsData;
+    }
+    export class GraphicsRenderer extends ObjectRenderer {
+        constructor(renderer: WebGLRenderer);
+
+        buildCircle: (graphicsData: Graphics, webGLData: Object) => void;
+        buildPoly: (graphicsData: Graphics, webGLData: Object) => boolean;
+        buildRectangle: (graphicsData: Graphics, webGLData: Object) => void;
+        buildComplexPoly: (graphicsData: Graphics, webGLData: Object) => void;
+        buildLine: (graphicsData: Graphics, webGLData: Object) => void;
+        updateGraphics: (graphics: Graphics) => void;
+        buildRoundedRectangle: (graphicsData: Graphics, webGLData: Object) => void;
+        quadraticBezierCurve: (fromX: number, fromY: number, cpX: number, cpY: number, toX: number, toY: number, out: any) => number[];
+        switchMode: (webGL: WebGLRenderingContext, type: number) => WebGLGraphicsData;
+    }
+    export class WebGLGraphicsData {
+        constructor(gl: WebGLRenderingContext);
+        upload: () => void;
+        reset: () => void;
+        destroy: () => void;
+    }
+
+    // - math
+    export module GroupD8 {
+        export function add(rotationSecond: number, rotationFirst: number): number;
+        export function byDirection(dx: number, dy: number): number;
+        export function inv(rotation: number): number;
+        export function isSwapWidthHeight(rotation: number): boolean;
+        export function matrixAppendRotationInv(matrix: Matrix, rotation: number, tx: number, ty: number): void;
+        export function rotate180(rotation: number): number;
+        export function sub(rotationSecond: number, rotationFirst: number): number;
+        export function uX(ind: number): number;
+        export function uY(ind: number): number;
+        export function vX(ind: number): number;
+        export function vY(ind: number): number;
+
+        export var E: number;
+        export var MIRROR_HORIZONTAL: number;
+        export var MIRROR_VERTICAL: number;
+        export var N: number;
+        export var NE: number;
+        export var NW: number;
+        export var S: number;
+        export var SE: number;
+        export var SW: number;
+        export var W: number;
+    }
+    export class Point {
+        x: number;
+        y: number;
+
+        constructor(x?: number, y?: number);
+
+        set(x?: number, y?: number): Point;
+        copy(p: Point): Point;
+
+        clone(): Point;
+        random(scale: number): Point;
+        normalized(): Point;
+        clamped(length: number): Point;
+        rotated(a: number): Point;
+        snapped(by: number): Point;
+
+        equals(p: Point): boolean;
+        exact_equals(p: Point): boolean;
+
+        add(b: Point): Point;
+        subtract(b: Point): Point;
+        multiply(b: Point): Point;
+        divide(b: Point): Point;
+        dot(b: Point): Point;
+        cross(b: Point): Point;
+
+        abs(): Point;
+        ceil(): Point;
+        floor(): Point;
+        round(): Point;
+        clamp(length: number): Point;
+
+        scale(b: number): Point;
+        negate(): Point;
+        inverse(): Point;
+        normalize(): Point;
+        rotate(a: number): Point;
+        perp(): Point;
+        project(other: Point): Point;
+        project_n(other: Point): Point;
+        reflex(axis: Point): Point;
+        reflect(axis: Point): Point;
+        reflect_n(axis: Point): Point;
+        bounce(axis: Point): Point;
+        slide(axis: Point): Point;
+
+        length(): number;
+        length_squared(): number;
+        angle(): number;
+        angle_to(b: Point): number;
+        angle_to_point(b: Point): number;
+        distance_to(b: Point): number;
+        distance_squared_to(b: Point): number;
+        tangent(): number;
+    }
+    export class Vector extends Point {}
+    export class Matrix {
+        a: number;
+        b: number;
+        c: number;
+        d: number;
+        tx: number;
+        ty: number;
+
+        from_array(array: number[]): void;
+        to_array(transpose?: boolean, out?: number[]): number[];
+        apply(pos: Point, newPos?: Point): Point;
+        apply_inverse(pos: Point, newPos?: Point): Point;
+        translate(x: number, y: number): Matrix;
+        scale(x: number, y: number): Matrix;
+        rotate(angle: number): Matrix;
+        append(matrix: Matrix): Matrix;
+        prepend(matrix: Matrix): Matrix;
+        invert(): Matrix;
+        identity(): Matrix;
+        clone(): Matrix;
+        copy(matrix: Matrix): Matrix;
+        set(a: number, b: number, c: number, d: number, tx: number, ty: number): Matrix;
+        set_transform(a: number, b: number, c: number, d: number, sr: number, cr: number, cy: number, sy: number, nsx: number, cs: number): Matrix;
+
+        static IDENTITY: Matrix;
+        static TEMP_MATRIX: Matrix;
+    }
+    export interface HitArea {
+        contains(x: number, y: number): boolean;
+    }
+    export class Circle implements HitArea {
+        constructor(x?: number, y?: number, radius?: number);
+
+        x: number;
+        y: number;
+        radius: number;
+        type: number;
+
+        clone(): Circle;
+        contains(x: number, y: number): boolean;
+        get_bounds(): Rectangle;
+    }
+    export class Ellipse implements HitArea {
+        constructor(x?: number, y?: number, width?: number, height?: number);
+
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+        type: number;
+
+        clone(): Ellipse;
+        contains(x: number, y: number): boolean;
+        get_bounds(): Rectangle;
+    }
+    export class Polygon implements HitArea {
+        constructor(points: Point[]);
+        constructor(points: number[]);
+        constructor(...points: Point[]);
+        constructor(...points: number[]);
+
+        closed: boolean;
+        points: number[];
+        type: number;
+
+        clone(): Polygon;
+        contains(x: number, y: number): boolean;
+    }
+    export class Rectangle implements HitArea {
+        constructor(x?: number, y?: number, width?: number, height?: number);
+
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+        type: number;
+
+        static EMPTY: Rectangle;
+
+        clone(): Rectangle;
+        contains(x: number, y: number): boolean;
+    }
+    export class RoundedRectangle implements HitArea {
+        constructor(x?: number, y?: number, width?: number, height?: number, radius?: number);
+
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+        radius: number;
+        type: number;
+
+        clone(): RoundedRectangle;
+        contains(x: number, y: number): boolean;
+    }
+
+    // - particles
+
+    export interface ParticleContainerProperties {
+        scale?: boolean;
+        position?: boolean;
+        rotation?: boolean;
+        uvs?: boolean;
+        alpha?: boolean;
+    }
+    export class ParticleContainer extends Node2D {
+        constructor(size?: number, properties?: ParticleContainerProperties, batchSize?: number);
+
+        protected _maxSize: number;
+        protected _batchSize: number;
+        protected _properties: boolean[];
+        protected _buffers: WebGLBuffer[];
+        protected _bufferToUpdate: number;
+
+        protected on_Children_change: (smallestChildIndex?: number) => void;
+
+        interactiveChildren: boolean;
+        blendMode: number;
+        roundPixels: boolean;
+
+        setProperties(properties: ParticleContainerProperties): void;
+    }
+    export interface ParticleBuffer {
+        gl: WebGLRenderingContext;
+        vertSize: number;
+        vertByteSize: number;
+        size: number;
+        dynamicProperties: any[];
+        staticProperties: any[];
+
+        staticStride: number;
+        staticBuffer: any;
+        staticData: any;
+        dynamicStride: number;
+        dynamicBuffer: any;
+        dynamicData: any;
+
+        initBuffers(): void;
+        bind(): void;
+        destroy(): void;
+    }
+    export interface IParticleRendererProperty {
+        attribute: number;
+        size: number;
+        uploadFunction: (children: Node2D[], startIndex: number, amount: number, array: number[], stride: number, offset: number) => void;
+        offset: number;
+    }
+    export class ParticleRenderer extends ObjectRenderer {
+        constructor(renderer: WebGLRenderer);
+
+        generateBuffers: (container: ParticleContainer) => ParticleBuffer[];
+        indexBuffer: WebGLBuffer;
+        indices: Uint16Array;
+        properties: IParticleRendererProperty[];
+        shader: Shader;
+        tempMatrix: Matrix;
+        uploadAlpha: (children: Node2D[], startIndex: number, amount: number, array: number[], stride: number, offset: number) => void;
+        uploadPosition: (children: Node2D[], startIndex: number, amount: number, array: number[], stride: number, offset: number) => void;
+        uploadRotation: (children: Node2D[], startIndex: number, amount: number, array: number[], stride: number, offset: number) => void;
+        uploadUvs: (children: Node2D[], startIndex: number, amount: number, array: number[], stride: number, offset: number) => void;
+        uploadVertices: (children: Node2D[], startIndex: number, amount: number, array: number[], stride: number, offset: number) => void;
+    }
+    export interface ParticleShader {}
+
+    // - renderers
+
+    export interface RendererOptions {
+        view?: HTMLCanvasElement;
+        transparent?: boolean;
+        antialias?: boolean;
+        resolution?: number;
+        clearBeforeRendering?: boolean;
+        preserveDrawingBuffer?: boolean;
+        forceFXAA?: boolean;
+        roundPixels?: boolean;
+        backgroundColor?: number;
+    }
+    export class SystemRenderer extends EventEmitter {
+        protected _backgroundColor: number;
+        protected _backgroundColorRgb: number[];
+        protected _backgroundColorString: string;
+        protected _tempDisplayObjectParent: any;
+        protected _lastObjectRendered: Node2D;
+
+        constructor(system: string, width?: number, height?: number, options?: RendererOptions);
+
+        type: number;
+        width: number;
+        height: number;
+        view: HTMLCanvasElement;
+        resolution: number;
+        transparent: boolean;
+        autoResize: boolean;
+        blendModes: any; //todo?
+        preserveDrawingBuffer: boolean;
+        clearBeforeRender: boolean;
+        roundPixels: boolean;
+        backgroundColor: number;
+
+        render(object: Node2D): void;
+        resize(width: number, height: number): void;
+        destroy(removeView?: boolean): void;
+    }
+    export class CanvasRenderer extends SystemRenderer {
+        protected renderDisplayObject(displayObject: Node2D, context: CanvasRenderingContext2D): void;
+        protected _mapBlendModes(): void;
+
+        constructor(width?: number, height?: number, options?: RendererOptions);
+
+        context: CanvasRenderingContext2D;
+        refresh: boolean;
+        maskManager: CanvasMaskManager;
+        roundPixels: boolean;
+        smoothProperty: string;
+
+        render(object: Node2D): void;
+        resize(w: number, h: number): void;
+    }
+    export class CanvasBuffer {
+        protected clear(): void;
+
+        constructor(width: number, height: number);
+
+        canvas: HTMLCanvasElement;
+        context: CanvasRenderingContext2D;
+
+        width: number;
+        height: number;
+
+        resize(width: number, height: number): void;
+        destroy(): void;
+    }
+    export module CanvasGraphics {
+        export function renderGraphicsMask(graphics: Graphics, context: CanvasRenderingContext2D): void;
+        export function updateGraphicsTint(graphics: Graphics): void;
+
+        export function renderGraphics(graphics: Graphics, context: CanvasRenderingContext2D): void;
+    }
+    export class CanvasMaskManager {
+        pushMask(maskData: any, renderer: WebGLRenderer | CanvasRenderer): void;
+        popMask(renderer: WebGLRenderer | CanvasRenderer): void;
+        destroy(): void;
+    }
+    export module CanvasTinter {
+        export function getTintedTexture(sprite: Node2D, color: number): HTMLCanvasElement;
+        export function tintWithMultiply(texture: Texture, color: number, canvas: HTMLDivElement): void;
+        export function tintWithOverlay(texture: Texture, color: number, canvas: HTMLCanvasElement): void;
+        export function tintWithPerPixel(texture: Texture, color: number, canvas: HTMLCanvasElement): void;
+        export function roundColor(color: number): number;
+        export var cacheStepsPerColorChannel: number;
+        export var convertTintToImage: boolean;
+        export var vanUseMultiply: boolean;
+        export var tintMethod: Function;
+    }
+    export class WebGLRenderer extends SystemRenderer {
+        protected _useFXAA: boolean;
+        protected _FXAAFilter: FXAAFilter;
+        protected _contextOptions: {
+            alpha: boolean;
+            antiAlias: boolean;
+            premultipliedAlpha: boolean;
+            stencil: boolean;
+            preseveDrawingBuffer: boolean;
+        };
+        protected _renderTargetStack: RenderTarget[];
+
+        protected _initContext(): void;
+        protected _createContext(): void;
+        protected handleContextLost: (event: WebGLContextEvent) => void;
+        protected _mapGlModes(): void;
+        protected _managedTextures: Texture[];
+
+        constructor(width?: number, height?: number, options?: RendererOptions);
+
+        drawCount: number;
+        shaderManager: ShaderManager;
+        maskManager: MaskManager;
+        stencilManager: StencilManager;
+        filterManager: FilterManager;
+        blendModeManager: BlendModeManager;
+        currentRenderTarget: RenderTarget;
+        currentRenderer: ObjectRenderer;
+
+        render(object: Node2D): void;
+        renderDisplayObject(displayObject: Node2D, renderTarget: RenderTarget, clear: boolean): void;
+        setObjectRenderer(objectRenderer: ObjectRenderer): void;
+        setRenderTarget(renderTarget: RenderTarget): void;
+        updateTexture(texture: BaseTexture | Texture): BaseTexture | Texture;
+        destroyTexture(texture: BaseTexture | Texture, _skipRemove?: boolean): void;
+    }
+    export class AbstractFilter {
+        protected vertexSrc: string[];
+        protected fragmentSrc: string[];
+
+        constructor(vertexSrc?: string | string[], fragmentSrc?: string | string[], uniforms?: any);
+
+        uniforms: any;
+
+        padding: number;
+
+        getShader(renderer: WebGLRenderer): Shader;
+        applyFilter(renderer: WebGLRenderer, input: RenderTarget, output: RenderTarget, clear?: boolean): void;
+        syncUniform(uniform: WebGLUniformLocation): void;
+    }
+    export class SpriteMaskFilter extends AbstractFilter {
+        constructor(sprite: Sprite);
+
+        maskSprite: Sprite;
+        maskMatrix: Matrix;
+
+        applyFilter(renderer: WebGLRenderbuffer, input: RenderTarget, output: RenderTarget): void;
+        map: Texture;
+        offset: Point;
+    }
+    export class FXAAFilter extends AbstractFilter {
+        applyFilter(renderer: WebGLRenderer, input: RenderTarget, output: RenderTarget): void;
+    }
+    export class BlendModeManager extends WebGLManager {
+        constructor(renderer: WebGLRenderer);
+
+        setBlendMode(blendMode: number): boolean;
+    }
+    export class FilterManager extends WebGLManager {
+        constructor(renderer: WebGLRenderer);
+
+        filterStack: any[];
+        renderer: WebGLRenderer;
+        texturePool: any[];
+
+        onContextChange: () => void;
+        setFilterStack(filterStack: any[]): void;
+        pushFilter(target: RenderTarget, filters: any[]): void;
+        popFilter(): AbstractFilter;
+        getRenderTarget(clear?: boolean): RenderTarget;
+        protected returnRenderTarget(renderTarget: RenderTarget): void;
+        applyFilter(shader: Shader | AbstractFilter, inputTarget: RenderTarget, outputTarget: RenderTarget, clear?: boolean): void;
+        calculateMappedMatrix(filterArea: Rectangle, sprite: Sprite, outputMatrix?: Matrix): Matrix;
+        capFilterArea(filterArea: Rectangle): void;
+        resize(width: number, height: number): void;
+        destroy(): void;
+    }
+    export class MaskManager extends WebGLManager {
+        stencilStack: StencilMaskStack;
+        reverse: boolean;
+        count: number;
+        alphaMaskPool: any[];
+
+        pushMask(target: RenderTarget, maskData: any): void;
+        popMask(target: RenderTarget, maskData: any): void;
+        pushSpriteMask(target: RenderTarget, maskData: any): void;
+        popSpriteMask(): void;
+        pushStencilMask(target: RenderTarget, maskData: any): void;
+        popStencilMask(target: RenderTarget, maskData: any): void;
+    }
+    export class ShaderManager extends WebGLManager {
+        protected _currentId: number;
+        protected currentShader: Shader;
+
+        constructor(renderer: WebGLRenderer);
+
+        maxAttibs: number;
+        attribState: any[];
+        tempAttribState: any[];
+        stack: any[];
+
+        setAttribs(attribs: any[]): void;
+        setShader(shader: Shader): boolean;
+        destroy(): void;
+    }
+    export class StencilManager extends WebGLManager {
+        constructor(renderer: WebGLRenderer);
+
+        setMaskStack(stencilMaskStack: StencilMaskStack): void;
+        pushStencil(graphics: Graphics, webGLData: WebGLGraphicsData): void;
+        bindGraphics(graphics: Graphics, webGLData: WebGLGraphicsData): void;
+        popStencil(graphics: Graphics, webGLData: WebGLGraphicsData): void;
+        destroy(): void;
+        pushMask(maskData: any[]): void;
+        popMask(maskData: any[]): void;
+    }
+    export class WebGLManager {
+        protected onContextChange: () => void;
+
+        constructor(renderer: WebGLRenderer);
+
+        renderer: WebGLRenderer;
+
+        destroy(): void;
+    }
+    export class Shader {
+        protected attributes: any;
+        protected textureCount: number;
+        protected uniforms: any;
+
+        protected _glCompile(type: any, src: any): Shader;
+
+        constructor(shaderManager: ShaderManager, vertexSrc: string, fragmentSrc: string, uniforms: any, attributes: any);
+
+        uid: number;
+        gl: WebGLRenderingContext;
+        shaderManager: ShaderManager;
+        program: WebGLProgram;
+        vertexSrc: string;
+        fragmentSrc: string;
+
+        init(): void;
+        cacheUniformLocations(keys: string[]): void;
+        cacheAttributeLocations(keys: string[]): void;
+        compile(): WebGLProgram;
+        syncUniform(uniform: any): void;
+        syncUniforms(): void;
+        initSampler2D(uniform: any): void;
+        destroy(): void;
+    }
+    export class ComplexPrimitiveShader extends Shader {
+        constructor(shaderManager: ShaderManager);
+    }
+    export class PrimitiveShader extends Shader {
+        constructor(shaderManager: ShaderManager);
+    }
+    export class TextureShader extends Shader {
+        constructor(shaderManager: ShaderManager, vertexSrc?: string, fragmentSrc?: string, customUniforms?: any, customAttributes?: any);
+    }
+    export interface StencilMaskStack {
+        stencilStack: any[];
+        reverse: boolean;
+        count: number;
+    }
+    export class ObjectRenderer extends WebGLManager {
+        start(): void;
+        stop(): void;
+        flush(): void;
+        render(object?: any): void;
+    }
+    export class RenderTarget {
+        constructor(gl: WebGLRenderingContext, width: number, height: number, scaleMode: number, resolution: number, root: boolean);
+
+        gl: WebGLRenderingContext;
+        frameBuffer: WebGLFramebuffer;
+        texture: Texture;
+        size: Rectangle;
+        resolution: number;
+        projectionMatrix: Matrix;
+        transform: Matrix;
+        frame: Rectangle;
+        stencilBuffer: WebGLRenderbuffer;
+        stencilMaskStack: StencilMaskStack;
+        filterStack: any[];
+        scaleMode: number;
+        root: boolean;
+
+        clear(bind?: boolean): void;
+        attachStencilBuffer(): void;
+        activate(): void;
+        calculateProjection(protectionFrame: Matrix): void;
+        resize(width: number, height: number): void;
+        destroy(): void;
+    }
+    export interface Quad {
+        gl: WebGLRenderingContext;
+        vertices: number[];
+        uvs: number[];
+        colors: number[];
+        indices: number[];
+        vertexBuffer: WebGLBuffer;
+        indexBuffer: WebGLBuffer;
+
+        map(rect: Rectangle, rect2: Rectangle): void;
+        upload(): void;
+        destroy(): void;
+    }
+
+    // - sprites
+    export class Sprite extends Node2D {
+        static from_Frame(frameId: string): Sprite;
+        static from_image(imageId: string, crossorigin?: boolean, scaleMode?: number): Sprite;
+
+        protected _texture: Texture;
+        protected _width: number;
+        protected _height: number;
+        protected cachedTint: number;
+
+        protected _onTextureUpdate(): void;
+
+        constructor(texture?: Texture);
+
+        anchor: Point;
+        tint: number;
+        blendMode: number;
+        shader: Shader | AbstractFilter;
+        texture: Texture;
+
+        width: number;
+        height: number;
+
+        getBounds(matrix?: Matrix): Rectangle;
+        getLocalBounds(): Rectangle;
+        containsPoint(point: Point): boolean;
+        destroy(destroyTexture?: boolean, destroyBaseTexture?: boolean): void;
+    }
+    export class SpriteRenderer extends ObjectRenderer {
+        protected renderBatch(texture: Texture, size: number, startIndex: number): void;
+
+        vertSize: number;
+        vertByteSize: number;
+        size: number;
+        vertices: number[];
+        positions: number[];
+        colors: number[];
+        indices: number[];
+        currentBatchSize: number;
+        sprites: Sprite[];
+        shader: Shader | AbstractFilter;
+
+        render(sprite: Sprite): void;
+        flush(): void;
+        start(): void;
+        destroy(): void;
+    }
+
+    // - coa sprite
+    class Element {
+        id: number;
+        name: string;
+    }
+    class File extends Element {
+        pivot_x: number;
+        pivot_y: number;
+        width: number;
+        height: number;
+    }
+    class Folder extends Element {
+        file: File[];
+    }
+    class ObjectInfo extends Element {
+        type: number;
+        w: number;
+        h: number;
+        pivot_x: number;
+        pivot_y: number;
+    }
+    class Animation extends Element {
+        entity: Entity;
+        length: number;
+        looping: boolean;
+        mainline: MainlineKey[];
+        timeline: TimelineKey[];
+    }
+    class Key extends Element {
+        time: number;
+        curve_type: number;
+        c1: number;
+        c2: number;
+        c3: number;
+        c4: number;
+    }
+    class Ref extends Element {
+        parent: number;
+        timeline: number;
+        key: number;
+    }
+    class ObjectRef extends Ref {
+        z_index: number;
+    }
+    class Spatial {
+        x: number;
+        y: number;
+        angle: number;
+        scale_x: number;
+        scale_y: number;
+        a: number;
+        init(data: any): Spatial;
+        interpolate(a: Spatial, b: Spatial, factor: number, spin: number);
+        apply_parent_transform(parent: Spatial);
+        copy(source: Spatial): Spatial;
+    }
+    class Obj extends Spatial {
+        animation: number;
+        entity: number;
+        folder: number;
+        file: number;
+        pivot_x: number;
+        pivot_y: number;
+        t: number;
+        init(data: any): Obj;
+        interpolate(a: Obj, b: Obj, factor: number, spin: number);
+        copy(source: Obj): Obj;
+    }
+    class MainlineKey extends Element {
+        bone_ref: Ref[];
+        object_ref: ObjectRef[];
+    }
+    class TimelineKey extends Key {
+        spin: number;
+        bone: Spatial;
+        object: Obj;
+    }
+    class Timeline extends Element {
+        object_type: number;
+        obj: number;
+        key: TimelineKey[];
+    }
+    class MapInstruction {
+        folder: number;
+        file: number;
+        target_folder: number;
+        target_file: number;
+    }
+    class CharacterMap extends Element {
+        map: MapInstruction[];
+    }
+    class Entity extends Element {
+        spriter: Model;
+        obj_info: ObjectInfo[];
+        character_map: CharacterMap[];
+        animation_table: { [name: string]: Animation };
+        animation: Animation[];
+        get_animations(): { [name: string]: Animation };
+    }
+    class Model {
+        folder: Folder[];
+        entity: Entity[];
+    }
+    class FrameData {
+        sprite_data: Obj[];
+        clear();
+    }
+    export class Animator {
+        animation_finished: Signal;
+        entity: Entity;
+        node: Node2D;
+        current_animation: Animation;
+        next_animation: Animation;
+        name: string;
+        speed: number;
+        length: number;
+        time: number;
+        frame_data: FrameData;
+
+        constructor(entity: Entity, node: Node2D);
+        get_progress(): number;
+        set_progress(value: number);
+        get_animations(): string[];
+        play(name: string);
+        transition(name: string, total_transition_time: number);
+        blend(first: string, second: string, factor: number);
+        update(delta: number);
+        protected animate(delta: number);
+    }
+    export class CoaSprite extends Node2D {
+        animator: Animator;
+        load(data: string, entity: number): CoaSprite;
+        play(anim: string): boolean;
+        transition(name: string, total_transition_time: number): boolean;
+        blend(first: string, second: string, factor: number): boolean;
+    }
+
+    // - text
+    export interface TextStyle {
+        font?: string;
+        fill?: string | number | CanvasGradient | CanvasPattern;
+        align?: string;
+        stroke?: string | number;
+        strokeThickness?: number;
+        wordWrap?: boolean;
+        wordWrapWidth?: number;
+        letterSpacing?: number;
+        breakWords?: boolean;
+        lineHeight?: number;
+        dropShadow?: boolean;
+        dropShadowColor?: string | number;
+        dropShadowAngle?: number;
+        dropShadowDistance?: number;
+        dropShadowBlur?: number;
+        padding?: number;
+        textBaseline?: string;
+        lineJoin?: string;
+        miterLimit?: number;
+    }
+    export class Text extends Sprite {
+        static fontPropertiesCache: any;
+        static fontPropertiesCanvas: HTMLCanvasElement;
+        static fontPropertiesContext: CanvasRenderingContext2D;
+
+        protected _text: string;
+        protected _style: TextStyle;
+
+        protected updateText(): void;
+        protected updateTexture(): void;
+        protected drawLetterSpacing(text: string, x: number, y: number, isStroke: boolean): void;
+        protected determineFontProperties(fontStyle: TextStyle): TextStyle;
+        protected wordWrap(text: string): boolean;
+
+        constructor(text?: string, style?: TextStyle, resolution?: number);
+
+        canvas: HTMLCanvasElement;
+        context: CanvasRenderingContext2D;
+        dirty: boolean;
+        resolution: number;
+        text: string;
+        style: TextStyle;
+
+        width: number;
+        height: number;
+    }
+
+    // - textures
+
+    export class BaseTexture extends EventEmitter {
+        static from_image(imageUrl: string, crossorigin?: boolean, scaleMode?: number): BaseTexture;
+        static from_canvas(canvas: HTMLCanvasElement, scaleMode?: number): BaseTexture;
+
+        protected _glTextures: any;
+
+        protected _sourceLoaded(): void;
+
+        constructor(source: HTMLImageElement | HTMLCanvasElement, scaleMode?: number, resolution?: number);
+
+        uuid: number;
+        resolution: number;
+        width: number;
+        height: number;
+        realWidth: number;
+        realHeight: number;
+        scaleMode: number;
+        hasLoaded: boolean;
+        isLoading: boolean;
+        source: HTMLImageElement | HTMLCanvasElement | HTMLVideoElement;
+        premultipliedAlpha: boolean;
+        imageUrl: string;
+        isPowerOfTwo: boolean;
+        mipmap: boolean;
+
+        update(): void;
+        loadSource(source: HTMLImageElement | HTMLCanvasElement): void;
+        destroy(): void;
+        dispose(): void;
+        updateSourceImage(newSrc: string): void;
+
+        on(event: 'dispose', fn: (baseTexture: BaseTexture) => void, context?: any): EventEmitter;
+        on(event: 'error', fn: (baseTexture: BaseTexture) => void, context?: any): EventEmitter;
+        on(event: 'loaded', fn: (baseTexture: BaseTexture) => void, context?: any): EventEmitter;
+        on(event: 'update', fn: (baseTexture: BaseTexture) => void, context?: any): EventEmitter;
+        on(event: string, fn: Function, context?: any): EventEmitter;
+
+        once(event: 'dispose', fn: (baseTexture: BaseTexture) => void, context?: any): EventEmitter;
+        once(event: 'error', fn: (baseTexture: BaseTexture) => void, context?: any): EventEmitter;
+        once(event: 'loaded', fn: (baseTexture: BaseTexture) => void, context?: any): EventEmitter;
+        once(event: 'update', fn: (baseTexture: BaseTexture) => void, context?: any): EventEmitter;
+        once(event: string, fn: Function, context?: any): EventEmitter;
+    }
+    export class RenderTexture extends Texture {
+        protected render_webGL(displayObject: DisplayObject, matrix?: Matrix, clear?: boolean, updateTransform?: boolean): void;
+        protected render_canvas(displayObject: DisplayObject, matrix?: Matrix, clear?: boolean, updateTransform?: boolean): void;
+
+        constructor(renderer: CanvasRenderer | WebGLRenderer, width?: number, height?: number, scaleMode?: number, resolution?: number);
+
+        width: number;
+        height: number;
+        resolution: number;
+        renderer: CanvasRenderer | WebGLRenderer;
+        valid: boolean;
+
+        render(displayObject: DisplayObject, matrix?: Matrix, clear?: boolean, updateTransform?: boolean): void;
+        resize(width: number, height: number, updateBase?: boolean): void;
+        clear(): void;
+        destroy(): void;
+        getImage(): HTMLImageElement;
+        getPixels(): number[];
+        getPixel(x: number, y: number): number[];
+        getBase64(): string;
+        getCanvas(): HTMLCanvasElement;
+    }
+    export class Texture extends EventEmitter {
+        static from_image(imageUrl: string, crossOrigin?: boolean, scaleMode?: number): Texture;
+        static from_frame(frameId: string): Texture;
+        static from_canvas(canvas: HTMLCanvasElement, scaleMode?: number): Texture;
+        static from_video(video: HTMLVideoElement | string, scaleMode?: number): Texture;
+        static from_video_rrl(videoUrl: string, scaleMode?: number): Texture;
+        static add_texture_to_cache(texture: Texture, id: string): void;
+        static remove_texture_from_cache(id: string): Texture;
+        static EMPTY: Texture;
+
+        protected _frame: Rectangle;
+
+        protected onBaseTextureUpdated(baseTexture: BaseTexture): void;
+        protected onBaseTextureLoaded(baseTexture: BaseTexture): void;
+
+        constructor(baseTexture: BaseTexture, frame?: Rectangle, crop?: Rectangle, trim?: Rectangle, rotate?: number);
+
+        noFrame: boolean;
+        baseTexture: BaseTexture;
+        trim: Rectangle;
+        valid: boolean;
+        requiresUpdate: boolean;
+        width: number;
+        height: number;
+        orig: Rectangle;
+        rotate: number;
+        crop: Rectangle;
+
+        frame: Rectangle;
+
+        update(): void;
+        destroy(destroyBase?: boolean): void;
+        clone(): Texture;
+
+        //pixi-spine needs it
+        _uvs: TextureUvs;
+        _updateUvs(): void;
+    }
+    export class TextureUvs {
+        x0: number;
+        y0: number;
+        x1: number;
+        y1: number;
+        x2: number;
+        y2: number;
+        x3: number;
+        y3: number;
+
+        protected set(frame: Rectangle, baseFrame: Rectangle, rotate: number): void;
+    }
+    export class VideoBaseTexture extends BaseTexture {
+        static from_video(video: HTMLVideoElement, scaleMode?: number): VideoBaseTexture;
+        static from_rrl(videoSrc: string | any | string[] | any[]): VideoBaseTexture;
+
+        protected _loaded: boolean;
+        protected _onUpdate(): void;
+        protected _onPlayStart(): void;
+        protected _onPlayStop(): void;
+        protected _onCanPlay(): void;
+
+        constructor(source: HTMLVideoElement, scaleMode?: number);
+
+        auto_update: boolean;
+
+        destroy(): void;
+    }
+
+    // - bitmap text
+    export interface BitmapTextStyle {
+        font?: string | {
+            name?: string;
+            size?: number;
+        };
+        align?: string;
+        tint?: number;
+    }
+    export class BitmapText extends Node2D {
+        static fonts: any;
+
+        protected _glyphs: Sprite[];
+        protected _font: string | {
+            tint: number;
+            align: string;
+            name: string;
+            size: number;
+        };
+        protected _text: string;
+
+        protected updateText(): void;
+
+        constructor(text: string, style?: BitmapTextStyle);
+
+        text_width: number;
+        text_height: number;
+        max_width: number;
+        max_line_height: number;
+        dirty: boolean;
+
+        tint: number;
+        align: string;
+        font: string | {
+            tint: number;
+            align: string;
+            name: string;
+            size: number;
+        };
+        text: string;
+    }
+
+    // - tiling sprite
+    export class TilingSprite extends Sprite {
+        //This is really unclean but is the only way :(
+        //See http://stackoverflow.com/questions/29593905/typescript-declaration-extending-class-with-static-method/29595798#29595798
+        //Thanks bas!
+        static from_frame(frameId: string): Sprite;
+        static from_image(imageId: string, crossorigin?: boolean, scaleMode?: number): Sprite;
+
+        static from_frame(frameId: string, width?: number, height?: number): TilingSprite;
+        static from_image(imageId: string, width?: number, height?: number, crossorigin?: boolean, scaleMode?: number): TilingSprite;
+
+        protected _tileScaleOffset: Point;
+        protected _tilingTexture: boolean;
+        protected _refreshTexture: boolean;
+        protected _uvs: TextureUvs[];
+
+        constructor(texture: Texture, width: number, height: number);
+
+        tile_scale: Point;
+        tile_position: Point;
+
+        width: number;
+        height: number;
+        originalTexture: Texture;
+
+        getBounds(): Rectangle;
+        generateTilingTexture(renderer: WebGLRenderer | CanvasRenderer, texture: Texture, forcePowerOfTwo?: boolean): Texture;
+        containsPoint(point: Point): boolean;
+        destroy(): void;
+    }
+
+    // - mesh
+    export class Mesh extends Container {
+        static DRAW_MODES: {
+            TRIANGLE_MESH: number;
+            TRIANGLES: number;
+        };
+
+        constructor(texture: Texture, vertices?: ArrayLike<number>, uvs?: ArrayLike<number>, indices?: ArrayLike<number>, drawMode?: number);
+
+        texture: Texture;
+        uvs: number[];
+        vertices: number[];
+        indices: number[];
+        dirty: number;
+        indexDirty: number;
+        blendMode: number;
+        canvasPadding: number;
+        drawMode: number;
+        shader: Shader | AbstractFilter;
+
+        getBounds(matrix?: Matrix): Rectangle;
+        containsPoint(point: Point): boolean;
+
+        protected _texture: Texture;
+
+        protected _renderCanvasTriangleMesh(context: CanvasRenderingContext2D): void;
+        protected _renderCanvasTriangles(context: CanvasRenderingContext2D): void;
+        protected _renderCanvasDrawTriangle(context: CanvasRenderingContext2D, vertices: number, uvs: number, index0: number, index1: number, index2: number): void;
+        protected renderMeshFlat(Mesh: Mesh): void;
+        protected _onTextureUpdate(): void;
+    }
+    export class Rope extends Mesh {
+        protected _ready: boolean;
+
+        protected getTextureUvs(): TextureUvs;
+
+        constructor(texture: Texture, points: Point[]);
+
+        points: Point[];
+        colors: number[];
+
+        refresh(): void;
+    }
+    export class Plane extends Mesh {
+        segmentsX: number;
+        segmentsY: number;
+
+        constructor(texture: Texture, segmentsX?: number, segmentsY?: number);
+    }
+    export class MeshRenderer extends ObjectRenderer {
+        protected _initWebGL(mesh: Mesh): void;
+
+        indices: number[];
+
+        constructor(renderer: WebGLRenderer);
+
+        render(mesh: Mesh): void;
+        flush(): void;
+        start(): void;
+        destroy(): void;
+    }
+    export interface MeshShader extends Shader {}
+
+    // - utils
+    export namespace utils {
+        export function uuid(): number;
+        export function hex2rgb(hex: number, out?: ArrayLike<number>): ArrayLike<number>;
+        export function hex2string(hex: number): string;
+        export function rgb2hex(rgb: ArrayLike<number>): number;
+        export function canUseNewCanvasBlendModes(): boolean;
+        export function getNextPowerOfTwo(number: number): number;
+        export function isPowerOfTwo(width: number, height: number): boolean;
+        export function getResolutionOfUrl(url: string): number;
+        export function skipHello(): void;
+        export function sayHello(type: string): void;
+        export function isWebGLSupported(): boolean;
+        export function sign(n: number): number;
+        export function removeItems<T>(arr: T[], startIdx: number, removeCount: number): void;
+        export const TextureCache: { [key: string]: Texture };
+        export const BaseTextureCache: { [key: string]: BaseTexture };
+
+        export namespace isMobile {
+            export * from 'ismobilejs';
+        }
+    }
+
+    export module ticker {
+        export var shared: Ticker;
+        export class Ticker {
+            protected _tick(time: number): void;
+            protected _emitter: utils.EventEmitter;
+            protected _requestId: number;
+            protected _maxElapsedMS: number;
+
+            protected _requestIfNeeded(): void;
+            protected _cancelIfNeeded(): void;
+            protected _startIfPossible(): void;
+
+            autoStart: boolean;
+            deltaTime: number;
+            elapsedMS: number;
+            lastTime: number;
+            speed: number;
+            started: boolean;
+
+            FPS: number;
+            minFPS: number;
+
+            add(fn: (deltaTime: number) => void, context?: any): Ticker;
+            addOnce(fn: (deltaTime: number) => void, context?: any): Ticker;
+            remove(fn: (deltaTime: number) => void, context?: any): Ticker;
+            start(): void;
+            stop(): void;
+            update(): void;
+        }
+    }
+
+    // filters
+    export namespace filters {
+        export * from 'engine/filters';
+    }
+
+    // input
+    import Input from 'engine/input';
+    export const input: Input;
+
+    // interaction
+    export namespace interaction {
+        export * from 'engine/interaction';
+    }
+
+    // loaders
+    export namespace loaders {
+        import ResourceLoader from 'resource-loader';
+        export class Loader extends ResourceLoader {
+            protected static _pixiMiddleware: Function[];
+            static addPixiMiddleware(fn: Function): void;
+        }
+        export { Resource } from 'resource-loader';
+    }
+    export const loader: loaders.Loader;
+
+    // index.js
+    export const sound: audio.SoundLibrary;
+
+    // SceneTree.js
+    import SceneTree from 'engine/SceneTree';
+    export const scene_tree: SceneTree;
+
+    // Signal.js
+    export { default as MiniSignal } from 'mini-signals';
+    export { MiniSignalBindings } from 'mini-signals';
+
+    export function assemble_scene(scn: Node2D, data: any);
+}

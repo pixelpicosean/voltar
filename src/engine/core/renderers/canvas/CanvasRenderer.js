@@ -36,6 +36,8 @@ export default class CanvasRenderer extends SystemRenderer
      *  (shown if not transparent).
      * @param {boolean} [options.pixel_snap=false] - If true Pixi will Math.floor() x/y values when rendering,
      *  stopping pixel interpolation.
+     * @param {any} [arg2]
+     * @param {any} [arg3]
      */
     constructor(options, arg2, arg3)
     {
@@ -199,6 +201,7 @@ export default class CanvasRenderer extends SystemRenderer
             // displayObject.hit_area = //TODO add a temp hit area
         }
 
+        context.save();
         context.setTransform(1, 0, 0, 1, 0, 0);
         context.globalAlpha = 1;
         this._activeBlendMode = BLEND_MODES.NORMAL;
@@ -234,6 +237,8 @@ export default class CanvasRenderer extends SystemRenderer
         this.context = context;
         displayObject.render_canvas(this);
         this.context = tempContext;
+
+        context.restore();
 
         this.resolution = rootResolution;
 

@@ -1,7 +1,7 @@
 import VisualServer from './VisualServer';
 import PhysicsServer from './PhysicsServer';
 import MessageQueue from './MessageQueue';
-import { Node2D, Vector } from './core';
+import { Node2D, Vector, ticker } from './core';
 
 import { outer_box_resize } from './resize';
 import remove_items from 'remove-array-items';
@@ -26,7 +26,6 @@ const DefaultSettings = {
         antialias: false,
         pixel_snap: true,
         scale_mode: 'linear',
-
 
         FPS: 60,
 
@@ -87,8 +86,6 @@ export default class SceneTree {
     }
     init(settings) {
         this._settings = Object.assign(this._settings, DefaultSettings, settings);
-
-        this.change_scene_to(this._settings.application.main_scene);
 
         window.addEventListener('load', this._initialize, false);
         document.addEventListener('DOMContentLoaded', this._initialize, false);
@@ -348,7 +345,13 @@ export default class SceneTree {
         window.addEventListener('orientationchange', on_window_resize, false);
 
         // Resize for the first tiem
-        setTimeout(on_window_resize, 1);
+        setTimeout(() => {
+            // Resize window for the first time
+            on_window_resize();
+
+            // Boot the first scene
+            this.change_scene_to(this._settings.application.main_scene);
+        }, 1);
 
         // Init input
         this.input._init(this.viewport);
@@ -357,6 +360,7 @@ export default class SceneTree {
         this._start_loop();
     }
     _start_loop() {
+        ticker.shared.start();
         this._loop_id = requestAnimationFrame(this._tick_bind);
     }
     _tick(timestamp) {
@@ -413,6 +417,8 @@ export default class SceneTree {
                 this.viewport.parent = null;
                 // - process nodes
                 this.current_scene._propagate_process(_process_tmp.slow_step_sec);
+                // - update shared ticker
+                ticker.shared.update(_process_tmp.slow_step);
                 // - solve collision
                 this.physics_server.solve_collision(this.current_scene);
                 // - remove nodes to be freed
@@ -440,12 +446,16 @@ export default class SceneTree {
             // Idle update
             // FIX ME: do we need this process method?
             // this.current_scene._process(_process_tmp.real_delta * 0.001);
+            if (this.current_scene._render) {
+                this.current_scene._render(timestamp);
+            }
 
             // Render
             this.visual_server.render(this.viewport);
         }
     }
     _end_loop() {
+        ticker.shared.stop();
         cancelAnimationFrame(this._loop_id);
     }
 

@@ -1,7 +1,7 @@
 import Sprite from './Sprite';
 import Texture from '../../textures/Texture';
 import { TextureCache } from '../../utils';
-import Signal from 'engine/Signal';
+import Signal from 'mini-signals';
 import remove_items from 'remove-array-items';
 import { Rectangle } from '../../math';
 

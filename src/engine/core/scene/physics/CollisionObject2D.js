@@ -47,6 +47,8 @@ export default class CollisionObject2D extends Node2D {
     constructor() {
         super();
 
+        this.is_physics_object = true;
+
         this.collision_layer = 0;
         this.collision_mask = 0;
 

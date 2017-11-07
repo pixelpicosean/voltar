@@ -8,7 +8,6 @@ import { WRAP_MODES, BLEND_MODES } from '../../../const';
 import { GLBuffer } from 'pixi-gl-core';
 
 import RectTileShader from './RectTileShader';
-import SquareTileShader from './SquareTileShader';
 
 
 function _hackSubImage(tex, sprite, clearBuffer, clearWidth, clearHeight) {
@@ -25,8 +24,6 @@ function _hackSubImage(tex, sprite, clearBuffer, clearWidth, clearHeight) {
 /*
  * Renderer for square and rectangle tiles.
  * Squares cannot be rotated, skewed.
- * For container with squares, scale.x must be equals to scale.y, matrix.a to matrix.d
- * Rectangles do not care about that.
  *
  * @class
  * @extends ObjectRenderer
@@ -49,7 +46,6 @@ export default class TileRenderer extends ObjectRenderer {
         this.texLoc = [];
 
         this.rectShader = null;
-        this.squareShader = null;
         this.boundSprites = null;
         this.glTextures = null;
     }
@@ -58,10 +54,8 @@ export default class TileRenderer extends ObjectRenderer {
         const gl = this.renderer.gl;
         const maxTextures = this.maxTextures;
         this.rectShader = new RectTileShader(gl, maxTextures);
-        this.squareShader = new SquareTileShader(gl, maxTextures);
         this.checkIndexBuffer(2000);
         this.rectShader.indexBuffer = this.indexBuffer;
-        this.squareShader.indexBuffer = this.indexBuffer;
         this.vbs = {};
         this.glTextures = [];
         this.boundSprites = [];
@@ -70,47 +64,41 @@ export default class TileRenderer extends ObjectRenderer {
 
     initBounds() {
         const gl = this.renderer.gl;
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = 2048;
-        tempCanvas.height = 2048;
-        // tempCanvas.getContext('2d').clearRect(0, 0, 2048, 2048);
         for (let i = 0; i < this.maxTextures; i++) {
             const rt = RenderTexture.create(2048, 2048);
-            rt.base_texture.premultipliedAlpha = true;
+            rt.base_texture.premultiplied_alpha = true;
             rt.base_texture.wrap_mode = WRAP_MODES.CLAMP;
             this.renderer.textureManager.update_texture(rt);
 
             this.glTextures.push(rt);
-            const bs = [];
+            const bounds = this.boundSprites;
             for (let j = 0; j < 4; j++) {
                 const spr = new Sprite();
                 spr.position.x = 1024 * (j & 1);
                 spr.position.y = 1024 * (j >> 1);
-                bs.push(spr);
+                bounds.push(spr);
             }
-            this.boundSprites.push(bs);
         }
     }
 
     bindTextures(renderer, shader, textures) {
-        const bounds = this.boundSprites;
-        const glts = this.glTextures;
         const len = textures.length;
         const maxTextures = this.maxTextures;
-        if (len >= 4 * maxTextures) {
+        if (len > 4 * maxTextures) {
             return;
         }
-
         const doClear = TileRenderer.DO_CLEAR;
         if (doClear && !this._clearBuffer) {
             this._clearBuffer = new Uint8Array(1024 * 1024 * 4);
         }
+        const glts = this.glTextures;
+        const bounds = this.boundSprites;
 
         let i;
         for (i = 0; i < len; i++) {
             const texture = textures[i];
             if (!texture || !textures[i].valid) continue;
-            const bs = bounds[i >> 2][i & 3];
+            const bs = bounds[i];
             if (!bs.texture ||
                 bs.texture.base_texture !== texture.base_texture) {
                 bs.texture = texture;
@@ -161,9 +149,9 @@ export default class TileRenderer extends ObjectRenderer {
         return null;
     }
 
-    createVb(useSquare) {
+    createVb() {
         const id = ++TileRenderer.vbAutoincrement;
-        const shader = this.getShader(useSquare);
+        const shader = this.getShader();
         const gl = this.renderer.gl;
         const vb = GLBuffer.createVertexBuffer(gl, null, gl.STREAM_DRAW);
         const stuff = {
@@ -171,7 +159,6 @@ export default class TileRenderer extends ObjectRenderer {
             vb: vb,
             vao: shader.createVao(this.renderer, vb),
             lastTimeAccess: Date.now(),
-            useSquare: useSquare,
             shader: shader
         };
         this.vbs[id] = stuff;
@@ -219,16 +206,14 @@ export default class TileRenderer extends ObjectRenderer {
         }
     }
 
-    getShader(useSquare) {
-        return useSquare ? this.squareShader : this.rectShader;
+    getShader() {
+        return this.rectShader;
     }
 
     destroy() {
         super.destroy();
         this.rectShader.destroy();
-        this.squareShader.destroy();
         this.rectShader = null;
-        this.squareShader = null;
     };
 }
 

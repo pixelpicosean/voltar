@@ -13,7 +13,7 @@ import * as interaction from './interaction';
 import * as loaders from './loaders';
 import * as prepare from './prepare';
 import * as audio from './audio';
-import Signal from './Signal';
+import Signal from 'mini-signals';
 import Tween from './anime/Tween';
 import TweenManager from './anime/TweenManager';
 
@@ -22,14 +22,15 @@ import { utils } from './core';
 utils.mixins.perform_mixins();
 
 /**
- * Alias for {@link V.loaders.shared}.
- * @name loader
- * @memberof V
- * @type {V.loader.Loader}
+ * Alias for {@link loaders.shared}
+ * @type {loaders.Loader}
  */
 const loader = loaders.shared || null;
 
-const sound = audio.SoundLibrary.init(loaders);
+/**
+ * @type {audio.SoundLibrary}
+ */
+const sound = audio.SoundLibrary.init(loaders.Resource, loaders.Loader, loader);
 
 export {
     accessibility,
@@ -48,14 +49,23 @@ export {
 };
 
 import Input from './input';
+/**
+ * @type {Input}
+ */
 export const input = new Input();
 
 import SceneTree from './SceneTree';
-
 export * from './SceneTree';
+/**
+ * @type {SceneTree}
+ */
 export const scene_tree = new SceneTree(input);
 
 
+/**
+ * @param {core.Node2D} node
+ * @param {any} children
+ */
 function assemble_node(node, children) {
     if (!children || children.length === 0) {
         return;
@@ -73,6 +83,12 @@ function assemble_node(node, children) {
         node.add_child(inst);
     }
 }
+/**
+ * Assemble a scene(Node2D) with hierarchy data
+ * @param {core.Node2D} scn
+ * @param {any} data data
+ * @returns {core.Node2D}
+ */
 export function assemble_scene(scn, data) {
     if (data.name) {
         scn.name = name;

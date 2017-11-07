@@ -2,7 +2,7 @@ import WebAudioInstance from "./WebAudioInstance";
 import WebAudioNodes from "./WebAudioNodes";
 /**
  * Represents a single sound element. Can be used to play, pause, etc. sound instances.
- *
+ * @private
  * @class WebAudioMedia
  * @memberof PIXI.sound.webaudio
  * @param {PIXI.sound.Sound} parent - Instance of parent Sound container
@@ -13,7 +13,6 @@ export default class WebAudioMedia {
         this._nodes = new WebAudioNodes(this.context);
         this._source = this._nodes.bufferSource;
         this.source = parent.options.source;
-        this.useXHR = parent.options.useXHR;
     }
     /**
      * Destructor, safer to use `SoundLibrary.remove(alias)` to remove this sound.
@@ -38,18 +37,6 @@ export default class WebAudioMedia {
     // Implement isPlayable
     get isPlayable() {
         return !!this._source && !!this._source.buffer;
-    }
-    // Implements volume
-    set volume(volume) {
-        this._nodes.gain.gain.value = volume;
-    }
-    // Implements looping
-    set loop(loop) {
-        this._source.loop = loop;
-    }
-    // Implements speed
-    set speed(value) {
-        this._source.playbackRate.value = value;
     }
     // Implement filters
     get filters() {

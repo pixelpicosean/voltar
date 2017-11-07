@@ -1,18 +1,14 @@
-/**
- * @class
- * @memberof V
- */
 export default class WebGLManager
 {
     /**
-     * @param {V.WebGLRenderer} renderer - The renderer this manager works for.
+     * @param {WebGLRenderer} renderer - The renderer this manager works for.
      */
     constructor(renderer)
     {
         /**
          * The renderer this manager works for.
          *
-         * @member {V.WebGLRenderer}
+         * @type {WebGLRenderer}
          */
         this.renderer = renderer;
 
@@ -21,7 +17,6 @@ export default class WebGLManager
 
     /**
      * Generic method called when there is a WebGL context change.
-     *
      */
     onContextChange()
     {
@@ -30,7 +25,6 @@ export default class WebGLManager
 
     /**
      * Generic destroy methods to be overridden by the subclass
-     *
      */
     destroy()
     {

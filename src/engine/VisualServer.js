@@ -18,18 +18,18 @@ export default class VisualServer {
         }
         this.is_initialized = true;
 
-        if (!config.force_canvas && isWebGLSupported()) {
-            this.renderer = new WebGLRenderer(config);
-        }
-        else {
-            this.renderer = new CanvasRenderer(config);
-        }
-
         if (config.scale_mode === 'linear') {
             settings.SCALE_MODE = SCALE_MODES.LINEAR;
         }
         else {
             settings.SCALE_MODE = SCALE_MODES.NEAREST;
+        }
+
+        if (!config.force_canvas && isWebGLSupported()) {
+            this.renderer = new WebGLRenderer(config);
+        }
+        else {
+            this.renderer = new CanvasRenderer(config);
         }
     }
     render(viewport) {

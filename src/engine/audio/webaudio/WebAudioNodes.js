@@ -1,5 +1,7 @@
 import Filterable from "../Filterable";
+;
 /**
+ * @private
  * @class WebAudioNodes
  * @extends PIXI.sound.Filterable
  * @private
@@ -43,22 +45,24 @@ export default class WebAudioNodes extends Filterable {
     /**
      * Clones the bufferSource. Used just before playing a sound.
      * @method PIXI.sound.SoundNodes#cloneBufferSource
-     * @returns {AudioBufferSourceNode} The clone AudioBufferSourceNode.
+     * @returns {PIXI.sound.SoundNodes~SourceClone} The clone AudioBufferSourceNode.
      */
     cloneBufferSource() {
         const orig = this.bufferSource;
-        const clone = this.context.audioContext.createBufferSource();
-        clone.buffer = orig.buffer;
-        clone.playbackRate.value = orig.playbackRate.value;
-        clone.loop = orig.loop;
-        clone.connect(this.destination);
-        return clone;
+        const source = this.context.audioContext.createBufferSource();
+        source.buffer = orig.buffer;
+        source.playbackRate.value = orig.playbackRate.value;
+        source.loop = orig.loop;
+        const gain = this.context.audioContext.createGain();
+        source.connect(gain);
+        gain.connect(this.destination);
+        return { source, gain };
     }
 }
 /**
  * The buffer size for script processor
  * @name PIXI.sound.SoundNodes.BUFFER_SIZE
- * @type {Number}
+ * @type {number}
  * @default 256
  */
 WebAudioNodes.BUFFER_SIZE = 256;

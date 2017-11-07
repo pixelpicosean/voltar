@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "module": "ES6",
+    "target": "ES5",
+    "baseUrl": "./src"
+  }
+}

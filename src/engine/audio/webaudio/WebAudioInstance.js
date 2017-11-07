@@ -2,6 +2,7 @@ import EventEmitter from 'eventemitter3';
 let id = 0;
 /**
  * A single play instance that handles the AudioBufferSourceNode.
+ * @private
  * @class WebAudioInstance
  * @memberof PIXI.sound.webaudio
  * @param {SoundNodes} source Reference to the SoundNodes.
@@ -12,6 +13,7 @@ export default class WebAudioInstance extends EventEmitter {
         this.id = id++;
         this._media = null;
         this._paused = false;
+        this._muted = false;
         this._elapsed = 0;
         this._updateListener = this._update.bind(this);
         // Initialize
@@ -32,56 +34,148 @@ export default class WebAudioInstance extends EventEmitter {
         }
     }
     /**
+     * Set the instance speed from 0 to 1
+     * @member {number} PIXI.sound.htmlaudio.HTMLAudioInstance#speed
+     */
+    get speed() {
+        return this._speed;
+    }
+    set speed(speed) {
+        this._speed = speed;
+        this.refresh();
+        this._update(true); // update progress
+    }
+    /**
+     * Get the set the volume for this instance from 0 to 1
+     * @member {number} PIXI.sound.htmlaudio.HTMLAudioInstance#volume
+     */
+    get volume() {
+        return this._volume;
+    }
+    set volume(volume) {
+        this._volume = volume;
+        this.refresh();
+    }
+    /**
+     * `true` if the sound is muted
+     * @member {boolean} PIXI.sound.htmlaudio.HTMLAudioInstance#muted
+     */
+    get muted() {
+        return this._muted;
+    }
+    set muted(muted) {
+        this._muted = muted;
+        this.refresh();
+    }
+    /**
+     * If the sound instance should loop playback
+     * @member {boolean} PIXI.sound.htmlaudio.HTMLAudioInstance#loop
+     */
+    get loop() {
+        return this._loop;
+    }
+    set loop(loop) {
+        this._loop = loop;
+        this.refresh();
+    }
+    /**
+     * Refresh loop, volume and speed based on changes to parent
+     * @method PIXI.sound.webaudio.WebAudioInstance#refresh
+     */
+    refresh() {
+        const global = this._media.context;
+        const sound = this._media.parent;
+        // Updating looping
+        this._source.loop = this._loop || sound.loop;
+        // Update the volume
+        const globalVolume = global.volume * (global.muted ? 0 : 1);
+        const soundVolume = sound.volume * (sound.muted ? 0 : 1);
+        const instanceVolume = this._volume * (this._muted ? 0 : 1);
+        this._gain.gain.value = instanceVolume * soundVolume * globalVolume;
+        // Update the speed
+        this._source.playbackRate.value = this._speed * sound.speed * global.speed;
+    }
+    /**
+     * Handle changes in paused state, either globally or sound or instance
+     * @method PIXI.sound.webaudio.WebAudioInstance#refreshPaused
+     */
+    refreshPaused() {
+        const global = this._media.context;
+        const sound = this._media.parent;
+        // Consider global and sound paused
+        const pausedReal = this._paused || sound.paused || global.paused;
+        if (pausedReal !== this._pausedReal) {
+            this._pausedReal = pausedReal;
+            if (pausedReal) {
+                // pause the sounds
+                this._internalStop();
+                /**
+                 * The sound is paused.
+                 * @event PIXI.sound.webaudio.WebAudioInstance#paused
+                 */
+                this.emit("paused");
+            }
+            else {
+                /**
+                 * The sound is unpaused.
+                 * @event PIXI.sound.webaudio.WebAudioInstance#resumed
+                 */
+                this.emit("resumed");
+                // resume the playing with offset
+                this.play({
+                    start: this._elapsed % this._duration,
+                    end: this._end,
+                    speed: this._speed,
+                    loop: this._loop,
+                    volume: this._volume
+                });
+            }
+            /**
+             * The sound is paused or unpaused.
+             * @event PIXI.sound.webaudio.WebAudioInstance#pause
+             * @property {boolean} paused If the instance was paused or not.
+             */
+            this.emit("pause", pausedReal);
+        }
+    }
+    /**
      * Plays the sound.
      * @method PIXI.sound.webaudio.WebAudioInstance#play
-     * @param {Number} [start=0] The position to start playing, in seconds.
-     * @param {Number} [end] The ending position in seconds.
-     * @param {Number} [speed] Override the default speed.
-     * @param {Boolean} [loop] Override the default loop.
-     * @param {Number} [fadeIn] Time to fadein volume.
-     * @param {Number} [fadeOut] Time to fadeout volume.
+     * @param {Object} options Play options
+     * @param {number} options.start The position to start playing, in seconds.
+     * @param {number} options.end The ending position in seconds.
+     * @param {number} options.speed Speed for the instance
+     * @param {boolean} options.loop If the instance is looping, defaults to sound loop
+     * @param {number} options.volume Volume of the instance
+     * @param {boolean} options.muted Muted state of instance
      */
-    play(start, end, speed, loop, fadeIn, fadeOut) {
+    play(options) {
+        const { start, end, speed, loop, volume, muted } = options;
         // @if DEBUG
         if (end) {
             console.assert(end > start, "End time is before start time");
         }
         // @endif
         this._paused = false;
-        this._source = this._media.nodes.cloneBufferSource();
-        if (speed !== undefined) {
-            this._source.playbackRate.value = speed;
-        }
-        this._speed = this._source.playbackRate.value;
-        if (loop !== undefined) {
-            this._loop = this._source.loop = !!loop;
-        }
+        const { source, gain } = this._media.nodes.cloneBufferSource();
+        this._source = source;
+        this._gain = gain;
+        this._speed = speed;
+        this._volume = volume;
+        this._loop = !!loop;
+        this._muted = muted;
+        this.refresh();
         // WebAudio doesn't support looping when a duration is set
         // we'll set this just for the heck of it
-        if (this._loop && end !== undefined) {
+        if (this.loop && end !== null) {
             // @if DEBUG
             console.warn('Looping not support when specifying an "end" time');
             // @endif
-            this._loop = this._source.loop = false;
+            this.loop = false;
         }
         this._end = end;
         const duration = this._source.buffer.duration;
-        fadeIn = this._toSec(fadeIn);
-        // Clamp fadeIn to the duration
-        if (fadeIn > duration) {
-            fadeIn = duration;
-        }
-        // Cannot fade out for looping sounds
-        if (!this._loop) {
-            fadeOut = this._toSec(fadeOut);
-            // Clamp fadeOut to the duration + fadeIn
-            if (fadeOut > duration - fadeIn) {
-                fadeOut = duration - fadeIn;
-            }
-        }
         this._duration = duration;
-        this._fadeIn = fadeIn;
-        this._fadeOut = fadeOut;
         this._lastUpdate = this._now();
         this._elapsed = start;
         this._source.onended = this._onComplete.bind(this);
@@ -105,8 +199,8 @@ export default class WebAudioInstance extends EventEmitter {
      * Utility to convert time in millseconds or seconds
      * @method PIXI.sound.webaudio.WebAudioInstance#_toSec
      * @private
-     * @param {Number} [time] Time in either ms or sec
-     * @return {Number} Time in seconds
+     * @param {number} [time] Time in either ms or sec
+     * @return {number} Time in seconds
      */
     _toSec(time) {
         if (time > 10) {
@@ -117,7 +211,7 @@ export default class WebAudioInstance extends EventEmitter {
     /**
      * Start the update progress.
      * @name PIXI.sound.webaudio.WebAudioInstance#_enabled
-     * @type {Boolean}
+     * @type {boolean}
      * @private
      */
     set _enabled(enabled) {
@@ -129,7 +223,7 @@ export default class WebAudioInstance extends EventEmitter {
     }
     /**
      * The current playback progress from 0 to 1.
-     * @type {Number}
+     * @type {number}
      * @name PIXI.sound.webaudio.WebAudioInstance#progress
      */
     get progress() {
@@ -137,40 +231,15 @@ export default class WebAudioInstance extends EventEmitter {
     }
     /**
      * Pauses the sound.
-     * @type {Boolean}
+     * @type {boolean}
      * @name PIXI.sound.webaudio.WebAudioInstance#paused
      */
     get paused() {
         return this._paused;
     }
     set paused(paused) {
-        if (paused !== this._paused) {
-            this._paused = paused;
-            if (paused) {
-                // pause the sounds
-                this._internalStop();
-                /**
-                 * The sound is paused.
-                 * @event PIXI.sound.webaudio.WebAudioInstance#paused
-                 */
-                this.emit("paused");
-            }
-            else {
-                /**
-                 * The sound is unpaused.
-                 * @event PIXI.sound.webaudio.WebAudioInstance#resumed
-                 */
-                this.emit("resumed");
-                // resume the playing with offset
-                this.play(this._elapsed % this._duration, this._end, this._speed, this._loop, this._fadeIn, this._fadeOut);
-            }
-            /**
-             * The sound is paused or unpaused.
-             * @event PIXI.sound.webaudio.WebAudioInstance#pause
-             * @property {Boolean} paused If the instance was paused or not.
-             */
-            this.emit("pause", paused);
-        }
+        this._paused = paused;
+        this.refreshPaused();
     }
     /**
      * Don't use after this.
@@ -179,31 +248,43 @@ export default class WebAudioInstance extends EventEmitter {
     destroy() {
         this.removeAllListeners();
         this._internalStop();
-        this._source = null;
-        this._speed = 0;
-        this._end = 0;
-        this._media = null;
+        if (this._source) {
+            this._source.disconnect();
+            this._source = null;
+        }
+        if (this._gain) {
+            this._gain.disconnect();
+            this._gain = null;
+        }
+        if (this._media) {
+            this._media.context.events.off('refresh', this.refresh, this);
+            this._media.context.events.off('refreshPaused', this.refreshPaused, this);
+            this._media = null;
+        }
+        this._end = null;
+        this._speed = 1;
+        this._volume = 1;
+        this._loop = false;
         this._elapsed = 0;
         this._duration = 0;
-        this._loop = false;
-        this._fadeIn = 0;
-        this._fadeOut = 0;
         this._paused = false;
+        this._muted = false;
+        this._pausedReal = false;
     }
     /**
      * To string method for instance.
      * @method PIXI.sound.webaudio.WebAudioInstance#toString
-     * @return {String} The string representation of instance.
+     * @return {string} The string representation of instance.
      * @private
      */
     toString() {
-        return "[SoundInstance id=" + this.id + "]";
+        return "[WebAudioInstance id=" + this.id + "]";
     }
     /**
      * Get the current time in seconds.
      * @method PIXI.sound.webaudio.WebAudioInstance#_now
      * @private
-     * @return {Number} Seconds since start of context
+     * @return {number} Seconds since start of context
      */
     _now() {
         return this._media.context.audioContext.currentTime;
@@ -218,37 +299,18 @@ export default class WebAudioInstance extends EventEmitter {
             const now = this._now();
             const delta = now - this._lastUpdate;
             if (delta > 0 || force) {
-                this._elapsed += delta;
+                const speed = this._source.playbackRate.value;
+                this._elapsed += delta * speed;
                 this._lastUpdate = now;
                 const duration = this._duration;
-                const progress = ((this._elapsed * this._speed) % duration) / duration;
-                if (this._fadeIn || this._fadeOut) {
-                    const position = progress * duration;
-                    const gain = this._media.nodes.gain.gain;
-                    const maxVolume = this._media.parent.volume;
-                    if (this._fadeIn) {
-                        if (position <= this._fadeIn && progress < 1) {
-                            // Manipulate the gain node directly
-                            // so we can maintain the starting volume
-                            gain.value = maxVolume * (position / this._fadeIn);
-                        }
-                        else {
-                            gain.value = maxVolume;
-                            this._fadeIn = 0;
-                        }
-                    }
-                    if (this._fadeOut && position >= duration - this._fadeOut) {
-                        const percent = (duration - position) / this._fadeOut;
-                        gain.value = maxVolume * percent;
-                    }
-                }
+                const progress = (this._elapsed % duration) / duration;
                 // Update the progress
                 this._progress = progress;
                 /**
                  * The sound progress is updated.
                  * @event PIXI.sound.webaudio.WebAudioInstance#progress
-                 * @property {Number} progress Amount progressed from 0 to 1
-                 * @property {Number} duration The total playback in seconds
+                 * @property {number} progress Amount progressed from 0 to 1
+                 * @property {number} duration The total playback in seconds
                  */
                 this.emit("progress", this._progress, duration);
             }
@@ -260,6 +322,8 @@ export default class WebAudioInstance extends EventEmitter {
      */
     init(media) {
         this._media = media;
+        media.context.events.on('refresh', this.refresh, this);
+        media.context.events.on('refreshPaused', this.refreshPaused, this);
     }
     /**
      * Stops the instance.
@@ -272,8 +336,6 @@ export default class WebAudioInstance extends EventEmitter {
             this._source.onended = null;
             this._source.stop();
             this._source = null;
-            // Reset the volume
-            this._media.volume = this._media.parent.volume;
         }
     }
     /**

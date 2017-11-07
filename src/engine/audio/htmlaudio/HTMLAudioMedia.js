@@ -2,6 +2,7 @@ import HTMLAudioInstance from "./HTMLAudioInstance";
 import EventEmitter from 'eventemitter3';
 /**
  * The fallback version of Sound which uses `<audio>` instead of WebAudio API.
+ * @private
  * @class HTMLAudioMedia
  * @memberof PIXI.sound.htmlaudio
  * @param {HTMLAudioElement|String|Object} options Either the path or url to the source file.
@@ -11,7 +12,6 @@ export default class HTMLAudioMedia extends EventEmitter {
     init(parent) {
         this.parent = parent;
         this._source = parent.options.source || new Audio();
-        this.speed = parent.options.speed;
         if (parent.url) {
             this._source.src = parent.url;
         }
@@ -23,32 +23,6 @@ export default class HTMLAudioMedia extends EventEmitter {
     // Implement isPlayable
     get isPlayable() {
         return !!this._source && this._source.readyState === 4;
-    }
-    // Implement volume
-    set volume(volume) {
-        const oldVolume = this.volume;
-        this._source.volume = volume;
-        if (volume !== oldVolume) {
-            this.emit('volume', volume);
-        }
-    }
-    get volume() {
-        return this._source.volume;
-    }
-    // Implement loop
-    set loop(loop) {
-        this._source.loop = loop;
-    }
-    // Implement speed
-    get speed() {
-        return this._source.playbackRate;
-    }
-    set speed(value) {
-        const oldSpeed = this.speed;
-        this._source.playbackRate = value;
-        if (value != oldSpeed) {
-            this.emit('speed', value);
-        }
     }
     // Implement duration
     get duration() {

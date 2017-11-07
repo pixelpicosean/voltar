@@ -1,6 +1,7 @@
 import EventEmitter from 'eventemitter3';
 /**
  * The fallback version of WebAudioContext which uses `<audio>` instead of WebAudio API.
+ * @private
  * @class HTMLAudioContext
  * @extends PIXI.util.EventEmitter
  * @memberof PIXI.sound.htmlaudio
@@ -8,75 +9,26 @@ import EventEmitter from 'eventemitter3';
 export default class HTMLAudioContext extends EventEmitter {
     constructor() {
         super();
-        this._volume = 1;
-        this._muted = false;
-        this._paused = false;
+        this.speed = 1;
+        this.volume = 1;
+        this.muted = false;
+        this.paused = false;
     }
     /**
-     * Pauses all sounds.
-     * @type {Boolean}
-     * @name PIXI.sound.htmlaudio.HTMLAudioContext#paused
-     * @default false
+     * Internal trigger when volume, mute or speed changes
+     * @method PIXI.sound.htmlaudio.HTMLAudioContext#refresh
+     * @private
      */
-    set paused(paused) {
-        const oldPaused = this._paused;
-        this._paused = paused;
-        if (paused !== oldPaused) {
-            /**
-             * Fired when paused state changes
-             * @event PIXI.sound.htmlaudio.HTMLAudioContext#paused
-             * @param {Boolean} paused - Paused state of context
-             * @private
-             */
-            this.emit('paused', paused);
-        }
-    }
-    get paused() {
-        return this._paused;
+    refresh() {
+        this.emit('refresh');
     }
     /**
-     * Sets the muted state.
-     * @type {Boolean}
-     * @name PIXI.sound.htmlaudio.HTMLAudioContext#muted
-     * @default false
+     * Internal trigger paused changes
+     * @method PIXI.sound.htmlaudio.HTMLAudioContext#refreshPaused
+     * @private
      */
-    set muted(muted) {
-        const oldMuted = this._muted;
-        this._muted = muted;
-        if (muted !== oldMuted) {
-            /**
-             * Fired when muted state changes
-             * @event PIXI.sound.htmlaudio.HTMLAudioContext#muted
-             * @param {Boolean} muted - Muted state of context
-             * @private
-             */
-            this.emit('muted', muted);
-        }
-    }
-    get muted() {
-        return this._muted;
-    }
-    /**
-     * Sets the volume from 0 to 1.
-     * @type {Number}
-     * @name PIXI.sound.htmlaudio.HTMLAudioContext#volume
-     * @default 1
-     */
-    set volume(volume) {
-        const oldVolume = this._volume;
-        this._volume = volume;
-        if (volume !== oldVolume) {
-            /**
-             * Fired when volume changes
-             * @event PIXI.sound.htmlaudio.HTMLAudioContext#volume
-             * @param {Boolean} volume - Current context volume
-             * @private
-             */
-            this.emit('volume', volume);
-        }
-    }
-    get volume() {
-        return this._volume;
+    refreshPaused() {
+        this.emit('refreshPaused');
     }
     /**
      * HTML Audio does not support filters, this is non-functional API.
@@ -111,20 +63,22 @@ export default class HTMLAudioContext extends EventEmitter {
     /**
      * Toggles the muted state.
      * @method PIXI.sound.htmlaudio.HTMLAudioContext#toggleMute
-     * @return {Boolean} The current muted state.
+     * @return {boolean} The current muted state.
      */
     toggleMute() {
         this.muted = !this.muted;
-        return this._muted;
+        this.refresh();
+        return this.muted;
     }
     /**
      * Toggles the paused state.
      * @method PIXI.sound.htmlaudio.HTMLAudioContext#togglePause
-     * @return {Boolean} The current paused state.
+     * @return {boolean} The current paused state.
      */
     togglePause() {
         this.paused = !this.paused;
-        return this._paused;
+        this.refreshPaused();
+        return this.paused;
     }
     /**
      * Destroy and don't use after this

@@ -1,8 +1,12 @@
 import Filterable from "../Filterable";
+import EventEmitter from 'eventemitter3';
+
+
 /**
- * @description Main class to handle WebAudio API. There's a simple chain
- * of AudioNode elements: analyser > gainNode > compressor > context.destination.
- * any filters that are added are inserted between the analyser and gainNode nodes
+ * Main class to handle WebAudio API. There's a simple chain
+ * of AudioNode elements: analyser > compressor > context.destination.
+ * any filters that are added are inserted between the analyser and compressor nodes
+ * @private
  * @class WebAudioContext
  * @extends PIXI.sound.Filterable
  * @memberof PIXI.sound.webaudio
@@ -10,22 +14,21 @@ import Filterable from "../Filterable";
 export default class WebAudioContext extends Filterable {
     constructor() {
         const ctx = new WebAudioContext.AudioContext();
-        const gain = ctx.createGain();
         const compressor = ctx.createDynamicsCompressor();
         const analyser = ctx.createAnalyser();
         // setup the end of the node chain
-        analyser.connect(gain);
-        gain.connect(compressor);
+        analyser.connect(compressor);
         compressor.connect(ctx.destination);
-        super(analyser, gain);
+        super(analyser, compressor);
         this._ctx = ctx;
         this._offlineCtx = new WebAudioContext.OfflineAudioContext(1, 2, ctx.sampleRate);
         this._unlocked = false;
-        this.gain = gain;
         this.compressor = compressor;
         this.analyser = analyser;
+        this.events = new EventEmitter();
         // Set the defaults
         this.volume = 1;
+        this.speed = 1;
         this.muted = false;
         this.paused = false;
         // Listen for document level clicks to unlock WebAudio on iOS. See the _unlock method.
@@ -106,12 +109,12 @@ export default class WebAudioContext extends Filterable {
         if (typeof ctx.close !== "undefined") {
             ctx.close();
         }
+        this.events.removeAllListeners();
         this.analyser.disconnect();
-        this.gain.disconnect();
         this.compressor.disconnect();
-        this.gain = null;
         this.analyser = null;
         this.compressor = null;
+        this.events = null;
         this._offlineCtx = null;
         this._ctx = null;
     }
@@ -134,38 +137,10 @@ export default class WebAudioContext extends Filterable {
         return this._offlineCtx;
     }
     /**
-     * Sets the muted state.
-     * @type {Boolean}
-     * @name PIXI.sound.webaudio.WebAudioContext#muted
-     * @default false
-     */
-    get muted() {
-        return this._muted;
-    }
-    set muted(muted) {
-        this._muted = !!muted;
-        this.gain.gain.value = this._muted ? 0 : this._volume;
-    }
-    /**
-     * Sets the volume from 0 to 1.
-     * @type {Number}
-     * @name PIXI.sound.webaudio.WebAudioContext#volume
-     * @default 1
-     */
-    set volume(volume) {
-        // update volume
-        this._volume = volume;
-        // update actual volume IIF not muted
-        if (!this._muted) {
-            this.gain.gain.value = this._volume;
-        }
-    }
-    get volume() {
-        return this._volume;
-    }
-    /**
-     * Pauses all sounds.
-     * @type {Boolean}
+     * Pauses all sounds, even though we handle this at the instance
+     * level, we'll also pause the audioContext so that the
+     * time used to compute progress isn't messed up.
+     * @type {boolean}
      * @name PIXI.sound.webaudio.WebAudioContext#paused
      * @default false
      */
@@ -182,21 +157,39 @@ export default class WebAudioContext extends Filterable {
         return this._paused;
     }
     /**
+     * Emit event when muted, volume or speed changes
+     * @method PIXI.sound.webaudio.WebAudioContext#refresh
+     * @private
+     */
+    refresh() {
+        this.events.emit('refresh');
+    }
+    /**
+     * Emit event when muted, volume or speed changes
+     * @method PIXI.sound.webaudio.WebAudioContext#refreshPaused
+     * @private
+     */
+    refreshPaused() {
+        this.events.emit('refreshPaused');
+    }
+    /**
      * Toggles the muted state.
      * @method PIXI.sound.webaudio.WebAudioContext#toggleMute
-     * @return {Boolean} The current muted state.
+     * @return {boolean} The current muted state.
      */
     toggleMute() {
         this.muted = !this.muted;
-        return this._muted;
+        this.refresh();
+        return this.muted;
     }
     /**
      * Toggles the paused state.
      * @method PIXI.sound.webaudio.WebAudioContext#togglePause
-     * @return {Boolean} The current muted state.
+     * @return {boolean} The current muted state.
      */
     togglePause() {
         this.paused = !this.paused;
+        this.refreshPaused();
         return this._paused;
     }
     /**

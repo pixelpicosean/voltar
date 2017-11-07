@@ -1,15 +1,17 @@
 import HTMLAudioMedia from "./htmlaudio/HTMLAudioMedia";
 import SoundLibrary from "./SoundLibrary";
 import SoundSprite from "./sprites/SoundSprite";
+import SoundUtils from "./utils/SoundUtils";
 import WebAudioMedia from "./webaudio/WebAudioMedia";
 /**
- * Abstract base class for LegacySound and Sound.
+ * Sound represents a single piece of loaded media. When playing a sound {@link v.sound.IMediaInstance} objects
+ * are created. Properties such a `volume`, `pause`, `mute`, `speed`, etc will have an effect on all instances.
  * @class Sound
- * @memberof PIXI.sound
+ * @memberof v.sound
  */
 export default class Sound {
     /**
-     * Constructor, use `PIXI.sound.Sound.from`
+     * Constructor, use `v.sound.Sound.from`
      * @private
      */
     constructor(media, options) {
@@ -38,26 +40,24 @@ export default class Sound {
     }
     /**
      * Create a new sound instance from source.
-     * @method PIXI.sound.Sound.from
+     * @method v.sound.Sound.from
      * @param {ArrayBuffer|String|Object|HTMLAudioElement} options Either the path or url to the source file.
      *        or the object of options to use.
      * @param {String} [options.url] If `options` is an object, the source of file.
      * @param {HTMLAudioElement|ArrayBuffer} [options.source] The source, if already preloaded.
-     * @param {Boolean} [options.autoPlay=false] true to play after loading.
-     * @param {Boolean} [options.preload=false] true to immediately start preloading.
-     * @param {Boolean} [options.singleInstance=false] `true` to disallow playing multiple layered instances at once.
-     * @param {Number} [options.volume=1] The amount of volume 1 = 100%.
-     * @param {Boolean} [options.useXHR=true] true to use XMLHttpRequest to load the sound. Default is false,
-     *        loaded with NodeJS's `fs` module.
-     * @param {Number} [options.speed=1] The playback rate where 1 is 100% speed.
+     * @param {boolean} [options.autoPlay=false] true to play after loading.
+     * @param {boolean} [options.preload=false] true to immediately start preloading.
+     * @param {boolean} [options.singleInstance=false] `true` to disallow playing multiple layered instances at once.
+     * @param {number} [options.volume=1] The amount of volume 1 = 100%.
+     * @param {number} [options.speed=1] The playback rate where 1 is 100% speed.
      * @param {Object} [options.sprites] The map of sprite data. Where a sprite is an object
      *        with a `start` and `end`, which are the times in seconds. Optionally, can include
      *        a `speed` amount where 1 is 100% speed.
-     * @param {PIXI.sound.Sound~completeCallback} [options.complete=null] Global complete callback
+     * @param {v.sound.Sound~completeCallback} [options.complete=null] Global complete callback
      *        when play is finished.
-     * @param {PIXI.sound.Sound~loadedCallback} [options.loaded=null] Call when finished loading.
-     * @param {Boolean} [options.loop=false] true to loop the audio playback.
-     * @return {PIXI.sound.Sound} Created sound instance.
+     * @param {v.sound.Sound~loadedCallback} [options.loaded=null] Call when finished loading.
+     * @param {boolean} [options.loop=false] true to loop the audio playback.
+     * @return {v.sound.Sound} Created sound instance.
      */
     static from(source) {
         let options = {};
@@ -71,7 +71,7 @@ export default class Sound {
             options = source;
         }
         // Default settings
-        options = Object.freeze(Object.assign({
+        options = Object.assign({
             autoPlay: false,
             singleInstance: false,
             url: null,
@@ -82,8 +82,12 @@ export default class Sound {
             complete: null,
             loaded: null,
             loop: false,
-            useXHR: true,
-        }, options));
+        }, options);
+        // Resolve url in-case it has a special format
+        if (options.url) {
+            options.url = SoundUtils.resolveUrl(options.url);
+        }
+        Object.freeze(options);
         const media = SoundLibrary.instance.useLegacy ?
             new HTMLAudioMedia() :
             new WebAudioMedia();
@@ -91,8 +95,8 @@ export default class Sound {
     }
     /**
      * Instance of the media context
-     * @name PIXI.sound.Sound#context
-     * @type {PIXI.sound.IMediaContext}
+     * @name v.sound.Sound#context
+     * @type {v.sound.IMediaContext}
      * @readonly
      */
     get context() {
@@ -100,49 +104,53 @@ export default class Sound {
     }
     /**
      * Stops all the instances of this sound from playing.
-     * @method PIXI.sound.Sound#pause
-     * @return {PIXI.sound.Sound} Instance of this sound.
+     * @method v.sound.Sound#pause
+     * @return {v.sound.Sound} Instance of this sound.
      */
     pause() {
-        this.paused = true;
         this.isPlaying = false;
+        this.paused = true;
         return this;
     }
     /**
      * Resuming all the instances of this sound from playing
-     * @method PIXI.sound.Sound#resume
-     * @return {PIXI.sound.Sound} Instance of this sound.
+     * @method v.sound.Sound#resume
+     * @return {v.sound.Sound} Instance of this sound.
      */
     resume() {
-        this.paused = false;
         this.isPlaying = this._instances.length > 0;
+        this.paused = false;
         return this;
     }
     /**
      * Stops all the instances of this sound from playing.
-     * @name PIXI.sound.Sound#paused
-     * @type {Boolean}
+     * @name v.sound.Sound#paused
+     * @type {boolean}
+     * @readonly
      */
+    get paused() {
+        return this._paused;
+    }
     set paused(paused) {
-        for (let i = this._instances.length - 1; i >= 0; i--) {
-            this._instances[i].paused = paused;
-        }
+        this._paused = paused;
+        this.refreshPaused();
     }
     /**
      * The playback rate
-     * @name PIXI.sound.Sound#speed
-     * @type {Number}
+     * @name v.sound.Sound#speed
+     * @type {number}
      */
     get speed() {
         return this._speed;
     }
     set speed(speed) {
-        this._speed = this.media.speed = speed;
+        this._speed = speed;
+        this.refresh();
     }
     /**
      * Set the filters. Only supported with WebAudio.
-     * @name PIXI.sound.Sound#filters
-     * @type {Array<PIXI.sound.filters.Filter>}
+     * @name v.sound.Sound#filters
+     * @type {Array<v.sound.filters.Filter>}
      */
     get filters() {
         return this.media.filters;
@@ -168,7 +176,7 @@ export default class Sound {
     }
     /**
      * Destructor, safer to use `SoundLibrary.remove(alias)` to remove this sound.
-     * @method PIXI.sound.Sound#destroy
+     * @method v.sound.Sound#destroy
      */
     destroy() {
         this._removeInstances();
@@ -180,14 +188,14 @@ export default class Sound {
     }
     /**
      * Remove all sound sprites.
-     * @method PIXI.sound.Sound#removeSprites
-     * @return {PIXI.sound.Sound} Sound instance for chaining.
+     * @method v.sound.Sound#removeSprites
+     * @return {v.sound.Sound} Sound instance for chaining.
      */
     /**
      * Remove a sound sprite.
-     * @method PIXI.sound.Sound#removeSprites
+     * @method v.sound.Sound#removeSprites
      * @param {String} alias The unique name of the sound sprite.
-     * @return {PIXI.sound.Sound} Sound instance for chaining.
+     * @return {v.sound.Sound} Sound instance for chaining.
      */
     removeSprites(alias) {
         if (!alias) {
@@ -206,8 +214,8 @@ export default class Sound {
     }
     /**
      * If the current sound is playable (loaded).
-     * @name PIXI.sound.Sound#isPlayable
-     * @type {Boolean}
+     * @name v.sound.Sound#isPlayable
+     * @type {boolean}
      * @readonly
      */
     get isPlayable() {
@@ -215,8 +223,8 @@ export default class Sound {
     }
     /**
      * Stops all the instances of this sound from playing.
-     * @method PIXI.sound.Sound#stop
-     * @return {PIXI.sound.Sound} Instance of this sound.
+     * @method v.sound.Sound#stop
+     * @return {v.sound.Sound} Instance of this sound.
      */
     stop() {
         if (!this.isPlayable) {
@@ -249,9 +257,12 @@ export default class Sound {
             complete: null,
             loaded: null,
             sprite: null,
+            end: null,
             start: 0,
-            fadeIn: 0,
-            fadeOut: 0,
+            volume: 1,
+            speed: 1,
+            muted: false,
+            loop: false,
         }, options || {});
         // A sprite is specified, add the options
         if (options.sprite) {
@@ -262,7 +273,7 @@ export default class Sound {
             const sprite = this._sprites[alias];
             options.start = sprite.start;
             options.end = sprite.end;
-            options.speed = sprite.speed;
+            options.speed = sprite.speed || 1;
             delete options.sprite;
         }
         // @deprecated offset option
@@ -305,34 +316,70 @@ export default class Sound {
         instance.once("stop", () => {
             this._onComplete(instance);
         });
-        instance.play(options.start, options.end, options.speed, options.loop, options.fadeIn, options.fadeOut);
+        instance.play(options);
         return instance;
     }
     /**
+     * Internal only, speed, loop, volume change occured.
+     * @method refresh
+     * @private
+     */
+    refresh() {
+        const len = this._instances.length;
+        for (let i = 0; i < len; i++) {
+            this._instances[i].refresh();
+        }
+    }
+    /**
+     * Handle changes in paused state. Internal only.
+     * @method refreshPaused
+     * @private
+     */
+    refreshPaused() {
+        const len = this._instances.length;
+        for (let i = 0; i < len; i++) {
+            this._instances[i].refreshPaused();
+        }
+    }
+    /**
      * Gets and sets the volume.
-     * @name PIXI.sound.Sound#volume
-     * @type {Number}
+     * @name v.sound.Sound#volume
+     * @type {number}
      */
     get volume() {
         return this._volume;
     }
     set volume(volume) {
-        this._volume = this.media.volume = volume;
+        this._volume = volume;
+        this.refresh();
+    }
+    /**
+     * Gets and sets the muted flag.
+     * @name v.sound.Sound#muted
+     * @type {number}
+     */
+    get muted() {
+        return this._muted;
+    }
+    set muted(muted) {
+        this._muted = muted;
+        this.refresh();
     }
     /**
      * Gets and sets the looping.
-     * @name PIXI.sound.Sound#loop
-     * @type {Boolean}
+     * @name v.sound.Sound#loop
+     * @type {boolean}
      */
     get loop() {
         return this._loop;
     }
     set loop(loop) {
-        this._loop = this.media.loop = loop;
+        this._loop = loop;
+        this.refresh();
     }
     /**
      * Starts the preloading of sound.
-     * @method PIXI.sound.Sound#_preload
+     * @method v.sound.Sound#_preload
      * @private
      */
     _preload(callback) {
@@ -340,8 +387,8 @@ export default class Sound {
     }
     /**
      * Gets the list of instances that are currently being played of this sound.
-     * @name PIXI.sound.Sound#instances
-     * @type {Array<SoundInstance>}
+     * @name v.sound.Sound#instances
+     * @type {Array<v.sound.IMediaInstance>}
      * @readonly
      */
     get instances() {
@@ -349,7 +396,7 @@ export default class Sound {
     }
     /**
      * Get the map of sprites.
-     * @name PIXI.sound.Sound#sprites
+     * @name v.sound.Sound#sprites
      * @type {Object}
      * @readonly
      */
@@ -358,15 +405,15 @@ export default class Sound {
     }
     /**
      * Get the duration of the audio in seconds.
-     * @name PIXI.sound.Sound#duration
-     * @type {Number}
+     * @name v.sound.Sound#duration
+     * @type {number}
      */
     get duration() {
         return this.media.duration;
     }
     /**
      * Auto play the first instance.
-     * @method PIXI.sound.Sound#autoPlayStart
+     * @method v.sound.Sound#autoPlayStart
      * @private
      */
     autoPlayStart() {
@@ -378,7 +425,7 @@ export default class Sound {
     }
     /**
      * Removes all instances.
-     * @method PIXI.sound.Sound#_removeInstances
+     * @method v.sound.Sound#_removeInstances
      * @private
      */
     _removeInstances() {
@@ -390,9 +437,9 @@ export default class Sound {
     }
     /**
      * Sound instance completed.
-     * @method PIXI.sound.Sound#_onComplete
+     * @method v.sound.Sound#_onComplete
      * @private
-     * @param {PIXI.sound.SoundInstance} instance
+     * @param {v.sound.IMediaInstance} instance
      */
     _onComplete(instance) {
         if (this._instances) {
@@ -406,9 +453,9 @@ export default class Sound {
     }
     /**
      * Create a new instance.
-     * @method PIXI.sound.Sound#_createInstance
+     * @method v.sound.Sound#_createInstance
      * @private
-     * @return {PIXI.sound.IMediaInstance} New instance to use
+     * @return {v.sound.IMediaInstance} New instance to use
      */
     _createInstance() {
         if (Sound._pool.length > 0) {
@@ -420,9 +467,9 @@ export default class Sound {
     }
     /**
      * Destroy/recycling the instance object.
-     * @method PIXI.sound.Sound#_poolInstance
+     * @method v.sound.Sound#_poolInstance
      * @private
-     * @param {PIXI.sound.IMediaInstance} instance - Instance to recycle
+     * @param {v.sound.IMediaInstance} instance - Instance to recycle
      */
     _poolInstance(instance) {
         instance.destroy();
@@ -434,7 +481,7 @@ export default class Sound {
 }
 /**
  * Pool of instances
- * @name PIXI.sound.Sound#_pool
+ * @name v.sound.Sound#_pool
  * @type {Array<IMediaInstance>}
  * @private
  */

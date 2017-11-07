@@ -3,7 +3,7 @@ import { TRANSFORM_MODE } from '../const';
 import settings from '../settings';
 import { TransformStatic, Transform, Point, Bounds, Rectangle } from '../math';
 import remove_items from 'remove-array-items';
-import Signal from 'engine/Signal';
+import Signal from 'mini-signals';
 import TweenManager from 'engine/anime/TweenManager';
 
 
@@ -20,44 +20,73 @@ let uid = 0;
  *
  * @class
  * @extends EventEmitter
- * @memberof V
  */
 export default class Node2D extends EventEmitter
 {
-    /**
-     *
-     */
     constructor()
     {
         super();
 
         const TransformClass = settings.TRANSFORM_MODE === TRANSFORM_MODE.STATIC ? TransformStatic : Transform;
 
+        /**
+         * @private
+         * @type {Node2D}
+         */
         this.tempNode2DParent = null;
 
+        /**
+         * @type {number}
+         */
         this.id = uid++;
 
+        /**
+         * @type {string}
+         */
         this.name = '';
+        /**
+         * @type {string}
+         */
         this.type = 'Node2D';
 
+        /**
+         * @type {boolean}
+         */
         this.is_inside_tree = false;
+        /**
+         * @type {boolean}
+         */
         this.is_queued_for_deletion = false;
 
+        /**
+         * @private
+         * @type {boolean}
+         */
         this.idle_process = false;
+        /**
+         * @private
+         * @type {boolean}
+         */
+        this.is_physics_object = false;
+        /**
+         * @private
+         * @type {number}
+         */
+        this._physics_children_count = 0;
 
         // TODO: need to create Transform from factory
         /**
          * World transform and local transform of this object.
          * This will become read-only later, please do not assign anything there unless you know what are you doing
          *
-         * @member {V.TransformBase}
+         * @type {TransformStatic|Transform}
          */
         this.transform = new TransformClass();
 
         /**
          * The opacity of the object.
          *
-         * @member {number}
+         * @type {number}
          */
         this.alpha = 1;
 
@@ -67,7 +96,7 @@ export default class Node2D extends EventEmitter
          *
          * Only affects recursive calls from parent. You can ask for bounds or call update_transform manually
          *
-         * @member {boolean}
+         * @type {boolean}
          */
         this.visible = true;
 
@@ -77,24 +106,27 @@ export default class Node2D extends EventEmitter
          *
          * Only affects recursive calls from parent. You can ask for bounds manually
          *
-         * @member {boolean}
+         * @type {boolean}
          */
         this.renderable = true;
 
         /**
          * The display object container that contains this display object.
          *
-         * @member {V.Node2D}
+         * @type {Node2D}
          * @readonly
          */
         this.parent = null;
 
+        /**
+         * @type {SceneTree}
+         */
         this.scene_tree = null;
 
         /**
          * The multiplied alpha of the displayObject
          *
-         * @member {number}
+         * @type {number}
          * @readonly
          */
         this.world_alpha = 1;
@@ -105,74 +137,108 @@ export default class Node2D extends EventEmitter
          *
          * Also works as an interaction mask
          *
-         * @member {V.Rectangle}
+         * @type {Rectangle}
          */
         this.filter_area = null;
 
+        /**
+         * @type {Array}
+         */
         this._filters = null;
+        /**
+         * @type {Array}
+         */
         this._enabledFilters = null;
 
         /**
          * The bounds object, this is used to calculate and store the bounds of the displayObject
          *
-         * @member {V.Rectangle}
          * @private
+         * @type {Bounds}
          */
         this._bounds = new Bounds();
+        /**
+         * @private
+         * @type {number}
+         */
         this._boundsID = 0;
+        /**
+         * @private
+         * @type {number}
+         */
         this._lastBoundsID = -1;
+        /**
+         * @private
+         * @type {Rectangle}
+         */
         this._boundsRect = null;
+        /**
+         * @private
+         * @type {Rectangle}
+         */
         this._localBoundsRect = null;
+        /**
+         * @private
+         * @type {Point}
+         */
         this._world_position = new Point();
+        /**
+         * @private
+         * @type {Point}
+         */
         this._world_scale = new Point(1, 1);
+        /**
+         * @private
+         * @type {number}
+         */
         this._world_rotation = 0;
 
         /**
          * The original, cached mask of the object
          *
-         * @member {V.Graphics|V.Sprite}
          * @private
+         * @type {Graphics|Sprite}
          */
         this._mask = null;
 
         /**
          * If the object has been destroyed via destroy(). If true, it should not be used.
          *
-         * @member {boolean}
+         * @type {boolean}
          * @private
          * @readonly
          */
         this._destroyed = false;
 
+        /**
+         * @private
+         * @type {boolean}
+         */
         this._is_ready = false;
 
         /**
          * The array of children of this container.
          *
-         * @member {V.Node2D[]}
+         * @type {Array<Node2D>}
          * @readonly
          */
         this.children = [];
 
+        /**
+         * @type {any}
+         */
         this.named_children = Object.create(null);
 
+        /**
+         * @type {Array<number>}
+         */
         this.groups = [];
 
-        this.tweens = new TweenManager(this);
-
         /**
-         * Fired when this Node2D is added to a Node2D.
-         *
-         * @event V.Node2D#added
-         * @param {V.Node2D} container - The container added to.
+         * @type {TweenManager}
          */
+        this.tweens = new TweenManager();
 
-        /**
-         * Fired when this Node2D is removed from a Node2D.
-         *
-         * @event V.Node2D#removed
-         * @param {V.Node2D} container - The container removed from.
-         */
 
         this.tree_entered = new Signal();
         this.tree_exited = new Signal();
@@ -215,7 +281,7 @@ export default class Node2D extends EventEmitter
 
     /**
      * @private
-     * @member {V.Node2D}
+     * @type {Node2D}
      */
     get _tempNode2DParent()
     {
@@ -227,6 +293,10 @@ export default class Node2D extends EventEmitter
         return this.tempNode2DParent;
     }
 
+    /**
+     * Set name of this node
+     * @param {string} name
+     */
     set_name(name) {
         this.name = name;
 
@@ -235,10 +305,16 @@ export default class Node2D extends EventEmitter
         }
     }
 
+    /**
+     * @param {boolean} p
+     */
     set_process(p) {
         this.idle_process = !!p;
     }
 
+    /**
+     * @param {number} group
+     */
     add_to_group(group) {
         if (this.groups.indexOf(group) < 0) {
             this.groups.push(group);
@@ -248,6 +324,9 @@ export default class Node2D extends EventEmitter
             }
         }
     }
+    /**
+     * @param {number} group
+     */
     remove_from_group(group) {
         let idx = this.groups.indexOf(group);
         if (idx >= 0) {
@@ -263,6 +342,7 @@ export default class Node2D extends EventEmitter
      * Updates the object transform for rendering
      *
      * TODO - Optimization pass!
+     * @private
      */
     _update_transform()
     {
@@ -276,6 +356,8 @@ export default class Node2D extends EventEmitter
     /**
      * recursively updates transform of all objects from the root to this one
      * internal function for to_local()
+     *
+     * @private
      */
     _recursive_post_update_transform()
     {
@@ -296,8 +378,8 @@ export default class Node2D extends EventEmitter
      * @param {boolean} skipUpdate - setting to true will stop the transforms of the scene graph from
      *  being updated. This means the calculation returned MAY be out of date BUT will give you a
      *  nice performance boost
-     * @param {V.Rectangle} rect - Optional rectangle to store the result of the bounds calculation
-     * @return {V.Rectangle} the rectangular bounding area
+     * @param {Rectangle} rect - Optional rectangle to store the result of the bounds calculation
+     * @return {Rectangle} the rectangular bounding area
      */
     get_bounds(skipUpdate, rect)
     {
@@ -337,8 +419,8 @@ export default class Node2D extends EventEmitter
     /**
      * Retrieves the local bounds of the displayObject as a rectangle object
      *
-     * @param {V.Rectangle} [rect] - Optional rectangle to store the result of the bounds calculation
-     * @return {V.Rectangle} the rectangular bounding area
+     * @param {Rectangle} [rect] - Optional rectangle to store the result of the bounds calculation
+     * @return {Rectangle} the rectangular bounding area
      */
     get_local_Bounds(rect)
     {
@@ -369,11 +451,11 @@ export default class Node2D extends EventEmitter
     /**
      * Calculates the global position of the display object
      *
-     * @param {V.Point} position - The world origin to calculate from
-     * @param {V.Point} [point] - A Point object in which to store the value, optional
+     * @param {Point} position - The world origin to calculate from
+     * @param {Point} [point] - A Point object in which to store the value, optional
      *  (otherwise will create a new Point)
      * @param {boolean} [skipUpdate=false] - Should we skip the update transform.
-     * @return {V.Point} A point object representing the position of this object
+     * @return {Point} A point object representing the position of this object
      */
     to_global(position, point, skipUpdate = false)
     {
@@ -403,12 +485,12 @@ export default class Node2D extends EventEmitter
     /**
      * Calculates the local position of the display object relative to another point
      *
-     * @param {V.Point} position - The world origin to calculate from
-     * @param {V.Node2D} [from] - The Node2D to calculate the global position from
-     * @param {V.Point} [point] - A Point object in which to store the value, optional
+     * @param {Point} position - The world origin to calculate from
+     * @param {Node2D} [from] - The Node2D to calculate the global position from
+     * @param {Point} [point] - A Point object in which to store the value, optional
      *  (otherwise will create a new Point)
      * @param {boolean} [skipUpdate=false] - Should we skip the update transform
-     * @return {V.Point} A point object representing the position of this object
+     * @return {Point} A point object representing the position of this object
      */
     to_local(position, from, point, skipUpdate)
     {
@@ -452,7 +534,7 @@ export default class Node2D extends EventEmitter
      * @param {number} [skewY=0] - The Y skew value
      * @param {number} [pivotX=0] - The X pivot value
      * @param {number} [pivotY=0] - The Y pivot value
-     * @return {V.Node2D} The Node2D instance
+     * @return {Node2D} The Node2D instance
      */
     set_transform(x = 0, y = 0, scaleX = 1, scaleY = 1, rotation = 0, skewX = 0, skewY = 0, pivotX = 0, pivotY = 0)
     {
@@ -474,7 +556,6 @@ export default class Node2D extends EventEmitter
      * remove the display object from its parent Node2D as well as remove
      * all current event listeners and internal references. Do not use a Node2D
      * after calling `destroy`.
-     *
      */
     destroy()
     {
@@ -503,7 +584,7 @@ export default class Node2D extends EventEmitter
      * The position of the displayObject on the x axis relative to the local coordinates of the parent.
      * An alias to position.x
      *
-     * @member {number}
+     * @type {number}
      */
     get x()
     {
@@ -519,7 +600,7 @@ export default class Node2D extends EventEmitter
      * The position of the displayObject on the y axis relative to the local coordinates of the parent.
      * An alias to position.y
      *
-     * @member {number}
+     * @type {number}
      */
     get y()
     {
@@ -534,7 +615,7 @@ export default class Node2D extends EventEmitter
     /**
      * Current transform of the object based on world (parent) factors
      *
-     * @member {V.Matrix}
+     * @member {Matrix}
      * @readonly
      */
     get world_transform()
@@ -545,7 +626,7 @@ export default class Node2D extends EventEmitter
     /**
      * Current transform of the object based on local factors: position, scale, other stuff
      *
-     * @member {V.Matrix}
+     * @member {Matrix}
      * @readonly
      */
     get local_transform()
@@ -557,7 +638,7 @@ export default class Node2D extends EventEmitter
      * The coordinate of the object relative to the local coordinates of the parent.
      * Assignment by value since pixi-v4.
      *
-     * @member {V.Point|V.ObservablePoint}
+     * @type {Point|ObservablePoint}
      */
     get position()
     {
@@ -584,7 +665,7 @@ export default class Node2D extends EventEmitter
      * The scale factor of the object.
      * Assignment by value since pixi-v4.
      *
-     * @member {V.Point|V.ObservablePoint}
+     * @type {Point|ObservablePoint}
      */
     get scale()
     {
@@ -611,7 +692,7 @@ export default class Node2D extends EventEmitter
      * The pivot point of the displayObject that it rotates around
      * Assignment by value since pixi-v4.
      *
-     * @member {V.Point|V.ObservablePoint}
+     * @type {Point|ObservablePoint}
      */
     get pivot()
     {
@@ -634,7 +715,7 @@ export default class Node2D extends EventEmitter
      * The skew factor for the object in radians.
      * Assignment by value since pixi-v4.
      *
-     * @member {V.ObservablePoint}
+     * @type {Point|ObservablePoint}
      */
     get skew()
     {
@@ -656,7 +737,7 @@ export default class Node2D extends EventEmitter
     /**
      * The rotation of the object in radians.
      *
-     * @member {number}
+     * @type {number}
      */
     get rotation()
     {
@@ -671,6 +752,9 @@ export default class Node2D extends EventEmitter
     get_rotation() {
         return this.transform.rotation;
     }
+    /**
+     * @param {number} value
+     */
     set_rotation(value) {
         this.transform.rotation = value;
     }
@@ -682,7 +766,7 @@ export default class Node2D extends EventEmitter
     /**
      * Indicates if the object is globally visible.
      *
-     * @member {boolean}
+     * @type {boolean}
      * @readonly
      */
     get world_visible()
@@ -710,7 +794,7 @@ export default class Node2D extends EventEmitter
      *
      * @todo For the moment, V.CanvasRenderer doesn't support V.Sprite as mask.
      *
-     * @member {V.Graphics|V.Sprite}
+     * @type {Graphics|Sprite}
      */
     get mask()
     {
@@ -737,7 +821,7 @@ export default class Node2D extends EventEmitter
      * * IMPORTANT: This is a webGL only feature and will be ignored by the canvas renderer.
      * To remove filters simply set this property to 'null'
      *
-     * @member {V.Filter[]}
+     * @type {Array<Filter>}
      */
     get filters()
     {
@@ -751,6 +835,9 @@ export default class Node2D extends EventEmitter
 
     _enter_tree() {}
     _ready() {}
+    /**
+     * @param {number} delta
+     */
     _process(delta) {}
     _exit_tree() {}
 
@@ -763,6 +850,11 @@ export default class Node2D extends EventEmitter
             this.scene_tree.queue_delete(this);
         }
     }
+    /**
+     * Call the method at the beginning of next frame
+     * @param {string} method
+     * @param {any} args
+     */
     call_deferred(method, args) {
         if (!this.is_inside_tree) {
             return;
@@ -807,6 +899,10 @@ export default class Node2D extends EventEmitter
         this._ready();
     }
 
+    /**
+     * @private
+     * @param {number} delta
+     */
     _propagate_process(delta) {
         if (this.idle_process) this._process(delta);
 
@@ -848,8 +944,9 @@ export default class Node2D extends EventEmitter
      * Overridable method that can be used by Node2D subclasses whenever the children array is modified
      *
      * @private
+     * @param {number} index
      */
-    on_children_change()
+    on_children_change(index)
     {
         /* empty */
     }
@@ -859,8 +956,8 @@ export default class Node2D extends EventEmitter
      *
      * Multiple items can be added like so: `myNode2D.add_child(thingOne, thingTwo, thingThree)`
      *
-     * @param {...V.Node2D} child - The Node2D(s) to add to the container
-     * @return {V.Node2D} The first child that was added.
+     * @param {Node2D} child - The Node2D to add to the container
+     * @return {Node2D} The child that was added.
      */
     add_child(child)
     {
@@ -874,6 +971,10 @@ export default class Node2D extends EventEmitter
         child.scene_tree = this.scene_tree;
         // ensure child transform will be recalculated
         child.transform._parentID = -1;
+
+        if (child.is_physics_object) {
+            this._physics_children_count += 1;
+        }
 
         this.children.push(child);
 
@@ -903,9 +1004,9 @@ export default class Node2D extends EventEmitter
     /**
      * Adds a child to the container at a specified index. If the index is out of bounds an error will be thrown
      *
-     * @param {V.Node2D} child - The child to add
+     * @param {Node2D} child - The child to add
      * @param {number} index - The index to place the child in
-     * @return {V.Node2D} The child that was added.
+     * @return {Node2D} The child that was added.
      */
     add_child_at(child, index)
     {
@@ -945,8 +1046,8 @@ export default class Node2D extends EventEmitter
     /**
      * Swaps the position of 2 Display Objects within this container.
      *
-     * @param {V.Node2D} child - First display object to swap
-     * @param {V.Node2D} child2 - Second display object to swap
+     * @param {Node2D} child - First display object to swap
+     * @param {Node2D} child2 - Second display object to swap
      */
     swap_children(child, child2)
     {
@@ -966,7 +1067,7 @@ export default class Node2D extends EventEmitter
     /**
      * Returns the index position of a child Node2D instance
      *
-     * @param {V.Node2D} child - The Node2D instance to identify
+     * @param {Node2D} child - The Node2D instance to identify
      * @return {number} The index position of the child display object to identify
      */
     get_child_index(child)
@@ -984,7 +1085,7 @@ export default class Node2D extends EventEmitter
     /**
      * Changes the position of an existing child in the display object container
      *
-     * @param {V.Node2D} child - The child Node2D instance for which you want to change the index number
+     * @param {Node2D} child - The child Node2D instance for which you want to change the index number
      * @param {number} index - The resulting index number for the child display object
      */
     set_child_index(child, index)
@@ -1006,7 +1107,7 @@ export default class Node2D extends EventEmitter
      * Returns the child at the specified index
      *
      * @param {number} index - The index to get the child at
-     * @return {V.Node2D} The child at the given index, if any.
+     * @return {Node2D} The child at the given index, if any.
      */
     get_child(index)
     {
@@ -1021,8 +1122,8 @@ export default class Node2D extends EventEmitter
     /**
      * Removes one or more children from the container.
      *
-     * @param {...V.Node2D} child - The Node2D(s) to remove
-     * @return {V.Node2D} The first child that was removed.
+     * @param {...Node2D} child - The Node2D(s) to remove
+     * @return {Node2D} The first child that was removed.
      */
     remove_child(child)
     {
@@ -1031,6 +1132,10 @@ export default class Node2D extends EventEmitter
         if (index === -1) return null;
 
         child.parent = null;
+
+        if (child.is_physics_object) {
+            this._physics_children_count -= 1;
+        }
 
         // ensure child transform will be recalculated
         child.transform._parentID = -1;
@@ -1056,7 +1161,7 @@ export default class Node2D extends EventEmitter
      * Removes a child from the specified index position.
      *
      * @param {number} index - The index to get the child from
-     * @return {V.Node2D} The child that was removed.
+     * @return {Node2D} The child that was removed.
      */
     remove_child_at(index)
     {
@@ -1067,6 +1172,10 @@ export default class Node2D extends EventEmitter
         child.scene_tree = null;
         child.transform._parentID = -1;
         remove_items(this.children, index, 1);
+
+        if (child.is_physics_object) {
+            this._physics_children_count -= 1;
+        }
 
         // remove from name hash
         if (child.name.length > 0) {
@@ -1089,7 +1198,7 @@ export default class Node2D extends EventEmitter
      *
      * @param {number} [beginIndex=0] - The beginning position.
      * @param {number} [endIndex=this.children.length] - The ending position. Default value is size of the container.
-     * @returns {Node2D[]} List of removed children
+     * @returns {Array<Node2D>} List of removed children
      */
     remove_children(beginIndex = 0, endIndex)
     {
@@ -1109,6 +1218,10 @@ export default class Node2D extends EventEmitter
                 if (removed[i].transform)
                 {
                     removed[i].transform._parentID = -1;
+                }
+
+                if (removed[i].is_physics_object) {
+                    this._physics_children_count -= 1;
                 }
 
                 // remove from name hash
@@ -1133,10 +1246,17 @@ export default class Node2D extends EventEmitter
         throw new RangeError('remove_children: numeric values are outside the acceptable range.');
     }
 
+    /**
+     * @returns {SceneTree}
+     */
     get_tree() {
         return this.scene_tree;
     }
 
+    /**
+     * @param {string} path
+     * @returns {Node2D}
+     */
     get_node(path) {
         const list = path.split('/');
 
@@ -1205,7 +1325,6 @@ export default class Node2D extends EventEmitter
 
     /**
      * Recalculates the bounds of the container.
-     *
      */
     calculate_bounds()
     {
@@ -1246,7 +1365,7 @@ export default class Node2D extends EventEmitter
     /**
      * Recalculates the bounds of the object. Override this to
      * calculate the bounds of the specific object (not including children).
-     *
+     * @private
      */
     _calculate_bounds()
     {
@@ -1266,7 +1385,7 @@ export default class Node2D extends EventEmitter
     /**
      * Renders the object using the WebGL renderer
      *
-     * @param {V.WebGLRenderer} renderer - The renderer
+     * @param {WebGLRenderer} renderer - The renderer
      */
     render_webGL(renderer)
     {
@@ -1297,7 +1416,7 @@ export default class Node2D extends EventEmitter
      * Render the object using the WebGL renderer and advanced features.
      *
      * @private
-     * @param {V.WebGLRenderer} renderer - The renderer
+     * @param {WebGLRenderer} renderer - The renderer
      */
     render_advanced_webGL(renderer)
     {
@@ -1422,7 +1541,7 @@ export default class Node2D extends EventEmitter
      * @param {boolean} [options.base_texture=false] - Only used for child Sprites if options.children is set to true
      *  Should it destroy the base texture of the child sprite
      */
-    destroy(options)
+    destroy_children(options)
     {
         super.destroy();
 
@@ -1434,7 +1553,7 @@ export default class Node2D extends EventEmitter
         {
             for (let i = 0; i < oldChildren.length; ++i)
             {
-                oldChildren[i].destroy(options);
+                oldChildren[i].destroy_children(options);
             }
         }
     }

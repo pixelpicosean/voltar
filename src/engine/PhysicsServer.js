@@ -187,7 +187,7 @@ const test_overlap = (a, b, a_is_area, b_is_area) => {
         }
         // area vs body or area vs area: SAT algorithm come to save
         else {
-            let a_pos = a.position, b_pos = b.position;
+            let a_pos = a.get_global_position(), b_pos = b.get_global_position();
             let a_points = a._shape.calc_points, b_points = b._shape.calc_points;
             let i = 0;
             // If any of the edge normals of A is a separating axis, no intersection.
@@ -235,7 +235,9 @@ export default class PhysicsServer {
         this.checks = Object.create(null);
         this.collision_checks = 0;
 
-        this._test_node(node);
+        if ((node.is_physics_object && node._shape) || node._physics_children_count > 0) {
+            this._test_node(node);
+        }
 
         // Recycle arrays in the hash
         for (let i in this.hash) {
@@ -298,9 +300,15 @@ export default class PhysicsServer {
     }
 
     _test_node(node) {
-        if (node.type !== 'Area2D' && node.type !== 'PhysicsBody2D') {
-            for (let i = 0; i < node.children.length; i++) {
-                this._test_node(node.children[i]);
+        if (!node.is_physics_object || !node._shape) {
+            if (node._physics_children_count > 0) {
+                let i = 0, c;
+                for (i = 0; i < node.children.length; i++) {
+                    c = node.children[i];
+                    if ((c.is_physics_object && c._shape) || c._physics_children_count > 0) {
+                        this._test_node(c);
+                    }
+                }
             }
             return;
         }
@@ -309,14 +317,13 @@ export default class PhysicsServer {
 
         // Update bounds
         if (coll._shape) {
-            const pos = coll.get_global_position();
+            coll._shape.calculate_points(coll);
 
+            let pos = coll.get_global_position();
             coll.left = pos.x + coll._shape.left;
             coll.right = pos.x + coll._shape.right;
             coll.top = pos.y + coll._shape.top;
             coll.bottom = pos.y + coll._shape.bottom;
-
-            coll._shape.calculate_points(coll);
         }
 
         // Insert the hash and test collisions

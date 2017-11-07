@@ -11,7 +11,6 @@ import Loader from './loader';
  *    // resources.bunny
  *    // resources.spaceship
  * });
- * @namespace V.loaders
  */
 export { Loader };
 export { default as bitmapFontParser, parse as parseBitmapFontData } from './bitmapFontParser';

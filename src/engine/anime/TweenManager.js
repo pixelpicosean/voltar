@@ -3,19 +3,45 @@ import Tween from './Tween';
 
 export default class TweenManager {
     constructor() {
+        /**
+         * @type {Array<Tween>}
+         */
         this.tweens = [];
     }
+    /**
+     * @param {Tween} tween
+     * @returns {Tween} The added tween
+     */
     add(tween) {
         this.tweens.push(tween);
+        return tween;
     }
+    /**
+     * @param {Tween} tween
+     */
     remove(tween) {
         tween.active = false;
         tween.is_removed = true;
     }
+    /**
+     * Create a tween instance and add it
+     * @returns {Tween}
+     */
+    create() {
+        let t = new Tween();
+        this.tweens.push(t);
+        return t;
+    }
 
+    /**
+     * @param {number} delta
+     */
     _process(delta) {
-        let i = 0, tween;
-        for (i = 0; i < this.tweens.length; i++) {
+        /**
+         * @type {Tween}
+         */
+        let tween;
+        for (let i = 0; i < this.tweens.length; i++) {
             tween = this.tweens[i];
 
             if (!tween.is_removed && tween.active) {
@@ -32,8 +58,11 @@ export default class TweenManager {
         }
     }
     _stop_all() {
-        let i = 0, tween;
-        for (i = 0; i < this.tweens.length; i++) {
+        /**
+         * @type {Tween}
+         */
+        let tween;
+        for (let i = 0; i < this.tweens.length; i++) {
             tween = this.tweens[i];
 
             tween.clear_events();
