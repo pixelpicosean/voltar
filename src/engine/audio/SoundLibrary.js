@@ -18,8 +18,9 @@ import * as webaudio from "./webaudio";
  * @private
  */
 export default class SoundLibrary {
-    constructor(loaders) {
-        this.loaders = loaders;
+    constructor(Resource) {
+        this.Resource = Resource;
+
         this.init();
     }
     /**
@@ -48,19 +49,12 @@ export default class SoundLibrary {
      * Initialize the singleton of the library
      * @return {Sound}
      */
-    static init(loaders) {
+    static init(Resource, Loader, shared) {
         if (SoundLibrary.instance) {
             throw new Error("SoundLibrary is already created");
         }
-        const instance = SoundLibrary.instance = new SoundLibrary(loaders);
-        // In some cases loaders can be not included
-        // the the bundle for PixiJS, custom builds
-        if (typeof loaders !== "undefined") {
-            this.loaders = loaders;
-            // Install the middleware to support
-            // v.loader and new v.loaders.Loader
-            LoaderMiddleware.install(instance, loaders);
-        }
+        const instance = SoundLibrary.instance = new SoundLibrary(Resource);
+        LoaderMiddleware.install(instance, Loader, Resource, shared);
         return instance;
     }
     /**
@@ -147,7 +141,7 @@ export default class SoundLibrary {
         return false;
     }
     set useLegacy(legacy) {
-        LoaderMiddleware.set_legacy(false, this.loaders);
+        LoaderMiddleware.set_legacy(false, this.Resource);
         // Set the context to use
         if (this.supported) {
             this._context = this._webAudioContext;

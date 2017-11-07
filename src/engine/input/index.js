@@ -54,8 +54,8 @@ export default class Input {
 
     /**
      * Bind a key to a specific action.
-     * @param  {String} key    Key to bind
-     * @param  {String} action Action name
+     * @param  {string} key    Key to bind
+     * @param  {string} action Action name
      * @return {Input} Self for chaining
      */
     bind(key, action) {
@@ -77,8 +77,8 @@ export default class Input {
     }
     /**
      * Unbind an action from a key.
-     * @param  {String} key    Key to unbind
-     * @param  {String} action Action to unbind
+     * @param  {string} key    Key to unbind
+     * @param  {string} action Action to unbind
      * @return {Input}   Self for chaining
      */
     unbind(key, action) {
@@ -114,24 +114,24 @@ export default class Input {
 
     /**
      * Whether an action is currently pressed.
-     * @param  {String} action Action name
-     * @return {Boolean}       Pressed or not
+     * @param  {string} action Action name
+     * @return {boolean}       Pressed or not
      */
     is_action_pressed(action) {
         return !!this.actions[action];
     }
     /**
      * Whether an action is just pressed.
-     * @param  {String} action Action name
-     * @return {Boolean}       Pressed or not
+     * @param  {string} action Action name
+     * @return {boolean}       Pressed or not
      */
     is_action_just_pressed(action) {
         return !!this.last_pressed[action];
     }
     /**
      * Whether an action is just released.
-     * @param  {String} action Action name
-     * @return {Boolean}       Released or not
+     * @param  {string} action Action name
+     * @return {boolean}       Released or not
      */
     is_action_just_released(action) {
         return !!this.last_released[action];
@@ -147,7 +147,10 @@ export default class Input {
 
     /**
      * Key down listener
-     * @param {String} k Name of the key
+     * @param {string} k Name of the key
+     * @param {boolean} shift
+     * @param {boolean} ctrl
+     * @param {boolean} alt
      * @private
      */
     _keydown(k, shift, ctrl, alt) {
@@ -161,7 +164,7 @@ export default class Input {
     }
     /**
      * Key up listener
-     * @param {String} k Name of the key
+     * @param {string} k Name of the key
      * @private
      */
     _keyup(k) {

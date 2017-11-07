@@ -11,28 +11,20 @@ let nextUid = 0;
 let saidHello = false;
 
 /**
- * Generalized convenience utilities for V.
+ * Generalized convenience utilities for
  * @example
- * // Extend V's internal Event Emitter.
- * class MyEmitter extends V.utils.EventEmitter {
- *   constructor() {
- *      super();
- *      console.log("Emitter created!");
- *   }
- * }
- *
  * // Get info on current device
- * console.log(V.utils.isMobile);
+ * console.log(utils.isMobile);
  *
  * // Convert hex color to string
- * console.log(V.utils.hex2string(0xff00ff)); // returns: "#ff00ff"
- * @namespace V.utils
+ * console.log(utils.hex2string(0xff00ff)); // returns: "#ff00ff"
+ * @namespace utils
  */
 export {
     /**
      * @see {@link https://github.com/kaimallea/isMobile}
      *
-     * @memberof V.utils
+     * @memberof utils
      * @function isMobile
      * @type {Object}
      */
@@ -41,7 +33,7 @@ export {
     /**
      * @see {@link https://github.com/mreinstein/remove-array-items}
      *
-     * @memberof V.utils
+     * @memberof utils
      * @function removeItems
      * @type {Object}
      */
@@ -49,13 +41,13 @@ export {
     /**
      * @see {@link https://github.com/primus/eventemitter3}
      *
-     * @memberof V.utils
+     * @memberof utils
      * @class EventEmitter
      * @type {EventEmitter}
      */
     EventEmitter,
     /**
-     * @memberof V.utils
+     * @memberof utils
      * @function plugin_target
      * @type {mixin}
      */
@@ -66,7 +58,7 @@ export {
 /**
  * Gets the next unique identifier
  *
- * @memberof V.utils
+ * @memberof utils
  * @function uid
  * @return {number} The next unique identifier to use.
  */
@@ -78,7 +70,7 @@ export function uid()
 /**
  * Converts a hex color number to an [R, G, B] array
  *
- * @memberof V.utils
+ * @memberof utils
  * @function hex2rgb
  * @param {number} hex - The number to convert
  * @param  {number[]} [out=[]] If supplied, this array will be used rather than returning a new one
@@ -98,7 +90,7 @@ export function hex2rgb(hex, out)
 /**
  * Converts a hex color number to a string.
  *
- * @memberof V.utils
+ * @memberof utils
  * @function hex2string
  * @param {number} hex - Number in hex
  * @return {string} The string color.
@@ -114,7 +106,7 @@ export function hex2string(hex)
 /**
  * Converts a color as an [R, G, B] array to a hex number
  *
- * @memberof V.utils
+ * @memberof utils
  * @function rgb2hex
  * @param {number[]} rgb - rgb array
  * @return {number} The color number
@@ -128,7 +120,7 @@ export function rgb2hex(rgb)
  * get the resolution / device pixel ratio of an asset by looking for the prefix
  * used by spritesheets and image urls
  *
- * @memberof V.utils
+ * @memberof utils
  * @function getResolutionOfUrl
  * @param {string} url - the image path
  * @param {number} [defaultValue=1] - the defaultValue if no filename prefix is set.
@@ -160,7 +152,7 @@ export function getResolutionOfUrl(url, defaultValue)
  * Split a data URI into components. Returns undefined if
  * parameter `dataUri` is not a valid data URI.
  *
- * @memberof V.utils
+ * @memberof utils
  * @function decomposeDataUri
  * @param {string} dataUri - the data URI to check
  * @return {DecomposedDataUri|undefined} The decomposed data uri or undefined
@@ -185,7 +177,7 @@ export function decomposeDataUri(dataUri)
 /**
  * Get type of the image by regexp for extension. Returns undefined for unknown extensions.
  *
- * @memberof V.utils
+ * @memberof utils
  * @function getUrlFileExtension
  * @param {string} url - the image path
  * @return {string|undefined} image extension
@@ -213,7 +205,7 @@ export function getUrlFileExtension(url)
 /**
  * Get size from an svg string using regexp.
  *
- * @memberof V.utils
+ * @memberof utils
  * @function getSvgSize
  * @param {string} svgString - a serialized svg element
  * @return {Size|undefined} image extension
@@ -236,7 +228,7 @@ export function getSvgSize(svgString)
  * Skips the hello message of renderers that are created after this is run.
  *
  * @function skipHello
- * @memberof V.utils
+ * @memberof utils
  */
 export function skipHello()
 {
@@ -244,13 +236,13 @@ export function skipHello()
 }
 
 /**
- * Logs out the version and renderer information for this running instance of V.
- * If you don't want to see this message you can run `V.utils.skipHello()` before
+ * Logs out the version and renderer information for this running instance of
+ * If you don't want to see this message you can run `utils.skipHello()` before
  * creating your renderer. Keep in mind that doing that will forever makes you a jerk face.
  *
  * @static
  * @function sayHello
- * @memberof V.utils
+ * @memberof utils
  * @param {string} type - The string renderer type to log.
  */
 export function sayHello(type) {
@@ -266,7 +258,7 @@ export function sayHello(type) {
 /**
  * Helper for checking for webgl support
  *
- * @memberof V.utils
+ * @memberof utils
  * @function isWebGLSupported
  * @return {boolean} is webgl supported
  */
@@ -309,7 +301,7 @@ export function isWebGLSupported()
 /**
  * Returns sign of number
  *
- * @memberof V.utils
+ * @memberof utils
  * @function sign
  * @param {number} n - the number to check the sign of
  * @returns {number} 0 if `n` is 0, -1 if `n` is negative, 1 if `n` is positive
@@ -324,7 +316,7 @@ export function sign(n)
 /**
  * @todo Describe property usage
  *
- * @memberof V.utils
+ * @memberof utils
  * @private
  */
 export const TextureCache = Object.create(null);
@@ -332,7 +324,7 @@ export const TextureCache = Object.create(null);
 /**
  * @todo Describe property usage
  *
- * @memberof V.utils
+ * @memberof utils
  * @private
  */
 export const BaseTextureCache = Object.create(null);
@@ -340,7 +332,7 @@ export const BaseTextureCache = Object.create(null);
 /**
  * Destroys all texture in the cache
  *
- * @memberof V.utils
+ * @memberof utils
  * @function destroyTextureCache
  */
 export function destroyTextureCache()
@@ -360,7 +352,7 @@ export function destroyTextureCache()
 /**
  * Removes all textures from cache, but does not destroy them
  *
- * @memberof V.utils
+ * @memberof utils
  * @function clearTextureCache
  */
 export function clearTextureCache()
@@ -378,7 +370,7 @@ export function clearTextureCache()
 }
 
 /**
- * @memberof V.utils
+ * @memberof utils
  * @const premultiplyBlendMode
  * @type {Array<number[]>} maps premultiply flag and blend_mode to adjusted blend_mode
  */
@@ -387,7 +379,7 @@ export const premultiplyBlendMode = map_premultiplied_blend_modes();
 /**
  * changes blend_mode according to texture format
  *
- * @memberof V.utils
+ * @memberof utils
  * @function correctBlendMode
  * @param {number} blend_mode supposed blend mode
  * @param {boolean} premultiplied  whether source is premultiplied

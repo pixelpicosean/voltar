@@ -36,6 +36,8 @@ export default class CanvasRenderer extends SystemRenderer
      *  (shown if not transparent).
      * @param {boolean} [options.pixel_snap=false] - If true Pixi will Math.floor() x/y values when rendering,
      *  stopping pixel interpolation.
+     * @param {any} [arg2]
+     * @param {any} [arg3]
      */
     constructor(options, arg2, arg3)
     {

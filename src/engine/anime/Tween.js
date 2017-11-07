@@ -1,9 +1,15 @@
 import remove_items from 'remove-array-items';
-import Signal from 'engine/Signal';
+import Signal from 'mini-signals';
 import { Vector, clamp } from 'engine/core/math';
 import flatten_key_url from './flatten_key_url';
 import { Easing } from './easing';
 
+
+/**
+ * @typedef VectorLike
+ * @property {number} x
+ * @property {number} y
+ */
 
 // InterpolateType
 const INTER_PROPERTY = 0;
@@ -21,7 +27,7 @@ const BOOL = 1;
 const STRING = 2;
 const VECTOR2 = 3;
 
-/** 
+/**
  * @param {any} obj
  * @param {string} key
  * @returns {any}
@@ -34,7 +40,7 @@ function get_property(obj, key) {
     }
     return res;
 }
-/** 
+/**
  * @param {any} obj
  * @param {string} key
  * @param {any} value
@@ -48,9 +54,9 @@ function set_property(obj, key, value) {
     res[key[key.length - 1]] = value;
 }
 /**
- * @param {any} obj 
- * @param {string} key 
- * @param {{x:number,y:number}} value 
+ * @param {any} obj
+ * @param {string} key
+ * @param {VectorLike} value
  */
 function set_vec_property(obj, key, value) {
     let idx = 0, res = obj;
@@ -70,8 +76,8 @@ const _tmp_vec2 = new Vector();
  */
 const VECTOR_ARR = [];
 /**
- * @param {number} x 
- * @param {number} y 
+ * @param {number} x
+ * @param {number} y
  * @returns {Vector}
  */
 const create_vector = (x, y) => {
@@ -136,14 +142,7 @@ const create_interpolate = () => {
 };
 
 // TODO: better easing support (https://github.com/rezoner/ease)
-
-/**
- * @class Tween
- */
 export default class Tween {
-    /**
-     * @constructor
-     */
     constructor() {
         this.tween_completed = new Signal();
         this.tween_started = new Signal();
@@ -157,6 +156,9 @@ export default class Tween {
         this.repeat = false;
         this.speed_scale = 1;
 
+        /**
+         * @type {Array<InterpolateData>}
+         */
         this.interpolates = [];
     }
 
@@ -199,7 +201,7 @@ export default class Tween {
         return this;
     }
     /**
-     * @returns {Tween}
+     * @returns {Tween} Self for chaining
      */
     reset_all() {
         let i = 0, data;
@@ -241,7 +243,7 @@ export default class Tween {
     /**
      * @param {any} obj Target
      * @param {string} key Key
-     * @returns {Tween}
+     * @returns {Tween} Self for chaining
      */
     resume(obj, key) {
         this.active = true;
@@ -268,8 +270,8 @@ export default class Tween {
     /**
      * @param {any} obj Target
      * @param {string} key Key
-     * @param {boolean} [first_only]
-     * @returns {Tween}
+     * @param {boolean} [first_only=true]
+     * @returns {Tween} Self for chaining
      */
     remove(obj, key, first_only = true) {
         let i = 0, data;
@@ -298,7 +300,7 @@ export default class Tween {
 
     /**
      * @param {number} p_time
-     * @returns {Tween}
+     * @returns {Tween} Self for chaining
      */
     seek(p_time) {
         let i = 0, data;
@@ -359,11 +361,11 @@ export default class Tween {
      * Animate a property of an object
      * @param {any} obj Target
      * @param {string} property Property to be animated
-     * @param {number|boolean|string|{x:number,y:number}} initial_val Initial value
-     * @param {number|boolean|string|{x:number,y:number}} final_val Initial value
+     * @param {number|boolean|string|VectorLike} initial_val Initial value
+     * @param {number|boolean|string|VectorLike} final_val Initial value
      * @param {number} duration Duration of this animation
      * @param {string} p_easing Easing function
-     * @param {number} [delay] Time before start
+     * @param {number} [delay=0] Time before start
      * @returns {boolean}
      */
     interpolate_property(obj, property, initial_val, final_val, duration, p_easing, delay = 0) {
@@ -411,6 +413,17 @@ export default class Tween {
         this.interpolates.push(data);
         return true;
     }
+    /**
+     * Animate a method of an object
+     * @param {any} obj Target
+     * @param {string} method Method to be animated
+     * @param {number|boolean|string|VectorLike} initial_val Initial value
+     * @param {number|boolean|string|VectorLike} final_val Initial value
+     * @param {number} duration Duration of this animation
+     * @param {string} p_easing Easing function
+     * @param {number} [delay=0] Time before start
+     * @returns {boolean}
+     */
     interpolate_method(obj, method, initial_val, final_val, duration, p_easing, delay = 0) {
         let easing = p_easing.split('.');
         let easing_func = Easing[easing[0]][easing[1]];
@@ -456,6 +469,14 @@ export default class Tween {
         this.interpolates.push(data);
         return true;
     }
+    /**
+     * Invoke a method after duration
+     * @param {any} obj Target
+     * @param {number} duration Duration of this animation
+     * @param {string} callback Function to call after the duration
+     * @param {any} [args] Arguments to be passed to the callback
+     * @returns {boolean}
+     */
     interpolate_callback(obj, duration, callback, args) {
         let data = create_interpolate();
         data.active = true;
@@ -474,6 +495,14 @@ export default class Tween {
         this.interpolates.push(data);
         return this;
     }
+    /**
+     * Invoke a method after duration, but from the deferred queue
+     * @param {any} obj Target
+     * @param {number} duration Duration of this animation
+     * @param {string} callback Function to call after the duration
+     * @param {any} [args] Arguments to be passed to the callback
+     * @returns {boolean}
+     */
     interpolate_deferred_callback(obj, duration, callback, args) {
         let data = create_interpolate();
         data.active = true;
@@ -492,6 +521,18 @@ export default class Tween {
         this.interpolates.push(data);
         return this;
     }
+    /**
+     * Follow a property of another object
+     * @param {any} obj Target
+     * @param {string} property Property to be animated
+     * @param {number|boolean|string|VectorLike} initial_val Initial value
+     * @param {any} target Object to follow
+     * @param {string} property Property of the followed object
+     * @param {number} duration Duration of this animation
+     * @param {string} p_easing Easing function
+     * @param {number} [delay=0] Time before start
+     * @returns {boolean}
+     */
     follow_property(obj, property, initial_val, target, target_property, duration, p_easing, delay = 0) {
         let easing = p_easing.split('.');
         let easing_func = Easing[easing[0]][easing[1]];
@@ -535,6 +576,18 @@ export default class Tween {
         this.interpolates.push(data);
         return true;
     }
+    /**
+     * Follow a method return value of another object
+     * @param {any} obj Target
+     * @param {string} method Method to be called
+     * @param {number|boolean|string|VectorLike} initial_val Initial value
+     * @param {any} target Object to follow
+     * @param {string} method Method of the followed object
+     * @param {number} duration Duration of this animation
+     * @param {string} p_easing Easing function
+     * @param {number} [delay=0] Time before start
+     * @returns {boolean}
+     */
     follow_method(obj, method, initial_val, target, target_method, duration, p_easing, delay = 0) {
         let easing = p_easing.split('.');
         let easing_func = Easing[easing[0]][easing[1]];
@@ -578,6 +631,18 @@ export default class Tween {
         this.interpolates.push(data);
         return true;
     }
+    /**
+     * Animate a property from value of another object to a final value
+     * @param {any} obj Target
+     * @param {string} property Property to be animated
+     * @param {any} initial Object to fetch initial value from
+     * @param {string} initial_property Property of the initial object
+     * @param {number|boolean|string|VectorLike} final_val Initial value
+     * @param {number} duration Duration of this animation
+     * @param {string} p_easing Easing function
+     * @param {number} [delay=0] Time before start
+     * @returns {boolean}
+     */
     targeting_property(obj, property, initial, initial_property, final_val, duration, p_easing, delay = 0) {
         let easing = p_easing.split('.');
         let easing_func = Easing[easing[0]][easing[1]];
@@ -626,6 +691,18 @@ export default class Tween {
         this.interpolates.push(data);
         return true;
     }
+    /**
+     * Animate a method from return of another object's method to a final value
+     * @param {any} obj Target
+     * @param {string} method Method to be animated
+     * @param {any} initial Object to fetch initial value from
+     * @param {string} initial_method Method of the initial object
+     * @param {number|boolean|string|VectorLike} final_val Initial value
+     * @param {number} duration Duration of this animation
+     * @param {string} p_easing Easing function
+     * @param {number} [delay=0] Time before start
+     * @returns {boolean}
+     */
     targeting_method(obj, method, initial, initial_method, final_val, duration, p_easing, delay = 0) {
         let easing = p_easing.split('.');
         let easing_func = Easing[easing[0]][easing[1]];
@@ -856,8 +933,8 @@ export default class Tween {
     }
     /**
      * @private
-     * @param {number|string|boolean|{x:number,y:number}} initial_val
-     * @param {number|string|boolean|{x:number,y:number}} final_val
+     * @param {number|string|boolean|VectorLike} initial_val
+     * @param {number|string|boolean|VectorLike} final_val
      * @param {InterpolateData} data
      * @returns {boolean}
      */
@@ -882,8 +959,8 @@ export default class Tween {
 
     /**
      * @private
-     * @param {InterpolateData} data 
-     * @returns {number|string|boolean|{x:number,y:number}}
+     * @param {InterpolateData} data
+     * @returns {number|string|boolean|VectorLike}
      */
     _run_equation(data) {
         let initial_val = this._get_initial_val(data);
@@ -909,7 +986,7 @@ export default class Tween {
     }
     /**
      * @private
-     * @param {InterpolateData} data 
+     * @param {InterpolateData} data
      * @returns {boolean}
      */
     _apply_tween_value(data, value) {

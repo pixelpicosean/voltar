@@ -5,18 +5,17 @@ import { Rectangle } from '../../../math';
 import Shader from '../../../Shader';
 import * as filterTransforms from '../filters/filterTransforms';
 import bitTwiddle from 'bit-twiddle';
+import Filter from '../filters/Filter';
+import WebGLRenderer from '../WebGLRenderer';
+import Node2D from '../../../scene/Node2D';
 
-/**
- * @ignore
- * @class
- */
 class FilterState
 {
-    /**
-     *
-     */
     constructor()
     {
+        /**
+         * @type {RenderTarget}
+         */
         this.renderTarget = null;
         this.sourceFrame = new Rectangle();
         this.destinationFrame = new Rectangle();
@@ -26,15 +25,10 @@ class FilterState
     }
 }
 
-/**
- * @class
- * @memberof V
- * @extends V.WebGLManager
- */
 export default class FilterManager extends WebGLManager
 {
     /**
-     * @param {V.WebGLRenderer} renderer - The renderer this manager works for.
+     * @param {WebGLRenderer} renderer - The renderer this manager works for.
      */
     constructor(renderer)
     {
@@ -50,14 +44,17 @@ export default class FilterManager extends WebGLManager
 
         this.filterData = null;
 
+        /**
+         * @type {Array<Filter>}
+         */
         this.managedFilters = [];
     }
 
     /**
      * Adds a new filter to the manager.
      *
-     * @param {V.Node2D} target - The target of the filter to render.
-     * @param {V.Filter[]} filters - The filters to apply.
+     * @param {Node2D} target - The target of the filter to render.
+     * @param {Array<Filter>} filters - The filters to apply.
      */
     pushFilter(target, filters)
     {
@@ -141,7 +138,6 @@ export default class FilterManager extends WebGLManager
 
     /**
      * Pops off the filter and applies it.
-     *
      */
     popFilter()
     {
@@ -203,9 +199,9 @@ export default class FilterManager extends WebGLManager
     /**
      * Draws a filter.
      *
-     * @param {V.Filter} filter - The filter to draw.
-     * @param {V.RenderTarget} input - The input render target.
-     * @param {V.RenderTarget} output - The target to output to.
+     * @param {Filter} filter - The filter to draw.
+     * @param {RenderTarget} input - The input render target.
+     * @param {RenderTarget} output - The target to output to.
      * @param {boolean} clear - Should the output be cleared before rendering to it
      */
     applyFilter(filter, input, output, clear)
@@ -283,8 +279,8 @@ export default class FilterManager extends WebGLManager
     /**
      * Uploads the uniforms of the filter.
      *
-     * @param {GLShader} shader - The underlying gl shader.
-     * @param {V.Filter} filter - The filter we are synchronizing.
+     * @param {Shader} shader - The underlying gl shader.
+     * @param {Filter} filter - The filter we are synchronizing.
      */
     syncUniforms(shader, filter)
     {
@@ -405,7 +401,7 @@ export default class FilterManager extends WebGLManager
      *
      * @param {boolean} clear - Should we clear the render texture when we get it?
      * @param {number} resolution - The resolution of the target.
-     * @return {V.RenderTarget} The new render target
+     * @return {RenderTarget} The new render target
      */
     getRenderTarget(clear, resolution)
     {
@@ -425,7 +421,7 @@ export default class FilterManager extends WebGLManager
     /**
      * Returns a render target to the pool.
      *
-     * @param {V.RenderTarget} renderTarget - The render target to return.
+     * @param {RenderTarget} renderTarget - The render target to return.
      */
     returnRenderTarget(renderTarget)
     {
@@ -438,8 +434,8 @@ export default class FilterManager extends WebGLManager
      * TODO playing around here.. this is temporary - (will end up in the shader)
      * this returns a matrix that will normalise map filter cords in the filter to screen space
      *
-     * @param {V.Matrix} outputMatrix - the matrix to output to.
-     * @return {V.Matrix} The mapped matrix.
+     * @param {Matrix} outputMatrix - the matrix to output to.
+     * @return {Matrix} The mapped matrix.
      */
     calculateScreenSpaceMatrix(outputMatrix)
     {
@@ -455,8 +451,8 @@ export default class FilterManager extends WebGLManager
     /**
      * Multiply vTextureCoord to this matrix to achieve (0,0,1,1) for filter_area
      *
-     * @param {V.Matrix} outputMatrix - The matrix to output to.
-     * @return {V.Matrix} The mapped matrix.
+     * @param {Matrix} outputMatrix - The matrix to output to.
+     * @return {Matrix} The mapped matrix.
      */
     calculateNormalizedScreenSpaceMatrix(outputMatrix)
     {
@@ -473,9 +469,9 @@ export default class FilterManager extends WebGLManager
     /**
      * This will map the filter coord so that a texture can be used based on the transform of a sprite
      *
-     * @param {V.Matrix} outputMatrix - The matrix to output to.
-     * @param {V.Sprite} sprite - The sprite to map to.
-     * @return {V.Matrix} The mapped matrix.
+     * @param {Matrix} outputMatrix - The matrix to output to.
+     * @param {Sprite} sprite - The sprite to map to.
+     * @return {Matrix} The mapped matrix.
      */
     calculateSpriteMatrix(outputMatrix, sprite)
     {
@@ -493,9 +489,8 @@ export default class FilterManager extends WebGLManager
      * Destroys this Filter Manager.
      *
      * @param {boolean} [contextLost=false] context was lost, do not free shaders
-     *
      */
-    destroy()
+    destroy(contextLost)
     {
         const renderer = this.renderer;
         const filters = this.managedFilters;
@@ -531,7 +526,7 @@ export default class FilterManager extends WebGLManager
      * @param {number} minWidth - The minimum width of the render target.
      * @param {number} minHeight - The minimum height of the render target.
      * @param {number} resolution - The resolution of the render target.
-     * @return {V.RenderTarget} The new render target.
+     * @return {RenderTarget} The new render target.
      */
     getPotRenderTarget(gl, minWidth, minHeight, resolution)
     {
@@ -597,7 +592,7 @@ export default class FilterManager extends WebGLManager
     /**
      * Frees a render target back into the pool.
      *
-     * @param {V.RenderTarget} renderTarget - The renderTarget to free
+     * @param {RenderTarget} renderTarget - The renderTarget to free
      */
     freePotRenderTarget(renderTarget)
     {
