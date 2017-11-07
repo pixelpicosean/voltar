@@ -111,7 +111,7 @@ export default class Animator {
      * @param {number} total_transition_time
      */
     transition(name, total_transition_time) {
-        this._total_transition_time = total_transition_time;
+        this._total_transition_time = total_transition_time * 1000;
         this._transition_time = 0;
         this._factor = 0;
         this.next_animation = this.animations[name];
@@ -148,8 +148,9 @@ export default class Animator {
             this._transition_time += Math.abs(elapsed);
             this._factor = this._transition_time / this._total_transition_time;
             if (this._transition_time >= this._total_transition_time) {
-                // let progress = this.get_progress();
+                let progress = this.get_progress();
                 this.play(this.next_animation.name);
+                this.set_progress(progress);
                 this.next_animation = null;
             }
         }
