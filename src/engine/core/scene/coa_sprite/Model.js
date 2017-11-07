@@ -100,6 +100,9 @@ export class Entity extends Element {
          */
         this.character_map = data.character_map.map(d => new CharacterMap(d));
 
+        /**
+         * @type {{[name: string]: Animation}}
+         */
         this.animation_tabel = {};
         /**
          * @type {Array<Animation>}

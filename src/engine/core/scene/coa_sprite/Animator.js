@@ -240,7 +240,5 @@ export default class Animator {
             spr.scale.set(obj.scale_x, -obj.scale_y);
             spr.alpha = obj.a;
         }
-
-        // TODO: recycle `objs`
     }
 }

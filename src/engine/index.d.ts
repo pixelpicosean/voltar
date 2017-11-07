@@ -644,6 +644,7 @@ declare module 'engine/VisualServer' {
 
 declare module 'engine' {
     import EventEmitter from 'eventemitter3';
+    import Signal from 'mini-signals';
 
     // accessibility
     declare namespace accessibility {
@@ -1118,6 +1119,7 @@ declare module 'engine' {
         distance_squared_to(b: Point): number;
         tangent(): number;
     }
+    export class Vector extends Point {}
     export class Matrix {
         a: number;
         b: number;
@@ -1636,6 +1638,143 @@ declare module 'engine' {
         flush(): void;
         start(): void;
         destroy(): void;
+    }
+
+    // - coa sprite
+    class Element {
+        id: number;
+        name: string;
+    }
+    class File extends Element {
+        pivot_x: number;
+        pivot_y: number;
+        width: number;
+        height: number;
+    }
+    class Folder extends Element {
+        file: File[];
+    }
+    class ObjectInfo extends Element {
+        type: number;
+        w: number;
+        h: number;
+        pivot_x: number;
+        pivot_y: number;
+    }
+    class Animation extends Element {
+        entity: Entity;
+        length: number;
+        looping: boolean;
+        mainline: MainlineKey[];
+        timeline: TimelineKey[];
+    }
+    class Key extends Element {
+        time: number;
+        curve_type: number;
+        c1: number;
+        c2: number;
+        c3: number;
+        c4: number;
+    }
+    class Ref extends Element {
+        parent: number;
+        timeline: number;
+        key: number;
+    }
+    class ObjectRef extends Ref {
+        z_index: number;
+    }
+    class Spatial {
+        x: number;
+        y: number;
+        angle: number;
+        scale_x: number;
+        scale_y: number;
+        a: number;
+        init(data: any): Spatial;
+        interpolate(a: Spatial, b: Spatial, factor: number, spin: number);
+        apply_parent_transform(parent: Spatial);
+        copy(source: Spatial): Spatial;
+    }
+    class Obj extends Spatial {
+        animation: number;
+        entity: number;
+        folder: number;
+        file: number;
+        pivot_x: number;
+        pivot_y: number;
+        t: number;
+        init(data: any): Obj;
+        interpolate(a: Obj, b: Obj, factor: number, spin: number);
+        copy(source: Obj): Obj;
+    }
+    class MainlineKey extends Element {
+        bone_ref: Ref[];
+        object_ref: ObjectRef[];
+    }
+    class TimelineKey extends Key {
+        spin: number;
+        bone: Spatial;
+        object: Obj;
+    }
+    class Timeline extends Element {
+        object_type: number;
+        obj: number;
+        key: TimelineKey[];
+    }
+    class MapInstruction {
+        folder: number;
+        file: number;
+        target_folder: number;
+        target_file: number;
+    }
+    class CharacterMap extends Element {
+        map: MapInstruction[];
+    }
+    class Entity extends Element {
+        spriter: Model;
+        obj_info: ObjectInfo[];
+        character_map: CharacterMap[];
+        animation_table: { [name: string]: Animation };
+        animation: Animation[];
+        get_animations(): { [name: string]: Animation };
+    }
+    class Model {
+        folder: Folder[];
+        entity: Entity[];
+    }
+    class FrameData {
+        sprite_data: Obj[];
+        clear();
+    }
+    export class Animator {
+        animation_finished: Signal;
+        entity: Entity;
+        node: Node2D;
+        current_animation: Animation;
+        next_animation: Animation;
+        name: string;
+        speed: number;
+        length: number;
+        time: number;
+        frame_data: FrameData;
+
+        constructor(entity: Entity, node: Node2D);
+        get_progress(): number;
+        set_progress(value: number);
+        get_animations(): string[];
+        play(name: string);
+        transition(name: string, total_transition_time: number);
+        blend(first: string, second: string, factor: number);
+        update(delta: number);
+        protected animate(delta: number);
+    }
+    export class CoaSprite extends Node2D {
+        animator: Animator;
+        load(data: string, entity: number): CoaSprite;
+        play(anim: string): boolean;
+        transition(name: string, total_transition_time: number): boolean;
+        blend(first: string, second: string, factor: number): boolean;
     }
 
     // - text

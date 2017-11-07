@@ -1,6 +1,3 @@
-/**
- * @namespace V
- */
 export * from './const';
 export * from './math';
 
@@ -26,6 +23,10 @@ export * from './scene/particles';
 
 export { default as Sprite } from './scene/sprites/Sprite';
 export { default as AnimatedSprite } from './scene/sprites/AnimatedSprite';
+export { default as CoaSprite } from './scene/coa_sprite/CoaSprite';
+export { Model, Animation } from './scene/coa_sprite/Model';
+export { FrameData } from './scene/coa_sprite/FrameData';
+export { default as Animator } from './scene/coa_sprite/Animator';
 export { SpriteFrames, filmstrip } from './scene/sprites/AnimatedSprite';
 export { default as TilingSprite } from './scene/sprites/TilingSprite';
 export { default as CanvasTinter } from './scene/sprites/canvas/CanvasTinter';

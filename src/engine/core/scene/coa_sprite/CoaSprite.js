@@ -29,12 +29,45 @@ export default class CoaSprite extends Node2D {
         return this;
     }
 
+    /**
+     * Play animation
+     * @param {string} anim
+     * @returns {boolean}
+     */
     play(anim) {
         if (!this.animator) {
             return false;
         }
-
         this.animator.play(anim);
+        return true;
+    }
+    /**
+     * Transition to give animation doing a progressive blend
+     * @param {string} name
+     * @param {number} total_transition_time
+     * @returns {boolean}
+     */
+    transition(name, total_transition_time) {
+        if (!this.animator) {
+            return false;
+        }
+        this.animator.transition(name, total_transition_time);
+        return true;
+    }
+    /**
+     * Blend two animations with the given weight factor.
+     * Factor ranges from 0.0f - 1.0f
+     * @param {string} first
+     * @param {string} second
+     * @param {number} factor
+     * @returns {boolean}
+     */
+    blend(first, second, factor) {
+        if (!this.animator) {
+            return false;
+        }
+        this.animator.blend(first, second, factor);
+        return true;
     }
 
     /**

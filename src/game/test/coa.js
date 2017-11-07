@@ -1,12 +1,13 @@
 import * as v from 'engine';
-import { Model } from 'engine/core/scene/coa_sprite/Model';
-import CoaSprite from 'engine/core/scene/coa_sprite/CoaSprite';
 
 v.loader.add('media/commander.json');
 v.loader.add('cc', 'media/commander.scon');
 
 
 export default class CoaTest extends v.Node2D {
+    /**
+     * @returns CoaTest
+     */
     static instance() {
         return new CoaTest();
     }
@@ -22,9 +23,9 @@ export default class CoaTest extends v.Node2D {
         // }
 
         /**
-         * @type {CoaSprite}
+         * @type {v.CoaSprite}
          */
-        let hero = this.add_child(new CoaSprite().load('cc', 0));
+        let hero = this.add_child(new v.CoaSprite().load('cc', 0));
         hero.position.set(128, 200);
         hero.play('idle');
         hero.animator.speed = 0.25;
