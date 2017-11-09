@@ -973,7 +973,7 @@ export default class Node2D extends EventEmitter
         child.transform._parentID = -1;
 
         if (child.is_physics_object) {
-            this._physics_children_count += 1;
+            this._physics_object_inserted();
         }
 
         this.children.push(child);
@@ -999,6 +999,18 @@ export default class Node2D extends EventEmitter
         }
 
         return child;
+    }
+    _physics_object_inserted() {
+        this._physics_children_count += 1;
+        if (this.parent) {
+            this.parent._physics_object_inserted();
+        }
+    }
+    _physics_object_removed() {
+        this._physics_children_count -= 1;
+        if (this.parent) {
+            this.parent._physics_object_removed();
+        }
     }
 
     /**
@@ -1134,7 +1146,7 @@ export default class Node2D extends EventEmitter
         child.parent = null;
 
         if (child.is_physics_object) {
-            this._physics_children_count -= 1;
+            this._physics_object_removed();
         }
 
         // ensure child transform will be recalculated
