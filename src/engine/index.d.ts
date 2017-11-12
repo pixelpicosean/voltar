@@ -127,7 +127,7 @@ declare module 'mini-signals' {
         add(fn: Function, thisArg?: any): MiniSignalBinding;
         once(fn: Function, thisArg?: any): MiniSignalBinding;
         detach(node: MiniSignalBinding): MiniSignal;
-        detach_all(): MiniSignal;
+        detachAll(): MiniSignal;
     }
     export class MiniSignalBinding {
         constructor(fn: Function, once: boolean, thisArg: any);

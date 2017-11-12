@@ -753,9 +753,9 @@ export default class Tween {
     }
 
     clear_events() {
-        this.tween_completed.detach_all();
-        this.tween_started.detach_all();
-        this.tween_step.detach_all();
+        this.tween_completed.detachAll();
+        this.tween_started.detachAll();
+        this.tween_step.detachAll();
     }
 
     /**
