@@ -3,7 +3,7 @@ import settings from '../settings';
 import Node2D from './Node2D';
 import Sprite from './sprites/Sprite';
 import { Point, Rectangle } from '../math';
-import { removeItems } from '../utils';
+import removeItems from 'remove-array-items';
 import Texture from '../textures/Texture';
 
 /**

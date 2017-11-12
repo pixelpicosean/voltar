@@ -17,9 +17,7 @@ export default class Timer extends Node2D {
         this.one_shot = false;
         this.processing = false;
         this.paused = false;
-
         this.time_left = -1;
-        this.processing = false;
     }
 
     set_wait_time(time) {
