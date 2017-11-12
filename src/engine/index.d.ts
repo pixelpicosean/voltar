@@ -1623,16 +1623,14 @@ declare module 'engine' {
         frac(): number;
         state(s: string): string;
     }
-    export namespace rnd {
-        export function randomize();
-        export function rand_range(min: number, max: number): number;
-        export function rand_range_i(min: number, max: number): number;
-        export function randf(): number;
-        export function randi(): number;
-        export function uuid(): string;
-        export function pick<T>(list: T[]): T;
-        export function pickweighted_pick<T>(list: T[]): T;
-    }
+    export function randomize();
+    export function rand_range(min: number, max: number): number;
+    export function rand_range_i(min: number, max: number): number;
+    export function randf(): number;
+    export function randi(): number;
+    export function uuid(): string;
+    export function pick<T>(list: T[]): T;
+    export function pickweighted_pick<T>(list: T[]): T;
 
     // - particles
 
