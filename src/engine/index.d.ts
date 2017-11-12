@@ -417,6 +417,7 @@ declare module 'engine/filters' {
 }
 
 declare module 'engine/input' {
+    import { Node2D, Vector } from 'engine';
     export default class Input {
         bindings: { [key: string]: string};
         key_list: string[];
@@ -445,17 +446,18 @@ declare module 'engine/input' {
 }
 
 declare module 'engine/interaction' {
+    import { Node2D, Point, CanvasRenderer, WebGLRenderer, HitArea } from 'engine';
     export interface InteractionEvent {
         stopped: boolean;
         target: any;
         type: string;
         data: InteractionData;
-        stopPropagation(): void;
+        stop_propagation(): void;
     }
     export class InteractionData {
         global: Point;
         target: Node2D;
-        originalEvent: Event;
+        original_event: Event;
 
         getLocalPosition(displayObject: Node2D, point?: Point, globalPos?: Point): Point;
     }
@@ -510,10 +512,10 @@ declare module 'engine/interaction' {
     }
     export interface InteractiveTarget {
         interactive: boolean;
-        buttonMode: boolean;
-        interactiveChildren: boolean;
-        defaultCursor: string;
-        hitArea: HitArea;
+        button_mode: boolean;
+        interactive_children: boolean;
+        default_cursor: string;
+        hit_area: HitArea;
     }
 }
 
@@ -532,6 +534,11 @@ declare module 'engine/MessageQueue' {
 }
 
 declare module 'engine/SceneTree' {
+    import { Node2D, Vector } from 'engine';
+    import VisualServer from 'engine/VisualServer';
+    import PhysicsServer from 'engine/PhysicsServer';
+    import MessageQueue from 'engine/MessageQueue';
+    import Input from 'engine/input';
     interface SceneTreeSetting {
         application: {
             name: string,
@@ -595,7 +602,6 @@ declare module 'engine/SceneTree' {
         protected _settings: SceneTreeSetting;
         protected _tick_bind: Function;
         protected _loop_id: number;
-        protected _initialize: Function;
         protected _next_scene_ctor: Function;
         protected _current_scene_ctor: Function;
         protected _process_tmp: ProcessPack;
@@ -633,6 +639,7 @@ declare module 'engine/SceneTree' {
 }
 
 declare module 'engine/VisualServer' {
+    import { Node2D, SystemRenderer } from 'engine';
     export default class VisualServer {
         is_initialized: boolean;
         renderer: SystemRenderer;
@@ -645,9 +652,10 @@ declare module 'engine/VisualServer' {
 declare module 'engine' {
     import EventEmitter from 'eventemitter3';
     import Signal from 'mini-signals';
+    import TweenManager from 'engine/anime/TweenManager';
 
     // accessibility
-    declare namespace accessibility {
+    export namespace accessibility {
         export class AccessibilityManager {
             protected div: HTMLElement;
             protected pool: HTMLElement[];
@@ -1119,6 +1127,7 @@ declare module 'engine' {
         distance_squared_to(b: Point): number;
         tangent(): number;
     }
+    export class ObservablePoint extends Point {}
     export class Vector extends Point {}
     export class Matrix {
         a: number;
@@ -1214,6 +1223,32 @@ declare module 'engine' {
 
         clone(): RoundedRectangle;
         contains(x: number, y: number): boolean;
+    }
+
+    // - rnd
+    export class RandomDataGenerator {
+        constructor(seeds?: string | any[]);
+        protected c: number;
+        protected s0: number;
+        protected s1: number;
+        protected s2: number;
+
+        rnd(): number;
+        sow(seeds: any[]);
+        hash(data: any): number;
+
+        frac(): number;
+        state(s: string): string;
+    }
+    export namespace rnd {
+        export function randomize();
+        export function rand_range(min: number, max: number): number;
+        export function rand_range_i(min: number, max: number): number;
+        export function randf(): number;
+        export function randi(): number;
+        export function uuid(): string;
+        export function pick<T>(list: T[]): T;
+        export function pickweighted_pick<T>(list: T[]): T;
     }
 
     // - particles
@@ -1600,11 +1635,11 @@ declare module 'engine' {
         protected _texture: Texture;
         protected _width: number;
         protected _height: number;
-        protected cachedTint: number;
+        protected cached_tint: number;
 
         protected _onTextureUpdate(): void;
 
-        constructor(texture?: Texture);
+        constructor(texture?: Texture | string);
 
         anchor: Point;
         tint: number;
@@ -1615,10 +1650,58 @@ declare module 'engine' {
         width: number;
         height: number;
 
-        getBounds(matrix?: Matrix): Rectangle;
-        getLocalBounds(): Rectangle;
-        containsPoint(point: Point): boolean;
+        get_local_bounds(): Rectangle;
         destroy(destroyTexture?: boolean, destroyBaseTexture?: boolean): void;
+    }
+    interface Anim {
+        speed: number;
+        loop: boolean;
+        frames: number[];
+        name: string;
+    }
+    export function filmstrip(tileset: Texture, width: number, height: number): Texture[];
+    export class SpriteFrames {
+        constructor(data: any);
+        animations: { [k: string]: Anim };
+        data: any;
+
+        add_animation(anim: string);
+        has_animation(anim: string): boolean;
+        remove_animation(anim: string);
+        rename_animation(prev: string, next: string);
+        set_animation_speed(anim: string, speed: number);
+        get_animation_speed(anim: string): number;
+        set_animation_loop(anim: string, loop: boolean);
+        get_animation_loop(anim: string): boolean;
+        get_frame_count(anim: string): number;
+        get_frame(anim: string, index: number): Texture;
+        set_frame(anim: string, index: number, tex: Texture);
+        remove_frame(anim: string, index: number);
+        clear(anim: string);
+        clear_all();
+    }
+    export class AnimatedSprite extends Sprite {
+        constructor(frames: any | SpriteFrames);
+
+        frames: SpriteFrames;
+        playing: boolean;
+        animation: string;
+        frame: number;
+        timeout: number;
+
+        animation_finished: Signal;
+        frame_changed: Signal;
+
+        play(anim: string);
+        stop();
+        set_animation(anim: string);
+        get_frame(): number;
+        set_frame(frame: number);
+        get_sprite_frames(): SpriteFrames;
+        set_sprite_frames(frames: SpriteFrames);
+
+        protected _reset_timeout();
+        protected _set_playing();
     }
     export class SpriteRenderer extends ObjectRenderer {
         protected renderBatch(texture: Texture, size: number, startIndex: number): void;
@@ -1824,6 +1907,171 @@ declare module 'engine' {
 
         width: number;
         height: number;
+    }
+
+    // - map
+    export class BackgrounMap extends Node2D {
+        constructor(tile_width: number, tile_height: number, data: number[][], texture: Texture | string);
+
+        data: number[][];
+        tile_width: number;
+        tile_height: number;
+        textures: Texture[];
+
+        protected pointsBuf: Vector[];
+        protected _tempSize: Float32Array;
+        protected _tempTexSize: number;
+        protected modificationMarker: number;
+
+        protected vbId: number;
+        protected vbBuffer: ArrayBuffer;
+        protected vbArray: Float32Array;
+        protected vbInts: Uint32Array;
+
+        protected _globalMat: Matrix;
+        protected _tempScale: number[];
+        protected _needs_redraw: boolean;
+
+        clear();
+        get_tile(x: number, y: number): number;
+        set_tile(x: number, y: number, tile: number);
+
+        protected _push_tile(u: number, v: number, x: number, y: number);
+        protected _draw_tiles();
+    }
+
+    interface CollisionResponse {
+        collision: {
+            x: boolean;
+            y: boolean;
+            slope: boolean;
+        };
+
+        tile: Vector;
+        collider: Node2D;
+
+        position: Vector;
+        normal: Vector;
+        travel: Vector;
+        remainder: Vector;
+    }
+    export class CollisionMap extends Node2D {
+        constructor(tile_size: number, data: number[][], layer_bit: number, tiledef: any);
+
+        width: number;
+        height: number;
+        collision_layer: number;
+        tilesize: number;
+        data: number[][];
+        last_slop: number;
+        tiledef: any;
+
+        get_collision_layer(): number;
+        get_collision_layer_bit(bit): number;
+        set_collision_layer(layer: number);
+        set_collision_layer_bit(bit: number, value: boolean);
+        trace(x: number, y: number, vx: number, vy: number, object_width: number, object_height: number, res: CollisionResponse);
+
+        clear();
+        get_tile(x: number, y: number): number;
+        set_tile(x: number, y: number, tile: number);
+    }
+
+    // - timer
+    export class Timer extends Node2D {
+        timeout: Signal;
+
+        wait_time: number;
+        autostart: boolean;
+        one_shot: boolean;
+        processing: boolean;
+        paused: boolean;
+
+        time_left: number;
+
+        set_wait_time(time: number);
+        get_wait_time(): number;
+        set_one_shot(one_shot: boolean);
+        is_one_shot(): boolean;
+        set_autostart(autostart: boolean);
+        has_autostart(): boolean;
+        set_paused(pause: boolean);
+        is_paused(): boolean;
+        is_stopped(): boolean;
+        get_time_left(): number;
+
+        start();
+        stop();
+    }
+
+    // - physics
+    interface CollisionShape {
+        left: number;
+        right: number;
+        top: number;
+        bottom: number;
+    }
+    export class CollisionObject2D extends Node2D {
+        collision_layer: number;
+        collision_mask: number;
+
+        left: number;
+        right: number;
+        top: number;
+        bottom: number;
+
+        protected _shape: CollisionShape;
+
+        get_shape(): CollisionShape;
+        set_shape(shape: CollisionShape);
+        get_collision_layer(): number;
+        get_collision_layer_bit(bit): number;
+        set_collision_layer(layer: number);
+        set_collision_layer_bit(bit: number, value: boolean);
+        get_collision_mask(): number;
+        get_collision_mask_bit(bit): number;
+        set_collision_mask(mask: number);
+        set_collision_mask_bit(bit: number, value: boolean);
+    }
+    export class RectangleShape2D implements CollisionShape {
+        left: number;
+        right: number;
+        top: number;
+        bottom: number;
+
+        extents: ObservablePoint;
+        points: Point[];
+        calc_points: Point[];
+        edges: Point[];
+        normals: Point[];
+
+        protected _dirty: boolean;
+
+        calculate_points(node: Node2D);
+        protected _calc_points(node: Node2D);
+    }
+    export class Area2D extends CollisionObject2D {
+        rotation: number;
+
+        set_rotation(rot: number);
+
+        area_enter(area: Area2D);
+        area_exit(area: Area2D);
+        body_enter(body: PhysicsBody2D);
+        body_exit(body: PhysicsBody2D);
+
+        protected _area_inout(is_in: boolean, area: Area2D);
+        protected _body_inout(is_in: boolean, body: PhysicsBody2D);
+    }
+    export class PhysicsBody2D extends CollisionObject2D {
+        collision_exceptions: PhysicsBody2D[];
+
+        move(vec: Vector);
+
+        add_collision_exception_with(body: PhysicsBody2D);
+
+        protected _collide_body(body: PhysicsBody2D, res: CollisionResponse): boolean;
+        protected _collide_map(res: CollisionResponse);
     }
 
     // - textures
