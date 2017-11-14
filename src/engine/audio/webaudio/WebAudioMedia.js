@@ -74,12 +74,13 @@ export default class WebAudioMedia {
     }
     // Implements load
     load(callback) {
-        // Load from the file path
-        if (this.parent.url) {
-            this._loadUrl(callback);
-        }
-        else if (this.source) {
+        // Load from the arraybuffer, incase it was loaded outside
+        if (this.source) {
             this._decode(this.source, callback);
+        }
+        // Load from the file path
+        else if (this.parent.url) {
+            this._loadUrl(callback);
         }
         else if (callback) {
             callback(new Error("sound.url or sound.source must be set"));
