@@ -136,14 +136,14 @@ export default class CollisionMap extends Node2D {
             // We can skip this test if this is not the first step or the new tile position
             // is the same as the current one.
             var prevTileX = Math.floor((x + pxOffsetX) / this.tilesize);
-            if (step > 0 || tileX == prevTileX || prevTileX < 0 || prevTileX >= this.width) {
+            if (step > 0 || tileX === prevTileX || prevTileX < 0 || prevTileX >= this.width) {
                 prevTileX = -1;
             }
 
             // Still inside this collision map?
             if (tileX >= 0 && tileX < this.width) {
                 for (tileY = firstTileY; tileY < lastTileY; tileY++) {
-                    if (prevTileX != -1) {
+                    if (prevTileX !== -1) {
                         t = this.data[tileY][prevTileX];
                         if (t > 1 && t <= this.last_slope && this._check_tile_def(res, t, x, y, rvx, rvy, width, height, prevTileX, tileY)) {
                             break;
@@ -152,7 +152,7 @@ export default class CollisionMap extends Node2D {
 
                     t = this.data[tileY][tileX];
                     if (
-                        t == 1 || t > this.last_slope || // fully solid tile?
+                        t === 1 || t > this.last_slope || // fully solid tile?
                         (t > 1 && this._check_tile_def(res, t, x, y, rvx, rvy, width, height, tileX, tileY)) // slope?
                     ) {
                         if (t > 1 && t <= this.last_slope && res.collision.slope) {
@@ -181,14 +181,14 @@ export default class CollisionMap extends Node2D {
             tileY = Math.floor((res.position.y + pxOffsetY) / this.tilesize);
 
             var prevTileY = Math.floor((y + pxOffsetY) / this.tilesize);
-            if (step > 0 || tileY == prevTileY || prevTileY < 0 || prevTileY >= this.height) {
+            if (step > 0 || tileY === prevTileY || prevTileY < 0 || prevTileY >= this.height) {
                 prevTileY = -1;
             }
 
             // Still inside this collision map?
             if (tileY >= 0 && tileY < this.height) {
                 for (tileX = firstTileX; tileX < lastTileX; tileX++) {
-                    if (prevTileY != -1) {
+                    if (prevTileY !== -1) {
                         t = this.data[prevTileY][tileX];
                         if (t > 1 && t <= this.last_slope &&
                             this._check_tile_def(res, t, x, y, rvx, rvy, width, height, tileX, prevTileY)) {
@@ -198,7 +198,7 @@ export default class CollisionMap extends Node2D {
 
                     t = this.data[tileY][tileX];
                     if (
-                        t == 1 || t > this.last_slope || // fully solid tile?
+                        t === 1 || t > this.last_slope || // fully solid tile?
                         (t > 1 && this._check_tile_def(res, t, x, y, rvx, rvy, width, height, tileX, tileY)) // slope?
                     ) {
                         if (t > 1 && t <= this.last_slope && res.collision.slope) {
