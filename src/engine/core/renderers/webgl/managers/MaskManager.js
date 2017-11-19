@@ -68,7 +68,7 @@ export default class MaskManager extends WebGLManager
     /**
      * Removes the last mask from the mask stack and doesn't return it.
      */
-    popMask()
+    popMask(target, maskData)
     {
         if (maskData.texture)
         {
