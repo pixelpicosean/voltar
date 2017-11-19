@@ -174,7 +174,7 @@ export default class ParticleNode2D extends Node2D
     update_transform()
     {
         // TODO don't need to!
-        this.displayObjectUpdateTransform();
+        this.node2d_update_transform();
         //  V.Node2D.prototype.update_transform.call( this );
     }
 
