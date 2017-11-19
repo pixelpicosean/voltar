@@ -1634,15 +1634,15 @@ declare module 'engine' {
 
     // - particles
 
-    export interface ParticleContainerProperties {
+    export interface ParticleNode2DProperties {
         scale?: boolean;
         position?: boolean;
         rotation?: boolean;
         uvs?: boolean;
         alpha?: boolean;
     }
-    export class ParticleContainer extends Node2D {
-        constructor(size?: number, properties?: ParticleContainerProperties, batchSize?: number);
+    export class ParticleNode2D extends Node2D {
+        constructor(size?: number, properties?: ParticleNode2DProperties, batchSize?: number);
 
         protected _maxSize: number;
         protected _batchSize: number;
@@ -1656,7 +1656,7 @@ declare module 'engine' {
         blendMode: number;
         roundPixels: boolean;
 
-        setProperties(properties: ParticleContainerProperties): void;
+        setProperties(properties: ParticleNode2DProperties): void;
     }
     export interface ParticleBuffer {
         gl: WebGLRenderingContext;
@@ -1686,7 +1686,7 @@ declare module 'engine' {
     export class ParticleRenderer extends ObjectRenderer {
         constructor(renderer: WebGLRenderer);
 
-        generateBuffers: (container: ParticleContainer) => ParticleBuffer[];
+        generateBuffers: (container: ParticleNode2D) => ParticleBuffer[];
         indexBuffer: WebGLBuffer;
         indices: Uint16Array;
         properties: IParticleRendererProperty[];
@@ -2024,7 +2024,7 @@ declare module 'engine' {
 
         anchor: Point;
         tint: number;
-        blendMode: number;
+        blend_mode: number;
         shader: Shader | AbstractFilter;
         texture: Texture;
 
