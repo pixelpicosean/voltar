@@ -2073,7 +2073,7 @@ declare module 'engine' {
         animation_finished: Signal;
         frame_changed: Signal;
 
-        play(anim: string);
+        play(anim: string, restart?: boolean);
         stop();
         set_animation(anim: string);
         get_frame(): number;

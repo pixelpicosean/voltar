@@ -201,11 +201,14 @@ export default class AnimatedSprite extends Sprite {
         this.frame_changed = new Signal();
     }
 
-    play(anim) {
+    play(anim, restart = false) {
         if (anim && anim.length > 0) {
             this.set_animation(anim);
         }
         this._set_playing(true);
+        if (restart) {
+            this.frame = 0;
+        }
     }
     stop() {
         this._set_playing(false);
