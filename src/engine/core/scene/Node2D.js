@@ -1186,7 +1186,7 @@ export default class Node2D extends EventEmitter
         remove_items(this.children, index, 1);
 
         if (child.is_physics_object) {
-            this._physics_children_count -= 1;
+            this._physics_object_removed();
         }
 
         // remove from name hash
@@ -1233,7 +1233,7 @@ export default class Node2D extends EventEmitter
                 }
 
                 if (removed[i].is_physics_object) {
-                    this._physics_children_count -= 1;
+                    this._physics_object_removed();
                 }
 
                 // remove from name hash
