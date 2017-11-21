@@ -2629,6 +2629,7 @@ declare module 'engine' {
             size: number;
         };
         text: string;
+        anchor: Point;
     }
 
     // - tiling sprite
