@@ -10,9 +10,8 @@ import Texture from './Texture';
  * A RenderTexture takes a snapshot of any Display Object given to its render method. For example:
  *
  * ```js
- * let renderer = V.autoDetectRenderer(1024, 1024, { view: canvas, ratio: 1 });
- * let renderTexture = V.RenderTexture.create(800, 600);
- * let sprite = V.Sprite.from_image("spinObj_01.png");
+ * let renderTexture = v.RenderTexture.create(800, 600);
+ * let sprite = v.Sprite.from_image("spinObj_01.png");
  *
  * sprite.position.x = 800/2;
  * sprite.position.y = 600/2;
@@ -29,20 +28,19 @@ import Texture from './Texture';
  *
  * sprite.set_transform()
  *
- * let renderTexture = new V.RenderTexture.create(100, 100);
+ * let renderTexture = v.RenderTexture.create(100, 100);
  *
  * renderer.render(sprite, renderTexture);  // Renders to center of RenderTexture
  * ```
  *
  * @class
- * @extends V.Texture
- * @memberof V
+ * @extends Texture
  */
 export default class RenderTexture extends Texture
 {
     /**
-     * @param {V.BaseRenderTexture} baseRenderTexture - The renderer used for this RenderTexture
-     * @param {V.Rectangle} [frame] - The rectangle frame of the texture to show
+     * @param {BaseRenderTexture} baseRenderTexture - The renderer used for this RenderTexture
+     * @param {Rectangle} [frame] - The rectangle frame of the texture to show
      */
     constructor(baseRenderTexture, frame)
     {

@@ -15,13 +15,12 @@ const tempPoint = new Point();
  * A tiling sprite is a fast way of rendering a tiling image
  *
  * @class
- * @extends V.Sprite
- * @memberof V.extras
+ * @extends Sprite
  */
 export default class TilingSprite extends Sprite
 {
     /**
-     * @param {V.Texture} texture - the texture of the tiling sprite
+     * @param {Texture} [texture] - the texture of the tiling sprite
      * @param {number} [width=100] - the width of the tiling sprite
      * @param {number} [height=100] - the height of the tiling sprite
      */
@@ -62,12 +61,12 @@ export default class TilingSprite extends Sprite
          * @type {CanvasPattern}
          * @private
          */
-        this._canvasPattern = null;
+        this._canvas_pattern = null;
 
         /**
          * transform that is applied to UV to get the texture coords
          *
-         * @member {V.extras.TextureTransform}
+         * @type {TextureTransform}
          */
         this.uv_transform = texture.transform || new TextureTransform(texture);
 
@@ -75,7 +74,7 @@ export default class TilingSprite extends Sprite
          * Plugin that is responsible for rendering this element.
          * Allows to customize the rendering process without overriding '_render_webGL' method.
          *
-         * @member {string}
+         * @type {string}
          * @default 'tilingSprite'
          */
         this.plugin_name = 'tilingSprite';
@@ -83,7 +82,7 @@ export default class TilingSprite extends Sprite
         /**
          * Whether or not anchor affects uvs
          *
-         * @member {boolean}
+         * @type {boolean}
          * @default false
          */
         this.uv_respect_anchor = false;
@@ -224,7 +223,7 @@ export default class TilingSprite extends Sprite
                     -texture._frame.x * base_texture_resolution, -texture._frame.y * base_texture_resolution);
             }
             this.cached_tint = this.tint;
-            this._canvasPattern = tempCanvas.context.createPattern(tempCanvas.canvas, 'repeat');
+            this._canvas_pattern = tempCanvas.context.createPattern(tempCanvas.canvas, 'repeat');
         }
 
         // set context state..
@@ -239,7 +238,7 @@ export default class TilingSprite extends Sprite
         renderer.setBlendMode(this.blend_mode);
 
         // fill the pattern!
-        context.fillStyle = this._canvasPattern;
+        context.fillStyle = this._canvas_pattern;
 
         // TODO - this should be rolled into the set_transform above..
         context.scale(this.tile_scale.x / base_texture_resolution, this.tile_scale.y / base_texture_resolution);

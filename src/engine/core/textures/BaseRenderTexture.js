@@ -30,8 +30,8 @@ import settings from '../settings';
  *
  * sprite.set_transform()
  *
- * let baseRenderTexture = new V.BaseRenderTexture(100, 100);
- * let renderTexture = new V.RenderTexture(baseRenderTexture);
+ * let baseRenderTexture = new v.BaseRenderTexture(100, 100);
+ * let renderTexture = new v.RenderTexture(baseRenderTexture);
  *
  * renderer.render(sprite, renderTexture);  // Renders to center of RenderTexture
  * ```

@@ -1589,6 +1589,11 @@ declare module 'engine' {
         height: number;
         type: number;
 
+        left: number;
+        right: number;
+        top: number;
+        bottom: number;
+
         static EMPTY: Rectangle;
 
         clone(): Rectangle;
@@ -2504,7 +2509,9 @@ declare module 'engine' {
         protected render_webGL(displayObject: DisplayObject, matrix?: Matrix, clear?: boolean, updateTransform?: boolean): void;
         protected render_canvas(displayObject: DisplayObject, matrix?: Matrix, clear?: boolean, updateTransform?: boolean): void;
 
-        constructor(renderer: CanvasRenderer | WebGLRenderer, width?: number, height?: number, scaleMode?: number, resolution?: number);
+        static create(width?: number, height?: number, scaleMode?: number, resolution?: number): RenderTexture;
+
+        constructor();
 
         width: number;
         height: number;
@@ -2539,11 +2546,11 @@ declare module 'engine' {
 
         constructor(baseTexture: BaseTexture, frame?: Rectangle, crop?: Rectangle, trim?: Rectangle, rotate?: number);
 
-        noFrame: boolean;
-        baseTexture: BaseTexture;
+        no_frame: boolean;
+        base_texture: BaseTexture;
         trim: Rectangle;
         valid: boolean;
-        requiresUpdate: boolean;
+        requires_update: boolean;
         width: number;
         height: number;
         orig: Rectangle;
@@ -2643,24 +2650,46 @@ declare module 'engine' {
         static from_frame(frameId: string, width?: number, height?: number): TilingSprite;
         static from_image(imageId: string, width?: number, height?: number, crossorigin?: boolean, scaleMode?: number): TilingSprite;
 
-        protected _tileScaleOffset: Point;
-        protected _tilingTexture: boolean;
-        protected _refreshTexture: boolean;
-        protected _uvs: TextureUvs[];
-
-        constructor(texture: Texture, width: number, height: number);
+        constructor(texture?: Texture, width?: number, height?: number);
 
         tile_scale: Point;
         tile_position: Point;
 
+        uv_transform: TextureTransform;
+        uv_respect_anchor: boolean;
+
         width: number;
         height: number;
-        originalTexture: Texture;
 
-        getBounds(): Rectangle;
-        generateTilingTexture(renderer: WebGLRenderer | CanvasRenderer, texture: Texture, forcePowerOfTwo?: boolean): Texture;
-        containsPoint(point: Point): boolean;
+        contains_point(point: Point): boolean;
         destroy(): void;
+    }
+
+    export class NineSliceSprite extends Node2D {
+        constructor(texture: Texture | string, top: number, right: number, bottom: number, left: number);
+        texture_left: number;
+        texture_right: number;
+        texture_top: number;
+        texture_bottom: number;
+        texture: Texture;
+
+        n: Sprite;
+        s: Sprite;
+        e: Sprite;
+        w: Sprite;
+        nw: Sprite;
+        ne: Sprite;
+        sw: Sprite;
+        se: Sprite;
+
+        tint: number;
+        width: number;
+        height: number;
+
+        resize(w: number, h: number);
+
+        protected _center_rect: Rectangle;
+        protected _update_visual();
     }
 
     // - mesh

@@ -1,7 +1,5 @@
 /**
- * Math classes and utilities mixed into V namespace.
- *
- * @lends V
+ * Math classes and utilities mixed into v namespace.
  */
 export { default as Point } from './Point';
 export { default as Vector } from './Point';

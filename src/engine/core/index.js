@@ -29,6 +29,7 @@ export { FrameData } from './scene/coa_sprite/FrameData';
 export { default as Animator } from './scene/coa_sprite/Animator';
 export { SpriteFrames, filmstrip } from './scene/sprites/AnimatedSprite';
 export { default as TilingSprite } from './scene/sprites/TilingSprite';
+export { default as NineSliceSprite } from './scene/sprites/NineSliceSprite';
 export { default as CanvasTinter } from './scene/sprites/canvas/CanvasTinter';
 export { default as SpriteRenderer } from './scene/sprites/webgl/SpriteRenderer';
 export { default as CanvasSpriteRenderer } from './scene/sprites/canvas/CanvasSpriteRenderer';
