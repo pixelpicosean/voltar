@@ -1390,10 +1390,10 @@ declare module 'engine' {
         clone(): Graphics;
         set_line_style(lineWidth?: number, color?: number, alpha?: number): Graphics;
         move_to(x: number, y: number): Graphics;
-        line_To(x: number, y: number): Graphics;
-        quadratic_Curve_To(cpX: number, cpY: number, toX: number, toY: number): Graphics;
-        bezier_Curve_To(cpX: number, cpY: number, cpX2: number, cpY2: number, toX: number, toY: number): Graphics;
-        arc_To(x1: number, y1: number, x2: number, y2: number, radius: number): Graphics;
+        line_to(x: number, y: number): Graphics;
+        quadratic_curve_to(cpX: number, cpY: number, toX: number, toY: number): Graphics;
+        bezier_curve_to(cpX: number, cpY: number, cpX2: number, cpY2: number, toX: number, toY: number): Graphics;
+        arc_to(x1: number, y1: number, x2: number, y2: number, radius: number): Graphics;
         arc(cx: number, cy: number, radius: number, startAngle: number, endAngle: number, anticlockwise?: boolean): Graphics;
         begin_fill(color: number, alpha?: number): Graphics;
         end_fill(): Graphics;
@@ -1636,6 +1636,16 @@ declare module 'engine' {
     export function uuid(): string;
     export function pick<T>(list: T[]): T;
     export function pickweighted_pick<T>(list: T[]): T;
+
+    // - math
+    export function clamp(num: number, min: number, max: number): number;
+    export function wrap(num: number, min: number, max: number): number;
+    export function wrap_angle(angle: number): number;
+    export function mod(a: number, n: number): number;
+    export function lerp(a: number, b: number, fct: number): number;
+    export function angle_difference(a: number, b: number): number;
+    export function deg2rad(a: number): number;
+    export function rad2deg(a: number): number;
 
     // - particles
 
