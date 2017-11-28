@@ -15,6 +15,8 @@ export default class NineSliceSprite extends Node2D {
     constructor(texture, top, right, bottom, left) {
         super();
 
+        this.type = 'NineSliceSprite';
+
         this.texture_left = left;
         this.texture_right = right;
         this.texture_top = top;
