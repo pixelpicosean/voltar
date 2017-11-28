@@ -1,7 +1,14 @@
-import * as path from 'path';
 import { utils } from '../core';
 import { Resource } from 'resource-loader';
 import BitmapText from '../core/scene/BitmapText';
+
+function basename(url) {
+    return url.replace(/\\/g,'/').replace( /.*\//, '' );
+}
+
+function dirname(url) {
+    return url.replace(/\\/g,'/').replace(/\/[^\/]*$/, '');;
+}
 
 /**
  * Register a BitmapText font from loader resource.
@@ -39,7 +46,7 @@ export default function ()
             return;
         }
 
-        let xmlUrl = !resource.isDataUrl ? path.dirname(resource.url) : '';
+        let xmlUrl = !resource.isDataUrl ? dirname(resource.url) : '';
 
         if (resource.isDataUrl)
         {
