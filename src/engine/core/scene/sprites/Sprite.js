@@ -162,6 +162,7 @@ export default class Sprite extends Node2D
             switch (k) {
                 // Directly set
                 // - Sprite
+                case 'texture':
                 case 'tint':
                     this[k] = data[k];
                     break;

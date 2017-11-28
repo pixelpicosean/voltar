@@ -422,7 +422,7 @@ export default class Node2D extends EventEmitter
      * @param {Rectangle} [rect] - Optional rectangle to store the result of the bounds calculation
      * @return {Rectangle} the rectangular bounding area
      */
-    get_local_Bounds(rect)
+    get_local_bounds(rect)
     {
         const transformRef = this.transform;
         const parentRef = this.parent;
@@ -1577,12 +1577,12 @@ export default class Node2D extends EventEmitter
      */
     get width()
     {
-        return this.scale.x * this.get_local_Bounds().width;
+        return this.scale.x * this.get_local_bounds().width;
     }
 
     set width(value) // eslint-disable-line require-jsdoc
     {
-        const width = this.get_local_Bounds().width;
+        const width = this.get_local_bounds().width;
 
         if (width !== 0)
         {
@@ -1603,12 +1603,12 @@ export default class Node2D extends EventEmitter
      */
     get height()
     {
-        return this.scale.y * this.get_local_Bounds().height;
+        return this.scale.y * this.get_local_bounds().height;
     }
 
     set height(value) // eslint-disable-line require-jsdoc
     {
-        const height = this.get_local_Bounds().height;
+        const height = this.get_local_bounds().height;
 
         if (height !== 0)
         {

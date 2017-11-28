@@ -1134,7 +1134,7 @@ export default class Graphics extends Node2D
      */
     generate_canvas_texture(scale_mode, resolution = 1)
     {
-        const bounds = this.get_local_Bounds();
+        const bounds = this.get_local_bounds();
 
         const canvasBuffer = RenderTexture.create(bounds.width, bounds.height, scale_mode, resolution);
 

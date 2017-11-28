@@ -412,11 +412,11 @@ export default class Text extends Sprite
      * @param {Rectangle} rect - The output rectangle.
      * @return {Rectangle} The bounds.
      */
-    get_local_Bounds(rect)
+    get_local_bounds(rect)
     {
         this.update_text(true);
 
-        return super.get_local_Bounds.call(this, rect);
+        return super.get_local_bounds(rect);
     }
 
     /**

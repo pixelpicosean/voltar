@@ -314,15 +314,15 @@ export default class BitmapText extends Node2D
     }
 
     /**
-     * Validates text before calling parent's get_local_Bounds
+     * Validates text before calling parent's get_local_bounds
      *
      * @return {V.Rectangle} The rectangular bounding area
      */
-    get_local_Bounds()
+    get_local_bounds()
     {
         this.validate();
 
-        return super.get_local_Bounds();
+        return super.get_local_bounds();
     }
 
     /**

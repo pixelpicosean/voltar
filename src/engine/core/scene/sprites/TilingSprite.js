@@ -285,7 +285,7 @@ export default class TilingSprite extends Sprite
      * @param {V.Rectangle} rect - The output rectangle.
      * @return {V.Rectangle} The bounds.
      */
-    get_local_Bounds(rect)
+    get_local_bounds(rect)
     {
         // we can do a fast local bounds if the sprite has no children!
         if (this.children.length === 0)
@@ -308,7 +308,7 @@ export default class TilingSprite extends Sprite
             return this._bounds.get_rectangle(rect);
         }
 
-        return super.get_local_Bounds.call(this, rect);
+        return super.get_local_bounds(rect);
     }
 
     /**
