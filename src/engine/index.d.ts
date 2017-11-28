@@ -1236,16 +1236,16 @@ declare module 'engine' {
         destroy(): void;
         get_global_position(point: Point): Point;
 
-        add_child(child: Node2D): Node2D;
-        add_child_at(child: Node2D, index: number): Node2D;
-        swap_children(child: Node2D, child2: Node2D): void;
-        get_child_index(child: Node2D): number;
-        set_child_index(child: Node2D, index: number): void;
-        get_child_at(index: number): Node2D;
-        get_Child_by_name(name: string): Node2D;
-        remove_child(child: Node2D): Node2D;
-        remove_child_at(index: number): Node2D;
-        remove_children(beginIndex?: number, endIndex?: number): Node2D[];
+        add_child<T extends Node2D>(child: T): T;
+        add_child_at<T extends Node2D>(child: T, index: number): T;
+        swap_children<T extends Node2D>(child: T, child2: T): void;
+        get_child_index<T extends Node2D>(child: T): number;
+        set_child_index<T extends Node2D>(child: T, index: number): void;
+        get_child_at<T extends Node2D>(index: number): T;
+        get_child_by_name<T extends Node2D>(name: string): T;
+        remove_child<T extends Node2D>(child: T): T;
+        remove_child_at<T extends Node2D>(index: number): T;
+        remove_children<T extends Node2D>(beginIndex?: number, endIndex?: number): T[];
         destroy(destroyChildren?: boolean): void;
         generate_texture(renderer: CanvasRenderer | WebGLRenderer, resolution?: number, scaleMode?: number): Texture;
 
@@ -1268,10 +1268,10 @@ declare module 'engine' {
         set_rotation(value: number);
         get_global_rotation(): number;
         get_tree(): SceneTree;
-        get_node(path: string): Node2D;
+        get_node<T extends Node2D>(path: string): T;
 
-        renderWebGL(renderer: WebGLRenderer): void;
-        renderCanvas(renderer: CanvasRenderer): void;
+        render_webGL(renderer: WebGLRenderer): void;
+        render_canvas(renderer: CanvasRenderer): void;
 
         _enter_tree();
         _ready();
