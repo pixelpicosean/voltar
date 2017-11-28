@@ -22,35 +22,32 @@ export default class NineSliceSprite extends Node2D {
         this.texture_top = top;
         this.texture_bottom = bottom;
 
+        this._center_rect = new Rectangle(0,0,0,0);
         /** @type {number} */
         this._tint = 0xFFFFFF;
         /** @type {Texture} */
         this._texture = null;
+
+        /** @type {Sprite} */
+        this.c = this.add_child(new Sprite());
+        /** @type {Sprite} */
+        this.n = this.add_child(new Sprite());
+        /** @type {Sprite} */
+        this.s = this.add_child(new Sprite());
+        /** @type {Sprite} */
+        this.w = this.add_child(new Sprite());
+        /** @type {Sprite} */
+        this.e = this.add_child(new Sprite());
+        /** @type {Sprite} */
+        this.nw = this.add_child(new Sprite());
+        /** @type {Sprite} */
+        this.ne = this.add_child(new Sprite());
+        /** @type {Sprite} */
+        this.sw = this.add_child(new Sprite());
+        /** @type {Sprite} */
+        this.se = this.add_child(new Sprite());
+
         this.texture = texture;
-
-        const frame = this._texture.frame;
-
-        this._center_rect = new Rectangle(left, top, frame.width - left - right, frame.height - top - bottom);
-
-        /** @type {Sprite} */
-        this.c = this.add_child(new Sprite(new Texture(this._texture.base_texture, new Rectangle(frame.x + left, frame.y + top, frame.width - left - right, frame.height - top - bottom))));
-        /** @type {Sprite} */
-        this.n = this.add_child(new Sprite(new Texture(this._texture.base_texture, new Rectangle(frame.x + left, frame.y, frame.width - left - right, top))));
-        /** @type {Sprite} */
-        this.s = this.add_child(new Sprite(new Texture(this._texture.base_texture, new Rectangle(frame.x + left, frame.y + frame.height - bottom, frame.width - left - right, bottom))));
-        /** @type {Sprite} */
-        this.w = this.add_child(new Sprite(new Texture(this._texture.base_texture, new Rectangle(frame.x, frame.y + top, left, frame.height - top - bottom))));
-        /** @type {Sprite} */
-        this.e = this.add_child(new Sprite(new Texture(this._texture.base_texture, new Rectangle(frame.x + frame.width - right, frame.y + top, right, frame.height - top - bottom))));
-        /** @type {Sprite} */
-        this.nw = this.add_child(new Sprite(new Texture(this._texture.base_texture, new Rectangle(frame.x, frame.y, left, top))));
-        /** @type {Sprite} */
-        this.ne = this.add_child(new Sprite(new Texture(this._texture.base_texture, new Rectangle(frame.x + frame.width - right, frame.y, right, top))));
-        /** @type {Sprite} */
-        this.sw = this.add_child(new Sprite(new Texture(this._texture.base_texture, new Rectangle(frame.x, frame.y + frame.height - bottom, left, bottom))));
-        /** @type {Sprite} */
-        this.se = this.add_child(new Sprite(new Texture(this._texture.base_texture, new Rectangle(frame.x + frame.width - right, frame.y + frame.height - bottom, right, bottom))));
-
         this._update_visual();
     }
     _load_data(data) {
@@ -103,7 +100,8 @@ export default class NineSliceSprite extends Node2D {
             value = TextureCache[p_value];
         }
         this._texture = value;
-        this._tint = 0xFFFFFF;
+
+        this._update_texture();
     }
     get tint() {
         return this._tint;
@@ -134,6 +132,27 @@ export default class NineSliceSprite extends Node2D {
         this._update_visual();
     }
 
+    _update_texture() {
+        const left = this.texture_left;
+        const right = this.texture_right;
+        const top = this.texture_top;
+        const bottom = this.texture_bottom;
+
+        const frame = this._texture.frame;
+        this._center_rect = new Rectangle(left, top, frame.width - left - right, frame.height - top - bottom);
+
+        this.n.texture = new Texture(this._texture.base_texture, new Rectangle(frame.x + left, frame.y, frame.width - left - right, top));
+        this.c.texture = new Texture(this._texture.base_texture, new Rectangle(frame.x + left, frame.y + top, frame.width - left - right, frame.height - top - bottom));
+        this.s.texture = new Texture(this._texture.base_texture, new Rectangle(frame.x + left, frame.y + frame.height - bottom, frame.width - left - right, bottom));
+        this.w.texture = new Texture(this._texture.base_texture, new Rectangle(frame.x, frame.y + top, left, frame.height - top - bottom));
+        this.e.texture = new Texture(this._texture.base_texture, new Rectangle(frame.x + frame.width - right, frame.y + top, right, frame.height - top - bottom));
+        this.nw.texture = new Texture(this._texture.base_texture, new Rectangle(frame.x, frame.y, left, top));
+        this.ne.texture = new Texture(this._texture.base_texture, new Rectangle(frame.x + frame.width - right, frame.y, right, top));
+        this.sw.texture = new Texture(this._texture.base_texture, new Rectangle(frame.x, frame.y + frame.height - bottom, left, bottom));
+        this.se.texture = new Texture(this._texture.base_texture, new Rectangle(frame.x + frame.width - right, frame.y + frame.height - bottom, right, bottom));
+
+        this._update_visual();
+    }
     _update_visual() {
         this.c.width = this._center_rect.width;
         this.c.height = this._center_rect.height;

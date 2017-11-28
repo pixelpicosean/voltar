@@ -120,8 +120,15 @@ export default class Text extends Sprite
                 // Directly set
                 // - Text
                 case 'text':
-                case 'style':
                     this[k] = data[k];
+                    break;
+                case 'style':
+                    this.style = data.style;
+                    this.local_style_id = -1;
+                    break;
+                case '_style':
+                    Object.assign(this._style, data._style);
+                    this.local_style_id = -1;
                     break;
             }
         }
