@@ -51,6 +51,28 @@ export default class NineSliceSprite extends Node2D {
 
         this._update_visual();
     }
+    _load_data(data) {
+        super._load_data(data);
+
+        for (let k in data) {
+            switch (k) {
+                // Directly set
+                // - Sprite
+                case 'texture':
+                case 'tint':
+                case 'width':
+                case 'height':
+                case 'texture_left':
+                case 'texture_right':
+                case 'texture_top':
+                case 'texture_bottom':
+                    this[k] = data[k];
+                    break;
+
+                // Set vector
+            }
+        }
+    }
 
     /**
      * Resize the sprite
