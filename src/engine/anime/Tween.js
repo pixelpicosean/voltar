@@ -799,7 +799,18 @@ export default class Tween {
                 this.reset_all();
             }
         }
+        else {
+            // Remove finished channels
+            for (i = 0; i < this.interpolates.length; i++) {
+                data = this.interpolates[i];
+                if (data.finish) {
+                    remove_items(this.interpolates, i--, 1);
+                    pool.push(data);
+                }
+            }
+        }
 
+        // Update still running channels
         for (i = 0; i < this.interpolates.length; i++) {
             data = this.interpolates[i];
             if (!data.active || data.finish) {
@@ -850,9 +861,6 @@ export default class Tween {
 
             if (data.finish) {
                 this.tween_completed.dispatch(data.key);
-                if (!this.repeat) {
-                    this.remove(data.obj, data.key, true);
-                }
             }
         }
     }
