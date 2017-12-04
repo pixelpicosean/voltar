@@ -2665,7 +2665,7 @@ declare module 'engine' {
         tile_scale: Point;
         tile_position: Point;
 
-        uv_transform: TextureTransform;
+        uv_transform: TextureMatrix;
         uv_respect_anchor: boolean;
 
         width: number;

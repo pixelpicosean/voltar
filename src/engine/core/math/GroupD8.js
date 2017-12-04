@@ -111,13 +111,13 @@ const GroupD8 = {
     rotate180: (rotation) => rotation ^ 4,
 
     /**
-     * I dont know why sometimes width and heights needs to be swapped. We'll fix it later.
+     * Direction of main vector can be horizontal, vertical or diagonal.
+     * Some objects work with vertical directions different.
      *
-     * @memberof V.GroupD8
      * @param {number} rotation - The number to check.
      * @returns {boolean} Whether or not the width/height should be swapped.
      */
-    is_swap_width_height: (rotation) => (rotation & 3) === 2,
+    is_vertical: (rotation) => (rotation & 3) === 2,
 
     /**
      * @memberof V.GroupD8

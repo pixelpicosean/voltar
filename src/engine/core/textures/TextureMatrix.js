@@ -6,13 +6,12 @@ const tempMat = new Matrix();
  * class controls uv transform and frame clamp for texture
  *
  * @class
- * @memberof V.extras
  */
-export default class TextureTransform
+export default class TextureMatrix
 {
     /**
      *
-     * @param {V.Texture} texture observed texture
+     * @param {Texture} texture observed texture
      * @param {number} [clamp_margin] Changes frame clamping, 0.5 by default. Use -0.5 for extra border.
      * @constructor
      */

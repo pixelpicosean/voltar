@@ -1,18 +1,18 @@
 import Filter from '../Filter';
 import { Matrix } from '../../../../math';
+import TextureMatrix from '../../../../textures/TextureMatrix';
 import { join } from 'path';
 
 /**
  * The SpriteMaskFilter class
  *
  * @class
- * @extends V.Filter
- * @memberof V
+ * @extends Filter
  */
 export default class SpriteMaskFilter extends Filter
 {
     /**
-     * @param {V.Sprite} sprite - the target sprite
+     * @param {Sprite} sprite - the target sprite
      */
     constructor(sprite)
     {
@@ -39,10 +39,24 @@ export default class SpriteMaskFilter extends Filter
     apply(filterManager, input, output)
     {
         const maskSprite = this.maskSprite;
+        const tex = this.maskSprite.texture;
 
-        this.uniforms.mask = maskSprite._texture;
-        this.uniforms.otherMatrix = filterManager.calculateSpriteMatrix(this.maskMatrix, maskSprite);
+        if (!tex.valid)
+        {
+            return;
+        }
+        if (!tex.transform)
+        {
+            // margin = 0.0, let it bleed a bit, shader code becomes easier
+            // assuming that atlas textures were made with 1-pixel padding
+            tex.transform = new TextureMatrix(tex, 0.0);
+        }
+        tex.transform.update();
+        this.uniforms.mask = tex;
+        this.uniforms.otherMatrix = filterManager.calculateSpriteMatrix(this.maskMatrix, maskSprite)
+            .prepend(tex.transform.map_coord);
         this.uniforms.alpha = maskSprite.world_alpha;
+        this.uniforms.maskClamp = tex.transform.u_clamp_frame;
 
         filterManager.applyFilter(this, input, output);
     }

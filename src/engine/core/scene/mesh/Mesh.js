@@ -1,5 +1,6 @@
 import { Point, Polygon } from '../../math';
-import TextureTransform from '../../textures/TextureTransform';
+import Texture from '../../textures/Texture';
+import TextureMatrix from '../../textures/TextureMatrix';
 import { BLEND_MODES } from '../../const';
 import * as utils from '../../utils';
 import Node2D from '../Node2D';
@@ -31,10 +32,10 @@ export default class Mesh extends Node2D
         /**
          * The texture of the Mesh
          *
-         * @member {V.Texture}
+         * @member {Texture}
          * @private
          */
-        this._texture = texture;
+        this._texture = texture || Texture.EMPTY;
 
         /**
          * The Uvs of the Mesh
@@ -134,10 +135,10 @@ export default class Mesh extends Node2D
          * its updated independently from texture uv_transform
          * updates of uvs are tied to that thing
          *
-         * @member {V.extras.TextureTransform}
+         * @member {V.extras.TextureMatrix}
          * @private
          */
-        this._uv_transform = new TextureTransform(texture);
+        this._uv_transform = new TextureMatrix(this._texture);
 
         /**
          * whether or not upload uv_transform to shader

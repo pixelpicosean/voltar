@@ -1,5 +1,5 @@
 import CanvasTinter from './canvas/CanvasTinter';
-import { default as TextureTransform } from '../../textures/TextureTransform';
+import TextureMatrix from '../../textures/TextureMatrix';
 import Texture from '../../textures/Texture';
 import { Point, TransformStatic, Rectangle } from '../../math';
 import Sprite from './Sprite';
@@ -66,9 +66,9 @@ export default class TilingSprite extends Sprite
         /**
          * transform that is applied to UV to get the texture coords
          *
-         * @type {TextureTransform}
+         * @type {TextureMatrix}
          */
-        this.uv_transform = texture.transform || new TextureTransform(texture);
+        this.uv_transform = texture.transform || new TextureMatrix(texture);
 
         /**
          * Plugin that is responsible for rendering this element.
