@@ -6,13 +6,13 @@ import { TextureCache } from '../../utils';
 
 export default class NineSliceSprite extends Node2D {
     /**
-     * @param {Texture|string} texture
-     * @param {number} top     top size
-     * @param {number} right   right size
-     * @param {number} bottom  bottom size
-     * @param {number} left    left size
+     * @param {Texture|string} [texture]
+     * @param {number} [top]     top size
+     * @param {number} [right]   right size
+     * @param {number} [bottom]  bottom size
+     * @param {number} [left]    left size
      */
-    constructor(texture, top, right, bottom, left) {
+    constructor(texture, top=0, right=0, bottom=0, left=0) {
         super();
 
         this.type = 'NineSliceSprite';
@@ -41,16 +41,17 @@ export default class NineSliceSprite extends Node2D {
         this._update_visual();
     }
     _load_data(data) {
+        if (data.texture) {
+            this.texture = data.texture;
+        }
+
         super._load_data(data);
 
         for (let k in data) {
             switch (k) {
                 // Directly set
                 // - Sprite
-                case 'texture':
                 case 'tint':
-                case 'width':
-                case 'height':
                 case 'texture_left':
                 case 'texture_right':
                 case 'texture_top':
@@ -63,6 +64,10 @@ export default class NineSliceSprite extends Node2D {
         }
 
         this._update_texture();
+
+        if (data.width && data.height) {
+            this.resize(data.width, data.height);
+        }
     }
 
     /**
@@ -84,6 +89,9 @@ export default class NineSliceSprite extends Node2D {
         return this._texture;
     }
     set texture(p_value) {
+        if (!p_value) {
+            return;
+        }
         let value = p_value;
         if (this._texture === value) {
             return;
