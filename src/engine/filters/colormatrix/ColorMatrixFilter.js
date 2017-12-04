@@ -7,14 +7,13 @@ import { join } from 'path';
  * with a new set of RGBA color and alpha values. It's pretty powerful!
  *
  * ```js
- *  let colorMatrix = new V.ColorMatrixFilter();
+ *  let colorMatrix = new v.filters.ColorMatrixFilter();
  *  container.filters = [colorMatrix];
  *  colorMatrix.contrast(2);
  * ```
  * @author Clément Chenebault <clement@goodboydigital.com>
  * @class
- * @extends V.Filter
- * @memberof V.filters
+ * @extends core.Filter
  */
 export default class ColorMatrixFilter extends core.Filter
 {

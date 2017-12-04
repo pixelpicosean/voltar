@@ -4,7 +4,7 @@
 import { TEXT_GRADIENT } from '../../const';
 import { hex2string } from '../../utils';
 
-const defaultStyle = {
+const default_style = {
     align: 'left',
     breakWords: false,
     dropShadow: false,
@@ -75,7 +75,8 @@ export default class TextStyle
      * @param {number} [style.letterSpacing=0] - The amount of spacing between letters, default is 0
      * @param {number} [style.lineHeight] - The line height, a number that represents the vertical space that a letter uses
      * @param {string} [style.lineJoin='miter'] - The lineJoin property sets the type of corner created, it can resolve
-     *      spiked text issues. Default is 'miter' (creates a sharp corner).
+     *      spiked text issues. Possible values "miter" (creates a sharp corner), "round" (creates a round corner) or "bevel"
+     *      (creates a squared corner).
      * @param {number} [style.miterLimit=10] - The miter limit to use when using the 'miter' lineJoin mode. This can reduce
      *      or increase the spikiness of rendered text.
      * @param {number} [style.padding=0] - Occasionally some fonts are cropped. Adding some padding will prevent this from
@@ -93,7 +94,9 @@ export default class TextStyle
     {
         this.styleID = 0;
 
-        Object.assign(this, defaultStyle, style);
+        this.reset();
+
+        deep_copy_properties(this, style, style);
     }
 
     /**
@@ -104,14 +107,11 @@ export default class TextStyle
      */
     clone()
     {
-        const clonedProperties = {};
+        const cloned_properties = {};
 
-        for (const key in defaultStyle)
-        {
-            clonedProperties[key] = this[key];
-        }
+        deep_copy_properties(cloned_properties, this, default_style);
 
-        return new TextStyle(clonedProperties);
+        return new TextStyle(cloned_properties);
     }
 
     /**
@@ -119,7 +119,7 @@ export default class TextStyle
      */
     reset()
     {
-        Object.assign(this, defaultStyle);
+        deep_copy_properties(this, default_style, default_style);
     }
 
     /**
@@ -754,4 +754,21 @@ function areArraysEqual(array1, array2)
     }
 
     return true;
+}
+
+/**
+ * Utility function to ensure that object properties are copied by value, and not by reference
+ *
+ * @param {Object} target Target object to copy properties into
+ * @param {Object} source Source object for the proporties to copy
+ * @param {string} property_obj Object containing properties names we want to loop over
+ */
+function deep_copy_properties(target, source, property_obj) {
+    for (const prop in property_obj) {
+        if (Array.isArray(source[prop])) {
+            target[prop] = source[prop].slice();
+        } else {
+            target[prop] = source[prop];
+        }
+    }
 }

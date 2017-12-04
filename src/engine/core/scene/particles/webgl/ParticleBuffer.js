@@ -18,7 +18,6 @@ import create_indices_for_quads from '../../../utils/create_indices_for_quads';
  *
  * @class
  * @private
- * @memberof V
  */
 export default class ParticleBuffer
 {
@@ -213,7 +212,7 @@ export default class ParticleBuffer
     /**
      * Uploads the dynamic properties.
      *
-     * @param {V.Node2D[]} children - The children to upload.
+     * @param {Node2D[]} children - The children to upload.
      * @param {number} startIndex - The index to start at.
      * @param {number} amount - The number to upload.
      */
@@ -234,7 +233,7 @@ export default class ParticleBuffer
     /**
      * Uploads the static properties.
      *
-     * @param {V.Node2D[]} children - The children to upload.
+     * @param {Node2D[]} children - The children to upload.
      * @param {number} startIndex - The index to start at.
      * @param {number} amount - The number to upload.
      */
@@ -259,12 +258,16 @@ export default class ParticleBuffer
     destroy()
     {
         this.dynamicProperties = null;
-        this.dynamicData = null;
         this.dynamicBuffer.destroy();
+        this.dynamicBuffer = null;
+        this.dynamicData = null;
+        this.dynamicDataUint32 = null;
 
         this.staticProperties = null;
-        this.staticData = null;
         this.staticBuffer.destroy();
+        this.staticBuffer = null;
+        this.staticData = null;
+        this.staticDataUint32 = null;
     }
 
 }

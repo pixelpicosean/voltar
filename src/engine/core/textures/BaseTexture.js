@@ -12,13 +12,12 @@ import bitTwiddle from 'bit-twiddle';
  *
  * @class
  * @extends EventEmitter
- * @memberof V
  */
 export default class BaseTexture extends EventEmitter
 {
     /**
      * @param {HTMLImageElement|HTMLCanvasElement} [source] - the source object of the texture.
-     * @param {number} [scale_mode=V.settings.SCALE_MODE] - See {@link V.SCALE_MODES} for possible values
+     * @param {number} [scale_mode=settings.SCALE_MODE] - See {@link SCALE_MODES} for possible values
      * @param {number} [resolution=1] - The resolution / device pixel ratio of the texture
      */
     constructor(source, scale_mode, resolution)
@@ -74,8 +73,8 @@ export default class BaseTexture extends EventEmitter
          * The scale mode to apply when scaling this texture
          *
          * @member {number}
-         * @default V.settings.SCALE_MODE
-         * @see V.SCALE_MODES
+         * @default settings.SCALE_MODE
+         * @see SCALE_MODES
          */
         this.scale_mode = scale_mode !== undefined ? scale_mode : settings.SCALE_MODE;
 
@@ -172,7 +171,7 @@ export default class BaseTexture extends EventEmitter
          * Also the texture must be a power of two size to work
          *
          * @member {boolean}
-         * @see V.MIPMAP_TEXTURES
+         * @see MIPMAP_TEXTURES
          */
         this.mipmap = settings.MIPMAP_TEXTURES;
 
@@ -181,7 +180,7 @@ export default class BaseTexture extends EventEmitter
          * WebGL Texture wrap mode
          *
          * @member {number}
-         * @see V.WRAP_MODES
+         * @see WRAP_MODES
          */
         this.wrap_mode = settings.WRAP_MODE;
 
@@ -224,39 +223,39 @@ export default class BaseTexture extends EventEmitter
          * Fired when a not-immediately-available source finishes loading.
          *
          * @protected
-         * @event V.BaseTexture#loaded
-         * @param {V.BaseTexture} base_texture - Resource loaded.
+         * @event BaseTexture#loaded
+         * @param {BaseTexture} base_texture - Resource loaded.
          */
 
         /**
          * Fired when a not-immediately-available source fails to load.
          *
          * @protected
-         * @event V.BaseTexture#error
-         * @param {V.BaseTexture} base_texture - Resource errored.
+         * @event BaseTexture#error
+         * @param {BaseTexture} base_texture - Resource errored.
          */
 
         /**
          * Fired when BaseTexture is updated.
          *
          * @protected
-         * @event V.BaseTexture#update
-         * @param {V.BaseTexture} base_texture - Instance of texture being updated.
+         * @event BaseTexture#update
+         * @param {BaseTexture} base_texture - Instance of texture being updated.
          */
 
         /**
          * Fired when BaseTexture is destroyed.
          *
          * @protected
-         * @event V.BaseTexture#dispose
-         * @param {V.BaseTexture} base_texture - Instance of texture being destroyed.
+         * @event BaseTexture#dispose
+         * @param {BaseTexture} base_texture - Instance of texture being destroyed.
          */
     }
 
     /**
      * Updates the texture on all the webgl renderers, this also assumes the src has changed.
      *
-     * @fires V.BaseTexture#update
+     * @fires BaseTexture#update
      */
     update()
     {
@@ -549,7 +548,7 @@ export default class BaseTexture extends EventEmitter
      *
      * @param  {string} svgString SVG source as string
      *
-     * @fires V.BaseTexture#loaded
+     * @fires BaseTexture#loaded
      */
     _loadSvgSourceUsingString(svgString)
     {
@@ -638,7 +637,7 @@ export default class BaseTexture extends EventEmitter
      * This means you can still use the texture later which will upload it to GPU
      * memory again.
      *
-     * @fires V.BaseTexture#dispose
+     * @fires BaseTexture#dispose
      */
     dispose()
     {
@@ -665,9 +664,9 @@ export default class BaseTexture extends EventEmitter
      * @static
      * @param {string} image_url - The image url of the texture
      * @param {boolean} [crossorigin=(auto)] - Should use anonymous CORS? Defaults to true if the URL is not a data-URI.
-     * @param {number} [scale_mode=V.settings.SCALE_MODE] - See {@link V.SCALE_MODES} for possible values
+     * @param {number} [scale_mode=settings.SCALE_MODE] - See {@link SCALE_MODES} for possible values
      * @param {number} [source_scale=(auto)] - Scale for the original image, used with Svg images.
-     * @return {V.BaseTexture} The new base texture.
+     * @return {BaseTexture} The new base texture.
      */
     static from_image(image_url, crossorigin, scale_mode, source_scale)
     {
@@ -712,9 +711,9 @@ export default class BaseTexture extends EventEmitter
      *
      * @static
      * @param {HTMLCanvasElement} canvas - The canvas element source of the texture
-     * @param {number} scale_mode - See {@link V.SCALE_MODES} for possible values
+     * @param {number} scale_mode - See {@link SCALE_MODES} for possible values
      * @param {string} [origin='canvas'] - A string origin of who created the base texture
-     * @return {V.BaseTexture} The new base texture.
+     * @return {BaseTexture} The new base texture.
      */
     static from_canvas(canvas, scale_mode, origin = 'canvas')
     {
@@ -736,13 +735,15 @@ export default class BaseTexture extends EventEmitter
 
     /**
      * Helper function that creates a base texture based on the source you provide.
-     * The source can be - image url, image element, canvas element.
+     * The source can be - image url, image element, canvas element. If the
+     * source is an image url or an image element and not in the base texture
+     * cache, it will be created and loaded.
      *
      * @static
      * @param {string|HTMLImageElement|HTMLCanvasElement} source - The source to create base texture from.
-     * @param {number} [scale_mode=V.settings.SCALE_MODE] - See {@link V.SCALE_MODES} for possible values
+     * @param {number} [scale_mode=settings.SCALE_MODE] - See {@link SCALE_MODES} for possible values
      * @param {number} [source_scale=(auto)] - Scale for the original image, used with Svg images.
-     * @return {V.BaseTexture} The new base texture.
+     * @return {BaseTexture} The new base texture.
      */
     static from(source, scale_mode, source_scale)
     {
@@ -786,7 +787,7 @@ export default class BaseTexture extends EventEmitter
      * Adds a BaseTexture to the global BaseTextureCache. This cache is shared across the whole V object.
      *
      * @static
-     * @param {V.BaseTexture} base_texture - The BaseTexture to add to the cache.
+     * @param {BaseTexture} base_texture - The BaseTexture to add to the cache.
      * @param {string} id - The id that the BaseTexture will be stored against.
      */
     static add_to_cache(base_texture, id)
@@ -815,8 +816,8 @@ export default class BaseTexture extends EventEmitter
      * Remove a BaseTexture from the global BaseTextureCache.
      *
      * @static
-     * @param {string|V.BaseTexture} base_texture - id of a BaseTexture to be removed, or a BaseTexture instance itself.
-     * @return {V.BaseTexture|null} The BaseTexture that was removed.
+     * @param {string|BaseTexture} base_texture - id of a BaseTexture to be removed, or a BaseTexture instance itself.
+     * @return {BaseTexture|null} The BaseTexture that was removed.
      */
     static remove_from_cache(base_texture)
     {
