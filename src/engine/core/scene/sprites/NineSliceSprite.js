@@ -61,6 +61,8 @@ export default class NineSliceSprite extends Node2D {
                 // Set vector
             }
         }
+
+        this._update_texture();
     }
 
     /**
