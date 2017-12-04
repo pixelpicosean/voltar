@@ -245,16 +245,18 @@ export default class SystemRenderer extends EventEmitter
      * @param {Node2D} displayObject - The displayObject the object will be generated from
      * @param {number} scale_mode - Should be one of the scale_mode consts
      * @param {number} resolution - The resolution / device pixel ratio of the texture being generated
+     * @param {Rectangle} [region] - The region of the displayObject, that shall be rendered,
+     *        if no region is specified, defaults to the local bounds of the displayObject.
      * @return {Texture} a texture of the graphics object
      */
-    generate_texture(displayObject, scale_mode, resolution)
+    generate_texture(displayObject, scale_mode, resolution, region)
     {
-        const bounds = displayObject.get_local_bounds();
+        region = region || displayObject.get_local_bounds();
 
-        const renderTexture = RenderTexture.create(bounds.width | 0, bounds.height | 0, scale_mode, resolution);
+        const renderTexture = RenderTexture.create(region.width | 0, region.height | 0, scale_mode, resolution);
 
-        tempMatrix.tx = -bounds.x;
-        tempMatrix.ty = -bounds.y;
+        tempMatrix.tx = -region.x;
+        tempMatrix.ty = -region.y;
 
         this.render(displayObject, renderTexture, false, tempMatrix, true);
 

@@ -30,12 +30,11 @@ const hit_test_event = {
  *
  * @class
  * @extends EventEmitter
- * @memberof V.interaction
  */
 export default class InteractionManager extends EventEmitter
 {
     /**
-     * @param {V.CanvasRenderer|V.WebGLRenderer} renderer - A reference to the current renderer
+     * @param {CanvasRenderer|WebGLRenderer} renderer - A reference to the current renderer
      * @param {object} [options] - The options for the manager.
      * @param {boolean} [options.auto_prevent_default=true] - Should the manager automatically prevent default browser actions.
      * @param {number} [options.interaction_frequency=10] - Frequency increases the interaction events will be checked.
@@ -49,7 +48,7 @@ export default class InteractionManager extends EventEmitter
         /**
          * The renderer this interaction manager works for.
          *
-         * @member {V.SystemRenderer}
+         * @member {SystemRenderer}
          */
         this.renderer = renderer;
 
@@ -75,7 +74,7 @@ export default class InteractionManager extends EventEmitter
         /**
          * The mouse data
          *
-         * @member {V.interaction.InteractionData}
+         * @member {InteractionData}
          */
         this.mouse = new InteractionData();
         this.mouse.identifier = MOUSE_POINTER_ID;
@@ -88,7 +87,7 @@ export default class InteractionManager extends EventEmitter
          * Actively tracked InteractionData
          *
          * @private
-         * @member {Object.<number,V.interation.InteractionData>}
+         * @member {Object.<number,interation.InteractionData>}
          */
         this.active_interaction_data = {};
         this.active_interaction_data[MOUSE_POINTER_ID] = this.mouse;
@@ -97,7 +96,7 @@ export default class InteractionManager extends EventEmitter
          * Pool of unused InteractionData
          *
          * @private
-         * @member {V.interation.InteractionData[]}
+         * @member {interation.InteractionData[]}
          */
         this.interaction_data_pool = [];
 
@@ -238,7 +237,7 @@ export default class InteractionManager extends EventEmitter
          * Internal cached let.
          *
          * @private
-         * @member {V.Point}
+         * @member {Point}
          */
         this._tempPoint = new core.Point();
 
@@ -258,403 +257,403 @@ export default class InteractionManager extends EventEmitter
          * Fired when a pointer device button (usually a mouse left-button) is pressed on the display
          * object.
          *
-         * @event V.interaction.InteractionManager#mousedown
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event InteractionManager#mousedown
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device secondary button (usually a mouse right-button) is pressed
          * on the display object.
          *
-         * @event V.interaction.InteractionManager#rightdown
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event InteractionManager#rightdown
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device button (usually a mouse left-button) is released over the display
          * object.
          *
-         * @event V.interaction.InteractionManager#mouseup
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event InteractionManager#mouseup
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device secondary button (usually a mouse right-button) is released
          * over the display object.
          *
-         * @event V.interaction.InteractionManager#rightup
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event InteractionManager#rightup
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device button (usually a mouse left-button) is pressed and released on
          * the display object.
          *
-         * @event V.interaction.InteractionManager#click
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event InteractionManager#click
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device secondary button (usually a mouse right-button) is pressed
          * and released on the display object.
          *
-         * @event V.interaction.InteractionManager#rightclick
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event InteractionManager#rightclick
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device button (usually a mouse left-button) is released outside the
          * display object that initially registered a
-         * [mousedown]{@link V.interaction.InteractionManager#event:mousedown}.
+         * [mousedown]{@link InteractionManager#event:mousedown}.
          *
-         * @event V.interaction.InteractionManager#mouseupoutside
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event InteractionManager#mouseupoutside
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device secondary button (usually a mouse right-button) is released
          * outside the display object that initially registered a
-         * [rightdown]{@link V.interaction.InteractionManager#event:rightdown}.
+         * [rightdown]{@link InteractionManager#event:rightdown}.
          *
-         * @event V.interaction.InteractionManager#rightupoutside
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event InteractionManager#rightupoutside
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device (usually a mouse) is moved while over the display object
          *
-         * @event V.interaction.InteractionManager#mousemove
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event InteractionManager#mousemove
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device (usually a mouse) is moved onto the display object
          *
-         * @event V.interaction.InteractionManager#mouseover
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event InteractionManager#mouseover
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device (usually a mouse) is moved off the display object
          *
-         * @event V.interaction.InteractionManager#mouseout
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event InteractionManager#mouseout
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device button is pressed on the display object.
          *
-         * @event V.interaction.InteractionManager#pointerdown
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event InteractionManager#pointerdown
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device button is released over the display object.
          *
-         * @event V.interaction.InteractionManager#pointerup
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event InteractionManager#pointerup
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when the operating system cancels a pointer event
          *
-         * @event V.interaction.InteractionManager#pointercancel
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event InteractionManager#pointercancel
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device button is pressed and released on the display object.
          *
-         * @event V.interaction.InteractionManager#pointertap
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event InteractionManager#pointertap
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device button is released outside the display object that initially
-         * registered a [pointerdown]{@link V.interaction.InteractionManager#event:pointerdown}.
+         * registered a [pointerdown]{@link InteractionManager#event:pointerdown}.
          *
-         * @event V.interaction.InteractionManager#pointerupoutside
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event InteractionManager#pointerupoutside
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device is moved while over the display object
          *
-         * @event V.interaction.InteractionManager#pointermove
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event InteractionManager#pointermove
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device is moved onto the display object
          *
-         * @event V.interaction.InteractionManager#pointerover
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event InteractionManager#pointerover
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device is moved off the display object
          *
-         * @event V.interaction.InteractionManager#pointerout
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event InteractionManager#pointerout
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a touch point is placed on the display object.
          *
-         * @event V.interaction.InteractionManager#touchstart
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event InteractionManager#touchstart
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a touch point is removed from the display object.
          *
-         * @event V.interaction.InteractionManager#touchend
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event InteractionManager#touchend
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when the operating system cancels a touch
          *
-         * @event V.interaction.InteractionManager#touchcancel
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event InteractionManager#touchcancel
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a touch point is placed and removed from the display object.
          *
-         * @event V.interaction.InteractionManager#tap
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event InteractionManager#tap
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a touch point is removed outside of the display object that initially
-         * registered a [touchstart]{@link V.interaction.InteractionManager#event:touchstart}.
+         * registered a [touchstart]{@link InteractionManager#event:touchstart}.
          *
-         * @event V.interaction.InteractionManager#touchendoutside
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event InteractionManager#touchendoutside
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a touch point is moved along the display object.
          *
-         * @event V.interaction.InteractionManager#touchmove
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event InteractionManager#touchmove
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device button (usually a mouse left-button) is pressed on the display.
          * object. Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event V.Node2D#mousedown
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event Node2D#mousedown
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device secondary button (usually a mouse right-button) is pressed
          * on the display object. Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event V.Node2D#rightdown
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event Node2D#rightdown
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device button (usually a mouse left-button) is released over the display
          * object. Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event V.Node2D#mouseup
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event Node2D#mouseup
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device secondary button (usually a mouse right-button) is released
          * over the display object. Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event V.Node2D#rightup
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event Node2D#rightup
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device button (usually a mouse left-button) is pressed and released on
          * the display object. Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event V.Node2D#click
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event Node2D#click
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device secondary button (usually a mouse right-button) is pressed
          * and released on the display object. Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event V.Node2D#rightclick
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event Node2D#rightclick
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device button (usually a mouse left-button) is released outside the
          * display object that initially registered a
-         * [mousedown]{@link V.Node2D#event:mousedown}.
+         * [mousedown]{@link Node2D#event:mousedown}.
          * Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event V.Node2D#mouseupoutside
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event Node2D#mouseupoutside
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device secondary button (usually a mouse right-button) is released
          * outside the display object that initially registered a
-         * [rightdown]{@link V.Node2D#event:rightdown}.
+         * [rightdown]{@link Node2D#event:rightdown}.
          * Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event V.Node2D#rightupoutside
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event Node2D#rightupoutside
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device (usually a mouse) is moved while over the display object.
          * Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event V.Node2D#mousemove
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event Node2D#mousemove
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device (usually a mouse) is moved onto the display object.
          * Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event V.Node2D#mouseover
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event Node2D#mouseover
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device (usually a mouse) is moved off the display object.
          * Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event V.Node2D#mouseout
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event Node2D#mouseout
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device button is pressed on the display object.
          * Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event V.Node2D#pointerdown
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event Node2D#pointerdown
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device button is released over the display object.
          * Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event V.Node2D#pointerup
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event Node2D#pointerup
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when the operating system cancels a pointer event.
          * Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event V.Node2D#pointercancel
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event Node2D#pointercancel
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device button is pressed and released on the display object.
          * Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event V.Node2D#pointertap
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event Node2D#pointertap
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device button is released outside the display object that initially
-         * registered a [pointerdown]{@link V.Node2D#event:pointerdown}.
+         * registered a [pointerdown]{@link Node2D#event:pointerdown}.
          * Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event V.Node2D#pointerupoutside
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event Node2D#pointerupoutside
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device is moved while over the display object.
          * Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event V.Node2D#pointermove
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event Node2D#pointermove
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device is moved onto the display object.
          * Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event V.Node2D#pointerover
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event Node2D#pointerover
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a pointer device is moved off the display object.
          * Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event V.Node2D#pointerout
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event Node2D#pointerout
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a touch point is placed on the display object.
          * Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event V.Node2D#touchstart
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event Node2D#touchstart
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a touch point is removed from the display object.
          * Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event V.Node2D#touchend
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event Node2D#touchend
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when the operating system cancels a touch.
          * Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event V.Node2D#touchcancel
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event Node2D#touchcancel
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a touch point is placed and removed from the display object.
          * Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event V.Node2D#tap
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event Node2D#tap
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a touch point is removed outside of the display object that initially
-         * registered a [touchstart]{@link V.Node2D#event:touchstart}.
+         * registered a [touchstart]{@link Node2D#event:touchstart}.
          * Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event V.Node2D#touchendoutside
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event Node2D#touchendoutside
+         * @param {InteractionEvent} event - Interaction event
          */
 
         /**
          * Fired when a touch point is moved along the display object.
          * Node2D's `interactive` property must be set to `true` to fire event.
          *
-         * @event V.Node2D#touchmove
-         * @param {V.interaction.InteractionEvent} event - Interaction event
+         * @event Node2D#touchmove
+         * @param {InteractionEvent} event - Interaction event
          */
     }
 
     /**
      * Hit tests a point against the display tree, returning the first interactive object that is hit.
      *
-     * @param {V.Point} globalPoint - A point to hit test with, in global space.
-     * @param {V.Node2D} [root] - The root display object to start from. If omitted, defaults
+     * @param {Point} globalPoint - A point to hit test with, in global space.
+     * @param {Node2D} [root] - The root display object to start from. If omitted, defaults
      * to the last rendered root of the associated renderer.
-     * @return {V.Node2D} The hit display object, if any.
+     * @return {Node2D} The hit display object, if any.
      */
     hit_test(global_point, root)
     {
@@ -681,7 +680,6 @@ export default class InteractionManager extends EventEmitter
      *
      * @param {HTMLCanvasElement} element - the DOM element which will receive mouse and touch events.
      * @param {number} [resolution=1] - The resolution / device pixel ratio of the new element (relative to the canvas).
-     * @private
      */
     set_target_element(element, resolution = 1)
     {
@@ -814,7 +812,7 @@ export default class InteractionManager extends EventEmitter
 
     /**
      * Updates the state of interactive objects.
-     * Invoked by a throttled ticker update from {@link V.ticker.shared}.
+     * Invoked by a throttled ticker update from {@link ticker.shared}.
      *
      * @param {number} delta_time - time delta since last tick
      */
@@ -924,7 +922,7 @@ export default class InteractionManager extends EventEmitter
     /**
      * Dispatches an event on the display object that was interacted with
      *
-     * @param {V.Node2D|V.Sprite|V.extras.TilingSprite} displayObject - the display object in question
+     * @param {Node2D|Sprite|extras.TilingSprite} displayObject - the display object in question
      * @param {string} eventString - the name of the event (e.g, mousedown)
      * @param {object} event_data - the event data object
      * @private
@@ -950,7 +948,7 @@ export default class InteractionManager extends EventEmitter
      * resulting value is stored in the point. This takes into account the fact that the DOM
      * element could be scaled and positioned anywhere on the screen.
      *
-     * @param  {V.Point} point - the point that the result will be stored in
+     * @param  {Point} point - the point that the result will be stored in
      * @param  {number} x - the x coord of the position to map
      * @param  {number} y - the y coord of the position to map
      */
@@ -980,9 +978,9 @@ export default class InteractionManager extends EventEmitter
      * testing the interactive objects and passes the hit across in the function.
      *
      * @private
-     * @param {V.interaction.InteractionEvent} interactionEvent - event containing the point that
+     * @param {InteractionEvent} interactionEvent - event containing the point that
      *  is tested for collision
-     * @param {V.Node2D|V.Sprite|V.extras.TilingSprite} displayObject - the displayObject
+     * @param {Node2D|Sprite|extras.TilingSprite} displayObject - the displayObject
      *  that will be hit test (recursively crawls its children)
      * @param {Function} [func] - the function that will be called on each interactive object. The
      *  interactionEvent, displayObject and hit will be passed to the function
@@ -1177,8 +1175,8 @@ export default class InteractionManager extends EventEmitter
      * Processes the result of the pointer down check and dispatches the event if need be
      *
      * @private
-     * @param {V.interaction.InteractionEvent} interactionEvent - The interaction event wrapping the DOM event
-     * @param {V.Node2D|V.Sprite|V.extras.TilingSprite} displayObject - The display object that was tested
+     * @param {InteractionEvent} interactionEvent - The interaction event wrapping the DOM event
+     * @param {Node2D|Sprite|extras.TilingSprite} displayObject - The display object that was tested
      * @param {boolean} hit - the result of the hit test on the display object
      */
     process_pointer_down(interactionEvent, displayObject, hit)
@@ -1281,8 +1279,8 @@ export default class InteractionManager extends EventEmitter
      * Processes the result of the pointer cancel check and dispatches the event if need be
      *
      * @private
-     * @param {V.interaction.InteractionEvent} interactionEvent - The interaction event wrapping the DOM event
-     * @param {V.Node2D|V.Sprite|V.extras.TilingSprite} displayObject - The display object that was tested
+     * @param {InteractionEvent} interactionEvent - The interaction event wrapping the DOM event
+     * @param {Node2D|Sprite|extras.TilingSprite} displayObject - The display object that was tested
      */
     process_pointer_cancel(interactionEvent, displayObject)
     {
@@ -1320,8 +1318,8 @@ export default class InteractionManager extends EventEmitter
      * Processes the result of the pointer up check and dispatches the event if need be
      *
      * @private
-     * @param {V.interaction.InteractionEvent} interactionEvent - The interaction event wrapping the DOM event
-     * @param {V.Node2D|V.Sprite|V.extras.TilingSprite} displayObject - The display object that was tested
+     * @param {InteractionEvent} interactionEvent - The interaction event wrapping the DOM event
+     * @param {Node2D|Sprite|extras.TilingSprite} displayObject - The display object that was tested
      * @param {boolean} hit - the result of the hit test on the display object
      */
     process_pointer_up(interactionEvent, displayObject, hit)
@@ -1461,8 +1459,8 @@ export default class InteractionManager extends EventEmitter
      * Processes the result of the pointer move check and dispatches the event if need be
      *
      * @private
-     * @param {V.interaction.InteractionEvent} interactionEvent - The interaction event wrapping the DOM event
-     * @param {V.Node2D|V.Sprite|V.extras.TilingSprite} displayObject - The display object that was tested
+     * @param {InteractionEvent} interactionEvent - The interaction event wrapping the DOM event
+     * @param {Node2D|Sprite|extras.TilingSprite} displayObject - The display object that was tested
      * @param {boolean} hit - the result of the hit test on the display object
      */
     process_pointer_move(interactionEvent, displayObject, hit)
@@ -1533,8 +1531,8 @@ export default class InteractionManager extends EventEmitter
      * Processes the result of the pointer over/out check and dispatches the event if need be
      *
      * @private
-     * @param {V.interaction.InteractionEvent} interactionEvent - The interaction event wrapping the DOM event
-     * @param {V.Node2D|V.Sprite|V.extras.TilingSprite} displayObject - The display object that was tested
+     * @param {InteractionEvent} interactionEvent - The interaction event wrapping the DOM event
+     * @param {Node2D|Sprite|extras.TilingSprite} displayObject - The display object that was tested
      * @param {boolean} hit - the result of the hit test on the display object
      */
     process_pointer_over_out(interactionEvent, displayObject, hit)
@@ -1626,7 +1624,7 @@ export default class InteractionManager extends EventEmitter
      *
      * @private
      * @param {PointerEvent} event - Normalized pointer event, output from normalize_to_pointer_data
-     * @return {V.interaction.InteractionData} - Interaction data for the given pointer identifier
+     * @return {InteractionData} - Interaction data for the given pointer identifier
      */
     get_interaction_data_for_pointer_id(event)
     {
@@ -1677,11 +1675,11 @@ export default class InteractionManager extends EventEmitter
      * Configure an InteractionEvent to wrap a DOM PointerEvent and InteractionData
      *
      * @private
-     * @param {V.interaction.InteractionEvent} interactionEvent - The event to be configured
+     * @param {InteractionEvent} interactionEvent - The event to be configured
      * @param {PointerEvent} pointerEvent - The DOM event that will be paired with the InteractionEvent
-     * @param {V.interaction.InteractionData} interactionData - The InteractionData that will be paired
+     * @param {InteractionData} interactionData - The InteractionData that will be paired
      *        with the InteractionEvent
-     * @return {V.interaction.InteractionEvent} the interaction event that was passed in
+     * @return {InteractionEvent} the interaction event that was passed in
      */
     configure_interaction_event_for_dom_event(interactionEvent, pointerEvent, interactionData)
     {
