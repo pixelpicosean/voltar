@@ -23,28 +23,18 @@ export default class NineSliceSprite extends Node2D {
         this.texture_bottom = bottom;
 
         this._center_rect = new Rectangle(0,0,0,0);
-        /** @type {number} */
         this._tint = 0xFFFFFF;
         /** @type {Texture} */
         this._texture = null;
 
-        /** @type {Sprite} */
         this.c = this.add_child(new Sprite());
-        /** @type {Sprite} */
         this.n = this.add_child(new Sprite());
-        /** @type {Sprite} */
         this.s = this.add_child(new Sprite());
-        /** @type {Sprite} */
         this.w = this.add_child(new Sprite());
-        /** @type {Sprite} */
         this.e = this.add_child(new Sprite());
-        /** @type {Sprite} */
         this.nw = this.add_child(new Sprite());
-        /** @type {Sprite} */
         this.ne = this.add_child(new Sprite());
-        /** @type {Sprite} */
         this.sw = this.add_child(new Sprite());
-        /** @type {Sprite} */
         this.se = this.add_child(new Sprite());
 
         this.texture = texture;

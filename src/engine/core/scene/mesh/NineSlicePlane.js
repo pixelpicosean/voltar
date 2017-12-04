@@ -36,13 +36,13 @@ const DEFAULT_BORDER_SIZE = 10;
 export default class NineSlicePlane extends Plane
 {
     /**
-     * @param {V.Texture} texture - The texture to use on the NineSlicePlane.
-     * @param {int} [left_width=10] size of the left vertical bar (A)
-     * @param {int} [top_height=10] size of the top horizontal bar (C)
-     * @param {int} [right_width=10] size of the right vertical bar (B)
-     * @param {int} [bottom_height=10] size of the bottom horizontal bar (D)
+     * @param {Texture|string} texture - The texture to use on the NineSlicePlane.
+     * @param {number} [top_height=10] size of the top horizontal bar (C)
+     * @param {number} [right_width=10] size of the right vertical bar (B)
+     * @param {number} [bottom_height=10] size of the bottom horizontal bar (D)
+     * @param {number} [left_width=10] size of the left vertical bar (A)
      */
-    constructor(texture, left_width, top_height, right_width, bottom_height)
+    constructor(texture, top_height, right_width, bottom_height, left_width)
     {
         super(texture, 4, 4);
 
