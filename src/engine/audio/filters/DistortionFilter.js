@@ -4,7 +4,7 @@ import SoundLibrary from '../SoundLibrary';
  * Filter for adding adding delaynode.
  *
  * @class DistortionFilter
- * @memberof PIXI.sound.filters
+ * @memberof v.audio.filters
  * @param {number} [amount=0] The amount of distoration from 0 to 1.
  */
 export default class DistortionFilter extends Filter {
@@ -20,7 +20,7 @@ export default class DistortionFilter extends Filter {
         this.amount = amount;
     }
     /**
-     * @name PIXI.sound.filters.Distoration#amount
+     * @name v.audio.filters.Distoration#amount
      * @type {number}
      */
     set amount(value) {

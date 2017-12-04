@@ -4,7 +4,7 @@ import EventEmitter from 'eventemitter3';
  * @private
  * @class HTMLAudioContext
  * @extends PIXI.util.EventEmitter
- * @memberof PIXI.sound.htmlaudio
+ * @memberof v.audio.htmlaudio
  */
 export default class HTMLAudioContext extends EventEmitter {
     constructor() {
@@ -16,7 +16,7 @@ export default class HTMLAudioContext extends EventEmitter {
     }
     /**
      * Internal trigger when volume, mute or speed changes
-     * @method PIXI.sound.htmlaudio.HTMLAudioContext#refresh
+     * @method v.audio.htmlaudio.HTMLAudioContext#refresh
      * @private
      */
     refresh() {
@@ -24,7 +24,7 @@ export default class HTMLAudioContext extends EventEmitter {
     }
     /**
      * Internal trigger paused changes
-     * @method PIXI.sound.htmlaudio.HTMLAudioContext#refreshPaused
+     * @method v.audio.htmlaudio.HTMLAudioContext#refreshPaused
      * @private
      */
     refreshPaused() {
@@ -32,8 +32,8 @@ export default class HTMLAudioContext extends EventEmitter {
     }
     /**
      * HTML Audio does not support filters, this is non-functional API.
-     * @type {Array<PIXI.sound.filters.Filter>}
-     * @name PIXI.sound.htmlaudio.HTMLAudioContext#filters
+     * @type {Array<v.audio.filters.Filter>}
+     * @name v.audio.htmlaudio.HTMLAudioContext#filters
      * @default null
      */
     get filters() {
@@ -50,7 +50,7 @@ export default class HTMLAudioContext extends EventEmitter {
     /**
      * HTML Audio does not support `audioContext`
      * @type {null}
-     * @name PIXI.sound.htmlaudio.HTMLAudioContext#audioContext
+     * @name v.audio.htmlaudio.HTMLAudioContext#audioContext
      * @default null
      * @readonly
      */
@@ -62,7 +62,7 @@ export default class HTMLAudioContext extends EventEmitter {
     }
     /**
      * Toggles the muted state.
-     * @method PIXI.sound.htmlaudio.HTMLAudioContext#toggleMute
+     * @method v.audio.htmlaudio.HTMLAudioContext#toggleMute
      * @return {boolean} The current muted state.
      */
     toggleMute() {
@@ -72,7 +72,7 @@ export default class HTMLAudioContext extends EventEmitter {
     }
     /**
      * Toggles the paused state.
-     * @method PIXI.sound.htmlaudio.HTMLAudioContext#togglePause
+     * @method v.audio.htmlaudio.HTMLAudioContext#togglePause
      * @return {boolean} The current paused state.
      */
     togglePause() {
@@ -82,7 +82,7 @@ export default class HTMLAudioContext extends EventEmitter {
     }
     /**
      * Destroy and don't use after this
-     * @method PIXI.sound.htmlaudio.HTMLAudioContext#destroy
+     * @method v.audio.htmlaudio.HTMLAudioContext#destroy
      */
     destroy() {
         this.removeAllListeners();

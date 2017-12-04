@@ -1,12 +1,13 @@
 import Filterable from "../Filterable";
+import WebAudioUtils from "./WebAudioUtils";
 ;
 /**
  * @private
  * @class WebAudioNodes
- * @extends PIXI.sound.Filterable
+ * @extends v.audio.Filterable
  * @private
- * @memberof PIXI.sound.webaudio
- * @param {PIXI.sound.webaudio.WebAudioContext} audioContext The audio context.
+ * @memberof v.audio.webaudio
+ * @param {v.audio.webaudio.WebAudioContext} audioContext The audio context.
  */
 export default class WebAudioNodes extends Filterable {
     constructor(context) {
@@ -28,7 +29,7 @@ export default class WebAudioNodes extends Filterable {
     }
     /**
      * Cleans up.
-     * @method PIXI.sound.SoundNodes#destroy
+     * @method v.audio.SoundNodes#destroy
      */
     destroy() {
         super.destroy();
@@ -44,14 +45,14 @@ export default class WebAudioNodes extends Filterable {
     }
     /**
      * Clones the bufferSource. Used just before playing a sound.
-     * @method PIXI.sound.SoundNodes#cloneBufferSource
-     * @returns {PIXI.sound.SoundNodes~SourceClone} The clone AudioBufferSourceNode.
+     * @method v.audio.SoundNodes#cloneBufferSource
+     * @returns {v.audio.SoundNodes~SourceClone} The clone AudioBufferSourceNode.
      */
     cloneBufferSource() {
         const orig = this.bufferSource;
         const source = this.context.audioContext.createBufferSource();
         source.buffer = orig.buffer;
-        source.playbackRate.value = orig.playbackRate.value;
+        WebAudioUtils.setParamValue(source.playbackRate, orig.playbackRate.value);
         source.loop = orig.loop;
         const gain = this.context.audioContext.createGain();
         source.connect(gain);
@@ -61,7 +62,7 @@ export default class WebAudioNodes extends Filterable {
 }
 /**
  * The buffer size for script processor
- * @name PIXI.sound.SoundNodes.BUFFER_SIZE
+ * @name v.audio.SoundNodes.BUFFER_SIZE
  * @type {number}
  * @default 256
  */

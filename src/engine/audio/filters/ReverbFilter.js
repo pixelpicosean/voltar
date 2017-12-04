@@ -5,7 +5,7 @@ import SoundLibrary from '../SoundLibrary';
  * https://github.com/web-audio-components/simple-reverb/
  *
  * @class ReverbFilter
- * @memberof PIXI.sound.filters
+ * @memberof v.audio.filters
  * @param {number} [seconds=3] Seconds for reverb
  * @param {number} [decay=2] The decay length
  * @param {boolean} [reverse=false] Reverse reverb
@@ -26,7 +26,7 @@ export default class ReverbFilter extends Filter {
     }
     /**
      * Clamp a value
-     * @method PIXI.sound.filters.ReverbFilter#_clamp
+     * @method v.audio.filters.ReverbFilter#_clamp
      * @private
      * @param {number} value
      * @param {number} min Minimum value
@@ -38,7 +38,7 @@ export default class ReverbFilter extends Filter {
     }
     /**
      * Length of reverb in seconds from 1 to 50
-     * @name PIXI.sound.filters.ReverbFilter#decay
+     * @name v.audio.filters.ReverbFilter#decay
      * @type {number}
      * @default 3
      */
@@ -51,7 +51,7 @@ export default class ReverbFilter extends Filter {
     }
     /**
      * Decay value from 0 to 100
-     * @name PIXI.sound.filters.ReverbFilter#decay
+     * @name v.audio.filters.ReverbFilter#decay
      * @type {number}
      * @default 2
      */
@@ -64,7 +64,7 @@ export default class ReverbFilter extends Filter {
     }
     /**
      * Reverse value from 0 to 1
-     * @name PIXI.sound.filters.ReverbFilter#reverse
+     * @name v.audio.filters.ReverbFilter#reverse
      * @type {boolean}
      * @default false
      */
@@ -78,7 +78,7 @@ export default class ReverbFilter extends Filter {
     /**
      * Utility function for building an impulse response
      * from the module parameters.
-     * @method PIXI.sound.filters.ReverbFilter#_rebuild
+     * @method v.audio.filters.ReverbFilter#_rebuild
      * @private
      */
     _rebuild() {

@@ -4,8 +4,8 @@ import WebAudioNodes from "./WebAudioNodes";
  * Represents a single sound element. Can be used to play, pause, etc. sound instances.
  * @private
  * @class WebAudioMedia
- * @memberof PIXI.sound.webaudio
- * @param {PIXI.sound.Sound} parent - Instance of parent Sound container
+ * @memberof v.audio.webaudio
+ * @param {v.audio.Sound} parent - Instance of parent Sound container
  */
 export default class WebAudioMedia {
     init(parent) {
@@ -17,7 +17,7 @@ export default class WebAudioMedia {
     /**
      * Destructor, safer to use `SoundLibrary.remove(alias)` to remove this sound.
      * @private
-     * @method PIXI.sound.webaudio.WebAudioMedia#destroy
+     * @method v.audio.webaudio.WebAudioMedia#destroy
      */
     destroy() {
         this.parent = null;
@@ -54,7 +54,7 @@ export default class WebAudioMedia {
     }
     /**
      * Gets and sets the buffer.
-     * @name PIXI.sound.webaudio.WebAudioMedia#buffer
+     * @name v.audio.webaudio.WebAudioMedia#buffer
      * @type {AudioBuffer}
      */
     get buffer() {
@@ -66,8 +66,8 @@ export default class WebAudioMedia {
     /**
      * Get the current chained nodes object
      * @private
-     * @name PIXI.sound.webaudio.WebAudioMedia#nodes
-     * @type {PIXI.sound.webaudio.WebAudioNodes}
+     * @name v.audio.webaudio.WebAudioMedia#nodes
+     * @type {v.audio.webaudio.WebAudioNodes}
      */
     get nodes() {
         return this._nodes;
@@ -91,7 +91,7 @@ export default class WebAudioMedia {
     }
     /**
      * Loads a sound using XHMLHttpRequest object.
-     * @method PIXI.sound.webaudio.WebAudioMedia#_loadUrl
+     * @method v.audio.webaudio.WebAudioMedia#_loadUrl
      * @private
      */
     _loadUrl(callback) {
@@ -109,7 +109,7 @@ export default class WebAudioMedia {
     }
     /**
      * Decodes the array buffer.
-     * @method PIXI.sound.webaudio.WebAudioMedia#decode
+     * @method v.audio.webaudio.WebAudioMedia#decode
      * @param {ArrayBuffer} arrayBuffer From load.
      * @private
      */

@@ -1,18 +1,17 @@
-import Filter from './Filter';
-import EqualizerFilter from './EqualizerFilter';
-import DistortionFilter from './DistortionFilter';
-import StereoFilter from './StereoFilter';
-import ReverbFilter from './ReverbFilter';
-import MonoFilter from './MonoFilter';
-import TelephoneFilter from './TelephoneFilter';
 /**
- * Set of dynamic filters to be applied to PIXI.sound.Sound.
+ * Set of dynamic filters to be applied to v.audio.Sound.
  * @example
- * const sound = PIXI.sound.Sound.from('file.mp3');
+ * const sound = v.audio.Sound.from('file.mp3');
  * sound.filters = [
- *   new PIXI.sound.filters.StereoFilter(-1),
- *   new PIXI.sound.filters.ReverbFilter()
+ *   new v.audio.filters.StereoFilter(-1),
+ *   new v.audio.filters.ReverbFilter()
  * ];
- * @namespace PIXI.sound.filters
+ * @namespace v.audio.filters
  */
-export { Filter, EqualizerFilter, DistortionFilter, StereoFilter, ReverbFilter, MonoFilter, TelephoneFilter };
+export { default as Filter } from './Filter';
+export { default as EqualizerFilter } from './EqualizerFilter';
+export { default as DistortionFilter } from './DistortionFilter';
+export { default as StereoFilter } from './StereoFilter';
+export { default as ReverbFilter } from './ReverbFilter';
+export { default as MonoFilter } from './MonoFilter';
+export { default as TelephoneFilter } from './TelephoneFilter';

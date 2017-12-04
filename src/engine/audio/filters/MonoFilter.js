@@ -4,7 +4,7 @@ import SoundLibrary from '../SoundLibrary';
  * Combine all channels into mono channel.
  *
  * @class MonoFilter
- * @memberof PIXI.sound.filters
+ * @memberof v.audio.filters
  */
 export default class MonoFilter extends Filter {
     constructor() {

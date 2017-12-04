@@ -4,9 +4,9 @@ import EventEmitter from 'eventemitter3';
  * The fallback version of Sound which uses `<audio>` instead of WebAudio API.
  * @private
  * @class HTMLAudioMedia
- * @memberof PIXI.sound.htmlaudio
+ * @memberof v.audio.htmlaudio
  * @param {HTMLAudioElement|String|Object} options Either the path or url to the source file.
- *        or the object of options to use. See {@link PIXI.sound.Sound.from}
+ *        or the object of options to use. See {@link v.audio.Sound.from}
  */
 export default class HTMLAudioMedia extends EventEmitter {
     init(parent) {
@@ -53,7 +53,7 @@ export default class HTMLAudioMedia extends EventEmitter {
     }
     /**
      * Get the audio source element.
-     * @name PIXI.sound.legacy.LegacySound#source
+     * @name v.audio.legacy.LegacySound#source
      * @type {HTMLAudioElement}
      * @readonly
      */

@@ -8,8 +8,8 @@ import EventEmitter from 'eventemitter3';
  * any filters that are added are inserted between the analyser and compressor nodes
  * @private
  * @class WebAudioContext
- * @extends PIXI.sound.Filterable
- * @memberof PIXI.sound.webaudio
+ * @extends v.audio.Filterable
+ * @memberof v.audio.webaudio
  */
 export default class WebAudioContext extends Filterable {
     constructor() {
@@ -48,7 +48,7 @@ export default class WebAudioContext extends Filterable {
      * Note that earlier versions of iOS supported `touchstart` for this, but iOS9 removed this functionality. Adding
      * a `touchstart` event to support older platforms may preclude a `mousedown` even from getting fired on iOS9, so we
      * stick with `mousedown` and `touchend`.
-     * @method PIXI.sound.webaudio.WebAudioContext#_unlock
+     * @method v.audio.webaudio.WebAudioContext#_unlock
      * @private
      */
     _unlock() {
@@ -66,7 +66,7 @@ export default class WebAudioContext extends Filterable {
     /**
      * Plays an empty sound in the web audio context.  This is used to enable web audio on iOS devices, as they
      * require the first sound to be played inside of a user initiated event (touch/click).
-     * @method PIXI.sound.webaudio.WebAudioContext#playEmptySound
+     * @method v.audio.webaudio.WebAudioContext#playEmptySound
      */
     playEmptySound() {
         const source = this._ctx.createBufferSource();
@@ -76,7 +76,7 @@ export default class WebAudioContext extends Filterable {
     }
     /**
      * Get AudioContext class, if not supported returns `null`
-     * @name PIXI.sound.webaudio.WebAudioContext.AudioContext
+     * @name v.audio.webaudio.WebAudioContext.AudioContext
      * @type {Function}
      * @static
      */
@@ -88,7 +88,7 @@ export default class WebAudioContext extends Filterable {
     }
     /**
      * Get OfflineAudioContext class, if not supported returns `null`
-     * @name PIXI.sound.webaudio.WebAudioContext.OfflineAudioContext
+     * @name v.audio.webaudio.WebAudioContext.OfflineAudioContext
      * @type {Function}
      * @static
      */
@@ -100,7 +100,7 @@ export default class WebAudioContext extends Filterable {
     }
     /**
      * Destroy this context.
-     * @method PIXI.sound.webaudio.WebAudioContext#destroy
+     * @method v.audio.webaudio.WebAudioContext#destroy
      */
     destroy() {
         super.destroy();
@@ -120,7 +120,7 @@ export default class WebAudioContext extends Filterable {
     }
     /**
      * The WebAudio API AudioContext object.
-     * @name PIXI.sound.webaudio.WebAudioContext#audioContext
+     * @name v.audio.webaudio.WebAudioContext#audioContext
      * @type {AudioContext}
      * @readonly
      */
@@ -129,7 +129,7 @@ export default class WebAudioContext extends Filterable {
     }
     /**
      * The WebAudio API OfflineAudioContext object.
-     * @name PIXI.sound.webaudio.WebAudioContext#offlineContext
+     * @name v.audio.webaudio.WebAudioContext#offlineContext
      * @type {OfflineAudioContext}
      * @readonly
      */
@@ -141,7 +141,7 @@ export default class WebAudioContext extends Filterable {
      * level, we'll also pause the audioContext so that the
      * time used to compute progress isn't messed up.
      * @type {boolean}
-     * @name PIXI.sound.webaudio.WebAudioContext#paused
+     * @name v.audio.webaudio.WebAudioContext#paused
      * @default false
      */
     set paused(paused) {
@@ -158,7 +158,7 @@ export default class WebAudioContext extends Filterable {
     }
     /**
      * Emit event when muted, volume or speed changes
-     * @method PIXI.sound.webaudio.WebAudioContext#refresh
+     * @method v.audio.webaudio.WebAudioContext#refresh
      * @private
      */
     refresh() {
@@ -166,7 +166,7 @@ export default class WebAudioContext extends Filterable {
     }
     /**
      * Emit event when muted, volume or speed changes
-     * @method PIXI.sound.webaudio.WebAudioContext#refreshPaused
+     * @method v.audio.webaudio.WebAudioContext#refreshPaused
      * @private
      */
     refreshPaused() {
@@ -174,7 +174,7 @@ export default class WebAudioContext extends Filterable {
     }
     /**
      * Toggles the muted state.
-     * @method PIXI.sound.webaudio.WebAudioContext#toggleMute
+     * @method v.audio.webaudio.WebAudioContext#toggleMute
      * @return {boolean} The current muted state.
      */
     toggleMute() {
@@ -184,7 +184,7 @@ export default class WebAudioContext extends Filterable {
     }
     /**
      * Toggles the paused state.
-     * @method PIXI.sound.webaudio.WebAudioContext#togglePause
+     * @method v.audio.webaudio.WebAudioContext#togglePause
      * @return {boolean} The current muted state.
      */
     togglePause() {

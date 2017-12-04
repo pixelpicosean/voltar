@@ -1,8 +1,8 @@
 /**
  * Object that represents a single Sound's sprite.
  * @class SoundSprite
- * @memberof PIXI.sound
- * @param {PIXI.sound.Sound} parent The parent sound
+ * @memberof v.audio
+ * @param {v.audio.Sound} parent The parent sound
  * @param {Object} options Data associated with object.
  * @param {number} options.start The start time in seconds.
  * @param {number} options.end The end time in seconds.
@@ -23,9 +23,9 @@ export default class SoundSprite {
     }
     /**
      * Play the sound sprite.
-     * @method PIXI.sound.SoundSprite#play
-     * @param {PIXI.sound.Sound~completeCallback} [complete] Function call when complete
-     * @return {PIXI.sound.IMediaInstance|Promise<PIXI.sound.IMediaInstance>} Sound instance being played.
+     * @method v.audio.SoundSprite#play
+     * @param {v.audio.Sound~completeCallback} [complete] Function call when complete
+     * @return {v.audio.IMediaInstance|Promise<v.audio.IMediaInstance>} Sound instance being played.
      */
     play(complete) {
         return this.parent.play(Object.assign({
@@ -37,7 +37,7 @@ export default class SoundSprite {
     }
     /**
      * Destroy and don't use after this
-     * @method PIXI.sound.SoundSprite#destroy
+     * @method v.audio.SoundSprite#destroy
      */
     destroy() {
         this.parent = null;

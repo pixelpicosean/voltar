@@ -3,7 +3,7 @@ import Sound from "../Sound";
 import WebAudioMedia from "../webaudio/WebAudioMedia";
 /**
  * Utilities that work with sounds.
- * @namespace PIXI.sound.utils
+ * @namespace v.audio.utils
  */
 export default class SoundUtils {
     /**
@@ -11,7 +11,7 @@ export default class SoundUtils {
      * a path based on the supported browser format. For instance:
      * "sounds/music.{ogg,mp3}", would resolve to "sounds/music.ogg"
      * if "ogg" support is found, otherwise, fallback to "sounds.music.mp3"
-     * @method PIXI.sound.utils.resolveUrl
+     * @method v.audio.utils.resolveUrl
      * @static
      * @param {string|PIXI.loaders.Resource} source - Path to resolve or Resource, if
      *        a Resource object is provided, automatically updates the extension and url
@@ -46,10 +46,10 @@ export default class SoundUtils {
     }
     /**
      * Create a new sound for a sine wave-based tone.  **Only supported with WebAudio**
-     * @method PIXI.sound.utils.sineTone
+     * @method v.audio.utils.sineTone
      * @param {number} [hertz=200] Frequency of sound.
      * @param {number} [seconds=1] Duration of sound in seconds.
-     * @return {PIXI.sound.Sound} New sound.
+     * @return {v.audio.Sound} New sound.
      */
     static sineTone(hertz = 200, seconds = 1) {
         const sound = Sound.from({
@@ -80,8 +80,8 @@ export default class SoundUtils {
     }
     /**
      * Render image as Texture. **Only supported with WebAudio**
-     * @method PIXI.sound.utils.render
-     * @param {PIXI.sound.Sound} sound Instance of sound to render
+     * @method v.audio.utils.render
+     * @param {v.audio.Sound} sound Instance of sound to render
      * @param {Object} [options] Custom rendering options
      * @param {number} [options.width=512] Width of the render
      * @param {number} [options.height=128] Height of the render
@@ -126,7 +126,7 @@ export default class SoundUtils {
     }
     /**
      * Create a new "Audio" stream based on given audio path and project uri; returns the audio object.
-     * @method PIXI.sound.utils.playOnce
+     * @method v.audio.utils.playOnce
      * @static
      * @param {String} fileName Full path of the file to play.
      * @param {Function} callback Callback when complete.
@@ -174,7 +174,7 @@ SoundUtils.FORMAT_PATTERN = /\.(\{([^\}]+)\})(\?.*)?$/;
  * The list of extensions that can be played.
  * @readonly
  * @static
- * @member {string[]} PIXI.sound.utils.extensions
+ * @member {string[]} v.audio.utils.extensions
  */
 SoundUtils.extensions = [
     "mp3",
@@ -193,7 +193,7 @@ SoundUtils.extensions = [
  * The list of browser supported audio formats.
  * @readonly
  * @static
- * @member {Object} PIXI.sound.utils.supported
+ * @member {Object} v.audio.utils.supported
  * @property {boolean} mp3 - `true` if file-type is supported
  * @property {boolean} ogg - `true` if file-type is supported
  * @property {boolean} oga - `true` if file-type is supported

@@ -1,10 +1,11 @@
 import Filter from './Filter';
 import SoundLibrary from '../SoundLibrary';
+import WebAudioUtils from '../webaudio/WebAudioUtils';
 /**
  * Creates a telephone-sound filter.
  *
  * @class TelephoneFilter
- * @memberof PIXI.sound.filters
+ * @memberof v.audio.filters
  */
 export default class TelephoneFilter extends Filter {
     constructor() {
@@ -18,13 +19,13 @@ export default class TelephoneFilter extends Filter {
         const hpf1 = audioContext.createBiquadFilter();
         const hpf2 = audioContext.createBiquadFilter();
         lpf1.type = 'lowpass';
-        lpf1.frequency.value = 2000.0;
+        WebAudioUtils.setParamValue(lpf1.frequency, 2000.0);
         lpf2.type = 'lowpass';
-        lpf2.frequency.value = 2000.0;
+        WebAudioUtils.setParamValue(lpf2.frequency, 2000.0);
         hpf1.type = 'highpass';
-        hpf1.frequency.value = 500.0;
+        WebAudioUtils.setParamValue(hpf1.frequency, 500.0);
         hpf2.type = 'highpass';
-        hpf2.frequency.value = 500.0;
+        WebAudioUtils.setParamValue(hpf2.frequency, 500.0);
         lpf1.connect(lpf2);
         lpf2.connect(hpf1);
         hpf1.connect(hpf2);
