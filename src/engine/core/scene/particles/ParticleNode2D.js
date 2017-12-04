@@ -38,7 +38,7 @@ export default class ParticleNode2D extends Node2D
      * @param {boolean} [properties.uvs=false] - When true, uvs be uploaded and applied.
      * @param {boolean} [properties.alpha=false] - When true, alpha be uploaded and applied.
      * @param {number} [batch_size=15000] - Number of particles per batch.
-     * @param {boolean} [auto_resize=true] If true, container allocates more batches in case
+     * @param {boolean} [auto_resize=false] If true, container allocates more batches in case
      *  there are more than `maxSize` particles.
      */
     constructor(maxSize = 1500, properties, batch_size = 16384, auto_resize = false)
