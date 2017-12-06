@@ -88,14 +88,6 @@ export default class TilingSprite extends Sprite
         this.uv_respect_anchor = false;
     }
 
-    _load_data(data) {
-        super._load_data(data);
-
-        for (let k in data) {
-            switch (k) {}
-        }
-    }
-
     /**
      * Changes frame clamping in corresponding textureTransform, shortcut
      * Change to -0.5 to add a pixel to the edge, recommended for transparent trimmed textures in atlas
