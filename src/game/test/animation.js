@@ -40,6 +40,10 @@ export default class AnimationTest extends v.Node2D {
         tween.start();
 
         icon.tweens.add(tween);
+
+        let tile = this.add_child(new v.TilingSprite('icon', 64, 64));
+        tile.width = 400;
+        tile.height = 400;
     }
     _process(delta) {}
     _exit_tree() {}

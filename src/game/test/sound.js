@@ -18,7 +18,12 @@ export default class SoundTest extends v.Node2D {
 
     _enter_tree() {}
     _ready() {
-        v.sound.play('bgm');
+        const bgm = v.sound.find('bgm');
+        bgm.filters = [
+            new v.audio.filters.StereoFilter(-1),
+            new v.audio.filters.ReverbFilter(),
+        ];
+        bgm.play();
 
         let timer = this.tweens.add(new v.Tween());
         timer.repeat = true;

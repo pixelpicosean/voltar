@@ -10,9 +10,10 @@ import PhysicsTest from 'game/test/physics';
 import TilemapTest from 'game/test/tilemap';
 import SoundTest from 'game/test/sound';
 import CoaTest from 'game/test/coa';
+import TextTest from 'game/test/text';
 
 
-const FirstScene = TilemapTest;
+const FirstScene = CoaTest;
 
 
 export default class Boot extends v.Node2D {
