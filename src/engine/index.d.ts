@@ -2258,7 +2258,8 @@ declare module 'engine' {
 
     // - text
     export interface TextStyle {
-        font?: string;
+        fontFamily?: string;
+        fontSize?: string;
         fill?: string | number | CanvasGradient | CanvasPattern;
         align?: string;
         stroke?: string | number;
