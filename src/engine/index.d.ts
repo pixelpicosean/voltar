@@ -2661,7 +2661,7 @@ declare module 'engine' {
         static from_frame(frameId: string, width?: number, height?: number): TilingSprite;
         static from_image(imageId: string, width?: number, height?: number, crossorigin?: boolean, scaleMode?: number): TilingSprite;
 
-        constructor(texture?: Texture, width?: number, height?: number);
+        constructor(texture?: Texture | string, width?: number, height?: number);
 
         tile_scale: Point;
         tile_position: Point;
