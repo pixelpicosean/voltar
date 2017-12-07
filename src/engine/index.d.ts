@@ -2549,6 +2549,7 @@ declare module 'engine' {
         static add_texture_to_cache(texture: Texture, id: string): void;
         static remove_texture_from_cache(id: string): Texture;
         static EMPTY: Texture;
+        static WHITE: Texture;
 
         protected _frame: Rectangle;
 
@@ -2577,6 +2578,10 @@ declare module 'engine' {
         //pixi-spine needs it
         _uvs: TextureUvs;
         _updateUvs(): void;
+    }
+    namespace Texture {
+        const EMPTY: Texture;
+        const WHITE: Texture;
     }
     export class TextureUvs {
         x0: number;
