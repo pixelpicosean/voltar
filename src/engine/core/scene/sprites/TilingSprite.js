@@ -136,6 +136,22 @@ export default class TilingSprite extends Sprite
         this.tile_transform.position.copy(value);
     }
 
+    _load_data(data) {
+        super._load_data(data);
+
+        for (let k in data) {
+            switch (k) {
+                case 'clamp_margin':
+                    this[k] = data[k];
+                    break;
+                case 'tile_position':
+                case 'tile_scale':
+                    this[k].copy(data[k]);
+                    break;
+            }
+        }
+    }
+
     /**
      * @private
      */
