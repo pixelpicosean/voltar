@@ -2,52 +2,52 @@ import { Matrix } from '../../../math';
 
 /**
  * Calculates the mapped matrix
+ * @param output_matrix {Matrix}
  * @param filter_area {Rectangle} The filter area
- * @param sprite {Sprite} the target sprite
- * @param outputMatrix {Matrix} @alvin
+ * @param texture_size {Rectangle} Size of the texture
  */
 // TODO playing around here.. this is temporary - (will end up in the shader)
 // this returns a matrix that will normalise map filter cords in the filter to screen space
-export function calculateScreenSpaceMatrix(outputMatrix, filter_area, textureSize)
+export function calculateScreenSpaceMatrix(output_matrix, filter_area, texture_size)
 {
      // let world_transform = sprite.world_transform.copy(Matrix.TEMP_MATRIX),
     // let texture = {width:1136, height:700};//sprite._texture.base_texture;
 
     // TODO unwrap?
-    const mappedMatrix = outputMatrix.identity();
+    const mapped_matrix = output_matrix.identity();
 
-    mappedMatrix.translate(filter_area.x / textureSize.width, filter_area.y / textureSize.height);
+    mapped_matrix.translate(filter_area.x / texture_size.width, filter_area.y / texture_size.height);
 
-    mappedMatrix.scale(textureSize.width, textureSize.height);
+    mapped_matrix.scale(texture_size.width, texture_size.height);
 
-    return mappedMatrix;
+    return mapped_matrix;
 }
 
-export function calculateNormalizedScreenSpaceMatrix(outputMatrix, filter_area, textureSize)
+export function calculateNormalizedScreenSpaceMatrix(output_matrix, filter_area, texture_size)
 {
-    const mappedMatrix = outputMatrix.identity();
+    const mapped_matrix = output_matrix.identity();
 
-    mappedMatrix.translate(filter_area.x / textureSize.width, filter_area.y / textureSize.height);
+    mapped_matrix.translate(filter_area.x / texture_size.width, filter_area.y / texture_size.height);
 
-    const translateScaleX = (textureSize.width / filter_area.width);
-    const translateScaleY = (textureSize.height / filter_area.height);
+    const translate_scale_x = (texture_size.width / filter_area.width);
+    const translate_scale_y = (texture_size.height / filter_area.height);
 
-    mappedMatrix.scale(translateScaleX, translateScaleY);
+    mapped_matrix.scale(translate_scale_x, translate_scale_y);
 
-    return mappedMatrix;
+    return mapped_matrix;
 }
 
 // this will map the filter coord so that a texture can be used based on the transform of a sprite
-export function calculateSpriteMatrix(outputMatrix, filter_area, textureSize, sprite)
+export function calculateSpriteMatrix(output_matrix, filter_area, texture_size, sprite)
 {
     const orig = sprite._texture.orig;
-    const mappedMatrix = outputMatrix.set(textureSize.width, 0, 0, textureSize.height, filterArea.x, filterArea.y);
+    const mapped_matrix = output_matrix.set(texture_size.width, 0, 0, texture_size.height, filter_area.x, filter_area.y);
     const worldTransform = sprite.world_transform.copy(Matrix.TEMP_MATRIX);
 
     worldTransform.invert();
-    mappedMatrix.prepend(worldTransform);
-    mappedMatrix.scale(1.0 / orig.width, 1.0 / orig.height);
-    mappedMatrix.translate(sprite.anchor.x, sprite.anchor.y);
+    mapped_matrix.prepend(worldTransform);
+    mapped_matrix.scale(1.0 / orig.width, 1.0 / orig.height);
+    mapped_matrix.translate(sprite.anchor.x, sprite.anchor.y);
 
-    return mappedMatrix;
+    return mapped_matrix;
 }
