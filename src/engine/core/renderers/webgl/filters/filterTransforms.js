@@ -42,10 +42,10 @@ export function calculateSpriteMatrix(output_matrix, filter_area, texture_size, 
 {
     const orig = sprite._texture.orig;
     const mapped_matrix = output_matrix.set(texture_size.width, 0, 0, texture_size.height, filter_area.x, filter_area.y);
-    const worldTransform = sprite.world_transform.copy(Matrix.TEMP_MATRIX);
+    const world_transform = sprite.world_transform.copy(Matrix.TEMP_MATRIX);
 
-    worldTransform.invert();
-    mapped_matrix.prepend(worldTransform);
+    world_transform.invert();
+    mapped_matrix.prepend(world_transform);
     mapped_matrix.scale(1.0 / orig.width, 1.0 / orig.height);
     mapped_matrix.translate(sprite.anchor.x, sprite.anchor.y);
 

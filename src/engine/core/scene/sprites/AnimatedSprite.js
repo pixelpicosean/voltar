@@ -157,21 +157,8 @@ export class SpriteFrames {
 /**
  * An AnimatedSprite is a simple way to display an animation depicted by a list of textures.
  *
- * ```js
- * let alien_images = ["image_sequence_01.png","image_sequence_02.png","image_sequence_03.png","image_sequence_04.png"];
- * let texture_array = [];
- *
- * for (let i=0; i < 4; i++)
- * {
- *      let texture = v.Texture.from_image(alien_images[i]);
- *      texture_array.push(texture);
- * };
- *
- * const data = new v.AnimatedSprite(texture_array);
- * ```
- *
  * @class
- * @extends v.Sprite
+ * @extends Sprite
  */
 export default class AnimatedSprite extends Sprite {
     /**
@@ -187,7 +174,7 @@ export default class AnimatedSprite extends Sprite {
         /**
          * Indicates if the AnimatedSprite is currently playing
          *
-         * @member {boolean}
+         * @type {boolean}
          * @readonly
          */
         this.playing = false;

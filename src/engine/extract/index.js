@@ -3,10 +3,9 @@
  * For instance, these plugins can be used for saving an Image, Canvas element or for exporting the raw image data (pixels).
  *
  * Do not instantiate these plugins directly. It is available from the `renderer.plugins` property.
- * See {@link V.CanvasRenderer#plugins} or {@link V.WebGLRenderer#plugins}.
+ * See {@link CanvasRenderer#plugins} or {@link WebGLRenderer#plugins}.
  * @example
  * // Create a new app (will auto-add extract plugin to renderer)
- * const app = new V.Application();
  *
  * // Draw a red circle
  * const graphics = new V.Graphics()
@@ -16,7 +15,7 @@
  * // Render the graphics as an HTMLImageElement
  * const image = app.renderer.plugins.extract.image(graphics);
  * document.body.appendChild(image);
- * @namespace V.extract
+ * @namespace v.extract
  */
 export { default as webgl } from './webgl/WebGLExtract';
 export { default as canvas } from './canvas/CanvasExtract';

@@ -1,22 +1,16 @@
 /**
  * This namespace contains WebGL-only display filters that can be applied
- * to Node2Ds using the {@link V.Node2D#filters filters} property.
+ * to Node2Ds using the {@link v.Node2D#filters filters} property.
  * @example
- * // Create a new application
- * const app = new V.Application();
- *
  * // Draw a green rectangle
- * const rect = new V.Graphics()
+ * const rect = new v.Graphics()
  *     .begin_fill(0x00ff00)
  *     .draw_rect(40, 40, 200, 200);
  *
  * // Add a blur filter
- * rect.filters = [new V.filters.BlurFilter()];
+ * rect.filters = [new v.filters.BlurFilter()];
  *
- * // Display rectangle
- * app.stage.add_child(rect);
- * document.body.appendChild(app.view);
- * @namespace V.filters
+ * @namespace v.filters
  */
 export { default as FXAAFilter } from './fxaa/FXAAFilter';
 export { default as NoiseFilter } from './noise/NoiseFilter';

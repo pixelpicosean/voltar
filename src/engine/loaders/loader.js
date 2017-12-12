@@ -12,9 +12,9 @@ import coaParser from './coa';
  * The new loader, extends Resource Loader by Chad Engler: https://github.com/englercj/resource-loader
  *
  * ```js
- * const loader = V.loader; // pixi exposes a premade instance for you to use.
+ * const loader = v.loader; // pixi exposes a premade instance for you to use.
  * //or
- * const loader = new V.loaders.Loader(); // you can also create your own if you want
+ * const loader = new v.loaders.Loader(); // you can also create your own if you want
  *
  * const sprites = {};
  *
@@ -40,9 +40,9 @@ import coaParser from './coa';
  *     // - `error`: The error that happened when trying to load (if any)
  *     // - `data`: The raw data that was loaded
  *     // also may contain other properties based on the middleware that runs.
- *     sprites.bunny = new V.TilingSprite(resources.bunny.texture);
- *     sprites.spaceship = new V.TilingSprite(resources.spaceship.texture);
- *     sprites.scoreFont = new V.TilingSprite(resources.scoreFont.texture);
+ *     sprites.bunny = new v.Sprite(resources.bunny.texture);
+ *     sprites.spaceship = new v.Sprite(resources.spaceship.texture);
+ *     sprites.scoreFont = new v.Sprite(resources.scoreFont.texture);
  * });
  *
  * // throughout the process multiple signals can be dispatched.
