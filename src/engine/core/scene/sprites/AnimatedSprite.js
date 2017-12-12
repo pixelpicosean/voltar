@@ -169,7 +169,7 @@ export default class AnimatedSprite extends Sprite {
 
         this.type = 'AnimatedSprite';
 
-        this.frames = (frames instanceof SpriteFrames) ? frames : new SpriteFrames(frames);
+        this.set_frames(frames);
 
         /**
          * Indicates if the AnimatedSprite is currently playing
@@ -187,6 +187,17 @@ export default class AnimatedSprite extends Sprite {
         this.animation_finished = new Signal();
         this.frame_changed = new Signal();
     }
+    _load_data(data) {
+        super._load_data(data);
+
+        for (let k in data) {
+            switch (k) {
+                case 'frames':
+                    this.set_frames(data[k]);
+                    break;
+            }
+        }
+    }
 
     play(anim, restart = false) {
         if (anim && anim.length > 0) {
@@ -201,6 +212,9 @@ export default class AnimatedSprite extends Sprite {
         this._set_playing(false);
     }
 
+    set_frames(frames) {
+        this.frames = (frames instanceof SpriteFrames) ? frames : new SpriteFrames(frames);
+    }
     set_animation(anim) {
         if (this.animation === anim) {
             return;
@@ -295,6 +309,10 @@ export default class AnimatedSprite extends Sprite {
             return;
         }
         if (this.frame < 0) {
+            super._propagate_process(delta);
+            return;
+        }
+        if (!this.playing) {
             super._propagate_process(delta);
             return;
         }
