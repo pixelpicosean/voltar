@@ -1,7 +1,9 @@
 import VisualServer from './VisualServer';
 import PhysicsServer from './PhysicsServer';
 import MessageQueue from './MessageQueue';
-import { Node2D, Vector, ticker } from './core';
+import Node2D from './core/scene/Node2D';
+import Vector from './core/math/Point';
+import { shared } from './core/ticker/index';
 
 import { outer_box_resize } from './resize';
 import remove_items from 'remove-array-items';
@@ -87,6 +89,7 @@ export default class SceneTree {
         this.stretch_mode = 'viewport';
         this.stretch_aspect = 'keep';
 
+        /** @type {HTMLCanvasElement} */
         this.view = null;
         this.container = null;
 
@@ -97,7 +100,8 @@ export default class SceneTree {
         this.message_queue = new MessageQueue();
         this.input = input;
 
-        this._settings = {};
+        /** @type {Settings} */
+        this._settings = null;
         this._tick_bind = this._tick.bind(this);
         this._loop_id = 0;
         this._initialize = this._initialize.bind(this);
@@ -119,8 +123,7 @@ export default class SceneTree {
      * @param {Settings} settings
      */
     init(settings) {
-        /** @type {Settings} */
-        this._settings = Object.assign(this._settings, DefaultSettings, settings);
+        this._settings = Object.assign({}, DefaultSettings, settings);
 
         document.title = this._settings.application.name;
 
@@ -361,7 +364,7 @@ export default class SceneTree {
                                 this.view.style.height = `${height}px`;
                                 this.view.style.marginTop = `${((window.innerHeight - height) * 0.5) | 0}px`;
                                 this.viewport_rect.size.set(this._settings.display.width, this._settings.display.height);
-                                this.viewport_rect.position.set(0, ((window.innerHeight - health) * 0.5) | 0);
+                                this.viewport_rect.position.set(0, ((window.innerHeight - height) * 0.5) | 0);
                             }
                             else {
                                 let scale = this._settings.display.height / window.innerHeight;
@@ -397,7 +400,7 @@ export default class SceneTree {
         this._start_loop();
     }
     _start_loop() {
-        ticker.shared.start();
+        shared.start();
         this._loop_id = requestAnimationFrame(this._tick_bind);
     }
     _tick(timestamp) {
@@ -455,7 +458,7 @@ export default class SceneTree {
                 // - process nodes
                 this.current_scene._propagate_process(_process_tmp.slow_step_sec);
                 // - update shared ticker
-                ticker.shared.update(_process_tmp.slow_step);
+                shared.update(_process_tmp.slow_step);
                 // - solve collision
                 this.physics_server.solve_collision(this.current_scene);
                 // - remove nodes to be freed
@@ -492,7 +495,7 @@ export default class SceneTree {
         }
     }
     _end_loop() {
-        ticker.shared.stop();
+        shared.stop();
         cancelAnimationFrame(this._loop_id);
     }
 

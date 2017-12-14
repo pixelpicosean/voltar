@@ -5,7 +5,7 @@ const EPSILON = 0.000001;
  * the horizontal axis and y represents the vertical axis.
  *
  * @class
- * @memberof V
+ * @memberof v
  */
 export default class Point {
     /**
@@ -38,21 +38,39 @@ export default class Point {
         this.y = y || ((y !== 0) ? this.x : 0);
         return this;
     }
+    /**
+     * Copy value from other Point
+     * @param {Point} a
+     * @returns {Point} self for chaining
+     */
     copy(a) {
         this.x = a.x;
         this.y = a.y;
         return this;
     }
 
+    /**
+     * Clone self
+     * @returns {Point}
+     */
     clone() {
         return new Point(this.x, this.y);
     }
     random(scale) {
         // TODO: requires random module
     }
+    /**
+     * Create a normalized clone
+     * @returns {Point}
+     */
     normalized() {
         return this.clone().normalize();
     }
+    /**
+     * Create a clamped Point
+     * @param {number} length
+     * @returns {Point}
+     */
     clamped(length) {
         const len = this.length();
         const v = this.clone();
@@ -61,17 +79,32 @@ export default class Point {
         }
         return v;
     }
+    /**
+     * Create a rotated Point
+     * @param {number} a
+     * @returns {Point}
+     */
     rotated(a) {
         return this.clone().rotate(a);
     }
     snapped(by) {}
 
+    /**
+     * Whether this equals to another point
+     * @param {Point} b
+     * @returns {boolean}
+     */
     equals(b) {
         const a0 = this.x, a1 = this.y;
         const b0 = b.x, b1 = b.y;
         return (Math.abs(a0 - b0) <= EPSILON * Math.max(1.0, Math.abs(a0), Math.abs(b0)) &&
                 Math.abs(a1 - b1) <= EPSILON * Math.max(1.0, Math.abs(a1), Math.abs(b1)));
     }
+    /**
+     * Whether this equals to another point(precisely)
+     * @param {Point} b
+     * @returns {boolean}
+     */
     exact_equals(b) {
         return (this.x === b.x) && (this.y === b.y);
     }
@@ -167,8 +200,7 @@ export default class Point {
      * Change this vector to be perpendicular to what it was before. (Effectively
      * roatates it 90 degrees in a clockwise direction)
      * @method perp
-     * @memberof Vector#
-     * @return {Vector} Self for chaining.
+     * @return {Point} Self for chaining.
      */
     perp() {
         const x = this.x;
