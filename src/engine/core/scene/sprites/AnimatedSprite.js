@@ -1,9 +1,15 @@
 import Sprite from './Sprite';
 import Texture from '../../textures/Texture';
-import { TextureCache } from '../../utils';
+import { TextureCache, SpriteFramesCache } from '../../utils';
 import Signal from 'mini-signals';
 import remove_items from 'remove-array-items';
 import { Rectangle } from '../../math';
+
+// Load sprite frames from assets folder
+import spriteframes_data from 'spriteframe/default.json';
+for (let data of spriteframes_data) {
+    SpriteFramesCache[data.key] = data.value;
+}
 
 
 class Anim {
@@ -162,7 +168,7 @@ export class SpriteFrames {
  */
 export default class AnimatedSprite extends Sprite {
     /**
-     * @param {SpriteFrames|Object} frames - frame and animation data
+     * @param {SpriteFrames|Object|string} frames - frame and animation data
      */
     constructor(frames) {
         super(undefined);
@@ -212,8 +218,16 @@ export default class AnimatedSprite extends Sprite {
         this._set_playing(false);
     }
 
-    set_frames(frames) {
-        this.frames = (frames instanceof SpriteFrames) ? frames : new SpriteFrames(frames);
+    set_frames(frames_p) {
+        let frames = null;
+        if (typeof(frames_p) === 'string') {
+            frames = SpriteFramesCache[frames_p];
+        } else if (frames_p instanceof SpriteFrames) {
+            frames = frames_p;
+        } else {
+            frames = new SpriteFrames(frames_p);
+        }
+        this.frames = frames;
     }
     set_animation(anim) {
         if (this.animation === anim) {

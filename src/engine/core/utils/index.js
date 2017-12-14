@@ -317,7 +317,6 @@ export function sign(n)
  * @todo Describe property usage
  *
  * @memberof utils
- * @private
  */
 export const TextureCache = Object.create(null);
 
@@ -325,7 +324,6 @@ export const TextureCache = Object.create(null);
  * @todo Describe property usage
  *
  * @memberof utils
- * @private
  */
 export const BaseTextureCache = Object.create(null);
 
@@ -368,6 +366,13 @@ export function clearTextureCache()
         delete BaseTextureCache[key];
     }
 }
+
+/**
+ * @todo Describe property usage
+ *
+ * @memberof utils
+ */
+export const SpriteFramesCache = Object.create(null);
 
 /**
  * @memberof utils
