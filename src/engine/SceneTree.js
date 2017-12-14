@@ -6,7 +6,38 @@ import { Node2D, Vector, ticker } from './core';
 import { outer_box_resize } from './resize';
 import remove_items from 'remove-array-items';
 
+/**
+ * @typedef ApplicationSettings
+ * @prop {string} name
+ * @prop {Function} main_scene
+ */
 
+ /**
+  * @typedef DisplaySettings
+  * @prop {string} view
+  * @prop {string} container
+  * @prop {number} width
+  * @prop {number} height
+  * @prop {number} resolution
+  * @prop {number} background_color
+  * @prop {boolean} force_canvas
+  * @prop {boolean} antialias
+  * @prop {boolean} pixel_snap
+  * @prop {string} scale_mode
+  * @prop {number} FPS
+  * @prop {string} stretch_mode
+  * @prop {string} stretch_aspect
+  */
+
+/**
+ * @typedef Settings
+ * @prop {ApplicationSettings} application
+ * @prop {DisplaySettings} display
+ */
+
+/**
+ * @type {Settings}
+ */
 const DefaultSettings = {
     application: {
         name: 'Voltar',
@@ -84,8 +115,14 @@ export default class SceneTree {
             count: 0,
         };
     }
+    /**
+     * @param {Settings} settings
+     */
     init(settings) {
+        /** @type {Settings} */
         this._settings = Object.assign(this._settings, DefaultSettings, settings);
+
+        document.title = this._settings.application.name;
 
         window.addEventListener('load', this._initialize, false);
         document.addEventListener('DOMContentLoaded', this._initialize, false);

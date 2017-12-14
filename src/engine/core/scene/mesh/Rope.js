@@ -1,4 +1,6 @@
 import Mesh from './Mesh';
+import Texture from '../../textures/Texture';
+import Point from '../../math/Point';
 
 /**
  * The rope allows you to draw a texture across several points and them manipulate these points
@@ -11,15 +13,13 @@ import Mesh from './Mesh';
  *  ```
  *
  * @class
- * @extends V.mesh.Mesh
- * @memberof V.mesh
- *
+ * @extends Mesh
  */
 export default class Rope extends Mesh
 {
     /**
-     * @param {V.Texture} texture - The texture to use on the rope.
-     * @param {V.Point[]} points - An array of {@link V.Point} objects to construct this rope.
+     * @param {Texture} texture - The texture to use on the rope.
+     * @param {Point[]} points - An array of {@link Point} objects to construct this rope.
      */
     constructor(texture, points)
     {
@@ -219,5 +219,4 @@ export default class Rope extends Mesh
         }
         this.node2d_update_transform();
     }
-
 }

@@ -362,9 +362,9 @@ declare module 'engine/audio' {
     export class SoundUtils {
         static extensions: string[];
         static supported: ExtensionMap;
-        static resolveUrl(source: string | PIXI.loaders.Resource): string;
+        static resolveUrl(source: string | loader.Resource): string;
         static sineTone(hertz?: number, seconds?: number): Sound;
-        static render(sound: Sound, options?: RenderOptions): PIXI.BaseTexture;
+        static render(sound: Sound, options?: RenderOptions): BaseTexture;
         static playOnce(url: string, callback?: (err?: Error) => void): string;
     }
     export const utils: typeof SoundUtils;
@@ -444,6 +444,10 @@ declare module 'engine/audio' {
             play(options: PlayOptions): void;
             destroy(): void;
             toString(): string;
+
+            on(msg: string, callback: Function, context?: any): void;
+            off(msg: string, callback: Function, context?: any): void;
+            once(msg: string, callback: Function, context?: any): void;
         }
         class HTMLAudioContext extends EventEmitter implements IMediaContext {
             speed: number;
@@ -510,6 +514,10 @@ declare module 'engine/audio' {
             destroy(): void;
             toString(): string;
             init(media: WebAudioMedia): void;
+
+            on(msg: string, callback: Function, context?: any): void;
+            off(msg: string, callback: Function, context?: any): void;
+            once(msg: string, callback: Function, context?: any): void;
         }
         class WebAudioMedia implements IMedia {
             parent: Sound;
@@ -633,9 +641,9 @@ declare module 'engine/anime/Tween' {
         protected _propagate_process(delta: number);
         protected _get_initial_val(p_data: InterpolateData): Tweenable;
         protected _get_delta_val(p_data: InterpolateData): Tweenable;
-        protected _calc_delta_val(initial_val: Tweenable, final_val: Tweenable, data: InteractionData): boolean;
-        protected _run_equation(data: InteractionData): Tweenable;
-        protected _apply_tween_value(data: InteractionData, value: Tweenable): boolean;
+        protected _calc_delta_val(initial_val: Tweenable, final_val: Tweenable, data: InterpolateData): boolean;
+        protected _run_equation(data: InterpolateData): Tweenable;
+        protected _apply_tween_value(data: InterpolateData, value: Tweenable): boolean;
     }
 }
 declare module 'engine/anime/TweenManager' {
@@ -655,15 +663,15 @@ declare module 'engine/anime/TweenManager' {
 }
 
 declare module 'engine/filters' {
-    export class AsciiFilter extends AbstractFilter {
+    export class AsciiFilter extends Filter {
         size: number;
     }
-    export class BloomFilter extends AbstractFilter {
+    export class BloomFilter extends Filter {
         blur: number;
         blurX: number;
         blurY: number;
     }
-    export class BlurFilter extends AbstractFilter {
+    export class BlurFilter extends Filter {
         protected blurXFilter: BlurXFilter;
         protected blurYFilter: BlurYFilter;
 
@@ -672,19 +680,19 @@ declare module 'engine/filters' {
         blurX: number;
         blurY: number;
     }
-    export class BlurXFilter extends AbstractFilter {
+    export class BlurXFilter extends Filter {
         passes: number;
         strength: number;
         blur: number;
     }
-    export class BlurYFilter extends AbstractFilter {
+    export class BlurYFilter extends Filter {
         passes: number;
         strength: number;
         blur: number;
     }
-    export class SmartBlurFilter extends AbstractFilter {
+    export class SmartBlurFilter extends Filter {
     }
-    export class ColorMatrixFilter extends AbstractFilter {
+    export class ColorMatrixFilter extends Filter {
         protected _loadMatrix(matrix: number[], multiply: boolean): void;
         protected _multiply(out: number[], a: number[], b: number[]): void;
         protected _colorMatrix(matrix: number[]): void;
@@ -712,33 +720,33 @@ declare module 'engine/filters' {
         lsd(multiply?: boolean): void;
         reset(): void;
     }
-    export class ColorStepFilter extends AbstractFilter {
+    export class ColorStepFilter extends Filter {
         step: number;
     }
-    export class ConvolutionFilter extends AbstractFilter {
+    export class ConvolutionFilter extends Filter {
         constructor(matrix: number[], width: number, height: number);
 
         matrix: number[];
         width: number;
         height: number;
     }
-    export class CrossHatchFilter extends AbstractFilter {
+    export class CrossHatchFilter extends Filter {
     }
-    export class DisplacementFilter extends AbstractFilter {
+    export class DisplacementFilter extends Filter {
         constructor(sprite: Sprite, scale?: number);
 
         map: Texture;
 
         scale: Point;
     }
-    export class DotScreenFilter extends AbstractFilter {
+    export class DotScreenFilter extends Filter {
         scale: number;
         angle: number;
     }
-    export class BlurYTintFilter extends AbstractFilter {
+    export class BlurYTintFilter extends Filter {
         blur: number;
     }
-    export class DropShadowFilter extends AbstractFilter {
+    export class DropShadowFilter extends Filter {
         blur: number;
         blurX: number;
         blurY: number;
@@ -747,32 +755,32 @@ declare module 'engine/filters' {
         distance: number;
         angle: number;
     }
-    export class GrayFilter extends AbstractFilter {
+    export class GrayFilter extends Filter {
         gray: number;
     }
-    export class InvertFilter extends AbstractFilter {
+    export class InvertFilter extends Filter {
         invert: number;
     }
-    export class NoiseFilter extends AbstractFilter {
+    export class NoiseFilter extends Filter {
         noise: number;
     }
-    export class PixelateFilter extends AbstractFilter {
+    export class PixelateFilter extends Filter {
         size: Point;
     }
-    export class RGBSplitFilter extends AbstractFilter {
+    export class RGBSplitFilter extends Filter {
         red: Point;
         green: Point;
         blue: Point;
     }
-    export class SepiaFilter extends AbstractFilter {
+    export class SepiaFilter extends Filter {
         sepia: number;
     }
-    export class ShockwaveFilter extends AbstractFilter {
+    export class ShockwaveFilter extends Filter {
         center: number[];
         params: any;
         time: number;
     }
-    export class TiltShiftAxisFilter extends AbstractFilter {
+    export class TiltShiftAxisFilter extends Filter {
         blur: number;
         gradientBlur: number;
         start: number;
@@ -780,19 +788,19 @@ declare module 'engine/filters' {
 
         updateDelta(): void;
     }
-    export class TiltShiftFilter extends AbstractFilter {
+    export class TiltShiftFilter extends Filter {
         blur: number;
         gradientBlur: number;
         start: number;
         end: number;
     }
-    export class TiltShiftXFilter extends AbstractFilter {
+    export class TiltShiftXFilter extends Filter {
         updateDelta(): void;
     }
-    export class TiltShiftYFilter extends AbstractFilter {
+    export class TiltShiftYFilter extends Filter {
         updateDelta(): void;
     }
-    export class TwistFilter extends AbstractFilter {
+    export class TwistFilter extends Filter {
         offset: Point;
         radius: number;
         angle: number;
@@ -1159,10 +1167,10 @@ declare module 'engine' {
 
     // - node
     export class Node2D extends EventEmitter implements interaction.InteractiveTarget {
-        public transform: TransformBase;
-        public local_transform: Matrix;
+        transform: TransformBase;
+        local_transform: Matrix;
         update_transform(): void;
-        public node2d_update_transform: () => any;
+        node2d_update_transform(): any;
 
         protected _update_transform();
         protected _recursive_post_update_transform();
@@ -1210,7 +1218,7 @@ declare module 'engine' {
         y: number;
         world_visible: boolean;
         mask: Graphics | Sprite;
-        filters: AbstractFilter[];
+        filters: Filter[];
 
         scene_tree: SceneTree;
         children: Node2D[];
@@ -1841,7 +1849,7 @@ declare module 'engine' {
         updateTexture(texture: BaseTexture | Texture): BaseTexture | Texture;
         destroyTexture(texture: BaseTexture | Texture, _skipRemove?: boolean): void;
     }
-    export class AbstractFilter {
+    export class Filter {
         protected vertexSrc: string[];
         protected fragmentSrc: string[];
 
@@ -1855,7 +1863,7 @@ declare module 'engine' {
         applyFilter(renderer: WebGLRenderer, input: RenderTarget, output: RenderTarget, clear?: boolean): void;
         syncUniform(uniform: WebGLUniformLocation): void;
     }
-    export class SpriteMaskFilter extends AbstractFilter {
+    export class SpriteMaskFilter extends Filter {
         constructor(sprite: Sprite);
 
         maskSprite: Sprite;
@@ -1865,7 +1873,7 @@ declare module 'engine' {
         map: Texture;
         offset: Point;
     }
-    export class FXAAFilter extends AbstractFilter {
+    export class FXAAFilter extends Filter {
         applyFilter(renderer: WebGLRenderer, input: RenderTarget, output: RenderTarget): void;
     }
     export class BlendModeManager extends WebGLManager {
@@ -1883,10 +1891,10 @@ declare module 'engine' {
         onContextChange: () => void;
         setFilterStack(filterStack: any[]): void;
         pushFilter(target: RenderTarget, filters: any[]): void;
-        popFilter(): AbstractFilter;
+        popFilter(): Filter;
         getRenderTarget(clear?: boolean): RenderTarget;
         protected returnRenderTarget(renderTarget: RenderTarget): void;
-        applyFilter(shader: Shader | AbstractFilter, inputTarget: RenderTarget, outputTarget: RenderTarget, clear?: boolean): void;
+        applyFilter(shader: Shader | Filter, inputTarget: RenderTarget, outputTarget: RenderTarget, clear?: boolean): void;
         calculateMappedMatrix(filterArea: Rectangle, sprite: Sprite, outputMatrix?: Matrix): Matrix;
         capFilterArea(filterArea: Rectangle): void;
         resize(width: number, height: number): void;
@@ -2040,7 +2048,7 @@ declare module 'engine' {
         anchor: Point;
         tint: number;
         blend_mode: number;
-        shader: Shader | AbstractFilter;
+        shader: Shader | Filter;
         texture: Texture;
 
         width: number;
@@ -2111,7 +2119,7 @@ declare module 'engine' {
         indices: number[];
         currentBatchSize: number;
         sprites: Sprite[];
-        shader: Shader | AbstractFilter;
+        shader: Shader | Filter;
 
         render(sprite: Sprite): void;
         flush(): void;
@@ -2517,8 +2525,8 @@ declare module 'engine' {
         once(event: string, fn: Function, context?: any): EventEmitter;
     }
     export class RenderTexture extends Texture {
-        protected render_webGL(displayObject: DisplayObject, matrix?: Matrix, clear?: boolean, updateTransform?: boolean): void;
-        protected render_canvas(displayObject: DisplayObject, matrix?: Matrix, clear?: boolean, updateTransform?: boolean): void;
+        protected render_webGL(displayObject: Node2D, matrix?: Matrix, clear?: boolean, updateTransform?: boolean): void;
+        protected render_canvas(displayObject: Node2D, matrix?: Matrix, clear?: boolean, updateTransform?: boolean): void;
 
         static create(width?: number, height?: number, scaleMode?: number, resolution?: number): RenderTexture;
 
@@ -2530,7 +2538,7 @@ declare module 'engine' {
         renderer: CanvasRenderer | WebGLRenderer;
         valid: boolean;
 
-        render(displayObject: DisplayObject, matrix?: Matrix, clear?: boolean, updateTransform?: boolean): void;
+        render(displayObject: Node2D, matrix?: Matrix, clear?: boolean, updateTransform?: boolean): void;
         resize(width: number, height: number, updateBase?: boolean): void;
         clear(): void;
         destroy(): void;
@@ -2726,7 +2734,7 @@ declare module 'engine' {
         blendMode: number;
         canvasPadding: number;
         drawMode: number;
-        shader: Shader | AbstractFilter;
+        shader: Shader | Filter;
 
         getBounds(matrix?: Matrix): Rectangle;
         containsPoint(point: Point): boolean;
@@ -2740,7 +2748,7 @@ declare module 'engine' {
         protected _onTextureUpdate(): void;
     }
     export class Rope extends Mesh {
-        protected _ready: boolean;
+        protected _is_ready: boolean;
 
         protected getTextureUvs(): TextureUvs;
 
@@ -2798,7 +2806,7 @@ declare module 'engine' {
         export var shared: Ticker;
         export class Ticker {
             protected _tick(time: number): void;
-            protected _emitter: utils.EventEmitter;
+            protected _emitter: EventEmitter;
             protected _requestId: number;
             protected _maxElapsedMS: number;
 
