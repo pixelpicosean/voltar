@@ -221,7 +221,7 @@ export default class AnimatedSprite extends Sprite {
     set_frames(frames_p) {
         let frames = null;
         if (typeof(frames_p) === 'string') {
-            frames = SpriteFramesCache[frames_p];
+            frames = new SpriteFrames(SpriteFramesCache[frames_p]);
         } else if (frames_p instanceof SpriteFrames) {
             frames = frames_p;
         } else {

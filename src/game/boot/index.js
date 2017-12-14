@@ -4,6 +4,7 @@ import data from './data.json';
 
 // Which test to run after resources load
 import AnimatedSpirteTest from 'game/test/animated-sprite';
+import AnimatedSpirteWithDataTest from 'game/test/animated-sprite-with-data';
 import AnimationTest from 'game/test/animation';
 import InputTest from 'game/test/input';
 import PhysicsTest from 'game/test/physics';
@@ -13,7 +14,7 @@ import CoaTest from 'game/test/coa';
 import TextTest from 'game/test/text';
 
 
-const FirstScene = CoaTest;
+const FirstScene = AnimatedSpirteWithDataTest;
 
 
 export default class Boot extends v.Node2D {
