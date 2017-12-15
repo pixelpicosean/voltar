@@ -94,10 +94,11 @@ function assemble_node(node, children) {
         data = children[i];
 
         if (data.type === 'Scene') {
-            if (!data.class) {
+            let packed_scene = require(`scene/${data.key}.json`);
+            if (!packed_scene.class) {
                 throw `[Assemble] class of packed scene is not defined!`;
             }
-            inst = new (registered_scene_class[data.class])();
+            inst = new (registered_scene_class[packed_scene.class])();
         } else {
             inst = new (core[data.type])();
         }
