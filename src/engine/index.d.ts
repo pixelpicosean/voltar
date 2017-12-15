@@ -2866,7 +2866,7 @@ declare module 'engine' {
     export const scene_tree: SceneTree;
 
     // Signal.js
-    export { default as MiniSignal } from 'mini-signals';
+    export { default as Signal } from 'mini-signals';
     export { MiniSignalBinding } from 'mini-signals';
 
     export function assemble_scene(scn: Node2D, data: any);
