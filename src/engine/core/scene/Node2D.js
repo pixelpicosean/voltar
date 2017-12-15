@@ -464,17 +464,17 @@ export default class Node2D extends EventEmitter
             this._recursive_post_update_transform();
 
             // this parent check is for just in case the item is a root object.
-            // If it is we need to give it a temporary parent so that displayObjectUpdateTransform works correctly
+            // If it is we need to give it a temporary parent so that node2d_update_transform works correctly
             // this is mainly to avoid a parent check in the main loop. Every little helps for performance :)
             if (!this.parent)
             {
                 this.parent = this._tempNode2DParent;
-                this.displayObjectUpdateTransform();
+                this.node2d_update_transform();
                 this.parent = null;
             }
             else
             {
-                this.displayObjectUpdateTransform();
+                this.node2d_update_transform();
             }
         }
 
@@ -504,17 +504,17 @@ export default class Node2D extends EventEmitter
             this._recursive_post_update_transform();
 
             // this parent check is for just in case the item is a root object.
-            // If it is we need to give it a temporary parent so that displayObjectUpdateTransform works correctly
+            // If it is we need to give it a temporary parent so that node2d_update_transform works correctly
             // this is mainly to avoid a parent check in the main loop. Every little helps for performance :)
             if (!this.parent)
             {
                 this.parent = this._tempNode2DParent;
-                this.displayObjectUpdateTransform();
+                this.node2d_update_transform();
                 this.parent = null;
             }
             else
             {
-                this.displayObjectUpdateTransform();
+                this.node2d_update_transform();
             }
         }
 
