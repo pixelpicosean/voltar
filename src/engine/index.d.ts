@@ -2870,4 +2870,16 @@ declare module 'engine' {
     export { MiniSignalBinding } from 'mini-signals';
 
     export function assemble_scene(scn: Node2D, data: any);
+
+    /**
+     * @type {{[k:string]: Function}}
+     */
+    export const registered_scene_class;
+
+    /**
+     * Register scene class, for packed scene instancing process
+     * @param {string} key  Key of the scene class
+     * @param {Function} ctor Class to be registered
+     */
+    export function register_scene_class(key: string, ctor: Function): void;
 }

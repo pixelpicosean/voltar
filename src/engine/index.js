@@ -63,6 +63,24 @@ export const scene_tree = new SceneTree(input);
 
 
 /**
+ * @type {{[k:string]: Function}}
+ */
+export const registered_scene_class = Object.create(null);
+
+/**
+ * Register scene class, for packed scene instancing process
+ * @param {string} key  Key of the scene class
+ * @param {Function} ctor Class to be registered
+ */
+export function register_scene_class(key, ctor) {
+    if (!registered_scene_class[key]) {
+        registered_scene_class[key] = ctor;
+    } else {
+        throw `[Class Register] scene with class "${key}" is already registered!`;
+    }
+}
+
+/**
  * @param {core.Node2D} node
  * @param {any} children
  */
@@ -75,7 +93,14 @@ function assemble_node(node, children) {
     for (i = 0; i < children.length; i++) {
         data = children[i];
 
-        inst = new (core[data.type])();
+        if (data.type === 'Scene') {
+            if (!data.class) {
+                throw `[Assemble] class of packed scene is not defined!`;
+            }
+            inst = new (registered_scene_class[data.class])();
+        } else {
+            inst = new (core[data.type])();
+        }
         inst._load_data(data);
 
         assemble_node(inst, data.children);
