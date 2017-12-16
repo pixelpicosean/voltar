@@ -99,7 +99,7 @@ function assemble_node(node, children) {
                 if (!registered_scene_class[packed_scene.class]) {
                     throw `[Assemble] class of scene "${packed_scene.class}" is not defined!`;
                 }
-                inst = new (registered_scene_class[packed_scene.class])();
+                inst = registered_scene_class[packed_scene.class].instance();
             } else {
                 inst = new (core[packed_scene.type])();
             }
