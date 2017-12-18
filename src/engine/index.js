@@ -102,12 +102,15 @@ function assemble_node(node, children) {
                 inst = registered_scene_class[packed_scene.class].instance();
             } else {
                 inst = new (core[packed_scene.type])();
+
+                inst._load_data(packed_scene);
+                assemble_node(inst, packed_scene.children);
             }
         } else {
             inst = new (core[data.type])();
         }
-        inst._load_data(data);
 
+        inst._load_data(data);
         assemble_node(inst, data.children);
 
         node.add_child(inst);
