@@ -114,12 +114,10 @@ export default class Sprite extends Node2D
             if (typeof(texture) === 'string') {
                 this._texture_key = texture;
                 this.texture = Texture.EMPTY;
-            }
-            else {
+            } else {
                 this.texture = texture;
             }
-        }
-        else {
+        } else {
             this.texture = Texture.EMPTY;
         }
 
@@ -642,17 +640,16 @@ export default class Sprite extends Node2D
         this._textureID = -1;
         this._textureTrimmedID = -1;
 
-        if (value)
-        {
-            // wait for the texture to load
-            if (value.base_texture.has_loaded)
-            {
-                this._onTextureUpdate();
-            }
-            else
-            {
-                value.once('update', this._onTextureUpdate, this);
-            }
+        if (!value) {
+            console.log(`Texture "${p_value}" is not found!`);
+            value = TextureCache['_empty_'];
+        }
+
+        // wait for the texture to load
+        if (value.base_texture.has_loaded) {
+            this._onTextureUpdate();
+        } else {
+            value.once('update', this._onTextureUpdate, this);
         }
     }
 }
