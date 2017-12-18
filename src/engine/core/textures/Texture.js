@@ -632,13 +632,26 @@ function create_white_texture()
 {
     const canvas = document.createElement('canvas');
 
-    canvas.width = 10;
-    canvas.height = 10;
+    canvas.width = 32;
+    canvas.height = 32;
 
     const context = canvas.getContext('2d');
+    let smoothProperty = 'imageSmoothingEnabled';
+    if (!context.imageSmoothingEnabled) {
+        if (context.webkitImageSmoothingEnabled) {
+            smoothProperty = 'webkitImageSmoothingEnabled';
+        } else if (context.mozImageSmoothingEnabled) {
+            smoothProperty = 'mozImageSmoothingEnabled';
+        } else if (context.oImageSmoothingEnabled) {
+            smoothProperty = 'oImageSmoothingEnabled';
+        } else if (context.msImageSmoothingEnabled) {
+            smoothProperty = 'msImageSmoothingEnabled';
+        }
+    }
+    context[smoothProperty] = false;
 
     context.fillStyle = 'white';
-    context.fillRect(0, 0, 10, 10);
+    context.fillRect(0, 0, 32, 32);
 
     return new Texture(new BaseTexture(canvas));
 }
@@ -661,6 +674,7 @@ function remove_all_handlers(tex)
 Texture.EMPTY = new Texture(new BaseTexture());
 remove_all_handlers(Texture.EMPTY);
 remove_all_handlers(Texture.EMPTY.base_texture);
+TextureCache['_empty_'] = Texture.EMPTY;
 
 /**
  * A white texture of 10x10 size, used for graphics and other things
@@ -672,3 +686,4 @@ remove_all_handlers(Texture.EMPTY.base_texture);
 Texture.WHITE = create_white_texture();
 remove_all_handlers(Texture.WHITE);
 remove_all_handlers(Texture.WHITE.base_texture);
+TextureCache['_white_'] = Texture.WHITE;
