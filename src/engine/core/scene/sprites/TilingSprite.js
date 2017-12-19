@@ -68,7 +68,7 @@ export default class TilingSprite extends Sprite
          *
          * @type {TextureMatrix}
          */
-        this.uv_transform = texture.transform || new TextureMatrix(texture);
+        this.uv_transform = this._texture.transform || new TextureMatrix(texture);
 
         /**
          * Plugin that is responsible for rendering this element.
