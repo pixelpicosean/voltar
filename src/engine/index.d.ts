@@ -2452,6 +2452,8 @@ declare module 'engine' {
 
         protected _dirty: boolean;
 
+        constructor(extents_x: number, extents_y: number);
+
         calculate_points(node: Node2D);
         protected _calc_points(node: Node2D);
     }
