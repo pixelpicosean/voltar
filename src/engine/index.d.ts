@@ -1276,7 +1276,7 @@ declare module 'engine' {
         set_rotation(value: number);
         get_global_rotation(): number;
         get_tree(): SceneTree;
-        get_node<T extends Node2D>(path: string): T;
+        get_node(path: string): Node2D;
 
         render_webGL(renderer: WebGLRenderer): void;
         render_canvas(renderer: CanvasRenderer): void;
@@ -2103,6 +2103,7 @@ declare module 'engine' {
         set_frame(frame: number);
         get_sprite_frames(): SpriteFrames;
         set_sprite_frames(frames: SpriteFrames);
+        set_frames(frames: SpriteFrames | string);
 
         protected _reset_timeout();
         protected _set_playing();
