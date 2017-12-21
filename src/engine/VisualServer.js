@@ -20,15 +20,13 @@ export default class VisualServer {
 
         if (config.scale_mode === 'linear') {
             settings.SCALE_MODE = SCALE_MODES.LINEAR;
-        }
-        else {
+        } else {
             settings.SCALE_MODE = SCALE_MODES.NEAREST;
         }
 
         if (!config.force_canvas && isWebGLSupported()) {
             this.renderer = new WebGLRenderer(config);
-        }
-        else {
+        } else {
             this.renderer = new CanvasRenderer(config);
         }
     }

@@ -204,6 +204,7 @@ export default class SceneTree {
             force_canvas: this._settings.display.force_canvas,
             antialias: this._settings.display.antialias,
             pixel_snap: this._settings.display.pixel_snap,
+            scale_mode: this._settings.display.scale_mode,
 
             auto_resize: false,
             transparent: false,
