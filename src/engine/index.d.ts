@@ -175,8 +175,8 @@ declare module 'engine/audio' {
         context: IMediaContext;
         supported: boolean;
         useLegacy: boolean;
-        volumeAll: number;
-        speedAll: number;
+        volume_all: number;
+        speed_all: number;
         filtersAll: Filter[];
         static instance: SoundLibrary;
         constructor(Resource: Function);
