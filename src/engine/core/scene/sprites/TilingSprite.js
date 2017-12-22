@@ -215,7 +215,7 @@ export default class TilingSprite extends Sprite
         {
             this._textureID = this._texture._updateID;
             // cut an object from a spritesheet..
-            const tempCanvas = new core.CanvasRenderTarget(texture._frame.width,
+            const tempCanvas = new CanvasRenderTarget(texture._frame.width,
                                                         texture._frame.height,
                                                         base_texture_resolution);
 
