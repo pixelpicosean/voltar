@@ -1,8 +1,8 @@
-import { Matrix } from '../../../math';
-import ObjectRenderer from '../../../renderers/webgl/ObjectRenderer';
+import Matrix from '../../../math/Matrix';
+import ObjectRenderer from '../../../renderers/webgl/utils/ObjectRenderer';
 import WebGLRenderer from '../../../renderers/webgl/WebGLRenderer';
 import Shader from '../../../Shader';
-import * as utils from '../../../utils';
+import { correctBlendMode, premultiplyRgba } from '../../../utils';
 import glCore from 'pixi-gl-core';
 import Mesh from '../Mesh';
 
@@ -12,8 +12,7 @@ const matrixIdentity = Matrix.IDENTITY;
  * WebGL renderer plugin for tiling sprites
  *
  * @class
- * @memberof V
- * @extends V.ObjectRenderer
+ * @extends ObjectRenderer
  */
 export default class MeshRenderer extends ObjectRenderer
 {
@@ -106,7 +105,7 @@ export default class MeshRenderer extends ObjectRenderer
 
         glData.shader.uniforms.uSampler = renderer.bindTexture(texture);
 
-        renderer.state.setBlendMode(utils.correctBlendMode(mesh.blend_mode, texture.base_texture.premultiplied_alpha));
+        renderer.state.setBlendMode(correctBlendMode(mesh.blend_mode, texture.base_texture.premultiplied_alpha));
 
         if (glData.shader.uniforms.uTransform)
         {
@@ -121,7 +120,7 @@ export default class MeshRenderer extends ObjectRenderer
         }
         glData.shader.uniforms.translationMatrix = mesh.world_transform.to_array(true);
 
-        glData.shader.uniforms.uColor = utils.premultiplyRgba(mesh.tint_rgb,
+        glData.shader.uniforms.uColor = premultiplyRgba(mesh.tint_rgb,
             mesh.world_alpha, glData.shader.uniforms.uColor, texture.base_texture.premultiplied_alpha);
 
         const draw_mode = mesh.draw_mode === Mesh.DRAW_MODES.TRIANGLE_MESH ? gl.TRIANGLE_STRIP : gl.TRIANGLES;

@@ -48,6 +48,7 @@ export { default as Mesh } from './scene/mesh/Mesh';
 export { default as NineSlicePlane } from './scene/mesh/NineSlicePlane';
 export { default as Plane } from './scene/mesh/Plane';
 export { default as Rope } from './scene/mesh/Rope';
+export { default as MeshRenderer } from './scene/mesh/webgl/MeshRenderer';
 
 export { default as BackgroundMap } from './scene/map/BackgroundMap';
 export { default as CollisionMap } from './scene/map/CollisionMap';
