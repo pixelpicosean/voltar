@@ -2729,9 +2729,9 @@ declare module 'engine' {
         constructor(texture: Texture, vertices?: ArrayLike<number>, uvs?: ArrayLike<number>, indices?: ArrayLike<number>, drawMode?: number);
 
         texture: Texture;
-        uvs: number[];
-        vertices: number[];
-        indices: number[];
+        uvs: Float32Array;
+        vertices: Float32Array;
+        indices: Uint16Array;
         dirty: number;
         indexDirty: number;
         blendMode: number;
