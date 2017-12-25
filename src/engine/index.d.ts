@@ -2733,14 +2733,17 @@ declare module 'engine' {
         vertices: Float32Array;
         indices: Uint16Array;
         dirty: number;
-        indexDirty: number;
-        blendMode: number;
-        canvasPadding: number;
-        drawMode: number;
+        index_dirty: number;
+        blend_mode: number;
+        canvas_padding: number;
+        draw_mode: number;
         shader: Shader | Filter;
 
         getBounds(matrix?: Matrix): Rectangle;
         containsPoint(point: Point): boolean;
+        multiply_uvs(): void;
+        refresh(force_update?: boolean): void;
+        _refresh(): void;
 
         protected _texture: Texture;
 

@@ -35,7 +35,7 @@ export default class Plane extends Mesh
          * @member {boolean}
          * @private
          */
-        this._ready = true;
+        this._ready_to_draw = true;
 
         this.vertices_x = vertices_x || 10;
         this.vertices_y = vertices_y || 10;
@@ -113,7 +113,7 @@ export default class Plane extends Mesh
         Mesh.prototype._onTextureUpdate.call(this);
 
         // wait for the Plane ctor to finish before calling refresh
-        if (this._ready)
+        if (this._ready_to_draw)
         {
             this.refresh();
         }
