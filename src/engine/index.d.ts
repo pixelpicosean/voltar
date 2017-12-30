@@ -1276,7 +1276,7 @@ declare module 'engine' {
         set_rotation(value: number);
         get_global_rotation(): number;
         get_tree(): SceneTree;
-        get_node(path: string): Node2D;
+        get_node<T extends Node2D>(path: string): T;
 
         render_webGL(renderer: WebGLRenderer): void;
         render_canvas(renderer: CanvasRenderer): void;
