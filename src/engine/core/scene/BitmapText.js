@@ -23,8 +23,7 @@ import Texture from '../textures/Texture';
  * @class
  * @extends Node2D
  */
-export default class BitmapText extends Node2D
-{
+export default class BitmapText extends Node2D {
     /**
      * @param {string} text - The copy that you would like the text to display
      * @param {object} style - The style parameters
@@ -36,8 +35,7 @@ export default class BitmapText extends Node2D
      *      single line text
      * @param {number} [style.tint=0xFFFFFF] - The tint color
      */
-    constructor(text, style = {})
-    {
+    constructor(text, style = { font: null }) {
         super();
 
         this.type = 'BitmapText';
@@ -143,6 +141,9 @@ export default class BitmapText extends Node2D
                 case 'max_line_height':
                     this[k] = data[k];
                     break;
+                case 'font_style':
+                    this._font = data[k];
+                    break;
             }
         }
     }
@@ -152,9 +153,11 @@ export default class BitmapText extends Node2D
      *
      * @private
      */
-    update_text()
-    {
+    update_text() {
         const data = BitmapText.fonts[this._font.name];
+        if (!data) {
+            return;
+        }
         const scale = this._font.size / data.size;
         const pos = new Point();
         const chars = [];
@@ -169,18 +172,15 @@ export default class BitmapText extends Node2D
         let spacesRemoved = 0;
         let max_line_height = 0;
 
-        for (let i = 0; i < this.text.length; i++)
-        {
+        for (let i = 0; i < this.text.length; i++) {
             const charCode = this.text.charCodeAt(i);
 
-            if (/(\s)/.test(this.text.charAt(i)))
-            {
+            if (/(\s)/.test(this.text.charAt(i))) {
                 lastSpace = i;
                 lastSpaceWidth = lastLineWidth;
             }
 
-            if (/(?:\r\n|\r|\n)/.test(this.text.charAt(i)))
-            {
+            if (/(?:\r\n|\r|\n)/.test(this.text.charAt(i))) {
                 line_widths.push(lastLineWidth);
                 maxLineWidth = Math.max(maxLineWidth, lastLineWidth);
                 line++;
@@ -191,8 +191,7 @@ export default class BitmapText extends Node2D
                 continue;
             }
 
-            if (lastSpace !== -1 && this._max_width > 0 && pos.x * scale > this._max_width)
-            {
+            if (lastSpace !== -1 && this._max_width > 0 && pos.x * scale > this._max_width) {
                 removeItems(chars, lastSpace - spacesRemoved, i - lastSpace);
                 i = lastSpace;
                 lastSpace = -1;
@@ -210,13 +209,11 @@ export default class BitmapText extends Node2D
 
             const charData = data.chars[charCode];
 
-            if (!charData)
-            {
+            if (!charData) {
                 continue;
             }
 
-            if (prevCharCode && charData.kerning[prevCharCode])
-            {
+            if (prevCharCode && charData.kerning[prevCharCode]) {
                 pos.x += charData.kerning[prevCharCode];
             }
 
@@ -237,16 +234,12 @@ export default class BitmapText extends Node2D
 
         const lineAlignOffsets = [];
 
-        for (let i = 0; i <= line; i++)
-        {
+        for (let i = 0; i <= line; i++) {
             let alignOffset = 0;
 
-            if (this._font.align === 'right')
-            {
+            if (this._font.align === 'right') {
                 alignOffset = maxLineWidth - line_widths[i];
-            }
-            else if (this._font.align === 'center')
-            {
+            } else if (this._font.align === 'center') {
                 alignOffset = (maxLineWidth - line_widths[i]) / 2;
             }
 
@@ -256,16 +249,12 @@ export default class BitmapText extends Node2D
         const lenChars = chars.length;
         const tint = this.tint;
 
-        for (let i = 0; i < lenChars; i++)
-        {
+        for (let i = 0; i < lenChars; i++) {
             let c = this._glyphs[i]; // get the next glyph sprite
 
-            if (c)
-            {
+            if (c) {
                 c.texture = chars[i].texture;
-            }
-            else
-            {
+            } else {
                 c = new Sprite(chars[i].texture);
                 this._glyphs.push(c);
             }
@@ -275,15 +264,13 @@ export default class BitmapText extends Node2D
             c.scale.x = c.scale.y = scale;
             c.tint = tint;
 
-            if (!c.parent)
-            {
+            if (!c.parent) {
                 this.add_child(c);
             }
         }
 
         // remove unnecessary children.
-        for (let i = lenChars; i < this._glyphs.length; ++i)
-        {
+        for (let i = lenChars; i < this._glyphs.length; ++i) {
             this.remove_child(this._glyphs[i]);
         }
 
@@ -291,10 +278,8 @@ export default class BitmapText extends Node2D
         this._text_height = (pos.y + data.lineHeight) * scale;
 
         // apply anchor
-        if (this.anchor.x !== 0 || this.anchor.y !== 0)
-        {
-            for (let i = 0; i < lenChars; i++)
-            {
+        if (this.anchor.x !== 0 || this.anchor.y !== 0) {
+            for (let i = 0; i < lenChars; i++) {
                 this._glyphs[i].x -= this._text_width * this.anchor.x;
                 this._glyphs[i].y -= this._text_height * this.anchor.y;
             }
@@ -307,8 +292,7 @@ export default class BitmapText extends Node2D
      *
      * @private
      */
-    update_transform()
-    {
+    update_transform() {
         this.validate();
         this.node2d_update_transform();
     }
@@ -318,8 +302,7 @@ export default class BitmapText extends Node2D
      *
      * @return {V.Rectangle} The rectangular bounding area
      */
-    get_local_bounds()
-    {
+    get_local_bounds() {
         this.validate();
 
         return super.get_local_bounds();
@@ -330,10 +313,8 @@ export default class BitmapText extends Node2D
      *
      * @private
      */
-    validate()
-    {
-        if (this.dirty)
-        {
+    validate() {
+        if (this.dirty) {
             this.update_text();
             this.dirty = false;
         }
@@ -344,13 +325,11 @@ export default class BitmapText extends Node2D
      *
      * @member {number}
      */
-    get tint()
-    {
+    get tint() {
         return this._font.tint;
     }
 
-    set tint(value) // eslint-disable-line require-jsdoc
-    {
+    set tint(value) {
         this._font.tint = (typeof value === 'number' && value >= 0) ? value : 0xFFFFFF;
 
         this.dirty = true;
@@ -362,13 +341,11 @@ export default class BitmapText extends Node2D
      * @member {string}
      * @default 'left'
      */
-    get align()
-    {
+    get align() {
         return this._font.align;
     }
 
-    set align(value) // eslint-disable-line require-jsdoc
-    {
+    set align(value) {
         this._font.align = value || 'left';
 
         this.dirty = true;
@@ -380,21 +357,16 @@ export default class BitmapText extends Node2D
      * Setting the anchor to 0.5,0.5 means the text's origin is centered
      * Setting the anchor to 1,1 would mean the text's origin point will be the bottom right corner
      *
-     * @member {V.Point | number}
+     * @member {v.Point | number}
      */
-    get anchor()
-    {
+    get anchor() {
         return this._anchor;
     }
 
-    set anchor(value) // eslint-disable-line require-jsdoc
-    {
-        if (typeof value === 'number')
-        {
+    set anchor(value) {
+        if (typeof value === 'number') {
             this._anchor.set(value);
-        }
-        else
-        {
+        } else {
             this._anchor.copy(value);
         }
     }
@@ -404,27 +376,21 @@ export default class BitmapText extends Node2D
      *
      * @member {string|object}
      */
-    get font()
-    {
+    get font() {
         return this._font;
     }
 
-    set font(value) // eslint-disable-line require-jsdoc
-    {
-        if (!value)
-        {
+    set font(value) {
+        if (!value) {
             return;
         }
 
-        if (typeof value === 'string')
-        {
+        if (typeof value === 'string') {
             value = value.split(' ');
 
             this._font.name = value.length === 1 ? value[0] : value.slice(1).join(' ');
             this._font.size = value.length >= 2 ? parseInt(value[0], 10) : BitmapText.fonts[this._font.name].size;
-        }
-        else
-        {
+        } else {
             this._font.name = value.name;
             this._font.size = typeof value.size === 'number' ? value.size : parseInt(value.size, 10);
         }
@@ -437,19 +403,16 @@ export default class BitmapText extends Node2D
      *
      * @member {string}
      */
-    get text()
-    {
+    get text() {
         return this._text;
     }
 
     /**
      * @param {string}
      */
-    set text(value) // eslint-disable-line require-jsdoc
-    {
+    set text(value) {
         value = value.toString() || ' ';
-        if (this._text === value)
-        {
+        if (this._text === value) {
             return;
         }
         this._text = value;
@@ -463,15 +426,12 @@ export default class BitmapText extends Node2D
      *
      * @member {number}
      */
-    get max_width()
-    {
+    get max_width() {
         return this._max_width;
     }
 
-    set max_width(value) // eslint-disable-line require-jsdoc
-    {
-        if (this._max_width === value)
-        {
+    set max_width(value) {
+        if (this._max_width === value) {
             return;
         }
         this._max_width = value;
@@ -485,8 +445,7 @@ export default class BitmapText extends Node2D
      * @member {number}
      * @readonly
      */
-    get max_line_height()
-    {
+    get max_line_height() {
         this.validate();
 
         return this._max_line_height;
@@ -499,8 +458,7 @@ export default class BitmapText extends Node2D
      * @member {number}
      * @readonly
      */
-    get text_width()
-    {
+    get text_width() {
         this.validate();
 
         return this._text_width;
@@ -513,8 +471,7 @@ export default class BitmapText extends Node2D
      * @member {number}
      * @readonly
      */
-    get text_height()
-    {
+    get text_height() {
         this.validate();
 
         return this._text_height;
@@ -525,11 +482,10 @@ export default class BitmapText extends Node2D
      *
      * @static
      * @param {XMLDocument} xml - The XML document data.
-     * @param {V.Texture} texture - Texture with all symbols.
+     * @param {v.Texture} texture - Texture with all symbols.
      * @return {Object} Result font object with font, size, lineHeight and char fields.
      */
-    static register_font(xml, texture)
-    {
+    static register_font(xml, texture) {
         const data = {};
         const info = xml.getElementsByTagName('info')[0];
         const common = xml.getElementsByTagName('common')[0];
@@ -543,8 +499,7 @@ export default class BitmapText extends Node2D
         // parse letters
         const letters = xml.getElementsByTagName('char');
 
-        for (let i = 0; i < letters.length; i++)
-        {
+        for (let i = 0; i < letters.length; i++) {
             const letter = letters[i];
             const charCode = parseInt(letter.getAttribute('id'), 10);
 
@@ -568,15 +523,13 @@ export default class BitmapText extends Node2D
         // parse kernings
         const kernings = xml.getElementsByTagName('kerning');
 
-        for (let i = 0; i < kernings.length; i++)
-        {
+        for (let i = 0; i < kernings.length; i++) {
             const kerning = kernings[i];
             const first = parseInt(kerning.getAttribute('first'), 10) / res;
             const second = parseInt(kerning.getAttribute('second'), 10) / res;
             const amount = parseInt(kerning.getAttribute('amount'), 10) / res;
 
-            if (data.chars[second])
-            {
+            if (data.chars[second]) {
                 data.chars[second].kerning[first] = amount;
             }
         }
