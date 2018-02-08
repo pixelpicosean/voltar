@@ -761,10 +761,10 @@ function areArraysEqual(array1, array2)
  *
  * @param {Object} target Target object to copy properties into
  * @param {Object} source Source object for the proporties to copy
- * @param {string} property_obj Object containing properties names we want to loop over
+ * @param {object} property_obj Object containing properties names we want to loop over
  */
 function deep_copy_properties(target, source, property_obj) {
-    for (const prop in property_obj) {
+    for (let prop in property_obj) {
         if (Array.isArray(source[prop])) {
             target[prop] = source[prop].slice();
         } else {
