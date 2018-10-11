@@ -650,7 +650,7 @@ export default class InteractionManager extends EventEmitter
     /**
      * Hit tests a point against the display tree, returning the first interactive object that is hit.
      *
-     * @param {Point} globalPoint - A point to hit test with, in global space.
+     * @param {Point} global_point - A point to hit test with, in global space.
      * @param {Node2D} [root] - The root display object to start from. If omitted, defaults
      * to the last rendered root of the associated renderer.
      * @return {Node2D} The hit display object, if any.
@@ -1266,7 +1266,7 @@ export default class InteractionManager extends EventEmitter
             else if (event.pointerType === 'touch')
             {
                 this.emit(cancelled ? 'touchcancel' : `touchend${eventAppend}`, interactionEvent);
-                this.release_interaction_data_for_pointer_id(event.pointerId, interactionData);
+                this.release_interaction_data_for_pointer_id(event.pointerId);
             }
         }
     }
@@ -1425,7 +1425,7 @@ export default class InteractionManager extends EventEmitter
 
         const events = this.normalize_to_pointer_data(original_event);
 
-        if (events[0].pointer_type === 'mouse')
+        if (events[0].pointerType === 'mouse' || events[0].pointerType === 'pen')
         {
             this.did_move = true;
 
@@ -1457,7 +1457,7 @@ export default class InteractionManager extends EventEmitter
             if (event.pointerType === 'mouse' || event.pointerType === 'pen') this.emit('mousemove', interactionEvent);
         }
 
-        if (events[0].pointer_type === 'mouse')
+        if (events[0].pointerType === 'mouse' || events[0].pointerType === 'pen')
         {
             this.set_cursor_mode(this.cursor);
 
@@ -1658,7 +1658,7 @@ export default class InteractionManager extends EventEmitter
         }
         // copy properties from the event, so that we can make sure that touch/pointer specific
         // data is available
-        interactionData._copyEvent(event);
+        interactionData.copyEvent(event);
 
         return interactionData;
     }
@@ -1676,7 +1676,7 @@ export default class InteractionManager extends EventEmitter
         if (interactionData)
         {
             delete this.active_interaction_data[pointer_id];
-            interactionData._reset();
+            interactionData.reset();
             this.interaction_data_pool.push(interactionData);
         }
     }
@@ -1700,21 +1700,21 @@ export default class InteractionManager extends EventEmitter
         // This is the way InteractionManager processed touch events before the refactoring, so I've kept
         // it here. But it doesn't make that much sense to me, since map_position_to_point already factors
         // in this.resolution, so this just divides by this.resolution twice for touch events...
-        if (navigator.isCocoonJS && pointerEvent.pointer_type === 'touch')
+        if (navigator.isCocoonJS && pointerEvent.pointerType === 'touch')
         {
             interactionData.global.x = interactionData.global.x / this.resolution;
             interactionData.global.y = interactionData.global.y / this.resolution;
         }
 
         // Not really sure why this is happening, but it's how a previous version handled things
-        if (pointerEvent.pointer_type === 'touch')
+        if (pointerEvent.pointerType === 'touch')
         {
             pointerEvent.globalX = interactionData.global.x;
             pointerEvent.globalY = interactionData.global.y;
         }
 
         interactionData.original_event = pointerEvent;
-        interactionEvent._reset();
+        interactionEvent.reset();
 
         return interactionEvent;
     }

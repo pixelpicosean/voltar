@@ -1,10 +1,11 @@
 import Point from './Point';
+import { PI_2 } from '../const';
 
 /**
  * The pixi Matrix class as an object, which makes it a lot faster,
  * here is a representation of it :
- * | a | b | tx|
- * | c | d | ty|
+ * | a | c | tx|
+ * | b | d | ty|
  * | 0 | 0 | 1 |
  *
  * @class
@@ -14,8 +15,8 @@ export default class Matrix
 {
     /**
      * @param {number} [a=1] - x scale
-     * @param {number} [b=0] - y skew
-     * @param {number} [c=0] - x skew
+     * @param {number} [b=0] - x skew
+     * @param {number} [c=0] - y skew
      * @param {number} [d=1] - y scale
      * @param {number} [tx=0] - x translation
      * @param {number} [ty=0] - y translation
@@ -283,36 +284,24 @@ export default class Matrix
      *
      * @param {number} x - Position on the x axis
      * @param {number} y - Position on the y axis
-     * @param {number} pivotX - Pivot on the x axis
-     * @param {number} pivotY - Pivot on the y axis
-     * @param {number} scaleX - Scale on the x axis
-     * @param {number} scaleY - Scale on the y axis
+     * @param {number} pivot_x - Pivot on the x axis
+     * @param {number} pivot_y - Pivot on the y axis
+     * @param {number} scale_x - Scale on the x axis
+     * @param {number} scale_y - Scale on the y axis
      * @param {number} rotation - Rotation in radians
-     * @param {number} skewX - Skew on the x axis
-     * @param {number} skewY - Skew on the y axis
+     * @param {number} skew_x - Skew on the x axis
+     * @param {number} skew_y - Skew on the y axis
      * @return {V.Matrix} This matrix. Good for chaining method calls.
      */
-    set_transform(x, y, pivotX, pivotY, scaleX, scaleY, rotation, skewX, skewY)
+    set_transform(x, y, pivot_x, pivot_y, scale_x, scale_y, rotation, skew_x, skew_y)
     {
-        const sr = Math.sin(rotation);
-        const cr = Math.cos(rotation);
-        const cy = Math.cos(skewY);
-        const sy = Math.sin(skewY);
-        const nsx = -Math.sin(skewX);
-        const cx = Math.cos(skewX);
+        this.a = Math.cos(rotation + skew_y) * scale_x;
+        this.b = Math.sin(rotation + skew_y) * scale_x;
+        this.c = -Math.sin(rotation - skew_x) * scale_y;
+        this.d = Math.cos(rotation - skew_x) * scale_y;
 
-        const a = cr * scaleX;
-        const b = sr * scaleX;
-        const c = -sr * scaleY;
-        const d = cr * scaleY;
-
-        this.a = (cy * a) + (sy * c);
-        this.b = (cy * b) + (sy * d);
-        this.c = (nsx * a) + (cx * c);
-        this.d = (nsx * b) + (cx * d);
-
-        this.tx = x + ((pivotX * a) + (pivotY * c));
-        this.ty = y + ((pivotX * b) + (pivotY * d));
+        this.tx = x - ((pivot_x * this.a) + (pivot_y * this.c));
+        this.ty = y - ((pivot_x * this.b) + (pivot_y * this.d));
 
         return this;
     }
@@ -363,7 +352,7 @@ export default class Matrix
 
         const delta = Math.abs(skewX + skewY);
 
-        if (delta < 0.00001)
+        if (delta < 0.00001 || Math.abs(PI_2 - delta) < 0.00001)
         {
             transform.rotation = skewY;
 
@@ -376,6 +365,7 @@ export default class Matrix
         }
         else
         {
+            transform.rotation = 0;
             transform.skew.x = skewX;
             transform.skew.y = skewY;
         }

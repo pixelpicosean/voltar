@@ -157,19 +157,19 @@ export default class Rectangle
     /**
      * Pads the rectangle making it grow in all directions.
      *
-     * @param {number} paddingX - The horizontal padding amount.
-     * @param {number} paddingY - The vertical padding amount.
+     * @param {number} padding_x - The horizontal padding amount.
+     * @param {number} [padding_y] - The vertical padding amount.
      */
-    pad(paddingX, paddingY)
+    pad(padding_x, padding_y)
     {
-        paddingX = paddingX || 0;
-        paddingY = paddingY || ((paddingY !== 0) ? paddingX : 0);
+        padding_x = padding_x || 0;
+        padding_y = padding_y || ((padding_y !== 0) ? padding_x : 0);
 
-        this.x -= paddingX;
-        this.y -= paddingY;
+        this.x -= padding_x;
+        this.y -= padding_y;
 
-        this.width += paddingX * 2;
-        this.height += paddingY * 2;
+        this.width += padding_x * 2;
+        this.height += padding_y * 2;
     }
 
     /**

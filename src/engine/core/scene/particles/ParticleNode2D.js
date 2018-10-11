@@ -89,10 +89,18 @@ export default class ParticleNode2D extends Node2D
         this._glBuffers = {};
 
         /**
-         * @member {number}
+         * for every batch stores _updateID corresponding to the last change in that batch
+         * @member {number[]}
          * @private
          */
-        this._bufferToUpdate = 0;
+        this._bufferUpdateIDs = [];
+
+        /**
+         * when child inserted, removed or changes position this number goes up
+         * @member {number[]}
+         * @private
+         */
+        this._updateID = 0;
 
         /**
          * @member {boolean}
@@ -233,10 +241,10 @@ export default class ParticleNode2D extends Node2D
     {
         const bufferIndex = Math.floor(smallestChildIndex / this._batchSize);
 
-        if (bufferIndex < this._bufferToUpdate)
-        {
-            this._bufferToUpdate = bufferIndex;
+        while (this._bufferUpdateIDs.length < bufferIndex) {
+            this._bufferUpdateIDs.push(0);
         }
+        this._bufferUpdateIDs[bufferIndex] = ++this._updateID;
     }
 
     /**
@@ -387,5 +395,6 @@ export default class ParticleNode2D extends Node2D
 
         this._properties = null;
         this._buffers = null;
+        this._bufferUpdateIDs = null;
     }
 }

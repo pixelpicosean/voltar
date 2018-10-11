@@ -1116,7 +1116,7 @@ export default class Node2D extends EventEmitter
     {
         if (index < 0 || index >= this.children.length)
         {
-            throw new Error('The supplied index is out of bounds');
+            throw new Error(`The index ${index} supplied is out of bounds ${this.children.length}`);
         }
 
         const currentIndex = this.get_child_index(child);
