@@ -806,6 +806,7 @@ export default class Node2D extends EventEmitter
         if (this._mask)
         {
             this._mask.renderable = true;
+            this._mask.is_mask = false;
         }
 
         this._mask = value;
@@ -813,6 +814,7 @@ export default class Node2D extends EventEmitter
         if (this._mask)
         {
             this._mask.renderable = false;
+            this._mask.is_mask = true;
         }
     }
 

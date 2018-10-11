@@ -1,4 +1,5 @@
 import { Point, Polygon } from '../../math';
+import settings from '../../settings';
 import Texture from '../../textures/Texture';
 import TextureMatrix from '../../textures/TextureMatrix';
 import { BLEND_MODES } from '../../const';
@@ -97,7 +98,7 @@ export default class Mesh extends Node2D
          *
          * @member {number}
          */
-        this.canvas_padding = 0;
+        this.canvas_padding = settings.MESH_CANVAS_PADDING;
 
         /**
          * The way the Mesh should be drawn, can be any of the {@link V.mesh.Mesh.DRAW_MODES} consts

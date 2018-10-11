@@ -151,24 +151,29 @@ export default class Spritesheet
     {
         let frameIndex = initialFrameIndex;
         const maxFrames = Spritesheet.BATCH_SIZE;
+        const sourceScale = this.base_texture.source_scale;
 
         while (frameIndex - initialFrameIndex < maxFrames && frameIndex < this._frameKeys.length)
         {
             const i = this._frameKeys[frameIndex];
-            const rect = this._frames[i].frame;
+            const data = this._frames[i];
+            const rect = data.frame;
 
             if (rect)
             {
                 let frame = null;
                 let trim = null;
+                const sourceSize = data.trimmed !== false && data.sourceSize
+                    ? data.sourceSize : data.frame;
+
                 const orig = new Rectangle(
                     0,
                     0,
-                    this._frames[i].sourceSize.w / this.resolution,
-                    this._frames[i].sourceSize.h / this.resolution
+                    Math.floor(sourceSize.w * sourceScale) / this.resolution,
+                    Math.floor(sourceSize.h * sourceScale) / this.resolution
                 );
 
-                if (this._frames[i].rotated)
+                if (data.rotated)
                 {
                     frame = new Rectangle(
                         rect.x / this.resolution,
@@ -188,11 +193,11 @@ export default class Spritesheet
                 }
 
                 //  Check to see if the sprite is trimmed
-                if (this._frames[i].trimmed)
+                if (data.trimmed !== false && data.spriteSourceSize)
                 {
                     trim = new Rectangle(
-                        this._frames[i].spriteSourceSize.x / this.resolution,
-                        this._frames[i].spriteSourceSize.y / this.resolution,
+                        Math.floor(data.spriteSourceSize.x * sourceScale) / this.resolution,
+                        Math.floor(data.spriteSourceSize.y * sourceScale) / this.resolution,
                         rect.w / this.resolution,
                         rect.h / this.resolution
                     );
@@ -203,7 +208,7 @@ export default class Spritesheet
                     frame,
                     orig,
                     trim,
-                    this._frames[i].rotated ? 2 : 0
+                    data.rotated ? 2 : 0
                 );
 
                 // lets also add the frame to pixi's global cache for from_frame and from_image functions

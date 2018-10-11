@@ -11,7 +11,7 @@ core.utils.mixins.delay_mixin(
     interactive_target
 );
 
-const MOUSE_POINTER_ID = 'MOUSE';
+const MOUSE_POINTER_ID = 1;
 
 // helpers for hit_test() - only used inside hit_test()
 const hit_test_event = {
@@ -1015,24 +1015,41 @@ export default class InteractionManager extends EventEmitter
         let hit = false;
         let interactiveParent = interactive;
 
-        // if the displayobject has a hit_area, then it does not need to hit_test children.
+        // Flag here can set to false if the event is outside the parents hitArea or mask
+        let hit_test_children = true;
+
+        // If there is a hitArea, no need to test against anything else if the pointer is not within the hitArea
+        // There is also no longer a need to hitTest children.
         if (displayObject.hit_area)
         {
+            if (hit_test) {
+                displayObject.world_transform.apply_inverse(point, this._tempPoint);
+                if (!displayObject.hitArea.contains(this._tempPoint.x, this._tempPoint.y)) {
+                    hit_test = false;
+                    hit_test_children = false;
+                }
+                else {
+                    hit = true;
+                }
+            }
             interactiveParent = false;
         }
-        // it has a mask! Then lets hit test that before continuing
-        else if (hit_test && displayObject._mask)
+        // If there is a mask, no need to test against anything else if the pointer is not within the mask
+        else if (displayObject._mask)
         {
-            if (!displayObject._mask.contains_point(point))
+            if (hit_test)
             {
-                hit_test = false;
+                if (!displayObject._mask.contains_point(point)) {
+                    hit_test = false;
+                    hit_test_children = false;
+                }
             }
         }
 
         // ** FREE TIP **! If an object is not interactive or has no buttons in it
         // (such as a game scene!) set interactive_children to false for that displayObject.
         // This will allow pixi to completely ignore and bypass checking the displayObjects children.
-        if (displayObject.interactive_children && displayObject.children)
+        if (hit_test_children && displayObject.interactive_children && displayObject.children)
         {
             const children = displayObject.children;
 
@@ -1082,15 +1099,8 @@ export default class InteractionManager extends EventEmitter
             // looking for an interactive child, just in case we hit one
             if (hit_test && !interactionEvent.target)
             {
-                if (displayObject.hit_area)
-                {
-                    displayObject.world_transform.apply_inverse(point, this._tempPoint);
-                    if (displayObject.hit_area.contains(this._tempPoint.x, this._tempPoint.y))
-                    {
-                        hit = true;
-                    }
-                }
-                else if (displayObject.contains_point)
+                // already tested against hitArea if it is defined
+                if (!displayObject.hit_area && displayObject.contains_point)
                 {
                     if (displayObject.contains_point(point))
                     {

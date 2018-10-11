@@ -145,6 +145,7 @@ export default class NineSlicePlane extends Plane
         const context = renderer.context;
 
         context.globalAlpha = this.world_alpha;
+        renderer.setBlendMode(this.blend_mode);
 
         const transform = this.world_transform;
         const res = renderer.resolution;

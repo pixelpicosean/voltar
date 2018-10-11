@@ -5,7 +5,7 @@ import GraphicsData from './GraphicsData';
 import Sprite from '../sprites/Sprite';
 import { Matrix, Point, Rectangle, RoundedRectangle, Ellipse, Polygon, Circle, Bounds } from '../../math';
 import { hex2rgb, rgb2hex } from '../../utils';
-import { SHAPES, BLEND_MODES } from '../../const';
+import { SHAPES, BLEND_MODES, PI_2 } from '../../const';
 import bezier_curve_to from './utils/bezier_curve_to';
 import CanvasRenderer from '../../renderers/canvas/CanvasRenderer';
 
@@ -550,15 +550,15 @@ export default class Graphics extends Node2D
 
         if (!anticlockwise && endAngle <= startAngle)
         {
-            endAngle += Math.PI * 2;
+            endAngle += PI_2;
         }
         else if (anticlockwise && startAngle <= endAngle)
         {
-            startAngle += Math.PI * 2;
+            startAngle += PI_2;
         }
 
         const sweep = endAngle - startAngle;
-        const segs = Math.ceil(Math.abs(sweep) / (Math.PI * 2)) * 40;
+        const segs = Math.ceil(Math.abs(sweep) / (PI_2)) * 40;
 
         if (sweep === 0)
         {
@@ -756,6 +756,38 @@ export default class Graphics extends Node2D
         this.draw_shape(shape);
 
         return this;
+    }
+
+    /**
+     * Draw a star shape with an abitrary number of points.
+     *
+     * @param {number} x - Center X position of the star
+     * @param {number} y - Center Y position of the star
+     * @param {number} points - The number of points of the star, must be > 1
+     * @param {number} radius - The outer radius of the star
+     * @param {number} [inner_radius] - The inner radius between points, default half `radius`
+     * @param {number} [rotation=0] - The rotation of the star in radians, where 0 is vertical
+     * @return {V.Graphics} This Graphics object. Good for chaining method calls
+     */
+    drawStar(x, y, points, radius, inner_radius, rotation = 0) {
+        inner_radius = inner_radius || radius / 2;
+
+        const start_angle = (-1 * Math.PI / 2) + rotation;
+        const len = points * 2;
+        const delta = PI_2 / len;
+        const polygon = [];
+
+        for (let i = 0; i < len; i++) {
+            const r = i % 2 ? inner_radius : radius;
+            const angle = (i * delta) + start_angle;
+
+            polygon.push(
+                x + (r * Math.cos(angle)),
+                y + (r * Math.sin(angle))
+            );
+        }
+
+        return this.draw_polygon(polygon);
     }
 
     /**
