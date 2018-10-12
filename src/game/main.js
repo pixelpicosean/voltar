@@ -1,6 +1,6 @@
 import * as v from 'engine';
 
-import Boot from 'game/boot';
+import Boot from 'game/boot/index';
 
 
 v.loader.add('media/04b03.fnt');
