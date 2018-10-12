@@ -23,7 +23,7 @@ import { SHAPES } from '../../../const';
 export default class CanvasGraphicsRenderer
 {
     /**
-     * @param {V.CanvasRenderer} renderer - The current V renderer.
+     * @param {CanvasRenderer} renderer - The current V renderer.
      */
     constructor(renderer)
     {
@@ -33,7 +33,7 @@ export default class CanvasGraphicsRenderer
     /**
      * Renders a Graphics object to a canvas.
      *
-     * @param {V.Graphics} graphics - the actual graphics object to render
+     * @param {Graphics} graphics - the actual graphics object to render
      */
     render(graphics)
     {
@@ -42,12 +42,6 @@ export default class CanvasGraphicsRenderer
         const world_alpha = graphics.world_alpha;
         const transform = graphics.transform.world_transform;
         const resolution = renderer.resolution;
-
-         // if the tint has changed, set the graphics object to dirty.
-        if (this._prevTint !== this.tint)
-        {
-            this.dirty = true;
-        }
 
         context.setTransform(
             transform.a * resolution,
@@ -58,10 +52,10 @@ export default class CanvasGraphicsRenderer
             transform.ty * resolution
         );
 
-        if (graphics.dirty)
+        // update tint if graphics was dirty
+        if (graphics.canvas_tint_dirty !== graphics.dirty || graphics._prevTint !== graphics.tint)
         {
             this.updateGraphicsTint(graphics);
-            graphics.dirty = false;
         }
 
         renderer.setBlendMode(graphics.blend_mode);
@@ -221,11 +215,12 @@ export default class CanvasGraphicsRenderer
      * Updates the tint of a graphics object
      *
      * @private
-     * @param {V.Graphics} graphics - the graphics that will have its tint updated
+     * @param {Graphics} graphics - the graphics that will have its tint updated
      */
     updateGraphicsTint(graphics)
     {
         graphics._prevTint = graphics.tint;
+        graphics.canvas_tint_dirty = graphics.dirty;
 
         const tintR = ((graphics.tint >> 16) & 0xFF) / 255;
         const tintG = ((graphics.tint >> 8) & 0xFF) / 255;
@@ -256,7 +251,7 @@ export default class CanvasGraphicsRenderer
     /**
      * Renders a polygon.
      *
-     * @param {V.Point[]} points - The points to render
+     * @param {Point[]} points - The points to render
      * @param {boolean} close - Should the polygon be closed
      * @param {CanvasRenderingContext2D} context - The rendering context to use
      */

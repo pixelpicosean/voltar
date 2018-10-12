@@ -43,6 +43,16 @@ export default class Spritesheet
         this.textures = {};
 
         /**
+         * A map containing the textures for each animation.
+         * Can be used to create an {@link AnimatedSprite}:
+         * ```js
+         * new AnimatedSprite(sheet.animations["anim_name"])
+         * ```
+         * @member {Object}
+         */
+        this.animations = {};
+
+        /**
          * Reference to the original JSON data.
          * @type {Object}
          */
@@ -133,6 +143,7 @@ export default class Spritesheet
         if (this._frameKeys.length <= Spritesheet.BATCH_SIZE)
         {
             this._processFrames(0);
+            this._process_animations();
             this._parseComplete();
         }
         else
@@ -208,7 +219,8 @@ export default class Spritesheet
                     frame,
                     orig,
                     trim,
-                    data.rotated ? 2 : 0
+                    data.rotated ? 2 : 0,
+                    data.anchor
                 );
 
                 // lets also add the frame to pixi's global cache for from_frame and from_image functions
@@ -216,6 +228,22 @@ export default class Spritesheet
             }
 
             frameIndex++;
+        }
+    }
+
+    /**
+     * Parse animations config
+     *
+     * @private
+     */
+    _process_animations() {
+        const animations = this.data.animations || {};
+
+        for (const animName in animations) {
+            this.animations[animName] = [];
+            for (const frameName of animations[animName]) {
+                this.animations[animName].push(this.textures[frameName]);
+            }
         }
     }
 
@@ -250,6 +278,7 @@ export default class Spritesheet
             }
             else
             {
+                this._process_animations();
                 this._parseComplete();
             }
         }, 0);

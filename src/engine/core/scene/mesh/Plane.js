@@ -5,22 +5,21 @@ import Mesh from './Mesh';
  *
  *```js
  * for (let i = 0; i < 20; i++) {
- *     points.push(new V.Point(i * 50, 0));
+ *     points.push(new Point(i * 50, 0));
  * };
- * let Plane = new V.Plane(V.Texture.from_image("snake.png"), points);
+ * let Plane = new Plane(Texture.from_image("snake.png"), points);
  *  ```
  *
  * @class
- * @extends V.mesh.Mesh
- * @memberof V.mesh
+ * @extends Mesh
  *
  */
 export default class Plane extends Mesh
 {
     /**
-     * @param {V.Texture} texture - The texture to use on the Plane.
-     * @param {number} vertices_x - The number of vertices in the x-axis
-     * @param {number} vertices_y - The number of vertices in the y-axis
+     * @param {Texture} texture - The texture to use on the Plane.
+     * @param {number} [vertices_x=10] - The number of vertices in the x-axis
+     * @param {number} [vertices_y=10] - The number of vertices in the y-axis
      */
     constructor(texture, vertices_x, vertices_y)
     {

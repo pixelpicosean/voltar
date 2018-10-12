@@ -12,17 +12,17 @@ const tempPoint = new Point();
  * A sprite can be created directly from an image like this:
  *
  * ```js
- * let sprite = new V.Sprite.from_image('assets/image.png');
+ * let sprite = new Sprite.from_image('assets/image.png');
  * ```
  *
  * @class
- * @extends V.Node2D
+ * @extends Node2D
  * @memberof V
  */
 export default class Sprite extends Node2D
 {
     /**
-     * @param {V.Texture|string} texture - The texture for this sprite
+     * @param {Texture|string} texture - The texture for this sprite
      */
     constructor(texture)
     {
@@ -32,11 +32,14 @@ export default class Sprite extends Node2D
 
         /**
          * The anchor sets the origin point of the texture.
-         * The default is 0,0 this means the texture's origin is the top left
-         * Setting the anchor to 0.5,0.5 means the texture's origin is centered
-         * Setting the anchor to 1,1 would mean the texture's origin point will be the bottom right corner
+         * The default is 0,0 or taken from the {@link Texture#default_anchor|Texture}
+         * passed to the constructor. A value of 0,0 means the texture's origin is the top left.
+         * Setting the anchor to 0.5,0.5 means the texture's origin is centered.
+         * Setting the anchor to 1,1 would mean the texture's origin point will be the bottom right corner.
+         * Note: Updating the {@link Texture#default_anchor} after a Texture is
+         * created does _not_ update the Sprite's anchor values.
          *
-         * @member {V.ObservablePoint}
+         * @member {ObservablePoint}
          * @private
          */
         this._anchor = new ObservablePoint(this._onAnchorUpdate, this);
@@ -45,7 +48,7 @@ export default class Sprite extends Node2D
          * The texture that the sprite is using
          *
          * @private
-         * @member {V.Texture}
+         * @member {Texture}
          */
         this._texture = null;
 
@@ -85,18 +88,18 @@ export default class Sprite extends Node2D
         this.tint = 0xFFFFFF;
 
         /**
-         * The blend mode to be applied to the sprite. Apply a value of `V.BLEND_MODES.NORMAL` to reset the blend mode.
+         * The blend mode to be applied to the sprite. Apply a value of `BLEND_MODES.NORMAL` to reset the blend mode.
          *
          * @member {number}
-         * @default V.BLEND_MODES.NORMAL
-         * @see V.BLEND_MODES
+         * @default BLEND_MODES.NORMAL
+         * @see BLEND_MODES
          */
         this.blend_mode = BLEND_MODES.NORMAL;
 
         /**
          * The shader that will be used to render the sprite. Set to null to remove a current shader.
          *
-         * @member {V.Filter|V.Shader}
+         * @member {Filter|Shader}
          */
         this.shader = null;
 
@@ -116,6 +119,9 @@ export default class Sprite extends Node2D
                 this.texture = Texture.EMPTY;
             } else {
                 this.texture = texture;
+            }
+            if (texture.default_anchor) {
+                this._anchor.set(texture.default_anchor.x, texture.default_anchor.y);
             }
         } else {
             this.texture = Texture.EMPTY;
@@ -353,7 +359,7 @@ export default class Sprite extends Node2D
     * Renders the object using the WebGL renderer
     *
     * @private
-    * @param {V.WebGLRenderer} renderer - The webgl renderer to use.
+    * @param {WebGLRenderer} renderer - The webgl renderer to use.
     */
     _render_webGL(renderer)
     {
@@ -367,7 +373,7 @@ export default class Sprite extends Node2D
     * Renders the object using the Canvas renderer
     *
     * @private
-    * @param {V.CanvasRenderer} renderer - The renderer
+    * @param {CanvasRenderer} renderer - The renderer
     */
     _render_canvas(renderer)
     {
@@ -402,8 +408,8 @@ export default class Sprite extends Node2D
     /**
      * Gets the local bounds of the sprite object.
      *
-     * @param {V.Rectangle} rect - The output rectangle.
-     * @return {V.Rectangle} The bounds.
+     * @param {Rectangle} rect - The output rectangle.
+     * @return {Rectangle} The bounds.
      */
     get_local_bounds(rect)
     {
@@ -434,7 +440,7 @@ export default class Sprite extends Node2D
     /**
      * Tests if a point is inside this sprite
      *
-     * @param {V.Point} point - the point to test
+     * @param {Point} point - the point to test
      * @return {boolean} the result of the test
      */
     contains_point(point)
@@ -497,8 +503,8 @@ export default class Sprite extends Node2D
      * The source can be - frame id, image url, video url, canvas element, video element, base texture
      *
      * @static
-     * @param {number|string|V.BaseTexture|HTMLCanvasElement|HTMLVideoElement} source Source to create texture from
-     * @return {V.Sprite} The newly created sprite
+     * @param {number|string|BaseTexture|HTMLCanvasElement|HTMLVideoElement} source Source to create texture from
+     * @return {Sprite} The newly created sprite
      */
     static from(source)
     {
@@ -511,7 +517,7 @@ export default class Sprite extends Node2D
      *
      * @static
      * @param {string} frameId - The frame Id of the texture in the cache
-     * @return {V.Sprite} A new Sprite using a texture from the texture cache matching the frameId
+     * @return {Sprite} A new Sprite using a texture from the texture cache matching the frameId
      */
     static from_frame(frameId)
     {
@@ -532,9 +538,9 @@ export default class Sprite extends Node2D
      * @static
      * @param {string} imageId - The image url of the texture
      * @param {boolean} [crossorigin=(auto)] - if you want to specify the cross-origin parameter
-     * @param {number} [scale_mode=V.settings.SCALE_MODE] - if you want to specify the scale mode,
-     *  see {@link V.SCALE_MODES} for possible values
-     * @return {V.Sprite} A new Sprite using a texture from the texture cache matching the image id
+     * @param {number} [scale_mode=settings.SCALE_MODE] - if you want to specify the scale mode,
+     *  see {@link SCALE_MODES} for possible values
+     * @return {Sprite} A new Sprite using a texture from the texture cache matching the image id
      */
     static from_image(imageId, crossorigin, scale_mode)
     {
@@ -579,11 +585,12 @@ export default class Sprite extends Node2D
 
     /**
      * The anchor sets the origin point of the texture.
-     * The default is 0,0 this means the texture's origin is the top left
-     * Setting the anchor to 0.5,0.5 means the texture's origin is centered
-     * Setting the anchor to 1,1 would mean the texture's origin point will be the bottom right corner
+     * The default is 0,0 or taken from the {@link Texture} passed to the constructor.
+     * Setting the texture at a later point of time does not change the anchor.
      *
-     * @member {V.ObservablePoint}
+     * 0,0 means the texture's origin is the top left, 0.5,0.5 is the center, 1,1 the bottom right corner.
+     *
+     * @member {ObservablePoint}
      */
     get anchor()
     {
@@ -616,7 +623,7 @@ export default class Sprite extends Node2D
     /**
      * The texture that the sprite is using
      *
-     * @member {V.Texture}
+     * @member {Texture}
      */
     get texture()
     {
@@ -636,7 +643,7 @@ export default class Sprite extends Node2D
             value = TextureCache[p_value];
         }
 
-        this._texture = value;
+        this._texture = value || Texture.EMPTY;
         this.cached_tint = 0xFFFFFF;
 
         this._textureID = -1;

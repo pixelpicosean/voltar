@@ -1383,13 +1383,15 @@ declare module 'engine' {
         protected _fillTint: number;
     }
     export class Graphics extends Node2D {
-        protected boundsDirty: boolean;
+        protected bounds_dirty: boolean;
         protected dirty: boolean;
+        protected canvas_tint_dirty: boolean;
         protected glDirty: boolean;
 
         fill_alpha: number;
         line_width: number;
         line_color: number;
+        line_alignment: number;
         tint: number;
         blend_mode: number;
         is_mask: boolean;
@@ -1758,7 +1760,7 @@ declare module 'engine' {
         roundPixels: boolean;
         backgroundColor: number;
 
-        render(object: Node2D): void;
+        render(object: Node2D, render_texture?: RenderTexture, clear?: boolean, transform?: Matrix, skip_update_transforms?: boolean): void;
         resize(width: number, height: number): void;
         destroy(removeView?: boolean): void;
     }
@@ -1774,7 +1776,7 @@ declare module 'engine' {
         roundPixels: boolean;
         smoothProperty: string;
 
-        render(object: Node2D): void;
+        render(object: Node2D, clear?: boolean, transform?: Matrix, skip_update_transforms?: boolean): void;
         resize(w: number, h: number): void;
     }
     export class CanvasBuffer {
@@ -1842,7 +1844,7 @@ declare module 'engine' {
         currentRenderTarget: RenderTarget;
         currentRenderer: ObjectRenderer;
 
-        render(object: Node2D): void;
+        render(object: Node2D, render_texture?: RenderTexture, clear?: boolean, transform?: Matrix, skip_update_transforms?: boolean): void;
         renderDisplayObject(displayObject: Node2D, renderTarget: RenderTarget, clear: boolean): void;
         setObjectRenderer(objectRenderer: ObjectRenderer): void;
         setRenderTarget(renderTarget: RenderTarget): void;
@@ -2577,6 +2579,7 @@ declare module 'engine' {
         width: number;
         height: number;
         orig: Rectangle;
+        default_anchor: Point;
         rotate: number;
         crop: Rectangle;
 

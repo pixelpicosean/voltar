@@ -22,8 +22,7 @@ const EMPTY_POINTS = [];
  * rectangles to the display, and to color and fill them.
  *
  * @class
- * @extends V.Node2D
- * @memberof V
+ * @extends Node2D
  */
 export default class Graphics extends Node2D
 {
@@ -74,12 +73,12 @@ export default class Graphics extends Node2D
          * @member {number}
          * @default 0
          */
-        this.lineAlignment = 0.5;
+        this.line_alignment = 0.5;
 
         /**
          * Graphics data
          *
-         * @member {V.GraphicsData[]}
+         * @member {GraphicsData[]}
          * @private
          */
         this.graphics_data = [];
@@ -105,18 +104,18 @@ export default class Graphics extends Node2D
 
         /**
          * The blend mode to be applied to the graphic shape. Apply a value of
-         * `V.BLEND_MODES.NORMAL` to reset the blend mode.
+         * `BLEND_MODES.NORMAL` to reset the blend mode.
          *
          * @member {number}
-         * @default V.BLEND_MODES.NORMAL;
-         * @see V.BLEND_MODES
+         * @default BLEND_MODES.NORMAL;
+         * @see BLEND_MODES
          */
         this.blend_mode = BLEND_MODES.NORMAL;
 
         /**
          * Current path
          *
-         * @member {V.GraphicsData}
+         * @member {GraphicsData}
          * @private
          */
         this.current_path = null;
@@ -147,7 +146,7 @@ export default class Graphics extends Node2D
         /**
          * A cache of the local bounds to prevent recalculation.
          *
-         * @member {V.Rectangle}
+         * @member {Rectangle}
          * @private
          */
         this._localBounds = new Bounds();
@@ -190,6 +189,9 @@ export default class Graphics extends Node2D
         this._spriteRect = null;
         this._fastRect = false;
 
+        this._prevRectTint = null;
+        this._prevRectFillColor = null;
+
         /**
          * When cacheAsBitmap is set to true the graphics object will be rendered as if it was a sprite.
          * This is useful if your graphics element does not change often, as it will speed up the rendering
@@ -199,7 +201,7 @@ export default class Graphics extends Node2D
          *
          * @name cacheAsBitmap
          * @member {boolean}
-         * @memberof V.Graphics#
+         * @memberof Graphics#
          * @default false
          */
     }
@@ -274,7 +276,7 @@ export default class Graphics extends Node2D
      * Creates a new Graphics object with the same values as this one.
      * Note that the only the properties of the object are cloned, not its transform (position,scale,etc)
      *
-     * @return {V.Graphics} A clone of the graphics object
+     * @return {Graphics} A clone of the graphics object
      */
     clone()
     {
@@ -284,7 +286,7 @@ export default class Graphics extends Node2D
         clone.fill_alpha = this.fill_alpha;
         clone.line_width = this.line_width;
         clone.line_color = this.line_color;
-        clone.lineAlignment = this.lineAlignment;
+        clone.line_alignment = this.line_alignment;
         clone.tint = this.tint;
         clone.blend_mode = this.blend_mode;
         clone.is_mask = this.is_mask;
@@ -425,15 +427,15 @@ export default class Graphics extends Node2D
      * @param {number} [line_width=0] - width of the line to draw, will update the objects stored style
      * @param {number} [color=0] - color of the line to draw, will update the objects stored style
      * @param {number} [alpha=1] - alpha of the line to draw, will update the objects stored style
-     * @param {number} [alignment=1] - alignment of the line to draw, (0 = inner, 0.5 = middle, 1 = outter)
-     * @return {V.Graphics} This Graphics object. Good for chaining method calls
+     * @param {number} [alignment=0.5] - alignment of the line to draw, (0 = inner, 0.5 = middle, 1 = outter)
+     * @return {Graphics} This Graphics object. Good for chaining method calls
      */
     set_line_style(line_width = 0, color = 0, alpha = 1, alignment = 0.5)
     {
         this.line_width = line_width;
         this.line_color = color;
         this.line_alpha = alpha;
-        this.lineAlignment = alignment;
+        this.line_alignment = alignment;
 
         if (this.current_path)
         {
@@ -452,7 +454,7 @@ export default class Graphics extends Node2D
                 this.current_path.line_width = this.line_width;
                 this.current_path.line_color = this.line_color;
                 this.current_path.line_alpha = this.line_alpha;
-                this.current_path.lineAlignment = this.lineAlignment;
+                this.current_path.lineAlignment = this.line_alignment;
             }
         }
 
@@ -464,7 +466,7 @@ export default class Graphics extends Node2D
      *
      * @param {number} x - the X coordinate to move to
      * @param {number} y - the Y coordinate to move to
-     * @return {V.Graphics} This Graphics object. Good for chaining method calls
+     * @return {Graphics} This Graphics object. Good for chaining method calls
      */
     move_to(x, y)
     {
@@ -482,12 +484,19 @@ export default class Graphics extends Node2D
      *
      * @param {number} x - the X coordinate to draw to
      * @param {number} y - the Y coordinate to draw to
-     * @return {V.Graphics} This Graphics object. Good for chaining method calls
+     * @return {Graphics} This Graphics object. Good for chaining method calls
      */
     line_to(x, y)
     {
-        this.current_path.shape.points.push(x, y);
-        this.dirty++;
+        const points = this.current_path.shape.points;
+
+        const fromX = points[points.length - 2];
+        const fromY = points[points.length - 1];
+
+        if (fromX !== x || fromY !== y) {
+            points.push(x, y);
+            this.dirty++;
+        }
 
         return this;
     }
@@ -500,7 +509,7 @@ export default class Graphics extends Node2D
      * @param {number} cpY - Control point y
      * @param {number} toX - Destination point x
      * @param {number} toY - Destination point y
-     * @return {V.Graphics} This Graphics object. Good for chaining method calls
+     * @return {Graphics} This Graphics object. Good for chaining method calls
      */
     quadratic_curve_to(cpX, cpY, toX, toY)
     {
@@ -556,7 +565,7 @@ export default class Graphics extends Node2D
      * @param {number} cpY2 - Second Control point y
      * @param {number} toX - Destination point x
      * @param {number} toY - Destination point y
-     * @return {V.Graphics} This Graphics object. Good for chaining method calls
+     * @return {Graphics} This Graphics object. Good for chaining method calls
      */
     bezier_curve_to(cpX, cpY, cpX2, cpY2, toX, toY)
     {
@@ -599,7 +608,7 @@ export default class Graphics extends Node2D
      * @param {number} x2 - The x-coordinate of the end of the arc
      * @param {number} y2 - The y-coordinate of the end of the arc
      * @param {number} radius - The radius of the arc
-     * @return {V.Graphics} This Graphics object. Good for chaining method calls
+     * @return {Graphics} This Graphics object. Good for chaining method calls
      */
     arc_to(x1, y1, x2, y2, radius)
     {
@@ -669,7 +678,7 @@ export default class Graphics extends Node2D
      * @param {boolean} [anticlockwise=false] - Specifies whether the drawing should be
      *  counter-clockwise or clockwise. False is default, and indicates clockwise, while true
      *  indicates counter-clockwise.
-     * @return {V.Graphics} This Graphics object. Good for chaining method calls
+     * @return {Graphics} This Graphics object. Good for chaining method calls
      */
     arc(cx, cy, radius, startAngle, endAngle, anticlockwise = false)
     {
@@ -705,8 +714,15 @@ export default class Graphics extends Node2D
 
         if (points)
         {
-            if (points[points.length - 2] !== startX || points[points.length - 1] !== startY)
-            {
+            // We check how far our start is from the last existing point
+            const xDiff = Math.abs(points[points.length - 2] - startX);
+            const yDiff = Math.abs(points[points.length - 1] - startY);
+
+            if (xDiff < 0.001 && yDiff < 0.001) {
+                // If the point is very close, we don't add it, since this would lead to artifacts
+                // during tesselation due to floating point imprecision.
+            }
+            else {
                 points.push(startX, startY);
             }
         }
@@ -752,7 +768,7 @@ export default class Graphics extends Node2D
      *
      * @param {number} [color=0] - the color of the fill
      * @param {number} [alpha=1] - the alpha of the fill
-     * @return {V.Graphics} This Graphics object. Good for chaining method calls
+     * @return {Graphics} This Graphics object. Good for chaining method calls
      */
     begin_fill(color = 0, alpha = 1)
     {
@@ -776,7 +792,7 @@ export default class Graphics extends Node2D
     /**
      * Applies a fill to the lines and shapes that were added since the last call to the begin_fill() method.
      *
-     * @return {V.Graphics} This Graphics object. Good for chaining method calls
+     * @return {Graphics} This Graphics object. Good for chaining method calls
      */
     end_fill()
     {
@@ -793,7 +809,7 @@ export default class Graphics extends Node2D
      * @param {number} y - The Y coord of the top-left of the rectangle
      * @param {number} width - The width of the rectangle
      * @param {number} height - The height of the rectangle
-     * @return {V.Graphics} This Graphics object. Good for chaining method calls
+     * @return {Graphics} This Graphics object. Good for chaining method calls
      */
     draw_rect(x, y, width, height)
     {
@@ -809,7 +825,7 @@ export default class Graphics extends Node2D
      * @param {number} width - The width of the rectangle
      * @param {number} height - The height of the rectangle
      * @param {number} radius - Radius of the rectangle corners
-     * @return {V.Graphics} This Graphics object. Good for chaining method calls
+     * @return {Graphics} This Graphics object. Good for chaining method calls
      */
     draw_rounded_rect(x, y, width, height, radius)
     {
@@ -824,7 +840,7 @@ export default class Graphics extends Node2D
      * @param {number} x - The X coordinate of the center of the circle
      * @param {number} y - The Y coordinate of the center of the circle
      * @param {number} radius - The radius of the circle
-     * @return {V.Graphics} This Graphics object. Good for chaining method calls
+     * @return {Graphics} This Graphics object. Good for chaining method calls
      */
     draw_circle(x, y, radius)
     {
@@ -840,7 +856,7 @@ export default class Graphics extends Node2D
      * @param {number} y - The Y coordinate of the center of the ellipse
      * @param {number} width - The half width of the ellipse
      * @param {number} height - The half height of the ellipse
-     * @return {V.Graphics} This Graphics object. Good for chaining method calls
+     * @return {Graphics} This Graphics object. Good for chaining method calls
      */
     draw_ellipse(x, y, width, height)
     {
@@ -852,8 +868,8 @@ export default class Graphics extends Node2D
     /**
      * Draws a polygon using the given path.
      *
-     * @param {number[]|V.Point[]} path - The path data used to construct the polygon.
-     * @return {V.Graphics} This Graphics object. Good for chaining method calls
+     * @param {number[]|Point[]} path - The path data used to construct the polygon.
+     * @return {Graphics} This Graphics object. Good for chaining method calls
      */
     draw_polygon(path)
     {
@@ -899,7 +915,7 @@ export default class Graphics extends Node2D
      * @param {number} radius - The outer radius of the star
      * @param {number} [inner_radius] - The inner radius between points, default half `radius`
      * @param {number} [rotation=0] - The rotation of the star in radians, where 0 is vertical
-     * @return {V.Graphics} This Graphics object. Good for chaining method calls
+     * @return {Graphics} This Graphics object. Good for chaining method calls
      */
     drawStar(x, y, points, radius, inner_radius, rotation = 0) {
         inner_radius = inner_radius || radius / 2;
@@ -925,18 +941,19 @@ export default class Graphics extends Node2D
     /**
      * Clears the graphics that were drawn to this Graphics object, and resets fill and line style settings.
      *
-     * @return {V.Graphics} This Graphics object. Good for chaining method calls
+     * @return {Graphics} This Graphics object. Good for chaining method calls
      */
     clear()
     {
         if (this.line_width || this.filling || this.graphics_data.length > 0)
         {
             this.line_width = 0;
-            this.lineAlignment = 0.5;
+            this.line_alignment = 0.5;
 
             this.filling = false;
 
             this.bounds_dirty = -1;
+            this.canvas_tint_dirty = -1;
             this.dirty++;
             this.clear_dirty++;
             this.graphics_data.length = 0;
@@ -965,7 +982,7 @@ export default class Graphics extends Node2D
      * Renders the object using the WebGL renderer
      *
      * @private
-     * @param {V.WebGLRenderer} renderer - The renderer
+     * @param {WebGLRenderer} renderer - The renderer
      */
     _render_webGL(renderer)
     {
@@ -992,7 +1009,7 @@ export default class Graphics extends Node2D
      * Renders a sprite rectangle.
      *
      * @private
-     * @param {V.WebGLRenderer} renderer - The renderer
+     * @param {WebGLRenderer} renderer - The renderer
      */
     _renderSpriteRect(renderer)
     {
@@ -1042,7 +1059,7 @@ export default class Graphics extends Node2D
      * Renders the object using the Canvas renderer
      *
      * @private
-     * @param {V.CanvasRenderer} renderer - The renderer
+     * @param {CanvasRenderer} renderer - The renderer
      */
     _render_canvas(renderer)
     {
@@ -1077,7 +1094,7 @@ export default class Graphics extends Node2D
     /**
      * Tests if a point is inside this graphics object
      *
-     * @param {V.Point} point - the point to test
+     * @param {Point} point - the point to test
      * @return {boolean} the result of the test
      */
     contains_point(point)
@@ -1251,8 +1268,8 @@ export default class Graphics extends Node2D
     /**
      * Draws the given shape to this Graphics object. Can be any of Circle, Rectangle, Ellipse, Line or Polygon.
      *
-     * @param {V.Circle|V.Ellipse|V.Polygon|V.Rectangle|V.RoundedRectangle} shape - The shape object to draw.
-     * @return {V.GraphicsData} The generated GraphicsData object.
+     * @param {Circle|Ellipse|Polygon|Rectangle|RoundedRectangle} shape - The shape object to draw.
+     * @return {GraphicsData} The generated GraphicsData object.
      */
     draw_shape(shape)
     {
@@ -1276,7 +1293,7 @@ export default class Graphics extends Node2D
             this.filling,
             this.native_lines,
             shape,
-            this.lineAlignment
+            this.line_alignment
         );
 
         this.graphics_data.push(data);
@@ -1297,7 +1314,7 @@ export default class Graphics extends Node2D
      *
      * @param {number} scale_mode - The scale mode of the texture.
      * @param {number} resolution - The resolution of the texture.
-     * @return {V.Texture} The new texture.
+     * @return {Texture} The new texture.
      */
     generate_canvas_texture(scale_mode, resolution = 1)
     {
@@ -1331,7 +1348,7 @@ export default class Graphics extends Node2D
     /**
      * Closes the current path.
      *
-     * @return {V.Graphics} Returns itself.
+     * @return {Graphics} Returns itself.
      */
     close_path()
     {
@@ -1349,7 +1366,7 @@ export default class Graphics extends Node2D
     /**
      * Adds a hole in the current path.
      *
-     * @return {V.Graphics} Returns itself.
+     * @return {Graphics} Returns itself.
      */
     add_hole()
     {
@@ -1418,7 +1435,7 @@ Graphics._SPRITE_TEXTURE = null;
  *
  * @static
  * @constant
- * @memberof v.Graphics
+ * @memberof Graphics
  * @name CURVES
  * @type {object}
  * @property {boolean} adaptive=false - flag indicating if the resolution should be adaptive
