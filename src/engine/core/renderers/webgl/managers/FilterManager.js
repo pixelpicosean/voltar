@@ -357,9 +357,13 @@ export default class FilterManager extends WebGLManager
             shader.uniforms.filterClamp = filterClamp;
         }
 
-        // TODO Cacheing layer..
+        // TODO Caching layer..
         for (const i in uniformData)
         {
+            if (!shader.uniforms.data[i]) {
+                continue;
+            }
+
             const type = uniformData[i].type;
 
             if (type === 'sampler2d' && uniforms[i] !== 0)

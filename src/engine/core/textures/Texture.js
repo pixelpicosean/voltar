@@ -357,16 +357,18 @@ export default class Texture extends EventEmitter
      * @static
      * @param {HTMLVideoElement|string} video - The URL or actual element of the video
      * @param {number} [scale_mode=settings.SCALE_MODE] - See {@link SCALE_MODES} for possible values
+     * @param {boolean} [crossorigin=(auto)] - Should use anonymous CORS? Defaults to true if the URL is not a data-URI.
+     * @param {boolean} [autoPlay=true] - Start playing video as soon as it is loaded
      * @return {Texture} The newly created texture
      */
-    static from_video(video, scale_mode)
+    static from_video(video, scale_mode, crossorigin, autoPlay)
     {
         if (typeof video === 'string')
         {
-            return Texture.from_video_url(video, scale_mode);
+            return Texture.from_video_url(video, scale_mode, crossorigin, autoPlay);
         }
 
-        return new Texture(VideoBaseTexture.from_video(video, scale_mode));
+        return new Texture(VideoBaseTexture.from_video(video, scale_mode, autoPlay));
     }
 
     /**
@@ -375,11 +377,13 @@ export default class Texture extends EventEmitter
      * @static
      * @param {string} videoUrl - URL of the video
      * @param {number} [scale_mode=settings.SCALE_MODE] - See {@link SCALE_MODES} for possible values
+     * @param {boolean} [crossorigin=(auto)] - Should use anonymous CORS? Defaults to true if the URL is not a data-URI.
+     * @param {boolean} [autoPlay=true] - Start playing video as soon as it is loaded
      * @return {Texture} The newly created texture
      */
-    static from_video_url(videoUrl, scale_mode)
+    static from_video_url(videoUrl, scale_mode, crossorigin, autoPlay)
     {
-        return new Texture(VideoBaseTexture.from_url(videoUrl, scale_mode));
+        return new Texture(VideoBaseTexture.from_url(videoUrl, scale_mode, crossorigin, autoPlay));
     }
 
     /**

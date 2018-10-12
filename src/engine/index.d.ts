@@ -2610,8 +2610,8 @@ declare module 'engine' {
         protected set(frame: Rectangle, baseFrame: Rectangle, rotate: number): void;
     }
     export class VideoBaseTexture extends BaseTexture {
-        static from_video(video: HTMLVideoElement, scaleMode?: number): VideoBaseTexture;
-        static from_rrl(videoSrc: string | any | string[] | any[]): VideoBaseTexture;
+        static from_video(video: HTMLVideoElement, scaleMode?: number, crossorigin?: boolean, auto_play?: boolean): VideoBaseTexture;
+        static from_url(videoSrc: string | any | string[] | any[], crossorigin?: boolean, auto_play?: boolean): VideoBaseTexture;
 
         protected _loaded: boolean;
         protected _onUpdate(): void;
@@ -2619,7 +2619,7 @@ declare module 'engine' {
         protected _onPlayStop(): void;
         protected _onCanPlay(): void;
 
-        constructor(source: HTMLVideoElement, scaleMode?: number);
+        constructor(source: HTMLVideoElement, scaleMode?: number, crossorigin?: boolean, auto_play?: boolean);
 
         auto_update: boolean;
 
