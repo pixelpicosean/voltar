@@ -29,8 +29,8 @@ const tempMatrix = new Matrix();
  */
 
 /**
- * The SystemRenderer is the base for a Pixi Renderer. It is extended by the {@link V.CanvasRenderer}
- * and {@link V.WebGLRenderer} which can be used for rendering a Pixi scene.
+ * The SystemRenderer is the base for a Pixi Renderer. It is extended by the {@link CanvasRenderer}
+ * and {@link WebGLRenderer} which can be used for rendering a Pixi scene.
  *
  * @abstract
  * @class
@@ -238,6 +238,8 @@ export default class SystemRenderer extends EventEmitter
         }
     }
 
+    render(obj, tex, clear, transform, skip_transform_update) {}
+
     /**
      * Useful function that returns a texture of the display object that can then be used to create sprites
      * This can be quite useful if your displayObject is complicated and needs to be reused multiple times.
@@ -258,7 +260,7 @@ export default class SystemRenderer extends EventEmitter
         tempMatrix.tx = -region.x;
         tempMatrix.ty = -region.y;
 
-        this.render(displayObject, renderTexture, false, tempMatrix, true);
+        this.render(displayObject, renderTexture, false, tempMatrix, !!displayObject.parent);
 
         return renderTexture;
     }

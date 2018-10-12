@@ -219,4 +219,14 @@ export default {
      */
     CAN_UPLOAD_SAME_BUFFER: can_upload_same_buffer(),
 
+    /**
+     * Default Mesh `canvasPadding`.
+     *
+     * @see v.mesh.Mesh#canvasPadding
+     * @static
+     * @constant
+     * @memberof v.settings
+     * @type {number}
+     */
+    MESH_CANVAS_PADDING: 0,
 };

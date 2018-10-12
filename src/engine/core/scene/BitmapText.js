@@ -3,6 +3,7 @@ import settings from '../settings';
 import Node2D from './Node2D';
 import Sprite from './sprites/Sprite';
 import { Point, Rectangle } from '../math';
+import { getResolutionOfUrl } from '../utils';
 import removeItems from 'remove-array-items';
 import Texture from '../textures/Texture';
 
@@ -113,6 +114,13 @@ export default class BitmapText extends Node2D {
         this._max_line_height = 0;
 
         /**
+         * Letter spacing. This is useful for setting the space between characters.
+         * @member {number}
+         * @private
+         */
+        this._letter_spacing = 0;
+
+        /**
          * Text anchor. read-only
          *
          * @member {V.ObservablePoint}
@@ -155,111 +163,122 @@ export default class BitmapText extends Node2D {
      */
     update_text() {
         const data = BitmapText.fonts[this._font.name];
-        if (!data) {
-            return;
-        }
         const scale = this._font.size / data.size;
         const pos = new Point();
         const chars = [];
         const line_widths = [];
+        const text = this.text.replace(/(?:\r\n|\r)/g, '\n');
+        const text_length = text.length;
+        const max_width = this._max_width * data.size / this._font.size;
 
-        let prevCharCode = null;
-        let lastLineWidth = 0;
-        let maxLineWidth = 0;
+        let prev_char_code = null;
+        let last_line_width = 0;
+        let max_line_width = 0;
         let line = 0;
-        let lastSpace = -1;
-        let lastSpaceWidth = 0;
-        let spacesRemoved = 0;
+        let last_break_pos = -1;
+        let last_break_width = 0;
+        let spaces_removed = 0;
         let max_line_height = 0;
 
-        for (let i = 0; i < this.text.length; i++) {
-            const charCode = this.text.charCodeAt(i);
+        for (let i = 0; i < text_length; i++) {
+            const char_code = text.charCodeAt(i);
+            const char = text.charAt(i);
 
-            if (/(\s)/.test(this.text.charAt(i))) {
-                lastSpace = i;
-                lastSpaceWidth = lastLineWidth;
+            if (/(?:\s)/.test(char)) {
+                last_break_pos = i;
+                last_break_width = last_line_width;
             }
 
-            if (/(?:\r\n|\r|\n)/.test(this.text.charAt(i))) {
-                line_widths.push(lastLineWidth);
-                maxLineWidth = Math.max(maxLineWidth, lastLineWidth);
-                line++;
+            if (char === '\r' || char === '\n') {
+                line_widths.push(last_line_width);
+                max_line_width = Math.max(max_line_width, last_line_width);
+                ++line;
+                ++spaces_removed;
 
                 pos.x = 0;
                 pos.y += data.lineHeight;
-                prevCharCode = null;
+                prev_char_code = null;
                 continue;
             }
 
-            if (lastSpace !== -1 && this._max_width > 0 && pos.x * scale > this._max_width) {
-                removeItems(chars, lastSpace - spacesRemoved, i - lastSpace);
-                i = lastSpace;
-                lastSpace = -1;
-                ++spacesRemoved;
+            const char_data = data.chars[char_code];
 
-                line_widths.push(lastSpaceWidth);
-                maxLineWidth = Math.max(maxLineWidth, lastSpaceWidth);
-                line++;
-
-                pos.x = 0;
-                pos.y += data.lineHeight;
-                prevCharCode = null;
+            if (!char_data) {
                 continue;
             }
 
-            const charData = data.chars[charCode];
-
-            if (!charData) {
-                continue;
-            }
-
-            if (prevCharCode && charData.kerning[prevCharCode]) {
-                pos.x += charData.kerning[prevCharCode];
+            if (prev_char_code && char_data.kerning[prev_char_code]) {
+                pos.x += char_data.kerning[prev_char_code];
             }
 
             chars.push({
-                texture: charData.texture,
+                texture: char_data.texture,
                 line,
-                charCode,
-                position: new Point(pos.x + charData.xOffset, pos.y + charData.yOffset),
+                char_code,
+                position: new Point(pos.x + char_data.xOffset + (this._letter_spacing / 2), pos.y + char_data.yOffset),
             });
-            lastLineWidth = pos.x + (charData.texture.width + charData.xOffset);
-            pos.x += charData.xAdvance;
-            max_line_height = Math.max(max_line_height, (charData.yOffset + charData.texture.height));
-            prevCharCode = charCode;
+            pos.x += char_data.xAdvance + this._letter_spacing;
+            last_line_width = pos.x;
+            max_line_height = Math.max(max_line_height, (char_data.yOffset + char_data.texture.height));
+            prev_char_code = char_code;
+
+            if (last_break_pos !== -1 && max_width > 0 && pos.x > max_width) {
+                ++spaces_removed;
+                removeItems(chars, 1 + last_break_pos - spaces_removed, 1 + i - last_break_pos);
+                i = last_break_pos;
+                last_break_pos = -1;
+
+                line_widths.push(last_break_width);
+                max_line_width = Math.max(max_line_width, last_break_width);
+                line++;
+
+                pos.x = 0;
+                pos.y += data.lineHeight;
+                prev_char_code = null;
+            }
         }
 
-        line_widths.push(lastLineWidth);
-        maxLineWidth = Math.max(maxLineWidth, lastLineWidth);
+        const last_char = text.charAt(text.length - 1);
 
-        const lineAlignOffsets = [];
+        if (last_char !== '\r' && last_char !== '\n') {
+            if (/(?:\s)/.test(last_char)) {
+                last_line_width = last_break_width;
+            }
+
+            line_widths.push(last_line_width);
+            max_line_width = Math.max(max_line_width, last_line_width);
+        }
+
+        const line_align_offsets = [];
 
         for (let i = 0; i <= line; i++) {
             let alignOffset = 0;
 
             if (this._font.align === 'right') {
-                alignOffset = maxLineWidth - line_widths[i];
-            } else if (this._font.align === 'center') {
-                alignOffset = (maxLineWidth - line_widths[i]) / 2;
+                alignOffset = max_line_width - line_widths[i];
+            }
+            else if (this._font.align === 'center') {
+                alignOffset = (max_line_width - line_widths[i]) / 2;
             }
 
-            lineAlignOffsets.push(alignOffset);
+            line_align_offsets.push(alignOffset);
         }
 
-        const lenChars = chars.length;
+        const len_chars = chars.length;
         const tint = this.tint;
 
-        for (let i = 0; i < lenChars; i++) {
+        for (let i = 0; i < len_chars; i++) {
             let c = this._glyphs[i]; // get the next glyph sprite
 
             if (c) {
                 c.texture = chars[i].texture;
-            } else {
+            }
+            else {
                 c = new Sprite(chars[i].texture);
                 this._glyphs.push(c);
             }
 
-            c.position.x = (chars[i].position.x + lineAlignOffsets[chars[i].line]) * scale;
+            c.position.x = (chars[i].position.x + line_align_offsets[chars[i].line]) * scale;
             c.position.y = chars[i].position.y * scale;
             c.scale.x = c.scale.y = scale;
             c.tint = tint;
@@ -270,16 +289,16 @@ export default class BitmapText extends Node2D {
         }
 
         // remove unnecessary children.
-        for (let i = lenChars; i < this._glyphs.length; ++i) {
+        for (let i = len_chars; i < this._glyphs.length; ++i) {
             this.remove_child(this._glyphs[i]);
         }
 
-        this._text_width = maxLineWidth * scale;
+        this._text_width = max_line_width * scale;
         this._text_height = (pos.y + data.lineHeight) * scale;
 
         // apply anchor
         if (this.anchor.x !== 0 || this.anchor.y !== 0) {
-            for (let i = 0; i < lenChars; i++) {
+            for (let i = 0; i < len_chars; i++) {
                 this._glyphs[i].x -= this._text_width * this.anchor.x;
                 this._glyphs[i].y -= this._text_height * this.anchor.y;
             }
@@ -465,6 +484,23 @@ export default class BitmapText extends Node2D {
     }
 
     /**
+     * Additional space between characters.
+     *
+     * @member {number}
+     */
+    get letter_spacing() {
+        return this._letter_spacing;
+    }
+
+    set letter_spacing(value) // eslint-disable-line require-jsdoc
+    {
+        if (this._letter_spacing !== value) {
+            this._letter_spacing = value;
+            this.dirty = true;
+        }
+    }
+
+    /**
      * The height of the overall text, different from fontSize,
      * which is defined in the style object
      *
@@ -482,19 +518,36 @@ export default class BitmapText extends Node2D {
      *
      * @static
      * @param {XMLDocument} xml - The XML document data.
-     * @param {v.Texture} texture - Texture with all symbols.
+     * @param {Object.<string, Texture>|Texture|Texture[]} textures - List of textures for each page.
+     *  If providing an object, the key is the `<page>` element's `file` attribute in the FNT file.
      * @return {Object} Result font object with font, size, lineHeight and char fields.
      */
-    static register_font(xml, texture) {
+    static register_font(xml, textures) {
         const data = {};
         const info = xml.getElementsByTagName('info')[0];
         const common = xml.getElementsByTagName('common')[0];
-        const res = texture.base_texture.resolution || settings.RESOLUTION;
+        const pages = xml.getElementsByTagName('page');
+        const res = getResolutionOfUrl(pages[0].getAttribute('file'), settings.RESOLUTION);
+        const pagesTextures = {};
 
         data.font = info.getAttribute('face');
         data.size = parseInt(info.getAttribute('size'), 10);
         data.lineHeight = parseInt(common.getAttribute('lineHeight'), 10) / res;
         data.chars = {};
+
+        // Single texture, convert to list
+        if (textures instanceof Texture) {
+            textures = [textures];
+        }
+
+        // Convert the input Texture, Textures or object
+        // into a page Texture lookup by "id"
+        for (let i = 0; i < pages.length; i++) {
+            const id = pages[i].getAttribute('id');
+            const file = pages[i].getAttribute('file');
+
+            pagesTextures[id] = textures instanceof Array ? textures[i] : textures[file];
+        }
 
         // parse letters
         const letters = xml.getElementsByTagName('char');
@@ -502,10 +555,10 @@ export default class BitmapText extends Node2D {
         for (let i = 0; i < letters.length; i++) {
             const letter = letters[i];
             const charCode = parseInt(letter.getAttribute('id'), 10);
-
+            const page = letter.getAttribute('page') || 0;
             const textureRect = new Rectangle(
-                (parseInt(letter.getAttribute('x'), 10) / res) + (texture.frame.x / res),
-                (parseInt(letter.getAttribute('y'), 10) / res) + (texture.frame.y / res),
+                (parseInt(letter.getAttribute('x'), 10) / res) + (pagesTextures[page].frame.x / res),
+                (parseInt(letter.getAttribute('y'), 10) / res) + (pagesTextures[page].frame.y / res),
                 parseInt(letter.getAttribute('width'), 10) / res,
                 parseInt(letter.getAttribute('height'), 10) / res
             );
@@ -515,8 +568,8 @@ export default class BitmapText extends Node2D {
                 yOffset: parseInt(letter.getAttribute('yoffset'), 10) / res,
                 xAdvance: parseInt(letter.getAttribute('xadvance'), 10) / res,
                 kerning: {},
-                texture: new Texture(texture.base_texture, textureRect),
-
+                texture: new Texture(pagesTextures[page].base_texture, textureRect),
+                page,
             };
         }
 

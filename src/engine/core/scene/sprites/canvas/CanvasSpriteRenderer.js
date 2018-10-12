@@ -92,8 +92,8 @@ export default class CanvasSpriteRenderer
                 dy = 0;
             }
 
-            dx -= width / 2;
-            dy -= height / 2;
+            dx -= width * 0.5;
+            dy -= height * 0.5;
 
             // Allow for pixel rounding
             if (renderer.pixel_snap)

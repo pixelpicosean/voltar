@@ -54,6 +54,7 @@ export default class MeshSpriteRenderer
             );
         }
 
+        renderer.context.globalAlpha = mesh.world_alpha;
         renderer.setBlendMode(mesh.blend_mode);
 
         if (mesh.draw_mode === Mesh.DRAW_MODES.TRIANGLE_MESH)
@@ -170,10 +171,12 @@ export default class MeshSpriteRenderer
         let y1 = vertices[index1 + 1];
         let y2 = vertices[index2 + 1];
 
-        if (mesh.canvas_padding > 0)
+        const canvas_padding = mesh.canvas_padding / this.renderer.resolution;
+
+        if (canvas_padding > 0)
         {
-            const paddingX = mesh.canvas_padding / mesh.world_transform.a;
-            const paddingY = mesh.canvas_padding / mesh.world_transform.d;
+            const paddingX = canvas_padding / Math.abs(mesh.world_transform.a);
+            const paddingY = canvas_padding / Math.abs(mesh.world_transform.d);
             const centerX = (x0 + x1 + x2) / 3;
             const centerY = (y0 + y1 + y2) / 3;
 

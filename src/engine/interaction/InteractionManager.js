@@ -11,7 +11,7 @@ core.utils.mixins.delay_mixin(
     interactive_target
 );
 
-const MOUSE_POINTER_ID = 'MOUSE';
+const MOUSE_POINTER_ID = 1;
 
 // helpers for hit_test() - only used inside hit_test()
 const hit_test_event = {
@@ -650,7 +650,7 @@ export default class InteractionManager extends EventEmitter
     /**
      * Hit tests a point against the display tree, returning the first interactive object that is hit.
      *
-     * @param {Point} globalPoint - A point to hit test with, in global space.
+     * @param {Point} global_point - A point to hit test with, in global space.
      * @param {Node2D} [root] - The root display object to start from. If omitted, defaults
      * to the last rendered root of the associated renderer.
      * @return {Node2D} The hit display object, if any.
@@ -1015,24 +1015,41 @@ export default class InteractionManager extends EventEmitter
         let hit = false;
         let interactiveParent = interactive;
 
-        // if the displayobject has a hit_area, then it does not need to hit_test children.
+        // Flag here can set to false if the event is outside the parents hitArea or mask
+        let hit_test_children = true;
+
+        // If there is a hitArea, no need to test against anything else if the pointer is not within the hitArea
+        // There is also no longer a need to hitTest children.
         if (displayObject.hit_area)
         {
+            if (hit_test) {
+                displayObject.world_transform.apply_inverse(point, this._tempPoint);
+                if (!displayObject.hitArea.contains(this._tempPoint.x, this._tempPoint.y)) {
+                    hit_test = false;
+                    hit_test_children = false;
+                }
+                else {
+                    hit = true;
+                }
+            }
             interactiveParent = false;
         }
-        // it has a mask! Then lets hit test that before continuing
-        else if (hit_test && displayObject._mask)
+        // If there is a mask, no need to test against anything else if the pointer is not within the mask
+        else if (displayObject._mask)
         {
-            if (!displayObject._mask.contains_point(point))
+            if (hit_test)
             {
-                hit_test = false;
+                if (!displayObject._mask.contains_point(point)) {
+                    hit_test = false;
+                    hit_test_children = false;
+                }
             }
         }
 
         // ** FREE TIP **! If an object is not interactive or has no buttons in it
         // (such as a game scene!) set interactive_children to false for that displayObject.
         // This will allow pixi to completely ignore and bypass checking the displayObjects children.
-        if (displayObject.interactive_children && displayObject.children)
+        if (hit_test_children && displayObject.interactive_children && displayObject.children)
         {
             const children = displayObject.children;
 
@@ -1082,15 +1099,8 @@ export default class InteractionManager extends EventEmitter
             // looking for an interactive child, just in case we hit one
             if (hit_test && !interactionEvent.target)
             {
-                if (displayObject.hit_area)
-                {
-                    displayObject.world_transform.apply_inverse(point, this._tempPoint);
-                    if (displayObject.hit_area.contains(this._tempPoint.x, this._tempPoint.y))
-                    {
-                        hit = true;
-                    }
-                }
-                else if (displayObject.contains_point)
+                // already tested against hitArea if it is defined
+                if (!displayObject.hit_area && displayObject.contains_point)
                 {
                     if (displayObject.contains_point(point))
                     {
@@ -1256,7 +1266,7 @@ export default class InteractionManager extends EventEmitter
             else if (event.pointerType === 'touch')
             {
                 this.emit(cancelled ? 'touchcancel' : `touchend${eventAppend}`, interactionEvent);
-                this.release_interaction_data_for_pointer_id(event.pointerId, interactionData);
+                this.release_interaction_data_for_pointer_id(event.pointerId);
             }
         }
     }
@@ -1333,6 +1343,9 @@ export default class InteractionManager extends EventEmitter
         const isTouch = data.pointer_type === 'touch';
 
         const isMouse = (data.pointer_type === 'mouse' || data.pointer_type === 'pen');
+        // need to track mouse down status in the mouse block so that we can emit
+        // event in a later block
+        let isMouseTap = false;
 
         // Mouse only
         if (isMouse)
@@ -1352,6 +1365,8 @@ export default class InteractionManager extends EventEmitter
                 if (isDown)
                 {
                     this.dispatch_event(displayObject, isRightButton ? 'rightclick' : 'click', interactionEvent);
+                    // because we can confirm that the mousedown happened on this object, emit pointertap
+                    isMouseTap = true;
                 }
             }
             else if (isDown)
@@ -1380,7 +1395,11 @@ export default class InteractionManager extends EventEmitter
 
             if (trackingData)
             {
-                this.dispatch_event(displayObject, 'pointertap', interactionEvent);
+                // emit pointertap if not a mouse, or if the mouse block decided it was a tap
+                if (!isMouse || isMouseTap)
+                {
+                    this.dispatch_event(displayObject, 'pointertap', interactionEvent);
+                }
                 if (isTouch)
                 {
                     this.dispatch_event(displayObject, 'tap', interactionEvent);
@@ -1415,7 +1434,7 @@ export default class InteractionManager extends EventEmitter
 
         const events = this.normalize_to_pointer_data(original_event);
 
-        if (events[0].pointer_type === 'mouse')
+        if (events[0].pointerType === 'mouse' || events[0].pointerType === 'pen')
         {
             this.did_move = true;
 
@@ -1447,7 +1466,7 @@ export default class InteractionManager extends EventEmitter
             if (event.pointerType === 'mouse' || event.pointerType === 'pen') this.emit('mousemove', interactionEvent);
         }
 
-        if (events[0].pointer_type === 'mouse')
+        if (events[0].pointerType === 'mouse' || events[0].pointerType === 'pen')
         {
             this.set_cursor_mode(this.cursor);
 
@@ -1648,7 +1667,7 @@ export default class InteractionManager extends EventEmitter
         }
         // copy properties from the event, so that we can make sure that touch/pointer specific
         // data is available
-        interactionData._copyEvent(event);
+        interactionData.copyEvent(event);
 
         return interactionData;
     }
@@ -1666,7 +1685,7 @@ export default class InteractionManager extends EventEmitter
         if (interactionData)
         {
             delete this.active_interaction_data[pointer_id];
-            interactionData._reset();
+            interactionData.reset();
             this.interaction_data_pool.push(interactionData);
         }
     }
@@ -1690,21 +1709,21 @@ export default class InteractionManager extends EventEmitter
         // This is the way InteractionManager processed touch events before the refactoring, so I've kept
         // it here. But it doesn't make that much sense to me, since map_position_to_point already factors
         // in this.resolution, so this just divides by this.resolution twice for touch events...
-        if (navigator.isCocoonJS && pointerEvent.pointer_type === 'touch')
+        if (navigator.isCocoonJS && pointerEvent.pointerType === 'touch')
         {
             interactionData.global.x = interactionData.global.x / this.resolution;
             interactionData.global.y = interactionData.global.y / this.resolution;
         }
 
         // Not really sure why this is happening, but it's how a previous version handled things
-        if (pointerEvent.pointer_type === 'touch')
+        if (pointerEvent.pointerType === 'touch')
         {
             pointerEvent.globalX = interactionData.global.x;
             pointerEvent.globalY = interactionData.global.y;
         }
 
         interactionData.original_event = pointerEvent;
-        interactionEvent._reset();
+        interactionEvent.reset();
 
         return interactionEvent;
     }

@@ -168,8 +168,8 @@ export default class Text extends Sprite
         const maxLineWidth = measured.maxLineWidth;
         const fontProperties = measured.fontProperties;
 
-        this.canvas.width = Math.ceil((width + (style.padding * 2)) * this.resolution);
-        this.canvas.height = Math.ceil((height + (style.padding * 2)) * this.resolution);
+        this.canvas.width = Math.ceil((Math.max(1, width) + (style.padding * 2)) * this.resolution);
+        this.canvas.height = Math.ceil((Math.max(1, height) + (style.padding * 2)) * this.resolution);
 
         context.scale(this.resolution, this.resolution);
 
@@ -342,9 +342,11 @@ export default class Text extends Sprite
         {
             const trimmed = trim_canvas(canvas);
 
-            canvas.width = trimmed.width;
-            canvas.height = trimmed.height;
-            this.context.putImageData(trimmed.data, 0, 0);
+            if (trimmed.data) {
+                canvas.width = trimmed.width;
+                canvas.height = trimmed.height;
+                this.context.putImageData(trimmed.data, 0, 0);
+            }
         }
 
         const texture = this._texture;

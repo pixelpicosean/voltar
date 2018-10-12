@@ -17,13 +17,30 @@ class FilterState
          * @type {RenderTarget}
          */
         this.renderTarget = null;
+        this.target = null;
+        this.resolution = 1;
+
+        // those three objects are used only for root
+        // re-assigned for everything else
         this.sourceFrame = new Rectangle();
         this.destinationFrame = new Rectangle();
         this.filters = [];
         this.target = null;
         this.resolution = 1;
     }
+
+    /**
+     * clears the state
+     */
+    clear()
+    {
+        this.filters = null;
+        this.target = null;
+        this.renderTarget = null;
+    }
 }
+
+const screenKey = 'screen';
 
 export default class FilterManager extends WebGLManager
 {
@@ -48,6 +65,11 @@ export default class FilterManager extends WebGLManager
          * @type {Array<Filter>}
          */
         this.managedFilters = [];
+
+        this.renderer.on('prerender', this.onPrerender, this);
+
+        this._screenWidth = renderer.view.width;
+        this._screenHeight = renderer.view.height;
     }
 
     /**
@@ -82,16 +104,23 @@ export default class FilterManager extends WebGLManager
 
         // get the current filter state..
         let currentState = filterData.stack[++filterData.index];
+        const renderTargetFrame = filterData.stack[0].destinationFrame;
 
         if (!currentState)
         {
             currentState = filterData.stack[filterData.index] = new FilterState();
         }
 
+        const fullScreen = target.filter_area
+            && target.filter_area.x === 0
+            && target.filter_area.y === 0
+            && target.filter_area.width === renderer.screen.width
+            && target.filter_area.height === renderer.screen.height;
+
         // for now we go off the filter of the first resolution..
         const resolution = filters[0].resolution;
         const padding = filters[0].padding | 0;
-        const target_bounds = target.filter_area || target.get_bounds(true);
+        const target_bounds = fullScreen ? renderer.screen : (target.filter_area || target.get_bounds(true));
         const sourceFrame = currentState.sourceFrame;
         const destinationFrame = currentState.destinationFrame;
 
@@ -100,19 +129,22 @@ export default class FilterManager extends WebGLManager
         sourceFrame.width = ((target_bounds.width * resolution) | 0) / resolution;
         sourceFrame.height = ((target_bounds.height * resolution) | 0) / resolution;
 
-        if (filterData.stack[0].renderTarget.transform)
-        { //
-
-            // TODO we should fit the rect around the transform..
-        }
-        else if (filters[0].autoFit)
+        if (!fullScreen)
         {
-            sourceFrame.fit(filterData.stack[0].destinationFrame);
-        }
+            if (filterData.stack[0].renderTarget.transform)
+            { //
 
-        // lets apply the padding After we fit the element to the screen.
-        // this should stop the strange side effects that can occur when cropping to the edges
-        sourceFrame.pad(padding);
+                // TODO we should fit the rect around the transform..
+            }
+            else if (filters[0].autoFit)
+            {
+                sourceFrame.fit(renderTargetFrame);
+            }
+
+            // lets apply the padding After we fit the element to the screen.
+            // this should stop the strange side effects that can occur when cropping to the edges
+            sourceFrame.pad(padding);
+        }
 
         destinationFrame.width = sourceFrame.width;
         destinationFrame.height = sourceFrame.height;
@@ -188,6 +220,7 @@ export default class FilterManager extends WebGLManager
             this.freePotRenderTarget(flop);
         }
 
+        currentState.clear();
         filterData.index--;
 
         if (filterData.index === 0)
@@ -324,9 +357,13 @@ export default class FilterManager extends WebGLManager
             shader.uniforms.filterClamp = filterClamp;
         }
 
-        // TODO Cacheing layer..
+        // TODO Caching layer..
         for (const i in uniformData)
         {
+            if (!shader.uniforms.data[i]) {
+                continue;
+            }
+
             const type = uniformData[i].type;
 
             if (type === 'sampler2d' && uniforms[i] !== 0)
@@ -495,6 +532,8 @@ export default class FilterManager extends WebGLManager
         const renderer = this.renderer;
         const filters = this.managedFilters;
 
+        renderer.off('prerender', this.onPrerender, this);
+
         for (let i = 0; i < filters.length; i++)
         {
             if (!contextLost)
@@ -530,11 +569,19 @@ export default class FilterManager extends WebGLManager
      */
     getPotRenderTarget(gl, minWidth, minHeight, resolution)
     {
-        // TODO you could return a bigger texture if there is not one in the pool?
-        minWidth = bitTwiddle.nextPow2(minWidth * resolution);
-        minHeight = bitTwiddle.nextPow2(minHeight * resolution);
+        let key = screenKey;
 
-        const key = ((minWidth & 0xFFFF) << 16) | (minHeight & 0xFFFF);
+        minWidth *= resolution;
+        minHeight *= resolution;
+
+        if (minWidth !== this._screenWidth
+            || minHeight !== this._screenHeight)
+        {
+            // TODO you could return a bigger texture if there is not one in the pool?
+            minWidth = bitTwiddle.nextPow2(minWidth * resolution);
+            minHeight = bitTwiddle.nextPow2(minHeight * resolution);
+            key = ((minWidth & 0xFFFF) << 16) | (minHeight & 0xFFFF);
+        }
 
         if (!this.pool[key])
         {
@@ -563,6 +610,7 @@ export default class FilterManager extends WebGLManager
         renderTarget.resolution = resolution;
         renderTarget.defaultFrame.width = renderTarget.size.width = minWidth / resolution;
         renderTarget.defaultFrame.height = renderTarget.size.height = minHeight / resolution;
+        renderTarget.filterPoolKey = key;
 
         return renderTarget;
     }
@@ -596,10 +644,27 @@ export default class FilterManager extends WebGLManager
      */
     freePotRenderTarget(renderTarget)
     {
-        const minWidth = renderTarget.size.width * renderTarget.resolution;
-        const minHeight = renderTarget.size.height * renderTarget.resolution;
-        const key = ((minWidth & 0xFFFF) << 16) | (minHeight & 0xFFFF);
+        this.pool[renderTarget.filterPoolKey].push(renderTarget);
+    }
 
-        this.pool[key].push(renderTarget);
+    /**
+     * Called before the renderer starts rendering.
+     *
+     */
+    onPrerender() {
+        if (this._screenWidth !== this.renderer.view.width
+            || this._screenHeight !== this.renderer.view.height) {
+            this._screenWidth = this.renderer.view.width;
+            this._screenHeight = this.renderer.view.height;
+
+            const textures = this.pool[screenKey];
+
+            if (textures) {
+                for (let j = 0; j < textures.length; j++) {
+                    textures[j].destroy(true);
+                }
+            }
+            this.pool[screenKey] = [];
+        }
     }
 }

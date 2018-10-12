@@ -62,7 +62,7 @@ export default class InteractionEvent
      *
      * @private
      */
-    _reset()
+    reset()
     {
         this.stopped = false;
         this.current_target = null;

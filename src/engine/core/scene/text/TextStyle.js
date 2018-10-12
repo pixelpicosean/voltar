@@ -30,10 +30,20 @@ const default_style = {
     strokeThickness: 0,
     textBaseline: 'alphabetic',
     trim: false,
+    whiteSpace: 'pre',
     wordWrap: false,
     wordWrapWidth: 100,
     leading: 0,
 };
+
+const genericFontFamilies = [
+    'serif',
+    'sans-serif',
+    'monospace',
+    'cursive',
+    'fantasy',
+    'system-ui',
+]
 
 /**
  * A TextStyle Object decorates a Text Object. It can be shared between
@@ -60,8 +70,8 @@ export default class TextStyle
      *  fillstyle that will be used on the text e.g 'red', '#00FF00'. Can be an array to create a gradient
      *  eg ['#000000','#FFFFFF']
      * {@link https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/fillStyle|MDN}
-     * @param {number} [style.fillGradientType=V.TEXT_GRADIENT.LINEAR_VERTICAL] - If fill is an array of colours
-     *  to create a gradient, this can change the type/direction of the gradient. See {@link V.TEXT_GRADIENT}
+     * @param {number} [style.fillGradientType=TEXT_GRADIENT.LINEAR_VERTICAL] - If fill is an array of colours
+     *  to create a gradient, this can change the type/direction of the gradient. See {@link TEXT_GRADIENT}
      * @param {number[]} [style.fillGradientStops] - If fill is an array of colours to create a gradient, this array can set
      * the stop points (numbers between 0 and 1) for the color, overriding the default behaviour of evenly spacing them.
      * @param {string|string[]} [style.fontFamily='Arial'] - The font family
@@ -87,6 +97,8 @@ export default class TextStyle
      *  Default is 0 (no stroke)
      * @param {boolean} [style.trim=false] - Trim transparent borders
      * @param {string} [style.textBaseline='alphabetic'] - The baseline of the text that is rendered.
+     * @param {boolean} [style.whiteSpace='pre'] - Determines whether newlines & spaces are collapsed or preserved "normal"
+     *      (collapse, collapse), "pre" (preserve, preserve) | "pre-line" (preserve, collapse). It needs wordWrap to be set to true
      * @param {boolean} [style.wordWrap=false] - Indicates if word wrap should be used
      * @param {number} [style.wordWrapWidth=100] - The width at which text will wrap, it needs wordWrap to be set to true
      */
@@ -103,7 +115,7 @@ export default class TextStyle
      * Creates a new TextStyle object with the same values as this one.
      * Note that the only the properties of the object are cloned.
      *
-     * @return {V.TextStyle} New cloned TextStyle object
+     * @return {TextStyle} New cloned TextStyle object
      */
     clone()
     {
@@ -607,6 +619,29 @@ export default class TextStyle
     }
 
     /**
+     * How newlines and spaces should be handled.
+     * Default is 'pre' (preserve, preserve).
+     *
+     *  value       | New lines     |   Spaces
+     *  ---         | ---           |   ---
+     * 'normal'     | Collapse      |   Collapse
+     * 'pre'        | Preserve      |   Preserve
+     * 'pre-line'   | Preserve      |   Collapse
+     *
+     * @member {string}
+     */
+    get whiteSpace() {
+        return this._whiteSpace;
+    }
+    set whiteSpace(whiteSpace) // eslint-disable-line require-jsdoc
+    {
+        if (this._whiteSpace !== whiteSpace) {
+            this._whiteSpace = whiteSpace;
+            this.styleID++;
+        }
+    }
+
+    /**
      * Indicates if word wrap should be used
      *
      * @member {boolean}
@@ -666,8 +701,8 @@ export default class TextStyle
             // Trim any extra white-space
             let fontFamily = fontFamilies[i].trim();
 
-            // Check if font already contains strings
-            if (!(/([\"\'])[^\'\"]+\1/).test(fontFamily))
+            // Check if font is already escaped in quotes except for CSS generic fonts
+            if (!(/([\"\'])[^\'\"]+\1/).test(fontFamily) && genericFontFamilies.indexOf(fontFamily) < 0)
             {
                 fontFamily = `"${fontFamily}"`;
             }

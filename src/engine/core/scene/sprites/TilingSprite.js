@@ -301,7 +301,7 @@ export default class TilingSprite extends Sprite
             this._bounds.min_x = this._width * -this._anchor._x;
             this._bounds.min_y = this._height * -this._anchor._y;
             this._bounds.max_x = this._width * (1 - this._anchor._x);
-            this._bounds.max_y = this._height * (1 - this._anchor._x);
+            this._bounds.max_y = this._height * (1 - this._anchor._y);
 
             if (!rect)
             {
@@ -412,7 +412,7 @@ export default class TilingSprite extends Sprite
      * @param {boolean} [crossorigin] - if you want to specify the cross-origin parameter
      * @param {number} [scale_mode=V.settings.SCALE_MODE] - if you want to specify the scale mode,
      *  see {@link V.SCALE_MODES} for possible values
-     * @return {V.extras.TilingSprite} A new TilingSprite using a texture from the texture cache matching the image id
+     * @return {v.extras.TilingSprite} A new TilingSprite using a texture from the texture cache matching the image id
      */
     static from_image(imageId, width, height, crossorigin, scale_mode)
     {

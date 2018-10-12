@@ -15,14 +15,22 @@ export default class GraphicsData
      * @param {number} fill_alpha - the alpha of the fill
      * @param {boolean} fill - whether or not the shape is filled with a colour
      * @param {boolean} native_lines - the method for drawing lines
-     * @param {V.Circle|V.Rectangle|V.Ellipse|V.Polygon} shape - The shape object to draw.
+     * @param {v.Circle|v.Rectangle|v.Ellipse|v.Polygon} shape - The shape object to draw.
+     * @param {number} lineAlignment - the alignment of the line.
      */
-    constructor(line_width, line_color, line_alpha, fillColor, fill_alpha, fill, native_lines, shape)
+    constructor(line_width, line_color, line_alpha, fillColor, fill_alpha, fill, native_lines, shape, lineAlignment)
     {
         /**
          * @member {number} the width of the line to draw
          */
         this.line_width = line_width;
+        /**
+         * The alignment of any lines drawn (0.5 = middle, 1 = outter, 0 = inner).
+         *
+         * @member {number}
+         * @default 0
+         */
+        this.lineAlignment = lineAlignment;
         /**
          * @member {boolean} if true the liens will be draw using LINES instead of TRIANGLE_STRIP
          */

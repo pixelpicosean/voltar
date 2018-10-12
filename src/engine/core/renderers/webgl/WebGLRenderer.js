@@ -283,7 +283,7 @@ export default class WebGLRenderer extends SystemRenderer
      * @param {Node2D} displayObject - the object to be rendered
      * @param {RenderTexture} renderTexture - The render texture to render to.
      * @param {boolean} [clear] - Should the canvas be cleared before the new render
-     * @param {Transform} [transform] - A transform to apply to the render texture before rendering.
+     * @param {Matrix} [transform] - A transform to apply to the render texture before rendering.
      * @param {boolean} [skipUpdateTransform] - Should we skip the update transform pass?
      */
     render(displayObject, renderTexture, clear, transform, skipUpdateTransform)

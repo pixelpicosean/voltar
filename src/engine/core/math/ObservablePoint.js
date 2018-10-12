@@ -7,7 +7,6 @@ import Point from './Point';
  * An observable point is a point that triggers a callback when the point's position is changed.
  *
  * @class
- * @memberof V
  */
 export default class ObservablePoint
 {
@@ -51,7 +50,7 @@ export default class ObservablePoint
     /**
      * Copies the data from another point
      *
-     * @param {V.Point|V.ObservablePoint} point - point to copy from
+     * @param {Point|ObservablePoint} point - point to copy from
      */
     copy(point)
     {
@@ -116,7 +115,7 @@ export default class ObservablePoint
         const len = this.length();
         const v = this.clone();
         if (len > 0 && length < len) {
-            v.scale(length / len);
+            scale(length / len);
         }
         return v;
     }

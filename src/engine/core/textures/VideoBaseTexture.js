@@ -12,13 +12,13 @@ import determine_cross_origin from '../utils/determine_cross_origin';
  * This can be used in several ways, such as:
  *
  * ```js
- * let texture = V.VideoBaseTexture.from_url('http://mydomain.com/video.mp4');
+ * let texture = VideoBaseTexture.from_url('http://mydomain.com/video.mp4');
  *
- * let texture = V.VideoBaseTexture.from_url({ src: 'http://mydomain.com/video.mp4', mime: 'video/mp4' });
+ * let texture = VideoBaseTexture.from_url({ src: 'http://mydomain.com/video.mp4', mime: 'video/mp4' });
  *
- * let texture = V.VideoBaseTexture.from_urls(['/video.webm', '/video.mp4']);
+ * let texture = VideoBaseTexture.from_urls(['/video.webm', '/video.mp4']);
  *
- * let texture = V.VideoBaseTexture.from_urls([
+ * let texture = VideoBaseTexture.from_urls([
  *     { src: '/video.webm', mime: 'video/webm' },
  *     { src: '/video.mp4', mime: 'video/mp4' }
  * ]);
@@ -27,16 +27,17 @@ import determine_cross_origin from '../utils/determine_cross_origin';
  * See the ["deus" demo](http://www.goodboydigital.com/pixijs/examples/deus/).
  *
  * @class
- * @extends V.BaseTexture
+ * @extends BaseTexture
  * @memberof V
  */
 export default class VideoBaseTexture extends BaseTexture
 {
     /**
      * @param {HTMLVideoElement} source - Video source
-     * @param {number} [scale_mode=V.settings.SCALE_MODE] - See {@link V.SCALE_MODES} for possible values
+     * @param {number} [scale_mode=settings.SCALE_MODE] - See {@link SCALE_MODES} for possible values
+     * @param {boolean} [autoPlay=true] - Start playing video as soon as it is loaded
      */
-    constructor(source, scale_mode)
+    constructor(source, scale_mode, autoPlay = true)
     {
         if (!source)
         {
@@ -67,7 +68,7 @@ export default class VideoBaseTexture extends BaseTexture
          * @member {boolean}
          * @default true
          */
-        this.auto_play = true;
+        this.auto_play = autoPlay;
 
         this.update = this.update.bind(this);
         this._onCanPlay = this._onCanPlay.bind(this);
@@ -210,10 +211,11 @@ export default class VideoBaseTexture extends BaseTexture
      *
      * @static
      * @param {HTMLVideoElement} video - Video to create texture from
-     * @param {number} [scale_mode=V.settings.SCALE_MODE] - See {@link V.SCALE_MODES} for possible values
-     * @return {V.VideoBaseTexture} Newly created VideoBaseTexture
+     * @param {number} [scale_mode=settings.SCALE_MODE] - See {@link SCALE_MODES} for possible values
+     * @param {boolean} [autoPlay=true] - Start playing video as soon as it is loaded
+     * @return {VideoBaseTexture} Newly created VideoBaseTexture
      */
-    static from_video(video, scale_mode)
+    static from_video(video, scale_mode, autoPlay)
     {
         if (!video._pixiId)
         {
@@ -224,7 +226,7 @@ export default class VideoBaseTexture extends BaseTexture
 
         if (!base_texture)
         {
-            base_texture = new VideoBaseTexture(video, scale_mode);
+            base_texture = new VideoBaseTexture(video, scale_mode, autoPlay);
             BaseTexture.add_to_cache(base_texture, video._pixiId);
         }
 
@@ -240,11 +242,12 @@ export default class VideoBaseTexture extends BaseTexture
      * @param {string} [videoSrc.src] - One of the source urls for the video
      * @param {string} [videoSrc.mime] - The mimetype of the video (e.g. 'video/mp4'). If not specified
      *  the url's extension will be used as the second part of the mime type.
-     * @param {number} scale_mode - See {@link V.SCALE_MODES} for possible values
+     * @param {number} scale_mode - See {@link SCALE_MODES} for possible values
      * @param {boolean} [crossorigin=(auto)] - Should use anonymous CORS? Defaults to true if the URL is not a data-URI.
-     * @return {V.VideoBaseTexture} Newly created VideoBaseTexture
+     * @param {boolean} [autoPlay=true] - Start playing video as soon as it is loaded
+     * @return {VideoBaseTexture} Newly created VideoBaseTexture
      */
-    static from_url(videoSrc, scale_mode, crossorigin)
+    static from_url(videoSrc, scale_mode, crossorigin, autoPlay)
     {
         const video = document.createElement('video');
 
@@ -278,7 +281,7 @@ export default class VideoBaseTexture extends BaseTexture
 
         video.load();
 
-        return VideoBaseTexture.from_video(video, scale_mode);
+        return VideoBaseTexture.from_video(video, scale_mode, autoPlay);
     }
 
     /**
@@ -317,6 +320,7 @@ function create_source(path, type)
 {
     if (!type)
     {
+        path = path.split('?').shift().toLowerCase();
         type = `video/${path.substr(path.lastIndexOf('.') + 1)}`;
     }
 

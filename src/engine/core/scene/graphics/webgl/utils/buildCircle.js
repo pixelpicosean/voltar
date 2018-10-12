@@ -82,13 +82,18 @@ export default function buildCircle(graphics_data, webGLData, webGLDataNativeLin
 
         graphics_data.points = [];
 
-        for (let i = 0; i < totalSegs + 1; i++)
+        for (let i = 0; i < totalSegs; i++)
         {
             graphics_data.points.push(
-                x + (Math.sin(seg * i) * width),
-                y + (Math.cos(seg * i) * height)
+                x + (Math.sin(seg * -i) * width),
+                y + (Math.cos(seg * -i) * height)
             );
         }
+
+        graphics_data.points.push(
+            graphics_data.points[0],
+            graphics_data.points[1]
+        );
 
         buildLine(graphics_data, webGLData, webGLDataNativeLines);
 

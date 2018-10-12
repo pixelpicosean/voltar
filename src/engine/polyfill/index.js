@@ -1,6 +1,7 @@
 import './Object.assign';
 import './Math.sign';
 import './raf';
+import './Number.isInteger';
 
 if (!window.ArrayBuffer)
 {
