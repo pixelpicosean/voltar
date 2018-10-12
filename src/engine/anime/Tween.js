@@ -126,7 +126,7 @@ class InterpolateData {
 
         return this;
     }
-};
+}
 
 /**
  * @type {Array<InterpolateData>}
@@ -321,11 +321,11 @@ export default class Tween {
             }
 
             switch (data.type) {
-                case INTER_PROPERTY:
-                case INTER_METHOD:
-                    break;
-                case INTER_CALLBACK:
-                    continue;
+            case INTER_PROPERTY:
+            case INTER_METHOD:
+                break;
+            case INTER_CALLBACK:
+                continue;
             }
 
             this._apply_tween_value(data, this._run_equation(data));
@@ -387,23 +387,23 @@ export default class Tween {
         data.easing = easing_func;
         data.delay = delay;
         switch (typeof(initial_val)) {
-            case 'number':
-                data.val_type = NUMBER;
-                break;
-            case 'boolean':
-                data.val_type = BOOL;
-                break;
-            case 'string':
-                data.val_type = STRING;
-                break;
-            case 'object':
-                if (('x' in initial_val) && ('y' in initial_val)) {
-                    data.initial_val = create_vector(initial_val.x, initial_val.y);
-                    data.final_val = create_vector(final_val.x, final_val.y);
-                    data.delta_val = create_vector(0, 0);
-                    data.val_type = VECTOR2;
-                }
-                break;
+        case 'number':
+            data.val_type = NUMBER;
+            break;
+        case 'boolean':
+            data.val_type = BOOL;
+            break;
+        case 'string':
+            data.val_type = STRING;
+            break;
+        case 'object':
+            if (('x' in initial_val) && ('y' in initial_val)) {
+                data.initial_val = create_vector(initial_val.x, initial_val.y);
+                data.final_val = create_vector(final_val.x, final_val.y);
+                data.delta_val = create_vector(0, 0);
+                data.val_type = VECTOR2;
+            }
+            break;
         }
 
         if (!this._calc_delta_val(data.initial_val, data.final_val, data)) {
@@ -443,23 +443,23 @@ export default class Tween {
         data.easing = easing_func;
         data.delay = delay;
         switch (typeof(initial_val)) {
-            case 'number':
-                data.val_type = NUMBER;
-                break;
-            case 'boolean':
-                data.val_type = BOOL;
-                break;
-            case 'string':
-                data.val_type = STRING;
-                break;
-            case 'object':
-                if (('x' in initial_val) && ('y' in initial_val)) {
-                    data.initial_val = create_vector(initial_val.x, initial_val.y);
-                    data.final_val = create_vector(final_val.x, final_val.y);
-                    data.delta_val = create_vector(0, 0);
-                    data.val_type = VECTOR2;
-                }
-                break;
+        case 'number':
+            data.val_type = NUMBER;
+            break;
+        case 'boolean':
+            data.val_type = BOOL;
+            break;
+        case 'string':
+            data.val_type = STRING;
+            break;
+        case 'object':
+            if (('x' in initial_val) && ('y' in initial_val)) {
+                data.initial_val = create_vector(initial_val.x, initial_val.y);
+                data.final_val = create_vector(final_val.x, final_val.y);
+                data.delta_val = create_vector(0, 0);
+                data.val_type = VECTOR2;
+            }
+            break;
         }
 
         if (!this._calc_delta_val(data.initial_val, data.final_val, data)) {
@@ -554,23 +554,23 @@ export default class Tween {
         data.easing = easing_func;
         data.delay = delay;
         switch (typeof(initial_val)) {
-            case 'number':
-                data.val_type = NUMBER;
-                break;
-            case 'boolean':
-                data.val_type = BOOL;
-                break;
-            case 'string':
-                data.val_type = STRING;
-                break;
-            case 'object':
-                if (('x' in initial_val) && ('y' in initial_val)) {
-                    data.initial_val = create_vector(initial_val.x, initial_val.y);
-                    data.final_val = create_vector(0, 0);
-                    data.delta_val = create_vector(0, 0);
-                    data.val_type = VECTOR2;
-                }
-                break;
+        case 'number':
+            data.val_type = NUMBER;
+            break;
+        case 'boolean':
+            data.val_type = BOOL;
+            break;
+        case 'string':
+            data.val_type = STRING;
+            break;
+        case 'object':
+            if (('x' in initial_val) && ('y' in initial_val)) {
+                data.initial_val = create_vector(initial_val.x, initial_val.y);
+                data.final_val = create_vector(0, 0);
+                data.delta_val = create_vector(0, 0);
+                data.val_type = VECTOR2;
+            }
+            break;
         }
 
         this.interpolates.push(data);
@@ -609,23 +609,23 @@ export default class Tween {
         data.easing = easing_func;
         data.delay = delay;
         switch (typeof(initial_val)) {
-            case 'number':
-                data.val_type = NUMBER;
-                break;
-            case 'boolean':
-                data.val_type = BOOL;
-                break;
-            case 'string':
-                data.val_type = STRING;
-                break;
-            case 'object':
-                if (('x' in initial_val) && ('y' in initial_val)) {
-                    data.initial_val = create_vector(initial_val.x, initial_val.y);
-                    data.final_val = create_vector(0, 0);
-                    data.delta_val = create_vector(0, 0);
-                    data.val_type = VECTOR2;
-                }
-                break;
+        case 'number':
+            data.val_type = NUMBER;
+            break;
+        case 'boolean':
+            data.val_type = BOOL;
+            break;
+        case 'string':
+            data.val_type = STRING;
+            break;
+        case 'object':
+            if (('x' in initial_val) && ('y' in initial_val)) {
+                data.initial_val = create_vector(initial_val.x, initial_val.y);
+                data.final_val = create_vector(0, 0);
+                data.delta_val = create_vector(0, 0);
+                data.val_type = VECTOR2;
+            }
+            break;
         }
 
         this.interpolates.push(data);
@@ -665,23 +665,23 @@ export default class Tween {
         data.delay = delay;
         let initial_val = get_property(initial, data.flat_target_key);
         switch (typeof(final_val)) {
-            case 'number':
-                data.val_type = NUMBER;
-                break;
-            case 'boolean':
-                data.val_type = BOOL;
-                break;
-            case 'string':
-                data.val_type = STRING;
-                break;
-            case 'object':
-                if (('x' in initial_val) && ('y' in initial_val)) {
-                    data.initial_val = create_vector(initial_val.x, initial_val.y);
-                    data.final_val = create_vector(final_val.x, final_val.y);
-                    data.delta_val = create_vector(0, 0);
-                    data.val_type = VECTOR2;
-                }
-                break;
+        case 'number':
+            data.val_type = NUMBER;
+            break;
+        case 'boolean':
+            data.val_type = BOOL;
+            break;
+        case 'string':
+            data.val_type = STRING;
+            break;
+        case 'object':
+            if (('x' in initial_val) && ('y' in initial_val)) {
+                data.initial_val = create_vector(initial_val.x, initial_val.y);
+                data.final_val = create_vector(final_val.x, final_val.y);
+                data.delta_val = create_vector(0, 0);
+                data.val_type = VECTOR2;
+            }
+            break;
         }
 
         if (!this._calc_delta_val(data.initial_val, data.final_val, data)) {
@@ -725,23 +725,23 @@ export default class Tween {
         data.delay = delay;
         let initial_val = initial[initial_method]();
         switch (typeof(final_val)) {
-            case 'number':
-                data.val_type = NUMBER;
-                break;
-            case 'boolean':
-                data.val_type = BOOL;
-                break;
-            case 'string':
-                data.val_type = STRING;
-                break;
-            case 'object':
-                if (('x' in initial_val) && ('y' in initial_val)) {
-                    data.initial_val = create_vector(initial_val.x, initial_val.y);
-                    data.final_val = create_vector(final_val.x, final_val.y);
-                    data.delta_val = create_vector(0, 0);
-                    data.val_type = VECTOR2;
-                }
-                break;
+        case 'number':
+            data.val_type = NUMBER;
+            break;
+        case 'boolean':
+            data.val_type = BOOL;
+            break;
+        case 'string':
+            data.val_type = STRING;
+            break;
+        case 'object':
+            if (('x' in initial_val) && ('y' in initial_val)) {
+                data.initial_val = create_vector(initial_val.x, initial_val.y);
+                data.final_val = create_vector(final_val.x, final_val.y);
+                data.delta_val = create_vector(0, 0);
+                data.val_type = VECTOR2;
+            }
+            break;
         }
 
         if (!this._calc_delta_val(data.initial_val, data.final_val, data)) {
@@ -833,30 +833,30 @@ export default class Tween {
             }
 
             switch (data.type) {
-                case INTER_PROPERTY:
-                case INTER_METHOD:
-                case FOLLOW_PROPERTY:
-                case FOLLOW_METHOD:
-                case TARGETING_PROPERTY:
-                case TARGETING_METHOD: {
-                    let result = this._run_equation(data);
-                    this.tween_step.dispatch(data.key, data.elapsed, result);
-                    this._apply_tween_value(data, result);
-                    if (data.finish) {
-                        this._apply_tween_value(data, data.final_val);
-                    }
-                } break;
+            case INTER_PROPERTY:
+            case INTER_METHOD:
+            case FOLLOW_PROPERTY:
+            case FOLLOW_METHOD:
+            case TARGETING_PROPERTY:
+            case TARGETING_METHOD: {
+                let result = this._run_equation(data);
+                this.tween_step.dispatch(data.key, data.elapsed, result);
+                this._apply_tween_value(data, result);
+                if (data.finish) {
+                    this._apply_tween_value(data, data.final_val);
+                }
+            } break;
 
-                case INTER_CALLBACK: {
-                    if (data.finish) {
-                        if (data.call_deferred) {
-                            data.obj.call_deferred(data.key, data.args);
-                        }
-                        else {
-                            data.obj[data.key](data.args);
-                        }
+            case INTER_CALLBACK: {
+                if (data.finish) {
+                    if (data.call_deferred) {
+                        data.obj.call_deferred(data.key, data.args);
                     }
-                } break;
+                    else {
+                        data.obj[data.key](data.args);
+                    }
+                }
+            } break;
             }
 
             if (data.finish) {
@@ -871,30 +871,30 @@ export default class Tween {
      */
     _get_initial_val(p_data) {
         switch (p_data.type) {
-            case INTER_PROPERTY:
-            case INTER_METHOD:
-            case FOLLOW_PROPERTY:
-            case FOLLOW_METHOD:
-                return p_data.initial_val;
+        case INTER_PROPERTY:
+        case INTER_METHOD:
+        case FOLLOW_PROPERTY:
+        case FOLLOW_METHOD:
+            return p_data.initial_val;
 
-            case TARGETING_PROPERTY:
-            case TARGETING_METHOD: {
-                let obj = p_data.target_obj;
-                let initial_val = undefined;
-                if (p_data.type === TARGETING_PROPERTY) {
-                    initial_val = get_property(obj, p_data.flat_target_key);
-                }
-                else {
-                    initial_val = obj[p_data.target_key]();
-                }
-                if (p_data.val_type === VECTOR2) {
-                    p_data.initial_val.copy(initial_val);
-                }
-                else {
-                    p_data.initial_val = initial_val;
-                }
-                return initial_val;
+        case TARGETING_PROPERTY:
+        case TARGETING_METHOD: {
+            let obj = p_data.target_obj;
+            let initial_val = undefined;
+            if (p_data.type === TARGETING_PROPERTY) {
+                initial_val = get_property(obj, p_data.flat_target_key);
             }
+            else {
+                initial_val = obj[p_data.target_key]();
+            }
+            if (p_data.val_type === VECTOR2) {
+                p_data.initial_val.copy(initial_val);
+            }
+            else {
+                p_data.initial_val = initial_val;
+            }
+            return initial_val;
+        }
         }
 
         return p_data.delta_val;
@@ -905,36 +905,36 @@ export default class Tween {
      */
     _get_delta_val(p_data) {
         switch (p_data.type) {
-            case INTER_PROPERTY:
-            case INTER_METHOD:
-                return p_data.delta_val;
+        case INTER_PROPERTY:
+        case INTER_METHOD:
+            return p_data.delta_val;
 
-            case FOLLOW_PROPERTY:
-            case FOLLOW_METHOD: {
-                let obj = p_data.target_obj;
-                let final_val = undefined;
-                if (p_data.type === FOLLOW_PROPERTY) {
-                    final_val = get_property(obj, p_data.flat_target_key);
-                }
-                else {
-                    final_val = obj[p_data.flat_target_key]();
-                }
-                if (p_data.val_type === VECTOR2) {
-                    p_data.final_val.copy(final_val);
-                }
-                else {
-                    p_data.final_val = final_val;
-                }
-                this._calc_delta_val(p_data.initial_val, p_data.final_val, p_data);
-                return p_data.delta_val;
-            } break;
+        case FOLLOW_PROPERTY:
+        case FOLLOW_METHOD: {
+            let obj = p_data.target_obj;
+            let final_val = undefined;
+            if (p_data.type === FOLLOW_PROPERTY) {
+                final_val = get_property(obj, p_data.flat_target_key);
+            }
+            else {
+                final_val = obj[p_data.flat_target_key]();
+            }
+            if (p_data.val_type === VECTOR2) {
+                p_data.final_val.copy(final_val);
+            }
+            else {
+                p_data.final_val = final_val;
+            }
+            this._calc_delta_val(p_data.initial_val, p_data.final_val, p_data);
+            return p_data.delta_val;
+        } break;
 
-            case TARGETING_PROPERTY:
-            case TARGETING_METHOD: {
-                let initial_val = this._get_initial_val(p_data);
-                this._calc_delta_val(initial_val, p_data.final_val, p_data);
-                return p_data.delta_val;
-            } break;
+        case TARGETING_PROPERTY:
+        case TARGETING_METHOD: {
+            let initial_val = this._get_initial_val(p_data);
+            this._calc_delta_val(initial_val, p_data.final_val, p_data);
+            return p_data.delta_val;
+        } break;
         }
 
         return p_data.initial_val;
@@ -948,19 +948,19 @@ export default class Tween {
      */
     _calc_delta_val(initial_val, final_val, data) {
         switch (data.val_type) {
-            case BOOL:
-                data.delta_val = Math.floor(final_val) - Math.floor(initial_val);
-                break;
-            case NUMBER:
-                data.delta_val = final_val - initial_val;
-                break;
-            case STRING:
-                data.delta_val = final_val.length;
-                break;
-            case VECTOR2:
-                data.delta_val.x = final_val.x - initial_val.x;
-                data.delta_val.y = final_val.y - initial_val.y;
-                break;
+        case BOOL:
+            data.delta_val = Math.floor(final_val) - Math.floor(initial_val);
+            break;
+        case NUMBER:
+            data.delta_val = final_val - initial_val;
+            break;
+        case STRING:
+            data.delta_val = final_val.length;
+            break;
+        case VECTOR2:
+            data.delta_val.x = final_val.x - initial_val.x;
+            data.delta_val.y = final_val.y - initial_val.y;
+            break;
         }
         return true;
     }
@@ -977,19 +977,19 @@ export default class Tween {
         let mod = data.easing(clamp((data.elapsed - data.delay) / data.duration, 0, 1));
 
         switch (data.val_type) {
-            case BOOL:
-                return mod > 0.5;
-            case NUMBER:
-                return initial_val + delta_val * mod;
-            case STRING:
-                return data.final_val.slice(0, Math.floor(delta_val * mod));
-            case VECTOR2:
-                _tmp_vec2.copy(initial_val);
-                _tmp_vec2.x += delta_val.x * mod;
-                _tmp_vec2.y += delta_val.y * mod;
-                return _tmp_vec2;
-            default:
-                return undefined;
+        case BOOL:
+            return mod > 0.5;
+        case NUMBER:
+            return initial_val + delta_val * mod;
+        case STRING:
+            return data.final_val.slice(0, Math.floor(delta_val * mod));
+        case VECTOR2:
+            _tmp_vec2.copy(initial_val);
+            _tmp_vec2.x += delta_val.x * mod;
+            _tmp_vec2.y += delta_val.y * mod;
+            return _tmp_vec2;
+        default:
+            return undefined;
         }
     }
     /**
@@ -999,25 +999,25 @@ export default class Tween {
      */
     _apply_tween_value(data, value) {
         switch (data.type) {
-            case INTER_PROPERTY:
-            case FOLLOW_PROPERTY:
-            case TARGETING_PROPERTY:
-                if (data.val_type === VECTOR2) {
-                    set_vec_property(data.obj, data.flat_key, value);
-                }
-                else {
-                    set_property(data.obj, data.flat_key, value);
-                }
-                break;
+        case INTER_PROPERTY:
+        case FOLLOW_PROPERTY:
+        case TARGETING_PROPERTY:
+            if (data.val_type === VECTOR2) {
+                set_vec_property(data.obj, data.flat_key, value);
+            }
+            else {
+                set_property(data.obj, data.flat_key, value);
+            }
+            break;
 
-            case INTER_METHOD:
-            case FOLLOW_METHOD:
-            case TARGETING_METHOD:
-                data.obj[data.key](value);
-                break;
+        case INTER_METHOD:
+        case FOLLOW_METHOD:
+        case TARGETING_METHOD:
+            data.obj[data.key](value);
+            break;
 
-            case INTER_CALLBACK:
-                break;
+        case INTER_CALLBACK:
+            break;
         }
         return true;
     }

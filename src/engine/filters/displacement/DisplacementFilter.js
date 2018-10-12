@@ -58,7 +58,7 @@ export default class DisplacementFilter extends core.Filter
         this.uniforms.scale.x = this.scale.x;
         this.uniforms.scale.y = this.scale.y;
 
-         // draw the filter...
+        // draw the filter...
         filterManager.applyFilter(this, input, output);
     }
 

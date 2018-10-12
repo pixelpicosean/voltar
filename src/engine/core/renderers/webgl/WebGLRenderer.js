@@ -314,7 +314,7 @@ export default class WebGLRenderer extends SystemRenderer
             displayObject.parent = this._tempNode2DParent;
             displayObject.update_transform();
             displayObject.parent = cacheParent;
-           // displayObject.hit_area = //TODO add a temp hit area
+            // displayObject.hit_area = //TODO add a temp hit area
         }
 
         this.bindRenderTexture(renderTexture, transform);
@@ -373,7 +373,7 @@ export default class WebGLRenderer extends SystemRenderer
      */
     resize(screenWidth, screenHeight)
     {
-      //  if(width * this.resolution === this.width && height * this.resolution === this.height)return;
+        //  if(width * this.resolution === this.width && height * this.resolution === this.height)return;
 
         SystemRenderer.prototype.resize.call(this, screenWidth, screenHeight);
 
@@ -588,7 +588,7 @@ export default class WebGLRenderer extends SystemRenderer
         return location;
     }
 
-     /**
+    /**
      * unbinds the texture ...
      *
      * @param {Texture} texture - the texture to unbind

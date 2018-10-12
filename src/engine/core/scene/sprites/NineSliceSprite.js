@@ -49,15 +49,15 @@ export default class NineSliceSprite extends Node2D {
 
         for (let k in data) {
             switch (k) {
-                // Directly set
-                // - Sprite
-                case 'tint':
-                case 'texture_left':
-                case 'texture_right':
-                case 'texture_top':
-                case 'texture_bottom':
-                    this[k] = data[k];
-                    break;
+            // Directly set
+            // - Sprite
+            case 'tint':
+            case 'texture_left':
+            case 'texture_right':
+            case 'texture_top':
+            case 'texture_bottom':
+                this[k] = data[k];
+                break;
 
                 // Set vector
             }

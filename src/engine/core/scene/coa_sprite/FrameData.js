@@ -56,26 +56,26 @@ function get_num_factor(a, b, v) {
  */
 function adjust_factor(factor, key) {
     switch (key.curve_type) {
-        case CurveType.instant:
-            factor = 0;
-            break;
-        case CurveType.linear:
-            break;
-        case CurveType.quadratic:
-            factor = bezier2(0, key.c1, 1, factor);
-            break;
-        case CurveType.cubic:
-            factor = bezier3(0, key.c1, key.c2, 1, factor);
-            break;
-        case CurveType.quartic:
-            factor = bezier4(0, key.c1, key.c2, key.c3, 1, factor);
-            break;
-        case CurveType.quintic:
-            factor = bezier5(0, key.c1, key.c2, key.c3, key.c4, 1, factor);
-            break;
-        case CurveType.bezier:
-            factor = bezier2d(key.c1, key.c2, key.c3, key.c4, factor);
-            break;
+    case CurveType.instant:
+        factor = 0;
+        break;
+    case CurveType.linear:
+        break;
+    case CurveType.quadratic:
+        factor = bezier2(0, key.c1, 1, factor);
+        break;
+    case CurveType.cubic:
+        factor = bezier3(0, key.c1, key.c2, 1, factor);
+        break;
+    case CurveType.quartic:
+        factor = bezier4(0, key.c1, key.c2, key.c3, 1, factor);
+        break;
+    case CurveType.quintic:
+        factor = bezier5(0, key.c1, key.c2, key.c3, key.c4, 1, factor);
+        break;
+    case CurveType.bezier:
+        factor = bezier2d(key.c1, key.c2, key.c3, key.c4, factor);
+        break;
     }
 
     return factor;
@@ -350,14 +350,14 @@ export class FrameDataCalculator {
      */
     add_spatial_data(info, timeline, spriter, delta) {
         switch (timeline.object_type) {
-            case ObjectType.sprite:
-                this.frame_data.sprite_data.push(info);
-                break;
-            case ObjectType.entity:
-                let new_anim = spriter.entity[info.entity].animation[info.animation];
-                let new_target_time = info.t * new_anim.length;
-                this.get_frame_data(new_anim, new_target_time, delta, info);
-                break;
+        case ObjectType.sprite:
+            this.frame_data.sprite_data.push(info);
+            break;
+        case ObjectType.entity:
+            let new_anim = spriter.entity[info.entity].animation[info.animation];
+            let new_target_time = info.t * new_anim.length;
+            this.get_frame_data(new_anim, new_target_time, delta, info);
+            break;
         }
     }
 

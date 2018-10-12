@@ -14,7 +14,7 @@ import remove_items from 'remove-array-items';
  * @prop {Function} main_scene
  */
 
- /**
+/**
   * @typedef DisplaySettings
   * @prop {string} view
   * @prop {string} container
@@ -219,167 +219,167 @@ export default class SceneTree {
         const on_window_resize = () => {
             let result;
             switch (this._settings.display.stretch_mode) {
-                case 'disabled':
+            case 'disabled':
+                this.visual_server.renderer.resize(window.innerWidth, window.innerHeight);
+                this.view.width = window.innerWidth * this.visual_server.renderer.resolution;
+                this.view.height = window.innerHeight * this.visual_server.renderer.resolution;
+                this.view.style.width = `${window.innerWidth}px`;
+                this.view.style.height = `${window.innerHeight}px`;
+                this.viewport_rect.size.set(window.innerWidth, window.innerHeight);
+                this.viewport_rect.position.set(0, 0);
+                break;
+            case '2D':
+                switch (this._settings.display.stretch_aspect) {
+                case 'ignore':
                     this.visual_server.renderer.resize(window.innerWidth, window.innerHeight);
                     this.view.width = window.innerWidth * this.visual_server.renderer.resolution;
                     this.view.height = window.innerHeight * this.visual_server.renderer.resolution;
+                    this.viewport.scale.set(window.innerWidth / this._settings.display.width, window.innerHeight / this._settings.display.height);
                     this.view.style.width = `${window.innerWidth}px`;
                     this.view.style.height = `${window.innerHeight}px`;
-                    this.viewport_rect.size.set(window.innerWidth, window.innerHeight);
+                    this.viewport_rect.size.set(this._settings.display.width, this._settings.display.height);
                     this.viewport_rect.position.set(0, 0);
                     break;
-                case '2D':
-                    switch (this._settings.display.stretch_aspect) {
-                        case 'ignore':
-                            this.visual_server.renderer.resize(window.innerWidth, window.innerHeight);
-                            this.view.width = window.innerWidth * this.visual_server.renderer.resolution;
-                            this.view.height = window.innerHeight * this.visual_server.renderer.resolution;
-                            this.viewport.scale.set(window.innerWidth / this._settings.display.width, window.innerHeight / this._settings.display.height);
-                            this.view.style.width = `${window.innerWidth}px`;
-                            this.view.style.height = `${window.innerHeight}px`;
-                            this.viewport_rect.size.set(this._settings.display.width, this._settings.display.height);
-                            this.viewport_rect.position.set(0, 0);
-                            break;
-                        case 'keep':
-                            result = outer_box_resize(window.innerWidth, window.innerHeight, this._settings.display.width, this._settings.display.height);
-                            let width = (this._settings.display.width * result.scale) | 0;
-                            let height = (this._settings.display.height * result.scale) | 0;
-                            this.visual_server.renderer.resize(width, height);
-                            this.viewport.scale.set(result.scale, result.scale);
-                            this.view.width = width * this.visual_server.renderer.resolution;
-                            this.view.height = height * this.visual_server.renderer.resolution;
-                            this.view.style.width = `${width}px`;
-                            this.view.style.height = `${height}px`;
-                            this.view.style.marginLeft = `${result.left}px`;
-                            this.view.style.marginTop = `${result.top}px`;
-                            this.viewport_rect.size.set(width, height);
-                            this.viewport_rect.position.set(result.left, result.top);
-                            break;
-                        case 'keep_width':
-                            if (window.innerWidth / window.innerHeight > this._settings.display.width / this._settings.display.height) {
-                                let scale = window.innerHeight / this._settings.display.height;
-                                let width = (this._settings.display.width * scale) | 0;
-                                let height = (width * (this._settings.display.height / this._settings.display.width)) | 0;
-                                this.visual_server.renderer.resize(width, height);
-                                this.viewport.scale.set(scale, scale);
-                                this.view.width = width * this.visual_server.renderer.resolution;
-                                this.view.height = height * this.visual_server.renderer.resolution;
-                                this.view.style.width = `${width}px`;
-                                this.view.style.height = `${height}px`;
-                                this.view.style.marginLeft = `${((window.innerWidth - width) * 0.5) | 0}px`;
-                                this.viewport_rect.size.set(width, height);
-                                this.viewport_rect.position.set(((window.innerWidth - width) * 0.5) | 0, 0);
-                            }
-                            else {
-                                let scale = window.innerWidth / this._settings.display.width;
-                                let width = window.innerWidth;
-                                let height = window.innerHeight;
-                                this.visual_server.renderer.resize(width, height);
-                                this.viewport.scale.set(scale, scale);
-                                this.view.width = width * this.visual_server.renderer.resolution;
-                                this.view.height = height * this.visual_server.renderer.resolution;
-                                this.view.style.width = `${width}px`;
-                                this.view.style.height = `${height}px`;
-                                this.view.style.marginLeft = `0px`;
-                                this.view.style.marginTop = `0px`;
-                                this.viewport_rect.size.set(width, height);
-                                this.viewport_rect.position.set(0, 0);
-                            }
-                            break;
-                        case 'keep_height':
-                            if (window.innerWidth / window.innerHeight < this._settings.display.width / this._settings.display.height) {
-                                let scale = window.innerWidth / this._settings.display.width;
-                                let height = (this._settings.display.height * scale) | 0;
-                                let width = (height * (this._settings.display.height / this._settings.display.width)) | 0;
-                                this.visual_server.renderer.resize(width, height);
-                                this.viewport.scale.set(scale, scale);
-                                this.view.style.width = `${width}px`;
-                                this.view.style.height = `${height}px`;
-                                this.view.style.marginTop = `${((window.innerHeight - height) * 0.5) | 0}px`;
-                                this.viewport_rect.size.set(width, height);
-                                this.viewport_rect.position.set(0, ((window.innerHeight - height) * 0.5) | 0);
-                            }
-                            else {
-                                let scale = window.innerHeight / this._settings.display.height;
-                                let height = window.innerHeight;
-                                let width = window.innerWidth;
-                                this.visual_server.renderer.resize(width, height);
-                                this.viewport.scale.set(scale, scale);
-                                this.view.width = width * this.visual_server.renderer.resolution;
-                                this.view.height = height * this.visual_server.renderer.resolution;
-                                this.view.style.width = `${width}px`;
-                                this.view.style.height = `${height}px`;
-                                this.view.style.marginLeft = `0px`;
-                                this.view.style.marginTop = `0px`;
-                                this.viewport_rect.size.set(width, height);
-                                this.viewport_rect.position.set(0, 0);
-                            }
-                            break;
+                case 'keep':
+                    result = outer_box_resize(window.innerWidth, window.innerHeight, this._settings.display.width, this._settings.display.height);
+                    let width = (this._settings.display.width * result.scale) | 0;
+                    let height = (this._settings.display.height * result.scale) | 0;
+                    this.visual_server.renderer.resize(width, height);
+                    this.viewport.scale.set(result.scale, result.scale);
+                    this.view.width = width * this.visual_server.renderer.resolution;
+                    this.view.height = height * this.visual_server.renderer.resolution;
+                    this.view.style.width = `${width}px`;
+                    this.view.style.height = `${height}px`;
+                    this.view.style.marginLeft = `${result.left}px`;
+                    this.view.style.marginTop = `${result.top}px`;
+                    this.viewport_rect.size.set(width, height);
+                    this.viewport_rect.position.set(result.left, result.top);
+                    break;
+                case 'keep_width':
+                    if (window.innerWidth / window.innerHeight > this._settings.display.width / this._settings.display.height) {
+                        let scale = window.innerHeight / this._settings.display.height;
+                        let width = (this._settings.display.width * scale) | 0;
+                        let height = (width * (this._settings.display.height / this._settings.display.width)) | 0;
+                        this.visual_server.renderer.resize(width, height);
+                        this.viewport.scale.set(scale, scale);
+                        this.view.width = width * this.visual_server.renderer.resolution;
+                        this.view.height = height * this.visual_server.renderer.resolution;
+                        this.view.style.width = `${width}px`;
+                        this.view.style.height = `${height}px`;
+                        this.view.style.marginLeft = `${((window.innerWidth - width) * 0.5) | 0}px`;
+                        this.viewport_rect.size.set(width, height);
+                        this.viewport_rect.position.set(((window.innerWidth - width) * 0.5) | 0, 0);
+                    }
+                    else {
+                        let scale = window.innerWidth / this._settings.display.width;
+                        let width = window.innerWidth;
+                        let height = window.innerHeight;
+                        this.visual_server.renderer.resize(width, height);
+                        this.viewport.scale.set(scale, scale);
+                        this.view.width = width * this.visual_server.renderer.resolution;
+                        this.view.height = height * this.visual_server.renderer.resolution;
+                        this.view.style.width = `${width}px`;
+                        this.view.style.height = `${height}px`;
+                        this.view.style.marginLeft = `0px`;
+                        this.view.style.marginTop = `0px`;
+                        this.viewport_rect.size.set(width, height);
+                        this.viewport_rect.position.set(0, 0);
                     }
                     break;
-                case 'viewport':
-                    switch (this._settings.display.stretch_aspect) {
-                        case 'ignore':
-                            this.view.style.width = `${window.innerWidth}px`;
-                            this.view.style.height = `${window.innerHeight}px`;
-                            this.view.style.marginLeft = `0`;
-                            this.view.style.marginTop = `0`;
-                            this.viewport_rect.size.set(this._settings.display.width, this._settings.display.height);
-                            this.viewport_rect.position.set(0, 0);
-                            break;
-                        case 'keep':
-                            result = outer_box_resize(window.innerWidth, window.innerHeight, this._settings.display.width, this._settings.display.height);
-                            this.view.style.width = `${(this._settings.display.width * result.scale) | 0}px`;
-                            this.view.style.height = `${(this._settings.display.height * result.scale) | 0}px`;
-                            this.view.style.marginLeft = `${result.left | 0}px`;
-                            this.view.style.marginTop = `${result.top | 0}px`;
-                            this.viewport_rect.size.set(this._settings.display.width, this._settings.display.height);
-                            this.viewport_rect.position.set(result.left | 0, result.top | 0);
-                            break;
-                        case 'keep_width':
-                            if (window.innerWidth / window.innerHeight > this._settings.display.width / this._settings.display.height) {
-                                let scale = window.innerHeight / this._settings.display.height;
-                                let width = (this._settings.display.width * scale) | 0;
-                                this.view.style.width = `${width}px`;
-                                this.view.style.height = `${(width * (this._settings.display.height / this._settings.display.width)) | 0}px`;
-                                this.view.style.marginLeft = `${(window.innerWidth - width) * 0.5}px`;
-                            this.viewport_rect.size.set(this._settings.display.width, this._settings.display.height);
-                                this.viewport_rect.position.set(((window.innerWidth - width) * 0.5) | 0, 0);
-                            }
-                            else {
-                                let scale = this._settings.display.width / window.innerWidth;
-                                this.visual_server.renderer.resize(this._settings.display.width, (window.innerHeight * scale) | 0);
-                                this.view.style.width = `${window.innerWidth}px`;
-                                this.view.style.height = `${window.innerHeight}px`;
-                                this.view.style.marginLeft = `0px`;
-                                this.view.style.marginTop = `0px`;
-                                this.viewport_rect.size.set(this._settings.display.width, (window.innerHeight * scale) | 0);
-                                this.viewport_rect.position.set(0, 0);
-                            }
-                            break;
-                        case 'keep_height':
-                            if (window.innerWidth / window.innerHeight < this._settings.display.width / this._settings.display.height) {
-                                let scale = window.innerWidth / this._settings.display.width;
-                                let height = (this._settings.display.height * scale) | 0;
-                                this.view.style.width = `${(height * (this._settings.display.height / this._settings.display.width)) | 0}px`;
-                                this.view.style.height = `${height}px`;
-                                this.view.style.marginTop = `${((window.innerHeight - height) * 0.5) | 0}px`;
-                                this.viewport_rect.size.set(this._settings.display.width, this._settings.display.height);
-                                this.viewport_rect.position.set(0, ((window.innerHeight - height) * 0.5) | 0);
-                            }
-                            else {
-                                let scale = this._settings.display.height / window.innerHeight;
-                                this.visual_server.renderer.resize((window.innerWidth * scale) | 0, this._settings.display.height);
-                                this.view.style.width = `${window.innerWidth}px`;
-                                this.view.style.height = `${window.innerHeight}px`;
-                                this.view.style.marginLeft = `0px`;
-                                this.view.style.marginTop = `0px`;
-                                this.viewport_rect.size.set((window.innerWidth * scale) | 0, this._settings.display.height);
-                                this.viewport_rect.position.set(0, 0);
-                            }
-                            break;
+                case 'keep_height':
+                    if (window.innerWidth / window.innerHeight < this._settings.display.width / this._settings.display.height) {
+                        let scale = window.innerWidth / this._settings.display.width;
+                        let height = (this._settings.display.height * scale) | 0;
+                        let width = (height * (this._settings.display.height / this._settings.display.width)) | 0;
+                        this.visual_server.renderer.resize(width, height);
+                        this.viewport.scale.set(scale, scale);
+                        this.view.style.width = `${width}px`;
+                        this.view.style.height = `${height}px`;
+                        this.view.style.marginTop = `${((window.innerHeight - height) * 0.5) | 0}px`;
+                        this.viewport_rect.size.set(width, height);
+                        this.viewport_rect.position.set(0, ((window.innerHeight - height) * 0.5) | 0);
+                    }
+                    else {
+                        let scale = window.innerHeight / this._settings.display.height;
+                        let height = window.innerHeight;
+                        let width = window.innerWidth;
+                        this.visual_server.renderer.resize(width, height);
+                        this.viewport.scale.set(scale, scale);
+                        this.view.width = width * this.visual_server.renderer.resolution;
+                        this.view.height = height * this.visual_server.renderer.resolution;
+                        this.view.style.width = `${width}px`;
+                        this.view.style.height = `${height}px`;
+                        this.view.style.marginLeft = `0px`;
+                        this.view.style.marginTop = `0px`;
+                        this.viewport_rect.size.set(width, height);
+                        this.viewport_rect.position.set(0, 0);
                     }
                     break;
+                }
+                break;
+            case 'viewport':
+                switch (this._settings.display.stretch_aspect) {
+                case 'ignore':
+                    this.view.style.width = `${window.innerWidth}px`;
+                    this.view.style.height = `${window.innerHeight}px`;
+                    this.view.style.marginLeft = `0`;
+                    this.view.style.marginTop = `0`;
+                    this.viewport_rect.size.set(this._settings.display.width, this._settings.display.height);
+                    this.viewport_rect.position.set(0, 0);
+                    break;
+                case 'keep':
+                    result = outer_box_resize(window.innerWidth, window.innerHeight, this._settings.display.width, this._settings.display.height);
+                    this.view.style.width = `${(this._settings.display.width * result.scale) | 0}px`;
+                    this.view.style.height = `${(this._settings.display.height * result.scale) | 0}px`;
+                    this.view.style.marginLeft = `${result.left | 0}px`;
+                    this.view.style.marginTop = `${result.top | 0}px`;
+                    this.viewport_rect.size.set(this._settings.display.width, this._settings.display.height);
+                    this.viewport_rect.position.set(result.left | 0, result.top | 0);
+                    break;
+                case 'keep_width':
+                    if (window.innerWidth / window.innerHeight > this._settings.display.width / this._settings.display.height) {
+                        let scale = window.innerHeight / this._settings.display.height;
+                        let width = (this._settings.display.width * scale) | 0;
+                        this.view.style.width = `${width}px`;
+                        this.view.style.height = `${(width * (this._settings.display.height / this._settings.display.width)) | 0}px`;
+                        this.view.style.marginLeft = `${(window.innerWidth - width) * 0.5}px`;
+                        this.viewport_rect.size.set(this._settings.display.width, this._settings.display.height);
+                        this.viewport_rect.position.set(((window.innerWidth - width) * 0.5) | 0, 0);
+                    }
+                    else {
+                        let scale = this._settings.display.width / window.innerWidth;
+                        this.visual_server.renderer.resize(this._settings.display.width, (window.innerHeight * scale) | 0);
+                        this.view.style.width = `${window.innerWidth}px`;
+                        this.view.style.height = `${window.innerHeight}px`;
+                        this.view.style.marginLeft = `0px`;
+                        this.view.style.marginTop = `0px`;
+                        this.viewport_rect.size.set(this._settings.display.width, (window.innerHeight * scale) | 0);
+                        this.viewport_rect.position.set(0, 0);
+                    }
+                    break;
+                case 'keep_height':
+                    if (window.innerWidth / window.innerHeight < this._settings.display.width / this._settings.display.height) {
+                        let scale = window.innerWidth / this._settings.display.width;
+                        let height = (this._settings.display.height * scale) | 0;
+                        this.view.style.width = `${(height * (this._settings.display.height / this._settings.display.width)) | 0}px`;
+                        this.view.style.height = `${height}px`;
+                        this.view.style.marginTop = `${((window.innerHeight - height) * 0.5) | 0}px`;
+                        this.viewport_rect.size.set(this._settings.display.width, this._settings.display.height);
+                        this.viewport_rect.position.set(0, ((window.innerHeight - height) * 0.5) | 0);
+                    }
+                    else {
+                        let scale = this._settings.display.height / window.innerHeight;
+                        this.visual_server.renderer.resize((window.innerWidth * scale) | 0, this._settings.display.height);
+                        this.view.style.width = `${window.innerWidth}px`;
+                        this.view.style.height = `${window.innerHeight}px`;
+                        this.view.style.marginLeft = `0px`;
+                        this.view.style.marginTop = `0px`;
+                        this.viewport_rect.size.set((window.innerWidth * scale) | 0, this._settings.display.height);
+                        this.viewport_rect.position.set(0, 0);
+                    }
+                    break;
+                }
+                break;
             }
         };
         window.addEventListener('resize', on_window_resize, false);
@@ -425,63 +425,63 @@ export default class SceneTree {
             const _process_tmp = this._process_tmp;
 
             if (_process_tmp.last > 0) {
-              _process_tmp.real_delta = timestamp - _process_tmp.last;
+                _process_tmp.real_delta = timestamp - _process_tmp.last;
             }
             _process_tmp.last = timestamp;
 
             // If the logic time is spiraling upwards, skip a frame entirely
             if (_process_tmp.spiraling > 1) {
-              // Reset the delta_time accumulator which will cause all pending dropped frames to be permanently skipped
-              _process_tmp.delta_time = 0;
-              _process_tmp.spiraling = 0;
+                // Reset the delta_time accumulator which will cause all pending dropped frames to be permanently skipped
+                _process_tmp.delta_time = 0;
+                _process_tmp.spiraling = 0;
             }
             else {
-              // Step size
-              _process_tmp.step = 1000.0 / this._settings.display.FPS;
-              _process_tmp.slow_step = _process_tmp.step * this.time_scale;
-              _process_tmp.slow_step_sec = _process_tmp.step * 0.001 * this.time_scale;
+                // Step size
+                _process_tmp.step = 1000.0 / this._settings.display.FPS;
+                _process_tmp.slow_step = _process_tmp.step * this.time_scale;
+                _process_tmp.slow_step_sec = _process_tmp.step * 0.001 * this.time_scale;
 
-              // Accumulate time until the step threshold is met or exceeded... up to a limit of 3 catch-up frames at step intervals
-              _process_tmp.delta_time += Math.max(Math.min(_process_tmp.step * 3, _process_tmp.real_delta), 0);
+                // Accumulate time until the step threshold is met or exceeded... up to a limit of 3 catch-up frames at step intervals
+                _process_tmp.delta_time += Math.max(Math.min(_process_tmp.step * 3, _process_tmp.real_delta), 0);
 
-              // Call the game update logic multiple times if necessary to "catch up" with dropped frames
-              // unless forceSingleUpdate is true
-              _process_tmp.count = 0;
+                // Call the game update logic multiple times if necessary to "catch up" with dropped frames
+                // unless forceSingleUpdate is true
+                _process_tmp.count = 0;
 
-              while (_process_tmp.delta_time >= _process_tmp.step) {
-                _process_tmp.delta_time -= _process_tmp.step;
+                while (_process_tmp.delta_time >= _process_tmp.step) {
+                    _process_tmp.delta_time -= _process_tmp.step;
 
-                // Fixed update
-                // - update transforms
-                this.viewport.parent = this.viewport._tempNode2DParent;
-                this.viewport.update_transform();
-                this.viewport.parent = null;
-                // - process nodes
-                this.current_scene._propagate_process(_process_tmp.slow_step_sec);
-                // - update shared ticker
-                shared.update(_process_tmp.slow_step);
-                // - solve collision
-                this.physics_server.solve_collision(this.current_scene);
-                // - remove nodes to be freed
-                this._flush_delete_queue();
-                // - update inputs
-                this.input._process(_process_tmp.slow_step_sec);
-                // - dispatch deferred messages
-                this.message_queue.flush();
+                    // Fixed update
+                    // - update transforms
+                    this.viewport.parent = this.viewport._tempNode2DParent;
+                    this.viewport.update_transform();
+                    this.viewport.parent = null;
+                    // - process nodes
+                    this.current_scene._propagate_process(_process_tmp.slow_step_sec);
+                    // - update shared ticker
+                    shared.update(_process_tmp.slow_step);
+                    // - solve collision
+                    this.physics_server.solve_collision(this.current_scene);
+                    // - remove nodes to be freed
+                    this._flush_delete_queue();
+                    // - update inputs
+                    this.input._process(_process_tmp.slow_step_sec);
+                    // - dispatch deferred messages
+                    this.message_queue.flush();
 
-                _process_tmp.count += 1;
-              }
+                    _process_tmp.count += 1;
+                }
 
-              // Detect spiraling (if the catch-up loop isn't fast enough, the number of iterations will increase constantly)
-              if (_process_tmp.count > _process_tmp.last_count) {
-                _process_tmp.spiraling += 1;
-              }
-              else if (_process_tmp.count < _process_tmp.last_count) {
+                // Detect spiraling (if the catch-up loop isn't fast enough, the number of iterations will increase constantly)
+                if (_process_tmp.count > _process_tmp.last_count) {
+                    _process_tmp.spiraling += 1;
+                }
+                else if (_process_tmp.count < _process_tmp.last_count) {
                 // Looks like it caught up successfully, reset the spiral alert counter
-                _process_tmp.spiraling = 0;
-              }
+                    _process_tmp.spiraling = 0;
+                }
 
-              _process_tmp.last_count = _process_tmp.count;
+                _process_tmp.last_count = _process_tmp.count;
             }
 
             // Idle update

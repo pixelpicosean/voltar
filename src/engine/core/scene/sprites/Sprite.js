@@ -164,24 +164,24 @@ export default class Sprite extends Node2D
 
         for (let k in data) {
             switch (k) {
-                // Directly set
-                // - Sprite
-                case 'texture':
-                case 'tint':
-                    this[k] = data[k];
-                    break;
+            // Directly set
+            // - Sprite
+            case 'texture':
+            case 'tint':
+                this[k] = data[k];
+                break;
 
                 // Set vector
                 // - Sprite
-                case 'anchor':
-                    this[k].x = data[k].x || 0;
-                    this[k].y = data[k].y || 0;
-                    break;
+            case 'anchor':
+                this[k].x = data[k].x || 0;
+                this[k].y = data[k].y || 0;
+                break;
 
                 // Blend modes
-                case 'blend_mode':
-                    this.blend_mode = BLEND_MODES[data[k]];
-                    break;
+            case 'blend_mode':
+                this.blend_mode = BLEND_MODES[data[k]];
+                break;
             }
         }
     }
@@ -289,7 +289,7 @@ export default class Sprite extends Node2D
         vertex_data[2] = (a * w0) + (c * h1) + tx;
         vertex_data[3] = (d * h1) + (b * w0) + ty;
 
-         // xy
+        // xy
         vertex_data[4] = (a * w0) + (c * h0) + tx;
         vertex_data[5] = (d * h0) + (b * w0) + ty;
 

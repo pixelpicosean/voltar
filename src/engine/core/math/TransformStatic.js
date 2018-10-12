@@ -17,7 +17,7 @@ export default class TransformStatic extends TransformBase
     {
         super();
 
-         /**
+        /**
          * The coordinate of the object relative to the local coordinates of the parent.
          *
          * @member {V.ObservablePoint}

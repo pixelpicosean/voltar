@@ -1,6 +1,6 @@
 import Filterable from "../Filterable";
 import WebAudioUtils from "./WebAudioUtils";
-;
+
 /**
  * @private
  * @class WebAudioNodes

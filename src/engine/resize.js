@@ -17,7 +17,7 @@ export function outer_box_resize(container_width, container_height, content_widt
     }
 
     return result;
-};
+}
 
 /**
  * Calculate how to scale a content to fill its container in `inner-box` mode.
@@ -38,4 +38,4 @@ export function inner_box_resize(container_width, container_height, content_widt
     }
 
     return result;
-};
+}

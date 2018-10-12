@@ -52,9 +52,9 @@ export default function buildComplexPoly(graphics_data, webGLData)
 
     // add a quad to the end cos there is no point making another buffer!
     points.push(min_x, min_y,
-                max_x, min_y,
-                max_x, max_y,
-                min_x, max_y);
+        max_x, min_y,
+        max_x, max_y,
+        min_x, max_y);
 
     // push a quad onto the end..
 

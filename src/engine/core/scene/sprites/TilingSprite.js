@@ -141,13 +141,13 @@ export default class TilingSprite extends Sprite
 
         for (let k in data) {
             switch (k) {
-                case 'clamp_margin':
-                    this[k] = data[k];
-                    break;
-                case 'tile_position':
-                case 'tile_scale':
-                    this[k].copy(data[k]);
-                    break;
+            case 'clamp_margin':
+                this[k] = data[k];
+                break;
+            case 'tile_position':
+            case 'tile_scale':
+                this[k].copy(data[k]);
+                break;
             }
         }
     }
@@ -216,8 +216,8 @@ export default class TilingSprite extends Sprite
             this._textureID = this._texture._updateID;
             // cut an object from a spritesheet..
             const tempCanvas = new CanvasRenderTarget(texture._frame.width,
-                                                        texture._frame.height,
-                                                        base_texture_resolution);
+                texture._frame.height,
+                base_texture_resolution);
 
             // Tint the tiling sprite
             if (this.tint !== 0xFFFFFF)
@@ -237,11 +237,11 @@ export default class TilingSprite extends Sprite
         // set context state..
         context.globalAlpha = this.world_alpha;
         context.setTransform(transform.a * resolution,
-                           transform.b * resolution,
-                           transform.c * resolution,
-                           transform.d * resolution,
-                           transform.tx * resolution,
-                           transform.ty * resolution);
+            transform.b * resolution,
+            transform.c * resolution,
+            transform.d * resolution,
+            transform.tx * resolution,
+            transform.ty * resolution);
 
         renderer.setBlendMode(this.blend_mode);
 

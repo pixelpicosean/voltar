@@ -7,7 +7,7 @@ function basename(url) {
 }
 
 function dirname(url) {
-    return url.replace(/\\/g,'/').replace(/\/[^\/]*$/, '');;
+    return url.replace(/\\/g,'/').replace(/\/[^\/]*$/, '');
 }
 
 /**

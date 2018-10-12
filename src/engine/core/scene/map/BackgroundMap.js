@@ -93,14 +93,14 @@ export default class BackgroundMap extends Node2D {
         //         pb.push(0);
         //     }
         // } else {
-            //ok, ok, lets use rectangle. but its not working with square shader yet
-            pb.push(u);
-            pb.push(v);
-            pb.push(x);
-            pb.push(y);
-            pb.push(this.tile_width);
-            pb.push(this.tile_height);
-            pb.push(0);
+        //ok, ok, lets use rectangle. but its not working with square shader yet
+        pb.push(u);
+        pb.push(v);
+        pb.push(x);
+        pb.push(y);
+        pb.push(this.tile_width);
+        pb.push(this.tile_height);
+        pb.push(0);
         // }
     }
 
@@ -114,9 +114,9 @@ export default class BackgroundMap extends Node2D {
                 c = row[q];
 
                 if (c === 0)
-                  continue;
+                    continue;
                 else
-                  c -= 1;
+                    c -= 1;
 
                 u = Math.floor(c % tile_per_row) * this.tile_width;
                 v = Math.floor(c / tile_per_row) * this.tile_height;

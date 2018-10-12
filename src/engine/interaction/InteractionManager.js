@@ -896,19 +896,19 @@ export default class InteractionManager extends EventEmitter
         {
             switch (typeof style)
             {
-                case 'string':
-                    // string styles are handled as cursor CSS
-                    this.interaction_dom_element.style.cursor = style;
-                    break;
-                case 'function':
-                    // functions are just called, and passed the cursor mode
-                    style(mode);
-                    break;
-                case 'object':
-                    // if it is an object, assume that it is a dictionary of CSS styles,
-                    // apply it to the interaction_dom_element
-                    Object.assign(this.interaction_dom_element.style, style);
-                    break;
+            case 'string':
+                // string styles are handled as cursor CSS
+                this.interaction_dom_element.style.cursor = style;
+                break;
+            case 'function':
+                // functions are just called, and passed the cursor mode
+                style(mode);
+                break;
+            case 'object':
+                // if it is an object, assume that it is a dictionary of CSS styles,
+                // apply it to the interaction_dom_element
+                Object.assign(this.interaction_dom_element.style, style);
+                break;
             }
         }
         else if (typeof mode === 'string' && !Object.prototype.hasOwnProperty.call(this.cursor_styles, mode))

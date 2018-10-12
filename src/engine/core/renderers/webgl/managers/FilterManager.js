@@ -407,7 +407,7 @@ export default class FilterManager extends WebGLManager
             {
                 // check if its a point..
                 if (uniforms[i].x !== undefined)
-               {
+                {
                     const val = shader.uniforms[i] || new Float32Array(2);
 
                     val[0] = uniforms[i].x;
@@ -415,7 +415,7 @@ export default class FilterManager extends WebGLManager
                     shader.uniforms[i] = val;
                 }
                 else
-               {
+                {
                     shader.uniforms[i] = uniforms[i];
                 }
             }

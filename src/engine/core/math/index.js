@@ -30,7 +30,7 @@ export const PI2 = Math.PI * 2;
  * @return {number} Clamped value
  */
 export function clamp(x, a, b) {
-  return (x < a) ? a : ((x > b) ? b : x);
+    return (x < a) ? a : ((x > b) ? b : x);
 }
 
 /**

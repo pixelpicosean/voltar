@@ -10,7 +10,7 @@ import { Matrix } from '../../../math';
 // this returns a matrix that will normalise map filter cords in the filter to screen space
 export function calculateScreenSpaceMatrix(output_matrix, filter_area, texture_size)
 {
-     // let world_transform = sprite.world_transform.copy(Matrix.TEMP_MATRIX),
+    // let world_transform = sprite.world_transform.copy(Matrix.TEMP_MATRIX),
     // let texture = {width:1136, height:700};//sprite._texture.base_texture;
 
     // TODO unwrap?

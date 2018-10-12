@@ -143,15 +143,15 @@ export default class BitmapText extends Node2D {
 
         for (let k in data) {
             switch (k) {
-                case 'font':
-                case 'text':
-                case 'max_width':
-                case 'max_line_height':
-                    this[k] = data[k];
-                    break;
-                case 'font_style':
-                    this._font = data[k];
-                    break;
+            case 'font':
+            case 'text':
+            case 'max_width':
+            case 'max_line_height':
+                this[k] = data[k];
+                break;
+            case 'font_style':
+                this._font = data[k];
+                break;
             }
         }
     }

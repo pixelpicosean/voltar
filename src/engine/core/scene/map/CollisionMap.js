@@ -234,7 +234,7 @@ export default class CollisionMap extends Node2D {
 
         // Find the box corner to test, relative to the line
         var tx = x + vx + (lvy < 0 ? width : 0) - lx,
-        ty = y + vy + (lvx > 0 ? height : 0) - ly;
+            ty = y + vy + (lvx > 0 ? height : 0) - ly;
 
         // Is the box corner behind the line?
         if (lvx * ty - lvy * tx > 0) {

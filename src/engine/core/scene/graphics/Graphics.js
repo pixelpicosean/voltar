@@ -211,63 +211,63 @@ export default class Graphics extends Node2D
 
         for (let k in data) {
             switch (k) {
-                // Directly set
-                // - Graphics
-                case 'tint':
-                    this[k] = data[k];
-                    break;
+            // Directly set
+            // - Graphics
+            case 'tint':
+                this[k] = data[k];
+                break;
 
                 // Blend modes
-                case 'blend_mode':
-                    this.blend_mode = BLEND_MODES[data[k]];
-                    break;
+            case 'blend_mode':
+                this.blend_mode = BLEND_MODES[data[k]];
+                break;
 
                 // Graphics
-                case 'shape':
-                    let { centered = true, line_width = 0, fill = 0, stroke = 0 } = data;
-                    switch (data.shape) {
-                        case 'rect':
-                        case 'rectangle':
-                        case 'box':
-                            let { width = 8, height = 8 } = data;
-                            if (line_width > 0) {
-                                this.set_line_style(line_width, stroke, 1);
-                            }
-                            this.begin_fill(fill, 1);
-                            if (centered) {
-                                this.draw_rect(-width / 2, -height / 2, width, height);
-                            }
-                            else {
-                                this.draw_rect(0, 0, width, height);
-                            }
-                            this.end_fill();
-                            break;
-                        case 'circ':
-                        case 'circle':
-                            let { radius = 8 } = data;
-                            if (line_width > 0) {
-                                this.set_line_style(line_width, stroke, 1);
-                            }
-                            this.begin_fill(fill, 1);
-                            if (centered) {
-                                this.draw_circle(0, 0, radius);
-                            }
-                            else {
-                                this.draw_circle(-radius, -radius, radius);
-                            }
-                            this.end_fill();
-                            break;
-                        case 'poly':
-                        case 'polygon':
-                            let { points = EMPTY_POINTS } = data;
-                            if (line_width > 0) {
-                                this.set_line_style(line_width, stroke, 1);
-                            }
-                            this.begin_fill(fill, 1);
-                            this.draw_polygon(points);
-                            this.end_fill();
-                            break;
+            case 'shape':
+                let { centered = true, line_width = 0, fill = 0, stroke = 0 } = data;
+                switch (data.shape) {
+                case 'rect':
+                case 'rectangle':
+                case 'box':
+                    let { width = 8, height = 8 } = data;
+                    if (line_width > 0) {
+                        this.set_line_style(line_width, stroke, 1);
                     }
+                    this.begin_fill(fill, 1);
+                    if (centered) {
+                        this.draw_rect(-width / 2, -height / 2, width, height);
+                    }
+                    else {
+                        this.draw_rect(0, 0, width, height);
+                    }
+                    this.end_fill();
+                    break;
+                case 'circ':
+                case 'circle':
+                    let { radius = 8 } = data;
+                    if (line_width > 0) {
+                        this.set_line_style(line_width, stroke, 1);
+                    }
+                    this.begin_fill(fill, 1);
+                    if (centered) {
+                        this.draw_circle(0, 0, radius);
+                    }
+                    else {
+                        this.draw_circle(-radius, -radius, radius);
+                    }
+                    this.end_fill();
+                    break;
+                case 'poly':
+                case 'polygon':
+                    let { points = EMPTY_POINTS } = data;
+                    if (line_width > 0) {
+                        this.set_line_style(line_width, stroke, 1);
+                    }
+                    this.begin_fill(fill, 1);
+                    this.draw_polygon(points);
+                    this.end_fill();
+                    break;
+                }
             }
         }
     }

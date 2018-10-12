@@ -132,7 +132,7 @@ export default class TileRenderer extends ObjectRenderer {
                 }
             }
         }
-    };
+    }
 
     start() {
         this.renderer.state.setBlendMode(BLEND_MODES.NORMAL);
@@ -214,7 +214,7 @@ export default class TileRenderer extends ObjectRenderer {
         super.destroy();
         this.rectShader.destroy();
         this.rectShader = null;
-    };
+    }
 }
 
 TileRenderer.vbAutoincrement = 0;

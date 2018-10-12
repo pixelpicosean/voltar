@@ -19,7 +19,7 @@ class Anim {
         this.frames = [];
         this.name = '';
     }
-};
+}
 
 function normalize_frame_list(frames) {
     let result = new Array(frames.length);
@@ -27,7 +27,7 @@ function normalize_frame_list(frames) {
         result[i] = (frames[i].base_texture ? frames[i].base_texture : TextureCache[frames[i]]);
     }
     return result;
-};
+}
 
 /**
  * Create textures for tiles in a tileset. Can also be used to extract
@@ -57,7 +57,7 @@ export function filmstrip(tileset, width, height) {
     }
 
     return strip;
-};
+}
 
 const SheetStripCache = Object.create(null);
 const SheetSubStripCache = Object.create(null);
@@ -86,7 +86,7 @@ function parse_sheet_frames(sheet) {
     }
 
     return seq;
-};
+}
 
 export class SpriteFrames {
     constructor(data) {
@@ -198,9 +198,9 @@ export default class AnimatedSprite extends Sprite {
 
         for (let k in data) {
             switch (k) {
-                case 'frames':
-                    this.set_frames(data[k]);
-                    break;
+            case 'frames':
+                this.set_frames(data[k]);
+                break;
             }
         }
     }

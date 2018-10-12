@@ -209,10 +209,10 @@ export default class Point {
         return this;
     }
     project(other) {
-      const amt = this.dot(other) / other.length_squared();
-      this.x = amt * other.x;
-      this.y = amt * other.y;
-      return this;
+        const amt = this.dot(other) / other.length_squared();
+        this.x = amt * other.x;
+        this.y = amt * other.y;
+        return this;
     }
     project_n(other) {
         const amt = this.dot(other);

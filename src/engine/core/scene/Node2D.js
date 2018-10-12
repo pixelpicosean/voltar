@@ -247,34 +247,34 @@ export default class Node2D extends EventEmitter
     _load_data(data) {
         for (let k in data) {
             switch (k) {
-                // Directly set
-                // - Node2D
-                case 'name':
-                case 'alpha':
-                case 'width':
-                case 'height':
-                case 'rotation':
-                case 'visible':
-                case 'x':
-                case 'y':
-                case 'interactive':
-                    this[k] = data[k];
-                    break;
+            // Directly set
+            // - Node2D
+            case 'name':
+            case 'alpha':
+            case 'width':
+            case 'height':
+            case 'rotation':
+            case 'visible':
+            case 'x':
+            case 'y':
+            case 'interactive':
+                this[k] = data[k];
+                break;
 
                 // Set vector
                 // - Node2D
-                case 'pivot':
-                case 'position':
-                case 'skew':
-                    this[k].x = data[k].x || 0;
-                    this[k].y = data[k].y || 0;
-                    break;
+            case 'pivot':
+            case 'position':
+            case 'skew':
+                this[k].x = data[k].x || 0;
+                this[k].y = data[k].y || 0;
+                break;
 
                 // - Node2D
-                case 'scale':
-                    this[k].x = data[k].x || 1;
-                    this[k].y = data[k].y || 1;
-                    break;
+            case 'scale':
+                this[k].x = data[k].x || 1;
+                this[k].y = data[k].y || 1;
+                break;
             }
         }
     }
@@ -1298,22 +1298,22 @@ export default class Node2D extends EventEmitter
         for (; i < l; i++) {
             name = list[i];
             switch (name) {
-                case '.':
-                    break;
-                case '..':
-                    node = node.parent;
-                    if (!node) {
-                        console.log('no parent node exists');
-                        return null;
-                    }
-                    break;
-                default:
-                    node = node.named_children[name];
-                    if (!node) {
-                        console.log(`node called "${name}" does not exist`);
-                        return null;
-                    }
-                    break;
+            case '.':
+                break;
+            case '..':
+                node = node.parent;
+                if (!node) {
+                    console.log('no parent node exists');
+                    return null;
+                }
+                break;
+            default:
+                node = node.named_children[name];
+                if (!node) {
+                    console.log(`node called "${name}" does not exist`);
+                    return null;
+                }
+                break;
             }
         }
 

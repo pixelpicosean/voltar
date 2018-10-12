@@ -248,10 +248,10 @@ export default class PhysicsServer {
 
         // Recycle arrays in the hash
         for (let i in this.hash) {
-          let group = this.hash[i];
-          for (let j in group) {
-            put_array(group[j]);
-          }
+            let group = this.hash[i];
+            for (let j in group) {
+                put_array(group[j]);
+            }
         }
     }
     test_node_against_map(node, vec) {
@@ -552,7 +552,7 @@ export default class PhysicsServer {
 
                 // No longer overlap?
                 if (
-                  a.bottom <= b.top ||
+                    a.bottom <= b.top ||
                   a.top >= b.bottom ||
                   a.left >= b.right ||
                   a.right <= b.left
@@ -569,7 +569,7 @@ export default class PhysicsServer {
 
                 // No longer overlap?
                 if (
-                  a.bottom <= b.top ||
+                    a.bottom <= b.top ||
                   a.top >= b.bottom ||
                   a.left >= b.right ||
                   a.right <= b.left

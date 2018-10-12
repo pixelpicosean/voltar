@@ -124,7 +124,7 @@ export default class GraphicsRenderer extends ObjectRenderer
     {
         const gl = this.renderer.gl;
 
-         // get the contexts graphics object
+        // get the contexts graphics object
         let webGL = graphics._webGL[this.CONTEXT_UID];
 
         // if the graphics object does not exist in the webGL context time to create it!
