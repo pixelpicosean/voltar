@@ -301,7 +301,7 @@ export default class TilingSprite extends Sprite
             this._bounds.min_x = this._width * -this._anchor._x;
             this._bounds.min_y = this._height * -this._anchor._y;
             this._bounds.max_x = this._width * (1 - this._anchor._x);
-            this._bounds.max_y = this._height * (1 - this._anchor._x);
+            this._bounds.max_y = this._height * (1 - this._anchor._y);
 
             if (!rect)
             {

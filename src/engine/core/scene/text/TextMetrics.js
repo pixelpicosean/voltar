@@ -466,7 +466,8 @@ export default class TextMetrics {
      */
     static measureFont(font) {
         // as this method is used for preparing assets, don't recalculate things if we don't need to
-        if (TextMetrics._fonts[font]) {
+        if (TextMetrics._fonts[font])
+        {
             return TextMetrics._fonts[font];
         }
 
@@ -556,11 +557,14 @@ export default class TextMetrics {
      * @static
      * @param {string} [font] - font name. If font name not set then clear cache for all fonts.
      */
-    static clearMetrics(font = '') {
-        if (font) {
+    static clearMetrics(font = '')
+    {
+        if (font)
+        {
             delete TextMetrics._fonts[font];
         }
-        else {
+        else
+        {
             TextMetrics._fonts = {};
         }
     }

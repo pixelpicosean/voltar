@@ -1343,6 +1343,9 @@ export default class InteractionManager extends EventEmitter
         const isTouch = data.pointer_type === 'touch';
 
         const isMouse = (data.pointer_type === 'mouse' || data.pointer_type === 'pen');
+        // need to track mouse down status in the mouse block so that we can emit
+        // event in a later block
+        let isMouseTap = false;
 
         // Mouse only
         if (isMouse)
@@ -1362,6 +1365,8 @@ export default class InteractionManager extends EventEmitter
                 if (isDown)
                 {
                     this.dispatch_event(displayObject, isRightButton ? 'rightclick' : 'click', interactionEvent);
+                    // because we can confirm that the mousedown happened on this object, emit pointertap
+                    isMouseTap = true;
                 }
             }
             else if (isDown)
@@ -1390,7 +1395,11 @@ export default class InteractionManager extends EventEmitter
 
             if (trackingData)
             {
-                this.dispatch_event(displayObject, 'pointertap', interactionEvent);
+                // emit pointertap if not a mouse, or if the mouse block decided it was a tap
+                if (!isMouse || isMouseTap)
+                {
+                    this.dispatch_event(displayObject, 'pointertap', interactionEvent);
+                }
                 if (isTouch)
                 {
                     this.dispatch_event(displayObject, 'tap', interactionEvent);

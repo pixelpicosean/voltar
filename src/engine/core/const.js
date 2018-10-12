@@ -223,11 +223,11 @@ export const URL_FILE_EXTENSION = /\.(\w{3,4})(?:$|\?|#)/i;
  * @static
  * @constant
  * @name DATA_URI
- * @memberof V
+ * @memberof v
  * @type {RegExp|string}
  * @example data:image/png;base64
  */
-export const DATA_URI = /^\s*data:(?:([\w-]+)\/([\w+.-]+))?(?:;(charset=[\w-]+|base64))?,(.*)/i;
+export const DATA_URI = /^\s*data:(?:([\w-]+)\/([\w+.-]+))?(?:;charset=([\w-]+))?(?:;(base64))?,(.*)/i;
 
 /**
  * Regexp for SVG size.

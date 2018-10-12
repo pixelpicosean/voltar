@@ -14,13 +14,13 @@ function dirname(url) {
  * Register a BitmapText font from loader resource.
  *
  * @function parseBitmapFontData
- * @memberof V.loaders
- * @param {V.loaders.Resource} resource - Loader resource.
- * @param {V.Texture} texture - Reference to texture.
+ * @memberof v.loaders
+ * @param {v.loaders.Resource} resource - Loader resource.
+ * @param {v.Texture|v.Texture[]} textures - Reference to texture.
  */
-export function parse(resource, texture)
+export function parse(resource, textures)
 {
-    resource.bitmapFont = BitmapText.register_font(resource.data, texture);
+    resource.bitmapFont = BitmapText.register_font(resource.data, textures);
 }
 
 export default function ()
@@ -74,29 +74,59 @@ export default function ()
             xmlUrl += '/';
         }
 
-        const textureUrl = xmlUrl + resource.data.getElementsByTagName('page')[0].getAttribute('file');
+        const pages = resource.data.getElementsByTagName('page');
+        const textures = {};
 
-        if (utils.TextureCache[textureUrl])
-        {
-            // reuse existing texture
-            parse(resource, utils.TextureCache[textureUrl]);
-            next();
-        }
-        else
-        {
-            const loadOptions = {
-                crossOrigin: resource.crossOrigin,
-                loadType: Resource.LOAD_TYPE.IMAGE,
-                metadata: resource.metadata.imageMetadata,
-                parentResource: resource,
-            };
+        // Handle completed, when the number of textures
+        // load is the same number as references in the fnt file
+        const completed = (page) => {
+            textures[page.metadata.pageFile] = page.texture;
 
-            // load the texture for the font
-            this.add(`${resource.name}_image`, textureUrl, loadOptions, (res) =>
-            {
-                parse(resource, res.texture);
+            if (Object.keys(textures).length === pages.length) {
+                parse(resource, textures);
                 next();
-            });
+            }
+        };
+
+        for (let i = 0; i < pages.length; ++i) {
+            const pageFile = pages[i].getAttribute('file');
+            const url = xmlUrl + pageFile;
+            let exists = false;
+
+            // incase the image is loaded outside
+            // using the same loader, resource will be available
+            for (const name in this.resources) {
+                const bitmapResource = this.resources[name];
+
+                if (bitmapResource.url === url) {
+                    bitmapResource.metadata.pageFile = pageFile;
+                    if (bitmapResource.texture) {
+                        completed(bitmapResource);
+                    }
+                    else {
+                        bitmapResource.onAfterMiddleware.add(completed);
+                    }
+                    exists = true;
+                    break;
+                }
+            }
+
+            // texture is not loaded, we'll attempt to add
+            // it to the load and add the texture to the list
+            if (!exists) {
+                // Standard loading options for images
+                const options = {
+                    crossOrigin: resource.crossOrigin,
+                    loadType: Resource.LOAD_TYPE.IMAGE,
+                    metadata: Object.assign(
+                        { pageFile },
+                        resource.metadata.imageMetadata
+                    ),
+                    parentResource: resource,
+                };
+
+                this.add(url, options, completed);
+            }
         }
     };
 }

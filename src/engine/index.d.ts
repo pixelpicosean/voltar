@@ -2651,6 +2651,7 @@ declare module 'engine' {
         text_width: number;
         text_height: number;
         max_width: number;
+        letter_spacing: number;
         max_line_height: number;
         dirty: boolean;
 

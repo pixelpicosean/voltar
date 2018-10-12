@@ -85,8 +85,8 @@ export default function buildCircle(graphics_data, webGLData, webGLDataNativeLin
         for (let i = 0; i < totalSegs + 1; i++)
         {
             graphics_data.points.push(
-                x + (Math.sin(seg * i) * width),
-                y + (Math.cos(seg * i) * height)
+                x + (Math.sin(seg * -i) * width),
+                y + (Math.cos(seg * -i) * height)
             );
         }
 

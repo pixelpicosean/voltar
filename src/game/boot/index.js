@@ -14,7 +14,7 @@ import CoaTest from 'game/test/coa';
 import TextTest from 'game/test/text';
 
 
-const FirstScene = AnimatedSpirteWithDataTest;
+const FirstScene = TextTest;
 
 
 export default class Boot extends v.Node2D {

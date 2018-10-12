@@ -69,6 +69,14 @@ export default class Graphics extends Node2D
         this.line_color = 0;
 
         /**
+         * The alignment of any lines drawn (0.5 = middle, 1 = outter, 0 = inner).
+         *
+         * @member {number}
+         * @default 0
+         */
+        this.lineAlignment = 0.5;
+
+        /**
          * Graphics data
          *
          * @member {V.GraphicsData[]}
@@ -276,6 +284,7 @@ export default class Graphics extends Node2D
         clone.fill_alpha = this.fill_alpha;
         clone.line_width = this.line_width;
         clone.line_color = this.line_color;
+        clone.lineAlignment = this.lineAlignment;
         clone.tint = this.tint;
         clone.blend_mode = this.blend_mode;
         clone.is_mask = this.is_mask;
@@ -297,19 +306,134 @@ export default class Graphics extends Node2D
     }
 
     /**
+     * Calculate length of quadratic curve
+     * @see {@link http://www.malczak.linuxpl.com/blog/quadratic-bezier-curve-length/}
+     * for the detailed explanation of math behind this.
+     *
+     * @private
+     * @param {number} fromX - x-coordinate of curve start point
+     * @param {number} fromY - y-coordinate of curve start point
+     * @param {number} cpX - x-coordinate of curve control point
+     * @param {number} cpY - y-coordinate of curve control point
+     * @param {number} toX - x-coordinate of curve end point
+     * @param {number} toY - y-coordinate of curve end point
+     * @return {number} Length of quadratic curve
+     */
+    _quadraticCurveLength(fromX, fromY, cpX, cpY, toX, toY) {
+        const ax = fromX - ((2.0 * cpX) + toX);
+        const ay = fromY - ((2.0 * cpY) + toY);
+        const bx = 2.0 * ((cpX - 2.0) * fromX);
+        const by = 2.0 * ((cpY - 2.0) * fromY);
+        const a = 4.0 * ((ax * ax) + (ay * ay));
+        const b = 4.0 * ((ax * bx) + (ay * by));
+        const c = (bx * bx) + (by * by);
+
+        const s = 2.0 * Math.sqrt(a + b + c);
+        const a2 = Math.sqrt(a);
+        const a32 = 2.0 * a * a2;
+        const c2 = 2.0 * Math.sqrt(c);
+        const ba = b / a2;
+
+        return (
+            (a32 * s)
+            + (a2 * b * (s - c2))
+            + (
+                ((4.0 * c * a) - (b * b))
+                * Math.log(((2.0 * a2) + ba + s) / (ba + c2))
+            )
+        )
+            / (4.0 * a32);
+    }
+
+    /**
+     * Calculate length of bezier curve.
+     * Analytical solution is impossible, since it involves an integral that does not integrate in general.
+     * Therefore numerical solution is used.
+     *
+     * @private
+     * @param {number} fromX - Starting point x
+     * @param {number} fromY - Starting point y
+     * @param {number} cpX - Control point x
+     * @param {number} cpY - Control point y
+     * @param {number} cpX2 - Second Control point x
+     * @param {number} cpY2 - Second Control point y
+     * @param {number} toX - Destination point x
+     * @param {number} toY - Destination point y
+     * @return {number} Length of bezier curve
+     */
+    _bezierCurveLength(fromX, fromY, cpX, cpY, cpX2, cpY2, toX, toY) {
+        const n = 10;
+        let result = 0.0;
+        let t = 0.0;
+        let t2 = 0.0;
+        let t3 = 0.0;
+        let nt = 0.0;
+        let nt2 = 0.0;
+        let nt3 = 0.0;
+        let x = 0.0;
+        let y = 0.0;
+        let dx = 0.0;
+        let dy = 0.0;
+        let prevX = fromX;
+        let prevY = fromY;
+
+        for (let i = 1; i <= n; ++i) {
+            t = i / n;
+            t2 = t * t;
+            t3 = t2 * t;
+            nt = (1.0 - t);
+            nt2 = nt * nt;
+            nt3 = nt2 * nt;
+
+            x = (nt3 * fromX) + (3.0 * nt2 * t * cpX) + (3.0 * nt * t2 * cpX2) + (t3 * toX);
+            y = (nt3 * fromY) + (3.0 * nt2 * t * cpY) + (3 * nt * t2 * cpY2) + (t3 * toY);
+            dx = prevX - x;
+            dy = prevY - y;
+            prevX = x;
+            prevY = y;
+
+            result += Math.sqrt((dx * dx) + (dy * dy));
+        }
+
+        return result;
+    }
+
+    /**
+     * Calculate number of segments for the curve based on its length to ensure its smoothness.
+     *
+     * @private
+     * @param {number} length - length of curve
+     * @return {number} Number of segments
+     */
+    _segmentsCount(length) {
+        let result = Math.ceil(length / Graphics.CURVES.maxLength);
+
+        if (result < Graphics.CURVES.minSegments) {
+            result = Graphics.CURVES.minSegments;
+        }
+        else if (result > Graphics.CURVES.maxSegments) {
+            result = Graphics.CURVES.maxSegments;
+        }
+
+        return result;
+    }
+
+    /**
      * Specifies the line style used for subsequent calls to Graphics methods such as the line_to()
      * method or the draw_circle() method.
      *
      * @param {number} [line_width=0] - width of the line to draw, will update the objects stored style
      * @param {number} [color=0] - color of the line to draw, will update the objects stored style
      * @param {number} [alpha=1] - alpha of the line to draw, will update the objects stored style
+     * @param {number} [alignment=1] - alignment of the line to draw, (0 = inner, 0.5 = middle, 1 = outter)
      * @return {V.Graphics} This Graphics object. Good for chaining method calls
      */
-    set_line_style(line_width = 0, color = 0, alpha = 1)
+    set_line_style(line_width = 0, color = 0, alpha = 1, alignment = 0.5)
     {
         this.line_width = line_width;
         this.line_color = color;
         this.line_alpha = alpha;
+        this.lineAlignment = alignment;
 
         if (this.current_path)
         {
@@ -328,6 +452,7 @@ export default class Graphics extends Node2D
                 this.current_path.line_width = this.line_width;
                 this.current_path.line_color = this.line_color;
                 this.current_path.line_alpha = this.line_alpha;
+                this.current_path.lineAlignment = this.lineAlignment;
             }
         }
 
@@ -391,7 +516,6 @@ export default class Graphics extends Node2D
             this.move_to(0, 0);
         }
 
-        const n = 20;
         const points = this.current_path.shape.points;
         let xa = 0;
         let ya = 0;
@@ -403,6 +527,9 @@ export default class Graphics extends Node2D
 
         const fromX = points[points.length - 2];
         const fromY = points[points.length - 1];
+        const n = Graphics.CURVES.adaptive
+            ? this._segmentsCount(this._quadraticCurveLength(fromX, fromY, cpX, cpY, toX, toY))
+            : 20;
 
         for (let i = 1; i <= n; ++i)
         {
@@ -452,7 +579,10 @@ export default class Graphics extends Node2D
 
         points.length -= 2;
 
-        bezier_curve_to(fromX, fromY, cpX, cpY, cpX2, cpY2, toX, toY, points);
+        const n = Graphics.CURVES.adaptive
+            ? this._segmentsCount(this._bezierCurveLength(fromX, fromY, cpX, cpY, cpX2, cpY2, toX, toY))
+            : 20;
+        bezier_curve_to(fromX, fromY, cpX, cpY, cpX2, cpY2, toX, toY, n, points);
 
         this.dirty++;
 
@@ -558,7 +688,9 @@ export default class Graphics extends Node2D
         }
 
         const sweep = endAngle - startAngle;
-        const segs = Math.ceil(Math.abs(sweep) / (PI_2)) * 40;
+        const segs = Graphics.CURVES.adaptive
+            ? this._segmentsCount(Math.abs(sweep) * radius)
+            : Math.ceil(Math.abs(sweep) / PI_2) * 40;
 
         if (sweep === 0)
         {
@@ -800,6 +932,8 @@ export default class Graphics extends Node2D
         if (this.line_width || this.filling || this.graphics_data.length > 0)
         {
             this.line_width = 0;
+            this.lineAlignment = 0.5;
+
             this.filling = false;
 
             this.bounds_dirty = -1;
@@ -1141,7 +1275,8 @@ export default class Graphics extends Node2D
             this.fill_alpha,
             this.filling,
             this.native_lines,
-            shape
+            shape,
+            this.lineAlignment
         );
 
         this.graphics_data.push(data);
@@ -1252,11 +1387,11 @@ export default class Graphics extends Node2D
         }
 
         // for each webgl data entry, destroy the WebGLGraphicsData
-        for (const id in this._webgl)
+        for (const id in this._webGL)
         {
-            for (let j = 0; j < this._webgl[id].data.length; ++j)
+            for (let j = 0; j < this._webGL[id].data.length; ++j)
             {
-                this._webgl[id].data[j].destroy();
+                this._webGL[id].data[j].destroy();
             }
         }
 
@@ -1268,10 +1403,32 @@ export default class Graphics extends Node2D
         this.graphics_data = null;
 
         this.current_path = null;
-        this._webgl = null;
+        this._webGL = null;
         this._localBounds = null;
     }
 
 }
 
 Graphics._SPRITE_TEXTURE = null;
+
+/**
+ * Graphics curves resolution settings. If `adaptive` flag is set to `true`,
+ * the resolution is calculated based on the curve's length to ensure better visual quality.
+ * Adaptive draw works with `bezierCurveTo` and `quadraticCurveTo`.
+ *
+ * @static
+ * @constant
+ * @memberof v.Graphics
+ * @name CURVES
+ * @type {object}
+ * @property {boolean} adaptive=false - flag indicating if the resolution should be adaptive
+ * @property {number} maxLength=10 - maximal length of a single segment of the curve (if adaptive = false, ignored)
+ * @property {number} minSegments=8 - minimal number of segments in the curve (if adaptive = false, ignored)
+ * @property {number} maxSegments=2048 - maximal number of segments in the curve (if adaptive = false, ignored)
+ */
+Graphics.CURVES = {
+    adaptive: false,
+    maxLength: 10,
+    minSegments: 8,
+    maxSegments: 2048,
+};
