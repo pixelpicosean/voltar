@@ -412,7 +412,7 @@ export default class TilingSprite extends Sprite
      * @param {boolean} [crossorigin] - if you want to specify the cross-origin parameter
      * @param {number} [scale_mode=V.settings.SCALE_MODE] - if you want to specify the scale mode,
      *  see {@link V.SCALE_MODES} for possible values
-     * @return {V.extras.TilingSprite} A new TilingSprite using a texture from the texture cache matching the image id
+     * @return {v.extras.TilingSprite} A new TilingSprite using a texture from the texture cache matching the image id
      */
     static from_image(imageId, width, height, crossorigin, scale_mode)
     {

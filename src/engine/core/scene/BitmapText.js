@@ -518,7 +518,8 @@ export default class BitmapText extends Node2D {
      *
      * @static
      * @param {XMLDocument} xml - The XML document data.
-     * @param {v.Texture|v.Texture[]} textures - List of textures for each page.
+     * @param {Object.<string, Texture>|Texture|Texture[]} textures - List of textures for each page.
+     *  If providing an object, the key is the `<page>` element's `file` attribute in the FNT file.
      * @return {Object} Result font object with font, size, lineHeight and char fields.
      */
     static register_font(xml, textures) {

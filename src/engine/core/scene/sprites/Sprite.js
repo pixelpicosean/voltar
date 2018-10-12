@@ -473,6 +473,8 @@ export default class Sprite extends Node2D
     {
         super.destroy(options);
 
+        this._texture.off('update', this._onTextureUpdate, this);
+
         this._anchor = null;
 
         const destroyTexture = typeof options === 'boolean' ? options : options && options.texture;
