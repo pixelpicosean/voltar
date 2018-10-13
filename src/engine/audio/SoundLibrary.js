@@ -1,21 +1,14 @@
-import Filterable from "./Filterable";
-import * as filters from "./filters";
-import * as htmlaudio from "./htmlaudio";
-import { HTMLAudioContext } from "./htmlaudio";
+import * as filters from "./filters/index";
+import { HTMLAudioContext } from "./htmlaudio/index";
 import LoaderMiddleware from "./loader/LoaderMiddleware";
 import Sound from "./Sound";
-import SoundSprite from "./sprites/SoundSprite";
-import utils from "./utils/SoundUtils";
-import { WebAudioContext } from "./webaudio";
-import * as webaudio from "./webaudio";
+import { WebAudioContext } from "./webaudio/index";
 /**
  * Contains all of the functionality for using the **pixi-sound** library.
  * This is deisnged to play audio with WebAudio and fallback to HTML5.
  */
 /**
  * @description Manages the playback of sounds.
- * @class SoundLibrary
- * @private
  */
 export default class SoundLibrary {
     constructor(Resource) {

@@ -1,35 +1,32 @@
-import { utils } from '../core';
-import { Resource } from 'resource-loader';
-import BitmapText from '../core/scene/BitmapText';
+import { resource_loader } from 'engine/dep/index';
+import BitmapText from 'engine/scene/BitmapText';
+import Texture from 'engine/textures/Texture';
+
+const { Resource } = resource_loader;
 
 function basename(url) {
-    return url.replace(/\\/g,'/').replace( /.*\//, '' );
+    return url.replace(/\\/g, '/').replace(/.*\//, '');
 }
 
 function dirname(url) {
-    return url.replace(/\\/g,'/').replace(/\/[^\/]*$/, '');
+    return url.replace(/\\/g, '/').replace(/\/[^\/]*$/, '');
 }
 
 /**
  * Register a BitmapText font from loader resource.
  *
  * @function parseBitmapFontData
- * @memberof v.loaders
- * @param {v.loaders.Resource} resource - Loader resource.
- * @param {v.Texture|v.Texture[]} textures - Reference to texture.
+ * @param {Resource} resource - Loader resource.
+ * @param {Texture|Texture[]} textures - Reference to texture.
  */
-export function parse(resource, textures)
-{
-    resource.bitmapFont = BitmapText.register_font(resource.data, textures);
+export function parse(resource, textures) {
+    resource.bitmap_font = BitmapText.register_font(resource.data, textures);
 }
 
-export default function ()
-{
-    return function bitmapFontParser(resource, next)
-    {
+export default function () {
+    return function bitmapFontParser(resource, next) {
         // skip if no data or not xml data
-        if (!resource.data || resource.type !== Resource.TYPE.XML)
-        {
+        if (!resource.data || resource.type !== Resource.TYPE.XML) {
             next();
 
             return;
@@ -39,8 +36,7 @@ export default function ()
         if (resource.data.getElementsByTagName('page').length === 0
             || resource.data.getElementsByTagName('info').length === 0
             || resource.data.getElementsByTagName('info')[0].getAttribute('face') === null
-        )
-        {
+        ) {
             next();
 
             return;
@@ -48,18 +44,14 @@ export default function ()
 
         let xmlUrl = !resource.isDataUrl ? dirname(resource.url) : '';
 
-        if (resource.isDataUrl)
-        {
-            if (xmlUrl === '.')
-            {
+        if (resource.isDataUrl) {
+            if (xmlUrl === '.') {
                 xmlUrl = '';
             }
 
-            if (this.baseUrl && xmlUrl)
-            {
+            if (this.baseUrl && xmlUrl) {
                 // if baseurl has a trailing slash then add one to xmlUrl so the replace works below
-                if (this.baseUrl.charAt(this.baseUrl.length - 1) === '/')
-                {
+                if (this.baseUrl.charAt(this.baseUrl.length - 1) === '/') {
                     xmlUrl += '/';
                 }
             }
@@ -69,8 +61,7 @@ export default function ()
         xmlUrl = xmlUrl.replace(this.baseUrl, '');
 
         // if there is an xmlUrl now, it needs a trailing slash. Ensure that it does if the string isn't empty.
-        if (xmlUrl && xmlUrl.charAt(xmlUrl.length - 1) !== '/')
-        {
+        if (xmlUrl && xmlUrl.charAt(xmlUrl.length - 1) !== '/') {
             xmlUrl += '/';
         }
 

@@ -15,11 +15,7 @@
             "error",
             4
         ],
-        "camelcase": [
-            0,
-            {
-                "properties": "always"
-            }
-        ]
+        "camelcase": "off",
+        "no-console": "off"
     }
 }

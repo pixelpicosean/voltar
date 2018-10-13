@@ -1,13 +1,12 @@
-import { Resource } from 'resource-loader';
-import Texture from '../core/textures/Texture';
+import { resource_loader } from 'engine/dep/index';
+import Texture from 'engine/textures/Texture';
 
-export default function ()
-{
-    return function textureParser(resource, next)
-    {
+const { Resource } = resource_loader;
+
+export default function () {
+    return function textureParser(resource, next) {
         // create a new texture if the data is an Image object
-        if (resource.data && resource.type === Resource.TYPE.IMAGE)
-        {
+        if (resource.data && resource.type === Resource.TYPE.IMAGE) {
             resource.texture = Texture.from_loader(
                 resource.data,
                 resource.url,

@@ -31,7 +31,7 @@ export default {
     interactive: false,
 
     /**
-     * Determines if the children to the displayObject can be clicked/touched
+     * Determines if the children to the node can be clicked/touched
      * Setting this to false allows pixi to bypass a recursive `hit_test` function
      *
      * @member {boolean}
@@ -41,7 +41,7 @@ export default {
 
     /**
      * Interaction shape. Children will be hit first, then this shape will be checked.
-     * Setting this will cause this shape to be checked in hit tests rather than the displayObject's bounds.
+     * Setting this will cause this shape to be checked in hit tests rather than the node's bounds.
      *
      * @example
      * const sprite = new V.Sprite(texture);
@@ -53,7 +53,7 @@ export default {
     hit_area: null,
 
     /**
-     * If enabled, the mouse cursor use the pointer behavior when hovered over the displayObject if it is interactive
+     * If enabled, the mouse cursor use the pointer behavior when hovered over the node if it is interactive
      * Setting this changes the 'cursor' property to `'pointer'`.
      *
      * @example
@@ -81,7 +81,7 @@ export default {
 
     /**
      * This defines what cursor mode is used when the mouse cursor
-     * is hovered over the displayObject.
+     * is hovered over the node.
      *
      * @example
      * const sprite = new V.Sprite(texture);

@@ -1,4 +1,4 @@
-import * as v from 'engine';
+import * as v from 'engine/index';
 
 v.loader.add('media/commander.json');
 v.loader.add('cc', 'media/commander.scon');
@@ -28,7 +28,7 @@ export default class CoaTest extends v.Node2D {
         let hero = this.add_child(new v.CoaSprite().load('cc', 0));
         hero.position.set(128, 200);
         hero.play('idle');
-        hero.animator.speed = 0.25;
+        // hero.animator.speed = 0.25;
         setInterval(() => {
             switch (hero.animator.current_animation.name) {
                 case 'idle':

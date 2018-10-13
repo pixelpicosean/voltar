@@ -1,20 +1,14 @@
-import * as core from '../../core';
-import { join } from 'path';
+import settings from 'engine/settings';
+import Filter from 'engine/renderers/webgl/filters/Filter';
 
 /**
  * Does nothing. Very handy.
- *
- * @class
- * @extends V.Filter
- * @memberof V.filters
  */
-export default class AlphaFilter extends core.Filter
-{
+export default class AlphaFilter extends Filter {
     /**
      * @param {number} [alpha=1] Amount of alpha from 0 to 1, where 0 is transparent
      */
-    constructor(alpha = 1.0)
-    {
+    constructor(alpha = 1.0) {
         super(
             // vertex shader
             require('../fragments/default.vert'),
@@ -32,8 +26,7 @@ export default class AlphaFilter extends core.Filter
      * @member {number}
      * @default 1
      */
-    get alpha()
-    {
+    get alpha() {
         return this.uniforms.uAlpha;
     }
 

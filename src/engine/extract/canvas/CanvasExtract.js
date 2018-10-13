@@ -1,29 +1,28 @@
-import * as core from '../../core';
+import CanvasRenderer from "engine/renderers/canvas/CanvasRenderer";
+import Rectangle from "engine/math/shapes/Rectangle";
+import Node2D from "engine/scene/Node2D";
+import RenderTexture from "engine/textures/RenderTexture";
+import CanvasRenderTarget from "engine/renderers/canvas/utils/CanvasRenderTarget";
 
-const TEMP_RECT = new core.Rectangle();
+const TEMP_RECT = new Rectangle();
 
 /**
  * The extract manager provides functionality to export content from the renderers.
  *
  * An instance of this class is automatically created by default, and can be found at renderer.plugins.extract
- *
- * @class
- * @memberof V.extract
  */
-export default class CanvasExtract
-{
+export default class CanvasExtract {
     /**
-     * @param {V.CanvasRenderer} renderer - A reference to the current renderer
+     * @param {CanvasRenderer} renderer - A reference to the current renderer
      */
-    constructor(renderer)
-    {
+    constructor(renderer) {
         this.renderer = renderer;
         /**
          * Collection of methods for extracting data (image, pixels, etc.) from a display object or render texture
          *
-         * @member {V.extract.CanvasExtract} extract
-         * @memberof V.CanvasRenderer#
-         * @see V.extract.CanvasExtract
+         * @member {CanvasExtract} extract
+         * @memberof CanvasRenderer#
+         * @see CanvasExtract
          */
         renderer.extract = this;
     }
@@ -31,12 +30,11 @@ export default class CanvasExtract
     /**
      * Will return a HTML Image of the target
      *
-     * @param {V.Node2D|V.RenderTexture} target - A displayObject or renderTexture
+     * @param {Node2D|RenderTexture} target - A node or render_texture
      *  to convert. If left empty will use use the main renderer
      * @return {HTMLImageElement} HTML Image of the target
      */
-    image(target)
-    {
+    image(target) {
         const image = new Image();
 
         image.src = this.base64(target);
@@ -46,52 +44,45 @@ export default class CanvasExtract
 
     /**
      * Will return a a base64 encoded string of this target. It works by calling
-     *  `CanvasExtract.getCanvas` and then running toDataURL on that.
+     *  `CanvasgetCanvas` and then running toDataURL on that.
      *
-     * @param {V.Node2D|V.RenderTexture} target - A displayObject or renderTexture
+     * @param {Node2D|RenderTexture} target - A node or render_texture
      *  to convert. If left empty will use use the main renderer
      * @return {string} A base64 encoded string of the texture.
      */
-    base64(target)
-    {
+    base64(target) {
         return this.canvas(target).toDataURL();
     }
 
     /**
      * Creates a Canvas element, renders this target to it and then returns it.
      *
-     * @param {V.Node2D|V.RenderTexture} target - A displayObject or renderTexture
+     * @param {Node2D|RenderTexture} target - A node or render_texture
      *  to convert. If left empty will use use the main renderer
      * @return {HTMLCanvasElement} A Canvas element with the texture rendered on.
      */
-    canvas(target)
-    {
+    canvas(target) {
         const renderer = this.renderer;
         let context;
         let resolution;
         let frame;
-        let renderTexture;
+        let render_texture;
 
-        if (target)
-        {
-            if (target instanceof core.RenderTexture)
-            {
-                renderTexture = target;
+        if (target) {
+            if (target instanceof RenderTexture) {
+                render_texture = target;
             }
-            else
-            {
-                renderTexture = renderer.generate_texture(target);
+            else {
+                render_texture = renderer.generate_texture(target);
             }
         }
 
-        if (renderTexture)
-        {
-            context = renderTexture.base_texture._canvasRenderTarget.context;
-            resolution = renderTexture.base_texture._canvasRenderTarget.resolution;
-            frame = renderTexture.frame;
+        if (render_texture) {
+            context = render_texture.base_texture._canvas_render_target.context;
+            resolution = render_texture.base_texture._canvas_render_target.resolution;
+            frame = render_texture.frame;
         }
-        else
-        {
+        else {
             context = renderer.rootContext;
 
             frame = TEMP_RECT;
@@ -102,7 +93,7 @@ export default class CanvasExtract
         const width = frame.width * resolution;
         const height = frame.height * resolution;
 
-        const canvasBuffer = new core.CanvasRenderTarget(width, height, 1);
+        const canvasBuffer = new CanvasRenderTarget(width, height, 1);
         const canvasData = context.getImageData(frame.x * resolution, frame.y * resolution, width, height);
 
         canvasBuffer.context.putImageData(canvasData, 0, 0);
@@ -115,38 +106,32 @@ export default class CanvasExtract
      * Will return a one-dimensional array containing the pixel data of the entire texture in RGBA
      * order, with integer values between 0 and 255 (included).
      *
-     * @param {V.Node2D|V.RenderTexture} target - A displayObject or renderTexture
+     * @param {Node2D|RenderTexture} target - A node or render_texture
      *  to convert. If left empty will use use the main renderer
      * @return {Uint8ClampedArray} One-dimensional array containing the pixel data of the entire texture
      */
-    pixels(target)
-    {
+    pixels(target) {
         const renderer = this.renderer;
         let context;
         let resolution;
         let frame;
-        let renderTexture;
+        let render_texture;
 
-        if (target)
-        {
-            if (target instanceof core.RenderTexture)
-            {
-                renderTexture = target;
+        if (target) {
+            if (target instanceof RenderTexture) {
+                render_texture = target;
             }
-            else
-            {
-                renderTexture = renderer.generate_texture(target);
+            else {
+                render_texture = renderer.generate_texture(target);
             }
         }
 
-        if (renderTexture)
-        {
-            context = renderTexture.base_texture._canvasRenderTarget.context;
-            resolution = renderTexture.base_texture._canvasRenderTarget.resolution;
-            frame = renderTexture.frame;
+        if (render_texture) {
+            context = render_texture.base_texture._canvas_render_target.context;
+            resolution = render_texture.base_texture._canvas_render_target.resolution;
+            frame = render_texture.frame;
         }
-        else
-        {
+        else {
             context = renderer.rootContext;
 
             frame = TEMP_RECT;
@@ -161,11 +146,10 @@ export default class CanvasExtract
      * Destroys the extract
      *
      */
-    destroy()
-    {
+    destroy() {
         this.renderer.extract = null;
         this.renderer = null;
     }
 }
 
-core.CanvasRenderer.registerPlugin('extract', CanvasExtract);
+CanvasRenderer.register_plugin('extract', CanvasExtract);

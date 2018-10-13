@@ -1,29 +1,25 @@
-import * as core from '../core';
+import { Point } from "engine/math/index";
+import Node2D from "engine/scene/Node2D";
 
 /**
  * Holds all information related to an Interaction event
- *
- * @class
- * @memberof V.interaction
  */
-export default class InteractionData
-{
+export default class InteractionData {
     /**
      *
      */
-    constructor()
-    {
+    constructor() {
         /**
          * This point stores the global coords of where the touch/mouse event happened
          *
-         * @member {V.Point}
+         * @member {Point}
          */
-        this.global = new core.Point();
+        this.global = new Point();
 
         /**
          * The target Node2D that was interacted with
          *
-         * @member {V.Node2D}
+         * @member {Node2D}
          */
         this.target = null;
 
@@ -138,26 +134,24 @@ export default class InteractionData
      * @member {number}
      * @see https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/pointer_id
      */
-    get pointer_id()
-    {
+    get pointer_id() {
         return this.identifier;
     }
 
     /**
-     * This will return the local coordinates of the specified displayObject for this InteractionData
+     * This will return the local coordinates of the specified node for this InteractionData
      *
-     * @param {V.Node2D} displayObject - The Node2D that you would like the local
+     * @param {Node2D} node - The Node2D that you would like the local
      *  coords off
-     * @param {V.Point} [point] - A Point object in which to store the value, optional (otherwise
+     * @param {Point} [point] - A Point object in which to store the value, optional (otherwise
      *  will create a new point)
-     * @param {V.Point} [globalPos] - A Point object containing your custom global coords, optional
+     * @param {Point} [globalPos] - A Point object containing your custom global coords, optional
      *  (otherwise will use the current global coords)
-     * @return {V.Point} A point containing the coordinates of the InteractionData position relative
+     * @return {Point} A point containing the coordinates of the InteractionData position relative
      *  to the Node2D
      */
-    get_local_position(displayObject, point, globalPos)
-    {
-        return displayObject.world_transform.apply_inverse(globalPos || this.global, point);
+    get_local_position(node, point, globalPos) {
+        return node.world_transform.apply_inverse(globalPos || this.global, point);
     }
 
     /**
@@ -166,13 +160,11 @@ export default class InteractionData
      * @param {Touch|MouseEvent|PointerEvent} event The normalized event data
      * @private
      */
-    copyEvent(event)
-    {
+    copy_event(event) {
         // is_primary should only change on touchstart/pointerdown, so we don't want to overwrite
         // it with "false" on later events when our shim for it on touch events might not be
         // accurate
-        if (event.is_primary)
-        {
+        if (event.is_primary) {
             this.is_primary = true;
         }
         this.button = event.button;
@@ -195,8 +187,7 @@ export default class InteractionData
      *
      * @private
      */
-    reset()
-    {
+    reset() {
         // is_primary is the only property that we really need to reset - everything else is
         // guaranteed to be overwritten
         this.is_primary = false;

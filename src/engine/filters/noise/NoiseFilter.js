@@ -1,5 +1,4 @@
-import * as core from '../../core';
-import { join } from 'path';
+import Filter from 'engine/renderers/webgl/filters/Filter';
 
 /**
  * @author Vico @vicocotea
@@ -8,19 +7,13 @@ import { join } from 'path';
 
 /**
  * A Noise effect filter.
- *
- * @class
- * @extends V.Filter
- * @memberof V.filters
  */
-export default class NoiseFilter extends core.Filter
-{
+export default class NoiseFilter extends Filter {
     /**
      * @param {number} noise - The noise intensity, should be a normalized value in the range [0, 1].
      * @param {number} seed - A random seed for the noise generation. Default is `Math.random()`.
      */
-    constructor(noise = 0.5, seed = Math.random())
-    {
+    constructor(noise = 0.5, seed = Math.random()) {
         super(
             // vertex shader
             require('../fragments/default.vert'),
@@ -38,8 +31,7 @@ export default class NoiseFilter extends core.Filter
      * @member {number}
      * @default 0.5
      */
-    get noise()
-    {
+    get noise() {
         return this.uniforms.uNoise;
     }
 
@@ -53,8 +45,7 @@ export default class NoiseFilter extends core.Filter
      *
      * @member {number}
      */
-    get seed()
-    {
+    get seed() {
         return this.uniforms.uSeed;
     }
 

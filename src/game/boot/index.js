@@ -1,4 +1,4 @@
-import * as v from 'engine';
+import * as v from 'engine/index';
 import data from './data.json';
 
 
@@ -14,7 +14,7 @@ import CoaTest from 'game/test/coa';
 import TextTest from 'game/test/text';
 
 
-const FirstScene = AnimatedSpriteTest;
+const FirstScene = CoaTest;
 
 
 export default class Boot extends v.Node2D {

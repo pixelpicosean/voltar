@@ -9,6 +9,7 @@ export const Easing = {
     Linear: {
         /**
          * @param {number} k
+         * @returns {number}
          */
         None: function(k) {
             return k;
@@ -18,18 +19,21 @@ export const Easing = {
     Quadratic: {
         /**
          * @param {number} k
+         * @returns {number}
          */
         In: function(k) {
             return k * k;
         },
         /**
          * @param {number} k
+         * @returns {number}
          */
         Out: function(k) {
             return k * (2 - k);
         },
         /**
          * @param {number} k
+         * @returns {number}
          */
         InOut: function(k) {
             if ((k *= 2) < 1) {return 0.5 * k * k;}
@@ -40,18 +44,21 @@ export const Easing = {
     Cubic: {
         /**
          * @param {number} k
+         * @returns {number}
          */
         In: function(k) {
             return k * k * k;
         },
         /**
          * @param {number} k
+         * @returns {number}
          */
         Out: function(k) {
             return --k * k * k + 1;
         },
         /**
          * @param {number} k
+         * @returns {number}
          */
         InOut: function(k) {
             if ((k *= 2) < 1) {return 0.5 * k * k * k;}
@@ -62,18 +69,21 @@ export const Easing = {
     Quartic: {
         /**
          * @param {number} k
+         * @returns {number}
          */
         In: function(k) {
             return k * k * k * k;
         },
         /**
          * @param {number} k
+         * @returns {number}
          */
         Out: function(k) {
             return 1 - (--k * k * k * k);
         },
         /**
          * @param {number} k
+         * @returns {number}
          */
         InOut: function(k) {
             if ((k *= 2) < 1) {return 0.5 * k * k * k * k;}
@@ -84,18 +94,21 @@ export const Easing = {
     Quintic: {
         /**
          * @param {number} k
+         * @returns {number}
          */
         In: function(k) {
             return k * k * k * k * k;
         },
         /**
          * @param {number} k
+         * @returns {number}
          */
         Out: function(k) {
             return --k * k * k * k * k + 1;
         },
         /**
          * @param {number} k
+         * @returns {number}
          */
         InOut: function(k) {
             if ((k *= 2) < 1) {return 0.5 * k * k * k * k * k;}
@@ -106,18 +119,21 @@ export const Easing = {
     Sinusoidal: {
         /**
          * @param {number} k
+         * @returns {number}
          */
         In: function(k) {
             return 1 - Math.cos(k * Math.PI / 2);
         },
         /**
          * @param {number} k
+         * @returns {number}
          */
         Out: function(k) {
             return Math.sin(k * Math.PI / 2);
         },
         /**
          * @param {number} k
+         * @returns {number}
          */
         InOut: function(k) {
             return 0.5 * (1 - Math.cos(Math.PI * k));
@@ -127,18 +143,21 @@ export const Easing = {
     Exponential: {
         /**
          * @param {number} k
+         * @returns {number}
          */
         In: function(k) {
             return k === 0 ? 0 : Math.pow(1024, k - 1);
         },
         /**
          * @param {number} k
+         * @returns {number}
          */
         Out: function(k) {
             return k === 1 ? 1 : 1 - Math.pow(2, -10 * k);
         },
         /**
          * @param {number} k
+         * @returns {number}
          */
         InOut: function(k) {
             if (k === 0) {return 0;}
@@ -151,18 +170,21 @@ export const Easing = {
     Circular: {
         /**
          * @param {number} k
+         * @returns {number}
          */
         In: function(k) {
             return 1 - Math.sqrt(1 - k * k);
         },
         /**
          * @param {number} k
+         * @returns {number}
          */
         Out: function(k) {
             return Math.sqrt(1 - (--k * k));
         },
         /**
          * @param {number} k
+         * @returns {number}
          */
         InOut: function(k) {
             if ((k *= 2) < 1) {return -0.5 * (Math.sqrt(1 - k * k) - 1);}
@@ -173,6 +195,7 @@ export const Easing = {
     Elastic: {
         /**
          * @param {number} k
+         * @returns {number}
          */
         In: function(k) {
             var s, a = 0.1,
@@ -188,6 +211,7 @@ export const Easing = {
         },
         /**
          * @param {number} k
+         * @returns {number}
          */
         Out: function(k) {
             var s, a = 0.1,
@@ -203,6 +227,7 @@ export const Easing = {
         },
         /**
          * @param {number} k
+         * @returns {number}
          */
         InOut: function(k) {
             var s, a = 0.1,
@@ -222,6 +247,7 @@ export const Easing = {
     Back: {
         /**
          * @param {number} k
+         * @returns {number}
          */
         In: function(k) {
             var s = 1.70158;
@@ -229,6 +255,7 @@ export const Easing = {
         },
         /**
          * @param {number} k
+         * @returns {number}
          */
         Out: function(k) {
             var s = 1.70158;
@@ -236,6 +263,7 @@ export const Easing = {
         },
         /**
          * @param {number} k
+         * @returns {number}
          */
         InOut: function(k) {
             var s = 1.70158 * 1.525;
@@ -247,12 +275,14 @@ export const Easing = {
     Bounce: {
         /**
          * @param {number} k
+         * @returns {number}
          */
         In: function(k) {
             return 1 - Easing.Bounce.Out(1 - k);
         },
         /**
          * @param {number} k
+         * @returns {number}
          */
         Out: function(k) {
             if (k < (1 / 2.75)) {
@@ -270,6 +300,7 @@ export const Easing = {
         },
         /**
          * @param {number} k
+         * @returns {number}
          */
         InOut: function(k) {
             if (k < 0.5) {return Easing.Bounce.In(k * 2) * 0.5;}

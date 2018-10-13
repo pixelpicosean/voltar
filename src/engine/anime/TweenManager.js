@@ -1,5 +1,5 @@
 import Tween from './Tween';
-
+import { remove_items } from 'engine/dep/index';
 
 export default class TweenManager {
     constructor() {

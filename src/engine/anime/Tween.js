@@ -1,6 +1,5 @@
-import remove_items from 'remove-array-items';
-import Signal from 'mini-signals';
-import { Vector, clamp } from 'engine/core/math';
+import { Signal, remove_items } from 'engine/dep/index';
+import { Vector, clamp } from 'engine/math/index';
 import flatten_key_url from './flatten_key_url';
 import { Easing } from './easing';
 
@@ -475,7 +474,7 @@ export default class Tween {
      * @param {number} duration Duration of this animation
      * @param {string} callback Function to call after the duration
      * @param {any} [args] Arguments to be passed to the callback
-     * @returns {boolean}
+     * @returns {Tween}
      */
     interpolate_callback(obj, duration, callback, args) {
         let data = create_interpolate();
@@ -501,7 +500,7 @@ export default class Tween {
      * @param {number} duration Duration of this animation
      * @param {string} callback Function to call after the duration
      * @param {any} [args] Arguments to be passed to the callback
-     * @returns {boolean}
+     * @returns {Tween}
      */
     interpolate_deferred_callback(obj, duration, callback, args) {
         let data = create_interpolate();
@@ -927,14 +926,14 @@ export default class Tween {
             }
             this._calc_delta_val(p_data.initial_val, p_data.final_val, p_data);
             return p_data.delta_val;
-        } break;
+        }
 
         case TARGETING_PROPERTY:
         case TARGETING_METHOD: {
             let initial_val = this._get_initial_val(p_data);
             this._calc_delta_val(initial_val, p_data.final_val, p_data);
             return p_data.delta_val;
-        } break;
+        }
         }
 
         return p_data.initial_val;

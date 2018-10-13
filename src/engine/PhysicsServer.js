@@ -1,5 +1,5 @@
-import Vector from './core/math/Point';
-import remove_items from 'remove-array-items';
+import { Vector } from 'engine/math/index';
+import { remove_items } from 'engine/dep/index';
 
 /**
  * @typedef Response

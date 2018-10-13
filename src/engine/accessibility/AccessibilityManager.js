@@ -1,14 +1,16 @@
-import * as core from '../core';
-import Device from 'ismobilejs';
+import { mixins } from '../utils/index';
+import { remove_items, device } from 'engine/dep/index';
 import accessible_target from './accessible_target';
-import SystemRenderer from '../core/renderers/SystemRenderer';
-import Node2D from '../core/scene/Node2D';
-import { Rectangle } from '../core/math';
+import SystemRenderer from '../renderers/SystemRenderer';
+import Node2D from '../scene/Node2D';
+import { Rectangle } from '../math/index';
+import WebGLRenderer from 'engine/renderers/webgl/WebGLRenderer';
+import CanvasRenderer from 'engine/renderers/canvas/CanvasRenderer';
 
 
 // add some extra variables to the container..
-core.utils.mixins.delay_mixin(
-    core.Node2D.prototype,
+mixins.delay_mixin(
+    Node2D.prototype,
     accessible_target
 );
 
@@ -34,15 +36,12 @@ const DIV_HOOK_ZINDEX = 2;
  *
  * An instance of this class is automatically created by default, and can be found at renderer.plugins.accessibility
  */
-export default class AccessibilityManager
-{
+export default class AccessibilityManager {
     /**
-     * @param {core.CanvasRenderer|core.WebGLRenderer} renderer - A reference to the current renderer
+     * @param {SystemRenderer} renderer - A reference to the current renderer
      */
-    constructor(renderer)
-    {
-        if ((Device.tablet || Device.phone) && !navigator.isCocoonJS)
-        {
+    constructor(renderer) {
+        if ((device.tablet || device.phone) && !navigator.isCocoonJS) {
             this.create_touch_hook();
         }
 
@@ -107,8 +106,8 @@ export default class AccessibilityManager
          *
          * @private
          */
-        this._onKeyDown = this._onKeyDown.bind(this);
-        this._onMouseMove = this._onMouseMove.bind(this);
+        this._on_key_down = this._on_key_down.bind(this);
+        this._on_mouse_move = this._on_mouse_move.bind(this);
 
         /**
          * stores the state of the manager. If there are no accessible objects or the mouse is moving, this will be false.
@@ -119,15 +118,14 @@ export default class AccessibilityManager
         this.is_mobile_accessabillity = false;
 
         // let listen for tab.. once pressed we can fire up and show the accessibility layer
-        window.addEventListener('keydown', this._onKeyDown, false);
+        window.addEventListener('keydown', this._on_key_down, false);
     }
 
     /**
      * Creates the touch hooks.
      *
      */
-    create_touch_hook()
-    {
+    create_touch_hook() {
         const hookDiv = document.createElement('button');
 
         hookDiv.style.width = `${DIV_HOOK_SIZE}px`;
@@ -139,8 +137,7 @@ export default class AccessibilityManager
         hookDiv.style.backgroundColor = '#FF0000';
         hookDiv.title = 'HOOK DIV';
 
-        hookDiv.addEventListener('focus', () =>
-        {
+        hookDiv.addEventListener('focus', () => {
             this.is_mobile_accessabillity = true;
             this.activate();
             document.body.removeChild(hookDiv);
@@ -155,22 +152,19 @@ export default class AccessibilityManager
      *
      * @private
      */
-    activate()
-    {
-        if (this.is_active)
-        {
+    activate() {
+        if (this.is_active) {
             return;
         }
 
         this.is_active = true;
 
-        window.document.addEventListener('mousemove', this._onMouseMove, true);
-        window.removeEventListener('keydown', this._onKeyDown, false);
+        window.document.addEventListener('mousemove', this._on_mouse_move, true);
+        window.removeEventListener('keydown', this._on_key_down, false);
 
         this.renderer.on('postrender', this.update, this);
 
-        if (this.renderer.view.parentNode)
-        {
+        if (this.renderer.view.parentNode) {
             this.renderer.view.parentNode.appendChild(this.div);
         }
     }
@@ -181,22 +175,19 @@ export default class AccessibilityManager
      *
      * @private
      */
-    deactivate()
-    {
-        if (!this.is_active || this.is_mobile_accessabillity)
-        {
+    deactivate() {
+        if (!this.is_active || this.is_mobile_accessabillity) {
             return;
         }
 
         this.is_active = false;
 
-        window.document.removeEventListener('mousemove', this._onMouseMove, true);
-        window.addEventListener('keydown', this._onKeyDown, false);
+        window.document.removeEventListener('mousemove', this._on_mouse_move, true);
+        window.addEventListener('keydown', this._on_key_down, false);
 
         this.renderer.off('postrender', this.update);
 
-        if (this.div.parentNode)
-        {
+        if (this.div.parentNode) {
             this.div.parentNode.removeChild(this.div);
         }
     }
@@ -205,29 +196,24 @@ export default class AccessibilityManager
      * This recursive function will run through the scene graph and add any new accessible objects to the DOM layer.
      *
      * @private
-     * @param {Node2D} displayObject - The Node2D to check.
+     * @param {Node2D} node - The Node2D to check.
      */
-    update_accessible_objects(displayObject)
-    {
-        if (!displayObject.visible)
-        {
+    update_accessible_objects(node) {
+        if (!node.visible) {
             return;
         }
 
-        if (displayObject.accessible && displayObject.interactive)
-        {
-            if (!displayObject._accessibleActive)
-            {
-                this.add_child(displayObject);
+        if (node.accessible && node.interactive) {
+            if (!node._accessible_active) {
+                this.add_child(node);
             }
 
-            displayObject.render_id = this.render_id;
+            node.render_id = this.render_id;
         }
 
-        const children = displayObject.children;
+        const children = node.children;
 
-        for (let i = 0; i < children.length; i++)
-        {
+        for (let i = 0; i < children.length; i++) {
             this.update_accessible_objects(children[i]);
         }
     }
@@ -237,15 +223,13 @@ export default class AccessibilityManager
      *
      * @private
      */
-    update()
-    {
-        if (!this.renderer.renderingToScreen)
-        {
+    update() {
+        if (!this.renderer.rendering_to_screen) {
             return;
         }
 
         // update children...
-        this.update_accessible_objects(this.renderer._lastObjectRendered);
+        this.update_accessible_objects(this.renderer._last_object_rendered);
 
         const rect = this.renderer.view.getBoundingClientRect();
         const sx = rect.width / this.renderer.width;
@@ -258,43 +242,37 @@ export default class AccessibilityManager
         div.style.width = `${this.renderer.width}px`;
         div.style.height = `${this.renderer.height}px`;
 
-        for (let i = 0; i < this.children.length; i++)
-        {
+        for (let i = 0; i < this.children.length; i++) {
             const child = this.children[i];
 
-            if (child.render_id !== this.render_id)
-            {
-                child._accessibleActive = false;
+            if (child.render_id !== this.render_id) {
+                child._accessible_active = false;
 
-                core.utils.removeItems(this.children, i, 1);
-                this.div.removeChild(child._accessibleDiv);
-                this.pool.push(child._accessibleDiv);
-                child._accessibleDiv = null;
+                remove_items(this.children, i, 1);
+                this.div.removeChild(child._accessible_div);
+                this.pool.push(child._accessible_div);
+                child._accessible_div = null;
 
                 i--;
 
-                if (this.children.length === 0)
-                {
+                if (this.children.length === 0) {
                     this.deactivate();
                 }
             }
-            else
-            {
+            else {
                 // map div to display..
-                div = child._accessibleDiv;
+                div = child._accessible_div;
                 let hit_area = child.hit_area;
                 const wt = child.world_transform;
 
-                if (child.hit_area)
-                {
+                if (child.hit_area) {
                     div.style.left = `${(wt.tx + (hit_area.x * wt.a)) * sx}px`;
                     div.style.top = `${(wt.ty + (hit_area.y * wt.d)) * sy}px`;
 
                     div.style.width = `${hit_area.width * wt.a * sx}px`;
                     div.style.height = `${hit_area.height * wt.d * sy}px`;
                 }
-                else
-                {
+                else {
                     hit_area = child.get_bounds();
 
                     this.cap_hit_area(hit_area);
@@ -306,12 +284,12 @@ export default class AccessibilityManager
                     div.style.height = `${hit_area.height * sy}px`;
 
                     // update button titles and hints if they exist and they've changed
-                    if (div.title !== child.accessibleTitle && child.accessibleTitle !== null) {
-                        div.title = child.accessibleTitle;
+                    if (div.title !== child.accessible_title && child.accessible_title !== null) {
+                        div.title = child.accessible_title;
                     }
-                    if (div.getAttribute('aria-label') !== child.accessibleHint
-                        && child.accessibleHint !== null) {
-                        div.setAttribute('aria-label', child.accessibleHint);
+                    if (div.getAttribute('aria-label') !== child.accessible_hint
+                        && child.accessible_hint !== null) {
+                        div.setAttribute('aria-label', child.accessible_hint);
                     }
                 }
             }
@@ -326,27 +304,22 @@ export default class AccessibilityManager
      *
      * @param {Rectangle} hit_area - TODO docs
      */
-    cap_hit_area(hit_area)
-    {
-        if (hit_area.x < 0)
-        {
+    cap_hit_area(hit_area) {
+        if (hit_area.x < 0) {
             hit_area.width += hit_area.x;
             hit_area.x = 0;
         }
 
-        if (hit_area.y < 0)
-        {
+        if (hit_area.y < 0) {
             hit_area.height += hit_area.y;
             hit_area.y = 0;
         }
 
-        if (hit_area.x + hit_area.width > this.renderer.width)
-        {
+        if (hit_area.x + hit_area.width > this.renderer.width) {
             hit_area.width = this.renderer.width - hit_area.x;
         }
 
-        if (hit_area.y + hit_area.height > this.renderer.height)
-        {
+        if (hit_area.y + hit_area.height > this.renderer.height) {
             hit_area.height = this.renderer.height - hit_area.y;
         }
     }
@@ -355,16 +328,14 @@ export default class AccessibilityManager
      * Adds a Node2D to the accessibility manager
      *
      * @private
-     * @param {Node2D} displayObject - The child to make accessible.
+     * @param {Node2D} node - The child to make accessible.
      */
-    add_child(displayObject)
-    {
+    add_child(node) {
         //    this.activate();
 
         let div = this.pool.pop();
 
-        if (!div)
-        {
+        if (!div) {
             div = document.createElement('button');
 
             div.style.width = `${DIV_TOUCH_SIZE}px`;
@@ -392,34 +363,31 @@ export default class AccessibilityManager
                 div.setAttribute('aria-relevant', 'text');
             }
 
-            div.addEventListener('click', this._onClick.bind(this));
-            div.addEventListener('focus', this._onFocus.bind(this));
-            div.addEventListener('focusout', this._onFocusOut.bind(this));
+            div.addEventListener('click', this._on_click.bind(this));
+            div.addEventListener('focus', this._on_focus.bind(this));
+            div.addEventListener('focusout', this._on_focus_out.bind(this));
         }
 
-        if (displayObject.accessibleTitle && displayObject.accessibleTitle !== null)
-        {
-            div.title = displayObject.accessibleTitle;
+        if (node.accessible_title && node.accessible_title !== null) {
+            div.title = node.accessible_title;
         }
-        else if (!displayObject.accessibleHint || displayObject.accessibleHint === null)
-        {
-            div.title = `displayObject ${displayObject.tabIndex}`;
+        else if (!node.accessible_hint || node.accessible_hint === null) {
+            div.title = `node ${node.tab_index}`;
         }
 
-        if (displayObject.accessibleHint && displayObject.accessibleHint !== null)
-        {
-            div.setAttribute('aria-label', displayObject.accessibleHint);
+        if (node.accessible_hint && node.accessible_hint !== null) {
+            div.setAttribute('aria-label', node.accessible_hint);
         }
 
         //
 
-        displayObject._accessibleActive = true;
-        displayObject._accessibleDiv = div;
-        div.displayObject = displayObject;
+        node._accessible_active = true;
+        node._accessible_div = div;
+        div.node = node;
 
-        this.children.push(displayObject);
-        this.div.appendChild(displayObject._accessibleDiv);
-        displayObject._accessibleDiv.tabIndex = displayObject.tabIndex;
+        this.children.push(node);
+        this.div.appendChild(node._accessible_div);
+        node._accessible_div.tab_index = node.tab_index;
     }
 
     /**
@@ -428,11 +396,10 @@ export default class AccessibilityManager
      * @private
      * @param {MouseEvent} e - The click event.
      */
-    _onClick(e)
-    {
-        const interactionManager = this.renderer.plugins.interaction;
+    _on_click(e) {
+        const interaction_manager = this.renderer.plugins.interaction;
 
-        interactionManager.dispatch_event(e.target.displayObject, 'click', interactionManager.event_data);
+        interaction_manager.dispatch_event(e.target.node, 'click', interaction_manager.event_data);
     }
 
     /**
@@ -441,14 +408,13 @@ export default class AccessibilityManager
      * @private
      * @param {FocusEvent} e - The focus event.
      */
-    _onFocus(e)
-    {
+    _on_focus(e) {
         if (!e.target.getAttribute('aria-live', 'off')) {
             e.target.setAttribute('aria-live', 'assertive');
         }
-        const interactionManager = this.renderer.plugins.interaction;
+        const interaction_manager = this.renderer.plugins.interaction;
 
-        interactionManager.dispatch_event(e.target.displayObject, 'mouseover', interactionManager.event_data);
+        interaction_manager.dispatch_event(e.target.node, 'mouseover', interaction_manager.event_data);
     }
 
     /**
@@ -457,14 +423,13 @@ export default class AccessibilityManager
      * @private
      * @param {FocusEvent} e - The focusout event.
      */
-    _onFocusOut(e)
-    {
+    _on_focus_out(e) {
         if (!e.target.getAttribute('aria-live', 'off')) {
             e.target.setAttribute('aria-live', 'polite');
         }
-        const interactionManager = this.renderer.plugins.interaction;
+        const interaction_manager = this.renderer.plugins.interaction;
 
-        interactionManager.dispatch_event(e.target.displayObject, 'mouseout', interactionManager.event_data);
+        interaction_manager.dispatch_event(e.target.node, 'mouseout', interaction_manager.event_data);
     }
 
     /**
@@ -473,10 +438,8 @@ export default class AccessibilityManager
      * @private
      * @param {KeyboardEvent} e - The keydown event.
      */
-    _onKeyDown(e)
-    {
-        if (e.keyCode !== KEY_CODE_TAB)
-        {
+    _on_key_down(e) {
+        if (e.keyCode !== KEY_CODE_TAB) {
             return;
         }
 
@@ -489,8 +452,7 @@ export default class AccessibilityManager
      * @private
      * @param {MouseEvent} e - The mouse event.
      */
-    _onMouseMove(e)
-    {
+    _on_mouse_move(e) {
         if (e.movementX === 0 && e.movementY === 0) {
             return;
         }
@@ -502,17 +464,15 @@ export default class AccessibilityManager
      * Destroys the accessibility manager
      *
      */
-    destroy()
-    {
+    destroy() {
         this.div = null;
 
-        for (let i = 0; i < this.children.length; i++)
-        {
+        for (let i = 0; i < this.children.length; i++) {
             this.children[i].div = null;
         }
 
-        window.document.removeEventListener('mousemove', this._onMouseMove, true);
-        window.removeEventListener('keydown', this._onKeyDown);
+        window.document.removeEventListener('mousemove', this._on_mouse_move, true);
+        window.removeEventListener('keydown', this._on_key_down);
 
         this.pool = null;
         this.children = null;
@@ -520,5 +480,5 @@ export default class AccessibilityManager
     }
 }
 
-core.WebGLRenderer.registerPlugin('accessibility', AccessibilityManager);
-core.CanvasRenderer.registerPlugin('accessibility', AccessibilityManager);
+WebGLRenderer.register_plugin('accessibility', AccessibilityManager);
+CanvasRenderer.register_plugin('accessibility', AccessibilityManager);

@@ -1,5 +1,4 @@
-import * as core from '../../core';
-import { join } from 'path';
+import Filter from 'engine/renderers/webgl/filters/Filter';
 
 /**
  *
@@ -8,19 +7,12 @@ import { join } from 'path';
  * unsupported by WebGL.
  *
  * @see https://github.com/mitsuhiko/webgl-meincraft
- *
- * @class
- * @extends V.Filter
- * @memberof V.filters
- *
  */
-export default class FXAAFilter extends core.Filter
-{
+export default class FXAAFilter extends Filter {
     /**
      *
      */
-    constructor()
-    {
+    constructor() {
         // TODO - needs work
         super(
             // vertex shader

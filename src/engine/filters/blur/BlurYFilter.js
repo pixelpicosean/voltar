@@ -1,25 +1,22 @@
-import * as core from '../../core';
+import settings from 'engine/settings';
 import generateBlurVertSource from './generateBlurVertSource';
 import generateBlurFragSource from './generateBlurFragSource';
 import getMaxBlurKernelSize from './getMaxBlurKernelSize';
+import Filter from 'engine/renderers/webgl/filters/Filter';
+import FilterManager from 'engine/renderers/webgl/managers/FilterManager';
+import RenderTarget from 'engine/renderers/webgl/utils/RenderTarget';
 
 /**
  * The BlurYFilter applies a horizontal Gaussian blur to an object.
- *
- * @class
- * @extends V.Filter
- * @memberof V.filters
  */
-export default class BlurYFilter extends core.Filter
-{
+export default class BlurYFilter extends Filter {
     /**
      * @param {number} strength - The strength of the blur filter.
      * @param {number} quality - The quality of the blur filter.
      * @param {number} resolution - The resolution of the blur filter.
      * @param {number} [kernelSize=5] - The kernelSize of the blur filter.Options: 5, 7, 9, 11, 13, 15.
      */
-    constructor(strength, quality, resolution, kernelSize)
-    {
+    constructor(strength, quality, resolution, kernelSize) {
         kernelSize = kernelSize || 5;
         const vertSrc = generateBlurVertSource(kernelSize, false);
         const fragSrc = generateBlurFragSource(kernelSize);
@@ -31,7 +28,7 @@ export default class BlurYFilter extends core.Filter
             fragSrc
         );
 
-        this.resolution = resolution || core.settings.RESOLUTION;
+        this.resolution = resolution || settings.RESOLUTION;
 
         this._quality = 0;
 
@@ -44,16 +41,14 @@ export default class BlurYFilter extends core.Filter
     /**
      * Applies the filter.
      *
-     * @param {V.FilterManager} filterManager - The manager.
-     * @param {V.RenderTarget} input - The input target.
-     * @param {V.RenderTarget} output - The output target.
+     * @param {FilterManager} filter_manager - The manager.
+     * @param {RenderTarget} input - The input target.
+     * @param {RenderTarget} output - The output target.
      * @param {boolean} clear - Should the output be cleared before rendering?
      */
-    apply(filterManager, input, output, clear)
-    {
-        if (this.firstRun)
-        {
-            const gl = filterManager.renderer.gl;
+    apply(filter_manager, input, output, clear) {
+        if (this.firstRun) {
+            const gl = filter_manager.renderer.gl;
             const kernelSize = getMaxBlurKernelSize(gl);
 
             this.vertexSrc = generateBlurVertSource(kernelSize, false);
@@ -67,19 +62,16 @@ export default class BlurYFilter extends core.Filter
         this.uniforms.strength *= this.strength;
         this.uniforms.strength /= this.passes;
 
-        if (this.passes === 1)
-        {
-            filterManager.applyFilter(this, input, output, clear);
+        if (this.passes === 1) {
+            filter_manager.apply_filter(this, input, output, clear);
         }
-        else
-        {
-            const renderTarget = filterManager.getRenderTarget(true);
+        else {
+            const render_target = filter_manager.get_render_rarget(true);
             let flip = input;
-            let flop = renderTarget;
+            let flop = render_target;
 
-            for (let i = 0; i < this.passes - 1; i++)
-            {
-                filterManager.applyFilter(this, flip, flop, true);
+            for (let i = 0; i < this.passes - 1; i++) {
+                filter_manager.apply_filter(this, flip, flop, true);
 
                 const temp = flop;
 
@@ -87,9 +79,9 @@ export default class BlurYFilter extends core.Filter
                 flip = temp;
             }
 
-            filterManager.applyFilter(this, flip, output, clear);
+            filter_manager.apply_filter(this, flip, output, clear);
 
-            filterManager.returnRenderTarget(renderTarget);
+            filter_manager.return_render_rarget(render_target);
         }
     }
 
@@ -99,8 +91,7 @@ export default class BlurYFilter extends core.Filter
      * @member {number}
      * @default 2
      */
-    get blur()
-    {
+    get blur() {
         return this.strength;
     }
 
@@ -117,8 +108,7 @@ export default class BlurYFilter extends core.Filter
      * @member {number}
      * @default 4
      */
-    get quality()
-    {
+    get quality() {
         return this._quality;
     }
 

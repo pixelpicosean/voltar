@@ -1,32 +1,29 @@
-import * as core from '../../core';
+import settings from 'engine/settings';
 import BlurXFilter from './BlurXFilter';
 import BlurYFilter from './BlurYFilter';
+import Filter from 'engine/renderers/webgl/filters/Filter';
+import FilterManager from 'engine/renderers/webgl/managers/FilterManager';
+import RenderTarget from 'engine/renderers/webgl/utils/RenderTarget';
 
 /**
  * The BlurFilter applies a Gaussian blur to an object.
  * The strength of the blur can be set for x- and y-axis separately.
- *
- * @class
- * @extends V.Filter
- * @memberof V.filters
  */
-export default class BlurFilter extends core.Filter
-{
+export default class BlurFilter extends Filter {
     /**
      * @param {number} strength - The strength of the blur filter.
      * @param {number} quality - The quality of the blur filter.
      * @param {number} resolution - The resolution of the blur filter.
      * @param {number} [kernelSize=5] - The kernelSize of the blur filter.Options: 5, 7, 9, 11, 13, 15.
      */
-    constructor(strength, quality, resolution, kernelSize)
-    {
+    constructor(strength, quality, resolution, kernelSize) {
         super();
 
         this.blurXFilter = new BlurXFilter(strength, quality, resolution, kernelSize);
         this.blurYFilter = new BlurYFilter(strength, quality, resolution, kernelSize);
 
         this.padding = 0;
-        this.resolution = resolution || core.settings.RESOLUTION;
+        this.resolution = resolution || settings.RESOLUTION;
         this.quality = quality || 4;
         this.blur = strength || 8;
     }
@@ -34,28 +31,26 @@ export default class BlurFilter extends core.Filter
     /**
      * Applies the filter.
      *
-     * @param {V.FilterManager} filterManager - The manager.
-     * @param {V.RenderTarget} input - The input target.
-     * @param {V.RenderTarget} output - The output target.
+     * @param {FilterManager} filter_manager - The manager.
+     * @param {RenderTarget} input - The input target.
+     * @param {RenderTarget} output - The output target.
      */
-    apply(filterManager, input, output)
-    {
-        const renderTarget = filterManager.getRenderTarget(true);
+    apply(filter_manager, input, output) {
+        const render_target = filter_manager.get_render_rarget(true);
 
-        this.blurXFilter.apply(filterManager, input, renderTarget, true);
-        this.blurYFilter.apply(filterManager, renderTarget, output, false);
+        this.blurXFilter.apply(filter_manager, input, render_target, true);
+        this.blurYFilter.apply(filter_manager, render_target, output, false);
 
-        filterManager.returnRenderTarget(renderTarget);
+        filter_manager.return_render_rarget(render_target);
     }
 
     /**
-     * Sets the strength of both the blurX and blurY properties simultaneously
+     * Sets the strength of both the blur_x and blur_y properties simultaneously
      *
      * @member {number}
      * @default 2
      */
-    get blur()
-    {
+    get blur() {
         return this.blurXFilter.blur;
     }
 
@@ -71,8 +66,7 @@ export default class BlurFilter extends core.Filter
      * @member {number}
      * @default 1
      */
-    get quality()
-    {
+    get quality() {
         return this.blurXFilter.quality;
     }
 
@@ -82,34 +76,32 @@ export default class BlurFilter extends core.Filter
     }
 
     /**
-     * Sets the strength of the blurX property
+     * Sets the strength of the blur_x property
      *
      * @member {number}
      * @default 2
      */
-    get blurX()
-    {
+    get blur_x() {
         return this.blurXFilter.blur;
     }
 
-    set blurX(value) // eslint-disable-line require-jsdoc
+    set blur_x(value) // eslint-disable-line require-jsdoc
     {
         this.blurXFilter.blur = value;
         this.padding = Math.max(Math.abs(this.blurXFilter.strength), Math.abs(this.blurYFilter.strength)) * 2;
     }
 
     /**
-     * Sets the strength of the blurY property
+     * Sets the strength of the blur_y property
      *
      * @member {number}
      * @default 2
      */
-    get blurY()
-    {
+    get blur_y() {
         return this.blurYFilter.blur;
     }
 
-    set blurY(value) // eslint-disable-line require-jsdoc
+    set blur_y(value) // eslint-disable-line require-jsdoc
     {
         this.blurYFilter.blur = value;
         this.padding = Math.max(Math.abs(this.blurXFilter.strength), Math.abs(this.blurYFilter.strength)) * 2;
@@ -121,8 +113,7 @@ export default class BlurFilter extends core.Filter
      * @member {number}
      * @default PIXI.BLEND_MODES.NORMAL
      */
-    get blend_mode()
-    {
+    get blend_mode() {
         return this.blurYFilter._blend_mode;
     }
 

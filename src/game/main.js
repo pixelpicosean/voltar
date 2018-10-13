@@ -1,4 +1,4 @@
-import * as v from 'engine';
+import * as v from 'engine/index';
 
 import Boot from 'game/boot/index';
 
@@ -30,3 +30,12 @@ v.scene_tree.init({
         stretch_aspect: 'keep',
     },
 });
+
+
+
+
+
+
+
+
+

@@ -1,27 +1,22 @@
-import * as core from '../../core';
-import { join } from 'path';
+import Filter from 'engine/renderers/webgl/filters/Filter';
 
 /**
  * The ColorMatrixFilter class lets you apply a 5x4 matrix transformation on the RGBA
- * color and alpha values of every pixel on your displayObject to produce a result
+ * color and alpha values of every pixel on your node to produce a result
  * with a new set of RGBA color and alpha values. It's pretty powerful!
  *
  * ```js
- *  let colorMatrix = new v.filters.ColorMatrixFilter();
+ *  let colorMatrix = new filters.ColorMatrixFilter();
  *  container.filters = [colorMatrix];
  *  colorMatrix.contrast(2);
  * ```
  * @author Clément Chenebault <clement@goodboydigital.com>
- * @class
- * @extends core.Filter
  */
-export default class ColorMatrixFilter extends core.Filter
-{
+export default class ColorMatrixFilter extends Filter {
     /**
      *
      */
-    constructor()
-    {
+    constructor() {
         super(
             // vertex shader
             require('../fragments/default.vert'),
@@ -45,14 +40,12 @@ export default class ColorMatrixFilter extends core.Filter
      * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
      *  just set the current matrix with @param matrix
      */
-    _loadMatrix(matrix, multiply = false)
-    {
+    _load_matrix(matrix, multiply = false) {
         let newMatrix = matrix;
 
-        if (multiply)
-        {
+        if (multiply) {
             this._multiply(newMatrix, this.uniforms.m, matrix);
-            newMatrix = this._colorMatrix(newMatrix);
+            newMatrix = this._color_matrix(newMatrix);
         }
 
         // set the new matrix
@@ -68,8 +61,7 @@ export default class ColorMatrixFilter extends core.Filter
      * @param {number[]} b - 5x4 matrix the second operand
      * @returns {number[]} 5x4 matrix
      */
-    _multiply(out, a, b)
-    {
+    _multiply(out, a, b) {
         // Red Channel
         out[0] = (a[0] * b[0]) + (a[1] * b[5]) + (a[2] * b[10]) + (a[3] * b[15]);
         out[1] = (a[0] * b[1]) + (a[1] * b[6]) + (a[2] * b[11]) + (a[3] * b[16]);
@@ -108,8 +100,7 @@ export default class ColorMatrixFilter extends core.Filter
      * @param {number[]} matrix - 5x4 matrix
      * @return {number[]} 5x4 matrix with all values between 0-1
      */
-    _colorMatrix(matrix)
-    {
+    _color_matrix(matrix) {
         // Create a Float32 Array and normalize the offset component to 0-1
         const m = new Float32Array(matrix);
 
@@ -128,8 +119,7 @@ export default class ColorMatrixFilter extends core.Filter
      * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
      *  just set the current matrix with @param matrix
      */
-    brightness(b, multiply)
-    {
+    brightness(b, multiply) {
         const matrix = [
             b, 0, 0, 0, 0,
             0, b, 0, 0, 0,
@@ -137,7 +127,7 @@ export default class ColorMatrixFilter extends core.Filter
             0, 0, 0, 1, 0,
         ];
 
-        this._loadMatrix(matrix, multiply);
+        this._load_matrix(matrix, multiply);
     }
 
     /**
@@ -147,8 +137,7 @@ export default class ColorMatrixFilter extends core.Filter
      * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
      *  just set the current matrix with @param matrix
      */
-    greyscale(scale, multiply)
-    {
+    greyscale(scale, multiply) {
         const matrix = [
             scale, scale, scale, 0, 0,
             scale, scale, scale, 0, 0,
@@ -156,7 +145,7 @@ export default class ColorMatrixFilter extends core.Filter
             0, 0, 0, 1, 0,
         ];
 
-        this._loadMatrix(matrix, multiply);
+        this._load_matrix(matrix, multiply);
     }
 
     /**
@@ -165,8 +154,7 @@ export default class ColorMatrixFilter extends core.Filter
      * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
      *  just set the current matrix with @param matrix
      */
-    blackAndWhite(multiply)
-    {
+    black_and_white(multiply) {
         const matrix = [
             0.3, 0.6, 0.1, 0, 0,
             0.3, 0.6, 0.1, 0, 0,
@@ -174,7 +162,7 @@ export default class ColorMatrixFilter extends core.Filter
             0, 0, 0, 1, 0,
         ];
 
-        this._loadMatrix(matrix, multiply);
+        this._load_matrix(matrix, multiply);
     }
 
     /**
@@ -184,8 +172,7 @@ export default class ColorMatrixFilter extends core.Filter
      * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
      *  just set the current matrix with @param matrix
      */
-    hue(rotation, multiply)
-    {
+    hue(rotation, multiply) {
         rotation = (rotation || 0) / 180 * Math.PI;
 
         const cosR = Math.cos(rotation);
@@ -227,7 +214,7 @@ export default class ColorMatrixFilter extends core.Filter
             0, 0, 0, 1, 0,
         ];
 
-        this._loadMatrix(matrix, multiply);
+        this._load_matrix(matrix, multiply);
     }
 
     /**
@@ -239,8 +226,7 @@ export default class ColorMatrixFilter extends core.Filter
      * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
      *  just set the current matrix with @param matrix
      */
-    contrast(amount, multiply)
-    {
+    contrast(amount, multiply) {
         const v = (amount || 0) + 1;
         const o = -0.5 * (v - 1);
 
@@ -251,7 +237,7 @@ export default class ColorMatrixFilter extends core.Filter
             0, 0, 0, 1, 0,
         ];
 
-        this._loadMatrix(matrix, multiply);
+        this._load_matrix(matrix, multiply);
     }
 
     /**
@@ -262,8 +248,7 @@ export default class ColorMatrixFilter extends core.Filter
      * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
      *  just set the current matrix with @param matrix
      */
-    saturate(amount = 0, multiply)
-    {
+    saturate(amount = 0, multiply) {
         const x = (amount * 2 / 3) + 1;
         const y = ((x - 1) * -0.5);
 
@@ -274,7 +259,7 @@ export default class ColorMatrixFilter extends core.Filter
             0, 0, 0, 1, 0,
         ];
 
-        this._loadMatrix(matrix, multiply);
+        this._load_matrix(matrix, multiply);
     }
 
     /**
@@ -294,8 +279,7 @@ export default class ColorMatrixFilter extends core.Filter
      * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
      *  just set the current matrix with @param matrix
      */
-    negative(multiply)
-    {
+    negative(multiply) {
         const matrix = [
             -1, 0, 0, 1, 0,
             0, -1, 0, 1, 0,
@@ -303,7 +287,7 @@ export default class ColorMatrixFilter extends core.Filter
             0, 0, 0, 1, 0,
         ];
 
-        this._loadMatrix(matrix, multiply);
+        this._load_matrix(matrix, multiply);
     }
 
     /**
@@ -312,8 +296,7 @@ export default class ColorMatrixFilter extends core.Filter
      * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
      *  just set the current matrix with @param matrix
      */
-    sepia(multiply)
-    {
+    sepia(multiply) {
         const matrix = [
             0.393, 0.7689999, 0.18899999, 0, 0,
             0.349, 0.6859999, 0.16799999, 0, 0,
@@ -321,7 +304,7 @@ export default class ColorMatrixFilter extends core.Filter
             0, 0, 0, 1, 0,
         ];
 
-        this._loadMatrix(matrix, multiply);
+        this._load_matrix(matrix, multiply);
     }
 
     /**
@@ -330,8 +313,7 @@ export default class ColorMatrixFilter extends core.Filter
      * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
      *  just set the current matrix with @param matrix
      */
-    technicolor(multiply)
-    {
+    technicolor(multiply) {
         const matrix = [
             1.9125277891456083, -0.8545344976951645, -0.09155508482755585, 0, 11.793603434377337,
             -0.3087833385928097, 1.7658908555458428, -0.10601743074722245, 0, -70.35205161461398,
@@ -339,7 +321,7 @@ export default class ColorMatrixFilter extends core.Filter
             0, 0, 0, 1, 0,
         ];
 
-        this._loadMatrix(matrix, multiply);
+        this._load_matrix(matrix, multiply);
     }
 
     /**
@@ -348,8 +330,7 @@ export default class ColorMatrixFilter extends core.Filter
      * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
      *  just set the current matrix with @param matrix
      */
-    polaroid(multiply)
-    {
+    polaroid(multiply) {
         const matrix = [
             1.438, -0.062, -0.062, 0, 0,
             -0.122, 1.378, -0.122, 0, 0,
@@ -357,7 +338,7 @@ export default class ColorMatrixFilter extends core.Filter
             0, 0, 0, 1, 0,
         ];
 
-        this._loadMatrix(matrix, multiply);
+        this._load_matrix(matrix, multiply);
     }
 
     /**
@@ -366,8 +347,7 @@ export default class ColorMatrixFilter extends core.Filter
      * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
      *  just set the current matrix with @param matrix
      */
-    toBGR(multiply)
-    {
+    to_bgr(multiply) {
         const matrix = [
             0, 0, 1, 0, 0,
             0, 1, 0, 0, 0,
@@ -375,7 +355,7 @@ export default class ColorMatrixFilter extends core.Filter
             0, 0, 0, 1, 0,
         ];
 
-        this._loadMatrix(matrix, multiply);
+        this._load_matrix(matrix, multiply);
     }
 
     /**
@@ -384,8 +364,7 @@ export default class ColorMatrixFilter extends core.Filter
      * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
      *  just set the current matrix with @param matrix
      */
-    kodachrome(multiply)
-    {
+    kodachrome(multiply) {
         const matrix = [
             1.1285582396593525, -0.3967382283601348, -0.03992559172921793, 0, 63.72958762196502,
             -0.16404339962244616, 1.0835251566291304, -0.05498805115633132, 0, 24.732407896706203,
@@ -393,7 +372,7 @@ export default class ColorMatrixFilter extends core.Filter
             0, 0, 0, 1, 0,
         ];
 
-        this._loadMatrix(matrix, multiply);
+        this._load_matrix(matrix, multiply);
     }
 
     /**
@@ -402,8 +381,7 @@ export default class ColorMatrixFilter extends core.Filter
      * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
      *  just set the current matrix with @param matrix
      */
-    browni(multiply)
-    {
+    browni(multiply) {
         const matrix = [
             0.5997023498159715, 0.34553243048391263, -0.2708298674538042, 0, 47.43192855600873,
             -0.037703249837783157, 0.8609577587992641, 0.15059552388459913, 0, -36.96841498319127,
@@ -411,7 +389,7 @@ export default class ColorMatrixFilter extends core.Filter
             0, 0, 0, 1, 0,
         ];
 
-        this._loadMatrix(matrix, multiply);
+        this._load_matrix(matrix, multiply);
     }
 
     /**
@@ -420,8 +398,7 @@ export default class ColorMatrixFilter extends core.Filter
      * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
      *  just set the current matrix with @param matrix
      */
-    vintage(multiply)
-    {
+    vintage(multiply) {
         const matrix = [
             0.6279345635605994, 0.3202183420819367, -0.03965408211312453, 0, 9.651285835294123,
             0.02578397704808868, 0.6441188644374771, 0.03259127616149294, 0, 7.462829176470591,
@@ -429,7 +406,7 @@ export default class ColorMatrixFilter extends core.Filter
             0, 0, 0, 1, 0,
         ];
 
-        this._loadMatrix(matrix, multiply);
+        this._load_matrix(matrix, multiply);
     }
 
     /**
@@ -442,8 +419,7 @@ export default class ColorMatrixFilter extends core.Filter
      * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
      *  just set the current matrix with @param matrix
      */
-    colorTone(desaturation, toned, lightColor, darkColor, multiply)
-    {
+    color_tone(desaturation, toned, lightColor, darkColor, multiply) {
         desaturation = desaturation || 0.2;
         toned = toned || 0.15;
         lightColor = lightColor || 0xFFE580;
@@ -464,7 +440,7 @@ export default class ColorMatrixFilter extends core.Filter
             lR - dR, lG - dG, lB - dB, 0, 0,
         ];
 
-        this._loadMatrix(matrix, multiply);
+        this._load_matrix(matrix, multiply);
     }
 
     /**
@@ -474,8 +450,7 @@ export default class ColorMatrixFilter extends core.Filter
      * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
      *  just set the current matrix with @param matrix
      */
-    night(intensity, multiply)
-    {
+    night(intensity, multiply) {
         intensity = intensity || 0.1;
         const matrix = [
             intensity * (-2.0), -intensity, 0, 0, 0,
@@ -484,7 +459,7 @@ export default class ColorMatrixFilter extends core.Filter
             0, 0, 0, 1, 0,
         ];
 
-        this._loadMatrix(matrix, multiply);
+        this._load_matrix(matrix, multiply);
     }
 
     /**
@@ -496,8 +471,7 @@ export default class ColorMatrixFilter extends core.Filter
      * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
      *  just set the current matrix with @param matrix
      */
-    predator(amount, multiply)
-    {
+    predator(amount, multiply) {
         const matrix = [
             // row 1
             11.224130630493164 * amount,
@@ -521,7 +495,7 @@ export default class ColorMatrixFilter extends core.Filter
             0, 0, 0, 1, 0,
         ];
 
-        this._loadMatrix(matrix, multiply);
+        this._load_matrix(matrix, multiply);
     }
 
     /**
@@ -532,8 +506,7 @@ export default class ColorMatrixFilter extends core.Filter
      * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
      *  just set the current matrix with @param matrix
      */
-    lsd(multiply)
-    {
+    lsd(multiply) {
         const matrix = [
             2, -0.4, 0.5, 0, 0,
             -0.5, 2, -0.4, 0, 0,
@@ -541,15 +514,14 @@ export default class ColorMatrixFilter extends core.Filter
             0, 0, 0, 1, 0,
         ];
 
-        this._loadMatrix(matrix, multiply);
+        this._load_matrix(matrix, multiply);
     }
 
     /**
      * Erase the current matrix by setting the default one
      *
      */
-    reset()
-    {
+    reset() {
         const matrix = [
             1, 0, 0, 0, 0,
             0, 1, 0, 0, 0,
@@ -557,7 +529,7 @@ export default class ColorMatrixFilter extends core.Filter
             0, 0, 0, 1, 0,
         ];
 
-        this._loadMatrix(matrix, false);
+        this._load_matrix(matrix, false);
     }
 
     /**
@@ -566,8 +538,7 @@ export default class ColorMatrixFilter extends core.Filter
      * @member {number[]}
      * @default [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0]
      */
-    get matrix()
-    {
+    get matrix() {
         return this.uniforms.m;
     }
 
@@ -586,8 +557,7 @@ export default class ColorMatrixFilter extends core.Filter
      * @member {number}
      * @default 1
      */
-    get alpha()
-    {
+    get alpha() {
         return this.uniforms.uAlpha;
     }
 

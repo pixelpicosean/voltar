@@ -1,6 +1,6 @@
-import remove_items from 'remove-array-items';
-
-
+/**
+ * @type {Message[]}
+ */
 const pool = [];
 
 class Message {
@@ -13,6 +13,12 @@ class Message {
 
 export default class MessageQueue {
     constructor() {
+        /**
+         * Message list
+         *
+         * @private
+         * @type {Message[]}
+         */
         this.messages = [];
     }
 

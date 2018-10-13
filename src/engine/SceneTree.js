@@ -1,9 +1,10 @@
 import VisualServer from './VisualServer';
 import PhysicsServer from './PhysicsServer';
 import MessageQueue from './MessageQueue';
-import Node2D from './core/scene/Node2D';
-import Vector from './core/math/Point';
-import { shared } from './core/ticker/index';
+import Node2D from './scene/Node2D';
+import Vector from './math/Point';
+import { shared } from './ticker/index';
+import * as utils from './utils/index';
 
 import { outer_box_resize } from './resize';
 import remove_items from 'remove-array-items';
@@ -123,6 +124,9 @@ export default class SceneTree {
      * @param {Settings} settings
      */
     init(settings) {
+        // Handle mixins now, after all code has been added
+        utils.mixins.perform_mixins();
+
         this._settings = Object.assign({}, DefaultSettings, settings);
 
         document.title = this._settings.application.name;
@@ -242,8 +246,8 @@ export default class SceneTree {
                     break;
                 case 'keep':
                     result = outer_box_resize(window.innerWidth, window.innerHeight, this._settings.display.width, this._settings.display.height);
-                    let width = (this._settings.display.width * result.scale) | 0;
-                    let height = (this._settings.display.height * result.scale) | 0;
+                    let width = Math.floor(this._settings.display.width * result.scale);
+                    let height = Math.floor(this._settings.display.height * result.scale);
                     this.visual_server.renderer.resize(width, height);
                     this.viewport.scale.set(result.scale, result.scale);
                     this.view.width = width * this.visual_server.renderer.resolution;
@@ -453,7 +457,7 @@ export default class SceneTree {
 
                     // Fixed update
                     // - update transforms
-                    this.viewport.parent = this.viewport._tempNode2DParent;
+                    this.viewport.parent = this.viewport._temp_node_2d_parent;
                     this.viewport.update_transform();
                     this.viewport.parent = null;
                     // - process nodes
