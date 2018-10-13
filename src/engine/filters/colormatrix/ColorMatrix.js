@@ -12,7 +12,7 @@ import Filter from 'engine/renderers/webgl/filters/Filter';
  * ```
  * @author Clément Chenebault <clement@goodboydigital.com>
  */
-export default class ColorMatrixFilter extends Filter {
+export default class ColorMatrix extends Filter {
     /**
      *
      */
@@ -21,7 +21,7 @@ export default class ColorMatrixFilter extends Filter {
             // vertex shader
             require('../fragments/default.vert'),
             // fragment shader
-            require('./colorMatrix.frag')
+            require('./color_matrix.frag')
         );
 
         this.uniforms.m = [

@@ -8,7 +8,7 @@ import Filter from 'engine/renderers/webgl/filters/Filter';
  *
  * @see https://github.com/mitsuhiko/webgl-meincraft
  */
-export default class FXAAFilter extends Filter {
+export default class FXAA extends Filter {
     /**
      *
      */

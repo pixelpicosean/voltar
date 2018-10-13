@@ -1,6 +1,6 @@
 /**
  * This namespace contains WebGL-only display filters that can be applied
- * to Node2Ds using the {@link v.Node2D#filters filters} property.
+ * to Node2Ds using the {@link Node2D#filters filters} property.
  * @example
  * // Draw a green rectangle
  * const rect = new v.Graphics()
@@ -8,15 +8,13 @@
  *     .draw_rect(40, 40, 200, 200);
  *
  * // Add a blur filter
- * rect.filters = [new v.filters.BlurFilter()];
- *
- * @namespace v.filters
+ * rect.filters = [new filters.BlurFilter()];
  */
-export { default as FXAAFilter } from './fxaa/FXAAFilter';
-export { default as NoiseFilter } from './noise/NoiseFilter';
-export { default as DisplacementFilter } from './displacement/DisplacementFilter';
-export { default as BlurFilter } from './blur/BlurFilter';
-export { default as BlurXFilter } from './blur/BlurXFilter';
-export { default as BlurYFilter } from './blur/BlurYFilter';
-export { default as ColorMatrixFilter } from './colormatrix/ColorMatrixFilter';
-export { default as AlphaFilter } from './alpha/AlphaFilter';
+export { default as FXAA } from './fxaa/FXAA';
+export { default as Noise } from './noise/Noise';
+export { default as Displacement } from './displacement/Displacement';
+export { default as Blur } from './blur/Blur';
+export { default as BlurX } from './blur/BlurX';
+export { default as BlurY } from './blur/BlurY';
+export { default as ColorMatrix } from './colormatrix/ColorMatrix';
+export { default as Alpha } from './alpha/Alpha';

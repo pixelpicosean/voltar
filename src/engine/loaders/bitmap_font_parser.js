@@ -15,7 +15,7 @@ function dirname(url) {
 /**
  * Register a BitmapText font from loader resource.
  *
- * @function parseBitmapFontData
+ * @function parse_bitmap_font_data
  * @param {Resource} resource - Loader resource.
  * @param {Texture|Texture[]} textures - Reference to texture.
  */
@@ -24,7 +24,7 @@ export function parse(resource, textures) {
 }
 
 export default function () {
-    return function bitmapFontParser(resource, next) {
+    return function bitmap_font_parser(resource, next) {
         // skip if no data or not xml data
         if (!resource.data || resource.type !== Resource.TYPE.XML) {
             next();

@@ -8,7 +8,7 @@ import Filter from 'engine/renderers/webgl/filters/Filter';
 /**
  * A Noise effect filter.
  */
-export default class NoiseFilter extends Filter {
+export default class Noise extends Filter {
     /**
      * @param {number} noise - The noise intensity, should be a normalized value in the range [0, 1].
      * @param {number} seed - A random seed for the noise generation. Default is `Math.random()`.

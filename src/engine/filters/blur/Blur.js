@@ -1,6 +1,6 @@
 import settings from 'engine/settings';
-import BlurXFilter from './BlurXFilter';
-import BlurYFilter from './BlurYFilter';
+import BlurX from './BlurX';
+import BlurY from './BlurY';
 import Filter from 'engine/renderers/webgl/filters/Filter';
 import FilterManager from 'engine/renderers/webgl/managers/FilterManager';
 import RenderTarget from 'engine/renderers/webgl/utils/RenderTarget';
@@ -9,7 +9,7 @@ import RenderTarget from 'engine/renderers/webgl/utils/RenderTarget';
  * The BlurFilter applies a Gaussian blur to an object.
  * The strength of the blur can be set for x- and y-axis separately.
  */
-export default class BlurFilter extends Filter {
+export default class Blur extends Filter {
     /**
      * @param {number} strength - The strength of the blur filter.
      * @param {number} quality - The quality of the blur filter.
@@ -19,8 +19,8 @@ export default class BlurFilter extends Filter {
     constructor(strength, quality, resolution, kernelSize) {
         super();
 
-        this.blurXFilter = new BlurXFilter(strength, quality, resolution, kernelSize);
-        this.blurYFilter = new BlurYFilter(strength, quality, resolution, kernelSize);
+        this.blurXFilter = new BlurX(strength, quality, resolution, kernelSize);
+        this.blurYFilter = new BlurY(strength, quality, resolution, kernelSize);
 
         this.padding = 0;
         this.resolution = resolution || settings.RESOLUTION;

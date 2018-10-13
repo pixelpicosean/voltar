@@ -14,8 +14,7 @@ const vertTemplate = [
     '}',
 ].join('\n');
 
-export default function generateVertBlurSource(kernelSize, x)
-{
+export default function generate_vert_blur_source(kernelSize, x) {
     const halfLength = Math.ceil(kernelSize / 2);
 
     let vertSource = vertTemplate;
@@ -24,17 +23,14 @@ export default function generateVertBlurSource(kernelSize, x)
     let template;
     // let value;
 
-    if (x)
-    {
+    if (x) {
         template = 'vBlurTexCoords[%index%] = aTextureCoord + vec2(%sampleIndex% * strength, 0.0);';
     }
-    else
-    {
+    else {
         template = 'vBlurTexCoords[%index%] = aTextureCoord + vec2(0.0, %sampleIndex% * strength);';
     }
 
-    for (let i = 0; i < kernelSize; i++)
-    {
+    for (let i = 0; i < kernelSize; i++) {
         let blur = template.replace('%index%', i);
 
         // value = i;

@@ -2,9 +2,9 @@ import ResourceLoader from 'resource-loader';
 import { Resource } from 'resource-loader';
 import { blobMiddlewareFactory } from 'resource-loader/lib/middlewares/parsing/blob';
 import EventEmitter from 'eventemitter3';
-import textureParser from './textureParser';
-import spritesheetParser from './spritesheetParser';
-import bitmapFontParser from './bitmapFontParser';
+import texture_parser from './texture_parser';
+import spritesheet_parser from './spritesheet_parser';
+import bitmap_font_parser from './bitmap_font_parser';
 import coaParser from './coa';
 
 /**
@@ -109,11 +109,11 @@ Loader._pixiMiddleware = [
     // parse any blob into more usable objects (e.g. Image)
     blobMiddlewareFactory,
     // parse any Image objects into textures
-    textureParser,
+    texture_parser,
     // parse any spritesheet data into multiple textures
-    spritesheetParser,
+    spritesheet_parser,
     // parse bitmap font data into multiple textures
-    bitmapFontParser,
+    bitmap_font_parser,
     // parse spriter scon data
     coaParser,
 ];

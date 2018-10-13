@@ -1,7 +1,7 @@
 import settings from 'engine/settings';
-import generateBlurVertSource from './generateBlurVertSource';
-import generateBlurFragSource from './generateBlurFragSource';
-import getMaxBlurKernelSize from './getMaxBlurKernelSize';
+import generate_blur_vert_source from './generate_blur_vert_source';
+import generate_blur_frag_source from './generate_blur_frag_source';
+import getMaxBlurKernelSize from './get_max_kernel_size';
 import Filter from 'engine/renderers/webgl/filters/Filter';
 import FilterManager from 'engine/renderers/webgl/managers/FilterManager';
 import RenderTarget from 'engine/renderers/webgl/utils/RenderTarget';
@@ -9,7 +9,7 @@ import RenderTarget from 'engine/renderers/webgl/utils/RenderTarget';
 /**
  * The BlurXFilter applies a horizontal Gaussian blur to an object.
  */
-export default class BlurXFilter extends Filter {
+export default class BlurX extends Filter {
     /**
      * @param {number} strength - The strength of the blur filter.
      * @param {number} quality - The quality of the blur filter.
@@ -18,8 +18,8 @@ export default class BlurXFilter extends Filter {
      */
     constructor(strength, quality, resolution, kernelSize) {
         kernelSize = kernelSize || 5;
-        const vertSrc = generateBlurVertSource(kernelSize, true);
-        const fragSrc = generateBlurFragSource(kernelSize);
+        const vertSrc = generate_blur_vert_source(kernelSize, true);
+        const fragSrc = generate_blur_frag_source(kernelSize);
 
         super(
             // vertex shader
@@ -51,8 +51,8 @@ export default class BlurXFilter extends Filter {
             const gl = filter_manager.renderer.gl;
             const kernelSize = getMaxBlurKernelSize(gl);
 
-            this.vertexSrc = generateBlurVertSource(kernelSize, true);
-            this.fragmentSrc = generateBlurFragSource(kernelSize);
+            this.vertexSrc = generate_blur_vert_source(kernelSize, true);
+            this.fragmentSrc = generate_blur_frag_source(kernelSize);
 
             this.firstRun = false;
         }

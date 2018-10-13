@@ -6,13 +6,13 @@ import FilterManager from 'engine/renderers/webgl/managers/FilterManager';
 import RenderTarget from 'engine/renderers/webgl/utils/RenderTarget';
 
 /**
- * The DisplacementFilter class uses the pixel values from the specified texture
+ * The Displacement class uses the pixel values from the specified texture
  * (called the displacement map) to perform a displacement of an object. You can
  * use this filter to apply all manor of crazy warping effects. Currently the r
  * property of the texture is used to offset the x and the g property of the texture
  * is used to offset the y.
  */
-export default class DisplacementFilter extends Filter {
+export default class Displacement extends Filter {
     /**
      * @param {Sprite} sprite - The sprite used for the displacement map. (make sure its added to the scene!)
      * @param {number} scale - The scale of the displacement
@@ -29,8 +29,8 @@ export default class DisplacementFilter extends Filter {
             require('./displacement.frag')
         );
 
-        this.maskSprite = sprite;
-        this.maskMatrix = maskMatrix;
+        this.mask_sprite = sprite;
+        this.mask_matrix = maskMatrix;
 
         this.uniforms.mapSampler = sprite._texture;
         this.uniforms.filterMatrix = maskMatrix;

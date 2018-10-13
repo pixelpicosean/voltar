@@ -13,9 +13,9 @@ import Loader from './loader';
  * });
  */
 export { Loader };
-export { default as bitmapFontParser, parse as parseBitmapFontData } from './bitmapFontParser';
-export { default as spritesheetParser, getResourcePath } from './spritesheetParser';
-export { default as textureParser } from './textureParser';
+export { default as bitmap_font_parser, parse as parse_bitmap_font_data } from './bitmap_font_parser';
+export { default as spritesheet_parser, get_resource_path } from './spritesheet_parser';
+export { default as texture_parser } from './texture_parser';
 
 /**
  * Reference to **resource-loader**'s Resource class.
@@ -26,7 +26,6 @@ export { Resource } from 'resource-loader';
 
 /**
  * A premade instance of the loader that can be used to load resources.
- * @name shared
  * @type {Loader}
  */
 const shared = new Loader();

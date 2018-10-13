@@ -4,7 +4,7 @@ import url from 'url';
 import Spritesheet from 'engine/textures/Spritesheet';
 
 export default function () {
-    return function spritesheetParser(resource, next) {
+    return function spritesheet_parser(resource, next) {
         const imageResourceName = `${resource.name}_image`;
 
         // skip if no data, its not json, it isn't spritesheet data, or the image resource already exists
@@ -24,7 +24,7 @@ export default function () {
             parentResource: resource,
         };
 
-        const resourcePath = getResourcePath(resource, this.baseUrl);
+        const resourcePath = get_resource_path(resource, this.baseUrl);
 
         // load the image for this sheet
         this.add(imageResourceName, resourcePath, loadOptions, function onImageLoad(res) {
@@ -49,7 +49,7 @@ export default function () {
     };
 }
 
-export function getResourcePath(resource, baseUrl) {
+export function get_resource_path(resource, baseUrl) {
     // Prepend url path unless the resource image is a data url
     if (resource.isDataUrl) {
         return resource.data.meta.image;

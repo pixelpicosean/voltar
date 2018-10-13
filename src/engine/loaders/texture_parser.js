@@ -4,7 +4,7 @@ import Texture from 'engine/textures/Texture';
 const { Resource } = resource_loader;
 
 export default function () {
-    return function textureParser(resource, next) {
+    return function texture_parser(resource, next) {
         // create a new texture if the data is an Image object
         if (resource.data && resource.type === Resource.TYPE.IMAGE) {
             resource.texture = Texture.from_loader(

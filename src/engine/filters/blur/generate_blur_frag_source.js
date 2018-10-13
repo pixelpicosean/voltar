@@ -19,8 +19,7 @@ const fragTemplate = [
 
 ].join('\n');
 
-export default function generateFragBlurSource(kernelSize)
-{
+export default function generate_frag_blur_source(kernelSize) {
     const kernel = GAUSSIAN_VALUES[kernelSize];
     const halfLength = kernel.length;
 
@@ -30,14 +29,12 @@ export default function generateFragBlurSource(kernelSize)
     const template = 'gl_FragColor += texture2D(uSampler, vBlurTexCoords[%index%]) * %value%;';
     let value;
 
-    for (let i = 0; i < kernelSize; i++)
-    {
+    for (let i = 0; i < kernelSize; i++) {
         let blur = template.replace('%index%', i);
 
         value = i;
 
-        if (i >= halfLength)
-        {
+        if (i >= halfLength) {
             value = kernelSize - i - 1;
         }
 
