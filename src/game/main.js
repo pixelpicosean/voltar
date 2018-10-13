@@ -30,12 +30,3 @@ v.scene_tree.init({
         stretch_aspect: 'keep',
     },
 });
-
-
-
-
-
-
-
-
-

@@ -74,10 +74,30 @@ export default class SceneTree {
         this.paused = false;
         this.debug_collisions_hint = false;
 
+        /**
+         * @type {Object<string, Node2D>}
+         * @private
+         */
         this.grouped_nodes = Object.create(null);
+
+        /**
+         * @type {Array<Node2D>}
+         * @private
+         */
         this.delete_queue = [];
 
+        /**
+         * Currently running scene
+         *
+         * @type {Node2D}
+         */
         this.current_scene = null;
+
+        /**
+         * Viewport node
+         *
+         * @type {Node2D}
+         */
         this.viewport = new Node2D();
         this.viewport.scene_tree = this;
         this.viewport.is_inside_tree = true;
@@ -94,6 +114,10 @@ export default class SceneTree {
         this.view = null;
         this.container = null;
 
+        /**
+         * Global time scale
+         * @default 1.0
+         */
         this.time_scale = 1;
 
         this.visual_server = new VisualServer();

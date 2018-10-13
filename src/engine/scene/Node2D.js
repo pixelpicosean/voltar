@@ -914,8 +914,8 @@ export default class Node2D extends EventEmitter {
      *
      * Multiple items can be added like so: `myNode2D.add_child(thingOne, thingTwo, thingThree)`
      *
-     * @template T
-     * @param {Node2D} child - The Node2D to add to the container
+     * @template {Node2D} T
+     * @param {T} child - The Node2D to add to the container
      * @return {T} The child that was added.
      */
     add_child(child) {
@@ -973,9 +973,10 @@ export default class Node2D extends EventEmitter {
     /**
      * Adds a child to the container at a specified index. If the index is out of bounds an error will be thrown
      *
-     * @param {Node2D} child - The child to add
+     * @template {Node2D} T
+     * @param {T} child - The child to add
      * @param {number} index - The index to place the child in
-     * @return {Node2D} The child that was added.
+     * @return {T} The child that was added.
      */
     add_child_at(child, index) {
         if (index < 0 || index > this.children.length) {
@@ -1019,8 +1020,9 @@ export default class Node2D extends EventEmitter {
     /**
      * Swaps the position of 2 Display Objects within this container.
      *
-     * @param {Node2D} child - First display object to swap
-     * @param {Node2D} child2 - Second display object to swap
+     * @template {Node2D} T
+     * @param {T} child - First display object to swap
+     * @param {T} child2 - Second display object to swap
      */
     swap_children(child, child2) {
         if (child === child2) {
@@ -1038,7 +1040,8 @@ export default class Node2D extends EventEmitter {
     /**
      * Returns the index position of a child Node2D instance
      *
-     * @param {Node2D} child - The Node2D instance to identify
+     * @template {Node2D} T
+     * @param {T} child - The Node2D instance to identify
      * @return {number} The index position of the child display object to identify
      */
     get_child_index(child) {
@@ -1054,7 +1057,8 @@ export default class Node2D extends EventEmitter {
     /**
      * Changes the position of an existing child in the display object container
      *
-     * @param {Node2D} child - The child Node2D instance for which you want to change the index number
+     * @template {Node2D} T
+     * @param {T} child - The child Node2D instance for which you want to change the index number
      * @param {number} index - The resulting index number for the child display object
      */
     set_child_index(child, index) {
@@ -1073,8 +1077,9 @@ export default class Node2D extends EventEmitter {
     /**
      * Returns the child at the specified index
      *
+     * @template {Node2D} T
      * @param {number} index - The index to get the child at
-     * @return {Node2D} The child at the given index, if any.
+     * @return {T} The child at the given index, if any.
      */
     get_child(index) {
         if (index < 0 || index >= this.children.length) {
