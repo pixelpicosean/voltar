@@ -1,3 +1,8 @@
+// Import features you want to use
+/* import 'engine/accessibility/index'; */
+/* import 'engine/filters/index'; */
+/* import 'engine/tween/index'; */
+
 import * as v from 'engine/index';
 
 import Boot from 'game/boot/index';
@@ -30,3 +35,5 @@ v.scene_tree.init({
         stretch_aspect: 'keep',
     },
 });
+
+console.log(new v.Node2D())

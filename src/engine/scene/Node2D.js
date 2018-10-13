@@ -1,4 +1,5 @@
 import settings from '../settings';
+import { node_plugins } from 'engine/registry';
 import { TRANSFORM_MODE } from '../const';
 import {
     EventEmitter, Signal,
@@ -229,13 +230,15 @@ export default class Node2D extends EventEmitter {
         /**
          * @type {Array<number>}
          */
-        this.groups = [];
+        this.groups = null;
 
         /**
          * @type {TweenManager}
          */
-        this.tweens = new TweenManager();
-
+        this.tweens = null;
+        if (node_plugins.TweenManager) {
+            this.tweens = new node_plugins.TweenManager();
+        }
 
         this.tree_entered = new Signal();
         this.tree_exited = new Signal();
@@ -311,6 +314,9 @@ export default class Node2D extends EventEmitter {
      * @param {number} group
      */
     add_to_group(group) {
+        if (!this.groups) {
+            this.groups = [];
+        }
         if (this.groups.indexOf(group) < 0) {
             this.groups.push(group);
 
@@ -323,6 +329,9 @@ export default class Node2D extends EventEmitter {
      * @param {number} group
      */
     remove_from_group(group) {
+        if (!this.groups) {
+            this.groups = [];
+        }
         let idx = this.groups.indexOf(group);
         if (idx >= 0) {
             remove_items(this.groups, idx, 1);
@@ -832,7 +841,7 @@ export default class Node2D extends EventEmitter {
         this.is_inside_tree = true;
 
         // Add to scene tree groups
-        if (this.groups.length > 0) {
+        if (this.groups && this.groups.length > 0) {
             for (let i = 0; i < this.groups.length; i++) {
                 this.scene_tree.add_node_to_group(this, this.groups[i]);
             }
@@ -869,15 +878,15 @@ export default class Node2D extends EventEmitter {
             this.children[i]._propagate_process(delta);
         }
 
-        this.tweens._process(delta);
+        this.tweens && this.tweens._process(delta);
     }
 
     _propagate_exit_tree() {
         // Stop animations
-        this.tweens._stop_all();
+        this.tweens && this.tweens._stop_all();
 
         // Remove from scene tree groups
-        if (this.groups.length > 0) {
+        if (this.groups && this.groups.length > 0) {
             for (let i = 0; i < this.groups.length; i++) {
                 this.scene_tree.remove_node_from_group(this, this.groups[i]);
             }

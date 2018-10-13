@@ -24,12 +24,21 @@ export default class TweenManager {
         tween.is_removed = true;
     }
     /**
-     * Create a tween instance and add it
+     * Create a tween instance
+     *
+     * @param {boolean} [add] Whether add to update list
      * @returns {Tween}
      */
-    create() {
+    create(add) {
+        if (add === undefined) {
+            add = false;
+        }
+
         let t = new Tween();
-        this.tweens.push(t);
+        if (add) {
+            this.tweens.push(t);
+        }
+
         return t;
     }
 
