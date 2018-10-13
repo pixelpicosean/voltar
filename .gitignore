@@ -32,3 +32,4 @@ node_modules
 
 # jetBrains IDE ignores
 .idea
+/.vscode
