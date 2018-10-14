@@ -8,7 +8,7 @@ import settings from '../../settings';
 import { Matrix } from '../../math/index';
 import Node2D from '../../scene/Node2D';
 import RenderTexture from '../../textures/RenderTexture';
-import BaseTexture from '../../textures/VideoBaseTexture';
+import BaseTexture from '../../textures/BaseTexture';
 
 /**
  * The CanvasRenderer draws the scene and all its content onto a 2d canvas. This renderer should

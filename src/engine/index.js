@@ -75,7 +75,6 @@ export { default as Texture } from './textures/Texture';
 export { default as BaseTexture } from './textures/BaseTexture';
 export { default as RenderTexture } from './textures/RenderTexture';
 export { default as BaseRenderTexture } from './textures/BaseRenderTexture';
-export { default as VideoBaseTexture } from './textures/VideoBaseTexture';
 export { default as TextureUvs } from './textures/TextureUvs';
 export { default as TextureMatrix } from './textures/TextureMatrix';
 
