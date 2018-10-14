@@ -27,7 +27,7 @@ export default class TweenManager {
      * Create a tween instance
      *
      * @param {boolean} [add] Whether add to update list
-     * @returns {Tween}
+     * @returns {Tween} Created tween
      */
     create(add) {
         if (add === undefined) {

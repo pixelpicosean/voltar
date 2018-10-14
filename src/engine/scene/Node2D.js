@@ -1,3 +1,5 @@
+/// <reference path="../tween/index.d.ts" />
+
 import settings from '../settings';
 import { node_plugins } from 'engine/registry';
 import { TRANSFORM_MODE } from '../const';
@@ -6,7 +8,6 @@ import {
     remove_items,
 } from 'engine/dep/index';
 import { TransformStatic, Transform, Point, Bounds, Rectangle } from 'engine/math/index';
-import TweenManager from 'engine/anime/TweenManager';
 import ObservablePoint from 'engine/math/ObservablePoint';
 import Filter from 'engine/renderers/webgl/filters/Filter';
 
@@ -233,7 +234,7 @@ export default class Node2D extends EventEmitter {
         this.groups = null;
 
         /**
-         * @type {TweenManager}
+         * @type {tween.TweenManager}
          */
         this.tweens = null;
         if (node_plugins.TweenManager) {
