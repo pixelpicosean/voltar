@@ -1,27 +1,23 @@
 {
-    "name": "Boot",
+    "name": "Preloader",
     "children": [
         {
-            "type": "Graphics",
-            "x": 100,
-            "y": 100,
-            "shape": "rect",
-            "width": 80,
-            "height": 10,
-            "centered": false,
-            "line_width": 1,
-            "stroke": "0xFFFFFF"
+            "type": "Sprite",
+            "x": 28,
+            "y": 118,
+            "width": 200,
+            "height": 20,
+            "tint": 0,
+            "texture": "_white_"
         },
         {
             "name": "bar",
-            "type": "Graphics",
-            "x": 100,
-            "y": 100,
-            "shape": "rect",
-            "width": 80,
-            "height": 10,
-            "centered": false,
-            "fill": "0xFFFFFF"
+            "type": "Sprite",
+            "x": 28,
+            "y": 118,
+            "width": 200,
+            "height": 20,
+            "texture": "_white_"
         }
     ]
 }
