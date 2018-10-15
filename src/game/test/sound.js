@@ -1,15 +1,13 @@
-import * as v from 'engine';
+import * as v from 'engine/index';
 
-
-v.loader.add('bgm', 'media/music/bgm.{m4a,ogg,ac3,mp3}');
-v.loader.add('fx_json', 'media/sound/fx.json');
-v.loader.add('fx', 'media/sound/fx.{m4a,ogg,ac3,mp3}');
-v.loader.onComplete.once(() => {
-    v.sound
-        .find('fx')
-        .addSprites(v.loader.resources['fx_json'].data.spritemap);
-});
-
+v.preload('bgm', 'media/music/bgm.{m4a,ogg,ac3,mp3}');
+v.preload('fx_json', 'media/sound/fx.json');
+v.preload('fx', 'media/sound/fx.{m4a,ogg,ac3,mp3}');
+// v.loader.onComplete.once(() => {
+//     v.sound
+//         .find('fx')
+//         .addSprites(v.loader.resources['fx_json'].data.spritemap);
+// });
 
 export default class SoundTest extends v.Node2D {
     static instance() {

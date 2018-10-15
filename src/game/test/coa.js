@@ -7,9 +7,6 @@ v.preload('cc', 'media/commander.scon');
 
 
 export default class CoaTest extends v.Node2D {
-    /**
-     * @returns CoaTest
-     */
     static instance() {
         return new CoaTest();
     }

@@ -2,16 +2,17 @@
 import * as v from 'engine/index';
 
 // Import features you want to use
-/* import 'engine/accessibility/index'; */
-/* import 'engine/interaction/index'; */
-/* import 'engine/filters/index'; */
-import 'engine/scene/sprites/index';
-/* import 'engine/tween/index'; */
-/* import 'engine/textures/VideoBaseTexture'; */
+/* import 'engine/accessibility/enable'; */
+/* import 'engine/scene/coa/enable'; */
+import 'engine/scene/graphics/enable';
+/* import 'engine/interaction/enable'; */
+/* import 'engine/scene/sprites/enable'; */
+/* import 'engine/scene/text/enable'; */
+/* import 'engine/tween/enable'; */
 
 // Scenes
 import Preloader from 'game/preloader/Preloader';
-import SpriteTest from 'game/test/Sprite';
+import Test from 'game/test/Graphics';
 
 v.preload('hero', 'media/hero.png')
 
@@ -20,7 +21,7 @@ v.scene_tree.init({
     application: {
         name: 'Voltar',
         preloader: Preloader,
-        main_scene: SpriteTest,
+        main_scene: Test,
     },
     display: {
         view: 'game',

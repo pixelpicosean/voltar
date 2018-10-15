@@ -1,5 +1,4 @@
-import * as v from 'engine';
-
+import * as v from 'engine/index';
 
 export default class TextScene extends v.Node2D {
     static instance() {
