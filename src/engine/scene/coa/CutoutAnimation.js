@@ -1,9 +1,8 @@
 import Node2D from '../Node2D';
 import Animator from './Animator';
-import { Entity, Model } from './Model';
+import { Model } from './Model';
 
-
-export default class CoaSprite extends Node2D {
+export default class CutoutAnimation extends Node2D {
     constructor() {
         super();
 

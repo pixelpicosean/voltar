@@ -1,6 +1,6 @@
 import { resource_loader } from 'engine/dep/index';
-import { Data } from 'engine/scene/coa_sprite/CoaSprite';
-import { Model } from 'engine/scene/coa_sprite/Model';
+import { Data } from './CutoutAnimation';
+import { Model } from './Model';
 
 const { Resource } = resource_loader;
 
