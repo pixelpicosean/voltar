@@ -1,10 +1,17 @@
-// import polyfills. Done as an export to make sure polyfills are imported first
+// ------------------------------------------------------------------
+// Polyfills
+// Done as an export to make sure polyfills are imported first.
+// ------------------------------------------------------------------
 export * from './polyfill/index';
 
-// Dependence
+// ------------------------------------------------------------------
+// 3rd party libs
+// ------------------------------------------------------------------
 export * from 'engine/dep/index';
 
+// ------------------------------------------------------------------
 // Node
+// ------------------------------------------------------------------
 import Node2D from './scene/Node2D';
 
 export { default as Node2D } from './scene/Node2D';
@@ -13,54 +20,53 @@ export { default as Sprite } from './scene/sprites/Sprite';
 export { default as AnimatedSprite } from './scene/sprites/AnimatedSprite';
 export { default as TilingSprite } from './scene/sprites/TilingSprite';
 export { default as NineSliceSprite } from './scene/sprites/NineSliceSprite';
-// import CoaSprite from './scene/coa_sprite/CoaSprite';
 
-// import Graphics from './scene/graphics/Graphics';
+export { default as CutoutAnimation } from './scene/coa/CutoutAnimation';
 
-// import BackgroundMap from './scene/map/BackgroundMap';
-// import CollisionMap from './scene/map/CollisionMap';
+export { default as Graphics } from './scene/graphics/Graphics';
 
-// import ParticleNode2D from './scene/particles/ParticleNode2D';
+export { default as BackgroundMap } from './scene/map/BackgroundMap';
+export { default as CollisionMap } from './scene/map/CollisionMap';
 
-// import Mesh from './scene/mesh/Mesh';
-// import Plane from './scene/mesh/Plane';
-// import NineslicePlane from './scene/mesh/NineslicePlane';
-// import Rope from './scene/mesh/Rope';
+export { default as ParticleNode2D } from './scene/particles/ParticleNode2D';
 
-// import Timer from './scene/Timer';
+export { default as Mesh } from './scene/mesh/Mesh';
+export { default as Plane } from './scene/mesh/Plane';
+export { default as NineslicePlane } from './scene/mesh/NineslicePlane';
+export { default as Rope } from './scene/mesh/Rope';
 
-import {
-    node_class_map,
-    scene_class_map,
-} from 'engine/registry';
-
-// Class
-// export { default as GraphicsRenderer } from './scene/graphics/webgl/GraphicsRenderer';
-
-// export { default as MeshRenderer } from './scene/mesh/webgl/MeshRenderer';
-
-export { default as Texture } from './textures/Texture';
-export { default as BaseTexture } from './textures/BaseTexture';
-export { default as RenderTexture } from './textures/RenderTexture';
-export { default as BaseRenderTexture } from './textures/BaseRenderTexture';
-export { default as TextureUvs } from './textures/TextureUvs';
-export { default as TextureMatrix } from './textures/TextureMatrix';
-
-export { default as RectangleShape2D } from './scene/physics/RectangleShape2D';
 export { default as Area2D } from './scene/physics/Area2D';
 export { default as PhysicsBody2D } from './scene/physics/PhysicsBody2D';
 
-export { default as Input } from './input/index';
-export { default as SceneTree } from './SceneTree';
+export { default as Timer } from './scene/Timer';
 
+// ------------------------------------------------------------------
+// Useful class
+// ------------------------------------------------------------------
+export { default as TextureUvs } from './textures/TextureUvs';
+export { default as TextureMatrix } from './textures/TextureMatrix';
+
+export { default as BaseTexture } from './textures/BaseTexture';
+export { default as Texture } from './textures/Texture';
+
+export { default as BaseRenderTexture } from './textures/BaseRenderTexture';
+export { default as RenderTexture } from './textures/RenderTexture';
+
+export { default as VideoBaseTexture } from './textures/VideoBaseTexture';
+
+export { default as RectangleShape2D } from './scene/physics/RectangleShape2D';
+
+// ------------------------------------------------------------------
 // Global constant, setting and function
+// ------------------------------------------------------------------
 import settings from './settings';
 export * from './const';
 export * from './math/index';
 export * from './rnd';
 
+// ------------------------------------------------------------------
 // Namespace
-// import * as accessibility from './accessibility/index';
+// ------------------------------------------------------------------
 import * as loaders from './loaders/index';
 import * as ticker from './ticker/index';
 import * as utils from './utils/index';
@@ -70,20 +76,25 @@ export {
 
     loaders,
     ticker,
+
     utils,
 }
 
+// ------------------------------------------------------------------
 // Instances
+// ------------------------------------------------------------------
 import Input from './input/index';
 import SceneTree from './SceneTree';
 
-// Global instances
 const preload_queue = [];
 
 export const input = new Input();
 export const scene_tree = new SceneTree(input, preload_queue);
 // export const sound = audio.SoundLibrary.init(loaders.Resource, loaders.Loader);
 
+// ------------------------------------------------------------------
+// Global functions
+// ------------------------------------------------------------------
 /**
  * Preload a resource before game start
  * @param {string} key Key of the resource
@@ -92,6 +103,8 @@ export const scene_tree = new SceneTree(input, preload_queue);
 export function preload(key, url) {
     preload_queue.push({ key, url });
 }
+
+import { node_class_map, scene_class_map } from 'engine/registry';
 
 /**
  * @typedef PackedScene

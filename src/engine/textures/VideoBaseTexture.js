@@ -1,8 +1,8 @@
-import { UPDATE_PRIORITY } from '../const';
-import { uid, BaseTextureCache } from '../utils/index';
-import { shared } from '../ticker/index';
+import { UPDATE_PRIORITY } from 'engine/const';
+import { uid, BaseTextureCache } from 'engine/utils/index';
+import { shared } from 'engine/ticker/index';
+import determine_cross_origin from 'engine/utils/determine_cross_origin';
 import BaseTexture from './BaseTexture';
-import determine_cross_origin from '../utils/determine_cross_origin';
 
 /**
  * A texture of a [playing] Video.

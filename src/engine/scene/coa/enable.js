@@ -1,5 +1,5 @@
 // Dependencies
-import 'engine/scene/sprites/index';
+import 'engine/scene/sprites/enable';
 
 import { node_class_map, loader_use_procs } from 'engine/registry';
 
