@@ -1,7 +1,7 @@
-import { hex2rgb } from '../../../utils';
-import { SHAPES } from '../../../const';
-import ObjectRenderer from '../../../renderers/webgl/utils/ObjectRenderer';
-import WebGLRenderer from '../../../renderers/WebGLRenderer';
+import { hex2rgb } from 'engine/utils/index';
+import { SHAPES } from 'engine/const';
+import ObjectRenderer from 'engine/renderers/utils/ObjectRenderer';
+import WebGLRenderer from 'engine/renderers/WebGLRenderer';
 import WebGLGraphicsData from './WebGLGraphicsData';
 import PrimitiveShader from './shaders/PrimitiveShader';
 
@@ -12,18 +12,12 @@ import buildCircle from './utils/buildCircle';
 
 /**
  * Renders the graphics object.
- *
- * @class
- * @memberof V
- * @extends V.ObjectRenderer
  */
-export default class GraphicsRenderer extends ObjectRenderer
-{
+export default class GraphicsRenderer extends ObjectRenderer {
     /**
-     * @param {V.WebGLRenderer} renderer - The renderer this object renderer works for.
+     * @param {WebGLRenderer} renderer - The renderer this object renderer works for.
      */
-    constructor(renderer)
-    {
+    constructor(renderer) {
         super(renderer);
 
         this.graphics_dataPool = [];
@@ -40,10 +34,8 @@ export default class GraphicsRenderer extends ObjectRenderer
      * Called when there is a WebGL context change
      *
      * @private
-     *
      */
-    on_context_change()
-    {
+    on_context_change() {
         this.gl = this.renderer.gl;
         this.CONTEXT_UID = this.renderer.CONTEXT_UID;
         this.primitiveShader = new PrimitiveShader(this.gl);
@@ -51,14 +43,11 @@ export default class GraphicsRenderer extends ObjectRenderer
 
     /**
      * Destroys this renderer.
-     *
      */
-    destroy()
-    {
+    destroy() {
         ObjectRenderer.prototype.destroy.call(this);
 
-        for (let i = 0; i < this.graphics_dataPool.length; ++i)
-        {
+        for (let i = 0; i < this.graphics_dataPool.length; ++i) {
             this.graphics_dataPool[i].destroy();
         }
 
@@ -68,18 +57,16 @@ export default class GraphicsRenderer extends ObjectRenderer
     /**
      * Renders a graphics object.
      *
-     * @param {V.Graphics} graphics - The graphics object to render.
+     * @param {Graphics} graphics - The graphics object to render.
      */
-    render(graphics)
-    {
+    render(graphics) {
         const renderer = this.renderer;
         const gl = renderer.gl;
 
         let webGLData;
         let webGL = graphics._webGL[this.CONTEXT_UID];
 
-        if (!webGL || graphics.dirty !== webGL.dirty)
-        {
+        if (!webGL || graphics.dirty !== webGL.dirty) {
             this.updateGraphics(graphics);
 
             webGL = graphics._webGL[this.CONTEXT_UID];
@@ -91,8 +78,7 @@ export default class GraphicsRenderer extends ObjectRenderer
         renderer.bindShader(shader);
         renderer.state.setBlendMode(graphics.blend_mode);
 
-        for (let i = 0, n = webGL.data.length; i < n; i++)
-        {
+        for (let i = 0, n = webGL.data.length; i < n; i++) {
             webGLData = webGL.data[i];
             const shaderTemp = webGLData.shader;
 
@@ -103,12 +89,10 @@ export default class GraphicsRenderer extends ObjectRenderer
 
             renderer.bindVao(webGLData.vao);
 
-            if (webGLData.native_lines)
-            {
+            if (webGLData.native_lines) {
                 gl.drawArrays(gl.LINES, 0, webGLData.points.length / 6);
             }
-            else
-            {
+            else {
                 webGLData.vao.draw(gl.TRIANGLE_STRIP, webGLData.indices.length);
             }
         }
@@ -118,18 +102,16 @@ export default class GraphicsRenderer extends ObjectRenderer
      * Updates the graphics object
      *
      * @private
-     * @param {V.Graphics} graphics - The graphics object to update
+     * @param {Graphics} graphics - The graphics object to update
      */
-    updateGraphics(graphics)
-    {
+    updateGraphics(graphics) {
         const gl = this.renderer.gl;
 
         // get the contexts graphics object
         let webGL = graphics._webGL[this.CONTEXT_UID];
 
         // if the graphics object does not exist in the webGL context time to create it!
-        if (!webGL)
-        {
+        if (!webGL) {
             webGL = graphics._webGL[this.CONTEXT_UID] = { lastIndex: 0, data: [], gl, clear_dirty: -1, dirty: -1 };
         }
 
@@ -137,13 +119,11 @@ export default class GraphicsRenderer extends ObjectRenderer
         webGL.dirty = graphics.dirty;
 
         // if the user cleared the graphics object we will need to clear every object
-        if (graphics.clear_dirty !== webGL.clear_dirty)
-        {
+        if (graphics.clear_dirty !== webGL.clear_dirty) {
             webGL.clear_dirty = graphics.clear_dirty;
 
             // loop through and return all the webGLDatas to the object pool so than can be reused later on
-            for (let i = 0; i < webGL.data.length; i++)
-            {
+            for (let i = 0; i < webGL.data.length; i++) {
                 this.graphics_dataPool.push(webGL.data[i]);
             }
 
@@ -158,33 +138,27 @@ export default class GraphicsRenderer extends ObjectRenderer
         // loop through the graphics datas and construct each one..
         // if the object is a complex fill then the new stencil buffer technique will be used
         // other wise graphics objects will be pushed into a batch..
-        for (let i = webGL.lastIndex; i < graphics.graphics_data.length; i++)
-        {
+        for (let i = webGL.lastIndex; i < graphics.graphics_data.length; i++) {
             const data = graphics.graphics_data[i];
 
             // TODO - this can be simplified
             webGLData = this.getWebGLData(webGL, 0);
 
-            if (data.native_lines && data.line_width)
-            {
+            if (data.native_lines && data.line_width) {
                 webGLDataNativeLines = this.getWebGLData(webGL, 0, true);
                 webGL.lastIndex++;
             }
 
-            if (data.type === SHAPES.POLY)
-            {
+            if (data.type === SHAPES.POLY) {
                 buildPoly(data, webGLData, webGLDataNativeLines);
             }
-            if (data.type === SHAPES.RECT)
-            {
+            if (data.type === SHAPES.RECT) {
                 buildRectangle(data, webGLData, webGLDataNativeLines);
             }
-            else if (data.type === SHAPES.CIRC || data.type === SHAPES.ELIP)
-            {
+            else if (data.type === SHAPES.CIRC || data.type === SHAPES.ELIP) {
                 buildCircle(data, webGLData, webGLDataNativeLines);
             }
-            else if (data.type === SHAPES.RREC)
-            {
+            else if (data.type === SHAPES.RREC) {
                 buildRoundedRectangle(data, webGLData, webGLDataNativeLines);
             }
 
@@ -194,12 +168,10 @@ export default class GraphicsRenderer extends ObjectRenderer
         this.renderer.bindVao(null);
 
         // upload all the dirty data...
-        for (let i = 0; i < webGL.data.length; i++)
-        {
+        for (let i = 0; i < webGL.data.length; i++) {
             webGLData = webGL.data[i];
 
-            if (webGLData.dirty)
-            {
+            if (webGLData.dirty) {
                 webGLData.upload();
             }
         }
@@ -213,12 +185,10 @@ export default class GraphicsRenderer extends ObjectRenderer
      * @param {number} native_lines - indicate whether the webGLData use for native_lines.
      * @return {*} TODO
      */
-    getWebGLData(gl, type, native_lines)
-    {
+    getWebGLData(gl, type, native_lines) {
         let webGLData = gl.data[gl.data.length - 1];
 
-        if (!webGLData || webGLData.native_lines !== native_lines || webGLData.points.length > 320000)
-        {
+        if (!webGLData || webGLData.native_lines !== native_lines || webGLData.points.length > 320000) {
             webGLData = this.graphics_dataPool.pop()
                 || new WebGLGraphicsData(this.renderer.gl, this.primitiveShader, this.renderer.state.attribsState);
             webGLData.native_lines = native_lines;
@@ -231,5 +201,3 @@ export default class GraphicsRenderer extends ObjectRenderer
         return webGLData;
     }
 }
-
-WebGLRenderer.register_plugin('graphics', GraphicsRenderer);

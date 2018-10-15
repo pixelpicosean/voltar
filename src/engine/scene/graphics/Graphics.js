@@ -1,18 +1,15 @@
 import Node2D from '../Node2D';
-import RenderTexture from '../../textures/RenderTexture';
 import Texture from '../../textures/Texture';
 import GraphicsData from './GraphicsData';
 import Sprite from '../sprites/Sprite';
-import { Matrix, Point, Rectangle, RoundedRectangle, Ellipse, Polygon, Circle, Bounds, PI2 } from '../../math/index';
+import { Point, Rectangle, RoundedRectangle, Ellipse, Polygon, Circle, Bounds, PI2 } from '../../math/index';
 import { hex2rgb, rgb2hex } from '../../utils/index';
 import { SHAPES, BLEND_MODES } from '../../const';
 import bezier_curve_to from './utils/bezier_curve_to';
 
-let canvasRenderer;
-const temp_matrix = new Matrix();
-const tempPoint = new Point();
-const tempColor1 = new Float32Array(4);
-const tempColor2 = new Float32Array(4);
+const temp_point = new Point();
+const temp_color_1 = new Float32Array(4);
+const temp_color_2 = new Float32Array(4);
 
 const EMPTY_POINTS = [];
 
@@ -966,8 +963,8 @@ export default class Graphics extends Node2D {
             sprite.tint = this.graphics_data[0].fillColor;
         }
         else {
-            const t1 = tempColor1;
-            const t2 = tempColor2;
+            const t1 = temp_color_1;
+            const t2 = temp_color_2;
 
             hex2rgb(this.graphics_data[0].fillColor, t1);
             hex2rgb(this.tint, t2);
@@ -1018,7 +1015,7 @@ export default class Graphics extends Node2D {
      * @return {boolean} the result of the test
      */
     contains_point(point) {
-        this.world_transform.apply_inverse(point, tempPoint);
+        this.world_transform.apply_inverse(point, temp_point);
 
         const graphics_data = this.graphics_data;
 
@@ -1031,12 +1028,12 @@ export default class Graphics extends Node2D {
 
             // only deal with fills..
             if (data.shape) {
-                if (data.shape.contains(tempPoint.x, tempPoint.y)) {
+                if (data.shape.contains(temp_point.x, temp_point.y)) {
                     if (data.holes) {
                         for (let i = 0; i < data.holes.length; i++) {
                             const hole = data.holes[i];
 
-                            if (hole.contains(tempPoint.x, tempPoint.y)) {
+                            if (hole.contains(temp_point.x, temp_point.y)) {
                                 return false;
                             }
                         }
