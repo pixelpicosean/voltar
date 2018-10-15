@@ -19,7 +19,7 @@ const tempPoint = new Point();
  */
 export default class Sprite extends Node2D {
     /**
-     * @param {Texture|string} texture - The texture for this sprite
+     * @param {Texture|string} [texture] - The texture for this sprite
      */
     constructor(texture) {
         super();
