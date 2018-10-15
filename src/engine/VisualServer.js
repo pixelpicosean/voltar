@@ -4,9 +4,11 @@ import { is_webgl_supported } from './utils/index';
 import { loader_use_procs } from 'engine/registry';
 import WebGLRenderer from './renderers/WebGLRenderer';
 import texture_parser from 'engine/textures/texture_parser';
+import spritesheet_parser from 'engine/textures/spritesheet_parser';
 
-// Texture parser is mandatory
+// Texture and spritesheet parsers are mandatory
 loader_use_procs.push(texture_parser);
+loader_use_procs.push(spritesheet_parser);
 
 export default class VisualServer {
     constructor() {
