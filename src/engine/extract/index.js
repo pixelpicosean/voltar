@@ -17,5 +17,5 @@
  * document.body.appendChild(image);
  * @namespace v.extract
  */
-export { default as webgl } from './webgl/WebGLExtract';
+export { default as webgl } from './WebGLExtract';
 export { default as canvas } from './canvas/CanvasExtract';

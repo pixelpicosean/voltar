@@ -722,7 +722,7 @@ export default class BaseTexture extends EventEmitter {
     }
 
     /**
-     * Adds a BaseTexture to the global BaseTextureCache. This cache is shared across the whole V object.
+     * Adds a BaseTexture to the global BaseTextureCache.
      *
      * @static
      * @param {BaseTexture} base_texture - The BaseTexture to add to the cache.

@@ -9,7 +9,7 @@ import {
 } from 'engine/dep/index';
 import { TransformStatic, Transform, Point, Bounds, Rectangle } from 'engine/math/index';
 import ObservablePoint from 'engine/math/ObservablePoint';
-import Filter from 'engine/renderers/webgl/filters/Filter';
+import Filter from 'engine/renderers/filters/Filter';
 
 let uid = 0;
 

@@ -1,4 +1,6 @@
 import SoundUtils from "../utils/SoundUtils";
+import { loader_pre_procs, loader_use_procs } from 'engine/registry';
+
 /**
  * Sound middleware installation utilities for PIXI.loaders.Loader
  * @class
@@ -9,7 +11,7 @@ export default class LoaderMiddleware {
      * Install the middleware
      * @param {SoundLibrary} sound - Instance of sound library
      */
-    static install(sound, Loader, Resource, shared) {
+    static install(sound, Loader, Resource) {
         LoaderMiddleware._sound = sound;
         LoaderMiddleware.set_legacy(sound.useLegacy, Resource);
         // Globally install middleware on all Loaders
@@ -19,8 +21,8 @@ export default class LoaderMiddleware {
             return LoaderMiddleware.plugin;
         });
         // Install middleware on the default loader
-        shared.use(LoaderMiddleware.plugin);
-        shared.pre(LoaderMiddleware.resolve);
+        loader_pre_procs.push(LoaderMiddleware.resolve);
+        loader_use_procs.push(LoaderMiddleware.plugin);
     }
     /**
      * Set the legacy mode

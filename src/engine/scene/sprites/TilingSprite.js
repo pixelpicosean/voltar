@@ -1,31 +1,22 @@
-import CanvasTinter from './canvas/CanvasTinter';
-import TextureMatrix from '../../textures/TextureMatrix';
-import Texture from '../../textures/Texture';
-import { Point, TransformStatic, Rectangle } from '../../math';
+import TextureMatrix from 'engine/textures/TextureMatrix';
+import BaseTexture from 'engine/textures/BaseTexture';
+import Texture from 'engine/textures/Texture';
+import { Point, TransformStatic, Rectangle } from 'engine/math/index';
+import { TextureCache } from 'engine/utils/index';
 import Sprite from './Sprite';
-import CanvasRenderTarget from '../../renderers/canvas/utils/CanvasRenderTarget';
-import * as utils from '../../utils';
-import './webgl/TilingSpriteRenderer';
 
-
-const tempPoint = new Point();
-
+const temp_point = new Point();
 
 /**
  * A tiling sprite is a fast way of rendering a tiling image
- *
- * @class
- * @extends Sprite
  */
-export default class TilingSprite extends Sprite
-{
+export default class TilingSprite extends Sprite {
     /**
      * @param {Texture} [texture] - the texture of the tiling sprite
      * @param {number} [width=100] - the width of the tiling sprite
      * @param {number} [height=100] - the height of the tiling sprite
      */
-    constructor(texture, width = 100, height = 100)
-    {
+    constructor(texture, width = 100, height = 100) {
         super(texture);
 
         this.type = 'TilingSprite';
@@ -33,7 +24,7 @@ export default class TilingSprite extends Sprite
         /**
          * Tile transform
          *
-         * @member {V.TransformStatic}
+         * @member {TransformStatic}
          */
         this.tile_transform = new TransformStatic();
 
@@ -75,9 +66,9 @@ export default class TilingSprite extends Sprite
          * Allows to customize the rendering process without overriding '_render_webgl' method.
          *
          * @type {string}
-         * @default 'tilingSprite'
+         * @default 'tiling_sprite'
          */
-        this.plugin_name = 'tilingSprite';
+        this.renderer_plugin = 'tiling_sprite';
 
         /**
          * Whether or not anchor affects uvs
@@ -95,8 +86,7 @@ export default class TilingSprite extends Sprite
      * @default 0.5
      * @member {number}
      */
-    get clamp_margin()
-    {
+    get clamp_margin() {
         return this.uv_transform.clamp_margin;
     }
 
@@ -109,10 +99,9 @@ export default class TilingSprite extends Sprite
     /**
      * The scaling of the image that is being tiled
      *
-     * @member {V.ObservablePoint}
+     * @member {ObservablePoint}
      */
-    get tile_scale()
-    {
+    get tile_scale() {
         return this.tile_transform.scale;
     }
 
@@ -124,10 +113,9 @@ export default class TilingSprite extends Sprite
     /**
      * The offset of the image that is being tiled
      *
-     * @member {V.ObservablePoint}
+     * @member {ObservablePoint}
      */
-    get tile_position()
-    {
+    get tile_position() {
         return this.tile_transform.position;
     }
 
@@ -141,13 +129,13 @@ export default class TilingSprite extends Sprite
 
         for (let k in data) {
             switch (k) {
-            case 'clamp_margin':
-                this[k] = data[k];
-                break;
-            case 'tile_position':
-            case 'tile_scale':
-                this[k].copy(data[k]);
-                break;
+                case 'clamp_margin':
+                    this[k] = data[k];
+                    break;
+                case 'tile_position':
+                case 'tile_scale':
+                    this[k].copy(data[k]);
+                    break;
             }
         }
     }
@@ -155,10 +143,8 @@ export default class TilingSprite extends Sprite
     /**
      * @private
      */
-    _on_texture_update()
-    {
-        if (this.uv_transform)
-        {
+    _on_texture_update() {
+        if (this.uv_transform) {
             this.uv_transform.texture = this._texture;
         }
         this.cached_tint = 0xFFFFFF;
@@ -168,108 +154,21 @@ export default class TilingSprite extends Sprite
      * Renders the object using the WebGL renderer
      *
      * @private
-     * @param {V.WebGLRenderer} renderer - The renderer
+     * @param {WebGLRenderer} renderer - The renderer
      */
-    _render_webgl(renderer)
-    {
+    _render_webgl(renderer) {
         // tweak our texture temporarily..
         const texture = this._texture;
 
-        if (!texture || !texture.valid)
-        {
+        if (!texture || !texture.valid) {
             return;
         }
 
         this.tile_transform.update_local_transform();
         this.uv_transform.update();
 
-        renderer.set_object_renderer(renderer.plugins[this.plugin_name]);
-        renderer.plugins[this.plugin_name].render(this);
-    }
-
-    /**
-     * Renders the object using the Canvas renderer
-     *
-     * @private
-     * @param {V.CanvasRenderer} renderer - a reference to the canvas renderer
-     */
-    _render_canvas(renderer)
-    {
-        const texture = this._texture;
-
-        if (!texture.base_texture.has_loaded)
-        {
-            return;
-        }
-
-        const context = renderer.context;
-        const transform = this.world_transform;
-        const resolution = renderer.resolution;
-        const base_texture = texture.base_texture;
-        const base_texture_resolution = base_texture.resolution;
-        const modX = ((this.tile_position.x / this.tile_scale.x) % texture._frame.width) * base_texture_resolution;
-        const modY = ((this.tile_position.y / this.tile_scale.y) % texture._frame.height) * base_texture_resolution;
-
-        // create a nice shiny pattern!
-        if (this._texture_id !== this._texture._update_id || this.cached_tint !== this.tint)
-        {
-            this._texture_id = this._texture._update_id;
-            // cut an object from a spritesheet..
-            const tempCanvas = new CanvasRenderTarget(texture._frame.width,
-                texture._frame.height,
-                base_texture_resolution);
-
-            // Tint the tiling sprite
-            if (this.tint !== 0xFFFFFF)
-            {
-                this.tintedTexture = CanvasTinter.getTintedTexture(this, this.tint);
-                tempCanvas.context.drawImage(this.tintedTexture, 0, 0);
-            }
-            else
-            {
-                tempCanvas.context.drawImage(base_texture.source,
-                    -texture._frame.x * base_texture_resolution, -texture._frame.y * base_texture_resolution);
-            }
-            this.cached_tint = this.tint;
-            this._canvas_pattern = tempCanvas.context.createPattern(tempCanvas.canvas, 'repeat');
-        }
-
-        // set context state..
-        context.globalAlpha = this.world_alpha;
-        context.setTransform(transform.a * resolution,
-            transform.b * resolution,
-            transform.c * resolution,
-            transform.d * resolution,
-            transform.tx * resolution,
-            transform.ty * resolution);
-
-        renderer.setBlendMode(this.blend_mode);
-
-        // fill the pattern!
-        context.fillStyle = this._canvas_pattern;
-
-        // TODO - this should be rolled into the set_transform above..
-        context.scale(this.tile_scale.x / base_texture_resolution, this.tile_scale.y / base_texture_resolution);
-
-        const anchorX = this.anchor.x * -this._width;
-        const anchorY = this.anchor.y * -this._height;
-
-        if (this.uv_respect_anchor)
-        {
-            context.translate(modX, modY);
-
-            context.fillRect(-modX + anchorX, -modY + anchorY,
-                this._width / this.tile_scale.x * base_texture_resolution,
-                this._height / this.tile_scale.y * base_texture_resolution);
-        }
-        else
-        {
-            context.translate(modX + anchorX, modY + anchorY);
-
-            context.fillRect(-modX, -modY,
-                this._width / this.tile_scale.x * base_texture_resolution,
-                this._height / this.tile_scale.y * base_texture_resolution);
-        }
+        renderer.set_object_renderer(renderer.plugins[this.renderer_plugin]);
+        renderer.plugins[this.renderer_plugin].render(this);
     }
 
     /**
@@ -277,8 +176,7 @@ export default class TilingSprite extends Sprite
      *
      * @private
      */
-    _calculate_bounds()
-    {
+    _calculate_bounds() {
         const min_x = this._width * -this._anchor._x;
         const min_y = this._height * -this._anchor._y;
         const max_x = this._width * (1 - this._anchor._x);
@@ -290,23 +188,19 @@ export default class TilingSprite extends Sprite
     /**
      * Gets the local bounds of the sprite object.
      *
-     * @param {V.Rectangle} rect - The output rectangle.
-     * @return {V.Rectangle} The bounds.
+     * @param {Rectangle} rect - The output rectangle.
+     * @return {Rectangle} The bounds.
      */
-    get_local_bounds(rect)
-    {
+    get_local_bounds(rect) {
         // we can do a fast local bounds if the sprite has no children!
-        if (this.children.length === 0)
-        {
+        if (this.children.length === 0) {
             this._bounds.min_x = this._width * -this._anchor._x;
             this._bounds.min_y = this._height * -this._anchor._y;
             this._bounds.max_x = this._width * (1 - this._anchor._x);
             this._bounds.max_y = this._height * (1 - this._anchor._y);
 
-            if (!rect)
-            {
-                if (!this._local_bounds_rect)
-                {
+            if (!rect) {
+                if (!this._local_bounds_rect) {
                     this._local_bounds_rect = new Rectangle();
                 }
 
@@ -322,23 +216,20 @@ export default class TilingSprite extends Sprite
     /**
      * Checks if a point is inside this tiling sprite.
      *
-     * @param {V.Point} point - the point to check
+     * @param {Point} point - the point to check
      * @return {boolean} Whether or not the sprite contains the point.
      */
-    contains_point(point)
-    {
-        this.world_transform.apply_inverse(point, tempPoint);
+    contains_point(point) {
+        this.world_transform.apply_inverse(point, temp_point);
 
         const width = this._width;
         const height = this._height;
         const x1 = -width * this.anchor._x;
 
-        if (tempPoint.x >= x1 && tempPoint.x < x1 + width)
-        {
+        if (temp_point.x >= x1 && temp_point.x < x1 + width) {
             const y1 = -height * this.anchor._y;
 
-            if (tempPoint.y >= y1 && tempPoint.y < y1 + height)
-            {
+            if (temp_point.y >= y1 && temp_point.y < y1 + height) {
                 return true;
             }
         }
@@ -356,8 +247,7 @@ export default class TilingSprite extends Sprite
      * @param {boolean} [options.texture=false] - Should it destroy the current texture of the sprite as well
      * @param {boolean} [options.base_texture=false] - Should it destroy the base texture of the sprite as well
      */
-    destroy(options)
-    {
+    destroy(options) {
         super.destroy(options);
 
         this.tile_transform = null;
@@ -369,13 +259,12 @@ export default class TilingSprite extends Sprite
      * The source can be - frame id, image url, video url, canvas element, video element, base texture
      *
      * @static
-     * @param {number|string|V.BaseTexture|HTMLCanvasElement|HTMLVideoElement} source - Source to create texture from
+     * @param {number|string|BaseTexture|HTMLCanvasElement|HTMLVideoElement} source - Source to create texture from
      * @param {number} width - the width of the tiling sprite
      * @param {number} height - the height of the tiling sprite
-     * @return {V.Texture} The newly created texture
+     * @return {Texture} The newly created texture
      */
-    static from(source, width, height)
-    {
+    static from(source, width, height) {
         return new TilingSprite(Texture.from(source), width, height);
     }
 
@@ -387,14 +276,12 @@ export default class TilingSprite extends Sprite
      * @param {string} frameId - The frame Id of the texture in the cache
      * @param {number} width - the width of the tiling sprite
      * @param {number} height - the height of the tiling sprite
-     * @return {V.extras.TilingSprite} A new TilingSprite using a texture from the texture cache matching the frameId
+     * @return {TilingSprite} A new TilingSprite using a texture from the texture cache matching the frameId
      */
-    static from_frame(frameId, width, height)
-    {
-        const texture = utils.TextureCache[frameId];
+    static from_frame(frameId, width, height) {
+        const texture = TextureCache[frameId];
 
-        if (!texture)
-        {
+        if (!texture) {
             throw new Error(`The frameId "${frameId}" does not exist in the texture cache ${this}`);
         }
 
@@ -410,12 +297,11 @@ export default class TilingSprite extends Sprite
      * @param {number} width - the width of the tiling sprite
      * @param {number} height - the height of the tiling sprite
      * @param {boolean} [crossorigin] - if you want to specify the cross-origin parameter
-     * @param {number} [scale_mode=V.settings.SCALE_MODE] - if you want to specify the scale mode,
-     *  see {@link V.SCALE_MODES} for possible values
-     * @return {v.extras.TilingSprite} A new TilingSprite using a texture from the texture cache matching the image id
+     * @param {number} [scale_mode=settings.SCALE_MODE] - if you want to specify the scale mode,
+     *  see {@link SCALE_MODES} for possible values
+     * @return {TilingSprite} A new TilingSprite using a texture from the texture cache matching the image id
      */
-    static from_image(imageId, width, height, crossorigin, scale_mode)
-    {
+    static from_image(imageId, width, height, crossorigin, scale_mode) {
         return new TilingSprite(Texture.from_image(imageId, crossorigin, scale_mode), width, height);
     }
 
@@ -424,8 +310,7 @@ export default class TilingSprite extends Sprite
      *
      * @member {number}
      */
-    get width()
-    {
+    get width() {
         return this._width;
     }
 
@@ -439,8 +324,7 @@ export default class TilingSprite extends Sprite
      *
      * @member {number}
      */
-    get height()
-    {
+    get height() {
         return this._height;
     }
 

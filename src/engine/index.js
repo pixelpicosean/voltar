@@ -7,16 +7,15 @@ export * from 'engine/dep/index';
 // Node
 import Node2D from './scene/Node2D';
 
-import Sprite from './scene/sprites/Sprite';
-import AnimatedSprite from './scene/sprites/AnimatedSprite';
-import TilingSprite from './scene/sprites/TilingSprite';
-import NineSliceSprite from './scene/sprites/NineSliceSprite';
-import CoaSprite from './scene/coa_sprite/CoaSprite';
+export { default as Node2D } from './scene/Node2D';
+
+export { default as Sprite } from './scene/sprites/Sprite';
+export { default as AnimatedSprite } from './scene/sprites/AnimatedSprite';
+export { default as TilingSprite } from './scene/sprites/TilingSprite';
+export { default as NineSliceSprite } from './scene/sprites/NineSliceSprite';
+// import CoaSprite from './scene/coa_sprite/CoaSprite';
 
 // import Graphics from './scene/graphics/Graphics';
-
-import BitmapText from './scene/BitmapText';
-import Text from './scene/text/Text';
 
 // import BackgroundMap from './scene/map/BackgroundMap';
 // import CollisionMap from './scene/map/CollisionMap';
@@ -30,46 +29,15 @@ import Text from './scene/text/Text';
 
 // import Timer from './scene/Timer';
 
-export {
-    Node2D,
-
-    Sprite,
-    AnimatedSprite,
-    TilingSprite,
-    NineSliceSprite,
-    CoaSprite,
-
-    // Graphics,
-
-    BitmapText,
-    Text,
-
-    // BackgroundMap,
-    // CollisionMap,
-
-    // ParticleNode2D,
-
-    // Mesh,
-    // Plane,
-    // NineslicePlane,
-    // Rope,
-
-    // Timer,
-}
-
 import {
     node_class_map,
     scene_class_map,
 } from 'engine/registry';
 
 // Class
-export { default as SpriteRenderer } from './scene/sprites/webgl/SpriteRenderer';
-// export { default as CanvasSpriteRenderer } from './scene/sprites/canvas/CanvasSpriteRenderer';
+// export { default as GraphicsRenderer } from './scene/graphics/webgl/GraphicsRenderer';
 
-export { default as GraphicsRenderer } from './scene/graphics/webgl/GraphicsRenderer';
-// export { default as CanvasGraphicsRenderer } from './scene/graphics/canvas/CanvasGraphicsRenderer';
-
-export { default as MeshRenderer } from './scene/mesh/webgl/MeshRenderer';
+// export { default as MeshRenderer } from './scene/mesh/webgl/MeshRenderer';
 
 export { default as Texture } from './textures/Texture';
 export { default as BaseTexture } from './textures/BaseTexture';
@@ -77,17 +45,6 @@ export { default as RenderTexture } from './textures/RenderTexture';
 export { default as BaseRenderTexture } from './textures/BaseRenderTexture';
 export { default as TextureUvs } from './textures/TextureUvs';
 export { default as TextureMatrix } from './textures/TextureMatrix';
-
-// export { default as CanvasRenderTarget } from './renderers/canvas/utils/CanvasRenderTarget';
-
-export { default as Shader } from './Shader';
-
-export { default as WebGLManager } from './renderers/webgl/managers/WebGLManager';
-export { default as ObjectRenderer } from './renderers/webgl/utils/ObjectRenderer';
-export { default as RenderTarget } from './renderers/webgl/utils/RenderTarget';
-export { default as Quad } from './renderers/webgl/utils/Quad';
-export { default as SpriteMaskFilter } from './renderers/webgl/filters/sprite_mask/SpriteMaskFilter';
-export { default as Filter } from './renderers/webgl/filters/Filter';
 
 export { default as RectangleShape2D } from './scene/physics/RectangleShape2D';
 export { default as Area2D } from './scene/physics/Area2D';
@@ -104,8 +61,6 @@ export * from './rnd';
 
 // Namespace
 // import * as accessibility from './accessibility/index';
-import * as audio from './audio/index';
-import * as interaction from './interaction/index';
 import * as loaders from './loaders/index';
 import * as ticker from './ticker/index';
 import * as utils from './utils/index';
@@ -113,8 +68,6 @@ import * as utils from './utils/index';
 export {
     settings,
 
-    audio,
-    interaction,
     loaders,
     ticker,
     utils,
@@ -125,11 +78,20 @@ import Input from './input/index';
 import SceneTree from './SceneTree';
 
 // Global instances
-export const loader = loaders.shared || null;
-export const input = new Input();
-export const scene_tree = new SceneTree(input);
-export const sound = audio.SoundLibrary.init(loaders.Resource, loaders.Loader, loader);
+const preload_queue = [];
 
+export const input = new Input();
+export const scene_tree = new SceneTree(input, preload_queue);
+// export const sound = audio.SoundLibrary.init(loaders.Resource, loaders.Loader);
+
+/**
+ * Preload a resource before game start
+ * @param {string} key Key of the resource
+ * @param {string} [url] URL of the resource
+ */
+export function preload(key, url) {
+    preload_queue.push({ key, url });
+}
 
 /**
  * @typedef PackedScene

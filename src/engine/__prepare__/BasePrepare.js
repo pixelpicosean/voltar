@@ -1,7 +1,7 @@
 import { UPDATE_PRIORITY } from 'engine/const';
 import { shared as SharedTicker } from 'engine/ticker/index';
 import SystemRenderer from 'engine/renderers/SystemRenderer';
-import WebGLRenderer from 'engine/renderers/webgl/WebGLRenderer';
+import WebGLRenderer from 'engine/renderers/WebGLRenderer';
 import Node2D from 'engine/scene/Node2D';
 import Texture from 'engine/textures/Texture';
 import BaseTexture from 'engine/textures/BaseTexture';

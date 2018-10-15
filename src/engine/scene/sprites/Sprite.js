@@ -1,8 +1,10 @@
-import { Point, ObservablePoint, Rectangle } from '../../math';
-import { sign, TextureCache } from '../../utils';
+import { Point, ObservablePoint, Rectangle } from '../../math/index';
+import { sign, TextureCache } from '../../utils/index';
 import { BLEND_MODES } from '../../const';
 import Texture from '../../textures/Texture';
 import Node2D from '../Node2D';
+
+import WebGLRenderer from 'engine/renderers/WebGLRenderer';
 
 const tempPoint = new Point();
 
@@ -150,7 +152,7 @@ export default class Sprite extends Node2D {
          * @member {string}
          * @default 'sprite'
          */
-        this.plugin_name = 'sprite';
+        this.renderer_plugin = 'sprite';
     }
 
     _load_data(data) {
@@ -347,18 +349,8 @@ export default class Sprite extends Node2D {
     _render_webgl(renderer) {
         this.calculate_vertices();
 
-        renderer.set_object_renderer(renderer.plugins[this.plugin_name]);
-        renderer.plugins[this.plugin_name].render(this);
-    }
-
-    /**
-    * Renders the object using the Canvas renderer
-    *
-    * @private
-    * @param {CanvasRenderer} renderer - The renderer
-    */
-    _render_canvas(renderer) {
-        renderer.plugins[this.plugin_name].render(this);
+        renderer.set_object_renderer(renderer.plugins[this.renderer_plugin]);
+        renderer.plugins[this.renderer_plugin].render(this);
     }
 
     /**

@@ -3,15 +3,14 @@ import SoundLibrary from "./SoundLibrary";
 import SoundSprite from "./sprites/SoundSprite";
 import SoundUtils from "./utils/SoundUtils";
 import WebAudioMedia from "./webaudio/WebAudioMedia";
+import Filter from "./filters/Filter";
 /**
- * Sound represents a single piece of loaded media. When playing a sound {@link v.sound.IMediaInstance} objects
+ * Sound represents a single piece of loaded media. When playing a sound {@link IMediaInstance} objects
  * are created. Properties such a `volume`, `pause`, `mute`, `speed`, etc will have an effect on all instances.
- * @class Sound
- * @memberof v.sound
  */
 export default class Sound {
     /**
-     * Constructor, use `v.sound.Sound.from`
+     * Constructor, use `Sound.from`
      * @private
      */
     constructor(media, options) {
@@ -40,7 +39,6 @@ export default class Sound {
     }
     /**
      * Create a new sound instance from source.
-     * @method v.sound.Sound.from
      * @param {ArrayBuffer|String|Object|HTMLAudioElement} options Either the path or url to the source file.
      *        or the object of options to use.
      * @param {String} [options.url] If `options` is an object, the source of file.
@@ -53,11 +51,11 @@ export default class Sound {
      * @param {Object} [options.sprites] The map of sprite data. Where a sprite is an object
      *        with a `start` and `end`, which are the times in seconds. Optionally, can include
      *        a `speed` amount where 1 is 100% speed.
-     * @param {v.sound.Sound~completeCallback} [options.complete=null] Global complete callback
+     * @param {Sound~completeCallback} [options.complete=null] Global complete callback
      *        when play is finished.
-     * @param {v.sound.Sound~loadedCallback} [options.loaded=null] Call when finished loading.
+     * @param {Sound~loadedCallback} [options.loaded=null] Call when finished loading.
      * @param {boolean} [options.loop=false] true to loop the audio playback.
-     * @return {v.sound.Sound} Created sound instance.
+     * @return {Sound} Created sound instance.
      */
     static from(source) {
         let options = {};
@@ -95,8 +93,7 @@ export default class Sound {
     }
     /**
      * Instance of the media context
-     * @name v.sound.Sound#context
-     * @type {v.sound.IMediaContext}
+     * @type {IMediaContext}
      * @readonly
      */
     get context() {
@@ -104,8 +101,7 @@ export default class Sound {
     }
     /**
      * Stops all the instances of this sound from playing.
-     * @method v.sound.Sound#pause
-     * @return {v.sound.Sound} Instance of this sound.
+     * @return {Sound} Instance of this sound.
      */
     pause() {
         this.isPlaying = false;
@@ -114,8 +110,7 @@ export default class Sound {
     }
     /**
      * Resuming all the instances of this sound from playing
-     * @method v.sound.Sound#resume
-     * @return {v.sound.Sound} Instance of this sound.
+     * @return {Sound} Instance of this sound.
      */
     resume() {
         this.isPlaying = this._instances.length > 0;
@@ -124,7 +119,6 @@ export default class Sound {
     }
     /**
      * Stops all the instances of this sound from playing.
-     * @name v.sound.Sound#paused
      * @type {boolean}
      * @readonly
      */
@@ -137,7 +131,6 @@ export default class Sound {
     }
     /**
      * The playback rate
-     * @name v.sound.Sound#speed
      * @type {number}
      */
     get speed() {
@@ -149,8 +142,7 @@ export default class Sound {
     }
     /**
      * Set the filters. Only supported with WebAudio.
-     * @name v.sound.Sound#filters
-     * @type {Array<v.sound.filters.Filter>}
+     * @type {Array<Filter>}
      */
     get filters() {
         return this.media.filters;
@@ -176,7 +168,6 @@ export default class Sound {
     }
     /**
      * Destructor, safer to use `SoundLibrary.remove(alias)` to remove this sound.
-     * @method v.sound.Sound#destroy
      */
     destroy() {
         this._removeInstances();
@@ -188,19 +179,14 @@ export default class Sound {
     }
     /**
      * Remove all sound sprites.
-     * @method v.sound.Sound#removeSprites
-     * @return {v.sound.Sound} Sound instance for chaining.
+     * @return {Sound} Sound instance for chaining.
      */
     /**
      * Remove a sound sprite.
-     * @method v.sound.Sound#removeSprites
-     * @param {String} alias The unique name of the sound sprite.
-     * @return {v.sound.Sound} Sound instance for chaining.
+     * @return {Sound} Sound instance for chaining.
      */
     removeSprites(alias) {
         if (!alias) {
-            for (const name in this._sprites) {
-                this.removeSprites(name);
             }
         }
         else {
@@ -214,7 +200,6 @@ export default class Sound {
     }
     /**
      * If the current sound is playable (loaded).
-     * @name v.sound.Sound#isPlayable
      * @type {boolean}
      * @readonly
      */
@@ -223,8 +208,7 @@ export default class Sound {
     }
     /**
      * Stops all the instances of this sound from playing.
-     * @method v.sound.Sound#stop
-     * @return {v.sound.Sound} Instance of this sound.
+     * @return {Sound} Instance of this sound.
      */
     stop() {
         if (!this.isPlayable) {
@@ -321,7 +305,6 @@ export default class Sound {
     }
     /**
      * Internal only, speed, loop, volume change occured.
-     * @method refresh
      * @private
      */
     refresh() {
@@ -332,7 +315,6 @@ export default class Sound {
     }
     /**
      * Handle changes in paused state. Internal only.
-     * @method refreshPaused
      * @private
      */
     refreshPaused() {
@@ -343,7 +325,6 @@ export default class Sound {
     }
     /**
      * Gets and sets the volume.
-     * @name v.sound.Sound#volume
      * @type {number}
      */
     get volume() {
@@ -355,7 +336,6 @@ export default class Sound {
     }
     /**
      * Gets and sets the muted flag.
-     * @name v.sound.Sound#muted
      * @type {number}
      */
     get muted() {
@@ -367,7 +347,6 @@ export default class Sound {
     }
     /**
      * Gets and sets the looping.
-     * @name v.sound.Sound#loop
      * @type {boolean}
      */
     get loop() {
@@ -379,7 +358,6 @@ export default class Sound {
     }
     /**
      * Starts the preloading of sound.
-     * @method v.sound.Sound#_preload
      * @private
      */
     _preload(callback) {
@@ -387,8 +365,7 @@ export default class Sound {
     }
     /**
      * Gets the list of instances that are currently being played of this sound.
-     * @name v.sound.Sound#instances
-     * @type {Array<v.sound.IMediaInstance>}
+     * @type {Array<IMediaInstance>}
      * @readonly
      */
     get instances() {
@@ -396,7 +373,6 @@ export default class Sound {
     }
     /**
      * Get the map of sprites.
-     * @name v.sound.Sound#sprites
      * @type {Object}
      * @readonly
      */
@@ -405,7 +381,6 @@ export default class Sound {
     }
     /**
      * Get the duration of the audio in seconds.
-     * @name v.sound.Sound#duration
      * @type {number}
      */
     get duration() {
@@ -413,7 +388,6 @@ export default class Sound {
     }
     /**
      * Auto play the first instance.
-     * @method v.sound.Sound#autoPlayStart
      * @private
      */
     autoPlayStart() {
@@ -425,7 +399,6 @@ export default class Sound {
     }
     /**
      * Removes all instances.
-     * @method v.sound.Sound#_removeInstances
      * @private
      */
     _removeInstances() {
@@ -437,9 +410,8 @@ export default class Sound {
     }
     /**
      * Sound instance completed.
-     * @method v.sound.Sound#_onComplete
      * @private
-     * @param {v.sound.IMediaInstance} instance
+     * @param {IMediaInstance} instance
      */
     _onComplete(instance) {
         if (this._instances) {
@@ -453,9 +425,8 @@ export default class Sound {
     }
     /**
      * Create a new instance.
-     * @method v.sound.Sound#_createInstance
      * @private
-     * @return {v.sound.IMediaInstance} New instance to use
+     * @return {IMediaInstance} New instance to use
      */
     _createInstance() {
         if (Sound._pool.length > 0) {
@@ -467,9 +438,8 @@ export default class Sound {
     }
     /**
      * Destroy/recycling the instance object.
-     * @method v.sound.Sound#_poolInstance
      * @private
-     * @param {v.sound.IMediaInstance} instance - Instance to recycle
+     * @param {IMediaInstance} instance - Instance to recycle
      */
     _poolInstance(instance) {
         instance.destroy();
@@ -481,7 +451,6 @@ export default class Sound {
 }
 /**
  * Pool of instances
- * @name v.sound.Sound#_pool
  * @type {Array<IMediaInstance>}
  * @private
  */

@@ -13,11 +13,11 @@ function plugin_target(obj) {
     /**
      * Adds a plugin to an object
      *
-     * @param {string} plugin_name - The events that should be listed.
+     * @param {string} renderer_plugin - The events that should be listed.
      * @param {Function} ctor - The constructor function for the plugin.
      */
-    obj.register_plugin = function register_plugin(plugin_name, ctor) {
-        obj.__plugins[plugin_name] = ctor;
+    obj.register_plugin = function register_plugin(renderer_plugin, ctor) {
+        obj.__plugins[renderer_plugin] = ctor;
     };
 
     /**

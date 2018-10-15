@@ -40,14 +40,14 @@ export default class SoundLibrary {
     }
     /**
      * Initialize the singleton of the library
-     * @return {Sound}
+     * @return {SoundLibrary}
      */
-    static init(Resource, Loader, shared) {
+    static init(Resource, Loader) {
         if (SoundLibrary.instance) {
             throw new Error("SoundLibrary is already created");
         }
         const instance = SoundLibrary.instance = new SoundLibrary(Resource);
-        LoaderMiddleware.install(instance, Loader, Resource, shared);
+        LoaderMiddleware.install(instance, Loader, Resource);
         return instance;
     }
     /**
@@ -372,3 +372,9 @@ export default class SoundLibrary {
         return this;
     }
 }
+
+/**
+ * @type {SoundLibrary}
+ * @static
+ */
+SoundLibrary.instance = null;

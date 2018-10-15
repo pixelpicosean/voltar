@@ -6,7 +6,7 @@ import interactive_target from './interactive_target';
 import { mixins } from 'engine/utils/index';
 import Node2D from 'engine/scene/Node2D';
 import CanvasRenderer from 'engine/renderers/canvas/CanvasRenderer';
-import WebGLRenderer from 'engine/renderers/webgl/WebGLRenderer';
+import WebGLRenderer from 'engine/renderers/WebGLRenderer';
 import Point from 'engine/math/Point';
 import * as ticker from 'engine/ticker/index';
 import { UPDATE_PRIORITY } from 'engine/const';

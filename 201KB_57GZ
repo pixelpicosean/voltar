@@ -1,0 +1,2 @@
+Minimal game size after compile is 201KB and 57KB(GZip),
+which includes rendering of sprite classes.

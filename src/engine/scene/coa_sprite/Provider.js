@@ -1,4 +1,4 @@
-import { CharacterMap, Animation, Folder, Spatial, Obj } from './Model';
+import { CharacterMap, Folder, Spatial, Obj } from './Model';
 import Sprite from '../sprites/Sprite';
 
 /**

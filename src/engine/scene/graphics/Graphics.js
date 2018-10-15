@@ -7,7 +7,6 @@ import { Matrix, Point, Rectangle, RoundedRectangle, Ellipse, Polygon, Circle, B
 import { hex2rgb, rgb2hex } from '../../utils/index';
 import { SHAPES, BLEND_MODES } from '../../const';
 import bezier_curve_to from './utils/bezier_curve_to';
-import CanvasRenderer from '../../renderers/canvas/CanvasRenderer';
 
 let canvasRenderer;
 const temp_matrix = new Matrix();
@@ -995,20 +994,6 @@ export default class Graphics extends Node2D {
     }
 
     /**
-     * Renders the object using the Canvas renderer
-     *
-     * @private
-     * @param {CanvasRenderer} renderer - The renderer
-     */
-    _render_canvas(renderer) {
-        if (this.is_mask === true) {
-            return;
-        }
-
-        renderer.plugins.graphics.render(this);
-    }
-
-    /**
      * Retrieves the bounds of the graphic shape as a rectangle object
      *
      * @private
@@ -1220,40 +1205,6 @@ export default class Graphics extends Node2D {
         this.dirty++;
 
         return data;
-    }
-
-    /**
-     * Generates a canvas texture.
-     *
-     * @param {number} scale_mode - The scale mode of the texture.
-     * @param {number} resolution - The resolution of the texture.
-     * @return {Texture} The new texture.
-     */
-    generate_canvas_texture(scale_mode, resolution = 1) {
-        const bounds = this.get_local_bounds();
-
-        const canvasBuffer = RenderTexture.create(bounds.width, bounds.height, scale_mode, resolution);
-
-        if (!canvasRenderer) {
-            canvasRenderer = new CanvasRenderer();
-        }
-
-        this.transform.update_local_transform();
-        this.transform.local_transform.copy(temp_matrix);
-
-        temp_matrix.invert();
-
-        temp_matrix.tx -= bounds.x;
-        temp_matrix.ty -= bounds.y;
-
-        canvasRenderer.render(this, canvasBuffer, true, temp_matrix);
-
-        const texture = Texture.from_canvas(canvasBuffer.base_texture._canvas_render_target.canvas, scale_mode, 'graphics');
-
-        texture.base_texture.resolution = resolution;
-        texture.base_texture.update();
-
-        return texture;
     }
 
     /**

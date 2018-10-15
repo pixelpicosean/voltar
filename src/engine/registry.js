@@ -1,3 +1,6 @@
+import { Resource } from "./loaders/index";
+import Node2D from './scene/Node2D';
+
 /**
  * Node class looking table
  * @type {Object}
@@ -21,3 +24,13 @@ export const node_plugins = {
  * @type {Object<string, PackedScene>}}
  */
 export const scene_class_map = Object.create(null);
+
+/**
+ * @type {Array<() => ((res: Resource, next: Function) => void)>}
+ */
+export const loader_pre_procs = [];
+
+/**
+ * @type {Array<() => ((res: Resource, next: Function) => void)>}
+ */
+export const loader_use_procs = [];

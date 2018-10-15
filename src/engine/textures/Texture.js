@@ -402,7 +402,7 @@ export default class Texture extends EventEmitter {
     }
 
     /**
-     * Adds a Texture to the global TextureCache. This cache is shared across the whole V object.
+     * Adds a Texture to the global TextureCache.
      *
      * @static
      * @param {Texture} texture - The Texture to add to the cache.

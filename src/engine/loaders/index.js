@@ -13,25 +13,6 @@ import Loader from './loader';
  * });
  */
 export { Loader };
-export { default as bitmap_font_parser, parse as parse_bitmap_font_data } from './bitmap_font_parser';
-export { default as spritesheet_parser, get_resource_path } from './spritesheet_parser';
-export { default as texture_parser } from './texture_parser';
 
-/**
- * Reference to **resource-loader**'s Resource class.
- * See https://github.com/englercj/resource-loader
- * @class Resource
- */
-export { Resource } from 'resource-loader';
-
-/**
- * A premade instance of the loader that can be used to load resources.
- * @type {Loader}
- */
-const shared = new Loader();
-
-shared.destroy = () => {
-    // protect destroying shared loader
-};
-
-export { shared };
+import { resource_loader } from 'engine/dep/index';
+export const { Resource } = resource_loader;
