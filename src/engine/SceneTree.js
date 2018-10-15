@@ -76,7 +76,7 @@ export default class SceneTree {
         this.debug_collisions_hint = false;
 
         /**
-         * @type {Object<string, Node2D>}
+         * @type {Object<string, Array<Node2D>>}
          * @private
          */
         this.grouped_nodes = Object.create(null);
@@ -111,7 +111,7 @@ export default class SceneTree {
         this.stretch_mode = 'viewport';
         this.stretch_aspect = 'keep';
 
-        /** @type {HTMLCanvasElement} */
+        /** @type {HTMLElement} */
         this.view = null;
         this.container = null;
 
@@ -214,6 +214,11 @@ export default class SceneTree {
         return this.viewport;
     }
 
+    /**
+     * Change to the given scene
+     *
+     * @param {typeof Node2D} scene_ctor Scene class
+     */
     change_scene_to(scene_ctor) {
         this._next_scene_ctor = scene_ctor;
     }
@@ -224,6 +229,11 @@ export default class SceneTree {
         this._next_scene_ctor = this._current_scene_ctor;
     }
 
+    /**
+     * Set pause state of the whole game
+     *
+     * @param {boolean} pause
+     */
     set_pause(pause) {}
     set_time_scale(scale) {
         this.time_scale = Math.max(0, scale);
@@ -251,7 +261,6 @@ export default class SceneTree {
 
             background_color: this.settings.display.background_color,
 
-            force_canvas: this.settings.display.force_canvas,
             antialias: this.settings.display.antialias,
             pixel_snap: this.settings.display.pixel_snap,
             scale_mode: this.settings.display.scale_mode,
@@ -271,8 +280,6 @@ export default class SceneTree {
             switch (this.settings.display.stretch_mode) {
             case 'disabled':
                 this.visual_server.renderer.resize(window.innerWidth, window.innerHeight);
-                this.view.width = window.innerWidth * this.visual_server.renderer.resolution;
-                this.view.height = window.innerHeight * this.visual_server.renderer.resolution;
                 this.view.style.width = `${window.innerWidth}px`;
                 this.view.style.height = `${window.innerHeight}px`;
                 this.viewport_rect.size.set(window.innerWidth, window.innerHeight);
@@ -282,8 +289,6 @@ export default class SceneTree {
                 switch (this.settings.display.stretch_aspect) {
                 case 'ignore':
                     this.visual_server.renderer.resize(window.innerWidth, window.innerHeight);
-                    this.view.width = window.innerWidth * this.visual_server.renderer.resolution;
-                    this.view.height = window.innerHeight * this.visual_server.renderer.resolution;
                     this.viewport.scale.set(window.innerWidth / this.settings.display.width, window.innerHeight / this.settings.display.height);
                     this.view.style.width = `${window.innerWidth}px`;
                     this.view.style.height = `${window.innerHeight}px`;
@@ -296,8 +301,6 @@ export default class SceneTree {
                     let height = Math.floor(this.settings.display.height * result.scale);
                     this.visual_server.renderer.resize(width, height);
                     this.viewport.scale.set(result.scale, result.scale);
-                    this.view.width = width * this.visual_server.renderer.resolution;
-                    this.view.height = height * this.visual_server.renderer.resolution;
                     this.view.style.width = `${width}px`;
                     this.view.style.height = `${height}px`;
                     this.view.style.marginLeft = `${result.left}px`;
@@ -312,8 +315,6 @@ export default class SceneTree {
                         let height = (width * (this.settings.display.height / this.settings.display.width)) | 0;
                         this.visual_server.renderer.resize(width, height);
                         this.viewport.scale.set(scale, scale);
-                        this.view.width = width * this.visual_server.renderer.resolution;
-                        this.view.height = height * this.visual_server.renderer.resolution;
                         this.view.style.width = `${width}px`;
                         this.view.style.height = `${height}px`;
                         this.view.style.marginLeft = `${((window.innerWidth - width) * 0.5) | 0}px`;
@@ -326,8 +327,6 @@ export default class SceneTree {
                         let height = window.innerHeight;
                         this.visual_server.renderer.resize(width, height);
                         this.viewport.scale.set(scale, scale);
-                        this.view.width = width * this.visual_server.renderer.resolution;
-                        this.view.height = height * this.visual_server.renderer.resolution;
                         this.view.style.width = `${width}px`;
                         this.view.style.height = `${height}px`;
                         this.view.style.marginLeft = `0px`;
@@ -355,8 +354,6 @@ export default class SceneTree {
                         let width = window.innerWidth;
                         this.visual_server.renderer.resize(width, height);
                         this.viewport.scale.set(scale, scale);
-                        this.view.width = width * this.visual_server.renderer.resolution;
-                        this.view.height = height * this.visual_server.renderer.resolution;
                         this.view.style.width = `${width}px`;
                         this.view.style.height = `${height}px`;
                         this.view.style.marginLeft = `0px`;
@@ -465,10 +462,10 @@ export default class SceneTree {
 
             this.current_scene = this._next_scene_ctor.instance();
             this.current_scene.scene_tree = this;
-            this.viewport.add_child(this.current_scene);
-
             this._current_scene_ctor = this._next_scene_ctor;
             this._next_scene_ctor = null;
+
+            this.viewport.add_child(this.current_scene);
         }
 
         if (this.current_scene) {
@@ -532,13 +529,6 @@ export default class SceneTree {
                 }
 
                 _process_tmp.last_count = _process_tmp.count;
-            }
-
-            // Idle update
-            // FIX ME: do we need this process method?
-            // this.current_scene._process(_process_tmp.real_delta * 0.001);
-            if (this.current_scene._render) {
-                this.current_scene._render(timestamp);
             }
 
             // Render
