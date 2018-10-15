@@ -1,3 +1,4 @@
+import settings from 'engine/settings';
 import Texture from 'engine/textures/Texture';
 import { get_resolution_of_url } from 'engine/utils/index';
 import { Rectangle } from 'engine/math/index';
@@ -9,7 +10,7 @@ export const registered_bitmap_fonts = {};
  *
  * @static
  * @param {XMLDocument} xml - The XML document data.
- * @param {Object.<string, Texture>|Texture|Texture[]} textures - List of textures for each page.
+ * @param {Object<string, Texture>|Texture|Texture[]} textures - List of textures for each page.
  *  If providing an object, the key is the `<page>` element's `file` attribute in the FNT file.
  * @return {Object} Result font object with font, size, lineHeight and char fields.
  */

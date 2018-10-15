@@ -25,6 +25,9 @@ export { default as CutoutAnimation } from './scene/coa/CutoutAnimation';
 
 export { default as Graphics } from './scene/graphics/Graphics';
 
+export { default as BitmapText } from './scene/text/BitmapText';
+export { default as Text } from './scene/text/Text';
+
 export { default as BackgroundMap } from './scene/map/BackgroundMap';
 export { default as CollisionMap } from './scene/map/CollisionMap';
 

@@ -1,3 +1,6 @@
+// Dependencies
+import 'engine/scene/sprites/enable';
+
 // Loader middleware
 import bitmap_font_parser from './bitmap_font_parser';
 import { loader_use_procs } from 'engine/registry';

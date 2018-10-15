@@ -123,8 +123,6 @@ declare module 'resource-loader' {
     class Resource {
         isJson: boolean;
         metadata: any;
-        spineData: any;
-        spineAtlas: any;
 
         name: string;
         texture: Texture;
@@ -137,6 +135,7 @@ declare module 'resource-loader' {
         error: Error;
         xhr: XMLHttpRequest;
         SVGMetadataElement: any;
+        bitmap_font: any;
 
         static setExtensionLoadType(extname: string, loadType: number): void;
         static setExtensionXhrType(extname: string, xhrType: number): void;
@@ -166,6 +165,15 @@ declare module 'resource-loader' {
             BLOB: number;
             DOCUMENT: number;
             JSON: number;
+            TEXT: number;
+        };
+        const TYPE: {
+            UNKNOWN: number;
+            JSON: number;
+            XML: number;
+            IMAGE: number;
+            AUDIO: number;
+            VIDEO: number;
             TEXT: number;
         };
     }

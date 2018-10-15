@@ -5,6 +5,22 @@ import Sprite from '../sprites/Sprite';
 import { registered_bitmap_fonts } from './res';
 
 /**
+ * @typedef BMFontConfig
+ * @property {number} [tint=0xFFFFFF] The tint color
+ * @property {string} [align='left'] Alignment for multiline text ('left', 'center' or 'right'), does not affect
+ *                                   single line text
+ * @property {string} [name] The bitmap font id
+ * @property {number} [size] The size of the font in pixels, e.g. 24
+ */
+/**
+ * @typedef BMFontStyle
+ * @property {string|BMFontConfig} font The font descriptor for the object, can be passed as a string of form
+ *                                      "24px FontName" or "FontName" or as an object with explicit name/size properties.
+ * @property {string} [align='left'] Alignment for multiline text ('left', 'center' or 'right'), does not affect
+ *                                   single line text
+ * @property {number} [tint=0xFFFFFF] The tint color
+ */
+/**
  * A BitmapText object will create a line or multiple lines of text using bitmap font. To
  * split a line you can use '\n', '\r' or '\r\n' in your string. You can generate the fnt files using:
  *
@@ -21,14 +37,7 @@ import { registered_bitmap_fonts } from './res';
 export default class BitmapText extends Node2D {
     /**
      * @param {string} text - The copy that you would like the text to display
-     * @param {object} style - The style parameters
-     * @param {string|object} style.font - The font descriptor for the object, can be passed as a string of form
-     *      "24px FontName" or "FontName" or as an object with explicit name/size properties.
-     * @param {string} [style.font.name] - The bitmap font id
-     * @param {number} [style.font.size] - The size of the font in pixels, e.g. 24
-     * @param {string} [style.align='left'] - Alignment for multiline text ('left', 'center' or 'right'), does not affect
-     *      single line text
-     * @param {number} [style.tint=0xFFFFFF] - The tint color
+     * @param {BMFontStyle} style - The style parameters
      */
     constructor(text, style = { font: null }) {
         super();
@@ -78,7 +87,7 @@ export default class BitmapText extends Node2D {
          * @member {object}
          * @private
          */
-        this.font = style.font; // run font setter
+        this.set_font(style.font);
 
         /**
          * Private tracker for the current text.
@@ -137,15 +146,16 @@ export default class BitmapText extends Node2D {
 
         for (let k in data) {
             switch (k) {
-            case 'font':
-            case 'text':
-            case 'max_width':
-            case 'max_line_height':
-                this[k] = data[k];
-                break;
-            case 'font_style':
-                this._font = data[k];
-                break;
+                case 'font':
+                case 'text':
+                case 'max_width':
+                    this[k] = data[k];
+                    break;
+                case 'font_style':
+                    this._font = data[k];
+                    break;
+                case 'max_line_height':
+                    this._max_line_height = data[k];
             }
         }
     }
@@ -157,6 +167,10 @@ export default class BitmapText extends Node2D {
      */
     update_text() {
         const data = registered_bitmap_fonts[this._font.name];
+        if (!data) {
+            console.warn(`BMFont "${this._font.name}" is not found!`);
+            return;
+        }
         const scale = this._font.size / data.size;
         const pos = new Point();
         const chars = [];
@@ -392,17 +406,24 @@ export default class BitmapText extends Node2D {
     get font() {
         return this._font;
     }
-
     set font(value) {
+        this.set_font(value);
+    }
+
+    /**
+     * @param {string|BMFontConfig} value
+     */
+    set_font(value) {
         if (!value) {
             return;
         }
 
         if (typeof value === 'string') {
-            value = value.split(' ');
+            /** @type {Array<String>} */
+            const value_list = value.split(' ');
 
-            this._font.name = value.length === 1 ? value[0] : value.slice(1).join(' ');
-            this._font.size = value.length >= 2 ? parseInt(value[0], 10) : registered_bitmap_fonts[this._font.name].size;
+            this._font.name = value_list.length === 1 ? value_list[0] : value_list.slice(1).join(' ');
+            this._font.size = value_list.length >= 2 ? parseInt(value_list[0], 10) : registered_bitmap_fonts[this._font.name].size;
         } else {
             this._font.name = value.name;
             this._font.size = typeof value.size === 'number' ? value.size : parseInt(value.size, 10);
@@ -421,7 +442,7 @@ export default class BitmapText extends Node2D {
     }
 
     /**
-     * @param {string}
+     * @param {string} value
      */
     set text(value) {
         value = value.toString() || ' ';

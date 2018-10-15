@@ -17,7 +17,4 @@ export default class TextScene extends v.Node2D {
         }));
         bt.y = 100
     }
-    _ready() {}
-    _process(delta) {}
-    _exit_tree() {}
 }

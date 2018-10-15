@@ -16,7 +16,7 @@ function dirname(url) {
  *
  * @function parse_bitmap_font_data
  * @param {Resource} resource - Loader resource.
- * @param {Texture|Texture[]} textures - Reference to texture.
+ * @param {Object<string, Texture>|Texture|Texture[]} textures - Reference to texture.
  */
 export function parse(resource, textures) {
     resource.bitmap_font = register_font(resource.data, textures);
@@ -69,6 +69,7 @@ export default function () {
         }
 
         const pages = resource.data.getElementsByTagName('page');
+        /** @type Object<string, Texture> */
         const textures = {};
 
         // Handle completed, when the number of textures
