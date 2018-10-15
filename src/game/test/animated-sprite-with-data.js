@@ -1,8 +1,8 @@
-import * as v from 'engine';
+import * as v from 'engine/index';
 
-v.loader.add('hero/1', 'media/hero/1.png');
-v.loader.add('hero/2', 'media/hero/2.png');
-v.loader.add('hero/3', 'media/hero/3.png');
+v.preload('hero/1', 'media/hero/1.png');
+v.preload('hero/2', 'media/hero/2.png');
+v.preload('hero/3', 'media/hero/3.png');
 
 export default class AnimatedSpriteScene2 extends v.Node2D {
     static instance() {

@@ -1,8 +1,8 @@
-import * as v from 'engine';
+import * as v from 'engine/index';
 
-v.loader.add('mask', 'media/mask-sheet.png');
+v.preload('mask', 'media/mask-sheet.png');
 for (let i = 0; i < 12; i++) {
-    v.loader.add(`mask_${i}`, `media/mask/${i}.png`);
+    v.preload(`mask_${i}`, `media/mask/${i}.png`);
 }
 
 
