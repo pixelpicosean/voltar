@@ -90,7 +90,7 @@ export default class FilterManager extends WebGLManager {
             filter_state.source_frame = filter_state.destination_frame = this.renderer._active_render_target.size;
             filter_state.render_target = renderer._active_render_target;
 
-            this.renderer._active_render_target.filterData = filter_data = {
+            this.renderer._active_render_target.filter_data = filter_data = {
                 index: 0,
                 stack: [filter_state],
             };
@@ -549,9 +549,9 @@ export default class FilterManager extends WebGLManager {
         // manually tweak the resolution...
         // this will not modify the size of the frame buffer, just its resolution.
         render_target.resolution = resolution;
-        render_target.defaultFrame.width = render_target.size.width = min_width / resolution;
-        render_target.defaultFrame.height = render_target.size.height = min_height / resolution;
-        render_target.filterPoolKey = key;
+        render_target.default_frame.width = render_target.size.width = min_width / resolution;
+        render_target.default_frame.height = render_target.size.height = min_height / resolution;
+        render_target.filter_pool_key = key;
 
         return render_target;
     }
@@ -580,7 +580,7 @@ export default class FilterManager extends WebGLManager {
      * @param {RenderTarget} render_target - The render_target to free
      */
     free_pot_render_target(render_target) {
-        this.pool[render_target.filterPoolKey].push(render_target);
+        this.pool[render_target.filter_pool_key].push(render_target);
     }
 
     /**

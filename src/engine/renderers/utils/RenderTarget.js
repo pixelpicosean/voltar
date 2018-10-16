@@ -28,14 +28,14 @@ export default class RenderTarget {
         /**
          * A frame buffer
          *
-         * @member {glCore.GLFramebuffer}
+         * @member {GL.GLFramebuffer}
          */
         this.frame_buffer = null;
 
         /**
          * The texture
          *
-         * @member {glCore.GLTexture}
+         * @member {GL.GLTexture}
          */
         this.texture = null;
 
@@ -85,32 +85,32 @@ export default class RenderTarget {
         /**
          * The stencil buffer stores masking data for the render target
          *
-         * @member {glCore.GLBuffer}
+         * @member {GL.GLBuffer}
          */
-        this.defaultFrame = new Rectangle();
+        this.default_frame = new Rectangle();
         this.destination_frame = null;
         this.source_frame = null;
 
         /**
          * The stencil buffer stores masking data for the render target
          *
-         * @member {glCore.GLBuffer}
+         * @member {GL.GLBuffer}
          */
-        this.stencilBuffer = null;
+        this.stencil_buffer = null;
 
         /**
          * The data structure for the stencil masks
          *
          * @member {Graphics[]}
          */
-        this.stencilMaskStack = [];
+        this.stencil_mask_stack = [];
 
         /**
          * Stores filter data for the render target
          *
          * @member {object[]}
          */
-        this.filterData = null;
+        this.filter_data = null;
 
         this.filter_stack = null;
 
@@ -121,7 +121,7 @@ export default class RenderTarget {
          * @private
          * @member {string}
          */
-        this.filterPoolKey = '';
+        this.filter_pool_key = '';
 
         /**
          * The scale mode.
@@ -200,7 +200,7 @@ export default class RenderTarget {
      * @param {Rectangle} [source_frame] - The source frame.
      */
     set_frame(destination_frame, source_frame) {
-        this.destination_frame = destination_frame || this.destination_frame || this.defaultFrame;
+        this.destination_frame = destination_frame || this.destination_frame || this.default_frame;
         this.source_frame = source_frame || this.source_frame || this.destination_frame;
     }
 
@@ -291,8 +291,8 @@ export default class RenderTarget {
         this.size.width = width;
         this.size.height = height;
 
-        this.defaultFrame.width = width;
-        this.defaultFrame.height = height;
+        this.default_frame.width = width;
+        this.default_frame.height = height;
 
         this.frame_buffer.resize(width * this.resolution, height * this.resolution);
 

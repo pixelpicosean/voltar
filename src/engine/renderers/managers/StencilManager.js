@@ -1,38 +1,30 @@
 import WebGLManager from './WebGLManager';
+import WebGLRenderer from '../WebGLRenderer';
+import Graphics from 'engine/scene/graphics/Graphics';
 
-/**
- * @class
- * @extends V.WebGLManager
- * @memberof V
- */
-export default class StencilManager extends WebGLManager
-{
+export default class StencilManager extends WebGLManager {
     /**
-     * @param {V.WebGLRenderer} renderer - The renderer this manager works for.
+     * @param {WebGLRenderer} renderer - The renderer this manager works for.
      */
-    constructor(renderer)
-    {
+    constructor(renderer) {
         super(renderer);
-        this.stencilMaskStack = null;
+        this.stencil_mask_stack = null;
     }
 
     /**
      * Changes the mask stack that is used by this manager.
      *
-     * @param {V.Graphics[]} stencilMaskStack - The mask stack
+     * @param {Graphics[]} stencil_mask_stack - The mask stack
      */
-    setMaskStack(stencilMaskStack)
-    {
-        this.stencilMaskStack = stencilMaskStack;
+    set_mask_stack(stencil_mask_stack) {
+        this.stencil_mask_stack = stencil_mask_stack;
 
         const gl = this.renderer.gl;
 
-        if (stencilMaskStack.length === 0)
-        {
+        if (stencil_mask_stack.length === 0) {
             gl.disable(gl.STENCIL_TEST);
         }
-        else
-        {
+        else {
             gl.enable(gl.STENCIL_TEST);
         }
     }
@@ -40,70 +32,64 @@ export default class StencilManager extends WebGLManager
     /**
      * Applies the Mask and adds it to the current filter stack. @alvin
      *
-     * @param {V.Graphics} graphics - The mask
+     * @param {Graphics} graphics - The mask
      */
-    pushStencil(graphics)
-    {
+    push_stencil(graphics) {
         this.renderer.set_object_renderer(this.renderer.plugins.graphics);
 
         this.renderer._active_render_target.attachStencilBuffer();
 
         const gl = this.renderer.gl;
-        const prevMaskCount = this.stencilMaskStack.length;
+        const prevMaskCount = this.stencil_mask_stack.length;
 
-        if (prevMaskCount === 0)
-        {
+        if (prevMaskCount === 0) {
             gl.enable(gl.STENCIL_TEST);
         }
 
-        this.stencilMaskStack.push(graphics);
+        this.stencil_mask_stack.push(graphics);
 
         // Increment the refference stencil value where the new mask overlaps with the old ones.
         gl.colorMask(false, false, false, false);
-        gl.stencilFunc(gl.EQUAL, prevMaskCount, this._getBitwiseMask());
+        gl.stencilFunc(gl.EQUAL, prevMaskCount, this._get_bitwise_mask());
         gl.stencilOp(gl.KEEP, gl.KEEP, gl.INCR);
         this.renderer.plugins.graphics.render(graphics);
 
-        this._useCurrent();
+        this._use_current();
     }
 
     /**
      * Removes the last mask from the stencil stack. @alvin
      */
-    popStencil()
-    {
+    pop_stencil() {
         this.renderer.set_object_renderer(this.renderer.plugins.graphics);
 
         const gl = this.renderer.gl;
-        const graphics = this.stencilMaskStack.pop();
+        const graphics = this.stencil_mask_stack.pop();
 
-        if (this.stencilMaskStack.length === 0)
-        {
+        if (this.stencil_mask_stack.length === 0) {
             // the stack is empty!
             gl.disable(gl.STENCIL_TEST);
             gl.clear(gl.STENCIL_BUFFER_BIT);
             gl.clearStencil(0);
         }
-        else
-        {
+        else {
             // Decrement the refference stencil value where the popped mask overlaps with the other ones
             gl.colorMask(false, false, false, false);
             gl.stencilOp(gl.KEEP, gl.KEEP, gl.DECR);
             this.renderer.plugins.graphics.render(graphics);
 
-            this._useCurrent();
+            this._use_current();
         }
     }
 
     /**
      * Setup renderer to use the current stencil data.
      */
-    _useCurrent()
-    {
+    _use_current() {
         const gl = this.renderer.gl;
 
         gl.colorMask(true, true, true, true);
-        gl.stencilFunc(gl.EQUAL, this.stencilMaskStack.length, this._getBitwiseMask());
+        gl.stencilFunc(gl.EQUAL, this.stencil_mask_stack.length, this._get_bitwise_mask());
         gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP);
     }
 
@@ -112,19 +98,15 @@ export default class StencilManager extends WebGLManager
      *
      * @return {number} The bitwise mask.
      */
-    _getBitwiseMask()
-    {
-        return (1 << this.stencilMaskStack.length) - 1;
+    _get_bitwise_mask() {
+        return (1 << this.stencil_mask_stack.length) - 1;
     }
 
     /**
      * Destroys the mask stack.
      *
      */
-    destroy()
-    {
+    destroy() {
         WebGLManager.prototype.destroy.call(this);
-
-        this.stencilMaskStack.stencilStack = null;
     }
 }

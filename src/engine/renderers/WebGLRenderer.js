@@ -53,11 +53,11 @@ export default class WebGLRenderer extends SystemRenderer {
          */
         this.type = RENDERER_TYPE.WEBGL;
 
-        this.handleContextLost = this.handleContextLost.bind(this);
-        this.handleContextRestored = this.handleContextRestored.bind(this);
+        this.handle_context_lost = this.handle_context_lost.bind(this);
+        this.handle_context_restored = this.handle_context_restored.bind(this);
 
-        this.view.addEventListener('webglcontextlost', this.handleContextLost, false);
-        this.view.addEventListener('webglcontextrestored', this.handleContextRestored, false);
+        this.view.addEventListener('webglcontextlost', this.handle_context_lost, false);
+        this.view.addEventListener('webglcontextrestored', this.handle_context_restored, false);
 
         /**
          * The options passed in to create a new webgl context.
@@ -65,7 +65,7 @@ export default class WebGLRenderer extends SystemRenderer {
          * @type {object}
          * @private
          */
-        this._contextOptions = {
+        this._context_options = {
             alpha: this.transparent,
             antialias: this.options.antialias,
             premultipliedAlpha: this.transparent,
@@ -88,7 +88,7 @@ export default class WebGLRenderer extends SystemRenderer {
          *
          * @type {StencilManager}
          */
-        this.stencilManager = new StencilManager(this);
+        this.stencil_manager = new StencilManager(this);
 
         /**
          * An empty renderer.
@@ -130,7 +130,7 @@ export default class WebGLRenderer extends SystemRenderer {
             validate_context(this.options.context);
         }
 
-        this.gl = this.options.context || GL.createContext(this.view, this._contextOptions);
+        this.gl = this.options.context || GL.createContext(this.view, this._context_options);
 
         this.CONTEXT_UID = CONTEXT_UID++;
 
@@ -233,16 +233,17 @@ export default class WebGLRenderer extends SystemRenderer {
         // now lets fill up the textures with empty ones!
         const emptyGLTexture = GL.GLTexture.fromData(gl, null, 1, 1);
 
-        const tempObj = { _gl_textures: {} };
+        const temp_obj = { _gl_textures: {} };
 
-        tempObj._gl_textures[this.CONTEXT_UID] = {};
+        temp_obj._gl_textures[this.CONTEXT_UID] = {};
 
         for (let i = 0; i < maxTextures; i++) {
             const empty = new BaseTexture();
 
             empty._gl_textures[this.CONTEXT_UID] = emptyGLTexture;
 
-            this.bound_textures[i] = tempObj;
+            // @ts-ignore
+            this.bound_textures[i] = temp_obj;
             this.empty_textures[i] = empty;
             this.bind_texture(null, i);
         }
@@ -452,7 +453,7 @@ export default class WebGLRenderer extends SystemRenderer {
                 this._activeShader.uniforms.projectionMatrix = render_target.projection_matrix.to_array(true);
             }
 
-            this.stencilManager.setMaskStack(render_target.stencilMaskStack);
+            this.stencil_manager.set_mask_stack(render_target.stencil_mask_stack);
         }
 
         return this;
@@ -490,7 +491,7 @@ export default class WebGLRenderer extends SystemRenderer {
      * current location of the texture instead of the one provided. To bypass this use force location
      *
      * @param {BaseTexture|Texture} texture - the new texture
-     * @param {number} location - the suggested texture location
+     * @param {number} [location] - the suggested texture location
      * @param {boolean} [force_location=false] - force the location
      * @return {number} bound texture location
      */
@@ -498,6 +499,7 @@ export default class WebGLRenderer extends SystemRenderer {
         texture = texture || this.empty_textures[location];
 
         /** @type BaseTexture */
+        // @ts-ignore
         const base_texture = texture.base_texture || texture;
         base_texture.touched = this.textureGC.count;
 
@@ -545,7 +547,7 @@ export default class WebGLRenderer extends SystemRenderer {
     unbind_texture(texture) {
         const gl = this.gl;
 
-        /** @type BaseTexture */
+        // @ts-ignore
         const base_texture = texture.base_texture || texture;
 
         for (let i = 0; i < this.bound_textures.length; i++) {
@@ -623,7 +625,7 @@ export default class WebGLRenderer extends SystemRenderer {
      * @private
      * @param {WebGLContextEvent} event - The context lost event.
      */
-    handleContextLost(event) {
+    handle_context_lost(event) {
         event.preventDefault();
     }
 
@@ -632,7 +634,7 @@ export default class WebGLRenderer extends SystemRenderer {
      *
      * @private
      */
-    handleContextRestored() {
+    handle_context_restored() {
         this.texture_manager.remove_all();
         this.filter_manager.destroy(true);
         this._init_context();
@@ -648,8 +650,8 @@ export default class WebGLRenderer extends SystemRenderer {
         this.destroy_plugins();
 
         // remove listeners
-        this.view.removeEventListener('webglcontextlost', this.handleContextLost);
-        this.view.removeEventListener('webglcontextrestored', this.handleContextRestored);
+        this.view.removeEventListener('webglcontextlost', this.handle_context_lost);
+        this.view.removeEventListener('webglcontextrestored', this.handle_context_restored);
 
         this.texture_manager.destroy();
 
@@ -660,7 +662,7 @@ export default class WebGLRenderer extends SystemRenderer {
 
         // destroy the managers
         this.mask_manager.destroy();
-        this.stencilManager.destroy();
+        this.stencil_manager.destroy();
         this.filter_manager.destroy();
 
         this.mask_manager = null;
@@ -668,10 +670,10 @@ export default class WebGLRenderer extends SystemRenderer {
         this.texture_manager = null;
         this.current_renderer = null;
 
-        this.handleContextLost = null;
-        this.handleContextRestored = null;
+        this.handle_context_lost = null;
+        this.handle_context_restored = null;
 
-        this._contextOptions = null;
+        this._context_options = null;
         this.gl.useProgram(null);
 
         if (this.gl.getExtension('WEBGL_lose_context')) {
@@ -682,6 +684,8 @@ export default class WebGLRenderer extends SystemRenderer {
 
         // this = null;
     }
+
+    static register_plugin(key, plugin) {}
 }
 
 /**

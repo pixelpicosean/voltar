@@ -35,7 +35,7 @@ export { default as ParticleNode2D } from './scene/particles/ParticleNode2D';
 
 export { default as Mesh } from './scene/mesh/Mesh';
 export { default as Plane } from './scene/mesh/Plane';
-export { default as NineslicePlane } from './scene/mesh/NineslicePlane';
+export { default as NineSlicePlane } from './scene/mesh/NineSlicePlane';
 export { default as Rope } from './scene/mesh/Rope';
 
 export { default as Area2D } from './scene/physics/Area2D';

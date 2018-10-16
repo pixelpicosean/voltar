@@ -1,31 +1,27 @@
-import { Point, Polygon } from '../../math';
-import settings from '../../settings';
-import Texture from '../../textures/Texture';
-import TextureMatrix from '../../textures/TextureMatrix';
-import { BLEND_MODES } from '../../const';
-import * as utils from '../../utils';
+import settings from 'engine/settings';
+import { BLEND_MODES } from 'engine/const';
+import { Point, Polygon } from 'engine/math/index';
+import { rgb2hex, hex2rgb } from 'engine/utils/index';
+import Texture from 'engine/textures/Texture';
+import TextureMatrix from 'engine/textures/TextureMatrix';
 import Node2D from '../Node2D';
+import WebGLRenderer from 'engine/renderers/WebGLRenderer';
 
-const tempPoint = new Point();
-const tempPolygon = new Polygon();
+const temp_point = new Point();
+const temp_polygon = new Polygon();
 
 /**
  * Base mesh class
- * @class
- * @extends v.Node2D
- * @memberof v.mesh
  */
-export default class Mesh extends Node2D
-{
+export default class Mesh extends Node2D {
     /**
-     * @param {v.Texture} texture - The texture to use
+     * @param {Texture} texture - The texture to use
      * @param {Float32Array} [vertices] - if you want to specify the vertices
      * @param {Float32Array} [uvs] - if you want to specify the uvs
      * @param {Uint16Array} [indices] - if you want to specify the indices
      * @param {number} [draw_mode] - the draw_mode, can be any of the Mesh.DRAW_MODES consts
      */
-    constructor(texture, vertices, uvs, indices, draw_mode)
-    {
+    constructor(texture, vertices, uvs, indices, draw_mode) {
         super();
 
         this.type = 'Mesh';
@@ -98,12 +94,12 @@ export default class Mesh extends Node2D
         this.auto_update = true;
 
         /**
-         * The blend mode to be applied to the sprite. Set to `v.BLEND_MODES.NORMAL` to remove
+         * The blend mode to be applied to the sprite. Set to `BLEND_MODES.NORMAL` to remove
          * any blend mode.
          *
          * @member {number}
-         * @default V.BLEND_MODES.NORMAL
-         * @see v.BLEND_MODES
+         * @default BLEND_MODES.NORMAL
+         * @see BLEND_MODES
          */
         this.blend_mode = BLEND_MODES.NORMAL;
 
@@ -116,22 +112,22 @@ export default class Mesh extends Node2D
         this.canvas_padding = settings.MESH_CANVAS_PADDING;
 
         /**
-         * The way the Mesh should be drawn, can be any of the {@link V.mesh.Mesh.DRAW_MODES} consts
+         * The way the Mesh should be drawn, can be any of the {@link Mesh.DRAW_MODES} consts
          *
          * @member {number}
-         * @see V.mesh.Mesh.DRAW_MODES
+         * @see Mesh.DRAW_MODES
          */
         this.draw_mode = draw_mode || Mesh.DRAW_MODES.TRIANGLE_MESH;
 
         /**
          * The default shader that is used if a mesh doesn't have a more specific one.
          *
-         * @member {V.Shader}
+         * @member {Shader}
          */
         this.shader = null;
 
         /**
-         * The tint applied to the mesh. This is a [r,g,b] value. A value of [1,1,1] will remove any
+         * The tint applied to the  This is a [r,g,b] value. A value of [1,1,1] will remove any
          * tint effect.
          *
          * @member {number}
@@ -144,14 +140,14 @@ export default class Mesh extends Node2D
          * @private
          * @member {object<number, object>}
          */
-        this._glDatas = {};
+        this._gl_datas = {};
 
         /**
          * transform that is applied to UV to get the texture coords
          * its updated independently from texture uv_transform
          * updates of uvs are tied to that thing
          *
-         * @member {V.extras.TextureMatrix}
+         * @member {extras.TextureMatrix}
          * @private
          */
         this._uv_transform = new TextureMatrix(this._texture);
@@ -178,24 +174,11 @@ export default class Mesh extends Node2D
      * Renders the object using the WebGL renderer
      *
      * @private
-     * @param {V.WebGLRenderer} renderer - a reference to the WebGL renderer
+     * @param {WebGLRenderer} renderer - a reference to the WebGL renderer
      */
-    _render_webgl(renderer)
-    {
+    _render_webgl(renderer) {
         this.refresh();
         renderer.set_object_renderer(renderer.plugins[this.renderer_plugin]);
-        renderer.plugins[this.renderer_plugin].render(this);
-    }
-
-    /**
-     * Renders the object using the Canvas renderer
-     *
-     * @private
-     * @param {V.CanvasRenderer} renderer - The canvas renderer.
-     */
-    _render_canvas(renderer)
-    {
-        this.refresh();
         renderer.plugins[this.renderer_plugin].render(this);
     }
 
@@ -204,8 +187,7 @@ export default class Mesh extends Node2D
      *
      * @private
      */
-    _on_texture_update()
-    {
+    _on_texture_update() {
         this._uv_transform.texture = this._texture;
         this.refresh();
     }
@@ -215,10 +197,8 @@ export default class Mesh extends Node2D
      * call it after you change uvs manually
      * make sure that texture is valid
      */
-    multiply_uvs()
-    {
-        if (!this.upload_uv_transform)
-        {
+    multiply_uvs() {
+        if (!this.upload_uv_transform) {
             this._uv_transform.multiply_uvs(this.uvs);
         }
     }
@@ -229,14 +209,11 @@ export default class Mesh extends Node2D
      *
      * @param {boolean} [forceUpdate=false] if true, matrices will be updated any case
      */
-    refresh(forceUpdate)
-    {
-        if (this.auto_update)
-        {
+    refresh(forceUpdate) {
+        if (this.auto_update) {
             this.vertex_dirty++;
         }
-        if (this._uv_transform.update(forceUpdate))
-        {
+        if (this._uv_transform.update(forceUpdate)) {
             this._refresh();
         }
     }
@@ -245,8 +222,7 @@ export default class Mesh extends Node2D
      * re-calculates mesh coords
      * @protected
      */
-    _refresh()
-    {
+    _refresh() {
         /* empty */
     }
 
@@ -254,35 +230,31 @@ export default class Mesh extends Node2D
      * Returns the bounds of the mesh as a rectangle. The bounds calculation takes the world_transform into account.
      *
      */
-    _calculate_bounds()
-    {
+    _calculate_bounds() {
         // TODO - we can cache local bounds and use them if they are dirty (like graphics)
         this._bounds.add_vertices(this.transform, this.vertices, 0, this.vertices.length);
     }
 
     /**
-     * Tests if a point is inside this mesh. Works only for TRIANGLE_MESH
+     * Tests if a point is inside this  Works only for TRIANGLE_MESH
      *
-     * @param {V.Point} point - the point to test
+     * @param {Point} point - the point to test
      * @return {boolean} the result of the test
      */
-    contains_point(point)
-    {
-        if (!this.get_bounds().contains(point.x, point.y))
-        {
+    contains_point(point) {
+        if (!this.get_bounds().contains(point.x, point.y)) {
             return false;
         }
 
-        this.world_transform.apply_inverse(point, tempPoint);
+        this.world_transform.apply_inverse(point, temp_point);
 
         const vertices = this.vertices;
-        const points = tempPolygon.points;
+        const points = temp_polygon.points;
         const indices = this.indices;
         const len = this.indices.length;
         const step = this.draw_mode === Mesh.DRAW_MODES.TRIANGLES ? 3 : 1;
 
-        for (let i = 0; i + 2 < len; i += step)
-        {
+        for (let i = 0; i + 2 < len; i += step) {
             const ind0 = indices[i] * 2;
             const ind1 = indices[i + 1] * 2;
             const ind2 = indices[i + 2] * 2;
@@ -294,8 +266,7 @@ export default class Mesh extends Node2D
             points[4] = vertices[ind2];
             points[5] = vertices[ind2 + 1];
 
-            if (tempPolygon.contains(tempPoint.x, tempPoint.y))
-            {
+            if (temp_polygon.contains(temp_point.x, temp_point.y)) {
                 return true;
             }
         }
@@ -306,68 +277,53 @@ export default class Mesh extends Node2D
     /**
      * The texture that the mesh uses.
      *
-     * @member {V.Texture}
+     * @member {Texture}
      */
-    get texture()
-    {
+    get texture() {
         return this._texture;
     }
 
     set texture(value) // eslint-disable-line require-jsdoc
     {
-        if (this._texture === value)
-        {
+        if (this._texture === value) {
             return;
         }
 
         this._texture = value;
 
-        if (value)
-        {
+        if (value) {
             // wait for the texture to load
-            if (value.base_texture.has_loaded)
-            {
+            if (value.base_texture.has_loaded) {
                 this._on_texture_update();
             }
-            else
-            {
+            else {
                 value.once('update', this._on_texture_update, this);
             }
         }
     }
 
     /**
-     * The tint applied to the mesh. This is a hex value. A value of 0xFFFFFF will remove any tint effect.
+     * The tint applied to the  This is a hex value. A value of 0xFFFFFF will remove any tint effect.
      *
      * @member {number}
      * @default 0xFFFFFF
      */
-    get tint()
-    {
-        return utils.rgb2hex(this.tint_rgb);
+    get tint() {
+        return rgb2hex(this.tint_rgb);
     }
 
     set tint(value) // eslint-disable-line require-jsdoc
     {
-        this.tint_rgb = utils.hex2rgb(value, this.tint_rgb);
+        this.tint_rgb = hex2rgb(value, this.tint_rgb);
     }
 
     /**
      * Destroys the Mesh object.
-     *
-     * @param {object|boolean} [options] - Options parameter. A boolean will act as if all
-     *  options have been set to that value
-     * @param {boolean} [options.children=false] - if set to true, all the children will have
-     *  their destroy method called as well. 'options' will be passed on to those calls.
-     * @param {boolean} [options.texture=false] - Only used for child Sprites if options.children is set to true
-     *  Should it destroy the texture of the child sprite
-     * @param {boolean} [options.baseTexture=false] - Only used for child Sprites if options.children is set to true
-     *  Should it destroy the base texture of the child sprite
      */
-    destroy(options) {
+    destroy() {
         // for each webgl data entry, destroy the WebGLGraphicsData
-        for (const id in this._glDatas) {
-            const data = this._glDatas[id];
+        for (const id in this._gl_datas) {
+            const data = this._gl_datas[id];
 
             if (data.destroy) {
                 data.destroy();
@@ -392,9 +348,9 @@ export default class Mesh extends Node2D
             }
         }
 
-        this._glDatas = null;
+        this._gl_datas = null;
 
-        super.destroy(options);
+        super.destroy();
     }
 }
 

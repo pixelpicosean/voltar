@@ -42,7 +42,7 @@ export default class MaskManager extends WebGLManager {
         } else if (this.enableScissor
             && !this.scissor
             && this.renderer._active_render_target.root
-            && !this.renderer.stencilManager.stencilMaskStack.length
+            && !this.renderer.stencil_manager.stencil_mask_stack.length
             // @ts-ignore
             && mask_data.is_fast_rect()) {
             const matrix = mask_data.world_transform;
@@ -70,7 +70,7 @@ export default class MaskManager extends WebGLManager {
         if (maskData.texture) {
             this.pop_sprite_mask();
         }
-        else if (this.enableScissor && !this.renderer.stencilManager.stencilMaskStack.length) {
+        else if (this.enableScissor && !this.renderer.stencil_manager.stencil_mask_stack.length) {
             this.pop_scissor_mask();
         }
         else {
@@ -115,11 +115,12 @@ export default class MaskManager extends WebGLManager {
     /**
      * Applies the Mask and adds it to the current filter stack.
      *
-     * @param {Sprite|Graphics} maskData - The masking data.
+     * @param {Sprite|Graphics} mask_data - The masking data.
      */
-    push_stencil_mask(maskData) {
+    push_stencil_mask(mask_data) {
         this.renderer.current_renderer.stop();
-        this.renderer.stencilManager.pushStencil(maskData);
+        // @ts-ignore
+        this.renderer.stencil_manager.push_stencil(mask_data);
     }
 
     /**
@@ -127,7 +128,7 @@ export default class MaskManager extends WebGLManager {
      */
     pop_stencil_mask() {
         this.renderer.current_renderer.stop();
-        this.renderer.stencilManager.popStencil();
+        this.renderer.stencil_manager.pop_stencil();
     }
 
     /**

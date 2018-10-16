@@ -1,4 +1,5 @@
 import Mesh from './Mesh';
+import Texture from 'engine/textures/Texture';
 
 /**
  * The Plane allows you to draw a texture across several points and them manipulate these points
@@ -9,20 +10,14 @@ import Mesh from './Mesh';
  * };
  * let Plane = new Plane(Texture.from_image("snake.png"), points);
  *  ```
- *
- * @class
- * @extends Mesh
- *
  */
-export default class Plane extends Mesh
-{
+export default class Plane extends Mesh {
     /**
      * @param {Texture} texture - The texture to use on the Plane.
      * @param {number} [vertices_x=10] - The number of vertices in the x-axis
      * @param {number} [vertices_y=10] - The number of vertices in the y-axis
      */
-    constructor(texture, vertices_x, vertices_y)
-    {
+    constructor(texture, vertices_x, vertices_y) {
         super(texture);
 
         this.type = 'Plane';
@@ -47,8 +42,7 @@ export default class Plane extends Mesh
      * Refreshes plane coordinates
      *
      */
-    _refresh()
-    {
+    _refresh() {
         const texture = this._texture;
         const total = this.vertices_x * this.vertices_y;
         const verts = [];
@@ -62,8 +56,7 @@ export default class Plane extends Mesh
         const sizeX = texture.width / segmentsX;
         const sizeY = texture.height / segmentsY;
 
-        for (let i = 0; i < total; i++)
-        {
+        for (let i = 0; i < total; i++) {
             const x = (i % this.vertices_x);
             const y = ((i / this.vertices_x) | 0);
 
@@ -76,8 +69,7 @@ export default class Plane extends Mesh
 
         const totalSub = segmentsX * segmentsY;
 
-        for (let i = 0; i < totalSub; i++)
-        {
+        for (let i = 0; i < totalSub; i++) {
             const xpos = i % segmentsX;
             const ypos = (i / segmentsX) | 0;
 
@@ -107,13 +99,11 @@ export default class Plane extends Mesh
      *
      * @private
      */
-    _on_texture_update()
-    {
+    _on_texture_update() {
         Mesh.prototype._on_texture_update.call(this);
 
         // wait for the Plane ctor to finish before calling refresh
-        if (this._ready_to_draw)
-        {
+        if (this._ready_to_draw) {
             this.refresh();
         }
     }
