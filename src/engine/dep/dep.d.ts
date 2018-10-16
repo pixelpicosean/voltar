@@ -447,3 +447,7 @@ declare module 'pixi-gl-core' {
         export function mapType(gl: WebGLRenderingContext, type: string): string;
     }
 }
+
+declare module 'earcut' {
+    export default function earcut(data: number[], hole_indices?: number[], dim?: number);
+}

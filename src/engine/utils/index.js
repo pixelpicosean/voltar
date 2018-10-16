@@ -32,8 +32,8 @@ export function uid() {
  * Converts a hex color number to an [R, G, B] array
  *
  * @param {number} hex - The number to convert
- * @param  {number[]} [out=[]] If supplied, this array will be used rather than returning a new one
- * @return {number[]} An array representing the [R, G, B] of the color.
+ * @param  {number[]|Float32Array} [out=[]] If supplied, this array will be used rather than returning a new one
+ * @return {number[]|Float32Array} An array representing the [R, G, B] of the color.
  */
 export function hex2rgb(hex, out) {
     out = out || [];
