@@ -1,4 +1,4 @@
-import Filter from 'engine/renderers/webgl/filters/Filter';
+import Filter from 'engine/renderers/filters/Filter';
 
 /**
  * The ColorMatrixFilter class lets you apply a 5x4 matrix transformation on the RGBA
@@ -568,4 +568,4 @@ export default class ColorMatrix extends Filter {
 }
 
 // Americanized alias
-ColorMatrixFilter.prototype.grayscale = ColorMatrixFilter.prototype.greyscale;
+ColorMatrix.prototype.grayscale = ColorMatrix.prototype.greyscale;

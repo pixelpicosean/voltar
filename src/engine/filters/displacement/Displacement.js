@@ -1,9 +1,9 @@
-import Filter from 'engine/renderers/webgl/filters/Filter';
+import Filter from 'engine/renderers/filters/Filter';
 import Matrix from 'engine/math/Matrix';
 import Sprite from 'engine/scene/sprites/Sprite';
 import Point from 'engine/math/Point';
-import FilterManager from 'engine/renderers/webgl/managers/FilterManager';
-import RenderTarget from 'engine/renderers/webgl/utils/RenderTarget';
+import FilterManager from 'engine/renderers/managers/FilterManager';
+import RenderTarget from 'engine/renderers/utils/RenderTarget';
 
 /**
  * The Displacement class uses the pixel values from the specified texture
@@ -18,7 +18,7 @@ export default class Displacement extends Filter {
      * @param {number} scale - The scale of the displacement
      */
     constructor(sprite, scale) {
-        const maskMatrix = new Matrix();
+        const mask_matrix = new Matrix();
 
         sprite.renderable = false;
 
@@ -30,10 +30,10 @@ export default class Displacement extends Filter {
         );
 
         this.mask_sprite = sprite;
-        this.mask_matrix = maskMatrix;
+        this.mask_matrix = mask_matrix;
 
         this.uniforms.mapSampler = sprite._texture;
-        this.uniforms.filterMatrix = maskMatrix;
+        this.uniforms.filterMatrix = mask_matrix;
         this.uniforms.scale = { x: 1, y: 1 };
 
         if (scale === null || scale === undefined) {

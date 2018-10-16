@@ -1,9 +1,9 @@
 import settings from 'engine/settings';
 import BlurX from './BlurX';
 import BlurY from './BlurY';
-import Filter from 'engine/renderers/webgl/filters/Filter';
-import FilterManager from 'engine/renderers/webgl/managers/FilterManager';
-import RenderTarget from 'engine/renderers/webgl/utils/RenderTarget';
+import Filter from 'engine/renderers/filters/Filter';
+import FilterManager from 'engine/renderers/managers/FilterManager';
+import RenderTarget from 'engine/renderers/utils/RenderTarget';
 
 /**
  * The BlurFilter applies a Gaussian blur to an object.

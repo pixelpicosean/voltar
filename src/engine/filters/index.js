@@ -8,7 +8,7 @@
  *     .draw_rect(40, 40, 200, 200);
  *
  * // Add a blur filter
- * rect.filters = [new filters.BlurFilter()];
+ * rect.filters = [new filters.Blur()];
  */
 export { default as FXAA } from './fxaa/FXAA';
 export { default as Noise } from './noise/Noise';

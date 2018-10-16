@@ -222,7 +222,7 @@ export default class FilterManager extends WebGLManager {
      * @param {Filter} filter - The filter to draw.
      * @param {RenderTarget} input - The input render target.
      * @param {RenderTarget} output - The target to output to.
-     * @param {boolean} clear - Should the output be cleared before rendering to it
+     * @param {boolean} [clear=false] - Should the output be cleared before rendering to it
      */
     apply_filter(filter, input, output, clear) {
         const renderer = this.renderer;

@@ -2,9 +2,9 @@ import settings from 'engine/settings';
 import generate_blur_vert_source from './generate_blur_vert_source';
 import generate_blur_frag_source from './generate_blur_frag_source';
 import getMaxBlurKernelSize from './get_max_kernel_size';
-import Filter from 'engine/renderers/webgl/filters/Filter';
-import FilterManager from 'engine/renderers/webgl/managers/FilterManager';
-import RenderTarget from 'engine/renderers/webgl/utils/RenderTarget';
+import Filter from 'engine/renderers/filters/Filter';
+import FilterManager from 'engine/renderers/managers/FilterManager';
+import RenderTarget from 'engine/renderers/utils/RenderTarget';
 
 /**
  * The BlurXFilter applies a horizontal Gaussian blur to an object.

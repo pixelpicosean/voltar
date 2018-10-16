@@ -1,4 +1,4 @@
-import Filter from 'engine/renderers/webgl/filters/Filter';
+import Filter from 'engine/renderers/filters/Filter';
 
 /**
  *
