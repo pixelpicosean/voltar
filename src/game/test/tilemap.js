@@ -96,7 +96,6 @@ class Me extends v.PhysicsBody2D {
     }
 }
 
-
 export default class TilemapScene extends v.Node2D {
     static instance() {
         return new TilemapScene();
@@ -114,9 +113,8 @@ export default class TilemapScene extends v.Node2D {
             [1, 1, 1, 1, 1, 1, 1, 1],
         ];
 
-        const t = new v.BackgroundMap(64, 64, data, 'collisiontiles');
+        const t = this.add_child(new v.BackgroundMap(64, 64, data, 'collisiontiles'));
         t.scale.set(0.5);
-        this.add_child(t);
 
         const c = new v.CollisionMap(32, data);
         c.set_collision_layer_bit(SOLID, true);
@@ -126,7 +124,4 @@ export default class TilemapScene extends v.Node2D {
         this.s.position.set(128, 64);
         this.add_child(this.s);
     }
-    _ready() { }
-    _process(delta) { }
-    _exit_tree() { }
 }
