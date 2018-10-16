@@ -1,21 +1,16 @@
-import glCore from 'pixi-gl-core';
+import { GL } from 'engine/dep/index';
+import Shader from 'engine/Shader';
 
 /**
  * An object containing WebGL specific properties to be used by the WebGL renderer
- *
- * @class
- * @private
- * @memberof V
  */
-export default class WebGLGraphicsData
-{
+export default class WebGLGraphicsData {
     /**
      * @param {WebGLRenderingContext} gl - The current WebGL drawing context
-     * @param {V.Shader} shader - The shader
+     * @param {Shader} shader - The shader
      * @param {object} attribsState - The state for the VAO
      */
-    constructor(gl, shader, attribsState)
-    {
+    constructor(gl, shader, attribsState) {
         /**
          * The current WebGL drawing context
          *
@@ -32,7 +27,7 @@ export default class WebGLGraphicsData
 
         /**
          * An array of points to draw
-         * @member {V.Point[]}
+         * @member {Point[]}
          */
         this.points = [];
 
@@ -45,13 +40,13 @@ export default class WebGLGraphicsData
          * The main buffer
          * @member {WebGLBuffer}
          */
-        this.buffer = glCore.GLBuffer.createVertexBuffer(gl);
+        this.buffer = GL.GLBuffer.createVertexBuffer(gl);
 
         /**
          * The index buffer
          * @member {WebGLBuffer}
          */
-        this.index_buffer = glCore.GLBuffer.createIndexBuffer(gl);
+        this.index_buffer = GL.GLBuffer.createIndexBuffer(gl);
 
         /**
          * Whether this graphics is dirty or not
@@ -70,11 +65,11 @@ export default class WebGLGraphicsData
 
         /**
          *
-         * @member {V.Shader}
+         * @member {Shader}
          */
         this.shader = shader;
 
-        this.vao = new glCore.VertexArrayObject(gl, attribsState)
+        this.vao = new GL.VertexArrayObject(gl, attribsState)
             .addIndex(this.index_buffer)
             .addAttribute(this.buffer, shader.attributes.aVertexPosition, gl.FLOAT, false, 4 * 6, 0)
             .addAttribute(this.buffer, shader.attributes.aColor, gl.FLOAT, false, 4 * 6, 2 * 4);
@@ -83,8 +78,7 @@ export default class WebGLGraphicsData
     /**
      * Resets the vertices and the indices
      */
-    reset()
-    {
+    reset() {
         this.points.length = 0;
         this.indices.length = 0;
     }
@@ -92,8 +86,7 @@ export default class WebGLGraphicsData
     /**
      * Binds the buffers and uploads the data
      */
-    upload()
-    {
+    upload() {
         this.glPoints = new Float32Array(this.points);
         this.buffer.upload(this.glPoints);
 
@@ -106,8 +99,7 @@ export default class WebGLGraphicsData
     /**
      * Empties all the data
      */
-    destroy()
-    {
+    destroy() {
         this.color = null;
         this.points = null;
         this.indices = null;

@@ -41,7 +41,7 @@ export default class TilingSpriteRenderer extends ObjectRenderer {
             require('./tilingSprite.vert'),
             require('./tilingSprite_simple.frag'));
 
-        this.renderer.bindVao(null);
+        this.renderer.bind_vao(null);
         this.quad = new Quad(gl, this.renderer.state.attribState);
         this.quad.initVao(this.shader);
     }
@@ -54,7 +54,7 @@ export default class TilingSpriteRenderer extends ObjectRenderer {
         const renderer = this.renderer;
         const quad = this.quad;
 
-        renderer.bindVao(quad.vao);
+        renderer.bind_vao(quad.vao);
 
         let vertices = quad.vertices;
 
@@ -97,7 +97,7 @@ export default class TilingSpriteRenderer extends ObjectRenderer {
 
         const shader = isSimple ? this.simpleShader : this.shader;
 
-        renderer.bindShader(shader);
+        renderer.bind_shader(shader);
 
         const w = tex.width;
         const h = tex.height;

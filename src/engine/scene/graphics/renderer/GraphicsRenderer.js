@@ -5,10 +5,11 @@ import WebGLRenderer from 'engine/renderers/WebGLRenderer';
 import WebGLGraphicsData from './WebGLGraphicsData';
 import PrimitiveShader from './shaders/PrimitiveShader';
 
-import buildPoly from './utils/buildPoly';
-import buildRectangle from './utils/buildRectangle';
-import buildRoundedRectangle from './utils/buildRoundedRectangle';
-import buildCircle from './utils/buildCircle';
+import build_poly from './utils/build_poly';
+import build_rectangle from './utils/build_rectangle';
+import build_rounded_rectangle from './utils/build_rounded_rectangle';
+import build_circle from './utils/build_circle';
+import Graphics from '../Graphics';
 
 /**
  * Renders the graphics object.
@@ -20,9 +21,9 @@ export default class GraphicsRenderer extends ObjectRenderer {
     constructor(renderer) {
         super(renderer);
 
-        this.graphics_dataPool = [];
+        this.graphics_data_pool = [];
 
-        this.primitiveShader = null;
+        this.primitive_shader = null;
 
         this.gl = renderer.gl;
 
@@ -38,7 +39,7 @@ export default class GraphicsRenderer extends ObjectRenderer {
     on_context_change() {
         this.gl = this.renderer.gl;
         this.CONTEXT_UID = this.renderer.CONTEXT_UID;
-        this.primitiveShader = new PrimitiveShader(this.gl);
+        this.primitive_shader = new PrimitiveShader(this.gl);
     }
 
     /**
@@ -47,11 +48,11 @@ export default class GraphicsRenderer extends ObjectRenderer {
     destroy() {
         ObjectRenderer.prototype.destroy.call(this);
 
-        for (let i = 0; i < this.graphics_dataPool.length; ++i) {
-            this.graphics_dataPool[i].destroy();
+        for (let i = 0; i < this.graphics_data_pool.length; ++i) {
+            this.graphics_data_pool[i].destroy();
         }
 
-        this.graphics_dataPool = null;
+        this.graphics_data_pool = null;
     }
 
     /**
@@ -63,37 +64,37 @@ export default class GraphicsRenderer extends ObjectRenderer {
         const renderer = this.renderer;
         const gl = renderer.gl;
 
-        let webGLData;
-        let webGL = graphics._webGL[this.CONTEXT_UID];
+        let webgl_data;
+        let webgl = graphics._webgl[this.CONTEXT_UID];
 
-        if (!webGL || graphics.dirty !== webGL.dirty) {
-            this.updateGraphics(graphics);
+        if (!webgl || graphics.dirty !== webgl.dirty) {
+            this.update_graphics(graphics);
 
-            webGL = graphics._webGL[this.CONTEXT_UID];
+            webgl = graphics._webgl[this.CONTEXT_UID];
         }
 
         // This  could be speeded up for sure!
-        const shader = this.primitiveShader;
+        const shader = this.primitive_shader;
 
-        renderer.bindShader(shader);
+        renderer.bind_shader(shader);
         renderer.state.setBlendMode(graphics.blend_mode);
 
-        for (let i = 0, n = webGL.data.length; i < n; i++) {
-            webGLData = webGL.data[i];
-            const shaderTemp = webGLData.shader;
+        for (let i = 0, n = webgl.data.length; i < n; i++) {
+            webgl_data = webgl.data[i];
+            const shader_temp = webgl_data.shader;
 
-            renderer.bindShader(shaderTemp);
-            shaderTemp.uniforms.translationMatrix = graphics.transform.world_transform.to_array(true);
-            shaderTemp.uniforms.tint = hex2rgb(graphics.tint);
-            shaderTemp.uniforms.alpha = graphics.world_alpha;
+            renderer.bind_shader(shader_temp);
+            shader_temp.uniforms.translationMatrix = graphics.transform.world_transform.to_array(true);
+            shader_temp.uniforms.tint = hex2rgb(graphics.tint);
+            shader_temp.uniforms.alpha = graphics.world_alpha;
 
-            renderer.bindVao(webGLData.vao);
+            renderer.bind_vao(webgl_data.vao);
 
-            if (webGLData.native_lines) {
-                gl.drawArrays(gl.LINES, 0, webGLData.points.length / 6);
+            if (webgl_data.native_lines) {
+                gl.drawArrays(gl.LINES, 0, webgl_data.points.length / 6);
             }
             else {
-                webGLData.vao.draw(gl.TRIANGLE_STRIP, webGLData.indices.length);
+                webgl_data.vao.draw(gl.TRIANGLE_STRIP, webgl_data.indices.length);
             }
         }
     }
@@ -104,75 +105,75 @@ export default class GraphicsRenderer extends ObjectRenderer {
      * @private
      * @param {Graphics} graphics - The graphics object to update
      */
-    updateGraphics(graphics) {
+    update_graphics(graphics) {
         const gl = this.renderer.gl;
 
         // get the contexts graphics object
-        let webGL = graphics._webGL[this.CONTEXT_UID];
+        let webgl = graphics._webgl[this.CONTEXT_UID];
 
         // if the graphics object does not exist in the webGL context time to create it!
-        if (!webGL) {
-            webGL = graphics._webGL[this.CONTEXT_UID] = { lastIndex: 0, data: [], gl, clear_dirty: -1, dirty: -1 };
+        if (!webgl) {
+            webgl = graphics._webgl[this.CONTEXT_UID] = { lastIndex: 0, data: [], gl, clear_dirty: -1, dirty: -1 };
         }
 
         // flag the graphics as not dirty as we are about to update it...
-        webGL.dirty = graphics.dirty;
+        webgl.dirty = graphics.dirty;
 
         // if the user cleared the graphics object we will need to clear every object
-        if (graphics.clear_dirty !== webGL.clear_dirty) {
-            webGL.clear_dirty = graphics.clear_dirty;
+        if (graphics.clear_dirty !== webgl.clear_dirty) {
+            webgl.clear_dirty = graphics.clear_dirty;
 
             // loop through and return all the webGLDatas to the object pool so than can be reused later on
-            for (let i = 0; i < webGL.data.length; i++) {
-                this.graphics_dataPool.push(webGL.data[i]);
+            for (let i = 0; i < webgl.data.length; i++) {
+                this.graphics_data_pool.push(webgl.data[i]);
             }
 
             // clear the array and reset the index..
-            webGL.data.length = 0;
-            webGL.lastIndex = 0;
+            webgl.data.length = 0;
+            webgl.lastIndex = 0;
         }
 
-        let webGLData;
-        let webGLDataNativeLines;
+        let webgl_data;
+        let webgl_data_native_lines;
 
         // loop through the graphics datas and construct each one..
         // if the object is a complex fill then the new stencil buffer technique will be used
         // other wise graphics objects will be pushed into a batch..
-        for (let i = webGL.lastIndex; i < graphics.graphics_data.length; i++) {
+        for (let i = webgl.lastIndex; i < graphics.graphics_data.length; i++) {
             const data = graphics.graphics_data[i];
 
             // TODO - this can be simplified
-            webGLData = this.getWebGLData(webGL, 0);
+            webgl_data = this.get_webgl_data(webgl, 0);
 
             if (data.native_lines && data.line_width) {
-                webGLDataNativeLines = this.getWebGLData(webGL, 0, true);
-                webGL.lastIndex++;
+                webgl_data_native_lines = this.get_webgl_data(webgl, 0, true);
+                webgl.lastIndex++;
             }
 
             if (data.type === SHAPES.POLY) {
-                buildPoly(data, webGLData, webGLDataNativeLines);
+                build_poly(data, webgl_data, webgl_data_native_lines);
             }
             if (data.type === SHAPES.RECT) {
-                buildRectangle(data, webGLData, webGLDataNativeLines);
+                build_rectangle(data, webgl_data, webgl_data_native_lines);
             }
             else if (data.type === SHAPES.CIRC || data.type === SHAPES.ELIP) {
-                buildCircle(data, webGLData, webGLDataNativeLines);
+                build_circle(data, webgl_data, webgl_data_native_lines);
             }
             else if (data.type === SHAPES.RREC) {
-                buildRoundedRectangle(data, webGLData, webGLDataNativeLines);
+                build_rounded_rectangle(data, webgl_data, webgl_data_native_lines);
             }
 
-            webGL.lastIndex++;
+            webgl.lastIndex++;
         }
 
-        this.renderer.bindVao(null);
+        this.renderer.bind_vao(null);
 
         // upload all the dirty data...
-        for (let i = 0; i < webGL.data.length; i++) {
-            webGLData = webGL.data[i];
+        for (let i = 0; i < webgl.data.length; i++) {
+            webgl_data = webgl.data[i];
 
-            if (webGLData.dirty) {
-                webGLData.upload();
+            if (webgl_data.dirty) {
+                webgl_data.upload();
             }
         }
     }
@@ -182,15 +183,15 @@ export default class GraphicsRenderer extends ObjectRenderer {
      * @private
      * @param {WebGLRenderingContext} gl - the current WebGL drawing context
      * @param {number} type - TODO @Alvin
-     * @param {number} native_lines - indicate whether the webGLData use for native_lines.
+     * @param {boolean} [native_lines=false] - indicate whether the webGLData use for native_lines.
      * @return {*} TODO
      */
-    getWebGLData(gl, type, native_lines) {
+    get_webgl_data(gl, type, native_lines) {
         let webGLData = gl.data[gl.data.length - 1];
 
         if (!webGLData || webGLData.native_lines !== native_lines || webGLData.points.length > 320000) {
-            webGLData = this.graphics_dataPool.pop()
-                || new WebGLGraphicsData(this.renderer.gl, this.primitiveShader, this.renderer.state.attribsState);
+            webGLData = this.graphics_data_pool.pop()
+                || new WebGLGraphicsData(this.renderer.gl, this.primitive_shader, this.renderer.state.attribsState);
             webGLData.native_lines = native_lines;
             webGLData.reset(type);
             gl.data.push(webGLData);

@@ -118,7 +118,7 @@ export default class Graphics extends Node2D {
          * @private
          */
         // TODO - _webgl should use a prototype object, not a random undocumented object...
-        this._webGL = {};
+        this._webgl = {};
 
         /**
          * Whether this shape is being used as a mask.
@@ -1258,9 +1258,9 @@ export default class Graphics extends Node2D {
         }
 
         // for each webgl data entry, destroy the WebGLGraphicsData
-        for (const id in this._webGL) {
-            for (let j = 0; j < this._webGL[id].data.length; ++j) {
-                this._webGL[id].data[j].destroy();
+        for (const id in this._webgl) {
+            for (let j = 0; j < this._webgl[id].data.length; ++j) {
+                this._webgl[id].data[j].destroy();
             }
         }
 
@@ -1271,7 +1271,7 @@ export default class Graphics extends Node2D {
         this.graphics_data = null;
 
         this.current_path = null;
-        this._webGL = null;
+        this._webgl = null;
         this._localBounds = null;
     }
 

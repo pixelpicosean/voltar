@@ -226,7 +226,7 @@ export default class WebGLRenderer extends SystemRenderer {
         this.rootRenderTarget = new RenderTarget(gl, this.width, this.height, null, this.resolution, true);
         this.rootRenderTarget.clearColor = this._background_colorRgba;
 
-        this.bindRenderTarget(this.rootRenderTarget);
+        this.bind_render_target(this.rootRenderTarget);
 
         // now lets fill up the textures with empty ones!
         const emptyGLTexture = GL.GLTexture.fromData(gl, null, 1, 1);
@@ -430,7 +430,7 @@ export default class WebGLRenderer extends SystemRenderer {
         }
 
         render_target.transform = transform;
-        this.bindRenderTarget(render_target);
+        this.bind_render_target(render_target);
 
         return this;
     }
@@ -441,7 +441,7 @@ export default class WebGLRenderer extends SystemRenderer {
      * @param {RenderTarget} render_target - the new render target
      * @return {WebGLRenderer} Returns itself.
      */
-    bindRenderTarget(render_target) {
+    bind_render_target(render_target) {
         if (render_target !== this._active_render_target) {
             this._active_render_target = render_target;
             render_target.activate();
@@ -463,7 +463,7 @@ export default class WebGLRenderer extends SystemRenderer {
      * @param {boolean} [autoProject=true] - Whether automatically set the projection matrix
      * @return {WebGLRenderer} Returns itself.
      */
-    bindShader(shader, autoProject) {
+    bind_shader(shader, autoProject) {
         // TODO cache
         if (this._activeShader !== shader) {
             this._activeShader = shader;
@@ -573,7 +573,7 @@ export default class WebGLRenderer extends SystemRenderer {
      * @param {VertexArrayObject} vao - the new Vao
      * @return {WebGLRenderer} Returns itself.
      */
-    bindVao(vao) {
+    bind_vao(vao) {
         if (this._activeVao === vao) {
             return this;
         }
@@ -599,7 +599,7 @@ export default class WebGLRenderer extends SystemRenderer {
     reset() {
         this.set_object_renderer(this.empty_renderer);
 
-        this.bindVao(null);
+        this.bind_vao(null);
         this._activeShader = null;
         this._active_render_target = this.rootRenderTarget;
 

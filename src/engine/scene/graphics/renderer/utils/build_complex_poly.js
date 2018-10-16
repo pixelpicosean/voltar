@@ -1,31 +1,27 @@
-import { hex2rgb } from '../../../../utils';
+import { hex2rgb } from 'engine/utils/index';
 
 /**
  * Builds a complex polygon to draw
  *
  * Ignored from docs since it is not directly exposed.
  *
- * @ignore
- * @private
- * @param {V.Graphics} graphics_data - The graphics object containing all the necessary properties
- * @param {object} webGLData - an object containing all the webGL-specific information to create this shape
+ * @param {import('engine/index').Graphics} graphics_data - The graphics object containing all the necessary properties
+ * @param {object} webgl_data - an object containing all the webGL-specific information to create this shape
  */
-export default function buildComplexPoly(graphics_data, webGLData)
-{
+export default function build_complex_poly(graphics_data, webgl_data) {
     // TODO - no need to copy this as it gets turned into a Float32Array anyways..
     const points = graphics_data.points.slice();
 
-    if (points.length < 6)
-    {
+    if (points.length < 6) {
         return;
     }
 
     // get first and last point.. figure out the middle!
-    const indices = webGLData.indices;
+    const indices = webgl_data.indices;
 
-    webGLData.points = points;
-    webGLData.alpha = graphics_data.fill_alpha;
-    webGLData.color = hex2rgb(graphics_data.fillColor);
+    webgl_data.points = points;
+    webgl_data.alpha = graphics_data.fill_alpha;
+    webgl_data.color = hex2rgb(graphics_data.fillColor);
 
     // calculate the bounds..
     let min_x = Infinity;
@@ -38,8 +34,7 @@ export default function buildComplexPoly(graphics_data, webGLData)
     let y = 0;
 
     // get size..
-    for (let i = 0; i < points.length; i += 2)
-    {
+    for (let i = 0; i < points.length; i += 2) {
         x = points[i];
         y = points[i + 1];
 
@@ -61,8 +56,7 @@ export default function buildComplexPoly(graphics_data, webGLData)
     // TODO - this aint needed!
     const length = points.length / 2;
 
-    for (let i = 0; i < length; i++)
-    {
+    for (let i = 0; i < length; i++) {
         indices.push(i);
     }
 }

@@ -112,7 +112,7 @@ export default class SpriteRenderer extends ObjectRenderer {
         // we use the second shader as the first one depending on your browser may omit aTextureId
         // as it is not used by the shader so is optimized out.
 
-        this.renderer.bindVao(null);
+        this.renderer.bind_vao(null);
 
         const attrs = this.shader.attributes;
 
@@ -387,7 +387,7 @@ export default class SpriteRenderer extends ObjectRenderer {
                 this.vaos[this.vertexCount] = vao;
             }
 
-            this.renderer.bindVao(this.vaos[this.vertexCount]);
+            this.renderer.bind_vao(this.vaos[this.vertexCount]);
 
             this.vertexBuffers[this.vertexCount].upload(buffer.vertices, 0, false);
 
@@ -434,11 +434,11 @@ export default class SpriteRenderer extends ObjectRenderer {
      * Starts a new sprite batch.
      */
     start() {
-        this.renderer.bindShader(this.shader);
+        this.renderer.bind_shader(this.shader);
 
         if (settings.CAN_UPLOAD_SAME_BUFFER) {
             // bind buffer #0, we don't need others
-            this.renderer.bindVao(this.vaos[this.vertexCount]);
+            this.renderer.bind_vao(this.vaos[this.vertexCount]);
 
             this.vertexBuffers[this.vertexCount].bind();
         }
