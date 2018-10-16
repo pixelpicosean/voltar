@@ -6,8 +6,11 @@ import bitmap_font_parser from './bitmap_font_parser';
 import { loader_use_procs } from 'engine/registry';
 loader_use_procs.push(bitmap_font_parser);
 
-// Renderer
+// Register to global node class map
+import { node_class_map } from 'engine/registry';
 
-// Class
-export { default as BitmapText } from './BitmapText';
-export { default as Text } from './Text';
+import Text from './Text';
+import BitmapText from './BitmapText';
+
+node_class_map['Text'] = Text;
+node_class_map['BitmapText'] = BitmapText;
