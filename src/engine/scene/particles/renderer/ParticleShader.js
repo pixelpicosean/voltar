@@ -1,16 +1,10 @@
-import Shader from '../../../Shader';
+import Shader from 'engine/Shader';
 
-/**
- * @class
- * @extends Shader
- */
-export default class ParticleShader extends Shader
-{
+export default class ParticleShader extends Shader {
     /**
-     * @param {Shader} gl - The webgl shader manager this shader works for.
+     * @param {WebGLRenderingContext} gl
      */
-    constructor(gl)
-    {
+    constructor(gl) {
         super(
             gl,
             // vertex shader
@@ -41,7 +35,7 @@ export default class ParticleShader extends Shader
                 '   vColor = aColor * uColor;',
                 '}',
             ].join('\n'),
-            // hello
+            // fragment shader
             [
                 'varying vec2 vTextureCoord;',
                 'varying vec4 vColor;',

@@ -1,11 +1,15 @@
-import ObjectRenderer from '../../../renderers/webgl/utils/ObjectRenderer';
-import WebGLRenderer from '../../../renderers/WebGLRenderer';
-import { premultiply_tint } from '../../../utils/index';
-import { Matrix } from '../../../math/index';
+import ObjectRenderer from 'engine/renderers/utils/ObjectRenderer';
+import WebGLRenderer from 'engine/renderers/WebGLRenderer';
+import {
+    premultiply_tint,
+    correct_blend_mode,
+    premultiply_rgba,
+} from 'engine/utils/index';
+import { Matrix } from 'engine/math/index';
 import ParticleShader from './ParticleShader';
 import ParticleBuffer from './ParticleBuffer';
 import ParticleNode2D from '../ParticleNode2D';
-
+import Sprite from 'engine/scene/sprites/Sprite';
 
 /**
  * @author Mat Groves
@@ -106,7 +110,7 @@ export default class ParticleRenderer extends ObjectRenderer {
      *
      */
     start() {
-        this.renderer.bindShader(this.shader);
+        this.renderer.bind_shader(this.shader);
     }
 
     /**
@@ -137,17 +141,17 @@ export default class ParticleRenderer extends ObjectRenderer {
         const base_texture = children[0]._texture.base_texture;
 
         // if the uvs have not updated then no point rendering just yet!
-        this.renderer.setBlendMode(utils.correct_blend_mode(container.blend_mode, base_texture.premultiplied_alpha));
+        this.renderer.setBlendMode(correct_blend_mode(container.blend_mode, base_texture.premultiplied_alpha));
 
         const gl = renderer.gl;
 
         const m = container.world_transform.copy(this.temp_matrix);
 
-        m.prepend(renderer._active_render_target.projectionMatrix);
+        m.prepend(renderer._active_render_target.projection_matrix);
 
         this.shader.uniforms.projectionMatrix = m.to_array(true);
 
-        this.shader.uniforms.uColor = utils.premultiply_rgba(container.tint_rgb,
+        this.shader.uniforms.uColor = premultiply_rgba(container.tint_rgb,
             container.world_alpha, this.shader.uniforms.uColor, base_texture.premultiplied_alpha);
 
         // make sure the texture is bound..
@@ -164,7 +168,7 @@ export default class ParticleRenderer extends ObjectRenderer {
             }
 
             if (j >= buffers.length) {
-                if (!container.autoResize) {
+                if (!container.auto_resize) {
                     break;
                 }
                 buffers.push(this._generate_one_more_buffer(container));
@@ -185,7 +189,7 @@ export default class ParticleRenderer extends ObjectRenderer {
             }
 
             // bind the buffer
-            renderer.bindVao(buffer.vao);
+            renderer.bind_vao(buffer.vao);
             buffer.vao.draw(gl.TRIANGLES, amount * 6);
         }
     }
@@ -228,7 +232,7 @@ export default class ParticleRenderer extends ObjectRenderer {
     /**
      * Uploads the verticies.
      *
-     * @param {Node2D[]} children - the array of display objects to render
+     * @param {Sprite[]} children - the array of display objects to render
      * @param {number} startIndex - the index to start from in the children array
      * @param {number} amount - the amount of children that will have their vertices uploaded
      * @param {number[]} array - The vertices to upload.
@@ -284,7 +288,7 @@ export default class ParticleRenderer extends ObjectRenderer {
 
     /**
      *
-     * @param {Node2D[]} children - the array of display objects to render
+     * @param {Sprite[]} children - the array of display objects to render
      * @param {number} startIndex - the index to start from in the children array
      * @param {number} amount - the amount of children that will have their positions uploaded
      * @param {number[]} array - The vertices to upload.
@@ -313,7 +317,7 @@ export default class ParticleRenderer extends ObjectRenderer {
 
     /**
      *
-     * @param {Node2D[]} children - the array of display objects to render
+     * @param {Sprite[]} children - the array of display objects to render
      * @param {number} startIndex - the index to start from in the children array
      * @param {number} amount - the amount of children that will have their rotation uploaded
      * @param {number[]} array - The vertices to upload.
@@ -335,7 +339,7 @@ export default class ParticleRenderer extends ObjectRenderer {
 
     /**
      *
-     * @param {Node2D[]} children - the array of display objects to render
+     * @param {Sprite[]} children - the array of display objects to render
      * @param {number} startIndex - the index to start from in the children array
      * @param {number} amount - the amount of children that will have their rotation uploaded
      * @param {number[]} array - The vertices to upload.
@@ -382,7 +386,7 @@ export default class ParticleRenderer extends ObjectRenderer {
 
     /**
      *
-     * @param {Node2D[]} children - the array of display objects to render
+     * @param {Sprite[]} children - the array of display objects to render
      * @param {number} startIndex - the index to start from in the children array
      * @param {number} amount - the amount of children that will have their rotation uploaded
      * @param {number[]} array - The vertices to upload.
@@ -425,5 +429,3 @@ export default class ParticleRenderer extends ObjectRenderer {
     }
 
 }
-
-WebGLRenderer.register_plugin('particle', ParticleRenderer);

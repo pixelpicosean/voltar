@@ -1,8 +1,7 @@
-import Node2D from '../Node2D';
-import { BLEND_MODES } from '../../const';
-import { hex2rgb } from '../../utils/index';
+import { BLEND_MODES } from 'engine/const';
+import { hex2rgb } from 'engine/utils/index';
 
-import './webgl/ParticleRenderer';
+import Node2D from '../Node2D';
 
 /**
  * The ParticleNode2D class is a really fast version of the Node2D built solely for speed,
@@ -24,12 +23,8 @@ import './webgl/ParticleRenderer';
  * ```
  *
  * And here you have a hundred sprites that will be renderer at the speed of light.
- *
- * @class
- * @extends Node2D
  */
-export default class ParticleNode2D extends Node2D
-{
+export default class ParticleNode2D extends Node2D {
     /**
      * @param {number} [maxSize=1500] - The maximum number of particles that can be renderer by the container.
      * @param {object} [properties] - The properties of children that should be uploaded to the gpu and applied.
@@ -42,24 +37,26 @@ export default class ParticleNode2D extends Node2D
      * @param {boolean} [auto_resize=false] If true, container allocates more batches in case
      *  there are more than `maxSize` particles.
      */
-    constructor(maxSize = 1500, properties, batch_size = 16384, auto_resize = false)
-    {
+    constructor(maxSize = 1500, properties, batch_size = 16384, auto_resize = false) {
         super();
 
         this.type = 'ParticleNode2D';
+
+        /**
+         * @type {Array<import('engine/index').Sprite>}
+         */
+        this.children;
 
         // Making sure the batch size is valid
         // 65535 is max vertex index in the index buffer (see ParticleRenderer)
         // so max number of particles is 65536 / 4 = 16384
         const maxBatchSize = 16384;
 
-        if (batch_size > maxBatchSize)
-        {
+        if (batch_size > maxBatchSize) {
             batch_size = maxBatchSize;
         }
 
-        if (batch_size > maxSize)
-        {
+        if (batch_size > maxSize) {
             batch_size = maxSize;
         }
 
@@ -105,7 +102,6 @@ export default class ParticleNode2D extends Node2D
 
         /**
          * @member {boolean}
-         *
          */
         this.interactive_children = false;
 
@@ -163,10 +159,8 @@ export default class ParticleNode2D extends Node2D
      *
      * @param {object} properties - The properties to be uploaded
      */
-    set_properties(properties)
-    {
-        if (properties)
-        {
+    set_properties(properties) {
+        if (properties) {
             this._properties[0] = 'vertices' in properties || 'scale' in properties ? !!properties.vertices || !!properties.scale : this._properties[0];
             this._properties[1] = 'position' in properties ? !!properties.position : this._properties[1];
             this._properties[2] = 'rotation' in properties ? !!properties.rotation : this._properties[2];
@@ -181,8 +175,7 @@ export default class ParticleNode2D extends Node2D
      *
      * @private
      */
-    update_transform()
-    {
+    update_transform() {
         // TODO don't need to!
         this.node2d_update_transform();
         //  Node2D.prototype.update_transform.call( this );
@@ -195,8 +188,7 @@ export default class ParticleNode2D extends Node2D
      * @member {number}
      * @default 0xFFFFFF
      */
-    get tint()
-    {
+    get tint() {
         return this._tint;
     }
 
@@ -210,20 +202,16 @@ export default class ParticleNode2D extends Node2D
      * Renders the container using the WebGL renderer
      *
      * @private
-     * @param {WebGLRenderer} renderer - The webgl renderer
+     * @param {import('engine/renderers/WebGLRenderer').default} renderer - The webgl renderer
      */
-    render_webgl(renderer)
-    {
-        if (!this.visible || this.world_alpha <= 0 || !this.children.length || !this.renderable)
-        {
+    render_webgl(renderer) {
+        if (!this.visible || this.world_alpha <= 0 || !this.children.length || !this.renderable) {
             return;
         }
 
-        if (!this.base_texture)
-        {
+        if (!this.base_texture) {
             this.base_texture = this.children[0]._texture.base_texture;
-            if (!this.base_texture.has_loaded)
-            {
+            if (!this.base_texture.has_loaded) {
                 this.base_texture.once('update', () => this.on_children_change(0));
             }
         }
@@ -238,8 +226,7 @@ export default class ParticleNode2D extends Node2D
      * @private
      * @param {number} smallestChildIndex - The smallest child index
      */
-    on_children_change(smallestChildIndex)
-    {
+    on_children_change(smallestChildIndex) {
         const bufferIndex = Math.floor(smallestChildIndex / this._batchSize);
 
         while (this._buffer_update_ids.length < bufferIndex) {
@@ -249,147 +236,13 @@ export default class ParticleNode2D extends Node2D
     }
 
     /**
-     * Renders the object using the Canvas renderer
-     *
-     * @private
-     * @param {CanvasRenderer} renderer - The canvas renderer
-     */
-    render_canvas(renderer)
-    {
-        if (!this.visible || this.world_alpha <= 0 || !this.children.length || !this.renderable)
-        {
-            return;
-        }
-
-        const context = renderer.context;
-        const transform = this.world_transform;
-        let isRotated = true;
-
-        let positionX = 0;
-        let positionY = 0;
-
-        let finalWidth = 0;
-        let finalHeight = 0;
-
-        renderer.setBlendMode(this.blend_mode);
-
-        context.globalAlpha = this.world_alpha;
-
-        this.displayObjectUpdateTransform();
-
-        for (let i = 0; i < this.children.length; ++i)
-        {
-            const child = this.children[i];
-
-            if (!child.visible)
-            {
-                continue;
-            }
-
-            const frame = child._texture.frame;
-
-            context.globalAlpha = this.world_alpha * child.alpha;
-
-            if (child.rotation % (Math.PI * 2) === 0)
-            {
-                // this is the fastest  way to optimise! - if rotation is 0 then we can avoid any kind of set_transform call
-                if (isRotated)
-                {
-                    context.setTransform(
-                        transform.a,
-                        transform.b,
-                        transform.c,
-                        transform.d,
-                        transform.tx * renderer.resolution,
-                        transform.ty * renderer.resolution
-                    );
-
-                    isRotated = false;
-                }
-
-                positionX = ((child.anchor.x) * (-frame.width * child.scale.x)) + child.position.x + 0.5;
-                positionY = ((child.anchor.y) * (-frame.height * child.scale.y)) + child.position.y + 0.5;
-
-                finalWidth = frame.width * child.scale.x;
-                finalHeight = frame.height * child.scale.y;
-            }
-            else
-            {
-                if (!isRotated)
-                {
-                    isRotated = true;
-                }
-
-                child.displayObjectUpdateTransform();
-
-                const childTransform = child.world_transform;
-
-                if (renderer.pixel_snap)
-                {
-                    context.setTransform(
-                        childTransform.a,
-                        childTransform.b,
-                        childTransform.c,
-                        childTransform.d,
-                        (childTransform.tx * renderer.resolution) | 0,
-                        (childTransform.ty * renderer.resolution) | 0
-                    );
-                }
-                else
-                {
-                    context.setTransform(
-                        childTransform.a,
-                        childTransform.b,
-                        childTransform.c,
-                        childTransform.d,
-                        childTransform.tx * renderer.resolution,
-                        childTransform.ty * renderer.resolution
-                    );
-                }
-
-                positionX = ((child.anchor.x) * (-frame.width)) + 0.5;
-                positionY = ((child.anchor.y) * (-frame.height)) + 0.5;
-
-                finalWidth = frame.width;
-                finalHeight = frame.height;
-            }
-
-            const resolution = child._texture.base_texture.resolution;
-
-            context.drawImage(
-                child._texture.base_texture.source,
-                frame.x * resolution,
-                frame.y * resolution,
-                frame.width * resolution,
-                frame.height * resolution,
-                positionX * renderer.resolution,
-                positionY * renderer.resolution,
-                finalWidth * renderer.resolution,
-                finalHeight * renderer.resolution
-            );
-        }
-    }
-
-    /**
      * Destroys the container
-     *
-     * @param {object|boolean} [options] - Options parameter. A boolean will act as if all options
-     *  have been set to that value
-     * @param {boolean} [options.children=false] - if set to true, all the children will have their
-     *  destroy method called as well. 'options' will be passed on to those calls.
-     * @param {boolean} [options.texture=false] - Only used for child Sprites if options.children is set to true
-     *  Should it destroy the texture of the child sprite
-     * @param {boolean} [options.base_texture=false] - Only used for child Sprites if options.children is set to true
-     *  Should it destroy the base texture of the child sprite
      */
-    destroy(options)
-    {
-        super.destroy(options);
+    destroy() {
+        super.destroy();
 
-        if (this._buffers)
-        {
-            for (let i = 0; i < this._buffers.length; ++i)
-            {
+        if (this._buffers) {
+            for (let i = 0; i < this._buffers.length; ++i) {
                 this._buffers[i].destroy();
             }
         }
