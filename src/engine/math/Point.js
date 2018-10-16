@@ -1,7 +1,7 @@
 export const EPSILON = 0.000001;
 
 /**
- * @type PointLike
+ * @typedef PointLike
  * @property {number} x
  * @property {number} y
  */
@@ -37,8 +37,14 @@ export default class Point {
      * @param {number} [y=0] - position of the point on the y axis
      */
     set(x, y) {
-        this.x = x || 0;
-        this.y = y || ((y !== 0) ? this.x : 0);
+        if (x === undefined) {
+            x = 0;
+        }
+        if (y === undefined) {
+            y = x;
+        }
+        this.x = x;
+        this.y = y;
         return this;
     }
     /**
@@ -56,7 +62,7 @@ export default class Point {
     /**
      * Clone self
      *
-     * @returns {PointLike}
+     * @returns {Point}
      */
     clone() {
         return new Point(this.x, this.y);
@@ -120,20 +126,40 @@ export default class Point {
     }
 
     /**
-     * @param {PointLike} b
+     * @param {PointLike|number} x
+     * @param {PointLike|number} [y]
      */
-    add(b) {
-        this.x += b.x;
-        this.y += b.y;
+    add(x, y) {
+        if (y === undefined) {
+            // @ts-ignore
+            this.x += x.x;
+            // @ts-ignore
+            this.y += x.y;
+        } else {
+            // @ts-ignore
+            this.x += x;
+            // @ts-ignore
+            this.y += y;
+        }
         return this;
     }
 
     /**
-     * @param {PointLike} b
+     * @param {PointLike|number} x
+     * @param {PointLike|number} [y]
      */
-    subtract(b) {
-        this.x -= b.x;
-        this.y -= b.y;
+    subtract(x, y) {
+        if (y === undefined) {
+            // @ts-ignore
+            this.x -= x.x;
+            // @ts-ignore
+            this.y -= x.y;
+        } else {
+            // @ts-ignore
+            this.x -= x;
+            // @ts-ignore
+            this.y -= y;
+        }
         return this;
     }
 
@@ -218,7 +244,8 @@ export default class Point {
     }
 
     /**
-     * @param {PointLike} b
+     * @param {number} b
+     * @returns {Point}
      */
     scale(b) {
         this.x *= b;
@@ -285,7 +312,7 @@ export default class Point {
     }
 
     /**
-     * @param {PointLike} other
+     * @param {Point} other
      * @returns {Point}
      */
     project(other) {
@@ -307,7 +334,7 @@ export default class Point {
     }
 
     /**
-     * @param {PointLike} axis
+     * @param {Point} axis
      * @returns {Point}
      */
     reflect(axis) {
@@ -331,7 +358,7 @@ export default class Point {
     }
 
     /**
-     * @param {PointLike} axis
+     * @param {Point} axis
      * @returns {Point}
      */
     bounce(axis) {
@@ -344,7 +371,7 @@ export default class Point {
     }
 
     /**
-     * @param {PointLike} n
+     * @param {Point} n
      * @returns {Point}
      */
     slide(n) {
