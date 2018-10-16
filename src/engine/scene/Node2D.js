@@ -392,7 +392,7 @@ export default class Node2D extends EventEmitter {
      * @param {boolean} skip_update - setting to true will stop the transforms of the scene graph from
      *  being updated. This means the calculation returned MAY be out of date BUT will give you a
      *  nice performance boost
-     * @param {Rectangle} rect - Optional rectangle to store the result of the bounds calculation
+     * @param {Rectangle} [rect] - Optional rectangle to store the result of the bounds calculation
      * @return {Rectangle} the rectangular bounding area
      */
     get_bounds(skip_update, rect) {

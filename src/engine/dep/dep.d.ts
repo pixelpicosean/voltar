@@ -213,7 +213,7 @@ declare module 'pixi-gl-core' {
     export function createContext(view: HTMLCanvasElement, options?: ContextOptions): WebGLRenderingContext;
     export function setVertexAttribArrays(gl: WebGLRenderingContext, attribs: Attrib[], state?: WebGLState): WebGLRenderingContext | undefined;
     export class GLBuffer {
-        constructor(gl: WebGLRenderingContext, type: number, data: ArrayBuffer | ArrayBufferView | any, drawType: number);
+        constructor(gl: WebGLRenderingContext, type: number, data?: ArrayBuffer | ArrayBufferView | any, drawType?: number);
 
         protected _updateID?: number;
         gl: WebGLRenderingContext;
@@ -225,8 +225,8 @@ declare module 'pixi-gl-core' {
         upload(data?: ArrayBuffer | ArrayBufferView | any, offset?: number, dontBind?: boolean): void;
         bind(): void;
 
-        static createVertexBuffer(gl: WebGLRenderingContext, data: ArrayBuffer | ArrayBufferView | any, drawType: number): GLBuffer;
-        static createIndexBuffer(gl: WebGLRenderingContext, data: ArrayBuffer | ArrayBufferView | any, drawType: number): GLBuffer;
+        static createVertexBuffer(gl: WebGLRenderingContext, data?: ArrayBuffer | ArrayBufferView | any, drawType?: number): GLBuffer;
+        static createIndexBuffer(gl: WebGLRenderingContext, data?: ArrayBuffer | ArrayBufferView | any, drawType?: number): GLBuffer;
         static create(gl: WebGLRenderingContext, type: number, data: ArrayBuffer | ArrayBufferView | any, drawType: number): GLBuffer;
 
         destroy(): void;
