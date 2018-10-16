@@ -1,5 +1,8 @@
 import Filter from 'engine/renderers/filters/Filter';
 
+import Vert from '../fragments/default.vert';
+import Frag from './alpha.frag';
+
 /**
  * Does nothing. Very handy.
  */
@@ -8,12 +11,7 @@ export default class Alpha extends Filter {
      * @param {number} [alpha=1] Amount of alpha from 0 to 1, where 0 is transparent
      */
     constructor(alpha = 1.0) {
-        super(
-            // vertex shader
-            require('../fragments/default.vert'),
-            // fragment shader
-            require('./alpha.frag')
-        );
+        super(Vert, Frag);
 
         this.alpha = alpha;
         this.glShaderKey = 'alpha';

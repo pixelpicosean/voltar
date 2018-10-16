@@ -4,6 +4,7 @@ import WebGLRenderer from '../WebGLRenderer';
 import Node2D from 'engine/scene/Node2D';
 import Sprite from 'engine/scene/sprites/Sprite';
 import Graphics from 'engine/scene/graphics/Graphics';
+import RenderTarget from '../utils/RenderTarget';
 
 export default class MaskManager extends WebGLManager {
     /**
@@ -27,22 +28,24 @@ export default class MaskManager extends WebGLManager {
      * Applies the Mask and adds it to the current filter stack.
      *
      * @param {Node2D} target - Display Object to push the mask to
-     * @param {Sprite|Graphics} maskData - The masking data.
+     * @param {Sprite|Graphics} mask_data - The masking data.
      */
-    push_mask(target, maskData) {
+    push_mask(target, mask_data) {
         // TODO the root check means scissor rect will not
         // be used on render textures more info here:
         // https://github.com/pixijs/pixi.js/pull/3545
 
-        if (maskData.texture) {
-            this.push_sprite_mask(target, maskData);
-        }
-        else if (this.enableScissor
+        // @ts-ignore
+        if (mask_data.texture) {
+            // @ts-ignore
+            this.push_sprite_mask(target, mask_data);
+        } else if (this.enableScissor
             && !this.scissor
             && this.renderer._active_render_target.root
             && !this.renderer.stencilManager.stencilMaskStack.length
-            && maskData.is_fast_rect()) {
-            const matrix = maskData.world_transform;
+            // @ts-ignore
+            && mask_data.is_fast_rect()) {
+            const matrix = mask_data.world_transform;
 
             let rot = Math.atan2(matrix.b, matrix.a);
 
@@ -50,14 +53,13 @@ export default class MaskManager extends WebGLManager {
             rot = Math.round(rot * (180 / Math.PI));
 
             if (rot % 90) {
-                this.push_stencil_mask(maskData);
+                this.push_stencil_mask(mask_data);
+            } else {
+                // @ts-ignore
+                this.push_scissor_mask(target, mask_data);
             }
-            else {
-                this.push_scissor_mask(target, maskData);
-            }
-        }
-        else {
-            this.push_stencil_mask(maskData);
+        } else {
+            this.push_stencil_mask(mask_data);
         }
     }
 
@@ -80,21 +82,22 @@ export default class MaskManager extends WebGLManager {
      * Applies the Mask and adds it to the current filter stack.
      *
      * @param {RenderTarget} target - Display Object to push the sprite mask to
-     * @param {Sprite} maskData - Sprite to be used as the mask
+     * @param {Sprite} mask_data - Sprite to be used as the mask
      */
-    push_sprite_mask(target, maskData) {
+    push_sprite_mask(target, mask_data) {
         let alphaMaskFilter = this.alphaMaskPool[this.alphaMaskIndex];
 
         if (!alphaMaskFilter) {
-            alphaMaskFilter = this.alphaMaskPool[this.alphaMaskIndex] = [new AlphaMaskFilter(maskData)];
+            alphaMaskFilter = this.alphaMaskPool[this.alphaMaskIndex] = [new AlphaMaskFilter(mask_data)];
         }
 
         alphaMaskFilter[0].resolution = this.renderer.resolution;
-        alphaMaskFilter[0].maskSprite = maskData;
+        alphaMaskFilter[0].maskSprite = mask_data;
 
         // TODO - may cause issues!
-        target.filter_area = maskData.get_bounds(true);
+        target.filter_area = mask_data.get_bounds(true);
 
+        // @ts-ignore
         this.renderer.filter_manager.push_filter(target, alphaMaskFilter);
 
         this.alphaMaskIndex++;
@@ -129,17 +132,17 @@ export default class MaskManager extends WebGLManager {
 
     /**
      * @param {Node2D} target - Display Object to push the mask to
-     * @param {Graphics} maskData - The masking data.
+     * @param {Graphics} mask_data - The masking data.
      */
-    push_scissor_mask(target, maskData) {
-        maskData.renderable = true;
+    push_scissor_mask(target, mask_data) {
+        mask_data.renderable = true;
 
         const render_target = this.renderer._active_render_target;
 
-        const bounds = maskData.get_bounds();
+        const bounds = mask_data.get_bounds();
 
         bounds.fit(render_target.size);
-        maskData.renderable = false;
+        mask_data.renderable = false;
 
         this.renderer.gl.enable(this.renderer.gl.SCISSOR_TEST);
 
@@ -153,7 +156,7 @@ export default class MaskManager extends WebGLManager {
         );
 
         this.scissorRenderTarget = render_target;
-        this.scissorData = maskData;
+        this.scissorData = mask_data;
         this.scissor = true;
     }
 

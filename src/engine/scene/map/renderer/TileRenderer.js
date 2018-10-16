@@ -1,32 +1,29 @@
-import ObjectRenderer from '../../../renderers/webgl/utils/ObjectRenderer';
+import ObjectRenderer from 'engine/renderers/utils/ObjectRenderer';
 
-import WebGLRenderer from '../../../renderers/WebGLRenderer';
-import RenderTexture from '../../../textures/RenderTexture';
+import RenderTexture from 'engine/textures/RenderTexture';
 import Sprite from '../../sprites/Sprite';
-import { WRAP_MODES, BLEND_MODES } from '../../../const';
+import { WRAP_MODES, BLEND_MODES } from 'engine/const';
 
-import { GLBuffer } from 'pixi-gl-core';
+import { GL } from 'engine/dep/index';
+const { GLBuffer } = GL;
 
 import RectTileShader from './RectTileShader';
 
 
-function _hackSubImage(tex, sprite, clearBuffer, clearWidth, clearHeight) {
+function hack_sub_image(tex, sprite, clear_buffer, clear_width, clear_height) {
     const gl = tex.gl;
-    const baseTex = sprite.texture.base_texture;
-    if (clearBuffer && clearWidth > 0 && clearHeight > 0)
-    {
-        gl.texSubImage2D(gl.TEXTURE_2D, 0, sprite.position.x, sprite.position.y, clearWidth, clearHeight, tex.format, tex.type, clearBuffer);
+    const base_tex = sprite.texture.base_texture;
+    if (clear_buffer && clear_width > 0 && clear_height > 0) {
+        gl.texSubImage2D(gl.TEXTURE_2D, 0, sprite.position.x, sprite.position.y, clear_width, clear_height, tex.format, tex.type, clear_buffer);
     }
     gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
-    gl.texSubImage2D(gl.TEXTURE_2D, 0, sprite.position.x, sprite.position.y, tex.format, tex.type, baseTex.source);
+    gl.texSubImage2D(gl.TEXTURE_2D, 0, sprite.position.x, sprite.position.y, tex.format, tex.type, base_tex.source);
 }
 
 /*
  * Renderer for square and rectangle tiles.
  * Squares cannot be rotated, skewed.
  *
- * @class
- * @extends ObjectRenderer
  * @param renderer {WebGLRenderer} The renderer this sprite batch works for.
  */
 
@@ -39,39 +36,38 @@ export default class TileRenderer extends ObjectRenderer {
         this.vbs = {};
         this.indices = new Uint16Array(0);
         this.index_buffer = null;
-        this._clearBuffer = null;
-        this.lastTimeCheck = 0;
-        this.tileAnim = [0, 0];
-        this.maxTextures = 4;
-        this.texLoc = [];
+        this.clear_buffer = null;
+        this.last_time_check = 0;
+        this.max_textures = 4;
+        this.tex_loc = [];
 
-        this.rectShader = null;
-        this.boundSprites = null;
-        this.glTextures = null;
+        this.rect_shader = null;
+        this.bound_sprites = null;
+        this.gl_textures = null;
     }
 
     on_context_change() {
         const gl = this.renderer.gl;
-        const maxTextures = this.maxTextures;
-        this.rectShader = new RectTileShader(gl, maxTextures);
-        this.checkIndexBuffer(2000);
-        this.rectShader.index_buffer = this.index_buffer;
+        const maxTextures = this.max_textures;
+        this.rect_shader = new RectTileShader(gl, maxTextures);
+        this.check_index_buffer(2000);
+        this.rect_shader.index_buffer = this.index_buffer;
         this.vbs = {};
-        this.glTextures = [];
-        this.boundSprites = [];
-        this.initBounds();
+        this.gl_textures = [];
+        this.bound_sprites = [];
+        this.init_bounds();
     }
 
-    initBounds() {
+    init_bounds() {
         const gl = this.renderer.gl;
-        for (let i = 0; i < this.maxTextures; i++) {
+        for (let i = 0; i < this.max_textures; i++) {
             const rt = RenderTexture.create(2048, 2048);
             rt.base_texture.premultiplied_alpha = true;
             rt.base_texture.wrap_mode = WRAP_MODES.CLAMP;
             this.renderer.texture_manager.update_texture(rt);
 
-            this.glTextures.push(rt);
-            const bounds = this.boundSprites;
+            this.gl_textures.push(rt);
+            const bounds = this.bound_sprites;
             for (let j = 0; j < 4; j++) {
                 const spr = new Sprite();
                 spr.position.x = 1024 * (j & 1);
@@ -81,18 +77,18 @@ export default class TileRenderer extends ObjectRenderer {
         }
     }
 
-    bindTextures(renderer, shader, textures) {
+    bind_textures(renderer, shader, textures) {
         const len = textures.length;
-        const maxTextures = this.maxTextures;
-        if (len > 4 * maxTextures) {
+        const max_textures = this.max_textures;
+        if (len > 4 * max_textures) {
             return;
         }
-        const doClear = TileRenderer.DO_CLEAR;
-        if (doClear && !this._clearBuffer) {
-            this._clearBuffer = new Uint8Array(1024 * 1024 * 4);
+        const do_clear = TileRenderer.DO_CLEAR;
+        if (do_clear && !this.clear_buffer) {
+            this.clear_buffer = new Uint8Array(1024 * 1024 * 4);
         }
-        const glts = this.glTextures;
-        const bounds = this.boundSprites;
+        const glts = this.gl_textures;
+        const bounds = this.bound_sprites;
 
         let i;
         for (i = 0; i < len; i++) {
@@ -104,31 +100,31 @@ export default class TileRenderer extends ObjectRenderer {
                 bs.texture = texture;
                 const glt = glts[i >> 2];
                 renderer.bind_texture(glt, 0, true);
-                if (doClear) {
-                    _hackSubImage((glt.base_texture)._gl_textures[renderer.CONTEXT_UID], bs, this._clearBuffer, 1024, 1024);
+                if (do_clear) {
+                    hack_sub_image((glt.base_texture)._gl_textures[renderer.CONTEXT_UID], bs, this.clear_buffer, 1024, 1024);
                 } else {
-                    _hackSubImage((glt.base_texture)._gl_textures[renderer.CONTEXT_UID], bs);
+                    hack_sub_image((glt.base_texture)._gl_textures[renderer.CONTEXT_UID], bs);
                 }
             }
         }
-        this.texLoc.length = 0;
-        for (i = 0; i < maxTextures; i++) {
+        this.tex_loc.length = 0;
+        for (i = 0; i < max_textures; i++) {
             //remove "i, true" after resolving a bug
-            this.texLoc.push(renderer.bind_texture(glts[i], i, true))
+            this.tex_loc.push(renderer.bind_texture(glts[i], i, true))
         }
-        shader.uniforms.uSamplers = this.texLoc;
+        shader.uniforms.uSamplers = this.tex_loc;
     }
 
-    checkLeaks() {
+    check_leaks() {
         const now = Date.now();
         const old = now - 10000;
-        if (this.lastTimeCheck < old ||
-            this.lastTimeCheck > now) {
-            this.lastTimeCheck = now;
+        if (this.last_time_check < old ||
+            this.last_time_check > now) {
+            this.last_time_check = now;
             const vbs = this.vbs;
             for (let key in vbs) {
-                if (vbs[key].lastTimeAccess < old) {
-                    this.removeVb(key);
+                if (vbs[key].last_time_access < old) {
+                    this.remove_vb(key);
                 }
             }
         }
@@ -139,8 +135,8 @@ export default class TileRenderer extends ObjectRenderer {
         //sorry, nothing
     }
 
-    getVb(id) {
-        this.checkLeaks();
+    get_vb(id) {
+        this.check_leaks();
         const vb = this.vbs[id];
         if (vb) {
             vb.lastAccessTime = Date.now();
@@ -149,23 +145,23 @@ export default class TileRenderer extends ObjectRenderer {
         return null;
     }
 
-    createVb() {
-        const id = ++TileRenderer.vbAutoincrement;
-        const shader = this.getShader();
+    create_vb() {
+        const id = ++TileRenderer.vb_auto_increment;
+        const shader = this.get_shader();
         const gl = this.renderer.gl;
         const vb = GLBuffer.createVertexBuffer(gl, null, gl.STREAM_DRAW);
         const stuff = {
             id: id,
             vb: vb,
             vao: shader.createVao(this.renderer, vb),
-            lastTimeAccess: Date.now(),
+            last_time_access: Date.now(),
             shader: shader
         };
         this.vbs[id] = stuff;
         return stuff;
     }
 
-    removeVb(id) {
+    remove_vb(id) {
         if (this.vbs[id]) {
             this.vbs[id].vb.destroy();
             this.vbs[id].vao.destroy();
@@ -173,15 +169,15 @@ export default class TileRenderer extends ObjectRenderer {
         }
     }
 
-    checkIndexBuffer(size) {
+    check_index_buffer(size) {
         // the total number of indices in our array, there are 6 points per quad.
-        const totalIndices = size * 6;
+        const total_indices = size * 6;
         let indices = this.indices;
-        if (totalIndices <= indices.length) {
+        if (total_indices <= indices.length) {
             return;
         }
-        let len = indices.length || totalIndices;
-        while (len < totalIndices) {
+        let len = indices.length || total_indices;
+        while (len < total_indices) {
             len <<= 1;
         }
 
@@ -206,18 +202,16 @@ export default class TileRenderer extends ObjectRenderer {
         }
     }
 
-    getShader() {
-        return this.rectShader;
+    get_shader() {
+        return this.rect_shader;
     }
 
     destroy() {
         super.destroy();
-        this.rectShader.destroy();
-        this.rectShader = null;
+        this.rect_shader.destroy();
+        this.rect_shader = null;
     }
 }
 
-TileRenderer.vbAutoincrement = 0;
+TileRenderer.vb_auto_increment = 0;
 TileRenderer.DO_CLEAR = false;
-
-WebGLRenderer.register_plugin('tilemap', TileRenderer);

@@ -1,26 +1,23 @@
 import TilemapShader from './TilemapShader';
 
-import { GLBuffer, VertexArrayObject } from 'pixi-gl-core';
+import { generate_fragment_src, fill_samplers } from './shader_gen';
 
-import { generateFragmentSrc, fillSamplers } from './shader_gen';
-
-import rectShaderVert from './rect.vert';
-import rectShaderFrag from './rect.frag';
-
+import rect_shader_vert from './rect.vert';
+import rect_shader_frag from './rect.frag';
 
 export default class RectTileShader extends TilemapShader {
-    constructor(gl, maxTextures) {
+    constructor(gl, max_textures) {
         super(gl,
-            maxTextures,
-            rectShaderVert,
-            generateFragmentSrc(maxTextures, rectShaderFrag)
+            max_textures,
+            rect_shader_vert,
+            generate_fragment_src(max_textures, rect_shader_frag)
         );
 
         this.vertSize = 9;
         this.vertPerQuad = 4;
         this.stride = this.vertSize * 4;
 
-        fillSamplers(this, this.maxTextures);
+        fill_samplers(this, this.max_textures);
     }
 
     createVao(renderer, vb) {

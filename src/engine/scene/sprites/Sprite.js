@@ -6,7 +6,7 @@ import Node2D from '../Node2D';
 
 import WebGLRenderer from 'engine/renderers/WebGLRenderer';
 
-const tempPoint = new Point();
+const temp_point = new Point();
 
 /**
  * The Sprite object is the base for all textured objects that are rendered to the screen
@@ -410,17 +410,17 @@ export default class Sprite extends Node2D {
      * @return {boolean} the result of the test
      */
     contains_point(point) {
-        this.world_transform.apply_inverse(point, tempPoint);
+        this.world_transform.apply_inverse(point, temp_point);
 
         const width = this._texture.orig.width;
         const height = this._texture.orig.height;
         const x1 = -width * this.anchor.x;
         let y1 = 0;
 
-        if (tempPoint.x >= x1 && tempPoint.x < x1 + width) {
+        if (temp_point.x >= x1 && temp_point.x < x1 + width) {
             y1 = -height * this.anchor.y;
 
-            if (tempPoint.y >= y1 && tempPoint.y < y1 + height) {
+            if (temp_point.y >= y1 && temp_point.y < y1 + height) {
                 return true;
             }
         }
@@ -430,16 +430,11 @@ export default class Sprite extends Node2D {
 
     /**
      * Destroys this sprite and optionally its texture and children
-     *
-     * @param {object|boolean} [options] - Options parameter. A boolean will act as if all options
+     * @param {DestroyOption|boolean} [options] - Options parameter. A boolean will act as if all options
      *  have been set to that value
-     * @param {boolean} [options.children=false] - if set to true, all the children will have their destroy
-     *      method called as well. 'options' will be passed on to those calls.
-     * @param {boolean} [options.texture=false] - Should it destroy the current texture of the sprite as well
-     * @param {boolean} [options.base_texture=false] - Should it destroy the base texture of the sprite as well
      */
     destroy(options) {
-        super.destroy(options);
+        super.destroy();
 
         this._texture.off('update', this._on_texture_update, this);
 

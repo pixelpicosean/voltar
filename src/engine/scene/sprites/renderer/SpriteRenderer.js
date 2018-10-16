@@ -2,7 +2,7 @@ import ObjectRenderer from 'engine/renderers/utils/ObjectRenderer';
 import WebGLRenderer from 'engine/renderers/WebGLRenderer';
 import create_indices_for_quads from 'engine/utils/create_indices_for_quads';
 import generateMultiTextureShader from './generateMultiTextureShader';
-import checkMaxIfStatmentsInShader from 'engine/renderers/utils/checkMaxIfStatmentsInShader';
+import check_max_if_statments_in_shader from 'engine/renderers/utils/check_max_if_statments_in_shader';
 import Buffer from './BatchBuffer';
 import settings from 'engine/settings';
 import { premultiply_blend_mode, premultiply_tint } from 'engine/utils/index';
@@ -101,7 +101,7 @@ export default class SpriteRenderer extends ObjectRenderer {
             this.MAX_TEXTURES = Math.min(gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS), settings.SPRITE_MAX_TEXTURES);
 
             // step 2: check the maximum number of if statements the shader can have too..
-            this.MAX_TEXTURES = checkMaxIfStatmentsInShader(this.MAX_TEXTURES, gl);
+            this.MAX_TEXTURES = check_max_if_statments_in_shader(this.MAX_TEXTURES, gl);
         }
 
         this.shader = generateMultiTextureShader(gl, this.MAX_TEXTURES);

@@ -8,7 +8,7 @@ import { Matrix, Rectangle } from 'engine/math/index';
  */
 // TODO playing around here.. this is temporary - (will end up in the shader)
 // this returns a matrix that will normalise map filter cords in the filter to screen space
-export function calculateScreenSpaceMatrix(output_matrix, filter_area, texture_size) {
+export function calculate_screen_space_matrix(output_matrix, filter_area, texture_size) {
     // let world_transform = sprite.world_transform.copy(Matrix.TEMP_MATRIX),
     // let texture = {width:1136, height:700};//sprite._texture.base_texture;
 
@@ -22,7 +22,7 @@ export function calculateScreenSpaceMatrix(output_matrix, filter_area, texture_s
     return mapped_matrix;
 }
 
-export function calculateNormalizedScreenSpaceMatrix(output_matrix, filter_area, texture_size) {
+export function calculate_normalized_screen_space_matrix(output_matrix, filter_area, texture_size) {
     const mapped_matrix = output_matrix.identity();
 
     mapped_matrix.translate(filter_area.x / texture_size.width, filter_area.y / texture_size.height);
@@ -36,7 +36,7 @@ export function calculateNormalizedScreenSpaceMatrix(output_matrix, filter_area,
 }
 
 // this will map the filter coord so that a texture can be used based on the transform of a sprite
-export function calculateSpriteMatrix(output_matrix, filter_area, texture_size, sprite) {
+export function calculate_sprite_matrix(output_matrix, filter_area, texture_size, sprite) {
     const orig = sprite._texture.orig;
     const mapped_matrix = output_matrix.set(texture_size.width, 0, 0, texture_size.height, filter_area.x, filter_area.y);
     const world_transform = sprite.world_transform.copy(Matrix.TEMP_MATRIX);

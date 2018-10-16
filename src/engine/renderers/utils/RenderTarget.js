@@ -30,7 +30,7 @@ export default class RenderTarget {
          *
          * @member {glCore.GLFramebuffer}
          */
-        this.frameBuffer = null;
+        this.frame_buffer = null;
 
         /**
          * The texture
@@ -66,7 +66,7 @@ export default class RenderTarget {
          *
          * @member {Matrix}
          */
-        this.projectionMatrix = new Matrix();
+        this.projection_matrix = new Matrix();
 
         /**
          * The object's transform
@@ -88,8 +88,8 @@ export default class RenderTarget {
          * @member {glCore.GLBuffer}
          */
         this.defaultFrame = new Rectangle();
-        this.destinationFrame = null;
-        this.sourceFrame = null;
+        this.destination_frame = null;
+        this.source_frame = null;
 
         /**
          * The stencil buffer stores masking data for the render target
@@ -111,6 +111,10 @@ export default class RenderTarget {
          * @member {object[]}
          */
         this.filterData = null;
+
+        this.filter_stack = null;
+
+        this.filter_area = null;
 
         /**
          * The key for pooled texture of FilterSystem
@@ -136,13 +140,13 @@ export default class RenderTarget {
         this.root = root;
 
         if (!this.root) {
-            this.frameBuffer = GLFramebuffer.createRGBA(gl, 100, 100);
+            this.frame_buffer = GLFramebuffer.createRGBA(gl, 100, 100);
 
             if (this.scale_mode === SCALE_MODES.NEAREST) {
-                this.frameBuffer.texture.enableNearestScaling();
+                this.frame_buffer.texture.enableNearestScaling();
             }
             else {
-                this.frameBuffer.texture.enableLinearScaling();
+                this.frame_buffer.texture.enableLinearScaling();
             }
             /*
                 A frame buffer needs a target to render to..
@@ -150,12 +154,12 @@ export default class RenderTarget {
              */
 
             // this is used by the base texture
-            this.texture = this.frameBuffer.texture;
+            this.texture = this.frame_buffer.texture;
         }
         else {
             // make it a null framebuffer..
-            this.frameBuffer = new GLFramebuffer(gl, 100, 100);
-            this.frameBuffer.framebuffer = null;
+            this.frame_buffer = new GLFramebuffer(gl, 100, 100);
+            this.frame_buffer.framebuffer = null;
         }
 
         this.set_frame();
@@ -171,7 +175,7 @@ export default class RenderTarget {
     clear(clearColor) {
         const cc = clearColor || this.clearColor;
 
-        this.frameBuffer.clear(cc[0], cc[1], cc[2], cc[3]);// r,g,b,a);
+        this.frame_buffer.clear(cc[0], cc[1], cc[2], cc[3]);// r,g,b,a);
     }
 
     /**
@@ -185,19 +189,19 @@ export default class RenderTarget {
          * lets create one and then add attach it to the framebuffer..
          */
         if (!this.root) {
-            this.frameBuffer.enableStencil();
+            this.frame_buffer.enableStencil();
         }
     }
 
     /**
      * Sets the frame of the render target.
      *
-     * @param {Rectangle} destinationFrame - The destination frame.
-     * @param {Rectangle} sourceFrame - The source frame.
+     * @param {Rectangle} [destination_frame] - The destination frame.
+     * @param {Rectangle} [source_frame] - The source frame.
      */
-    set_frame(destinationFrame, sourceFrame) {
-        this.destinationFrame = destinationFrame || this.destinationFrame || this.defaultFrame;
-        this.sourceFrame = sourceFrame || this.sourceFrame || this.destinationFrame;
+    set_frame(destination_frame, source_frame) {
+        this.destination_frame = destination_frame || this.destination_frame || this.defaultFrame;
+        this.source_frame = source_frame || this.source_frame || this.destination_frame;
     }
 
     /**
@@ -209,22 +213,22 @@ export default class RenderTarget {
         const gl = this.gl;
 
         // make sure the texture is unbound!
-        this.frameBuffer.bind();
+        this.frame_buffer.bind();
 
-        this.calculateProjection(this.destinationFrame, this.sourceFrame);
+        this.calculateProjection(this.destination_frame, this.source_frame);
 
         if (this.transform) {
-            this.projectionMatrix.append(this.transform);
+            this.projection_matrix.append(this.transform);
         }
 
         // TODO add a check as them may be the same!
-        if (this.destinationFrame !== this.sourceFrame) {
+        if (this.destination_frame !== this.source_frame) {
             gl.enable(gl.SCISSOR_TEST);
             gl.scissor(
-                this.destinationFrame.x | 0,
-                this.destinationFrame.y | 0,
-                (this.destinationFrame.width * this.resolution) | 0,
-                (this.destinationFrame.height * this.resolution) | 0
+                this.destination_frame.x | 0,
+                this.destination_frame.y | 0,
+                (this.destination_frame.width * this.resolution) | 0,
+                (this.destination_frame.height * this.resolution) | 0
             );
         }
         else {
@@ -233,40 +237,40 @@ export default class RenderTarget {
 
         // TODO - does not need to be updated all the time??
         gl.viewport(
-            this.destinationFrame.x | 0,
-            this.destinationFrame.y | 0,
-            (this.destinationFrame.width * this.resolution) | 0,
-            (this.destinationFrame.height * this.resolution) | 0
+            this.destination_frame.x | 0,
+            this.destination_frame.y | 0,
+            (this.destination_frame.width * this.resolution) | 0,
+            (this.destination_frame.height * this.resolution) | 0
         );
     }
 
     /**
      * Updates the projection matrix based on a projection frame (which is a rectangle)
      *
-     * @param {Rectangle} destinationFrame - The destination frame.
-     * @param {Rectangle} sourceFrame - The source frame.
+     * @param {Rectangle} destination_frame - The destination frame.
+     * @param {Rectangle} [source_frame] - The source frame.
      */
-    calculateProjection(destinationFrame, sourceFrame) {
-        const pm = this.projectionMatrix;
+    calculateProjection(destination_frame, source_frame) {
+        const pm = this.projection_matrix;
 
-        sourceFrame = sourceFrame || destinationFrame;
+        source_frame = source_frame || destination_frame;
 
         pm.identity();
 
         // TODO: make dest scale source
         if (!this.root) {
-            pm.a = 1 / destinationFrame.width * 2;
-            pm.d = 1 / destinationFrame.height * 2;
+            pm.a = 1 / destination_frame.width * 2;
+            pm.d = 1 / destination_frame.height * 2;
 
-            pm.tx = -1 - (sourceFrame.x * pm.a);
-            pm.ty = -1 - (sourceFrame.y * pm.d);
+            pm.tx = -1 - (source_frame.x * pm.a);
+            pm.ty = -1 - (source_frame.y * pm.d);
         }
         else {
-            pm.a = 1 / destinationFrame.width * 2;
-            pm.d = -1 / destinationFrame.height * 2;
+            pm.a = 1 / destination_frame.width * 2;
+            pm.d = -1 / destination_frame.height * 2;
 
-            pm.tx = -1 - (sourceFrame.x * pm.a);
-            pm.ty = 1 - (sourceFrame.y * pm.d);
+            pm.tx = -1 - (source_frame.x * pm.a);
+            pm.ty = 1 - (source_frame.y * pm.d);
         }
     }
 
@@ -290,7 +294,7 @@ export default class RenderTarget {
         this.defaultFrame.width = width;
         this.defaultFrame.height = height;
 
-        this.frameBuffer.resize(width * this.resolution, height * this.resolution);
+        this.frame_buffer.resize(width * this.resolution, height * this.resolution);
 
         const projectionFrame = this.frame || this.size;
 
@@ -302,9 +306,9 @@ export default class RenderTarget {
      *
      */
     destroy() {
-        this.frameBuffer.destroy();
+        this.frame_buffer.destroy();
 
-        this.frameBuffer = null;
+        this.frame_buffer = null;
         this.texture = null;
     }
 }

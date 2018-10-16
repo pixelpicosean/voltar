@@ -120,7 +120,7 @@ declare namespace tween {
          */
         create(add?: boolean): Tween;
 
-        protected _process(delta: number);
-        protected _stop_all();
+        _process(delta: number);
+        _stop_all();
     }
 }

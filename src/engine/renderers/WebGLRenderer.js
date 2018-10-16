@@ -37,6 +37,8 @@ export default class WebGLRenderer extends SystemRenderer {
     constructor(options, arg2, arg3) {
         super('WebGL', options, arg2, arg3);
 
+        this.plugins = {};
+
         this.legacy = this.options.legacy;
 
         if (this.legacy) {
@@ -352,7 +354,7 @@ export default class WebGLRenderer extends SystemRenderer {
             this.rootRenderTarget.activate();
 
             if (this._activeShader) {
-                this._activeShader.uniforms.projectionMatrix = this.rootRenderTarget.projectionMatrix.to_array(true);
+                this._activeShader.uniforms.projectionMatrix = this.rootRenderTarget.projection_matrix.to_array(true);
             }
         }
     }
@@ -447,7 +449,7 @@ export default class WebGLRenderer extends SystemRenderer {
             render_target.activate();
 
             if (this._activeShader) {
-                this._activeShader.uniforms.projectionMatrix = render_target.projectionMatrix.to_array(true);
+                this._activeShader.uniforms.projectionMatrix = render_target.projection_matrix.to_array(true);
             }
 
             this.stencilManager.setMaskStack(render_target.stencilMaskStack);
@@ -474,7 +476,7 @@ export default class WebGLRenderer extends SystemRenderer {
             // it hinders the performance of this method.
             if (autoProject !== false) {
                 // automatically set the projection matrix
-                shader.uniforms.projectionMatrix = this._active_render_target.projectionMatrix.to_array(true);
+                shader.uniforms.projectionMatrix = this._active_render_target.projection_matrix.to_array(true);
             }
         }
 

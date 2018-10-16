@@ -925,7 +925,7 @@ export default class Graphics extends Node2D {
      * Renders the object using the WebGL renderer
      *
      * @private
-     * @param {WebGLRenderer} renderer - The renderer
+     * @param {import('engine/renderers/WebGLRenderer').default} renderer - The renderer
      */
     _render_webgl(renderer) {
         // if the sprite is not visible or the alpha is 0 then no need to render this element
@@ -948,13 +948,13 @@ export default class Graphics extends Node2D {
      * Renders a sprite rectangle.
      *
      * @private
-     * @param {WebGLRenderer} renderer - The renderer
+     * @param {import('engine/renderers/WebGLRenderer').default} renderer - The renderer
      */
     _renderSpriteRect(renderer) {
         const rect = this.graphics_data[0].shape;
 
         if (!this._spriteRect) {
-            this._spriteRect = new Sprite(new Texture(Texture.WHITE));
+            this._spriteRect = new Sprite(Texture.WHITE);
         }
 
         const sprite = this._spriteRect;
@@ -1239,18 +1239,9 @@ export default class Graphics extends Node2D {
 
     /**
      * Destroys the Graphics object.
-     *
-     * @param {object|boolean} [options] - Options parameter. A boolean will act as if all
-     *  options have been set to that value
-     * @param {boolean} [options.children=false] - if set to true, all the children will have
-     *  their destroy method called as well. 'options' will be passed on to those calls.
-     * @param {boolean} [options.texture=false] - Only used for child Sprites if options.children is set to true
-     *  Should it destroy the texture of the child sprite
-     * @param {boolean} [options.base_texture=false] - Only used for child Sprites if options.children is set to true
-     *  Should it destroy the base texture of the child sprite
      */
-    destroy(options) {
-        super.destroy(options);
+    destroy() {
+        super.destroy();
 
         // destroy each of the GraphicsData objects
         for (let i = 0; i < this.graphics_data.length; ++i) {

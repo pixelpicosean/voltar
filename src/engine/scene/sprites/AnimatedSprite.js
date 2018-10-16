@@ -1,9 +1,9 @@
-import Sprite from './Sprite';
-import Texture from '../../textures/Texture';
-import { TextureCache, SpriteFramesCache } from '../../utils';
-import Signal from 'mini-signals';
+import { TextureCache, SpriteFramesCache } from 'engine/utils/index';
+import { Rectangle } from 'engine/math/index';
 import remove_items from 'remove-array-items';
-import { Rectangle } from '../../math';
+import { Signal } from 'engine/dep/index';
+import Texture from 'engine/textures/Texture';
+import Sprite from './Sprite';
 
 // Load sprite frames from assets folder
 import spriteframes_data from 'spriteframe/default.json';
@@ -393,12 +393,8 @@ export default class AnimatedSprite extends Sprite {
     /**
      * Stops the AnimatedSprite and destroys it
      *
-     * @param {object|boolean} [options] - Options parameter. A boolean will act as if all options
+     * @param {import('./Sprite').DestroyOption|boolean} [options] - Options parameter. A boolean will act as if all options
      *  have been set to that value
-     * @param {boolean} [options.children=false] - if set to true, all the children will have their destroy
-     *      method called as well. 'options' will be passed on to those calls.
-     * @param {boolean} [options.texture=false] - Should it destroy the current texture of the sprite as well
-     * @param {boolean} [options.base_texture=false] - Should it destroy the base texture of the sprite as well
      */
     destroy(options) {
         this.stop();

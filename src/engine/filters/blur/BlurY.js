@@ -14,18 +14,18 @@ export default class BlurY extends Filter {
      * @param {number} strength - The strength of the blur filter.
      * @param {number} quality - The quality of the blur filter.
      * @param {number} resolution - The resolution of the blur filter.
-     * @param {number} [kernelSize=5] - The kernelSize of the blur filter.Options: 5, 7, 9, 11, 13, 15.
+     * @param {number} [kernel_size=5] - The kernelSize of the blur filter.Options: 5, 7, 9, 11, 13, 15.
      */
-    constructor(strength, quality, resolution, kernelSize) {
-        kernelSize = kernelSize || 5;
-        const vertSrc = generate_blur_vert_source(kernelSize, false);
-        const fragSrc = generate_blur_frag_source(kernelSize);
+    constructor(strength, quality, resolution, kernel_size) {
+        kernel_size = kernel_size || 5;
+        const vert_src = generate_blur_vert_source(kernel_size, false);
+        const frag_src = generate_blur_frag_source(kernel_size);
 
         super(
             // vertex shader
-            vertSrc,
+            vert_src,
             // fragment shader
-            fragSrc
+            frag_src
         );
 
         this.resolution = resolution || settings.RESOLUTION;
@@ -49,10 +49,10 @@ export default class BlurY extends Filter {
     apply(filter_manager, input, output, clear) {
         if (this.first_run) {
             const gl = filter_manager.renderer.gl;
-            const kernelSize = getMaxBlurKernelSize(gl);
+            const kernel_size = getMaxBlurKernelSize(gl);
 
-            this.vertexSrc = generate_blur_vert_source(kernelSize, false);
-            this.fragmentSrc = generate_blur_frag_source(kernelSize);
+            this.vertex_src = generate_blur_vert_source(kernel_size, false);
+            this.fragment_src = generate_blur_frag_source(kernel_size);
 
             this.first_run = false;
         }

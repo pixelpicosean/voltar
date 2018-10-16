@@ -1,11 +1,8 @@
 // Based on pixi-tilemap master~02218a043cacd310b49e2801a117423cb46b23d3
 import Node2D from '../Node2D';
 
-import { TextureCache } from '../../utils';
-import { Matrix } from '../../math';
-import './canvas/CanvasTileRenderer';
-import './webgl/TileRenderer';
-
+import { TextureCache } from 'engine/utils/index';
+import { Matrix } from 'engine/math/index';
 
 export default class BackgroundMap extends Node2D {
     constructor(tile_width, tile_height, data, texture) {
@@ -18,23 +15,22 @@ export default class BackgroundMap extends Node2D {
         this.tile_width = tile_width;
         this.tile_height = tile_height;
 
-        this.pointsBuf = [];
-        this._tempSize = new Float32Array([0, 0]);
-        this._tempTexSize = 1;
-        this.modificationMarker = 0;
+        this.points_buf = [];
+        this._temp_size = new Float32Array([0, 0]);
+        this._temp_tex_size = 1;
+        this.modification_marker = 0;
 
-        this.vbId = 0;
-        this.vbBuffer = null;
-        this.vbArray = null;
-        this.vbInts = null;
+        this.vb_id = 0;
+        this.vb_buffer = null;
+        this.vb_array = null;
+        this.vb_ints = null;
 
-        this._globalMat = new Matrix();
-        this._tempScale = [0, 0];
+        this._global_mat = new Matrix();
+        this._temp_scale = [0, 0];
 
         if (!texture) {
             this.textures = [];
-        }
-        else if (!Array.isArray(texture)) {
+        } else if (!Array.isArray(texture)) {
             if (texture.base_texture) {
                 this.textures = [texture];
             }
@@ -49,8 +45,8 @@ export default class BackgroundMap extends Node2D {
     clear() {
         this.data = [[]];
 
-        this.pointsBuf.length = 0;
-        this.modificationMarker = 0;
+        this.points_buf.length = 0;
+        this.modification_marker = 0;
     }
 
     get_tile(x, y) {
@@ -63,7 +59,7 @@ export default class BackgroundMap extends Node2D {
     }
 
     _push_tile(u, v, x, y) {
-        var pb = this.pointsBuf;
+        var pb = this.points_buf;
 
         // var i;
         // if (this.tile_width % this.tile_height === 0) {
@@ -93,14 +89,14 @@ export default class BackgroundMap extends Node2D {
         //         pb.push(0);
         //     }
         // } else {
-        //ok, ok, lets use rectangle. but its not working with square shader yet
-        pb.push(u);
-        pb.push(v);
-        pb.push(x);
-        pb.push(y);
-        pb.push(this.tile_width);
-        pb.push(this.tile_height);
-        pb.push(0);
+            //ok, ok, lets use rectangle. but its not working with square shader yet
+            pb.push(u);
+            pb.push(v);
+            pb.push(x);
+            pb.push(y);
+            pb.push(this.tile_width);
+            pb.push(this.tile_height);
+            pb.push(0);
         // }
     }
 
@@ -126,114 +122,74 @@ export default class BackgroundMap extends Node2D {
         }
     }
 
-    _render_canvas(renderer) {
-        if (this.textures.length === 0) return;
-
-        // Check whether we need to redraw the whole map
-        if (this._needs_redraw) {
-            this._needs_redraw = false;
-            this.pointsBuf.length = 0;
-            this.modificationMarker = 0;
-            this._draw_tiles();
-        }
-
-        // Start to render
-        var wt = this.world_transform;
-        renderer.context.setTransform(
-            wt.a,
-            wt.b,
-            wt.c,
-            wt.d,
-            wt.tx * renderer.resolution,
-            wt.ty * renderer.resolution
-        );
-
-        var points = this.pointsBuf;
-        renderer.context.fillStyle = '#000000';
-        for (var i = 0, n = points.length; i < n; i += 7) {
-            var x1 = points[i], y1 = points[i + 1];
-            var x2 = points[i + 2], y2 = points[i + 3];
-            var w = points[i + 4];
-            var h = points[i + 5];
-            var textureId = points[i + 6];
-            if (textureId >= 0) {
-                renderer.context.drawImage(this.textures[textureId].base_texture.source, x1, y1, w, h, x2, y2, w, h);
-            } else {
-                renderer.context.globalAlpha = 0.5;
-                renderer.context.fillRect(x2, y2, w, h);
-                renderer.context.globalAlpha = 1;
-            }
-        }
-    }
-
     _render_webgl(renderer) {
         // Check whether we need to redraw the whole map
         if (this._needs_redraw) {
             this._needs_redraw = false;
-            this.pointsBuf.length = 0;
-            this.modificationMarker = 0;
+            this.points_buf.length = 0;
+            this.modification_marker = 0;
             this._draw_tiles();
         }
 
         // Start to render
         var gl = renderer.gl;
-        var shader = renderer.plugins.tilemap.getShader();
+        var shader = renderer.plugins.tilemap.get_shader();
         renderer.set_object_renderer(renderer.plugins.tilemap);
-        renderer.bindShader(shader);
-        renderer._active_render_target.projectionMatrix.copy(this._globalMat).append(this.world_transform);
-        shader.uniforms.projectionMatrix = this._globalMat.to_array(true);
+        renderer.bind_shader(shader);
+        renderer._active_render_target.projection_matrix.copy(this._global_mat).append(this.world_transform);
+        shader.uniforms.projectionMatrix = this._global_mat.to_array(true);
 
-        var points = this.pointsBuf;
+        var points = this.points_buf;
         if (points.length === 0) return;
-        var rectsCount = points.length / 7;
+        var rects_count = points.length / 7;
         var tile = renderer.plugins.tilemap;
         var gl = renderer.gl;
-        tile.checkIndexBuffer(rectsCount);
+        tile.check_index_buffer(rects_count);
 
         var textures = this.textures;
         if (textures.length === 0) return;
         var len = textures.length;
-        if (this._tempTexSize < shader.maxTextures) {
-            this._tempTexSize = shader.maxTextures;
-            this._tempSize = new Float32Array(2 * shader.maxTextures);
+        if (this._temp_tex_size < shader.maxTextures) {
+            this._temp_tex_size = shader.maxTextures;
+            this._temp_size = new Float32Array(2 * shader.maxTextures);
         }
         // var samplerSize = this._tempSize;
         for (var i = 0; i < len; i++) {
             if (!textures[i] || !textures[i].valid) return;
         }
-        tile.bindTextures(renderer, shader, textures);
+        tile.bind_textures(renderer, shader, textures);
         // shader.uniforms.uSamplerSize = samplerSize;
         //lost context! recover!
-        var vb = tile.getVb(this.vbId);
+        var vb = tile.get_vb(this.vb_id);
         if (!vb) {
-            vb = tile.createVb();
-            this.vbId = vb.id;
-            this.vbBuffer = null;
-            this.modificationMarker = 0;
+            vb = tile.create_vb();
+            this.vb_id = vb.id;
+            this.vb_buffer = null;
+            this.modification_marker = 0;
         }
         var vao = vb.vao;
-        renderer.bindVao(vao);
+        renderer.bind_vao(vao);
         var vertexBuf = vb.vb;
         //if layer was changed, re-upload vertices
         vertexBuf.bind();
-        var vertices = rectsCount * shader.vertPerQuad;
+        var vertices = rects_count * shader.vertPerQuad;
         if (vertices === 0) return;
-        if (this.modificationMarker != vertices) {
-            this.modificationMarker = vertices;
+        if (this.modification_marker != vertices) {
+            this.modification_marker = vertices;
             var vs = shader.stride * vertices;
-            if (!this.vbBuffer || this.vbBuffer.byteLength < vs) {
+            if (!this.vb_buffer || this.vb_buffer.byteLength < vs) {
                 //!@#$ happens, need resize
                 var bk = shader.stride;
                 while (bk < vs) {
                     bk *= 2;
                 }
-                this.vbBuffer = new ArrayBuffer(bk);
-                this.vbArray = new Float32Array(this.vbBuffer);
-                this.vbInts = new Uint32Array(this.vbBuffer);
-                vertexBuf.upload(this.vbBuffer, 0, true);
+                this.vb_buffer = new ArrayBuffer(bk);
+                this.vb_array = new Float32Array(this.vb_buffer);
+                this.vb_ints = new Uint32Array(this.vb_buffer);
+                vertexBuf.upload(this.vb_buffer, 0, true);
             }
 
-            var arr = this.vbArray, ints = this.vbInts;
+            var arr = this.vb_array, ints = this.vb_ints;
             //upload vertices!
             var sz = 0;
             var textureId, shiftU, shiftV;
@@ -291,6 +247,6 @@ export default class BackgroundMap extends Node2D {
             //     vb.upload(view, 0);
             // }
         }
-        gl.drawElements(gl.TRIANGLES, rectsCount * 6, gl.UNSIGNED_SHORT, 0);
+        gl.drawElements(gl.TRIANGLES, rects_count * 6, gl.UNSIGNED_SHORT, 0);
     }
 }

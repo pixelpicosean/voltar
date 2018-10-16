@@ -6,6 +6,11 @@ import WebGLRenderer from 'engine/renderers/WebGLRenderer';
 import Shader from 'engine/Shader';
 import Quad from 'engine/renderers/utils/Quad';
 
+import Vert from './tiling_sprite.vert';
+import Frag from './tiling_sprite.frag';
+import SimpleFrag from './tiling_sprite_simple.frag';
+import TilingSprite from '../TilingSprite';
+
 const temp_mat = new Matrix();
 
 /**
@@ -34,12 +39,8 @@ export default class TilingSpriteRenderer extends ObjectRenderer {
     on_context_change() {
         const gl = this.renderer.gl;
 
-        this.shader = new Shader(gl,
-            require('./tilingSprite.vert'),
-            require('./tilingSprite.frag'));
-        this.simpleShader = new Shader(gl,
-            require('./tilingSprite.vert'),
-            require('./tilingSprite_simple.frag'));
+        this.shader = new Shader(gl, Vert, Frag);
+        this.simpleShader = new Shader(gl, Vert, SimpleFrag);
 
         this.renderer.bind_vao(null);
         this.quad = new Quad(gl, this.renderer.state.attribState);

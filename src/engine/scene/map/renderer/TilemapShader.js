@@ -1,20 +1,17 @@
-import Shader from '../../../Shader';
+import Shader from 'engine/Shader';
 
-import { fillSamplers } from './shader_gen';
-
+import { fill_samplers } from './shader_gen';
 
 export default class TilemapShader extends Shader {
-    constructor(gl, maxTextures, shaderVert, shaderFrag) {
+    constructor(gl, max_textures, shader_vert, shader_frag) {
         super(gl,
-            shaderVert,
-            shaderFrag
+            shader_vert,
+            shader_frag
         );
 
-        this.maxTextures = maxTextures;
+        this.max_textures = max_textures;
         this.index_buffer = null;
 
-        fillSamplers(this, this.maxTextures);
+        fill_samplers(this, this.max_textures);
     }
-
-    createVao(renderer, vb) {}
 }

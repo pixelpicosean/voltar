@@ -3,7 +3,7 @@ import RenderTarget from '../utils/RenderTarget';
 import Quad from '../utils/Quad';
 import { Rectangle, nearest_po2 } from 'engine/math/index';
 import Shader from 'engine/Shader';
-import * as filterTransforms from '../filters/filterTransforms';
+import * as filter_transforms from '../filters/filter_transforms';
 import Filter from '../filters/Filter';
 import WebGLRenderer from '../WebGLRenderer';
 import Node2D from 'engine/scene/Node2D';
@@ -37,7 +37,7 @@ class FilterState {
     }
 }
 
-const screenKey = 'screen';
+const screen_key = 'screen';
 
 export default class FilterManager extends WebGLManager {
     /**
@@ -64,7 +64,7 @@ export default class FilterManager extends WebGLManager {
          */
         this.managed_filters = [];
 
-        this.renderer.on('prerender', this.onPrerender, this);
+        this.renderer.on('prerender', this.on_pre_render, this);
 
         this._screen_width = renderer.view.width;
         this._screen_height = renderer.view.height;
@@ -82,7 +82,7 @@ export default class FilterManager extends WebGLManager {
         let filter_data = this.filter_data;
 
         if (!filter_data) {
-            filter_data = this.renderer._active_render_target.filterStack;
+            filter_data = this.renderer._active_render_target.filter_stack;
 
             // add new stack
             const filter_state = new FilterState();
@@ -166,7 +166,7 @@ export default class FilterManager extends WebGLManager {
     pop_filter() {
         const filter_data = this.filter_data;
 
-        const lastState = filter_data.stack[filter_data.index - 1];
+        const last_state = filter_data.stack[filter_data.index - 1];
         const current_state = filter_data.stack[filter_data.index];
 
         this.quad.map(current_state.render_target.size, current_state.source_frame).upload();
@@ -174,10 +174,9 @@ export default class FilterManager extends WebGLManager {
         const filters = current_state.filters;
 
         if (filters.length === 1) {
-            filters[0].apply(this, current_state.render_target, lastState.render_target, false, current_state);
+            filters[0].apply(this, current_state.render_target, last_state.render_target, false, current_state);
             this.free_pot_render_target(current_state.render_target);
-        }
-        else {
+        } else {
             let flip = current_state.render_target;
             let flop = this.get_pot_render_target(
                 this.renderer.gl,
@@ -202,7 +201,7 @@ export default class FilterManager extends WebGLManager {
                 flop = t;
             }
 
-            filters[i].apply(this, flip, lastState.render_target, false, current_state);
+            filters[i].apply(this, flip, last_state.render_target, false, current_state);
 
             this.free_pot_render_target(flip);
             this.free_pot_render_target(flop);
@@ -236,14 +235,13 @@ export default class FilterManager extends WebGLManager {
                 shader = this.shader_cache[filter.glShaderKey];
 
                 if (!shader) {
-                    shader = new Shader(this.gl, filter.vertexSrc, filter.fragmentSrc);
+                    shader = new Shader(this.gl, filter.vertex_src, filter.fragment_src);
 
                     filter.glShaders[renderer.CONTEXT_UID] = this.shader_cache[filter.glShaderKey] = shader;
                     this.managed_filters.push(filter);
                 }
-            }
-            else {
-                shader = filter.glShaders[renderer.CONTEXT_UID] = new Shader(this.gl, filter.vertexSrc, filter.fragmentSrc);
+            } else {
+                shader = filter.glShaders[renderer.CONTEXT_UID] = new Shader(this.gl, filter.vertex_src, filter.fragment_src);
                 this.managed_filters.push(filter);
             }
 
@@ -296,25 +294,25 @@ export default class FilterManager extends WebGLManager {
      * @param {Filter} filter - The filter we are synchronizing.
      */
     sync_uniforms(shader, filter) {
-        const uniformData = filter.uniformData;
+        const uniform_data = filter.uniformData;
         const uniforms = filter.uniforms;
 
         // 0 is reserved for the pixi texture so we start at 1!
-        let textureCount = 1;
-        let currentState;
+        let texture_count = 1;
+        let current_state;
 
         // filter_area and filterClamp that are handled by FilterManager directly
         // they must not appear in uniformData
 
         if (shader.uniforms.filter_area) {
-            currentState = this.filter_data.stack[this.filter_data.index];
+            current_state = this.filter_data.stack[this.filter_data.index];
 
             const filter_area = shader.uniforms.filter_area;
 
-            filter_area[0] = currentState.render_target.size.width;
-            filter_area[1] = currentState.render_target.size.height;
-            filter_area[2] = currentState.source_frame.x;
-            filter_area[3] = currentState.source_frame.y;
+            filter_area[0] = current_state.render_target.size.width;
+            filter_area[1] = current_state.render_target.size.height;
+            filter_area[2] = current_state.source_frame.x;
+            filter_area[3] = current_state.source_frame.y;
 
             shader.uniforms.filter_area = filter_area;
         }
@@ -322,32 +320,31 @@ export default class FilterManager extends WebGLManager {
         // use this to clamp displaced texture coords so they belong to filter_area
         // see displacementFilter fragment shader for an example
         if (shader.uniforms.filterClamp) {
-            currentState = currentState || this.filter_data.stack[this.filter_data.index];
+            current_state = current_state || this.filter_data.stack[this.filter_data.index];
 
-            const filterClamp = shader.uniforms.filterClamp;
+            const filter_clamp = shader.uniforms.filterClamp;
 
-            filterClamp[0] = 0;
-            filterClamp[1] = 0;
-            filterClamp[2] = (currentState.source_frame.width - 1) / currentState.render_target.size.width;
-            filterClamp[3] = (currentState.source_frame.height - 1) / currentState.render_target.size.height;
+            filter_clamp[0] = 0;
+            filter_clamp[1] = 0;
+            filter_clamp[2] = (current_state.source_frame.width - 1) / current_state.render_target.size.width;
+            filter_clamp[3] = (current_state.source_frame.height - 1) / current_state.render_target.size.height;
 
-            shader.uniforms.filterClamp = filterClamp;
+            shader.uniforms.filterClamp = filter_clamp;
         }
 
         // TODO Caching layer..
-        for (const i in uniformData) {
+        for (const i in uniform_data) {
             if (!shader.uniforms.data[i]) {
                 continue;
             }
 
-            const type = uniformData[i].type;
+            const type = uniform_data[i].type;
 
             if (type === 'sampler2d' && uniforms[i] !== 0) {
                 if (uniforms[i].base_texture) {
-                    shader.uniforms[i] = this.renderer.bind_texture(uniforms[i].base_texture, textureCount);
-                }
-                else {
-                    shader.uniforms[i] = textureCount;
+                    shader.uniforms[i] = this.renderer.bind_texture(uniforms[i].base_texture, texture_count);
+                } else {
+                    shader.uniforms[i] = texture_count;
 
                     // TODO
                     // this is helpful as renderTargets can also be set.
@@ -356,15 +353,14 @@ export default class FilterManager extends WebGLManager {
                     // rather than a render_target
                     const gl = this.renderer.gl;
 
-                    this.renderer.bound_textures[textureCount] = this.renderer.empty_textures[textureCount];
-                    gl.activeTexture(gl.TEXTURE0 + textureCount);
+                    this.renderer.bound_textures[texture_count] = this.renderer.empty_textures[texture_count];
+                    gl.activeTexture(gl.TEXTURE0 + texture_count);
 
                     uniforms[i].texture.bind();
                 }
 
-                textureCount++;
-            }
-            else if (type === 'mat3') {
+                texture_count++;
+            } else if (type === 'mat3') {
                 // check if its pixi matrix..
                 if (uniforms[i].a !== undefined) {
                     shader.uniforms[i] = uniforms[i].to_array(true);
@@ -372,8 +368,7 @@ export default class FilterManager extends WebGLManager {
                 else {
                     shader.uniforms[i] = uniforms[i];
                 }
-            }
-            else if (type === 'vec2') {
+            } else if (type === 'vec2') {
                 // check if its a point..
                 if (uniforms[i].x !== undefined) {
                     const val = shader.uniforms[i] || new Float32Array(2);
@@ -385,13 +380,11 @@ export default class FilterManager extends WebGLManager {
                 else {
                     shader.uniforms[i] = uniforms[i];
                 }
-            }
-            else if (type === 'float') {
-                if (shader.uniforms.data[i].value !== uniformData[i]) {
+            } else if (type === 'float') {
+                if (shader.uniforms.data[i].value !== uniform_data[i]) {
                     shader.uniforms[i] = uniforms[i];
                 }
-            }
-            else {
+            } else {
                 shader.uniforms[i] = uniforms[i];
             }
         }
@@ -433,48 +426,47 @@ export default class FilterManager extends WebGLManager {
      * TODO playing around here.. this is temporary - (will end up in the shader)
      * this returns a matrix that will normalise map filter cords in the filter to screen space
      *
-     * @param {Matrix} outputMatrix - the matrix to output to.
+     * @param {Matrix} output_matrix - the matrix to output to.
      * @return {Matrix} The mapped matrix.
      */
-    calculateScreenSpaceMatrix(outputMatrix) {
-        const currentState = this.filter_data.stack[this.filter_data.index];
+    calculateScreenSpaceMatrix(output_matrix) {
+        const current_state = this.filter_data.stack[this.filter_data.index];
 
-        return filterTransforms.calculateScreenSpaceMatrix(
-            outputMatrix,
-            currentState.source_frame,
-            currentState.render_target.size
+        return filter_transforms.calculate_screen_space_matrix(
+            output_matrix,
+            current_state.source_frame,
+            current_state.render_target.size
         );
     }
 
     /**
      * Multiply vTextureCoord to this matrix to achieve (0,0,1,1) for filter_area
      *
-     * @param {Matrix} outputMatrix - The matrix to output to.
+     * @param {Matrix} output_matrix - The matrix to output to.
      * @return {Matrix} The mapped matrix.
      */
-    calculateNormalizedScreenSpaceMatrix(outputMatrix) {
-        const currentState = this.filter_data.stack[this.filter_data.index];
+    calculate_normalized_screen_space_matrix(output_matrix) {
+        const current_state = this.filter_data.stack[this.filter_data.index];
 
-        return filterTransforms.calculateNormalizedScreenSpaceMatrix(
-            outputMatrix,
-            currentState.source_frame,
-            currentState.render_target.size,
-            currentState.destination_frame
+        return filter_transforms.calculate_normalized_screen_space_matrix(
+            output_matrix,
+            current_state.source_frame,
+            current_state.render_target.size
         );
     }
 
     /**
      * This will map the filter coord so that a texture can be used based on the transform of a sprite
      *
-     * @param {Matrix} outputMatrix - The matrix to output to.
+     * @param {Matrix} output_matrix - The matrix to output to.
      * @param {import('engine/index').Sprite} sprite - The sprite to map to.
      * @return {Matrix} The mapped matrix.
      */
-    calculate_sprite_matrix(outputMatrix, sprite) {
+    calculate_sprite_matrix(output_matrix, sprite) {
         const currentState = this.filter_data.stack[this.filter_data.index];
 
-        return filterTransforms.calculateSpriteMatrix(
-            outputMatrix,
+        return filter_transforms.calculate_sprite_matrix(
+            output_matrix,
             currentState.source_frame,
             currentState.render_target.size,
             sprite
@@ -484,26 +476,25 @@ export default class FilterManager extends WebGLManager {
     /**
      * Destroys this Filter Manager.
      *
-     * @param {boolean} [contextLost=false] context was lost, do not free shaders
+     * @param {boolean} [context_lost=false] context was lost, do not free shaders
      */
-    destroy(contextLost) {
+    destroy(context_lost) {
         const renderer = this.renderer;
         const filters = this.managed_filters;
 
-        renderer.off('prerender', this.onPrerender, this);
+        renderer.off('prerender', this.on_pre_render, this);
 
         for (let i = 0; i < filters.length; i++) {
-            if (!contextLost) {
+            if (!context_lost) {
                 filters[i].glShaders[renderer.CONTEXT_UID].destroy();
             }
             delete filters[i].glShaders[renderer.CONTEXT_UID];
         }
 
         this.shader_cache = {};
-        if (!contextLost) {
+        if (!context_lost) {
             this.emptyPool();
-        }
-        else {
+        } else {
             this.pool = {};
         }
     }
@@ -516,23 +507,23 @@ export default class FilterManager extends WebGLManager {
      *
      * @private
      * @param {WebGLRenderingContext} gl - The webgl rendering context
-     * @param {number} minWidth - The minimum width of the render target.
-     * @param {number} minHeight - The minimum height of the render target.
+     * @param {number} min_width - The minimum width of the render target.
+     * @param {number} min_height - The minimum height of the render target.
      * @param {number} resolution - The resolution of the render target.
      * @return {RenderTarget} The new render target.
      */
-    get_pot_render_target(gl, minWidth, minHeight, resolution) {
-        let key = screenKey;
+    get_pot_render_target(gl, min_width, min_height, resolution) {
+        let key = screen_key;
 
-        minWidth *= resolution;
-        minHeight *= resolution;
+        min_width *= resolution;
+        min_height *= resolution;
 
-        if (minWidth !== this._screen_width
-            || minHeight !== this._screen_height) {
+        if (min_width !== this._screen_width
+            || min_height !== this._screen_height) {
             // TODO you could return a bigger texture if there is not one in the pool?
-            minWidth = nearest_po2(minWidth * resolution);
-            minHeight = nearest_po2(minHeight * resolution);
-            key = (((minWidth & 0xFFFF) << 16) | (minHeight & 0xFFFF)).toString();
+            min_width = nearest_po2(min_width * resolution);
+            min_height = nearest_po2(min_height * resolution);
+            key = (((min_width & 0xFFFF) << 16) | (min_height & 0xFFFF)).toString();
         }
 
         if (!this.pool[key]) {
@@ -549,7 +540,7 @@ export default class FilterManager extends WebGLManager {
             gl.activeTexture(gl.TEXTURE0);
 
             // internally - this will cause a texture to be bound..
-            render_target = new RenderTarget(gl, minWidth, minHeight, null, 1);
+            render_target = new RenderTarget(gl, min_width, min_height, null, 1);
 
             // set the current one back
             gl.bindTexture(gl.TEXTURE_2D, tex._gl_textures[this.renderer.CONTEXT_UID].texture);
@@ -558,8 +549,8 @@ export default class FilterManager extends WebGLManager {
         // manually tweak the resolution...
         // this will not modify the size of the frame buffer, just its resolution.
         render_target.resolution = resolution;
-        render_target.defaultFrame.width = render_target.size.width = minWidth / resolution;
-        render_target.defaultFrame.height = render_target.size.height = minHeight / resolution;
+        render_target.defaultFrame.width = render_target.size.width = min_width / resolution;
+        render_target.defaultFrame.height = render_target.size.height = min_height / resolution;
         render_target.filterPoolKey = key;
 
         return render_target;
@@ -596,20 +587,20 @@ export default class FilterManager extends WebGLManager {
      * Called before the renderer starts rendering.
      *
      */
-    onPrerender() {
+    on_pre_render() {
         if (this._screen_width !== this.renderer.view.width
             || this._screen_height !== this.renderer.view.height) {
             this._screen_width = this.renderer.view.width;
             this._screen_height = this.renderer.view.height;
 
-            const textures = this.pool[screenKey];
+            const textures = this.pool[screen_key];
 
             if (textures) {
                 for (let j = 0; j < textures.length; j++) {
                     textures[j].destroy(true);
                 }
             }
-            this.pool[screenKey] = [];
+            this.pool[screen_key] = [];
         }
     }
 }

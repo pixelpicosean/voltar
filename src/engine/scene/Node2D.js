@@ -14,6 +14,14 @@ import Filter from 'engine/renderers/filters/Filter';
 let uid = 0;
 
 /**
+ * @typedef DestroyOption
+ * @property {boolean} children if set to true, all the children will have their
+ *                              destroy method called as well. 'options' will be passed on to those calls.
+ * @property {boolean} [texture] Should it destroy the current texture of the sprite as well
+ * @property {boolean} [base_texture] Should it destroy the base texture of the sprite as well
+ */
+
+/**
  * A Node2D represents a collection of display objects.
  * It is the base class of all display objects that act as a container for other objects.
  *
@@ -125,7 +133,7 @@ export default class Node2D extends EventEmitter {
         this.parent = null;
 
         /**
-         * @type {SceneTree}
+         * @type {import('engine/SceneTree').default}
          */
         this.scene_tree = null;
 
@@ -203,9 +211,14 @@ export default class Node2D extends EventEmitter {
          * The original, cached mask of the object
          *
          * @private
-         * @type {Graphics|Sprite}
+         * @type {import('./graphics/Graphics').default|import('./sprites/Sprite').default}
          */
         this._mask = null;
+
+        /**
+         * @private
+         */
+        this.is_mask = false;
 
         /**
          * If the object has been destroyed via destroy(). If true, it should not be used.
@@ -389,7 +402,7 @@ export default class Node2D extends EventEmitter {
     /**
      * Retrieves the bounds of the node as a rectangle object.
      *
-     * @param {boolean} skip_update - setting to true will stop the transforms of the scene graph from
+     * @param {boolean} [skip_update=false] - setting to true will stop the transforms of the scene graph from
      *  being updated. This means the calculation returned MAY be out of date BUT will give you a
      *  nice performance boost
      * @param {Rectangle} [rect] - Optional rectangle to store the result of the bounds calculation
@@ -754,6 +767,7 @@ export default class Node2D extends EventEmitter {
      * @readonly
      */
     get world_visible() {
+        /** @type {Node2D} */
         let item = this;
 
         do {
@@ -775,7 +789,7 @@ export default class Node2D extends EventEmitter {
      *
      * @todo For the moment, CanvasRenderer doesn't support Sprite as mask.
      *
-     * @type {Graphics|Sprite}
+     * @type {import('./graphics/Graphics').default|import('./sprites/Sprite').default}
      */
     get mask() {
         return this._mask;
@@ -1100,9 +1114,8 @@ export default class Node2D extends EventEmitter {
     /**
      * Returns the child at the specified index
      *
-     * @template {Node2D} T
      * @param {number} index - The index to get the child at
-     * @return {T} The child at the given index, if any.
+     * @return {extends typeof Node2D} The child at the given index, if any.
      */
     get_child(index) {
         if (index < 0 || index >= this.children.length) {
@@ -1115,8 +1128,9 @@ export default class Node2D extends EventEmitter {
     /**
      * Removes one or more children from the container.
      *
-     * @param {...Node2D} child - The Node2D(s) to remove
-     * @return {Node2D} The first child that was removed.
+     * @template T {Node2D}
+     * @param {...T} child - The Node2D(s) to remove
+     * @return {T} The first child that was removed.
      */
     remove_child(child) {
         const index = this.children.indexOf(child);
@@ -1153,7 +1167,7 @@ export default class Node2D extends EventEmitter {
      * Removes a child from the specified index position.
      *
      * @param {number} index - The index to get the child from
-     * @return {Node2D} The child that was removed.
+     * @return {extends typeof Node2D} The child that was removed.
      */
     remove_child_at(index) {
         const child = this.get_child(index);
@@ -1189,7 +1203,7 @@ export default class Node2D extends EventEmitter {
      *
      * @param {number} [beginIndex=0] - The beginning position.
      * @param {number} [endIndex=this.children.length] - The ending position. Default value is size of the container.
-     * @returns {Array<Node2D>} List of removed children
+     * @returns {Array<extends typeof Node2D>} List of removed children
      */
     remove_children(beginIndex = 0, endIndex) {
         const begin = beginIndex;
@@ -1241,7 +1255,7 @@ export default class Node2D extends EventEmitter {
 
     /**
      * @param {string} path
-     * @returns {Node2D}
+     * @returns {extends typeof Node2D}
      */
     get_node(path) {
         const list = path.split('/');
@@ -1492,14 +1506,8 @@ export default class Node2D extends EventEmitter {
      * Removes all internal references and listeners as well as removes children from the display list.
      * Do not use a Node2D after calling `destroy`.
      *
-     * @param {object|boolean} [options] - Options parameter. A boolean will act as if all options
+     * @param {DestroyOption|boolean} [options] - Options parameter. A boolean will act as if all options
      *  have been set to that value
-     * @param {boolean} [options.children=false] - if set to true, all the children will have their destroy
-     *  method called as well. 'options' will be passed on to those calls.
-     * @param {boolean} [options.texture=false] - Only used for child Sprites if options.children is set to true
-     *  Should it destroy the texture of the child sprite
-     * @param {boolean} [options.base_texture=false] - Only used for child Sprites if options.children is set to true
-     *  Should it destroy the base texture of the child sprite
      */
     destroy_children(options) {
         super.destroy();
@@ -1562,5 +1570,8 @@ export default class Node2D extends EventEmitter {
     }
 }
 
-// performance increase to avoid using call.. (10x faster)
+/**
+ * performance increase to avoid using call.. (10x faster)
+ * @this {Node2D}
+ */
 Node2D.prototype.node2d_update_transform = Node2D.prototype.update_transform;

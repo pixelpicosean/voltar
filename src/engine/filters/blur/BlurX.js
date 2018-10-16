@@ -1,7 +1,7 @@
 import settings from 'engine/settings';
 import generate_blur_vert_source from './generate_blur_vert_source';
 import generate_blur_frag_source from './generate_blur_frag_source';
-import getMaxBlurKernelSize from './get_max_kernel_size';
+import get_max_blur_kernel_size from './get_max_kernel_size';
 import Filter from 'engine/renderers/filters/Filter';
 import FilterManager from 'engine/renderers/managers/FilterManager';
 import RenderTarget from 'engine/renderers/utils/RenderTarget';
@@ -14,18 +14,18 @@ export default class BlurX extends Filter {
      * @param {number} strength - The strength of the blur filter.
      * @param {number} quality - The quality of the blur filter.
      * @param {number} resolution - The resolution of the blur filter.
-     * @param {number} [kernelSize=5] - The kernelSize of the blur filter.Options: 5, 7, 9, 11, 13, 15.
+     * @param {number} [kernel_size=5] - The kernelSize of the blur filter.Options: 5, 7, 9, 11, 13, 15.
      */
-    constructor(strength, quality, resolution, kernelSize) {
-        kernelSize = kernelSize || 5;
-        const vertSrc = generate_blur_vert_source(kernelSize, true);
-        const fragSrc = generate_blur_frag_source(kernelSize);
+    constructor(strength, quality, resolution, kernel_size) {
+        kernel_size = kernel_size || 5;
+        const vert_src = generate_blur_vert_source(kernel_size, true);
+        const frag_src = generate_blur_frag_source(kernel_size);
 
         super(
             // vertex shader
-            vertSrc,
+            vert_src,
             // fragment shader
-            fragSrc
+            frag_src
         );
 
         this.resolution = resolution || settings.RESOLUTION;
@@ -35,7 +35,7 @@ export default class BlurX extends Filter {
         this.quality = quality || 4;
         this.strength = strength || 8;
 
-        this.firstRun = true;
+        this.first_run = true;
     }
 
     /**
@@ -47,14 +47,14 @@ export default class BlurX extends Filter {
      * @param {boolean} clear - Should the output be cleared before rendering?
      */
     apply(filter_manager, input, output, clear) {
-        if (this.firstRun) {
+        if (this.first_run) {
             const gl = filter_manager.renderer.gl;
-            const kernelSize = getMaxBlurKernelSize(gl);
+            const kernel_size = get_max_blur_kernel_size(gl);
 
-            this.vertexSrc = generate_blur_vert_source(kernelSize, true);
-            this.fragmentSrc = generate_blur_frag_source(kernelSize);
+            this.vertex_src = generate_blur_vert_source(kernel_size, true);
+            this.fragment_src = generate_blur_frag_source(kernel_size);
 
-            this.firstRun = false;
+            this.first_run = false;
         }
 
         this.uniforms.strength = (1 / output.size.width) * (output.size.width / input.size.width);

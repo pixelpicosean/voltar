@@ -3,17 +3,70 @@ declare module 'remove-array-items' {
 }
 
 declare module 'eventemitter3' {
-    export default class EventEmitter {
-        listeners(event: string): Function[];
-        emit(event: string, ...args: any[]): boolean;
-        on(event: string, fn: Function, context?: any): EventEmitter;
-        once(event: string, fn: Function, context?: any): EventEmitter;
-        removeListener(event: string, fn: Function, context?: any, once?: boolean): EventEmitter;
-        removeAllListeners(event: string): EventEmitter;
+    /**
+     * Minimal `EventEmitter` interface that is molded against the Node.js
+     * `EventEmitter` interface.
+     */
+    class EventEmitter<EventTypes extends string | symbol = string | symbol> {
+        static prefixed: string | boolean;
 
-        off(event: string, fn: Function, context?: any, once?: boolean): EventEmitter;
-        addListener(event: string, fn: Function, context?: any): EventEmitter;
+        /**
+         * Return an array listing the events for which the emitter has registered
+         * listeners.
+         */
+        eventNames(): Array<EventTypes>;
+
+        /**
+         * Return the listeners registered for a given event.
+         */
+        listeners(event: EventTypes): Array<EventEmitter.ListenerFn>;
+
+        /**
+         * Return the number of listeners listening to a given event.
+         */
+        listenerCount(event: EventTypes): number;
+
+        /**
+         * Calls each of the listeners registered for a given event.
+         */
+        emit(event: EventTypes, ...args: Array<any>): boolean;
+
+        /**
+         * Add a listener for a given event.
+         */
+        on(event: EventTypes, fn: EventEmitter.ListenerFn, context?: any): this;
+        addListener(event: EventTypes, fn: EventEmitter.ListenerFn, context?: any): this;
+
+        /**
+         * Add a one-time listener for a given event.
+         */
+        once(event: EventTypes, fn: EventEmitter.ListenerFn, context?: any): this;
+
+        /**
+         * Remove the listeners of a given event.
+         */
+        removeListener(event: EventTypes, fn?: EventEmitter.ListenerFn, context?: any, once?: boolean): this;
+        off(event: EventTypes, fn?: EventEmitter.ListenerFn, context?: any, once?: boolean): this;
+
+        /**
+         * Remove all listeners, or those of the specified event.
+         */
+        removeAllListeners(event?: EventTypes): this;
     }
+
+    export namespace EventEmitter {
+        export interface ListenerFn {
+            (...args: Array<any>): void;
+        }
+
+        export interface EventEmitterStatic {
+            new <EventTypes extends string | symbol = string | symbol>(): EventEmitter<EventTypes>;
+        }
+
+        export const EventEmitter: EventEmitterStatic;
+    }
+
+    export default EventEmitter;
 }
 
 declare module 'mini-signals' {
@@ -235,7 +288,7 @@ declare module 'pixi-gl-core' {
         constructor(gl: WebGLRenderingContext, width: number, height: number);
 
         gl: WebGLRenderingContext;
-        frameBuffer: WebGLFramebuffer;
+        framebuffer: WebGLFramebuffer;
         stencil: WebGLRenderbuffer;
         texture: GLTexture;
         width: number;
@@ -249,7 +302,7 @@ declare module 'pixi-gl-core' {
         resize(width: number, height: number): void;
         destroy(): void;
 
-        static createRGBA(gl: WebGLRenderingContext, width: number, height: number, data: ArrayBuffer | ArrayBufferView | any): GLFramebuffer;
+        static createRGBA(gl: WebGLRenderingContext, width: number, height: number): GLFramebuffer;
         static createFloat32(gl: WebGLRenderingContext, width: number, height: number, data: ArrayBuffer | ArrayBufferView | any): GLFramebuffer;
     }
     export class GLShader {
@@ -315,7 +368,6 @@ declare module 'pixi-gl-core' {
         tempAttribState: Attrib[];
         attribState: Attrib[];
     }
-
     export class VertexArrayObject {
         static FORCE_NATIVE: boolean;
 
@@ -337,5 +389,61 @@ declare module 'pixi-gl-core' {
         clear(): this;
         draw(type: number, size?: number, start?: number): this;
         destroy(): void;
+    }
+    export namespace shader {
+        /**
+         * @param gl {WebGLRenderingContext} The current WebGL context {WebGLProgram}
+         * @param vertexSrc {string|string[]} The vertex shader source as an array of strings.
+         * @param fragmentSrc {string|string[]} The fragment shader source as an array of strings.
+         * @param attributeLocations {any} An attribute location map that lets you manually set the attribute locations
+         * @return {WebGLProgram} the shader program
+         */
+        export function compileProgram(gl: WebGLRenderingContext, vertexSrc: string|string[], fragmentSrc: string|string[], attributeLocations: any): WebGLProgram;
+
+        /**
+         * @param type Type of value
+         * @param size
+         */
+        export function defaultValue(type: string, size: number): Array<boolean>|Int32Array|Float32Array;
+
+        /**
+         * Extracts the attributes
+         * @param gl {WebGLRenderingContext} The current WebGL rendering context
+         * @param program {WebGLProgram} The shader program to get the attributes from
+         * @return attributes {any}
+         */
+        export function extractAttributes(gl: WebGLRenderingContext, program: WebGLProgram): any;
+
+        /**
+         * Extracts the uniforms
+         *
+         * @param gl {WebGLRenderingContext} The current WebGL rendering context
+         * @param program {WebGLProgram} The shader program to get the uniforms from
+         * @return uniforms {any}
+         */
+        export function extractUniforms(gl: WebGLRenderingContext, program: WebGLProgram): any;
+
+        /**
+         * Extracts the attributes
+         *
+         * @param gl {WebGLRenderingContext} The current WebGL rendering context
+         * @param uniforms {{[key: string]: any}} @mat ?
+         * @return {any}
+         */
+        export function generateUniformAccessObject(gl: WebGLRenderingContext, uniform: {[key: string]: any}): any;
+
+        /**
+         * Sets the float precision on the shader. If the precision is already present this function will do nothing
+         *
+         * @param {string} src       the shader source
+         * @param {string} precision The float precision of the shader. Options are 'lowp', 'mediump' or 'highp'.
+         *
+         * @return {string} modified shader source
+         */
+        export function setPrecision(src: string, precision: string): string;
+
+        export function mapSize(type: string): number;
+
+        export function mapType(gl: WebGLRenderingContext, type: string): string;
     }
 }

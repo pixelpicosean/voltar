@@ -240,12 +240,8 @@ export default class TilingSprite extends Sprite {
     /**
      * Destroys this sprite and optionally its texture and children
      *
-     * @param {object|boolean} [options] - Options parameter. A boolean will act as if all options
+     * @param {import('./Sprite').DestroyOption|boolean} [options] - Options parameter. A boolean will act as if all options
      *  have been set to that value
-     * @param {boolean} [options.children=false] - if set to true, all the children will have their destroy
-     *      method called as well. 'options' will be passed on to those calls.
-     * @param {boolean} [options.texture=false] - Should it destroy the current texture of the sprite as well
-     * @param {boolean} [options.base_texture=false] - Should it destroy the base texture of the sprite as well
      */
     destroy(options) {
         super.destroy(options);
@@ -262,7 +258,7 @@ export default class TilingSprite extends Sprite {
      * @param {number|string|BaseTexture|HTMLCanvasElement|HTMLVideoElement} source - Source to create texture from
      * @param {number} width - the width of the tiling sprite
      * @param {number} height - the height of the tiling sprite
-     * @return {Texture} The newly created texture
+     * @return {TilingSprite} The newly created texture
      */
     static from(source, width, height) {
         return new TilingSprite(Texture.from(source), width, height);

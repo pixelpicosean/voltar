@@ -1,34 +1,35 @@
 import { uid } from 'engine/utils/index';
 import { BLEND_MODES } from 'engine/const';
 import settings from 'engine/settings';
-import extractUniformsFromSrc from './extractUniformsFromSrc';
+import extract_uniforms_from_src from './extract_uniforms_from_src';
+import RenderTarget from '../utils/RenderTarget';
 
 const SOURCE_KEY_MAP = {};
 
 export default class Filter {
     /**
-     * @param {string} [vertexSrc] - The source of the vertex shader.
-     * @param {string} [fragmentSrc] - The source of the fragment shader.
+     * @param {string} [vertex_src] - The source of the vertex shader.
+     * @param {string} [fragment_src] - The source of the fragment shader.
      * @param {object} [uniforms] - Custom uniforms to use to augment the built-in ones.
      */
-    constructor(vertexSrc, fragmentSrc, uniforms) {
+    constructor(vertex_src, fragment_src, uniforms) {
         /**
          * The vertex shader.
          *
          * @type {string}
          */
-        this.vertexSrc = vertexSrc || Filter.defaultVertexSrc;
+        this.vertex_src = vertex_src || Filter.default_vertex_src;
 
         /**
          * The fragment shader.
          *
          * @type {string}
          */
-        this.fragmentSrc = fragmentSrc || Filter.defaultFragmentSrc;
+        this.fragment_src = fragment_src || Filter.default_fragment_src;
 
         this._blend_mode = BLEND_MODES.NORMAL;
 
-        this.uniformData = uniforms || extractUniformsFromSrc(this.vertexSrc, this.fragmentSrc, 'projectionMatrix|uSampler');
+        this.uniformData = uniforms || extract_uniforms_from_src(this.vertex_src, this.fragment_src);
 
         /**
          * An object containing the current values of custom uniforms.
@@ -51,11 +52,11 @@ export default class Filter {
         this.glShaders = {};
 
         // used for cacheing.. sure there is a better way!
-        if (!SOURCE_KEY_MAP[this.vertexSrc + this.fragmentSrc]) {
-            SOURCE_KEY_MAP[this.vertexSrc + this.fragmentSrc] = uid();
+        if (!SOURCE_KEY_MAP[this.vertex_src + this.fragment_src]) {
+            SOURCE_KEY_MAP[this.vertex_src + this.fragment_src] = uid();
         }
 
-        this.glShaderKey = SOURCE_KEY_MAP[this.vertexSrc + this.fragmentSrc];
+        this.glShaderKey = SOURCE_KEY_MAP[this.vertex_src + this.fragment_src];
 
         /**
          * The padding of the filter. Some filters require extra space to breath such as a blur.
@@ -93,15 +94,15 @@ export default class Filter {
     /**
      * Applies the filter
      *
-     * @param {FilterManager} filter_manager - The renderer to retrieve the filter from
+     * @param {import('../managers/FilterManager').default} filter_manager - The renderer to retrieve the filter from
      * @param {RenderTarget} input - The input render target.
      * @param {RenderTarget} output - The target to output to.
      * @param {boolean} clear - Should the output be cleared before rendering to it
-     * @param {object} [currentState] - It's current state of filter.
+     * @param {object} [current_state] - It's current state of filter.
      *        There are some useful properties in the currentState :
      *        target, filters, sourceFrame, destinationFrame, render_target, resolution
      */
-    apply(filter_manager, input, output, clear, currentState) // eslint-disable-line no-unused-vars
+    apply(filter_manager, input, output, clear, current_state) // eslint-disable-line no-unused-vars
     {
         // --- //
         //  this.uniforms.filterMatrix = filter_manager.calculateSpriteMatrix(temp_matrix, window.panda );
@@ -134,7 +135,7 @@ export default class Filter {
      * @static
      * @constant
      */
-    static get defaultVertexSrc() {
+    static get default_vertex_src() {
         return [
             'attribute vec2 aVertexPosition;',
             'attribute vec2 aTextureCoord;',
@@ -159,7 +160,7 @@ export default class Filter {
      * @static
      * @constant
      */
-    static get defaultFragmentSrc() {
+    static get default_fragment_src() {
         return [
             'varying vec2 vTextureCoord;',
             'varying vec2 vFilterCoord;',

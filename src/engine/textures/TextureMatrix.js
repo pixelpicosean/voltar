@@ -95,8 +95,7 @@ export default class TextureMatrix {
             return false;
         }
 
-        if (!force_update
-            && this._lastTextureID === tex._update_id) {
+        if (!force_update && this._lastTextureID === tex._update_id) {
             return false;
         }
 
