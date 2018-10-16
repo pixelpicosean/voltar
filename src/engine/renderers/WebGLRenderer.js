@@ -1,4 +1,8 @@
-import glCore from 'pixi-gl-core';
+import { GL } from 'engine/dep/index';
+const { VertexArrayObject } = GL;
+import { plugin_target } from 'engine/utils/index';
+import { RENDERER_TYPE } from 'engine/const';
+import BaseTexture from 'engine/textures/BaseTexture';
 
 import SystemRenderer from './SystemRenderer';
 import MaskManager from './managers/MaskManager';
@@ -7,53 +11,26 @@ import FilterManager from './managers/FilterManager';
 import RenderTarget from './utils/RenderTarget';
 import ObjectRenderer from './utils/ObjectRenderer';
 import TextureManager from './TextureManager';
-import BaseTexture from '../textures/BaseTexture';
 import TextureGarbageCollector from './TextureGarbageCollector';
 import WebGLState from './WebGLState';
 import map_webgl_draw_modes_to_voltar from './utils/map_webgl_draw_modes_to_voltar';
-import validateContext from './utils/validateContext';
-import { plugin_target } from '../utils/index';
-import { RENDERER_TYPE } from '../const';
+import validate_context from './utils/validate_context';
+import Matrix from 'engine/math/Matrix';
+import Shader from 'engine/Shader';
+import Texture from 'engine/textures/Texture';
+import RenderTexture from 'engine/textures/RenderTexture';
 
 let CONTEXT_UID = 0;
-
-/**
- * @typedef RendererOption
- * @property {number} [width=800] - the width of the screen
- * @property {number} [height=600] - the height of the screen
- * @property {HTMLCanvasElement} [view] - the canvas to use as a view, optional
- * @property {boolean} [transparent=false] - If the render view is transparent, default false
- * @property {boolean} [auto_resize=false] - If the render view is automatically resized, default false
- * @property {boolean} [antialias=false] - sets antialias (only applicable in chrome at the moment)
- * @property {number} [resolution=1] - The resolution / device pixel ratio of the renderer. The
- *     resolution of the renderer retina would be 2.
- * @property {boolean} [preserve_drawing_buffer=false] - enables drawing buffer preservation,
- *     enable this if you need to call toDataUrl on the webgl context.
- * @property {boolean} [clear_before_render=true] - This sets if the renderer will clear the canvas or
- *     not before the new render pass.
- * @property {number} [background_color=0x000000] - The background color of the rendered area
- *     (shown if not transparent).
- * @property {boolean} [pixel_snap=false] - If true Pixi will Math.floor() x/y values when rendering,
- *     stopping pixel interpolation.
- * @property {boolean} [round_pixels=false] - If true PixiJS will Math.floor() x/y values when
- *     rendering, stopping pixel interpolation.
- * @property {boolean} [legacy=false] - If true PixiJS will aim to ensure compatibility
- *     with older / less advanced devices. If you experiance unexplained flickering try setting this to true.
- * @property {string} [powerPreference] - Parameter passed to webgl context, set to "high-performance"
- *     for devices with dual graphics card
- */
 
 /**
  * The WebGLRenderer draws the scene and all its content onto a webGL enabled canvas. This renderer
  * should be used for browsers that support webGL. This Render works by automatically managing webGLBatchs.
  * So no need for Sprite Batches or Sprite Clouds.
  * Don't forget to add the view to your DOM or you will not see anything :)
- *
- * @class
  */
 export default class WebGLRenderer extends SystemRenderer {
     /**
-     * @param {RendererOption} [options] - The optional renderer parameters
+     * @param {import('./SystemRenderer').RendererDesc} [options] - The optional renderer parameters
      * @param {any} [arg2]
      * @param {any} [arg3]
      */
@@ -63,7 +40,7 @@ export default class WebGLRenderer extends SystemRenderer {
         this.legacy = this.options.legacy;
 
         if (this.legacy) {
-            glCore.VertexArrayObject.FORCE_NATIVE = true;
+            GL.VertexArrayObject.FORCE_NATIVE = true;
         }
 
         /**
@@ -89,10 +66,10 @@ export default class WebGLRenderer extends SystemRenderer {
         this._contextOptions = {
             alpha: this.transparent,
             antialias: this.options.antialias,
-            premultiplied_alpha: this.transparent && this.transparent !== 'notMultiplied',
+            premultipliedAlpha: this.transparent,
             stencil: true,
-            preserve_drawing_buffer: this.options.preserve_drawing_buffer,
-            powerPreference: this.options.powerPreference,
+            preserveDrawingBuffer: this.options.preserve_drawing_buffer,
+            powerPreference: this.options.power_preference,
         };
 
         this._background_colorRgba[3] = this.transparent ? 0 : 1;
@@ -148,10 +125,10 @@ export default class WebGLRenderer extends SystemRenderer {
         // initialize the context so it is ready for the managers.
         if (this.options.context) {
             // checks to see if a context is valid..
-            validateContext(this.options.context);
+            validate_context(this.options.context);
         }
 
-        this.gl = this.options.context || glCore.createContext(this.view, this._contextOptions);
+        this.gl = this.options.context || GL.createContext(this.view, this._contextOptions);
 
         this.CONTEXT_UID = CONTEXT_UID++;
 
@@ -166,9 +143,10 @@ export default class WebGLRenderer extends SystemRenderer {
 
         /**
          * Holds the current state of textures bound to the GPU.
-         * @type {Array<Texture>}
+         * @type {Array<BaseTexture>}
          */
         this.bound_textures = null;
+        this.empty_textures = null;
 
         /**
          * Holds the current shader
@@ -186,7 +164,7 @@ export default class WebGLRenderer extends SystemRenderer {
          */
         this._active_render_target = null;
 
-        this._initContext();
+        this._init_context();
 
         // map some webGL blend and drawmodes..
         this.draw_modes = map_webgl_draw_modes_to_voltar(this.gl);
@@ -214,13 +192,15 @@ export default class WebGLRenderer extends SystemRenderer {
          * @param {WebGLRenderingContext} gl - WebGL context.
          */
     }
+    init_plugins() { }
+    destroy_plugins() { }
 
     /**
      * Creates the WebGL context
      *
      * @private
      */
-    _initContext() {
+    _init_context() {
         const gl = this.gl;
 
         // restore a context if it was previously lost
@@ -234,7 +214,7 @@ export default class WebGLRenderer extends SystemRenderer {
         this._activeVao = null;
 
         this.bound_textures = new Array(maxTextures);
-        this.emptyTextures = new Array(maxTextures);
+        this.empty_textures = new Array(maxTextures);
 
         // create a texture manager...
         this.texture_manager = new TextureManager(this);
@@ -249,7 +229,7 @@ export default class WebGLRenderer extends SystemRenderer {
         this.bindRenderTarget(this.rootRenderTarget);
 
         // now lets fill up the textures with empty ones!
-        const emptyGLTexture = new glCore.GLTexture.fromData(gl, null, 1, 1);
+        const emptyGLTexture = GL.GLTexture.fromData(gl, null, 1, 1);
 
         const tempObj = { _gl_textures: {} };
 
@@ -261,7 +241,7 @@ export default class WebGLRenderer extends SystemRenderer {
             empty._gl_textures[this.CONTEXT_UID] = emptyGLTexture;
 
             this.bound_textures[i] = tempObj;
-            this.emptyTextures[i] = empty;
+            this.empty_textures[i] = empty;
             this.bind_texture(null, i);
         }
 
@@ -274,8 +254,8 @@ export default class WebGLRenderer extends SystemRenderer {
     /**
      * Renders the object to its webGL view
      *
-     * @param {Node2D} node - the object to be rendered
-     * @param {RenderTexture} render_texture - The render texture to render to.
+     * @param {import('engine/index').Node2D} node - the object to be rendered
+     * @param {import('engine/index').RenderTexture} render_texture - The render texture to render to.
      * @param {boolean} [clear] - Should the canvas be cleared before the new render
      * @param {Matrix} [transform] - A transform to apply to the render texture before rendering.
      * @param {boolean} [skip_updateTransform] - Should we skip the update transform pass?
@@ -389,10 +369,10 @@ export default class WebGLRenderer extends SystemRenderer {
     /**
      * Erases the active render target and fills the drawing area with a colour
      *
-     * @param {number} [clearColor] - The colour
+     * @param {Array<number>} [clear_color] - The colour
      */
-    clear(clearColor) {
-        this._active_render_target.clear(clearColor);
+    clear(clear_color) {
+        this._active_render_target.clear(clear_color);
     }
 
     /**
@@ -408,15 +388,15 @@ export default class WebGLRenderer extends SystemRenderer {
      * Erases the render texture and fills the drawing area with a colour
      *
      * @param {RenderTexture} render_texture - The render texture to clear
-     * @param {number} [clearColor] - The colour
+     * @param {Array<number>} [clear_color] - The colour
      * @return {WebGLRenderer} Returns itself.
      */
-    clearRenderTexture(render_texture, clearColor) {
+    clearRenderTexture(render_texture, clear_color) {
         const base_texture = render_texture.base_texture;
         const render_target = base_texture._gl_render_targets[this.CONTEXT_UID];
 
         if (render_target) {
-            render_target.clear(clearColor);
+            render_target.clear(clear_color);
         }
 
         return this;
@@ -425,8 +405,8 @@ export default class WebGLRenderer extends SystemRenderer {
     /**
      * Binds a render texture for rendering
      *
-     * @param {RenderTexture} render_texture - The render texture to render
-     * @param {Transform} transform - The transform to be applied to the render texture
+     * @param {import('engine/index').RenderTexture} render_texture - The render texture to render
+     * @param {Matrix} transform - The transform to be applied to the render texture
      * @return {WebGLRenderer} Returns itself.
      */
     bind_render_texture(render_texture, transform) {
@@ -507,20 +487,22 @@ export default class WebGLRenderer extends SystemRenderer {
      * needless binding of textures. For example if the texture is already bound it will return the
      * current location of the texture instead of the one provided. To bypass this use force location
      *
-     * @param {Texture} texture - the new texture
+     * @param {BaseTexture|Texture} texture - the new texture
      * @param {number} location - the suggested texture location
-     * @param {boolean} [forceLocation=false] - force the location
+     * @param {boolean} [force_location=false] - force the location
      * @return {number} bound texture location
      */
-    bind_texture(texture, location, forceLocation = false) {
-        texture = texture || this.emptyTextures[location];
-        texture = texture.base_texture || texture;
-        texture.touched = this.textureGC.count;
+    bind_texture(texture, location, force_location = false) {
+        texture = texture || this.empty_textures[location];
 
-        if (!forceLocation) {
+        /** @type BaseTexture */
+        const base_texture = texture.base_texture || texture;
+        base_texture.touched = this.textureGC.count;
+
+        if (!force_location) {
             // TODO - maybe look into adding boundIds.. save us the loop?
             for (let i = 0; i < this.bound_textures.length; i++) {
-                if (this.bound_textures[i] === texture) {
+                if (this.bound_textures[i] === base_texture) {
                     return i;
                 }
             }
@@ -536,15 +518,15 @@ export default class WebGLRenderer extends SystemRenderer {
         }
 
         const gl = this.gl;
-        const gl_texture = texture._gl_textures[this.CONTEXT_UID];
+        const gl_texture = base_texture._gl_textures[this.CONTEXT_UID];
 
         if (!gl_texture) {
-            // this will also bind the texture..
-            this.texture_manager.update_texture(texture, location);
+            // this will also bind the base_texture..
+            this.texture_manager.update_texture(base_texture, location);
         }
         else {
-            // bind the current texture
-            this.bound_textures[location] = texture;
+            // bind the current base_texture
+            this.bound_textures[location] = base_texture;
             gl.activeTexture(gl.TEXTURE0 + location);
             gl.bindTexture(gl.TEXTURE_2D, gl_texture.texture);
         }
@@ -555,20 +537,21 @@ export default class WebGLRenderer extends SystemRenderer {
     /**
      * unbinds the texture ...
      *
-     * @param {Texture} texture - the texture to unbind
+     * @param {BaseTexture|Texture} texture - the texture to unbind
      * @return {WebGLRenderer} Returns itself.
      */
     unbind_texture(texture) {
         const gl = this.gl;
 
-        texture = texture.base_texture || texture;
+        /** @type BaseTexture */
+        const base_texture = texture.base_texture || texture;
 
         for (let i = 0; i < this.bound_textures.length; i++) {
-            if (this.bound_textures[i] === texture) {
-                this.bound_textures[i] = this.emptyTextures[i];
+            if (this.bound_textures[i] === base_texture) {
+                this.bound_textures[i] = this.empty_textures[i];
 
                 gl.activeTexture(gl.TEXTURE0 + i);
-                gl.bind_texture(gl.TEXTURE_2D, this.emptyTextures[i]._gl_textures[this.CONTEXT_UID].texture);
+                gl.bindTexture(gl.TEXTURE_2D, this.empty_textures[i]._gl_textures[this.CONTEXT_UID].texture);
             }
         }
 
@@ -578,16 +561,16 @@ export default class WebGLRenderer extends SystemRenderer {
     /**
      * Creates a new VAO from this renderer's context and state.
      *
-     * @return {glCore.VertexArrayObject} The new VAO.
+     * @return {VertexArrayObject} The new VAO.
      */
     createVao() {
-        return new glCore.VertexArrayObject(this.gl, this.state.attribState);
+        return new GL.VertexArrayObject(this.gl, this.state.attribState);
     }
 
     /**
      * Changes the current Vao to the one given in parameter
      *
-     * @param {glCore.VertexArrayObject} vao - the new Vao
+     * @param {VertexArrayObject} vao - the new Vao
      * @return {WebGLRenderer} Returns itself.
      */
     bindVao(vao) {
@@ -621,7 +604,7 @@ export default class WebGLRenderer extends SystemRenderer {
         this._active_render_target = this.rootRenderTarget;
 
         for (let i = 0; i < this.bound_textures.length; i++) {
-            this.bound_textures[i] = this.emptyTextures[i];
+            this.bound_textures[i] = this.empty_textures[i];
         }
 
         // bind the main frame buffer (the screen);
@@ -650,7 +633,7 @@ export default class WebGLRenderer extends SystemRenderer {
     handleContextRestored() {
         this.texture_manager.remove_all();
         this.filter_manager.destroy(true);
-        this._initContext();
+        this._init_context();
     }
 
     /**
@@ -660,7 +643,7 @@ export default class WebGLRenderer extends SystemRenderer {
      *  See: https://github.com/pixijs/pixi.js/issues/2233
      */
     destroy(removeView) {
-        this.destroyPlugins();
+        this.destroy_plugins();
 
         // remove listeners
         this.view.removeEventListener('webglcontextlost', this.handleContextLost);

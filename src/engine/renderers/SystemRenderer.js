@@ -27,6 +27,11 @@ const temp_matrix = new Matrix();
  *     (shown if not transparent).
  * @property {boolean} [pixel_snap=false] - If true Pixi will Math.floor() x/y values when rendering,
  *     stopping pixel interpolation.
+ * @property {boolean} [legacy=false] - If true PixiJS will aim to ensure compatibility
+ *     with older / less advanced devices. If you experiance unexplained flickering try setting this to true.
+ * @property {string} [power_preference] - Parameter passed to webgl context, set to "high-performance"
+ *     for devices with dual graphics card
+ * @property {WebGLRenderingContext} [context]
  */
 
 /**

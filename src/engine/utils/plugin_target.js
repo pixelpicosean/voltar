@@ -36,7 +36,7 @@ function plugin_target(obj) {
      * Removes all the plugins of this object
      *
      */
-    obj.prototype.destroyPlugins = function destroyPlugins() {
+    obj.prototype.destroy_plugins = function destroy_plugins() {
         for (const o in this.plugins) {
             this.plugins[o].destroy();
             this.plugins[o] = null;
