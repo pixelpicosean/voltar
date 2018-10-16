@@ -69,8 +69,6 @@ declare module 'ismobilejs' {
     export const tablet: boolean;
 }
 
-declare module 'bit-twiddle' {}
-
 // https://github.com/englercj/resource-loader/
 // v2.1.1
 declare module 'resource-loader' {
@@ -180,4 +178,164 @@ declare module 'resource-loader' {
 }
 
 declare module 'pixi-gl-core' {
+    interface WebGLState {}
+
+    export interface ContextOptions {
+        /**
+         * Boolean that indicates if the canvas contains an alpha buffer.
+         */
+        alpha?: boolean;
+        /**
+         * Boolean that indicates that the drawing buffer has a depth buffer of at least 16 bits.
+         */
+        depth?: boolean;
+        /**
+         * Boolean that indicates that the drawing buffer has a stencil buffer of at least 8 bits.
+         */
+        stencil?: boolean;
+        /**
+         * Boolean that indicates whether or not to perform anti-aliasing.
+         */
+        antialias?: boolean;
+        /**
+         * Boolean that indicates that the page compositor will assume the drawing buffer contains colors with pre-multiplied alpha.
+         */
+        premultipliedAlpha?: boolean;
+        /**
+         * If the value is true the buffers will not be cleared and will preserve their values until cleared or overwritten by the author.
+         */
+        preserveDrawingBuffer?: boolean;
+        /**
+         *  Boolean that indicates if a context will be created if the system performance is low.
+         */
+        failIfMajorPerformanceCaveat?: boolean;
+    }
+    export function createContext(view: HTMLCanvasElement, options?: ContextOptions): WebGLRenderingContext;
+    export function setVertexAttribArrays(gl: WebGLRenderingContext, attribs: Attrib[], state?: WebGLState): WebGLRenderingContext | undefined;
+    export class GLBuffer {
+        constructor(gl: WebGLRenderingContext, type: number, data: ArrayBuffer | ArrayBufferView | any, drawType: number);
+
+        protected _updateID?: number;
+        gl: WebGLRenderingContext;
+        buffer: WebGLBuffer;
+        type: number;
+        drawType: number;
+        data: ArrayBuffer | ArrayBufferView | any;
+
+        upload(data?: ArrayBuffer | ArrayBufferView | any, offset?: number, dontBind?: boolean): void;
+        bind(): void;
+
+        static createVertexBuffer(gl: WebGLRenderingContext, data: ArrayBuffer | ArrayBufferView | any, drawType: number): GLBuffer;
+        static createIndexBuffer(gl: WebGLRenderingContext, data: ArrayBuffer | ArrayBufferView | any, drawType: number): GLBuffer;
+        static create(gl: WebGLRenderingContext, type: number, data: ArrayBuffer | ArrayBufferView | any, drawType: number): GLBuffer;
+
+        destroy(): void;
+    }
+    export class GLFramebuffer {
+        constructor(gl: WebGLRenderingContext, width: number, height: number);
+
+        gl: WebGLRenderingContext;
+        frameBuffer: WebGLFramebuffer;
+        stencil: WebGLRenderbuffer;
+        texture: GLTexture;
+        width: number;
+        height: number;
+
+        enableTexture(texture: GLTexture): void;
+        enableStencil(): void;
+        clear(r: number, g: number, b: number, a: number): void;
+        bind(): void;
+        unbind(): void;
+        resize(width: number, height: number): void;
+        destroy(): void;
+
+        static createRGBA(gl: WebGLRenderingContext, width: number, height: number, data: ArrayBuffer | ArrayBufferView | any): GLFramebuffer;
+        static createFloat32(gl: WebGLRenderingContext, width: number, height: number, data: ArrayBuffer | ArrayBufferView | any): GLFramebuffer;
+    }
+    export class GLShader {
+        constructor(gl: WebGLRenderingContext, vertexSrc: string | string[], fragmentSrc: string | string[], precision?: string, attributeLocations?: { [key: string]: number });
+
+        gl: WebGLRenderingContext;
+        program?: WebGLProgram | null;
+        uniformData: any;
+        uniforms: any;
+        attributes: any;
+
+        bind(): this;
+        destroy(): void;
+    }
+    export class GLTexture {
+        constructor(gl: WebGLRenderingContext, width?: number, height?: number, format?: number, type?: number);
+
+        gl: WebGLRenderingContext;
+        texture: WebGLTexture;
+        mipmap: boolean;
+        premultiplyAlpha: boolean;
+        width: number;
+        height: number;
+        format: number;
+        type: number;
+
+        upload(source: HTMLImageElement | ImageData | HTMLVideoElement | HTMLCanvasElement): void;
+        uploadData(data: ArrayBuffer | ArrayBufferView, width: number, height: number): void;
+        bind(location?: number): void;
+        unbind(): void;
+        minFilter(linear: boolean): void;
+        magFilter(linear: boolean): void;
+        enableMipmap(): void;
+        enableLinearScaling(): void;
+        enableNearestScaling(): void;
+        enableWrapClamp(): void;
+        enableWrapRepeat(): void;
+        enableWrapMirrorRepeat(): void;
+        destroy(): void;
+
+        static fromSource(gl: WebGLRenderingContext, source: HTMLImageElement | ImageData | HTMLVideoElement | HTMLCanvasElement, premultipleAlpha?: boolean): GLTexture;
+        static fromData(gl: WebGLRenderingContext, data: number[], width: number, height: number): GLTexture;
+    }
+    export interface Attrib {
+        attribute: {
+            location: number;
+            size: number;
+        };
+        normalized: boolean;
+        stride: number;
+        start: number;
+        buffer: ArrayBuffer;
+    }
+    export interface WebGLRenderingContextAttribute {
+        buffer: WebGLBuffer;
+        attribute: any;
+        type: number;
+        normalized: boolean;
+        stride: number;
+        start: number;
+    }
+    export interface AttribState {
+        tempAttribState: Attrib[];
+        attribState: Attrib[];
+    }
+
+    export class VertexArrayObject {
+        static FORCE_NATIVE: boolean;
+
+        constructor(gl: WebGLRenderingContext, state?: WebGLState);
+
+        protected nativeVaoExtension: any;
+        protected nativeState: AttribState;
+        protected nativeVao: VertexArrayObject;
+        gl: WebGLRenderingContext;
+        attributes: Attrib[];
+        indexBuffer: GLBuffer;
+        dirty: boolean;
+
+        bind(): this;
+        unbind(): this;
+        activate(): this;
+        addAttribute(buffer: GLBuffer, attribute: Attrib, type?: number, normalized?: boolean, stride?: number, start?: number): this;
+        addIndex(buffer: GLBuffer, options?: any): this;
+        clear(): this;
+        draw(type: number, size?: number, start?: number): this;
+        destroy(): void;
+    }
 }
