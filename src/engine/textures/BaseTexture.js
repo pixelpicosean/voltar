@@ -7,8 +7,9 @@ import {
     decompose_data_uri,
     BaseTextureCache, TextureCache,
 } from '../utils/index';
+import { is_po2 } from 'engine/math/index';
+import { EventEmitter } from 'engine/dep/index';
 import determine_cross_origin from '../utils/determine_cross_origin';
-import { EventEmitter, BitTwiddle } from 'engine/dep/index';
 
 /**
  * A texture stores the information that represents an image. All textures have a base texture.
@@ -189,6 +190,11 @@ export default class BaseTexture extends EventEmitter {
          * @member {object<number, WebGLTexture>}
          */
         this._gl_textures = {};
+        /**
+         * @private
+         * @member {object<number, RenderTarget>}
+         */
+        this._gl_render_targets = null;
 
         this._enabled = 0;
         this._virtal_bound_id = -1;
@@ -273,7 +279,7 @@ export default class BaseTexture extends EventEmitter {
         this.width = this.real_width / this.resolution;
         this.height = this.real_height / this.resolution;
 
-        this.is_power_of_two = BitTwiddle.isPow2(this.real_width) && BitTwiddle.isPow2(this.real_height);
+        this.is_power_of_two = is_po2(this.real_width) && is_po2(this.real_height);
     }
 
     /**

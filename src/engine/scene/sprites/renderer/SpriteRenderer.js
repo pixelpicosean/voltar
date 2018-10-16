@@ -7,7 +7,7 @@ import Buffer from './BatchBuffer';
 import settings from 'engine/settings';
 import { premultiply_blend_mode, premultiply_tint } from 'engine/utils/index';
 import { GLBuffer } from 'pixi-gl-core';
-import bitTwiddle from 'bit-twiddle';
+import { nearest_po2, log_base_2 } from 'engine/math/index';
 
 let TICK = 0;
 let TEXTURE_TICK = 0;
@@ -48,7 +48,7 @@ export default class SpriteRenderer extends ObjectRenderer {
         // let numVerts = this.size * 4 * this.vertByteSize;
 
         this.buffers = [];
-        for (let i = 1; i <= bitTwiddle.nextPow2(this.size); i *= 2) {
+        for (let i = 1; i <= nearest_po2(this.size); i *= 2) {
             this.buffers.push(new Buffer(i * 4 * this.vertByteSize));
         }
 
@@ -152,7 +152,7 @@ export default class SpriteRenderer extends ObjectRenderer {
     /**
      * Renders the sprite object.
      *
-     * @param {Sprite} sprite - the sprite to render when using this spritebatch
+     * @param {import('engine/index').Sprite} sprite - the sprite to render when using this spritebatch
      */
     render(sprite) {
         // TODO set blend modes..
@@ -185,8 +185,8 @@ export default class SpriteRenderer extends ObjectRenderer {
         const gl = this.renderer.gl;
         const MAX_TEXTURES = this.MAX_TEXTURES;
 
-        const np2 = bitTwiddle.nextPow2(this.currentIndex);
-        const log2 = bitTwiddle.log2(np2);
+        const np2 = nearest_po2(this.currentIndex);
+        const log2 = log_base_2(np2);
         const buffer = this.buffers[log2];
 
         const sprites = this.sprites;
@@ -223,7 +223,7 @@ export default class SpriteRenderer extends ObjectRenderer {
             const bt = rendererBoundTextures[i];
 
             if (bt._enabled === TICK) {
-                bound_textures[i] = this.renderer.emptyTextures[i];
+                bound_textures[i] = this.renderer.empty_textures[i];
                 continue;
             }
 

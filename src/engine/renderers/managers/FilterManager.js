@@ -1,10 +1,9 @@
 import WebGLManager from './WebGLManager';
 import RenderTarget from '../utils/RenderTarget';
 import Quad from '../utils/Quad';
-import { Rectangle } from 'engine/math/index';
+import { Rectangle, nearest_po2 } from 'engine/math/index';
 import Shader from 'engine/Shader';
 import * as filterTransforms from '../filters/filterTransforms';
-import { BitTwiddle } from 'engine/dep/index';
 import Filter from '../filters/Filter';
 import WebGLRenderer from '../WebGLRenderer';
 import Node2D from 'engine/scene/Node2D';
@@ -270,7 +269,7 @@ export default class FilterManager extends WebGLManager {
         // free unit 0 for us, doesn't matter what was there
         // don't try to restore it, because sync_uniforms can upload it to another slot
         // and it'll be a problem
-        const tex = this.renderer.emptyTextures[0];
+        const tex = this.renderer.empty_textures[0];
 
         this.renderer.bound_textures[0] = tex;
         // this syncs the pixi filters  uniforms with glsl uniforms
@@ -353,7 +352,7 @@ export default class FilterManager extends WebGLManager {
                     // rather than a render_target
                     const gl = this.renderer.gl;
 
-                    this.renderer.bound_textures[textureCount] = this.renderer.emptyTextures[textureCount];
+                    this.renderer.bound_textures[textureCount] = this.renderer.empty_textures[textureCount];
                     gl.activeTexture(gl.TEXTURE0 + textureCount);
 
                     uniforms[i].texture.bind();
@@ -527,8 +526,8 @@ export default class FilterManager extends WebGLManager {
         if (minWidth !== this._screen_width
             || minHeight !== this._screen_height) {
             // TODO you could return a bigger texture if there is not one in the pool?
-            minWidth = BitTwiddle.nextPow2(minWidth * resolution);
-            minHeight = BitTwiddle.nextPow2(minHeight * resolution);
+            minWidth = nearest_po2(minWidth * resolution);
+            minHeight = nearest_po2(minHeight * resolution);
             key = ((minWidth & 0xFFFF) << 16) | (minHeight & 0xFFFF);
         }
 
