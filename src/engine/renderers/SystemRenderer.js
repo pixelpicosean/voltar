@@ -252,8 +252,8 @@ export default class SystemRenderer extends EventEmitter {
      * This can be quite useful if your node is complicated and needs to be reused multiple times.
      *
      * @param {Node2D} node - The node the object will be generated from
-     * @param {number} scale_mode - Should be one of the scale_mode consts
-     * @param {number} resolution - The resolution / device pixel ratio of the texture being generated
+     * @param {number} [scale_mode] - Should be one of the scale_mode consts
+     * @param {number} [resolution] - The resolution / device pixel ratio of the texture being generated
      * @param {Rectangle} [region] - The region of the node, that shall be rendered,
      *        if no region is specified, defaults to the local bounds of the node.
      * @return {Texture} a texture of the graphics object

@@ -1,8 +1,8 @@
 import Rectangle from "engine/math/shapes/Rectangle";
 import WebGLRenderer from "engine/renderers/WebGLRenderer";
-import Node2D from "engine/scene/Node2D";
 import RenderTexture from "engine/textures/RenderTexture";
-import CanvasRenderTarget from "engine/renderers/canvas/utils/CanvasRenderTarget";
+import Node2D from "engine/scene/Node2D";
+import CanvasRenderTarget from "engine/renderers/utils/CanvasRenderTarget";
 
 const TEMP_RECT = new Rectangle();
 const BYTES_PER_PIXEL = 4;
@@ -18,14 +18,6 @@ export default class WebGLExtract {
      */
     constructor(renderer) {
         this.renderer = renderer;
-        /**
-         * Collection of methods for extracting data (image, pixels, etc.) from a display object or render texture
-         *
-         * @member {extract.WebGLExtract} extract
-         * @memberof WebGLRenderer#
-         * @see extract.WebGLExtract
-         */
-        renderer.extract = this;
     }
 
     /**
@@ -64,10 +56,10 @@ export default class WebGLExtract {
      */
     canvas(target) {
         const renderer = this.renderer;
-        let textureBuffer;
+        let texture_buffer;
         let resolution;
         let frame;
-        let flipY = false;
+        let flip_y = false;
         let render_texture;
         let generated = false;
 
@@ -83,29 +75,29 @@ export default class WebGLExtract {
         }
 
         if (render_texture) {
-            textureBuffer = render_texture.base_texture._gl_render_targets[this.renderer.CONTEXT_UID];
-            resolution = textureBuffer.resolution;
+            texture_buffer = render_texture.base_texture._gl_render_targets[this.renderer.CONTEXT_UID];
+            resolution = texture_buffer.resolution;
             frame = render_texture.frame;
-            flipY = false;
+            flip_y = false;
         }
         else {
-            textureBuffer = this.renderer.rootRenderTarget;
-            resolution = textureBuffer.resolution;
-            flipY = true;
+            texture_buffer = this.renderer.root_render_target;
+            resolution = texture_buffer.resolution;
+            flip_y = true;
 
             frame = TEMP_RECT;
-            frame.width = textureBuffer.size.width;
-            frame.height = textureBuffer.size.height;
+            frame.width = texture_buffer.size.width;
+            frame.height = texture_buffer.size.height;
         }
 
         const width = frame.width * resolution;
         const height = frame.height * resolution;
 
-        const canvasBuffer = new CanvasRenderTarget(width, height, 1);
+        const canvas_buffer = new CanvasRenderTarget(width, height, 1);
 
-        if (textureBuffer) {
+        if (texture_buffer) {
             // bind the buffer
-            renderer.bindRenderTarget(textureBuffer);
+            renderer.bind_render_target(texture_buffer);
 
             // set up an array of pixels
             const webglPixels = new Uint8Array(BYTES_PER_PIXEL * width * height);
@@ -124,16 +116,16 @@ export default class WebGLExtract {
             );
 
             // add the pixels to the canvas
-            const canvasData = canvasBuffer.context.getImageData(0, 0, width, height);
+            const canvas_data = canvas_buffer.context.getImageData(0, 0, width, height);
 
-            canvasData.data.set(webglPixels);
+            canvas_data.data.set(webglPixels);
 
-            canvasBuffer.context.putImageData(canvasData, 0, 0);
+            canvas_buffer.context.putImageData(canvas_data, 0, 0);
 
             // pulling pixels
-            if (flipY) {
-                canvasBuffer.context.scale(1, -1);
-                canvasBuffer.context.drawImage(canvasBuffer.canvas, 0, -height);
+            if (flip_y) {
+                canvas_buffer.context.scale(1, -1);
+                canvas_buffer.context.drawImage(canvas_buffer.canvas, 0, -height);
             }
         }
 
@@ -142,7 +134,7 @@ export default class WebGLExtract {
         }
 
         // send the canvas back..
-        return canvasBuffer.canvas;
+        return canvas_buffer.canvas;
     }
 
     /**
@@ -151,11 +143,11 @@ export default class WebGLExtract {
      *
      * @param {Node2D|RenderTexture} target - A node or render_texture
      *  to convert. If left empty will use use the main renderer
-     * @return {Uint8ClampedArray} One-dimensional array containing the pixel data of the entire texture
+     * @return {Uint8Array} One-dimensional array containing the pixel data of the entire texture
      */
     pixels(target) {
         const renderer = this.renderer;
-        let textureBuffer;
+        let texture_buffer;
         let resolution;
         let frame;
         let render_texture;
@@ -164,36 +156,33 @@ export default class WebGLExtract {
         if (target) {
             if (target instanceof RenderTexture) {
                 render_texture = target;
-            }
-            else {
-                // TODO: parameters are not enough
+            } else {
                 render_texture = this.renderer.generate_texture(target);
                 generated = true;
             }
         }
 
         if (render_texture) {
-            textureBuffer = render_texture.base_texture._gl_render_targets[this.renderer.CONTEXT_UID];
-            resolution = textureBuffer.resolution;
+            texture_buffer = render_texture.base_texture._gl_render_targets[this.renderer.CONTEXT_UID];
+            resolution = texture_buffer.resolution;
             frame = render_texture.frame;
-        }
-        else {
-            textureBuffer = this.renderer.rootRenderTarget;
-            resolution = textureBuffer.resolution;
+        } else {
+            texture_buffer = this.renderer.root_render_target;
+            resolution = texture_buffer.resolution;
 
             frame = TEMP_RECT;
-            frame.width = textureBuffer.size.width;
-            frame.height = textureBuffer.size.height;
+            frame.width = texture_buffer.size.width;
+            frame.height = texture_buffer.size.height;
         }
 
         const width = frame.width * resolution;
         const height = frame.height * resolution;
 
-        const webglPixels = new Uint8Array(BYTES_PER_PIXEL * width * height);
+        const webgl_pixels = new Uint8Array(BYTES_PER_PIXEL * width * height);
 
-        if (textureBuffer) {
+        if (texture_buffer) {
             // bind the buffer
-            renderer.bindRenderTarget(textureBuffer);
+            renderer.bind_render_target(texture_buffer);
             // read pixels to the array
             const gl = renderer.gl;
 
@@ -204,7 +193,7 @@ export default class WebGLExtract {
                 height,
                 gl.RGBA,
                 gl.UNSIGNED_BYTE,
-                webglPixels
+                webgl_pixels
             );
         }
 
@@ -212,7 +201,7 @@ export default class WebGLExtract {
             render_texture.destroy(true);
         }
 
-        return webglPixels;
+        return webgl_pixels;
     }
 
     /**
@@ -220,9 +209,6 @@ export default class WebGLExtract {
      *
      */
     destroy() {
-        this.renderer.extract = null;
         this.renderer = null;
     }
 }
-
-WebGLRenderer.register_plugin('extract', WebGLExtract);

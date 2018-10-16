@@ -9,6 +9,7 @@ import { mixins } from './utils/index';
 
 import { outer_box_resize } from './resize';
 import remove_items from 'remove-array-items';
+import { optional } from './registry';
 
 /**
  * @typedef ApplicationSettings
@@ -128,6 +129,10 @@ export default class SceneTree {
         this.loader = null;
         this.preload_queue = preload_queue;
         this.visual_server = new VisualServer();
+        /**
+         * @type {import('engine/extract/WebGLExtract').default}
+         */
+        this.extract = null;
         this.physics_server = new PhysicsServer();
         this.message_queue = new MessageQueue();
         this.input = input;
@@ -271,6 +276,9 @@ export default class SceneTree {
             clear_before_render: true,
             preserve_drawing_buffer: false,
         });
+        if (optional.Extract) {
+            this.extract = new optional.Extract(this.visual_server.renderer);
+        }
 
         this.physics_server.init();
 

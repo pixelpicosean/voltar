@@ -210,25 +210,25 @@ export default class WebGLRenderer extends SystemRenderer {
             gl.getExtension('WEBGL_lose_context').restoreContext();
         }
 
-        const maxTextures = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
+        const max_textures = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
 
         this._activeShader = null;
         this._activeVao = null;
 
-        this.bound_textures = new Array(maxTextures);
-        this.empty_textures = new Array(maxTextures);
+        this.bound_textures = new Array(max_textures);
+        this.empty_textures = new Array(max_textures);
 
         // create a texture manager...
         this.texture_manager = new TextureManager(this);
         this.filter_manager = new FilterManager(this);
-        this.textureGC = new TextureGarbageCollector(this);
+        this.texture_gc = new TextureGarbageCollector(this);
 
         this.state.resetToDefault();
 
-        this.rootRenderTarget = new RenderTarget(gl, this.width, this.height, null, this.resolution, true);
-        this.rootRenderTarget.clearColor = this._background_colorRgba;
+        this.root_render_target = new RenderTarget(gl, this.width, this.height, null, this.resolution, true);
+        this.root_render_target.clearColor = this._background_colorRgba;
 
-        this.bind_render_target(this.rootRenderTarget);
+        this.bind_render_target(this.root_render_target);
 
         // now lets fill up the textures with empty ones!
         const emptyGLTexture = GL.GLTexture.fromData(gl, null, 1, 1);
@@ -237,7 +237,7 @@ export default class WebGLRenderer extends SystemRenderer {
 
         temp_obj._gl_textures[this.CONTEXT_UID] = {};
 
-        for (let i = 0; i < maxTextures; i++) {
+        for (let i = 0; i < max_textures; i++) {
             const empty = new BaseTexture();
 
             empty._gl_textures[this.CONTEXT_UID] = emptyGLTexture;
@@ -305,7 +305,7 @@ export default class WebGLRenderer extends SystemRenderer {
 
         // this.set_object_renderer(this.emptyRenderer);
 
-        this.textureGC.update();
+        this.texture_gc.update();
 
         this.emit('postrender');
     }
@@ -349,13 +349,13 @@ export default class WebGLRenderer extends SystemRenderer {
 
         SystemRenderer.prototype.resize.call(this, screenWidth, screenHeight);
 
-        this.rootRenderTarget.resize(screenWidth, screenHeight);
+        this.root_render_target.resize(screenWidth, screenHeight);
 
-        if (this._active_render_target === this.rootRenderTarget) {
-            this.rootRenderTarget.activate();
+        if (this._active_render_target === this.root_render_target) {
+            this.root_render_target.activate();
 
             if (this._activeShader) {
-                this._activeShader.uniforms.projectionMatrix = this.rootRenderTarget.projection_matrix.to_array(true);
+                this._activeShader.uniforms.projectionMatrix = this.root_render_target.projection_matrix.to_array(true);
             }
         }
     }
@@ -426,10 +426,10 @@ export default class WebGLRenderer extends SystemRenderer {
             this.unbind_texture(base_texture);
 
             render_target = base_texture._gl_render_targets[this.CONTEXT_UID];
-            render_target.setFrame(render_texture.frame);
+            render_target.set_frame(render_texture.frame);
         }
         else {
-            render_target = this.rootRenderTarget;
+            render_target = this.root_render_target;
         }
 
         render_target.transform = transform;
@@ -501,7 +501,7 @@ export default class WebGLRenderer extends SystemRenderer {
         /** @type BaseTexture */
         // @ts-ignore
         const base_texture = texture.base_texture || texture;
-        base_texture.touched = this.textureGC.count;
+        base_texture.touched = this.texture_gc.count;
 
         if (!force_location) {
             // TODO - maybe look into adding boundIds.. save us the loop?
@@ -605,14 +605,14 @@ export default class WebGLRenderer extends SystemRenderer {
 
         this.bind_vao(null);
         this._activeShader = null;
-        this._active_render_target = this.rootRenderTarget;
+        this._active_render_target = this.root_render_target;
 
         for (let i = 0; i < this.bound_textures.length; i++) {
             this.bound_textures[i] = this.empty_textures[i];
         }
 
         // bind the main frame buffer (the screen);
-        this.rootRenderTarget.activate();
+        this.root_render_target.activate();
 
         this.state.resetToDefault();
 

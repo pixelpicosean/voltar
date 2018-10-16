@@ -1,5 +1,4 @@
 import { Resource } from "./loaders/index";
-import Node2D from './scene/Node2D';
 
 /**
  * Node class looking table
@@ -34,3 +33,7 @@ export const loader_pre_procs = [];
  * @type {Array<() => ((res: Resource, next: Function) => void)>}
  */
 export const loader_use_procs = [];
+
+export const optional = {
+    Extract: null,
+}

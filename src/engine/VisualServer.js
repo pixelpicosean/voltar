@@ -15,6 +15,13 @@ export default class VisualServer {
         this.is_initialized = false;
 
         this.renderer = null;
+
+        /**
+         * Collection of methods for extracting data (image, pixels, etc.) from a display object or render texture
+         *
+         * @type {import('./extract/WebGLExtract').default}
+         */
+        this.extract = null;
     }
 
     init(config) {
@@ -31,9 +38,9 @@ export default class VisualServer {
 
         if (!is_webgl_supported()) {
             throw 'Voltar only support WebGL rendering!';
-        } else {
-            this.renderer = new WebGLRenderer(config);
         }
+
+        this.renderer = new WebGLRenderer(config);
     }
     render(viewport) {
         this.renderer.render(viewport, undefined, true, undefined, true);
