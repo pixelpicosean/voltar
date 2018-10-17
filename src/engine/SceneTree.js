@@ -137,7 +137,7 @@ export default class SceneTree {
          */
         this.extract = null;
         this.physics_server = new PhysicsServer();
-        this.message_queue = new MessageQueue();
+        this.message_queue = MessageQueue.get_singleton();
         this.input = input;
 
         /** @type {Settings} */

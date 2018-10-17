@@ -1,8 +1,8 @@
 // disabling eslint for now, going to rewrite this in v5
 /* eslint-disable */
 
-import { TEXT_GRADIENT } from '../../const';
-import { hex2string } from '../../utils';
+import { TEXT_GRADIENT } from 'engine/const';
+import { hex2string } from 'engine/utils/index';
 
 const default_style = {
     align: 'left',
@@ -13,7 +13,7 @@ const default_style = {
     dropShadowBlur: 0,
     dropShadowColor: 'black',
     dropShadowDistance: 5,
-    fill: 'black',
+    fill: '#FFFFFF',
     fillGradientType: TEXT_GRADIENT.LINEAR_VERTICAL,
     fillGradientStops: [],
     fontFamily: 'Arial',
@@ -48,12 +48,8 @@ const genericFontFamilies = [
 /**
  * A TextStyle Object decorates a Text Object. It can be shared between
  * multiple Text objects. Changing the style will update all text objects using it.
- *
- * @class
- * @memberof V
  */
-export default class TextStyle
-{
+export default class TextStyle {
     /**
      * @param {object} [style] - The style parameters
      * @param {string} [style.align='left'] - Alignment for multiline text ('left', 'center' or 'right'),
@@ -102,8 +98,7 @@ export default class TextStyle
      * @param {boolean} [style.wordWrap=false] - Indicates if word wrap should be used
      * @param {number} [style.wordWrapWidth=100] - The width at which text will wrap, it needs wordWrap to be set to true
      */
-    constructor(style)
-    {
+    constructor(style) {
         this.styleID = 0;
 
         this.reset();
@@ -117,8 +112,7 @@ export default class TextStyle
      *
      * @return {TextStyle} New cloned TextStyle object
      */
-    clone()
-    {
+    clone() {
         const cloned_properties = {};
 
         deep_copy_properties(cloned_properties, this, default_style);
@@ -129,8 +123,7 @@ export default class TextStyle
     /**
      * Resets all properties to the defaults specified in TextStyle.prototype._default
      */
-    reset()
-    {
+    reset() {
         deep_copy_properties(this, default_style, default_style);
     }
 
@@ -139,14 +132,11 @@ export default class TextStyle
      *
      * @member {string}
      */
-    get align()
-    {
+    get align() {
         return this._align;
     }
-    set align(align)
-    {
-        if (this._align !== align)
-        {
+    set align(align) {
+        if (this._align !== align) {
             this._align = align;
             this.styleID++;
         }
@@ -157,14 +147,11 @@ export default class TextStyle
      *
      * @member {boolean}
      */
-    get breakWords()
-    {
+    get breakWords() {
         return this._breakWords;
     }
-    set breakWords(breakWords)
-    {
-        if (this._breakWords !== breakWords)
-        {
+    set breakWords(breakWords) {
+        if (this._breakWords !== breakWords) {
             this._breakWords = breakWords;
             this.styleID++;
         }
@@ -175,14 +162,11 @@ export default class TextStyle
      *
      * @member {boolean}
      */
-    get dropShadow()
-    {
+    get dropShadow() {
         return this._dropShadow;
     }
-    set dropShadow(dropShadow)
-    {
-        if (this._dropShadow !== dropShadow)
-        {
+    set dropShadow(dropShadow) {
+        if (this._dropShadow !== dropShadow) {
             this._dropShadow = dropShadow;
             this.styleID++;
         }
@@ -193,14 +177,11 @@ export default class TextStyle
      *
      * @member {number}
      */
-    get dropShadowAlpha()
-    {
+    get dropShadowAlpha() {
         return this._dropShadowAlpha;
     }
-    set dropShadowAlpha(dropShadowAlpha)
-    {
-        if (this._dropShadowAlpha !== dropShadowAlpha)
-        {
+    set dropShadowAlpha(dropShadowAlpha) {
+        if (this._dropShadowAlpha !== dropShadowAlpha) {
             this._dropShadowAlpha = dropShadowAlpha;
             this.styleID++;
         }
@@ -211,14 +192,11 @@ export default class TextStyle
      *
      * @member {number}
      */
-    get dropShadowAngle()
-    {
+    get dropShadowAngle() {
         return this._dropShadowAngle;
     }
-    set dropShadowAngle(dropShadowAngle)
-    {
-        if (this._dropShadowAngle !== dropShadowAngle)
-        {
+    set dropShadowAngle(dropShadowAngle) {
+        if (this._dropShadowAngle !== dropShadowAngle) {
             this._dropShadowAngle = dropShadowAngle;
             this.styleID++;
         }
@@ -229,14 +207,11 @@ export default class TextStyle
      *
      * @member {number}
      */
-    get dropShadowBlur()
-    {
+    get dropShadowBlur() {
         return this._dropShadowBlur;
     }
-    set dropShadowBlur(dropShadowBlur)
-    {
-        if (this._dropShadowBlur !== dropShadowBlur)
-        {
+    set dropShadowBlur(dropShadowBlur) {
+        if (this._dropShadowBlur !== dropShadowBlur) {
             this._dropShadowBlur = dropShadowBlur;
             this.styleID++;
         }
@@ -247,15 +222,12 @@ export default class TextStyle
      *
      * @member {string|number}
      */
-    get dropShadowColor()
-    {
+    get dropShadowColor() {
         return this._dropShadowColor;
     }
-    set dropShadowColor(dropShadowColor)
-    {
+    set dropShadowColor(dropShadowColor) {
         const outputColor = getColor(dropShadowColor);
-        if (this._dropShadowColor !== outputColor)
-        {
+        if (this._dropShadowColor !== outputColor) {
             this._dropShadowColor = outputColor;
             this.styleID++;
         }
@@ -266,14 +238,11 @@ export default class TextStyle
      *
      * @member {number}
      */
-    get dropShadowDistance()
-    {
+    get dropShadowDistance() {
         return this._dropShadowDistance;
     }
-    set dropShadowDistance(dropShadowDistance)
-    {
-        if (this._dropShadowDistance !== dropShadowDistance)
-        {
+    set dropShadowDistance(dropShadowDistance) {
+        if (this._dropShadowDistance !== dropShadowDistance) {
             this._dropShadowDistance = dropShadowDistance;
             this.styleID++;
         }
@@ -286,15 +255,12 @@ export default class TextStyle
      *
      * @member {string|string[]|number|number[]|CanvasGradient|CanvasPattern}
      */
-    get fill()
-    {
+    get fill() {
         return this._fill;
     }
-    set fill(fill)
-    {
+    set fill(fill) {
         const outputColor = getColor(fill);
-        if (this._fill !== outputColor)
-        {
+        if (this._fill !== outputColor) {
             this._fill = outputColor;
             this.styleID++;
         }
@@ -306,14 +272,11 @@ export default class TextStyle
      *
      * @member {number}
      */
-    get fillGradientType()
-    {
+    get fillGradientType() {
         return this._fillGradientType;
     }
-    set fillGradientType(fillGradientType)
-    {
-        if (this._fillGradientType !== fillGradientType)
-        {
+    set fillGradientType(fillGradientType) {
+        if (this._fillGradientType !== fillGradientType) {
             this._fillGradientType = fillGradientType;
             this.styleID++;
         }
@@ -325,14 +288,11 @@ export default class TextStyle
      *
      * @member {number[]}
      */
-    get fillGradientStops()
-    {
+    get fillGradientStops() {
         return this._fillGradientStops;
     }
-    set fillGradientStops(fillGradientStops)
-    {
-        if (!areArraysEqual(this._fillGradientStops,fillGradientStops))
-        {
+    set fillGradientStops(fillGradientStops) {
+        if (!areArraysEqual(this._fillGradientStops, fillGradientStops)) {
             this._fillGradientStops = fillGradientStops;
             this.styleID++;
         }
@@ -343,14 +303,11 @@ export default class TextStyle
      *
      * @member {string|string[]}
      */
-    get fontFamily()
-    {
+    get fontFamily() {
         return this._fontFamily;
     }
-    set fontFamily(fontFamily)
-    {
-        if (this.fontFamily !== fontFamily)
-        {
+    set fontFamily(fontFamily) {
+        if (this.fontFamily !== fontFamily) {
             this._fontFamily = fontFamily;
             this.styleID++;
         }
@@ -362,14 +319,11 @@ export default class TextStyle
      *
      * @member {number|string}
      */
-    get fontSize()
-    {
+    get fontSize() {
         return this._fontSize;
     }
-    set fontSize(fontSize)
-    {
-        if (this._fontSize !== fontSize)
-        {
+    set fontSize(fontSize) {
+        if (this._fontSize !== fontSize) {
             this._fontSize = fontSize;
             this.styleID++;
         }
@@ -381,14 +335,11 @@ export default class TextStyle
      *
      * @member {string}
      */
-    get fontStyle()
-    {
+    get fontStyle() {
         return this._fontStyle;
     }
-    set fontStyle(fontStyle)
-    {
-        if (this._fontStyle !== fontStyle)
-        {
+    set fontStyle(fontStyle) {
+        if (this._fontStyle !== fontStyle) {
             this._fontStyle = fontStyle;
             this.styleID++;
         }
@@ -400,14 +351,11 @@ export default class TextStyle
      *
      * @member {string}
      */
-    get fontVariant()
-    {
+    get fontVariant() {
         return this._fontVariant;
     }
-    set fontVariant(fontVariant)
-    {
-        if (this._fontVariant !== fontVariant)
-        {
+    set fontVariant(fontVariant) {
+        if (this._fontVariant !== fontVariant) {
             this._fontVariant = fontVariant;
             this.styleID++;
         }
@@ -419,14 +367,11 @@ export default class TextStyle
      *
      * @member {string}
      */
-    get fontWeight()
-    {
+    get fontWeight() {
         return this._fontWeight;
     }
-    set fontWeight(fontWeight)
-    {
-        if (this._fontWeight !== fontWeight)
-        {
+    set fontWeight(fontWeight) {
+        if (this._fontWeight !== fontWeight) {
             this._fontWeight = fontWeight;
             this.styleID++;
         }
@@ -437,14 +382,11 @@ export default class TextStyle
      *
      * @member {number}
      */
-    get letterSpacing()
-    {
+    get letterSpacing() {
         return this._letterSpacing;
     }
-    set letterSpacing(letterSpacing)
-    {
-        if (this._letterSpacing !== letterSpacing)
-        {
+    set letterSpacing(letterSpacing) {
+        if (this._letterSpacing !== letterSpacing) {
             this._letterSpacing = letterSpacing;
             this.styleID++;
         }
@@ -455,14 +397,11 @@ export default class TextStyle
      *
      * @member {number}
      */
-    get lineHeight()
-    {
+    get lineHeight() {
         return this._lineHeight;
     }
-    set lineHeight(lineHeight)
-    {
-        if (this._lineHeight !== lineHeight)
-        {
+    set lineHeight(lineHeight) {
+        if (this._lineHeight !== lineHeight) {
             this._lineHeight = lineHeight;
             this.styleID++;
         }
@@ -473,14 +412,12 @@ export default class TextStyle
      *
      * @member {number}
      */
-    get leading()
-    {
+    get leading() {
         return this._leading;
     }
     set leading(leading) // eslint-disable-line require-jsdoc
     {
-        if (this._leading !== leading)
-        {
+        if (this._leading !== leading) {
             this._leading = leading;
             this.styleID++;
         }
@@ -492,14 +429,11 @@ export default class TextStyle
      *
      * @member {string}
      */
-    get lineJoin()
-    {
+    get lineJoin() {
         return this._lineJoin;
     }
-    set lineJoin(lineJoin)
-    {
-        if (this._lineJoin !== lineJoin)
-        {
+    set lineJoin(lineJoin) {
+        if (this._lineJoin !== lineJoin) {
             this._lineJoin = lineJoin;
             this.styleID++;
         }
@@ -511,14 +445,11 @@ export default class TextStyle
      *
      * @member {number}
      */
-    get miterLimit()
-    {
+    get miterLimit() {
         return this._miterLimit;
     }
-    set miterLimit(miterLimit)
-    {
-        if (this._miterLimit !== miterLimit)
-        {
+    set miterLimit(miterLimit) {
+        if (this._miterLimit !== miterLimit) {
             this._miterLimit = miterLimit;
             this.styleID++;
         }
@@ -530,14 +461,11 @@ export default class TextStyle
      *
      * @member {number}
      */
-    get padding()
-    {
+    get padding() {
         return this._padding;
     }
-    set padding(padding)
-    {
-        if (this._padding !== padding)
-        {
+    set padding(padding) {
+        if (this._padding !== padding) {
             this._padding = padding;
             this.styleID++;
         }
@@ -549,15 +477,12 @@ export default class TextStyle
      *
      * @member {string|number}
      */
-    get stroke()
-    {
+    get stroke() {
         return this._stroke;
     }
-    set stroke(stroke)
-    {
+    set stroke(stroke) {
         const outputColor = getColor(stroke);
-        if (this._stroke !== outputColor)
-        {
+        if (this._stroke !== outputColor) {
             this._stroke = outputColor;
             this.styleID++;
         }
@@ -569,14 +494,11 @@ export default class TextStyle
      *
      * @member {number}
      */
-    get strokeThickness()
-    {
+    get strokeThickness() {
         return this._strokeThickness;
     }
-    set strokeThickness(strokeThickness)
-    {
-        if (this._strokeThickness !== strokeThickness)
-        {
+    set strokeThickness(strokeThickness) {
+        if (this._strokeThickness !== strokeThickness) {
             this._strokeThickness = strokeThickness;
             this.styleID++;
         }
@@ -587,14 +509,11 @@ export default class TextStyle
      *
      * @member {string}
      */
-    get textBaseline()
-    {
+    get textBaseline() {
         return this._textBaseline;
     }
-    set textBaseline(textBaseline)
-    {
-        if (this._textBaseline !== textBaseline)
-        {
+    set textBaseline(textBaseline) {
+        if (this._textBaseline !== textBaseline) {
             this._textBaseline = textBaseline;
             this.styleID++;
         }
@@ -605,14 +524,11 @@ export default class TextStyle
      *
      * @member {boolean}
      */
-    get trim()
-    {
+    get trim() {
         return this._trim;
     }
-    set trim(trim)
-    {
-        if (this._trim !== trim)
-        {
+    set trim(trim) {
+        if (this._trim !== trim) {
             this._trim = trim;
             this.styleID++;
         }
@@ -646,14 +562,11 @@ export default class TextStyle
      *
      * @member {boolean}
      */
-    get wordWrap()
-    {
+    get wordWrap() {
         return this._wordWrap;
     }
-    set wordWrap(wordWrap)
-    {
-        if (this._wordWrap !== wordWrap)
-        {
+    set wordWrap(wordWrap) {
+        if (this._wordWrap !== wordWrap) {
             this._wordWrap = wordWrap;
             this.styleID++;
         }
@@ -664,14 +577,11 @@ export default class TextStyle
      *
      * @member {number}
      */
-    get wordWrapWidth()
-    {
+    get wordWrapWidth() {
         return this._wordWrapWidth;
     }
-    set wordWrapWidth(wordWrapWidth)
-    {
-        if (this._wordWrapWidth !== wordWrapWidth)
-        {
+    set wordWrapWidth(wordWrapWidth) {
+        if (this._wordWrapWidth !== wordWrapWidth) {
             this._wordWrapWidth = wordWrapWidth;
             this.styleID++;
         }
@@ -682,8 +592,7 @@ export default class TextStyle
      *
      * @return {string} Font style string, for passing to `TextMetrics.measureFont()`
      */
-    toFontString()
-    {
+    toFontString() {
         // build canvas api font setting from individual components. Convert a numeric this.fontSize to px
         const fontSizeString = (typeof this.fontSize === 'number') ? `${this.fontSize}px` : this.fontSize;
 
@@ -691,19 +600,16 @@ export default class TextStyle
         // this will support font names with spaces
         let fontFamilies = this.fontFamily;
 
-        if (!Array.isArray(this.fontFamily))
-        {
+        if (!Array.isArray(this.fontFamily)) {
             fontFamilies = this.fontFamily.split(',');
         }
 
-        for (let i = fontFamilies.length - 1; i >= 0; i--)
-        {
+        for (let i = fontFamilies.length - 1; i >= 0; i--) {
             // Trim any extra white-space
             let fontFamily = fontFamilies[i].trim();
 
             // Check if font is already escaped in quotes except for CSS generic fonts
-            if (!(/([\"\'])[^\'\"]+\1/).test(fontFamily) && genericFontFamilies.indexOf(fontFamily) < 0)
-            {
+            if (!(/([\"\'])[^\'\"]+\1/).test(fontFamily) && genericFontFamilies.indexOf(fontFamily) < 0) {
                 fontFamily = `"${fontFamily}"`;
             }
             fontFamilies[i] = fontFamily;
@@ -719,16 +625,12 @@ export default class TextStyle
  * @param {number|number[]} color
  * @return {string} The color as a string.
  */
-function getSingleColor(color)
-{
-    if (typeof color === 'number')
-    {
+function getSingleColor(color) {
+    if (typeof color === 'number') {
         return hex2string(color);
     }
-    else if ( typeof color === 'string' )
-    {
-        if ( color.indexOf('0x') === 0 )
-        {
+    else if (typeof color === 'string') {
+        if (color.indexOf('0x') === 0) {
             color = color.replace('0x', '#');
         }
     }
@@ -743,16 +645,12 @@ function getSingleColor(color)
  * @param {number|number[]} color
  * @return {string} The color as a string.
  */
-function getColor(color)
-{
-    if (!Array.isArray(color))
-    {
+function getColor(color) {
+    if (!Array.isArray(color)) {
         return getSingleColor(color);
     }
-    else
-    {
-        for (let i = 0; i < color.length; ++i)
-        {
+    else {
+        for (let i = 0; i < color.length; ++i) {
             color[i] = getSingleColor(color[i]);
         }
 
@@ -768,22 +666,17 @@ function getColor(color)
  * @param {Array} array2 Second array to compare
  * @return {boolean} Do the arrays contain the same values in the same order
  */
-function areArraysEqual(array1, array2)
-{
-    if (!Array.isArray(array1) || !Array.isArray(array2))
-    {
+function areArraysEqual(array1, array2) {
+    if (!Array.isArray(array1) || !Array.isArray(array2)) {
         return false;
     }
 
-    if (array1.length !== array2.length)
-    {
+    if (array1.length !== array2.length) {
         return false;
     }
 
-    for (let i = 0; i < array1.length; ++i)
-    {
-        if (array1[i] !== array2[i])
-        {
+    for (let i = 0; i < array1.length; ++i) {
+        if (array1[i] !== array2[i]) {
             return false;
         }
     }
