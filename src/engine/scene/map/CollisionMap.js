@@ -1,18 +1,43 @@
+import { Point } from 'engine/math/index';
 import Node2D from '../Node2D';
 
 const HALF_PI = Math.PI * 0.5;
 const SLOPE_ANGLE_DIFF_MIN = 0.001;
 
+/**
+ * @typedef CollisionInfo
+ * @property {number} x
+ * @property {number} y
+ * @property {boolean} slope
+ */
+
+/**
+ * @typedef TraceResult
+ * @property {Point} position
+ * @property {CollisionInfo} collision
+ * @property {CollisionMap} collider
+ */
+
 export default class CollisionMap extends Node2D {
     get_collision_layer() {
         return this.collision_layer;
     }
+    /**
+     * @param {number} bit
+     */
     get_collision_layer_bit(bit) {
         return this.collision_layer & (1 << bit);
     }
+    /**
+     * @param {number} layer
+     */
     set_collision_layer(layer) {
         this.collision_layer = layer;
     }
+    /**
+     * @param {number} bit
+     * @param {number} [value]
+     */
     set_collision_layer_bit(bit, value) {
         if (value) {
             this.collision_layer |= 1 << bit;
@@ -29,6 +54,13 @@ export default class CollisionMap extends Node2D {
         return (this.data) ? this.data.length : 0;
     }
 
+    /**
+     *
+     * @param {number} tilesize Tile size in pixel
+     * @param {number[][]} data Map data as a 2D array
+     * @param {number} [layer_bit=1] Collision layer bit
+     * @param {any} [tiledef] Tile slope definition
+     */
     constructor(tilesize, data, layer_bit = 1, tiledef = TileDef) {
         super();
 
@@ -40,12 +72,16 @@ export default class CollisionMap extends Node2D {
         this.tilesize = tilesize;
         this.data = data;
 
+        /**
+         * @type {Object<number, Array<number>>}
+         */
         this.tiledef = tiledef;
         this.last_slope = 1;
 
         for (let t in this.tiledef) {
-            if ((t | 0) > this.last_slope) {
-                this.last_slope = (t | 0);
+            let t_num = parseInt(t);
+            if ((t_num | 0) > this.last_slope) {
+                this.last_slope = (t_num | 0);
             }
         }
 
@@ -60,16 +96,39 @@ export default class CollisionMap extends Node2D {
 
     clear() {
         this.data = [[]];
-        this.width = 0;
-        this.height = 0;
     }
+    /**
+     * Get the tile index at grid (x, y)
+     * @param {number} x
+     * @param {number} y
+     * @returns {number}
+     */
     get_tile(x, y) {
         return this.data[y][x];
     }
+
+    /**
+     * Set tile index at grid (x, y)
+     * @param {number} x
+     * @param {number} y
+     * @param {number} tile
+     */
     set_tile(x, y, tile) {
         this.data[y][x] = tile;
     }
 
+    /**
+     * Trace an object against the map
+     *
+     * @param {number} x
+     * @param {number} y
+     * @param {number} vx Velocity x
+     * @param {number} vy Velocity y
+     * @param {number} object_width Width of the object
+     * @param {number} object_height Height of the object
+     * @param {TraceResult} res
+     * @returns {TraceResult}
+     */
     trace(x, y, vx, vy, object_width, object_height, res) {
         // Break the trace down into smaller steps if necessary.
         // We add a little extra movement (0.1 px) when calculating the number of steps required,
