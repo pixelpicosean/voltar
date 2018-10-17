@@ -667,7 +667,7 @@ class Animation {
             to_time = tmp;
         }
 
-        if (loop) {
+        if (this.loop) {
             from_time = posmod(from_time, length);
             to_time = posmod(to_time, length);
 
