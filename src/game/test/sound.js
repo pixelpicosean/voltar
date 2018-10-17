@@ -1,8 +1,8 @@
 import * as v from 'engine/index';
 
-v.preload('bgm', 'media/music/bgm.{m4a,ogg,ac3,mp3}');
+v.preload('bgm', 'media/music/bgm.ogg');
 v.preload('fx_json', 'media/sound/fx.json');
-v.preload('fx', 'media/sound/fx.{m4a,ogg,ac3,mp3}');
+v.preload('fx', 'media/sound/fx.ogg');
 // v.loader.onComplete.once(() => {
 //     v.sound
 //         .find('fx')
@@ -18,18 +18,15 @@ export default class SoundTest extends v.Node2D {
     _ready() {
         const bgm = v.sound.find('bgm');
         bgm.filters = [
-            new v.audio.filters.StereoFilter(-1),
             new v.audio.filters.ReverbFilter(),
         ];
         bgm.play();
 
-        let timer = this.tweens.add(new v.Tween());
-        timer.repeat = true;
-        timer.interpolate_callback(this, 0.2, 'play', undefined);
+        // let timer = this.tweens.create();
+        // timer.repeat = true;
+        // timer.interpolate_callback(this, 0.2, 'play', undefined);
         // timer.start();
     }
-    _process(delta) {}
-    _exit_tree() {}
 
     play() {
         v.sound
