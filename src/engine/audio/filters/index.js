@@ -1,12 +1,11 @@
 /**
  * Set of dynamic filters to be applied to v.audio.Sound.
  * @example
- * const sound = v.audio.Sound.from('file.mp3');
+ * const sound = audio.Sound.from('file.mp3');
  * sound.filters = [
- *   new v.audio.filters.StereoFilter(-1),
- *   new v.audio.filters.ReverbFilter()
+ *   new audio.filters.StereoFilter(-1),
+ *   new audio.filters.ReverbFilter()
  * ];
- * @namespace v.audio.filters
  */
 export { default as Filter } from './Filter';
 export { default as EqualizerFilter } from './EqualizerFilter';

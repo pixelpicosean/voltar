@@ -1,21 +1,39 @@
+import Filter from "./filters/Filter";
+
 /**
  * Abstract class which SoundNodes and SoundContext
  * both extend. This provides the functionality for adding
  * dynamic filters.
- * @class Filterable
- * @memberof v.sound
+ *
  * @param {AudioNode} source The source audio node
  * @param {AudioNode} destination The output audio node
  * @private
  */
 export default class Filterable {
     constructor(input, output) {
+        /**
+         * The destination output audio node
+         * @type {AudioNode}
+         * @private
+         */
         this._output = output;
+
+        /**
+         * Get the gain node
+         * @type {AudioNode}
+         * @private
+         */
         this._input = input;
+
+        /**
+         * Collection of filters.
+         * @type {Filter[]}
+         * @private
+         */
+        this._filters = null;
     }
     /**
      * The destination output audio node
-     * @name v.sound.Filterable#destination
      * @type {AudioNode}
      * @readonly
      */
@@ -24,8 +42,7 @@ export default class Filterable {
     }
     /**
      * The collection of filters
-     * @name v.sound.Filterable#filters
-     * @type {v.sound.filters.Filter[]}
+     * @type {Filter[]}
      */
     get filters() {
         return this._filters;
@@ -41,11 +58,15 @@ export default class Filterable {
             // Reconnect direct path
             this._input.connect(this._output);
         }
+
         if (filters && filters.length) {
             this._filters = filters.slice(0);
+
             // Disconnect direct path before inserting filters
             this._input.disconnect();
+
             // Connect each filter
+            /** @type {Filter} */
             let prevFilter = null;
             filters.forEach((filter) => {
                 if (prevFilter === null) {
@@ -58,12 +79,14 @@ export default class Filterable {
                 }
                 prevFilter = filter;
             });
-            prevFilter.connect(this._output);
+
+            if (prevFilter) {
+                prevFilter.connect(this._output);
+            }
         }
     }
     /**
      * Cleans up.
-     * @method v.sound.Filterable#destroy
      */
     destroy() {
         this.filters = null;

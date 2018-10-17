@@ -1,11 +1,10 @@
 import Filter from './Filter';
 import SoundLibrary from '../SoundLibrary';
+
 /**
  * Filter for adding reverb. Refactored from
  * https://github.com/web-audio-components/simple-reverb/
  *
- * @class ReverbFilter
- * @memberof v.audio.filters
  * @param {number} [seconds=3] Seconds for reverb
  * @param {number} [decay=2] The decay length
  * @param {boolean} [reverse=false] Reverse reverb
@@ -16,17 +15,40 @@ export default class ReverbFilter extends Filter {
             super(null);
             return;
         }
+
         const convolver = SoundLibrary.instance.context.audioContext.createConvolver();
+
         super(convolver);
+
+        /**
+         * The covolver node
+         * @type {ConvolverNode}
+         * @private
+         */
         this._convolver = convolver;
+
+        /**
+         * @type {number}
+         * @private
+         */
         this._seconds = this._clamp(seconds, 1, 50);
+
+        /**
+         * @type {number}
+         * @private
+         */
         this._decay = this._clamp(decay, 0, 100);
+
+        /**
+         * @type {boolean}
+         * @private
+         */
         this._reverse = reverse;
+
         this._rebuild();
     }
     /**
      * Clamp a value
-     * @method v.audio.filters.ReverbFilter#_clamp
      * @private
      * @param {number} value
      * @param {number} min Minimum value
@@ -38,7 +60,6 @@ export default class ReverbFilter extends Filter {
     }
     /**
      * Length of reverb in seconds from 1 to 50
-     * @name v.audio.filters.ReverbFilter#decay
      * @type {number}
      * @default 3
      */
@@ -49,9 +70,9 @@ export default class ReverbFilter extends Filter {
         this._seconds = this._clamp(seconds, 1, 50);
         this._rebuild();
     }
+
     /**
      * Decay value from 0 to 100
-     * @name v.audio.filters.ReverbFilter#decay
      * @type {number}
      * @default 2
      */
@@ -62,9 +83,9 @@ export default class ReverbFilter extends Filter {
         this._decay = this._clamp(decay, 0, 100);
         this._rebuild();
     }
+
     /**
      * Reverse value from 0 to 1
-     * @name v.audio.filters.ReverbFilter#reverse
      * @type {boolean}
      * @default false
      */
@@ -75,10 +96,10 @@ export default class ReverbFilter extends Filter {
         this._reverse = reverse;
         this._rebuild();
     }
+
     /**
      * Utility function for building an impulse response
      * from the module parameters.
-     * @method v.audio.filters.ReverbFilter#_rebuild
      * @private
      */
     _rebuild() {
@@ -89,6 +110,7 @@ export default class ReverbFilter extends Filter {
         const impulseL = impulse.getChannelData(0);
         const impulseR = impulse.getChannelData(1);
         let n;
+
         for (let i = 0; i < length; i++) {
             n = this._reverse ? length - i : i;
             impulseL[i] = (Math.random() * 2 - 1) * Math.pow(1 - n / length, this._decay);

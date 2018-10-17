@@ -127,6 +127,9 @@ export default class SceneTree {
          * @type {Loader}
          */
         this.loader = null;
+        /**
+         * @type {Array<Array<string>>}
+         */
         this.preload_queue = preload_queue;
         this.visual_server = new VisualServer();
         /**
@@ -174,12 +177,8 @@ export default class SceneTree {
         this.loader.destroy = () => {};
 
         // Load resources marked as preload
-        for (const res of this.preload_queue) {
-            if (res.url) {
-                this.loader.add(res.key, res.url)
-            } else {
-                this.loader.add(res.key)
-            }
+        for (const settings of this.preload_queue) {
+            this.loader.add.apply(this.loader, settings);
         }
 
         window.addEventListener('load', this._initialize, false);

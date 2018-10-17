@@ -1,42 +1,144 @@
 import EventEmitter from 'eventemitter3';
 import WebAudioUtils from "./WebAudioUtils";
+import WebAudioMedia from './WebAudioMedia';
+
 let id = 0;
+
 /**
  * A single play instance that handles the AudioBufferSourceNode.
- * @private
- * @class WebAudioInstance
- * @memberof v.audio.webaudio
- * @param {SoundNodes} source Reference to the SoundNodes.
+ * @param {WebAudioMedia} source
  */
 export default class WebAudioInstance extends EventEmitter {
     constructor(media) {
         super();
+
+        /**
+         * The current unique ID for this instance.
+         * @readonly
+         */
         this.id = id++;
+
+        /**
+         * The source Sound.
+         * @type {WebAudioMedia}
+         * @private
+         */
         this._media = null;
+
+        /**
+         * true if paused.
+         * @type {boolean}
+         * @private
+         */
         this._paused = false;
+
+        /**
+         * true if muted.
+         * @type {boolean}
+         * @private
+         */
         this._muted = false;
+
+        /**
+         * true if paused.
+         * @type {number}
+         * @private
+         */
         this._elapsed = 0;
+
+        /**
+         * The instance volume
+         * @type {number}
+         * @private
+         */
+        this._volume = 0;
+
+        /**
+         * Last update frame number.
+         * @type {number}
+         * @private
+         */
+        this._lastUpdate = 0;
+
+        /**
+         * The total number of seconds elapsed in playback.
+         * @type {number}
+         * @private
+         */
+        this._elapsed = 0;
+
+        /**
+         * Playback rate, where 1 is 100%.
+         * @type {number}
+         * @private
+         */
+        this._speed = 0;
+
+        /**
+         * Playback rate, where 1 is 100%.
+         * @type {number}
+         * @private
+         */
+        this._end = 0;
+
+        /**
+         * `true` if should be looping.
+         * @type {boolean}
+         * @private
+         */
+        this._loop = false;
+
+        /**
+         * Gain node for controlling volume of instance
+         * @type {GainNode}
+         * @private
+         */
+        this._gain = null;
+
+        /**
+         * Length of the sound in seconds.
+         * @type {number}
+         * @private
+         */
+        this._duration = 0;
+
+        /**
+         * The progress of the sound from 0 to 1.
+         * @type {number}
+         * @private
+         */
+        this._progress = 0;
+
+        /**
+         * Callback for update listener
+         * @type {EventListener}
+         * @private
+         */
         this._updateListener = this._update.bind(this);
+
+        /**
+         * Audio buffer source clone from Sound object.
+         * @type {AudioBufferSourceNode}
+         * @private
+         */
+        this._source = null;
+
         // Initialize
         this.init(media);
     }
     /**
      * Stops the instance, don't use after this.
-     * @method v.audio.webaudio.WebAudioInstance#stop
      */
     stop() {
         if (this._source) {
             this._internalStop();
-            /**
-             * The sound is stopped. Don't use after this is called.
-             * @event v.audio.webaudio.WebAudioInstance#stop
-             */
+
             this.emit("stop");
         }
     }
     /**
      * Set the instance speed from 0 to 1
-     * @member {number} v.audio.htmlaudio.HTMLAudioInstance#speed
+     * @member {number}
      */
     get speed() {
         return this._speed;
@@ -48,7 +150,7 @@ export default class WebAudioInstance extends EventEmitter {
     }
     /**
      * Get the set the volume for this instance from 0 to 1
-     * @member {number} v.audio.htmlaudio.HTMLAudioInstance#volume
+     * @member {number}
      */
     get volume() {
         return this._volume;
@@ -59,7 +161,7 @@ export default class WebAudioInstance extends EventEmitter {
     }
     /**
      * `true` if the sound is muted
-     * @member {boolean} v.audio.htmlaudio.HTMLAudioInstance#muted
+     * @member {boolean}
      */
     get muted() {
         return this._muted;
@@ -70,7 +172,7 @@ export default class WebAudioInstance extends EventEmitter {
     }
     /**
      * If the sound instance should loop playback
-     * @member {boolean} v.audio.htmlaudio.HTMLAudioInstance#loop
+     * @member {boolean}
      */
     get loop() {
         return this._loop;
@@ -81,84 +183,72 @@ export default class WebAudioInstance extends EventEmitter {
     }
     /**
      * Refresh loop, volume and speed based on changes to parent
-     * @method v.audio.webaudio.WebAudioInstance#refresh
      */
     refresh() {
         const global = this._media.context;
         const sound = this._media.parent;
+
         // Updating looping
         this._source.loop = this._loop || sound.loop;
+
         // Update the volume
         const globalVolume = global.volume * (global.muted ? 0 : 1);
         const soundVolume = sound.volume * (sound.muted ? 0 : 1);
         const instanceVolume = this._volume * (this._muted ? 0 : 1);
         WebAudioUtils.setParamValue(this._gain.gain, instanceVolume * soundVolume * globalVolume);
+
         // Update the speed
         WebAudioUtils.setParamValue(this._source.playbackRate, this._speed * sound.speed * global.speed);
     }
     /**
      * Handle changes in paused state, either globally or sound or instance
-     * @method v.audio.webaudio.WebAudioInstance#refreshPaused
      */
     refreshPaused() {
         const global = this._media.context;
         const sound = this._media.parent;
+
         // Consider global and sound paused
         const pausedReal = this._paused || sound.paused || global.paused;
+
         if (pausedReal !== this._pausedReal) {
             this._pausedReal = pausedReal;
+
             if (pausedReal) {
                 // pause the sounds
                 this._internalStop();
-                /**
-                 * The sound is paused.
-                 * @event v.audio.webaudio.WebAudioInstance#paused
-                 */
+
                 this.emit("paused");
             }
             else {
-                /**
-                 * The sound is unpaused.
-                 * @event v.audio.webaudio.WebAudioInstance#resumed
-                 */
                 this.emit("resumed");
+
                 // resume the playing with offset
                 this.play({
                     start: this._elapsed % this._duration,
                     end: this._end,
                     speed: this._speed,
                     loop: this._loop,
-                    volume: this._volume
+                    volume: this._volume,
                 });
             }
-            /**
-             * The sound is paused or unpaused.
-             * @event v.audio.webaudio.WebAudioInstance#pause
-             * @property {boolean} paused If the instance was paused or not.
-             */
+
             this.emit("pause", pausedReal);
         }
     }
     /**
      * Plays the sound.
-     * @method v.audio.webaudio.WebAudioInstance#play
-     * @param {Object} options Play options
-     * @param {number} options.start The position to start playing, in seconds.
-     * @param {number} options.end The ending position in seconds.
-     * @param {number} options.speed Speed for the instance
-     * @param {boolean} options.loop If the instance is looping, defaults to sound loop
-     * @param {number} options.volume Volume of the instance
-     * @param {boolean} options.muted Muted state of instance
+     * @param {import('../Sound').PlayOptions} options Play options
      */
     play(options) {
         const { start, end, speed, loop, volume, muted } = options;
-        // @if DEBUG
+
         if (end) {
             console.assert(end > start, "End time is before start time");
         }
-        // @endif
+
         this._paused = false;
         const { source, gain } = this._media.nodes.cloneBufferSource();
+
         this._source = source;
         this._gain = gain;
         this._speed = speed;
@@ -166,41 +256,40 @@ export default class WebAudioInstance extends EventEmitter {
         this._loop = !!loop;
         this._muted = muted;
         this.refresh();
+
         // WebAudio doesn't support looping when a duration is set
         // we'll set this just for the heck of it
         if (this.loop && end !== null) {
-            // @if DEBUG
             console.warn('Looping not support when specifying an "end" time');
-            // @endif
             this.loop = false;
         }
         this._end = end;
+
         const duration = this._source.buffer.duration;
+
         this._duration = duration;
         this._lastUpdate = this._now();
         this._elapsed = start;
         this._source.onended = this._onComplete.bind(this);
+
         if (end) {
             this._source.start(0, start, end - start);
-        }
-        else {
+        } else {
             this._source.start(0, start);
         }
-        /**
-         * The sound is started.
-         * @event v.audio.webaudio.WebAudioInstance#start
-         */
+
         this.emit("start");
+
         // Do an update for the initial progress
         this._update(true);
+
         // Start handling internal ticks
         this._enabled = true;
     }
     /**
      * Utility to convert time in millseconds or seconds
-     * @method v.audio.webaudio.WebAudioInstance#_toSec
      * @private
-     * @param {number} [time] Time in either ms or sec
+     * @param {number} time Time in either ms or sec
      * @return {number} Time in seconds
      */
     _toSec(time) {
@@ -211,13 +300,14 @@ export default class WebAudioInstance extends EventEmitter {
     }
     /**
      * Start the update progress.
-     * @name v.audio.webaudio.WebAudioInstance#_enabled
      * @type {boolean}
      * @private
      */
     set _enabled(enabled) {
         const script = this._media.nodes.script;
+
         script.removeEventListener('audioprocess', this._updateListener);
+
         if (enabled) {
             script.addEventListener('audioprocess', this._updateListener);
         }
@@ -225,7 +315,6 @@ export default class WebAudioInstance extends EventEmitter {
     /**
      * The current playback progress from 0 to 1.
      * @type {number}
-     * @name v.audio.webaudio.WebAudioInstance#progress
      */
     get progress() {
         return this._progress;
@@ -233,7 +322,6 @@ export default class WebAudioInstance extends EventEmitter {
     /**
      * Pauses the sound.
      * @type {boolean}
-     * @name v.audio.webaudio.WebAudioInstance#paused
      */
     get paused() {
         return this._paused;
@@ -244,7 +332,6 @@ export default class WebAudioInstance extends EventEmitter {
     }
     /**
      * Don't use after this.
-     * @method v.audio.webaudio.WebAudioInstance#destroy
      */
     destroy() {
         this.removeAllListeners();
@@ -274,16 +361,14 @@ export default class WebAudioInstance extends EventEmitter {
     }
     /**
      * To string method for instance.
-     * @method v.audio.webaudio.WebAudioInstance#toString
      * @return {string} The string representation of instance.
      * @private
      */
     toString() {
-        return "[WebAudioInstance id=" + this.id + "]";
+        return `[WebAudioInstance id=${this.id}]`;
     }
     /**
      * Get the current time in seconds.
-     * @method v.audio.webaudio.WebAudioInstance#_now
      * @private
      * @return {number} Seconds since start of context
      */
@@ -292,34 +377,30 @@ export default class WebAudioInstance extends EventEmitter {
     }
     /**
      * Internal update the progress.
-     * @method v.audio.webaudio.WebAudioInstance#_update
      * @private
      */
     _update(force = false) {
         if (this._source) {
             const now = this._now();
             const delta = now - this._lastUpdate;
+
             if (delta > 0 || force) {
                 const speed = this._source.playbackRate.value;
                 this._elapsed += delta * speed;
                 this._lastUpdate = now;
                 const duration = this._duration;
                 const progress = (this._elapsed % duration) / duration;
+
                 // Update the progress
                 this._progress = progress;
-                /**
-                 * The sound progress is updated.
-                 * @event v.audio.webaudio.WebAudioInstance#progress
-                 * @property {number} progress Amount progressed from 0 to 1
-                 * @property {number} duration The total playback in seconds
-                 */
+
                 this.emit("progress", this._progress, duration);
             }
         }
     }
     /**
      * Initializes the instance.
-     * @method v.audio.webaudio.WebAudioInstance#init
+     * @param {WebAudioMedia} media
      */
     init(media) {
         this._media = media;
@@ -328,7 +409,6 @@ export default class WebAudioInstance extends EventEmitter {
     }
     /**
      * Stops the instance.
-     * @method v.audio.webaudio.WebAudioInstance#_internalStop
      * @private
      */
     _internalStop() {
@@ -341,7 +421,6 @@ export default class WebAudioInstance extends EventEmitter {
     }
     /**
      * Callback when completed.
-     * @method v.audio.webaudio.WebAudioInstance#_onComplete
      * @private
      */
     _onComplete() {
@@ -352,10 +431,7 @@ export default class WebAudioInstance extends EventEmitter {
         this._source = null;
         this._progress = 1;
         this.emit("progress", 1, this._duration);
-        /**
-         * The sound ends, don't use after this
-         * @event v.audio.webaudio.WebAudioInstance#end
-         */
+
         this.emit("end", this);
     }
 }

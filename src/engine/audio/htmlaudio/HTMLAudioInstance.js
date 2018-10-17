@@ -1,14 +1,25 @@
 import { EventEmitter } from 'engine/dep/index';
 import * as ticker from 'engine/ticker/index';
+import HTMLAudioMedia from './HTMLAudioMedia';
 
 let id = 0;
 /**
  * Instance which wraps the `<audio>` element playback.
- * @private
  */
 export default class HTMLAudioInstance extends EventEmitter {
     constructor(parent) {
         super();
+
+        /**
+         * @type {HTMLAudioMedia}
+         */
+        this._media = null;
+
+        /**
+         * @type {HTMLAudioElement}
+         */
+        this._source = null;
+
         this.id = id++;
         this.init(parent);
     }
@@ -50,7 +61,9 @@ export default class HTMLAudioInstance extends EventEmitter {
     init(media) {
         this._playing = false;
         this._duration = media.source.duration;
-        const source = this._source = media.source.cloneNode(false);
+        // @ts-ignore
+        this._source = media.source.cloneNode(false);
+        const source = this._source;
         source.src = media.parent.url;
         source.onplay = this._onPlay.bind(this);
         source.onpause = this._onPause.bind(this);

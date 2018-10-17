@@ -4,6 +4,60 @@ import SoundSprite from "./sprites/SoundSprite";
 import SoundUtils from "./utils/SoundUtils";
 import WebAudioMedia from "./webaudio/WebAudioMedia";
 import Filter from "./filters/Filter";
+
+/**
+ * Constructor options
+ * @typedef Options
+ * @property {boolean} [autoPlay]
+ * @property {boolean} [preaload]
+ * @property {boolean} [singleInstance]
+ * @property {number} [volume]
+ * @property {number} [speed]
+ * @property {CompleteCallback} [complete]
+ * @property {LoadedCallback} [loaded]
+ * @property {boolean} [preload]
+ * @property {boolean} [loop]
+ * @property {string} [url]
+ * @property {ArrayBuffer|HTMLAudioElement} [source]
+ * @property {{[id: string]: import("./sprites/SoundSprite").SoundSpriteData}} [sprites];
+ */
+
+// Interface for play options
+/**
+ * @typedef PlayOptions
+ * @property {number} [start]
+ * @property {number} [end]
+ * @property {number} [speed]
+ * @property {boolean} [loop]
+ * @property {number} [volume]
+ * @property {string} [sprite]
+ * @property {boolean} [muted]
+ * @property {CompleteCallback} [complete]
+ * @property {LoadedCallback} [loaded]
+ * @property {number} [offset]
+ */
+
+/**
+ * Callback when sound is loaded.
+ * @callback PIXI.sound.Sound~loadedCallback
+ * @param {Error} err The callback error.
+ * @param {PIXI.sound.Sound} sound The instance of new sound.
+ * @param {PIXI.sound.IMediaInstance} instance The instance of auto-played sound.
+ */
+/**
+ * Callback when sound is loaded.
+ * @callback LoadedCallback
+ * @param {Error} err The callback error.
+ * @param {Sound} [sound] The instance of new sound.
+ * @param {IMediaInstance} [instance] The instance of auto-played sound.
+ */
+
+/**
+ * Callback when sound is completed.
+ * @callback CompleteCallback
+ * @param {Sound} sound The instance of sound.
+ */
+
 /**
  * Sound represents a single piece of loaded media. When playing a sound {@link IMediaInstance} objects
  * are created. Properties such a `volume`, `pause`, `mute`, `speed`, etc will have an effect on all instances.
@@ -11,25 +65,133 @@ import Filter from "./filters/Filter";
 export default class Sound {
     /**
      * Constructor, use `Sound.from`
-     * @private
+     * @param {IMedia} media
+     * @param {Options} options
      */
     constructor(media, options) {
         this.media = media;
         this.options = options;
-        this._instances = [];
-        this._sprites = {};
-        this.media.init(this);
-        const complete = options.complete;
-        this._autoPlayOptions = complete ? { complete } : null;
+
+        /**
+         * `true` if the buffer is loaded.
+         *
+         * @type {boolean}
+         * @default false
+         */
         this.isLoaded = false;
+        /**
+         * `true` if the sound is currently being played.
+         *
+         * @type {boolean}
+         * @default false
+         * @readonly
+         */
         this.isPlaying = false;
+        /**
+         * true to start playing immediate after load.
+         *
+         * @type {boolean}
+         * @default false
+         * @readonly
+         */
         this.autoPlay = options.autoPlay;
+        /**
+         * `true` to disallow playing multiple layered instances at once.
+         *
+         * @type {boolean}
+         * @default false
+         */
         this.singleInstance = options.singleInstance;
+        /**
+         * `true` to immediately start preloading.
+         *
+         * @type {boolean}
+         * @default false
+         * @readonly
+         */
         this.preload = options.preload || this.autoPlay;
+        /**
+         * The file source to load.
+         *
+         * @type {String}
+         * @readonly
+         */
         this.url = options.url;
-        this.speed = options.speed;
+        /**
+         * The constructor options.
+         *
+         * @type {Object}
+         * @readonly
+         */
+        this.options = options;
+        /**
+         * The audio source
+         *
+         * @type {IMedia}
+         * @private
+         */
+        this.media = media;
+        /**
+         * The collection of instances being played.
+         *
+         * @type {Array<IMediaInstance>}
+         * @private
+         */
+        this._instances = [];
+        /**
+         * Reference to the sound context.
+         *
+         * @type {import("./sprites/SoundSprite").SoundSprites}
+         * @private
+         */
+        this._sprites = {};
+        const complete = options.complete;
+        /**
+         * The options when auto-playing.
+         *
+         * @type {PlayOptions}
+         * @private
+         */
+        this._autoPlayOptions = complete ? { complete } : null;
+        /**
+         * The internal volume.
+         *
+         * @type {number}
+         * @private
+         */
         this.volume = options.volume;
+        /**
+         * The internal paused state.
+         *
+         * @type {boolean}
+         * @private
+         */
+        this._paused = false;
+        /**
+         * The internal muted state.
+         *
+         * @type {boolean}
+         * @private
+         */
+        this._muted = false;
+        /**
+         * The internal volume.
+         *
+         * @type {boolean}
+         * @private
+         */
+        this._loop = false;
+        /**
+         * The internal playbackRate
+         *
+         * @type {number}
+         * @private
+         */
+        this.speed = options.speed;
         this.loop = options.loop;
+
+        this.media.init(this);
+
         if (options.sprites) {
             this.addSprites(options.sprites);
         }
@@ -39,22 +201,8 @@ export default class Sound {
     }
     /**
      * Create a new sound instance from source.
-     * @param {ArrayBuffer|String|Object|HTMLAudioElement} options Either the path or url to the source file.
-     *        or the object of options to use.
-     * @param {String} [options.url] If `options` is an object, the source of file.
-     * @param {HTMLAudioElement|ArrayBuffer} [options.source] The source, if already preloaded.
-     * @param {boolean} [options.autoPlay=false] true to play after loading.
-     * @param {boolean} [options.preload=false] true to immediately start preloading.
-     * @param {boolean} [options.singleInstance=false] `true` to disallow playing multiple layered instances at once.
-     * @param {number} [options.volume=1] The amount of volume 1 = 100%.
-     * @param {number} [options.speed=1] The playback rate where 1 is 100% speed.
-     * @param {Object} [options.sprites] The map of sprite data. Where a sprite is an object
-     *        with a `start` and `end`, which are the times in seconds. Optionally, can include
-     *        a `speed` amount where 1 is 100% speed.
-     * @param {Sound~completeCallback} [options.complete=null] Global complete callback
-     *        when play is finished.
-     * @param {Sound~loadedCallback} [options.loaded=null] Call when finished loading.
-     * @param {boolean} [options.loop=false] true to loop the audio playback.
+     * @param {ArrayBuffer|String|Object|HTMLAudioElement} source Either the path or url to the source file.
+     *                                                            or the object of options to use.
      * @return {Sound} Created sound instance.
      */
     static from(source) {
@@ -150,7 +298,14 @@ export default class Sound {
     set filters(filters) {
         this.media.filters = filters;
     }
-    // Actual implementation
+    /**
+     * Add a sound sprite, which is a saved instance of a longer sound.
+     * Similar to an image spritesheet.
+     * @param {string|{[id: string]: import("./sprites/SoundSprite").SoundSpriteData}} source The unique name of the sound sprite or sprites
+     * @param {import("./sprites/SoundSprite").SoundSpriteData} [data] Map of sounds to add where the key is the alias,
+     *        and the data are configuration options
+     * @returns {SoundSprite|import("./sprites/SoundSprite").SoundSprites} Sound sprite result.
+     */
     addSprites(source, data) {
         if (typeof source === "object") {
             const results = {};
@@ -178,18 +333,17 @@ export default class Sound {
         this._instances = null;
     }
     /**
-     * Remove all sound sprites.
-     * @return {Sound} Sound instance for chaining.
-     */
-    /**
      * Remove a sound sprite.
+     * @param {string} [alias] The unique name of the sound sprite, if nothing
+     *                         is provided, all sprites will be removed.
      * @return {Sound} Sound instance for chaining.
      */
     removeSprites(alias) {
         if (!alias) {
+            for (const name in this._sprites) {
+                this.removeSprites(name);
             }
-        }
-        else {
+        } else {
             const sprite = this._sprites[alias];
             if (sprite !== undefined) {
                 sprite.destroy();
@@ -223,20 +377,24 @@ export default class Sound {
         }
         return this;
     }
-    // Overloaded function
+    /**
+     * Plays a sound or a sound sprite
+     * @param {string|PlayOptions|CompleteCallback} [source] Name of sprite or play options or complete callback
+     * @param {CompleteCallback} [complete] Callback when complete
+     */
     play(source, complete) {
+        /** @type {PlayOptions} */
         let options;
         if (typeof source === "string") {
             const sprite = source;
             options = { sprite, complete };
-        }
-        else if (typeof source === "function") {
+        } else if (typeof source === "function") {
             options = {};
             options.complete = source;
-        }
-        else {
+        } else {
             options = source;
         }
+
         options = Object.assign({
             complete: null,
             loaded: null,
@@ -248,12 +406,13 @@ export default class Sound {
             muted: false,
             loop: false,
         }, options || {});
+
         // A sprite is specified, add the options
         if (options.sprite) {
             const alias = options.sprite;
-            // @if DEBUG
+
             console.assert(!!this._sprites[alias], `Alias ${alias} is not available`);
-            // @endif
+
             const sprite = this._sprites[alias];
             options.start = sprite.start;
             options.end = sprite.end;
@@ -300,7 +459,9 @@ export default class Sound {
         instance.once("stop", () => {
             this._onComplete(instance);
         });
+
         instance.play(options);
+
         return instance;
     }
     /**
@@ -336,7 +497,7 @@ export default class Sound {
     }
     /**
      * Gets and sets the muted flag.
-     * @type {number}
+     * @type {boolean}
      */
     get muted() {
         return this._muted;
@@ -358,6 +519,7 @@ export default class Sound {
     }
     /**
      * Starts the preloading of sound.
+     * @param {LoadedCallback} [callback]
      * @private
      */
     _preload(callback) {
@@ -449,6 +611,7 @@ export default class Sound {
         }
     }
 }
+
 /**
  * Pool of instances
  * @type {Array<IMediaInstance>}

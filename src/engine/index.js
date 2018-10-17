@@ -70,17 +70,19 @@ export * from './rnd';
 // ------------------------------------------------------------------
 // Namespace
 // ------------------------------------------------------------------
+import * as utils from './utils/index';
 import * as loaders from './loaders/index';
 import * as ticker from './ticker/index';
-import * as utils from './utils/index';
+import * as audio from './audio/index';
 
 export {
     settings,
 
+    utils,
+
     loaders,
     ticker,
-
-    utils,
+    audio,
 }
 
 // ------------------------------------------------------------------
@@ -89,22 +91,21 @@ export {
 import Input from './input/index';
 import SceneTree from './SceneTree';
 
+/** @type {Array<Array<string>>} */
 const preload_queue = [];
 
 export const input = new Input();
 export const scene_tree = new SceneTree(input, preload_queue);
-// export const sound = audio.SoundLibrary.init(loaders.Resource, loaders.Loader);
+export const sound = audio.SoundLibrary.init();
 
 // ------------------------------------------------------------------
 // Global functions
 // ------------------------------------------------------------------
 /**
  * Preload a resource before game start
- * @param {string} key Key of the resource
- * @param {string} [url] URL of the resource
  */
-export function preload(key, url) {
-    preload_queue.push({ key, url });
+export function preload(...settings) {
+    preload_queue.push(settings);
 }
 
 import { node_class_map, scene_class_map } from 'engine/registry';
