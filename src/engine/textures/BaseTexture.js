@@ -7,8 +7,9 @@ import {
     decompose_data_uri,
     BaseTextureCache, TextureCache,
 } from '../utils/index';
+import { is_po2 } from 'engine/math/index';
+import { EventEmitter } from 'engine/dep/index';
 import determine_cross_origin from '../utils/determine_cross_origin';
-import { EventEmitter, BitTwiddle } from 'engine/dep/index';
 
 /**
  * A texture stores the information that represents an image. All textures have a base texture.
@@ -189,9 +190,14 @@ export default class BaseTexture extends EventEmitter {
          * @member {object<number, WebGLTexture>}
          */
         this._gl_textures = {};
+        /**
+         * @private
+         * @member {object<number, RenderTarget>}
+         */
+        this._gl_render_targets = null;
 
         this._enabled = 0;
-        this._virtal_bound_id = -1;
+        this._virtalBoundId = -1;
 
         /**
          * If the object has been destroyed via destroy(). If true, it should not be used.
@@ -257,7 +263,9 @@ export default class BaseTexture extends EventEmitter {
     update() {
         // Svg size is handled during load
         if (this.image_type !== 'svg') {
+            // @ts-ignore
             this.real_width = this.source.naturalWidth || this.source.videoWidth || this.source.width;
+            // @ts-ignore
             this.real_height = this.source.naturalHeight || this.source.videoHeight || this.source.height;
 
             this._update_dimensions();
@@ -273,7 +281,7 @@ export default class BaseTexture extends EventEmitter {
         this.width = this.real_width / this.resolution;
         this.height = this.real_height / this.resolution;
 
-        this.is_power_of_two = BitTwiddle.isPow2(this.real_width) && BitTwiddle.isPow2(this.real_height);
+        this.is_power_of_two = is_po2(this.real_width) && is_po2(this.real_height);
     }
 
     /**
@@ -298,37 +306,37 @@ export default class BaseTexture extends EventEmitter {
      * @param {HTMLImageElement|HTMLCanvasElement} source - the source object of the texture.
      */
     load_source(source) {
-        const wasLoading = this.is_loading;
+        const was_loading = this.is_loading;
 
         this.has_loaded = false;
         this.is_loading = false;
 
-        if (wasLoading && this.source) {
+        if (was_loading && this.source) {
             this.source.onload = null;
             this.source.onerror = null;
         }
 
-        const firstSourceLoaded = !this.source;
+        const first_source_loaded = !this.source;
 
         this.source = source;
 
         // Apply source if loaded. Otherwise setup appropriate loading monitors.
+        // @ts-ignore
         if (((source.src && source.complete) || source.getContext) && source.width && source.height) {
             this._update_image_type();
 
             if (this.image_type === 'svg') {
                 this._load_svg_source();
-            }
-            else {
+            } else {
                 this._source_loaded();
             }
 
-            if (firstSourceLoaded) {
+            if (first_source_loaded) {
                 // send loaded event if previous source was null and we have been passed a pre-loaded IMG element
                 this.emit('loaded', this);
             }
-        }
-        else if (!source.getContext) {
+        // @ts-ignore
+        } else if (!source.getContext) {
             // Image fail / not ready
             this.is_loading = true;
 
@@ -368,9 +376,10 @@ export default class BaseTexture extends EventEmitter {
             };
 
             // Per http://www.w3.org/TR/html5/embedded-content-0.html#the-img-element
-            //   "The value of `complete` can thus change while a script is executing."
+            // "The value of `complete` can thus change while a script is executing."
             // So complete needs to be re-checked after the callbacks have been added..
             // NOTE: complete will be true if the image has no src so best to check if the src is set.
+            // @ts-ignore
             if (source.complete && source.src) {
                 // ..and if we're complete now, no need for callbacks
                 source.onload = null;
@@ -388,12 +397,12 @@ export default class BaseTexture extends EventEmitter {
                     this._source_loaded();
 
                     // If any previous subscribers possible
-                    if (wasLoading) {
+                    if (was_loading) {
                         this.emit('loaded', this);
                     }
                 }
                 // If any previous subscribers possible
-                else if (wasLoading) {
+                else if (was_loading) {
                     this.emit('error', this);
                 }
             }
@@ -408,20 +417,19 @@ export default class BaseTexture extends EventEmitter {
             return;
         }
 
-        const dataUri = decompose_data_uri(this.image_url);
+        const data_uri = decompose_data_uri(this.image_url);
         let image_type;
 
-        if (dataUri && dataUri.mediaType === 'image') {
+        if (data_uri && data_uri.mediaType === 'image') {
             // Check for subType validity
-            const firstSubType = dataUri.subType.split('+')[0];
+            const first_sub_type = data_uri.subType.split('+')[0];
 
-            image_type = get_url_file_extension(`.${firstSubType}`);
+            image_type = get_url_file_extension(`.${first_sub_type}`);
 
             if (!image_type) {
                 throw new Error('Invalid image type in data URI.');
             }
-        }
-        else {
+        } else {
             image_type = get_url_file_extension(this.image_url);
 
             if (!image_type) {
@@ -442,12 +450,11 @@ export default class BaseTexture extends EventEmitter {
             return;
         }
 
-        const dataUri = decompose_data_uri(this.image_url);
+        const data_uri = decompose_data_uri(this.image_url);
 
-        if (dataUri) {
-            this._load_svg_source_using_data_uri(dataUri);
-        }
-        else {
+        if (data_uri) {
+            this._load_svg_source_using_data_uri(data_uri);
+        } else {
             // We got an URL, so we need to do an XHR to check the svg size
             this._load_svg_source_using_xhr();
         }
@@ -456,29 +463,28 @@ export default class BaseTexture extends EventEmitter {
     /**
      * Reads an SVG string from data URI and then calls `_loadSvgSourceUsingString`.
      *
-     * @param {string} dataUri - The data uri to load from.
+     * @param {import('engine/utils/index').DecomposedDataUri} data_uri - The data uri to load from.
      */
-    _load_svg_source_using_data_uri(dataUri) {
-        let svgString;
+    _load_svg_source_using_data_uri(data_uri) {
+        let svg_string;
 
-        if (dataUri.encoding === 'base64') {
+        if (data_uri.encoding === 'base64') {
             if (!atob) {
                 throw new Error('Your browser doesn\'t support base64 conversions.');
             }
-            svgString = atob(dataUri.data);
-        }
-        else {
-            svgString = dataUri.data;
+            svg_string = atob(data_uri.data);
+        } else {
+            svg_string = data_uri.data;
         }
 
-        this._load_svg_source_using_string(svgString);
+        this._load_svg_source_using_string(svg_string);
     }
 
     /**
      * Loads an SVG string from `image_url` using XHR and then calls `_loadSvgSourceUsingString`.
      */
     _load_svg_source_using_xhr() {
-        const svgXhr = new XMLHttpRequest();
+        const svg_xhr = new XMLHttpRequest();
 
         // This throws error on IE, so SVG Document can't be used
         // svgXhr.responseType = 'document';
@@ -487,18 +493,18 @@ export default class BaseTexture extends EventEmitter {
         // but overrideMimeType() can be used to force the response to be parsed as XML
         // svgXhr.overrideMimeType('image/svg+xml');
 
-        svgXhr.onload = () => {
-            if (svgXhr.readyState !== svgXhr.DONE || svgXhr.status !== 200) {
+        svg_xhr.onload = () => {
+            if (svg_xhr.readyState !== svg_xhr.DONE || svg_xhr.status !== 200) {
                 throw new Error('Failed to load SVG using XHR.');
             }
 
-            this._load_svg_source_using_string(svgXhr.response);
+            this._load_svg_source_using_string(svg_xhr.response);
         };
 
-        svgXhr.onerror = () => this.emit('error', this);
+        svg_xhr.onerror = () => this.emit('error', this);
 
-        svgXhr.open('GET', this.image_url, true);
-        svgXhr.send();
+        svg_xhr.open('GET', this.image_url, true);
+        svg_xhr.send();
     }
 
     /**
@@ -506,23 +512,23 @@ export default class BaseTexture extends EventEmitter {
      * created canvas is the new `source`. The SVG is scaled using `source_scale`. Called by
      * `_loadSvgSourceUsingXhr` or `_loadSvgSourceUsingDataUri`.
      *
-     * @param  {string} svgString SVG source as string
+     * @param  {string} svg_string SVG source as string
      *
      * @fires BaseTexture#loaded
      */
-    _load_svg_source_using_string(svgString) {
-        const svgSize = get_svg_size(svgString);
+    _load_svg_source_using_string(svg_string) {
+        const svg_size = get_svg_size(svg_string);
 
-        const svgWidth = svgSize.width;
-        const svgHeight = svgSize.height;
+        const svg_width = svg_size.width;
+        const svg_height = svg_size.height;
 
-        if (!svgWidth || !svgHeight) {
+        if (!svg_width || !svg_height) {
             throw new Error('The SVG image must have width and height defined (in pixels), canvas API needs them.');
         }
 
         // Scale real_width and real_height
-        this.real_width = Math.round(svgWidth * this.source_scale);
-        this.real_height = Math.round(svgHeight * this.source_scale);
+        this.real_width = Math.round(svg_width * this.source_scale);
+        this.real_height = Math.round(svg_height * this.source_scale);
 
         this._update_dimensions();
 
@@ -536,7 +542,7 @@ export default class BaseTexture extends EventEmitter {
         // Draw the Svg to the canvas
         canvas
             .getContext('2d')
-            .drawImage(this.source, 0, 0, svgWidth, svgHeight, 0, 0, this.real_width, this.real_height);
+            .drawImage(this.source, 0, 0, svg_width, svg_height, 0, 0, this.real_width, this.real_height);
 
         // Replace the original source image with the canvas
         this.origin_source = this.source;
@@ -571,7 +577,9 @@ export default class BaseTexture extends EventEmitter {
 
             this.image_url = null;
 
+            // @ts-ignore
             if (!navigator.isCocoonJS) {
+                // @ts-ignore
                 this.source.src = '';
             }
         }
@@ -601,10 +609,11 @@ export default class BaseTexture extends EventEmitter {
      * Changes the source image of the texture.
      * The original source must be an Image element.
      *
-     * @param {string} newSrc - the path of the image
+     * @param {string} new_src - the path of the image
      */
-    update_source_image(newSrc) {
-        this.source.src = newSrc;
+    update_source_image(new_src) {
+        // @ts-ignore
+        this.source.src = new_src;
 
         this.load_source(this.source);
     }
@@ -658,7 +667,7 @@ export default class BaseTexture extends EventEmitter {
      *
      * @static
      * @param {HTMLCanvasElement} canvas - The canvas element source of the texture
-     * @param {number} scale_mode - See {@link SCALE_MODES} for possible values
+     * @param {number} [scale_mode] - See {@link SCALE_MODES} for possible values
      * @param {string} [origin='canvas'] - A string origin of who created the base texture
      * @return {BaseTexture} The new base texture.
      */
@@ -722,7 +731,7 @@ export default class BaseTexture extends EventEmitter {
     }
 
     /**
-     * Adds a BaseTexture to the global BaseTextureCache. This cache is shared across the whole V object.
+     * Adds a BaseTexture to the global BaseTextureCache.
      *
      * @static
      * @param {BaseTexture} base_texture - The BaseTexture to add to the cache.

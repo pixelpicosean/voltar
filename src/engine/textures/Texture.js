@@ -1,7 +1,6 @@
 import settings from '../settings';
 import { EventEmitter } from 'engine/dep/index';
 import BaseTexture from './BaseTexture';
-import VideoBaseTexture from './VideoBaseTexture';
 import TextureUvs from './TextureUvs';
 import TextureMatrix from './TextureMatrix';
 import { Rectangle, Point } from '../math/index';
@@ -324,38 +323,6 @@ export default class Texture extends EventEmitter {
     }
 
     /**
-     * Helper function that creates a new Texture based on the given video element.
-     *
-     * @static
-     * @param {HTMLVideoElement|string} video - The URL or actual element of the video
-     * @param {number} [scale_mode=settings.SCALE_MODE] - See {@link SCALE_MODES} for possible values
-     * @param {boolean} [crossorigin=(auto)] - Should use anonymous CORS? Defaults to true if the URL is not a data-URI.
-     * @param {boolean} [autoPlay=true] - Start playing video as soon as it is loaded
-     * @return {Texture} The newly created texture
-     */
-    static from_video(video, scale_mode, crossorigin, autoPlay) {
-        if (typeof video === 'string') {
-            return Texture.from_video_url(video, scale_mode, crossorigin, autoPlay);
-        }
-
-        return new Texture(VideoBaseTexture.from_video(video, scale_mode, autoPlay));
-    }
-
-    /**
-     * Helper function that creates a new Texture based on the video url.
-     *
-     * @static
-     * @param {string} videoUrl - URL of the video
-     * @param {number} [scale_mode=settings.SCALE_MODE] - See {@link SCALE_MODES} for possible values
-     * @param {boolean} [crossorigin=(auto)] - Should use anonymous CORS? Defaults to true if the URL is not a data-URI.
-     * @param {boolean} [autoPlay=true] - Start playing video as soon as it is loaded
-     * @return {Texture} The newly created texture
-     */
-    static from_video_url(videoUrl, scale_mode, crossorigin, autoPlay) {
-        return new Texture(VideoBaseTexture.from_url(videoUrl, scale_mode, crossorigin, autoPlay));
-    }
-
-    /**
      * Helper function that creates a new Texture based on the source you provide.
      * The source can be - frame id, image url, video url, canvas element, video element, base texture
      *
@@ -435,7 +402,7 @@ export default class Texture extends EventEmitter {
     }
 
     /**
-     * Adds a Texture to the global TextureCache. This cache is shared across the whole V object.
+     * Adds a Texture to the global TextureCache.
      *
      * @static
      * @param {Texture} texture - The Texture to add to the cache.

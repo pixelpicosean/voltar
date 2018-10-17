@@ -1,4 +1,4 @@
-import * as v from 'engine';
+import * as v from 'engine/index';
 
 
 export default class AnimationTest extends v.Node2D {
@@ -7,9 +7,6 @@ export default class AnimationTest extends v.Node2D {
     }
 
     _enter_tree() {
-        /**
-         * @type {v.BitmapText}
-         */
         this.label = this.add_child(new v.BitmapText('', {
             font: '32px 04b03',
         }));
@@ -23,7 +20,7 @@ export default class AnimationTest extends v.Node2D {
         icon2.scale.set(0.5);
         icon2.position.set(0, 180);
 
-        let tween = new v.Tween();
+        let tween = this.tweens.create(false);
         tween.interpolate_property(icon, 'position', { x: 50, y: 100 }, { x: 150, y: 50 }, 1, 'Quadratic.InOut', 2);
         tween.interpolate_property(icon, 'position.x', 150, 50, 1, 'Quadratic.InOut', 3);
         tween.interpolate_property(icon, 'tint', 0x000000, 0xFFFFFF, 2, 'Quadratic.InOut', 2);

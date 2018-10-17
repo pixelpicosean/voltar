@@ -57,7 +57,7 @@ export default class TransformBase {
 
 /**
  * Updates the values of the object and applies the parent's transform.
- * @param  parent_transform {TransformBase} The transform of the parent of this object
+ * @param parent_transform {TransformBase} The transform of the parent of this object
  */
 TransformBase.prototype.update_world_transform = TransformBase.prototype.update_transform;
 

@@ -4,7 +4,7 @@ import accessible_target from './accessible_target';
 import SystemRenderer from '../renderers/SystemRenderer';
 import Node2D from '../scene/Node2D';
 import { Rectangle } from '../math/index';
-import WebGLRenderer from 'engine/renderers/webgl/WebGLRenderer';
+import WebGLRenderer from 'engine/renderers/WebGLRenderer';
 import CanvasRenderer from 'engine/renderers/canvas/CanvasRenderer';
 
 

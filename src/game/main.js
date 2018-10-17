@@ -1,13 +1,30 @@
+// Import the engine it self
 import * as v from 'engine/index';
 
-import Boot from 'game/boot/index';
+// Import features you want to use
+/* import 'engine/accessibility/enable'; */
+/* import 'engine/interaction/enable'; */
+/* import 'engine/extract/enable'; */
+/* import 'engine/scene/coa/enable'; */
+import 'engine/scene/graphics/enable';
+/* import 'engine/scene/map/enable'; */
+/* import 'engine/scene/mesh/enable'; */
+/* import 'engine/scene/particles/enable'; */
+import 'engine/scene/sprites/enable';
+/* import 'engine/scene/text/enable'; */
+/* import 'engine/tween/enable'; */
 
-v.loader.add('media/04b03.fnt');
+// Scenes
+import Preloader from 'game/preloader/Preloader';
+import Test from 'game/test/Sprite';
+
+v.preload('media/04b03.fnt');
 
 v.scene_tree.init({
     application: {
         name: 'Voltar',
-        main_scene: Boot,
+        preloader: Preloader,
+        main_scene: Test,
     },
     display: {
         view: 'game',
@@ -19,7 +36,6 @@ v.scene_tree.init({
 
         background_color: 0x00AAC9,
 
-        force_canvas: false,
         antialias: false,
         pixel_snap: true,
         scale_mode: 'nearest',

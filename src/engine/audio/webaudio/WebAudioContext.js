@@ -1,38 +1,100 @@
+import { EventEmitter } from 'engine/dep/index';
 import Filterable from "../Filterable";
-import EventEmitter from 'eventemitter3';
-
 
 /**
  * Main class to handle WebAudio API. There's a simple chain
  * of AudioNode elements: analyser > compressor > context.destination.
  * any filters that are added are inserted between the analyser and compressor nodes
- * @private
- * @class WebAudioContext
- * @extends v.audio.Filterable
- * @memberof v.audio.webaudio
  */
 export default class WebAudioContext extends Filterable {
     constructor() {
+        // @ts-ignore
         const ctx = new WebAudioContext.AudioContext();
         const compressor = ctx.createDynamicsCompressor();
         const analyser = ctx.createAnalyser();
+
         // setup the end of the node chain
         analyser.connect(compressor);
         compressor.connect(ctx.destination);
+
         super(analyser, compressor);
+
+        /**
+         * The instance of the AudioContext for WebAudio API.
+         * @type {AudioContext}
+         * @private
+         */
         this._ctx = ctx;
-        this._offlineCtx = new WebAudioContext.OfflineAudioContext(1, 2, ctx.sampleRate);
+
+        /**
+         * The instance of the OfflineAudioContext for fast decoding audio.
+         * @type {OfflineAudioContext}
+         * @private
+         */
+        // @ts-ignore
+        this._offlineCtx = new WebAudioContext.OfflineAudioContext(1, 2, (window.OfflineAudioContext) ? ctx.sampleRate : 44100);
+
+        /**
+         * Indicated whether audio on iOS has been unlocked, which requires a touchend/mousedown event that plays an
+         * empty sound.
+         * @type {boolean}
+         * @private
+         */
         this._unlocked = false;
+
+        /**
+         * Context Compressor node
+         * @type {DynamicsCompressorNode}
+         * @readonly
+         */
         this.compressor = compressor;
+
+        /**
+         * Context Analyser node
+         * @type {AnalyserNode}
+         * @readonly
+         */
         this.analyser = analyser;
+
+        /**
+         * Handle global events
+         * @type {EventEmitter}
+         * @default 1
+         */
         this.events = new EventEmitter();
-        // Set the defaults
+
+        /**
+         * Sets the volume from 0 to 1.
+         * @type {number}
+         * @default 1
+         */
         this.volume = 1;
+
+        /**
+         * Global speed of all sounds
+         * @type {number}
+         * @readonly
+         */
         this.speed = 1;
+
+        /**
+         * Sets the muted state.
+         * @type {boolean}
+         * @default false
+         */
         this.muted = false;
+
+        /**
+         * Current paused status
+         * @type {boolean}
+         * @private
+         * @default false
+         */
+        this._paused = false;
         this.paused = false;
+
         // Listen for document level clicks to unlock WebAudio on iOS. See the _unlock method.
-        if ("ontouchstart" in window && ctx.state !== "running") {
+        if (ctx.state !== "running") {
             this._unlock(); // When played inside of a touch event, this will enable audio on iOS immediately.
             this._unlock = this._unlock.bind(this);
             document.addEventListener("mousedown", this._unlock, true);
@@ -48,7 +110,6 @@ export default class WebAudioContext extends Filterable {
      * Note that earlier versions of iOS supported `touchstart` for this, but iOS9 removed this functionality. Adding
      * a `touchstart` event to support older platforms may preclude a `mousedown` even from getting fired on iOS9, so we
      * stick with `mousedown` and `touchend`.
-     * @method v.audio.webaudio.WebAudioContext#_unlock
      * @private
      */
     _unlock() {
@@ -66,45 +127,47 @@ export default class WebAudioContext extends Filterable {
     /**
      * Plays an empty sound in the web audio context.  This is used to enable web audio on iOS devices, as they
      * require the first sound to be played inside of a user initiated event (touch/click).
-     * @method v.audio.webaudio.WebAudioContext#playEmptySound
      */
     playEmptySound() {
         const source = this._ctx.createBufferSource();
         source.buffer = this._ctx.createBuffer(1, 1, 22050);
         source.connect(this._ctx.destination);
         source.start(0, 0, 0);
+        if (source.context.state === 'suspended') {
+            source.context.resume();
+        }
     }
     /**
      * Get AudioContext class, if not supported returns `null`
-     * @name v.audio.webaudio.WebAudioContext.AudioContext
-     * @type {Function}
      * @static
+     * @returns {AudioContext}
      */
     static get AudioContext() {
-        const win = window;
-        return (win.AudioContext ||
-            win.webkitAudioContext ||
-            null);
+        return (window.AudioContext ||
+            window.webkitAudioContext ||
+            null
+        );
     }
     /**
      * Get OfflineAudioContext class, if not supported returns `null`
-     * @name v.audio.webaudio.WebAudioContext.OfflineAudioContext
-     * @type {Function}
      * @static
+     * @returns {OfflineAudioContext}
      */
     static get OfflineAudioContext() {
-        const win = window;
-        return (win.OfflineAudioContext ||
-            win.webkitOfflineAudioContext ||
-            null);
+        return (
+            window.OfflineAudioContext ||
+            window.webkitOfflineAudioContext ||
+            null
+        );
     }
     /**
      * Destroy this context.
-     * @method v.audio.webaudio.WebAudioContext#destroy
      */
     destroy() {
         super.destroy();
+
         const ctx = this._ctx;
+
         // check if browser supports AudioContext.close()
         if (typeof ctx.close !== "undefined") {
             ctx.close();
@@ -120,7 +183,6 @@ export default class WebAudioContext extends Filterable {
     }
     /**
      * The WebAudio API AudioContext object.
-     * @name v.audio.webaudio.WebAudioContext#audioContext
      * @type {AudioContext}
      * @readonly
      */
@@ -129,7 +191,6 @@ export default class WebAudioContext extends Filterable {
     }
     /**
      * The WebAudio API OfflineAudioContext object.
-     * @name v.audio.webaudio.WebAudioContext#offlineContext
      * @type {OfflineAudioContext}
      * @readonly
      */
@@ -141,7 +202,6 @@ export default class WebAudioContext extends Filterable {
      * level, we'll also pause the audioContext so that the
      * time used to compute progress isn't messed up.
      * @type {boolean}
-     * @name v.audio.webaudio.WebAudioContext#paused
      * @default false
      */
     set paused(paused) {
@@ -158,7 +218,6 @@ export default class WebAudioContext extends Filterable {
     }
     /**
      * Emit event when muted, volume or speed changes
-     * @method v.audio.webaudio.WebAudioContext#refresh
      * @private
      */
     refresh() {
@@ -166,7 +225,6 @@ export default class WebAudioContext extends Filterable {
     }
     /**
      * Emit event when muted, volume or speed changes
-     * @method v.audio.webaudio.WebAudioContext#refreshPaused
      * @private
      */
     refreshPaused() {
@@ -174,7 +232,6 @@ export default class WebAudioContext extends Filterable {
     }
     /**
      * Toggles the muted state.
-     * @method v.audio.webaudio.WebAudioContext#toggleMute
      * @return {boolean} The current muted state.
      */
     toggleMute() {
@@ -184,7 +241,6 @@ export default class WebAudioContext extends Filterable {
     }
     /**
      * Toggles the paused state.
-     * @method v.audio.webaudio.WebAudioContext#togglePause
      * @return {boolean} The current muted state.
      */
     togglePause() {
@@ -194,15 +250,18 @@ export default class WebAudioContext extends Filterable {
     }
     /**
      * Decode the audio data
-     * @method decode
      * @param {ArrayBuffer} arrayBuffer Buffer from loader
-     * @param {Function} callback When completed, error and audioBuffer are parameters.
+     * @param {(err?: Error, buffer?: AudioBuffer) => void} callback When completed, error and audioBuffer are parameters.
      */
     decode(arrayBuffer, callback) {
-        this._offlineCtx.decodeAudioData(arrayBuffer, (buffer) => {
-            callback(null, buffer);
-        }, () => {
-            callback(new Error("Unable to decode file"));
-        });
+        this._offlineCtx.decodeAudioData(
+            arrayBuffer,
+            (buffer) => {
+                callback(null, buffer);
+            },
+            () => {
+                callback(new Error("Unable to decode file"));
+            }
+        );
     }
 }

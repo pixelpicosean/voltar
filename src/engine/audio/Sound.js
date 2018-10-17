@@ -3,34 +3,195 @@ import SoundLibrary from "./SoundLibrary";
 import SoundSprite from "./sprites/SoundSprite";
 import SoundUtils from "./utils/SoundUtils";
 import WebAudioMedia from "./webaudio/WebAudioMedia";
+import Filter from "./filters/Filter";
+
 /**
- * Sound represents a single piece of loaded media. When playing a sound {@link v.sound.IMediaInstance} objects
+ * Constructor options
+ * @typedef Options
+ * @property {boolean} [autoPlay]
+ * @property {boolean} [preaload]
+ * @property {boolean} [singleInstance]
+ * @property {number} [volume]
+ * @property {number} [speed]
+ * @property {CompleteCallback} [complete]
+ * @property {LoadedCallback} [loaded]
+ * @property {boolean} [preload]
+ * @property {boolean} [loop]
+ * @property {string} [url]
+ * @property {ArrayBuffer|HTMLAudioElement} [source]
+ * @property {{[id: string]: import("./sprites/SoundSprite").SoundSpriteData}} [sprites];
+ */
+
+// Interface for play options
+/**
+ * @typedef PlayOptions
+ * @property {number} [start]
+ * @property {number} [end]
+ * @property {number} [speed]
+ * @property {boolean} [loop]
+ * @property {number} [volume]
+ * @property {string} [sprite]
+ * @property {boolean} [muted]
+ * @property {CompleteCallback} [complete]
+ * @property {LoadedCallback} [loaded]
+ * @property {number} [offset]
+ */
+
+/**
+ * Callback when sound is loaded.
+ * @callback PIXI.sound.Sound~loadedCallback
+ * @param {Error} err The callback error.
+ * @param {PIXI.sound.Sound} sound The instance of new sound.
+ * @param {PIXI.sound.IMediaInstance} instance The instance of auto-played sound.
+ */
+/**
+ * Callback when sound is loaded.
+ * @callback LoadedCallback
+ * @param {Error} err The callback error.
+ * @param {Sound} [sound] The instance of new sound.
+ * @param {IMediaInstance} [instance] The instance of auto-played sound.
+ */
+
+/**
+ * Callback when sound is completed.
+ * @callback CompleteCallback
+ * @param {Sound} sound The instance of sound.
+ */
+
+/**
+ * Sound represents a single piece of loaded media. When playing a sound {@link IMediaInstance} objects
  * are created. Properties such a `volume`, `pause`, `mute`, `speed`, etc will have an effect on all instances.
- * @class Sound
- * @memberof v.sound
  */
 export default class Sound {
     /**
-     * Constructor, use `v.sound.Sound.from`
-     * @private
+     * Constructor, use `Sound.from`
+     * @param {IMedia} media
+     * @param {Options} options
      */
     constructor(media, options) {
         this.media = media;
         this.options = options;
-        this._instances = [];
-        this._sprites = {};
-        this.media.init(this);
-        const complete = options.complete;
-        this._autoPlayOptions = complete ? { complete } : null;
+
+        /**
+         * `true` if the buffer is loaded.
+         *
+         * @type {boolean}
+         * @default false
+         */
         this.isLoaded = false;
+        /**
+         * `true` if the sound is currently being played.
+         *
+         * @type {boolean}
+         * @default false
+         * @readonly
+         */
         this.isPlaying = false;
+        /**
+         * true to start playing immediate after load.
+         *
+         * @type {boolean}
+         * @default false
+         * @readonly
+         */
         this.autoPlay = options.autoPlay;
+        /**
+         * `true` to disallow playing multiple layered instances at once.
+         *
+         * @type {boolean}
+         * @default false
+         */
         this.singleInstance = options.singleInstance;
+        /**
+         * `true` to immediately start preloading.
+         *
+         * @type {boolean}
+         * @default false
+         * @readonly
+         */
         this.preload = options.preload || this.autoPlay;
+        /**
+         * The file source to load.
+         *
+         * @type {String}
+         * @readonly
+         */
         this.url = options.url;
-        this.speed = options.speed;
+        /**
+         * The constructor options.
+         *
+         * @type {Object}
+         * @readonly
+         */
+        this.options = options;
+        /**
+         * The audio source
+         *
+         * @type {IMedia}
+         * @private
+         */
+        this.media = media;
+        /**
+         * The collection of instances being played.
+         *
+         * @type {Array<IMediaInstance>}
+         * @private
+         */
+        this._instances = [];
+        /**
+         * Reference to the sound context.
+         *
+         * @type {import("./sprites/SoundSprite").SoundSprites}
+         * @private
+         */
+        this._sprites = {};
+        const complete = options.complete;
+        /**
+         * The options when auto-playing.
+         *
+         * @type {PlayOptions}
+         * @private
+         */
+        this._autoPlayOptions = complete ? { complete } : null;
+        /**
+         * The internal volume.
+         *
+         * @type {number}
+         * @private
+         */
         this.volume = options.volume;
+        /**
+         * The internal paused state.
+         *
+         * @type {boolean}
+         * @private
+         */
+        this._paused = false;
+        /**
+         * The internal muted state.
+         *
+         * @type {boolean}
+         * @private
+         */
+        this._muted = false;
+        /**
+         * The internal volume.
+         *
+         * @type {boolean}
+         * @private
+         */
+        this._loop = false;
+        /**
+         * The internal playbackRate
+         *
+         * @type {number}
+         * @private
+         */
+        this.speed = options.speed;
         this.loop = options.loop;
+
+        this.media.init(this);
+
         if (options.sprites) {
             this.addSprites(options.sprites);
         }
@@ -40,24 +201,9 @@ export default class Sound {
     }
     /**
      * Create a new sound instance from source.
-     * @method v.sound.Sound.from
-     * @param {ArrayBuffer|String|Object|HTMLAudioElement} options Either the path or url to the source file.
-     *        or the object of options to use.
-     * @param {String} [options.url] If `options` is an object, the source of file.
-     * @param {HTMLAudioElement|ArrayBuffer} [options.source] The source, if already preloaded.
-     * @param {boolean} [options.autoPlay=false] true to play after loading.
-     * @param {boolean} [options.preload=false] true to immediately start preloading.
-     * @param {boolean} [options.singleInstance=false] `true` to disallow playing multiple layered instances at once.
-     * @param {number} [options.volume=1] The amount of volume 1 = 100%.
-     * @param {number} [options.speed=1] The playback rate where 1 is 100% speed.
-     * @param {Object} [options.sprites] The map of sprite data. Where a sprite is an object
-     *        with a `start` and `end`, which are the times in seconds. Optionally, can include
-     *        a `speed` amount where 1 is 100% speed.
-     * @param {v.sound.Sound~completeCallback} [options.complete=null] Global complete callback
-     *        when play is finished.
-     * @param {v.sound.Sound~loadedCallback} [options.loaded=null] Call when finished loading.
-     * @param {boolean} [options.loop=false] true to loop the audio playback.
-     * @return {v.sound.Sound} Created sound instance.
+     * @param {ArrayBuffer|String|Object|HTMLAudioElement} source Either the path or url to the source file.
+     *                                                            or the object of options to use.
+     * @return {Sound} Created sound instance.
      */
     static from(source) {
         let options = {};
@@ -95,8 +241,7 @@ export default class Sound {
     }
     /**
      * Instance of the media context
-     * @name v.sound.Sound#context
-     * @type {v.sound.IMediaContext}
+     * @type {IMediaContext}
      * @readonly
      */
     get context() {
@@ -104,8 +249,7 @@ export default class Sound {
     }
     /**
      * Stops all the instances of this sound from playing.
-     * @method v.sound.Sound#pause
-     * @return {v.sound.Sound} Instance of this sound.
+     * @return {Sound} Instance of this sound.
      */
     pause() {
         this.isPlaying = false;
@@ -114,8 +258,7 @@ export default class Sound {
     }
     /**
      * Resuming all the instances of this sound from playing
-     * @method v.sound.Sound#resume
-     * @return {v.sound.Sound} Instance of this sound.
+     * @return {Sound} Instance of this sound.
      */
     resume() {
         this.isPlaying = this._instances.length > 0;
@@ -124,7 +267,6 @@ export default class Sound {
     }
     /**
      * Stops all the instances of this sound from playing.
-     * @name v.sound.Sound#paused
      * @type {boolean}
      * @readonly
      */
@@ -137,7 +279,6 @@ export default class Sound {
     }
     /**
      * The playback rate
-     * @name v.sound.Sound#speed
      * @type {number}
      */
     get speed() {
@@ -149,8 +290,7 @@ export default class Sound {
     }
     /**
      * Set the filters. Only supported with WebAudio.
-     * @name v.sound.Sound#filters
-     * @type {Array<v.sound.filters.Filter>}
+     * @type {Array<Filter>}
      */
     get filters() {
         return this.media.filters;
@@ -158,7 +298,14 @@ export default class Sound {
     set filters(filters) {
         this.media.filters = filters;
     }
-    // Actual implementation
+    /**
+     * Add a sound sprite, which is a saved instance of a longer sound.
+     * Similar to an image spritesheet.
+     * @param {string|{[id: string]: import("./sprites/SoundSprite").SoundSpriteData}} source The unique name of the sound sprite or sprites
+     * @param {import("./sprites/SoundSprite").SoundSpriteData} [data] Map of sounds to add where the key is the alias,
+     *        and the data are configuration options
+     * @returns {SoundSprite|import("./sprites/SoundSprite").SoundSprites} Sound sprite result.
+     */
     addSprites(source, data) {
         if (typeof source === "object") {
             const results = {};
@@ -176,7 +323,6 @@ export default class Sound {
     }
     /**
      * Destructor, safer to use `SoundLibrary.remove(alias)` to remove this sound.
-     * @method v.sound.Sound#destroy
      */
     destroy() {
         this._removeInstances();
@@ -187,23 +333,17 @@ export default class Sound {
         this._instances = null;
     }
     /**
-     * Remove all sound sprites.
-     * @method v.sound.Sound#removeSprites
-     * @return {v.sound.Sound} Sound instance for chaining.
-     */
-    /**
      * Remove a sound sprite.
-     * @method v.sound.Sound#removeSprites
-     * @param {String} alias The unique name of the sound sprite.
-     * @return {v.sound.Sound} Sound instance for chaining.
+     * @param {string} [alias] The unique name of the sound sprite, if nothing
+     *                         is provided, all sprites will be removed.
+     * @return {Sound} Sound instance for chaining.
      */
     removeSprites(alias) {
         if (!alias) {
             for (const name in this._sprites) {
                 this.removeSprites(name);
             }
-        }
-        else {
+        } else {
             const sprite = this._sprites[alias];
             if (sprite !== undefined) {
                 sprite.destroy();
@@ -214,7 +354,6 @@ export default class Sound {
     }
     /**
      * If the current sound is playable (loaded).
-     * @name v.sound.Sound#isPlayable
      * @type {boolean}
      * @readonly
      */
@@ -223,8 +362,7 @@ export default class Sound {
     }
     /**
      * Stops all the instances of this sound from playing.
-     * @method v.sound.Sound#stop
-     * @return {v.sound.Sound} Instance of this sound.
+     * @return {Sound} Instance of this sound.
      */
     stop() {
         if (!this.isPlayable) {
@@ -239,20 +377,24 @@ export default class Sound {
         }
         return this;
     }
-    // Overloaded function
+    /**
+     * Plays a sound or a sound sprite
+     * @param {string|PlayOptions|CompleteCallback} [source] Name of sprite or play options or complete callback
+     * @param {CompleteCallback} [complete] Callback when complete
+     */
     play(source, complete) {
+        /** @type {PlayOptions} */
         let options;
         if (typeof source === "string") {
             const sprite = source;
             options = { sprite, complete };
-        }
-        else if (typeof source === "function") {
+        } else if (typeof source === "function") {
             options = {};
             options.complete = source;
-        }
-        else {
+        } else {
             options = source;
         }
+
         options = Object.assign({
             complete: null,
             loaded: null,
@@ -264,12 +406,13 @@ export default class Sound {
             muted: false,
             loop: false,
         }, options || {});
+
         // A sprite is specified, add the options
         if (options.sprite) {
             const alias = options.sprite;
-            // @if DEBUG
+
             console.assert(!!this._sprites[alias], `Alias ${alias} is not available`);
-            // @endif
+
             const sprite = this._sprites[alias];
             options.start = sprite.start;
             options.end = sprite.end;
@@ -316,12 +459,13 @@ export default class Sound {
         instance.once("stop", () => {
             this._onComplete(instance);
         });
+
         instance.play(options);
+
         return instance;
     }
     /**
      * Internal only, speed, loop, volume change occured.
-     * @method refresh
      * @private
      */
     refresh() {
@@ -332,7 +476,6 @@ export default class Sound {
     }
     /**
      * Handle changes in paused state. Internal only.
-     * @method refreshPaused
      * @private
      */
     refreshPaused() {
@@ -343,7 +486,6 @@ export default class Sound {
     }
     /**
      * Gets and sets the volume.
-     * @name v.sound.Sound#volume
      * @type {number}
      */
     get volume() {
@@ -355,8 +497,7 @@ export default class Sound {
     }
     /**
      * Gets and sets the muted flag.
-     * @name v.sound.Sound#muted
-     * @type {number}
+     * @type {boolean}
      */
     get muted() {
         return this._muted;
@@ -367,7 +508,6 @@ export default class Sound {
     }
     /**
      * Gets and sets the looping.
-     * @name v.sound.Sound#loop
      * @type {boolean}
      */
     get loop() {
@@ -379,7 +519,7 @@ export default class Sound {
     }
     /**
      * Starts the preloading of sound.
-     * @method v.sound.Sound#_preload
+     * @param {LoadedCallback} [callback]
      * @private
      */
     _preload(callback) {
@@ -387,8 +527,7 @@ export default class Sound {
     }
     /**
      * Gets the list of instances that are currently being played of this sound.
-     * @name v.sound.Sound#instances
-     * @type {Array<v.sound.IMediaInstance>}
+     * @type {Array<IMediaInstance>}
      * @readonly
      */
     get instances() {
@@ -396,7 +535,6 @@ export default class Sound {
     }
     /**
      * Get the map of sprites.
-     * @name v.sound.Sound#sprites
      * @type {Object}
      * @readonly
      */
@@ -405,7 +543,6 @@ export default class Sound {
     }
     /**
      * Get the duration of the audio in seconds.
-     * @name v.sound.Sound#duration
      * @type {number}
      */
     get duration() {
@@ -413,7 +550,6 @@ export default class Sound {
     }
     /**
      * Auto play the first instance.
-     * @method v.sound.Sound#autoPlayStart
      * @private
      */
     autoPlayStart() {
@@ -425,7 +561,6 @@ export default class Sound {
     }
     /**
      * Removes all instances.
-     * @method v.sound.Sound#_removeInstances
      * @private
      */
     _removeInstances() {
@@ -437,9 +572,8 @@ export default class Sound {
     }
     /**
      * Sound instance completed.
-     * @method v.sound.Sound#_onComplete
      * @private
-     * @param {v.sound.IMediaInstance} instance
+     * @param {IMediaInstance} instance
      */
     _onComplete(instance) {
         if (this._instances) {
@@ -453,9 +587,8 @@ export default class Sound {
     }
     /**
      * Create a new instance.
-     * @method v.sound.Sound#_createInstance
      * @private
-     * @return {v.sound.IMediaInstance} New instance to use
+     * @return {IMediaInstance} New instance to use
      */
     _createInstance() {
         if (Sound._pool.length > 0) {
@@ -467,9 +600,8 @@ export default class Sound {
     }
     /**
      * Destroy/recycling the instance object.
-     * @method v.sound.Sound#_poolInstance
      * @private
-     * @param {v.sound.IMediaInstance} instance - Instance to recycle
+     * @param {IMediaInstance} instance - Instance to recycle
      */
     _poolInstance(instance) {
         instance.destroy();
@@ -479,9 +611,9 @@ export default class Sound {
         }
     }
 }
+
 /**
  * Pool of instances
- * @name v.sound.Sound#_pool
  * @type {Array<IMediaInstance>}
  * @private
  */

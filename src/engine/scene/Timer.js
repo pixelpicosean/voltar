@@ -18,6 +18,8 @@ export default class Timer extends Node2D {
         this.processing = false;
         this.paused = false;
         this.time_left = -1;
+
+        this.has_transform = false;
     }
 
     set_wait_time(time) {

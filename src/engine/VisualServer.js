@@ -1,15 +1,27 @@
 import settings from './settings';
 import { SCALE_MODES } from './const';
 import { is_webgl_supported } from './utils/index';
-import CanvasRenderer from './renderers/canvas/CanvasRenderer';
-import WebGLRenderer from './renderers/webgl/WebGLRenderer';
+import { loader_use_procs } from 'engine/registry';
+import WebGLRenderer from './renderers/WebGLRenderer';
+import texture_parser from 'engine/textures/texture_parser';
+import spritesheet_parser from 'engine/textures/spritesheet_parser';
 
+// Texture and spritesheet parsers are mandatory
+loader_use_procs.push(texture_parser);
+loader_use_procs.push(spritesheet_parser);
 
 export default class VisualServer {
     constructor() {
         this.is_initialized = false;
 
         this.renderer = null;
+
+        /**
+         * Collection of methods for extracting data (image, pixels, etc.) from a display object or render texture
+         *
+         * @type {import('./extract/WebGLExtract').default}
+         */
+        this.extract = null;
     }
 
     init(config) {
@@ -24,11 +36,11 @@ export default class VisualServer {
             settings.SCALE_MODE = SCALE_MODES.NEAREST;
         }
 
-        if (!config.force_canvas && is_webgl_supported()) {
-            this.renderer = new WebGLRenderer(config);
-        } else {
-            this.renderer = new CanvasRenderer(config);
+        if (!is_webgl_supported()) {
+            throw 'Voltar only support WebGL rendering!';
         }
+
+        this.renderer = new WebGLRenderer(config);
     }
     render(viewport) {
         this.renderer.render(viewport, undefined, true, undefined, true);

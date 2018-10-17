@@ -1,4 +1,5 @@
 import Plane from './Plane';
+import Texture from 'engine/textures/Texture';
 
 const DEFAULT_BORDER_SIZE = 10;
 
@@ -7,7 +8,7 @@ const DEFAULT_BORDER_SIZE = 10;
  * for buttons with rounded corners for example) and the other areas will be scaled horizontally and or vertically
  *
  *```js
- * let Plane9 = new V.NineSlicePlane(V.Texture.from_image('BoxWithRoundedCorners.png'), 15, 15, 15, 15);
+ * let Plane9 = new NineSlicePlane(Texture.from_image('BoxWithRoundedCorners.png'), 15, 15, 15, 15);
  *  ```
  * <pre>
  *      A                          B
@@ -28,13 +29,8 @@ const DEFAULT_BORDER_SIZE = 10;
  *     area 5 will be stretched both horizontally and vertically
  * </pre>
  *
- * @class
- * @extends V.mesh.Plane
- * @memberof V.mesh
- *
  */
-export default class NineSlicePlane extends Plane
-{
+export default class NineSlicePlane extends Plane {
     /**
      * @param {Texture|string} texture - The texture to use on the NineSlicePlane.
      * @param {number} [top_height=10] size of the top horizontal bar (C)
@@ -42,20 +38,21 @@ export default class NineSlicePlane extends Plane
      * @param {number} [bottom_height=10] size of the bottom horizontal bar (D)
      * @param {number} [left_width=10] size of the left vertical bar (A)
      */
-    constructor(texture, top_height, right_width, bottom_height, left_width)
-    {
+    constructor(texture, top_height, right_width, bottom_height, left_width) {
         super(texture, 4, 4);
 
         this.type = 'NineSlicePlane';
 
+        // @ts-ignore
         this._origWidth = texture.orig.width;
+        // @ts-ignore
         this._origHeight = texture.orig.height;
 
         /**
          * The width of the NineSlicePlane, setting this will actually modify the vertices and UV's of this plane
          *
          * @member {number}
-         * @memberof V.NineSlicePlane#
+         * @memberof NineSlicePlane#
          * @override
          */
         this._width = this._origWidth;
@@ -64,7 +61,7 @@ export default class NineSlicePlane extends Plane
          * The height of the NineSlicePlane, setting this will actually modify the vertices and UV's of this plane
          *
          * @member {number}
-         * @memberof V.NineSlicePlane#
+         * @memberof NineSlicePlane#
          * @override
          */
         this._height = this._origHeight;
@@ -73,7 +70,7 @@ export default class NineSlicePlane extends Plane
          * The width of the left column (a)
          *
          * @member {number}
-         * @memberof V.NineSlicePlane#
+         * @memberof NineSlicePlane#
          * @override
          */
         this._left_width = typeof left_width !== 'undefined' ? left_width : DEFAULT_BORDER_SIZE;
@@ -82,7 +79,7 @@ export default class NineSlicePlane extends Plane
          * The width of the right column (b)
          *
          * @member {number}
-         * @memberof V.NineSlicePlane#
+         * @memberof NineSlicePlane#
          * @override
          */
         this._right_width = typeof right_width !== 'undefined' ? right_width : DEFAULT_BORDER_SIZE;
@@ -91,7 +88,7 @@ export default class NineSlicePlane extends Plane
          * The height of the top row (c)
          *
          * @member {number}
-         * @memberof V.NineSlicePlane#
+         * @memberof NineSlicePlane#
          * @override
          */
         this._top_height = typeof top_height !== 'undefined' ? top_height : DEFAULT_BORDER_SIZE;
@@ -100,7 +97,7 @@ export default class NineSlicePlane extends Plane
          * The height of the bottom row (d)
          *
          * @member {number}
-         * @memberof V.NineSlicePlane#
+         * @memberof NineSlicePlane#
          * @override
          */
         this._bottom_height = typeof bottom_height !== 'undefined' ? bottom_height : DEFAULT_BORDER_SIZE;
@@ -112,8 +109,7 @@ export default class NineSlicePlane extends Plane
      * Updates the horizontal vertices.
      *
      */
-    update_horizontal_vertices()
-    {
+    update_horizontal_vertices() {
         const vertices = this.vertices;
 
         const h = this._top_height + this._bottom_height;
@@ -128,8 +124,7 @@ export default class NineSlicePlane extends Plane
      * Updates the vertical vertices.
      *
      */
-    update_vertical_vertices()
-    {
+    update_vertical_vertices() {
         const vertices = this.vertices;
 
         const w = this._left_width + this._right_width;
@@ -138,61 +133,6 @@ export default class NineSlicePlane extends Plane
         vertices[2] = vertices[10] = vertices[18] = vertices[26] = this._left_width * scale;
         vertices[4] = vertices[12] = vertices[20] = vertices[28] = this._width - (this._right_width * scale);
         vertices[6] = vertices[14] = vertices[22] = vertices[30] = this._width;
-    }
-
-    /**
-     * Renders the object using the Canvas renderer
-     *
-     * @private
-     * @param {V.CanvasRenderer} renderer - The canvas renderer to render with.
-     */
-    _render_canvas(renderer)
-    {
-        const context = renderer.context;
-
-        context.globalAlpha = this.world_alpha;
-        renderer.setBlendMode(this.blend_mode);
-
-        const transform = this.world_transform;
-        const res = renderer.resolution;
-
-        if (renderer.pixel_snap)
-        {
-            context.setTransform(
-                transform.a * res,
-                transform.b * res,
-                transform.c * res,
-                transform.d * res,
-                (transform.tx * res) | 0,
-                (transform.ty * res) | 0
-            );
-        }
-        else
-        {
-            context.setTransform(
-                transform.a * res,
-                transform.b * res,
-                transform.c * res,
-                transform.d * res,
-                transform.tx * res,
-                transform.ty * res
-            );
-        }
-
-        const base = this._texture.base_texture;
-        const textureSource = base.source;
-        const w = base.width * base.resolution;
-        const h = base.height * base.resolution;
-
-        this.draw_segment(context, textureSource, w, h, 0, 1, 10, 11);
-        this.draw_segment(context, textureSource, w, h, 2, 3, 12, 13);
-        this.draw_segment(context, textureSource, w, h, 4, 5, 14, 15);
-        this.draw_segment(context, textureSource, w, h, 8, 9, 18, 19);
-        this.draw_segment(context, textureSource, w, h, 10, 11, 20, 21);
-        this.draw_segment(context, textureSource, w, h, 12, 13, 22, 23);
-        this.draw_segment(context, textureSource, w, h, 16, 17, 26, 27);
-        this.draw_segment(context, textureSource, w, h, 18, 19, 28, 29);
-        this.draw_segment(context, textureSource, w, h, 20, 21, 30, 31);
     }
 
     /**
@@ -210,8 +150,7 @@ export default class NineSlicePlane extends Plane
      * @param {number} x2 - x index 2
      * @param {number} y2 - y index 2
      */
-    draw_segment(context, textureSource, w, h, x1, y1, x2, y2)
-    {
+    draw_segment(context, textureSource, w, h, x1, y1, x2, y2) {
         // otherwise you get weird results when using slices of that are 0 wide or high.
         const uvs = this.uvs;
         const vertices = this.vertices;
@@ -222,25 +161,21 @@ export default class NineSlicePlane extends Plane
         let dh = vertices[y2] - vertices[y1];
 
         // make sure the source is at least 1 pixel wide and high, otherwise nothing will be drawn.
-        if (sw < 1)
-        {
+        if (sw < 1) {
             sw = 1;
         }
 
-        if (sh < 1)
-        {
+        if (sh < 1) {
             sh = 1;
         }
 
         // make sure destination is at least 1 pixel wide and high, otherwise you get
         // lines when rendering close to original size.
-        if (dw < 1)
-        {
+        if (dw < 1) {
             dw = 1;
         }
 
-        if (dh < 1)
-        {
+        if (dh < 1) {
             dh = 1;
         }
 
@@ -252,8 +187,7 @@ export default class NineSlicePlane extends Plane
      *
      * @member {number}
      */
-    get width()
-    {
+    get width() {
         return this._width;
     }
 
@@ -268,8 +202,7 @@ export default class NineSlicePlane extends Plane
      *
      * @member {number}
      */
-    get height()
-    {
+    get height() {
         return this._height;
     }
 
@@ -284,8 +217,7 @@ export default class NineSlicePlane extends Plane
      *
      * @member {number}
      */
-    get left_width()
-    {
+    get left_width() {
         return this._left_width;
     }
 
@@ -300,8 +232,7 @@ export default class NineSlicePlane extends Plane
      *
      * @member {number}
      */
-    get right_width()
-    {
+    get right_width() {
         return this._right_width;
     }
 
@@ -316,8 +247,7 @@ export default class NineSlicePlane extends Plane
      *
      * @member {number}
      */
-    get top_height()
-    {
+    get top_height() {
         return this._top_height;
     }
 
@@ -332,8 +262,7 @@ export default class NineSlicePlane extends Plane
      *
      * @member {number}
      */
-    get bottom_height()
-    {
+    get bottom_height() {
         return this._bottom_height;
     }
 
@@ -346,8 +275,7 @@ export default class NineSlicePlane extends Plane
     /**
      * Refreshes NineSlicePlane coords. All of them.
      */
-    _refresh()
-    {
+    _refresh() {
         super._refresh();
 
         const uvs = this.uvs;

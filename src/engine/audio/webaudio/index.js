@@ -1,7 +1,5 @@
 /**
  * Classes supporting non-WebAudio based browsers.
- * @namespace v.audio.webaudio
- * @private
  */
 export { default as WebAudioMedia } from "./WebAudioMedia";
 export { default as WebAudioInstance } from "./WebAudioInstance";

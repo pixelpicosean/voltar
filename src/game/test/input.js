@@ -1,9 +1,7 @@
-import * as v from 'engine';
+import * as v from 'engine/index';
 
-
-v.loader.add('tileset', 'media/tileset.png');
-v.loader.add('icon', 'media/icon.png');
-
+v.preload('tileset', 'media/tileset.png');
+v.preload('icon', 'media/icon.png');
 
 class Me extends v.PhysicsBody2D {
     constructor() {

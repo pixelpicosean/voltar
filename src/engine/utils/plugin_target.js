@@ -13,11 +13,11 @@ function plugin_target(obj) {
     /**
      * Adds a plugin to an object
      *
-     * @param {string} plugin_name - The events that should be listed.
+     * @param {string} renderer_plugin - The events that should be listed.
      * @param {Function} ctor - The constructor function for the plugin.
      */
-    obj.register_plugin = function register_plugin(plugin_name, ctor) {
-        obj.__plugins[plugin_name] = ctor;
+    obj.register_plugin = function register_plugin(renderer_plugin, ctor) {
+        obj.__plugins[renderer_plugin] = ctor;
     };
 
     /**
@@ -36,7 +36,7 @@ function plugin_target(obj) {
      * Removes all the plugins of this object
      *
      */
-    obj.prototype.destroyPlugins = function destroyPlugins() {
+    obj.prototype.destroy_plugins = function destroy_plugins() {
         for (const o in this.plugins) {
             this.plugins[o].destroy();
             this.plugins[o] = null;

@@ -1,11 +1,9 @@
-import ResourceLoader from 'resource-loader';
-import { Resource } from 'resource-loader';
+import { EventEmitter, resource_loader, ResourceLoader } from 'engine/dep/index';
+const { Resource } = resource_loader;
+
 import { blobMiddlewareFactory } from 'resource-loader/lib/middlewares/parsing/blob';
-import EventEmitter from 'eventemitter3';
-import textureParser from './textureParser';
-import spritesheetParser from './spritesheetParser';
-import bitmapFontParser from './bitmapFontParser';
-import coaParser from './coa';
+
+import { loader_pre_procs, loader_use_procs } from 'engine/registry';
 
 /**
  *
@@ -54,20 +52,23 @@ import coaParser from './coa';
  *
  * @see https://github.com/englercj/resource-loader
  */
-export default class Loader extends ResourceLoader
-{
+export default class Loader extends ResourceLoader {
     /**
      * @param {string} [baseUrl=''] - The base url for all resources loaded by this loader.
      * @param {number} [concurrency=10] - The number of resources to load concurrently.
      */
-    constructor(baseUrl, concurrency)
-    {
+    constructor(baseUrl, concurrency) {
         super(baseUrl, concurrency);
         EventEmitter.call(this);
 
-        for (let i = 0; i < Loader._pixiMiddleware.length; ++i)
-        {
-            this.use(Loader._pixiMiddleware[i]());
+        for (let i = 0; i < loader_pre_procs.length; ++i) {
+            this.pre(loader_pre_procs[i]());
+        }
+
+        // parse any blob into more usable objects (e.g. Image)
+        this.use(blobMiddlewareFactory());
+        for (let i = 0; i < loader_use_procs.length; ++i) {
+            this.use(loader_use_procs[i]());
         }
 
         // Compat layer, translate the new v2 signals into old v1 events.
@@ -79,44 +80,18 @@ export default class Loader extends ResourceLoader
     }
 
     /**
-     * Adds a default middleware to the pixi loader.
-     *
-     * @static
-     * @param {Function} fn - The middleware to add.
-     */
-    static addPixiMiddleware(fn)
-    {
-        Loader._pixiMiddleware.push(fn);
-    }
-
-    /**
      * Destroy the loader, removes references.
      */
-    destroy()
-    {
+    destroy() {
         this.removeAllListeners();
         this.reset();
     }
 }
 
 // Copy EE3 prototype (mixin)
-for (const k in EventEmitter.prototype)
-{
+for (const k in EventEmitter.prototype) {
     Loader.prototype[k] = EventEmitter.prototype[k];
 }
-
-Loader._pixiMiddleware = [
-    // parse any blob into more usable objects (e.g. Image)
-    blobMiddlewareFactory,
-    // parse any Image objects into textures
-    textureParser,
-    // parse any spritesheet data into multiple textures
-    spritesheetParser,
-    // parse bitmap font data into multiple textures
-    bitmapFontParser,
-    // parse spriter scon data
-    coaParser,
-];
 
 // Add custom extentions
 Resource.setExtensionXhrType('fnt', Resource.XHR_RESPONSE_TYPE.DOCUMENT);

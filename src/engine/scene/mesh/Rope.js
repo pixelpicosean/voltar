@@ -1,28 +1,23 @@
 import Mesh from './Mesh';
-import Texture from '../../textures/Texture';
-import Point from '../../math/Point';
+import Texture from 'engine/textures/Texture';
+import { Point } from 'engine/math/index';
 
 /**
  * The rope allows you to draw a texture across several points and them manipulate these points
  *
  *```js
  * for (let i = 0; i < 20; i++) {
- *     points.push(new V.Point(i * 50, 0));
+ *     points.push(new Point(i * 50, 0));
  * };
- * let rope = new V.Rope(V.Texture.from_image("snake.png"), points);
+ * let rope = new Rope(Texture.from_image("snake.png"), points);
  *  ```
- *
- * @class
- * @extends Mesh
  */
-export default class Rope extends Mesh
-{
+export default class Rope extends Mesh {
     /**
      * @param {Texture} texture - The texture to use on the rope.
      * @param {Point[]} points - An array of {@link Point} objects to construct this rope.
      */
-    constructor(texture, points)
-    {
+    constructor(texture, points) {
         super(texture);
 
         this.type = 'Rope';
@@ -30,7 +25,7 @@ export default class Rope extends Mesh
         /**
          * An array of points that determine the rope
          *
-         * @member {V.Point[]}
+         * @member {Point[]}
          */
         this.points = points;
 
@@ -76,19 +71,16 @@ export default class Rope extends Mesh
      * Refreshes
      *
      */
-    _refresh()
-    {
+    _refresh() {
         const points = this.points;
 
         // if too little points, or texture hasn't got UVs set yet just move on.
-        if (points.length < 1 || !this._texture._uvs)
-        {
+        if (points.length < 1 || !this._texture._uvs) {
             return;
         }
 
         // if the number of points has changed we will need to recreate the arraybuffers
-        if (this.vertices.length / 4 !== points.length)
-        {
+        if (this.vertices.length / 4 !== points.length) {
             this.vertices = new Float32Array(points.length * 4);
             this.uvs = new Float32Array(points.length * 4);
             this.colors = new Float32Array(points.length * 2);
@@ -113,8 +105,7 @@ export default class Rope extends Mesh
 
         const total = points.length;
 
-        for (let i = 1; i < total; i++)
-        {
+        for (let i = 1; i < total; i++) {
             // time to do some smart drawing!
             let index = i * 4;
             const amount = i / (total - 1);
@@ -145,12 +136,10 @@ export default class Rope extends Mesh
     /**
      * refreshes vertices of Rope mesh
      */
-    refresh_vertices()
-    {
+    refresh_vertices() {
         const points = this.points;
 
-        if (points.length < 1)
-        {
+        if (points.length < 1) {
             return;
         }
 
@@ -164,17 +153,14 @@ export default class Rope extends Mesh
         const vertices = this.vertices;
         const total = points.length;
 
-        for (let i = 0; i < total; i++)
-        {
+        for (let i = 0; i < total; i++) {
             const point = points[i];
             const index = i * 4;
 
-            if (i < points.length - 1)
-            {
+            if (i < points.length - 1) {
                 nextPoint = points[i + 1];
             }
-            else
-            {
+            else {
                 nextPoint = point;
             }
 
@@ -183,8 +169,7 @@ export default class Rope extends Mesh
 
             let ratio = (1 - (i / (total - 1))) * 10;
 
-            if (ratio > 1)
-            {
+            if (ratio > 1) {
                 ratio = 1;
             }
 
@@ -211,10 +196,8 @@ export default class Rope extends Mesh
      *
      * @private
      */
-    update_transform()
-    {
-        if (this.auto_update)
-        {
+    update_transform() {
+        if (this.auto_update) {
             this.refresh_vertices();
         }
         this.node2d_update_transform();

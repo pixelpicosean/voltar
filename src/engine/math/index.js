@@ -107,3 +107,44 @@ export function deg2rad(deg) {
 export function rad2deg(rad) {
     return RAD_TO_DEG * rad;
 }
+
+/**
+ * Returns the nearest larger power of 2 for integer value.
+ *
+ * @param {number} v
+ * @return {number}
+ */
+export function nearest_po2(v) {
+    v += v === 0;
+    --v;
+    v |= v >>> 1;
+    v |= v >>> 2;
+    v |= v >>> 4;
+    v |= v >>> 8;
+    v |= v >>> 16;
+    return v + 1;
+}
+
+/**
+ * Returns whether the value is power of 2
+ *
+ * @param {number} v
+ * @returns {boolean}
+ */
+export function is_po2(v) {
+    return !(v & (v - 1)) && (!!v);
+}
+/**
+ * Computes log base 2 of v
+ *
+ * @param {number} v
+ * @returns {number}
+ */
+export function log_base_2(v) {
+    let r, shift;
+    r = (v > 0xFFFF) << 4; v >>>= r;
+    shift = (v > 0xFF) << 3; v >>>= shift; r |= shift;
+    shift = (v > 0xF) << 2; v >>>= shift; r |= shift;
+    shift = (v > 0x3) << 1; v >>>= shift; r |= shift;
+    return r | (v >> 1);
+}

@@ -1,12 +1,10 @@
+import { EventEmitter } from 'engine/dep/index';
 import HTMLAudioInstance from "./HTMLAudioInstance";
-import EventEmitter from 'eventemitter3';
+
 /**
  * The fallback version of Sound which uses `<audio>` instead of WebAudio API.
- * @private
- * @class HTMLAudioMedia
- * @memberof v.audio.htmlaudio
  * @param {HTMLAudioElement|String|Object} options Either the path or url to the source file.
- *        or the object of options to use. See {@link v.audio.Sound.from}
+ *        or the object of options to use. See {@link Sound.from}
  */
 export default class HTMLAudioMedia extends EventEmitter {
     init(parent) {
@@ -37,23 +35,21 @@ export default class HTMLAudioMedia extends EventEmitter {
         return null;
     }
     set filters(filters) {
-        // @if DEBUG
         console.warn('HTML Audio does not support filters');
-        // @endif
     }
     // Override the destroy
     destroy() {
         this.removeAllListeners();
         this.parent = null;
         if (this._source) {
-            this._source.src = "";
+            this._source.src = '';
             this._source.load();
             this._source = null;
         }
     }
     /**
      * Get the audio source element.
-     * @name v.audio.legacy.LegacySound#source
+     * @name legacy.LegacySound#source
      * @type {HTMLAudioElement}
      * @readonly
      */
@@ -77,7 +73,7 @@ export default class HTMLAudioMedia extends EventEmitter {
         }
         // If there's no source, we cannot load
         if (!sound.url) {
-            return callback(new Error("sound.url or sound.source must be set"));
+            return callback(new Error('sound.url or sound.source must be set'));
         }
         // Set the source
         source.src = sound.url;

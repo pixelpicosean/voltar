@@ -1,19 +1,15 @@
 import Node2D from '../Node2D';
-import RenderTexture from '../../textures/RenderTexture';
 import Texture from '../../textures/Texture';
 import GraphicsData from './GraphicsData';
 import Sprite from '../sprites/Sprite';
-import { Matrix, Point, Rectangle, RoundedRectangle, Ellipse, Polygon, Circle, Bounds, PI2 } from '../../math/index';
+import { Point, Rectangle, RoundedRectangle, Ellipse, Polygon, Circle, Bounds, PI2 } from '../../math/index';
 import { hex2rgb, rgb2hex } from '../../utils/index';
 import { SHAPES, BLEND_MODES } from '../../const';
 import bezier_curve_to from './utils/bezier_curve_to';
-import CanvasRenderer from '../../renderers/canvas/CanvasRenderer';
 
-let canvasRenderer;
-const temp_matrix = new Matrix();
-const tempPoint = new Point();
-const tempColor1 = new Float32Array(4);
-const tempColor2 = new Float32Array(4);
+const temp_point = new Point();
+const temp_color_1 = new Float32Array(4);
+const temp_color_2 = new Float32Array(4);
 
 const EMPTY_POINTS = [];
 
@@ -122,7 +118,7 @@ export default class Graphics extends Node2D {
          * @private
          */
         // TODO - _webgl should use a prototype object, not a random undocumented object...
-        this._webGL = {};
+        this._webgl = {};
 
         /**
          * Whether this shape is being used as a mask.
@@ -929,7 +925,7 @@ export default class Graphics extends Node2D {
      * Renders the object using the WebGL renderer
      *
      * @private
-     * @param {WebGLRenderer} renderer - The renderer
+     * @param {import('engine/renderers/WebGLRenderer').default} renderer - The renderer
      */
     _render_webgl(renderer) {
         // if the sprite is not visible or the alpha is 0 then no need to render this element
@@ -952,13 +948,13 @@ export default class Graphics extends Node2D {
      * Renders a sprite rectangle.
      *
      * @private
-     * @param {WebGLRenderer} renderer - The renderer
+     * @param {import('engine/renderers/WebGLRenderer').default} renderer - The renderer
      */
     _renderSpriteRect(renderer) {
         const rect = this.graphics_data[0].shape;
 
         if (!this._spriteRect) {
-            this._spriteRect = new Sprite(new Texture(Texture.WHITE));
+            this._spriteRect = new Sprite(Texture.WHITE);
         }
 
         const sprite = this._spriteRect;
@@ -967,8 +963,8 @@ export default class Graphics extends Node2D {
             sprite.tint = this.graphics_data[0].fillColor;
         }
         else {
-            const t1 = tempColor1;
-            const t2 = tempColor2;
+            const t1 = temp_color_1;
+            const t2 = temp_color_2;
 
             hex2rgb(this.graphics_data[0].fillColor, t1);
             hex2rgb(this.tint, t2);
@@ -992,20 +988,6 @@ export default class Graphics extends Node2D {
         sprite._on_anchor_update();
 
         sprite._render_webgl(renderer);
-    }
-
-    /**
-     * Renders the object using the Canvas renderer
-     *
-     * @private
-     * @param {CanvasRenderer} renderer - The renderer
-     */
-    _render_canvas(renderer) {
-        if (this.is_mask === true) {
-            return;
-        }
-
-        renderer.plugins.graphics.render(this);
     }
 
     /**
@@ -1033,7 +1015,7 @@ export default class Graphics extends Node2D {
      * @return {boolean} the result of the test
      */
     contains_point(point) {
-        this.world_transform.apply_inverse(point, tempPoint);
+        this.world_transform.apply_inverse(point, temp_point);
 
         const graphics_data = this.graphics_data;
 
@@ -1046,12 +1028,12 @@ export default class Graphics extends Node2D {
 
             // only deal with fills..
             if (data.shape) {
-                if (data.shape.contains(tempPoint.x, tempPoint.y)) {
+                if (data.shape.contains(temp_point.x, temp_point.y)) {
                     if (data.holes) {
                         for (let i = 0; i < data.holes.length; i++) {
                             const hole = data.holes[i];
 
-                            if (hole.contains(tempPoint.x, tempPoint.y)) {
+                            if (hole.contains(temp_point.x, temp_point.y)) {
                                 return false;
                             }
                         }
@@ -1223,40 +1205,6 @@ export default class Graphics extends Node2D {
     }
 
     /**
-     * Generates a canvas texture.
-     *
-     * @param {number} scale_mode - The scale mode of the texture.
-     * @param {number} resolution - The resolution of the texture.
-     * @return {Texture} The new texture.
-     */
-    generate_canvas_texture(scale_mode, resolution = 1) {
-        const bounds = this.get_local_bounds();
-
-        const canvasBuffer = RenderTexture.create(bounds.width, bounds.height, scale_mode, resolution);
-
-        if (!canvasRenderer) {
-            canvasRenderer = new CanvasRenderer();
-        }
-
-        this.transform.update_local_transform();
-        this.transform.local_transform.copy(temp_matrix);
-
-        temp_matrix.invert();
-
-        temp_matrix.tx -= bounds.x;
-        temp_matrix.ty -= bounds.y;
-
-        canvasRenderer.render(this, canvasBuffer, true, temp_matrix);
-
-        const texture = Texture.from_canvas(canvasBuffer.base_texture._canvas_render_target.canvas, scale_mode, 'graphics');
-
-        texture.base_texture.resolution = resolution;
-        texture.base_texture.update();
-
-        return texture;
-    }
-
-    /**
      * Closes the current path.
      *
      * @return {Graphics} Returns itself.
@@ -1291,18 +1239,9 @@ export default class Graphics extends Node2D {
 
     /**
      * Destroys the Graphics object.
-     *
-     * @param {object|boolean} [options] - Options parameter. A boolean will act as if all
-     *  options have been set to that value
-     * @param {boolean} [options.children=false] - if set to true, all the children will have
-     *  their destroy method called as well. 'options' will be passed on to those calls.
-     * @param {boolean} [options.texture=false] - Only used for child Sprites if options.children is set to true
-     *  Should it destroy the texture of the child sprite
-     * @param {boolean} [options.base_texture=false] - Only used for child Sprites if options.children is set to true
-     *  Should it destroy the base texture of the child sprite
      */
-    destroy(options) {
-        super.destroy(options);
+    destroy() {
+        super.destroy();
 
         // destroy each of the GraphicsData objects
         for (let i = 0; i < this.graphics_data.length; ++i) {
@@ -1310,9 +1249,9 @@ export default class Graphics extends Node2D {
         }
 
         // for each webgl data entry, destroy the WebGLGraphicsData
-        for (const id in this._webGL) {
-            for (let j = 0; j < this._webGL[id].data.length; ++j) {
-                this._webGL[id].data[j].destroy();
+        for (const id in this._webgl) {
+            for (let j = 0; j < this._webgl[id].data.length; ++j) {
+                this._webgl[id].data[j].destroy();
             }
         }
 
@@ -1323,7 +1262,7 @@ export default class Graphics extends Node2D {
         this.graphics_data = null;
 
         this.current_path = null;
-        this._webGL = null;
+        this._webgl = null;
         this._localBounds = null;
     }
 

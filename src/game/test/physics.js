@@ -1,4 +1,4 @@
-import * as v from 'engine';
+import * as v from 'engine/index';
 
 
 class CustomArea extends v.Area2D {

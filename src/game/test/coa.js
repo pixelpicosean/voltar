@@ -1,13 +1,12 @@
 import * as v from 'engine/index';
 
-v.loader.add('media/commander.json');
-v.loader.add('cc', 'media/commander.scon');
+v.preload('media/04b03.fnt');
+
+v.preload('media/commander.json');
+v.preload('cc', 'media/commander.scon');
 
 
 export default class CoaTest extends v.Node2D {
-    /**
-     * @returns CoaTest
-     */
     static instance() {
         return new CoaTest();
     }
@@ -22,10 +21,7 @@ export default class CoaTest extends v.Node2D {
         //     hero.play('idle');
         // }
 
-        /**
-         * @type {v.CoaSprite}
-         */
-        let hero = this.add_child(new v.CoaSprite().load('cc', 0));
+        let hero = this.add_child(new v.CutoutAnimation().load('cc', 0));
         hero.position.set(128, 200);
         hero.play('idle');
         // hero.animator.speed = 0.25;
@@ -55,18 +51,18 @@ export default class CoaTest extends v.Node2D {
             }
         }, 4000);
 
-        this.info = this.add_child(new v.BitmapText('0', {
-            font: '04b03',
-        }));
-        this.info.position.set(4, 4);
+        // this.info = this.add_child(new v.BitmapText('0', {
+        //     font: '04b03',
+        // }));
+        // this.info.position.set(4, 4);
     }
     _ready() {
         this.set_process(true);
         this.last = performance.now();
     }
     _render(now) {
-        this.info.text = `${(1000 / (now - this.last)) | 0}`;
-        this.last = now;
+        // this.info.text = `${(1000 / (now - this.last)) | 0}`;
+        // this.last = now;
     }
     _exit_tree() {}
 }

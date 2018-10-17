@@ -1,0 +1,23 @@
+{
+    "name": "Preloader",
+    "children": [
+        {
+            "type": "Sprite",
+            "x": 28,
+            "y": 118,
+            "width": 200,
+            "height": 20,
+            "tint": 0,
+            "texture": "_white_"
+        },
+        {
+            "name": "bar",
+            "type": "Sprite",
+            "x": 28,
+            "y": 118,
+            "width": 200,
+            "height": 20,
+            "texture": "_white_"
+        }
+    ]
+}

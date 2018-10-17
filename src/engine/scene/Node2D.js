@@ -1,15 +1,25 @@
+/// <reference path="../tween/index.d.ts" />
+
 import settings from '../settings';
+import { node_plugins } from 'engine/registry';
 import { TRANSFORM_MODE } from '../const';
 import {
     EventEmitter, Signal,
     remove_items,
 } from 'engine/dep/index';
 import { TransformStatic, Transform, Point, Bounds, Rectangle } from 'engine/math/index';
-import TweenManager from 'engine/anime/TweenManager';
 import ObservablePoint from 'engine/math/ObservablePoint';
-import Filter from 'engine/renderers/webgl/filters/Filter';
+import Filter from 'engine/renderers/filters/Filter';
 
 let uid = 0;
+
+/**
+ * @typedef DestroyOption
+ * @property {boolean} children if set to true, all the children will have their
+ *                              destroy method called as well. 'options' will be passed on to those calls.
+ * @property {boolean} [texture] Should it destroy the current texture of the sprite as well
+ * @property {boolean} [base_texture] Should it destroy the base texture of the sprite as well
+ */
 
 /**
  * A Node2D represents a collection of display objects.
@@ -54,6 +64,13 @@ export default class Node2D extends EventEmitter {
          * @type {boolean}
          */
         this.is_queued_for_deletion = false;
+        /**
+         * Nodes that will always keep identity transform if this is
+         * set to false.
+         *
+         * @type {boolean}
+         */
+        this.has_transform = true;
 
         /**
          * @private
@@ -116,7 +133,7 @@ export default class Node2D extends EventEmitter {
         this.parent = null;
 
         /**
-         * @type {SceneTree}
+         * @type {import('engine/SceneTree').default}
          */
         this.scene_tree = null;
 
@@ -194,9 +211,14 @@ export default class Node2D extends EventEmitter {
          * The original, cached mask of the object
          *
          * @private
-         * @type {Graphics|Sprite}
+         * @type {import('./graphics/Graphics').default|import('./sprites/Sprite').default}
          */
         this._mask = null;
+
+        /**
+         * @private
+         */
+        this.is_mask = false;
 
         /**
          * If the object has been destroyed via destroy(). If true, it should not be used.
@@ -229,13 +251,15 @@ export default class Node2D extends EventEmitter {
         /**
          * @type {Array<number>}
          */
-        this.groups = [];
+        this.groups = null;
 
         /**
-         * @type {TweenManager}
+         * @type {tween.TweenManager}
          */
-        this.tweens = new TweenManager();
-
+        this.tweens = null;
+        if (node_plugins.TweenManager) {
+            this.tweens = new node_plugins.TweenManager();
+        }
 
         this.tree_entered = new Signal();
         this.tree_exited = new Signal();
@@ -311,6 +335,9 @@ export default class Node2D extends EventEmitter {
      * @param {number} group
      */
     add_to_group(group) {
+        if (!this.groups) {
+            this.groups = [];
+        }
         if (this.groups.indexOf(group) < 0) {
             this.groups.push(group);
 
@@ -323,6 +350,9 @@ export default class Node2D extends EventEmitter {
      * @param {number} group
      */
     remove_from_group(group) {
+        if (!this.groups) {
+            this.groups = [];
+        }
         let idx = this.groups.indexOf(group);
         if (idx >= 0) {
             remove_items(this.groups, idx, 1);
@@ -340,11 +370,13 @@ export default class Node2D extends EventEmitter {
      * @private
      */
     _update_transform() {
-        this.transform.update_transform(this.parent.transform);
+        if (this.has_transform) {
+            this.transform.update_transform(this.parent.transform);
+            this._bounds.update_id++;
+        }
+
         // multiply the alphas..
         this.world_alpha = this.alpha * this.parent.world_alpha;
-
-        this._bounds.update_id++;
     }
 
     /**
@@ -356,20 +388,24 @@ export default class Node2D extends EventEmitter {
     _recursive_post_update_transform() {
         if (this.parent) {
             this.parent._recursive_post_update_transform();
-            this.transform.update_transform(this.parent.transform);
+            if (this.has_transform) {
+                this.transform.update_transform(this.parent.transform);
+            }
         }
         else {
-            this.transform.update_transform(this._temp_node_2d_parent.transform);
+            if (this.has_transform) {
+                this.transform.update_transform(this._temp_node_2d_parent.transform);
+            }
         }
     }
 
     /**
      * Retrieves the bounds of the node as a rectangle object.
      *
-     * @param {boolean} skip_update - setting to true will stop the transforms of the scene graph from
+     * @param {boolean} [skip_update=false] - setting to true will stop the transforms of the scene graph from
      *  being updated. This means the calculation returned MAY be out of date BUT will give you a
      *  nice performance boost
-     * @param {Rectangle} rect - Optional rectangle to store the result of the bounds calculation
+     * @param {Rectangle} [rect] - Optional rectangle to store the result of the bounds calculation
      * @return {Rectangle} the rectangular bounding area
      */
     get_bounds(skip_update, rect) {
@@ -731,6 +767,7 @@ export default class Node2D extends EventEmitter {
      * @readonly
      */
     get world_visible() {
+        /** @type {Node2D} */
         let item = this;
 
         do {
@@ -752,7 +789,7 @@ export default class Node2D extends EventEmitter {
      *
      * @todo For the moment, CanvasRenderer doesn't support Sprite as mask.
      *
-     * @type {Graphics|Sprite}
+     * @type {import('./graphics/Graphics').default|import('./sprites/Sprite').default}
      */
     get mask() {
         return this._mask;
@@ -832,7 +869,7 @@ export default class Node2D extends EventEmitter {
         this.is_inside_tree = true;
 
         // Add to scene tree groups
-        if (this.groups.length > 0) {
+        if (this.groups && this.groups.length > 0) {
             for (let i = 0; i < this.groups.length; i++) {
                 this.scene_tree.add_node_to_group(this, this.groups[i]);
             }
@@ -869,15 +906,15 @@ export default class Node2D extends EventEmitter {
             this.children[i]._propagate_process(delta);
         }
 
-        this.tweens._process(delta);
+        this.tweens && this.tweens._process(delta);
     }
 
     _propagate_exit_tree() {
         // Stop animations
-        this.tweens._stop_all();
+        this.tweens && this.tweens._stop_all();
 
         // Remove from scene tree groups
-        if (this.groups.length > 0) {
+        if (this.groups && this.groups.length > 0) {
             for (let i = 0; i < this.groups.length; i++) {
                 this.scene_tree.remove_node_from_group(this, this.groups[i]);
             }
@@ -1077,9 +1114,8 @@ export default class Node2D extends EventEmitter {
     /**
      * Returns the child at the specified index
      *
-     * @template {Node2D} T
      * @param {number} index - The index to get the child at
-     * @return {T} The child at the given index, if any.
+     * @return {extends typeof Node2D} The child at the given index, if any.
      */
     get_child(index) {
         if (index < 0 || index >= this.children.length) {
@@ -1092,8 +1128,9 @@ export default class Node2D extends EventEmitter {
     /**
      * Removes one or more children from the container.
      *
-     * @param {...Node2D} child - The Node2D(s) to remove
-     * @return {Node2D} The first child that was removed.
+     * @template T {Node2D}
+     * @param {...T} child - The Node2D(s) to remove
+     * @return {T} The first child that was removed.
      */
     remove_child(child) {
         const index = this.children.indexOf(child);
@@ -1130,7 +1167,7 @@ export default class Node2D extends EventEmitter {
      * Removes a child from the specified index position.
      *
      * @param {number} index - The index to get the child from
-     * @return {Node2D} The child that was removed.
+     * @return {extends typeof Node2D} The child that was removed.
      */
     remove_child_at(index) {
         const child = this.get_child(index);
@@ -1166,7 +1203,7 @@ export default class Node2D extends EventEmitter {
      *
      * @param {number} [beginIndex=0] - The beginning position.
      * @param {number} [endIndex=this.children.length] - The ending position. Default value is size of the container.
-     * @returns {Array<Node2D>} List of removed children
+     * @returns {Array<extends typeof Node2D>} List of removed children
      */
     remove_children(beginIndex = 0, endIndex) {
         const begin = beginIndex;
@@ -1218,7 +1255,7 @@ export default class Node2D extends EventEmitter {
 
     /**
      * @param {string} path
-     * @returns {Node2D}
+     * @returns {extends typeof Node2D}
      */
     get_node(path) {
         const list = path.split('/');
@@ -1263,18 +1300,20 @@ export default class Node2D extends EventEmitter {
      * Updates the transform on all children of this container for rendering
      */
     update_transform() {
-        this._bounds_id++;
+        if (this.has_transform) {
+            this._bounds_id++;
 
-        this.transform.update_transform(this.parent.transform);
+            this.transform.update_transform(this.parent.transform);
+
+            let t = this.transform.world_transform;
+            this._world_position.set(t.tx, t.ty);
+            this._world_scale.copy(this.parent._world_scale)
+                .multiply(this.scale);
+            this._world_rotation = this.parent._world_rotation + this.transform.rotation;
+        }
 
         // TODO: check render flags, how to process stuff here
         this.world_alpha = this.alpha * this.parent.world_alpha;
-
-        let t = this.transform.world_transform;
-        this._world_position.set(t.tx, t.ty);
-        this._world_scale.copy(this.parent._world_scale)
-            .multiply(this.scale);
-        this._world_rotation = this.parent._world_rotation + this.transform.rotation;
 
         for (let i = 0, j = this.children.length; i < j; ++i) {
             const child = this.children[i];
@@ -1467,14 +1506,8 @@ export default class Node2D extends EventEmitter {
      * Removes all internal references and listeners as well as removes children from the display list.
      * Do not use a Node2D after calling `destroy`.
      *
-     * @param {object|boolean} [options] - Options parameter. A boolean will act as if all options
+     * @param {DestroyOption|boolean} [options] - Options parameter. A boolean will act as if all options
      *  have been set to that value
-     * @param {boolean} [options.children=false] - if set to true, all the children will have their destroy
-     *  method called as well. 'options' will be passed on to those calls.
-     * @param {boolean} [options.texture=false] - Only used for child Sprites if options.children is set to true
-     *  Should it destroy the texture of the child sprite
-     * @param {boolean} [options.base_texture=false] - Only used for child Sprites if options.children is set to true
-     *  Should it destroy the base texture of the child sprite
      */
     destroy_children(options) {
         super.destroy();
@@ -1537,5 +1570,8 @@ export default class Node2D extends EventEmitter {
     }
 }
 
-// performance increase to avoid using call.. (10x faster)
+/**
+ * performance increase to avoid using call.. (10x faster)
+ * @this {Node2D}
+ */
 Node2D.prototype.node2d_update_transform = Node2D.prototype.update_transform;

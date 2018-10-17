@@ -1,9 +1,7 @@
 import Node2D from '../Node2D';
 
-
 const HALF_PI = Math.PI * 0.5;
 const SLOPE_ANGLE_DIFF_MIN = 0.001;
-
 
 export default class CollisionMap extends Node2D {
     get_collision_layer() {
@@ -27,11 +25,9 @@ export default class CollisionMap extends Node2D {
     get width() {
         return (this.data && this.data[0]) ? this.data[0].length : 0;
     }
-    set width(v) {}
     get height() {
         return (this.data) ? this.data.length : 0;
     }
-    set height(v) {}
 
     constructor(tilesize, data, layer_bit = 1, tiledef = TileDef) {
         super();
@@ -48,8 +44,8 @@ export default class CollisionMap extends Node2D {
         this.last_slope = 1;
 
         for (let t in this.tiledef) {
-            if (t | 0 > this.last_slope) {
-                this.last_slope = t | 0;
+            if ((t | 0) > this.last_slope) {
+                this.last_slope = (t | 0);
             }
         }
 

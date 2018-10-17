@@ -183,7 +183,7 @@ export default class Ticker {
      * it is removed or the ticker is stopped.
      *
      * @param {Function} fn - The listener function to be added for updates
-     * @param {Function} [context] - The listener context
+     * @param {any} [context] - The listener context
      * @param {number} [priority=UPDATE_PRIORITY.NORMAL] - The priority for emitting
      * @returns {Ticker} This instance of a ticker
      */
@@ -248,7 +248,7 @@ export default class Ticker {
      * If no handlers are left after removing, then it cancels the animation frame.
      *
      * @param {Function} fn - The listener function to be removed
-     * @param {Function} [context] - The listener context to be removed
+     * @param {any} [context] - The listener context to be removed
      * @returns {Ticker} This instance of a ticker
      */
     remove(fn, context) {

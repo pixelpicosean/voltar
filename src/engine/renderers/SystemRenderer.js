@@ -27,6 +27,11 @@ const temp_matrix = new Matrix();
  *     (shown if not transparent).
  * @property {boolean} [pixel_snap=false] - If true Pixi will Math.floor() x/y values when rendering,
  *     stopping pixel interpolation.
+ * @property {boolean} [legacy=false] - If true PixiJS will aim to ensure compatibility
+ *     with older / less advanced devices. If you experiance unexplained flickering try setting this to true.
+ * @property {string} [power_preference] - Parameter passed to webgl context, set to "high-performance"
+ *     for devices with dual graphics card
+ * @property {WebGLRenderingContext} [context]
  */
 
 /**
@@ -247,8 +252,8 @@ export default class SystemRenderer extends EventEmitter {
      * This can be quite useful if your node is complicated and needs to be reused multiple times.
      *
      * @param {Node2D} node - The node the object will be generated from
-     * @param {number} scale_mode - Should be one of the scale_mode consts
-     * @param {number} resolution - The resolution / device pixel ratio of the texture being generated
+     * @param {number} [scale_mode] - Should be one of the scale_mode consts
+     * @param {number} [resolution] - The resolution / device pixel ratio of the texture being generated
      * @param {Rectangle} [region] - The region of the node, that shall be rendered,
      *        if no region is specified, defaults to the local bounds of the node.
      * @return {Texture} a texture of the graphics object

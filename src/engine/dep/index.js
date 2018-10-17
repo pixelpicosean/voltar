@@ -14,5 +14,4 @@ export const GL = GL_ns;
 
 import * as resource_loader_ns from 'resource-loader';
 export const resource_loader = resource_loader_ns;
-
-export { default as BitTwiddle } from 'bit-twiddle';
+export const ResourceLoader = resource_loader.default;

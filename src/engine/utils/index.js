@@ -32,8 +32,8 @@ export function uid() {
  * Converts a hex color number to an [R, G, B] array
  *
  * @param {number} hex - The number to convert
- * @param  {number[]} [out=[]] If supplied, this array will be used rather than returning a new one
- * @return {number[]} An array representing the [R, G, B] of the color.
+ * @param  {number[]|Float32Array} [out=[]] If supplied, this array will be used rather than returning a new one
+ * @return {number[]|Float32Array} An array representing the [R, G, B] of the color.
  */
 export function hex2rgb(hex, out) {
     out = out || [];
@@ -89,11 +89,12 @@ export function get_resolution_of_url(url, default_value) {
 /**
  * Typedef for decompose_data_uri return object.
  *
- * @typedef {object} DecomposedDataUri
- * @property {mediaType} Media type, eg. `image`
- * @property {subType} Sub type, eg. `png`
- * @property {encoding} Data encoding, eg. `base64`
- * @property {data} The actual data
+ * @typedef DecomposedDataUri
+ * @property {String} mediaType type, eg. `image`
+ * @property {String} subType type, eg. `png`
+ * @property {String} charset
+ * @property {String} encoding encoding, eg. `base64`
+ * @property {any} data The actual data
  */
 
 /**
@@ -194,13 +195,16 @@ export function is_webgl_supported() {
     const context_desc = { stencil: true, failIfMajorPerformanceCaveat: true };
 
     try {
+        // @ts-ignore
         if (!window.WebGLRenderingContext) {
             return false;
         }
 
         const canvas = document.createElement('canvas');
         /** @type {WebGLRenderingContext} */
-        let gl = canvas.getContext('webgl', context_desc) || canvas.getContext('experimental-webgl', context_desc);
+        let gl;
+        // @ts-ignore
+        gl = canvas.getContext('webgl', context_desc) || canvas.getContext('experimental-webgl', context_desc);
 
         const success = !!(gl && gl.getContextAttributes().stencil);
 

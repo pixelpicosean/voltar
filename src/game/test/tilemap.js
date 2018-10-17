@@ -1,14 +1,11 @@
-import * as v from 'engine';
+import * as v from 'engine/index';
 
-
-v.loader.add('collisiontiles', 'media/collisiontiles-64.png');
-v.loader.add('hero', 'media/hero.png');
-
+v.preload('collisiontiles', 'media/collisiontiles-64.png');
+v.preload('hero', 'media/hero.png');
 
 const SOLID = 1;
 const HERO = 2;
 const ENEMY = 3;
-
 
 class Me extends v.PhysicsBody2D {
     constructor() {
@@ -36,7 +33,7 @@ class Me extends v.PhysicsBody2D {
                     sheet: 'hero',
                     width: 24,
                     height: 24,
-                    sequence: [0,1,2],
+                    sequence: [0, 1, 2],
                 },
             },
         });
@@ -99,7 +96,6 @@ class Me extends v.PhysicsBody2D {
     }
 }
 
-
 export default class TilemapScene extends v.Node2D {
     static instance() {
         return new TilemapScene();
@@ -107,19 +103,18 @@ export default class TilemapScene extends v.Node2D {
 
     _enter_tree() {
         const data = [
-            [  1,  1,  1,  1,  1,  1,  1,  1 ],
-            [  1, 35,  0,  0,  0,  0, 13,  1 ],
-            [  1,  0,  0,  0,  0,  0,  0,  1 ],
-            [  1,  0,  0,  0,  0,  0,  0,  1 ],
-            [  1,  0,  0, 12, 12,  0,  0,  1 ],
-            [  1,  0,  0,  0,  0,  0,  0,  1 ],
-            [  1,  0,  3,  4, 25, 26,  0,  1 ],
-            [  1,  1,  1,  1,  1,  1,  1,  1 ],
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 35, 0, 0, 0, 0, 13, 1],
+            [1, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 12, 12, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 3, 4, 25, 26, 0, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1],
         ];
 
-        const t = new v.BackgroundMap(64, 64, data, 'collisiontiles');
+        const t = this.add_child(new v.BackgroundMap(64, 64, data, 'collisiontiles'));
         t.scale.set(0.5);
-        this.add_child(t);
 
         const c = new v.CollisionMap(32, data);
         c.set_collision_layer_bit(SOLID, true);
@@ -129,7 +124,4 @@ export default class TilemapScene extends v.Node2D {
         this.s.position.set(128, 64);
         this.add_child(this.s);
     }
-    _ready() {}
-    _process(delta) {}
-    _exit_tree() {}
 }
