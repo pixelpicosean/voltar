@@ -167,26 +167,31 @@ declare module 'resource-loader' {
 
         load(cb?: (loader: Loader, object: any) => void): Loader;
     }
-    interface Texture { }
     interface TextureDictionary {
-        [index: string]: Texture;
+        [index: string]: import('engine/textures/Texture').default;
     }
     class Resource {
+        name: string;
+        extension: string;
+
+        url: string;
+        data: any;
+
+        texture: import('engine/textures/Texture').default;
+        textures: TextureDictionary;
+        SVGMetadataElement: any;
+        // TODO: declare bmfont as a class
+        bitmap_font: any;
+        sound: import('engine/audio/index').Sound;
+
         isJson: boolean;
         metadata: any;
 
-        name: string;
-        texture: Texture;
-        textures: TextureDictionary;
-        url: string;
-        data: any;
         crossOrigin: boolean | string;
         loadType: number;
         xhrType: string;
         error: Error;
         xhr: XMLHttpRequest;
-        SVGMetadataElement: any;
-        bitmap_font: any;
 
         static setExtensionLoadType(extname: string, loadType: number): void;
         static setExtensionXhrType(extname: string, xhrType: number): void;

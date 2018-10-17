@@ -537,7 +537,6 @@ export default class BaseTexture extends EventEmitter {
 
         canvas.width = this.real_width;
         canvas.height = this.real_height;
-        // @ts-ignore
         canvas._pixiId = `canvas_${uid()}`;
 
         // Draw the Svg to the canvas
@@ -550,7 +549,6 @@ export default class BaseTexture extends EventEmitter {
         this.source = canvas;
 
         // Add also the canvas in cache (destroy clears by `image_url` and `source._pixiId`)
-        // @ts-ignore
         BaseTexture.add_to_cache(this, canvas._pixiId);
 
         this.is_loading = false;
@@ -669,23 +667,19 @@ export default class BaseTexture extends EventEmitter {
      *
      * @static
      * @param {HTMLCanvasElement} canvas - The canvas element source of the texture
-     * @param {number} scale_mode - See {@link SCALE_MODES} for possible values
+     * @param {number} [scale_mode] - See {@link SCALE_MODES} for possible values
      * @param {string} [origin='canvas'] - A string origin of who created the base texture
      * @return {BaseTexture} The new base texture.
      */
     static from_canvas(canvas, scale_mode, origin = 'canvas') {
-        // @ts-ignore
         if (!canvas._pixiId) {
-            // @ts-ignore
             canvas._pixiId = `${origin}_${uid()}`;
         }
 
-        // @ts-ignore
         let base_texture = BaseTextureCache[canvas._pixiId];
 
         if (!base_texture) {
             base_texture = new BaseTexture(canvas, scale_mode);
-            // @ts-ignore
             BaseTexture.add_to_cache(base_texture, canvas._pixiId);
         }
 
