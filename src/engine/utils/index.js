@@ -3,6 +3,7 @@ import settings from '../settings';
 import plugin_target from './plugin_target';
 import * as mixins from './mixin';
 import map_premultiplied_blend_modes from './map_premultiplied_blend_modes';
+import deep_merge from './deep_merge';
 
 let next_uid = 0;
 let said_hello = false;
@@ -17,6 +18,7 @@ let said_hello = false;
 export {
     plugin_target,
     mixins,
+    deep_merge,
 };
 
 /**

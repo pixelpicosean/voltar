@@ -5,7 +5,7 @@ import Node2D from './scene/Node2D';
 import Vector from './math/Point';
 import { shared as shared_ticker } from './ticker/index';
 import { Loader } from './loaders/index';
-import { mixins } from './utils/index';
+import { mixins, deep_merge } from './utils/index';
 
 import { outer_box_resize } from './resize';
 import remove_items from 'remove-array-items';
@@ -166,7 +166,7 @@ export default class SceneTree {
         // Handle mixins now, after all code has been added
         mixins.perform_mixins();
 
-        this.settings = Object.assign({}, DefaultSettings, settings);
+        this.settings = deep_merge({}, DefaultSettings, settings);
 
         document.title = this.settings.application.name;
 
