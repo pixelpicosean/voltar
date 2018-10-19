@@ -43,6 +43,8 @@ export { default as PhysicsBody2D } from './scene/physics/PhysicsBody2D';
 
 export { default as Timer } from './scene/Timer';
 
+export { default as AnimationPlayer } from './scene/animation/AnimationPlayer';
+
 // ------------------------------------------------------------------
 // Useful class
 // ------------------------------------------------------------------

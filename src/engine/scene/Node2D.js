@@ -10,6 +10,7 @@ import {
 import { TransformStatic, Transform, Point, Bounds, Rectangle } from 'engine/math/index';
 import ObservablePoint from 'engine/math/ObservablePoint';
 import Filter from 'engine/renderers/filters/Filter';
+import { rgb2hex } from 'engine/utils/index';
 
 let uid = 0;
 
@@ -33,6 +34,8 @@ let uid = 0;
 export default class Node2D extends EventEmitter {
     constructor() {
         super();
+
+        const self = this;
 
         const TransformClass = settings.TRANSFORM_MODE === TRANSFORM_MODE.STATIC ? TransformStatic : Transform;
 
@@ -261,6 +264,42 @@ export default class Node2D extends EventEmitter {
             this.tweens = new node_plugins.TweenManager();
         }
 
+        this.tint = 0;
+        this.modulate = {
+            _rgb: [0, 0, 0],
+
+            get r() {
+                return this._rgb[0];
+            },
+            set r(value) {
+                this._rgb[0] = value;
+                self.tint = rgb2hex(this._rgb);
+            },
+
+            get g() {
+                return this._rgb[1];
+            },
+            set g(value) {
+                this._rgb[1] = value;
+                self.tint = rgb2hex(this._rgb);
+            },
+
+            get b() {
+                return this._rgb[2];
+            },
+            set b(value) {
+                this._rgb[2] = value;
+                self.tint = rgb2hex(this._rgb);
+            },
+
+            get a() {
+                return self.alpha;
+            },
+            set a(value) {
+                self.alpha = value;
+            },
+        };
+
         this.tree_entered = new Signal();
         this.tree_exited = new Signal();
     }
@@ -299,6 +338,21 @@ export default class Node2D extends EventEmitter {
             }
         }
     }
+
+    /**
+     * Set value of this node with key, values and lerp factor
+     * @param {string} key
+     * @param {any} a
+     * @param {any} b
+     * @param {number} c
+     */
+    set_lerp_value(key, a, b, c) {}
+    /**
+     * Set value of this node with its key
+     * @param {string} key
+     * @param {any} value
+     */
+    set_value(key, value) {}
 
     /**
      * @private
@@ -1247,15 +1301,16 @@ export default class Node2D extends EventEmitter {
     }
 
     /**
-     * @returns {SceneTree}
+     * @returns {import('engine/SceneTree').default}
      */
     get_tree() {
         return this.scene_tree;
     }
 
     /**
+     * @template T {Node2D}
      * @param {string} path
-     * @returns {extends typeof Node2D}
+     * @returns {T}
      */
     get_node(path) {
         const list = path.split('/');
