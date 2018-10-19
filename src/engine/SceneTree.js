@@ -57,7 +57,7 @@ const DefaultSettings = {
         height: 250,
         resolution: 1,
 
-        background_color: 0x000000,
+        background_color: 0x4C4C4C,
 
         antialias: false,
         pixel_snap: true,

@@ -12,6 +12,7 @@ const {
     string,
     boolean,
     get_function_params,
+    Color,
 } = require('./parser/parse_utils');
 
 const gd_scene = require('./parser/gd_scene');
@@ -471,6 +472,7 @@ module.exports.convert_project_settings = (project_url) => {
     // Convert back into a big string
     data = lines.reduce((data, line) => data + line + '\n', '');
 
+    /** @type {any} */
     const settings = split_to_blocks(data)
         .map(parse_block)
         .map(b => {
@@ -495,6 +497,9 @@ module.exports.convert_project_settings = (project_url) => {
         // size
         display.width = int(settings.display['window/size/width']) || 640;
         display.height = int(settings.display['window/size/height']) || 480;
+
+        // clear color
+        display.background_color = color2hex(Color(settings.rendering['environment/default_clear_color']));
 
         // stretch
         let stretch_mode = string(settings.display['window/stretch/mode']);
@@ -523,3 +528,13 @@ module.exports.convert_project_settings = (project_url) => {
 
     fs.writeFileSync(project_url.replace(/\.godot/, '.json'), JSON.stringify(real_settings, null, 4));
 };
+
+/**
+ * Converts a color {r, g, b, a} to a hex number
+ *
+ * @param {{r: number, g: number, b: number, a: number}} color
+ * @return {number} The hex color number
+ */
+function color2hex({ r, g, b }) {
+    return (((r * 255) << 16) + ((g * 255) << 8) + (b * 255 | 0));
+}
