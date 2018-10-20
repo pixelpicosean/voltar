@@ -256,21 +256,15 @@ export default class Animation {
         return this;
     }
 
-    // @public
-    // add_track(p_type, p_at_pos = -1) { }
-    // clear() { }
-    // copy_track(p_track, p_to_animation) { }
-    // find_track(p_path) { }
-    // get_track_count() { }
-    // method_track_get_key_indices(p_track, p_time, p_delta, p_indices) { }
-    // method_track_get_params(p_track, p_key_idx) { }
-    // method_track_get_name(p_track, p_key_idx) { }
-    // remove_track(p_track) { }
-    // track_find_key(p_track, p_time, p_exact = false) { }
-    // track_get_interpolation_loop_wrap(p_track) { }
-    // track_get_interpolation_type(p_track) { }
-    // track_get_key_count(p_track) { }
-    // track_get_key_time(p_track, p_key_idx) { }
-    // track_get_key_transition(p_track, p_key_idx) { }
-    // track_get_key_value(p_track, p_key_idx) { }
+    /**
+     * Clear the animation (clear all tracks and reset all).
+     */
+    clear() {
+        this.tracks.length = 0;
+        this.loop = false;
+        this.length = 1;
+    }
+
+    // We don't provide more methods since they are not useful,
+    // so we can save some bytes here.
 }
