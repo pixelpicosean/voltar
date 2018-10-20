@@ -25,7 +25,7 @@
                 "position": {
                     "name": "position",
                     "length": 2,
-                    "loop": true,
+                    "loop": false,
                     "step": 0.1,
                     "tracks": [
                         {
@@ -38,9 +38,11 @@
                                     0,
                                     0.5,
                                     1,
-                                    1.5
+                                    1.5,
+                                    2
                                 ],
                                 "transitions": [
+                                    1,
                                     1,
                                     1,
                                     1,
@@ -63,6 +65,10 @@
                                     {
                                         "x": 257.647,
                                         "y": 81.8825
+                                    },
+                                    {
+                                        "x": 139.17,
+                                        "y": 80.597
                                     }
                                 ]
                             }
@@ -77,9 +83,11 @@
                                     0,
                                     0.5,
                                     1,
-                                    1.5
+                                    1.5,
+                                    2
                                 ],
                                 "transitions": [
+                                    1,
                                     1,
                                     1,
                                     1,
@@ -90,7 +98,8 @@
                                     0,
                                     0.835942898535204,
                                     -0.4762933715522445,
-                                    0.4667534018608435
+                                    0.4667534018608435,
+                                    0
                                 ]
                             }
                         },
@@ -102,9 +111,11 @@
                             "keys": {
                                 "times": [
                                     0,
-                                    1
+                                    1,
+                                    2
                                 ],
                                 "transitions": [
+                                    1,
                                     1,
                                     1
                                 ],
@@ -117,6 +128,10 @@
                                     {
                                         "x": 2,
                                         "y": 2
+                                    },
+                                    {
+                                        "x": 1,
+                                        "y": 1
                                     }
                                 ]
                             }
@@ -159,16 +174,19 @@
                             "keys": {
                                 "times": [
                                     0,
-                                    1
+                                    1,
+                                    2
                                 ],
                                 "transitions": [
+                                    1,
                                     1,
                                     1
                                 ],
                                 "update": 1,
                                 "values": [
-                                    "Title",
-                                    "Cool"
+                                    "Voltar",
+                                    "Cool",
+                                    "Voltar"
                                 ]
                             }
                         },
@@ -180,9 +198,11 @@
                             "keys": {
                                 "times": [
                                     0,
-                                    1
+                                    1,
+                                    2
                                 ],
                                 "transitions": [
+                                    1,
                                     1,
                                     1
                                 ],
@@ -195,10 +215,165 @@
                                         "a": 1
                                     },
                                     {
-                                        "r": 1,
-                                        "g": 0.375,
-                                        "b": 0.931641,
+                                        "r": null
+                                    },
+                                    {
+                                        "r": 0.375,
+                                        "g": 1,
+                                        "b": 0.941406,
                                         "a": 1
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                },
+                "second": {
+                    "name": "second",
+                    "length": 2,
+                    "loop": false,
+                    "step": 0.1,
+                    "tracks": [
+                        {
+                            "type": "value",
+                            "path": "pop:position",
+                            "interp": 1,
+                            "loop_wrap": true,
+                            "keys": {
+                                "times": [
+                                    0,
+                                    0.5,
+                                    1,
+                                    2
+                                ],
+                                "transitions": [
+                                    1,
+                                    1,
+                                    1,
+                                    1
+                                ],
+                                "update": 0,
+                                "values": [
+                                    {
+                                        "x": 139.17,
+                                        "y": 80.597
+                                    },
+                                    {
+                                        "x": 197.279,
+                                        "y": 198.753
+                                    },
+                                    {
+                                        "x": 139.17,
+                                        "y": 80.597
+                                    },
+                                    {
+                                        "x": 139.17,
+                                        "y": 80.597
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "type": "value",
+                            "path": "pop:rotation",
+                            "interp": 1,
+                            "loop_wrap": true,
+                            "keys": {
+                                "times": [
+                                    0,
+                                    0.5,
+                                    1,
+                                    2
+                                ],
+                                "transitions": [
+                                    1,
+                                    1,
+                                    1,
+                                    1
+                                ],
+                                "update": 0,
+                                "values": [
+                                    0,
+                                    12.566370614359172,
+                                    0,
+                                    0
+                                ]
+                            }
+                        },
+                        {
+                            "type": "value",
+                            "path": "pop:scale",
+                            "interp": 1,
+                            "loop_wrap": true,
+                            "keys": {
+                                "times": [
+                                    0,
+                                    0.5,
+                                    1,
+                                    2
+                                ],
+                                "transitions": [
+                                    1,
+                                    1,
+                                    1,
+                                    1
+                                ],
+                                "update": 0,
+                                "values": [
+                                    {
+                                        "x": 1,
+                                        "y": 1
+                                    },
+                                    {
+                                        "x": 2,
+                                        "y": 2
+                                    },
+                                    {
+                                        "x": 1,
+                                        "y": 1
+                                    },
+                                    {
+                                        "x": 1,
+                                        "y": 1
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "type": "value",
+                            "path": "Label:scale",
+                            "interp": 1,
+                            "loop_wrap": true,
+                            "keys": {
+                                "times": [
+                                    0,
+                                    0.9,
+                                    1.5,
+                                    2
+                                ],
+                                "transitions": [
+                                    1,
+                                    1,
+                                    1,
+                                    1
+                                ],
+                                "update": 0,
+                                "values": [
+                                    {
+                                        "x": 1,
+                                        "y": 1
+                                    },
+                                    {
+                                        "x": 1,
+                                        "y": 1
+                                    },
+                                    {
+                                        "x": 1.5,
+                                        "y": 1.5
+                                    },
+                                    {
+                                        "x": 1,
+                                        "y": 1
                                     }
                                 ]
                             }
@@ -215,7 +390,7 @@
                 "x": 137,
                 "y": 162
             },
-            "text": "Title",
+            "text": "Voltar",
             "style": {
                 "align": "center",
                 "fill": "#5ffff0",

@@ -10,6 +10,11 @@ export default class SpriteTest extends v.Sprite {
     }
 
     _ready() {
-        this.get_node('AnimationPlayer').play('position')
+        /** @type {v.AnimationPlayer} */
+        const anim = this.get_node('AnimationPlayer')
+        anim.animation_set_next('position', 'second');
+        anim.animation_set_next('second', 'position');
+
+        anim.play('position')
     }
 }
