@@ -1,12 +1,10 @@
 {
   "name": "voltar_converter",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Convert Godot tscn file to Voltar capable format",
-  "main": "tscn_to_json.js",
-  "repository": "git@gitlab.com:reddypanda/voltar_converter.git",
+  "main": "main.js",
+  "repository": "https://github.com/pixelpicosean/voltar.git",
   "author": "Sean Bohan <pixelpicosean@gmail.com>",
-  "license": "MIT",
-  "private": true,
   "dependencies": {
     "lodash": "^4.17.4",
     "walk": "^2.3.9"

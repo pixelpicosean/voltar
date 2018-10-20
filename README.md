@@ -31,6 +31,9 @@ to generated atlas exported to `media` folder. Otherwise it won't work.
 
 ### Steps
 
+Make sure you've installed dependencies of the importer. In case you're not:
+`cd godot_importer && yarn` or `cd godot_importer && npm install`
+
 Setup Godot project (from project settings)
 
 Create scenes, and save them into the `assets/scene` folder
