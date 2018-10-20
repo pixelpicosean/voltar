@@ -3,7 +3,25 @@ Voltar
 
 Next generation of LesserPanda framework.
 
+## Voltar CommandLine Tools
+
+`yarn global add voltar-cli` or `npm install -g voltar-cli`
+
+### Commands
+
+`voltar create`: create project, slow and require network. Recommend to copy the whole repo instead.
+
+`voltar start`: start dev server with live-reloading
+
+`voltar build`: build for production and copy `media` with compiled scripts to `dist`
+
 ## Godot Importer
+
+You can edit scenes from Godot and then use the importer to convert **project setting**
+and **scenes** to JSON format, then load them like normal config data. Voltar editor
+is deprecated in favor of the workflow with Godot and importer.
+
+### Rules for Godot support
 
 Scenes should be saved into the `assets/scene`, and uses assets located inside
 `assets` folder.
@@ -12,6 +30,9 @@ Textures should **ALWAYS** go into `assets/image/*` and uses the texture packer
 to generated atlas exported to `media` folder. Otherwise it won't work.
 
 ### Steps
+
+Make sure you've installed dependencies of the importer. In case you're not:
+`cd godot_importer && yarn` or `cd godot_importer && npm install`
 
 Setup Godot project (from project settings)
 
