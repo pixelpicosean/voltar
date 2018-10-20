@@ -1,13 +1,44 @@
 import WebAudioInstance from "./WebAudioInstance";
 import WebAudioNodes from "./WebAudioNodes";
+import Sound from "../Sound";
+import WebAudioContext from "./WebAudioContext";
+import Filter from "../filters/Filter";
+
 /**
  * Represents a single sound element. Can be used to play, pause, etc. sound instances.
- * @private
- * @class WebAudioMedia
- * @memberof PIXI.sound.webaudio
- * @param {PIXI.sound.Sound} parent - Instance of parent Sound container
+ *
+ * @param {Sound} parent - Instance of parent Sound container
  */
 export default class WebAudioMedia {
+    constructor() {
+        /**
+         * Reference to the parent Sound container.
+         * @type {Sound}
+         * @readonly
+         */
+        this.parent = null;
+
+        /**
+         * Instance of the chain builder.
+         * @type {WebAudioNodes}
+         * @private
+         */
+        this._nodes = null;
+
+        /**
+         * Instance of the source node.
+         * @type {AudioBufferSourceNode}
+         * @private
+         */
+        this._source = null;
+
+        /**
+         * The file buffer to load.
+         * @type {ArrayBuffer}
+         * @readonly
+         */
+        this.source = null;
+    }
     init(parent) {
         this.parent = parent;
         this._nodes = new WebAudioNodes(this.context);
@@ -17,7 +48,6 @@ export default class WebAudioMedia {
     /**
      * Destructor, safer to use `SoundLibrary.remove(alias)` to remove this sound.
      * @private
-     * @method PIXI.sound.webaudio.WebAudioMedia#destroy
      */
     destroy() {
         this.parent = null;
@@ -47,14 +77,12 @@ export default class WebAudioMedia {
     }
     // Implements duration
     get duration() {
-        // @if DEBUG
         console.assert(this.isPlayable, "Sound not yet playable, no duration");
-        // @endif
+
         return this._source.buffer.duration;
     }
     /**
      * Gets and sets the buffer.
-     * @name PIXI.sound.webaudio.WebAudioMedia#buffer
      * @type {AudioBuffer}
      */
     get buffer() {
@@ -66,38 +94,41 @@ export default class WebAudioMedia {
     /**
      * Get the current chained nodes object
      * @private
-     * @name PIXI.sound.webaudio.WebAudioMedia#nodes
-     * @type {PIXI.sound.webaudio.WebAudioNodes}
+     * @type {WebAudioNodes}
      */
     get nodes() {
         return this._nodes;
     }
-    // Implements load
+
+    /**
+     * Implement load
+     * @param {import("../Sound").LoadedCallback} [callback]
+     */
     load(callback) {
-        // Load from the file path
-        if (this.parent.url) {
-            this._loadUrl(callback);
-        }
-        else if (this.source) {
+        // Load from the arraybuffer, incase it was loaded outside
+        if (this.source) {
             this._decode(this.source, callback);
         }
-        else if (callback) {
+        // Load from the file path
+        else if (this.parent.url) {
+            this._loadUrl(callback);
+        } else if (callback) {
             callback(new Error("sound.url or sound.source must be set"));
-        }
-        else {
+        } else {
             console.error("sound.url or sound.source must be set");
         }
     }
     /**
      * Loads a sound using XHMLHttpRequest object.
-     * @method PIXI.sound.webaudio.WebAudioMedia#_loadUrl
      * @private
+     * @param {import("../Sound").LoadedCallback} [callback]
      */
     _loadUrl(callback) {
         const request = new XMLHttpRequest();
         const url = this.parent.url;
         request.open("GET", url, true);
         request.responseType = "arraybuffer";
+
         // Decode asynchronously
         request.onload = () => {
             this.source = request.response;
@@ -108,23 +139,25 @@ export default class WebAudioMedia {
     }
     /**
      * Decodes the array buffer.
-     * @method PIXI.sound.webaudio.WebAudioMedia#decode
      * @param {ArrayBuffer} arrayBuffer From load.
+     * @param {import("../Sound").LoadedCallback} [callback]
      * @private
      */
     _decode(arrayBuffer, callback) {
+        /** @type {WebAudioContext} */
+        // @ts-ignore
         const context = this.parent.context;
         context.decode(arrayBuffer, (err, buffer) => {
             if (err) {
                 if (callback) {
                     callback(err);
                 }
-            }
-            else {
+            } else {
                 this.parent.isLoaded = true;
                 this.buffer = buffer;
                 const instance = this.parent.autoPlayStart();
                 if (callback) {
+                    // @ts-ignore
                     callback(null, this.parent, instance);
                 }
             }

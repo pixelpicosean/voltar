@@ -1,10 +1,7 @@
-import EventEmitter from 'eventemitter3';
+import { EventEmitter } from 'engine/dep/index';
+
 /**
  * The fallback version of WebAudioContext which uses `<audio>` instead of WebAudio API.
- * @private
- * @class HTMLAudioContext
- * @extends PIXI.util.EventEmitter
- * @memberof PIXI.sound.htmlaudio
  */
 export default class HTMLAudioContext extends EventEmitter {
     constructor() {
@@ -16,7 +13,7 @@ export default class HTMLAudioContext extends EventEmitter {
     }
     /**
      * Internal trigger when volume, mute or speed changes
-     * @method PIXI.sound.htmlaudio.HTMLAudioContext#refresh
+     * @method HTMLAudioContext#refresh
      * @private
      */
     refresh() {
@@ -24,7 +21,7 @@ export default class HTMLAudioContext extends EventEmitter {
     }
     /**
      * Internal trigger paused changes
-     * @method PIXI.sound.htmlaudio.HTMLAudioContext#refreshPaused
+     * @method HTMLAudioContext#refreshPaused
      * @private
      */
     refreshPaused() {
@@ -32,37 +29,31 @@ export default class HTMLAudioContext extends EventEmitter {
     }
     /**
      * HTML Audio does not support filters, this is non-functional API.
-     * @type {Array<PIXI.sound.filters.Filter>}
-     * @name PIXI.sound.htmlaudio.HTMLAudioContext#filters
+     * @type {Array<import('../filters/index').Filter>}
+     * @name HTMLAudioContext#filters
      * @default null
      */
     get filters() {
-        // @if DEBUG
         console.warn('HTML Audio does not support filters');
-        // @endif
         return null;
     }
     set filters(filters) {
-        // @if DEBUG
         console.warn('HTML Audio does not support filters');
-        // @endif
     }
     /**
      * HTML Audio does not support `audioContext`
      * @type {null}
-     * @name PIXI.sound.htmlaudio.HTMLAudioContext#audioContext
+     * @name HTMLAudioContext#audioContext
      * @default null
      * @readonly
      */
     get audioContext() {
-        // @if DEBUG
         console.warn('HTML Audio does not support audioContext');
-        // @endif
         return null;
     }
     /**
      * Toggles the muted state.
-     * @method PIXI.sound.htmlaudio.HTMLAudioContext#toggleMute
+     * @method HTMLAudioContext#toggleMute
      * @return {boolean} The current muted state.
      */
     toggleMute() {
@@ -72,7 +63,7 @@ export default class HTMLAudioContext extends EventEmitter {
     }
     /**
      * Toggles the paused state.
-     * @method PIXI.sound.htmlaudio.HTMLAudioContext#togglePause
+     * @method HTMLAudioContext#togglePause
      * @return {boolean} The current paused state.
      */
     togglePause() {
@@ -82,7 +73,7 @@ export default class HTMLAudioContext extends EventEmitter {
     }
     /**
      * Destroy and don't use after this
-     * @method PIXI.sound.htmlaudio.HTMLAudioContext#destroy
+     * @method HTMLAudioContext#destroy
      */
     destroy() {
         this.removeAllListeners();

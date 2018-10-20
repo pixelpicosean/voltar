@@ -1,25 +1,51 @@
-import Filterable from "./Filterable";
-import * as filters from "./filters";
-import * as htmlaudio from "./htmlaudio";
-import { HTMLAudioContext } from "./htmlaudio";
+import * as filters from "./filters/index";
+import { HTMLAudioContext } from "./htmlaudio/index";
 import LoaderMiddleware from "./loader/LoaderMiddleware";
 import Sound from "./Sound";
-import SoundSprite from "./sprites/SoundSprite";
-import utils from "./utils/SoundUtils";
-import { WebAudioContext } from "./webaudio";
-import * as webaudio from "./webaudio";
+import { WebAudioContext } from "./webaudio/index";
+import Filter from "./filters/Filter";
+
 /**
- * Contains all of the functionality for using the **pixi-sound** library.
- * This is deisnged to play audio with WebAudio and fallback to HTML5.
- */
-/**
- * @description Manages the playback of sounds.
- * @class SoundLibrary
- * @private
+ * Manages the playback of sounds.
  */
 export default class SoundLibrary {
-    constructor(Resource) {
-        this.Resource = Resource;
+    constructor() {
+        /**
+         * For legacy approach for Audio. Instead of using WebAudio API
+         * for playback of sounds, it will use HTML5 `<audio>` element.
+         * @type {boolean}
+         * @default false
+         * @private
+         */
+        this._useLegacy = false;
+
+        /**
+         * The global context to use.
+         * @type {IMediaContext}
+         * @private
+         */
+        this._context = null;
+
+        /**
+         * The WebAudio specific context
+         * @type {WebAudioContext}
+         * @private
+         */
+        this._webAudioContext = null;
+
+        /**
+         * The HTML Audio (legacy) context.
+         * @type {HTMLAudioContext}
+         * @private
+         */
+        this._htmlAudioContext = null;
+
+        /**
+         * The map of all sounds by alias.
+         * @type {{[id: string]: Sound}}
+         * @private
+         */
+        this._sounds = null;
 
         this.init();
     }
@@ -41,20 +67,25 @@ export default class SoundLibrary {
     /**
      * The global context to use.
      * @readonly
+     * @type {IMediaContext}
      */
     get context() {
         return this._context;
     }
+
     /**
      * Initialize the singleton of the library
-     * @return {Sound}
+     * @return {SoundLibrary}
      */
-    static init(Resource, Loader, shared) {
+    static init() {
         if (SoundLibrary.instance) {
             throw new Error("SoundLibrary is already created");
         }
-        const instance = SoundLibrary.instance = new SoundLibrary(Resource);
-        LoaderMiddleware.install(instance, Loader, Resource, shared);
+
+        const instance = SoundLibrary.instance = new SoundLibrary();
+
+        LoaderMiddleware.install(instance);
+
         return instance;
     }
     /**
@@ -63,10 +94,10 @@ export default class SoundLibrary {
      * **Only supported with WebAudio.**
      * @example
      * // Adds a filter to pan all output left
-     * v.sound.filtersAll = [
-     *     new v.sound.filters.StereoFilter(-1)
+     * sound.filtersAll = [
+     *     new sound.filters.StereoFilter(-1)
      * ];
-     * @type {Array<filters.Filter>}
+     * @type {Array<Filter>}
      */
     get filtersAll() {
         if (!this.useLegacy) {
@@ -87,25 +118,33 @@ export default class SoundLibrary {
     get supported() {
         return WebAudioContext.AudioContext !== null;
     }
-    // Actual method
+    /**
+     * Adds a new sound by alias or register an existing sound with library cache
+     * @param {string|Object<string, import("./Sound").Options|string|ArrayBuffer|HTMLAudioElement>} source The sound alias reference or
+     *      map of sounds to add, the key is the alias,
+     *      the value is `string`, `ArrayBuffer`, `HTMLAudioElement`
+     *      or the list of options
+     * @param {import("./Sound").Options|string|ArrayBuffer|HTMLAudioElement|Sound} sourceOptions options
+     * @returns {Sound}
+     */
     add(source, sourceOptions) {
         if (typeof source === "object") {
             const results = {};
             for (const alias in source) {
+                /** @type {import("./Sound").Options} */
                 const options = this._getOptions(source[alias], sourceOptions);
                 results[alias] = this.add(alias, options);
             }
+            // TODO: multiply sound return support
+            // @ts-ignore
             return results;
-        }
-        else if (typeof source === "string") {
-            // @if DEBUG
+        } else if (typeof source === "string") {
             console.assert(!this._sounds[source], `Sound with alias ${source} already exists.`);
-            // @endif
+
             if (sourceOptions instanceof Sound) {
                 this._sounds[source] = sourceOptions;
                 return sourceOptions;
-            }
-            else {
+            } else {
                 const options = this._getOptions(sourceOptions);
                 const sound = Sound.from(options);
                 this._sounds[source] = sound;
@@ -118,7 +157,7 @@ export default class SoundLibrary {
      * @private
      * @param {string|ArrayBuffer|HTMLAudioElement|Object} source The source options
      * @param {any} [overrides] Override default options
-     * @return {Object} The construction options
+     * @return {import("./Sound").Options} The construction options
      */
     _getOptions(source, overrides) {
         let options;
@@ -141,12 +180,14 @@ export default class SoundLibrary {
         return false;
     }
     set useLegacy(legacy) {
-        LoaderMiddleware.set_legacy(false, this.Resource);
+        LoaderMiddleware.legacy = legacy;
+        this._useLegacy = legacy;
+
         // Set the context to use
-        if (this.supported) {
+        if (!legacy && this.supported) {
+            // @ts-ignore
             this._context = this._webAudioContext;
-        }
-        else {
+        } else {
             this._context = this._htmlAudioContext;
         }
     }
@@ -188,7 +229,7 @@ export default class SoundLibrary {
      * @return {boolean} `true` if all sounds are paused.
      */
     toggle_pause_all() {
-        return this._context.toggle_pause();
+        return this._context.togglePause();
     }
     /**
      * Pauses any playing sounds.
@@ -276,26 +317,14 @@ export default class SoundLibrary {
         this.exists(alias, true);
         return this._sounds[alias];
     }
-    /**
-     * Plays a sound.
-     * @param {String} alias The sound alias reference.
-     * @param {String} sprite The alias of the sprite to play.
-     * @return {any} The sound instance, this cannot be reused
-     *         after it is done playing. Returns `null` if the sound has not yet loaded.
-     */
+
     /**
      * Plays a sound.
      * @param {string} alias The sound alias reference.
-     * @param {Object|Function} options The options or callback when done.
-     * @param {Function} [options.complete] When completed.
-     * @param {Function} [options.loaded] If not already preloaded, callback when finishes load.
-     * @param {number} [options.start=0] Start time offset.
-     * @param {number} [options.end] End time offset.
-     * @param {number} [options.speed] Override default speed, default to the Sound's speed setting.
-     * @param {boolean} [options.loop] Override default loop, default to the Sound's loop setting.
-     * @return {any} The sound instance,
-     *        this cannot be reused after it is done playing. Returns a Promise if the sound
-     *        has not yet loaded.
+     * @param {import("./Sound").PlayOptions|import("./Sound").CompleteCallback|string} options The options or callback when done.
+     * @return {IMediaInstance|Promise<IMediaInstance>} The sound instance,
+     *      this cannot be reused after it is done playing. Returns a Promise if the sound
+     *      has not yet loaded.
      */
     play(alias, options) {
         return this.find(alias).play(options);
@@ -379,3 +408,10 @@ export default class SoundLibrary {
         return this;
     }
 }
+
+/**
+ * Singleton instance
+ * @type {SoundLibrary}
+ * @static
+ */
+SoundLibrary.instance = null;

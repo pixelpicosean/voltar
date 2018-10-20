@@ -2,9 +2,6 @@ import Filter from './Filter';
 import SoundLibrary from '../SoundLibrary';
 /**
  * Combine all channels into mono channel.
- *
- * @class MonoFilter
- * @memberof PIXI.sound.filters
  */
 export default class MonoFilter extends Filter {
     constructor() {
@@ -15,7 +12,14 @@ export default class MonoFilter extends Filter {
         const splitter = audioContext.createChannelSplitter();
         const merger = audioContext.createChannelMerger();
         merger.connect(splitter);
+
         super(merger, splitter);
+
+        /**
+         * Merger node
+         * @type {ChannelMergerNode}
+         * @private
+         */
         this._merger = merger;
     }
     destroy() {

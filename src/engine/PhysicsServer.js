@@ -1,6 +1,13 @@
-import { Vector } from './core';
-import remove_items from 'remove-array-items';
+import { Vector } from 'engine/math/index';
+import { remove_items } from 'engine/dep/index';
 
+/**
+ * @typedef Response
+ * @prop {boolean} aInB
+ * @prop {boolean} bInA
+ * @prop {number} overlap
+ * @prop {Vector} overlapN
+ */
 
 let i = 0;
 
@@ -47,7 +54,7 @@ const tmp_res = {
 /**
  * A pool of `Vector` objects that are used in calculations to avoid
  * allocating memory.
- * @type {array<Vector>}
+ * @type {Vector[]}
  * @private
  */
 const T_VECTORS = new Array(10);
@@ -56,7 +63,7 @@ for (i = 0; i < 10; i++) { T_VECTORS[i] = new Vector() }
 /**
  * A pool of arrays of numbers used in calculations to avoid allocating
  * memory.
- * @type {array<array<number>>}
+ * @type {number[][]}
  * @private
  */
 const T_ARRAYS = new Array(5);
@@ -67,9 +74,9 @@ for (i = 0; i < 5; i++) { T_ARRAYS[i] = [] }
  * resulting in a one dimensional range of the minimum and
  * maximum value on that axis.
  * @private
- * @param {array<Vector>} points The points to flatten
+ * @param {Vector[]} points The points to flatten
  * @param {Vector} normal The unit vector axis to flatten on
- * @param {array<Number>} result An array.  After calling this function,
+ * @param {number[]} result An array.  After calling this function,
  *   result[0] will be the minimum value,
  *   result[1] will be the maximum value
  */
@@ -94,8 +101,8 @@ function flatten_points_on(points, normal, result) {
  * @private
  * @param {Vector} aPos The position of the first polygon
  * @param {Vector} bPos The position of the second polygon
- * @param {array<Vector>} aPoints The points in the first polygon
- * @param {array<Vector>} bPoints The points in the second polygon
+ * @param {Vector[]} aPoints The points in the first polygon
+ * @param {Vector[]} bPoints The points in the second polygon
  * @param {Vector} axis The axis (unit sized) to test against. The points of both polygons
  *   will be projected onto this axis
  * @param {Response=} response A Response object (optional) which will be populated
@@ -162,7 +169,7 @@ function is_separating_axis(aPos, bPos, aPoints, bPoints, axis, response) {
             response.overlap = absOverlap;
             response.overlapN.copy(axis);
             if (overlap < 0) {
-                response.overlapN.reverse();
+                response.overlapN.negate();
             }
         }
     }
@@ -241,10 +248,10 @@ export default class PhysicsServer {
 
         // Recycle arrays in the hash
         for (let i in this.hash) {
-          let group = this.hash[i];
-          for (let j in group) {
-            put_array(group[j]);
-          }
+            let group = this.hash[i];
+            for (let j in group) {
+                put_array(group[j]);
+            }
         }
     }
     test_node_against_map(node, vec) {
@@ -545,7 +552,7 @@ export default class PhysicsServer {
 
                 // No longer overlap?
                 if (
-                  a.bottom <= b.top ||
+                    a.bottom <= b.top ||
                   a.top >= b.bottom ||
                   a.left >= b.right ||
                   a.right <= b.left
@@ -562,7 +569,7 @@ export default class PhysicsServer {
 
                 // No longer overlap?
                 if (
-                  a.bottom <= b.top ||
+                    a.bottom <= b.top ||
                   a.top >= b.bottom ||
                   a.left >= b.right ||
                   a.right <= b.left

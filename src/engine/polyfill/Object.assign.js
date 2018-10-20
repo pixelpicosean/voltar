@@ -4,7 +4,6 @@
 
 import objectAssign from 'object-assign';
 
-if (!Object.assign)
-{
+if (!Object.assign) {
     Object.assign = objectAssign;
 }

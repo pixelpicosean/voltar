@@ -22,7 +22,7 @@ if (!(window.performance && window.performance.now)) {
         window.performance = {};
     }
 
-    window.performance.now = function() {
+    window.performance.now = function () {
         return Date.now() - startTime;
     };
 }
@@ -39,7 +39,7 @@ for (var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
 }
 
 if (!window.requestAnimationFrame) {
-    window.requestAnimationFrame = function(callback) {
+    window.requestAnimationFrame = function (callback) {
         if (typeof callback !== 'function') {
             throw new TypeError(callback + ' is not a function');
         }
@@ -53,7 +53,7 @@ if (!window.requestAnimationFrame) {
 
         last_time = currentTime;
 
-        return setTimeout(function() {
+        return setTimeout(function () {
             last_time = Date.now();
             callback(performance.now());
         }, delay);
@@ -61,7 +61,7 @@ if (!window.requestAnimationFrame) {
 }
 
 if (!window.cancelAnimationFrame) {
-    window.cancelAnimationFrame = function(id) {
+    window.cancelAnimationFrame = function (id) {
         clearTimeout(id);
     };
 }

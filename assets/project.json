@@ -1,0 +1,11 @@
+{
+    "application": {
+        "name": "voltar"
+    },
+    "display": {
+        "width": 400,
+        "height": 400,
+        "stretch_mode": "viewport",
+        "stretch_aspect": "keep"
+    }
+}

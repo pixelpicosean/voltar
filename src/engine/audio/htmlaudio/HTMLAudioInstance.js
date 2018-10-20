@@ -1,21 +1,31 @@
-import EventEmitter from 'eventemitter3';
+import { EventEmitter } from 'engine/dep/index';
+import * as ticker from 'engine/ticker/index';
+import HTMLAudioMedia from './HTMLAudioMedia';
+
 let id = 0;
 /**
  * Instance which wraps the `<audio>` element playback.
- * @private
- * @class HTMLAudioInstance
- * @memberof PIXI.sound.htmlaudio
  */
 export default class HTMLAudioInstance extends EventEmitter {
     constructor(parent) {
         super();
+
+        /**
+         * @type {HTMLAudioMedia}
+         */
+        this._media = null;
+
+        /**
+         * @type {HTMLAudioElement}
+         */
+        this._source = null;
+
         this.id = id++;
         this.init(parent);
     }
     /**
      * The current playback progress from 0 to 1.
      * @type {number}
-     * @name PIXI.sound.htmlaudio.HTMLAudioInstance#progress
      */
     get progress() {
         const { currentTime } = this._source;
@@ -24,7 +34,6 @@ export default class HTMLAudioInstance extends EventEmitter {
     /**
      * Pauses the sound.
      * @type {boolean}
-     * @name PIXI.sound.htmlaudio.HTMLAudioInstance#paused
      */
     get paused() {
         return this._paused;
@@ -47,13 +56,14 @@ export default class HTMLAudioInstance extends EventEmitter {
     }
     /**
      * Initialize the instance.
-     * @method PIXI.sound.htmlaudio.HTMLAudioInstance#init
-     * @param {PIXI.sound.htmlaudio.HTMLAudioMedia} media
+     * @param {HTMLAudioMedia} media
      */
     init(media) {
         this._playing = false;
         this._duration = media.source.duration;
-        const source = this._source = media.source.cloneNode(false);
+        // @ts-ignore
+        this._source = media.source.cloneNode(false);
+        const source = this._source;
         source.src = media.parent.url;
         source.onplay = this._onPlay.bind(this);
         source.onpause = this._onPause.bind(this);
@@ -63,7 +73,6 @@ export default class HTMLAudioInstance extends EventEmitter {
     }
     /**
      * Stop the sound playing
-     * @method PIXI.sound.htmlaudio.HTMLAudioInstance#_internalStop
      * @private
      */
     _internalStop() {
@@ -74,7 +83,6 @@ export default class HTMLAudioInstance extends EventEmitter {
     }
     /**
      * Stop the sound playing
-     * @method PIXI.sound.htmlaudio.HTMLAudioInstance#stop
      */
     stop() {
         this._internalStop();
@@ -84,7 +92,7 @@ export default class HTMLAudioInstance extends EventEmitter {
     }
     /**
      * Set the instance speed from 0 to 1
-     * @member {number} PIXI.sound.htmlaudio.HTMLAudioInstance#speed
+     * @member {number} HTMLAudioInstance#speed
      */
     get speed() {
         return this._speed;
@@ -95,7 +103,7 @@ export default class HTMLAudioInstance extends EventEmitter {
     }
     /**
      * Get the set the volume for this instance from 0 to 1
-     * @member {number} PIXI.sound.htmlaudio.HTMLAudioInstance#volume
+     * @member {number} HTMLAudioInstance#volume
      */
     get volume() {
         return this._volume;
@@ -106,7 +114,7 @@ export default class HTMLAudioInstance extends EventEmitter {
     }
     /**
      * If the sound instance should loop playback
-     * @member {boolean} PIXI.sound.htmlaudio.HTMLAudioInstance#loop
+     * @member {boolean} HTMLAudioInstance#loop
      */
     get loop() {
         return this._loop;
@@ -117,7 +125,7 @@ export default class HTMLAudioInstance extends EventEmitter {
     }
     /**
      * `true` if the sound is muted
-     * @member {boolean} PIXI.sound.htmlaudio.HTMLAudioInstance#muted
+     * @member {boolean} HTMLAudioInstance#muted
      */
     get muted() {
         return this._muted;
@@ -128,7 +136,7 @@ export default class HTMLAudioInstance extends EventEmitter {
     }
     /**
      * Call whenever the loop, speed or volume changes
-     * @method PIXI.sound.htmlaudio.HTMLAudioInstance#refresh
+     * @method HTMLAudioInstance#refresh
      */
     refresh() {
         const global = this._media.context;
@@ -145,7 +153,7 @@ export default class HTMLAudioInstance extends EventEmitter {
     }
     /**
      * Handle changes in paused state, either globally or sound or instance
-     * @method PIXI.sound.htmlaudio.HTMLAudioInstance#refreshPaused
+     * @method HTMLAudioInstance#refreshPaused
      */
     refreshPaused() {
         const global = this._media.context;
@@ -158,14 +166,14 @@ export default class HTMLAudioInstance extends EventEmitter {
                 this._internalStop();
                 /**
                  * The sound is paused.
-                 * @event PIXI.sound.htmlaudio.HTMLAudioInstance#paused
+                 * @event HTMLAudioInstance#paused
                  */
                 this.emit("paused");
             }
             else {
                 /**
                  * The sound is unpaused.
-                 * @event PIXI.sound.htmlaudio.HTMLAudioInstance#resumed
+                 * @event HTMLAudioInstance#resumed
                  */
                 this.emit("resumed");
                 // resume the playing with offset
@@ -179,7 +187,7 @@ export default class HTMLAudioInstance extends EventEmitter {
             }
             /**
              * The sound is paused or unpaused.
-             * @event PIXI.sound.htmlaudio.HTMLAudioInstance#pause
+             * @event HTMLAudioInstance#pause
              * @property {boolean} paused If the instance was paused or not.
              */
             this.emit("pause", pausedReal);
@@ -187,7 +195,7 @@ export default class HTMLAudioInstance extends EventEmitter {
     }
     /**
      * Start playing the sound/
-     * @method PIXI.sound.htmlaudio.HTMLAudioInstance#play
+     * @method HTMLAudioInstance#play
      */
     play(options) {
         const { start, end, speed, loop, volume, muted } = options;
@@ -221,20 +229,20 @@ export default class HTMLAudioInstance extends EventEmitter {
                 this._source.currentTime = start;
                 this._source.onloadedmetadata = null;
                 this.emit("progress", start, this._duration);
-                PIXI.ticker.shared.add(this._onUpdate, this);
+                ticker.shared.add(this._onUpdate, this);
             }
         };
         this._source.onended = this._onComplete.bind(this);
         this._source.play();
         /**
          * The sound is started.
-         * @event PIXI.sound.htmlaudio.HTMLAudioInstance#start
+         * @event HTMLAudioInstance#start
          */
         this.emit("start");
     }
     /**
      * Handle time update on sound.
-     * @method PIXI.sound.htmlaudio.HTMLAudioInstance#_onUpdate
+     * @method HTMLAudioInstance#_onUpdate
      * @private
      */
     _onUpdate() {
@@ -245,25 +253,25 @@ export default class HTMLAudioInstance extends EventEmitter {
     }
     /**
      * Callback when completed.
-     * @method PIXI.sound.htmlaudio.HTMLAudioInstance#_onComplete
+     * @method HTMLAudioInstance#_onComplete
      * @private
      */
     _onComplete() {
-        PIXI.ticker.shared.remove(this._onUpdate, this);
+        ticker.shared.remove(this._onUpdate, this);
         this._internalStop();
         this.emit("progress", 1, this._duration);
         /**
          * The sound ends, don't use after this
-         * @event PIXI.sound.htmlaudio.HTMLAudioInstance#end
+         * @event HTMLAudioInstance#end
          */
         this.emit("end", this);
     }
     /**
      * Don't use after this.
-     * @method PIXI.sound.htmlaudio.HTMLAudioInstance#destroy
+     * @method HTMLAudioInstance#destroy
      */
     destroy() {
-        PIXI.ticker.shared.remove(this._onUpdate, this);
+        ticker.shared.remove(this._onUpdate, this);
         this.removeAllListeners();
         const source = this._source;
         if (source) {
@@ -292,7 +300,7 @@ export default class HTMLAudioInstance extends EventEmitter {
     }
     /**
      * To string method for instance.
-     * @method PIXI.sound.htmlaudio.HTMLAudioInstance#toString
+     * @method HTMLAudioInstance#toString
      * @return {String} The string representation of instance.
      * @private
      */
@@ -302,7 +310,7 @@ export default class HTMLAudioInstance extends EventEmitter {
 }
 /**
  * Extra padding, in seconds, to deal with low-latecy of HTMLAudio.
- * @name PIXI.sound.htmlaudio.HTMLAudioInstance.PADDING
+ * @name HTMLAudioInstance.PADDING
  * @readonly
  * @default 0.1
  */

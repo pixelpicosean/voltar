@@ -12,31 +12,31 @@ export default {
 
     /**
      * Sets the title attribute of the shadow div
-     * If accessibleTitle AND accessibleHint has not been this will default to 'displayObject [tabIndex]'
+     * If accessible_title AND accessible_hint has not been this will default to 'node [tab_index]'
      *
      * @type {string}
      */
-    accessibleTitle: null,
+    accessible_title: null,
 
     /**
      * Sets the aria-label attribute of the shadow div
      *
      * @type {string}
      */
-    accessibleHint: null,
+    accessible_hint: null,
 
     /**
      * @todo Needs docs.
      */
-    tabIndex: 0,
+    tab_index: 0,
 
     /**
      * @todo Needs docs.
      */
-    _accessibleActive: false,
+    _accessible_active: false,
 
     /**
      * @todo Needs docs.
      */
-    _accessibleDiv: false,
+    _accessible_div: false,
 };

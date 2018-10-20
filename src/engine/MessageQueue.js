@@ -1,6 +1,6 @@
-import remove_items from 'remove-array-items';
-
-
+/**
+ * @type {Message[]}
+ */
 const pool = [];
 
 class Message {
@@ -12,7 +12,17 @@ class Message {
 }
 
 export default class MessageQueue {
+    static get_singleton() {
+        return message_queue;
+    }
+
     constructor() {
+        /**
+         * Message list
+         *
+         * @private
+         * @type {Message[]}
+         */
         this.messages = [];
     }
 
@@ -38,3 +48,4 @@ export default class MessageQueue {
         this.messages.length = 0;
     }
 }
+let message_queue = new MessageQueue();

@@ -1,5 +1,5 @@
 import remove_items from 'remove-array-items';
-import { Vector } from 'engine/core';
+import { Vector } from '../math/index';
 import keyboard from './keyboard';
 
 
@@ -54,6 +54,7 @@ export default class Input {
 
     /**
      * Bind a key to a specific action.
+     *
      * @param  {string} key    Key to bind
      * @param  {string} action Action name
      * @return {Input} Self for chaining
@@ -77,6 +78,7 @@ export default class Input {
     }
     /**
      * Unbind an action from a key.
+     *
      * @param  {string} key    Key to unbind
      * @param  {string} action Action to unbind
      * @return {Input}   Self for chaining
@@ -98,7 +100,6 @@ export default class Input {
     }
     /**
      * Unbind all the actions.
-     * @method unbindAll
      */
     unbind_all() {
         for (let k in this.bindings) {
@@ -114,6 +115,7 @@ export default class Input {
 
     /**
      * Whether an action is currently pressed.
+     *
      * @param  {string} action Action name
      * @return {boolean}       Pressed or not
      */
@@ -122,6 +124,7 @@ export default class Input {
     }
     /**
      * Whether an action is just pressed.
+     *
      * @param  {string} action Action name
      * @return {boolean}       Pressed or not
      */
@@ -130,6 +133,7 @@ export default class Input {
     }
     /**
      * Whether an action is just released.
+     *
      * @param  {string} action Action name
      * @return {boolean}       Released or not
      */
@@ -147,13 +151,11 @@ export default class Input {
 
     /**
      * Key down listener
+     *
      * @param {string} k Name of the key
-     * @param {boolean} shift
-     * @param {boolean} ctrl
-     * @param {boolean} alt
      * @private
      */
-    _keydown(k, shift, ctrl, alt) {
+    _keydown(k) {
         if (this.key_list.indexOf(k) !== -1) {
             let i, list = this.bindings[k];
             for (i = 0; i < list.length; i++) {
@@ -164,6 +166,7 @@ export default class Input {
     }
     /**
      * Key up listener
+     *
      * @param {string} k Name of the key
      * @private
      */

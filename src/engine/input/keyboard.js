@@ -1,16 +1,9 @@
-/**
- * @class Keyboard
- * @extends {EventEmitter}
- *
- * @emits keydown
- * @emits keyup
- */
 export default {
     /**
-     * @type {array}
+     * @type {Object.<string, boolean>}}
      * @private
      */
-    pressed_keys: [],
+    pressed_keys: {},
     manager: null,
 
     _init(manager) {
@@ -23,8 +16,7 @@ export default {
 
     /**
      * Check if key is pressed down.
-     * @method down
-     * @memberof Keyboard#
+     *
      * @param {string} key  Name of the key to check
      * @return {Boolean}  Whether this key is pressed down
      */
@@ -33,15 +25,13 @@ export default {
     },
 
     /**
-     * @method _keydown
-     * @memberof Keyboard#
      * @param {KeyboardEvent} event   Keydown event
      * @private
      */
     _keydown(event) {
         if (!KEYS[event.keyCode]) {
             // Unknown key
-            KEYS[event.keyCode] = event.keyCode;
+            KEYS[event.keyCode.toString()] = event.keyCode;
         }
 
         if (this.pressed_keys[KEYS[event.keyCode]]) {
@@ -55,8 +45,6 @@ export default {
     },
 
     /**
-     * @method _keyup
-     * @memberof Keyboard#
      * @param {KeyboardEvent} event   Key up event
      * @private
      */
@@ -67,7 +55,7 @@ export default {
         }
     },
 
-    _process(delta) {},
+    _process(delta) { },
 
     _reset_keys() {
         for (var key in this.pressed_keys) {
@@ -78,8 +66,8 @@ export default {
 
 /**
  * List of available keys.
- * @memberof Keyboard#
- * @type {object}
+ *
+ * @type {Object.<number, string>}
  */
 export const KEYS = {
     8: 'BACKSPACE',

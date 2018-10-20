@@ -1,6 +1,14 @@
 /**
+ * @typedef ScaleBox
+ * @property {number} left
+ * @property {number} top
+ * @property {number} scale
+ */
+
+/**
  * Calculate how to scale a content to fill its container in `outer-box` mode.
- * @return {object} { left , top , scale }
+ *
+ * @return {ScaleBox}
  */
 export function outer_box_resize(container_width, container_height, content_width, content_height) {
     const pRatio = container_width / container_height;
@@ -17,11 +25,11 @@ export function outer_box_resize(container_width, container_height, content_widt
     }
 
     return result;
-};
+}
 
 /**
  * Calculate how to scale a content to fill its container in `inner-box` mode.
- * @return {object} { left , top , scale }
+ * @return {ScaleBox}
  */
 export function inner_box_resize(container_width, container_height, content_width, content_height) {
     const pRatio = container_width / container_height;
@@ -38,4 +46,4 @@ export function inner_box_resize(container_width, container_height, content_widt
     }
 
     return result;
-};
+}

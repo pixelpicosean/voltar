@@ -1,0 +1,12 @@
+{
+  "name": "voltar_converter",
+  "version": "0.1.0",
+  "description": "Convert Godot tscn file to Voltar capable format",
+  "main": "main.js",
+  "repository": "https://github.com/pixelpicosean/voltar.git",
+  "author": "Sean Bohan <pixelpicosean@gmail.com>",
+  "dependencies": {
+    "lodash": "^4.17.4",
+    "walk": "^2.3.9"
+  }
+}

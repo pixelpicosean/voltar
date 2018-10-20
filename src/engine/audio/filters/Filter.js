@@ -1,20 +1,26 @@
 /**
  * Represents a single sound element. Can be used to play, pause, etc. sound instances.
- *
- * @class Filter
- * @memberof PIXI.sound.filters
- * @param {AudioNode} destination The audio node to use as the destination for the input AudioNode
- * @param {AudioNode} [source] Optional output node, defaults to destination node. This is useful
- *        when creating filters which contains multiple AudioNode elements chained together.
  */
 export default class Filter {
+    /**
+     * @param {AudioNode} destination The audio node to use as the destination for the input AudioNode
+     * @param {AudioNode} [source] Optional output node, defaults to destination node. This is useful
+     *        when creating filters which contains multiple AudioNode elements chained together.
+     */
     constructor(destination, source) {
+        /**
+         * The node to connect for the filter to the previous filter.
+         * @member {AudioNode}
+         */
         this.destination = destination;
+        /**
+         * The node to connect for the filter to the previous filter.
+         * @member {AudioNode}
+         */
         this.source = source || destination;
     }
     /**
      * Connect to the destination.
-     * @method PIXI.sound.filters.Filter#connect
      * @param {AudioNode} destination The destination node to connect the output to
      */
     connect(destination) {
@@ -22,14 +28,12 @@ export default class Filter {
     }
     /**
      * Completely disconnect filter from destination and source nodes.
-     * @method PIXI.sound.filters.Filter#disconnect
      */
     disconnect() {
         this.source.disconnect();
     }
     /**
      * Destroy the filter and don't use after this.
-     * @method PIXI.sound.filters.Filter#destroy
      */
     destroy() {
         this.disconnect();

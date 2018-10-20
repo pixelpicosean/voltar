@@ -30,5 +30,8 @@ node_modules
 /lib
 /dist
 
-# jetBrains IDE ignores
 .idea
+.vscode
+.import
+dist
+*.import

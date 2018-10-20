@@ -1,9 +1,6 @@
-import Filterable from "./Filterable";
-import * as filters from "./filters";
-import * as htmlaudio from "./htmlaudio";
-import Sound from "./Sound";
-import SoundLibrary from "./SoundLibrary";
-import SoundSprite from "./sprites/SoundSprite";
-import utils from "./utils/SoundUtils";
-import * as webaudio from "./webaudio";
-export { filters, htmlaudio, webaudio, utils, Sound, SoundSprite, Filterable, SoundLibrary };
+export { default as Sound } from "./Sound";
+export { default as SoundLibrary } from "./SoundLibrary";
+export { default as SoundSprite } from "./sprites/SoundSprite";
+
+import * as filters from "./filters/index";
+export { filters };
