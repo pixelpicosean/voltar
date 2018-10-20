@@ -3,6 +3,7 @@ const {
     remove_first_n_last,
     trim_string,
 } = require('../utils');
+const { path_modifiers } = require('./registry');
 
 module.exports.string = (str) => {
     if (_.isString(str) && str.length > 0) {
@@ -101,7 +102,13 @@ module.exports.NodePath = (path) => {
         return undefined;
     }
 
-    return module.exports.string(get_function_params(path)[0]);
+    let result = module.exports.string(get_function_params(path)[0]);
+
+    for (let f of path_modifiers) {
+        result = f(result);
+    }
+
+    return result;
 };
 
 module.exports.PoolRealArray = (arr) => {
@@ -153,11 +160,15 @@ module.exports.GeneralArray = (arr) => {
         if (first_item_str.indexOf('true') >= 0 || first_item_str.indexOf('false') >= 0) {
             return item_strs.map(module.exports.boolean);
         }
+        // string
+        else if (first_item_str[0] === '"' && _.last(first_item_str) === '"') {
+            return item_strs.map(remove_first_n_last);
+        }
         // number
         else if (_.isNumber(parseFloat(first_item_str))) {
             return item_strs.map(parseFloat);
         }
-        // string
+        // unknown value
         else {
             return item_strs;
         }
