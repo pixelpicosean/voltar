@@ -181,6 +181,19 @@
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
+            <key type="filename">sprites/hero.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>18,6,36,12</rect>
+                <key>scale9Paddings</key>
+                <rect>18,6,36,12</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">sprites/hero/1.png</key>
             <key type="filename">sprites/hero/2.png</key>
             <key type="filename">sprites/hero/3.png</key>
@@ -193,6 +206,19 @@
                 <rect>6,6,12,12</rect>
                 <key>scale9Paddings</key>
                 <rect>6,6,12,12</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">sprites/mask.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>16,12,32,24</rect>
+                <key>scale9Paddings</key>
+                <rect>16,12,32,24</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
