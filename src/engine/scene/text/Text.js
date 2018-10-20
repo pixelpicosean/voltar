@@ -1,7 +1,7 @@
 import settings from 'engine/settings';
 import { TEXT_GRADIENT } from 'engine/const';
 import { Rectangle } from 'engine/math/index';
-import { sign } from 'engine/utils/index';
+import { sign, rgb2hex, hex2string } from 'engine/utils/index';
 import trim_canvas from 'engine/utils/trim_canvas';
 import Texture from 'engine/textures/Texture';
 import Sprite from 'engine/scene/sprites/Sprite';
@@ -43,6 +43,7 @@ export default class Text extends Sprite {
         texture.trim = new Rectangle();
 
         super(texture);
+        const self = this;
 
         this.type = 'Text';
 
@@ -104,6 +105,41 @@ export default class Text extends Sprite {
         this.style = style;
 
         this.local_style_id = -1;
+
+        this.fill = {
+            _rgb: [0, 0, 0],
+
+            get r() {
+                return this._rgb[0];
+            },
+            set r(value) {
+                this._rgb[0] = value;
+                self._style.fill = hex2string(rgb2hex(this._rgb));
+            },
+
+            get g() {
+                return this._rgb[1];
+            },
+            set g(value) {
+                this._rgb[1] = value;
+                self._style.fill = hex2string(rgb2hex(this._rgb));
+            },
+
+            get b() {
+                return this._rgb[2];
+            },
+            set b(value) {
+                this._rgb[2] = value;
+                self._style.fill = hex2string(rgb2hex(this._rgb));
+            },
+
+            get a() {
+                return 1;
+            },
+            set a(value) {
+                // Fill does not support alpha
+            },
+        };
     }
 
     _load_data(data) {
