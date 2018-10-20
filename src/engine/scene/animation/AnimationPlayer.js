@@ -338,7 +338,7 @@ class PlaybackData {
     }
 }
 class Blend {
-    constructor() {
+    constructor(time = 0, left = 0) {
         this.data = new PlaybackData();
         this.blend_time = 0;
         this.blend_left = 0;
@@ -445,7 +445,11 @@ export default class AnimationPlayer extends Node2D {
         /**
          * @type {Object<string, AnimationData>}
          */
-        this.animtion_set = {};
+        this.animation_set = {};
+        /**
+         * @type {Object<string, number>}
+         */
+        this.blend_times = {};
 
         this.playback = new Playback();
     }
@@ -507,7 +511,6 @@ export default class AnimationPlayer extends Node2D {
                 this.playback.started = false;
             }
 
-            this._animation_update_transforms();
             if (this.end_reached) {
                 if (this.queued.length > 0) {
                     this.play(this.queued.shift());
@@ -527,6 +530,7 @@ export default class AnimationPlayer extends Node2D {
     }
     /**
      * Update animation
+     *
      * @param {number} delta Delta time since last frame
      * @param {boolean} started
      */
@@ -644,7 +648,6 @@ export default class AnimationPlayer extends Node2D {
             }
         }
     }
-    _animation_update_transforms() {}
 
     /**
      * @param {AnimationData} anim
@@ -686,7 +689,7 @@ export default class AnimationPlayer extends Node2D {
         let ad = new AnimationData();
         ad.animation = animation;
         ad.name = name;
-        this.animtion_set[name] = ad;
+        this.animation_set[name] = ad;
 
         this.anims[name] = animation;
 
@@ -694,30 +697,53 @@ export default class AnimationPlayer extends Node2D {
     }
 
     /**
+     * Shifts position in the animation timeline. Delta is the time in seconds to shift.
+     *
      * @param {number} time
      */
-    advance(time) {}
+    advance(time) {
+        this._animation_process(time);
+    }
 
     /**
+     * Returns the name of the next animation in the queue.
+     *
      * @param {string} animation
      * @returns {string}
      */
     animation_get_next(animation) {
-        return '';
+        return this.animation_set[animation].next || '';
     }
 
     /**
+     * Triggers the anim_to animation when the anim_from animation completes.
+     *
      * @param {string} animation
      * @param {string} next
      */
-    animation_set_next(animation, next) { }
+    animation_set_next(animation, next) {
+        let anim = this.animation_set[animation];
+        if (anim) {
+            anim.next = next;
+        }
+    }
 
     /**
-     * Must be called by hand if an animation was modified after added
+     * AnimationPlayer caches animated nodes. It may not notice if a node disappears,
+     * so clear_caches forces it to update the cache again.
      */
-    clear_caches() { }
+    clear_caches() {
+        for (let k in this.animation_set) {
+            this.animation_set[k].node_cache = {};
+        }
+    }
 
-    clear_queue() { }
+    /**
+     * Clears all queued, unplayed animations.
+     */
+    clear_queue() {
+        this.queued.length = 0;
+    }
 
     /**
      * @param {Animation} animation
@@ -735,23 +761,39 @@ export default class AnimationPlayer extends Node2D {
         return this.anims[name];
     }
     /**
-     * @param {string[]} animations
+     * Returns the list of stored animation names.
+     *
+     * @param {string[]} [animations] output array
+     * @returns {string[]}
      */
-    get_animation_list(animations) { }
+    get_animation_list(animations) {
+        if (animations === undefined) {
+            return Object.keys(this.animation_set);
+        }
+
+        for (let k in this.animation_set) {
+            animations.push(k);
+        }
+        return animations;
+    }
 
     /**
+     * Get the blend time (in seconds) between two animations, referenced by their names.
+     *
      * @param {string} animation1
      * @param {string} animation2
      * @returns {number}
      */
     get_blend_time(animation1, animation2) {
-        return 0;
+        return this.blend_times[`${animation1}->${animation2}`] || 0;
     }
 
     /**
      * @param {string} name
      */
-    has_animation(name) { }
+    has_animation(name) {
+        return !!this.animation_set[name];
+    }
 
     /**
      * Play the animation with key name. Custom speed and blend times can be set.
@@ -769,27 +811,68 @@ export default class AnimationPlayer extends Node2D {
             return;
         }
 
-        if (!this.animtion_set[name]) {
+        if (!this.animation_set[name]) {
             console.log(`Animation not found: ${name}`);
             return;
         }
 
         const c = this.playback;
-        c.current.from = this.animtion_set[name];
+
+        if (c.current.from) {
+            let blend_time = 0;
+            let bk = `${c.current.from.name}->${name}`;
+
+            if (custom_blend >= 0) {
+                blend_time = custom_blend;
+            } else if (Number.isFinite(this.blend_times[bk])) {
+                blend_time = this.blend_times[bk];
+            } else {
+                bk = `*->${name}`;
+                if (Number.isFinite(this.blend_times[bk])) {
+                    blend_time = this.blend_times[bk];
+                } else {
+                    bk = `${c.current.from.name}->*`;
+
+                    if (Number.isFinite(this.blend_times[bk])) {
+                        blend_time = this.blend_times[bk];
+                    }
+                }
+            }
+
+            if (custom_blend < 0 && equals(blend_time, 0) && this.default_blend_time) {
+                blend_time = this.default_blend_time;
+            }
+            if (blend_time > 0) {
+                let b = new Blend(blend_time, blend_time);
+                b.data = c.current;
+                c.blend.push(b);
+            }
+        }
+
+        c.current.from = this.animation_set[name];
         c.current.pos = from_end ? c.current.from.animation.length : 0;
         c.current.speed_scale = custom_scale;
         c.assigned = name;
         c.seeked = false;
         c.started = true;
 
+        if (!this.end_reached) {
+            this.queued.length = 0;
+        }
         this.set_process(true);
-
         this.is_playing = true;
 
         // this.emit_signal('animation_started', c.assigned);
+
+        let next = this.animation_get_next(name);
+        if (next && this.animation_set[next]) {
+            this.queue(next);
+        }
     }
 
     /**
+     * Play the animation with key name in reverse.
+     *
      * @param {string} name
      * @param {number} custom_blend
      */
@@ -797,37 +880,72 @@ export default class AnimationPlayer extends Node2D {
         this.play(name, custom_blend, -1, true);
     }
     /**
+     * Queue an animation for playback once the current one is done.
+     *
      * @param {string} name
      */
-    queue(name) { }
+    queue(name) {
+        if (!this.is_playing) {
+            this.play(name);
+        } else {
+            this.queued.push(name);
+        }
+    }
 
     /**
-     * @param {string} name
-     */
-    remove_animation(name) { }
-    /**
-     * @param {string} name
-     * @param {string} new_name
-     */
-    rename_animation(name, new_name) { }
-
-    /**
+     * Seek the animation to the seconds point in time (in seconds).
+     * If update is true, the animation updates too,
+     * otherwise it updates at process time.
+     *
      * @param {number} time
      * @param {boolean} [update]
      */
-    seek(time, update = false) { }
+    seek(time, update = false) {
+        if (!this.playback.current.from) {
+            if (this.playback.assigned) {
+                this.playback.current.from = this.animation_set[this.playback.assigned];
+            }
+        }
+
+        this.playback.current.pos = time;
+        this.playback.seeked = true;
+        if (update) {
+            this._animation_process(0);
+        }
+    }
 
     /**
+     * Specify a blend time (in seconds) between two animations, referenced by their names.
+     *
      * @param {string} animation1
      * @param {string} animation2
      * @param {number} time
      */
-    set_blend_time(animation1, animation2, time) { }
+    set_blend_time(animation1, animation2, time) {
+        if (equals(time, 0)) {
+            delete this.blend_times[`${animation1}->${animation2}`];
+        } else {
+            this.blend_times[`${animation1}->${animation2}`] = time;
+        }
+    }
 
     /**
+     * Stop the currently playing animation. If reset is true, the anim position is reset to 0.
+     *
      * @param {boolean} [reset]
      */
-    stop(reset = true) { }
+    stop(reset = true) {
+        const c = this.playback;
+
+        c.blend.length = 0;
+        if (reset) {
+            c.current.from = null;
+            c.current.speed_scale = 1;
+        }
+        this.set_process(false);
+        this.queued.length = 0;
+        this.is_playing = false;
+    }
 }
 
 node_class_map['AnimationPlayer'] = AnimationPlayer;
