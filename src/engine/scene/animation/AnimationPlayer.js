@@ -4,7 +4,7 @@ import Node2D from "../Node2D";
 
 import { node_class_map } from 'engine/registry';
 
-import Animation, { TrackType, UpdateMode, Key, ValueTrack, InterpolationType, PropType } from './Animation';
+import Animation, { TrackType, UpdateMode, Key, ValueTrack, InterpolationType, PropType, MethodTrack } from './Animation';
 
 function posmod(p_x, p_y) {
     return (p_x >= 0) ? (p_x % p_y) : (p_y - (-p_x) % p_y);
@@ -107,7 +107,7 @@ function anim_prop(path) {
  * @param {string} key
  * @param {any} value
  */
-function apply_value(node, type, key, value) {
+function apply_immediate_value(node, type, key, value) {
     switch (type) {
         case PropType.NUMBER:
         case PropType.BOOLEAN:
@@ -172,14 +172,14 @@ function apply_interpolate_value(node, type, key, value_a, value_b, c) {
  * @param {number} interp
  * @param {boolean} loop_wrap
  */
-function interpolate_track(node, anim, track, time, interp, loop_wrap) {
+function interpolate_track_on_node(node, anim, track, time, interp, loop_wrap) {
     let keys = track.values;
-    let len = find_track_key(keys, anim.length);
+    let len = find_track_key(keys, anim.length) + 1;
 
     if (len <= 0) {
         return;
     } else if (len === 1) {
-        apply_value(node, track.prop_type, track.prop_key, keys[0].value);
+        apply_immediate_value(node, track.prop_type, track.prop_key, keys[0].value);
     }
 
     let idx = find_track_key(keys, time);
@@ -266,7 +266,7 @@ function interpolate_track(node, anim, track, time, interp, loop_wrap) {
 
     if (tr === 0 || idx === next) {
         // don't interpolate if not needed
-        apply_value(node, track.prop_type, track.prop_key, keys[idx].value);
+        apply_immediate_value(node, track.prop_type, track.prop_key, keys[idx].value);
     }
 
     if (!equals(tr, 1)) {
@@ -275,9 +275,10 @@ function interpolate_track(node, anim, track, time, interp, loop_wrap) {
 
     switch (interp) {
         case InterpolationType.INTERPOLATION_NEAREST: {
-            apply_value(node, track.prop_type, track.prop_key, keys[idx].value);
+            apply_immediate_value(node, track.prop_type, track.prop_key, keys[idx].value);
         }
         case InterpolationType.INTERPOLATION_LINEAR: {
+            // console.log(`key<${track.prop_key}>[${idx} -> ${next}]: factor=${c}`)
             apply_interpolate_value(node, track.prop_type, track.prop_key, keys[idx].value, keys[next].value, c);
         }
         case InterpolationType.INTERPOLATION_CUBIC: {
@@ -296,6 +297,23 @@ function interpolate_track(node, anim, track, time, interp, loop_wrap) {
             return keys[idx].value;
         }
     }
+}
+/**
+ * @param {Node2D} node
+ * @param {Animation} anim
+ * @param {ValueTrack} track
+ * @param {number} time
+ * @param {boolean} loop_wrap
+ */
+function immediate_track_on_node(node, anim, track, time, loop_wrap) {
+    let keys = track.values;
+    let idx = find_track_key(keys, time);
+
+    if (idx === -2) {
+        return;
+    }
+
+    apply_immediate_value(node, track.prop_type, track.prop_key, keys[idx].value);
 }
 
 class AnimationData {
@@ -613,14 +631,15 @@ export default class AnimationPlayer extends Node2D {
                     let update_mode = t.update_mode;
 
                     if (update_mode === UpdateMode.UPDATE_CONTINUOUS || update_mode === UpdateMode.UPDATE_CAPTURE || (equals(delta, 0) && update_mode === UpdateMode.UPDATE_DISCRETE)) { // delta == 0 means seek
-                        interpolate_track(node, a, t, time, update_mode === UpdateMode.UPDATE_CONTINUOUS ? t.interp : InterpolationType.INTERPOLATION_NEAREST, t.loop_wrap);
+                        interpolate_track_on_node(node, a, t, time, update_mode === UpdateMode.UPDATE_CONTINUOUS ? t.interp : InterpolationType.INTERPOLATION_NEAREST, t.loop_wrap);
                     } else if (is_current && !equals(delta, CMP_EPSILON)) {
-                        switch (track.prop_key) {
-                            case 'position':
-                            case 'scale': {
-                            } break;
-                        }
+                        immediate_track_on_node(node, a, t, time, t.loop_wrap);
                     }
+                } break;
+                case TrackType.TYPE_METHOD: {
+                    /** @type {MethodTrack} */
+                    // @ts-ignore
+                    let t = track;
                 } break;
             }
         }
