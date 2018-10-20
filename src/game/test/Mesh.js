@@ -1,7 +1,5 @@
 import * as v from 'engine/index';
 
-v.preload('icon', 'media/icon.png');
-
 export default class SpriteTest extends v.Node2D {
     static instance() {
         return new SpriteTest();
@@ -24,7 +22,7 @@ export default class SpriteTest extends v.Node2D {
     }
 
     _enter_tree() {
-        this.rope = this.add_child(new v.Rope(v.Texture.from_image('icon'), this.points));
+        this.rope = this.add_child(new v.Rope(v.Texture.from_image('hero/1'), this.points));
         this.set_process(true)
     }
     _process(delta) {

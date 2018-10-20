@@ -1,43 +1,40 @@
 import * as v from 'engine/index';
 
-v.preload('mask', 'media/mask-sheet.png');
-for (let i = 0; i < 12; i++) {
-    v.preload(`mask_${i}`, `media/mask/${i}.png`);
-}
 
-
-const ImageAnimData = {
-    i: {
-        speed: 16,
-        loop: true,
-        frames: [
-            'mask_0',
-            'mask_1',
-            'mask_2',
-            'mask_3',
-            'mask_4',
-            'mask_5',
-            'mask_6',
-            'mask_7',
-            'mask_8',
-            'mask_9',
-            'mask_10',
-            'mask_11',
-        ],
-    },
-};
-const SpriteSheetAnimData = {
-    i: {
-        speed: 16,
-        loop: true,
-        frames: {
-            sheet: 'mask',
-            width: 16,
-            height: 16,
-            sequence: [0,1,2,3,4,5,6,7,8,9,10,11],
+const datas = [
+    {
+        i: {
+            speed: 16,
+            loop: true,
+            frames: [
+                'mask/0',
+                'mask/1',
+                'mask/2',
+                'mask/3',
+                'mask/4',
+                'mask/5',
+                'mask/6',
+                'mask/7',
+                'mask/8',
+                'mask/9',
+                'mask/10',
+                'mask/11',
+            ],
         },
     },
-};
+    {
+        i: {
+            speed: 16,
+            loop: true,
+            frames: {
+                sheet: 'mask',
+                width: 16,
+                height: 16,
+                sequence: [0,1,2,3,4,5,6,7,8,9,10,11],
+            },
+        },
+    },
+];
 
 
 export default class AnimatedSpriteScene extends v.Node2D {
@@ -46,20 +43,20 @@ export default class AnimatedSpriteScene extends v.Node2D {
     }
 
     _enter_tree() {
-        const datas = [ImageAnimData, SpriteSheetAnimData];
+        const scale = 1;
 
-        let r, q;
-        for (r = 0; r < 16; r++) {
-            for (q = 0; q < 16; q++) {
+        const rows = Math.round(25 / scale);
+        const columns = Math.round(25 / scale);
+
+        for (let r = 0; r < rows; r++) {
+            for (let q = 0; q < columns; q++) {
                 let spr = new v.AnimatedSprite(v.pick(datas));
-                spr.position.set(q * 16, r * 16);
+                spr.position.set(q * 16 * scale, r * 16 * scale);
+                spr.scale.set(scale);
                 spr.play('i');
-                spr.set_frame(Math.floor((r + q) * 0.25) % 12);
+                spr.set_frame(12 - Math.round(Math.sqrt(Math.pow(r - rows / 2, 2) + Math.pow(q - columns / 2, 2)) * 1) % 12);
                 this.add_child(spr);
             }
         }
     }
-    _ready() {}
-    _process(delta) {}
-    _exit_tree() {}
 }

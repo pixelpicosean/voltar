@@ -24,9 +24,10 @@ export default class CollisionMap extends Node2D {
     }
     /**
      * @param {number} bit
+     * @returns {boolean}
      */
     get_collision_layer_bit(bit) {
-        return this.collision_layer & (1 << bit);
+        return (this.collision_layer & (1 << bit)) === bit;
     }
     /**
      * @param {number} layer
@@ -36,7 +37,7 @@ export default class CollisionMap extends Node2D {
     }
     /**
      * @param {number} bit
-     * @param {number} [value]
+     * @param {boolean} [value]
      */
     set_collision_layer_bit(bit, value) {
         if (value) {

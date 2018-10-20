@@ -20,26 +20,7 @@ export default class SoundTest extends v.Node2D {
         bgm.filters = [
             new v.audio.filters.ReverbFilter(),
         ];
+        bgm.volume = 0.2;
         bgm.play();
-
-        // let timer = this.tweens.create();
-        // timer.repeat = true;
-        // timer.interpolate_callback(this, 0.2, 'play', undefined);
-        // timer.start();
-    }
-
-    play() {
-        v.sound
-            .find('fx')
-            .play({
-                volume: 0.25,
-                sprite: v.pick([
-                    'button',
-                    'cash',
-                    'hiscore',
-                    'hit',
-                    'sound_toggle',
-                ]),
-            });
     }
 }

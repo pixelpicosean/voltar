@@ -1,7 +1,5 @@
 import * as v from 'engine/index';
 
-v.preload('media/04b03.fnt');
-
 v.preload('media/commander.json');
 v.preload('cc', 'media/commander.scon');
 

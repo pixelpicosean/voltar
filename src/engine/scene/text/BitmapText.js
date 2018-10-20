@@ -357,6 +357,10 @@ export default class BitmapText extends Node2D {
     }
 
     set tint(value) {
+        if (!this._font) {
+            return;
+        }
+
         this._font.tint = (typeof value === 'number' && value >= 0) ? value : 0xFFFFFF;
 
         this.dirty = true;

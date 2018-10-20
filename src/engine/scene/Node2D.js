@@ -692,7 +692,7 @@ export default class Node2D extends EventEmitter {
 
     /**
      * The coordinate of the object relative to the local coordinates of the parent.
-     * Assignment by value since pixi-v4.
+     * Assignment by value.
      *
      * @type {Point|ObservablePoint}
      */

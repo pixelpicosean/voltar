@@ -64,7 +64,7 @@ const SheetSubStripCache = Object.create(null);
 
 function parse_sheet_frames(sheet) {
     const tex = sheet.sheet.base_texture ? sheet.sheet : TextureCache[sheet.sheet];
-    const key = `@${tex.uid}+${sheet.width}+${sheet.height}`;
+    const key = `#${tex.uid}[${sheet.width}x${sheet.height}]`;
     let list = SheetStripCache[key];
 
     // Create a new strip list if not exist
@@ -75,7 +75,7 @@ function parse_sheet_frames(sheet) {
     }
 
     // Create sequence for this anim
-    const sub_key = `${key}_${sheet.sequence.toString()}`;
+    const sub_key = `${key}-(${sheet.sequence.toString()})`;
     let seq = SheetSubStripCache[sub_key];
     if (!Array.isArray(seq)) {
         seq = new Array(sheet.sequence.length);

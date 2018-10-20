@@ -1,7 +1,6 @@
 import * as v from 'engine/index';
 
 v.preload('collisiontiles', 'media/collisiontiles-64.png');
-v.preload('hero', 'media/hero.png');
 
 const SOLID = 1;
 const HERO = 2;
@@ -120,8 +119,8 @@ export default class TilemapScene extends v.Node2D {
         c.set_collision_layer_bit(SOLID, true);
         this.add_child(c);
 
-        this.s = new Me();
-        this.s.position.set(128, 64);
-        this.add_child(this.s);
+        const hero = new Me();
+        hero.position.set(128, 64);
+        this.add_child(hero);
     }
 }

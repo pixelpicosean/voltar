@@ -1,0 +1,230 @@
+{
+    "type": "Node2D",
+    "name": "Node2D",
+    "children": [
+        {
+            "type": "Sprite",
+            "name": "pop",
+            "position": {
+                "x": 139.17,
+                "y": 80.597
+            },
+            "texture": "title/pop",
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            },
+            "children": []
+        },
+        {
+            "type": "AnimationPlayer",
+            "name": "AnimationPlayer",
+            "root_node": "..",
+            "playback_speed": 1,
+            "anims": {
+                "position": {
+                    "name": "position",
+                    "length": 2,
+                    "loop": true,
+                    "step": 0.1,
+                    "tracks": [
+                        {
+                            "type": "value",
+                            "path": "pop:position",
+                            "interp": 1,
+                            "loop_wrap": true,
+                            "keys": {
+                                "times": [
+                                    0,
+                                    0.5,
+                                    1,
+                                    1.5
+                                ],
+                                "transitions": [
+                                    1,
+                                    1,
+                                    1,
+                                    1
+                                ],
+                                "update": 0,
+                                "values": [
+                                    {
+                                        "x": 139.17,
+                                        "y": 80.597
+                                    },
+                                    {
+                                        "x": 139.954,
+                                        "y": 318.624
+                                    },
+                                    {
+                                        "x": 258.464,
+                                        "y": 320.123
+                                    },
+                                    {
+                                        "x": 257.647,
+                                        "y": 81.8825
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "type": "value",
+                            "path": "pop:rotation",
+                            "interp": 1,
+                            "loop_wrap": true,
+                            "keys": {
+                                "times": [
+                                    0,
+                                    0.5,
+                                    1,
+                                    1.5
+                                ],
+                                "transitions": [
+                                    1,
+                                    1,
+                                    1,
+                                    1
+                                ],
+                                "update": 0,
+                                "values": [
+                                    0,
+                                    0.835942898535204,
+                                    -0.4762933715522445,
+                                    0.4667534018608435
+                                ]
+                            }
+                        },
+                        {
+                            "type": "value",
+                            "path": "pop:scale",
+                            "interp": 1,
+                            "loop_wrap": true,
+                            "keys": {
+                                "times": [
+                                    0,
+                                    1
+                                ],
+                                "transitions": [
+                                    1,
+                                    1
+                                ],
+                                "update": 0,
+                                "values": [
+                                    {
+                                        "x": 1,
+                                        "y": 1
+                                    },
+                                    {
+                                        "x": 2,
+                                        "y": 2
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "type": "method",
+                            "path": ".",
+                            "interp": 1,
+                            "loop_wrap": true,
+                            "keys": {
+                                "times": [
+                                    0.7,
+                                    1.3
+                                ],
+                                "transitions": [
+                                    1,
+                                    1
+                                ],
+                                "values": [
+                                    {
+                                        "args": [
+                                            "1/3"
+                                        ],
+                                        "method": "say"
+                                    },
+                                    {
+                                        "args": [
+                                            "2/3"
+                                        ],
+                                        "method": "say"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "type": "value",
+                            "path": "Label:text",
+                            "interp": 1,
+                            "loop_wrap": true,
+                            "keys": {
+                                "times": [
+                                    0,
+                                    1
+                                ],
+                                "transitions": [
+                                    1,
+                                    1
+                                ],
+                                "update": 1,
+                                "values": [
+                                    "Title",
+                                    "Cool"
+                                ]
+                            }
+                        },
+                        {
+                            "type": "value",
+                            "path": "Label:fill",
+                            "interp": 1,
+                            "loop_wrap": true,
+                            "keys": {
+                                "times": [
+                                    0,
+                                    1
+                                ],
+                                "transitions": [
+                                    1,
+                                    1
+                                ],
+                                "update": 0,
+                                "values": [
+                                    {
+                                        "r": 0.375,
+                                        "g": 1,
+                                        "b": 0.941406,
+                                        "a": 1
+                                    },
+                                    {
+                                        "r": 1,
+                                        "g": 0.375,
+                                        "b": 0.931641,
+                                        "a": 1
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            "children": []
+        },
+        {
+            "type": "Text",
+            "name": "Label",
+            "position": {
+                "x": 137,
+                "y": 162
+            },
+            "text": "Title",
+            "style": {
+                "align": "center",
+                "fill": "#5ffff0",
+                "stroke": "#0",
+                "strokeThickness": 10,
+                "fontSize": 72,
+                "fontFamily": "Tondu Beta"
+            },
+            "children": []
+        }
+    ]
+}
