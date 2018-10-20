@@ -399,7 +399,7 @@ function normalize_resource(node, meta) {
 }
 
 function convert_scene(tscn_path) {
-    console.log(`- parse "${tscn_path}"`);
+    console.log(`- import "${path.basename(tscn_path)}"`);
 
     const data = fs.readFileSync(tscn_path, 'utf8');
 
@@ -499,15 +499,18 @@ module.exports.convert_project_settings = (project_url) => {
         display.height = int(settings.display['window/size/height']) || 480;
 
         // clear color
-        display.background_color = color2hex(Color(settings.rendering['environment/default_clear_color']));
+        let clear_color = Color(settings.rendering['environment/default_clear_color']);
+        if (clear_color !== undefined) {
+            display.background_color = color2hex(clear_color);
+        }
 
         // stretch
         let stretch_mode = string(settings.display['window/stretch/mode']);
-        if (stretch_mode) {
+        if (stretch_mode !== undefined) {
             display.stretch_mode = stretch_mode;
         }
         let stretch_aspect = string(settings.display['window/stretch/aspect']);
-        if (stretch_aspect) {
+        if (stretch_aspect !== undefined) {
             display.stretch_aspect = stretch_aspect;
         }
 

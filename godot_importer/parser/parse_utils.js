@@ -109,7 +109,9 @@ module.exports.PoolRealArray = (arr) => {
 };
 module.exports.Vector2Array = (arr) => {
     const vec_strs = arr.replace(/\[|\]/g, '').split('),').map(s => s.trim());
-    vec_strs[0] += ')';
+    for (let i = 0; i < vec_strs.length - 1; i++) {
+        vec_strs[i] += ')';
+    }
     return vec_strs.map(vec => {
         const vec_arr = get_function_params(vec)
             .map(module.exports.real);

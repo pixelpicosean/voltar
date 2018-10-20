@@ -29,7 +29,6 @@ const TrackProcs = {
 };
 const transform_track = (track) => {
     const type = get_prop_name(track.path);
-    console.log(`transform ${type}`)
     if (_.keys(TrackProcs).indexOf(type) >= 0) {
         TrackProcs[type](track);
     }
