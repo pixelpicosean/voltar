@@ -51,7 +51,7 @@ export default class Point {
      * Copy value from other Point
      *
      * @param {PointLike} a
-     * @returns {PointLike} self for chaining
+     * @returns {Point} self for chaining
      */
     copy(a) {
         this.x = a.x;
@@ -73,7 +73,7 @@ export default class Point {
     /**
      * Create a normalized clone
      *
-     * @returns {PointLike}
+     * @returns {Point}
      */
     normalized() {
         return this.clone().normalize();
@@ -165,6 +165,7 @@ export default class Point {
 
     /**
      * @param {PointLike} b
+     * @returns {Point}
      */
     multiply(b) {
         this.x *= b.x;
@@ -174,6 +175,7 @@ export default class Point {
 
     /**
      * @param {PointLike} b
+     * @returns {Point}
      */
     divide(b) {
         this.x /= b.x;
@@ -183,6 +185,7 @@ export default class Point {
 
     /**
      * @param {PointLike} b
+     * @returns {number}
      */
     dot(b) {
         return this.x * b.x + this.y * b.y;
@@ -190,6 +193,7 @@ export default class Point {
 
     /**
      * @param {PointLike} b
+     * @returns {number}
      */
     cross(b) {
         return this.x * b.y - this.y * b.x;

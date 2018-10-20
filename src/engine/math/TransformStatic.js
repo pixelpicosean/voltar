@@ -96,7 +96,7 @@ export default class TransformStatic extends TransformBase {
     /**
      * Updates the values of the object and applies the parent's transform.
      *
-     * @param {TransformBase} parent_transform - The transform of the parent of this object
+     * @param {TransformStatic} parent_transform - The transform of the parent of this object
      */
     update_transform(parent_transform) {
         const lt = this.local_transform;

@@ -9,7 +9,10 @@ import { mixins, deep_merge } from './utils/index';
 
 import { outer_box_resize } from './resize';
 import remove_items from 'remove-array-items';
-import { optional } from './registry';
+import { alternative, optional } from './registry';
+import engine_settings from 'engine/settings';
+import { TRANSFORM_MODE } from './const';
+import { TransformStatic, Transform } from './math/index';
 
 /**
  * @typedef ApplicationSettings
@@ -169,6 +172,10 @@ export default class SceneTree {
         this.settings = deep_merge({}, DefaultSettings, settings);
 
         document.title = this.settings.application.name;
+
+        // Register alternatives
+        // @ts-ignore
+        alternative.Transform = (engine_settings.TRANSFORM_MODE === TRANSFORM_MODE.STATIC) ? TransformStatic : Transform;
 
         // Initialize loader here since our plugins are all
         // registered now

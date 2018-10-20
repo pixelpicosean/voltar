@@ -1,8 +1,7 @@
 /// <reference path="../tween/index.d.ts" />
 
 import settings from '../settings';
-import { node_plugins } from 'engine/registry';
-import { TRANSFORM_MODE } from '../const';
+import { node_plugins, alternative } from 'engine/registry';
 import {
     EventEmitter, Signal,
     remove_items,
@@ -34,10 +33,7 @@ let uid = 0;
 export default class Node2D extends EventEmitter {
     constructor() {
         super();
-
         const self = this;
-
-        const TransformClass = settings.TRANSFORM_MODE === TRANSFORM_MODE.STATIC ? TransformStatic : Transform;
 
         /**
          * @private
@@ -96,9 +92,9 @@ export default class Node2D extends EventEmitter {
          * World transform and local transform of this object.
          * This will become read-only later, please do not assign anything there unless you know what are you doing
          *
-         * @type {TransformStatic|Transform}
+         * @type {TransformStatic}
          */
-        this.transform = new TransformClass();
+        this.transform = new alternative.Transform();
 
         /**
          * The opacity of the object.
@@ -694,7 +690,7 @@ export default class Node2D extends EventEmitter {
      * The coordinate of the object relative to the local coordinates of the parent.
      * Assignment by value.
      *
-     * @type {Point|ObservablePoint}
+     * @type {ObservablePoint}
      */
     get position() {
         return this.transform.position;
@@ -720,7 +716,7 @@ export default class Node2D extends EventEmitter {
      * The scale factor of the object.
      * Assignment by value since pixi-v4.
      *
-     * @type {Point|ObservablePoint}
+     * @type {ObservablePoint}
      */
     get scale() {
         return this.transform.scale;
@@ -746,7 +742,7 @@ export default class Node2D extends EventEmitter {
      * The pivot point of the node that it rotates around
      * Assignment by value since pixi-v4.
      *
-     * @type {Point|ObservablePoint}
+     * @type {ObservablePoint}
      */
     get pivot() {
         return this.transform.pivot;
@@ -768,7 +764,7 @@ export default class Node2D extends EventEmitter {
      * The skew factor for the object in radians.
      * Assignment by value since pixi-v4.
      *
-     * @type {Point|ObservablePoint}
+     * @type {ObservablePoint}
      */
     get skew() {
         return this.transform.skew;
@@ -1168,23 +1164,24 @@ export default class Node2D extends EventEmitter {
     /**
      * Returns the child at the specified index
      *
+     * @template T {Node2D}
      * @param {number} index - The index to get the child at
-     * @return {extends typeof Node2D} The child at the given index, if any.
+     * @return {T} The child at the given index, if any.
      */
     get_child(index) {
         if (index < 0 || index >= this.children.length) {
             throw new Error(`get_child: Index (${index}) does not exist.`);
         }
 
+        // @ts-ignore
         return this.children[index];
     }
 
     /**
      * Removes one or more children from the container.
      *
-     * @template T {Node2D}
-     * @param {...T} child - The Node2D(s) to remove
-     * @return {T} The first child that was removed.
+     * @param {Node2D} child - The Node2D to remove
+     * @return {Node2D} The first child that was removed.
      */
     remove_child(child) {
         const index = this.children.indexOf(child);
@@ -1221,7 +1218,7 @@ export default class Node2D extends EventEmitter {
      * Removes a child from the specified index position.
      *
      * @param {number} index - The index to get the child from
-     * @return {extends typeof Node2D} The child that was removed.
+     * @return {Node2D} The child that was removed.
      */
     remove_child_at(index) {
         const child = this.get_child(index);
@@ -1316,6 +1313,7 @@ export default class Node2D extends EventEmitter {
         const list = path.split('/');
 
         // Find the base node
+        /** @type {Node2D} */
         let node = this;
 
         let i = 0, l = list.length, name;
@@ -1348,6 +1346,7 @@ export default class Node2D extends EventEmitter {
             }
         }
 
+        // @ts-ignore
         return node;
     }
 
@@ -1434,7 +1433,7 @@ export default class Node2D extends EventEmitter {
     /**
      * Renders the object using the WebGL renderer
      *
-     * @param {WebGLRenderer} renderer - The renderer
+     * @param {import('engine/renderers/WebGLRenderer').default} renderer - The renderer
      */
     render_webgl(renderer) {
         // if the object is not visible or the alpha is 0 then no need to render this element
@@ -1460,7 +1459,7 @@ export default class Node2D extends EventEmitter {
      * Render the object using the WebGL renderer and advanced features.
      *
      * @private
-     * @param {WebGLRenderer} renderer - The renderer
+     * @param {import('engine/renderers/WebGLRenderer').default} renderer - The renderer
      */
     render_advanced_webgl(renderer) {
         renderer.flush();
@@ -1514,47 +1513,11 @@ export default class Node2D extends EventEmitter {
      * To be overridden by the subclasses.
      *
      * @private
-     * @param {WebGLRenderer} renderer - The renderer
+     * @param {import('engine/renderers/WebGLRenderer').default} renderer - The renderer
      */
     _render_webgl(renderer) // eslint-disable-line no-unused-vars
     {
         // this is where content itself gets rendered...
-    }
-
-    /**
-     * To be overridden by the subclass
-     *
-     * @private
-     * @param {CanvasRenderer} renderer - The renderer
-     */
-    _render_canvas(renderer) // eslint-disable-line no-unused-vars
-    {
-        // this is where content itself gets rendered...
-    }
-
-    /**
-     * Renders the object using the Canvas renderer
-     *
-     * @param {CanvasRenderer} renderer - The renderer
-     */
-    render_canvas(renderer) {
-        // if not visible or the alpha is 0 then no need to render this
-        if (!this.visible || this.world_alpha <= 0 || !this.renderable) {
-            return;
-        }
-
-        if (this._mask) {
-            renderer.mask_manager.push_mask(this._mask);
-        }
-
-        this._render_canvas(renderer);
-        for (let i = 0, j = this.children.length; i < j; ++i) {
-            this.children[i].render_canvas(renderer);
-        }
-
-        if (this._mask) {
-            renderer.mask_manager.pop_mask(renderer);
-        }
     }
 
     /**
@@ -1565,8 +1528,6 @@ export default class Node2D extends EventEmitter {
      *  have been set to that value
      */
     destroy_children(options) {
-        super.destroy();
-
         const destroy_children = typeof options === 'boolean' ? options : options && options.children;
 
         const old_children = this.remove_children(0, this.children.length);
