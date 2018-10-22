@@ -219,6 +219,9 @@ const test_overlap = (a, b, a_is_area, b_is_area) => {
 
 
 export default class PhysicsServer {
+    static get_singleton() {
+        return physics_server;
+    }
     constructor() {
         this.is_initialized = false;
 
@@ -585,3 +588,4 @@ export default class PhysicsServer {
         }
     }
 }
+let physics_server = new PhysicsServer();
