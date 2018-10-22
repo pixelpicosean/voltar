@@ -174,12 +174,22 @@ export default class Point {
     }
 
     /**
-     * @param {PointLike} b
+     * @param {PointLike|number} x
+     * @param {PointLike|number} [y]
      * @returns {Point}
      */
-    divide(b) {
-        this.x /= b.x;
-        this.y /= b.y;
+    divide(x, y) {
+        if (y === undefined) {
+            // @ts-ignore
+            this.x /= x.x;
+            // @ts-ignore
+            this.y /= x.y;
+        } else {
+            // @ts-ignore
+            this.x /= x;
+            // @ts-ignore
+            this.y /= y;
+        }
         return this;
     }
 
