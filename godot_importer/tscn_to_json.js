@@ -142,7 +142,7 @@ function parse_block(block) {
                             // Contains ":" means it is a single line property
                             if (block[i].indexOf(':') >= 0) {
                                 let inner_seg = block[i].split(':');
-                                _.last(inner_prop)[trim_string(inner_seg[0]).replace(/"/g, '')] = trim_string(inner_seg[1]);
+                                _.last(prop)[trim_string(inner_seg[0]).replace(/"/g, '')] = trim_string(inner_seg[1]);
                             }
                             // Current object is finished
                             else if (block[i] === '}, {') {
