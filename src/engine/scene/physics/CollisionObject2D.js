@@ -15,7 +15,7 @@ export default class CollisionObject2D extends Node2D {
         return this.collision_layer & (1 << bit);
     }
     set_collision_layer(layer) {
-        thsi.collision_layer = layer;
+        this.collision_layer = layer;
     }
     set_collision_layer_bit(bit, value) {
         if (value) {

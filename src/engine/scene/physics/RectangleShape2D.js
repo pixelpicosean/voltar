@@ -1,4 +1,4 @@
-import { Vector, ObservablePoint } from '../../math';
+import { Vector, ObservablePoint } from '../../math/index';
 
 export default class RectangleShape2D {
     constructor(extent_x = 4, extent_y = 4) {
