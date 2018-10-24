@@ -35,10 +35,12 @@ export default class RectangleShape2D extends CollisionShape2D {
 
         this.normals[0]
             .copy(this.vertices[3]).subtract(this.vertices[2])
-            .perp();
+            .perp()
+            .normalize()
         this.normals[1]
             .copy(this.vertices[2]).subtract(this.vertices[1])
-            .perp();
+            .perp()
+            .normalize()
 
         let min_x = Number.POSITIVE_INFINITY,
             min_y = Number.POSITIVE_INFINITY;
