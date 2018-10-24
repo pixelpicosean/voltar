@@ -1,42 +1,14 @@
-import remove_items from 'remove-array-items';
+import { remove_items } from 'engine/dep/index';
+import { Vector2 } from 'engine/math/index';
 import CollisionObject2D from './CollisionObject2D';
-import { Vector } from '../../math';
-
 
 export default class PhysicsBody2D extends CollisionObject2D {
-    set_shape(s) {
-        this._shape = s;
-        this._shape._dirty = true;
-        this._shape.calculate_points(this);
-    }
-
     constructor() {
         super();
 
         this.type = 'PhysicsBody2D';
 
         this.collision_exceptions = [];
-    }
-    _collide_body(body, res) {
-        return true;
-    }
-    _collide_map(res) {
-        this.position.copy(res.position);
-    }
-
-    move(vec) {
-        if (this.scene_tree) {
-            let res = this.scene_tree.physics_server.test_node_against_map(this, vec);
-            if (res) {
-                this._collide_map(res);
-            }
-            else {
-                this.position.add(vec);
-            }
-        }
-        else {
-            this.position.add(vec);
-        }
     }
 
     add_collision_exception_with(body) {
