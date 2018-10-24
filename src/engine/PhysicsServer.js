@@ -121,7 +121,7 @@ function project_points(points, normal, result) {
  *      and a response is passed in, information about how much overlap and
  *      the direction of the overlap will be populated
  */
-function try_to_separate_axis(a_pos, b_pos, a_points, b_points, axis, response) {
+function sat_2d_calculate_penetration(a_pos, b_pos, a_points, b_points, axis, response) {
     var range_a = ARRAY_POOL.pop();
     var range_b = ARRAY_POOL.pop();
     // The magnitude of the offset between the two polygons
@@ -457,14 +457,14 @@ export default class PhysicsServer {
                                 let separated = false;
                                 // If any of the edge normals of A is a separating axis, no intersection.
                                 for (let i = 0; i < shape.normals.length; i++) {
-                                    if (try_to_separate_axis(a_pos, b_pos, a_points, b_points, shape.normals[i], undefined)) {
+                                    if (sat_2d_calculate_penetration(a_pos, b_pos, a_points, b_points, shape.normals[i], undefined)) {
                                         separated = true;
                                         break;
                                     }
                                 }
                                 // If any of the edge normals of B is a separating axis, no intersection.
                                 for (let i = 0; i < shape2.normals.length; i++) {
-                                    if (try_to_separate_axis(a_pos, b_pos, a_points, b_points, shape2.normals[i], undefined)) {
+                                    if (sat_2d_calculate_penetration(a_pos, b_pos, a_points, b_points, shape2.normals[i], undefined)) {
                                         separated = true;
                                         break;
                                     }
