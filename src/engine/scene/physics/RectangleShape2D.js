@@ -1,86 +1,59 @@
-import { Vector, ObservablePoint } from '../../math/index';
+import { Vector2 } from 'engine/math/index';
+import CollisionShape2D from './CollisionShape2D';
 
-export default class RectangleShape2D {
+const tmp_point = new Vector2(0, 0);
+const tmp_point2 = new Vector2(0, 0);
+
+export default class RectangleShape2D extends CollisionShape2D {
     constructor(extent_x = 4, extent_y = 4) {
-        this._dirty = true;
+        super();
 
-        this.left = 0;
-        this.right = 0;
-        this.top = 0;
-        this.bottom = 0;
-
-        this.extents = new ObservablePoint(function() {
-            this._dirty = true;
-
-            this.points[0].set(-this.extents._x, -this.extents._y);
-            this.points[1].set( this.extents._x, -this.extents._y);
-            this.points[2].set( this.extents._x,  this.extents._y);
-            this.points[3].set(-this.extents._x,  this.extents._y);
-        }, this, extent_x, extent_y);
-
-        this.points = [
-            new Vector(-extent_x, -extent_y),
-            new Vector( extent_x, -extent_y),
-            new Vector( extent_x,  extent_y),
-            new Vector(-extent_x,  extent_y),
+        this.extents = new Vector2(extent_x, extent_y);
+        this.vertices = [
+            new Vector2(0, 0),    // top-left
+            new Vector2(0, 0),    // bottom-left
+            new Vector2(0, 0),    // bottom-right
+            new Vector2(0, 0),    // top-right
         ];
-        this.calc_points =
-            [new Vector(), new Vector(), new Vector(), new Vector()];
-        this.edges =
-            [new Vector(), new Vector(), new Vector(), new Vector()];
-        this.normals =
-            [new Vector(), new Vector(), new Vector(), new Vector()];
+        this.normals = [
+            new Vector2(1, 0),    // right
+            new Vector2(0, 1),    // down
+        ];
+
+        this.update_transform(tmp_point.set(0, 0), 0, tmp_point2.set(1, 1));
     }
+    update_transform(position, rotation, scale) {
+        const c = Math.cos(rotation);
+        const s = Math.sin(rotation);
+        const w = this.extents.x;
+        const h = this.extents.y;
 
-    calculate_points(node) {
-        if (this._dirty) {
-            this._calc_points(node);
-            this._dirty = false;
+        this.vertices[2].set(w * c + h * s, h * c - w * s).multiply(scale);
+        this.vertices[3].set(w * c - h * s, -h * c - w * s).multiply(scale);
+        this.vertices[0].set(-w * c - h * s, -h * c + w * s).multiply(scale);
+        this.vertices[1].set(-w * c + h * s, h * c + w * s).multiply(scale);
+
+        this.normals[0]
+            .copy(this.vertices[3]).subtract(this.vertices[2])
+            .perp();
+        this.normals[1]
+            .copy(this.vertices[2]).subtract(this.vertices[1])
+            .perp();
+
+        let min_x = Number.POSITIVE_INFINITY,
+            min_y = Number.POSITIVE_INFINITY;
+        let max_x = Number.NEGATIVE_INFINITY,
+            max_y = Number.NEGATIVE_INFINITY;
+        for (let vert of this.vertices) {
+            min_x = Math.min(min_x, vert.x);
+            max_x = Math.max(max_x, vert.x);
+
+            min_y = Math.min(min_y, vert.y);
+            max_y = Math.max(max_y, vert.y);
         }
-    }
-    _calc_points(node) {
-        // Calculated points - this is what is used for underlying collisions and takes into account
-        // the rotation set on the polygon.
-        let calcPoints = this.calc_points;
-        // The edges here are the direction of the `n`th edge of the polygon, relative to
-        // the `n`th point. If you want to draw a given edge from the edge value, you must
-        // first translate to the position of the starting point.
-        let edges = this.edges;
-        // The normals here are the direction of the normal for the `n`th edge of the polygon, relative
-        // to the position of the `n`th point. If you want to draw an edge normal, you must first
-        // translate to the position of the starting point.
-        let normals = this.normals;
-        // Copy the original points array and apply the rotation
-        let points = this.points;
-        let rotation = node.get_global_rotation();
-        let i, calcPoint;
-        let left = 0, top = 0, right = 0, bottom = 0;
-        for (i = 0; i < 4; i++) {
-            calcPoint = calcPoints[i].copy(points[i]);
-            if (rotation !== 0) {
-                calcPoint.rotate(rotation);
-            }
-
-            // Update AABB info
-            left = Math.min(left, calcPoint.x);
-            top = Math.min(top, calcPoint.y);
-            right = Math.max(right, calcPoint.x);
-            bottom = Math.max(bottom, calcPoint.y);
-        }
-
-        // Calculate the edges/normals
-        let p1, p2, e;
-        for (i = 0; i < 4; i++) {
-            p1 = calcPoints[i];
-            p2 = i < 3 ? calcPoints[i + 1] : calcPoints[0];
-            e = edges[i].copy(p2).subtract(p1);
-            normals[i].copy(e).perp().normalize();
-        }
-
-        // Calculate the bounding box
-        this.left = left;
-        this.right = right;
-        this.top = top;
-        this.bottom = bottom;
+        this.aabb.width = Math.round(max_x - min_x);
+        this.aabb.height = Math.round(max_y - min_y);
+        this.aabb.x = Math.round(position.x - this.aabb.width * 0.5);
+        this.aabb.y = Math.round(position.y - this.aabb.height * 0.5);
     }
 }

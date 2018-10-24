@@ -471,6 +471,7 @@ export default class SceneTree {
         if (this._next_scene_ctor) {
             if (this.current_scene) {
                 this.viewport.remove_children();
+                this.physics_server.clean();
                 this.current_scene = null;
             }
 
@@ -522,7 +523,7 @@ export default class SceneTree {
                     // - update shared ticker
                     shared_ticker.update(_process_tmp.slow_step);
                     // - solve collision
-                    this.physics_server.solve_collision(this.current_scene);
+                    this.physics_server.update(this.current_scene, _process_tmp.slow_step_sec);
                     // - remove nodes to be freed
                     this._flush_delete_queue();
                     // - update inputs

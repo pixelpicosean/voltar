@@ -80,12 +80,8 @@ export default class Node2D extends EventEmitter {
          * @private
          * @type {boolean}
          */
+        this.physics_process = false;
         this.is_physics_object = false;
-        /**
-         * @private
-         * @type {number}
-         */
-        this._physics_children_count = 0;
 
         // TODO: need to create Transform from factory
         /**
@@ -379,6 +375,12 @@ export default class Node2D extends EventEmitter {
      */
     set_process(p) {
         this.idle_process = !!p;
+    }
+    /**
+     * @param {boolean} p
+     */
+    set_physics_process(p) {
+        this.physics_process = !!p;
     }
 
     /**
@@ -882,6 +884,10 @@ export default class Node2D extends EventEmitter {
      * @param {number} delta
      */
     _process(delta) { }
+    /**
+     * @param {number} delta
+     */
+    _physics_process(delta) { }
     _exit_tree() { }
 
     queue_free() {
@@ -1016,10 +1022,6 @@ export default class Node2D extends EventEmitter {
         // ensure child transform will be recalculated
         child.transform._parent_id = -1;
 
-        if (child.is_physics_object) {
-            this._physics_object_inserted();
-        }
-
         this.children.push(child);
 
         // add to name hash
@@ -1043,18 +1045,6 @@ export default class Node2D extends EventEmitter {
         }
 
         return child;
-    }
-    _physics_object_inserted() {
-        this._physics_children_count += 1;
-        if (this.parent) {
-            this.parent._physics_object_inserted();
-        }
-    }
-    _physics_object_removed() {
-        this._physics_children_count -= 1;
-        if (this.parent) {
-            this.parent._physics_object_removed();
-        }
     }
 
     /**
@@ -1190,10 +1180,6 @@ export default class Node2D extends EventEmitter {
 
         child.parent = null;
 
-        if (child.is_physics_object) {
-            this._physics_object_removed();
-        }
-
         // ensure child transform will be recalculated
         child.transform._parent_id = -1;
         remove_items(this.children, index, 1);
@@ -1229,10 +1215,6 @@ export default class Node2D extends EventEmitter {
         child.transform._parent_id = -1;
         remove_items(this.children, index, 1);
 
-        if (child.is_physics_object) {
-            this._physics_object_removed();
-        }
-
         // remove from name hash
         if (child.name.length > 0) {
             this.named_children[child.name] = undefined;
@@ -1254,7 +1236,7 @@ export default class Node2D extends EventEmitter {
      *
      * @param {number} [beginIndex=0] - The beginning position.
      * @param {number} [endIndex=this.children.length] - The ending position. Default value is size of the container.
-     * @returns {Array<extends typeof Node2D>} List of removed children
+     * @returns {Array<Node2D>} List of removed children
      */
     remove_children(beginIndex = 0, endIndex) {
         const begin = beginIndex;
@@ -1270,10 +1252,6 @@ export default class Node2D extends EventEmitter {
                 removed[i].scene_tree = null;
                 if (removed[i].transform) {
                     removed[i].transform._parent_id = -1;
-                }
-
-                if (removed[i].is_physics_object) {
-                    this._physics_object_removed();
                 }
 
                 // remove from name hash
