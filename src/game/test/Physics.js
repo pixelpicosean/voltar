@@ -77,7 +77,7 @@ class CustomBody extends v.PhysicsBody2D {
     constructor() {
         super();
 
-        this.velocity = new v.Vector(0, 0);
+        this.velocity = new v.Vector2(0, 0);
 
         this.set_shape(new v.RectangleShape2D(10, 10));
         this.set_collision_layer_bit(3, true);

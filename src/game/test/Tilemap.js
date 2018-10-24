@@ -39,8 +39,8 @@ class Me extends v.PhysicsBody2D {
         this.gfx.anchor.set(0.5);
         this.add_child(this.gfx);
 
-        this.velocity = new v.Vector();
-        this.motion = new v.Vector();
+        this.velocity = new v.Vector2();
+        this.motion = new v.Vector2();
     }
     _ready() {
         this.set_process(true);

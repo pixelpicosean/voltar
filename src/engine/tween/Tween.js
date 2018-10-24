@@ -1,5 +1,5 @@
 import { Signal, remove_items } from 'engine/dep/index';
-import { Vector, clamp } from 'engine/math/index';
+import { Vector2, clamp } from 'engine/math/index';
 import flatten_key_url from './flatten_key_url';
 import { Easing } from './easing';
 
@@ -68,20 +68,20 @@ function set_vec_property(obj, key, value) {
     res.y = value.y;
 }
 
-const _tmp_vec2 = new Vector();
+const _tmp_vec2 = new Vector2();
 
 /**
- * @type {Array<Vector>}
+ * @type {Array<Vector2>}
  */
 const VECTOR_ARR = [];
 /**
  * @param {number} x
  * @param {number} y
- * @returns {Vector}
+ * @returns {Vector2}
  */
 const create_vector = (x, y) => {
     let vec = VECTOR_ARR.pop();
-    if (!vec) vec = new Vector(x, y);
+    if (!vec) vec = new Vector2(x, y);
     vec.set(x, y);
     return vec;
 };

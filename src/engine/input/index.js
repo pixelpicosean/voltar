@@ -1,5 +1,5 @@
 import remove_items from 'remove-array-items';
-import { Vector } from '../math/index';
+import { Vector2 } from '../math/index';
 import keyboard from './keyboard';
 
 
@@ -14,7 +14,7 @@ export default class Input {
         this.last_pressed = {};
         this.last_released = {};
 
-        this.mouse = new Vector(0, 0);
+        this.mouse = new Vector2(0, 0);
     }
     _init(viewport) {
         // Keyboard
