@@ -1,11 +1,13 @@
-import CollisionObject2D from './CollisionObject2D';
-import { remove_items, Signal } from 'engine/dep/index';
+import CollisionObject2D, { CollisionObjectTypes } from './CollisionObject2D';
+import { Signal } from 'engine/dep/index';
 
 export default class Area2D extends CollisionObject2D {
     constructor() {
         super();
 
         this.type = 'Area2D';
+
+        this.collision_object_type = CollisionObjectTypes.AREA;
 
         this.touched_areas = [];
         this.prev_touched_areas = [];

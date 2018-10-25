@@ -1,12 +1,12 @@
 import { remove_items } from 'engine/dep/index';
-import { Vector2 } from 'engine/math/index';
-import CollisionObject2D from './CollisionObject2D';
+import CollisionObject2D, { CollisionObjectTypes } from './CollisionObject2D';
 
 export default class PhysicsBody2D extends CollisionObject2D {
     constructor() {
         super();
 
         this.type = 'PhysicsBody2D';
+        this.collision_object_type = CollisionObjectTypes.STATIC;
 
         this.collision_exceptions = [];
     }

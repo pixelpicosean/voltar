@@ -2,6 +2,15 @@ import Node2D from '../Node2D';
 import CollisionShape2D from './CollisionShape2D';
 import { remove_items } from 'engine/dep/index';
 
+/** @enum {number} */
+export const CollisionObjectTypes = {
+    NONE: 0,
+    AREA: 1,
+    RIGID: 2,
+    KINEMATIC: 3,
+    STATIC: 4,
+};
+
 export default class CollisionObject2D extends Node2D {
     /**
      * @returns {number}
@@ -79,6 +88,7 @@ export default class CollisionObject2D extends Node2D {
         super();
 
         this.is_physics_object = true;
+        this.collision_object_type = CollisionObjectTypes.NONE;
 
         this.collision_layer = 0;
         this.collision_mask = 0;

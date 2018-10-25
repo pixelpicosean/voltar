@@ -1,17 +1,11 @@
 import { Vector2 } from 'engine/math/index';
 import { remove_items } from 'engine/dep/index';
 import Node2D from './scene/Node2D';
-import CollisionShape2D from './scene/physics/CollisionShape2D';
-import CollisionObject2D from './scene/physics/CollisionObject2D';
-import Area2D from './scene/physics/Area2D';
 
-/**
- * @typedef Response
- * @prop {boolean} a_in_b
- * @prop {boolean} b_in_a
- * @prop {number} overlap
- * @prop {Vector2} normal
- */
+import CollisionShape2D from './scene/physics/CollisionShape2D';
+import CollisionObject2D, { CollisionObjectTypes } from './scene/physics/CollisionObject2D';
+import Area2D from './scene/physics/Area2D';
+import PhysicsBody2D from './scene/physics/PhysicsBody2D';
 
 let i = 0;
 
@@ -44,6 +38,50 @@ const res = {
 };
 
 const tmp_vec = new Vector2();
+
+class Collision {
+    constructor() {
+        /**
+         * @type {PhysicsBody2D}
+         */
+        this.collider = null;
+
+        this.normal = new Vector2();
+        this.travel = new Vector2();
+        this.remainder = new Vector2();
+
+        this.overlap = 0;
+    }
+    reset() {
+        this.collider = null;
+
+        this.normal.set(0, 0);
+        this.travel.set(0, 0);
+        this.remainder.set(0, 0);
+
+        this.overlap = 0;
+
+        return this;
+    }
+}
+const COLLSION_POOL = [];
+for (let i = 0; i < 16; i++) {
+    COLLSION_POOL.push(new Collision());
+}
+/**
+ * @returns {Collision}
+ */
+const get_collision = () => {
+    let co = COLLSION_POOL.pop();
+    if (!co) {
+        return new Collision();
+    }
+    return co;
+}
+const put_collision = (co) => {
+    co.reset();
+    COLLSION_POOL.push(co);
+};
 
 const tmp_res = {
     collision: {
@@ -115,13 +153,13 @@ function project_points(points, normal, result) {
  * @param {Vector2[]} b_points The points in the second polygon
  * @param {Vector2} axis The axis (unit sized) to test against. The points of both polygons
  *      will be projected onto this axis
- * @param {Response=} response A Response object (optional) which will be populated
+ * @param {Collision=} collision A Collision object (optional) which will be populated
  *      if the axis is not a separating axis
  * @return {boolean} true if it is a separating axis, false otherwise.  If false,
  *      and a response is passed in, information about how much overlap and
  *      the direction of the overlap will be populated
  */
-function sat_2d_calculate_penetration(a_pos, b_pos, a_points, b_points, axis, response) {
+function sat_2d_calculate_penetration(a_pos, b_pos, a_points, b_points, axis, collision) {
     var range_a = ARRAY_POOL.pop();
     var range_b = ARRAY_POOL.pop();
     // The magnitude of the offset between the two polygons
@@ -141,15 +179,13 @@ function sat_2d_calculate_penetration(a_pos, b_pos, a_points, b_points, axis, re
         return true;
     }
     // This is not a separating axis. If we're calculating a response, calculate the overlap.
-    if (response) {
+    if (collision) {
         var overlap = 0;
         // A starts further left than B
         if (range_a[0] < range_b[0]) {
-            response.a_in_b = false;
             // A ends before B does. We have to pull A out of B
             if (range_a[1] < range_b[1]) {
                 overlap = range_a[1] - range_b[0];
-                response.b_in_a = false;
                 // B is fully inside A.  Pick the shortest way out.
             }
             else {
@@ -159,11 +195,9 @@ function sat_2d_calculate_penetration(a_pos, b_pos, a_points, b_points, axis, re
             }
             // B starts further left than A
         } else {
-            response.b_in_a = false;
             // B ends before A ends. We have to push A out of B
             if (range_a[1] > range_b[1]) {
                 overlap = range_a[0] - range_b[1];
-                response.a_in_b = false;
                 // A is fully inside B.  Pick the shortest way out.
             }
             else {
@@ -173,12 +207,12 @@ function sat_2d_calculate_penetration(a_pos, b_pos, a_points, b_points, axis, re
             }
         }
         // If this is the smallest amount of overlap we've seen so far, set it as the minimum overlap.
-        var absOverlap = Math.abs(overlap);
-        if (absOverlap < response.overlap) {
-            response.overlap = absOverlap;
-            response.normal.copy(axis);
+        var abs_overlap = Math.abs(overlap);
+        if (abs_overlap < collision.overlap) {
+            collision.overlap = abs_overlap;
+            collision.normal.copy(axis);
             if (overlap < 0) {
-                response.normal.negate();
+                collision.normal.negate();
             }
         }
     }
@@ -380,8 +414,6 @@ export default class PhysicsServer {
             const ex = aabb.right >> this.spatial_shift;
             const ey = aabb.bottom >> this.spatial_shift;
 
-            const a_is_area = (coll.type === 'Area2D');
-
             for (let y = sy; y <= ey; y++) {
                 for (let x = sx; x <= ex; x++) {
                     // Find or create the list
@@ -409,22 +441,35 @@ export default class PhysicsServer {
                         const coll2 = shape2.owner;
                         const aabb2 = shape2.aabb;
 
-                        // Pass: same shape or someone is already removed
-                        if (shape2 === shape || coll.is_queued_for_deletion || coll2.is_queued_for_deletion) {
+                        // Sort the 2 object
+                        const a = (coll.collision_object_type < coll2.collision_object_type) ? coll : coll2;
+                        const b = (coll === a) ? coll2 : coll;
+                        const shape_a = (coll === a) ? shape : shape2;
+                        const shape_b = (coll === a) ? shape2 : shape;
+                        const aabb_a = (coll === a) ? aabb : aabb2;
+                        const aabb_b = (coll === a) ? aabb2 : aabb;
+
+                        // Ignore: same shape or same owner or is already marked as removed
+                        if (shape_a === shape_b || a === b || a.is_queued_for_deletion || b.is_queued_for_deletion) {
                             continue;
                         }
 
-                        let a2b = !!(coll.collision_mask & coll2.collision_layer);
-                        let b2a = !!(coll2.collision_mask & coll.collision_layer);
+                        // Ignore: static object does not overlap with anything
+                        if (a.collision_object_type === CollisionObjectTypes.STATIC && b.collision_object_type === CollisionObjectTypes.STATIC) {
+                            continue;
+                        }
 
-                        // Pass: never collide with each other
+                        let a2b = !!(a.collision_mask & b.collision_layer);
+                        let b2a = !!(b.collision_mask & a.collision_layer);
+
+                        // Ignore: they don't collide with each other
                         if (!a2b && !b2a) {
                             continue;
                         }
 
-                        const key = `${shape.id < shape2.id ? shape.id : shape2.id}:${shape.id > shape2.id ? shape.id : shape2.id}`;
+                        const key = `${shape_a.id < shape_b.id ? shape_a.id : shape_b.id}:${shape_a.id > shape_b.id ? shape_a.id : shape_b.id}`;
 
-                        // Pass: already checked
+                        // Ignore: already checked this pair
                         if (this.checks[key]) {
                             continue;
                         }
@@ -433,38 +478,93 @@ export default class PhysicsServer {
                         this.checks[key] = true;
                         this.collision_checks++;
 
-                        const b_is_area = coll2.type === 'Area2D';
+                        const cast_a = (a.collision_object_type <= b.collision_object_type);
+                        const cast_b = (a.collision_object_type >= b.collision_object_type);
+
+                        const a_is_area = (a.collision_object_type === CollisionObjectTypes.AREA);
+                        const b_is_area = (b.collision_object_type === CollisionObjectTypes.AREA);
 
                         if (!(
-                            aabb.bottom <= aabb2.top ||
-                            aabb.top >= aabb2.bottom ||
-                            aabb.left >= aabb2.right ||
-                            aabb.right <= aabb2.left)
-                        ) {
+                            aabb_a.bottom <= aabb_b.top
+                            ||
+                            aabb_a.top >= aabb_b.bottom
+                            ||
+                            aabb_a.left >= aabb_b.right
+                            ||
+                            aabb_a.right <= aabb_b.left
+                        )) {
                             // Body vs Body: calculate the collision information and solve it
                             if (!a_is_area && !b_is_area) {
                                 // @ts-ignore
-                                a2b = a2b && (coll.collision_exceptions.indexOf(coll2) < 0);
+                                a2b = a2b && (a.collision_exceptions.indexOf(b) < 0);
                                 // @ts-ignore
-                                b2a = b2a && (coll2.collision_exceptions.indexOf(coll) < 0);
+                                b2a = b2a && (b.collision_exceptions.indexOf(a) < 0);
 
-                                // TODO: Body vs Body
+                                let a_pos = a._world_position, b_pos = b._world_position;
+                                let a_points = shape_a.vertices, b_points = shape_b.vertices;
+                                let separated = false;
+                                // If any of the edge normals of A is a separating axis, no intersection.
+                                /** @type {Collision[]} */
+                                let collisions = get_array();
+                                for (let i = 0; i < shape_a.normals.length; i++) {
+                                    let co = get_collision();
+                                    if (sat_2d_calculate_penetration(a_pos, b_pos, a_points, b_points, shape_a.normals[i], co)) {
+                                        separated = true;
+                                        put_collision(co);
+                                        break;
+                                    } else {
+                                        collisions.push(co);
+                                    }
+                                }
+                                // If any of the edge normals of B is a separating axis, no intersection.
+                                for (let i = 0; i < shape_b.normals.length; i++) {
+                                    let co = get_collision();
+                                    if (sat_2d_calculate_penetration(a_pos, b_pos, a_points, b_points, shape_b.normals[i], co)) {
+                                        separated = true;
+                                        put_collision(co);
+                                        break;
+                                    } else {
+                                        collisions.push(co);
+                                    }
+                                }
+                                // Intersected?
+                                if (!separated) {
+                                    // Find the collision with minimal overlap
+                                    /** @type {Collision} */
+                                    let real_co = null;
+                                    for (let co of collisions) {
+                                        if (!real_co) {
+                                            real_co = co;
+                                            break;
+                                        } else {
+                                            if (co.overlap < real_co.overlap) {
+                                                real_co = co;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                // Recycle objects
+                                for (let co of collisions) {
+                                    put_collision(co);
+                                }
+                                put_array(collisions);
                             }
                             // Area vs Body or Area vs Area
                             else {
-                                let a_pos = coll._world_position, b_pos = coll2._world_position;
-                                let a_points = shape.vertices, b_points = shape2.vertices;
+                                let a_pos = a._world_position, b_pos = b._world_position;
+                                let a_points = shape_a.vertices, b_points = shape_b.vertices;
                                 let separated = false;
                                 // If any of the edge normals of A is a separating axis, no intersection.
-                                for (let i = 0; i < shape.normals.length; i++) {
-                                    if (sat_2d_calculate_penetration(a_pos, b_pos, a_points, b_points, shape.normals[i], undefined)) {
+                                for (let i = 0; i < shape_a.normals.length; i++) {
+                                    if (sat_2d_calculate_penetration(a_pos, b_pos, a_points, b_points, shape_a.normals[i], undefined)) {
                                         separated = true;
                                         break;
                                     }
                                 }
                                 // If any of the edge normals of B is a separating axis, no intersection.
-                                for (let i = 0; i < shape2.normals.length; i++) {
-                                    if (sat_2d_calculate_penetration(a_pos, b_pos, a_points, b_points, shape2.normals[i], undefined)) {
+                                for (let i = 0; i < shape_b.normals.length; i++) {
+                                    if (sat_2d_calculate_penetration(a_pos, b_pos, a_points, b_points, shape_b.normals[i], undefined)) {
                                         separated = true;
                                         break;
                                     }
@@ -474,30 +574,40 @@ export default class PhysicsServer {
                                     // Area vs Area
                                     if (a_is_area && b_is_area) {
                                         // @ts-ignore
-                                        coll.touched_areas.push(coll2);
+                                        a.touched_areas.push(b);
                                         // @ts-ignore
-                                        if (coll.prev_touched_areas.indexOf(coll2) < 0) {
+                                        if (a.prev_touched_areas.indexOf(b) < 0) {
                                             // @ts-ignore
-                                            coll._area_inout(true, coll2);
+                                            a._area_inout(true, b);
                                         }
 
                                         // @ts-ignore
-                                        coll2.touched_areas.push(coll);
+                                        b.touched_areas.push(a);
                                         // @ts-ignore
-                                        if (coll2.prev_touched_areas.indexOf(coll) < 0) {
+                                        if (b.prev_touched_areas.indexOf(a) < 0) {
                                             // @ts-ignore
-                                            coll2._area_inout(true, coll);
+                                            b._area_inout(true, a);
                                         }
                                     }
                                     // Area vs Body
                                     else if (a_is_area && !b_is_area) {
                                         // @ts-ignore
-                                        coll._body_inout(true, coll2);
+                                        a.touched_bodies.push(b);
+                                        // @ts-ignore
+                                        if (a.prev_touched_bodies.indexOf(b) < 0) {
+                                            // @ts-ignore
+                                            a._body_inout(true, b);
+                                        }
                                     }
                                     // Body vs Area
                                     else if (!a_is_area && b_is_area) {
                                         // @ts-ignore
-                                        coll2._body_inout(true, coll);
+                                        b.touched_bodies.push(a);
+                                        // @ts-ignore
+                                        if (b.prev_touched_bodies.indexOf(a) < 0) {
+                                            // @ts-ignore
+                                            b._body_inout(true, a);
+                                        }
                                     }
                                 }
                             }
@@ -508,7 +618,7 @@ export default class PhysicsServer {
         }
 
         for (const coll of colls) {
-            if (coll.type === 'Area2D') {
+            if (coll.collision_object_type === CollisionObjectTypes.AREA) {
                 /** @type {Area2D} */
                 // @ts-ignore
                 const area = coll;
