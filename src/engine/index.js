@@ -39,7 +39,9 @@ export { default as NineSlicePlane } from './scene/mesh/NineSlicePlane';
 export { default as Rope } from './scene/mesh/Rope';
 
 export { default as Area2D } from './scene/physics/Area2D';
-export { default as PhysicsBody2D } from './scene/physics/PhysicsBody2D';
+export { default as RigidBody2D } from './scene/physics/RigidBody2D';
+export { default as KinematicBody2D } from './scene/physics/KinematicBody2D';
+export { default as StaticBody2D } from './scene/physics/StaticBody2D';
 
 export { default as Timer } from './scene/Timer';
 
