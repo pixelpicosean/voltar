@@ -149,9 +149,9 @@ export default class Matrix {
      * Get a new position with the current transformation applied.
      * Can be used to go from a child's coordinate space to the world coordinate space. (e.g. rendering)
      *
-     * @param {Point} pos - The origin
-     * @param {Point} [new_pos] - The point that the new position is assigned to (allowed to be same as input)
-     * @return {Point} The new point, transformed through this matrix
+     * @param {import('./Point').PointLike} pos - The origin
+     * @param {import('./Point').PointLike} [new_pos] - The point that the new position is assigned to (allowed to be same as input)
+     * @return {import('./Point').PointLike} The new point, transformed through this matrix
      */
     apply(pos, new_pos) {
         new_pos = new_pos || new Point();
@@ -169,9 +169,9 @@ export default class Matrix {
      * Get a new position with the inverse of the current transformation applied.
      * Can be used to go from the world coordinate space to a child's coordinate space. (e.g. input)
      *
-     * @param {Point} pos - The origin
-     * @param {Point} [new_pos] - The point that the new position is assigned to (allowed to be same as input)
-     * @return {Point} The new point, inverse-transformed through this matrix
+     * @param {import('./Point').PointLike} pos - The origin
+     * @param {import('./Point').PointLike} [new_pos] - The point that the new position is assigned to (allowed to be same as input)
+     * @return {import('./Point').PointLike} The new point, inverse-transformed through this matrix
      */
     apply_inverse(pos, new_pos) {
         new_pos = new_pos || new Point();
