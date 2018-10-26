@@ -1,4 +1,4 @@
-import { Vector2 } from 'engine/math/index';
+import { Vector2, Rectangle } from 'engine/math/index';
 import { remove_items } from 'engine/dep/index';
 import Node2D from './scene/Node2D';
 
@@ -7,8 +7,9 @@ import CollisionObject2D, { CollisionObjectTypes } from './scene/physics/Collisi
 import Area2D from './scene/physics/Area2D';
 import PhysicsBody2D from './scene/physics/PhysicsBody2D';
 import RigidBody2D from './scene/physics/RigidBody2D';
+import KinematicBody2D from './scene/physics/KinematicBody2D';
 
-// TODO: move to
+// TODO: move to physics settings
 const sleep_threshold_linear = 2;
 const sleep_threshold_angular = 8.0 / 180.0 * Math.PI;
 const time_before_sleep = 0.5;
@@ -120,6 +121,8 @@ const tmp_res = {
     travel: new Vector2(),
     remainder: new Vector2(),
 };
+
+const tmp_aabb = new Rectangle();
 
 /**
  * A pool of `Vector` objects that are used in calculations to avoid
@@ -269,6 +272,8 @@ export default class PhysicsServer {
          */
         this.delete_queue = [];
         this.collision_maps = [];
+
+        this.process_step = 0;
     }
 
     init() {
@@ -393,6 +398,8 @@ export default class PhysicsServer {
      * @param {number} delta
      */
     simulate(colls, delta) {
+        this.process_step = delta;
+
         for (const coll of colls) {
             // TODO: Update StaticBody2D movement
 
@@ -466,7 +473,12 @@ export default class PhysicsServer {
                     // Insert collider into the group
                     group.push(shape);
 
-                    // Pass: only one shape
+                    // Ignore: kinematic bodies will be updated and test later
+                    if (coll.collision_object_type === CollisionObjectTypes.KINEMATIC) {
+                        continue;
+                    }
+
+                    // Ignore: only one shape
                     if (group.length === 1) {
                         continue;
                     }
@@ -714,8 +726,6 @@ export default class PhysicsServer {
                 // @ts-ignore
                 const rigid = coll;
 
-                // console.log(rigid.linear_velocity.length());
-
                 // Check whether the rigid body can sleep now
                 if (
                     rigid.can_sleep
@@ -732,6 +742,12 @@ export default class PhysicsServer {
                     rigid._still_time = 0;
                 }
             }
+            else if (coll.collision_object_type === CollisionObjectTypes.KINEMATIC) {
+                /** @type {KinematicBody2D} */
+                // @ts-ignore
+                const kinematic = coll;
+                kinematic._propagate_physics_process(delta);
+            }
         }
     }
 
@@ -747,6 +763,183 @@ export default class PhysicsServer {
             }
             this.fetch_collision_objects(c, out);
         }
+    }
+
+    /**
+     * @param {KinematicBody2D} coll
+     * @param {Vector2} velocity
+     * @returns {Collision}
+     */
+    body_test_motion(coll, velocity) {
+        const motion = get_vector2().copy(velocity).scale(this.process_step);
+
+        const shape = coll.shapes[0];
+
+        // Apply the motion now, so we can test whether there's a collision
+        coll._world_position.add(motion);
+        coll.parent.transform.world_transform.apply_inverse(coll._world_position, coll.position);
+
+        // Let the aabb contains both space before move and after move
+        const aabb = tmp_aabb;
+        aabb.copy(shape.aabb);
+        aabb.x += motion.x;
+        aabb.y += motion.y;
+        aabb.enlarge(shape.aabb);
+
+        // Insert the hash and test collisions
+        const sx = aabb.left >> this.spatial_shift;
+        const sy = aabb.top >> this.spatial_shift;
+        const ex = aabb.right >> this.spatial_shift;
+        const ey = aabb.bottom >> this.spatial_shift;
+
+        for (let y = sy; y <= ey; y++) {
+            for (let x = sx; x <= ex; x++) {
+                // Find or create the list
+                if (!this.hash[x]) {
+                    this.hash[x] = Object.create(null);
+                }
+                if (!this.hash[x][y]) {
+                    this.hash[x][y] = get_array();
+                }
+                const group = this.hash[x][y];
+
+                // Pass: only one shape
+                if (group.length === 0 || group.length === 1) {
+                    continue;
+                }
+
+                // Test shapes in the same group
+                for (let j = 0; j < group.length; j++) {
+                    let shape2 = group[j];
+                    /** @type {PhysicsBody2D} */
+                    // @ts-ignore
+                    const coll2 = shape2.owner;
+                    const aabb2 = shape2.aabb;
+
+                    // No need to sort
+                    const a = coll;
+                    const b = coll2;
+                    const shape_a = shape;
+                    const shape_b = shape2;
+                    const aabb_a = aabb;
+                    const aabb_b = aabb2;
+
+                    // Ignore: same shape or same owner or is already marked as removed
+                    if (shape_a === shape_b || a === b || a.is_queued_for_deletion || b.is_queued_for_deletion) {
+                        continue;
+                    }
+
+                    let a2b = !!(a.collision_mask & b.collision_layer);
+                    let b2a = !!(b.collision_mask & a.collision_layer);
+
+                    // Ignore: they don't collide with each other
+                    if (!a2b && !b2a) {
+                        continue;
+                    }
+
+                    const key = `${shape_a.id < shape_b.id ? shape_a.id : shape_b.id}:${shape_a.id > shape_b.id ? shape_a.id : shape_b.id}`;
+
+                    // Ignore: already checked this pair
+                    if (this.checks[key]) {
+                        continue;
+                    }
+
+                    // Mark this pair is already checked
+                    this.checks[key] = true;
+                    this.collision_checks++;
+
+                    const cast_a = (a.collision_object_type <= b.collision_object_type);
+                    const cast_b = (a.collision_object_type >= b.collision_object_type);
+
+                    if (!(
+                        aabb_a.bottom <= aabb_b.top
+                        ||
+                        aabb_a.top >= aabb_b.bottom
+                        ||
+                        aabb_a.left >= aabb_b.right
+                        ||
+                        aabb_a.right <= aabb_b.left
+                    )) {
+                        // @ts-ignore
+                        a2b = a2b && (a.collision_exceptions.indexOf(b) < 0);
+                        // @ts-ignore
+                        b2a = b2a && (b.collision_exceptions.indexOf(a) < 0);
+
+                        let a_pos = a._world_position, b_pos = b._world_position;
+                        let a_points = shape_a.vertices, b_points = shape_b.vertices;
+                        let separated = false;
+                        // If any of the edge normals of A is a separating axis, no intersection.
+                        /** @type {Collision[]} */
+                        let collisions = get_array();
+                        for (let i = 0; i < shape_a.normals.length; i++) {
+                            let co = get_collision();
+                            if (sat_2d_calculate_penetration(a_pos, b_pos, a_points, b_points, shape_a.normals[i], co)) {
+                                separated = true;
+                                put_collision(co);
+                                break;
+                            } else {
+                                collisions.push(co);
+                            }
+                        }
+                        // If any of the edge normals of B is a separating axis, no intersection.
+                        for (let i = 0; i < shape_b.normals.length; i++) {
+                            let co = get_collision();
+                            if (sat_2d_calculate_penetration(a_pos, b_pos, a_points, b_points, shape_b.normals[i], co)) {
+                                separated = true;
+                                put_collision(co);
+                                break;
+                            } else {
+                                collisions.push(co);
+                            }
+                        }
+                        // Intersected?
+                        if (!separated) {
+                            // Find the collision with minimal overlap
+                            /** @type {Collision} */
+                            let real_co = null;
+                            for (let co of collisions) {
+                                if (!real_co) {
+                                    real_co = co;
+                                    continue;
+                                } else {
+                                    if (co.overlap < real_co.overlap) {
+                                        real_co = co;
+                                    }
+                                }
+                            }
+
+                            // Solve the overlapping between bodies
+                            if (cast_a && !cast_b) {
+                                // Push rigid body back a little bit so they won't overlap any more
+                                const push_dist = (real_co.overlap) / Math.cos(real_co.normal.angle_to(motion));
+                                real_co.remainder.copy(motion).normalize()
+                                    .scale(push_dist)
+                                real_co.travel.copy(motion)
+                                    .subtract(real_co.remainder)
+                                a.parent.transform.world_transform.apply_inverse(a._world_position.subtract(real_co.remainder), a.position);
+
+                                // Update collision info
+                                real_co.collider = b;
+
+                                // Let's stop here and return the info
+                                return real_co;
+                            } else if (cast_a && cast_b) {
+                                // TODO: cast both kinematic bodies
+                            } // impossible to cast b while don't cast a
+                        }
+
+                        // Recycle objects
+                        for (let co of collisions) {
+                            put_collision(co);
+                        }
+                        put_array(collisions);
+                    }
+                }
+            }
+        }
+
+        // Does not overlap at all
+        return undefined;
     }
 }
 let physics_server = new PhysicsServer();
