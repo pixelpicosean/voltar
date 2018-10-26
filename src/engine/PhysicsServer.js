@@ -6,8 +6,31 @@ import CollisionShape2D from './scene/physics/CollisionShape2D';
 import CollisionObject2D, { CollisionObjectTypes } from './scene/physics/CollisionObject2D';
 import Area2D from './scene/physics/Area2D';
 import PhysicsBody2D from './scene/physics/PhysicsBody2D';
+import RigidBody2D from './scene/physics/RigidBody2D';
 
 let i = 0;
+
+const Vector2s = new Array(20);
+for (i = 0; i < 20; i++) {
+    Vector2s[i] = new Vector2();
+}
+/**
+ * @returns {Vector2}
+ */
+const get_vector2 = () => {
+    let vec = Vector2s.pop();
+    if (!vec) {
+        vec = new Vector2();
+    }
+    return vec;
+};
+/**
+ * @param {Vector2} vec
+ */
+const put_vector2 = (vec) => {
+    vec.set(0, 0);
+    Vector2s.push(vec);
+};
 
 const Arrays = new Array(20);
 for (i = 0; i < 20; i++) {
@@ -31,14 +54,6 @@ const put_array = (arr) => {
     Arrays.push(arr);
 };
 
-const res = {
-    overlap: 0,
-    overlap_n: new Vector2(),
-    overlap_v: new Vector2(),
-};
-
-const tmp_vec = new Vector2();
-
 class Collision {
     constructor() {
         /**
@@ -50,7 +65,7 @@ class Collision {
         this.travel = new Vector2();
         this.remainder = new Vector2();
 
-        this.overlap = 0;
+        this.overlap = Number.POSITIVE_INFINITY;
     }
     reset() {
         this.collider = null;
@@ -59,7 +74,7 @@ class Collision {
         this.travel.set(0, 0);
         this.remainder.set(0, 0);
 
-        this.overlap = 0;
+        this.overlap = Number.POSITIVE_INFINITY;
 
         return this;
     }
@@ -209,7 +224,8 @@ function sat_2d_calculate_penetration(a_pos, b_pos, a_points, b_points, axis, co
         // If this is the smallest amount of overlap we've seen so far, set it as the minimum overlap.
         var abs_overlap = Math.abs(overlap);
         if (abs_overlap < collision.overlap) {
-            collision.overlap = abs_overlap;
+            // FIXME: why we need this small number addition to get things right?
+            collision.overlap = abs_overlap + 0.000001;
             collision.normal.copy(axis);
             if (overlap < 0) {
                 collision.normal.negate();
@@ -372,7 +388,24 @@ export default class PhysicsServer {
     simulate(colls, delta) {
         for (const coll of colls) {
             // TODO: Update StaticBody2D movement
-            // TODO: Calculate RigidBody2D motion
+
+            // Calculate RigidBody2D motion
+            if (coll.collision_object_type === CollisionObjectTypes.RIGID) {
+                /** @type {RigidBody2D} */
+                // @ts-ignore
+                const rigid = coll;
+
+                rigid._bounce_count = 0;
+
+                // Custom physics process
+                rigid._propagate_physics_process(delta);
+
+                // Integrate force to the rigid body
+                rigid._integrate_forces(delta);
+
+                // Update transform info
+                rigid._update_transform();
+            }
         }
 
         for (const shape of this.shapes) {
@@ -442,7 +475,7 @@ export default class PhysicsServer {
                         const aabb2 = shape2.aabb;
 
                         // Sort the 2 object
-                        const a = (coll.collision_object_type < coll2.collision_object_type) ? coll : coll2;
+                        const a = (coll.collision_object_type <= coll2.collision_object_type) ? coll : coll2;
                         const b = (coll === a) ? coll2 : coll;
                         const shape_a = (coll === a) ? shape : shape2;
                         const shape_b = (coll === a) ? shape2 : shape;
@@ -535,13 +568,46 @@ export default class PhysicsServer {
                                     for (let co of collisions) {
                                         if (!real_co) {
                                             real_co = co;
-                                            break;
+                                            continue;
                                         } else {
                                             if (co.overlap < real_co.overlap) {
                                                 real_co = co;
                                             }
                                         }
                                     }
+
+                                    // Solve the overlapping between bodies
+                                    if (cast_a && !cast_b) {
+                                        // Rigid body bounce off kinematic or static
+                                        if (a.collision_object_type === CollisionObjectTypes.RIGID) {
+                                            /** @type {RigidBody2D} */
+                                            // @ts-ignore
+                                            const rigid = a;
+
+                                            if (rigid._bounce_count > 0) {
+                                                continue;
+                                            }
+                                            rigid._bounce_count += 1;
+
+                                            const tmp_vec2 = get_vector2();
+                                            // Push rigid body back a little bit so they won't overlap any more
+                                            const push_dist = (real_co.overlap) / Math.cos(real_co.normal.angle_to(rigid._motion));
+                                            real_co.remainder.copy(rigid._motion).normalize()
+                                                .scale(push_dist)
+                                            real_co.travel.copy(rigid._motion)
+                                                .subtract(real_co.remainder)
+                                            rigid.parent.transform.world_transform.apply_inverse(rigid._world_position.subtract(real_co.remainder), rigid.position);
+
+                                            // Let the rigid body bounce
+                                            rigid.linear_velocity.bounce(real_co.normal).multiply(-1, 1);
+
+                                            put_vector2(tmp_vec2);
+                                        }
+                                        // TODO: move and collide
+                                        // TODO: move and slice
+                                    } else if (cast_a && cast_b) {
+
+                                    } // impossible to cast b while don't cast a
                                 }
 
                                 // Recycle objects
@@ -640,9 +706,7 @@ export default class PhysicsServer {
                 }
 
                 // Custom process method call
-                if (area.physics_process) {
-                    area._physics_process(delta);
-                }
+                area._propagate_physics_process(delta);
             }
         }
     }
