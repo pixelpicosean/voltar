@@ -1,13 +1,13 @@
 import Mesh from './Mesh';
 import Texture from 'engine/textures/Texture';
-import { Point } from 'engine/math/index';
+import { Vector2 } from 'engine/math/index';
 
 /**
  * The rope allows you to draw a texture across several points and them manipulate these points
  *
  *```js
  * for (let i = 0; i < 20; i++) {
- *     points.push(new Point(i * 50, 0));
+ *     points.push(new Vector2(i * 50, 0));
  * };
  * let rope = new Rope(Texture.from_image("snake.png"), points);
  *  ```
@@ -15,7 +15,7 @@ import { Point } from 'engine/math/index';
 export default class Rope extends Mesh {
     /**
      * @param {Texture} texture - The texture to use on the rope.
-     * @param {Point[]} points - An array of {@link Point} objects to construct this rope.
+     * @param {Vector2[]} points - An array of {@link Vector2} objects to construct this rope.
      */
     constructor(texture, points) {
         super(texture);
@@ -25,7 +25,7 @@ export default class Rope extends Mesh {
         /**
          * An array of points that determine the rope
          *
-         * @member {Point[]}
+         * @member {Vector2[]}
          */
         this.points = points;
 

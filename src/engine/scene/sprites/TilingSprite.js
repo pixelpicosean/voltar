@@ -1,11 +1,11 @@
 import TextureMatrix from 'engine/textures/TextureMatrix';
 import BaseTexture from 'engine/textures/BaseTexture';
 import Texture from 'engine/textures/Texture';
-import { Point, TransformStatic, Rectangle } from 'engine/math/index';
+import { Vector2, TransformStatic, Rectangle } from 'engine/math/index';
 import { TextureCache } from 'engine/utils/index';
 import Sprite from './Sprite';
 
-const temp_point = new Point();
+const temp_point = new Vector2();
 
 /**
  * A tiling sprite is a fast way of rendering a tiling image
@@ -216,7 +216,7 @@ export default class TilingSprite extends Sprite {
     /**
      * Checks if a point is inside this tiling sprite.
      *
-     * @param {Point} point - the point to check
+     * @param {Vector2} point - the point to check
      * @return {boolean} Whether or not the sprite contains the point.
      */
     contains_point(point) {

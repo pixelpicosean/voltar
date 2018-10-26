@@ -1,9 +1,9 @@
 
-import Point, { EPSILON } from './Point';
+import Vector2, { EPSILON } from './Vector2';
 
 
 /**
- * The Point object represents a location in a two-dimensional coordinate system, where x represents
+ * The Vector2 object represents a location in a two-dimensional coordinate system, where x represents
  * the horizontal axis and y represents the vertical axis.
  * An observable point is a point that triggers a callback when the point's position is changed.
  */
@@ -45,7 +45,7 @@ export default class ObservablePoint {
     /**
      * Copies the data from another point
      *
-     * @param {Point|ObservablePoint} point - point to copy from
+     * @param {Vector2|ObservablePoint} point - point to copy from
      */
     copy(point) {
         if (this._x !== point.x || this._y !== point.y) {
@@ -92,7 +92,7 @@ export default class ObservablePoint {
     }
 
     clone() {
-        return new Point(this._x, this._y);
+        return new Vector2(this._x, this._y);
     }
     random(scale) {
         // TODO: requires random module
@@ -283,6 +283,6 @@ export default class ObservablePoint {
         return x * x + y * y;
     }
     tangent() {
-        return new Point(this._y, -this._x);
+        return new Vector2(this._y, -this._x);
     }
 }

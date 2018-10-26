@@ -1,4 +1,4 @@
-import Point from './Point';
+import Vector2 from './Vector2';
 import TransformBase from './TransformBase';
 import Rectangle from './shapes/Rectangle';
 
@@ -91,7 +91,7 @@ export default class Bounds {
     /**
      * This function should be inlined when its possible.
      *
-     * @param {Point} point - The point to add.
+     * @param {Vector2} point - The point to add.
      */
     add_point(point) {
         this.min_x = Math.min(this.min_x, point.x);

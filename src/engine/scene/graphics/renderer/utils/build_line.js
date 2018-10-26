@@ -1,4 +1,4 @@
-import { Point } from 'engine/math/index';
+import { Vector2 } from 'engine/math/index';
 import { hex2rgb } from 'engine/utils/index';
 import WebGLGraphicsData from '../WebGLGraphicsData';
 
@@ -48,8 +48,8 @@ function build_line(graphics_data, webGLData) {
     // }
 
     // get first and last point.. figure out the middle!
-    const firstPoint = new Point(points[0], points[1]);
-    let lastPoint = new Point(points[points.length - 2], points[points.length - 1]);
+    const firstPoint = new Vector2(points[0], points[1]);
+    let lastPoint = new Vector2(points[points.length - 2], points[points.length - 1]);
 
     // if the first point is the last point - gonna have issues :)
     if (firstPoint.x === lastPoint.x && firstPoint.y === lastPoint.y) {
@@ -59,7 +59,7 @@ function build_line(graphics_data, webGLData) {
         points.pop();
         points.pop();
 
-        lastPoint = new Point(points[points.length - 2], points[points.length - 1]);
+        lastPoint = new Vector2(points[points.length - 2], points[points.length - 1]);
 
         const midPointX = lastPoint.x + ((firstPoint.x - lastPoint.x) * 0.5);
         const midPointY = lastPoint.y + ((firstPoint.y - lastPoint.y) * 0.5);

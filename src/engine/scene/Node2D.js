@@ -6,7 +6,7 @@ import {
     EventEmitter, Signal,
     remove_items,
 } from 'engine/dep/index';
-import { TransformStatic, Transform, Point, Bounds, Rectangle } from 'engine/math/index';
+import { TransformStatic, Transform, Vector2, Bounds, Rectangle } from 'engine/math/index';
 import ObservablePoint from 'engine/math/ObservablePoint';
 import Filter from 'engine/renderers/filters/Filter';
 import { rgb2hex } from 'engine/utils/index';
@@ -188,14 +188,14 @@ export default class Node2D extends EventEmitter {
         this._local_bounds_rect = null;
         /**
          * @private
-         * @type {Point}
+         * @type {Vector2}
          */
-        this._world_position = new Point();
+        this._world_position = new Vector2();
         /**
          * @private
-         * @type {Point}
+         * @type {Vector2}
          */
-        this._world_scale = new Point(1, 1);
+        this._world_scale = new Vector2(1, 1);
         /**
          * @private
          * @type {number}
@@ -520,11 +520,11 @@ export default class Node2D extends EventEmitter {
     /**
      * Calculates the global position of the display object
      *
-     * @param {Point} position - The world origin to calculate from
-     * @param {Point} [point] - A Point object in which to store the value, optional
-     *  (otherwise will create a new Point)
+     * @param {Vector2} position - The world origin to calculate from
+     * @param {Vector2} [point] - A Vector2 object in which to store the value, optional
+     *  (otherwise will create a new Vector2)
      * @param {boolean} [skip_update=false] - Should we skip the update transform.
-     * @return {Point} A point object representing the position of this object
+     * @return {Vector2} A point object representing the position of this object
      */
     to_global(position, point, skip_update = false) {
         if (!skip_update) {
@@ -550,12 +550,12 @@ export default class Node2D extends EventEmitter {
     /**
      * Calculates the local position of the display object relative to another point
      *
-     * @param {Point} position - The world origin to calculate from
+     * @param {Vector2} position - The world origin to calculate from
      * @param {Node2D} [from] - The Node2D to calculate the global position from
-     * @param {Point} [point] - A Point object in which to store the value, optional
-     *  (otherwise will create a new Point)
+     * @param {Vector2} [point] - A Vector2 object in which to store the value, optional
+     *  (otherwise will create a new Vector2)
      * @param {boolean} [skip_update=false] - Should we skip the update transform
-     * @return {Point} A point object representing the position of this object
+     * @return {Vector2} A point object representing the position of this object
      */
     to_local(position, from, point, skip_update) {
         if (from) {

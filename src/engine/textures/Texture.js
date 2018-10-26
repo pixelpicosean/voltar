@@ -3,7 +3,7 @@ import { EventEmitter } from 'engine/dep/index';
 import BaseTexture from './BaseTexture';
 import TextureUvs from './TextureUvs';
 import TextureMatrix from './TextureMatrix';
-import { Rectangle, Point } from '../math/index';
+import { Rectangle, Vector2 } from '../math/index';
 import { uid, TextureCache, get_resolution_of_url } from '../utils/index';
 
 /**
@@ -35,7 +35,7 @@ export default class Texture extends EventEmitter {
      * @param {Rectangle} [orig] - The area of original texture
      * @param {Rectangle} [trim] - Trimmed rectangle of original texture
      * @param {number} [rotate] - indicates how the texture was rotated by texture packer. See {@link GroupD8}
-     * @param {Point} [anchor] - Default anchor point used for sprite placement / rotation
+     * @param {Vector2} [anchor] - Default anchor point used for sprite placement / rotation
      */
     constructor(base_texture, frame, orig, trim, rotate, anchor) {
         super();
@@ -136,10 +136,10 @@ export default class Texture extends EventEmitter {
         /**
          * Anchor point that is used as default if sprite is created with this texture.
          * Changing the `default_anchor` at a later point of time will not update Sprite's anchor point.
-         * @member {Point}
+         * @member {Vector2}
          * @default {0,0}
          */
-        this.default_anchor = anchor ? new Point(anchor.x, anchor.y) : new Point(0, 0);
+        this.default_anchor = anchor ? new Vector2(anchor.x, anchor.y) : new Vector2(0, 0);
 
         /**
          * Fired when the texture is updated. This happens if the frame or the base_texture is updated.

@@ -2,12 +2,12 @@ import Node2D from '../Node2D';
 import Texture from '../../textures/Texture';
 import GraphicsData from './GraphicsData';
 import Sprite from '../sprites/Sprite';
-import { Point, Rectangle, RoundedRectangle, Ellipse, Polygon, Circle, Bounds, PI2 } from '../../math/index';
+import { Vector2, Rectangle, RoundedRectangle, Ellipse, Polygon, Circle, Bounds, PI2 } from '../../math/index';
 import { hex2rgb, rgb2hex } from '../../utils/index';
 import { SHAPES, BLEND_MODES } from '../../const';
 import bezier_curve_to from './utils/bezier_curve_to';
 
-const temp_point = new Point();
+const temp_point = new Vector2();
 const temp_color_1 = new Float32Array(4);
 const temp_color_2 = new Float32Array(4);
 
@@ -818,7 +818,7 @@ export default class Graphics extends Node2D {
     /**
      * Draws a polygon using the given path.
      *
-     * @param {number[]|Point[]} path - The path data used to construct the polygon.
+     * @param {number[]|Vector2[]} path - The path data used to construct the polygon.
      * @return {Graphics} This Graphics object. Good for chaining method calls
      */
     draw_polygon(path) {
@@ -1011,7 +1011,7 @@ export default class Graphics extends Node2D {
     /**
      * Tests if a point is inside this graphics object
      *
-     * @param {Point} point - the point to test
+     * @param {Vector2} point - the point to test
      * @return {boolean} the result of the test
      */
     contains_point(point) {

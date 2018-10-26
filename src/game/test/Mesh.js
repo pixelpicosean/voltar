@@ -11,11 +11,11 @@ export default class SpriteTest extends v.Node2D {
         this.a = 0;
 
         /**
-         * @type {Array<v.Point>}
+         * @type {Array<v.Vector2>}
          */
         this.points = [];
         for (let i = 0; i < 20; i++) {
-            this.points.push(new v.Point(228, 128));
+            this.points.push(new v.Vector2(228, 128));
         };
 
         this.rope = null;

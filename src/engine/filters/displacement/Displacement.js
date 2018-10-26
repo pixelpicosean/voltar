@@ -1,7 +1,7 @@
 import Filter from 'engine/renderers/filters/Filter';
 import Matrix from 'engine/math/Matrix';
 import Sprite from 'engine/scene/sprites/Sprite';
-import Point from 'engine/math/Point';
+import Vector2 from 'engine/math/Vector2';
 import FilterManager from 'engine/renderers/managers/FilterManager';
 import RenderTarget from 'engine/renderers/utils/RenderTarget';
 
@@ -40,7 +40,7 @@ export default class Displacement extends Filter {
             scale = 20;
         }
 
-        this.scale = new Point(scale, scale);
+        this.scale = new Vector2(scale, scale);
     }
 
     /**

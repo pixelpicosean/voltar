@@ -27,7 +27,7 @@ export default class WebGLGraphicsData {
 
         /**
          * An array of points to draw
-         * @member {Point[]}
+         * @member {Vector2[]}
          */
         this.points = [];
 

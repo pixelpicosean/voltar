@@ -1,13 +1,13 @@
 import settings from 'engine/settings';
 import { BLEND_MODES } from 'engine/const';
-import { Point, Polygon } from 'engine/math/index';
+import { Vector2, Polygon } from 'engine/math/index';
 import { rgb2hex, hex2rgb } from 'engine/utils/index';
 import Texture from 'engine/textures/Texture';
 import TextureMatrix from 'engine/textures/TextureMatrix';
 import Node2D from '../Node2D';
 import WebGLRenderer from 'engine/renderers/WebGLRenderer';
 
-const temp_point = new Point();
+const temp_point = new Vector2();
 const temp_polygon = new Polygon();
 
 /**
@@ -238,7 +238,7 @@ export default class Mesh extends Node2D {
     /**
      * Tests if a point is inside this  Works only for TRIANGLE_MESH
      *
-     * @param {Point} point - the point to test
+     * @param {Vector2} point - the point to test
      * @return {boolean} the result of the test
      */
     contains_point(point) {

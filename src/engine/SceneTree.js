@@ -2,7 +2,7 @@ import VisualServer from './VisualServer';
 import PhysicsServer from './PhysicsServer';
 import MessageQueue from './MessageQueue';
 import Node2D from './scene/Node2D';
-import Vector from './math/Point';
+import Vector from './math/Vector2';
 import { shared as shared_ticker } from './ticker/index';
 import { Loader } from './loaders/index';
 import { mixins, deep_merge } from './utils/index';

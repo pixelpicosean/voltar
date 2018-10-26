@@ -1,4 +1,4 @@
-import Point from "engine/math/Point";
+import Vector2 from "engine/math/Vector2";
 
 /**
  * @enum {number}
@@ -202,7 +202,7 @@ export class BezierTrack extends Track {
 
         this.type = TrackType.TYPE_BEZIER;
 
-        /** @type Key<{in_handle: Point, out_handle: Point, value: number}>[] */
+        /** @type Key<{in_handle: Vector2, out_handle: Vector2, value: number}>[] */
         this.values = [];
     }
     load(data) {

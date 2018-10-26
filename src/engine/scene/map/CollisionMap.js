@@ -1,4 +1,4 @@
-import { Point } from 'engine/math/index';
+import { Vector2 } from 'engine/math/index';
 import Node2D from '../Node2D';
 
 const HALF_PI = Math.PI * 0.5;
@@ -13,7 +13,7 @@ const SLOPE_ANGLE_DIFF_MIN = 0.001;
 
 /**
  * @typedef TraceResult
- * @property {Point} position
+ * @property {Vector2} position
  * @property {CollisionInfo} collision
  * @property {CollisionMap} collider
  */

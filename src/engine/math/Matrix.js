@@ -1,4 +1,4 @@
-import Point from './Point';
+import Vector2 from './Vector2';
 import { PI2 } from '../index';
 
 /**
@@ -149,12 +149,12 @@ export default class Matrix {
      * Get a new position with the current transformation applied.
      * Can be used to go from a child's coordinate space to the world coordinate space. (e.g. rendering)
      *
-     * @param {import('./Point').PointLike} pos - The origin
-     * @param {import('./Point').PointLike} [new_pos] - The point that the new position is assigned to (allowed to be same as input)
-     * @return {import('./Point').PointLike} The new point, transformed through this matrix
+     * @param {import('./Vector2').Vector2Like} pos - The origin
+     * @param {import('./Vector2').Vector2Like} [new_pos] - The point that the new position is assigned to (allowed to be same as input)
+     * @return {import('./Vector2').Vector2Like} The new point, transformed through this matrix
      */
     apply(pos, new_pos) {
-        new_pos = new_pos || new Point();
+        new_pos = new_pos || new Vector2();
 
         const x = pos.x;
         const y = pos.y;
@@ -169,12 +169,12 @@ export default class Matrix {
      * Get a new position with the inverse of the current transformation applied.
      * Can be used to go from the world coordinate space to a child's coordinate space. (e.g. input)
      *
-     * @param {import('./Point').PointLike} pos - The origin
-     * @param {import('./Point').PointLike} [new_pos] - The point that the new position is assigned to (allowed to be same as input)
-     * @return {import('./Point').PointLike} The new point, inverse-transformed through this matrix
+     * @param {import('./Vector2').Vector2Like} pos - The origin
+     * @param {import('./Vector2').Vector2Like} [new_pos] - The point that the new position is assigned to (allowed to be same as input)
+     * @return {import('./Vector2').Vector2Like} The new point, inverse-transformed through this matrix
      */
     apply_inverse(pos, new_pos) {
-        new_pos = new_pos || new Point();
+        new_pos = new_pos || new Vector2();
 
         const id = 1 / ((this.a * this.d) + (this.c * -this.b));
 

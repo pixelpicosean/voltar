@@ -1,5 +1,5 @@
 import { remove_items } from 'engine/dep/index';
-import { Point, ObservablePoint, Rectangle } from 'engine/math/index';
+import { Vector2, ObservablePoint, Rectangle } from 'engine/math/index';
 import Node2D from '../Node2D';
 import Sprite from '../sprites/Sprite';
 import { registered_bitmap_fonts } from './res';
@@ -172,7 +172,7 @@ export default class BitmapText extends Node2D {
             return;
         }
         const scale = this._font.size / data.size;
-        const pos = new Point();
+        const pos = new Vector2();
         const chars = [];
         const line_widths = [];
         const text = this.text.replace(/(?:\r\n|\r)/g, '\n');
@@ -223,7 +223,7 @@ export default class BitmapText extends Node2D {
                 texture: char_data.texture,
                 line,
                 char_code,
-                position: new Point(pos.x + char_data.xOffset + (this._letter_spacing / 2), pos.y + char_data.yOffset),
+                position: new Vector2(pos.x + char_data.xOffset + (this._letter_spacing / 2), pos.y + char_data.yOffset),
             });
             pos.x += char_data.xAdvance + this._letter_spacing;
             last_line_width = pos.x;
@@ -388,7 +388,7 @@ export default class BitmapText extends Node2D {
      * Setting the anchor to 0.5,0.5 means the text's origin is centered
      * Setting the anchor to 1,1 would mean the text's origin point will be the bottom right corner
      *
-     * @member {Point | number}
+     * @member {Vector2 | number}
      */
     get anchor() {
         return this._anchor;

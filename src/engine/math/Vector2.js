@@ -1,7 +1,7 @@
 export const EPSILON = 0.000001;
 
 /**
- * @typedef PointLike
+ * @typedef Vector2Like
  * @property {number} x
  * @property {number} y
  */
@@ -10,7 +10,7 @@ export const EPSILON = 0.000001;
  * The Vector2 object represents a location in a two-dimensional coordinate system, where x represents
  * the horizontal axis and y represents the vertical axis.
  */
-export default class Point {
+export default class Vector2 {
     /**
      * @param {number} [x=0] - position of the point on the x axis
      * @param {number} [y=0] - position of the point on the y axis
@@ -50,8 +50,8 @@ export default class Point {
     /**
      * Copy value from other vector
      *
-     * @param {PointLike} a
-     * @returns {Point} self for chaining
+     * @param {Vector2Like} a
+     * @returns {Vector2} self for chaining
      */
     copy(a) {
         this.x = a.x;
@@ -62,10 +62,10 @@ export default class Point {
     /**
      * Clone self
      *
-     * @returns {Point}
+     * @returns {Vector2}
      */
     clone() {
-        return new Point(this.x, this.y);
+        return new Vector2(this.x, this.y);
     }
     random(scale) {
         // TODO: requires random module
@@ -73,7 +73,7 @@ export default class Point {
     /**
      * Create a normalized clone
      *
-     * @returns {Point}
+     * @returns {Vector2}
      */
     normalized() {
         return this.clone().normalize();
@@ -82,7 +82,7 @@ export default class Point {
      * Create a clamped vector.
      *
      * @param {number} length
-     * @returns {Point}
+     * @returns {Vector2}
      */
     clamped(length) {
         const len = this.length();
@@ -96,7 +96,7 @@ export default class Point {
      * Create a rotated vector.
      *
      * @param {number} a
-     * @returns {Point}
+     * @returns {Vector2}
      */
     rotated(a) {
         return this.clone().rotate(a);
@@ -106,7 +106,7 @@ export default class Point {
     /**
      * Whether this equals to another point
      *
-     * @param {PointLike} b
+     * @param {Vector2Like} b
      * @returns {boolean}
      */
     equals(b) {
@@ -118,7 +118,7 @@ export default class Point {
     /**
      * Whether this equals to another point(precisely)
      *
-     * @param {PointLike} b
+     * @param {Vector2Like} b
      * @returns {boolean}
      */
     exact_equals(b) {
@@ -128,8 +128,8 @@ export default class Point {
     /**
      * Add the vector by another vector or number.
      *
-     * @param {PointLike|number} x
-     * @param {PointLike|number} [y]
+     * @param {Vector2Like|number} x
+     * @param {Vector2Like|number} [y]
      */
     add(x, y) {
         if (y === undefined) {
@@ -149,8 +149,8 @@ export default class Point {
     /**
      * Subtract the vector by another vector or number.
      *
-     * @param {PointLike|number} x
-     * @param {PointLike|number} [y]
+     * @param {Vector2Like|number} x
+     * @param {Vector2Like|number} [y]
      */
     subtract(x, y) {
         if (y === undefined) {
@@ -170,8 +170,8 @@ export default class Point {
     /**
      * Multiply the vector by another vector or number.
      *
-     * @param {PointLike|number} x
-     * @param {PointLike|number} [y]
+     * @param {Vector2Like|number} x
+     * @param {Vector2Like|number} [y]
      */
     multiply(x, y) {
         if (y === undefined) {
@@ -191,9 +191,9 @@ export default class Point {
     /**
      * Divide x and y by another vector or number.
      *
-     * @param {PointLike|number} x
-     * @param {PointLike|number} [y]
-     * @returns {Point}
+     * @param {Vector2Like|number} x
+     * @param {Vector2Like|number} [y]
+     * @returns {Vector2}
      */
     divide(x, y) {
         if (y === undefined) {
@@ -213,7 +213,7 @@ export default class Point {
     /**
      * Dot multiply another vector.
      *
-     * @param {PointLike} b
+     * @param {Vector2Like} b
      * @returns {number}
      */
     dot(b) {
@@ -223,7 +223,7 @@ export default class Point {
     /**
      * Cross multiply another vector.
      *
-     * @param {PointLike} b
+     * @param {Vector2Like} b
      * @returns {number}
      */
     cross(b) {
@@ -233,7 +233,7 @@ export default class Point {
     /**
      * Change x and y components to their absolute values.
      *
-     * @returns {Point}
+     * @returns {Vector2}
      */
     abs() {
         this.x = Math.abs(this.x);
@@ -244,7 +244,7 @@ export default class Point {
     /**
      * Ceil x and y components.
      *
-     * @returns {Point}
+     * @returns {Vector2}
      */
     ceil() {
         this.x = Math.ceil(this.x);
@@ -255,7 +255,7 @@ export default class Point {
     /**
      * Floor x and y components.
      *
-     * @returns {Point}
+     * @returns {Vector2}
      */
     floor() {
         this.x = Math.floor(this.x);
@@ -266,7 +266,7 @@ export default class Point {
     /**
      * Round to int vector.
      *
-     * @returns {Point}
+     * @returns {Vector2}
      */
     round() {
         this.x = Math.round(this.x);
@@ -278,7 +278,7 @@ export default class Point {
      * Clamp the vector to specific length.
      *
      * @param {number} length
-     * @returns {Point}
+     * @returns {Vector2}
      */
     clamp(length) {
         const len = this.length();
@@ -292,7 +292,7 @@ export default class Point {
      * Scale the vector by a number factor.
      *
      * @param {number} b
-     * @returns {Point}
+     * @returns {Vector2}
      */
     scale(b) {
         this.x *= b;
@@ -303,7 +303,7 @@ export default class Point {
     /**
      * Negate x and y components.
      *
-     * @returns {Point}
+     * @returns {Vector2}
      */
     negate() {
         this.x = -this.x;
@@ -314,7 +314,7 @@ export default class Point {
     /**
      * Inverse the x and y components.
      *
-     * @returns {Point}
+     * @returns {Vector2}
      */
     inverse() {
         this.x = 1.0 / this.x;
@@ -325,7 +325,7 @@ export default class Point {
     /**
      * Normalize this vector to unit length.
      *
-     * @returns {Point}
+     * @returns {Vector2}
      */
     normalize() {
         const x = this.x, y = this.y;
@@ -342,7 +342,7 @@ export default class Point {
      * Rotates the vector by “phi” radians.
      *
      * @param {number} a
-     * @returns {Point}
+     * @returns {Vector2}
      */
     rotate(a) {
         const x = this.x, y = this.y;
@@ -357,7 +357,7 @@ export default class Point {
      * roatates it 90 degrees in a clockwise direction)
      *
      * @method perp
-     * @return {Point} Self for chaining.
+     * @return {Vector2} Self for chaining.
      */
     perp() {
         const x = this.x;
@@ -369,8 +369,8 @@ export default class Point {
     /**
      * Project to a vector.
      *
-     * @param {Point} other
-     * @returns {Point}
+     * @param {Vector2} other
+     * @returns {Vector2}
      */
     project(other) {
         const amt = this.dot(other) / other.length_squared();
@@ -382,8 +382,8 @@ export default class Point {
     /**
      * Project to a vector which is already normalized.
      *
-     * @param {PointLike} other
-     * @returns {Point}
+     * @param {Vector2Like} other
+     * @returns {Vector2}
      */
     project_n(other) {
         const amt = this.dot(other);
@@ -395,8 +395,8 @@ export default class Point {
     /**
      * Reflects the vector along the given plane, specified by its normal vector.
      *
-     * @param {Point} axis
-     * @returns {Point}
+     * @param {Vector2} axis
+     * @returns {Vector2}
      */
     reflect(axis) {
         const dot = this.dot(axis);
@@ -408,8 +408,8 @@ export default class Point {
     /**
      * Bounce returns the vector “bounced off” from the given plane, specified by its normal vector.
      *
-     * @param {Point} normal
-     * @returns {Point}
+     * @param {Vector2} normal
+     * @returns {Vector2}
      */
     bounce(normal) {
         return this.reflect(normal).scale(-1);
@@ -418,8 +418,8 @@ export default class Point {
     /**
      * Slide returns the component of the vector along the given plane, specified by its normal vector.
      *
-     * @param {Point} normal
-     * @returns {Point}
+     * @param {Vector2} normal
+     * @returns {Vector2}
      */
     slide(normal) {
         return this.subtract(tmp_point.copy(normal).scale(-this.dot(normal)));
@@ -460,7 +460,7 @@ export default class Point {
     /**
      * Returns the angle in radians between the two vectors.
      *
-     * @param {PointLike} b
+     * @param {Vector2Like} b
      * @returns {number}
      */
     angle_to(b) {
@@ -468,7 +468,7 @@ export default class Point {
     }
 
     /**
-     * @param {PointLike} b
+     * @param {Vector2Like} b
      * @returns {number}
      */
     angle_to_point(b) {
@@ -478,7 +478,7 @@ export default class Point {
     /**
      * Returns the distance to vector “b”.
      *
-     * @param {PointLike} b
+     * @param {Vector2Like} b
      * @returns {number}
      */
     distance_to(b) {
@@ -491,7 +491,7 @@ export default class Point {
      * Returns the squared distance to vector “b”. Prefer this function
      * over “distance_to” if you need to sort vectors or need the squared distance for some formula.
      *
-     * @param {PointLike} b
+     * @param {Vector2Like} b
      * @returns {number}
      */
     distance_squared_to(b) {
@@ -503,11 +503,11 @@ export default class Point {
     /**
      * Returns a perpendicular vector.
      *
-     * @return {Point}
+     * @return {Vector2}
      */
     tangent() {
-        return new Point(this.y, -this.x);
+        return new Vector2(this.y, -this.x);
     }
 }
 
-const tmp_point = new Point();
+const tmp_point = new Vector2();

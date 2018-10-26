@@ -1,4 +1,4 @@
-import { Point, ObservablePoint, Rectangle } from '../../math/index';
+import { Vector2, ObservablePoint, Rectangle } from '../../math/index';
 import { sign, TextureCache } from '../../utils/index';
 import { BLEND_MODES } from '../../const';
 import Texture from '../../textures/Texture';
@@ -6,7 +6,7 @@ import Node2D from '../Node2D';
 
 import WebGLRenderer from 'engine/renderers/WebGLRenderer';
 
-const temp_point = new Point();
+const temp_point = new Vector2();
 
 /**
  * The Sprite object is the base for all textured objects that are rendered to the screen
@@ -406,7 +406,7 @@ export default class Sprite extends Node2D {
     /**
      * Tests if a point is inside this sprite
      *
-     * @param {Point} point - the point to test
+     * @param {Vector2} point - the point to test
      * @return {boolean} the result of the test
      */
     contains_point(point) {

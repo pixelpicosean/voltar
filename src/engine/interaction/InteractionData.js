@@ -1,4 +1,4 @@
-import { Point } from "engine/math/index";
+import { Vector2 } from "engine/math/index";
 import Node2D from "engine/scene/Node2D";
 
 /**
@@ -12,9 +12,9 @@ export default class InteractionData {
         /**
          * This point stores the global coords of where the touch/mouse event happened
          *
-         * @member {Point}
+         * @member {Vector2}
          */
-        this.global = new Point();
+        this.global = new Vector2();
 
         /**
          * The target Node2D that was interacted with
@@ -143,11 +143,11 @@ export default class InteractionData {
      *
      * @param {Node2D} node - The Node2D that you would like the local
      *  coords off
-     * @param {Point} [point] - A Point object in which to store the value, optional (otherwise
+     * @param {Vector2} [point] - A Vector2 object in which to store the value, optional (otherwise
      *  will create a new point)
-     * @param {Point} [globalPos] - A Point object containing your custom global coords, optional
+     * @param {Vector2} [globalPos] - A Vector2 object containing your custom global coords, optional
      *  (otherwise will use the current global coords)
-     * @return {Point} A point containing the coordinates of the InteractionData position relative
+     * @return {Vector2} A point containing the coordinates of the InteractionData position relative
      *  to the Node2D
      */
     get_local_position(node, point, globalPos) {

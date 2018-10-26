@@ -7,7 +7,7 @@ import { mixins } from 'engine/utils/index';
 import Node2D from 'engine/scene/Node2D';
 import CanvasRenderer from 'engine/renderers/canvas/CanvasRenderer';
 import WebGLRenderer from 'engine/renderers/WebGLRenderer';
-import Point from 'engine/math/Point';
+import Vector2 from 'engine/math/Vector2';
 import * as ticker from 'engine/ticker/index';
 import { UPDATE_PRIORITY } from 'engine/const';
 
@@ -241,9 +241,9 @@ export default class InteractionManager extends EventEmitter {
          * Internal cached let.
          *
          * @private
-         * @member {Point}
+         * @member {Vector2}
          */
-        this._temp_point = new Point();
+        this._temp_point = new Vector2();
 
         /**
          * The current resolution / device pixel ratio.
@@ -654,7 +654,7 @@ export default class InteractionManager extends EventEmitter {
     /**
      * Hit tests a point against the display tree, returning the first interactive object that is hit.
      *
-     * @param {Point} global_point - A point to hit test with, in global space.
+     * @param {Vector2} global_point - A point to hit test with, in global space.
      * @param {Node2D} [root] - The root display object to start from. If omitted, defaults
      * to the last rendered root of the associated renderer.
      * @return {Node2D} The hit display object, if any.
@@ -920,7 +920,7 @@ export default class InteractionManager extends EventEmitter {
      * resulting value is stored in the point. This takes into account the fact that the DOM
      * element could be scaled and positioned anywhere on the screen.
      *
-     * @param  {Point} point - the point that the result will be stored in
+     * @param  {Vector2} point - the point that the result will be stored in
      * @param  {number} x - the x coord of the position to map
      * @param  {number} y - the y coord of the position to map
      */

@@ -6,7 +6,7 @@ import Texture from 'engine/textures/Texture';
  *
  *```js
  * for (let i = 0; i < 20; i++) {
- *     points.push(new Point(i * 50, 0));
+ *     points.push(new Vector2(i * 50, 0));
  * };
  * let Plane = new Plane(Texture.from_image("snake.png"), points);
  *  ```

@@ -1,12 +1,12 @@
-import Point from '../Point';
+import Vector2 from '../Vector2';
 import { SHAPES } from '../../const';
 
 export default class Polygon {
     /**
-     * @param {Point[]|number[]} points - This can be an array of Points
+     * @param {Vector2[]|number[]} points - This can be an array of Points
      *  that form the polygon, a flat array of numbers that will be interpreted as [x,y, x,y, ...], or
      *  the arguments passed can be all the points of the polygon e.g.
-     *  `new Polygon(new Point(), new Point(), ...)`, or the arguments passed can be flat
+     *  `new Polygon(new Vector2(), new Vector2(), ...)`, or the arguments passed can be flat
      *  x,y values e.g. `new Polygon(x,y, x,y, x,y, ...)` where `x` and `y` are Numbers.
      */
     constructor(...points) {
@@ -15,7 +15,7 @@ export default class Polygon {
         }
 
         // if this is an array of points, convert it to a flat array of numbers
-        if (points[0] instanceof Point) {
+        if (points[0] instanceof Vector2) {
             const p = [];
 
             for (let i = 0, il = points.length; i < il; i++) {
