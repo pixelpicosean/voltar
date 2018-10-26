@@ -112,6 +112,11 @@ export default class CollisionObject2D extends Node2D {
 
         super._propagate_enter_tree();
     }
+    _propagate_physics_process(delta) {
+        if (this.physics_process) {
+            this._physics_process(delta);
+        }
+    }
     _propagate_exit_tree() {
         super._propagate_exit_tree();
 

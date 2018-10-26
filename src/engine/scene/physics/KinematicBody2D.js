@@ -1,6 +1,7 @@
-import CollisionObject2D, { CollisionObjectTypes } from './CollisionObject2D';
+import { CollisionObjectTypes } from './CollisionObject2D';
+import PhysicsBody2D from './PhysicsBody2D';
 
-export default class KinematicBody2D extends CollisionObject2D {
+export default class KinematicBody2D extends PhysicsBody2D {
     constructor() {
         super();
 
