@@ -4,20 +4,54 @@ import { CollisionObjectTypes } from './CollisionObject2D';
 
 const tmp_vec = new Vector2();
 
+const default_angular_damp = 1;
+const default_linear_damp = 0.1;
+const gravity = new Vector2(0, 98);
+
 export default class RigidBody2D extends PhysicsBody2D {
     constructor() {
         super();
 
         this.collision_object_type = CollisionObjectTypes.RIGID;
 
+        this.angular_damp = -1;
+        this.angular_velocity = 0;
         this.applied_force = new Vector2(0, 0);
+        this.applied_torque = 0;
+        this.bounce = 0;
+        this.friction = 1;
+        this.gravity_scale = 1;
+        this.inertia = 1;
+        this.linear_damp = -1;
         this.linear_velocity = new Vector2(0, 0);
+        this.mass = 1;
 
         this._motion = new Vector2(0, 0);
+        this._inv_mass = 1.0 / this.mass;
+        this._inv_inertia = 1.0 / this.inertia;
     }
     _integrate_forces(step) {
+        // Calculate rotating
+        let angular_damp = (this.angular_damp >= 0) ? this.angular_damp : default_angular_damp;
+        angular_damp = 1.0 - step * angular_damp;
+        if (angular_damp < 0) {
+            angular_damp = 0;
+        }
+        this.angular_velocity *= angular_damp;
+        this.angular_velocity += this._inv_inertia * this.applied_torque * step;
+        this.rotation += this.angular_velocity * step;
+
         // Apply force -> velocity
-        this.linear_velocity.add(this.applied_force.x * step, this.applied_force.y * step);
+        let linear_damp = (this.linear_damp >= 0) ? this.linear_damp : default_linear_damp;
+        linear_damp = 1.0 - step * linear_damp;
+        if (linear_damp < 0) {
+            linear_damp = 0;
+        }
+        this.linear_velocity.scale(linear_damp);
+        this.linear_velocity.add(
+            this._inv_mass * (gravity.x * this.gravity_scale * this.mass + this.applied_force.x) * step,
+            this._inv_mass * (gravity.x * this.gravity_scale * this.mass + this.applied_force.y) * step
+        );
 
         // Apply velocity -> motion
         this._motion.copy(this.linear_velocity).scale(step);
