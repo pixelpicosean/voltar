@@ -6,7 +6,7 @@ export default class PhysicsBody2D extends CollisionObject2D {
         super();
 
         this.type = 'PhysicsBody2D';
-        this.collision_object_type = CollisionObjectTypes.STATIC;
+        this.collision_object_type = CollisionObjectTypes.NONE;
 
         this.collision_exceptions = [];
     }
@@ -14,11 +14,11 @@ export default class PhysicsBody2D extends CollisionObject2D {
     add_collision_exception_with(body) {
         if (this.collision_exceptions.indexOf(body) < 0) {
             this.collision_exceptions.push(body);
-            body.tree_exited.once(this._collision_exception_freed.bind(this, this.collision_exceptions.length - 1));
+            body.tree_exited.once(this._collision_exception_freed.bind(this, body));
         }
     }
 
-    _collision_exception_freed(idx) {
-        remove_items(this.collision_exceptions, idx, 1);
+    _collision_exception_freed(body) {
+        remove_items(this.collision_exceptions, this.collision_exceptions.indexOf(body), 1);
     }
 }
