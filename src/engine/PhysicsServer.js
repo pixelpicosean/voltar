@@ -8,6 +8,13 @@ import Area2D from './scene/physics/Area2D';
 import PhysicsBody2D from './scene/physics/PhysicsBody2D';
 import RigidBody2D from './scene/physics/RigidBody2D';
 
+// TODO: move to
+const sleep_threshold_linear = 2;
+const sleep_threshold_angular = 8.0 / 180.0 * Math.PI;
+const time_before_sleep = 0.5;
+
+const sleep_threshold_linear_sqr = sleep_threshold_linear * sleep_threshold_linear;
+
 let i = 0;
 
 const Vector2s = new Array(20);
@@ -592,7 +599,8 @@ export default class PhysicsServer {
                                             rigid.parent.transform.world_transform.apply_inverse(rigid._world_position.subtract(real_co.remainder), rigid.position);
 
                                             // Let the rigid body bounce
-                                            rigid.linear_velocity.bounce(real_co.normal).multiply(-1, 1);
+                                            rigid.linear_velocity.bounce(real_co.normal)
+                                            rigid.linear_velocity.multiply(-rigid.bounce, rigid.bounce);
 
                                             put_vector2(tmp_vec2);
                                         }
@@ -700,6 +708,29 @@ export default class PhysicsServer {
 
                 // Custom process method call
                 area._propagate_physics_process(delta);
+            }
+            else if (coll.collision_object_type === CollisionObjectTypes.RIGID) {
+                /** @type {RigidBody2D} */
+                // @ts-ignore
+                const rigid = coll;
+
+                // console.log(rigid.linear_velocity.length());
+
+                // Check whether the rigid body can sleep now
+                if (
+                    rigid.can_sleep
+                    &&
+                    rigid.linear_velocity.length_squared() <= sleep_threshold_linear_sqr
+                    &&
+                    Math.abs(rigid.angular_velocity) <= sleep_threshold_angular
+                ) {
+                    rigid._still_time += delta;
+                    if (rigid._still_time > time_before_sleep) {
+                        rigid.sleeping = true;
+                    }
+                } else {
+                    rigid._still_time = 0;
+                }
             }
         }
     }
