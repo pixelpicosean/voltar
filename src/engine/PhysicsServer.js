@@ -395,8 +395,6 @@ export default class PhysicsServer {
                 // @ts-ignore
                 const rigid = coll;
 
-                rigid._bounce_count = 0;
-
                 // Custom physics process
                 rigid._propagate_physics_process(delta);
 
@@ -583,11 +581,6 @@ export default class PhysicsServer {
                                             /** @type {RigidBody2D} */
                                             // @ts-ignore
                                             const rigid = a;
-
-                                            if (rigid._bounce_count > 0) {
-                                                continue;
-                                            }
-                                            rigid._bounce_count += 1;
 
                                             const tmp_vec2 = get_vector2();
                                             // Push rigid body back a little bit so they won't overlap any more

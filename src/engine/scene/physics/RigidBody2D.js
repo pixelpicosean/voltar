@@ -14,7 +14,6 @@ export default class RigidBody2D extends PhysicsBody2D {
         this.linear_velocity = new Vector2(0, 0);
 
         this._motion = new Vector2(0, 0);
-        this._bounce_count = 0;
     }
     _integrate_forces(step) {
         // Apply force -> velocity
