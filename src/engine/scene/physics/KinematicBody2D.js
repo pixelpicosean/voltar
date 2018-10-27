@@ -104,8 +104,6 @@ export default class KinematicBody2D extends PhysicsBody2D {
                     motion.slide(floor_normal);
                     lv.slide(floor_normal);
                 } else {
-                    // collision.normal.inverse();
-                    // collision.normal.multiply(1, -1);
                     motion.slide(collision.normal);
                     lv.slide(collision.normal);
                 }
