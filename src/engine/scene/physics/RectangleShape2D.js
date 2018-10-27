@@ -28,17 +28,17 @@ export default class RectangleShape2D extends CollisionShape2D {
         const w = this.extents.x;
         const h = this.extents.y;
 
-        this.vertices[2].set(w * c + h * s, h * c - w * s).multiply(scale);
-        this.vertices[3].set(w * c - h * s, -h * c - w * s).multiply(scale);
-        this.vertices[0].set(-w * c - h * s, -h * c + w * s).multiply(scale);
-        this.vertices[1].set(-w * c + h * s, h * c + w * s).multiply(scale);
+        this.vertices[2].set((w * c - h * s) * scale.x, (w * s + h * c) * scale.y)
+        this.vertices[3].set((w * c + h * s) * scale.x, (w * s - h * c) * scale.y)
+        this.vertices[0].set((-w * c + h * s) * scale.x, (-w * s - h * c) * scale.y)
+        this.vertices[1].set((-w * c - h * s) * scale.x, (-w * s + h * c) * scale.y)
 
         this.normals[0]
-            .copy(this.vertices[3]).subtract(this.vertices[2])
+            .copy(this.vertices[2]).subtract(this.vertices[3])
             .perp()
             .normalize()
         this.normals[1]
-            .copy(this.vertices[2]).subtract(this.vertices[1])
+            .copy(this.vertices[1]).subtract(this.vertices[2])
             .perp()
             .normalize()
 
