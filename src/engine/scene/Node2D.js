@@ -296,6 +296,10 @@ export default class Node2D extends EventEmitter {
         this.tree_exited = new Signal();
     }
 
+    /**
+     * @param {any} data
+     * @returns {this}
+     */
     _load_data(data) {
         for (let k in data) {
             switch (k) {
@@ -329,6 +333,7 @@ export default class Node2D extends EventEmitter {
                     break;
             }
         }
+        return this;
     }
 
     /**
@@ -361,6 +366,7 @@ export default class Node2D extends EventEmitter {
     /**
      * Set name of this node
      * @param {string} name
+     * @returns {this}
      */
     set_name(name) {
         this.name = name;
@@ -368,23 +374,30 @@ export default class Node2D extends EventEmitter {
         if (this.parent) {
             this.parent._validate_child_name(this);
         }
+
+        return this;
     }
 
     /**
      * @param {boolean} p
+     * @returns {this}
      */
     set_process(p) {
         this.idle_process = !!p;
+        return this;
     }
     /**
      * @param {boolean} p
+     * @returns {this}
      */
     set_physics_process(p) {
         this.physics_process = !!p;
+        return this;
     }
 
     /**
      * @param {number} group
+     * @returns {this}
      */
     add_to_group(group) {
         if (!this.groups) {
@@ -397,9 +410,11 @@ export default class Node2D extends EventEmitter {
                 this.scene_tree.add_node_to_group(this, group);
             }
         }
+        return this;
     }
     /**
      * @param {number} group
+     * @returns {this}
      */
     remove_from_group(group) {
         if (!this.groups) {
@@ -413,6 +428,7 @@ export default class Node2D extends EventEmitter {
                 this.scene_tree.remove_node_from_group(this, group);
             }
         }
+        return this;
     }
 
     /**
@@ -520,11 +536,11 @@ export default class Node2D extends EventEmitter {
     /**
      * Calculates the global position of the display object
      *
-     * @param {Vector2} position - The world origin to calculate from
-     * @param {Vector2} [point] - A Vector2 object in which to store the value, optional
+     * @param {import('engine/math/Vector2').Vector2Like} position - The world origin to calculate from
+     * @param {import('engine/math/Vector2').Vector2Like} [point] - A Vector2 object in which to store the value, optional
      *  (otherwise will create a new Vector2)
      * @param {boolean} [skip_update=false] - Should we skip the update transform.
-     * @return {Vector2} A point object representing the position of this object
+     * @return {import('engine/math/Vector2').Vector2Like} A point object representing the position of this object
      */
     to_global(position, point, skip_update = false) {
         if (!skip_update) {
@@ -550,12 +566,12 @@ export default class Node2D extends EventEmitter {
     /**
      * Calculates the local position of the display object relative to another point
      *
-     * @param {Vector2} position - The world origin to calculate from
+     * @param {import('engine/math/Vector2').Vector2Like} position - The world origin to calculate from
      * @param {Node2D} [from] - The Node2D to calculate the global position from
-     * @param {Vector2} [point] - A Vector2 object in which to store the value, optional
+     * @param {import('engine/math/Vector2').Vector2Like} [point] - A Vector2 object in which to store the value, optional
      *  (otherwise will create a new Vector2)
      * @param {boolean} [skip_update=false] - Should we skip the update transform
-     * @return {Vector2} A point object representing the position of this object
+     * @return {import('engine/math/Vector2').Vector2Like} A point object representing the position of this object
      */
     to_local(position, from, point, skip_update) {
         if (from) {
@@ -594,7 +610,7 @@ export default class Node2D extends EventEmitter {
      * @param {number} [skew_y=0] - The Y skew value
      * @param {number} [pivot_x=0] - The X pivot value
      * @param {number} [pivot_y=0] - The Y pivot value
-     * @return {Node2D} The Node2D instance
+     * @returns {this}
      */
     set_transform(x = 0, y = 0, scale_x = 1, scale_y = 1, rotation = 0, skew_x = 0, skew_y = 0, pivot_x = 0, pivot_y = 0) {
         this.position.x = x;
@@ -615,6 +631,7 @@ export default class Node2D extends EventEmitter {
      * remove the display object from its parent Node2D as well as remove
      * all current event listeners and internal references. Do not use a Node2D
      * after calling `destroy`.
+     * @returns {this}
      */
     destroy() {
         // TODO: how do we cleanup an `EventEmitter`
@@ -636,6 +653,8 @@ export default class Node2D extends EventEmitter {
         this.interactive_children = false;
 
         this._destroyed = true;
+
+        return this;
     }
 
     /**
@@ -706,8 +725,13 @@ export default class Node2D extends EventEmitter {
     get_position() {
         return this.transform.position;
     }
+    /**
+     * @param {import('engine/math/Vector2').Vector2Like} value
+     * @returns {this}
+     */
     set_position(value) {
         this.transform.position.copy(value);
+        return this;
     }
 
     get_global_position() {
@@ -732,8 +756,13 @@ export default class Node2D extends EventEmitter {
     get_scale() {
         return this.transform.scale;
     }
+    /**
+     * @param {import('engine/math/Vector2').Vector2Like} value
+     * @returns {this}
+     */
     set_scale(value) {
         this.transform.scale.copy(value);
+        return this;
     }
 
     get_global_scale() {
@@ -758,8 +787,13 @@ export default class Node2D extends EventEmitter {
     get_pivot() {
         return this.transform.pivot;
     }
+    /**
+     * @param {import('engine/math/Vector2').Vector2Like} value
+     * @returns {this}
+     */
     set_pivot(value) {
         this.transform.pivot.copy(value);
+        return this;
     }
 
     /**
@@ -780,8 +814,13 @@ export default class Node2D extends EventEmitter {
     get_skew() {
         return this.transform.skew;
     }
+    /**
+     * @param {import('engine/math/Vector2').Vector2Like} value
+     * @returns {this}
+     */
     set_skew(value) {
         this.transform.skew.copy(value);
+        return this;
     }
 
     /**
@@ -803,9 +842,11 @@ export default class Node2D extends EventEmitter {
     }
     /**
      * @param {number} value
+     * @returns {this}
      */
     set_rotation(value) {
         this.transform.rotation = value;
+        return this;
     }
 
     get_global_rotation() {
@@ -890,6 +931,9 @@ export default class Node2D extends EventEmitter {
     _physics_process(delta) { }
     _exit_tree() { }
 
+    /**
+     * @returns {this}
+     */
     queue_free() {
         if (!this.is_inside_tree) {
             if (this.parent) {
@@ -901,20 +945,25 @@ export default class Node2D extends EventEmitter {
         if (this.scene_tree) {
             this.scene_tree.queue_delete(this);
         }
+
+        return this;
     }
     /**
      * Call the method at the beginning of next frame
      * @param {string} method
      * @param {any} args
+     * @returns {this}
      */
     call_deferred(method, args) {
         if (!this.is_inside_tree) {
-            return;
+            return this;
         }
 
         if (this.scene_tree) {
             this.scene_tree.message_queue.push_call(this, method, args);
         }
+
+        return this;
     }
 
     _propagate_enter_tree() {
@@ -1100,6 +1149,7 @@ export default class Node2D extends EventEmitter {
      * @template {Node2D} T
      * @param {T} child - First display object to swap
      * @param {T} child2 - Second display object to swap
+     * @returns {this}
      */
     swap_children(child, child2) {
         if (child === child2) {
@@ -1112,6 +1162,8 @@ export default class Node2D extends EventEmitter {
         this.children[index1] = child2;
         this.children[index2] = child;
         this.on_children_change(index1 < index2 ? index1 : index2);
+
+        return this;
     }
 
     /**
@@ -1137,6 +1189,7 @@ export default class Node2D extends EventEmitter {
      * @template {Node2D} T
      * @param {T} child - The child Node2D instance for which you want to change the index number
      * @param {number} index - The resulting index number for the child display object
+     * @returns {this}
      */
     set_child_index(child, index) {
         if (index < 0 || index >= this.children.length) {
@@ -1149,6 +1202,8 @@ export default class Node2D extends EventEmitter {
         this.children.splice(index, 0, child); // add at new position
 
         this.on_children_change(index);
+
+        return this;
     }
 
     /**
@@ -1504,6 +1559,7 @@ export default class Node2D extends EventEmitter {
      *
      * @param {DestroyOption|boolean} [options] - Options parameter. A boolean will act as if all options
      *  have been set to that value
+     * @returns {this}
      */
     destroy_children(options) {
         const destroy_children = typeof options === 'boolean' ? options : options && options.children;
@@ -1515,6 +1571,8 @@ export default class Node2D extends EventEmitter {
                 old_children[i].destroy_children(options);
             }
         }
+
+        return this;
     }
 
     /**
