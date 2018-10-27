@@ -614,7 +614,6 @@ export default class PhysicsServer {
 
                                             // Let the rigid body bounce
                                             rigid.linear_velocity.bounce(real_co.normal)
-                                            rigid.linear_velocity.multiply(-rigid.bounce, rigid.bounce);
                                             for (let s of rigid.shapes) {
                                                 s.update_transform(rigid._world_position, rigid._world_rotation, rigid._world_scale);
                                             }

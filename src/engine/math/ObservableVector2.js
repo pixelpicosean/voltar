@@ -318,8 +318,7 @@ export default class ObservableVector2 {
         return this;
     }
     bounce(axis) {
-        return this.reflect(axis)
-            .multiply(1, -1)
+        return this.reflect(axis).negate()
     }
     slide(normal) {
         return this.subtract(tmp_point.copy(normal).scale(this.dot(normal)))

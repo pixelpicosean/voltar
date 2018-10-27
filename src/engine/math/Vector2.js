@@ -415,8 +415,7 @@ export default class Vector2 {
      * @returns {Vector2}
      */
     bounce(normal) {
-        return this.reflect(normal)
-            .multiply(1, -1)
+        return this.reflect(normal).negate()
     }
 
     /**
