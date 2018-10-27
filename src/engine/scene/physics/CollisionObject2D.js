@@ -29,9 +29,12 @@ export default class CollisionObject2D extends Node2D {
     }
     /**
      * @param {number} layer
+     * @returns {this}
      */
     set_collision_layer(layer) {
         this.collision_layer = layer;
+
+        return this;
     }
     /**
      * Set/clear individual bits on the layer mask. This makes
@@ -39,6 +42,7 @@ export default class CollisionObject2D extends Node2D {
      *
      * @param {number} bit
      * @param {boolean} value
+     * @returns {this}
      */
     set_collision_layer_bit(bit, value) {
         if (value) {
@@ -46,6 +50,8 @@ export default class CollisionObject2D extends Node2D {
         } else {
             this.collision_layer &= ~(1 << bit);
         }
+
+        return this;
     }
 
     /**
@@ -65,9 +71,12 @@ export default class CollisionObject2D extends Node2D {
     }
     /**
      * @param {number} mask
+     * @returns {this}
      */
     set_collision_mask(mask) {
         this.collision_mask = mask;
+
+        return this;
     }
     /**
      * Set/clear individual bits on the collision mask. This makes
@@ -75,6 +84,7 @@ export default class CollisionObject2D extends Node2D {
      *
      * @param {number} bit
      * @param {boolean} value
+     * @returns {this}
      */
     set_collision_mask_bit(bit, value) {
         if (value) {
@@ -82,6 +92,8 @@ export default class CollisionObject2D extends Node2D {
         } else {
             this.collision_mask &= ~(1 << bit);
         }
+
+        return this;
     }
 
     constructor() {
@@ -125,6 +137,7 @@ export default class CollisionObject2D extends Node2D {
 
     /**
      * @param {CollisionShape2D} shape
+     * @returns {this}
      */
     add_shape(shape) {
         shape.owner = this;
@@ -133,9 +146,12 @@ export default class CollisionObject2D extends Node2D {
         if (this.is_inside_tree) {
             this._add_shapes_to_physics_server();
         }
+
+        return this;
     }
     /**
      * @param {CollisionShape2D} shape
+     * @returns {this}
      */
     remove_shape(shape) {
         shape.owner = null;
@@ -147,6 +163,8 @@ export default class CollisionObject2D extends Node2D {
         if (shape.is_inside_tree) {
             this.scene_tree.physics_server.remove_shape(shape);
         }
+
+        return this;
     }
 
     _load_data(data) {
