@@ -5,6 +5,9 @@ import Vector2 from 'engine/math/Vector2';
 import FilterManager from 'engine/renderers/managers/FilterManager';
 import RenderTarget from 'engine/renderers/utils/RenderTarget';
 
+import VertShader from '../fragments/default-filter-matrix.vert';
+import FragShader from './displacement.frag';
+
 /**
  * The Displacement class uses the pixel values from the specified texture
  * (called the displacement map) to perform a displacement of an object. You can
@@ -22,12 +25,7 @@ export default class Displacement extends Filter {
 
         sprite.renderable = false;
 
-        super(
-            // vertex shader
-            require('../fragments/default-filter-matrix.vert'),
-            // fragment shader
-            require('./displacement.frag')
-        );
+        super(VertShader, FragShader);
 
         this.mask_sprite = sprite;
         this.mask_matrix = mask_matrix;
