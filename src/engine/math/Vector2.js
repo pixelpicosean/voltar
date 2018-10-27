@@ -412,7 +412,8 @@ export default class Vector2 {
      * @returns {Vector2}
      */
     bounce(normal) {
-        return this.reflect(normal).scale(-1);
+        return this.reflect(normal)
+            .multiply(1, -1)
     }
 
     /**
@@ -422,7 +423,7 @@ export default class Vector2 {
      * @returns {Vector2}
      */
     slide(normal) {
-        return this.subtract(tmp_point.copy(normal).scale(-this.dot(normal)));
+        return this.subtract(tmp_point.copy(normal).scale(this.dot(normal)))
     }
 
     /**
