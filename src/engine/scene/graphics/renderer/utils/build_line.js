@@ -1,6 +1,5 @@
 import { Vector2 } from 'engine/math/index';
 import { hex2rgb } from 'engine/utils/index';
-import WebGLGraphicsData from '../WebGLGraphicsData';
 import GraphicsData from '../../GraphicsData';
 
 /**
@@ -8,11 +7,11 @@ import GraphicsData from '../../GraphicsData';
  *
  * Ignored from docs since it is not directly exposed.
  *
- * @param {WebGLGraphicsData} graphics_data - The graphics object containing all the necessary properties
+ * @param {GraphicsData} graphics_data - The graphics object containing all the necessary properties
  * @param {object} webgl_data - an object containing all the webGL-specific information to create this shape
  * @param {object} webgl_data_native_lines - an object containing all the webGL-specific information to create native_lines
  */
-export default function (graphics_data, webgl_data, webgl_data_native_lines) {
+export default function(graphics_data, webgl_data, webgl_data_native_lines) {
     if (graphics_data.native_lines) {
         build_native_line(graphics_data, webgl_data_native_lines);
     }
@@ -28,7 +27,7 @@ export default function (graphics_data, webgl_data, webgl_data_native_lines) {
  *
  * @ignore
  * @private
- * @param {WebGLGraphicsData} graphics_data - The graphics object containing all the necessary properties
+ * @param {GraphicsData} graphics_data - The graphics object containing all the necessary properties
  * @param {object} webGLData - an object containing all the webGL-specific information to create this shape
  */
 function build_line(graphics_data, webGLData) {
@@ -248,7 +247,7 @@ function build_line(graphics_data, webGLData) {
  *
  * @ignore
  * @private
- * @param {WebGLGraphicsData} graphics_data - The graphics object containing all the necessary properties
+ * @param {GraphicsData} graphics_data - The graphics object containing all the necessary properties
  * @param {object} webGLData - an object containing all the webGL-specific information to create this shape
  */
 function build_native_line(graphics_data, webGLData) {

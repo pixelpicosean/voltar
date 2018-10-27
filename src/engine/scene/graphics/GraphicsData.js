@@ -1,4 +1,4 @@
-import { Circle, Rectangle, Ellipse, Polygon } from "engine/math/index";
+import { Circle, Rectangle, Ellipse, Polygon, RoundedRectangle } from "engine/math/index";
 
 /**
  * A GraphicsData object.
@@ -13,10 +13,10 @@ export default class GraphicsData {
      * @param {number} fill_alpha - the alpha of the fill
      * @param {boolean} fill - whether or not the shape is filled with a colour
      * @param {boolean} native_lines - the method for drawing lines
-     * @param {Circle|Rectangle|Ellipse|Polygon} shape - The shape object to draw.
-     * @param {number} lineAlignment - the alignment of the line.
+     * @param {Circle|Rectangle|Ellipse|Polygon|RoundedRectangle} shape - The shape object to draw.
+     * @param {number} line_alignment - the alignment of the line.
      */
-    constructor(line_width, line_color, line_alpha, fillColor, fill_alpha, fill, native_lines, shape, lineAlignment) {
+    constructor(line_width, line_color, line_alpha, fillColor, fill_alpha, fill, native_lines, shape, line_alignment) {
         /**
          * @member {number} the width of the line to draw
          */
@@ -27,7 +27,7 @@ export default class GraphicsData {
          * @member {number}
          * @default 0
          */
-        this.lineAlignment = lineAlignment;
+        this.lineAlignment = line_alignment;
         /**
          * @member {boolean} if true the liens will be draw using LINES instead of TRIANGLE_STRIP
          */
@@ -79,6 +79,11 @@ export default class GraphicsData {
          * @member {number} The type of the shape, see the Const.Shapes file for all the existing types,
          */
         this.type = shape.type;
+
+        /**
+         * @type {number[]}
+         */
+        this.points = [];
     }
 
     /**

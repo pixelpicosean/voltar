@@ -975,6 +975,7 @@ export default class Graphics extends Node2D {
             t1[1] *= t2[1];
             t1[2] *= t2[2];
 
+            // @ts-ignore
             sprite.tint = rgb2hex(t1);
         }
         sprite.alpha = this.graphics_data[0].fill_alpha;
@@ -1072,7 +1073,7 @@ export default class Graphics extends Node2D {
                 const type = data.type;
                 const line_width = data.line_width;
 
-                shape = data.shape;
+                let shape = data.shape;
 
                 if (type === SHAPES.RECT || type === SHAPES.RREC) {
                     x = shape.x - (line_width / 2);
@@ -1197,6 +1198,7 @@ export default class Graphics extends Node2D {
         this.graphics_data.push(data);
 
         if (data.type === SHAPES.POLY) {
+            // @ts-ignore
             data.shape.closed = data.shape.closed || this.filling;
             this.current_path = data;
         }
