@@ -1,4 +1,4 @@
-import { Vector2, Rectangle } from 'engine/math/index';
+import { Vector2, Rectangle, clamp } from 'engine/math/index';
 import { remove_items } from 'engine/dep/index';
 import Node2D from './scene/Node2D';
 
@@ -312,8 +312,11 @@ export default class PhysicsServer {
         // Recycle arrays in the hash
         for (let i in this.hash) {
             let group = this.hash[i];
-            for (let j in group) {
-                put_array(group[j]);
+            if (Array.isArray(group)) {
+                for (let j of group) {
+                    j.length = 0;
+                    put_array(j);
+                }
             }
         }
     }
@@ -530,9 +533,6 @@ export default class PhysicsServer {
                         this.checks[key] = true;
                         this.collision_checks++;
 
-                        const cast_a = (a.collision_object_type <= b.collision_object_type);
-                        const cast_b = (a.collision_object_type >= b.collision_object_type);
-
                         const a_is_area = (a.collision_object_type === CollisionObjectTypes.AREA);
                         const b_is_area = (b.collision_object_type === CollisionObjectTypes.AREA);
 
@@ -596,16 +596,26 @@ export default class PhysicsServer {
                                     }
 
                                     // Solve the overlapping between bodies
-                                    if (cast_a && !cast_b) {
-                                        // Rigid body bounce off kinematic or static
-                                        if (a.collision_object_type === CollisionObjectTypes.RIGID) {
-                                            /** @type {RigidBody2D} */
-                                            // @ts-ignore
-                                            const rigid = a;
+                                    // Always push self back to safe place
+                                    if (a.collision_object_type === CollisionObjectTypes.RIGID) {
+                                        /** @type {RigidBody2D} */
+                                        // @ts-ignore
+                                        const rigid = a;
 
-                                            const tmp_vec2 = get_vector2();
-                                            // Push rigid body back a little bit so they won't overlap any more
-                                            const push_dist = (real_co.overlap) / Math.cos(real_co.normal.angle_to(rigid._motion));
+                                        // Push rigid body back
+                                        const tmp_vec2 = get_vector2();
+                                        const angle = real_co.normal.angle_to(rigid._motion);
+                                        // Fix the body position directly while the angle between motion
+                                        // and response normal is too close to right-angle.
+                                        // This is a hack but work pretty well.
+                                        if (Math.abs(Math.abs(angle) - Math.PI * 0.5) < Math.PI * 0.1) {
+                                            real_co.travel.copy(real_co.normal)
+                                                .scale(real_co.overlap)
+                                            rigid.parent.transform.world_transform.apply_inverse(rigid._world_position.add(real_co.travel), rigid.position);
+                                            rigid.linear_velocity.project_n(real_co.normal);
+                                            console.log('what!')
+                                        } else {
+                                            const push_dist = (real_co.overlap) / Math.cos(angle);
                                             real_co.remainder.copy(rigid._motion).normalize()
                                                 .scale(push_dist)
                                             real_co.travel.copy(rigid._motion)
@@ -613,18 +623,17 @@ export default class PhysicsServer {
                                             rigid.parent.transform.world_transform.apply_inverse(rigid._world_position.subtract(real_co.remainder), rigid.position);
 
                                             // Let the rigid body bounce
-                                            rigid.linear_velocity.bounce(real_co.normal)
-                                            for (let s of rigid.shapes) {
-                                                s.update_transform(rigid._world_position, rigid._world_rotation, rigid._world_scale);
-                                            }
-
-                                            put_vector2(tmp_vec2);
+                                            rigid.linear_velocity.copy(rigid.linear_velocity).bounce(real_co.normal)
+                                                .scale(rigid.bounce)
                                         }
-                                        // TODO: move and collide
-                                        // TODO: move and slice
-                                    } else if (cast_a && cast_b) {
 
-                                    } // impossible to cast b while don't cast a
+                                        // Update transform of the body's shapes
+                                        for (let s of rigid.shapes) {
+                                            s.update_transform(rigid._world_position, rigid._world_rotation, rigid._world_scale);
+                                        }
+
+                                        put_vector2(tmp_vec2);
+                                    }
                                 }
 
                                 // Recycle objects
@@ -819,6 +828,11 @@ export default class PhysicsServer {
                     const coll2 = shape2.owner;
                     const aabb2 = shape2.aabb;
 
+                    // no more area
+                    if (coll2.collision_object_type === CollisionObjectTypes.AREA) {
+                        continue;
+                    }
+
                     // No need to sort
                     const a = coll;
                     const b = coll2;
@@ -840,19 +854,10 @@ export default class PhysicsServer {
                         continue;
                     }
 
-                    const key = `${shape_a.id < shape_b.id ? shape_a.id : shape_b.id}:${shape_a.id > shape_b.id ? shape_a.id : shape_b.id}`;
-
-                    // Ignore: already checked this pair
-                    if (this.checks[key]) {
-                        continue;
-                    }
-
-                    // Mark this pair is already checked
-                    this.checks[key] = true;
+                    // A new check but won't be added to the check key
+                    // since this is a positive behavior, we don't need
+                    // to poll.
                     this.collision_checks++;
-
-                    const cast_a = (a.collision_object_type <= b.collision_object_type);
-                    const cast_b = (a.collision_object_type >= b.collision_object_type);
 
                     if (!(
                         aabb_a.bottom <= aabb_b.top
@@ -911,24 +916,31 @@ export default class PhysicsServer {
                                 }
                             }
 
-                            // Solve the overlapping between bodies
-                            if (cast_a && !cast_b) {
-                                // Push rigid body back a little bit so they won't overlap any more
-                                const push_dist = (real_co.overlap) / Math.cos(real_co.normal.angle_to(motion));
+                            // Solve the overlapping between bodies.
+                            // Push body a back so they won't overlap any more.
+                            const angle = real_co.normal.angle_to(motion);
+                            // Fix the body position directly while the angle between motion
+                            // and response normal is too close to right-angle.
+                            // This is a hack but work pretty well.
+                            if (Math.abs(Math.abs(angle) - Math.PI * 0.5) < Math.PI * 0.1) {
+                                real_co.travel.set(0, 0)
+                                real_co.remainder.copy(real_co.normal)
+                                    .scale(real_co.overlap)
+                                motion.set(0, 0)
+                                a.parent.transform.world_transform.apply_inverse(a._world_position.add(real_co.travel), a.position);
+                            } else {
                                 real_co.remainder.copy(motion).normalize()
-                                    .scale(push_dist)
+                                    .scale((real_co.overlap) / Math.cos(angle))
                                 real_co.travel.copy(motion)
                                     .subtract(real_co.remainder)
                                 a.parent.transform.world_transform.apply_inverse(a._world_position.subtract(real_co.remainder), a.position);
+                            }
 
-                                // Update collision info
-                                real_co.collider = b;
+                            // Update collision info
+                            real_co.collider = b;
 
-                                // Let's stop here and return the info
-                                return real_co;
-                            } else if (cast_a && cast_b) {
-                                // TODO: cast both kinematic bodies
-                            } // impossible to cast b while don't cast a
+                            // Let's stop here and return the info
+                            return real_co;
                         }
 
                         // Recycle objects
