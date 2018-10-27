@@ -76,6 +76,7 @@ export default class GraphicsRenderer extends ObjectRenderer {
         // This  could be speeded up for sure!
         const shader = this.primitive_shader;
 
+        // @ts-ignore
         renderer.bind_shader(shader);
         renderer.state.setBlendMode(graphics.blend_mode);
 
@@ -187,13 +188,16 @@ export default class GraphicsRenderer extends ObjectRenderer {
      * @return {*} TODO
      */
     get_webgl_data(gl, type, native_lines) {
+        // @ts-ignore
         let webGLData = gl.data[gl.data.length - 1];
 
         if (!webGLData || webGLData.native_lines !== native_lines || webGLData.points.length > 320000) {
             webGLData = this.graphics_data_pool.pop()
+                // @ts-ignore
                 || new WebGLGraphicsData(this.renderer.gl, this.primitive_shader, this.renderer.state.attribsState);
             webGLData.native_lines = native_lines;
             webGLData.reset(type);
+            // @ts-ignore
             gl.data.push(webGLData);
         }
 

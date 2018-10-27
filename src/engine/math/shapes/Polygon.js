@@ -1,38 +1,34 @@
-import Vector2 from '../Vector2';
 import { SHAPES } from '../../const';
 
 export default class Polygon {
     /**
-     * @param {Vector2[]|number[]} points - This can be an array of Points
+     * @param {import('../Vector2').Vector2Like[]|number[]} [points] - This can be an array of Points
      *  that form the polygon, a flat array of numbers that will be interpreted as [x,y, x,y, ...], or
      *  the arguments passed can be all the points of the polygon e.g.
      *  `new Polygon(new Vector2(), new Vector2(), ...)`, or the arguments passed can be flat
      *  x,y values e.g. `new Polygon(x,y, x,y, x,y, ...)` where `x` and `y` are Numbers.
      */
-    constructor(...points) {
-        if (Array.isArray(points[0])) {
-            points = points[0];
-        }
-
-        // if this is an array of points, convert it to a flat array of numbers
-        if (points[0] instanceof Vector2) {
-            const p = [];
-
-            for (let i = 0, il = points.length; i < il; i++) {
-                p.push(points[i].x, points[i].y);
-            }
-
-            points = p;
-        }
-
-        this.closed = true;
-
+    constructor(points) {
         /**
          * An array of the points of this polygon
          *
          * @member {number[]}
          */
-        this.points = points;
+        this.points = [];
+
+        // if passed points is an array of points, convert it to a flat array of numbers
+        if (points) {
+            if (typeof (points[0]) === 'number') {
+                this.points = this.points.concat(points);
+            } else {
+                for (let i = 0, il = points.length; i < il; i++) {
+                    // @ts-ignore
+                    this.points.push(points[i].x, points[i].y);
+                }
+            }
+        }
+
+        this.closed = true;
 
         /**
          * The type of the object, mainly used to avoid `instanceof` checks
@@ -40,7 +36,6 @@ export default class Polygon {
          * @member {number}
          * @readOnly
          * @default SHAPES.POLY
-         * @see SHAPES
          */
         this.type = SHAPES.POLY;
     }

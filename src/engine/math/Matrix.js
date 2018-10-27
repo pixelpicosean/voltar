@@ -320,8 +320,8 @@ export default class Matrix {
     /**
      * Decomposes the matrix (x, y, scaleX, scaleY, and rotation) and sets the properties on to a transform.
      *
-     * @param {Transform|TransformStatic} transform - The transform to apply the properties to.
-     * @return {Transform|TransformStatic} The transform with the newly applied properties
+     * @param {import('./Transform').default|import('./TransformStatic').default} transform - The transform to apply the properties to.
+     * @return {import('./Transform').default|import('./TransformStatic').default} The transform with the newly applied properties
      */
     decompose(transform) {
         // sort out rotation / skew..
