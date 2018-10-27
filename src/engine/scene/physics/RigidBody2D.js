@@ -24,7 +24,6 @@ export default class RigidBody2D extends PhysicsBody2D {
         this.gravity_scale = 1;
         this.inertia = 1;
         this.linear_damp = -1;
-        this.linear_velocity = new Vector2(0, 0);
         this.mass = 1;
         this.sleeping = false;
 
