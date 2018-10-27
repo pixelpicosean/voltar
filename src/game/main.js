@@ -3,7 +3,7 @@ import * as v from 'engine/index';
 
 // Import features you want to use
 /* import 'engine/accessibility/enable'; */
-/* import 'engine/interaction/enable'; */
+import 'engine/interaction/enable';
 import 'engine/extract/enable';
 import 'engine/scene/coa/enable';
 import 'engine/scene/graphics/enable';
