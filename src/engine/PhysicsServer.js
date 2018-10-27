@@ -62,12 +62,13 @@ const put_array = (arr) => {
     Arrays.push(arr);
 };
 
-class Collision {
+export class Collision {
     constructor() {
         /**
          * @type {PhysicsBody2D}
          */
         this.collider = null;
+        this.collider_vel = new Vector2();
 
         this.normal = new Vector2();
         this.travel = new Vector2();
@@ -77,6 +78,7 @@ class Collision {
     }
     reset() {
         this.collider = null;
+        this.collider_vel.set(0, 0);
 
         this.normal.set(0, 0);
         this.travel.set(0, 0);
@@ -613,6 +615,9 @@ export default class PhysicsServer {
                                             // Let the rigid body bounce
                                             rigid.linear_velocity.bounce(real_co.normal)
                                             rigid.linear_velocity.multiply(-rigid.bounce, rigid.bounce);
+                                            for (let s of rigid.shapes) {
+                                                s.update_transform(rigid._world_position, rigid._world_rotation, rigid._world_scale);
+                                            }
 
                                             put_vector2(tmp_vec2);
                                         }
@@ -767,17 +772,16 @@ export default class PhysicsServer {
 
     /**
      * @param {KinematicBody2D} coll
-     * @param {Vector2} velocity
+     * @param {Vector2} motion
      * @returns {Collision}
      */
-    body_test_motion(coll, velocity) {
-        const motion = get_vector2().copy(velocity).scale(this.process_step);
-
+    body_test_motion(coll, motion) {
         const shape = coll.shapes[0];
 
         // Apply the motion now, so we can test whether there's a collision
         coll._world_position.add(motion);
         coll.parent.transform.world_transform.apply_inverse(coll._world_position, coll.position);
+        shape.update_transform(coll._world_position, coll._world_rotation, coll._world_scale);
 
         // Let the aabb contains both space before move and after move
         const aabb = tmp_aabb;
