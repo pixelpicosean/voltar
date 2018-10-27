@@ -50,8 +50,15 @@ export default class InputScene extends v.Node2D {
         t.scale.set(4);
         this.add_child(t);
 
-        this.s = new Me();
-        this.s.position.set(100, 100);
-        this.add_child(this.s);
+        const s = this.add_child(new Me())
+            .set_position(100, 100)
+        s.interactive = true
+        s.on('pointerdown', () => {
+            console.log('jump')
+            s.tweens.create(true)
+                .interpolate_property(s.scale, 'y', 1.5, 1.75, 0.1, 'Quartic.Out')
+                .interpolate_property(s.scale, 'y', 1.75, 1.5, 0.1, 'Quartic.In', 0.1)
+                .start()
+        })
     }
 }

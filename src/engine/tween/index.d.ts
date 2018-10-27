@@ -57,33 +57,33 @@ declare namespace tween {
 
         constructor();
 
-        set_active(active: boolean);
-        set_speed_scale(scale: number);
+        set_active(active: boolean): Tween;
+        set_speed_scale(scale: number): Tween;
 
-        start();
+        start(): Tween;
         reset(obj: any, key: string): Tween;
-        reset_all();
+        reset_all(): Tween;
         stop(obj: any, key: string): Tween;
-        stop_all();
+        stop_all(): Tween;
         resume(obj: any, key: string): Tween;
-        resume_all();
+        resume_all(): Tween;
         remove(obj: any, key: string, first_only: boolean): Tween;
-        remove_all();
+        remove_all(): Tween;
 
         seek(p_time: number): Tween;
         tell(): number;
         get_runtime(): number;
 
-        interpolate_property<T, K extends keyof T, S extends Tweenable>(obj: T, property: K, initial_val: S, final_val: S, duration: number, p_easing: Easing, delay?: number);
-        interpolate_method<T, K extends keyof T, S extends Tweenable>(obj: T, method: K, initial_val: S, final_val: S, duration: number, p_easing: Easing, delay?: number);
-        interpolate_callback<T, K extends keyof T>(obj: T, duration: number, callback: K, args?: any);
-        interpolate_deferred_callback<T, K extends keyof T>(obj: T, duration: number, callback: K, args?: any);
-        follow_property<T, K extends keyof T, S extends Tweenable>(obj: T, property: K, initial_val: S, target: any, target_property: string, duration: number, p_easing: Easing, delay?: number);
-        follow_method<T, K extends keyof T, T2, K2 extends keyof T2, S extends Tweenable>(obj: T, method: K, initial_val: S, target: T2, target_method: K2, duration: number, p_easing: Easing, delay?: number);
-        targeting_property<T, K extends keyof T, T2, K2 extends keyof T2, S extends Tweenable>(obj: T, property: K, initial: T2, initial_property: K2, final_val: S, duration: number, p_easing: Easing, delay?: number);
-        targeting_method<T, K extends keyof T, T2, K2 extends keyof T2, S extends Tweenable>(obj: T, method: K, initial: T2, initial_method: K2, final_val: S, duration: number, p_easing: Easing, delay?: number);
+        interpolate_property<T, K extends keyof T, S extends Tweenable>(obj: T, property: K, initial_val: S, final_val: S, duration: number, p_easing: Easing, delay?: number): Tween;
+        interpolate_method<T, K extends keyof T, S extends Tweenable>(obj: T, method: K, initial_val: S, final_val: S, duration: number, p_easing: Easing, delay?: number): Tween
+        interpolate_callback<T, K extends keyof T>(obj: T, duration: number, callback: K, args?: any): Tween
+        interpolate_deferred_callback<T, K extends keyof T>(obj: T, duration: number, callback: K, args?: any): Tween
+        follow_property<T, K extends keyof T, S extends Tweenable>(obj: T, property: K, initial_val: S, target: any, target_property: string, duration: number, p_easing: Easing, delay?: number): Tween
+        follow_method<T, K extends keyof T, T2, K2 extends keyof T2, S extends Tweenable>(obj: T, method: K, initial_val: S, target: T2, target_method: K2, duration: number, p_easing: Easing, delay?: number): Tween
+        targeting_property<T, K extends keyof T, T2, K2 extends keyof T2, S extends Tweenable>(obj: T, property: K, initial: T2, initial_property: K2, final_val: S, duration: number, p_easing: Easing, delay?: number): Tween
+        targeting_method<T, K extends keyof T, T2, K2 extends keyof T2, S extends Tweenable>(obj: T, method: K, initial: T2, initial_method: K2, final_val: S, duration: number, p_easing: Easing, delay?: number): Tween
 
-        clear_events();
+        clear_events(): Tween;
 
         protected _init();
         protected _propagate_process(delta: number);

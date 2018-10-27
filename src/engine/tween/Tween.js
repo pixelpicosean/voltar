@@ -163,27 +163,33 @@ export default class Tween {
 
     /**
      * @param {boolean} active
+     * @returns this
      */
     set_active(active) {
         this.active = active;
+        return this;
     }
     /**
      * @param {number} scale
+     * @returns this
      */
     set_speed_scale(scale) {
         this.speed_scale = scale;
+        return this;
     }
 
     /**
      * Start the tween
+     * @returns this
      */
     start() {
         this.active = true;
+        return this;
     }
     /**
      * @param {any} obj Target
      * @param {string} key Key
-     * @returns {Tween}
+     * @returns this
      */
     reset(obj, key) {
         let i = 0, data;
@@ -200,7 +206,7 @@ export default class Tween {
         return this;
     }
     /**
-     * @returns {Tween} Self for chaining
+     * @returns this
      */
     reset_all() {
         let i = 0, data;
@@ -218,7 +224,7 @@ export default class Tween {
     /**
      * @param {any} obj Target
      * @param {string} key Key
-     * @returns {Tween}
+     * @returns this
      */
     stop(obj, key) {
         let i = 0, data;
@@ -230,6 +236,9 @@ export default class Tween {
         }
         return this;
     }
+    /**
+     * @returns this
+     */
     stop_all() {
         this.active = false;
 
@@ -242,7 +251,7 @@ export default class Tween {
     /**
      * @param {any} obj Target
      * @param {string} key Key
-     * @returns {Tween} Self for chaining
+     * @returns this
      */
     resume(obj, key) {
         this.active = true;
@@ -256,6 +265,9 @@ export default class Tween {
         }
         return this;
     }
+    /**
+     * @returns this
+     */
     resume_all() {
         this.active = true;
 
@@ -270,7 +282,7 @@ export default class Tween {
      * @param {any} obj Target
      * @param {string} key Key
      * @param {boolean} [first_only=true]
-     * @returns {Tween} Self for chaining
+     * @returns this
      */
     remove(obj, key, first_only = true) {
         let i = 0, data;
@@ -286,6 +298,9 @@ export default class Tween {
         }
         return this;
     }
+    /**
+     * @returns this
+     */
     remove_all() {
         this.active = false;
 
@@ -299,7 +314,7 @@ export default class Tween {
 
     /**
      * @param {number} p_time
-     * @returns {Tween} Self for chaining
+     * @returns this
      */
     seek(p_time) {
         let i = 0, data;
@@ -365,7 +380,7 @@ export default class Tween {
      * @param {number} duration Duration of this animation
      * @param {string} p_easing Easing function
      * @param {number} [delay=0] Time before start
-     * @returns {boolean}
+     * @returns this
      */
     interpolate_property(obj, property, initial_val, final_val, duration, p_easing, delay = 0) {
         let easing = p_easing.split('.');
@@ -396,8 +411,10 @@ export default class Tween {
             data.val_type = STRING;
             break;
         case 'object':
+            // @ts-ignore
             if (('x' in initial_val) && ('y' in initial_val)) {
                 data.initial_val = create_vector(initial_val.x, initial_val.y);
+                // @ts-ignore
                 data.final_val = create_vector(final_val.x, final_val.y);
                 data.delta_val = create_vector(0, 0);
                 data.val_type = VECTOR2;
@@ -406,11 +423,12 @@ export default class Tween {
         }
 
         if (!this._calc_delta_val(data.initial_val, data.final_val, data)) {
-            return false;
+            return this;
         }
 
         this.interpolates.push(data);
-        return true;
+
+        return this;
     }
     /**
      * Animate a method of an object
@@ -421,7 +439,7 @@ export default class Tween {
      * @param {number} duration Duration of this animation
      * @param {string} p_easing Easing function
      * @param {number} [delay=0] Time before start
-     * @returns {boolean}
+     * @returns this
      */
     interpolate_method(obj, method, initial_val, final_val, duration, p_easing, delay = 0) {
         let easing = p_easing.split('.');
@@ -452,8 +470,10 @@ export default class Tween {
             data.val_type = STRING;
             break;
         case 'object':
+            // @ts-ignore
             if (('x' in initial_val) && ('y' in initial_val)) {
                 data.initial_val = create_vector(initial_val.x, initial_val.y);
+                // @ts-ignore
                 data.final_val = create_vector(final_val.x, final_val.y);
                 data.delta_val = create_vector(0, 0);
                 data.val_type = VECTOR2;
@@ -462,11 +482,11 @@ export default class Tween {
         }
 
         if (!this._calc_delta_val(data.initial_val, data.final_val, data)) {
-            return false;
+            return this;
         }
 
         this.interpolates.push(data);
-        return true;
+        return this;
     }
     /**
      * Invoke a method after duration
@@ -474,7 +494,7 @@ export default class Tween {
      * @param {number} duration Duration of this animation
      * @param {string} callback Function to call after the duration
      * @param {any} [args] Arguments to be passed to the callback
-     * @returns {Tween}
+     * @returns this
      */
     interpolate_callback(obj, duration, callback, args) {
         let data = create_interpolate();
@@ -500,7 +520,7 @@ export default class Tween {
      * @param {number} duration Duration of this animation
      * @param {string} callback Function to call after the duration
      * @param {any} [args] Arguments to be passed to the callback
-     * @returns {Tween}
+     * @returns this
      */
     interpolate_deferred_callback(obj, duration, callback, args) {
         let data = create_interpolate();
@@ -530,7 +550,7 @@ export default class Tween {
      * @param {number} duration Duration of this animation
      * @param {string} p_easing Easing function
      * @param {number} [delay=0] Time before start
-     * @returns {boolean}
+     * @returns this
      */
     follow_property(obj, property, initial_val, target, target_property, duration, p_easing, delay = 0) {
         let easing = p_easing.split('.');
@@ -563,6 +583,7 @@ export default class Tween {
             data.val_type = STRING;
             break;
         case 'object':
+            // @ts-ignore
             if (('x' in initial_val) && ('y' in initial_val)) {
                 data.initial_val = create_vector(initial_val.x, initial_val.y);
                 data.final_val = create_vector(0, 0);
@@ -573,7 +594,7 @@ export default class Tween {
         }
 
         this.interpolates.push(data);
-        return true;
+        return this;
     }
     /**
      * Follow a method return value of another object
@@ -585,7 +606,7 @@ export default class Tween {
      * @param {number} duration Duration of this animation
      * @param {string} p_easing Easing function
      * @param {number} [delay=0] Time before start
-     * @returns {boolean}
+     * @returns this
      */
     follow_method(obj, method, initial_val, target, target_method, duration, p_easing, delay = 0) {
         let easing = p_easing.split('.');
@@ -618,6 +639,7 @@ export default class Tween {
             data.val_type = STRING;
             break;
         case 'object':
+            // @ts-ignore
             if (('x' in initial_val) && ('y' in initial_val)) {
                 data.initial_val = create_vector(initial_val.x, initial_val.y);
                 data.final_val = create_vector(0, 0);
@@ -628,7 +650,7 @@ export default class Tween {
         }
 
         this.interpolates.push(data);
-        return true;
+        return this;
     }
     /**
      * Animate a property from value of another object to a final value
@@ -640,7 +662,7 @@ export default class Tween {
      * @param {number} duration Duration of this animation
      * @param {string} p_easing Easing function
      * @param {number} [delay=0] Time before start
-     * @returns {boolean}
+     * @returns this
      */
     targeting_property(obj, property, initial, initial_property, final_val, duration, p_easing, delay = 0) {
         let easing = p_easing.split('.');
@@ -676,6 +698,7 @@ export default class Tween {
         case 'object':
             if (('x' in initial_val) && ('y' in initial_val)) {
                 data.initial_val = create_vector(initial_val.x, initial_val.y);
+                // @ts-ignore
                 data.final_val = create_vector(final_val.x, final_val.y);
                 data.delta_val = create_vector(0, 0);
                 data.val_type = VECTOR2;
@@ -684,11 +707,11 @@ export default class Tween {
         }
 
         if (!this._calc_delta_val(data.initial_val, data.final_val, data)) {
-            return false;
+            return this;
         }
 
         this.interpolates.push(data);
-        return true;
+        return this;
     }
     /**
      * Animate a method from return of another object's method to a final value
@@ -700,7 +723,7 @@ export default class Tween {
      * @param {number} duration Duration of this animation
      * @param {string} p_easing Easing function
      * @param {number} [delay=0] Time before start
-     * @returns {boolean}
+     * @returns this
      */
     targeting_method(obj, method, initial, initial_method, final_val, duration, p_easing, delay = 0) {
         let easing = p_easing.split('.');
@@ -736,6 +759,7 @@ export default class Tween {
         case 'object':
             if (('x' in initial_val) && ('y' in initial_val)) {
                 data.initial_val = create_vector(initial_val.x, initial_val.y);
+                // @ts-ignore
                 data.final_val = create_vector(final_val.x, final_val.y);
                 data.delta_val = create_vector(0, 0);
                 data.val_type = VECTOR2;
@@ -744,17 +768,22 @@ export default class Tween {
         }
 
         if (!this._calc_delta_val(data.initial_val, data.final_val, data)) {
-            return false;
+            return this;
         }
 
         this.interpolates.push(data);
-        return true;
+        return this;
     }
 
+    /**
+     * @returns this
+     */
     clear_events() {
         this.tween_completed.detachAll();
         this.tween_started.detachAll();
         this.tween_step.detachAll();
+
+        return this;
     }
 
     /**
@@ -948,16 +977,21 @@ export default class Tween {
     _calc_delta_val(initial_val, final_val, data) {
         switch (data.val_type) {
         case BOOL:
+            // @ts-ignore
             data.delta_val = Math.floor(final_val) - Math.floor(initial_val);
             break;
         case NUMBER:
+            // @ts-ignore
             data.delta_val = final_val - initial_val;
             break;
         case STRING:
+            // @ts-ignore
             data.delta_val = final_val.length;
             break;
         case VECTOR2:
+            // @ts-ignore
             data.delta_val.x = final_val.x - initial_val.x;
+            // @ts-ignore
             data.delta_val.y = final_val.y - initial_val.y;
             break;
         }
