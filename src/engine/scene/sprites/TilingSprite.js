@@ -99,7 +99,7 @@ export default class TilingSprite extends Sprite {
     /**
      * The scaling of the image that is being tiled
      *
-     * @member {ObservablePoint}
+     * @member {ObservableVector2}
      */
     get tile_scale() {
         return this.tile_transform.scale;
@@ -113,7 +113,7 @@ export default class TilingSprite extends Sprite {
     /**
      * The offset of the image that is being tiled
      *
-     * @member {ObservablePoint}
+     * @member {ObservableVector2}
      */
     get tile_position() {
         return this.tile_transform.position;
@@ -138,6 +138,8 @@ export default class TilingSprite extends Sprite {
                     break;
             }
         }
+
+        return this;
     }
 
     /**

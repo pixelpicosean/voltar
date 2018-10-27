@@ -1,4 +1,4 @@
-import ObservablePoint from './ObservablePoint';
+import ObservableVector2 from './ObservableVector2';
 import TransformBase from './TransformBase';
 import Matrix from './Matrix';
 
@@ -12,30 +12,30 @@ export default class TransformStatic extends TransformBase {
         /**
          * The coordinate of the object relative to the local coordinates of the parent.
          *
-         * @member {ObservablePoint}
+         * @member {ObservableVector2}
          */
-        this.position = new ObservablePoint(this.on_change, this, 0, 0);
+        this.position = new ObservableVector2(this.on_change, this, 0, 0);
 
         /**
          * The scale factor of the object.
          *
-         * @member {ObservablePoint}
+         * @member {ObservableVector2}
          */
-        this.scale = new ObservablePoint(this.on_change, this, 1, 1);
+        this.scale = new ObservableVector2(this.on_change, this, 1, 1);
 
         /**
          * The pivot point of the node that it rotates around
          *
-         * @member {ObservablePoint}
+         * @member {ObservableVector2}
          */
-        this.pivot = new ObservablePoint(this.on_change, this, 0, 0);
+        this.pivot = new ObservableVector2(this.on_change, this, 0, 0);
 
         /**
          * The skew amount, on the x and y axis.
          *
-         * @member {ObservablePoint}
+         * @member {ObservableVector2}
          */
-        this.skew = new ObservablePoint(this.update_skew, this, 0, 0);
+        this.skew = new ObservableVector2(this.update_skew, this, 0, 0);
 
         this._rotation = 0;
 

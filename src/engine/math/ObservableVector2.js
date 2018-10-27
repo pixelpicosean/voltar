@@ -1,13 +1,13 @@
-
 import Vector2, { EPSILON } from './Vector2';
 
+const tmp_point = new Vector2();
 
 /**
  * The Vector2 object represents a location in a two-dimensional coordinate system, where x represents
  * the horizontal axis and y represents the vertical axis.
  * An observable point is a point that triggers a callback when the point's position is changed.
  */
-export default class ObservablePoint {
+export default class ObservableVector2 {
     /**
      * @param {Function} cb - callback when changed
      * @param {object} scope - owner of callback
@@ -30,22 +30,24 @@ export default class ObservablePoint {
      * @param {number} [y=0] - position of the point on the y axis
      */
     set(x, y) {
-        const _x = x || 0;
-        const _y = y || ((y !== 0) ? _x : 0);
-
-        if (this._x !== _x || this._y !== _y) {
-            this._x = _x;
-            this._y = _y;
+        if (x === undefined) {
+            x = 0;
+        }
+        if (y === undefined) {
+            y = x;
+        }
+        if (x !== this._x || y !== this._y) {
+            this._x = x;
+            this._y = y;
             this.cb.call(this.scope);
         }
-
         return this;
     }
 
     /**
      * Copies the data from another point
      *
-     * @param {import('./Vector2').Vector2Like|ObservablePoint} point - point to copy from
+     * @param {import('./Vector2').Vector2Like|ObservableVector2} point - point to copy from
      */
     copy(point) {
         if (this._x !== point.x || this._y !== point.y) {
@@ -113,6 +115,9 @@ export default class ObservablePoint {
     }
     snapped(by) { }
 
+    /**
+     * @param {import('./Vector2').Vector2Like} b
+     */
     equals(b) {
         const a0 = this._x, a1 = this._y;
         const b0 = b.x, b1 = b.y;
@@ -123,29 +128,109 @@ export default class ObservablePoint {
         return (this._x === b.x) && (this._y === b.y);
     }
 
-    add(b) {
-        this.x += b.x;
-        this.y += b.y;
+    /**
+     * Add the vector by another vector or number.
+     *
+     * @param {import('./Vector2').Vector2Like|number} x
+     * @param {import('./Vector2').Vector2Like|number} [y]
+     * @returns this
+     */
+    add(x, y) {
+        if (y === undefined) {
+            // @ts-ignore
+            this.x += x.x;
+            // @ts-ignore
+            this.y += x.y;
+        } else {
+            // @ts-ignore
+            this.x += x;
+            // @ts-ignore
+            this.y += y;
+        }
         return this;
     }
-    subtract(b) {
-        this.x -= b.x;
-        this.y -= b.y;
+
+    /**
+     * Subtract the vector by another vector or number.
+     *
+     * @param {import('./Vector2').Vector2Like|number} x
+     * @param {import('./Vector2').Vector2Like|number} [y]
+     * @returns this
+     */
+    subtract(x, y) {
+        if (y === undefined) {
+            // @ts-ignore
+            this.x -= x.x;
+            // @ts-ignore
+            this.y -= x.y;
+        } else {
+            // @ts-ignore
+            this.x -= x;
+            // @ts-ignore
+            this.y -= y;
+        }
         return this;
     }
-    multiply(b) {
-        this.x *= b.x;
-        this.y *= b.y;
+
+    /**
+     * Multiply the vector by another vector or number.
+     *
+     * @param {import('./Vector2').Vector2Like|number} x
+     * @param {import('./Vector2').Vector2Like|number} [y]
+     * @returns this
+     */
+    multiply(x, y) {
+        if (y === undefined) {
+            // @ts-ignore
+            this.x *= x.x;
+            // @ts-ignore
+            this.y *= x.y;
+        } else {
+            // @ts-ignore
+            this.x *= x;
+            // @ts-ignore
+            this.y *= y;
+        }
         return this;
     }
-    divide(b) {
-        this.x /= b.x;
-        this.y /= b.y;
+
+    /**
+     * Divide x and y by another vector or number.
+     *
+     * @param {import('./Vector2').Vector2Like|number} x
+     * @param {import('./Vector2').Vector2Like|number} [y]
+     * @returns this
+     */
+    divide(x, y) {
+        if (y === undefined) {
+            // @ts-ignore
+            this.x /= x.x;
+            // @ts-ignore
+            this.y /= x.y;
+        } else {
+            // @ts-ignore
+            this.x /= x;
+            // @ts-ignore
+            this.y /= y;
+        }
         return this;
     }
+
+    /**
+     * Dot multiply another vector.
+     *
+     * @param {import('./Vector2').Vector2Like} b
+     * @returns {number}
+     */
     dot(b) {
         return this._x * b.x + this._y * b.y;
     }
+    /**
+     * Cross multiply another vector.
+     *
+     * @param {import('./Vector2').Vector2Like} b
+     * @returns {number}
+     */
     cross(b) {
         return this._x * b.y - this._y * b.x;
     }
@@ -206,7 +291,7 @@ export default class ObservablePoint {
     /**
      * Change this vector to be perpendicular to what it was before. (Effectively
      * roatates it 90 degrees in a clockwise direction)
-     * @return {ObservablePoint} Self for chaining.
+     * @return {ObservableVector2} Self for chaining.
      */
     perp() {
         const x = this.x;
@@ -227,30 +312,17 @@ export default class ObservablePoint {
         return this;
     }
     reflect(axis) {
-        const x = this._x;
-        const y = this._y;
-        this.project(axis).scale(2);
-        this.x -= x;
-        this.y -= y;
-        return this;
-    }
-    reflect_n(axis) {
-        const x = this._x;
-        const y = this._y;
-        this.project_n(axis).scale(2);
+        const dot = this.dot(axis);
+        this.x = 2 * axis.x * dot - this._x;
+        this.y = 2 * axis.y * dot - this._y;
         return this;
     }
     bounce(axis) {
-        const x = this._x;
-        const y = this._y;
-        this.project(axis).scale(2);
-        this.x = x - this.x;
-        this.y = y - this.y;
-        return this;
+        return this.reflect(axis)
+            .multiply(1, -1)
     }
-    slide(n) {
-        this.subtract(n.scale(this.dot(n)));
-        return this;
+    slide(normal) {
+        return this.subtract(tmp_point.copy(normal).scale(this.dot(normal)))
     }
 
     length() {

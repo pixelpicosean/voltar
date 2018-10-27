@@ -1,5 +1,5 @@
 import { remove_items } from 'engine/dep/index';
-import { Vector2, ObservablePoint, Rectangle } from 'engine/math/index';
+import { Vector2, ObservableVector2, Rectangle } from 'engine/math/index';
 import Node2D from '../Node2D';
 import Sprite from '../sprites/Sprite';
 import { registered_bitmap_fonts } from './res';
@@ -126,10 +126,10 @@ export default class BitmapText extends Node2D {
         /**
          * Text anchor. read-only
          *
-         * @member {ObservablePoint}
+         * @member {ObservableVector2}
          * @private
          */
-        this._anchor = new ObservablePoint(() => { this.dirty = true; }, this, 0, 0);
+        this._anchor = new ObservableVector2(() => { this.dirty = true; }, this, 0, 0);
 
         /**
          * The dirty state of this object.

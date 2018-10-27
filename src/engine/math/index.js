@@ -2,7 +2,7 @@
  * Math classes and utilities mixed into v namespace.
  */
 export { default as Vector2 } from './Vector2';
-export { default as ObservablePoint } from './ObservablePoint';
+export { default as ObservableVector2 } from './ObservableVector2';
 export { default as Matrix } from './Matrix';
 export { default as GroupD8 } from './GroupD8';
 export { default as Bounds } from './Bounds';
@@ -114,6 +114,7 @@ export function rad2deg(rad) {
  * @return {number}
  */
 export function nearest_po2(v) {
+    // @ts-ignore
     v += v === 0;
     --v;
     v |= v >>> 1;
@@ -141,9 +142,13 @@ export function is_po2(v) {
  */
 export function log_base_2(v) {
     let r, shift;
+    // @ts-ignore
     r = (v > 0xFFFF) << 4; v >>>= r;
+    // @ts-ignore
     shift = (v > 0xFF) << 3; v >>>= shift; r |= shift;
+    // @ts-ignore
     shift = (v > 0xF) << 2; v >>>= shift; r |= shift;
+    // @ts-ignore
     shift = (v > 0x3) << 1; v >>>= shift; r |= shift;
     return r | (v >> 1);
 }

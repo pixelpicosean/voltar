@@ -7,7 +7,7 @@ import {
     remove_items,
 } from 'engine/dep/index';
 import { TransformStatic, Transform, Vector2, Bounds, Rectangle } from 'engine/math/index';
-import ObservablePoint from 'engine/math/ObservablePoint';
+import ObservableVector2 from 'engine/math/ObservableVector2';
 import Filter from 'engine/renderers/filters/Filter';
 import { rgb2hex } from 'engine/utils/index';
 
@@ -712,7 +712,7 @@ export default class Node2D extends EventEmitter {
      * The coordinate of the object relative to the local coordinates of the parent.
      * Assignment by value.
      *
-     * @type {ObservablePoint}
+     * @type {ObservableVector2}
      */
     get position() {
         return this.transform.position;
@@ -743,7 +743,7 @@ export default class Node2D extends EventEmitter {
      * The scale factor of the object.
      * Assignment by value since pixi-v4.
      *
-     * @type {ObservablePoint}
+     * @type {ObservableVector2}
      */
     get scale() {
         return this.transform.scale;
@@ -774,7 +774,7 @@ export default class Node2D extends EventEmitter {
      * The pivot point of the node that it rotates around
      * Assignment by value since pixi-v4.
      *
-     * @type {ObservablePoint}
+     * @type {ObservableVector2}
      */
     get pivot() {
         return this.transform.pivot;
@@ -801,7 +801,7 @@ export default class Node2D extends EventEmitter {
      * The skew factor for the object in radians.
      * Assignment by value since pixi-v4.
      *
-     * @type {ObservablePoint}
+     * @type {ObservableVector2}
      */
     get skew() {
         return this.transform.skew;

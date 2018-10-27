@@ -1,4 +1,4 @@
-import { Vector2, ObservablePoint, Rectangle } from '../../math/index';
+import { Vector2, ObservableVector2, Rectangle } from '../../math/index';
 import { sign, TextureCache } from '../../utils/index';
 import { BLEND_MODES } from '../../const';
 import Texture from '../../textures/Texture';
@@ -35,10 +35,10 @@ export default class Sprite extends Node2D {
          * Note: Updating the {@link Texture#default_anchor} after a Texture is
          * created does _not_ update the Sprite's anchor values.
          *
-         * @member {ObservablePoint}
+         * @member {ObservableVector2}
          * @private
          */
-        this._anchor = new ObservablePoint(this._on_anchor_update, this);
+        this._anchor = new ObservableVector2(this._on_anchor_update, this);
 
         /**
          * The texture that the sprite is using
@@ -542,7 +542,7 @@ export default class Sprite extends Node2D {
      *
      * 0,0 means the texture's origin is the top left, 0.5,0.5 is the center, 1,1 the bottom right corner.
      *
-     * @member {ObservablePoint}
+     * @member {ObservableVector2}
      */
     get anchor() {
         return this._anchor;
