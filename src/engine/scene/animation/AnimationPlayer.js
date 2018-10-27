@@ -470,6 +470,8 @@ export default class AnimationPlayer extends Node2D {
                 } break;
             }
         }
+
+        return this;
     }
 
     _propagate_ready() {

@@ -45,7 +45,7 @@ export default class ObservablePoint {
     /**
      * Copies the data from another point
      *
-     * @param {Vector2|ObservablePoint} point - point to copy from
+     * @param {import('./Vector2').Vector2Like|ObservablePoint} point - point to copy from
      */
     copy(point) {
         if (this._x !== point.x || this._y !== point.y) {

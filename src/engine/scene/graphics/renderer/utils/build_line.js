@@ -1,6 +1,7 @@
 import { Vector2 } from 'engine/math/index';
 import { hex2rgb } from 'engine/utils/index';
 import WebGLGraphicsData from '../WebGLGraphicsData';
+import GraphicsData from '../../GraphicsData';
 
 /**
  * Builds a line to draw
@@ -31,7 +32,7 @@ export default function (graphics_data, webgl_data, webgl_data_native_lines) {
  * @param {object} webGLData - an object containing all the webGL-specific information to create this shape
  */
 function build_line(graphics_data, webGLData) {
-    // TODO OPTIMISE!
+    // TODO: OPTIMISE!
     let points = graphics_data.points;
 
     if (points.length === 0) {

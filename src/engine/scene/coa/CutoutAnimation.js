@@ -15,6 +15,7 @@ export default class CutoutAnimation extends Node2D {
      * Load entity data from scon model
      * @param {string} data key of the animation data
      * @param {number} entity entity index in the animation data
+     * @returns {this}
      */
     load(data, entity) {
         /**

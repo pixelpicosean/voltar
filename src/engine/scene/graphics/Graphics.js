@@ -261,6 +261,8 @@ export default class Graphics extends Node2D {
                     }
             }
         }
+
+        return this;
     }
 
     /**
@@ -1264,6 +1266,8 @@ export default class Graphics extends Node2D {
         this.current_path = null;
         this._webgl = null;
         this._localBounds = null;
+
+        return this;
     }
 
 }

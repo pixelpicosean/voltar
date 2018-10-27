@@ -24,6 +24,7 @@ import Node2D from '../Node2D';
  *
  * And here you have a hundred sprites that will be renderer at the speed of light.
  */
+// @ts-ignore
 export default class ParticleNode2D extends Node2D {
     /**
      * @param {number} [maxSize=1500] - The maximum number of particles that can be renderer by the container.
@@ -43,7 +44,7 @@ export default class ParticleNode2D extends Node2D {
         this.type = 'ParticleNode2D';
 
         /**
-         * @type {Array<import('engine/index').Sprite>}
+         * @type {import('engine/index').Sprite[]}
          */
         this.children;
 
@@ -250,5 +251,7 @@ export default class ParticleNode2D extends Node2D {
         this._properties = null;
         this._buffers = null;
         this._buffer_update_ids = null;
+
+        return this;
     }
 }

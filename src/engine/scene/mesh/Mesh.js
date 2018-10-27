@@ -350,7 +350,7 @@ export default class Mesh extends Node2D {
 
         this._gl_datas = null;
 
-        super.destroy();
+        return super.destroy();
     }
 }
 

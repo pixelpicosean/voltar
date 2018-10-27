@@ -1,11 +1,9 @@
+import { Circle, Rectangle, Ellipse, Polygon } from "engine/math/index";
+
 /**
  * A GraphicsData object.
- *
- * @class
- * @memberof V
  */
-export default class GraphicsData
-{
+export default class GraphicsData {
     /**
      *
      * @param {number} line_width - the width of the line to draw
@@ -15,11 +13,10 @@ export default class GraphicsData
      * @param {number} fill_alpha - the alpha of the fill
      * @param {boolean} fill - whether or not the shape is filled with a colour
      * @param {boolean} native_lines - the method for drawing lines
-     * @param {v.Circle|v.Rectangle|v.Ellipse|v.Polygon} shape - The shape object to draw.
+     * @param {Circle|Rectangle|Ellipse|Polygon} shape - The shape object to draw.
      * @param {number} lineAlignment - the alignment of the line.
      */
-    constructor(line_width, line_color, line_alpha, fillColor, fill_alpha, fill, native_lines, shape, lineAlignment)
-    {
+    constructor(line_width, line_color, line_alpha, fillColor, fill_alpha, fill, native_lines, shape, lineAlignment) {
         /**
          * @member {number} the width of the line to draw
          */
@@ -74,7 +71,7 @@ export default class GraphicsData
         this.holes = [];
 
         /**
-         * @member {V.Circle|V.Ellipse|V.Polygon|V.Rectangle|V.RoundedRectangle} The shape object to draw.
+         * @member {Circle|Ellipse|Polygon|Rectangle|RoundedRectangle} The shape object to draw.
          */
         this.shape = shape;
 
@@ -87,10 +84,9 @@ export default class GraphicsData
     /**
      * Creates a new GraphicsData object with the same values as this one.
      *
-     * @return {V.GraphicsData} Cloned GraphicsData object
+     * @return {GraphicsData} Cloned GraphicsData object
      */
-    clone()
-    {
+    clone() {
         return new GraphicsData(
             this.line_width,
             this.line_color,
@@ -99,25 +95,24 @@ export default class GraphicsData
             this.fill_alpha,
             this.fill,
             this.native_lines,
-            this.shape
+            this.shape,
+            this.lineAlignment
         );
     }
 
     /**
      * Adds a hole to the shape.
      *
-     * @param {V.Rectangle|V.Circle} shape - The shape of the hole.
+     * @param {Rectangle|Circle} shape - The shape of the hole.
      */
-    add_hole(shape)
-    {
+    add_hole(shape) {
         this.holes.push(shape);
     }
 
     /**
      * Destroys the Graphics data.
      */
-    destroy()
-    {
+    destroy() {
         this.shape = null;
         this.holes = null;
     }

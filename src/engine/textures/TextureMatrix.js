@@ -85,7 +85,7 @@ export default class TextureMatrix {
 
     /**
      * updates matrices if texture was changed
-     * @param {boolean} force_update if true, matrices will be updated any case
+     * @param {boolean} [force_update=false] if true, matrices will be updated any case
      * @returns {boolean} whether or not it was updated
      */
     update(force_update) {

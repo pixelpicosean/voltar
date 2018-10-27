@@ -233,7 +233,8 @@ export default class Node2D extends EventEmitter {
         /**
          * The array of children of this container.
          *
-         * @type {Array<Node2D>}
+         * @template {Node2D} T
+         * @type {Array<T>}
          * @readonly
          */
         this.children = [];

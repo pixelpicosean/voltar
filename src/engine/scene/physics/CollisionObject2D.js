@@ -150,6 +150,8 @@ export default class CollisionObject2D extends Node2D {
     }
 
     _load_data(data) {
+        super._load_data(data);
+
         for (let k in data) {
             switch (k) {
             // Directly set
@@ -176,6 +178,8 @@ export default class CollisionObject2D extends Node2D {
                 break;
             }
         }
+
+        return this;
     }
     _add_shapes_to_physics_server() {
         for (let s of this.shapes) {

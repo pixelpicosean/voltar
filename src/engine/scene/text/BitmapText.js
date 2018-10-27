@@ -158,6 +158,8 @@ export default class BitmapText extends Node2D {
                     this._max_line_height = data[k];
             }
         }
+
+        return this;
     }
 
     /**

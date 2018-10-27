@@ -154,7 +154,7 @@ export default class TilingSprite extends Sprite {
      * Renders the object using the WebGL renderer
      *
      * @private
-     * @param {WebGLRenderer} renderer - The renderer
+     * @param {import('engine/renderers/WebGLRenderer').default} renderer - The renderer
      */
     _render_webgl(renderer) {
         // tweak our texture temporarily..
@@ -240,7 +240,7 @@ export default class TilingSprite extends Sprite {
     /**
      * Destroys this sprite and optionally its texture and children
      *
-     * @param {import('./Sprite').DestroyOption|boolean} [options] - Options parameter. A boolean will act as if all options
+     * @param {import('../Node2D').DestroyOption|boolean} [options] - Options parameter. A boolean will act as if all options
      *  have been set to that value
      */
     destroy(options) {
@@ -248,57 +248,6 @@ export default class TilingSprite extends Sprite {
 
         this.tile_transform = null;
         this.uv_transform = null;
-    }
-
-    /**
-     * Helper function that creates a new tiling sprite based on the source you provide.
-     * The source can be - frame id, image url, video url, canvas element, video element, base texture
-     *
-     * @static
-     * @param {number|string|BaseTexture|HTMLCanvasElement|HTMLVideoElement} source - Source to create texture from
-     * @param {number} width - the width of the tiling sprite
-     * @param {number} height - the height of the tiling sprite
-     * @return {TilingSprite} The newly created texture
-     */
-    static from(source, width, height) {
-        return new TilingSprite(Texture.from(source), width, height);
-    }
-
-    /**
-     * Helper function that creates a tiling sprite that will use a texture from the TextureCache based on the frameId
-     * The frame ids are created when a Texture packer file has been loaded
-     *
-     * @static
-     * @param {string} frameId - The frame Id of the texture in the cache
-     * @param {number} width - the width of the tiling sprite
-     * @param {number} height - the height of the tiling sprite
-     * @return {TilingSprite} A new TilingSprite using a texture from the texture cache matching the frameId
-     */
-    static from_frame(frameId, width, height) {
-        const texture = TextureCache[frameId];
-
-        if (!texture) {
-            throw new Error(`The frameId "${frameId}" does not exist in the texture cache ${this}`);
-        }
-
-        return new TilingSprite(texture, width, height);
-    }
-
-    /**
-     * Helper function that creates a sprite that will contain a texture based on an image url
-     * If the image is not in the texture cache it will be loaded
-     *
-     * @static
-     * @param {string} imageId - The image url of the texture
-     * @param {number} width - the width of the tiling sprite
-     * @param {number} height - the height of the tiling sprite
-     * @param {boolean} [crossorigin] - if you want to specify the cross-origin parameter
-     * @param {number} [scale_mode=settings.SCALE_MODE] - if you want to specify the scale mode,
-     *  see {@link SCALE_MODES} for possible values
-     * @return {TilingSprite} A new TilingSprite using a texture from the texture cache matching the image id
-     */
-    static from_image(imageId, width, height, crossorigin, scale_mode) {
-        return new TilingSprite(Texture.from_image(imageId, crossorigin, scale_mode), width, height);
     }
 
     /**

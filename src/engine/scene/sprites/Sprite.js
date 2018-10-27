@@ -180,6 +180,8 @@ export default class Sprite extends Node2D {
                     break;
             }
         }
+
+        return this;
     }
 
     _propagate_enter_tree() {
@@ -430,7 +432,7 @@ export default class Sprite extends Node2D {
 
     /**
      * Destroys this sprite and optionally its texture and children
-     * @param {DestroyOption|boolean} [options] - Options parameter. A boolean will act as if all options
+     * @param {import('../Node2D').DestroyOption|boolean} [options] - Options parameter. A boolean will act as if all options
      *  have been set to that value
      */
     destroy(options) {
