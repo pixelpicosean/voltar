@@ -632,6 +632,7 @@ export default class Node2D extends EventEmitter {
      * remove the display object from its parent Node2D as well as remove
      * all current event listeners and internal references. Do not use a Node2D
      * after calling `destroy`.
+     *
      * @returns {this}
      */
     destroy() {

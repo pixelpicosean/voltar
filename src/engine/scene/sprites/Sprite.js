@@ -1,10 +1,12 @@
-import { Vector2, ObservableVector2, Rectangle } from '../../math/index';
-import { sign, TextureCache } from '../../utils/index';
-import { BLEND_MODES } from '../../const';
-import Texture from '../../textures/Texture';
-import Node2D from '../Node2D';
-
+import { BLEND_MODES } from 'engine/const';
+import { Vector2, ObservableVector2, Rectangle } from 'engine/math/index';
+import { sign, TextureCache } from 'engine/utils/index';
 import WebGLRenderer from 'engine/renderers/WebGLRenderer';
+
+import Texture from 'engine/textures/Texture';
+import BaseTexture from 'engine/textures/BaseTexture';
+
+import Node2D from '../Node2D';
 
 const temp_point = new Vector2();
 
@@ -116,7 +118,9 @@ export default class Sprite extends Node2D {
             } else {
                 this.texture = texture;
             }
+            // @ts-ignore
             if (texture.default_anchor) {
+                // @ts-ignore
                 this._anchor.set(texture.default_anchor.x, texture.default_anchor.y);
             }
         } else {
@@ -452,6 +456,8 @@ export default class Sprite extends Node2D {
 
         this._texture = null;
         this.shader = null;
+
+        return this;
     }
 
     // some helper functions..
