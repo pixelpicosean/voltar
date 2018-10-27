@@ -13,7 +13,7 @@ import Texture from 'engine/textures/Texture';
  */
 export default class Plane extends Mesh {
     /**
-     * @param {Texture} texture - The texture to use on the Plane.
+     * @param {string|Texture} texture - The texture to use on the Plane.
      * @param {number} [vertices_x=10] - The number of vertices in the x-axis
      * @param {number} [vertices_y=10] - The number of vertices in the y-axis
      */

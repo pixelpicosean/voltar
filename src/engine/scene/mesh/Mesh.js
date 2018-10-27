@@ -1,7 +1,7 @@
 import settings from 'engine/settings';
 import { BLEND_MODES } from 'engine/const';
 import { Vector2, Polygon } from 'engine/math/index';
-import { rgb2hex, hex2rgb } from 'engine/utils/index';
+import { rgb2hex, hex2rgb, TextureCache } from 'engine/utils/index';
 import Texture from 'engine/textures/Texture';
 import TextureMatrix from 'engine/textures/TextureMatrix';
 import Node2D from '../Node2D';
@@ -15,13 +15,17 @@ const temp_polygon = new Polygon();
  */
 export default class Mesh extends Node2D {
     /**
-     * @param {Texture} texture - The texture to use
+     * @param {string|Texture} texture - The texture to use
      * @param {Float32Array} [vertices] - if you want to specify the vertices
      * @param {Float32Array} [uvs] - if you want to specify the uvs
      * @param {Uint16Array} [indices] - if you want to specify the indices
      * @param {number} [draw_mode] - the draw_mode, can be any of the Mesh.DRAW_MODES consts
      */
     constructor(texture, vertices, uvs, indices, draw_mode) {
+        if (typeof(texture) === 'string') {
+            texture = TextureCache[texture];
+        }
+
         super();
 
         this.type = 'Mesh';
@@ -350,7 +354,7 @@ export default class Mesh extends Node2D {
 
         this._gl_datas = null;
 
-        return super.destroy();
+        super.destroy();
     }
 }
 

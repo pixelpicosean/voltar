@@ -456,8 +456,6 @@ export default class Sprite extends Node2D {
 
         this._texture = null;
         this.shader = null;
-
-        return this;
     }
 
     // some helper functions..

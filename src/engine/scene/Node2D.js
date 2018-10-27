@@ -312,11 +312,6 @@ export default class Node2D extends EventEmitter {
          */
         this.cursor = null;
         this.button_mode = false;
-        /**
-         * @type {(point: import('engine/math/Vector2').Vector2Like) => boolean}
-         */
-        this.contains_point = null;
-        this.tracked_pointers = null;
 
         this.tree_entered = new Signal();
         this.tree_exited = new Signal();
@@ -657,8 +652,6 @@ export default class Node2D extends EventEmitter {
      * remove the display object from its parent Node2D as well as remove
      * all current event listeners and internal references. Do not use a Node2D
      * after calling `destroy`.
-     *
-     * @returns {this}
      */
     destroy() {
         // TODO: how do we cleanup an `EventEmitter`
@@ -680,8 +673,6 @@ export default class Node2D extends EventEmitter {
         this.interactive_children = false;
 
         this._destroyed = true;
-
-        return this;
     }
 
     /**
