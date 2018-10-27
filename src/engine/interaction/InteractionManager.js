@@ -5,7 +5,6 @@ import InteractionTrackingData from './InteractionTrackingData';
 import interactive_target from './interactive_target';
 import { mixins } from 'engine/utils/index';
 import Node2D from 'engine/scene/Node2D';
-import CanvasRenderer from 'engine/renderers/canvas/CanvasRenderer';
 import WebGLRenderer from 'engine/renderers/WebGLRenderer';
 import Vector2 from 'engine/math/Vector2';
 import * as ticker from 'engine/ticker/index';
@@ -19,12 +18,19 @@ mixins.delay_mixin(
 
 const MOUSE_POINTER_ID = 1;
 
+const NOOP = () => {};
+
 // helpers for hit_test() - only used inside hit_test()
 const hit_test_event = {
+    type: null,
     target: null,
+    current_target: null,
     data: {
         global: null,
     },
+    stopped: false,
+    stop_propagation: NOOP,
+    reset: NOOP,
 };
 
 /**
@@ -33,13 +39,10 @@ const hit_test_event = {
  * This manager also supports multitouch.
  *
  * An instance of this class is automatically created by default, and can be found at renderer.plugins.interaction
- *
- * @class
- * @extends EventEmitter
  */
 export default class InteractionManager extends EventEmitter {
     /**
-     * @param {CanvasRenderer|WebGLRenderer} renderer - A reference to the current renderer
+     * @param {WebGLRenderer} renderer - A reference to the current renderer
      * @param {object} [options] - The options for the manager.
      * @param {boolean} [options.auto_prevent_default=true] - Should the manager automatically prevent default browser actions.
      * @param {number} [options.interaction_frequency=10] - Frequency increases the interaction events will be checked.
@@ -164,6 +167,7 @@ export default class InteractionManager extends EventEmitter {
          * @readonly
          * @member {boolean}
          */
+        // @ts-ignore
         this.supports_pointer_events = !!window.PointerEvent;
 
         // this will make it so that you don't have to call bind all the time
@@ -897,7 +901,7 @@ export default class InteractionManager extends EventEmitter {
     /**
      * Dispatches an event on the display object that was interacted with
      *
-     * @param {Node2D|Sprite|extras.TilingSprite} node - the display object in question
+     * @param {Node2D} node - the display object in question
      * @param {string} eventString - the name of the event (e.g, mousedown)
      * @param {object} event_data - the event data object
      * @private
@@ -935,9 +939,12 @@ export default class InteractionManager extends EventEmitter {
             rect = this.interaction_dom_element.getBoundingClientRect();
         }
 
+        // @ts-ignore
         const resolutionMultiplier = navigator.isCocoonJS ? this.resolution : (1.0 / this.resolution);
 
+        // @ts-ignore
         point.x = ((x - rect.left) * (this.interaction_dom_element.width / rect.width)) * resolutionMultiplier;
+        // @ts-ignore
         point.y = ((y - rect.top) * (this.interaction_dom_element.height / rect.height)) * resolutionMultiplier;
     }
 
@@ -949,7 +956,7 @@ export default class InteractionManager extends EventEmitter {
      * @private
      * @param {InteractionEvent} interactionEvent - event containing the point that
      *  is tested for collision
-     * @param {Node2D|Sprite|extras.TilingSprite} node - the node
+     * @param {Node2D} node - the node
      *  that will be hit test (recursively crawls its children)
      * @param {Function} [func] - the function that will be called on each interactive object. The
      *  interactionEvent, node and hit will be passed to the function
@@ -982,15 +989,15 @@ export default class InteractionManager extends EventEmitter {
         let hit = false;
         let interactiveParent = interactive;
 
-        // Flag here can set to false if the event is outside the parents hitArea or mask
+        // Flag here can set to false if the event is outside the parents hit_area or mask
         let hit_test_children = true;
 
-        // If there is a hitArea, no need to test against anything else if the pointer is not within the hitArea
+        // If there is a hit_area, no need to test against anything else if the pointer is not within the hit_area
         // There is also no longer a need to hitTest children.
         if (node.hit_area) {
             if (hit_test) {
                 node.world_transform.apply_inverse(point, this._temp_point);
-                if (!node.hitArea.contains(this._temp_point.x, this._temp_point.y)) {
+                if (!node.hit_area.contains(this._temp_point.x, this._temp_point.y)) {
                     hit_test = false;
                     hit_test_children = false;
                 }
@@ -1055,7 +1062,7 @@ export default class InteractionManager extends EventEmitter {
             // has already been hit - but only if it was interactive, otherwise we need to keep
             // looking for an interactive child, just in case we hit one
             if (hit_test && !interactionEvent.target) {
-                // already tested against hitArea if it is defined
+                // already tested against hit_area if it is defined
                 if (!node.hit_area && node.contains_point) {
                     if (node.contains_point(point)) {
                         hit = true;
@@ -1097,6 +1104,7 @@ export default class InteractionManager extends EventEmitter {
 
         // Guaranteed that there will be at least one event in events, and all events must have the same pointer type
 
+        // @ts-ignore
         if (this.auto_prevent_default && events[0].isNormalized) {
             original_event.preventDefault();
         }
@@ -1132,7 +1140,7 @@ export default class InteractionManager extends EventEmitter {
      *
      * @private
      * @param {InteractionEvent} interactionEvent - The interaction event wrapping the DOM event
-     * @param {Node2D|Sprite|extras.TilingSprite} node - The display object that was tested
+     * @param {Node2D} node - The display object that was tested
      * @param {boolean} hit - the result of the hit test on the display object
      */
     process_pointer_down(interactionEvent, node, hit) {
@@ -1224,7 +1232,7 @@ export default class InteractionManager extends EventEmitter {
      *
      * @private
      * @param {InteractionEvent} interactionEvent - The interaction event wrapping the DOM event
-     * @param {Node2D|Sprite|extras.TilingSprite} node - The display object that was tested
+     * @param {Node2D} node - The display object that was tested
      */
     process_pointer_cancel(interactionEvent, node) {
         const data = interactionEvent.data;
@@ -1259,7 +1267,7 @@ export default class InteractionManager extends EventEmitter {
      *
      * @private
      * @param {InteractionEvent} interactionEvent - The interaction event wrapping the DOM event
-     * @param {Node2D|Sprite|extras.TilingSprite} node - The display object that was tested
+     * @param {Node2D} node - The display object that was tested
      * @param {boolean} hit - the result of the hit test on the display object
      */
     process_pointer_up(interactionEvent, node, hit) {
@@ -1391,7 +1399,7 @@ export default class InteractionManager extends EventEmitter {
      *
      * @private
      * @param {InteractionEvent} interactionEvent - The interaction event wrapping the DOM event
-     * @param {Node2D|Sprite|extras.TilingSprite} node - The display object that was tested
+     * @param {Node2D} node - The display object that was tested
      * @param {boolean} hit - the result of the hit test on the display object
      */
     process_pointer_move(interactionEvent, node, hit) {
@@ -1456,7 +1464,7 @@ export default class InteractionManager extends EventEmitter {
      *
      * @private
      * @param {InteractionEvent} interactionEvent - The interaction event wrapping the DOM event
-     * @param {Node2D|Sprite|extras.TilingSprite} node - The display object that was tested
+     * @param {Node2D} node - The display object that was tested
      * @param {boolean} hit - the result of the hit test on the display object
      */
     process_pointer_over_out(interactionEvent, node, hit) {
@@ -1595,6 +1603,7 @@ export default class InteractionManager extends EventEmitter {
         // This is the way InteractionManager processed touch events before the refactoring, so I've kept
         // it here. But it doesn't make that much sense to me, since map_position_to_point already factors
         // in this.resolution, so this just divides by this.resolution twice for touch events...
+        // @ts-ignore
         if (navigator.isCocoonJS && pointerEvent.pointerType === 'touch') {
             interactionData.global.x = interactionData.global.x / this.resolution;
             interactionData.global.y = interactionData.global.y / this.resolution;
@@ -1602,7 +1611,9 @@ export default class InteractionManager extends EventEmitter {
 
         // Not really sure why this is happening, but it's how a previous version handled things
         if (pointerEvent.pointerType === 'touch') {
+            // @ts-ignore
             pointerEvent.globalX = interactionData.global.x;
+            // @ts-ignore
             pointerEvent.globalY = interactionData.global.y;
         }
 
@@ -1627,47 +1638,75 @@ export default class InteractionManager extends EventEmitter {
             for (let i = 0, li = event.changedTouches.length; i < li; i++) {
                 const touch = event.changedTouches[i];
 
+                // @ts-ignore
                 if (typeof touch.button === 'undefined') touch.button = event.touches.length ? 1 : 0;
+                // @ts-ignore
                 if (typeof touch.buttons === 'undefined') touch.buttons = event.touches.length ? 1 : 0;
+                // @ts-ignore
                 if (typeof touch.isPrimary === 'undefined') {
+                // @ts-ignore
                     touch.isPrimary = event.touches.length === 1 && event.type === 'touchstart';
                 }
+                // @ts-ignore
                 if (typeof touch.width === 'undefined') touch.width = touch.radiusX || 1;
+                // @ts-ignore
                 if (typeof touch.height === 'undefined') touch.height = touch.radiusY || 1;
+                // @ts-ignore
                 if (typeof touch.tiltX === 'undefined') touch.tiltX = 0;
+                // @ts-ignore
                 if (typeof touch.tiltY === 'undefined') touch.tiltY = 0;
+                // @ts-ignore
                 if (typeof touch.pointerType === 'undefined') touch.pointerType = 'touch';
+                // @ts-ignore
                 if (typeof touch.pointerId === 'undefined') touch.pointerId = touch.identifier || 0;
+                // @ts-ignore
                 if (typeof touch.pressure === 'undefined') touch.pressure = touch.force || 0.5;
+                // @ts-ignore
                 touch.twist = 0;
+                // @ts-ignore
                 touch.tangentialPressure = 0;
                 // TODO: Remove these, as layerX/Y is not a standard, is deprecated, has uneven
                 // support, and the fill ins are not quite the same
                 // offsetX/Y might be okay, but is not the same as clientX/Y when the canvas's top
                 // left is not 0,0 on the page
+                // @ts-ignore
                 if (typeof touch.layerX === 'undefined') touch.layerX = touch.offsetX = touch.clientX;
+                // @ts-ignore
                 if (typeof touch.layerY === 'undefined') touch.layerY = touch.offsetY = touch.clientY;
 
                 // mark the touch as normalized, just so that we know we did it
+                // @ts-ignore
                 touch.isNormalized = true;
 
                 normalizedEvents.push(touch);
             }
         }
         // apparently PointerEvent subclasses MouseEvent, so yay
+        // @ts-ignore
         else if (event instanceof MouseEvent && (!this.supports_pointer_events || !(event instanceof window.PointerEvent))) {
-            if (typeof event.is_primary === 'undefined') event.is_primary = true;
+            // @ts-ignore
+            if (typeof event.isPrimary === 'undefined') event.isPrimary = true;
+            // @ts-ignore
             if (typeof event.width === 'undefined') event.width = 1;
+            // @ts-ignore
             if (typeof event.height === 'undefined') event.height = 1;
+            // @ts-ignore
             if (typeof event.tiltX === 'undefined') event.tiltX = 0;
+            // @ts-ignore
             if (typeof event.tiltY === 'undefined') event.tiltY = 0;
+            // @ts-ignore
             if (typeof event.pointerType === 'undefined') event.pointerType = 'mouse';
+            // @ts-ignore
             if (typeof event.pointerId === 'undefined') event.pointerId = MOUSE_POINTER_ID;
+            // @ts-ignore
             if (typeof event.pressure === 'undefined') event.pressure = 0.5;
+            // @ts-ignore
             event.twist = 0;
+            // @ts-ignore
             event.tangentialPressure = 0;
 
             // mark the mouse event as normalized, just so that we know we did it
+            // @ts-ignore
             event.isNormalized = true;
 
             normalizedEvents.push(event);
@@ -1676,6 +1715,7 @@ export default class InteractionManager extends EventEmitter {
             normalizedEvents.push(event);
         }
 
+        // @ts-ignore
         return normalizedEvents;
     }
 
@@ -1718,4 +1758,3 @@ export default class InteractionManager extends EventEmitter {
 }
 
 WebGLRenderer.register_plugin('interaction', InteractionManager);
-CanvasRenderer.register_plugin('interaction', InteractionManager);

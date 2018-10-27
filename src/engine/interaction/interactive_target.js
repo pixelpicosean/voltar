@@ -1,16 +1,17 @@
+import InteractionTrackingData from './InteractionTrackingData';
+
 /**
  * Default property values of interactive objects
- * Used by {@link V.interaction.InteractionManager} to automatically give all Node2Ds these properties
+ * Used by {@link InteractionManager} to automatically give all Node2Ds these properties
  *
  * @private
- * @name interactiveTarget
- * @memberof V.interaction
+ * @name interactive_target
  * @example
  *      function MyObject() {}
  *
  *      Object.assign(
- *          core.Node2D.prototype,
- *          V.interaction.interactiveTarget
+ *          MyObject.prototype,
+ *          interactive_target
  *      );
  */
 export default {
@@ -20,13 +21,12 @@ export default {
      * events will not be emitted unless `interactive` is set to `true`.
      *
      * @example
-     * const sprite = new V.Sprite(texture);
+     * const sprite = new Sprite(texture);
      * sprite.interactive = true;
      * sprite.on('tap', (event) => {
-     *    //handle event
+     *      // handle event
      * });
      * @member {boolean}
-     * @memberof V.Node2D#
      */
     interactive: false,
 
@@ -35,7 +35,6 @@ export default {
      * Setting this to false allows pixi to bypass a recursive `hit_test` function
      *
      * @member {boolean}
-     * @memberof V.Node2D#
      */
     interactive_children: true,
 
@@ -44,11 +43,10 @@ export default {
      * Setting this will cause this shape to be checked in hit tests rather than the node's bounds.
      *
      * @example
-     * const sprite = new V.Sprite(texture);
+     * const sprite = new Sprite(texture);
      * sprite.interactive = true;
-     * sprite.hit_area = new V.Rectangle(0, 0, 100, 100);
-     * @member {V.Rectangle|V.Circle|V.Ellipse|V.Polygon|V.RoundedRectangle}
-     * @memberof V.Node2D#
+     * sprite.hit_area = new Rectangle(0, 0, 100, 100);
+     * @member {Rectangle|Circle|Ellipse|Polygon|RoundedRectangle}
      */
     hit_area: null,
 
@@ -57,11 +55,10 @@ export default {
      * Setting this changes the 'cursor' property to `'pointer'`.
      *
      * @example
-     * const sprite = new V.Sprite(texture);
+     * const sprite = new Sprite(texture);
      * sprite.interactive = true;
      * sprite.button_mode = true;
      * @member {boolean}
-     * @memberof V.Node2D#
      */
     get button_mode()
     {
@@ -84,21 +81,20 @@ export default {
      * is hovered over the node.
      *
      * @example
-     * const sprite = new V.Sprite(texture);
+     * const sprite = new Sprite(texture);
      * sprite.interactive = true;
      * sprite.cursor = 'wait';
      * @see https://developer.mozilla.org/en/docs/Web/CSS/cursor
      *
      * @member {string}
-     * @memberof V.Node2D#
      */
     cursor: null,
 
     /**
      * Internal set of all active pointers, by identifier
      *
-     * @member {Map<number, InteractionTrackingData>}
-     * @memberof V.Node2D#
+     * @member {Object<number, InteractionTrackingData>}
+     * @memberof Node2D#
      * @private
      */
     get tracked_pointers()
@@ -112,7 +108,7 @@ export default {
      * Map of all tracked pointers, by identifier. Use tracked_pointers to access.
      *
      * @private
-     * @type {Map<number, InteractionTrackingData>}
+     * @type {Object<number, InteractionTrackingData>}
      */
     _tracked_pointers: undefined,
 };

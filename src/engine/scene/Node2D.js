@@ -1,12 +1,20 @@
 /// <reference path="../tween/index.d.ts" />
 
-import settings from '../settings';
 import { node_plugins, alternative } from 'engine/registry';
 import {
     EventEmitter, Signal,
     remove_items,
 } from 'engine/dep/index';
-import { TransformStatic, Transform, Vector2, Bounds, Rectangle } from 'engine/math/index';
+import {
+    TransformStatic,
+    Vector2,
+    Bounds,
+    Rectangle,
+    Circle,
+    Polygon,
+    RoundedRectangle,
+    Ellipse,
+} from 'engine/math/index';
 import ObservableVector2 from 'engine/math/ObservableVector2';
 import Filter from 'engine/renderers/filters/Filter';
 import { rgb2hex } from 'engine/utils/index';
@@ -292,6 +300,23 @@ export default class Node2D extends EventEmitter {
                 self.alpha = value;
             },
         };
+
+        this.interactive = false;
+        this.interactive_children = true;
+        /**
+         * @type {Rectangle|Circle|Ellipse|Polygon|RoundedRectangle}
+         */
+        this.hit_area = null;
+        /**
+         * @type {string}
+         */
+        this.cursor = null;
+        this.button_mode = false;
+        /**
+         * @type {(point: import('engine/math/Vector2').Vector2Like) => boolean}
+         */
+        this.contains_point = null;
+        this.tracked_pointers = null;
 
         this.tree_entered = new Signal();
         this.tree_exited = new Signal();

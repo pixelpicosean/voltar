@@ -143,11 +143,11 @@ export default class InteractionData {
      *
      * @param {Node2D} node - The Node2D that you would like the local
      *  coords off
-     * @param {Vector2} [point] - A Vector2 object in which to store the value, optional (otherwise
+     * @param {import("engine/math/Vector2").Vector2Like} [point] - A Vector2 object in which to store the value, optional (otherwise
      *  will create a new point)
-     * @param {Vector2} [globalPos] - A Vector2 object containing your custom global coords, optional
+     * @param {import("engine/math/Vector2").Vector2Like} [globalPos] - A Vector2 object containing your custom global coords, optional
      *  (otherwise will use the current global coords)
-     * @return {Vector2} A point containing the coordinates of the InteractionData position relative
+     * @return {import("engine/math/Vector2").Vector2Like} A point containing the coordinates of the InteractionData position relative
      *  to the Node2D
      */
     get_local_position(node, point, globalPos) {
@@ -161,24 +161,36 @@ export default class InteractionData {
      * @private
      */
     copy_event(event) {
-        // is_primary should only change on touchstart/pointerdown, so we don't want to overwrite
+        // isPrimary should only change on touchstart/pointerdown, so we don't want to overwrite
         // it with "false" on later events when our shim for it on touch events might not be
         // accurate
-        if (event.is_primary) {
+        // @ts-ignore
+        if (event.isPrimary) {
             this.is_primary = true;
         }
+        // @ts-ignore
         this.button = event.button;
         // event.buttons is not available in all browsers (ie. Safari), but it does have a non-standard
         // event.which property instead, which conveys the same information.
+        // @ts-ignore
         this.buttons = Number.isInteger(event.buttons) ? event.buttons : event.which;
+        // @ts-ignore
         this.width = event.width;
+        // @ts-ignore
         this.height = event.height;
+        // @ts-ignore
         this.tilt_x = event.tiltX;
+        // @ts-ignore
         this.tilt_y = event.tiltY;
+        // @ts-ignore
         this.pointer_type = event.pointerType;
+        // @ts-ignore
         this.pressure = event.pressure;
+        // @ts-ignore
         this.rotation_angle = event.rotationAngle;
+        // @ts-ignore
         this.twist = event.twist || 0;
+        // @ts-ignore
         this.tangential_pressure = event.tangentialPressure || 0;
     }
 
