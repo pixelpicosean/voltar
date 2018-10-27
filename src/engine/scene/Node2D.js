@@ -727,11 +727,19 @@ export default class Node2D extends EventEmitter {
         return this.transform.position;
     }
     /**
-     * @param {import('engine/math/Vector2').Vector2Like} value
+     * @param {import('engine/math/Vector2').Vector2Like|number} x
+     * @param {number} [y]
      * @returns {this}
      */
-    set_position(value) {
-        this.transform.position.copy(value);
+    set_position(x, y) {
+        if (typeof(x) === 'object') {
+            y = x.y;
+            x = x.x;
+        }
+        if (y === undefined) {
+            y = x;
+        }
+        this.transform.position.set(x, y);
         return this;
     }
 
@@ -758,11 +766,19 @@ export default class Node2D extends EventEmitter {
         return this.transform.scale;
     }
     /**
-     * @param {import('engine/math/Vector2').Vector2Like} value
+     * @param {import('engine/math/Vector2').Vector2Like|number} x
+     * @param {number} [y]
      * @returns {this}
      */
-    set_scale(value) {
-        this.transform.scale.copy(value);
+    set_scale(x, y) {
+        if (typeof (x) === 'object') {
+            y = x.y;
+            x = x.x;
+        }
+        if (y === undefined) {
+            y = x;
+        }
+        this.transform.scale.set(x, y);
         return this;
     }
 
@@ -789,11 +805,19 @@ export default class Node2D extends EventEmitter {
         return this.transform.pivot;
     }
     /**
-     * @param {import('engine/math/Vector2').Vector2Like} value
+     * @param {import('engine/math/Vector2').Vector2Like|number} x
+     * @param {number} [y]
      * @returns {this}
      */
-    set_pivot(value) {
-        this.transform.pivot.copy(value);
+    set_pivot(x, y) {
+        if (typeof (x) === 'object') {
+            y = x.y;
+            x = x.x;
+        }
+        if (y === undefined) {
+            y = x;
+        }
+        this.transform.pivot.set(x, y);
         return this;
     }
 
@@ -816,11 +840,19 @@ export default class Node2D extends EventEmitter {
         return this.transform.skew;
     }
     /**
-     * @param {import('engine/math/Vector2').Vector2Like} value
+     * @param {import('engine/math/Vector2').Vector2Like|number} x
+     * @param {number} [y]
      * @returns {this}
      */
-    set_skew(value) {
-        this.transform.skew.copy(value);
+    set_skew(x, y) {
+        if (typeof (x) === 'object') {
+            y = x.y;
+            x = x.x;
+        }
+        if (y === undefined) {
+            y = x;
+        }
+        this.transform.skew.set(x, y);
         return this;
     }
 
@@ -905,11 +937,19 @@ export default class Node2D extends EventEmitter {
     }
 
     /**
+     * @param {import('./graphics/Graphics').default|import('./sprites/Sprite').default} value
+     */
+    set_mask(value) {
+        this.mask = value;
+        return this;
+    }
+
+    /**
      * Sets the filters for the node.
      * * IMPORTANT: This is a webGL only feature and will be ignored by the canvas renderer.
      * To remove filters simply set this property to 'null'
      *
-     * @type {Array<Filter>}
+     * @type {Filter[]}
      */
     get filters() {
         return this._filters && this._filters.slice();
@@ -918,6 +958,13 @@ export default class Node2D extends EventEmitter {
     set filters(value) // eslint-disable-line require-jsdoc
     {
         this._filters = value && value.slice();
+    }
+
+    /**
+     * @param {Filter[]} value
+     */
+    set_filters(value) {
+        this.filters = value;
     }
 
     _enter_tree() { }
@@ -1072,6 +1119,7 @@ export default class Node2D extends EventEmitter {
         // ensure child transform will be recalculated
         child.transform._parent_id = -1;
 
+        // @ts-ignore
         this.children.push(child);
 
         // add to name hash
@@ -1119,6 +1167,7 @@ export default class Node2D extends EventEmitter {
         // ensure child transform will be recalculated
         child.transform._parent_id = -1;
 
+        // @ts-ignore
         this.children.splice(index, 0, child);
 
         // add to name hash
@@ -1160,7 +1209,9 @@ export default class Node2D extends EventEmitter {
         const index1 = this.get_child_index(child);
         const index2 = this.get_child_index(child2);
 
+        // @ts-ignore
         this.children[index1] = child2;
+        // @ts-ignore
         this.children[index2] = child;
         this.on_children_change(index1 < index2 ? index1 : index2);
 
@@ -1175,6 +1226,7 @@ export default class Node2D extends EventEmitter {
      * @return {number} The index position of the child display object to identify
      */
     get_child_index(child) {
+        // @ts-ignore
         const index = this.children.indexOf(child);
 
         if (index === -1) {
@@ -1200,6 +1252,7 @@ export default class Node2D extends EventEmitter {
         const current_index = this.get_child_index(child);
 
         remove_items(this.children, current_index, 1); // remove from old position
+        // @ts-ignore
         this.children.splice(index, 0, child); // add at new position
 
         this.on_children_change(index);
@@ -1230,6 +1283,7 @@ export default class Node2D extends EventEmitter {
      * @return {Node2D} The first child that was removed.
      */
     remove_child(child) {
+        // @ts-ignore
         const index = this.children.indexOf(child);
 
         if (index === -1) return null;

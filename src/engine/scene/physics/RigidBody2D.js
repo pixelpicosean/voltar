@@ -33,6 +33,70 @@ export default class RigidBody2D extends PhysicsBody2D {
 
         this._still_time = 0;
     }
+    /**
+     * @param {number} value
+     * @returns this
+     */
+    set_angular_damp(value) {
+        this.angular_damp = value;
+        return this;
+    }
+    /**
+     * @param {number} value
+     * @returns this
+     */
+    set_angular_velocity(value) {
+        this.angular_velocity = value;
+        return this;
+    }
+    /**
+     * @param {number} value
+     * @returns this
+     */
+    set_bounce(value) {
+        this.bounce = value;
+        return this;
+    }
+    /**
+     * @param {boolean} value
+     * @returns this
+     */
+    set_can_sleep(value) {
+        this.can_sleep = value;
+        return this;
+    }
+    /**
+     * @param {number} value
+     * @returns this
+     */
+    set_friction(value) {
+        this.friction = value;
+        return this;
+    }
+    /**
+     * @param {number} value
+     * @returns this
+     */
+    set_gravity_scale(value) {
+        this.gravity_scale = value;
+        return this;
+    }
+    /**
+     * @param {number} value
+     * @returns this
+     */
+    set_linear_damp(value) {
+        this.linear_damp = value;
+        return this;
+    }
+    /**
+     * @param {number} value
+     * @returns this
+     */
+    set_mass(value) {
+        this.mass = value;
+        return this;
+    }
 
     /**
      * @param {Vector2} offset
