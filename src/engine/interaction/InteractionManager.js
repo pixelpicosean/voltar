@@ -1063,7 +1063,9 @@ export default class InteractionManager extends EventEmitter {
             // looking for an interactive child, just in case we hit one
             if (hit_test && !interactionEvent.target) {
                 // already tested against hit_area if it is defined
+                // @ts-ignore
                 if (!node.hit_area && node.contains_point) {
+                    // @ts-ignore
                     if (node.contains_point(point)) {
                         hit = true;
                     }
@@ -1148,7 +1150,9 @@ export default class InteractionManager extends EventEmitter {
         const id = interactionEvent.data.identifier;
 
         if (hit) {
+            // @ts-ignore
             if (!node.tracked_pointers[id]) {
+                // @ts-ignore
                 node.tracked_pointers[id] = new InteractionTrackingData(id);
             }
             this.dispatch_event(node, 'pointerdown', interactionEvent);
@@ -1160,9 +1164,11 @@ export default class InteractionManager extends EventEmitter {
                 const isRightButton = data.button === 2;
 
                 if (isRightButton) {
+                    // @ts-ignore
                     node.tracked_pointers[id].right_down = true;
                 }
                 else {
+                    // @ts-ignore
                     node.tracked_pointers[id].left_down = true;
                 }
 
@@ -1239,7 +1245,9 @@ export default class InteractionManager extends EventEmitter {
 
         const id = interactionEvent.data.identifier;
 
+        // @ts-ignore
         if (node.tracked_pointers[id] !== undefined) {
+            // @ts-ignore
             delete node.tracked_pointers[id];
             this.dispatch_event(node, 'pointercancel', interactionEvent);
 
@@ -1275,6 +1283,7 @@ export default class InteractionManager extends EventEmitter {
 
         const id = interactionEvent.data.identifier;
 
+        // @ts-ignore
         const trackingData = node.tracked_pointers[id];
 
         const isTouch = data.pointer_type === 'touch';
@@ -1341,6 +1350,7 @@ export default class InteractionManager extends EventEmitter {
         }
         // Only remove the tracking data if there is no over/down state still associated with it
         if (trackingData && trackingData.none) {
+            // @ts-ignore
             delete node.tracked_pointers[id];
         }
     }
@@ -1474,10 +1484,12 @@ export default class InteractionManager extends EventEmitter {
 
         const isMouse = (data.pointer_type === 'mouse' || data.pointer_type === 'pen');
 
+        // @ts-ignore
         let trackingData = node.tracked_pointers[id];
 
         // if we just moused over the display object, then we need to track that state
         if (hit && !trackingData) {
+            // @ts-ignore
             trackingData = node.tracked_pointers[id] = new InteractionTrackingData(id);
         }
 
@@ -1506,6 +1518,7 @@ export default class InteractionManager extends EventEmitter {
             }
             // if there is no mouse down information for the pointer, then it is safe to delete
             if (trackingData.none) {
+                // @ts-ignore
                 delete node.tracked_pointers[id];
             }
         }
