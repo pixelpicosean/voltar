@@ -3,9 +3,9 @@
     "children": [
         {
             "type": "Sprite",
-            "x": 28,
-            "y": 118,
-            "width": 200,
+            "x": 0,
+            "y": 190,
+            "width": 400,
             "height": 20,
             "tint": 0,
             "texture": "_white_"
@@ -13,9 +13,9 @@
         {
             "name": "bar",
             "type": "Sprite",
-            "x": 28,
-            "y": 118,
-            "width": 200,
+            "x": 0,
+            "y": 190,
+            "width": 400,
             "height": 20,
             "texture": "_white_"
         }
