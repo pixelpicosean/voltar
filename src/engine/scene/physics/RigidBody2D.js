@@ -4,10 +4,6 @@ import { CollisionObjectTypes } from './CollisionObject2D';
 
 const tmp_vec = new Vector2();
 
-const default_angular_damp = 1;
-const default_linear_damp = 0.1;
-const gravity = new Vector2(0, 98);
-
 export default class RigidBody2D extends PhysicsBody2D {
     constructor() {
         super();
@@ -147,8 +143,10 @@ export default class RigidBody2D extends PhysicsBody2D {
             return;
         }
 
+        const physics_settings = this.scene_tree.settings.physics;
+
         // Calculate rotating
-        let angular_damp = (this.angular_damp >= 0) ? this.angular_damp : default_angular_damp;
+        let angular_damp = (this.angular_damp >= 0) ? this.angular_damp : physics_settings.default_angular_damp;
         angular_damp = 1.0 - step * angular_damp;
         if (angular_damp < 0) {
             angular_damp = 0;
@@ -158,15 +156,15 @@ export default class RigidBody2D extends PhysicsBody2D {
         this.rotation += this.angular_velocity * step;
 
         // Apply force -> velocity
-        let linear_damp = (this.linear_damp >= 0) ? this.linear_damp : default_linear_damp;
+        let linear_damp = (this.linear_damp >= 0) ? this.linear_damp : physics_settings.default_linear_damp;
         linear_damp = 1.0 - step * linear_damp;
         if (linear_damp < 0) {
             linear_damp = 0;
         }
         this.linear_velocity.scale(linear_damp);
         this.linear_velocity.add(
-            this._inv_mass * (gravity.x * this.gravity_scale * this.mass + this.applied_force.x) * step,
-            this._inv_mass * (gravity.y * this.gravity_scale * this.mass + this.applied_force.y) * step
+            this._inv_mass * (physics_settings.gravity.x * this.gravity_scale * this.mass + this.applied_force.x) * step,
+            this._inv_mass * (physics_settings.gravity.y * this.gravity_scale * this.mass + this.applied_force.y) * step
         );
 
         // Apply velocity -> motion

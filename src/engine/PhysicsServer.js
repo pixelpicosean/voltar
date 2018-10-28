@@ -9,12 +9,12 @@ import PhysicsBody2D from './scene/physics/PhysicsBody2D';
 import RigidBody2D from './scene/physics/RigidBody2D';
 import KinematicBody2D from './scene/physics/KinematicBody2D';
 
-// TODO: move to physics settings
-const sleep_threshold_linear = 2;
-const sleep_threshold_angular = 8.0 / 180.0 * Math.PI;
-const time_before_sleep = 0.5;
+// These settings will be set from scene tree
+let sleep_threshold_linear = 2;
+let sleep_threshold_angular = 8.0 / 180.0 * Math.PI;
+let time_before_sleep = 0.5;
 
-const sleep_threshold_linear_sqr = sleep_threshold_linear * sleep_threshold_linear;
+let sleep_threshold_linear_sqr = sleep_threshold_linear * sleep_threshold_linear;
 
 let i = 0;
 
@@ -278,10 +278,16 @@ export default class PhysicsServer {
         this.process_step = 0;
     }
 
-    init() {
+    init(settings) {
         if (this.is_initialized) {
             return;
         }
+
+        sleep_threshold_linear = settings.sleep_threshold_linear;
+        sleep_threshold_linear_sqr = sleep_threshold_linear * sleep_threshold_linear;
+        sleep_threshold_angular = settings.sleep_threshold_angular;
+        time_before_sleep = settings.time_before_sleep;
+
         this.is_initialized = true;
     }
     /**

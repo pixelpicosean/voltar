@@ -9,10 +9,12 @@ const {
 } = require('./utils');
 const {
     int,
+    real,
     string,
     boolean,
     get_function_params,
     Color,
+    Vector2,
 } = require('./parser/parse_utils');
 
 const gd_scene = require('./parser/gd_scene');
@@ -527,6 +529,50 @@ module.exports.convert_project_settings = (project_url) => {
         }
 
         real_settings.display = display;
+    }
+    if (settings.physics) {
+        let physics = {};
+
+        let sleep_threshold_linear = real(settings.physics['2d/sleep_threshold_linear']);
+        if (sleep_threshold_linear !== undefined) {
+            physics.sleep_threshold_linear = sleep_threshold_linear;
+        }
+
+        let sleep_threshold_angular = real(settings.physics['2d/sleep_threshold_angular']);
+        if (sleep_threshold_angular !== undefined) {
+            physics.sleep_threshold_angular = sleep_threshold_angular;
+        }
+
+        let time_before_sleep = real(settings.physics['2d/time_before_sleep']);
+        if (time_before_sleep !== undefined) {
+            physics.time_before_sleep = time_before_sleep;
+        }
+
+        let default_gravity = real(settings.physics['2d/default_gravity']) || 98;
+        let default_gravity_vector = Vector2(settings.physics['2d/default_gravity_vector']);
+        if (default_gravity_vector !== undefined) {
+            physics.gravity = {
+                x: default_gravity_vector.x * default_gravity,
+                y: default_gravity_vector.y * default_gravity,
+            }
+        } else {
+            physics.gravity = {
+                x: 0,
+                y: default_gravity,
+            }
+        }
+
+        let default_linear_damp = real(settings.physics['2d/default_linear_damp']);
+        if (default_linear_damp !== undefined) {
+            physics.default_linear_damp = default_linear_damp;
+        }
+
+        let default_angular_damp = real(settings.physics['2d/default_angular_damp']);
+        if (default_angular_damp !== undefined) {
+            physics.default_angular_damp = default_angular_damp;
+        }
+
+        real_settings.physics = physics;
     }
 
     fs.writeFileSync(project_url.replace(/\.godot/, '.json'), JSON.stringify(real_settings, null, 4));

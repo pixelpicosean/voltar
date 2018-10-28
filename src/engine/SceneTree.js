@@ -38,9 +38,25 @@ import { TransformStatic, Transform } from './math/index';
   */
 
 /**
+ * @typedef Gravity
+ * @prop {number} x
+ * @prop {number} y
+ */
+/**
+  * @typedef PhysicsSettings
+  * @prop {number} sleep_threshold_linear
+  * @prop {number} sleep_threshold_angular
+  * @prop {number} time_before_sleep
+  * @prop {number} default_angular_damp
+  * @prop {number} default_linear_damp
+  * @prop {Gravity} gravity
+  */
+
+/**
  * @typedef Settings
  * @prop {ApplicationSettings} application
  * @prop {DisplaySettings} display
+ * @prop {PhysicsSettings} physics
  */
 
 /**
@@ -70,6 +86,14 @@ const DefaultSettings = {
 
         stretch_mode: 'viewport',
         stretch_aspect: 'keep',
+    },
+    physics: {
+        sleep_threshold_linear: 2,
+        sleep_threshold_angular: 8.0 / 180.0 * Math.PI,
+        time_before_sleep: 0.5,
+        default_linear_damp: 0.1,
+        default_angular_damp: 1,
+        gravity: { x: 0, y: 98 },
     },
 };
 
@@ -286,7 +310,7 @@ export default class SceneTree {
             this.extract = new optional.Extract(this.visual_server.renderer);
         }
 
-        this.physics_server.init();
+        this.physics_server.init(this.settings.physics);
 
         // Listen to the resize and orientation events
         const on_window_resize = () => {
