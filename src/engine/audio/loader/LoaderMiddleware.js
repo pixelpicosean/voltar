@@ -15,7 +15,6 @@ export default class LoaderMiddleware {
      * @param {SoundLibrary} sound - Instance of sound library
      */
     static install(sound) {
-        console.log('install')
         LoaderMiddleware._sound = sound;
         LoaderMiddleware.legacy = sound.useLegacy;
 
