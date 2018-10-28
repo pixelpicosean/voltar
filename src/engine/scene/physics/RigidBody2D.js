@@ -30,6 +30,33 @@ export default class RigidBody2D extends PhysicsBody2D {
 
         this._still_time = 0;
     }
+    _load_data(data) {
+        super._load_data(data);
+
+        for (let k in data) {
+            switch (k) {
+                case 'mass':
+                case 'friction':
+                case 'bounce':
+                case 'gravity_scale':
+                case 'sleeping':
+                case 'can_sleep':
+                case 'linear_damp':
+                case 'angular_damp':
+                case 'angular_velocity':
+                case 'applied_torque': {
+                    this[k] = data[k];
+                } break;
+                case 'linear_velocity':
+                case 'applied_force': {
+                    this[k].copy(data[k]);
+                } break;
+            }
+        }
+
+        return this;
+    }
+
     /**
      * @param {number} value
      * @returns this
