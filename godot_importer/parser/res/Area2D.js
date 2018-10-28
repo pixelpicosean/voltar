@@ -1,29 +1,19 @@
 const _ = require('lodash');
 const {
-    boolean,
+    real,
     Vector2,
 } = require('../parse_utils');
 
-const Node2D = require('./Node2D');
+const CollisionObject2D = require('./CollisionObject2D');
 
 module.exports = (data) => {
-    const res = Object.assign({}, Node2D(data), {
+    const res = Object.assign({}, CollisionObject2D(data), {
         type: 'Area2D',
-        texture: data.prop.texture,
-        pivot: Vector2(data.prop.offset),
     });
-
-    // Set anchor based on `center`
-    const centered = boolean(data.prop.centered);
-    if (centered === undefined || (centered !== undefined && centered)) {
-        res.anchor = { x: 0.5, y: 0.5 };
-    }
-
-    // Revert pivot
-    if (res.pivot) {
-        res.pivot.x = -res.pivot.x;
-        res.pivot.y = -res.pivot.y;
-    }
+    res.gravity_vec = Vector2(data.prop.gravity_vec);
+    res.gravity = real(data.prop.gravity);
+    res.linear_damp = real(data.prop.linear_damp);
+    res.angular_damp = real(data.prop.angular_damp);
 
     return res;
 };

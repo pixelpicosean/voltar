@@ -302,6 +302,9 @@ function construct_scene(blocks) {
         for (let c of node.children) {
             remove_meta(c);
         }
+        if (node._is_proxy_) {
+            delete node.children;
+        }
     })(root_node);
 
     // Add resources into root_node.__meta__
@@ -340,8 +343,8 @@ function normalize_res_url(url) {
 }
 
 const resource_normalizers = {
-    Texture: (res, meta) => normalize_image_res_url(res.path),
-    DynamicFontData: (res, meta) => normalize_res_url(res.path),
+    Texture: (res) => normalize_image_res_url(res.path),
+    DynamicFontData: (res) => normalize_res_url(res.path),
     DynamicFont: (res, meta) => {
         const font = {
             size: res.size,
@@ -351,7 +354,12 @@ const resource_normalizers = {
         font.family = resource_normalizers[font_data.type](font_data, meta);
         return font;
     },
-    PackedScene: (res, meta) => normalize_res_url(res.path),
+    RectangleShape2D: (res, meta, parent) => {
+        res.position = parent.position;
+        delete parent.position;
+        return res;
+    },
+    PackedScene: (res) => normalize_res_url(res.path),
 };
 
 const post_resource_actions = {
@@ -382,10 +390,10 @@ function normalize_resource(node, meta) {
         if (_.isString(value)) {
             if (value.indexOf('ExtResource') >= 0) {
                 let res = meta.ext_resource[get_function_params(value)];
-                node[k] = resource_normalizers[res.type](res, meta);
+                node[k] = resource_normalizers[res.type](res, meta, node);
             } else if (value.indexOf('SubResource') >= 0) {
                 let res = meta.sub_resource[get_function_params(value)];
-                node[k] = resource_normalizers[res.type](res, meta);
+                node[k] = resource_normalizers[res.type](res, meta, node);
             }
         }
     }
@@ -395,9 +403,11 @@ function normalize_resource(node, meta) {
         post_action(node, meta);
     }
 
-    node.children.forEach(child => {
-        normalize_resource(child, meta);
-    });
+    if (node.children) {
+        node.children.forEach(child => {
+            normalize_resource(child, meta);
+        });
+    }
 }
 
 function convert_scene(tscn_path) {
