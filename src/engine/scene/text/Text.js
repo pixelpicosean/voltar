@@ -162,6 +162,8 @@ export default class Text extends Sprite {
                     break;
             }
         }
+
+        return this;
     }
 
     /**
