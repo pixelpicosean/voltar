@@ -421,7 +421,7 @@ export default class Vector2 {
     /**
      * Slide returns the component of the vector along the given plane, specified by its normal vector.
      *
-     * @param {Vector2} normal
+     * @param {Vector2Like} normal
      * @returns {Vector2}
      */
     slide(normal) {

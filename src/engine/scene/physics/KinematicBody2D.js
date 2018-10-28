@@ -32,7 +32,7 @@ export default class KinematicBody2D extends PhysicsBody2D {
     /**
      * Moves the body along the vector vec. The body will stop if it collides.
      *
-     * @param {Vector2} vec
+     * @param {import('engine/math/Vector2').Vector2Like} vec
      * @returns {import('engine/PhysicsServer').Collision}
      */
     move_and_collide(vec) {
@@ -40,8 +40,8 @@ export default class KinematicBody2D extends PhysicsBody2D {
     }
 
     /**
-     * @param {Vector2} velocity
-     * @param {Vector2} [floor_normal=Vector2(0, 0)]
+     * @param {import('engine/math/Vector2').Vector2Like} velocity
+     * @param {import('engine/math/Vector2').Vector2Like} [floor_normal=Vector2(0, 0)]
      * @param {boolean} [stop_on_slope=false]
      * @param {number} [max_bounces=4]
      * @param {number} [floor_max_angle=0.785398]
@@ -49,7 +49,7 @@ export default class KinematicBody2D extends PhysicsBody2D {
     move_and_slide(velocity, floor_normal = ZeroVec, stop_on_slope = false, max_bounces = 4, floor_max_angle = 0.785398) {
         const floor_motion = tmp_vec.copy(this.floor_velocity);
         if (this.on_floor && this.on_floor_body) {
-            // this approach makes sure there is less delay between the actual body velocity and the one we saved
+            // This approach makes sure there is less delay between the actual body velocity and the one we saved
             floor_motion.copy(this.on_floor_body.linear_velocity);
         }
 
@@ -71,12 +71,12 @@ export default class KinematicBody2D extends PhysicsBody2D {
                 motion.copy(collision.remainder);
 
                 let is_on_slope = false;
-                if (floor_normal === ZeroVec || floor_normal.equals(ZeroVec)) {
+                if (floor_normal === ZeroVec || ZeroVec.equals(floor_normal)) {
                     // All is a wall
                     this.on_wall = true;
                 } else {
                     // Floor
-                    if (collision.normal.dot(floor_normal) >= Math.cos(floor_max_angle + FLOOR_ANGLE_THRESHOLD)) {
+                    if (collision.normal.dot(tmp_vec6.copy(floor_normal).negate()) >= Math.cos(floor_max_angle + FLOOR_ANGLE_THRESHOLD)) {
                         this.on_floor = true;
                         this.on_floor_body = collision.collider;
                         this.floor_velocity.copy(collision.collider_vel);
@@ -92,7 +92,7 @@ export default class KinematicBody2D extends PhysicsBody2D {
                         is_on_slope = true;
                     }
                     // Ceiling
-                    else if (collision.normal.dot(tmp_vec6.copy(floor_normal).negate()) >= Math.cos(floor_max_angle + FLOOR_ANGLE_THRESHOLD)) {
+                    else if (collision.normal.dot(floor_normal) >= Math.cos(floor_max_angle + FLOOR_ANGLE_THRESHOLD)) {
                         this.on_ceiling = true;
                     }
                     else {
@@ -101,15 +101,21 @@ export default class KinematicBody2D extends PhysicsBody2D {
                 }
 
                 if (stop_on_slope && is_on_slope) {
-                    motion.slide(floor_normal);
+                    // motion.slide(floor_normal);
                     lv.slide(floor_normal);
                 } else {
-                    motion.slide(collision.normal);
+                    // motion.slide(collision.normal);
                     lv.slide(collision.normal);
                 }
-            }
-            else {
+            } else {
                 motion.set(0, 0);
+            }
+
+            if (stop_on_slope) {
+                break;
+            }
+
+            if (!collision) {
                 break;
             }
 

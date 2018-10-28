@@ -780,7 +780,7 @@ export default class PhysicsServer {
 
     /**
      * @param {KinematicBody2D} coll
-     * @param {Vector2} motion
+     * @param {import('./math/Vector2').Vector2Like} motion
      * @returns {Collision}
      */
     body_test_motion(coll, motion) {
@@ -926,7 +926,8 @@ export default class PhysicsServer {
                                 real_co.travel.set(0, 0)
                                 real_co.remainder.copy(real_co.normal)
                                     .scale(real_co.overlap)
-                                motion.set(0, 0)
+                                motion.x = 0
+                                motion.y = 0
                                 a.parent.transform.world_transform.apply_inverse(a._world_position.add(real_co.travel), a.position);
                             } else {
                                 real_co.remainder.copy(motion).normalize()
