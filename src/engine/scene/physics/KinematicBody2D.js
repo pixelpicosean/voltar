@@ -1,6 +1,7 @@
 import { CollisionObjectTypes } from './CollisionObject2D';
 import PhysicsBody2D from './PhysicsBody2D';
 import { Vector2 } from 'engine/math/index';
+import { node_class_map } from 'engine/registry';
 
 const tmp_vec = new Vector2();
 const tmp_vec2 = new Vector2();
@@ -128,3 +129,5 @@ export default class KinematicBody2D extends PhysicsBody2D {
         return lv;
     }
 }
+
+node_class_map['KinematicBody2D'] = KinematicBody2D;

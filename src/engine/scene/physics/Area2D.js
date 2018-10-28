@@ -1,5 +1,6 @@
 import CollisionObject2D, { CollisionObjectTypes } from './CollisionObject2D';
 import { Signal } from 'engine/dep/index';
+import { node_class_map } from 'engine/registry';
 
 export default class Area2D extends CollisionObject2D {
     constructor() {
@@ -20,6 +21,17 @@ export default class Area2D extends CollisionObject2D {
         this.body_entered = new Signal();
         this.body_exited = new Signal();
     }
+    _load_data(data) {
+        super._load_data(data);
+
+        for (let k in data) {
+            switch (k) {
+
+            }
+        }
+
+        return this;
+    }
 
     _area_inout(is_in, area) {
         if (is_in) {
@@ -36,3 +48,5 @@ export default class Area2D extends CollisionObject2D {
         }
     }
 }
+
+node_class_map['Area2D'] = Area2D;

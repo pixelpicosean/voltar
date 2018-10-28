@@ -1,6 +1,7 @@
 import { Vector2 } from 'engine/math/index';
 import PhysicsBody2D from './PhysicsBody2D';
 import { CollisionObjectTypes } from './CollisionObject2D';
+import { node_class_map } from 'engine/registry';
 
 const tmp_vec = new Vector2();
 
@@ -178,3 +179,5 @@ export default class RigidBody2D extends PhysicsBody2D {
         this.parent.transform.world_transform.apply_inverse(tmp_vec, this.position);
     }
 }
+
+node_class_map['RigidBody2D'] = RigidBody2D;

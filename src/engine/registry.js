@@ -1,11 +1,17 @@
 import { Resource } from "./loaders/index";
-import { Transform, TransformStatic } from 'engine/math/index';
+import { TransformStatic } from 'engine/math/index';
 
 /**
  * Node class looking table
  * @type {Object}
  */
 export const node_class_map = {};
+
+/**
+ * Resource class looking table
+ * @type {Object}
+ */
+export const res_class_map = {};
 
 /**
  * Plugins to be used in Node2D class
@@ -17,7 +23,7 @@ export const node_plugins = {
 
 /**
  * @typedef PackedScene
- * @property {() => Node2D} instance
+ * @property {() => import('./scene/Node2D').default} instance
  */
 /**
  * Scene class looking table

@@ -112,7 +112,11 @@ export function preload(...settings) {
     preload_queue.push(settings);
 }
 
-import { node_class_map, scene_class_map } from 'engine/registry';
+import {
+    node_class_map,
+    scene_class_map,
+    res_class_map,
+} from 'engine/registry';
 
 /**
  * @typedef PackedScene
@@ -175,12 +179,18 @@ function assemble_node(node, children) {
                 assemble_node(inst, packed_scene.children);
             }
         } else {
-            inst = new (node_class_map[data.type])();
+            if (data._is_proxy_) {
+                inst = new (res_class_map[data.prop_value.type])()._load_data(data.prop_value);
+            } else {
+                inst = new (node_class_map[data.type])()._load_data(data);
+            }
         }
 
-        inst._load_data(data);
-        assemble_node(inst, data.children);
-
-        node.add_child(inst);
+        if (data._is_proxy_) {
+            node[`add_${data.prop_key}`](inst);
+        } else {
+            assemble_node(inst, data.children);
+            node.add_child(inst);
+        }
     }
 }

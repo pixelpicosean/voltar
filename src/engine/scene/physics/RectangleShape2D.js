@@ -1,5 +1,6 @@
 import { Vector2 } from 'engine/math/index';
 import CollisionShape2D from './CollisionShape2D';
+import { res_class_map } from 'engine/registry';
 
 const tmp_point = new Vector2(0, 0);
 const tmp_point2 = new Vector2(0, 0);
@@ -7,6 +8,8 @@ const tmp_point2 = new Vector2(0, 0);
 export default class RectangleShape2D extends CollisionShape2D {
     constructor(extent_x = 4, extent_y = 4) {
         super();
+
+        this.position = new Vector2(0, 0);
 
         this.extents = new Vector2(extent_x, extent_y);
         this.vertices = [
@@ -21,6 +24,29 @@ export default class RectangleShape2D extends CollisionShape2D {
         ];
 
         this.update_transform(tmp_point.set(0, 0), 0, tmp_point2.set(1, 1));
+    }
+    _load_data(data) {
+        this.extents.copy(data.extents);
+        if (data.position) {
+            this.set_position(data.position);
+        }
+        return this;
+    }
+    /**
+     * @param {import('engine/math/Vector2').Vector2Like|number} x
+     * @param {number} [y]
+     * @returns this
+     */
+    set_position(x, y) {
+        if (y === undefined) {
+            // @ts-ignore
+            this.position.set(x.x, x.y);
+        } else {
+            // @ts-ignore
+            this.position.set(x, y);
+        }
+        this.update_transform(tmp_point.set(0, 0), 0, tmp_point2.set(1, 1));
+        return this;
     }
     update_transform(position, rotation, scale) {
         const c = Math.cos(rotation);
@@ -59,3 +85,5 @@ export default class RectangleShape2D extends CollisionShape2D {
         this.aabb.y = Math.round(position.y - this.aabb.height * 0.5);
     }
 }
+
+res_class_map['RectangleShape2D'] = RectangleShape2D;
