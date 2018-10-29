@@ -1,11 +1,10 @@
 import * as v from 'engine/index';
-import { Vector2 } from 'engine/index';
 
 const PhysicsLayers = {
-    SOLID: 1,
-    HERO: 2,
-    HERO_DMG: 3,
-    ENEMY: 4,
+    SOLID: 0,
+    HERO: 1,
+    HERO_DMG: 2,
+    ENEMY: 3,
 }
 
 class Bullet extends v.KinematicBody2D {
@@ -17,11 +16,14 @@ class Bullet extends v.KinematicBody2D {
 
         this.speed = 200
 
-        this.add_shape(new v.RectangleShape2D(4, 4))
+        this
+            .set_collision_layer_bit(PhysicsLayers.SOLID, false)
             .set_collision_layer_bit(PhysicsLayers.HERO_DMG, true)
 
             .set_collision_mask_bit(PhysicsLayers.SOLID, true)
             .set_collision_mask_bit(PhysicsLayers.ENEMY, true)
+
+        this.add_shape(new v.RectangleShape2D(4, 4))
 
         this.add_child(new v.Graphics())
             .begin_fill(0xFFFF00, 0.6)
@@ -62,11 +64,14 @@ class Box extends v.KinematicBody2D {
 
         this.speed = 80
 
-        this.add_shape(new v.RectangleShape2D(10, 10))
+        this
+            .set_collision_layer_bit(PhysicsLayers.SOLID, false)
             .set_collision_layer_bit(PhysicsLayers.HERO, true)
 
             .set_collision_mask_bit(PhysicsLayers.SOLID, true)
             .set_collision_mask_bit(PhysicsLayers.ENEMY, true)
+
+        this.add_shape(new v.RectangleShape2D(10, 10))
 
         this.add_child(new v.Graphics())
             .begin_fill(0x00FFFF, 0.6)
@@ -140,13 +145,17 @@ export default class SAT extends v.Node2D {
      * @param {number} h
      */
     create_wall(x, y, w, h) {
-        this.add_child(new v.StaticBody2D())
-            .add_shape(new v.RectangleShape2D(w / 2, h / 2))
+        const wall = this.add_child(new v.StaticBody2D())
             .set_collision_layer_bit(1, true)
             .set_position(x, y)
-            .add_child(new v.Graphics())
-                .begin_fill(0xFFFFFF, 0.4)
-                .draw_rect(-w / 2, -h / 2, w, h)
-                .end_fill()
+
+        wall.add_shape(new v.RectangleShape2D(w / 2, h / 2))
+
+        wall.add_child(new v.Graphics())
+            .begin_fill(0xFFFFFF, 0.4)
+            .draw_rect(-w / 2, -h / 2, w, h)
+            .end_fill()
+
+        return wall;
     }
 }
