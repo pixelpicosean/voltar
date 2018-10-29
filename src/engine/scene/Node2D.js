@@ -1453,6 +1453,10 @@ export default class Node2D extends EventEmitter {
      * Updates the transform on all children of this container for rendering
      */
     update_transform() {
+        if (!this.is_inside_tree) {
+            return;
+        }
+
         if (this.has_transform) {
             this._bounds_id++;
 
