@@ -421,7 +421,6 @@ export default class Control extends Node2D {
     }
     set rotation(value) {
         this.data.rotation = value;
-        this.transform.rotation = value;
         this.update_transform();
     }
     set_rotation(value) {
@@ -435,7 +434,6 @@ export default class Control extends Node2D {
     }
     set rect_scale(value) {
         this.data.scale.copy(value);
-        this.transform.scale.copy(this.data.scale);
         this.update_transform();
     }
     /**
@@ -602,11 +600,14 @@ export default class Control extends Node2D {
 
     constructor() {
         super();
+        const self = this;
 
         this.type = 'Control';
 
         this.data = {
-            pos_cache: new Vector2(),
+            get pos_cache() {
+                return self.transform.position;
+            },
             size_cache: new Vector2(),
             minimum_size_cache: new Vector2(),
             minimum_size_valid: false,
@@ -619,8 +620,15 @@ export default class Control extends Node2D {
             h_grow: GrowDirection.BEGIN,
             v_grow: GrowDirection.BEGIN,
 
-            rotation: 0,
-            scale: new Vector2(1, 1),
+            get rotation() {
+                return self.transform.rotation;
+            },
+            set rotation(value) {
+                self.transform.rotation = value;
+            },
+            get scale() {
+                return self.transform.scale;
+            },
             pivot_offset: new Vector2(),
 
             pending_resize: false,
@@ -811,7 +819,7 @@ export default class Control extends Node2D {
         }
 
         new_pos_cache.set(margin_pos[0], margin_pos[1]);
-        new_size_cache.set(margin_pos[2], margin_pos[3]);
+        new_size_cache.set(margin_pos[2], margin_pos[3]).subtract(new_pos_cache);
 
         const minimum_size = this.get_combined_minimum_size(tmp_vec4);
 
@@ -864,10 +872,6 @@ export default class Control extends Node2D {
                 this._update_transform();
             }
         }
-
-        this.transform.position.copy(this.data.pos_cache);
-        this.transform.rotation = this.data.rotation;
-        this.transform.scale.copy(this.data.scale);
     }
 
     _update_minimum_size_cache() {
