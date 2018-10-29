@@ -1,8 +1,25 @@
-import Node2D from '../Node2D';
-import { Vector2, Rectangle, rad2deg, deg2rad } from 'engine/math/index';
-import { node_class_map } from 'engine/registry';
-import { BLEND_MODES } from 'engine/const';
+import {
+    Vector2,
+    Rectangle,
+    rad2deg,
+    deg2rad,
+    clamp,
+} from 'engine/math/index';
 import MessageQueue from 'engine/MessageQueue';
+import { BLEND_MODES } from 'engine/const';
+import Node2D from '../Node2D';
+
+import { node_class_map } from 'engine/registry';
+
+/**
+ * @enum {number}
+ */
+export const Margin = {
+    Left: 0,
+    Top: 1,
+    Right: 2,
+    Bottom: 3,
+}
 
 /**
  * @enum {number}
@@ -79,6 +96,7 @@ const tmp_rect = new Rectangle();
 const tmp_rect2 = new Rectangle();
 const tmp_rect3 = new Rectangle();
 const tmp_rect4 = new Rectangle();
+const tmp_rect5 = new Rectangle();
 
 const margin_pos = [0, 0, 0, 0];
 
@@ -86,6 +104,129 @@ const new_pos_cache = new Vector2();
 const new_size_cache = new Vector2();
 
 export default class Control extends Node2D {
+    /**
+     * @param {Margin} margin
+     * @param {Anchor} anchor
+     * @param {boolean} keep_margin
+     * @param {boolean} push_opposite_anchor
+     * @returns this
+     */
+    set_anchor(margin, anchor, keep_margin = true, push_opposite_anchor = true) {
+        const parent_rect = this.get_parent_anchorable_rect(tmp_rect5);
+        let parent_range = (margin === Margin.Left || margin === Margin.Right) ? parent_rect.width : parent_rect.height;
+        let previous_margin_pos = this.data.margin[margin] + this.data.anchor[margin] * parent_range;
+        let previous_opposite_margin_pos = this.data.margin[(margin + 2) % 4] + this.data.anchor[(margin + 2) % 4] * parent_range;
+
+        this.data.anchor[margin] = clamp(anchor, 0.0, 1.0);
+
+        if (
+            ((margin === Margin.Left || margin === Margin.Top) && this.data.anchor[margin] > this.data.anchor[(margin + 2) % 4])
+            ||
+            ((margin === Margin.Right || margin === Margin.Bottom) && this.data.anchor[margin] < this.data.anchor[(margin + 2) % 4])
+        ) {
+            if (push_opposite_anchor) {
+                this.data.anchor[(margin + 2) % 4] = this.data.anchor[margin];
+            } else {
+                this.data.anchor[margin] = this.data.anchor[(margin + 2) % 4];
+            }
+        }
+
+        if (keep_margin) {
+            this.data.margin[margin] = previous_margin_pos - this.data.anchor[margin] * parent_range;
+            if (push_opposite_anchor) {
+                this.data.margin[(margin + 2) % 4] = previous_opposite_margin_pos - this.data.anchor[(margin + 2) % 4] * parent_range;
+            }
+        }
+        if (this.is_inside_tree) {
+            this._size_changed();
+        }
+
+        return this;
+    }
+    /**
+     * @param {Margin} margin
+     * @param {number} value
+     * @return this
+     */
+    set_margin(margin, value) {
+        this.data[margin] = value;
+        this._size_changed();
+
+        return this;
+    }
+
+    /**
+     * @type {Anchor}
+     */
+    get anchor_bottom() {
+        return this.data.anchor[Margin.Bottom];
+    }
+    set anchor_bottom(value) {
+        this.set_anchor(Margin.Bottom, value);
+    }
+    /**
+     * @param {Anchor} value
+     * @return this
+     */
+    set_anchor_bottom(value) {
+        this.set_anchor(Margin.Bottom, value);
+        return this;
+    }
+
+    /**
+     * @type {Anchor}
+     */
+    get anchor_left() {
+        return this.data.anchor[Margin.Left];
+    }
+    set anchor_left(value) {
+        this.set_anchor(Margin.Left, value);
+    }
+    /**
+     * @param {Anchor} value
+     * @return this
+     */
+    set_anchor_left(value) {
+        this.set_anchor(Margin.Left, value);
+        return this;
+    }
+
+    /**
+     * @type {Anchor}
+     */
+    get anchor_top() {
+        return this.data.anchor[Margin.Top];
+    }
+    set anchor_top(value) {
+        this.set_anchor(Margin.Top, value);
+    }
+    /**
+     * @param {Anchor} value
+     * @return this
+     */
+    set_anchor_top(value) {
+        this.set_anchor(Margin.Top, value);
+        return this;
+    }
+
+    /**
+     * @type {Anchor}
+     */
+    get anchor_right() {
+        return this.data.anchor[Margin.Right];
+    }
+    set anchor_right(value) {
+        this.set_anchor(Margin.Right, value);
+    }
+    /**
+     * @param {Anchor} value
+     * @return this
+     */
+    set_anchor_right(value) {
+        this.set_anchor(Margin.Right, value);
+        return this;
+    }
+
     get mouse_default_cursor_shape() {
         return this.cursor;
     }
@@ -390,43 +531,6 @@ export default class Control extends Node2D {
         super();
 
         this.type = 'Control';
-
-        /**
-         * @type {Anchor}
-         */
-        this.anchor_bottom = Anchor.BEGIN;
-        /**
-         * @type {Anchor}
-         */
-        this.anchor_left = Anchor.BEGIN;
-        /**
-         * @type {Anchor}
-         */
-        this.anchor_right = Anchor.BEGIN;
-        /**
-         * @type {Anchor}
-         */
-        this.anchor_top = Anchor.BEGIN;
-
-        /**
-         * @type {number}
-         */
-        this.margin_bottom = 0;
-
-        /**
-         * @type {number}
-         */
-        this.margin_left = 0;
-
-        /**
-         * @type {number}
-         */
-        this.margin_right = 0;
-
-        /**
-         * @type {number}
-         */
-        this.margin_top = 0;
 
         this.data = {
             pos_cache: new Vector2(),
