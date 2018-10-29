@@ -21,6 +21,9 @@ export { default as AnimatedSprite } from './scene/sprites/AnimatedSprite';
 export { default as TilingSprite } from './scene/sprites/TilingSprite';
 export { default as NineSliceSprite } from './scene/sprites/NineSliceSprite';
 
+export { default as Control } from './scene/controls/Control';
+export { default as ColorRect } from './scene/controls/ColorRect';
+
 export { default as CutoutAnimation } from './scene/coa/CutoutAnimation';
 
 export { default as Graphics } from './scene/graphics/Graphics';
