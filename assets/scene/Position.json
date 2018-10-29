@@ -215,7 +215,10 @@
                                         "a": 1
                                     },
                                     {
-                                        "r": null
+                                        "r": 1,
+                                        "g": 0.375,
+                                        "b": 0.931641,
+                                        "a": 1
                                     },
                                     {
                                         "r": 0.375,
@@ -400,6 +403,37 @@
                 "fontFamily": "Tondu Beta"
             },
             "children": []
+        },
+        {
+            "type": "Control",
+            "name": "Control",
+            "anchor_bottom": 0,
+            "anchor_left": 0,
+            "anchor_top": 0,
+            "anchor_right": 0,
+            "margin_bottom": 40,
+            "margin_right": 40,
+            "children": [
+                {
+                    "type": "ColorRect",
+                    "name": "ColorRect",
+                    "anchor_bottom": 0,
+                    "anchor_left": 0,
+                    "anchor_top": 0,
+                    "anchor_right": 0,
+                    "margin_bottom": 75,
+                    "margin_left": 326,
+                    "margin_top": 35,
+                    "margin_right": 366,
+                    "color": {
+                        "r": 1,
+                        "g": 1,
+                        "b": 1,
+                        "a": 1
+                    },
+                    "children": []
+                }
+            ]
         }
     ]
 }
