@@ -149,7 +149,7 @@ export default class Control extends Node2D {
      * @return this
      */
     set_margin(margin, value) {
-        this.data[margin] = value;
+        this.data.margin[margin] = value;
         this._size_changed();
 
         return this;
@@ -227,6 +227,78 @@ export default class Control extends Node2D {
         return this;
     }
 
+    /**
+     * @type {Anchor}
+     */
+    get margin_bottom() {
+        return this.data.margin[Margin.Bottom];
+    }
+    set margin_bottom(value) {
+        this.set_margin(Margin.Bottom, value);
+    }
+    /**
+     * @param {Anchor} value
+     * @return this
+     */
+    set_margin_bottom(value) {
+        this.set_margin(Margin.Bottom, value);
+        return this;
+    }
+
+    /**
+     * @type {Anchor}
+     */
+    get margin_left() {
+        return this.data.margin[Margin.Left];
+    }
+    set margin_left(value) {
+        this.set_margin(Margin.Left, value);
+    }
+    /**
+     * @param {Anchor} value
+     * @return this
+     */
+    set_margin_left(value) {
+        this.set_margin(Margin.Left, value);
+        return this;
+    }
+
+    /**
+     * @type {Anchor}
+     */
+    get margin_top() {
+        return this.data.margin[Margin.Top];
+    }
+    set margin_top(value) {
+        this.set_margin(Margin.Top, value);
+    }
+    /**
+     * @param {Anchor} value
+     * @return this
+     */
+    set_margin_top(value) {
+        this.set_margin(Margin.Top, value);
+        return this;
+    }
+
+    /**
+     * @type {Anchor}
+     */
+    get margin_right() {
+        return this.data.margin[Margin.Right];
+    }
+    set margin_right(value) {
+        this.set_margin(Margin.Right, value);
+    }
+    /**
+     * @param {Anchor} value
+     * @return this
+     */
+    set_margin_right(value) {
+        this.set_margin(Margin.Right, value);
+        return this;
+    }
+
     get mouse_default_cursor_shape() {
         return this.cursor;
     }
@@ -262,7 +334,7 @@ export default class Control extends Node2D {
      * @param {number} [y]
      */
     set_rect_size(x, y) {
-        if (!y === undefined) {
+        if (y !== undefined) {
             // @ts-ignore
             tmp_vec6.set(x, y);
         } else {
@@ -275,7 +347,7 @@ export default class Control extends Node2D {
     }
 
     get rect_position() {
-        return this.data.size_cache;
+        return this.data.pos_cache;
     }
     set rect_position(value) {
         tmp_rect4.x = value.x;
@@ -349,10 +421,11 @@ export default class Control extends Node2D {
     }
     set rotation(value) {
         this.data.rotation = value;
+        this.transform.rotation = value;
         this.update_transform();
     }
     set_rotation(value) {
-        this.data.rotation = value;
+        this.rotation = value;
 
         return this;
     }
@@ -362,6 +435,7 @@ export default class Control extends Node2D {
     }
     set rect_scale(value) {
         this.data.scale.copy(value);
+        this.transform.scale.copy(this.data.scale);
         this.update_transform();
     }
     /**
@@ -415,7 +489,6 @@ export default class Control extends Node2D {
     }
     set rect_pivot_offset(value) {
         this.data.pivot_offset.copy(value);
-        this.update_transform();
     }
     /**
      * @param {number|import('engine/math/Vector2').Vector2Like} x
@@ -547,7 +620,7 @@ export default class Control extends Node2D {
             v_grow: GrowDirection.BEGIN,
 
             rotation: 0,
-            scale: new Vector2(),
+            scale: new Vector2(1, 1),
             pivot_offset: new Vector2(),
 
             pending_resize: false,
@@ -590,6 +663,42 @@ export default class Control extends Node2D {
 
         this.blend_mode = BLEND_MODES.NORMAL;
     }
+    _load_data(data) {
+        super._load_data(data);
+
+        for (let k in data) {
+            switch (k) {
+                case 'anchor_bottom':
+                case 'anchor_left':
+                case 'anchor_right':
+                case 'anchor_top':
+
+                case 'margin_bottom':
+                case 'margin_left':
+                case 'margin_right':
+                case 'margin_top':
+
+                case 'rect_min_size':
+                case 'rect_rotation':
+                case 'rect_scale':
+                case 'rect_pivot_offset':
+                case 'rect_clip_content':
+
+                case 'grow_horizontal':
+                case 'grow_vertical':
+
+                case 'mouse_default_cursor_shape':
+
+                case 'size_flags_horizontal':
+                case 'size_flags_vertical':
+                case 'size_flags_stretch_ratio': {
+                    this[`set_${k}`](data[k]);
+                }
+            }
+        }
+
+        return this;
+    }
 
     _propagate_enter_tree() {
         this.data.parent_canvas_item = this.get_parent_item();
@@ -605,7 +714,7 @@ export default class Control extends Node2D {
      * @return {Vector2}
      */
     get_minimum_size(size) {
-        return this.rect_min_size;
+        return size.copy(this.rect_min_size);
     }
     /**
      * @param {Vector2} size
@@ -674,6 +783,7 @@ export default class Control extends Node2D {
             if (invalidate.is_set_as_toplevel()) {
                 break;
             }
+            // @ts-ignore
             invalidate = invalidate.data.parent;
         }
 
@@ -725,8 +835,8 @@ export default class Control extends Node2D {
             new_size_cache.y = minimum_size.y;
         }
 
-        let pos_changed = new_pos_cache.equals(this.data.pos_cache);
-        let size_changed = new_size_cache.equals(this.data.size_cache);
+        let pos_changed = !new_pos_cache.equals(this.data.pos_cache);
+        let size_changed = !new_size_cache.equals(this.data.size_cache);
 
         this.data.pos_cache.copy(new_pos_cache);
         this.data.size_cache.copy(new_size_cache);
@@ -742,14 +852,22 @@ export default class Control extends Node2D {
                 // this._change_notify_margins(); // this is editor only
 
                 // FIXME: do we need this?
+                // this.position.copy(this.data.pos_cache);
+                // this.scale.copy(this.data.scale);
                 this.update_transform();
             }
 
             if (pos_changed && !size_changed) {
                 // FIXME: do we need to update it here?
+                // this.position.copy(this.data.pos_cache);
+                // this.scale.copy(this.data.scale);
                 this._update_transform();
             }
         }
+
+        this.transform.position.copy(this.data.pos_cache);
+        this.transform.rotation = this.data.rotation;
+        this.transform.scale.copy(this.data.scale);
     }
 
     _update_minimum_size_cache() {

@@ -28,6 +28,15 @@ export default class ColorRect extends Control {
             this._tint_rgb = (tint >> 16) + (tint & 0xff00) + ((tint & 0xff) << 16);
         }, this);
     }
+    _load_data(data) {
+        super._load_data(data);
+
+        if (data.color) {
+            this.set_color(data.color.r, data.color.g, data.color.b, data.color.a);
+        }
+
+        return this;
+    }
 
     /**
      * @param {number} r
@@ -89,6 +98,7 @@ export default class ColorRect extends Control {
      * @param {WebGLRenderer} renderer - The webgl renderer to use.
      */
     _render_webgl(renderer) {
+        // TODO: only calculate vertices when its size changed
         this.calculate_vertices();
 
         renderer.set_object_renderer(renderer.plugins[this.renderer_plugin]);
