@@ -361,7 +361,7 @@ export default class Node2D extends EventEmitter {
      */
     get _temp_node_2d_parent() {
         if (this.temp_node_2d_parent === null) {
-            this.temp_node_2d_parent = new Node2D();
+            this.temp_node_2d_parent = Object.freeze(new Node2D());
         }
 
         return this.temp_node_2d_parent;
@@ -442,13 +442,18 @@ export default class Node2D extends EventEmitter {
      * @private
      */
     _update_transform() {
+        let parent = this.parent;
+        if (!parent) {
+            parent = this._temp_node_2d_parent;
+        }
+
         if (this.has_transform) {
-            this.transform.update_transform(this.parent.transform);
+            this.transform.update_transform(parent.transform);
             this._bounds.update_id++;
         }
 
         // multiply the alphas..
-        this.world_alpha = this.alpha * this.parent.world_alpha;
+        this.world_alpha = this.alpha * parent.world_alpha;
     }
 
     /**
@@ -463,8 +468,7 @@ export default class Node2D extends EventEmitter {
             if (this.has_transform) {
                 this.transform.update_transform(this.parent.transform);
             }
-        }
-        else {
+        } else {
             if (this.has_transform) {
                 this.transform.update_transform(this._temp_node_2d_parent.transform);
             }
@@ -1453,24 +1457,25 @@ export default class Node2D extends EventEmitter {
      * Updates the transform on all children of this container for rendering
      */
     update_transform() {
-        if (!this.is_inside_tree) {
-            return;
+        let parent = this.parent;
+        if (!parent) {
+            parent = this._temp_node_2d_parent;
         }
 
         if (this.has_transform) {
             this._bounds_id++;
 
-            this.transform.update_transform(this.parent.transform);
+            this.transform.update_transform(parent.transform);
 
             let t = this.transform.world_transform;
             this._world_position.set(t.tx, t.ty);
-            this._world_scale.copy(this.parent._world_scale)
+            this._world_scale.copy(parent._world_scale)
                 .multiply(this.scale);
-            this._world_rotation = this.parent._world_rotation + this.transform.rotation;
+            this._world_rotation = parent._world_rotation + this.transform.rotation;
         }
 
         // TODO: check render flags, how to process stuff here
-        this.world_alpha = this.alpha * this.parent.world_alpha;
+        this.world_alpha = this.alpha * parent.world_alpha;
 
         for (let i = 0, j = this.children.length; i < j; ++i) {
             const child = this.children[i];
