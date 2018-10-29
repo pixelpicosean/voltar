@@ -136,7 +136,9 @@ module.exports.Rect2Array = (arr) => {
 };
 module.exports.ColorArray = (arr) => {
     const color_strs = arr.replace(/\[|\]/g, '').split('),').map(s => s.trim());
-    color_strs[0] += ')';
+    for (let i = 0; i < color_strs.length - 1; i++) {
+        color_strs[i] += ' )';
+    }
     return color_strs.map(color => {
         const color_arr = get_function_params(color)
             .map(module.exports.real);
