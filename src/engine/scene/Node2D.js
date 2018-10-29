@@ -18,6 +18,7 @@ import {
 import ObservableVector2 from 'engine/math/ObservableVector2';
 import Filter from 'engine/renderers/filters/Filter';
 import { rgb2hex } from 'engine/utils/index';
+import Color from 'engine/Color';
 
 let uid = 0;
 
@@ -41,7 +42,6 @@ let uid = 0;
 export default class Node2D extends EventEmitter {
     constructor() {
         super();
-        const self = this;
 
         /**
          * @private
@@ -266,40 +266,9 @@ export default class Node2D extends EventEmitter {
         }
 
         this.tint = 0;
-        this.modulate = {
-            _rgb: [0, 0, 0],
-
-            get r() {
-                return this._rgb[0];
-            },
-            set r(value) {
-                this._rgb[0] = value;
-                self.tint = rgb2hex(this._rgb);
-            },
-
-            get g() {
-                return this._rgb[1];
-            },
-            set g(value) {
-                this._rgb[1] = value;
-                self.tint = rgb2hex(this._rgb);
-            },
-
-            get b() {
-                return this._rgb[2];
-            },
-            set b(value) {
-                this._rgb[2] = value;
-                self.tint = rgb2hex(this._rgb);
-            },
-
-            get a() {
-                return self.alpha;
-            },
-            set a(value) {
-                self.alpha = value;
-            },
-        };
+        this.modulate = new Color(1, 1, 1, 1, (rgb) => {
+            this.tint = rgb2hex(rgb);
+        }, this);
 
         this.interactive = false;
         this.interactive_children = true;

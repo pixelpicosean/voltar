@@ -1,3 +1,5 @@
+const NOOP = () => {};
+
 export default class Color {
     get r() {
         return this._rgb[0];
@@ -21,28 +23,35 @@ export default class Color {
         this.cb.call(this.scope, this._rgb);
     }
     get a() {
-        return this.scope.alpha;
+        if (this.scope) {
+            return this.scope.alpha;
+        }
+        return 1;
     }
     set a(value) {
-        this.scope.alpha = value;
-        this.cb.call(this.scope, this._rgb);
+        if (this.scope) {
+            this.scope.alpha = value;
+            this.cb.call(this.scope, this._rgb);
+        }
     }
 
     /**
-     * @param {Function} cb
-     * @param {any} scope
      * @param {number} [r]
      * @param {number} [g]
      * @param {number} [b]
      * @param {number} [a]
+     * @param {Function} [cb]
+     * @param {any} [scope]
      */
-    constructor(cb, scope, r = 1, g = 1, b = 1, a = 1) {
+    constructor(r = 1, g = 1, b = 1, a = 1, cb = NOOP, scope = null) {
         this._rgb = [r, g, b];
 
         this.cb = cb;
         this.scope = scope;
 
-        this.scope.alpha = a;
+        if (this.scope) {
+            this.scope.alpha = a;
+        }
     }
 
     /**
@@ -55,7 +64,7 @@ export default class Color {
         this._rgb[0] = r;
         this._rgb[1] = g;
         this._rgb[2] = b;
-        if (a !== undefined) {
+        if (a !== undefined && this.scope) {
             this.scope.alpha = a;
         }
 

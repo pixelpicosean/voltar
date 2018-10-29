@@ -346,12 +346,12 @@ export default class Sprite extends Node2D {
     }
 
     /**
-    *
-    * Renders the object using the WebGL renderer
-    *
-    * @private
-    * @param {WebGLRenderer} renderer - The webgl renderer to use.
-    */
+     *
+     * Renders the object using the WebGL renderer
+     *
+     * @private
+     * @param {WebGLRenderer} renderer - The webgl renderer to use.
+     */
     _render_webgl(renderer) {
         this.calculate_vertices();
 
