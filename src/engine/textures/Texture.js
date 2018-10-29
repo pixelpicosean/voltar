@@ -593,7 +593,7 @@ remove_all_handlers(Texture.EMPTY.base_texture);
 TextureCache['_empty_'] = Texture.EMPTY;
 
 /**
- * A white texture of 10x10 size, used for graphics and other things
+ * A white texture of 32x32 size, used for graphics and other things
  * Can not be destroyed.
  *
  * @static
