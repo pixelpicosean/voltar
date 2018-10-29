@@ -501,6 +501,7 @@ export default class SceneTree {
 
             this.current_scene = this._next_scene_ctor.instance();
             this.current_scene.scene_tree = this;
+            this.current_scene.toplevel = true;
             this._current_scene_ctor = this._next_scene_ctor;
             this._next_scene_ctor = null;
 

@@ -270,6 +270,8 @@ export default class Node2D extends EventEmitter {
             this.tint = rgb2hex(rgb);
         }, this);
 
+        this.toplevel = false;
+
         this.interactive = false;
         this.interactive_children = true;
         /**
@@ -326,6 +328,8 @@ export default class Node2D extends EventEmitter {
         return this;
     }
 
+    _resized() { }
+
     /**
      * Set value of this node with key, values and lerp factor
      * @param {string} key
@@ -340,6 +344,16 @@ export default class Node2D extends EventEmitter {
      * @param {any} value
      */
     set_value(key, value) {}
+
+    is_set_as_toplevel() {
+        return this.toplevel;
+    }
+    get_parent_item() {
+        if (this.toplevel) {
+            return null;
+        }
+        return this.parent;
+    }
 
     /**
      * @private
@@ -642,6 +656,17 @@ export default class Node2D extends EventEmitter {
         this.interactive_children = false;
 
         this._destroyed = true;
+    }
+
+    /**
+     * @param {Rectangle} rect
+     */
+    get_anchorable_rect(rect) {
+        rect.x = 0;
+        rect.y = 0;
+        rect.width = 0;
+        rect.height = 0;
+        return rect;
     }
 
     /**
