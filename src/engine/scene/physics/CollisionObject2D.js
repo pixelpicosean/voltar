@@ -23,13 +23,14 @@ export default class CollisionObject2D extends Node2D {
      * other areas will collide with this one on the given layer.
      *
      * @param {number} bit
+     * @returns {boolean}
      */
     get_collision_layer_bit(bit) {
-        return this.collision_layer & (1 << bit);
+        return !!(this.collision_layer & (1 << bit));
     }
     /**
      * @param {number} layer
-     * @returns {this}
+     * @returns this
      */
     set_collision_layer(layer) {
         this.collision_layer = layer;
@@ -42,11 +43,11 @@ export default class CollisionObject2D extends Node2D {
      *
      * @param {number} bit
      * @param {boolean} value
-     * @returns {this}
+     * @returns this
      */
     set_collision_layer_bit(bit, value) {
         if (value) {
-            this.collision_layer |= 1 << bit;
+            this.collision_layer |= (1 << bit);
         } else {
             this.collision_layer &= ~(1 << bit);
         }
@@ -65,13 +66,14 @@ export default class CollisionObject2D extends Node2D {
      * this area will collide with others on the given layer.
      *
      * @param {number} bit
+     * @returns {boolean}
      */
     get_collision_mask_bit(bit) {
-        return this.collision_mask & (1 << bit);
+        return !!(this.collision_mask & (1 << bit));
     }
     /**
      * @param {number} mask
-     * @returns {this}
+     * @returns this
      */
     set_collision_mask(mask) {
         this.collision_mask = mask;
@@ -84,11 +86,11 @@ export default class CollisionObject2D extends Node2D {
      *
      * @param {number} bit
      * @param {boolean} value
-     * @returns {this}
+     * @returns this
      */
     set_collision_mask_bit(bit, value) {
         if (value) {
-            this.collision_mask |= 1 << bit;
+            this.collision_mask |= (1 << bit);
         } else {
             this.collision_mask &= ~(1 << bit);
         }
@@ -137,7 +139,7 @@ export default class CollisionObject2D extends Node2D {
 
     /**
      * @param {CollisionShape2D} shape
-     * @returns {this}
+     * @returns {CollisionShape2D}
      */
     add_shape(shape) {
         shape.owner = this;
@@ -147,11 +149,11 @@ export default class CollisionObject2D extends Node2D {
             this._add_shapes_to_physics_server();
         }
 
-        return this;
+        return shape;
     }
     /**
      * @param {CollisionShape2D} shape
-     * @returns {this}
+     * @returns this
      */
     remove_shape(shape) {
         shape.owner = null;
