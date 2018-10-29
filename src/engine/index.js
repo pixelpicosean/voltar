@@ -50,6 +50,8 @@ export { default as AnimationPlayer } from './scene/animation/AnimationPlayer';
 // ------------------------------------------------------------------
 // Useful class
 // ------------------------------------------------------------------
+export { default as Color } from './Color';
+
 export { default as TextureUvs } from './textures/TextureUvs';
 export { default as TextureMatrix } from './textures/TextureMatrix';
 
