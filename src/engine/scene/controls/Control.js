@@ -421,7 +421,6 @@ export default class Control extends Node2D {
     }
     set rotation(value) {
         this.data.rotation = value;
-        this.update_transform();
     }
     set_rotation(value) {
         this.rotation = value;
@@ -434,7 +433,6 @@ export default class Control extends Node2D {
     }
     set rect_scale(value) {
         this.data.scale.copy(value);
-        this.update_transform();
     }
     /**
      * @param {number|import('engine/math/Vector2').Vector2Like} x
@@ -605,9 +603,7 @@ export default class Control extends Node2D {
         this.type = 'Control';
 
         this.data = {
-            get pos_cache() {
-                return self.transform.position;
-            },
+            pos_cache: new Vector2(),
             size_cache: new Vector2(),
             minimum_size_cache: new Vector2(),
             minimum_size_valid: false,
@@ -620,16 +616,9 @@ export default class Control extends Node2D {
             h_grow: GrowDirection.BEGIN,
             v_grow: GrowDirection.BEGIN,
 
-            get rotation() {
-                return self.transform.rotation;
-            },
-            set rotation(value) {
-                self.transform.rotation = value;
-            },
-            get scale() {
-                return self.transform.scale;
-            },
-            pivot_offset: new Vector2(),
+            rotation: 0,
+            scale: new Vector2(1, 1),
+            pivot_offset: new Vector2(0, 0),
 
             pending_resize: false,
 
@@ -715,6 +704,14 @@ export default class Control extends Node2D {
         }
 
         super._propagate_enter_tree();
+    }
+    update_transform() {
+        this.transform.position.copy(this.data.pos_cache).add(this.data.pivot_offset);
+        this.transform.rotation = this.data.rotation;
+        this.transform.scale.copy(this.data.scale);
+        this.transform.pivot.copy(this.data.pivot_offset);
+
+        super.update_transform();
     }
 
     /**
@@ -843,7 +840,6 @@ export default class Control extends Node2D {
             new_size_cache.y = minimum_size.y;
         }
 
-        let pos_changed = !new_pos_cache.equals(this.data.pos_cache);
         let size_changed = !new_size_cache.equals(this.data.size_cache);
 
         this.data.pos_cache.copy(new_pos_cache);
@@ -852,24 +848,6 @@ export default class Control extends Node2D {
         if (this.is_inside_tree) {
             if (size_changed) {
                 this._resized();
-            }
-            if (pos_changed || size_changed) {
-                // FIXME: item_rect_changed not implemented yet
-                // this.item_rect_changed(size_changed);
-
-                // this._change_notify_margins(); // this is editor only
-
-                // FIXME: do we need this?
-                // this.position.copy(this.data.pos_cache);
-                // this.scale.copy(this.data.scale);
-                this.update_transform();
-            }
-
-            if (pos_changed && !size_changed) {
-                // FIXME: do we need to update it here?
-                // this.position.copy(this.data.pos_cache);
-                // this.scale.copy(this.data.scale);
-                this._update_transform();
             }
         }
     }
