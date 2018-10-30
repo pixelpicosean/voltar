@@ -1,6 +1,7 @@
 import Container from "./Container";
 import Control, { SizeFlag } from "./Control";
 import { Vector2, Rectangle } from "engine/math/index";
+import { node_class_map } from "engine/registry";
 
 /**
  * @enum {number}
@@ -56,6 +57,20 @@ export default class BoxContainer extends Container {
 
         this.vertical = vertical;
         this.align = AlignMode.BEGIN;
+    }
+
+    _load_data(data) {
+        super._load_data(data);
+
+        for (let k in data) {
+            switch (k) {
+                case 'alignment': {
+                    this[k] = data[k];
+                } break;
+            }
+        }
+
+        return this;
     }
 
     _children_sorted() {
@@ -295,3 +310,6 @@ export class VBoxContainer extends BoxContainer {
         this.type = 'VBoxContainer';
     }
 }
+
+node_class_map['VBoxContainer'] = VBoxContainer;
+node_class_map['HBoxContainer'] = HBoxContainer;

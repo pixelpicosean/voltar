@@ -20,7 +20,7 @@ export default class Theme {
 const default_theme = (() => {
     const t = new Theme();
 
-    t.constants.HBoxContainer = {
+    t.constants.HBoxContainer = t.constants.VBoxContainer = {
         separation: 4,
     };
 
