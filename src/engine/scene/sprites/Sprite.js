@@ -613,4 +613,9 @@ export default class Sprite extends Node2D {
             value.once('update', this._on_texture_update, this);
         }
     }
+
+    set_texture(value) {
+        this.texture = value;
+        return this;
+    }
 }
