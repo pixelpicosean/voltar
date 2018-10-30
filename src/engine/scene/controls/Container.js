@@ -9,6 +9,8 @@ export default class Container extends Control {
     constructor() {
         super();
 
+        this.type = 'Container';
+
         this.pending_sort = false;
     }
     _propagate_enter_tree() {
