@@ -502,9 +502,9 @@
             "anchor_top": 0,
             "anchor_right": 0,
             "margin_bottom": 398,
-            "margin_left": 197,
-            "margin_top": 230,
-            "margin_right": 237,
+            "margin_left": 156,
+            "margin_top": 233,
+            "margin_right": 223,
             "rect_pivot_offset": {
                 "x": 0,
                 "y": 0
@@ -513,8 +513,28 @@
             "mouse_default_cursor_shape": 0,
             "size_flags_horizontal": 1,
             "size_flags_vertical": 1,
-            "alignment": 2,
+            "alignment": 0,
             "children": [
+                {
+                    "type": "TextureRect",
+                    "name": "TextureRect2",
+                    "anchor_bottom": 0,
+                    "anchor_left": 0,
+                    "anchor_top": 0,
+                    "anchor_right": 0,
+                    "margin_bottom": 16,
+                    "margin_right": 67,
+                    "rect_pivot_offset": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rect_clip_content": false,
+                    "mouse_default_cursor_shape": 0,
+                    "size_flags_horizontal": 1,
+                    "size_flags_vertical": 1,
+                    "texture": "mask/sample",
+                    "children": []
+                },
                 {
                     "type": "ColorRect",
                     "name": "ColorRect",
@@ -522,9 +542,9 @@
                     "anchor_left": 0,
                     "anchor_top": 0,
                     "anchor_right": 0,
-                    "margin_bottom": 96,
-                    "margin_top": 76,
-                    "margin_right": 40,
+                    "margin_bottom": 40,
+                    "margin_top": 20,
+                    "margin_right": 67,
                     "rect_min_size": {
                         "x": 20,
                         "y": 20
@@ -546,19 +566,15 @@
                     "children": []
                 },
                 {
-                    "type": "ColorRect",
-                    "name": "ColorRect2",
+                    "type": "TextureRect",
+                    "name": "TextureRect",
                     "anchor_bottom": 0,
                     "anchor_left": 0,
                     "anchor_top": 0,
                     "anchor_right": 0,
-                    "margin_bottom": 120,
-                    "margin_top": 100,
-                    "margin_right": 40,
-                    "rect_min_size": {
-                        "x": 20,
-                        "y": 20
-                    },
+                    "margin_bottom": 95,
+                    "margin_top": 44,
+                    "margin_right": 67,
                     "rect_pivot_offset": {
                         "x": 0,
                         "y": 0
@@ -567,72 +583,8 @@
                     "mouse_default_cursor_shape": 0,
                     "size_flags_horizontal": 1,
                     "size_flags_vertical": 1,
-                    "color": {
-                        "r": 1,
-                        "g": 1,
-                        "b": 1,
-                        "a": 1
-                    },
-                    "children": []
-                },
-                {
-                    "type": "ColorRect",
-                    "name": "ColorRect3",
-                    "anchor_bottom": 0,
-                    "anchor_left": 0,
-                    "anchor_top": 0,
-                    "anchor_right": 0,
-                    "margin_bottom": 144,
-                    "margin_top": 124,
-                    "margin_right": 40,
-                    "rect_min_size": {
-                        "x": 20,
-                        "y": 20
-                    },
-                    "rect_pivot_offset": {
-                        "x": 0,
-                        "y": 0
-                    },
-                    "rect_clip_content": false,
-                    "mouse_default_cursor_shape": 0,
-                    "size_flags_horizontal": 1,
-                    "size_flags_vertical": 1,
-                    "color": {
-                        "r": 1,
-                        "g": 1,
-                        "b": 1,
-                        "a": 1
-                    },
-                    "children": []
-                },
-                {
-                    "type": "ColorRect",
-                    "name": "ColorRect4",
-                    "anchor_bottom": 0,
-                    "anchor_left": 0,
-                    "anchor_top": 0,
-                    "anchor_right": 0,
-                    "margin_bottom": 168,
-                    "margin_top": 148,
-                    "margin_right": 40,
-                    "rect_min_size": {
-                        "x": 20,
-                        "y": 20
-                    },
-                    "rect_pivot_offset": {
-                        "x": 0,
-                        "y": 0
-                    },
-                    "rect_clip_content": false,
-                    "mouse_default_cursor_shape": 0,
-                    "size_flags_horizontal": 1,
-                    "size_flags_vertical": 1,
-                    "color": {
-                        "r": 1,
-                        "g": 1,
-                        "b": 1,
-                        "a": 1
-                    },
+                    "texture": "mask/sample",
+                    "stretch_mode": 6,
                     "children": []
                 }
             ]

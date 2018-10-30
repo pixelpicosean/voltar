@@ -4,7 +4,7 @@
         <key>fileFormatVersion</key>
         <int>4</int>
         <key>texturePackerVersion</key>
-        <string>4.8.3</string>
+        <string>4.9.0</string>
         <key>autoSDSettings</key>
         <array>
             <struct type="AutoSDSettings">
@@ -234,6 +234,7 @@
             <key type="filename">sprites/mask/7.png</key>
             <key type="filename">sprites/mask/8.png</key>
             <key type="filename">sprites/mask/9.png</key>
+            <key type="filename">sprites/mask/sample.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>

@@ -136,6 +136,14 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
 	"sourceSize": {"w":16,"h":16}
 },
+"mask/sample":
+{
+	"frame": {"x":130,"y":220,"w":16,"h":16},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
+	"sourceSize": {"w":16,"h":16}
+},
 "title/pop":
 {
 	"frame": {"x":2,"y":2,"w":279,"h":162},
@@ -151,6 +159,6 @@
 	"format": "RGBA8888",
 	"size": {"w":512,"h":256},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:65938092f599ba320dc6318af9efd56e:f8885f33835eb4f9f6d03e376315f9f5:1eabdf11f75e3a4fe3147baf7b5be24b$"
+	"smartupdate": "$TexturePacker:SmartUpdate:f0554e228f2f6fdc04a41752ee6b7f49:4a3eebd35928e2e57a996e501518833f:1eabdf11f75e3a4fe3147baf7b5be24b$"
 }
 }
