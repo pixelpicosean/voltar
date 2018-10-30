@@ -285,7 +285,7 @@ export default class Node2D extends EventEmitter {
             this.tweens = new node_plugins.TweenManager();
         }
 
-        this.tint = 0;
+        this.tint = 0xFFFFFF;
         this.modulate = new Color(1, 1, 1, 1, (rgb) => {
             this.tint = rgb2hex(rgb);
         }, this);
