@@ -23,6 +23,7 @@ export { default as NineSliceSprite } from './scene/sprites/NineSliceSprite';
 
 export { default as Control } from './scene/controls/Control';
 export { default as ColorRect } from './scene/controls/ColorRect';
+export { default as TextureRect } from './scene/controls/TextureRect';
 export { VBoxContainer, HBoxContainer } from './scene/controls/BoxContainer';
 
 export { default as CutoutAnimation } from './scene/coa/CutoutAnimation';
