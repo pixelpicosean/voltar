@@ -228,6 +228,69 @@
                                     }
                                 ]
                             }
+                        },
+                        {
+                            "type": "value",
+                            "path": "ColorRect:color",
+                            "interp": 1,
+                            "loop_wrap": true,
+                            "keys": {
+                                "times": [
+                                    0,
+                                    1,
+                                    2
+                                ],
+                                "transitions": [
+                                    1,
+                                    1,
+                                    1
+                                ],
+                                "update": 0,
+                                "values": [
+                                    {
+                                        "r": 1,
+                                        "g": 1,
+                                        "b": 1,
+                                        "a": 1
+                                    },
+                                    {
+                                        "r": 0,
+                                        "g": 0.237732,
+                                        "b": 0.742188,
+                                        "a": 1
+                                    },
+                                    {
+                                        "r": 1,
+                                        "g": 1,
+                                        "b": 1,
+                                        "a": 1
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "type": "value",
+                            "path": "ColorRect:rotation",
+                            "interp": 1,
+                            "loop_wrap": true,
+                            "keys": {
+                                "times": [
+                                    0,
+                                    0.6,
+                                    1.5
+                                ],
+                                "transitions": [
+                                    1,
+                                    1,
+                                    1
+                                ],
+                                "update": 0,
+                                "values": [
+                                    0,
+                                    -0.38043988903271597,
+                                    0.44865782817616634
+                                ]
+                            }
                         }
                     ]
                 },
@@ -405,14 +468,52 @@
             "children": []
         },
         {
-            "type": "Control",
-            "name": "Control",
+            "type": "ColorRect",
+            "name": "ColorRect",
             "anchor_bottom": 0,
             "anchor_left": 0,
             "anchor_top": 0,
             "anchor_right": 0,
-            "margin_bottom": 40,
-            "margin_right": 40,
+            "margin_bottom": 328,
+            "margin_left": 3,
+            "margin_top": 228,
+            "margin_right": 150,
+            "rect_pivot_offset": {
+                "x": 50,
+                "y": 50
+            },
+            "rect_clip_content": false,
+            "mouse_default_cursor_shape": 0,
+            "size_flags_horizontal": 1,
+            "size_flags_vertical": 1,
+            "color": {
+                "r": 1,
+                "g": 1,
+                "b": 1,
+                "a": 1
+            },
+            "children": []
+        },
+        {
+            "type": "VBoxContainer",
+            "name": "VBoxContainer",
+            "anchor_bottom": 0,
+            "anchor_left": 0,
+            "anchor_top": 0,
+            "anchor_right": 0,
+            "margin_bottom": 398,
+            "margin_left": 197,
+            "margin_top": 230,
+            "margin_right": 237,
+            "rect_pivot_offset": {
+                "x": 0,
+                "y": 0
+            },
+            "rect_clip_content": false,
+            "mouse_default_cursor_shape": 0,
+            "size_flags_horizontal": 1,
+            "size_flags_vertical": 1,
+            "alignment": 2,
             "children": [
                 {
                     "type": "ColorRect",
@@ -421,10 +522,111 @@
                     "anchor_left": 0,
                     "anchor_top": 0,
                     "anchor_right": 0,
-                    "margin_bottom": 75,
-                    "margin_left": 326,
-                    "margin_top": 35,
-                    "margin_right": 366,
+                    "margin_bottom": 96,
+                    "margin_top": 76,
+                    "margin_right": 40,
+                    "rect_min_size": {
+                        "x": 20,
+                        "y": 20
+                    },
+                    "rect_pivot_offset": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rect_clip_content": false,
+                    "mouse_default_cursor_shape": 0,
+                    "size_flags_horizontal": 1,
+                    "size_flags_vertical": 1,
+                    "color": {
+                        "r": 1,
+                        "g": 1,
+                        "b": 1,
+                        "a": 1
+                    },
+                    "children": []
+                },
+                {
+                    "type": "ColorRect",
+                    "name": "ColorRect2",
+                    "anchor_bottom": 0,
+                    "anchor_left": 0,
+                    "anchor_top": 0,
+                    "anchor_right": 0,
+                    "margin_bottom": 120,
+                    "margin_top": 100,
+                    "margin_right": 40,
+                    "rect_min_size": {
+                        "x": 20,
+                        "y": 20
+                    },
+                    "rect_pivot_offset": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rect_clip_content": false,
+                    "mouse_default_cursor_shape": 0,
+                    "size_flags_horizontal": 1,
+                    "size_flags_vertical": 1,
+                    "color": {
+                        "r": 1,
+                        "g": 1,
+                        "b": 1,
+                        "a": 1
+                    },
+                    "children": []
+                },
+                {
+                    "type": "ColorRect",
+                    "name": "ColorRect3",
+                    "anchor_bottom": 0,
+                    "anchor_left": 0,
+                    "anchor_top": 0,
+                    "anchor_right": 0,
+                    "margin_bottom": 144,
+                    "margin_top": 124,
+                    "margin_right": 40,
+                    "rect_min_size": {
+                        "x": 20,
+                        "y": 20
+                    },
+                    "rect_pivot_offset": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rect_clip_content": false,
+                    "mouse_default_cursor_shape": 0,
+                    "size_flags_horizontal": 1,
+                    "size_flags_vertical": 1,
+                    "color": {
+                        "r": 1,
+                        "g": 1,
+                        "b": 1,
+                        "a": 1
+                    },
+                    "children": []
+                },
+                {
+                    "type": "ColorRect",
+                    "name": "ColorRect4",
+                    "anchor_bottom": 0,
+                    "anchor_left": 0,
+                    "anchor_top": 0,
+                    "anchor_right": 0,
+                    "margin_bottom": 168,
+                    "margin_top": 148,
+                    "margin_right": 40,
+                    "rect_min_size": {
+                        "x": 20,
+                        "y": 20
+                    },
+                    "rect_pivot_offset": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rect_clip_content": false,
+                    "mouse_default_cursor_shape": 0,
+                    "size_flags_horizontal": 1,
+                    "size_flags_vertical": 1,
                     "color": {
                         "r": 1,
                         "g": 1,
