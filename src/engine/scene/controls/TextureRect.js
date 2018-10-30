@@ -1,10 +1,8 @@
 import Control from './Control';
 import Texture from 'engine/textures/Texture';
 import WebGLRenderer from 'engine/renderers/WebGLRenderer';
-import { rgb2hex, TextureCache } from 'engine/utils/index';
 import { node_class_map } from 'engine/registry';
-import Color from 'engine/Color';
-import { Vector2, Rectangle } from 'engine/math/index';
+import { Vector2 } from 'engine/math/index';
 import Sprite from '../sprites/Sprite';
 import TilingSprite from '../sprites/TilingSprite';
 
@@ -21,6 +19,8 @@ export const StretchMode = {
     KEEP_ASPECT_CENTERED: 6,
     KEEP_ASPECT_COVERED: 7,
 }
+
+const tmp_vec = new Vector2();
 
 export default class TextureRect extends Control {
     /**
@@ -167,10 +167,8 @@ export default class TextureRect extends Control {
                 this.sprite.tint = this.tint;
                 this.sprite.alpha = this.alpha;
                 this.sprite.blend_mode = this.blend_mode;
-                this.sprite.calculate_vertices();
 
-                renderer.set_object_renderer(renderer.plugins['sprite']);
-                renderer.plugins['sprite'].render(this.sprite);
+                this.sprite._render_webgl(renderer);
             } break;
             case StretchMode.KEEP_ASPECT_CENTERED:
             case StretchMode.KEEP_ASPECT: {
@@ -200,16 +198,43 @@ export default class TextureRect extends Control {
                 this.sprite.tint = this.tint;
                 this.sprite.alpha = this.alpha;
                 this.sprite.blend_mode = this.blend_mode;
-                this.sprite.calculate_vertices();
 
-                renderer.set_object_renderer(renderer.plugins['sprite']);
-                renderer.plugins['sprite'].render(this.sprite);
+                this.sprite._render_webgl(renderer);
             } break;
             case StretchMode.TILE: {
+                this.tsprite.transform.set_from_matrix(this.transform.world_transform);
+                this.tsprite.width = this.rect_size.x;
+                this.tsprite.height = this.rect_size.y;
 
+                // TODO: sync more properties for rendering
+                this.tsprite._update_transform();
+                this.tsprite.clamp_margin = -0.5;
+                this.tsprite.tint = this.tint;
+                this.tsprite.alpha = this.alpha;
+                this.tsprite.blend_mode = this.blend_mode;
+
+                this.tsprite._render_webgl(renderer);
             } break;
             case StretchMode.KEEP_ASPECT_COVERED: {
+                this.tsprite.transform.set_from_matrix(this.transform.world_transform);
+                this.tsprite.width = this.rect_size.x;
+                this.tsprite.height = this.rect_size.y;
 
+                const scale_size = tmp_vec.set(this.rect_size.x / this._texture.width, this.rect_size.y / this._texture.height);
+                const scale = scale_size.x > scale_size.y ? scale_size.x : scale_size.y;
+                this.tsprite.tile_scale.set(scale, scale);
+                this.tsprite.tile_position.set(this._texture.width * scale, this._texture.height * scale)
+                    .subtract(this.rect_size)
+                    .scale(-0.5)
+
+                // TODO: sync more properties for rendering
+                this.tsprite._update_transform();
+                this.tsprite.clamp_margin = -0.5;
+                this.tsprite.tint = this.tint;
+                this.tsprite.alpha = this.alpha;
+                this.tsprite.blend_mode = this.blend_mode;
+
+                this.tsprite._render_webgl(renderer);
             } break;
         }
     }
