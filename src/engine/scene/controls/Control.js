@@ -10,6 +10,7 @@ import { BLEND_MODES } from 'engine/const';
 import Node2D from '../Node2D';
 
 import { node_class_map } from 'engine/registry';
+import Theme from './Theme';
 
 /**
  * @enum {number}
@@ -656,7 +657,7 @@ export default class Control extends Node2D {
             style_override: undefined,
             font_override: undefined,
             color_override: undefined,
-            constant_override: undefined,
+            constant_override: {},
         };
 
         this.blend_mode = BLEND_MODES.NORMAL;
@@ -775,6 +776,26 @@ export default class Control extends Node2D {
         rect.width = this.data.size_cache.x;
         rect.height = this.data.size_cache.y;
         return rect;
+    }
+
+    /**
+     * @param {string} name
+     * @param {string} [type]
+     * @return {number}
+     */
+    get_constant(name, type) {
+        if (type === undefined) {
+            const c = this.data.constant_override[name];
+            if (c !== undefined) {
+                return c;
+            }
+
+            type = this.type;
+        }
+
+        // TODO: Loop through theme owners and find the value
+
+        return Theme.get_default().get_constant(name, type);
     }
 
     _compute_margins(rect, anchors, margins) {
