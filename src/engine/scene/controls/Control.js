@@ -91,6 +91,7 @@ const tmp_vec7 = new Vector2();
 const tmp_vec8 = new Vector2();
 const tmp_vec9 = new Vector2();
 const tmp_vec10 = new Vector2();
+const tmp_vec11 = new Vector2();
 
 const tmp_rect = new Rectangle();
 const tmp_rect2 = new Rectangle();
@@ -527,7 +528,7 @@ export default class Control extends Node2D {
             return;
         }
         this.data.h_size_flags = value;
-        // emit_signal('size_flags_changed)
+        this.emit('size_flags_changed');
     }
     set_size_flags_horizontal(value) {
         this.size_flags_horizontal = value;
@@ -545,7 +546,7 @@ export default class Control extends Node2D {
             return;
         }
         this.data.v_size_flags = value;
-        // emit_signal('size_flags_changed)
+        this.emit('size_flags_changed');
     }
     set_size_flags_vertical(value) {
         this.size_flags_vertical = value;
@@ -560,7 +561,7 @@ export default class Control extends Node2D {
             return;
         }
         this.data.expand = value;
-        // emit_signal('size_flags_changed)
+        this.emit('size_flags_changed');
     }
     set_size_flags_stretch_ratio(value) {
         this.size_flags_stretch_ratio = value;
@@ -705,6 +706,14 @@ export default class Control extends Node2D {
 
         super._propagate_enter_tree();
     }
+
+    add_child_notify(child) {
+        // TODO: change child's theme if we have any
+    }
+    remove_child_notify(child) {
+        // TODO: unset child's theme owner
+    }
+
     update_transform() {
         this.transform.position.copy(this.data.pos_cache).add(this.data.pivot_offset);
         this.transform.rotation = this.data.rotation;
@@ -852,6 +861,27 @@ export default class Control extends Node2D {
         }
     }
 
+    _update_minimum_size() {
+        if (!this.is_inside_tree) {
+            return;
+        }
+
+        const minsize = this.get_combined_minimum_size(tmp_vec11);
+        if (
+            minsize.x > this.data.size_cache.x
+            ||
+            minsize.y > this.data.size_cache.y
+        ) {
+            this._size_changed();
+        }
+
+        this.data.updating_last_minimum_size = false;
+
+        if (!minsize.equals(this.data.last_minimum_size)) {
+            this.data.last_minimum_size.copy(minsize);
+            this.emit('minimum_size_changed');
+        }
+    }
     _update_minimum_size_cache() {
         const minsize = this.get_minimum_size(tmp_vec3);
         minsize.x = Math.max(minsize.x, this.data.custom_minimum_size.x);
