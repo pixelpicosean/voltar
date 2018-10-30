@@ -88,6 +88,10 @@ export default class Node2D extends EventEmitter {
          */
         this.type = 'Node2D';
 
+        // Flags to avoid call of `instanceof` for better performance
+        this.is_physics_object = false;
+        this.is_control = false;
+
         /**
          * @type {boolean}
          */
@@ -114,7 +118,6 @@ export default class Node2D extends EventEmitter {
          * @type {boolean}
          */
         this.physics_process = false;
-        this.is_physics_object = false;
 
         // TODO: need to create Transform from factory
         /**

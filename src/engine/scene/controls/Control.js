@@ -604,6 +604,8 @@ export default class Control extends Node2D {
 
         this.type = 'Control';
 
+        this.is_control = true;
+
         this.data = {
             pos_cache: new Vector2(),
             size_cache: new Vector2(),

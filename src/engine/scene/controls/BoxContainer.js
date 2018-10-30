@@ -98,9 +98,11 @@ export default class BoxContainer extends Container {
 
         let first = true;
 
-        for (let c of this.children) {
-            // TODO: use flag to optimize
-            if (!(c instanceof Control) || !c.world_visible) {
+        /** @type {Container} */
+        let c;
+        // @ts-ignore
+        for (c of this.children) {
+            if (!c.is_control || !c.world_visible) {
                 continue;
             }
             if (c.toplevel) {
@@ -145,9 +147,11 @@ export default class BoxContainer extends Container {
          */
         const min_size_cache = {};
 
-        for (let c of this.children) {
-            // TODO: use flag to optimize
-            if (!(c instanceof Control) || !c.world_visible) {
+        /** @type {Container} */
+        let c;
+        // @ts-ignore
+        for (c of this.children) {
+            if (!c.is_control || !c.world_visible) {
                 continue;
             }
             if (c.toplevel) {
@@ -247,8 +251,9 @@ export default class BoxContainer extends Container {
         first = true;
         let idx = 0;
 
-        for (let c of this.children) {
-            if (!(c instanceof Control) || !c.world_visible) {
+        // @ts-ignore
+        for (c of this.children) {
+            if (!c.is_control || !c.world_visible) {
                 continue;
             }
             if (c.toplevel) {
