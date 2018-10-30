@@ -40,6 +40,31 @@ let uid = 0;
  * ```
  */
 export default class Node2D extends EventEmitter {
+    /**
+     * The visibility of the object. If false the object will not be drawn, and
+     * the update_transform function will not be called.
+     *
+     * Only affects recursive calls from parent. You can ask for bounds or call update_transform manually
+     *
+     * @type {boolean}
+     */
+    get visible() {
+        return this._visible;
+    }
+    set visible(value) {
+        if (this._visible !== value) {
+            this._visible = value;
+            this._visibility_changed();
+        }
+    }
+    /**
+     * @param {boolean} value
+     */
+    set_visible(value) {
+        this.visible = value;
+        return this;
+    }
+
     constructor() {
         super();
 
@@ -107,15 +132,7 @@ export default class Node2D extends EventEmitter {
          */
         this.alpha = 1;
 
-        /**
-         * The visibility of the object. If false the object will not be drawn, and
-         * the update_transform function will not be called.
-         *
-         * Only affects recursive calls from parent. You can ask for bounds or call update_transform manually
-         *
-         * @type {boolean}
-         */
-        this.visible = true;
+        this._visible = true;
 
         /**
          * Can this object be rendered, if false the object will not be drawn but the update_transform
@@ -329,6 +346,8 @@ export default class Node2D extends EventEmitter {
     }
 
     _resized() { }
+    _visibility_changed() { }
+    _children_sorted() { }
 
     /**
      * Set value of this node with key, values and lerp factor
@@ -1113,6 +1132,18 @@ export default class Node2D extends EventEmitter {
     on_children_change(index) {
         /* empty */
     }
+    /**
+     * @param {Node2D} child
+     */
+    add_child_notify(child) { }
+    /**
+     * @param {Node2D} child
+     */
+    remove_child_notify(child) { }
+    /**
+     * @param {Node2D} child
+     */
+    move_child_notify(child) { }
 
     /**
      * Adds one or more children to the container.
@@ -1152,6 +1183,7 @@ export default class Node2D extends EventEmitter {
 
         // TODO - lets either do all callbacks or all events.. not both!
         this.on_children_change(this.children.length - 1);
+        this.add_child_notify(child);
 
         if (this._is_ready) {
             child._propagate_ready();
@@ -1200,6 +1232,7 @@ export default class Node2D extends EventEmitter {
 
         // TODO - lets either do all callbacks or all events.. not both!
         this.on_children_change(this.children.length - 1);
+        this.add_child_notify(child);
 
         if (this._is_ready) {
             child._propagate_ready();
@@ -1259,7 +1292,7 @@ export default class Node2D extends EventEmitter {
      * @param {number} index - The resulting index number for the child display object
      * @returns {this}
      */
-    set_child_index(child, index) {
+    move_child(child, index) {
         if (index < 0 || index >= this.children.length) {
             throw new Error(`The index ${index} supplied is out of bounds ${this.children.length}`);
         }
@@ -1271,6 +1304,7 @@ export default class Node2D extends EventEmitter {
         this.children.splice(index, 0, child); // add at new position
 
         this.on_children_change(index);
+        this.move_child_notify(child);
 
         return this;
     }
@@ -1322,6 +1356,8 @@ export default class Node2D extends EventEmitter {
         // TODO - lets either do all callbacks or all events.. not both!
         this.on_children_change(index);
 
+        this.remove_child_notify(child);
+
         return child;
     }
 
@@ -1352,6 +1388,8 @@ export default class Node2D extends EventEmitter {
 
         // TODO - lets either do all callbacks or all events.. not both!
         this.on_children_change(index);
+
+        this.remove_child_notify(child);
 
         return child;
     }
@@ -1385,6 +1423,8 @@ export default class Node2D extends EventEmitter {
                 }
 
                 removed[i]._propagate_exit_tree();
+
+                this.remove_child_notify(removed[i]);
             }
 
             this._bounds_id++;
