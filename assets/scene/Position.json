@@ -501,10 +501,10 @@
             "anchor_left": 0,
             "anchor_top": 0,
             "anchor_right": 0,
-            "margin_bottom": 398,
-            "margin_left": 156,
-            "margin_top": 233,
-            "margin_right": 223,
+            "margin_bottom": 394,
+            "margin_left": 153,
+            "margin_top": 229,
+            "margin_right": 218,
             "rect_pivot_offset": {
                 "x": 0,
                 "y": 0
@@ -523,7 +523,7 @@
                     "anchor_top": 0,
                     "anchor_right": 0,
                     "margin_bottom": 16,
-                    "margin_right": 67,
+                    "margin_right": 65,
                     "rect_pivot_offset": {
                         "x": 0,
                         "y": 0
@@ -533,6 +533,7 @@
                     "size_flags_horizontal": 1,
                     "size_flags_vertical": 1,
                     "texture": "mask/sample",
+                    "stretch_mode": 7,
                     "children": []
                 },
                 {
@@ -544,7 +545,7 @@
                     "anchor_right": 0,
                     "margin_bottom": 40,
                     "margin_top": 20,
-                    "margin_right": 67,
+                    "margin_right": 65,
                     "rect_min_size": {
                         "x": 20,
                         "y": 20
@@ -566,15 +567,66 @@
                     "children": []
                 },
                 {
+                    "type": "MarginContainer",
+                    "name": "MarginContainer",
+                    "anchor_bottom": 0,
+                    "anchor_left": 0,
+                    "anchor_top": 0,
+                    "anchor_right": 0,
+                    "margin_bottom": 64,
+                    "margin_top": 44,
+                    "margin_right": 65,
+                    "rect_pivot_offset": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rect_clip_content": false,
+                    "mouse_default_cursor_shape": 0,
+                    "size_flags_horizontal": 1,
+                    "size_flags_vertical": 1,
+                    "children": [
+                        {
+                            "type": "ColorRect",
+                            "name": "ColorRect2",
+                            "anchor_bottom": 0,
+                            "anchor_left": 0,
+                            "anchor_top": 0,
+                            "anchor_right": 0,
+                            "margin_bottom": 20,
+                            "margin_left": 8,
+                            "margin_right": 65,
+                            "rect_min_size": {
+                                "x": 20,
+                                "y": 20
+                            },
+                            "rect_pivot_offset": {
+                                "x": 0,
+                                "y": 0
+                            },
+                            "rect_clip_content": false,
+                            "mouse_default_cursor_shape": 0,
+                            "size_flags_horizontal": 1,
+                            "size_flags_vertical": 1,
+                            "color": {
+                                "r": 1,
+                                "g": 1,
+                                "b": 1,
+                                "a": 1
+                            },
+                            "children": []
+                        }
+                    ]
+                },
+                {
                     "type": "TextureRect",
                     "name": "TextureRect",
                     "anchor_bottom": 0,
                     "anchor_left": 0,
                     "anchor_top": 0,
                     "anchor_right": 0,
-                    "margin_bottom": 95,
-                    "margin_top": 44,
-                    "margin_right": 67,
+                    "margin_bottom": 84,
+                    "margin_top": 68,
+                    "margin_right": 65,
                     "rect_pivot_offset": {
                         "x": 0,
                         "y": 0
@@ -585,6 +637,31 @@
                     "size_flags_vertical": 1,
                     "texture": "mask/sample",
                     "stretch_mode": 6,
+                    "children": []
+                },
+                {
+                    "type": "NinePatchRect",
+                    "name": "NinePatchRect",
+                    "anchor_bottom": 0,
+                    "anchor_left": 0,
+                    "anchor_top": 0,
+                    "anchor_right": 0,
+                    "margin_bottom": 120,
+                    "margin_top": 88,
+                    "margin_right": 65,
+                    "rect_pivot_offset": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rect_clip_content": false,
+                    "mouse_default_cursor_shape": 0,
+                    "size_flags_horizontal": 1,
+                    "size_flags_vertical": 1,
+                    "texture": "mask/nine-slice",
+                    "patch_margin_bottom": 16,
+                    "patch_margin_left": 16,
+                    "patch_margin_top": 16,
+                    "patch_margin_right": 16,
                     "children": []
                 }
             ]

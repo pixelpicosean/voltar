@@ -9,6 +9,5 @@ export default class ControlTest extends v.Node2D {
         return s;
     }
 
-    _ready() {
-    }
+    _enter_tree() { }
 }
