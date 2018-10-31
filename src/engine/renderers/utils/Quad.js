@@ -1,21 +1,18 @@
 import { GL } from 'engine/dep/index';
 const { GLBuffer, VertexArrayObject } = GL;
 import create_indices_for_quads from 'engine/utils/create_indices_for_quads';
+import Shader from 'engine/Shader';
+import { Rectangle } from 'engine/math/index';
 
 /**
  * Helper class to create a quad
- *
- * @class
- * @memberof V
  */
-export default class Quad
-{
+export default class Quad {
     /**
      * @param {WebGLRenderingContext} gl - The gl context for this quad to use.
      * @param {object} state - TODO: Description
      */
-    constructor(gl, state)
-    {
+    constructor(gl, state) {
         /**
          * the current WebGL drawing context
          *
@@ -49,8 +46,7 @@ export default class Quad
 
         this.interleaved = new Float32Array(8 * 2);
 
-        for (let i = 0; i < 4; i++)
-        {
+        for (let i = 0; i < 4; i++) {
             this.interleaved[i * 4] = this.vertices[(i * 2)];
             this.interleaved[(i * 4) + 1] = this.vertices[(i * 2) + 1];
             this.interleaved[(i * 4) + 2] = this.uvs[i * 2];
@@ -89,10 +85,9 @@ export default class Quad
     /**
      * Initialises the vaos and uses the shader.
      *
-     * @param {V.Shader} shader - the shader to use
+     * @param {Shader} shader - the shader to use
      */
-    initVao(shader)
-    {
+    initVao(shader) {
         this.vao.clear()
             .addIndex(this.index_buffer)
             .addAttribute(this.vertexBuffer, shader.attributes.aVertexPosition, this.gl.FLOAT, false, 4 * 4, 0)
@@ -102,12 +97,11 @@ export default class Quad
     /**
      * Maps two Rectangle to the quad.
      *
-     * @param {V.Rectangle} targetTextureFrame - the first rectangle
-     * @param {V.Rectangle} destinationFrame - the second rectangle
-     * @return {V.Quad} Returns itself.
+     * @param {Rectangle} targetTextureFrame - the first rectangle
+     * @param {Rectangle} destinationFrame - the second rectangle
+     * @return {Quad} Returns itself.
      */
-    map(targetTextureFrame, destinationFrame)
-    {
+    map(targetTextureFrame, destinationFrame) {
         let x = 0; // destinationFrame.x / targetTextureFrame.width;
         let y = 0; // destinationFrame.y / targetTextureFrame.height;
 
@@ -144,12 +138,10 @@ export default class Quad
     /**
      * Binds the buffer and uploads the data
      *
-     * @return {V.Quad} Returns itself.
+     * @return {Quad} Returns itself.
      */
-    upload()
-    {
-        for (let i = 0; i < 4; i++)
-        {
+    upload() {
+        for (let i = 0; i < 4; i++) {
             this.interleaved[i * 4] = this.vertices[(i * 2)];
             this.interleaved[(i * 4) + 1] = this.vertices[(i * 2) + 1];
             this.interleaved[(i * 4) + 2] = this.uvs[i * 2];
@@ -164,8 +156,7 @@ export default class Quad
     /**
      * Removes this quad from WebGL
      */
-    destroy()
-    {
+    destroy() {
         const gl = this.gl;
 
         gl.deleteBuffer(this.vertexBuffer);

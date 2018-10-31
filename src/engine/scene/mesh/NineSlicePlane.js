@@ -28,25 +28,24 @@ const DEFAULT_BORDER_SIZE = 10;
  *     areas 4 and 6 will be stretched vertically
  *     area 5 will be stretched both horizontally and vertically
  * </pre>
- *
  */
 export default class NineSlicePlane extends Plane {
     /**
-     * @param {Texture|string} texture - The texture to use on the NineSlicePlane.
+     * @param {Texture|string} [texture] - The texture to use on the NineSlicePlane.
      * @param {number} [top_height=10] size of the top horizontal bar (C)
      * @param {number} [right_width=10] size of the right vertical bar (B)
      * @param {number} [bottom_height=10] size of the bottom horizontal bar (D)
      * @param {number} [left_width=10] size of the left vertical bar (A)
      */
-    constructor(texture, top_height, right_width, bottom_height, left_width) {
+    constructor(texture, top_height = 10, right_width = 10, bottom_height = 10, left_width = 10) {
         super(texture, 4, 4);
 
         this.type = 'NineSlicePlane';
 
         // @ts-ignore
-        this._origWidth = texture.orig.width;
+        this._orig_texture_width = texture.orig.width;
         // @ts-ignore
-        this._origHeight = texture.orig.height;
+        this._orig_texture_height = texture.orig.height;
 
         /**
          * The width of the NineSlicePlane, setting this will actually modify the vertices and UV's of this plane
@@ -55,7 +54,7 @@ export default class NineSlicePlane extends Plane {
          * @memberof NineSlicePlane#
          * @override
          */
-        this._width = this._origWidth;
+        this._width = this._orig_texture_width;
 
         /**
          * The height of the NineSlicePlane, setting this will actually modify the vertices and UV's of this plane
@@ -64,7 +63,7 @@ export default class NineSlicePlane extends Plane {
          * @memberof NineSlicePlane#
          * @override
          */
-        this._height = this._origHeight;
+        this._height = this._orig_texture_height;
 
         /**
          * The width of the left column (a)
@@ -281,11 +280,11 @@ export default class NineSlicePlane extends Plane {
         const uvs = this.uvs;
         const texture = this._texture;
 
-        this._origWidth = texture.orig.width;
-        this._origHeight = texture.orig.height;
+        this._orig_texture_width = texture.orig.width;
+        this._orig_texture_height = texture.orig.height;
 
-        const _uvw = 1.0 / this._origWidth;
-        const _uvh = 1.0 / this._origHeight;
+        const _uvw = 1.0 / this._orig_texture_width;
+        const _uvh = 1.0 / this._orig_texture_height;
 
         uvs[0] = uvs[8] = uvs[16] = uvs[24] = 0;
         uvs[1] = uvs[3] = uvs[5] = uvs[7] = 0;

@@ -22,7 +22,7 @@ export default class Mesh extends Node2D {
      * @param {number} [draw_mode] - the draw_mode, can be any of the Mesh.DRAW_MODES consts
      */
     constructor(texture, vertices, uvs, indices, draw_mode) {
-        if (typeof(texture) === 'string') {
+        if (typeof (texture) === 'string') {
             texture = TextureCache[texture];
         }
 
@@ -287,13 +287,16 @@ export default class Mesh extends Node2D {
         return this._texture;
     }
 
-    set texture(value) // eslint-disable-line require-jsdoc
-    {
+    set texture(value) {
         if (this._texture === value) {
             return;
         }
 
-        this._texture = value;
+        if (typeof (value) === 'string') {
+            value = TextureCache[value];
+        }
+
+        this._texture = value || Texture.EMPTY;
 
         if (value) {
             // wait for the texture to load
@@ -316,8 +319,7 @@ export default class Mesh extends Node2D {
         return rgb2hex(this.tint_rgb);
     }
 
-    set tint(value) // eslint-disable-line require-jsdoc
-    {
+    set tint(value) {
         this.tint_rgb = hex2rgb(value, this.tint_rgb);
     }
 

@@ -1,8 +1,8 @@
 import Node2D from '../Node2D';
 import Sprite from './Sprite';
-import Texture from '../../textures/Texture';
-import { Rectangle } from '../../math';
-import { TextureCache } from '../../utils';
+import Texture from 'engine/textures/Texture';
+import { Rectangle } from 'engine/math/index';
+import { TextureCache } from 'engine/utils/index';
 
 export default class NineSliceSprite extends Node2D {
     /**
@@ -37,6 +37,7 @@ export default class NineSliceSprite extends Node2D {
         this.sw = this.add_child(new Sprite());
         this.se = this.add_child(new Sprite());
 
+        // @ts-ignore
         this.texture = texture;
         this._update_visual();
     }
@@ -68,6 +69,8 @@ export default class NineSliceSprite extends Node2D {
         if (data.width && data.height) {
             this.resize(data.width, data.height);
         }
+
+        return this;
     }
 
     /**
