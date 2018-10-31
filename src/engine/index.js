@@ -26,6 +26,7 @@ export { default as ColorRect } from './scene/controls/ColorRect';
 export { default as TextureRect } from './scene/controls/TextureRect';
 export { default as NinePatchRect } from './scene/controls/NinePatchRect';
 export { VBoxContainer, HBoxContainer } from './scene/controls/BoxContainer';
+export { default as MarginContainer } from './scene/controls/MarginContainer';
 
 export { default as CutoutAnimation } from './scene/coa/CutoutAnimation';
 

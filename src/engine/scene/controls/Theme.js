@@ -24,5 +24,12 @@ const default_theme = (() => {
         separation: 4,
     };
 
+    t.constants.MarginContainer = {
+        margin_bottom: 0,
+        margin_left: 0,
+        margin_top: 0,
+        margin_right: 0,
+    };
+
     return t;
 })();
