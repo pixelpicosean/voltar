@@ -1,6 +1,7 @@
 import { EventEmitter, resource_loader, ResourceLoader } from 'engine/dep/index';
 const { Resource } = resource_loader;
 
+// @ts-ignore
 import { blobMiddlewareFactory } from 'resource-loader/lib/middlewares/parsing/blob';
 
 import { loader_pre_procs, loader_use_procs } from 'engine/registry';
@@ -72,10 +73,15 @@ export default class Loader extends ResourceLoader {
         }
 
         // Compat layer, translate the new v2 signals into old v1 events.
+        // @ts-ignore
         this.onStart.add((l) => this.emit('start', l));
+        // @ts-ignore
         this.onProgress.add((l, r) => this.emit('progress', l, r));
+        // @ts-ignore
         this.onError.add((e, l, r) => this.emit('error', e, l, r));
+        // @ts-ignore
         this.onLoad.add((l, r) => this.emit('load', l, r));
+        // @ts-ignore
         this.onComplete.add((l, r) => this.emit('complete', l, r));
     }
 
@@ -83,6 +89,7 @@ export default class Loader extends ResourceLoader {
      * Destroy the loader, removes references.
      */
     destroy() {
+        // @ts-ignore
         this.removeAllListeners();
         this.reset();
     }

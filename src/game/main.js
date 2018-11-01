@@ -23,9 +23,6 @@ import Test from 'game/test/Control';
 // Settings exported from Godot
 import Settings from 'project.json';
 
-// Default font
-v.preload('media/04b03.fnt');
-
 // Always prefer atlas, for better performance and Godot importer support
 // while in Godot you do not need to use atlas, keep using single images.
 // This may change in the future, but will keep as is right now.

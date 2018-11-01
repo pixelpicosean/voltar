@@ -13,6 +13,8 @@ import { alternative, optional } from './registry';
 import engine_settings from 'engine/settings';
 import { TRANSFORM_MODE } from './const';
 import { TransformStatic, Transform } from './math/index';
+import Theme, { default_font_name } from './scene/resources/Theme';
+import { registered_bitmap_fonts } from './scene/text/res';
 
 /**
  * @typedef ApplicationSettings
@@ -208,9 +210,15 @@ export default class SceneTree {
         this.loader.destroy = () => { };
 
         // Load resources marked as preload
+        this.preload_queue.unshift([`media/${default_font_name}.fnt`]);
         for (const settings of this.preload_queue) {
             this.loader.add.apply(this.loader, settings);
         }
+
+        // Set default font after loader is complete
+        this.loader.onComplete.once(() => {
+            Theme.set_default_font(registered_bitmap_fonts[default_font_name]);
+        });
 
         window.addEventListener('load', this._initialize, false);
         document.addEventListener('DOMContentLoaded', this._initialize, false);
