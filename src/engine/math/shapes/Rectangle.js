@@ -13,36 +13,30 @@ export default class Rectangle {
      */
     constructor(x = 0, y = 0, width = 0, height = 0) {
         /**
-         * @member {number}
-         * @default 0
+         * @type {number}
          */
         this.x = Number(x);
 
         /**
-         * @member {number}
-         * @default 0
+         * @type {number}
          */
         this.y = Number(y);
 
         /**
-         * @member {number}
-         * @default 0
+         * @type {number}
          */
         this.width = Number(width);
 
         /**
-         * @member {number}
-         * @default 0
+         * @type {number}
          */
         this.height = Number(height);
 
         /**
          * The type of the object, mainly used to avoid `instanceof` checks
          *
-         * @member {number}
+         * @type {number}
          * @readOnly
-         * @default SHAPES.RECT
-         * @see SHAPES
          */
         this.type = SHAPES.RECT;
     }
