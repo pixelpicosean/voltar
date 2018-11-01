@@ -2,7 +2,11 @@ import settings from 'engine/settings';
 import Texture from 'engine/textures/Texture';
 import { get_resolution_of_url } from 'engine/utils/index';
 import { Rectangle } from 'engine/math/index';
+import Font, { Character } from '../resources/Font';
 
+/**
+ * @type {Object<string, Font>}
+ */
 export const registered_bitmap_fonts = {};
 
 /**
@@ -15,17 +19,17 @@ export const registered_bitmap_fonts = {};
  * @return {Object} Result font object with font, size, lineHeight and char fields.
  */
 export function register_font(xml, textures) {
-    const data = {};
+    const font = new Font();
+
     const info = xml.getElementsByTagName('info')[0];
     const common = xml.getElementsByTagName('common')[0];
     const pages = xml.getElementsByTagName('page');
     const res = get_resolution_of_url(pages[0].getAttribute('file'), settings.RESOLUTION);
     const pages_textures = {};
 
-    data.font = info.getAttribute('face');
-    data.size = parseInt(info.getAttribute('size'), 10);
-    data.lineHeight = parseInt(common.getAttribute('lineHeight'), 10) / res;
-    data.chars = {};
+    font.name = info.getAttribute('face');
+    font.size = parseInt(info.getAttribute('size'), 10);
+    font.height = parseInt(common.getAttribute('lineHeight'), 10) / res;
 
     // Single texture, convert to list
     if (textures instanceof Texture) {
@@ -38,7 +42,7 @@ export function register_font(xml, textures) {
         const id = pages[i].getAttribute('id');
         const file = pages[i].getAttribute('file');
 
-        pages_textures[id] = textures instanceof Array ? textures[i] : textures[file];
+        pages_textures[id] = Array.isArray(textures) ? textures[i] : textures[file];
     }
 
     // parse letters
@@ -55,14 +59,12 @@ export function register_font(xml, textures) {
             parseInt(letter.getAttribute('height'), 10) / res
         );
 
-        data.chars[char_code] = {
-            xOffset: parseInt(letter.getAttribute('xoffset'), 10) / res,
-            yOffset: parseInt(letter.getAttribute('yoffset'), 10) / res,
-            xAdvance: parseInt(letter.getAttribute('xadvance'), 10) / res,
-            kerning: {},
-            texture: new Texture(pages_textures[page].base_texture, texture_rect),
-            page,
-        };
+        const char = font.char_map[char_code] = new Character();
+        char.h_align = parseInt(letter.getAttribute('xoffset'), 10) / res;
+        char.v_align = parseInt(letter.getAttribute('yoffset'), 10) / res;
+        char.advance = parseInt(letter.getAttribute('xadvance'), 10) / res;
+        char.rect.copy(texture_rect);
+        char.texture = new Texture(pages_textures[page].base_texture, texture_rect);
     }
 
     // parse kernings
@@ -74,14 +76,14 @@ export function register_font(xml, textures) {
         const second = parseInt(kerning.getAttribute('second'), 10) / res;
         const amount = parseInt(kerning.getAttribute('amount'), 10) / res;
 
-        if (data.chars[second]) {
-            data.chars[second].kerning[first] = amount;
+        if (font.char_map[second]) {
+            font.char_map[second].kerning[first] = amount;
         }
     }
 
     // I'm leaving this as a temporary fix so we can test the bitmap fonts in v3
     // but it's very likely to change
-    registered_bitmap_fonts[data.font] = data;
+    registered_bitmap_fonts[font.name] = font;
 
-    return data;
+    return font;
 }

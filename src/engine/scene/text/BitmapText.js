@@ -168,18 +168,18 @@ export default class BitmapText extends Node2D {
      * @private
      */
     update_text() {
-        const data = registered_bitmap_fonts[this._font.name];
-        if (!data) {
+        const font = registered_bitmap_fonts[this._font.name];
+        if (!font) {
             console.warn(`BMFont "${this._font.name}" is not found!`);
             return;
         }
-        const scale = this._font.size / data.size;
+        const scale = this._font.size / font.size;
         const pos = new Vector2();
         const chars = [];
         const line_widths = [];
         const text = this.text.replace(/(?:\r\n|\r)/g, '\n');
         const text_length = text.length;
-        const max_width = this._max_width * data.size / this._font.size;
+        const max_width = this._max_width * font.size / this._font.size;
 
         let prev_char_code = null;
         let last_line_width = 0;
@@ -206,12 +206,12 @@ export default class BitmapText extends Node2D {
                 ++spaces_removed;
 
                 pos.x = 0;
-                pos.y += data.lineHeight;
+                pos.y += font.height;
                 prev_char_code = null;
                 continue;
             }
 
-            const char_data = data.chars[char_code];
+            const char_data = font.char_map[char_code];
 
             if (!char_data) {
                 continue;
@@ -225,11 +225,11 @@ export default class BitmapText extends Node2D {
                 texture: char_data.texture,
                 line,
                 char_code,
-                position: new Vector2(pos.x + char_data.xOffset + (this._letter_spacing / 2), pos.y + char_data.yOffset),
+                position: new Vector2(pos.x + char_data.h_align + (this._letter_spacing / 2), pos.y + char_data.v_align),
             });
-            pos.x += char_data.xAdvance + this._letter_spacing;
+            pos.x += char_data.advance + this._letter_spacing;
             last_line_width = pos.x;
-            max_line_height = Math.max(max_line_height, (char_data.yOffset + char_data.texture.height));
+            max_line_height = Math.max(max_line_height, (char_data.v_align + char_data.texture.height));
             prev_char_code = char_code;
 
             if (last_break_pos !== -1 && max_width > 0 && pos.x > max_width) {
@@ -243,7 +243,7 @@ export default class BitmapText extends Node2D {
                 line++;
 
                 pos.x = 0;
-                pos.y += data.lineHeight;
+                pos.y += font.height;
                 prev_char_code = null;
             }
         }
@@ -304,7 +304,7 @@ export default class BitmapText extends Node2D {
         }
 
         this._text_width = max_line_width * scale;
-        this._text_height = (pos.y + data.lineHeight) * scale;
+        this._text_height = (pos.y + font.height) * scale;
 
         // apply anchor
         if (this.anchor.x !== 0 || this.anchor.y !== 0) {
