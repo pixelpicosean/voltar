@@ -17,6 +17,7 @@ import {
     GrowDirection,
 } from './const';
 import Theme from '../resources/Theme';
+import StyleBox from '../resources/StyleBox';
 import Font from '../resources/Font';
 
 const tmp_vec = new Vector2();
@@ -741,7 +742,28 @@ export default class Control extends Node2D {
     /**
      * @param {string} name
      * @param {string} [type]
-     * @returns {string}
+     * @returns {StyleBox}
+     */
+    get_stylebox(name, type) {
+        if (!type) {
+            if (this.data.stylebox_override) {
+                const stylebox = this.data.stylebox_override[name];
+                if (stylebox !== undefined) {
+                    return stylebox;
+                }
+            }
+
+            type = this.type;
+        }
+
+        // TODO: try with custom themes
+
+        return Theme.get_default().get_stylebox(name, type);
+    }
+    /**
+     * @param {string} name
+     * @param {string} [type]
+     * @returns {Font}
      */
     get_font(name, type) {
         if (!type) {
