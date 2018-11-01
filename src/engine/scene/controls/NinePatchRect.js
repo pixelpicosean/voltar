@@ -1,4 +1,5 @@
-import Control, { Margin } from './Control';
+import Control from './Control';
+import { Margin } from './const';
 import Texture from 'engine/textures/Texture';
 import WebGLRenderer from 'engine/renderers/WebGLRenderer';
 import { node_class_map } from 'engine/registry';

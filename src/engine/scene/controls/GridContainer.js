@@ -1,7 +1,7 @@
 import Container from "./Container";
 import { Vector2, Rectangle } from "engine/math/index";
 import { node_class_map } from "engine/registry";
-import { SizeFlag } from "./Control";
+import { SizeFlag } from "./const";
 import { remove_items } from "engine/dep/index";
 
 const tmp_vec = new Vector2();

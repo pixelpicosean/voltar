@@ -1,8 +1,29 @@
-const default_font = '04b03';
+import StyleBox from "./StyleBox";
+import { Margin } from "../controls/const";
+import Font from "./Font";
+
+export const default_font_name = '04b03';
+
+let default_font = null;
+const default_style = (() => {
+    const style = new StyleBox();
+    style.set_default_margin(Margin.Bottom, 2);
+    style.set_default_margin(Margin.Left, 2);
+    style.set_default_margin(Margin.Top, 2);
+    style.set_default_margin(Margin.Right, 2);
+    return style;
+})();
 
 export default class Theme {
     static get_default() {
         return default_theme;
+    }
+
+    /**
+     * @param {Font} font
+     */
+    static set_default_font(font) {
+        default_font = font;
     }
 
     constructor() {
@@ -35,7 +56,23 @@ export default class Theme {
     /**
      * @param {string} name
      * @param {string} type
-     * @returns {string}
+     * @returns {StyleBox}
+     */
+    get_stylebox(name, type) {
+        if (this.style_map[type]) {
+            let style = this.style_map[type][name];
+            if (style) {
+                return style;
+            }
+        }
+
+        return default_style;
+    }
+
+    /**
+     * @param {string} name
+     * @param {string} type
+     * @returns {Font}
      */
     get_font(name, type) {
         if (this.font_map[type]) {

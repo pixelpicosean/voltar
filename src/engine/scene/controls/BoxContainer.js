@@ -1,5 +1,6 @@
 import Container from "./Container";
-import Control, { SizeFlag } from "./Control";
+import Control from "./Control";
+import { SizeFlag } from "./const";
 import { Vector2, Rectangle } from "engine/math/index";
 import { node_class_map } from "engine/registry";
 
