@@ -659,7 +659,7 @@ export default class Control extends Node2D {
             style_override: undefined,
             font_override: undefined,
             color_override: undefined,
-            constant_override: {},
+            constant_override: undefined,
         };
 
         this.blend_mode = BLEND_MODES.NORMAL;
@@ -786,10 +786,12 @@ export default class Control extends Node2D {
      * @return {number}
      */
     get_constant(name, type) {
-        if (type === undefined) {
-            const c = this.data.constant_override[name];
-            if (c !== undefined) {
-                return c;
+        if (!type) {
+            if (this.data.constant_override) {
+                const c = this.data.constant_override[name];
+                if (c !== undefined) {
+                    return c;
+                }
             }
 
             type = this.type;
@@ -798,6 +800,27 @@ export default class Control extends Node2D {
         // TODO: Loop through theme owners and find the value
 
         return Theme.get_default().get_constant(name, type);
+    }
+    /**
+     * @param {string} name
+     * @param {string} [type]
+     * @returns {string}
+     */
+    get_font(name, type) {
+        if (!type) {
+            if (this.data.font_override) {
+                const font = this.data.font_override[name];
+                if (font !== undefined) {
+                    return font;
+                }
+            }
+
+            type = this.type;
+        }
+
+        // TODO: try with custom themes
+
+        return Theme.get_default().get_font(name, type);
     }
 
     _compute_margins(rect, anchors, margins) {
