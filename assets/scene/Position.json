@@ -501,7 +501,7 @@
             "anchor_left": 0,
             "anchor_top": 0,
             "anchor_right": 0,
-            "margin_bottom": 394,
+            "margin_bottom": 396,
             "margin_left": 153,
             "margin_top": 229,
             "margin_right": 218,
@@ -662,6 +662,276 @@
                     "patch_margin_left": 16,
                     "patch_margin_top": 16,
                     "patch_margin_right": 16,
+                    "children": []
+                }
+            ]
+        },
+        {
+            "type": "CenterContainer",
+            "name": "CenterContainer",
+            "anchor_bottom": 0,
+            "anchor_left": 0,
+            "anchor_top": 0,
+            "anchor_right": 0,
+            "margin_bottom": 328,
+            "margin_left": 3,
+            "margin_top": 228,
+            "margin_right": 150,
+            "rect_pivot_offset": {
+                "x": 0,
+                "y": 0
+            },
+            "rect_clip_content": false,
+            "mouse_default_cursor_shape": 0,
+            "size_flags_horizontal": 1,
+            "size_flags_vertical": 1,
+            "use_top_left": false,
+            "children": [
+                {
+                    "type": "TextureRect",
+                    "name": "TextureRect3",
+                    "anchor_bottom": 0,
+                    "anchor_left": 0,
+                    "anchor_top": 0,
+                    "anchor_right": 0,
+                    "margin_bottom": 82,
+                    "margin_left": 41,
+                    "margin_top": 18,
+                    "margin_right": 105,
+                    "rect_pivot_offset": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rect_clip_content": false,
+                    "mouse_default_cursor_shape": 0,
+                    "size_flags_horizontal": 1,
+                    "size_flags_vertical": 1,
+                    "texture": "mask/nine-slice",
+                    "stretch_mode": 6,
+                    "children": []
+                },
+                {
+                    "type": "TextureRect",
+                    "name": "TextureRect4",
+                    "anchor_bottom": 0,
+                    "anchor_left": 0,
+                    "anchor_top": 0,
+                    "anchor_right": 0,
+                    "margin_bottom": 58,
+                    "margin_left": 65,
+                    "margin_top": 42,
+                    "margin_right": 81,
+                    "rect_pivot_offset": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rect_clip_content": false,
+                    "mouse_default_cursor_shape": 0,
+                    "size_flags_horizontal": 1,
+                    "size_flags_vertical": 1,
+                    "texture": "mask/sample",
+                    "stretch_mode": 6,
+                    "children": []
+                }
+            ]
+        },
+        {
+            "type": "GridContainer",
+            "name": "GridContainer",
+            "anchor_bottom": 0,
+            "anchor_left": 0,
+            "anchor_top": 0,
+            "anchor_right": 0,
+            "margin_bottom": 370,
+            "margin_left": 233,
+            "margin_top": 231,
+            "margin_right": 368,
+            "rect_pivot_offset": {
+                "x": 0,
+                "y": 0
+            },
+            "rect_clip_content": false,
+            "mouse_default_cursor_shape": 0,
+            "size_flags_horizontal": 1,
+            "size_flags_vertical": 1,
+            "columns": 4,
+            "children": [
+                {
+                    "type": "TextureRect",
+                    "name": "TextureRect",
+                    "anchor_bottom": 0,
+                    "anchor_left": 0,
+                    "anchor_top": 0,
+                    "anchor_right": 0,
+                    "margin_bottom": 16,
+                    "margin_right": 16,
+                    "rect_pivot_offset": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rect_clip_content": false,
+                    "mouse_default_cursor_shape": 0,
+                    "size_flags_horizontal": 1,
+                    "size_flags_vertical": 1,
+                    "texture": "mask/sample",
+                    "stretch_mode": 0,
+                    "children": []
+                },
+                {
+                    "type": "TextureRect",
+                    "name": "TextureRect2",
+                    "anchor_bottom": 0,
+                    "anchor_left": 0,
+                    "anchor_top": 0,
+                    "anchor_right": 0,
+                    "margin_bottom": 16,
+                    "margin_left": 20,
+                    "margin_right": 36,
+                    "rect_pivot_offset": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rect_clip_content": false,
+                    "mouse_default_cursor_shape": 0,
+                    "size_flags_horizontal": 1,
+                    "size_flags_vertical": 1,
+                    "texture": "mask/sample",
+                    "stretch_mode": 0,
+                    "children": []
+                },
+                {
+                    "type": "TextureRect",
+                    "name": "TextureRect3",
+                    "anchor_bottom": 0,
+                    "anchor_left": 0,
+                    "anchor_top": 0,
+                    "anchor_right": 0,
+                    "margin_bottom": 16,
+                    "margin_left": 40,
+                    "margin_right": 104,
+                    "rect_pivot_offset": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rect_clip_content": false,
+                    "mouse_default_cursor_shape": 0,
+                    "size_flags_horizontal": 1,
+                    "size_flags_vertical": 1,
+                    "texture": "mask/sample",
+                    "stretch_mode": 0,
+                    "children": []
+                },
+                {
+                    "type": "TextureRect",
+                    "name": "TextureRect4",
+                    "anchor_bottom": 0,
+                    "anchor_left": 0,
+                    "anchor_top": 0,
+                    "anchor_right": 0,
+                    "margin_bottom": 16,
+                    "margin_left": 108,
+                    "margin_right": 124,
+                    "rect_pivot_offset": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rect_clip_content": false,
+                    "mouse_default_cursor_shape": 0,
+                    "size_flags_horizontal": 1,
+                    "size_flags_vertical": 1,
+                    "texture": "mask/sample",
+                    "stretch_mode": 0,
+                    "children": []
+                },
+                {
+                    "type": "TextureRect",
+                    "name": "TextureRect5",
+                    "anchor_bottom": 0,
+                    "anchor_left": 0,
+                    "anchor_top": 0,
+                    "anchor_right": 0,
+                    "margin_bottom": 84,
+                    "margin_top": 20,
+                    "margin_right": 16,
+                    "rect_pivot_offset": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rect_clip_content": false,
+                    "mouse_default_cursor_shape": 0,
+                    "size_flags_horizontal": 1,
+                    "size_flags_vertical": 1,
+                    "texture": "mask/sample",
+                    "stretch_mode": 0,
+                    "children": []
+                },
+                {
+                    "type": "TextureRect",
+                    "name": "TextureRect6",
+                    "anchor_bottom": 0,
+                    "anchor_left": 0,
+                    "anchor_top": 0,
+                    "anchor_right": 0,
+                    "margin_bottom": 84,
+                    "margin_left": 20,
+                    "margin_top": 20,
+                    "margin_right": 36,
+                    "rect_pivot_offset": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rect_clip_content": false,
+                    "mouse_default_cursor_shape": 0,
+                    "size_flags_horizontal": 1,
+                    "size_flags_vertical": 1,
+                    "texture": "mask/sample",
+                    "stretch_mode": 0,
+                    "children": []
+                },
+                {
+                    "type": "TextureRect",
+                    "name": "TextureRect7",
+                    "anchor_bottom": 0,
+                    "anchor_left": 0,
+                    "anchor_top": 0,
+                    "anchor_right": 0,
+                    "margin_bottom": 84,
+                    "margin_left": 40,
+                    "margin_top": 20,
+                    "margin_right": 104,
+                    "rect_pivot_offset": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rect_clip_content": false,
+                    "mouse_default_cursor_shape": 0,
+                    "size_flags_horizontal": 1,
+                    "size_flags_vertical": 1,
+                    "texture": "mask/nine-slice",
+                    "stretch_mode": 0,
+                    "children": []
+                },
+                {
+                    "type": "TextureRect",
+                    "name": "TextureRect8",
+                    "anchor_bottom": 0,
+                    "anchor_left": 0,
+                    "anchor_top": 0,
+                    "anchor_right": 0,
+                    "margin_bottom": 84,
+                    "margin_left": 108,
+                    "margin_top": 20,
+                    "margin_right": 124,
+                    "rect_pivot_offset": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rect_clip_content": false,
+                    "mouse_default_cursor_shape": 0,
+                    "size_flags_horizontal": 1,
+                    "size_flags_vertical": 1,
+                    "texture": "mask/sample",
+                    "stretch_mode": 0,
                     "children": []
                 }
             ]
