@@ -36,6 +36,15 @@ export default class GridContainer extends Container {
 
         this._columns = 1;
     }
+    _load_data(data) {
+        super._load_data(data);
+
+        if (data.columns !== undefined) {
+            this.columns = data.columns;
+        }
+
+        return this;
+    }
 
     _children_sorted() {
         let valid_controls_index = 0;
@@ -182,8 +191,8 @@ export default class GridContainer extends Container {
      * @returns {Vector2}
      */
     get_minimum_size(size) {
-        const col_minw = {};
-        const row_minh = {};
+        const col_minw = [];
+        const row_minh = [];
 
         const hsep = this.get_constant('hseparation');
         const vsep = this.get_constant('vseparation');
@@ -225,12 +234,16 @@ export default class GridContainer extends Container {
 
         const ms = size.set(0, 0);
 
-        for (let k in col_minw) {
-            ms.x += col_minw[k];
+        for (let k of col_minw) {
+            if (k !== undefined) {
+                ms.x += col_minw[k];
+            }
         }
 
-        for (let k in row_minh) {
-            ms.y += row_minh[k];
+        for (let k of row_minh) {
+            if (k !== undefined) {
+                ms.y += row_minh[k];
+            }
         }
 
         ms.y += vsep * max_row;
