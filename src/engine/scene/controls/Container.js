@@ -35,27 +35,27 @@ export default class Container extends Control {
      */
     fit_child_in_rect(child, rect) {
         const minsize = child.get_combined_minimum_size(tmp_vec);
-        tmp_rect.x = tmp_rect.y = tmp_rect.width = tmp_rect.height = 0;
+        const r = tmp_rect.copy(rect);
 
         if (!(child.size_flags_horizontal & SizeFlag.FILL)) {
-            tmp_rect.width = minsize.x;
+            r.width = minsize.x;
             if (child.size_flags_horizontal & SizeFlag.SHRINK_END) {
-                tmp_rect.x += (rect.width - minsize.x);
+                r.x += (rect.width - minsize.x);
             } else if (child.size_flags_horizontal & SizeFlag.SHRINK_CENTER) {
-                tmp_rect.x += Math.floor((rect.width - minsize.x) * 0.5);
+                r.x += Math.floor((rect.width - minsize.x) * 0.5);
             } else {
-                tmp_rect.x += 0;
+                r.x += 0;
             }
         }
 
         if (!(child.size_flags_vertical & SizeFlag.FILL)) {
-            tmp_rect.height = minsize.y;
+            r.height = minsize.y;
             if (child.size_flags_vertical & SizeFlag.SHRINK_END) {
-                tmp_rect.y += (rect.height - minsize.y);
+                r.y += (rect.height - minsize.y);
             } else if (child.size_flags_vertical & SizeFlag.SHRINK_CENTER) {
-                tmp_rect.y += Math.floor((rect.height - minsize.y) * 0.5);
+                r.y += Math.floor((rect.height - minsize.y) * 0.5);
             } else {
-                tmp_rect.y += 0;
+                r.y += 0;
             }
         }
 
@@ -63,8 +63,8 @@ export default class Container extends Control {
             child.set_anchor(i, Anchor.BEGIN);
         }
 
-        child.set_rect_position(tmp_rect.x, tmp_rect.y);
-        child.set_rect_size(tmp_rect.width, tmp_rect.height);
+        child.set_rect_position(r.x, r.y);
+        child.set_rect_size(r.width, r.height);
         child.set_rect_rotation(0);
         child.set_rect_scale(1, 1);
     }
