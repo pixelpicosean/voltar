@@ -648,10 +648,10 @@ export default class Control extends Node2D {
             this.data.parent = this.parent;
         }
 
+        super._propagate_enter_tree();
+
         this.data.minimum_size_valid = false;
         this._size_changed();
-
-        super._propagate_enter_tree();
     }
 
     add_child_notify(child) {
