@@ -40,8 +40,8 @@ export default class GridContainer extends Container {
     _children_sorted() {
         let valid_controls_index = 0;
 
-        const col_minw = {};
-        const row_minh = {};
+        const col_minw = [];
+        const row_minh = [];
         const col_expanded = [];
         const row_expanded = [];
 
@@ -70,10 +70,10 @@ export default class GridContainer extends Container {
                 col_minw[col] = ms.x;
             }
 
-            if (row_minh[col] !== undefined) {
-                row_minh[col] = Math.max(row_minh[col], ms.y);
+            if (row_minh[row] !== undefined) {
+                row_minh[row] = Math.max(row_minh[row], ms.y);
             } else {
-                row_minh[col] = ms.y;
+                row_minh[row] = ms.y;
             }
 
             if (c.size_flags_horizontal & SizeFlag.EXPAND) {
@@ -90,15 +90,15 @@ export default class GridContainer extends Container {
 
         // Evaluate the remaining space for expanded columns/rows
         const remaining_space = tmp_vec2.copy(this.rect_size);
-        for (let k in col_minw) {
-            if (col_expanded.indexOf(parseInt(k)) < 0) {
-                remaining_space.x -= col_minw[k];
+        for (let i = 0; i < col_minw.length; i++) {
+            if ((col_minw[i] !== undefined) && (col_expanded.indexOf(i) < 0)) {
+                remaining_space.x -= col_minw[i];
             }
         }
 
-        for (let k in row_minh) {
-            if (col_expanded.indexOf(parseInt(k)) < 0) {
-                remaining_space.y -= row_minh[k];
+        for (let i = 0; i < row_minh.length; i++) {
+            if ((row_minh[i] !== undefined) && (row_expanded.indexOf(i) < 0)) {
+                remaining_space.y -= row_minh[i];
             }
         }
         remaining_space.y -= vsep * Math.max(max_row - 1, 0);
@@ -118,7 +118,7 @@ export default class GridContainer extends Container {
             }
 
             if (!can_fit) {
-                remove_items(col_expanded, max_index, 1);
+                remove_items(col_expanded, col_expanded.indexOf(max_index), 1);
                 remaining_space.x -= col_minw[max_index];
             }
         }
@@ -137,7 +137,7 @@ export default class GridContainer extends Container {
             }
 
             if (!can_fit) {
-                remove_items(row_expanded, max_index, 1);
+                remove_items(row_expanded, row_expanded.indexOf(max_index), 1);
                 remaining_space.y -= row_minh[max_index];
             }
         }
@@ -183,7 +183,7 @@ export default class GridContainer extends Container {
      */
     get_minimum_size(size) {
         const col_minw = {};
-        const row_minh= {};
+        const row_minh = {};
 
         const hsep = this.get_constant('hseparation');
         const vsep = this.get_constant('vseparation');
