@@ -204,13 +204,6 @@ export default class Label extends Control {
 
         /** @type {Sprite[]} */
         this._glyphs = [];
-
-        // this.data.pos_cache = new ObservableVector2(() => {
-        //     console.log(this.data.pos_cache.x, this.data.pos_cache.y);
-        //     if (this.data.pos_cache.y === 127) {
-        //         debugger
-        //     }
-        // }, this, 0, 0);
     }
     _load_data(data) {
         super._load_data(data);
@@ -284,6 +277,7 @@ export default class Label extends Control {
             if (this._clip_text) {
                 size.x = 1;
             }
+            // console.log(size.x + min_style.x, size.y + min_style.y);
             return size.add(min_style);
         }
     }
@@ -661,7 +655,7 @@ export default class Label extends Control {
 
                         glyph_idx++;
                         g.transform.set_from_matrix(this.transform.world_transform);
-                        g.position.set(x_ofs + char.h_align, y_ofs - font.ascent + char.v_align)
+                        g.position.add(x_ofs + char.h_align, y_ofs - font.ascent + char.v_align)
                         g._update_transform();
 
                         g.texture = char.texture;
