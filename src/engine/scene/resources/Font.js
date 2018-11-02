@@ -59,7 +59,7 @@ export default class Font {
      * @returns {Vector2}
      */
     get_char_size(size, char, next = '') {
-        const c = this.char_map[char];
+        const c = this.char_map[char.charCodeAt(0)];
         if (!c) {
             return ZeroVector;
         }
@@ -67,7 +67,7 @@ export default class Font {
         size.set(c.advance, c.rect.height);
 
         if (next) {
-            const n = this.char_map[next];
+            const n = this.char_map[next.charCodeAt(0)];
             if (n) {
                 const amount = n.kerning[char];
                 if (amount !== undefined) {

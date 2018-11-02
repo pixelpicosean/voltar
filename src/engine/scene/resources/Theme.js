@@ -1,6 +1,7 @@
 import StyleBox from "./StyleBox";
 import { Margin } from "../controls/const";
 import Font from "./Font";
+import Color from "engine/Color";
 
 export const default_font_name = '04b03';
 
@@ -13,6 +14,8 @@ const default_style = (() => {
     style.set_default_margin(Margin.Right, 2);
     return style;
 })();
+
+const White = Object.freeze(new Color(1, 1, 1, 1));
 
 export default class Theme {
     static get_default() {
@@ -49,6 +52,9 @@ export default class Theme {
             GridContainer: {
                 hseparation: 4,
                 vseparation: 4,
+            },
+            Label: {
+                line_spacing: 3,
             },
         };
     }
@@ -87,6 +93,22 @@ export default class Theme {
         }
 
         return default_font;
+    }
+
+    /**
+     * @param {string} name
+     * @param {string} type
+     * @returns {Color}
+     */
+    get_color(name, type) {
+        if (this.color_map[type]) {
+            let color = this.color_map[type][name];
+            if (color) {
+                return color;
+            }
+        }
+
+        return White;
     }
 
     /**
