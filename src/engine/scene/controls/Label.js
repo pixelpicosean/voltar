@@ -277,7 +277,6 @@ export default class Label extends Control {
             if (this._clip_text) {
                 size.x = 1;
             }
-            // console.log(size.x + min_style.x, size.y + min_style.y);
             return size.add(min_style);
         }
     }
@@ -364,6 +363,10 @@ export default class Label extends Control {
     }
 
     regenerate_word_cache() {
+        if (!this.is_inside_tree) {
+            return;
+        }
+
         this.word_cache = null;
 
         /** @type {string} */

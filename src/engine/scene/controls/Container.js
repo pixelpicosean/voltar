@@ -15,10 +15,10 @@ export default class Container extends Control {
         this.pending_sort = false;
     }
     _propagate_enter_tree() {
+        super._propagate_enter_tree();
+
         this.pending_sort = false;
         this.queue_sort();
-
-        super._propagate_enter_tree();
     }
     _resized() {
         this.queue_sort();
