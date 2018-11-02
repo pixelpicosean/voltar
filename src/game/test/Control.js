@@ -12,9 +12,5 @@ export default class ControlTest extends v.Node2D {
     }
 
     _enter_tree() {
-        this.add_child(new v.BitmapText('Hello', {
-            font: 'Foo',
-        }))
-        .set_position(100, 100);
     }
 }

@@ -3,508 +3,14 @@
     "name": "Node2D",
     "children": [
         {
-            "type": "Sprite",
-            "name": "pop",
-            "position": {
-                "x": 139.17,
-                "y": 80.597
-            },
-            "texture": "title/pop",
-            "anchor": {
-                "x": 0.5,
-                "y": 0.5
-            },
-            "children": []
-        },
-        {
-            "type": "AnimationPlayer",
-            "name": "AnimationPlayer",
-            "root_node": "..",
-            "playback_speed": 1,
-            "anims": {
-                "position": {
-                    "name": "position",
-                    "length": 2,
-                    "loop": false,
-                    "step": 0.1,
-                    "tracks": [
-                        {
-                            "type": "value",
-                            "path": "pop:position",
-                            "interp": 1,
-                            "loop_wrap": true,
-                            "keys": {
-                                "times": [
-                                    0,
-                                    0.5,
-                                    1,
-                                    1.5,
-                                    2
-                                ],
-                                "transitions": [
-                                    1,
-                                    1,
-                                    1,
-                                    1,
-                                    1
-                                ],
-                                "update": 0,
-                                "values": [
-                                    {
-                                        "x": 139.17,
-                                        "y": 80.597
-                                    },
-                                    {
-                                        "x": 139.954,
-                                        "y": 318.624
-                                    },
-                                    {
-                                        "x": 258.464,
-                                        "y": 320.123
-                                    },
-                                    {
-                                        "x": 257.647,
-                                        "y": 81.8825
-                                    },
-                                    {
-                                        "x": 139.17,
-                                        "y": 80.597
-                                    }
-                                ]
-                            }
-                        },
-                        {
-                            "type": "value",
-                            "path": "pop:rotation",
-                            "interp": 1,
-                            "loop_wrap": true,
-                            "keys": {
-                                "times": [
-                                    0,
-                                    0.5,
-                                    1,
-                                    1.5,
-                                    2
-                                ],
-                                "transitions": [
-                                    1,
-                                    1,
-                                    1,
-                                    1,
-                                    1
-                                ],
-                                "update": 0,
-                                "values": [
-                                    0,
-                                    0.835942898535204,
-                                    -0.4762933715522445,
-                                    0.4667534018608435,
-                                    0
-                                ]
-                            }
-                        },
-                        {
-                            "type": "value",
-                            "path": "pop:scale",
-                            "interp": 1,
-                            "loop_wrap": true,
-                            "keys": {
-                                "times": [
-                                    0,
-                                    1,
-                                    2
-                                ],
-                                "transitions": [
-                                    1,
-                                    1,
-                                    1
-                                ],
-                                "update": 0,
-                                "values": [
-                                    {
-                                        "x": 1,
-                                        "y": 1
-                                    },
-                                    {
-                                        "x": 2,
-                                        "y": 2
-                                    },
-                                    {
-                                        "x": 1,
-                                        "y": 1
-                                    }
-                                ]
-                            }
-                        },
-                        {
-                            "type": "method",
-                            "path": ".",
-                            "interp": 1,
-                            "loop_wrap": true,
-                            "keys": {
-                                "times": [
-                                    0.7,
-                                    1.3
-                                ],
-                                "transitions": [
-                                    1,
-                                    1
-                                ],
-                                "values": [
-                                    {
-                                        "args": [
-                                            "1/3"
-                                        ],
-                                        "method": "say"
-                                    },
-                                    {
-                                        "args": [
-                                            "2/3"
-                                        ],
-                                        "method": "say"
-                                    }
-                                ]
-                            }
-                        },
-                        {
-                            "type": "value",
-                            "path": "Label:text",
-                            "interp": 1,
-                            "loop_wrap": true,
-                            "keys": {
-                                "times": [
-                                    0,
-                                    1,
-                                    2
-                                ],
-                                "transitions": [
-                                    1,
-                                    1,
-                                    1
-                                ],
-                                "update": 1,
-                                "values": [
-                                    "Voltar",
-                                    "Cool",
-                                    "Voltar"
-                                ]
-                            }
-                        },
-                        {
-                            "type": "value",
-                            "path": "Label:fill",
-                            "interp": 1,
-                            "loop_wrap": true,
-                            "keys": {
-                                "times": [
-                                    0,
-                                    1,
-                                    2
-                                ],
-                                "transitions": [
-                                    1,
-                                    1,
-                                    1
-                                ],
-                                "update": 0,
-                                "values": [
-                                    {
-                                        "r": 0.375,
-                                        "g": 1,
-                                        "b": 0.941406,
-                                        "a": 1
-                                    },
-                                    {
-                                        "r": 1,
-                                        "g": 0.375,
-                                        "b": 0.931641,
-                                        "a": 1
-                                    },
-                                    {
-                                        "r": 0.375,
-                                        "g": 1,
-                                        "b": 0.941406,
-                                        "a": 1
-                                    }
-                                ]
-                            }
-                        },
-                        {
-                            "type": "value",
-                            "path": "ColorRect:color",
-                            "interp": 1,
-                            "loop_wrap": true,
-                            "keys": {
-                                "times": [
-                                    0,
-                                    1,
-                                    2
-                                ],
-                                "transitions": [
-                                    1,
-                                    1,
-                                    1
-                                ],
-                                "update": 0,
-                                "values": [
-                                    {
-                                        "r": 1,
-                                        "g": 1,
-                                        "b": 1,
-                                        "a": 1
-                                    },
-                                    {
-                                        "r": 0,
-                                        "g": 0.237732,
-                                        "b": 0.742188,
-                                        "a": 1
-                                    },
-                                    {
-                                        "r": 1,
-                                        "g": 1,
-                                        "b": 1,
-                                        "a": 1
-                                    }
-                                ]
-                            }
-                        },
-                        {
-                            "type": "value",
-                            "path": "ColorRect:rotation",
-                            "interp": 1,
-                            "loop_wrap": true,
-                            "keys": {
-                                "times": [
-                                    0,
-                                    0.6,
-                                    1.5
-                                ],
-                                "transitions": [
-                                    1,
-                                    1,
-                                    1
-                                ],
-                                "update": 0,
-                                "values": [
-                                    0,
-                                    -0.38043988903271597,
-                                    0.44865782817616634
-                                ]
-                            }
-                        }
-                    ]
-                },
-                "second": {
-                    "name": "second",
-                    "length": 2,
-                    "loop": false,
-                    "step": 0.1,
-                    "tracks": [
-                        {
-                            "type": "value",
-                            "path": "pop:position",
-                            "interp": 1,
-                            "loop_wrap": true,
-                            "keys": {
-                                "times": [
-                                    0,
-                                    0.5,
-                                    1,
-                                    2
-                                ],
-                                "transitions": [
-                                    1,
-                                    1,
-                                    1,
-                                    1
-                                ],
-                                "update": 0,
-                                "values": [
-                                    {
-                                        "x": 139.17,
-                                        "y": 80.597
-                                    },
-                                    {
-                                        "x": 197.279,
-                                        "y": 198.753
-                                    },
-                                    {
-                                        "x": 139.17,
-                                        "y": 80.597
-                                    },
-                                    {
-                                        "x": 139.17,
-                                        "y": 80.597
-                                    }
-                                ]
-                            }
-                        },
-                        {
-                            "type": "value",
-                            "path": "pop:rotation",
-                            "interp": 1,
-                            "loop_wrap": true,
-                            "keys": {
-                                "times": [
-                                    0,
-                                    0.5,
-                                    1,
-                                    2
-                                ],
-                                "transitions": [
-                                    1,
-                                    1,
-                                    1,
-                                    1
-                                ],
-                                "update": 0,
-                                "values": [
-                                    0,
-                                    12.566370614359172,
-                                    0,
-                                    0
-                                ]
-                            }
-                        },
-                        {
-                            "type": "value",
-                            "path": "pop:scale",
-                            "interp": 1,
-                            "loop_wrap": true,
-                            "keys": {
-                                "times": [
-                                    0,
-                                    0.5,
-                                    1,
-                                    2
-                                ],
-                                "transitions": [
-                                    1,
-                                    1,
-                                    1,
-                                    1
-                                ],
-                                "update": 0,
-                                "values": [
-                                    {
-                                        "x": 1,
-                                        "y": 1
-                                    },
-                                    {
-                                        "x": 2,
-                                        "y": 2
-                                    },
-                                    {
-                                        "x": 1,
-                                        "y": 1
-                                    },
-                                    {
-                                        "x": 1,
-                                        "y": 1
-                                    }
-                                ]
-                            }
-                        },
-                        {
-                            "type": "value",
-                            "path": "Label:scale",
-                            "interp": 1,
-                            "loop_wrap": true,
-                            "keys": {
-                                "times": [
-                                    0,
-                                    0.9,
-                                    1.5,
-                                    2
-                                ],
-                                "transitions": [
-                                    1,
-                                    1,
-                                    1,
-                                    1
-                                ],
-                                "update": 0,
-                                "values": [
-                                    {
-                                        "x": 1,
-                                        "y": 1
-                                    },
-                                    {
-                                        "x": 1,
-                                        "y": 1
-                                    },
-                                    {
-                                        "x": 1.5,
-                                        "y": 1.5
-                                    },
-                                    {
-                                        "x": 1,
-                                        "y": 1
-                                    }
-                                ]
-                            }
-                        }
-                    ]
-                }
-            },
-            "children": []
-        },
-        {
-            "type": "Text",
-            "name": "Label",
-            "position": {
-                "x": 137,
-                "y": 162
-            },
-            "text": "Voltar",
-            "style": {
-                "align": "center",
-                "fill": "#5ffff0",
-                "stroke": "#0",
-                "strokeThickness": 10,
-                "fontSize": 72,
-                "fontFamily": "Tondu Beta"
-            },
-            "children": []
-        },
-        {
             "type": "ColorRect",
             "name": "ColorRect",
             "anchor_bottom": 0,
             "anchor_left": 0,
             "anchor_top": 0,
             "anchor_right": 0,
-            "margin_bottom": 328,
-            "margin_left": 3,
-            "margin_top": 228,
-            "margin_right": 150,
-            "rect_pivot_offset": {
-                "x": 50,
-                "y": 50
-            },
-            "rect_clip_content": false,
-            "mouse_default_cursor_shape": 0,
-            "size_flags_horizontal": 1,
-            "size_flags_vertical": 1,
-            "color": {
-                "r": 1,
-                "g": 1,
-                "b": 1,
-                "a": 1
-            },
-            "children": []
-        },
-        {
-            "type": "VBoxContainer",
-            "name": "VBoxContainer",
-            "anchor_bottom": 0,
-            "anchor_left": 0,
-            "anchor_top": 0,
-            "anchor_right": 0,
-            "margin_bottom": 396,
-            "margin_left": 153,
-            "margin_top": 229,
-            "margin_right": 218,
+            "margin_bottom": 400,
+            "margin_right": 400,
             "rect_pivot_offset": {
                 "x": 0,
                 "y": 0
@@ -513,17 +19,42 @@
             "mouse_default_cursor_shape": 0,
             "size_flags_horizontal": 1,
             "size_flags_vertical": 1,
-            "alignment": 0,
+            "color": {
+                "r": 0.757812,
+                "g": 0.75,
+                "b": 1,
+                "a": 1
+            },
+            "children": []
+        },
+        {
+            "type": "GridContainer",
+            "name": "Box",
+            "anchor_bottom": 0,
+            "anchor_left": 0,
+            "anchor_top": 0,
+            "anchor_right": 0,
+            "margin_bottom": 400,
+            "margin_right": 400,
+            "rect_pivot_offset": {
+                "x": 0,
+                "y": 0
+            },
+            "rect_clip_content": false,
+            "mouse_default_cursor_shape": 0,
+            "size_flags_horizontal": 1,
+            "size_flags_vertical": 1,
+            "columns": 4,
             "children": [
                 {
                     "type": "TextureRect",
-                    "name": "TextureRect2",
+                    "name": "TextureRect",
                     "anchor_bottom": 0,
                     "anchor_left": 0,
                     "anchor_top": 0,
                     "anchor_right": 0,
-                    "margin_bottom": 16,
-                    "margin_right": 65,
+                    "margin_bottom": 65,
+                    "margin_right": 64,
                     "rect_pivot_offset": {
                         "x": 0,
                         "y": 0
@@ -532,23 +63,49 @@
                     "mouse_default_cursor_shape": 0,
                     "size_flags_horizontal": 1,
                     "size_flags_vertical": 1,
-                    "texture": "mask/sample",
-                    "stretch_mode": 7,
+                    "texture": "mask/nine-slice",
+                    "stretch_mode": 0,
                     "children": []
                 },
                 {
-                    "type": "ColorRect",
-                    "name": "ColorRect",
+                    "type": "Label",
+                    "name": "Label2",
                     "anchor_bottom": 0,
                     "anchor_left": 0,
                     "anchor_top": 0,
                     "anchor_right": 0,
-                    "margin_bottom": 40,
-                    "margin_top": 20,
-                    "margin_right": 65,
+                    "margin_bottom": 65,
+                    "margin_left": 68,
+                    "margin_right": 170,
+                    "rect_pivot_offset": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rect_clip_content": false,
+                    "mouse_default_cursor_shape": 0,
+                    "size_flags_horizontal": 1,
+                    "size_flags_vertical": 4,
+                    "align": 1,
+                    "lines_skipped": 0,
+                    "max_lines_visible": -1,
+                    "percent_visible": 1,
+                    "text": "ABC",
+                    "font": "Foo",
+                    "children": []
+                },
+                {
+                    "type": "ColorRect",
+                    "name": "Color",
+                    "anchor_bottom": 0,
+                    "anchor_left": 0,
+                    "anchor_top": 0,
+                    "anchor_right": 0,
+                    "margin_bottom": 65,
+                    "margin_left": 174,
+                    "margin_right": 254,
                     "rect_min_size": {
-                        "x": 20,
-                        "y": 20
+                        "x": 32,
+                        "y": 0
                     },
                     "rect_pivot_offset": {
                         "x": 0,
@@ -567,15 +124,15 @@
                     "children": []
                 },
                 {
-                    "type": "MarginContainer",
-                    "name": "MarginContainer",
+                    "type": "Label",
+                    "name": "Label3",
                     "anchor_bottom": 0,
                     "anchor_left": 0,
                     "anchor_top": 0,
                     "anchor_right": 0,
-                    "margin_bottom": 64,
-                    "margin_top": 44,
-                    "margin_right": 65,
+                    "margin_bottom": 65,
+                    "margin_left": 258,
+                    "margin_right": 361,
                     "rect_pivot_offset": {
                         "x": 0,
                         "y": 0
@@ -583,220 +140,13 @@
                     "rect_clip_content": false,
                     "mouse_default_cursor_shape": 0,
                     "size_flags_horizontal": 1,
-                    "size_flags_vertical": 1,
-                    "children": [
-                        {
-                            "type": "ColorRect",
-                            "name": "ColorRect2",
-                            "anchor_bottom": 0,
-                            "anchor_left": 0,
-                            "anchor_top": 0,
-                            "anchor_right": 0,
-                            "margin_bottom": 20,
-                            "margin_left": 8,
-                            "margin_right": 65,
-                            "rect_min_size": {
-                                "x": 20,
-                                "y": 20
-                            },
-                            "rect_pivot_offset": {
-                                "x": 0,
-                                "y": 0
-                            },
-                            "rect_clip_content": false,
-                            "mouse_default_cursor_shape": 0,
-                            "size_flags_horizontal": 1,
-                            "size_flags_vertical": 1,
-                            "color": {
-                                "r": 1,
-                                "g": 1,
-                                "b": 1,
-                                "a": 1
-                            },
-                            "children": []
-                        }
-                    ]
-                },
-                {
-                    "type": "TextureRect",
-                    "name": "TextureRect",
-                    "anchor_bottom": 0,
-                    "anchor_left": 0,
-                    "anchor_top": 0,
-                    "anchor_right": 0,
-                    "margin_bottom": 84,
-                    "margin_top": 68,
-                    "margin_right": 65,
-                    "rect_pivot_offset": {
-                        "x": 0,
-                        "y": 0
-                    },
-                    "rect_clip_content": false,
-                    "mouse_default_cursor_shape": 0,
-                    "size_flags_horizontal": 1,
-                    "size_flags_vertical": 1,
-                    "texture": "mask/sample",
-                    "stretch_mode": 6,
-                    "children": []
-                },
-                {
-                    "type": "NinePatchRect",
-                    "name": "NinePatchRect",
-                    "anchor_bottom": 0,
-                    "anchor_left": 0,
-                    "anchor_top": 0,
-                    "anchor_right": 0,
-                    "margin_bottom": 120,
-                    "margin_top": 88,
-                    "margin_right": 65,
-                    "rect_pivot_offset": {
-                        "x": 0,
-                        "y": 0
-                    },
-                    "rect_clip_content": false,
-                    "mouse_default_cursor_shape": 0,
-                    "size_flags_horizontal": 1,
-                    "size_flags_vertical": 1,
-                    "texture": "mask/nine-slice",
-                    "patch_margin_bottom": 16,
-                    "patch_margin_left": 16,
-                    "patch_margin_top": 16,
-                    "patch_margin_right": 16,
-                    "children": []
-                }
-            ]
-        },
-        {
-            "type": "CenterContainer",
-            "name": "CenterContainer",
-            "anchor_bottom": 0,
-            "anchor_left": 0,
-            "anchor_top": 0,
-            "anchor_right": 0,
-            "margin_bottom": 328,
-            "margin_left": 3,
-            "margin_top": 228,
-            "margin_right": 150,
-            "rect_pivot_offset": {
-                "x": 0,
-                "y": 0
-            },
-            "rect_clip_content": false,
-            "mouse_default_cursor_shape": 0,
-            "size_flags_horizontal": 1,
-            "size_flags_vertical": 1,
-            "use_top_left": false,
-            "children": [
-                {
-                    "type": "TextureRect",
-                    "name": "TextureRect3",
-                    "anchor_bottom": 0,
-                    "anchor_left": 0,
-                    "anchor_top": 0,
-                    "anchor_right": 0,
-                    "margin_bottom": 82,
-                    "margin_left": 41,
-                    "margin_top": 18,
-                    "margin_right": 105,
-                    "rect_pivot_offset": {
-                        "x": 0,
-                        "y": 0
-                    },
-                    "rect_clip_content": false,
-                    "mouse_default_cursor_shape": 0,
-                    "size_flags_horizontal": 1,
-                    "size_flags_vertical": 1,
-                    "texture": "mask/nine-slice",
-                    "stretch_mode": 6,
-                    "children": []
-                },
-                {
-                    "type": "TextureRect",
-                    "name": "TextureRect4",
-                    "anchor_bottom": 0,
-                    "anchor_left": 0,
-                    "anchor_top": 0,
-                    "anchor_right": 0,
-                    "margin_bottom": 58,
-                    "margin_left": 65,
-                    "margin_top": 42,
-                    "margin_right": 81,
-                    "rect_pivot_offset": {
-                        "x": 0,
-                        "y": 0
-                    },
-                    "rect_clip_content": false,
-                    "mouse_default_cursor_shape": 0,
-                    "size_flags_horizontal": 1,
-                    "size_flags_vertical": 1,
-                    "texture": "mask/sample",
-                    "stretch_mode": 6,
-                    "children": []
-                }
-            ]
-        },
-        {
-            "type": "GridContainer",
-            "name": "GridContainer",
-            "anchor_bottom": 0,
-            "anchor_left": 0,
-            "anchor_top": 0,
-            "anchor_right": 0,
-            "margin_bottom": 370,
-            "margin_left": 233,
-            "margin_top": 231,
-            "margin_right": 368,
-            "rect_pivot_offset": {
-                "x": 0,
-                "y": 0
-            },
-            "rect_clip_content": false,
-            "mouse_default_cursor_shape": 0,
-            "size_flags_horizontal": 1,
-            "size_flags_vertical": 1,
-            "columns": 4,
-            "children": [
-                {
-                    "type": "TextureRect",
-                    "name": "TextureRect",
-                    "anchor_bottom": 0,
-                    "anchor_left": 0,
-                    "anchor_top": 0,
-                    "anchor_right": 0,
-                    "margin_bottom": 16,
-                    "margin_right": 16,
-                    "rect_pivot_offset": {
-                        "x": 0,
-                        "y": 0
-                    },
-                    "rect_clip_content": false,
-                    "mouse_default_cursor_shape": 0,
-                    "size_flags_horizontal": 1,
-                    "size_flags_vertical": 1,
-                    "texture": "mask/sample",
-                    "stretch_mode": 0,
-                    "children": []
-                },
-                {
-                    "type": "TextureRect",
-                    "name": "TextureRect2",
-                    "anchor_bottom": 0,
-                    "anchor_left": 0,
-                    "anchor_top": 0,
-                    "anchor_right": 0,
-                    "margin_bottom": 16,
-                    "margin_left": 20,
-                    "margin_right": 36,
-                    "rect_pivot_offset": {
-                        "x": 0,
-                        "y": 0
-                    },
-                    "rect_clip_content": false,
-                    "mouse_default_cursor_shape": 0,
-                    "size_flags_horizontal": 1,
-                    "size_flags_vertical": 1,
-                    "texture": "mask/sample",
-                    "stretch_mode": 0,
+                    "size_flags_vertical": 4,
+                    "align": 1,
+                    "lines_skipped": 0,
+                    "max_lines_visible": -1,
+                    "percent_visible": 1,
+                    "text": "DEF",
+                    "font": "Foo",
                     "children": []
                 },
                 {
@@ -806,9 +156,9 @@
                     "anchor_left": 0,
                     "anchor_top": 0,
                     "anchor_right": 0,
-                    "margin_bottom": 16,
-                    "margin_left": 40,
-                    "margin_right": 104,
+                    "margin_bottom": 134,
+                    "margin_top": 69,
+                    "margin_right": 64,
                     "rect_pivot_offset": {
                         "x": 0,
                         "y": 0
@@ -817,20 +167,48 @@
                     "mouse_default_cursor_shape": 0,
                     "size_flags_horizontal": 1,
                     "size_flags_vertical": 1,
-                    "texture": "mask/sample",
+                    "texture": "mask/nine-slice",
                     "stretch_mode": 0,
                     "children": []
                 },
                 {
-                    "type": "TextureRect",
-                    "name": "TextureRect4",
+                    "type": "Label",
+                    "name": "Label4",
                     "anchor_bottom": 0,
                     "anchor_left": 0,
                     "anchor_top": 0,
                     "anchor_right": 0,
-                    "margin_bottom": 16,
-                    "margin_left": 108,
-                    "margin_right": 124,
+                    "margin_bottom": 134,
+                    "margin_left": 68,
+                    "margin_top": 69,
+                    "margin_right": 170,
+                    "rect_pivot_offset": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rect_clip_content": false,
+                    "mouse_default_cursor_shape": 0,
+                    "size_flags_horizontal": 1,
+                    "size_flags_vertical": 4,
+                    "align": 1,
+                    "lines_skipped": 0,
+                    "max_lines_visible": -1,
+                    "percent_visible": 1,
+                    "text": "GHI",
+                    "font": "Foo",
+                    "children": []
+                },
+                {
+                    "type": "ColorRect",
+                    "name": "Color2",
+                    "anchor_bottom": 0,
+                    "anchor_left": 0,
+                    "anchor_top": 0,
+                    "anchor_right": 0,
+                    "margin_bottom": 134,
+                    "margin_left": 174,
+                    "margin_top": 69,
+                    "margin_right": 254,
                     "rect_pivot_offset": {
                         "x": 0,
                         "y": 0
@@ -839,8 +217,39 @@
                     "mouse_default_cursor_shape": 0,
                     "size_flags_horizontal": 1,
                     "size_flags_vertical": 1,
-                    "texture": "mask/sample",
-                    "stretch_mode": 0,
+                    "color": {
+                        "r": 1,
+                        "g": 1,
+                        "b": 1,
+                        "a": 1
+                    },
+                    "children": []
+                },
+                {
+                    "type": "Label",
+                    "name": "Label5",
+                    "anchor_bottom": 0,
+                    "anchor_left": 0,
+                    "anchor_top": 0,
+                    "anchor_right": 0,
+                    "margin_bottom": 134,
+                    "margin_left": 258,
+                    "margin_top": 69,
+                    "margin_right": 361,
+                    "rect_pivot_offset": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rect_clip_content": false,
+                    "mouse_default_cursor_shape": 0,
+                    "size_flags_horizontal": 1,
+                    "size_flags_vertical": 4,
+                    "align": 1,
+                    "lines_skipped": 0,
+                    "max_lines_visible": -1,
+                    "percent_visible": 1,
+                    "text": "JKL",
+                    "font": "Foo",
                     "children": []
                 },
                 {
@@ -850,55 +259,9 @@
                     "anchor_left": 0,
                     "anchor_top": 0,
                     "anchor_right": 0,
-                    "margin_bottom": 84,
-                    "margin_top": 20,
-                    "margin_right": 16,
-                    "rect_pivot_offset": {
-                        "x": 0,
-                        "y": 0
-                    },
-                    "rect_clip_content": false,
-                    "mouse_default_cursor_shape": 0,
-                    "size_flags_horizontal": 1,
-                    "size_flags_vertical": 1,
-                    "texture": "mask/sample",
-                    "stretch_mode": 0,
-                    "children": []
-                },
-                {
-                    "type": "TextureRect",
-                    "name": "TextureRect6",
-                    "anchor_bottom": 0,
-                    "anchor_left": 0,
-                    "anchor_top": 0,
-                    "anchor_right": 0,
-                    "margin_bottom": 84,
-                    "margin_left": 20,
-                    "margin_top": 20,
-                    "margin_right": 36,
-                    "rect_pivot_offset": {
-                        "x": 0,
-                        "y": 0
-                    },
-                    "rect_clip_content": false,
-                    "mouse_default_cursor_shape": 0,
-                    "size_flags_horizontal": 1,
-                    "size_flags_vertical": 1,
-                    "texture": "mask/sample",
-                    "stretch_mode": 0,
-                    "children": []
-                },
-                {
-                    "type": "TextureRect",
-                    "name": "TextureRect7",
-                    "anchor_bottom": 0,
-                    "anchor_left": 0,
-                    "anchor_top": 0,
-                    "anchor_right": 0,
-                    "margin_bottom": 84,
-                    "margin_left": 40,
-                    "margin_top": 20,
-                    "margin_right": 104,
+                    "margin_bottom": 218,
+                    "margin_top": 138,
+                    "margin_right": 64,
                     "rect_pivot_offset": {
                         "x": 0,
                         "y": 0
@@ -912,16 +275,47 @@
                     "children": []
                 },
                 {
-                    "type": "TextureRect",
-                    "name": "TextureRect8",
+                    "type": "Label",
+                    "name": "Label6",
                     "anchor_bottom": 0,
                     "anchor_left": 0,
                     "anchor_top": 0,
                     "anchor_right": 0,
-                    "margin_bottom": 84,
-                    "margin_left": 108,
-                    "margin_top": 20,
-                    "margin_right": 124,
+                    "margin_bottom": 210,
+                    "margin_left": 68,
+                    "margin_top": 145,
+                    "margin_right": 170,
+                    "rect_pivot_offset": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rect_clip_content": false,
+                    "mouse_default_cursor_shape": 0,
+                    "size_flags_horizontal": 1,
+                    "size_flags_vertical": 4,
+                    "align": 1,
+                    "lines_skipped": 0,
+                    "max_lines_visible": -1,
+                    "percent_visible": 1,
+                    "text": "MNO",
+                    "font": "Foo",
+                    "children": []
+                },
+                {
+                    "type": "ColorRect",
+                    "name": "Color3",
+                    "anchor_bottom": 0,
+                    "anchor_left": 0,
+                    "anchor_top": 0,
+                    "anchor_right": 0,
+                    "margin_bottom": 218,
+                    "margin_left": 174,
+                    "margin_top": 138,
+                    "margin_right": 254,
+                    "rect_min_size": {
+                        "x": 80,
+                        "y": 80
+                    },
                     "rect_pivot_offset": {
                         "x": 0,
                         "y": 0
@@ -930,8 +324,245 @@
                     "mouse_default_cursor_shape": 0,
                     "size_flags_horizontal": 1,
                     "size_flags_vertical": 1,
-                    "texture": "mask/sample",
+                    "color": {
+                        "r": 1,
+                        "g": 1,
+                        "b": 1,
+                        "a": 1
+                    },
+                    "children": []
+                },
+                {
+                    "type": "Label",
+                    "name": "Label7",
+                    "anchor_bottom": 0,
+                    "anchor_left": 0,
+                    "anchor_top": 0,
+                    "anchor_right": 0,
+                    "margin_bottom": 210,
+                    "margin_left": 258,
+                    "margin_top": 145,
+                    "margin_right": 361,
+                    "rect_pivot_offset": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rect_clip_content": false,
+                    "mouse_default_cursor_shape": 0,
+                    "size_flags_horizontal": 1,
+                    "size_flags_vertical": 4,
+                    "align": 1,
+                    "lines_skipped": 0,
+                    "max_lines_visible": -1,
+                    "percent_visible": 1,
+                    "text": "PQR",
+                    "font": "Foo",
+                    "children": []
+                },
+                {
+                    "type": "TextureRect",
+                    "name": "TextureRect7",
+                    "anchor_bottom": 0,
+                    "anchor_left": 0,
+                    "anchor_top": 0,
+                    "anchor_right": 0,
+                    "margin_bottom": 287,
+                    "margin_top": 222,
+                    "margin_right": 64,
+                    "rect_pivot_offset": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rect_clip_content": false,
+                    "mouse_default_cursor_shape": 0,
+                    "size_flags_horizontal": 1,
+                    "size_flags_vertical": 1,
+                    "texture": "mask/nine-slice",
                     "stretch_mode": 0,
+                    "children": []
+                },
+                {
+                    "type": "Label",
+                    "name": "Label8",
+                    "anchor_bottom": 0,
+                    "anchor_left": 0,
+                    "anchor_top": 0,
+                    "anchor_right": 0,
+                    "margin_bottom": 287,
+                    "margin_left": 68,
+                    "margin_top": 222,
+                    "margin_right": 170,
+                    "rect_pivot_offset": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rect_clip_content": false,
+                    "mouse_default_cursor_shape": 0,
+                    "size_flags_horizontal": 1,
+                    "size_flags_vertical": 4,
+                    "align": 1,
+                    "lines_skipped": 0,
+                    "max_lines_visible": -1,
+                    "percent_visible": 1,
+                    "text": "STU",
+                    "font": "Foo",
+                    "children": []
+                },
+                {
+                    "type": "ColorRect",
+                    "name": "Color4",
+                    "anchor_bottom": 0,
+                    "anchor_left": 0,
+                    "anchor_top": 0,
+                    "anchor_right": 0,
+                    "margin_bottom": 287,
+                    "margin_left": 174,
+                    "margin_top": 222,
+                    "margin_right": 254,
+                    "rect_pivot_offset": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rect_clip_content": false,
+                    "mouse_default_cursor_shape": 0,
+                    "size_flags_horizontal": 1,
+                    "size_flags_vertical": 1,
+                    "color": {
+                        "r": 1,
+                        "g": 1,
+                        "b": 1,
+                        "a": 1
+                    },
+                    "children": []
+                },
+                {
+                    "type": "Label",
+                    "name": "Label9",
+                    "anchor_bottom": 0,
+                    "anchor_left": 0,
+                    "anchor_top": 0,
+                    "anchor_right": 0,
+                    "margin_bottom": 287,
+                    "margin_left": 258,
+                    "margin_top": 222,
+                    "margin_right": 361,
+                    "rect_pivot_offset": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rect_clip_content": false,
+                    "mouse_default_cursor_shape": 0,
+                    "size_flags_horizontal": 1,
+                    "size_flags_vertical": 4,
+                    "align": 1,
+                    "lines_skipped": 0,
+                    "max_lines_visible": -1,
+                    "percent_visible": 1,
+                    "text": "VWX",
+                    "font": "Foo",
+                    "children": []
+                },
+                {
+                    "type": "TextureRect",
+                    "name": "TextureRect9",
+                    "anchor_bottom": 0,
+                    "anchor_left": 0,
+                    "anchor_top": 0,
+                    "anchor_right": 0,
+                    "margin_bottom": 356,
+                    "margin_top": 291,
+                    "margin_right": 64,
+                    "rect_pivot_offset": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rect_clip_content": false,
+                    "mouse_default_cursor_shape": 0,
+                    "size_flags_horizontal": 1,
+                    "size_flags_vertical": 1,
+                    "texture": "mask/nine-slice",
+                    "stretch_mode": 0,
+                    "children": []
+                },
+                {
+                    "type": "Label",
+                    "name": "Label10",
+                    "anchor_bottom": 0,
+                    "anchor_left": 0,
+                    "anchor_top": 0,
+                    "anchor_right": 0,
+                    "margin_bottom": 356,
+                    "margin_left": 68,
+                    "margin_top": 291,
+                    "margin_right": 170,
+                    "rect_pivot_offset": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rect_clip_content": false,
+                    "mouse_default_cursor_shape": 0,
+                    "size_flags_horizontal": 1,
+                    "size_flags_vertical": 4,
+                    "align": 1,
+                    "lines_skipped": 0,
+                    "max_lines_visible": -1,
+                    "percent_visible": 1,
+                    "text": "YZ",
+                    "font": "Foo",
+                    "children": []
+                },
+                {
+                    "type": "ColorRect",
+                    "name": "Color5",
+                    "anchor_bottom": 0,
+                    "anchor_left": 0,
+                    "anchor_top": 0,
+                    "anchor_right": 0,
+                    "margin_bottom": 356,
+                    "margin_left": 174,
+                    "margin_top": 291,
+                    "margin_right": 254,
+                    "rect_pivot_offset": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rect_clip_content": false,
+                    "mouse_default_cursor_shape": 0,
+                    "size_flags_horizontal": 1,
+                    "size_flags_vertical": 1,
+                    "color": {
+                        "r": 1,
+                        "g": 1,
+                        "b": 1,
+                        "a": 1
+                    },
+                    "children": []
+                },
+                {
+                    "type": "Label",
+                    "name": "Label11",
+                    "anchor_bottom": 0,
+                    "anchor_left": 0,
+                    "anchor_top": 0,
+                    "anchor_right": 0,
+                    "margin_bottom": 356,
+                    "margin_left": 258,
+                    "margin_top": 291,
+                    "margin_right": 361,
+                    "rect_pivot_offset": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rect_clip_content": false,
+                    "mouse_default_cursor_shape": 0,
+                    "size_flags_horizontal": 1,
+                    "size_flags_vertical": 4,
+                    "align": 1,
+                    "lines_skipped": 0,
+                    "max_lines_visible": -1,
+                    "percent_visible": 1,
+                    "text": "123",
+                    "font": "Foo",
                     "children": []
                 }
             ]
