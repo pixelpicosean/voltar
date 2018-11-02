@@ -8,10 +8,10 @@ export const default_font_name = '04b03';
 let default_font = null;
 const default_style = (() => {
     const style = new StyleBox();
-    style.set_default_margin(Margin.Bottom, 2);
-    style.set_default_margin(Margin.Left, 2);
-    style.set_default_margin(Margin.Top, 2);
-    style.set_default_margin(Margin.Right, 2);
+    style.set_default_margin(Margin.Bottom, 0);
+    style.set_default_margin(Margin.Left, 0);
+    style.set_default_margin(Margin.Top, 0);
+    style.set_default_margin(Margin.Right, 0);
     return style;
 })();
 
