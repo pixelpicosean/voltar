@@ -29,7 +29,6 @@ class MinSizeCache {
 const tmp_vec = new Vector2();
 const tmp_vec2 = new Vector2();
 const tmp_vec3 = new Vector2();
-const msc = new MinSizeCache();
 
 export default class BoxContainer extends Container {
     get alignment() {
@@ -63,12 +62,8 @@ export default class BoxContainer extends Container {
     _load_data(data) {
         super._load_data(data);
 
-        for (let k in data) {
-            switch (k) {
-                case 'alignment': {
-                    this[k] = data[k];
-                } break;
-            }
+        if (data.alignment !== undefined) {
+            this.alignment = data.alignment;
         }
 
         return this;
@@ -160,7 +155,7 @@ export default class BoxContainer extends Container {
             }
 
             const size = c.get_combined_minimum_size(tmp_vec);
-            msc.reset();
+            const msc = new MinSizeCache();
 
             if (this.vertical) {
                 stretch_min += size.y;
@@ -272,7 +267,7 @@ export default class BoxContainer extends Container {
             let from = ofs;
             let to = ofs + msc.final_size;
 
-            if (msc.will_stretch && idx == children_count - 1) {
+            if (msc.will_stretch && idx === children_count - 1) {
                 to = this.vertical ? new_size.y : new_size.x;
             }
 
