@@ -16,7 +16,7 @@ export default class CenterContainer extends Container {
     }
     /**
      * @param {number} value
-     * @returns this
+     * @returns {this}
      */
     set_use_top_left(value) {
         this.use_top_left = value;

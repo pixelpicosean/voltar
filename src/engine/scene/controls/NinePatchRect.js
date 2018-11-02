@@ -35,7 +35,7 @@ export default class NinePatchRect extends Control {
     }
     /**
      * @param {string|Texture} value
-     * @returns this
+     * @returns {this}
      */
     set_texture(value) {
         // @ts-ignore
@@ -45,7 +45,7 @@ export default class NinePatchRect extends Control {
 
     /**
      * @param {boolean} value
-     * @returns this
+     * @returns {this}
      */
     set_draw_center(value) {
         this.draw_center = value;
@@ -53,7 +53,7 @@ export default class NinePatchRect extends Control {
 
     /**
      * @param {number} value
-     * @returns this
+     * @returns {this}
      */
     set_axis_stretch_horizontal(value) {
         this.axis_stretch_horizontal = value;
@@ -61,7 +61,7 @@ export default class NinePatchRect extends Control {
 
     /**
      * @param {number} value
-     * @returns this
+     * @returns {this}
      */
     set_axis_stretch_vertical(value) {
         this.axis_stretch_vertical = value;

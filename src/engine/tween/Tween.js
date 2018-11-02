@@ -163,7 +163,7 @@ export default class Tween {
 
     /**
      * @param {boolean} active
-     * @returns this
+     * @returns {this}
      */
     set_active(active) {
         this.active = active;
@@ -171,7 +171,7 @@ export default class Tween {
     }
     /**
      * @param {number} scale
-     * @returns this
+     * @returns {this}
      */
     set_speed_scale(scale) {
         this.speed_scale = scale;
@@ -180,7 +180,7 @@ export default class Tween {
 
     /**
      * Start the tween
-     * @returns this
+     * @returns {this}
      */
     start() {
         this.active = true;
@@ -189,7 +189,7 @@ export default class Tween {
     /**
      * @param {any} obj Target
      * @param {string} key Key
-     * @returns this
+     * @returns {this}
      */
     reset(obj, key) {
         let i = 0, data;
@@ -206,7 +206,7 @@ export default class Tween {
         return this;
     }
     /**
-     * @returns this
+     * @returns {this}
      */
     reset_all() {
         let i = 0, data;
@@ -224,7 +224,7 @@ export default class Tween {
     /**
      * @param {any} obj Target
      * @param {string} key Key
-     * @returns this
+     * @returns {this}
      */
     stop(obj, key) {
         let i = 0, data;
@@ -237,7 +237,7 @@ export default class Tween {
         return this;
     }
     /**
-     * @returns this
+     * @returns {this}
      */
     stop_all() {
         this.active = false;
@@ -251,7 +251,7 @@ export default class Tween {
     /**
      * @param {any} obj Target
      * @param {string} key Key
-     * @returns this
+     * @returns {this}
      */
     resume(obj, key) {
         this.active = true;
@@ -266,7 +266,7 @@ export default class Tween {
         return this;
     }
     /**
-     * @returns this
+     * @returns {this}
      */
     resume_all() {
         this.active = true;
@@ -282,7 +282,7 @@ export default class Tween {
      * @param {any} obj Target
      * @param {string} key Key
      * @param {boolean} [first_only=true]
-     * @returns this
+     * @returns {this}
      */
     remove(obj, key, first_only = true) {
         let i = 0, data;
@@ -299,7 +299,7 @@ export default class Tween {
         return this;
     }
     /**
-     * @returns this
+     * @returns {this}
      */
     remove_all() {
         this.active = false;
@@ -314,7 +314,7 @@ export default class Tween {
 
     /**
      * @param {number} p_time
-     * @returns this
+     * @returns {this}
      */
     seek(p_time) {
         let i = 0, data;
@@ -380,7 +380,7 @@ export default class Tween {
      * @param {number} duration Duration of this animation
      * @param {string} p_easing Easing function
      * @param {number} [delay=0] Time before start
-     * @returns this
+     * @returns {this}
      */
     interpolate_property(obj, property, initial_val, final_val, duration, p_easing, delay = 0) {
         let easing = p_easing.split('.');
@@ -439,7 +439,7 @@ export default class Tween {
      * @param {number} duration Duration of this animation
      * @param {string} p_easing Easing function
      * @param {number} [delay=0] Time before start
-     * @returns this
+     * @returns {this}
      */
     interpolate_method(obj, method, initial_val, final_val, duration, p_easing, delay = 0) {
         let easing = p_easing.split('.');
@@ -494,7 +494,7 @@ export default class Tween {
      * @param {number} duration Duration of this animation
      * @param {string} callback Function to call after the duration
      * @param {any} [args] Arguments to be passed to the callback
-     * @returns this
+     * @returns {this}
      */
     interpolate_callback(obj, duration, callback, args) {
         let data = create_interpolate();
@@ -520,7 +520,7 @@ export default class Tween {
      * @param {number} duration Duration of this animation
      * @param {string} callback Function to call after the duration
      * @param {any} [args] Arguments to be passed to the callback
-     * @returns this
+     * @returns {this}
      */
     interpolate_deferred_callback(obj, duration, callback, args) {
         let data = create_interpolate();
@@ -550,7 +550,7 @@ export default class Tween {
      * @param {number} duration Duration of this animation
      * @param {string} p_easing Easing function
      * @param {number} [delay=0] Time before start
-     * @returns this
+     * @returns {this}
      */
     follow_property(obj, property, initial_val, target, target_property, duration, p_easing, delay = 0) {
         let easing = p_easing.split('.');
@@ -606,7 +606,7 @@ export default class Tween {
      * @param {number} duration Duration of this animation
      * @param {string} p_easing Easing function
      * @param {number} [delay=0] Time before start
-     * @returns this
+     * @returns {this}
      */
     follow_method(obj, method, initial_val, target, target_method, duration, p_easing, delay = 0) {
         let easing = p_easing.split('.');
@@ -662,7 +662,7 @@ export default class Tween {
      * @param {number} duration Duration of this animation
      * @param {string} p_easing Easing function
      * @param {number} [delay=0] Time before start
-     * @returns this
+     * @returns {this}
      */
     targeting_property(obj, property, initial, initial_property, final_val, duration, p_easing, delay = 0) {
         let easing = p_easing.split('.');
@@ -723,7 +723,7 @@ export default class Tween {
      * @param {number} duration Duration of this animation
      * @param {string} p_easing Easing function
      * @param {number} [delay=0] Time before start
-     * @returns this
+     * @returns {this}
      */
     targeting_method(obj, method, initial, initial_method, final_val, duration, p_easing, delay = 0) {
         let easing = p_easing.split('.');
@@ -776,7 +776,7 @@ export default class Tween {
     }
 
     /**
-     * @returns this
+     * @returns {this}
      */
     clear_events() {
         this.tween_completed.detachAll();

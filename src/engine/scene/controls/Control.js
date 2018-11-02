@@ -19,6 +19,7 @@ import {
 import Theme from '../resources/Theme';
 import StyleBox from '../resources/StyleBox';
 import Font from '../resources/Font';
+import Color from 'engine/Color';
 
 const tmp_vec = new Vector2();
 const tmp_vec2 = new Vector2();
@@ -49,7 +50,7 @@ export default class Control extends Node2D {
      * @param {Anchor} anchor
      * @param {boolean} keep_margin
      * @param {boolean} push_opposite_anchor
-     * @returns this
+     * @returns {this}
      */
     set_anchor(margin, anchor, keep_margin = true, push_opposite_anchor = true) {
         const parent_rect = this.get_parent_anchorable_rect(tmp_rect5);
@@ -555,8 +556,8 @@ export default class Control extends Node2D {
 
             margin: [0, 0, 0, 0],
             anchor: [0, 0, 0, 0],
-            h_grow: GrowDirection.BEGIN,
-            v_grow: GrowDirection.BEGIN,
+            h_grow: GrowDirection.END,
+            v_grow: GrowDirection.END,
 
             rotation: 0,
             scale: new Vector2(1, 1),
@@ -638,6 +639,7 @@ export default class Control extends Node2D {
 
         return this;
     }
+    _theme_changed() { }
 
     _propagate_enter_tree() {
         this.data.parent_canvas_item = this.get_parent_item();
@@ -781,6 +783,46 @@ export default class Control extends Node2D {
 
         return Theme.get_default().get_font(name, type);
     }
+    /**
+     * @param {string} name
+     * @param {string} [type]
+     * @returns {Color}
+     */
+    get_color(name, type) {
+        if (!type) {
+            if (this.data.color_override) {
+                const color = this.data.color_override[name];
+                if (color !== undefined) {
+                    return color;
+                }
+            }
+
+            type = this.type;
+        }
+
+        // TODO: try with custom themes
+
+        return Theme.get_default().get_color(name, type);
+    }
+
+    /**
+     * @param {string} name
+     * @param {Font} font
+     */
+    add_font_override(name, font) {
+        this.data.font_override = this.data.font_override || {};
+        this.data.font_override[name] = font;
+        this._theme_changed();
+    }
+    /**
+     * @param {string} name
+     * @param {Color} color
+     */
+    add_color_override(name, color) {
+        this.data.color_override = this.data.color_override || {};
+        this.data.color_override[name] = color;
+        this._theme_changed();
+    }
 
     _compute_margins(rect, anchors, margins) {
         const parent_rect = this.get_parent_anchorable_rect(tmp_rect2);
@@ -836,7 +878,7 @@ export default class Control extends Node2D {
 
         if (minimum_size.x > new_size_cache.x) {
             if (this.data.h_grow === GrowDirection.BEGIN) {
-                new_pos_cache.x += new_size_cache.x - minimum_size.x;
+                new_pos_cache.x += (new_size_cache.x - minimum_size.x);
             } else if (this.data.h_grow === GrowDirection.BOTH) {
                 new_pos_cache.x += 0.5 * (new_size_cache.x - minimum_size.x);
             }
@@ -846,7 +888,7 @@ export default class Control extends Node2D {
 
         if (minimum_size.y > new_size_cache.y) {
             if (this.data.v_grow === GrowDirection.BEGIN) {
-                new_pos_cache.y += new_size_cache.y - minimum_size.y;
+                new_pos_cache.y += (new_size_cache.y - minimum_size.y);
             } else if (this.data.v_grow === GrowDirection.BOTH) {
                 new_pos_cache.y += 0.5 * (new_size_cache.y - minimum_size.y);
             }
@@ -854,6 +896,7 @@ export default class Control extends Node2D {
             new_size_cache.y = minimum_size.y;
         }
 
+        let pos_changed = !new_pos_cache.equals(this.data.pos_cache);
         let size_changed = !new_size_cache.equals(this.data.size_cache);
 
         this.data.pos_cache.copy(new_pos_cache);
@@ -862,6 +905,9 @@ export default class Control extends Node2D {
         if (this.is_inside_tree) {
             if (size_changed) {
                 this._resized();
+            }
+            if (pos_changed && !size_changed) {
+                this._update_transform();
             }
         }
     }

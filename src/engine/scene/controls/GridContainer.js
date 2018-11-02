@@ -22,7 +22,7 @@ export default class GridContainer extends Container {
     }
     /**
      * @param {number} value
-     * @returns this
+     * @returns {this}
      */
     set_columns(value) {
         this.columns = value;

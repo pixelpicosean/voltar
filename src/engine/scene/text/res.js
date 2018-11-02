@@ -28,8 +28,9 @@ export function register_font(xml, textures) {
     const pages_textures = {};
 
     font.name = info.getAttribute('face');
-    font.size = parseInt(info.getAttribute('size'), 10);
+    font.size = parseInt(info.getAttribute('size'), 10) / res;
     font.height = parseInt(common.getAttribute('lineHeight'), 10) / res;
+    font.ascent = parseInt(common.getAttribute('base'), 10) / res;
 
     // Single texture, convert to list
     if (textures instanceof Texture) {
@@ -52,6 +53,7 @@ export function register_font(xml, textures) {
         const letter = letters[i];
         const char_code = parseInt(letter.getAttribute('id'), 10);
         const page = letter.getAttribute('page') || 0;
+        const texture = pages_textures[page];
         const texture_rect = new Rectangle(
             (parseInt(letter.getAttribute('x'), 10) / res) + (pages_textures[page].frame.x / res),
             (parseInt(letter.getAttribute('y'), 10) / res) + (pages_textures[page].frame.y / res),
@@ -64,7 +66,7 @@ export function register_font(xml, textures) {
         char.v_align = parseInt(letter.getAttribute('yoffset'), 10) / res;
         char.advance = parseInt(letter.getAttribute('xadvance'), 10) / res;
         char.rect.copy(texture_rect);
-        char.texture = new Texture(pages_textures[page].base_texture, texture_rect);
+        char.texture = new Texture(texture.base_texture, texture_rect);
     }
 
     // parse kernings

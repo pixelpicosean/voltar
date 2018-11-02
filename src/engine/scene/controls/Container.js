@@ -82,7 +82,7 @@ export default class Container extends Control {
         this.pending_sort = true;
     }
 
-    _sort_chilren() {
+    _sort_children() {
         if (!this.is_inside_tree) {
             return;
         }

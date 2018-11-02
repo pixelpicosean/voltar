@@ -15,7 +15,7 @@ export default class PhysicsBody2D extends CollisionObject2D {
     /**
      * @param {import('engine/math/Vector2').Vector2Like|number} x
      * @param {number} [y]
-     * @returns this
+     * @returns {this}
      */
     set_linear_velocity(x, y) {
         if (typeof (x) === 'object') {

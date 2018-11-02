@@ -35,7 +35,7 @@ export default class RectangleShape2D extends CollisionShape2D {
     /**
      * @param {import('engine/math/Vector2').Vector2Like|number} x
      * @param {number} [y]
-     * @returns this
+     * @returns {this}
      */
     set_position(x, y) {
         if (y === undefined) {

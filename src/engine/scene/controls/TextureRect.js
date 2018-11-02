@@ -39,7 +39,7 @@ export default class TextureRect extends Control {
     }
     /**
      * @param {string|Texture} value
-     * @returns this
+     * @returns {this}
      */
     set_texture(value) {
         // @ts-ignore
@@ -60,7 +60,7 @@ export default class TextureRect extends Control {
     }
     /**
      * @param {boolean} value
-     * @returns this
+     * @returns {this}
      */
     set_expand(value) {
         this.expand = value;
@@ -78,7 +78,7 @@ export default class TextureRect extends Control {
     }
     /**
      * @param {number} value
-     * @returns this
+     * @returns {this}
      */
     set_stretch_mode(value) {
         this.stretch_mode = value;

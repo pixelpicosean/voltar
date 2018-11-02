@@ -133,7 +133,7 @@ export default class ObservableVector2 {
      *
      * @param {import('./Vector2').Vector2Like|number} x
      * @param {import('./Vector2').Vector2Like|number} [y]
-     * @returns this
+     * @returns {this}
      */
     add(x, y) {
         if (y === undefined) {
@@ -155,7 +155,7 @@ export default class ObservableVector2 {
      *
      * @param {import('./Vector2').Vector2Like|number} x
      * @param {import('./Vector2').Vector2Like|number} [y]
-     * @returns this
+     * @returns {this}
      */
     subtract(x, y) {
         if (y === undefined) {
@@ -177,7 +177,7 @@ export default class ObservableVector2 {
      *
      * @param {import('./Vector2').Vector2Like|number} x
      * @param {import('./Vector2').Vector2Like|number} [y]
-     * @returns this
+     * @returns {this}
      */
     multiply(x, y) {
         if (y === undefined) {
@@ -199,7 +199,7 @@ export default class ObservableVector2 {
      *
      * @param {import('./Vector2').Vector2Like|number} x
      * @param {import('./Vector2').Vector2Like|number} [y]
-     * @returns this
+     * @returns {this}
      */
     divide(x, y) {
         if (y === undefined) {

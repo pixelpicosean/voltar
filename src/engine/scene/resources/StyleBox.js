@@ -8,7 +8,7 @@ export default class StyleBox {
     /**
      * @param {Margin} margin
      * @param {number} value
-     * @returns this
+     * @returns {this}
      */
     set_default_margin(margin, value) {
         this.margin[margin] = value;

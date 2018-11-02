@@ -30,7 +30,7 @@ export default class CollisionObject2D extends Node2D {
     }
     /**
      * @param {number} layer
-     * @returns this
+     * @returns {this}
      */
     set_collision_layer(layer) {
         this.collision_layer = layer;
@@ -43,7 +43,7 @@ export default class CollisionObject2D extends Node2D {
      *
      * @param {number} bit
      * @param {boolean} value
-     * @returns this
+     * @returns {this}
      */
     set_collision_layer_bit(bit, value) {
         if (value) {
@@ -73,7 +73,7 @@ export default class CollisionObject2D extends Node2D {
     }
     /**
      * @param {number} mask
-     * @returns this
+     * @returns {this}
      */
     set_collision_mask(mask) {
         this.collision_mask = mask;
@@ -86,7 +86,7 @@ export default class CollisionObject2D extends Node2D {
      *
      * @param {number} bit
      * @param {boolean} value
-     * @returns this
+     * @returns {this}
      */
     set_collision_mask_bit(bit, value) {
         if (value) {
@@ -153,7 +153,7 @@ export default class CollisionObject2D extends Node2D {
     }
     /**
      * @param {CollisionShape2D} shape
-     * @returns this
+     * @returns {this}
      */
     remove_shape(shape) {
         shape.owner = null;
