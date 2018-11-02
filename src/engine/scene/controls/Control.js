@@ -78,9 +78,7 @@ export default class Control extends Node2D {
                 this.data.margin[(margin + 2) % 4] = previous_opposite_margin_pos - this.data.anchor[(margin + 2) % 4] * parent_range;
             }
         }
-        if (this.is_inside_tree) {
-            this._size_changed();
-        }
+        this._size_changed();
 
         return this;
     }
@@ -293,6 +291,8 @@ export default class Control extends Node2D {
     set rect_position(value) {
         tmp_rect4.x = value.x;
         tmp_rect4.y = value.y;
+        tmp_rect4.width = 0;
+        tmp_rect4.height = 0;
         this._compute_margins(tmp_rect4, this.data.anchor, this.data.margin);
         this._size_changed();
     }
@@ -608,15 +608,15 @@ export default class Control extends Node2D {
 
         for (let k in data) {
             switch (k) {
-                case 'anchor_bottom':
-                case 'anchor_left':
-                case 'anchor_right':
-                case 'anchor_top':
-
                 case 'margin_bottom':
                 case 'margin_left':
                 case 'margin_right':
                 case 'margin_top':
+
+                case 'anchor_bottom':
+                case 'anchor_left':
+                case 'anchor_right':
+                case 'anchor_top':
 
                 case 'rect_min_size':
                 case 'rect_rotation':
@@ -643,9 +643,13 @@ export default class Control extends Node2D {
 
     _propagate_enter_tree() {
         this.data.parent_canvas_item = this.get_parent_item();
-        if (this.parent instanceof Control) {
+        if (this.parent.is_control) {
+            // @ts-ignore
             this.data.parent = this.parent;
         }
+
+        this.data.minimum_size_valid = false;
+        this._size_changed();
 
         super._propagate_enter_tree();
     }
@@ -829,7 +833,7 @@ export default class Control extends Node2D {
         margins[0] = Math.floor(rect.x - (anchors[0] * parent_rect.width));
         margins[1] = Math.floor(rect.y - (anchors[1] * parent_rect.height));
         margins[2] = Math.floor(rect.x + rect.width - (anchors[2] * parent_rect.width));
-        margins[3] = Math.floor(rect.x + rect.height - (anchors[3] * parent_rect.height));
+        margins[3] = Math.floor(rect.y + rect.height - (anchors[3] * parent_rect.height));
     }
 
     minimum_size_changed() {
@@ -861,6 +865,10 @@ export default class Control extends Node2D {
         MessageQueue.get_singleton().push_call(this, '_update_minimum_size');
     }
     _size_changed() {
+        if (!this.is_inside_tree) {
+            return;
+        }
+
         const parent_rect = this.get_parent_anchorable_rect(tmp_rect3);
         margin_pos[0] = 0;
         margin_pos[1] = 0;
@@ -934,6 +942,10 @@ export default class Control extends Node2D {
         }
     }
     _update_minimum_size_cache() {
+        if (!this.is_inside_tree) {
+            return;
+        }
+
         const minsize = this.get_minimum_size(tmp_vec3);
         minsize.x = Math.max(minsize.x, this.data.custom_minimum_size.x);
         minsize.y = Math.max(minsize.y, this.data.custom_minimum_size.y);
