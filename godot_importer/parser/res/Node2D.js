@@ -3,6 +3,7 @@ const {
     path,
     int,
     real,
+    boolean,
     Vector2,
     Color,
 } = require('../parse_utils');
@@ -18,5 +19,6 @@ module.exports = (data) => {
         rotation: real(data.prop.rotation),
         scale: Vector2(data.prop.scale),
         modulate: Color(data.prop.modulate),
+        visible: boolean(data.prop.visible),
     };
 };

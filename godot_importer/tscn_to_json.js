@@ -354,6 +354,7 @@ const resource_normalizers = {
         font.family = resource_normalizers[font_data.type](font_data, meta);
         return font;
     },
+    BitmapFont: (res, meta) => path.basename(res.path, '.fnt'),
     RectangleShape2D: (res, meta, parent) => {
         res.position = parent.position;
         delete parent.position;
