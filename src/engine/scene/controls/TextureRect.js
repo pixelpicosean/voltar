@@ -36,6 +36,13 @@ export default class TextureRect extends Control {
         this.tsprite.texture = p_value;
 
         this._texture = this.sprite._texture;
+
+        // wait for the texture to load
+        if (this._texture.base_texture.has_loaded) {
+            this._on_texture_update();
+        } else {
+            this._texture.once('update', this._on_texture_update, this);
+        }
     }
     /**
      * @param {string|Texture} value
@@ -64,6 +71,7 @@ export default class TextureRect extends Control {
      */
     set_expand(value) {
         this.expand = value;
+        return this;
     }
 
     get stretch_mode() {
@@ -82,6 +90,7 @@ export default class TextureRect extends Control {
      */
     set_stretch_mode(value) {
         this.stretch_mode = value;
+        return this;
     }
 
     constructor() {
@@ -133,7 +142,7 @@ export default class TextureRect extends Control {
 
         this._need_redraw = true;
 
-        this.minimum_size_changed();
+        this._update_minimum_size_cache();
     }
 
     /**
