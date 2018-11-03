@@ -135,6 +135,9 @@ export default class BaseButton extends Control {
             }
         }
     }
+    is_pressed() {
+        return this.toggle_mode ? this.status.pressed : this.status.press_attempt;
+    }
     is_hovered() {
         return this.status.hovering;
     }
