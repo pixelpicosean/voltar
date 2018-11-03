@@ -62,7 +62,6 @@ export default class TextureRect extends Control {
      */
     set expand(value) {
         this._expand = value;
-        this._need_redraw = true;
         this.minimum_size_changed();
     }
     /**
@@ -82,7 +81,6 @@ export default class TextureRect extends Control {
      */
     set stretch_mode(value) {
         this._stretch_mode = value;
-        this._need_redraw = true;
     }
     /**
      * @param {number} value
@@ -98,7 +96,6 @@ export default class TextureRect extends Control {
 
         this.type = 'TextureRect';
 
-        this._need_redraw = false;
         this.sprite = new Sprite();
         this.tsprite = new TilingSprite();
 
@@ -137,11 +134,6 @@ export default class TextureRect extends Control {
     }
 
     _on_texture_update() {
-        this._texture_id = -1;
-        this._texture_trimmed_id = -1;
-
-        this._need_redraw = true;
-
         this._update_minimum_size_cache();
     }
 
