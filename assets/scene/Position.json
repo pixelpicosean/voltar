@@ -47,14 +47,14 @@
             "columns": 4,
             "children": [
                 {
-                    "type": "TextureRect",
-                    "name": "TextureRect",
+                    "type": "TextureButton",
+                    "name": "Button",
                     "anchor_bottom": 0,
                     "anchor_left": 0,
                     "anchor_top": 0,
                     "anchor_right": 0,
                     "margin_bottom": 65,
-                    "margin_right": 64,
+                    "margin_right": 49,
                     "rect_pivot_offset": {
                         "x": 0,
                         "y": 0
@@ -63,8 +63,11 @@
                     "mouse_default_cursor_shape": 0,
                     "size_flags_horizontal": 1,
                     "size_flags_vertical": 1,
-                    "texture": "mask/nine-slice",
-                    "stretch_mode": 0,
+                    "toggle_mode": false,
+                    "texture_disabled": "mask/button-disabled",
+                    "texture_hover": "mask/button-hover",
+                    "texture_normal": "mask/button-normal",
+                    "texture_pressed": "mask/button-down",
                     "children": []
                 },
                 {
@@ -75,8 +78,8 @@
                     "anchor_top": 0,
                     "anchor_right": 0,
                     "margin_bottom": 65,
-                    "margin_left": 68,
-                    "margin_right": 170,
+                    "margin_left": 53,
+                    "margin_right": 155,
                     "rect_pivot_offset": {
                         "x": 0,
                         "y": 0
@@ -101,8 +104,8 @@
                     "anchor_top": 0,
                     "anchor_right": 0,
                     "margin_bottom": 65,
-                    "margin_left": 174,
-                    "margin_right": 254,
+                    "margin_left": 159,
+                    "margin_right": 239,
                     "rect_min_size": {
                         "x": 32,
                         "y": 0
@@ -131,8 +134,8 @@
                     "anchor_top": 0,
                     "anchor_right": 0,
                     "margin_bottom": 65,
-                    "margin_left": 258,
-                    "margin_right": 361,
+                    "margin_left": 243,
+                    "margin_right": 346,
                     "rect_pivot_offset": {
                         "x": 0,
                         "y": 0
@@ -150,15 +153,15 @@
                     "children": []
                 },
                 {
-                    "type": "TextureRect",
-                    "name": "TextureRect3",
+                    "type": "TextureButton",
+                    "name": "Button2",
                     "anchor_bottom": 0,
                     "anchor_left": 0,
                     "anchor_top": 0,
                     "anchor_right": 0,
                     "margin_bottom": 134,
                     "margin_top": 69,
-                    "margin_right": 64,
+                    "margin_right": 49,
                     "rect_pivot_offset": {
                         "x": 0,
                         "y": 0
@@ -167,8 +170,12 @@
                     "mouse_default_cursor_shape": 0,
                     "size_flags_horizontal": 1,
                     "size_flags_vertical": 1,
-                    "texture": "mask/nine-slice",
-                    "stretch_mode": 0,
+                    "toggle_mode": false,
+                    "expand": true,
+                    "texture_disabled": "mask/button-disabled",
+                    "texture_hover": "mask/button-hover",
+                    "texture_normal": "mask/button-normal",
+                    "texture_pressed": "mask/button-down",
                     "children": []
                 },
                 {
@@ -179,9 +186,9 @@
                     "anchor_top": 0,
                     "anchor_right": 0,
                     "margin_bottom": 134,
-                    "margin_left": 68,
+                    "margin_left": 53,
                     "margin_top": 69,
-                    "margin_right": 170,
+                    "margin_right": 155,
                     "rect_pivot_offset": {
                         "x": 0,
                         "y": 0
@@ -206,9 +213,9 @@
                     "anchor_top": 0,
                     "anchor_right": 0,
                     "margin_bottom": 134,
-                    "margin_left": 174,
+                    "margin_left": 159,
                     "margin_top": 69,
-                    "margin_right": 254,
+                    "margin_right": 239,
                     "rect_pivot_offset": {
                         "x": 0,
                         "y": 0
@@ -233,9 +240,9 @@
                     "anchor_top": 0,
                     "anchor_right": 0,
                     "margin_bottom": 134,
-                    "margin_left": 258,
+                    "margin_left": 243,
                     "margin_top": 69,
-                    "margin_right": 361,
+                    "margin_right": 346,
                     "rect_pivot_offset": {
                         "x": 0,
                         "y": 0
@@ -253,15 +260,15 @@
                     "children": []
                 },
                 {
-                    "type": "TextureRect",
-                    "name": "TextureRect5",
+                    "type": "TextureButton",
+                    "name": "Button3",
                     "anchor_bottom": 0,
                     "anchor_left": 0,
                     "anchor_top": 0,
                     "anchor_right": 0,
                     "margin_bottom": 218,
                     "margin_top": 138,
-                    "margin_right": 64,
+                    "margin_right": 49,
                     "rect_pivot_offset": {
                         "x": 0,
                         "y": 0
@@ -270,8 +277,11 @@
                     "mouse_default_cursor_shape": 0,
                     "size_flags_horizontal": 1,
                     "size_flags_vertical": 1,
-                    "texture": "mask/nine-slice",
-                    "stretch_mode": 0,
+                    "toggle_mode": false,
+                    "texture_disabled": "mask/button-disabled",
+                    "texture_hover": "mask/button-hover",
+                    "texture_normal": "mask/button-normal",
+                    "texture_pressed": "mask/button-down",
                     "children": []
                 },
                 {
@@ -282,9 +292,9 @@
                     "anchor_top": 0,
                     "anchor_right": 0,
                     "margin_bottom": 210,
-                    "margin_left": 68,
+                    "margin_left": 53,
                     "margin_top": 145,
-                    "margin_right": 170,
+                    "margin_right": 155,
                     "rect_pivot_offset": {
                         "x": 0,
                         "y": 0
@@ -309,9 +319,9 @@
                     "anchor_top": 0,
                     "anchor_right": 0,
                     "margin_bottom": 218,
-                    "margin_left": 174,
+                    "margin_left": 159,
                     "margin_top": 138,
-                    "margin_right": 254,
+                    "margin_right": 239,
                     "rect_min_size": {
                         "x": 80,
                         "y": 80
@@ -340,9 +350,9 @@
                     "anchor_top": 0,
                     "anchor_right": 0,
                     "margin_bottom": 210,
-                    "margin_left": 258,
+                    "margin_left": 243,
                     "margin_top": 145,
-                    "margin_right": 361,
+                    "margin_right": 346,
                     "rect_pivot_offset": {
                         "x": 0,
                         "y": 0
@@ -360,15 +370,15 @@
                     "children": []
                 },
                 {
-                    "type": "TextureRect",
-                    "name": "TextureRect7",
+                    "type": "TextureButton",
+                    "name": "Button4",
                     "anchor_bottom": 0,
                     "anchor_left": 0,
                     "anchor_top": 0,
                     "anchor_right": 0,
                     "margin_bottom": 287,
                     "margin_top": 222,
-                    "margin_right": 64,
+                    "margin_right": 49,
                     "rect_pivot_offset": {
                         "x": 0,
                         "y": 0
@@ -377,8 +387,11 @@
                     "mouse_default_cursor_shape": 0,
                     "size_flags_horizontal": 1,
                     "size_flags_vertical": 1,
-                    "texture": "mask/nine-slice",
-                    "stretch_mode": 0,
+                    "toggle_mode": false,
+                    "texture_disabled": "mask/button-disabled",
+                    "texture_hover": "mask/button-hover",
+                    "texture_normal": "mask/button-normal",
+                    "texture_pressed": "mask/button-down",
                     "children": []
                 },
                 {
@@ -389,9 +402,9 @@
                     "anchor_top": 0,
                     "anchor_right": 0,
                     "margin_bottom": 287,
-                    "margin_left": 68,
+                    "margin_left": 53,
                     "margin_top": 222,
-                    "margin_right": 170,
+                    "margin_right": 155,
                     "rect_pivot_offset": {
                         "x": 0,
                         "y": 0
@@ -416,9 +429,9 @@
                     "anchor_top": 0,
                     "anchor_right": 0,
                     "margin_bottom": 287,
-                    "margin_left": 174,
+                    "margin_left": 159,
                     "margin_top": 222,
-                    "margin_right": 254,
+                    "margin_right": 239,
                     "rect_pivot_offset": {
                         "x": 0,
                         "y": 0
@@ -443,9 +456,9 @@
                     "anchor_top": 0,
                     "anchor_right": 0,
                     "margin_bottom": 287,
-                    "margin_left": 258,
+                    "margin_left": 243,
                     "margin_top": 222,
-                    "margin_right": 361,
+                    "margin_right": 346,
                     "rect_pivot_offset": {
                         "x": 0,
                         "y": 0
@@ -463,15 +476,15 @@
                     "children": []
                 },
                 {
-                    "type": "TextureRect",
-                    "name": "TextureRect9",
+                    "type": "TextureButton",
+                    "name": "Button5",
                     "anchor_bottom": 0,
                     "anchor_left": 0,
                     "anchor_top": 0,
                     "anchor_right": 0,
                     "margin_bottom": 356,
                     "margin_top": 291,
-                    "margin_right": 64,
+                    "margin_right": 49,
                     "rect_pivot_offset": {
                         "x": 0,
                         "y": 0
@@ -480,8 +493,11 @@
                     "mouse_default_cursor_shape": 0,
                     "size_flags_horizontal": 1,
                     "size_flags_vertical": 1,
-                    "texture": "mask/nine-slice",
-                    "stretch_mode": 0,
+                    "toggle_mode": false,
+                    "texture_disabled": "mask/button-disabled",
+                    "texture_hover": "mask/button-hover",
+                    "texture_normal": "mask/button-normal",
+                    "texture_pressed": "mask/button-down",
                     "children": []
                 },
                 {
@@ -492,9 +508,9 @@
                     "anchor_top": 0,
                     "anchor_right": 0,
                     "margin_bottom": 356,
-                    "margin_left": 68,
+                    "margin_left": 53,
                     "margin_top": 291,
-                    "margin_right": 170,
+                    "margin_right": 155,
                     "rect_pivot_offset": {
                         "x": 0,
                         "y": 0
@@ -519,9 +535,9 @@
                     "anchor_top": 0,
                     "anchor_right": 0,
                     "margin_bottom": 356,
-                    "margin_left": 174,
+                    "margin_left": 159,
                     "margin_top": 291,
-                    "margin_right": 254,
+                    "margin_right": 239,
                     "rect_pivot_offset": {
                         "x": 0,
                         "y": 0
@@ -546,9 +562,9 @@
                     "anchor_top": 0,
                     "anchor_right": 0,
                     "margin_bottom": 356,
-                    "margin_left": 258,
+                    "margin_left": 243,
                     "margin_top": 291,
-                    "margin_right": 361,
+                    "margin_right": 346,
                     "rect_pivot_offset": {
                         "x": 0,
                         "y": 0

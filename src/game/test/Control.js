@@ -11,6 +11,6 @@ export default class ControlTest extends v.Node2D {
         return s;
     }
 
-    _enter_tree() {
+    _ready() {
     }
 }

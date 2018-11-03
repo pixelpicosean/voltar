@@ -247,6 +247,34 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">sprites/mask/button-disabled.png</key>
+            <key type="filename">sprites/mask/button-hover.png</key>
+            <key type="filename">sprites/mask/button-normal.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>12,12,25,25</rect>
+                <key>scale9Paddings</key>
+                <rect>12,12,25,25</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">sprites/mask/button-down.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>12,11,25,23</rect>
+                <key>scale9Paddings</key>
+                <rect>12,11,25,23</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">sprites/mask/nine-slice.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
