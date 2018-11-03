@@ -359,13 +359,13 @@ export default class Node2D extends EventEmitter {
      * @param {any} b
      * @param {number} c
      */
-    set_lerp_value(key, a, b, c) {}
+    _set_lerp_value(key, a, b, c) {}
     /**
      * Set value of this node with its key
      * @param {string} key
      * @param {any} value
      */
-    set_value(key, value) {}
+    _set_value(key, value) {}
 
     is_set_as_toplevel() {
         return this.toplevel;

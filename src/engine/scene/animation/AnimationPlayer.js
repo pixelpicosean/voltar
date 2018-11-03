@@ -125,7 +125,7 @@ function apply_immediate_value(node, type, key, value) {
             node[key].a = value.a;
         } break;
         case PropType.ANY: {
-            node.set_value(key, value);
+            node._set_value(key, value);
         } break;
     }
 }
@@ -160,7 +160,7 @@ function apply_interpolate_value(node, type, key, value_a, value_b, c) {
             node[key].a = interpolate_number(value_a.a, value_b.a, c);
         } break;
         case PropType.ANY: {
-            node.set_lerp_value(key, value_a, value_b, c);
+            node._set_lerp_value(key, value_a, value_b, c);
         } break;
     }
 }
