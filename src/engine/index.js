@@ -26,6 +26,7 @@ export { default as Label } from './scene/controls/Label';
 export { default as ColorRect } from './scene/controls/ColorRect';
 export { default as TextureRect } from './scene/controls/TextureRect';
 export { default as NinePatchRect } from './scene/controls/NinePatchRect';
+export { default as TextureButton } from './scene/controls/TextureButton';
 export { default as MarginContainer } from './scene/controls/MarginContainer';
 export { default as CenterContainer } from './scene/controls/CenterContainer';
 export { VBoxContainer, HBoxContainer } from './scene/controls/BoxContainer';
