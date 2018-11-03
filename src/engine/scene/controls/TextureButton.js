@@ -10,18 +10,19 @@ import BaseButton, { DrawMode } from './BaseButton';
  * @enum {number}
  */
 export const StretchMode = {
-    SCALE: 1,
-    TILE: 2,
-    KEEP: 3,
-    KEEP_CENTERED: 4,
-    KEEP_ASPECT: 5,
-    KEEP_ASPECT_CENTERED: 6,
-    KEEP_ASPECT_COVERED: 7,
+    SCALE: 0,
+    TILE: 1,
+    KEEP: 2,
+    KEEP_CENTERED: 3,
+    KEEP_ASPECT: 4,
+    KEEP_ASPECT_CENTERED: 5,
+    KEEP_ASPECT_COVERED: 6,
 }
 
 const tmp_vec = new Vector2();
 const tmp_vec2 = new Vector2();
 const tmp_vec3 = new Vector2();
+const tmp_vec4 = new Vector2();
 
 export default class TextureButton extends BaseButton {
     /**
@@ -312,15 +313,63 @@ export default class TextureButton extends BaseButton {
                 } break;
                 case StretchMode.KEEP_ASPECT_CENTERED:
                 case StretchMode.KEEP_ASPECT: {
-                    // TODO
+                    size.copy(this.rect_size);
+                    let tex_width = texture.width * size.y / texture.height;
+                    let tex_height = size.y;
+
+                    if (tex_width > size.x) {
+                        tex_width = size.x;
+                        tex_height = texture.height * tex_width / texture.width;
+                    }
+
+                    if (this._stretch_mode === StretchMode.KEEP_ASPECT_CENTERED) {
+                        ofs.x = (size.x - tex_width) * 0.5;
+                        ofs.y = (size.y - tex_height) * 0.5;
+                    }
+                    size.x = tex_width;
+                    size.y = tex_height;
                 } break;
-                case StretchMode.KEEP_ASPECT_CENTERED: {
-                    // TODO
+                case StretchMode.KEEP_ASPECT_COVERED: {
+                    this.tsprite.transform.set_from_matrix(this.transform.world_transform);
+                    this.tsprite.width = this.rect_size.x;
+                    this.tsprite.height = this.rect_size.y;
+
+                    const scale_size = tmp_vec4.set(this.rect_size.x / texture.width, this.rect_size.y / texture.height);
+                    const scale = scale_size.x > scale_size.y ? scale_size.x : scale_size.y;
+                    this.tsprite.tile_scale.set(scale, scale);
+                    this.tsprite.tile_position.set(texture.width * scale, texture.height * scale)
+                        .subtract(this.rect_size)
+                        .scale(-0.5)
+
+                    // TODO: sync more properties for rendering
+                    this.tsprite._update_transform();
+                    this.tsprite.texture = texture;
+                    this.tsprite.clamp_margin = -0.5;
+                    this.tsprite.tint = this.tint;
+                    this.tsprite.alpha = this.alpha;
+                    this.tsprite.blend_mode = this.blend_mode;
+
+                    this.tsprite._render_webgl(renderer);
+
+                    return;
                 } break;
             }
         }
         if (this._tile) {
+            this.tsprite.transform.set_from_matrix(this.transform.world_transform);
+            this.tsprite.position.add(ofs);
+            this.tsprite.width = size.x;
+            this.tsprite.height = size.y;
 
+            // TODO: sync more properties for rendering
+            this.tsprite._update_transform();
+            this.tsprite.texture = texture;
+            this.tsprite.clamp_margin = -0.5;
+            this.tsprite.tint = this.tint;
+            this.tsprite.alpha = this.alpha;
+            this.tsprite.blend_mode = this.blend_mode;
+
+            this.tsprite._render_webgl(renderer);
         } else {
             this.sprite.transform.set_from_matrix(this.transform.world_transform);
             this.sprite.position.add(ofs);
@@ -335,105 +384,6 @@ export default class TextureButton extends BaseButton {
             this.sprite.blend_mode = this.blend_mode;
 
             this.sprite._render_webgl(renderer);
-        }
-        return;
-
-        switch (this._stretch_mode) {
-            case StretchMode.SCALE:
-            case StretchMode.KEEP:
-            case StretchMode.KEEP_CENTERED: {
-                this.sprite.transform.set_from_matrix(this.transform.world_transform);
-                if (this._stretch_mode === StretchMode.KEEP_CENTERED) {
-                    this.sprite.position.add(
-                        (this.rect_size.x - texture.width) * 0.5,
-                        (this.rect_size.y - texture.height) * 0.5
-                    );
-                }
-                if (this._expand || this._stretch_mode === StretchMode.SCALE) {
-                    this.sprite.width = this.rect_size.x;
-                    this.sprite.height = this.rect_size.y;
-                } else {
-                    this.sprite.scale.set(1, 1);
-                }
-
-                // TODO: sync more properties for rendering
-                this.sprite._update_transform();
-                this.sprite._texture = texture;
-                this.sprite.tint = this.tint;
-                this.sprite.alpha = this.alpha;
-                this.sprite.blend_mode = this.blend_mode;
-
-                this.sprite._render_webgl(renderer);
-            } break;
-            case StretchMode.KEEP_ASPECT_CENTERED:
-            case StretchMode.KEEP_ASPECT: {
-                this.sprite.transform.set_from_matrix(this.transform.world_transform);
-                let tex_width = texture.width * this.rect_size.y / texture.height;
-                let tex_height = this.rect_size.y;
-
-                if (tex_width > this.rect_size.x) {
-                    tex_width = this.rect_size.x;
-                    tex_height = texture.height * tex_width / texture.width;
-                }
-
-                let ofs_x = 0;
-                let ofs_y = 0;
-
-                if (this._stretch_mode === StretchMode.KEEP_ASPECT_CENTERED) {
-                    ofs_x += (this.rect_size.x - tex_width) * 0.5;
-                    ofs_y += (this.rect_size.y - tex_height) * 0.5;
-                }
-
-                this.sprite.position.add(ofs_x, ofs_y);
-                this.sprite.width = tex_width;
-                this.sprite.height = tex_height;
-
-                // TODO: sync more properties for rendering
-                this.sprite._update_transform();
-                this.sprite._texture = texture;
-                this.sprite.tint = this.tint;
-                this.sprite.alpha = this.alpha;
-                this.sprite.blend_mode = this.blend_mode;
-
-                this.sprite._render_webgl(renderer);
-            } break;
-            case StretchMode.TILE: {
-                this.tsprite.transform.set_from_matrix(this.transform.world_transform);
-                this.tsprite.width = this.rect_size.x;
-                this.tsprite.height = this.rect_size.y;
-
-                // TODO: sync more properties for rendering
-                this.tsprite._update_transform();
-                this.tsprite._texture = texture;
-                this.tsprite.clamp_margin = -0.5;
-                this.tsprite.tint = this.tint;
-                this.tsprite.alpha = this.alpha;
-                this.tsprite.blend_mode = this.blend_mode;
-
-                this.tsprite._render_webgl(renderer);
-            } break;
-            case StretchMode.KEEP_ASPECT_COVERED: {
-                this.tsprite.transform.set_from_matrix(this.transform.world_transform);
-                this.tsprite.width = this.rect_size.x;
-                this.tsprite.height = this.rect_size.y;
-
-                const scale_size = tmp_vec.set(this.rect_size.x / texture.width, this.rect_size.y / texture.height);
-                const scale = scale_size.x > scale_size.y ? scale_size.x : scale_size.y;
-                this.tsprite.tile_scale.set(scale, scale);
-                this.tsprite.tile_position.set(texture.width * scale, texture.height * scale)
-                    .subtract(this.rect_size)
-                    .scale(-0.5)
-
-                // TODO: sync more properties for rendering
-                this.tsprite._update_transform();
-                this.tsprite._texture = texture;
-                this.tsprite.clamp_margin = -0.5;
-                this.tsprite.tint = this.tint;
-                this.tsprite.alpha = this.alpha;
-                this.tsprite.blend_mode = this.blend_mode;
-
-                this.tsprite._render_webgl(renderer);
-            } break;
         }
     }
 }
