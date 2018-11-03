@@ -157,6 +157,7 @@ texture_pressed = ExtResource( 2 )
 texture_hover = ExtResource( 3 )
 texture_disabled = ExtResource( 4 )
 expand = true
+stretch_mode = 6
 _sections_unfolded = [ "Rect", "Textures" ]
 
 [node name="Label4" type="Label" parent="Box" index="5"]

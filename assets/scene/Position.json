@@ -172,6 +172,7 @@
                     "size_flags_vertical": 1,
                     "toggle_mode": false,
                     "expand": true,
+                    "stretch_mode": 6,
                     "texture_disabled": "mask/button-disabled",
                     "texture_hover": "mask/button-hover",
                     "texture_normal": "mask/button-normal",
