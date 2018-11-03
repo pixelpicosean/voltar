@@ -1,16 +1,11 @@
 /**
  * Event class that mimics native DOM events.
- *
- * @class
- * @memberof V.interaction
  */
-export default class InteractionEvent
-{
+export default class InteractionEvent {
     /**
      *
      */
-    constructor()
-    {
+    constructor() {
         /**
          * Whether this event will continue propagating in the tree
          *
@@ -20,16 +15,16 @@ export default class InteractionEvent
 
         /**
          * The object which caused this event to be dispatched.
-         * For listener callback see {@link V.interaction.InteractionEvent.current_target}.
+         * For listener callback see {@link InteractionEvent.current_target}.
          *
-         * @member {V.Node2D}
+         * @member {Node2D}
          */
         this.target = null;
 
         /**
          * The object whose event listener’s callback is currently being invoked.
          *
-         * @member {V.Node2D}
+         * @member {Node2D}
          */
         this.current_target = null;
 
@@ -43,7 +38,7 @@ export default class InteractionEvent
         /**
          * InteractionData related to this event
          *
-         * @member {V.interaction.InteractionData}
+         * @member {InteractionData}
          */
         this.data = null;
     }
@@ -52,8 +47,7 @@ export default class InteractionEvent
      * Prevents event from reaching any objects other than the current object.
      *
      */
-    stop_propagation()
-    {
+    stop_propagation() {
         this.stopped = true;
     }
 
@@ -62,8 +56,7 @@ export default class InteractionEvent
      *
      * @private
      */
-    reset()
-    {
+    reset() {
         this.stopped = false;
         this.current_target = null;
         this.target = null;

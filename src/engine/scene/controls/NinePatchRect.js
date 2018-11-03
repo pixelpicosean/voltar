@@ -49,6 +49,7 @@ export default class NinePatchRect extends Control {
      */
     set_draw_center(value) {
         this.draw_center = value;
+        return this;
     }
 
     /**
@@ -57,6 +58,7 @@ export default class NinePatchRect extends Control {
      */
     set_axis_stretch_horizontal(value) {
         this.axis_stretch_horizontal = value;
+        return this;
     }
 
     /**
@@ -65,6 +67,7 @@ export default class NinePatchRect extends Control {
      */
     set_axis_stretch_vertical(value) {
         this.axis_stretch_vertical = value;
+        return this;
     }
 
     get patch_margin_bottom() {

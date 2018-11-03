@@ -1,17 +1,11 @@
 /**
- * Node2Ds with the {@link V.interaction.interactiveTarget} mixin use this class to track interactions
- *
- * @class
- * @private
- * @memberof V.interaction
+ * Node2Ds with the {@link interactive_target} mixin use this class to track interactions
  */
-export default class InteractionTrackingData
-{
+export default class InteractionTrackingData {
     /**
      * @param {number} pointer_id - Unique pointer id of the event
      */
-    constructor(pointer_id)
-    {
+    constructor(pointer_id) {
         this._pointer_id = pointer_id;
         this._flags = InteractionTrackingData.FLAGS.NONE;
     }
@@ -22,14 +16,11 @@ export default class InteractionTrackingData
      * @param {number} flag - The interaction flag to set
      * @param {boolean} yn - Should the flag be set or unset
      */
-    _doSet(flag, yn)
-    {
-        if (yn)
-        {
+    _doSet(flag, yn) {
+        if (yn) {
             this._flags = this._flags | flag;
         }
-        else
-        {
+        else {
             this._flags = this._flags & (~flag);
         }
     }
@@ -40,8 +31,7 @@ export default class InteractionTrackingData
      * @readonly
      * @member {number}
      */
-    get pointer_id()
-    {
+    get pointer_id() {
         return this._pointer_id;
     }
 
@@ -49,10 +39,8 @@ export default class InteractionTrackingData
      * State of the tracking data, expressed as bit flags
      *
      * @member {number}
-     * @memberof V.interaction.InteractionTrackingData#
      */
-    get flags()
-    {
+    get flags() {
         return this._flags;
     }
 
@@ -61,8 +49,7 @@ export default class InteractionTrackingData
      *
      * @param {number} flags - Flags to set
      */
-    set flags(flags)
-    {
+    set flags(flags) {
         this._flags = flags;
     }
 
@@ -70,22 +57,18 @@ export default class InteractionTrackingData
      * Is the tracked event inactive (not over or down)?
      *
      * @member {number}
-     * @memberof V.interaction.InteractionTrackingData#
      */
-    get none()
-    {
-        return this._flags === this.constructor.FLAGS.NONE;
+    get none() {
+        return this._flags === InteractionTrackingData.FLAGS.NONE;
     }
 
     /**
      * Is the tracked event over the Node2D?
      *
      * @member {boolean}
-     * @memberof V.interaction.InteractionTrackingData#
      */
-    get over()
-    {
-        return (this._flags & this.constructor.FLAGS.OVER) !== 0;
+    get over() {
+        return (this._flags & InteractionTrackingData.FLAGS.OVER) !== 0;
     }
 
     /**
@@ -93,20 +76,17 @@ export default class InteractionTrackingData
      *
      * @param {boolean} yn - Is the event over?
      */
-    set over(yn)
-    {
-        this._doSet(this.constructor.FLAGS.OVER, yn);
+    set over(yn) {
+        this._doSet(InteractionTrackingData.FLAGS.OVER, yn);
     }
 
     /**
      * Did the right mouse button come down in the Node2D?
      *
      * @member {boolean}
-     * @memberof V.interaction.InteractionTrackingData#
      */
-    get right_down()
-    {
-        return (this._flags & this.constructor.FLAGS.RIGHT_DOWN) !== 0;
+    get right_down() {
+        return (this._flags & InteractionTrackingData.FLAGS.RIGHT_DOWN) !== 0;
     }
 
     /**
@@ -114,20 +94,17 @@ export default class InteractionTrackingData
      *
      * @param {boolean} yn - Is the right mouse button down?
      */
-    set right_down(yn)
-    {
-        this._doSet(this.constructor.FLAGS.RIGHT_DOWN, yn);
+    set right_down(yn) {
+        this._doSet(InteractionTrackingData.FLAGS.RIGHT_DOWN, yn);
     }
 
     /**
      * Did the left mouse button come down in the Node2D?
      *
      * @member {boolean}
-     * @memberof V.interaction.InteractionTrackingData#
      */
-    get left_down()
-    {
-        return (this._flags & this.constructor.FLAGS.LEFT_DOWN) !== 0;
+    get left_down() {
+        return (this._flags & InteractionTrackingData.FLAGS.LEFT_DOWN) !== 0;
     }
 
     /**
@@ -135,15 +112,15 @@ export default class InteractionTrackingData
      *
      * @param {boolean} yn - Is the left mouse button down?
      */
-    set left_down(yn)
-    {
-        this._doSet(this.constructor.FLAGS.LEFT_DOWN, yn);
+    set left_down(yn) {
+        this._doSet(InteractionTrackingData.FLAGS.LEFT_DOWN, yn);
     }
 }
 
-InteractionTrackingData.FLAGS = Object.freeze({
+InteractionTrackingData.FLAGS = {
     NONE: 0,
     OVER: 1 << 0,
     LEFT_DOWN: 1 << 1,
     RIGHT_DOWN: 1 << 2,
-});
+}
+Object.freeze(InteractionTrackingData.FLAGS);

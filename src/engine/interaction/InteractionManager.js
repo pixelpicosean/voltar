@@ -131,9 +131,8 @@ export default class InteractionManager extends EventEmitter {
          * future versions of pixi.
          *
          * @member {boolean}
-         * @default false
          */
-        this.move_when_inside = false;
+        this.move_when_inside = true;
 
         /**
          * Have events been attached to the dom element?
