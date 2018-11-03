@@ -602,6 +602,8 @@ export default class Control extends Node2D {
         };
 
         this.blend_mode = BLEND_MODES.NORMAL;
+
+        this.hit_area = new Rectangle();
     }
     _load_data(data) {
         super._load_data(data);
@@ -668,6 +670,12 @@ export default class Control extends Node2D {
         this.transform.pivot.copy(this.data.pivot_offset);
 
         super.update_transform();
+
+        // Update hit area
+        this.hit_area.x = this.data.pos_cache.x - this.data.pivot_offset.x;
+        this.hit_area.y = this.data.pos_cache.y - this.data.pivot_offset.y;
+        this.hit_area.width = this.data.size_cache.x;
+        this.hit_area.height = this.data.size_cache.y;
     }
 
     /**
