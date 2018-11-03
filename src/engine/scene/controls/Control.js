@@ -672,8 +672,8 @@ export default class Control extends Node2D {
         super.update_transform();
 
         // Update hit area
-        this.hit_area.x = this.data.pos_cache.x - this.data.pivot_offset.x;
-        this.hit_area.y = this.data.pos_cache.y - this.data.pivot_offset.y;
+        this.hit_area.x = -this.data.pivot_offset.x;
+        this.hit_area.y = -this.data.pivot_offset.y;
         this.hit_area.width = this.data.size_cache.x;
         this.hit_area.height = this.data.size_cache.y;
     }
