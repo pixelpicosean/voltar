@@ -5,6 +5,8 @@ const {
 } = require('../utils');
 const { path_modifiers } = require('./registry');
 
+module.exports.Nullable = (value) => (value === 'null' ? undefined : value);
+
 module.exports.string = (str) => {
     if (_.isString(str) && str.length > 0) {
         if (str[0] === '"' && str.length >= 2) {
