@@ -1,5 +1,4 @@
 import Control from "./Control";
-import { Rectangle } from "engine/math/index";
 
 /**
  * @enum {number}
