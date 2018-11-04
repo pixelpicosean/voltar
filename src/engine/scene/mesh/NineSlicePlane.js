@@ -43,9 +43,9 @@ export default class NineSlicePlane extends Plane {
         this.type = 'NineSlicePlane';
 
         // @ts-ignore
-        this._orig_texture_width = texture.orig.width;
+        this._orig_texture_width = this._texture.orig.width;
         // @ts-ignore
-        this._orig_texture_height = texture.orig.height;
+        this._orig_texture_height = this._texture.orig.height;
 
         /**
          * The width of the NineSlicePlane, setting this will actually modify the vertices and UV's of this plane

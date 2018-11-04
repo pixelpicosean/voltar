@@ -946,11 +946,9 @@ export default class Node2D extends EventEmitter {
 
     /**
      * Sets a mask for the node. A mask is an object that limits the visibility of an
-     * object to the shape of the mask applied to it. In V a regular mask must be a
+     * object to the shape of the mask applied to it. In voltar a regular mask must be a
      * Graphics or a Sprite object. This allows for much faster masking in canvas as it
      * utilises shape clipping. To remove a mask, set this property to null.
-     *
-     * @todo For the moment, CanvasRenderer doesn't support Sprite as mask.
      *
      * @type {import('./graphics/Graphics').default|import('./sprites/Sprite').default}
      */

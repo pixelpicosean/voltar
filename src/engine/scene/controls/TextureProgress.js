@@ -9,6 +9,7 @@ import WebGLRenderer from "engine/renderers/WebGLRenderer";
 import Sprite from "../sprites/Sprite";
 import TilingSprite from "../sprites/TilingSprite";
 import NineSlicePlane from "../mesh/NineSlicePlane";
+import Graphics from "../graphics/Graphics";
 
 const tmp_vec = new Vector2();
 
@@ -370,6 +371,8 @@ export default class TextureProgress extends Range {
         this.mesh_under = new NineSlicePlane(Texture.WHITE);
         this.mesh_progress = new NineSlicePlane(Texture.WHITE);
         this.mesh_over = new NineSlicePlane(Texture.WHITE);
+
+        this.mesh_progress.mask = new Graphics();
     }
     _load_data(data) {
         super._load_data(data);
@@ -496,31 +499,36 @@ export default class TextureProgress extends Range {
                 this.mesh_progress.texture = this._texture_progress;
 
                 const s = tmp_vec.copy(this.rect_size);
+
+                this.mesh_progress._width = s.x;
+                this.mesh_progress._height = s.y;
+                this.mesh_progress._refresh();
+
+                /** @type {Graphics} */
+                // @ts-ignore
+                const mask = this.mesh_progress.mask;
+                mask.transform.set_from_matrix(this.transform.world_transform);
+                mask.clear().begin_fill(0xFFFFFF);
+
                 switch (this.fill_mode) {
                     case FillMode.LEFT_TO_RIGHT: {
-                        this.mesh_progress._width = Math.round(s.x * this.ratio);
-                        this.mesh_progress._height = Math.round(s.y);
+                        mask.draw_rect(0, 0, Math.round(s.x * this.ratio), Math.round(s.y));
                     } break;
                     case FillMode.RIGHT_TO_LEFT: {
-                        this.mesh_progress._width = Math.round(s.x * this.ratio);
-                        this.mesh_progress.x += Math.round(s.x * (1 - this.ratio));
-                        this.mesh_progress._height = Math.round(s.y);
+                        mask.draw_rect(Math.round(s.x * (1 - this.ratio)), 0, Math.round(s.x * this.ratio), Math.round(s.y));
                     } break;
                     case FillMode.TOP_TO_BOTTOM: {
-                        this.mesh_progress._width = Math.round(s.x);
-                        this.mesh_progress._height = Math.round(s.y * this.ratio);
+                        mask.draw_rect(0, 0, Math.round(s.x), Math.round(s.y * this.ratio));
                     } break;
                     case FillMode.BOTTOM_TO_TOP: {
-                        this.mesh_progress._width = Math.round(s.x);
-                        this.mesh_progress._height = Math.round(s.y * (1 - this.ratio));
+                        mask.draw_rect(0, Math.round(s.y * (1 - this.ratio)), Math.round(s.x), Math.round(s.y * this.ratio));
                     } break;
                     default: {
-                        this.mesh_progress._width = Math.round(s.x * this.ratio);
-                        this.mesh_progress._height = Math.round(s.y);
+                        mask.draw_rect(0, 0, Math.round(s.x * this.ratio), Math.round(s.y));
                     } break;
                 }
 
-                this.mesh_progress._refresh();
+                mask.end_fill();
 
                 // TODO: sync more properties for rendering
                 this.mesh_progress._update_transform();
@@ -528,7 +536,11 @@ export default class TextureProgress extends Range {
                 this.mesh_progress.alpha = this.alpha;
                 this.mesh_progress.blend_mode = this.blend_mode;
 
+                renderer.flush();
+                renderer.mask_manager.push_mask(this.mesh_progress, mask);
                 this.mesh_progress._render_webgl(renderer);
+                renderer.mask_manager.pop_mask(this.mesh_progress, mask);
+                renderer.flush();
             }
             if (this._texture_over && this._texture_over.valid) {
                 this.mesh_over.transform.set_from_matrix(this.transform.world_transform);
