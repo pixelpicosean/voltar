@@ -1,8 +1,7 @@
 const {
     int,
-    real,
     boolean,
-    Vector2,
+    Nullable,
 } = require('../parse_utils');
 
 const BaseButton = require('./BaseButton');
@@ -15,10 +14,10 @@ module.exports = (data) => {
     res.expand = boolean(data.prop.expand);
     res.stretch_mode = int(data.prop.stretch_mode);
 
-    res.texture_disabled = data.prop.texture_disabled;
-    res.texture_hover = data.prop.texture_hover;
-    res.texture_normal = data.prop.texture_normal;
-    res.texture_pressed = data.prop.texture_pressed;
+    res.texture_disabled = Nullable(data.prop.texture_disabled);
+    res.texture_hover = Nullable(data.prop.texture_hover);
+    res.texture_normal = Nullable(data.prop.texture_normal);
+    res.texture_pressed = Nullable(data.prop.texture_pressed);
 
     return res;
 };

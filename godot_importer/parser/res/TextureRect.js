@@ -1,8 +1,7 @@
 const {
     int,
-    real,
     boolean,
-    Vector2,
+    Nullable,
 } = require('../parse_utils');
 
 const Control = require('./Control');
@@ -12,7 +11,7 @@ module.exports = (data) => {
         type: 'TextureRect',
     });
 
-    res.texture = data.prop.texture;
+    res.texture = Nullable(data.prop.texture);
     res.expand = boolean(data.prop.expand);
     res.stretch_mode = int(data.prop.stretch_mode);
 
