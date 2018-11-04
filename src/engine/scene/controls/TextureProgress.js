@@ -8,6 +8,7 @@ import { Margin } from "./const";
 import WebGLRenderer from "engine/renderers/WebGLRenderer";
 import Sprite from "../sprites/Sprite";
 import TilingSprite from "../sprites/TilingSprite";
+import NineSlicePlane from "../mesh/NineSlicePlane";
 
 const tmp_vec = new Vector2();
 
@@ -365,6 +366,10 @@ export default class TextureProgress extends Range {
         this.sprite_under = new Sprite();
         this.sprite_progress = new TilingSprite();
         this.sprite_over = new Sprite();
+
+        this.mesh_under = new NineSlicePlane(Texture.WHITE);
+        this.mesh_progress = new NineSlicePlane(Texture.WHITE);
+        this.mesh_over = new NineSlicePlane(Texture.WHITE);
     }
     _load_data(data) {
         super._load_data(data);
@@ -425,6 +430,22 @@ export default class TextureProgress extends Range {
 
     set_stretch_margin(margin, size) {
         this.stretch_margin[margin] = size;
+
+        this.mesh_under.bottom_height = this.stretch_margin[Margin.Bottom];
+        this.mesh_under.left_width = this.stretch_margin[Margin.Left];
+        this.mesh_under.top_height = this.stretch_margin[Margin.Top];
+        this.mesh_under.right_width = this.stretch_margin[Margin.Right];
+
+        this.mesh_progress.bottom_height = this.stretch_margin[Margin.Bottom];
+        this.mesh_progress.left_width = this.stretch_margin[Margin.Left];
+        this.mesh_progress.top_height = this.stretch_margin[Margin.Top];
+        this.mesh_progress.right_width = this.stretch_margin[Margin.Right];
+
+        this.mesh_over.bottom_height = this.stretch_margin[Margin.Bottom];
+        this.mesh_over.left_width = this.stretch_margin[Margin.Left];
+        this.mesh_over.top_height = this.stretch_margin[Margin.Top];
+        this.mesh_over.right_width = this.stretch_margin[Margin.Right];
+
         this.minimum_size_changed();
     }
 
@@ -455,13 +476,75 @@ export default class TextureProgress extends Range {
     _render_webgl(renderer) {
         if (this._nine_patch_stretch && (this.fill_mode === FillMode.LEFT_TO_RIGHT || this.fill_mode === FillMode.RIGHT_TO_LEFT || this.fill_mode === FillMode.TOP_TO_BOTTOM || this.fill_mode === FillMode.BOTTOM_TO_TOP)) {
             if (this._texture_under && this._texture_under.valid) {
-                // TODO: draw nine patch stretched
+                this.mesh_under.transform.set_from_matrix(this.transform.world_transform);
+                this.mesh_under.texture = this._texture_under;
+
+                this.mesh_under._width = this.rect_size.x;
+                this.mesh_under._height = this.rect_size.y;
+                this.mesh_under._refresh();
+
+                // TODO: sync more properties for rendering
+                this.mesh_under._update_transform();
+                this.mesh_under.tint = this._tint_under.as_hex();
+                this.mesh_under.alpha = this.alpha;
+                this.mesh_under.blend_mode = this.blend_mode;
+
+                this.mesh_under._render_webgl(renderer);
             }
             if (this._texture_progress && this._texture_progress.valid) {
-                // TODO: draw nine patch stretched
+                this.mesh_progress.transform.set_from_matrix(this.transform.world_transform);
+                this.mesh_progress.texture = this._texture_progress;
+
+                const s = tmp_vec.copy(this.rect_size);
+                switch (this.fill_mode) {
+                    case FillMode.LEFT_TO_RIGHT: {
+                        this.mesh_progress._width = Math.round(s.x * this.ratio);
+                        this.mesh_progress._height = Math.round(s.y);
+                    } break;
+                    case FillMode.RIGHT_TO_LEFT: {
+                        this.mesh_progress._width = Math.round(s.x * this.ratio);
+                        this.mesh_progress.x += Math.round(s.x * (1 - this.ratio));
+                        this.mesh_progress._height = Math.round(s.y);
+                    } break;
+                    case FillMode.TOP_TO_BOTTOM: {
+                        this.mesh_progress._width = Math.round(s.x);
+                        this.mesh_progress._height = Math.round(s.y * this.ratio);
+                    } break;
+                    case FillMode.BOTTOM_TO_TOP: {
+                        this.mesh_progress._width = Math.round(s.x);
+                        this.mesh_progress._height = Math.round(s.y * (1 - this.ratio));
+                    } break;
+                    default: {
+                        this.mesh_progress._width = Math.round(s.x * this.ratio);
+                        this.mesh_progress._height = Math.round(s.y);
+                    } break;
+                }
+
+                this.mesh_progress._refresh();
+
+                // TODO: sync more properties for rendering
+                this.mesh_progress._update_transform();
+                this.mesh_progress.tint = this._tint_under.as_hex();
+                this.mesh_progress.alpha = this.alpha;
+                this.mesh_progress.blend_mode = this.blend_mode;
+
+                this.mesh_progress._render_webgl(renderer);
             }
             if (this._texture_over && this._texture_over.valid) {
-                // TODO: draw nine patch stretched
+                this.mesh_over.transform.set_from_matrix(this.transform.world_transform);
+                this.mesh_over.texture = this._texture_over;
+
+                this.mesh_over._width = this.rect_size.x;
+                this.mesh_over._height = this.rect_size.y;
+                this.mesh_over._refresh();
+
+                // TODO: sync more properties for rendering
+                this.mesh_over._update_transform();
+                this.mesh_over.tint = this._tint_under.as_hex();
+                this.mesh_over.alpha = this.alpha;
+                this.mesh_over.blend_mode = this.blend_mode;
+
+                this.mesh_over._render_webgl(renderer);
             }
         } else {
             if (this._texture_under && this._texture_under.valid) {
