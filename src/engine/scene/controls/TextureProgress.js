@@ -487,7 +487,9 @@ export default class TextureProgress extends Range {
                         this.sprite_progress.height = Math.round(s.y);
                     } break;
                     case FillMode.RIGHT_TO_LEFT: {
-                        this.sprite_progress.width = Math.round(s.x * (1 - this.ratio));
+                        this.sprite_progress.width = Math.round(s.x * this.ratio);
+                        this.sprite_progress.x += Math.round(s.x * (1 - this.ratio));
+                        this.sprite_progress.tile_position.x = -this.sprite_progress.x;
                         this.sprite_progress.height = Math.round(s.y);
                     } break;
                     case FillMode.TOP_TO_BOTTOM: {
@@ -496,7 +498,9 @@ export default class TextureProgress extends Range {
                     } break;
                     case FillMode.BOTTOM_TO_TOP: {
                         this.sprite_progress.width = Math.round(s.x);
-                        this.sprite_progress.height = Math.round(s.y * (1 - this.ratio));
+                        this.sprite_progress.y += Math.round(s.y * (1 - this.ratio));
+                        this.sprite_progress.tile_position.y = -this.sprite_progress.y;
+                        this.sprite_progress.height = Math.round(s.y * this.ratio);
                     } break;
                     case FillMode.CLOCKWISE:
                     case FillMode.COUNTER_CLOCKWISE:
@@ -505,11 +509,13 @@ export default class TextureProgress extends Range {
                     } break;
                     case FillMode.BILINEAR_LEFT_AND_RIGHT: {
                         this.sprite_progress.position.add(Math.round(s.x * 0.5 - s.x* this.ratio * 0.5), 0);
+                        this.sprite_progress.tile_position.copy(this.sprite_progress.position);
                         this.sprite_progress.width = Math.round(s.x * this.ratio);
                         this.sprite_progress.height = Math.round(s.y);
                     } break;
                     case FillMode.BILINEAR_TOP_AND_BOTTOM: {
                         this.sprite_progress.position.add(0, Math.round(s.y * 0.5 - s.y * this.ratio * 0.5));
+                        this.sprite_progress.tile_position.copy(this.sprite_progress.position);
                         this.sprite_progress.width = Math.round(s.y);
                         this.sprite_progress.height = Math.round(s.y * this.ratio);
                     } break;
