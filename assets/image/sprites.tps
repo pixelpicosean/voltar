@@ -302,6 +302,20 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">sprites/mask/radial_back.png</key>
+            <key type="filename">sprites/mask/radial_progress.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,4,9,9</rect>
+                <key>scale9Paddings</key>
+                <rect>4,4,9,9</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">sprites/title/pop.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>

@@ -38,6 +38,51 @@
                 "a": 1
             },
             "children": []
+        },
+        {
+            "type": "TextureProgress",
+            "name": "TextureProgress",
+            "anchor_bottom": 0,
+            "anchor_left": 0,
+            "anchor_top": 0,
+            "anchor_right": 0,
+            "margin_bottom": 174,
+            "margin_left": 165,
+            "margin_top": 157,
+            "margin_right": 182,
+            "rect_scale": {
+                "x": 8,
+                "y": 8
+            },
+            "rect_pivot_offset": {
+                "x": 0,
+                "y": 0
+            },
+            "rect_clip_content": false,
+            "mouse_default_cursor_shape": 0,
+            "size_flags_horizontal": 1,
+            "size_flags_vertical": 1,
+            "exp_edit": false,
+            "max_value": 100,
+            "min_value": 0,
+            "page": 0,
+            "rounded": false,
+            "step": 1,
+            "value": 25,
+            "texture_under": "mask/radial_back",
+            "texture_progress": "mask/radial_progress",
+            "fill_mode": 4,
+            "nine_patch_stretch": false,
+            "radial_center_offset": {
+                "x": 0,
+                "y": 0
+            },
+            "radial_fill_degrees": 360,
+            "stretch_margin_bottom": 9,
+            "stretch_margin_left": 9,
+            "stretch_margin_top": 9,
+            "stretch_margin_right": 9,
+            "children": []
         }
     ]
 }
