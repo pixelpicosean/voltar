@@ -25,7 +25,6 @@ export const FillMode = {
     COUNTER_CLOCKWISE: 5,
     BILINEAR_LEFT_AND_RIGHT: 6,
     BILINEAR_TOP_AND_BOTTOM: 7,
-    CLOCKWISE_AND_COUNTER_CLOCKWISE: 8,
 }
 
 export default class TextureProgress extends Range {
@@ -372,7 +371,9 @@ export default class TextureProgress extends Range {
         this.mesh_progress = new NineSlicePlane(Texture.WHITE);
         this.mesh_over = new NineSlicePlane(Texture.WHITE);
 
-        this.mesh_progress.mask = new Graphics();
+        this.render_mask = new Graphics();
+        this.render_mask.renderable = false;
+        this.render_mask.is_mask = true;
     }
     _load_data(data) {
         super._load_data(data);
@@ -504,9 +505,7 @@ export default class TextureProgress extends Range {
                 this.mesh_progress._height = s.y;
                 this.mesh_progress._refresh();
 
-                /** @type {Graphics} */
-                // @ts-ignore
-                const mask = this.mesh_progress.mask;
+                const mask = this.render_mask;
                 mask.transform.set_from_matrix(this.transform.world_transform);
                 mask.clear().begin_fill(0xFFFFFF);
 
@@ -575,6 +574,8 @@ export default class TextureProgress extends Range {
                 this.sprite_progress.transform.set_from_matrix(this.transform.world_transform);
                 this.sprite_progress.texture = this._texture_progress;
 
+                let mask;
+
                 const s = tmp_vec.set(this._texture_progress.width, this._texture_progress.height);
                 switch (this.fill_mode) {
                     case FillMode.LEFT_TO_RIGHT: {
@@ -598,9 +599,29 @@ export default class TextureProgress extends Range {
                         this.sprite_progress.height = Math.round(s.y * this.ratio);
                     } break;
                     case FillMode.CLOCKWISE:
-                    case FillMode.COUNTER_CLOCKWISE:
-                    case FillMode.CLOCKWISE_AND_COUNTER_CLOCKWISE: {
-                        // TODO: radial progress rendering
+                    case FillMode.COUNTER_CLOCKWISE: {
+                        this.sprite_progress.width = s.x;
+                        this.sprite_progress.height = s.y;
+
+                        mask = this.render_mask;
+                        mask.transform.set_from_matrix(this.transform.world_transform);
+                        mask.position.add(s.x * 0.5 * this.rect_scale.x, s.y * 0.5 * this.rect_scale.y);
+                        mask._update_transform();
+
+                        const rr = s.x > s.y ? s.x : s.y;
+                        const r = rr * 0.5;
+                        mask.clear().begin_fill(0xFFFFFF);
+                        if (this.ratio === 1) {
+                            mask.draw_circle(0, 0, r);
+                        } else {
+                            mask.move_to(0, 0)
+                            if (this.fill_mode === FillMode.COUNTER_CLOCKWISE) {
+                                mask.arc(0, 0, r, -Math.PI * 0.5, (1 - this.ratio) * Math.PI * 2 - Math.PI * 0.5, true)
+                            } else {
+                                mask.arc(0, 0, r, -Math.PI * 0.5, this.ratio * Math.PI * 2 - Math.PI * 0.5, false)
+                            }
+                        }
+                        mask.end_fill();
                     } break;
                     case FillMode.BILINEAR_LEFT_AND_RIGHT: {
                         this.sprite_progress.position.add(Math.round(s.x * 0.5 - s.x* this.ratio * 0.5), 0);
@@ -626,7 +647,15 @@ export default class TextureProgress extends Range {
                 this.sprite_progress.alpha = this.alpha;
                 this.sprite_progress.blend_mode = this.blend_mode;
 
-                this.sprite_progress._render_webgl(renderer);
+                if (mask) {
+                    renderer.flush();
+                    renderer.mask_manager.push_mask(this.sprite_progress, mask);
+                    this.sprite_progress._render_webgl(renderer);
+                    renderer.mask_manager.pop_mask(this.sprite_progress, mask);
+                    renderer.flush();
+                } else {
+                    this.sprite_progress._render_webgl(renderer);
+                }
             }
             if (this._texture_over && this._texture_over.valid) {
                 this.sprite_over.transform.set_from_matrix(this.transform.world_transform);
