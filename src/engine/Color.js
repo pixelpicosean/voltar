@@ -1,3 +1,5 @@
+import { rgb2hex } from "./utils/index";
+
 const NOOP = () => {};
 
 export default class Color {
@@ -71,5 +73,9 @@ export default class Color {
         this.cb.call(this.scope, this._rgb);
 
         return this;
+    }
+
+    as_hex() {
+        return rgb2hex(this._rgb);
     }
 };
