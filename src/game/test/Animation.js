@@ -24,7 +24,7 @@ export default class AnimationTest extends v.Node2D {
         // @ts-ignore
         tween.interpolate_property(icon, 'position.x', 150, 50, 1, 'Quadratic.InOut', 3);
         tween.interpolate_property(icon, 'tint', 0x000000, 0xFFFFFF, 2, 'Quadratic.InOut', 2);
-        tween.tween_completed.add((key) => {
+        tween.connect('tween_completed', (key) => {
             console.log(`animation [${key}] end`);
         });
         tween.interpolate_method(this, 'fly', 0, 100, 5, 'Quadratic.InOut');
