@@ -5,14 +5,15 @@ class CustomArea extends v.Area2D {
     constructor(ext_x, ext_y) {
         super();
 
-        this.set_shape(new v.RectangleShape2D(ext_x, ext_y));
+        this.add_shape(new v.RectangleShape2D(ext_x, ext_y));
+        this.set_collision_layer_bit(0, false);
         this.set_collision_layer_bit(1, true);
         this.set_collision_mask_bit(2, true);
 
         this._debug_shape = new v.Graphics();
         this._debug_shape.clear();
         this._debug_shape.begin_fill(0xffffff);
-        this._debug_shape.draw_rect(-this._shape.extents.x, -this._shape.extents.y, this._shape.extents.x * 2, this._shape.extents.y * 2);
+        this._debug_shape.draw_rect(-this.shapes[0].extents.x, -this.shapes[0].extents.y, this.shapes[0].extents.x * 2, this.shapes[0].extents.y * 2);
         this._debug_shape.end_fill();
         this.add_child(this._debug_shape);
 
@@ -40,30 +41,32 @@ class CustomArea2 extends v.Area2D {
     constructor() {
         super();
 
-        this.set_shape(new v.RectangleShape2D(16, 16));
+        this.add_shape(new v.RectangleShape2D(16, 16));
+        this.set_collision_layer_bit(0, false);
         this.set_collision_layer_bit(2, true);
 
         this._debug_shape = new v.Graphics();
         this._debug_shape.clear();
         this._debug_shape.begin_fill(0xffffff);
-        this._debug_shape.draw_rect(-this._shape.extents.x, -this._shape.extents.y, this._shape.extents.x * 2, this._shape.extents.y * 2);
+        this._debug_shape.draw_rect(-this.shapes[0].extents.x, -this.shapes[0].extents.y, this.shapes[0].extents.x * 2, this.shapes[0].extents.y * 2);
         this._debug_shape.end_fill();
         this.add_child(this._debug_shape);
     }
 }
 
 
-class StaticBody extends v.PhysicsBody2D {
+class StaticBody extends v.StaticBody2D {
     constructor() {
         super();
 
-        this.set_shape(new v.RectangleShape2D(40, 20));
+        this.add_shape(new v.RectangleShape2D(40, 20));
+        this.set_collision_layer_bit(0, false);
         this.set_collision_layer_bit(2, true);
 
         this._debug_shape = new v.Graphics();
         this._debug_shape.clear();
         this._debug_shape.begin_fill(0xffffff);
-        this._debug_shape.draw_rect(-this._shape.extents.x, -this._shape.extents.y, this._shape.extents.x * 2, this._shape.extents.y * 2);
+        this._debug_shape.draw_rect(-this.shapes[0].extents.x, -this.shapes[0].extents.y, this.shapes[0].extents.x * 2, this.shapes[0].extents.y * 2);
         this._debug_shape.end_fill();
         this.add_child(this._debug_shape);
     }
@@ -73,40 +76,35 @@ class StaticBody extends v.PhysicsBody2D {
 }
 
 
-class CustomBody extends v.PhysicsBody2D {
+class CustomBody extends v.KinematicBody2D {
     constructor() {
         super();
 
         this.velocity = new v.Vector2(0, 0);
 
-        this.set_shape(new v.RectangleShape2D(10, 10));
+        this.add_shape(new v.RectangleShape2D(10, 10));
+        this.set_collision_layer_bit(0, false);
         this.set_collision_layer_bit(3, true);
         this.set_collision_mask_bit(2, true);
 
         this._debug_shape = new v.Graphics();
         this._debug_shape.clear();
         this._debug_shape.begin_fill(0xffffff);
-        this._debug_shape.draw_rect(-this._shape.extents.x, -this._shape.extents.y, this._shape.extents.x * 2, this._shape.extents.y * 2);
+        this._debug_shape.draw_rect(-this.shapes[0].extents.x, -this.shapes[0].extents.y, this.shapes[0].extents.x * 2, this.shapes[0].extents.y * 2);
         this._debug_shape.end_fill();
         this.add_child(this._debug_shape);
     }
     _ready() {
-        this.set_process(true);
+        this.set_physics_process(true);
     }
-    _process(delta) {
+    _physics_process(delta) {
         this.velocity.y += 40 * delta;
 
-        this.x += this.velocity.x * delta;
-        this.y += this.velocity.y * delta;
-    }
-
-    _collide_body(body, res) {
-        // this.velocity.slide(res.overlap_n);
-        this.velocity.bounce(res.overlap_n);
-
-        this.add_collision_exception_with(body);
-
-        return true;
+        const c = this.move_and_collide({ x: this.velocity.x * delta, y: this.velocity.y * delta });
+        if (c) {
+            this.velocity.bounce(c.normal);
+            this.add_collision_exception_with(c.collider);
+        }
     }
 }
 
