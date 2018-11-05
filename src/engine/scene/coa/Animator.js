@@ -1,4 +1,4 @@
-import { Signal } from 'engine/dep/index';
+import { EventEmitter } from 'engine/dep/index';
 import Sprite from '../sprites/Sprite';
 import Node2D from '../Node2D';
 
@@ -6,13 +6,13 @@ import { Entity, Animation, Obj } from './Model';
 import { FrameData, frame_data_calculator } from './FrameData';
 import { TextureProvider, object_provider } from './Provider';
 
-export default class Animator {
+export default class Animator extends EventEmitter {
     /**
      * @param {Entity} entity
      * @param {Node2D} node
      */
     constructor(entity, node) {
-        this.animation_finished = new Signal();
+        super();
 
         /**
          * @type {Entity}
@@ -165,7 +165,7 @@ export default class Animator {
                 this.time = 0;
             }
             if (this.time !== initial_time) {
-                this.animation_finished.dispatch(this.name);
+                this.emit_signal('animation_finished', this.name);
             }
         }
         else if (this.time >= this.length) {
@@ -176,7 +176,7 @@ export default class Animator {
                 this.time = this.length;
             }
             if (this.time !== initial_time) {
-                this.animation_finished.dispatch(this.name);
+                this.emit_signal('animation_finished', this.name);
             }
         }
 

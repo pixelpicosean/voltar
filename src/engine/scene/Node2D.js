@@ -2,7 +2,8 @@
 
 import { node_plugins, alternative } from 'engine/registry';
 import {
-    EventEmitter, Signal,
+    EventEmitter,
+    Signal,
     remove_items,
 } from 'engine/dep/index';
 import {
@@ -303,9 +304,6 @@ export default class Node2D extends EventEmitter {
          */
         this.cursor = null;
         this.button_mode = false;
-
-        this.tree_entered = new Signal();
-        this.tree_exited = new Signal();
     }
 
     /**
@@ -1065,7 +1063,7 @@ export default class Node2D extends EventEmitter {
 
         this._enter_tree();
 
-        this.tree_entered.dispatch();
+        this.emit_signal('tree_entered');
 
         for (let i = 0, l = this.children.length; i < l; i++) {
             this.children[i].scene_tree = this.scene_tree;
@@ -1116,7 +1114,7 @@ export default class Node2D extends EventEmitter {
 
         this._exit_tree();
 
-        this.tree_exited.dispatch();
+        this.emit_signal('tree_exited');
 
         // Reset flags
         this._is_ready = false;

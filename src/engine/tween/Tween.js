@@ -1,4 +1,4 @@
-import { Signal, remove_items } from 'engine/dep/index';
+import { EventEmitter, remove_items } from 'engine/dep/index';
 import { Vector2, clamp } from 'engine/math/index';
 import flatten_key_url from './flatten_key_url';
 import { Easing } from './easing';
@@ -141,12 +141,9 @@ const create_interpolate = () => {
 };
 
 // TODO: better easing support (https://github.com/rezoner/ease)
-export default class Tween {
+export default class Tween extends EventEmitter {
     constructor() {
-        this.tween_completed = new Signal();
-        this.tween_started = new Signal();
-        this.tween_step = new Signal();
-
+        super();
 
         this.is_removed = false;
 
@@ -779,9 +776,9 @@ export default class Tween {
      * @returns {this}
      */
     clear_events() {
-        this.tween_completed.detachAll();
-        this.tween_started.detachAll();
-        this.tween_step.detachAll();
+        this.disconnect_all('tween_completed');
+        this.disconnect_all('tween_started');
+        this.disconnect_all('tween_step');
 
         return this;
     }
@@ -851,7 +848,7 @@ export default class Tween {
                 continue;
             }
             else if (prev_delaying) {
-                this.tween_started.dispatch(data.flat_key);
+                this.emit_signal('tween_started', data.flat_key);
                 this._apply_tween_value(data, data.initial_val);
             }
 
@@ -868,7 +865,7 @@ export default class Tween {
             case TARGETING_PROPERTY:
             case TARGETING_METHOD: {
                 let result = this._run_equation(data);
-                this.tween_step.dispatch(data.key, data.elapsed, result);
+                this.emit_signal('tween_step', data.key, data.elapsed, result);
                 this._apply_tween_value(data, result);
                 if (data.finish) {
                     this._apply_tween_value(data, data.final_val);
@@ -888,7 +885,7 @@ export default class Tween {
             }
 
             if (data.finish) {
-                this.tween_completed.dispatch(data.key);
+                this.emit_signal('tween_completed', data.key);
             }
         }
     }

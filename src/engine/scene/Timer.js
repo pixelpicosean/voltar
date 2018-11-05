@@ -1,15 +1,9 @@
 import Node2D from './Node2D';
-import { Signal } from 'engine/dep/index';
-
+import { node_class_map } from 'engine/registry';
 
 export default class Timer extends Node2D {
     constructor() {
         super();
-
-
-        // Signal
-        this.timeout = new Signal();
-
 
         // Properties
         this.wait_time = 1;
@@ -97,7 +91,7 @@ export default class Timer extends Node2D {
                     this.stop();
                 }
 
-                this.timeout.dispatch();
+                this.emit_signal('timeout');
             }
         }
 
@@ -108,3 +102,5 @@ export default class Timer extends Node2D {
         }
     }
 }
+
+node_class_map['Timer'] = Timer;

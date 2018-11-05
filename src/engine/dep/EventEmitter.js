@@ -159,6 +159,11 @@ EventEmitter.prototype.get_signal_connection_count = function get_signal_connect
  * Calls each of the listeners registered for a given event.
  *
  * @param {(String|Symbol)} event The event name.
+ * @param {any} [a1]
+ * @param {any} [a2]
+ * @param {any} [a3]
+ * @param {any} [a4]
+ * @param {any} [a5]
  * @returns {Boolean} `true` if the event had listeners, else `false`.
  * @public
  */

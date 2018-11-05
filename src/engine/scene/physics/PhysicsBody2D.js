@@ -32,7 +32,7 @@ export default class PhysicsBody2D extends CollisionObject2D {
     add_collision_exception_with(body) {
         if (this.collision_exceptions.indexOf(body) < 0) {
             this.collision_exceptions.push(body);
-            body.tree_exited.once(this._collision_exception_freed.bind(this, body));
+            body.tree_exited.connect_once(this._collision_exception_freed.bind(this, body));
         }
     }
 

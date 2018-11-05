@@ -1,7 +1,6 @@
 import { TextureCache, SpriteFramesCache } from 'engine/utils/index';
 import { Rectangle } from 'engine/math/index';
 import remove_items from 'remove-array-items';
-import { Signal } from 'engine/dep/index';
 import Texture from 'engine/textures/Texture';
 import Sprite from './Sprite';
 
@@ -32,7 +31,7 @@ function normalize_frame_list(frames) {
 /**
  * Create textures for tiles in a tileset. Can also be used to extract
  * grid based sprite-sheets.
- * @param  {Texture} tilesetp   Tileset texture.
+ * @param  {Texture} tileset    Tileset texture.
  * @param  {Number} width       Width of a single tile.
  * @param  {Number} height      Height of a single tile.
  * @return {Array<Texture>}     List of textures.
@@ -189,9 +188,6 @@ export default class AnimatedSprite extends Sprite {
         this.frame = 0;
 
         this.timeout = 0;
-
-        this.animation_finished = new Signal();
-        this.frame_changed = new Signal();
     }
     _load_data(data) {
         super._load_data(data);
@@ -263,7 +259,7 @@ export default class AnimatedSprite extends Sprite {
         this.frame = frame;
         this._reset_timeout();
         this._update_texture();
-        this.frame_changed.dispatch();
+        this.emit_signal('frame_changed');
     }
     get_sprite_frames() {
         return this.frames;
@@ -353,7 +349,7 @@ export default class AnimatedSprite extends Sprite {
                 else {
                     this.frame++;
                     if (this.frame === fc - 1) {
-                        this.animation_finished.dispatch();
+                        this.emit_signal('animation_finished');
                     }
                 }
 
@@ -391,7 +387,7 @@ export default class AnimatedSprite extends Sprite {
     /**
      * Stops the AnimatedSprite and destroys it
      *
-     * @param {import('./Sprite').DestroyOption|boolean} [options] - Options parameter. A boolean will act as if all options
+     * @param {import('../Node2D').DestroyOption|boolean} [options] - Options parameter. A boolean will act as if all options
      *  have been set to that value
      */
     destroy(options) {

@@ -425,8 +425,6 @@ export default class AnimationPlayer extends Node2D {
          */
         this.has_transform = false;
 
-        this.animation_changed = new Signal();
-
         this.autoplay = '';
         this.playback_speed = 1;
         this.root_node = '..';
