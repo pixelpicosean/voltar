@@ -43,11 +43,6 @@ export default class ParticleNode2D extends Node2D {
 
         this.type = 'ParticleNode2D';
 
-        /**
-         * @type {import('engine/index').Sprite[]}
-         */
-        this.children;
-
         // Making sure the batch size is valid
         // 65535 is max vertex index in the index buffer (see ParticleRenderer)
         // so max number of particles is 65536 / 4 = 16384

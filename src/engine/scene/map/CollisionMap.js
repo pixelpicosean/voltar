@@ -87,10 +87,10 @@ export default class CollisionMap extends Node2D {
         }
 
         // Notify the physics server that collision map is entered/exited
-        this.tree_entered.add(() => {
+        this.connect('tree_entered', () => {
             this.scene_tree.physics_server.add_collision_map(this);
         });
-        this.tree_exited.add(() => {
+        this.connect('tree_exited', () => {
             this.scene_tree.physics_server.remove_collision_map(this);
         });
     }

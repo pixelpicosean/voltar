@@ -5,7 +5,6 @@ import SystemRenderer from '../renderers/SystemRenderer';
 import Node2D from '../scene/Node2D';
 import { Rectangle } from '../math/index';
 import WebGLRenderer from 'engine/renderers/WebGLRenderer';
-import CanvasRenderer from 'engine/renderers/canvas/CanvasRenderer';
 
 
 // add some extra variables to the container..
@@ -41,6 +40,7 @@ export default class AccessibilityManager {
      * @param {SystemRenderer} renderer - A reference to the current renderer
      */
     constructor(renderer) {
+        // @ts-ignore
         if ((device.tablet || device.phone) && !navigator.isCocoonJS) {
             this.create_touch_hook();
         }

@@ -532,10 +532,10 @@ export default class Text extends Sprite {
      * Note* Unlike a Sprite, a Text object will automatically destroy its base_texture and texture as
      * the majority of the time the texture will not be shared with any other Sprites.
      *
-     * @param {import('../sprites/Sprite').DestroyOption|boolean} [options] - Options parameter. A boolean will act as if all options
+     * @param {import('../Node2D').DestroyOption|boolean} [options] - Options parameter. A boolean will act as if all options
      *  have been set to that value
      */
-    destroy() {
+    destroy(options) {
         if (typeof options === 'boolean') {
             options = { children: options };
         }
