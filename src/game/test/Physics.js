@@ -5,7 +5,8 @@ class CustomArea extends v.Area2D {
     constructor(ext_x, ext_y) {
         super();
 
-        this.add_shape(new v.RectangleShape2D(ext_x, ext_y));
+        const shape = new v.RectangleShape2D(ext_x, ext_y);
+        this.add_shape(shape);
         this.set_collision_layer_bit(0, false);
         this.set_collision_layer_bit(1, true);
         this.set_collision_mask_bit(2, true);
@@ -13,7 +14,7 @@ class CustomArea extends v.Area2D {
         this._debug_shape = new v.Graphics();
         this._debug_shape.clear();
         this._debug_shape.begin_fill(0xffffff);
-        this._debug_shape.draw_rect(-this.shapes[0].extents.x, -this.shapes[0].extents.y, this.shapes[0].extents.x * 2, this.shapes[0].extents.y * 2);
+        this._debug_shape.draw_rect(-shape.extents.x, -shape.extents.y, shape.extents.x * 2, shape.extents.y * 2);
         this._debug_shape.end_fill();
         this.add_child(this._debug_shape);
 
@@ -41,14 +42,15 @@ class CustomArea2 extends v.Area2D {
     constructor() {
         super();
 
-        this.add_shape(new v.RectangleShape2D(16, 16));
+        const shape = new v.RectangleShape2D(16, 16);
+        this.add_shape(shape);
         this.set_collision_layer_bit(0, false);
         this.set_collision_layer_bit(2, true);
 
         this._debug_shape = new v.Graphics();
         this._debug_shape.clear();
         this._debug_shape.begin_fill(0xffffff);
-        this._debug_shape.draw_rect(-this.shapes[0].extents.x, -this.shapes[0].extents.y, this.shapes[0].extents.x * 2, this.shapes[0].extents.y * 2);
+        this._debug_shape.draw_rect(-shape.extents.x, -shape.extents.y, shape.extents.x * 2, shape.extents.y * 2);
         this._debug_shape.end_fill();
         this.add_child(this._debug_shape);
     }
@@ -59,14 +61,15 @@ class StaticBody extends v.StaticBody2D {
     constructor() {
         super();
 
-        this.add_shape(new v.RectangleShape2D(40, 20));
+        const shape = new v.RectangleShape2D(40, 20);
+        this.add_shape(shape);
         this.set_collision_layer_bit(0, false);
         this.set_collision_layer_bit(2, true);
 
         this._debug_shape = new v.Graphics();
         this._debug_shape.clear();
         this._debug_shape.begin_fill(0xffffff);
-        this._debug_shape.draw_rect(-this.shapes[0].extents.x, -this.shapes[0].extents.y, this.shapes[0].extents.x * 2, this.shapes[0].extents.y * 2);
+        this._debug_shape.draw_rect(-shape.extents.x, -shape.extents.y, shape.extents.x * 2, shape.extents.y * 2);
         this._debug_shape.end_fill();
         this.add_child(this._debug_shape);
     }
@@ -82,7 +85,8 @@ class CustomBody extends v.KinematicBody2D {
 
         this.velocity = new v.Vector2(0, 0);
 
-        this.add_shape(new v.RectangleShape2D(10, 10));
+        const shape = new v.RectangleShape2D(10, 10)
+        this.add_shape(shape);
         this.set_collision_layer_bit(0, false);
         this.set_collision_layer_bit(3, true);
         this.set_collision_mask_bit(2, true);
@@ -90,7 +94,7 @@ class CustomBody extends v.KinematicBody2D {
         this._debug_shape = new v.Graphics();
         this._debug_shape.clear();
         this._debug_shape.begin_fill(0xffffff);
-        this._debug_shape.draw_rect(-this.shapes[0].extents.x, -this.shapes[0].extents.y, this.shapes[0].extents.x * 2, this.shapes[0].extents.y * 2);
+        this._debug_shape.draw_rect(-shape.extents.x, -shape.extents.y, shape.extents.x * 2, shape.extents.y * 2);
         this._debug_shape.end_fill();
         this.add_child(this._debug_shape);
     }

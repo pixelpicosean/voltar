@@ -6,11 +6,12 @@ const SOLID = 1;
 const HERO = 2;
 const ENEMY = 3;
 
-class Me extends v.PhysicsBody2D {
+class Me extends v.KinematicBody2D {
     constructor() {
         super();
 
-        this.set_shape(new v.RectangleShape2D(6, 12));
+        this.add_shape(new v.RectangleShape2D(6, 12));
+        this.set_collision_layer_bit(0, false);
         this.set_collision_layer_bit(HERO, true);
         this.set_collision_mask_bit(SOLID, true);
 
@@ -43,7 +44,7 @@ class Me extends v.PhysicsBody2D {
         this.motion = new v.Vector2();
     }
     _ready() {
-        this.set_process(true);
+        this.set_physics_process(true);
 
         v.input.bind('A', 'left');
         v.input.bind('D', 'right');
@@ -52,7 +53,7 @@ class Me extends v.PhysicsBody2D {
 
         this.gfx.play('idle');
     }
-    _process(delta) {
+    _physics_process(delta) {
         if (v.input.is_action_just_pressed('jump')) {
             this.velocity.y = -280;
         }
@@ -79,19 +80,7 @@ class Me extends v.PhysicsBody2D {
             this.gfx.play('idle');
         }
 
-        this.move(this.motion.copy(this.velocity).scale(delta));
-    }
-    _collide_map(res) {
-        if (res.collision.slope || res.collision.y) {
-            res.remainder.y = 0;
-            this.velocity.y = 0;
-        }
-        this.position.copy(res.position)
-            .add(res.remainder.slide(res.normal));
-
-        if (v.input.is_action_pressed('down') && res.tile.y === 12) {
-            this.position.y += 1;
-        }
+        this.move_and_collide(this.motion.copy(this.velocity).scale(delta));
     }
 }
 
