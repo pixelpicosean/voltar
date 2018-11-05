@@ -442,7 +442,7 @@ export default class Sprite extends Node2D {
     destroy(options) {
         super.destroy();
 
-        this._texture.off('update', this._on_texture_update, this);
+        this._texture.disconnect('update', this._on_texture_update, this);
 
         this._anchor = null;
 
@@ -610,7 +610,7 @@ export default class Sprite extends Node2D {
         if (value.base_texture.has_loaded) {
             this._on_texture_update();
         } else {
-            value.once('update', this._on_texture_update, this);
+            value.connect_once('update', this._on_texture_update, this);
         }
     }
 

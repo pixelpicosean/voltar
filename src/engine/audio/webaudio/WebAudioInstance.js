@@ -1,4 +1,4 @@
-import EventEmitter from 'eventemitter3';
+import { EventEmitter } from 'engine/dep/index';
 import WebAudioUtils from "./WebAudioUtils";
 import WebAudioMedia from './WebAudioMedia';
 
@@ -133,7 +133,7 @@ export default class WebAudioInstance extends EventEmitter {
         if (this._source) {
             this._internalStop();
 
-            this.emit("stop");
+            this.emit_signal("stop");
         }
     }
     /**
@@ -217,10 +217,10 @@ export default class WebAudioInstance extends EventEmitter {
                 // pause the sounds
                 this._internalStop();
 
-                this.emit("paused");
+                this.emit_signal("paused");
             }
             else {
-                this.emit("resumed");
+                this.emit_signal("resumed");
 
                 // resume the playing with offset
                 this.play({
@@ -232,7 +232,7 @@ export default class WebAudioInstance extends EventEmitter {
                 });
             }
 
-            this.emit("pause", pausedReal);
+            this.emit_signal("pause", pausedReal);
         }
     }
     /**
@@ -278,7 +278,7 @@ export default class WebAudioInstance extends EventEmitter {
             this._source.start(0, start);
         }
 
-        this.emit("start");
+        this.emit_signal("start");
 
         // Do an update for the initial progress
         this._update(true);
@@ -334,7 +334,7 @@ export default class WebAudioInstance extends EventEmitter {
      * Don't use after this.
      */
     destroy() {
-        this.removeAllListeners();
+        this.disconnect_all();
         this._internalStop();
         if (this._source) {
             this._source.disconnect();
@@ -394,7 +394,7 @@ export default class WebAudioInstance extends EventEmitter {
                 // Update the progress
                 this._progress = progress;
 
-                this.emit("progress", this._progress, duration);
+                this.emit_signal("progress", this._progress, duration);
             }
         }
     }
@@ -430,8 +430,8 @@ export default class WebAudioInstance extends EventEmitter {
         }
         this._source = null;
         this._progress = 1;
-        this.emit("progress", 1, this._duration);
+        this.emit_signal("progress", 1, this._duration);
 
-        this.emit("end", this);
+        this.emit_signal("end", this);
     }
 }

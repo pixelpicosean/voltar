@@ -41,7 +41,7 @@ export default class TextureRect extends Control {
         if (this._texture.base_texture.has_loaded) {
             this._on_texture_update();
         } else {
-            this._texture.once('update', this._on_texture_update, this);
+            this._texture.connect_once('update', this._on_texture_update, this);
         }
     }
     /**

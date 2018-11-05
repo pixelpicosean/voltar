@@ -64,7 +64,7 @@ export default class FilterManager extends WebGLManager {
          */
         this.managed_filters = [];
 
-        this.renderer.on('prerender', this.on_pre_render, this);
+        this.renderer.connect('prerender', this.on_pre_render, this);
 
         this._screen_width = renderer.view.width;
         this._screen_height = renderer.view.height;
@@ -482,7 +482,7 @@ export default class FilterManager extends WebGLManager {
         const renderer = this.renderer;
         const filters = this.managed_filters;
 
-        renderer.off('prerender', this.on_pre_render, this);
+        renderer.disconnect('prerender', this.on_pre_render, this);
 
         for (let i = 0; i < filters.length; i++) {
             if (!context_lost) {

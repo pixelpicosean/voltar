@@ -271,7 +271,7 @@ export default class BaseTexture extends EventEmitter {
             this._update_dimensions();
         }
 
-        this.emit('update', this);
+        this.emit_signal('update', this);
     }
 
     /**
@@ -333,7 +333,7 @@ export default class BaseTexture extends EventEmitter {
 
             if (first_source_loaded) {
                 // send loaded event if previous source was null and we have been passed a pre-loaded IMG element
-                this.emit('loaded', this);
+                this.emit_signal('loaded', this);
             }
         // @ts-ignore
         } else if (!source.getContext) {
@@ -360,7 +360,7 @@ export default class BaseTexture extends EventEmitter {
                     return;
                 }
 
-                scope.emit('loaded', scope);
+                scope.emit_signal('loaded', scope);
             };
 
             source.onerror = () => {
@@ -372,7 +372,7 @@ export default class BaseTexture extends EventEmitter {
                 }
 
                 scope.is_loading = false;
-                scope.emit('error', scope);
+                scope.emit_signal('error', scope);
             };
 
             // Per http://www.w3.org/TR/html5/embedded-content-0.html#the-img-element
@@ -398,12 +398,12 @@ export default class BaseTexture extends EventEmitter {
 
                     // If any previous subscribers possible
                     if (was_loading) {
-                        this.emit('loaded', this);
+                        this.emit_signal('loaded', this);
                     }
                 }
                 // If any previous subscribers possible
                 else if (was_loading) {
-                    this.emit('error', this);
+                    this.emit_signal('error', this);
                 }
             }
         }
@@ -501,7 +501,7 @@ export default class BaseTexture extends EventEmitter {
             this._load_svg_source_using_string(svg_xhr.response);
         };
 
-        svg_xhr.onerror = () => this.emit('error', this);
+        svg_xhr.onerror = () => this.emit_signal('error', this);
 
         svg_xhr.open('GET', this.image_url, true);
         svg_xhr.send();
@@ -553,7 +553,7 @@ export default class BaseTexture extends EventEmitter {
 
         this.is_loading = false;
         this._source_loaded();
-        this.emit('loaded', this);
+        this.emit_signal('loaded', this);
     }
 
     /**
@@ -602,7 +602,7 @@ export default class BaseTexture extends EventEmitter {
      * @fires BaseTexture#dispose
      */
     dispose() {
-        this.emit('dispose', this);
+        this.emit_signal('dispose', this);
     }
 
     /**

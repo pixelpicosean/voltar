@@ -17,7 +17,7 @@ export default class HTMLAudioContext extends EventEmitter {
      * @private
      */
     refresh() {
-        this.emit('refresh');
+        this.emit_signal('refresh');
     }
     /**
      * Internal trigger paused changes
@@ -25,7 +25,7 @@ export default class HTMLAudioContext extends EventEmitter {
      * @private
      */
     refreshPaused() {
-        this.emit('refreshPaused');
+        this.emit_signal('refreshPaused');
     }
     /**
      * HTML Audio does not support filters, this is non-functional API.
@@ -76,6 +76,6 @@ export default class HTMLAudioContext extends EventEmitter {
      * @method HTMLAudioContext#destroy
      */
     destroy() {
-        this.removeAllListeners();
+        this.disconnect_all();
     }
 }

@@ -31,7 +31,7 @@ export default class NinePatchRect extends Control {
         this._texture = this.mesh.texture;
 
         this.minimum_size_changed();
-        this.emit('texture_changed');
+        this.emit_signal('texture_changed');
     }
     /**
      * @param {string|Texture} value

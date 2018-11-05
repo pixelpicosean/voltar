@@ -23,7 +23,7 @@ export default {
      * @example
      * const sprite = new Sprite(texture);
      * sprite.interactive = true;
-     * sprite.on('tap', (event) => {
+     * sprite.connect('tap', (event) => {
      *      // handle event
      * });
      * @member {boolean}

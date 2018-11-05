@@ -74,15 +74,15 @@ export default class Loader extends ResourceLoader {
 
         // Compat layer, translate the new v2 signals into old v1 events.
         // @ts-ignore
-        this.onStart.add((l) => this.emit('start', l));
+        this.onStart.add((l) => this.emit_signal('start', l));
         // @ts-ignore
-        this.onProgress.add((l, r) => this.emit('progress', l, r));
+        this.onProgress.add((l, r) => this.emit_signal('progress', l, r));
         // @ts-ignore
-        this.onError.add((e, l, r) => this.emit('error', e, l, r));
+        this.onError.add((e, l, r) => this.emit_signal('error', e, l, r));
         // @ts-ignore
-        this.onLoad.add((l, r) => this.emit('load', l, r));
+        this.onLoad.add((l, r) => this.emit_signal('load', l, r));
         // @ts-ignore
-        this.onComplete.add((l, r) => this.emit('complete', l, r));
+        this.onComplete.add((l, r) => this.emit_signal('complete', l, r));
     }
 
     /**
@@ -90,7 +90,7 @@ export default class Loader extends ResourceLoader {
      */
     destroy() {
         // @ts-ignore
-        this.removeAllListeners();
+        this.disconnect_all();
         this.reset();
     }
 }

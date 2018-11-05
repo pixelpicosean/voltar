@@ -88,7 +88,7 @@ export default class Container extends Control {
         }
 
         this._children_sorted();
-        this.emit('sort_children');
+        this.emit_signal('sort_children');
         this.pending_sort = false;
     }
 
@@ -103,8 +103,8 @@ export default class Container extends Control {
     add_child_notify(child) {
         super.add_child_notify(child);
 
-        child.on('size_flags_changed', this.queue_sort, this);
-        child.on('minimum_size_changed', this._child_minsize_changed, this);
+        child.connect('size_flags_changed', this.queue_sort, this);
+        child.connect('minimum_size_changed', this._child_minsize_changed, this);
 
         this.minimum_size_changed();
         this.queue_sort();
@@ -122,8 +122,8 @@ export default class Container extends Control {
      * @param {Control} child
      */
     remove_child_notify(child) {
-        child.off('size_flags_changed', this.queue_sort, this);
-        child.off('minimum_size_changed', this._child_minsize_changed, this);
+        child.disconnect('size_flags_changed', this.queue_sort, this);
+        child.disconnect('minimum_size_changed', this._child_minsize_changed, this);
 
         this.minimum_size_changed();
         this.queue_sort();

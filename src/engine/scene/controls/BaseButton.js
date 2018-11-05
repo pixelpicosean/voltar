@@ -85,11 +85,11 @@ export default class BaseButton extends Control {
         };
 
         this.interactive = true;
-        this.on('pointerover', this._pointer_over, this);
-        this.on('pointerout', this._pointer_out, this);
-        this.on('pointerdown', this._pointer_down, this);
-        this.on('pointerup', this._pointer_up, this);
-        this.on('pointerupoutside', this._pointer_up_outside, this);
+        this.connect('pointerover', this._pointer_over, this);
+        this.connect('pointerout', this._pointer_out, this);
+        this.connect('pointerdown', this._pointer_down, this);
+        this.connect('pointerup', this._pointer_up, this);
+        this.connect('pointerupoutside', this._pointer_up_outside, this);
     }
 
     _visibility_changed() {
@@ -149,48 +149,48 @@ export default class BaseButton extends Control {
     }
     _pointer_down(e) {
         if (this.action_mode === ActionMode.BUTTON_PRESS) {
-            this.emit('button_down');
+            this.emit_signal('button_down');
 
             if (!this.toggle_mode) {
                 this.status.press_attempt = true;
                 this.status.pressing_inside = true;
 
                 this._pressed();
-                this.emit('pressed');
+                this.emit_signal('pressed');
             } else {
                 this.status.pressed = !this.status.pressed;
 
                 this._pressed();
-                this.emit('pressed');
+                this.emit_signal('pressed');
 
                 this._toggled(this.status.pressed);
-                this.emit('toggled', this.status.pressed);
+                this.emit_signal('toggled', this.status.pressed);
             }
         } else {
             this.status.press_attempt = true;
             this.status.pressing_inside = true;
-            this.emit('button_down');
+            this.emit_signal('button_down');
         }
     }
     _pointer_up(e) {
         if (this.action_mode === ActionMode.BUTTON_PRESS) {
-            this.emit('button_up');
+            this.emit_signal('button_up');
             this.status.press_attempt = false;
         } else {
-            this.emit('button_up');
+            this.emit_signal('button_up');
 
             if (this.status.press_attempt && this.status.pressing_inside) {
                 if (!this.toggle_mode) {
                     this._pressed();
-                    this.emit('pressed');
+                    this.emit_signal('pressed');
                 } else {
                     this.status.pressed = !this.status.pressed;
 
                     this._pressed();
-                    this.emit('pressed');
+                    this.emit_signal('pressed');
 
                     this._toggled(this.status.pressed);
-                    this.emit('toggled', this.status.pressed);
+                    this.emit_signal('toggled', this.status.pressed);
                 }
             }
 

@@ -664,7 +664,7 @@ export default class Node2D extends EventEmitter {
      */
     destroy() {
         // TODO: how do we cleanup an `EventEmitter`
-        this.removeAllListeners();
+        this.disconnect_all();
         if (this.parent) {
             this.parent.remove_child(this);
         }

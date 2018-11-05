@@ -106,7 +106,7 @@ export default class BaseRenderTexture extends BaseTexture {
             return;
         }
 
-        this.emit('update', this);
+        this.emit_signal('update', this);
     }
 
     /**

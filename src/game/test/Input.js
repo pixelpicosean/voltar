@@ -53,7 +53,7 @@ export default class InputScene extends v.Node2D {
         const s = this.add_child(new Me())
             .set_position(100, 100)
         s.interactive = true
-        s.on('pointerdown', () => {
+        s.connect('pointerdown', () => {
             console.log('jump')
             s.tweens.create(true)
                 .interpolate_property(s.scale, 'y', 1.5, 1.75, 0.1, 'Quartic.Out')

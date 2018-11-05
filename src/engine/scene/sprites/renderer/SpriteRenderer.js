@@ -82,7 +82,7 @@ export default class SpriteRenderer extends ObjectRenderer {
         this.vaoMax = 2;
         this.vertexCount = 0;
 
-        this.renderer.on('prerender', this.onPrerender, this);
+        this.renderer.connect('prerender', this.onPrerender, this);
     }
 
     /**
@@ -470,7 +470,7 @@ export default class SpriteRenderer extends ObjectRenderer {
             this.index_buffer.destroy();
         }
 
-        this.renderer.off('prerender', this.onPrerender, this);
+        this.renderer.disconnect('prerender', this.onPrerender, this);
 
         super.destroy();
 

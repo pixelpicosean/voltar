@@ -12,7 +12,7 @@ export default class WebGLManager {
          */
         this.renderer = renderer;
 
-        this.renderer.on('context', this.on_context_change, this);
+        this.renderer.connect('context', this.on_context_change, this);
     }
 
     /**
@@ -26,7 +26,7 @@ export default class WebGLManager {
      * Generic destroy methods to be overridden by the subclass
      */
     destroy() {
-        this.renderer.off('context', this.on_context_change, this);
+        this.renderer.disconnect('context', this.on_context_change, this);
 
         this.renderer = null;
     }

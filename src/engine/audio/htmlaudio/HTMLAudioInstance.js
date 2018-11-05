@@ -87,7 +87,7 @@ export default class HTMLAudioInstance extends EventEmitter {
     stop() {
         this._internalStop();
         if (this._source) {
-            this.emit("stop");
+            this.emit_signal("stop");
         }
     }
     /**
@@ -168,14 +168,14 @@ export default class HTMLAudioInstance extends EventEmitter {
                  * The sound is paused.
                  * @event HTMLAudioInstance#paused
                  */
-                this.emit("paused");
+                this.emit_signal("paused");
             }
             else {
                 /**
                  * The sound is unpaused.
                  * @event HTMLAudioInstance#resumed
                  */
-                this.emit("resumed");
+                this.emit_signal("resumed");
                 // resume the playing with offset
                 this.play({
                     start: this._source.currentTime,
@@ -190,7 +190,7 @@ export default class HTMLAudioInstance extends EventEmitter {
              * @event HTMLAudioInstance#pause
              * @property {boolean} paused If the instance was paused or not.
              */
-            this.emit("pause", pausedReal);
+            this.emit_signal("pause", pausedReal);
         }
     }
     /**
@@ -228,7 +228,7 @@ export default class HTMLAudioInstance extends EventEmitter {
             if (this._source) {
                 this._source.currentTime = start;
                 this._source.onloadedmetadata = null;
-                this.emit("progress", start, this._duration);
+                this.emit_signal("progress", start, this._duration);
                 ticker.shared.add(this._onUpdate, this);
             }
         };
@@ -238,7 +238,7 @@ export default class HTMLAudioInstance extends EventEmitter {
          * The sound is started.
          * @event HTMLAudioInstance#start
          */
-        this.emit("start");
+        this.emit_signal("start");
     }
     /**
      * Handle time update on sound.
@@ -246,7 +246,7 @@ export default class HTMLAudioInstance extends EventEmitter {
      * @private
      */
     _onUpdate() {
-        this.emit("progress", this.progress, this._duration);
+        this.emit_signal("progress", this.progress, this._duration);
         if (this._source.currentTime >= this._end && !this._source.loop) {
             this._onComplete();
         }
@@ -259,12 +259,12 @@ export default class HTMLAudioInstance extends EventEmitter {
     _onComplete() {
         ticker.shared.remove(this._onUpdate, this);
         this._internalStop();
-        this.emit("progress", 1, this._duration);
+        this.emit_signal("progress", 1, this._duration);
         /**
          * The sound ends, don't use after this
          * @event HTMLAudioInstance#end
          */
-        this.emit("end", this);
+        this.emit_signal("end", this);
     }
     /**
      * Don't use after this.
@@ -272,7 +272,7 @@ export default class HTMLAudioInstance extends EventEmitter {
      */
     destroy() {
         ticker.shared.remove(this._onUpdate, this);
-        this.removeAllListeners();
+        this.disconnect_all();
         const source = this._source;
         if (source) {
             // Remove the listeners

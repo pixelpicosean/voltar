@@ -119,8 +119,8 @@ export default class TextureManager {
 
             texture._gl_textures[this.renderer.CONTEXT_UID] = glTexture;
 
-            texture.on('update', this.update_texture, this);
-            texture.on('dispose', this.destroy_texture, this);
+            texture.connect('update', this.update_texture, this);
+            texture.connect('dispose', this.destroy_texture, this);
 
             this._managed_textures.push(texture);
 
@@ -182,8 +182,8 @@ export default class TextureManager {
             this.renderer.unbind_texture(texture);
 
             glTextures[uid].destroy();
-            texture.off('update', this.update_texture, this);
-            texture.off('dispose', this.destroy_texture, this);
+            texture.disconnect('update', this.update_texture, this);
+            texture.disconnect('dispose', this.destroy_texture, this);
 
             delete glTextures[uid];
 
@@ -226,8 +226,8 @@ export default class TextureManager {
 
             this.destroy_texture(texture, true);
 
-            texture.off('update', this.update_texture, this);
-            texture.off('dispose', this.destroy_texture, this);
+            texture.disconnect('update', this.update_texture, this);
+            texture.disconnect('dispose', this.destroy_texture, this);
         }
 
         this._managed_textures = null;

@@ -40,7 +40,7 @@ export default class TextureButton extends BaseButton {
         if (this._texture_normal.base_texture.has_loaded) {
             this._on_texture_update();
         } else {
-            this._texture_normal.once('update', this._on_texture_update, this);
+            this._texture_normal.connect_once('update', this._on_texture_update, this);
         }
     }
     /**
@@ -68,7 +68,7 @@ export default class TextureButton extends BaseButton {
         if (this._texture_pressed.base_texture.has_loaded) {
             this._on_texture_update();
         } else {
-            this._texture_pressed.once('update', this._on_texture_update, this);
+            this._texture_pressed.connect_once('update', this._on_texture_update, this);
         }
     }
     /**
@@ -96,7 +96,7 @@ export default class TextureButton extends BaseButton {
         if (this._texture_hover.base_texture.has_loaded) {
             this._on_texture_update();
         } else {
-            this._texture_hover.once('update', this._on_texture_update, this);
+            this._texture_hover.connect_once('update', this._on_texture_update, this);
         }
     }
     /**
@@ -124,7 +124,7 @@ export default class TextureButton extends BaseButton {
         if (this._texture_disabled.base_texture.has_loaded) {
             this._on_texture_update();
         } else {
-            this._texture_disabled.once('update', this._on_texture_update, this);
+            this._texture_disabled.connect_once('update', this._on_texture_update, this);
         }
     }
     /**

@@ -162,7 +162,7 @@ export default class AccessibilityManager {
         window.document.addEventListener('mousemove', this._on_mouse_move, true);
         window.removeEventListener('keydown', this._on_key_down, false);
 
-        this.renderer.on('postrender', this.update, this);
+        this.renderer.connect('postrender', this.update, this);
 
         if (this.renderer.view.parentNode) {
             this.renderer.view.parentNode.appendChild(this.div);
@@ -185,7 +185,7 @@ export default class AccessibilityManager {
         window.document.removeEventListener('mousemove', this._on_mouse_move, true);
         window.addEventListener('keydown', this._on_key_down, false);
 
-        this.renderer.off('postrender', this.update);
+        this.renderer.disconnect('postrender', this.update);
 
         if (this.div.parentNode) {
             this.div.parentNode.removeChild(this.div);

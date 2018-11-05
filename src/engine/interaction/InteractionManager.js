@@ -910,7 +910,7 @@ export default class InteractionManager extends EventEmitter {
             event_data.current_target = node;
             event_data.type = eventString;
 
-            node.emit(eventString, event_data);
+            node.emit_signal(eventString, event_data);
 
             if (node[eventString]) {
                 node[eventString](event_data);
@@ -1123,15 +1123,15 @@ export default class InteractionManager extends EventEmitter {
 
             this.process_interactive(interactionEvent, this.renderer._last_object_rendered, this.process_pointer_down, true);
 
-            this.emit('pointerdown', interactionEvent);
+            this.emit_signal('pointerdown', interactionEvent);
             if (event.pointerType === 'touch') {
-                this.emit('touchstart', interactionEvent);
+                this.emit_signal('touchstart', interactionEvent);
             }
             // emit a mouse event for "pen" pointers, the way a browser would emit a fallback event
             else if (event.pointerType === 'mouse' || event.pointerType === 'pen') {
                 const isRightButton = event.button === 2;
 
-                this.emit(isRightButton ? 'rightdown' : 'mousedown', this.event_data);
+                this.emit_signal(isRightButton ? 'rightdown' : 'mousedown', this.event_data);
             }
         }
     }
@@ -1205,15 +1205,15 @@ export default class InteractionManager extends EventEmitter {
             // perform hit testing for events targeting our canvas or cancel events
             this.process_interactive(interactionEvent, this.renderer._last_object_rendered, func, cancelled || !eventAppend);
 
-            this.emit(cancelled ? 'pointercancel' : `pointerup${eventAppend}`, interactionEvent);
+            this.emit_signal(cancelled ? 'pointercancel' : `pointerup${eventAppend}`, interactionEvent);
 
             if (event.pointerType === 'mouse' || event.pointerType === 'pen') {
                 const isRightButton = event.button === 2;
 
-                this.emit(isRightButton ? `rightup${eventAppend}` : `mouseup${eventAppend}`, interactionEvent);
+                this.emit_signal(isRightButton ? `rightup${eventAppend}` : `mouseup${eventAppend}`, interactionEvent);
             }
             else if (event.pointerType === 'touch') {
-                this.emit(cancelled ? 'touchcancel' : `touchend${eventAppend}`, interactionEvent);
+                this.emit_signal(cancelled ? 'touchcancel' : `touchend${eventAppend}`, interactionEvent);
                 this.release_interaction_data_for_pointer_id(event.pointerId);
             }
         }
@@ -1391,9 +1391,9 @@ export default class InteractionManager extends EventEmitter {
                 this.process_pointer_move,
                 interactive
             );
-            this.emit('pointermove', interactionEvent);
-            if (event.pointerType === 'touch') this.emit('touchmove', interactionEvent);
-            if (event.pointerType === 'mouse' || event.pointerType === 'pen') this.emit('mousemove', interactionEvent);
+            this.emit_signal('pointermove', interactionEvent);
+            if (event.pointerType === 'touch') this.emit_signal('touchmove', interactionEvent);
+            if (event.pointerType === 'mouse' || event.pointerType === 'pen') this.emit_signal('mousemove', interactionEvent);
         }
 
         if (events[0].pointerType === 'mouse' || events[0].pointerType === 'pen') {
@@ -1457,9 +1457,9 @@ export default class InteractionManager extends EventEmitter {
 
         this.process_interactive(interactionEvent, this.renderer._last_object_rendered, this.process_pointer_over_out, false);
 
-        this.emit('pointerout', interactionEvent);
+        this.emit_signal('pointerout', interactionEvent);
         if (event.pointerType === 'mouse' || event.pointerType === 'pen') {
-            this.emit('mouseout', interactionEvent);
+            this.emit_signal('mouseout', interactionEvent);
         }
         else {
             // we can get touchleave events after touchend, so we want to make sure we don't
@@ -1545,9 +1545,9 @@ export default class InteractionManager extends EventEmitter {
             this.mouse_over_renderer = true;
         }
 
-        this.emit('pointerover', interactionEvent);
+        this.emit_signal('pointerover', interactionEvent);
         if (event.pointerType === 'mouse' || event.pointerType === 'pen') {
-            this.emit('mouseover', interactionEvent);
+            this.emit_signal('mouseover', interactionEvent);
         }
     }
 
@@ -1738,7 +1738,7 @@ export default class InteractionManager extends EventEmitter {
     destroy() {
         this.remove_events();
 
-        this.removeAllListeners();
+        this.disconnect_all();
 
         this.renderer = null;
 

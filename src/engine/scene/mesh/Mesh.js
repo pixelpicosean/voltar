@@ -304,7 +304,7 @@ export default class Mesh extends Node2D {
                 this._on_texture_update();
             }
             else {
-                value.once('update', this._on_texture_update, this);
+                value.connect_once('update', this._on_texture_update, this);
             }
         }
     }

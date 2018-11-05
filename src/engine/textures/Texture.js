@@ -125,12 +125,12 @@ export default class Texture extends EventEmitter {
                 frame = new Rectangle(0, 0, base_texture.width, base_texture.height);
 
                 // if there is no frame we should monitor for any base texture changes..
-                base_texture.on('update', this.on_base_texture_updated, this);
+                base_texture.connect('update', this.on_base_texture_updated, this);
             }
             this.frame = frame;
         }
         else {
-            base_texture.once('loaded', this.on_base_texture_loaded, this);
+            base_texture.connect_once('loaded', this.on_base_texture_loaded, this);
         }
 
         /**
@@ -194,8 +194,8 @@ export default class Texture extends EventEmitter {
             this.frame = this._frame;
         }
 
-        this.base_texture.on('update', this.on_base_texture_updated, this);
-        this.emit('update', this);
+        this.base_texture.connect('update', this.on_base_texture_updated, this);
+        this.emit_signal('update', this);
     }
 
     /**
@@ -210,7 +210,7 @@ export default class Texture extends EventEmitter {
         this._frame.width = base_texture.width;
         this._frame.height = base_texture.height;
 
-        this.emit('update', this);
+        this.emit_signal('update', this);
     }
 
     /**
@@ -230,8 +230,8 @@ export default class Texture extends EventEmitter {
                 this.base_texture.destroy();
             }
 
-            this.base_texture.off('update', this.on_base_texture_updated, this);
-            this.base_texture.off('loaded', this.on_base_texture_loaded, this);
+            this.base_texture.disconnect('update', this.on_base_texture_updated, this);
+            this.base_texture.disconnect('loaded', this.on_base_texture_loaded, this);
 
             this.base_texture = null;
         }

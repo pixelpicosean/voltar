@@ -39,7 +39,7 @@ export default class HTMLAudioMedia extends EventEmitter {
     }
     // Override the destroy
     destroy() {
-        this.removeAllListeners();
+        this.disconnect_all();
         this.parent = null;
         if (this._source) {
             this._source.src = '';

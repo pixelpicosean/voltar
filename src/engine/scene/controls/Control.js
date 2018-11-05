@@ -468,7 +468,7 @@ export default class Control extends Node2D {
             return;
         }
         this.data.h_size_flags = value;
-        this.emit('size_flags_changed');
+        this.emit_signal('size_flags_changed');
     }
     set_size_flags_horizontal(value) {
         this.size_flags_horizontal = value;
@@ -486,7 +486,7 @@ export default class Control extends Node2D {
             return;
         }
         this.data.v_size_flags = value;
-        this.emit('size_flags_changed');
+        this.emit_signal('size_flags_changed');
     }
     set_size_flags_vertical(value) {
         this.size_flags_vertical = value;
@@ -501,7 +501,7 @@ export default class Control extends Node2D {
             return;
         }
         this.data.expand = value;
-        this.emit('size_flags_changed');
+        this.emit_signal('size_flags_changed');
     }
     set_size_flags_stretch_ratio(value) {
         this.size_flags_stretch_ratio = value;
@@ -946,7 +946,7 @@ export default class Control extends Node2D {
 
         if (!minsize.equals(this.data.last_minimum_size)) {
             this.data.last_minimum_size.copy(minsize);
-            this.emit('minimum_size_changed');
+            this.emit_signal('minimum_size_changed');
         }
     }
     _update_minimum_size_cache() {

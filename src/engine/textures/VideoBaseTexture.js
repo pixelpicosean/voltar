@@ -148,7 +148,7 @@ export default class VideoBaseTexture extends BaseTexture {
             // prevent multiple loaded dispatches..
             if (!this.__loaded) {
                 this.__loaded = true;
-                this.emit('loaded', this);
+                this.emit_signal('loaded', this);
             }
 
             if (this._is_source_playing()) {

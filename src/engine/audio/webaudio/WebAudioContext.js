@@ -172,7 +172,7 @@ export default class WebAudioContext extends Filterable {
         if (typeof ctx.close !== "undefined") {
             ctx.close();
         }
-        this.events.removeAllListeners();
+        this.events.disconnect_all();
         this.analyser.disconnect();
         this.compressor.disconnect();
         this.analyser = null;
@@ -221,14 +221,14 @@ export default class WebAudioContext extends Filterable {
      * @private
      */
     refresh() {
-        this.events.emit('refresh');
+        this.events.emit_signal('refresh');
     }
     /**
      * Emit event when muted, volume or speed changes
      * @private
      */
     refreshPaused() {
-        this.events.emit('refreshPaused');
+        this.events.emit_signal('refreshPaused');
     }
     /**
      * Toggles the muted state.

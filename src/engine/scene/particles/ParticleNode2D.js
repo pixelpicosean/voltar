@@ -213,7 +213,7 @@ export default class ParticleNode2D extends Node2D {
         if (!this.base_texture) {
             this.base_texture = this.children[0]._texture.base_texture;
             if (!this.base_texture.has_loaded) {
-                this.base_texture.once('update', () => this.on_children_change(0));
+                this.base_texture.connect_once('update', () => this.on_children_change(0));
             }
         }
 

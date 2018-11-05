@@ -248,7 +248,7 @@ export default class WebGLRenderer extends SystemRenderer {
             this.bind_texture(null, i);
         }
 
-        this.emit('context', gl);
+        this.emit_signal('context', gl);
 
         // setup the width/height properties and gl viewport
         this.resize(this.screen.width, this.screen.height);
@@ -267,7 +267,7 @@ export default class WebGLRenderer extends SystemRenderer {
         // can be handy to know!
         this.rendering_to_screen = !render_texture;
 
-        this.emit('prerender');
+        this.emit_signal('prerender');
 
         // no point rendering if our context has been blown up!
         if (!this.gl || this.gl.isContextLost()) {
@@ -307,7 +307,7 @@ export default class WebGLRenderer extends SystemRenderer {
 
         this.texture_gc.update();
 
-        this.emit('postrender');
+        this.emit_signal('postrender');
     }
 
     /**

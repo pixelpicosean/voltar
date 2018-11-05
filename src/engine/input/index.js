@@ -1,6 +1,7 @@
 import remove_items from 'remove-array-items';
 import { Vector2 } from '../math/index';
 import keyboard from './keyboard';
+import Node2D from 'engine/scene/Node2D';
 
 
 /**
@@ -16,25 +17,29 @@ export default class Input {
 
         this.mouse = new Vector2(0, 0);
     }
+    /**
+     * @param {Node2D} viewport
+     */
     _init(viewport) {
         // Keyboard
         keyboard._init(this);
 
         // Mouse
         viewport.interactive = true;
+        // @ts-ignore
         viewport.contains_point = () => true;
-        viewport.on('pointerdown', (e) => {
+        viewport.connect('pointerdown', (e) => {
             this.mouse.copy(e.data.global);
             this._keydown('MOUSE');
         });
-        viewport.on('pointermove', (e) => {
+        viewport.connect('pointermove', (e) => {
             this.mouse.copy(e.data.global);
         });
-        viewport.on('pointerup', (e) => {
+        viewport.connect('pointerup', (e) => {
             this.mouse.copy(e.data.global);
             this._keyup('MOUSE');
         });
-        viewport.on('pointerupoutside', (e) => {
+        viewport.connect('pointerupoutside', (e) => {
             this.mouse.copy(e.data.global);
             this._keyup('MOUSE');
         });
