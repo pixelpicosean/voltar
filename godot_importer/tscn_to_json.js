@@ -481,6 +481,9 @@ module.exports.convert_project_settings = (project_url) => {
             break;
         }
     }
+    while (lines[0][0] !== '[') {
+        lines.shift();
+    }
 
     // Convert back into a big string
     data = lines.reduce((data, line) => data + line + '\n', '');
