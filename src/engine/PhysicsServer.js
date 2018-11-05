@@ -558,6 +558,11 @@ export default class PhysicsServer {
                                 // @ts-ignore
                                 b2a = b2a && (b.collision_exceptions.indexOf(a) < 0);
 
+                                // Ignore: they don't care about each other :)
+                                if (!a2b && !b2a) {
+                                    continue;
+                                }
+
                                 let a_pos = a._world_position, b_pos = b._world_position;
                                 let a_points = shape_a.vertices, b_points = shape_b.vertices;
                                 let separated = false;
@@ -878,6 +883,11 @@ export default class PhysicsServer {
                         a2b = a2b && (a.collision_exceptions.indexOf(b) < 0);
                         // @ts-ignore
                         b2a = b2a && (b.collision_exceptions.indexOf(a) < 0);
+
+                        // Ignore: they don't care about each other :)
+                        if (!a2b && !b2a) {
+                            continue;
+                        }
 
                         let a_pos = a._world_position, b_pos = b._world_position;
                         let a_points = shape_a.vertices, b_points = shape_b.vertices;
