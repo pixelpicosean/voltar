@@ -345,7 +345,9 @@ export default class WebAudioInstance extends EventEmitter {
             this._gain = null;
         }
         if (this._media) {
+            // @ts-ignore
             this._media.context.events.off('refresh', this.refresh, this);
+            // @ts-ignore
             this._media.context.events.off('refreshPaused', this.refreshPaused, this);
             this._media = null;
         }
@@ -404,7 +406,9 @@ export default class WebAudioInstance extends EventEmitter {
      */
     init(media) {
         this._media = media;
+        // @ts-ignore
         media.context.events.connect('refresh', this.refresh, this);
+        // @ts-ignore
         media.context.events.connect('refreshPaused', this.refreshPaused, this);
     }
     /**

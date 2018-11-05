@@ -112,6 +112,7 @@ export default class Texture extends EventEmitter {
 
         this._rotate = Number(rotate || 0);
 
+        // @ts-ignore
         if (rotate === true) {
             // this is old texturepacker legacy, some games/libraries are passing "true" for rotated textures
             this._rotate = 2;
@@ -323,51 +324,6 @@ export default class Texture extends EventEmitter {
     }
 
     /**
-     * Helper function that creates a new Texture based on the source you provide.
-     * The source can be - frame id, image url, video url, canvas element, video element, base texture
-     *
-     * @static
-     * @param {number|string|HTMLImageElement|HTMLCanvasElement|HTMLVideoElement|BaseTexture}
-     *        source - Source to create texture from
-     * @return {Texture} The newly created texture
-     */
-    static from(source) {
-        // TODO auto detect cross origin..
-        // TODO pass in scale mode?
-        if (typeof source === 'string') {
-            const texture = TextureCache[source];
-
-            if (!texture) {
-                // check if its a video..
-                const isVideo = source.match(/\.(mp4|webm|ogg|h264|avi|mov)$/) !== null;
-
-                if (isVideo) {
-                    return Texture.from_video_url(source);
-                }
-
-                return Texture.from_image(source);
-            }
-
-            return texture;
-        }
-        else if (source instanceof HTMLImageElement) {
-            return new Texture(BaseTexture.from(source));
-        }
-        else if (source instanceof HTMLCanvasElement) {
-            return Texture.from_canvas(source, settings.SCALE_MODE, 'HTMLCanvasElement');
-        }
-        else if (source instanceof HTMLVideoElement) {
-            return Texture.from_video(source);
-        }
-        else if (source instanceof BaseTexture) {
-            return new Texture(source);
-        }
-
-        // lets assume its a texture!
-        return source;
-    }
-
-    /**
      * Create a texture from a source and add to the cache.
      *
      * @static
@@ -555,12 +511,16 @@ function create_white_texture() {
     const context = canvas.getContext('2d');
     let smoothProperty = 'imageSmoothingEnabled';
     if (!context.imageSmoothingEnabled) {
+        // @ts-ignore
         if (context.webkitImageSmoothingEnabled) {
             smoothProperty = 'webkitImageSmoothingEnabled';
+        // @ts-ignore
         } else if (context.mozImageSmoothingEnabled) {
             smoothProperty = 'mozImageSmoothingEnabled';
+        // @ts-ignore
         } else if (context.oImageSmoothingEnabled) {
             smoothProperty = 'oImageSmoothingEnabled';
+        // @ts-ignore
         } else if (context.msImageSmoothingEnabled) {
             smoothProperty = 'msImageSmoothingEnabled';
         }

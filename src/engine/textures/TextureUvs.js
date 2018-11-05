@@ -25,7 +25,7 @@ export default class TextureUvs {
      *
      * @private
      * @param {Rectangle} frame - The frame of the texture
-     * @param {Rectangle} base_frame - The base frame of the texture
+     * @param {{width: number, height: number}} base_frame - The base frame of the texture
      * @param {number} rotate - Rotation of frame, see {@link GroupD8}
      */
     set(frame, base_frame, rotate) {

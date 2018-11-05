@@ -138,6 +138,7 @@ export default class ParticleRenderer extends ObjectRenderer {
             buffers = container._glBuffers[renderer.CONTEXT_UID] = this.generate_buffers(container);
         }
 
+        // @ts-ignore
         const base_texture = children[0]._texture.base_texture;
 
         // if the uvs have not updated then no point rendering just yet!

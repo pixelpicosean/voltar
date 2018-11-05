@@ -237,6 +237,7 @@ export default class Sound {
         const media = SoundLibrary.instance.useLegacy ?
             new HTMLAudioMedia() :
             new WebAudioMedia();
+        // @ts-ignore
         return new Sound(media, options);
     }
     /**
@@ -450,12 +451,14 @@ export default class Sound {
         const instance = this._createInstance();
         this._instances.push(instance);
         this.isPlaying = true;
+        // @ts-ignore
         instance.connect_once("end", () => {
             if (options.complete) {
                 options.complete(this);
             }
             this._onComplete(instance);
         });
+        // @ts-ignore
         instance.connect_once("stop", () => {
             this._onComplete(instance);
         });

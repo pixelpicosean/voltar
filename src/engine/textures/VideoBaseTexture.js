@@ -169,12 +169,18 @@ export default class VideoBaseTexture extends BaseTexture {
             shared.remove(this.update, this);
         }
 
+        // @ts-ignore
         if (this.source && this.source._pixiId) {
+            // @ts-ignore
             BaseTexture.remove_from_cache(this.source._pixiId);
+            // @ts-ignore
             delete this.source._pixiId;
 
+            // @ts-ignore
             this.source.pause();
+            // @ts-ignore
             this.source.src = '';
+            // @ts-ignore
             this.source.load();
         }
 
@@ -191,14 +197,18 @@ export default class VideoBaseTexture extends BaseTexture {
      * @return {VideoBaseTexture} Newly created VideoBaseTexture
      */
     static from_video(video, scale_mode, auto_play) {
+        // @ts-ignore
         if (!video._pixiId) {
+            // @ts-ignore
             video._pixiId = `video_${uid()}`;
         }
 
+        // @ts-ignore
         let base_texture = BaseTextureCache[video._pixiId];
 
         if (!base_texture) {
             base_texture = new VideoBaseTexture(video, scale_mode, auto_play);
+            // @ts-ignore
             BaseTexture.add_to_cache(base_texture, video._pixiId);
         }
 
@@ -211,8 +221,8 @@ export default class VideoBaseTexture extends BaseTexture {
      *
      * @static
      * @param {string|object|string[]|object[]} video_src - The URL(s) for the video.
-     * @param {string} [videoSrc.src] - One of the source urls for the video
-     * @param {string} [videoSrc.mime] - The mimetype of the video (e.g. 'video/mp4'). If not specified
+     * @param {string} [video_src.src] - One of the source urls for the video
+     * @param {string} [video_src.mime] - The mimetype of the video (e.g. 'video/mp4'). If not specified
      *  the url's extension will be used as the second part of the mime type.
      * @param {number} scale_mode - See {@link SCALE_MODES} for possible values
      * @param {boolean} [crossorigin=(auto)] - Should use anonymous CORS? Defaults to true if the URL is not a data-URI.

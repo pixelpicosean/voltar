@@ -230,6 +230,7 @@ export default class Animator extends EventEmitter {
             obj = objs[i];
             info = this.sprite_provider.get(obj.folder, obj.file);
 
+            // @ts-ignore
             spr = this.node.children[i];
             spr.texture = info.texture;
             spr.x = obj.x;
