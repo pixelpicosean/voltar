@@ -381,7 +381,7 @@ export default class Text extends Sprite {
         // call sprite onTextureUpdate to update scale if _width or _height were set
         this._on_texture_update();
 
-        base_texture.emit('update', base_texture);
+        base_texture.emit_signal('update', base_texture);
 
         this.dirty = false;
     }
@@ -389,7 +389,7 @@ export default class Text extends Sprite {
     /**
      * Renders the object using the WebGL renderer
      *
-     * @param {WebGLRenderer} renderer - The renderer
+     * @param {import('engine/renderers/WebGLRenderer').default} renderer - The renderer
      */
     render_webgl(renderer) {
         if (this.resolution !== renderer.resolution) {

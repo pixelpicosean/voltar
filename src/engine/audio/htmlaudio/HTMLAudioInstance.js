@@ -67,8 +67,8 @@ export default class HTMLAudioInstance extends EventEmitter {
         source.src = media.parent.url;
         source.onplay = this._onPlay.bind(this);
         source.onpause = this._onPause.bind(this);
-        media.context.on('refresh', this.refresh, this);
-        media.context.on('refreshPaused', this.refreshPaused, this);
+        media.context.connect('refresh', this.refresh, this);
+        media.context.connect('refreshPaused', this.refreshPaused, this);
         this._media = media;
     }
     /**

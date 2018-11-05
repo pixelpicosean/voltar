@@ -404,8 +404,8 @@ export default class WebAudioInstance extends EventEmitter {
      */
     init(media) {
         this._media = media;
-        media.context.events.on('refresh', this.refresh, this);
-        media.context.events.on('refreshPaused', this.refreshPaused, this);
+        media.context.events.connect('refresh', this.refresh, this);
+        media.context.events.connect('refreshPaused', this.refreshPaused, this);
     }
     /**
      * Stops the instance.

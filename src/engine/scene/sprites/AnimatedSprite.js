@@ -196,13 +196,11 @@ export default class AnimatedSprite extends Sprite {
     _load_data(data) {
         super._load_data(data);
 
-        for (let k in data) {
-            switch (k) {
-            case 'frames':
-                this.set_frames(data[k]);
-                break;
-            }
+        if (data.frames !== undefined) {
+            this.set_frame(data.frames);
         }
+
+        return this;
     }
 
     play(anim, restart = false) {

@@ -450,13 +450,13 @@ export default class Sound {
         const instance = this._createInstance();
         this._instances.push(instance);
         this.isPlaying = true;
-        instance.once("end", () => {
+        instance.connect_once("end", () => {
             if (options.complete) {
                 options.complete(this);
             }
             this._onComplete(instance);
         });
-        instance.once("stop", () => {
+        instance.connect_once("stop", () => {
             this._onComplete(instance);
         });
 
