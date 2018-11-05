@@ -12,7 +12,7 @@ const temp_point = new Vector2();
  */
 export default class TilingSprite extends Sprite {
     /**
-     * @param {Texture} [texture] - the texture of the tiling sprite
+     * @param {string|Texture} [texture] - the texture of the tiling sprite
      * @param {number} [width=100] - the width of the tiling sprite
      * @param {number} [height=100] - the height of the tiling sprite
      */
@@ -59,6 +59,7 @@ export default class TilingSprite extends Sprite {
          *
          * @type {TextureMatrix}
          */
+        // @ts-ignore
         this.uv_transform = this._texture.transform || new TextureMatrix(texture);
 
         /**

@@ -1,6 +1,5 @@
 import * as v from 'engine/index';
 
-
 export default class AnimationTest extends v.Node2D {
     static instance() {
         return new AnimationTest();
@@ -22,6 +21,7 @@ export default class AnimationTest extends v.Node2D {
 
         let tween = this.tweens.create(false);
         tween.interpolate_property(icon, 'position', { x: 50, y: 100 }, { x: 150, y: 50 }, 1, 'Quadratic.InOut', 2);
+        // @ts-ignore
         tween.interpolate_property(icon, 'position.x', 150, 50, 1, 'Quadratic.InOut', 3);
         tween.interpolate_property(icon, 'tint', 0x000000, 0xFFFFFF, 2, 'Quadratic.InOut', 2);
         tween.tween_completed.add((key) => {
