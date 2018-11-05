@@ -1,3 +1,4 @@
+// @ts-nocheck
 const _ = require('lodash');
 const fp = require('lodash/fp');
 const fs = require('fs');
