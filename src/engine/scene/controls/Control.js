@@ -318,7 +318,7 @@ export default class Control extends Node2D {
         return this.data.custom_minimum_size;
     }
     set rect_min_size(value) {
-        if (value.equals(this.data.custom_minimum_size)) {
+        if (this.data.custom_minimum_size.equals(value)) {
             return;
         }
 
@@ -608,35 +608,67 @@ export default class Control extends Node2D {
     _load_data(data) {
         super._load_data(data);
 
-        for (let k in data) {
-            switch (k) {
-                case 'margin_bottom':
-                case 'margin_left':
-                case 'margin_right':
-                case 'margin_top':
+        if (data.anchor_bottom !== undefined) {
+            this.anchor_bottom = data.anchor_bottom;
+        }
+        if (data.anchor_left !== undefined) {
+            this.anchor_left = data.anchor_left;
+        }
+        if (data.anchor_right !== undefined) {
+            this.anchor_right = data.anchor_right;
+        }
+        if (data.anchor_top !== undefined) {
+            this.anchor_top = data.anchor_top;
+        }
 
-                case 'anchor_bottom':
-                case 'anchor_left':
-                case 'anchor_right':
-                case 'anchor_top':
+        if (data.margin_bottom !== undefined) {
+            this.margin_bottom = data.margin_bottom;
+        }
+        if (data.margin_left !== undefined) {
+            this.margin_left = data.margin_left;
+        }
+        if (data.margin_right !== undefined) {
+            this.margin_right = data.margin_right;
+        }
+        if (data.margin_top !== undefined) {
+            this.margin_top = data.margin_top;
+        }
 
-                case 'rect_min_size':
-                case 'rect_rotation':
-                case 'rect_scale':
-                case 'rect_pivot_offset':
-                case 'rect_clip_content':
+        if (data.rect_min_size !== undefined) {
+            this.rect_min_size = data.rect_min_size;
+        }
+        if (data.rect_rotation !== undefined) {
+            this.rect_rotation = data.rect_rotation;
+        }
+        if (data.rect_scale !== undefined) {
+            this.rect_scale = data.rect_scale;
+        }
+        if (data.rect_pivot_offset !== undefined) {
+            this.rect_pivot_offset = data.rect_pivot_offset;
+        }
+        if (data.rect_clip_content !== undefined) {
+            this.rect_clip_content = data.rect_clip_content;
+        }
 
-                case 'grow_horizontal':
-                case 'grow_vertical':
+        if (data.grow_horizontal !== undefined) {
+            this.grow_horizontal = data.grow_horizontal;
+        }
+        if (data.grow_vertical !== undefined) {
+            this.grow_vertical = data.grow_vertical;
+        }
 
-                case 'mouse_default_cursor_shape':
+        if (data.mouse_default_cursor_shape !== undefined) {
+            this.mouse_default_cursor_shape = data.mouse_default_cursor_shape;
+        }
 
-                case 'size_flags_horizontal':
-                case 'size_flags_vertical':
-                case 'size_flags_stretch_ratio': {
-                    this[`set_${k}`](data[k]);
-                }
-            }
+        if (data.size_flags_horizontal !== undefined) {
+            this.size_flags_horizontal = data.size_flags_horizontal;
+        }
+        if (data.size_flags_vertical !== undefined) {
+            this.size_flags_vertical = data.size_flags_vertical;
+        }
+        if (data.size_flags_stretch_ratio !== undefined) {
+            this.size_flags_stretch_ratio = data.size_flags_stretch_ratio;
         }
 
         return this;
@@ -650,10 +682,10 @@ export default class Control extends Node2D {
             this.data.parent = this.parent;
         }
 
-        super._propagate_enter_tree();
-
         this.data.minimum_size_valid = false;
         this._size_changed();
+
+        super._propagate_enter_tree();
     }
 
     add_child_notify(child) {
@@ -873,10 +905,6 @@ export default class Control extends Node2D {
         MessageQueue.get_singleton().push_call(this, '_update_minimum_size');
     }
     _size_changed() {
-        if (!this.is_inside_tree) {
-            return;
-        }
-
         const parent_rect = this.get_parent_anchorable_rect(tmp_rect3);
         margin_pos[0] = 0;
         margin_pos[1] = 0;

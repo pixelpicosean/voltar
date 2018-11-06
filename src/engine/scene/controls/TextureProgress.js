@@ -478,6 +478,8 @@ export default class TextureProgress extends Range {
      * @param {WebGLRenderer} renderer
      */
     _render_webgl(renderer) {
+        this._update_transform();
+
         if (this._nine_patch_stretch && (this.fill_mode === FillMode.LEFT_TO_RIGHT || this.fill_mode === FillMode.RIGHT_TO_LEFT || this.fill_mode === FillMode.TOP_TO_BOTTOM || this.fill_mode === FillMode.BOTTOM_TO_TOP)) {
             if (this._texture_under && this._texture_under.valid) {
                 this.mesh_under.transform.set_from_matrix(this.transform.world_transform);

@@ -503,6 +503,8 @@ export default class Label extends Control {
      * @param {import('engine/renderers/WebGLRenderer').default} renderer - The renderer
      */
     _render_webgl(renderer) {
+        this._update_transform();
+
         if (this._clip_text) {
             // TODO: use mask to clip
         }

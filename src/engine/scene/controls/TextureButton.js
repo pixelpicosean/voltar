@@ -254,6 +254,8 @@ export default class TextureButton extends BaseButton {
      * @param {WebGLRenderer} renderer - The webgl renderer to use.
      */
     _render_webgl(renderer) {
+        this._update_transform();
+
         let texture = undefined;
 
         switch (this.get_draw_mode()) {

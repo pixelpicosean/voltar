@@ -197,6 +197,8 @@ export default class NinePatchRect extends Control {
      * @param {WebGLRenderer} renderer - The webgl renderer to use.
      */
     _render_webgl(renderer) {
+        this._update_transform();
+
         this.mesh.transform.set_from_matrix(this.transform.world_transform);
 
         this.mesh._width = this.rect_size.x;

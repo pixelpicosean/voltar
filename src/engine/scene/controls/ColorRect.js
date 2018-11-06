@@ -98,6 +98,8 @@ export default class ColorRect extends Control {
      * @param {WebGLRenderer} renderer - The webgl renderer to use.
      */
     _render_webgl(renderer) {
+        this._update_transform();
+
         this.calculate_vertices();
 
         renderer.set_object_renderer(renderer.plugins[this.renderer_plugin]);

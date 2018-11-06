@@ -144,6 +144,8 @@ export default class TextureRect extends Control {
      * @param {WebGLRenderer} renderer - The webgl renderer to use.
      */
     _render_webgl(renderer) {
+        this._update_transform();
+
         switch (this._stretch_mode) {
             case StretchMode.SCALE_ON_EXPAND:
             case StretchMode.SCALE:
