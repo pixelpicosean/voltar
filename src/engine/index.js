@@ -22,6 +22,7 @@ export { default as TilingSprite } from './scene/sprites/TilingSprite';
 export { default as NineSliceSprite } from './scene/sprites/NineSliceSprite';
 
 export { default as Control } from './scene/controls/Control';
+export { default as Container } from './scene/controls/Container';
 export { default as Label } from './scene/controls/Label';
 export { default as ColorRect } from './scene/controls/ColorRect';
 export { default as TextureRect } from './scene/controls/TextureRect';

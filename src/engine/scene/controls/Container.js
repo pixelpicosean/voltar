@@ -2,6 +2,7 @@ import Control from './Control';
 import { SizeFlag, Anchor } from "./const";
 import { Rectangle, Vector2 } from 'engine/math/index';
 import MessageQueue from 'engine/MessageQueue';
+import { node_class_map } from 'engine/registry';
 
 const tmp_vec = new Vector2();
 const tmp_rect = new Rectangle();
@@ -129,3 +130,5 @@ export default class Container extends Control {
         this.queue_sort();
     }
 }
+
+node_class_map['Container'] = Container;
