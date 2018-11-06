@@ -158,9 +158,7 @@ export function register_scene_class(key, ctor) {
  * @returns {Node2D}
  */
 export function assemble_scene(scn, data) {
-    if (data.name) {
-        scn.name = name;
-    }
+    scn._load_data(data);
     if (data.children) {
         assemble_node(scn, data.children);
     }
