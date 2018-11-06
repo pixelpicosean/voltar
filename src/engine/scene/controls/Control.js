@@ -905,6 +905,10 @@ export default class Control extends Node2D {
         MessageQueue.get_singleton().push_call(this, '_update_minimum_size');
     }
     _size_changed() {
+        if (!this.is_inside_tree) {
+            return;
+        }
+
         const parent_rect = this.get_parent_anchorable_rect(tmp_rect3);
         margin_pos[0] = 0;
         margin_pos[1] = 0;

@@ -1050,8 +1050,8 @@ export default class Node2D extends EventEmitter {
     _propagate_enter_tree() {
         // Add to scene tree groups
         if (this.groups && this.groups.length > 0) {
-            for (let i = 0; i < this.groups.length; i++) {
-                this.scene_tree.add_node_to_group(this, this.groups[i]);
+            for (let g of this.groups) {
+                this.scene_tree.add_node_to_group(this, g);
             }
         }
 
@@ -1059,15 +1059,16 @@ export default class Node2D extends EventEmitter {
 
         this.emit_signal('tree_entered');
 
-        for (let i = 0, l = this.children.length; i < l; i++) {
-            this.children[i].scene_tree = this.scene_tree;
-            this.children[i]._propagate_enter_tree();
+        for (let c of this.children) {
+            c.scene_tree = this.scene_tree;
+            c.is_inside_tree = true;
+            c._propagate_enter_tree();
         }
     }
 
     _propagate_ready() {
-        for (let i = 0, l = this.children.length; i < l; i++) {
-            this.children[i]._propagate_ready();
+        for (let c of this.children) {
+            c._propagate_ready();
         }
 
         this._is_ready = true;
@@ -1220,7 +1221,7 @@ export default class Node2D extends EventEmitter {
         this._bounds_id++;
 
         if (this.is_inside_tree) {
-            child.is_inside_tree = true;
+            // child.is_inside_tree = true;
             child._propagate_enter_tree();
             child.update_transform();
         }
