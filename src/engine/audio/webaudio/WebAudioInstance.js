@@ -185,6 +185,11 @@ export default class WebAudioInstance extends EventEmitter {
      * Refresh loop, volume and speed based on changes to parent
      */
     refresh() {
+        // Sound could be paused
+        if (!this._source) {
+            return;
+        }
+
         const global = this._media.context;
         const sound = this._media.parent;
 
