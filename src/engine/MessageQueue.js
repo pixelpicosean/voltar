@@ -27,6 +27,13 @@ export default class MessageQueue {
     }
 
     push_call(obj, method, args) {
+        // Multiple equal message call is not allowed in a single frame
+        for (let m of this.messages) {
+            if (m.obj === obj && m.method === method && m.args === args) {
+                return;
+            }
+        }
+
         let msg = pool.pop();
         if (!msg) msg = new Message();
 
