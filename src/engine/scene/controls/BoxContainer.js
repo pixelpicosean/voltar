@@ -128,6 +128,10 @@ export default class BoxContainer extends Container {
     }
 
     _resort() {
+        if (!this.is_inside_tree) {
+            return;
+        }
+
         /** First pass, determine minimum size AND amount of stretchable elements */
 
         const new_size = this.rect_size;
@@ -231,7 +235,7 @@ export default class BoxContainer extends Container {
         /** Final pass, draw and stretch elements **/
 
         let ofs = 0;
-        if (has_stretched) {
+        if (!has_stretched) {
             switch (this.align) {
                 case AlignMode.BEGIN: {
                 } break;
