@@ -4,14 +4,7 @@ import remove_items from 'remove-array-items';
 import Texture from 'engine/textures/Texture';
 import Sprite from './Sprite';
 
-// Load sprite frames from assets folder
-import spriteframes_data from 'spriteframe/default.json';
-for (let data of spriteframes_data) {
-    SpriteFramesCache[data.key] = data.value;
-}
-
-
-class Anim {
+export class Anim {
     constructor() {
         this.speed = 5;
         this.loop = true;

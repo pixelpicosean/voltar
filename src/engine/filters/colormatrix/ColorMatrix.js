@@ -1,5 +1,8 @@
 import Filter from 'engine/renderers/filters/Filter';
 
+import Vert from '../fragments/default.vert';
+import Frag from './color_matrix.frag';
+
 /**
  * The ColorMatrixFilter class lets you apply a 5x4 matrix transformation on the RGBA
  * color and alpha values of every pixel on your node to produce a result
@@ -17,12 +20,7 @@ export default class ColorMatrix extends Filter {
      *
      */
     constructor() {
-        super(
-            // vertex shader
-            require('../fragments/default.vert'),
-            // fragment shader
-            require('./color_matrix.frag')
-        );
+        super(Vert, Frag);
 
         this.uniforms.m = [
             1, 0, 0, 0, 0,
@@ -37,7 +35,7 @@ export default class ColorMatrix extends Filter {
      * Transforms current matrix and set the new one
      *
      * @param {number[]} matrix - 5x4 matrix
-     * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
+     * @param {boolean} [multiply=false] - if true, current matrix and matrix are multiplied. If false,
      *  just set the current matrix with @param matrix
      */
     _load_matrix(matrix, multiply = false) {
@@ -109,6 +107,7 @@ export default class ColorMatrix extends Filter {
         m[14] /= 255;
         m[19] /= 255;
 
+        // @ts-ignore
         return m;
     }
 
@@ -116,8 +115,7 @@ export default class ColorMatrix extends Filter {
      * Adjusts brightness
      *
      * @param {number} b - value of the brigthness (0-1, where 0 is black)
-     * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
-     *  just set the current matrix with @param matrix
+     * @param {boolean} multiply - if true, current matrix and matrix are multiplied.
      */
     brightness(b, multiply) {
         const matrix = [
@@ -134,8 +132,7 @@ export default class ColorMatrix extends Filter {
      * Set the matrices in grey scales
      *
      * @param {number} scale - value of the grey (0-1, where 0 is black)
-     * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
-     *  just set the current matrix with @param matrix
+     * @param {boolean} multiply - if true, current matrix and matrix are multiplied.
      */
     greyscale(scale, multiply) {
         const matrix = [
@@ -151,8 +148,7 @@ export default class ColorMatrix extends Filter {
     /**
      * Set the black and white matrice.
      *
-     * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
-     *  just set the current matrix with @param matrix
+     * @param {boolean} multiply - if true, current matrix and matrix are multiplied.
      */
     black_and_white(multiply) {
         const matrix = [
@@ -169,8 +165,7 @@ export default class ColorMatrix extends Filter {
      * Set the hue property of the color
      *
      * @param {number} rotation - in degrees
-     * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
-     *  just set the current matrix with @param matrix
+     * @param {boolean} multiply - if true, current matrix and matrix are multiplied.
      */
     hue(rotation, multiply) {
         rotation = (rotation || 0) / 180 * Math.PI;
@@ -223,8 +218,7 @@ export default class ColorMatrix extends Filter {
      * Decrease contrast : bring the shadows up and the highlights down
      *
      * @param {number} amount - value of the contrast (0-1)
-     * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
-     *  just set the current matrix with @param matrix
+     * @param {boolean} multiply - if true, current matrix and matrix are multiplied.
      */
     contrast(amount, multiply) {
         const v = (amount || 0) + 1;
@@ -245,10 +239,9 @@ export default class ColorMatrix extends Filter {
      * Increase saturation : increase contrast, brightness, and sharpness
      *
      * @param {number} amount - The saturation amount (0-1)
-     * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
-     *  just set the current matrix with @param matrix
+     * @param {boolean} [multiply] - if true, current matrix and matrix are multiplied.
      */
-    saturate(amount = 0, multiply) {
+    saturate(amount = 0, multiply = false) {
         const x = (amount * 2 / 3) + 1;
         const y = ((x - 1) * -0.5);
 
@@ -276,8 +269,7 @@ export default class ColorMatrix extends Filter {
     /**
      * Negative image (inverse of classic rgb matrix)
      *
-     * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
-     *  just set the current matrix with @param matrix
+     * @param {boolean} multiply - if true, current matrix and matrix are multiplied.
      */
     negative(multiply) {
         const matrix = [
@@ -293,8 +285,7 @@ export default class ColorMatrix extends Filter {
     /**
      * Sepia image
      *
-     * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
-     *  just set the current matrix with @param matrix
+     * @param {boolean} multiply - if true, current matrix and matrix are multiplied.
      */
     sepia(multiply) {
         const matrix = [
@@ -310,8 +301,7 @@ export default class ColorMatrix extends Filter {
     /**
      * Color motion picture process invented in 1916 (thanks Dominic Szablewski)
      *
-     * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
-     *  just set the current matrix with @param matrix
+     * @param {boolean} multiply - if true, current matrix and matrix are multiplied.
      */
     technicolor(multiply) {
         const matrix = [
@@ -327,8 +317,7 @@ export default class ColorMatrix extends Filter {
     /**
      * Polaroid filter
      *
-     * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
-     *  just set the current matrix with @param matrix
+     * @param {boolean} multiply - if true, current matrix and matrix are multiplied.
      */
     polaroid(multiply) {
         const matrix = [
@@ -344,8 +333,7 @@ export default class ColorMatrix extends Filter {
     /**
      * Filter who transforms : Red -> Blue and Blue -> Red
      *
-     * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
-     *  just set the current matrix with @param matrix
+     * @param {boolean} multiply - if true, current matrix and matrix are multiplied.
      */
     to_bgr(multiply) {
         const matrix = [
@@ -361,8 +349,7 @@ export default class ColorMatrix extends Filter {
     /**
      * Color reversal film introduced by Eastman Kodak in 1935. (thanks Dominic Szablewski)
      *
-     * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
-     *  just set the current matrix with @param matrix
+     * @param {boolean} multiply - if true, current matrix and matrix are multiplied.
      */
     kodachrome(multiply) {
         const matrix = [
@@ -378,8 +365,7 @@ export default class ColorMatrix extends Filter {
     /**
      * Brown delicious browni filter (thanks Dominic Szablewski)
      *
-     * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
-     *  just set the current matrix with @param matrix
+     * @param {boolean} multiply - if true, current matrix and matrix are multiplied.
      */
     browni(multiply) {
         const matrix = [
@@ -395,8 +381,7 @@ export default class ColorMatrix extends Filter {
     /**
      * Vintage filter (thanks Dominic Szablewski)
      *
-     * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
-     *  just set the current matrix with @param matrix
+     * @param {boolean} multiply - if true, current matrix and matrix are multiplied.
      */
     vintage(multiply) {
         const matrix = [
@@ -414,10 +399,9 @@ export default class ColorMatrix extends Filter {
      *
      * @param {number} desaturation - Tone values.
      * @param {number} toned - Tone values.
-     * @param {string} lightColor - Tone values, example: `0xFFE580`
-     * @param {string} darkColor - Tone values, example: `0xFFE580`
-     * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
-     *  just set the current matrix with @param matrix
+     * @param {number} lightColor - Tone values, example: `0xFFE580`
+     * @param {number} darkColor - Tone values, example: `0xFFE580`
+     * @param {boolean} multiply - if true, current matrix and matrix are multiplied.
      */
     color_tone(desaturation, toned, lightColor, darkColor, multiply) {
         desaturation = desaturation || 0.2;
@@ -447,8 +431,7 @@ export default class ColorMatrix extends Filter {
      * Night effect
      *
      * @param {number} intensity - The intensity of the night effect.
-     * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
-     *  just set the current matrix with @param matrix
+     * @param {boolean} multiply - if true, current matrix and matrix are multiplied.
      */
     night(intensity, multiply) {
         intensity = intensity || 0.1;
@@ -468,8 +451,7 @@ export default class ColorMatrix extends Filter {
      * Erase the current matrix by setting a new indepent one
      *
      * @param {number} amount - how much the predator feels his future victim
-     * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
-     *  just set the current matrix with @param matrix
+     * @param {boolean} multiply - if true, current matrix and matrix are multiplied.
      */
     predator(amount, multiply) {
         const matrix = [
@@ -503,8 +485,7 @@ export default class ColorMatrix extends Filter {
      *
      * Multiply the current matrix
      *
-     * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
-     *  just set the current matrix with @param matrix
+     * @param {boolean} multiply - if true, current matrix and matrix are multiplied.
      */
     lsd(multiply) {
         const matrix = [

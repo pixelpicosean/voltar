@@ -1,4 +1,6 @@
 import Filter from 'engine/renderers/filters/Filter';
+import Vert from './fragments/default.vert';
+import Frag from './noise.frag';
 
 /**
  * @author Vico @vicocotea
@@ -14,12 +16,7 @@ export default class Noise extends Filter {
      * @param {number} seed - A random seed for the noise generation. Default is `Math.random()`.
      */
     constructor(noise = 0.5, seed = Math.random()) {
-        super(
-            // vertex shader
-            require('../fragments/default.vert'),
-            // fragment shader
-            require('./noise.frag')
-        );
+        super(Vert, Frag);
 
         this.noise = noise;
         this.seed = seed;

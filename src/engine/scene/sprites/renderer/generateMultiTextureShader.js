@@ -1,5 +1,6 @@
-import Shader from '../../../Shader';
-import { join } from 'path';
+import Shader from 'engine/Shader';
+
+import vertex_src from './texture.vert';
 
 const fragTemplate = [
     'varying vec2 vTextureCoord;',
@@ -15,20 +16,17 @@ const fragTemplate = [
     '}',
 ].join('\n');
 
-export default function generateMultiTextureShader(gl, maxTextures)
-{
-    const vertexSrc = require('./texture.vert');
+export default function generateMultiTextureShader(gl, maxTextures) {
     let fragmentSrc = fragTemplate;
 
     fragmentSrc = fragmentSrc.replace(/%count%/gi, maxTextures);
     fragmentSrc = fragmentSrc.replace(/%forloop%/gi, generateSampleSrc(maxTextures));
 
-    const shader = new Shader(gl, vertexSrc, fragmentSrc);
+    const shader = new Shader(gl, vertex_src, fragmentSrc);
 
     const sampleValues = [];
 
-    for (let i = 0; i < maxTextures; i++)
-    {
+    for (let i = 0; i < maxTextures; i++) {
         sampleValues[i] = i;
     }
 
@@ -38,22 +36,18 @@ export default function generateMultiTextureShader(gl, maxTextures)
     return shader;
 }
 
-function generateSampleSrc(maxTextures)
-{
+function generateSampleSrc(maxTextures) {
     let src = '';
 
     src += '\n';
     src += '\n';
 
-    for (let i = 0; i < maxTextures; i++)
-    {
-        if (i > 0)
-        {
+    for (let i = 0; i < maxTextures; i++) {
+        if (i > 0) {
             src += '\nelse ';
         }
 
-        if (i < maxTextures - 1)
-        {
+        if (i < maxTextures - 1) {
             src += `if(textureId == ${i}.0)`;
         }
 

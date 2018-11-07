@@ -5,6 +5,9 @@ import Sprite from 'engine/scene/sprites/Sprite';
 import RenderTarget from '../../utils/RenderTarget';
 import FilterManager from '../../managers/FilterManager';
 
+import Vert from './sprite_mask_filter.vert';
+import Frag from './sprite_mask_filter.frag';
+
 /**
  * The SpriteMaskFilter class
  */
@@ -15,10 +18,7 @@ export default class SpriteMaskFilter extends Filter {
     constructor(sprite) {
         const mask_matrix = new Matrix();
 
-        super(
-            require('./sprite_mask_filter.vert'),
-            require('./sprite_mask_filter.frag')
-        );
+        super(Vert, Frag);
 
         sprite.renderable = false;
 

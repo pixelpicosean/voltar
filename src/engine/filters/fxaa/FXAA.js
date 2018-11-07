@@ -1,5 +1,8 @@
 import Filter from 'engine/renderers/filters/Filter';
 
+import Vert from './fxaa.vert';
+import Frag from './fxaa.frag';
+
 /**
  *
  * Basic FXAA implementation based on the code on geeks3d.com with the
@@ -14,11 +17,6 @@ export default class FXAA extends Filter {
      */
     constructor() {
         // TODO - needs work
-        super(
-            // vertex shader
-            require('./fxaa.vert'),
-            // fragment shader
-            require('./fxaa.frag')
-        );
+        super(Vert, Frag);
     }
 }
