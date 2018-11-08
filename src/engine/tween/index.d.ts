@@ -40,12 +40,7 @@ declare namespace tween {
         | 'Back.In' | 'Back.Out' | 'Back.InOut'
         | 'Bounce.In' | 'Bounce.Out' | 'Bounce.InOut';
 
-    import MiniSignal from 'mini-signals';
-    export class Tween {
-        tween_completed: MiniSignal;
-        tween_started: MiniSignal;
-        tween_step: MiniSignal;
-
+    export class Tween extends EventEmitter {
         is_removed: boolean;
 
         autoplay: boolean;
@@ -56,6 +51,12 @@ declare namespace tween {
         interpolates: InterpolateData[];
 
         constructor();
+
+        connect(event: string, fn: Function, context?: any): Tween;
+        connect_once(event: string, fn: Function, context?: any): Tween;
+        disconnect(event: string, fn: Function, context?: any): Tween;
+        disconnect_all(event: string): Tween;
+        emit_signal(event: string, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any): Tween;
 
         set_active(active: boolean): Tween;
         set_speed_scale(scale: number): Tween;

@@ -54,7 +54,7 @@ function EE(fn, context, once) {
  * @returns {EventEmitter}
  * @private
  */
-function addListener(emitter, event, fn, context, once) {
+function add_listener(emitter, event, fn, context, once) {
     if (typeof fn !== 'function') {
         throw new TypeError('The listener must be a function');
     }
@@ -76,7 +76,7 @@ function addListener(emitter, event, fn, context, once) {
  * @param {(String|Symbol)} evt The Event name.
  * @private
  */
-function clearEvent(emitter, evt) {
+function clear_event(emitter, evt) {
     if (--emitter._eventsCount === 0) emitter._events = new Events();
     else delete emitter._events[evt];
 }
@@ -100,7 +100,7 @@ function EventEmitter() {
  * @returns {Array}
  * @public
  */
-EventEmitter.prototype.get_signal_list = function eventNames() {
+EventEmitter.prototype.get_signal_list = function get_signal_list() {
     var names = []
         , events
         , name;
@@ -125,7 +125,7 @@ EventEmitter.prototype.get_signal_list = function eventNames() {
  * @returns {Array} The registered listeners.
  * @public
  */
-EventEmitter.prototype.get_signal_connection_list = function listeners(event) {
+EventEmitter.prototype.get_signal_connection_list = function listget_signal_connection_listeners(event) {
     var evt = prefix ? prefix + event : event
         , handlers = this._events[evt];
 
@@ -229,7 +229,7 @@ EventEmitter.prototype.emit_signal = function emit_signal(event, a1, a2, a3, a4,
  * @public
  */
 EventEmitter.prototype.connect = function connect(event, fn, context) {
-    return addListener(this, event, fn, context, false);
+    return add_listener(this, event, fn, context, false);
 };
 
 /**
@@ -242,7 +242,7 @@ EventEmitter.prototype.connect = function connect(event, fn, context) {
  * @public
  */
 EventEmitter.prototype.connect_once = function connect_once(event, fn, context) {
-    return addListener(this, event, fn, context, true);
+    return add_listener(this, event, fn, context, true);
 };
 
 /**
@@ -260,7 +260,7 @@ EventEmitter.prototype.disconnect = function disconnect(event, fn, context, once
 
     if (!this._events[evt]) return this;
     if (!fn) {
-        clearEvent(this, evt);
+        clear_event(this, evt);
         return this;
     }
 
@@ -272,7 +272,7 @@ EventEmitter.prototype.disconnect = function disconnect(event, fn, context, once
             (!once || listeners.once) &&
             (!context || listeners.context === context)
         ) {
-            clearEvent(this, evt);
+            clear_event(this, evt);
         }
     } else {
         for (var i = 0, events = [], length = listeners.length; i < length; i++) {
@@ -289,7 +289,7 @@ EventEmitter.prototype.disconnect = function disconnect(event, fn, context, once
         // Reset the array, or remove it completely if we have no more listeners.
         //
         if (events.length) this._events[evt] = events.length === 1 ? events[0] : events;
-        else clearEvent(this, evt);
+        else clear_event(this, evt);
     }
 
     return this;
@@ -307,7 +307,7 @@ EventEmitter.prototype.disconnect_all = function disconnect_all(event) {
 
     if (event) {
         evt = prefix ? prefix + event : event;
-        if (this._events[evt]) clearEvent(this, evt);
+        if (this._events[evt]) clear_event(this, evt);
     } else {
         this._events = new Events();
         this._eventsCount = 0;
