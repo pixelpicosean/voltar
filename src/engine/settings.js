@@ -1,4 +1,4 @@
-import { TRANSFORM_MODE, GC_MODES, WRAP_MODES, PRECISION, SCALE_MODES } from './const';
+import { GC_MODES, WRAP_MODES, PRECISION, SCALE_MODES } from './const';
 import max_recommended_textures from './utils/max_recommended_textures';
 import can_upload_same_buffer from './utils/can_upload_same_buffer';
 
@@ -111,14 +111,6 @@ export default {
     },
 
     // TODO: use enum instead of number as the type
-
-    /**
-     * Default transform type.
-     *
-     * @type {TRANSFORM_MODE}
-     * @default TRANSFORM_MODE.STATIC
-     */
-    TRANSFORM_MODE: TRANSFORM_MODE.STATIC,
 
     /**
      * Default Garbage Collection mode.

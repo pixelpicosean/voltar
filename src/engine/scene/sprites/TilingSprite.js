@@ -1,7 +1,7 @@
 import TextureMatrix from 'engine/textures/TextureMatrix';
 import BaseTexture from 'engine/textures/BaseTexture';
 import Texture from 'engine/textures/Texture';
-import { Vector2, TransformStatic, Rectangle } from 'engine/math/index';
+import { Vector2, Transform, Rectangle } from 'engine/math/index';
 import { TextureCache } from 'engine/utils/index';
 import Sprite from './Sprite';
 
@@ -24,9 +24,9 @@ export default class TilingSprite extends Sprite {
         /**
          * Tile transform
          *
-         * @member {TransformStatic}
+         * @member {Transform}
          */
-        this.tile_transform = new TransformStatic();
+        this.tile_transform = new Transform();
 
         // /// private
 

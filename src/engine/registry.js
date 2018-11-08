@@ -1,5 +1,4 @@
 import { Resource } from "./loaders/index";
-import { TransformStatic } from 'engine/math/index';
 
 /**
  * Node class looking table
@@ -40,10 +39,6 @@ export const loader_pre_procs = [];
  * @type {Array<() => ((res: Resource, next: Function) => void)>}
  */
 export const loader_use_procs = [];
-
-export const alternative = {
-    Transform: TransformStatic,
-}
 
 export const optional = {
     Extract: null,

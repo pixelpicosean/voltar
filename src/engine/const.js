@@ -167,16 +167,6 @@ export const PRECISION = {
 };
 
 /**
- * Constants that specify the transform type.
- *
- * @enum {number}
- */
-export const TRANSFORM_MODE = {
-    STATIC: 0,
-    DYNAMIC: 1,
-};
-
-/**
  * Constants that define the type of gradient on text.
  *
  * @enum {number}

@@ -1,29 +1,45 @@
-import Vector2 from './Vector2';
 import ObservableVector2 from './ObservableVector2';
-import TransformBase from './TransformBase';
 import Matrix from './Matrix';
 
 /**
- * Generic class to deal with traditional 2D matrix transforms
- * local transformation is calculated from position,scale,skew and rotation
+ * Transform that takes care about its versions
  */
-export default class Transform extends TransformBase {
+export default class Transform {
     constructor() {
-        super();
+        /**
+         * The global matrix transform. It can be swapped temporarily by some functions like get_local_Bounds()
+         *
+         * @member {Matrix}
+         */
+        this.world_transform = new Matrix();
+
+        /**
+         * The local matrix transform
+         *
+         * @member {Matrix}
+         */
+        this.local_transform = new Matrix();
 
         /**
          * The coordinate of the object relative to the local coordinates of the parent.
          *
-         * @member {Vector2}
+         * @member {ObservableVector2}
          */
-        this.position = new Vector2(0, 0);
+        this.position = new ObservableVector2(this.on_change, this, 0, 0);
 
         /**
          * The scale factor of the object.
          *
-         * @member {Vector2}
+         * @member {ObservableVector2}
          */
-        this.scale = new Vector2(1, 1);
+        this.scale = new ObservableVector2(this.on_change, this, 1, 1);
+
+        /**
+         * The pivot point of the node that it rotates around
+         *
+         * @member {ObservableVector2}
+         */
+        this.pivot = new ObservableVector2(this.on_change, this, 0, 0);
 
         /**
          * The skew amount, on the x and y axis.
@@ -32,29 +48,32 @@ export default class Transform extends TransformBase {
          */
         this.skew = new ObservableVector2(this.update_skew, this, 0, 0);
 
-        /**
-         * The pivot point of the node that it rotates around
-         *
-         * @member {Vector2}
-         */
-        this.pivot = new Vector2(0, 0);
-
-        /**
-         * The rotation value of the object, in radians
-         *
-         * @member {Number}
-         * @private
-         */
         this._rotation = 0;
 
         this._cx = 1; // cos rotation + skewY;
         this._sx = 0; // sin rotation + skewY;
         this._cy = 0; // cos rotation + Math.PI/2 - skewX;
         this._sy = 1; // sin rotation + Math.PI/2 - skewX;
+
+        this._parent_id = 0;
+
+        this._world_id = 0;
+        this._local_id = 0;
+
+        this._current_local_id = 0;
     }
 
     /**
-     * Updates the skew values when the skew or rotation changes.
+     * Called when a value changes.
+     *
+     * @private
+     */
+    on_change() {
+        this._local_id++;
+    }
+
+    /**
+     * Called when skew or rotation changes
      *
      * @private
      */
@@ -63,6 +82,8 @@ export default class Transform extends TransformBase {
         this._sx = Math.sin(this._rotation + this.skew._y);
         this._cy = -Math.sin(this._rotation - this.skew._x); // cos, added PI/2
         this._sy = Math.cos(this._rotation - this.skew._x); // sin, added PI/2
+
+        this._local_id++;
     }
 
     /**
@@ -71,13 +92,20 @@ export default class Transform extends TransformBase {
     update_local_transform() {
         const lt = this.local_transform;
 
-        lt.a = this._cx * this.scale.x;
-        lt.b = this._sx * this.scale.x;
-        lt.c = this._cy * this.scale.y;
-        lt.d = this._sy * this.scale.y;
+        if (this._local_id !== this._current_local_id) {
+            // get the matrix values of the displayobject based on its transform properties..
+            lt.a = this._cx * this.scale._x;
+            lt.b = this._sx * this.scale._x;
+            lt.c = this._cy * this.scale._y;
+            lt.d = this._sy * this.scale._y;
 
-        lt.tx = this.position.x - ((this.pivot.x * lt.a) + (this.pivot.y * lt.c));
-        lt.ty = this.position.y - ((this.pivot.x * lt.b) + (this.pivot.y * lt.d));
+            lt.tx = this.position._x - ((this.pivot._x * lt.a) + (this.pivot._y * lt.c));
+            lt.ty = this.position._y - ((this.pivot._x * lt.b) + (this.pivot._y * lt.d));
+            this._current_local_id = this._local_id;
+
+            // force an update..
+            this._parent_id = -1;
+        }
     }
 
     /**
@@ -88,26 +116,38 @@ export default class Transform extends TransformBase {
     update_transform(parent_transform) {
         const lt = this.local_transform;
 
-        lt.a = this._cx * this.scale.x;
-        lt.b = this._sx * this.scale.x;
-        lt.c = this._cy * this.scale.y;
-        lt.d = this._sy * this.scale.y;
+        if (this._local_id !== this._current_local_id) {
+            // get the matrix values of the displayobject based on its transform properties..
+            lt.a = this._cx * this.scale._x;
+            lt.b = this._sx * this.scale._x;
+            lt.c = this._cy * this.scale._y;
+            lt.d = this._sy * this.scale._y;
 
-        lt.tx = this.position.x - ((this.pivot.x * lt.a) + (this.pivot.y * lt.c));
-        lt.ty = this.position.y - ((this.pivot.x * lt.b) + (this.pivot.y * lt.d));
+            lt.tx = this.position._x - ((this.pivot._x * lt.a) + (this.pivot._y * lt.c));
+            lt.ty = this.position._y - ((this.pivot._x * lt.b) + (this.pivot._y * lt.d));
+            this._current_local_id = this._local_id;
 
-        // concat the parent matrix with the objects transform.
-        const pt = parent_transform.world_transform;
-        const wt = this.world_transform;
+            // force an update..
+            this._parent_id = -1;
+        }
 
-        wt.a = (lt.a * pt.a) + (lt.b * pt.c);
-        wt.b = (lt.a * pt.b) + (lt.b * pt.d);
-        wt.c = (lt.c * pt.a) + (lt.d * pt.c);
-        wt.d = (lt.c * pt.b) + (lt.d * pt.d);
-        wt.tx = (lt.tx * pt.a) + (lt.ty * pt.c) + pt.tx;
-        wt.ty = (lt.tx * pt.b) + (lt.ty * pt.d) + pt.ty;
+        if (this._parent_id !== parent_transform._world_id) {
+            // concat the parent matrix with the objects transform.
+            const pt = parent_transform.world_transform;
+            const wt = this.world_transform;
 
-        this._world_id++;
+            wt.a = (lt.a * pt.a) + (lt.b * pt.c);
+            wt.b = (lt.a * pt.b) + (lt.b * pt.d);
+            wt.c = (lt.c * pt.a) + (lt.d * pt.c);
+            wt.d = (lt.c * pt.b) + (lt.d * pt.d);
+            wt.tx = (lt.tx * pt.a) + (lt.ty * pt.c) + pt.tx;
+            wt.ty = (lt.tx * pt.b) + (lt.ty * pt.d) + pt.ty;
+
+            this._parent_id = parent_transform._world_id;
+
+            // update the id of the transform..
+            this._world_id++;
+        }
     }
 
     /**
@@ -117,6 +157,7 @@ export default class Transform extends TransformBase {
      */
     set_from_matrix(matrix) {
         matrix.decompose(this);
+        this._local_id++;
     }
 
     /**
@@ -134,3 +175,5 @@ export default class Transform extends TransformBase {
         this.update_skew();
     }
 }
+
+export const IDENTITY = new Transform();

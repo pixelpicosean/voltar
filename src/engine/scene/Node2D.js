@@ -1,13 +1,12 @@
 /// <reference path="../tween/index.d.ts" />
 
-import { node_plugins, alternative } from 'engine/registry';
+import { node_plugins } from 'engine/registry';
 import {
     EventEmitter,
-    Signal,
     remove_items,
 } from 'engine/dep/index';
 import {
-    TransformStatic,
+    Transform,
     Vector2,
     Bounds,
     Rectangle,
@@ -125,9 +124,9 @@ export default class Node2D extends EventEmitter {
          * World transform and local transform of this object.
          * This will become read-only later, please do not assign anything there unless you know what are you doing
          *
-         * @type {TransformStatic}
+         * @type {Transform}
          */
-        this.transform = new alternative.Transform();
+        this.transform = new Transform();
 
         /**
          * The opacity of the object.

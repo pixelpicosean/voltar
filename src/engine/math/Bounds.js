@@ -1,5 +1,5 @@
 import Vector2 from './Vector2';
-import TransformBase from './TransformBase';
+import Transform from './Transform';
 import Rectangle from './shapes/Rectangle';
 
 /**
@@ -149,7 +149,7 @@ export default class Bounds {
     /**
      * Adds sprite frame, transformed.
      *
-     * @param {TransformBase} transform - TODO
+     * @param {Transform} transform - TODO
      * @param {number} x0 - TODO
      * @param {number} y0 - TODO
      * @param {number} x1 - TODO
@@ -207,7 +207,7 @@ export default class Bounds {
     /**
      * Add an array of vertices
      *
-     * @param {TransformBase} transform - TODO
+     * @param {Transform} transform - TODO
      * @param {Float32Array} vertices - TODO
      * @param {number} beginOffset - TODO
      * @param {number} endOffset - TODO
