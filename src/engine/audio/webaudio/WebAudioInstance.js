@@ -1,4 +1,4 @@
-import { EventEmitter } from 'engine/dep/index';
+import { VObject } from 'engine/dep/index';
 import WebAudioUtils from "./WebAudioUtils";
 import WebAudioMedia from './WebAudioMedia';
 
@@ -8,7 +8,7 @@ let id = 0;
  * A single play instance that handles the AudioBufferSourceNode.
  * @param {WebAudioMedia} source
  */
-export default class WebAudioInstance extends EventEmitter {
+export default class WebAudioInstance extends VObject {
     constructor(media) {
         super();
 

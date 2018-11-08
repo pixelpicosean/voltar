@@ -46,12 +46,12 @@ function EE(fn, context, once) {
 /**
  * Add a listener for a given event.
  *
- * @param {EventEmitter} emitter Reference to the `EventEmitter` instance.
+ * @param {VObject} emitter Reference to the `VObject` instance.
  * @param {(String|Symbol)} event The event name.
  * @param {Function} fn The listener function.
  * @param {*} context The context to invoke the listener with.
  * @param {Boolean} once Specify if the listener is a one-time listener.
- * @returns {EventEmitter}
+ * @returns {VObject}
  * @private
  */
 function add_listener(emitter, event, fn, context, once) {
@@ -72,7 +72,7 @@ function add_listener(emitter, event, fn, context, once) {
 /**
  * Clear event by name.
  *
- * @param {EventEmitter} emitter Reference to the `EventEmitter` instance.
+ * @param {VObject} emitter Reference to the `VObject` instance.
  * @param {(String|Symbol)} evt The Event name.
  * @private
  */
@@ -82,13 +82,12 @@ function clear_event(emitter, evt) {
 }
 
 /**
- * Minimal `EventEmitter` interface that is molded against the Node.js
- * `EventEmitter` interface.
+ * Base class of most engine classes, with ability to emit events.
  *
  * @constructor
  * @public
  */
-function EventEmitter() {
+function VObject() {
     this._events = new Events();
     this._eventsCount = 0;
 }
@@ -100,7 +99,7 @@ function EventEmitter() {
  * @returns {Array}
  * @public
  */
-EventEmitter.prototype.get_signal_list = function get_signal_list() {
+VObject.prototype.get_signal_list = function get_signal_list() {
     var names = []
         , events
         , name;
@@ -125,7 +124,7 @@ EventEmitter.prototype.get_signal_list = function get_signal_list() {
  * @returns {Array} The registered listeners.
  * @public
  */
-EventEmitter.prototype.get_signal_connection_list = function listget_signal_connection_listeners(event) {
+VObject.prototype.get_signal_connection_list = function listget_signal_connection_listeners(event) {
     var evt = prefix ? prefix + event : event
         , handlers = this._events[evt];
 
@@ -146,7 +145,7 @@ EventEmitter.prototype.get_signal_connection_list = function listget_signal_conn
  * @returns {Number} The number of listeners.
  * @public
  */
-EventEmitter.prototype.get_signal_connection_count = function get_signal_connection_count(event) {
+VObject.prototype.get_signal_connection_count = function get_signal_connection_count(event) {
     var evt = prefix ? prefix + event : event
         , listeners = this._events[evt];
 
@@ -167,7 +166,7 @@ EventEmitter.prototype.get_signal_connection_count = function get_signal_connect
  * @returns {Boolean} `true` if the event had listeners, else `false`.
  * @public
  */
-EventEmitter.prototype.emit_signal = function emit_signal(event, a1, a2, a3, a4, a5) {
+VObject.prototype.emit_signal = function emit_signal(event, a1, a2, a3, a4, a5) {
     var evt = prefix ? prefix + event : event;
 
     if (!this._events[evt]) return false;
@@ -225,10 +224,10 @@ EventEmitter.prototype.emit_signal = function emit_signal(event, a1, a2, a3, a4,
  * @param {(String|Symbol)} event The event name.
  * @param {Function} fn The listener function.
  * @param {*} [context=this] The context to invoke the listener with.
- * @returns {EventEmitter} `this`.
+ * @returns {VObject} `this`.
  * @public
  */
-EventEmitter.prototype.connect = function connect(event, fn, context) {
+VObject.prototype.connect = function connect(event, fn, context) {
     return add_listener(this, event, fn, context, false);
 };
 
@@ -238,10 +237,10 @@ EventEmitter.prototype.connect = function connect(event, fn, context) {
  * @param {(String|Symbol)} event The event name.
  * @param {Function} fn The listener function.
  * @param {*} [context=this] The context to invoke the listener with.
- * @returns {EventEmitter} `this`.
+ * @returns {VObject} `this`.
  * @public
  */
-EventEmitter.prototype.connect_once = function connect_once(event, fn, context) {
+VObject.prototype.connect_once = function connect_once(event, fn, context) {
     return add_listener(this, event, fn, context, true);
 };
 
@@ -252,10 +251,10 @@ EventEmitter.prototype.connect_once = function connect_once(event, fn, context) 
  * @param {Function} fn Only remove the listeners that match this function.
  * @param {*} [context] Only remove the listeners that have this context.
  * @param {Boolean} [once] Only remove one-time listeners.
- * @returns {EventEmitter} `this`.
+ * @returns {VObject} `this`.
  * @public
  */
-EventEmitter.prototype.disconnect = function disconnect(event, fn, context, once) {
+VObject.prototype.disconnect = function disconnect(event, fn, context, once) {
     var evt = prefix ? prefix + event : event;
 
     if (!this._events[evt]) return this;
@@ -299,10 +298,10 @@ EventEmitter.prototype.disconnect = function disconnect(event, fn, context, once
  * Remove all listeners, or those of the specified event.
  *
  * @param {(String|Symbol)} [event] The event name.
- * @returns {EventEmitter} `this`.
+ * @returns {VObject} `this`.
  * @public
  */
-EventEmitter.prototype.disconnect_all = function disconnect_all(event) {
+VObject.prototype.disconnect_all = function disconnect_all(event) {
     var evt;
 
     if (event) {
@@ -318,4 +317,4 @@ EventEmitter.prototype.disconnect_all = function disconnect_all(event) {
 
 export const prefixed = prefix;
 
-export default EventEmitter;
+export default VObject;

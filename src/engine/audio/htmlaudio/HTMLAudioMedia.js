@@ -1,4 +1,4 @@
-import { EventEmitter } from 'engine/dep/index';
+import { VObject } from 'engine/dep/index';
 import HTMLAudioInstance from "./HTMLAudioInstance";
 
 /**
@@ -6,7 +6,7 @@ import HTMLAudioInstance from "./HTMLAudioInstance";
  * @param {HTMLAudioElement|String|Object} options Either the path or url to the source file.
  *        or the object of options to use. See {@link Sound.from}
  */
-export default class HTMLAudioMedia extends EventEmitter {
+export default class HTMLAudioMedia extends VObject {
     init(parent) {
         this.parent = parent;
         this._source = parent.options.source || new Audio();

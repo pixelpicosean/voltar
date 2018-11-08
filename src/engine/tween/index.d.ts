@@ -40,7 +40,7 @@ declare namespace tween {
         | 'Back.In' | 'Back.Out' | 'Back.InOut'
         | 'Bounce.In' | 'Bounce.Out' | 'Bounce.InOut';
 
-    export class Tween extends EventEmitter {
+    export class Tween extends VObject {
         is_removed: boolean;
 
         autoplay: boolean;

@@ -2,7 +2,7 @@
 
 export { default as remove_items } from 'remove-array-items';
 
-export { default as EventEmitter } from './EventEmitter';
+export { default as VObject } from './VObject';
 
 export { default as Signal } from 'mini-signals';
 

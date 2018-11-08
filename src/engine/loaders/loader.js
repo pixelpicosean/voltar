@@ -1,4 +1,4 @@
-import { EventEmitter, resource_loader, ResourceLoader } from 'engine/dep/index';
+import { VObject, resource_loader, ResourceLoader } from 'engine/dep/index';
 const { Resource } = resource_loader;
 
 // @ts-ignore
@@ -60,7 +60,7 @@ export default class Loader extends ResourceLoader {
      */
     constructor(baseUrl, concurrency) {
         super(baseUrl, concurrency);
-        EventEmitter.call(this);
+        VObject.call(this);
 
         for (let i = 0; i < loader_pre_procs.length; ++i) {
             this.pre(loader_pre_procs[i]());
@@ -96,8 +96,8 @@ export default class Loader extends ResourceLoader {
 }
 
 // Copy EE3 prototype (mixin)
-for (const k in EventEmitter.prototype) {
-    Loader.prototype[k] = EventEmitter.prototype[k];
+for (const k in VObject.prototype) {
+    Loader.prototype[k] = VObject.prototype[k];
 }
 
 // Add custom extentions

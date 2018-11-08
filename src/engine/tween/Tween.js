@@ -1,4 +1,4 @@
-import { EventEmitter, remove_items } from 'engine/dep/index';
+import { VObject, remove_items } from 'engine/dep/index';
 import { Vector2, clamp } from 'engine/math/index';
 import flatten_key_url from './flatten_key_url';
 import { Easing } from './easing';
@@ -141,7 +141,7 @@ const create_interpolate = () => {
 };
 
 // TODO: better easing support (https://github.com/rezoner/ease)
-export default class Tween extends EventEmitter {
+export default class Tween extends VObject {
     constructor() {
         super();
 

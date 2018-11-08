@@ -1,4 +1,4 @@
-import { EventEmitter } from 'engine/dep/index';
+import { VObject } from 'engine/dep/index';
 import * as ticker from 'engine/ticker/index';
 import HTMLAudioMedia from './HTMLAudioMedia';
 
@@ -6,7 +6,7 @@ let id = 0;
 /**
  * Instance which wraps the `<audio>` element playback.
  */
-export default class HTMLAudioInstance extends EventEmitter {
+export default class HTMLAudioInstance extends VObject {
     constructor(parent) {
         super();
 

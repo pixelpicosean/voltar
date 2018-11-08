@@ -1,4 +1,4 @@
-import { EventEmitter } from 'engine/dep/index';
+import { VObject } from 'engine/dep/index';
 import InteractionData from './InteractionData';
 import InteractionEvent from './InteractionEvent';
 import InteractionTrackingData from './InteractionTrackingData';
@@ -40,7 +40,7 @@ const hit_test_event = {
  *
  * An instance of this class is automatically created by default, and can be found at renderer.plugins.interaction
  */
-export default class InteractionManager extends EventEmitter {
+export default class InteractionManager extends VObject {
     /**
      * @param {WebGLRenderer} renderer - A reference to the current renderer
      * @param {object} [options] - The options for the manager.

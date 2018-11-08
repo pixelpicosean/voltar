@@ -1,4 +1,4 @@
-import { EventEmitter } from 'engine/dep/index';
+import { VObject } from 'engine/dep/index';
 import Filterable from "../Filterable";
 
 /**
@@ -58,10 +58,10 @@ export default class WebAudioContext extends Filterable {
 
         /**
          * Handle global events
-         * @type {EventEmitter}
+         * @type {VObject}
          * @default 1
          */
-        this.events = new EventEmitter();
+        this.events = new VObject();
 
         /**
          * Sets the volume from 0 to 1.

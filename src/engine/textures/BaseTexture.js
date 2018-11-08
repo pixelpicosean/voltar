@@ -8,13 +8,13 @@ import {
     BaseTextureCache, TextureCache,
 } from '../utils/index';
 import { is_po2 } from 'engine/math/index';
-import { EventEmitter } from 'engine/dep/index';
+import { VObject } from 'engine/dep/index';
 import determine_cross_origin from '../utils/determine_cross_origin';
 
 /**
  * A texture stores the information that represents an image. All textures have a base texture.
  */
-export default class BaseTexture extends EventEmitter {
+export default class BaseTexture extends VObject {
     /**
      * @param {HTMLImageElement|HTMLCanvasElement} [source] - the source object of the texture.
      * @param {number} [scale_mode=settings.SCALE_MODE] - See {@link SCALE_MODES} for possible values

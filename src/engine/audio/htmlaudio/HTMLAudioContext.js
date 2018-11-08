@@ -1,9 +1,9 @@
-import { EventEmitter } from 'engine/dep/index';
+import { VObject } from 'engine/dep/index';
 
 /**
  * The fallback version of WebAudioContext which uses `<audio>` instead of WebAudio API.
  */
-export default class HTMLAudioContext extends EventEmitter {
+export default class HTMLAudioContext extends VObject {
     constructor() {
         super();
         this.speed = 1;

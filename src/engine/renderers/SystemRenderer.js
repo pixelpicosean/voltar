@@ -2,7 +2,7 @@ import { RENDERER_TYPE } from '../const';
 import settings from '../settings';
 import { say_hello, hex2string, hex2rgb } from '../utils/index';
 import { Matrix, Rectangle } from '../math/index';
-import { EventEmitter } from 'engine/dep/index';
+import { VObject } from 'engine/dep/index';
 import Node2D from '../scene/Node2D';
 import RenderTexture from '../textures/RenderTexture';
 import Texture from '../textures/Texture';
@@ -40,7 +40,7 @@ const temp_matrix = new Matrix();
  *
  * @abstract
  */
-export default class SystemRenderer extends EventEmitter {
+export default class SystemRenderer extends VObject {
     /**
      * @param {string} system - The name of the system this renderer is for.
      * @param {RendererDesc} [desc] - The optional renderer parameters

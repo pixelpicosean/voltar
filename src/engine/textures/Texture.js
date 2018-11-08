@@ -1,5 +1,5 @@
 import settings from '../settings';
-import { EventEmitter } from 'engine/dep/index';
+import { VObject } from 'engine/dep/index';
 import BaseTexture from './BaseTexture';
 import TextureUvs from './TextureUvs';
 import TextureMatrix from './TextureMatrix';
@@ -28,7 +28,7 @@ import { uid, TextureCache, get_resolution_of_url } from '../utils/index';
  * ```
  * You can use a ticker or rAF to ensure your sprites load the finished textures after processing. See issue #3068.
  */
-export default class Texture extends EventEmitter {
+export default class Texture extends VObject {
     /**
      * @param {BaseTexture} base_texture - The base texture source to create the texture from
      * @param {Rectangle} [frame] - The rectangle frame of the texture to show

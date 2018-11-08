@@ -2,7 +2,7 @@
 
 import { node_plugins } from 'engine/registry';
 import {
-    EventEmitter,
+    VObject,
     remove_items,
 } from 'engine/dep/index';
 import {
@@ -39,7 +39,7 @@ let uid = 0;
  * container.add_child(sprite);
  * ```
  */
-export default class Node2D extends EventEmitter {
+export default class Node2D extends VObject {
     /**
      * The visibility of the object. If false the object will not be drawn, and
      * the update_transform function will not be called.
@@ -660,7 +660,7 @@ export default class Node2D extends EventEmitter {
      * after calling `destroy`.
      */
     destroy() {
-        // TODO: how do we cleanup an `EventEmitter`
+        // TODO: how do we cleanup an `VObject`
         this.disconnect_all();
         if (this.parent) {
             this.parent.remove_child(this);
