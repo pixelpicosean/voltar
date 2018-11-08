@@ -152,90 +152,50 @@ export class SpriteFrames {
     }
 }
 
-/**
- * An AnimatedSprite is a simple way to display an animation depicted by a list of textures.
- *
- * @class
- * @extends Sprite
- */
 export default class AnimatedSprite extends Sprite {
-    /**
-     * @param {SpriteFrames|Object|string} frames - frame and animation data
-     */
-    constructor(frames) {
-        super(undefined);
-
-        this.type = 'AnimatedSprite';
-
-        this.set_frames(frames);
-
-        /**
-         * Indicates if the AnimatedSprite is currently playing
-         *
-         * @type {boolean}
-         * @readonly
-         */
-        this.playing = false;
-
-        this.animation = '';
-        this.frame = 0;
-
-        this.timeout = 0;
+    get frames() {
+        return this._frames;
     }
-    _load_data(data) {
-        super._load_data(data);
-
-        if (data.frames !== undefined) {
-            this.set_frame(data.frames);
-        }
-
-        return this;
-    }
-
-    play(anim, restart = false) {
-        if (anim && anim.length > 0) {
-            this.set_animation(anim);
-        }
-        this._set_playing(true);
-        if (restart) {
-            this.frame = 0;
-        }
-    }
-    stop() {
-        this._set_playing(false);
-    }
-
-    set_frames(frames_p) {
+    set frames(frames_p) {
         let frames = null;
-        if (typeof(frames_p) === 'string') {
+        if (typeof (frames_p) === 'string') {
             frames = new SpriteFrames(SpriteFramesCache[frames_p]);
         } else if (frames_p instanceof SpriteFrames) {
             frames = frames_p;
         } else {
             frames = new SpriteFrames(frames_p);
         }
-        this.frames = frames;
+        this._frames = frames;
     }
-    set_animation(anim) {
-        if (this.animation === anim) {
+    set_frames(value) {
+        this.frames = value;
+        return this;
+    }
+
+    get animation() {
+        return this._animation;
+    }
+    set animation(anim) {
+        if (this._animation === anim) {
             return;
         }
 
-        this.animation = anim;
+        this._animation = anim;
         this._reset_timeout();
-        this.set_frame(0);
+        this._frame = 0;
         this._update_texture();
     }
-    get_frame() {
-        return this.frame;
+
+    get frame() {
+        return this._frame;
     }
-    set_frame(frame) {
-        if (!this.frames) {
+    set frame(frame) {
+        if (!this._frames) {
             return;
         }
 
-        if (this.frames.has_animation(this.animation)) {
-            const limit = this.frames.get_frame_count(this.animation);
+        if (this._frames.has_animation(this._animation)) {
+            const limit = this._frames.get_frame_count(this._animation);
             if (frame >= limit) {
                 frame = limit - 1;
             }
@@ -245,34 +205,109 @@ export default class AnimatedSprite extends Sprite {
             frame = 0;
         }
 
-        if (frame === this.frame) {
+        if (frame === this._frame) {
             return;
         }
 
-        this.frame = frame;
+        this._frame = frame;
         this._reset_timeout();
         this._update_texture();
         this.emit_signal('frame_changed');
     }
-    get_sprite_frames() {
-        return this.frames;
+    set_frame(value) {
+        this.frame = value;
+        return this;
     }
-    set_sprite_frames(frames) {
-        this.frames = (frames instanceof SpriteFrames) ? frames : new SpriteFrames(frames);
 
-        this.set_frame(this.frame);
+    get playing() {
+        return this._playing;
+    }
+    set playing(value) {
+        this._playing = true;
+        this._set_playing(value);
+    }
+    set_playing(value) {
+        this.playing = value;
+        return this;
+    }
+
+    /**
+     * An AnimatedSprite is a simple way to display an animation depicted by a list of textures.
+     *
+     * @param {SpriteFrames|Object|string} frames - frame and animation data
+     */
+    constructor(frames) {
+        super(undefined);
+
+        this.type = 'AnimatedSprite';
+
+        this._frames = null;
+
+        this.frames = frames;
+
+        /**
+         * Indicates if the AnimatedSprite is currently playing
+         *
+         * @type {boolean}
+         * @readonly
+         */
+        this._playing = false;
+
+        this._animation = '';
+        this._frame = 0;
+        this.speed_scale = 1;
+
+        this.timeout = 0;
+    }
+    _load_data(data) {
+        super._load_data(data);
+
+        if (data.frames !== undefined) {
+            this.frames = data.frames;
+        }
+
+        if (data.animation !== undefined) {
+            this.animation = data.animation;
+        }
+
+        if (data.frame !== undefined) {
+            this.frame = data.frame;
+        }
+
+        if (data.playing !== undefined) {
+            this.playing = data.playing;
+        }
+
+        if (data.speed_scale !== undefined) {
+            this.speed_scale = data.speed_scale;
+        }
+
+        return this;
+    }
+
+    play(anim, restart = false) {
+        if (anim && anim.length > 0) {
+            this._animation = anim;
+        }
+        this._set_playing(true);
+        if (restart) {
+            this._frame = 0;
+        }
+    }
+    stop() {
+        this._set_playing(false);
     }
 
     _reset_timeout() {
         if (!this.playing) {
             return;
         }
-        if (!this.frames) {
+        if (!this._frames) {
             return;
         }
 
-        if (this.frames.has_animation(this.animation)) {
-            const speed = this.frames.get_animation_speed(this.animation);
+        if (this._frames.has_animation(this.animation)) {
+            const speed = this._frames.get_animation_speed(this.animation);
             if (speed > 0) {
                 this.timeout = 1.0 / speed;
             }
@@ -301,47 +336,47 @@ export default class AnimatedSprite extends Sprite {
      */
     _propagate_process(delta) {
         // Update animation
-        if (!this.frames) {
+        if (!this._frames) {
             super._propagate_process(delta);
             return;
         }
-        if (!this.frames.has_animation(this.animation)) {
+        if (!this._frames.has_animation(this._animation)) {
             super._propagate_process(delta);
             return;
         }
-        if (this.frame < 0) {
+        if (this._frame < 0) {
             super._propagate_process(delta);
             return;
         }
-        if (!this.playing) {
+        if (!this._playing) {
             super._propagate_process(delta);
             return;
         }
 
-        const speed = this.frames.get_animation_speed(this.animation);
+        const speed = this._frames.get_animation_speed(this._animation);
         if (speed === 0) {
             super._propagate_process(delta);
             return;
         }
 
-        let remaining = delta;
+        let remaining = delta * this.speed_scale;
 
         while (remaining) {
             if (this.timeout <= 0) {
                 this.timeout = 1.0 / speed;
 
-                const fc = this.frames.get_frame_count(this.animation);
-                if (this.frame >= fc - 1) {
-                    if (this.frames.get_animation_loop(this.animation)) {
-                        this.frame = 0;
+                const fc = this._frames.get_frame_count(this._animation);
+                if (this._frame >= fc - 1) {
+                    if (this._frames.get_animation_loop(this._animation)) {
+                        this._frame = 0;
                     }
                     else {
-                        this.frame = fc - 1;
+                        this._frame = fc - 1;
                     }
                 }
                 else {
-                    this.frame++;
-                    if (this.frame === fc - 1) {
+                    this._frame++;
+                    if (this._frame === fc - 1) {
                         this.emit_signal('animation_finished');
                     }
                 }
@@ -364,7 +399,7 @@ export default class AnimatedSprite extends Sprite {
      */
     _update_texture() {
         // let tex = this.frames.animations[this.animation].frames[this.frame];
-        let tex = this.frames.get_frame(this.animation, this.frame);
+        let tex = this._frames.get_frame(this._animation, this._frame);
         // Frame texture is texture instance
         if (tex.base_texture) {
             this._texture = tex;

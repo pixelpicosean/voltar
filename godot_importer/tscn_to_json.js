@@ -1,12 +1,12 @@
-// @ts-nocheck
 const _ = require('lodash');
 const fp = require('lodash/fp');
 const fs = require('fs');
 const path = require('path');
 const walk = require('walk');
 const {
+    remove_last,
     remove_first_n_last,
-    trim_string,
+    parse_as_primitive,
 } = require('./utils');
 const {
     int,
@@ -16,12 +16,17 @@ const {
     get_function_params,
     Color,
     Vector2,
+    GeneralArray,
 } = require('./parser/parse_utils');
 
 const gd_scene = require('./parser/gd_scene');
 const node = require('./parser/node');
 const resource = require('./parser/resource');
 
+/**
+ * @param {string} data
+ * @returns string[]
+ */
 function split_to_blocks(data) {
     const blocks = [];
 
@@ -45,6 +50,10 @@ function split_to_blocks(data) {
 
     return blocks.filter(b => b.length > 0);
 }
+/**
+ * @param {string} attr_str
+ * @returns {}
+ */
 function parse_attr(attr_str) {
     const attr = {};
 
@@ -95,6 +104,10 @@ function parse_attr(attr_str) {
 
     return attr;
 };
+/**
+ * @param {string} str
+ * @returns {{key: string, attr: any}}
+ */
 function parse_section(str) {
     if (str[0] !== '[' || _.last(str) !== ']') {
         throw `Expected '[' at the beginning and ']' at the end!`;
@@ -109,117 +122,188 @@ function parse_section(str) {
         attr: parse_attr(attr_str),
     };
 };
+/**
+ * @param {any} db
+ * @param {string} line
+ * @param {string[]} tokens
+ * @param {{key: string|number, value: any}[]} stack
+ * @param {string|number} [key]
+ */
+function push_tokens_in_a_line(db, line, tokens, stack, key = undefined) {
+    const p_idx = line.indexOf('{');
+    const b_idx = line.indexOf('[');
+
+    // array or dictionary
+    // - "{"
+    if (p_idx >= 0 && b_idx < 0) {
+        tokens.push('{')
+        stack.push({
+            key: key,
+            value: {},
+        })
+        // all the properties of a dictionary are start with a "key"
+        // so we can stop here
+    }
+    // - "["
+    else if (b_idx >= 0 && p_idx < 0) {
+        tokens.push('[')
+        stack.push({
+            key: key,
+            value: [],
+        })
+        const rest_line = line.substring(b_idx + 1);
+
+        // the array is ended in this line
+        if (rest_line.indexOf(']') === rest_line.lastIndexOf(']')) {
+            const items_str = rest_line.substring(0, rest_line.indexOf(']')).trim();
+            const items = GeneralArray(items_str);
+
+            // end it
+            tokens.pop();
+            const pack = stack.pop();
+            pack.value = items;
+
+            const parent = (stack.length > 0) ? _.last(stack).value : db;
+            parent[key] = items;
+        }
+        // multi-line array
+        else {
+            push_tokens_in_a_line(db, rest_line, tokens, stack, 0);
+        }
+    }
+    // - "{ [" or "[ {"
+    else if (p_idx >= 0 && b_idx >= 0) {
+        if (p_idx < b_idx) {
+            tokens.push('{')
+            stack.push({
+                key: key,
+                value: {},
+            })
+        } else {
+            tokens.push('[')
+            stack.push({
+                key: key,
+                value: [],
+            })
+            const rest_line = line.substring(b_idx + 1);
+            push_tokens_in_a_line(db, rest_line, tokens, stack, 0);
+        }
+    }
+
+    // let's just keep the others for now
+    else {
+        const parent = (stack.length > 0) ? _.last(stack).value : db;
+        parent[key] = line;
+    }
+};
+/**
+ * @param {string[]} block
+ * @returns {any}
+ */
 function parse_block(block) {
     const data = Object.assign({
         prop: {}
     }, parse_section(block[0]));
 
-    // Properties
+    const tokens = [];
+    /** @type {{key: string|number, value: any}[]} */
+    const stack = [];
     for (let i = 1; i < block.length; i++) {
-        if (block[i].indexOf('=') >= 0) {
-            // One line property is not end with '{'
-            if (_.last(block[i]) !== '{') {
-                let seg = block[i].split('=');
-                data.prop[trim_string(seg[0]).replace(/"/g, '')] = trim_string(seg[1]);
-            }
-            // Multi-line property (object)
-            else {
-                let seg = block[i].split('=');
+        const line = block[i];
 
-                // An array, so this line is end with "[ {"
-                if (seg[1].indexOf('[') >= 0) {
-                    let prop = data.prop[trim_string(seg[0]).replace(/"/g, '')] = [{}];
-                    i += 1;
-
-                    let square_balance = -1;
-                    for (; i < block.length; i++) {
-                        if (block[i].indexOf('[') >= 0) {
-                            square_balance -= 1;
+        let token = tokens.length ? tokens[tokens.length - 1] : '';
+        switch (token) {
+            // search for new token
+            case '': {
+                const equal_idx = line.indexOf('=');
+                if (equal_idx > 0) {
+                    const key = line.substr(0, equal_idx).trim();
+                    const value_res = parse_as_primitive(line.substring(equal_idx + 1));
+                    if (value_res.is_valid) {
+                        data.prop[key] = value_res.value;
+                    } else {
+                        // multi-line string
+                        if (value_res.type === 'multi_line_string') {
+                            tokens.push('"');
+                            stack.push({
+                                key: key,
+                                value: (value_res.value + '\n'),
+                            });
                         }
-                        if (block[i].indexOf(']') >= 0) {
-                            square_balance += 1;
-                        }
-
-                        // not open another multi-line [ ]
-                        if (square_balance === -1) {
-                            // Contains ":" means it is a single line property
-                            if (block[i].indexOf(':') >= 0) {
-                                let inner_seg = block[i].split(':');
-                                _.last(prop)[trim_string(inner_seg[0]).replace(/"/g, '')] = trim_string(inner_seg[1]);
-                            }
-                            // Current object is finished
-                            else if (block[i] === '}, {') {
-                                prop.push({});
-                            }
-                        } else if (square_balance === 0) {
-                            break;
+                        // array or dictionary
+                        else {
+                            push_tokens_in_a_line(data.prop, value_res.value, tokens, stack, key);
                         }
                     }
                 }
-                // An object, so this line is end with "{"
+            } break;
+            case '"': {
+                let str_after_last_quotation = line;
+
+                // see whether there're some "content" quotations
+                let idx = line.lastIndexOf('\\"');
+                if (idx > 0) {
+                    str_after_last_quotation = line.substring(idx + 1);
+                }
+                if (str_after_last_quotation[str_after_last_quotation.length - 1] === '"') {
+                    // now we found end of this multi-line string
+                    const pack = stack.pop();
+                    pack.value = pack.value + remove_last(line);
+                    data.prop[pack.key] = pack.value;
+
+                    // Pop out current token
+                    tokens.pop();
+                }
+            } break;
+            case '{': {
+                const idx_of_first_quotation = line.indexOf('"');
+
+                // "key": value
+                if (idx_of_first_quotation >= 0) {
+                    const idx_of_second_quotation = line.substring(line.indexOf('"') + 1).indexOf('"') + (line.indexOf('"') + 1);
+                    const key = line.substring(idx_of_first_quotation + 1, idx_of_second_quotation);
+                    const idx_of_colon = line.indexOf(':');
+                    const value_res = parse_as_primitive(line.substring(idx_of_colon + 1));
+                    if (value_res.is_valid) {
+                        const pack = _.last(stack);
+                        pack.value[key] = value_res.value;
+                    }
+                    // array or dictionary
+                    else {
+                        push_tokens_in_a_line(data.prop, value_res.value, tokens, stack, key);
+                    }
+                }
+                // "}" or "}, {" or "} ]"
                 else {
-                    let prop = data.prop[trim_string(seg[0]).replace(/"/g, '')];
-                    if (!prop) {
-                        prop = data.prop[trim_string(seg[0]).replace(/"/g, '')] = {};
-                    }
-                    i += 1;
+                    const idx_of_close_p = line.indexOf('}');
+                    if (idx_of_close_p >= 0) {
+                        // close current dictionary
+                        tokens.pop();
+                        const pack = stack.pop();
+                        const parent = (stack.length > 0) ? _.last(stack).value : data.prop;
+                        parent[pack.key] = pack.value;
 
-                    let obj_prop_arr = [];
-                    let should_parse = false;
-                    for (; i < block.length; i++) {
-                        if (block[i] === '}') {
-                            i -= 1;
-                            should_parse = true;
-                            break;
-                        } else if (block[i] === '} ]') {
-                            should_parse = false;
-                            break;
+                        const rest_line = line.substring(idx_of_close_p + 1);
+
+                        // a new dictionrary after current one
+                        if (rest_line.indexOf(',') >= 0) {
+                            tokens.push('{');
+                            stack.push({
+                                key: Number(pack.key) + 1,
+                                value: {},
+                            })
                         }
-                        // An array, so this line is end with "[ {"
-                        else if (block[i].indexOf('[ {') >= 0) {
-                            let seg = block[i].split(':');
-                            let inner_prop = prop[trim_string(seg[0]).replace(/"/g, '')] = [{}];
-                            i += 1;
-
-                            let square_balance = -1;
-                            for (; i < block.length; i++) {
-                                if (block[i].indexOf('[') >= 0) {
-                                    square_balance -= 1;
-                                }
-                                if (block[i].indexOf(']') >= 0) {
-                                    square_balance += 1;
-                                }
-
-                                // not open another multi-line [ ]
-                                if (square_balance === -1) {
-                                    // Contains ":" means it is a single line property
-                                    if (block[i].indexOf(':') >= 0) {
-                                        let inner_seg = block[i].split(':');
-                                        _.last(inner_prop)[trim_string(inner_seg[0]).replace(/"/g, '')] = trim_string(inner_seg[1]);
-                                    }
-                                    // Current object is finished
-                                    else if (block[i] === '}, {') {
-                                        inner_prop.push({});
-                                    }
-                                } else if (square_balance === 0) {
-                                    break;
-                                }
-
-                                // TODO: support nested object literal
-                            }
-                        } else {
-                            obj_prop_arr.push(block[i]);
+                        // the dictionary just end here
+                        else if (rest_line.indexOf(']') >= 0) {
+                            const pack = stack.pop();
+                            const parent = (stack.length > 0) ? _.last(stack).value : data.prop;
+                            parent[pack.key] = pack.value;
                         }
-                    }
-
-                    if (should_parse) {
-                        for (let line of obj_prop_arr) {
-                            let inner_seg = line.split(':');
-                            prop[trim_string(inner_seg[0]).replace(/"/g, '')] = trim_string(inner_seg[1]);
-                        }
+                    } else {
+                        // shouldn't be here!!!
                     }
                 }
-            }
+            } break;
         }
     }
 
@@ -250,9 +334,14 @@ function convert_block(block) {
     }
 }
 
+/**
+ *
+ * @param {any[]} blocks
+ */
 function construct_scene(blocks) {
     // Fetch node block list
     const node_list = fp.flow(
+        // @ts-ignore
         fp.filter(b => b.key === 'node'),
         fp.forEach(n => {
             n.__meta__ = {};
@@ -260,6 +349,7 @@ function construct_scene(blocks) {
             delete n.key;
             delete n.index;
         })
+    // @ts-ignore
     )(blocks);
 
     // Combine nodes into scene tree
@@ -268,9 +358,11 @@ function construct_scene(blocks) {
     const node_db = {
         '.': root_node,
     };
+    // @ts-ignore
     const child_node_list = fp.filter(b => !!b.parent)(node_list);
     for (let i = 0; i < child_node_list.length; i++) {
         let n = child_node_list[i];
+        // @ts-ignore
         let parent = node_db[n.parent];
 
         // Let's work on this node later, since its parent node
@@ -284,16 +376,21 @@ function construct_scene(blocks) {
         parent.children.push(n);
 
         // Calculate path of the node
+        // @ts-ignore
         if (n.parent === '.') {
+            // @ts-ignore
             n.__meta__.path = n.name;
         } else {
+            // @ts-ignore
             n.__meta__.path = `${parent.__meta__.path}/${n.name}`;
         }
 
         // Insert into node db
+        // @ts-ignore
         node_db[n.__meta__.path] = n;
 
         // Delete parent property which is no longer used
+        // @ts-ignore
         delete n.parent;
     }
 
@@ -310,15 +407,20 @@ function construct_scene(blocks) {
 
     // Add resources into root_node.__meta__
     const fetch_res = (type) => (fp.flow(
+            // @ts-ignore
             fp.filter(b => b.key === `${type}_resource`),
             fp.reduce((hash, b) => {
+                // @ts-ignore
                 hash[b.id] = b;
 
+                // @ts-ignore
                 delete b.key;
+                // @ts-ignore
                 delete b.id;
 
                 return hash;
             }, {})
+        // @ts-ignore
         )(blocks)
     );
 
@@ -330,12 +432,20 @@ function construct_scene(blocks) {
     return root_node;
 }
 
+/**
+ * @param {string} url
+ * @returns {string}
+ */
 function normalize_image_res_url(url) {
     // "res://" = 6, "/image/" = 6
     const without_prefix = url.substring(6 + 6);
     const without_ext = without_prefix.substring(0, without_prefix.indexOf(path.extname(without_prefix)));
     return without_ext.substring(without_ext.indexOf('/') + 1);
 }
+/**
+ * @param {string} url
+ * @returns {string}
+ */
 function normalize_res_url(url) {
     // "res://" = 6
     const without_prefix = url.substring(6);
@@ -345,13 +455,28 @@ function normalize_res_url(url) {
 
 const resource_normalizers = {
     Texture: (res) => normalize_image_res_url(res.path),
+    SpriteFrames: (res, meta) => {
+        const frames = {};
+        res.animations.forEach(anim => {
+            const a = frames[anim.name] = {
+                frames: anim.frames.map(f => {
+                    const tex = meta.ext_resource[get_function_params(f)[0]];
+                    return resource_normalizers.Texture(tex);
+                }),
+                name: anim.name,
+                loop: anim.loop,
+                speed: anim.speed,
+            };
+        })
+        return frames;
+    },
     DynamicFontData: (res) => normalize_res_url(res.path),
     DynamicFont: (res, meta) => {
         const font = {
             size: res.size,
             family: undefined,
         };
-        const font_data = meta.ext_resource[get_function_params(res.font_data)];
+        const font_data = meta.ext_resource[get_function_params(res.font_data)[0]];
         font.family = resource_normalizers[font_data.type](font_data, meta);
         return font;
     },
@@ -379,7 +504,7 @@ const post_resource_actions = {
     AnimationPlayer: (node, meta) => {
         const anims = {};
         for (let a in node.anims) {
-            anims[a] = meta.sub_resource[get_function_params(node.anims[a])];
+            anims[a] = meta.sub_resource[get_function_params(node.anims[a])[0]];
             delete anims[a].type;
         }
         node.anims = anims;
@@ -391,10 +516,10 @@ function normalize_resource(node, meta) {
         let value = node[k];
         if (_.isString(value)) {
             if (value.indexOf('ExtResource') >= 0) {
-                let res = meta.ext_resource[get_function_params(value)];
+                let res = meta.ext_resource[get_function_params(value)[0]];
                 node[k] = resource_normalizers[res.type](res, meta, node);
             } else if (value.indexOf('SubResource') >= 0) {
-                let res = meta.sub_resource[get_function_params(value)];
+                let res = meta.sub_resource[get_function_params(value)[0]];
                 node[k] = resource_normalizers[res.type](res, meta, node);
             }
         }
@@ -465,6 +590,9 @@ module.exports.convert_scenes = (scene_root_url) => {
     return generated_data;
 }
 
+/**
+ * @param {string} project_url
+ */
 module.exports.convert_project_settings = (project_url) => {
     let data = fs.readFileSync(project_url, 'utf8');
 
@@ -487,7 +615,7 @@ module.exports.convert_project_settings = (project_url) => {
     }
 
     // Convert back into a big string
-    data = lines.reduce((data, line) => data + line + '\n', '');
+    data = lines.join('\n')
 
     /** @type {any} */
     const settings = split_to_blocks(data)
@@ -500,6 +628,9 @@ module.exports.convert_project_settings = (project_url) => {
             settings[b.key] = b.prop;
             return settings;
         }, {});
+
+    // Save the version
+    settings.version = version;
 
     // Filter and normalize settings
     const real_settings = {};
