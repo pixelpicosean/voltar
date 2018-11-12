@@ -12,6 +12,7 @@ module.exports = (data) => {
         type: 'AnimationPlayer',
         name: string(data.attr.name),
         parent: path(data.attr.parent),
+        autoplay: string(data.prop.autoplay),
         root_node: NodePath(data.prop.root_node),
         playback_speed: real(data.prop.playback_speed),
         anims: {},

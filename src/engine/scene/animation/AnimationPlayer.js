@@ -454,19 +454,20 @@ export default class AnimationPlayer extends Node2D {
     _load_data(data) {
         super._load_data(data);
 
-        for (let k in data) {
-            switch (k) {
-                case 'name':
-                case 'root_node':
-                case 'playback_speed': {
-                    this[k] = data[k];
-                } break;
-                case 'anims': {
-                    for (let key in data.anims) {
-                        this.add_animation(key, new Animation().load(data.anims[key]));
-                    }
-                } break;
+        if (data.anims !== undefined) {
+            for (let key in data.anims) {
+                this.add_animation(key, new Animation().load(data.anims[key]));
             }
+        }
+
+        if (data.root_node !== undefined) {
+            this.root_node = data.root_node;
+        }
+        if (data.playback_speed !== undefined) {
+            this.playback_speed = data.playback_speed;
+        }
+        if (data.autoplay !== undefined) {
+            this.autoplay = data.autoplay;
         }
 
         return this;
