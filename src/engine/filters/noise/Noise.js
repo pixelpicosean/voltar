@@ -1,5 +1,5 @@
 import Filter from 'engine/renderers/filters/Filter';
-import Vert from './fragments/default.vert';
+import Vert from '../fragments/default.vert';
 import Frag from './noise.frag';
 
 /**
