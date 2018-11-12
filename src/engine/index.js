@@ -159,7 +159,8 @@ export function register_scene_class(key, ctor) {
  * @returns {typeof Node2D}
  */
 export function attach_script(url, scene) {
-    const data = require(`scene/${url.replace(/^scene\//, '').replace(/\.json$/, '')}.json`);
+    const key = utils.scene_path_to_key(url);
+    const data = require(`scene/${key}.json`);
 
     // Add `instance` static method if not exist
     if (!scene['instance'] || (typeof (scene['instance']) !== 'function')) {
@@ -169,7 +170,8 @@ export function attach_script(url, scene) {
     }
 
     // @ts-ignore
-    scene_class_map[url] = scene;
+    // Register as scene
+    register_scene_class(key, scene);
 
     return scene;
 }

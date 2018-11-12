@@ -5,13 +5,14 @@ import Node2D from './scene/Node2D';
 import Vector from './math/Vector2';
 import { shared as shared_ticker } from './ticker/index';
 import { Loader } from './loaders/index';
-import { mixins, deep_merge } from './utils/index';
+import { mixins, deep_merge, scene_path_to_key } from './utils/index';
 
 import { outer_box_resize } from './resize';
 import remove_items from 'remove-array-items';
-import { optional } from './registry';
+import { optional, scene_class_map, node_class_map } from './registry';
 import Theme, { default_font_name } from './scene/resources/Theme';
 import { registered_bitmap_fonts } from './scene/text/res';
+import { assemble_scene } from './index';
 
 /**
  * @typedef ApplicationSettings
@@ -171,7 +172,7 @@ export default class SceneTree {
         this._idle_bind = this.idle.bind(this);
         this._loop_id = 0;
         this._initialize = this._initialize.bind(this);
-        this._next_scene_ctor = null;
+        this._next_scene = null;
         this._current_scene_ctor = null;
         this._process_tmp = {
             spiraling: 0,
@@ -251,18 +252,32 @@ export default class SceneTree {
     }
 
     /**
+     * Changes to the scene at the given path
+     *
+     * @param {String} path
+     */
+    change_scene(path) {
+        const key = scene_path_to_key(path);
+
+        this._next_scene = scene_class_map[key];
+
+        if (!this._next_scene) {
+            this._next_scene = require(`scene/${key}.json`);
+        }
+    }
+    /**
      * Change to the given scene
      *
      * @param {typeof Node2D} scene_ctor Scene class
      */
     change_scene_to(scene_ctor) {
-        this._next_scene_ctor = scene_ctor;
+        this._next_scene = scene_ctor;
     }
     get_current_scene() {
         return this.current_scene;
     }
     reload_current_scene() {
-        this._next_scene_ctor = this._current_scene_ctor;
+        this._next_scene = this._current_scene_ctor;
     }
 
     /**
@@ -493,18 +508,27 @@ export default class SceneTree {
     idle(timestamp) {
         this._loop_id = requestAnimationFrame(this._idle_bind);
 
-        if (this._next_scene_ctor) {
+        if (this._next_scene) {
             if (this.current_scene) {
                 this.viewport.remove_children();
                 this.physics_server.clean();
                 this.current_scene = null;
             }
 
-            this.current_scene = this._next_scene_ctor.instance();
+            // Instance from scene with class(script)
+            if (typeof (this._next_scene.instance) === 'function') {
+                this.current_scene = this._next_scene.instance();
+            }
+            // Instance from pure scene data?
+            else {
+                this.current_scene = new (node_class_map[this._next_scene.type])();
+                this.current_scene._load_data(this._next_scene);
+                assemble_scene(this.current_scene, this._next_scene);
+            }
             this.current_scene.scene_tree = this;
             this.current_scene.toplevel = true;
-            this._current_scene_ctor = this._next_scene_ctor;
-            this._next_scene_ctor = null;
+            this._current_scene_ctor = this._next_scene;
+            this._next_scene = null;
 
             this.viewport.add_child(this.current_scene);
         }
