@@ -133,6 +133,8 @@ import {
     res_class_map,
 } from 'engine/registry';
 
+const has = Object.prototype.hasOwnProperty;
+
 /**
  * @typedef PackedScene
  * @property {() => Node2D} instance
@@ -149,6 +151,27 @@ export function register_scene_class(key, ctor) {
     } else {
         throw `[Class Register] scene with class "${key}" is already registered!`;
     }
+}
+
+/**
+ * @param {String} url path to the scene (JSON from .tscn)
+ * @param {typeof Node2D} scene Scene class
+ * @returns {typeof Node2D}
+ */
+export function attach_script(url, scene) {
+    const data = require(`scene/${url.replace(/^scene\//, '').replace(/\.json$/, '')}.json`);
+
+    // Add `instance` static method if not exist
+    if (!scene['instance'] || (typeof (scene['instance']) !== 'function')) {
+        scene['instance'] = () => {
+            return assemble_scene(new scene(), data);
+        };
+    }
+
+    // @ts-ignore
+    scene_class_map[url] = scene;
+
+    return scene;
 }
 
 /**
@@ -179,18 +202,27 @@ function assemble_node(node, children) {
         data = children[i];
 
         if (data.type === 'Scene') {
-            let packed_scene = require(`scene/${data.key}.json`);
-            if (packed_scene.class) {
-                if (!scene_class_map[packed_scene.class]) {
-                    throw `[Assemble] class of scene "${packed_scene.class}" is not defined!`;
-                }
-                inst = scene_class_map[packed_scene.class].instance();
-            } else {
-                inst = new (node_class_map[packed_scene.type])();
+            // Scene data (converted from ".tscn")
+            const packed_scene = require(`scene/${data.key}.json`);
 
-                inst._load_data(packed_scene);
-                assemble_node(inst, packed_scene.children);
+            // Let's see whether it is registered
+            const scene_class = has.call(scene_class_map, data.key) ? scene_class_map[data.key] : undefined;
+
+            // Custom scene class?
+            if (scene_class) {
+                inst = scene_class.instance();
             }
+            // Or we simply create it as a "collapsed scene tree"
+            else {
+                inst = new (node_class_map[packed_scene.type])();
+                inst._load_data(packed_scene);
+            }
+
+            // Apply custom data to the scene
+            inst._load_data(data);
+
+            // And children under it
+            assemble_node(inst, packed_scene.children);
         } else {
             if (data._is_proxy_) {
                 inst = new (res_class_map[data.prop_value.type])()._load_data(data.prop_value);
