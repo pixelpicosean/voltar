@@ -254,7 +254,7 @@ export default class TextureButton extends BaseButton {
      * @param {WebGLRenderer} renderer - The webgl renderer to use.
      */
     _render_webgl(renderer) {
-        this._update_transform();
+        this.node2d_update_transform();
 
         let texture = undefined;
 
@@ -296,7 +296,7 @@ export default class TextureButton extends BaseButton {
         }
 
         const ofs = tmp_vec2.set(0, 0);
-        const size = tmp_vec3.set(texture.width, texture.height);
+        const size = tmp_vec3.set(texture.width * this.rect_scale.x, texture.height * this.rect_scale.y);
         this._tile = false;
         if (this._expand) {
             switch (this._stretch_mode) {
