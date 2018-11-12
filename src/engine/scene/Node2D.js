@@ -1,6 +1,6 @@
 /// <reference path="../tween/index.d.ts" />
 
-import { node_plugins } from 'engine/registry';
+import { node_plugins, node_class_map } from 'engine/registry';
 import {
     VObject,
     remove_items,
@@ -310,38 +310,47 @@ export default class Node2D extends VObject {
      * @returns {this}
      */
     _load_data(data) {
-        for (let k in data) {
-            switch (k) {
-                // Directly set
-                // - Node2D
-                case 'name':
-                case 'alpha':
-                case 'width':
-                case 'height':
-                case 'rotation':
-                case 'visible':
-                case 'x':
-                case 'y':
-                case 'interactive':
-                    this[k] = data[k];
-                    break;
-
-                // Set vector
-                // - Node2D
-                case 'pivot':
-                case 'position':
-                case 'skew':
-                    this[k].x = data[k].x || 0;
-                    this[k].y = data[k].y || 0;
-                    break;
-
-                // - Node2D
-                case 'scale':
-                    this[k].x = data[k].x || 1;
-                    this[k].y = data[k].y || 1;
-                    break;
-            }
+        if (data.name !== undefined) {
+            this.name = data.name;
         }
+        if (data.alpha !== undefined) {
+            this.alpha = data.alpha;
+        }
+        if (data.width !== undefined) {
+            this.width = data.width;
+        }
+        if (data.height !== undefined) {
+            this.height = data.height;
+        }
+        if (data.rotation !== undefined) {
+            this.rotation = data.rotation;
+        }
+        if (data.visible !== undefined) {
+            this.visible = data.visible;
+        }
+        if (data.x !== undefined) {
+            this.x = data.x;
+        }
+        if (data.y !== undefined) {
+            this.y = data.y;
+        }
+        if (data.interactive !== undefined) {
+            this.interactive = data.interactive;
+        }
+
+        if (data.pivot !== undefined) {
+            this.pivot.copy(data.pivot);
+        }
+        if (data.position !== undefined) {
+            this.position.copy(data.position);
+        }
+        if (data.skew !== undefined) {
+            this.skew.copy(data.skew);
+        }
+        if (data.scale !== undefined) {
+            this.scale.copy(data.scale);
+        }
+
         return this;
     }
 
@@ -1737,3 +1746,5 @@ export default class Node2D extends VObject {
  * @this {Node2D}
  */
 Node2D.prototype.node2d_update_transform = Node2D.prototype.update_transform;
+
+node_class_map['Node2D'] = Node2D;
