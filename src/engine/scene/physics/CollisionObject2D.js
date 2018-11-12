@@ -117,6 +117,7 @@ export default class CollisionObject2D extends Node2D {
          */
         this.shapes = [];
     }
+
     _propagate_enter_tree() {
         if (this.is_inside_tree) {
             return;
@@ -172,31 +173,11 @@ export default class CollisionObject2D extends Node2D {
     _load_data(data) {
         super._load_data(data);
 
-        for (let k in data) {
-            switch (k) {
-            // Directly set
-            // - Node2D
-            case 'name':
-            case 'x':
-            case 'y':
-            case 'collision_layer':
-            case 'collision_mask':
-                this[k] = data[k];
-                break;
-
-                // Set vector
-                // - Node2D
-            case 'position':
-                this[k].x = data[k].x || 0;
-                this[k].y = data[k].y || 0;
-                break;
-
-                // - Node2D
-            case 'scale':
-                this[k].x = data[k].x || 1;
-                this[k].y = data[k].y || 1;
-                break;
-            }
+        if (data.collision_layer !== undefined) {
+            this.collision_layer = data.collision_layer;
+        }
+        if (data.collision_mask !== undefined) {
+            this.collision_mask = data.collision_mask;
         }
 
         return this;
