@@ -162,7 +162,7 @@ export default class TextureRect extends Control {
                     this.sprite.width = this.rect_size.x;
                     this.sprite.height = this.rect_size.y;
                 } else {
-                    this.sprite.scale.set(1, 1);
+                    this.sprite.scale.copy(this.rect_scale);
                 }
 
                 // TODO: sync more properties for rendering
