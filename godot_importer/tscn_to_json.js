@@ -505,6 +505,25 @@ const post_resource_actions = {
         const anims = {};
         for (let a in node.anims) {
             anims[a] = meta.sub_resource[get_function_params(node.anims[a])[0]];
+
+            // try to normalize animation values
+            for (let track of anims[a].tracks) {
+                let values = track.keys.values;
+                for (let i = 0; i < values.length; i++) {
+                    let value = values[i];
+
+                    if (_.isString(value)) {
+                        if (value.indexOf('ExtResource') >= 0) {
+                            let res = meta.ext_resource[get_function_params(value)[0]];
+                            values[i] = resource_normalizers[res.type](res, meta, node);
+                        } else if (value.indexOf('SubResource') >= 0) {
+                            let res = meta.sub_resource[get_function_params(value)[0]];
+                            values[i] = resource_normalizers[res.type](res, meta, node);
+                        }
+                    }
+                }
+            }
+
             delete anims[a].type;
         }
         node.anims = anims;
@@ -512,6 +531,7 @@ const post_resource_actions = {
 };
 
 function normalize_resource(node, meta) {
+    // try to normalize all implicit properties
     for (let k in node) {
         let value = node[k];
         if (_.isString(value)) {
