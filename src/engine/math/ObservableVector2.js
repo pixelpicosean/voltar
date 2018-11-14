@@ -8,6 +8,59 @@ const tmp_point = new Vector2();
  * An observable point is a point that triggers a callback when the point's position is changed.
  */
 export default class ObservableVector2 {
+    get width() {
+        return this._x;
+    }
+    /**
+     * @param {number} value
+     */
+    set width(value) {
+        this.x = value;
+    }
+    /**
+     * @param {number} value
+     * @returns {this}
+     */
+    set_width(value) {
+        this.x = value;
+        return this;
+    }
+
+    get height() {
+        return this._y;
+    }
+    /**
+     * @param {number} value
+     */
+    set height(value) {
+        this.y = value;
+    }
+    /**
+     * @param {number} value
+     * @returns {this}
+     */
+    set_height(value) {
+        this.y = value;
+        return this;
+    }
+
+    /**
+     * @param {number} value
+     * @returns {this}
+     */
+    set_x(value) {
+        this.x = value;
+        return this;
+    }
+    /**
+     * @param {number} value
+     * @returns {this}
+     */
+    set_y(value) {
+        this.y = value;
+        return this;
+    }
+
     /**
      * @param {Function} cb - callback when changed
      * @param {object} scope - owner of callback

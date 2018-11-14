@@ -11,6 +11,59 @@ export const EPSILON = 0.000001;
  * the horizontal axis and y represents the vertical axis.
  */
 export default class Vector2 {
+    get width() {
+        return this.x;
+    }
+    /**
+     * @param {number} value
+     */
+    set width(value) {
+        this.x = value;
+    }
+    /**
+     * @param {number} value
+     * @returns {this}
+     */
+    set_width(value) {
+        this.x = value;
+        return this;
+    }
+
+    get height() {
+        return this.y;
+    }
+    /**
+     * @param {number} value
+     */
+    set height(value) {
+        this.y = value;
+    }
+    /**
+     * @param {number} value
+     * @returns {this}
+     */
+    set_height(value) {
+        this.y = value;
+        return this;
+    }
+
+    /**
+     * @param {number} value
+     * @returns {this}
+     */
+    set_x(value) {
+        this.x = value;
+        return this;
+    }
+    /**
+     * @param {number} value
+     * @returns {this}
+     */
+    set_y(value) {
+        this.y = value;
+        return this;
+    }
+
     /**
      * @param {number} [x=0] - position of the point on the x axis
      * @param {number} [y=0] - position of the point on the y axis
