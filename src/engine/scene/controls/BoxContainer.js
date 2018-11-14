@@ -108,17 +108,17 @@ export default class BoxContainer extends Container {
             const size = c.get_combined_minimum_size(tmp_vec3);
 
             if (this.vertical) {
-                if (size.x > minimum.x) {
-                    minimum.x = size.x;
+                if (size.width > minimum.width) {
+                    minimum.width = size.width;
                 }
 
-                minimum.y += size.y + (first ? 0 : sep);
+                minimum.height += size.height + (first ? 0 : sep);
             } else {
-                if (size.y > minimum.y) {
-                    minimum.y = size.y;
+                if (size.height > minimum.height) {
+                    minimum.height = size.height;
                 }
 
-                minimum.x += size.x + (first ? 0 : sep);
+                minimum.width += size.width + (first ? 0 : sep);
             }
 
             first = false;
@@ -162,12 +162,12 @@ export default class BoxContainer extends Container {
             const msc = new MinSizeCache();
 
             if (this.vertical) {
-                stretch_min += size.y;
-                msc.min_size = size.y;
+                stretch_min += size.height;
+                msc.min_size = size.height;
                 msc.will_stretch = !!(c.size_flags_vertical & SizeFlag.EXPAND);
             } else {
-                stretch_min += size.x;
-                msc.min_size = size.x;
+                stretch_min += size.width;
+                msc.min_size = size.width;
                 msc.will_stretch = !!(c.size_flags_horizontal & SizeFlag.EXPAND);
             }
 
@@ -184,7 +184,7 @@ export default class BoxContainer extends Container {
             return;
         }
 
-        let stretch_max = (this.vertical ? new_size.y : new_size.x) - (children_count - 1) * sep;
+        let stretch_max = (this.vertical ? new_size.height : new_size.width) - (children_count - 1) * sep;
         let stretch_diff = stretch_max - stretch_min;
         if (stretch_diff < 0) {
             // Avoid negative stretch space
@@ -272,7 +272,7 @@ export default class BoxContainer extends Container {
             let to = ofs + msc.final_size;
 
             if (msc.will_stretch && idx === children_count - 1) {
-                to = this.vertical ? new_size.y : new_size.x;
+                to = this.vertical ? new_size.height : new_size.width;
             }
 
             let size = to - from;
@@ -283,13 +283,13 @@ export default class BoxContainer extends Container {
             if (this.vertical) {
                 rect.x = 0;
                 rect.y = from;
-                rect.width = new_size.x;
+                rect.width = new_size.width;
                 rect.height = size;
             } else {
                 rect.x = from;
                 rect.y = 0;
                 rect.width = size;
-                rect.height = new_size.y;
+                rect.height = new_size.height;
             }
 
             this.fit_child_in_rect(c, rect);
