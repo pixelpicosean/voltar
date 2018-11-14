@@ -71,9 +71,9 @@ export default class TextureUvs {
             this.y3 = (frame.y + frame.height) / th;
         }
 
-        this.uvs_uint32[0] = (((this.y0 * 65535) & 0xFFFF) << 16) | ((this.x0 * 65535) & 0xFFFF);
-        this.uvs_uint32[1] = (((this.y1 * 65535) & 0xFFFF) << 16) | ((this.x1 * 65535) & 0xFFFF);
-        this.uvs_uint32[2] = (((this.y2 * 65535) & 0xFFFF) << 16) | ((this.x2 * 65535) & 0xFFFF);
-        this.uvs_uint32[3] = (((this.y3 * 65535) & 0xFFFF) << 16) | ((this.x3 * 65535) & 0xFFFF);
+        this.uvs_uint32[0] = ((Math.round(this.y0 * 65535) & 0xFFFF) << 16) | (Math.round(this.x0 * 65535) & 0xFFFF);
+        this.uvs_uint32[1] = ((Math.round(this.y1 * 65535) & 0xFFFF) << 16) | (Math.round(this.x1 * 65535) & 0xFFFF);
+        this.uvs_uint32[2] = ((Math.round(this.y2 * 65535) & 0xFFFF) << 16) | (Math.round(this.x2 * 65535) & 0xFFFF);
+        this.uvs_uint32[3] = ((Math.round(this.y3 * 65535) & 0xFFFF) << 16) | (Math.round(this.x3 * 65535) & 0xFFFF);
     }
 }

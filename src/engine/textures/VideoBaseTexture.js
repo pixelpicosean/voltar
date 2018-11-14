@@ -290,8 +290,8 @@ VideoBaseTexture.from_urls = VideoBaseTexture.from_url;
 
 function create_source(path, type) {
     if (!type) {
-        path = path.split('?').shift().toLowerCase();
-        type = `video/${path.substr(path.lastIndexOf('.') + 1)}`;
+        const pure_path = path.split('?').shift().toLowerCase();
+        type = `video/${pure_path.substr(pure_path.lastIndexOf('.') + 1)}`;
     }
 
     const source = document.createElement('source');
