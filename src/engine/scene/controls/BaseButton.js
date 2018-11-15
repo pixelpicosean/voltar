@@ -91,6 +91,24 @@ export default class BaseButton extends Control {
         this.connect('pointerup', this._pointer_up, this);
         this.connect('pointerupoutside', this._pointer_up_outside, this);
     }
+    _load_data(data) {
+        super._load_data(data);
+
+        if (data.action_mode !== undefined) {
+            this.action_mode = data.action_mode;
+        }
+        if (data.disabled !== undefined) {
+            this.disabled = data.disabled;
+        }
+        if (data.pressed !== undefined) {
+            this.pressed = data.pressed;
+        }
+        if (data.toggle_mode !== undefined) {
+            this.toggle_mode = data.toggle_mode;
+        }
+
+        return this;
+    }
 
     _visibility_changed() {
         if (!this.toggle_mode) {
