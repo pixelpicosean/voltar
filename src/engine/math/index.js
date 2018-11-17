@@ -54,8 +54,19 @@ export function clamp(x, a, b) {
  */
 export const wrap = (value, min, max) => (value - min) % (max - min) + min;
 
+/**
+ * @param {Number} a
+ * @param {Number} n
+ * @returns {Number}
+ */
 export const mod = (a, n) => (a % n + n) % n;
 
+/**
+ * @param {Number} a
+ * @param {Number} b
+ * @param {Number} fct
+ * @returns {Number}
+ */
 export const lerp = (a, b, fct) => a + (b - a) * fct;
 
 /**
@@ -65,9 +76,17 @@ export const wrap_angle = (a) => (a + PI) % PI2 - PI;
 
 /**
  * Minimal difference between 2 angles
+ * @param {Number} a
+ * @param {Number} b
+ * @returns {Number}
  */
 export const angle_difference = (a, b) => mod((b - a + PI), PI2) - PI;
 
+/**
+ * @param {Number} p_x
+ * @param {Number} p_c
+ * @returns {Number}
+ */
 export function ease(p_x, p_c) {
     if (p_x < 0) {
         p_x = 0;
