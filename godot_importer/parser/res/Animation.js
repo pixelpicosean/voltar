@@ -12,10 +12,6 @@ const {
 
 const get_prop_name = (path) => _.last(path.split(':'));
 
-const trans_rect_track = (track) => {
-    track.path = track.path.replace('rect_', '');
-    return track;
-};
 const trans_rotation_track = (track) => {
     track.path = track.path.replace(get_prop_name(track.path), 'rotation');
     track.keys.values = track.keys.values.map(deg => deg / 180 * Math.PI);
@@ -25,7 +21,6 @@ const trans_rotation_track = (track) => {
 const TrackProcs = {
     'rotation_degrees': trans_rotation_track,
     'rect_rotation': trans_rotation_track,
-    'rect_position': trans_rect_track,
 };
 const transform_track = (track) => {
     const type = get_prop_name(track.path);
