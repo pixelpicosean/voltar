@@ -493,7 +493,9 @@ export default class AnimationPlayer extends Node2D {
      * @param {number} delta - Time since last tick.
      */
     _propagate_process(delta) {
-        this._animation_process(delta);
+        if (this.idle_process) {
+            this._animation_process(delta);
+        }
 
         super._propagate_process(delta);
     }
