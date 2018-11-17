@@ -308,7 +308,6 @@ export default class Range extends Control {
     }
     _changed_notify(what) {
         this.emit_signal('changed', this.shared.val);
-        this._changed_notify(what);
     }
 
     /**
