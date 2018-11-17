@@ -520,7 +520,7 @@ export default class AnimationPlayer extends Node2D {
                     this.is_playing = false;
                     this.set_process(false);
                     if (this.end_notify) {
-                        // this.emit_signal ...
+                        this.emit_signal('animation_finished');
                     }
                 }
                 this.end_reached = false;
@@ -803,18 +803,19 @@ export default class AnimationPlayer extends Node2D {
      * @param {number} [custom_blend]
      * @param {number} [custom_scale]
      * @param {boolean} [from_end]
+     * @returns {this}
      */
     play(name = '', custom_blend = -1, custom_scale = 1.0, from_end = false) {
         if (name.length === 0) {
             name = this.playback.assigned;
         }
         if (name.length === 0) {
-            return;
+            return this;
         }
 
         if (!this.animation_set[name]) {
             console.log(`Animation not found: ${name}`);
-            return;
+            return this;
         }
 
         const c = this.playback;
@@ -863,12 +864,14 @@ export default class AnimationPlayer extends Node2D {
         this.set_process(true);
         this.is_playing = true;
 
-        // this.emit_signal('animation_started', c.assigned);
+        this.emit_signal('animation_started', c.assigned);
 
         let next = this.animation_get_next(name);
         if (next && this.animation_set[next]) {
             this.queue(next);
         }
+
+        return this;
     }
 
     /**
