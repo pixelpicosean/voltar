@@ -136,8 +136,9 @@ export default class RenderTarget {
          * Whether this object is the root element or not
          *
          * @member {boolean}
+         * @default false
          */
-        this.root = root;
+        this.root = root || false;
 
         if (!this.root) {
             this.frame_buffer = GLFramebuffer.createRGBA(gl, 100, 100);

@@ -109,6 +109,11 @@ export default class TextureManager {
                 render_target.resize(texture.width, texture.height);
                 texture._gl_render_targets[this.renderer.CONTEXT_UID] = render_target;
                 glTexture = render_target.texture;
+
+                // framebuffer constructor disactivates current framebuffer
+                if (!this.renderer._active_render_target.root) {
+                    this.renderer._active_render_target.frame_buffer.bind();
+                }
             }
             else {
                 glTexture = new GLTexture(this.gl, null, null, null, null);
