@@ -10,9 +10,9 @@ export default class Filter {
     /**
      * @param {string} [vertex_src] - The source of the vertex shader.
      * @param {string} [fragment_src] - The source of the fragment shader.
-     * @param {object} [uniforms] - Custom uniforms to use to augment the built-in ones.
+     * @param {object} [uniform_data] - Custom uniforms to use to augment the built-in ones.
      */
-    constructor(vertex_src, fragment_src, uniforms) {
+    constructor(vertex_src, fragment_src, uniform_data) {
         /**
          * The vertex shader.
          *
@@ -29,7 +29,11 @@ export default class Filter {
 
         this._blend_mode = BLEND_MODES.NORMAL;
 
-        this.uniformData = uniforms || extract_uniforms_from_src(this.vertex_src, this.fragment_src);
+        this.uniformData = uniform_data || extract_uniforms_from_src(
+            this.vertex_src,
+            this.fragment_src,
+            'projectionMatrix|uSampler'
+        );
 
         /**
          * An object containing the current values of custom uniforms.

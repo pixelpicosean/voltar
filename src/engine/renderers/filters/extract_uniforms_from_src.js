@@ -2,14 +2,14 @@ import { GL } from 'engine/dep/index';
 
 const defaultValue = GL.shader.defaultValue;
 
-export default function extract_uniforms_from_src(vertex_src, fragment_src) {
-    const vert_uniforms = extract_uniforms_from_string(vertex_src);
-    const frag_uniforms = extract_uniforms_from_string(fragment_src);
+export default function extract_uniforms_from_src(vertex_src, fragment_src, mask) {
+    const vert_uniforms = extract_uniforms_from_string(vertex_src, mask);
+    const frag_uniforms = extract_uniforms_from_string(fragment_src, mask);
 
     return Object.assign({}, vert_uniforms, frag_uniforms);
 }
 
-function extract_uniforms_from_string(string) {
+function extract_uniforms_from_string(string, mask) {
     const mask_regex = new RegExp('^(projectionMatrix|uSampler|filter_area|filterClamp)$');
 
     const uniforms = {};
