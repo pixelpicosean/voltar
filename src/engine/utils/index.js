@@ -248,6 +248,24 @@ export function sign(n) {
 }
 
 /**
+ * @param {Array} array Array to be shuffled
+ * @returns {Array} The modified array
+ */
+export function shuffle(array) {
+    const len = array.length - 1;
+
+    for (let i = len; i > 0; i--) {
+        const randomIndex = Math.floor(this.frac() * (i + 1));
+        const itemAtIndex = array[randomIndex];
+
+        array[randomIndex] = array[i];
+        array[i] = itemAtIndex;
+    }
+
+    return array;
+}
+
+/**
  * @todo Describe property usage
  */
 export const TextureCache = Object.create(null);
