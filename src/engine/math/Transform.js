@@ -171,8 +171,10 @@ export default class Transform {
 
     set rotation(value) // eslint-disable-line require-jsdoc
     {
-        this._rotation = value;
-        this.update_skew();
+        if (this._rotation !== value) {
+            this._rotation = value;
+            this.update_skew();
+        }
     }
 }
 
