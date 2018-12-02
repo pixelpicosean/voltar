@@ -169,7 +169,7 @@ export default class SceneTree {
 
         /** @type {Settings} */
         this.settings = null;
-        this._idle_bind = this.idle.bind(this);
+        this._iteration_bind = this.iteration.bind(this);
         this._loop_id = 0;
         this._initialize = this._initialize.bind(this);
         this._next_scene = null;
@@ -503,10 +503,10 @@ export default class SceneTree {
     }
     _start_loop() {
         shared_ticker.start();
-        this._loop_id = requestAnimationFrame(this._idle_bind);
+        this._loop_id = requestAnimationFrame(this._iteration_bind);
     }
-    idle(timestamp) {
-        this._loop_id = requestAnimationFrame(this._idle_bind);
+    iteration(timestamp) {
+        this._loop_id = requestAnimationFrame(this._iteration_bind);
 
         if (this._next_scene) {
             if (this.current_scene) {
