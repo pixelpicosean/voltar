@@ -3,6 +3,45 @@ import { node_class_map } from 'engine/registry';
 import { Vector2 } from 'engine/math/index';
 
 export default class Area2D extends CollisionObject2D {
+    get monitoring() {
+        return this._monitoring;
+    }
+    /**
+     * @param {boolean} value
+     */
+    set monitoring(value) {
+        this._monitoring = value;
+
+        if (this._monitoring) {
+            // this.set_monitor_callback(this, this._body_inout);
+            // this.set_area_monitor_callback(this, this._area_inout);
+        }
+    }
+    /**
+     * @param {boolean} value
+     */
+    set_monitoring(value) {
+        this._monitoring = value;
+        return this;
+    }
+
+    get monitorable() {
+        return this._monitorable;
+    }
+    /**
+     * @param {boolean} value
+     */
+    set monitorable(value) {
+        this._monitorable = value;
+    }
+    /**
+     * @param {boolean} value
+     */
+    set_monitorable(value) {
+        this._monitorable = value;
+        return this;
+    }
+
     constructor() {
         super();
 
@@ -16,6 +55,8 @@ export default class Area2D extends CollisionObject2D {
         this.gravity = 0;
         this.linear_damp = 0.1;
         this.angular_damp = 1;
+        this._monitoring = false;
+        this._monitorable = false;
 
         this.touched_areas = [];
         this.prev_touched_areas = [];
@@ -61,6 +102,9 @@ export default class Area2D extends CollisionObject2D {
         } else {
             this.emit_signal('body_exited', body);
         }
+    }
+
+    call_queries() {
     }
 }
 

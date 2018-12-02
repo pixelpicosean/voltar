@@ -39,4 +39,8 @@ export default class PhysicsBody2D extends CollisionObject2D {
     _collision_exception_freed(body) {
         remove_items(this.collision_exceptions, this.collision_exceptions.indexOf(body), 1);
     }
+
+    /* Body2DSW API */
+
+    update_inertias() { }
 }
