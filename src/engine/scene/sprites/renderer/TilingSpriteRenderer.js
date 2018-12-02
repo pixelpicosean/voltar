@@ -118,7 +118,7 @@ export default class TilingSpriteRenderer extends ObjectRenderer {
         // tempMat.prepend(lt);
         // tempMat.scale(1.0 / ts._width, 1.0 / ts._height);
 
-        temp_mat.invert();
+        temp_mat.affine_inverse();
         if (isSimple) {
             temp_mat.prepend(uv.map_coord);
         }

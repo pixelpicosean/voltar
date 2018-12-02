@@ -9,6 +9,17 @@ import { PI2 } from '../index';
  * | 0 | 0 | 1 |
  */
 export default class Matrix {
+    get origin() {
+        return this._origin.set(this.tx, this.ty);
+    }
+    set origin(value) {
+        this._origin.copy(value);
+    }
+    set_origin(value) {
+        this._origin.copy(value);
+        return this;
+    }
+
     /**
      * @param {number} [a=1] - x scale
      * @param {number} [b=0] - x skew
@@ -19,46 +30,51 @@ export default class Matrix {
      */
     constructor(a = 1, b = 0, c = 0, d = 1, tx = 0, ty = 0) {
         /**
-         * @member {number}
+         * @type {number}
          * @default 1
          */
         this.a = a;
 
         /**
-         * @member {number}
+         * @type {number}
          * @default 0
          */
         this.b = b;
 
         /**
-         * @member {number}
+         * @type {number}
          * @default 0
          */
         this.c = c;
 
         /**
-         * @member {number}
+         * @type {number}
          * @default 1
          */
         this.d = d;
 
         /**
-         * @member {number}
+         * @type {number}
          * @default 0
          */
         this.tx = tx;
 
         /**
-         * @member {number}
+         * @type {number}
          * @default 0
          */
         this.ty = ty;
 
         /**
-         * @member {Float32Array}
+         * @type {Float32Array}
          * @private
          */
         this.array = null;
+        /**
+         * @type {Vector2}
+         * @private
+         */
+        this._origin = new Vector2();
     }
 
     /**
@@ -153,7 +169,7 @@ export default class Matrix {
      * @param {import('./Vector2').Vector2Like} [new_pos] - The point that the new position is assigned to (allowed to be same as input)
      * @return {import('./Vector2').Vector2Like} The new point, transformed through this matrix
      */
-    apply(pos, new_pos) {
+    basis_xform(pos, new_pos) {
         new_pos = new_pos || new Vector2();
 
         const x = pos.x;
@@ -169,11 +185,11 @@ export default class Matrix {
      * Get a new position with the inverse of the current transformation applied.
      * Can be used to go from the world coordinate space to a child's coordinate space. (e.g. input)
      *
-     * @param {import('./Vector2').Vector2Like} pos - The origin
-     * @param {import('./Vector2').Vector2Like} [new_pos] - The point that the new position is assigned to (allowed to be same as input)
-     * @return {import('./Vector2').Vector2Like} The new point, inverse-transformed through this matrix
+     * @param {Vector2} pos - The origin
+     * @param {Vector2} [new_pos] - The point that the new position is assigned to (allowed to be same as input)
+     * @return {Vector2} The new point, inverse-transformed through this matrix
      */
-    apply_inverse(pos, new_pos) {
+    basis_xform_inv(pos, new_pos) {
         new_pos = new_pos || new Vector2();
 
         const id = 1 / ((this.a * this.d) + (this.c * -this.b));
@@ -366,7 +382,7 @@ export default class Matrix {
      *
      * @return {Matrix} This matrix. Good for chaining method calls.
      */
-    invert() {
+    affine_inverse() {
         const a1 = this.a;
         const b1 = this.b;
         const c1 = this.c;

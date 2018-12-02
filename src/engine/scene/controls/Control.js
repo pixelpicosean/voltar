@@ -400,7 +400,7 @@ export default class Control extends Node2D {
         this._world_position.copy(value);
 
         if (this.data.parent_canvas_item) {
-            this.data.parent_canvas_item.transform.world_transform.apply_inverse(this._world_position, this.position);
+            this.data.parent_canvas_item.transform.world_transform.basis_xform_inv(this._world_position, this.position);
         }
     }
     /**

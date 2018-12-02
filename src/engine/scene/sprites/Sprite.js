@@ -416,7 +416,7 @@ export default class Sprite extends Node2D {
      * @return {boolean} the result of the test
      */
     contains_point(point) {
-        this.world_transform.apply_inverse(point, temp_point);
+        this.world_transform.basis_xform_inv(point, temp_point);
 
         const width = this._texture.orig.width;
         const height = this._texture.orig.height;
@@ -459,18 +459,6 @@ export default class Sprite extends Node2D {
     }
 
     // some helper functions..
-
-    /**
-     * Helper function that creates a new sprite based on the source you provide.
-     * The source can be - frame id, image url, video url, canvas element, video element, base texture
-     *
-     * @static
-     * @param {number|string|BaseTexture|HTMLCanvasElement|HTMLVideoElement} source Source to create texture from
-     * @return {Sprite} The newly created sprite
-     */
-    static from(source) {
-        return new Sprite(Texture.from(source));
-    }
 
     /**
      * Helper function that creates a sprite that will contain a texture from the TextureCache based on the frameId

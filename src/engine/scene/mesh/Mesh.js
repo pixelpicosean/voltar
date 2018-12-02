@@ -250,7 +250,7 @@ export default class Mesh extends Node2D {
             return false;
         }
 
-        this.world_transform.apply_inverse(point, temp_point);
+        this.world_transform.basis_xform_inv(point, temp_point);
 
         const vertices = this.vertices;
         const points = temp_polygon.points;

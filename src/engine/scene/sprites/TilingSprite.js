@@ -223,7 +223,7 @@ export default class TilingSprite extends Sprite {
      * @return {boolean} Whether or not the sprite contains the point.
      */
     contains_point(point) {
-        this.world_transform.apply_inverse(point, temp_point);
+        this.world_transform.basis_xform_inv(point, temp_point);
 
         const width = this._width;
         const height = this._height;

@@ -151,7 +151,7 @@ export default class InteractionData {
      *  to the Node2D
      */
     get_local_position(node, point, globalPos) {
-        return node.world_transform.apply_inverse(globalPos || this.global, point);
+        return node.world_transform.basis_xform_inv(globalPos || this.global, point);
     }
 
     /**
