@@ -63,6 +63,8 @@ export { default as AnimationPlayer } from './scene/animation/AnimationPlayer';
 // ------------------------------------------------------------------
 // Useful class
 // ------------------------------------------------------------------
+export { default as OS } from './os';
+
 export { default as Color } from './Color';
 
 export { default as TextureUvs } from './textures/TextureUvs';
