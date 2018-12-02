@@ -97,7 +97,7 @@ const DefaultSettings = {
     },
 };
 
-class SceneTreeTimer {
+export class SceneTreeTimer {
     constructor() {
         this.time_left = 0;
         this.process_pause = true;
@@ -107,7 +107,7 @@ class SceneTreeTimer {
 /**
  * @enum {string}
  */
-const StretchMode = {
+export const StretchMode = {
     'DISABLED': 'disabled',
     '2D': '2d',
     'VIEWPORT': 'viewport',
@@ -116,7 +116,7 @@ const StretchMode = {
 /**
  * @enum {string}
  */
-const StretchAspect = {
+export const StretchAspect = {
     'IGNORE': 'disabled',
     'KEEP': 'keep',
     'KEEP_WIDTH': 'keep_width',
@@ -124,7 +124,7 @@ const StretchAspect = {
     'EXPAND': 'expand',
 }
 
-class Group {
+export class Group {
     constructor() {
         /**
          * @type {Node2D[]}
