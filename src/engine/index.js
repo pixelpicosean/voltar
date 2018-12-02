@@ -110,7 +110,7 @@ export {
 // Instances
 // ------------------------------------------------------------------
 import Input from './input/index';
-import SceneTree from './scene/main/SceneTree';
+import SceneTree from './scene/main/scene_tree';
 
 /** @type {Array<Array<string>>} */
 const preload_queue = [];

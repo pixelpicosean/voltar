@@ -156,7 +156,7 @@ export default class Node2D extends VObject {
         this.parent = null;
 
         /**
-         * @type {import('engine/scene/main/SceneTree').default}
+         * @type {import('engine/scene/main/scene_tree').default}
          */
         this.scene_tree = null;
 
@@ -1454,7 +1454,7 @@ export default class Node2D extends VObject {
     }
 
     /**
-     * @returns {import('engine/scene/main/SceneTree').default}
+     * @returns {import('engine/scene/main/scene_tree').default}
      */
     get_tree() {
         return this.scene_tree;
