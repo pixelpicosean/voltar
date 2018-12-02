@@ -1,4 +1,5 @@
 import { SHAPES } from '../../const';
+import Vector2 from '../Vector2';
 
 /**
  * Rectangle object is an area defined by its position, as indicated by its top-left corner
@@ -111,6 +112,17 @@ export default class Rectangle {
         return this;
     }
 
+    is_identity() {
+        return this.x === 0 && this.y === 0 && this.width === 0 && this.height === 0;
+    }
+
+    /**
+     * @param {Rectangle} rect
+     */
+    equal(rect) {
+        return this.x === rect.x && this.y === rect.y && this.width === rect.width && this.height === rect.height;
+    }
+
     /**
      * Checks whether the x and y coordinates given are contained within this Rectangle
      *
@@ -202,5 +214,93 @@ export default class Rectangle {
         this.width = x2 - x1;
         this.y = y1;
         this.height = y2 - y1;
+    }
+
+    /**
+     * @param {Rectangle} rectangle
+     * @returns {boolean}
+     */
+    intersects(rectangle) {
+        return !(
+            this.bottom <= rectangle.top
+            ||
+            this.top >= rectangle.bottom
+            ||
+            this.left >= rectangle.right
+            ||
+            this.right <= rectangle.left
+        );
+    }
+
+    /**
+     * @param {Vector2} p_from
+     * @param {Vector2} p_to
+     * @returns {boolean}
+     */
+    intersects_segment(p_from, p_to) {
+        let min = 0, max = 1;
+
+        {
+            let seg_from = p_from.x;
+            let seg_to = p_to.x;
+            let box_begin = this.x;
+            let box_end = box_begin + this.width;
+            let cmin = 0, cmax = 0;
+
+            if (seg_from < seg_to) {
+                if (seg_from > box_end || seg_to < box_begin) {
+                    return false;
+                }
+                let length = seg_to - seg_from;
+                cmin = (seg_from < box_begin) ? ((box_begin - seg_from) / length) : 0;
+                cmax = (seg_to > box_end) ? ((box_end - seg_from) / length) : 1;
+            } else {
+                if (seg_to > box_end || seg_from < box_begin)
+                    return false;
+                let length = seg_to - seg_from;
+                cmin = (seg_from > box_end) ? (box_end - seg_from) / length : 0;
+                cmax = (seg_to < box_begin) ? (box_begin - seg_from) / length : 1;
+            }
+
+            if (cmin > min) {
+                min = cmin;
+            }
+            if (cmax < max)
+                max = cmax;
+            if (max < min)
+                return false;
+        }
+        {
+            let seg_from = p_from.y;
+            let seg_to = p_to.y;
+            let box_begin = this.y;
+            let box_end = box_begin + this.height;
+            let cmin = 0, cmax = 0;
+
+            if (seg_from < seg_to) {
+                if (seg_from > box_end || seg_to < box_begin) {
+                    return false;
+                }
+                let length = seg_to - seg_from;
+                cmin = (seg_from < box_begin) ? ((box_begin - seg_from) / length) : 0;
+                cmax = (seg_to > box_end) ? ((box_end - seg_from) / length) : 1;
+            } else {
+                if (seg_to > box_end || seg_from < box_begin)
+                    return false;
+                let length = seg_to - seg_from;
+                cmin = (seg_from > box_end) ? (box_end - seg_from) / length : 0;
+                cmax = (seg_to < box_begin) ? (box_begin - seg_from) / length : 1;
+            }
+
+            if (cmin > min) {
+                min = cmin;
+            }
+            if (cmax < max)
+                max = cmax;
+            if (max < min)
+                return false;
+        }
+
+        return true;
     }
 }
