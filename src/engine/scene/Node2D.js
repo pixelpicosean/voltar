@@ -156,7 +156,7 @@ export default class Node2D extends VObject {
         this.parent = null;
 
         /**
-         * @type {import('engine/SceneTree').default}
+         * @type {import('engine/scene/main/SceneTree').default}
          */
         this.scene_tree = null;
 
@@ -448,7 +448,7 @@ export default class Node2D extends VObject {
             this.groups.push(group);
 
             if (this.is_inside_tree) {
-                this.scene_tree.add_node_to_group(this, group);
+                // this.scene_tree.add_node_to_group(this, group);
             }
         }
         return this;
@@ -466,7 +466,7 @@ export default class Node2D extends VObject {
             remove_items(this.groups, idx, 1);
 
             if (this.is_inside_tree) {
-                this.scene_tree.remove_node_from_group(this, group);
+                // this.scene_tree.remove_node_from_group(this, group);
             }
         }
         return this;
@@ -1068,7 +1068,7 @@ export default class Node2D extends VObject {
         // Add to scene tree groups
         if (this.groups && this.groups.length > 0) {
             for (let g of this.groups) {
-                this.scene_tree.add_node_to_group(this, g);
+                // this.scene_tree.add_node_to_group(this, g);
             }
         }
 
@@ -1114,7 +1114,7 @@ export default class Node2D extends VObject {
         // Remove from scene tree groups
         if (this.groups && this.groups.length > 0) {
             for (let i = 0; i < this.groups.length; i++) {
-                this.scene_tree.remove_node_from_group(this, this.groups[i]);
+                // this.scene_tree.remove_node_from_group(this, this.groups[i]);
             }
         }
 
@@ -1454,7 +1454,7 @@ export default class Node2D extends VObject {
     }
 
     /**
-     * @returns {import('engine/SceneTree').default}
+     * @returns {import('engine/scene/main/SceneTree').default}
      */
     get_tree() {
         return this.scene_tree;

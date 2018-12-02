@@ -63,7 +63,7 @@ export { default as AnimationPlayer } from './scene/animation/AnimationPlayer';
 // ------------------------------------------------------------------
 // Useful class
 // ------------------------------------------------------------------
-export { default as OS } from './os';
+export { default as OS } from './core/os';
 
 export { default as Color } from './Color';
 
@@ -110,7 +110,7 @@ export {
 // Instances
 // ------------------------------------------------------------------
 import Input from './input/index';
-import SceneTree from './SceneTree';
+import SceneTree from './scene/main/SceneTree';
 
 /** @type {Array<Array<string>>} */
 const preload_queue = [];

@@ -1,18 +1,18 @@
-import VisualServer from './VisualServer';
-import PhysicsServer from './PhysicsServer';
-import MessageQueue from './MessageQueue';
-import Node2D from './scene/Node2D';
-import Vector from './math/Vector2';
-import { shared as shared_ticker } from './ticker/index';
-import { Loader } from './loaders/index';
-import { mixins, deep_merge, scene_path_to_key } from './utils/index';
+import VisualServer from '../../VisualServer';
+import PhysicsServer from '../../PhysicsServer';
+import MessageQueue from '../../MessageQueue';
+import Node2D from '../Node2D';
+import Vector from '../../math/Vector2';
+import { shared as shared_ticker } from '../../ticker/index';
+import { Loader } from '../../loaders/index';
+import { mixins, deep_merge, scene_path_to_key } from '../../utils/index';
 
-import { outer_box_resize } from './resize';
+import { outer_box_resize } from '../../resize';
 import remove_items from 'remove-array-items';
-import { optional, scene_class_map, node_class_map } from './registry';
-import Theme, { default_font_name } from './scene/resources/Theme';
-import { registered_bitmap_fonts } from './scene/text/res';
-import { assemble_scene } from './index';
+import { optional, scene_class_map, node_class_map } from '../../registry';
+import Theme, { default_font_name } from '../resources/Theme';
+import { registered_bitmap_fonts } from '../text/res';
+import { assemble_scene } from '../../index';
 
 /**
  * @typedef ApplicationSettings
@@ -97,17 +97,65 @@ const DefaultSettings = {
     },
 };
 
+class SceneTreeTimer {
+    constructor() {
+        this.time_left = 0;
+        this.process_pause = true;
+    }
+}
+
+/**
+ * @enum {string}
+ */
+const StretchMode = {
+    'DISABLED': 'disabled',
+    '2D': '2d',
+    'VIEWPORT': 'viewport',
+}
+
+/**
+ * @enum {string}
+ */
+const StretchAspect = {
+    'IGNORE': 'disabled',
+    'KEEP': 'keep',
+    'KEEP_WIDTH': 'keep_width',
+    'KEEP_HEIGHT': 'keep_height',
+    'EXPAND': 'expand',
+}
+
+class Group {
+    constructor() {
+        /**
+         * @type {Node2D[]}
+         */
+        this.nodes = [];
+        this.changed = false;
+    }
+}
 
 export default class SceneTree {
     constructor(input, preload_queue) {
+        this.tree_version = 1;
+        this.physics_process_time = 1;
+        this.idle_process_time = 1;
+
+        this.root = null;
+        this.current_frame = 0;
+        this.current_event = 0;
+        this.call_lock = 0;
+        this.root_lock = 0;
+        this.node_count = 0;
+
         this.paused = false;
+
         this.debug_collisions_hint = false;
 
         /**
-         * @type {Object<string, Array<Node2D>>}
+         * @type {Map<string, Group>}
          * @private
          */
-        this.grouped_nodes = Object.create(null);
+        this.group_map = new Map();
 
         /**
          * @type {Array<Node2D>}
@@ -225,26 +273,53 @@ export default class SceneTree {
         node.is_queued_for_deletion = true;
         this.delete_queue.push(node);
     }
-    get_nodes_in_group(group) {
-        return this.grouped_nodes[group];
+
+    /**
+     * @param {string} p_identifier
+     */
+    has_group(p_identifier) {
+        return this.group_map.has(p_identifier);
     }
-    add_node_to_group(node, group_p) {
-        let group = this.grouped_nodes[group_p];
-        if (!group) {
-            group = this.grouped_nodes[group_p] = [];
+    /**
+     * @param {string} p_group
+     * @param {Array<Node2D>} [p_list]
+     */
+    get_nodes_in_group(p_group, p_list = []) {
+        p_list.length = 0;
+
+        const E = this.group_map.get(p_group);
+        if (!E) {
+            return p_list;
         }
-        if (group.indexOf(node) < 0) {
-            group.push(node);
+
+        this._update_group_order(E);
+        const nc = E.nodes.length;
+        if (nc === 0) {
+            return p_list;
+        }
+        for (let n of E.nodes) {
+            p_list.push(n);
         }
     }
-    remove_node_from_group(node, group_p) {
-        let group = this.grouped_nodes[group_p];
-        if (group) {
-            let idx = group.indexOf(node);
-            if (idx >= 0) {
-                remove_items(group, idx, 1);
-            }
+    /**
+     * @param {Group} g
+     * @param {boolean} [p_use_priority]
+     */
+    _update_group_order(g, p_use_priority = false) {
+        if (!g.changed) {
+            return;
         }
+        if (g.nodes.length === 0) {
+            return;
+        }
+
+        if (p_use_priority) {
+            // TODO: compare nodes with priority in a group
+        } else {
+            // TODO: compare nodes in a group
+        }
+
+        g.changed = false;
     }
 
     get_root() {
