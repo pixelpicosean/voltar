@@ -4,7 +4,7 @@
  * @constant
  * @type {string}
  */
-export const VERSION = '3.0.0 - Pixi.js(4.8.x-dev)';
+export const VERSION = '3.1.0-dev';
 
 /**
  * Constant to identify the Renderer Type.

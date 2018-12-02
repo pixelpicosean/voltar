@@ -1,4 +1,4 @@
-import { DATA_URI, URL_FILE_EXTENSION, SVG_SIZE } from '../const';
+import { DATA_URI, URL_FILE_EXTENSION, SVG_SIZE, VERSION } from '../const';
 import settings from '../settings';
 import plugin_target from './plugin_target';
 import * as mixins from './mixin';
@@ -6,7 +6,6 @@ import map_premultiplied_blend_modes from './map_premultiplied_blend_modes';
 import deep_merge from './deep_merge';
 
 let next_uid = 0;
-let said_hello = false;
 
 /**
  * Generalized convenience utilities for
@@ -173,26 +172,11 @@ export function get_svg_size(svg_string) {
 }
 
 /**
- * Skips the hello message of renderers that are created after this is run.
+ * Logs out the version information for this running instance of.
  */
-export function skip_hello() {
-    said_hello = true;
-}
-
-/**
- * Logs out the version and renderer information for this running instance of
- * If you don't want to see this message you can run `utils.skip_hello()` before
- * creating your renderer. Keep in mind that doing that will forever makes you a jerk face.
- *
- * @param {string} type - The string renderer type to log.
- */
-export function say_hello(type) {
-    if (!said_hello) {
-        said_hello = true;
-
-        if (window.console) {
-            console.log(`[Voltar] Renderer: ${type}`);
-        }
+export function say_hello() {
+    if (window.console) {
+        console.log(`[Voltar] ver.${VERSION}`);
     }
 }
 
