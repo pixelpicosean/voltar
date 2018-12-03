@@ -1,5 +1,5 @@
 import VisualServer from '../../VisualServer';
-import PhysicsServer from '../../PhysicsServer';
+import PhysicsServer from 'engine/physics/physics_server';
 import MessageQueue from '../../MessageQueue';
 import Node2D from '../Node2D';
 import Vector from '../../math/Vector2';
@@ -8,7 +8,6 @@ import { Loader } from '../../loaders/index';
 import { mixins, deep_merge, scene_path_to_key } from '../../utils/index';
 
 import { outer_box_resize } from '../../resize';
-import remove_items from 'remove-array-items';
 import { optional, scene_class_map, node_class_map } from '../../registry';
 import Theme, { default_font_name } from '../resources/Theme';
 import { registered_bitmap_fonts } from '../text/res';
@@ -32,7 +31,6 @@ import { assemble_scene } from '../../index';
   * @prop {boolean} antialias
   * @prop {boolean} pixel_snap
   * @prop {string} scale_mode
-  * @prop {number} FPS
   * @prop {string} stretch_mode
   * @prop {string} stretch_aspect
   */
@@ -44,6 +42,7 @@ import { assemble_scene } from '../../index';
  */
 /**
   * @typedef PhysicsSettings
+  * @prop {number} physics_fps
   * @prop {number} sleep_threshold_linear
   * @prop {number} sleep_threshold_angular
   * @prop {number} time_before_sleep
@@ -82,12 +81,11 @@ const DefaultSettings = {
         pixel_snap: true,
         scale_mode: 'linear',
 
-        FPS: 60,
-
         stretch_mode: 'viewport',
         stretch_aspect: 'keep',
     },
     physics: {
+        physics_fps: 60,
         sleep_threshold_linear: 2,
         sleep_threshold_angular: 8.0 / 180.0 * Math.PI,
         time_before_sleep: 0.5,
@@ -586,7 +584,10 @@ export default class SceneTree {
         if (this._next_scene) {
             if (this.current_scene) {
                 this.viewport.remove_children();
-                this.physics_server.clean();
+
+                // TODO: clean up physics server during scene switching
+                // this.physics_server.clean();
+
                 this.current_scene = null;
             }
 
@@ -624,7 +625,7 @@ export default class SceneTree {
             }
             else {
                 // Step size
-                _process_tmp.step = 1000.0 / this.settings.display.FPS;
+                _process_tmp.step = 1000.0 / this.settings.physics.physics_fps;
                 _process_tmp.slow_step = _process_tmp.step * this.time_scale;
                 _process_tmp.slow_step_sec = _process_tmp.step * 0.001 * this.time_scale;
 
@@ -638,22 +639,32 @@ export default class SceneTree {
                 while (_process_tmp.delta_time >= _process_tmp.step) {
                     _process_tmp.delta_time -= _process_tmp.step;
 
-                    // Fixed update
-                    // - update transforms
+                    // Physics update
+
+                    // - flush_transform_notifications
                     this.viewport.parent = this.viewport._temp_node_2d_parent;
                     this.viewport.update_transform();
                     this.viewport.parent = null;
+
+                    // - update physics server
+                    this.physics_server.sync();
+                    this.physics_server.flush_queries();
+
                     // - process nodes
-                    this.current_scene._propagate_process(_process_tmp.slow_step_sec);
-                    // - update shared ticker
-                    shared_ticker.update(_process_tmp.slow_step);
-                    // - solve collision
-                    this.physics_server.update(this.current_scene, _process_tmp.slow_step_sec);
-                    // - remove nodes to be freed
+                    this.current_scene._propagate_physics_process(_process_tmp.slow_step_sec);
+
+                    this.message_queue.flush();
+
+                    this.physics_server.end_sync();
+                    this.physics_server.step(_process_tmp.slow_step_sec);
+
+                    // - flush_transform_notifications
+                    this.viewport.parent = this.viewport._temp_node_2d_parent;
+                    this.viewport.update_transform();
+                    this.viewport.parent = null;
+
                     this._flush_delete_queue();
-                    // - update inputs
-                    this.input._process(_process_tmp.slow_step_sec);
-                    // - dispatch deferred messages
+
                     this.message_queue.flush();
 
                     _process_tmp.count += 1;
@@ -670,6 +681,34 @@ export default class SceneTree {
 
                 _process_tmp.last_count = _process_tmp.count;
             }
+
+            // Idle update
+
+            // - flush_transform_notifications
+            this.viewport.parent = this.viewport._temp_node_2d_parent;
+            this.viewport.update_transform();
+            this.viewport.parent = null;
+
+            // - process nodes
+            this.current_scene._propagate_process(_process_tmp.real_delta * 0.001);
+
+            // - update shared ticker
+            shared_ticker.update(_process_tmp.real_delta);
+
+            this.message_queue.flush();
+
+            // - flush_transform_notifications
+            this.viewport.parent = this.viewport._temp_node_2d_parent;
+            this.viewport.update_transform();
+            this.viewport.parent = null;
+
+            // - remove nodes to be freed
+            this._flush_delete_queue();
+
+            // - update inputs
+            this.input._process(_process_tmp.real_delta * 0.001);
+
+            this.message_queue.flush();
 
             // Render
             this.visual_server.render(this.viewport);
