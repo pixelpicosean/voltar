@@ -268,9 +268,9 @@ export default class Node2D extends VObject {
         this.children = [];
 
         /**
-         * @type {any}
+         * @type {Map<string, Node2D>}
          */
-        this.named_children = Object.create(null);
+        this.named_children = new Map();
 
         /**
          * @type {Array<number>}
@@ -1358,7 +1358,7 @@ export default class Node2D extends VObject {
 
         // remove from name hash
         if (child.name.length > 0) {
-            this.named_children[child.name] = undefined;
+            this.named_children.delete(child.name);
         }
 
         // ensure bounds will be recalculated
@@ -1391,7 +1391,7 @@ export default class Node2D extends VObject {
 
         // remove from name hash
         if (child.name.length > 0) {
-            this.named_children[child.name] = undefined;
+            this.named_children.delete(child.name);
         }
 
         // ensure bounds will be recalculated
@@ -1432,7 +1432,7 @@ export default class Node2D extends VObject {
 
                 // remove from name hash
                 if (removed[i].name.length > 0) {
-                    this.named_children[removed[i].name] = undefined;
+                    this.named_children.delete(removed[i].name);
                 }
 
                 removed[i]._propagate_exit_tree();
@@ -1493,7 +1493,7 @@ export default class Node2D extends VObject {
                     }
                     break;
                 default:
-                    node = node.named_children[name];
+                    node = node.named_children.get(name);
                     if (!node) {
                         console.log(`node called "${name}" does not exist`);
                         return null;
@@ -1584,11 +1584,11 @@ export default class Node2D extends VObject {
     _validate_child_name(child) {
         let n = child.name;
         let i = 2;
-        while (this.named_children[n]) {
+        while (this.named_children.has(n)) {
             n = `${name}_${i}`;
         }
         child.name = n;
-        this.named_children[n] = child;
+        this.named_children.set(n, child);
     }
 
     /**
