@@ -165,13 +165,11 @@ export default class Matrix {
      * Get a new position with the current transformation applied.
      * Can be used to go from a child's coordinate space to the world coordinate space. (e.g. rendering)
      *
-     * @param {import('./Vector2').Vector2Like} pos - The origin
-     * @param {import('./Vector2').Vector2Like} [new_pos] - The point that the new position is assigned to (allowed to be same as input)
-     * @return {import('./Vector2').Vector2Like} The new point, transformed through this matrix
+     * @param {Vector2} pos - The origin
+     * @param {Vector2} [new_pos] - The point that the new position is assigned to (allowed to be same as input)
+     * @return {Vector2} The new point, transformed through this matrix
      */
-    basis_xform(pos, new_pos) {
-        new_pos = new_pos || new Vector2();
-
+    basis_xform(pos, new_pos = new Vector2()) {
         const x = pos.x;
         const y = pos.y;
 
@@ -189,9 +187,7 @@ export default class Matrix {
      * @param {Vector2} [new_pos] - The point that the new position is assigned to (allowed to be same as input)
      * @return {Vector2} The new point, inverse-transformed through this matrix
      */
-    basis_xform_inv(pos, new_pos) {
-        new_pos = new_pos || new Vector2();
-
+    basis_xform_inv(pos, new_pos = new Vector2()) {
         const id = 1 / ((this.a * this.d) + (this.c * -this.b));
 
         const x = pos.x;

@@ -581,11 +581,11 @@ export default class Node2D extends VObject {
     /**
      * Calculates the global position of the display object
      *
-     * @param {import('engine/math/Vector2').Vector2Like} position - The world origin to calculate from
-     * @param {import('engine/math/Vector2').Vector2Like} [point] - A Vector2 object in which to store the value, optional
+     * @param {Vector2} position - The world origin to calculate from
+     * @param {Vector2} [point] - A Vector2 object in which to store the value, optional
      *  (otherwise will create a new Vector2)
      * @param {boolean} [skip_update=false] - Should we skip the update transform.
-     * @return {import('engine/math/Vector2').Vector2Like} A point object representing the position of this object
+     * @return {Vector2} A point object representing the position of this object
      */
     to_global(position, point, skip_update = false) {
         if (!skip_update) {
@@ -611,12 +611,12 @@ export default class Node2D extends VObject {
     /**
      * Calculates the local position of the display object relative to another point
      *
-     * @param {import('engine/math/Vector2').Vector2Like} position - The world origin to calculate from
+     * @param {Vector2} position - The world origin to calculate from
      * @param {Node2D} [from] - The Node2D to calculate the global position from
-     * @param {import('engine/math/Vector2').Vector2Like} [point] - A Vector2 object in which to store the value, optional
+     * @param {Vector2} [point] - A Vector2 object in which to store the value, optional
      *  (otherwise will create a new Vector2)
      * @param {boolean} [skip_update=false] - Should we skip the update transform
-     * @return {import('engine/math/Vector2').Vector2Like} A point object representing the position of this object
+     * @return {Vector2} A point object representing the position of this object
      */
     to_local(position, from, point, skip_update) {
         if (from) {
@@ -1581,6 +1581,9 @@ export default class Node2D extends VObject {
         // FILL IN//
     }
 
+    /**
+     * @param {Node2D} child
+     */
     _validate_child_name(child) {
         let n = child.name;
         let i = 2;
