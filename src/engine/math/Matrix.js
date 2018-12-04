@@ -1,5 +1,5 @@
 import Vector2 from './Vector2';
-import { PI2 } from '../index';
+import { PI2, Rectangle } from '../index';
 
 /**
  * The pixi Matrix class as an object, which makes it a lot faster,
@@ -166,7 +166,7 @@ export default class Matrix {
      * @param {Vector2} [r_out] - The point that the new position is assigned to (allowed to be same as input)
      * @return {Vector2} The new point, transformed through this matrix
      */
-    basis_xform(p_vec, r_out = new Vector2()) {
+    basis_xform(p_vec, r_out = Vector2.create()) {
         r_out.x = (this.a * p_vec.x) + (this.c * p_vec.y);
         r_out.y = (this.b * p_vec.x) + (this.d * p_vec.y);
 
@@ -178,7 +178,7 @@ export default class Matrix {
      * @param {Vector2} [r_out] - The point that the new position is assigned to (allowed to be same as input)
      * @return {Vector2} The new point, inverse-transformed through this matrix
      */
-    basis_xform_inv(p_vec, r_out = new Vector2()) {
+    basis_xform_inv(p_vec, r_out = Vector2.create()) {
         r_out.x = (this.a * p_vec.x) + (this.b * p_vec.y);
         r_out.y = (this.c * p_vec.x) + (this.d * p_vec.y);
 
@@ -193,7 +193,7 @@ export default class Matrix {
      * @param {Vector2} [r_out] - The point that the new position is assigned to (allowed to be same as input)
      * @return {Vector2} The new point, transformed through this matrix
      */
-    xform(p_vec, r_out = new Vector2()) {
+    xform(p_vec, r_out = Vector2.create()) {
         r_out.x = (this.a * p_vec.x) + (this.c * p_vec.y) + this.tx;
         r_out.y = (this.b * p_vec.x) + (this.d * p_vec.y) + this.ty;
 
@@ -208,9 +208,34 @@ export default class Matrix {
      * @param {Vector2} [r_out] - The point that the new position is assigned to (allowed to be same as input)
      * @return {Vector2} The new point, inverse-transformed through this matrix
      */
-    xform_inv(p_vec, r_out = new Vector2()) {
+    xform_inv(p_vec, r_out = Vector2.create()) {
         r_out.x = this.a * (p_vec.x - this.tx) + this.b * (p_vec.y - this.ty);
         r_out.y = this.c * (p_vec.x - this.tx) + this.d * (p_vec.y - this.ty);
+
+        return r_out;
+    }
+
+    /**
+     * @param {Rectangle} p_rect
+     * @param {Rectangle} [r_out]
+     */
+    xform_rect(p_rect, r_out = Rectangle.create()) {
+        const x = Vector2.create(this.a * p_rect.width, this.b * p_rect.width);
+        const y = Vector2.create(this.c * p_rect.height, this.d * p_rect.height);
+        const pos = Vector2.create(p_rect.x, p_rect.y);
+        this.xform(pos, pos);
+
+        r_out.x = pos.x;
+        r_out.y = pos.y;
+        const vec = Vector2.create();
+        r_out.expand_to(vec.copy(pos).add(x));
+        r_out.expand_to(vec.copy(pos).add(y));
+        r_out.expand_to(vec.copy(pos).add(x).add(y));
+
+        Vector2.delete(x);
+        Vector2.delete(y);
+        Vector2.delete(pos);
+        Vector2.delete(vec);
 
         return r_out;
     }
@@ -321,7 +346,7 @@ export default class Matrix {
     }
 
     /**
-     * Prepends the given Matrix to this Matrix.
+     * Prepends the given Matrix to this Matrix (`Matrix_A *= Matrix_B` in Godot)
      *
      * @param {Matrix} matrix - The matrix to prepend
      * @return {Matrix} This matrix. Good for chaining method calls.
