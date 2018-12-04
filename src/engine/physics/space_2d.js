@@ -1,4 +1,4 @@
-import { Physics2DDirectSpaceState } from "./state";
+import { Physics2DDirectSpaceState } from "../servers/physics_2d/state";
 import { INTERSECTION_QUERY_MAX } from "./const";
 
 const ElapsedTime = {

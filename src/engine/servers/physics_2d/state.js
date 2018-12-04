@@ -1,7 +1,7 @@
 import { Vector2, Matrix, Rectangle } from "engine/math/index";
-import { INTERSECTION_QUERY_MAX, Type } from "./const";
+import { INTERSECTION_QUERY_MAX, Type } from "../../physics/const";
 
-export class Physics2DDirectBodyState {
+export class Physics2DDirectBodyStateSW {
     /**
      * @returns {Vector2}
      */
@@ -298,7 +298,7 @@ class ShapeRestInfo {
 
 /**
  *
- * @param {import('./collision_object_2d').default} p_object
+ * @param {import('../../physics/collision_object_2d').default} p_object
  * @param {number} p_collision_mask
  * @param {boolean} p_collide_with_bodies
  * @param {boolean} p_collide_with_areas
@@ -320,7 +320,7 @@ function _can_collide_with(p_object, p_collision_mask, p_collide_with_bodies, p_
 
 export class Physics2DDirectSpaceState {
     constructor() {
-        /** @type {import('./space_2d').default} */
+        /** @type {import('../../physics/space_2d').default} */
         this.space = null;
     }
 
