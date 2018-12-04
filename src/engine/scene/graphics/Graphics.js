@@ -1018,7 +1018,7 @@ export default class Graphics extends Node2D {
      * @return {boolean} the result of the test
      */
     contains_point(point) {
-        this.world_transform.basis_xform_inv(point, temp_point);
+        this.world_transform.xform_inv(point, temp_point);
 
         const graphics_data = this.graphics_data;
 

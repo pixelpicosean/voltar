@@ -605,7 +605,7 @@ export default class Node2D extends VObject {
         }
 
         // don't need to update the lot
-        return this.world_transform.basis_xform(position, point);
+        return this.world_transform.xform(position, point);
     }
 
     /**
@@ -640,7 +640,7 @@ export default class Node2D extends VObject {
         }
 
         // simply apply the matrix..
-        return this.world_transform.basis_xform_inv(position, point);
+        return this.world_transform.xform_inv(position, point);
     }
 
     /**

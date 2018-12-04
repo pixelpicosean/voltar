@@ -995,7 +995,7 @@ export default class InteractionManager extends VObject {
         // There is also no longer a need to hitTest children.
         if (node.hit_area) {
             if (hit_test) {
-                node.world_transform.basis_xform_inv(point, this._temp_point);
+                node.world_transform.xform_inv(point, this._temp_point);
                 if (!node.hit_area.contains(this._temp_point.x, this._temp_point.y)) {
                     hit_test = false;
                     hit_test_children = false;

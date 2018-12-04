@@ -203,7 +203,7 @@ export default class RigidBody2D extends PhysicsBody2D {
         tmp_vec.set(this._world_position.x + this._motion.x, this._world_position.y + this._motion.y);
 
         // Apply the motion, we will test collision and solve it later
-        this.parent.transform.world_transform.basis_xform_inv(tmp_vec, this.position);
+        this.parent.transform.world_transform.xform_inv(tmp_vec, this.position);
     }
 }
 

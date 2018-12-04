@@ -85,7 +85,7 @@ export default class KinematicBody2D extends PhysicsBody2D {
                         if (stop_on_slope) {
                             if (tmp_vec5.copy(lv_n).add(floor_normal).equals(ZeroVec)) {
                                 this._world_position.subtract(collision.travel);
-                                this.parent.world_transform.basis_xform_inv(this._world_position, this.position);
+                                this.parent.world_transform.xform_inv(this._world_position, this.position);
                                 return lv.set(0, 0);
                             }
                         }

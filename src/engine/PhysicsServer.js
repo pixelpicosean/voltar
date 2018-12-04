@@ -622,7 +622,7 @@ export default class PhysicsServer {
                                         if (Math.abs(Math.abs(angle) - Math.PI * 0.5) < Math.PI * 0.1) {
                                             real_co.travel.copy(real_co.normal)
                                                 .scale(real_co.overlap)
-                                            rigid.parent.transform.world_transform.basis_xform_inv(rigid._world_position.add(real_co.travel), rigid.position);
+                                            rigid.parent.transform.world_transform.xform_inv(rigid._world_position.add(real_co.travel), rigid.position);
                                             rigid.linear_velocity.project_n(real_co.normal);
                                             console.log('what!')
                                         } else {
@@ -631,7 +631,7 @@ export default class PhysicsServer {
                                                 .scale(push_dist)
                                             real_co.travel.copy(rigid._motion)
                                                 .subtract(real_co.remainder)
-                                            rigid.parent.transform.world_transform.basis_xform_inv(rigid._world_position.subtract(real_co.remainder), rigid.position);
+                                            rigid.parent.transform.world_transform.xform_inv(rigid._world_position.subtract(real_co.remainder), rigid.position);
 
                                             // Let the rigid body bounce
                                             rigid.linear_velocity.copy(rigid.linear_velocity).bounce(real_co.normal)
@@ -799,7 +799,7 @@ export default class PhysicsServer {
 
         // Apply the motion now, so we can test whether there's a collision
         coll._world_position.add(motion);
-        coll.parent.transform.world_transform.basis_xform_inv(coll._world_position, coll.position);
+        coll.parent.transform.world_transform.xform_inv(coll._world_position, coll.position);
         shape.update_transform(coll._world_position, coll._world_rotation, coll._world_scale);
 
         // Let the aabb contains both space before move and after move
@@ -944,13 +944,13 @@ export default class PhysicsServer {
                                     .scale(real_co.overlap)
                                 motion.x = 0
                                 motion.y = 0
-                                a.parent.transform.world_transform.basis_xform_inv(a._world_position.add(real_co.travel), a.position);
+                                a.parent.transform.world_transform.xform_inv(a._world_position.add(real_co.travel), a.position);
                             } else {
                                 real_co.remainder.copy(motion).normalize()
                                     .scale((real_co.overlap) / Math.cos(angle))
                                 real_co.travel.copy(motion)
                                     .subtract(real_co.remainder)
-                                a.parent.transform.world_transform.basis_xform_inv(a._world_position.subtract(real_co.remainder), a.position);
+                                a.parent.transform.world_transform.xform_inv(a._world_position.subtract(real_co.remainder), a.position);
                             }
 
                             // Update collision info
