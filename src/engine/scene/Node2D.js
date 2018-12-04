@@ -1115,7 +1115,7 @@ export default class Node2D extends VObject {
         if (this.physics_process) this._physics_process(delta);
 
         for (let i = 0, l = this.children.length; i < l; i++) {
-            this.children[i]._propagate_process(delta);
+            this.children[i]._propagate_physics_process(delta);
         }
 
         // TODO: support tweens with physics_process mode
