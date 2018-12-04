@@ -4,7 +4,7 @@ export default class Step2D {
     }
 
     /**
-     * @param {import('./space_2d').default} p_space
+     * @param {import('../../physics/space_2d').default} p_space
      * @param {number} p_delta
      * @param {number} p_iterations
      */
@@ -15,7 +15,7 @@ export default class Step2D {
 
         /* INTEGRATE FORCES */
 
-        let profile_begtime = Date.now();
+        let profile_begtime = performance.now();
         let profile_endtime = 0;
 
         let active_count = 0;

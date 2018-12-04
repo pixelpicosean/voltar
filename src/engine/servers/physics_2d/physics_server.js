@@ -1,6 +1,5 @@
 import {
     Vector2,
-    Transform,
     Matrix,
 } from "engine/math/index";
 
@@ -15,7 +14,7 @@ import {
     Physics2DDirectSpaceState,
     Physics2DDirectBodyStateSW,
 } from "./state";
-import Step2D from "../../physics/step_2d";
+import Step2D from "./step_2d";
 import Space2D from "../../physics/space_2d";
 import { CircleShape2DSW, Shape2DSW } from "./shape_2d_sw";
 import CollisionSolver2DSW from "./collision_solver_2d_sw";
@@ -90,18 +89,6 @@ export default class PhysicsServer {
         this.is_initialized = false;
     }
 
-    // /**
-    //  *
-    //  * @param {any} body
-    //  * @param {Transform} xfrom
-    //  * @param {Vector2} motion
-    //  * @param {boolean} infinite_inertia
-    //  * @param {number} [margin]
-    //  * @param {Physics2DTestMotionResult} [result]
-    //  * @returns {boolean}
-    //  */
-    // _body_test_motion(body, xfrom, motion, infinite_inertia, margin = 0.08, result = undefined) { }
-
     line_shape_create() { }
     ray_shape_create() { }
     segment_shape_create() { }
@@ -116,9 +103,51 @@ export default class PhysicsServer {
     /**
      * @param {Vector2} p_point_A
      * @param {Vector2} p_point_B
-     * @param {any} p_userdata
+     * @param {CollCbkData} p_userdata
      */
-    _shape_col_cbk(p_point_A, p_point_B, p_userdata) { }
+    _shape_col_cbk(p_point_A, p_point_B, p_userdata) {
+        const cbk = p_userdata;
+
+        if (cbk.max === 0) {
+            return;
+        }
+
+        if (!cbk.valid_dir.is_zero()) {
+            if (p_point_A.distance_squared_to(p_point_B) > cbk.valid_depth * cbk.valid_depth) {
+                cbk.invalid_by_dir++;
+                return;
+            }
+            const rel_dir = p_point_A.clone().subtract(p_point_B).normalize();
+
+            if (cbk.valid_dir.dot(rel_dir) < 0.7071) { // sqrt(2) / 2 - 45 degrees
+                cbk.invalid_by_dir++;
+                return;
+            }
+        }
+
+        if (cbk.amount === cbk.max) {
+            let min_depth = Number.MAX_VALUE;
+            let min_depth_idx = 0;
+            for (let i = 0; i < cbk.amount; i++) {
+                const d = cbk.ptr[i * 2 + 0].distance_squared_to(cbk.ptr[i * 2 + 1]);
+                if (d < min_depth) {
+                    min_depth = d;
+                    min_depth_idx = i;
+                }
+            }
+
+            let d = p_point_A.distance_squared_to(p_point_B);
+            if (d < min_depth) {
+                return;
+            }
+            cbk.ptr[min_depth_idx * 2 + 0].copy(p_point_A);
+            cbk.ptr[min_depth_idx * 2 + 1].copy(p_point_B);
+        } else {
+            cbk.ptr[cbk.amount * 2 + 0].copy(p_point_A);
+            cbk.ptr[cbk.amount * 2 + 1].copy(p_point_B);
+            cbk.amount++;
+        }
+    }
 
     /**
      * @param {Shape2DSW} p_shape
@@ -140,7 +169,10 @@ export default class PhysicsServer {
      * @param {Shape2DSW} p_shape
      * @param {number} p_bias
      */
-    shape_set_custom_solver_bias(p_shape, p_bias) { }
+    shape_set_custom_solver_bias(p_shape, p_bias) {
+        // TODO: remove this useless method
+        p_shape.custom_bias = p_bias;
+    }
 
     /**
      * @param {Shape2DSW} p_shape_A
@@ -336,7 +368,6 @@ export default class PhysicsServer {
         this.doing_sync = false;
 
         this.last_step = p_step;
-        // Physics2DDirectBodyState.singleton.step = p_step;
         this.island_count = 0;
         this.active_objects = 0;
         this.collision_pairs = 0;
