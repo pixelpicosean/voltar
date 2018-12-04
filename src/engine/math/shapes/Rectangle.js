@@ -252,35 +252,35 @@ export default class Rectangle {
     /**
      * Fits this rectangle around the passed one.
      *
-     * @param {Rectangle} rectangle - The rectangle to fit.
+     * @param {Rectangle} p_rect - The rectangle to fit.
      */
-    fit_to(rectangle) {
-        if (this.x < rectangle.x) {
+    fit_to(p_rect) {
+        if (this.x < p_rect.x) {
             this.width += this.x;
             if (this.width < 0) {
                 this.width = 0;
             }
 
-            this.x = rectangle.x;
+            this.x = p_rect.x;
         }
 
-        if (this.y < rectangle.y) {
+        if (this.y < p_rect.y) {
             this.height += this.y;
             if (this.height < 0) {
                 this.height = 0;
             }
-            this.y = rectangle.y;
+            this.y = p_rect.y;
         }
 
-        if (this.x + this.width > rectangle.x + rectangle.width) {
-            this.width = rectangle.width - this.x;
+        if (this.x + this.width > p_rect.x + p_rect.width) {
+            this.width = p_rect.width - this.x;
             if (this.width < 0) {
                 this.width = 0;
             }
         }
 
-        if (this.y + this.height > rectangle.y + rectangle.height) {
-            this.height = rectangle.height - this.y;
+        if (this.y + this.height > p_rect.y + p_rect.height) {
+            this.height = p_rect.height - this.y;
             if (this.height < 0) {
                 this.height = 0;
             }
@@ -288,35 +288,46 @@ export default class Rectangle {
     }
 
     /**
-     * Enlarges this rectangle to include the passed rectangle.
+     * Merge the given rectangle and return a new one.
      *
-     * @param {Rectangle} rectangle - The rectangle to include.
+     * @param {Rectangle} p_rect - The rectangle to merge.
      */
-    enlarge(rectangle) {
-        const x1 = Math.min(this.x, rectangle.x);
-        const x2 = Math.max(this.x + this.width, rectangle.x + rectangle.width);
-        const y1 = Math.min(this.y, rectangle.y);
-        const y2 = Math.max(this.y + this.height, rectangle.y + rectangle.height);
+    merge(p_rect) {
+        return this.clone().merge_to(p_rect);
+    }
+
+    /**
+     * Merge this rectangle with the passed rectangle
+     *
+     * @param {Rectangle} p_rect - The rectangle to merge.
+     */
+    merge_to(p_rect) {
+        const x1 = Math.min(this.x, p_rect.x);
+        const x2 = Math.max(this.x + this.width, p_rect.x + p_rect.width);
+        const y1 = Math.min(this.y, p_rect.y);
+        const y2 = Math.max(this.y + this.height, p_rect.y + p_rect.height);
 
         this.x = x1;
         this.width = x2 - x1;
         this.y = y1;
         this.height = y2 - y1;
+
+        return this;
     }
 
     /**
-     * @param {Rectangle} rectangle
+     * @param {Rectangle} p_rect
      * @returns {boolean}
      */
-    intersects(rectangle) {
+    intersects(p_rect) {
         return !(
-            this.bottom <= rectangle.top
+            this.bottom <= p_rect.top
             ||
-            this.top >= rectangle.bottom
+            this.top >= p_rect.bottom
             ||
-            this.left >= rectangle.right
+            this.left >= p_rect.right
             ||
-            this.right <= rectangle.left
+            this.right <= p_rect.left
         );
     }
 
