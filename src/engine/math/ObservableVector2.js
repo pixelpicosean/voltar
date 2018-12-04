@@ -309,6 +309,20 @@ export default class ObservableVector2 {
         return this;
     }
 
+    /**
+     * Clamp the vector to specific length.
+     *
+     * @param {number} length
+     * @returns {Vector2}
+     */
+    clamp(length) {
+        const len = this.length();
+        if (len > 0 && length < len) {
+            this.scale(length / len);
+        }
+        return this;
+    }
+
     scale(b) {
         this.x *= b;
         this.y *= b;
