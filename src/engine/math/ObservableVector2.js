@@ -423,4 +423,8 @@ export default class ObservableVector2 {
     tangent() {
         return new Vector2(this._y, -this._x);
     }
+
+    is_zero() {
+        return this._x === 0 && this._y === 0;
+    }
 }

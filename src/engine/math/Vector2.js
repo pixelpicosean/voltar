@@ -580,6 +580,10 @@ export default class Vector2 {
     tangent() {
         return new Vector2(this.y, -this.x);
     }
+
+    is_zero() {
+        return this.x === 0 && this.y === 0;
+    }
 }
 
 /**
