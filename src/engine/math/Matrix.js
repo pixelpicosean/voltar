@@ -167,8 +167,8 @@ export default class Matrix {
      * @return {Vector2} The new point, transformed through this matrix
      */
     basis_xform(p_vec, r_out = new Vector2()) {
-        r_out.x = (this.a * p_vec.x) + (this.c * p_vec.y) + this.tx;
-        r_out.y = (this.b * p_vec.x) + (this.d * p_vec.y) + this.ty;
+        r_out.x = (this.a * p_vec.x) + (this.c * p_vec.y);
+        r_out.y = (this.b * p_vec.x) + (this.d * p_vec.y);
 
         return r_out;
     }
@@ -179,8 +179,8 @@ export default class Matrix {
      * @return {Vector2} The new point, inverse-transformed through this matrix
      */
     basis_xform_inv(p_vec, r_out = new Vector2()) {
-        r_out.x = this.a * p_vec.x + this.b * p_vec.y;
-        r_out.y = this.c * p_vec.x + this.d * p_vec.y;
+        r_out.x = (this.a * p_vec.x) + (this.b * p_vec.y);
+        r_out.y = (this.c * p_vec.x) + (this.d * p_vec.y);
 
         return r_out;
     }
@@ -395,19 +395,23 @@ export default class Matrix {
      * @return {Matrix} This matrix. Good for chaining method calls.
      */
     affine_inverse() {
-        const a1 = this.a;
-        const b1 = this.b;
-        const c1 = this.c;
-        const d1 = this.d;
-        const tx1 = this.tx;
-        const n = (a1 * d1) - (b1 * c1);
+        const det = (this.a * this.d) - (this.b * this.c);
+        const idet = 1.0 / det;
 
-        this.a = d1 / n;
-        this.b = -b1 / n;
-        this.c = -c1 / n;
-        this.d = a1 / n;
-        this.tx = ((c1 * this.ty) - (d1 * tx1)) / n;
-        this.ty = -((a1 * this.ty) - (b1 * tx1)) / n;
+        const tmp = this.d;
+        this.d = this.a;
+        this.a = tmp;
+
+        this.a *= idet;
+        this.b *= -idet;
+        this.c *= -idet;
+        this.d *= idet;
+
+        const tx = (this.a * -this.tx) + (this.c * -this.ty);
+        const ty = (this.b * -this.tx) + (this.d * -this.ty);
+
+        this.tx = tx;
+        this.ty = ty;
 
         return this;
     }
