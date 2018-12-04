@@ -14,7 +14,7 @@ import {
     Physics2DDirectSpaceState,
     Physics2DDirectBodyStateSW,
 } from "./state";
-import Step2D from "./step_2d";
+import Step2DSW from "./step_2d_sw";
 import Space2D from "../../physics/space_2d";
 import { CircleShape2DSW, Shape2DSW } from "./shape_2d_sw";
 import CollisionSolver2DSW from "./collision_solver_2d_sw";
@@ -72,7 +72,7 @@ export default class PhysicsServer {
         this.flushing_queries = false;
 
         /**
-         * @type {Step2D}
+         * @type {Step2DSW}
          */
         this.stepper = null;
 
@@ -322,7 +322,7 @@ export default class PhysicsServer {
         this.doing_sync = false;
         this.last_step = 0.001;
         this.iterations = 8;
-        this.stepper = new Step2D();
+        this.stepper = new Step2DSW();
         this.direct_state = new Physics2DDirectBodyStateSW();
 
         // sleep_threshold_linear = settings.sleep_threshold_linear;

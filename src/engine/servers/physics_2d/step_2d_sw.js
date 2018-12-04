@@ -1,4 +1,4 @@
-export default class Step2D {
+export default class Step2DSW {
     constructor() {
         this._step = 1;
     }
