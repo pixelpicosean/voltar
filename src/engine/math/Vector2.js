@@ -11,6 +11,22 @@ export const EPSILON = 0.000001;
  * the horizontal axis and y represents the vertical axis.
  */
 export default class Vector2 {
+    static create() {
+        const vec = pool.pop();
+        if (!vec) {
+            return new Vector2();
+        } else {
+            return vec;
+        }
+    }
+    /**
+     * @param {Vector2} vec
+     */
+    static delete(vec) {
+        pool.push(vec);
+        return Vector2;
+    }
+
     get width() {
         return this.x;
     }
@@ -564,22 +580,6 @@ export default class Vector2 {
     tangent() {
         return new Vector2(this.y, -this.x);
     }
-}
-
-Vector2.get = () => {
-    const vec = pool.pop();
-    if (!vec) {
-        return new Vector2();
-    } else {
-        return vec;
-    }
-}
-/**
- * @param {Vector2} vec
- */
-Vector2.put = (vec) => {
-    pool.push(vec);
-    return Vector2;
 }
 
 /**

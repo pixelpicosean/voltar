@@ -54,13 +54,13 @@ export default class Shape2D {
      * @param {Matrix} p_shape_xform
      */
     collide(p_local_xform, p_shape, p_shape_xform) {
-        const v0 = Vector2.get();
-        const v1 = Vector2.get();
+        const v0 = Vector2.create();
+        const v1 = Vector2.create();
 
         const res = PhysicsServer.singleton.shape_collide(this.shape, p_local_xform, v0, p_shape.shape, p_shape_xform, v1, null, 0, { value: 0 });
 
-        Vector2.put(v0);
-        Vector2.put(v1);
+        Vector2.delete(v0);
+        Vector2.delete(v1);
 
         return res;
     }
@@ -75,7 +75,7 @@ export default class Shape2D {
     collide_with_motion_and_get_contacts(p_local_xform, p_local_motion, p_shape, p_shape_xform, p_shape_motion) {
         const max_contacts = 16;
         const result = new Array(max_contacts * 2);
-        for (let i = 0; i < max_contacts; i++) result[i] = Vector2.get();
+        for (let i = 0; i < max_contacts; i++) result[i] = Vector2.create();
         const contacts = { value: 0 };
 
         if (!PhysicsServer.singleton.shape_collide(this.shape, p_local_xform, p_local_motion, p_shape.shape, p_shape_xform, p_shape_motion, result, max_contacts, contacts)) {
@@ -96,18 +96,18 @@ export default class Shape2D {
     collide_and_get_contacts(p_local_xform, p_shape, p_shape_xform) {
         const max_contacts = 16;
         const result = new Array(max_contacts * 2);
-        for (let i = 0; i < max_contacts; i++) result[i] = Vector2.get();
+        for (let i = 0; i < max_contacts; i++) result[i] = Vector2.create();
         const contacts = { value: 0 };
 
-        const v0 = Vector2.get();
-        const v1 = Vector2.get();
+        const v0 = Vector2.create();
+        const v1 = Vector2.create();
         if (!PhysicsServer.singleton.shape_collide(this.shape, p_local_xform, v0, p_shape.shape, p_shape_xform, v1, result, max_contacts, contacts)) {
-            Vector2.put(v0);
-            Vector2.put(v1);
+            Vector2.delete(v0);
+            Vector2.delete(v1);
             return null;
         }
-        Vector2.put(v0);
-        Vector2.put(v1);
+        Vector2.delete(v0);
+        Vector2.delete(v1);
 
         result.length = contacts.value;
         // FIXME: why we only return half the results?
