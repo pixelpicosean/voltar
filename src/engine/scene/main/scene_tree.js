@@ -1,5 +1,5 @@
 import VisualServer from '../../VisualServer';
-import PhysicsServer from 'engine/physics/physics_server';
+import PhysicsServer from 'engine/servers/physics_2d/physics_server';
 import MessageQueue from '../../MessageQueue';
 import Node2D from '../Node2D';
 import Vector from '../../math/Vector2';
