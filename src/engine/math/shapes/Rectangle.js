@@ -2,10 +2,46 @@ import { SHAPES } from '../../const';
 import Vector2 from '../Vector2';
 
 /**
+ * @type {Rectangle[]}
+ */
+const pool = [];
+
+/**
  * Rectangle object is an area defined by its position, as indicated by its top-left corner
  * point (x, y) and by its width and its height.
  */
 export default class Rectangle {
+    /**
+     * @param {number} p_x
+     * @param {number} p_y
+     * @param {number} p_width
+     * @param {number} p_height
+     */
+    static create(p_x=0, p_y=0, p_width=0, p_height=0) {
+        const r = pool.pop();
+        if (!r) {
+            return new Rectangle(p_x, p_y, p_width, p_height);
+        } else {
+            return r.set(p_x, p_y, p_width, p_height);
+        }
+    }
+    /**
+     * @param {Rectangle} p_rect
+     */
+    static delete(p_rect) {
+        pool.push(p_rect);
+    }
+
+    /**
+     * A constant empty rectangle.
+     *
+     * @static
+     * @constant
+     */
+    static get EMPTY() {
+        return Object.freeze(new Rectangle(0, 0, 0, 0));
+    }
+
     /**
      * @param {number} [x=0] - The X coordinate of the upper-left corner of the rectangle
      * @param {number} [y=0] - The Y coordinate of the upper-left corner of the rectangle
@@ -40,6 +76,20 @@ export default class Rectangle {
          * @readOnly
          */
         this.type = SHAPES.RECT;
+    }
+
+    /**
+     * @param {number} p_x
+     * @param {number} p_y
+     * @param {number} p_width
+     * @param {number} p_height
+     */
+    set(p_x, p_y, p_width, p_height) {
+        this.x = p_x;
+        this.y = p_y;
+        this.width = p_width;
+        this.height = p_height;
+        return this;
     }
 
     /**
@@ -79,22 +129,12 @@ export default class Rectangle {
     }
 
     /**
-     * A constant empty rectangle.
-     *
-     * @static
-     * @constant
-     */
-    static get EMPTY() {
-        return new Rectangle(0, 0, 0, 0);
-    }
-
-    /**
      * Creates a clone of this Rectangle
      *
      * @return {Rectangle} a copy of the rectangle
      */
     clone() {
-        return new Rectangle(this.x, this.y, this.width, this.height);
+        return Rectangle.create(this.x, this.y, this.width, this.height);
     }
 
     /**
@@ -150,9 +190,7 @@ export default class Rectangle {
      * @param {number} p_by - The horizontal padding amount.
      */
     grow(p_by) {
-        const g = new Rectangle();
-        g.grow_to(p_by);
-        return g;
+        return this.clone().grow_to(p_by);
     }
 
     /**
@@ -175,7 +213,7 @@ export default class Rectangle {
      * @param {number} p_bottom
      */
     grow_individual(p_left, p_top, p_right, p_bottom) {
-        const g = new Rectangle();
+        const g = this.clone();
         g.x -= p_left;
         g.y -= p_top;
         g.width += (p_left + p_right);
@@ -187,9 +225,7 @@ export default class Rectangle {
      * @param {Vector2} p_vector
      */
     expand(p_vector) {
-        const g = new Rectangle();
-        g.expand_to(p_vector);
-        return g;
+        return this.clone().expand_to(p_vector);
     }
 
     /**

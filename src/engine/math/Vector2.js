@@ -11,12 +11,16 @@ export const EPSILON = 0.000001;
  * the horizontal axis and y represents the vertical axis.
  */
 export default class Vector2 {
-    static create() {
+    /**
+     * @param {number} [p_x]
+     * @param {number} [p_y]
+     */
+    static create(p_x=0, p_y=0) {
         const vec = pool.pop();
         if (!vec) {
-            return new Vector2();
+            return new Vector2(p_x, p_y);
         } else {
-            return vec;
+            return vec.set(p_x, p_y);
         }
     }
     /**
