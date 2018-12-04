@@ -1,5 +1,5 @@
-import { Physics2DDirectSpaceState } from "../servers/physics_2d/state";
-import { INTERSECTION_QUERY_MAX } from "./const";
+import { Physics2DDirectSpaceStateSW } from "../../servers/physics_2d/state";
+import { INTERSECTION_QUERY_MAX } from "../../physics/const";
 
 const ElapsedTime = {
     INTEGRATE_FORCES: 0,
@@ -10,7 +10,7 @@ const ElapsedTime = {
     MAX: 5,
 }
 
-export default class Space2D {
+export default class Space2DSW {
     get active() {
         return this._active;
     }
@@ -30,34 +30,31 @@ export default class Space2D {
     }
     constructor() {
         this._active = false;
-        this.space = null;
 
         this.elapsed_time = new Array(ElapsedTime.MAX);
-        /** @type {Physics2DDirectSpaceState} */
+
+        this.self = this;
+        /** @type {Physics2DDirectSpaceStateSW} */
         this.direct_access = null;
 
-        /** @type {import('./broadphase').default} */
+        /** @type {import('./broad_phase_2d_sw').default} */
         this.broadphase = null;
         this.active_list = [];
-        /** @type {Array<import('../scene/physics/PhysicsBody2D').default>} */
         this.inertia_update_list = [];
-        /** @type {Array<import('../scene/physics/PhysicsBody2D').default>} */
         this.state_query_list = [];
-        /** @type {Array<import('../scene/physics/Area2D').default>} */
         this.monitor_query_list = [];
-        /** @type {Array<import('../scene/physics/Area2D').default>} */
         this.area_moved_list = [];
 
-        this.objects = [];
+        this.objects = new Set();
 
-        this.area = null;
+        this.default_area = null;
 
         this.contact_recycle_radius = 0;
         this.contact_max_separation = 0;
         this.contact_max_allowed_penetration = 0;
         this.constraint_bias = 0;
 
-        /** @type {import('./collision_object_2d').default[]} */
+        /** @type {import('../../physics/collision_object_2d').default[]} */
         this.intersection_query_results = new Array(INTERSECTION_QUERY_MAX);
         /** @type {number[]} */
         this.intersection_query_subindex_results = new Array(INTERSECTION_QUERY_MAX);
@@ -67,9 +64,14 @@ export default class Space2D {
         this.collision_pairs = 0;
     }
 
-    get_moved_area_list() {
-        return this.area_moved_list;
-    }
+    area_add_to_moved_list(p_area) { }
+    area_remove_from_moved_list(p_area) { }
+
+    area_add_to_state_query_list(p_area) { }
+    area_remove_from_state_query_list(p_area) { }
+
+    add_object(p_object) { }
+    remove_object(p_object) { }
 
     setup() {
         while (this.inertia_update_list.length > 0) {
@@ -89,4 +91,7 @@ export default class Space2D {
             this.monitor_query_list.shift().call_queries();
         }
     }
+
+    set_param(p_param, p_value) { }
+    get_param(p_param) { }
 }

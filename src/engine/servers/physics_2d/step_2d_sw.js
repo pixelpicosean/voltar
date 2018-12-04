@@ -4,7 +4,7 @@ export default class Step2DSW {
     }
 
     /**
-     * @param {import('../../physics/space_2d').default} p_space
+     * @param {import('../../scene/resources/space_2d').default} p_space
      * @param {number} p_delta
      * @param {number} p_iterations
      */
