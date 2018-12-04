@@ -72,12 +72,13 @@ export class Shape2DSW {
         return null;
     }
     /**
+     * @param {Vector2} p_cast
      * @param {Vector2} p_normal
      * @param {Matrix} p_transform
      * @param {{min: number, max: number}} r_result
      * @return {{min: number, max: number}}
      */
-    project_range_castv(p_normal, p_transform, r_result) {
+    project_range_castv(p_cast, p_normal, p_transform, r_result) {
         return null;
     }
     /**
