@@ -13,11 +13,12 @@ import {
 import {
     ShapeResult,
     Physics2DDirectSpaceState,
-    Physics2DDirectBodyState,
-} from "../../physics/state";
+    Physics2DDirectBodyStateSW,
+} from "./state";
 import Step2D from "../../physics/step_2d";
 import Space2D from "../../physics/space_2d";
-import { CircleShape2DSW } from "./shape_2d_sw";
+import { CircleShape2DSW, Shape2DSW } from "./shape_2d_sw";
+import CollisionSolver2DSW from "./collision_solver_2d_sw";
 
 class RayResult {
     constructor() {
@@ -39,6 +40,20 @@ class Physics2DShapeQueryResult {
     get_result_count() { }
     get_result() { }
     get_result_object_shape() { }
+}
+
+class CollCbkData {
+    constructor() {
+        this.valid_dir = new Vector2();
+        this.valid_depth = 0;
+        this.max = 0;
+        this.amount = 0;
+        this.invalid_by_dir = 0;
+        /**
+         * @type {Vector2[]}
+         */
+        this.ptr = null;
+    }
 }
 
 export default class PhysicsServer {
@@ -68,15 +83,9 @@ export default class PhysicsServer {
         this.active_spaces = [];
 
         /**
-         * @type {Physics2DDirectBodyState}
+         * @type {Physics2DDirectBodyStateSW}
          */
         this.direct_state = null;
-
-        this.shape_owner = null;
-        this.space_owner = null;
-        this.area_owner = null;
-        this.body_owner = null;
-        this.joint_owner = null;
 
         this.is_initialized = false;
     }
@@ -86,10 +95,10 @@ export default class PhysicsServer {
     //  * @param {any} body
     //  * @param {Transform} xfrom
     //  * @param {Vector2} motion
-    //  * @param {Boolean} infinite_inertia
+    //  * @param {boolean} infinite_inertia
     //  * @param {number} [margin]
     //  * @param {Physics2DTestMotionResult} [result]
-    //  * @returns {Boolean}
+    //  * @returns {boolean}
     //  */
     // _body_test_motion(body, xfrom, motion, infinite_inertia, margin = 0.08, result = undefined) { }
 
@@ -104,28 +113,61 @@ export default class PhysicsServer {
     convex_polygon_shape_create() { }
     concave_polygon_shape_create() { }
 
-    shape_set_data(shape, data) { }
     /**
-     * @param {any} shape
-     * @param {number} bias
+     * @param {Vector2} p_point_A
+     * @param {Vector2} p_point_B
+     * @param {any} p_userdata
      */
-    shape_set_custom_solver_bias(shape, bias) { }
+    _shape_col_cbk(p_point_A, p_point_B, p_userdata) { }
 
     /**
-     *
-     * @param {any} shape_A
-     * @param {Transform} xform_A
-     * @param {Vector2} motion_A
-     * @param {any} shape_B
-     * @param {Transform} xform_B
-     * @param {Vector2} motion_B
-     * @param {Vector2[]} results
-     * @param {number} result_max
-     * @param {number} result_count
-     * @returns {Boolean}
+     * @param {Shape2DSW} p_shape
+     * @param {number} p_data
      */
-    shape_collide(shape_A, xform_A, motion_A, shape_B, xform_B, motion_B, results, result_max, result_count) {
-        return false;
+    shape_set_data(p_shape, p_data) {
+        // TODO: remove this useless method
+        p_shape.set_data(p_data);
+    }
+    /**
+     * @param {Shape2DSW} p_shape
+     * @returns {any}
+     */
+    shape_get_data(p_shape) {
+        // TODO: remove this useless method
+        return p_shape.get_data();
+    }
+    /**
+     * @param {Shape2DSW} p_shape
+     * @param {number} p_bias
+     */
+    shape_set_custom_solver_bias(p_shape, p_bias) { }
+
+    /**
+     * @param {Shape2DSW} p_shape_A
+     * @param {Matrix} p_xform_A
+     * @param {Vector2} p_motion_A
+     * @param {Shape2DSW} p_shape_B
+     * @param {Matrix} p_xform_B
+     * @param {Vector2} p_motion_B
+     * @param {Vector2[]} r_results
+     * @param {number} p_result_max
+     * @param {{ value: number }} r_ret
+     * @returns {boolean}
+     */
+    shape_collide(p_shape_A, p_xform_A, p_motion_A, p_shape_B, p_xform_B, p_motion_B, r_results, p_result_max, r_ret) {
+        if (p_result_max === 0) {
+            return CollisionSolver2DSW.solve(p_shape_A, p_xform_A, p_motion_A, p_shape_B, p_xform_B, p_motion_B, null, null);
+        }
+
+        const cbk = new CollCbkData();
+        cbk.max = p_result_max;
+        cbk.amount = 0;
+        cbk.ptr = r_results;
+
+        const res = CollisionSolver2DSW.solve(p_shape_A, p_xform_A, p_motion_A, p_shape_B, p_xform_B, p_motion_B, this._shape_col_cbk, cbk);
+        r_ret.value = cbk.amount;
+
+        return res;
     }
 
     /* SPACE API */
@@ -133,11 +175,11 @@ export default class PhysicsServer {
     space_create() { }
     /**
      * @param {any} space
-     * @param {Boolean} active
+     * @param {boolean} active
      */
     space_set_active(space, active) { }
     /**
-     * @returns {Boolean}
+     * @returns {boolean}
      */
     space_is_active(space) {
         return false;
@@ -160,14 +202,6 @@ export default class PhysicsServer {
 
     /**
      * @param {any} space
-     * @returns {Physics2DDirectSpaceState}
-     */
-    space_get_direct_state(space) {
-        return null;
-    }
-
-    /**
-     * @param {any} space
      * @returns {Vector2[]}
      */
     space_get_contacts(space) {
@@ -181,55 +215,70 @@ export default class PhysicsServer {
         return 0;
     }
 
+    /**
+     * @param {any} space
+     * @returns {Physics2DDirectSpaceState}
+     */
+    space_get_direct_state(space) {
+        return null;
+    }
+
     /* AERA API */
 
     area_create() { }
 
-    area_set_space(area, space) { }
-    area_get_space(area) { }
-
     /**
-     * @param {any} area
-     * @param {AreaSpaceOverrideMode} mode
+     * @param {any} p_area
+     * @param {AreaSpaceOverrideMode} p_mode
      */
-    area_set_space_override_mode(area, mode) { }
+    area_set_space_override_mode(p_area, p_mode) { }
     /**
-     * @param {any} area
+     * @param {any} p_area
      * @returns {AreaSpaceOverrideMode}
      */
-    area_get_space_override_mode(area) {
+    area_get_space_override_mode(p_area) {
         return null;
     }
 
-    area_add_shape(area, shape, transform = undefined) { }
-    area_set_shape(area, shape_idx, shape) { }
-    area_set_shape_transform(area, shape_idx, transform) { }
+    area_set_space(p_area, space) { }
+    area_get_space(p_area) { }
 
-    area_get_shape_count(area) { }
-    area_get_shape(area, shape_idx) { }
-    area_get_shape_transform(area, shape_idx) { }
+    area_add_shape(p_area, shape, transform = undefined) { }
+    area_set_shape(p_area, shape_idx, shape) { }
+    area_set_shape_transform(p_area, shape_idx, transform) { }
 
-    area_remove_shape(area, shape_idx) { }
-    area_clear_shapes(area) { }
+    area_get_shape_count(p_area) { }
+    area_get_shape(p_area, shape_idx) { }
+    area_get_shape_transform(p_area, shape_idx) { }
 
-    area_set_shape_disabled(area, shape_idx, disabled) { }
+    area_remove_shape(p_area, shape_idx) { }
+    area_clear_shapes(p_area) { }
 
-    area_attach_object_instance(area, id) { }
-    area_get_object_instance(area) { }
+    area_set_shape_disabled(p_area, shape_idx, disabled) { }
 
-    area_attach_canvas_instance(area, id) { }
-    area_get_canvas_instance(area) { }
+    area_attach_object_instance(p_area, id) { }
+    area_get_object_instance(p_area) { }
 
-    area_set_param(area, param) { }
-    area_get_param(area) { }
+    area_attach_canvas_instance(p_area, id) { }
+    area_get_canvas_instance(p_area) { }
 
-    area_set_collision_mask(area, mask) { }
-    area_set_collision_layer(area, layer) { }
+    area_set_param(p_area, param) { }
+    area_get_param(p_area) { }
 
-    area_set_monitorable(area, monitorable) { }
+    area_set_transform(p_area, p_transform) { }
+    area_get_transform(p_area) { }
+    area_set_monitorable(p_area, monitorable) { }
+    area_set_collision_mask(p_area, mask) { }
+    area_set_collision_layer(p_area, layer) { }
 
-    area_set_monitor_callback(area, receiver, method) { }
-    area_set_area_monitor_callback(area, receiver, method) { }
+    area_set_monitor_callback(p_area, receiver, method) { }
+    area_set_area_monitor_callback(p_area, receiver, method) { }
+
+    area_set_pickable(p_area, p_pickable) { }
+
+    /* BODY API */
+
+    /* JOINT API */
 
     /* MISC */
 
@@ -242,7 +291,7 @@ export default class PhysicsServer {
         this.last_step = 0.001;
         this.iterations = 8;
         this.stepper = new Step2D();
-        this.direct_state = new Physics2DDirectBodyState();
+        this.direct_state = new Physics2DDirectBodyStateSW();
 
         // sleep_threshold_linear = settings.sleep_threshold_linear;
         // sleep_threshold_linear_sqr = sleep_threshold_linear * sleep_threshold_linear;
