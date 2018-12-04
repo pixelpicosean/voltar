@@ -1,5 +1,5 @@
 import { Rectangle, Vector2 } from "engine/math/index";
-import CollisionObject2D from "./collision_object_2d";
+import CollisionObject2DSW from "./collision_object_2d_sw";
 
 const LARGE_ELEMENT_FI = 1.01239812;
 
@@ -98,8 +98,8 @@ class PosBin {
     }
 }
 
-/** @typedef {(A: import('./collision_object_2d').default, p_sub_index_A: number, B: import('./collision_object_2d').default, p_sub_index_B: number, userdata: any) => void} PairCallback */
-/** @typedef {(A: import('./collision_object_2d').default, p_sub_index_A: number, B: import('./collision_object_2d').default, p_sub_index_B: number, data: any, userdata: any) => void} UnpairCallback */
+/** @typedef {(A: CollisionObject2DSW, p_sub_index_A: number, B: CollisionObject2DSW, p_sub_index_B: number, userdata: any) => void} PairCallback */
+/** @typedef {(A: CollisionObject2DSW, p_sub_index_A: number, B: CollisionObject2DSW, p_sub_index_B: number, data: any, userdata: any) => void} UnpairCallback */
 
 export default class BroadPhase2D {
     constructor() {
@@ -113,10 +113,12 @@ export default class BroadPhase2D {
         this.large_elements = new Map();
 
         this.current = 0;
-        this.pass = 0;
+        this.pass = 1;
 
-        this.cell_size = 0;
-        this.large_object_min_surface = 0;
+        // TODO: load config data from project file
+        this.cell_size = 128;
+        // TODO: load config data from project file
+        this.large_object_min_surface = 512;
 
         /**
          * @type {PairCallback}
@@ -129,7 +131,8 @@ export default class BroadPhase2D {
         this.unpair_callback = null;
         this.unpair_userdata = null;
 
-        this.hash_table_size = 0;
+        // TODO: load config data from project file
+        this.hash_table_size = 4096;
 
         /**
          * @type {Map<number, PairData>}
@@ -137,14 +140,17 @@ export default class BroadPhase2D {
         this.pair_map = new Map();
 
         /**
-         * @type {Map<number, PosBin>}
+         * @type {Array<PosBin>}
          */
-        this.hash_table = new Map();
+        this.hash_table = new Array(this.hash_table_size);
+        for (let i = 0; i < this.hash_table_size; i++) {
+            this.hash_table[i] = null;
+        }
     }
 
     /**
      *
-     * @param {CollisionObject2D} p_object
+     * @param {CollisionObject2DSW} p_object
      * @param {number} [p_subindex]
      */
     create(p_object, p_subindex = 0) {
@@ -200,7 +206,12 @@ export default class BroadPhase2D {
             this._exit_grid(e, e.aabb, e._static);
         }
 
-        this.element_map.delete(p_id);
+        e._static = p_static;
+
+        if (!e.aabb.is_identity()) {
+            this._enter_grid(e, e.aabb, e._static);
+            this._check_motion(e);
+        }
     }
     /**
      * @param {number} p_id
@@ -237,14 +248,14 @@ export default class BroadPhase2D {
     /**
      * @param {Vector2} p_from
      * @param {Vector2} p_to
-     * @param {import('./collision_object_2d').default[]} p_results
+     * @param {CollisionObject2DSW[]} p_results
      * @param {number} p_max_results
      * @param {number[]} p_result_indices
      */
     cull_segment(p_from, p_to, p_results, p_max_results, p_result_indices = null) { }
     /**
      * @param {Rectangle} p_aabb
-     * @param {import('./collision_object_2d').default[]} p_results
+     * @param {CollisionObject2DSW[]} p_results
      * @param {number} p_max_results
      * @param {number[]} p_result_indices
      */
@@ -349,7 +360,7 @@ export default class BroadPhase2D {
                 pk.key = 0;
 
                 const idx = pk.hash() % this.hash_table_size;
-                let pb = this.hash_table.get(idx);
+                let pb = this.hash_table[idx];
 
                 while (pb) {
                     if (pb.key === pk) {
@@ -364,8 +375,8 @@ export default class BroadPhase2D {
                 if (!pb) {
                     pb = new PosBin();
                     pb.key.copy(pk);
-                    pb.next = this.hash_table.get(idx);
-                    this.hash_table.set(idx, pb);
+                    pb.next = this.hash_table[idx];
+                    this.hash_table[idx] = pb;
                 }
 
                 if (p_static) {
@@ -450,7 +461,7 @@ export default class BroadPhase2D {
                 pk.key = 0;
 
                 const idx = pk.hash() % this.hash_table_size;
-                let pb = this.hash_table.get(idx);
+                let pb = this.hash_table[idx];
 
                 while (pb) {
                     if (pb.key === pk) {
@@ -493,10 +504,10 @@ export default class BroadPhase2D {
                 }
 
                 if (pb.object_set.size === 0 && pb.static_object_set.size === 0) {
-                    if (this.hash_table.get(idx) === pb) {
-                        this.hash_table.set(idx, pb.next);
+                    if (this.hash_table[idx] === pb) {
+                        this.hash_table[idx] = pb.next;
                     } else {
-                        let px = this.hash_table.get(idx);
+                        let px = this.hash_table[idx];
 
                         while (px) {
                             if (px.next === pb) {
@@ -533,7 +544,7 @@ export default class BroadPhase2D {
      * @param {Rectangle} p_aabb
      * @param {Vector2} p_from
      * @param {Vector2} p_to
-     * @param {import('./collision_object_2d').default[]} p_results
+     * @param {CollisionObject2DSW[]} p_results
      * @param {number} p_max_results
      * @param {number[]} p_result_indices
      * @param {number} index
@@ -545,7 +556,7 @@ export default class BroadPhase2D {
         pk.y = p_cell.y;
 
         const idx = pk.hash() % this.hash_table_size;
-        let pb = this.hash_table.get(idx);
+        let pb = this.hash_table[idx];
 
         while (pb) {
             if (pb.key.equal(pk)) {
