@@ -1,4 +1,3 @@
-import { ShapeType } from "engine/physics/const";
 import { Rectangle } from "engine/math/index";
 import PhysicsServer from "engine/servers/physics_2d/physics_server";
 import Shape2D from "./shape_2d";
@@ -26,8 +25,6 @@ export default class CircleShape2D extends Shape2D {
     constructor() {
         super(PhysicsServer.singleton.circle_shape_create());
 
-        this.type = ShapeType.CIRCLE;
-
         this._radius = 10;
         this._update_shape();
     }
@@ -42,6 +39,6 @@ export default class CircleShape2D extends Shape2D {
         return p_rect;
     }
     _update_shape() {
-        this.shape.configure(-this._radius, -this._radius, this._radius * 2, this._radius * 2);
+        this.shape.set_data(this._radius);
     }
 }
