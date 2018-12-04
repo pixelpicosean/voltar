@@ -9,14 +9,15 @@ import {
     SpaceParameter,
     AreaParameter,
     AreaSpaceOverrideMode,
-} from './const';
+} from '../../physics/const';
 import {
     ShapeResult,
     Physics2DDirectSpaceState,
     Physics2DDirectBodyState,
-} from "./state";
-import Step2D from "./step_2d";
-import Space2D from "./space_2d";
+} from "../../physics/state";
+import Step2D from "../../physics/step_2d";
+import Space2D from "../../physics/space_2d";
+import { CircleShape2DSW } from "./shape_2d_sw";
 
 class RayResult {
     constructor() {
@@ -92,17 +93,12 @@ export default class PhysicsServer {
     //  */
     // _body_test_motion(body, xfrom, motion, infinite_inertia, margin = 0.08, result = undefined) { }
 
-    /**
-     * @param {ShapeType} shape
-     */
-    _shape_create(shape) {
-
-    }
-
     line_shape_create() { }
     ray_shape_create() { }
     segment_shape_create() { }
-    circle_shape_create() { }
+    circle_shape_create() {
+        return new CircleShape2DSW();
+    }
     rectangle_shape_create() { }
     capsule_shape_create() { }
     convex_polygon_shape_create() { }
