@@ -124,18 +124,18 @@ export default class Matrix {
     /**
      * Creates an array from the current Matrix object.
      *
-     * @param {boolean} transpose - Whether we need to transpose the matrix or not
-     * @param {Float32Array} [out=new Float32Array(9)] - If provided the array will be assigned to out
+     * @param {boolean} p_transpose - Whether we need to transpose the matrix or not
+     * @param {Float32Array} [r_out] - If provided the array will be assigned to out
      * @return {Float32Array} the newly created array which contains the matrix
      */
-    to_array(transpose, out) {
+    to_array(p_transpose, r_out) {
         if (!this.array) {
             this.array = new Float32Array(9);
         }
 
-        const array = out || this.array;
+        const array = r_out || this.array;
 
-        if (transpose) {
+        if (p_transpose) {
             array[0] = this.a;
             array[1] = this.b;
             array[2] = 0;
@@ -162,41 +162,57 @@ export default class Matrix {
     }
 
     /**
+     * @param {Vector2} p_vec - The origin
+     * @param {Vector2} [r_out] - The point that the new position is assigned to (allowed to be same as input)
+     * @return {Vector2} The new point, transformed through this matrix
+     */
+    basis_xform(p_vec, r_out = new Vector2()) {
+        r_out.x = (this.a * p_vec.x) + (this.c * p_vec.y) + this.tx;
+        r_out.y = (this.b * p_vec.x) + (this.d * p_vec.y) + this.ty;
+
+        return r_out;
+    }
+
+    /**
+     * @param {Vector2} p_vec - The origin
+     * @param {Vector2} [r_out] - The point that the new position is assigned to (allowed to be same as input)
+     * @return {Vector2} The new point, inverse-transformed through this matrix
+     */
+    basis_xform_inv(p_vec, r_out = new Vector2()) {
+        r_out.x = this.a * p_vec.x + this.b * p_vec.y;
+        r_out.y = this.c * p_vec.x + this.d * p_vec.y;
+
+        return r_out;
+    }
+
+    /**
      * Get a new position with the current transformation applied.
      * Can be used to go from a child's coordinate space to the world coordinate space. (e.g. rendering)
      *
-     * @param {Vector2} pos - The origin
-     * @param {Vector2} [new_pos] - The point that the new position is assigned to (allowed to be same as input)
+     * @param {Vector2} p_vec - The origin
+     * @param {Vector2} [r_out] - The point that the new position is assigned to (allowed to be same as input)
      * @return {Vector2} The new point, transformed through this matrix
      */
-    basis_xform(pos, new_pos = new Vector2()) {
-        const x = pos.x;
-        const y = pos.y;
+    xform(p_vec, r_out = new Vector2()) {
+        r_out.x = (this.a * p_vec.x) + (this.c * p_vec.y) + this.tx;
+        r_out.y = (this.b * p_vec.x) + (this.d * p_vec.y) + this.ty;
 
-        new_pos.x = (this.a * x) + (this.c * y) + this.tx;
-        new_pos.y = (this.b * x) + (this.d * y) + this.ty;
-
-        return new_pos;
+        return r_out;
     }
 
     /**
      * Get a new position with the inverse of the current transformation applied.
      * Can be used to go from the world coordinate space to a child's coordinate space. (e.g. input)
      *
-     * @param {Vector2} pos - The origin
-     * @param {Vector2} [new_pos] - The point that the new position is assigned to (allowed to be same as input)
+     * @param {Vector2} p_vec - The origin
+     * @param {Vector2} [r_out] - The point that the new position is assigned to (allowed to be same as input)
      * @return {Vector2} The new point, inverse-transformed through this matrix
      */
-    basis_xform_inv(pos, new_pos = new Vector2()) {
-        const id = 1 / ((this.a * this.d) + (this.c * -this.b));
+    xform_inv(p_vec, r_out = new Vector2()) {
+        r_out.x = this.a * (p_vec.x - this.tx) + this.b * (p_vec.y - this.ty);
+        r_out.y = this.c * (p_vec.x - this.tx) + this.d * (p_vec.y - this.ty);
 
-        const x = pos.x;
-        const y = pos.y;
-
-        new_pos.x = (this.d * id * x) + (-this.c * id * y) + (((this.ty * this.c) - (this.tx * this.d)) * id);
-        new_pos.y = (this.a * id * y) + (-this.b * id * x) + (((-this.ty * this.a) + (this.tx * this.b)) * id);
-
-        return new_pos;
+        return r_out;
     }
 
     /**
