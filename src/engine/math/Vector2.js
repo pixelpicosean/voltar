@@ -566,4 +566,25 @@ export default class Vector2 {
     }
 }
 
+Vector2.get = () => {
+    const vec = pool.pop();
+    if (!vec) {
+        return new Vector2();
+    } else {
+        return vec;
+    }
+}
+/**
+ * @param {Vector2} vec
+ */
+Vector2.put = (vec) => {
+    pool.push(vec);
+    return Vector2;
+}
+
+/**
+ * @type {Vector2[]}
+ */
+const pool = [];
+
 const tmp_point = new Vector2();
