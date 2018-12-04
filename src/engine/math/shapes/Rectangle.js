@@ -147,18 +147,70 @@ export default class Rectangle {
     /**
      * Pads the rectangle making it grow in all directions.
      *
-     * @param {number} padding_x - The horizontal padding amount.
-     * @param {number} [padding_y] - The vertical padding amount.
+     * @param {number} p_by - The horizontal padding amount.
      */
-    pad(padding_x, padding_y) {
-        padding_x = padding_x || 0;
-        padding_y = padding_y || ((padding_y !== 0) ? padding_x : 0);
+    grow(p_by) {
+        const g = new Rectangle();
+        g.grow_to(p_by);
+        return g;
+    }
 
-        this.x -= padding_x;
-        this.y -= padding_y;
+    /**
+     * Pads the rectangle making it grow in all directions.
+     *
+     * @param {number} p_by - The horizontal padding amount.
+     */
+    grow_to(p_by) {
+        this.x -= p_by;
+        this.y -= p_by;
+        this.width += p_by * 2;
+        this.height += p_by * 2;
+        return this;
+    }
 
-        this.width += padding_x * 2;
-        this.height += padding_y * 2;
+    /**
+     * @param {number} p_left
+     * @param {number} p_top
+     * @param {number} p_right
+     * @param {number} p_bottom
+     */
+    grow_individual(p_left, p_top, p_right, p_bottom) {
+        const g = new Rectangle();
+        g.x -= p_left;
+        g.y -= p_top;
+        g.width += (p_left + p_right);
+        g.height += (p_top + p_bottom);
+        return g;
+    }
+
+    /**
+     * @param {Vector2} p_vector
+     */
+    expand(p_vector) {
+        const g = new Rectangle();
+        g.expand_to(p_vector);
+        return g;
+    }
+
+    /**
+     * @param {Vector2} p_vector
+     */
+    expand_to(p_vector) {
+        if (p_vector.x < this.x) {
+            this.x = p_vector.x;
+        }
+        if (p_vector.y < this.y) {
+            this.y = p_vector.y;
+        }
+
+        if (p_vector.x > this.x + this.width) {
+            this.width = p_vector.x - this.x;
+        }
+        if (p_vector.y > this.y + this.height) {
+            this.height = p_vector.y - this.y;
+        }
+
+        return this;
     }
 
     /**
@@ -166,7 +218,7 @@ export default class Rectangle {
      *
      * @param {Rectangle} rectangle - The rectangle to fit.
      */
-    fit(rectangle) {
+    fit_to(rectangle) {
         if (this.x < rectangle.x) {
             this.width += this.x;
             if (this.width < 0) {

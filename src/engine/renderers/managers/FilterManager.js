@@ -130,12 +130,12 @@ export default class FilterManager extends WebGLManager {
                 // TODO we should fit the rect around the transform..
             }
             else if (filters[0].autoFit) {
-                source_frame.fit(render_target_frame);
+                source_frame.fit_to(render_target_frame);
             }
 
             // lets apply the padding After we fit the element to the screen.
             // this should stop the strange side effects that can occur when cropping to the edges
-            source_frame.pad(padding);
+            source_frame.grow_to(padding);
         }
 
         destination_frame.width = source_frame.width;

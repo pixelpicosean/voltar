@@ -142,7 +142,7 @@ export default class MaskManager extends WebGLManager {
 
         const bounds = mask_data.get_bounds();
 
-        bounds.fit(render_target.size);
+        bounds.fit_to(render_target.size);
         mask_data.renderable = false;
 
         this.renderer.gl.enable(this.renderer.gl.SCISSOR_TEST);
