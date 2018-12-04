@@ -11,13 +11,15 @@ import {
 } from '../../physics/const';
 import {
     ShapeResult,
-    Physics2DDirectSpaceState,
+    Physics2DDirectSpaceStateSW,
     Physics2DDirectBodyStateSW,
 } from "./state";
 import Step2DSW from "./step_2d_sw";
-import Space2D from "../../physics/space_2d";
+import Space2D from "../../scene/resources/space_2d";
 import { CircleShape2DSW, Shape2DSW } from "./shape_2d_sw";
 import CollisionSolver2DSW from "./collision_solver_2d_sw";
+import Space2DSW from "./space_2d_sw";
+import Area2DSW from "./area_2d_sw";
 
 class RayResult {
     constructor() {
@@ -77,9 +79,9 @@ export default class PhysicsServer {
         this.stepper = null;
 
         /**
-         * @type {Array<Space2D>}
+         * @type {Set<Space2DSW>}
          */
-        this.active_spaces = [];
+        this.active_spaces = new Set();
 
         /**
          * @type {Physics2DDirectBodyStateSW}
@@ -204,27 +206,42 @@ export default class PhysicsServer {
 
     /* SPACE API */
 
-    space_create() { }
+    space_create() {
+        const space = new Space2DSW();
+        const area = this.area_create();
+        space.default_area = area;
+        area.space = space;
+        area.set_priority(-1);
+
+        return space;
+    }
     /**
-     * @param {any} space
-     * @param {boolean} active
+     * @param {Space2DSW} p_space
+     * @param {boolean} p_active
      */
-    space_set_active(space, active) { }
+    space_set_active(p_space, p_active) {
+        if (p_active) {
+            this.active_spaces.add(p_space);
+        } else {
+            this.active_spaces.delete(p_space);
+        }
+    }
     /**
+     * @param {Space2DSW} p_space
      * @returns {boolean}
      */
-    space_is_active(space) {
-        return false;
+    space_is_active(p_space) {
+        return this.active_spaces.has(p_space);
     }
 
     /**
-     * @param {any} space
+     * @param {Space2DSW} space
      * @param {SpaceParameter} param
      * @param {number} value
      */
     space_set_param(space, param, value) { }
     /**
-     * @param {any} space
+     * @param {Space2DSW} space
      * @param {SpaceParameter} param
      * @returns {number}
      */
@@ -233,7 +250,7 @@ export default class PhysicsServer {
     }
 
     /**
-     * @param {any} space
+     * @param {Space2DSW} space
      * @returns {Vector2[]}
      */
     space_get_contacts(space) {
@@ -248,8 +265,8 @@ export default class PhysicsServer {
     }
 
     /**
-     * @param {any} space
-     * @returns {Physics2DDirectSpaceState}
+     * @param {Space2DSW} space
+     * @returns {Physics2DDirectSpaceStateSW}
      */
     space_get_direct_state(space) {
         return null;
@@ -257,7 +274,11 @@ export default class PhysicsServer {
 
     /* AERA API */
 
-    area_create() { }
+    area_create() {
+        const area = new Area2DSW();
+        area.self = area;
+        return area;
+    }
 
     /**
      * @param {any} p_area

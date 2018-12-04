@@ -1,5 +1,7 @@
 import { Physics2DDirectSpaceStateSW } from "../../servers/physics_2d/state";
 import { INTERSECTION_QUERY_MAX } from "../../physics/const";
+import Area2DSW from "./area_2d_sw";
+import SelfList from "engine/core/self_list";
 
 const ElapsedTime = {
     INTEGRATE_FORCES: 0,
@@ -72,6 +74,15 @@ export default class Space2DSW {
 
     add_object(p_object) { }
     remove_object(p_object) { }
+
+    /**
+     * @param {SelfList<Area2DSW>} p_area
+     */
+    area_add_to_monitor_query_list(p_area) { }
+    /**
+     * @param {SelfList<Area2DSW>} p_area
+     */
+    area_remove_from_monitor_query_list(p_area) { }
 
     setup() {
         while (this.inertia_update_list.length > 0) {

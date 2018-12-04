@@ -179,7 +179,7 @@ export class Physics2DDirectBodyStateSW {
     integrate_forces() { }
 
     /**
-     * @returns {Physics2DDirectSpaceState}
+     * @returns {Physics2DDirectSpaceStateSW}
      */
     get_space_state() {
         return null;
@@ -318,9 +318,9 @@ function _can_collide_with(p_object, p_collision_mask, p_collide_with_bodies, p_
     return true;
 }
 
-export class Physics2DDirectSpaceState {
+export class Physics2DDirectSpaceStateSW {
     constructor() {
-        /** @type {import('../../physics/space_2d').default} */
+        /** @type {import('../../scene/resources/space_2d').default} */
         this.space = null;
     }
 
