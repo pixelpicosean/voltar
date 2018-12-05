@@ -3,6 +3,7 @@ import { Matrix } from 'engine/math/index';
 import Shape2D from '../resources/shape_2d';
 import PhysicsServer from 'engine/servers/physics_2d/physics_server';
 import { remove_items } from 'engine/dep/index';
+import CollisionObject2DSW from 'engine/servers/physics_2d/collision_object_2d_sw';
 
 class Shape {
     constructor() {
@@ -37,11 +38,13 @@ export const CollisionObjectTypes = {
 
 export default class CollisionObject2D extends Node2D {
     /**
-     * @param {any} p_rid
+     * @param {CollisionObject2DSW} p_rid
      * @param {boolean} p_area
      */
     constructor(p_rid, p_area) {
         super();
+
+        this.is_collision_object = true;
 
         this.area = p_area;
         this.rid = p_rid;
