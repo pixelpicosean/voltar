@@ -274,6 +274,9 @@ export default class PhysicsServer {
 
     /* AERA API */
 
+    /**
+     * @returns {Area2DSW}
+     */
     area_create() {
         const area = new Area2DSW();
         area.self = area;
@@ -281,16 +284,18 @@ export default class PhysicsServer {
     }
 
     /**
-     * @param {any} p_area
+     * @param {Area2DSW} p_area
      * @param {AreaSpaceOverrideMode} p_mode
      */
-    area_set_space_override_mode(p_area, p_mode) { }
+    area_set_space_override_mode(p_area, p_mode) {
+        p_area.space_override_mode = p_mode;
+    }
     /**
-     * @param {any} p_area
+     * @param {Area2DSW} p_area
      * @returns {AreaSpaceOverrideMode}
      */
     area_get_space_override_mode(p_area) {
-        return null;
+        return p_area.space_override_mode;
     }
 
     area_set_space(p_area, space) { }
