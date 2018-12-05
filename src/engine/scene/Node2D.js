@@ -89,8 +89,9 @@ export default class Node2D extends VObject {
         this.type = 'Node2D';
 
         // Flags to avoid call of `instanceof` for better performance
-        this.is_physics_object = false;
+        this.is_node = true;
         this.is_control = false;
+        this.is_collision_object = false;
 
         /**
          * @type {boolean}
@@ -1064,6 +1065,9 @@ export default class Node2D extends VObject {
         return this;
     }
 
+    _propagate_parent() { }
+    _propagate_unparent() { }
+
     _propagate_enter_tree() {
         // Add to scene tree groups
         if (this.groups && this.groups.length > 0) {
@@ -1074,7 +1078,7 @@ export default class Node2D extends VObject {
 
         this._enter_tree();
 
-        this.emit_signal('tree_entered');
+        this.emit_signal('tree_entered', this);
 
         for (let c of this.children) {
             c.scene_tree = this.scene_tree;
@@ -1141,7 +1145,7 @@ export default class Node2D extends VObject {
 
         this._exit_tree();
 
-        this.emit_signal('tree_exited');
+        this.emit_signal('tree_exited', this);
 
         // Reset flags
         this._is_ready = false;
@@ -1202,6 +1206,8 @@ export default class Node2D extends VObject {
         // ensure bounds will be recalculated
         this._bounds_id++;
 
+        child._propagate_parent();
+
         if (this.is_inside_tree) {
             child.is_inside_tree = true;
             child._propagate_enter_tree();
@@ -1251,6 +1257,8 @@ export default class Node2D extends VObject {
 
         // ensure bounds will be recalculated
         this._bounds_id++;
+
+        child._propagate_parent();
 
         if (this.is_inside_tree) {
             // child.is_inside_tree = true;
@@ -1366,9 +1374,10 @@ export default class Node2D extends VObject {
         if (index === -1) return null;
 
         child.parent = null;
-
+        child._propagate_unparent();
         // ensure child transform will be recalculated
         child.transform._parent_id = -1;
+
         remove_items(this.children, index, 1);
 
         // remove from name hash
@@ -1402,6 +1411,9 @@ export default class Node2D extends VObject {
         child.parent = null;
         child.scene_tree = null;
         child.transform._parent_id = -1;
+
+        child._propagate_unparent();
+
         remove_items(this.children, index, 1);
 
         // remove from name hash
@@ -1444,6 +1456,7 @@ export default class Node2D extends VObject {
                 if (removed[i].transform) {
                     removed[i].transform._parent_id = -1;
                 }
+                removed[i]._propagate_unparent();
 
                 // remove from name hash
                 if (removed[i].name.length > 0) {
