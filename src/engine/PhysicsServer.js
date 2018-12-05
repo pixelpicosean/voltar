@@ -807,7 +807,7 @@ export default class PhysicsServer {
         aabb.copy(shape.aabb);
         aabb.x += motion.x;
         aabb.y += motion.y;
-        aabb.enlarge(shape.aabb);
+        aabb.merge_to(shape.aabb);
 
         // Insert the hash and test collisions
         const sx = aabb.left >> this.spatial_shift;
