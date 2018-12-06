@@ -269,6 +269,11 @@ export default class Area2D extends CollisionObject2D {
          * @type {Map<Area2D, AreaState>}
          */
         this.area_map = new Map();
+
+        this.gravity = 98;
+        this.gravity_vec = new Vector2(0, 1);
+        this.monitoring = true;
+        this.monitorable = true;
     }
     _load_data(data) {
         super._load_data(data);

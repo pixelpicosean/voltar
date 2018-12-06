@@ -26,7 +26,7 @@ export default class Space2D {
         /**
          * @type {Space2DSW}
          */
-        this.space = null;
+        this.space = PhysicsServer.singleton.space_create();
     }
 
     get_rid() {

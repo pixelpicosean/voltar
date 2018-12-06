@@ -1,9 +1,8 @@
 import { Rectangle, Matrix, Vector2 } from "engine/math/index";
 import { Shape2DSW } from "engine/servers/physics_2d/shape_2d_sw";
 import PhysicsServer from "engine/servers/physics_2d/physics_server";
-import { VObject } from "engine/dep/index";
 
-export default class Shape2D extends VObject {
+export default class Shape2D {
     get custom_solver_bias() {
         return this.custom_bias;
     }
@@ -26,8 +25,6 @@ export default class Shape2D extends VObject {
      * @param {Shape2DSW} p_shape
      */
     constructor(p_shape) {
-        super();
-
         this.shape = p_shape;
         this.custom_bias = 0;
 
