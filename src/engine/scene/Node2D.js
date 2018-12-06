@@ -1018,6 +1018,17 @@ export default class Node2D extends VObject {
         this.filters = value;
     }
 
+    get_world_2d() {
+        if (this.scene_tree) {
+            return this.scene_tree.viewport.find_world_2d();
+        } else {
+            return null;
+        }
+    }
+    get_global_transform() {
+        return this.transform.world_transform;
+    }
+
     _enter_tree() { }
     _ready() { }
     /**
@@ -1064,6 +1075,8 @@ export default class Node2D extends VObject {
 
         return this;
     }
+
+    _notify_transform_changed() { }
 
     _propagate_parent() { }
     _propagate_unparent() { }
@@ -1546,7 +1559,11 @@ export default class Node2D extends VObject {
         if (this.has_transform) {
             this._bounds_id++;
 
+            let transform_changed = (this.transform._local_id !== this.transform._current_local_id);
             this.transform.update_transform(parent.transform);
+            if (transform_changed) {
+                this._notify_transform_changed();
+            }
 
             let t = this.transform.world_transform;
             this._world_position.set(t.tx, t.ty);
