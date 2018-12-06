@@ -1,5 +1,5 @@
 import CollisionObject2DSW from "./collision_object_2d_sw";
-import { Type, AreaSpaceOverrideMode, AreaParameter } from "engine/physics/const";
+import { Type, AreaSpaceOverrideMode, AreaParameter } from "engine/scene/physics/const";
 import { Vector2, Matrix } from "engine/math/index";
 import Constraint2DSW from "./constraint_2d_sw";
 import Space2DSW from "./space_2d_sw";

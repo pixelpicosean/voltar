@@ -1,5 +1,5 @@
 import { Physics2DDirectSpaceStateSW } from "../../servers/physics_2d/state";
-import { INTERSECTION_QUERY_MAX, Type } from "../../physics/const";
+import { INTERSECTION_QUERY_MAX, Type } from "../../scene/physics/const";
 import Area2DSW from "./area_2d_sw";
 import SelfList, { List } from "engine/core/self_list";
 import BroadPhase2D from "./broad_phase_2d_sw";

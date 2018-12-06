@@ -8,7 +8,7 @@ import {
     SpaceParameter,
     AreaParameter,
     AreaSpaceOverrideMode,
-} from '../../physics/const';
+} from '../../scene/physics/const';
 import {
     ShapeResult,
     Physics2DDirectSpaceStateSW,
@@ -20,6 +20,7 @@ import { CircleShape2DSW, Shape2DSW } from "./shape_2d_sw";
 import CollisionSolver2DSW from "./collision_solver_2d_sw";
 import Space2DSW from "./space_2d_sw";
 import Area2DSW from "./area_2d_sw";
+import CollisionObject2DSW from "./collision_object_2d_sw";
 
 class RayResult {
     constructor() {
@@ -443,6 +444,11 @@ export default class PhysicsServer {
     area_set_pickable(p_area, p_pickable) { }
 
     /* BODY API */
+
+    /**
+     * @returns {CollisionObject2DSW}
+     */
+    body_create() { return null }
 
     /* JOINT API */
 

@@ -1,5 +1,5 @@
 import { Vector2, Matrix, Rectangle } from "engine/math/index";
-import { INTERSECTION_QUERY_MAX, Type } from "../../physics/const";
+import { INTERSECTION_QUERY_MAX, Type } from "engine/scene/physics/const";
 
 export class Physics2DDirectBodyStateSW {
     /**
@@ -298,7 +298,7 @@ class ShapeRestInfo {
 
 /**
  *
- * @param {import('../../physics/collision_object_2d').default} p_object
+ * @param {import('./collision_object_2d_sw').default} p_object
  * @param {number} p_collision_mask
  * @param {boolean} p_collide_with_bodies
  * @param {boolean} p_collide_with_areas
@@ -308,10 +308,10 @@ function _can_collide_with(p_object, p_collision_mask, p_collide_with_bodies, p_
         return false;
     }
 
-    if (p_object.physics_type === Type.AREA && !p_collide_with_areas) {
+    if (p_object.type === Type.AREA && !p_collide_with_areas) {
         return false;
     }
-    if (p_object.physics_type === Type.BODY && !p_collide_with_bodies) {
+    if (p_object.type === Type.BODY && !p_collide_with_bodies) {
         return false;
     }
 
@@ -320,7 +320,7 @@ function _can_collide_with(p_object, p_collision_mask, p_collide_with_bodies, p_
 
 export class Physics2DDirectSpaceStateSW {
     constructor() {
-        /** @type {import('../../scene/resources/space_2d').default} */
+        /** @type {import('./space_2d_sw').default} */
         this.space = null;
     }
 
@@ -457,7 +457,7 @@ export class Physics2DDirectSpaceStateSW {
 
             const shape = col_obj.get_shape(shape_idx);
 
-            const local_point = col_obj.transform_.clone().append(col_obj.get_shape_transform(shape_idx)).affine_inverse().xform(p_point);
+            const local_point = col_obj.transform.clone().append(col_obj.get_shape_transform(shape_idx)).affine_inverse().xform(p_point);
 
             if (!shape.contains_point(local_point)) {
                 continue;

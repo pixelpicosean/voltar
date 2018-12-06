@@ -1,7 +1,7 @@
 import { Matrix, Rectangle, Vector2 } from "engine/math/index";
 import { Shape2DSW } from "./shape_2d_sw";
 import Space2DSW from "./space_2d_sw";
-import { Type } from "engine/physics/const";
+import { Type } from "engine/scene/physics/const";
 import { remove_items } from "engine/dep/index";
 
 const IDTransform = Object.freeze(new Matrix());

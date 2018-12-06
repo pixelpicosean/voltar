@@ -1,7 +1,7 @@
 import CollisionObject2D, { CollisionObjectTypes } from './collision_object_2d';
 import { node_class_map } from 'engine/registry';
 import PhysicsServer from 'engine/servers/physics_2d/physics_server';
-import { AreaSpaceOverrideMode } from 'engine/physics/const';
+import { AreaSpaceOverrideMode } from 'engine/scene/physics/const';
 import { Vector2 } from 'engine/math/index';
 import Area2DSW from 'engine/servers/physics_2d/area_2d_sw';
 import { remove_items } from 'engine/dep/index';
@@ -261,7 +261,7 @@ export default class Area2D extends CollisionObject2D {
         this._monitorable = false;
 
         /**
-         * @type {Map<PhysicsBody2D, BodyState>}
+         * @type {Map<import('./physics_body_2d').PhysicsBody2D, BodyState>}
          */
         this.body_map = new Map();
 

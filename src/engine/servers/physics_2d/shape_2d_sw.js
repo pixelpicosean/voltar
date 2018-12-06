@@ -1,5 +1,5 @@
 import { Rectangle, Vector2, Matrix } from "engine/math/index";
-import { ShapeType } from "engine/physics/const";
+import { ShapeType } from "engine/scene/physics/const";
 
 // TODO: move the CMP_EPSILON to math const
 const CMP_EPSILON = 0.00001;
