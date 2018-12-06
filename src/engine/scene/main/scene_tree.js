@@ -12,6 +12,8 @@ import { optional, scene_class_map, node_class_map } from '../../registry';
 import Theme, { default_font_name } from '../resources/Theme';
 import { registered_bitmap_fonts } from '../text/res';
 import { assemble_scene } from '../../index';
+import World2D from '../resources/world_2d';
+import Viewport from './viewport';
 
 /**
  * @typedef ApplicationSettings
@@ -168,19 +170,15 @@ export default class SceneTree {
          */
         this.current_scene = null;
 
-        /**
-         * Viewport node
-         *
-         * @type {Node2D}
-         */
-        this.viewport = new Node2D();
+        this.viewport = new Viewport();
         this.viewport.scene_tree = this;
-        this.viewport.is_inside_tree = true;
-        this.viewport._is_ready = true;
         this.viewport_rect = {
             position: new Vector(0, 0),
             size: new Vector(1, 1),
         };
+
+        this.world_2d = new World2D();
+        this.viewport.world_2d = this.world_2d;
 
         this.stretch_mode = 'viewport';
         this.stretch_aspect = 'keep';
@@ -661,6 +659,7 @@ export default class SceneTree {
                     // - flush_transform_notifications
                     this.viewport.parent = this.viewport._temp_node_2d_parent;
                     this.viewport.update_transform();
+                    this.viewport.update_worlds(_process_tmp.slow_step_sec);
                     this.viewport.parent = null;
 
                     this._flush_delete_queue();

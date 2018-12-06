@@ -14,6 +14,8 @@ export * from 'engine/dep/index';
 // ------------------------------------------------------------------
 import Node2D from './scene/Node2D';
 
+export { default as Viewport } from './scene/main/viewport';
+
 export { default as Node2D } from './scene/Node2D';
 
 export { default as Sprite } from './scene/sprites/Sprite';
