@@ -2,10 +2,10 @@ import Body2DSW from "./body_2d_sw";
 
 export default class Constraint2DSW {
     /**
-     * @param {Body2DSW[]} p_bodies
-     * @param {number} p_body_count
+     * @param {Body2DSW[]} [p_bodies]
+     * @param {number} [p_body_count]
      */
-    constructor(p_bodies, p_body_count) {
+    constructor(p_bodies = null, p_body_count = 0) {
         this._bodies = p_bodies;
         this._body_count = p_body_count;
         this.island_step = 0;
@@ -19,6 +19,7 @@ export default class Constraint2DSW {
          */
         this.island_list_next = null;
     }
+    free() { }
 
     /**
      * @param {number} p_step

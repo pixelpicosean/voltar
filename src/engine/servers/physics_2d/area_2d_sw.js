@@ -12,20 +12,6 @@ class BodyKey {
         this.body_shape = p_body_shape;
         this.area_shape = p_area_shape;
     }
-    /**
-     * @param {BodyKey} p_key
-     */
-    is_less_than(p_key) {
-        if (this.rid === p_key.rid) {
-            if (this.body_shape === p_key.body_shape) {
-                return this.area_shape < p_key.area_shape;
-            } else {
-                return this.body_shape < p_key.body_shape;
-            }
-        } else {
-            return this.rid < p_key.rid;
-        }
-    }
 }
 
 class BodyState {
@@ -50,7 +36,7 @@ export default class Area2DSW extends CollisionObject2DSW {
         this.linear_damp = 0.1;
         this.angular_damp = 1;
         this.priotity = 0;
-        this.monitorable = true;
+        this.monitorable = false;
 
         this.monitor_callback_scope = null;
         /**
@@ -86,6 +72,8 @@ export default class Area2DSW extends CollisionObject2DSW {
          * @type {Set<Constraint2DSW>}
          */
         this.constraints = new Set();
+
+        this._set_static(true);
     }
 
     _queue_monitor_update() {
@@ -166,7 +154,7 @@ export default class Area2DSW extends CollisionObject2DSW {
             this._queue_monitor_update();
         }
     }
-    remove_area_to_query(p_area, p_area_shape, p_self_shape) {
+    remove_area_from_query(p_area, p_area_shape, p_self_shape) {
         for (let [bk, s] of this.monitored_areas) {
             if (bk.instance === p_area && bk.area_shape === p_area_shape && bk.body_shape === p_self_shape) {
                 s.dec();

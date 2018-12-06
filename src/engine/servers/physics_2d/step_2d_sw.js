@@ -1,10 +1,12 @@
+import Space2DSW from "./space_2d_sw";
+
 export default class Step2DSW {
     constructor() {
         this._step = 1;
     }
 
     /**
-     * @param {import('../../scene/resources/space_2d').default} p_space
+     * @param {Space2DSW} p_space
      * @param {number} p_delta
      * @param {number} p_iterations
      */

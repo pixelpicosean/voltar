@@ -363,7 +363,7 @@ export default class BroadPhase2D {
                 let pb = this.hash_table[idx];
 
                 while (pb) {
-                    if (pb.key === pk) {
+                    if (pb.key.key === pk.key) {
                         break;
                     }
 
@@ -380,11 +380,23 @@ export default class BroadPhase2D {
                 }
 
                 if (p_static) {
-                    if (pb.static_object_set.get(p_elem).inc() === 1) {
+                    let E = pb.static_object_set.get(p_elem);
+                    if (!E) {
+                        E = new RC();
+                        pb.static_object_set.set(p_elem, E);
+                    }
+
+                    if (E.inc() === 1) {
                         entered = true;
                     }
                 } else {
-                    if (pb.object_set.get(p_elem).inc() === 1) {
+                    let E = pb.static_object_set.get(p_elem);
+                    if (!E) {
+                        E = new RC();
+                        pb.static_object_set.set(p_elem, E);
+                    }
+
+                    if (E.inc() === 1) {
                         entered = true;
                     }
                 }
@@ -464,7 +476,7 @@ export default class BroadPhase2D {
                 let pb = this.hash_table[idx];
 
                 while (pb) {
-                    if (pb.key === pk) {
+                    if (pb.key.key === pk.key) {
                         break;
                     }
 
@@ -474,12 +486,24 @@ export default class BroadPhase2D {
                 let exited = false;
 
                 if (p_static) {
-                    if (pb.static_object_set.get(p_elem).dec() === 0) {
+                    let E = pb.static_object_set.get(p_elem);
+                    if (!E) {
+                        E = new RC();
+                        pb.static_object_set.set(p_elem, E);
+                    }
+
+                    if (E.dec() === 0) {
                         pb.static_object_set.delete(p_elem);
                         exited = true;
                     }
                 } else {
-                    if (pb.object_set.get(p_elem).dec() === 0) {
+                    let E = pb.static_object_set.get(p_elem);
+                    if (!E) {
+                        E = new RC();
+                        pb.static_object_set.set(p_elem, E);
+                    }
+
+                    if (E.dec() === 0) {
                         pb.object_set.delete(p_elem);
                         exited = true;
                     }

@@ -53,6 +53,8 @@ export { default as Plane } from './scene/mesh/Plane';
 export { default as NineSlicePlane } from './scene/mesh/NineSlicePlane';
 export { default as Rope } from './scene/mesh/Rope';
 
+export { default as CollisionShape2D } from './scene/physics/collision_shape_2d';
+export { default as CircleShape2D } from './scene/resources/circle_shape_2d';
 export { default as Area2D } from './scene/physics/area_2d';
 // export { default as RigidBody2D } from './scene/physics/RigidBody2D';
 // export { default as KinematicBody2D } from './scene/physics/KinematicBody2D';
@@ -80,7 +82,7 @@ export { default as RenderTexture } from './textures/RenderTexture';
 
 export { default as VideoBaseTexture } from './textures/VideoBaseTexture';
 
-export { default as RectangleShape2D } from './scene/physics/RectangleShape2D';
+// export { default as RectangleShape2D } from './scene/physics/RectangleShape2D';
 
 // ------------------------------------------------------------------
 // Global constant, setting and function

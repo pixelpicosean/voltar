@@ -62,7 +62,7 @@ export default class PhysicsServer {
         return PhysicsServer.singleton;
     }
     constructor() {
-        this.active = false;
+        this.active = true;
         this.iterations = 0;
         this.doing_sync = false;
         this.last_step = 0;
@@ -211,7 +211,7 @@ export default class PhysicsServer {
         const area = this.area_create();
         space.default_area = area;
         area.space = space;
-        area.set_priority(-1);
+        area.priotity = -1;
 
         return space;
     }
@@ -232,21 +232,6 @@ export default class PhysicsServer {
      */
     space_is_active(p_space) {
         return this.active_spaces.has(p_space);
-    }
-
-    /**
-     * @param {Space2DSW} space
-     * @param {SpaceParameter} param
-     * @param {number} value
-     */
-    space_set_param(space, param, value) { }
-    /**
-     * @param {Space2DSW} space
-     * @param {SpaceParameter} param
-     * @returns {number}
-     */
-    space_get_param(space, param) {
-        return 0;
     }
 
     /**
@@ -298,40 +283,163 @@ export default class PhysicsServer {
         return p_area.space_override_mode;
     }
 
-    area_set_space(p_area, space) { }
-    area_get_space(p_area) { }
+    /**
+     * @param {Area2DSW} p_area
+     * @param {Space2DSW} p_space
+     */
+    area_set_space(p_area, p_space) {
+        if (p_area.space === p_space) {
+            return;
+        }
 
-    area_add_shape(p_area, shape, transform = undefined) { }
-    area_set_shape(p_area, shape_idx, shape) { }
-    area_set_shape_transform(p_area, shape_idx, transform) { }
+        p_area.clear_constraints();
+        p_area.set_space(p_space);
+    }
+    /**
+     * @param {Area2DSW} p_area
+     */
+    area_get_space(p_area) {
+        return p_area.space;
+    }
 
-    area_get_shape_count(p_area) { }
-    area_get_shape(p_area, shape_idx) { }
-    area_get_shape_transform(p_area, shape_idx) { }
+    /**
+     * @param {Area2DSW} p_area
+     * @param {Shape2DSW} p_shape
+     * @param {Matrix} p_transform
+     */
+    area_add_shape(p_area, p_shape, p_transform = Matrix.IDENTITY) {
+        p_area.add_shape(p_shape, p_transform);
+    }
+    /**
+     * @param {Area2DSW} p_area
+     * @param {number} p_shape_idx
+     * @param {Shape2DSW} p_shape
+     */
+    area_set_shape(p_area, p_shape_idx, p_shape) {
+        p_area.set_shape(p_shape_idx, p_shape);
+    }
+    /**
+     * @param {Area2DSW} p_area
+     * @param {number} p_shape_idx
+     * @param {Matrix} p_transform
+     */
+    area_set_shape_transform(p_area, p_shape_idx, p_transform) {
+        p_area.set_shape_transform(p_shape_idx, p_transform);
+    }
 
-    area_remove_shape(p_area, shape_idx) { }
-    area_clear_shapes(p_area) { }
+    /**
+     * @param {Area2DSW} p_area
+     */
+    area_get_shape_count(p_area) {
+        return p_area.shapes.length;
+    }
+    /**
+     * @param {Area2DSW} p_area
+     * @param {number} p_shape_idx
+     */
+    area_get_shape(p_area, p_shape_idx) {
+        return p_area.get_shape(p_shape_idx);
+    }
+    /**
+     * @param {Area2DSW} p_area
+     * @param {number} p_shape_idx
+     */
+    area_get_shape_transform(p_area, p_shape_idx) {
+        return p_area.get_shape_transform(p_shape_idx);
+    }
 
-    area_set_shape_disabled(p_area, shape_idx, disabled) { }
+    /**
+     * @param {Area2DSW} p_area
+     * @param {number} p_shape_idx
+     */
+    area_remove_shape(p_area, p_shape_idx) {
+        p_area.remove_shape_by_index(p_shape_idx);
+    }
+    /**
+     * @param {Area2DSW} p_area
+     */
+    area_clear_shapes(p_area) {
+        while (p_area.shapes.length) {
+            p_area.remove_shape_by_index(0);
+        }
+    }
 
-    area_attach_object_instance(p_area, id) { }
-    area_get_object_instance(p_area) { }
+    /**
+     * @param {Area2DSW} p_area
+     * @param {number} p_shape_idx
+     * @param {boolean} p_disabled
+     */
+    area_set_shape_disabled(p_area, p_shape_idx, p_disabled) {
+        p_area.set_shape_as_disabled(p_shape_idx, p_disabled);
+    }
 
-    area_attach_canvas_instance(p_area, id) { }
-    area_get_canvas_instance(p_area) { }
+    /**
+     * @param {Area2DSW} p_area
+     * @param {import('engine/scene/physics/area_2d').default} id
+     */
+    area_attach_object_instance(p_area, id) {
+        p_area.instance = id;
+    }
+    /**
+     * @param {Area2DSW} p_area
+     */
+    area_get_object_instance(p_area) {
+        return p_area.instance;
+    }
+
+    /**
+     * @param {Area2DSW} p_area
+     * @param {import('engine/scene/physics/area_2d').default} id
+     */
+    area_attach_canvas_instance(p_area, id) {
+        p_area.instance = id;
+    }
+    /**
+     * @param {Area2DSW} p_area
+     */
+    area_get_canvas_instance(p_area) {
+        return p_area.instance;
+    }
 
     area_set_param(p_area, param) { }
     area_get_param(p_area) { }
 
+    /**
+     * @param {Area2DSW} p_area
+     */
     area_set_transform(p_area, p_transform) { }
+    /**
+     * @param {Area2DSW} p_area
+     */
     area_get_transform(p_area) { }
+    /**
+     * @param {Area2DSW} p_area
+     */
     area_set_monitorable(p_area, monitorable) { }
+    /**
+     * @param {Area2DSW} p_area
+     */
     area_set_collision_mask(p_area, mask) { }
+    /**
+     * @param {Area2DSW} p_area
+     */
     area_set_collision_layer(p_area, layer) { }
+    /**
+     * @param {Area2DSW} p_area
+     */
 
+     /**
+     * @param {Area2DSW} p_area
+     */
     area_set_monitor_callback(p_area, receiver, method) { }
+    /**
+     * @param {Area2DSW} p_area
+     */
     area_set_area_monitor_callback(p_area, receiver, method) { }
 
+    /**
+     * @param {Area2DSW} p_area
+     */
     area_set_pickable(p_area, p_pickable) { }
 
     /* BODY API */

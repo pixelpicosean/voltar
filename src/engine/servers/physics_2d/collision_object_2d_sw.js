@@ -214,6 +214,18 @@ export default class CollisionObject2DSW {
     }
     /**
      * @param {number} p_index
+     * @param {Shape2DSW} p_shape
+     */
+    set_shape(p_index, p_shape) {
+        this.shapes[p_index].shape.remove_owner(this);
+        this.shapes[p_index].shape = p_shape;
+
+        p_shape.add_owner(this);
+        this._update_shapes();
+        this._shapes_changed();
+    }
+    /**
+     * @param {number} p_index
      * @param {Matrix} p_transform
      */
     set_shape_transform(p_index, p_transform) {
@@ -233,7 +245,7 @@ export default class CollisionObject2DSW {
      * @param {number} p_index
      */
     get_shape(p_index) {
-        return this.shapes[p_index];
+        return this.shapes[p_index].shape;
     }
     /**
      * @param {number} p_index
@@ -264,7 +276,7 @@ export default class CollisionObject2DSW {
     /**
      * @param {number} p_index
      */
-    is_shape_disabled(p_index) {
+    is_shape_set_as_disabled(p_index) {
         return this.shapes[p_index].disabled;
     }
 
