@@ -1,7 +1,7 @@
 /**
  * @template T
  */
-class List {
+export class List {
     constructor() {
         /**
          * @type {SelfList<T>}
