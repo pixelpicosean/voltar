@@ -476,30 +476,20 @@ export default class Matrix {
     }
 
     /**
-     * Changes the values of the given matrix to be the same as the ones in this matrix
+     * Copy the values of given matrix to this one.
      *
      * @param {Matrix} matrix - The matrix to copy from.
      * @return {Matrix} The matrix given in parameter with its values updated.
      */
     copy(matrix) {
-        matrix.a = this.a;
-        matrix.b = this.b;
-        matrix.c = this.c;
-        matrix.d = this.d;
-        matrix.tx = this.tx;
-        matrix.ty = this.ty;
+        this.a = matrix.a;
+        this.b = matrix.b;
+        this.c = matrix.c;
+        this.d = matrix.d;
+        this.tx = matrix.tx;
+        this.ty = matrix.ty;
 
-        return matrix;
-    }
-
-    /**
-     * A default (identity) matrix
-     *
-     * @static
-     * @const
-     */
-    static get IDENTITY() {
-        return new Matrix();
+        return this;
     }
 
     /**
@@ -512,3 +502,5 @@ export default class Matrix {
         return new Matrix();
     }
 }
+
+Matrix.IDENTITY = Object.freeze(new Matrix());
