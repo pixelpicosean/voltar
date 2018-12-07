@@ -408,11 +408,15 @@ export default class PhysicsServer {
     /**
      * @param {Area2DSW} p_area
      */
-    area_set_transform(p_area, p_transform) { }
+    area_set_transform(p_area, p_transform) {
+        p_area.set_transform(p_transform);
+    }
     /**
      * @param {Area2DSW} p_area
      */
-    area_get_transform(p_area) { }
+    area_get_transform(p_area) {
+        return p_area.transform;
+    }
     /**
      * @param {Area2DSW} p_area
      * @param {boolean} p_monitorable
@@ -422,24 +426,38 @@ export default class PhysicsServer {
     }
     /**
      * @param {Area2DSW} p_area
+     * @param {number} p_mask
      */
-    area_set_collision_mask(p_area, mask) { }
+    area_set_collision_mask(p_area, p_mask) {
+        p_area.collision_mask = p_mask;
+    }
     /**
      * @param {Area2DSW} p_area
+     * @param {number} p_layer
      */
-    area_set_collision_layer(p_area, layer) { }
+    area_set_collision_layer(p_area, p_layer) {
+        p_area.collision_layer = p_layer;
+    }
     /**
      * @param {Area2DSW} p_area
      */
 
      /**
      * @param {Area2DSW} p_area
+     * @param {any} p_receiver
+     * @param {Function} p_method
      */
-    area_set_monitor_callback(p_area, receiver, method) { }
+    area_set_monitor_callback(p_area, p_receiver, p_method) {
+        p_area.set_monitor_callback(p_receiver, p_method);
+    }
     /**
      * @param {Area2DSW} p_area
+     * @param {any} p_receiver
+     * @param {Function} p_method
      */
-    area_set_area_monitor_callback(p_area, receiver, method) { }
+    area_set_area_monitor_callback(p_area, p_receiver, p_method) {
+        p_area.set_area_monitor_callback(p_receiver, p_method);
+    }
 
     /**
      * @param {Area2DSW} p_area
