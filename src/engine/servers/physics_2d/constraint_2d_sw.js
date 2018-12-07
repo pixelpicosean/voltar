@@ -24,7 +24,9 @@ export default class Constraint2DSW {
     /**
      * @param {number} p_step
      */
-    setup(p_step) { }
+    setup(p_step) {
+        return false;
+    }
     /**
      * @param {number} p_step
      */
