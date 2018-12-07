@@ -415,8 +415,11 @@ export default class PhysicsServer {
     area_get_transform(p_area) { }
     /**
      * @param {Area2DSW} p_area
+     * @param {boolean} p_monitorable
      */
-    area_set_monitorable(p_area, monitorable) { }
+    area_set_monitorable(p_area, p_monitorable) {
+        p_area.set_monitorable(p_monitorable);
+    }
     /**
      * @param {Area2DSW} p_area
      */

@@ -330,7 +330,12 @@ export default class BroadPhase2D {
                 this._pair_attempt(p_elem, elem);
             }
 
-            this.large_elements.get(p_elem).inc();
+            let E = this.large_elements.get(p_elem);
+            if (!E) {
+                E = new RC();
+                this.large_elements.set(p_elem, E);
+            }
+            E.inc();
             return;
         }
 
@@ -387,6 +392,7 @@ export default class BroadPhase2D {
 
                 if (entered) {
                     for (let [elem] of pb.object_set) {
+                        console.log(`try to pair <${elem.owner.instance.name}:${p_elem.owner.instance.name}>`)
                         if (elem.owner === p_elem.owner) {
                             continue;
                         }
@@ -671,7 +677,7 @@ export default class BroadPhase2D {
         for (let [elem, pair_data] of p_elem.paired) {
             const pairing = p_elem.aabb.intersects(elem.aabb);
 
-            if (pairing != pair_data.colliding) {
+            if (pairing !== pair_data.colliding) {
                 if (pairing) {
                     if (this.pair_callback) {
                         pair_data.ud = this.pair_callback(p_elem.owner, p_elem.subindex, elem.owner, elem.subindex, this.pair_userdata);

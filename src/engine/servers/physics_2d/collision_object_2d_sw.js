@@ -27,10 +27,22 @@ export default class CollisionObject2DSW {
         return  this._static;
     }
     /**
-     * @param {boolean} value
+     * @param {boolean} p_static
      */
-    set static(value) {
-        this._static = value;
+    set static(p_static) {
+        if (this._static === p_static) {
+            return;
+        }
+        this._static = p_static;
+
+        if (!this.space) {
+            return;
+        }
+        for (let s of this.shapes) {
+            if (s.bpid > 0) {
+                this.space.broadphase.set_static(s.bpid, this._static);
+            }
+        }
     }
     /**
      * @param {boolean} value
@@ -149,21 +161,6 @@ export default class CollisionObject2DSW {
      */
     _set_inv_transform(p_transform) {
         this.inv_transform.copy(p_transform);
-    }
-    _set_static(p_static) {
-        if (this._static === p_static) {
-            return;
-        }
-        this._static = p_static;
-
-        if (!this.space) {
-            return;
-        }
-        for (let s of this.shapes) {
-            if (s.bpid > 0) {
-                this.space.broadphase.set_static(s.bpid, this._static);
-            }
-        }
     }
 
     _shape_changed() {

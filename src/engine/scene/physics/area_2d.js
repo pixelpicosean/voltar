@@ -224,10 +224,16 @@ export default class Area2D extends CollisionObject2D {
         return this._monitorable;
     }
     /**
-     * @param {boolean} value
+     * @param {boolean} p_enable
      */
-    set monitorable(value) {
-        this._monitorable = value;
+    set monitorable(p_enable) {
+        if (p_enable === this._monitorable) {
+            return;
+        }
+
+        this._monitorable = p_enable;
+
+        PhysicsServer.singleton.area_set_monitorable(this.rid, this._monitorable);
     }
     /**
      * @param {boolean} value

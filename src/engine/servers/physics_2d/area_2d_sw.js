@@ -73,7 +73,7 @@ export default class Area2DSW extends CollisionObject2DSW {
          */
         this.constraints = new Set();
 
-        this._set_static(true);
+        this.static = true;
     }
 
     _queue_monitor_update() {
@@ -144,23 +144,41 @@ export default class Area2DSW extends CollisionObject2DSW {
      * @param {number} p_self_shape
      */
     add_area_to_query(p_area, p_area_shape, p_self_shape) {
+        let E;
         for (let [bk, s] of this.monitored_areas) {
             if (bk.instance === p_area && bk.area_shape === p_area_shape && bk.body_shape === p_self_shape) {
-                s.inc();
+                E = s;
                 break;
             }
         }
+        if (!E) {
+            const bk = new BodyKey(p_area, p_area_shape, p_self_shape);
+            E = new BodyState();
+            this.monitored_areas.set(bk, E);
+        }
+
+        E.inc();
+
         if (!this.monitor_query_list.in_list()) {
             this._queue_monitor_update();
         }
     }
     remove_area_from_query(p_area, p_area_shape, p_self_shape) {
+        let E;
         for (let [bk, s] of this.monitored_areas) {
             if (bk.instance === p_area && bk.area_shape === p_area_shape && bk.body_shape === p_self_shape) {
-                s.dec();
+                E = s;
                 break;
             }
         }
+        if (!E) {
+            const bk = new BodyKey(p_area, p_area_shape, p_self_shape);
+            E = new BodyState();
+            this.monitored_areas.set(bk, E);
+        }
+
+        E.dec();
+
         if (!this.monitor_query_list.in_list()) {
             this._queue_monitor_update();
         }
@@ -215,12 +233,12 @@ export default class Area2DSW extends CollisionObject2DSW {
      * @param {boolean} p_monitorable
      */
     set_monitorable(p_monitorable) {
-        if (this.monitorable == p_monitorable) {
+        if (this.monitorable === p_monitorable) {
             return;
         }
 
         this.monitorable = p_monitorable;
-        this._set_static(!this.monitorable);
+        this.static = !this.monitorable;
     }
     get_monitorable() {
         return this.monitorable;
