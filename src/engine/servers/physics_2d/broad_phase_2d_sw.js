@@ -173,15 +173,15 @@ export default class BroadPhase2D {
     move(p_id, p_aabb) {
         const e = this.element_map.get(p_id);
 
-        if (p_aabb.equal(e.aabb)) {
+        if (p_aabb.equals(e.aabb)) {
             return;
         }
 
-        if (!p_aabb.is_identity()) {
+        if (!p_aabb.is_zero()) {
             this._enter_grid(e, p_aabb, e._static);
         }
 
-        if (!e.aabb.is_identity()) {
+        if (!e.aabb.is_zero()) {
             this._exit_grid(e, e.aabb, e._static);
         }
 
@@ -202,13 +202,13 @@ export default class BroadPhase2D {
             return;
         }
 
-        if (!e.aabb.is_identity()) {
+        if (!e.aabb.is_zero()) {
             this._exit_grid(e, e.aabb, e._static);
         }
 
         e._static = p_static;
 
-        if (!e.aabb.is_identity()) {
+        if (!e.aabb.is_zero()) {
             this._enter_grid(e, e.aabb, e._static);
             this._check_motion(e);
         }
@@ -219,7 +219,7 @@ export default class BroadPhase2D {
     remove(p_id) {
         const e = this.element_map.get(p_id);
 
-        if (!e.aabb.is_identity()) {
+        if (!e.aabb.is_zero()) {
             this._exit_grid(e, e.aabb, e._static);
         }
 

@@ -152,14 +152,14 @@ export default class Rectangle {
         return this;
     }
 
-    is_identity() {
+    is_zero() {
         return this.x === 0 && this.y === 0 && this.width === 0 && this.height === 0;
     }
 
     /**
      * @param {Rectangle} rect
      */
-    equal(rect) {
+    equals(rect) {
         return this.x === rect.x && this.y === rect.y && this.width === rect.width && this.height === rect.height;
     }
 
