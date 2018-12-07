@@ -42,16 +42,12 @@ class RC {
 
 class PosKey {
     constructor() {
-        this.x = 0;
-        this.y = 0;
         this.key = 0;
     }
     /**
      * @param {PosKey} key
      */
     copy(key) {
-        this.x = key.x;
-        this.y = key.y;
         this.key = key.key;
         return this;
     }
@@ -71,16 +67,11 @@ class PosKey {
      * @returns {boolean}
      */
     equal(p_key) { return this.key === p_key.key }
-    /**
-     * @param {PosKey} p_key
-     * @returns {boolean}
-     */
-    less_than(p_key) { return this.key < p_key.key }
 }
 
 class PosBin {
     constructor() {
-        this.key = new PosKey();
+        this.key = new Vector2();
 
         /**
          * @type {Map<Element, RC>}
@@ -131,21 +122,15 @@ export default class BroadPhase2D {
         this.unpair_callback = null;
         this.unpair_userdata = null;
 
-        // TODO: load config data from project file
-        this.hash_table_size = 4096;
-
         /**
          * @type {Map<number, PairData>}
          */
         this.pair_map = new Map();
 
         /**
-         * @type {Array<PosBin>}
+         * @type {Map<number, Map<number, PosBin>>}
          */
-        this.hash_table = new Array(this.hash_table_size);
-        for (let i = 0; i < this.hash_table_size; i++) {
-            this.hash_table[i] = null;
-        }
+        this.hash_table = new Map();
     }
 
     /**
@@ -325,7 +310,7 @@ export default class BroadPhase2D {
      */
     _enter_grid(p_elem, p_rect, p_static) {
         // use magic number to avoid floating point issues
-        const sz = new Vector2(
+        const sz = Vector2.create(
             p_rect.width / this.cell_size * LARGE_ELEMENT_FI,
             p_rect.height / this.cell_size * LARGE_ELEMENT_FI
         )
@@ -349,21 +334,20 @@ export default class BroadPhase2D {
             return;
         }
 
-        const from = new Vector2(Math.floor(p_rect.x / this.cell_size), Math.floor(p_rect.y / this.cell_size));
-        const to = new Vector2(Math.floor((p_rect.x + p_rect.width) / this.cell_size), Math.floor((p_rect.y + p_rect.height) / this.cell_size));
+        const from = Vector2.create(Math.floor(p_rect.x / this.cell_size), Math.floor(p_rect.y / this.cell_size));
+        const to = Vector2.create(Math.floor((p_rect.x + p_rect.width) / this.cell_size), Math.floor((p_rect.y + p_rect.height) / this.cell_size));
 
-        const pk = new PosKey();
         for (let i = from.x; i <= to.x; i++) {
             for (let j = from.y; j <= to.y; j++) {
-                pk.x = i;
-                pk.y = j;
-                pk.key = 0;
-
-                const idx = pk.hash() % this.hash_table_size;
-                let pb = this.hash_table[idx];
+                let r = this.hash_table.get(i);
+                if (!r) {
+                    r = new Map();
+                    this.hash_table.set(i, r);
+                }
+                let pb = r.get(j);
 
                 while (pb) {
-                    if (pb.key.key === pk.key) {
+                    if (pb.key.x === i && pb.key.y === j) {
                         break;
                     }
 
@@ -374,9 +358,9 @@ export default class BroadPhase2D {
 
                 if (!pb) {
                     pb = new PosBin();
-                    pb.key.copy(pk);
-                    pb.next = this.hash_table[idx];
-                    this.hash_table[idx] = pb;
+                    pb.key.set(i, j);
+                    pb.next = r.get(j);
+                    r.set(j, pb);
                 }
 
                 if (p_static) {
@@ -390,10 +374,10 @@ export default class BroadPhase2D {
                         entered = true;
                     }
                 } else {
-                    let E = pb.static_object_set.get(p_elem);
+                    let E = pb.object_set.get(p_elem);
                     if (!E) {
                         E = new RC();
-                        pb.static_object_set.set(p_elem, E);
+                        pb.object_set.set(p_elem, E);
                     }
 
                     if (E.inc() === 1) {
@@ -436,6 +420,10 @@ export default class BroadPhase2D {
 
             this._pair_attempt(elem, p_elem);
         }
+
+        Vector2.delete(sz);
+        Vector2.delete(from);
+        Vector2.delete(to);
     }
     /**
      * @param {Element} p_elem
@@ -444,7 +432,7 @@ export default class BroadPhase2D {
      */
     _exit_grid(p_elem, p_rect, p_static) {
         // use magic number to avoid floating point issues
-        const sz = new Vector2(
+        const sz = Vector2.create(
             p_rect.width / this.cell_size * LARGE_ELEMENT_FI,
             p_rect.height / this.cell_size * LARGE_ELEMENT_FI
         )
@@ -462,21 +450,20 @@ export default class BroadPhase2D {
             return;
         }
 
-        const from = new Vector2(Math.floor(p_rect.x / this.cell_size), Math.floor(p_rect.y / this.cell_size));
-        const to = new Vector2(Math.floor((p_rect.x + p_rect.width) / this.cell_size), Math.floor((p_rect.y + p_rect.height) / this.cell_size));
+        const from = Vector2.create(Math.floor(p_rect.x / this.cell_size), Math.floor(p_rect.y / this.cell_size));
+        const to = Vector2.create(Math.floor((p_rect.x + p_rect.width) / this.cell_size), Math.floor((p_rect.y + p_rect.height) / this.cell_size));
 
-        const pk = new PosKey();
         for (let i = from.x; i <= to.x; i++) {
             for (let j = from.y; j <= to.y; j++) {
-                pk.x = i;
-                pk.y = j;
-                pk.key = 0;
-
-                const idx = pk.hash() % this.hash_table_size;
-                let pb = this.hash_table[idx];
+                let r = this.hash_table.get(i);
+                if (!r) {
+                    r = new Map();
+                    this.hash_table.set(i, r);
+                }
+                let pb = r.get(j);
 
                 while (pb) {
-                    if (pb.key.key === pk.key) {
+                    if (pb.key.x === i && pb.key.y === j) {
                         break;
                     }
 
@@ -497,10 +484,10 @@ export default class BroadPhase2D {
                         exited = true;
                     }
                 } else {
-                    let E = pb.static_object_set.get(p_elem);
+                    let E = pb.object_set.get(p_elem);
                     if (!E) {
                         E = new RC();
-                        pb.static_object_set.set(p_elem, E);
+                        pb.object_set.set(p_elem, E);
                     }
 
                     if (E.dec() === 0) {
@@ -528,10 +515,10 @@ export default class BroadPhase2D {
                 }
 
                 if (pb.object_set.size === 0 && pb.static_object_set.size === 0) {
-                    if (this.hash_table[idx] === pb) {
-                        this.hash_table[idx] = pb.next;
+                    if (r.get(j) === pb) {
+                        r.set(j, pb.next);
                     } else {
-                        let px = this.hash_table[idx];
+                        let px = r.get(j);
 
                         while (px) {
                             if (px.next === pb) {
@@ -559,6 +546,10 @@ export default class BroadPhase2D {
 
             this._unpair_attempt(p_elem, elem);
         }
+
+        Vector2.delete(sz);
+        Vector2.delete(from);
+        Vector2.delete(to);
     }
     /**
      *
@@ -575,15 +566,10 @@ export default class BroadPhase2D {
      * @returns {number}
      */
     _cull(use_aabb, use_segment, p_cell, p_aabb, p_from, p_to, p_results, p_max_results, p_result_indices, index) {
-        const pk = new PosKey();
-        pk.x = p_cell.x;
-        pk.y = p_cell.y;
-
-        const idx = pk.hash() % this.hash_table_size;
-        let pb = this.hash_table[idx];
+        let pb = this.hash_table.get(p_cell.x).get(p_cell.y);
 
         while (pb) {
-            if (pb.key.equal(pk)) {
+            if (pb.key.equals(p_cell)) {
                 break;
             }
 
