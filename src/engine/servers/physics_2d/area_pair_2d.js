@@ -42,7 +42,8 @@ export class Area2Pair2DSW extends Constraint2DSW {
         let result = false;
         if (this.area_a.is_shape_set_as_disabled(this.shape_a) || this.area_b.is_shape_set_as_disabled(this.shape_b)) {
             result = false;
-        } else if (this.area_a.test_collision_mask(this.area_b) && CollisionSolver2DSW.solve(this.area_a.get_shape(this.shape_a), this.area_a.transform.clone().append(this.area_a.get_shape_transform(this.shape_a)), new Vector2(), this.area_b.get_shape(this.shape_b), this.area_b.transform.clone().append(this.area_b.get_shape_transform(this.shape_b)), new Vector2(), null, this)) {
+            // TODO: cache transform
+        } else if (this.area_a.test_collision_mask(this.area_b) && CollisionSolver2DSW.solve(this.area_a.get_shape(this.shape_a), this.area_a.transform.clone().append(this.area_a.get_shape_transform(this.shape_a)), Vector2.Zero, this.area_b.get_shape(this.shape_b), this.area_b.transform.clone().append(this.area_b.get_shape_transform(this.shape_b)), Vector2.Zero, null, this)) {
             result = true;
         }
 

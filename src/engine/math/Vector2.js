@@ -589,6 +589,7 @@ export default class Vector2 {
         return this.x === 0 && this.y === 0;
     }
 }
+Vector2.Zero = Object.freeze(new Vector2());
 
 /**
  * @type {Vector2[]}
