@@ -67,7 +67,7 @@ class Box extends v.Area2D {
 
         this.gfx = this.add_child(new v.Graphics())
             .begin_fill(color, 0.6)
-            .draw_rect(0, 0, p_width, p_height)
+            .draw_rect(-p_width / 2, -p_height / 2, p_width, p_height)
             .end_fill()
 
         if (should_move) {
@@ -112,14 +112,12 @@ export default class NewPhysics extends v.Node2D {
             g.move_to(0, j * 128).line_to(size.x, j * 128);
         }
 
-        const Class = Box;
-
-        const m = new Class(20, 20, 0xFFFFFF, true)
+        const m = new Ball(20, 0xFFFFFF, true)
             .set_position(64, 192)
             .set_name('M')
         this.add_child(m);
 
-        const s = new Class(20, 20, 0xFFFFFF)
+        const s = new Box(20, 20, 0xFFFFFF)
             .set_position(192, 192)
             .set_name('S')
         this.add_child(s);
