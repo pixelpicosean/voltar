@@ -1,3 +1,5 @@
+import { PI, PI2, DEG_TO_RAD, RAD_TO_DEG } from './const';
+
 /**
  * Math classes and utilities mixed into v namespace.
  */
@@ -15,19 +17,7 @@ export { default as Polygon } from './shapes/Polygon';
 export { default as Rectangle } from './shapes/Rectangle';
 export { default as RoundedRectangle } from './shapes/RoundedRectangle';
 
-export const PI = Math.PI;
-export const PI2 = Math.PI * 2;
-export const TAU = PI2;
-
-/**
- * Conversion factor for converting radians to degrees.
- */
-export const RAD_TO_DEG = 180 / Math.PI;
-
-/**
- * Conversion factor for converting degrees to radians.
- */
-export const DEG_TO_RAD = Math.PI / 180;
+export * from './const';
 
 /**
  * Force a value within the boundaries by clamping `x` to the range `[a, b]`.

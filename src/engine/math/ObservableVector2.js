@@ -1,4 +1,5 @@
-import Vector2, { EPSILON } from './Vector2';
+import Vector2 from './Vector2';
+import { CMP_EPSILON } from './const';
 
 const tmp_point = new Vector2();
 
@@ -174,8 +175,8 @@ export default class ObservableVector2 {
     equals(b) {
         const a0 = this._x, a1 = this._y;
         const b0 = b.x, b1 = b.y;
-        return (Math.abs(a0 - b0) <= EPSILON * Math.max(1.0, Math.abs(a0), Math.abs(b0)) &&
-            Math.abs(a1 - b1) <= EPSILON * Math.max(1.0, Math.abs(a1), Math.abs(b1)));
+        return (Math.abs(a0 - b0) <= CMP_EPSILON * Math.max(1.0, Math.abs(a0), Math.abs(b0)) &&
+            Math.abs(a1 - b1) <= CMP_EPSILON * Math.max(1.0, Math.abs(a1), Math.abs(b1)));
     }
     exact_equals(b) {
         return (this._x === b.x) && (this._y === b.y);

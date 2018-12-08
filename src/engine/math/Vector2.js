@@ -1,4 +1,4 @@
-export const EPSILON = 0.000001;
+import { CMP_EPSILON } from './const';
 
 /**
  * @typedef Vector2Like
@@ -185,8 +185,8 @@ export default class Vector2 {
     equals(b) {
         const a0 = this.x, a1 = this.y;
         const b0 = b.x, b1 = b.y;
-        return (Math.abs(a0 - b0) <= EPSILON * Math.max(1.0, Math.abs(a0), Math.abs(b0)) &&
-            Math.abs(a1 - b1) <= EPSILON * Math.max(1.0, Math.abs(a1), Math.abs(b1)));
+        return (Math.abs(a0 - b0) <= CMP_EPSILON * Math.max(1.0, Math.abs(a0), Math.abs(b0)) &&
+            Math.abs(a1 - b1) <= CMP_EPSILON * Math.max(1.0, Math.abs(a1), Math.abs(b1)));
     }
     /**
      * Whether this equals to another point(precisely)
