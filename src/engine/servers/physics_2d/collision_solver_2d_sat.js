@@ -577,7 +577,124 @@ const _collision_circle_circle = (cast_A, cast_B, with_margin) => {
  * @param {boolean} with_margin
  */
 const _collision_circle_rectangle = (cast_A, cast_B, with_margin) => {
-    return () => false;
+    /** @type {SeparatorAxisTest2D<CircleShape2DSW, RectangleShape2DSW>} */
+    const separator = new SeparatorAxisTest2D(cast_A, cast_B, with_margin);
+
+    /**
+     * @param {CircleShape2DSW} p_circle_A
+     * @param {Matrix} p_transform_A
+     * @param {RectangleShape2DSW} p_rectangle_B
+     * @param {Matrix} p_transform_B
+     * @param {_CollectorCallback2D} p_collector
+     * @param {Vector2} p_motion_A
+     * @param {Vector2} p_motion_B
+     * @param {number} p_margin_A
+     * @param {number} p_margin_B
+     */
+    const solve = (p_circle_A, p_transform_A, p_rectangle_B, p_transform_B, p_collector, p_motion_A, p_motion_B, p_margin_A, p_margin_B) => {
+        separator.init(p_circle_A, p_transform_A, p_rectangle_B, p_transform_B, p_collector, p_motion_A, p_motion_B, p_margin_A, p_margin_B);
+
+        if (!separator.test_previous_axis()) {
+            return;
+        }
+
+        if (!separator.test_cast()) {
+            return;
+        }
+
+        const sphere = p_transform_A.get_elements(2);
+        const axis_0 = p_transform_B.get_elements(0);
+        const axis_1 = p_transform_B.get_elements(1);
+
+        if (!separator.test_axis(axis_0.normalize())) {
+            Vector2.delete(sphere);
+            Vector2.delete(axis_0);
+            Vector2.delete(axis_1);
+            return;
+        }
+
+        if (!separator.test_axis(axis_1.normalize())) {
+            Vector2.delete(sphere);
+            Vector2.delete(axis_0);
+            Vector2.delete(axis_1);
+            return;
+        }
+
+        const binv = p_transform_B.clone().affine_inverse();
+        {
+            const c_axis = p_rectangle_B.get_circle_axis(p_transform_B, binv, sphere);
+            if (!separator.test_axis(c_axis)) {
+                Vector2.delete(sphere);
+                Vector2.delete(axis_0);
+                Vector2.delete(axis_1);
+                Matrix.delete(binv);
+
+                Vector2.delete(c_axis);
+                return;
+            }
+            Vector2.delete(c_axis);
+        }
+
+        if (cast_A) {
+            const sphereofs = sphere.clone().add(p_motion_A);
+            const c_axis = p_rectangle_B.get_circle_axis(p_transform_B, binv, sphereofs);
+            if (!separator.test_axis(c_axis)) {
+                Vector2.delete(sphere);
+                Vector2.delete(axis_0);
+                Vector2.delete(axis_1);
+                Matrix.delete(binv);
+
+                Vector2.delete(sphereofs);
+                Vector2.delete(c_axis);
+                return;
+            }
+            Vector2.delete(sphereofs);
+            Vector2.delete(c_axis);
+        }
+
+        if (cast_B) {
+            const sphereofs = sphere.clone().add(p_motion_B);
+            const c_axis = p_rectangle_B.get_circle_axis(p_transform_B, binv, sphereofs);
+            if (!separator.test_axis(c_axis)) {
+                Vector2.delete(sphere);
+                Vector2.delete(axis_0);
+                Vector2.delete(axis_1);
+                Matrix.delete(binv);
+
+                Vector2.delete(sphereofs);
+                Vector2.delete(c_axis);
+                return;
+            }
+            Vector2.delete(sphereofs);
+            Vector2.delete(c_axis);
+        }
+
+        if (cast_A && cast_B) {
+            const sphereofs = sphere.clone().add(p_motion_A).subtract(p_motion_B);
+            const c_axis = p_rectangle_B.get_circle_axis(p_transform_B, binv, sphereofs);
+            if (!separator.test_axis(c_axis)) {
+                Vector2.delete(sphere);
+                Vector2.delete(axis_0);
+                Vector2.delete(axis_1);
+                Matrix.delete(binv);
+
+                Vector2.delete(sphereofs);
+                Vector2.delete(c_axis);
+                return;
+            }
+            Vector2.delete(sphereofs);
+            Vector2.delete(c_axis);
+        }
+
+        Vector2.delete(sphere);
+        Vector2.delete(axis_0);
+        Vector2.delete(axis_1);
+        Matrix.delete(binv);
+
+        separator.generate_contacts();
+    }
+
+    return solve;
 }
 /**
  * @param {boolean} cast_A
@@ -636,6 +753,7 @@ const _collision_rectangle_rectangle = (cast_A, cast_B, with_margin) => {
 
         const elem_A_1 = p_transform_A.get_elements(1).normalize();
         if (!separator.test_axis(elem_A_1)) {
+            Vector2.delete(elem_A_0);
             Vector2.delete(elem_A_1);
             return;
         }
@@ -643,15 +761,25 @@ const _collision_rectangle_rectangle = (cast_A, cast_B, with_margin) => {
         // box faces B
         const elem_B_0 = p_transform_B.get_elements(0).normalize();
         if (!separator.test_axis(elem_B_0)) {
+            Vector2.delete(elem_A_0);
+            Vector2.delete(elem_A_1);
             Vector2.delete(elem_B_0);
             return;
         }
 
         const elem_B_1 = p_transform_B.get_elements(1).normalize();
         if (!separator.test_axis(elem_B_1)) {
+            Vector2.delete(elem_A_0);
+            Vector2.delete(elem_A_1);
+            Vector2.delete(elem_B_0);
             Vector2.delete(elem_B_1);
             return;
         }
+
+        Vector2.delete(elem_A_0);
+        Vector2.delete(elem_A_1);
+        Vector2.delete(elem_B_0);
+        Vector2.delete(elem_B_1);
 
         if (with_margin) {
             const inv_A = p_transform_A.clone().affine_inverse();
