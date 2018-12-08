@@ -1,4 +1,4 @@
-import { Shape2DSW, CircleShape2DSW } from "./shape_2d_sw";
+import { Shape2DSW, CircleShape2DSW, RectangleShape2DSW } from "./shape_2d_sw";
 import { Matrix, Vector2, CMP_EPSILON } from "engine/math/index";
 import { get_closest_point_to_segment_uncapped_2d } from "engine/math/geometry";
 
@@ -602,7 +602,127 @@ const _collision_circle_convex_polygon = (cast_A, cast_B, with_margin) => {
  * @param {boolean} with_margin
  */
 const _collision_rectangle_rectangle = (cast_A, cast_B, with_margin) => {
-    return () => false;
+    /** @type {SeparatorAxisTest2D<RectangleShape2DSW, RectangleShape2DSW>} */
+    const separator = new SeparatorAxisTest2D(cast_A, cast_B, with_margin);
+
+    /**
+     * @param {RectangleShape2DSW} p_rectangle_A
+     * @param {Matrix} p_transform_A
+     * @param {RectangleShape2DSW} p_rectangle_B
+     * @param {Matrix} p_transform_B
+     * @param {_CollectorCallback2D} p_collector
+     * @param {Vector2} p_motion_A
+     * @param {Vector2} p_motion_B
+     * @param {number} p_margin_A
+     * @param {number} p_margin_B
+     */
+    const solve = (p_rectangle_A, p_transform_A, p_rectangle_B, p_transform_B, p_collector, p_motion_A, p_motion_B, p_margin_A, p_margin_B) => {
+        separator.init(p_rectangle_A, p_transform_A, p_rectangle_B, p_transform_B, p_collector, p_motion_A, p_motion_B, p_margin_A, p_margin_B);
+
+        if (!separator.test_previous_axis()) {
+            return;
+        }
+
+        if (!separator.test_cast()) {
+            return;
+        }
+
+        // box faces A
+        const elem_A_0 = p_transform_A.get_elements(0).normalize();
+        if (!separator.test_axis(elem_A_0)) {
+            Vector2.delete(elem_A_0);
+            return;
+        }
+
+        const elem_A_1 = p_transform_A.get_elements(1).normalize();
+        if (!separator.test_axis(elem_A_1)) {
+            Vector2.delete(elem_A_1);
+            return;
+        }
+
+        // box faces B
+        const elem_B_0 = p_transform_B.get_elements(0).normalize();
+        if (!separator.test_axis(elem_B_0)) {
+            Vector2.delete(elem_B_0);
+            return;
+        }
+
+        const elem_B_1 = p_transform_B.get_elements(1).normalize();
+        if (!separator.test_axis(elem_B_1)) {
+            Vector2.delete(elem_B_1);
+            return;
+        }
+
+        if (with_margin) {
+            const inv_A = p_transform_A.clone().affine_inverse();
+            const inv_B = p_transform_B.clone().affine_inverse();
+
+            if (!separator.test_axis(p_rectangle_A.get_box_axis(p_transform_A, inv_A, p_rectangle_B, p_transform_B, inv_B))) {
+                Matrix.delete(inv_A);
+                Matrix.delete(inv_B);
+                return;
+            }
+
+            if (cast_A || cast_B) {
+                const aofs = p_transform_A.clone();
+                aofs.tx += p_motion_A.x;
+                aofs.ty += p_motion_A.y;
+
+                const bofs = p_transform_B.clone();
+                bofs.tx += p_motion_B.x;
+                bofs.ty += p_motion_B.y;
+
+                const aofsinv = aofs.clone().affine_inverse();
+                const bofsinv = bofs.clone().affine_inverse();
+
+                if (cast_A) {
+                    const box_axis = p_rectangle_A.get_box_axis(aofs, aofsinv, p_rectangle_B, p_transform_B, inv_B);
+                    if (!separator.test_axis(box_axis)) {
+                        Matrix.delete(inv_A);
+                        Matrix.delete(inv_B);
+                        Matrix.delete(aofs);
+                        Matrix.delete(aofsinv);
+                        Matrix.delete(bofs);
+                        Matrix.delete(bofsinv);
+                        Vector2.delete(box_axis);
+                        return;
+                    }
+                }
+
+                if (cast_B) {
+                    const box_axis = p_rectangle_A.get_box_axis(p_transform_A, inv_A, p_rectangle_B, bofs, bofsinv);
+                    if (!separator.test_axis(box_axis)) {
+                        Matrix.delete(inv_A);
+                        Matrix.delete(inv_B);
+                        Matrix.delete(aofs);
+                        Matrix.delete(aofsinv);
+                        Matrix.delete(bofs);
+                        Matrix.delete(bofsinv);
+                        Vector2.delete(box_axis);
+                        return;
+                    }
+                }
+
+                if (cast_A && cast_B) {
+                    const box_axis = p_rectangle_A.get_box_axis(aofs, aofsinv, p_rectangle_B, bofs, bofsinv);
+                    if (!separator.test_axis(box_axis)) {
+                        Matrix.delete(inv_A);
+                        Matrix.delete(inv_B);
+                        Matrix.delete(aofs);
+                        Matrix.delete(aofsinv);
+                        Matrix.delete(bofs);
+                        Matrix.delete(bofsinv);
+                        Vector2.delete(box_axis);
+                        return;
+                    }
+                }
+            }
+        }
+
+        separator.generate_contacts();
+    }
+
+    return solve;
 }
 /**
  * @param {boolean} cast_A

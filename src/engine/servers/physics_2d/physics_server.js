@@ -16,7 +16,7 @@ import {
 } from "./state";
 import Step2DSW from "./step_2d_sw";
 import Space2D from "../../scene/resources/space_2d";
-import { CircleShape2DSW, Shape2DSW } from "./shape_2d_sw";
+import { CircleShape2DSW, Shape2DSW, RectangleShape2DSW } from "./shape_2d_sw";
 import CollisionSolver2DSW from "./collision_solver_2d_sw";
 import Space2DSW from "./space_2d_sw";
 import Area2DSW from "./area_2d_sw";
@@ -98,7 +98,9 @@ export default class PhysicsServer {
     circle_shape_create() {
         return new CircleShape2DSW();
     }
-    rectangle_shape_create() { }
+    rectangle_shape_create() {
+        return new RectangleShape2DSW();
+    }
     capsule_shape_create() { }
     convex_polygon_shape_create() { }
     concave_polygon_shape_create() { }

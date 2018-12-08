@@ -334,10 +334,14 @@ export default class Rectangle {
     /**
      * @param {Vector2} p_from
      * @param {Vector2} p_to
+     * @param {Vector2} r_pos
+     * @param {Vector2} r_normal
      * @returns {boolean}
      */
-    intersects_segment(p_from, p_to) {
+    intersects_segment(p_from, p_to, r_pos, r_normal) {
         let min = 0, max = 1;
+        let axis = 0;
+        let sign = 0;
 
         {
             let seg_from = p_from.x;
@@ -345,6 +349,7 @@ export default class Rectangle {
             let box_begin = this.x;
             let box_end = box_begin + this.width;
             let cmin = 0, cmax = 0;
+            let csign = 0;
 
             if (seg_from < seg_to) {
                 if (seg_from > box_end || seg_to < box_begin) {
@@ -353,16 +358,20 @@ export default class Rectangle {
                 let length = seg_to - seg_from;
                 cmin = (seg_from < box_begin) ? ((box_begin - seg_from) / length) : 0;
                 cmax = (seg_to > box_end) ? ((box_end - seg_from) / length) : 1;
+                csign = -1;
             } else {
                 if (seg_to > box_end || seg_from < box_begin)
                     return false;
                 let length = seg_to - seg_from;
                 cmin = (seg_from > box_end) ? (box_end - seg_from) / length : 0;
                 cmax = (seg_to < box_begin) ? (box_begin - seg_from) / length : 1;
+                csign = 1;
             }
 
             if (cmin > min) {
                 min = cmin;
+                axis = 0;
+                sign = csign;
             }
             if (cmax < max)
                 max = cmax;
@@ -375,6 +384,7 @@ export default class Rectangle {
             let box_begin = this.y;
             let box_end = box_begin + this.height;
             let cmin = 0, cmax = 0;
+            let csign = 0;
 
             if (seg_from < seg_to) {
                 if (seg_from > box_end || seg_to < box_begin) {
@@ -383,22 +393,43 @@ export default class Rectangle {
                 let length = seg_to - seg_from;
                 cmin = (seg_from < box_begin) ? ((box_begin - seg_from) / length) : 0;
                 cmax = (seg_to > box_end) ? ((box_end - seg_from) / length) : 1;
+                csign = -1;
             } else {
                 if (seg_to > box_end || seg_from < box_begin)
                     return false;
                 let length = seg_to - seg_from;
                 cmin = (seg_from > box_end) ? (box_end - seg_from) / length : 0;
                 cmax = (seg_to < box_begin) ? (box_begin - seg_from) / length : 1;
+                csign = 1;
             }
 
             if (cmin > min) {
                 min = cmin;
+                axis = 1;
+                sign = csign;
             }
             if (cmax < max)
                 max = cmax;
             if (max < min)
                 return false;
         }
+
+        const rel = p_to.clone().subtract(p_from);
+
+        if (r_normal) {
+            r_normal.set(0, 0);
+            if (axis === 0) {
+                r_normal.x = sign;
+            } else {
+                r_normal.y = sign;
+            }
+        }
+
+        if (r_pos) {
+            r_pos.copy(p_from).add(rel.scale(min));
+        }
+
+        Vector2.delete(rel);
 
         return true;
     }
