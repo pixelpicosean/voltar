@@ -6,9 +6,14 @@ import Space2DSW from "./space_2d_sw";
 import SelfList from "engine/core/self_list";
 
 class BodyKey {
-    constructor(p_body = null, p_body_shape = 0, p_area_shape = 0) {
+    /**
+     * @param {Area2DSW} p_body
+     * @param {number} p_body_shape
+     * @param {number} p_area_shape
+     */
+    constructor(p_body, p_body_shape, p_area_shape) {
         this.rid = p_body;
-        this.instance = p_body;
+        this.instance = p_body.instance;
         this.body_shape = p_body_shape;
         this.area_shape = p_area_shape;
     }
@@ -291,7 +296,7 @@ export default class Area2DSW extends CollisionObject2DSW {
                 }
 
                 this.monitor_callback_method.call(this.monitor_callback_scope,
-                    bs.state > 0 ? 'AREA_BODY_ADDED' : 'AREA_BODY_REMOVED',
+                    bs.state > 0,
                     bk.rid,
                     bk.instance,
                     bk.body_shape,
@@ -316,7 +321,7 @@ export default class Area2DSW extends CollisionObject2DSW {
                 }
 
                 this.area_monitor_callback_method.call(this.area_monitor_callback_scope,
-                    bs.state > 0 ? 'AREA_BODY_ADDED' : 'AREA_BODY_REMOVED',
+                    bs.state > 0,
                     bk.rid,
                     bk.instance,
                     bk.body_shape,

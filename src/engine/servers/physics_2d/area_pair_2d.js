@@ -69,6 +69,7 @@ export class Area2Pair2DSW extends Constraint2DSW {
             this.colliding = result;
         }
 
+        // never do any post solving
         return false;
     }
     /**

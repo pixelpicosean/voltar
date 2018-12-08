@@ -314,15 +314,13 @@ export default class Area2D extends CollisionObject2D {
     _body_exit_tree(p_id) { }
 
     /**
-     * @param {string} p_status
+     * @param {boolean} p_area_in
      * @param {Area2D} p_area
      * @param {any} p_instance
      * @param {number} p_area_shape
      * @param {number} p_self_shape
      */
-    _area_inout(p_status, p_area, p_instance, p_area_shape, p_self_shape) {
-        // TODO: [optimize] change the status to number enum
-        const area_in = p_status === 'AREA_BODY_ADDED';
+    _area_inout(p_area_in, p_area, p_instance, p_area_shape, p_self_shape) {
         const obj = p_instance;
         /**
          * @type {Node2D}
@@ -330,7 +328,7 @@ export default class Area2D extends CollisionObject2D {
         const node = (p_instance.is_node ? p_instance : null);
         let E = this.area_map.get(p_instance);
 
-        if (area_in) {
+        if (p_area_in) {
             if (!E) {
                 E = new AreaState();
                 E.rc = 0;

@@ -392,7 +392,6 @@ export default class BroadPhase2D {
 
                 if (entered) {
                     for (let [elem] of pb.object_set) {
-                        console.log(`try to pair <${elem.owner.instance.name}:${p_elem.owner.instance.name}>`)
                         if (elem.owner === p_elem.owner) {
                             continue;
                         }
