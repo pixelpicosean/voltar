@@ -443,6 +443,17 @@ export default class Vector2 {
     }
 
     /**
+     * @param {number} p_d
+     * @param {Vector2} p_vec
+     */
+    plane_project(p_d, p_vec) {
+        const self = this.clone();
+        const vec = p_vec.clone().subtract(self.scale(this.dot(p_vec) - p_d));
+        Vector2.delete(self);
+        return vec;
+    }
+
+    /**
      * Project to a vector.
      *
      * @param {Vector2} other

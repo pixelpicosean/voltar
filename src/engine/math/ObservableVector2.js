@@ -367,6 +367,15 @@ export default class ObservableVector2 {
         this.y = -x;
         return this;
     }
+    /**
+     * @param {number} p_d
+     * @param {Vector2} p_vec
+     */
+    plane_project(p_d, p_vec) {
+        const self = this.clone();
+        const vec = p_vec.clone().subtract(self.scale(this.dot(p_vec) - p_d));
+        return vec;
+    }
     project(other) {
         const amt = this.dot(other) / other.length_squared();
         this.x = amt * other.x;
