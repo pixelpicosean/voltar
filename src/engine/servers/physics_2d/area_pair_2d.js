@@ -1,7 +1,7 @@
 import Constraint2DSW from "./constraint_2d_sw";
 import Area2DSW from "./area_2d_sw";
 import CollisionSolver2DSW from "./collision_solver_2d_sw";
-import { Vector2 } from "engine/math/index";
+import { Vector2, Matrix } from "engine/math/index";
 
 export class Area2Pair2DSW extends Constraint2DSW {
     /**
@@ -42,9 +42,16 @@ export class Area2Pair2DSW extends Constraint2DSW {
         let result = false;
         if (this.area_a.is_shape_set_as_disabled(this.shape_a) || this.area_b.is_shape_set_as_disabled(this.shape_b)) {
             result = false;
-            // TODO: cache transform
-        } else if (this.area_a.test_collision_mask(this.area_b) && CollisionSolver2DSW.solve(this.area_a.get_shape(this.shape_a), this.area_a.transform.clone().append(this.area_a.get_shape_transform(this.shape_a)), Vector2.Zero, this.area_b.get_shape(this.shape_b), this.area_b.transform.clone().append(this.area_b.get_shape_transform(this.shape_b)), Vector2.Zero, null, this)) {
-            result = true;
+        } else if (this.area_a.test_collision_mask(this.area_b)) {
+            const xform_a = this.area_a.transform.clone().append(this.area_a.get_shape_transform(this.shape_a));
+            const xform_b = this.area_b.transform.clone().append(this.area_b.get_shape_transform(this.shape_b));
+
+            if (CollisionSolver2DSW.solve(this.area_a.get_shape(this.shape_a), xform_a, Vector2.Zero, this.area_b.get_shape(this.shape_b), xform_b, Vector2.Zero, null, this)) {
+                result = true;
+            }
+
+            Matrix.delete(xform_a);
+            Matrix.delete(xform_b);
         }
 
         if (result !== this.colliding) {

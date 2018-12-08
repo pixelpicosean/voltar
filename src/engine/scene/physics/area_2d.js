@@ -1,4 +1,4 @@
-import CollisionObject2D, { CollisionObjectTypes } from './collision_object_2d';
+import CollisionObject2D from './collision_object_2d';
 import { node_class_map } from 'engine/registry';
 import PhysicsServer from 'engine/servers/physics_2d/physics_server';
 import { AreaSpaceOverrideMode } from 'engine/scene/physics/const';

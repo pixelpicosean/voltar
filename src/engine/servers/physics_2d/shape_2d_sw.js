@@ -1,8 +1,6 @@
-import { Rectangle, Vector2, Matrix } from "engine/math/index";
+import { Rectangle, Vector2, Matrix, CMP_EPSILON } from "engine/math/index";
 import { ShapeType } from "engine/scene/physics/const";
 
-// TODO: move the CMP_EPSILON to math const
-const CMP_EPSILON = 0.00001;
 const _SEGMENT_IS_VALID_SUPPORT_THRESHOLD = 0.99998;
 
 const tmp_vec = new Vector2();
@@ -86,8 +84,7 @@ export class Shape2DSW {
      * @param {Vector2} [out]
      * @returns {Vector2}
      */
-    get_support(p_normal, out = new Vector2()) {
-        // TODO: cache the array?
+    get_support(p_normal, out = Vector2.create()) {
         const res = [out, tmp_vec.set(0, 0)];
         this.get_supports(p_normal, res);
         return out;
@@ -232,9 +229,9 @@ export class CircleShape2DSW extends Shape2DSW {
 
         const d = normal.dot(transform.origin);
 
-        // TODO: cache a vector instead of creating new one
         const local_normal = transform.xform_inv(normal);
         const scale = local_normal.length();
+        Vector2.delete(local_normal);
 
         result.min = d - this.radius * scale;
         result.max = d + this.radius * scale;
@@ -268,7 +265,6 @@ export class CircleShape2DSW extends Shape2DSW {
     intersect_segment(p_begin, p_end, r_point, r_normal) {
         const line_vec = p_end.clone().subtract(p_begin);
 
-        // TODO: replace method call to expressions, performance boost?
         const a = line_vec.dot(line_vec);
         const b = 2 * p_begin.dot(line_vec);
         const c = p_begin.dot(p_begin) - this.radius * this.radius;
@@ -287,6 +283,8 @@ export class CircleShape2DSW extends Shape2DSW {
 
         r_point.copy(p_begin).add(line_vec.x * res, line_vec.y * res);
         r_normal.copy(r_point).normalize();
+
+        Vector2.delete(line_vec);
         return true;
     }
     /**

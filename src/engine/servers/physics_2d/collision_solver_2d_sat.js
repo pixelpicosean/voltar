@@ -32,8 +32,10 @@ class _CollectorCallback2D {
         this.userdata = null;
         this.swap = false;
         this.collided = false;
+        /** @type {Vector2} */
         this.normal = new Vector2();
-        this.sep_axis = new Vector2();
+        /** @type {Vector2} */
+        this.sep_axis = null;
     }
     /**
      * @param {Vector2} p_point_A
@@ -48,6 +50,7 @@ class _CollectorCallback2D {
     }
 }
 
+const tmp_callback = new _CollectorCallback2D();
 /**
  * @param {Shape2DSW} p_shape_A
  * @param {Matrix} p_transform_A
@@ -67,13 +70,13 @@ export function sat_2d_calculate_penetration(p_shape_A, p_transform_A, p_motion_
     let type_A = p_shape_A.type;
     let type_B = p_shape_B.type;
 
-    // TODO: cache the callback
-    const callback = new _CollectorCallback2D();
+    const callback = tmp_callback;
     callback.callback = p_result_callback;
     callback.swap = p_swap;
     callback.userdata = p_userdata;
     callback.collided = false;
     callback.sep_axis = sep_axis;
+    callback.normal.set(0, 0);
 
     let A = p_shape_A;
     let B = p_shape_B;
@@ -152,6 +155,13 @@ class _generate_contacts_Pair {
         this.d = 0;
     }
 }
+const dvec = [
+    new _generate_contacts_Pair(),
+    new _generate_contacts_Pair(),
+    new _generate_contacts_Pair(),
+    new _generate_contacts_Pair(),
+]
+const _generate_contacts_Pair_sort = (a, b) => (a.d - b.d);
 /**
  * @param {Vector2[]} p_points_A
  * @param {number} p_point_count_A
@@ -164,14 +174,6 @@ function _generate_contacts_edge_edge(p_points_A, p_point_count_A, p_points_B, p
     const t = n.tangent();
     const dA = n.dot(p_points_A[0]);
     const dB = n.dot(p_points_B[0]);
-
-    // TODO: cache this array
-    const dvec = [
-        new _generate_contacts_Pair(),
-        new _generate_contacts_Pair(),
-        new _generate_contacts_Pair(),
-        new _generate_contacts_Pair(),
-    ]
 
     dvec[0].d = t.dot(p_points_A[0]);
     dvec[0].a = true;
@@ -186,7 +188,7 @@ function _generate_contacts_edge_edge(p_points_A, p_point_count_A, p_points_B, p
     dvec[3].a = false;
     dvec[3].idx = 1;
 
-    dvec.sort((a, b) => (a.d - b.d));
+    dvec.sort(_generate_contacts_Pair_sort);
 
     for (let i = 1; i <= 2; i++) {
         if (dvec[i].a) {

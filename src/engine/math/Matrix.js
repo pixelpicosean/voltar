@@ -9,6 +9,30 @@ import { PI2, Rectangle } from '../index';
  * | 0 | 0 | 1 |
  */
 export default class Matrix {
+    /**
+     * @param {number} [a=1] - x scale
+     * @param {number} [b=0] - x skew
+     * @param {number} [c=0] - y skew
+     * @param {number} [d=1] - y scale
+     * @param {number} [tx=0] - x translation
+     * @param {number} [ty=0] - y translation
+     */
+    static create(a = 1, b = 0, c = 0, d = 1, tx = 0, ty = 0) {
+        const m = pool.pop();
+        if (m) {
+            return m.set(a, b, c, d, tx, ty);
+        } else {
+            return new Matrix(a, b, c, d, tx, ty);
+        }
+    }
+    /**
+     * @param {Matrix} m
+     */
+    static delete(m) {
+        pool.push(m);
+        return Matrix;
+    }
+
     get origin() {
         return this._origin.set(this.tx, this.ty);
     }
@@ -463,16 +487,14 @@ export default class Matrix {
      * @return {Matrix} A copy of this matrix. Good for chaining method calls.
      */
     clone() {
-        const matrix = new Matrix();
-
-        matrix.a = this.a;
-        matrix.b = this.b;
-        matrix.c = this.c;
-        matrix.d = this.d;
-        matrix.tx = this.tx;
-        matrix.ty = this.ty;
-
-        return matrix;
+        return Matrix.create(
+            this.a,
+            this.b,
+            this.c,
+            this.d,
+            this.tx,
+            this.ty
+        );
     }
 
     /**
@@ -504,3 +526,8 @@ export default class Matrix {
 }
 
 Matrix.IDENTITY = Object.freeze(new Matrix());
+
+/**
+ * @type {Matrix[]}
+ */
+const pool = [];

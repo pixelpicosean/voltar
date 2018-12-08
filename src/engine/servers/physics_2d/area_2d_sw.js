@@ -258,8 +258,10 @@ export default class Area2DSW extends CollisionObject2DSW {
         }
 
         this._set_transform(p_transform);
-        // TOOD: cache the transform
-        this._set_inv_transform(p_transform.clone().affine_inverse());
+
+        const m = p_transform.clone().affine_inverse();
+        this._set_inv_transform(m);
+        Matrix.delete(m);
     }
 
     /**
