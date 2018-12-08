@@ -50,6 +50,49 @@ class Ball extends v.Area2D {
     }
 }
 
+class Box extends v.Area2D {
+    constructor(p_width = 16, p_height, color = 0xFFFFFF, should_move = false) {
+        super();
+
+        this.should_move = should_move;
+
+        this
+            .set_collision_layer_bit(PhysicsLayers.SOLID, true)
+            .set_collision_mask_bit(PhysicsLayers.SOLID, true)
+
+        const shape = new v.RectangleShape2D();
+        shape.extents.set(p_width / 2, p_height / 2)
+        this.add_child(new v.CollisionShape2D())
+            .shape = shape;
+
+        this.gfx = this.add_child(new v.Graphics())
+            .begin_fill(color, 0.6)
+            .draw_rect(0, 0, p_width, p_height)
+            .end_fill()
+
+        if (should_move) {
+            this.set_physics_process(true);
+
+            this.connect('area_entered', () => {
+                this.gfx.tint = 0x00FF00;
+                console.log('enter')
+            })
+            this.connect('area_exited', () => {
+                this.gfx.tint = 0xFFFFFF;
+                console.log('exit')
+            })
+        }
+    }
+    /**
+     * @param {Number} delta
+     */
+    _physics_process(delta) {
+        if (this.should_move) {
+            this.x += 10 * delta;
+        }
+    }
+}
+
 export default class NewPhysics extends v.Node2D {
     static instance() {
         return new NewPhysics();
@@ -69,12 +112,14 @@ export default class NewPhysics extends v.Node2D {
             g.move_to(0, j * 128).line_to(size.x, j * 128);
         }
 
-        const m = new Ball(30, 0xFFFFFF, true)
+        const Class = Box;
+
+        const m = new Class(20, 20, 0xFFFFFF, true)
             .set_position(64, 192)
             .set_name('M')
         this.add_child(m);
 
-        const s = new Ball(30, 0xFFFFFF)
+        const s = new Class(20, 20, 0xFFFFFF)
             .set_position(192, 192)
             .set_name('S')
         this.add_child(s);
