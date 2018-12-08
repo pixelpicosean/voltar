@@ -186,15 +186,26 @@ export default class Matrix {
     }
 
     /**
+     * @param {number} p_row
+     */
+    get_elements(p_row) {
+        switch (p_row) {
+            case 0: return Vector2.create(this.a, this.b);
+            case 1: return Vector2.create(this.c, this.d);
+            case 2: return Vector2.create(this.tx, this.ty);
+        }
+    }
+
+    /**
      * @param {Vector2} p_vec - The origin
      * @param {Vector2} [r_out] - The point that the new position is assigned to (allowed to be same as input)
      * @return {Vector2} The new point, transformed through this matrix
      */
     basis_xform(p_vec, r_out = Vector2.create()) {
-        r_out.x = (this.a * p_vec.x) + (this.c * p_vec.y);
-        r_out.y = (this.b * p_vec.x) + (this.d * p_vec.y);
+        const x = (this.a * p_vec.x) + (this.c * p_vec.y);
+        const y = (this.b * p_vec.x) + (this.d * p_vec.y);
 
-        return r_out;
+        return r_out.set(x, y);
     }
 
     /**
@@ -203,10 +214,10 @@ export default class Matrix {
      * @return {Vector2} The new point, inverse-transformed through this matrix
      */
     basis_xform_inv(p_vec, r_out = Vector2.create()) {
-        r_out.x = (this.a * p_vec.x) + (this.b * p_vec.y);
-        r_out.y = (this.c * p_vec.x) + (this.d * p_vec.y);
+        const x = (this.a * p_vec.x) + (this.b * p_vec.y);
+        const y = (this.c * p_vec.x) + (this.d * p_vec.y);
 
-        return r_out;
+        return r_out.set(x, y);
     }
 
     /**
@@ -218,10 +229,10 @@ export default class Matrix {
      * @return {Vector2} The new point, transformed through this matrix
      */
     xform(p_vec, r_out = Vector2.create()) {
-        r_out.x = (this.a * p_vec.x) + (this.c * p_vec.y) + this.tx;
-        r_out.y = (this.b * p_vec.x) + (this.d * p_vec.y) + this.ty;
+        const x = (this.a * p_vec.x) + (this.c * p_vec.y) + this.tx;
+        const y = (this.b * p_vec.x) + (this.d * p_vec.y) + this.ty;
 
-        return r_out;
+        return r_out.set(x, y);
     }
 
     /**
@@ -233,10 +244,10 @@ export default class Matrix {
      * @return {Vector2} The new point, inverse-transformed through this matrix
      */
     xform_inv(p_vec, r_out = Vector2.create()) {
-        r_out.x = this.a * (p_vec.x - this.tx) + this.b * (p_vec.y - this.ty);
-        r_out.y = this.c * (p_vec.x - this.tx) + this.d * (p_vec.y - this.ty);
+        const x = this.a * (p_vec.x - this.tx) + this.b * (p_vec.y - this.ty);
+        const y = this.c * (p_vec.x - this.tx) + this.d * (p_vec.y - this.ty);
 
-        return r_out;
+        return r_out.set(x, y);
     }
 
     /**
