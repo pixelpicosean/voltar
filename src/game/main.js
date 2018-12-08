@@ -18,7 +18,7 @@ import 'engine/tween/enable';
 import Preloader from 'game/preloader/Preloader';
 
 // First scene after preloader
-import Test from 'game/test/Sprite';
+import Test from 'game/test/NewPhysics';
 
 // Settings exported from Godot
 import Settings from 'project.json';
