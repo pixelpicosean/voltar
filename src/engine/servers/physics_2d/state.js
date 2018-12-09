@@ -1,6 +1,5 @@
 import { Vector2, Matrix, Rectangle } from "engine/math/index";
 import { INTERSECTION_QUERY_MAX, CollisionObjectType, BodyState } from "engine/scene/physics/const";
-import Body2DSW from "./body_2d_sw";
 
 export class Physics2DDirectBodyStateSW {
     /**
@@ -195,7 +194,7 @@ export class Physics2DDirectBodyStateSW {
     Physics2DDirectBodyStateSW() {
         Physics2DDirectBodyStateSW.singleton = this;
         /**
-         * @type {Body2DSW}
+         * @type {import('./body_2d_sw').default}
          */
         this.body = null;
 

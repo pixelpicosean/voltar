@@ -11,6 +11,16 @@ import { Shape2DSW } from "./shape_2d_sw";
 import { Matrix, Vector2, Rectangle, CMP_EPSILON } from "engine/math/index";
 import CollisionSolver2DSW from "./collision_solver_2d_sw";
 
+class ExcludedShapeSW {
+    constructor() {
+        /** @type {Shape2DSW} */
+        this.local_shape = null;
+        /** @type {CollisionObject2DSW} */
+        this.against_object = null;
+        this.against_shape_index = 0;
+    }
+}
+
 const max_excluded_shape_pairs = 32;
 /** @type {ExcludedShapeSW[]} */
 const excluded_shape_pairs = (() => {
@@ -67,16 +77,6 @@ const ElapsedTime = {
     SOLVE_CONSTRAINTS: 3,
     INTEGRATE_VELOCITIES: 4,
     MAX: 5,
-}
-
-class ExcludedShapeSW {
-    constructor() {
-        /** @type {Shape2DSW} */
-        this.local_shape = null;
-        /** @type {CollisionObject2DSW} */
-        this.against_object = null;
-        this.against_shape_index = 0;
-    }
 }
 
 class _RestCallbackData2D {
