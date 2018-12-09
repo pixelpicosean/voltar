@@ -197,6 +197,17 @@ export default class Matrix {
     }
 
     /**
+     * @param {number} p_axis
+     */
+    get_axis(p_axis) {
+        switch (p_axis) {
+            case 0: return Vector2.create(this.a, this.b);
+            case 1: return Vector2.create(this.c, this.d);
+            case 2: return Vector2.create(this.tx, this.ty);
+        }
+    }
+
+    /**
      * @param {Vector2} p_vec - The origin
      * @param {Vector2} [r_out] - The point that the new position is assigned to (allowed to be same as input)
      * @return {Vector2} The new point, transformed through this matrix
