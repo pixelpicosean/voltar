@@ -14,6 +14,7 @@ import {
     Polygon,
     RoundedRectangle,
     Ellipse,
+    Matrix,
 } from 'engine/math/index';
 import ObservableVector2 from 'engine/math/ObservableVector2';
 import Filter from 'engine/renderers/filters/Filter';
@@ -1027,6 +1028,17 @@ export default class Node2D extends VObject {
     }
     get_global_transform() {
         return this.transform.world_transform;
+    }
+    /**
+     * @param {Matrix} p_transform
+     */
+    set_global_transform(p_transform) {
+        const xform = this.parent.get_global_transform().clone()
+            .affine_inverse()
+            .append(p_transform);
+        this.transform.set_from_matrix(xform);
+        Matrix.delete(xform);
+        return this;
     }
 
     _enter_tree() { }
