@@ -285,6 +285,6 @@ export default class CollisionObject2D extends Node2D {
             }
         }
 
-        return 0;
+        return null;
     }
 }

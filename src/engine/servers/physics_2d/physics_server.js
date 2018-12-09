@@ -13,6 +13,7 @@ import {
     ShapeResult,
     Physics2DDirectSpaceStateSW,
     Physics2DDirectBodyStateSW,
+    MotionResult,
 } from "./state";
 import Step2DSW from "./step_2d_sw";
 import Space2D from "../../scene/resources/space_2d";
@@ -21,6 +22,7 @@ import CollisionSolver2DSW from "./collision_solver_2d_sw";
 import Space2DSW from "./space_2d_sw";
 import Area2DSW from "./area_2d_sw";
 import CollisionObject2DSW from "./collision_object_2d_sw";
+import Body2DSW from "./body_2d_sw";
 
 class RayResult {
     constructor() {
@@ -469,9 +471,39 @@ export default class PhysicsServer {
     /* BODY API */
 
     /**
-     * @returns {CollisionObject2DSW}
+     * @returns {Body2DSW}
      */
     body_create() { return null }
+
+    body_set_space(p_body, p_space) { }
+    body_get_space(p_body) { }
+
+    body_add_shape(p_body) { }
+    body_remove_shape(p_body) { }
+    body_clear_shapes(p_body) { }
+    body_set_shape(p_body) { }
+    body_get_shape(p_body) { }
+    body_set_shape_transform(p_body) { }
+    body_get_shape_transform(p_body) { }
+    body_set_shape_metadata(p_body) { }
+    body_get_shape_metadata(p_body) { }
+
+    body_set_shape_disabled(p_body) { }
+    body_set_shape_as_one_way_collision(p_body) { }
+
+    /**
+     *
+     * @param {Body2DSW} p_body
+     * @param {Matrix} p_from
+     * @param {Vector2} p_motion
+     * @param {boolean} p_infinite_inertia
+     * @param {number} [p_margin]
+     * @param {MotionResult} [r_result]
+     * @param {boolean} [p_exclude_raycast_shapes]
+     */
+    body_test_motion(p_body, p_from, p_motion, p_infinite_inertia, p_margin = 0.001, r_result = null, p_exclude_raycast_shapes = true) {
+        return p_body.space.test_body_motion(p_body, p_from, p_motion, p_infinite_inertia, p_margin, r_result, p_exclude_raycast_shapes);
+    }
 
     /* JOINT API */
 

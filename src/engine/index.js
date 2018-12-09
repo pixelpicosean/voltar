@@ -55,6 +55,10 @@ export { default as Rope } from './scene/mesh/Rope';
 
 export { default as CollisionShape2D } from './scene/physics/collision_shape_2d';
 export { default as Area2D } from './scene/physics/area_2d';
+export {
+    StaticBody2D,
+    KinematicBody2D,
+} from './scene/physics/physics_body_2d';
 export { default as CircleShape2D } from './scene/resources/circle_shape_2d';
 export { default as RectangleShape2D } from './scene/resources/rectangle_shape_2d';
 

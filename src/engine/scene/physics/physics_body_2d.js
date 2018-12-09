@@ -1,9 +1,11 @@
 import CollisionObject2D from "./collision_object_2d";
 import PhysicsServer from "engine/servers/physics_2d/physics_server";
 import { BodyMode } from "./const";
-import { Vector2 } from "engine/math/index";
+import { Vector2, Matrix } from "engine/math/index";
 import Body2DSW from "engine/servers/physics_2d/body_2d_sw";
 import PhysicsMaterial from "../resources/physics_material";
+import Node2D from "../Node2D";
+import { MotionResult } from "engine/servers/physics_2d/state";
 
 export class PhysicsBody2D extends CollisionObject2D {
     /**
@@ -229,4 +231,143 @@ export class StaticBody2D extends PhysicsBody2D {
             this.rid.friction = this._physics_material_override.computed_friction;
         }
     }
+}
+
+class Collision {
+    constructor() {
+        this.collision = new Vector2();
+        this.normal = new Vector2();
+        this.collider_vel = new Vector2();
+        /** @type {Node2D} */
+        this.collider = null;
+        this.collider_rid = null;
+        this.collider_shape = 0;
+        this.collider_metadata = null;
+        this.remainder = new Vector2();
+        this.travel = new Vector2();
+        this.local_shape = 0;
+    }
+}
+
+class KinematicCollision2D {
+    get position() { return this.collision.collision }
+    get normal() { return this.collision.normal }
+    get travel() { return this.collision.travel }
+    get remainder() { return this.collision.remainder }
+    get local_shape() { return this.owner.shape_find_owner(this.collision.local_shape) }
+    get collider() { return this.collision.collider }
+    get collider_shape() {
+        if (this.collider) {
+            if (this.collider.is_collision_object) {
+                // @ts-ignore (cast_to<CollisionObject2D>)
+                return this.collider.shape_find_owner(this.collision.collider_shape);
+            }
+        }
+        return null;
+    }
+    get collider_shape_index() { return this.collision.collider_shape }
+    get collider_velocity() { return this.collision.collider_vel }
+    constructor() {
+        /** @type {KinematicBody2D} */
+        this.owner = null;
+        this.collision = new Collision();
+        this.metadata = Object.freeze(Object.create({}));
+    }
+}
+
+export class KinematicBody2D extends PhysicsBody2D {
+    constructor() {
+        super(BodyMode.KINEMATIC);
+
+        this.margin = 0.08;
+
+        this.floor_velocity = new Vector2();
+        this.on_floor_body = null;
+        this.on_floor = false;
+        this.on_ceiling = false;
+        this.on_wall = false;
+        this.sync_to_physics = false;
+
+        /** @type {Collision[]} */
+        this.colliders = [];
+        /** @type {KinematicCollision2D[]} */
+        this.slide_colliders = [];
+        /** @type {KinematicCollision2D} */
+        this.motion_cache = null;
+
+        this.last_valid_transform = new Matrix();
+    }
+
+    /**
+     * @param {Vector2} p_motion
+     * @param {boolean} [p_infinite_inertia]
+     * @param {boolean} [p_exclude_raycast_shapes]
+     * @param {boolean} [p_test_only]
+     */
+    _move(p_motion, p_infinite_inertia = true, p_exclude_raycast_shapes = true, p_test_only = false) {
+        // TODO: cache Collision
+        const col = new Collision();
+
+        if (this.move_and_collide(p_motion, p_infinite_inertia, col, p_exclude_raycast_shapes, p_test_only)) {
+            if (!this.motion_cache) {
+                this.motion_cache = new KinematicCollision2D();
+                this.motion_cache.owner = this;
+            }
+
+            this.motion_cache.collision = col;
+
+            return this.motion_cache;
+        }
+
+        return null;
+    }
+    _get_slide_collision(p_bounce) { }
+
+    _direct_state_changed(p_state) { }
+
+    /**
+     * @param {Vector2} p_motion
+     * @param {boolean} p_infinite_inertia
+     * @param {Collision} r_collision
+     * @param {boolean} [p_exclude_raycast_shapes]
+     * @param {boolean} [p_test_only]
+     */
+    move_and_collide(p_motion, p_infinite_inertia, r_collision, p_exclude_raycast_shapes = true, p_test_only = false) {
+        const gt = this.transform.world_transform.clone();
+        // TODO: cache MotionResult
+        const result = new MotionResult();
+        const colliding = PhysicsServer.singleton.body_test_motion(this.rid, gt, p_motion, p_infinite_inertia, this.margin, result, p_exclude_raycast_shapes);
+
+        if (colliding) {
+            r_collision.collider_metadata = result.collider_metadata;
+            r_collision.collider_shape = result.collider_shape;
+            r_collision.collider_vel.copy(result.collider_velocity);
+            r_collision.collision.copy(result.collision_point);
+            r_collision.normal.copy(result.collision_normal);
+            r_collision.collider = result.collider_id;
+            r_collision.collider_rid = result.collider;
+            r_collision.travel.copy(result.motion);
+            r_collision.remainder.copy(result.remainder);
+            r_collision.local_shape = result.collision_local_shape;
+        }
+
+        if (!p_test_only) {
+            gt.tx += result.motion.x;
+            gt.ty += result.motion.y;
+            this.set_global_transform(gt);
+        }
+
+        Matrix.delete(gt);
+        return colliding;
+    }
+
+    test_move(p_from, p_motion, p_infinite_inertia = true) { }
+
+    separate_raycast_shapes(p_infinite_inertia, r_collision) { }
+
+    move_and_slide(p_linear_velocity, p_floor_direction = Vector2.Zero, p_stop_on_slope = false, p_max_slides = 4, p_floor_max_angle = Math.PI * 0.25, p_infinite_inertia = true) { }
+    move_and_slide_with_snap(p_linear_velocity, p_snap, p_floor_direction = Vector2.Zero, p_stop_on_slope = false, p_max_slides = 4, p_floor_max_angle = Math.PI * 0.25, p_infinite_inertia = true) { }
+
+    get_slide_count() { }
+    get_slide_collision(p_bounce) { }
 }

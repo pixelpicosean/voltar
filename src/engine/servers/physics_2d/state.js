@@ -496,3 +496,19 @@ export class Physics2DDirectSpaceStateSW {
         return cc;
     }
 }
+
+export class MotionResult {
+    constructor() {
+        this.motion = new Vector2();
+        this.remainder = new Vector2();
+
+        this.collision_point = new Vector2();
+        this.collision_normal = new Vector2();
+        this.collider_velocity = new Vector2();
+        this.collision_local_shape = 0;
+        this.collider_id = null;
+        this.collider = null;
+        this.collider_shape = 0;
+        this.collider_metadata = null;
+    }
+}
