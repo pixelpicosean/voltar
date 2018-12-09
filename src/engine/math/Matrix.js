@@ -44,6 +44,46 @@ export default class Matrix {
         return this;
     }
 
+    get rotation() {
+        // sort out rotation / skew..
+        const a = this.a;
+        const b = this.b;
+        const c = this.c;
+        const d = this.d;
+
+        const skew_x = -Math.atan2(-c, d);
+        const skew_y = Math.atan2(b, a);
+
+        const delta = Math.abs(skew_x + skew_y);
+
+        let rotation = 0;
+        if (delta < 0.00001 || Math.abs(PI2 - delta) < 0.00001) {
+            rotation = skew_y;
+
+            if (a < 0 && d >= 0) {
+                rotation += (rotation <= 0) ? Math.PI : -Math.PI;
+            }
+        }
+        else {
+            rotation = 0;
+        }
+
+        return rotation;
+    }
+    set rotation(value) {
+        // TODO: do not support skew, since it is not supported by Godot
+        const cr = Math.cos(value);
+        const sr = Math.sin(value);
+        this.a = cr;
+        this.b = sr;
+        this.c = -sr;
+        this.d = cr;
+    }
+    set_rotation(value) {
+        this.rotation = value;
+        return this;
+    }
+
     /**
      * @param {number} [a=1] - x scale
      * @param {number} [b=0] - x skew
@@ -340,6 +380,28 @@ export default class Matrix {
         this.ty = (tx1 * sin) + (this.ty * cos);
 
         return this;
+    }
+
+    /**
+     * Invert this matrix.
+     * This method assumes the basis is a rotation matrix, with no scaling.
+     * Use affine_inverse instead if scaling is required.
+     */
+    invert() {
+        let tmp = this.a; this.a = this.c; this.c = tmp;
+        const tx = this.a * (-this.tx) + this.c * (-this.ty);
+        const ty = this.b * (-this.tx) + this.d * (-this.ty);
+        this.tx = tx;
+        this.ty = ty;
+        return this;
+    }
+
+    /**
+     * Return a inverted matrix
+     */
+    inverse() {
+        const inv = this.clone();
+        return inv.invert();
     }
 
     /**
