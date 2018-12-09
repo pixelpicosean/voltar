@@ -1,5 +1,5 @@
-import { Physics2DDirectSpaceStateSW, MotionResult } from "../../servers/physics_2d/state";
-import { INTERSECTION_QUERY_MAX, CollisionObjectType } from "../../scene/physics/const";
+import { Physics2DDirectSpaceStateSW, MotionResult, CollCbkData, _shape_col_cbk, Physics2DDirectBodyStateSW } from "../../servers/physics_2d/state";
+import { INTERSECTION_QUERY_MAX, CollisionObjectType, ShapeType, BodyMode } from "../../scene/physics/const";
 import Area2DSW from "./area_2d_sw";
 import SelfList, { List } from "engine/core/self_list";
 import BroadPhase2D from "./broad_phase_2d_sw";
@@ -8,7 +8,28 @@ import { Area2Pair2DSW } from "./area_pair_2d";
 import Constraint2DSW from "./constraint_2d_sw";
 import Body2DSW from "./body_2d_sw";
 import { Shape2DSW } from "./shape_2d_sw";
-import { Matrix, Vector2, Rectangle } from "engine/math/index";
+import { Matrix, Vector2, Rectangle, CMP_EPSILON } from "engine/math/index";
+import CollisionSolver2DSW from "./collision_solver_2d_sw";
+
+const max_excluded_shape_pairs = 32;
+/** @type {ExcludedShapeSW[]} */
+const excluded_shape_pairs = (() => {
+    const arr = new Array(max_excluded_shape_pairs);
+    for (let i = 0; i < max_excluded_shape_pairs; i++) arr[i] = new ExcludedShapeSW();
+    return arr;
+})()
+
+const max_results = 32;
+/** @type {Vector2[]} */
+const sr = (() => {
+    const sr = new Array(max_results * 2);
+    for (let i = 0; i < max_results * 2; i++) sr[i] = new Vector2();
+    return sr;
+})()
+const get_sr = () => {
+    for (let v of sr) v.set(0, 0);
+    return sr;
+}
 
 const ElapsedTime = {
     INTEGRATE_FORCES: 0,
@@ -101,9 +122,43 @@ export default class Space2DSW {
 
     /**
      * @param {Body2DSW} p_body
-     * @param {Body2DSW} p_aabb
+     * @param {Rectangle} p_aabb
      */
-    _cull_aabb_for_body(p_body, p_aabb) { }
+    _cull_aabb_for_body(p_body, p_aabb) {
+        let amount = this.broadphase.cull_aabb(p_aabb, this.intersection_query_results, INTERSECTION_QUERY_MAX, this.intersection_query_subindex_results);
+
+        for (let i = 0; i < amount; i++) {
+            let keep = true;
+
+            /** @type {Body2DSW} */
+            // @ts-ignore
+            const res = this.intersection_query_results[i];
+            if (res === p_body) {
+                keep = false;
+            } else if (res.type === CollisionObjectType.AREA) {
+                keep = false;
+            } else if (res.test_collision_mask(p_body) === 0) {
+                keep = false;
+            } else if (res.has_exception(p_body.self) || p_body.has_exception(res.self)) {
+                keep = false;
+            } else if (res.shapes[this.intersection_query_subindex_results[i]].disabled) {
+                keep = false;
+            }
+
+            if (!keep) {
+                if (i < amount - 1) {
+                    let tmp;
+                    tmp = this.intersection_query_results[i]; this.intersection_query_results[i] = this.intersection_query_results[amount - 1]; this.intersection_query_results[amount - 1] = tmp;
+                    tmp = this.intersection_query_subindex_results[i]; this.intersection_query_subindex_results[i] = this.intersection_query_subindex_results[amount - 1]; this.intersection_query_subindex_results[amount - 1] = tmp;
+                }
+
+                amount--;
+                i--;
+            }
+        }
+
+        return amount;
+    }
 
     /**
      * @param {SelfList<Body2DSW>} p_body
@@ -237,6 +292,185 @@ export default class Space2DSW {
         const body_aabb = Rectangle.create();
 
         let shapes_found = false;
+
+        for (let i = 0; i < p_body.shapes.length; i++) {
+            const s = p_body.shapes[i];
+            if (s.disabled) {
+                continue;
+            }
+
+            if (!shapes_found) {
+                body_aabb.copy(s.aabb_cache);
+                shapes_found = true;
+            } else {
+                body_aabb.merge_to(s.aabb_cache);
+            }
+        }
+
+        if (!shapes_found) {
+            return false;
+        }
+
+        p_from.xform_rect(p_body.inv_transform.xform_rect(body_aabb, body_aabb), body_aabb);
+        body_aabb.grow_to(p_margin);
+
+        let excluded_shape_pair_count = 0;
+
+        const separation_margin = Math.min(p_margin, Math.max(0, p_motion.length() - CMP_EPSILON));
+
+        const body_transform = p_from.clone();
+
+        {
+            // STEP 1, FREE BODY IF STUCK
+
+            let recover_attempts = 4;
+            const sr = get_sr();
+
+            do {
+                // TODO: cache CollCbkData
+                const cbk = new CollCbkData();
+                cbk.max = max_results;
+                cbk.amount = 0;
+                cbk.ptr = sr;
+                cbk.invalid_by_dir = 0;
+                excluded_shape_pair_count = 0; // last step is the one valid
+
+                const cbkres = _shape_col_cbk;
+
+                let collided = false;
+
+                let amount = this._cull_aabb_for_body(p_body, body_aabb);
+
+                for (let body_shape of p_body.shapes) {
+                    if (body_shape.disabled) {
+                        continue;
+                    }
+
+                    if (p_exclude_raycast_shapes && body_shape.shape.type === ShapeType.RAY) {
+                        continue;
+                    }
+
+                    const body_shape_xform = body_transform.clone().append(body_shape.xform);
+                    for (let i = 0; i < amount; i++) {
+                        const col_obj = this.intersection_query_results[i];
+                        let shape_index = this.intersection_query_subindex_results[i];
+
+                        if (col_obj.type === CollisionObjectType.BODY) {
+                            /** @type {Body2DSW} */
+                            // @ts-ignore
+                            const b = col_obj;
+                            if (p_infinite_inertia && b.mode !== BodyMode.STATIC && b.mode !== BodyMode.KINEMATIC) {
+                                continue;
+                            }
+                        }
+
+                        const col_obj_shape_xform = col_obj.transform.clone().append(col_obj.shapes[shape_index].xform);
+
+                        if (col_obj.shapes[shape_index].one_way_collision) {
+                            // TODO: cache the get_axis() result
+                            cbk.valid_dir.copy(col_obj_shape_xform.get_axis(1)).normalize();
+
+                            cbk.valid_depth = p_margin;
+                            cbk.invalid_by_dir = 0;
+
+                            if (col_obj.type === CollisionObjectType.BODY) {
+                                /** @type {Body2DSW} */
+                                // @ts-ignore
+                                const b = col_obj;
+                                if (b.mode === BodyMode.KINEMATIC || b.mode === BodyMode.RIGID) {
+                                    // fix for moving platforms (kinematic and dynamic), margin is increased by
+                                    // how much it moved in the give direction
+                                    const lv = b.linear_velocity.clone();
+                                    // compute displacement from linear velocity
+                                    const motion = lv.multiply(Physics2DDirectBodyStateSW.singleton.step);
+                                    const motion_len = motion.length();
+                                    motion.normalize();
+                                    cbk.valid_depth += motion_len * Math.max(motion.dot(cbk.valid_dir.clone().negate()), 0);
+                                }
+                            } else {
+                                cbk.valid_dir.set(0, 0);
+                                cbk.valid_depth = 0;
+                                cbk.invalid_by_dir = 0;
+                            }
+
+                            let current_collisions = cbk.amount;
+                            let did_collide = false;
+
+                            const against_shape = col_obj.shapes[shape_index].shape;
+                            if (CollisionSolver2DSW.solve(body_shape.shape, body_shape_xform, Vector2.Zero, against_shape, col_obj_shape_xform, Vector2.Zero, cbkres, cbk, null, separation_margin)) {
+                                did_collide = cbk.amount > current_collisions;
+                            }
+
+                            if (!did_collide && cbk.invalid_by_dir > 0) {
+                                // this shape must be excluded
+                                if (excluded_shape_pair_count < max_excluded_shape_pairs) {
+                                    const esp = excluded_shape_pairs[excluded_shape_pair_count++];
+                                    esp.local_shape = body_shape.shape;
+                                    esp.against_object = col_obj;
+                                    esp.against_shape_index = shape_index;
+                                }
+                            }
+
+                            if (did_collide) {
+                                collided = true;
+                            }
+                        }
+                    }
+                }
+
+                if (!collided) {
+                    break;
+                }
+
+                const recover_motion = Vector2.create();
+
+                for (let i = 0; i < cbk.amount; i++) {
+                    recover_motion.add(
+                        (sr[i * 2 + 1].x - sr[i * 2 + 0].x) * 0.4,
+                        (sr[i * 2 + 1].y - sr[i * 2 + 0].y) * 0.4
+                    );
+                }
+
+                if (recover_motion.is_zero()) {
+                    collided = false;
+                    break;
+                }
+
+                body_transform.tx += recover_motion.x;
+                body_transform.ty += recover_motion.y;
+
+                body_aabb.x += recover_motion.x;
+                body_aabb.y += recover_motion.y;
+
+                recover_attempts--;
+
+            } while (recover_attempts);
+        }
+
+        let safe = 1;
+        let unsafe = 1;
+        let best_shape = -1;
+
+        {
+            // STEP 2 ATTEMPT MOTION
+        }
+
+        let collided = false;
+        if (safe >= 1) {
+            best_shape = -1; // no best shape with cast, reset to -1
+        }
+
+        {
+            // it collided, let's get the reset info in unsafe advance
+        }
+
+        if (!collided && r_result) {
+            r_result.motion.copy(p_motion);
+            r_result.remainder.set(0, 0);
+            r_result.motion.add(body_transform.origin.clone().subtract(p_from.origin));
+        }
+
+        return collided;
     }
 
     /**

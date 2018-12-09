@@ -4,9 +4,6 @@ import {
 } from "engine/math/index";
 
 import {
-    ShapeType,
-    SpaceParameter,
-    AreaParameter,
     AreaSpaceOverrideMode,
 } from '../../scene/physics/const';
 import {
@@ -14,14 +11,14 @@ import {
     Physics2DDirectSpaceStateSW,
     Physics2DDirectBodyStateSW,
     MotionResult,
+    CollCbkData,
+    _shape_col_cbk,
 } from "./state";
 import Step2DSW from "./step_2d_sw";
-import Space2D from "../../scene/resources/space_2d";
 import { CircleShape2DSW, Shape2DSW, RectangleShape2DSW } from "./shape_2d_sw";
 import CollisionSolver2DSW from "./collision_solver_2d_sw";
 import Space2DSW from "./space_2d_sw";
 import Area2DSW from "./area_2d_sw";
-import CollisionObject2DSW from "./collision_object_2d_sw";
 import Body2DSW from "./body_2d_sw";
 
 class RayResult {
@@ -44,20 +41,6 @@ class Physics2DShapeQueryResult {
     get_result_count() { }
     get_result() { }
     get_result_object_shape() { }
-}
-
-class CollCbkData {
-    constructor() {
-        this.valid_dir = new Vector2();
-        this.valid_depth = 0;
-        this.max = 0;
-        this.amount = 0;
-        this.invalid_by_dir = 0;
-        /**
-         * @type {Vector2[]}
-         */
-        this.ptr = null;
-    }
 }
 
 export default class PhysicsServer {
@@ -108,55 +91,6 @@ export default class PhysicsServer {
     concave_polygon_shape_create() { }
 
     /**
-     * @param {Vector2} p_point_A
-     * @param {Vector2} p_point_B
-     * @param {CollCbkData} p_userdata
-     */
-    _shape_col_cbk(p_point_A, p_point_B, p_userdata) {
-        const cbk = p_userdata;
-
-        if (cbk.max === 0) {
-            return;
-        }
-
-        if (!cbk.valid_dir.is_zero()) {
-            if (p_point_A.distance_squared_to(p_point_B) > cbk.valid_depth * cbk.valid_depth) {
-                cbk.invalid_by_dir++;
-                return;
-            }
-            const rel_dir = p_point_A.clone().subtract(p_point_B).normalize();
-
-            if (cbk.valid_dir.dot(rel_dir) < 0.7071) { // sqrt(2) / 2 - 45 degrees
-                cbk.invalid_by_dir++;
-                return;
-            }
-        }
-
-        if (cbk.amount === cbk.max) {
-            let min_depth = Number.MAX_VALUE;
-            let min_depth_idx = 0;
-            for (let i = 0; i < cbk.amount; i++) {
-                const d = cbk.ptr[i * 2 + 0].distance_squared_to(cbk.ptr[i * 2 + 1]);
-                if (d < min_depth) {
-                    min_depth = d;
-                    min_depth_idx = i;
-                }
-            }
-
-            let d = p_point_A.distance_squared_to(p_point_B);
-            if (d < min_depth) {
-                return;
-            }
-            cbk.ptr[min_depth_idx * 2 + 0].copy(p_point_A);
-            cbk.ptr[min_depth_idx * 2 + 1].copy(p_point_B);
-        } else {
-            cbk.ptr[cbk.amount * 2 + 0].copy(p_point_A);
-            cbk.ptr[cbk.amount * 2 + 1].copy(p_point_B);
-            cbk.amount++;
-        }
-    }
-
-    /**
      * @param {Shape2DSW} p_shape
      * @param {number} p_data
      */
@@ -203,7 +137,7 @@ export default class PhysicsServer {
         cbk.amount = 0;
         cbk.ptr = r_results;
 
-        const res = CollisionSolver2DSW.solve(p_shape_A, p_xform_A, p_motion_A, p_shape_B, p_xform_B, p_motion_B, this._shape_col_cbk, cbk);
+        const res = CollisionSolver2DSW.solve(p_shape_A, p_xform_A, p_motion_A, p_shape_B, p_xform_B, p_motion_B, _shape_col_cbk, cbk);
         r_ret.value = cbk.amount;
 
         return res;
@@ -492,7 +426,6 @@ export default class PhysicsServer {
     body_set_shape_as_one_way_collision(p_body) { }
 
     /**
-     *
      * @param {Body2DSW} p_body
      * @param {Matrix} p_from
      * @param {Vector2} p_motion
@@ -502,7 +435,7 @@ export default class PhysicsServer {
      * @param {boolean} [p_exclude_raycast_shapes]
      */
     body_test_motion(p_body, p_from, p_motion, p_infinite_inertia, p_margin = 0.001, r_result = null, p_exclude_raycast_shapes = true) {
-        return p_body.space.test_body_motion(p_body, p_from, p_motion, p_infinite_inertia, p_margin, r_result, p_exclude_raycast_shapes);
+        return p_body.space.body_test_motion(p_body, p_from, p_motion, p_infinite_inertia, p_margin, r_result, p_exclude_raycast_shapes);
     }
 
     /* JOINT API */

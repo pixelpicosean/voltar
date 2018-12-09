@@ -125,7 +125,8 @@ export default class Body2DSW extends CollisionObject2DSW {
          */
         this.direct_state_query_list = null;
 
-        this.exceptions = [];
+        /** @type {Set<CollisionObject2DSW>} */
+        this.exceptions = new Set();
         this.continuous_cd_mode = CCDMode.DISABLED;
         this.omit_force_integration = false;
         this._active = false;
@@ -176,9 +177,24 @@ export default class Body2DSW extends CollisionObject2DSW {
     can_report_contacts() { }
     add_contact() { }
 
-    add_exception() { }
-    remove_exception() { }
-    has_exception() { }
+    /**
+     * @param {CollisionObject2DSW} p_exception
+     */
+    add_exception(p_exception) {
+        this.exceptions.add(p_exception);
+    }
+    /**
+     * @param {CollisionObject2DSW} p_exception
+     */
+    remove_exception(p_exception) {
+        this.exceptions.delete(p_exception);
+    }
+    /**
+     * @param {CollisionObject2DSW} p_exception
+     */
+    has_exception(p_exception) {
+        return this.exceptions.has(p_exception);
+    }
 
     add_constraint() { }
     remove_constraint() { }
