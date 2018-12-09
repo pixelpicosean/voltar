@@ -162,6 +162,12 @@ export default class CollisionObject2DSW {
     _set_inv_transform(p_transform) {
         this.inv_transform.copy(p_transform);
     }
+    /**
+     * @param {boolean} p_static
+     */
+    _set_static(p_static) {
+        this.static = p_static;
+    }
 
     _shape_changed() {
         this._update_shapes();

@@ -298,10 +298,10 @@ export default class Space2DSW {
     }
 
     setup() {
-        // while (this.inertia_update_list.first()) {
-        //     this.inertia_update_list.first().self().update_inertias();
-        //     this.inertia_update_list.remove(this.inertia_update_list.first())
-        // }
+        while (this.inertia_update_list.first()) {
+            this.inertia_update_list.first().self().update_inertias();
+            this.inertia_update_list.remove(this.inertia_update_list.first())
+        }
     }
     update() {
         this.broadphase.update();
@@ -309,7 +309,9 @@ export default class Space2DSW {
 
     call_queries() {
         while (this.state_query_list.first()) {
-            // TODO: query bodies
+            const b = this.state_query_list.first().self();
+            this.state_query_list.remove(this.state_query_list.first());
+            b.call_queries();
         }
 
         while (this.monitor_query_list.first()) {
