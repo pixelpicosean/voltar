@@ -54,7 +54,7 @@ export const AreaSpaceOverrideMode = {
 /**
  * @enum {number}
  */
-export const Type = {
+export const CollisionObjectType = {
     AREA: 0,
     BODY: 1,
 }

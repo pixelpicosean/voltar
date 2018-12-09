@@ -1,5 +1,5 @@
 import { Physics2DDirectSpaceStateSW } from "../../servers/physics_2d/state";
-import { INTERSECTION_QUERY_MAX, Type } from "../../scene/physics/const";
+import { INTERSECTION_QUERY_MAX, CollisionObjectType } from "../../scene/physics/const";
 import Area2DSW from "./area_2d_sw";
 import SelfList, { List } from "engine/core/self_list";
 import BroadPhase2D from "./broad_phase_2d_sw";
@@ -164,11 +164,11 @@ export default class Space2DSW {
 
         p_self.collision_pairs++;
 
-        if (type_A === Type.AREA) {
+        if (type_A === CollisionObjectType.AREA) {
             /** @type {Area2DSW} */
             // @ts-ignore
             const area = A;
-            if (type_B === Type.AREA) {
+            if (type_B === CollisionObjectType.AREA) {
                 /** @type {Area2DSW} */
                 // @ts-ignore
                 const area_b = B;

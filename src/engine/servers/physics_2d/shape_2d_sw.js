@@ -1,5 +1,5 @@
 import { Rectangle, Vector2, Matrix, CMP_EPSILON } from "engine/math/index";
-import { ShapeType, Type } from "engine/scene/physics/const";
+import { ShapeType, CollisionObjectType } from "engine/scene/physics/const";
 
 const _SEGMENT_IS_VALID_SUPPORT_THRESHOLD = 0.99998;
 
