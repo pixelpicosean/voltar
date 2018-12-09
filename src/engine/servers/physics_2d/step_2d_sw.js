@@ -1,6 +1,7 @@
 import Space2DSW from "./space_2d_sw";
 import Body2DSW from "./body_2d_sw";
 import Constraint2DSW from "./constraint_2d_sw";
+import { BodyMode } from "engine/scene/physics/const";
 
 export default class Step2DSW {
     constructor() {
@@ -15,7 +16,7 @@ export default class Step2DSW {
     step(p_space, p_delta, p_iterations) {
         p_space.setup(); // update inertias, etc
 
-        // const body_list = p_space.get_active_body_list();
+        const body_list = p_space.active_list;
 
         /* INTEGRATE FORCES */
 
@@ -24,13 +25,48 @@ export default class Step2DSW {
 
         let active_count = 0;
 
-        // TODO: body list and others
+        let b = body_list.first();
+        while (b) {
+            b.self().integrate_forces(p_delta);
+            b = b.next();
+            active_count++;
+        }
+
+        p_space.active_objects = active_count;
 
         /* GENERATE CONSTRAINT ISLANDS */
 
+        /** @type {Body2DSW} */
         let island_list = null;
         /** @type {Constraint2DSW} */
         let constraint_island_list = null;
+        b = body_list.first();
+
+        let island_count = 0;
+
+        while (b) {
+            const body = b.self();
+
+            if (body.island_step !== this._step) {
+                /** @type {Body2DSW} */
+                let island = null;
+                /** @type {{ value: Constraint2DSW }} */
+                let constraint_island = { value: null };
+                this._populate_island(body, island, constraint_island);
+
+                island.island_list_next = island_list;
+                island_list = island;
+
+                if (constraint_island) {
+                    constraint_island.value.island_list_next = constraint_island_list;
+                    constraint_island_list = constraint_island.value;
+                    island_count++;
+                }
+            }
+            b = b.next();
+        }
+
+        p_space.island_count = island_count;
 
         const aml = p_space.area_moved_list;
 
@@ -90,7 +126,22 @@ export default class Step2DSW {
 
         /* INTEGRATE VELOCITIES */
 
+        b = body_list.first();
+        while (b) {
+            const n = b.next();
+            b.self().integrate_velocities(p_delta);
+            b = n; // in case it shuts itself down
+        }
+
         /* SLEEP / WAKE UP ISLANDS */
+
+        {
+            let bi = island_list;
+            while (bi) {
+                this._check_suspend(bi, p_delta);
+                bi = bi.island_list_next;
+            }
+        }
 
         p_space.update();
         this._step++;
@@ -99,16 +150,32 @@ export default class Step2DSW {
     /**
      * @param {Body2DSW} p_body
      * @param {Body2DSW} p_island
-     * @param {Constraint2DSW} p_constraint_island
+     * @param {{ value: Constraint2DSW }} p_constraint_island
      */
     _populate_island(p_body, p_island, p_constraint_island) {
-        // p_body.set_island_setp(this._step);
-        // p_body.set_island_next(p_island);
-        // p_island = p_body;
+        p_body.island_step = this._step;
+        p_body.island_next = p_island;
+        p_island = p_body;
 
-        // for (let [c] of p_body.constraint_map) {
+        for (let [c, E] of p_body.constraint_map) {
+            if (c.island_step === this._step) {
+                continue;
+            }
+            c.island_step = this._step;
+            c.island_next = p_constraint_island.value;
+            p_constraint_island.value = c;
 
-        // }
+            for (let i = 0; i < c._body_count; i++) {
+                if (i === E) {
+                    continue;
+                }
+                const b = c._bodies[i];
+                if (b.island_step === this._step || b.mode === BodyMode.STATIC || b.mode === BodyMode.KINEMATIC) {
+                    continue; // no go
+                }
+                this._populate_island(c._bodies[i], p_island, p_constraint_island);
+            }
+        }
     }
     /**
      * @param {Constraint2DSW} p_island
@@ -152,8 +219,26 @@ export default class Step2DSW {
         }
     }
     /**
-     * @param {Constraint2DSW} p_island
+     * @param {Body2DSW} p_island
      * @param {number} p_delta
      */
-    _check_suspend(p_island, p_delta) { }
+    _check_suspend(p_island, p_delta) {
+        let can_sleep = true;
+
+        let b = p_island;
+        while (b) {
+            if (b.mode === BodyMode.STATIC || b.mode === BodyMode.KINEMATIC) {
+                b = b.island_next;
+                continue;
+            }
+
+            const active = b.active;
+
+            if (active === can_sleep) {
+                b.set_active(!can_sleep);
+            }
+
+            b = b.island_next;
+        }
+    }
 }

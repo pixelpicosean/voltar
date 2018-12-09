@@ -5,6 +5,7 @@ import SelfList from "engine/core/self_list";
 import Constraint2DSW from "./constraint_2d_sw";
 import Space2DSW from "./space_2d_sw";
 import { Physics2DDirectBodyStateSW } from "./state";
+import Area2DSW from "./area_2d_sw";
 
 class AreaCMP { }
 
@@ -172,7 +173,19 @@ export default class Body2DSW extends CollisionObject2DSW {
         this.wakeup_neighbours();
     }
 
-    _compute_area_gravity_and_dampenings(p_area) { }
+    /**
+     * @param {Area2DSW} p_area
+     */
+    _compute_area_gravity_and_dampenings(p_area) {
+        if (p_area.gravity_is_point) {
+            // TODO: support gravity_is_point
+        } else {
+            this.gravity.add(p_area.gravity_vector.clone().scale(p_area.gravity));
+        }
+
+        this.area_linear_damp += p_area.linear_damp;
+        this.area_angular_damp += p_area.angular_damp;
+    }
 
     set_force_integration_callback(p_id, p_method, p_udata = {}) { }
 
@@ -260,7 +273,14 @@ export default class Body2DSW extends CollisionObject2DSW {
         return this.mode;
     }
 
+    /**
+     * @param {number} p_state
+     * @param {any} p_value
+     */
     set_state(p_state, p_value) { }
+    /**
+     * @param {number} p_state
+     */
     get_state(p_state) { }
 
     add_central_force(p_force) { }
@@ -314,8 +334,41 @@ export default class Body2DSW extends CollisionObject2DSW {
         }
     }
 
+    /**
+     * @param {number} p_step
+     */
     integrate_forces(p_step) { }
-    integrate_velocities(p_step) { }
+    /**
+     * @param {number} p_step
+     */
+    integrate_velocities(p_step) {
+        if (this.mode === BodyMode.STATIC) {
+            return;
+        }
+
+        if (this.fi_callback) {
+            this.space.body_add_to_state_query_list(this.direct_state_query_list);
+        }
+
+        if (this.mode === BodyMode.KINEMATIC) {
+            this._set_transform(this.new_transform, false);
+            this._set_inv_transform(this.new_transform.clone().affine_inverse());
+            if (this.contacts.length === 0 && this.linear_velocity.is_zero() && this.angular_velocity === 0) {
+                this.set_active(false); // stopped moving, deactivate
+            }
+            return;
+        }
+
+        const total_angular_velocity = this.angular_velocity + this.biased_angular_velocity;
+        const total_linear_velocity = this.linear_velocity.clone().add(this.biased_linear_velocity);
+
+        const angle = this.transform.rotation + total_angular_velocity * p_step;
+        this._set_inv_transform(this.transform.inverse());
+
+        if (this.continuous_cd_mode !== CCDMode.DISABLED) {
+            this.new_transform.copy(this.transform);
+        }
+    }
 
     get_motion() {
         if (this.mode > BodyMode.KINEMATIC) {
