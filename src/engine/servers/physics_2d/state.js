@@ -1,80 +1,85 @@
 import { Vector2, Matrix, Rectangle } from "engine/math/index";
-import { INTERSECTION_QUERY_MAX, Type } from "engine/scene/physics/const";
+import { INTERSECTION_QUERY_MAX, CollisionObjectType, BodyState } from "engine/scene/physics/const";
+import Body2DSW from "./body_2d_sw";
 
 export class Physics2DDirectBodyStateSW {
     /**
      * @returns {Vector2}
      */
     get_total_gravity() {
-        return null;
+        return this.body.gravity;
     }
     /**
      * @returns {number}
      */
     get_total_linear_damp() {
-        return 0;
+        return this.body.area_linear_damp;
     }
     /**
      * @returns {number}
      */
     get_total_angular_damp() {
-        return 0;
+        return this.body.area_angular_damp;
     }
 
     /**
      * @returns {number}
      */
     get_inverse_mass() {
-        return 0;
+        return this.body.inv_mass;
     }
     /**
      * @returns {number}
      */
     get_inverse_inertia() {
-        return 0;
+        return this.body.inv_inertia;
     }
 
     /**
      * @param {Vector2} velocity
      */
     set_linear_velocity(velocity) {
-        return null;
+        return this.body.linear_velocity.copy(velocity);
     }
     /**
      * @returns {Vector2}
      */
     get_linear_velocity() {
-        return null;
+        return this.body.linear_velocity;
     }
 
     /**
      * @param {number} velocity
      */
     set_angular_velocity(velocity) {
-        return null;
+        this.body.angular_velocity = velocity;
     }
     /**
      * @returns {number}
      */
     get_angular_velocity() {
-        return 0;
+        return this.body.angular_velocity;
     }
 
     /**
      * @param {Matrix} transform
      */
-    set_transform(transform) { }
+    set_transform(transform) {
+        this.body.set_state(BodyState.TRANSFORM, transform);
+    }
     /**
      * @returns {Matrix}
      */
     get_transform() {
-        return null;
+        return this.body.transform;
     }
 
     /**
      * @param {Vector2} force
      */
-    add_central_force(force) { }
+    add_central_force(force) {
+        // this.body.add_central_force(force);
+    }
     /**
      * @param {Vector2} offset
      * @param {Vector2} force
@@ -99,14 +104,16 @@ export class Physics2DDirectBodyStateSW {
     apply_impulse(offset, impulse) { }
 
     /**
-     * @param {boolean} enable
+     * @param {boolean} p_enable
      */
-    set_sleep_state(enable) { }
+    set_sleep_state(p_enable) {
+        this.body.active = !p_enable;
+    }
     /**
      * @returns {boolean}
      */
     is_sleeping() {
-        return false;
+        return !this.body.active;
     }
 
     /**
@@ -129,7 +136,7 @@ export class Physics2DDirectBodyStateSW {
      */
     get_contact_local_normal(contact_idx) {
         return null;
-     }
+    }
     /**
      * @param {number} contact_idx
      * @returns {number}
@@ -156,7 +163,7 @@ export class Physics2DDirectBodyStateSW {
      */
     get_contact_collider_shape(contact_idx) {
         return 0;
-     }
+    }
     /**
      * @param {number} contact_idx
      * @returns {any}
@@ -183,8 +190,18 @@ export class Physics2DDirectBodyStateSW {
      */
     get_space_state() {
         return null;
-     }
+    }
+
+    Physics2DDirectBodyStateSW() {
+        Physics2DDirectBodyStateSW.singleton = this;
+        /**
+         * @type {Body2DSW}
+         */
+        this.body = null;
+    }
 }
+/** @type {Physics2DDirectBodyStateSW} */
+Physics2DDirectBodyStateSW.singleton = null;
 
 export class Physics2DShapeQueryParameters {
     constructor() {
@@ -308,10 +325,10 @@ function _can_collide_with(p_object, p_collision_mask, p_collide_with_bodies, p_
         return false;
     }
 
-    if (p_object.type === Type.AREA && !p_collide_with_areas) {
+    if (p_object.type === CollisionObjectType.AREA && !p_collide_with_areas) {
         return false;
     }
-    if (p_object.type === Type.BODY && !p_collide_with_bodies) {
+    if (p_object.type === CollisionObjectType.BODY && !p_collide_with_bodies) {
         return false;
     }
 

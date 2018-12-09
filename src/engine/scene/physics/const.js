@@ -59,4 +59,31 @@ export const CollisionObjectType = {
     BODY: 1,
 }
 
+/**
+ * @enum {number}
+ */
+export const BodyMode = {
+    STATIC: 0,
+    KINEMATIC: 1,
+    RIGID: 2,
+    CHARACTER: 3,
+}
+
+/**
+ * @enum {number}
+ */
+export const BodyState = {
+    TRANSFORM: 0,
+    LINEAR_VELOCITY: 1,
+    ANGULAR_VELOCITY: 2,
+    SLEEPING: 3,
+    CAN_SLEEP: 4,
+}
+
+export const CCDMode = {
+    DISABLED: 0,
+    CAST_RAY: 1,
+    CAST_SHAPE: 2,
+}
+
 export const INTERSECTION_QUERY_MAX = 2048;
