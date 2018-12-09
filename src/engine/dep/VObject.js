@@ -295,6 +295,30 @@ VObject.prototype.disconnect = function disconnect(event, fn, context, once) {
 };
 
 /**
+ * Whether an function(with context) is connected to this object.
+ *
+ * @param {(String|Symbol)} event The event name.
+ * @param {Function} fn
+ * @param {any} [context]
+ * @returns {boolean}
+ * @public
+ */
+VObject.prototype.is_connected = function is_connected(event, fn, context) {
+    var evt = prefix ? prefix + event : event;
+
+    if (!this._events[evt]) return false;
+    if (!fn) return false;
+
+    var listeners = this._events[evt];
+
+    return (
+        listeners.fn === fn
+        &&
+        listeners.context === context
+    );
+};
+
+/**
  * Remove all listeners, or those of the specified event.
  *
  * @param {(String|Symbol)} [event] The event name.
