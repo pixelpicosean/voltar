@@ -31,6 +31,35 @@ const get_sr = () => {
     return sr;
 }
 
+/**
+ * @param {Vector2} p_point_A
+ * @param {Vector2} p_point_B
+ * @param {_RestCallbackData2D} rd
+ */
+function _rest_cbk_result(p_point_A, p_point_B, rd) {
+    if (!rd.valid_dir.is_zero()) {
+        if (p_point_A.distance_squared_to(p_point_B) > rd.valid_depth * rd.valid_depth) {
+            return;
+        }
+        if (rd.valid_dir.dot((p_point_A.clone().subtract(p_point_B).normalize())) < Math.PI * 0.25) {
+            return;
+        }
+    }
+
+    const contact_rel = p_point_B.clone().subtract(p_point_A);
+    const len = contact_rel.length();
+    if (len <= rd.best_len) {
+        return;
+    }
+
+    rd.best_len = len;
+    rd.best_contact.copy(p_point_B);
+    rd.best_normal.copy(contact_rel).divide(len, len);
+    rd.best_object = rd.object;
+    rd.best_shape = rd.shape;
+    rd.best_local_shape = rd.local_shape;
+}
+
 const ElapsedTime = {
     INTEGRATE_FORCES: 0,
     GENERATE_ISLANDS: 1,
@@ -47,6 +76,24 @@ class ExcludedShapeSW {
         /** @type {CollisionObject2DSW} */
         this.against_object = null;
         this.against_shape_index = 0;
+    }
+}
+
+class _RestCallbackData2D {
+    constructor() {
+        /** @type {CollisionObject2DSW} */
+        this.object = null;
+        /** @type {CollisionObject2DSW} */
+        this.best_object = null;
+        this.local_shape = 0;
+        this.best_local_shape = 0;
+        this.shape = 0;
+        this.best_shape = 0;
+        this.best_contact = new Vector2();
+        this.best_normal = new Vector2();
+        this.best_len = 0;
+        this.valid_dir = new Vector2();
+        this.valid_depth = 0;
     }
 }
 
@@ -453,6 +500,132 @@ export default class Space2DSW {
 
         {
             // STEP 2 ATTEMPT MOTION
+
+            const motion_aabb = body_aabb.clone();
+            motion_aabb.x += p_motion.x;
+            motion_aabb.y += p_motion.y;
+            motion_aabb.merge_to(body_aabb);
+
+            let amount = this._cull_aabb_for_body(p_body, motion_aabb);
+
+            for (let body_shape_idx = 0; body_shape_idx < p_body.shapes.length; body_shape_idx++) {
+                const body_shape = p_body.shapes[body_shape_idx];
+                if (body_shape.disabled) {
+                    continue;
+                }
+
+                if (p_exclude_raycast_shapes && body_shape.shape.type === ShapeType.RAY) {
+                    continue;
+                }
+
+                const body_shape_xform = body_transform.clone().append(body_shape.xform);
+
+                let stuck = false;
+
+                let best_safe = 1;
+                let best_unsafe = 1;
+
+                for (let i = 0; i < amount; i++) {
+                    const col_obj = this.intersection_query_results[i];
+                    let col_shape_idx = this.intersection_query_subindex_results[i];
+                    const against_shape = col_obj.shapes[col_shape_idx];
+
+                    if (col_obj.type === CollisionObjectType.BODY) {
+                        /** @type {Body2DSW} */
+                        // @ts-ignore
+                        const b = col_obj;
+                        if (p_infinite_inertia && b.mode !== BodyMode.STATIC && b.mode !== BodyMode.KINEMATIC) {
+                            continue;
+                        }
+                    }
+
+                    let excluded = false;
+
+                    for (let k = 0; k < excluded_shape_pair_count; k++) {
+                        if (excluded_shape_pairs[k].local_shape === body_shape.shape && excluded_shape_pairs[k].against_object === col_obj && excluded_shape_pairs[k].against_shape_index === col_shape_idx) {
+                            excluded = true;
+                            break;
+                        }
+                    }
+
+                    if (excluded) {
+                        continue;
+                    }
+
+                    const col_obj_shape_xform = col_obj.transform.clone().append(against_shape.xform);
+                    // test initial overlap, does it collide if going all the way?
+                    if (!CollisionSolver2DSW.solve(body_shape.shape, body_shape_xform, p_motion, against_shape.shape, col_obj_shape_xform, Vector2.Zero, null, null, null, 0)) {
+                        continue;
+                    }
+
+                    // test initial overlap
+                    if (!CollisionSolver2DSW.solve(body_shape.shape, body_shape_xform, Vector2.Zero, against_shape.shape, col_obj_shape_xform, Vector2.Zero, null, null, null, 0)) {
+                        if (against_shape.one_way_collision) {
+                            continue;
+                        }
+
+                        stuck = true;
+                        break;
+                    }
+
+                    // just do kinematic solving
+                    let low = 0;
+                    let hi = 1;
+                    const mnormal = p_motion.normalized();
+                    const sep = mnormal.clone();
+
+                    for (let k = 0; k < 8; k++) {
+                        const ofs = (low + hi) * 0.5;
+
+                        sep.copy(mnormal);
+                        // TODO: cache array and other Vector2, Matrix
+                        const collided = CollisionSolver2DSW.solve(body_shape.shape, body_shape_xform, p_motion.clone().scale(ofs), against_shape.shape, col_obj_shape_xform, Vector2.Zero, null, null, [sep], 0);
+
+                        if (collided) {
+                            hi = ofs;
+                        } else {
+                            low = ofs;
+                        }
+                    }
+
+                    if (against_shape.one_way_collision) {
+                        const cd = [new Vector2(), new Vector2()];
+                        const cbk = new CollCbkData();
+                        cbk.max = 1;
+                        cbk.amount = 0;
+                        cbk.ptr = cd;
+                        cbk.valid_dir.copy(col_obj_shape_xform.get_axis(1)).normalize();
+
+                        cbk.valid_depth = Number.MAX_VALUE;
+
+                        const sep = [mnormal.clone()];
+                        const collided = CollisionSolver2DSW.solve(body_shape.shape, body_shape_xform, p_motion.clone().scale(hi + this.contact_max_allowed_penetration), against_shape.shape, col_obj_shape_xform, Vector2.Zero, _shape_col_cbk, cbk, sep, 0);
+                        if (!collided || cbk.amount === 0) {
+                            continue;
+                        }
+                    }
+
+                    if (low < best_safe) {
+                        best_safe = low;
+                        best_unsafe = hi;
+                    }
+                }
+
+                if (stuck) {
+                    safe = 0;
+                    unsafe = 0;
+                    best_shape = body_shape_idx;
+                    break;
+                }
+                if (best_safe === 1) {
+                    continue;
+                }
+                if (best_safe < safe) {
+                    safe = best_safe;
+                    unsafe = best_unsafe;
+                    best_shape = body_shape_idx;
+                }
+            }
         }
 
         let collided = false;
@@ -462,6 +635,101 @@ export default class Space2DSW {
 
         {
             // it collided, let's get the reset info in unsafe advance
+            const ugt = body_transform.clone();
+            ugt.tx += p_motion.x * unsafe;
+            ugt.ty += p_motion.y * unsafe;
+
+            // TODO: cache _RestCallbackData2D
+            const rcd = new _RestCallbackData2D();
+            rcd.best_len = 0;
+            rcd.best_object = null;
+            rcd.best_shape = 0;
+
+            // optimization
+            let from_shape = best_shape !== -1 ? best_shape : 0;
+            let to_shape = best_shape !== -1 ? best_shape + 1 : p_body.shapes.length;
+
+            for (let j = from_shape; j < to_shape; j++) {
+                const body_shape = p_body.shapes[j];
+                const body_shape_xform = ugt.clone().append(body_shape.xform);
+
+                body_aabb.x += p_motion.x * unsafe;
+                body_aabb.y += p_motion.y * unsafe;
+
+                let amount = this._cull_aabb_for_body(p_body, body_aabb);
+
+                for (let i = 0; i < amount; i++) {
+                    const col_obj = this.intersection_query_results[i];
+                    const shape_idx = this.intersection_query_subindex_results[i];
+
+                    if (col_obj.type === CollisionObjectType.BODY) {
+                        /** @type {Body2DSW} */
+                        // @ts-ignore
+                        const b = col_obj;
+                        if (p_infinite_inertia && b.mode !== BodyMode.STATIC && b.mode !== BodyMode.KINEMATIC) {
+                            continue;
+                        }
+                    }
+
+                    const against_shape = col_obj.shapes[shape_idx];
+
+                    let excluded = false;
+                    for (let k = 0; k < excluded_shape_pair_count; k++) {
+                        if (excluded_shape_pairs[k].local_shape === body_shape.shape && excluded_shape_pairs[k].against_object === col_obj && excluded_shape_pairs[k].against_shape_index === shape_idx) {
+                            excluded = true;
+                            break;
+                        }
+                    }
+                    if (excluded) {
+                        continue;
+                    }
+
+                    const col_obj_shape_xform = col_obj.transform.clone().append(against_shape.xform);
+
+                    if (against_shape.one_way_collision) {
+                        rcd.valid_dir.copy(col_obj_shape_xform.get_axis(1)).normalize();
+                        rcd.valid_depth = Number.MAX_VALUE;
+                    } else {
+                        rcd.valid_dir.set(0, 0);
+                        rcd.valid_depth = 0;
+                    }
+
+                    rcd.object = col_obj;
+                    rcd.shape = shape_idx;
+                    rcd.local_shape = j;
+                    const sc = CollisionSolver2DSW.solve(body_shape.shape, body_shape_xform, Vector2.Zero, against_shape.shape, col_obj_shape_xform, Vector2.Zero, _rest_cbk_result, rcd, null, p_margin);
+                    if (!sc) {
+                        continue;
+                    }
+                }
+            }
+
+            if (rcd.best_len !== 0) {
+                if (r_result) {
+                    r_result.collider = rcd.best_object.self;
+                    r_result.collider_id = rcd.best_object;
+                    r_result.collider_shape = rcd.best_shape;
+                    r_result.collision_local_shape = rcd.best_local_shape;
+                    r_result.collision_normal.copy(rcd.best_normal);
+                    r_result.collision_point.copy(rcd.best_contact);
+                    r_result.collider_metadata = rcd.best_object.get_shape_metadata(rcd.best_shape);
+
+                    /** @type {Body2DSW} */
+                    // @ts-ignore
+                    const body = rcd.best_object;
+                    const rel_vec = r_result.collision_point.clone().subtract(body.transform.origin);
+                    r_result.collider_velocity.set(
+                        -body.angular_velocity * rel_vec.y,
+                        body.angular_velocity * rel_vec.x
+                    ).add(body.linear_velocity);
+
+                    r_result.motion.copy(p_motion).scale(safe);
+                    r_result.remainder.copy(p_motion).subtract(r_result.motion);
+                    r_result.motion.add(body_transform.origin).subtract(p_from.origin);
+                }
+
+                collided = true;
+            }
         }
 
         if (!collided && r_result) {
