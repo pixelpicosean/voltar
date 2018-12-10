@@ -118,6 +118,8 @@ export class PhysicsBody2D extends CollisionObject2D {
          * @type {Body2DSW}
          */
         this.rid;
+
+        this.rid.set_mode(p_mode);
     }
 
     get_collision_exception() { }
