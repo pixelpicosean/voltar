@@ -1,5 +1,5 @@
 import CollisionObject2DSW from "./collision_object_2d_sw";
-import { BodyMode, CollisionObjectType, CCDMode } from "engine/scene/physics/const";
+import { BodyMode, CollisionObjectType, CCDMode, BodyState } from "engine/scene/physics/const";
 import { Vector2, Matrix, mod } from "engine/math/index";
 import SelfList from "engine/core/self_list";
 import Constraint2DSW from "./constraint_2d_sw";
@@ -86,7 +86,7 @@ export default class Body2DSW extends CollisionObject2DSW {
     constructor() {
         super(CollisionObjectType.BODY);
 
-        this.mode = BodyMode.STATIC;
+        this.mode = BodyMode.RIGID;
 
         this.biased_linear_velocity = new Vector2();
         this.biased_angular_velocity = 0;
@@ -94,15 +94,15 @@ export default class Body2DSW extends CollisionObject2DSW {
         this.linear_velocity = new Vector2();
         this.angular_velocity = 0;
 
-        this.linear_damp = 0;
-        this.angular_damp = 0;
-        this.gravity_scale = 0;
+        this.linear_damp = -1;
+        this.angular_damp = -1;
+        this.gravity_scale = 1;
 
-        this.mass = 0;
+        this.mass = 1;
         this.bounce = 0;
-        this.friction = 0;
+        this.friction = 1;
 
-        this._inv_mass = 0;
+        this._inv_mass = 1;
         this._inv_inertia = 0;
         this.user_inertia = false;
 
@@ -118,21 +118,21 @@ export default class Body2DSW extends CollisionObject2DSW {
         /**
          * @type {SelfList<Body2DSW>}
          */
-        this.active_list = null;
+        this.active_list = new SelfList(this);
         /**
          * @type {SelfList<Body2DSW>}
          */
-        this.inertia_update_list = null;
+        this.inertia_update_list = new SelfList(this);
         /**
          * @type {SelfList<Body2DSW>}
          */
-        this.direct_state_query_list = null;
+        this.direct_state_query_list = new SelfList(this);
 
         /** @type {Set<CollisionObject2DSW>} */
         this.exceptions = new Set();
         this.continuous_cd_mode = CCDMode.DISABLED;
         this.omit_force_integration = false;
-        this._active = false;
+        this._active = true;
         this.can_sleep = false;
         this.first_time_kinematic = false;
         this.first_integration = false;
@@ -161,6 +161,8 @@ export default class Body2DSW extends CollisionObject2DSW {
         this.island_next = null;
         /** @type {Body2DSW} */
         this.island_list_next = null;
+
+        this._set_static(false);
     }
 
     _update_inertia() {
@@ -239,6 +241,13 @@ export default class Body2DSW extends CollisionObject2DSW {
     apply_impulse(p_impulse) { }
     apply_bias_impulse(p_impulse) { }
 
+    wakeup() {
+        if ((!this.space) || this.mode === BodyMode.STATIC || this.mode === BodyMode.KINEMATIC) {
+            return;
+        }
+        this.set_active(true);
+    }
+
     /**
      * @param {BodyMode} p_mode
      */
@@ -277,11 +286,88 @@ export default class Body2DSW extends CollisionObject2DSW {
      * @param {number} p_state
      * @param {any} p_value
      */
-    set_state(p_state, p_value) { }
+    set_state(p_state, p_value) {
+        switch (p_state) {
+            case BodyState.TRANSFORM: {
+                if (this.mode === BodyMode.KINEMATIC) {
+                    this.new_transform.copy(p_value);
+                    this.set_active(true);
+                    if (this.first_time_kinematic) {
+                        this._set_transform(p_value);
+                        this._set_inv_transform(this.transform.clone().affine_inverse());
+                        this.first_time_kinematic = false;
+                    }
+                } else if (this.mode === BodyMode.STATIC) {
+                    this._set_transform(p_value);
+                    this._set_inv_transform(this.transform.clone().affine_inverse());
+                    this.wakeup_neighbours();
+                } else {
+                    /** @type {Matrix} */
+                    const t = p_value;
+                    t.orthonormalize();
+                    this.new_transform.copy(this.transform);
+                    if (t.equals(this.new_transform)) {
+                        break;
+                    }
+                    this._set_transform(t);
+                    this._set_inv_transform(this.transform.inverse());
+                }
+                this.wakeup();
+            } break;
+            case BodyState.LINEAR_VELOCITY: {
+                this.linear_velocity.copy(p_value);
+                this.wakeup();
+            } break;
+            case BodyState.ANGULAR_VELOCITY: {
+                this.angular_velocity = p_value;
+                this.wakeup();
+            } break;
+            case BodyState.SLEEPING: {
+                if (this.mode === BodyMode.STATIC || this.mode === BodyMode.KINEMATIC) {
+                    break;
+                }
+                /** @type {boolean} */
+                let do_sleep = p_value;
+                if (do_sleep) {
+                    this.linear_velocity.set(0, 0);
+                    this.angular_velocity = 0;
+                    this.set_active(false);
+                } else {
+                    if (this.mode !== BodyMode.STATIC) {
+                        this.set_active(true);
+                    }
+                }
+            } break;
+            case BodyState.CAN_SLEEP: {
+                this.can_sleep = p_value;
+                if (this.mode === BodyMode.RIGID && !this.active && !this.can_sleep) {
+                    this.set_active(true);
+                }
+            } break;
+        }
+    }
     /**
      * @param {number} p_state
      */
-    get_state(p_state) { }
+    get_state(p_state) {
+        switch (p_state) {
+            case BodyState.TRANSFORM: {
+                return this.transform;
+            } break;
+            case BodyState.LINEAR_VELOCITY: {
+                return this.linear_velocity;
+            } break;
+            case BodyState.ANGULAR_VELOCITY: {
+                return this.angular_velocity;
+            } break;
+            case BodyState.SLEEPING: {
+                return !this.active;
+            } break;
+            case BodyState.CAN_SLEEP: {
+                return this.can_sleep;
+            } break;
+        }
+    }
 
     add_central_force(p_force) { }
     add_force(p_force) { }

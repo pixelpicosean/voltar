@@ -407,22 +407,86 @@ export default class PhysicsServer {
     /**
      * @returns {Body2DSW}
      */
-    body_create() { return null }
+    body_create() {
+        const body = new Body2DSW();
+        body.self = body;
+        return body;
+    }
 
-    body_set_space(p_body, p_space) { }
-    body_get_space(p_body) { }
+    /**
+     * @param {Body2DSW} p_body
+     * @param {Space2DSW} p_space
+     */
+    body_set_space(p_body, p_space) {
+        if (p_body.space === p_space) {
+            return;
+        }
 
-    body_add_shape(p_body) { }
-    body_remove_shape(p_body) { }
-    body_clear_shapes(p_body) { }
+        p_body.constraint_map.clear();
+        p_body.set_space(p_space);
+    }
+    /**
+     * @param {Body2DSW} p_body
+     */
+    body_get_space(p_body) {
+        return p_body.space;
+    }
+
+    /**
+     * @param {Body2DSW} p_body
+     * @param {Shape2DSW} p_shape
+     * @param {Matrix} p_transform
+     */
+    body_add_shape(p_body, p_shape, p_transform) {
+        p_body.add_shape(p_shape, p_transform);
+    }
+    /**
+     * @param {Body2DSW} p_body
+     * @param {Shape2DSW} p_shape
+     */
+    body_remove_shape(p_body, p_shape) {
+        p_body.remove_shape(p_shape);
+    }
+    /**
+     * @param {Body2DSW} p_body
+     */
+    body_clear_shapes(p_body) {
+        while (p_body.shapes.length) {
+            p_body.remove_shape_by_index(0);
+        }
+    }
+    /**
+     * @param {Body2DSW} p_body
+     */
     body_set_shape(p_body) { }
+    /**
+     * @param {Body2DSW} p_body
+     */
     body_get_shape(p_body) { }
+    /**
+     * @param {Body2DSW} p_body
+     */
     body_set_shape_transform(p_body) { }
+    /**
+     * @param {Body2DSW} p_body
+     */
     body_get_shape_transform(p_body) { }
+    /**
+     * @param {Body2DSW} p_body
+     */
     body_set_shape_metadata(p_body) { }
+    /**
+     * @param {Body2DSW} p_body
+     */
     body_get_shape_metadata(p_body) { }
 
+    /**
+     * @param {Body2DSW} p_body
+     */
     body_set_shape_disabled(p_body) { }
+    /**
+     * @param {Body2DSW} p_body
+     */
     body_set_shape_as_one_way_collision(p_body) { }
 
     /**
@@ -496,6 +560,9 @@ export default class PhysicsServer {
         this.doing_sync = false;
 
         this.last_step = p_step;
+        if (Physics2DDirectBodyStateSW.singleton) {
+            Physics2DDirectBodyStateSW.singleton.step = p_step;
+        }
         this.island_count = 0;
         this.active_objects = 0;
         this.collision_pairs = 0;

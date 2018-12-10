@@ -48,16 +48,16 @@ export default class Step2DSW {
             const body = b.self();
 
             if (body.island_step !== this._step) {
-                /** @type {Body2DSW} */
-                let island = null;
+                /** @type {{ value: Body2DSW }} */
+                let island = { value: null };
                 /** @type {{ value: Constraint2DSW }} */
                 let constraint_island = { value: null };
                 this._populate_island(body, island, constraint_island);
 
-                island.island_list_next = island_list;
-                island_list = island;
+                island.value.island_list_next = island_list;
+                island_list = island.value;
 
-                if (constraint_island) {
+                if (constraint_island.value) {
                     constraint_island.value.island_list_next = constraint_island_list;
                     constraint_island_list = constraint_island.value;
                     island_count++;
@@ -149,13 +149,13 @@ export default class Step2DSW {
 
     /**
      * @param {Body2DSW} p_body
-     * @param {Body2DSW} p_island
+     * @param {{ value: Body2DSW }} p_island
      * @param {{ value: Constraint2DSW }} p_constraint_island
      */
     _populate_island(p_body, p_island, p_constraint_island) {
         p_body.island_step = this._step;
-        p_body.island_next = p_island;
-        p_island = p_body;
+        p_body.island_next = p_island.value;
+        p_island.value = p_body;
 
         for (let [c, E] of p_body.constraint_map) {
             if (c.island_step === this._step) {

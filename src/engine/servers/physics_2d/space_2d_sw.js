@@ -4,7 +4,7 @@ import Area2DSW from "./area_2d_sw";
 import SelfList, { List } from "engine/core/self_list";
 import BroadPhase2D from "./broad_phase_2d_sw";
 import CollisionObject2DSW from "./collision_object_2d_sw";
-import { Area2Pair2DSW } from "./area_pair_2d";
+import { Area2Pair2DSW, AreaPair2DSW } from "./area_pair_2d";
 import Constraint2DSW from "./constraint_2d_sw";
 import Body2DSW from "./body_2d_sw";
 import { Shape2DSW } from "./shape_2d_sw";
@@ -772,7 +772,10 @@ export default class Space2DSW {
                 const area_b = B;
                 return new Area2Pair2DSW(area_b, p_subindex_B, area, p_subindex_A);
             } else {
-                // TODO: body pair
+                /** @type {Body2DSW} */
+                // @ts-ignore
+                const body = B;
+                return new AreaPair2DSW(body, p_subindex_B, area, p_subindex_A);
             }
         } else {
             // TODO: body pair

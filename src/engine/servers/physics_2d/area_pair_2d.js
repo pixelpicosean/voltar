@@ -1,7 +1,84 @@
+import CollisionSolver2DSW from "./collision_solver_2d_sw";
 import Constraint2DSW from "./constraint_2d_sw";
 import Area2DSW from "./area_2d_sw";
-import CollisionSolver2DSW from "./collision_solver_2d_sw";
+import Body2DSW from "./body_2d_sw";
 import { Vector2, Matrix } from "engine/math/index";
+import { BodyMode, AreaSpaceOverrideMode } from "engine/scene/physics/const";
+
+export class AreaPair2DSW extends Constraint2DSW {
+    /**
+     * @param {Body2DSW} p_body
+     * @param {number} p_body_shape
+     * @param {Area2DSW} p_area
+     * @param {number} p_area_shape
+     */
+    constructor(p_body, p_body_shape, p_area, p_area_shape) {
+        super();
+
+        this.body = p_body;
+        this.area = p_area;
+        this.body_shape = p_body_shape;
+        this.area_shape = p_area_shape;
+        this.colliding = false;
+        this.body.add_constraint(this, 0);
+        this.area.add_constraint(this);
+        if (p_body.mode === BodyMode.KINEMATIC) {
+            p_body.set_active(true);
+        }
+    }
+    free() {
+        if (this.colliding) {
+            if (this.area.space_override_mode !== AreaSpaceOverrideMode.DISABLED) {
+                this.body.remove_area(this.area);
+            }
+            if (this.area.has_monitor_callback()) {
+                this.area.remove_body_from_query(this.body, this.body_shape, this.area_shape);
+            }
+        }
+
+        this.body.remove_constraint(this);
+        this.area.remove_constraint(this);
+    }
+    /**
+     * @param {number} p_step
+     */
+    setup(p_step) {
+        let result = false;
+
+        if (this.body.is_shape_set_as_disabled(this.body_shape) || this.area.is_shape_set_as_disabled(this.area_shape)) {
+            result = false;
+        } else if (this.area.test_collision_mask(this.body) && CollisionSolver2DSW.solve(this.body.get_shape(this.body_shape), this.body.transform.clone().append(this.body.get_shape_transform(this.body_shape)), Vector2.Zero, this.area.get_shape(this.area_shape), this.area.transform.clone().append(this.area.get_shape_transform(this.area_shape)), Vector2.Zero, null, this)) {
+            result = true;
+        }
+
+        if (result !== this.colliding) {
+            if (result) {
+                if (this.area.space_override_mode !== AreaSpaceOverrideMode.DISABLED) {
+                    this.body.add_area(this.area);
+                }
+                if (this.area.has_monitor_callback()) {
+                    this.area.add_body_to_query(this.body, this.body_shape, this.area_shape);
+                }
+            } else {
+                if (this.area.space_override_mode !== AreaSpaceOverrideMode.DISABLED) {
+                    this.body.remove_area(this.area);
+                }
+                if (this.area.has_monitor_callback()) {
+                    this.area.remove_body_from_query(this.body, this.body_shape, this.area_shape);
+                }
+            }
+
+            this.colliding = result;
+        }
+
+        // never do any post solving
+        return false;
+    }
+    /**
+     * @param {number} p_step
+     */
+    solve(p_step) { }
+}
 
 export class Area2Pair2DSW extends Constraint2DSW {
     /**

@@ -4,10 +4,11 @@ import { Vector2, Matrix } from "engine/math/index";
 import Constraint2DSW from "./constraint_2d_sw";
 import Space2DSW from "./space_2d_sw";
 import SelfList from "engine/core/self_list";
+import Body2DSW from "./body_2d_sw";
 
 class BodyKey {
     /**
-     * @param {Area2DSW} p_body
+     * @param {Area2DSW|Body2DSW} p_body
      * @param {number} p_body_shape
      * @param {number} p_area_shape
      */
@@ -141,6 +142,57 @@ export default class Area2DSW extends CollisionObject2DSW {
     }
     has_area_monitor_callback() {
         return this.area_monitor_callback_scope;
+    }
+
+    /**
+     * @param {Body2DSW} p_body
+     * @param {number} p_body_shape
+     * @param {number} p_area_shape
+     */
+    add_body_to_query(p_body, p_body_shape, p_area_shape) {
+        let E;
+        for (let [bk, s] of this.monitored_bodies) {
+            if (bk.instance === p_body && bk.body_shape === p_body_shape && bk.area_shape === p_area_shape) {
+                E = s;
+                break;
+            }
+        }
+        if (!E) {
+            const bk = new BodyKey(p_body, p_body_shape, p_area_shape);
+            E = new BodyState();
+            this.monitored_bodies.set(bk, E);
+        }
+
+        E.inc();
+
+        if (!this.monitor_query_list.in_list()) {
+            this._queue_monitor_update();
+        }
+    }
+    /**
+     * @param {Body2DSW} p_body
+     * @param {number} p_body_shape
+     * @param {number} p_area_shape
+     */
+    remove_body_from_query(p_body, p_body_shape, p_area_shape) {
+        let E;
+        for (let [bk, s] of this.monitored_areas) {
+            if (bk.instance === p_body && bk.body_shape === p_body_shape && bk.area_shape === p_area_shape) {
+                E = s;
+                break;
+            }
+        }
+        if (!E) {
+            const bk = new BodyKey(p_body, p_body_shape, p_area_shape);
+            E = new BodyState();
+            this.monitored_areas.set(bk, E);
+        }
+
+        E.dec();
+
+        if (!this.monitor_query_list.in_list()) {
+            this._queue_monitor_update();
+        }
     }
 
     /**
