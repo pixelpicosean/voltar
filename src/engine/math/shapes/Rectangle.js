@@ -334,11 +334,11 @@ export default class Rectangle {
     /**
      * @param {Vector2} p_from
      * @param {Vector2} p_to
-     * @param {Vector2} r_pos
-     * @param {Vector2} r_normal
+     * @param {Vector2} [r_pos]
+     * @param {Vector2} [r_normal]
      * @returns {boolean}
      */
-    intersects_segment(p_from, p_to, r_pos, r_normal) {
+    intersects_segment(p_from, p_to, r_pos = undefined, r_normal = undefined) {
         let min = 0, max = 1;
         let axis = 0;
         let sign = 0;
