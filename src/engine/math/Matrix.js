@@ -248,6 +248,25 @@ export default class Matrix {
     }
 
     /**
+     * @param {Matrix} p_matrix
+     */
+    equals(p_matrix) {
+        return (
+            this.a === p_matrix.a
+            &&
+            this.b === p_matrix.b
+            &&
+            this.c === p_matrix.c
+            &&
+            this.d === p_matrix.d
+            &&
+            this.tx === p_matrix.tx
+            &&
+            this.ty === p_matrix.ty
+        );
+    }
+
+    /**
      * @param {Vector2} p_vec - The origin
      * @param {Vector2} [r_out] - The point that the new position is assigned to (allowed to be same as input)
      * @return {Vector2} The new point, transformed through this matrix
@@ -402,6 +421,31 @@ export default class Matrix {
     inverse() {
         const inv = this.clone();
         return inv.invert();
+    }
+
+    orthonormalize() {
+        const x = Vector2.create(this.a, this.b);
+        const y = Vector2.create(this.c, this.d);
+
+        x.normalize();
+        this.a = x.x;
+        this.b = x.y;
+
+        y.subtract(x.scale(x.dot(y)));
+        y.normalize();
+
+        this.c = y.x;
+        this.d = y.y;
+
+        Vector2.delete(x);
+        Vector2.delete(y);
+
+        return this;
+    }
+
+    orthonormalized() {
+        const on = this.clone();
+        return on.orthonormalize();
     }
 
     /**
