@@ -6,6 +6,7 @@ import { remove_items } from 'engine/dep/index';
 import CollisionObject2DSW from 'engine/servers/physics_2d/collision_object_2d_sw';
 import Area2DSW from 'engine/servers/physics_2d/area_2d_sw';
 import CollisionShape2D from './collision_shape_2d';
+import { BodyState } from './const';
 
 class Shape {
     constructor() {
@@ -85,7 +86,8 @@ export default class CollisionObject2D extends Node2D {
             // @ts-ignore
             this.rid.set_transform(this.get_global_transform());
         } else {
-            // TODO: body_set_state(this.rid, ...)
+            // @ts-ignore
+            this.rid.set_state(BodyState.TRANSFORM, this.get_global_transform());
         }
 
         this.last_transform.copy(this.get_global_transform());
@@ -95,7 +97,8 @@ export default class CollisionObject2D extends Node2D {
             // @ts-ignore
             PhysicsServer.singleton.area_set_space(this.rid, space);
         } else {
-            // TODO: body_set_space(this.rid, ...)
+            // @ts-ignore
+            PhysicsServer.singleton.body_set_space(this.rid, space);
         }
     }
     _notify_transform_changed() {
@@ -103,7 +106,8 @@ export default class CollisionObject2D extends Node2D {
             // @ts-ignore
             this.rid.set_transform(this.get_global_transform());
         } else {
-            // TODO: body_set_state(this.rid, ...)
+            // @ts-ignore
+            this.rid.set_state(BodyState.TRANSFORM, this.get_global_transform());
         }
 
         this.last_transform.copy(this.get_global_transform());
@@ -113,7 +117,8 @@ export default class CollisionObject2D extends Node2D {
             // @ts-ignore
             PhysicsServer.singleton.area_set_space(this.rid, null);
         } else {
-            // TODO: PhysicsServer.singleton.body_set_space(this.rid, null);
+            // @ts-ignore
+            PhysicsServer.singleton.body_set_space(this.rid, null);
         }
 
         super._propagate_exit_tree();
