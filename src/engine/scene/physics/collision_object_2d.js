@@ -64,7 +64,8 @@ export default class CollisionObject2D extends Node2D {
             // @ts-ignore
             PhysicsServer.singleton.area_attach_object_instance(this.rid, this);
         } else {
-            // TODO: PhysicsServer.singleton.body_attach_object_instance(this.rid, this);
+            // @ts-ignore
+            PhysicsServer.singleton.body_attach_object_instance(this.rid, this);
         }
     }
     free() {
@@ -217,7 +218,8 @@ export default class CollisionObject2D extends Node2D {
             // @ts-ignore
             PhysicsServer.singleton.area_add_shape(this.rid, p_shape.shape, sd.xform);
         } else {
-            // TODO: PhysicsServer.singleton.body_add_shape(this.rid, p_shape.shape, sd.xform);
+            // @ts-ignore
+            PhysicsServer.singleton.body_add_shape(this.rid, p_shape.shape, sd.xform);
         }
         sd.shapes.push(s);
 

@@ -162,7 +162,7 @@ export default class Body2DSW extends CollisionObject2DSW {
         /** @type {Body2DSW} */
         this.island_list_next = null;
 
-        this._set_static(false);
+        this.static = false;
     }
 
     _update_inertia() {

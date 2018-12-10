@@ -491,6 +491,14 @@ export default class PhysicsServer {
 
     /**
      * @param {Body2DSW} p_body
+     * @param {import('engine/scene/physics/physics_body_2d').PhysicsBody2D} id
+     */
+    body_attach_object_instance(p_body, id) {
+        p_body.instance = id;
+    }
+
+    /**
+     * @param {Body2DSW} p_body
      * @param {Matrix} p_from
      * @param {Vector2} p_motion
      * @param {boolean} p_infinite_inertia

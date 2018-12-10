@@ -6,6 +6,7 @@ import { Vector2 } from 'engine/math/index';
 import Area2DSW from 'engine/servers/physics_2d/area_2d_sw';
 import { remove_items } from 'engine/dep/index';
 import Node2D from '../Node2D';
+import { PhysicsBody2D } from './physics_body_2d';
 
 class ShapePair {
     /**
@@ -309,9 +310,103 @@ export default class Area2D extends CollisionObject2D {
         this._clear_monitoring();
     }
 
-    _body_inout(p_status, p_body, p_instance, p_area_shape, p_self_shape) { }
-    _body_enter_tree(p_id) { }
-    _body_exit_tree(p_id) { }
+    /**
+     * @param {number} p_body_in
+     * @param {PhysicsBody2D} p_body
+     * @param {any} p_instance
+     * @param {number} p_body_shape
+     * @param {number} p_area_shape
+     */
+    _body_inout(p_body_in, p_body, p_instance, p_body_shape, p_area_shape) {
+        const obj = p_instance;
+        /**
+         * @type {Node2D}
+         */
+        const node = (p_instance.is_node ? p_instance : null);
+        let E = this.body_map.get(p_instance);
+
+        if (!p_body_in && !E) {
+            return; // does not exist because it was likely removed from the tree
+        }
+
+        if (p_body_in) {
+            if (!E) {
+                E = new BodyState();
+                E.rc = 0;
+                E.in_tree = node && node.is_inside_tree;
+                this.body_map.set(p_instance, E);
+                if (node) {
+                    node.connect('tree_entered', this._body_enter_tree, this);
+                    node.connect('tree_exited', this._body_exit_tree, this);
+                    if (E.in_tree) {
+                        this.emit_signal('body_entered', node);
+                    }
+                }
+            }
+            E.rc++;
+            if (node) {
+                E.shapes.push(new ShapePair(p_body_shape, p_area_shape));
+            }
+
+            if (!node || E.in_tree) {
+                this.emit_signal('body_shape_entered', p_instance, node, p_body_shape, p_area_shape);
+            }
+        } else {
+            E.rc--;
+
+            if (node) {
+                for (let i = 0; i < E.shapes.length; i++) {
+                    if (E.shapes[i].body_shape === p_body_shape && E.shapes[i].area_shape === p_area_shape) {
+                        remove_items(E.shapes, i, 1);
+                        break;
+                    }
+                }
+            }
+
+            let eraseit = false;
+
+            if (E.rc === 0) {
+                if (node) {
+                    node.disconnect('tree_entered', this._body_enter_tree, this);
+                    node.disconnect('tree_exited', this._body_exit_tree, this);
+                    if (E.in_tree) {
+                        this.emit_signal('body_exited', node);
+                    }
+                }
+
+                eraseit = true;
+            }
+            if (!node || E.in_tree) {
+                this.emit_signal('body_shape_exited', obj, obj, p_body_shape, p_area_shape);
+            }
+
+            if (eraseit) {
+                this.body_map.delete(p_instance);
+            }
+        }
+    }
+    /**
+     * @param {PhysicsBody2D} p_node
+     */
+    _body_enter_tree(p_node) {
+        const st = this.body_map.get(p_node);
+        st.in_tree = true;
+        this.emit_signal('body_entered', p_node);
+        for (let s of st.shapes) {
+            this.emit_signal('body_shape_entered', p_node, p_node, s.body_shape, s.area_shape);
+        }
+    }
+    /**
+     * @param {PhysicsBody2D} p_node
+     */
+    _body_exit_tree(p_node) {
+        const st = this.body_map.get(p_node);
+        st.in_tree = false;
+        this.emit_signal('body_exited', p_node);
+        for (let s of st.shapes) {
+            this.emit_signal('body_shape_exited', p_node, p_node, s.body_shape, s.area_shape);
+        }
+    }
 
     /**
      * @param {boolean} p_area_in

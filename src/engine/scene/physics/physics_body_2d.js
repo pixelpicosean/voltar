@@ -281,6 +281,8 @@ export class KinematicBody2D extends PhysicsBody2D {
     constructor() {
         super(BodyMode.KINEMATIC);
 
+        this.type = 'KinematicBody2D';
+
         this.margin = 0.08;
 
         this.floor_velocity = new Vector2();
