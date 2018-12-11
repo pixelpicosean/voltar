@@ -73,7 +73,23 @@ export default class Body2DSW extends CollisionObject2DSW {
      * @param {boolean} p_enable
      */
     set active(p_enable) {
+        if (this._active === p_enable) {
+            return;
+        }
+
         this._active = p_enable;
+        if (!p_enable) {
+            if (this.space) {
+                this.space.body_remove_from_active_list(this.active_list);
+            }
+        } else {
+            if (this.mode === BodyMode.STATIC) {
+                return;
+            }
+            if (this.space) {
+                this.space.body_add_to_active_list(this.active_list);
+            }
+        }
     }
     /**
      * @param {boolean} p_enable
@@ -353,19 +369,19 @@ export default class Body2DSW extends CollisionObject2DSW {
         switch (p_state) {
             case BodyState.TRANSFORM: {
                 return this.transform;
-            } break;
+            }
             case BodyState.LINEAR_VELOCITY: {
                 return this.linear_velocity;
-            } break;
+            }
             case BodyState.ANGULAR_VELOCITY: {
                 return this.angular_velocity;
-            } break;
+            }
             case BodyState.SLEEPING: {
                 return !this.active;
-            } break;
+            }
             case BodyState.CAN_SLEEP: {
                 return this.can_sleep;
-            } break;
+            }
         }
     }
 
@@ -423,7 +439,90 @@ export default class Body2DSW extends CollisionObject2DSW {
     /**
      * @param {number} p_step
      */
-    integrate_forces(p_step) { }
+    integrate_forces(p_step) {
+        if (this.mode === BodyMode.STATIC) {
+            return;
+        }
+
+        const def_area = this.space.default_area;
+
+        const ac = this.areas.length;
+        let stopped = false;
+        this.gravity.set(0, 0);
+        this.area_angular_damp = 0;
+        this.area_linear_damp = 0;
+        if (ac) {
+            // TODO
+        }
+        if (!stopped) {
+            this._compute_area_gravity_and_dampenings(def_area);
+        }
+        this.gravity.scale(this.gravity_scale);
+
+        if (this.angular_damp >= 0) {
+            this.area_angular_damp = this.angular_damp;
+        }
+
+        if (this.linear_damp >= 0) {
+            this.area_linear_damp = this.linear_damp;
+        }
+
+        const motion = Vector2.create();
+        let do_motion = false;
+
+        if (this.mode === BodyMode.KINEMATIC) {
+            // compute motion, angular and etc. velocities from prev transform
+            motion.copy(this.new_transform.origin).subtract(this.transform.origin);
+            this.linear_velocity.copy(motion).divide(p_step);
+
+            const rot = this.new_transform.rotation - this.transform.rotation;
+            this.angular_velocity = rot / p_step;
+
+            do_motion = true;
+        } else {
+            if (!this.omit_force_integration && !this.first_integration) {
+                // overridden by direct state query
+
+                const force = this.gravity.clone().scale(this.mass);
+                force.add(this.applied_force);
+                let torque = this.applied_torque;
+
+                let damp = 1 - p_step * this.area_linear_damp;
+
+                if (damp < 0) {
+                    damp = 0;
+                }
+
+                let angular_damp = 1 - p_step * this.area_angular_damp;
+
+                if (angular_damp < 0) {
+                    angular_damp = 0;
+                }
+
+                this.linear_velocity.scale(damp);
+                this.angular_velocity *= angular_damp;
+
+                this.linear_velocity.add(force.scale(this._inv_mass * p_step));
+                this.angular_velocity += this._inv_inertia * torque * p_step;
+            }
+
+            if (this.continuous_cd_mode !== CCDMode.DISABLED) {
+                motion.copy(this.linear_velocity).scale(p_step);
+                do_motion = true;
+            }
+        }
+
+        this.first_integration = false;
+        this.biased_angular_velocity = 0;
+        this.biased_linear_velocity.set(0, 0);
+
+        if (do_motion) {
+            this._update_shapes_with_motion(motion);
+        }
+
+        this.def_area = null; // clear the area, so it is set in the next frame
+        this.contact_count = 0;
+    }
     /**
      * @param {number} p_step
      */
@@ -449,6 +548,10 @@ export default class Body2DSW extends CollisionObject2DSW {
         const total_linear_velocity = this.linear_velocity.clone().add(this.biased_linear_velocity);
 
         const angle = this.transform.rotation + total_angular_velocity * p_step;
+        const pos = this.transform.origin.clone().add(total_linear_velocity.scale(p_step));
+
+        const t = Matrix.create().rotate(angle).translate(pos.x, pos.y);
+        this._set_transform(t, this.continuous_cd_mode === CCDMode.DISABLED);
         this._set_inv_transform(this.transform.inverse());
 
         if (this.continuous_cd_mode !== CCDMode.DISABLED) {
@@ -487,7 +590,22 @@ export default class Body2DSW extends CollisionObject2DSW {
     }
     wakeup_neighbours() {
         for (let [c, E] of this.constraint_map) {
+            const n = c._bodies;
+            const bc = c._body_count;
 
+            for (let i = 0; i < bc; i++) {
+                if (i === E) {
+                    continue;
+                }
+                const b = n[i];
+                if (b.mode !== BodyMode.RIGID) {
+                    continue;
+                }
+
+                if (!b.active) {
+                    b.set_active(true);
+                }
+            }
         }
     }
 
