@@ -417,7 +417,7 @@ class SeparatorAxisTest2D {
     }
     generate_contacts() {
         // nothing to do, don't generate
-        if (this.best_axis.equals(Vector2.ZERO)) {
+        if (this.best_axis.is_zero()) {
             return;
         }
 
@@ -428,7 +428,7 @@ class SeparatorAxisTest2D {
             return;
         }
 
-        const negate_best_axis = this.best_axis.clone();
+        const negate_best_axis = this.best_axis.clone().negate();
         const supports_A = reset_vec_array(supports_vec_1);
         let support_count_A = 0;
         if (this.cast_A) {

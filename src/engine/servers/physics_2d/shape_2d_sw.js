@@ -359,7 +359,23 @@ export class RectangleShape2DSW extends Shape2DSW {
                 r_supports[0].y = this.half_extents.y;
 
                 r_supports[1].x = this.half_extents.x * sgn;
-                r_supports[1].y = this.half_extents.y;
+                r_supports[1].y = -this.half_extents.y;
+
+                return 2;
+            } else {
+                ag.y = 1;
+                const dp = ag.dot(p_normal);
+                if (Math.abs(dp) < _SEGMENT_IS_VALID_SUPPORT_THRESHOLD) {
+                    continue;
+                }
+
+                const sgn = dp > 0 ? 1 : -1;
+
+                r_supports[0].y = this.half_extents.y * sgn;
+                r_supports[0].x = this.half_extents.x;
+
+                r_supports[1].y = this.half_extents.y * sgn;
+                r_supports[1].x = -this.half_extents.x;
 
                 return 2;
             }

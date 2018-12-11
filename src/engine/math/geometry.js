@@ -92,7 +92,7 @@ export function get_closest_point_to_segment_uncapped_2d(p_point, p_segment) {
     const p = p_point.clone().subtract(p_segment[0]);
     const n = p_segment[1].clone().subtract(p_segment[0]);
     const l = n.length();
-    if (l < Number.EPSILON) {
+    if (l < 1e-10) {
         Vector2.delete(p);
         Vector2.delete(n);
 

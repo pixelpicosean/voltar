@@ -1,6 +1,7 @@
 import { Vector2, Matrix } from "engine/math/index";
 import { Shape2DSW } from "./shape_2d_sw";
 import { sat_2d_calculate_penetration as collision_solver } from './collision_solver_2d_sat';
+import { ShapeType } from "engine/scene/physics/const";
 
 /**
  * @typedef {(p_point_A: Vector2, p_point_B: Vector2, p_userdata: any) => void} CallbackResult
@@ -35,7 +36,29 @@ export default class CollisionSolver2DSW {
             swap = true;
         }
 
-        return collision_solver(p_shape_A, p_transform_A, p_motion_A, p_shape_B, p_transform_B, p_motion_B, p_result_callback, p_userdata, false, sep_axis, margin_A, margin_B);
+        if (type_A === ShapeType.LINE) {
+            if (type_B === ShapeType.LINE || type_B === ShapeType.RAY) {
+                return false;
+            }
+
+            if (!swap) {
+                return solve_static_line(p_shape_B, p_transform_B, p_shape_A, p_transform_A, p_result_callback, p_userdata, true);
+            } else {
+                return solve_static_line(p_shape_A, p_transform_A, p_shape_B, p_transform_B, p_result_callback, p_userdata, false);
+            }
+        } else if (type_A === ShapeType.RAY) {
+            if (type_B === ShapeType.RAY) {
+                return false;
+            }
+
+            if (!swap) {
+                return solve_raycast(p_shape_B, p_motion_B, p_transform_B, p_shape_A, p_transform_A, p_result_callback, p_userdata, true, sep_axis);
+            } else {
+                return solve_raycast(p_shape_A, p_motion_A, p_transform_A, p_shape_B, p_transform_B, p_result_callback, p_userdata, false, sep_axis);
+            }
+        } else {
+            return collision_solver(p_shape_A, p_transform_A, p_motion_A, p_shape_B, p_transform_B, p_motion_B, p_result_callback, p_userdata, false, sep_axis, margin_A, margin_B);
+        }
 
         return false;
     }
@@ -51,6 +74,7 @@ export default class CollisionSolver2DSW {
  * @returns {boolean}
  */
 function solve_static_line(p_shape_A, p_transform_A, p_shape_B, p_transform_B, p_result_callback, p_userdata, p_swap_result) {
+    // TODO: real "solve_static_line"
     return false;
 }
 
@@ -70,5 +94,6 @@ function solve_concave() { }
  * @returns {boolean}
  */
 function solve_raycast(p_shape_A, p_motion_A, p_transform_A, p_shape_B, p_transform_B, p_result_callback, p_userdata, p_swap_result, sep_axis = null) {
+    // TODO: real "solve_raycast"
     return false;
 }
