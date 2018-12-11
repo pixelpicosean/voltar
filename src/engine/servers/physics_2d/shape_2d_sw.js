@@ -315,6 +315,7 @@ export class CircleShape2DSW extends Shape2DSW {
 	}
 }
 CircleShape2DSW.prototype.project_range_castv = Shape2DSW.prototype.__default_project_range_cast;
+CircleShape2DSW.prototype.project_range_cast = Shape2DSW.prototype.__default_project_range_cast;
 
 export class RectangleShape2DSW extends Shape2DSW {
     get type() {
@@ -507,3 +508,4 @@ export class RectangleShape2DSW extends Shape2DSW {
     }
 }
 RectangleShape2DSW.prototype.project_range_castv = Shape2DSW.prototype.__default_project_range_cast;
+RectangleShape2DSW.prototype.project_range_cast = Shape2DSW.prototype.__default_project_range_cast;
