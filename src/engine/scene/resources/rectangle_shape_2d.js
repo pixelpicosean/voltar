@@ -14,11 +14,19 @@ export default class RectangleShape2D extends Shape2D {
         this._update_shape();
     }
     /**
-     * @param {Vector2} value
+     * @param {import("engine/math/Vector2").Vector2Like|number} x
+     * @param {import("engine/math/Vector2").Vector2Like|number} [y]
      * @returns {this}
      */
-    set_extents(value) {
-        this.extents = value;
+    set_extents(x, y = undefined) {
+        if (y === undefined) {
+            // @ts-ignore
+            this._extents.copy(x);
+        } else {
+            // @ts-ignore
+            this._extents.set(x, y);
+        }
+        this._update_shape();
         return this;
     }
 

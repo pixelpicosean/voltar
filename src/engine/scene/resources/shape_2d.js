@@ -27,15 +27,6 @@ export default class Shape2D {
     constructor(p_shape) {
         this.shape = p_shape;
         this.custom_bias = 0;
-
-        /* CollisionObject2DSW::Shape API */
-        this.xform = new Matrix();
-        this.xform_inv = new Matrix();
-        this.bpid = -1;
-        this.aabb_cache = new Rectangle();
-        this.metadata = null;
-        this.disabled = false;
-        this.one_way_collision = false;
     }
 
     /**
@@ -115,7 +106,7 @@ export default class Shape2D {
         return result;
     }
 
-    get_rect(rect = new Rectangle()) {
+    get_rect(rect = Rectangle.create()) {
         rect.x = rect.y = rect.width = rect.height = 0;
         return rect;
     }
