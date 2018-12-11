@@ -129,6 +129,9 @@ export default class Node2D extends VObject {
          * @type {Transform}
          */
         this.transform = new Transform();
+        this.block_transform_notify = false;
+        this.notify_local_transform = false;
+        this.notify_transform = false;
 
         /**
          * The opacity of the object.
