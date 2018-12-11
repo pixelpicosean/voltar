@@ -249,6 +249,19 @@ class Collision {
         this.travel = new Vector2();
         this.local_shape = 0;
     }
+    reset() {
+        this.collision.set(0, 0);
+        this.normal.set(0, 0);
+        this.collider_vel.set(0, 0);
+        this.collider = null;
+        this.collider_rid = null;
+        this.collider_shape = 0;
+        this.collider_metadata = null;
+        this.remainder.set(0, 0);
+        this.travel.set(0, 0);
+        this.local_shape = 0;
+        return this;
+    }
 }
 
 export class KinematicCollision2D {
@@ -276,6 +289,9 @@ export class KinematicCollision2D {
         this.metadata = Object.freeze(Object.create({}));
     }
 }
+
+const col = new Collision();
+const motion_result = new MotionResult();
 
 export class KinematicBody2D extends PhysicsBody2D {
     constructor() {
@@ -309,8 +325,7 @@ export class KinematicBody2D extends PhysicsBody2D {
      * @param {boolean} [p_test_only]
      */
     move_and_collide(p_motion, p_infinite_inertia = true, p_exclude_raycast_shapes = true, p_test_only = false) {
-        // TODO: cache Collision
-        const col = new Collision();
+        col.reset();
 
         if (this._move(p_motion, p_infinite_inertia, col, p_exclude_raycast_shapes, p_test_only)) {
             if (!this.motion_cache) {
@@ -338,26 +353,25 @@ export class KinematicBody2D extends PhysicsBody2D {
      */
     _move(p_motion, p_infinite_inertia, r_collision, p_exclude_raycast_shapes = true, p_test_only = false) {
         const gt = this.transform.world_transform.clone();
-        // TODO: cache MotionResult
-        const result = new MotionResult();
-        const colliding = PhysicsServer.singleton.body_test_motion(this.rid, gt, p_motion, p_infinite_inertia, this.margin, result, p_exclude_raycast_shapes);
+        motion_result.reset();
+        const colliding = PhysicsServer.singleton.body_test_motion(this.rid, gt, p_motion, p_infinite_inertia, this.margin, motion_result, p_exclude_raycast_shapes);
 
         if (colliding) {
-            r_collision.collider_metadata = result.collider_metadata;
-            r_collision.collider_shape = result.collider_shape;
-            r_collision.collider_vel.copy(result.collider_velocity);
-            r_collision.collision.copy(result.collision_point);
-            r_collision.normal.copy(result.collision_normal);
-            r_collision.collider = result.collider_id;
-            r_collision.collider_rid = result.collider;
-            r_collision.travel.copy(result.motion);
-            r_collision.remainder.copy(result.remainder);
-            r_collision.local_shape = result.collision_local_shape;
+            r_collision.collider_metadata = motion_result.collider_metadata;
+            r_collision.collider_shape = motion_result.collider_shape;
+            r_collision.collider_vel.copy(motion_result.collider_velocity);
+            r_collision.collision.copy(motion_result.collision_point);
+            r_collision.normal.copy(motion_result.collision_normal);
+            r_collision.collider = motion_result.collider_id;
+            r_collision.collider_rid = motion_result.collider;
+            r_collision.travel.copy(motion_result.motion);
+            r_collision.remainder.copy(motion_result.remainder);
+            r_collision.local_shape = motion_result.collision_local_shape;
         }
 
         if (!p_test_only) {
-            gt.tx += result.motion.x;
-            gt.ty += result.motion.y;
+            gt.tx += motion_result.motion.x;
+            gt.ty += motion_result.motion.y;
             this.set_global_transform(gt);
         }
 

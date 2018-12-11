@@ -512,6 +512,20 @@ export class MotionResult {
         this.collider_shape = 0;
         this.collider_metadata = null;
     }
+    reset() {
+        this.motion.set(0, 0);
+        this.remainder.set(0, 0);
+
+        this.collision_point.set(0, 0);
+        this.collision_normal.set(0, 0);
+        this.collider_velocity.set(0, 0);
+        this.collision_local_shape = 0;
+        this.collider_id = null;
+        this.collider = null;
+        this.collider_shape = 0;
+        this.collider_metadata = null;
+        return this;
+    }
 }
 
 export class CollCbkData {
