@@ -251,7 +251,7 @@ class Collision {
     }
 }
 
-class KinematicCollision2D {
+export class KinematicCollision2D {
     get position() { return this.collision.collision }
     get normal() { return this.collision.normal }
     get travel() { return this.collision.travel }
@@ -308,11 +308,11 @@ export class KinematicBody2D extends PhysicsBody2D {
      * @param {boolean} [p_exclude_raycast_shapes]
      * @param {boolean} [p_test_only]
      */
-    _move(p_motion, p_infinite_inertia = true, p_exclude_raycast_shapes = true, p_test_only = false) {
+    move_and_collide(p_motion, p_infinite_inertia = true, p_exclude_raycast_shapes = true, p_test_only = false) {
         // TODO: cache Collision
         const col = new Collision();
 
-        if (this.move_and_collide(p_motion, p_infinite_inertia, col, p_exclude_raycast_shapes, p_test_only)) {
+        if (this._move(p_motion, p_infinite_inertia, col, p_exclude_raycast_shapes, p_test_only)) {
             if (!this.motion_cache) {
                 this.motion_cache = new KinematicCollision2D();
                 this.motion_cache.owner = this;
@@ -336,7 +336,7 @@ export class KinematicBody2D extends PhysicsBody2D {
      * @param {boolean} [p_exclude_raycast_shapes]
      * @param {boolean} [p_test_only]
      */
-    move_and_collide(p_motion, p_infinite_inertia, r_collision, p_exclude_raycast_shapes = true, p_test_only = false) {
+    _move(p_motion, p_infinite_inertia, r_collision, p_exclude_raycast_shapes = true, p_test_only = false) {
         const gt = this.transform.world_transform.clone();
         // TODO: cache MotionResult
         const result = new MotionResult();
