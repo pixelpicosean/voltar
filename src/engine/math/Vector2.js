@@ -27,7 +27,9 @@ export default class Vector2 {
      * @param {Vector2} vec
      */
     static delete(vec) {
-        pool.push(vec);
+        if (vec) {
+            pool.push(vec);
+        }
         return Vector2;
     }
 

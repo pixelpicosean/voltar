@@ -29,7 +29,10 @@ export default class Rectangle {
      * @param {Rectangle} p_rect
      */
     static delete(p_rect) {
-        pool.push(p_rect);
+        if (p_rect) {
+            pool.push(p_rect);
+        }
+        return Rectangle;
     }
 
     /**

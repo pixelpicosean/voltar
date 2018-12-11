@@ -29,7 +29,9 @@ export default class Matrix {
      * @param {Matrix} m
      */
     static delete(m) {
-        pool.push(m);
+        if (m) {
+            pool.push(m);
+        }
         return Matrix;
     }
 
