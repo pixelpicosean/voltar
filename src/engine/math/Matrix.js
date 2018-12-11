@@ -362,6 +362,15 @@ export default class Matrix {
     }
 
     /**
+     * Return a new Matrix that not translated.
+     */
+    untranslated() {
+        const copy = this.clone();
+        copy.tx = copy.ty = 0;
+        return copy;
+    }
+
+    /**
      * Applies a scale transformation to the matrix.
      *
      * @param {number} x The amount to scale horizontally
