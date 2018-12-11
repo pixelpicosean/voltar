@@ -4,7 +4,7 @@ import {
 } from "engine/math/index";
 
 import {
-    AreaSpaceOverrideMode,
+    AreaSpaceOverrideMode, AreaParameter,
 } from '../../scene/physics/const';
 import {
     ShapeResult,
@@ -174,26 +174,11 @@ export default class PhysicsServer {
     }
 
     /**
-     * @param {Space2DSW} space
-     * @returns {Vector2[]}
-     */
-    space_get_contacts(space) {
-        return null;
-    }
-    /**
-     * @param {any} space
-     * @returns {number}
-     */
-    space_get_contact_count(space) {
-        return 0;
-    }
-
-    /**
-     * @param {Space2DSW} space
+     * @param {Space2DSW} p_space
      * @returns {Physics2DDirectSpaceStateSW}
      */
-    space_get_direct_state(space) {
-        return null;
+    space_get_direct_state(p_space) {
+        return p_space.direct_access;
     }
 
     /* AERA API */
@@ -340,8 +325,21 @@ export default class PhysicsServer {
         return p_area.instance;
     }
 
-    area_set_param(p_area, param) { }
-    area_get_param(p_area) { }
+    /**
+     * @param {Area2DSW} p_area
+     * @param {AreaParameter} p_param
+     * @param {any} p_value
+     */
+    area_set_param(p_area, p_param, p_value) {
+        p_area.set_param(p_param, p_value)
+    }
+    /**
+     * @param {Area2DSW} p_area
+     * @param {AreaParameter} p_param
+     */
+    area_get_param(p_area, p_param) {
+        return p_area.get_param(p_param);
+    }
 
     /**
      * @param {Area2DSW} p_area
@@ -457,37 +455,66 @@ export default class PhysicsServer {
     }
     /**
      * @param {Body2DSW} p_body
+     * @param {number} p_shape_idx
+     * @param {Shape2DSW} p_shape
      */
-    body_set_shape(p_body) { }
+    body_set_shape(p_body, p_shape_idx, p_shape) {
+        p_body.set_shape(p_shape_idx, p_shape);
+    }
     /**
      * @param {Body2DSW} p_body
+     * @param {number} p_shape_idx
      */
-    body_get_shape(p_body) { }
+    body_get_shape(p_body, p_shape_idx) {
+        return p_body.get_shape(p_shape_idx);
+    }
     /**
      * @param {Body2DSW} p_body
+     * @param {number} p_shape_idx
+     * @param {Matrix} p_transform
      */
-    body_set_shape_transform(p_body) { }
+    body_set_shape_transform(p_body, p_shape_idx, p_transform) {
+        p_body.set_shape_transform(p_shape_idx, p_transform);
+    }
     /**
      * @param {Body2DSW} p_body
+     * @param {number} p_shape_idx
      */
-    body_get_shape_transform(p_body) { }
+    body_get_shape_transform(p_body, p_shape_idx) {
+        return p_body.get_shape_transform(p_shape_idx);
+    }
     /**
      * @param {Body2DSW} p_body
+     * @param {number} p_shape_idx
+     * @param {any} p_metadata
      */
-    body_set_shape_metadata(p_body) { }
+    body_set_shape_metadata(p_body, p_shape_idx, p_metadata) {
+        p_body.set_shape_metadata(p_shape_idx, p_metadata);
+    }
     /**
      * @param {Body2DSW} p_body
+     * @param {number} p_shape_idx
      */
-    body_get_shape_metadata(p_body) { }
+    body_get_shape_metadata(p_body, p_shape_idx) {
+        return p_body.get_shape_metadata(p_shape_idx);
+    }
 
     /**
      * @param {Body2DSW} p_body
+     * @param {number} p_shape_idx
+     * @param {boolean} p_disabled
      */
-    body_set_shape_disabled(p_body) { }
+    body_set_shape_disabled(p_body, p_shape_idx, p_disabled) {
+        p_body.set_shape_as_disabled(p_shape_idx, p_disabled);
+    }
     /**
      * @param {Body2DSW} p_body
+     * @param {number} p_shape_idx
+     * @param {boolean} p_enabled
      */
-    body_set_shape_as_one_way_collision(p_body) { }
+    body_set_shape_as_one_way_collision(p_body, p_shape_idx, p_enabled) {
+        p_body.set_shape_as_one_way_collision(p_shape_idx, p_enabled);
+    }
 
     /**
      * @param {Body2DSW} p_body
@@ -532,6 +559,7 @@ export default class PhysicsServer {
 
         this.is_initialized = true;
     }
+    // TODO: free owners
     free(rid) { }
 
     set_active(p_active) {
