@@ -32,11 +32,20 @@ class Ball extends v.Area2D {
 
             this.connect('area_entered', () => {
                 this.gfx.tint = 0x00FF00;
-                console.log('enter')
+                console.log('area enter')
             })
             this.connect('area_exited', () => {
                 this.gfx.tint = 0xFFFFFF;
-                console.log('exit')
+                console.log('area exit')
+            })
+
+            this.connect('body_entered', () => {
+                this.gfx.tint = 0xFF0000;
+                console.log('body enter')
+            })
+            this.connect('body_exited', () => {
+                this.gfx.tint = 0xFFFFFF;
+                console.log('body exit')
             })
         }
     }
@@ -51,7 +60,7 @@ class Ball extends v.Area2D {
 }
 
 class Box extends v.Area2D {
-    constructor(p_width = 16, p_height, color = 0xFFFFFF, should_move = false) {
+    constructor(p_width = 16, p_height = 16, color = 0xFFFFFF, should_move = false) {
         super();
 
         this.should_move = should_move;
@@ -61,7 +70,7 @@ class Box extends v.Area2D {
             .set_collision_mask_bit(PhysicsLayers.SOLID, true)
 
         const shape = new v.RectangleShape2D();
-        shape.extents.set(p_width / 2, p_height / 2)
+        shape.set_extents(p_width / 2, p_height / 2);
         this.add_child(new v.CollisionShape2D())
             .shape = shape;
 
@@ -80,6 +89,15 @@ class Box extends v.Area2D {
             this.connect('area_exited', () => {
                 this.gfx.tint = 0xFFFFFF;
                 console.log('exit')
+            })
+
+            this.connect('body_entered', () => {
+                this.gfx.tint = 0xFF0000;
+                console.log('body enter')
+            })
+            this.connect('body_exited', () => {
+                this.gfx.tint = 0xFFFFFF;
+                console.log('body exit')
             })
         }
     }
@@ -112,14 +130,20 @@ export default class NewPhysics extends v.Node2D {
             g.move_to(0, j * 128).line_to(size.x, j * 128);
         }
 
-        const m = new Ball(20, 0xFFFFFF, true)
-            .set_position(64, 192)
+        const m = new Box(32, 32, 0xFFFFFF, true)
+            .set_position(64, 192 + 32)
             .set_name('M')
         this.add_child(m);
 
-        const s = new Box(20, 20, 0xFFFFFF)
+        const s = new Box(40, 40, 0xFFFFFF)
             .set_position(192, 192)
+            .set_rotation(Math.PI * 0.25)
             .set_name('S')
         this.add_child(s);
+
+        const sa = new Ball(20, 0xFFFFFF, false)
+            .set_position(320, 192)
+            .set_name('SA')
+        this.add_child(sa);
     }
 }
