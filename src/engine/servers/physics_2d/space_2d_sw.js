@@ -10,6 +10,7 @@ import Body2DSW from "./body_2d_sw";
 import { Shape2DSW } from "./shape_2d_sw";
 import { Matrix, Vector2, Rectangle, CMP_EPSILON } from "engine/math/index";
 import CollisionSolver2DSW from "./collision_solver_2d_sw";
+import BodyPair2DSW from "./body_pair_2d";
 
 class ExcludedShapeSW {
     constructor() {
@@ -778,7 +779,13 @@ export default class Space2DSW {
                 return new AreaPair2DSW(body, p_subindex_B, area, p_subindex_A);
             }
         } else {
-            // TODO: body pair
+            /** @type {Body2DSW} */
+            // @ts-ignore
+            const body_A = A;
+            /** @type {Body2DSW} */
+            // @ts-ignore
+            const body_B = B;
+            return new BodyPair2DSW(body_A, p_subindex_A, body_B, p_subindex_B);
         }
 
         return null;

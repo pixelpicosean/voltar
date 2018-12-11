@@ -6,6 +6,7 @@ import Constraint2DSW from "./constraint_2d_sw";
 import Space2DSW from "./space_2d_sw";
 import { Physics2DDirectBodyStateSW } from "./state";
 import Area2DSW from "./area_2d_sw";
+import { remove_items } from "engine/dep/index";
 
 class AreaCMP { }
 
@@ -207,15 +208,98 @@ export default class Body2DSW extends CollisionObject2DSW {
 
     set_force_integration_callback(p_id, p_method, p_udata = {}) { }
 
-    add_area(p_area) { }
-    remove_area(p_area) { }
+    /**
+     * @param {Area2DSW} p_area
+     */
+    add_area(p_area) {
+        const index = this.areas.indexOf(p_area);
+        if (index < 0) {
+            // FIXME: use "ordered_insert" instead
+            this.areas.push(p_area);
+        }
+    }
+    /**
+     * @param {Area2DSW} p_area
+     */
+    remove_area(p_area) {
+        const index = this.areas.indexOf(p_area);
+        if (index >= 0) {
+            remove_items(this.areas, index, 1);
+        }
+    }
 
-    set_max_contacts_reported(p_size) { }
+    /**
+     * @param {number} p_size
+     */
+    set_max_contacts_reported(p_size) {
+        this.contacts.length = p_size;
+        for (let i = 0; i < p_size; i++) {
+            // TODO: cache the contacts
+            if (!this.contacts[i]) this.contacts[i] = new Contact();
+        }
+        this.contact_count = 0;
+        if (this.mode === BodyMode.KINEMATIC && p_size) this.set_active(true);
+    }
 
-    get_max_contacts_reported() { }
+    get_max_contacts_reported() {
+        return this.contacts.length;
+    }
 
-    can_report_contacts() { }
-    add_contact() { }
+    can_report_contacts() {
+        return this.contacts.length > 0;
+    }
+    /**
+     * @param {Vector2} p_local_pos
+     * @param {Vector2} p_local_normal
+     * @param {number} p_depth
+     * @param {number} p_local_shape
+     * @param {Vector2} p_collider_pos
+     * @param {number} p_collider_shape
+     * @param {any} p_collider_instance
+     * @param {any} p_collider
+     * @param {Vector2} p_collider_velocity_at_pos
+     */
+    add_contact(p_local_pos, p_local_normal, p_depth, p_local_shape, p_collider_pos, p_collider_shape, p_collider_instance, p_collider, p_collider_velocity_at_pos) {
+        const c_max = this.contacts.length;
+
+        if (c_max === 0) {
+            return;
+        }
+
+        const c = this.contacts;
+
+        let idx = -1;
+
+        if (this.contact_count < c_max) {
+            idx = this.contact_count++;
+        } else {
+            let least_depth = 1e20;
+            let least_deep = -1;
+            for (let i = 0; i < c_max; i++) {
+                if (i === 0 || c[i].depth < least_depth) {
+                    least_deep = i;
+                    least_depth = c[i].depth;
+                }
+            }
+
+            if (least_deep >= 0 && least_depth < p_depth) {
+                idx = least_deep;
+            }
+            if (idx === -1) {
+                return; // none least deeper than this
+            }
+        }
+
+        c[idx].local_pos.copy(p_local_pos);
+        c[idx].local_normal.copy(p_local_normal);
+        c[idx].depth = p_depth;
+        c[idx].local_shape = p_local_shape;
+        c[idx].collider_pos.copy(p_collider_pos);
+        c[idx].collider_shape = p_collider_shape;
+        c[idx].collider_instance = p_collider_instance;
+        c[idx].collider = p_collider;
+        c[idx].collider_velocity_at_pos.copy(p_collider_velocity_at_pos);
+    }
 
     /**
      * @param {CollisionObject2DSW} p_exception
@@ -253,9 +337,33 @@ export default class Body2DSW extends CollisionObject2DSW {
         return this.constraint_map;
     }
 
-    apply_central_impulse(p_impulse) { }
-    apply_impulse(p_impulse) { }
-    apply_bias_impulse(p_impulse) { }
+    /**
+     * @param {Vector2} p_impulse
+     */
+    apply_central_impulse(p_impulse) {
+        this.linear_velocity.x += p_impulse.x * this._inv_mass;
+        this.linear_velocity.y += p_impulse.y * this._inv_mass;
+    }
+    /**
+     * @param {Vector2} p_offset
+     * @param {Vector2} p_impulse
+     */
+    apply_impulse(p_offset, p_impulse) {
+        this.linear_velocity.x += p_impulse.x * this._inv_mass;
+        this.linear_velocity.y += p_impulse.y * this._inv_mass;
+
+        this.angular_velocity += this._inv_inertia * p_offset.cross(p_impulse);
+    }
+    /**
+     * @param {Vector2} p_pos
+     * @param {Vector2} p_impulse
+     */
+    apply_bias_impulse(p_pos, p_impulse) {
+        this.biased_linear_velocity.x += p_impulse.x * this._inv_mass;
+        this.biased_linear_velocity.y += p_impulse.y * this._inv_mass;
+
+        this.angular_velocity += this._inv_mass * p_pos.cross(p_impulse);
+    }
 
     wakeup() {
         if ((!this.space) || this.mode === BodyMode.STATIC || this.mode === BodyMode.KINEMATIC) {
