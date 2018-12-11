@@ -2,6 +2,8 @@ import { Shape2DSW, CircleShape2DSW, RectangleShape2DSW } from "./shape_2d_sw";
 import { Matrix, Vector2, CMP_EPSILON } from "engine/math/index";
 import { get_closest_point_to_segment_uncapped_2d } from "engine/math/geometry";
 
+/** @typedef {(A: Shape2DSW, xform_A: Matrix, B: Shape2DSW, xform_B: Matrix, collector: _CollectorCallback2D, motion_A: Vector2, motion_B: Vector2, margin_A: number, margin_B: number) => void} CollisionFunc */
+
 /**
  * @param {number} n
  */
@@ -34,7 +36,7 @@ class _CollectorCallback2D {
         this.collided = false;
         /** @type {Vector2} */
         this.normal = new Vector2();
-        /** @type {Vector2} */
+        /** @type {Vector2[]} */
         this.sep_axis = null;
     }
     /**
@@ -61,7 +63,7 @@ const tmp_callback = new _CollectorCallback2D();
  * @param {import("./collision_solver_2d_sw").CallbackResult} p_result_callback
  * @param {any} p_userdata
  * @param {boolean} [p_swap]
- * @param {Vector2} [sep_axis]
+ * @param {Vector2[]} [sep_axis]
  * @param {number} [p_margin_A]
  * @param {number} [p_margin_B]
  * @returns {boolean}
@@ -97,6 +99,9 @@ export function sat_2d_calculate_penetration(p_shape_A, p_transform_A, p_motion_
         callback.swap = !callback.swap;
     }
 
+    /**
+     * @type {CollisionFunc}
+     */
     let collision_func = null;
 
     if (margin_A || margin_B) {
@@ -306,8 +311,8 @@ class SeparatorAxisTest2D {
         return this;
     }
     test_previous_axis() {
-        if (this.callback && this.callback.sep_axis && !this.callback.sep_axis.is_zero()) {
-            return this.test_axis(this.callback.sep_axis);
+        if (this.callback && this.callback.sep_axis && !this.callback.sep_axis[0].is_zero()) {
+            return this.test_axis(this.callback.sep_axis[0]);
         }
         return true;
     }
@@ -386,7 +391,7 @@ class SeparatorAxisTest2D {
 
         if (dmin > 0 || dmax < 0) {
             if (this.callback && this.callback.sep_axis) {
-                this.callback.sep_axis.copy(axis);
+                this.callback.sep_axis[0].copy(axis);
             }
 
             Vector2.delete(axis);
@@ -429,6 +434,9 @@ class SeparatorAxisTest2D {
         if (this.cast_A) {
             // @ts-ignore
             support_count_A = this.shape_A.get_supports_transformed_cast(this.motion_A, negate_best_axis, this.transform_A, supports_A);
+        } else {
+            // @ts-ignore
+            support_count_A = this.shape_A.get_supports(this.transform_A.basis_xform_inv(this.best_axis.clone().negate()).normalize(), supports_A);
             for (let i = 0; i < support_count_A; i++) {
                 this.transform_A.xform(supports_A[i], supports_A[i]);
             }
@@ -445,6 +453,9 @@ class SeparatorAxisTest2D {
         if (this.cast_B) {
             // @ts-ignore
             support_count_B = this.shape_B.get_supports_transformed_cast(this.motion_B, negate_best_axis, this.transform_B, supports_B);
+        } else {
+            // @ts-ignore
+            support_count_B = this.shape_B.get_supports(this.transform_B.basis_xform_inv(this.best_axis.clone()).normalize(), supports_B);
             for (let i = 0; i < support_count_B; i++) {
                 this.transform_B.xform(supports_B[i], supports_B[i]);
             }
@@ -459,8 +470,8 @@ class SeparatorAxisTest2D {
         this.callback.normal.copy(this.best_axis);
         _generate_contacts_from_supports(supports_A, support_count_A, supports_B, support_count_B, this.callback);
 
-        if (this.callback && this.callback.sep_axis && this.callback.sep_axis.is_zero()) {
-            this.callback.sep_axis.set(0, 0); // invalidate previous axis (no test)
+        if (this.callback && this.callback.sep_axis && !this.callback.sep_axis[0].is_zero()) {
+            this.callback.sep_axis[0].set(0, 0); // invalidate previous axis (no test)
         }
     }
 }
@@ -934,57 +945,267 @@ const collision_table = [
 ]
 
 const collision_table_castA = [
-    [],
-    [],
-    [],
-    [],
-    [],
+    [
+        _collision_segment_segment(true, false, false),
+        _collision_segment_circle(true, false, false),
+        _collision_segment_rectangle(true, false, false),
+        _collision_segment_capsule(true, false, false),
+        _collision_segment_convex_polygon(true, false, false),
+    ],
+    [
+        null,
+        _collision_circle_circle(true, false, false),
+        _collision_circle_rectangle(true, false, false),
+        _collision_circle_capsule(true, false, false),
+        _collision_circle_convex_polygon(true, false, false),
+    ],
+    [
+        null,
+        null,
+        _collision_rectangle_rectangle(true, false, false),
+        _collision_rectangle_capsule(true, false, false),
+        _collision_rectangle_convex_polygon(true, false, false),
+    ],
+    [
+        null,
+        null,
+        null,
+        _collision_capsule_capsule(true, false, false),
+        _collision_capsule_convex_polygon(true, false, false),
+    ],
+    [
+        null,
+        null,
+        null,
+        null,
+        _collision_convex_polygon_convex_polygon(true, false, false),
+    ],
 ]
 
 const collision_table_castB = [
-    [],
-    [],
-    [],
-    [],
-    [],
+    [
+        _collision_segment_segment(false, true, false),
+        _collision_segment_circle(false, true, false),
+        _collision_segment_rectangle(false, true, false),
+        _collision_segment_capsule(false, true, false),
+        _collision_segment_convex_polygon(false, true, false),
+    ],
+    [
+        null,
+        _collision_circle_circle(false, true, false),
+        _collision_circle_rectangle(false, true, false),
+        _collision_circle_capsule(false, true, false),
+        _collision_circle_convex_polygon(false, true, false),
+    ],
+    [
+        null,
+        null,
+        _collision_rectangle_rectangle(false, true, false),
+        _collision_rectangle_capsule(false, true, false),
+        _collision_rectangle_convex_polygon(false, true, false),
+    ],
+    [
+        null,
+        null,
+        null,
+        _collision_capsule_capsule(false, true, false),
+        _collision_capsule_convex_polygon(false, true, false),
+    ],
+    [
+        null,
+        null,
+        null,
+        null,
+        _collision_convex_polygon_convex_polygon(false, true, false),
+    ],
 ]
 
 const collision_table_castA_castB = [
-    [],
-    [],
-    [],
-    [],
-    [],
+    [
+        _collision_segment_segment(true, true, false),
+        _collision_segment_circle(true, true, false),
+        _collision_segment_rectangle(true, true, false),
+        _collision_segment_capsule(true, true, false),
+        _collision_segment_convex_polygon(true, true, false),
+    ],
+    [
+        null,
+        _collision_circle_circle(true, true, false),
+        _collision_circle_rectangle(true, true, false),
+        _collision_circle_capsule(true, true, false),
+        _collision_circle_convex_polygon(true, true, false),
+    ],
+    [
+        null,
+        null,
+        _collision_rectangle_rectangle(true, true, false),
+        _collision_rectangle_capsule(true, true, false),
+        _collision_rectangle_convex_polygon(true, true, false),
+    ],
+    [
+        null,
+        null,
+        null,
+        _collision_capsule_capsule(true, true, false),
+        _collision_capsule_convex_polygon(true, true, false),
+    ],
+    [
+        null,
+        null,
+        null,
+        null,
+        _collision_convex_polygon_convex_polygon(true, true, false),
+    ],
 ]
 
 const collision_table_margin = [
-    [],
-    [],
-    [],
-    [],
-    [],
+    [
+        _collision_segment_segment(false, false, true),
+        _collision_segment_circle(false, false, true),
+        _collision_segment_rectangle(false, false, true),
+        _collision_segment_capsule(false, false, true),
+        _collision_segment_convex_polygon(false, false, true),
+    ],
+    [
+        null,
+        _collision_circle_circle(false, false, true),
+        _collision_circle_rectangle(false, false, true),
+        _collision_circle_capsule(false, false, true),
+        _collision_circle_convex_polygon(false, false, true),
+    ],
+    [
+        null,
+        null,
+        _collision_rectangle_rectangle(false, false, true),
+        _collision_rectangle_capsule(false, false, true),
+        _collision_rectangle_convex_polygon(false, false, true),
+    ],
+    [
+        null,
+        null,
+        null,
+        _collision_capsule_capsule(false, false, true),
+        _collision_capsule_convex_polygon(false, false, true),
+    ],
+    [
+        null,
+        null,
+        null,
+        null,
+        _collision_convex_polygon_convex_polygon(false, false, true),
+    ],
 ]
 
 const collision_table_castA_margin = [
-    [],
-    [],
-    [],
-    [],
-    [],
+    [
+        _collision_segment_segment(true, false, true),
+        _collision_segment_circle(true, false, true),
+        _collision_segment_rectangle(true, false, true),
+        _collision_segment_capsule(true, false, true),
+        _collision_segment_convex_polygon(true, false, true),
+    ],
+    [
+        null,
+        _collision_circle_circle(true, false, true),
+        _collision_circle_rectangle(true, false, true),
+        _collision_circle_capsule(true, false, true),
+        _collision_circle_convex_polygon(true, false, true),
+    ],
+    [
+        null,
+        null,
+        _collision_rectangle_rectangle(true, false, true),
+        _collision_rectangle_capsule(true, false, true),
+        _collision_rectangle_convex_polygon(true, false, true),
+    ],
+    [
+        null,
+        null,
+        null,
+        _collision_capsule_capsule(true, false, true),
+        _collision_capsule_convex_polygon(true, false, true),
+    ],
+    [
+        null,
+        null,
+        null,
+        null,
+        _collision_convex_polygon_convex_polygon(true, false, true),
+    ],
 ]
 
 const collision_table_castB_margin = [
-    [],
-    [],
-    [],
-    [],
-    [],
+    [
+        _collision_segment_segment(false, true, true),
+        _collision_segment_circle(false, true, true),
+        _collision_segment_rectangle(false, true, true),
+        _collision_segment_capsule(false, true, true),
+        _collision_segment_convex_polygon(false, true, true),
+    ],
+    [
+        null,
+        _collision_circle_circle(false, true, true),
+        _collision_circle_rectangle(false, true, true),
+        _collision_circle_capsule(false, true, true),
+        _collision_circle_convex_polygon(false, true, true),
+    ],
+    [
+        null,
+        null,
+        _collision_rectangle_rectangle(false, true, true),
+        _collision_rectangle_capsule(false, true, true),
+        _collision_rectangle_convex_polygon(false, true, true),
+    ],
+    [
+        null,
+        null,
+        null,
+        _collision_capsule_capsule(false, true, true),
+        _collision_capsule_convex_polygon(false, true, true),
+    ],
+    [
+        null,
+        null,
+        null,
+        null,
+        _collision_convex_polygon_convex_polygon(false, true, true),
+    ],
 ]
 
 const collision_table_castA_castB_margin = [
-    [],
-    [],
-    [],
-    [],
-    [],
+    [
+        _collision_segment_segment(true, true, true),
+        _collision_segment_circle(true, true, true),
+        _collision_segment_rectangle(true, true, true),
+        _collision_segment_capsule(true, true, true),
+        _collision_segment_convex_polygon(true, true, true),
+    ],
+    [
+        null,
+        _collision_circle_circle(true, true, true),
+        _collision_circle_rectangle(true, true, true),
+        _collision_circle_capsule(true, true, true),
+        _collision_circle_convex_polygon(true, true, true),
+    ],
+    [
+        null,
+        null,
+        _collision_rectangle_rectangle(true, true, true),
+        _collision_rectangle_capsule(true, true, true),
+        _collision_rectangle_convex_polygon(true, true, true),
+    ],
+    [
+        null,
+        null,
+        null,
+        _collision_capsule_capsule(true, true, true),
+        _collision_capsule_convex_polygon(true, true, true),
+    ],
+    [
+        null,
+        null,
+        null,
+        null,
+        _collision_convex_polygon_convex_polygon(true, true, true),
+    ],
 ]
