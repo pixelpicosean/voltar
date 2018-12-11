@@ -571,7 +571,12 @@ export default class BroadPhase2D {
      * @returns {number}
      */
     _cull(use_aabb, use_segment, p_cell, p_aabb, p_from, p_to, p_results, p_max_results, p_result_indices, index) {
-        let pb = this.hash_table.get(p_cell.x).get(p_cell.y);
+        let row = this.hash_table.get(p_cell.x);
+        if (!row) {
+            row = new Map();
+            this.hash_table.set(p_cell.x, row);
+        }
+        let pb = row.get(p_cell.y);
 
         while (pb) {
             if (pb.key.equals(p_cell)) {
