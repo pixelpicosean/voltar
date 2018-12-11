@@ -446,7 +446,7 @@ export default class Space2DSW {
                             let did_collide = false;
 
                             const against_shape = col_obj.shapes[shape_index].shape;
-                            if (CollisionSolver2DSW.solve(body_shape.shape, body_shape_xform, Vector2.Zero, against_shape, col_obj_shape_xform, Vector2.Zero, cbkres, cbk, null, separation_margin)) {
+                            if (CollisionSolver2DSW.solve(body_shape.shape, body_shape_xform, Vector2.ZERO, against_shape, col_obj_shape_xform, Vector2.ZERO, cbkres, cbk, null, separation_margin)) {
                                 did_collide = cbk.amount > current_collisions;
                             }
 
@@ -556,12 +556,12 @@ export default class Space2DSW {
 
                     const col_obj_shape_xform = col_obj.transform.clone().append(against_shape.xform);
                     // test initial overlap, does it collide if going all the way?
-                    if (!CollisionSolver2DSW.solve(body_shape.shape, body_shape_xform, p_motion, against_shape.shape, col_obj_shape_xform, Vector2.Zero, null, null, null, 0)) {
+                    if (!CollisionSolver2DSW.solve(body_shape.shape, body_shape_xform, p_motion, against_shape.shape, col_obj_shape_xform, Vector2.ZERO, null, null, null, 0)) {
                         continue;
                     }
 
                     // test initial overlap
-                    if (!CollisionSolver2DSW.solve(body_shape.shape, body_shape_xform, Vector2.Zero, against_shape.shape, col_obj_shape_xform, Vector2.Zero, null, null, null, 0)) {
+                    if (!CollisionSolver2DSW.solve(body_shape.shape, body_shape_xform, Vector2.ZERO, against_shape.shape, col_obj_shape_xform, Vector2.ZERO, null, null, null, 0)) {
                         if (against_shape.one_way_collision) {
                             continue;
                         }
@@ -581,7 +581,7 @@ export default class Space2DSW {
 
                         sep.copy(mnormal);
                         // TODO: cache array and other Vector2, Matrix
-                        const collided = CollisionSolver2DSW.solve(body_shape.shape, body_shape_xform, p_motion.clone().scale(ofs), against_shape.shape, col_obj_shape_xform, Vector2.Zero, null, null, [sep], 0);
+                        const collided = CollisionSolver2DSW.solve(body_shape.shape, body_shape_xform, p_motion.clone().scale(ofs), against_shape.shape, col_obj_shape_xform, Vector2.ZERO, null, null, [sep], 0);
 
                         if (collided) {
                             hi = ofs;
@@ -601,7 +601,7 @@ export default class Space2DSW {
                         cbk.valid_depth = Number.MAX_VALUE;
 
                         const sep = [mnormal.clone()];
-                        const collided = CollisionSolver2DSW.solve(body_shape.shape, body_shape_xform, p_motion.clone().scale(hi + this.contact_max_allowed_penetration), against_shape.shape, col_obj_shape_xform, Vector2.Zero, _shape_col_cbk, cbk, sep, 0);
+                        const collided = CollisionSolver2DSW.solve(body_shape.shape, body_shape_xform, p_motion.clone().scale(hi + this.contact_max_allowed_penetration), against_shape.shape, col_obj_shape_xform, Vector2.ZERO, _shape_col_cbk, cbk, sep, 0);
                         if (!collided || cbk.amount === 0) {
                             continue;
                         }
@@ -699,7 +699,7 @@ export default class Space2DSW {
                     rcd.object = col_obj;
                     rcd.shape = shape_idx;
                     rcd.local_shape = j;
-                    const sc = CollisionSolver2DSW.solve(body_shape.shape, body_shape_xform, Vector2.Zero, against_shape.shape, col_obj_shape_xform, Vector2.Zero, _rest_cbk_result, rcd, null, p_margin);
+                    const sc = CollisionSolver2DSW.solve(body_shape.shape, body_shape_xform, Vector2.ZERO, against_shape.shape, col_obj_shape_xform, Vector2.ZERO, _rest_cbk_result, rcd, null, p_margin);
                     if (!sc) {
                         continue;
                     }

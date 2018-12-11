@@ -47,7 +47,7 @@ export class AreaPair2DSW extends Constraint2DSW {
 
         if (this.body.is_shape_set_as_disabled(this.body_shape) || this.area.is_shape_set_as_disabled(this.area_shape)) {
             result = false;
-        } else if (this.area.test_collision_mask(this.body) && CollisionSolver2DSW.solve(this.body.get_shape(this.body_shape), this.body.transform.clone().append(this.body.get_shape_transform(this.body_shape)), Vector2.Zero, this.area.get_shape(this.area_shape), this.area.transform.clone().append(this.area.get_shape_transform(this.area_shape)), Vector2.Zero, null, this)) {
+        } else if (this.area.test_collision_mask(this.body) && CollisionSolver2DSW.solve(this.body.get_shape(this.body_shape), this.body.transform.clone().append(this.body.get_shape_transform(this.body_shape)), Vector2.ZERO, this.area.get_shape(this.area_shape), this.area.transform.clone().append(this.area.get_shape_transform(this.area_shape)), Vector2.ZERO, null, this)) {
             result = true;
         }
 
@@ -123,7 +123,7 @@ export class Area2Pair2DSW extends Constraint2DSW {
             const xform_a = this.area_a.transform.clone().append(this.area_a.get_shape_transform(this.shape_a));
             const xform_b = this.area_b.transform.clone().append(this.area_b.get_shape_transform(this.shape_b));
 
-            if (CollisionSolver2DSW.solve(this.area_a.get_shape(this.shape_a), xform_a, Vector2.Zero, this.area_b.get_shape(this.shape_b), xform_b, Vector2.Zero, null, this)) {
+            if (CollisionSolver2DSW.solve(this.area_a.get_shape(this.shape_a), xform_a, Vector2.ZERO, this.area_b.get_shape(this.shape_b), xform_b, Vector2.ZERO, null, this)) {
                 result = true;
             }
 

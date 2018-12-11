@@ -295,7 +295,7 @@ class SeparatorAxisTest2D {
      * @param {number} p_margin_A
      * @param {number} p_margin_B
      */
-    init(p_shape_A, p_transform_A, p_shape_B, p_transform_B, p_collector, p_motion_A = Vector2.Zero, p_motion_B = Vector2.Zero, p_margin_A = 0, p_margin_B = 0) {
+    init(p_shape_A, p_transform_A, p_shape_B, p_transform_B, p_collector, p_motion_A = Vector2.ZERO, p_motion_B = Vector2.ZERO, p_margin_A = 0, p_margin_B = 0) {
         this.margin_A = p_margin_A;
         this.margin_B = p_margin_B;
         this.best_depth = Number.MAX_VALUE;
@@ -417,7 +417,7 @@ class SeparatorAxisTest2D {
     }
     generate_contacts() {
         // nothing to do, don't generate
-        if (this.best_axis.equals(Vector2.Zero)) {
+        if (this.best_axis.equals(Vector2.ZERO)) {
             return;
         }
 

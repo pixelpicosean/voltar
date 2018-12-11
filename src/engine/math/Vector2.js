@@ -602,7 +602,13 @@ export default class Vector2 {
         return this.x === 0 && this.y === 0;
     }
 }
-Vector2.Zero = Object.freeze(new Vector2());
+Vector2.ZERO = Object.freeze(new Vector2());
+Vector2.ONE = Object.freeze(new Vector2(1, 1));
+Vector2.INF = Object.freeze(new Vector2(Infinity, Infinity));
+Vector2.LEFT = Object.freeze(new Vector2(-1, 0));
+Vector2.RIGHT = Object.freeze(new Vector2(1, 0));
+Vector2.UP = Object.freeze(new Vector2(0, -1));
+Vector2.DOWN = Object.freeze(new Vector2(0, 1));
 
 /**
  * @type {Vector2[]}

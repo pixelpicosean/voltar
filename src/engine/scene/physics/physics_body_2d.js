@@ -383,8 +383,8 @@ export class KinematicBody2D extends PhysicsBody2D {
 
     separate_raycast_shapes(p_infinite_inertia, r_collision) { }
 
-    move_and_slide(p_linear_velocity, p_floor_direction = Vector2.Zero, p_stop_on_slope = false, p_max_slides = 4, p_floor_max_angle = Math.PI * 0.25, p_infinite_inertia = true) { }
-    move_and_slide_with_snap(p_linear_velocity, p_snap, p_floor_direction = Vector2.Zero, p_stop_on_slope = false, p_max_slides = 4, p_floor_max_angle = Math.PI * 0.25, p_infinite_inertia = true) { }
+    move_and_slide(p_linear_velocity, p_floor_direction = Vector2.ZERO, p_stop_on_slope = false, p_max_slides = 4, p_floor_max_angle = Math.PI * 0.25, p_infinite_inertia = true) { }
+    move_and_slide_with_snap(p_linear_velocity, p_snap, p_floor_direction = Vector2.ZERO, p_stop_on_slope = false, p_max_slides = 4, p_floor_max_angle = Math.PI * 0.25, p_infinite_inertia = true) { }
 
     get_slide_count() { }
     get_slide_collision(p_bounce) { }
