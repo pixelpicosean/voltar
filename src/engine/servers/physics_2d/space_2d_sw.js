@@ -709,7 +709,7 @@ export default class Space2DSW {
             if (rcd.best_len !== 0) {
                 if (r_result) {
                     r_result.collider = rcd.best_object.self;
-                    r_result.collider_id = rcd.best_object;
+                    r_result.collider_id = rcd.best_object.instance;
                     r_result.collider_shape = rcd.best_shape;
                     r_result.collision_local_shape = rcd.best_local_shape;
                     r_result.collision_normal.copy(rcd.best_normal);
