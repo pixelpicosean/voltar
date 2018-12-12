@@ -158,6 +158,7 @@ export default class Transform {
     set_from_matrix(matrix) {
         matrix.decompose(this);
         this._local_id++;
+        return this;
     }
 
     /**
