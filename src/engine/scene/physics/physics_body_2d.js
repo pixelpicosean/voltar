@@ -437,7 +437,7 @@ export class KinematicBody2D extends PhysicsBody2D {
     separate_raycast_shapes(p_infinite_inertia, r_collision) {
         const sep_res = get_sep_res();
 
-        const gt = this.get_global_transform();
+        const gt = this.get_global_transform().clone();
 
         const recover = Vector2.create();
         const hits = this.rid.space.test_body_ray_separation(this.rid, gt, p_infinite_inertia, recover, sep_res, 8, this.margin);
@@ -465,8 +465,12 @@ export class KinematicBody2D extends PhysicsBody2D {
             r_collision.travel.copy(recover);
             r_collision.remainder.set(0, 0);
 
+            Matrix.delete(gt);
+            Vector2.delete(recover);
             return true;
         } else {
+            Matrix.delete(gt);
+            Vector2.delete(recover);
             return false;
         }
     }
