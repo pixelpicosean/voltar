@@ -334,7 +334,7 @@ export default class Space2DSW {
      * @param {MotionResult} r_result
      * @param {boolean} [p_exclude_raycast_shapes]
      */
-    body_test_motion(p_body, p_from, p_motion, p_infinite_inertia, p_margin, r_result, p_exclude_raycast_shapes = true) {
+    test_body_motion(p_body, p_from, p_motion, p_infinite_inertia, p_margin, r_result, p_exclude_raycast_shapes = true) {
         if (r_result) {
             r_result.collider_id = null;
             r_result.collider_shape = 0;

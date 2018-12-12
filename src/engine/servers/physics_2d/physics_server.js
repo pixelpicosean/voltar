@@ -534,7 +534,7 @@ export default class PhysicsServer {
      * @param {boolean} [p_exclude_raycast_shapes]
      */
     body_test_motion(p_body, p_from, p_motion, p_infinite_inertia, p_margin = 0.001, r_result = null, p_exclude_raycast_shapes = true) {
-        return p_body.space.body_test_motion(p_body, p_from, p_motion, p_infinite_inertia, p_margin, r_result, p_exclude_raycast_shapes);
+        return p_body.space.test_body_motion(p_body, p_from, p_motion, p_infinite_inertia, p_margin, r_result, p_exclude_raycast_shapes);
     }
 
     /* JOINT API */
