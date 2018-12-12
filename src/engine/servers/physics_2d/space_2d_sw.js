@@ -136,10 +136,13 @@ export default class Space2DSW {
     constructor() {
         this._active = false;
 
-        this.elapsed_time = new Array(ElapsedTime.MAX);
+        /** @type {number[]} */
+        this.elapsed_time = new Array(ElapsedTime.MAX); for (let i = 0; i < this.elapsed_time.length; i++) this.elapsed_time[i] = 0;
 
         /** @type {Physics2DDirectSpaceStateSW} */
-        this.direct_access = null;
+        this.direct_access = new Physics2DDirectSpaceStateSW();
+        this.direct_access.space = this;
+
         this.self = this;
 
         /** @type {BroadPhase2D} */
@@ -166,19 +169,20 @@ export default class Space2DSW {
          */
         this.default_area = null;
 
-        this.contact_recycle_radius = 0;
-        this.contact_max_separation = 0;
-        this.contact_max_allowed_penetration = 0;
-        this.constraint_bias = 0;
+        this.contact_recycle_radius = 1;
+        this.contact_max_separation = 1.5;
+        this.contact_max_allowed_penetration = 0.3;
+        this.constraint_bias = 0.2;
 
         /** @type {CollisionObject2DSW[]} */
         this.intersection_query_results = new Array(INTERSECTION_QUERY_MAX);
         /** @type {number[]} */
         this.intersection_query_subindex_results = new Array(INTERSECTION_QUERY_MAX);
 
-        this.body_linear_velocity_sleep_threshold = 0;
-        this.body_angular_velocity_sleep_threshold = 0;
-        this.body_time_to_sleep = 0;
+        // TODO: load from project.godot
+        this.body_linear_velocity_sleep_threshold = 2;
+        this.body_angular_velocity_sleep_threshold = 8 / 180 * Math.PI;
+        this.body_time_to_sleep = 0.5;
 
         this.island_count = 0;
         this.active_objects = 0;

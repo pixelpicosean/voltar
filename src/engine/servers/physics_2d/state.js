@@ -371,7 +371,7 @@ export class Physics2DDirectSpaceStateSW {
      * @param {boolean} [p_collide_with_bodies=true]
      * @param {boolean} [p_collide_with_areas=false]
      */
-    intersect_ray(p_from, p_to, r_result, p_exclude = undefined, p_collision_mask = 0xFFFFFFFF, p_collide_with_bodies = true, p_collide_with_areas = false) {
+    intersect_ray(p_from, p_to, r_result, p_exclude = new Set(), p_collision_mask = 0xFFFFFFFF, p_collide_with_bodies = true, p_collide_with_areas = false) {
         const begin = p_from.clone();
         const end = p_to.clone();
         const normal = end.clone().subtract(begin).normalize();
@@ -422,6 +422,7 @@ export class Physics2DDirectSpaceStateSW {
                     res_point.copy(shape_point);
                     inv_xform.basis_xform_inv(shape_normal, res_normal).normalize();
                     res_shape = shape_idx;
+                    res_obj = col_obj;
                     collided = true;
                 }
             }
