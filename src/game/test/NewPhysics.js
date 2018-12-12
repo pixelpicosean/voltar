@@ -39,7 +39,9 @@ class Ball extends v.KinematicBody2D {
      */
     _physics_process(delta) {
         // this.move_and_collide(this.motion.copy(this.velocity).scale(delta));
-        this.move_and_slide(this.velocity);
+        const vel = this.move_and_slide(this.velocity);
+        this.velocity.copy(vel);
+        v.Vector2.delete(vel);
     }
 }
 
