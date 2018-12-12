@@ -127,8 +127,8 @@ export class Area2Pair2DSW extends Constraint2DSW {
                 result = true;
             }
 
-            Matrix.delete(xform_a);
-            Matrix.delete(xform_b);
+            Matrix.free(xform_a);
+            Matrix.free(xform_b);
         }
 
         if (result !== this.colliding) {

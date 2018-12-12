@@ -99,7 +99,7 @@ export default class CollisionObject2DSW {
             xform.xform_rect(shape_aabb, shape_aabb);
             s.aabb_cache.copy(shape_aabb);
             s.aabb_cache.grow_to((s.aabb_cache.width + s.aabb_cache.height) * 0.5 * 0.05);
-            Rectangle.delete(shape_aabb);
+            Rectangle.free(shape_aabb);
 
             this.space.broadphase.move(s.bpid, s.aabb_cache);
         }
@@ -129,10 +129,10 @@ export default class CollisionObject2DSW {
             const xform = this.transform.clone().append(s.xform);
             xform.xform_rect(shape_aabb, shape_aabb);
             s.aabb_cache.copy(shape_aabb);
-            const rect = Rectangle.create(shape_aabb.x + p_motion.x, shape_aabb.y + p_motion.y, shape_aabb.width, shape_aabb.height);
+            const rect = Rectangle.new(shape_aabb.x + p_motion.x, shape_aabb.y + p_motion.y, shape_aabb.width, shape_aabb.height);
             s.aabb_cache.merge_to(rect);
-            Rectangle.delete(shape_aabb);
-            Rectangle.delete(rect);
+            Rectangle.free(shape_aabb);
+            Rectangle.free(rect);
 
             this.space.broadphase.move(s.bpid, s.aabb_cache);
         }

@@ -441,7 +441,7 @@ export class KinematicBody2D extends PhysicsBody2D {
             this.set_global_transform(gt);
         }
 
-        Matrix.delete(gt);
+        Matrix.free(gt);
         return colliding;
     }
 
@@ -463,7 +463,7 @@ export class KinematicBody2D extends PhysicsBody2D {
 
         const gt = this.get_global_transform().clone();
 
-        const recover = Vector2.create();
+        const recover = Vector2.new();
         const hits = this.rid.space.test_body_ray_separation(this.rid, gt, p_infinite_inertia, recover, sep_res, 8, this.margin);
         let deepest = -1;
         let deepest_depth = 0;
@@ -489,12 +489,12 @@ export class KinematicBody2D extends PhysicsBody2D {
             r_collision.travel.copy(recover);
             r_collision.remainder.set(0, 0);
 
-            Matrix.delete(gt);
-            Vector2.delete(recover);
+            Matrix.free(gt);
+            Vector2.free(recover);
             return true;
         } else {
-            Matrix.delete(gt);
-            Vector2.delete(recover);
+            Matrix.free(gt);
+            Vector2.free(recover);
             return false;
         }
     }
@@ -577,12 +577,12 @@ export class KinematicBody2D extends PhysicsBody2D {
                                     gt.ty -= collision.travel.y;
                                     this.set_global_transform(gt);
 
-                                    Vector2.delete(floor_motion);
-                                    Vector2.delete(motion);
-                                    Vector2.delete(lv_n);
+                                    Vector2.free(floor_motion);
+                                    Vector2.free(motion);
+                                    Vector2.free(lv_n);
                                     Collision.free(collision);
-                                    Vector2.delete(vec);
-                                    Matrix.delete(gt);
+                                    Vector2.free(vec);
+                                    Matrix.free(gt);
                                     return Vector2.ZERO;
                                 }
                             }
@@ -619,9 +619,9 @@ export class KinematicBody2D extends PhysicsBody2D {
             }
         }
 
-        Vector2.delete(floor_motion);
-        Vector2.delete(motion);
-        Vector2.delete(lv_n);
+        Vector2.free(floor_motion);
+        Vector2.free(motion);
+        Vector2.free(lv_n);
 
         return lv;
     }
@@ -645,7 +645,7 @@ export class KinematicBody2D extends PhysicsBody2D {
         const col = Collision.new();
         const gt = this.get_global_transform().clone();
 
-        const n_floor_dir = Vector2.create();
+        const n_floor_dir = Vector2.new();
         if (this._move(p_snap, p_infinite_inertia, col, false, true)) {
             gt.tx += col.travel.x;
             gt.ty += col.travel.y;
@@ -659,8 +659,8 @@ export class KinematicBody2D extends PhysicsBody2D {
         }
 
         Collision.free(col);
-        Matrix.delete(gt);
-        Vector2.delete(n_floor_dir);
+        Matrix.free(gt);
+        Vector2.free(n_floor_dir);
         return ret;
     }
 

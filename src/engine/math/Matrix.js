@@ -17,7 +17,7 @@ export default class Matrix {
      * @param {number} [tx=0] - x translation
      * @param {number} [ty=0] - y translation
      */
-    static create(a = 1, b = 0, c = 0, d = 1, tx = 0, ty = 0) {
+    static new(a = 1, b = 0, c = 0, d = 1, tx = 0, ty = 0) {
         const m = pool.pop();
         if (m) {
             return m.set(a, b, c, d, tx, ty);
@@ -28,7 +28,7 @@ export default class Matrix {
     /**
      * @param {Matrix} m
      */
-    static delete(m) {
+    static free(m) {
         if (m) {
             pool.push(m);
         }
@@ -232,9 +232,9 @@ export default class Matrix {
      */
     get_elements(p_row) {
         switch (p_row) {
-            case 0: return Vector2.create(this.a, this.b);
-            case 1: return Vector2.create(this.c, this.d);
-            case 2: return Vector2.create(this.tx, this.ty);
+            case 0: return Vector2.new(this.a, this.b);
+            case 1: return Vector2.new(this.c, this.d);
+            case 2: return Vector2.new(this.tx, this.ty);
         }
     }
 
@@ -243,9 +243,9 @@ export default class Matrix {
      */
     get_axis(p_axis) {
         switch (p_axis) {
-            case 0: return Vector2.create(this.a, this.b);
-            case 1: return Vector2.create(this.c, this.d);
-            case 2: return Vector2.create(this.tx, this.ty);
+            case 0: return Vector2.new(this.a, this.b);
+            case 1: return Vector2.new(this.c, this.d);
+            case 2: return Vector2.new(this.tx, this.ty);
         }
     }
 
@@ -273,7 +273,7 @@ export default class Matrix {
      * @param {Vector2} [r_out] - The point that the new position is assigned to (allowed to be same as input)
      * @return {Vector2} The new point, transformed through this matrix
      */
-    basis_xform(p_vec, r_out = Vector2.create()) {
+    basis_xform(p_vec, r_out = Vector2.new()) {
         const x = (this.a * p_vec.x) + (this.c * p_vec.y);
         const y = (this.b * p_vec.x) + (this.d * p_vec.y);
 
@@ -285,7 +285,7 @@ export default class Matrix {
      * @param {Vector2} [r_out] - The point that the new position is assigned to (allowed to be same as input)
      * @return {Vector2} The new point, inverse-transformed through this matrix
      */
-    basis_xform_inv(p_vec, r_out = Vector2.create()) {
+    basis_xform_inv(p_vec, r_out = Vector2.new()) {
         const x = (this.a * p_vec.x) + (this.b * p_vec.y);
         const y = (this.c * p_vec.x) + (this.d * p_vec.y);
 
@@ -300,7 +300,7 @@ export default class Matrix {
      * @param {Vector2} [r_out] - The point that the new position is assigned to (allowed to be same as input)
      * @return {Vector2} The new point, transformed through this matrix
      */
-    xform(p_vec, r_out = Vector2.create()) {
+    xform(p_vec, r_out = Vector2.new()) {
         const x = (this.a * p_vec.x) + (this.c * p_vec.y) + this.tx;
         const y = (this.b * p_vec.x) + (this.d * p_vec.y) + this.ty;
 
@@ -315,7 +315,7 @@ export default class Matrix {
      * @param {Vector2} [r_out] - The point that the new position is assigned to (allowed to be same as input)
      * @return {Vector2} The new point, inverse-transformed through this matrix
      */
-    xform_inv(p_vec, r_out = Vector2.create()) {
+    xform_inv(p_vec, r_out = Vector2.new()) {
         const x = this.a * (p_vec.x - this.tx) + this.b * (p_vec.y - this.ty);
         const y = this.c * (p_vec.x - this.tx) + this.d * (p_vec.y - this.ty);
 
@@ -326,23 +326,23 @@ export default class Matrix {
      * @param {Rectangle} p_rect
      * @param {Rectangle} [r_out]
      */
-    xform_rect(p_rect, r_out = Rectangle.create()) {
-        const x = Vector2.create(this.a * p_rect.width, this.b * p_rect.width);
-        const y = Vector2.create(this.c * p_rect.height, this.d * p_rect.height);
-        const pos = Vector2.create(p_rect.x, p_rect.y);
+    xform_rect(p_rect, r_out = Rectangle.new()) {
+        const x = Vector2.new(this.a * p_rect.width, this.b * p_rect.width);
+        const y = Vector2.new(this.c * p_rect.height, this.d * p_rect.height);
+        const pos = Vector2.new(p_rect.x, p_rect.y);
         this.xform(pos, pos);
 
         r_out.x = pos.x;
         r_out.y = pos.y;
-        const vec = Vector2.create();
+        const vec = Vector2.new();
         r_out.expand_to(vec.copy(pos).add(x));
         r_out.expand_to(vec.copy(pos).add(y));
         r_out.expand_to(vec.copy(pos).add(x).add(y));
 
-        Vector2.delete(x);
-        Vector2.delete(y);
-        Vector2.delete(pos);
-        Vector2.delete(vec);
+        Vector2.free(x);
+        Vector2.free(y);
+        Vector2.free(pos);
+        Vector2.free(vec);
 
         return r_out;
     }
@@ -435,8 +435,8 @@ export default class Matrix {
     }
 
     orthonormalize() {
-        const x = Vector2.create(this.a, this.b);
-        const y = Vector2.create(this.c, this.d);
+        const x = Vector2.new(this.a, this.b);
+        const y = Vector2.new(this.c, this.d);
 
         x.normalize();
         this.a = x.x;
@@ -448,8 +448,8 @@ export default class Matrix {
         this.c = y.x;
         this.d = y.y;
 
-        Vector2.delete(x);
-        Vector2.delete(y);
+        Vector2.free(x);
+        Vector2.free(y);
 
         return this;
     }
@@ -626,7 +626,7 @@ export default class Matrix {
      * @return {Matrix} A copy of this matrix. Good for chaining method calls.
      */
     clone() {
-        return Matrix.create(
+        return Matrix.new(
             this.a,
             this.b,
             this.c,

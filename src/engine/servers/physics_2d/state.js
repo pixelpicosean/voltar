@@ -531,7 +531,7 @@ export class Physics2DDirectSpaceStateSW {
             return 0;
         }
 
-        const aabb = Rectangle.create(
+        const aabb = Rectangle.new(
             p_point.x - 0.00001,
             p_point.y - 0.00001,
             0.00002,
@@ -584,7 +584,7 @@ export class Physics2DDirectSpaceStateSW {
             cc++;
         }
 
-        Rectangle.delete(aabb);
+        Rectangle.free(aabb);
 
         return cc;
     }

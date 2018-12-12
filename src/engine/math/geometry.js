@@ -26,10 +26,10 @@ export function get_closest_points_between_segments(p1, q1, p2, q2, c1, c2) {
         const c = c1.clone().subtract(c2);
         const res = Math.sqrt(c.dot(c));
 
-        Vector2.delete(d1);
-        Vector2.delete(d2);
-        Vector2.delete(r);
-        Vector2.delete(c);
+        Vector2.free(d1);
+        Vector2.free(d2);
+        Vector2.free(r);
+        Vector2.free(c);
 
         return res;
     }
@@ -76,10 +76,10 @@ export function get_closest_points_between_segments(p1, q1, p2, q2, c1, c2) {
     const c = c1.clone().subtract(c2);
     const res = Math.sqrt(c.dot(c));
 
-    Vector2.delete(d1);
-    Vector2.delete(d2);
-    Vector2.delete(r);
-    Vector2.delete(c);
+    Vector2.free(d1);
+    Vector2.free(d2);
+    Vector2.free(r);
+    Vector2.free(c);
 
     return res;
 }
@@ -93,8 +93,8 @@ export function get_closest_point_to_segment_uncapped_2d(p_point, p_segment) {
     const n = p_segment[1].clone().subtract(p_segment[0]);
     const l = n.length();
     if (l < 1e-10) {
-        Vector2.delete(p);
-        Vector2.delete(n);
+        Vector2.free(p);
+        Vector2.free(n);
 
         return p_segment[0];
     }

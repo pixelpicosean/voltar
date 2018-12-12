@@ -265,11 +265,11 @@ export default class BodyPair2DSW extends Constraint2DSW {
                 global_B.add(offset_A);
 
                 if (gather_A) {
-                    const crB = Vector2.create(-B.angular_velocity * c.rB.y, B.angular_velocity * c.rB.x);
+                    const crB = Vector2.new(-B.angular_velocity * c.rB.y, B.angular_velocity * c.rB.x);
                     A.add_contact(global_A, c.normal.clone().negate(), depth, this.shape_A, global_B, this.shape_B, B.instance, B.self, crB.add(B.linear_velocity));
                 }
                 if (gather_B) {
-                    const crA = Vector2.create(-A.angular_velocity * c.rA.y, A.angular_velocity * c.rA.x);
+                    const crA = Vector2.new(-A.angular_velocity * c.rA.y, A.angular_velocity * c.rA.x);
                     A.add_contact(global_B, c.normal, depth, this.shape_B, global_A, this.shape_A, A.instance, A.self, crA.add(A.linear_velocity));
                 }
             }
@@ -307,8 +307,8 @@ export default class BodyPair2DSW extends Constraint2DSW {
 
             c.bounce = combine_bounce(A, B);
             if (c.bounce) {
-                const crA = Vector2.create(-A.angular_velocity * c.rA.y, A.angular_velocity * c.rA.x);
-                const crB = Vector2.create(-B.angular_velocity * c.rB.y, B.angular_velocity * c.rB.x);
+                const crA = Vector2.new(-A.angular_velocity * c.rA.y, A.angular_velocity * c.rA.x);
+                const crB = Vector2.new(-B.angular_velocity * c.rB.y, B.angular_velocity * c.rB.x);
                 const dv = B.linear_velocity.clone().add(crB).subtract(A.linear_velocity).subtract(crA);
                 c.bounce = c.bounce * dv.dot(c.normal);
             }
@@ -339,12 +339,12 @@ export default class BodyPair2DSW extends Constraint2DSW {
 
             // relative velocity at contact
 
-            const crA = Vector2.create(-A.angular_velocity * c.rA.y, A.angular_velocity * c.rA.x);
-            const crB = Vector2.create(-B.angular_velocity * c.rB.y, B.angular_velocity * c.rB.x);
+            const crA = Vector2.new(-A.angular_velocity * c.rA.y, A.angular_velocity * c.rA.x);
+            const crB = Vector2.new(-B.angular_velocity * c.rB.y, B.angular_velocity * c.rB.x);
             const dv = B.linear_velocity.clone().add(crB).subtract(A.linear_velocity).subtract(crA);
 
-            const crbA = Vector2.create(-A.biased_angular_velocity * c.rA.y, A.biased_angular_velocity * c.rA.x);
-            const crbB = Vector2.create(-B.biased_angular_velocity * c.rB.y, B.biased_angular_velocity * c.rB.x);
+            const crbA = Vector2.new(-A.biased_angular_velocity * c.rA.y, A.biased_angular_velocity * c.rA.x);
+            const crbB = Vector2.new(-B.biased_angular_velocity * c.rB.y, B.biased_angular_velocity * c.rB.x);
             const dbv = B.biased_linear_velocity.clone().add(crbB).subtract(A.biased_linear_velocity).subtract(crbA);
 
             const vn = dv.dot(c.normal);
@@ -409,7 +409,7 @@ export default class BodyPair2DSW extends Constraint2DSW {
         // cast a segment from support in motion normal, in the same direction of motion
         // by motion length support is the worst case collision point, so real collision
         // happened before
-        const s = [Vector2.create(), Vector2.create()];
+        const s = [Vector2.new(), Vector2.new()];
         const a = p_A.get_shape(p_shape_A).get_supports(p_xform_A.basis_xform(mnormal).normalize(), s);
         const from = p_xform_A.xform(s[0], s[0]);
         const to = from.clone().add(motion);
@@ -420,8 +420,8 @@ export default class BodyPair2DSW extends Constraint2DSW {
         const local_from = from_inv.xform(from.clone().subtract(mnormal.clone().scale(mlen * 0.1)));
         const local_to = from_inv.xform(to);
 
-        const rpos = Vector2.create();
-        const rnorm = Vector2.create();
+        const rpos = Vector2.new();
+        const rnorm = Vector2.new();
         if (!p_B.get_shape(p_shape_B).intersect_segment(local_from, local_to, rpos, rnorm)) {
             return false;
         }

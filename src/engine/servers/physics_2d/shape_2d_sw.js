@@ -84,7 +84,7 @@ export class Shape2DSW {
      * @param {Vector2} [out]
      * @returns {Vector2}
      */
-    get_support(p_normal, out = Vector2.create()) {
+    get_support(p_normal, out = Vector2.new()) {
         const res = [out, tmp_vec.set(0, 0)];
         this.get_supports(p_normal, res);
         return out;
@@ -271,7 +271,7 @@ export class CircleShape2DSW extends Shape2DSW {
         r_point.copy(p_begin).add(line_vec.x * res, line_vec.y * res);
         r_normal.copy(r_point).normalize();
 
-        Vector2.delete(line_vec);
+        Vector2.free(line_vec);
         return true;
     }
     /**
@@ -343,7 +343,7 @@ export class RectangleShape2DSW extends Shape2DSW {
      * @returns {Number}
      */
     get_supports(p_normal, r_supports) {
-        const ag = Vector2.create();
+        const ag = Vector2.new();
 
         for (let i = 0; i < 2; i++) {
             if (i === 0) {
@@ -414,7 +414,7 @@ export class RectangleShape2DSW extends Shape2DSW {
     get_moment_of_inertia(p_mass, p_scale) {
         const he2 = this.half_extents.clone().scale(2).multiply(p_scale);
         const res = p_mass * he2.dot(he2) / 12;
-        Vector2.delete(he2);
+        Vector2.free(he2);
         return res;
     }
 
@@ -442,7 +442,7 @@ export class RectangleShape2DSW extends Shape2DSW {
         r_result.min = Number.MAX_VALUE;
         r_result.max = -Number.MAX_VALUE;
 
-        const local_normal = Vector2.create();
+        const local_normal = Vector2.new();
         for (let i = 0; i < 4; i++) {
             local_normal.set(
                 ((i & 1) * 2 - 1) * this.half_extents.x,
@@ -458,7 +458,7 @@ export class RectangleShape2DSW extends Shape2DSW {
                 r_result.min = d;
             }
         }
-        Vector2.delete(local_normal);
+        Vector2.free(local_normal);
 
         return r_result;
     }
@@ -470,11 +470,11 @@ export class RectangleShape2DSW extends Shape2DSW {
      */
     get_circle_axis(p_xform, p_xform_inv, p_circle) {
         const local_v = p_xform_inv.xform(p_circle);
-        const he = Vector2.create(
+        const he = Vector2.new(
             (local_v.x < 0) ? -this.half_extents.x : this.half_extents.x,
             (local_v.y < 0) ? -this.half_extents.y : this.half_extents.y
         );
-        Vector2.delete(local_v);
+        Vector2.free(local_v);
         return p_xform.xform(he, he).subtract(p_circle).normalize();
     }
     /**
@@ -485,41 +485,41 @@ export class RectangleShape2DSW extends Shape2DSW {
      * @param {Matrix} p_B_xform_inv
      */
     get_box_axis(p_xform, p_xform_inv, p_B, p_B_xform, p_B_xform_inv) {
-        const a = Vector2.create();
-        const b = Vector2.create();
+        const a = Vector2.new();
+        const b = Vector2.new();
 
         {
-            const local_v = Vector2.create();
+            const local_v = Vector2.new();
             p_xform_inv.xform(p_B_xform.origin, local_v);
 
-            const he = Vector2.create(
+            const he = Vector2.new(
                 (local_v.x < 0) ? -this.half_extents.x : this.half_extents.x,
                 (local_v.y < 0) ? -this.half_extents.y : this.half_extents.y
             )
 
             p_xform.xform(he, a);
 
-            Vector2.delete(local_v);
-            Vector2.delete(he);
+            Vector2.free(local_v);
+            Vector2.free(he);
         }
         {
-            const local_v = Vector2.create();
+            const local_v = Vector2.new();
             p_B_xform_inv.xform(p_xform.origin, local_v);
 
-            const he = Vector2.create(
+            const he = Vector2.new(
                 (local_v.x < 0) ? -p_B.half_extents.x : p_B.half_extents.x,
                 (local_v.y < 0) ? -p_B.half_extents.y : p_B.half_extents.y
             )
 
             p_xform.xform(he, b);
 
-            Vector2.delete(local_v);
-            Vector2.delete(he);
+            Vector2.free(local_v);
+            Vector2.free(he);
         }
 
         a.subtract(b).normalize();
 
-        Vector2.delete(b);
+        Vector2.free(b);
         return a;
     }
 }

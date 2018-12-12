@@ -17,7 +17,7 @@ export default class Rectangle {
      * @param {number} p_width
      * @param {number} p_height
      */
-    static create(p_x=0, p_y=0, p_width=0, p_height=0) {
+    static new(p_x=0, p_y=0, p_width=0, p_height=0) {
         const r = pool.pop();
         if (!r) {
             return new Rectangle(p_x, p_y, p_width, p_height);
@@ -28,7 +28,7 @@ export default class Rectangle {
     /**
      * @param {Rectangle} p_rect
      */
-    static delete(p_rect) {
+    static free(p_rect) {
         if (p_rect) {
             pool.push(p_rect);
         }
@@ -137,7 +137,7 @@ export default class Rectangle {
      * @return {Rectangle} a copy of the rectangle
      */
     clone() {
-        return Rectangle.create(this.x, this.y, this.width, this.height);
+        return Rectangle.new(this.x, this.y, this.width, this.height);
     }
 
     /**
@@ -432,7 +432,7 @@ export default class Rectangle {
             r_pos.copy(p_from).add(rel.scale(min));
         }
 
-        Vector2.delete(rel);
+        Vector2.free(rel);
 
         return true;
     }

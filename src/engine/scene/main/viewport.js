@@ -41,11 +41,11 @@ export default class Viewport extends Node2D {
         this.find_world_2d()._update_viewport(this, xformed_rect);
         this.find_world_2d()._update();
 
-        Rectangle.delete(abstracted_rect);
+        Rectangle.free(abstracted_rect);
     }
 
     get_visible_rect() {
-        const r = Rectangle.create();
+        const r = Rectangle.new();
 
         if (this.size.is_zero()) {
             r.width = window.innerWidth;

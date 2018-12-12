@@ -317,7 +317,7 @@ export default class Area2DSW extends CollisionObject2DSW {
 
         const m = p_transform.clone().affine_inverse();
         this._set_inv_transform(m);
-        Matrix.delete(m);
+        Matrix.free(m);
     }
 
     /**

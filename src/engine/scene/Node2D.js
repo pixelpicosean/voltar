@@ -1040,7 +1040,7 @@ export default class Node2D extends VObject {
             .affine_inverse()
             .append(p_transform);
         this.transform.set_from_matrix(xform).update_transform(this.parent.transform);
-        Matrix.delete(xform);
+        Matrix.free(xform);
         return this;
     }
 

@@ -260,7 +260,7 @@ export default class BroadPhase2D {
         const pos = p_from.clone().divide(this.cell_size, this.cell_size).floor();
         const end = p_to.clone().divide(this.cell_size, this.cell_size).floor();
 
-        const step = Vector2.create(Math.sign(dir.x), Math.sign(dir.y));
+        const step = Vector2.new(Math.sign(dir.x), Math.sign(dir.y));
 
         const max = new Vector2();
 
@@ -408,7 +408,7 @@ export default class BroadPhase2D {
      */
     _enter_grid(p_elem, p_rect, p_static) {
         // use magic number to avoid floating point issues
-        const sz = Vector2.create(
+        const sz = Vector2.new(
             p_rect.width / this.cell_size * LARGE_ELEMENT_FI,
             p_rect.height / this.cell_size * LARGE_ELEMENT_FI
         )
@@ -437,8 +437,8 @@ export default class BroadPhase2D {
             return;
         }
 
-        const from = Vector2.create(Math.floor(p_rect.x / this.cell_size), Math.floor(p_rect.y / this.cell_size));
-        const to = Vector2.create(Math.floor((p_rect.x + p_rect.width) / this.cell_size), Math.floor((p_rect.y + p_rect.height) / this.cell_size));
+        const from = Vector2.new(Math.floor(p_rect.x / this.cell_size), Math.floor(p_rect.y / this.cell_size));
+        const to = Vector2.new(Math.floor((p_rect.x + p_rect.width) / this.cell_size), Math.floor((p_rect.y + p_rect.height) / this.cell_size));
 
         for (let i = from.x; i <= to.x; i++) {
             for (let j = from.y; j <= to.y; j++) {
@@ -524,9 +524,9 @@ export default class BroadPhase2D {
             this._pair_attempt(elem, p_elem);
         }
 
-        Vector2.delete(sz);
-        Vector2.delete(from);
-        Vector2.delete(to);
+        Vector2.free(sz);
+        Vector2.free(from);
+        Vector2.free(to);
     }
     /**
      * @param {Element} p_elem
@@ -535,7 +535,7 @@ export default class BroadPhase2D {
      */
     _exit_grid(p_elem, p_rect, p_static) {
         // use magic number to avoid floating point issues
-        const sz = Vector2.create(
+        const sz = Vector2.new(
             p_rect.width / this.cell_size * LARGE_ELEMENT_FI,
             p_rect.height / this.cell_size * LARGE_ELEMENT_FI
         )
@@ -553,8 +553,8 @@ export default class BroadPhase2D {
             return;
         }
 
-        const from = Vector2.create(Math.floor(p_rect.x / this.cell_size), Math.floor(p_rect.y / this.cell_size));
-        const to = Vector2.create(Math.floor((p_rect.x + p_rect.width) / this.cell_size), Math.floor((p_rect.y + p_rect.height) / this.cell_size));
+        const from = Vector2.new(Math.floor(p_rect.x / this.cell_size), Math.floor(p_rect.y / this.cell_size));
+        const to = Vector2.new(Math.floor((p_rect.x + p_rect.width) / this.cell_size), Math.floor((p_rect.y + p_rect.height) / this.cell_size));
 
         for (let i = from.x; i <= to.x; i++) {
             for (let j = from.y; j <= to.y; j++) {
@@ -650,9 +650,9 @@ export default class BroadPhase2D {
             this._unpair_attempt(p_elem, elem);
         }
 
-        Vector2.delete(sz);
-        Vector2.delete(from);
-        Vector2.delete(to);
+        Vector2.free(sz);
+        Vector2.free(from);
+        Vector2.free(to);
     }
     /**
      *

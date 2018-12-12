@@ -15,7 +15,7 @@ export default class Vector2 {
      * @param {number} [p_x]
      * @param {number} [p_y]
      */
-    static create(p_x=0, p_y=0) {
+    static new(p_x=0, p_y=0) {
         const vec = pool.pop();
         if (!vec) {
             return new Vector2(p_x, p_y);
@@ -26,7 +26,7 @@ export default class Vector2 {
     /**
      * @param {Vector2} vec
      */
-    static delete(vec) {
+    static free(vec) {
         if (vec) {
             pool.push(vec);
         }
@@ -204,7 +204,7 @@ export default class Vector2 {
      * Add the vector by another vector or number.
      *
      * @param {Vector2Like|number} x
-     * @param {Vector2Like|number} [y]
+     * @param {number} [y]
      * @returns {this}
      */
     add(x, y) {
@@ -226,7 +226,7 @@ export default class Vector2 {
      * Subtract the vector by another vector or number.
      *
      * @param {Vector2Like|number} x
-     * @param {Vector2Like|number} [y]
+     * @param {number} [y]
      * @returns {this}
      */
     subtract(x, y) {
@@ -248,7 +248,7 @@ export default class Vector2 {
      * Multiply the vector by another vector or number.
      *
      * @param {Vector2Like|number} x
-     * @param {Vector2Like|number} [y]
+     * @param {number} [y]
      * @returns {this}
      */
     multiply(x, y) {
@@ -270,7 +270,7 @@ export default class Vector2 {
      * Divide x and y by another vector or number.
      *
      * @param {Vector2Like|number} x
-     * @param {Vector2Like|number} [y]
+     * @param {number} [y]
      * @returns {this}
      */
     divide(x, y) {
@@ -451,7 +451,7 @@ export default class Vector2 {
     plane_project(p_d, p_vec) {
         const self = this.clone();
         const vec = p_vec.clone().subtract(self.scale(this.dot(p_vec) - p_d));
-        Vector2.delete(self);
+        Vector2.free(self);
         return vec;
     }
 

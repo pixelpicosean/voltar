@@ -151,7 +151,7 @@ function _generate_contacts_point_point(p_points_A, p_point_count_A, p_points_B,
 function _generate_contacts_point_edge(p_points_A, p_point_count_A, p_points_B, p_point_count_B, p_collector) {
     const closest_B = get_closest_point_to_segment_uncapped_2d(p_points_A[0], p_points_B);
     p_collector.call(p_points_A[0], closest_B);
-    Vector2.delete(closest_B);
+    Vector2.free(closest_B);
 }
 class _generate_contacts_Pair {
     constructor() {
@@ -203,7 +203,7 @@ function _generate_contacts_edge_edge(p_points_A, p_point_count_A, p_points_B, p
                 continue;
             p_collector.call(a, b);
 
-            Vector2.delete(b);
+            Vector2.free(b);
         } else {
             const b = p_points_B[dvec[i].idx];
             const a = n.plane_project(dA, b);
@@ -211,7 +211,7 @@ function _generate_contacts_edge_edge(p_points_A, p_point_count_A, p_points_B, p
                 continue;
             p_collector.call(a, b);
 
-            Vector2.delete(a);
+            Vector2.free(a);
         }
     }
 }
@@ -320,11 +320,11 @@ class SeparatorAxisTest2D {
         if (this.cast_A) {
             const na = this.motion_A.normalized();
             if (!this.test_axis(na)) {
-                Vector2.delete(na);
+                Vector2.free(na);
                 return false;
             }
             if (!this.test_axis(na.tangent())) {
-                Vector2.delete(na);
+                Vector2.free(na);
                 return false;
             }
         }
@@ -332,11 +332,11 @@ class SeparatorAxisTest2D {
         if (this.cast_B) {
             const nb = this.motion_B.normalized();
             if (!this.test_axis(nb)) {
-                Vector2.delete(nb);
+                Vector2.free(nb);
                 return false;
             }
             if (!this.test_axis(nb.tangent())) {
-                Vector2.delete(nb);
+                Vector2.free(nb);
                 return false;
             }
         }
@@ -394,7 +394,7 @@ class SeparatorAxisTest2D {
                 this.callback.sep_axis[0].copy(axis);
             }
 
-            Vector2.delete(axis);
+            Vector2.free(axis);
             return false;
         }
 
@@ -412,7 +412,7 @@ class SeparatorAxisTest2D {
             }
         }
 
-        Vector2.delete(axis);
+        Vector2.free(axis);
         return true;
     }
     generate_contacts() {
@@ -487,7 +487,7 @@ class SeparatorAxisTest2D {
  * @param {Vector2} m_b
  */
 const TEST_POINT = (separator, cast_A, cast_B, p_motion_A, p_motion_B, m_a, m_b) => {
-    const vec = Vector2.create();
+    const vec = Vector2.new();
     const result = (
         (!separator.test_axis((vec.copy(m_a).subtract(m_b).normalize())))
         ||
@@ -497,7 +497,7 @@ const TEST_POINT = (separator, cast_A, cast_B, p_motion_A, p_motion_B, m_a, m_b)
         ||
         (cast_A && cast_B && !separator.test_axis(vec.copy(m_a).add(p_motion_A).subtract(m_b).subtract(p_motion_B).normalize()))
     );
-    Vector2.delete(vec);
+    Vector2.free(vec);
     return result;
 }
 
@@ -618,16 +618,16 @@ const _collision_circle_rectangle = (cast_A, cast_B, with_margin) => {
         const axis_1 = p_transform_B.get_elements(1);
 
         if (!separator.test_axis(axis_0.normalize())) {
-            Vector2.delete(sphere);
-            Vector2.delete(axis_0);
-            Vector2.delete(axis_1);
+            Vector2.free(sphere);
+            Vector2.free(axis_0);
+            Vector2.free(axis_1);
             return;
         }
 
         if (!separator.test_axis(axis_1.normalize())) {
-            Vector2.delete(sphere);
-            Vector2.delete(axis_0);
-            Vector2.delete(axis_1);
+            Vector2.free(sphere);
+            Vector2.free(axis_0);
+            Vector2.free(axis_1);
             return;
         }
 
@@ -635,72 +635,72 @@ const _collision_circle_rectangle = (cast_A, cast_B, with_margin) => {
         {
             const c_axis = p_rectangle_B.get_circle_axis(p_transform_B, binv, sphere);
             if (!separator.test_axis(c_axis)) {
-                Vector2.delete(sphere);
-                Vector2.delete(axis_0);
-                Vector2.delete(axis_1);
-                Matrix.delete(binv);
+                Vector2.free(sphere);
+                Vector2.free(axis_0);
+                Vector2.free(axis_1);
+                Matrix.free(binv);
 
-                Vector2.delete(c_axis);
+                Vector2.free(c_axis);
                 return;
             }
-            Vector2.delete(c_axis);
+            Vector2.free(c_axis);
         }
 
         if (cast_A) {
             const sphereofs = sphere.clone().add(p_motion_A);
             const c_axis = p_rectangle_B.get_circle_axis(p_transform_B, binv, sphereofs);
             if (!separator.test_axis(c_axis)) {
-                Vector2.delete(sphere);
-                Vector2.delete(axis_0);
-                Vector2.delete(axis_1);
-                Matrix.delete(binv);
+                Vector2.free(sphere);
+                Vector2.free(axis_0);
+                Vector2.free(axis_1);
+                Matrix.free(binv);
 
-                Vector2.delete(sphereofs);
-                Vector2.delete(c_axis);
+                Vector2.free(sphereofs);
+                Vector2.free(c_axis);
                 return;
             }
-            Vector2.delete(sphereofs);
-            Vector2.delete(c_axis);
+            Vector2.free(sphereofs);
+            Vector2.free(c_axis);
         }
 
         if (cast_B) {
             const sphereofs = sphere.clone().add(p_motion_B);
             const c_axis = p_rectangle_B.get_circle_axis(p_transform_B, binv, sphereofs);
             if (!separator.test_axis(c_axis)) {
-                Vector2.delete(sphere);
-                Vector2.delete(axis_0);
-                Vector2.delete(axis_1);
-                Matrix.delete(binv);
+                Vector2.free(sphere);
+                Vector2.free(axis_0);
+                Vector2.free(axis_1);
+                Matrix.free(binv);
 
-                Vector2.delete(sphereofs);
-                Vector2.delete(c_axis);
+                Vector2.free(sphereofs);
+                Vector2.free(c_axis);
                 return;
             }
-            Vector2.delete(sphereofs);
-            Vector2.delete(c_axis);
+            Vector2.free(sphereofs);
+            Vector2.free(c_axis);
         }
 
         if (cast_A && cast_B) {
             const sphereofs = sphere.clone().add(p_motion_A).subtract(p_motion_B);
             const c_axis = p_rectangle_B.get_circle_axis(p_transform_B, binv, sphereofs);
             if (!separator.test_axis(c_axis)) {
-                Vector2.delete(sphere);
-                Vector2.delete(axis_0);
-                Vector2.delete(axis_1);
-                Matrix.delete(binv);
+                Vector2.free(sphere);
+                Vector2.free(axis_0);
+                Vector2.free(axis_1);
+                Matrix.free(binv);
 
-                Vector2.delete(sphereofs);
-                Vector2.delete(c_axis);
+                Vector2.free(sphereofs);
+                Vector2.free(c_axis);
                 return;
             }
-            Vector2.delete(sphereofs);
-            Vector2.delete(c_axis);
+            Vector2.free(sphereofs);
+            Vector2.free(c_axis);
         }
 
-        Vector2.delete(sphere);
-        Vector2.delete(axis_0);
-        Vector2.delete(axis_1);
-        Matrix.delete(binv);
+        Vector2.free(sphere);
+        Vector2.free(axis_0);
+        Vector2.free(axis_1);
+        Matrix.free(binv);
 
         separator.generate_contacts();
     }
@@ -758,47 +758,47 @@ const _collision_rectangle_rectangle = (cast_A, cast_B, with_margin) => {
         // box faces A
         const elem_A_0 = p_transform_A.get_elements(0).normalize();
         if (!separator.test_axis(elem_A_0)) {
-            Vector2.delete(elem_A_0);
+            Vector2.free(elem_A_0);
             return;
         }
 
         const elem_A_1 = p_transform_A.get_elements(1).normalize();
         if (!separator.test_axis(elem_A_1)) {
-            Vector2.delete(elem_A_0);
-            Vector2.delete(elem_A_1);
+            Vector2.free(elem_A_0);
+            Vector2.free(elem_A_1);
             return;
         }
 
         // box faces B
         const elem_B_0 = p_transform_B.get_elements(0).normalize();
         if (!separator.test_axis(elem_B_0)) {
-            Vector2.delete(elem_A_0);
-            Vector2.delete(elem_A_1);
-            Vector2.delete(elem_B_0);
+            Vector2.free(elem_A_0);
+            Vector2.free(elem_A_1);
+            Vector2.free(elem_B_0);
             return;
         }
 
         const elem_B_1 = p_transform_B.get_elements(1).normalize();
         if (!separator.test_axis(elem_B_1)) {
-            Vector2.delete(elem_A_0);
-            Vector2.delete(elem_A_1);
-            Vector2.delete(elem_B_0);
-            Vector2.delete(elem_B_1);
+            Vector2.free(elem_A_0);
+            Vector2.free(elem_A_1);
+            Vector2.free(elem_B_0);
+            Vector2.free(elem_B_1);
             return;
         }
 
-        Vector2.delete(elem_A_0);
-        Vector2.delete(elem_A_1);
-        Vector2.delete(elem_B_0);
-        Vector2.delete(elem_B_1);
+        Vector2.free(elem_A_0);
+        Vector2.free(elem_A_1);
+        Vector2.free(elem_B_0);
+        Vector2.free(elem_B_1);
 
         if (with_margin) {
             const inv_A = p_transform_A.clone().affine_inverse();
             const inv_B = p_transform_B.clone().affine_inverse();
 
             if (!separator.test_axis(p_rectangle_A.get_box_axis(p_transform_A, inv_A, p_rectangle_B, p_transform_B, inv_B))) {
-                Matrix.delete(inv_A);
-                Matrix.delete(inv_B);
+                Matrix.free(inv_A);
+                Matrix.free(inv_B);
                 return;
             }
 
@@ -817,13 +817,13 @@ const _collision_rectangle_rectangle = (cast_A, cast_B, with_margin) => {
                 if (cast_A) {
                     const box_axis = p_rectangle_A.get_box_axis(aofs, aofsinv, p_rectangle_B, p_transform_B, inv_B);
                     if (!separator.test_axis(box_axis)) {
-                        Matrix.delete(inv_A);
-                        Matrix.delete(inv_B);
-                        Matrix.delete(aofs);
-                        Matrix.delete(aofsinv);
-                        Matrix.delete(bofs);
-                        Matrix.delete(bofsinv);
-                        Vector2.delete(box_axis);
+                        Matrix.free(inv_A);
+                        Matrix.free(inv_B);
+                        Matrix.free(aofs);
+                        Matrix.free(aofsinv);
+                        Matrix.free(bofs);
+                        Matrix.free(bofsinv);
+                        Vector2.free(box_axis);
                         return;
                     }
                 }
@@ -831,13 +831,13 @@ const _collision_rectangle_rectangle = (cast_A, cast_B, with_margin) => {
                 if (cast_B) {
                     const box_axis = p_rectangle_A.get_box_axis(p_transform_A, inv_A, p_rectangle_B, bofs, bofsinv);
                     if (!separator.test_axis(box_axis)) {
-                        Matrix.delete(inv_A);
-                        Matrix.delete(inv_B);
-                        Matrix.delete(aofs);
-                        Matrix.delete(aofsinv);
-                        Matrix.delete(bofs);
-                        Matrix.delete(bofsinv);
-                        Vector2.delete(box_axis);
+                        Matrix.free(inv_A);
+                        Matrix.free(inv_B);
+                        Matrix.free(aofs);
+                        Matrix.free(aofsinv);
+                        Matrix.free(bofs);
+                        Matrix.free(bofsinv);
+                        Vector2.free(box_axis);
                         return;
                     }
                 }
@@ -845,13 +845,13 @@ const _collision_rectangle_rectangle = (cast_A, cast_B, with_margin) => {
                 if (cast_A && cast_B) {
                     const box_axis = p_rectangle_A.get_box_axis(aofs, aofsinv, p_rectangle_B, bofs, bofsinv);
                     if (!separator.test_axis(box_axis)) {
-                        Matrix.delete(inv_A);
-                        Matrix.delete(inv_B);
-                        Matrix.delete(aofs);
-                        Matrix.delete(aofsinv);
-                        Matrix.delete(bofs);
-                        Matrix.delete(bofsinv);
-                        Vector2.delete(box_axis);
+                        Matrix.free(inv_A);
+                        Matrix.free(inv_B);
+                        Matrix.free(aofs);
+                        Matrix.free(aofsinv);
+                        Matrix.free(bofs);
+                        Matrix.free(bofsinv);
+                        Vector2.free(box_axis);
                         return;
                     }
                 }
