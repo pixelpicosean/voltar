@@ -1,4 +1,4 @@
-import { Shape2DSW, CircleShape2DSW, RectangleShape2DSW } from "./shape_2d_sw";
+import { Shape2DSW, CircleShape2DSW, RectangleShape2DSW, SegmentShape2DSW } from "./shape_2d_sw";
 import { Matrix, Vector2, CMP_EPSILON } from "engine/math/index";
 import { get_closest_point_to_segment_uncapped_2d } from "engine/math/geometry";
 
@@ -507,7 +507,55 @@ const TEST_POINT = (separator, cast_A, cast_B, p_motion_A, p_motion_B, m_a, m_b)
  * @param {boolean} with_margin
  */
 const _collision_segment_segment = (cast_A, cast_B, with_margin) => {
-    return () => false;
+    /** @type {SeparatorAxisTest2D<SegmentShape2DSW, SegmentShape2DSW>} */
+    const separator = new SeparatorAxisTest2D(cast_A, cast_B, with_margin);
+
+    /**
+     * @param {SegmentShape2DSW} p_segment_A
+     * @param {Matrix} p_transform_A
+     * @param {SegmentShape2DSW} p_segment_B
+     * @param {Matrix} p_transform_B
+     * @param {_CollectorCallback2D} p_collector
+     * @param {Vector2} p_motion_A
+     * @param {Vector2} p_motion_B
+     * @param {number} p_margin_A
+     * @param {number} p_margin_B
+     */
+    const solve = (p_segment_A, p_transform_A, p_segment_B, p_transform_B, p_collector, p_motion_A, p_motion_B, p_margin_A, p_margin_B) => {
+        if (!separator.test_previous_axis()) {
+            return;
+        }
+
+        if (!separator.test_cast()) {
+            return;
+        }
+
+        if (!separator.test_axis(p_segment_A.get_xformed_normal(p_transform_A))) {
+            return;
+        }
+        if (!separator.test_axis(p_segment_B.get_xformed_normal(p_transform_B))) {
+            return;
+        }
+
+        if (with_margin) {
+            if (TEST_POINT(separator, cast_A, cast_B, p_motion_A, p_motion_B, p_transform_A.xform(p_segment_A.a), p_transform_B.xform(p_segment_B.a))) {
+                return;
+            }
+            if (TEST_POINT(separator, cast_A, cast_B, p_motion_A, p_motion_B, p_transform_A.xform(p_segment_A.a), p_transform_B.xform(p_segment_B.b))) {
+                return;
+            }
+            if (TEST_POINT(separator, cast_A, cast_B, p_motion_A, p_motion_B, p_transform_A.xform(p_segment_A.b), p_transform_B.xform(p_segment_B.a))) {
+                return;
+            }
+            if (TEST_POINT(separator, cast_A, cast_B, p_motion_A, p_motion_B, p_transform_A.xform(p_segment_A.b), p_transform_B.xform(p_segment_B.b))) {
+                return;
+            }
+        }
+
+        separator.generate_contacts();
+    }
+
+    return solve;
 }
 /**
  * @param {boolean} cast_A
@@ -515,7 +563,51 @@ const _collision_segment_segment = (cast_A, cast_B, with_margin) => {
  * @param {boolean} with_margin
  */
 const _collision_segment_circle = (cast_A, cast_B, with_margin) => {
-    return () => false;
+    /** @type {SeparatorAxisTest2D<SegmentShape2DSW, CircleShape2DSW>} */
+    const separator = new SeparatorAxisTest2D(cast_A, cast_B, with_margin);
+
+    /**
+     * @param {SegmentShape2DSW} p_segment_A
+     * @param {Matrix} p_transform_A
+     * @param {CircleShape2DSW} p_circle_B
+     * @param {Matrix} p_transform_B
+     * @param {_CollectorCallback2D} p_collector
+     * @param {Vector2} p_motion_A
+     * @param {Vector2} p_motion_B
+     * @param {number} p_margin_A
+     * @param {number} p_margin_B
+     */
+    const solve = (p_segment_A, p_transform_A, p_circle_B, p_transform_B, p_collector, p_motion_A, p_motion_B, p_margin_A, p_margin_B) => {
+        separator.init(p_segment_A, p_transform_A, p_circle_B, p_transform_B, p_collector, p_motion_A, p_motion_B, p_margin_A, p_margin_B);
+
+        if (!separator.test_previous_axis()) {
+            return;
+        }
+
+        if (!separator.test_cast()) {
+            return;
+        }
+
+        // segment normal
+        if (!separator.test_axis(
+            p_transform_A.xform(p_segment_A.b).subtract(p_transform_A.xform(p_segment_A.a)).normalize().tangent()
+        )) {
+            return;
+        }
+
+        // endpoint a vs circle
+        if (TEST_POINT(separator, cast_A, cast_B, p_motion_A, p_motion_B, p_transform_A.xform(p_segment_A.a), p_transform_B.origin)) {
+            return;
+        }
+        // endpoint b vs circle
+        if (TEST_POINT(separator, cast_A, cast_B, p_motion_A, p_motion_B, p_transform_A.xform(p_segment_A.b), p_transform_B.origin)) {
+            return;
+        }
+
+        separator.generate_contacts();
+    }
+
+    return solve;
 }
 /**
  * @param {boolean} cast_A
@@ -523,7 +615,118 @@ const _collision_segment_circle = (cast_A, cast_B, with_margin) => {
  * @param {boolean} with_margin
  */
 const _collision_segment_rectangle = (cast_A, cast_B, with_margin) => {
-    return () => false;
+    /** @type {SeparatorAxisTest2D<SegmentShape2DSW, RectangleShape2DSW>} */
+    const separator = new SeparatorAxisTest2D(cast_A, cast_B, with_margin);
+
+    /**
+     * @param {SegmentShape2DSW} p_segment_A
+     * @param {Matrix} p_transform_A
+     * @param {RectangleShape2DSW} p_rect_B
+     * @param {Matrix} p_transform_B
+     * @param {_CollectorCallback2D} p_collector
+     * @param {Vector2} p_motion_A
+     * @param {Vector2} p_motion_B
+     * @param {number} p_margin_A
+     * @param {number} p_margin_B
+     */
+    const solve = (p_segment_A, p_transform_A, p_rect_B, p_transform_B, p_collector, p_motion_A, p_motion_B, p_margin_A, p_margin_B) => {
+        separator.init(p_segment_A, p_transform_A, p_rect_B, p_transform_B, p_collector, p_motion_A, p_motion_B, p_margin_A, p_margin_B);
+
+        if (!separator.test_previous_axis()) {
+            return;
+        }
+
+        if (!separator.test_cast()) {
+            return;
+        }
+
+        const vec = p_segment_A.get_xformed_normal(p_transform_A);
+        if (!separator.test_axis(vec)) {
+            Vector2.free(vec);
+            return;
+        }
+
+        vec.set(p_transform_B.a, p_transform_B.b).normalize();
+        if (!separator.test_axis(vec)) {
+            Vector2.free(vec);
+            return;
+        }
+
+        vec.set(p_transform_B.c, p_transform_B.d).normalize();
+        if (!separator.test_axis(vec)) {
+            Vector2.free(vec);
+            return;
+        }
+
+        if (with_margin) {
+            const inv = p_transform_B.clone().affine_inverse();
+
+            const a = p_transform_A.xform(p_segment_A.a);
+            const b = p_transform_A.xform(p_segment_A.b);
+
+            if (!separator.test_axis(p_rect_B.get_circle_axis(p_transform_B, inv, a))) {
+                Vector2.free(vec);
+                Vector2.free(a);
+                Vector2.free(b);
+                return;
+            }
+            if (!separator.test_axis(p_rect_B.get_circle_axis(p_transform_B, inv, b))) {
+                Vector2.free(vec);
+                Vector2.free(a);
+                Vector2.free(b);
+                return;
+            }
+
+            if (cast_A) {
+                if (!separator.test_axis(p_rect_B.get_circle_axis(p_transform_B, inv, vec.copy(a).add(p_motion_A)))) {
+                    Vector2.free(vec);
+                    Vector2.free(a);
+                    Vector2.free(b);
+                    return;
+                }
+                if (!separator.test_axis(p_rect_B.get_circle_axis(p_transform_B, inv, vec.copy(b).add(p_motion_A)))) {
+                    Vector2.free(vec);
+                    Vector2.free(a);
+                    Vector2.free(b);
+                    return;
+                }
+            }
+
+            if (cast_B) {
+                if (!separator.test_axis(p_rect_B.get_circle_axis(p_transform_B, inv, vec.copy(a).subtract(p_motion_B)))) {
+                    Vector2.free(vec);
+                    Vector2.free(a);
+                    Vector2.free(b);
+                    return;
+                }
+                if (!separator.test_axis(p_rect_B.get_circle_axis(p_transform_B, inv, vec.copy(b).subtract(p_motion_B)))) {
+                    Vector2.free(vec);
+                    Vector2.free(a);
+                    Vector2.free(b);
+                    return;
+                }
+            }
+
+            if (cast_A && cast_B) {
+                if (!separator.test_axis(p_rect_B.get_circle_axis(p_transform_B, inv, vec.copy(a).add(p_motion_A).subtract(p_motion_B)))) {
+                    Vector2.free(vec);
+                    Vector2.free(a);
+                    Vector2.free(b);
+                    return;
+                }
+                if (!separator.test_axis(p_rect_B.get_circle_axis(p_transform_B, inv, vec.copy(b).add(p_motion_A).subtract(p_motion_B)))) {
+                    Vector2.free(vec);
+                    Vector2.free(a);
+                    Vector2.free(b);
+                    return;
+                }
+            }
+        }
+
+        separator.generate_contacts();
+    }
+
+    return solve;
 }
 /**
  * @param {boolean} cast_A

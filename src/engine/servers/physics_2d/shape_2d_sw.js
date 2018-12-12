@@ -1,5 +1,6 @@
 import { Rectangle, Vector2, Matrix, CMP_EPSILON } from "engine/math/index";
 import { ShapeType, CollisionObjectType } from "engine/scene/physics/const";
+import { segment_intersects_segment_2d } from "engine/math/geometry";
 
 const _SEGMENT_IS_VALID_SUPPORT_THRESHOLD = 0.99998;
 
@@ -54,7 +55,7 @@ export class Shape2DSW {
 
     /**
      * @param {Vector2} p_point
-     * @returns {Boolean}
+     * @returns {boolean}
      */
     contains_point(p_point) {
         return false;
@@ -103,7 +104,7 @@ export class Shape2DSW {
      * @param {Vector2} p_end
      * @param {Vector2} p_point
      * @param {Vector2} p_normal
-     * @returns {Boolean}
+     * @returns {boolean}
      */
     intersect_segment(p_begin, p_end, p_point, p_normal) {
         return false;
@@ -205,6 +206,275 @@ export class Shape2DSW {
     }
 }
 
+export class SegmentShape2DSW extends Shape2DSW {
+    get type() {
+        return ShapeType.SEGMENT;
+    }
+
+    /**
+     * @param {import("engine/math/Vector2").Vector2Like} [p_a]
+     * @param {import("engine/math/Vector2").Vector2Like} [p_b]
+     * @param {import("engine/math/Vector2").Vector2Like} [p_normal]
+     */
+    constructor(p_a = Vector2.ZERO, p_b = Vector2.ZERO, p_normal = Vector2.ZERO) {
+        super();
+
+        this.a = new Vector2(p_a.x, p_a.y);
+        this.b = new Vector2(p_b.x, p_b.y);
+        this.normal = new Vector2(p_normal.x, p_normal.y);
+    }
+
+    /**
+     * @param {Matrix} p_xform
+     */
+    get_xformed_normal(p_xform) {
+        const aa = p_xform.xform(this.a);
+        const bb = p_xform.xform(this.b);
+        const res = bb.subtract(aa).normalize().tangent();
+        Vector2.free(aa);
+        Vector2.free(bb);
+        return res;
+    }
+
+    /**
+     * @param {Vector2} p_normal
+     * @param {Matrix} p_transform
+     * @param {{min: number, max: number}} r_result
+     * @return {{min: number, max: number}}
+     */
+    project_rangev(p_normal, p_transform, r_result) {
+        return this.project_range(p_normal, p_transform, r_result);
+    }
+    /**
+     * @param {Vector2} p_normal
+     * @param {Vector2[]} r_supports
+     * @returns {Number}
+     */
+    get_supports(p_normal, r_supports) {
+        if (Math.abs(p_normal.dot(this.normal)) > _SEGMENT_IS_VALID_SUPPORT_THRESHOLD) {
+            r_supports[0].copy(this.a);
+            r_supports[1].copy(this.b);
+            return 2;
+        }
+
+        const sub = this.b.clone().subtract(a);
+        const dp = p_normal.dot(sub);
+        if (dp > 0) {
+            r_supports[0].copy(this.b);
+        } else {
+            r_supports[0].copy(this.a);
+        }
+        return 1;
+    }
+
+    /**
+     * @param {Vector2} p_point
+     * @returns {boolean}
+     */
+    contains_point(p_point) {
+        return false;
+    }
+    /**
+     * @param {Vector2} p_begin
+     * @param {Vector2} p_end
+     * @param {Vector2} r_point
+     * @param {Vector2} r_normal
+     * @returns {boolean}
+     */
+    intersect_segment(p_begin, p_end, r_point, r_normal) {
+        if (!segment_intersects_segment_2d(p_begin, p_end, this.a, this.b, r_point)) {
+            return false;
+        }
+
+        if (this.normal.dot(p_begin) > this.normal.dot(this.a)) {
+            r_normal.copy(this.normal);
+        } else {
+            r_normal.copy(this.normal).negate();
+        }
+
+        return true;
+    }
+    /**
+     * @param {Number} p_mass
+     * @param {Vector2} p_scale
+     * @returns {Number}
+     */
+    get_moment_of_inertia(p_mass, p_scale) {
+        const s = [this.a.clone().multiply(p_scale), this.b.clone().multiply(p_scale)];
+
+        const l = s[1].distance_to(s[0]);
+        const ofs = s[0].add(s[1]).scale(0.5);
+
+        const len2 = ofs.length_squared();
+
+        Vector2.free(s[0]);
+        Vector2.free(s[1]);
+        return p_mass * (l * l / 12 + len2);
+    }
+
+    /**
+     * @param {Rectangle} p_data
+     */
+    set_data(p_data) {
+        this.a.set(p_data.x, p_data.y);
+        this.b.set(p_data.width, p_data.height);
+        const sub = this.b.clone().subtract(this.a);
+        const n = sub.tangent();
+        this.normal.copy(n);
+
+        const aabb = Rectangle.new(this.a.x, this.a.y);
+        aabb.expand_to(this.b);
+        if (aabb.width === 0) {
+            aabb.width = 0.001;
+        }
+        if (aabb.height === 0) {
+            aabb.height = 0.001;
+        }
+        this.configure(aabb.x, aabb.y, aabb.width, aabb.height);
+
+        Vector2.free(sub);
+        Vector2.free(n);
+        Rectangle.free(aabb);
+    }
+    get_data() {
+        return Rectangle.new(this.a.x, this.a.y, this.b.x, this.b.y);
+    }
+
+    /**
+     * @param {Vector2} p_normal
+     * @param {Matrix} p_transform
+     * @param {{min: number, max: number}} r_result
+     * @return {{min: number, max: number}}
+     */
+    project_range(p_normal, p_transform, r_result) {
+        // real large
+        const aa = p_transform.xform(this.a);
+        const bb = p_transform.xform(this.b);
+        r_result.max = p_normal.dot(aa);
+        r_result.min = p_normal.dot(bb);
+        if (r_result.max < r_result.min) {
+            let tmp = r_result.max; r_result.max = r_result.min; r_result.min = tmp;
+        }
+
+        Vector2.free(aa);
+        Vector2.free(bb);
+        return r_result;
+    }
+}
+SegmentShape2DSW.prototype.project_range_castv = Shape2DSW.prototype.__default_project_range_cast;
+SegmentShape2DSW.prototype.project_range_cast = Shape2DSW.prototype.__default_project_range_cast;
+
+export class RayShape2DSW extends Shape2DSW {
+    get type() {
+        return ShapeType.RAY;
+    }
+
+    /**
+     * @param {number} [p_length]
+     */
+    constructor(p_length = 20) {
+        super();
+
+        this.length = p_length;
+        this.slips_on_slope = false;
+    }
+
+    /**
+     * @param {Vector2} p_normal
+     * @param {Matrix} p_transform
+     * @param {{min: number, max: number}} r_result
+     * @return {{min: number, max: number}}
+     */
+    project_rangev(p_normal, p_transform, r_result) {
+        // real large
+        const vec = Vector2.new(0, this.length);
+
+        r_result.max = p_normal.dot(p_transform.origin);
+        r_result.min = p_normal.dot(p_transform.xform(vec, vec));
+        if (r_result.max < r_result.min) {
+            let tmp = r_result.max; r_result.max = r_result.min; r_result.min = tmp;
+        }
+
+        return r_result;
+    }
+    /**
+     * @param {Vector2} p_normal
+     * @param {Vector2[]} r_supports
+     * @returns {Number}
+     */
+    get_supports(p_normal, r_supports) {
+        if (p_normal.y > 0) {
+            r_supports[0].set(0, this.length);
+        } else {
+            r_supports[0].set(0, 0);
+        }
+
+        return 1;
+    }
+
+    /**
+     * @param {Vector2} p_point
+     * @returns {boolean}
+     */
+    contains_point(p_point) {
+        return false;
+    }
+    /**
+     * @param {Vector2} p_begin
+     * @param {Vector2} p_end
+     * @param {Vector2} r_point
+     * @param {Vector2} r_normal
+     * @returns {boolean}
+     */
+    intersect_segment(p_begin, p_end, r_point, r_normal) {
+        return false;
+    }
+    /**
+     * @param {Number} p_mass
+     * @param {Vector2} p_scale
+     * @returns {Number}
+     */
+    get_moment_of_inertia(p_mass, p_scale) {
+        return 0;
+    }
+
+    /**
+     * @param {{ length: number, slips_on_slope: boolean }} p_data
+     */
+    set_data({ length, slips_on_slope }) {
+        this.length = length;
+        this.slips_on_slope = slips_on_slope;
+        this.configure(0, 0, 0.001, length);
+    }
+    get_data() {
+        return {
+            length: this.length,
+            slips_on_slope: this.slips_on_slope,
+        };
+    }
+
+    /**
+     * @param {Vector2} p_normal
+     * @param {Matrix} p_transform
+     * @param {{min: number, max: number}} r_result
+     * @return {{min: number, max: number}}
+     */
+    project_range(p_normal, p_transform, r_result) {
+        // real large
+        const vec = Vector2.new(0, this.length);
+        r_result.max = p_normal.dot(p_transform.origin);
+        r_result.min = p_normal.dot(p_transform.xform(vec, vec));
+        if (r_result.max < r_result.min) {
+            let tmp = r_result.max; r_result.max = r_result.min; r_result.min = tmp;
+        }
+
+        Vector2.free(vec);
+        return r_result;
+    }
+}
+RayShape2DSW.prototype.project_range_castv = Shape2DSW.prototype.__default_project_range_cast;
+RayShape2DSW.prototype.project_range_cast = Shape2DSW.prototype.__default_project_range_cast;
+
 export class CircleShape2DSW extends Shape2DSW {
     get type() {
         return ShapeType.CIRCLE;
@@ -237,7 +507,7 @@ export class CircleShape2DSW extends Shape2DSW {
 
     /**
      * @param {Vector2} point
-     * @returns {Boolean}
+     * @returns {boolean}
      */
     contains_point(point) {
         return point.length_squared() < this.radius * this.radius;
@@ -247,7 +517,7 @@ export class CircleShape2DSW extends Shape2DSW {
      * @param {Vector2} p_end
      * @param {Vector2} r_point
      * @param {Vector2} r_normal
-     * @returns {Boolean}
+     * @returns {boolean}
      */
     intersect_segment(p_begin, p_end, r_point, r_normal) {
         const line_vec = p_end.clone().subtract(p_begin);
@@ -391,7 +661,7 @@ export class RectangleShape2DSW extends Shape2DSW {
 
     /**
      * @param {Vector2} p_point
-     * @returns {Boolean}
+     * @returns {boolean}
      */
     contains_point(p_point) {
         return Math.abs(p_point.x) < this.half_extents.x && Math.abs(p_point.y) < this.half_extents.y;
@@ -401,7 +671,7 @@ export class RectangleShape2DSW extends Shape2DSW {
      * @param {Vector2} p_end
      * @param {Vector2} r_point
      * @param {Vector2} r_normal
-     * @returns {Boolean}
+     * @returns {boolean}
      */
     intersect_segment(p_begin, p_end, r_point, r_normal) {
         return this.aabb.intersects_segment(p_begin, p_end, r_point, r_normal);

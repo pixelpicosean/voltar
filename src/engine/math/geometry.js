@@ -3,6 +3,45 @@ import { CMP_EPSILON } from "./const";
 import { clamp } from "./index";
 
 /**
+ * @param {Vector2} p_from_a
+ * @param {Vector2} p_to_a
+ * @param {Vector2} p_from_b
+ * @param {Vector2} p_to_b
+ * @param {Vector2[]} r_result
+ */
+export function segment_intersects_segment_2d(p_from_a, p_to_a, p_from_b, p_to_b, r_result) {
+    const B = p_to_a.clone().subtract(p_from_a);
+    const C = p_from_b.clone().subtract(p_from_a);
+    const D = p_to_b.clone().subtract(p_from_a);
+
+    const ABlen = B.dot(B);
+    if (ABlen <= 0) {
+        return false;
+    }
+    const Bn = B.clone().divide(ABlen, ABlen);
+    C.set(C.x * Bn.x + C.y * Bn.y, C.y * Bn.x - C.x * Bn.y);
+    D.set(D.x * Bn.x + D.y * Bn.y, D.y * Bn.x - D.x * Bn.y);
+
+    if ((C.y < 0 && D.y < 0) || (C.y >= 0 && D.y >= 0)) {
+        return false;
+    }
+
+    const ABpos = D.x + (C.x - D.x) * D.y / (D.y - C.y);
+
+    // fail if segment C-D crosses line A-B outside of segment A-B
+    if (ABpos < 0 || ABpos > 1) {
+        return false;
+    }
+
+    // apply the discovered position to line A-B in the original coordinate system
+    if (r_result) {
+        r_result[0].copy(B).scale(ABpos).add(p_from_a);
+    }
+
+    return true;
+}
+
+/**
  * @param {Vector2} p1
  * @param {Vector2} q1
  * @param {Vector2} p2

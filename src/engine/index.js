@@ -61,6 +61,8 @@ export {
 export { default as RayCast2D } from './scene/ray_cast_2d';
 
 export { default as CollisionShape2D } from './scene/physics/collision_shape_2d';
+
+export { RayShape2D, SegmentShape2D } from './scene/resources/segment_shape_2d';
 export { default as CircleShape2D } from './scene/resources/circle_shape_2d';
 export { default as RectangleShape2D } from './scene/resources/rectangle_shape_2d';
 
