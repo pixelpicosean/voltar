@@ -626,6 +626,7 @@ export default class SceneTree {
                 _process_tmp.step = 1000.0 / this.settings.physics.physics_fps;
                 _process_tmp.slow_step = _process_tmp.step * this.time_scale;
                 _process_tmp.slow_step_sec = _process_tmp.step * 0.001 * this.time_scale;
+                this.physics_process_time = _process_tmp.slow_step_sec;
 
                 // Accumulate time until the step threshold is met or exceeded... up to a limit of 3 catch-up frames at step intervals
                 _process_tmp.delta_time += Math.max(Math.min(_process_tmp.step * 3, _process_tmp.real_delta), 0);
@@ -649,17 +650,17 @@ export default class SceneTree {
                     this.physics_server.flush_queries();
 
                     // - process nodes
-                    this.current_scene._propagate_physics_process(_process_tmp.slow_step_sec);
+                    this.current_scene._propagate_physics_process(this.physics_process_time);
 
                     this.message_queue.flush();
 
                     this.physics_server.end_sync();
-                    this.physics_server.step(_process_tmp.slow_step_sec);
+                    this.physics_server.step(this.physics_process_time);
 
                     // - flush_transform_notifications
                     this.viewport.parent = this.viewport._temp_node_2d_parent;
                     this.viewport.update_transform();
-                    this.viewport.update_worlds(_process_tmp.slow_step_sec);
+                    this.viewport.update_worlds(this.physics_process_time);
                     this.viewport.parent = null;
 
                     this._flush_delete_queue();
@@ -683,13 +684,15 @@ export default class SceneTree {
 
             // Idle update
 
+            this.idle_process_time = _process_tmp.real_delta * 0.001;
+
             // - flush_transform_notifications
             this.viewport.parent = this.viewport._temp_node_2d_parent;
             this.viewport.update_transform();
             this.viewport.parent = null;
 
             // - process nodes
-            this.current_scene._propagate_process(_process_tmp.real_delta * 0.001);
+            this.current_scene._propagate_process(this.idle_process_time);
 
             // - update shared ticker
             shared_ticker.update(_process_tmp.real_delta);
@@ -705,7 +708,7 @@ export default class SceneTree {
             this._flush_delete_queue();
 
             // - update inputs
-            this.input._process(_process_tmp.real_delta * 0.001);
+            this.input._process(this.idle_process_time);
 
             this.message_queue.flush();
 
