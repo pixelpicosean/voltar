@@ -618,9 +618,48 @@ export class KinematicBody2D extends PhysicsBody2D {
 
         return lv;
     }
-    move_and_slide_with_snap(p_linear_velocity, p_snap, p_floor_direction = Vector2.ZERO, p_stop_on_slope = false, p_max_slides = 4, p_floor_max_angle = Math.PI * 0.25, p_infinite_inertia = true) { }
+    /**
+     * @param {Vector2} p_linear_velocity
+     * @param {Vector2} p_snap
+     * @param {Vector2} [p_floor_direction]
+     * @param {boolean} [p_stop_on_slope]
+     * @param {number} [p_max_slides]
+     * @param {number} [p_floor_max_angle]
+     * @param {boolean} [p_infinite_inertia]
+     */
+    move_and_slide_with_snap(p_linear_velocity, p_snap, p_floor_direction = Vector2.ZERO, p_stop_on_slope = false, p_max_slides = 4, p_floor_max_angle = Math.PI * 0.25, p_infinite_inertia = true) {
+        const was_on_floor = this.on_floor;
 
-    get_slide_count() { }
+        const ret = this.move_and_slide(p_linear_velocity, p_floor_direction, p_stop_on_slope, p_max_slides, p_floor_max_angle, p_infinite_inertia);
+        if (!was_on_floor || p_snap.is_zero()) {
+            return ret;
+        }
+
+        const col = Collision.new();
+        const gt = this.get_global_transform().clone();
+
+        const n_floor_dir = Vector2.create();
+        if (this._move(p_snap, p_infinite_inertia, col, false, true)) {
+            gt.tx += col.travel.x;
+            gt.ty += col.travel.y;
+            n_floor_dir.copy(p_floor_direction).normalize();
+            if (!p_floor_direction.is_zero() && Math.acos(n_floor_dir.dot(col.normal)) < p_floor_max_angle) {
+                this.on_floor = true;
+                this.on_floor_body = col.collider_rid;
+                this.floor_velocity.copy(col.collider_vel);
+            }
+            this.set_global_transform(gt);
+        }
+
+        Collision.free(col);
+        Matrix.delete(gt);
+        Vector2.delete(n_floor_dir);
+        return ret;
+    }
+
+    get_slide_count() {
+        return this.colliders.length;
+    }
     /**
      * @param {number} p_bounce
      */
