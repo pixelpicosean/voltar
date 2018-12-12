@@ -21,12 +21,12 @@ class Ball extends v.KinematicBody2D {
 
         this.add_child(new v.CollisionShape2D())
             .set_shape(
-                new v.CircleShape2D().set_radius(p_radius)
+                new v.RectangleShape2D().set_extents(p_radius, p_radius)
             );
 
         this.gfx = this.add_child(new v.Graphics())
             .begin_fill(color, 0.6)
-            .draw_circle(0, 0, p_radius)
+            .draw_rect(0, 0, p_radius, p_radius)
             .end_fill()
 
         this.set_physics_process(true);
@@ -91,7 +91,7 @@ export default class NewPhysics extends v.Node2D {
         this.add_child(s);
 
         const sa = new Ball(20, 0xFFFFFF)
-            .set_position(64, 192 + 16)
+            .set_position(64, 192 + 0)
             .set_name('M')
         this.add_child(sa);
     }
