@@ -8,13 +8,12 @@ const PhysicsLayers = {
 }
 
 class Ball extends v.KinematicBody2D {
-    constructor(p_radius = 16, color = 0xFFFFFF, ray_length = 40) {
+    constructor(p_radius = 16, color = 0xFFFFFF) {
         super();
 
         this.velocity = new v.Vector2();
         this.motion = new v.Vector2();
         this.ray_result = new v.RayResult();
-        this.ray_length = ray_length;
 
         this
             .set_collision_layer_bit(PhysicsLayers.SOLID, true)
@@ -29,9 +28,6 @@ class Ball extends v.KinematicBody2D {
             .begin_fill(color, 0.6)
             .draw_circle(0, 0, p_radius)
             .end_fill()
-            .set_line_style(2, 0x00FFFF, 0.8)
-            .move_to(0, 0)
-            .line_to(ray_length, 0)
 
         this.set_physics_process(true);
     }
@@ -42,17 +38,8 @@ class Ball extends v.KinematicBody2D {
      * @param {Number} delta
      */
     _physics_process(delta) {
-        const col = this.move_and_collide(this.motion.copy(this.velocity).scale(delta));
-        if (col) {
-            // console.log(`collide with something`)
-            this.velocity.bounce(col.normal);
-        }
-
-        // test raycast
-        const res = this.get_world_2d().direct_space_state.intersect_ray(this.get_global_position(), this.get_global_position().clone().add(this.ray_length, 0), this.ray_result);
-        if (res) {
-            console.log('ray hit')
-        }
+        // this.move_and_collide(this.motion.copy(this.velocity).scale(delta));
+        this.move_and_slide(this.velocity);
     }
 }
 
@@ -101,7 +88,7 @@ export default class NewPhysics extends v.Node2D {
             .set_name('S')
         this.add_child(s);
 
-        const sa = new Ball(20, 0xFFFFFF, 48)
+        const sa = new Ball(20, 0xFFFFFF)
             .set_position(64, 192 + 16)
             .set_name('M')
         this.add_child(sa);
