@@ -528,6 +528,32 @@ export class MotionResult {
     }
 }
 
+export class SeparationResult {
+    constructor() {
+        this.collision_depth = 0;
+        this.collision_point = new Vector2();
+        this.collision_normal = new Vector2();
+        this.collider_velocity = new Vector2();
+        this.collision_local_shape = 0;
+        this.collider_id = null;
+        this.collider = null;
+        this.collider_shape = 0;
+        this.collider_metadata = null;
+    }
+    reset() {
+        this.collision_depth = 0;
+        this.collision_point.set(0, 0);
+        this.collision_normal.set(0, 0);
+        this.collider_velocity.set(0, 0);
+        this.collision_local_shape = 0;
+        this.collider_id = null;
+        this.collider = null;
+        this.collider_shape = 0;
+        this.collider_metadata = null;
+        return this;
+    }
+}
+
 export class CollCbkData {
     constructor() {
         this.valid_dir = new Vector2();

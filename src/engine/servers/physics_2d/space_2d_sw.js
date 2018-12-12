@@ -1,4 +1,4 @@
-import { Physics2DDirectSpaceStateSW, MotionResult, CollCbkData, _shape_col_cbk, Physics2DDirectBodyStateSW } from "../../servers/physics_2d/state";
+import { Physics2DDirectSpaceStateSW, MotionResult, CollCbkData, _shape_col_cbk, Physics2DDirectBodyStateSW, SeparationResult } from "../../servers/physics_2d/state";
 import { INTERSECTION_QUERY_MAX, CollisionObjectType, ShapeType, BodyMode } from "../../scene/physics/const";
 import Area2DSW from "./area_2d_sw";
 import SelfList, { List } from "engine/core/self_list";
@@ -742,6 +742,178 @@ export default class Space2DSW {
         }
 
         return collided;
+    }
+    /**
+     * @param {Body2DSW} p_body
+     * @param {Matrix} p_transform
+     * @param {boolean} p_infinite_inertia
+     * @param {Vector2} r_recover_motion
+     * @param {SeparationResult[]} r_results
+     * @param {number} p_result_max
+     * @param {number} p_margin
+     */
+    test_body_ray_separation(p_body, p_transform, p_infinite_inertia, r_recover_motion, r_results, p_result_max, p_margin) {
+        const body_aabb = Rectangle.create();
+
+        let shapes_found = false;
+
+        for (let s of p_body.shapes) {
+            if (s.disabled) {
+                continue;
+            }
+
+            if (!shapes_found) {
+                body_aabb.copy(s.aabb_cache);
+                shapes_found = true;
+            } else {
+                body_aabb.merge_to(s.aabb_cache);
+            }
+        }
+
+        if (!shapes_found) {
+            return 0;
+        }
+
+        // undo the currently transform the physics server is aware of and apply the provided one
+        p_transform.xform_rect(p_body.inv_transform.xform_rect(body_aabb, body_aabb), body_aabb);
+        body_aabb.grow_to(p_margin);
+
+        const body_transform = p_transform.clone();
+
+        for (let i = 0; i < p_result_max; i++) {
+            // reset results
+            r_results[i].collision_depth = 0;
+        }
+
+        let rays_found = 0;
+
+        {
+            // raycast and separate
+
+            const max_results = 32;
+            let recover_attempts = 4;
+            /** @type {Vector2[]} */
+            const sr = new Array(max_results * 2); for (let i = 0; i < max_results * 2; i++) sr[i] = new Vector2();
+            const cbk = new CollCbkData();
+            const cbkres = _shape_col_cbk;
+
+            do {
+                const recover_motion = Vector2.create();
+
+                let collided = false;
+
+                let amount = this._cull_aabb_for_body(p_body, body_aabb);
+                let ray_index = 0;
+
+                for (let body_shape of p_body.shapes) {
+                    if (body_shape.disabled) {
+                        continue;
+                    }
+
+                    if (body_shape.shape.type !== ShapeType.RAY) {
+                        continue;
+                    }
+
+                    const body_shape_xform = body_transform.clone().append(body_shape.xform);
+
+                    for (let i = 0; i < amount; i++) {
+                        const col_obj = this.intersection_query_results[i];
+                        const shape_idx = this.intersection_query_subindex_results[i];
+
+                        cbk.amount = 0;
+                        cbk.ptr = sr;
+                        cbk.invalid_by_dir = 0;
+
+                        if (col_obj.type === CollisionObjectType.BODY) {
+                            /** @type {Body2DSW} */
+                            const b = col_obj;
+                            if (p_infinite_inertia && b.mode === BodyMode.STATIC && b.mode === BodyMode.KINEMATIC) {
+                                continue;
+                            }
+                        }
+
+                        const col_obj_shape_xform = col_obj.transform.clone().append(col_obj.get_shape_transform(shape_idx));
+
+                        if (col_obj.is_shape_one_way_collision(shape_idx)) {
+                            cbk.valid_dir.copy(col_obj_shape_xform.get_axis(1)).normalize();
+                            cbk.valid_depth = p_margin; // only valid depth is the collision margin
+                            cbk.invalid_by_dir = 0;
+                        } else {
+                            cbk.valid_dir.set(0, 0);
+                            cbk.valid_depth = 0;
+                            cbk.invalid_by_dir = 0;
+                        }
+
+                        const against_shape = col_obj.get_shape(shape_idx);
+                        if (CollisionSolver2DSW.solve(body_shape.shape, body_shape_xform, Vector2.ZERO, against_shape, col_obj_shape_xform, Vector2.ZERO, cbkres, cbk, null, p_margin)) {
+                            if (cbk.amount > 0) {
+                                collided = true;
+                            }
+
+                            if (ray_index < p_result_max) {
+                                const result = r_results[ray_index];
+
+                                for (let k = 0; k < cbk.amount; k++) {
+                                    const a = sr[k * 2 + 0];
+                                    const b = sr[k * 2 + 1];
+                                    const b_minus_a = b.clone().subtract(a);
+
+                                    recover_motion.add(b_minus_a.scale(0.4));
+
+                                    const depth = a.distance_to(b);
+                                    if (depth > result.collision_depth) {
+                                        result.collision_depth = depth;
+                                        result.collision_point.copy(b);
+                                        result.collision_normal.copy(b).subtract(a).normalize();
+                                        result.collision_local_shape = shape_idx;
+                                        result.collider = col_obj.self;
+                                        result.collider_id = col_obj.instance;
+                                        result.collider_metadata = col_obj.get_shape_metadata(shape_idx);
+                                        if (col_obj.type === CollisionObjectType.BODY) {
+                                            /** @type {Body2DSW} */
+                                            // @ts-ignore (cast<Body2DSW>)
+                                            const body = col_obj;
+
+                                            const rel_vec = b.subtract(body.transform.origin);
+                                            result.collider_velocity.set(
+                                                -body.angular_velocity * rel_vec.y,
+                                                body.angular_velocity * rel_vec.x
+                                            ).add(body.linear_velocity);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    ray_index++;
+                }
+
+                rays_found = Math.max(ray_index, rays_found);
+
+                if (!collided || recover_motion.is_zero()) {
+                    break;
+                }
+
+                body_transform.tx += recover_motion.x;
+                body_transform.ty += recover_motion.y;
+                body_aabb.x += recover_motion.x;
+                body_aabb.y += recover_motion.y;
+
+                recover_attempts--;
+            } while (recover_attempts);
+        }
+
+        // optimize results (remove non colliding)
+        for (let i = 0; i < rays_found; i++) {
+            if (r_results[i].collision_depth === 0) {
+                rays_found--;
+                let tmp = r_results[i]; r_results[i] = r_results[rays_found]; r_results[rays_found] = tmp;
+            }
+        }
+
+        r_recover_motion.set(body_transform.tx, body_transform.ty).subtract(p_transform.tx, p_transform.ty);
+        return rays_found;
     }
 
     /**
