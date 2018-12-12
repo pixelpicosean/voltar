@@ -31,7 +31,7 @@ class Ball extends v.KinematicBody2D {
         this.set_physics_process(true);
     }
     _ready() {
-        this.velocity.set(10, 0);
+        this.velocity.set(20, 0);
     }
     /**
      * @param {Number} delta
@@ -39,7 +39,7 @@ class Ball extends v.KinematicBody2D {
     _physics_process(delta) {
         const col = this.move_and_collide(this.motion.copy(this.velocity).scale(delta));
         if (col) {
-            console.log(`collide with something`)
+            // console.log(`collide with something`)
             this.velocity.bounce(col.normal);
         }
     }
@@ -85,8 +85,8 @@ export default class NewPhysics extends v.Node2D {
         }
 
         const s = new Box(40, 40, 0xFFFFFF)
-            .set_position(192, 192)
-            // .set_rotation(Math.PI * 0.25)
+            .set_position(192, 192 + 32)
+            .set_rotation(Math.PI * 0.25)
             .set_name('S')
         this.add_child(s);
 
