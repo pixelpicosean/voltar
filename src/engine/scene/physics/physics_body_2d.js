@@ -5,7 +5,7 @@ import { Vector2, Matrix } from "engine/math/index";
 import Body2DSW from "engine/servers/physics_2d/body_2d_sw";
 import PhysicsMaterial from "../resources/physics_material";
 import Node2D from "../Node2D";
-import { MotionResult } from "engine/servers/physics_2d/state";
+import { MotionResult, SeparationResult } from "engine/servers/physics_2d/state";
 
 export class PhysicsBody2D extends CollisionObject2D {
     /**
@@ -292,6 +292,18 @@ export class KinematicCollision2D {
 
 const col = new Collision();
 const motion_result = new MotionResult();
+const sep_res = (() => {
+    /** @type {SeparationResult[]} */
+    const arr = new Array(8);
+    for (let i = 0; i < 8; i++) arr[i] = new SeparationResult();
+    return arr;
+})()
+const get_sep_res = () => {
+    for (let s of sep_res) s.reset();
+    return sep_res;
+}
+
+const FLOOR_ANGLE_THRESHOLD = 0.01;
 
 export class KinematicBody2D extends PhysicsBody2D {
     constructor() {
@@ -302,6 +314,7 @@ export class KinematicBody2D extends PhysicsBody2D {
         this.margin = 0.08;
 
         this.floor_velocity = new Vector2();
+        /** @type {PhysicsBody2D} */
         this.on_floor_body = null;
         this.on_floor = false;
         this.on_ceiling = false;
@@ -381,9 +394,160 @@ export class KinematicBody2D extends PhysicsBody2D {
 
     test_move(p_from, p_motion, p_infinite_inertia = true) { }
 
-    separate_raycast_shapes(p_infinite_inertia, r_collision) { }
+    /**
+     * @param {boolean} p_infinite_inertia
+     * @param {Collision} r_collision
+     */
+    separate_raycast_shapes(p_infinite_inertia, r_collision) {
+        const sep_res = get_sep_res();
 
-    move_and_slide(p_linear_velocity, p_floor_direction = Vector2.ZERO, p_stop_on_slope = false, p_max_slides = 4, p_floor_max_angle = Math.PI * 0.25, p_infinite_inertia = true) { }
+        const gt = this.get_global_transform();
+
+        const recover = Vector2.create();
+        const hits = this.rid.space.test_body_ray_separation(this.rid, gt, p_infinite_inertia, recover, sep_res, 8, this.margin);
+        let deepest = -1;
+        let deepest_depth = 0;
+        for (let i = 0; i < hits; i++) {
+            if (deepest === -1 || sep_res[i].collision_depth > deepest_depth) {
+                deepest = i;
+                deepest_depth = sep_res[i].collision_depth;
+            }
+        }
+
+        gt.tx += recover.x;
+        gt.ty += recover.y;
+        this.set_global_transform(gt);
+
+        if (deepest !== -1) {
+            r_collision.collider = sep_res[deepest].collider_id;
+            r_collision.collider_metadata = sep_res[deepest].collider_metadata;
+            r_collision.collider_shape = sep_res[deepest].collider_shape;
+            r_collision.collider_vel.copy(sep_res[deepest].collider_velocity);
+            r_collision.collision.copy(sep_res[deepest].collision_point);
+            r_collision.normal.copy(sep_res[deepest].collision_normal);
+            r_collision.local_shape = sep_res[deepest].collision_local_shape;
+            r_collision.travel.copy(recover);
+            r_collision.remainder.set(0, 0);
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * @param {Vector2} p_linear_velocity
+     * @param {Vector2} [p_floor_direction]
+     * @param {boolean} [p_stop_on_slope]
+     * @param {number} [p_max_slides]
+     * @param {number} [p_floor_max_angle]
+     * @param {boolean} [p_infinite_inertia]
+     */
+    move_and_slide(p_linear_velocity, p_floor_direction = Vector2.ZERO, p_stop_on_slope = false, p_max_slides = 4, p_floor_max_angle = Math.PI * 0.25, p_infinite_inertia = true) {
+        const floor_motion = this.floor_velocity.clone();
+        if (this.on_floor && this.on_floor_body) {
+            // this approach makes sure there is less delay between the actual body velocity
+            // and the one we saved
+            const bs = this.on_floor_body.rid;
+            if (bs) {
+                floor_motion.copy(bs.linear_velocity);
+            }
+        }
+
+        // hack in order to work with calling from _process as well as from _physics_process
+        const motion = floor_motion.clone().add(p_linear_velocity).scale(this.scene_tree.physics_process_time);
+        const lv = p_linear_velocity.clone();
+
+        this.on_floor = false;
+        this.on_floor_body = null;
+        this.on_ceiling = false;
+        this.on_wall = false;
+        this.colliders.length = 0;
+        this.floor_velocity.set(0, 0);
+
+        const lv_n = p_linear_velocity.normalized();
+
+        while (p_max_slides) {
+            const collision = new Collision();
+            let found_collision = false;
+
+            for (let i = 0; i < 2; i++) {
+                let collided = false;
+                if (i === 0) { // collide
+                    collided = this._move(motion, p_infinite_inertia, collision);
+                    if (!collided) {
+                        motion.set(0, 0); // clear because no collision happened and motion completed
+                    }
+                } else { // separate raycasts (if any)
+                    collided = this.separate_raycast_shapes(p_infinite_inertia, collision);
+                    if (collided) {
+                        collision.remainder.copy(motion); // keep
+                        collision.travel.set(0, 0);
+                    }
+                }
+
+                if (collided) {
+                    found_collision = true;
+                }
+
+                if (collided) {
+                    this.colliders.push(collision);
+                    motion.copy(collision.remainder);
+
+                    let is_on_slope = false;
+                    if (p_floor_direction.is_zero()) {
+                        // all is a wall
+                        this.on_wall = true;
+                    } else {
+                        if (collision.normal.dot(p_floor_direction) >= Math.cos(p_floor_max_angle + FLOOR_ANGLE_THRESHOLD)) { // floor
+                            this.on_floor = true;
+                            // @ts-ignore
+                            this.on_floor_body = collision.collider;
+                            this.floor_velocity.copy(collision.collider_vel);
+
+                            if (p_stop_on_slope) {
+                                if (lv_n.clone().add(p_floor_direction).is_zero()) {
+                                    const gt = this.get_global_transform();
+                                    gt.tx -= collision.travel.x;
+                                    gt.ty -= collision.travel.y;
+                                    this.set_global_transform(gt);
+                                    return Vector2.ZERO;
+                                }
+                            }
+
+                            is_on_slope = true;
+                        } else if (collision.normal.dot(p_floor_direction.clone().negate()) >= Math.cos(p_floor_max_angle + FLOOR_ANGLE_THRESHOLD)) { // ceiling
+                            this.on_ceiling = true;
+                        } else {
+                            this.on_wall = true;
+                        }
+                    }
+
+                    if (p_stop_on_slope && is_on_slope) {
+                        motion.slide(p_floor_direction);
+                        lv.slide(p_floor_direction);
+                    } else {
+                        motion.slide(collision.normal);
+                        lv.slide(collision.normal);
+                    }
+                }
+
+                if (p_stop_on_slope) {
+                    break;
+                }
+            }
+
+            if (!found_collision) {
+                break;
+            }
+            p_max_slides--;
+            if (motion.is_zero()) {
+                break;
+            }
+        }
+
+        return lv;
+    }
     move_and_slide_with_snap(p_linear_velocity, p_snap, p_floor_direction = Vector2.ZERO, p_stop_on_slope = false, p_max_slides = 4, p_floor_max_angle = Math.PI * 0.25, p_infinite_inertia = true) { }
 
     get_slide_count() { }
