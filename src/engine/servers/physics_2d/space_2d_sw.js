@@ -826,6 +826,7 @@ export default class Space2DSW {
 
                         if (col_obj.type === CollisionObjectType.BODY) {
                             /** @type {Body2DSW} */
+                            // @ts-ignore (cast<Body2DSW>)
                             const b = col_obj;
                             if (p_infinite_inertia && b.mode === BodyMode.STATIC && b.mode === BodyMode.KINEMATIC) {
                                 continue;

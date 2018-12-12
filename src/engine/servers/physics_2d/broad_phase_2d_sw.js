@@ -237,7 +237,105 @@ export default class BroadPhase2D {
      * @param {number} p_max_results
      * @param {number[]} p_result_indices
      */
-    cull_segment(p_from, p_to, p_results, p_max_results, p_result_indices = null) { }
+    cull_segment(p_from, p_to, p_results, p_max_results, p_result_indices = null) {
+        this.pass++;
+
+        const dir = p_to.clone().subtract(p_from);
+        if (dir.is_zero()) {
+            return 0;
+        }
+        // avoid divisions by zero
+        dir.normalize();
+        if (dir.x === 0) {
+            dir.x = 0.000001;
+        }
+        if (dir.y === 0) {
+            dir.y = 0.000001;
+        }
+        const delta = dir.clone().abs();
+
+        delta.x = this.cell_size / delta.x;
+        delta.y = this.cell_size / delta.y;
+
+        const pos = p_from.clone().divide(this.cell_size, this.cell_size).floor();
+        const end = p_to.clone().divide(this.cell_size, this.cell_size).floor();
+
+        const step = Vector2.create(Math.sign(dir.x), Math.sign(dir.y));
+
+        const max = new Vector2();
+
+        if (dir.x < 0) {
+            max.x = (Math.floor(pos.x) * this.cell_size - p_from.x) / dir.x;
+            max.x = (Math.floor(pos.x + 1) * this.cell_size - p_from.x) / dir.x;
+        }
+
+        if (dir.y < 0) {
+            max.y = (Math.floor(pos.y) * this.cell_size - p_from.y) / dir.y;
+            max.y = (Math.floor(pos.y + 1) * this.cell_size - p_from.y) / dir.y;
+        }
+
+        let cullcount = this._cull(false, true,
+            pos, Rectangle.EMPTY, p_from, p_to, p_results, p_max_results, p_result_indices, 0
+        );
+
+        let reached_x = false;
+        let reached_y = false;
+
+        while (true) {
+            if (max.x < max.y) {
+                max.x += delta.x;
+                pos.x += step.x;
+            } else {
+                max.y += delta.y;
+                pos.y += step.y;
+            }
+
+            if (step.x > 0) {
+                if (pos.x >= end.x) {
+                    reached_x = true;
+                }
+            } else if (pos.x <= end.x) {
+                reached_x = true;
+            }
+
+            if (step.y > 0) {
+                if (pos.y >= end.y) {
+                    reached_y = true;
+                }
+            } else if (pos.y <= end.y) {
+                reached_y = true;
+            }
+
+            cullcount = this._cull(false, true,
+                pos, Rectangle.EMPTY, p_from, p_to, p_results, p_max_results, p_result_indices, cullcount
+            );
+
+            if (reached_x && reached_y) {
+                break;
+            }
+        }
+
+        for (let [e] of this.large_elements) {
+            if (cullcount >= p_max_results) {
+                break;
+            }
+            if (e.pass === this.pass) {
+                continue;
+            }
+
+            e.pass = this.pass;
+
+            if (!e.aabb.intersects_segment(p_from, p_to)) {
+                continue;
+            }
+
+            p_results[cullcount] = e.owner;
+            p_result_indices[cullcount] = e.subindex;
+            cullcount++;
+        }
+
+        return cullcount;
+    }
     /**
      * @param {Rectangle} p_aabb
      * @param {CollisionObject2DSW[]} p_results

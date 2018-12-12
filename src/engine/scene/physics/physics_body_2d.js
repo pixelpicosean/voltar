@@ -5,7 +5,7 @@ import { Vector2, Matrix } from "engine/math/index";
 import Body2DSW from "engine/servers/physics_2d/body_2d_sw";
 import PhysicsMaterial from "../resources/physics_material";
 import Node2D from "../Node2D";
-import { MotionResult, SeparationResult } from "engine/servers/physics_2d/state";
+import { MotionResult, SeparationResult, Physics2DDirectBodyStateSW } from "engine/servers/physics_2d/state";
 
 export class PhysicsBody2D extends CollisionObject2D {
     /**
@@ -330,6 +330,13 @@ export class KinematicBody2D extends PhysicsBody2D {
 
         this.last_valid_transform = new Matrix();
     }
+    _propagate_enter_tree() {
+        super._propagate_enter_tree();
+
+        this.last_valid_transform.copy(this.get_global_transform());
+    }
+
+    // TODO: "local_transform_changed" notification
 
     /**
      * @param {Vector2} p_motion
@@ -353,9 +360,38 @@ export class KinematicBody2D extends PhysicsBody2D {
 
         return null;
     }
-    _get_slide_collision(p_bounce) { }
+    /**
+     * @param {number} p_bounce
+     */
+    _get_slide_collision(p_bounce) {
+        if (p_bounce >= this.slide_colliders.length) {
+            this.slide_colliders.length = p_bounce + 1;
+        }
 
-    _direct_state_changed(p_state) { }
+        let inst = this.slide_colliders[p_bounce];
+        if (!inst) {
+            inst = new KinematicCollision2D();
+            inst.owner = this;
+            this.slide_colliders[p_bounce] = inst;
+        }
+
+        inst.collision = this.colliders[p_bounce];
+        return inst;
+    }
+
+    /**
+     * @param {Physics2DDirectBodyStateSW} p_state
+     */
+    _direct_state_changed(p_state) {
+        if (!this.sync_to_physics) {
+            return;
+        }
+
+        this.last_valid_transform.copy(p_state.get_transform());
+        this.notify_local_transform = false;
+        this.set_global_transform(this.last_valid_transform);
+        this.notify_local_transform = true;
+    }
 
     /**
      * @param {Vector2} p_motion
@@ -551,5 +587,10 @@ export class KinematicBody2D extends PhysicsBody2D {
     move_and_slide_with_snap(p_linear_velocity, p_snap, p_floor_direction = Vector2.ZERO, p_stop_on_slope = false, p_max_slides = 4, p_floor_max_angle = Math.PI * 0.25, p_infinite_inertia = true) { }
 
     get_slide_count() { }
-    get_slide_collision(p_bounce) { }
+    /**
+     * @param {number} p_bounce
+     */
+    get_slide_collision(p_bounce) {
+        return this.colliders[p_bounce];
+    }
 }

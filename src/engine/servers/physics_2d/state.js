@@ -1,5 +1,6 @@
 import { Vector2, Matrix, Rectangle } from "engine/math/index";
 import { INTERSECTION_QUERY_MAX, CollisionObjectType, BodyState } from "engine/scene/physics/const";
+import CollisionObject2DSW from "./collision_object_2d_sw";
 
 export class Physics2DDirectBodyStateSW {
     /**
@@ -336,6 +337,18 @@ function _can_collide_with(p_object, p_collision_mask, p_collide_with_bodies, p_
     return true;
 }
 
+export class RayResult {
+    constructor() {
+        this.position = new Vector2();
+        this.normal = new Vector2();
+        this.rid = null;
+        this.collider_id = null;
+        this.collider = null;
+        this.shape = 0;
+        this.metadata = null;
+    }
+}
+
 export class Physics2DDirectSpaceStateSW {
     constructor() {
         /** @type {import('./space_2d_sw').default} */
@@ -343,15 +356,86 @@ export class Physics2DDirectSpaceStateSW {
     }
 
     /**
-     * @param {Vector2} from
-     * @param {Vector2} to
-     * @param {ShapeResult} result
-     * @param {Array} [exclude]
-     * @param {number} [collision_layer]
-     * @param {boolean} [collide_with_bodies=true]
-     * @param {boolean} [collide_with_areas=false]
+     * @param {Vector2} p_from
+     * @param {Vector2} p_to
+     * @param {RayResult} r_result
+     * @param {Set<CollisionObject2DSW>} [p_exclude]
+     * @param {number} [p_collision_mask]
+     * @param {boolean} [p_collide_with_bodies=true]
+     * @param {boolean} [p_collide_with_areas=false]
      */
-    intersect_ray(from, to, result, exclude = undefined, collision_layer = 0xFFFFFFFF, collide_with_bodies = true, collide_with_areas = false) { }
+    intersect_ray(p_from, p_to, r_result, p_exclude = undefined, p_collision_mask = 0xFFFFFFFF, p_collide_with_bodies = true, p_collide_with_areas = false) {
+        const begin = p_from.clone();
+        const end = p_to.clone();
+        const normal = end.clone().subtract(begin).normalize();
+
+        const amount = this.space.broadphase.cull_segment(begin, end, this.space.intersection_query_results, INTERSECTION_QUERY_MAX, this.space.intersection_query_subindex_results);
+
+        // TODO: create another array that references results, compute AABBs and check
+        // closest point to ray origin, sort and stop evaluating results when beyond first collision
+
+        let collided = false;
+        const res_point = new Vector2();
+        const res_normal = new Vector2();
+        let res_shape = 0;
+        /** @type {CollisionObject2DSW} */
+        let res_obj = null;
+        let min_d = 1e10;
+
+        for (let i = 0; i < amount; i++) {
+            if (!_can_collide_with(this.space.intersection_query_results[i], p_collision_mask, p_collide_with_bodies, p_collide_with_areas)) {
+                continue;
+            }
+
+            if (p_exclude.has(this.space.intersection_query_results[i])) {
+                continue;
+            }
+
+            const col_obj = this.space.intersection_query_results[i];
+
+            const shape_idx = this.space.intersection_query_subindex_results[i];
+            const inv_xform = col_obj.get_shape_inv_transform(shape_idx).clone().append(col_obj.inv_transform);
+
+            const local_from = inv_xform.xform(begin);
+            const local_to = inv_xform.xform(end);
+
+            const shape = col_obj.get_shape(shape_idx);
+
+            const shape_point = new Vector2();
+            const shape_normal = new Vector2();
+
+            if (shape.intersect_segment(local_from, local_to, shape_point, shape_normal)) {
+                const xform = col_obj.transform.clone().append(col_obj.get_shape_transform(shape_idx));
+                xform.xform(shape_point, shape_point);
+
+                const ld = normal.dot(shape_point);
+
+                if (ld < min_d) {
+                    min_d = ld;
+                    res_point.copy(shape_point);
+                    inv_xform.basis_xform_inv(shape_normal, res_normal).normalize();
+                    res_shape = shape_idx;
+                    collided = true;
+                }
+            }
+        }
+
+        if (!collided) {
+            return false;
+        }
+
+        r_result.collider_id = res_obj.instance;
+        r_result.collider = res_obj.instance;
+        r_result.normal.copy(res_normal);
+        r_result.metadata = res_obj.get_shape_metadata(res_shape);
+        r_result.position.copy(res_point);
+        r_result.rid = res_obj.self;
+        r_result.shape = res_shape;
+
+        // TODO: cache tons of temp objects
+
+        return true;
+    }
 
     /**
      * @param {Vector2} point
