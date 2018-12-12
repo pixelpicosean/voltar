@@ -1,6 +1,13 @@
-import { Vector2, Matrix, Rectangle } from "engine/math/index";
-import { INTERSECTION_QUERY_MAX, CollisionObjectType, BodyState } from "engine/scene/physics/const";
-import CollisionObject2DSW from "./collision_object_2d_sw";
+import {
+    Vector2,
+    Matrix,
+    Rectangle,
+} from "engine/math/index";
+import {
+    INTERSECTION_QUERY_MAX,
+    CollisionObjectType,
+    BodyState,
+} from "engine/scene/physics/const";
 
 export class Physics2DDirectBodyStateSW {
     /**
@@ -359,7 +366,7 @@ export class Physics2DDirectSpaceStateSW {
      * @param {Vector2} p_from
      * @param {Vector2} p_to
      * @param {RayResult} r_result
-     * @param {Set<CollisionObject2DSW>} [p_exclude]
+     * @param {Set<import('./collision_object_2d_sw').default>} [p_exclude]
      * @param {number} [p_collision_mask]
      * @param {boolean} [p_collide_with_bodies=true]
      * @param {boolean} [p_collide_with_areas=false]
@@ -378,7 +385,7 @@ export class Physics2DDirectSpaceStateSW {
         const res_point = new Vector2();
         const res_normal = new Vector2();
         let res_shape = 0;
-        /** @type {CollisionObject2DSW} */
+        /** @type {import('./collision_object_2d_sw').default} */
         let res_obj = null;
         let min_d = 1e10;
 

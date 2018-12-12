@@ -1,14 +1,18 @@
-import CollisionObject2DSW from "./collision_object_2d_sw";
-import { CollisionObjectType, AreaSpaceOverrideMode, AreaParameter } from "engine/scene/physics/const";
-import { Vector2, Matrix } from "engine/math/index";
-import Constraint2DSW from "./constraint_2d_sw";
-import Space2DSW from "./space_2d_sw";
 import SelfList from "engine/core/self_list";
-import Body2DSW from "./body_2d_sw";
+import {
+    Vector2,
+    Matrix,
+} from "engine/math/index";
+import {
+    CollisionObjectType,
+    AreaSpaceOverrideMode,
+    AreaParameter,
+} from "engine/scene/physics/const";
+import CollisionObject2DSW from "./collision_object_2d_sw";
 
 class BodyKey {
     /**
-     * @param {Area2DSW|Body2DSW} p_body
+     * @param {Area2DSW|import('./body_2d_sw').default} p_body
      * @param {number} p_body_shape
      * @param {number} p_area_shape
      */
@@ -75,7 +79,7 @@ export default class Area2DSW extends CollisionObject2DSW {
         this.monitored_areas = new Map();
 
         /**
-         * @type {Set<Constraint2DSW>}
+         * @type {Set<import('./constraint_2d_sw').default>}
          */
         this.constraints = new Set();
 
@@ -145,7 +149,7 @@ export default class Area2DSW extends CollisionObject2DSW {
     }
 
     /**
-     * @param {Body2DSW} p_body
+     * @param {import('./body_2d_sw').default} p_body
      * @param {number} p_body_shape
      * @param {number} p_area_shape
      */
@@ -170,7 +174,7 @@ export default class Area2DSW extends CollisionObject2DSW {
         }
     }
     /**
-     * @param {Body2DSW} p_body
+     * @param {import('./body_2d_sw').default} p_body
      * @param {number} p_body_shape
      * @param {number} p_area_shape
      */
@@ -271,13 +275,13 @@ export default class Area2DSW extends CollisionObject2DSW {
     }
 
     /**
-     * @param {Constraint2DSW} p_constraint
+     * @param {import('./constraint_2d_sw').default} p_constraint
      */
     add_constraint(p_constraint) {
         this.constraints.add(p_constraint);
     }
     /**
-     * @param {Constraint2DSW} p_constraint
+     * @param {import('./constraint_2d_sw').default} p_constraint
      */
     remove_constraint(p_constraint) {
         this.constraints.delete(p_constraint);
@@ -317,7 +321,7 @@ export default class Area2DSW extends CollisionObject2DSW {
     }
 
     /**
-     * @param {Space2DSW} p_sapce
+     * @param {import('./space_2d_sw').default} p_sapce
      */
     set_space(p_sapce) {
         if (this.space) {

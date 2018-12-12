@@ -112,6 +112,10 @@ class SpatialIndexer2D {
 }
 
 export default class World2D {
+    get direct_space_state() {
+        return this.space.direct_access;
+    }
+
     constructor() {
         this.canvas = null;
 

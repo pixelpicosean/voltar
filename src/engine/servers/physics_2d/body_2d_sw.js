@@ -1,12 +1,19 @@
-import CollisionObject2DSW from "./collision_object_2d_sw";
-import { BodyMode, CollisionObjectType, CCDMode, BodyState } from "engine/scene/physics/const";
-import { Vector2, Matrix, mod } from "engine/math/index";
-import SelfList from "engine/core/self_list";
-import Constraint2DSW from "./constraint_2d_sw";
-import Space2DSW from "./space_2d_sw";
-import { Physics2DDirectBodyStateSW } from "./state";
-import Area2DSW from "./area_2d_sw";
 import { remove_items } from "engine/dep/index";
+import SelfList from "engine/core/self_list";
+import {
+    Vector2,
+    Matrix,
+} from "engine/math/index";
+import CollisionObject2DSW from "./collision_object_2d_sw";
+import {
+    BodyMode,
+    CollisionObjectType,
+    CCDMode,
+    BodyState,
+} from "engine/scene/physics/const";
+import {
+    Physics2DDirectBodyStateSW,
+} from "./state";
 
 class AreaCMP { }
 
@@ -156,7 +163,7 @@ export default class Body2DSW extends CollisionObject2DSW {
         this.new_transform = new Matrix();
 
         /**
-         * @type {Map<Constraint2DSW, number>}
+         * @type {Map<import('./constraint_2d_sw').default, number>}
          */
         this.constraint_map = new Map();
 
@@ -193,7 +200,7 @@ export default class Body2DSW extends CollisionObject2DSW {
     }
 
     /**
-     * @param {Area2DSW} p_area
+     * @param {import('./area_2d_sw').default} p_area
      */
     _compute_area_gravity_and_dampenings(p_area) {
         if (p_area.gravity_is_point) {
@@ -209,7 +216,7 @@ export default class Body2DSW extends CollisionObject2DSW {
     set_force_integration_callback(p_id, p_method, p_udata = {}) { }
 
     /**
-     * @param {Area2DSW} p_area
+     * @param {import('./area_2d_sw').default} p_area
      */
     add_area(p_area) {
         const index = this.areas.indexOf(p_area);
@@ -219,7 +226,7 @@ export default class Body2DSW extends CollisionObject2DSW {
         }
     }
     /**
-     * @param {Area2DSW} p_area
+     * @param {import('./area_2d_sw').default} p_area
      */
     remove_area(p_area) {
         const index = this.areas.indexOf(p_area);
@@ -321,14 +328,14 @@ export default class Body2DSW extends CollisionObject2DSW {
     }
 
     /**
-     * @param {Constraint2DSW} p_constraint
+     * @param {import('./constraint_2d_sw').default} p_constraint
      * @param {number} p_pos
      */
     add_constraint(p_constraint, p_pos) {
         this.constraint_map.set(p_constraint, p_pos);
     }
     /**
-     * @param {Constraint2DSW} p_constraint
+     * @param {import('./constraint_2d_sw').default} p_constraint
      */
     remove_constraint(p_constraint) {
         this.constraint_map.delete(p_constraint);
@@ -499,7 +506,7 @@ export default class Body2DSW extends CollisionObject2DSW {
     add_torque(p_torque) { }
 
     /**
-     * @param {Space2DSW} p_space
+     * @param {import('./space_2d_sw').default} p_space
      */
     set_space(p_space) {
         if (this.space) {

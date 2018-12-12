@@ -1,16 +1,33 @@
-import { Physics2DDirectSpaceStateSW, MotionResult, CollCbkData, _shape_col_cbk, Physics2DDirectBodyStateSW, SeparationResult } from "../../servers/physics_2d/state";
-import { INTERSECTION_QUERY_MAX, CollisionObjectType, ShapeType, BodyMode } from "../../scene/physics/const";
-import Area2DSW from "./area_2d_sw";
 import SelfList, { List } from "engine/core/self_list";
+import {
+    Matrix,
+    Vector2,
+    Rectangle,
+    CMP_EPSILON,
+} from "engine/math/index";
 import BroadPhase2D from "./broad_phase_2d_sw";
-import CollisionObject2DSW from "./collision_object_2d_sw";
-import { Area2Pair2DSW, AreaPair2DSW } from "./area_pair_2d";
-import Constraint2DSW from "./constraint_2d_sw";
-import Body2DSW from "./body_2d_sw";
 import { Shape2DSW } from "./shape_2d_sw";
-import { Matrix, Vector2, Rectangle, CMP_EPSILON } from "engine/math/index";
-import CollisionSolver2DSW from "./collision_solver_2d_sw";
+import CollisionObject2DSW from "./collision_object_2d_sw";
+import Area2DSW from "./area_2d_sw";
+import Body2DSW from "./body_2d_sw";
+import Constraint2DSW from "./constraint_2d_sw";
+import { Area2Pair2DSW, AreaPair2DSW } from "./area_pair_2d";
 import BodyPair2DSW from "./body_pair_2d";
+import {
+    Physics2DDirectSpaceStateSW,
+    MotionResult,
+    CollCbkData,
+    _shape_col_cbk,
+    Physics2DDirectBodyStateSW,
+    SeparationResult,
+} from "../../servers/physics_2d/state";
+import {
+    INTERSECTION_QUERY_MAX,
+    CollisionObjectType,
+    ShapeType,
+    BodyMode,
+} from "../../scene/physics/const";
+import CollisionSolver2DSW from "./collision_solver_2d_sw";
 
 class ExcludedShapeSW {
     constructor() {

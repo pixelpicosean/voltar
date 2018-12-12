@@ -1,8 +1,6 @@
-import Body2DSW from "./body_2d_sw";
-
 export default class Constraint2DSW {
     /**
-     * @param {Body2DSW[]} [p_bodies]
+     * @param {import('./body_2d_sw').default[]} [p_bodies]
      * @param {number} [p_body_count]
      */
     constructor(p_bodies = null, p_body_count = 0) {
