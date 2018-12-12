@@ -445,7 +445,14 @@ export class KinematicBody2D extends PhysicsBody2D {
         return colliding;
     }
 
-    test_move(p_from, p_motion, p_infinite_inertia = true) { }
+    /**
+     * @param {Matrix} p_from
+     * @param {Vector2} p_motion
+     * @param {boolean} [p_infinite_inertia]
+     */
+    test_move(p_from, p_motion, p_infinite_inertia = true) {
+        return PhysicsServer.singleton.body_test_motion(this.rid, p_from, p_motion, p_infinite_inertia, this.margin);
+    }
 
     /**
      * @param {boolean} p_infinite_inertia
