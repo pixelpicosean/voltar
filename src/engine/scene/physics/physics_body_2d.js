@@ -235,7 +235,24 @@ export class StaticBody2D extends PhysicsBody2D {
     }
 }
 
+/** @type {Collision[]} */
+const collision_pool = [];
 class Collision {
+    static new() {
+        const i = collision_pool.pop();
+        if (i) {
+            return i.reset();
+        } else {
+            return new Collision();
+        }
+    }
+    /**
+     * @param {Collision} c
+     */
+    static free(c) {
+        if (c) collision_pool.push(c);
+        return Collision;
+    }
     constructor() {
         this.collision = new Vector2();
         this.normal = new Vector2();
@@ -508,7 +525,7 @@ export class KinematicBody2D extends PhysicsBody2D {
         const lv_n = p_linear_velocity.normalized();
 
         while (p_max_slides) {
-            const collision = new Collision();
+            const collision = Collision.new();
             let found_collision = false;
 
             for (let i = 0; i < 2; i++) {
@@ -546,11 +563,19 @@ export class KinematicBody2D extends PhysicsBody2D {
                             this.floor_velocity.copy(collision.collider_vel);
 
                             if (p_stop_on_slope) {
-                                if (lv_n.clone().add(p_floor_direction).is_zero()) {
-                                    const gt = this.get_global_transform();
+                                const vec = lv_n.clone().add(p_floor_direction);
+                                if (vec.is_zero()) {
+                                    const gt = this.get_global_transform().clone();
                                     gt.tx -= collision.travel.x;
                                     gt.ty -= collision.travel.y;
                                     this.set_global_transform(gt);
+
+                                    Vector2.delete(floor_motion);
+                                    Vector2.delete(motion);
+                                    Vector2.delete(lv_n);
+                                    Collision.free(collision);
+                                    Vector2.delete(vec);
+                                    Matrix.delete(gt);
                                     return Vector2.ZERO;
                                 }
                             }
@@ -578,6 +603,7 @@ export class KinematicBody2D extends PhysicsBody2D {
             }
 
             if (!found_collision) {
+                Collision.free(collision);
                 break;
             }
             p_max_slides--;
@@ -585,6 +611,10 @@ export class KinematicBody2D extends PhysicsBody2D {
                 break;
             }
         }
+
+        Vector2.delete(floor_motion);
+        Vector2.delete(motion);
+        Vector2.delete(lv_n);
 
         return lv;
     }
