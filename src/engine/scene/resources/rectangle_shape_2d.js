@@ -36,6 +36,13 @@ export default class RectangleShape2D extends Shape2D {
         this._extents = new Vector2(10, 10);
         this._update_shape();
     }
+    _load_data(p_data) {
+        if (p_data.extents !== undefined) {
+            this.set_extents(p_data.extents);
+        }
+        return this;
+    }
+
     /**
      * @param {Rectangle} [p_rect]
      * @returns {Rectangle}

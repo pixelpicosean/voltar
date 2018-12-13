@@ -28,6 +28,13 @@ export default class CircleShape2D extends Shape2D {
         this._radius = 10;
         this._update_shape();
     }
+    _load_data(p_data) {
+        if (p_data.radius !== undefined) {
+            this.set_radius(p_data.radius);
+        }
+        return this;
+    }
+
     /**
      * @param {Rectangle} [p_rect]
      * @returns {Rectangle}

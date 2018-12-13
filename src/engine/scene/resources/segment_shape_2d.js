@@ -54,6 +54,16 @@ export class SegmentShape2D extends Shape2D {
         this._b = new Vector2();
         this._update_shape();
     }
+    _load_data(p_data) {
+        if (p_data.a !== undefined) {
+            this.set_a(p_data.a);
+        }
+        if (p_data.b !== undefined) {
+            this.set_b(p_data.b);
+        }
+        return this;
+    }
+
     get_rect() {
         return Rectangle.new(this._a.x, this._a.y).expand_to(this._b);
     }
@@ -108,6 +118,16 @@ export class RayShape2D extends Shape2D {
         this._slips_on_slope = false;
         this._update_shape();
     }
+    _load_data(p_data) {
+        if (p_data.length !== undefined) {
+            this.set_length(p_data.length);
+        }
+        if (p_data.slips_on_slope !== undefined) {
+            this.set_slips_on_slope(p_data.slips_on_slope);
+        }
+        return this;
+    }
+
     get_rect() {
         const rect = Rectangle.new();
         const vec = Vector2.new(0, this._length);

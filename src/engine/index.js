@@ -243,14 +243,18 @@ function assemble_node(node, children) {
             assemble_node(inst, packed_scene.children);
         } else {
             if (data._is_proxy_) {
-                inst = new (res_class_map[data.prop_value.type])()._load_data(data.prop_value);
+                if (res_class_map.hasOwnProperty(data.prop_value.type)) {
+                    inst = new (res_class_map[data.prop_value.type])()._load_data(data.prop_value);
+                } else {
+                    inst = data.prop_value;
+                }
             } else {
                 inst = new (node_class_map[data.type])()._load_data(data);
             }
         }
 
         if (data._is_proxy_) {
-            node[`add_${data.prop_key}`](inst);
+            node[`set_${data.prop_key}`](inst);
         } else {
             assemble_node(inst, data.children);
             node.add_child(inst);
