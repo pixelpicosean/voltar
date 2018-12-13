@@ -1,8 +1,8 @@
-import Node2D from "./Node2D";
+import Node2D from "../Node2D";
 import { Vector2 } from "engine/math/index";
 import PhysicsServer from "engine/servers/physics_2d/physics_server";
 import { RayResult } from "engine/servers/physics_2d/state";
-import CollisionObject2D from "./physics/collision_object_2d";
+import CollisionObject2D from "./collision_object_2d";
 import CollisionObject2DSW from "engine/servers/physics_2d/collision_object_2d_sw";
 
 export default class RayCast2D extends Node2D {

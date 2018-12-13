@@ -58,7 +58,7 @@ export {
     StaticBody2D,
     KinematicBody2D, KinematicCollision2D,
 } from './scene/physics/physics_body_2d';
-export { default as RayCast2D } from './scene/ray_cast_2d';
+export { default as RayCast2D } from './scene/physics/ray_cast_2d';
 
 export { default as CollisionShape2D } from './scene/physics/collision_shape_2d';
 
