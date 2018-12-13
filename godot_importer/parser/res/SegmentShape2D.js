@@ -5,6 +5,7 @@ const {
 
 module.exports = (data) => {
     const res = {
+        _is_proxy_: true,
         id: data.attr.id,
         type: data.attr.type,
         a: real(data.prop.a),
