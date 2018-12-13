@@ -25,7 +25,7 @@ const resource = require('./parser/resource');
 
 /**
  * @param {string} data
- * @returns string[]
+ * @returns {string[][]}
  */
 function split_to_blocks(data) {
     const blocks = [];
@@ -52,7 +52,7 @@ function split_to_blocks(data) {
 }
 /**
  * @param {string} attr_str
- * @returns {}
+ * @returns {any}
  */
 function parse_attr(attr_str) {
     const attr = {};

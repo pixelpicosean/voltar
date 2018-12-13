@@ -1,6 +1,7 @@
 import Node2D from "../Node2D";
 import Shape2D from "../resources/shape_2d";
 import { Rectangle } from "engine/math/index";
+import { res_class_map } from "engine/registry";
 
 export default class CollisionShape2D extends Node2D {
     get shape() {
@@ -83,6 +84,16 @@ export default class CollisionShape2D extends Node2D {
         this.parent = null;
         this.rect = new Rectangle(-10, -10, 20, 20);
     }
+    _load_data(p_data) {
+        super._load_data(p_data);
+
+        if (p_data.shape !== undefined) {
+            this.set_shape(new res_class_map[p_data.shape.type](p_data.shape));
+        }
+
+        return this;
+    }
+
     _propagate_parent() {
         if (this.parent.is_collision_object) {
             this.owner = this.parent.create_shape_owner(this);
