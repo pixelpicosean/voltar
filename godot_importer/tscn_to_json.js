@@ -16,6 +16,7 @@ const {
     get_function_params,
     Color,
     Vector2,
+    Rect2,
     GeneralArray,
 } = require('./parser/parse_utils');
 
@@ -328,6 +329,12 @@ function convert_block(block) {
         case 'node': {
             return node(block);
         };
+        case 'gd_resource': {
+            return block;
+        };
+        case 'resource': {
+            return block;
+        };
         default: {
             throw `Block with key "${block.key}" is not supported!`;
         };
@@ -452,6 +459,14 @@ function normalize_res_url(url) {
     const without_ext = without_prefix.substring(0, without_prefix.indexOf(path.extname(without_prefix)));
     return without_ext.substring(without_ext.indexOf('/') + 1);
 }
+/**
+ * @param {string} url
+ * @returns {string}
+ */
+function normalize_res_real_url(url) {
+    const without_prefix = url.replace('res://', __dirname + '/../assets/');
+    return without_prefix;
+}
 
 const resource_normalizers = {
     Texture: (res) => normalize_image_res_url(res.path),
@@ -485,6 +500,58 @@ const resource_normalizers = {
         res.position = parent.position;
         delete parent.position;
         return res;
+    },
+    TileSet: (res, meta) => {
+        const text_data = fs.readFileSync(normalize_res_real_url(res.path), 'utf8');
+
+        const sections = split_to_blocks(text_data)
+            .map(parse_block)
+            .map(convert_block)
+
+        const res_table = {};
+        const head = sections.shift();
+        for (let i = 0; i < head.attr.load_steps; i++) {
+            const sec = sections[i];
+            if (sec.key === 'ext_resource') {
+                res_table[sec.id] = resource_normalizers[sec.type](sec);
+            } else if (sec.key === 'sub_resource') {
+                throw 'sub_source in "tres" is not supported yet';
+            } else if (sec.key === 'resource') {
+                const prop = sec.prop;
+                // TODO: make this a general function
+                const keys = Object.keys(prop);
+                // Array?
+                if (_.startsWith(keys[0], '0/')) {
+                    const array = [];
+                    for (const k in prop) {
+                        const key_list = k.split('/');
+                        const index = parseInt(key_list[0]);
+                        if (array.length < index + 1) {
+                            array.length = index + 1;
+                            array[index] = {};
+                        }
+
+                        let value = prop[k];
+                        if (_.startsWith(value, 'ExtResource')) {
+                            value = res_table[get_function_params(value)];
+                        } else if (_.startsWith(value, 'Vector2')) {
+                            value = Vector2(value);
+                        } else if (_.startsWith(value, 'Color')) {
+                            value = Color(value);
+                        } else if (_.startsWith(value, 'Rect2')) {
+                            value = Rect2(value);
+                        }
+
+                        array[index][key_list[1]] = value;
+                    }
+                    return array;
+                }
+                // Dictionary?
+                else {
+                    return prop;
+                }
+            }
+        }
     },
     PackedScene: (res) => normalize_res_url(res.path),
 };

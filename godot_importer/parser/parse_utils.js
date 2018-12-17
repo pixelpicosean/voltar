@@ -146,6 +146,18 @@ module.exports.Color = (color) => {
     return { r: parseFloat(arr[0]), g: parseFloat(arr[1]), b: parseFloat(arr[2]), a: parseFloat(arr[3]) };
 };
 /**
+ * @param {string} rect
+ * @returns {{ x: number, y: number, width: number, height: number }}
+ */
+module.exports.Rect2 = (rect) => {
+    if (!rect) {
+        return undefined;
+    }
+
+    const arr = get_function_params(rect);
+    return { x: parseFloat(arr[0]), y: parseFloat(arr[1]), width: parseFloat(arr[2]), height: parseFloat(arr[3]) };
+};
+/**
  * @param {string} path
  * @returns {string}
  */
@@ -163,6 +175,13 @@ module.exports.NodePath = (path) => {
     return result;
 };
 
+/**
+ * @param {string} arr
+ * @returns {number[]}
+ */
+module.exports.PoolIntArray = (arr) => {
+    return get_function_params(arr).map(module.exports.int);
+};
 /**
  * @param {string} arr
  * @returns {number[]}
