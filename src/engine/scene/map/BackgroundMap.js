@@ -4,11 +4,11 @@ import Node2D from '../Node2D';
 import { TextureCache } from 'engine/utils/index';
 import { Matrix } from 'engine/math/index';
 
-export default class BackgroundMap extends Node2D {
+export default class TileMap extends Node2D {
     constructor(tile_width, tile_height, data, texture) {
         super();
 
-        this.type = 'BackgroundMap';
+        this.type = 'TileMap';
 
         this.data = data;
 
@@ -49,15 +49,30 @@ export default class BackgroundMap extends Node2D {
         this.modification_marker = 0;
     }
 
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
     get_tile(x, y) {
         return this.data[y][x];
     }
+    /**
+     * @param {number} x
+     * @param {number} y
+     * @param {number} tile
+     */
     set_tile(x, y, tile) {
         this.data[y][x] = tile;
 
         this._needs_redraw = true;
     }
 
+    /**
+     * @param {number} u
+     * @param {number} v
+     * @param {number} x
+     * @param {number} y
+     */
     _push_tile(u, v, x, y) {
         var pb = this.points_buf;
 
@@ -122,6 +137,9 @@ export default class BackgroundMap extends Node2D {
         }
     }
 
+    /**
+     * @param {import('engine/renderers/WebGLRenderer').default} renderer
+     */
     _render_webgl(renderer) {
         // Check whether we need to redraw the whole map
         if (this._needs_redraw) {
@@ -136,7 +154,7 @@ export default class BackgroundMap extends Node2D {
         var shader = renderer.plugins.tilemap.get_shader();
         renderer.set_object_renderer(renderer.plugins.tilemap);
         renderer.bind_shader(shader);
-        renderer._active_render_target.projection_matrix.copy(this._global_mat).append(this.world_transform);
+        this._global_mat.copy(renderer._active_render_target.projection_matrix).append(this.world_transform);
         shader.uniforms.projectionMatrix = this._global_mat.to_array(true);
 
         var points = this.points_buf;
