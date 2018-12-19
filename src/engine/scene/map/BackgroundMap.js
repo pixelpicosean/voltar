@@ -3,8 +3,15 @@ import Node2D from '../Node2D';
 
 import { TextureCache } from 'engine/utils/index';
 import { Matrix } from 'engine/math/index';
+import Texture from 'engine/textures/Texture';
 
 export default class TileMap extends Node2D {
+    /**
+     * @param {number} tile_width
+     * @param {number} tile_height
+     * @param {number[][]} data
+     * @param {string|Texture} texture
+     */
     constructor(tile_width, tile_height, data, texture) {
         super();
 
@@ -28,14 +35,16 @@ export default class TileMap extends Node2D {
         this._global_mat = new Matrix();
         this._temp_scale = [0, 0];
 
-        if (!texture) {
-            this.textures = [];
-        } else if (!Array.isArray(texture)) {
-            if (texture.base_texture) {
-                this.textures = [texture];
-            }
-            else {
-                this.textures = [TextureCache[texture]];
+        /**
+         * @type {Texture[]}
+         */
+        this.textures = [];
+
+        if (texture && !Array.isArray(texture)) {
+            if (texture instanceof Texture) {
+                this.textures.push(texture);
+            } else {
+                this.textures.push(TextureCache[texture]);
             }
         }
 
@@ -76,43 +85,13 @@ export default class TileMap extends Node2D {
     _push_tile(u, v, x, y) {
         var pb = this.points_buf;
 
-        // var i;
-        // if (this.tile_width % this.tile_height === 0) {
-        //     //horizontal line on squares
-        //     for (i = 0; i < this.tile_width / this.tile_height; i++) {
-        //         pb.push(u + i * this.tile_height);
-        //         pb.push(v);
-        //         pb.push(x + i * this.tile_height);
-        //         pb.push(y);
-        //         pb.push(this.tile_height);
-        //         pb.push(this.tile_height);
-        //         pb.push(animX | 0);
-        //         pb.push(animY | 0);
-        //         pb.push(0);
-        //     }
-        // } else if (this.tile_height % this.tile_width === 0) {
-        //     //vertical line on squares
-        //     for (i = 0; i < this.tile_height / this.tile_width; i++) {
-        //         pb.push(u);
-        //         pb.push(v + i * this.tile_width);
-        //         pb.push(x);
-        //         pb.push(y + i * this.tile_width);
-        //         pb.push(this.tile_width);
-        //         pb.push(this.tile_width);
-        //         pb.push(animX | 0);
-        //         pb.push(animY | 0);
-        //         pb.push(0);
-        //     }
-        // } else {
-            //ok, ok, lets use rectangle. but its not working with square shader yet
-            pb.push(u);
-            pb.push(v);
-            pb.push(x);
-            pb.push(y);
-            pb.push(this.tile_width);
-            pb.push(this.tile_height);
-            pb.push(0);
-        // }
+        pb.push(u);
+        pb.push(v);
+        pb.push(x);
+        pb.push(y);
+        pb.push(this.tile_width);
+        pb.push(this.tile_height);
+        pb.push(0);
     }
 
     _draw_tiles() {
@@ -258,12 +237,7 @@ export default class TileMap extends Node2D {
                 arr[sz++] = v + h - eps;
                 arr[sz++] = textureId;
             }
-            // if (vs > this.vbArray.length/2 ) {
             vertexBuf.upload(arr, 0, true);
-            // } else {
-            //     var view = arr.subarray(0, vs);
-            //     vb.upload(view, 0);
-            // }
         }
         gl.drawElements(gl.TRIANGLES, rects_count * 6, gl.UNSIGNED_SHORT, 0);
     }
