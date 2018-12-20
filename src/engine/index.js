@@ -91,8 +91,6 @@ export { default as RenderTexture } from './textures/RenderTexture';
 
 export { default as VideoBaseTexture } from './textures/VideoBaseTexture';
 
-// export { default as RectangleShape2D } from './scene/physics/RectangleShape2D';
-
 // ------------------------------------------------------------------
 // Global constant, setting and function
 // ------------------------------------------------------------------
@@ -100,6 +98,7 @@ import settings from './settings';
 export * from './const';
 export * from './math/index';
 export * from './rnd';
+export { default as yield } from './core/yield';
 
 // ------------------------------------------------------------------
 // Namespace
