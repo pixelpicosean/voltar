@@ -14,6 +14,7 @@ import { registered_bitmap_fonts } from '../text/res';
 import { assemble_scene } from '../../index';
 import World2D from '../resources/world_2d';
 import Viewport from './viewport';
+import { VObject } from 'engine/dep/index';
 
 /**
  * @typedef ApplicationSettings
@@ -97,12 +98,30 @@ const DefaultSettings = {
     },
 };
 
-export class SceneTreeTimer {
+export class SceneTreeTimer extends VObject {
+    static new() {
+        const p = SceneTreeTimer.pool.pop();
+        if (!p) return new SceneTreeTimer();
+        else return p;
+    }
+    /**
+     * @param {SceneTreeTimer} t
+     */
+    static free(t) {
+        if (t) {
+            t.disconnect_all();
+            SceneTreeTimer.pool.push(t);
+        }
+    }
     constructor() {
+        super();
+
         this.time_left = 0;
         this.process_pause = true;
     }
 }
+/** @type {SceneTreeTimer[]} */
+SceneTreeTimer.pool = [];
 
 /**
  * @enum {string}
@@ -162,6 +181,12 @@ export default class SceneTree {
          * @private
          */
         this.delete_queue = [];
+
+        /**
+         * @type {SceneTreeTimer[]}
+         * @private
+         */
+        this.timers = [];
 
         /**
          * Currently running scene
@@ -264,6 +289,18 @@ export default class SceneTree {
 
     is_paused() { }
     is_debugging_collisions_hint() { }
+
+    /**
+     * @param {number} p_delay_sec
+     * @param {boolean} [p_process_pause]
+     */
+    create_timer(p_delay_sec, p_process_pause = true) {
+        const stt = SceneTreeTimer.new();
+        stt.process_pause = p_process_pause;
+        stt.time_left = p_delay_sec;
+        this.timers.push(stt);
+        return stt;
+    }
 
     queue_delete(node) {
         node.is_queued_for_deletion = true;
@@ -711,6 +748,25 @@ export default class SceneTree {
             this.input._process(this.idle_process_time);
 
             this.message_queue.flush();
+
+            // - go through timers
+            let L = null;
+            if (this.timers.length > 0) {
+                L = this.timers[0];
+            }
+            for (let i = this.timers.length - 1; i >= 0; i--) {
+                const t = this.timers[i];
+                if (this.paused && !t.process_pause) {
+                    continue;
+                }
+                t.time_left -= this.idle_process_time;
+
+                if (t.time_left < 0) {
+                    t.emit_signal('timeout');
+                    this.timers.splice(i, 1);
+                    SceneTreeTimer.free(t);
+                }
+            }
 
             // Render
             this.visual_server.render(this.viewport);
