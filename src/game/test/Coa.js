@@ -9,7 +9,7 @@ export default class CoaTest extends v.Node2D {
         return new CoaTest();
     }
 
-    _enter_tree() {
+    async _enter_tree() {
         const num = 32, col = 8;
         const scale = 0.25;
         // for (let i = 0; i < num; i++) {
@@ -21,46 +21,33 @@ export default class CoaTest extends v.Node2D {
 
         let hero = this.add_child(new v.CutoutAnimation().load('cc', 0));
         hero.position.set(128, 200);
-        hero.play('idle');
-        // hero.animator.speed = 0.25;
-        setInterval(() => {
-            switch (hero.animator.current_animation.name) {
-                case 'idle':
-                    hero.animator.transition('walk', 0.5);
-                    break;
-                case 'walk':
-                    hero.animator.transition('jump', 0.5);
-                    break;
-                case 'jump':
-                    hero.animator.transition('doublejump', 0.5);
-                    break;
-                case 'doublejump':
-                    hero.animator.transition('fall', 0.5);
-                    break;
-                case 'fall':
-                    hero.animator.transition('wallslice', 0.5);
-                    break;
-                case 'wallslice':
-                    hero.animator.transition('atk', 0.5);
-                    break;
-                case 'atk':
-                    hero.animator.transition('idle', 0.5);
-                    break;
-            }
-        }, 4000);
 
-        // this.info = this.add_child(new v.BitmapText('0', {
-        //     font: '04b03',
-        // }));
-        // this.info.position.set(4, 4);
+        hero.play('idle');
+        await v.yield(v.scene_tree.create_timer(4), 'timeout');
+
+        hero.animator.transition('walk', 0.5);
+        await v.yield(v.scene_tree.create_timer(4), 'timeout');
+
+        hero.animator.transition('jump', 0.5);
+        await v.yield(v.scene_tree.create_timer(4), 'timeout');
+
+        hero.animator.transition('doublejump', 0.5);
+        await v.yield(v.scene_tree.create_timer(4), 'timeout');
+
+        hero.animator.transition('fall', 0.5);
+        await v.yield(v.scene_tree.create_timer(4), 'timeout');
+
+        hero.animator.transition('wallslice', 0.5);
+        await v.yield(v.scene_tree.create_timer(4), 'timeout');
+
+        hero.animator.transition('atk', 0.5);
+        await v.yield(v.scene_tree.create_timer(4), 'timeout');
+
+        hero.animator.transition('idle', 0.5);
     }
     _ready() {
         this.set_process(true);
         this.last = performance.now();
-    }
-    _render(now) {
-        // this.info.text = `${(1000 / (now - this.last)) | 0}`;
-        // this.last = now;
     }
     _exit_tree() {}
 }
