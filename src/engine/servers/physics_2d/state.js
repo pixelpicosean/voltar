@@ -200,7 +200,6 @@ export class Physics2DDirectBodyStateSW {
     }
 
     Physics2DDirectBodyStateSW() {
-        Physics2DDirectBodyStateSW.singleton = this;
         /**
          * @type {import('./body_2d_sw').default}
          */
@@ -208,9 +207,17 @@ export class Physics2DDirectBodyStateSW {
 
         this.step = 0;
     }
+
+    static get singleton() {
+        return Physics2DDirectBodyStateSW_singleton;
+    }
+    static new() {
+        Physics2DDirectBodyStateSW_singleton = new Physics2DDirectBodyStateSW()
+        return Physics2DDirectBodyStateSW_singleton;
+    }
 }
 /** @type {Physics2DDirectBodyStateSW} */
-Physics2DDirectBodyStateSW.singleton = null;
+let Physics2DDirectBodyStateSW_singleton = null;
 
 export class Physics2DShapeQueryParameters {
     constructor() {

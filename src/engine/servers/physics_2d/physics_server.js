@@ -554,7 +554,7 @@ export default class PhysicsServer {
         this.last_step = 0.001;
         this.iterations = 8;
         this.stepper = new Step2DSW();
-        this.direct_state = new Physics2DDirectBodyStateSW();
+        this.direct_state = Physics2DDirectBodyStateSW.new();
 
         // sleep_threshold_linear = settings.sleep_threshold_linear;
         // sleep_threshold_linear_sqr = sleep_threshold_linear * sleep_threshold_linear;
