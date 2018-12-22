@@ -865,7 +865,7 @@ export default class Graphics extends Node2D {
      * @param {number} [rotation=0] - The rotation of the star in radians, where 0 is vertical
      * @return {Graphics} This Graphics object. Good for chaining method calls
      */
-    drawStar(x, y, points, radius, inner_radius, rotation = 0) {
+    draw_star(x, y, points, radius, inner_radius, rotation = 0) {
         inner_radius = inner_radius || radius / 2;
 
         const start_angle = (-1 * Math.PI / 2) + rotation;
