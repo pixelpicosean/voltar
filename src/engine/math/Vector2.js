@@ -125,12 +125,12 @@ export default class Vector2 {
     /**
      * Copy value from other vector
      *
-     * @param {Vector2Like} a
+     * @param {Vector2Like} p_b
      * @returns {Vector2} self for chaining
      */
-    copy(a) {
-        this.x = a.x;
-        this.y = a.y;
+    copy(p_b) {
+        this.x = p_b.x;
+        this.y = p_b.y;
         return this;
     }
 
@@ -156,48 +156,48 @@ export default class Vector2 {
     /**
      * Create a clamped vector.
      *
-     * @param {number} length
+     * @param {number} p_length
      * @returns {Vector2}
      */
-    clamped(length) {
+    clamped(p_length) {
         const len = this.length();
         const v = this.clone();
-        if (len > 0 && length < len) {
-            v.scale(length / len);
+        if (len > 0 && p_length < len) {
+            v.scale(p_length / len);
         }
         return v;
     }
     /**
      * Create a rotated vector.
      *
-     * @param {number} a
+     * @param {number} p_rotation
      * @returns {Vector2}
      */
-    rotated(a) {
-        return this.clone().rotate(a);
+    rotated(p_rotation) {
+        return this.clone().rotate(p_rotation);
     }
     snapped(by) { }
 
     /**
      * Whether this equals to another point
      *
-     * @param {Vector2Like} b
+     * @param {Vector2Like} p_b
      * @returns {boolean}
      */
-    equals(b) {
+    equals(p_b) {
         const a0 = this.x, a1 = this.y;
-        const b0 = b.x, b1 = b.y;
+        const b0 = p_b.x, b1 = p_b.y;
         return (Math.abs(a0 - b0) <= CMP_EPSILON * Math.max(1.0, Math.abs(a0), Math.abs(b0)) &&
             Math.abs(a1 - b1) <= CMP_EPSILON * Math.max(1.0, Math.abs(a1), Math.abs(b1)));
     }
     /**
      * Whether this equals to another point(precisely)
      *
-     * @param {Vector2Like} b
+     * @param {Vector2Like} p_b
      * @returns {boolean}
      */
-    exact_equals(b) {
-        return (this.x === b.x) && (this.y === b.y);
+    exact_equals(p_b) {
+        return (this.x === p_b.x) && (this.y === p_b.y);
     }
 
     /**
@@ -291,21 +291,21 @@ export default class Vector2 {
     /**
      * Dot multiply another vector.
      *
-     * @param {Vector2Like} b
+     * @param {Vector2Like} p_b
      * @returns {number}
      */
-    dot(b) {
-        return this.x * b.x + this.y * b.y;
+    dot(p_b) {
+        return this.x * p_b.x + this.y * p_b.y;
     }
 
     /**
      * Cross multiply another vector.
      *
-     * @param {Vector2Like} b
+     * @param {Vector2Like} p_b
      * @returns {number}
      */
-    cross(b) {
-        return this.x * b.y - this.y * b.x;
+    cross(p_b) {
+        return this.x * p_b.y - this.y * p_b.x;
     }
 
     /**
@@ -355,13 +355,13 @@ export default class Vector2 {
     /**
      * Clamp the vector to specific length.
      *
-     * @param {number} length
+     * @param {number} p_length
      * @returns {Vector2}
      */
-    clamp(length) {
+    clamp(p_length) {
         const len = this.length();
-        if (len > 0 && length < len) {
-            this.scale(length / len);
+        if (len > 0 && p_length < len) {
+            this.scale(p_length / len);
         }
         return this;
     }
@@ -419,12 +419,12 @@ export default class Vector2 {
     /**
      * Rotates the vector by “phi” radians.
      *
-     * @param {number} a
+     * @param {number} p_rotation
      * @returns {Vector2}
      */
-    rotate(a) {
+    rotate(p_rotation) {
         const x = this.x, y = this.y;
-        const c = Math.cos(a), s = Math.sin(a);
+        const c = Math.cos(p_rotation), s = Math.sin(p_rotation);
         this.x = x * c - y * s;
         this.y = x * s + y * c;
         return this;
@@ -458,26 +458,26 @@ export default class Vector2 {
     /**
      * Project to a vector.
      *
-     * @param {Vector2} other
+     * @param {Vector2} p_b
      * @returns {Vector2}
      */
-    project(other) {
-        const amt = this.dot(other) / other.length_squared();
-        this.x = amt * other.x;
-        this.y = amt * other.y;
+    project(p_b) {
+        const amt = this.dot(p_b) / p_b.length_squared();
+        this.x = amt * p_b.x;
+        this.y = amt * p_b.y;
         return this;
     }
 
     /**
      * Project to a vector which is already normalized.
      *
-     * @param {Vector2Like} other
+     * @param {Vector2Like} p_b
      * @returns {Vector2}
      */
-    project_n(other) {
-        const amt = this.dot(other);
-        this.x = amt * other.x;
-        this.y = amt * other.y;
+    project_n(p_b) {
+        const amt = this.dot(p_b);
+        this.x = amt * p_b.x;
+        this.y = amt * p_b.y;
         return this;
     }
 
@@ -595,7 +595,7 @@ export default class Vector2 {
      * @return {Vector2}
      */
     tangent() {
-        return new Vector2(this.y, -this.x);
+        return Vector2.new(this.y, -this.x);
     }
 
     is_zero() {

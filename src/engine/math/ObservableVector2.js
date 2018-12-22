@@ -431,7 +431,7 @@ export default class ObservableVector2 {
         return x * x + y * y;
     }
     tangent() {
-        return new Vector2(this._y, -this._x);
+        return Vector2.new(this._y, -this._x);
     }
 
     is_zero() {
