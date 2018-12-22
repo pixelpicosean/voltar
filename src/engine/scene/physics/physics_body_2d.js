@@ -558,7 +558,6 @@ export class KinematicBody2D extends PhysicsBody2D {
                     this.colliders.push(collision);
                     motion.copy(collision.remainder);
 
-                    let is_on_slope = false;
                     if (p_floor_direction.is_zero()) {
                         // all is a wall
                         this.on_wall = true;
@@ -571,11 +570,15 @@ export class KinematicBody2D extends PhysicsBody2D {
 
                             if (p_stop_on_slope) {
                                 const vec = lv_n.clone().add(p_floor_direction);
-                                if (vec.is_zero()) {
+                                if (vec.is_zero() && collision.travel.length() < 1) {
                                     const gt = this.get_global_transform().clone();
-                                    gt.tx -= collision.travel.x;
-                                    gt.ty -= collision.travel.y;
+                                    const tangent = p_floor_direction.tangent();
+                                    const proj = collision.travel.clone().project(tangent);
+                                    gt.tx -= proj.x;
+                                    gt.ty -= proj.y;
                                     this.set_global_transform(gt);
+                                    Vector2.free(tangent);
+                                    Vector2.free(proj);
 
                                     Vector2.free(floor_motion);
                                     Vector2.free(motion);
@@ -586,8 +589,6 @@ export class KinematicBody2D extends PhysicsBody2D {
                                     return Vector2.ZERO;
                                 }
                             }
-
-                            is_on_slope = true;
                         } else if (collision.normal.dot(p_floor_direction.clone().negate()) >= Math.cos(p_floor_max_angle + FLOOR_ANGLE_THRESHOLD)) { // ceiling
                             this.on_ceiling = true;
                         } else {
@@ -595,13 +596,8 @@ export class KinematicBody2D extends PhysicsBody2D {
                         }
                     }
 
-                    if (p_stop_on_slope && is_on_slope) {
-                        motion.slide(p_floor_direction);
-                        lv.slide(p_floor_direction);
-                    } else {
-                        motion.slide(collision.normal);
-                        lv.slide(collision.normal);
-                    }
+                    motion.slide(collision.normal);
+                    lv.slide(collision.normal);
                 }
 
                 if (p_stop_on_slope) {
