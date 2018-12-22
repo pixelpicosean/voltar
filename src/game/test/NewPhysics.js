@@ -22,11 +22,13 @@ class Ball extends v.KinematicBody2D {
         this.add_child(new v.CollisionShape2D())
             .set_shape(
                 new v.RectangleShape2D().set_extents(p_radius, p_radius)
+                // new v.CircleShape2D().set_radius(p_radius)
             );
 
         this.gfx = this.add_child(new v.Graphics())
             .begin_fill(color, 0.6)
             .draw_rect(0, 0, p_radius, p_radius)
+            // .draw_circle(0, 0, p_radius)
             .end_fill()
 
         this.set_physics_process(true);
@@ -40,7 +42,7 @@ class Ball extends v.KinematicBody2D {
     _physics_process(delta) {
         // this.move_and_collide(this.motion.copy(this.velocity).scale(delta));
         const vel = this.move_and_slide(this.velocity);
-        this.velocity.copy(vel);
+        // this.velocity.copy(vel);
         v.Vector2.free(vel);
     }
 }
