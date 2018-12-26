@@ -1,4 +1,4 @@
-import VisualServer from '../../VisualServer';
+import VisualServer from '../../servers/visual/visual_server';
 import PhysicsServer from 'engine/servers/physics_2d/physics_server';
 import MessageQueue from '../../MessageQueue';
 import Node2D from '../Node2D';

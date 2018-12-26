@@ -1,8 +1,8 @@
-import settings from './settings';
-import { SCALE_MODES } from './const';
-import { is_webgl_supported } from './utils/index';
+import settings from '../../settings';
+import { SCALE_MODES } from '../../const';
+import { is_webgl_supported } from '../../utils/index';
 import { loader_use_procs } from 'engine/registry';
-import WebGLRenderer from './renderers/WebGLRenderer';
+import WebGLRenderer from '../../renderers/WebGLRenderer';
 import texture_parser from 'engine/textures/texture_parser';
 import spritesheet_parser from 'engine/textures/spritesheet_parser';
 
@@ -19,7 +19,7 @@ export default class VisualServer {
         /**
          * Collection of methods for extracting data (image, pixels, etc.) from a display object or render texture
          *
-         * @type {import('./extract/WebGLExtract').default}
+         * @type {import('../../extract/WebGLExtract').default}
          */
         this.extract = null;
     }
@@ -42,6 +42,9 @@ export default class VisualServer {
 
         this.renderer = new WebGLRenderer(config);
     }
+    /**
+     * @param {import('../../scene/Node2D').default} viewport
+     */
     render(viewport) {
         this.renderer.render(viewport, undefined, true, undefined, true);
     }
