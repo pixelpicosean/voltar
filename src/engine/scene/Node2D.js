@@ -1653,7 +1653,7 @@ export default class Node2D extends VObject {
         } else {
             this._render_webgl(renderer);
 
-            // simple render children!
+            // simply render children!
             for (let c of this.children) {
                 c.render_webgl(renderer);
             }

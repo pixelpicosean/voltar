@@ -15,6 +15,7 @@ export * from 'engine/dep/index';
 import Node2D from './scene/Node2D';
 
 export { default as Viewport } from './scene/main/viewport';
+export { default as CanvasLayer } from './scene/main/canvas_layer';
 
 export { default as Node2D } from './scene/Node2D';
 
