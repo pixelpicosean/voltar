@@ -88,7 +88,13 @@ export default class RenderTarget {
          * @member {GL.GLBuffer}
          */
         this.default_frame = new Rectangle();
+        /**
+         * @type {Rectangle}
+         */
         this.destination_frame = null;
+        /**
+         * @type {Rectangle}
+         */
         this.source_frame = null;
 
         /**
@@ -210,7 +216,7 @@ export default class RenderTarget {
      *
      */
     activate() {
-        // TOOD refactor usage of frame..
+        // TODO: refactor usage of frame..
         const gl = this.gl;
 
         // make sure the texture is unbound!
@@ -222,8 +228,7 @@ export default class RenderTarget {
             this.projection_matrix.append(this.transform);
         }
 
-        // TODO add a check as them may be the same!
-        if (this.destination_frame !== this.source_frame) {
+        if (!this.destination_frame.equals(this.source_frame)) {
             gl.enable(gl.SCISSOR_TEST);
             gl.scissor(
                 this.destination_frame.x | 0,
@@ -236,7 +241,7 @@ export default class RenderTarget {
             gl.disable(gl.SCISSOR_TEST);
         }
 
-        // TODO - does not need to be updated all the time??
+        // TODO: does not need to be updated all the time??
         gl.viewport(
             this.destination_frame.x | 0,
             this.destination_frame.y | 0,

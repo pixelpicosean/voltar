@@ -263,7 +263,7 @@ export default class WebGLRenderer extends SystemRenderer {
      * @param {Matrix} [transform] - A transform to apply to the render texture before rendering.
      * @param {boolean} [skip_updateTransform] - Should we skip the update transform pass?
      */
-    render(node, render_texture, clear, transform, skip_updateTransform) {
+    render(node, render_texture, clear, transform = Matrix.IDENTITY, skip_updateTransform = false) {
         // can be handy to know!
         this.rendering_to_screen = !render_texture;
 
@@ -409,10 +409,11 @@ export default class WebGLRenderer extends SystemRenderer {
      * Binds a render texture for rendering
      *
      * @param {import('engine/index').RenderTexture} render_texture - The render texture to render
-     * @param {Matrix} transform - The transform to be applied to the render texture
+     * @param {Matrix} [transform] - The transform to be applied to the render texture
      * @return {WebGLRenderer} Returns itself.
      */
-    bind_render_texture(render_texture, transform) {
+    bind_render_texture(render_texture, transform = Matrix.IDENTITY) {
+        /** @type {RenderTarget} */
         let render_target;
 
         if (render_texture) {
@@ -432,7 +433,8 @@ export default class WebGLRenderer extends SystemRenderer {
             render_target = this.root_render_target;
         }
 
-        render_target.transform = transform;
+        render_target.calculateProjection(render_target.frame || render_target.size);
+        render_target.projection_matrix.append(transform);
         this.bind_render_target(render_target);
 
         return this;
@@ -448,13 +450,13 @@ export default class WebGLRenderer extends SystemRenderer {
         if (render_target !== this._active_render_target) {
             this._active_render_target = render_target;
             render_target.activate();
-
-            if (this._activeShader) {
-                this._activeShader.uniforms.projectionMatrix = render_target.projection_matrix.to_array(true);
-            }
-
-            this.stencil_manager.set_mask_stack(render_target.stencil_mask_stack);
         }
+
+        if (this._activeShader) {
+            this._activeShader.uniforms.projectionMatrix = render_target.projection_matrix.to_array(true);
+        }
+
+        this.stencil_manager.set_mask_stack(render_target.stencil_mask_stack);
 
         return this;
     }

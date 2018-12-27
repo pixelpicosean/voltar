@@ -5,6 +5,7 @@ import { loader_use_procs } from 'engine/registry';
 import WebGLRenderer from '../../renderers/WebGLRenderer';
 import texture_parser from 'engine/textures/texture_parser';
 import spritesheet_parser from 'engine/textures/spritesheet_parser';
+import { Matrix } from 'engine/math/index';
 
 // Texture and spritesheet parsers are mandatory
 loader_use_procs.push(texture_parser);
@@ -43,7 +44,7 @@ export default class VisualServer {
         this.renderer = new WebGLRenderer(config);
     }
     /**
-     * @param {import('../../scene/Node2D').default} viewport
+     * @param {import('../../scene/main/viewport').default} viewport
      */
     render(viewport) {
         this.renderer.render(viewport, undefined, true, undefined, true);
