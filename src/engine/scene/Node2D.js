@@ -725,8 +725,7 @@ export default class Node2D extends VObject {
         return this.position.x;
     }
 
-    set x(value) // eslint-disable-line require-jsdoc
-    {
+    set x(value) {
         this.transform.position.x = value;
     }
 
@@ -740,8 +739,7 @@ export default class Node2D extends VObject {
         return this.position.y;
     }
 
-    set y(value) // eslint-disable-line require-jsdoc
-    {
+    set y(value) {
         this.transform.position.y = value;
     }
 
@@ -775,8 +773,7 @@ export default class Node2D extends VObject {
         return this.transform.position;
     }
 
-    set position(value) // eslint-disable-line require-jsdoc
-    {
+    set position(value) {
         this.transform.position.copy(value);
     }
 
@@ -814,8 +811,7 @@ export default class Node2D extends VObject {
         return this.transform.scale;
     }
 
-    set scale(value) // eslint-disable-line require-jsdoc
-    {
+    set scale(value) {
         this.transform.scale.copy(value);
     }
 
@@ -853,8 +849,7 @@ export default class Node2D extends VObject {
         return this.transform.pivot;
     }
 
-    set pivot(value) // eslint-disable-line require-jsdoc
-    {
+    set pivot(value) {
         this.transform.pivot.copy(value);
     }
 
@@ -888,8 +883,7 @@ export default class Node2D extends VObject {
         return this.transform.skew;
     }
 
-    set skew(value) // eslint-disable-line require-jsdoc
-    {
+    set skew(value) {
         this.transform.skew.copy(value);
     }
 
@@ -922,8 +916,7 @@ export default class Node2D extends VObject {
         return this.transform.rotation;
     }
 
-    set rotation(value) // eslint-disable-line require-jsdoc
-    {
+    set rotation(value) {
         this.transform.rotation = value;
     }
 
@@ -976,8 +969,7 @@ export default class Node2D extends VObject {
         return this._mask;
     }
 
-    set mask(value) // eslint-disable-line require-jsdoc
-    {
+    set mask(value) {
         if (this._mask) {
             this._mask.renderable = true;
             this._mask.is_mask = false;
@@ -1010,8 +1002,7 @@ export default class Node2D extends VObject {
         return this._filters && this._filters.slice();
     }
 
-    set filters(value) // eslint-disable-line require-jsdoc
-    {
+    set filters(value) {
         this._filters = value && value.slice();
     }
 
@@ -1539,22 +1530,21 @@ export default class Node2D extends VObject {
         for (; i < l; i++) {
             name = list[i];
             switch (name) {
-                case '.':
-                    break;
-                case '..':
+                case '.': break;
+                case '..': {
                     node = node.parent;
                     if (!node) {
                         console.log('no parent node exists');
                         return null;
                     }
-                    break;
-                default:
+                } break;
+                default: {
                     node = node.named_children.get(name);
                     if (!node) {
                         console.log(`node called "${name}" does not exist`);
                         return null;
                     }
-                    break;
+                } break;
             }
         }
 
@@ -1590,9 +1580,7 @@ export default class Node2D extends VObject {
         // TODO: check render flags, how to process stuff here
         this.world_alpha = this.alpha * parent.world_alpha;
 
-        for (let i = 0, j = this.children.length; i < j; ++i) {
-            const child = this.children[i];
-
+        for (let child of this.children) {
             if (child.visible) {
                 child.update_transform();
             }
@@ -1607,24 +1595,20 @@ export default class Node2D extends VObject {
 
         this._calculate_bounds();
 
-        for (let i = 0; i < this.children.length; i++) {
-            const child = this.children[i];
-
+        for (let child of this.children) {
             if (!child.visible || !child.renderable) {
                 continue;
             }
 
             child.calculate_bounds();
 
-            // TODO: filter+mask, need to mask both somehow
+            // FIXME: filter+mask is not supported, should we even consider that?
             if (child._mask) {
                 child._mask.calculate_bounds();
                 this._bounds.add_bounds_mask(child._bounds, child._mask._bounds);
-            }
-            else if (child.filter_area) {
+            } else if (child.filter_area) {
                 this._bounds.add_bounds_area(child._bounds, child.filter_area);
-            }
-            else {
+            } else {
                 this._bounds.add_bounds(child._bounds);
             }
         }
@@ -1637,9 +1621,7 @@ export default class Node2D extends VObject {
      * calculate the bounds of the specific object (not including children).
      * @private
      */
-    _calculate_bounds() {
-        // FILL IN//
-    }
+    _calculate_bounds() { }
 
     /**
      * @param {Node2D} child
@@ -1668,13 +1650,12 @@ export default class Node2D extends VObject {
         // do a quick check to see if this element has a mask or a filter.
         if (this._mask || this._filters) {
             this.render_advanced_webgl(renderer);
-        }
-        else {
+        } else {
             this._render_webgl(renderer);
 
             // simple render children!
-            for (let i = 0, j = this.children.length; i < j; ++i) {
-                this.children[i].render_webgl(renderer);
+            for (let c of this.children) {
+                c.render_webgl(renderer);
             }
         }
     }
@@ -1699,9 +1680,9 @@ export default class Node2D extends VObject {
 
             this._enabled_filters.length = 0;
 
-            for (let i = 0; i < filters.length; i++) {
-                if (filters[i].enabled) {
-                    this._enabled_filters.push(filters[i]);
+            for (let f of filters) {
+                if (f.enabled) {
+                    this._enabled_filters.push(f);
                 }
             }
 
@@ -1718,8 +1699,8 @@ export default class Node2D extends VObject {
         this._render_webgl(renderer);
 
         // now loop through the children and make sure they get rendered
-        for (let i = 0, j = this.children.length; i < j; i++) {
-            this.children[i].render_webgl(renderer);
+        for (let c of this.children) {
+            c.render_webgl(renderer);
         }
 
         renderer.flush();
@@ -1739,10 +1720,7 @@ export default class Node2D extends VObject {
      * @private
      * @param {import('engine/renderers/WebGLRenderer').default} renderer - The renderer
      */
-    _render_webgl(renderer) // eslint-disable-line no-unused-vars
-    {
-        // this is where content itself gets rendered...
-    }
+    _render_webgl(renderer) { }
 
     /**
      * Removes all internal references and listeners as well as removes children from the display list.
@@ -1775,14 +1753,12 @@ export default class Node2D extends VObject {
         return this.scale.x * this.get_local_bounds().width;
     }
 
-    set width(value) // eslint-disable-line require-jsdoc
-    {
+    set width(value) {
         const width = this.get_local_bounds().width;
 
         if (width !== 0) {
             this.scale.x = value / width;
-        }
-        else {
+        } else {
             this.scale.x = 1;
         }
 
@@ -1798,14 +1774,12 @@ export default class Node2D extends VObject {
         return this.scale.y * this.get_local_bounds().height;
     }
 
-    set height(value) // eslint-disable-line require-jsdoc
-    {
+    set height(value) {
         const height = this.get_local_bounds().height;
 
         if (height !== 0) {
             this.scale.y = value / height;
-        }
-        else {
+        } else {
             this.scale.y = 1;
         }
 
