@@ -151,8 +151,7 @@ export default class RenderTarget {
 
             if (this.scale_mode === SCALE_MODES.NEAREST) {
                 this.frame_buffer.texture.enableNearestScaling();
-            }
-            else {
+            } else {
                 this.frame_buffer.texture.enableLinearScaling();
             }
             /*
@@ -162,8 +161,7 @@ export default class RenderTarget {
 
             // this is used by the base texture
             this.texture = this.frame_buffer.texture;
-        }
-        else {
+        } else {
             // make it a null framebuffer..
             this.frame_buffer = new GLFramebuffer(gl, 100, 100);
             this.frame_buffer.framebuffer = null;
@@ -222,7 +220,7 @@ export default class RenderTarget {
         // make sure the texture is unbound!
         this.frame_buffer.bind();
 
-        this.calculateProjection(this.destination_frame, this.source_frame);
+        this.calculate_projection(this.destination_frame, this.source_frame);
 
         if (this.transform) {
             this.projection_matrix.append(this.transform);
@@ -236,8 +234,7 @@ export default class RenderTarget {
                 (this.destination_frame.width * this.resolution) | 0,
                 (this.destination_frame.height * this.resolution) | 0
             );
-        }
-        else {
+        } else {
             gl.disable(gl.SCISSOR_TEST);
         }
 
@@ -256,7 +253,7 @@ export default class RenderTarget {
      * @param {Rectangle} destination_frame - The destination frame.
      * @param {Rectangle} [source_frame] - The source frame.
      */
-    calculateProjection(destination_frame, source_frame) {
+    calculate_projection(destination_frame, source_frame) {
         const pm = this.projection_matrix;
 
         source_frame = source_frame || destination_frame;
@@ -270,8 +267,7 @@ export default class RenderTarget {
 
             pm.tx = -1 - (source_frame.x * pm.a);
             pm.ty = -1 - (source_frame.y * pm.d);
-        }
-        else {
+        } else {
             pm.a = 1 / destination_frame.width * 2;
             pm.d = -1 / destination_frame.height * 2;
 
@@ -302,9 +298,7 @@ export default class RenderTarget {
 
         this.frame_buffer.resize(width * this.resolution, height * this.resolution);
 
-        const projectionFrame = this.frame || this.size;
-
-        this.calculateProjection(projectionFrame);
+        this.calculate_projection(this.frame || this.size);
     }
 
     /**

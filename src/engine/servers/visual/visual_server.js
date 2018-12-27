@@ -47,6 +47,7 @@ export default class VisualServer {
      * @param {import('../../scene/main/viewport').default} viewport
      */
     render(viewport) {
-        this.renderer.render(viewport, undefined, true, undefined, true);
+        // TODO: transform should be stretch_transform * global_canvas_transform * canvas_transform
+        this.renderer.render(viewport, undefined, true, viewport.canvas_transform, true);
     }
 }

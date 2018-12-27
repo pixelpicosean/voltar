@@ -428,12 +428,11 @@ export default class WebGLRenderer extends SystemRenderer {
 
             render_target = base_texture._gl_render_targets[this.CONTEXT_UID];
             render_target.set_frame(render_texture.frame);
-        }
-        else {
+        } else {
             render_target = this.root_render_target;
         }
 
-        render_target.calculateProjection(render_target.frame || render_target.size);
+        render_target.calculate_projection(render_target.frame || render_target.size);
         render_target.projection_matrix.append(transform);
         this.bind_render_target(render_target);
 
