@@ -1627,10 +1627,11 @@ export default class Node2D extends VObject {
      * @param {Node2D} child
      */
     _validate_child_name(child) {
+        const name = child.name;
         let n = child.name;
         let i = 2;
         while (this.named_children.has(n)) {
-            n = `${name}_${i}`;
+            n = `${name}_${i++}`;
         }
         child.name = n;
         this.named_children.set(n, child);
