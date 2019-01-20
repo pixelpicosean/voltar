@@ -4,6 +4,7 @@ import { sign, TextureCache } from 'engine/utils/index';
 import WebGLRenderer from 'engine/renderers/WebGLRenderer';
 
 import Texture from 'engine/textures/Texture';
+import BaseTexture from 'engine/textures/BaseTexture';
 
 import Node2D from '../Node2D';
 
@@ -573,28 +574,29 @@ export default class Sprite extends Node2D {
      * @type {Texture}
      */
     set texture(p_value) {
-        /** @type {Texture} */
-        // @ts-ignore
-        let value = p_value;
-
         if (this._texture === p_value) {
             return;
         }
 
+        /** @type {Texture} */
+        let value;
+
         if (typeof (p_value) === 'string') {
             value = TextureCache[p_value];
+        } else {
+            value = p_value;
         }
-
-        this._texture = value || Texture.EMPTY;
-        this.cached_tint = 0xFFFFFF;
-
-        this._texture_id = -1;
-        this._texture_trimmed_id = -1;
 
         if (!value) {
             console.log(`Texture "${p_value}" is not found!`);
-            value = TextureCache['_empty_'];
+            value = Texture.EMPTY;
         }
+
+        this.cached_tint = 0xFFFFFF;
+
+        this._texture = value;
+        this._texture_id = -1;
+        this._texture_trimmed_id = -1;
 
         // wait for the texture to load
         if (value.base_texture.has_loaded) {
