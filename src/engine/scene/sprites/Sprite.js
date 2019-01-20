@@ -40,7 +40,9 @@ export default class Sprite extends Node2D {
          * @member {ObservableVector2}
          * @private
          */
-        this._anchor = new ObservableVector2(this._on_anchor_update, this);
+        this._anchor = new ObservableVector2(this._on_anchor_update, this, 0.5, 0.5);
+
+        this._offset = new ObservableVector2(this._on_anchor_update, this, 0, 0);
 
         /**
          * The texture that the sprite is using
@@ -167,23 +169,25 @@ export default class Sprite extends Node2D {
                 // Directly set
                 // - Sprite
                 case 'texture':
-                case 'tint':
+                case 'tint': {
                     this[k] = data[k];
-                    break;
+                } break;
 
                 // Set vector
                 // - Sprite
                 case 'anchor':
-                    this[k].x = data[k].x || 0;
-                    this[k].y = data[k].y || 0;
-                    break;
+                case 'offset': {
+                    this[k].copy(data[k]);
+                } break;
 
                 // Blend modes
-                case 'blend_mode':
+                case 'blend_mode': {
                     this.blend_mode = BLEND_MODES[data[k]];
-                    break;
+                } break;
             }
         }
+
+        this._on_anchor_update();
 
         return this;
     }
@@ -252,6 +256,7 @@ export default class Sprite extends Node2D {
         const trim = texture.trim;
         const orig = texture.orig;
         const anchor = this._anchor;
+        const offset = this._offset;
 
         let w0 = 0;
         let w1 = 0;
@@ -261,17 +266,16 @@ export default class Sprite extends Node2D {
         if (trim) {
             // if the sprite is trimmed and is not a tilingsprite then we need to add the extra
             // space before transforming the sprite coords.
-            w1 = trim.x - (anchor._x * orig.width);
+            w1 = trim.x - (anchor._x * orig.width) + offset.x;
             w0 = w1 + trim.width;
 
-            h1 = trim.y - (anchor._y * orig.height);
+            h1 = trim.y - (anchor._y * orig.height) + offset.y;
             h0 = h1 + trim.height;
-        }
-        else {
-            w1 = -anchor._x * orig.width;
+        } else {
+            w1 = -anchor._x * orig.width + offset.x;
             w0 = w1 + orig.width;
 
-            h1 = -anchor._y * orig.height;
+            h1 = -anchor._y * orig.height + offset.y;
             h0 = h1 + orig.height;
         }
 
@@ -312,6 +316,7 @@ export default class Sprite extends Node2D {
         const vertex_data = this.vertex_trimmed_data;
         const orig = texture.orig;
         const anchor = this._anchor;
+        const offset = this._offset;
 
         // lets calculate the new untrimmed bounds..
         const wt = this.transform.world_transform;
@@ -322,10 +327,10 @@ export default class Sprite extends Node2D {
         const tx = wt.tx;
         const ty = wt.ty;
 
-        const w1 = -anchor._x * orig.width;
+        const w1 = -anchor._x * orig.width + offset.x;
         const w0 = w1 + orig.width;
 
-        const h1 = -anchor._y * orig.height;
+        const h1 = -anchor._y * orig.height + offset.y;
         const h0 = h1 + orig.height;
 
         // xy
@@ -540,9 +545,22 @@ export default class Sprite extends Node2D {
         return this._anchor;
     }
 
-    set anchor(value) // eslint-disable-line require-jsdoc
-    {
+    /**
+     * @param {import('engine/math/Vector2').Vector2Like} value
+     */
+    set anchor(value) {
         this._anchor.copy(value);
+    }
+
+    get offset() {
+        return this._offset;
+    }
+
+    /**
+     * @param {import('engine/math/Vector2').Vector2Like} value
+     */
+    set offset(value) {
+        this._offset.copy(value);
     }
 
     /**
@@ -556,8 +574,10 @@ export default class Sprite extends Node2D {
         return this._tint;
     }
 
-    set tint(value) // eslint-disable-line require-jsdoc
-    {
+    /**
+     * @member {number}
+     */
+    set tint(value) {
         this._tint = value;
         this._tint_rgb = (value >> 16) + (value & 0xff00) + ((value & 0xff) << 16);
     }
@@ -571,8 +591,10 @@ export default class Sprite extends Node2D {
         return this._texture;
     }
 
-    set texture(p_value) // eslint-disable-line require-jsdoc
-    {
+    /**
+     * @member {string|Texture}
+     */
+    set texture(p_value) {
         let value = p_value;
 
         if (this._texture === value) {
@@ -602,6 +624,9 @@ export default class Sprite extends Node2D {
         }
     }
 
+    /**
+     * @member {string|Texture}
+     */
     set_texture(value) {
         this.texture = value;
         return this;
