@@ -37,8 +37,7 @@ export default class Sprite extends Node2D {
          * Note: Updating the {@link Texture#default_anchor} after a Texture is
          * created does _not_ update the Sprite's anchor values.
          *
-         * @member {ObservableVector2}
-         * @private
+         *  @private
          */
         this._anchor = new ObservableVector2(this._on_anchor_update, this, 0.5, 0.5);
 
@@ -48,7 +47,7 @@ export default class Sprite extends Node2D {
          * The texture that the sprite is using
          *
          * @private
-         * @member {Texture}
+         * @type {Texture}
          */
         this._texture = null;
 
@@ -56,7 +55,7 @@ export default class Sprite extends Node2D {
          * The key of the texture that the sprite is using
          *
          * @private
-         * @member {string|null}
+         * @type {string|null}
          */
         this._texture_key = null;
 
@@ -64,7 +63,7 @@ export default class Sprite extends Node2D {
          * The width of the sprite (this is initially set by the texture)
          *
          * @private
-         * @member {number}
+         * @type {number}
          */
         this._width = 0;
 
@@ -72,7 +71,7 @@ export default class Sprite extends Node2D {
          * The height of the sprite (this is initially set by the texture)
          *
          * @private
-         * @member {number}
+         * @type {number}
          */
         this._height = 0;
 
@@ -80,7 +79,7 @@ export default class Sprite extends Node2D {
          * The tint applied to the sprite. This is a hex value. A value of 0xFFFFFF will remove any tint effect.
          *
          * @private
-         * @member {number}
+         * @type {number}
          * @default 0xFFFFFF
          */
         this._tint = null;
@@ -90,7 +89,7 @@ export default class Sprite extends Node2D {
         /**
          * The blend mode to be applied to the sprite. Apply a value of `BLEND_MODES.NORMAL` to reset the blend mode.
          *
-         * @member {number}
+         * @type {number}
          * @default BLEND_MODES.NORMAL
          * @see BLEND_MODES
          */
@@ -99,7 +98,7 @@ export default class Sprite extends Node2D {
         /**
          * The shader that will be used to render the sprite. Set to null to remove a current shader.
          *
-         * @member {Filter|Shader}
+         * @type {Filter|Shader}
          */
         this.shader = null;
 
@@ -107,7 +106,7 @@ export default class Sprite extends Node2D {
          * An internal cached value of the tint.
          *
          * @private
-         * @member {number}
+         * @type {number}
          * @default 0xFFFFFF
          */
         this.cached_tint = 0xFFFFFF;
@@ -133,7 +132,7 @@ export default class Sprite extends Node2D {
          * this is used to store the vertex data of the sprite (basically a quad)
          *
          * @private
-         * @member {Float32Array}
+         * @type {Float32Array}
          */
         this.vertex_data = new Float32Array(8);
 
@@ -141,7 +140,7 @@ export default class Sprite extends Node2D {
          * This is used to calculate the bounds of the object IF it is a trimmed sprite
          *
          * @private
-         * @member {Float32Array}
+         * @type {Float32Array}
          */
         this.vertex_trimmed_data = null;
 
@@ -155,7 +154,7 @@ export default class Sprite extends Node2D {
          * Plugin that is responsible for rendering this element.
          * Allows to customize the rendering process without overriding '_render_webgl' & '_render_canvas' methods.
          *
-         * @member {string}
+         * @type {string}
          * @default 'sprite'
          */
         this.renderer_plugin = 'sprite';
@@ -463,73 +462,48 @@ export default class Sprite extends Node2D {
         this.shader = null;
     }
 
-    // some helper functions..
-
-    /**
-     * Helper function that creates a sprite that will contain a texture from the TextureCache based on the frameId
-     * The frame ids are created when a Texture packer file has been loaded
-     *
-     * @static
-     * @param {string} frameId - The frame Id of the texture in the cache
-     * @return {Sprite} A new Sprite using a texture from the texture cache matching the frameId
-     */
-    static from_frame(frameId) {
-        const texture = TextureCache[frameId];
-
-        if (!texture) {
-            throw new Error(`The frameId "${frameId}" does not exist in the texture cache`);
-        }
-
-        return new Sprite(texture);
-    }
-
-    /**
-     * Helper function that creates a sprite that will contain a texture based on an image url
-     * If the image is not in the texture cache it will be loaded
-     *
-     * @static
-     * @param {string} imageId - The image url of the texture
-     * @param {boolean} [crossorigin=(auto)] - if you want to specify the cross-origin parameter
-     * @param {number} [scale_mode=settings.SCALE_MODE] - if you want to specify the scale mode,
-     *  see {@link SCALE_MODES} for possible values
-     * @return {Sprite} A new Sprite using a texture from the texture cache matching the image id
-     */
-    static from_image(imageId, crossorigin, scale_mode) {
-        return new Sprite(Texture.from_image(imageId, crossorigin, scale_mode));
-    }
-
     /**
      * The width of the sprite, setting this will actually modify the scale to achieve the value set
      *
-     * @member {number}
+     * @type {number}
      */
-    get width() {
-        return Math.abs(this.scale.x) * this._texture.orig.width;
-    }
-
-    set width(value) // eslint-disable-line require-jsdoc
-    {
+    set width(value) {
         const s = sign(this.scale.x) || 1;
 
         this.scale.x = s * value / this._texture.orig.width;
         this._width = value;
     }
+    get width() {
+        return Math.abs(this.scale.x) * this._texture.orig.width;
+    }
+    /**
+     * @param {number} value
+     */
+    set_width(value) {
+        this.width = value;
+        return this;
+    }
 
     /**
      * The height of the sprite, setting this will actually modify the scale to achieve the value set
      *
-     * @member {number}
+     * @type {number}
      */
-    get height() {
-        return Math.abs(this.scale.y) * this._texture.orig.height;
-    }
-
-    set height(value) // eslint-disable-line require-jsdoc
-    {
+    set height(value) {
         const s = sign(this.scale.y) || 1;
 
         this.scale.y = s * value / this._texture.orig.height;
         this._height = value;
+    }
+    get height() {
+        return Math.abs(this.scale.y) * this._texture.orig.height;
+    }
+    /**
+     * @param {number} value
+     */
+    set_height(value) {
+        this.height = value;
+        return this;
     }
 
     /**
@@ -539,65 +513,72 @@ export default class Sprite extends Node2D {
      *
      * 0,0 means the texture's origin is the top left, 0.5,0.5 is the center, 1,1 the bottom right corner.
      *
-     * @member {ObservableVector2}
-     */
-    get anchor() {
-        return this._anchor;
-    }
-
-    /**
-     * @param {import('engine/math/Vector2').Vector2Like} value
+     * @type {ObservableVector2}
      */
     set anchor(value) {
         this._anchor.copy(value);
     }
-
-    get offset() {
-        return this._offset;
+    get anchor() {
+        return this._anchor;
     }
-
     /**
      * @param {import('engine/math/Vector2').Vector2Like} value
      */
+    set_anchor(value) {
+        this._anchor.copy(value);
+        return this;
+    }
+
+    /**
+     * @type {ObservableVector2}
+     */
     set offset(value) {
         this._offset.copy(value);
+    }
+    get offset() {
+        return this._offset;
+    }
+    /**
+     * @param {import('engine/math/Vector2').Vector2Like} value
+     */
+    set_offset(value) {
+        this._offset.copy(value);
+        return this;
     }
 
     /**
      * The tint applied to the sprite. This is a hex value.
      * A value of 0xFFFFFF will remove any tint effect.
      *
-     * @member {number}
+     * @type {number}
      * @default 0xFFFFFF
-     */
-    get tint() {
-        return this._tint;
-    }
-
-    /**
-     * @member {number}
      */
     set tint(value) {
         this._tint = value;
         this._tint_rgb = (value >> 16) + (value & 0xff00) + ((value & 0xff) << 16);
     }
+    get tint() {
+        return this._tint;
+    }
+    /**
+     * @param {number} value
+     */
+    set_tint(value) {
+        this.tint = value;
+        return this;
+    }
 
     /**
      * The texture that the sprite is using
      *
-     * @member {Texture}
-     */
-    get texture() {
-        return this._texture;
-    }
-
-    /**
-     * @member {string|Texture}
+     * @type {Texture}
      */
     set texture(p_value) {
+        /** @type {Texture} */
+        // @ts-ignore
         let value = p_value;
 
-        if (this._texture === value) {
+        if (this._texture === p_value) {
             return;
         }
 
@@ -623,11 +604,14 @@ export default class Sprite extends Node2D {
             value.connect_once('update', this._on_texture_update, this);
         }
     }
-
+    get texture() {
+        return this._texture;
+    }
     /**
-     * @member {string|Texture}
+     * @param {string|Texture} value
      */
     set_texture(value) {
+        // @ts-ignore
         this.texture = value;
         return this;
     }
