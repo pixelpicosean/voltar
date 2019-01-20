@@ -651,24 +651,33 @@ export default class Label extends Control {
                             n = n.toUpperCase();
                         }
 
+                        glyph_idx++;
+
                         const char = font.char_map[c.charCodeAt(0)];
 
                         let g = this._glyphs[glyph_idx];
                         if (!g) {
                             this._glyphs[glyph_idx] = g = new Sprite();
+                            g.anchor.set(0, 0);
+                            g.interactive = false;
+                            g.interactive_children = false;
                         }
 
-                        glyph_idx++;
-                        g.transform.set_from_matrix(this.transform.world_transform);
-                        g.position.add(x_ofs + char.h_align, y_ofs - font.ascent + char.v_align)
-                        g._update_transform();
-
+                        // Update char sprite info
                         g.texture = char.texture;
+                        g.position.set(x_ofs + char.h_align, y_ofs - font.ascent + char.v_align);
+
+                        // Update transform
+                        g.parent = this;
+                        g._update_transform();
+                        g.parent = null;
+
                         // TODO: calculate once and set _tint to all char sprites
                         g.modulate.set(font_color.r, font_color.g, font_color.b, font_color.a);
 
-                        g.render_webgl(renderer);
+                        g._render_webgl(renderer);
 
+                        // Prepare for next char
                         x_ofs += font.get_char_size(tmp_vec10, c, n).x;
                         chars_total++;
                     }
