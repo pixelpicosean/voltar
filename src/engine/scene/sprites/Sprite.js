@@ -4,7 +4,6 @@ import { sign, TextureCache } from 'engine/utils/index';
 import WebGLRenderer from 'engine/renderers/WebGLRenderer';
 
 import Texture from 'engine/textures/Texture';
-import BaseTexture from 'engine/textures/BaseTexture';
 
 import Node2D from '../Node2D';
 
@@ -98,7 +97,7 @@ export default class Sprite extends Node2D {
         /**
          * The shader that will be used to render the sprite. Set to null to remove a current shader.
          *
-         * @type {Filter|Shader}
+         * @type {import('engine/renderers/filters/Filter')}
          */
         this.shader = null;
 
