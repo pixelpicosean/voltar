@@ -565,10 +565,16 @@ const post_resource_actions = {
         }
     },
     Scene: (node, meta) => {
-        node.key = node.instance;
+        if (node.instance !== undefined) {
+            node.key = node.instance;
+        }
         delete node.instance;
     },
     AnimationPlayer: (node, meta) => {
+        if (node._anim_post_processed) {
+            return;
+        }
+
         const anims = {};
         for (let a in node.anims) {
             anims[a] = meta.sub_resource[get_function_params(node.anims[a])[0]];
@@ -594,6 +600,7 @@ const post_resource_actions = {
             delete anims[a].type;
         }
         node.anims = anims;
+        node._anim_post_processed = true;
     },
 };
 
@@ -601,6 +608,11 @@ function normalize_resource(node, meta) {
     // try to normalize all implicit properties
     for (let k in node) {
         let value = node[k];
+
+        if (value === undefined) {
+            continue;
+        }
+
         if (_.isString(value)) {
             if (value.indexOf('ExtResource') >= 0) {
                 let res = meta.ext_resource[get_function_params(value)[0]];
@@ -639,13 +651,14 @@ function clean_up_unused_data(node) {
     // Remove __meta__
     node.__meta__ = undefined;
 
-    // Remove zero pivot
-    if (node.pivot) {
-        if (node.pivot.x === 0 && node.pivot.y === 0) {
-            node.pivot = undefined;
+    // Remove properties start with "_"
+    for (let k in node) {
+        if (k[0] === '_') {
+            delete node[k];
         }
     }
 
+    // Cleanup children data
     for (let c of node.children) {
         clean_up_unused_data(c);
     }
@@ -662,32 +675,8 @@ function convert_scene(tscn_path) {
             .map(convert_block)
     );
 
-    // Add `parent` property to nodes
-    const add_parent = (node) => {
-        for (let c of node.children) {
-            c.parent = node;
-            add_parent(c);
-        }
-    }
-    add_parent(scene);
-
     // Normalize resources
     normalize_resource(scene, scene.__meta__);
-
-    // Post process
-    post_process_nodes(scene);
-
-    // Remove `parent` property to nodes
-    const remove_parent = (node) => {
-        node.parent = undefined;
-        for (let c of node.children) {
-            remove_parent(c);
-        }
-    }
-    remove_parent(scene);
-
-    // Data cleanup
-    clean_up_unused_data(scene);
 
     return scene;
 }
@@ -724,6 +713,58 @@ module.exports.convert_scenes = (scene_root_url) => {
             },
         },
     });
+
+    // Parse scene instance override properties
+    const scene_db = {};
+    for (let s of generated_data) {
+        scene_db[path.basename(s.url, '.json')] = s;
+    }
+
+    for (let s of generated_data) {
+        const scene = s.data;
+
+        // Parse scene instance data
+        const parse = (node) => {
+            if (node.type === 'Scene') {
+                const template = scene_db[node.key].data;
+
+                const res = require(`./parser/res/${template.type}`)(
+                    {
+                        attr: {},
+                        prop: node.prop,
+                    }
+                );
+
+                // `prop` is no longer useful
+                delete node.prop;
+
+                // Type should not be changed
+                delete res.type;
+
+                // Add instance data to the Scene node
+                for (let k in res) {
+                    if (res[k] !== undefined) {
+                        node[k] = res[k];
+                    }
+                }
+            }
+
+            for (let c of node.children) {
+                parse(c);
+            }
+        }
+        parse(s.data);
+
+        // Normalize resources
+        normalize_resource(scene, scene.__meta__);
+
+        // Post process
+        post_process_nodes(scene);
+
+        // Data cleanup
+        clean_up_unused_data(scene);
+    }
+
     return generated_data;
 }
 
