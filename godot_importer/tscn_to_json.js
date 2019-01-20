@@ -624,6 +624,33 @@ function normalize_resource(node, meta) {
     }
 }
 
+function post_process_nodes(node) {
+    const parser = require(`./parser/res/${node.type}`);
+    if (parser.post_process) {
+        parser.post_process(node);
+    }
+
+    if (node.children) {
+        node.children.forEach(post_process_nodes);
+    }
+}
+
+function clean_up_unused_data(node) {
+    // Remove __meta__
+    node.__meta__ = undefined;
+
+    // Remove zero pivot
+    if (node.pivot) {
+        if (node.pivot.x === 0 && node.pivot.y === 0) {
+            node.pivot = undefined;
+        }
+    }
+
+    for (let c of node.children) {
+        clean_up_unused_data(c);
+    }
+}
+
 function convert_scene(tscn_path) {
     console.log(`- import "${path.basename(tscn_path)}"`);
 
@@ -634,10 +661,33 @@ function convert_scene(tscn_path) {
             .map(parse_block)
             .map(convert_block)
     );
+
+    // Add `parent` property to nodes
+    const add_parent = (node) => {
+        for (let c of node.children) {
+            c.parent = node;
+            add_parent(c);
+        }
+    }
+    add_parent(scene);
+
+    // Normalize resources
     normalize_resource(scene, scene.__meta__);
 
-    // Remove `__meta__`
-    delete scene.__meta__;
+    // Post process
+    post_process_nodes(scene);
+
+    // Remove `parent` property to nodes
+    const remove_parent = (node) => {
+        node.parent = undefined;
+        for (let c of node.children) {
+            remove_parent(c);
+        }
+    }
+    remove_parent(scene);
+
+    // Data cleanup
+    clean_up_unused_data(scene);
 
     return scene;
 }
