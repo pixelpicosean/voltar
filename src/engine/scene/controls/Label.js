@@ -187,7 +187,7 @@ export default class Label extends Control {
         this.minsize = new Vector2();
         this.lines_skipped = 0;
         this.max_lines_visible = -1;
-        this._percent_visible = -1;
+        this._percent_visible = 1;
         /**
          * @type {string}
          */
