@@ -356,6 +356,10 @@ export default class Node2D extends VObject {
             this.scale.copy(data.scale);
         }
 
+        if (data.has_transform !== undefined) {
+            this.has_transform = data.has_transform;
+        }
+
         if (data.modulate !== undefined) {
             this.modulate.set(
                 data.modulate.r,
