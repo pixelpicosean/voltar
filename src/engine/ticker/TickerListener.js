@@ -1,13 +1,8 @@
 /**
  * Internal class for handling the priority sorting of ticker handlers.
- *
- * @private
- * @class
  */
 export default class TickerListener {
     /**
-     * Constructor
-     *
      * @param {Function} fn - The listener function to be added for one update
      * @param {Function} [context=null] - The listener context
      * @param {number} [priority=0] - The priority for emitting

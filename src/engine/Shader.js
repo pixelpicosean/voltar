@@ -3,6 +3,10 @@ import settings from './settings';
 
 const { GLShader } = GL;
 
+/**
+ * @param {string|string[]} src
+ * @param {string} def
+ */
 function check_precision(src, def) {
     if (src instanceof Array) {
         if (src[0].substring(0, 9) !== 'precision') {
@@ -12,8 +16,7 @@ function check_precision(src, def) {
 
             return copy;
         }
-    }
-    else if (src.trim().substring(0, 9) !== 'precision') {
+    } else if (src.trim().substring(0, 9) !== 'precision') {
         return `precision ${def} float;\n${src}`;
     }
 

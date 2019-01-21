@@ -100,7 +100,7 @@ export default class RenderTexture extends Texture {
 
         // TODO: do we have `resize` method in `BaseTexture`?
         if (!do_not_resize_base_texture) {
-            this.base_texture.resize(width, height);
+            // this.base_texture.resize(width, height);
         }
 
         this._update_uvs();

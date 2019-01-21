@@ -1,8 +1,8 @@
 /**
  * Mixes all enumerable properties and methods from a source object to a target object.
  *
- * @param {object} target The prototype or instance that properties and methods should be added to.
- * @param {object} source The source of properties and methods to mix in.
+ * @param {any} target The prototype or instance that properties and methods should be added to.
+ * @param {any} source The source of properties and methods to mix in.
  */
 export function mixin(target, source) {
     if (!target || !source) return;
@@ -27,8 +27,8 @@ const mixins = [];
  * Queues a mixin to be handled towards the end of the initialization of V, so that deprecation
  * can take effect.
  *
- * @param {object} target The prototype or instance that properties and methods should be added to.
- * @param {object} source The source of properties and methods to mix in.
+ * @param {any} target The prototype or instance that properties and methods should be added to.
+ * @param {any} source The source of properties and methods to mix in.
  */
 export function delay_mixin(target, source) {
     mixins.push(target, source);

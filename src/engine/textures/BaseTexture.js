@@ -10,6 +10,7 @@ import {
 import { is_po2 } from 'engine/math/index';
 import { VObject } from 'engine/dep/index';
 import determine_cross_origin from '../utils/determine_cross_origin';
+import RenderTarget from 'engine/renderers/utils/RenderTarget';
 
 /**
  * A texture stores the information that represents an image. All textures have a base texture.
@@ -30,7 +31,7 @@ export default class BaseTexture extends VObject {
         /**
          * The resolution / device pixel ratio of the texture
          *
-         * @member {number}
+         * @type {number}
          * @default 1
          */
         this.resolution = resolution || settings.RESOLUTION;
@@ -39,7 +40,7 @@ export default class BaseTexture extends VObject {
          * The width of the base texture set when the image has loaded
          *
          * @readonly
-         * @member {number}
+         * @type {number}
          */
         this.width = 100;
 
@@ -47,7 +48,7 @@ export default class BaseTexture extends VObject {
          * The height of the base texture set when the image has loaded
          *
          * @readonly
-         * @member {number}
+         * @type {number}
          */
         this.height = 100;
 
@@ -57,21 +58,21 @@ export default class BaseTexture extends VObject {
          * Used to store the actual width of the source of this texture
          *
          * @readonly
-         * @member {number}
+         * @type {number}
          */
         this.real_width = 100;
         /**
          * Used to store the actual height of the source of this texture
          *
          * @readonly
-         * @member {number}
+         * @type {number}
          */
         this.real_height = 100;
 
         /**
          * The scale mode to apply when scaling this texture
          *
-         * @member {number}
+         * @type {number}
          * @default settings.SCALE_MODE
          * @see SCALE_MODES
          */
@@ -83,7 +84,7 @@ export default class BaseTexture extends VObject {
          * This is never true if the underlying source fails to load or has no texture data.
          *
          * @readonly
-         * @member {boolean}
+         * @type {boolean}
          */
         this.has_loaded = false;
 
@@ -95,7 +96,7 @@ export default class BaseTexture extends VObject {
          * immediately-available bypasses loading entirely.
          *
          * @readonly
-         * @member {boolean}
+         * @type {boolean}
          */
         this.is_loading = false;
 
@@ -105,7 +106,7 @@ export default class BaseTexture extends VObject {
          * TODO: Make this a setter that calls load_source();
          *
          * @readonly
-         * @member {HTMLImageElement|HTMLCanvasElement}
+         * @type {HTMLImageElement|HTMLCanvasElement}
          */
         this.source = null; // set in load_source, if at all
 
@@ -116,7 +117,7 @@ export default class BaseTexture extends VObject {
          * TODO: Currently not in use but could be used when re-scaling svg.
          *
          * @readonly
-         * @member {Image}
+         * @type {HTMLImageElement|HTMLCanvasElement}
          */
         this.origin_source = null; // set in loadSvg, if at all
 
@@ -124,7 +125,7 @@ export default class BaseTexture extends VObject {
          * Type of image defined in source, eg. `png` or `svg`
          *
          * @readonly
-         * @member {string}
+         * @type {string}
          */
         this.image_type = null; // set in updateImageType
 
@@ -132,7 +133,7 @@ export default class BaseTexture extends VObject {
          * Scale for source image. Used with Svg images to scale them before rasterization.
          *
          * @readonly
-         * @member {number}
+         * @type {number}
          */
         this.source_scale = 1.0;
 
@@ -140,7 +141,7 @@ export default class BaseTexture extends VObject {
          * Controls if RGB channels should be pre-multiplied by Alpha  (WebGL only)
          * All blend modes, and shaders written for default value. Change it on your own risk.
          *
-         * @member {boolean}
+         * @type {boolean}
          * @default true
          */
         this.premultiplied_alpha = true;
@@ -148,7 +149,7 @@ export default class BaseTexture extends VObject {
         /**
          * The image url of the texture
          *
-         * @member {string}
+         * @type {string}
          */
         this.image_url = null;
 
@@ -157,7 +158,7 @@ export default class BaseTexture extends VObject {
          * as you can
          *
          * @private
-         * @member {boolean}
+         * @type {boolean}
          */
         this.is_power_of_two = false;
 
@@ -169,7 +170,7 @@ export default class BaseTexture extends VObject {
          * to be set before the texture is used
          * Also the texture must be a power of two size to work
          *
-         * @member {boolean}
+         * @type {boolean}
          * @see MIPMAP_TEXTURES
          */
         this.mipmap = settings.MIPMAP_TEXTURES;
@@ -178,7 +179,7 @@ export default class BaseTexture extends VObject {
          *
          * WebGL Texture wrap mode
          *
-         * @member {number}
+         * @type {number}
          * @see WRAP_MODES
          */
         this.wrap_mode = settings.WRAP_MODE;
@@ -187,12 +188,12 @@ export default class BaseTexture extends VObject {
          * A map of renderer IDs to webgl textures
          *
          * @private
-         * @member {object<number, WebGLTexture>}
+         * @type {Object<number, WebGLTexture>}
          */
         this._gl_textures = {};
         /**
          * @private
-         * @member {object<number, RenderTarget>}
+         * @type {Object<number, RenderTarget>}
          */
         this._gl_render_targets = null;
 
@@ -202,7 +203,7 @@ export default class BaseTexture extends VObject {
         /**
          * If the object has been destroyed via destroy(). If true, it should not be used.
          *
-         * @member {boolean}
+         * @type {boolean}
          * @private
          * @readonly
          */
@@ -213,7 +214,7 @@ export default class BaseTexture extends VObject {
          * automatically set as long as BaseTexture.add_to_cache is used, but may not be set if a
          * BaseTexture is added directly to the BaseTextureCache array.
          *
-         * @member {string[]}
+         * @type {string[]}
          */
         this.texture_cache_ids = [];
 

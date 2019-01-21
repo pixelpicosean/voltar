@@ -147,12 +147,12 @@ export class RandomDataGenerator {
    */
     state(state) {
         if (typeof state === 'string' && state.match(/^!rnd/)) {
-            state = state.split(',');
+            const states = state.split(',');
 
-            this.c = parseFloat(state[1]);
-            this.s0 = parseFloat(state[2]);
-            this.s1 = parseFloat(state[3]);
-            this.s2 = parseFloat(state[4]);
+            this.c = parseFloat(states[1]);
+            this.s0 = parseFloat(states[2]);
+            this.s1 = parseFloat(states[3]);
+            this.s2 = parseFloat(states[4]);
         }
 
         return ['!rnd', this.c, this.s0, this.s1, this.s2].join(',');
@@ -217,7 +217,7 @@ export function randi() {
 export function uuid() {
     let a = '', b = '';
 
-    /* eslint no-empty:0*/
+    // @ts-ignore
     for (b = a = ''; a++ < 36; b += ~a % 5 | a * 3 & 4 ? (a ^ 15 ? 8 ^ rnd.frac() * (a ^ 20 ? 16 : 4) : 4).toString(16) : '-') { }
 
     return b;

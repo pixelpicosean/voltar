@@ -37,22 +37,19 @@ export default function trim_canvas(canvas) {
 
             if (bound.left === null) {
                 bound.left = x;
-            }
-            else if (x < bound.left) {
+            } else if (x < bound.left) {
                 bound.left = x;
             }
 
             if (bound.right === null) {
                 bound.right = x + 1;
-            }
-            else if (bound.right < x) {
+            } else if (bound.right < x) {
                 bound.right = x + 1;
             }
 
             if (bound.bottom === null) {
                 bound.bottom = y;
-            }
-            else if (bound.bottom < y) {
+            } else if (bound.bottom < y) {
                 bound.bottom = y;
             }
         }
@@ -65,8 +62,8 @@ export default function trim_canvas(canvas) {
     }
 
     return {
-        height,
-        width,
-        data,
+        width: width,
+        height: height,
+        data: data,
     };
 }

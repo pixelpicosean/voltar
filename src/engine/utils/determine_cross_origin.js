@@ -8,13 +8,13 @@ let temp_anchor;
  * function does nothing.
  * Nipped from the resource loader!
  *
- * @param {string} url - The url to test.
+ * @param {string} url_str - The url to test.
  * @param {object} [loc=window.location] - The location object to test against.
  * @return {string} The crossOrigin value to use (or empty string for none).
  */
-export default function determine_cross_origin(url, loc = window.location) {
+export default function determine_cross_origin(url_str, loc = window.location) {
     // data: and javascript: urls are considered same-origin
-    if (url.indexOf('data:') === 0) {
+    if (url_str.indexOf('data:') === 0) {
         return '';
     }
 
@@ -28,8 +28,8 @@ export default function determine_cross_origin(url, loc = window.location) {
     // let the browser determine the full href for the url of this resource and then
     // parse with the node url lib, we can't use the properties of the anchor element
     // because they don't work in IE9 :(
-    temp_anchor.href = url;
-    url = _url.parse(temp_anchor.href);
+    temp_anchor.href = url_str;
+    const url = _url.parse(temp_anchor.href);
 
     const same_port = (!url.port && loc.port === '') || (url.port === loc.port);
 

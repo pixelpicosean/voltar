@@ -5,7 +5,7 @@
  *      function MyObject() {}
  *      plugin_target.mixin(MyObject);
  *
- * @param {object} obj - The object to mix into.
+ * @param {any} obj - The object to mix into.
  */
 function plugin_target(obj) {
     obj.__plugins = {};
@@ -14,7 +14,7 @@ function plugin_target(obj) {
      * Adds a plugin to an object
      *
      * @param {string} renderer_plugin - The events that should be listed.
-     * @param {Function} ctor - The constructor function for the plugin.
+     * @param {FunctionConstructor} ctor - The constructor function for the plugin.
      */
     obj.register_plugin = function register_plugin(renderer_plugin, ctor) {
         obj.__plugins[renderer_plugin] = ctor;
@@ -50,7 +50,7 @@ export default {
     /**
      * Mixes in the properties of the plugin_target into another object
      *
-     * @param {object} obj - The obj to mix into
+     * @param {any} obj - The obj to mix into
      */
     mixin: function mixin(obj) {
         plugin_target(obj);

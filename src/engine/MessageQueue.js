@@ -26,9 +26,14 @@ export default class MessageQueue {
         this.messages = [];
     }
 
+    /**
+     * @param {any} obj
+     * @param {string} method
+     * @param {any} args
+     */
     push_call(obj, method, args) {
         // Multiple equal message call is not allowed in a single frame
-        for (let m of this.messages) {
+        for (const m of this.messages) {
             if (m.obj === obj && m.method === method && m.args === args) {
                 return;
             }
@@ -44,11 +49,8 @@ export default class MessageQueue {
         this.messages.push(msg);
     }
     flush() {
-        let i = 0, msg;
-        for (i = 0; i < this.messages.length; i++) {
-            msg = this.messages[i];
+        for (const msg of this.messages) {
             msg.obj[msg.method](msg.args);
-
             pool.push(msg);
         }
 

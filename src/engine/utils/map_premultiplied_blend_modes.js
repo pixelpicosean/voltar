@@ -3,8 +3,8 @@ import { BLEND_MODES } from '../const';
 /**
  * Corrects pixi blend, takes premultiplied alpha into account
  *
- * @param {Array<number[]>} [array] - The array to output into.
- * @return {Array<number[]>} Mapped modes.
+ * @param {number[][]} [array] - The array to output into.
+ * @return {number[][]} Mapped modes.
  */
 
 export default function map_premultiplied_blend_modes(array) {
