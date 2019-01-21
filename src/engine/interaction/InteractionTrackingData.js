@@ -29,7 +29,7 @@ export default class InteractionTrackingData {
      * Unique pointer id of the event
      *
      * @readonly
-     * @member {number}
+     * @type {number}
      */
     get pointer_id() {
         return this._pointer_id;
@@ -38,7 +38,7 @@ export default class InteractionTrackingData {
     /**
      * State of the tracking data, expressed as bit flags
      *
-     * @member {number}
+     * @type {number}
      */
     get flags() {
         return this._flags;
@@ -56,7 +56,7 @@ export default class InteractionTrackingData {
     /**
      * Is the tracked event inactive (not over or down)?
      *
-     * @member {number}
+     * @type {boolean}
      */
     get none() {
         return this._flags === InteractionTrackingData.FLAGS.NONE;
@@ -65,7 +65,7 @@ export default class InteractionTrackingData {
     /**
      * Is the tracked event over the Node2D?
      *
-     * @member {boolean}
+     * @type {boolean}
      */
     get over() {
         return (this._flags & InteractionTrackingData.FLAGS.OVER) !== 0;
@@ -83,7 +83,7 @@ export default class InteractionTrackingData {
     /**
      * Did the right mouse button come down in the Node2D?
      *
-     * @member {boolean}
+     * @type {boolean}
      */
     get right_down() {
         return (this._flags & InteractionTrackingData.FLAGS.RIGHT_DOWN) !== 0;
@@ -101,7 +101,7 @@ export default class InteractionTrackingData {
     /**
      * Did the left mouse button come down in the Node2D?
      *
-     * @member {boolean}
+     * @type {boolean}
      */
     get left_down() {
         return (this._flags & InteractionTrackingData.FLAGS.LEFT_DOWN) !== 0;

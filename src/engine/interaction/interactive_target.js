@@ -1,4 +1,11 @@
 import InteractionTrackingData from './InteractionTrackingData';
+import {
+    Rectangle,
+    Circle,
+    Ellipse,
+    Polygon,
+    RoundedRectangle,
+} from 'engine/math/index';
 
 /**
  * Default property values of interactive objects
@@ -26,7 +33,7 @@ export default {
      * sprite.connect('tap', (event) => {
      *      // handle event
      * });
-     * @member {boolean}
+     * @type {boolean}
      */
     interactive: false,
 
@@ -34,7 +41,7 @@ export default {
      * Determines if the children to the node can be clicked/touched
      * Setting this to false allows pixi to bypass a recursive `hit_test` function
      *
-     * @member {boolean}
+     * @type {boolean}
      */
     interactive_children: true,
 
@@ -46,7 +53,7 @@ export default {
      * const sprite = new Sprite(texture);
      * sprite.interactive = true;
      * sprite.hit_area = new Rectangle(0, 0, 100, 100);
-     * @member {Rectangle|Circle|Ellipse|Polygon|RoundedRectangle}
+     * @type {Rectangle|Circle|Ellipse|Polygon|RoundedRectangle}
      */
     hit_area: null,
 
@@ -58,7 +65,7 @@ export default {
      * const sprite = new Sprite(texture);
      * sprite.interactive = true;
      * sprite.button_mode = true;
-     * @member {boolean}
+     * @type {boolean}
      */
     get button_mode()
     {
@@ -86,14 +93,14 @@ export default {
      * sprite.cursor = 'wait';
      * @see https://developer.mozilla.org/en/docs/Web/CSS/cursor
      *
-     * @member {string}
+     * @type {string}
      */
     cursor: null,
 
     /**
      * Internal set of all active pointers, by identifier
      *
-     * @member {Object<number, InteractionTrackingData>}
+     * @type {Object<number, InteractionTrackingData>}
      * @memberof Node2D#
      * @private
      */

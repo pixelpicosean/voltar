@@ -1,3 +1,6 @@
+import Node2D from "engine/scene/Node2D";
+import InteractionData from "./InteractionData";
+
 /**
  * Event class that mimics native DOM events.
  */
@@ -9,7 +12,7 @@ export default class InteractionEvent {
         /**
          * Whether this event will continue propagating in the tree
          *
-         * @member {boolean}
+         * @type {boolean}
          */
         this.stopped = false;
 
@@ -17,28 +20,28 @@ export default class InteractionEvent {
          * The object which caused this event to be dispatched.
          * For listener callback see {@link InteractionEvent.current_target}.
          *
-         * @member {Node2D}
+         * @type {Node2D}
          */
         this.target = null;
 
         /**
          * The object whose event listener’s callback is currently being invoked.
          *
-         * @member {Node2D}
+         * @type {Node2D}
          */
         this.current_target = null;
 
         /**
          * Type of the event
          *
-         * @member {string}
+         * @type {string}
          */
         this.type = null;
 
         /**
          * InteractionData related to this event
          *
-         * @member {InteractionData}
+         * @type {InteractionData}
          */
         this.data = null;
     }

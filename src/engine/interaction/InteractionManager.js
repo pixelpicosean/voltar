@@ -9,6 +9,7 @@ import WebGLRenderer from 'engine/renderers/WebGLRenderer';
 import Vector2 from 'engine/math/Vector2';
 import * as ticker from 'engine/ticker/index';
 import { UPDATE_PRIORITY } from 'engine/const';
+import SystemRenderer from 'engine/renderers/SystemRenderer';
 
 // Mix interactive_target into Node2D.prototype, after deprecation has been handled
 mixins.delay_mixin(
@@ -25,13 +26,12 @@ const hit_test_event = {
     type: null,
     target: null,
     current_target: null,
-    data: {
-        global: null,
-    },
+    data: new InteractionData(),
     stopped: false,
     stop_propagation: NOOP,
     reset: NOOP,
 };
+hit_test_event.data.global = null;
 
 /**
  * The interaction manager deals with mouse, touch and pointer events. Any Node2D can be interactive
@@ -55,7 +55,7 @@ export default class InteractionManager extends VObject {
         /**
          * The renderer this interaction manager works for.
          *
-         * @member {SystemRenderer}
+         * @type {SystemRenderer}
          */
         this.renderer = renderer;
 
@@ -65,7 +65,7 @@ export default class InteractionManager extends VObject {
          * preventDefault on pointer events stops mouse events from firing
          * Thus, for every pointer event, there will always be either a mouse of touch event alongside it.
          *
-         * @member {boolean}
+         * @type {boolean}
          * @default true
          */
         this.auto_prevent_default = options.auto_prevent_default !== undefined ? options.auto_prevent_default : true;
@@ -73,7 +73,7 @@ export default class InteractionManager extends VObject {
         /**
          * Frequency in milliseconds that the mousemove, moveover & mouseout interaction events will be checked.
          *
-         * @member {number}
+         * @type {number}
          * @default 10
          */
         this.interaction_frequency = options.interaction_frequency || 10;
@@ -81,7 +81,7 @@ export default class InteractionManager extends VObject {
         /**
          * The mouse data
          *
-         * @member {InteractionData}
+         * @type {InteractionData}
          */
         this.mouse = new InteractionData();
         this.mouse.identifier = MOUSE_POINTER_ID;
@@ -94,7 +94,7 @@ export default class InteractionManager extends VObject {
          * Actively tracked InteractionData
          *
          * @private
-         * @member {Object.<number,interation.InteractionData>}
+         * @type {Object.<number, InteractionData>}
          */
         this.active_interaction_data = {};
         this.active_interaction_data[MOUSE_POINTER_ID] = this.mouse;
@@ -103,14 +103,14 @@ export default class InteractionManager extends VObject {
          * Pool of unused InteractionData
          *
          * @private
-         * @member {interation.InteractionData[]}
+         * @type {InteractionData[]}
          */
         this.interaction_data_pool = [];
 
         /**
          * An event data object to handle all the event tracking/dispatching
          *
-         * @member {object}
+         * @type {object}
          */
         this.event_data = new InteractionEvent();
 
@@ -118,7 +118,7 @@ export default class InteractionManager extends VObject {
          * The DOM element to bind to.
          *
          * @private
-         * @member {HTMLElement}
+         * @type {HTMLElement}
          */
         this.interaction_dom_element = null;
 
@@ -130,7 +130,7 @@ export default class InteractionManager extends VObject {
          * It is currently set to false as this is how pixi used to work. This will be set to true in
          * future versions of pixi.
          *
-         * @member {boolean}
+         * @type {boolean}
          */
         this.move_when_inside = true;
 
@@ -138,7 +138,7 @@ export default class InteractionManager extends VObject {
          * Have events been attached to the dom element?
          *
          * @private
-         * @member {boolean}
+         * @type {boolean}
          */
         this.events_added = false;
 
@@ -146,7 +146,7 @@ export default class InteractionManager extends VObject {
          * Is the mouse hovering over the renderer?
          *
          * @private
-         * @member {boolean}
+         * @type {boolean}
          */
         this.mouse_over_renderer = false;
 
@@ -155,7 +155,7 @@ export default class InteractionManager extends VObject {
          * https://www.w3.org/TR/touch-events/
          *
          * @readonly
-         * @member {boolean}
+         * @type {boolean}
          */
         this.supports_touch_events = 'ontouchstart' in window;
 
@@ -164,7 +164,7 @@ export default class InteractionManager extends VObject {
          * https://www.w3.org/Submission/pointer-events/
          *
          * @readonly
-         * @member {boolean}
+         * @type {boolean}
          */
         // @ts-ignore
         this.supports_pointer_events = !!window.PointerEvent;
@@ -173,42 +173,42 @@ export default class InteractionManager extends VObject {
 
         /**
          * @private
-         * @member {Function}
+         * @type {Function}
          */
         this.on_pointer_up = this.on_pointer_up.bind(this);
         this.process_pointer_up = this.process_pointer_up.bind(this);
 
         /**
          * @private
-         * @member {Function}
+         * @type {Function}
          */
         this.on_pointer_cancel = this.on_pointer_cancel.bind(this);
         this.process_pointer_cancel = this.process_pointer_cancel.bind(this);
 
         /**
          * @private
-         * @member {Function}
+         * @type {Function}
          */
         this.on_pointer_down = this.on_pointer_down.bind(this);
         this.process_pointer_down = this.process_pointer_down.bind(this);
 
         /**
          * @private
-         * @member {Function}
+         * @type {Function}
          */
         this.on_pointer_move = this.on_pointer_move.bind(this);
         this.process_pointer_move = this.process_pointer_move.bind(this);
 
         /**
          * @private
-         * @member {Function}
+         * @type {Function}
          */
         this.on_pointer_out = this.on_pointer_out.bind(this);
         this.process_pointer_over_out = this.process_pointer_over_out.bind(this);
 
         /**
          * @private
-         * @member {Function}
+         * @type {Function}
          */
         this.on_pointer_over = this.on_pointer_over.bind(this);
 
@@ -217,7 +217,7 @@ export default class InteractionManager extends VObject {
          * values, objects are handled as dictionaries of CSS values for interaction_dom_element,
          * and functions are called instead of changing the CSS.
          * Default CSS cursor values are provided for 'default' and 'pointer' modes.
-         * @member {Object.<string, (string|Function|Object.<string, string>)>}
+         * @type {Object.<string, (string|Function|Object.<string, string>)>}
          */
         this.cursor_styles = {
             default: 'inherit',
@@ -228,7 +228,7 @@ export default class InteractionManager extends VObject {
          * The mode of the cursor that is being used.
          * The value of this is a key from the cursor_styles dictionary.
          *
-         * @member {string}
+         * @type {string}
          */
         this.current_cursor_mode = null;
 
@@ -236,7 +236,7 @@ export default class InteractionManager extends VObject {
          * Internal cached let.
          *
          * @private
-         * @member {string}
+         * @type {string}
          */
         this.cursor = null;
 
@@ -244,14 +244,14 @@ export default class InteractionManager extends VObject {
          * Internal cached let.
          *
          * @private
-         * @member {Vector2}
+         * @type {Vector2}
          */
         this._temp_point = new Vector2();
 
         /**
          * The current resolution / device pixel ratio.
          *
-         * @member {number}
+         * @type {number}
          * @default 1
          */
         this.resolution = 1;
@@ -834,13 +834,14 @@ export default class InteractionManager extends VObject {
         for (const k in this.active_interaction_data) {
             // eslint-disable-next-line no-prototype-builtins
             if (this.active_interaction_data.hasOwnProperty(k)) {
-                const interactionData = this.active_interaction_data[k];
+                const interaction_data = this.active_interaction_data[k];
 
-                if (interactionData.original_event && interactionData.pointer_type !== 'touch') {
+                if (interaction_data.original_event && interaction_data.pointer_type !== 'touch') {
                     const interaction_event = this.configure_interaction_event_for_dom_event(
                         this.event_data,
-                        interactionData.original_event,
-                        interactionData
+                        // @ts-ignore
+                        interaction_data.original_event,
+                        interaction_data
                     );
 
                     this.process_interactive(

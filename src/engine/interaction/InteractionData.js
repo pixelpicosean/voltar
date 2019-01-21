@@ -12,14 +12,14 @@ export default class InteractionData {
         /**
          * This point stores the global coords of where the touch/mouse event happened
          *
-         * @member {Vector2}
+         * @type {Vector2}
          */
         this.global = new Vector2();
 
         /**
          * The target Node2D that was interacted with
          *
-         * @member {Node2D}
+         * @type {Node2D}
          */
         this.target = null;
 
@@ -29,14 +29,14 @@ export default class InteractionData {
          * @see https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent
          * @see https://developer.mozilla.org/en-US/docs/Web/API/TouchEvent
          * @see https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent
-         * @member {MouseEvent|TouchEvent|PointerEvent}
+         * @type {MouseEvent|TouchEvent|PointerEvent}
          */
         this.original_event = null;
 
         /**
          * Unique identifier for this interaction
          *
-         * @member {number}
+         * @type {number}
          */
         this.identifier = null;
 
@@ -131,7 +131,7 @@ export default class InteractionData {
     /**
      * The unique identifier of the pointer. It will be the same as `identifier`.
      * @readonly
-     * @member {number}
+     * @type {number}
      * @see https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/pointer_id
      */
     get pointer_id() {
@@ -143,15 +143,15 @@ export default class InteractionData {
      *
      * @param {Node2D} node - The Node2D that you would like the local
      *  coords off
-     * @param {import("engine/math/Vector2").Vector2Like} [point] - A Vector2 object in which to store the value, optional (otherwise
+     * @param {Vector2} [point] - A Vector2 object in which to store the value, optional (otherwise
      *  will create a new point)
-     * @param {import("engine/math/Vector2").Vector2Like} [globalPos] - A Vector2 object containing your custom global coords, optional
+     * @param {Vector2} [global_pos] - A Vector2 object containing your custom global coords, optional
      *  (otherwise will use the current global coords)
-     * @return {import("engine/math/Vector2").Vector2Like} A point containing the coordinates of the InteractionData position relative
+     * @return {Vector2} A point containing the coordinates of the InteractionData position relative
      *  to the Node2D
      */
-    get_local_position(node, point, globalPos) {
-        return node.world_transform.xform_inv(globalPos || this.global, point);
+    get_local_position(node, point, global_pos) {
+        return node.world_transform.xform_inv(global_pos || this.global, point);
     }
 
     /**

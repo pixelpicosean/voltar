@@ -71,6 +71,7 @@ export {
 } from './servers/physics_2d/state';
 
 export { default as Timer } from './scene/Timer';
+export { default as InteractionEvent } from './interaction/InteractionEvent';
 
 export { default as AnimationPlayer } from './scene/animation/AnimationPlayer';
 
