@@ -1,0 +1,33 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://image/sprites/hero/1.png" type="Texture" id=1]
+
+[sub_resource type="Curve2D" id=1]
+
+_data = {
+"points": PoolVector2Array( 0, 0, 0, 0, 40, 36, 0, 0, 0, 0, 347, 41, 0, 0, 0, 0, 349, 340, 0, 0, 0, 0, 43, 337, 0, 0, 0, 0, 41, 70, 0, 0, 0, 0, 308, 81, 0, 0, 0, 0, 305, 271, 0, 0, 0, 0, 97, 255, 0, 0, 0, 0, 98, 142, 0, 0, 0, 0, 240, 143, 0, 0, 0, 0, 222, 210, 0, 0, 0, 0, 163, 201 )
+}
+
+[sub_resource type="GDScript" id=2]
+
+script/source = "extends PathFollow2D
+
+func _process(delta: float) -> void:
+	offset += 100 * delta
+	if unit_offset > 1:
+		unit_offset -= 1
+"
+
+[node name="PathSample" type="Node2D"]
+
+[node name="Path2D" type="Path2D" parent="."]
+curve = SubResource( 1 )
+
+[node name="PathFollow2D" type="PathFollow2D" parent="Path2D"]
+position = Vector2( 40, 36 )
+rotation = 0.0162857
+script = SubResource( 2 )
+
+[node name="1" type="Sprite" parent="Path2D/PathFollow2D"]
+texture = ExtResource( 1 )
+

@@ -18,7 +18,7 @@ import 'engine/tween/enable';
 import Preloader from 'game/preloader/Preloader';
 
 // First scene after preloader
-import Test from 'game/test/NewPhysics';
+import Main from 'game/test/Path';
 
 // Settings exported from Godot
 import Settings from 'project.json';
@@ -32,7 +32,7 @@ v.scene_tree.init(
     v.utils.deep_merge(Settings, {
         application: {
             preloader: Preloader,
-            main_scene: Test,
+            main_scene: Main,
         },
         display: {
             scale_mode: 'nearest',
