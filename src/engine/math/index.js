@@ -45,17 +45,31 @@ export function clamp(x, a, b) {
 export const wrap = (value, min, max) => (value - min) % (max - min) + min;
 
 /**
- * @param {Number} a
- * @param {Number} n
- * @returns {Number}
+ * @param {number} a
+ * @param {number} n
+ * @returns {number}
  */
-export const mod = (a, n) => (a % n + n) % n;
+export const mod = (a, n) => a % n;
 
 /**
- * @param {Number} a
- * @param {Number} b
- * @param {Number} fct
- * @returns {Number}
+ * @param {number} p_x
+ * @param {number} p_y
+ * @returns {number}
+ */
+export const posmod = (p_x, p_y) => {
+    let value = p_x % p_y;
+    if ((value < 0 && p_y > 0) || (value > 0 && p_y < 0)) {
+        value += p_y;
+    }
+    value += 0.0;
+    return value;
+};
+
+/**
+ * @param {number} a
+ * @param {number} b
+ * @param {number} fct
+ * @returns {number}
  */
 export const lerp = (a, b, fct) => a + (b - a) * fct;
 
@@ -66,16 +80,16 @@ export const wrap_angle = (a) => (a + PI) % PI2 - PI;
 
 /**
  * Minimal difference between 2 angles
- * @param {Number} a
- * @param {Number} b
- * @returns {Number}
+ * @param {number} a
+ * @param {number} b
+ * @returns {number}
  */
 export const angle_difference = (a, b) => mod((b - a + PI), PI2) - PI;
 
 /**
- * @param {Number} p_x
- * @param {Number} p_c
- * @returns {Number}
+ * @param {number} p_x
+ * @param {number} p_c
+ * @returns {number}
  */
 export function ease(p_x, p_c) {
     if (p_x < 0) {

@@ -70,6 +70,8 @@ export {
     RayResult,
 } from './servers/physics_2d/state';
 
+export { Path2D, PathFollow2D } from './scene/path_2d';
+
 export { default as Timer } from './scene/Timer';
 export { default as InteractionEvent } from './interaction/InteractionEvent';
 

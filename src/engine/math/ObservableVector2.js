@@ -437,4 +437,32 @@ export default class ObservableVector2 {
     is_zero() {
         return this._x === 0 && this._y === 0;
     }
+
+    /**
+     * @param {Vector2} p_b
+     * @param {number} p_t
+     */
+    linear_interpolate(p_b, p_t) {
+        const res = this.clone();
+
+        res.x += (p_t * (p_b.x - this._x));
+        res.y += (p_t * (p_b.y - this._y));
+
+        return res;
+    }
+
+    /**
+     * @param {Vector2} p_b
+     * @param {Vector2} p_pre_a
+     * @param {Vector2} p_post_b
+     * @param {number} p_t
+     */
+    cubic_interpolate(p_b, p_pre_a, p_post_b, p_t) {
+        const t2 = p_t * p_t;
+        const t3 = t2 * p_t;
+        return Vector2.new(
+            0.5 * ((this._x * 2) + (-p_pre_a.x + p_b.x) * p_t + (2 * p_pre_a.x - 5 * this._x + 4 * p_b.x - p_post_b.x) * t2 + (-p_pre_a.x + 3 * this._x - 3 * p_b.x + p_post_b.x) * t3),
+            0.5 * ((this._y * 2) + (-p_pre_a.y + p_b.y) * p_t + (2 * p_pre_a.y - 5 * this._y + 4 * p_b.y - p_post_b.y) * t2 + (-p_pre_a.y + 3 * this._y - 3 * p_b.y + p_post_b.y) * t3)
+        );
+    }
 }
