@@ -74,6 +74,7 @@ export { Path2D, PathFollow2D } from './scene/path_2d';
 
 export { default as Timer } from './scene/Timer';
 export { default as YSort } from './scene/y_sort';
+export { default as RemoteTransform2D } from './scene/remote_transform_2d';
 
 export { default as InteractionEvent } from './interaction/InteractionEvent';
 

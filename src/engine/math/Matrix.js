@@ -41,6 +41,9 @@ export default class Matrix {
     set origin(value) {
         this._origin.copy(value);
     }
+    /**
+     * @param {Vector2} value
+     */
     set_origin(value) {
         this._origin.copy(value);
         return this;
