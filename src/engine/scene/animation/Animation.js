@@ -230,18 +230,24 @@ export default class Animation {
     constructor() {
         this.name = '';
 
-        this.length = 0;
+        this.length = 1;
         this.loop = false;
-        this.step = 0;
+        this.step = 0.1;
 
         /** @type {Track[]} */
         this.tracks = null;
     }
 
     load(data) {
-        this.length = data.length;
-        this.loop = data.loop;
-        this.step = data.step;
+        if (data.length !== undefined) {
+            this.length = data.length;
+        }
+        if (data.loop !== undefined) {
+            this.loop = data.loop;
+        }
+        if (data.step !== undefined) {
+            this.step = data.step;
+        }
 
         this.tracks = data.tracks.map(track_data => {
             switch (track_data.type) {
