@@ -73,6 +73,8 @@ export {
 export { Path2D, PathFollow2D } from './scene/path_2d';
 
 export { default as Timer } from './scene/Timer';
+export { default as YSort } from './scene/y_sort';
+
 export { default as InteractionEvent } from './interaction/InteractionEvent';
 
 export { default as AnimationPlayer } from './scene/animation/AnimationPlayer';
