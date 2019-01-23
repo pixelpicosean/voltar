@@ -161,9 +161,9 @@ export default class Matrix {
     from_array(array) {
         this.a = array[0];
         this.b = array[1];
-        this.c = array[3];
-        this.d = array[4];
-        this.tx = array[2];
+        this.c = array[2];
+        this.d = array[3];
+        this.tx = array[4];
         this.ty = array[5];
     }
 
