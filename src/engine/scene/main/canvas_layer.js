@@ -1,48 +1,86 @@
 import Node2D from "../Node2D";
-import { Vector2, rad2deg, deg2rad, Matrix } from "engine/math/index";
+import { Vector2, rad2deg, deg2rad, Matrix, Transform, ObservableVector2 } from "engine/math/index";
+import { node_class_map } from "engine/registry";
 
 export default class CanvasLayer extends Node2D {
-    get offset() {
-        return this.transform.position;
-    }
     /**
-     * @param {Vector2} value
+     * @type {Vector2}
      */
+    get offset() {
+        return this.custom_transform.position;
+    }
     set offset(value) {
-        this.transform.position.copy(value);
+        this.custom_transform.position.copy(value);
     }
     /**
      * @param {Vector2} value
      */
     set_offset(value) {
-        this.transform.position.copy(value);
+        this.custom_transform.position.copy(value);
         return this;
     }
 
-    get rotation_degree() {
-        return rad2deg(this.transform.rotation);
+    /**
+     * @type {number}
+     */
+    get rotation() {
+        return this.custom_transform.rotation;
+    }
+    set rotation(value) {
+        this.custom_transform.rotation = value;
     }
     /**
      * @param {number} value
      */
+    set_rotation(value) {
+        this.custom_transform.rotation = value;
+        return this;
+    }
+
+    /**
+     * @type {number}
+     */
+    get rotation_degree() {
+        return rad2deg(this.custom_transform.rotation);
+    }
     set rotation_degree(value) {
-        this.transform.rotation = deg2rad(value);
+        this.custom_transform.rotation = deg2rad(value);
     }
     /**
      * @param {number} value
      */
     set_rotation_degree(value) {
-        this.transform.rotation = deg2rad(value);
+        this.custom_transform.rotation = deg2rad(value);
+        return this;
+    }
+
+    /**
+     * @type {ObservableVector2}
+     */
+    get scale() {
+        return this.custom_transform.scale;
+    }
+    set scale(value) {
+        this.custom_transform.scale.copy(value);
+    }
+    /**
+     * @param {Vector2} value
+     */
+    set_scale(value) {
+        this.custom_transform.scale.copy(value);
         return this;
     }
 
     constructor() {
         super();
 
+        this.has_transform = false;
         this.is_canvas_layer = true;
         this.toplevel = true;
 
         this.layer = 0;
+
+        this.custom_transform = new Transform();
 
         /**
          * @type {import('./viewport').default}
@@ -52,34 +90,14 @@ export default class CanvasLayer extends Node2D {
         this.sort_index = 0;
     }
 
-    _recursive_post_update_transform() {
-        this.transform.update_transform(this._temp_node_2d_parent.transform);
-    }
-    _update_transform() {
-        this.transform.update_transform(this._temp_node_2d_parent.transform);
-        this._bounds.update_id++;
-    }
-    update_transform() {
-        const parent = this._temp_node_2d_parent;
+    _load_data(data) {
+        super._load_data(data);
 
-        this._bounds_id++;
-
-        let transform_changed = (this.transform._local_id !== this.transform._current_local_id);
-        this.transform.update_transform(parent.transform);
-        if (transform_changed) {
-            this._notify_transform_changed();
+        if (data.transform !== undefined) {
+            this.custom_transform.local_transform.from_array(data.transform);
         }
 
-        let t = this.transform.local_transform;
-        this._world_position.set(t.tx, t.ty);
-        this._world_scale.copy(this.scale);
-        this._world_rotation = this.transform.rotation;
-
-        for (let child of this.children) {
-            if (child.visible) {
-                child.update_transform();
-            }
-        }
+        return this;
     }
 
     /**
@@ -92,19 +110,19 @@ export default class CanvasLayer extends Node2D {
         renderer.current_renderer.flush();
 
         // Apply canvas transform
-        renderer.bind_render_texture(undefined, this.transform.local_transform);
+        renderer.bind_render_texture(undefined, this.custom_transform.local_transform);
 
-        // simply render children!
+        // Render children with the new transform
         for (let c of this.children) {
             c.render_webgl(renderer);
         }
+
+        // Let's have a rendering pass before transform reset
+        renderer.current_renderer.flush();
 
         // Revert render transform
         renderer.bind_render_texture(undefined, this.scene_tree.viewport.canvas_transform);
     }
 }
-/**
- * performance increase to avoid using call.. (10x faster)
- * @this {CanvasLayer}
- */
-CanvasLayer.prototype.node2d_update_transform = CanvasLayer.prototype.update_transform;
+
+node_class_map['CanvasLayer'] = CanvasLayer;
