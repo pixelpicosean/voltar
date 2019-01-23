@@ -567,7 +567,7 @@ const post_resource_actions = {
     },
     Scene: (node, meta) => {
         if (node.instance !== undefined) {
-            node.key = node.instance;
+            node.filename = node.instance;
         }
         delete node.instance;
     },
@@ -727,7 +727,7 @@ module.exports.convert_scenes = (scene_root_url) => {
         // Parse scene instance data
         const parse = (node) => {
             if (node.type === 'Scene') {
-                const template = scene_db[node.key].data;
+                const template = scene_db[node.filename].data;
 
                 const res = require(`./parser/res/${template.type}`)(
                     {

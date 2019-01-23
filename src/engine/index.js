@@ -72,13 +72,17 @@ export {
 
 export { Path2D, PathFollow2D } from './scene/path_2d';
 
+export { default as AnimationPlayer } from './scene/animation/AnimationPlayer';
+
 export { default as Timer } from './scene/Timer';
 export { default as YSort } from './scene/y_sort';
 export { default as RemoteTransform2D } from './scene/remote_transform_2d';
+export {
+    VisibilityNotifier2D,
+    VisibilityEnabler2D,
+} from './scene/visibility_notifier_2d';
 
 export { default as InteractionEvent } from './interaction/InteractionEvent';
-
-export { default as AnimationPlayer } from './scene/animation/AnimationPlayer';
 
 // ------------------------------------------------------------------
 // Useful class
@@ -226,10 +230,10 @@ function assemble_node(node, children) {
 
         if (data.type === 'Scene') {
             // Scene data (converted from ".tscn")
-            const packed_scene = require(`scene/${data.key}.json`);
+            const packed_scene = require(`scene/${data.filename}.json`);
 
             // Let's see whether it is registered
-            const scene_class = has.call(scene_class_map, data.key) ? scene_class_map[data.key] : undefined;
+            const scene_class = has.call(scene_class_map, data.filename) ? scene_class_map[data.filename] : undefined;
 
             // Custom scene class?
             if (scene_class) {

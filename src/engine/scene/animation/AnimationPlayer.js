@@ -397,16 +397,6 @@ export default class AnimationPlayer extends Node2D {
     }
 
     /**
-     * If true, updates animations in response to process-related notifications.
-     * @property {boolean}
-     */
-    get playback_active() {
-        return false;
-    }
-    set playback_active(active) {
-    }
-
-    /**
      * The default time in which to blend animations.
      * @property {number}
      */
@@ -435,6 +425,12 @@ export default class AnimationPlayer extends Node2D {
         this.is_playing = false;
         this.end_reached = false;
         this.end_notify = false;
+
+        /**
+         * If true, updates animations in response to process-related notifications.
+         * @type {boolean}
+         */
+        this.playback_active = true;
 
         /**
          * @type {Object<string, Animation>}
@@ -493,7 +489,7 @@ export default class AnimationPlayer extends Node2D {
      * @param {number} delta - Time since last tick.
      */
     _propagate_process(delta) {
-        if (this.idle_process) {
+        if (this.idle_process && this.playback_active) {
             this._animation_process(delta);
         }
 

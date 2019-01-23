@@ -89,6 +89,8 @@ export default class Node2D extends VObject {
          */
         this.type = 'Node2D';
 
+        this.filename = '';
+
         // Flags to avoid call of `instanceof` for better performance
         this.is_node = true;
         this.is_control = false;
@@ -315,6 +317,9 @@ export default class Node2D extends VObject {
      * @returns {this}
      */
     _load_data(data) {
+        if (data.filename !== undefined) {
+            this.filename = data.filename;
+        }
         if (data.name !== undefined) {
             this.name = data.name;
         }

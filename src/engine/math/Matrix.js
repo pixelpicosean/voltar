@@ -351,6 +351,35 @@ export default class Matrix {
     }
 
     /**
+     * @param {Rectangle} p_rect
+     * @param {Rectangle} [r_out]
+     */
+    xform_inv_rect(p_rect, r_out = Rectangle.new()) {
+        const ends_0 = Vector2.new(p_rect.x, p_rect.y);
+        const ends_1 = Vector2.new(p_rect.x, p_rect.y + p_rect.height);
+        const ends_2 = Vector2.new(p_rect.x + p_rect.width, p_rect.y + p_rect.height);
+        const ends_3 = Vector2.new(p_rect.x + p_rect.width, p_rect.y);
+
+        this.xform_inv(ends_0, ends_0);
+        this.xform_inv(ends_1, ends_1);
+        this.xform_inv(ends_2, ends_2);
+        this.xform_inv(ends_3, ends_3);
+
+        r_out.x = ends_0.x;
+        r_out.y = ends_0.y;
+        r_out.expand_to(ends_1);
+        r_out.expand_to(ends_2);
+        r_out.expand_to(ends_3);
+
+        Vector2.free(ends_0);
+        Vector2.free(ends_1);
+        Vector2.free(ends_2);
+        Vector2.free(ends_3);
+
+        return r_out;
+    }
+
+    /**
      * Translates the matrix on the x and y.
      *
      * @param {number} x How much to translate x by
