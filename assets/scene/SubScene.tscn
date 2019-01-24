@@ -1,0 +1,7 @@
+[gd_scene format=2]
+
+[node name="SubScene" type="Node2D"]
+position = Vector2( 162.157, 148.092 )
+
+[node name="VisibilityEnabler2D" type="VisibilityEnabler2D" parent="."]
+

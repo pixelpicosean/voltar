@@ -1,17 +1,23 @@
 import * as v from 'engine/index';
+import layout from 'scene/PathSample.json';
 
 export default class ParticleTest extends v.Node2D {
     static instance() {
-        return new ParticleTest();
+        return v.assemble_scene(new ParticleTest(), layout);
+    }
+    _ready() {
+        /**
+         * @type {v.CPUParticles2D}
+         */
+        this.particle = this.get_node('CPUParticles2D');
+
+        this.set_process(true);
     }
 
-    _enter_tree() {
-        let spr = this.add_child(new v.ParticleNode2D());
-        spr.position.set(100, 100);
-
-        for (let i = 0; i < 100; i++) {
-            let p = spr.add_child(new v.Sprite('hero/2'));
-            p.position.set(v.rand_range(-128, 128), v.rand_range(-128, 128))
-        }
+    /**
+     * @param {number} delta
+     */
+    _process(delta) {
+        this.particle.position.copy(v.input.mouse);
     }
 }

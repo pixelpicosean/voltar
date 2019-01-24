@@ -3,103 +3,53 @@
     "name": "PathSample",
     "children": [
         {
-            "type": "Path2D",
-            "name": "Path2D",
-            "curve": {
-                "points": [
+            "type": "CPUParticles2D",
+            "name": "CPUParticles2D",
+            "position": {
+                "x": 193.232,
+                "y": 290.218
+            },
+            "amount": 16,
+            "angular_velocity": 360,
+            "angular_velocity_random": 1,
+            "emission_shape": 1,
+            "emission_sphere_radius": 10,
+            "gravity": {
+                "x": 0,
+                "y": -360
+            },
+            "local_coords": false,
+            "scale_amount_curve": {
+                "type": "Curve",
+                "data": [
+                    {
+                        "x": 0,
+                        "y": 0
+                    },
                     0,
                     0,
                     0,
                     0,
-                    40,
-                    36,
+                    {
+                        "x": 0.394844,
+                        "y": 0.61582
+                    },
+                    1.10079,
+                    1.10079,
+                    0,
+                    0,
+                    {
+                        "x": 1,
+                        "y": 0
+                    },
                     0,
                     0,
                     0,
-                    0,
-                    347,
-                    41,
-                    0,
-                    0,
-                    0,
-                    0,
-                    349,
-                    340,
-                    0,
-                    0,
-                    0,
-                    0,
-                    43,
-                    337,
-                    0,
-                    0,
-                    0,
-                    0,
-                    41,
-                    70,
-                    0,
-                    0,
-                    0,
-                    0,
-                    308,
-                    81,
-                    0,
-                    0,
-                    0,
-                    0,
-                    305,
-                    271,
-                    0,
-                    0,
-                    0,
-                    0,
-                    97,
-                    255,
-                    0,
-                    0,
-                    0,
-                    0,
-                    98,
-                    142,
-                    0,
-                    0,
-                    0,
-                    0,
-                    240,
-                    143,
-                    0,
-                    0,
-                    0,
-                    0,
-                    222,
-                    210,
-                    0,
-                    0,
-                    0,
-                    0,
-                    163,
-                    201
+                    0
                 ]
             },
-            "children": [
-                {
-                    "type": "PathFollow2D",
-                    "name": "PathFollow2D",
-                    "position": {
-                        "x": 40,
-                        "y": 36
-                    },
-                    "rotation": 0.0162857,
-                    "children": [
-                        {
-                            "type": "Sprite",
-                            "name": "1",
-                            "texture": "hero/1",
-                            "children": []
-                        }
-                    ]
-                }
-            ]
+            "texture": "mask/particle",
+            "children": []
         }
     ]
 }

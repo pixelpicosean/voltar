@@ -176,6 +176,14 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
 	"sourceSize": {"w":64,"h":64}
 },
+"mask/particle":
+{
+	"frame": {"x":286,"y":201,"w":16,"h":16},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
+	"sourceSize": {"w":16,"h":16}
+},
 "mask/progress":
 {
 	"frame": {"x":133,"y":191,"w":36,"h":18},
@@ -210,7 +218,7 @@
 },
 "mask/sample":
 {
-	"frame": {"x":286,"y":201,"w":16,"h":16},
+	"frame": {"x":304,"y":201,"w":16,"h":16},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
@@ -235,6 +243,6 @@
 	"format": "RGBA8888",
 	"size": {"w":332,"h":230},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:1fb8b5e3926320f6cfb525ec66a8fe4d:de12626b174e82bc005ca46deb6ae2cf:1eabdf11f75e3a4fe3147baf7b5be24b$"
+	"smartupdate": "$TexturePacker:SmartUpdate:04ccb410ec5d374b2b8c5b2576ab1d11:1b1fcf90e70955e8f8e3106510dda4e2:1eabdf11f75e3a4fe3147baf7b5be24b$"
 }
 }
