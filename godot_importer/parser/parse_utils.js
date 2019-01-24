@@ -247,18 +247,26 @@ module.exports.GeneralArray = (value) => {
             return [];
         }
 
-        // parse array from a string
-        if (value.indexOf('Vector2(') >= 0) {
-            return module.exports.Vector2Array(value);
-        }
-        else if (value.indexOf('Rect2(') >= 0) {
-            return module.exports.Rect2Array(value);
-        }
-        else if (value.indexOf('Color(') >= 0) {
-            return module.exports.ColorArray(value);
-        }
-        else {
-            arr = value.replace(/\[|\]/g, '').split(',').map(s => s.trim());
+        const tmp_arr = value.replace(/\[|\]/g, '').split(',').map(s => s.trim());
+        const last_elem = (tmp_arr[tmp_arr.length - 1] !== '') ? tmp_arr[tmp_arr.length - 1] : tmp_arr[tmp_arr.length - 2];
+
+        // Static type array?
+        if (tmp_arr[0][0] === last_elem[0]) {
+            // parse array from a string
+            if (value.indexOf('Vector2(') >= 0) {
+                return module.exports.Vector2Array(value);
+            }
+            else if (value.indexOf('Rect2(') >= 0) {
+                return module.exports.Rect2Array(value);
+            }
+            else if (value.indexOf('Color(') >= 0) {
+                return module.exports.ColorArray(value);
+            }
+            else {
+                arr = value.replace(/\[|\]/g, '').split(',').map(s => s.trim());
+            }
+        } else {
+            return [value];
         }
     } else {
         return value;

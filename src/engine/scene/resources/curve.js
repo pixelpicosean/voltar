@@ -5,12 +5,29 @@ const tmp = new Vector2();
 
 /**
  * @param {number} t
+ * @param {number} start
+ * @param {number} control_1
+ * @param {number} control_2
+ * @param {number} end
+ */
+function _bezier_interp(t, start, control_1, control_2, end) {
+    const omt = (1.0 - t);
+    const omt2 = omt * omt;
+    const omt3 = omt2 * omt;
+    const t2 = t * t;
+    const t3 = t2 * t;
+
+    return start * omt3 + control_1 * omt2 * t * 3 + control_2 * omt * t2 * 3 + end * t3;
+}
+
+/**
+ * @param {number} t
  * @param {Vector2} start
  * @param {Vector2} control_1
  * @param {Vector2} control_2
  * @param {Vector2} end
  */
-function _bezier_interp(t, start, control_1, control_2, end) {
+function _bezier_interp_vec(t, start, control_1, control_2, end) {
     const omt = (1.0 - t);
     const omt2 = omt * omt;
     const omt3 = omt2 * omt;
@@ -477,6 +494,8 @@ export class Curve extends VObject {
         }
 
         this.mark_dirty();
+
+        return this;
     }
 
     bake() {
@@ -736,7 +755,7 @@ export class Curve2D extends VObject {
         const p3 = this.points[p_index + 1].pos;
         const p2 = p3.clone().add(this.points[p_index + 1].in);
 
-        const res = _bezier_interp(p_offset, p0, p1, p2, p3);
+        const res = _bezier_interp_vec(p_offset, p0, p1, p2, p3);
 
         Vector2.free(p0);
         Vector2.free(p1);
@@ -985,7 +1004,7 @@ export class Curve2D extends VObject {
                     np = 1;
                 }
 
-                let npp = _bezier_interp(np, this.points[i].pos, this.points[i].pos.clone().add(this.points[i].out), this.points[i + 1].pos.clone().add(this.points[i + 1].in), this.points[i + 1].pos);
+                let npp = _bezier_interp_vec(np, this.points[i].pos, this.points[i].pos.clone().add(this.points[i].out), this.points[i + 1].pos.clone().add(this.points[i + 1].in), this.points[i + 1].pos);
                 let d = pos.distance_to(npp);
 
                 if (d > this._bake_interval) {
@@ -996,7 +1015,7 @@ export class Curve2D extends VObject {
                     let mid = low + (hi - low) * 0.5;
 
                     for (let j = 0; j < interations; j++) {
-                        npp = _bezier_interp(mid, this.points[i].pos, this.points[i].pos.clone().add(this.points[i].out), this.points[i + 1].pos.clone().add(this.points[i + 1].in), this.points[i + 1].pos);
+                        npp = _bezier_interp_vec(mid, this.points[i].pos, this.points[i].pos.clone().add(this.points[i].out), this.points[i + 1].pos.clone().add(this.points[i + 1].in), this.points[i + 1].pos);
                         d = pos.distance_to(npp);
 
                         if (this._bake_interval < d) {
@@ -1039,9 +1058,9 @@ export class Curve2D extends VObject {
      */
     _bake_segment2d(r_bake, p_begin, p_end, p_a, p_out, p_b, p_in, p_depth, p_max_depth, p_tol) {
         const mp = p_begin + (p_end - p_begin) * 0.5;
-        const beg = _bezier_interp(p_begin, p_a, p_a.clone().add(p_out), p_b.clone().add(p_in), p_b);
-        const mid = _bezier_interp(mp, p_a, p_a.clone().add(p_out), p_b.clone().add(p_in), p_b);
-        const end = _bezier_interp(p_end, p_a, p_a.clone().add(p_out), p_b.clone().add(p_in), p_b);
+        const beg = _bezier_interp_vec(p_begin, p_a, p_a.clone().add(p_out), p_b.clone().add(p_in), p_b);
+        const mid = _bezier_interp_vec(mp, p_a, p_a.clone().add(p_out), p_b.clone().add(p_in), p_b);
+        const end = _bezier_interp_vec(p_end, p_a, p_a.clone().add(p_out), p_b.clone().add(p_in), p_b);
 
         const na = mid.clone().subtract(beg).normalize();
         const nb = end.clone().subtract(mid).normalize();

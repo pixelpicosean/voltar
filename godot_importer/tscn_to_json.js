@@ -555,6 +555,7 @@ const resource_normalizers = {
     },
     PackedScene: (res) => normalize_res_url(res.path),
     Curve2D: (res) => ({ points: res.points }),
+    Curve: (res) => res,
 };
 
 const post_resource_actions = {

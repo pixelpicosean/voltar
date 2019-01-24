@@ -159,6 +159,149 @@ export default class CPUParticles2D extends Node2D {
         }
     }
 
+    get angle() {
+        return this.parameters[Parameter.ANGLE];
+    }
+    set angle(value) {
+        this.parameters[Parameter.ANGLE] = value;
+    }
+    get angle_random() {
+        return this.randomness[Parameter.ANGLE];
+    }
+    set angle_random(value) {
+        this.randomness[Parameter.ANGLE] = value;
+    }
+
+    get angular_velocity() {
+        return this.parameters[Parameter.ANGULAR_VELOCITY];
+    }
+    set angular_velocity(value) {
+        this.parameters[Parameter.ANGULAR_VELOCITY] = value;
+    }
+    get angular_velocity_random() {
+        return this.randomness[Parameter.ANGULAR_VELOCITY];
+    }
+    set angular_velocity_random(value) {
+        this.randomness[Parameter.ANGULAR_VELOCITY] = value;
+    }
+
+    get anim_offset() {
+        return this.parameters[Parameter.ANIM_OFFSET];
+    }
+    set anim_offset(value) {
+        this.parameters[Parameter.ANIM_OFFSET] = value;
+    }
+    get anim_offset_random() {
+        return this.randomness[Parameter.ANIM_OFFSET];
+    }
+    set anim_offset_random(value) {
+        this.randomness[Parameter.ANIM_OFFSET] = value;
+    }
+
+    get anim_speed() {
+        return this.parameters[Parameter.ANIM_SPEED];
+    }
+    set anim_speed(value) {
+        this.parameters[Parameter.ANIM_SPEED] = value;
+    }
+    get anim_speed_random() {
+        return this.randomness[Parameter.ANIM_SPEED];
+    }
+    set anim_speed_random(value) {
+        this.randomness[Parameter.ANIM_SPEED] = value;
+    }
+
+    get damping() {
+        return this.parameters[Parameter.DAMPING];
+    }
+    set damping(value) {
+        this.parameters[Parameter.DAMPING] = value;
+    }
+    get damping_random() {
+        return this.randomness[Parameter.DAMPING];
+    }
+    set damping_random(value) {
+        this.randomness[Parameter.DAMPING] = value;
+    }
+
+    get hue_variation() {
+        return this.parameters[Parameter.HUE_VARIATION];
+    }
+    set hue_variation(value) {
+        this.parameters[Parameter.HUE_VARIATION] = value;
+    }
+    get hue_variation_random() {
+        return this.randomness[Parameter.HUE_VARIATION];
+    }
+    set hue_variation_random(value) {
+        this.randomness[Parameter.HUE_VARIATION] = value;
+    }
+
+    get linear_accel() {
+        return this.parameters[Parameter.LINEAR_ACCEL];
+    }
+    set linear_accel(value) {
+        this.parameters[Parameter.LINEAR_ACCEL] = value;
+    }
+    get linear_accel_random() {
+        return this.randomness[Parameter.LINEAR_ACCEL];
+    }
+    set linear_accel_random(value) {
+        this.randomness[Parameter.LINEAR_ACCEL] = value;
+    }
+
+    get radial_accel() {
+        return this.parameters[Parameter.RADIAL_ACCEL];
+    }
+    set radial_accel(value) {
+        this.parameters[Parameter.RADIAL_ACCEL] = value;
+    }
+    get radial_accel_random() {
+        return this.randomness[Parameter.RADIAL_ACCEL];
+    }
+    set radial_accel_random(value) {
+        this.randomness[Parameter.RADIAL_ACCEL] = value;
+    }
+
+    get scale_amount() {
+        return this.parameters[Parameter.SCALE];
+    }
+    set scale_amount(value) {
+        this.parameters[Parameter.SCALE] = value;
+    }
+    get scale_amount_random() {
+        return this.randomness[Parameter.SCALE];
+    }
+    set scale_amount_random(value) {
+        this.randomness[Parameter.SCALE] = value;
+    }
+
+    get tangential_accel() {
+        return this.parameters[Parameter.TANGENTIAL_ACCEL];
+    }
+    set tangential_accel(value) {
+        this.parameters[Parameter.TANGENTIAL_ACCEL] = value;
+    }
+    get tangential_accel_random() {
+        return this.randomness[Parameter.TANGENTIAL_ACCEL];
+    }
+    set tangential_accel_random(value) {
+        this.randomness[Parameter.TANGENTIAL_ACCEL] = value;
+    }
+
+    get initial_velocity() {
+        return this.parameters[Parameter.INITIAL_LINEAR_VELOCITY];
+    }
+    set initial_velocity(value) {
+        this.parameters[Parameter.INITIAL_LINEAR_VELOCITY] = value;
+    }
+    get initial_velocity_random() {
+        return this.randomness[Parameter.INITIAL_LINEAR_VELOCITY];
+    }
+    set initial_velocity_random(value) {
+        this.randomness[Parameter.INITIAL_LINEAR_VELOCITY] = value;
+    }
+
     constructor() {
         super();
 
@@ -211,51 +354,28 @@ export default class CPUParticles2D extends Node2D {
         this.flag_align_y = 0;
         this.gravity = new Vector2(0, 98.8);
 
-        this.angle = 0;
+        /** @type {Curve} */
         this.angle_curve = null;
-        this.angle_random = 0;
-
-        this.angular_velocity = 0;
+        /** @type {Curve} */
         this.angular_velocity_curve = null;
-        this.angular_velocity_random = 0;
-
-        this.anim_offset = 0;
+        /** @type {Curve} */
         this.anim_offset_curve = null;
-        this.anim_offset_random = 0;
-
-        this.anim_speed = 0;
+        /** @type {Curve} */
         this.anim_speed_curve = null;
-        this.anim_speed_random = 0;
-
-        this.damping = 0;
+        /** @type {Curve} */
         this.damping_curve = null;
-        this.damping_random = 0;
+        /** @type {Curve} */
+        this.hue_variation_curve = null;
+        /** @type {Curve} */
+        this.linear_accel_curve = null;
+        /** @type {Curve} */
+        this.radial_accel_curve = null;
+        /** @type {Curve} */
+        this.scale_amount_curve = null;
+        /** @type {Curve} */
+        this.tangential_accel_curve = null;
 
         this.draw_order = DrawOrder.INDEX;
-
-        this.hue_variation = 0;
-        this.hue_variation_curve = null;
-        this.hue_variation_random = 0;
-
-        this.linear_accel = 0;
-        this.linear_accel_curve = null;
-        this.linear_accel_random = 0;
-
-        this.radial_accel = 0;
-        this.radial_accel_curve = null;
-        this.radial_accel_random = 0;
-
-        this.scale_amount = 0;
-        this.scale_amount_curve = null;
-        this.scale_amount_random = 0;
-
-        this.tangential_accel = 0;
-        this.tangential_accel_curve = null;
-        this.tangential_accel_random = 0;
-
-        this.initial_velocity = 0;
-        this.initial_velocity_random = 0;
-
 
         this.time = 0;
         this.inactive_time = 0;
@@ -302,63 +422,78 @@ export default class CPUParticles2D extends Node2D {
         super._load_data(data);
 
         if (data.amount !== undefined) this.amount = data.amount;
-        if (data.angle !== undefined) this.angle = data.angle;
-        if (data.angle_curve !== undefined) this.angle_curve = data.angle_curve;
-        if (data.angle_random !== undefined) this.angle_random = data.angle_random;
-        if (data.angular_velocity !== undefined) this.angular_velocity = data.angular_velocity;
-        if (data.angular_velocity_curve !== undefined) this.angular_velocity_curve = data.angular_velocity_curve;
-        if (data.angular_velocity_random !== undefined) this.angular_velocity_random = data.angular_velocity_random;
-        if (data.anim_offset !== undefined) this.anim_offset = data.anim_offset;
-        if (data.anim_offset_curve !== undefined) this.anim_offset_curve = data.anim_offset_curve;
-        if (data.anim_offset_random !== undefined) this.anim_offset_random = data.anim_offset_random;
-        if (data.anim_speed !== undefined) this.anim_speed = data.anim_speed;
-        if (data.anim_speed_curve !== undefined) this.anim_speed_curve = data.anim_speed_curve;
-        if (data.anim_speed_random !== undefined) this.anim_speed_random = data.anim_speed_random;
-        if (data.color !== undefined) this.color.copy(data.color);
-        // if (data.color_ramp !== undefined) this.color_ramp = data.data;
-        if (data.damping !== undefined) this.damping = data.damping;
-        if (data.damping_curve !== undefined) this.damping_curve = data.damping_curve;
-        if (data.damping_random !== undefined) this.damping_random = data.damping_random;
-        if (data.draw_order !== undefined) this.draw_order = data.draw_order;
-        // if (data.emission_colors !== undefined) this.emission_colors = data.emission_colors;
-        // if (data.emission_normals !== undefined) this.emission_normals = data.emission_normals;
-        // if (data.emission_points !== undefined) this.emission_points = data.emission_points;
-        if (data.emission_rect_extents !== undefined) this.emission_rect_extents = data.emission_rect_extents;
-        if (data.emission_shape !== undefined) this.emission_shape = data.emission_shape;
-        if (data.emission_sphere_radius !== undefined) this.emission_sphere_radius = data.emission_sphere_radius;
-        if (data.emitting !== undefined) this.emitting = data.emitting;
+        if (data.gravity !== undefined) this.gravity.copy(data.gravity);
+        if (data.lifetime !== undefined) this.lifetime = data.lifetime;
+        if (data.one_shot !== undefined) this.one_shot = data.one_shot;
         if (data.explosiveness !== undefined) this.explosiveness = data.explosiveness;
+        if (data.preprocess !== undefined) this.preprocess = data.preprocess;
+        if (data.randomness !== undefined) this.randomness = data.randomness;
+        if (data.speed_scale !== undefined) this.speed_scale = data.speed_scale;
+        if (data.spread !== undefined) this.spread = data.spread;
+        if (data.local_coords !== undefined) this.local_coords = data.local_coords;
         if (data.fixed_fps !== undefined) this.fixed_fps = data.fixed_fps;
+        if (data.emitting !== undefined) this.emitting = data.emitting;
         if (data.flag_align_y !== undefined) this.flag_align_y = data.flag_align_y;
         if (data.flatness !== undefined) this.flatness = data.flatness;
         if (data.fract_delta !== undefined) this.fract_delta = data.fract_delta;
-        if (data.gravity !== undefined) this.gravity.copy(data.gravity);
-        if (data.hue_variation !== undefined) this.hue_variation = data.hue_variation;
-        if (data.hue_variation_curve !== undefined) this.hue_variation_curve = data.hue_variation_curve;
-        if (data.hue_variation_random !== undefined) this.hue_variation_random = data.hue_variation_random;
+        if (data.draw_order !== undefined) this.draw_order = data.draw_order;
+
+        if (data.color !== undefined) this.color.copy(data.color);
+        // if (data.color_ramp !== undefined) this.color_ramp = data.data;
+
+        if (data.texture !== undefined) this.texture = data.texture;
+        // if (data.normalmap !== undefined) this.normalmap = data.normalmap;
+
         if (data.initial_velocity !== undefined) this.initial_velocity = data.initial_velocity;
         if (data.initial_velocity_random !== undefined) this.initial_velocity_random = data.initial_velocity_random;
-        if (data.lifetime !== undefined) this.lifetime = data.lifetime;
+
+        if (data.angle !== undefined) this.angle = data.angle;
+        if (data.angle_curve !== undefined) this.set_param_curve(Parameter.ANGLE, new Curve().set_data(data.angle_curve.data));
+        if (data.angle_random !== undefined) this.angle_random = data.angle_random;
+
+        if (data.angular_velocity !== undefined) this.angular_velocity = data.angular_velocity;
+        if (data.angular_velocity_curve !== undefined) this.set_param_curve(Parameter.ANGULAR_VELOCITY, new Curve().set_data(data.angular_velocity_curve.data));
+        if (data.angular_velocity_random !== undefined) this.angular_velocity_random = data.angular_velocity_random;
+
+        if (data.anim_offset !== undefined) this.anim_offset = data.anim_offset;
+        if (data.anim_offset_curve !== undefined) this.set_param_curve(Parameter.ANIM_OFFSET, new Curve().set_data(data.anim_offset_curve.data));
+        if (data.anim_offset_random !== undefined) this.anim_offset_random = data.anim_offset_random;
+
+        if (data.anim_speed !== undefined) this.anim_speed = data.anim_speed;
+        if (data.anim_speed_curve !== undefined) this.set_param_curve(Parameter.ANIM_SPEED, new Curve().set_data(data.anim_speed_curve.data));
+        if (data.anim_speed_random !== undefined) this.anim_speed_random = data.anim_speed_random;
+
+        if (data.damping !== undefined) this.damping = data.damping;
+        if (data.damping_curve !== undefined) this.set_param_curve(Parameter.DAMPING, new Curve().set_data(data.damping_curve.data));
+        if (data.damping_random !== undefined) this.damping_random = data.damping_random;
+
+        // if (data.emission_colors !== undefined) this.emission_colors = data.emission_colors;
+        // if (data.emission_normals !== undefined) this.emission_normals = data.emission_normals;
+        // if (data.emission_points !== undefined) this.emission_points = data.emission_points;
+
+        if (data.emission_rect_extents !== undefined) this.emission_rect_extents = data.emission_rect_extents;
+        if (data.emission_shape !== undefined) this.emission_shape = data.emission_shape;
+        if (data.emission_sphere_radius !== undefined) this.emission_sphere_radius = data.emission_sphere_radius;
+
+        if (data.hue_variation !== undefined) this.hue_variation = data.hue_variation;
+        if (data.hue_variation_curve !== undefined) this.set_param_curve(Parameter.HUE_VARIATION, new Curve().set_data(data.hue_variation_curve.data));
+        if (data.hue_variation_random !== undefined) this.hue_variation_random = data.hue_variation_random;
+
         if (data.linear_accel !== undefined) this.linear_accel = data.linear_accel;
-        if (data.linear_accel_curve !== undefined) this.linear_accel_curve = data.linear_accel_curve;
+        if (data.linear_accel_curve !== undefined) this.set_param_curve(Parameter.LINEAR_ACCEL, new Curve().set_data(data.linear_accel_curve.data));
         if (data.linear_accel_random !== undefined) this.linear_accel_random = data.linear_accel_random;
-        if (data.local_coords !== undefined) this.local_coords = data.local_coords;
-        if (data.normalmap !== undefined) this.normalmap = data.normalmap;
-        if (data.one_shot !== undefined) this.one_shot = data.one_shot;
-        if (data.preprocess !== undefined) this.preprocess = data.preprocess;
+
         if (data.radial_accel !== undefined) this.radial_accel = data.radial_accel;
-        if (data.radial_accel_curve !== undefined) this.radial_accel_curve = data.radial_accel_curve;
+        if (data.radial_accel_curve !== undefined) this.set_param_curve(Parameter.RADIAL_ACCEL, new Curve().set_data(data.radial_accel_curve.data));
         if (data.radial_accel_random !== undefined) this.radial_accel_random = data.radial_accel_random;
-        if (data.randomness !== undefined) this.randomness = data.randomness;
+
         if (data.scale_amount !== undefined) this.scale_amount = data.scale_amount;
-        if (data.scale_amount_curve !== undefined) this.scale_amount_curve = data.scale_amount_curve;
+        if (data.scale_amount_curve !== undefined) this.set_param_curve(Parameter.SCALE, new Curve().set_data(data.scale_amount_curve.data));
         if (data.scale_amount_random !== undefined) this.scale_amount_random = data.scale_amount_random;
-        if (data.speed_scale !== undefined) this.speed_scale = data.speed_scale;
-        if (data.spread !== undefined) this.spread = data.spread;
+
         if (data.tangential_accel !== undefined) this.tangential_accel = data.tangential_accel;
-        if (data.tangential_accel_curve !== undefined) this.tangential_accel_curve = data.tangential_accel_curve;
+        if (data.tangential_accel_curve !== undefined) this.set_param_curve(Parameter.TANGENTIAL_ACCEL, new Curve().set_data(data.tangential_accel_curve.data));
         if (data.tangential_accel_random !== undefined) this.tangential_accel_random = data.tangential_accel_random;
-        if (data.texture !== undefined) this.texture = data.texture;
 
         return this;
     }
@@ -842,6 +977,8 @@ export default class CPUParticles2D extends Node2D {
 
             p.transform.a *= base_scale;
             p.transform.b *= base_scale;
+            p.transform.c *= base_scale;
+            p.transform.d *= base_scale;
 
             p.transform.tx += p.velocity.x * local_delta;
             p.transform.ty += p.velocity.y * local_delta;
