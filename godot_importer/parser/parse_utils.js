@@ -180,6 +180,8 @@ module.exports.NodePath = (path) => {
  * @returns {number[]}
  */
 module.exports.PoolIntArray = (arr) => {
+    if (arr === undefined) return undefined;
+
     return get_function_params(arr).map(module.exports.int);
 };
 /**
@@ -187,6 +189,8 @@ module.exports.PoolIntArray = (arr) => {
  * @returns {number[]}
  */
 module.exports.PoolRealArray = (arr) => {
+    if (arr === undefined) return undefined;
+
     return get_function_params(arr).map(module.exports.real);
 };
 /**
@@ -194,6 +198,8 @@ module.exports.PoolRealArray = (arr) => {
  * @returns {{ x: number, y: number }[]}
  */
 module.exports.Vector2Array = (arr) => {
+    if (arr === undefined) return undefined;
+
     const vec_strs = arr.replace(/\[|\]/g, '').split('),').map((s, i, a) => (i < a.length - 1) ? `${s})`.trim() : s.trim());
     for (let i = 0; i < vec_strs.length - 1; i++) {
         vec_strs[i] += ')';

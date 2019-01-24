@@ -421,6 +421,19 @@ export default class Matrix {
     }
 
     /**
+     * @param {number} x
+     * @param {number} y
+     */
+    scale_basis(x, y) {
+        this.a *= x;
+        this.b *= y;
+        this.c *= x;
+        this.d *= y;
+
+        return this;
+    }
+
+    /**
      * Applies a rotation transformation to the matrix.
      *
      * @param {number} angle - The angle in radians.

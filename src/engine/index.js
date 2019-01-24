@@ -82,6 +82,7 @@ export {
     VisibilityEnabler2D,
 } from './scene/visibility_notifier_2d';
 
+export { default as Camera2D } from './scene/camera_2d';
 export { default as Timer } from './scene/Timer';
 
 export { default as InteractionEvent } from './interaction/InteractionEvent';
