@@ -528,11 +528,11 @@ export default class WebGLRenderer extends SystemRenderer {
         if (!gl_texture) {
             // this will also bind the base_texture..
             this.texture_manager.update_texture(base_texture, location);
-        }
-        else {
+        } else {
             // bind the current base_texture
             this.bound_textures[location] = base_texture;
             gl.activeTexture(gl.TEXTURE0 + location);
+            // @ts-ignore
             gl.bindTexture(gl.TEXTURE_2D, gl_texture.texture);
         }
 
