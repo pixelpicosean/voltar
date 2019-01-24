@@ -46,7 +46,7 @@ export { default as Text } from './scene/text/Text';
 
 export { default as TileMap } from './scene/map/BackgroundMap';
 
-export { default as ParticleNode2D } from './scene/particles/ParticleNode2D';
+export { default as CPUParticles2D } from './scene/cpu_particles_2d';
 
 export { default as Mesh } from './scene/mesh/Mesh';
 export { default as Plane } from './scene/mesh/Plane';
@@ -92,6 +92,7 @@ export { default as InteractionEvent } from './interaction/InteractionEvent';
 export { default as OS } from './core/os';
 
 export { default as Color } from './Color';
+export { Curve, Curve2D } from './scene/resources/curve';
 
 export { default as TextureUvs } from './textures/TextureUvs';
 export { default as TextureMatrix } from './textures/TextureMatrix';
