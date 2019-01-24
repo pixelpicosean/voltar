@@ -1003,7 +1003,11 @@ export default class CPUParticles2D extends Node2D {
 
             // Update transform
             p.transform.decompose(p.sprite.transform);
-            p.sprite.transform.update_transform(this.transform);
+            if (this.local_coords) {
+                p.sprite.transform.update_transform(this.transform);
+            } else {
+                p.sprite.transform.update_transform(this._temp_node_2d_parent.transform);
+            }
             p.sprite.calculate_vertices();
 
             // Update texture
