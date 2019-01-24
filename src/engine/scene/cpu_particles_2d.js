@@ -17,6 +17,11 @@ import { TextureCache } from 'engine/utils/index';
 import { Texture } from 'engine/index';
 
 /**
+ * @param {number} value
+ */
+const validate_frac = (value) => (value < 0) ? 0 : ((value > 1) ? 1 : value);
+
+/**
  * @enum {number}
  */
 const DrawOrder = {
@@ -65,7 +70,7 @@ const EmissionShape = {
 class Particle {
     constructor() {
         this.transform = new Matrix();
-        this.color = new Color();
+        this.color = new Color(1, 1, 1, 1);
         this.custom = [0, 0, 0, 0];
         this.rotation = 0;
         this.velocity = new Vector2();
@@ -75,7 +80,7 @@ class Particle {
         this.hue_rot_rand = 0;
         this.anim_offset_rand = 0;
         this.time = 0;
-        this.base_color = new Color();
+        this.base_color = new Color(1, 1, 1, 1);
 
         this.seed = 0;
 
@@ -93,29 +98,17 @@ class Particle {
 /** @type {Particle[]} */
 const ParticlePool = [];
 
-const basis = (m00 = 1, m01 = 0, m02 = 0, m10 = 0, m11 = 1, m12 = 0, m20 = 0, m21 = 0, m22 = 1) => [
+const basis = (m00 = 1, m01 = 0, m02 = 0, m10 = 0, m11 = 1, m12 = 0, m20 = 0, m21 = 0, m22 = 1) => ([
     [m00, m01, m02],
     [m10, m11, m12],
     [m20, m21, m22],
-];
+]);
 
 const mat1 = basis(0.299, 0.587, 0.114, 0.299, 0.587, 0.114, 0.299, 0.587, 0.114);
 const mat2 = basis(0.701, -0.587, -0.114, -0.299, 0.413, -0.114, -0.300, -0.588, 0.886);
 const mat3 = basis(0.168, 0.330, -0.497, -0.328, 0.035, 0.292, 1.250, -1.050, -0.203);
 
 const hue_rot_mat = basis();
-const reset_hue_rot_mat = () => {
-    hue_rot_mat[0][0] = 1;
-    hue_rot_mat[0][1] = 0;
-    hue_rot_mat[0][2] = 0;
-    hue_rot_mat[1][0] = 0;
-    hue_rot_mat[1][1] = 1;
-    hue_rot_mat[1][2] = 0;
-    hue_rot_mat[2][0] = 0;
-    hue_rot_mat[2][1] = 0;
-    hue_rot_mat[2][2] = 1;
-    return hue_rot_mat;
-};
 
 export default class CPUParticles2D extends Node2D {
     /**
@@ -935,7 +928,6 @@ export default class CPUParticles2D extends Node2D {
             let hue_rot_c = Math.cos(hue_rot_angle);
             let hue_rot_s = Math.sin(hue_rot_angle);
 
-            const hue_rot_mat = reset_hue_rot_mat();
             for (let j = 0; j < 3; j++) {
                 hue_rot_mat[j][0] = mat1[j][0] + mat2[j][0] * hue_rot_c + mat3[j][0] * hue_rot_s;
                 hue_rot_mat[j][1] = mat1[j][1] + mat2[j][1] * hue_rot_c + mat3[j][1] * hue_rot_s;
@@ -945,11 +937,19 @@ export default class CPUParticles2D extends Node2D {
             // TODO: gradient/color ramp
             p.color.copy(this.color);
 
-            p.color.r = (hue_rot_mat[0][0] * p.color.r) + (hue_rot_mat[1][0] * p.color.g) + (hue_rot_mat[2][0] * p.color.b);
-            p.color.g = (hue_rot_mat[0][1] * p.color.r) + (hue_rot_mat[1][1] * p.color.g) + (hue_rot_mat[2][1] * p.color.b);
-            p.color.b = (hue_rot_mat[0][2] * p.color.r) + (hue_rot_mat[1][2] * p.color.g) + (hue_rot_mat[2][2] * p.color.b);
+            const r = p.color.r;
+            const g = p.color.g;
+            const b = p.color.b;
+            p.color.r = (hue_rot_mat[0][0] * r) + (hue_rot_mat[1][0] * g) + (hue_rot_mat[2][0] * b);
+            p.color.g = (hue_rot_mat[0][1] * r) + (hue_rot_mat[1][1] * g) + (hue_rot_mat[2][1] * b);
+            p.color.b = (hue_rot_mat[0][2] * r) + (hue_rot_mat[1][2] * g) + (hue_rot_mat[2][2] * b);
 
             p.color.multiply(p.base_color);
+
+            p.color.r = validate_frac(p.color.r);
+            p.color.g = validate_frac(p.color.g);
+            p.color.b = validate_frac(p.color.b);
+            p.color.a = validate_frac(p.color.a);
 
             if (this.flags[Flags.ALIGN_Y_TO_VELOCITY]) {
                 if (p.velocity.length_squared() > 0) {
@@ -997,6 +997,10 @@ export default class CPUParticles2D extends Node2D {
         renderer.set_object_renderer(renderer.plugins.sprite);
 
         for (let p of this.particles) {
+            if (!p.active) {
+                continue;
+            }
+
             // Update transform
             p.transform.decompose(p.sprite.transform);
             p.sprite.transform.update_transform(this.transform);
@@ -1006,8 +1010,7 @@ export default class CPUParticles2D extends Node2D {
             p.sprite.texture = this.texture;
 
             // Color
-            p.sprite.tint = p.color.as_hex();
-            p.sprite.alpha = p.color.a;
+            p.sprite.modulate.copy(p.color).multiply(this.modulate);
 
             renderer.plugins.sprite.render(p.sprite);
         }

@@ -83,10 +83,10 @@ export default class Color {
      * @param {Color} c
      */
     copy(c) {
-        this._rgb[0] = c._rgb[0];
-        this._rgb[1] = c._rgb[1];
-        this._rgb[2] = c._rgb[2];
-        this._alpha = c._alpha;
+        this._rgb[0] = c.r;
+        this._rgb[1] = c.g;
+        this._rgb[2] = c.b;
+        this._alpha = c.a;
 
         this.cb.call(this.scope, this._rgb);
 
@@ -97,10 +97,10 @@ export default class Color {
      * @param {Color} c
      */
     multiply(c) {
-        this._rgb[0] *= c._rgb[0];
-        this._rgb[1] *= c._rgb[1];
-        this._rgb[2] *= c._rgb[2];
-        this._alpha *= c._alpha;
+        this._rgb[0] *= c.r;
+        this._rgb[1] *= c.g;
+        this._rgb[2] *= c.b;
+        this._alpha *= c.a;
 
         this.cb.call(this.scope, this._rgb);
 
