@@ -18,6 +18,27 @@
                 "x": 0,
                 "y": -360
             },
+            "hue_variation_curve": {
+                "type": "Curve",
+                "data": [
+                    {
+                        "x": 0,
+                        "y": 0.00721765
+                    },
+                    0,
+                    0,
+                    0,
+                    0,
+                    {
+                        "x": 1,
+                        "y": 1
+                    },
+                    0,
+                    0,
+                    0,
+                    0
+                ]
+            },
             "local_coords": false,
             "scale_amount_curve": {
                 "type": "Curve",
@@ -57,46 +78,6 @@
                     "children": []
                 }
             ]
-        },
-        {
-            "type": "Sprite",
-            "name": "nine-slice",
-            "position": {
-                "x": 41.3684,
-                "y": 42.3372
-            },
-            "texture": "mask/nine-slice",
-            "children": []
-        },
-        {
-            "type": "Sprite",
-            "name": "nine-slice2",
-            "position": {
-                "x": 354.203,
-                "y": 43.8412
-            },
-            "texture": "mask/nine-slice",
-            "children": []
-        },
-        {
-            "type": "Sprite",
-            "name": "nine-slice3",
-            "position": {
-                "x": 42.1204,
-                "y": 356.676
-            },
-            "texture": "mask/nine-slice",
-            "children": []
-        },
-        {
-            "type": "Sprite",
-            "name": "nine-slice4",
-            "position": {
-                "x": 357.211,
-                "y": 359.684
-            },
-            "texture": "mask/nine-slice",
-            "children": []
         },
         {
             "type": "CanvasLayer",
@@ -147,6 +128,46 @@
                     "children": []
                 }
             ]
+        },
+        {
+            "type": "Sprite",
+            "name": "nine-slice",
+            "position": {
+                "x": 41.3684,
+                "y": 42.3372
+            },
+            "texture": "mask/nine-slice",
+            "children": []
+        },
+        {
+            "type": "Sprite",
+            "name": "nine-slice2",
+            "position": {
+                "x": 354.203,
+                "y": 43.8412
+            },
+            "texture": "mask/nine-slice",
+            "children": []
+        },
+        {
+            "type": "Sprite",
+            "name": "nine-slice3",
+            "position": {
+                "x": 42.1204,
+                "y": 356.676
+            },
+            "texture": "mask/nine-slice",
+            "children": []
+        },
+        {
+            "type": "Sprite",
+            "name": "nine-slice4",
+            "position": {
+                "x": 357.211,
+                "y": 359.684
+            },
+            "texture": "mask/nine-slice",
+            "children": []
         }
     ]
 }
