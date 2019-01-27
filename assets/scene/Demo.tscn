@@ -1,0 +1,37 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://tileset/collision.tres" type="TileSet" id=1]
+
+[sub_resource type="Curve" id=1]
+
+max_value = 2.0
+_data = [ Vector2( 0, 1.03179 ), 0.0, 4.07671, 0, 0, Vector2( 0.545837, 1.19019 ), -4.35165, -4.35165, 0, 0, Vector2( 0.998815, 0 ), 0.0701476, 0.0, 0, 0 ]
+
+[sub_resource type="Curve" id=2]
+
+min_value = -1.0
+_data = [ Vector2( 0, 0.531647 ), 0.0, 0.0, 0, 0, Vector2( 1, 0.0029304 ), 0.0, 0.0, 0, 0 ]
+
+[node name="Demo" type="Node2D"]
+
+[node name="TileMap" type="TileMap" parent="."]
+tile_set = ExtResource( 1 )
+format = 1
+tile_data = PoolIntArray( 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 0, 5, 0, 0, 6, 0, 0, 7, 0, 0, 8, 0, 0, 9, 0, 0, 10, 0, 0, 11, 0, 0, 12, 0, 0, 13, 0, 0, 14, 0, 0, 15, 0, 0, 65536, 0, 0, 65537, 16, 0, 65543, 6, 0, 65544, 16, 0, 65550, 6, 0, 65551, 0, 0, 131072, 0, 0, 131087, 0, 0, 196608, 0, 0, 196623, 0, 0, 262144, 0, 0, 262151, 2, 0, 262152, 15, 0, 262159, 0, 0, 327680, 0, 0, 327681, 0, 0, 327682, 0, 0, 327683, 0, 0, 327684, 0, 0, 327685, 0, 0, 327686, 0, 0, 327687, 0, 0, 327688, 0, 0, 327689, 0, 0, 327690, 0, 0, 327691, 0, 0, 327692, 0, 0, 327693, 0, 0, 327694, 0, 0, 327695, 0, 0 )
+
+[node name="CPUParticles2D" type="CPUParticles2D" parent="."]
+position = Vector2( 511.777, 99.1971 )
+rotation = 1.5708
+amount = 6
+lifetime = 2.0
+explosiveness = 0.8
+randomness = 0.5
+spread = 80.0
+gravity = Vector2( 98, 0 )
+initial_velocity = 135.01
+initial_velocity_random = 0.36
+damping = 23.71
+scale_amount_curve = SubResource( 1 )
+hue_variation_random = 0.25
+hue_variation_curve = SubResource( 2 )
+

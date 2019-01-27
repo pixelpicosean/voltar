@@ -508,6 +508,7 @@ const resource_normalizers = {
             .map(parse_block)
             .map(convert_block)
 
+        let result = undefined;
         const res_table = {};
         const head = sections.shift();
         for (let i = 0; i < head.attr.load_steps; i++) {
@@ -515,7 +516,7 @@ const resource_normalizers = {
             if (sec.key === 'ext_resource') {
                 res_table[sec.id] = resource_normalizers[sec.type](sec);
             } else if (sec.key === 'sub_resource') {
-                throw 'sub_source in "tres" is not supported yet';
+                throw 'sub_resource in "tres" is not supported yet';
             } else if (sec.key === 'resource') {
                 const prop = sec.prop;
                 // TODO: make this a general function
@@ -544,14 +545,69 @@ const resource_normalizers = {
 
                         array[index][key_list[1]] = value;
                     }
-                    return array;
+                    result = array;
                 }
                 // Dictionary?
                 else {
-                    return prop;
+                    result = prop;
                 }
             }
         }
+
+        if (result.length > 0) {
+            const texture = result[0].texture;
+            const tile_mode = result[0].tile_mode;
+            result = result.map(tile => {
+                const data = {};
+                if (tile.modulate) {
+                    if (
+                        tile.modulate.r !== 1
+                        ||
+                        tile.modulate.g !== 1
+                        ||
+                        tile.modulate.b !== 1
+                        ||
+                        tile.modulate.a !== 1
+                    ) {
+                        data.modulate = tile.modulate;
+                    }
+                }
+                if (tile.navigation_offset) {
+                    if (
+                        tile.navigation_offset.x !== 0
+                        ||
+                        tile.navigation_offset.y !== 0
+                    ) {
+                        data.navigation_offset = tile.navigation_offset;
+                    }
+                }
+                if (tile.occluder_offset) {
+                    if (
+                        tile.occluder_offset.x !== 0
+                        ||
+                        tile.occluder_offset.y !== 0
+                    ) {
+                        data.occluder_offset = tile.occluder_offset;
+                    }
+                }
+                data.region = tile.region;
+                if (tile.tex_offset) {
+                    if (
+                        tile.tex_offset.x !== 0
+                        ||
+                        tile.tex_offset.y !== 0
+                    ) {
+                        data.tex_offset = tile.tex_offset;
+                    }
+                }
+                if (tile.shapes.length > 0) {
+                    data.shapes = tile.shapes;
+                }
+                return data;
+            });
+        }
+
+        return result;
     },
     PackedScene: (res) => normalize_res_url(res.path),
     Curve2D: (res) => ({ points: res.points }),

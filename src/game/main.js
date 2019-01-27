@@ -18,7 +18,7 @@ import 'engine/tween/enable';
 import Preloader from 'game/preloader/Preloader';
 
 // First scene after preloader
-import Main from 'game/test/Particle';
+import Main from 'game/game/demo';
 
 // Settings exported from Godot
 import Settings from 'project.json';

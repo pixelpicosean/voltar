@@ -1,8 +1,6 @@
 const {
     int,
-    boolean,
     Vector2,
-    Nullable,
     PoolIntArray,
 } = require('../parse_utils');
 

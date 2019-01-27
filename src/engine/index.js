@@ -44,7 +44,7 @@ export { default as Graphics } from './scene/graphics/Graphics';
 export { default as BitmapText } from './scene/text/BitmapText';
 export { default as Text } from './scene/text/Text';
 
-export { default as TileMap } from './scene/map/BackgroundMap';
+export { default as TileMap } from './scene/map/tile_map';
 
 export { default as CPUParticles2D } from './scene/cpu_particles_2d';
 

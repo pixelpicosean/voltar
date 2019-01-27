@@ -8,6 +8,6 @@ WebGLRenderer.register_plugin('tilemap', TileRenderer);
 
 // Register to global node class map
 import { node_class_map } from 'engine/registry';
-import TileMap from './BackgroundMap';
+import TileMap from './tile_map';
 
 node_class_map['TileMap'] = TileMap;
