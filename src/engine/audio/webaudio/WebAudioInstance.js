@@ -351,9 +351,9 @@ export default class WebAudioInstance extends VObject {
         }
         if (this._media) {
             // @ts-ignore
-            this._media.context.events.off('refresh', this.refresh, this);
+            this._media.context.events.disconnect('refresh', this.refresh, this);
             // @ts-ignore
-            this._media.context.events.off('refreshPaused', this.refreshPaused, this);
+            this._media.context.events.disconnect('refreshPaused', this.refreshPaused, this);
             this._media = null;
         }
         this._end = null;
