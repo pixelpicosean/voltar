@@ -650,6 +650,11 @@ const post_resource_actions = {
                         } else if (value.indexOf('SubResource') >= 0) {
                             let res = meta.sub_resource[get_function_params(value)[0]];
                             values[i] = resource_normalizers[res.type](res, meta, node);
+                        } else {
+                            const arr = GeneralArray(value);
+                            if (Array.isArray(arr)) {
+                                values[i] = arr;
+                            }
                         }
                     }
                 }
