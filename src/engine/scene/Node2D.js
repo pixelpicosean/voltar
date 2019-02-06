@@ -268,8 +268,7 @@ export default class Node2D extends VObject {
         /**
          * The array of children of this container.
          *
-         * @template {Node2D} T
-         * @type {Array<T>}
+         * @type {Array<Node2D>}
          * @readonly
          */
         this.children = [];
@@ -388,13 +387,13 @@ export default class Node2D extends VObject {
      * @param {any} b
      * @param {number} c
      */
-    _set_lerp_value(key, a, b, c) {}
+    _set_lerp_value(key, a, b, c) { }
     /**
      * Set value of this node with its key
      * @param {string} key
      * @param {any} value
      */
-    _set_value(key, value) {}
+    _set_value(key, value) { }
 
     is_set_as_toplevel() {
         return this.toplevel;
@@ -795,7 +794,7 @@ export default class Node2D extends VObject {
      * @returns {this}
      */
     set_position(x, y) {
-        if (typeof(x) === 'object') {
+        if (typeof (x) === 'object') {
             y = x.y;
             x = x.x;
         }
@@ -1223,7 +1222,6 @@ export default class Node2D extends VObject {
         // ensure child transform will be recalculated
         child.transform._parent_id = -1;
 
-        // @ts-ignore
         this.children.push(child);
 
         // add to name hash
@@ -1275,7 +1273,6 @@ export default class Node2D extends VObject {
         // ensure child transform will be recalculated
         child.transform._parent_id = -1;
 
-        // @ts-ignore
         this.children.splice(index, 0, child);
 
         // add to name hash
@@ -1376,9 +1373,8 @@ export default class Node2D extends VObject {
     /**
      * Returns the child at the specified index
      *
-     * @template T {Node2D}
      * @param {number} index - The index to get the child at
-     * @return {T} The child at the given index, if any.
+     * @return {Node2D} The child at the given index, if any.
      */
     get_child(index) {
         if (index < 0 || index >= this.children.length) {
@@ -1517,16 +1513,14 @@ export default class Node2D extends VObject {
     }
 
     /**
-     * @template T {Node2D}
      * @param {string} path
-     * @returns {T}
+     * @returns {Node2D}
      */
     get_node(path) {
         const list = path.split('/');
 
         // Find the base node
-        /** @type {Node2D} */
-        let node = this;
+        let node = /** @type {Node2D} */ (this);
 
         let i = 0, l = list.length, name;
 
@@ -1557,7 +1551,6 @@ export default class Node2D extends VObject {
             }
         }
 
-        // @ts-ignore
         return node;
     }
 
