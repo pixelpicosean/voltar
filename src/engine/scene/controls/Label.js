@@ -673,7 +673,7 @@ export default class Label extends Control {
                         g.parent = null;
 
                         // TODO: calculate once and set _tint to all char sprites
-                        g.modulate.set(font_color.r, font_color.g, font_color.b, font_color.a);
+                        g.modulate.set(font_color.r * this.modulate.r, font_color.g * this.modulate.g, font_color.b * this.modulate.b, font_color.a * this.modulate.a);
 
                         g._render_webgl(renderer);
 
