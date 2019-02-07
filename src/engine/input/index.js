@@ -145,13 +145,27 @@ export default class Input {
     is_action_just_released(action) {
         return !!this.last_released[action];
     }
+    /**
+     * @param {string} action
+     */
     action_press(action) {
         this.actions[action] = true;
         this.last_pressed[action] = true;
     }
+    /**
+     * @param {string} action
+     */
     action_release(action) {
         this.actions[action] = false;
         this.last_released[action] = true;
+    }
+
+    /**
+     * @param {string} action
+     */
+    get_action_strength(action) {
+        // TODO: add gamepad strength support
+        return (!!this.actions[action]) ? 1 : 0;
     }
 
     /**
