@@ -356,7 +356,6 @@ function construct_scene(blocks) {
             delete n.key;
             delete n.index;
         })
-    // @ts-ignore
     )(blocks);
 
     // Combine nodes into scene tree
@@ -413,23 +412,20 @@ function construct_scene(blocks) {
     })(root_node);
 
     // Add resources into root_node.__meta__
-    const fetch_res = (type) => (fp.flow(
+    const fetch_res = (type) => fp.flow(
+        fp.filter(b => b.key === `${type}_resource`),
+        fp.reduce((hash, b) => {
             // @ts-ignore
-            fp.filter(b => b.key === `${type}_resource`),
-            fp.reduce((hash, b) => {
-                // @ts-ignore
-                hash[b.id] = b;
+            hash[b.id] = b;
 
-                // @ts-ignore
-                delete b.key;
-                // @ts-ignore
-                delete b.id;
+            // @ts-ignore
+            delete b.key;
+            // @ts-ignore
+            delete b.id;
 
-                return hash;
-            }, {})
-        // @ts-ignore
-        )(blocks)
-    );
+            return hash;
+        }, {})
+    )(blocks);
 
     root_node.__meta__ = {
         ext_resource: fetch_res('ext'),
@@ -768,6 +764,7 @@ module.exports.convert_scenes = (scene_root_url) => {
                     })();
                     generated_data.push({
                         url: url.replace(/\.tscn/, '.json'),
+                        filename: key,
                         data: convert_scene(url),
                     })
                 } else {
@@ -780,7 +777,7 @@ module.exports.convert_scenes = (scene_root_url) => {
     // Parse scene instance override properties
     const scene_db = {};
     for (let s of generated_data) {
-        scene_db[path.basename(s.url, '.json')] = s;
+        scene_db[s.filename] = s;
     }
 
     for (let s of generated_data) {
