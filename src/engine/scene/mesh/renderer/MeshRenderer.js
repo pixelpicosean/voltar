@@ -9,7 +9,7 @@ import Mesh from '../Mesh';
 import Vert from './mesh.vert';
 import Frag from './mesh.frag';
 
-const matrix_identity = Matrix.IDENTITY;
+const matrix_identity_array = Matrix.new().to_array(true);
 
 /**
  * WebGL renderer plugin for tiling sprites
@@ -105,7 +105,7 @@ export default class MeshRenderer extends ObjectRenderer {
                 gl_data.shader.uniforms.uTransform = mesh._uv_transform.map_coord.to_array(true);
             }
             else {
-                gl_data.shader.uniforms.uTransform = matrix_identity.to_array(true);
+                gl_data.shader.uniforms.uTransform = matrix_identity_array;
             }
         }
         gl_data.shader.uniforms.translationMatrix = mesh.world_transform.to_array(true);
