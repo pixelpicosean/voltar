@@ -29,9 +29,9 @@ export default class MessageQueue {
     /**
      * @param {any} obj
      * @param {string} method
-     * @param {any} args
+     * @param {any} [args]
      */
-    push_call(obj, method, args) {
+    push_call(obj, method, args = null) {
         // Multiple equal message call is not allowed in a single frame
         for (const m of this.messages) {
             if (m.obj === obj && m.method === method && m.args === args) {
