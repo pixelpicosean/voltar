@@ -12,6 +12,39 @@ export default class Circle {
      * @param {number} [y=0] - The Y coordinate of the center of this circle
      * @param {number} [radius=0] - The radius of the circle
      */
+    static new(x, y, radius) {
+        return new Circle(x, y, radius);
+    }
+
+    get radius() {
+        return this._radius * this.scale;
+    }
+    /**
+     * @param {number} value
+     */
+    set radius(value) {
+        this._radius = value;
+    }
+    /**
+     * @param {number} value
+     */
+    set_radius(value) {
+        this.radius = value;
+    }
+
+    /**
+     * @param {number} value
+     */
+    set_scale(value) {
+        this.scale = value;
+        return this;
+    }
+
+    /**
+     * @param {number} [x=0] - The X coordinate of the center of this circle
+     * @param {number} [y=0] - The Y coordinate of the center of this circle
+     * @param {number} [radius=0] - The radius of the circle
+     */
     constructor(x = 0, y = 0, radius = 0) {
         /**
          * @member {number}
@@ -29,7 +62,9 @@ export default class Circle {
          * @member {number}
          * @default 0
          */
-        this.radius = radius;
+        this._radius = radius;
+
+        this.scale = 1;
 
         /**
          * The type of the object, mainly used to avoid `instanceof` checks

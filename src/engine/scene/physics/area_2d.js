@@ -1,12 +1,14 @@
 import CollisionObject2D from './collision_object_2d';
 import { node_class_map } from 'engine/registry';
 import PhysicsServer from 'engine/servers/physics_2d/physics_server';
-import { AreaSpaceOverrideMode } from 'engine/scene/physics/const';
-import { Vector2 } from 'engine/math/index';
+import { AreaSpaceOverrideMode, ShapeType } from 'engine/scene/physics/const';
+import { Vector2, Circle, Rectangle } from 'engine/math/index';
 import Area2DSW from 'engine/servers/physics_2d/area_2d_sw';
 import { remove_items } from 'engine/dep/index';
 import Node2D from '../Node2D';
 import { PhysicsBody2D } from './physics_body_2d';
+import { CircleShape2D } from 'engine/index';
+import { SHAPES } from 'engine/const';
 
 class ShapePair {
     /**
@@ -244,6 +246,23 @@ export default class Area2D extends CollisionObject2D {
         return this;
     }
 
+    get pickable() {
+        return this.interactive;
+    }
+    /**
+     * @param {boolean} value
+     */
+    set pickable(value) {
+        this.interactive = value;
+    }
+    /**
+     * @param {boolean} value
+     */
+    set_pickable(value) {
+        this.pickable = value;
+        return this;
+    }
+
     constructor() {
         super(PhysicsServer.singleton.area_create(), true);
 
@@ -266,6 +285,7 @@ export default class Area2D extends CollisionObject2D {
         this.priority = 0;
         this._monitoring = false;
         this._monitorable = false;
+        this._first_shape = null;
 
         /**
          * @type {Map<import('./physics_body_2d').PhysicsBody2D, BodyState>}
@@ -281,6 +301,7 @@ export default class Area2D extends CollisionObject2D {
         this.gravity_vec = new Vector2(0, 1);
         this.monitoring = true;
         this.monitorable = true;
+        this.pickable = true;
     }
     _load_data(data) {
         super._load_data(data);
@@ -303,11 +324,48 @@ export default class Area2D extends CollisionObject2D {
         if (data.gravity_vec !== undefined) {
             this.gravity_vec = data.gravity_vec;
         }
+        if (data.pickable !== undefined) {
+            this.pickable = data.pickable;
+        }
 
         return this;
     }
     _propagate_exit_tree() {
         this._clear_monitoring();
+    }
+
+    /**
+     * @param {number} delta
+     */
+    _propagate_process(delta) {
+        super._propagate_process(delta);
+
+        if (this.interactive && !this.hit_area) {
+            let shape = this._first_shape;
+            if (!shape) {
+                shape = this._first_shape = this.shape_find_owner(0);
+            }
+            switch (shape.shape.shape.type) {
+                case ShapeType.RECTANGLE: {
+                    this.hit_area = shape.shape.get_rect();
+                } break;
+                case ShapeType.CIRCLE: {
+                    const shape_inst = /** @type {CircleShape2D} */ (shape.shape);
+                    this.hit_area = new Circle(shape.x, shape.y, shape_inst.radius);
+                } break;
+                default: {
+                    console.log(`Area2D hit area with "${shape.shape.shape.type}" shape is not supported!`);
+                } break;
+            }
+        }
+
+        if (this.hit_area) {
+            if (this.hit_area.type === SHAPES.RECT) {
+                this._first_shape.transform.world_transform.xform_rect(/** @type {Rectangle} */(this.hit_area));
+            } else if (this.hit_area.type === SHAPES.CIRC) {
+                this._first_shape.transform.world_transform.xform_circle(/** @type {Circle} */(this.hit_area));
+            }
+        }
     }
 
     /**

@@ -1,5 +1,6 @@
 import Vector2 from './Vector2';
 import { PI2, Rectangle } from '../index';
+import { Circle } from './index';
 
 /**
  * The pixi Matrix class as an object, which makes it a lot faster,
@@ -375,6 +376,24 @@ export default class Matrix {
         Vector2.free(ends_1);
         Vector2.free(ends_2);
         Vector2.free(ends_3);
+
+        return r_out;
+    }
+
+    /**
+     * @param {Circle} p_circle
+     * @param {Circle} [r_out]
+     */
+    xform_circle(p_circle, r_out = Circle.new()) {
+        const pos = Vector2.new(p_circle.x, p_circle.y);
+        this.xform(pos, pos);
+
+        r_out.x = pos.x;
+        r_out.y = pos.y;
+
+        p_circle.scale = Math.sqrt((this.a * this.a) + (this.b * this.b));
+
+        Vector2.free(pos);
 
         return r_out;
     }
