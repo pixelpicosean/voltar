@@ -226,8 +226,9 @@ export function uuid() {
 /**
  * Returns a random member of `array`.
  *
- * @param {Array} ary - An Array to pick a random member of.
- * @return {any} A random member of the array.
+ * @template T
+ * @param {Array<T>} ary - An Array to pick a random member of.
+ * @return {T} A random member of the array.
  */
 export function pick(ary) {
     return ary[rand_range_i(0, ary.length - 1)];
@@ -236,8 +237,9 @@ export function pick(ary) {
 /**
  * Returns a random member of `array`, favoring the earlier entries.
  *
- * @param {Array} ary - An Array to pick a random member of.
- * @return {any} A random member of the array.
+ * @template T
+ * @param {Array<T>} ary - An Array to pick a random member of.
+ * @return {T} A random member of the array.
  */
 export function weighted_pick(ary) {
     return ary[~~(Math.pow(rnd.frac(), 2) * (ary.length - 1) + 0.5)];
