@@ -857,6 +857,7 @@ export default class Control extends Node2D {
         this.data.font_override = this.data.font_override || {};
         this.data.font_override[name] = font;
         this._theme_changed();
+        return this;
     }
     /**
      * @param {string} name
@@ -866,6 +867,7 @@ export default class Control extends Node2D {
         this.data.color_override = this.data.color_override || {};
         this.data.color_override[name] = color;
         this._theme_changed();
+        return this;
     }
 
     _compute_margins(rect, anchors, margins) {
