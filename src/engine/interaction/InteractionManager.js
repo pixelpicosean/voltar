@@ -19,7 +19,7 @@ mixins.delay_mixin(
 
 const MOUSE_POINTER_ID = 1;
 
-const NOOP = () => {};
+const NOOP = () => { };
 
 // helpers for hit_test() - only used inside hit_test()
 const hit_test_event = {
@@ -954,7 +954,7 @@ export default class InteractionManager extends VObject {
      * testing the interactive objects and passes the hit across in the function.
      *
      * @private
-     * @param {InteractionEvent} interactionEvent - event containing the point that
+     * @param {InteractionEvent} interaction_event - event containing the point that
      *  is tested for collision
      * @param {Node2D} node - the node
      *  that will be hit test (recursively crawls its children)
@@ -964,12 +964,12 @@ export default class InteractionManager extends VObject {
      * @param {boolean} [interactive] - Whether the node is interactive
      * @return {boolean} returns true if the node hit the point
      */
-    process_interactive(interactionEvent, node, func, hit_test, interactive) {
+    process_interactive(interaction_event, node, func, hit_test, interactive) {
         if (!node || !node.visible) {
             return false;
         }
 
-        const point = interactionEvent.data.global;
+        const point = interaction_event.data.global;
 
         // Took a little while to rework this function correctly! But now it is done and nice and optimised. ^_^
         //
@@ -987,14 +987,15 @@ export default class InteractionManager extends VObject {
         interactive = node.interactive || interactive;
 
         let hit = false;
-        let interactiveParent = interactive;
+        let interactive_parent = interactive;
 
         // Flag here can set to false if the event is outside the parents hit_area or mask
         let hit_test_children = true;
 
         // If there is a hit_area, no need to test against anything else if the pointer is not within the hit_area
-        // There is also no longer a need to hitTest children.
-        if (node.hit_area) {
+        // There is also no longer a need to hit_test children.
+        // We should ignore Control otherwise it may jump children's hit test
+        if (node.hit_area && node.type !== 'Control') {
             if (hit_test) {
                 node.world_transform.xform_inv(point, this._temp_point);
                 if (!node.hit_area.contains(this._temp_point.x, this._temp_point.y)) {
@@ -1005,7 +1006,7 @@ export default class InteractionManager extends VObject {
                     hit = true;
                 }
             }
-            interactiveParent = false;
+            interactive_parent = false;
         }
         // If there is a mask, no need to test against anything else if the pointer is not within the mask
         else if (node._mask) {
@@ -1027,7 +1028,7 @@ export default class InteractionManager extends VObject {
                 const child = children[i];
 
                 // time to get recursive.. if this function will return if something is hit..
-                const childHit = this.process_interactive(interactionEvent, child, func, hit_test, interactiveParent);
+                const childHit = this.process_interactive(interaction_event, child, func, hit_test, interactive_parent);
 
                 if (childHit) {
                     // its a good idea to check if a child has lost its parent.
@@ -1038,7 +1039,7 @@ export default class InteractionManager extends VObject {
 
                     // we no longer need to hit test any more objects in this container as we we
                     // now know the parent has been hit
-                    interactiveParent = false;
+                    interactive_parent = false;
 
                     // If the child is interactive , that means that the object hit was actually
                     // interactive and not just the child of an interactive object.
@@ -1046,7 +1047,7 @@ export default class InteractionManager extends VObject {
                     // through all objects, but we don't need to perform any hit tests.
 
                     if (childHit) {
-                        if (interactionEvent.target) {
+                        if (interaction_event.target) {
                             hit_test = false;
                         }
                         hit = true;
@@ -1061,7 +1062,7 @@ export default class InteractionManager extends VObject {
             // We also don't need to worry about hit testing if once of the displayObjects children
             // has already been hit - but only if it was interactive, otherwise we need to keep
             // looking for an interactive child, just in case we hit one
-            if (hit_test && !interactionEvent.target) {
+            if (hit_test && !interaction_event.target) {
                 // already tested against hit_area if it is defined
                 // @ts-ignore
                 if (!node.hit_area && node.contains_point) {
@@ -1073,12 +1074,12 @@ export default class InteractionManager extends VObject {
             }
 
             if (node.interactive) {
-                if (hit && !interactionEvent.target) {
-                    interactionEvent.target = node;
+                if (hit && !interaction_event.target) {
+                    interaction_event.target = node;
                 }
 
                 if (func) {
-                    func(interactionEvent, node, !!hit);
+                    func(interaction_event, node, !!hit);
                 }
             }
         }
@@ -1657,7 +1658,7 @@ export default class InteractionManager extends VObject {
                 if (typeof touch.buttons === 'undefined') touch.buttons = event.touches.length ? 1 : 0;
                 // @ts-ignore
                 if (typeof touch.isPrimary === 'undefined') {
-                // @ts-ignore
+                    // @ts-ignore
                     touch.isPrimary = event.touches.length === 1 && event.type === 'touchstart';
                 }
                 // @ts-ignore
