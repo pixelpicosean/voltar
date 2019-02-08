@@ -262,6 +262,7 @@ export default class TextureButton extends BaseButton {
             case DrawMode.NORMAL: {
                 texture = this._texture_normal;
             } break;
+            case DrawMode.HOVER_PRESSED:
             case DrawMode.PRESSED: {
                 if (this._texture_pressed && this._texture_pressed.valid) {
                     texture = this._texture_pressed;
