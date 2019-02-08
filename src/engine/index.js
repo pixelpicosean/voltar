@@ -123,6 +123,8 @@ import * as loaders from './loaders/index';
 import * as ticker from './ticker/index';
 import * as audio from './audio/index';
 
+export { registered_bitmap_fonts as bitmap_fonts } from './scene/text/res';
+
 export {
     settings,
 
