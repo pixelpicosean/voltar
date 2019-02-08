@@ -40,7 +40,7 @@ declare namespace tween {
         | 'Back.In' | 'Back.Out' | 'Back.InOut'
         | 'Bounce.In' | 'Bounce.Out' | 'Bounce.InOut';
 
-    export class Tween extends VObject {
+    export class Tween {
         is_removed: boolean;
 
         autoplay: boolean;
@@ -50,13 +50,20 @@ declare namespace tween {
 
         interpolates: InterpolateData[];
 
+        _events: any[];
+        _eventsCount: number;
+
         constructor();
 
-        connect(event: string, fn: Function, context?: any): Tween;
-        connect_once(event: string, fn: Function, context?: any): Tween;
-        disconnect(event: string, fn: Function, context?: any): Tween;
-        disconnect_all(event: string): Tween;
-        emit_signal(event: string, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any): Tween;
+        connect(event: string, fn: Function, context?: any): any;
+        connect_once(event: string, fn: Function, context?: any): any;
+        disconnect(event: string, fn: Function, context?: any): any;
+        disconnect_all(event: string): any;
+        emit_signal(event: string, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any): boolean;
+        get_signal_list(): any[];
+        get_signal_connection_list(): any[];
+        get_signal_connection_count(): number;
+        is_connected(event: string | Symbol, fn: Function, context: any): boolean;
 
         set_active(active: boolean): Tween;
         set_speed_scale(scale: number): Tween;
