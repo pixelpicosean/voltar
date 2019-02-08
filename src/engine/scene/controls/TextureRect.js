@@ -96,8 +96,8 @@ export default class TextureRect extends Control {
 
         this.type = 'TextureRect';
 
-        this.sprite = new Sprite();
-        this.tsprite = new TilingSprite();
+        this.sprite = new Sprite(); this.sprite.anchor.set(0, 0);
+        this.tsprite = new TilingSprite(); this.tsprite.anchor.set(0, 0);
 
         this._expand = false;
         this._stretch_mode = StretchMode.SCALE_ON_EXPAND;
