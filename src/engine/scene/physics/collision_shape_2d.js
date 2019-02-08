@@ -88,7 +88,7 @@ export default class CollisionShape2D extends Node2D {
         super._load_data(p_data);
 
         if (p_data.shape !== undefined) {
-            this.set_shape(new res_class_map[p_data.shape.type](p_data.shape));
+            this.set_shape(new res_class_map[p_data.shape.type]()._load_data(p_data.shape));
         }
 
         return this;
