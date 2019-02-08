@@ -257,7 +257,7 @@ export class SegmentShape2DSW extends Shape2DSW {
             return 2;
         }
 
-        const sub = this.b.clone().subtract(a);
+        const sub = this.b.clone().subtract(this.a);
         const dp = p_normal.dot(sub);
         if (dp > 0) {
             r_supports[0].copy(this.b);
@@ -282,7 +282,7 @@ export class SegmentShape2DSW extends Shape2DSW {
      * @returns {boolean}
      */
     intersect_segment(p_begin, p_end, r_point, r_normal) {
-        if (!segment_intersects_segment_2d(p_begin, p_end, this.a, this.b, r_point)) {
+        if (!segment_intersects_segment_2d(p_begin, p_end, this.a, this.b, r_point[0])) {
             return false;
         }
 
@@ -582,7 +582,7 @@ export class CircleShape2DSW extends Shape2DSW {
         r_result.max = d + (this.radius) * scale;
 
         return r_result;
-	}
+    }
 }
 CircleShape2DSW.prototype.project_range_castv = Shape2DSW.prototype.__default_project_range_cast;
 CircleShape2DSW.prototype.project_range_cast = Shape2DSW.prototype.__default_project_range_cast;
