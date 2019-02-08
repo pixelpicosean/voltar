@@ -541,7 +541,7 @@ export default class AnimationPlayer extends Node2D {
             c.seeked = false;
         }
 
-        for (let i = c.blend.length - 1; i >=0; i--) {
+        for (let i = c.blend.length - 1; i >= 0; i--) {
             let b = c.blend[i];
             let blend = b.blend_left / b.blend_time;
             this._animation_process_data(b.data, delta, blend, false, false);
@@ -879,7 +879,7 @@ export default class AnimationPlayer extends Node2D {
      * @param {number} custom_blend
      */
     play_backwards(name = '', custom_blend = -1) {
-        this.play(name, custom_blend, -1, true);
+        return this.play(name, custom_blend, -1, true);
     }
     /**
      * Queue an animation for playback once the current one is done.
@@ -892,6 +892,7 @@ export default class AnimationPlayer extends Node2D {
         } else {
             this.queued.push(name);
         }
+        return this;
     }
 
     /**
@@ -914,6 +915,7 @@ export default class AnimationPlayer extends Node2D {
         if (update) {
             this._animation_process(0);
         }
+        return this;
     }
 
     /**
@@ -929,6 +931,7 @@ export default class AnimationPlayer extends Node2D {
         } else {
             this.blend_times[`${animation1}->${animation2}`] = time;
         }
+        return this;
     }
 
     /**
@@ -947,6 +950,8 @@ export default class AnimationPlayer extends Node2D {
         this.set_process(false);
         this.queued.length = 0;
         this.is_playing = false;
+
+        return this;
     }
 }
 
