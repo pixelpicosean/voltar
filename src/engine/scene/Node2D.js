@@ -21,6 +21,8 @@ import Filter from 'engine/renderers/filters/Filter';
 import { rgb2hex } from 'engine/utils/index';
 import Color from 'engine/Color';
 
+const tmp_color = new Color(1, 1, 1, 1);
+
 let uid = 0;
 
 /**
@@ -65,6 +67,25 @@ export default class Node2D extends VObject {
         this.visible = value;
         return this;
     }
+
+    get alpha() {
+        return this.modulate.a * this.self_modulate.a;
+    }
+
+    // NOTE: code below is wrong, but disable alpha setter will break old games
+    // /**
+    //  * @param {number} value
+    //  */
+    // set alpha(value) {
+    //     this.modulate.a = value;
+    // }
+    // /**
+    //  * @param {number} value
+    //  */
+    // set_alpha(value) {
+    //     this.alpha = value;
+    //     return this;
+    // }
 
     constructor() {
         super();
@@ -134,13 +155,6 @@ export default class Node2D extends VObject {
         this.block_transform_notify = false;
         this.notify_local_transform = false;
         this.notify_transform = false;
-
-        /**
-         * The opacity of the object.
-         *
-         * @type {number}
-         */
-        this.alpha = 1;
 
         this._visible = true;
 
@@ -292,9 +306,8 @@ export default class Node2D extends VObject {
         }
 
         this.tint = 0xFFFFFF;
-        this.modulate = new Color(1, 1, 1, 1, (rgb) => {
-            this.tint = rgb2hex(rgb);
-        }, this);
+        this.modulate = new Color(1, 1, 1, 1);
+        this.self_modulate = new Color(1, 1, 1, 1);
 
         this.toplevel = false;
 
@@ -321,9 +334,6 @@ export default class Node2D extends VObject {
         }
         if (data.name !== undefined) {
             this.name = data.name;
-        }
-        if (data.alpha !== undefined) {
-            this.alpha = data.alpha;
         }
         if (data.width !== undefined) {
             this.width = data.width;
@@ -365,12 +375,10 @@ export default class Node2D extends VObject {
         }
 
         if (data.modulate !== undefined) {
-            this.modulate.set(
-                data.modulate.r,
-                data.modulate.g,
-                data.modulate.b,
-                data.modulate.a
-            );
+            this.modulate.copy(data.modulate);
+        }
+        if (data.self_modulate !== undefined) {
+            this.self_modulate.copy(data.self_modulate);
         }
 
         return this;
@@ -501,9 +509,6 @@ export default class Node2D extends VObject {
             this.transform.update_transform(parent.transform);
             this._bounds.update_id++;
         }
-
-        // multiply the alphas..
-        this.world_alpha = this.alpha * parent.world_alpha;
     }
 
     /**
@@ -1639,6 +1644,21 @@ export default class Node2D extends VObject {
         this.named_children.set(n, child);
     }
 
+    _update_color() {
+        const parent = this.parent || this.temp_node_2d_parent;
+
+        // Calculate real color
+        tmp_color
+            .copy(parent.self_modulate).multiply(parent.modulate)
+            .multiply(this.modulate).multiply(this.self_modulate)
+
+        // Update our world alpha
+        this.world_alpha = tmp_color.a;
+
+        // Update our tint
+        this.tint = tmp_color.as_hex();
+    }
+
     /**
      * Renders the object using the WebGL renderer
      *
@@ -1649,6 +1669,8 @@ export default class Node2D extends VObject {
         if (!this.visible || this.world_alpha <= 0 || !this.renderable) {
             return;
         }
+
+        this._update_color();
 
         // do a quick check to see if this element has a mask or a filter.
         if (this._mask || this._filters) {
@@ -1670,6 +1692,8 @@ export default class Node2D extends VObject {
      * @param {import('engine/renderers/WebGLRenderer').default} renderer - The renderer
      */
     render_advanced_webgl(renderer) {
+        this._update_color();
+
         renderer.flush();
 
         const filters = this._filters;

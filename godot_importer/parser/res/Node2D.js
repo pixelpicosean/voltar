@@ -19,6 +19,7 @@ module.exports = (data) => {
         rotation: real(data.prop.rotation),
         scale: Vector2(data.prop.scale),
         modulate: Color(data.prop.modulate),
+        self_modulate: Color(data.prop.self_modulate),
         visible: boolean(data.prop.visible),
     };
 };
