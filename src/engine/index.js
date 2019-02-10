@@ -248,14 +248,16 @@ function assemble_node(node, children) {
             // Or we simply create it as a "collapsed scene tree"
             else {
                 inst = new (node_class_map[packed_scene.type])();
-                inst._load_data(packed_scene);
             }
 
-            // Apply custom data to the scene
-            inst._load_data(data);
-
-            // And children under it
+            // Create child nodes
             assemble_node(inst, packed_scene.children);
+
+            // Load scene's local data
+            inst._load_data(packed_scene);
+
+            // Load override data from parent scene
+            inst._load_data(data);
         } else {
             if (data._is_proxy_) {
                 if (res_class_map.hasOwnProperty(data.prop_value.type)) {
