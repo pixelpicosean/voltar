@@ -336,7 +336,7 @@ export default class BaseTexture extends VObject {
                 // send loaded event if previous source was null and we have been passed a pre-loaded IMG element
                 this.emit_signal('loaded', this);
             }
-        // @ts-ignore
+            // @ts-ignore
         } else if (!source.getContext) {
             // Image fail / not ready
             this.is_loading = true;
@@ -579,10 +579,7 @@ export default class BaseTexture extends VObject {
             this.image_url = null;
 
             // @ts-ignore
-            if (!navigator.isCocoonJS) {
-                // @ts-ignore
-                this.source.src = '';
-            }
+            this.source.src = '';
         }
 
         this.source = null;
