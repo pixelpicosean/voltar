@@ -1,4 +1,5 @@
 import Control from "./Control";
+import InteractiveEvent from 'engine/interaction/InteractionEvent';
 
 /**
  * @enum {number}
@@ -159,13 +160,24 @@ export default class BaseButton extends Control {
         return this.status.hovering;
     }
 
+    /**
+    * @param {InteractiveEvent} e
+    */
     _pointer_over(e) {
         this.status.hovering = true;
     }
+    /**
+     * @param {InteractiveEvent} e
+     */
     _pointer_out(e) {
         this.status.hovering = false;
     }
+    /**
+     * @param {InteractiveEvent} e
+     */
     _pointer_down(e) {
+        e.stop_propagation();
+
         if (this.action_mode === ActionMode.BUTTON_PRESS) {
             this.emit_signal('button_down');
 
@@ -190,7 +202,12 @@ export default class BaseButton extends Control {
             this.emit_signal('button_down');
         }
     }
+    /**
+     * @param {InteractiveEvent} e
+     */
     _pointer_up(e) {
+        e.stop_propagation();
+
         if (this.action_mode === ActionMode.BUTTON_PRESS) {
             this.emit_signal('button_up');
             this.status.press_attempt = false;
