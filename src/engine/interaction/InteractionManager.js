@@ -749,6 +749,11 @@ export default class InteractionManager extends VObject {
             this.interaction_dom_element.addEventListener('touchmove', this.on_pointer_move, true);
         }
 
+        this.interaction_dom_element.oncontextmenu = (e) => {
+            e.stopPropagation();
+            return false;
+        }
+
         this.events_added = true;
     }
 
@@ -826,7 +831,7 @@ export default class InteractionManager extends VObject {
             return;
         }
 
-        this.cursor = null;
+        this.cursor = undefined;
 
         // Resets the flag as set by a stop_propagation call. This flag is usually reset by a user interaction of any kind,
         // but there was a scenario of a display object moving under a static mouse cursor.
@@ -855,21 +860,20 @@ export default class InteractionManager extends VObject {
         }
 
         this.set_cursor_mode(this.cursor);
-
-        // TODO
     }
 
     /**
      * Sets the current cursor mode, handling any callbacks or CSS style changes.
      *
-     * @param {string} mode - cursor mode, a key from the cursor_styles dictionary
+     * @param {string} [mode] - cursor mode, a key from the cursor_styles dictionary
      */
-    set_cursor_mode(mode) {
-        mode = mode || 'default';
+    set_cursor_mode(mode = 'default') {
+        // Always update cursor to make sure it's correct
         // if the mode didn't actually change, bail early
-        if (this.current_cursor_mode === mode) {
-            return;
-        }
+        // if (this.current_cursor_mode === mode) {
+        //     return;
+        // }
+
         this.current_cursor_mode = mode;
         const style = this.cursor_styles[mode];
 
@@ -890,8 +894,7 @@ export default class InteractionManager extends VObject {
                     Object.assign(this.interaction_dom_element.style, style);
                     break;
             }
-        }
-        else if (typeof mode === 'string' && !Object.prototype.hasOwnProperty.call(this.cursor_styles, mode)) {
+        } else if (typeof mode === 'string' && !Object.prototype.hasOwnProperty.call(this.cursor_styles, mode)) {
             // if it mode is a string (not a Symbol) and cursor_styles doesn't have any entry
             // for the mode, then assume that the dev wants it to be CSS for the cursor.
             this.interaction_dom_element.style.cursor = mode;
@@ -1371,7 +1374,7 @@ export default class InteractionManager extends VObject {
         if (events[0].pointerType === 'mouse' || events[0].pointerType === 'pen') {
             this.did_move = true;
 
-            this.cursor = null;
+            this.cursor = undefined;
         }
 
         const eventLen = events.length;
@@ -1448,7 +1451,7 @@ export default class InteractionManager extends VObject {
 
         if (event.pointerType === 'mouse') {
             this.mouse_over_renderer = false;
-            this.set_cursor_mode(null);
+            this.set_cursor_mode();
         }
 
         const interactionData = this.get_interaction_data_for_pointer_id(event);

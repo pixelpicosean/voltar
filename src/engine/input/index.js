@@ -2,6 +2,7 @@ import remove_items from 'remove-array-items';
 import { Vector2 } from '../math/index';
 import keyboard from './keyboard';
 import Node2D from 'engine/scene/Node2D';
+import { InteractionEvent } from 'engine/interaction/enable';
 
 
 /**
@@ -26,23 +27,49 @@ export default class Input {
 
         // Mouse
         viewport.interactive = true;
+
         // @ts-ignore
         viewport.contains_point = () => true;
-        viewport.connect('pointerdown', (e) => {
+        const down = (/** @type {InteractionEvent} */e) => {
             this.mouse.copy(e.data.global);
-            this._keydown('MOUSE');
-        });
-        viewport.connect('pointermove', (e) => {
+            if (e.data.pointer_type)
+                this._keydown('BUTTON_LEFT');
+        };
+        const move = (/** @type {InteractionEvent} */e) => {
             this.mouse.copy(e.data.global);
-        });
-        viewport.connect('pointerup', (e) => {
+        };
+        const up = (/** @type {InteractionEvent} */e) => {
             this.mouse.copy(e.data.global);
-            this._keyup('MOUSE');
-        });
-        viewport.connect('pointerupoutside', (e) => {
+            this._keyup('BUTTON_LEFT');
+        };
+        const upoutside = (/** @type {InteractionEvent} */e) => {
             this.mouse.copy(e.data.global);
-            this._keyup('MOUSE');
-        });
+            this._keyup('BUTTON_LEFT');
+        };
+
+        const rightdown = (/** @type {InteractionEvent} */e) => {
+            this._keydown('BUTTON_RIGHT');
+        };
+        const rightup = (/** @type {InteractionEvent} */e) => {
+            this._keyup('BUTTON_RIGHT');
+        };
+        const rightupoutside = (/** @type {InteractionEvent} */e) => {
+            this._keyup('BUTTON_RIGHT');
+        };
+
+        viewport.connect('touchstart', down);
+        viewport.connect('touchmove', move);
+        viewport.connect('touchend', up);
+        viewport.connect('touchendoutside', upoutside);
+
+        viewport.connect('mousedown', down);
+        viewport.connect('mousemove', move);
+        viewport.connect('mouseup', up);
+        viewport.connect('mouseupoutside', upoutside);
+
+        viewport.connect('rightdown', rightdown);
+        viewport.connect('rightup', rightup);
+        viewport.connect('rightupoutside', rightupoutside);
     }
     _process(delta) {
         keyboard._process(delta);
