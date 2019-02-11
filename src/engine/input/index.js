@@ -57,6 +57,16 @@ export default class Input {
             this._keyup('BUTTON_RIGHT');
         };
 
+        const middledown = (/** @type {InteractionEvent} */e) => {
+            this._keydown('BUTTON_MIDDLE');
+        };
+        const middleup = (/** @type {InteractionEvent} */e) => {
+            this._keyup('BUTTON_MIDDLE');
+        };
+        const middleupoutside = (/** @type {InteractionEvent} */e) => {
+            this._keyup('BUTTON_MIDDLE');
+        };
+
         viewport.connect('touchstart', down);
         viewport.connect('touchmove', move);
         viewport.connect('touchend', up);
@@ -70,16 +80,22 @@ export default class Input {
         viewport.connect('rightdown', rightdown);
         viewport.connect('rightup', rightup);
         viewport.connect('rightupoutside', rightupoutside);
+
+        viewport.connect('middledown', middledown);
+        viewport.connect('middleup', middleup);
+        viewport.connect('middleupoutside', middleupoutside);
     }
+    /**
+     * @param {number} delta
+     */
     _process(delta) {
         keyboard._process(delta);
 
         // Mark press/release action as false
-        let k;
-        for (k in this.last_pressed) {
+        for (const k in this.last_pressed) {
             this.last_pressed[k] = false;
         }
-        for (k in this.last_released) {
+        for (const k in this.last_released) {
             this.last_released[k] = false;
         }
     }
@@ -94,8 +110,7 @@ export default class Input {
     bind(key, action) {
         if (Array.isArray(this.bindings[key])) {
             this.bindings[key].push(action);
-        }
-        else {
+        } else {
             this.bindings[key] = [action];
         }
 

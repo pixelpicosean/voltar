@@ -16,11 +16,10 @@ export default class InteractionTrackingData {
      * @param {number} flag - The interaction flag to set
      * @param {boolean} yn - Should the flag be set or unset
      */
-    _doSet(flag, yn) {
+    _do_set(flag, yn) {
         if (yn) {
             this._flags = this._flags | flag;
-        }
-        else {
+        } else {
             this._flags = this._flags & (~flag);
         }
     }
@@ -77,7 +76,7 @@ export default class InteractionTrackingData {
      * @param {boolean} yn - Is the event over?
      */
     set over(yn) {
-        this._doSet(InteractionTrackingData.FLAGS.OVER, yn);
+        this._do_set(InteractionTrackingData.FLAGS.OVER, yn);
     }
 
     /**
@@ -95,7 +94,7 @@ export default class InteractionTrackingData {
      * @param {boolean} yn - Is the right mouse button down?
      */
     set right_down(yn) {
-        this._doSet(InteractionTrackingData.FLAGS.RIGHT_DOWN, yn);
+        this._do_set(InteractionTrackingData.FLAGS.RIGHT_DOWN, yn);
     }
 
     /**
@@ -113,7 +112,25 @@ export default class InteractionTrackingData {
      * @param {boolean} yn - Is the left mouse button down?
      */
     set left_down(yn) {
-        this._doSet(InteractionTrackingData.FLAGS.LEFT_DOWN, yn);
+        this._do_set(InteractionTrackingData.FLAGS.LEFT_DOWN, yn);
+    }
+
+    /**
+     * Did the middle mouse button come down in the Node2D?
+     *
+     * @type {boolean}
+     */
+    get middle_down() {
+        return (this._flags & InteractionTrackingData.FLAGS.MIDDLE_DOWN) !== 0;
+    }
+
+    /**
+     * Set the middle down flag
+     *
+     * @param {boolean} yn - Is the middle mouse button down?
+     */
+    set middle_down(yn) {
+        this._do_set(InteractionTrackingData.FLAGS.MIDDLE_DOWN, yn);
     }
 }
 
@@ -122,5 +139,6 @@ InteractionTrackingData.FLAGS = {
     OVER: 1 << 0,
     LEFT_DOWN: 1 << 1,
     RIGHT_DOWN: 1 << 2,
+    MIDDLE_DOWN: 1 << 3,
 }
 Object.freeze(InteractionTrackingData.FLAGS);
