@@ -583,7 +583,7 @@ export default class Space2DSW {
                     }
 
                     // test initial overlap
-                    if (!CollisionSolver2DSW.solve(body_shape.shape, body_shape_xform, Vector2.ZERO, against_shape.shape, col_obj_shape_xform, Vector2.ZERO, null, null, null, 0)) {
+                    if (CollisionSolver2DSW.solve(body_shape.shape, body_shape_xform, Vector2.ZERO, against_shape.shape, col_obj_shape_xform, Vector2.ZERO, null, null, null, 0)) {
                         if (against_shape.one_way_collision) {
                             continue;
                         }
