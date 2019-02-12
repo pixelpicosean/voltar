@@ -497,6 +497,11 @@ const resource_normalizers = {
         delete parent.position;
         return res;
     },
+    CircleShape2D: (res, meta, parent) => {
+        res.position = parent.position;
+        delete parent.position;
+        return res;
+    },
     TileSet: (res, meta) => {
         const text_data = fs.readFileSync(normalize_res_real_url(res.path), 'utf8');
 
@@ -878,6 +883,9 @@ module.exports.convert_project_settings = (project_url) => {
         real_settings.application = application;
     }
     if (settings.display || settings.rendering) {
+        settings.display = settings.display || {};
+        settings.rendering = settings.rendering || {};
+
         let display = {};
 
         // size
