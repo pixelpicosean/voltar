@@ -1584,9 +1584,6 @@ export default class Node2D extends VObject {
             this._world_rotation = parent._world_rotation + this.transform.rotation;
         }
 
-        // TODO: check render flags, how to process stuff here
-        this.world_alpha = this.alpha * parent.world_alpha;
-
         for (let child of this.children) {
             if (child.visible) {
                 child.update_transform();
