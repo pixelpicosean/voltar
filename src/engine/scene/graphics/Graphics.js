@@ -978,7 +978,7 @@ export default class Graphics extends Node2D {
             // @ts-ignore
             sprite.tint = rgb2hex(t1);
         }
-        sprite.alpha = this.graphics_data[0].fill_alpha;
+        sprite.modulate.a = this.graphics_data[0].fill_alpha;
         sprite.world_alpha = this.world_alpha * sprite.alpha;
         sprite.blend_mode = this.blend_mode;
 
