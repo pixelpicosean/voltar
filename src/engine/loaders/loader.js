@@ -60,7 +60,6 @@ export default class Loader extends ResourceLoader {
      */
     constructor(baseUrl, concurrency) {
         super(baseUrl, concurrency);
-        VObject.call(this);
 
         for (let i = 0; i < loader_pre_procs.length; ++i) {
             this.pre(loader_pre_procs[i]());
