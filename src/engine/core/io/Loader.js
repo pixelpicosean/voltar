@@ -1,5 +1,5 @@
 import Signal from 'mini-signals';
-import parseUri from 'parse-uri';
+import parseUri from './parse_uri';
 import * as async from './async';
 import Resource from './Resource';
 import { VObject } from 'engine/dep/index';
