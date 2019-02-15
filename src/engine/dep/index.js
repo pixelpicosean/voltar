@@ -4,8 +4,6 @@ export { default as remove_items } from 'remove-array-items';
 
 export { default as VObject } from './VObject';
 
-export { default as Signal } from 'mini-signals';
-
 import * as device_ns from 'ismobilejs';
 export const device = device_ns;
 

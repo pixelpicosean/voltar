@@ -2,15 +2,19 @@ import Resource from 'engine/core/io/Resource';
 import url from 'url';
 import Spritesheet from 'engine/textures/Spritesheet';
 
-export default function () {
-    return function spritesheet_parser(resource, next) {
-        const imageResourceName = `${resource.name}_image`;
+export default () => {
+    return function spritesheet_parser(/** @type {Resource} */ resource, /** @type {Function} */ next) {
+        const image_resource_name = `${resource.name}_image`;
 
         // skip if no data, its not json, it isn't spritesheet data, or the image resource already exists
-        if (!resource.data
-            || resource.type !== Resource.TYPE.JSON
-            || !resource.data.frames
-            || this.resources[imageResourceName]
+        if (
+            !resource.data
+            ||
+            resource.type !== Resource.TYPE.JSON
+            ||
+            !resource.data.frames
+            ||
+            this.resources[image_resource_name]
         ) {
             next();
 
@@ -18,15 +22,15 @@ export default function () {
         }
 
         const loadOptions = {
-            crossOrigin: resource.crossOrigin,
-            metadata: resource.metadata.imageMetadata,
-            parentResource: resource,
+            crossOrigin: resource.cross_origin,
+            metadata: resource.metadata.image_metadata,
+            parent_resource: resource,
         };
 
         const resourcePath = get_resource_path(resource, this.baseUrl);
 
         // load the image for this sheet
-        this.add(imageResourceName, resourcePath, loadOptions, function onImageLoad(res) {
+        this.add(image_resource_name, resourcePath, loadOptions, function onImageLoad(/** @type {Resource} */ res) {
             if (res.error) {
                 next(res.error);
 
@@ -48,11 +52,11 @@ export default function () {
     };
 }
 
-export function get_resource_path(resource, baseUrl) {
+export function get_resource_path(/** @type {Resource} */ resource, /** @type {string} */ base_url) {
     // Prepend url path unless the resource image is a data url
-    if (resource.isDataUrl) {
+    if (resource.is_data_url) {
         return resource.data.meta.image;
     }
 
-    return url.resolve(resource.url.replace(baseUrl, ''), resource.data.meta.image);
+    return url.resolve(resource.url.replace(base_url, ''), resource.data.meta.image);
 }

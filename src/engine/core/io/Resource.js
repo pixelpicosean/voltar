@@ -1,9 +1,10 @@
-import Signal from 'mini-signals';
-import parseUri from './parse_uri';
+import parse_uri from './parse_uri';
+import { VObject } from 'engine/dep/index';
+import Texture from 'engine/textures/Texture';
+import Spritesheet from 'engine/textures/Spritesheet';
+import Font from 'engine/scene/resources/Font';
 
-// tests if CORS is supported in XHR, if not we need to use XDR
-const useXdr = !!(window.XDomainRequest && !('withCredentials' in (new XMLHttpRequest())));
-let tempAnchor = null;
+let temp_anchor = null;
 
 // some status constants
 const STATUS_NONE = 0;
@@ -17,16 +18,16 @@ function _noop() { }
 /**
  * Manages the state and loading of a resource and all child resources.
  */
-export default class Resource {
+export default class Resource extends VObject {
     /**
      * Sets the load type to be used for a specific extension.
      *
      * @static
      * @param {string} extname - The extension to set the type for, e.g. "png" or "fnt"
-     * @param {Resource.LOAD_TYPE} loadType - The load type to set it to.
+     * @param {Resource.LOAD_TYPE} load_type - The load type to set it to.
      */
-    static setExtensionLoadType(extname, loadType) {
-        setExtMap(Resource._loadTypeMap, extname, loadType);
+    static set_extension_load_type(extname, load_type) {
+        set_ext_map(Resource.load_type_map, extname, load_type);
     }
 
     /**
@@ -34,10 +35,10 @@ export default class Resource {
      *
      * @static
      * @param {string} extname - The extension to set the type for, e.g. "png" or "fnt"
-     * @param {Resource.XHR_RESPONSE_TYPE} xhrType - The xhr type to set it to.
+     * @param {Resource.XHR_RESPONSE_TYPE} xhr_type - The xhr type to set it to.
      */
-    static setExtensionXhrType(extname, xhrType) {
-        setExtMap(Resource._xhrTypeMap, extname, xhrType);
+    static set_extension_xhr_type(extname, xhr_type) {
+        set_ext_map(Resource.xhr_type_map, extname, xhr_type);
     }
 
     /**
@@ -45,18 +46,20 @@ export default class Resource {
      * @param {string|string[]} url - The url for this resource, for audio/video loads you can pass
      *      an array of sources.
      * @param {object} [options] - The options for the load.
-     * @param {string|boolean} [options.crossOrigin] - Is this request cross-origin? Default is to
+     * @param {string|boolean} [options.cross_origin] - Is this request cross-origin? Default is to
      *      determine automatically.
      * @param {number} [options.timeout=0] - A timeout in milliseconds for the load. If the load takes
      *      longer than this time it is cancelled and the load is considered a failure. If this value is
      *      set to `0` then there is no explicit timeout.
-     * @param {Resource.LOAD_TYPE} [options.loadType=Resource.LOAD_TYPE.XHR] - How should this resource
+     * @param {Resource.LOAD_TYPE} [options.load_type=Resource.LOAD_TYPE.XHR] - How should this resource
      *      be loaded?
-     * @param {Resource.XHR_RESPONSE_TYPE} [options.xhrType=Resource.XHR_RESPONSE_TYPE.DEFAULT] - How
+     * @param {Resource.XHR_RESPONSE_TYPE} [options.xhr_type=Resource.XHR_RESPONSE_TYPE.DEFAULT] - How
      *      should the data being loaded be interpreted when using XHR?
-     * @param {Resource.IMetadata} [options.metadata] - Extra configuration for middleware and the Resource object.
+     * @param {IMetadata} [options.metadata] - Extra configuration for middleware and the Resource object.
      */
     constructor(name, url, options) {
+        super();
+
         if (typeof name !== 'string' || typeof url !== 'string') {
             throw new Error('Both name and url are required for constructing a resource.');
         }
@@ -72,7 +75,7 @@ export default class Resource {
         this._flags = 0;
 
         // set data url flag, needs to be set early for some _determineX checks to work.
-        this._setFlag(Resource.STATUS_FLAGS.DATA_URL, url.indexOf('data:') === 0);
+        this._set_flag(Resource.STATUS_FLAGS.DATA_URL, url.indexOf('data:') === 0);
 
         /**
          * The name of this resource.
@@ -96,7 +99,7 @@ export default class Resource {
          * @readonly
          * @type {string}
          */
-        this.extension = this._getExtension();
+        this.extension = this._get_extension();
 
         /**
          * The data that was loaded by the resource.
@@ -106,21 +109,41 @@ export default class Resource {
         this.data = null;
 
         /**
+         * @type {Texture}
+         */
+        this.texture = null;
+
+        /**
+         * @type {Object<string, Texture>}
+         */
+        this.textures = null;
+
+        /**
+         * @type {Spritesheet}
+         */
+        this.spritesheet = null;
+
+        /**
          * @type {any}
          */
         this.sound = null;
 
         /**
-         * @type {any}
+         * @type {Font}
          */
         this.bitmap_font = null;
 
         /**
+         * @type {any}
+         */
+        this.blob = null;
+
+        /**
          * Is this request cross-origin? If unset, determined automatically.
          *
-         * @type {string}
+         * @type {string|boolean}
          */
-        this.crossOrigin = options.crossOrigin === true ? 'anonymous' : options.crossOrigin;
+        this.cross_origin = (options.cross_origin === true) ? 'anonymous' : options.cross_origin;
 
         /**
          * A timeout in milliseconds for the load. If the load takes longer than this time
@@ -136,14 +159,14 @@ export default class Resource {
          *
          * @type {Resource.LOAD_TYPE}
          */
-        this.loadType = options.loadType || this._determineLoadType();
+        this.load_type = options.load_type || this._determine_load_type();
 
         /**
          * The type used to load the resource via XHR. If unset, determined automatically.
          *
          * @type {string}
          */
-        this.xhrType = options.xhrType;
+        this.xhr_type = options.xhr_type;
 
         /**
          * Extra info for middleware, and controlling specifics about how the resource loads.
@@ -151,7 +174,7 @@ export default class Resource {
          * Note that if you pass in a `loadElement`, the Resource class takes ownership of it.
          * Meaning it will modify it as it sees fit.
          *
-         * @type {Resource.IMetadata}
+         * @type {IMetadata}
          */
         this.metadata = options.metadata || {};
 
@@ -165,7 +188,7 @@ export default class Resource {
 
         /**
          * The XHR object that was used to load this resource. This is only set
-         * when `loadType` is `Resource.LOAD_TYPE.XHR`.
+         * when `load_type` is `Resource.LOAD_TYPE.XHR`.
          *
          * @readonly
          * @type {XMLHttpRequest}
@@ -194,7 +217,7 @@ export default class Resource {
          * @readonly
          * @type {number}
          */
-        this.progressChunk = 0;
+        this.progress_chunk = 0;
 
         /**
          * The `dequeue` method that will be used a storage place for the async queue dequeue method
@@ -211,131 +234,35 @@ export default class Resource {
          * @private
          * @type {function}
          */
-        this._onLoadBinding = null;
+        this._on_load_binding = null;
 
         /**
          * The timer for element loads to check if they timeout.
-         *
-         * @private
-         * @type {number}
          */
-        this._elementTimer = 0;
+        this._element_timer = undefined;
 
-        /**
-         * The `complete` function bound to this resource's context.
-         *
-         * @private
-         * @type {function}
-         */
-        this._boundComplete = this.complete.bind(this);
-
-        /**
-         * The `_onError` function bound to this resource's context.
-         *
-         * @private
-         * @type {function}
-         */
-        this._boundOnError = this._onError.bind(this);
-
-        /**
-         * The `_onProgress` function bound to this resource's context.
-         *
-         * @private
-         * @type {function}
-         */
-        this._boundOnProgress = this._onProgress.bind(this);
-
-        /**
-         * The `_onTimeout` function bound to this resource's context.
-         *
-         * @private
-         * @type {function}
-         */
-        this._boundOnTimeout = this._onTimeout.bind(this);
+        this._bound_complete = this.complete.bind(this);
+        this._bound_on_error = this._on_error.bind(this);
+        this._bound_on_progress = this._on_progress.bind(this);
+        this._bound_on_timeout = this._on_timeout.bind(this);
 
         // xhr callbacks
-        this._boundXhrOnError = this._xhrOnError.bind(this);
-        this._boundXhrOnTimeout = this._xhrOnTimeout.bind(this);
-        this._boundXhrOnAbort = this._xhrOnAbort.bind(this);
-        this._boundXhrOnLoad = this._xhrOnLoad.bind(this);
-
-        /**
-         * Dispatched when the resource beings to load.
-         *
-         * The callback looks like {@link Resource.OnStartSignal}.
-         *
-         * @type {Signal}
-         */
-        this.onStart = new Signal();
-
-        /**
-         * Dispatched each time progress of this resource load updates.
-         * Not all resources types and loader systems can support this event
-         * so sometimes it may not be available. If the resource
-         * is being loaded on a modern browser, using XHR, and the remote server
-         * properly sets Content-Length headers, then this will be available.
-         *
-         * The callback looks like {@link Resource.OnProgressSignal}.
-         *
-         * @type {Signal}
-         */
-        this.onProgress = new Signal();
-
-        /**
-         * Dispatched once this resource has loaded, if there was an error it will
-         * be in the `error` property.
-         *
-         * The callback looks like {@link Resource.OnCompleteSignal}.
-         *
-         * @type {Signal}
-         */
-        this.onComplete = new Signal();
-
-        /**
-         * Dispatched after this resource has had all the *after* middleware run on it.
-         *
-         * The callback looks like {@link Resource.OnCompleteSignal}.
-         *
-         * @type {Signal}
-         */
-        this.onAfterMiddleware = new Signal();
+        this._bound_xhr_on_error = this._xhr_on_error.bind(this);
+        this._bound_xhr_on_timeout = this._xhr_on_timeout.bind(this);
+        this._bound_xhr_on_abort = this._xhr_on_abort.bind(this);
+        this._bound_xhr_on_load = this._xhr_on_load.bind(this);
     }
 
     /**
-     * When the resource starts to load.
-     *
-     * @memberof Resource
-     * @callback OnStartSignal
-     * @param {Resource} resource - The resource that the event happened on.
-     */
-
-    /**
-     * When the resource reports loading progress.
-     *
-     * @memberof Resource
-     * @callback OnProgressSignal
-     * @param {Resource} resource - The resource that the event happened on.
-     * @param {number} percentage - The progress of the load in the range [0, 1].
-     */
-
-    /**
-     * When the resource finishes loading.
-     *
-     * @memberof Resource
-     * @callback OnCompleteSignal
-     * @param {Resource} resource - The resource that the event happened on.
-     */
-
-    /**
-     * @memberof Resource
-     * @typedef {object} IMetadata
-     * @property {HTMLImageElement|HTMLAudioElement|HTMLVideoElement} [loadElement=null] - The
+     * @typedef IMetadata
+     * @property {HTMLImageElement|HTMLAudioElement|HTMLVideoElement} [load_element=null] - The
      *      element to use for loading, instead of creating one.
-     * @property {boolean} [skipSource=false] - Skips adding source(s) to the load element. This
-     *      is useful if you want to pass in a `loadElement` that you already added load sources to.
-     * @property {string|string[]} [mimeType] - The mime type to use for the source element
+     * @property {boolean} [skip_source=false] - Skips adding source(s) to the load element. This
+     *      is useful if you want to pass in a `load_element` that you already added load sources to.
+     * @property {string|string[]} [mime_type] - The mime type to use for the source element
      *      of a video/audio elment. If the urls are an array, you can pass this as an array as well
      *      where each index is the mime type to use for the corresponding url index.
+     * @property {any} [image_metadata]
      */
 
     /**
@@ -344,8 +271,8 @@ export default class Resource {
      * @readonly
      * @type {boolean}
      */
-    get isDataUrl() {
-        return this._hasFlag(Resource.STATUS_FLAGS.DATA_URL);
+    get is_data_url() {
+        return this._has_flag(Resource.STATUS_FLAGS.DATA_URL);
     }
 
     /**
@@ -355,8 +282,8 @@ export default class Resource {
      * @readonly
      * @type {boolean}
      */
-    get isComplete() {
-        return this._hasFlag(Resource.STATUS_FLAGS.COMPLETE);
+    get is_complete() {
+        return this._has_flag(Resource.STATUS_FLAGS.COMPLETE);
     }
 
     /**
@@ -366,8 +293,8 @@ export default class Resource {
      * @readonly
      * @type {boolean}
      */
-    get isLoading() {
-        return this._hasFlag(Resource.STATUS_FLAGS.LOADING);
+    get is_loading() {
+        return this._has_flag(Resource.STATUS_FLAGS.LOADING);
     }
 
     /**
@@ -375,7 +302,7 @@ export default class Resource {
      *
      */
     complete() {
-        this._clearEvents();
+        this._clear_events();
         this._finish();
     }
 
@@ -394,16 +321,12 @@ export default class Resource {
         this.error = new Error(message);
 
         // clear events before calling aborts
-        this._clearEvents();
+        this._clear_events();
 
         // abort the actual loading
         if (this.xhr) {
             this.xhr.abort();
-        }
-        else if (this.xdr) {
-            this.xdr.abort();
-        }
-        else if (this.data) {
+        } else if (this.data) {
             // single source
             if (this.data.src) {
                 this.data.src = Resource.EMPTY_GIF;
@@ -426,56 +349,48 @@ export default class Resource {
      * @param {Function} [cb] - Optional callback to call once the resource is loaded.
      */
     load(cb) {
-        if (this.isLoading) {
+        if (this.is_loading) {
             return;
         }
 
-        if (this.isComplete) {
+        if (this.is_complete) {
             if (cb) {
                 setTimeout(() => cb(this), 1);
             }
 
             return;
-        }
-        else if (cb) {
-            this.onComplete.once(cb);
+        } else if (cb) {
+            this.connect_once('complete', cb);
         }
 
-        this._setFlag(Resource.STATUS_FLAGS.LOADING, true);
+        this._set_flag(Resource.STATUS_FLAGS.LOADING, true);
 
-        this.onStart.dispatch(this);
+        this.emit_signal('start', this);
 
         // if unset, determine the value
-        if (this.crossOrigin === false || typeof this.crossOrigin !== 'string') {
-            this.crossOrigin = this._determineCrossOrigin(this.url);
+        if (this.cross_origin === false || typeof this.cross_origin !== 'string') {
+            this.cross_origin = this._determine_cross_origin(this.url);
         }
 
-        switch (this.loadType) {
-            case Resource.LOAD_TYPE.IMAGE:
+        switch (this.load_type) {
+            case Resource.LOAD_TYPE.IMAGE: {
                 this.type = Resource.TYPE.IMAGE;
-                this._loadElement('image');
-                break;
-
-            case Resource.LOAD_TYPE.AUDIO:
+                this._load_element('image');
+            } break;
+            case Resource.LOAD_TYPE.AUDIO: {
                 this.type = Resource.TYPE.AUDIO;
-                this._loadSourceElement('audio');
-                break;
-
-            case Resource.LOAD_TYPE.VIDEO:
+                this._load_source_element('audio');
+            } break;
+            case Resource.LOAD_TYPE.VIDEO: {
                 this.type = Resource.TYPE.VIDEO;
-                this._loadSourceElement('video');
-                break;
-
-            case Resource.LOAD_TYPE.XHR:
+                this._load_source_element('video');
+            } break;
+            case Resource.LOAD_TYPE.XHR: {
                 /* falls through */
-            default:
-                if (useXdr && this.crossOrigin) {
-                    this._loadXdr();
-                }
-                else {
-                    this._loadXhr();
-                }
-                break;
+            }
+            default: {
+                this._load_xhr();
+            } break;
         }
     }
 
@@ -484,9 +399,8 @@ export default class Resource {
      *
      * @private
      * @param {number} flag - The flag to check.
-     * @return {boolean} True if the flag is set.
      */
-    _hasFlag(flag) {
+    _has_flag(flag) {
         return (this._flags & flag) !== 0;
     }
 
@@ -497,7 +411,7 @@ export default class Resource {
      * @param {number} flag - The flag to (un)set.
      * @param {boolean} value - Whether to set or (un)set the flag.
      */
-    _setFlag(flag, value) {
+    _set_flag(flag, value) {
         this._flags = value ? (this._flags | flag) : (this._flags & ~flag);
     }
 
@@ -506,25 +420,24 @@ export default class Resource {
      *
      * @private
      */
-    _clearEvents() {
-        clearTimeout(this._elementTimer);
+    _clear_events() {
+        clearTimeout(this._element_timer);
 
         if (this.data && this.data.removeEventListener) {
-            this.data.removeEventListener('error', this._boundOnError, false);
-            this.data.removeEventListener('load', this._boundComplete, false);
-            this.data.removeEventListener('progress', this._boundOnProgress, false);
-            this.data.removeEventListener('canplaythrough', this._boundComplete, false);
+            this.data.removeEventListener('error', this._bound_on_error, false);
+            this.data.removeEventListener('load', this._bound_complete, false);
+            this.data.removeEventListener('progress', this._bound_on_progress, false);
+            this.data.removeEventListener('canplaythrough', this._bound_complete, false);
         }
 
         if (this.xhr) {
             if (this.xhr.removeEventListener) {
-                this.xhr.removeEventListener('error', this._boundXhrOnError, false);
-                this.xhr.removeEventListener('timeout', this._boundXhrOnTimeout, false);
-                this.xhr.removeEventListener('abort', this._boundXhrOnAbort, false);
-                this.xhr.removeEventListener('progress', this._boundOnProgress, false);
-                this.xhr.removeEventListener('load', this._boundXhrOnLoad, false);
-            }
-            else {
+                this.xhr.removeEventListener('error', this._bound_xhr_on_error, false);
+                this.xhr.removeEventListener('timeout', this._bound_xhr_on_timeout, false);
+                this.xhr.removeEventListener('abort', this._bound_xhr_on_abort, false);
+                this.xhr.removeEventListener('progress', this._bound_on_progress, false);
+                this.xhr.removeEventListener('load', this._bound_xhr_on_load, false);
+            } else {
                 this.xhr.onerror = null;
                 this.xhr.ontimeout = null;
                 this.xhr.onprogress = null;
@@ -539,14 +452,14 @@ export default class Resource {
      * @private
      */
     _finish() {
-        if (this.isComplete) {
+        if (this.is_complete) {
             throw new Error('Complete called again for an already completed resource.');
         }
 
-        this._setFlag(Resource.STATUS_FLAGS.COMPLETE, true);
-        this._setFlag(Resource.STATUS_FLAGS.LOADING, false);
+        this._set_flag(Resource.STATUS_FLAGS.COMPLETE, true);
+        this._set_flag(Resource.STATUS_FLAGS.LOADING, false);
 
-        this.onComplete.dispatch(this);
+        this.emit_signal('complete', this);
     }
 
     /**
@@ -556,31 +469,29 @@ export default class Resource {
      * @private
      * @param {string} type - The type of element to use.
      */
-    _loadElement(type) {
-        if (this.metadata.loadElement) {
-            this.data = this.metadata.loadElement;
-        }
-        else if (type === 'image' && typeof window.Image !== 'undefined') {
+    _load_element(type) {
+        if (this.metadata.load_element) {
+            this.data = this.metadata.load_element;
+        } else if (type === 'image' && typeof Image !== 'undefined') {
             this.data = new Image();
-        }
-        else {
+        } else {
             this.data = document.createElement(type);
         }
 
-        if (this.crossOrigin) {
-            this.data.crossOrigin = this.crossOrigin;
+        if (this.cross_origin) {
+            this.data.crossOrigin = this.cross_origin;
         }
 
-        if (!this.metadata.skipSource) {
+        if (!this.metadata.skip_source) {
             this.data.src = this.url;
         }
 
-        this.data.addEventListener('error', this._boundOnError, false);
-        this.data.addEventListener('load', this._boundComplete, false);
-        this.data.addEventListener('progress', this._boundOnProgress, false);
+        this.data.addEventListener('error', this._bound_on_error, false);
+        this.data.addEventListener('load', this._bound_complete, false);
+        this.data.addEventListener('progress', this._bound_on_progress, false);
 
         if (this.timeout) {
-            this._elementTimer = setTimeout(this._boundOnTimeout, this.timeout);
+            this._element_timer = setTimeout(this._bound_on_timeout, this.timeout);
         }
     }
 
@@ -591,14 +502,12 @@ export default class Resource {
      * @private
      * @param {string} type - The type of element to use.
      */
-    _loadSourceElement(type) {
-        if (this.metadata.loadElement) {
-            this.data = this.metadata.loadElement;
-        }
-        else if (type === 'audio' && typeof window.Audio !== 'undefined') {
+    _load_source_element(type) {
+        if (this.metadata.load_element) {
+            this.data = this.metadata.load_element;
+        } else if (type === 'audio' && typeof Audio !== 'undefined') {
             this.data = new Audio();
-        }
-        else {
+        } else {
             this.data = document.createElement(type);
         }
 
@@ -608,42 +517,37 @@ export default class Resource {
             return;
         }
 
-        if (this.crossOrigin) {
-            this.data.crossOrigin = this.crossOrigin;
+        if (this.cross_origin) {
+            this.data.crossOrigin = this.cross_origin;
         }
 
-        if (!this.metadata.skipSource) {
-            // support for CocoonJS Canvas+ runtime, lacks document.createElement('source')
-            if (navigator.isCocoonJS) {
-                this.data.src = Array.isArray(this.url) ? this.url[0] : this.url;
-            }
-            else if (Array.isArray(this.url)) {
-                const mimeTypes = this.metadata.mimeType;
+        if (!this.metadata.skip_source) {
+            if (Array.isArray(this.url)) {
+                const mime_types = this.metadata.mime_type;
 
                 for (let i = 0; i < this.url.length; ++i) {
                     this.data.appendChild(
-                        this._createSource(type, this.url[i], Array.isArray(mimeTypes) ? mimeTypes[i] : mimeTypes)
+                        this._create_source(type, this.url[i], Array.isArray(mime_types) ? mime_types[i] : mime_types)
                     );
                 }
-            }
-            else {
-                const mimeTypes = this.metadata.mimeType;
+            } else {
+                const mimeTypes = this.metadata.mime_type;
 
                 this.data.appendChild(
-                    this._createSource(type, this.url, Array.isArray(mimeTypes) ? mimeTypes[0] : mimeTypes)
+                    this._create_source(type, this.url, Array.isArray(mimeTypes) ? mimeTypes[0] : mimeTypes)
                 );
             }
         }
 
-        this.data.addEventListener('error', this._boundOnError, false);
-        this.data.addEventListener('load', this._boundComplete, false);
-        this.data.addEventListener('progress', this._boundOnProgress, false);
-        this.data.addEventListener('canplaythrough', this._boundComplete, false);
+        this.data.addEventListener('error', this._bound_on_error, false);
+        this.data.addEventListener('load', this._bound_complete, false);
+        this.data.addEventListener('progress', this._bound_on_progress, false);
+        this.data.addEventListener('canplaythrough', this._bound_complete, false);
 
         this.data.load();
 
         if (this.timeout) {
-            this._elementTimer = setTimeout(this._boundOnTimeout, this.timeout);
+            this._element_timer = setTimeout(this._bound_on_timeout, this.timeout);
         }
     }
 
@@ -652,10 +556,10 @@ export default class Resource {
      *
      * @private
      */
-    _loadXhr() {
+    _load_xhr() {
         // if unset, determine the value
-        if (typeof this.xhrType !== 'string') {
-            this.xhrType = this._determineXhrType();
+        if (typeof this.xhr_type !== 'string') {
+            this.xhr_type = this._determine_xhr_type();
         }
 
         const xhr = this.xhr = new XMLHttpRequest();
@@ -667,52 +571,21 @@ export default class Resource {
 
         // load json as text and parse it ourselves. We do this because some browsers
         // *cough* safari *cough* can't deal with it.
-        if (this.xhrType === Resource.XHR_RESPONSE_TYPE.JSON || this.xhrType === Resource.XHR_RESPONSE_TYPE.DOCUMENT) {
+        if (this.xhr_type === Resource.XHR_RESPONSE_TYPE.JSON || this.xhr_type === Resource.XHR_RESPONSE_TYPE.DOCUMENT) {
+            // @ts-ignore
             xhr.responseType = Resource.XHR_RESPONSE_TYPE.TEXT;
-        }
-        else {
-            xhr.responseType = this.xhrType;
+        } else {
+            // @ts-ignore
+            xhr.responseType = this.xhr_type;
         }
 
-        xhr.addEventListener('error', this._boundXhrOnError, false);
-        xhr.addEventListener('timeout', this._boundXhrOnTimeout, false);
-        xhr.addEventListener('abort', this._boundXhrOnAbort, false);
-        xhr.addEventListener('progress', this._boundOnProgress, false);
-        xhr.addEventListener('load', this._boundXhrOnLoad, false);
+        xhr.addEventListener('error', this._bound_xhr_on_error, false);
+        xhr.addEventListener('timeout', this._bound_xhr_on_timeout, false);
+        xhr.addEventListener('abort', this._bound_xhr_on_abort, false);
+        xhr.addEventListener('progress', this._bound_on_progress, false);
+        xhr.addEventListener('load', this._bound_xhr_on_load, false);
 
         xhr.send();
-    }
-
-    /**
-     * Loads this resources using an XDomainRequest. This is here because we need to support IE9 (gross).
-     *
-     * @private
-     */
-    _loadXdr() {
-        // if unset, determine the value
-        if (typeof this.xhrType !== 'string') {
-            this.xhrType = this._determineXhrType();
-        }
-
-        const xdr = this.xhr = new XDomainRequest(); // eslint-disable-line no-undef
-
-        // XDomainRequest has a few quirks. Occasionally it will abort requests
-        // A way to avoid this is to make sure ALL callbacks are set even if not used
-        // More info here: http://stackoverflow.com/questions/15786966/xdomainrequest-aborts-post-on-ie-9
-        xdr.timeout = this.timeout || 5000; // XDR needs a timeout value or it breaks in IE9
-
-        xdr.onerror = this._boundXhrOnError;
-        xdr.ontimeout = this._boundXhrOnTimeout;
-        xdr.onprogress = this._boundOnProgress;
-        xdr.onload = this._boundXhrOnLoad;
-
-        xdr.open('GET', this.url, true);
-
-        // Note: The xdr.send() call is wrapped in a timeout to prevent an
-        // issue with the interface where some requests are lost if multiple
-        // XDomainRequests are being sent at the same time.
-        // Some info here: https://github.com/photonstorm/phaser/issues/1248
-        setTimeout(() => xdr.send(), 1);
     }
 
     /**
@@ -722,11 +595,10 @@ export default class Resource {
      * @param {string} type - The element type (video or audio).
      * @param {string} url - The source URL to load from.
      * @param {string} [mime] - The mime type of the video
-     * @return {HTMLSourceElement} The source element.
      */
-    _createSource(type, url, mime) {
+    _create_source(type, url, mime) {
         if (!mime) {
-            mime = `${type}/${this._getExtension(url)}`;
+            mime = `${type}/${this._get_extension()}`;
         }
 
         const source = document.createElement('source');
@@ -743,7 +615,8 @@ export default class Resource {
      * @param {Event} event - The error event from the element that emits it.
      * @private
      */
-    _onError(event) {
+    _on_error(event) {
+        // @ts-ignore
         this.abort(`Failed to load element using: ${event.target.nodeName}`);
     }
 
@@ -751,11 +624,11 @@ export default class Resource {
      * Called if a load progress event fires for an element or xhr/xdr.
      *
      * @private
-     * @param {XMLHttpRequestProgressEvent|Event} event - Progress event.
+     * @param {ProgressEvent} event - Progress event.
      */
-    _onProgress(event) {
+    _on_progress(event) {
         if (event && event.lengthComputable) {
-            this.onProgress.dispatch(this, event.loaded / event.total);
+            this.emit_signal('progress', this, event.loaded / event.total);
         }
     }
 
@@ -764,7 +637,7 @@ export default class Resource {
      *
      * @private
      */
-    _onTimeout() {
+    _on_timeout() {
         this.abort(`Load timed out.`);
     }
 
@@ -773,10 +646,10 @@ export default class Resource {
      *
      * @private
      */
-    _xhrOnError() {
+    _xhr_on_error() {
         const xhr = this.xhr;
 
-        this.abort(`${reqType(xhr)} Request failed. Status: ${xhr.status}, text: "${xhr.statusText}"`);
+        this.abort(`${req_type(xhr)} Request failed. Status: ${xhr.status}, text: "${xhr.statusText}"`);
     }
 
     /**
@@ -784,10 +657,10 @@ export default class Resource {
      *
      * @private
      */
-    _xhrOnTimeout() {
+    _xhr_on_timeout() {
         const xhr = this.xhr;
 
-        this.abort(`${reqType(xhr)} Request timed out.`);
+        this.abort(`${req_type(xhr)} Request timed out.`);
     }
 
     /**
@@ -795,19 +668,18 @@ export default class Resource {
      *
      * @private
      */
-    _xhrOnAbort() {
+    _xhr_on_abort() {
         const xhr = this.xhr;
 
-        this.abort(`${reqType(xhr)} Request was aborted by the user.`);
+        this.abort(`${req_type(xhr)} Request was aborted by the user.`);
     }
 
     /**
      * Called when data successfully loads from an xhr/xdr request.
      *
      * @private
-     * @param {XMLHttpRequestLoadEvent|Event} event - Load event
      */
-    _xhrOnLoad() {
+    _xhr_on_load() {
         const xhr = this.xhr;
         let text = '';
         let status = typeof xhr.status === 'undefined' ? STATUS_OK : xhr.status; // XDR has no `.status`, assume 200.
@@ -831,31 +703,29 @@ export default class Resource {
 
         if (statusType === STATUS_TYPE_OK) {
             // if text, just return it
-            if (this.xhrType === Resource.XHR_RESPONSE_TYPE.TEXT) {
+            if (this.xhr_type === Resource.XHR_RESPONSE_TYPE.TEXT) {
                 this.data = text;
                 this.type = Resource.TYPE.TEXT;
             }
             // if json, parse into json object
-            else if (this.xhrType === Resource.XHR_RESPONSE_TYPE.JSON) {
+            else if (this.xhr_type === Resource.XHR_RESPONSE_TYPE.JSON) {
                 try {
                     this.data = JSON.parse(text);
                     this.type = Resource.TYPE.JSON;
-                }
-                catch (e) {
+                } catch (e) {
                     this.abort(`Error trying to parse loaded json: ${e}`);
 
                     return;
                 }
             }
             // if xml, parse into an xml document or div element
-            else if (this.xhrType === Resource.XHR_RESPONSE_TYPE.DOCUMENT) {
+            else if (this.xhr_type === Resource.XHR_RESPONSE_TYPE.DOCUMENT) {
                 try {
-                    if (window.DOMParser) {
+                    if (DOMParser) {
                         const domparser = new DOMParser();
 
                         this.data = domparser.parseFromString(text, 'text/xml');
-                    }
-                    else {
+                    } else {
                         const div = document.createElement('div');
 
                         div.innerHTML = text;
@@ -864,8 +734,7 @@ export default class Resource {
                     }
 
                     this.type = Resource.TYPE.XML;
-                }
-                catch (e) {
+                } catch (e) {
                     this.abort(`Error trying to parse loaded xml: ${e}`);
 
                     return;
@@ -875,8 +744,7 @@ export default class Resource {
             else {
                 this.data = xhr.response || text;
             }
-        }
-        else {
+        } else {
             this.abort(`[${xhr.status}] ${xhr.statusText}: ${xhr.responseURL}`);
 
             return;
@@ -893,9 +761,8 @@ export default class Resource {
      * @private
      * @param {string} url - The url to test.
      * @param {object} [loc=window.location] - The location object to test against.
-     * @return {string} The crossOrigin value to use (or empty string for none).
      */
-    _determineCrossOrigin(url, loc) {
+    _determine_cross_origin(url, loc) {
         // data: and javascript: urls are considered same-origin
         if (url.indexOf('data:') === 0) {
             return '';
@@ -911,21 +778,21 @@ export default class Resource {
         // default is window.location
         loc = loc || window.location;
 
-        if (!tempAnchor) {
-            tempAnchor = document.createElement('a');
+        if (!temp_anchor) {
+            temp_anchor = document.createElement('a');
         }
 
         // let the browser determine the full href for the url of this resource and then
         // parse with the node url lib, we can't use the properties of the anchor element
         // because they don't work in IE9 :(
-        tempAnchor.href = url;
-        url = parseUri(tempAnchor.href, { strictMode: true });
+        temp_anchor.href = url;
+        const parsed_url = parse_uri(temp_anchor.href, { strictMode: true });
 
-        const samePort = (!url.port && loc.port === '') || (url.port === loc.port);
-        const protocol = url.protocol ? `${url.protocol}:` : '';
+        const samePort = (!parsed_url.port && loc.port === '') || (parsed_url.port === loc.port);
+        const protocol = parsed_url.protocol ? `${parsed_url.protocol}:` : '';
 
         // if cross origin
-        if (url.host !== loc.hostname || !samePort || protocol !== loc.protocol) {
+        if (parsed_url.host !== loc.hostname || !samePort || protocol !== loc.protocol) {
             return 'anonymous';
         }
 
@@ -937,10 +804,9 @@ export default class Resource {
      * resource being loaded.
      *
      * @private
-     * @return {Resource.XHR_RESPONSE_TYPE} The responseType to use.
      */
-    _determineXhrType() {
-        return Resource._xhrTypeMap[this.extension] || Resource.XHR_RESPONSE_TYPE.TEXT;
+    _determine_xhr_type() {
+        return Resource.xhr_type_map[this.extension] || Resource.XHR_RESPONSE_TYPE.TEXT;
     }
 
     /**
@@ -948,28 +814,25 @@ export default class Resource {
      * resource being loaded.
      *
      * @private
-     * @return {Resource.LOAD_TYPE} The loadType to use.
      */
-    _determineLoadType() {
-        return Resource._loadTypeMap[this.extension] || Resource.LOAD_TYPE.XHR;
+    _determine_load_type() {
+        return Resource.load_type_map[this.extension] || Resource.LOAD_TYPE.XHR;
     }
 
     /**
      * Extracts the extension (sans '.') of the file being loaded by the resource.
      *
      * @private
-     * @return {string} The extension.
      */
-    _getExtension() {
+    _get_extension() {
         let url = this.url;
         let ext = '';
 
-        if (this.isDataUrl) {
+        if (this.is_data_url) {
             const slashIndex = url.indexOf('/');
 
             ext = url.substring(slashIndex + 1, url.indexOf(';', slashIndex));
-        }
-        else {
+        } else {
             const queryStart = url.indexOf('?');
             const hashStart = url.indexOf('#');
             const index = Math.min(
@@ -990,9 +853,8 @@ export default class Resource {
      *
      * @private
      * @param {Resource.XHR_RESPONSE_TYPE} type - The type to get a mime type for.
-     * @return {string} The mime type to use.
      */
-    _getMimeFromXhrType(type) {
+    _get_mime_from_xhr_type(type) {
         switch (type) {
             case Resource.XHR_RESPONSE_TYPE.BUFFER:
                 return 'application/octet-binary';
@@ -1034,16 +896,16 @@ Resource.STATUS_FLAGS = {
  *
  * @static
  * @readonly
- * @enum {number}
+ * @enum {string}
  */
 Resource.TYPE = {
-    UNKNOWN:    0,
-    JSON:       1,
-    XML:        2,
-    IMAGE:      3,
-    AUDIO:      4,
-    VIDEO:      5,
-    TEXT:       6,
+    UNKNOWN:    'unknown',
+    JSON:       'json',
+    XML:        'xml',
+    IMAGE:      'image',
+    AUDIO:      'audio',
+    VIDEO:      'video',
+    TEXT:       'text',
 };
 
 /**
@@ -1051,17 +913,17 @@ Resource.TYPE = {
  *
  * @static
  * @readonly
- * @enum {number}
+ * @enum {string}
  */
 Resource.LOAD_TYPE = {
     /** Uses XMLHttpRequest to load the resource. */
-    XHR:    1,
+    XHR:    'xhr',
     /** Uses an `Image` object to load the resource. */
-    IMAGE:  2,
+    IMAGE:  'image',
     /** Uses an `Audio` object to load the resource. */
-    AUDIO:  3,
+    AUDIO:  'audio',
     /** Uses a `Video` object to load the resource. */
-    VIDEO:  4,
+    VIDEO:  'video',
 };
 
 /**
@@ -1086,7 +948,7 @@ Resource.XHR_RESPONSE_TYPE = {
     TEXT:       'text',
 };
 
-Resource._loadTypeMap = {
+Resource.load_type_map = {
     // images
     gif:        Resource.LOAD_TYPE.IMAGE,
     png:        Resource.LOAD_TYPE.IMAGE,
@@ -1110,7 +972,7 @@ Resource._loadTypeMap = {
     webm:       Resource.LOAD_TYPE.VIDEO,
 };
 
-Resource._xhrTypeMap = {
+Resource.xhr_type_map = {
     // xml
     xhtml:      Resource.XHR_RESPONSE_TYPE.DOCUMENT,
     html:       Resource.XHR_RESPONSE_TYPE.DOCUMENT,
@@ -1118,11 +980,7 @@ Resource._xhrTypeMap = {
     xml:        Resource.XHR_RESPONSE_TYPE.DOCUMENT,
     tmx:        Resource.XHR_RESPONSE_TYPE.DOCUMENT,
     svg:        Resource.XHR_RESPONSE_TYPE.DOCUMENT,
-
-    // This was added to handle Tiled Tileset XML, but .tsx is also a TypeScript React Component.
-    // Since it is way less likely for people to be loading TypeScript files instead of Tiled files,
-    // this should probably be fine.
-    tsx:        Resource.XHR_RESPONSE_TYPE.DOCUMENT,
+    fnt:        Resource.XHR_RESPONSE_TYPE.DOCUMENT,
 
     // images
     gif:        Resource.XHR_RESPONSE_TYPE.BLOB,
@@ -1157,9 +1015,9 @@ Resource.EMPTY_GIF = 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAA
  * @ignore
  * @param {object} map - The map to set on.
  * @param {string} extname - The extension (or key) to set.
- * @param {number} val - The value to set.
+ * @param {string} val - The value to set.
  */
-function setExtMap(map, extname, val) {
+function set_ext_map(map, extname, val) {
     if (extname && extname.indexOf('.') === 0) {
         extname = extname.substring(1);
     }
@@ -1175,11 +1033,8 @@ function setExtMap(map, extname, val) {
  * Quick helper to get string xhr type.
  *
  * @ignore
- * @param {XMLHttpRequest|XDomainRequest} xhr - The request to check.
- * @return {string} The type.
+ * @param {XMLHttpRequest} xhr - The request to check.
  */
-function reqType(xhr) {
+function req_type(xhr) {
     return xhr.toString().replace('object ', '');
 }
-
-Resource.setExtensionXhrType('fnt', Resource.XHR_RESPONSE_TYPE.DOCUMENT);

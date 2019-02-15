@@ -1,5 +1,3 @@
-import { Signal } from 'engine/dep/index';
-import MessageQueue from 'engine/MessageQueue';
 import Node2D from "../Node2D";
 
 import { node_class_map } from 'engine/registry';

@@ -1,8 +1,11 @@
+import Resource from "../../Resource";
+
 // a simple in-memory cache for resources
+/** @type {Object<string, any>} */
 const cache = {};
 
-export function memoryMiddlewareFactory() {
-    return function memoryMiddleware(resource, next) {
+export default () => {
+    return function memory_middleware(/** @type {Resource} */ resource, /** @type {Function} */ next) {
         // if cached, then set data and complete the resource
         if (cache[resource.url]) {
             resource.data = cache[resource.url];
@@ -10,7 +13,7 @@ export function memoryMiddlewareFactory() {
         }
         // if not cached, wait for complete and store it in the cache.
         else {
-            resource.onComplete.once(() => (cache[this.url] = this.data));
+            resource.connect_once('complete', () => (cache[this.url] = this.data));
         }
 
         next();

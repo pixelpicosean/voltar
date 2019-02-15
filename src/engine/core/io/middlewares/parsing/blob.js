@@ -5,8 +5,8 @@ import { encodeBinary } from '../../b64';
 const Url = window.URL || window.webkitURL;
 
 // a middleware for transforming XHR loaded Blobs into more useful objects
-export function blobMiddlewareFactory() {
-    return function blobMiddleware(resource, next) {
+export default function blob_middleware_factory() {
+    return function blob_middleware(/** @type {Resource} */ resource, /** @type {Function} */ next) {
         if (!resource.data) {
             next();
 
@@ -14,7 +14,7 @@ export function blobMiddlewareFactory() {
         }
 
         // if this was an XHR load of a blob
-        if (resource.xhr && resource.xhrType === Resource.XHR_RESPONSE_TYPE.BLOB) {
+        if (resource.xhr && resource.xhr_type === Resource.XHR_RESPONSE_TYPE.BLOB) {
             // if there is no blob support we probably got a binary string back
             if (!window.Blob || typeof resource.data === 'string') {
                 const type = resource.xhr.getResponseHeader('content-type');

@@ -1,4 +1,3 @@
-import settings from '../settings';
 import { VObject } from 'engine/dep/index';
 import BaseTexture from './BaseTexture';
 import TextureUvs from './TextureUvs';

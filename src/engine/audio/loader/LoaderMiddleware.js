@@ -23,10 +23,8 @@ export default class LoaderMiddleware {
     }
     /**
      * Set the legacy mode
-     * @type {boolean}
-     * @private
      */
-    static set legacy(legacy) {
+    static set legacy(/** @type {boolean} */ legacy) {
         // Configure PIXI Loader to handle audio files correctly
         const exts = SoundUtils.extensions;
 
@@ -34,14 +32,14 @@ export default class LoaderMiddleware {
         if (!legacy) {
             // Load all audio files as ArrayBuffers
             exts.forEach((ext) => {
-                Resource.setExtensionXhrType(ext, Resource.XHR_RESPONSE_TYPE.BUFFER);
-                Resource.setExtensionLoadType(ext, Resource.LOAD_TYPE.XHR);
+                Resource.set_extension_xhr_type(ext, Resource.XHR_RESPONSE_TYPE.BUFFER);
+                Resource.set_extension_load_type(ext, Resource.LOAD_TYPE.XHR);
             });
         } else {
             // Fall back to loading as <audio> elements
             exts.forEach((ext) => {
-                Resource.setExtensionXhrType(ext, Resource.XHR_RESPONSE_TYPE.DEFAULT);
-                Resource.setExtensionLoadType(ext, Resource.LOAD_TYPE.AUDIO);
+                Resource.set_extension_xhr_type(ext, Resource.XHR_RESPONSE_TYPE.DEFAULT);
+                Resource.set_extension_load_type(ext, Resource.LOAD_TYPE.AUDIO);
             });
         }
     }
@@ -55,7 +53,7 @@ export default class LoaderMiddleware {
         next();
     }
     /**
-     * Actual resource-loader middleware for sound class
+     * IO middleware for sound
      * @param {Resource} resource
      * @param {() => void} next
      */

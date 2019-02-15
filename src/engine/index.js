@@ -85,6 +85,9 @@ export { default as Timer } from './scene/Timer';
 
 export { default as InteractionEvent } from './interaction/InteractionEvent';
 
+export { default as Loader } from 'engine/core/io/Loader';
+export { default as Resource } from 'engine/core/io/Resource';
+
 // ------------------------------------------------------------------
 // Useful class
 // ------------------------------------------------------------------

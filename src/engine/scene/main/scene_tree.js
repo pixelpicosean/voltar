@@ -279,7 +279,7 @@ export default class SceneTree {
         }
 
         // Set default font after loader is complete
-        this.loader.onComplete.once(() => {
+        this.loader.connect_once('complete', () => {
             Theme.set_default_font(registered_bitmap_fonts[default_font_name]);
         });
 

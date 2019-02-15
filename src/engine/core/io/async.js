@@ -8,7 +8,7 @@ function _noop() { }
  * @param {Function} callback - Function to call when done, or on error.
  * @param {boolean} [defer_next=false] - Break synchronous each loop by calling next with a setTimeout of 1.
  */
-export function eachSeries(array, iterator, callback, defer_next) {
+export function each_series(array, iterator, callback, defer_next) {
     let i = 0;
     const len = array.length;
 
@@ -37,7 +37,7 @@ export function eachSeries(array, iterator, callback, defer_next) {
  * @param {Function} fn - The function to wrap.
  * @return {Function} The wrapping function.
  */
-function onlyOnce(fn) {
+function only_once(fn) {
     return function onceWrapper() {
         if (fn === null) {
             throw new Error('Callback was already called.');
@@ -62,7 +62,7 @@ function onlyOnce(fn) {
  * @property {(err: string, data: any) => void} error
  * @property {boolean} started
  * @property {boolean} paused
- * @property {(data: any, callback: Function) => void} push
+ * @property {(data: any, callback?: Function) => void} push
  * @property {() => void} kill
  * @property {(data: any, callback: Function) => void} unshift
  * @property {() => void} process
@@ -123,7 +123,7 @@ export function queue(worker, concurrency = 1) {
                     q.saturated();
                 }
 
-                worker(task.data, onlyOnce(_next(task)));
+                worker(task.data, only_once(_next(task)));
             }
         },
         length() {

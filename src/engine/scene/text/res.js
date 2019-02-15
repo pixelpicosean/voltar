@@ -16,7 +16,6 @@ export const registered_bitmap_fonts = {};
  * @param {XMLDocument} xml - The XML document data.
  * @param {Object<string, Texture>|Texture|Texture[]} textures - List of textures for each page.
  *  If providing an object, the key is the `<page>` element's `file` attribute in the FNT file.
- * @return {Object} Result font object with font, size, lineHeight and char fields.
  */
 export function register_font(xml, textures) {
     const font = new Font();
