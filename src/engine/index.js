@@ -37,8 +37,6 @@ export { default as CenterContainer } from './scene/controls/CenterContainer';
 export { VBoxContainer, HBoxContainer } from './scene/controls/BoxContainer';
 export { default as GridContainer } from './scene/controls/GridContainer';
 
-export { default as CutoutAnimation } from './scene/coa/CutoutAnimation';
-
 export { default as Graphics } from './scene/graphics/Graphics';
 
 export { default as BitmapText } from './scene/text/BitmapText';
