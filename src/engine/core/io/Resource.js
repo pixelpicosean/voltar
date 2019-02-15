@@ -67,7 +67,7 @@ export default class Resource {
          * The state flags of this resource.
          *
          * @private
-         * @member {number}
+         * @type {number}
          */
         this._flags = 0;
 
@@ -78,7 +78,7 @@ export default class Resource {
          * The name of this resource.
          *
          * @readonly
-         * @member {string}
+         * @type {string}
          */
         this.name = name;
 
@@ -86,7 +86,7 @@ export default class Resource {
          * The url used to load this resource.
          *
          * @readonly
-         * @member {string}
+         * @type {string}
          */
         this.url = url;
 
@@ -94,21 +94,31 @@ export default class Resource {
          * The extension used to load this resource.
          *
          * @readonly
-         * @member {string}
+         * @type {string}
          */
         this.extension = this._getExtension();
 
         /**
          * The data that was loaded by the resource.
          *
-         * @member {any}
+         * @type {any}
          */
         this.data = null;
 
         /**
+         * @type {any}
+         */
+        this.sound = null;
+
+        /**
+         * @type {any}
+         */
+        this.bitmap_font = null;
+
+        /**
          * Is this request cross-origin? If unset, determined automatically.
          *
-         * @member {string}
+         * @type {string}
          */
         this.crossOrigin = options.crossOrigin === true ? 'anonymous' : options.crossOrigin;
 
@@ -117,21 +127,21 @@ export default class Resource {
          * it is cancelled and the load is considered a failure. If this value is set to `0`
          * then there is no explicit timeout.
          *
-         * @member {number}
+         * @type {number}
          */
         this.timeout = options.timeout || 0;
 
         /**
          * The method of loading to use for this resource.
          *
-         * @member {Resource.LOAD_TYPE}
+         * @type {Resource.LOAD_TYPE}
          */
         this.loadType = options.loadType || this._determineLoadType();
 
         /**
          * The type used to load the resource via XHR. If unset, determined automatically.
          *
-         * @member {string}
+         * @type {string}
          */
         this.xhrType = options.xhrType;
 
@@ -141,7 +151,7 @@ export default class Resource {
          * Note that if you pass in a `loadElement`, the Resource class takes ownership of it.
          * Meaning it will modify it as it sees fit.
          *
-         * @member {Resource.IMetadata}
+         * @type {Resource.IMetadata}
          */
         this.metadata = options.metadata || {};
 
@@ -149,7 +159,7 @@ export default class Resource {
          * The error that occurred while loading (if any).
          *
          * @readonly
-         * @member {Error}
+         * @type {Error}
          */
         this.error = null;
 
@@ -158,7 +168,7 @@ export default class Resource {
          * when `loadType` is `Resource.LOAD_TYPE.XHR`.
          *
          * @readonly
-         * @member {XMLHttpRequest}
+         * @type {XMLHttpRequest}
          */
         this.xhr = null;
 
@@ -166,7 +176,7 @@ export default class Resource {
          * The child resources this resource owns.
          *
          * @readonly
-         * @member {Resource[]}
+         * @type {Resource[]}
          */
         this.children = [];
 
@@ -174,7 +184,7 @@ export default class Resource {
          * The resource type.
          *
          * @readonly
-         * @member {Resource.TYPE}
+         * @type {Resource.TYPE}
          */
         this.type = Resource.TYPE.UNKNOWN;
 
@@ -182,7 +192,7 @@ export default class Resource {
          * The progress chunk owned by this resource.
          *
          * @readonly
-         * @member {number}
+         * @type {number}
          */
         this.progressChunk = 0;
 
@@ -191,7 +201,7 @@ export default class Resource {
          * used privately by the loader.
          *
          * @private
-         * @member {function}
+         * @type {function}
          */
         this._dequeue = _noop;
 
@@ -199,7 +209,7 @@ export default class Resource {
          * Used a storage place for the on load binding used privately by the loader.
          *
          * @private
-         * @member {function}
+         * @type {function}
          */
         this._onLoadBinding = null;
 
@@ -207,7 +217,7 @@ export default class Resource {
          * The timer for element loads to check if they timeout.
          *
          * @private
-         * @member {number}
+         * @type {number}
          */
         this._elementTimer = 0;
 
@@ -215,7 +225,7 @@ export default class Resource {
          * The `complete` function bound to this resource's context.
          *
          * @private
-         * @member {function}
+         * @type {function}
          */
         this._boundComplete = this.complete.bind(this);
 
@@ -223,7 +233,7 @@ export default class Resource {
          * The `_onError` function bound to this resource's context.
          *
          * @private
-         * @member {function}
+         * @type {function}
          */
         this._boundOnError = this._onError.bind(this);
 
@@ -231,7 +241,7 @@ export default class Resource {
          * The `_onProgress` function bound to this resource's context.
          *
          * @private
-         * @member {function}
+         * @type {function}
          */
         this._boundOnProgress = this._onProgress.bind(this);
 
@@ -239,7 +249,7 @@ export default class Resource {
          * The `_onTimeout` function bound to this resource's context.
          *
          * @private
-         * @member {function}
+         * @type {function}
          */
         this._boundOnTimeout = this._onTimeout.bind(this);
 
@@ -254,7 +264,7 @@ export default class Resource {
          *
          * The callback looks like {@link Resource.OnStartSignal}.
          *
-         * @member {Signal<Resource.OnStartSignal>}
+         * @type {Signal}
          */
         this.onStart = new Signal();
 
@@ -267,7 +277,7 @@ export default class Resource {
          *
          * The callback looks like {@link Resource.OnProgressSignal}.
          *
-         * @member {Signal<Resource.OnProgressSignal>}
+         * @type {Signal}
          */
         this.onProgress = new Signal();
 
@@ -277,7 +287,7 @@ export default class Resource {
          *
          * The callback looks like {@link Resource.OnCompleteSignal}.
          *
-         * @member {Signal<Resource.OnCompleteSignal>}
+         * @type {Signal}
          */
         this.onComplete = new Signal();
 
@@ -286,7 +296,7 @@ export default class Resource {
          *
          * The callback looks like {@link Resource.OnCompleteSignal}.
          *
-         * @member {Signal<Resource.OnCompleteSignal>}
+         * @type {Signal}
          */
         this.onAfterMiddleware = new Signal();
     }
@@ -332,7 +342,7 @@ export default class Resource {
      * Stores whether or not this url is a data url.
      *
      * @readonly
-     * @member {boolean}
+     * @type {boolean}
      */
     get isDataUrl() {
         return this._hasFlag(Resource.STATUS_FLAGS.DATA_URL);
@@ -343,7 +353,7 @@ export default class Resource {
      * loaded.
      *
      * @readonly
-     * @member {boolean}
+     * @type {boolean}
      */
     get isComplete() {
         return this._hasFlag(Resource.STATUS_FLAGS.COMPLETE);
@@ -354,7 +364,7 @@ export default class Resource {
      * and is false again when complete.
      *
      * @readonly
-     * @member {boolean}
+     * @type {boolean}
      */
     get isLoading() {
         return this._hasFlag(Resource.STATUS_FLAGS.LOADING);
@@ -413,7 +423,7 @@ export default class Resource {
     /**
      * Kicks off loading of this resource. This method is asynchronous.
      *
-     * @param {Resource.OnCompleteSignal} [cb] - Optional callback to call once the resource is loaded.
+     * @param {Function} [cb] - Optional callback to call once the resource is loaded.
      */
     load(cb) {
         if (this.isLoading) {
@@ -1171,3 +1181,5 @@ function setExtMap(map, extname, val) {
 function reqType(xhr) {
     return xhr.toString().replace('object ', '');
 }
+
+Resource.setExtensionXhrType('fnt', Resource.XHR_RESPONSE_TYPE.DOCUMENT);

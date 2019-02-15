@@ -1,4 +1,4 @@
-import { Resource } from "./loaders/index";
+import Resource from "engine/core/io/Resource";
 
 /**
  * Node class looking table

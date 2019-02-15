@@ -2,8 +2,7 @@ import SoundUtils from "../utils/SoundUtils";
 import { loader_pre_procs, loader_use_procs } from 'engine/registry';
 import SoundLibrary from "../SoundLibrary";
 
-import { resource_loader } from 'engine/dep/index';
-const { Resource } = resource_loader;
+import Resource from 'engine/core/io/Resource';
 
 
 /**

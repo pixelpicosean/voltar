@@ -5,7 +5,6 @@ import * as v from 'engine/index';
 /* import 'engine/accessibility/enable'; */
 import 'engine/interaction/enable';
 import 'engine/extract/enable';
-import 'engine/scene/coa/enable';
 import 'engine/scene/graphics/enable';
 import 'engine/scene/map/enable';
 import 'engine/scene/mesh/enable';

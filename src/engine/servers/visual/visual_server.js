@@ -5,7 +5,6 @@ import { loader_use_procs } from 'engine/registry';
 import WebGLRenderer from '../../renderers/WebGLRenderer';
 import texture_parser from 'engine/textures/texture_parser';
 import spritesheet_parser from 'engine/textures/spritesheet_parser';
-import { Matrix } from 'engine/math/index';
 
 // Texture and spritesheet parsers are mandatory
 loader_use_procs.push(texture_parser);

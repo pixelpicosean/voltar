@@ -1,8 +1,11 @@
 import Signal from 'mini-signals';
-import parseUri from './parse_uri';
+import parse_uri from './parse_uri';
 import * as async from './async';
 import Resource from './Resource';
 import { VObject } from 'engine/dep/index';
+
+import { blobMiddlewareFactory } from './middlewares/parsing/blob';
+import { loader_pre_procs, loader_use_procs } from 'engine/registry';
 
 // some constants
 const MAX_PROGRESS = 100;
@@ -22,21 +25,21 @@ export default class Loader extends VObject {
         /**
          * The base url for all resources loaded by this loader.
          *
-         * @member {string}
+         * @type {string}
          */
         this.baseUrl = baseUrl;
 
         /**
          * The progress percent of the loader going through the queue.
          *
-         * @member {number}
+         * @type {number}
          */
         this.progress = 0;
 
         /**
          * Loading state of the loader, true if it is currently loading resources.
          *
-         * @member {boolean}
+         * @type {boolean}
          */
         this.loading = false;
 
@@ -60,7 +63,7 @@ export default class Loader extends VObject {
          * // This will request 'image.png?v=1&user=me&password=secret'
          * loader.add('iamge.png?v=1').load();
          *
-         * @member {string}
+         * @type {string}
          */
         this.defaultQueryString = '';
 
@@ -68,7 +71,7 @@ export default class Loader extends VObject {
          * The middleware to run before loading each resource.
          *
          * @private
-         * @member {function[]}
+         * @type {function[]}
          */
         this._beforeMiddleware = [];
 
@@ -76,7 +79,7 @@ export default class Loader extends VObject {
          * The middleware to run after loading each resource.
          *
          * @private
-         * @member {function[]}
+         * @type {function[]}
          */
         this._afterMiddleware = [];
 
@@ -84,7 +87,7 @@ export default class Loader extends VObject {
          * The tracks the resources we are currently completing parsing for.
          *
          * @private
-         * @member {Resource[]}
+         * @type {Resource[]}
          */
         this._resourcesParsing = [];
 
@@ -92,10 +95,9 @@ export default class Loader extends VObject {
          * The `_loadResource` function bound with this object context.
          *
          * @private
-         * @member {function}
+         * @type {function}
          * @param {Resource} r - The resource to load
          * @param {Function} d - The dequeue function
-         * @return {undefined}
          */
         this._boundLoadResource = (r, d) => this._loadResource(r, d);
 
@@ -103,7 +105,6 @@ export default class Loader extends VObject {
          * The resources waiting to be loaded.
          *
          * @private
-         * @member {Resource[]}
          */
         this._queue = async.queue(this._boundLoadResource, concurrency);
 
@@ -112,52 +113,42 @@ export default class Loader extends VObject {
         /**
          * All the resources for this loader keyed by name.
          *
-         * @member {object<string, Resource>}
+         * @type {Object<string, Resource>}
          */
         this.resources = {};
 
         /**
          * Dispatched once per loaded or errored resource.
          *
-         * The callback looks like {@link Loader.OnProgressSignal}.
-         *
-         * @member {Signal<Loader.OnProgressSignal>}
+         * @type {Signal}
          */
         this.onProgress = new Signal();
 
         /**
          * Dispatched once per errored resource.
          *
-         * The callback looks like {@link Loader.OnErrorSignal}.
-         *
-         * @member {Signal<Loader.OnErrorSignal>}
+         * @type {Signal}
          */
         this.onError = new Signal();
 
         /**
          * Dispatched once per loaded resource.
          *
-         * The callback looks like {@link Loader.OnLoadSignal}.
-         *
-         * @member {Signal<Loader.OnLoadSignal>}
+         * @type {Signal}
          */
         this.onLoad = new Signal();
 
         /**
          * Dispatched when the loader begins to process the queue.
          *
-         * The callback looks like {@link Loader.OnStartSignal}.
-         *
-         * @member {Signal<Loader.OnStartSignal>}
+         * @type {Signal}
          */
         this.onStart = new Signal();
 
         /**
          * Dispatched when the queued resources all load.
          *
-         * The callback looks like {@link Loader.OnCompleteSignal}.
-         *
-         * @member {Signal<Loader.OnCompleteSignal>}
+         * @type {Signal}
          */
         this.onComplete = new Signal();
 
@@ -170,50 +161,29 @@ export default class Loader extends VObject {
         for (let i = 0; i < Loader._defaultAfterMiddleware.length; ++i) {
             this.use(Loader._defaultAfterMiddleware[i]);
         }
+
+        for (let i = 0; i < loader_pre_procs.length; ++i) {
+            this.pre(loader_pre_procs[i]());
+        }
+
+        // parse any blob into more usable objects (e.g. Image)
+        this.use(blobMiddlewareFactory());
+        for (let i = 0; i < loader_use_procs.length; ++i) {
+            this.use(loader_use_procs[i]());
+        }
+
+        // Compat layer, translate the new v2 signals into old v1 events.
+        // @ts-ignore
+        this.onStart.add((l) => this.emit_signal('start', l));
+        // @ts-ignore
+        this.onProgress.add((l, r) => this.emit_signal('progress', l, r));
+        // @ts-ignore
+        this.onError.add((e, l, r) => this.emit_signal('error', e, l, r));
+        // @ts-ignore
+        this.onLoad.add((l, r) => this.emit_signal('load', l, r));
+        // @ts-ignore
+        this.onComplete.add((l, r) => this.emit_signal('complete', l, r));
     }
-
-    /**
-     * When the progress changes the loader and resource are disaptched.
-     *
-     * @memberof Loader
-     * @callback OnProgressSignal
-     * @param {Loader} loader - The loader the progress is advancing on.
-     * @param {Resource} resource - The resource that has completed or failed to cause the progress to advance.
-     */
-
-    /**
-     * When an error occurrs the loader and resource are disaptched.
-     *
-     * @memberof Loader
-     * @callback OnErrorSignal
-     * @param {Loader} loader - The loader the error happened in.
-     * @param {Resource} resource - The resource that caused the error.
-     */
-
-    /**
-     * When a load completes the loader and resource are disaptched.
-     *
-     * @memberof Loader
-     * @callback OnLoadSignal
-     * @param {Loader} loader - The loader that laoded the resource.
-     * @param {Resource} resource - The resource that has completed loading.
-     */
-
-    /**
-     * When the loader starts loading resources it dispatches this callback.
-     *
-     * @memberof Loader
-     * @callback OnStartSignal
-     * @param {Loader} loader - The loader that has started loading resources.
-     */
-
-    /**
-     * When the loader completes loading resources it dispatches this callback.
-     *
-     * @memberof Loader
-     * @callback OnCompleteSignal
-     * @param {Loader} loader - The loader that has finished loading resources.
-     */
 
     /**
      * Options for a call to `.add()`.
@@ -238,91 +208,9 @@ export default class Loader extends VObject {
      * @property {Resource.IMetadata} [metadata] - Extra configuration for middleware and the Resource object.
      */
 
-    /* eslint-disable require-jsdoc,valid-jsdoc */
     /**
      * Adds a resource (or multiple resources) to the loader queue.
-     *
-     * This function can take a wide variety of different parameters. The only thing that is always
-     * required the url to load. All the following will work:
-     *
-     * ```js
-     * loader
-     *     // normal param syntax
-     *     .add('key', 'http://...', function () {})
-     *     .add('http://...', function () {})
-     *     .add('http://...')
-     *
-     *     // object syntax
-     *     .add({
-     *         name: 'key2',
-     *         url: 'http://...'
-     *     }, function () {})
-     *     .add({
-     *         url: 'http://...'
-     *     }, function () {})
-     *     .add({
-     *         name: 'key3',
-     *         url: 'http://...'
-     *         onComplete: function () {}
-     *     })
-     *     .add({
-     *         url: 'https://...',
-     *         onComplete: function () {},
-     *         crossOrigin: true
-     *     })
-     *
-     *     // you can also pass an array of objects or urls or both
-     *     .add([
-     *         { name: 'key4', url: 'http://...', onComplete: function () {} },
-     *         { url: 'http://...', onComplete: function () {} },
-     *         'http://...'
-     *     ])
-     *
-     *     // and you can use both params and options
-     *     .add('key', 'http://...', { crossOrigin: true }, function () {})
-     *     .add('http://...', { crossOrigin: true }, function () {});
-     * ```
-     *
-     * @function
-     * @variation 1
-     * @param {string} name - The name of the resource to load.
-     * @param {string} url - The url for this resource, relative to the baseUrl of this loader.
-     * @param {Resource.OnCompleteSignal} [callback] - Function to call when this specific resource completes loading.
-     * @return {this} Returns itself.
-     *//**
-     * @function
-     * @variation 2
-     * @param {string} name - The name of the resource to load.
-     * @param {string} url - The url for this resource, relative to the baseUrl of this loader.
-     * @param {IAddOptions} [options] - The options for the load.
-     * @param {Resource.OnCompleteSignal} [callback] - Function to call when this specific resource completes loading.
-     * @return {this} Returns itself.
-     *//**
-     * @function
-     * @variation 3
-     * @param {string} url - The url for this resource, relative to the baseUrl of this loader.
-     * @param {Resource.OnCompleteSignal} [callback] - Function to call when this specific resource completes loading.
-     * @return {this} Returns itself.
-     *//**
-     * @function
-     * @variation 4
-     * @param {string} url - The url for this resource, relative to the baseUrl of this loader.
-     * @param {IAddOptions} [options] - The options for the load.
-     * @param {Resource.OnCompleteSignal} [callback] - Function to call when this specific resource completes loading.
-     * @return {this} Returns itself.
-     *//**
-     * @function
-     * @variation 5
-     * @param {IAddOptions} options - The options for the load. This object must contain a `url` property.
-     * @param {Resource.OnCompleteSignal} [callback] - Function to call when this specific resource completes loading.
-     * @return {this} Returns itself.
-     *//**
-     * @function
-     * @variation 6
-     * @param {Array<IAddOptions|string>} resources - An array of resources to load, where each is
-     *      either an object with the options or a string url. If you pass an object, it must contain a `url` property.
-     * @param {Resource.OnCompleteSignal} [callback] - Function to call when this specific resource completes loading.
-     * @return {this} Returns itself.
+     * This function can take a wide variety of different parameters.
      */
     add(name, url, options, cb) {
         // special case of an array of objects or urls
@@ -409,18 +297,15 @@ export default class Loader extends VObject {
 
         return this;
     }
-    /* eslint-enable require-jsdoc,valid-jsdoc */
 
     /**
      * Sets up a middleware function that will run *before* the
      * resource is loaded.
      *
-     * @param {function} fn - The middleware function to register.
-     * @return {this} Returns itself.
+     * @param {Function} fn - The middleware function to register.
      */
     pre(fn) {
         this._beforeMiddleware.push(fn);
-
         return this;
     }
 
@@ -428,19 +313,15 @@ export default class Loader extends VObject {
      * Sets up a middleware function that will run *after* the
      * resource is loaded.
      *
-     * @param {function} fn - The middleware function to register.
-     * @return {this} Returns itself.
+     * @param {Function} fn - The middleware function to register.
      */
     use(fn) {
         this._afterMiddleware.push(fn);
-
         return this;
     }
 
     /**
      * Resets the queue of the loader to prepare for a new load.
-     *
-     * @return {this} Returns itself.
      */
     reset() {
         this.progress = 0;
@@ -467,11 +348,15 @@ export default class Loader extends VObject {
         return this;
     }
 
+    destroy() {
+        this.disconnect_all();
+        this.reset();
+    }
+
     /**
      * Starts loading the queued resources.
      *
-     * @param {function} [cb] - Optional callback that will be bound to the `complete` event.
-     * @return {this} Returns itself.
+     * @param {Function} [cb] - Optional callback that will be bound to the `complete` event.
      */
     load(cb) {
         // register complete callback if they pass one
@@ -487,8 +372,7 @@ export default class Loader extends VObject {
         if (this._queue.idle()) {
             this._onStart();
             this._onComplete();
-        }
-        else {
+        } else {
             // distribute progress chunks
             const numTasks = this._queue._tasks.length;
             const chunk = MAX_PROGRESS / numTasks;
@@ -510,13 +394,12 @@ export default class Loader extends VObject {
     /**
      * The number of resources to load concurrently.
      *
-     * @member {number}
+     * @type {number}
      * @default 10
      */
     get concurrency() {
         return this._queue.concurrency;
     }
-    // eslint-disable-next-line require-jsdoc
     set concurrency(concurrency) {
         this._queue.concurrency = concurrency;
     }
@@ -526,10 +409,9 @@ export default class Loader extends VObject {
      *
      * @private
      * @param {string} url - The url to prepare.
-     * @return {string} The prepared url.
      */
     _prepareUrl(url) {
-        const parsedUrl = parseUri(url, { strictMode: true });
+        const parsedUrl = parse_uri(url, { strictMode: true });
         let result;
 
         // absolute url, just use it as is.
@@ -555,8 +437,7 @@ export default class Loader extends VObject {
 
             if (result.indexOf('?') !== -1) {
                 result += `&${this.defaultQueryString}`;
-            }
-            else {
+            } else {
                 result += `?${this.defaultQueryString}`;
             }
 
@@ -571,7 +452,7 @@ export default class Loader extends VObject {
      *
      * @private
      * @param {Resource} resource - The resource to load.
-     * @param {function} dequeue - The function to call when we need to dequeue this item.
+     * @param {Function} dequeue - The function to call when we need to dequeue this item.
      */
     _loadResource(resource, dequeue) {
         resource._dequeue = dequeue;
@@ -579,6 +460,10 @@ export default class Loader extends VObject {
         // run before middleware
         async.eachSeries(
             this._beforeMiddleware,
+            /**
+             * @param {Function} fn
+             * @param {Function} next
+             */
             (fn, next) => {
                 fn.call(this, resource, () => {
                     // if the before middleware marks the resource as complete,
@@ -637,6 +522,10 @@ export default class Loader extends VObject {
         // run all the after middleware for this resource
         async.eachSeries(
             this._afterMiddleware,
+            /**
+             * @param {Function} fn
+             * @param {Function} next
+             */
             (fn, next) => {
                 fn.call(this, resource, next);
             },
@@ -663,14 +552,37 @@ export default class Loader extends VObject {
             true
         );
     }
+
+    /**
+     * Sets up a middleware function that will run *before* the
+     * resource is loaded.
+     *
+     * @param {Function} fn - The middleware function to register.
+     */
+    static LoaderPreStatic(fn) {
+        Loader._defaultBeforeMiddleware.push(fn);
+
+        return Loader;
+    }
+
+    /**
+     * Sets up a middleware function that will run *after* the
+     * resource is loaded.
+     *
+     * @param {Function} fn - The middleware function to register.
+     */
+    static LoaderUseStatic(fn) {
+        Loader._defaultAfterMiddleware.push(fn);
+
+        return Loader;
+    }
 }
 
 /**
  * A default array of middleware to run before loading each resource.
  * Each of these middlewares are added to any new Loader instances when they are created.
  *
- * @private
- * @member {function[]}
+ * @type {Function[]}
  */
 Loader._defaultBeforeMiddleware = [];
 
@@ -678,33 +590,6 @@ Loader._defaultBeforeMiddleware = [];
  * A default array of middleware to run after loading each resource.
  * Each of these middlewares are added to any new Loader instances when they are created.
  *
- * @private
- * @member {function[]}
+ * @type {Function[]}
  */
 Loader._defaultAfterMiddleware = [];
-
-/**
- * Sets up a middleware function that will run *before* the
- * resource is loaded.
- *
- * @static
- * @param {function} fn - The middleware function to register.
- */
-Loader.pre = function LoaderPreStatic(fn) {
-    Loader._defaultBeforeMiddleware.push(fn);
-
-    return Loader;
-};
-
-/**
- * Sets up a middleware function that will run *after* the
- * resource is loaded.
- *
- * @static
- * @param {function} fn - The middleware function to register.
- */
-Loader.use = function LoaderUseStatic(fn) {
-    Loader._defaultAfterMiddleware.push(fn);
-
-    return Loader;
-};

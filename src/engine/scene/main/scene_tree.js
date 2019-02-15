@@ -4,7 +4,7 @@ import MessageQueue from '../../MessageQueue';
 import Node2D from '../Node2D';
 import Vector from '../../math/Vector2';
 import { shared as shared_ticker } from '../../ticker/index';
-import { Loader } from '../../loaders/index';
+import Loader from 'engine/core/io/Loader';
 import { mixins, deep_merge, scene_path_to_key } from '../../utils/index';
 
 import { outer_box_resize } from '../../resize';

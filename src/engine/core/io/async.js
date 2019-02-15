@@ -3,13 +3,12 @@ function _noop() { }
 /**
  * Iterates an array in series.
  *
- * @memberof async
- * @param {Array.<*>} array - Array to iterate.
- * @param {function} iterator - Function to call for each element.
- * @param {function} callback - Function to call when done, or on error.
- * @param {boolean} [deferNext=false] - Break synchronous each loop by calling next with a setTimeout of 1.
+ * @param {Array<any>} array - Array to iterate.
+ * @param {Function} iterator - Function to call for each element.
+ * @param {Function} callback - Function to call when done, or on error.
+ * @param {boolean} [defer_next=false] - Break synchronous each loop by calling next with a setTimeout of 1.
  */
-export function eachSeries(array, iterator, callback, deferNext) {
+export function eachSeries(array, iterator, callback, defer_next) {
     let i = 0;
     const len = array.length;
 
@@ -22,12 +21,11 @@ export function eachSeries(array, iterator, callback, deferNext) {
             return;
         }
 
-        if (deferNext) {
+        if (defer_next) {
             setTimeout(() => {
                 iterator(array[i++], next);
             }, 1);
-        }
-        else {
+        } else {
             iterator(array[i++], next);
         }
     })();
@@ -36,10 +34,8 @@ export function eachSeries(array, iterator, callback, deferNext) {
 /**
  * Ensures a function is only called once.
  *
- * @ignore
- * @memberof async
- * @param {function} fn - The function to wrap.
- * @return {function} The wrapping function.
+ * @param {Function} fn - The function to wrap.
+ * @return {Function} The wrapping function.
  */
 function onlyOnce(fn) {
     return function onceWrapper() {
@@ -55,22 +51,41 @@ function onlyOnce(fn) {
 }
 
 /**
+ * @typedef QueueObject
+ * @property {Array} _tasks
+ * @property {number} concurrency
+ * @property {() => void} saturated
+ * @property {() => void} unsaturated
+ * @property {number} buffer
+ * @property {() => void} empty
+ * @property {() => void} drain
+ * @property {(err: string, data: any) => void} error
+ * @property {boolean} started
+ * @property {boolean} paused
+ * @property {(data: any, callback: Function) => void} push
+ * @property {() => void} kill
+ * @property {(data: any, callback: Function) => void} unshift
+ * @property {() => void} process
+ * @property {() => number} length
+ * @property {() => number} running
+ * @property {() => boolean} idle
+ * @property {() => void} pause
+ * @property {() => void} resume
+ */
+
+/**
  * Async queue implementation,
  *
- * @memberof async
- * @param {function} worker - The worker function to call for each task.
- * @param {number} concurrency - How many workers to run in parrallel.
- * @return {*} The async queue object.
+ * @param {Function} worker - The worker function to call for each task.
+ * @param {number} [concurrency=1] - How many workers to run in parrallel.
  */
-export function queue(worker, concurrency) {
-    if (concurrency == null) { // eslint-disable-line no-eq-null,eqeqeq
-        concurrency = 1;
-    }
-    else if (concurrency === 0) {
+export function queue(worker, concurrency = 1) {
+    if (concurrency === 0) {
         throw new Error('Concurrency must not be zero');
     }
 
     let workers = 0;
+    /** @type {QueueObject} */
     const q = {
         _tasks: [],
         concurrency,
@@ -142,8 +157,13 @@ export function queue(worker, concurrency) {
         },
     };
 
-    function _insert(data, insertAtFront, callback) {
-        if (callback != null && typeof callback !== 'function') { // eslint-disable-line no-eq-null,eqeqeq
+    /**
+     * @param {any} data
+     * @param {boolean} insert_at_front
+     * @param {Function} callback
+     */
+    function _insert(data, insert_at_front, callback) {
+        if (callback && typeof callback !== 'function') {
             throw new Error('task callback must be a function');
         }
 
@@ -158,26 +178,28 @@ export function queue(worker, concurrency) {
 
         const item = {
             data,
-            callback: typeof callback === 'function' ? callback : _noop,
+            callback: callback || _noop,
         };
 
-        if (insertAtFront) {
+        if (insert_at_front) {
             q._tasks.unshift(item);
-        }
-        else {
+        } else {
             q._tasks.push(item);
         }
 
         setTimeout(() => q.process(), 1);
     }
 
+    /**
+     * @param {any} task
+     */
     function _next(task) {
         return function next() {
             workers -= 1;
 
             task.callback.apply(task, arguments);
 
-            if (arguments[0] != null) { // eslint-disable-line no-eq-null,eqeqeq
+            if (arguments[0] != null) {
                 q.error(arguments[0], task.data);
             }
 

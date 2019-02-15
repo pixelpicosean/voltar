@@ -1,5 +1,4 @@
-import { resource_loader } from 'engine/dep/index';
-const { Resource } = resource_loader;
+import Resource from 'engine/core/io/Resource';
 import Texture from 'engine/textures/Texture';
 import { register_font } from './res';
 

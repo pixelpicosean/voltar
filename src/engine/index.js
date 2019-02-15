@@ -117,7 +117,6 @@ export { default as yield } from './core/yield';
 // Namespace
 // ------------------------------------------------------------------
 import * as utils from './utils/index';
-import * as loaders from './loaders/index';
 import * as ticker from './ticker/index';
 import * as audio from './audio/index';
 
@@ -128,7 +127,6 @@ export {
 
     utils,
 
-    loaders,
     ticker,
     audio,
 }

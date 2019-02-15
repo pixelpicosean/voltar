@@ -1,6 +1,7 @@
-import { Resource } from '../../Resource';
+import Resource from '../../Resource';
 import { encodeBinary } from '../../b64';
 
+// @ts-ignore
 const Url = window.URL || window.webkitURL;
 
 // a middleware for transforming XHR loaded Blobs into more useful objects
