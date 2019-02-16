@@ -140,8 +140,11 @@ export {
 import Input from './input/index';
 import SceneTree from './scene/main/scene_tree';
 
-/** @type {Array<Array<string>>} */
-const preload_queue = [];
+const preload_queue = {
+    is_complete: false,
+    /** @type {(string|Object)[][]} */
+    queue: [],
+};
 
 export const input = new Input();
 export const scene_tree = new SceneTree(input, preload_queue);
@@ -152,9 +155,13 @@ export const sound = audio.SoundLibrary.init();
 // ------------------------------------------------------------------
 /**
  * Preload a resource before game start
+ * @param {string|Object} settings
  */
 export function preload(...settings) {
-    preload_queue.push(settings);
+    if (preload_queue.is_complete) {
+        throw new Error('"preload" can only be called before launch!');
+    }
+    preload_queue.queue.push(settings);
 }
 
 import {

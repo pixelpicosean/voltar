@@ -15,6 +15,7 @@ import { assemble_scene } from '../../index';
 import World2D from '../resources/world_2d';
 import Viewport from './viewport';
 import { VObject } from 'engine/dep/index';
+import Input from 'engine/input/index';
 
 /**
  * @typedef ApplicationSettings
@@ -154,6 +155,11 @@ export class Group {
 }
 
 export default class SceneTree {
+    /**
+     *
+     * @param {Input} input
+     * @param {{ is_complete: boolean, queue: (string|Object)[][]}} preload_queue
+     */
     constructor(input, preload_queue) {
         this.tree_version = 1;
         this.physics_process_time = 1;
@@ -223,9 +229,6 @@ export default class SceneTree {
          * @type {Loader}
          */
         this.loader = null;
-        /**
-         * @type {Array<Array<string>>}
-         */
         this.preload_queue = preload_queue;
         this.visual_server = new VisualServer();
         /**
@@ -269,17 +272,16 @@ export default class SceneTree {
         // Initialize loader here since our plugins are all
         // registered now
         this.loader = new Loader();
-        // Prevent the default loader from destroying
-        this.loader.destroy = () => { };
 
         // Load resources marked as preload
-        this.preload_queue.unshift([`media/${default_font_name}.fnt`]);
-        for (const settings of this.preload_queue) {
-            this.loader.add.apply(this.loader, settings);
+        this.preload_queue.queue.unshift([`media/${default_font_name}.fnt`]);
+        for (const settings of this.preload_queue.queue) {
+            this.loader.add.call(this.loader, ...settings);
         }
 
         // Set default font after loader is complete
         this.loader.connect_once('complete', () => {
+            this.preload_queue.is_complete = true;
             Theme.set_default_font(registered_bitmap_fonts[default_font_name]);
         });
 
@@ -302,6 +304,9 @@ export default class SceneTree {
         return stt;
     }
 
+    /**
+     * @param {Node2D} node
+     */
     queue_delete(node) {
         node.is_queued_for_deletion = true;
         this.delete_queue.push(node);

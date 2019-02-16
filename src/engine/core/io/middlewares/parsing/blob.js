@@ -1,5 +1,5 @@
 import Resource from '../../Resource';
-import { encodeBinary } from '../../b64';
+import encode_binary from '../../b64';
 
 // @ts-ignore
 const Url = window.URL || window.webkitURL;
@@ -22,7 +22,7 @@ export default function blob_middleware_factory() {
                 // this is an image, convert the binary string into a data url
                 if (type && type.indexOf('image') === 0) {
                     resource.data = new Image();
-                    resource.data.src = `data:${type};base64,${encodeBinary(resource.xhr.responseText)}`;
+                    resource.data.src = `data:${type};base64,${encode_binary(resource.xhr.responseText)}`;
 
                     resource.type = Resource.TYPE.IMAGE;
 
