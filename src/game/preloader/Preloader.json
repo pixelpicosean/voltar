@@ -2,21 +2,20 @@
     "name": "Preloader",
     "children": [
         {
+            "name": "bg",
             "type": "Sprite",
-            "x": 0,
-            "y": 190,
             "width": 400,
             "height": 20,
             "tint": 0,
+            "visible": false,
             "texture": "_white_"
         },
         {
             "name": "bar",
             "type": "Sprite",
-            "x": 0,
-            "y": 190,
             "width": 400,
             "height": 20,
+            "visible": false,
             "texture": "_white_"
         }
     ]

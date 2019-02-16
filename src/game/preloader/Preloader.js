@@ -7,28 +7,27 @@ export default class Boot extends v.Node2D {
     }
 
     _enter_tree() {
-        const bar = this.get_node('bar');
+        this.get_node('bg').set_visible(true);
+
+        const bar = /** @type {v.Sprite} */ (this.get_node('bar'));
         const full_bar_width = bar.width;
 
-        let progress_bind = undefined;
-        const on_load_progress = (loader) => {
+        bar.x = v.scene_tree.viewport_rect.size.x / 2;
+        bar.y = v.scene_tree.viewport_rect.size.y / 2;
+        bar.width = 0;
+        bar.visible = true;
+
+        const on_load_progress = (/** @type {v.Loader} */loader) => {
             bar.width = Math.round(full_bar_width * (loader.progress / 100));
         };
         const on_load_complete = () => {
-            if (progress_bind) {
-                progress_bind.detach();
-            }
+            bar.width = full_bar_width;
+
+            v.scene_tree.loader.disconnect('progress', on_load_progress);
             v.scene_tree.change_scene_to(v.scene_tree.settings.application.main_scene);
         }
 
-        if (v.scene_tree.preload_queue.length > 0) {
-            progress_bind = v.scene_tree.loader.onProgress.add(on_load_progress);
-            v.scene_tree.loader.load(on_load_complete);
-
-            bar.width = 0;
-        } else {
-            bar.width = full_bar_width;
-            on_load_complete();
-        }
+        v.scene_tree.loader.connect('progress', on_load_progress);
+        v.scene_tree.loader.load(on_load_complete);
     }
 }
