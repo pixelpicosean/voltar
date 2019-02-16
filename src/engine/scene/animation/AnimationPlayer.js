@@ -510,8 +510,12 @@ export default class AnimationPlayer extends Node2D {
 
             if (this.end_reached) {
                 if (this.queued.length > 0) {
-                    this.play(this.queued.shift());
-                    // this.emit_signal ...
+                    const old = this.playback.assigned;
+                    const new_name = this.queued.shift();
+                    this.play(new_name);
+                    if (this.end_notify) {
+                        this.emit_signal('animation_changed', old, new_name);
+                    }
                 } else {
                     this.is_playing = false;
                     this.set_process(false);
