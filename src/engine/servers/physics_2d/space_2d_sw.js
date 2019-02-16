@@ -199,9 +199,7 @@ export default class Space2DSW {
         for (let i = 0; i < amount; i++) {
             let keep = true;
 
-            /** @type {Body2DSW} */
-            // @ts-ignore
-            const res = this.intersection_query_results[i];
+            const res = /** @type {Body2DSW} */ (this.intersection_query_results[i]);
             if (res === p_body) {
                 keep = false;
             } else if (res.type === CollisionObjectType.AREA) {
@@ -427,9 +425,7 @@ export default class Space2DSW {
                         let shape_index = this.intersection_query_subindex_results[i];
 
                         if (col_obj.type === CollisionObjectType.BODY) {
-                            /** @type {Body2DSW} */
-                            // @ts-ignore
-                            const b = col_obj;
+                            const b = /** @type {Body2DSW} */ (col_obj);
                             if (p_infinite_inertia && b.mode !== BodyMode.STATIC && b.mode !== BodyMode.KINEMATIC) {
                                 continue;
                             }
@@ -445,9 +441,7 @@ export default class Space2DSW {
                             cbk.invalid_by_dir = 0;
 
                             if (col_obj.type === CollisionObjectType.BODY) {
-                                /** @type {Body2DSW} */
-                                // @ts-ignore
-                                const b = col_obj;
+                                const b = /** @type {Body2DSW} */ (col_obj);
                                 if (b.mode === BodyMode.KINEMATIC || b.mode === BodyMode.RIGID) {
                                     // fix for moving platforms (kinematic and dynamic), margin is increased by
                                     // how much it moved in the give direction
@@ -555,9 +549,7 @@ export default class Space2DSW {
                     const against_shape = col_obj.shapes[col_shape_idx];
 
                     if (col_obj.type === CollisionObjectType.BODY) {
-                        /** @type {Body2DSW} */
-                        // @ts-ignore
-                        const b = col_obj;
+                        const b = /** @type {Body2DSW} */ (col_obj);
                         if (p_infinite_inertia && b.mode !== BodyMode.STATIC && b.mode !== BodyMode.KINEMATIC) {
                             continue;
                         }
@@ -687,9 +679,7 @@ export default class Space2DSW {
                     const shape_idx = this.intersection_query_subindex_results[i];
 
                     if (col_obj.type === CollisionObjectType.BODY) {
-                        /** @type {Body2DSW} */
-                        // @ts-ignore
-                        const b = col_obj;
+                        const b = /** @type {Body2DSW} */ (col_obj);
                         if (p_infinite_inertia && b.mode !== BodyMode.STATIC && b.mode !== BodyMode.KINEMATIC) {
                             continue;
                         }
@@ -738,9 +728,7 @@ export default class Space2DSW {
                     r_result.collision_point.copy(rcd.best_contact);
                     r_result.collider_metadata = rcd.best_object.get_shape_metadata(rcd.best_shape);
 
-                    /** @type {Body2DSW} */
-                    // @ts-ignore
-                    const body = rcd.best_object;
+                    const body = /** @type {Body2DSW} */ (rcd.best_object);
                     const rel_vec = r_result.collision_point.clone().subtract(body.transform.origin);
                     r_result.collider_velocity.set(
                         -body.angular_velocity * rel_vec.y,
@@ -846,9 +834,7 @@ export default class Space2DSW {
                         cbk.invalid_by_dir = 0;
 
                         if (col_obj.type === CollisionObjectType.BODY) {
-                            /** @type {Body2DSW} */
-                            // @ts-ignore (cast<Body2DSW>)
-                            const b = col_obj;
+                            const b = /** @type {Body2DSW} */ (col_obj);
                             if (p_infinite_inertia && b.mode === BodyMode.STATIC && b.mode === BodyMode.KINEMATIC) {
                                 continue;
                             }
@@ -892,9 +878,7 @@ export default class Space2DSW {
                                         result.collider_id = col_obj.instance;
                                         result.collider_metadata = col_obj.get_shape_metadata(shape_idx);
                                         if (col_obj.type === CollisionObjectType.BODY) {
-                                            /** @type {Body2DSW} */
-                                            // @ts-ignore (cast<Body2DSW>)
-                                            const body = col_obj;
+                                            const body = /** @type {Body2DSW} */ (col_obj);
 
                                             const rel_vec = b.subtract(body.transform.origin);
                                             result.collider_velocity.set(
@@ -958,27 +942,17 @@ export default class Space2DSW {
         p_self.collision_pairs++;
 
         if (type_A === CollisionObjectType.AREA) {
-            /** @type {Area2DSW} */
-            // @ts-ignore
-            const area = A;
+            const area = /** @type {Area2DSW} */ (A);
             if (type_B === CollisionObjectType.AREA) {
-                /** @type {Area2DSW} */
-                // @ts-ignore
-                const area_b = B;
+                const area_b = /** @type {Area2DSW} */ (B);
                 return new Area2Pair2DSW(area_b, p_subindex_B, area, p_subindex_A);
             } else {
-                /** @type {Body2DSW} */
-                // @ts-ignore
-                const body = B;
+                const body = /** @type {Body2DSW} */ (B);
                 return new AreaPair2DSW(body, p_subindex_B, area, p_subindex_A);
             }
         } else {
-            /** @type {Body2DSW} */
-            // @ts-ignore
-            const body_A = A;
-            /** @type {Body2DSW} */
-            // @ts-ignore
-            const body_B = B;
+            const body_A = /** @type {Body2DSW} */ (A);
+            const body_B = /** @type {Body2DSW} */ (B);
             return new BodyPair2DSW(body_A, p_subindex_A, body_B, p_subindex_B);
         }
 
