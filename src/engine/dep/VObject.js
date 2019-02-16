@@ -104,6 +104,11 @@ export default class VObject {
         for (const e  of listeners) {
             e.fn.call(e.context, ...args);
         }
+        for (let i = listeners.length - 1; i >= 0; i--) {
+            if (listeners[i].once) {
+                remove_items(listeners, i, 1);
+            }
+        }
 
         return true;
     }
