@@ -12,6 +12,13 @@ const MAX_PROGRESS = 100;
 const rgx_extract_url_hash = /(#[\w-]+)?$/;
 
 /**
+ * All the resources for this loader keyed by name.
+ *
+ * @type {Object<string, Resource>}
+ */
+const shared_resources = {};
+
+/**
  * Manages the state and loading of multiple resources to load.
  */
 export default class Loader extends VObject {
@@ -110,12 +117,7 @@ export default class Loader extends VObject {
 
         this._queue.pause();
 
-        /**
-         * All the resources for this loader keyed by name.
-         *
-         * @type {Object<string, Resource>}
-         */
-        this.resources = {};
+        this.resources = shared_resources;
 
         // Add default before middleware
         for (let i = 0; i < Loader._default_before_middleware.length; ++i) {
