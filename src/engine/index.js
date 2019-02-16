@@ -139,6 +139,7 @@ export {
 // ------------------------------------------------------------------
 import Input from './input/index';
 import SceneTree from './scene/main/scene_tree';
+import Loader from './core/io/Loader';
 
 const preload_queue = {
     is_complete: false,
@@ -154,14 +155,36 @@ export const sound = audio.SoundLibrary.init();
 // Global functions
 // ------------------------------------------------------------------
 /**
- * Preload a resource before game start
- * @param {string|Object} settings
+ * Preload a resource before game start.
+ * @param {...(string|Object)} settings
  */
 export function preload(...settings) {
     if (preload_queue.is_complete) {
         throw new Error('"preload" can only be called before launch!');
     }
     preload_queue.queue.push(settings);
+}
+
+/**
+ * Add a new resource loading to the queue and load. A new loading process will be
+ * used while other resources are also loading right now.
+ * @param {...(string|Object)} settings
+ */
+export function load(...settings) {
+    if (!preload_queue.is_complete) {
+        throw new Error('Use "preload" if you want to load assets before launch.');
+    }
+
+    const loader = scene_tree.loader;
+
+    // Load by the main loader
+    if (!loader.loading) {
+        return loader.add(...settings).load();
+    }
+
+    // Load by a new loader instance
+    console.warn('Start a new loading process since other resources are loading!');
+    return new Loader().add(...settings).load();
 }
 
 import {
