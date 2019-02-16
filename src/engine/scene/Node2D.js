@@ -507,6 +507,8 @@ export default class Node2D extends VObject {
 
         if (this.has_transform) {
             this.transform.update_transform(parent.transform);
+            this._notify_transform_changed();
+
             this._bounds.update_id++;
         }
     }
@@ -522,10 +524,12 @@ export default class Node2D extends VObject {
             this.parent._recursive_post_update_transform();
             if (this.has_transform) {
                 this.transform.update_transform(this.parent.transform);
+                this._notify_transform_changed();
             }
         } else {
             if (this.has_transform) {
                 this.transform.update_transform(this._temp_node_2d_parent.transform);
+                this._notify_transform_changed();
             }
         }
     }
@@ -1571,11 +1575,8 @@ export default class Node2D extends VObject {
         if (this.has_transform) {
             this._bounds_id++;
 
-            let transform_changed = (this.transform._local_id !== this.transform._current_local_id);
             this.transform.update_transform(parent.transform);
-            if (transform_changed) {
-                this._notify_transform_changed();
-            }
+            this._notify_transform_changed();
 
             let t = this.transform.world_transform;
             this._world_position.set(t.tx, t.ty);
