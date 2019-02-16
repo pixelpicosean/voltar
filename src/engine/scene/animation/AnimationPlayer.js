@@ -518,6 +518,7 @@ export default class AnimationPlayer extends Node2D {
                     }
                 } else {
                     this.is_playing = false;
+                    this.playback.current.pos = 0;
                     this.set_process(false);
                     if (this.end_notify) {
                         this.emit_signal('animation_finished');
