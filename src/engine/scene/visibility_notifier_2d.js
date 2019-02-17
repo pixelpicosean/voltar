@@ -1,7 +1,7 @@
 import Node2D from "./Node2D";
 import { node_class_map } from "engine/registry";
 import { Rectangle } from "engine/math/index";
-import { Viewport } from "engine/index";
+import { Viewport, AnimationPlayer, AnimatedSprite } from "engine/index";
 
 export class VisibilityNotifier2D extends Node2D {
     constructor() {
@@ -255,16 +255,13 @@ export class VisibilityEnabler2D extends VisibilityNotifier2D {
             // TODO: sleep RigidBody2D
         }
         if (p_node.type === 'AnimationPlayer') {
-            // @ts-ignore
-            p_node.playback_active = p_enabled;
+            /** @type {AnimationPlayer} */ (p_node).playback_active = p_enabled;
         }
         if (p_node.type === 'AnimatedSprite') {
             if (p_enabled) {
-                // @ts-ignore
-                p_node.play();
+                /** @type {AnimatedSprite} */ (p_node).play();
             } else {
-                // @ts-ignore
-                p_node.stop();
+                /** @type {AnimatedSprite} */ (p_node).stop();
             }
         }
         if (p_node.type === 'RigidBody2D') {

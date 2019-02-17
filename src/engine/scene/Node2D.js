@@ -655,8 +655,7 @@ export default class Node2D extends VObject {
                 this.parent = this._temp_node_2d_parent;
                 this.node2d_update_transform();
                 this.parent = null;
-            }
-            else {
+            } else {
                 this.node2d_update_transform();
             }
         }
