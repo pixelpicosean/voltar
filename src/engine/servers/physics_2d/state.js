@@ -659,6 +659,7 @@ export class CollCbkData {
         this.valid_depth = 0;
         this.max = 0;
         this.amount = 0;
+        this.passed = 0;
         this.invalid_by_dir = 0;
         /**
          * @type {Vector2[]}
@@ -709,9 +710,11 @@ export function _shape_col_cbk(p_point_A, p_point_B, p_userdata) {
         }
         cbk.ptr[min_depth_idx * 2 + 0].copy(p_point_A);
         cbk.ptr[min_depth_idx * 2 + 1].copy(p_point_B);
+        cbk.passed++;
     } else {
         cbk.ptr[cbk.amount * 2 + 0].copy(p_point_A);
         cbk.ptr[cbk.amount * 2 + 1].copy(p_point_B);
         cbk.amount++;
+        cbk.passed++;
     }
 }

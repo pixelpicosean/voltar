@@ -400,6 +400,7 @@ export default class Space2DSW {
                 const cbk = new CollCbkData();
                 cbk.max = max_results;
                 cbk.amount = 0;
+                cbk.passed = 0;
                 cbk.ptr = sr;
                 cbk.invalid_by_dir = 0;
                 excluded_shape_pair_count = 0; // last step is the one valid
@@ -452,33 +453,33 @@ export default class Space2DSW {
                                     motion.normalize();
                                     cbk.valid_depth += motion_len * Math.max(motion.dot(cbk.valid_dir.clone().negate()), 0);
                                 }
-                            } else {
-                                cbk.valid_dir.set(0, 0);
-                                cbk.valid_depth = 0;
-                                cbk.invalid_by_dir = 0;
                             }
+                        } else {
+                            cbk.valid_dir.set(0, 0);
+                            cbk.valid_depth = 0;
+                            cbk.invalid_by_dir = 0;
+                        }
 
-                            let current_collisions = cbk.amount;
-                            let did_collide = false;
+                        let current_passed = cbk.passed; // save how many points passed collision
+                        let did_collide = false;
 
-                            const against_shape = col_obj.shapes[shape_index].shape;
-                            if (CollisionSolver2DSW.solve(body_shape.shape, body_shape_xform, Vector2.ZERO, against_shape, col_obj_shape_xform, Vector2.ZERO, cbkres, cbk, null, separation_margin)) {
-                                did_collide = cbk.amount > current_collisions;
+                        const against_shape = col_obj.shapes[shape_index].shape;
+                        if (CollisionSolver2DSW.solve(body_shape.shape, body_shape_xform, Vector2.ZERO, against_shape, col_obj_shape_xform, Vector2.ZERO, cbkres, cbk, null, separation_margin)) {
+                            did_collide = cbk.passed > current_passed; // more passed, so collision actually existed
+                        }
+
+                        if (!did_collide && cbk.invalid_by_dir > 0) {
+                            // this shape must be excluded
+                            if (excluded_shape_pair_count < max_excluded_shape_pairs) {
+                                const esp = excluded_shape_pairs[excluded_shape_pair_count++];
+                                esp.local_shape = body_shape.shape;
+                                esp.against_object = col_obj;
+                                esp.against_shape_index = shape_index;
                             }
+                        }
 
-                            if (!did_collide && cbk.invalid_by_dir > 0) {
-                                // this shape must be excluded
-                                if (excluded_shape_pair_count < max_excluded_shape_pairs) {
-                                    const esp = excluded_shape_pairs[excluded_shape_pair_count++];
-                                    esp.local_shape = body_shape.shape;
-                                    esp.against_object = col_obj;
-                                    esp.against_shape_index = shape_index;
-                                }
-                            }
-
-                            if (did_collide) {
-                                collided = true;
-                            }
+                        if (did_collide) {
+                            collided = true;
                         }
                     }
                 }
