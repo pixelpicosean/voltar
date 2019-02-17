@@ -570,7 +570,7 @@ export class KinematicBody2D extends PhysicsBody2D {
 
                             if (p_stop_on_slope) {
                                 const vec = lv_n.clone().add(p_floor_direction);
-                                if (vec.is_zero() && collision.travel.length() < 1) {
+                                if (vec.length() < 0.01 && collision.travel.length() < 1) {
                                     const gt = this.get_global_transform().clone();
                                     const tangent = p_floor_direction.tangent();
                                     const proj = collision.travel.clone().project(tangent);
@@ -643,15 +643,23 @@ export class KinematicBody2D extends PhysicsBody2D {
 
         const n_floor_dir = Vector2.new();
         if (this._move(p_snap, p_infinite_inertia, col, false, true)) {
-            gt.tx += col.travel.x;
-            gt.ty += col.travel.y;
-            n_floor_dir.copy(p_floor_direction).normalize();
-            if (!p_floor_direction.is_zero() && Math.acos(n_floor_dir.dot(col.normal)) < p_floor_max_angle) {
-                this.on_floor = true;
-                this.on_floor_body = col.collider_rid;
-                this.floor_velocity.copy(col.collider_vel);
+            let apply = true;
+            if (!p_floor_direction.is_zero()) {
+                n_floor_dir.copy(p_floor_direction).normalize();
+                if (Math.acos(n_floor_dir.dot(col.normal)) < p_floor_max_angle) {
+                    this.on_floor = true;
+                    this.on_floor_body = col.collider_rid;
+                    this.floor_velocity.copy(col.collider_vel);
+                } else {
+                    apply = false;
+                }
             }
-            this.set_global_transform(gt);
+
+            if (apply) {
+                gt.tx += col.travel.x;
+                gt.ty += col.travel.y;
+                this.set_global_transform(gt);
+            }
         }
 
         Collision.free(col);
