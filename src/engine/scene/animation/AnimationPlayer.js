@@ -631,9 +631,7 @@ export default class AnimationPlayer extends Node2D {
 
             switch (track.type) {
                 case TrackType.TYPE_VALUE: {
-                    /** @type {ValueTrack} */
-                    // @ts-ignore
-                    let t = track;
+                    let t = /** @type {ValueTrack} */(track);
                     let update_mode = t.update_mode;
 
                     if (update_mode === UpdateMode.UPDATE_CONTINUOUS || update_mode === UpdateMode.UPDATE_CAPTURE || (equals(delta, 0) && update_mode === UpdateMode.UPDATE_DISCRETE)) { // delta == 0 means seek
@@ -643,9 +641,7 @@ export default class AnimationPlayer extends Node2D {
                     }
                 } break;
                 case TrackType.TYPE_METHOD: {
-                    /** @type {MethodTrack} */
-                    // @ts-ignore
-                    let t = track;
+                    let t = /** @type {MethodTrack} */(track);
                 } break;
             }
         }
@@ -853,7 +849,14 @@ export default class AnimationPlayer extends Node2D {
         }
 
         c.current.from = this.animation_set[name];
-        c.current.pos = from_end ? c.current.from.animation.length : 0;
+
+        if (c.assigned !== name) { // reset
+            c.current.pos = from_end ? c.current.from.animation.length : 0;
+        } else if (from_end && c.current.pos === 0) {
+            // Animation reset BUT played backwards, set position to the end
+            c.current.pos = c.current.from.animation.length;
+        }
+
         c.current.speed_scale = custom_scale;
         c.assigned = name;
         c.seeked = false;
@@ -949,6 +952,7 @@ export default class AnimationPlayer extends Node2D {
         if (reset) {
             c.current.from = null;
             c.current.speed_scale = 1;
+            c.current.pos = 0;
         }
         this.set_process(false);
         this.queued.length = 0;
