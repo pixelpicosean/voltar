@@ -37,12 +37,44 @@ function split_to_blocks(data) {
         line = lines[i];
 
         // Reach a block head
-        if (line[0] === '[' && _.last(line) === ']') {
-            // Save current block
-            blocks.push(block);
+        if (line[0] === '[') {
+            // Is it a one-line head?
+            if (_.last(line) === ']') {
+                // Save current block
+                blocks.push(block);
 
-            // Start a new block
-            block = [line];
+                // Start a new block
+                block = [line];
+            }
+            // So it's a multi-line head
+            else {
+                // Loop through lines to find all the closing brackets
+                let close_brackets_to_be_found = 0;
+                let content = '';
+                inner: for (; i < lines.length; i++) {
+                    let inner_line = lines[i];
+
+                    // Concate the lines since head is only allowed
+                    // to be one-line
+                    content = `${content} ${inner_line}`;
+
+                    // How many [ do we have in this line?
+                    close_brackets_to_be_found += (inner_line.match(/\[/g) || []).length;
+
+                    // How many ] do we have in this line?
+                    close_brackets_to_be_found -= (inner_line.match(/\]/g) || []).length;
+
+                    // Are we done?
+                    if (close_brackets_to_be_found === 0) {
+                        // Save current block
+                        blocks.push(block);
+
+                        // Start a new block
+                        block = [content.trim()];
+                        break inner;
+                    }
+                }
+            }
         } else {
             block.push(line);
         }
@@ -87,6 +119,25 @@ function parse_attr(attr_str) {
 
             // Remove parsed attribute
             str = str.substring(idx + 2 + value.length);
+        }
+        // - array
+        else if (first_letter_of_value === '[') {
+            let str_after_mark = str.substring(idx + 1);
+            let close_brackets_to_be_found = 1;
+            let attr_length = 1;
+            inner: for (let i = 1; i < str_after_mark.length; i++) {
+                attr_length += 1;
+
+                close_brackets_to_be_found += ((str_after_mark[i] === '[') ? 1 : ((str_after_mark[i] === ']') ? -1 : 0));
+
+                if (close_brackets_to_be_found === 0) {
+                    attr[key] = GeneralArray(str_after_mark);
+                    break inner;
+                }
+            }
+
+            // Remove parsed attribute
+            str = str.substring(idx + attr_length);
         }
         // - function value
         else {

@@ -9,12 +9,13 @@ const {
 } = require('../parse_utils');
 
 module.exports = (data) => {
-    return {
+    const node = {
         key: data.key,
         index: int(data.attr.index),
         type: 'Node2D',
         name: string(data.attr.name),
         parent: path(data.attr.parent),
+        groups: undefined,
         position: Vector2(data.prop.position),
         rotation: real(data.prop.rotation),
         scale: Vector2(data.prop.scale),
@@ -22,4 +23,10 @@ module.exports = (data) => {
         self_modulate: Color(data.prop.self_modulate),
         visible: boolean(data.prop.visible),
     };
+
+    if (Array.isArray(data.attr.groups)) {
+        node.groups = data.attr.groups.filter(g => g.length > 0);
+    }
+
+    return node;
 };

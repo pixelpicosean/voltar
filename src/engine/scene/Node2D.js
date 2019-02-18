@@ -293,7 +293,7 @@ export default class Node2D extends VObject {
         this.named_children = new Map();
 
         /**
-         * @type {Array<number>}
+         * @type {Set<string>}
          */
         this.groups = null;
 
@@ -334,6 +334,11 @@ export default class Node2D extends VObject {
         }
         if (data.name !== undefined) {
             this.name = data.name;
+        }
+        if (data.groups !== undefined) {
+            for (const g of data.groups) {
+                this.add_to_group(g);
+            }
         }
         if (data.width !== undefined) {
             this.width = data.width;
@@ -458,39 +463,53 @@ export default class Node2D extends VObject {
     }
 
     /**
-     * @param {number} group
+     * @param {string} group
      * @returns {this}
      */
     add_to_group(group) {
         if (!this.groups) {
-            this.groups = [];
+            this.groups = new Set();
         }
-        if (this.groups.indexOf(group) < 0) {
-            this.groups.push(group);
 
+        const in_group = this.groups.has(group);
+        if (!in_group) {
+            this.groups.add(group);
             if (this.is_inside_tree) {
                 // this.scene_tree.add_node_to_group(this, group);
             }
         }
+
         return this;
     }
     /**
-     * @param {number} group
+     * @param {string} group
      * @returns {this}
      */
     remove_from_group(group) {
         if (!this.groups) {
-            this.groups = [];
+            this.groups = new Set();
+            return this;
         }
-        let idx = this.groups.indexOf(group);
-        if (idx >= 0) {
-            remove_items(this.groups, idx, 1);
+
+        if (this.groups.has(group)) {
+            this.groups.delete(group);
 
             if (this.is_inside_tree) {
                 // this.scene_tree.remove_node_from_group(this, group);
             }
         }
         return this;
+    }
+
+    /**
+     * @param {string} group
+     */
+    is_in_group(group) {
+        return this.groups && this.groups.has(group);
+    }
+
+    get_groups() {
+        return this.groups;
     }
 
     /**
