@@ -6,7 +6,12 @@
             "type": "Sprite",
             "width": 400,
             "height": 20,
-            "tint": 0,
+            "self_modulate": {
+                "r": 1,
+                "g": 1,
+                "b": 1,
+                "a": 0.32
+            },
             "visible": false,
             "texture": "_white_"
         },
