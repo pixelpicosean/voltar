@@ -382,11 +382,11 @@ export default class PhysicsServer {
      * @param {Area2DSW} p_area
      */
 
-     /**
-     * @param {Area2DSW} p_area
-     * @param {any} p_receiver
-     * @param {Function} p_method
-     */
+    /**
+    * @param {Area2DSW} p_area
+    * @param {any} p_receiver
+    * @param {Function} p_method
+    */
     area_set_monitor_callback(p_area, p_receiver, p_method) {
         p_area.set_monitor_callback(p_receiver, p_method);
     }
@@ -444,10 +444,10 @@ export default class PhysicsServer {
     }
     /**
      * @param {Body2DSW} p_body
-     * @param {Shape2DSW} p_shape
+     * @param {number} p_shape
      */
     body_remove_shape(p_body, p_shape) {
-        p_body.remove_shape(p_shape);
+        p_body.remove_shape_by_index(p_shape);
     }
     /**
      * @param {Body2DSW} p_body
@@ -515,9 +515,10 @@ export default class PhysicsServer {
      * @param {Body2DSW} p_body
      * @param {number} p_shape_idx
      * @param {boolean} p_enabled
+     * @param {number} p_margin
      */
-    body_set_shape_as_one_way_collision(p_body, p_shape_idx, p_enabled) {
-        p_body.set_shape_as_one_way_collision(p_shape_idx, p_enabled);
+    body_set_shape_as_one_way_collision(p_body, p_shape_idx, p_enabled, p_margin) {
+        p_body.set_shape_as_one_way_collision(p_shape_idx, p_enabled, p_margin);
     }
 
     /**

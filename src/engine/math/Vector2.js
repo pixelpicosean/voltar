@@ -15,7 +15,7 @@ export default class Vector2 {
      * @param {number} [p_x]
      * @param {number} [p_y]
      */
-    static new(p_x=0, p_y=0) {
+    static new(p_x = 0, p_y = 0) {
         const vec = pool.pop();
         if (!vec) {
             return new Vector2(p_x, p_y);
@@ -594,8 +594,8 @@ export default class Vector2 {
      *
      * @return {Vector2}
      */
-    tangent() {
-        return Vector2.new(this.y, -this.x);
+    tangent(r_out = Vector2.new()) {
+        return r_out.set(this.y, -this.x);
     }
 
     is_zero() {

@@ -19,12 +19,13 @@ class Shape {
         this.metadata = null;
         this.disabled = false;
         this.one_way_collision = false;
+        this.one_way_collision_margin = 0;
     }
 }
 
 export default class CollisionObject2DSW {
     get static() {
-        return  this._static;
+        return this._static;
     }
     /**
      * @param {boolean} p_static
@@ -286,9 +287,11 @@ export default class CollisionObject2DSW {
     /**
      * @param {number} p_index
      * @param {boolean} p_one_way_collision
+     * @param {number} p_margin
      */
-    set_shape_as_one_way_collision(p_index, p_one_way_collision) {
+    set_shape_as_one_way_collision(p_index, p_one_way_collision, p_margin) {
         this.shapes[p_index].one_way_collision = p_one_way_collision;
+        this.shapes[p_index].one_way_collision_margin = p_margin;
     }
     /**
      * @param {number} p_index

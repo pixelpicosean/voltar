@@ -76,6 +76,11 @@ function _rest_cbk_result(p_point_A, p_point_B, rd) {
 
     const contact_rel = p_point_B.clone().subtract(p_point_A);
     const len = contact_rel.length();
+
+    if (len < rd.min_allowed_depth) {
+        return;
+    }
+
     if (len <= rd.best_len) {
         return;
     }
@@ -112,6 +117,7 @@ class _RestCallbackData2D {
         this.best_len = 0;
         this.valid_dir = new Vector2();
         this.valid_depth = 0;
+        this.min_allowed_depth = 0;
     }
 }
 
@@ -172,6 +178,7 @@ export default class Space2DSW {
         this.contact_recycle_radius = 1;
         this.contact_max_separation = 1.5;
         this.contact_max_allowed_penetration = 0.3;
+        this.test_motion_min_contact_depth = 0.005;
         this.constraint_bias = 0.2;
 
         /** @type {CollisionObject2DSW[]} */
@@ -661,6 +668,7 @@ export default class Space2DSW {
             rcd.best_len = 0;
             rcd.best_object = null;
             rcd.best_shape = 0;
+            rcd.min_allowed_depth = this.test_motion_min_contact_depth;
 
             // optimization
             let from_shape = best_shape !== -1 ? best_shape : 0;

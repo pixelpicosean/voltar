@@ -56,7 +56,7 @@ declare module 'ismobilejs' {
 }
 
 declare module 'pixi-gl-core' {
-    interface WebGLState {}
+    interface WebGLState { }
 
     export interface ContextOptions {
         /**
@@ -223,13 +223,13 @@ declare module 'pixi-gl-core' {
          * @param attributeLocations {any} An attribute location map that lets you manually set the attribute locations
          * @return {WebGLProgram} the shader program
          */
-        export function compileProgram(gl: WebGLRenderingContext, vertexSrc: string|string[], fragmentSrc: string|string[], attributeLocations: any): WebGLProgram;
+        export function compileProgram(gl: WebGLRenderingContext, vertexSrc: string | string[], fragmentSrc: string | string[], attributeLocations: any): WebGLProgram;
 
         /**
          * @param type Type of value
          * @param size
          */
-        export function defaultValue(type: string, size: number): Array<boolean>|Int32Array|Float32Array;
+        export function defaultValue(type: string, size: number): Array<boolean> | Int32Array | Float32Array;
 
         /**
          * Extracts the attributes
@@ -255,7 +255,7 @@ declare module 'pixi-gl-core' {
          * @param uniforms {{[key: string]: any}} @mat ?
          * @return {any}
          */
-        export function generateUniformAccessObject(gl: WebGLRenderingContext, uniform: {[key: string]: any}): any;
+        export function generateUniformAccessObject(gl: WebGLRenderingContext, uniform: { [key: string]: any }): any;
 
         /**
          * Sets the float precision on the shader. If the precision is already present this function will do nothing
@@ -274,5 +274,5 @@ declare module 'pixi-gl-core' {
 }
 
 declare module 'earcut' {
-    export default function earcut(data: number[], hole_indices?: number[], dim?: number);
+    export default function earcut(data: number[], hole_indices?: number[], dim?: number): number[];
 }

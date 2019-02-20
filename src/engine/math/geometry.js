@@ -143,3 +143,35 @@ export function get_closest_point_to_segment_uncapped_2d(p_point, p_segment) {
 
     return p_segment[0].clone().add(n.scale(d));
 }
+
+/**
+ * @param {Vector2[]} p_polygon
+ */
+export function is_polygon_clockwise(p_polygon) {
+    const c = p_polygon.length;
+    if (c < 3) {
+        return false;
+    }
+    let sum = 0;
+    /** @type {Vector2} */
+    let v1 = null;
+    /** @type {Vector2} */
+    let v2 = null;
+    for (let i = 0; i < c; i++) {
+        v1 = p_polygon[i];
+        v2 = p_polygon[(i + 1) % c];
+        sum += (v2.x - v1.x) * (v2.y + v1.y);
+    }
+
+    return sum > 0;
+}
+
+/**
+ * Returns a list of points on the convex hull in counter-clockwise order.
+ * Note: the last point in the returned list is the same as the first one.
+ * @param {Vector2[]} p
+ */
+export function convex_hull_2d(p) {
+    console.warn('"convex_hull_2d" is not supported yet!');
+    return [];
+}
