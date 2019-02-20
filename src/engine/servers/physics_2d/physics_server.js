@@ -15,7 +15,7 @@ import {
     _shape_col_cbk,
 } from "./state";
 import Step2DSW from "./step_2d_sw";
-import { CircleShape2DSW, Shape2DSW, RectangleShape2DSW, SegmentShape2DSW, RayShape2DSW } from "./shape_2d_sw";
+import { CircleShape2DSW, Shape2DSW, RectangleShape2DSW, SegmentShape2DSW, RayShape2DSW, ConvexPolygonShape2DSW } from "./shape_2d_sw";
 import CollisionSolver2DSW from "./collision_solver_2d_sw";
 import Space2DSW from "./space_2d_sw";
 import Area2DSW from "./area_2d_sw";
@@ -91,7 +91,9 @@ export default class PhysicsServer {
         return new RectangleShape2DSW();
     }
     capsule_shape_create() { }
-    convex_polygon_shape_create() { }
+    convex_polygon_shape_create() {
+        return new ConvexPolygonShape2DSW();
+    }
     concave_polygon_shape_create() { }
 
     /**

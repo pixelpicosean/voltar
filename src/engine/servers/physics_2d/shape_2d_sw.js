@@ -798,8 +798,8 @@ RectangleShape2DSW.prototype.project_range_cast = Shape2DSW.prototype.__default_
 
 class Point {
     constructor(pos_x = 0, pos_y = 0, normal_x = 0, normal_y = 0) {
-        this.pos = new Vector2();
-        this.normal = new Vector2();
+        this.pos = new Vector2(pos_x, pos_y);
+        this.normal = new Vector2(normal_x, normal_y);
     }
 }
 
@@ -977,13 +977,12 @@ export class ConvexPolygonShape2DSW extends Shape2DSW {
     }
 
     /**
-     * @param {number[]} p_data
+     * @param {Vector2[]} p_data
      */
     set_data(p_data) {
-        const len = Math.floor(p_data.length / 2);
-        this._points.length = len;
+        const len = p_data.length;
         for (let i = 0; i < len; i++) {
-            this.points[i] = new Point(p_data[i * 2 + 0], p_data[i * 2 + 1]);
+            this._points[i] = new Point(p_data[i].x, p_data[i].y);
         }
         const n = Vector2.new(), t = Vector2.new();
         for (let i = 0; i < len; i++) {

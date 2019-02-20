@@ -11,6 +11,7 @@ export default class ConvexPolygonShape2D extends Shape2D {
      * @param {Vector2[]} p_points
      */
     set points(p_points) {
+        this._points = p_points;
         this._update_shape();
     }
     /**
@@ -22,12 +23,17 @@ export default class ConvexPolygonShape2D extends Shape2D {
     }
 
     constructor() {
-        super(PhysicsServer.singleton.rectangle_shape_create());
+        super(PhysicsServer.singleton.convex_polygon_shape_create());
 
         /**
          * @type {Vector2[]}
          */
         this._points = [];
+        const pcount = 3;
+        for (let i = 0; i < pcount; i++) {
+            this._points.push(new Vector2(Math.sin(i * Math.PI * 2 / pcount), -Math.cos(i * Math.PI * 2 / pcount)).scale(10));
+        }
+
         this._update_shape();
     }
     _load_data(p_data) {
