@@ -123,6 +123,7 @@ export default class CollisionShape2D extends Node2D {
      * @param {boolean} [p_xform_only]
      */
     _update_in_shape_owner(p_xform_only = false) {
+        this.transform.update_local_transform();
         this.parent.shape_owner_set_transform(this, this.transform.local_transform);
         if (p_xform_only) {
             return;
