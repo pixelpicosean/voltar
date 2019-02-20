@@ -254,8 +254,8 @@ export default class CollisionPolygon2D extends Node2D {
         for (let i = 0; i < len; i++) {
             decomp[i] = [
                 this._polygon[indexes[i * 3 + 0]],
-                this._polygon[indexes[i * 3 + 1]],
                 this._polygon[indexes[i * 3 + 2]],
+                this._polygon[indexes[i * 3 + 1]],
             ]
         }
 
