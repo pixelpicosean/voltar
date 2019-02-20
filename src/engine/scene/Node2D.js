@@ -1124,7 +1124,7 @@ export default class Node2D extends VObject {
 
     _propagate_enter_tree() {
         // Add to scene tree groups
-        if (this.groups && this.groups.length > 0) {
+        if (this.groups && this.groups.size > 0) {
             for (let g of this.groups) {
                 // this.scene_tree.add_node_to_group(this, g);
             }
@@ -1185,8 +1185,8 @@ export default class Node2D extends VObject {
         this.tweens && this.tweens._stop_all();
 
         // Remove from scene tree groups
-        if (this.groups && this.groups.length > 0) {
-            for (let i = 0; i < this.groups.length; i++) {
+        if (this.groups && this.groups.size > 0) {
+            for (let i = 0; i < this.groups.size; i++) {
                 // this.scene_tree.remove_node_from_group(this, this.groups[i]);
             }
         }

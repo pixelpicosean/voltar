@@ -543,16 +543,8 @@ const resource_normalizers = {
         return font;
     },
     BitmapFont: (res, meta) => path.basename(res.path, '.fnt'),
-    RectangleShape2D: (res, meta, parent) => {
-        res.position = parent.position;
-        delete parent.position;
-        return res;
-    },
-    CircleShape2D: (res, meta, parent) => {
-        res.position = parent.position;
-        delete parent.position;
-        return res;
-    },
+    RectangleShape2D: (res, meta, parent) => res,
+    CircleShape2D: (res, meta, parent) => res,
     TileSet: (res, meta) => {
         const text_data = fs.readFileSync(normalize_res_real_url(res.path), 'utf8');
 
