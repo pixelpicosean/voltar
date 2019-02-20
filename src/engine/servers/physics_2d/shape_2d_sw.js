@@ -980,13 +980,13 @@ export class ConvexPolygonShape2DSW extends Shape2DSW {
      * @param {Vector2[]} p_data
      */
     set_data(p_data) {
-        const len = p_data.length;
-        for (let i = 0; i < len; i++) {
+        const point_count = p_data.length;
+        for (let i = 0; i < point_count; i++) {
             this._points[i] = new Point(p_data[i].x, p_data[i].y);
         }
         const n = Vector2.new(), t = Vector2.new();
-        for (let i = 0; i < len; i++) {
-            n.copy(this._points[i].pos).subtract(this._points[(i + 1) % len].pos);
+        for (let i = 0; i < point_count; i++) {
+            n.copy(this._points[(i + 1) % point_count].pos).subtract(this._points[i].pos);
             this._points[i].normal.copy(n.tangent(t).normalize());
         }
         Vector2.free(t);
@@ -995,7 +995,7 @@ export class ConvexPolygonShape2DSW extends Shape2DSW {
         const aabb = Rectangle.new();
         aabb.x = this._points[0].pos.x;
         aabb.y = this._points[0].pos.y;
-        for (let i = 1; i < len; i++) {
+        for (let i = 1; i < point_count; i++) {
             aabb.expand_to(this._points[i].pos);
         }
 

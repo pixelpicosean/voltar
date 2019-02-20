@@ -4,6 +4,7 @@ import { Rectangle, Vector2 } from "engine/math/index";
 import { res_class_map } from "engine/registry";
 import ConvexPolygonShape2D from "../resources/convex_polygon_shape_2d";
 import earcut from 'earcut';
+import decompose_in_convex from "engine/math/convex";
 
 /**
  * @param {Vector2[]} arr
@@ -245,20 +246,6 @@ export default class CollisionPolygon2D extends Node2D {
     }
 
     _decompose_in_convex() {
-        // TODO: create polygons instead of triangles
-        const indexes = earcut(vec2_arr_2_num_arr(this._polygon));
-        const len = Math.floor(indexes.length / 3);
-
-        /** @type {Vector2[][]} */
-        const decomp = new Array(len);
-        for (let i = 0; i < len; i++) {
-            decomp[i] = [
-                this._polygon[indexes[i * 3 + 0]],
-                this._polygon[indexes[i * 3 + 2]],
-                this._polygon[indexes[i * 3 + 1]],
-            ]
-        }
-
-        return decomp;
+        return decompose_in_convex(this._polygon).map(arr => arr.reverse());
     }
 }

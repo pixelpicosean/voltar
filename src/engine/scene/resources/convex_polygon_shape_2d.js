@@ -30,7 +30,7 @@ export default class ConvexPolygonShape2D extends Shape2D {
          */
         this._points = [];
         const pcount = 3;
-        for (let i = 0; i < pcount; i++) {
+        for (let i = pcount - 1; i >= 0; i--) {
             this._points.push(new Vector2(Math.sin(i * Math.PI * 2 / pcount), -Math.cos(i * Math.PI * 2 / pcount)).scale(10));
         }
 
@@ -56,7 +56,7 @@ export default class ConvexPolygonShape2D extends Shape2D {
     _update_shape() {
         let final_points = this._points;
         // needs to be counter clockwise
-        if (!is_polygon_clockwise(final_points)) {
+        if (is_polygon_clockwise(final_points)) {
             final_points = final_points.reverse();
         }
         this.shape.set_data(final_points);
