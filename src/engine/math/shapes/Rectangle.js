@@ -17,7 +17,7 @@ export default class Rectangle {
      * @param {number} p_width
      * @param {number} p_height
      */
-    static new(p_x=0, p_y=0, p_width=0, p_height=0) {
+    static new(p_x = 0, p_y = 0, p_width = 0, p_height = 0) {
         const r = pool.pop();
         if (!r) {
             return new Rectangle(p_x, p_y, p_width, p_height);
@@ -235,19 +235,30 @@ export default class Rectangle {
      * @param {Vector2} p_vector
      */
     expand_to(p_vector) {
-        if (p_vector.x < this.x) {
-            this.x = p_vector.x;
+        const begin = Vector2.new(this.x, this.y);
+        const end = Vector2.new(this.x + this.width, this.y + this.height);
+
+        if (p_vector.x < begin.x) {
+            begin.x = p_vector.x;
         }
-        if (p_vector.y < this.y) {
-            this.y = p_vector.y;
+        if (p_vector.y < begin.y) {
+            begin.y = p_vector.y;
         }
 
-        if (p_vector.x > this.x + this.width) {
-            this.width = p_vector.x - this.x;
+        if (p_vector.x > end.x) {
+            end.x = p_vector.x;
         }
-        if (p_vector.y > this.y + this.height) {
-            this.height = p_vector.y - this.y;
+        if (p_vector.y > end.y) {
+            end.y = p_vector.y;
         }
+
+        this.x = begin.x;
+        this.y = begin.y;
+        this.width = end.x - begin.x;
+        this.height = end.y - begin.y;
+
+        Vector2.free(begin);
+        Vector2.free(end);
 
         return this;
     }
