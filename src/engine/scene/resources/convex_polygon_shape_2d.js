@@ -36,9 +36,6 @@ export default class ConvexPolygonShape2D extends Shape2D {
 
         this._update_shape();
     }
-    _load_data(p_data) {
-        return this;
-    }
 
     /**
      * @param {Rectangle} [p_rect]
@@ -59,8 +56,8 @@ export default class ConvexPolygonShape2D extends Shape2D {
     _update_shape() {
         let final_points = this._points;
         // needs to be counter clockwise
-        if (is_polygon_clockwise(final_points)) {
-            final_points = final_points.slice(0).reverse();
+        if (!is_polygon_clockwise(final_points)) {
+            final_points = final_points.reverse();
         }
         this.shape.set_data(final_points);
     }
