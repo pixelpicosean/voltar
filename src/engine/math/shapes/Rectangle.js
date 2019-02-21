@@ -18,20 +18,21 @@ export default class Rectangle {
      * @param {number} p_height
      */
     static new(p_x = 0, p_y = 0, p_width = 0, p_height = 0) {
-        const r = pool.pop();
-        if (!r) {
-            return new Rectangle(p_x, p_y, p_width, p_height);
-        } else {
-            return r.set(p_x, p_y, p_width, p_height);
-        }
+        // const r = pool.pop();
+        // if (!r) {
+        //     return new Rectangle(p_x, p_y, p_width, p_height);
+        // } else {
+        //     return r.set(p_x, p_y, p_width, p_height);
+        // }
+        return new Rectangle(p_x, p_y, p_width, p_height);
     }
     /**
      * @param {Rectangle} p_rect
      */
     static free(p_rect) {
-        if (p_rect) {
-            pool.push(p_rect);
-        }
+        // if (p_rect) {
+        //     pool.push(p_rect);
+        // }
         return Rectangle;
     }
 
