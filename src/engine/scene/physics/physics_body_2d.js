@@ -586,7 +586,7 @@ export class KinematicBody2D extends PhysicsBody2D {
                                     Collision.free(collision);
                                     Vector2.free(vec);
                                     Matrix.free(gt);
-                                    return Vector2.ZERO;
+                                    return Vector2.new(0, 0);
                                 }
                             }
                         } else if (collision.normal.dot(p_floor_direction.clone().negate()) >= Math.cos(p_floor_max_angle + FLOOR_ANGLE_THRESHOLD)) { // ceiling

@@ -680,7 +680,7 @@ export default class Body2DSW extends CollisionObject2DSW {
         } else if (this.mode === BodyMode.KINEMATIC) {
             return this.transform.origin.clone().subtract(this.new_transform.origin);
         }
-        return Vector2.ZERO;
+        return Vector2.new(0, 0);
     }
 
     call_queries() {
