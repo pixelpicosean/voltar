@@ -617,11 +617,6 @@ export default class Matrix {
 
         if (delta < 0.00001 || Math.abs(PI2 - delta) < 0.00001) {
             transform.rotation = skew_y;
-
-            if (a < 0 && d >= 0) {
-                transform.rotation += (transform.rotation <= 0) ? Math.PI : -Math.PI;
-            }
-
             transform.skew.x = transform.skew.y = 0;
         }
         else {
