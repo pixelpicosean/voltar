@@ -21,14 +21,6 @@ export {
 };
 
 /**
- * @param {String} path
- * @returns {String}
- */
-export function scene_path_to_key(path) {
-    return path.replace(/^scene\/|\.json$/g, '');
-}
-
-/**
  * Gets the next unique identifier
  *
  * @return {number} The next unique identifier to use.

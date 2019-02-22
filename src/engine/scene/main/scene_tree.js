@@ -5,7 +5,7 @@ import Node2D from '../Node2D';
 import Vector from '../../math/Vector2';
 import { shared as shared_ticker } from '../../ticker/index';
 import Loader from 'engine/core/io/Loader';
-import { mixins, deep_merge, scene_path_to_key } from '../../utils/index';
+import { mixins, deep_merge } from '../../utils/index';
 
 import { outer_box_resize } from '../../resize';
 import { optional, scene_class_map, node_class_map, res_procs } from '../../registry';
@@ -21,7 +21,7 @@ import Input from 'engine/input/index';
  * @typedef ApplicationSettings
  * @prop {string} name
  * @prop {typeof Node2D} preloader
- * @prop {typeof Node2D} main_scene
+ * @prop {string} main_scene
  */
 
 /**
@@ -440,12 +440,10 @@ export default class SceneTree {
      * @param {String} path
      */
     change_scene(path) {
-        const key = scene_path_to_key(path);
-
-        this._next_scene = scene_class_map[key];
+        this._next_scene = scene_class_map[path];
 
         if (!this._next_scene) {
-            this._next_scene = require(`scene/${key}.json`);
+            this._next_scene = this.resource_map[path];
         }
     }
     /**

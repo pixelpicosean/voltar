@@ -223,19 +223,14 @@ export function register_scene_class(key, ctor) {
  * @returns {typeof Node2D}
  */
 export function attach_script(url, scene) {
-    const key = utils.scene_path_to_key(url);
-    const data = resource_map[key];
-
-    // Add `instance` static method if not exist
-    if (!scene['instance'] || (typeof (scene['instance']) !== 'function')) {
-        scene['instance'] = () => {
-            return assemble_scene(new scene(), data);
-        };
-    }
+    // Add `instance` static method
+    scene['instance'] = () => {
+        return assemble_scene(new scene(), resource_map[url]);
+    };
 
     // @ts-ignore
     // Register as scene
-    register_scene_class(key, scene);
+    register_scene_class(url, scene);
 
     return scene;
 }
