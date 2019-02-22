@@ -3,6 +3,7 @@ import { Matrix, Vector2, Rectangle } from 'engine/math/index';
 import Color from 'engine/Color';
 import Texture from 'engine/textures/Texture';
 import { TextureCache } from 'engine/utils/index';
+import { res_procs } from 'engine/registry';
 
 class ShapeData {
     constructor() {
@@ -77,7 +78,15 @@ class TileData {
     }
 }
 
+const tile_set_map = {};
+
 export default class TileSet {
+    /**
+     * @param {string} key
+     */
+    static with_key(key) {
+        return tile_set_map[key];
+    }
     constructor() {
         /**
          * @type {TileData[]}
@@ -101,4 +110,19 @@ export default class TileSet {
     clear() {
         this.tile_map.length = 0;
     }
+}
+
+res_procs['TileSet'] = (key, data, resource_map) => {
+    let res = tile_set_map[key];
+
+    // Create tile set for each resource
+    if (!res) {
+        res = Object.freeze(new TileSet()._load_data(data));
+        tile_set_map[key] = res;
+    }
+
+    // Save tile set to global resource_map
+    resource_map[key] = res;
+
+    return res;
 }
