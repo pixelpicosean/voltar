@@ -8,9 +8,14 @@ export const node_class_map = {};
 
 /**
  * Resource class looking table
- * @type {Object}
+ * @type {Object<string, GeneratorFunctionConstructor>}
  */
 export const res_class_map = {};
+
+/**
+ * @type {Object<string, (key: string, data: any, resource_map: Object<string, any>) => any>}
+ */
+export const res_procs = {};
 
 /**
  * Plugins to be used in Node2D class

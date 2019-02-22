@@ -511,11 +511,10 @@ function normalize_res_url(url) {
  * @returns {string}
  */
 function normalize_res_real_url(url) {
-    const without_prefix = url.replace('res://', __dirname + '/../assets/');
-    return without_prefix;
+    return url.replace('res://', path.normalize(path.join(__dirname, '/../assets/')));
 }
 
-const ext_loading_queue = [];
+const resource_map = {};
 
 const resource_normalizers = {
     Texture: (res) => normalize_image_res_url(res.path),
@@ -661,19 +660,21 @@ const resource_normalizers = {
         }
 
         if (result) {
+            const json_path = real_url.replace(path.extname(real_url), '.json');
+
             // Save resource as JSON besides of the original tscn file
-            fs.writeFileSync(`${real_url.substr(0, real_url.length - path.extname(real_url).length)}.json`, JSON.stringify(result, null, 4));
+            fs.writeFileSync(json_path, JSON.stringify(result, null, 4));
 
             // Add this resource to loading queue
-            ext_loading_queue.push({
-                url: res.path,
-                res: result,
-            });
+            resource_map[res.path] = {
+                '@type#': 'TileSet',
+                data: result,
+            };
         }
 
         return `@url#${res.path}`;
     },
-    PackedScene: (res) => normalize_res_url(res.path),
+    PackedScene: (res) => res.path,
     Curve2D: (res) => ({ points: res.points }),
     Curve: (res) => res,
 };
@@ -813,32 +814,20 @@ function convert_scene(tscn_path) {
     return scene;
 }
 
-module.exports.convert_scenes = (scene_root_url) => {
+module.exports.convert_scenes = (/** @type {string} */scene_root_url_p) => {
+    const scene_root_url = path.normalize(scene_root_url_p);
     const generated_data = [];
     walk.walkSync(scene_root_url, {
         listeners: {
-            file: function (root, fileStats, next) {
-                if (path.extname(fileStats.name) === '.tscn') {
-                    const url = `${root}/${fileStats.name}`;
-                    const name = fileStats.name.substring(0, fileStats.name.length - 5);
-                    const key = (() => {
-                        const segs = root.split('/scene/');
-                        segs.shift();
-                        let path = '';
-                        if (segs.length > 0) {
-                            for (let s of segs) {
-                                path += s;
-                            }
-                            path += `/${name}`;
-                        } else {
-                            path = name;
-                        }
-                        return path;
-                    })();
+            file: function (root, file_stats, next) {
+                if (path.extname(file_stats.name) === '.tscn') {
+                    const url = path.resolve(root, file_stats.name);
+                    const relative_to_root = path.relative(scene_root_url, root);
+                    const data = convert_scene(url);
                     generated_data.push({
-                        url: url.replace(/\.tscn/, '.json'),
-                        filename: key,
-                        data: convert_scene(url),
+                        url: url.replace(/\.tscn$/, '.json'),
+                        filename: `res://${(path.join(relative_to_root, file_stats.name))}`,
+                        data: data,
                     })
                 } else {
                     next();
@@ -1051,7 +1040,7 @@ module.exports.convert_project_settings = (project_url) => {
 };
 
 module.exports.get_resource_map = () => {
-    return ext_loading_queue;
+    return resource_map;
 };
 
 /**

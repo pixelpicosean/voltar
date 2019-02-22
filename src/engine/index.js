@@ -143,6 +143,8 @@ import Input from './input/index';
 import SceneTree from './scene/main/scene_tree';
 import Loader from './core/io/Loader';
 
+import resource_map from 'resources.json';
+
 const preload_queue = {
     is_complete: false,
     /** @type {(string|Object)[][]} */
@@ -150,7 +152,7 @@ const preload_queue = {
 };
 
 export const input = new Input();
-export const scene_tree = new SceneTree(input, preload_queue);
+export const scene_tree = new SceneTree(input, preload_queue, resource_map);
 export const sound = audio.SoundLibrary.init();
 
 // ------------------------------------------------------------------
@@ -222,7 +224,7 @@ export function register_scene_class(key, ctor) {
  */
 export function attach_script(url, scene) {
     const key = utils.scene_path_to_key(url);
-    const data = require(`scene/${key}.json`);
+    const data = resource_map[key];
 
     // Add `instance` static method if not exist
     if (!scene['instance'] || (typeof (scene['instance']) !== 'function')) {
@@ -267,7 +269,7 @@ function assemble_node(node, children) {
 
         if (data.type === 'Scene') {
             // Scene data (converted from ".tscn")
-            const packed_scene = require(`scene/${data.filename}.json`);
+            const packed_scene = resource_map[data.filename];
 
             // Let's see whether it is registered
             const scene_class = has.call(scene_class_map, data.filename) ? scene_class_map[data.filename] : undefined;

@@ -1,9 +1,8 @@
 import * as v from 'engine/index';
-import layout from 'scene/Demo.json';
 
 export default class Demo extends v.Node2D {
     static instance() {
-        return v.assemble_scene(new Demo(), layout);
+        return new Demo();
     }
     _enter_tree() {
         this.add_child(new v.Sprite())
@@ -11,3 +10,5 @@ export default class Demo extends v.Node2D {
             .set_position(100, 100)
     }
 }
+
+v.attach_script('res://scene/Demo.tscn', Demo);

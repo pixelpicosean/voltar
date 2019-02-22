@@ -8,7 +8,7 @@ import Loader from 'engine/core/io/Loader';
 import { mixins, deep_merge, scene_path_to_key } from '../../utils/index';
 
 import { outer_box_resize } from '../../resize';
-import { optional, scene_class_map, node_class_map } from '../../registry';
+import { optional, scene_class_map, node_class_map, res_procs } from '../../registry';
 import Theme, { default_font_name } from '../resources/Theme';
 import { registered_bitmap_fonts } from '../text/res';
 import { assemble_scene } from '../../index';
@@ -154,13 +154,70 @@ export class Group {
     }
 }
 
+const ext_key = '@ext#', ext_len = ext_key.length;
+const sub_key = '@sub#', sub_len = sub_key.length;
+const url_key = '@url#', url_len = url_key.length;
+res_procs['PackedScene'] = (key, data, resource_map) => {
+    const ext = data.__meta__.ext;
+    const sub = data.__meta__.sub;
+    const normalize = (node) => {
+        let k, v, res;
+        for (k in node) {
+            v = node[k];
+            if (typeof (v) === 'string' && v[0] === '@') {
+                // ext_resource?
+                if (v.indexOf(ext_key) >= 0) {
+                    res = ext[v.substring(ext_len)];
+                    if (typeof (res) === 'string' && res[0] === '@') {
+                        if (res.indexOf(url_key) >= 0) {
+                            res = resource_map[res.substring(url_len)];
+                        }
+                    }
+                    node[k] = res;
+                }
+                // sub_resource?
+                else if (v.indexOf(sub_key) >= 0 && v[0] === '@') {
+                    res = sub[v.substring(sub_len)];
+                    if (typeof (res) === 'string' && res[0] === '@') {
+                        if (res.indexOf(url_key) >= 0) {
+                            res = resource_map[res.substring(url_len)];
+                        }
+                    }
+                    node[k] = res;
+                }
+            }
+        }
+
+        for (let n of node.children) {
+            normalize(n);
+        }
+
+        return node;
+    }
+
+    // Normalize ext and sub resources of this scene
+    const scene = normalize(data);
+    delete scene.__meta__;
+
+    // Override scene data back to resource_map
+    resource_map[key] = scene;
+
+    return scene;
+}
+
+/**
+ * @typedef FoldedResource
+ * @property {string} type
+ * @property {any} data
+ */
+
 export default class SceneTree {
     /**
-     *
      * @param {Input} input
      * @param {{ is_complete: boolean, queue: (string|Object)[][]}} preload_queue
+     * @param {Object<string, FoldedResource|any>} resource_map
      */
-    constructor(input, preload_queue) {
+    constructor(input, preload_queue, resource_map) {
         this.tree_version = 1;
         this.physics_process_time = 1;
         this.idle_process_time = 1;
@@ -175,6 +232,8 @@ export default class SceneTree {
         this.paused = false;
 
         this.debug_collisions_hint = false;
+
+        this.resource_map = resource_map;
 
         /**
          * @type {Map<string, Group>}
@@ -283,6 +342,17 @@ export default class SceneTree {
         this.loader.connect_once('complete', () => {
             this.preload_queue.is_complete = true;
             Theme.set_default_font(registered_bitmap_fonts[default_font_name]);
+
+            // Process imported resources
+            const has = Object.prototype.hasOwnProperty;
+            const resource_map = this.resource_map;
+            const type_key = '@type#';
+            for (let k in resource_map) {
+                if (has.call(resource_map[k], type_key)) {
+                    resource_map[k] = res_procs[resource_map[k][type_key]](k, resource_map[k].data, resource_map);
+                }
+            }
+            resource_map;
         });
 
         window.addEventListener('load', this._initialize, false);
