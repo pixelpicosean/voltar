@@ -751,7 +751,7 @@ function normalize_resource(node, meta, __final_meta__) {
                 const key = get_function_params(value)[0];
                 let res = meta.sub_resource[key];
                 node[k] = `@sub#${key}`;
-                __final_meta__.ext[key] = resource_normalizers[res.type](res, meta, node);
+                __final_meta__.sub[key] = resource_normalizers[res.type](res, meta, node);
             }
         }
     }
