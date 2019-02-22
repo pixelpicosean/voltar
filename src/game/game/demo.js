@@ -1,10 +1,8 @@
 import * as v from 'engine/index';
 
 export default class Demo extends v.Node2D {
-    _enter_tree() {
-        this.add_child(new v.Sprite())
-            .set_texture('progress')
-            .set_position(100, 100)
+    _ready() {
+        console.log('Demo is ready!');
     }
 }
 
