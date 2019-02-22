@@ -21,7 +21,7 @@ import Input from 'engine/input/index';
  * @typedef ApplicationSettings
  * @prop {string} name
  * @prop {typeof Node2D} preloader
- * @prop {string} main_scene
+ * @prop {string|typeof Node2D} main_scene
  */
 
 /**

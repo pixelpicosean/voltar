@@ -32,7 +32,7 @@ v.scene_tree.init(
     v.utils.deep_merge(Settings, {
         application: {
             preloader: Preloader,
-            main_scene: Main,
+            main_scene: 'res://scene/Demo.tscn',
         },
         display: {
             scale_mode: 'nearest',

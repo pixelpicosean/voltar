@@ -24,7 +24,13 @@ export default class Boot extends v.Node2D {
             bar.width = full_bar_width;
 
             v.scene_tree.loader.disconnect('progress', on_load_progress);
-            v.scene_tree.change_scene_to(v.scene_tree.settings.application.main_scene);
+
+            const main_scene = v.scene_tree.settings.application.main_scene;
+            if (typeof (main_scene) === 'string') {
+                v.scene_tree.change_scene(main_scene);
+            } else {
+                v.scene_tree.change_scene_to(main_scene);
+            }
         }
 
         v.scene_tree.loader.connect('progress', on_load_progress);
