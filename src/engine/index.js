@@ -276,10 +276,10 @@ function assemble_node(node, children) {
             // Or we simply create it as a "collapsed scene tree"
             else {
                 inst = new (node_class_map[packed_scene.type])();
-            }
 
-            // Create child nodes
-            assemble_node(inst, packed_scene.children);
+                // Create child nodes
+                assemble_node(inst, packed_scene.children);
+            }
 
             // Load scene's local data
             inst._load_data(packed_scene);
