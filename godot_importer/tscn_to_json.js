@@ -515,6 +515,8 @@ function normalize_res_real_url(url) {
     return without_prefix;
 }
 
+const ext_loading_queue = [];
+
 const resource_normalizers = {
     Texture: (res) => normalize_image_res_url(res.path),
     SpriteFrames: (res, meta) => {
@@ -546,13 +548,15 @@ const resource_normalizers = {
     RectangleShape2D: (res, meta, parent) => res,
     CircleShape2D: (res, meta, parent) => res,
     TileSet: (res, meta) => {
-        const text_data = fs.readFileSync(normalize_res_real_url(res.path), 'utf8');
+        const real_url = normalize_res_real_url(res.path);
+        const text_data = fs.readFileSync(real_url, 'utf8');
 
         const sections = split_to_blocks(text_data)
             .map(parse_block)
             .map(convert_block)
 
         let result = undefined;
+        let tile_map = undefined;
         const res_table = {};
         const head = sections.shift();
         for (let i = 0; i < head.attr.load_steps; i++) {
@@ -589,19 +593,19 @@ const resource_normalizers = {
 
                         array[index][key_list[1]] = value;
                     }
-                    result = array;
+                    tile_map = array;
                 }
                 // Dictionary?
                 else {
-                    result = prop;
+                    tile_map = prop;
                 }
             }
         }
 
-        if (result.length > 0) {
-            const texture = result[0].texture;
-            const tile_mode = result[0].tile_mode;
-            result = result.map(tile => {
+        if (tile_map.length > 0) {
+            const texture = tile_map[0].texture;
+            const tile_mode = tile_map[0].tile_mode;
+            tile_map = tile_map.map(tile => {
                 const data = {};
                 if (tile.modulate) {
                     if (
@@ -650,13 +654,24 @@ const resource_normalizers = {
                 return data;
             });
 
-            return {
+            result = {
                 texture: texture,
-                tile_map: result,
+                tile_map: tile_map,
             };
         }
 
-        return result;
+        if (result) {
+            // Save resource as JSON besides of the original tscn file
+            fs.writeFileSync(`${real_url.substr(0, real_url.length - path.extname(real_url).length)}.json`, JSON.stringify(result, null, 4));
+
+            // Add this resource to loading queue
+            ext_loading_queue.push({
+                url: res.path,
+                res: result,
+            });
+        }
+
+        return `@url#${res.path}`;
     },
     PackedScene: (res) => normalize_res_url(res.path),
     Curve2D: (res) => ({ points: res.points }),
@@ -716,7 +731,7 @@ const post_resource_actions = {
     },
 };
 
-function normalize_resource(node, meta) {
+function normalize_resource(node, meta, __final_meta__) {
     // try to normalize all implicit properties
     for (let k in node) {
         let value = node[k];
@@ -727,11 +742,15 @@ function normalize_resource(node, meta) {
 
         if (_.isString(value)) {
             if (value.indexOf('ExtResource') >= 0) {
-                let res = meta.ext_resource[get_function_params(value)[0]];
-                node[k] = resource_normalizers[res.type](res, meta, node);
+                const key = get_function_params(value)[0];
+                let res = meta.ext_resource[key];
+                node[k] = `@ext#${key}`;
+                __final_meta__.ext[key] = resource_normalizers[res.type](res, meta, node);
             } else if (value.indexOf('SubResource') >= 0) {
-                let res = meta.sub_resource[get_function_params(value)[0]];
-                node[k] = resource_normalizers[res.type](res, meta, node);
+                const key = get_function_params(value)[0];
+                let res = meta.sub_resource[key];
+                node[k] = `@sub#${key}`;
+                __final_meta__.ext[key] = resource_normalizers[res.type](res, meta, node);
             }
         }
     }
@@ -743,7 +762,7 @@ function normalize_resource(node, meta) {
 
     if (node.children) {
         node.children.forEach(child => {
-            normalize_resource(child, meta);
+            normalize_resource(child, meta, __final_meta__);
         });
     }
 }
@@ -760,12 +779,12 @@ function post_process_nodes(node) {
 }
 
 function clean_up_unused_data(node) {
-    // Remove __meta__
-    node.__meta__ = undefined;
+    // Let's use the final meta as final meta
+    node.__meta__ = node.__final_meta__;
 
     // Remove properties start with "_"
     for (let k in node) {
-        if (k[0] === '_') {
+        if (_.startsWith(k, '_') && k !== '__meta__') {
             delete node[k];
         }
     }
@@ -777,7 +796,7 @@ function clean_up_unused_data(node) {
 }
 
 function convert_scene(tscn_path) {
-    console.log(`- import "${path.basename(tscn_path)}"`);
+    console.log(`  - import "${path.basename(tscn_path)}"`);
 
     const data = fs.readFileSync(tscn_path, 'utf8');
 
@@ -788,7 +807,8 @@ function convert_scene(tscn_path) {
     );
 
     // Normalize resources
-    normalize_resource(scene, scene.__meta__);
+    scene.__final_meta__ = { ext: {}, sub: {} };
+    normalize_resource(scene, scene.__meta__, scene.__final_meta__);
 
     return scene;
 }
@@ -835,11 +855,23 @@ module.exports.convert_scenes = (scene_root_url) => {
 
     for (let s of generated_data) {
         const scene = s.data;
+        const meta = scene.__final_meta__;
 
         // Parse scene instance data
         const parse = (node) => {
             if (node.type === 'Scene') {
-                const template = scene_db[node.filename].data;
+                let filename = node.filename;
+
+                // ext_resource?
+                if (_.startsWith(node.filename, '@ext#')) {
+                    filename = meta.ext[filename.substring(5)];
+                }
+                // sub_resource?
+                else if (_.startsWith(node.filename, '@sub#')) {
+                    filename = meta.sub[filename.substring(5)];
+                }
+
+                const template = scene_db[filename].data;
 
                 const res = require(`./parser/res/${template.type}`)(
                     {
@@ -869,7 +901,7 @@ module.exports.convert_scenes = (scene_root_url) => {
         parse(s.data);
 
         // Normalize resources
-        normalize_resource(scene, scene.__meta__);
+        normalize_resource(scene, scene.__meta__, scene.__final_meta__);
 
         // Post process
         post_process_nodes(scene);
@@ -1016,6 +1048,10 @@ module.exports.convert_project_settings = (project_url) => {
     }
 
     fs.writeFileSync(project_url.replace(/\.godot/, '.json'), JSON.stringify(real_settings, null, 4));
+};
+
+module.exports.get_resource_map = () => {
+    return ext_loading_queue;
 };
 
 /**
