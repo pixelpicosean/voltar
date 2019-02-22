@@ -19,15 +19,15 @@ module.exports = (data) => {
 
     const tile_data = [];
     const encoded_data = PoolIntArray(data.prop.tile_data);
-    for (let i = 0; i < encoded_data.length - 3; i += 3) {
+    for (let i = 0; i < encoded_data.length; i += 3) {
         // Insert int32 data
         view.setInt32(0, encoded_data[i + 0]); // 0 - 4 byte
         view.setInt32(4, encoded_data[i + 1]); // 4 - 8 byte
         view.setInt32(8, encoded_data[i + 2]); // 8 - 12 byte
 
         // Decode real data from the buffer
-        const x = view.getUint16(0); // 0 - 2 byte
-        const y = view.getUint16(2); // 2 - 4 byte
+        const y = view.getUint16(0); // 0 - 2 byte
+        const x = view.getUint16(2); // 2 - 4 byte
         const t = view.getUint32(4); // 4 - 8 byte
 
         // TODO: parse tile flags `view.getUint32(8)` // 8 - 12 byte

@@ -13,7 +13,7 @@ export default class TileMap extends Node2D {
 
         this.type = 'TileMap';
 
-        this.cell_size = new Vector2();
+        this.cell_size = new Vector2(64, 64);
 
         /**
          * @type {Texture[]}
@@ -28,7 +28,7 @@ export default class TileMap extends Node2D {
         /**
          * @type {TileSet}
          */
-        this.tile_set = null;
+        this.tile_set = new TileSet();
 
 
         // Rendering caches
@@ -48,8 +48,20 @@ export default class TileMap extends Node2D {
         this._needs_redraw = true;
     }
 
+    _load_data(data) {
+        super._load_data(data);
+
+        this.tile_set._load_data(data.tile_set);
+
+        this.data = data.tile_data;
+
+        this._needs_redraw = true;
+
+        return this;
+    }
+
     clear() {
-        this.data = [];
+        this.data.length = 0;
 
         this.points_buf.length = 0;
         this.modification_marker = 0;
@@ -58,60 +70,41 @@ export default class TileMap extends Node2D {
     /**
      * @param {number} x
      * @param {number} y
-     */
-    get_tile(x, y) {
-        return this.data[y][x];
-    }
-    /**
-     * @param {number} x
-     * @param {number} y
-     * @param {number} tile
-     */
-    set_tile(x, y, tile) {
-        this.data[y][x] = tile;
-
-        this._needs_redraw = true;
-    }
-
-    /**
      * @param {number} u
      * @param {number} v
-     * @param {number} x
-     * @param {number} y
+     * @param {number} w
+     * @param {number} h
      */
-    _push_tile(u, v, x, y) {
+    _push_tile(x, y, u, v, w, h) {
         var pb = this.points_buf;
 
         pb.push(u);
         pb.push(v);
         pb.push(x);
         pb.push(y);
-        pb.push(this.cell_size.x);
-        pb.push(this.cell_size.y);
+        pb.push(w);
+        pb.push(h);
 
         // TODO: support multi-textures
         pb.push(0);
     }
 
     _draw_tiles() {
-        let r, q, row, c, u, v;
-        const tile_per_row = Math.floor(this.textures[0].width / this.tile_width);
+        // Reset
+        this.points_buf.length = 0;
+        this.modification_marker = 0;
 
-        for (r = 0; r < this.data.length; r++) {
-            row = this.data[r];
-            for (q = 0; q < row.length; q++) {
-                c = row[q];
+        // Upload textures
+        this.textures[0] = this.tile_set.texture;
 
-                if (c === 0)
-                    continue;
-                else
-                    c -= 1;
-
-                u = Math.floor(c % tile_per_row) * this.tile_width;
-                v = Math.floor(c / tile_per_row) * this.tile_height;
-
-                this._push_tile(u, v, q * this.tile_width, r * this.tile_height);
-            }
+        // Create tiles
+        for (let i = 0; i < this.data.length; i += 3) {
+            const tile = this.tile_set.tile_map[this.data[i + 2]];
+            this._push_tile(
+                this.data[i + 0] * this.cell_size.x, this.data[i + 1] * this.cell_size.y,
+                tile.region.x, tile.region.y,
+                tile.region.width, tile.region.height
+            );
         }
     }
 
@@ -122,8 +115,6 @@ export default class TileMap extends Node2D {
         // Check whether we need to redraw the whole map
         if (this._needs_redraw) {
             this._needs_redraw = false;
-            this.points_buf.length = 0;
-            this.modification_marker = 0;
             this._draw_tiles();
         }
 

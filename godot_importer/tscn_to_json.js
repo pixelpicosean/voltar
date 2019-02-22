@@ -649,6 +649,11 @@ const resource_normalizers = {
                 }
                 return data;
             });
+
+            return {
+                texture: texture,
+                tile_map: result,
+            };
         }
 
         return result;

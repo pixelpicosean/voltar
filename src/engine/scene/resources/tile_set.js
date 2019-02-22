@@ -1,5 +1,8 @@
 import Shape2D from './shape_2d';
 import { Matrix, Vector2, Rectangle } from 'engine/math/index';
+import Color from 'engine/Color';
+import Texture from 'engine/textures/Texture';
+import { TextureCache } from 'engine/utils/index';
 
 class ShapeData {
     constructor() {
@@ -10,7 +13,7 @@ class ShapeData {
         this.shape_transform = new Matrix();
         this.autotile_coord = new Vector2();
         this.one_way_collision = false;
-        this.one_way_collision_margin = 1;
+        this.one_way_collision_margin = 1.0;
     }
 }
 
@@ -52,13 +55,25 @@ class TileData {
     constructor() {
         this.offset = new Vector2();
         this.region = new Rectangle();
+        /** @type {ShapeData[]} */
         this.shapes_data = [];
         this.occluder_offset = new Vector2();
         this.occluder = null;
         this.navigation_polygon_offset = new Vector2();
         this.navigation_polygon = null;
         this.tile_mode = SINGLE_TITLE;
+        this.modulate = new Color(1, 1, 1, 1);
         this.autotile_data = new AutotileData();
+    }
+    _load_data(data) {
+        if (data.offset !== undefined) {
+            this.offset.copy(data.offset);
+        }
+        if (data.region !== undefined) {
+            this.region.copy(data.region);
+        }
+        // TODO: support other properties
+        return this;
     }
 }
 
@@ -68,8 +83,22 @@ export default class TileSet {
          * @type {TileData[]}
          */
         this.tile_map = [];
+        /**
+         * @type {Texture}
+         */
+        this.texture = null;
     }
     _load_data(data) {
+        this.tile_map.length = data.tile_map.length;
+        for (let i = 0; i < this.tile_map.length; i++) {
+            this.tile_map[i] = new TileData()._load_data(data.tile_map[i]);
+        }
+        this.texture = TextureCache[data.texture] || Texture.WHITE;
+
         return this;
+    }
+
+    clear() {
+        this.tile_map.length = 0;
     }
 }
