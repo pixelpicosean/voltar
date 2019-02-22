@@ -3,7 +3,6 @@
 [ext_resource path="res://image/tilesets/collisiontiles-64.png" type="Texture" id=1]
 
 [resource]
-
 0/name = "collisiontiles-64.png 0"
 0/texture = ExtResource( 1 )
 0/tex_offset = Vector2( 0, 0 )

@@ -26,6 +26,7 @@ import Settings from 'project.json';
 // while in Godot you do not need to use atlas, keep using single images.
 // This may change in the future, but will keep as is right now.
 v.preload('media/sprites.json');
+v.preload('collisiontiles-64', 'media/collisiontiles-64.png');
 
 v.scene_tree.init(
     v.utils.deep_merge(Settings, {
