@@ -208,7 +208,7 @@ export default class NinePatchRect extends Control {
         // TODO: sync more properties for rendering
         this.mesh._update_transform();
         this.mesh.tint = this.tint;
-        this.mesh.alpha = this.alpha;
+        this.mesh.self_modulate.a = this.alpha;
         this.mesh.blend_mode = this.blend_mode;
 
         this.mesh._render_webgl(renderer);

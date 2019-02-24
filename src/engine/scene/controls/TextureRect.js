@@ -168,7 +168,7 @@ export default class TextureRect extends Control {
                 // TODO: sync more properties for rendering
                 this.sprite._update_transform();
                 this.sprite.tint = this.tint;
-                this.sprite.alpha = this.alpha;
+                this.sprite.self_modulate.a = this.alpha;
                 this.sprite.blend_mode = this.blend_mode;
 
                 this.sprite._render_webgl(renderer);
@@ -199,7 +199,7 @@ export default class TextureRect extends Control {
                 // TODO: sync more properties for rendering
                 this.sprite._update_transform();
                 this.sprite.tint = this.tint;
-                this.sprite.alpha = this.alpha;
+                this.sprite.self_modulate.a = this.alpha;
                 this.sprite.blend_mode = this.blend_mode;
 
                 this.sprite._render_webgl(renderer);
@@ -213,7 +213,7 @@ export default class TextureRect extends Control {
                 this.tsprite._update_transform();
                 this.tsprite.clamp_margin = -0.5;
                 this.tsprite.tint = this.tint;
-                this.tsprite.alpha = this.alpha;
+                this.tsprite.self_modulate.a = this.alpha;
                 this.tsprite.blend_mode = this.blend_mode;
 
                 this.tsprite._render_webgl(renderer);
@@ -234,7 +234,7 @@ export default class TextureRect extends Control {
                 this.tsprite._update_transform();
                 this.tsprite.clamp_margin = -0.5;
                 this.tsprite.tint = this.tint;
-                this.tsprite.alpha = this.alpha;
+                this.tsprite.self_modulate.a = this.alpha;
                 this.tsprite.blend_mode = this.blend_mode;
 
                 this.tsprite._render_webgl(renderer);

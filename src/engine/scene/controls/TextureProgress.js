@@ -492,7 +492,7 @@ export default class TextureProgress extends Range {
                 // TODO: sync more properties for rendering
                 this.mesh_under._update_transform();
                 this.mesh_under.tint = this._tint_under.as_hex();
-                this.mesh_under.alpha = this.alpha;
+                this.mesh_under.self_modulate.a = this.alpha;
                 this.mesh_under.blend_mode = this.blend_mode;
 
                 this.mesh_under._render_webgl(renderer);
@@ -534,7 +534,7 @@ export default class TextureProgress extends Range {
                 // TODO: sync more properties for rendering
                 this.mesh_progress._update_transform();
                 this.mesh_progress.tint = this._tint_under.as_hex();
-                this.mesh_progress.alpha = this.alpha;
+                this.mesh_progress.self_modulate.a = this.alpha;
                 this.mesh_progress.blend_mode = this.blend_mode;
 
                 renderer.flush();
@@ -554,7 +554,7 @@ export default class TextureProgress extends Range {
                 // TODO: sync more properties for rendering
                 this.mesh_over._update_transform();
                 this.mesh_over.tint = this._tint_under.as_hex();
-                this.mesh_over.alpha = this.alpha;
+                this.mesh_over.self_modulate.a = this.alpha;
                 this.mesh_over.blend_mode = this.blend_mode;
 
                 this.mesh_over._render_webgl(renderer);
@@ -567,7 +567,7 @@ export default class TextureProgress extends Range {
                 // TODO: sync more properties for rendering
                 this.sprite_under._update_transform();
                 this.sprite_under.tint = this._tint_under.as_hex();
-                this.sprite_under.alpha = this.alpha;
+                this.sprite_under.self_modulate.a = this.alpha;
                 this.sprite_under.blend_mode = this.blend_mode;
 
                 this.sprite_under._render_webgl(renderer);
@@ -646,7 +646,7 @@ export default class TextureProgress extends Range {
                 // TODO: sync more properties for rendering
                 this.sprite_progress._update_transform();
                 this.sprite_progress.tint = this._tint_progress.as_hex();
-                this.sprite_progress.alpha = this.alpha;
+                this.sprite_progress.self_modulate.a = this.alpha;
                 this.sprite_progress.blend_mode = this.blend_mode;
 
                 if (mask) {
@@ -666,7 +666,7 @@ export default class TextureProgress extends Range {
                 // TODO: sync more properties for rendering
                 this.sprite_over._update_transform();
                 this.sprite_over.tint = this._tint_over.as_hex();
-                this.sprite_over.alpha = this.alpha;
+                this.sprite_over.self_modulate.a = this.alpha;
                 this.sprite_over.blend_mode = this.blend_mode;
 
                 this.sprite_over._render_webgl(renderer);
