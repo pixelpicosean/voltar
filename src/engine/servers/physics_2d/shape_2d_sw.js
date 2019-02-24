@@ -664,7 +664,11 @@ export class RectangleShape2DSW extends Shape2DSW {
      * @returns {boolean}
      */
     contains_point(p_point) {
-        return Math.abs(p_point.x) < this.half_extents.x && Math.abs(p_point.y) < this.half_extents.y;
+        const x = p_point.x;
+        const y = p_point.y;
+        const edge_x = this.half_extents.x;
+        const edge_y = this.half_extents.y;
+        return (x >= -edge_x) && (x < edge_x) && (y >= -edge_y) && (y < edge_y);
     }
     /**
      * @param {Vector2} p_begin
