@@ -285,6 +285,10 @@ export default class AnimatedSprite extends Sprite {
         return this;
     }
 
+    /**
+     * @param {string} anim
+     * @param {boolean} [restart]
+     */
     play(anim, restart = false) {
         if (anim && anim.length > 0) {
             this._animation = anim;
@@ -293,9 +297,11 @@ export default class AnimatedSprite extends Sprite {
         if (restart) {
             this._frame = 0;
         }
+        return this;
     }
     stop() {
         this._set_playing(false);
+        return this;
     }
 
     _reset_timeout() {
