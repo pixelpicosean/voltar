@@ -1,10 +1,8 @@
 import Node2D from "../Node2D";
-import Shape2D from "../resources/shape_2d";
 import { Rectangle, Vector2 } from "engine/math/index";
-import { res_class_map } from "engine/registry";
 import ConvexPolygonShape2D from "../resources/convex_polygon_shape_2d";
-import earcut from 'earcut';
 import decompose_in_convex from "engine/math/convex";
+import { is_polygon_clockwise } from "engine/math/geometry";
 
 /**
  * @param {Vector2[]} arr
@@ -123,6 +121,10 @@ export default class CollisionPolygon2D extends Node2D {
                 this.aabb.width += this.aabb.width * 0.6;
                 this.aabb.height += this.aabb.height * 0.6;
             }
+        }
+
+        if (is_polygon_clockwise(this._polygon)) {
+            this._polygon.reverse();
         }
 
         if (this.parent) {
