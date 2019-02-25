@@ -156,6 +156,9 @@ export default class AnimatedSprite extends Sprite {
     get frames() {
         return this._frames;
     }
+    /**
+     * @param {SpriteFrames} frames_p
+     */
     set frames(frames_p) {
         let frames = null;
         if (typeof (frames_p) === 'string') {
@@ -167,6 +170,9 @@ export default class AnimatedSprite extends Sprite {
         }
         this._frames = frames;
     }
+    /**
+     * @param {SpriteFrames} value
+     */
     set_frames(value) {
         this.frames = value;
         return this;
@@ -175,6 +181,9 @@ export default class AnimatedSprite extends Sprite {
     get animation() {
         return this._animation;
     }
+    /**
+     * @param {string} anim
+     */
     set animation(anim) {
         if (this._animation === anim) {
             return;
@@ -182,13 +191,15 @@ export default class AnimatedSprite extends Sprite {
 
         this._animation = anim;
         this._reset_timeout();
-        this._frame = 0;
-        this._update_texture();
+        this.frame = 0;
     }
 
     get frame() {
         return this._frame;
     }
+    /**
+     * @param {number} frame
+     */
     set frame(frame) {
         if (!this._frames) {
             return;
@@ -214,6 +225,9 @@ export default class AnimatedSprite extends Sprite {
         this._update_texture();
         this.emit_signal('frame_changed');
     }
+    /**
+     * @param {number} value
+     */
     set_frame(value) {
         this.frame = value;
         return this;
@@ -226,6 +240,9 @@ export default class AnimatedSprite extends Sprite {
         this._playing = true;
         this._set_playing(value);
     }
+    /**
+     * @param {boolean} value
+     */
     set_playing(value) {
         this.playing = value;
         return this;
@@ -253,11 +270,15 @@ export default class AnimatedSprite extends Sprite {
          */
         this._playing = false;
 
-        this._animation = '';
+        this._animation = 'default';
+        /**
+         * @type {number}
+         */
         this._frame = 0;
         this.speed_scale = 1;
 
         this.timeout = 0;
+        this.is_over = false;
     }
     _load_data(data) {
         super._load_data(data);
@@ -291,7 +312,7 @@ export default class AnimatedSprite extends Sprite {
      */
     play(anim, restart = false) {
         if (anim && anim.length > 0) {
-            this._animation = anim;
+            this.animation = anim;
         }
         this._set_playing(true);
         if (restart) {
@@ -300,37 +321,23 @@ export default class AnimatedSprite extends Sprite {
         return this;
     }
     stop() {
-        this._set_playing(false);
+        this.playing = false;
         return this;
     }
 
     _reset_timeout() {
-        if (!this.playing) {
-            return;
-        }
-        if (!this._frames) {
+        if (!this._playing) {
             return;
         }
 
-        if (this._frames.has_animation(this.animation)) {
-            const speed = this._frames.get_animation_speed(this.animation);
-            if (speed > 0) {
-                this.timeout = 1.0 / speed;
-            }
-            else {
-                this.timeout = 0;
-            }
-        }
-        else {
-            this.timeout = 0;
-        }
+        this.timeout = this._get_frame_duration();
+        this.is_over = false;
     }
     _set_playing(playing) {
-        if (this.playing === playing) {
+        if (this._playing === playing) {
             return;
         }
-        this.playing = playing;
-
+        this._playing = playing;
         this._reset_timeout();
     }
 
@@ -359,32 +366,32 @@ export default class AnimatedSprite extends Sprite {
             return;
         }
 
-        const speed = this._frames.get_animation_speed(this._animation);
+        const speed = this._frames.get_animation_speed(this._animation) * this.speed_scale;
         if (speed === 0) {
             super._propagate_process(delta);
             return;
         }
 
-        let remaining = delta * this.speed_scale;
+        let remaining = delta;
 
         while (remaining) {
             if (this.timeout <= 0) {
-                this.timeout = 1.0 / speed;
+                this.timeout = this._get_frame_duration();
 
                 const fc = this._frames.get_frame_count(this._animation);
                 if (this._frame >= fc - 1) {
                     if (this._frames.get_animation_loop(this._animation)) {
                         this._frame = 0;
-                    }
-                    else {
-                        this._frame = fc - 1;
-                    }
-                }
-                else {
-                    this._frame++;
-                    if (this._frame === fc - 1) {
                         this.emit_signal('animation_finished');
+                    } else {
+                        this._frame = fc - 1;
+                        if (!this.is_over) {
+                            this.is_over = true;
+                            this.emit_signal('animation_finished');
+                        }
                     }
+                } else {
+                    this._frame++;
                 }
 
                 this._update_texture();
@@ -416,6 +423,16 @@ export default class AnimatedSprite extends Sprite {
             this._texture = TextureCache[tex];
             this._texture_id = -1;
         }
+    }
+
+    _get_frame_duration() {
+        if (this._frames && this._frames.has_animation(this._animation)) {
+            const speed = this._frames.get_animation_speed(this._animation) * this.speed_scale;
+            if (speed > 0) {
+                return 1 / speed;
+            }
+        }
+        return 0;
     }
 
     /**
