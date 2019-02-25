@@ -93,6 +93,9 @@ export default class Area2D extends CollisionObject2D {
      */
     set_collision_layer(layer) {
         this.collision_layer = layer;
+        if (this.rid) {
+            this.rid.collision_layer = this.collision_layer;
+        }
 
         return this;
     }
@@ -109,6 +112,10 @@ export default class Area2D extends CollisionObject2D {
             this.collision_layer |= (1 << bit);
         } else {
             this.collision_layer &= ~(1 << bit);
+        }
+
+        if (this.rid) {
+            this.rid.collision_layer = this.collision_layer;
         }
 
         return this;
@@ -137,6 +144,10 @@ export default class Area2D extends CollisionObject2D {
     set_collision_mask(mask) {
         this.collision_mask = mask;
 
+        if (this.rid) {
+            this.rid.collision_mask = this.collision_mask;
+        }
+
         return this;
     }
     /**
@@ -152,6 +163,10 @@ export default class Area2D extends CollisionObject2D {
             this.collision_mask |= (1 << bit);
         } else {
             this.collision_mask &= ~(1 << bit);
+        }
+
+        if (this.rid) {
+            this.rid.collision_mask = this.collision_mask;
         }
 
         return this;
@@ -306,6 +321,12 @@ export default class Area2D extends CollisionObject2D {
     _load_data(data) {
         super._load_data(data);
 
+        if (data.collision_layer !== undefined) {
+            this.set_collision_layer(data.collision_layer);
+        }
+        if (data.collision_mask !== undefined) {
+            this.set_collision_mask(data.collision_mask);
+        }
         if (data.gravity_point !== undefined) {
             this.gravity_point = data.gravity_point;
         }

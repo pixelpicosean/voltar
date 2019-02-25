@@ -333,6 +333,6 @@ export default class CollisionObject2DSW {
      * @param {CollisionObject2DSW} p_other
      */
     test_collision_mask(p_other) {
-        return this.collision_layer & p_other.collision_mask || p_other.collision_layer & this.collision_mask;
+        return !!(this.collision_layer & p_other.collision_mask) || !!(p_other.collision_layer & this.collision_mask);
     }
 }

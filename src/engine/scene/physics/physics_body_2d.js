@@ -30,6 +30,9 @@ export class PhysicsBody2D extends CollisionObject2D {
      */
     set_collision_layer(layer) {
         this.collision_layer = layer;
+        if (this.rid) {
+            this.rid.collision_layer = this.collision_layer;
+        }
 
         return this;
     }
@@ -46,6 +49,10 @@ export class PhysicsBody2D extends CollisionObject2D {
             this.collision_layer |= (1 << bit);
         } else {
             this.collision_layer &= ~(1 << bit);
+        }
+
+        if (this.rid) {
+            this.rid.collision_layer = this.collision_layer;
         }
 
         return this;
@@ -74,6 +81,10 @@ export class PhysicsBody2D extends CollisionObject2D {
     set_collision_mask(mask) {
         this.collision_mask = mask;
 
+        if (this.rid) {
+            this.rid.collision_mask = this.collision_mask;
+        }
+
         return this;
     }
     /**
@@ -89,6 +100,10 @@ export class PhysicsBody2D extends CollisionObject2D {
             this.collision_mask |= (1 << bit);
         } else {
             this.collision_mask &= ~(1 << bit);
+        }
+
+        if (this.rid) {
+            this.rid.collision_mask = this.collision_mask;
         }
 
         return this;
@@ -120,6 +135,18 @@ export class PhysicsBody2D extends CollisionObject2D {
         this.rid;
 
         this.rid.set_mode(p_mode);
+    }
+    _load_data(data) {
+        super._load_data(data);
+
+        if (data.collision_layer !== undefined) {
+            this.set_collision_layer(data.collision_layer);
+        }
+        if (data.collision_mask !== undefined) {
+            this.set_collision_mask(data.collision_mask);
+        }
+
+        return this;
     }
 
     get_collision_exception() { }
@@ -222,6 +249,25 @@ export class StaticBody2D extends PhysicsBody2D {
          * @type {PhysicsMaterial}
          */
         this._physics_material_override = null;
+    }
+
+    _load_data(data) {
+        super._load_data(data);
+
+        if (data.bounce !== undefined) {
+            this.bounce = data.bounce;
+        }
+        if (data.constant_angular_velocity !== undefined) {
+            this.constant_angular_velocity = data.constant_angular_velocity;
+        }
+        if (data.constant_linear_velocity !== undefined) {
+            this.constant_linear_velocity.copy(data.constant_linear_velocity);
+        }
+        if (data.friction !== undefined) {
+            this.friction = data.friction;
+        }
+
+        return this;
     }
 
     _reload_physics_characteristics() {
@@ -347,6 +393,16 @@ export class KinematicBody2D extends PhysicsBody2D {
 
         this.last_valid_transform = new Matrix();
     }
+    _load_data(data) {
+        super._load_data(data);
+
+        if (data.safe_margin !== undefined) {
+            this.margin = data.safe_margin;
+        }
+
+        return this;
+    }
+
     _propagate_enter_tree() {
         super._propagate_enter_tree();
 

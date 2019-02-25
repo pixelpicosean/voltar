@@ -211,7 +211,7 @@ export default class Space2DSW {
                 keep = false;
             } else if (res.type === CollisionObjectType.AREA) {
                 keep = false;
-            } else if (res.test_collision_mask(p_body) === 0) {
+            } else if (!res.test_collision_mask(p_body)) {
                 keep = false;
             } else if (res.has_exception(p_body.self) || p_body.has_exception(res.self)) {
                 keep = false;

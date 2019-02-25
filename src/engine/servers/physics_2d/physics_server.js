@@ -532,6 +532,22 @@ export default class PhysicsServer {
     }
 
     /**
+     * @param {import('engine/scene/physics/physics_body_2d').PhysicsBody2D} p_body
+     * @param {number} p_layer
+     */
+    body_set_collision_layer(p_body, p_layer) {
+        p_body.rid.collision_layer = p_layer;
+    }
+
+    /**
+     * @param {import('engine/scene/physics/physics_body_2d').PhysicsBody2D} p_body
+     * @param {number} p_mask
+     */
+    body_set_collision_mask(p_body, p_mask) {
+        p_body.rid.collision_mask = p_mask;
+    }
+
+    /**
      * @param {Body2DSW} p_body
      * @param {Matrix} p_from
      * @param {Vector2} p_motion

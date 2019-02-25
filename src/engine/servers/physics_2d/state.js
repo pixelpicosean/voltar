@@ -476,7 +476,8 @@ export class Physics2DDirectSpaceStateSW {
      * @param {boolean} [collide_with_bodies=true]
      * @param {boolean} [collide_with_areas=false]
      */
-    intersect_shape(shape, xform, motion, margin, result, result_max, exclude = undefined, collision_layer = 0xFFFFFFFF, collide_with_bodies = true, collide_with_areas = false) { }
+    intersect_shape(shape, xform, motion, margin, result, result_max, exclude = undefined, collision_layer = 0xFFFFFFFF, collide_with_bodies = true, collide_with_areas = false) {
+    }
 
     /**
      * @param {any} shape
@@ -490,7 +491,8 @@ export class Physics2DDirectSpaceStateSW {
      * @param {boolean} [collide_with_bodies=true]
      * @param {boolean} [collide_with_areas=false]
      */
-    cast_motion(shape, xform, motion, margin, closest_safe, closest_unsafe, result_max, exclude = undefined, collision_layer = 0xFFFFFFFF, collide_with_bodies = true, collide_with_areas = false) { }
+    cast_motion(shape, xform, motion, margin, closest_safe, closest_unsafe, result_max, exclude = undefined, collision_layer = 0xFFFFFFFF, collide_with_bodies = true, collide_with_areas = false) {
+    }
 
     /**
      * @param {any} shape
@@ -505,7 +507,8 @@ export class Physics2DDirectSpaceStateSW {
      * @param {boolean} [collide_with_bodies=true]
      * @param {boolean} [collide_with_areas=false]
      */
-    collide_shape(shape, xform, motion, margin, results, result_max, result_count, exclude = undefined, collision_layer = 0xFFFFFFFF, collide_with_bodies = true, collide_with_areas = false) { }
+    collide_shape(shape, xform, motion, margin, results, result_max, result_count, exclude = undefined, collision_layer = 0xFFFFFFFF, collide_with_bodies = true, collide_with_areas = false) {
+    }
 
     /**
      * @param {any} shape
@@ -518,7 +521,8 @@ export class Physics2DDirectSpaceStateSW {
      * @param {boolean} [collide_with_bodies=true]
      * @param {boolean} [collide_with_areas=false]
      */
-    rest_info(shape, xform, motion, margin, info, exclude = undefined, collision_layer = 0xFFFFFFFF, collide_with_bodies = true, collide_with_areas = false) { }
+    rest_info(shape, xform, motion, margin, info, exclude = undefined, collision_layer = 0xFFFFFFFF, collide_with_bodies = true, collide_with_areas = false) {
+    }
 
     /**
      * @param {Vector2} p_point
