@@ -19,6 +19,8 @@ const tmp_vec10 = new Vector2();
 
 const tmp_rect = new Rectangle();
 
+const tmp_color = new Color();
+
 const Align = {
     LEFT: 0,
     CENTER: 1,
@@ -521,6 +523,12 @@ export default class Label extends Control {
         const font_color = this.get_color('font_color');
         const line_spacing = this.get_constant('line_spacing');
 
+        const color_hex = tmp_color
+            .copy(font_color)
+            .multiply(this.modulate)
+            .multiply(this.self_modulate)
+            .as_hex();
+
         // TODO: draw stylebox
 
         const font_h = font.height + line_spacing;
@@ -666,19 +674,12 @@ export default class Label extends Control {
                         // Update char sprite info
                         g.texture = char.texture;
                         g.position.set(x_ofs + char.h_align, y_ofs - font.ascent + char.v_align);
+                        g.tint = color_hex;
 
                         // Update transform
                         g.parent = this;
                         g._update_transform();
                         g.parent = null;
-
-                        // TODO: calculate once and set _tint to all char sprites
-                        g.modulate.set(
-                            font_color.r * this.modulate.r * this.self_modulate.r,
-                            font_color.g * this.modulate.g * this.self_modulate.g,
-                            font_color.b * this.modulate.b * this.self_modulate.b,
-                            font_color.a * this.modulate.a * this.self_modulate.a
-                        );
 
                         g._render_webgl(renderer);
 
