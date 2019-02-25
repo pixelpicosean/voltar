@@ -345,17 +345,21 @@ export default class Area2D extends CollisionObject2D {
             if (!shape) {
                 shape = this._first_shape = this.shape_find_owner(0);
             }
-            switch (shape.shape.shape.type) {
-                case ShapeType.RECTANGLE: {
-                    this.hit_area = shape.shape.get_rect();
-                } break;
-                case ShapeType.CIRCLE: {
-                    const shape_inst = /** @type {CircleShape2D} */ (shape.shape);
-                    this.hit_area = new Circle(shape.x, shape.y, shape_inst.radius);
-                } break;
-                default: {
-                    console.log(`Area2D hit area with "${shape.shape.shape.type}" shape is not supported!`);
-                } break;
+            if (shape.shape) {
+                switch (shape.shape.shape.type) {
+                    case ShapeType.RECTANGLE: {
+                        this.hit_area = shape.shape.get_rect();
+                    } break;
+                    case ShapeType.CIRCLE: {
+                        const shape_inst = /** @type {CircleShape2D} */ (shape.shape);
+                        this.hit_area = new Circle(shape.x, shape.y, shape_inst.radius);
+                    } break;
+                    default: {
+                        console.log(`Area2D hit area with "${shape.shape.shape.type}" shape is not supported!`);
+                    } break;
+                }
+            } else {
+                // TODO: supoort CollisionPolygon2D
             }
         }
 
