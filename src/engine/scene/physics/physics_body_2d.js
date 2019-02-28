@@ -22,7 +22,7 @@ export class PhysicsBody2D extends CollisionObject2D {
      * @returns {boolean}
      */
     get_collision_layer_bit(bit) {
-        return !!(this.collision_layer & (1 << bit));
+        return !!(this.collision_layer & (1 << (bit - 1)));
     }
     /**
      * @param {number} layer
@@ -46,9 +46,9 @@ export class PhysicsBody2D extends CollisionObject2D {
      */
     set_collision_layer_bit(bit, value) {
         if (value) {
-            this.collision_layer |= (1 << bit);
+            this.collision_layer |= (1 << (bit - 1));
         } else {
-            this.collision_layer &= ~(1 << bit);
+            this.collision_layer &= ~(1 << (bit - 1));
         }
 
         if (this.rid) {
@@ -72,7 +72,7 @@ export class PhysicsBody2D extends CollisionObject2D {
      * @returns {boolean}
      */
     get_collision_mask_bit(bit) {
-        return !!(this.collision_mask & (1 << bit));
+        return !!(this.collision_mask & (1 << (bit - 1)));
     }
     /**
      * @param {number} mask
@@ -97,9 +97,9 @@ export class PhysicsBody2D extends CollisionObject2D {
      */
     set_collision_mask_bit(bit, value) {
         if (value) {
-            this.collision_mask |= (1 << bit);
+            this.collision_mask |= (1 << (bit - 1));
         } else {
-            this.collision_mask &= ~(1 << bit);
+            this.collision_mask &= ~(1 << (bit - 1));
         }
 
         if (this.rid) {
