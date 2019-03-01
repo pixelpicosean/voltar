@@ -959,7 +959,7 @@ module.exports.convert_project_settings = (project_url) => {
 
         // size
         display.width = int(settings.display['window/size/width']) || 640;
-        display.height = int(settings.display['window/size/height']) || 480;
+        display.height = int(settings.display['window/size/height']) || 600;
 
         // clear color
         let clear_color = Color(settings.rendering['environment/default_clear_color']);
