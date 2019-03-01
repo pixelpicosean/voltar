@@ -131,13 +131,14 @@ function parse_attr(attr_str) {
                 close_brackets_to_be_found += ((str_after_mark[i] === '[') ? 1 : ((str_after_mark[i] === ']') ? -1 : 0));
 
                 if (close_brackets_to_be_found === 0) {
-                    attr[key] = GeneralArray(str_after_mark);
+                    const array_str = str_after_mark.substring(1, i).trim();
+                    attr[key] = GeneralArray(array_str);
                     break inner;
                 }
             }
 
             // Remove parsed attribute
-            str = str.substring(idx + attr_length);
+            str = str.substring(idx + attr_length + 1).trim();
         }
         // - function value
         else {
@@ -959,7 +960,7 @@ module.exports.convert_project_settings = (project_url) => {
 
         // size
         display.width = int(settings.display['window/size/width']) || 640;
-        display.height = int(settings.display['window/size/height']) || 600;
+        display.height = int(settings.display['window/size/height']) || 480;
 
         // clear color
         let clear_color = Color(settings.rendering['environment/default_clear_color']);
@@ -1034,6 +1035,22 @@ module.exports.convert_project_settings = (project_url) => {
         }
 
         real_settings.physics = physics;
+    }
+    if (settings.layer_names) {
+        const layer_values = {};
+        for (const k in settings.layer_names) {
+            if (k.indexOf('2d_physics/layer_') >= 0) {
+                const num_str = k.replace('2d_physics/layer_', '');
+                const num = parseInt(num_str);
+                if (Number.isFinite(num)) {
+                    layer_values[settings.layer_names[k]] = num;
+                }
+            }
+        }
+
+        real_settings.layer_map = {
+            physics: layer_values,
+        };
     }
 
     fs.writeFileSync(project_url.replace(/\.godot/, '.json'), JSON.stringify(real_settings, null, 4));
