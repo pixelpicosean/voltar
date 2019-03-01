@@ -865,7 +865,7 @@ module.exports.convert_scenes = (/** @type {string} */scene_root_url_p) => {
 
                 const res = require(`./parser/res/${template.type}`)(
                     {
-                        attr: {},
+                        attr: node._attr || {},
                         prop: node.prop,
                     }
                 );

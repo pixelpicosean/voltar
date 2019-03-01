@@ -6,6 +6,8 @@ const {
 
 module.exports = (data) => {
     return {
+        _attr: data.attr,
+
         key: data.key,
         index: int(data.attr.index),
         type: 'Scene',
