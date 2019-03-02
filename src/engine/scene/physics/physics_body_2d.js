@@ -303,7 +303,7 @@ class Collision {
         this.collision = new Vector2();
         this.normal = new Vector2();
         this.collider_vel = new Vector2();
-        /** @type {Node2D} */
+        /** @type {StaticBody2D|KinematicBody2D} */
         this.collider = null;
         this.collider_rid = null;
         this.collider_shape = 0;
