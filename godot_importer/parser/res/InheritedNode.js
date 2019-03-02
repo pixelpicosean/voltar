@@ -10,11 +10,9 @@ module.exports = (data) => {
 
         key: data.key,
         index: int(data.attr.index),
-        type: 'Scene',
+        type: '',
         name: string(data.attr.name),
-        filename: data.attr.instance,
         parent: path(data.attr.parent),
-        instance: data.attr.instance,
 
         prop: data.prop,
     };

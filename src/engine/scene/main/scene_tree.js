@@ -56,10 +56,16 @@ import Input from 'engine/input/index';
   */
 
 /**
+ * @typedef LayerMap
+ * @prop {Object<string, number>} physics
+ */
+
+/**
  * @typedef Settings
  * @prop {ApplicationSettings} application
  * @prop {DisplaySettings} display
  * @prop {PhysicsSettings} physics
+ * @prop {LayerMap} layer_map
  */
 
 /**
@@ -96,6 +102,9 @@ const DefaultSettings = {
         default_linear_damp: 0.1,
         default_angular_damp: 1,
         gravity: { x: 0, y: 98 },
+    },
+    layer_map: {
+        physics: {},
     },
 };
 
@@ -187,6 +196,8 @@ res_procs['PackedScene'] = (key, data, resource_map) => {
                 }
             }
         }
+
+        node.inherit = data.__meta__.inherit;
 
         for (let n of node.children) {
             normalize(n);

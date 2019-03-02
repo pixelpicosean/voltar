@@ -401,10 +401,15 @@ function construct_scene(blocks) {
     // Fetch node block list
     const node_list = fp.flow(
         // @ts-ignore
-        fp.filter(b => b.key === 'node'),
+        fp.filter(b => b.key === 'node' || b.key === 'inherited_node'),
         fp.forEach(n => {
-            n.__meta__ = {};
+            n.__self_meta__ = {};
             n.children = [];
+
+            if (n.key === 'inherited_node') {
+                n.type = '';
+            }
+
             delete n.key;
             delete n.index;
         })
@@ -412,7 +417,7 @@ function construct_scene(blocks) {
 
     // Combine nodes into scene tree
     const root_node = fp.find(n => !n.parent)(node_list);
-    root_node.__meta__.path = '';
+    root_node.__self_meta__.path = '';
     const node_db = {
         '.': root_node,
     };
@@ -437,15 +442,15 @@ function construct_scene(blocks) {
         // @ts-ignore
         if (n.parent === '.') {
             // @ts-ignore
-            n.__meta__.path = n.name;
+            n.__self_meta__.path = n.name;
         } else {
             // @ts-ignore
-            n.__meta__.path = `${parent.__meta__.path}/${n.name}`;
+            n.__self_meta__.path = `${parent.__self_meta__.path}/${n.name}`;
         }
 
         // Insert into node db
         // @ts-ignore
-        node_db[n.__meta__.path] = n;
+        node_db[n.__self_meta__.path] = n;
 
         // Delete parent property which is no longer used
         // @ts-ignore
@@ -454,7 +459,6 @@ function construct_scene(blocks) {
 
     // Remove metadata of nodes
     (function remove_meta(node) {
-        delete node.__meta__;
         for (let c of node.children) {
             remove_meta(c);
         }
@@ -463,7 +467,7 @@ function construct_scene(blocks) {
         }
     })(root_node);
 
-    // Add resources into root_node.__meta__
+    // Add resources into root_node.__self_meta__
     const fetch_res = (type) => fp.flow(
         fp.filter(b => b.key === `${type}_resource`),
         fp.reduce((hash, b) => {
@@ -691,6 +695,7 @@ const post_resource_actions = {
     Scene: (node, meta) => {
         if (node.instance !== undefined) {
             node.filename = node.instance;
+            node._attr.instance = node.instance;
         }
         delete node.instance;
     },
@@ -846,6 +851,7 @@ module.exports.convert_scenes = (/** @type {string} */scene_root_url_p) => {
     for (let s of generated_data) {
         const scene = s.data;
         const meta = scene.__final_meta__;
+        scene._is_root = true;
 
         // Parse scene instance data
         const parse = (node) => {
@@ -861,9 +867,20 @@ module.exports.convert_scenes = (/** @type {string} */scene_root_url_p) => {
                     filename = meta.sub[filename.substring(5)];
                 }
 
-                const template = scene_db[filename].data;
+                let template = scene_db[filename].data;
+                let type = template.type;
+                let res = null;
 
-                const res = require(`./parser/res/${template.type}`)(
+                // inherited scene?
+                if (template._attr && template._attr.instance) {
+                    const template_meta = template.__meta__;
+                    const filename_idx = template._attr.instance.substring(5);
+                    const filename = template_meta.ext_resource[filename_idx].path;
+                    const parent_template = scene_db[filename].data;
+                    type = parent_template.type;
+                }
+
+                res = require(`./parser/res/${type}`)(
                     {
                         attr: node._attr || {},
                         prop: node.prop,
@@ -882,13 +899,42 @@ module.exports.convert_scenes = (/** @type {string} */scene_root_url_p) => {
                         node[k] = res[k];
                     }
                 }
+
+                if (node._is_root) {
+                    meta.inherit = true;
+                }
+            } else if (node.type.length === 0) {
+                // Find the scene inherited from
+                const filename = meta.ext[scene.filename.substring(5)]
+                const parent_scene = scene_db[filename].data;
+                find: for (const c of parent_scene.children) {
+                    if (c.__self_meta__.path === node.__self_meta__.path) {
+                        node.type = c.type;
+                        break find;
+                    }
+                }
+
+                const res = require(`./parser/res/${node.type}`)({
+                    attr: node._attr || {},
+                    prop: node.prop,
+                });
+                for (let k in res) {
+                    if (res[k] !== undefined) {
+                        node[k] = res[k];
+                    }
+                }
+
+                delete node.prop;
+                delete node.parent;
+
+                return;
             }
 
             for (let c of node.children) {
                 parse(c);
             }
         }
-        parse(s.data);
+        parse(scene);
 
         // Normalize resources
         normalize_resource(scene, scene.__meta__, scene.__final_meta__);

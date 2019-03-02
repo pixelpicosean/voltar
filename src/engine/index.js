@@ -225,7 +225,9 @@ export function register_scene_class(key, ctor) {
 export function attach_script(url, scene) {
     // Add `instance` static method
     scene['instance'] = () => {
-        return assemble_scene(new scene(), resource_map[url]);
+        const scene_data = resource_map[url];
+        // TODO: support inherited scene (as root node)
+        return assemble_scene(new scene(), scene_data);
     };
 
     // @ts-ignore
@@ -267,11 +269,41 @@ function assemble_node(node, children) {
             const packed_scene = resource_map[data.filename];
 
             // Let's see whether it is registered
-            const scene_class = has.call(scene_class_map, data.filename) ? scene_class_map[data.filename] : undefined;
+            let scene_class = has.call(scene_class_map, data.filename) ? scene_class_map[data.filename] : undefined;
 
             // Custom scene class?
             if (scene_class) {
                 inst = scene_class.instance();
+            }
+            // Inherit from another scene?
+            else if (packed_scene.inherit) {
+                scene_class = has.call(scene_class_map, packed_scene.filename) ? scene_class_map[packed_scene.filename] : undefined;
+                const parent_packed_scene = resource_map[packed_scene.filename];
+
+                if (scene_class) {
+                    inst = scene_class.instance();
+                    inst._load_data(parent_packed_scene);
+
+                    // Instead of re-create/override child nodes,
+                    // let's override their data.
+                    for (const c of packed_scene.children) {
+                        let child = inst.named_children.get(c.name);
+                        if (child) {
+                            child._load_data(c);
+                        }
+                    }
+                } else {
+                    inst = new (node_class_map[parent_packed_scene.type])();
+
+                    // Create child nodes of parent scene
+                    assemble_node(inst, parent_packed_scene.children);
+
+                    // Load parent scene data
+                    inst._load_data(parent_packed_scene);
+
+                    // TODO: make this a recursive function, so we can support
+                    // multiple level inheritance
+                }
             }
             // Or we simply create it as a "collapsed scene tree"
             else {
