@@ -478,12 +478,23 @@ export default class SceneTree {
      * @param {boolean} pause
      */
     set_pause(pause) { }
+    /**
+     * @param {number} scale
+     */
     set_time_scale(scale) {
         this.time_scale = Math.max(0, scale);
     }
 
+    /**
+     * @param {string} mode
+     * @param {string} aspect
+     * @param {number} minsize
+     */
     set_screen_stretch(mode, aspect, minsize) { }
 
+    /**
+     * @param {boolean} enable
+     */
     set_debug_collisions_hint(enable) { }
 
     // Private
