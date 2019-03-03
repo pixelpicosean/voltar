@@ -1,2 +1,0 @@
-Minimal game size is 250KB and 70KB after GZip, which includes rendering of sprite classes
-and full audio support (playback and filters).
