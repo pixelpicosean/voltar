@@ -1013,8 +1013,12 @@ module.exports.convert_project_settings = (project_url) => {
         let display = {};
 
         // size
-        display.width = int(settings.display['window/size/width']) || 640;
-        display.height = int(settings.display['window/size/height']) || 480;
+        if (settings.display['window/size/width'] !== undefined) {
+            display.width = int(settings.display['window/size/width']) || 1024;
+        }
+        if (settings.display['window/size/height'] !== undefined) {
+            display.height = int(settings.display['window/size/height']) || 600;
+        }
 
         // clear color
         let clear_color = Color(settings.rendering['environment/default_clear_color']);

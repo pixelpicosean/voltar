@@ -81,8 +81,8 @@ const DefaultSettings = {
         view: 'game',
         container: 'container',
 
-        width: 400,
-        height: 250,
+        width: 1024,
+        height: 600,
         resolution: 1,
 
         background_color: 0x4C4C4C,
