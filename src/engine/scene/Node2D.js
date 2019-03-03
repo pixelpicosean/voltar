@@ -97,6 +97,12 @@ export default class Node2D extends VObject {
         this.temp_node_2d_parent = null;
 
         /**
+         * Data loaded from `_load_data` method
+         * @type {any}
+         */
+        this.instance_data = null;
+
+        /**
          * @type {number}
          */
         this.id = uid++;
@@ -329,6 +335,8 @@ export default class Node2D extends VObject {
      * @returns {this}
      */
     _load_data(data) {
+        this.instance_data = data;
+
         if (data.filename !== undefined) {
             this.filename = data.filename;
         }

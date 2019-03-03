@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const {
     string,
     path,
@@ -27,6 +28,9 @@ module.exports = (data) => {
     if (Array.isArray(data.attr.groups)) {
         node.groups = data.attr.groups.filter(g => g.length > 0);
     }
+
+    // Save properties so we can do some post-process
+    node._prop = data.prop;
 
     return node;
 };

@@ -900,6 +900,14 @@ module.exports.convert_scenes = (/** @type {string} */scene_root_url_p) => {
                     }
                 }
 
+                // Check whether we have script exported properties
+                for (let k in node._prop) {
+                    if (node._prop[k] !== undefined && !node.hasOwnProperty(k)) {
+                        node[k] = node._prop[k];
+                    }
+                }
+                delete node._prop;
+
                 if (node._is_root) {
                     meta.inherit = true;
                 }
