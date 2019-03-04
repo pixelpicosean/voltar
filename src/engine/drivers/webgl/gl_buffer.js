@@ -6,41 +6,41 @@ export default class GLBuffer {
      * @param gl {WebGLRenderingContext} The current WebGL rendering context
      * @param [type] {number} gl.ARRAY_BUFFER | gl.ELEMENT_ARRAY_BUFFER
      * @param [data] {ArrayBuffer|SharedArrayBuffer|ArrayBufferView} an array of data
-     * @param [drawType] {number} gl.STATIC_DRAW | gl.DYNAMIC_DRAW | gl.STREAM_DRAW
+     * @param [draw_type] {number} gl.STATIC_DRAW | gl.DYNAMIC_DRAW | gl.STREAM_DRAW
      */
-    constructor(gl, type, data, drawType) {
+    constructor(gl, type, data, draw_type) {
         /**
          * The current WebGL rendering context
          *
-         * @member {WebGLRenderingContext}
+         * @type {WebGLRenderingContext}
          */
         this.gl = gl;
 
         /**
          * The WebGL buffer, created upon instantiation
          *
-         * @member {WebGLBuffer}
+         * @type {WebGLBuffer}
          */
         this.buffer = gl.createBuffer();
 
         /**
          * The type of the buffer
          *
-         * @member {gl.ARRAY_BUFFER|gl.ELEMENT_ARRAY_BUFFER}
+         * @type {typeof gl.ARRAY_BUFFER|typeof gl.ELEMENT_ARRAY_BUFFER}
          */
         this.type = type || gl.ARRAY_BUFFER;
 
         /**
          * The draw type of the buffer
          *
-         * @member {gl.STATIC_DRAW|gl.DYNAMIC_DRAW|gl.STREAM_DRAW}
+         * @type {number} gl.STATIC_DRAW | gl.DYNAMIC_DRAW | gl.STREAM_DRAW
          */
-        this.drawType = drawType || gl.STATIC_DRAW;
+        this.draw_type = draw_type || gl.STATIC_DRAW;
 
         /**
          * The data in the buffer, as a typed array
          *
-         * @member {ArrayBuffer| SharedArrayBuffer|ArrayBufferView}
+         * @type {ArrayBuffer|SharedArrayBuffer|ArrayBufferView}
          */
         this.data = EMPTY_ARRAY_BUFFER;
 
@@ -48,18 +48,18 @@ export default class GLBuffer {
             this.upload(data);
         }
 
-        this._updateID = 0;
+        this._update_id = 0;
     }
 
     /**
      * Uploads the buffer to the GPU
-     * @param [data] {ArrayBuffer| SharedArrayBuffer|ArrayBufferView} an array of data to upload
+     * @param [data] {ArrayBuffer|SharedArrayBuffer|ArrayBufferView} an array of data to upload
      * @param [offset] {number} if only a subset of the data should be uploaded, this is the amount of data to subtract
-     * @param [dontBind] {boolean} whether to bind the buffer before uploading it
+     * @param [dont_bind] {boolean} whether to bind the buffer before uploading it
      */
-    upload(data, offset = 0, dontBind = false) {
+    upload(data, offset = 0, dont_bind = false) {
         // todo - needed?
-        if (!dontBind) this.bind();
+        if (!dont_bind) this.bind();
 
         var gl = this.gl;
 
@@ -68,7 +68,7 @@ export default class GLBuffer {
         if (this.data.byteLength >= data.byteLength) {
             gl.bufferSubData(this.type, offset, data);
         } else {
-            gl.bufferData(this.type, data, this.drawType);
+            gl.bufferData(this.type, data, this.draw_type);
         }
 
         this.data = data;
@@ -92,28 +92,28 @@ export default class GLBuffer {
     /**
      * @param {WebGLRenderingContext} gl
      * @param {ArrayBuffer} [data]
-     * @param {number} [drawType]
+     * @param {number} [draw_type]
      */
-    static createVertexBuffer(gl, data, drawType) {
-        return new GLBuffer(gl, gl.ARRAY_BUFFER, data, drawType);
+    static create_vertex_buffer(gl, data, draw_type) {
+        return new GLBuffer(gl, gl.ARRAY_BUFFER, data, draw_type);
     }
 
     /**
      * @param {WebGLRenderingContext} gl
      * @param {ArrayBuffer} [data]
-     * @param {number} [drawType]
+     * @param {number} [draw_type]
      */
-    static createIndexBuffer(gl, data, drawType) {
-        return new GLBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, data, drawType);
+    static create_index_buffer(gl, data, draw_type) {
+        return new GLBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, data, draw_type);
     }
 
     /**
      * @param {WebGLRenderingContext} gl
      * @param {number} [type]
      * @param {ArrayBuffer} [data]
-     * @param {number} [drawType]
+     * @param {number} [draw_type]
      */
-    static create(gl, type, data, drawType) {
-        return new GLBuffer(gl, type, data, drawType);
+    static create(gl, type, data, draw_type) {
+        return new GLBuffer(gl, type, data, draw_type);
     }
 }

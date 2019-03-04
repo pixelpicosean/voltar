@@ -146,12 +146,12 @@ export default class RenderTarget {
         this.root = root || false;
 
         if (!this.root) {
-            this.frame_buffer = GLFramebuffer.createRGBA(gl, 100, 100);
+            this.frame_buffer = GLFramebuffer.create_rgba(gl, 100, 100);
 
             if (this.scale_mode === SCALE_MODES.NEAREST) {
-                this.frame_buffer.texture.enableNearestScaling();
+                this.frame_buffer.texture.enable_nearest_scaling();
             } else {
-                this.frame_buffer.texture.enableLinearScaling();
+                this.frame_buffer.texture.enable_linear_scaling();
             }
             /*
                 A frame buffer needs a target to render to..
@@ -193,7 +193,7 @@ export default class RenderTarget {
          * lets create one and then add attach it to the framebuffer..
          */
         if (!this.root) {
-            this.frame_buffer.enableStencil();
+            this.frame_buffer.enable_stencil();
         }
     }
 

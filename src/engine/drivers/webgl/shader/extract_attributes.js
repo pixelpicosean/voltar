@@ -1,5 +1,5 @@
-import mapType from './map_type';
-import mapSize from './map_size';
+import map_type from './map_type';
+import map_size from './map_size';
 
 /**
  * @typedef AttributeObject
@@ -14,23 +14,22 @@ import mapSize from './map_size';
  * @param gl {WebGLRenderingContext} The current WebGL rendering context
  * @param program {WebGLProgram} The shader program to get the attributes from
  */
-export default function extractAttributes(gl, program) {
+export default function extract_attributes(gl, program) {
     /**
      * @type {Object<string, AttributeObject>}
      */
-    var attributes = {};
+    const attributes = {};
 
-    var totalAttributes = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
+    const total_attributes = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
 
-    for (var i = 0; i < totalAttributes; i++) {
-        var attribData = gl.getActiveAttrib(program, i);
-        var type = mapType(gl, attribData.type);
+    for (let i = 0; i < total_attributes; i++) {
+        const attrib_data = gl.getActiveAttrib(program, i);
+        const type = map_type(gl, attrib_data.type);
 
-        // TODO: make an attribute object
-        attributes[attribData.name] = {
+        attributes[attrib_data.name] = {
             type: type,
-            size: mapSize(type),
-            location: gl.getAttribLocation(program, attribData.name),
+            size: map_size(type),
+            location: gl.getAttribLocation(program, attrib_data.name),
             /**
              * @param {number} [type]
              * @param {boolean} [normalized]

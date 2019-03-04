@@ -1,39 +1,38 @@
 /**
  * @param gl {WebGLRenderingContext} The current WebGL context
  * @param attribs {any}
- * @param state {any}
+ * @param state {{ temp_attrib_state: boolean[], attrib_state: boolean[] }}
  */
-export default function setVertexAttribArrays(gl, attribs, state) {
-    var i = 0;
+export default function set_vertex_attrib_arrays(gl, attribs, state) {
+    let i = 0;
     if (state) {
-        var tempAttribState = state.tempAttribState,
-            attribState = state.attribState;
+        const temp_attrib_state = state.temp_attrib_state,
+            attrib_state = state.attrib_state;
 
-        for (i = 0; i < tempAttribState.length; i++) {
-            tempAttribState[i] = false;
+        for (i = 0; i < temp_attrib_state.length; i++) {
+            temp_attrib_state[i] = false;
         }
 
         // set the new attribs
         for (i = 0; i < attribs.length; i++) {
-            tempAttribState[attribs[i].attribute.location] = true;
+            temp_attrib_state[attribs[i].attribute.location] = true;
         }
 
-        for (i = 0; i < attribState.length; i++) {
-            if (attribState[i] !== tempAttribState[i]) {
-                attribState[i] = tempAttribState[i];
+        for (i = 0; i < attrib_state.length; i++) {
+            if (attrib_state[i] !== temp_attrib_state[i]) {
+                attrib_state[i] = temp_attrib_state[i];
 
-                if (state.attribState[i]) {
+                if (state.attrib_state[i]) {
                     gl.enableVertexAttribArray(i);
                 } else {
                     gl.disableVertexAttribArray(i);
                 }
             }
         }
-
     } else {
         for (i = 0; i < attribs.length; i++) {
-            var attrib = attribs[i];
+            const attrib = attribs[i];
             gl.enableVertexAttribArray(attrib.attribute.location);
         }
     }
-};
+}

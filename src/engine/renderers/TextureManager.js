@@ -115,7 +115,7 @@ export default class TextureManager {
             else {
                 glTexture = new GLTexture(this.gl, null, null, null, null);
                 glTexture.bind(location);
-                glTexture.premultiplyAlpha = true;
+                glTexture.premultiply_alpha = true;
                 glTexture.upload(texture.source);
             }
 
@@ -128,28 +128,28 @@ export default class TextureManager {
 
             if (texture.is_power_of_two) {
                 if (texture.mipmap) {
-                    glTexture.enableMipmap();
+                    glTexture.enable_mipmap();
                 }
 
                 if (texture.wrap_mode === WRAP_MODES.CLAMP) {
-                    glTexture.enableWrapClamp();
+                    glTexture.enable_wrap_clamp();
                 }
                 else if (texture.wrap_mode === WRAP_MODES.REPEAT) {
-                    glTexture.enableWrapRepeat();
+                    glTexture.enable_wrap_repeat();
                 }
                 else {
-                    glTexture.enableWrapMirrorRepeat();
+                    glTexture.enable_wrap_mirror_repeat();
                 }
             }
             else {
-                glTexture.enableWrapClamp();
+                glTexture.enable_wrap_clamp();
             }
 
             if (texture.scale_mode === SCALE_MODES.NEAREST) {
-                glTexture.enableNearestScaling();
+                glTexture.enable_nearest_scaling();
             }
             else {
-                glTexture.enableLinearScaling();
+                glTexture.enable_linear_scaling();
             }
         }
         // the texture already exists so we only need to update it..

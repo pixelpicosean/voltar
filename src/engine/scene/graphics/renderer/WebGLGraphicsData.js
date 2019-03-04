@@ -43,13 +43,13 @@ export default class WebGLGraphicsData {
          * The main buffer
          * @type {GLBuffer}
          */
-        this.buffer = GLBuffer.createVertexBuffer(gl);
+        this.buffer = GLBuffer.create_vertex_buffer(gl);
 
         /**
          * The index buffer
          * @type {GLBuffer}
          */
-        this.index_buffer = GLBuffer.createIndexBuffer(gl);
+        this.index_buffer = GLBuffer.create_index_buffer(gl);
 
         /**
          * Whether this graphics is dirty or not

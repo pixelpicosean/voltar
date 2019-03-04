@@ -66,14 +66,14 @@ export default class Quad {
          *
          * @member {GLBuffer}
          */
-        this.vertexBuffer = GLBuffer.createVertexBuffer(gl, this.interleaved, gl.STATIC_DRAW);
+        this.vertexBuffer = GLBuffer.create_vertex_buffer(gl, this.interleaved, gl.STATIC_DRAW);
 
         /**
          * The index buffer
          *
          * @member {GLBuffer}
          */
-        this.index_buffer = GLBuffer.createIndexBuffer(gl, this.indices, gl.STATIC_DRAW);
+        this.index_buffer = GLBuffer.create_index_buffer(gl, this.indices, gl.STATIC_DRAW);
 
         /**
          * The vertex array object

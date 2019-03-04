@@ -2,14 +2,12 @@
  * @param {WebGLRenderingContext} gl
  * @param {number} type
  */
-export default function mapType(gl, type) {
+export default function map_type(gl, type) {
     if (!GL_TABLE) {
-        var typeNames = Object.keys(GL_TO_GLSL_TYPES);
-
         GL_TABLE = {};
 
-        for (var i = 0; i < typeNames.length; ++i) {
-            var tn = typeNames[i];
+        const type_names = Object.keys(GL_TO_GLSL_TYPES);
+        for (const tn of type_names) {
             GL_TABLE[gl[tn]] = GL_TO_GLSL_TYPES[tn];
         }
     }
@@ -20,9 +18,10 @@ export default function mapType(gl, type) {
 /**
  * @type {Object<string, string>}
  */
-var GL_TABLE = null;
+let GL_TABLE = null;
 
-var GL_TO_GLSL_TYPES = {
+/** @type {Object<string, string>} */
+const GL_TO_GLSL_TYPES = {
     'FLOAT': 'float',
     'FLOAT_VEC2': 'vec2',
     'FLOAT_VEC3': 'vec3',
@@ -42,5 +41,5 @@ var GL_TO_GLSL_TYPES = {
     'FLOAT_MAT3': 'mat3',
     'FLOAT_MAT4': 'mat4',
 
-    'SAMPLER_2D': 'sampler2D'
+    'SAMPLER_2D': 'sampler2D',
 };

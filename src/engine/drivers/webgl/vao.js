@@ -1,5 +1,16 @@
-import setVertexAttribArrays from './set_vertex_attrib_arrays';
+import set_vertex_attrib_arrays from './set_vertex_attrib_arrays';
 import GLBuffer from './gl_buffer';
+
+/**
+ * @typedef Attribute
+ * @property {GLBuffer} buffer
+ * @property {import('./shader/extract_attributes').AttributeObject} attribute
+ * @property {number} location
+ * @property {number} type
+ * @property {boolean} normalized
+ * @property {number} stride
+ * @property {number} start
+ */
 
 export default class VertexArrayObject {
     /**
@@ -7,13 +18,13 @@ export default class VertexArrayObject {
      * Only works if WebGL extensions are enabled (they usually are)
      *
      * @param {WebGLRenderingContext} gl The current WebGL rendering context
-     * @param {any} [state]
+     * @param {{ temp_attrib_state: boolean[], attrib_state: boolean[] }} [state]
      */
     constructor(gl, state = null) {
-        this.nativeVaoExtension = null;
+        this.native_vao_extension = null;
 
         if (!VertexArrayObject.FORCE_NATIVE) {
-            this.nativeVaoExtension =
+            this.native_vao_extension =
                 gl.getExtension('OES_vertex_array_object')
                 ||
                 gl.getExtension('MOZ_OES_vertex_array_object')
@@ -21,43 +32,39 @@ export default class VertexArrayObject {
                 gl.getExtension('WEBKIT_OES_vertex_array_object')
         }
 
-        this.nativeState = state;
+        this.native_state = state;
 
-        if (this.nativeVaoExtension) {
-            this.nativeVao = this.nativeVaoExtension.createVertexArrayOES();
+        if (this.native_vao_extension) {
+            this.native_vao = this.native_vao_extension.createVertexArrayOES();
 
-            var maxAttribs = gl.getParameter(gl.MAX_VERTEX_ATTRIBS);
+            var max_attribs = gl.getParameter(gl.MAX_VERTEX_ATTRIBS);
 
             // VAO - overwrite the state..
-            this.nativeState = {
-                tempAttribState: new Array(maxAttribs),
-                attribState: new Array(maxAttribs)
+            this.native_state = {
+                temp_attrib_state: new Array(max_attribs),
+                attrib_state: new Array(max_attribs)
             };
         }
 
         /**
          * The current WebGL rendering context
-         *
-         * @type {WebGLRenderingContext}
          */
         this.gl = gl;
 
         /**
          * An array of attributes
          *
-         * @type {Array}
+         * @type {Attribute[]}
          */
         this.attributes = [];
 
         /**
          * @type {GLBuffer}
          */
-        this.indexBuffer = null;
+        this.index_buffer = null;
 
         /**
          * A boolean flag
-         *
-         * @type {boolean}
          */
         this.dirty = false;
     }
@@ -66,19 +73,18 @@ export default class VertexArrayObject {
      * Binds the buffer
      */
     bind() {
-        if (this.nativeVao) {
-            this.nativeVaoExtension.bindVertexArrayOES(this.nativeVao);
+        if (this.native_vao) {
+            this.native_vao_extension.bindVertexArrayOES(this.native_vao);
 
             if (this.dirty) {
                 this.dirty = false;
                 this.activate();
                 return this;
             }
-            if (this.indexBuffer) {
-                this.indexBuffer.bind();
+            if (this.index_buffer) {
+                this.index_buffer.bind();
             }
-        }
-        else {
+        } else {
             this.activate();
         }
 
@@ -89,8 +95,8 @@ export default class VertexArrayObject {
      * Unbinds the buffer
      */
     unbind() {
-        if (this.nativeVao) {
-            this.nativeVaoExtension.bindVertexArrayOES(null);
+        if (this.native_vao) {
+            this.native_vao_extension.bindVertexArrayOES(null);
         }
 
         return this;
@@ -101,15 +107,15 @@ export default class VertexArrayObject {
      */
     activate() {
 
-        var gl = this.gl;
-        var lastBuffer = null;
+        const gl = this.gl;
+        let last_buffer = null;
 
-        for (var i = 0; i < this.attributes.length; i++) {
-            var attrib = this.attributes[i];
+        for (let i = 0; i < this.attributes.length; i++) {
+            const attrib = this.attributes[i];
 
-            if (lastBuffer !== attrib.buffer) {
+            if (last_buffer !== attrib.buffer) {
                 attrib.buffer.bind();
-                lastBuffer = attrib.buffer;
+                last_buffer = attrib.buffer;
             }
 
             gl.vertexAttribPointer(attrib.attribute.location,
@@ -117,13 +123,14 @@ export default class VertexArrayObject {
                 attrib.type || gl.FLOAT,
                 attrib.normalized || false,
                 attrib.stride || 0,
-                attrib.start || 0);
+                attrib.start || 0
+            );
         }
 
-        setVertexAttribArrays(gl, this.attributes, this.nativeState);
+        set_vertex_attrib_arrays(gl, this.attributes, this.native_state);
 
-        if (this.indexBuffer) {
-            this.indexBuffer.bind();
+        if (this.index_buffer) {
+            this.index_buffer.bind();
         }
 
         return this;
@@ -131,17 +138,16 @@ export default class VertexArrayObject {
 
     /**
      * @param {GLBuffer} buffer
-     * @param {any} attribute
+     * @param {import('./shader/extract_attributes').AttributeObject} attribute
      * @param {number} [type]
      * @param {boolean} [normalized]
      * @param {number} [stride]
      * @param {number} [start]
      */
-    addAttribute(buffer, attribute, type = undefined, normalized = false, stride = 0, start = 0) {
+    addAttribute(buffer, attribute, type, normalized = false, stride = 0, start = 0) {
         this.attributes.push({
             buffer: buffer,
             attribute: attribute,
-
             location: attribute.location,
             type: type || this.gl.FLOAT,
             normalized: normalized,
@@ -158,7 +164,7 @@ export default class VertexArrayObject {
      * @param {GLBuffer} buffer
      */
     addIndex(buffer) {
-        this.indexBuffer = buffer;
+        this.index_buffer = buffer;
 
         this.dirty = true;
 
@@ -169,16 +175,14 @@ export default class VertexArrayObject {
      * Unbinds this vao and disables it
      */
     clear() {
-        // var gl = this.gl;
-
         // TODO - should this function unbind after clear?
         // for now, no but lets see what happens in the real world!
-        if (this.nativeVao) {
-            this.nativeVaoExtension.bindVertexArrayOES(this.nativeVao);
+        if (this.native_vao) {
+            this.native_vao_extension.bindVertexArrayOES(this.native_vao);
         }
 
         this.attributes.length = 0;
-        this.indexBuffer = null;
+        this.index_buffer = null;
 
         return this;
     }
@@ -189,14 +193,13 @@ export default class VertexArrayObject {
      * @param start {number}
      */
     draw(type, size, start) {
-        var gl = this.gl;
+        const gl = this.gl;
 
-        if (this.indexBuffer) {
-            gl.drawElements(type, size || this.indexBuffer.data.length, gl.UNSIGNED_SHORT, (start || 0) * 2);
-        }
-        else {
+        if (this.index_buffer) {
+            gl.drawElements(type, size || this.index_buffer.data.length, gl.UNSIGNED_SHORT, (start || 0) * 2);
+        } else {
             // TODO need a better way to calculate size..
-            gl.drawArrays(type, start, size || this.getSize());
+            gl.drawArrays(type, start, size || this.get_size());
         }
 
         return this;
@@ -208,19 +211,19 @@ export default class VertexArrayObject {
     destroy() {
         // lose references
         this.gl = null;
-        this.indexBuffer = null;
+        this.index_buffer = null;
         this.attributes = null;
-        this.nativeState = null;
+        this.native_state = null;
 
-        if (this.nativeVao) {
-            this.nativeVaoExtension.deleteVertexArrayOES(this.nativeVao);
+        if (this.native_vao) {
+            this.native_vao_extension.deleteVertexArrayOES(this.native_vao);
         }
 
-        this.nativeVaoExtension = null;
-        this.nativeVao = null;
+        this.native_vao_extension = null;
+        this.native_vao = null;
     }
 
-    getSize() {
+    get_size() {
         var attrib = this.attributes[0];
         return attrib.buffer.data.length / ((attrib.stride / 4) || attrib.attribute.size);
     }

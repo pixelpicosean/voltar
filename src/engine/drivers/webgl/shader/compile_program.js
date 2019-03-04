@@ -1,32 +1,30 @@
 /**
  * @param gl {WebGLRenderingContext} The current WebGL context {WebGLProgram}
- * @param vertexSrc {string} The vertex shader source as string.
- * @param fragmentSrc {string} The fragment shader source as string.
- * @param attributeLocations {Object} An attribute location map that lets you manually set the attribute locations
- * @return {WebGLProgram} the shader program
+ * @param vertex_src {string} The vertex shader source as string.
+ * @param fragment_src {string} The fragment shader source as string.
+ * @param attribute_locations {{ [key:string]: number }} An attribute location map that lets you manually set the attribute locations
  */
-export default function compileProgram(gl, vertexSrc, fragmentSrc, attributeLocations) {
-    var glVertShader = compileShader(gl, gl.VERTEX_SHADER, vertexSrc);
-    var glFragShader = compileShader(gl, gl.FRAGMENT_SHADER, fragmentSrc);
+export default function compile_program(gl, vertex_src, fragment_src, attribute_locations) {
+    var gl_vert_shader = compile_shader(gl, gl.VERTEX_SHADER, vertex_src);
+    var gl_frag_shader = compile_shader(gl, gl.FRAGMENT_SHADER, fragment_src);
 
     var program = gl.createProgram();
 
-    gl.attachShader(program, glVertShader);
-    gl.attachShader(program, glFragShader);
+    gl.attachShader(program, gl_vert_shader);
+    gl.attachShader(program, gl_frag_shader);
 
     // optionally, set the attributes manually for the program rather than letting WebGL decide..
-    if (attributeLocations) {
-        for (var i in attributeLocations) {
-            gl.bindAttribLocation(program, attributeLocations[i], i);
+    if (attribute_locations) {
+        for (var i in attribute_locations) {
+            gl.bindAttribLocation(program, attribute_locations[i], i);
         }
     }
-
 
     gl.linkProgram(program);
 
     // if linking fails, then log and cleanup
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-        console.error('Pixi.js Error: Could not initialize shader.');
+        console.error('Error: Could not initialize shader.');
         console.error('gl.VALIDATE_STATUS', gl.getProgramParameter(program, gl.VALIDATE_STATUS));
         console.error('gl.getError()', gl.getError());
 
@@ -40,20 +38,18 @@ export default function compileProgram(gl, vertexSrc, fragmentSrc, attributeLoca
     }
 
     // clean up some shaders
-    gl.deleteShader(glVertShader);
-    gl.deleteShader(glFragShader);
+    gl.deleteShader(gl_vert_shader);
+    gl.deleteShader(gl_frag_shader);
 
     return program;
 }
 
 /**
- * @private
  * @param gl {WebGLRenderingContext} The current WebGL context {WebGLProgram}
  * @param type {Number} the type, can be either VERTEX_SHADER or FRAGMENT_SHADER
  * @param vertexSrc {string} The vertex shader source as string.
- * @return {WebGLShader} the shader
  */
-function compileShader(gl, type, vertexSrc) {
+function compile_shader(gl, type, vertexSrc) {
     var shader = gl.createShader(type);
 
     gl.shaderSource(shader, vertexSrc);

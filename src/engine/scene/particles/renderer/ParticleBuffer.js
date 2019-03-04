@@ -105,7 +105,7 @@ export default class ParticleBuffer {
          * @member {Uint16Array}
          */
         this.indices = create_indices_for_quads(this.size);
-        this.index_buffer = GLBuffer.createIndexBuffer(gl, this.indices, gl.STATIC_DRAW);
+        this.index_buffer = GLBuffer.create_index_buffer(gl, this.indices, gl.STATIC_DRAW);
 
         this.dynamicStride = 0;
 
@@ -121,7 +121,7 @@ export default class ParticleBuffer {
 
         this.dynamicData = new Float32Array(dynBuffer);
         this.dynamicDataUint32 = new Uint32Array(dynBuffer);
-        this.dynamicBuffer = GLBuffer.createVertexBuffer(gl, dynBuffer, gl.STREAM_DRAW);
+        this.dynamicBuffer = GLBuffer.create_vertex_buffer(gl, dynBuffer, gl.STREAM_DRAW);
 
         // static //
         let staticOffset = 0;
@@ -140,7 +140,7 @@ export default class ParticleBuffer {
 
         this.staticData = new Float32Array(statBuffer);
         this.staticDataUint32 = new Uint32Array(statBuffer);
-        this.staticBuffer = GLBuffer.createVertexBuffer(gl, statBuffer, gl.STATIC_DRAW);
+        this.staticBuffer = GLBuffer.create_vertex_buffer(gl, statBuffer, gl.STATIC_DRAW);
 
         this.vao = new VertexArrayObject(gl)
             .addIndex(this.index_buffer);

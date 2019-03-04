@@ -2,7 +2,7 @@
  * @param type {string} Type of value
  * @param size {number}
  */
-export default function defaultValue(type, size) {
+export default function default_value(type, size) {
     switch (type) {
         case 'float':
             return 0;
@@ -63,9 +63,10 @@ export default function defaultValue(type, size) {
  * @param {number} size
  */
 function boolean_array(size) {
-    var array = new Array(size);
+    /** @type {boolean[]} */
+    const array = new Array(size);
 
-    for (var i = 0; i < array.length; i++) {
+    for (let i = 0; i < array.length; i++) {
         array[i] = false;
     }
 

@@ -18,7 +18,6 @@ export default class GLTexture {
          */
         this.gl = gl;
 
-
         /**
          * The WebGL texture
          *
@@ -31,16 +30,14 @@ export default class GLTexture {
          *
          * @type {boolean}
          */
-        // some settings..
         this.mipmap = false;
-
 
         /**
          * Set to true to enable pre-multiplied alpha
          *
          * @type {boolean}
          */
-        this.premultiplyAlpha = false;
+        this.premultiply_alpha = false;
 
         /**
          * The width of texture
@@ -77,23 +74,22 @@ export default class GLTexture {
     upload(source) {
         this.bind();
 
-        var gl = this.gl;
+        const gl = this.gl;
 
-        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, this.premultiplyAlpha ? 1 : 0);
+        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, this.premultiply_alpha ? 1 : 0);
 
-        var newWidth = /** @type {HTMLVideoElement} */(source).videoWidth || source.width;
-        var newHeight = /** @type {HTMLVideoElement} */(source).videoHeight || source.height;
+        const new_width = /** @type {HTMLVideoElement} */(source).videoWidth || source.width;
+        const new_height = /** @type {HTMLVideoElement} */(source).videoHeight || source.height;
 
-        if (newHeight !== this.height || newWidth !== this.width) {
+        if (new_height !== this.height || new_width !== this.width) {
             gl.texImage2D(gl.TEXTURE_2D, 0, this.format, this.format, this.type, source);
-        }
-        else {
+        } else {
             gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, this.format, this.type, source);
         }
 
         // if the source is a video, we need to use the videoWidth / videoHeight properties as width / height will be incorrect.
-        this.width = newWidth;
-        this.height = newHeight;
+        this.width = new_width;
+        this.height = new_height;
     }
 
     /**
@@ -102,32 +98,31 @@ export default class GLTexture {
      * @param width {number} the new width of the texture
      * @param height {number} the new height of the texture
      */
-    uploadData(data, width, height) {
+    upload_data(data, width, height) {
         this.bind();
 
-        var gl = this.gl;
+        const gl = this.gl;
 
         if (data instanceof Float32Array) {
             if (!FLOATING_POINT_AVAILABLE) {
-                var ext = gl.getExtension("OES_texture_float");
+                const ext = gl.getExtension("OES_texture_float");
 
                 if (ext) {
                     FLOATING_POINT_AVAILABLE = true;
-                }
-                else {
+                } else {
                     throw new Error('floating point textures not available');
                 }
             }
 
             this.type = gl.FLOAT;
         } else {
-            // TODO support for other types
             this.type = this.type || gl.UNSIGNED_BYTE;
+
+            // TODO support for other types
         }
 
         // what type of data?
-        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, this.premultiplyAlpha ? 1 : 0);
-
+        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, this.premultiply_alpha ? 1 : 0);
 
         if (width !== this.width || height !== this.height) {
             gl.texImage2D(gl.TEXTURE_2D, 0, this.format, width, height, 0, this.format, this.type, data || null);
@@ -138,7 +133,6 @@ export default class GLTexture {
         this.width = width;
         this.height = height;
 
-
         //	texSubImage2D
     }
 
@@ -146,8 +140,8 @@ export default class GLTexture {
      * Binds the texture
      * @param {number} [location]
      */
-    bind(location = undefined) {
-        var gl = this.gl;
+    bind(location) {
+        const gl = this.gl;
 
         if (location !== undefined) {
             gl.activeTexture(gl.TEXTURE0 + location);
@@ -160,15 +154,14 @@ export default class GLTexture {
      * Unbinds the texture
      */
     unbind() {
-        var gl = this.gl;
-        gl.bindTexture(gl.TEXTURE_2D, null);
+        this.gl.bindTexture(this.gl.TEXTURE_2D, null);
     }
 
     /**
      * @param {boolean} linear if we want to use linear filtering or nearest neighbour interpolation
      */
-    minFilter(linear) {
-        var gl = this.gl;
+    min_filter(linear) {
+        const gl = this.gl;
 
         this.bind();
 
@@ -180,10 +173,10 @@ export default class GLTexture {
     }
 
     /**
-     * @param linear {boolean} if we want to use linear filtering or nearest neighbour interpolation
+     * @param {boolean} linear if we want to use linear filtering or nearest neighbour interpolation
      */
-    magFilter(linear) {
-        var gl = this.gl;
+    mag_filter(linear) {
+        const gl = this.gl;
 
         this.bind();
 
@@ -193,8 +186,8 @@ export default class GLTexture {
     /**
      * Enables mipmapping
      */
-    enableMipmap() {
-        var gl = this.gl;
+    enable_mipmap() {
+        const gl = this.gl;
 
         this.bind();
 
@@ -206,24 +199,24 @@ export default class GLTexture {
     /**
      * Enables linear filtering
      */
-    enableLinearScaling() {
-        this.minFilter(true);
-        this.magFilter(true);
+    enable_linear_scaling() {
+        this.min_filter(true);
+        this.mag_filter(true);
     }
 
     /**
      * Enables nearest neighbour interpolation
      */
-    enableNearestScaling() {
-        this.minFilter(false);
-        this.magFilter(false);
+    enable_nearest_scaling() {
+        this.min_filter(false);
+        this.mag_filter(false);
     }
 
     /**
      * Enables clamping on the texture so WebGL will not repeat it
      */
-    enableWrapClamp() {
-        var gl = this.gl;
+    enable_wrap_clamp() {
+        const gl = this.gl;
 
         this.bind();
 
@@ -234,8 +227,8 @@ export default class GLTexture {
     /**
      * Enable tiling on the texture
      */
-    enableWrapRepeat() {
-        var gl = this.gl;
+    enable_wrap_repeat() {
+        const gl = this.gl;
 
         this.bind();
 
@@ -243,8 +236,8 @@ export default class GLTexture {
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
     }
 
-    enableWrapMirrorRepeat() {
-        var gl = this.gl;
+    enable_wrap_mirror_repeat() {
+        const gl = this.gl;
 
         this.bind();
 
@@ -252,24 +245,24 @@ export default class GLTexture {
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
     }
 
-
     /**
      * Destroys this texture
      */
     destroy() {
-        var gl = this.gl;
-        //TODO
+        const gl = this.gl;
         gl.deleteTexture(this.texture);
+
+        // TODO
     }
 
     /**
     * @param gl {WebGLRenderingContext} The current WebGL context
     * @param source {HTMLImageElement|ImageData} the source image of the texture
-    * @param premultiplyAlpha {boolean} If we want to use pre-multiplied alpha
+    * @param premultiply_alpha {boolean} If we want to use pre-multiplied alpha
     */
-    static fromSource(gl, source, premultiplyAlpha) {
-        var texture = new GLTexture(gl);
-        texture.premultiplyAlpha = premultiplyAlpha || false;
+    static from_source(gl, source, premultiply_alpha = false) {
+        const texture = new GLTexture(gl);
+        texture.premultiply_alpha = premultiply_alpha;
         texture.upload(source);
 
         return texture;
@@ -281,10 +274,9 @@ export default class GLTexture {
      * @param width {number} the new width of the texture
      * @param height {number} the new height of the texture
      */
-    static fromData(gl, data, width, height) {
-        //console.log(data, width, height);
-        var texture = new GLTexture(gl);
-        texture.uploadData(data, width, height);
+    static from_data(gl, data, width, height) {
+        const texture = new GLTexture(gl);
+        texture.upload_data(data, width, height);
 
         return texture;
     }

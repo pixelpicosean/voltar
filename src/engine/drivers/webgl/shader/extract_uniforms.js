@@ -1,5 +1,5 @@
-import mapType from './map_type';
-import defaultValue from './default_value';
+import map_type from './map_type';
+import default_value from './default_value';
 
 /**
  * @typedef UniformObject
@@ -14,24 +14,24 @@ import defaultValue from './default_value';
  * @param gl {WebGLRenderingContext} The current WebGL rendering context
  * @param program {WebGLProgram} The shader program to get the uniforms from
  */
-export default function extractUniforms(gl, program) {
+export default function extract_uniforms(gl, program) {
     /**
      * @type {Object<string, UniformObject>}
      */
-    var uniforms = {};
+    const uniforms = {};
 
-    var totalUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
+    const total_uniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
 
-    for (var i = 0; i < totalUniforms; i++) {
-        var uniformData = gl.getActiveUniform(program, i);
-        var name = uniformData.name.replace(/\[.*?\]/, "");
-        var type = mapType(gl, uniformData.type);
+    for (let i = 0; i < total_uniforms; i++) {
+        const uniform_data = gl.getActiveUniform(program, i);
+        const name = uniform_data.name.replace(/\[.*?\]/, "");
+        const type = map_type(gl, uniform_data.type);
 
         uniforms[name] = {
             type: type,
-            size: uniformData.size,
+            size: uniform_data.size,
             location: gl.getUniformLocation(program, name),
-            value: defaultValue(type, uniformData.size)
+            value: default_value(type, uniform_data.size)
         };
     }
 

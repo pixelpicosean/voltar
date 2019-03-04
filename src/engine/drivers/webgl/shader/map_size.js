@@ -1,11 +1,11 @@
 /**
  * @param type {string}
- * @return {number}
  */
-export default function mapSize(type) {
+export default function map_size(type) {
     return GLSL_TO_SIZE[type];
 }
 
+/** @type {Object<string, number>} */
 const GLSL_TO_SIZE = {
     'float': 1,
     'vec2': 2,
@@ -26,5 +26,5 @@ const GLSL_TO_SIZE = {
     'mat3': 9,
     'mat4': 16,
 
-    'sampler2D': 1
+    'sampler2D': 1,
 };

@@ -5,10 +5,10 @@ export default class GLFramebuffer {
      * Helper class to create a webGL Framebuffer
      *
      * @param gl {WebGLRenderingContext} The current WebGL rendering context
-     * @param width {number} the width of the drawing area of the frame buffer
-     * @param height {number} the height of the drawing area of the frame buffer
+     * @param [width] {number} the width of the drawing area of the frame buffer
+     * @param [height] {number} the height of the drawing area of the frame buffer
      */
-    constructor(gl, width, height) {
+    constructor(gl, width = 100, height = 100) {
         /**
          * The current WebGL rendering context
          *
@@ -42,20 +42,20 @@ export default class GLFramebuffer {
          *
          * @type {number}
          */
-        this.width = width || 100;
+        this.width = width;
         /**
          * The height of the drawing area of the buffer
          *
          * @type {number}
          */
-        this.height = height || 100;
+        this.height = height;
     }
 
     /**
      * Adds a texture to the frame buffer
      * @param texture {GLTexture}
      */
-    enableTexture(texture) {
+    enable_texture(texture) {
         var gl = this.gl;
 
         this.texture = texture || new GLTexture(gl);
@@ -72,7 +72,7 @@ export default class GLFramebuffer {
     /**
      * Initialises the stencil buffer
      */
-    enableStencil() {
+    enable_stencil() {
         if (this.stencil) return;
 
         var gl = this.gl;
@@ -98,7 +98,7 @@ export default class GLFramebuffer {
     clear(r, g, b, a) {
         this.bind();
 
-        var gl = this.gl;
+        const gl = this.gl;
 
         gl.clearColor(r, g, b, a);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -108,16 +108,14 @@ export default class GLFramebuffer {
      * Binds the frame buffer to the WebGL context
      */
     bind() {
-        var gl = this.gl;
-        gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
+        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);
     }
 
     /**
      * Unbinds the frame buffer to the WebGL context
      */
     unbind() {
-        var gl = this.gl;
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
     }
     /**
      * Resizes the drawing area of the buffer to the given width and height
@@ -125,13 +123,13 @@ export default class GLFramebuffer {
      * @param  height {number} the new height
      */
     resize(width, height) {
-        var gl = this.gl;
+        const gl = this.gl;
 
         this.width = width;
         this.height = height;
 
         if (this.texture) {
-            this.texture.uploadData(null, width, height);
+            this.texture.upload_data(null, width, height);
         }
 
         if (this.stencil) {
@@ -145,9 +143,8 @@ export default class GLFramebuffer {
      * Destroys this buffer
      */
     destroy() {
-        var gl = this.gl;
+        const gl = this.gl;
 
-        //TODO
         if (this.texture) {
             this.texture.destroy();
         }
@@ -166,14 +163,14 @@ export default class GLFramebuffer {
      * @param width {number} the width of the drawing area of the frame buffer
      * @param height {number} the height of the drawing area of the frame buffer
      */
-    static createRGBA(gl, width, height) {
-        var texture = GLTexture.fromData(gl, null, width, height);
-        texture.enableNearestScaling();
-        texture.enableWrapClamp();
+    static create_rgba(gl, width, height) {
+        const texture = GLTexture.from_data(gl, null, width, height);
+        texture.enable_nearest_scaling();
+        texture.enable_wrap_clamp();
 
         //now create the framebuffer object and attach the texture to it.
-        var fbo = new GLFramebuffer(gl, width, height);
-        fbo.enableTexture(texture);
+        const fbo = new GLFramebuffer(gl, width, height);
+        fbo.enable_texture(texture);
         //fbo.enableStencil(); // get this back on soon!
 
         //fbo.enableStencil(); // get this back on soon!
@@ -190,15 +187,15 @@ export default class GLFramebuffer {
      * @param height {number} the height of the drawing area of the frame buffer
      * @param data {Float32Array} an array of data
      */
-    static createFloat32(gl, width, height, data) {
+    static create_float32(gl, width, height, data) {
         // create a new texture..
-        var texture = GLTexture.fromData(gl, data, width, height);
-        texture.enableNearestScaling();
-        texture.enableWrapClamp();
+        const texture = GLTexture.from_data(gl, data, width, height);
+        texture.enable_nearest_scaling();
+        texture.enable_wrap_clamp();
 
         //now create the framebuffer object and attach the texture to it.
-        var fbo = new GLFramebuffer(gl, width, height);
-        fbo.enableTexture(texture);
+        const fbo = new GLFramebuffer(gl, width, height);
+        fbo.enable_texture(texture);
 
         fbo.unbind();
 

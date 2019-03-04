@@ -1,20 +1,20 @@
-import compileProgram from './shader/compile_program';
-import extractAttributes from './shader/extract_attributes';
-import extractUniforms from './shader/extract_uniforms';
-import setPrecision from './shader/set_precision';
-import generateUniformAccessObject from './shader/generate_uniform_access_object';
+import compile_program from './shader/compile_program';
+import extract_attributes from './shader/extract_attributes';
+import extract_uniforms from './shader/extract_uniforms';
+import set_precision from './shader/set_precision';
+import generate_uniform_access_object from './shader/generate_uniform_access_object';
 
 export default class GLShader {
     /**
      * Helper class to create a webGL Shader
      *
      * @param gl {WebGLRenderingContext}
-     * @param vertexSrc {string} The vertex shader source as string.
-     * @param fragmentSrc {string} The fragment shader source asstring.
+     * @param vertex_src {string} The vertex shader source as string.
+     * @param fragment_src {string} The fragment shader source asstring.
      * @param precision {string} The float precision of the shader. Options are 'lowp', 'mediump' or 'highp'.
-     * @param attributeLocations {any} A key value pair showing which location eact attribute should sit eg {position:0, uvs:1}
+     * @param attribute_locations {{ [key:string]: number }} A key value pair showing which location eact attribute should sit eg {position:0, uvs:1}
      */
-    constructor(gl, vertexSrc, fragmentSrc, precision, attributeLocations) {
+    constructor(gl, vertex_src, fragment_src, precision, attribute_locations) {
         /**
          * The current WebGL rendering context
          *
@@ -23,29 +23,29 @@ export default class GLShader {
         this.gl = gl;
 
         if (precision) {
-            vertexSrc = setPrecision(vertexSrc, precision);
-            fragmentSrc = setPrecision(fragmentSrc, precision);
+            vertex_src = set_precision(vertex_src, precision);
+            fragment_src = set_precision(fragment_src, precision);
         }
 
         /**
          * The shader program
          */
-        this.program = compileProgram(gl, vertexSrc, fragmentSrc, attributeLocations);
+        this.program = compile_program(gl, vertex_src, fragment_src, attribute_locations);
 
         /**
          * The attributes of the shader as an object
          */
-        this.attributes = extractAttributes(gl, this.program);
+        this.attributes = extract_attributes(gl, this.program);
 
         /**
          * The uniforms of the shader as an object
          */
-        this.uniformData = extractUniforms(gl, this.program);
+        this.uniformData = extract_uniforms(gl, this.program);
 
         /**
          * The uniforms of the shader as an object
          */
-        this.uniforms = generateUniformAccessObject(gl, this.uniformData);
+        this.uniforms = generate_uniform_access_object(gl, this.uniformData);
     }
     /**
      * Uses this shader
@@ -63,7 +63,6 @@ export default class GLShader {
         this.uniformData = null;
         this.uniforms = null;
 
-        var gl = this.gl;
-        gl.deleteProgram(this.program);
+        this.gl.deleteProgram(this.program);
     }
 }

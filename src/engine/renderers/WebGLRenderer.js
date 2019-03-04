@@ -212,7 +212,7 @@ export default class WebGLRenderer extends SystemRenderer {
         this.bind_render_target(this.root_render_target);
 
         // now lets fill up the textures with empty ones!
-        const emptyGLTexture = GLTexture.fromData(gl, null, 1, 1);
+        const emptyGLTexture = GLTexture.from_data(gl, null, 1, 1);
 
         const temp_obj = { _gl_textures: {} };
 

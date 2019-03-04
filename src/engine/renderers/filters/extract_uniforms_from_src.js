@@ -1,4 +1,4 @@
-import defaultValue from 'engine/drivers/webgl/shader/default_value';
+import default_value from 'engine/drivers/webgl/shader/default_value';
 
 /**
  * @param {string} vertex_src
@@ -47,7 +47,7 @@ function extract_uniforms_from_string(string, mask) {
 
             if (!name.match(mask_regex)) {
                 uniforms[name] = {
-                    value: defaultValue(type, size),
+                    value: default_value(type, size),
                     name,
                     type,
                 };

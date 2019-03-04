@@ -148,7 +148,7 @@ export default class TileRenderer extends ObjectRenderer {
         const id = ++TileRenderer.vb_auto_increment;
         const shader = this.get_shader();
         const gl = this.renderer.gl;
-        const vb = GLBuffer.createVertexBuffer(gl, null, gl.STREAM_DRAW);
+        const vb = GLBuffer.create_vertex_buffer(gl, null, gl.STREAM_DRAW);
         const stuff = {
             id: id,
             vb: vb,
@@ -197,7 +197,7 @@ export default class TileRenderer extends ObjectRenderer {
             this.index_buffer.upload(indices);
         } else {
             let gl = this.renderer.gl;
-            this.index_buffer = GLBuffer.createIndexBuffer(gl, this.indices, gl.STATIC_DRAW);
+            this.index_buffer = GLBuffer.create_index_buffer(gl, this.indices, gl.STATIC_DRAW);
         }
     }
 

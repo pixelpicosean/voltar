@@ -1,46 +1,37 @@
 /**
  * Extracts the attributes
  * @param gl {WebGLRenderingContext} The current WebGL rendering context
- * @param uniformData {Object<string, import("./extract_uniforms").UniformObject>}
+ * @param uniform_data {Object<string, import("./extract_uniforms").UniformObject>}
  */
-export default function generateUniformAccessObject(gl, uniformData) {
+export default function generate_uniform_access_object(gl, uniform_data) {
     // this is the object we will be sending back.
     // an object hierachy will be created for structs
-    var uniforms = { data: {} };
+    const uniforms = { data: {}, gl: gl };
 
-    uniforms.gl = gl;
+    const uniform_keys = Object.keys(uniform_data);
 
-    var uniformKeys = Object.keys(uniformData);
+    for (let i = 0; i < uniform_keys.length; i++) {
+        const full_name = uniform_keys[i];
 
-    for (var i = 0; i < uniformKeys.length; i++) {
-        var fullName = uniformKeys[i];
+        const name_tokens = full_name.split('.');
+        const name = name_tokens[name_tokens.length - 1];
 
-        var nameTokens = fullName.split('.');
-        var name = nameTokens[nameTokens.length - 1];
+        const uniform_group = get_uniform_group(name_tokens, uniforms);
 
-        var uniformGroup = getUniformGroup(nameTokens, uniforms);
+        const uniform = uniform_data[full_name];
+        uniform_group.data[name] = uniform;
+        uniform_group.gl = gl;
 
-        var uniform = uniformData[fullName];
-        uniformGroup.data[name] = uniform;
-
-        uniformGroup.gl = gl;
-
-        Object.defineProperty(uniformGroup, name, {
-            get: generateGetter(name),
-            set: generateSetter(name, uniform)
+        Object.defineProperty(uniform_group, name, {
+            get: generate_getter(name),
+            set: generate_setter(name, uniform)
         });
     }
 
     return uniforms;
 }
 
-var generateGetter = function (name) {
-    return function () {
-        return this.data[name].value;
-    };
-};
-
-var GLSL_SINGLE_SETTERS = {
+const GLSL_SINGLE_SETTERS = {
     float: function setSingleFloat(gl, location, value) { gl.uniform1f(location, value); },
     vec2: function setSingleVec2(gl, location, value) { gl.uniform2f(location, value[0], value[1]); },
     vec3: function setSingleVec3(gl, location, value) { gl.uniform3f(location, value[0], value[1], value[2]); },
@@ -63,7 +54,7 @@ var GLSL_SINGLE_SETTERS = {
     sampler2D: function setSingleSampler2D(gl, location, value) { gl.uniform1i(location, value); },
 };
 
-var GLSL_ARRAY_SETTERS = {
+const GLSL_ARRAY_SETTERS = {
     float: function setFloatArray(gl, location, value) { gl.uniform1fv(location, value); },
     vec2: function setVec2Array(gl, location, value) { gl.uniform2fv(location, value); },
     vec3: function setVec3Array(gl, location, value) { gl.uniform3fv(location, value); },
@@ -79,26 +70,41 @@ var GLSL_ARRAY_SETTERS = {
     sampler2D: function setSampler2DArray(gl, location, value) { gl.uniform1iv(location, value); },
 };
 
-function generateSetter(name, uniform) {
-    return function (value) {
+/**
+ * @param {string} name
+ */
+function generate_getter(name) {
+    return function() {
+        return this.data[name].value;
+    };
+}
+
+/**
+ * @param {string} name
+ * @param {import("./extract_uniforms").UniformObject} uniform
+ */
+function generate_setter(name, uniform) {
+    return function(/** @type {number} */value) {
         this.data[name].value = value;
-        var location = this.data[name].location;
+        const location = this.data[name].location;
         if (uniform.size === 1) {
             GLSL_SINGLE_SETTERS[uniform.type](this.gl, location, value);
-        }
-        else {
-            // glslSetArray(gl, location, type, value) {
+        } else {
             GLSL_ARRAY_SETTERS[uniform.type](this.gl, location, value);
         }
     };
 }
 
-function getUniformGroup(nameTokens, uniform) {
-    var cur = uniform;
+/**
+ * @param {string[]} name_tokens
+ * @param {{ data: any, gl: WebGLRenderingContext }} uniform
+ */
+function get_uniform_group(name_tokens, uniform) {
+    let cur = uniform;
 
-    for (var i = 0; i < nameTokens.length - 1; i++) {
-        var o = cur[nameTokens[i]] || { data: {} };
-        cur[nameTokens[i]] = o;
+    for (let i = 0; i < name_tokens.length - 1; i++) {
+        let o = cur[name_tokens[i]] || { data: {}, gl: null };
+        cur[name_tokens[i]] = o;
         cur = o;
     }
 

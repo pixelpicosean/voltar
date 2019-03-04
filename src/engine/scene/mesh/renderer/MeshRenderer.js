@@ -59,9 +59,9 @@ export default class MeshRenderer extends ObjectRenderer {
 
             gl_data = {
                 shader: this.shader,
-                vertexBuffer: GLBuffer.createVertexBuffer(gl, mesh.vertices, gl.STREAM_DRAW),
-                uvBuffer: GLBuffer.createVertexBuffer(gl, mesh.uvs, gl.STREAM_DRAW),
-                index_buffer: GLBuffer.createIndexBuffer(gl, mesh.indices, gl.STATIC_DRAW),
+                vertexBuffer: GLBuffer.create_vertex_buffer(gl, mesh.vertices, gl.STREAM_DRAW),
+                uvBuffer: GLBuffer.create_vertex_buffer(gl, mesh.uvs, gl.STREAM_DRAW),
+                index_buffer: GLBuffer.create_index_buffer(gl, mesh.indices, gl.STATIC_DRAW),
                 // build the vao object that will render..
                 vao: null,
                 dirty: mesh.dirty,
