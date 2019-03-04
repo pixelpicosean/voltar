@@ -6,7 +6,7 @@ import check_max_if_statments_in_shader from 'engine/renderers/utils/check_max_i
 import Buffer from './BatchBuffer';
 import settings from 'engine/settings';
 import { premultiply_blend_mode, premultiply_tint } from 'engine/utils/index';
-import { GLBuffer } from 'pixi-gl-core';
+import GLBuffer from 'engine/drivers/webgl/gl_buffer';
 import { nearest_po2, log_base_2 } from 'engine/math/index';
 
 let TICK = 0;
@@ -107,7 +107,7 @@ export default class SpriteRenderer extends ObjectRenderer {
         this.shader = generateMultiTextureShader(gl, this.MAX_TEXTURES);
 
         // create a couple of buffers
-        this.index_buffer = GLBuffer.createIndexBuffer(gl, this.indices, gl.STATIC_DRAW);
+        this.index_buffer = GLBuffer.create_index_buffer(gl, this.indices, gl.STATIC_DRAW);
 
         // we use the second shader as the first one depending on your browser may omit aTextureId
         // as it is not used by the shader so is optimized out.
@@ -118,7 +118,7 @@ export default class SpriteRenderer extends ObjectRenderer {
 
         for (let i = 0; i < this.vaoMax; i++) {
             /* eslint-disable max-len */
-            const vertexBuffer = this.vertexBuffers[i] = GLBuffer.createVertexBuffer(gl, null, gl.STREAM_DRAW);
+            const vertexBuffer = this.vertexBuffers[i] = GLBuffer.create_vertex_buffer(gl, null, gl.STREAM_DRAW);
             /* eslint-enable max-len */
 
             // build the vao object that will render..
@@ -369,9 +369,7 @@ export default class SpriteRenderer extends ObjectRenderer {
 
                 const attrs = this.shader.attributes;
 
-                /* eslint-disable max-len */
-                const vertexBuffer = this.vertexBuffers[this.vertexCount] = GLBuffer.createVertexBuffer(gl, null, gl.STREAM_DRAW);
-                /* eslint-enable max-len */
+                const vertexBuffer = this.vertexBuffers[this.vertexCount] = GLBuffer.create_vertex_buffer(gl, null, gl.STREAM_DRAW);
 
                 // build the vao object that will render..
                 const vao = this.renderer.createVao()

@@ -4,8 +4,7 @@ import { BLEND_MODES } from 'engine/const';
  * Maps gl blend combinations to WebGL.
  *
  * @param {WebGLRenderingContext} gl - The rendering context.
- * @param {string[]} [array=[]] - The array to output into.
- * @return {string[]} Mapped modes.
+ * @param {number[][]} [array] - The array to output into.
  */
 export default function map_web_gl_blend_modes_to_voltar(gl, array = []) {
     // TODO - premultiply alpha would be different.
