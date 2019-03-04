@@ -35,10 +35,8 @@ const temp_matrix = new Matrix();
  */
 
 /**
- * The SystemRenderer is the base for a Renderer. It is extended by the {@link CanvasRenderer}
- * and {@link WebGLRenderer} which can be used for rendering a scene.
- *
- * @abstract
+ * The SystemRenderer is the base for a Renderer. It is extended by the
+ * `WebGLRenderer` which can be used for rendering a scene.
  */
 export default class SystemRenderer extends VObject {
     /**
@@ -50,7 +48,7 @@ export default class SystemRenderer extends VObject {
     constructor(system, desc, arg2, arg3) {
         super();
 
-        say_hello(system);
+        say_hello();
 
         // Support for constructor(system, screenWidth, screenHeight, options)
         if (typeof desc === 'number') {
@@ -100,7 +98,6 @@ export default class SystemRenderer extends VObject {
          * The resolution / device pixel ratio of the renderer
          *
          * @type {number}
-         * @default 1
          */
         this.resolution = desc.resolution || settings.RESOLUTION;
 
@@ -167,7 +164,7 @@ export default class SystemRenderer extends VObject {
          * @type {Array<number>}
          * @private
          */
-        this._background_colorRgba = [0, 0, 0, 0];
+        this._background_color_rgba = [0, 0, 0, 0];
 
         /**
          * The background color as a string.
@@ -175,7 +172,7 @@ export default class SystemRenderer extends VObject {
          * @type {string}
          * @private
          */
-        this._background_colorString = '#000000';
+        this._background_color_string = '#000000';
 
         this.background_color = desc.background_color || this._background_color; // run bg color setter
 
@@ -274,10 +271,10 @@ export default class SystemRenderer extends VObject {
     /**
      * Removes everything from the renderer and optionally removes the Canvas DOM element.
      *
-     * @param {boolean} [removeView=false] - Removes the Canvas element from the DOM.
+     * @param {boolean} [remove_view] - Removes the Canvas element from the DOM.
      */
-    destroy(removeView) {
-        if (removeView && this.view.parentNode) {
+    destroy(remove_view) {
+        if (remove_view && this.view.parentNode) {
             this.view.parentNode.removeChild(this.view);
         }
 
@@ -303,8 +300,8 @@ export default class SystemRenderer extends VObject {
         this.pixel_snap = false;
 
         this._background_color = 0;
-        this._background_colorRgba = null;
-        this._background_colorString = null;
+        this._background_color_rgba = null;
+        this._background_color_string = null;
 
         this._temp_node_2d_parent = null;
         this._last_object_rendered = null;
@@ -318,11 +315,9 @@ export default class SystemRenderer extends VObject {
     get background_color() {
         return this._background_color;
     }
-
-    set background_color(value) // eslint-disable-line require-jsdoc
-    {
+    set background_color(value) {
         this._background_color = value;
-        this._background_colorString = hex2string(value);
-        hex2rgb(value, this._background_colorRgba);
+        this._background_color_string = hex2string(value);
+        hex2rgb(value, this._background_color_rgba);
     }
 }

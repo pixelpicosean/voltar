@@ -2,7 +2,7 @@
  * @param {HTMLCanvasElement} canvas
  * @param {any} [options]
  */
-export default function(canvas, options) {
+export default function create_context(canvas, options) {
     const gl = canvas.getContext('webgl', options) ||
         canvas.getContext('experimental-webgl', options);
 

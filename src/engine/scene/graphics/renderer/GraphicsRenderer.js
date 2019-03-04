@@ -78,7 +78,7 @@ export default class GraphicsRenderer extends ObjectRenderer {
 
         // @ts-ignore
         renderer.bind_shader(shader);
-        renderer.state.setBlendMode(graphics.blend_mode);
+        renderer.state.set_blend_mode(graphics.blend_mode);
 
         for (let i = 0, n = webgl.data.length; i < n; i++) {
             webgl_data = webgl.data[i];

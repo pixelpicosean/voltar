@@ -421,7 +421,7 @@ export default class SpriteRenderer extends ObjectRenderer {
             }
 
             // set the blend mode..
-            this.renderer.state.setBlendMode(group.blend);
+            this.renderer.state.set_blend_mode(group.blend);
 
             gl.drawElements(gl.TRIANGLES, group.size * 6, gl.UNSIGNED_SHORT, group.start * 6 * 2);
         }

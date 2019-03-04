@@ -1,6 +1,6 @@
 import VertexArrayObject from 'engine/drivers/webgl/vao';
 import GLTexture from 'engine/drivers/webgl/gl_texture';
-import createContext from 'engine/drivers/webgl/create_context';
+import create_context from 'engine/drivers/webgl/create_context';
 
 import { plugin_target } from 'engine/utils/index';
 import { RENDERER_TYPE } from 'engine/const';
@@ -76,7 +76,7 @@ export default class WebGLRenderer extends SystemRenderer {
             powerPreference: this.options.power_preference,
         };
 
-        this._background_colorRgba[3] = this.transparent ? 0 : 1;
+        this._background_color_rgba[3] = this.transparent ? 0 : 1;
 
         /**
          * Manages the masks using the stencil buffer.
@@ -132,7 +132,7 @@ export default class WebGLRenderer extends SystemRenderer {
             validate_context(this.options.context);
         }
 
-        this.gl = this.options.context || createContext(this.view, this._context_options);
+        this.gl = this.options.context || create_context(this.view, this._context_options);
 
         this.CONTEXT_UID = CONTEXT_UID++;
 
@@ -157,9 +157,9 @@ export default class WebGLRenderer extends SystemRenderer {
          *
          * @type {Shader}
          */
-        this._activeShader = null;
+        this._active_shader = null;
 
-        this._activeVao = null;
+        this._active_vao = null;
 
         /**
          * Holds the current render target
@@ -176,33 +176,12 @@ export default class WebGLRenderer extends SystemRenderer {
         this._nextTextureLocation = 0;
 
         this.setBlendMode(0);
-
-        /**
-         * Fired after rendering finishes.
-         *
-         * @event WebGLRenderer#postrender
-         */
-
-        /**
-         * Fired before rendering starts.
-         *
-         * @event WebGLRenderer#prerender
-         */
-
-        /**
-         * Fired when the WebGL context is set.
-         *
-         * @event WebGLRenderer#context
-         * @param {WebGLRenderingContext} gl - WebGL context.
-         */
     }
     init_plugins() { }
     destroy_plugins() { }
 
     /**
      * Creates the WebGL context
-     *
-     * @private
      */
     _init_context() {
         const gl = this.gl;
@@ -214,8 +193,8 @@ export default class WebGLRenderer extends SystemRenderer {
 
         const max_textures = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
 
-        this._activeShader = null;
-        this._activeVao = null;
+        this._active_shader = null;
+        this._active_vao = null;
 
         this.bound_textures = new Array(max_textures);
         this.empty_textures = new Array(max_textures);
@@ -225,10 +204,10 @@ export default class WebGLRenderer extends SystemRenderer {
         this.filter_manager = new FilterManager(this);
         this.texture_gc = new TextureGarbageCollector(this);
 
-        this.state.resetToDefault();
+        this.state.reset_to_default();
 
         this.root_render_target = new RenderTarget(gl, this.width, this.height, null, this.resolution, true);
-        this.root_render_target.clearColor = this._background_colorRgba;
+        this.root_render_target.clearColor = this._background_color_rgba;
 
         this.bind_render_target(this.root_render_target);
 
@@ -356,8 +335,8 @@ export default class WebGLRenderer extends SystemRenderer {
         if (this._active_render_target === this.root_render_target) {
             this.root_render_target.activate();
 
-            if (this._activeShader) {
-                this._activeShader.uniforms.projectionMatrix = this.root_render_target.projection_matrix.to_array(true);
+            if (this._active_shader) {
+                this._active_shader.uniforms.projectionMatrix = this.root_render_target.projection_matrix.to_array(true);
             }
         }
     }
@@ -368,7 +347,7 @@ export default class WebGLRenderer extends SystemRenderer {
      * @param {number} blend_mode - the desired blend mode
      */
     setBlendMode(blend_mode) {
-        this.state.setBlendMode(blend_mode);
+        this.state.set_blend_mode(blend_mode);
     }
 
     /**
@@ -453,8 +432,8 @@ export default class WebGLRenderer extends SystemRenderer {
             render_target.activate();
         }
 
-        if (this._activeShader) {
-            this._activeShader.uniforms.projectionMatrix = render_target.projection_matrix.to_array(true);
+        if (this._active_shader) {
+            this._active_shader.uniforms.projectionMatrix = render_target.projection_matrix.to_array(true);
         }
 
         this.stencil_manager.set_mask_stack(render_target.stencil_mask_stack);
@@ -471,8 +450,8 @@ export default class WebGLRenderer extends SystemRenderer {
      */
     bind_shader(shader, autoProject) {
         // TODO cache
-        if (this._activeShader !== shader) {
-            this._activeShader = shader;
+        if (this._active_shader !== shader) {
+            this._active_shader = shader;
             shader.bind();
 
             // `autoProject` normally would be a default parameter set to true
@@ -581,19 +560,19 @@ export default class WebGLRenderer extends SystemRenderer {
      * @return {WebGLRenderer} Returns itself.
      */
     bind_vao(vao) {
-        if (this._activeVao === vao) {
+        if (this._active_vao === vao) {
             return this;
         }
 
         if (vao) {
             vao.bind();
         }
-        else if (this._activeVao) {
+        else if (this._active_vao) {
             // TODO this should always be true i think?
-            this._activeVao.unbind();
+            this._active_vao.unbind();
         }
 
-        this._activeVao = vao;
+        this._active_vao = vao;
 
         return this;
     }
@@ -607,7 +586,7 @@ export default class WebGLRenderer extends SystemRenderer {
         this.set_object_renderer(this.empty_renderer);
 
         this.bind_vao(null);
-        this._activeShader = null;
+        this._active_shader = null;
         this._active_render_target = this.root_render_target;
 
         for (let i = 0; i < this.bound_textures.length; i++) {
@@ -617,7 +596,7 @@ export default class WebGLRenderer extends SystemRenderer {
         // bind the main frame buffer (the screen);
         this.root_render_target.activate();
 
-        this.state.resetToDefault();
+        this.state.reset_to_default();
 
         return this;
     }
