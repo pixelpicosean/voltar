@@ -1,7 +1,7 @@
 /**
  * @param gl {WebGLRenderingContext} The current WebGL context
  * @param attribs {any}
- * @param state {{ temp_attrib_state: boolean[], attrib_state: boolean[] }}
+ * @param state {{ temp_attrib_state: number[], attrib_state: number[] }}
  */
 export default function set_vertex_attrib_arrays(gl, attribs, state) {
     let i = 0;
@@ -10,12 +10,12 @@ export default function set_vertex_attrib_arrays(gl, attribs, state) {
             attrib_state = state.attrib_state;
 
         for (i = 0; i < temp_attrib_state.length; i++) {
-            temp_attrib_state[i] = false;
+            temp_attrib_state[i] = 0;
         }
 
         // set the new attribs
         for (i = 0; i < attribs.length; i++) {
-            temp_attrib_state[attribs[i].attribute.location] = true;
+            temp_attrib_state[attribs[i].attribute.location] = 1;
         }
 
         for (i = 0; i < attrib_state.length; i++) {

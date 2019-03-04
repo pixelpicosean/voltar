@@ -550,7 +550,7 @@ export default class WebGLRenderer extends SystemRenderer {
      * @return {VertexArrayObject} The new VAO.
      */
     createVao() {
-        return new VertexArrayObject(this.gl, this.state.attribState);
+        return new VertexArrayObject(this.gl, this.state.attrib_state);
     }
 
     /**

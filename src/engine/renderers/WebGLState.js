@@ -41,7 +41,7 @@ export default class WebGLState {
         /**
          * The stack holding all the different states
          *
-         * @type {Array<*>}
+         * @type {Uint8Array[]}
          */
         this.stack = [];
 
@@ -54,15 +54,15 @@ export default class WebGLState {
 
         this.max_attribs = gl.getParameter(gl.MAX_VERTEX_ATTRIBS);
 
-        this.attribState = {
-            tempAttribState: new Array(this.max_attribs),
-            attribState: new Array(this.max_attribs),
+        this.attrib_state = {
+            temp_attrib_state: /** @type {number[]} */(new Array(this.max_attribs)),
+            attrib_state: /** @type {number[]} */(new Array(this.max_attribs)),
         };
 
         this.blend_modes = map_web_gl_blend_modes_to_voltar(gl);
 
         // check we have vao..
-        this.nativeVaoExtension = (
+        this.native_vao_extension = (
             gl.getExtension('OES_vertex_array_object')
             ||
             gl.getExtension('MOZ_OES_vertex_array_object')
@@ -103,7 +103,7 @@ export default class WebGLState {
     /**
      * Sets the current state
      *
-     * @param {*} state - The state to set.
+     * @param {Uint8Array} state - The state to set.
      */
     set_state(state) {
         this.set_blend(state[BLEND]);
@@ -116,11 +116,9 @@ export default class WebGLState {
     /**
      * Enables or disabled blending.
      *
-     * @param {boolean} value_p - Turn on or off webgl blending.
+     * @param {number} value - Turn on or off webgl blending.
      */
-    set_blend(value_p) {
-        const value = value_p ? 1 : 0;
-
+    set_blend(value) {
         if (this.active_state[BLEND] === value) {
             return;
         }
@@ -153,49 +151,43 @@ export default class WebGLState {
     /**
      * Sets whether to enable or disable depth test.
      *
-     * @param {boolean} value_p - Turn on or off webgl depth testing.
+     * @param {number} value - Turn on or off webgl depth testing.
      */
-    set_depth_test(value_p) {
-        const value = value_p ? 1 : 0;
-
+    set_depth_test(value) {
         if (this.active_state[DEPTH_TEST] === value) {
             return;
         }
 
         this.active_state[DEPTH_TEST] = value;
-        this.gl[value_p ? 'enable' : 'disable'](this.gl.DEPTH_TEST);
+        this.gl[value ? 'enable' : 'disable'](this.gl.DEPTH_TEST);
     }
 
     /**
      * Sets whether to enable or disable cull face.
      *
-     * @param {boolean} value_p - Turn on or off webgl cull face.
+     * @param {number} value - Turn on or off webgl cull face.
      */
-    set_cull_face(value_p) {
-        const value = value_p ? 1 : 0;
-
+    set_cull_face(value) {
         if (this.active_state[CULL_FACE] === value) {
             return;
         }
 
         this.active_state[CULL_FACE] = value;
-        this.gl[value_p ? 'enable' : 'disable'](this.gl.CULL_FACE);
+        this.gl[value ? 'enable' : 'disable'](this.gl.CULL_FACE);
     }
 
     /**
      * Sets the gl front face.
      *
-     * @param {boolean} value_p - true is clockwise and false is counter-clockwise
+     * @param {number} value - true is clockwise and false is counter-clockwise
      */
-    set_front_face(value_p) {
-        const value = value_p ? 1 : 0;
-
+    set_front_face(value) {
         if (this.active_state[FRONT_FACE] === value) {
             return;
         }
 
         this.active_state[FRONT_FACE] = value;
-        this.gl.frontFace(this.gl[value_p ? 'CW' : 'CCW']);
+        this.gl.frontFace(this.gl[value ? 'CW' : 'CCW']);
     }
 
     /**
@@ -203,12 +195,12 @@ export default class WebGLState {
      *
      */
     reset_attributes() {
-        for (let i = 0; i < this.attribState.tempAttribState.length; i++) {
-            this.attribState.tempAttribState[i] = 0;
+        for (let i = 0; i < this.attrib_state.temp_attrib_state.length; i++) {
+            this.attrib_state.temp_attrib_state[i] = 0;
         }
 
-        for (let i = 0; i < this.attribState.attribState.length; i++) {
-            this.attribState.attribState[i] = 0;
+        for (let i = 0; i < this.attrib_state.attrib_state.length; i++) {
+            this.attrib_state.attrib_state[i] = 0;
         }
 
         // im going to assume one is always active for performance reasons.
@@ -223,8 +215,8 @@ export default class WebGLState {
      */
     reset_to_default() {
         // unbind any VAO if they exist..
-        if (this.nativeVaoExtension) {
-            this.nativeVaoExtension.bindVertexArrayOES(null);
+        if (this.native_vao_extension) {
+            this.native_vao_extension.bindVertexArrayOES(null);
         }
 
         // reset all attributes..

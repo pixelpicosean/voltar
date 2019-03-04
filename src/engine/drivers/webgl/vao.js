@@ -18,7 +18,7 @@ export default class VertexArrayObject {
      * Only works if WebGL extensions are enabled (they usually are)
      *
      * @param {WebGLRenderingContext} gl The current WebGL rendering context
-     * @param {{ temp_attrib_state: boolean[], attrib_state: boolean[] }} [state]
+     * @param {{ temp_attrib_state: number[], attrib_state: number[] }} [state]
      */
     constructor(gl, state = null) {
         this.native_vao_extension = null;
@@ -41,8 +41,8 @@ export default class VertexArrayObject {
 
             // VAO - overwrite the state..
             this.native_state = {
-                temp_attrib_state: new Array(max_attribs),
-                attrib_state: new Array(max_attribs)
+                temp_attrib_state: /** @type {number[]} */(new Array(max_attribs)),
+                attrib_state: /** @type {number[]} */(new Array(max_attribs))
             };
         }
 
@@ -196,7 +196,7 @@ export default class VertexArrayObject {
         const gl = this.gl;
 
         if (this.index_buffer) {
-            gl.drawElements(type, size || this.index_buffer.data.length, gl.UNSIGNED_SHORT, (start || 0) * 2);
+            gl.drawElements(type, size || /** @type {SharedArrayBuffer} */(this.index_buffer.data).length, gl.UNSIGNED_SHORT, (start || 0) * 2);
         } else {
             // TODO need a better way to calculate size..
             gl.drawArrays(type, start, size || this.get_size());
@@ -225,7 +225,7 @@ export default class VertexArrayObject {
 
     get_size() {
         var attrib = this.attributes[0];
-        return attrib.buffer.data.length / ((attrib.stride / 4) || attrib.attribute.size);
+        return /** @type {SharedArrayBuffer} */(attrib.buffer.data).length / ((attrib.stride / 4) || attrib.attribute.size);
     }
 }
 

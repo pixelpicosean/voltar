@@ -43,7 +43,7 @@ export default class TilingSpriteRenderer extends ObjectRenderer {
         this.simpleShader = new Shader(gl, Vert, SimpleFrag);
 
         this.renderer.bind_vao(null);
-        this.quad = new Quad(gl, this.renderer.state.attribState);
+        this.quad = new Quad(gl, this.renderer.state.attrib_state);
         this.quad.initVao(this.shader);
     }
 
