@@ -2,6 +2,7 @@ import GLBuffer from 'engine/drivers/webgl/gl_buffer';
 import VertexArrayObject from 'engine/drivers/webgl/vao';
 
 import Shader from 'engine/Shader';
+import Vector2 from 'engine/math/Vector2';
 
 /**
  * An object containing WebGL specific properties to be used by the WebGL renderer
@@ -16,49 +17,49 @@ export default class WebGLGraphicsData {
         /**
          * The current WebGL drawing context
          *
-         * @member {WebGLRenderingContext}
+         * @type {WebGLRenderingContext}
          */
         this.gl = gl;
 
         // TODO does this need to be split before uploading??
         /**
          * An array of color components (r,g,b)
-         * @member {number[]}
+         * @type {number[]}
          */
         this.color = [0, 0, 0]; // color split!
 
         /**
          * An array of points to draw
-         * @member {Vector2[]}
+         * @type {Vector2[]}
          */
         this.points = [];
 
         /**
          * The indices of the vertices
-         * @member {number[]}
+         * @type {number[]}
          */
         this.indices = [];
         /**
          * The main buffer
-         * @member {WebGLBuffer}
+         * @type {GLBuffer}
          */
         this.buffer = GLBuffer.createVertexBuffer(gl);
 
         /**
          * The index buffer
-         * @member {WebGLBuffer}
+         * @type {GLBuffer}
          */
         this.index_buffer = GLBuffer.createIndexBuffer(gl);
 
         /**
          * Whether this graphics is dirty or not
-         * @member {boolean}
+         * @type {boolean}
          */
         this.dirty = true;
 
         /**
          * Whether this graphics is native_lines or not
-         * @member {boolean}
+         * @type {boolean}
          */
         this.native_lines = false;
 
@@ -67,7 +68,7 @@ export default class WebGLGraphicsData {
 
         /**
          *
-         * @member {Shader}
+         * @type {Shader}
          */
         this.shader = shader;
 

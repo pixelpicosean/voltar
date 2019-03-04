@@ -7,15 +7,18 @@ export default class VertexArrayObject {
      * Only works if WebGL extensions are enabled (they usually are)
      *
      * @param {WebGLRenderingContext} gl The current WebGL rendering context
-     * @param {any} state
+     * @param {any} [state]
      */
-    constructor(gl, state) {
+    constructor(gl, state = null) {
         this.nativeVaoExtension = null;
 
         if (!VertexArrayObject.FORCE_NATIVE) {
-            this.nativeVaoExtension = gl.getExtension('OES_vertex_array_object') ||
-                gl.getExtension('MOZ_OES_vertex_array_object') ||
-                gl.getExtension('WEBKIT_OES_vertex_array_object');
+            this.nativeVaoExtension =
+                gl.getExtension('OES_vertex_array_object')
+                ||
+                gl.getExtension('MOZ_OES_vertex_array_object')
+                ||
+                gl.getExtension('WEBKIT_OES_vertex_array_object')
         }
 
         this.nativeState = state;
@@ -127,23 +130,23 @@ export default class VertexArrayObject {
     }
 
     /**
-     * @param buffer     {GLBuffer}
-     * @param attribute  {any}
-     * @param type       {string}
-     * @param normalized {boolean}
-     * @param stride     {number}
-     * @param start      {number}
+     * @param {GLBuffer} buffer
+     * @param {any} attribute
+     * @param {number} [type]
+     * @param {boolean} [normalized]
+     * @param {number} [stride]
+     * @param {number} [start]
      */
-    addAttribute(buffer, attribute, type, normalized, stride, start) {
+    addAttribute(buffer, attribute, type = undefined, normalized = false, stride = 0, start = 0) {
         this.attributes.push({
             buffer: buffer,
             attribute: attribute,
 
             location: attribute.location,
             type: type || this.gl.FLOAT,
-            normalized: normalized || false,
-            stride: stride || 0,
-            start: start || 0
+            normalized: normalized,
+            stride: stride,
+            start: start,
         });
 
         this.dirty = true;
@@ -152,7 +155,7 @@ export default class VertexArrayObject {
     }
 
     /**
-     * @param buffer   {GLBuffer}
+     * @param {GLBuffer} buffer
      */
     addIndex(buffer) {
         this.indexBuffer = buffer;

@@ -14,7 +14,7 @@ export default class GLTexture {
         /**
          * The current WebGL rendering context
          *
-         * @member {WebGLRenderingContext}
+         * @type {WebGLRenderingContext}
          */
         this.gl = gl;
 
@@ -22,14 +22,14 @@ export default class GLTexture {
         /**
          * The WebGL texture
          *
-         * @member {WebGLTexture}
+         * @type {WebGLTexture}
          */
         this.texture = gl.createTexture();
 
         /**
          * If mipmapping was used for this texture, enable and disable with enableMipmap()
          *
-         * @member {boolean}
+         * @type {boolean}
          */
         // some settings..
         this.mipmap = false;
@@ -38,48 +38,48 @@ export default class GLTexture {
         /**
          * Set to true to enable pre-multiplied alpha
          *
-         * @member {boolean}
+         * @type {boolean}
          */
         this.premultiplyAlpha = false;
 
         /**
          * The width of texture
          *
-         * @member {number}
+         * @type {number}
          */
         this.width = width;
         /**
          * The height of texture
          *
-         * @member {number}
+         * @type {number}
          */
         this.height = height;
 
         /**
          * The pixel format of the texture. defaults to gl.RGBA
          *
-         * @member {number}
+         * @type {number}
          */
         this.format = format || gl.RGBA;
 
         /**
          * The gl type of the texture. defaults to gl.UNSIGNED_BYTE
          *
-         * @member {number}
+         * @type {number}
          */
         this.type = type || gl.UNSIGNED_BYTE;
     }
 
     /**
      * Uploads this texture to the GPU
-     * @param source {HTMLImageElement|ImageData|HTMLVideoElement} the source image of the texture
+     * @param source {HTMLImageElement|ImageData|HTMLCanvasElement|HTMLVideoElement} the source image of the texture
      */
     upload(source) {
         this.bind();
 
         var gl = this.gl;
 
-        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, this.premultiplyAlpha);
+        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, this.premultiplyAlpha ? 1 : 0);
 
         var newWidth = /** @type {HTMLVideoElement} */(source).videoWidth || source.width;
         var newHeight = /** @type {HTMLVideoElement} */(source).videoHeight || source.height;
@@ -126,7 +126,7 @@ export default class GLTexture {
         }
 
         // what type of data?
-        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, this.premultiplyAlpha);
+        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, this.premultiplyAlpha ? 1 : 0);
 
 
         if (width !== this.width || height !== this.height) {

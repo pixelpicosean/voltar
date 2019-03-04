@@ -2,20 +2,11 @@ import GLShader from 'engine/drivers/webgl/gl_shader';
 import settings from './settings';
 
 /**
- * @param {string|string[]} src
+ * @param {string} src
  * @param {string} def
  */
 function check_precision(src, def) {
-    if (src instanceof Array) {
-        debugger
-        if (src[0].substring(0, 9) !== 'precision') {
-            const copy = src.slice(0);
-
-            copy.unshift(`precision ${def} float;`);
-
-            return copy;
-        }
-    } else if (src.trim().substring(0, 9) !== 'precision') {
+    if (src.trim().substring(0, 9) !== 'precision') {
         return `precision ${def} float;\n${src}`;
     }
 

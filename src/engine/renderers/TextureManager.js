@@ -17,21 +17,21 @@ export default class TextureManager {
         /**
          * A reference to the current renderer
          *
-         * @member {WebGLRenderer}
+         * @type {WebGLRenderer}
          */
         this.renderer = renderer;
 
         /**
          * The current WebGL rendering context
          *
-         * @member {WebGLRenderingContext}
+         * @type {WebGLRenderingContext}
          */
         this.gl = renderer.gl;
 
         /**
          * Track textures in the renderer so we can no longer listen to them on destruction.
          *
-         * @member {Array<*>}
+         * @type {Array<*>}
          * @private
          */
         this._managed_textures = [];
@@ -56,14 +56,11 @@ export default class TextureManager {
     /**
      * Updates and/or Creates a WebGL texture for the renderer's context.
      *
-     * @param {BaseTexture|Texture} texture - the texture to update
+     * @param {BaseTexture} texture - the texture to update
      * @param {number} location - the location the texture will be bound to.
      * @return {GLTexture} The gl texture.
      */
     update_texture(texture, location) {
-        // assume it good!
-        // texture = texture.base_texture || texture;
-
         const gl = this.gl;
 
         const is_render_texture = !!texture._gl_render_targets;
@@ -169,11 +166,17 @@ export default class TextureManager {
     /**
      * Deletes the texture from WebGL
      *
-     * @param {BaseTexture|Texture} texture - the texture to destroy
+     * @param {BaseTexture|Texture} texture_or_base_texture - the texture to destroy
      * @param {boolean} [skip_remove=false] - Whether to skip removing the texture from the TextureManager.
      */
-    destroy_texture(texture, skip_remove) {
-        texture = texture.base_texture || texture;
+    destroy_texture(texture_or_base_texture, skip_remove) {
+        /** @type {BaseTexture} */
+        let texture = null;
+        if (texture_or_base_texture instanceof Texture) {
+            texture = texture_or_base_texture.base_texture;
+        } else {
+            texture = texture_or_base_texture;
+        }
 
         if (!texture.has_loaded) {
             return;

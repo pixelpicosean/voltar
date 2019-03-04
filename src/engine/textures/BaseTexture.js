@@ -11,15 +11,20 @@ import { is_po2 } from 'engine/math/index';
 import { VObject } from 'engine/dep/index';
 import determine_cross_origin from '../utils/determine_cross_origin';
 import RenderTarget from 'engine/renderers/utils/RenderTarget';
+import GLTexture from 'engine/drivers/webgl/gl_texture';
+
+/**
+ * @typedef {HTMLImageElement|HTMLCanvasElement|HTMLVideoElement} BaseTextureSource
+ */
 
 /**
  * A texture stores the information that represents an image. All textures have a base texture.
  */
 export default class BaseTexture extends VObject {
     /**
-     * @param {HTMLImageElement|HTMLCanvasElement} [source] - the source object of the texture.
-     * @param {number} [scale_mode=settings.SCALE_MODE] - See {@link SCALE_MODES} for possible values
-     * @param {number} [resolution=1] - The resolution / device pixel ratio of the texture
+     * @param {BaseTextureSource} [source] - the source object of the texture.
+     * @param {number} [scale_mode] - See {@link SCALE_MODES} for possible values
+     * @param {number} [resolution] - The resolution / device pixel ratio of the texture
      */
     constructor(source, scale_mode, resolution) {
         super();
@@ -106,7 +111,7 @@ export default class BaseTexture extends VObject {
          * TODO: Make this a setter that calls load_source();
          *
          * @readonly
-         * @type {HTMLImageElement|HTMLCanvasElement}
+         * @type {BaseTextureSource}
          */
         this.source = null; // set in load_source, if at all
 
@@ -117,7 +122,7 @@ export default class BaseTexture extends VObject {
          * TODO: Currently not in use but could be used when re-scaling svg.
          *
          * @readonly
-         * @type {HTMLImageElement|HTMLCanvasElement}
+         * @type {BaseTextureSource}
          */
         this.origin_source = null; // set in loadSvg, if at all
 
@@ -188,7 +193,7 @@ export default class BaseTexture extends VObject {
          * A map of renderer IDs to webgl textures
          *
          * @private
-         * @type {Object<number, WebGLTexture>}
+         * @type {Object<number, GLTexture>}
          */
         this._gl_textures = {};
         /**
@@ -222,52 +227,16 @@ export default class BaseTexture extends VObject {
         if (source) {
             this.load_source(source);
         }
-
-        /**
-         * Fired when a not-immediately-available source finishes loading.
-         *
-         * @protected
-         * @event BaseTexture#loaded
-         * @param {BaseTexture} base_texture - Resource loaded.
-         */
-
-        /**
-         * Fired when a not-immediately-available source fails to load.
-         *
-         * @protected
-         * @event BaseTexture#error
-         * @param {BaseTexture} base_texture - Resource errored.
-         */
-
-        /**
-         * Fired when BaseTexture is updated.
-         *
-         * @protected
-         * @event BaseTexture#update
-         * @param {BaseTexture} base_texture - Instance of texture being updated.
-         */
-
-        /**
-         * Fired when BaseTexture is destroyed.
-         *
-         * @protected
-         * @event BaseTexture#dispose
-         * @param {BaseTexture} base_texture - Instance of texture being destroyed.
-         */
     }
 
     /**
      * Updates the texture on all the webgl renderers, this also assumes the src has changed.
-     *
-     * @fires BaseTexture#update
      */
     update() {
         // Svg size is handled during load
         if (this.image_type !== 'svg') {
-            // @ts-ignore
-            this.real_width = this.source.naturalWidth || this.source.videoWidth || this.source.width;
-            // @ts-ignore
-            this.real_height = this.source.naturalHeight || this.source.videoHeight || this.source.height;
+            this.real_width = /** @type {HTMLImageElement} */(this.source).naturalWidth || /** @type {HTMLVideoElement} */(this.source).videoWidth || this.source.width;
+            this.real_height = /** @type {HTMLImageElement} */(this.source).naturalHeight || /** @type {HTMLVideoElement} */(this.source).videoHeight || this.source.height;
 
             this._update_dimensions();
         }
@@ -303,8 +272,7 @@ export default class BaseTexture extends VObject {
      *          // (it may still make sense to listen to the events)
      *     }
      *
-     * @protected
-     * @param {HTMLImageElement|HTMLCanvasElement} source - the source object of the texture.
+     * @param {BaseTextureSource} source - the source object of the texture.
      */
     load_source(source) {
         const was_loading = this.is_loading;
@@ -322,8 +290,7 @@ export default class BaseTexture extends VObject {
         this.source = source;
 
         // Apply source if loaded. Otherwise setup appropriate loading monitors.
-        // @ts-ignore
-        if (((source.src && source.complete) || source.getContext) && source.width && source.height) {
+        if (((/** @type {HTMLImageElement} */(source).src && /** @type {HTMLImageElement} */(source).complete) || /** @type {HTMLCanvasElement} */(source).getContext) && source.width && source.height) {
             this._update_image_type();
 
             if (this.image_type === 'svg') {
@@ -336,8 +303,7 @@ export default class BaseTexture extends VObject {
                 // send loaded event if previous source was null and we have been passed a pre-loaded IMG element
                 this.emit_signal('loaded', this);
             }
-            // @ts-ignore
-        } else if (!source.getContext) {
+        } else if (!/** @type {HTMLCanvasElement} */(source).getContext) {
             // Image fail / not ready
             this.is_loading = true;
 
@@ -380,15 +346,13 @@ export default class BaseTexture extends VObject {
             // "The value of `complete` can thus change while a script is executing."
             // So complete needs to be re-checked after the callbacks have been added..
             // NOTE: complete will be true if the image has no src so best to check if the src is set.
-            // @ts-ignore
-            if (source.complete && source.src) {
+            if (/** @type {HTMLImageElement} */(source).complete && /** @type {HTMLImageElement} */(source).src) {
                 // ..and if we're complete now, no need for callbacks
                 source.onload = null;
                 source.onerror = null;
 
                 if (scope.image_type === 'svg') {
                     scope._load_svg_source();
-
                     return;
                 }
 
@@ -514,8 +478,6 @@ export default class BaseTexture extends VObject {
      * `_loadSvgSourceUsingXhr` or `_loadSvgSourceUsingDataUri`.
      *
      * @param  {string} svg_string SVG source as string
-     *
-     * @fires BaseTexture#loaded
      */
     _load_svg_source_using_string(svg_string) {
         const svg_size = get_svg_size(svg_string);
@@ -538,7 +500,7 @@ export default class BaseTexture extends VObject {
 
         canvas.width = this.real_width;
         canvas.height = this.real_height;
-        canvas._pixiId = `canvas_${uid()}`;
+        canvas._tex_id = `canvas_${uid()}`;
 
         // Draw the Svg to the canvas
         canvas
@@ -549,8 +511,8 @@ export default class BaseTexture extends VObject {
         this.origin_source = this.source;
         this.source = canvas;
 
-        // Add also the canvas in cache (destroy clears by `image_url` and `source._pixiId`)
-        BaseTexture.add_to_cache(this, canvas._pixiId);
+        // Add also the canvas in cache (destroy clears by `image_url` and `source._tex_id`)
+        BaseTexture.add_to_cache(this, canvas._tex_id);
 
         this.is_loading = false;
         this._source_loaded();
@@ -560,8 +522,6 @@ export default class BaseTexture extends VObject {
     /**
      * Used internally to update the width, height, and some other tracking vars once
      * a source has successfully loaded.
-     *
-     * @private
      */
     _source_loaded() {
         this.has_loaded = true;
@@ -578,8 +538,7 @@ export default class BaseTexture extends VObject {
 
             this.image_url = null;
 
-            // @ts-ignore
-            this.source.src = '';
+            /** @type {HTMLImageElement} */(this.source).src = '';
         }
 
         this.source = null;
@@ -596,8 +555,6 @@ export default class BaseTexture extends VObject {
      * Frees the texture from WebGL memory without destroying this texture object.
      * This means you can still use the texture later which will upload it to GPU
      * memory again.
-     *
-     * @fires BaseTexture#dispose
      */
     dispose() {
         this.emit_signal('dispose', this);
@@ -610,8 +567,7 @@ export default class BaseTexture extends VObject {
      * @param {string} new_src - the path of the image
      */
     update_source_image(new_src) {
-        // @ts-ignore
-        this.source.src = new_src;
+        /** @type {HTMLImageElement} */(this.source).src = new_src;
 
         this.load_source(this.source);
     }
@@ -620,12 +576,10 @@ export default class BaseTexture extends VObject {
      * Helper function that creates a base texture from the given image url.
      * If the image is not in the base texture cache it will be created and loaded.
      *
-     * @static
      * @param {string} image_url - The image url of the texture
-     * @param {boolean} [crossorigin=(auto)] - Should use anonymous CORS? Defaults to true if the URL is not a data-URI.
-     * @param {number} [scale_mode=settings.SCALE_MODE] - See {@link SCALE_MODES} for possible values
-     * @param {number} [source_scale=(auto)] - Scale for the original image, used with Svg images.
-     * @return {BaseTexture} The new base texture.
+     * @param {boolean} [crossorigin] - Should use anonymous CORS? Defaults to true if the URL is not a data-URI.
+     * @param {number} [scale_mode] - See {@link SCALE_MODES} for possible values
+     * @param {number} [source_scale] - Scale for the original image, used with Svg images.
      */
     static from_image(image_url, crossorigin, scale_mode, source_scale) {
         let base_texture = BaseTextureCache[image_url];
@@ -637,9 +591,8 @@ export default class BaseTexture extends VObject {
 
             if (crossorigin === undefined && image_url.indexOf('data:') !== 0) {
                 image.crossOrigin = determine_cross_origin(image_url);
-            }
-            else if (crossorigin) {
-                image.crossOrigin = typeof crossorigin === 'string' ? crossorigin : 'anonymous';
+            } else if (crossorigin) {
+                image.crossOrigin = (typeof crossorigin === 'string') ? crossorigin : 'anonymous';
             }
 
             base_texture = new BaseTexture(image, scale_mode);
@@ -663,44 +616,39 @@ export default class BaseTexture extends VObject {
     /**
      * Helper function that creates a base texture from the given canvas element.
      *
-     * @static
      * @param {HTMLCanvasElement} canvas - The canvas element source of the texture
      * @param {number} [scale_mode] - See {@link SCALE_MODES} for possible values
-     * @param {string} [origin='canvas'] - A string origin of who created the base texture
-     * @return {BaseTexture} The new base texture.
+     * @param {string} [origin] - A string origin of who created the base texture
      */
     static from_canvas(canvas, scale_mode, origin = 'canvas') {
-        if (!canvas._pixiId) {
-            canvas._pixiId = `${origin}_${uid()}`;
+        if (!canvas._tex_id) {
+            canvas._tex_id = `${origin}_${uid()}`;
         }
 
-        let base_texture = BaseTextureCache[canvas._pixiId];
+        let base_texture = BaseTextureCache[canvas._tex_id];
 
         if (!base_texture) {
             base_texture = new BaseTexture(canvas, scale_mode);
-            BaseTexture.add_to_cache(base_texture, canvas._pixiId);
+            BaseTexture.add_to_cache(base_texture, canvas._tex_id);
         }
 
         return base_texture;
     }
 
     /**
-     * Helper function that creates a base texture based on the source you provide.
+     * Helper function that creates a base texture based o_tex_idource you provide.
      * The source can be - image url, image element, canvas element. If the
      * source is an image url or an image element and not in the base texture
      * cache, it will be created and loaded.
      *
-     * @static
      * @param {string|HTMLImageElement|HTMLCanvasElement} source - The source to create base texture from.
-     * @param {number} [scale_mode=settings.SCALE_MODE] - See {@link SCALE_MODES} for possible values
-     * @param {number} [source_scale=(auto)] - Scale for the original image, used with Svg images.
-     * @return {BaseTexture} The new base texture.
+     * @param {number} [scale_mode]
+     * @param {number} [source_scale] - Scale for the original image, used with Svg images.
      */
     static from(source, scale_mode, source_scale) {
         if (typeof source === 'string') {
             return BaseTexture.from_image(source, undefined, scale_mode, source_scale);
-        }
-        else if (source instanceof HTMLImageElement) {
+        } else if (source instanceof HTMLImageElement) {
             const image_url = source.src;
             let base_texture = BaseTextureCache[image_url];
 
@@ -719,8 +667,7 @@ export default class BaseTexture extends VObject {
             }
 
             return base_texture;
-        }
-        else if (source instanceof HTMLCanvasElement) {
+        } else if (source instanceof HTMLCanvasElement) {
             return BaseTexture.from_canvas(source, scale_mode);
         }
 
@@ -731,7 +678,6 @@ export default class BaseTexture extends VObject {
     /**
      * Adds a BaseTexture to the global BaseTextureCache.
      *
-     * @static
      * @param {BaseTexture} base_texture - The BaseTexture to add to the cache.
      * @param {string} id - The id that the BaseTexture will be stored against.
      */
@@ -741,13 +687,9 @@ export default class BaseTexture extends VObject {
                 base_texture.texture_cache_ids.push(id);
             }
 
-            // @if DEBUG
-            /* eslint-disable no-console */
             if (BaseTextureCache[id]) {
                 console.warn(`BaseTexture added to the cache with an id [${id}] that already had an entry`);
             }
-            /* eslint-enable no-console */
-            // @endif
 
             BaseTextureCache[id] = base_texture;
         }
@@ -756,27 +698,24 @@ export default class BaseTexture extends VObject {
     /**
      * Remove a BaseTexture from the global BaseTextureCache.
      *
-     * @static
      * @param {string|BaseTexture} base_texture - id of a BaseTexture to be removed, or a BaseTexture instance itself.
-     * @return {BaseTexture|null} The BaseTexture that was removed.
      */
     static remove_from_cache(base_texture) {
         if (typeof base_texture === 'string') {
-            const base_textureFromCache = BaseTextureCache[base_texture];
+            const base_texture_from_cache = BaseTextureCache[base_texture];
 
-            if (base_textureFromCache) {
-                const index = base_textureFromCache.texture_cache_ids.indexOf(base_texture);
+            if (base_texture_from_cache) {
+                const index = base_texture_from_cache.texture_cache_ids.indexOf(base_texture);
 
                 if (index > -1) {
-                    base_textureFromCache.texture_cache_ids.splice(index, 1);
+                    base_texture_from_cache.texture_cache_ids.splice(index, 1);
                 }
 
                 delete BaseTextureCache[base_texture];
 
-                return base_textureFromCache;
+                return base_texture_from_cache;
             }
-        }
-        else if (base_texture && base_texture.texture_cache_ids) {
+        } else if (base_texture && base_texture.texture_cache_ids) {
             for (let i = 0; i < base_texture.texture_cache_ids.length; ++i) {
                 delete BaseTextureCache[base_texture.texture_cache_ids[i]];
             }

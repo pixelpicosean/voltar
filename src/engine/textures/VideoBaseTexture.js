@@ -5,6 +5,13 @@ import determine_cross_origin from 'engine/utils/determine_cross_origin';
 import BaseTexture from './BaseTexture';
 
 /**
+ * @typedef VideoURLObj
+ * @property {string} src One of the source urls for the video
+ * @property {string} mime The mimetype of the video (e.g. 'video/mp4'). If not specified
+ *                         the url's extension will be used as the second part of the mime type.
+ */
+
+/**
  * A texture of a [playing] Video.
  *
  * Video base textures mimic Pixi BaseTexture.from.... method in their creation process.
@@ -29,8 +36,8 @@ import BaseTexture from './BaseTexture';
 export default class VideoBaseTexture extends BaseTexture {
     /**
      * @param {HTMLVideoElement} source - Video source
-     * @param {number} [scale_mode=settings.SCALE_MODE] - See {@link SCALE_MODES} for possible values
-     * @param {boolean} [auto_play=true] - Start playing video as soon as it is loaded
+     * @param {number} [scale_mode]
+     * @param {boolean} [auto_play] - Start playing video as soon as it is loaded
      */
     constructor(source, scale_mode, auto_play = true) {
         if (!source) {
@@ -57,8 +64,7 @@ export default class VideoBaseTexture extends BaseTexture {
          * When set to true will automatically play videos used by this texture once
          * they are loaded. If false, it will not modify the playing state.
          *
-         * @member {boolean}
-         * @default true
+         * @type {boolean}
          */
         this.auto_play = auto_play;
 
@@ -68,7 +74,7 @@ export default class VideoBaseTexture extends BaseTexture {
         source.addEventListener('play', this._on_play_start.bind(this));
         source.addEventListener('pause', this._on_play_stop.bind(this));
         this.has_loaded = false;
-        this.__loaded = false;
+        this._loaded = false;
 
         if (!this._is_source_ready()) {
             source.addEventListener('canplay', this._on_can_play);
@@ -81,30 +87,24 @@ export default class VideoBaseTexture extends BaseTexture {
 
     /**
      * Returns true if the underlying source is playing.
-     *
-     * @private
-     * @return {boolean} True if playing.
      */
     _is_source_playing() {
-        const source = this.source;
+        const source = /** @type {HTMLVideoElement} */(this.source);
 
         return (source.currentTime > 0 && source.paused === false && source.ended === false && source.readyState > 2);
     }
 
     /**
      * Returns true if the underlying source is ready for playing.
-     *
-     * @private
-     * @return {boolean} True if ready.
      */
     _is_source_ready() {
-        return this.source.readyState === 3 || this.source.readyState === 4;
+        return  /** @type {HTMLVideoElement} */(this.source).readyState === 3
+            ||
+            /** @type {HTMLVideoElement} */(this.source).readyState === 4;
     }
 
     /**
      * Runs the update loop when the video is ready to play
-     *
-     * @private
      */
     _on_play_start() {
         // Just in case the video has not received its can play even yet..
@@ -120,8 +120,6 @@ export default class VideoBaseTexture extends BaseTexture {
 
     /**
      * Fired when a pause event is triggered, stops the update loop
-     *
-     * @private
      */
     _on_play_stop() {
         if (this._is_auto_updating) {
@@ -132,8 +130,6 @@ export default class VideoBaseTexture extends BaseTexture {
 
     /**
      * Fired when the video is loaded and ready to play
-     *
-     * @private
      */
     _on_can_play() {
         this.has_loaded = true;
@@ -142,74 +138,61 @@ export default class VideoBaseTexture extends BaseTexture {
             this.source.removeEventListener('canplay', this._on_can_play);
             this.source.removeEventListener('canplaythrough', this._on_can_play);
 
-            this.width = this.source.videoWidth;
-            this.height = this.source.videoHeight;
+            this.width = /** @type {HTMLVideoElement} */(this.source).videoWidth;
+            this.height = /** @type {HTMLVideoElement} */(this.source).videoHeight;
 
             // prevent multiple loaded dispatches..
-            if (!this.__loaded) {
-                this.__loaded = true;
+            if (!this._loaded) {
+                this._loaded = true;
                 this.emit_signal('loaded', this);
             }
 
             if (this._is_source_playing()) {
                 this._on_play_start();
-            }
-            else if (this.auto_play) {
-                this.source.play();
+            } else if (this.auto_play) {
+                /** @type {HTMLVideoElement} */(this.source).play();
             }
         }
     }
 
     /**
      * Destroys this texture
-     *
      */
     destroy() {
         if (this._is_auto_updating) {
             shared.remove(this.update, this);
         }
 
-        // @ts-ignore
-        if (this.source && this.source._pixiId) {
-            // @ts-ignore
-            BaseTexture.remove_from_cache(this.source._pixiId);
-            // @ts-ignore
-            delete this.source._pixiId;
+        if (this.source && this.source._tex_id) {
+            BaseTexture.remove_from_cache(this.source._tex_id);
+            delete this.source._tex_id;
 
-            // @ts-ignore
-            this.source.pause();
-            // @ts-ignore
-            this.source.src = '';
-            // @ts-ignore
-            this.source.load();
+            /** @type {HTMLVideoElement} */(this.source).pause();
+            /** @type {HTMLVideoElement} */(this.source).src = '';
+            /** @type {HTMLVideoElement} */(this.source).load();
         }
 
         super.destroy();
     }
 
     /**
-     * Mimic Pixi BaseTexture.from.... method.
+     * Mimic BaseTexture.from.... method.
      *
-     * @static
      * @param {HTMLVideoElement} video - Video to create texture from
-     * @param {number} [scale_mode=settings.SCALE_MODE] - See {@link SCALE_MODES} for possible values
-     * @param {boolean} [auto_play=true] - Start playing video as soon as it is loaded
+     * @param {number} [scale_mode]
+     * @param {boolean} [auto_play] - Start playing video as soon as it is loaded
      * @return {VideoBaseTexture} Newly created VideoBaseTexture
      */
     static from_video(video, scale_mode, auto_play) {
-        // @ts-ignore
-        if (!video._pixiId) {
-            // @ts-ignore
-            video._pixiId = `video_${uid()}`;
+        if (!video._tex_id) {
+            video._tex_id = `video_${uid()}`;
         }
 
-        // @ts-ignore
-        let base_texture = BaseTextureCache[video._pixiId];
+        let base_texture = BaseTextureCache[video._tex_id];
 
         if (!base_texture) {
             base_texture = new VideoBaseTexture(video, scale_mode, auto_play);
-            // @ts-ignore
-            BaseTexture.add_to_cache(base_texture, video._pixiId);
+            BaseTexture.add_to_cache(base_texture, video._tex_id);
         }
 
         return base_texture;
@@ -219,14 +202,10 @@ export default class VideoBaseTexture extends BaseTexture {
      * Helper function that creates a new BaseTexture based on the given video element.
      * This BaseTexture can then be used to create a texture
      *
-     * @static
-     * @param {string|object|string[]|object[]} video_src - The URL(s) for the video.
-     * @param {string} [video_src.src] - One of the source urls for the video
-     * @param {string} [video_src.mime] - The mimetype of the video (e.g. 'video/mp4'). If not specified
-     *  the url's extension will be used as the second part of the mime type.
-     * @param {number} scale_mode - See {@link SCALE_MODES} for possible values
-     * @param {boolean} [crossorigin=(auto)] - Should use anonymous CORS? Defaults to true if the URL is not a data-URI.
-     * @param {boolean} [auto_play=true] - Start playing video as soon as it is loaded
+     * @param {string|VideoURLObj|string[]|VideoURLObj[]} video_src - The URL(s) for the video.
+     * @param {number} scale_mode
+     * @param {boolean} [crossorigin] - Should use anonymous CORS? Defaults to true if the URL is not a data-URI.
+     * @param {boolean} [auto_play] - Start playing video as soon as it is loaded
      * @return {VideoBaseTexture} Newly created VideoBaseTexture
      */
     static from_url(video_src, scale_mode, crossorigin, auto_play) {
@@ -235,24 +214,27 @@ export default class VideoBaseTexture extends BaseTexture {
         video.setAttribute('webkit-playsinline', '');
         video.setAttribute('playsinline', '');
 
-        const url = Array.isArray(video_src) ? (video_src[0].src || video_src[0]) : (video_src.src || video_src);
+        const url = Array.isArray(video_src) ?
+            (/** @type {VideoURLObj} */(video_src[0]).src || video_src[0]) :
+            (/** @type {VideoURLObj} */(video_src).src || video_src);
 
-        if (crossorigin === undefined && url.indexOf('data:') !== 0) {
-            video.crossOrigin = determine_cross_origin(url);
-        }
-        else if (crossorigin) {
-            video.crossOrigin = typeof crossorigin === 'string' ? crossorigin : 'anonymous';
+        if (crossorigin === undefined && /** @type {string} */(url).indexOf('data:') !== 0) {
+            video.crossOrigin = determine_cross_origin(/** @type {string} */(url));
+        } else if (crossorigin) {
+            video.crossOrigin = (typeof crossorigin === 'string') ?
+                crossorigin :
+                'anonymous';
         }
 
         // array of objects or strings
         if (Array.isArray(video_src)) {
             for (let i = 0; i < video_src.length; ++i) {
-                video.appendChild(create_source(video_src[i].src || video_src[i], video_src[i].mime));
+                video.appendChild(create_source(/** @type {VideoURLObj} */(video_src[i]).src || /** @type {string} */(video_src[i]), /** @type {VideoURLObj} */(video_src[i]).mime));
             }
         }
         // single object or string
         else {
-            video.appendChild(create_source(url, video_src.mime));
+            video.appendChild(create_source(/** @type {string} */(url), /** @type {VideoURLObj} */(video_src).mime));
         }
 
         video.load();
@@ -263,22 +245,20 @@ export default class VideoBaseTexture extends BaseTexture {
     /**
      * Should the base texture automatically update itself, set to true by default
      *
-     * @member {boolean}
+     * @type {boolean}
      */
     get auto_update() {
         return this._auto_update;
     }
 
-    set auto_update(value) // eslint-disable-line require-jsdoc
-    {
+    set auto_update(value) {
         if (value !== this._auto_update) {
             this._auto_update = value;
 
             if (!this._auto_update && this._is_auto_updating) {
                 shared.remove(this.update, this);
                 this._is_auto_updating = false;
-            }
-            else if (this._auto_update && !this._is_auto_updating) {
+            } else if (this._auto_update && !this._is_auto_updating) {
                 shared.add(this.update, this, UPDATE_PRIORITY.HIGH);
                 this._is_auto_updating = true;
             }
@@ -288,6 +268,10 @@ export default class VideoBaseTexture extends BaseTexture {
 
 VideoBaseTexture.from_urls = VideoBaseTexture.from_url;
 
+/**
+ * @param {string} path
+ * @param {string} type
+ */
 function create_source(path, type) {
     if (!type) {
         const pure_path = path.split('?').shift().toLowerCase();
