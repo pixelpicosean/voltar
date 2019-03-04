@@ -1,13 +1,13 @@
 precision highp float;
 attribute vec2 a_vertex_position;
 attribute vec2 a_texture_coord;
-attribute vec4 aColor;
+attribute vec4 a_color;
 attribute float aTextureId;
 
 uniform mat3 projection_matrix;
 
 varying vec2 v_texture_coord;
-varying vec4 vColor;
+varying vec4 v_color;
 varying float vTextureId;
 
 void main(void){
@@ -15,5 +15,5 @@ void main(void){
 
     v_texture_coord = a_texture_coord;
     vTextureId = aTextureId;
-    vColor = aColor;
+    v_color = a_color;
 }

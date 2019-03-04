@@ -1,7 +1,7 @@
 precision highp float;
 
 varying vec2 v_texture_coord;
-varying vec4 vColor;
+varying vec4 v_color;
 
 uniform float u_noise;
 uniform float u_seed;

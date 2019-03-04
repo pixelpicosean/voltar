@@ -85,7 +85,7 @@ export default class GraphicsRenderer extends ObjectRenderer {
             const shader_temp = webgl_data.shader;
 
             renderer.bind_shader(shader_temp);
-            shader_temp.uniforms.translationMatrix = graphics.transform.world_transform.to_array(true);
+            shader_temp.uniforms.translation_matrix = graphics.transform.world_transform.to_array(true);
             shader_temp.uniforms.tint = hex2rgb(graphics.tint);
             shader_temp.uniforms.alpha = graphics.world_alpha;
 

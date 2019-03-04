@@ -109,7 +109,7 @@ export default class MeshRenderer extends ObjectRenderer {
                 gl_data.shader.uniforms.uTransform = matrix_identity_array;
             }
         }
-        gl_data.shader.uniforms.translationMatrix = mesh.world_transform.to_array(true);
+        gl_data.shader.uniforms.translation_matrix = mesh.world_transform.to_array(true);
 
         gl_data.shader.uniforms.uColor = premultiply_rgba(mesh.tint_rgb,
             mesh.world_alpha, gl_data.shader.uniforms.uColor, texture.base_texture.premultiplied_alpha);

@@ -4,7 +4,7 @@ import vertex_src from './texture.vert';
 
 const fragTemplate = [
     'varying vec2 v_texture_coord;',
-    'varying vec4 vColor;',
+    'varying vec4 v_color;',
     'varying float vTextureId;',
     'uniform sampler2D uSamplers[%count%];',
 
@@ -12,7 +12,7 @@ const fragTemplate = [
     'vec4 color;',
     'float textureId = floor(vTextureId+0.5);',
     '%forloop%',
-    'gl_FragColor = color * vColor;',
+    'gl_FragColor = color * v_color;',
     '}',
 ].join('\n');
 

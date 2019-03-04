@@ -131,7 +131,7 @@ export default class TilingSpriteRenderer extends ObjectRenderer {
         shader.uniforms.uTransform = temp_mat.to_array(true);
         shader.uniforms.uColor = premultiply_tint_to_rgba(ts.tint, ts.world_alpha,
             shader.uniforms.uColor, baseTex.premultiplied_alpha);
-        shader.uniforms.translationMatrix = ts.transform.world_transform.to_array(true);
+        shader.uniforms.translation_matrix = ts.transform.world_transform.to_array(true);
 
         shader.uniforms.u_sampler = renderer.bind_texture(tex);
 

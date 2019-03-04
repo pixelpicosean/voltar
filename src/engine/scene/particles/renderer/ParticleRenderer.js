@@ -96,7 +96,7 @@ export default class ParticleRenderer extends ObjectRenderer {
             },
             // tintData
             {
-                attribute: this.shader.attributes.aColor,
+                attribute: this.shader.attributes.a_color,
                 size: 1,
                 unsignedByte: true,
                 uploadFunction: this.upload_tint,

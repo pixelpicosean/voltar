@@ -2,7 +2,6 @@ import GLBuffer from 'engine/drivers/webgl/gl_buffer';
 import VertexArrayObject from 'engine/drivers/webgl/vao';
 
 import Shader from 'engine/Shader';
-import Vector2 from 'engine/math/Vector2';
 
 /**
  * An object containing WebGL specific properties to be used by the WebGL renderer
@@ -11,26 +10,24 @@ export default class WebGLGraphicsData {
     /**
      * @param {WebGLRenderingContext} gl - The current WebGL drawing context
      * @param {Shader} shader - The shader
-     * @param {object} attribsState - The state for the VAO
+     * @param {import('engine/drivers/webgl/vao').VertexArrayObjectDesc} attribs_state - The state for the VAO
      */
-    constructor(gl, shader, attribsState) {
+    constructor(gl, shader, attribs_state) {
         /**
          * The current WebGL drawing context
-         *
-         * @type {WebGLRenderingContext}
          */
         this.gl = gl;
 
         // TODO does this need to be split before uploading??
         /**
-         * An array of color components (r,g,b)
+         * An array of color components (r, g, b)
          * @type {number[]}
          */
-        this.color = [0, 0, 0]; // color split!
+        this.color = [0, 0, 0];
 
         /**
          * An array of points to draw
-         * @type {Vector2[]}
+         * @type {number[]}
          */
         this.points = [];
 
@@ -41,41 +38,43 @@ export default class WebGLGraphicsData {
         this.indices = [];
         /**
          * The main buffer
-         * @type {GLBuffer}
          */
         this.buffer = GLBuffer.create_vertex_buffer(gl);
 
         /**
          * The index buffer
-         * @type {GLBuffer}
          */
         this.index_buffer = GLBuffer.create_index_buffer(gl);
 
         /**
          * Whether this graphics is dirty or not
-         * @type {boolean}
          */
         this.dirty = true;
 
         /**
          * Whether this graphics is native_lines or not
-         * @type {boolean}
          */
         this.native_lines = false;
 
-        this.glPoints = null;
-        this.glIndices = null;
+        /**
+         * @type {Float32Array}
+         */
+        this.gl_vertices = null;
 
         /**
-         *
+         * @type {Uint16Array}
+         */
+        this.gl_indices = null;
+
+        /**
          * @type {Shader}
          */
         this.shader = shader;
 
-        this.vao = new VertexArrayObject(gl, attribsState)
+        this.vao = new VertexArrayObject(gl, attribs_state)
             .add_index(this.index_buffer)
             .add_attribute(this.buffer, shader.attributes.a_vertex_position, gl.FLOAT, false, 4 * 6, 0)
-            .add_attribute(this.buffer, shader.attributes.aColor, gl.FLOAT, false, 4 * 6, 2 * 4);
+            .add_attribute(this.buffer, shader.attributes.a_color, gl.FLOAT, false, 4 * 6, 2 * 4);
     }
 
     /**
@@ -90,11 +89,11 @@ export default class WebGLGraphicsData {
      * Binds the buffers and uploads the data
      */
     upload() {
-        this.glPoints = new Float32Array(this.points);
-        this.buffer.upload(this.glPoints);
+        this.gl_vertices = new Float32Array(this.points);
+        this.buffer.upload(this.gl_vertices);
 
-        this.glIndices = new Uint16Array(this.indices);
-        this.index_buffer.upload(this.glIndices);
+        this.gl_indices = new Uint16Array(this.indices);
+        this.index_buffer.upload(this.gl_indices);
 
         this.dirty = false;
     }
@@ -116,7 +115,7 @@ export default class WebGLGraphicsData {
         this.buffer = null;
         this.index_buffer = null;
 
-        this.glPoints = null;
-        this.glIndices = null;
+        this.gl_vertices = null;
+        this.gl_indices = null;
     }
 }
