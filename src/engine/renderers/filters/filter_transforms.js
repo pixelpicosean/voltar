@@ -9,33 +9,37 @@ import { Matrix, Rectangle } from 'engine/math/index';
 // TODO playing around here.. this is temporary - (will end up in the shader)
 // this returns a matrix that will normalise map filter cords in the filter to screen space
 export function calculate_screen_space_matrix(output_matrix, filter_area, texture_size) {
-    // let world_transform = sprite.world_transform.copy(Matrix.TEMP_MATRIX),
-    // let texture = {width:1136, height:700};//sprite._texture.base_texture;
-
     // TODO unwrap?
     const mapped_matrix = output_matrix.identity();
 
     mapped_matrix.translate(filter_area.x / texture_size.width, filter_area.y / texture_size.height);
-
     mapped_matrix.scale(texture_size.width, texture_size.height);
 
     return mapped_matrix;
 }
 
+/**
+ * Calculates the mapped matrix
+ * @param output_matrix {Matrix}
+ * @param filter_area {Rectangle} The filter area
+ * @param texture_size {Rectangle} Size of the texture
+ */
 export function calculate_normalized_screen_space_matrix(output_matrix, filter_area, texture_size) {
     const mapped_matrix = output_matrix.identity();
 
     mapped_matrix.translate(filter_area.x / texture_size.width, filter_area.y / texture_size.height);
-
-    const translate_scale_x = (texture_size.width / filter_area.width);
-    const translate_scale_y = (texture_size.height / filter_area.height);
-
-    mapped_matrix.scale(translate_scale_x, translate_scale_y);
+    mapped_matrix.scale(texture_size.width / filter_area.width, texture_size.height / filter_area.height);
 
     return mapped_matrix;
 }
 
-// this will map the filter coord so that a texture can be used based on the transform of a sprite
+/**
+ * this will map the filter coord so that a texture can be used based on the transform of a sprite
+ * @param output_matrix {Matrix}
+ * @param filter_area {Rectangle} The filter area
+ * @param texture_size {Rectangle} Size of the texture
+ * @param sprite {import('../../scene/sprites/Sprite').default}
+ */
 export function calculate_sprite_matrix(output_matrix, filter_area, texture_size, sprite) {
     const orig = sprite._texture.orig;
     const mapped_matrix = output_matrix.set(texture_size.width, 0, 0, texture_size.height, filter_area.x, filter_area.y);

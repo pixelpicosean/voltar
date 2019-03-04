@@ -1,5 +1,6 @@
 import settings from '../settings';
 import BaseTexture from './BaseTexture';
+import RenderTarget from 'engine/renderers/utils/RenderTarget';
 
 /**
  * A BaseRenderTexture is a special texture that allows any Pixi display object to be rendered to it.
@@ -37,10 +38,10 @@ import BaseTexture from './BaseTexture';
  */
 export default class BaseRenderTexture extends BaseTexture {
     /**
-     * @param {number} [width=100] - The width of the base render texture
-     * @param {number} [height=100] - The height of the base render texture
-     * @param {number} [scale_mode=settings.SCALE_MODE] - See {@link SCALE_MODES} for possible values
-     * @param {number} [resolution=1] - The resolution / device pixel ratio of the texture being generated
+     * @param {number} [width] - The width of the base render texture
+     * @param {number} [height] - The height of the base render texture
+     * @param {number} [scale_mode]
+     * @param {number} [resolution] - The resolution / device pixel ratio of the texture being generated
      */
     constructor(width = 100, height = 100, scale_mode, resolution) {
         super(null, scale_mode);
@@ -59,7 +60,7 @@ export default class BaseRenderTexture extends BaseTexture {
         /**
          * A map of renderer IDs to webgl renderTargets
          *
-         * @member {Object.<number, WebGLTexture>}
+         * @type {Object<number, RenderTarget>}
          * @private
          */
         this._gl_render_targets = {};
@@ -67,7 +68,7 @@ export default class BaseRenderTexture extends BaseTexture {
         /**
          * A reference to the canvas render target (we only need one as this can be shared across renderers)
          *
-         * @member {Object.<number, WebGLTexture>}
+         * @type {Object<number, WebGLTexture>}
          * @private
          */
         this._canvas_render_target = null;
@@ -75,7 +76,7 @@ export default class BaseRenderTexture extends BaseTexture {
         /**
          * This will let the renderer know if the texture is valid. If it's not then it cannot be rendered.
          *
-         * @member {boolean}
+         * @type {boolean}
          */
         this.valid = false;
     }
@@ -111,7 +112,6 @@ export default class BaseRenderTexture extends BaseTexture {
 
     /**
      * Destroys this texture
-     *
      */
     destroy() {
         super.destroy();

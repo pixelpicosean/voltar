@@ -24,17 +24,14 @@ export default class VisualServer {
         this.extract = null;
     }
 
+    /**
+     * @param {import('engine/renderers/SystemRenderer').RendererDesc} config
+     */
     init(config) {
         if (this.is_initialized) {
             return;
         }
         this.is_initialized = true;
-
-        if (config.scale_mode === 'linear') {
-            settings.SCALE_MODE = SCALE_MODES.LINEAR;
-        } else {
-            settings.SCALE_MODE = SCALE_MODES.NEAREST;
-        }
 
         if (!is_webgl_supported()) {
             throw 'Voltar only support WebGL rendering!';

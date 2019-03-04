@@ -24,8 +24,8 @@ export default class RectTileShader extends TilemapShader {
         var gl = renderer.gl;
         return renderer.createVao()
             .addIndex(this.index_buffer)
-            .addAttribute(vb, this.attributes.aVertexPosition, gl.FLOAT, false, this.stride, 0)
-            .addAttribute(vb, this.attributes.aTextureCoord, gl.FLOAT, false, this.stride, 2 * 4)
+            .addAttribute(vb, this.attributes.a_vertex_position, gl.FLOAT, false, this.stride, 0)
+            .addAttribute(vb, this.attributes.a_texture_coord, gl.FLOAT, false, this.stride, 2 * 4)
             .addAttribute(vb, this.attributes.aFrame, gl.FLOAT, false, this.stride, 4 * 4)
             .addAttribute(vb, this.attributes.aTextureId, gl.FLOAT, false, this.stride, 8 * 4);
     }

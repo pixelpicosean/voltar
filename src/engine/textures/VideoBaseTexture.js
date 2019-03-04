@@ -79,8 +79,7 @@ export default class VideoBaseTexture extends BaseTexture {
         if (!this._is_source_ready()) {
             source.addEventListener('canplay', this._on_can_play);
             source.addEventListener('canplaythrough', this._on_can_play);
-        }
-        else {
+        } else {
             this._on_can_play();
         }
     }

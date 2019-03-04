@@ -84,7 +84,6 @@ export default {
      * @property {HTMLCanvasElement} view=null
      * @property {number} resolution=1
      * @property {boolean} antialias=false
-     * @property {boolean} force_fxaa=false
      * @property {boolean} auto_resize=false
      * @property {boolean} transparent=false
      * @property {number} background_color=0x000000
@@ -98,7 +97,6 @@ export default {
     RENDER_OPTIONS: {
         view: null,
         antialias: false,
-        force_fxaa: false,
         auto_resize: false,
         transparent: false,
         background_color: 0x000000,

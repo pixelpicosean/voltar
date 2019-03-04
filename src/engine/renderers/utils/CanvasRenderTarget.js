@@ -31,8 +31,6 @@ export default class CanvasRenderTarget {
 
     /**
      * Clears the canvas that was created by the CanvasRenderTarget class.
-     *
-     * @private
      */
     clear() {
         this.context.setTransform(1, 0, 0, 1, 0, 0);
@@ -62,28 +60,24 @@ export default class CanvasRenderTarget {
     /**
      * The width of the canvas buffer in pixels.
      *
-     * @member {number}
+     * @type {number}
      */
     get width() {
         return this.canvas.width;
     }
-
-    set width(val) // eslint-disable-line require-jsdoc
-    {
+    set width(val) {
         this.canvas.width = val;
     }
 
     /**
      * The height of the canvas buffer in pixels.
      *
-     * @member {number}
+     * @type {number}
      */
     get height() {
         return this.canvas.height;
     }
-
-    set height(val) // eslint-disable-line require-jsdoc
-    {
+    set height(val) {
         this.canvas.height = val;
     }
 }

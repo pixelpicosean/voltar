@@ -68,7 +68,7 @@ export default class ParticleRenderer extends ObjectRenderer {
         this.properties = [
             // verticesData
             {
-                attribute: this.shader.attributes.aVertexPosition,
+                attribute: this.shader.attributes.a_vertex_position,
                 size: 2,
                 uploadFunction: this.upload_vertices,
                 offset: 0,
@@ -89,7 +89,7 @@ export default class ParticleRenderer extends ObjectRenderer {
             },
             // uvsData
             {
-                attribute: this.shader.attributes.aTextureCoord,
+                attribute: this.shader.attributes.a_texture_coord,
                 size: 2,
                 uploadFunction: this.upload_uvs,
                 offset: 0,
@@ -142,7 +142,7 @@ export default class ParticleRenderer extends ObjectRenderer {
         const base_texture = children[0]._texture.base_texture;
 
         // if the uvs have not updated then no point rendering just yet!
-        this.renderer.setBlendMode(correct_blend_mode(container.blend_mode, base_texture.premultiplied_alpha));
+        this.renderer.set_blend_mode(correct_blend_mode(container.blend_mode, base_texture.premultiplied_alpha));
 
         const gl = renderer.gl;
 
@@ -150,13 +150,13 @@ export default class ParticleRenderer extends ObjectRenderer {
 
         m.prepend(renderer._active_render_target.projection_matrix);
 
-        this.shader.uniforms.projectionMatrix = m.to_array(true);
+        this.shader.uniforms.projection_matrix = m.to_array(true);
 
         this.shader.uniforms.uColor = premultiply_rgba(container.tint_rgb,
             container.world_alpha, this.shader.uniforms.uColor, base_texture.premultiplied_alpha);
 
         // make sure the texture is bound..
-        this.shader.uniforms.uSampler = renderer.bind_texture(base_texture);
+        this.shader.uniforms.u_sampler = renderer.bind_texture(base_texture);
 
         let updateStatic = false;
 

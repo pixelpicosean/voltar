@@ -11,20 +11,16 @@ import { Rectangle } from 'engine/math/index';
 export default class Quad {
     /**
      * @param {WebGLRenderingContext} gl - The gl context for this quad to use.
-     * @param {object} state - TODO: Description
+     * @param {import('engine/drivers/webgl/vao').VertexArrayObjectDesc} state
      */
     constructor(gl, state) {
         /**
          * the current WebGL drawing context
-         *
-         * @member {WebGLRenderingContext}
          */
         this.gl = gl;
 
         /**
          * An array of vertices
-         *
-         * @member {Float32Array}
          */
         this.vertices = new Float32Array([
             -1, -1,
@@ -35,8 +31,6 @@ export default class Quad {
 
         /**
          * The Uvs of the quad
-         *
-         * @member {Float32Array}
          */
         this.uvs = new Float32Array([
             0, 0,
@@ -56,29 +50,21 @@ export default class Quad {
 
         /**
          * An array containing the indices of the vertices
-         *
-         * @member {Uint16Array}
          */
         this.indices = create_indices_for_quads(1);
 
         /**
          * The vertex buffer
-         *
-         * @member {GLBuffer}
          */
-        this.vertexBuffer = GLBuffer.create_vertex_buffer(gl, this.interleaved, gl.STATIC_DRAW);
+        this.vertex_buffer = GLBuffer.create_vertex_buffer(gl, this.interleaved, gl.STATIC_DRAW);
 
         /**
          * The index buffer
-         *
-         * @member {GLBuffer}
          */
         this.index_buffer = GLBuffer.create_index_buffer(gl, this.indices, gl.STATIC_DRAW);
 
         /**
          * The vertex array object
-         *
-         * @member {VertexArrayObject}
          */
         this.vao = new VertexArrayObject(gl, state);
     }
@@ -88,58 +74,55 @@ export default class Quad {
      *
      * @param {Shader} shader - the shader to use
      */
-    initVao(shader) {
+    init_vao(shader) {
         this.vao.clear()
-            .addIndex(this.index_buffer)
-            .addAttribute(this.vertexBuffer, shader.attributes.aVertexPosition, this.gl.FLOAT, false, 4 * 4, 0)
-            .addAttribute(this.vertexBuffer, shader.attributes.aTextureCoord, this.gl.FLOAT, false, 4 * 4, 2 * 4);
+            .add_index(this.index_buffer)
+            .add_attribute(this.vertex_buffer, shader.attributes.a_vertex_position, this.gl.FLOAT, false, 4 * 4, 0)
+            .add_attribute(this.vertex_buffer, shader.attributes.a_texture_coord, this.gl.FLOAT, false, 4 * 4, 2 * 4)
     }
 
     /**
      * Maps two Rectangle to the quad.
      *
-     * @param {Rectangle} targetTextureFrame - the first rectangle
-     * @param {Rectangle} destinationFrame - the second rectangle
-     * @return {Quad} Returns itself.
+     * @param {Rectangle} target_texture_frame - the first rectangle
+     * @param {Rectangle} destination_frame - the second rectangle
      */
-    map(targetTextureFrame, destinationFrame) {
+    map(target_texture_frame, destination_frame) {
         let x = 0; // destinationFrame.x / targetTextureFrame.width;
         let y = 0; // destinationFrame.y / targetTextureFrame.height;
 
         this.uvs[0] = x;
         this.uvs[1] = y;
 
-        this.uvs[2] = x + (destinationFrame.width / targetTextureFrame.width);
+        this.uvs[2] = x + (destination_frame.width / target_texture_frame.width);
         this.uvs[3] = y;
 
-        this.uvs[4] = x + (destinationFrame.width / targetTextureFrame.width);
-        this.uvs[5] = y + (destinationFrame.height / targetTextureFrame.height);
+        this.uvs[4] = x + (destination_frame.width / target_texture_frame.width);
+        this.uvs[5] = y + (destination_frame.height / target_texture_frame.height);
 
         this.uvs[6] = x;
-        this.uvs[7] = y + (destinationFrame.height / targetTextureFrame.height);
+        this.uvs[7] = y + (destination_frame.height / target_texture_frame.height);
 
-        x = destinationFrame.x;
-        y = destinationFrame.y;
+        x = destination_frame.x;
+        y = destination_frame.y;
 
         this.vertices[0] = x;
         this.vertices[1] = y;
 
-        this.vertices[2] = x + destinationFrame.width;
+        this.vertices[2] = x + destination_frame.width;
         this.vertices[3] = y;
 
-        this.vertices[4] = x + destinationFrame.width;
-        this.vertices[5] = y + destinationFrame.height;
+        this.vertices[4] = x + destination_frame.width;
+        this.vertices[5] = y + destination_frame.height;
 
         this.vertices[6] = x;
-        this.vertices[7] = y + destinationFrame.height;
+        this.vertices[7] = y + destination_frame.height;
 
         return this;
     }
 
     /**
      * Binds the buffer and uploads the data
-     *
-     * @return {Quad} Returns itself.
      */
     upload() {
         for (let i = 0; i < 4; i++) {
@@ -149,7 +132,7 @@ export default class Quad {
             this.interleaved[(i * 4) + 3] = this.uvs[(i * 2) + 1];
         }
 
-        this.vertexBuffer.upload(this.interleaved);
+        this.vertex_buffer.upload(this.interleaved);
 
         return this;
     }
@@ -160,7 +143,7 @@ export default class Quad {
     destroy() {
         const gl = this.gl;
 
-        gl.deleteBuffer(this.vertexBuffer);
+        gl.deleteBuffer(this.vertex_buffer);
         gl.deleteBuffer(this.index_buffer);
     }
 }

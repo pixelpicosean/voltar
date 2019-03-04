@@ -123,7 +123,7 @@ export default class TileMap extends Node2D {
         renderer.set_object_renderer(renderer.plugins.tilemap);
         renderer.bind_shader(shader);
         this._global_mat.copy(renderer._active_render_target.projection_matrix).append(this.world_transform);
-        shader.uniforms.projectionMatrix = this._global_mat.to_array(true);
+        shader.uniforms.projection_matrix = this._global_mat.to_array(true);
 
         var points = this.points_buf;
         if (points.length === 0) return;

@@ -1,13 +1,12 @@
-varying vec2 vTextureCoord;
-uniform sampler2D uSampler;
+varying vec2 v_texture_coord;
+uniform sampler2D u_sampler;
 uniform float m[20];
-uniform float uAlpha;
+uniform float u_alpha;
 
-void main(void)
-{
-    vec4 c = texture2D(uSampler, vTextureCoord);
+void main(void) {
+    vec4 c = texture2D(u_sampler, v_texture_coord);
 
-    if (uAlpha == 0.0) {
+    if (u_alpha == 0.0) {
         gl_FragColor = c;
         return;
     }
@@ -43,7 +42,7 @@ void main(void)
        result.a += (m[18] * c.a);
        result.a += m[19];
 
-    vec3 rgb = mix(c.rgb, result.rgb, uAlpha);
+    vec3 rgb = mix(c.rgb, result.rgb, u_alpha);
 
     // Premultiply alpha again.
     rgb *= result.a;

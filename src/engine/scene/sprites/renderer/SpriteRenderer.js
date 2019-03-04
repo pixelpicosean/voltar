@@ -24,7 +24,7 @@ export default class SpriteRenderer extends ObjectRenderer {
 
         /**
          * Number of values sent in the vertex buffer.
-         * aVertexPosition(2), aTextureCoord(1), aColor(1), aTextureId(1) = 5
+         * a_vertex_position(2), a_texture_coord(1), aColor(1), aTextureId(1) = 5
          *
          * @member {number}
          */
@@ -122,14 +122,14 @@ export default class SpriteRenderer extends ObjectRenderer {
             /* eslint-enable max-len */
 
             // build the vao object that will render..
-            const vao = this.renderer.createVao()
-                .addIndex(this.index_buffer)
-                .addAttribute(vertexBuffer, attrs.aVertexPosition, gl.FLOAT, false, this.vertByteSize, 0)
-                .addAttribute(vertexBuffer, attrs.aTextureCoord, gl.UNSIGNED_SHORT, true, this.vertByteSize, 2 * 4)
-                .addAttribute(vertexBuffer, attrs.aColor, gl.UNSIGNED_BYTE, true, this.vertByteSize, 3 * 4);
+            const vao = this.renderer.create_vao()
+                .add_index(this.index_buffer)
+                .add_attribute(vertexBuffer, attrs.a_vertex_position, gl.FLOAT, false, this.vertByteSize, 0)
+                .add_attribute(vertexBuffer, attrs.a_texture_coord, gl.UNSIGNED_SHORT, true, this.vertByteSize, 2 * 4)
+                .add_attribute(vertexBuffer, attrs.aColor, gl.UNSIGNED_BYTE, true, this.vertByteSize, 3 * 4);
 
             if (attrs.aTextureId) {
-                vao.addAttribute(vertexBuffer, attrs.aTextureId, gl.FLOAT, false, this.vertByteSize, 4 * 4);
+                vao.add_attribute(vertexBuffer, attrs.aTextureId, gl.FLOAT, false, this.vertByteSize, 4 * 4);
             }
 
             this.vaos[i] = vao;
@@ -372,14 +372,14 @@ export default class SpriteRenderer extends ObjectRenderer {
                 const vertexBuffer = this.vertexBuffers[this.vertexCount] = GLBuffer.create_vertex_buffer(gl, null, gl.STREAM_DRAW);
 
                 // build the vao object that will render..
-                const vao = this.renderer.createVao()
-                    .addIndex(this.index_buffer)
-                    .addAttribute(vertexBuffer, attrs.aVertexPosition, gl.FLOAT, false, this.vertByteSize, 0)
-                    .addAttribute(vertexBuffer, attrs.aTextureCoord, gl.UNSIGNED_SHORT, true, this.vertByteSize, 2 * 4)
-                    .addAttribute(vertexBuffer, attrs.aColor, gl.UNSIGNED_BYTE, true, this.vertByteSize, 3 * 4);
+                const vao = this.renderer.create_vao()
+                    .add_index(this.index_buffer)
+                    .add_attribute(vertexBuffer, attrs.a_vertex_position, gl.FLOAT, false, this.vertByteSize, 0)
+                    .add_attribute(vertexBuffer, attrs.a_texture_coord, gl.UNSIGNED_SHORT, true, this.vertByteSize, 2 * 4)
+                    .add_attribute(vertexBuffer, attrs.aColor, gl.UNSIGNED_BYTE, true, this.vertByteSize, 3 * 4);
 
                 if (attrs.aTextureId) {
-                    vao.addAttribute(vertexBuffer, attrs.aTextureId, gl.FLOAT, false, this.vertByteSize, 4 * 4);
+                    vao.add_attribute(vertexBuffer, attrs.aTextureId, gl.FLOAT, false, this.vertByteSize, 4 * 4);
                 }
 
                 this.vaos[this.vertexCount] = vao;

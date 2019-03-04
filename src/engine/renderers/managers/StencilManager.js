@@ -37,7 +37,7 @@ export default class StencilManager extends WebGLManager {
     push_stencil(graphics) {
         this.renderer.set_object_renderer(this.renderer.plugins.graphics);
 
-        this.renderer._active_render_target.attachStencilBuffer();
+        this.renderer._active_render_target.attach_stencil_buffer();
 
         const gl = this.renderer.gl;
         const prevMaskCount = this.stencil_mask_stack.length;

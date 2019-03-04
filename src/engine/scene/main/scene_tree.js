@@ -11,7 +11,7 @@ import { outer_box_resize } from '../../resize';
 import { optional, scene_class_map, node_class_map, res_procs } from '../../registry';
 import Theme, { default_font_name } from '../resources/Theme';
 import { registered_bitmap_fonts } from '../text/res';
-import { assemble_scene } from '../../index';
+import { assemble_scene, settings, SCALE_MODES } from '../../index';
 import World2D from '../resources/world_2d';
 import Viewport from './viewport';
 import { VObject } from 'engine/dep/index';
@@ -284,8 +284,9 @@ export default class SceneTree {
         this.stretch_mode = 'viewport';
         this.stretch_aspect = 'keep';
 
-        /** @type {HTMLElement} */
+        /** @type {HTMLCanvasElement} */
         this.view = null;
+        /** @type {HTMLElement} */
         this.container = null;
 
         /**
@@ -502,7 +503,7 @@ export default class SceneTree {
         window.removeEventListener('load', this._initialize);
         document.removeEventListener('DOMContentLoaded', this._initialize);
 
-        this.view = document.getElementById(this.settings.display.view);
+        this.view = /** @type {HTMLCanvasElement} */(document.getElementById(this.settings.display.view));
         this.container = document.getElementById(this.settings.display.container);
 
         // TODO: move all these configs to project settings, the same as Godot
@@ -517,14 +518,17 @@ export default class SceneTree {
 
             antialias: this.settings.display.antialias,
             pixel_snap: this.settings.display.pixel_snap,
-            scale_mode: this.settings.display.scale_mode,
 
             auto_resize: false,
             transparent: false,
-            force_fxaa: false,
             clear_before_render: true,
             preserve_drawing_buffer: false,
         });
+        if (this.settings.display.scale_mode === 'linear') {
+            settings.SCALE_MODE = SCALE_MODES.LINEAR;
+        } else {
+            settings.SCALE_MODE = SCALE_MODES.NEAREST;
+        }
         if (optional.Extract) {
             this.extract = new optional.Extract(this.visual_server.renderer);
         }

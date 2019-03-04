@@ -31,34 +31,26 @@ export default class TextureManager {
         /**
          * Track textures in the renderer so we can no longer listen to them on destruction.
          *
-         * @type {Array<*>}
-         * @private
+         * @type {BaseTexture[]}
          */
         this._managed_textures = [];
     }
 
     /**
      * Binds a texture.
-     *
      */
-    bind_texture() {
-        // empty
-    }
+    bind_texture() { }
 
     /**
      * Gets a texture.
-     *
      */
-    get_texture() {
-        // empty
-    }
+    get_texture() { }
 
     /**
      * Updates and/or Creates a WebGL texture for the renderer's context.
      *
      * @param {BaseTexture} texture - the texture to update
      * @param {number} location - the location the texture will be bound to.
-     * @return {GLTexture} The gl texture.
      */
     update_texture(texture, location) {
         const gl = this.gl;
@@ -91,9 +83,9 @@ export default class TextureManager {
 
         gl.activeTexture(gl.TEXTURE0 + location);
 
-        let glTexture = texture._gl_textures[this.renderer.CONTEXT_UID];
+        let gl_texture = texture._gl_textures[this.renderer.CONTEXT_UID];
 
-        if (!glTexture) {
+        if (!gl_texture) {
             if (is_render_texture) {
                 const render_target = new RenderTarget(
                     this.gl,
@@ -105,21 +97,20 @@ export default class TextureManager {
 
                 render_target.resize(texture.width, texture.height);
                 texture._gl_render_targets[this.renderer.CONTEXT_UID] = render_target;
-                glTexture = render_target.texture;
+                gl_texture = render_target.texture;
 
                 // framebuffer constructor disactivates current framebuffer
                 if (!this.renderer._active_render_target.root) {
                     this.renderer._active_render_target.frame_buffer.bind();
                 }
-            }
-            else {
-                glTexture = new GLTexture(this.gl, null, null, null, null);
-                glTexture.bind(location);
-                glTexture.premultiply_alpha = true;
-                glTexture.upload(texture.source);
+            } else {
+                gl_texture = new GLTexture(this.gl, null, null, null, null);
+                gl_texture.bind(location);
+                gl_texture.premultiply_alpha = true;
+                gl_texture.upload(texture.source);
             }
 
-            texture._gl_textures[this.renderer.CONTEXT_UID] = glTexture;
+            texture._gl_textures[this.renderer.CONTEXT_UID] = gl_texture;
 
             texture.connect('update', this.update_texture, this);
             texture.connect('dispose', this.destroy_texture, this);
@@ -128,39 +119,33 @@ export default class TextureManager {
 
             if (texture.is_power_of_two) {
                 if (texture.mipmap) {
-                    glTexture.enable_mipmap();
+                    gl_texture.enable_mipmap();
                 }
 
                 if (texture.wrap_mode === WRAP_MODES.CLAMP) {
-                    glTexture.enable_wrap_clamp();
+                    gl_texture.enable_wrap_clamp();
+                } else if (texture.wrap_mode === WRAP_MODES.REPEAT) {
+                    gl_texture.enable_wrap_repeat();
+                } else {
+                    gl_texture.enable_wrap_mirror_repeat();
                 }
-                else if (texture.wrap_mode === WRAP_MODES.REPEAT) {
-                    glTexture.enable_wrap_repeat();
-                }
-                else {
-                    glTexture.enable_wrap_mirror_repeat();
-                }
-            }
-            else {
-                glTexture.enable_wrap_clamp();
+            } else {
+                gl_texture.enable_wrap_clamp();
             }
 
             if (texture.scale_mode === SCALE_MODES.NEAREST) {
-                glTexture.enable_nearest_scaling();
+                gl_texture.enable_nearest_scaling();
+            } else {
+                gl_texture.enable_linear_scaling();
             }
-            else {
-                glTexture.enable_linear_scaling();
-            }
-        }
-        // the texture already exists so we only need to update it..
-        else if (is_render_texture) {
+        } else if (is_render_texture) {
+            // the texture already exists so we only need to update it..
             texture._gl_render_targets[this.renderer.CONTEXT_UID].resize(texture.width, texture.height);
-        }
-        else {
-            glTexture.upload(texture.source);
+        } else {
+            gl_texture.upload(texture.source);
         }
 
-        return glTexture;
+        return gl_texture;
     }
 
     /**
@@ -183,17 +168,17 @@ export default class TextureManager {
         }
 
         const uid = this.renderer.CONTEXT_UID;
-        const glTextures = texture._gl_textures;
-        const glRenderTargets = texture._gl_render_targets;
+        const gl_textures = texture._gl_textures;
+        const gl_render_targets = texture._gl_render_targets;
 
-        if (glTextures[uid]) {
+        if (gl_textures[uid]) {
             this.renderer.unbind_texture(texture);
 
-            glTextures[uid].destroy();
+            gl_textures[uid].destroy();
             texture.disconnect('update', this.update_texture, this);
             texture.disconnect('dispose', this.destroy_texture, this);
 
-            delete glTextures[uid];
+            delete gl_textures[uid];
 
             if (!skip_remove) {
                 const i = this._managed_textures.indexOf(texture);
@@ -204,9 +189,9 @@ export default class TextureManager {
             }
         }
 
-        if (glRenderTargets && glRenderTargets[uid]) {
-            glRenderTargets[uid].destroy();
-            delete glRenderTargets[uid];
+        if (gl_render_targets && gl_render_targets[uid]) {
+            gl_render_targets[uid].destroy();
+            delete gl_render_targets[uid];
         }
     }
 

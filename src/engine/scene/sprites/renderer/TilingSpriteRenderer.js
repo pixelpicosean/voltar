@@ -44,7 +44,7 @@ export default class TilingSpriteRenderer extends ObjectRenderer {
 
         this.renderer.bind_vao(null);
         this.quad = new Quad(gl, this.renderer.state.attrib_state);
-        this.quad.initVao(this.shader);
+        this.quad.init_vao(this.shader);
     }
 
     /**
@@ -133,9 +133,9 @@ export default class TilingSpriteRenderer extends ObjectRenderer {
             shader.uniforms.uColor, baseTex.premultiplied_alpha);
         shader.uniforms.translationMatrix = ts.transform.world_transform.to_array(true);
 
-        shader.uniforms.uSampler = renderer.bind_texture(tex);
+        shader.uniforms.u_sampler = renderer.bind_texture(tex);
 
-        renderer.setBlendMode(correct_blend_mode(ts.blend_mode, baseTex.premultiplied_alpha));
+        renderer.set_blend_mode(correct_blend_mode(ts.blend_mode, baseTex.premultiplied_alpha));
 
         quad.vao.draw(this.renderer.gl.TRIANGLES, 6, 0);
     }

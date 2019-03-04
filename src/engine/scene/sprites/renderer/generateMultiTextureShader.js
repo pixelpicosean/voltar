@@ -3,7 +3,7 @@ import Shader from 'engine/Shader';
 import vertex_src from './texture.vert';
 
 const fragTemplate = [
-    'varying vec2 vTextureCoord;',
+    'varying vec2 v_texture_coord;',
     'varying vec4 vColor;',
     'varying float vTextureId;',
     'uniform sampler2D uSamplers[%count%];',
@@ -52,7 +52,7 @@ function generateSampleSrc(maxTextures) {
         }
 
         src += '\n{';
-        src += `\n\tcolor = texture2D(uSamplers[${i}], vTextureCoord);`;
+        src += `\n\tcolor = texture2D(uSamplers[${i}], v_texture_coord);`;
         src += '\n}';
     }
 

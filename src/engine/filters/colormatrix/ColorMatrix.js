@@ -9,24 +9,22 @@ import Frag from './color_matrix.frag';
  * with a new set of RGBA color and alpha values. It's pretty powerful!
  *
  * ```js
- *  let colorMatrix = new filters.ColorMatrixFilter();
- *  container.filters = [colorMatrix];
+ *  let colorMatrix = new ColorMatrixFilter();
+ *  node.filters = [colorMatrix];
  *  colorMatrix.contrast(2);
  * ```
  * @author Clément Chenebault <clement@goodboydigital.com>
  */
 export default class ColorMatrix extends Filter {
-    /**
-     *
-     */
     constructor() {
         super(Vert, Frag);
 
-        this.uniforms.m = [
+        this.uniforms.m = new Float32Array([
             1, 0, 0, 0, 0,
             0, 1, 0, 0, 0,
             0, 0, 1, 0, 0,
-            0, 0, 0, 1, 0];
+            0, 0, 0, 1, 0,
+        ]);
 
         this.alpha = 1;
     }
@@ -35,29 +33,27 @@ export default class ColorMatrix extends Filter {
      * Transforms current matrix and set the new one
      *
      * @param {number[]} matrix - 5x4 matrix
-     * @param {boolean} [multiply=false] - if true, current matrix and matrix are multiplied. If false,
+     * @param {boolean} [multiply] - if true, current matrix and matrix are multiplied. If false,
      *  just set the current matrix with @param matrix
      */
     _load_matrix(matrix, multiply = false) {
-        let newMatrix = matrix;
+        let new_matrix = new Float32Array(matrix);
 
         if (multiply) {
-            this._multiply(newMatrix, this.uniforms.m, matrix);
-            newMatrix = this._color_matrix(newMatrix);
+            this._multiply(new_matrix, this.uniforms.m, matrix);
+            new_matrix = this._color_matrix(new_matrix);
         }
 
         // set the new matrix
-        this.uniforms.m = newMatrix;
+        this.uniforms.m = new_matrix;
     }
 
     /**
      * Multiplies two mat5's
      *
-     * @private
-     * @param {number[]} out - 5x4 matrix the receiving matrix
-     * @param {number[]} a - 5x4 matrix the first operand
+     * @param {Float32Array} out - 5x4 matrix the receiving matrix
+     * @param {Float32Array} a - 5x4 matrix the first operand
      * @param {number[]} b - 5x4 matrix the second operand
-     * @returns {number[]} 5x4 matrix
      */
     _multiply(out, a, b) {
         // Red Channel
@@ -92,23 +88,17 @@ export default class ColorMatrix extends Filter {
     }
 
     /**
-     * Create a Float32 Array and normalize the offset component to 0-1
+     * Normalize the offset component to 0-1
      *
-     * @private
-     * @param {number[]} matrix - 5x4 matrix
-     * @return {number[]} 5x4 matrix with all values between 0-1
+     * @param {Float32Array} matrix - 5x4 matrix
      */
     _color_matrix(matrix) {
-        // Create a Float32 Array and normalize the offset component to 0-1
-        const m = new Float32Array(matrix);
+        matrix[4] /= 255;
+        matrix[9] /= 255;
+        matrix[14] /= 255;
+        matrix[19] /= 255;
 
-        m[4] /= 255;
-        m[9] /= 255;
-        m[14] /= 255;
-        m[19] /= 255;
-
-        // @ts-ignore
-        return m;
+        return matrix;
     }
 
     /**
@@ -170,8 +160,8 @@ export default class ColorMatrix extends Filter {
     hue(rotation, multiply) {
         rotation = (rotation || 0) / 180 * Math.PI;
 
-        const cosR = Math.cos(rotation);
-        const sinR = Math.sin(rotation);
+        const cos_r = Math.cos(rotation);
+        const sin_r = Math.sin(rotation);
         const sqrt = Math.sqrt;
 
         /* a good approximation for hue rotation
@@ -190,17 +180,17 @@ export default class ColorMatrix extends Filter {
         const w = 1 / 3;
         const sqrW = sqrt(w); // weight is
 
-        const a00 = cosR + ((1.0 - cosR) * w);
-        const a01 = (w * (1.0 - cosR)) - (sqrW * sinR);
-        const a02 = (w * (1.0 - cosR)) + (sqrW * sinR);
+        const a00 = cos_r + ((1.0 - cos_r) * w);
+        const a01 = (w * (1.0 - cos_r)) - (sqrW * sin_r);
+        const a02 = (w * (1.0 - cos_r)) + (sqrW * sin_r);
 
-        const a10 = (w * (1.0 - cosR)) + (sqrW * sinR);
-        const a11 = cosR + (w * (1.0 - cosR));
-        const a12 = (w * (1.0 - cosR)) - (sqrW * sinR);
+        const a10 = (w * (1.0 - cos_r)) + (sqrW * sin_r);
+        const a11 = cos_r + (w * (1.0 - cos_r));
+        const a12 = (w * (1.0 - cos_r)) - (sqrW * sin_r);
 
-        const a20 = (w * (1.0 - cosR)) - (sqrW * sinR);
-        const a21 = (w * (1.0 - cosR)) + (sqrW * sinR);
-        const a22 = cosR + (w * (1.0 - cosR));
+        const a20 = (w * (1.0 - cos_r)) - (sqrW * sin_r);
+        const a21 = (w * (1.0 - cos_r)) + (sqrW * sin_r);
+        const a22 = cos_r + (w * (1.0 - cos_r));
 
         const matrix = [
             a00, a01, a02, 0, 0,
@@ -257,12 +247,8 @@ export default class ColorMatrix extends Filter {
 
     /**
      * Desaturate image (remove color)
-     *
-     * Call the saturate function
-     *
      */
-    desaturate() // eslint-disable-line no-unused-vars
-    {
+    desaturate() {
         this.saturate(-1);
     }
 
@@ -399,29 +385,29 @@ export default class ColorMatrix extends Filter {
      *
      * @param {number} desaturation - Tone values.
      * @param {number} toned - Tone values.
-     * @param {number} lightColor - Tone values, example: `0xFFE580`
-     * @param {number} darkColor - Tone values, example: `0xFFE580`
+     * @param {number} light_color - Tone values, example: `0xFFE580`
+     * @param {number} dark_color - Tone values, example: `0xFFE580`
      * @param {boolean} multiply - if true, current matrix and matrix are multiplied.
      */
-    color_tone(desaturation, toned, lightColor, darkColor, multiply) {
+    color_tone(desaturation, toned, light_color, dark_color, multiply) {
         desaturation = desaturation || 0.2;
         toned = toned || 0.15;
-        lightColor = lightColor || 0xFFE580;
-        darkColor = darkColor || 0x338000;
+        light_color = light_color || 0xFFE580;
+        dark_color = dark_color || 0x338000;
 
-        const lR = ((lightColor >> 16) & 0xFF) / 255;
-        const lG = ((lightColor >> 8) & 0xFF) / 255;
-        const lB = (lightColor & 0xFF) / 255;
+        const l_r = ((light_color >> 16) & 0xFF) / 255;
+        const l_g = ((light_color >> 8) & 0xFF) / 255;
+        const l_b = (light_color & 0xFF) / 255;
 
-        const dR = ((darkColor >> 16) & 0xFF) / 255;
-        const dG = ((darkColor >> 8) & 0xFF) / 255;
-        const dB = (darkColor & 0xFF) / 255;
+        const d_r = ((dark_color >> 16) & 0xFF) / 255;
+        const d_g = ((dark_color >> 8) & 0xFF) / 255;
+        const d_b = (dark_color & 0xFF) / 255;
 
         const matrix = [
             0.3, 0.59, 0.11, 0, 0,
-            lR, lG, lB, desaturation, 0,
-            dR, dG, dB, toned, 0,
-            lR - dR, lG - dG, lB - dB, 0, 0,
+            l_r, l_g, l_b, desaturation, 0,
+            d_r, d_g, d_b, toned, 0,
+            l_r - d_r, l_g - d_g, l_b - d_b, 0, 0,
         ];
 
         this._load_matrix(matrix, multiply);
@@ -483,8 +469,6 @@ export default class ColorMatrix extends Filter {
     /**
      * LSD effect
      *
-     * Multiply the current matrix
-     *
      * @param {boolean} multiply - if true, current matrix and matrix are multiplied.
      */
     lsd(multiply) {
@@ -500,7 +484,6 @@ export default class ColorMatrix extends Filter {
 
     /**
      * Erase the current matrix by setting the default one
-     *
      */
     reset() {
         const matrix = [
@@ -516,15 +499,12 @@ export default class ColorMatrix extends Filter {
     /**
      * The matrix of the color matrix filter
      *
-     * @member {number[]}
-     * @default [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0]
+     * @type {number[]}
      */
     get matrix() {
         return this.uniforms.m;
     }
-
-    set matrix(value) // eslint-disable-line require-jsdoc
-    {
+    set matrix(value) {
         this.uniforms.m = value;
     }
 
@@ -535,16 +515,14 @@ export default class ColorMatrix extends Filter {
      * When the value is 1, the result color is used.
      * When in the range (0, 1) the color is interpolated between the original and result by this amount.
      *
-     * @member {number}
+     * @type {number}
      * @default 1
      */
     get alpha() {
-        return this.uniforms.uAlpha;
+        return this.uniforms.u_alpha;
     }
-
-    set alpha(value) // eslint-disable-line require-jsdoc
-    {
-        this.uniforms.uAlpha = value;
+    set alpha(value) {
+        this.uniforms.u_alpha = value;
     }
 }
 

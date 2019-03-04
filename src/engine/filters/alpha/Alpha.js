@@ -8,27 +8,24 @@ import Frag from './alpha.frag';
  */
 export default class Alpha extends Filter {
     /**
-     * @param {number} [alpha=1] Amount of alpha from 0 to 1, where 0 is transparent
+     * @param {number} [alpha] Amount of alpha from 0 to 1, where 0 is transparent
      */
     constructor(alpha = 1.0) {
         super(Vert, Frag);
 
         this.alpha = alpha;
-        this.glShaderKey = 'alpha';
+        this.gl_shader_key = 'alpha';
     }
 
     /**
      * Coefficient for alpha multiplication
      *
-     * @member {number}
-     * @default 1
+     * @type {number}
      */
     get alpha() {
-        return this.uniforms.uAlpha;
+        return this.uniforms.u_alpha;
     }
-
-    set alpha(value) // eslint-disable-line require-jsdoc
-    {
-        this.uniforms.uAlpha = value;
+    set alpha(value) {
+        this.uniforms.u_alpha = value;
     }
 }

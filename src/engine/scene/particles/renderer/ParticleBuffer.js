@@ -143,13 +143,13 @@ export default class ParticleBuffer {
         this.staticBuffer = GLBuffer.create_vertex_buffer(gl, statBuffer, gl.STATIC_DRAW);
 
         this.vao = new VertexArrayObject(gl)
-            .addIndex(this.index_buffer);
+            .add_index(this.index_buffer);
 
         for (let i = 0; i < this.dynamicProperties.length; ++i) {
             const property = this.dynamicProperties[i];
 
             if (property.unsignedByte) {
-                this.vao.addAttribute(
+                this.vao.add_attribute(
                     this.dynamicBuffer,
                     property.attribute,
                     gl.UNSIGNED_BYTE,
@@ -159,7 +159,7 @@ export default class ParticleBuffer {
                 );
             }
             else {
-                this.vao.addAttribute(
+                this.vao.add_attribute(
                     this.dynamicBuffer,
                     property.attribute,
                     gl.FLOAT,
@@ -174,7 +174,7 @@ export default class ParticleBuffer {
             const property = this.staticProperties[i];
 
             if (property.unsignedByte) {
-                this.vao.addAttribute(
+                this.vao.add_attribute(
                     this.staticBuffer,
                     property.attribute,
                     gl.UNSIGNED_BYTE,
@@ -184,7 +184,7 @@ export default class ParticleBuffer {
                 );
             }
             else {
-                this.vao.addAttribute(
+                this.vao.add_attribute(
                     this.staticBuffer,
                     property.attribute,
                     gl.FLOAT,

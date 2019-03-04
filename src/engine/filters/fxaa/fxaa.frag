@@ -4,8 +4,8 @@ varying vec2 v_rgbSW;
 varying vec2 v_rgbSE;
 varying vec2 v_rgbM;
 
-varying vec2 vTextureCoord;
-uniform sampler2D uSampler;
+varying vec2 v_texture_coord;
+uniform sampler2D u_sampler;
 uniform vec4 filter_area;
 
 /**
@@ -112,12 +112,6 @@ vec4 fxaa(sampler2D tex, vec2 fragCoord, vec2 resolution,
 }
 
 void main() {
-
-      vec2 fragCoord = vTextureCoord * filter_area.xy;
-
-      vec4 color;
-
-    color = fxaa(uSampler, fragCoord, filter_area.xy, v_rgbNW, v_rgbNE, v_rgbSW, v_rgbSE, v_rgbM);
-
-      gl_FragColor = color;
+    vec2 fragCoord = v_texture_coord * filter_area.xy;
+    gl_FragColor = fxaa(u_sampler, fragCoord, filter_area.xy, v_rgbNW, v_rgbNE, v_rgbSW, v_rgbSE, v_rgbM);
 }

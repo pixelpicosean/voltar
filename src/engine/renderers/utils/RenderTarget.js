@@ -2,23 +2,23 @@ import { Rectangle, Matrix } from 'engine/math/index';
 import { SCALE_MODES } from 'engine/const';
 import settings from 'engine/settings';
 import GLFramebuffer from 'engine/drivers/webgl/gl_frame_buffer';
+import GLTexture from 'engine/drivers/webgl/gl_texture';
+import GLBuffer from 'engine/drivers/webgl/gl_buffer';
 
 export default class RenderTarget {
     /**
      * @param {WebGLRenderingContext} gl - The current WebGL drawing context
-     * @param {number} [width=0] - the horizontal range of the filter
-     * @param {number} [height=0] - the vertical range of the filter
-     * @param {number} [scale_mode=settings.SCALE_MODE] - See {@link SCALE_MODES} for possible values
-     * @param {number} [resolution=1] - The current resolution / device pixel ratio
-     * @param {boolean} [root=false] - Whether this object is the root element or not
+     * @param {number} [width] - the horizontal range of the filter
+     * @param {number} [height] - the vertical range of the filter
+     * @param {number} [scale_mode]
+     * @param {number} [resolution] - The current resolution / device pixel ratio
+     * @param {boolean} [root] - Whether this object is the root element or not
      */
-    constructor(gl, width, height, scale_mode, resolution, root) {
+    constructor(gl, width = 0, height = 0, scale_mode, resolution = 1, root = false) {
         // TODO Resolution could go here ( eg low res blurs )
 
         /**
          * The current WebGL drawing context.
-         *
-         * @member {WebGLRenderingContext}
          */
         this.gl = gl;
 
@@ -27,65 +27,51 @@ export default class RenderTarget {
         /**
          * A frame buffer
          *
-         * @member {GL.GLFramebuffer}
+         * @type {GLFramebuffer}
          */
         this.frame_buffer = null;
 
         /**
          * The texture
          *
-         * @member {GL.GLTexture}
+         * @type {GLTexture}
          */
         this.texture = null;
 
         /**
          * The background colour of this render target, as an array of [r,g,b,a] values
-         *
-         * @member {number[]}
          */
         this.clearColor = [0, 0, 0, 0];
 
         /**
          * The size of the object as a rectangle
-         *
-         * @member {Rectangle}
          */
         this.size = new Rectangle(0, 0, 1, 1);
 
         /**
          * The current resolution / device pixel ratio
-         *
-         * @member {number}
-         * @default 1
          */
         this.resolution = resolution || settings.RESOLUTION;
 
         /**
          * The projection matrix
-         *
-         * @member {Matrix}
          */
         this.projection_matrix = new Matrix();
 
         /**
          * The object's transform
          *
-         * @member {Matrix}
+         * @type {Matrix}
          */
         this.transform = null;
 
         /**
          * The frame.
          *
-         * @member {Rectangle}
+         * @type {Rectangle}
          */
         this.frame = null;
 
-        /**
-         * The stencil buffer stores masking data for the render target
-         *
-         * @member {GL.GLBuffer}
-         */
         this.default_frame = new Rectangle();
         /**
          * @type {Rectangle}
@@ -99,51 +85,48 @@ export default class RenderTarget {
         /**
          * The stencil buffer stores masking data for the render target
          *
-         * @member {GL.GLBuffer}
+         * @type {GLBuffer}
          */
         this.stencil_buffer = null;
 
         /**
          * The data structure for the stencil masks
          *
-         * @member {Graphics[]}
+         * @type {import('../../scene/graphics/Graphics').default[]}
          */
         this.stencil_mask_stack = [];
 
         /**
          * Stores filter data for the render target
          *
-         * @member {object[]}
+         * @type {{index: number, stack: import('../managers/FilterManager').FilterState[]}}
          */
         this.filter_data = null;
 
+        /**
+         * @type {{index: number, stack: import('../managers/FilterManager').FilterState[]}}
+         */
         this.filter_stack = null;
 
+        /**
+         * @type {Rectangle}
+         */
         this.filter_area = null;
 
         /**
          * The key for pooled texture of FilterSystem
-         * @private
-         * @member {string}
          */
         this.filter_pool_key = '';
 
         /**
          * The scale mode.
-         *
-         * @member {number}
-         * @default settings.SCALE_MODE
-         * @see SCALE_MODES
          */
         this.scale_mode = scale_mode !== undefined ? scale_mode : settings.SCALE_MODE;
 
         /**
          * Whether this object is the root element or not
-         *
-         * @member {boolean}
-         * @default false
          */
-        this.root = root || false;
+        this.root = root;
 
         if (!this.root) {
             this.frame_buffer = GLFramebuffer.create_rgba(gl, 100, 100);
@@ -174,10 +157,10 @@ export default class RenderTarget {
     /**
      * Clears the filter texture.
      *
-     * @param {number[]} [clearColor=this.clearColor] - Array of [r,g,b,a] to clear the framebuffer
+     * @param {number[]} [clear_color] - Array of [r,g,b,a] to clear the framebuffer
      */
-    clear(clearColor) {
-        const cc = clearColor || this.clearColor;
+    clear(clear_color) {
+        const cc = clear_color || this.clearColor;
 
         this.frame_buffer.clear(cc[0], cc[1], cc[2], cc[3]);// r,g,b,a);
     }
@@ -186,7 +169,7 @@ export default class RenderTarget {
      * Binds the stencil buffer.
      *
      */
-    attachStencilBuffer() {
+    attach_stencil_buffer() {
         // TODO check if stencil is done?
         /**
          * The stencil buffer is used for masking in pixi

@@ -21,16 +21,16 @@ export default () => {
             return;
         }
 
-        const loadOptions = {
-            crossOrigin: resource.cross_origin,
+        const load_options = {
+            cross_origin: resource.cross_origin,
             metadata: resource.metadata.image_metadata,
             parent_resource: resource,
         };
 
-        const resourcePath = get_resource_path(resource, this.baseUrl);
+        const resource_path = get_resource_path(resource, this.base_url);
 
         // load the image for this sheet
-        this.add(image_resource_name, resourcePath, loadOptions, function onImageLoad(/** @type {Resource} */ res) {
+        this.add(image_resource_name, resource_path, load_options, function onImageLoad(/** @type {Resource} */ res) {
             if (res.error) {
                 next(res.error);
 

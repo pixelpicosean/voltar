@@ -9,7 +9,7 @@ export default class BlendModeManager extends WebGLManager {
         super(renderer);
 
         /**
-         * @member {number}
+         * @type {number}
          */
         this.current_blend_mode = 99999;
     }
@@ -17,9 +17,7 @@ export default class BlendModeManager extends WebGLManager {
     /**
      * Sets-up the given blend_mode from WebGL's point of view.
      *
-     * @param {number} blend_mode - the blend_mode, should be a Pixi const, such as
-     *  `BLEND_MODES.ADD`. See {@link BLEND_MODES} for possible values.
-     * @return {boolean} Returns if the blend mode was changed.
+     * @param {number} blend_mode - the blend_mode, should be a const, such as `BLEND_MODES.ADD`.
      */
     set_blend_mode(blend_mode) {
         if (this.current_blend_mode === blend_mode) {
@@ -27,7 +25,6 @@ export default class BlendModeManager extends WebGLManager {
         }
 
         this.current_blend_mode = blend_mode;
-
         const mode = this.renderer.blend_modes[this.current_blend_mode];
 
         this.renderer.gl.blendFunc(mode[0], mode[1]);

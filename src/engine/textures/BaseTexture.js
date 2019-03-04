@@ -37,7 +37,6 @@ export default class BaseTexture extends VObject {
          * The resolution / device pixel ratio of the texture
          *
          * @type {number}
-         * @default 1
          */
         this.resolution = resolution || settings.RESOLUTION;
 
@@ -78,8 +77,6 @@ export default class BaseTexture extends VObject {
          * The scale mode to apply when scaling this texture
          *
          * @type {number}
-         * @default settings.SCALE_MODE
-         * @see SCALE_MODES
          */
         this.scale_mode = scale_mode !== undefined ? scale_mode : settings.SCALE_MODE;
 
@@ -147,7 +144,6 @@ export default class BaseTexture extends VObject {
          * All blend modes, and shaders written for default value. Change it on your own risk.
          *
          * @type {boolean}
-         * @default true
          */
         this.premultiplied_alpha = true;
 
@@ -176,7 +172,6 @@ export default class BaseTexture extends VObject {
          * Also the texture must be a power of two size to work
          *
          * @type {boolean}
-         * @see MIPMAP_TEXTURES
          */
         this.mipmap = settings.MIPMAP_TEXTURES;
 
@@ -185,7 +180,6 @@ export default class BaseTexture extends VObject {
          * WebGL Texture wrap mode
          *
          * @type {number}
-         * @see WRAP_MODES
          */
         this.wrap_mode = settings.WRAP_MODE;
 

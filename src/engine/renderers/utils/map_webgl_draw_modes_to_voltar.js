@@ -4,8 +4,7 @@ import { DRAW_MODES } from 'engine/const';
  * Generic Mask Stack data structure.
  *
  * @param {WebGLRenderingContext} gl - The current WebGL drawing context
- * @param {object} [object={}] - The object to map into
- * @return {object} The mapped draw modes.
+ * @param {Object<number, number>} [object] - The object to map into
  */
 export default function map_webgl_draw_modes_to_voltar(gl, object = {}) {
     object[DRAW_MODES.POINTS] = gl.POINTS;

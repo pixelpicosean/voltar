@@ -25,29 +25,25 @@ export default class Noise extends Filter {
     /**
      * The amount of noise to apply, this value should be in the range (0, 1].
      *
-     * @member {number}
+     * @type {number}
      * @default 0.5
      */
     get noise() {
-        return this.uniforms.uNoise;
+        return this.uniforms.u_noise;
     }
-
-    set noise(value) // eslint-disable-line require-jsdoc
-    {
-        this.uniforms.uNoise = value;
+    set noise(value) {
+        this.uniforms.u_noise = value;
     }
 
     /**
      * A seed value to apply to the random noise generation. `Math.random()` is a good value to use.
      *
-     * @member {number}
+     * @type {number}
      */
     get seed() {
-        return this.uniforms.uSeed;
+        return this.uniforms.u_seed;
     }
-
-    set seed(value) // eslint-disable-line require-jsdoc
-    {
-        this.uniforms.uSeed = value;
+    set seed(value) {
+        this.uniforms.u_seed = value;
     }
 }

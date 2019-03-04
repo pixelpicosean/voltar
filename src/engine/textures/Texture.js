@@ -33,18 +33,16 @@ export default class Texture extends VObject {
      * @param {Rectangle} [frame] - The rectangle frame of the texture to show
      * @param {Rectangle} [orig] - The area of original texture
      * @param {Rectangle} [trim] - Trimmed rectangle of original texture
-     * @param {number} [rotate] - indicates how the texture was rotated by texture packer. See {@link GroupD8}
+     * @param {number|boolean} [rotate] - indicates how the texture was rotated by texture packer.
      * @param {Vector2} [anchor] - Default anchor point used for sprite placement / rotation
      */
-    constructor(base_texture, frame, orig, trim, rotate, anchor) {
+    constructor(base_texture, frame, orig, trim, rotate = 0, anchor) {
         super();
 
         this.uid = uid();
 
         /**
          * Does this Texture have any frame data assigned to it?
-         *
-         * @member {boolean}
          */
         this.no_frame = false;
 
@@ -60,7 +58,7 @@ export default class Texture extends VObject {
         /**
          * The base texture that this texture uses.
          *
-         * @member {BaseTexture}
+         * @type {BaseTexture}
          */
         this.base_texture = base_texture;
 
@@ -68,7 +66,7 @@ export default class Texture extends VObject {
          * This is the area of the BaseTexture image to actually copy to the Canvas / WebGL when rendering,
          * irrespective of the actual frame size or placement (which can be influenced by trimmed texture atlases)
          *
-         * @member {Rectangle}
+         * @type {Rectangle}
          */
         this._frame = frame;
 
@@ -76,28 +74,28 @@ export default class Texture extends VObject {
          * This is the trimmed area of original texture, before it was put in atlas.
          * Please call `_updateUvs()` after you change coordinates of `trim` manually.
          *
-         * @member {Rectangle}
+         * @type {Rectangle}
          */
         this.trim = trim;
 
         /**
          * This will let the renderer know if the texture is valid. If it's not then it cannot be rendered.
          *
-         * @member {boolean}
+         * @type {boolean}
          */
         this.valid = false;
 
         /**
          * This will let a renderer know that a texture has been updated (used mainly for webGL uv updates)
          *
-         * @member {boolean}
+         * @type {boolean}
          */
         this.requires_update = false;
 
         /**
          * The WebGL UV data cache.
          *
-         * @member {TextureUvs}
+         * @type {TextureUvs}
          * @private
          */
         this._uvs = null;
@@ -105,18 +103,16 @@ export default class Texture extends VObject {
         /**
          * This is the area of original texture, before it was put in atlas
          *
-         * @member {Rectangle}
+         * @type {Rectangle}
          */
         this.orig = orig || frame;// new Rectangle(0, 0, 1, 1);
 
-        this._rotate = Number(rotate || 0);
+        this._rotate = Number(rotate);
 
-        // @ts-ignore
         if (rotate === true) {
             // this is old texturepacker legacy, some games/libraries are passing "true" for rotated textures
             this._rotate = 2;
-        }
-        else if (this._rotate % 2 !== 0) {
+        } else if (this._rotate % 2 !== 0) {
             throw new Error('attempt to use diamond-shaped UVs. If you are sure, set rotation manually');
         }
 
@@ -128,26 +124,17 @@ export default class Texture extends VObject {
                 base_texture.connect('update', this.on_base_texture_updated, this);
             }
             this.frame = frame;
-        }
-        else {
+        } else {
             base_texture.connect_once('loaded', this.on_base_texture_loaded, this);
         }
 
         /**
          * Anchor point that is used as default if sprite is created with this texture.
          * Changing the `default_anchor` at a later point of time will not update Sprite's anchor point.
-         * @member {Vector2}
+         * @type {Vector2}
          * @default {0,0}
          */
         this.default_anchor = anchor ? new Vector2(anchor.x, anchor.y) : new Vector2(0, 0);
-
-        /**
-         * Fired when the texture is updated. This happens if the frame or the base_texture is updated.
-         *
-         * @event Texture#update
-         * @protected
-         * @param {Texture} texture - Instance of texture being updated.
-         */
 
         this._update_id = 0;
 
@@ -164,7 +151,7 @@ export default class Texture extends VObject {
          * automatically set as long as Texture.add_to_cache is used, but may not be set if a
          * Texture is added directly to the TextureCache array.
          *
-         * @member {string[]}
+         * @type {string[]}
          */
         this.texture_cache_ids = [];
     }
@@ -189,8 +176,7 @@ export default class Texture extends VObject {
         // TODO this code looks confusing.. boo to abusing getters and setters!
         if (this.no_frame) {
             this.frame = new Rectangle(0, 0, base_texture.width, base_texture.height);
-        }
-        else {
+        } else {
             this.frame = this._frame;
         }
 
@@ -216,9 +202,9 @@ export default class Texture extends VObject {
     /**
      * Destroys this texture
      *
-     * @param {boolean} [destroyBase=false] Whether to destroy the base texture as well
+     * @param {boolean} [destroyBase] Whether to destroy the base texture as well
      */
-    destroy(destroyBase) {
+    destroy(destroyBase = false) {
         if (this.base_texture) {
             if (destroyBase) {
                 // delete the texture if it exists in the texture cache..
@@ -249,8 +235,6 @@ export default class Texture extends VObject {
 
     /**
      * Creates a new texture object that acts the same as this one.
-     *
-     * @return {Texture} The new texture
      */
     clone() {
         return new Texture(this.base_texture, this.frame, this.orig, this.trim, this.rotate);
@@ -276,9 +260,8 @@ export default class Texture extends VObject {
      * @static
      * @param {string} image_url - The image url of the texture
      * @param {boolean} [crossorigin] - Whether requests should be treated as crossorigin
-     * @param {number} [scale_mode=settings.SCALE_MODE] - See {@link SCALE_MODES} for possible values
-     * @param {number} [source_scale=(auto)] - Scale for the original image, used with SVG images.
-     * @return {Texture} The newly created texture
+     * @param {number} [scale_mode]
+     * @param {number} [source_scale] - Scale for the original image, used with SVG images.
      */
     static from_image(image_url, crossorigin, scale_mode, source_scale) {
         let texture = TextureCache[image_url];
@@ -297,7 +280,6 @@ export default class Texture extends VObject {
      *
      * @static
      * @param {string} frameId - The frame Id of the texture in the cache
-     * @return {Texture} The newly created texture
      */
     static from_frame(frameId) {
         const texture = TextureCache[frameId];
@@ -314,9 +296,8 @@ export default class Texture extends VObject {
      *
      * @static
      * @param {HTMLCanvasElement} canvas - The canvas element source of the texture
-     * @param {number} [scale_mode=settings.SCALE_MODE] - See {@link SCALE_MODES} for possible values
-     * @param {string} [origin='canvas'] - A string origin of who created the base texture
-     * @return {Texture} The newly created texture
+     * @param {number} [scale_mode] - See {@link SCALE_MODES} for possible values
+     * @param {string} [origin] - A string origin of who created the base texture
      */
     static from_canvas(canvas, scale_mode, origin = 'canvas') {
         return new Texture(BaseTexture.from_canvas(canvas, scale_mode, origin));
@@ -330,7 +311,6 @@ export default class Texture extends VObject {
      * @param {String} image_url - File name of texture, for cache and resolving resolution.
      * @param {String} [name] - Human readible name for the texture cache. If no name is
      *        specified, only `image_url` will be used as the cache ID.
-     * @return {Texture} Output texture
      */
     static from_loader(source, image_url, name) {
         const base_texture = new BaseTexture(source, undefined, get_resolution_of_url(image_url));
@@ -369,13 +349,9 @@ export default class Texture extends VObject {
                 texture.texture_cache_ids.push(id);
             }
 
-            // @if DEBUG
-            /* eslint-disable no-console */
             if (TextureCache[id]) {
                 console.warn(`Texture added to the cache with an id [${id}] that already had an entry`);
             }
-            /* eslint-enable no-console */
-            // @endif
 
             TextureCache[id] = texture;
         }
@@ -386,7 +362,6 @@ export default class Texture extends VObject {
      *
      * @static
      * @param {string|Texture} texture - id of a Texture to be removed, or a Texture instance itself
-     * @return {Texture|null} The Texture that was removed
      */
     static remove_from_cache(texture) {
         if (typeof texture === 'string') {
@@ -403,8 +378,7 @@ export default class Texture extends VObject {
 
                 return textureFromCache;
             }
-        }
-        else if (texture && texture.texture_cache_ids) {
+        } else if (texture && texture.texture_cache_ids) {
             for (let i = 0; i < texture.texture_cache_ids.length; ++i) {
                 // Check that texture matches the one being passed in before deleting it from the cache.
                 if (TextureCache[texture.texture_cache_ids[i]] === texture) {
@@ -422,31 +396,29 @@ export default class Texture extends VObject {
 
     /**
      * The frame specifies the region of the base texture that this texture uses.
-     * Please call `_updateUvs()` after you change coordinates of `frame` manually.
+     * Please call `_update_uvs()` after you change coordinates of `frame` manually.
      *
-     * @member {Rectangle}
+     * @type {Rectangle}
      */
     get frame() {
         return this._frame;
     }
-
-    set frame(frame) // eslint-disable-line require-jsdoc
-    {
+    set frame(frame) {
         this._frame = frame;
 
         this.no_frame = false;
 
         const { x, y, width, height } = frame;
-        const xNotFit = x + width > this.base_texture.width;
-        const yNotFit = y + height > this.base_texture.height;
+        const x_not_fit = x + width > this.base_texture.width;
+        const y_not_fit = y + height > this.base_texture.height;
 
-        if (xNotFit || yNotFit) {
-            const relationship = xNotFit && yNotFit ? 'and' : 'or';
-            const errorX = `X: ${x} + ${width} = ${x + width} > ${this.base_texture.width}`;
-            const errorY = `Y: ${y} + ${height} = ${y + height} > ${this.base_texture.height}`;
+        if (x_not_fit || y_not_fit) {
+            const relationship = x_not_fit && y_not_fit ? 'and' : 'or';
+            const error_x = `X: ${x} + ${width} = ${x + width} > ${this.base_texture.width}`;
+            const error_y = `Y: ${y} + ${height} = ${y + height} > ${this.base_texture.height}`;
 
             throw new Error('Texture Error: frame does not fit inside the base Texture dimensions: '
-                + `${errorX} ${relationship} ${errorY}`);
+                + `${error_x} ${relationship} ${error_y}`);
         }
 
         // this.valid = width && height && this.base_texture.source && this.base_texture.has_loaded;
@@ -466,16 +438,13 @@ export default class Texture extends VObject {
      * set to 2 to compensate for texture packer rotation
      * set to 6 to compensate for spine packer rotation
      * can be used to rotate or mirror sprites
-     * See {@link GroupD8} for explanation
      *
-     * @member {number}
+     * @type {number}
      */
     get rotate() {
         return this._rotate;
     }
-
-    set rotate(rotate) // eslint-disable-line require-jsdoc
-    {
+    set rotate(rotate) {
         this._rotate = rotate;
         if (this.valid) {
             this._update_uvs();
@@ -485,7 +454,7 @@ export default class Texture extends VObject {
     /**
      * The width of the Texture in pixels.
      *
-     * @member {number}
+     * @type {number}
      */
     get width() {
         return this.orig.width;
@@ -494,7 +463,7 @@ export default class Texture extends VObject {
     /**
      * The height of the Texture in pixels.
      *
-     * @member {number}
+     * @type {number}
      */
     get height() {
         return this.orig.height;
@@ -508,23 +477,23 @@ function create_white_texture() {
     canvas.height = 32;
 
     const context = canvas.getContext('2d');
-    let smoothProperty = 'imageSmoothingEnabled';
+    let smooth_property = 'imageSmoothingEnabled';
     if (!context.imageSmoothingEnabled) {
         // @ts-ignore
         if (context.webkitImageSmoothingEnabled) {
-            smoothProperty = 'webkitImageSmoothingEnabled';
+            smooth_property = 'webkitImageSmoothingEnabled';
         // @ts-ignore
         } else if (context.mozImageSmoothingEnabled) {
-            smoothProperty = 'mozImageSmoothingEnabled';
+            smooth_property = 'mozImageSmoothingEnabled';
         // @ts-ignore
         } else if (context.oImageSmoothingEnabled) {
-            smoothProperty = 'oImageSmoothingEnabled';
+            smooth_property = 'oImageSmoothingEnabled';
         // @ts-ignore
         } else if (context.msImageSmoothingEnabled) {
-            smoothProperty = 'msImageSmoothingEnabled';
+            smooth_property = 'msImageSmoothingEnabled';
         }
     }
-    context[smoothProperty] = false;
+    context[smooth_property] = false;
 
     context.fillStyle = 'white';
     context.fillRect(0, 0, 32, 32);
@@ -532,11 +501,13 @@ function create_white_texture() {
     return new Texture(new BaseTexture(canvas));
 }
 
+function _noop() { }
+
 function remove_all_handlers(tex) {
-    tex.destroy = function _emptyDestroy() { /* empty */ };
-    tex.on = function _emptyOn() { /* empty */ };
-    tex.once = function _emptyOnce() { /* empty */ };
-    tex.emit = function _emptyEmit() { /* empty */ };
+    tex.destroy = _noop;
+    tex.on = _noop;
+    tex.once = _noop;
+    tex.emit = _noop;
 }
 
 /**

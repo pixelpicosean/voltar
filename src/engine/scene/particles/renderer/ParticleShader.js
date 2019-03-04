@@ -9,41 +9,41 @@ export default class ParticleShader extends Shader {
             gl,
             // vertex shader
             [
-                'attribute vec2 aVertexPosition;',
-                'attribute vec2 aTextureCoord;',
+                'attribute vec2 a_vertex_position;',
+                'attribute vec2 a_texture_coord;',
                 'attribute vec4 aColor;',
 
                 'attribute vec2 aPositionCoord;',
                 'attribute float aRotation;',
 
-                'uniform mat3 projectionMatrix;',
+                'uniform mat3 projection_matrix;',
                 'uniform vec4 uColor;',
 
-                'varying vec2 vTextureCoord;',
+                'varying vec2 v_texture_coord;',
                 'varying vec4 vColor;',
 
                 'void main(void){',
-                '   float x = (aVertexPosition.x) * cos(aRotation) - (aVertexPosition.y) * sin(aRotation);',
-                '   float y = (aVertexPosition.x) * sin(aRotation) + (aVertexPosition.y) * cos(aRotation);',
+                '   float x = (a_vertex_position.x) * cos(aRotation) - (a_vertex_position.y) * sin(aRotation);',
+                '   float y = (a_vertex_position.x) * sin(aRotation) + (a_vertex_position.y) * cos(aRotation);',
 
                 '   vec2 v = vec2(x, y);',
                 '   v = v + aPositionCoord;',
 
-                '   gl_Position = vec4((projectionMatrix * vec3(v, 1.0)).xy, 0.0, 1.0);',
+                '   gl_Position = vec4((projection_matrix * vec3(v, 1.0)).xy, 0.0, 1.0);',
 
-                '   vTextureCoord = aTextureCoord;',
+                '   v_texture_coord = a_texture_coord;',
                 '   vColor = aColor * uColor;',
                 '}',
             ].join('\n'),
             // fragment shader
             [
-                'varying vec2 vTextureCoord;',
+                'varying vec2 v_texture_coord;',
                 'varying vec4 vColor;',
 
-                'uniform sampler2D uSampler;',
+                'uniform sampler2D u_sampler;',
 
                 'void main(void){',
-                '  vec4 color = texture2D(uSampler, vTextureCoord) * vColor;',
+                '  vec4 color = texture2D(u_sampler, v_texture_coord) * vColor;',
                 '  gl_FragColor = color;',
                 '}',
             ].join('\n')

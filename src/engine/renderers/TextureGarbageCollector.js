@@ -1,10 +1,12 @@
 import { GC_MODES } from '../const';
 import settings from '../settings';
+import TextureManager from './TextureManager';
 
 /**
  * @typedef HasTextureManager
- * @property {TextureManater} texture_manager
+ * @property {TextureManager} texture_manager
  */
+
 /**
  * TextureGarbageCollector. This class manages the GPU and ensures that it does not get clogged
  * up with textures that are no longer being used.
@@ -17,9 +19,9 @@ export default class TextureGarbageCollector {
         this.renderer = renderer;
 
         this.count = 0;
-        this.checkCount = 0;
-        this.maxIdle = settings.GC_MAX_IDLE;
-        this.checkCountMax = settings.GC_MAX_CHECK_COUNT;
+        this.check_count = 0;
+        this.max_idle = settings.GC_MAX_IDLE;
+        this.check_count_max = settings.GC_MAX_CHECK_COUNT;
         this.mode = settings.GC_MODE;
     }
 
@@ -34,10 +36,10 @@ export default class TextureGarbageCollector {
             return;
         }
 
-        this.checkCount++;
+        this.check_count++;
 
-        if (this.checkCount > this.checkCountMax) {
-            this.checkCount = 0;
+        if (this.check_count > this.check_count_max) {
+            this.check_count = 0;
 
             this.run();
         }
@@ -49,44 +51,46 @@ export default class TextureGarbageCollector {
      */
     run() {
         const tm = this.renderer.texture_manager;
-        const managedTextures = tm._managed_textures;
-        let wasRemoved = false;
+        const managed_textures = tm._managed_textures;
+        let was_removed = false;
 
-        for (let i = 0; i < managedTextures.length; i++) {
-            const texture = managedTextures[i];
+        for (let i = 0; i < managed_textures.length; i++) {
+            const texture = managed_textures[i];
 
             // only supports non generated textures at the moment!
-            if (!texture._gl_render_targets && this.count - texture.touched > this.maxIdle) {
+            if (!texture._gl_render_targets && this.count - texture.touched > this.max_idle) {
                 tm.destroy_texture(texture, true);
-                managedTextures[i] = null;
-                wasRemoved = true;
+                managed_textures[i] = null;
+                was_removed = true;
             }
         }
 
-        if (wasRemoved) {
+        if (was_removed) {
             let j = 0;
 
-            for (let i = 0; i < managedTextures.length; i++) {
-                if (managedTextures[i] !== null) {
-                    managedTextures[j++] = managedTextures[i];
+            for (let i = 0; i < managed_textures.length; i++) {
+                if (managed_textures[i] !== null) {
+                    managed_textures[j++] = managed_textures[i];
                 }
             }
 
-            managedTextures.length = j;
+            managed_textures.length = j;
         }
     }
 
     /**
      * Removes all the textures within the specified node and its children from the GPU
      *
-     * @param {Node2D} node - the node to remove the textures from.
+     * @param {import('../scene/Node2D').default} node - the node to remove the textures from.
      */
     unload(node) {
         const tm = this.renderer.texture_manager;
 
+        const sprite = /** @type {import('../scene/sprites/Sprite').default} */(node);
+
         // only destroy non generated textures
-        if (node._texture && node._texture._gl_render_targets) {
-            tm.destroy_texture(node._texture, true);
+        if (sprite._texture && sprite._texture.base_texture && sprite._texture.base_texture._gl_render_targets) {
+            tm.destroy_texture(sprite._texture, true);
         }
 
         for (let i = node.children.length - 1; i >= 0; i--) {

@@ -124,6 +124,7 @@ export { default as yield } from './core/yield';
 import * as utils from './utils/index';
 import * as ticker from './ticker/index';
 import * as audio from './audio/index';
+import * as filters from './filters/index';
 
 export { registered_bitmap_fonts as bitmap_fonts } from './scene/text/res';
 
@@ -134,6 +135,7 @@ export {
 
     ticker,
     audio,
+    filters,
 }
 
 // ------------------------------------------------------------------

@@ -1,6 +1,7 @@
 import BaseRenderTexture from './BaseRenderTexture';
 import Texture from './Texture';
 import { Rectangle } from '../math/index';
+import settings from 'engine/settings';
 
 /**
  * A RenderTexture is a special texture that allows any Pixi display object to be rendered to it.
@@ -53,17 +54,11 @@ export default class RenderTexture extends Texture {
             // we have an old render texture..
             console.warn(`Please use RenderTexture.create(${width}, ${height}) instead of the ctor directly.`);
             _legacy_renderer = arguments[0];
-            /* eslint-enable prefer-rest-params, no-console */
 
             frame = null;
             base_render_texture = new BaseRenderTexture(width, height, scale_mode, resolution);
         }
 
-        /**
-         * The base texture object that this texture uses
-         *
-         * @member {BaseTexture}
-         */
         super(
             base_render_texture,
             frame
@@ -73,8 +68,6 @@ export default class RenderTexture extends Texture {
 
         /**
          * This will let the renderer know if the texture is valid. If it's not then it cannot be rendered.
-         *
-         * @member {boolean}
          */
         this.valid = true;
 
@@ -109,13 +102,13 @@ export default class RenderTexture extends Texture {
     /**
      * A short hand way of creating a render texture.
      *
-     * @param {number} [width=100] - The width of the render texture
-     * @param {number} [height=100] - The height of the render texture
-     * @param {number} [scale_mode=settings.SCALE_MODE] - See {@link SCALE_MODES} for possible values
-     * @param {number} [resolution=1] - The resolution / device pixel ratio of the texture being generated
+     * @param {number} [width] - The width of the render texture
+     * @param {number} [height] - The height of the render texture
+     * @param {number} [scale_mode]
+     * @param {number} [resolution] - The resolution / device pixel ratio of the texture being generated
      * @return {RenderTexture} The new render texture
      */
-    static create(width, height, scale_mode, resolution) {
-        return new RenderTexture(new BaseRenderTexture(width, height, scale_mode, resolution));
+    static create(width = 100, height = 100, scale_mode, resolution) {
+        return new RenderTexture(new BaseRenderTexture(width, height, scale_mode || settings.SCALE_MODE, resolution || settings.RESOLUTION));
     }
 }

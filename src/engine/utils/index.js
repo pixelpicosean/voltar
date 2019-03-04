@@ -74,17 +74,17 @@ export function rgb2hex(rgb) {
  * used by spritesheets and image urls
  *
  * @param {string} url - the image path
- * @param {number} [default_value=1] - the defaultValue if no filename prefix is set.
+ * @param {number} [default_value] - the defaultValue if no filename prefix is set.
  * @return {number} resolution / device pixel ratio of an asset
  */
-export function get_resolution_of_url(url, default_value) {
+export function get_resolution_of_url(url, default_value = 1) {
     const resolution = settings.RETINA_PREFIX.exec(url);
 
     if (resolution) {
         return parseFloat(resolution[1]);
     }
 
-    return default_value !== undefined ? default_value : 1;
+    return default_value;
 }
 
 /**

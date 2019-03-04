@@ -20,7 +20,7 @@ export default class Spritesheet {
 
     /**
      * @param {BaseTexture} base_texture Reference to the source BaseTexture object.
-     * @param {Object} data - Spritesheet image data.
+     * @param {{ frames: string[], animations: string[][], meta: { scale?: string }}} data - Spritesheet image data.
      * @param {string} [resolution_filename] - The filename to consider when determining
      *        the resolution of the spritesheet. If not provided, the image_url will
      *        be used on the BaseTexture.
@@ -34,7 +34,7 @@ export default class Spritesheet {
 
         /**
          * Map of spritesheet textures.
-         * @type {Object.<string, Texture>}
+         * @type {Object<string, Texture>}
          */
         this.textures = {};
 
@@ -44,13 +44,12 @@ export default class Spritesheet {
          * ```js
          * new AnimatedSprite(sheet.animations["anim_name"])
          * ```
-         * @member {Object}
+         * @type {Object<string, Texture[]>}
          */
         this.animations = {};
 
         /**
          * Reference to the original JSON data.
-         * @type {Object}
          */
         this.data = data;
 
@@ -104,12 +103,12 @@ export default class Spritesheet {
         const scale = this.data.meta.scale;
 
         // Use a defaultValue of `null` to check if a url-based resolution is set
-        let resolution = get_resolution_of_url(resolution_filename, null);
+        let resolution = get_resolution_of_url(resolution_filename, -1);
 
         // No resolution found via URL
-        if (resolution === null) {
+        if (resolution === -1) {
             // Use the scale value or default to 1
-            resolution = scale !== undefined ? parseFloat(scale) : 1;
+            resolution = (scale !== undefined) ? parseFloat(scale) : 1;
         }
 
         // For non-1 resolutions, update base_texture
@@ -133,12 +132,11 @@ export default class Spritesheet {
         this._callback = callback;
 
         if (this._frame_keys.length <= Spritesheet.BATCH_SIZE) {
-            this._processFrames(0);
+            this._process_frames(0);
             this._process_animations();
-            this._parseComplete();
-        }
-        else {
-            this._nextBatch();
+            this._parse_complete();
+        } else {
+            this._next_batch();
         }
     }
 
@@ -148,7 +146,7 @@ export default class Spritesheet {
      * @private
      * @param {number} initial_frame_index - The index of frame to start.
      */
-    _processFrames(initial_frame_index) {
+    _process_frames(initial_frame_index) {
         let frame_index = initial_frame_index;
         const max_frames = Spritesheet.BATCH_SIZE;
         const source_scale = this.base_texture.source_scale;
@@ -178,8 +176,7 @@ export default class Spritesheet {
                         rect.h / this.resolution,
                         rect.w / this.resolution
                     );
-                }
-                else {
+                } else {
                     frame = new Rectangle(
                         rect.x / this.resolution,
                         rect.y / this.resolution,
@@ -223,10 +220,10 @@ export default class Spritesheet {
     _process_animations() {
         const animations = this.data.animations || {};
 
-        for (const animName in animations) {
-            this.animations[animName] = [];
-            for (const frameName of animations[animName]) {
-                this.animations[animName].push(this.textures[frameName]);
+        for (const anim_name in animations) {
+            this.animations[anim_name] = [];
+            for (const frameName of animations[anim_name]) {
+                this.animations[anim_name].push(this.textures[frameName]);
             }
         }
     }
@@ -236,7 +233,7 @@ export default class Spritesheet {
      *
      * @private
      */
-    _parseComplete() {
+    _parse_complete() {
         const callback = this._callback;
 
         this._callback = null;
@@ -249,16 +246,16 @@ export default class Spritesheet {
      *
      * @private
      */
-    _nextBatch() {
-        this._processFrames(this._batch_index * Spritesheet.BATCH_SIZE);
+    _next_batch() {
+        this._process_frames(this._batch_index * Spritesheet.BATCH_SIZE);
         this._batch_index++;
         setTimeout(() => {
             if (this._batch_index * Spritesheet.BATCH_SIZE < this._frame_keys.length) {
-                this._nextBatch();
+                this._next_batch();
             }
             else {
                 this._process_animations();
-                this._parseComplete();
+                this._parse_complete();
             }
         }, 0);
     }
@@ -266,7 +263,7 @@ export default class Spritesheet {
     /**
      * Destroy Spritesheet and don't use after this.
      *
-     * @param {boolean} [destroy_base=false] Whether to destroy the base texture as well
+     * @param {boolean} [destroy_base] Whether to destroy the base texture as well
      */
     destroy(destroy_base = false) {
         for (const i in this.textures) {

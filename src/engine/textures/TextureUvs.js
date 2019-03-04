@@ -56,8 +56,7 @@ export default class TextureUvs {
             rotate = GroupD8.add(rotate, 2);
             this.x3 = cX + (w2 * GroupD8.u_x(rotate));
             this.y3 = cY + (h2 * GroupD8.u_y(rotate));
-        }
-        else {
+        } else {
             this.x0 = frame.x / tw;
             this.y0 = frame.y / th;
 

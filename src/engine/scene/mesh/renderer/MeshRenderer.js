@@ -71,9 +71,9 @@ export default class MeshRenderer extends ObjectRenderer {
 
             // build the vao object that will render..
             gl_data.vao = new VertexArrayObject(gl)
-                .addIndex(gl_data.index_buffer)
-                .addAttribute(gl_data.vertexBuffer, gl_data.shader.attributes.aVertexPosition, gl.FLOAT, false, 2 * 4, 0)
-                .addAttribute(gl_data.uvBuffer, gl_data.shader.attributes.aTextureCoord, gl.FLOAT, false, 2 * 4, 0);
+                .add_index(gl_data.index_buffer)
+                .add_attribute(gl_data.vertexBuffer, gl_data.shader.attributes.a_vertex_position, gl.FLOAT, false, 2 * 4, 0)
+                .add_attribute(gl_data.uvBuffer, gl_data.shader.attributes.a_texture_coord, gl.FLOAT, false, 2 * 4, 0);
 
             mesh._gl_datas[renderer.CONTEXT_UID] = gl_data;
         }
@@ -97,7 +97,7 @@ export default class MeshRenderer extends ObjectRenderer {
 
         renderer.bind_shader(gl_data.shader);
 
-        gl_data.shader.uniforms.uSampler = renderer.bind_texture(texture);
+        gl_data.shader.uniforms.u_sampler = renderer.bind_texture(texture);
 
         renderer.state.set_blend_mode(correct_blend_mode(mesh.blend_mode, texture.base_texture.premultiplied_alpha));
 

@@ -1,15 +1,15 @@
-attribute vec2 aVertexPosition;
-attribute vec2 aTextureCoord;
+attribute vec2 a_vertex_position;
+attribute vec2 a_texture_coord;
 
-uniform mat3 projectionMatrix;
+uniform mat3 projection_matrix;
 uniform mat3 translationMatrix;
 uniform mat3 uTransform;
 
-varying vec2 vTextureCoord;
+varying vec2 v_texture_coord;
 
 void main(void)
 {
-    gl_Position = vec4((projectionMatrix * translationMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);
+    gl_Position = vec4((projection_matrix * translationMatrix * vec3(a_vertex_position, 1.0)).xy, 0.0, 1.0);
 
-    vTextureCoord = (uTransform * vec3(aTextureCoord, 1.0)).xy;
+    v_texture_coord = (uTransform * vec3(a_texture_coord, 1.0)).xy;
 }

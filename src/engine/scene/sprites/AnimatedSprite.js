@@ -8,15 +8,22 @@ export class Anim {
     constructor() {
         this.speed = 5;
         this.loop = true;
+        /**
+         * @type {Texture[]}
+         */
         this.frames = [];
         this.name = '';
     }
 }
 
+/**
+ * @param {Texture[]|string[]} frames
+ */
 function normalize_frame_list(frames) {
-    let result = new Array(frames.length);
+    /** @type {Texture[]} */
+    const result = new Array(frames.length);
     for (let i = 0; i < result.length; i++) {
-        result[i] = (frames[i].base_texture ? frames[i].base_texture : TextureCache[frames[i]]);
+        result[i] = (/** @type {Texture} */(frames[i]).base_texture ? /** @type {Texture} */(frames[i]).base_texture : TextureCache[/** @type {string} */(frames[i])]);
     }
     return result;
 }
@@ -25,9 +32,8 @@ function normalize_frame_list(frames) {
  * Create textures for tiles in a tileset. Can also be used to extract
  * grid based sprite-sheets.
  * @param  {Texture} tileset    Tileset texture.
- * @param  {Number} width       Width of a single tile.
- * @param  {Number} height      Height of a single tile.
- * @return {Array<Texture>}     List of textures.
+ * @param  {number} width       Width of a single tile.
+ * @param  {number} height      Height of a single tile.
  */
 export function filmstrip(tileset, width, height) {
     let strip = [];
@@ -99,17 +105,30 @@ export class SpriteFrames {
         }
     }
 
+    /**
+     * @param {string} anim
+     */
     add_animation(anim) {
         const a = new Anim();
         a.name = anim;
         this.animations[anim] = a;
     }
+    /**
+     * @param {string} anim
+     */
     has_animation(anim) {
         return anim in this.animations;
     }
+    /**
+     * @param {string} anim
+     */
     remove_animation(anim) {
         delete this.animations[anim];
     }
+    /**
+    * @param {string} prev
+    * @param {string} next
+    */
     rename_animation(prev, next) {
         const a = this.animations[prev];
         a.name = next;
@@ -117,32 +136,65 @@ export class SpriteFrames {
         this.animations[next] = a;
     }
 
+    /**
+     * @param {string} anim
+     * @param {number} fps
+     */
     set_animation_speed(anim, fps) {
         this.animations[anim].speed = fps;
     }
+    /**
+     * @param {string} anim
+     */
     get_animation_speed(anim) {
         return this.animations[anim].speed;
     }
 
+    /**
+     * @param {string} anim
+     * @param {boolean} loop
+     */
     set_animation_loop(anim, loop) {
         this.animations[anim].loop = loop;
     }
+    /**
+     * @param {string} anim
+     */
     get_animation_loop(anim) {
         return this.animations[anim].loop;
     }
 
+    /**
+     * @param {string} anim
+     */
     get_frame_count(anim) {
         return this.animations[anim].frames.length;
     }
+    /**
+     * @param {string} anim
+     * @param {number} idx
+     */
     get_frame(anim, idx) {
         return this.animations[anim].frames[idx];
     }
+    /**
+     * @param {string} anim
+     * @param {number} idx
+     * @param {Texture} texture
+     */
     set_frame(anim, idx, texture) {
         this.animations[anim].frames[idx] = texture;
     }
+    /**
+     * @param {string} anim
+     * @param {number} idx
+     */
     remove_frame(anim, idx) {
         remove_items(this.animations[anim].frames, idx, 1);
     }
+    /**
+     * @param {string} anim
+     */
     clear(anim) {
         this.animations[anim].frames.length = 0;
     }

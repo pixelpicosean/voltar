@@ -12,13 +12,19 @@ import GLBuffer from './gl_buffer';
  * @property {number} start
  */
 
+/**
+ * @typedef VertexArrayObjectDesc
+ * @property {number[]} temp_attrib_state
+ * @property {number[]} attrib_state
+ */
+
 export default class VertexArrayObject {
     /**
      * Helper class to work with WebGL VertexArrayObjects (vaos)
      * Only works if WebGL extensions are enabled (they usually are)
      *
      * @param {WebGLRenderingContext} gl The current WebGL rendering context
-     * @param {{ temp_attrib_state: number[], attrib_state: number[] }} [state]
+     * @param {VertexArrayObjectDesc} [state]
      */
     constructor(gl, state = null) {
         this.native_vao_extension = null;
@@ -144,7 +150,7 @@ export default class VertexArrayObject {
      * @param {number} [stride]
      * @param {number} [start]
      */
-    addAttribute(buffer, attribute, type, normalized = false, stride = 0, start = 0) {
+    add_attribute(buffer, attribute, type, normalized = false, stride = 0, start = 0) {
         this.attributes.push({
             buffer: buffer,
             attribute: attribute,
@@ -163,7 +169,7 @@ export default class VertexArrayObject {
     /**
      * @param {GLBuffer} buffer
      */
-    addIndex(buffer) {
+    add_index(buffer) {
         this.index_buffer = buffer;
 
         this.dirty = true;

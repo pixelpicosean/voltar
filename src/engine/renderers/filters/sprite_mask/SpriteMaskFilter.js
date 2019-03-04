@@ -47,10 +47,10 @@ export default class SpriteMaskFilter extends Filter {
         }
         tex.transform.update();
         this.uniforms.mask = tex;
-        this.uniforms.otherMatrix = filter_manager.calculate_sprite_matrix(this.mask_matrix, maskSprite)
+        this.uniforms.other_matrix = filter_manager.calculate_sprite_matrix(this.mask_matrix, maskSprite)
             .prepend(tex.transform.map_coord);
         this.uniforms.alpha = maskSprite.world_alpha;
-        this.uniforms.maskClamp = tex.transform.u_clamp_frame;
+        this.uniforms.mask_clamp = tex.transform.u_clamp_frame;
 
         filter_manager.apply_filter(this, input, output);
     }

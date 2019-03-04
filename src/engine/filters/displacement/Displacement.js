@@ -5,8 +5,9 @@ import Vector2 from 'engine/math/Vector2';
 import FilterManager from 'engine/renderers/managers/FilterManager';
 import RenderTarget from 'engine/renderers/utils/RenderTarget';
 
-import VertShader from '../fragments/default-filter-matrix.vert';
+import VertShader from '../fragments/default_filter_matrix.vert';
 import FragShader from './displacement.frag';
+import Texture from 'engine/textures/Texture';
 
 /**
  * The Displacement class uses the pixel values from the specified texture
@@ -18,9 +19,9 @@ import FragShader from './displacement.frag';
 export default class Displacement extends Filter {
     /**
      * @param {Sprite} sprite - The sprite used for the displacement map. (make sure its added to the scene!)
-     * @param {number} scale - The scale of the displacement
+     * @param {number} [scale] - The scale of the displacement
      */
-    constructor(sprite, scale) {
+    constructor(sprite, scale = 20) {
         const mask_matrix = new Matrix();
 
         sprite.renderable = false;
@@ -30,13 +31,9 @@ export default class Displacement extends Filter {
         this.mask_sprite = sprite;
         this.mask_matrix = mask_matrix;
 
-        this.uniforms.mapSampler = sprite._texture;
-        this.uniforms.filterMatrix = mask_matrix;
+        this.uniforms.map_sampler = sprite._texture;
+        this.uniforms.filter_matrix = mask_matrix;
         this.uniforms.scale = { x: 1, y: 1 };
-
-        if (scale === null || scale === undefined) {
-            scale = 20;
-        }
 
         this.scale = new Vector2(scale, scale);
     }
@@ -59,14 +56,12 @@ export default class Displacement extends Filter {
     /**
      * The texture used for the displacement map. Must be power of 2 sized texture.
      *
-     * @member {Texture}
+     * @type {Texture}
      */
     get map() {
-        return this.uniforms.mapSampler;
+        return this.uniforms.map_sampler;
     }
-
-    set map(value) // eslint-disable-line require-jsdoc
-    {
-        this.uniforms.mapSampler = value;
+    set map(value) {
+        this.uniforms.map_sampler = value;
     }
 }

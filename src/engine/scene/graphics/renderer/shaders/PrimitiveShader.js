@@ -17,11 +17,11 @@ export default class PrimitiveShader extends Shader
         super(gl,
             // vertex shader
             [
-                'attribute vec2 aVertexPosition;',
+                'attribute vec2 a_vertex_position;',
                 'attribute vec4 aColor;',
 
                 'uniform mat3 translationMatrix;',
-                'uniform mat3 projectionMatrix;',
+                'uniform mat3 projection_matrix;',
 
                 'uniform float alpha;',
                 'uniform vec3 tint;',
@@ -29,7 +29,7 @@ export default class PrimitiveShader extends Shader
                 'varying vec4 vColor;',
 
                 'void main(void){',
-                '   gl_Position = vec4((projectionMatrix * translationMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);',
+                '   gl_Position = vec4((projection_matrix * translationMatrix * vec3(a_vertex_position, 1.0)).xy, 0.0, 1.0);',
                 '   vColor = aColor * vec4(tint * alpha, alpha);',
                 '}',
             ].join('\n'),

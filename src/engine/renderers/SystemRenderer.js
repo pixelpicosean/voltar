@@ -1,33 +1,30 @@
-import { RENDERER_TYPE } from '../const';
 import settings from '../settings';
+import { RENDERER_TYPE } from '../const';
+
 import { say_hello, hex2string, hex2rgb } from '../utils/index';
 import { Matrix, Rectangle } from '../math/index';
 import { VObject } from 'engine/dep/index';
 import Node2D from '../scene/Node2D';
 import RenderTexture from '../textures/RenderTexture';
-import Texture from '../textures/Texture';
 
 const temp_matrix = new Matrix();
 
 /**
  * @typedef RendererDesc
- * @property {number} [width=800] - the width of the screen
- * @property {number} [height=600] - the height of the screen
+ * @property {number} [width] - the width of the screen
+ * @property {number} [height] - the height of the screen
  * @property {HTMLCanvasElement} [view] - the canvas to use as a view, optional
- * @property {boolean} [transparent=false] - If the render view is transparent, default false
- * @property {boolean} [auto_resize=false] - If the render view is automatically resized, default false
- * @property {boolean} [antialias=false] - sets antialias (only applicable in chrome at the moment)
- * @property {number} [resolution=1] - The resolution / device pixel ratio of the renderer. The
+ * @property {boolean} [transparent] - If the render view is transparent, default false
+ * @property {boolean} [auto_resize] - If the render view is automatically resized, default false
+ * @property {boolean} [antialias] - sets antialias (only applicable in chrome at the moment)
+ * @property {number} [resolution] - The resolution / device pixel ratio of the renderer. The
  *     resolution of the renderer retina would be 2.
- * @property {boolean} [preserve_drawing_buffer=false] - enables drawing buffer preservation,
+ * @property {boolean} [preserve_drawing_buffer] - enables drawing buffer preservation,
  *     enable this if you need to call toDataUrl on the webgl context.
- * @property {boolean} [clear_before_render=true] - This sets if the renderer will clear the canvas or
- *     not before the new render pass.
- * @property {number} [background_color=0x000000] - The background color of the rendered area
- *     (shown if not transparent).
- * @property {boolean} [pixel_snap=false] - If true Pixi will Math.floor() x/y values when rendering,
- *     stopping pixel interpolation.
- * @property {boolean} [legacy=false] - If true PixiJS will aim to ensure compatibility
+ * @property {boolean} [clear_before_render] - This sets if the renderer will clear the canvas or not before the new render pass.
+ * @property {number} [background_color] - The background color of the rendered area (shown if not transparent).
+ * @property {boolean} [pixel_snap] - Round x/y values when rendering, stopping pixel interpolation.
+ * @property {boolean} [legacy] - If true PixiJS will aim to ensure compatibility
  *     with older / less advanced devices. If you experiance unexplained flickering try setting this to true.
  * @property {string} [power_preference] - Parameter passed to webgl context, set to "high-performance"
  *     for devices with dual graphics card
@@ -42,39 +39,25 @@ export default class SystemRenderer extends VObject {
     /**
      * @param {string} system - The name of the system this renderer is for.
      * @param {RendererDesc} [desc] - The optional renderer parameters
-     * @param {any} [arg2]
-     * @param {any} [arg3]
      */
-    constructor(system, desc, arg2, arg3) {
+    constructor(system, desc) {
         super();
 
+        this.system = system;
+
         say_hello();
-
-        // Support for constructor(system, screenWidth, screenHeight, options)
-        if (typeof desc === 'number') {
-            desc = Object.assign({
-                width: desc,
-                height: arg2 || settings.RENDER_OPTIONS.height,
-            }, arg3);
-        }
-
-        // Add the default render options
-        desc = Object.assign({}, settings.RENDER_OPTIONS, desc);
 
         /**
          * The supplied constructor options.
          *
          * @type {RendererDesc}
-         * @readOnly
          */
-        this.options = desc;
+        this.options = Object.assign({}, settings.RENDER_OPTIONS, desc);
 
         /**
          * The type of the renderer.
          *
          * @type {number}
-         * @default RENDERER_TYPE.UNKNOWN
-         * @see RENDERER_TYPE
          */
         this.type = RENDERER_TYPE.UNKNOWN;
 
@@ -138,12 +121,11 @@ export default class SystemRenderer extends VObject {
          * your game has a canvas filling background image you often don't need this set.
          *
          * @type {boolean}
-         * @default
          */
         this.clear_before_render = desc.clear_before_render;
 
         /**
-         * If true Pixi will Math.floor() x/y values when rendering, stopping pixel interpolation.
+         * Whether round x/y values when rendering, stopping pixel interpolation.
          * Handy for crisp pixel art and speed on legacy devices.
          *
          * @type {boolean}
@@ -154,15 +136,13 @@ export default class SystemRenderer extends VObject {
          * The background color as a number.
          *
          * @type {number}
-         * @private
          */
         this._background_color = 0x000000;
 
         /**
          * The background color as an [R, G, B] array.
          *
-         * @type {Array<number>}
-         * @private
+         * @type {number[]}
          */
         this._background_color_rgba = [0, 0, 0, 0];
 
@@ -170,7 +150,6 @@ export default class SystemRenderer extends VObject {
          * The background color as a string.
          *
          * @type {string}
-         * @private
          */
         this._background_color_string = '#000000';
 
@@ -180,7 +159,6 @@ export default class SystemRenderer extends VObject {
          * This temporary display object used as the parent of the currently being rendered item
          *
          * @type {Node2D}
-         * @private
          */
         this._temp_node_2d_parent = new Node2D();
 
@@ -188,7 +166,6 @@ export default class SystemRenderer extends VObject {
          * The last root object that the renderer tried to render.
          *
          * @type {Node2D}
-         * @private
          */
         this._last_object_rendered = this._temp_node_2d_parent;
     }
@@ -197,8 +174,6 @@ export default class SystemRenderer extends VObject {
      * Same as view.width, actual number of pixels in the canvas by horizontal
      *
      * @type {number}
-     * @readonly
-     * @default 800
      */
     get width() {
         return this.view.width;
@@ -208,8 +183,6 @@ export default class SystemRenderer extends VObject {
      * Same as view.height, actual number of pixels in the canvas by vertical
      *
      * @type {number}
-     * @readonly
-     * @default 600
      */
     get height() {
         return this.view.height;
@@ -219,19 +192,19 @@ export default class SystemRenderer extends VObject {
      * Resizes the screen and canvas to the specified width and height
      * Canvas dimensions are multiplied by resolution
      *
-     * @param {number} screenWidth - the new width of the screen
-     * @param {number} screenHeight - the new height of the screen
+     * @param {number} screen_width - the new width of the screen
+     * @param {number} screen_height - the new height of the screen
      */
-    resize(screenWidth, screenHeight) {
-        this.screen.width = screenWidth;
-        this.screen.height = screenHeight;
+    resize(screen_width, screen_height) {
+        this.screen.width = screen_width;
+        this.screen.height = screen_height;
 
-        this.view.width = screenWidth * this.resolution;
-        this.view.height = screenHeight * this.resolution;
+        this.view.width = screen_width * this.resolution;
+        this.view.height = screen_height * this.resolution;
 
         if (this.auto_resize) {
-            this.view.style.width = `${screenWidth}px`;
-            this.view.style.height = `${screenHeight}px`;
+            this.view.style.width = `${screen_width}px`;
+            this.view.style.height = `${screen_height}px`;
         }
     }
 
@@ -253,7 +226,6 @@ export default class SystemRenderer extends VObject {
      * @param {number} [resolution] - The resolution / device pixel ratio of the texture being generated
      * @param {Rectangle} [region] - The region of the node, that shall be rendered,
      *        if no region is specified, defaults to the local bounds of the node.
-     * @return {Texture} a texture of the graphics object
      */
     generate_texture(node, scale_mode, resolution, region) {
         region = region || node.get_local_bounds();

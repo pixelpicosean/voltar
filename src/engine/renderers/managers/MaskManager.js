@@ -15,13 +15,13 @@ export default class MaskManager extends WebGLManager {
 
         // TODO - we don't need both!
         this.scissor = false;
-        this.scissorData = null;
-        this.scissorRenderTarget = null;
+        this.scissor_data = null;
+        this.scissor_render_target = null;
 
-        this.enableScissor = true;
+        this.enable_scissor = true;
 
-        this.alphaMaskPool = [];
-        this.alphaMaskIndex = 0;
+        this.alpha_mask_pool = [];
+        this.alpha_mask_index = 0;
     }
 
     /**
@@ -39,7 +39,7 @@ export default class MaskManager extends WebGLManager {
         if (mask_data.texture) {
             // @ts-ignore
             this.push_sprite_mask(target, mask_data);
-        } else if (this.enableScissor
+        } else if (this.enable_scissor
             && !this.scissor
             && this.renderer._active_render_target.root
             && !this.renderer.stencil_manager.stencil_mask_stack.length
@@ -70,7 +70,7 @@ export default class MaskManager extends WebGLManager {
         if (maskData.texture) {
             this.pop_sprite_mask();
         }
-        else if (this.enableScissor && !this.renderer.stencil_manager.stencil_mask_stack.length) {
+        else if (this.enable_scissor && !this.renderer.stencil_manager.stencil_mask_stack.length) {
             this.pop_scissor_mask();
         }
         else {
@@ -85,10 +85,10 @@ export default class MaskManager extends WebGLManager {
      * @param {Sprite} mask_data - Sprite to be used as the mask
      */
     push_sprite_mask(target, mask_data) {
-        let alphaMaskFilter = this.alphaMaskPool[this.alphaMaskIndex];
+        let alphaMaskFilter = this.alpha_mask_pool[this.alpha_mask_index];
 
         if (!alphaMaskFilter) {
-            alphaMaskFilter = this.alphaMaskPool[this.alphaMaskIndex] = [new AlphaMaskFilter(mask_data)];
+            alphaMaskFilter = this.alpha_mask_pool[this.alpha_mask_index] = [new AlphaMaskFilter(mask_data)];
         }
 
         alphaMaskFilter[0].resolution = this.renderer.resolution;
@@ -100,7 +100,7 @@ export default class MaskManager extends WebGLManager {
         // @ts-ignore
         this.renderer.filter_manager.push_filter(target, alphaMaskFilter);
 
-        this.alphaMaskIndex++;
+        this.alpha_mask_index++;
     }
 
     /**
@@ -109,7 +109,7 @@ export default class MaskManager extends WebGLManager {
      */
     pop_sprite_mask() {
         this.renderer.filter_manager.pop_filter();
-        this.alphaMaskIndex--;
+        this.alpha_mask_index--;
     }
 
     /**
@@ -156,14 +156,14 @@ export default class MaskManager extends WebGLManager {
             bounds.height * resolution
         );
 
-        this.scissorRenderTarget = render_target;
-        this.scissorData = mask_data;
+        this.scissor_render_target = render_target;
+        this.scissor_data = mask_data;
         this.scissor = true;
     }
 
     pop_scissor_mask() {
-        this.scissorRenderTarget = null;
-        this.scissorData = null;
+        this.scissor_render_target = null;
+        this.scissor_data = null;
         this.scissor = false;
 
         // must be scissor!

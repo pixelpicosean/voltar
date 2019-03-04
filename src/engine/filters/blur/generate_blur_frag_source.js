@@ -7,45 +7,45 @@ const GAUSSIAN_VALUES = {
     15: [0.000489, 0.002403, 0.009246, 0.02784, 0.065602, 0.120999, 0.174697, 0.197448],
 };
 
-const fragTemplate = [
-    'varying vec2 vBlurTexCoords[%size%];',
-    'uniform sampler2D uSampler;',
+const frag_template = `
+    varying vec2 v_blur_tex_coords[%size%];
+    uniform sampler2D u_sampler;
 
-    'void main(void)',
-    '{',
-    '    gl_FragColor = vec4(0.0);',
-    '    %blur%',
-    '}',
+    void main(void) {
+        gl_FragColor = vec4(0.0);
+        %blur%
+    }
+`;
 
-].join('\n');
-
-export default function generate_frag_blur_source(kernelSize) {
-    const kernel = GAUSSIAN_VALUES[kernelSize];
+/**
+ * @param {number} kernel_size
+ */
+export default function generate_frag_blur_source(kernel_size) {
+    const kernel = GAUSSIAN_VALUES[kernel_size];
     const halfLength = kernel.length;
 
-    let fragSource = fragTemplate;
+    let frag_source = frag_template;
 
-    let blurLoop = '';
-    const template = 'gl_FragColor += texture2D(uSampler, vBlurTexCoords[%index%]) * %value%;';
+    let blur_loop = '';
+    const template = 'gl_FragColor += texture2D(u_sampler, v_blur_tex_coords[%index%]) * %value%;';
     let value;
-
-    for (let i = 0; i < kernelSize; i++) {
-        let blur = template.replace('%index%', i);
+    for (let i = 0; i < kernel_size; i++) {
+        let blur = template.replace('%index%', `${i}`);
 
         value = i;
 
         if (i >= halfLength) {
-            value = kernelSize - i - 1;
+            value = kernel_size - i - 1;
         }
 
         blur = blur.replace('%value%', kernel[value]);
 
-        blurLoop += blur;
-        blurLoop += '\n';
+        blur_loop += blur;
+        blur_loop += '\n';
     }
 
-    fragSource = fragSource.replace('%blur%', blurLoop);
-    fragSource = fragSource.replace('%size%', kernelSize);
+    frag_source = frag_source.replace('%blur%', blur_loop);
+    frag_source = frag_source.replace('%size%', `${kernel_size}`);
 
-    return fragSource;
+    return frag_source;
 }

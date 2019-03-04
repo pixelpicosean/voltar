@@ -3,24 +3,25 @@ import default_value from 'engine/drivers/webgl/shader/default_value';
 /**
  * @param {string} vertex_src
  * @param {string} fragment_src
- * @param {string} mask
  */
-export default function extract_uniforms_from_src(vertex_src, fragment_src, mask) {
-    const vert_uniforms = extract_uniforms_from_string(vertex_src, mask);
-    const frag_uniforms = extract_uniforms_from_string(fragment_src, mask);
+export default function extract_uniforms_from_src(vertex_src, fragment_src) {
+    const vert_uniforms = extract_uniforms_from_string(vertex_src);
+    const frag_uniforms = extract_uniforms_from_string(fragment_src);
 
     return Object.assign({}, vert_uniforms, frag_uniforms);
 }
 
 /**
  * @param {string} string
- * @param {string} mask
  */
-function extract_uniforms_from_string(string, mask) {
-    const mask_regex = new RegExp('^(projectionMatrix|uSampler|filter_area|filterClamp)$');
+function extract_uniforms_from_string(string) {
+    const mask_regex = new RegExp('^(projection_matrix|u_sampler|filter_area|filter_clamp)$');
 
+    /** @type {Object<string, { value: any, name: string, type: string }>} */
     const uniforms = {};
-    let name_split;
+
+    /** @type {string[]} */
+    let name_split = null;
 
     // clean the lines a little - remove extra spaces / tabs etc
     // then split along ';'

@@ -11,12 +11,12 @@ import RenderTarget from 'engine/renderers/utils/RenderTarget';
  */
 export default class BlurY extends Filter {
     /**
-     * @param {number} strength - The strength of the blur filter.
-     * @param {number} quality - The quality of the blur filter.
-     * @param {number} resolution - The resolution of the blur filter.
-     * @param {number} [kernel_size=5] - The kernelSize of the blur filter.Options: 5, 7, 9, 11, 13, 15.
+     * @param {number} [strength] - The strength of the blur filter.
+     * @param {number} [quality] - The quality of the blur filter.
+     * @param {number} [resolution] - The resolution of the blur filter.
+     * @param {number} [kernel_size] - The kernelSize of the blur filter.Options: 5, 7, 9, 11, 13, 15.
      */
-    constructor(strength, quality, resolution, kernel_size) {
+    constructor(strength = 8, quality = 4, resolution, kernel_size = 5) {
         kernel_size = kernel_size || 5;
         const vert_src = generate_blur_vert_source(kernel_size, false);
         const frag_src = generate_blur_frag_source(kernel_size);
@@ -32,8 +32,8 @@ export default class BlurY extends Filter {
 
         this._quality = 0;
 
-        this.quality = quality || 4;
-        this.strength = strength || 8;
+        this.quality = quality;
+        this.strength = strength;
 
         this.first_run = true;
     }
@@ -64,8 +64,7 @@ export default class BlurY extends Filter {
 
         if (this.passes === 1) {
             filter_manager.apply_filter(this, input, output, clear);
-        }
-        else {
+        } else {
             const render_target = filter_manager.get_render_rarget(true);
             let flip = input;
             let flop = render_target;
@@ -88,15 +87,13 @@ export default class BlurY extends Filter {
     /**
      * Sets the strength of both the blur.
      *
-     * @member {number}
+     * @type {number}
      * @default 2
      */
     get blur() {
         return this.strength;
     }
-
-    set blur(value) // eslint-disable-line require-jsdoc
-    {
+    set blur(value) {
         this.padding = Math.abs(value) * 2;
         this.strength = value;
     }
@@ -105,15 +102,13 @@ export default class BlurY extends Filter {
      * Sets the quality of the blur by modifying the number of passes. More passes means higher
      * quaility bluring but the lower the performance.
      *
-     * @member {number}
+     * @type {number}
      * @default 4
      */
     get quality() {
         return this._quality;
     }
-
-    set quality(value) // eslint-disable-line require-jsdoc
-    {
+    set quality(value) {
         this._quality = value;
         this.passes = value;
     }

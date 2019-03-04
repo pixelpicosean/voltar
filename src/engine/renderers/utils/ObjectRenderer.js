@@ -6,11 +6,8 @@ import WebGLManager from '../managers/WebGLManager';
 export default class ObjectRenderer extends WebGLManager {
     /**
      * Starts the renderer and sets the shader
-     *
      */
-    start() {
-        // set the shader..
-    }
+    start() { }
 
     /**
      * Stops the renderer
@@ -22,19 +19,13 @@ export default class ObjectRenderer extends WebGLManager {
 
     /**
      * Stub method for rendering content and emptying the current batch.
-     *
      */
-    flush() {
-        // flush!
-    }
+    flush() { }
 
     /**
      * Renders an object
      *
-     * @param {Node2D} object - The object to render.
+     * @param {import('../../scene/Node2D').default} node - The object to render.
      */
-    render(object) // eslint-disable-line no-unused-vars
-    {
-        // render the object
-    }
+    render(node) { }
 }
