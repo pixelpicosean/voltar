@@ -1,6 +1,7 @@
 import { Matrix } from 'engine/math/index';
 import { correct_blend_mode, premultiply_rgba } from 'engine/utils/index';
-import { GL } from 'engine/dep/index';
+import GLBuffer from 'engine/drivers/webgl/gl_buffer';
+import VertexArrayObject from 'engine/drivers/webgl/vao';
 import ObjectRenderer from 'engine/renderers/utils/ObjectRenderer';
 import WebGLRenderer from 'engine/renderers/WebGLRenderer';
 import Shader from 'engine/Shader';
@@ -58,9 +59,9 @@ export default class MeshRenderer extends ObjectRenderer {
 
             gl_data = {
                 shader: this.shader,
-                vertexBuffer: GL.GLBuffer.createVertexBuffer(gl, mesh.vertices, gl.STREAM_DRAW),
-                uvBuffer: GL.GLBuffer.createVertexBuffer(gl, mesh.uvs, gl.STREAM_DRAW),
-                index_buffer: GL.GLBuffer.createIndexBuffer(gl, mesh.indices, gl.STATIC_DRAW),
+                vertexBuffer: GLBuffer.createVertexBuffer(gl, mesh.vertices, gl.STREAM_DRAW),
+                uvBuffer: GLBuffer.createVertexBuffer(gl, mesh.uvs, gl.STREAM_DRAW),
+                index_buffer: GLBuffer.createIndexBuffer(gl, mesh.indices, gl.STATIC_DRAW),
                 // build the vao object that will render..
                 vao: null,
                 dirty: mesh.dirty,
@@ -69,7 +70,7 @@ export default class MeshRenderer extends ObjectRenderer {
             };
 
             // build the vao object that will render..
-            gl_data.vao = new GL.VertexArrayObject(gl)
+            gl_data.vao = new VertexArrayObject(gl)
                 .addIndex(gl_data.index_buffer)
                 .addAttribute(gl_data.vertexBuffer, gl_data.shader.attributes.aVertexPosition, gl.FLOAT, false, 2 * 4, 0)
                 .addAttribute(gl_data.uvBuffer, gl_data.shader.attributes.aTextureCoord, gl.FLOAT, false, 2 * 4, 0);

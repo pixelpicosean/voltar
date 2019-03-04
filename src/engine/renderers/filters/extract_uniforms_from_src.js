@@ -1,7 +1,10 @@
-import { GL } from 'engine/dep/index';
+import defaultValue from 'engine/drivers/webgl/shader/default_value';
 
-const defaultValue = GL.shader.defaultValue;
-
+/**
+ * @param {string} vertex_src
+ * @param {string} fragment_src
+ * @param {string} mask
+ */
 export default function extract_uniforms_from_src(vertex_src, fragment_src, mask) {
     const vert_uniforms = extract_uniforms_from_string(vertex_src, mask);
     const frag_uniforms = extract_uniforms_from_string(fragment_src, mask);
@@ -9,6 +12,10 @@ export default function extract_uniforms_from_src(vertex_src, fragment_src, mask
     return Object.assign({}, vert_uniforms, frag_uniforms);
 }
 
+/**
+ * @param {string} string
+ * @param {string} mask
+ */
 function extract_uniforms_from_string(string, mask) {
     const mask_regex = new RegExp('^(projectionMatrix|uSampler|filter_area|filterClamp)$');
 

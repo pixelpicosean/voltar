@@ -1,4 +1,6 @@
-import { GL } from 'engine/dep/index';
+import GLBuffer from 'engine/drivers/webgl/gl_buffer';
+import VertexArrayObject from 'engine/drivers/webgl/vao';
+
 import Shader from 'engine/Shader';
 
 /**
@@ -40,13 +42,13 @@ export default class WebGLGraphicsData {
          * The main buffer
          * @member {WebGLBuffer}
          */
-        this.buffer = GL.GLBuffer.createVertexBuffer(gl);
+        this.buffer = GLBuffer.createVertexBuffer(gl);
 
         /**
          * The index buffer
          * @member {WebGLBuffer}
          */
-        this.index_buffer = GL.GLBuffer.createIndexBuffer(gl);
+        this.index_buffer = GLBuffer.createIndexBuffer(gl);
 
         /**
          * Whether this graphics is dirty or not
@@ -69,7 +71,7 @@ export default class WebGLGraphicsData {
          */
         this.shader = shader;
 
-        this.vao = new GL.VertexArrayObject(gl, attribsState)
+        this.vao = new VertexArrayObject(gl, attribsState)
             .addIndex(this.index_buffer)
             .addAttribute(this.buffer, shader.attributes.aVertexPosition, gl.FLOAT, false, 4 * 6, 0)
             .addAttribute(this.buffer, shader.attributes.aColor, gl.FLOAT, false, 4 * 6, 2 * 4);

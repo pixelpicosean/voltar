@@ -1,5 +1,7 @@
-import { GL } from 'engine/dep/index';
-const { VertexArrayObject } = GL;
+import VertexArrayObject from 'engine/drivers/webgl/vao';
+import GLTexture from 'engine/drivers/webgl/gl_texture';
+import createContext from 'engine/drivers/webgl/create_context';
+
 import { plugin_target } from 'engine/utils/index';
 import { RENDERER_TYPE } from 'engine/const';
 import BaseTexture from 'engine/textures/BaseTexture';
@@ -42,7 +44,7 @@ export default class WebGLRenderer extends SystemRenderer {
         this.legacy = this.options.legacy;
 
         if (this.legacy) {
-            GL.VertexArrayObject.FORCE_NATIVE = true;
+            VertexArrayObject.FORCE_NATIVE = true;
         }
 
         /**
@@ -130,7 +132,7 @@ export default class WebGLRenderer extends SystemRenderer {
             validate_context(this.options.context);
         }
 
-        this.gl = this.options.context || GL.createContext(this.view, this._context_options);
+        this.gl = this.options.context || createContext(this.view, this._context_options);
 
         this.CONTEXT_UID = CONTEXT_UID++;
 
@@ -231,7 +233,7 @@ export default class WebGLRenderer extends SystemRenderer {
         this.bind_render_target(this.root_render_target);
 
         // now lets fill up the textures with empty ones!
-        const emptyGLTexture = GL.GLTexture.fromData(gl, null, 1, 1);
+        const emptyGLTexture = GLTexture.fromData(gl, null, 1, 1);
 
         const temp_obj = { _gl_textures: {} };
 
@@ -569,7 +571,7 @@ export default class WebGLRenderer extends SystemRenderer {
      * @return {VertexArrayObject} The new VAO.
      */
     createVao() {
-        return new GL.VertexArrayObject(this.gl, this.state.attribState);
+        return new VertexArrayObject(this.gl, this.state.attribState);
     }
 
     /**

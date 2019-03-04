@@ -1,8 +1,7 @@
 import { Rectangle, Matrix } from 'engine/math/index';
 import { SCALE_MODES } from 'engine/const';
 import settings from 'engine/settings';
-import { GL } from 'engine/dep/index';
-const { GLFramebuffer } = GL;
+import GLFramebuffer from 'engine/drivers/webgl/gl_frame_buffer';
 
 export default class RenderTarget {
     /**

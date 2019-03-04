@@ -1,6 +1,7 @@
 import Node2D from '../../Node2D';
 import create_indices_for_quads from 'engine/utils/create_indices_for_quads';
-import { GL } from 'engine/dep/index';
+import GLBuffer from 'engine/drivers/webgl/gl_buffer';
+import VertexArrayObject from 'engine/drivers/webgl/vao';
 
 /**
  * @author Mat Groves
@@ -104,7 +105,7 @@ export default class ParticleBuffer {
          * @member {Uint16Array}
          */
         this.indices = create_indices_for_quads(this.size);
-        this.index_buffer = GL.GLBuffer.createIndexBuffer(gl, this.indices, gl.STATIC_DRAW);
+        this.index_buffer = GLBuffer.createIndexBuffer(gl, this.indices, gl.STATIC_DRAW);
 
         this.dynamicStride = 0;
 
@@ -120,7 +121,7 @@ export default class ParticleBuffer {
 
         this.dynamicData = new Float32Array(dynBuffer);
         this.dynamicDataUint32 = new Uint32Array(dynBuffer);
-        this.dynamicBuffer = GL.GLBuffer.createVertexBuffer(gl, dynBuffer, gl.STREAM_DRAW);
+        this.dynamicBuffer = GLBuffer.createVertexBuffer(gl, dynBuffer, gl.STREAM_DRAW);
 
         // static //
         let staticOffset = 0;
@@ -139,9 +140,9 @@ export default class ParticleBuffer {
 
         this.staticData = new Float32Array(statBuffer);
         this.staticDataUint32 = new Uint32Array(statBuffer);
-        this.staticBuffer = GL.GLBuffer.createVertexBuffer(gl, statBuffer, gl.STATIC_DRAW);
+        this.staticBuffer = GLBuffer.createVertexBuffer(gl, statBuffer, gl.STATIC_DRAW);
 
-        this.vao = new GL.VertexArrayObject(gl)
+        this.vao = new VertexArrayObject(gl)
             .addIndex(this.index_buffer);
 
         for (let i = 0; i < this.dynamicProperties.length; ++i) {

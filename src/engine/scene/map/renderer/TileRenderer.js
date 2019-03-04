@@ -4,8 +4,7 @@ import RenderTexture from 'engine/textures/RenderTexture';
 import Sprite from '../../sprites/Sprite';
 import { WRAP_MODES, BLEND_MODES } from 'engine/const';
 
-import { GL } from 'engine/dep/index';
-const { GLBuffer } = GL;
+import GLBuffer from 'engine/drivers/webgl/gl_buffer';
 
 import RectTileShader from './RectTileShader';
 

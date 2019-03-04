@@ -1,4 +1,4 @@
-import { GL } from 'engine/dep/index';
+import createContext from 'engine/drivers/webgl/create_context';
 
 const frag_template = [
     'precision mediump float;',
@@ -24,7 +24,7 @@ export default function check_max_if_statments_in_shader(max_ifs, gl) {
         tiny_canvas.width = 1;
         tiny_canvas.height = 1;
 
-        gl = GL.createContext(tiny_canvas);
+        gl = createContext(tiny_canvas);
     }
 
     const shader = gl.createShader(gl.FRAGMENT_SHADER);

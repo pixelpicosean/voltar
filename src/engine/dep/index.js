@@ -6,6 +6,3 @@ export { default as VObject } from '../core/VObject';
 
 import * as device_ns from 'ismobilejs';
 export const device = device_ns;
-
-import * as GL_ns from 'pixi-gl-core';
-export const GL = GL_ns;

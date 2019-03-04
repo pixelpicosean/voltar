@@ -1,6 +1,6 @@
 import { WRAP_MODES, SCALE_MODES } from 'engine/const';
-import { GL, remove_items } from 'engine/dep/index';
-const { GLTexture } = GL;
+import { remove_items } from 'engine/dep/index';
+import GLTexture from 'engine/drivers/webgl/gl_texture';
 import RenderTarget from './utils/RenderTarget';
 import WebGLRenderer from './WebGLRenderer';
 import BaseTexture from 'engine/textures/BaseTexture';

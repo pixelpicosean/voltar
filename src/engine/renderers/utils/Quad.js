@@ -1,5 +1,6 @@
-import { GL } from 'engine/dep/index';
-const { GLBuffer, VertexArrayObject } = GL;
+import GLBuffer from 'engine/drivers/webgl/gl_buffer'
+import VertexArrayObject from 'engine/drivers/webgl/vao'
+
 import create_indices_for_quads from 'engine/utils/create_indices_for_quads';
 import Shader from 'engine/Shader';
 import { Rectangle } from 'engine/math/index';
