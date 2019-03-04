@@ -197,7 +197,8 @@ export default class BaseTexture extends VObject {
         this._gl_render_targets = null;
 
         this._enabled = 0;
-        this._virtalBoundId = -1;
+
+        this._virtal_bound_id = -1;
 
         /**
          * If the object has been destroyed via destroy(). If true, it should not be used.

@@ -4,7 +4,7 @@ export function fill_samplers(shader, max_textures) {
         sample_values[i] = i;
     }
     shader.bind();
-    shader.uniforms.uSamplers = sample_values;
+    shader.uniforms.u_samplers = sample_values;
 
     var sampler_size = [];
     for (i = 0; i < max_textures; i++) {
@@ -25,7 +25,7 @@ export function generate_sample_src(max_textures) {
     src += '\n';
     src += '\n';
 
-    src += 'if(vTextureId <= -1.0) {';
+    src += 'if(v_texture_id <= -1.0) {';
     src += '\n\tcolor = vec4(0.0, 0.0, 0.0, 0.5);';
     src += '\n}';
 
@@ -37,7 +37,7 @@ export function generate_sample_src(max_textures) {
         }
 
         src += '\n{';
-        src += '\n\tcolor = texture2D(uSamplers[' + i + '], textureCoord * uSamplerSize[' + i + ']);';
+        src += '\n\tcolor = texture2D(u_samplers[' + i + '], textureCoord * uSamplerSize[' + i + ']);';
         src += '\n}';
     }
 

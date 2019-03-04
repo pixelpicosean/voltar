@@ -111,7 +111,7 @@ export default class TileRenderer extends ObjectRenderer {
             //remove "i, true" after resolving a bug
             this.tex_loc.push(renderer.bind_texture(glts[i], i, true))
         }
-        shader.uniforms.uSamplers = this.tex_loc;
+        shader.uniforms.u_samplers = this.tex_loc;
     }
 
     check_leaks() {

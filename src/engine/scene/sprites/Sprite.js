@@ -4,7 +4,6 @@ import { sign, TextureCache } from 'engine/utils/index';
 import WebGLRenderer from 'engine/renderers/WebGLRenderer';
 
 import Texture from 'engine/textures/Texture';
-import BaseTexture from 'engine/textures/BaseTexture';
 
 import Node2D from '../Node2D';
 
@@ -118,11 +117,10 @@ export default class Sprite extends Node2D {
                 this.texture = Texture.EMPTY;
             } else {
                 this.texture = texture;
-            }
-            // @ts-ignore
-            if (texture.default_anchor) {
-                // @ts-ignore
-                this._anchor.set(texture.default_anchor.x, texture.default_anchor.y);
+
+                if (texture.default_anchor) {
+                    this._anchor.set(texture.default_anchor.x, texture.default_anchor.y);
+                }
             }
         } else {
             this.texture = Texture.EMPTY;
@@ -152,10 +150,7 @@ export default class Sprite extends Node2D {
 
         /**
          * Plugin that is responsible for rendering this element.
-         * Allows to customize the rendering process without overriding '_render_webgl' & '_render_canvas' methods.
-         *
-         * @type {string}
-         * @default 'sprite'
+         * Allows to customize the rendering process without overriding '_render_webgl'.
          */
         this.renderer_plugin = 'sprite';
     }
@@ -302,8 +297,7 @@ export default class Sprite extends Node2D {
     calculate_trimmed_vertices() {
         if (!this.vertex_trimmed_data) {
             this.vertex_trimmed_data = new Float32Array(8);
-        }
-        else if (this._transform_trimmed_id === this.transform._world_id && this._texture_trimmed_id === this._texture._update_id) {
+        } else if (this._transform_trimmed_id === this.transform._world_id && this._texture_trimmed_id === this._texture._update_id) {
             return;
         }
 
@@ -377,8 +371,7 @@ export default class Sprite extends Node2D {
             // no trim! lets use the usual calculations..
             this.calculate_vertices();
             this._bounds.add_quad(this.vertex_data);
-        }
-        else {
+        } else {
             // lets calculate a special trimmed bounds...
             this.calculate_trimmed_vertices();
             this._bounds.add_quad(this.vertex_trimmed_data);
@@ -389,7 +382,6 @@ export default class Sprite extends Node2D {
      * Gets the local bounds of the sprite object.
      *
      * @param {Rectangle} rect - The output rectangle.
-     * @return {Rectangle} The bounds.
      */
     get_local_bounds(rect) {
         // we can do a fast local bounds if the sprite has no children!
@@ -417,7 +409,6 @@ export default class Sprite extends Node2D {
      * Tests if a point is inside this sprite
      *
      * @param {Vector2} point - the point to test
-     * @return {boolean} the result of the test
      */
     contains_point(point) {
         this.world_transform.xform_inv(point, temp_point);
@@ -574,6 +565,15 @@ export default class Sprite extends Node2D {
      * @type {Texture}
      */
     set texture(p_value) {
+        this.set_texture(p_value);
+    }
+    get texture() {
+        return this._texture;
+    }
+    /**
+     * @param {string|Texture} p_value
+     */
+    set_texture(p_value) {
         if (this._texture === p_value) {
             return;
         }
@@ -604,16 +604,7 @@ export default class Sprite extends Node2D {
         } else {
             value.connect_once('update', this._on_texture_update, this);
         }
-    }
-    get texture() {
-        return this._texture;
-    }
-    /**
-     * @param {string|Texture} value
-     */
-    set_texture(value) {
-        // @ts-ignore
-        this.texture = value;
+
         return this;
     }
 }
