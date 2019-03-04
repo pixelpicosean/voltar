@@ -1,4 +1,4 @@
-import { remove_items } from "./index";
+import { remove_items } from "engine/dep/index";
 
 /**
  * Representation of a single event listener.
