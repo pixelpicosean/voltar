@@ -10,7 +10,7 @@ export default class GLTexture {
      * @param [format] {number} the pixel format of the texture. defaults to gl.RGBA
      * @param [type] {number} the gl type of the texture. defaults to gl.UNSIGNED_BYTE
      */
-    constructor(gl, width = -1, height = -1, format = gl.RGBA, type = gl.UNSIGNED_BYTE) {
+    constructor(gl, width = -1, height = -1, format = undefined, type = undefined) {
         /**
          * The current WebGL rendering context
          *
@@ -60,14 +60,14 @@ export default class GLTexture {
          *
          * @member {number}
          */
-        this.format = format;
+        this.format = format || gl.RGBA;
 
         /**
          * The gl type of the texture. defaults to gl.UNSIGNED_BYTE
          *
          * @member {number}
          */
-        this.type = type;
+        this.type = type || gl.UNSIGNED_BYTE;
     }
 
     /**
