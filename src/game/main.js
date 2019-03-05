@@ -2,7 +2,6 @@
 import * as v from 'engine/index';
 
 // Import features you want to use
-/* import 'engine/accessibility/enable'; */
 import 'engine/interaction/enable';
 /* import 'engine/extract/enable'; */
 import 'engine/scene/graphics/enable';
@@ -32,7 +31,7 @@ v.scene_tree.init(
     v.utils.deep_merge(Settings, {
         application: {
             preloader: Preloader,
-            main_scene: 'res://scene/Demo.tscn',
+            main_scene: Main,
         },
         display: {
             scale_mode: 'nearest',

@@ -634,7 +634,7 @@ export default class WebGLRenderer extends SystemRenderer {
 
     /**
      * @param {string} key
-     * @param {FunctionConstructor} plugin
+     * @param {any} plugin
      */
     static register_plugin(key, plugin) { }
 }
