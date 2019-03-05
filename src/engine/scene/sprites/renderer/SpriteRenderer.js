@@ -12,8 +12,8 @@ import Shader from 'engine/Shader';
 import VertexArrayObject from 'engine/drivers/webgl/vao';
 import BaseTexture from 'engine/textures/BaseTexture';
 
-let TICK = 0;
-let TEXTURE_TICK = 0;
+let tick = 0;
+let texture_tick = 0;
 
 /**
  * @typedef Group
@@ -228,24 +228,24 @@ export default class SpriteRenderer extends ObjectRenderer {
         current_group.start = 0;
         current_group.blend = blend_mode;
 
-        TICK++;
+        tick++;
 
         let i = 0;
 
         // copy textures..
         for (i = 0; i < MAX_TEXTURES; ++i) {
-            const bt = renderer_bound_textures[i];
+            const bound_texture = renderer_bound_textures[i];
 
-            if (bt._enabled === TICK) {
+            if (bound_texture._enabled === tick) {
                 bound_textures[i] = this.renderer.empty_textures[i];
                 continue;
             }
 
-            bound_textures[i] = bt;
-            bt._virtal_bound_id = i;
-            bt._enabled = TICK;
+            bound_textures[i] = bound_texture;
+            bound_texture._virtal_bound_id = i;
+            bound_texture._enabled = tick;
         }
-        TICK++;
+        tick++;
 
         for (i = 0; i < this.current_index; ++i) {
             // upload the sprite elemetns...
@@ -265,15 +265,15 @@ export default class SpriteRenderer extends ObjectRenderer {
                 // force the batch to break!
                 current_texture = null;
                 texture_count = MAX_TEXTURES;
-                TICK++;
+                tick++;
             }
 
             if (current_texture !== next_texture) {
                 current_texture = next_texture;
 
-                if (next_texture._enabled !== TICK) {
+                if (next_texture._enabled !== tick) {
                     if (texture_count === MAX_TEXTURES) {
-                        TICK++;
+                        tick++;
 
                         current_group.size = i - current_group.start;
 
@@ -289,24 +289,24 @@ export default class SpriteRenderer extends ObjectRenderer {
 
                     if (next_texture._virtal_bound_id === -1) {
                         for (let j = 0; j < MAX_TEXTURES; ++j) {
-                            const t_index = (j + TEXTURE_TICK) % MAX_TEXTURES;
+                            const tex_index = (j + texture_tick) % MAX_TEXTURES;
 
-                            const t = bound_textures[t_index];
+                            const tex = bound_textures[tex_index];
 
-                            if (t._enabled !== TICK) {
-                                TEXTURE_TICK++;
+                            if (tex._enabled !== tick) {
+                                texture_tick++;
 
-                                t._virtal_bound_id = -1;
+                                tex._virtal_bound_id = -1;
 
-                                next_texture._virtal_bound_id = t_index;
+                                next_texture._virtal_bound_id = tex_index;
 
-                                bound_textures[t_index] = next_texture;
+                                bound_textures[tex_index] = next_texture;
                                 break;
                             }
                         }
                     }
 
-                    next_texture._enabled = TICK;
+                    next_texture._enabled = tick;
 
                     current_group.texture_count++;
                     current_group.ids[texture_count] = next_texture._virtal_bound_id;
@@ -316,58 +316,62 @@ export default class SpriteRenderer extends ObjectRenderer {
 
             vertex_data = sprite.vertex_data;
 
-            // TODO this sum does not need to be set each frame..
+            // TODO: this sum does not need to be set each frame...
             uvs = sprite._texture._uvs.uvs_uint32;
 
             if (this.renderer.pixel_snap) {
                 const resolution = this.renderer.resolution;
 
-                // xy
-                float32_view[index] = ((vertex_data[0] * resolution) | 0) / resolution;
-                float32_view[index + 1] = ((vertex_data[1] * resolution) | 0) / resolution;
+                // [write] vertex_position
+                float32_view[index +  0] = ((vertex_data[0] * resolution) | 0) / resolution;
+                float32_view[index +  1] = ((vertex_data[1] * resolution) | 0) / resolution;
 
-                // xy
-                float32_view[index + 6] = ((vertex_data[2] * resolution) | 0) / resolution;
-                float32_view[index + 7] = ((vertex_data[3] * resolution) | 0) / resolution;
+                // [write] vertex_position
+                float32_view[index +  6] = ((vertex_data[2] * resolution) | 0) / resolution;
+                float32_view[index +  7] = ((vertex_data[3] * resolution) | 0) / resolution;
 
-                // xy
+                // [write] vertex_position
                 float32_view[index + 12] = ((vertex_data[4] * resolution) | 0) / resolution;
                 float32_view[index + 13] = ((vertex_data[5] * resolution) | 0) / resolution;
 
-                // xy
+                // [write] vertex_position
                 float32_view[index + 18] = ((vertex_data[6] * resolution) | 0) / resolution;
                 float32_view[index + 19] = ((vertex_data[7] * resolution) | 0) / resolution;
             } else {
-                // xy
-                float32_view[index] = vertex_data[0];
-                float32_view[index + 1] = vertex_data[1];
+                // [write] vertex_position
+                float32_view[index +  0] = vertex_data[0];
+                float32_view[index +  1] = vertex_data[1];
 
-                // xy
-                float32_view[index + 6] = vertex_data[2];
-                float32_view[index + 7] = vertex_data[3];
+                // [write] vertex_position
+                float32_view[index +  6] = vertex_data[2];
+                float32_view[index +  7] = vertex_data[3];
 
-                // xy
+                // [write] vertex_position
                 float32_view[index + 12] = vertex_data[4];
                 float32_view[index + 13] = vertex_data[5];
 
-                // xy
+                // [write] vertex_position
                 float32_view[index + 18] = vertex_data[6];
                 float32_view[index + 19] = vertex_data[7];
             }
 
-            uint32_view[index + 2] = uvs[0];
-            uint32_view[index + 8] = uvs[1];
+            // [write] texture_coord
+            uint32_view[index +  2] = uvs[0];
+            uint32_view[index +  8] = uvs[1];
             uint32_view[index + 14] = uvs[2];
             uint32_view[index + 20] = uvs[3];
 
-            const alpha = Math.min(sprite.world_alpha, 1.0);
             // we dont call extra function if alpha is 1.0, that's faster
+            const alpha = Math.min(sprite.world_alpha, 1.0);
             const argb = alpha < 1.0 && next_texture.premultiplied_alpha ?
                 premultiply_tint(sprite._tint_rgb, alpha) :
                 sprite._tint_rgb + (alpha * 255 << 24);
 
+            // [write] color
             uint32_view[index + 3] = uint32_view[index + 9] = uint32_view[index + 15] = uint32_view[index + 21] = argb;
+            // [write] color_mode
             float32_view[index + 4] = float32_view[index + 10] = float32_view[index + 16] = float32_view[index + 22] = sprite.color_mode;
+            // [write] texture_id
             float32_view[index + 5] = float32_view[index + 11] = float32_view[index + 17] = float32_view[index + 23] = next_texture._virtal_bound_id;
 
             index += this.vert_byte_size;
@@ -376,8 +380,7 @@ export default class SpriteRenderer extends ObjectRenderer {
         current_group.size = i - current_group.start;
 
         if (!settings.CAN_UPLOAD_SAME_BUFFER) {
-            // this is still needed for IOS performance..
-            // it really does not like uploading to the same buffer in a single frame!
+            // iOS does not like uploading to the same buffer in a single frame.
             if (this.vao_max <= this.vertex_count) {
                 this.vao_max++;
 
@@ -385,7 +388,7 @@ export default class SpriteRenderer extends ObjectRenderer {
 
                 const vertexBuffer = this.vertex_buffers[this.vertex_count] = GLBuffer.create_vertex_buffer(gl, null, gl.STREAM_DRAW);
 
-                // build the vao object that will render..
+                // Build the vao object that will render
                 const vao = this.renderer.create_vao()
                     .add_index(this.index_buffer)
                     .add_attribute(vertexBuffer, attrs.a_vertex_position, gl.FLOAT, false, this.vert_byte_size, 0)
@@ -406,7 +409,7 @@ export default class SpriteRenderer extends ObjectRenderer {
 
             this.vertex_count++;
         } else {
-            // lets use the faster option, always use buffer number 0
+            // Lets use the faster option, always use buffer number 0
             this.vertex_buffers[this.vertex_count].upload(buffer.vertices, 0, true);
         }
 
@@ -414,7 +417,7 @@ export default class SpriteRenderer extends ObjectRenderer {
             renderer_bound_textures[i]._virtal_bound_id = -1;
         }
 
-        // render the groups..
+        // Render the groups
         for (i = 0; i < group_count; ++i) {
             const group = groups[i];
             const groupTextureCount = group.texture_count;
@@ -422,23 +425,23 @@ export default class SpriteRenderer extends ObjectRenderer {
             for (let j = 0; j < groupTextureCount; j++) {
                 current_texture = group.textures[j];
 
-                // reset virtual ids..
-                // lets do a quick check..
+                // Reset virtual ids
+                // Lets do a quick check
                 if (renderer_bound_textures[group.ids[j]] !== current_texture) {
                     this.renderer.bind_texture(current_texture, group.ids[j], true);
                 }
 
-                // reset the virtualId..
+                // Reset the virtual_id
                 current_texture._virtal_bound_id = -1;
             }
 
-            // set the blend mode..
+            // Set the blend mode
             this.renderer.state.set_blend_mode(group.blend);
 
             gl.drawElements(gl.TRIANGLES, group.size * 6, gl.UNSIGNED_SHORT, group.start * 6 * 2);
         }
 
-        // reset elements for the next flush
+        // Reset elements for the next flush
         this.current_index = 0;
     }
 
