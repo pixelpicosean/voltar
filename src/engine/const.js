@@ -18,6 +18,16 @@ export const RENDERER_TYPE = {
 };
 
 /**
+ * Color modes for sprite rendering
+ *
+ * @enum {number}
+ */
+export const COLOR_MODES = {
+    MULTIPLY: 0,
+    FILL: 1,
+}
+
+/**
  * Various blend modes supported by
  *
  * IMPORTANT - The WebGL renderer only supports the NORMAL, ADD, MULTIPLY and SCREEN blend modes.

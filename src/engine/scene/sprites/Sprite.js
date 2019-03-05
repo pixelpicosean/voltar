@@ -1,4 +1,4 @@
-import { BLEND_MODES } from 'engine/const';
+import { BLEND_MODES, COLOR_MODES } from 'engine/const';
 import { Vector2, ObservableVector2, Rectangle } from 'engine/math/index';
 import { sign, TextureCache } from 'engine/utils/index';
 import WebGLRenderer from 'engine/renderers/WebGLRenderer';
@@ -86,11 +86,18 @@ export default class Sprite extends Node2D {
         this.tint = 0xFFFFFF;
 
         /**
+         * How to apply color: fill or additive (inspired by Phaser3):
+         * - MULTIPLY: texture color multiply modulate/self_modulate
+         * - FILL: opaque texture color filled by modulate/self_modulate (useful for flash effects)
+         * @type {COLOR_MODES}
+         */
+        this.color_mode = COLOR_MODES.MULTIPLY;
+
+        /**
          * The blend mode to be applied to the sprite. Apply a value of `BLEND_MODES.NORMAL` to reset the blend mode.
          *
-         * @type {number}
+         * @type {BLEND_MODES}
          * @default BLEND_MODES.NORMAL
-         * @see BLEND_MODES
          */
         this.blend_mode = BLEND_MODES.NORMAL;
 

@@ -3,16 +3,24 @@ import Shader from 'engine/Shader';
 import vertex_src from './texture.vert';
 
 const frag_template = `
+    uniform sampler2D u_samplers[%count%];
+
     varying vec2 v_texture_coord;
     varying vec4 v_color;
+    varying float v_color_mode;
     varying float v_texture_id;
-    uniform sampler2D u_samplers[%count%];
 
     void main(void) {
         vec4 color;
-        float textureId = floor(v_texture_id+0.5);
+        float texture_id = floor(v_texture_id + 0.5);
         %forloop%
-        gl_FragColor = color * v_color;
+        if (v_color_mode == 0.0) {
+            // multiply texture and color
+            gl_FragColor = color * v_color;
+        } else {
+            // solid color + texture alpha
+            gl_FragColor = vec4(v_color.rgb, v_color.a * color.a);
+        }
     }
 `
 
@@ -56,7 +64,7 @@ function generate_sample_src(max_textures) {
         }
 
         if (i < max_textures - 1) {
-            src += `if (textureId == ${i}.0)`;
+            src += `if (texture_id == ${i}.0)`;
         }
 
         src += '\n{';

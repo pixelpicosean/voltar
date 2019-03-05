@@ -39,7 +39,7 @@ export default class SpriteRenderer extends ObjectRenderer {
          * Number of values sent in the vertex buffer.
          * a_vertex_position(2), a_texture_coord(1), a_color(1), a_texture_id(1) = 5
          */
-        this.vert_size = 5;
+        this.vert_size = 6;
 
         /**
          * The size of the vertex information in bytes.
@@ -136,10 +136,11 @@ export default class SpriteRenderer extends ObjectRenderer {
                 .add_index(this.index_buffer)
                 .add_attribute(vertex_buffer, attrs.a_vertex_position, gl.FLOAT, false, this.vert_byte_size, 0)
                 .add_attribute(vertex_buffer, attrs.a_texture_coord, gl.UNSIGNED_SHORT, true, this.vert_byte_size, 2 * 4)
-                .add_attribute(vertex_buffer, attrs.a_color, gl.UNSIGNED_BYTE, true, this.vert_byte_size, 3 * 4);
+                .add_attribute(vertex_buffer, attrs.a_color, gl.UNSIGNED_BYTE, true, this.vert_byte_size, 3 * 4)
+                .add_attribute(vertex_buffer, attrs.a_color_mode, gl.FLOAT, false, this.vert_byte_size, 4 * 4)
 
             if (attrs.a_texture_id) {
-                vao.add_attribute(vertex_buffer, attrs.a_texture_id, gl.FLOAT, false, this.vert_byte_size, 4 * 4);
+                vao.add_attribute(vertex_buffer, attrs.a_texture_id, gl.FLOAT, false, this.vert_byte_size, 5 * 4);
             }
 
             this.vaos[i] = vao;
@@ -326,38 +327,38 @@ export default class SpriteRenderer extends ObjectRenderer {
                 float32_view[index + 1] = ((vertex_data[1] * resolution) | 0) / resolution;
 
                 // xy
-                float32_view[index + 5] = ((vertex_data[2] * resolution) | 0) / resolution;
-                float32_view[index + 6] = ((vertex_data[3] * resolution) | 0) / resolution;
+                float32_view[index + 6] = ((vertex_data[2] * resolution) | 0) / resolution;
+                float32_view[index + 7] = ((vertex_data[3] * resolution) | 0) / resolution;
 
                 // xy
-                float32_view[index + 10] = ((vertex_data[4] * resolution) | 0) / resolution;
-                float32_view[index + 11] = ((vertex_data[5] * resolution) | 0) / resolution;
+                float32_view[index + 12] = ((vertex_data[4] * resolution) | 0) / resolution;
+                float32_view[index + 13] = ((vertex_data[5] * resolution) | 0) / resolution;
 
                 // xy
-                float32_view[index + 15] = ((vertex_data[6] * resolution) | 0) / resolution;
-                float32_view[index + 16] = ((vertex_data[7] * resolution) | 0) / resolution;
+                float32_view[index + 18] = ((vertex_data[6] * resolution) | 0) / resolution;
+                float32_view[index + 19] = ((vertex_data[7] * resolution) | 0) / resolution;
             } else {
                 // xy
                 float32_view[index] = vertex_data[0];
                 float32_view[index + 1] = vertex_data[1];
 
                 // xy
-                float32_view[index + 5] = vertex_data[2];
-                float32_view[index + 6] = vertex_data[3];
+                float32_view[index + 6] = vertex_data[2];
+                float32_view[index + 7] = vertex_data[3];
 
                 // xy
-                float32_view[index + 10] = vertex_data[4];
-                float32_view[index + 11] = vertex_data[5];
+                float32_view[index + 12] = vertex_data[4];
+                float32_view[index + 13] = vertex_data[5];
 
                 // xy
-                float32_view[index + 15] = vertex_data[6];
-                float32_view[index + 16] = vertex_data[7];
+                float32_view[index + 18] = vertex_data[6];
+                float32_view[index + 19] = vertex_data[7];
             }
 
             uint32_view[index + 2] = uvs[0];
-            uint32_view[index + 7] = uvs[1];
-            uint32_view[index + 12] = uvs[2];
-            uint32_view[index + 17] = uvs[3];
+            uint32_view[index + 8] = uvs[1];
+            uint32_view[index + 14] = uvs[2];
+            uint32_view[index + 20] = uvs[3];
 
             const alpha = Math.min(sprite.world_alpha, 1.0);
             // we dont call extra function if alpha is 1.0, that's faster
@@ -365,10 +366,11 @@ export default class SpriteRenderer extends ObjectRenderer {
                 premultiply_tint(sprite._tint_rgb, alpha) :
                 sprite._tint_rgb + (alpha * 255 << 24);
 
-            uint32_view[index + 3] = uint32_view[index + 8] = uint32_view[index + 13] = uint32_view[index + 18] = argb;
-            float32_view[index + 4] = float32_view[index + 9] = float32_view[index + 14] = float32_view[index + 19] = next_texture._virtal_bound_id;
+            uint32_view[index + 3] = uint32_view[index + 9] = uint32_view[index + 15] = uint32_view[index + 21] = argb;
+            float32_view[index + 4] = float32_view[index + 10] = float32_view[index + 16] = float32_view[index + 22] = sprite.color_mode;
+            float32_view[index + 5] = float32_view[index + 11] = float32_view[index + 17] = float32_view[index + 23] = next_texture._virtal_bound_id;
 
-            index += 20;
+            index += this.vert_byte_size;
         }
 
         current_group.size = i - current_group.start;
@@ -388,10 +390,11 @@ export default class SpriteRenderer extends ObjectRenderer {
                     .add_index(this.index_buffer)
                     .add_attribute(vertexBuffer, attrs.a_vertex_position, gl.FLOAT, false, this.vert_byte_size, 0)
                     .add_attribute(vertexBuffer, attrs.a_texture_coord, gl.UNSIGNED_SHORT, true, this.vert_byte_size, 2 * 4)
-                    .add_attribute(vertexBuffer, attrs.a_color, gl.UNSIGNED_BYTE, true, this.vert_byte_size, 3 * 4);
+                    .add_attribute(vertexBuffer, attrs.a_color, gl.UNSIGNED_BYTE, true, this.vert_byte_size, 3 * 4)
+                    .add_attribute(vertexBuffer, attrs.a_color_mode, gl.FLOAT, false, this.vert_byte_size, 4 * 4)
 
                 if (attrs.a_texture_id) {
-                    vao.add_attribute(vertexBuffer, attrs.a_texture_id, gl.FLOAT, false, this.vert_byte_size, 4 * 4);
+                    vao.add_attribute(vertexBuffer, attrs.a_texture_id, gl.FLOAT, false, this.vert_byte_size, 5 * 4);
                 }
 
                 this.vaos[this.vertex_count] = vao;
