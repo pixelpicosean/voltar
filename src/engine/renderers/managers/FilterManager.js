@@ -428,7 +428,7 @@ export default class FilterManager extends WebGLManager {
      *
      * @param {Matrix} output_matrix - the matrix to output to.
      */
-    calculateScreenSpaceMatrix(output_matrix) {
+    calculate_screen_space_matrix(output_matrix) {
         const current_state = this.filter_data.stack[this.filter_data.index];
 
         return filter_transforms.calculate_screen_space_matrix(
@@ -490,7 +490,7 @@ export default class FilterManager extends WebGLManager {
 
         this.shader_cache = {};
         if (!context_lost) {
-            this.emptyPool();
+            this.empty_pool();
         } else {
             this.pool = {};
         }
@@ -515,8 +515,11 @@ export default class FilterManager extends WebGLManager {
         min_width *= resolution;
         min_height *= resolution;
 
-        if (min_width !== this._screen_width
-            || min_height !== this._screen_height) {
+        if (
+            min_width !== this._screen_width
+            ||
+            min_height !== this._screen_height
+        ) {
             // TODO you could return a bigger texture if there is not one in the pool?
             min_width = nearest_po2(min_width * resolution);
             min_height = nearest_po2(min_height * resolution);
@@ -557,7 +560,7 @@ export default class FilterManager extends WebGLManager {
      * Empties the texture pool.
      *
      */
-    emptyPool() {
+    empty_pool() {
         for (const i in this.pool) {
             const textures = this.pool[i];
 

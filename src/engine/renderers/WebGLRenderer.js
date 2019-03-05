@@ -94,6 +94,8 @@ export default class WebGLRenderer extends SystemRenderer {
          */
         this.current_renderer = this.empty_renderer;
 
+        this.current_projection_matrix = new Matrix();
+
         /**
          * Manages textures
          *
@@ -355,8 +357,9 @@ export default class WebGLRenderer extends SystemRenderer {
      *
      * @param {Matrix} matrix - The transformation matrix
      */
-    set_transform(matrix) {
-        this._active_render_target.transform = matrix;
+    set_projection_matrix(matrix) {
+        this.current_projection_matrix.copy(matrix);
+        this.bind_render_target(this._active_render_target);
     }
 
     /**
@@ -418,6 +421,11 @@ export default class WebGLRenderer extends SystemRenderer {
         if (render_target !== this._active_render_target) {
             this._active_render_target = render_target;
             render_target.activate();
+        }
+
+        if (this._active_render_target === this.root_render_target) {
+            this.root_render_target.calculate_projection(this.root_render_target.size);
+            this.root_render_target.projection_matrix.append(this.current_projection_matrix);
         }
 
         if (this._active_shader) {

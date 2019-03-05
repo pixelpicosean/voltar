@@ -110,7 +110,7 @@ export default class CanvasLayer extends Node2D {
         renderer.current_renderer.flush();
 
         // Apply canvas transform
-        renderer.bind_render_texture(undefined, this.custom_transform.local_transform);
+        renderer.set_projection_matrix(this.custom_transform.local_transform);
 
         // Render children with the new transform
         for (let c of this.children) {
@@ -121,7 +121,7 @@ export default class CanvasLayer extends Node2D {
         renderer.current_renderer.flush();
 
         // Revert render transform
-        renderer.bind_render_texture(undefined, this.scene_tree.viewport.canvas_transform);
+        renderer.set_projection_matrix(this.scene_tree.viewport.canvas_transform);
     }
 }
 
