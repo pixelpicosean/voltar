@@ -2,7 +2,7 @@
  * @param gl {WebGLRenderingContext} The current WebGL context {WebGLProgram}
  * @param vertex_src {string} The vertex shader source as string.
  * @param fragment_src {string} The fragment shader source as string.
- * @param attribute_locations {{ [key:string]: number }} An attribute location map that lets you manually set the attribute locations
+ * @param [attribute_locations] {Object<string, number>} An attribute location map that lets you manually set the attribute locations
  */
 export default function compile_program(gl, vertex_src, fragment_src, attribute_locations) {
     var gl_vert_shader = compile_shader(gl, gl.VERTEX_SHADER, vertex_src);

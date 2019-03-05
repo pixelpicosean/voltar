@@ -1,15 +1,20 @@
 import { WRAP_MODES } from 'engine/const';
+
+import WebGLRenderer from 'engine/renderers/WebGLRenderer';
+import ObjectRenderer from 'engine/renderers/utils/ObjectRenderer';
+
+import GLShader from 'engine/drivers/webgl/gl_shader';
+
+import Quad from 'engine/renderers/utils/Quad';
+
 import { Matrix } from 'engine/math/index';
 import { premultiply_tint_to_rgba, correct_blend_mode } from 'engine/utils/index';
-import ObjectRenderer from 'engine/renderers/utils/ObjectRenderer';
-import WebGLRenderer from 'engine/renderers/WebGLRenderer';
-import Shader from 'engine/Shader';
-import Quad from 'engine/renderers/utils/Quad';
+
+import TilingSprite from '../TilingSprite';
 
 import Vert from './tiling_sprite.vert';
 import Frag from './tiling_sprite.frag';
 import SimpleFrag from './tiling_sprite_simple.frag';
-import TilingSprite from '../TilingSprite';
 
 const temp_mat = new Matrix();
 
@@ -39,8 +44,8 @@ export default class TilingSpriteRenderer extends ObjectRenderer {
     on_context_change() {
         const gl = this.renderer.gl;
 
-        this.shader = new Shader(gl, Vert, Frag);
-        this.simpleShader = new Shader(gl, Vert, SimpleFrag);
+        this.shader = new GLShader(gl, Vert, Frag);
+        this.simpleShader = new GLShader(gl, Vert, SimpleFrag);
 
         this.renderer.bind_vao(null);
         this.quad = new Quad(gl, this.renderer.state.attrib_state);
@@ -129,8 +134,8 @@ export default class TilingSpriteRenderer extends ObjectRenderer {
         }
 
         shader.uniforms.uTransform = temp_mat.to_array(true);
-        shader.uniforms.uColor = premultiply_tint_to_rgba(ts.tint, ts.world_alpha,
-            shader.uniforms.uColor, baseTex.premultiplied_alpha);
+        shader.uniforms.u_color = premultiply_tint_to_rgba(ts.tint, ts.world_alpha,
+            shader.uniforms.u_color, baseTex.premultiplied_alpha);
         shader.uniforms.translation_matrix = ts.transform.world_transform.to_array(true);
 
         shader.uniforms.u_sampler = renderer.bind_texture(tex);

@@ -1,8 +1,8 @@
 import GLBuffer from 'engine/drivers/webgl/gl_buffer'
+import GLShader from 'engine/drivers/webgl/gl_shader';
 import VertexArrayObject from 'engine/drivers/webgl/vao'
 
 import create_indices_for_quads from 'engine/utils/create_indices_for_quads';
-import Shader from 'engine/Shader';
 import { Rectangle } from 'engine/math/index';
 
 /**
@@ -72,7 +72,7 @@ export default class Quad {
     /**
      * Initialises the vaos and uses the shader.
      *
-     * @param {Shader} shader - the shader to use
+     * @param {GLShader} shader - the shader to use
      */
     init_vao(shader) {
         this.vao.clear()

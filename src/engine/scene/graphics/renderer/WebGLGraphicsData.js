@@ -1,7 +1,6 @@
-import GLBuffer from 'engine/drivers/webgl/gl_buffer';
 import VertexArrayObject from 'engine/drivers/webgl/vao';
-
-import Shader from 'engine/Shader';
+import GLBuffer from 'engine/drivers/webgl/gl_buffer';
+import GLShader from 'engine/drivers/webgl/gl_shader';
 
 /**
  * An object containing WebGL specific properties to be used by the WebGL renderer
@@ -9,7 +8,7 @@ import Shader from 'engine/Shader';
 export default class WebGLGraphicsData {
     /**
      * @param {WebGLRenderingContext} gl - The current WebGL drawing context
-     * @param {Shader} shader - The shader
+     * @param {GLShader} shader - The shader
      * @param {import('engine/drivers/webgl/vao').VertexArrayObjectDesc} attribs_state - The state for the VAO
      */
     constructor(gl, shader, attribs_state) {
@@ -67,7 +66,7 @@ export default class WebGLGraphicsData {
         this.gl_indices = null;
 
         /**
-         * @type {Shader}
+         * @type {GLShader}
          */
         this.shader = shader;
 

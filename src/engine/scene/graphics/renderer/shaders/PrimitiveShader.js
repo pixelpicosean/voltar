@@ -1,4 +1,4 @@
-import Shader from 'engine/Shader';
+import GLShader from 'engine/drivers/webgl/gl_shader';
 
 const vert = `
     attribute vec2 a_vertex_position;
@@ -29,7 +29,7 @@ const frag = `
 /**
  * This shader is used to draw simple primitive shapes for Graphics.
  */
-export default class PrimitiveShader extends Shader {
+export default class PrimitiveShader extends GLShader {
     /**
      * @param {WebGLRenderingContext} gl - The webgl shader manager this shader works for.
      */

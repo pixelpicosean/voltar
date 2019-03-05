@@ -23,9 +23,8 @@ function hack_sub_image(tex, sprite, clear_buffer, clear_width, clear_height) {
  * Renderer for square and rectangle tiles.
  * Squares cannot be rotated, skewed.
  *
- * @param renderer {WebGLRenderer} The renderer this sprite batch works for.
+ * @param {WebGLRenderer} renderer The renderer this sprite batch works for.
  */
-
 export default class TileRenderer extends ObjectRenderer {
     constructor(renderer) {
         super(renderer);

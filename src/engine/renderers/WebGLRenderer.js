@@ -1,26 +1,30 @@
+import { RENDERER_TYPE } from 'engine/const';
+
 import VertexArrayObject from 'engine/drivers/webgl/vao';
+import GLShader from 'engine/drivers/webgl/gl_shader';
 import GLTexture from 'engine/drivers/webgl/gl_texture';
 import create_context from 'engine/drivers/webgl/create_context';
-
-import { plugin_target } from 'engine/utils/index';
-import { RENDERER_TYPE } from 'engine/const';
-import BaseTexture from 'engine/textures/BaseTexture';
+import validate_context from './utils/validate_context';
 
 import SystemRenderer from './SystemRenderer';
+import ObjectRenderer from './utils/ObjectRenderer';
+
 import MaskManager from './managers/MaskManager';
 import StencilManager from './managers/StencilManager';
 import FilterManager from './managers/FilterManager';
-import RenderTarget from './utils/RenderTarget';
-import ObjectRenderer from './utils/ObjectRenderer';
 import TextureManager from './TextureManager';
 import TextureGarbageCollector from './TextureGarbageCollector';
+import RenderTarget from './utils/RenderTarget';
 import WebGLState from './WebGLState';
-import map_webgl_draw_modes_to_voltar from './utils/map_webgl_draw_modes_to_voltar';
-import validate_context from './utils/validate_context';
-import Matrix from 'engine/math/Matrix';
-import Shader from 'engine/Shader';
+
 import Texture from 'engine/textures/Texture';
+import BaseTexture from 'engine/textures/BaseTexture';
 import RenderTexture from 'engine/textures/RenderTexture';
+
+import map_webgl_draw_modes_to_voltar from './utils/map_webgl_draw_modes_to_voltar';
+import Matrix from 'engine/math/Matrix';
+
+import { plugin_target } from 'engine/utils/index';
 
 let CONTEXT_UID = 0;
 
@@ -147,7 +151,7 @@ export default class WebGLRenderer extends SystemRenderer {
         /**
          * Holds the current shader
          *
-         * @type {Shader}
+         * @type {GLShader}
          */
         this._active_shader = null;
 
@@ -440,7 +444,7 @@ export default class WebGLRenderer extends SystemRenderer {
     /**
      * Changes the current shader to the one given in parameter
      *
-     * @param {Shader} shader - the new shader
+     * @param {GLShader} shader - the new shader
      * @param {boolean} [auto_project] - Whether automatically set the projection matrix
      */
     bind_shader(shader, auto_project = true) {

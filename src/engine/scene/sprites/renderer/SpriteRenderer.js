@@ -1,16 +1,21 @@
-import ObjectRenderer from 'engine/renderers/utils/ObjectRenderer';
+import settings from 'engine/settings';
+
 import WebGLRenderer from 'engine/renderers/WebGLRenderer';
+import ObjectRenderer from 'engine/renderers/utils/ObjectRenderer';
+
+import VertexArrayObject from 'engine/drivers/webgl/vao';
+import GLShader from 'engine/drivers/webgl/gl_shader';
+import GLBuffer from 'engine/drivers/webgl/gl_buffer';
+
+import BaseTexture from 'engine/textures/BaseTexture';
+
+import Buffer from './BatchBuffer';
 import create_indices_for_quads from 'engine/utils/create_indices_for_quads';
 import generate_multi_texture_shader from './generate_multi_texture_shader';
+
 import check_max_if_statments_in_shader from 'engine/renderers/utils/check_max_if_statments_in_shader';
-import Buffer from './BatchBuffer';
-import settings from 'engine/settings';
 import { premultiply_blend_mode, premultiply_tint } from 'engine/utils/index';
-import GLBuffer from 'engine/drivers/webgl/gl_buffer';
 import { nearest_po2, log_base_2 } from 'engine/math/index';
-import Shader from 'engine/Shader';
-import VertexArrayObject from 'engine/drivers/webgl/vao';
-import BaseTexture from 'engine/textures/BaseTexture';
 
 let tick = 0;
 let texture_tick = 0;
@@ -69,7 +74,7 @@ export default class SpriteRenderer extends ObjectRenderer {
          * The default shaders that is used if a sprite doesn't have a more specific one.
          * there is a shader for each number of textures that can be rendererd.
          * These shaders will also be generated on the fly as required.
-         * @type {Shader}
+         * @type {GLShader}
          */
         this.shader = null;
 

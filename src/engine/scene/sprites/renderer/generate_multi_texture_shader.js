@@ -1,4 +1,4 @@
-import Shader from 'engine/Shader';
+import GLShader from 'engine/drivers/webgl/gl_shader';
 
 import vertex_src from './texture.vert';
 
@@ -34,7 +34,7 @@ export default function generate_multi_texture_shader(gl, max_textures) {
     fragment_src = fragment_src.replace(/%count%/gi, `${max_textures}`);
     fragment_src = fragment_src.replace(/%forloop%/gi, generate_sample_src(max_textures));
 
-    const shader = new Shader(gl, vertex_src, fragment_src);
+    const shader = new GLShader(gl, vertex_src, fragment_src);
 
     /** @type {number[]} */
     const sample_values = [];

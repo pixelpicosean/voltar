@@ -75,14 +75,14 @@ export default class ParticleRenderer extends ObjectRenderer {
             },
             // positionData
             {
-                attribute: this.shader.attributes.aPositionCoord,
+                attribute: this.shader.attributes.a_position_coord,
                 size: 2,
                 uploadFunction: this.upload_position,
                 offset: 0,
             },
             // rotationData
             {
-                attribute: this.shader.attributes.aRotation,
+                attribute: this.shader.attributes.a_rotation,
                 size: 1,
                 uploadFunction: this.upload_rotation,
                 offset: 0,
@@ -152,8 +152,8 @@ export default class ParticleRenderer extends ObjectRenderer {
 
         this.shader.uniforms.projection_matrix = m.to_array(true);
 
-        this.shader.uniforms.uColor = premultiply_rgba(container.tint_rgb,
-            container.world_alpha, this.shader.uniforms.uColor, base_texture.premultiplied_alpha);
+        this.shader.uniforms.u_color = premultiply_rgba(container.tint_rgb,
+            container.world_alpha, this.shader.uniforms.u_color, base_texture.premultiplied_alpha);
 
         // make sure the texture is bound..
         this.shader.uniforms.u_sampler = renderer.bind_texture(base_texture);

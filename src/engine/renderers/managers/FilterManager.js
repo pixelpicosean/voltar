@@ -1,13 +1,14 @@
+import GLShader from 'engine/drivers/webgl/gl_shader';
+import { Rectangle, Matrix, nearest_po2 } from 'engine/math/index';
+import * as filter_transforms from '../filters/filter_transforms';
+
+import WebGLRenderer from '../WebGLRenderer';
 import WebGLManager from './WebGLManager';
 import RenderTarget from '../utils/RenderTarget';
-import Quad from '../utils/Quad';
-import { Rectangle, nearest_po2 } from 'engine/math/index';
-import Shader from 'engine/Shader';
-import * as filter_transforms from '../filters/filter_transforms';
 import Filter from '../filters/Filter';
-import WebGLRenderer from '../WebGLRenderer';
+
+import Quad from '../utils/Quad';
 import Node2D from 'engine/scene/Node2D';
-import Matrix from 'engine/math/Matrix';
 
 export class FilterState {
     constructor() {
@@ -234,13 +235,13 @@ export default class FilterManager extends WebGLManager {
                 shader = this.shader_cache[filter.gl_shader_key];
 
                 if (!shader) {
-                    shader = new Shader(this.gl, filter.vertex_src, filter.fragment_src);
+                    shader = new GLShader(this.gl, filter.vertex_src, filter.fragment_src);
 
                     filter.gl_shaders[renderer.CONTEXT_UID] = this.shader_cache[filter.gl_shader_key] = shader;
                     this.managed_filters.push(filter);
                 }
             } else {
-                shader = filter.gl_shaders[renderer.CONTEXT_UID] = new Shader(this.gl, filter.vertex_src, filter.fragment_src);
+                shader = filter.gl_shaders[renderer.CONTEXT_UID] = new GLShader(this.gl, filter.vertex_src, filter.fragment_src);
                 this.managed_filters.push(filter);
             }
 
@@ -289,7 +290,7 @@ export default class FilterManager extends WebGLManager {
     /**
      * Uploads the uniforms of the filter.
      *
-     * @param {Shader} shader - The underlying gl shader.
+     * @param {GLShader} shader - The underlying gl shader.
      * @param {Filter} filter - The filter we are synchronizing.
      */
     sync_uniforms(shader, filter) {

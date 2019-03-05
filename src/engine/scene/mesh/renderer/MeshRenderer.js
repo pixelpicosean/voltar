@@ -1,10 +1,13 @@
 import { Matrix } from 'engine/math/index';
 import { correct_blend_mode, premultiply_rgba } from 'engine/utils/index';
+
 import GLBuffer from 'engine/drivers/webgl/gl_buffer';
+import GLShader from 'engine/drivers/webgl/gl_shader';
 import VertexArrayObject from 'engine/drivers/webgl/vao';
+
 import ObjectRenderer from 'engine/renderers/utils/ObjectRenderer';
 import WebGLRenderer from 'engine/renderers/WebGLRenderer';
-import Shader from 'engine/Shader';
+
 import Mesh from '../Mesh';
 
 import Vert from './mesh.vert';
@@ -35,7 +38,7 @@ export default class MeshRenderer extends ObjectRenderer {
     on_context_change() {
         const gl = this.renderer.gl;
 
-        this.shader = new Shader(gl, Vert, Frag);
+        this.shader = new GLShader(gl, Vert, Frag);
     }
 
     /**
@@ -111,8 +114,8 @@ export default class MeshRenderer extends ObjectRenderer {
         }
         gl_data.shader.uniforms.translation_matrix = mesh.world_transform.to_array(true);
 
-        gl_data.shader.uniforms.uColor = premultiply_rgba(mesh.tint_rgb,
-            mesh.world_alpha, gl_data.shader.uniforms.uColor, texture.base_texture.premultiplied_alpha);
+        gl_data.shader.uniforms.u_color = premultiply_rgba(mesh.tint_rgb,
+            mesh.world_alpha, gl_data.shader.uniforms.u_color, texture.base_texture.premultiplied_alpha);
 
         const draw_mode = mesh.draw_mode === Mesh.DRAW_MODES.TRIANGLE_MESH ? gl.TRIANGLE_STRIP : gl.TRIANGLES;
 

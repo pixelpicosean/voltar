@@ -1,7 +1,7 @@
 varying vec2 v_texture_coord;
 
 uniform sampler2D u_sampler;
-uniform vec4 uColor;
+uniform vec4 u_color;
 uniform mat3 uMapCoord;
 uniform vec4 u_clamp_frame;
 uniform vec2 u_clamp_offset;
@@ -13,5 +13,5 @@ void main(void)
     coord = clamp(coord, u_clamp_frame.xy, u_clamp_frame.zw);
 
     vec4 sample = texture2D(u_sampler, coord);
-    gl_FragColor = sample * uColor ;
+    gl_FragColor = sample * u_color ;
 }
