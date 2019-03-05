@@ -1,4 +1,4 @@
-import Container from "./Container";
+import Container from "./container";
 import { Vector2, Rectangle } from "engine/math/index";
 import { node_class_map } from "engine/registry";
 import { SizeFlag } from "./const";
@@ -22,7 +22,6 @@ export default class GridContainer extends Container {
     }
     /**
      * @param {number} value
-     * @returns {this}
      */
     set_columns(value) {
         this.columns = value;
@@ -59,10 +58,9 @@ export default class GridContainer extends Container {
         const max_col = Math.min(this.children.length, this._columns);
         const max_row = Math.floor(this.children.length / this._columns);
 
-        /** @type {Container} */
-        let c;
-        // @ts-ignore
-        for (c of this.children) {
+        for (const node of this.children) {
+            const c = /** @type {Container} */(node);
+
             if (!c.is_control || !c.world_visible) {
                 continue;
             }
@@ -159,8 +157,10 @@ export default class GridContainer extends Container {
         let row_ofs = 0;
 
         valid_controls_index = 0;
-        // @ts-ignore
-        for (c of this.children) {
+
+        for (const node of this.children) {
+            const c = /** @type {Container} */(node);
+
             if (!c.is_control || !c.world_visible) {
                 continue;
             }
@@ -188,7 +188,6 @@ export default class GridContainer extends Container {
 
     /**
      * @param {Vector2} size
-     * @returns {Vector2}
      */
     get_minimum_size(size) {
         const col_minw = [];
@@ -202,10 +201,9 @@ export default class GridContainer extends Container {
 
         let valid_controls_index = 0;
 
-        /** @type {Container} */
-        let c;
-        // @ts-ignore
-        for (c of this.children) {
+        for (const node of this.children) {
+            const c = /** @type {Container} */(node);
+
             if (!c.is_control || !c.world_visible) {
                 continue;
             }

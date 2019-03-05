@@ -1,5 +1,5 @@
-import Container from "./Container";
-import Control from "./Control";
+import Container from "./container";
+import Control from "./control";
 import { SizeFlag } from "./const";
 import { Vector2, Rectangle } from "engine/math/index";
 import { node_class_map } from "engine/registry";
@@ -43,7 +43,6 @@ export default class BoxContainer extends Container {
     }
     /**
      * @param {AlignMode} value
-     * @return this
      */
     set_alignment(value) {
         this.align = value;
@@ -88,16 +87,18 @@ export default class BoxContainer extends Container {
         }
     }
 
+    /**
+     * @param {Vector2} size
+     */
     get_minimum_size(size) {
         const minimum = size.set(0, 0);
         const sep = this.get_constant('separation');
 
         let first = true;
 
-        /** @type {Container} */
-        let c;
-        // @ts-ignore
-        for (c of this.children) {
+        for (const node of this.children) {
+            const c = /** @type {Container} */(node);
+
             if (!c.is_control || !c.world_visible) {
                 continue;
             }
@@ -147,10 +148,9 @@ export default class BoxContainer extends Container {
          */
         const min_size_cache = {};
 
-        /** @type {Container} */
-        let c;
-        // @ts-ignore
-        for (c of this.children) {
+        for (const node of this.children) {
+            const c = /** @type {Container} */(node);
+
             if (!c.is_control || !c.world_visible) {
                 continue;
             }
@@ -251,8 +251,9 @@ export default class BoxContainer extends Container {
         first = true;
         let idx = 0;
 
-        // @ts-ignore
-        for (c of this.children) {
+        for (const node of this.children) {
+            const c = /** @type {Container} */(node);
+
             if (!c.is_control || !c.world_visible) {
                 continue;
             }

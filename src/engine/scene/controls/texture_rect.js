@@ -1,4 +1,4 @@
-import Control from './Control';
+import Control from './control';
 import Texture from 'engine/textures/Texture';
 import WebGLRenderer from 'engine/renderers/WebGLRenderer';
 import { node_class_map } from 'engine/registry';
@@ -26,7 +26,7 @@ export default class TextureRect extends Control {
     /**
      * The texture that the sprite is using
      *
-     * @member {Texture}
+     * @type {Texture}
      */
     get texture() {
         return this._texture;
@@ -46,7 +46,6 @@ export default class TextureRect extends Control {
     }
     /**
      * @param {string|Texture} value
-     * @returns {this}
      */
     set_texture(value) {
         // @ts-ignore
@@ -66,7 +65,6 @@ export default class TextureRect extends Control {
     }
     /**
      * @param {boolean} value
-     * @returns {this}
      */
     set_expand(value) {
         this.expand = value;
@@ -84,7 +82,6 @@ export default class TextureRect extends Control {
     }
     /**
      * @param {number} value
-     * @returns {this}
      */
     set_stretch_mode(value) {
         this.stretch_mode = value;

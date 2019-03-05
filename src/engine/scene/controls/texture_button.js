@@ -4,7 +4,7 @@ import { node_class_map } from 'engine/registry';
 import { Vector2 } from 'engine/math/index';
 import Sprite from '../sprites/Sprite';
 import TilingSprite from '../sprites/TilingSprite';
-import BaseButton, { DrawMode } from './BaseButton';
+import BaseButton, { DrawMode } from './base_button';
 
 /**
  * @enum {number}
@@ -26,13 +26,19 @@ const tmp_vec4 = new Vector2();
 
 export default class TextureButton extends BaseButton {
     /**
-     * @member {Texture}
+     * @type {Texture}
      */
     get texture_normal() {
         return this._texture_normal;
     }
     set texture_normal(p_value) {
-        this.sprite.texture = p_value;
+        this.set_texture_normal(p_value);
+    }
+    /**
+     * @param {string|Texture} p_value
+     */
+    set_texture_normal(p_value) {
+        this.sprite.set_texture(p_value);
 
         this._texture_normal = this.sprite._texture;
 
@@ -42,19 +48,12 @@ export default class TextureButton extends BaseButton {
         } else {
             this._texture_normal.connect_once('update', this._on_texture_update, this);
         }
-    }
-    /**
-     * @param {string|Texture} value
-     * @returns {this}
-     */
-    set_texture_normal(value) {
-        // @ts-ignore
-        this.texture_normal = value;
+
         return this;
     }
 
     /**
-     * @member {Texture}
+     * @type {Texture}
      */
     get texture_pressed() {
         return this._texture_pressed;
@@ -73,7 +72,6 @@ export default class TextureButton extends BaseButton {
     }
     /**
      * @param {string|Texture} value
-     * @returns {this}
      */
     set_texture_pressed(value) {
         // @ts-ignore
@@ -82,7 +80,7 @@ export default class TextureButton extends BaseButton {
     }
 
     /**
-     * @member {Texture}
+     * @type {Texture}
      */
     get texture_hover() {
         return this._texture_hover;
@@ -101,7 +99,6 @@ export default class TextureButton extends BaseButton {
     }
     /**
      * @param {string|Texture} value
-     * @returns {this}
      */
     set_texture_hover(value) {
         // @ts-ignore
@@ -110,7 +107,7 @@ export default class TextureButton extends BaseButton {
     }
 
     /**
-     * @member {Texture}
+     * @type {Texture}
      */
     get texture_disabled() {
         return this._texture_disabled;
@@ -129,7 +126,6 @@ export default class TextureButton extends BaseButton {
     }
     /**
      * @param {string|Texture} value
-     * @returns {this}
      */
     set_texture_disabled(value) {
         // @ts-ignore
@@ -150,7 +146,6 @@ export default class TextureButton extends BaseButton {
     }
     /**
      * @param {boolean} value
-     * @returns {this}
      */
     set_expand(value) {
         this.expand = value;
@@ -169,7 +164,6 @@ export default class TextureButton extends BaseButton {
     }
     /**
      * @param {number} value
-     * @returns {this}
      */
     set_stretch_mode(value) {
         this.stretch_mode = value;

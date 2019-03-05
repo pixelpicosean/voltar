@@ -1,4 +1,4 @@
-import Control from "./Control";
+import Control from "./control";
 import InteractiveEvent from 'engine/interaction/InteractionEvent';
 
 /**
@@ -9,6 +9,9 @@ export const ActionMode = {
     BUTTON_RELEASE: 1,
 }
 
+/**
+ * @enum {number}
+ */
 export const DrawMode = {
     NORMAL: 0,
     PRESSED: 1,
@@ -122,6 +125,10 @@ export default class BaseButton extends Control {
     }
 
     _pressed() { }
+
+    /**
+     * @param {boolean} pressed
+     */
     _toggled(pressed) { }
 
     get_draw_mode() {
@@ -232,6 +239,9 @@ export default class BaseButton extends Control {
             this.status.press_attempt = false;
         }
     }
+    /**
+     * @param {InteractiveEvent} e
+     */
     _pointer_up_outside(e) {
         this.status.press_attempt = false;
     }

@@ -1,4 +1,4 @@
-import Container from "./Container";
+import Container from "./container";
 import { Vector2, Rectangle } from "engine/math/index";
 import { node_class_map } from "engine/registry";
 
@@ -21,10 +21,9 @@ export default class MarginContainer extends Container {
 
         const s = tmp_vec2.set(0, 0);
 
-        /** @type {Container} */
-        let c;
-        // @ts-ignore
-        for (c of this.children) {
+        for (const node of this.children) {
+            const c = /** @type {Container} */(node);
+
             if (!c.is_control || !c.world_visible) {
                 continue;
             }
@@ -44,6 +43,9 @@ export default class MarginContainer extends Container {
         }
     }
 
+    /**
+     * @param {Vector2} size
+     */
     get_minimum_size(size) {
         const margin_left = this.get_constant('margin_left');
         const margin_top = this.get_constant('margin_top');
@@ -52,10 +54,9 @@ export default class MarginContainer extends Container {
 
         const max = size.set(0, 0);
 
-        /** @type {Container} */
-        let c;
-        // @ts-ignore
-        for (c of this.children) {
+        for (const node of this.children) {
+            const c = /** @type {Container} */(node);
+
             if (!c.is_control || !c.world_visible) {
                 continue;
             }

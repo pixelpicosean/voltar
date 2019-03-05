@@ -1,10 +1,10 @@
-import Range from "./Range";
-import { Vector2, Rectangle, clamp } from "engine/math/index";
-import { node_class_map } from "engine/registry";
-import Color from "engine/Color";
-import Texture from "engine/textures/Texture";
-import { TextureCache } from "engine/utils/index";
 import { Margin } from "./const";
+import Color from "engine/Color";
+import Range from "./range";
+import Texture from "engine/textures/Texture";
+import { Vector2, clamp } from "engine/math/index";
+import { node_class_map } from "engine/registry";
+import { TextureCache } from "engine/utils/index";
 import WebGLRenderer from "engine/renderers/WebGLRenderer";
 import Sprite from "../sprites/Sprite";
 import TilingSprite from "../sprites/TilingSprite";
@@ -40,7 +40,6 @@ export default class TextureProgress extends Range {
     }
     /**
      * @param {boolean} value
-     * @returns {this}
      */
     set_nine_patch_stretch(value) {
         this.nine_patch_stretch = value;
@@ -59,7 +58,6 @@ export default class TextureProgress extends Range {
     /**
      * @param {number|import("engine/math/Vector2").Vector2Like} x
      * @param {number} [y]
-     * @returns {this}
      */
     set_radial_center_offset(x, y) {
         if (y !== undefined) {
@@ -84,7 +82,6 @@ export default class TextureProgress extends Range {
     }
     /**
      * @param {number} value
-     * @returns {this}
      */
     set_radial_fill_degrees(value) {
         this.radial_fill_degrees = value;
@@ -108,7 +105,6 @@ export default class TextureProgress extends Range {
     }
     /**
      * @param {number} value
-     * @returns {this}
      */
     set_radial_initial_angle(value) {
         this.radial_initial_angle = value;
@@ -126,7 +122,6 @@ export default class TextureProgress extends Range {
     }
     /**
      * @param {number} value
-     * @returns {this}
      */
     set_stretch_margin_bottom(value) {
         this.stretch_margin_bottom = value;
@@ -144,7 +139,6 @@ export default class TextureProgress extends Range {
     }
     /**
      * @param {number} value
-     * @returns {this}
      */
     set_stretch_margin_left(value) {
         this.stretch_margin_left = value;
@@ -162,7 +156,6 @@ export default class TextureProgress extends Range {
     }
     /**
      * @param {number} value
-     * @returns {this}
      */
     set_stretch_margin_top(value) {
         this.stretch_margin_top = value;
@@ -180,7 +173,6 @@ export default class TextureProgress extends Range {
     }
     /**
      * @param {number} value
-     * @returns {this}
      */
     set_stretch_margin_right(value) {
         this.stretch_margin_right = value;
@@ -200,7 +192,6 @@ export default class TextureProgress extends Range {
      * @param {number|Color} r
      * @param {number} [g]
      * @param {number} [b]
-     * @returns {this}
      */
     set_tint_over(r, g, b) {
         if (g !== undefined) {
@@ -226,7 +217,6 @@ export default class TextureProgress extends Range {
      * @param {number|Color} r
      * @param {number} [g]
      * @param {number} [b]
-     * @returns {this}
      */
     set_tint_progress(r, g, b) {
         if (g !== undefined) {
@@ -252,7 +242,6 @@ export default class TextureProgress extends Range {
      * @param {number|Color} r
      * @param {number} [g]
      * @param {number} [b]
-     * @returns {this}
      */
     set_tint_under(r, g, b) {
         if (g !== undefined) {
@@ -283,7 +272,6 @@ export default class TextureProgress extends Range {
     }
     /**
      * @param {string|Texture} value
-     * @returns {this}
      */
     set_texture_over(value) {
         this.texture_over = value;
@@ -306,7 +294,6 @@ export default class TextureProgress extends Range {
     }
     /**
      * @param {string|Texture} value
-     * @returns {this}
      */
     set_texture_progress(value) {
         this.texture_progress = value;
@@ -329,7 +316,6 @@ export default class TextureProgress extends Range {
     }
     /**
      * @param {string|Texture} value
-     * @returns {this}
      */
     set_texture_under(value) {
         this.texture_under = value;
@@ -455,7 +441,6 @@ export default class TextureProgress extends Range {
 
     /**
      * @param {Vector2} size
-     * @returns {Vector2}
      */
     get_minimum_size(size) {
         if (this._nine_patch_stretch) {

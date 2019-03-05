@@ -1,33 +1,27 @@
 /**
  * Calculate the points for a bezier curve and then draws it.
  *
- * Ignored from docs since it is not directly exposed.
- *
- * @ignore
- * @param {number} fromX - Starting point x
- * @param {number} fromY - Starting point y
- * @param {number} cpX - Control point x
- * @param {number} cpY - Control point y
- * @param {number} cpX2 - Second Control point x
- * @param {number} cpY2 - Second Control point y
- * @param {number} toX - Destination point x
- * @param {number} toY - Destination point y
+ * @param {number} from_x - Starting point x
+ * @param {number} from_y - Starting point y
+ * @param {number} cp_x - Control point x
+ * @param {number} cp_y - Control point y
+ * @param {number} cp_x2 - Second Control point x
+ * @param {number} cp_y2 - Second Control point y
+ * @param {number} to_x - Destination point x
+ * @param {number} to_y - Destination point y
  * @param {number} n - Number of segments approximating the bezier curve
- * @param {number[]} [path=[]] - Path array to push points into
- * @return {number[]} Array of points of the curve
+ * @param {number[]} [path] - Path array to push points into
  */
-export default function bezier_curve_to(fromX, fromY, cpX, cpY, cpX2, cpY2, toX, toY, n, path = [])
-{
+export default function bezier_curve_to(from_x, from_y, cp_x, cp_y, cp_x2, cp_y2, to_x, to_y, n, path = []) {
     let dt = 0;
     let dt2 = 0;
     let dt3 = 0;
     let t2 = 0;
     let t3 = 0;
 
-    path.push(fromX, fromY);
+    path.push(from_x, from_y);
 
-    for (let i = 1, j = 0; i <= n; ++i)
-    {
+    for (let i = 1, j = 0; i <= n; ++i) {
         j = i / n;
 
         dt = (1 - j);
@@ -38,8 +32,8 @@ export default function bezier_curve_to(fromX, fromY, cpX, cpY, cpX2, cpY2, toX,
         t3 = t2 * j;
 
         path.push(
-            (dt3 * fromX) + (3 * dt2 * j * cpX) + (3 * dt * t2 * cpX2) + (t3 * toX),
-            (dt3 * fromY) + (3 * dt2 * j * cpY) + (3 * dt * t2 * cpY2) + (t3 * toY)
+            (dt3 * from_x) + (3 * dt2 * j * cp_x) + (3 * dt * t2 * cp_x2) + (t3 * to_x),
+            (dt3 * from_y) + (3 * dt2 * j * cp_y) + (3 * dt * t2 * cp_y2) + (t3 * to_y)
         );
     }
 

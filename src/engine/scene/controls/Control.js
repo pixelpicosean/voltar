@@ -50,7 +50,6 @@ export default class Control extends Node2D {
      * @param {Anchor} anchor
      * @param {boolean} keep_margin
      * @param {boolean} push_opposite_anchor
-     * @returns {this}
      */
     set_anchor(margin, anchor, keep_margin = true, push_opposite_anchor = true) {
         const parent_rect = this.get_parent_anchorable_rect(tmp_rect5);
@@ -85,7 +84,6 @@ export default class Control extends Node2D {
     /**
      * @param {Margin} margin
      * @param {number} value
-     * @return this
      */
     set_margin(margin, value) {
         this.data.margin[margin] = value;
@@ -105,7 +103,6 @@ export default class Control extends Node2D {
     }
     /**
      * @param {Anchor} value
-     * @return this
      */
     set_anchor_bottom(value) {
         this.set_anchor(Margin.Bottom, value);
@@ -123,7 +120,6 @@ export default class Control extends Node2D {
     }
     /**
      * @param {Anchor} value
-     * @return this
      */
     set_anchor_left(value) {
         this.set_anchor(Margin.Left, value);
@@ -141,7 +137,6 @@ export default class Control extends Node2D {
     }
     /**
      * @param {Anchor} value
-     * @return this
      */
     set_anchor_top(value) {
         this.set_anchor(Margin.Top, value);
@@ -159,7 +154,6 @@ export default class Control extends Node2D {
     }
     /**
      * @param {Anchor} value
-     * @return this
      */
     set_anchor_right(value) {
         this.set_anchor(Margin.Right, value);
@@ -177,7 +171,6 @@ export default class Control extends Node2D {
     }
     /**
      * @param {Anchor} value
-     * @return this
      */
     set_margin_bottom(value) {
         this.set_margin(Margin.Bottom, value);
@@ -195,7 +188,6 @@ export default class Control extends Node2D {
     }
     /**
      * @param {Anchor} value
-     * @return this
      */
     set_margin_left(value) {
         this.set_margin(Margin.Left, value);
@@ -213,7 +205,6 @@ export default class Control extends Node2D {
     }
     /**
      * @param {Anchor} value
-     * @return this
      */
     set_margin_top(value) {
         this.set_margin(Margin.Top, value);
@@ -231,21 +222,27 @@ export default class Control extends Node2D {
     }
     /**
      * @param {Anchor} value
-     * @return this
      */
     set_margin_right(value) {
         this.set_margin(Margin.Right, value);
         return this;
     }
 
+    /**
+     * @type {string}
+     */
     get mouse_default_cursor_shape() {
         return this.cursor;
     }
     set mouse_default_cursor_shape(value) {
         this.cursor = value;
     }
+    /**
+     * @param {string} value
+     */
     set_mouse_default_cursor_shape(value) {
         this.cursor = value;
+        return this;
     }
 
     get rect_size() {
@@ -688,9 +685,17 @@ export default class Control extends Node2D {
         super._propagate_enter_tree();
     }
 
+    /**
+     *
+     * @param {Node2D} child
+     */
     add_child_notify(child) {
         // TODO: change child's theme if we have any
     }
+    /**
+     *
+     * @param {Node2D} child
+     */
     remove_child_notify(child) {
         // TODO: unset child's theme owner
     }
@@ -712,14 +717,12 @@ export default class Control extends Node2D {
 
     /**
      * @param {Vector2} size
-     * @return {Vector2}
      */
     get_minimum_size(size) {
         return size.copy(this.rect_min_size);
     }
     /**
      * @param {Vector2} size
-     * @return {Vector2}
      */
     get_combined_minimum_size(size) {
         if (!this.data.minimum_size_valid) {
@@ -730,7 +733,6 @@ export default class Control extends Node2D {
 
     /**
      * @param {Rectangle} rect
-     * @returns {Rectangle}
      */
     get_parent_anchorable_rect(rect) {
         if (!this.is_inside_tree) {
@@ -754,7 +756,6 @@ export default class Control extends Node2D {
     }
     /**
      * @param {Rectangle} rect
-     * @returns {Rectangle}
      */
     get_anchorable_rect(rect) {
         rect.x = 0;
@@ -767,7 +768,6 @@ export default class Control extends Node2D {
     /**
      * @param {string} name
      * @param {string} [type]
-     * @return {number}
      */
     get_constant(name, type) {
         if (!type) {
@@ -788,7 +788,6 @@ export default class Control extends Node2D {
     /**
      * @param {string} name
      * @param {string} [type]
-     * @returns {StyleBox}
      */
     get_stylebox(name, type) {
         if (!type) {
@@ -809,7 +808,6 @@ export default class Control extends Node2D {
     /**
      * @param {string} name
      * @param {string} [type]
-     * @returns {Font}
      */
     get_font(name, type) {
         if (!type) {
@@ -830,7 +828,6 @@ export default class Control extends Node2D {
     /**
      * @param {string} name
      * @param {string} [type]
-     * @returns {Color}
      */
     get_color(name, type) {
         if (!type) {
@@ -870,6 +867,11 @@ export default class Control extends Node2D {
         return this;
     }
 
+    /**
+     * @param {Rectangle} rect
+     * @param {number[]} anchors
+     * @param {number[]} margins
+     */
     _compute_margins(rect, anchors, margins) {
         const parent_rect = this.get_parent_anchorable_rect(tmp_rect2);
         margins[0] = Math.floor(rect.x - (anchors[0] * parent_rect.width));

@@ -2,12 +2,20 @@ import Node2D from "../Node2D";
 
 import { node_class_map } from 'engine/registry';
 
-import Animation, { TrackType, UpdateMode, Key, ValueTrack, InterpolationType, PropType, MethodTrack } from './Animation';
+import Animation, { TrackType, UpdateMode, Key, ValueTrack, InterpolationType, PropType, MethodTrack } from './animation';
 
+/**
+ * @param {number} p_x
+ * @param {number} p_y
+ */
 function posmod(p_x, p_y) {
     return (p_x >= 0) ? (p_x % p_y) : (p_y - (-p_x) % p_y);
 }
 
+/**
+ * @param {number} x
+ * @param {number} c
+ */
 function ease(x, c) {
     if (x < 0)
         x = 0;
@@ -35,7 +43,6 @@ const CMP_EPSILON = 0.00001;
 /**
  * @param {number} a
  * @param {number} b
- * @returns {boolean}
  */
 function equals(a, b) {
     return Math.abs(a - b) < CMP_EPSILON;
@@ -45,7 +52,6 @@ function equals(a, b) {
  * @param {number} a
  * @param {number} b
  * @param {number} c
- * @returns {number}
  */
 function interpolate_number(a, b, c) {
     return a * (1.0 - c) + b * c;
@@ -56,7 +62,6 @@ function interpolate_number(a, b, c) {
  * @param {number} b
  * @param {number} post_b
  * @param {number} c
- * @returns {number}
  */
 function cubic_interpolate_number(pre_a, a, b, post_b, c) {
     return interpolate_number(a, b, c);
@@ -93,9 +98,15 @@ function find_track_key(keys, time) {
 
     return middle;
 }
+/**
+ * @param {string} path
+ */
 function anim_path_without_prop(path) {
     return path.split(':')[0];
 }
+/**
+ * @param {string} path
+ */
 function anim_prop(path) {
     return path.split(':')[1];
 }

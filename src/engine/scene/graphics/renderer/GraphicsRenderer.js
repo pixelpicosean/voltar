@@ -1,15 +1,17 @@
-import { hex2rgb } from 'engine/utils/index';
-import { SHAPES } from 'engine/const';
 import ObjectRenderer from 'engine/renderers/utils/ObjectRenderer';
 import WebGLRenderer from 'engine/renderers/WebGLRenderer';
 import WebGLGraphicsData from './WebGLGraphicsData';
 import PrimitiveShader from './shaders/PrimitiveShader';
 
+import Graphics from '../Graphics';
+
 import build_poly from './utils/build_poly';
 import build_rectangle from './utils/build_rectangle';
 import build_rounded_rectangle from './utils/build_rounded_rectangle';
 import build_circle from './utils/build_circle';
-import Graphics from '../Graphics';
+
+import { hex2rgb } from 'engine/utils/index';
+import { SHAPES } from 'engine/const';
 
 /**
  * Renders the graphics object.
@@ -46,7 +48,7 @@ export default class GraphicsRenderer extends ObjectRenderer {
      * Destroys this renderer.
      */
     destroy() {
-        ObjectRenderer.prototype.destroy.call(this);
+        super.destroy();
 
         for (let i = 0; i < this.graphics_data_pool.length; ++i) {
             this.graphics_data_pool[i].destroy();
@@ -76,7 +78,6 @@ export default class GraphicsRenderer extends ObjectRenderer {
         // This  could be speeded up for sure!
         const shader = this.primitive_shader;
 
-        // @ts-ignore
         renderer.bind_shader(shader);
         renderer.state.set_blend_mode(graphics.blend_mode);
 
@@ -93,8 +94,7 @@ export default class GraphicsRenderer extends ObjectRenderer {
 
             if (webgl_data.native_lines) {
                 gl.drawArrays(gl.LINES, 0, webgl_data.points.length / 6);
-            }
-            else {
+            } else {
                 webgl_data.vao.draw(gl.TRIANGLE_STRIP, webgl_data.indices.length);
             }
         }
@@ -156,11 +156,9 @@ export default class GraphicsRenderer extends ObjectRenderer {
             }
             if (data.type === SHAPES.RECT) {
                 build_rectangle(data, webgl_data, webgl_data_native_lines);
-            }
-            else if (data.type === SHAPES.CIRC || data.type === SHAPES.ELIP) {
+            } else if (data.type === SHAPES.CIRC || data.type === SHAPES.ELIP) {
                 build_circle(data, webgl_data, webgl_data_native_lines);
-            }
-            else if (data.type === SHAPES.RREC) {
+            } else if (data.type === SHAPES.RREC) {
                 build_rounded_rectangle(data, webgl_data, webgl_data_native_lines);
             }
 
@@ -185,7 +183,6 @@ export default class GraphicsRenderer extends ObjectRenderer {
      * @param {WebGLRenderingContext} gl - the current WebGL drawing context
      * @param {number} type - TODO @Alvin
      * @param {boolean} [native_lines=false] - indicate whether the webGLData use for native_lines.
-     * @return {*} TODO
      */
     get_webgl_data(gl, type, native_lines) {
         // @ts-ignore

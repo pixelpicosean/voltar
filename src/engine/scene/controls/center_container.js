@@ -1,4 +1,4 @@
-import Container from "./Container";
+import Container from "./container";
 import { Vector2, Rectangle } from "engine/math/index";
 import { node_class_map } from "engine/registry";
 
@@ -32,10 +32,9 @@ export default class CenterContainer extends Container {
     }
 
     _children_sorted() {
-        /** @type {Container} */
-        let c;
-        // @ts-ignore
-        for (c of this.children) {
+        for (const node of this.children) {
+            const c = /** @type {Container} */(node);
+
             if (!c.is_control || !c.world_visible) {
                 continue;
             }
@@ -62,10 +61,9 @@ export default class CenterContainer extends Container {
             return ms;
         }
 
-        /** @type {Container} */
-        let c;
-        // @ts-ignore
-        for (c of this.children) {
+        for (const node of this.children) {
+            const c = /** @type {Container} */(node);
+
             if (!c.is_control || !c.world_visible) {
                 continue;
             }

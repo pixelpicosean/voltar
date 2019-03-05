@@ -1,4 +1,4 @@
-import Control from './Control';
+import Control from './control';
 import { SizeFlag, Anchor } from "./const";
 import { Rectangle, Vector2 } from 'engine/math/index';
 import MessageQueue from 'engine/MessageQueue';

@@ -1,9 +1,13 @@
-import Control from './Control';
-import Texture from 'engine/textures/Texture';
+import Control from './control';
+
 import WebGLRenderer from 'engine/renderers/WebGLRenderer';
+import Texture from 'engine/textures/Texture';
+import Color from 'engine/Color';
+
 import { rgb2hex } from 'engine/utils/index';
 import { node_class_map } from 'engine/registry';
-import Color from 'engine/Color';
+import { COLOR_MODES } from 'engine/const';
+
 
 export default class ColorRect extends Control {
     constructor() {
@@ -23,10 +27,8 @@ export default class ColorRect extends Control {
         this._texture = Texture.WHITE;
         this._tint_rgb = null;
 
-        this.color = new Color(1, 1, 1, 1, (rgb) => {
-            let tint = rgb2hex(rgb);
-            this._tint_rgb = (tint >> 16) + (tint & 0xff00) + ((tint & 0xff) << 16);
-        }, this);
+        this.color = new Color(1, 1, 1, 1);
+        this.color_mode = COLOR_MODES.MULTIPLY;
     }
     _load_data(data) {
         super._load_data(data);

@@ -24,18 +24,18 @@ export { default as AnimatedSprite } from './scene/sprites/AnimatedSprite';
 export { default as TilingSprite } from './scene/sprites/TilingSprite';
 export { default as NineSliceSprite } from './scene/sprites/NineSliceSprite';
 
-export { default as Control } from './scene/controls/Control';
-export { default as Container } from './scene/controls/Container';
-export { default as Label } from './scene/controls/Label';
-export { default as ColorRect } from './scene/controls/ColorRect';
-export { default as TextureRect } from './scene/controls/TextureRect';
-export { default as NinePatchRect } from './scene/controls/NinePatchRect';
-export { default as TextureButton } from './scene/controls/TextureButton';
-export { default as TextureProgress } from './scene/controls/TextureProgress';
-export { default as MarginContainer } from './scene/controls/MarginContainer';
-export { default as CenterContainer } from './scene/controls/CenterContainer';
-export { VBoxContainer, HBoxContainer } from './scene/controls/BoxContainer';
-export { default as GridContainer } from './scene/controls/GridContainer';
+export { default as Control } from './scene/controls/control';
+export { default as Container } from './scene/controls/container';
+export { default as Label } from './scene/controls/label';
+export { default as ColorRect } from './scene/controls/color_rect';
+export { default as TextureRect } from './scene/controls/texture_rect';
+export { default as NinePatchRect } from './scene/controls/nine_patch_rect';
+export { default as TextureButton } from './scene/controls/texture_button';
+export { default as TextureProgress } from './scene/controls/texture_progress';
+export { default as MarginContainer } from './scene/controls/margin_container';
+export { default as CenterContainer } from './scene/controls/center_container';
+export { VBoxContainer, HBoxContainer } from './scene/controls/box_container';
+export { default as GridContainer } from './scene/controls/grid_container';
 
 export { default as Graphics } from './scene/graphics/Graphics';
 
@@ -72,7 +72,7 @@ export {
 
 export { Path2D, PathFollow2D } from './scene/path_2d';
 
-export { default as AnimationPlayer } from './scene/animation/AnimationPlayer';
+export { default as AnimationPlayer } from './scene/animation/animation_player';
 
 export { default as RemoteTransform2D } from './scene/remote_transform_2d';
 export { default as YSort } from './scene/y_sort';

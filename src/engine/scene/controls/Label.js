@@ -1,10 +1,12 @@
-import Control from "./Control";
-import { Vector2, Rectangle, ObservableVector2 } from "engine/math/index";
-import { node_class_map } from "engine/registry";
-import { SizeFlag, Margin } from "./const";
+import Control from "./control";
 import Sprite from "../sprites/Sprite";
-import { registered_bitmap_fonts } from "../text/res";
+
+import { Vector2, Rectangle } from "engine/math/index";
 import Color from "engine/Color";
+import { SizeFlag, Margin } from "./const";
+
+import { node_class_map } from "engine/registry";
+import { registered_bitmap_fonts } from "../text/res";
 
 const tmp_vec = new Vector2();
 const tmp_vec2 = new Vector2();
@@ -21,6 +23,9 @@ const tmp_rect = new Rectangle();
 
 const tmp_color = new Color();
 
+/**
+ * @enum {number}
+ */
 const Align = {
     LEFT: 0,
     CENTER: 1,
@@ -28,6 +33,9 @@ const Align = {
     FILL: 3,
 }
 
+/**
+ * @enum {number}
+ */
 const VAlign = {
     TOP: 0,
     CENTER: 1,
@@ -62,7 +70,6 @@ export default class Label extends Control {
     }
     /**
      * @param {boolean} value
-     * @returns {this}
      */
     set_autowrap(value) {
         this.autowrap = value;
@@ -81,7 +88,6 @@ export default class Label extends Control {
     }
     /**
      * @param {boolean} value
-     * @returns {this}
      */
     set_uppercase(value) {
         this.uppercase = value;
@@ -106,7 +112,6 @@ export default class Label extends Control {
     }
     /**
      * @param {string} value
-     * @returns {this}
      */
     set_text(value) {
         this.text = value;
@@ -125,7 +130,6 @@ export default class Label extends Control {
     }
     /**
      * @param {boolean} value
-     * @returns {this}
      */
     set_clip_text(value) {
         this.clip_text = value;
@@ -146,7 +150,6 @@ export default class Label extends Control {
     }
     /**
      * @param {number} value
-     * @returns {this}
      */
     set_visible_characters(value) {
         this.visible_characters = value;
@@ -170,7 +173,6 @@ export default class Label extends Control {
     }
     /**
      * @param {number} value
-     * @returns {this}
      */
     set_percent_visible(value) {
         this.percent_visible = value;
@@ -263,7 +265,6 @@ export default class Label extends Control {
 
     /**
      * @param {Vector2} size
-     * @returns {Vector2}
      */
     get_minimum_size(size) {
         const min_style = this.get_stylebox('normal').get_minimum_size(tmp_vec);
@@ -283,9 +284,6 @@ export default class Label extends Control {
         }
     }
 
-    /**
-     * @returns {number}
-     */
     get_longest_line_width() {
         const font = this.get_font('font');
         let max_line_width = 0;
@@ -317,9 +315,7 @@ export default class Label extends Control {
 
         return max_line_width;
     }
-    /**
-     * @returns {number}
-     */
+
     get_line_count() {
         if (!this.is_inside_tree) {
             return 1;
@@ -330,24 +326,18 @@ export default class Label extends Control {
 
         return this.line_count;
     }
-    /**
-     * @returns {number}
-     */
+
     get_line_height() {
         return this.get_font('font').get_height();
     }
-    /**
-     * @returns {number}
-     */
+
     get_total_character_count() {
         if (this.word_cache_dirty) {
             this.regenerate_word_cache();
         }
         return this.total_char_cache;
     }
-    /**
-     * @returns {number}
-     */
+
     get_visible_line_count() {
         const line_spacing = this.get_constant('line_spacing');
         const font_h = this.get_font('font').height + line_spacing;
@@ -403,7 +393,6 @@ export default class Label extends Control {
             let insert_newline = false;
             let char_width = 0;
 
-            // @ts-ignore
             if (char_code < 33) {
                 if (current_word_size > 0) {
                     const wc = new WordCache();

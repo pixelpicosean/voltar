@@ -1,4 +1,4 @@
-import Control from "./Control";
+import Control from "./control";
 import { Vector2, Rectangle, clamp } from "engine/math/index";
 import { remove_items } from "engine/dep/index";
 
@@ -22,6 +22,9 @@ class Shared {
         this.allow_greater = false;
         this.allow_lesser = false;
 
+        /**
+         * @type {Range[]}
+         */
         this.owners = [];
         if (owner !== undefined) {
             this.owners.push(owner);
@@ -35,6 +38,9 @@ class Shared {
             e._value_changed_notify();
         }
     }
+    /**
+     * @param {string} what
+     */
     emit_changed(what) {
         for (let e of this.owners) {
             if (!e.is_inside_tree) {
@@ -54,7 +60,6 @@ export default class Range extends Control {
     }
     /**
      * @param {boolean} val
-     * @returns {this}
      */
     set_allow_greater(val) {
         this.allow_greater = val;
@@ -69,7 +74,6 @@ export default class Range extends Control {
     }
     /**
      * @param {boolean} val
-     * @returns {this}
      */
     set_allow_lesser(val) {
         this.allow_lesser = val;
@@ -84,7 +88,6 @@ export default class Range extends Control {
     }
     /**
      * @param {boolean} val
-     * @returns {this}
      */
     set_exp_edit(val) {
         this.exp_edit = val;
@@ -121,7 +124,6 @@ export default class Range extends Control {
     }
     /**
      * @param {number} val
-     * @returns {this}
      */
     set_value(val) {
         this.value = val;
@@ -139,7 +141,6 @@ export default class Range extends Control {
     }
     /**
      * @param {number} val
-     * @returns {this}
      */
     set_min_value(val) {
         this.min_value = val;
@@ -157,7 +158,6 @@ export default class Range extends Control {
     }
     /**
      * @param {number} val
-     * @returns {this}
      */
     set_max_value(val) {
         this.max_value = val;
@@ -173,7 +173,6 @@ export default class Range extends Control {
     }
     /**
      * @param {number} val
-     * @returns {this}
      */
     set_step(val) {
         this.step = val;
@@ -191,7 +190,6 @@ export default class Range extends Control {
     }
     /**
      * @param {number} val
-     * @returns {this}
      */
     set_page(val) {
         this.page = val;
@@ -232,7 +230,6 @@ export default class Range extends Control {
     }
     /**
      * @param {number} val
-     * @returns {this}
      */
     set_ratio(val) {
         this.ratio = val;
@@ -241,7 +238,6 @@ export default class Range extends Control {
 
     /**
      * @param {boolean} val
-     * @returns {this}
      */
     set_rounded(val) {
         this.rounded = val;
@@ -300,12 +296,19 @@ export default class Range extends Control {
         return this;
     }
 
+    /**
+     * @param {any} value
+     */
     _value_changed(value) { }
 
     _value_changed_notify() {
         this._value_changed(this.shared.val);
         this.emit_signal('value_changed', this.shared.val);
     }
+
+    /**
+     * @param {string} [what]
+     */
     _changed_notify(what) {
         this.emit_signal('changed', this.shared.val);
     }
@@ -331,6 +334,9 @@ export default class Range extends Control {
         this._ref_shared(nshared);
     }
 
+    /**
+     * @param {Shared} shared
+     */
     _ref_shared(shared) {
         if (this.shared && shared === this.shared) {
             return;

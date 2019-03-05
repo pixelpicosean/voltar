@@ -1,6 +1,6 @@
 import GLShader from 'engine/drivers/webgl/gl_shader';
 
-const vert = `
+const Vert = `
     attribute vec2 a_vertex_position;
     attribute vec4 a_color;
 
@@ -18,7 +18,7 @@ const vert = `
     }
 `;
 
-const frag = `
+const Frag = `
     varying vec4 v_color;
 
     void main(void) {
@@ -34,6 +34,6 @@ export default class PrimitiveShader extends GLShader {
      * @param {WebGLRenderingContext} gl - The webgl shader manager this shader works for.
      */
     constructor(gl) {
-        super(gl, vert, frag);
+        super(gl, Vert, Frag);
     }
 }

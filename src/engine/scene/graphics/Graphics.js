@@ -20,7 +20,7 @@ const EMPTY_POINTS = [];
 export default class Graphics extends Node2D {
     /**
      *
-     * @param {boolean} [native_lines=false] - If true the lines will be draw using LINES instead of TRIANGLE_STRIP
+     * @param {boolean} [native_lines] - If true the lines will be draw using LINES instead of TRIANGLE_STRIP
      */
     constructor(native_lines = false) {
         super();
@@ -30,7 +30,7 @@ export default class Graphics extends Node2D {
         /**
          * The alpha value used when filling the Graphics object.
          *
-         * @member {number}
+         * @type {number}
          * @default 1
          */
         this.fill_alpha = 1;
@@ -38,7 +38,7 @@ export default class Graphics extends Node2D {
         /**
          * The width (thickness) of any lines drawn.
          *
-         * @member {number}
+         * @type {number}
          * @default 0
          */
         this.line_width = 0;
@@ -46,14 +46,13 @@ export default class Graphics extends Node2D {
         /**
          * If true the lines will be draw using LINES instead of TRIANGLE_STRIP
          *
-         * @member {boolean}
+         * @type {boolean}
          */
         this.native_lines = native_lines;
 
         /**
          * The color of any lines drawn.
          *
-         * @member {string}
          * @default 0
          */
         this.line_color = 0;
@@ -61,7 +60,7 @@ export default class Graphics extends Node2D {
         /**
          * The alignment of any lines drawn (0.5 = middle, 1 = outter, 0 = inner).
          *
-         * @member {number}
+         * @type {number}
          * @default 0
          */
         this.line_alignment = 0.5;
@@ -69,7 +68,7 @@ export default class Graphics extends Node2D {
         /**
          * Graphics data
          *
-         * @member {GraphicsData[]}
+         * @type {GraphicsData[]}
          * @private
          */
         this.graphics_data = [];
@@ -78,7 +77,7 @@ export default class Graphics extends Node2D {
          * The tint applied to the graphic shape. This is a hex value. Apply a value of 0xFFFFFF to
          * reset the tint.
          *
-         * @member {number}
+         * @type {number}
          * @default 0xFFFFFF
          */
         this.tint = 0xFFFFFF;
@@ -87,7 +86,7 @@ export default class Graphics extends Node2D {
          * The previous tint applied to the graphic shape. Used to compare to the current tint and
          * check if theres change.
          *
-         * @member {number}
+         * @type {number}
          * @private
          * @default 0xFFFFFF
          */
@@ -97,7 +96,7 @@ export default class Graphics extends Node2D {
          * The blend mode to be applied to the graphic shape. Apply a value of
          * `BLEND_MODES.NORMAL` to reset the blend mode.
          *
-         * @member {number}
+         * @type {number}
          * @default BLEND_MODES.NORMAL;
          * @see BLEND_MODES
          */
@@ -106,7 +105,7 @@ export default class Graphics extends Node2D {
         /**
          * Current path
          *
-         * @member {GraphicsData}
+         * @type {GraphicsData}
          * @private
          */
         this.current_path = null;
@@ -114,30 +113,28 @@ export default class Graphics extends Node2D {
         /**
          * Array containing some WebGL-related properties used by the WebGL renderer.
          *
-         * @member {object<number, object>}
+         * @type {Object<number, object>}
          * @private
          */
-        // TODO - _webgl should use a prototype object, not a random undocumented object...
         this._webgl = {};
 
         /**
          * Whether this shape is being used as a mask.
          *
-         * @member {boolean}
+         * @type {boolean}
          */
         this.is_mask = false;
 
         /**
          * The bounds' padding used for bounds calculation.
          *
-         * @member {number}
+         * @type {number}
          */
         this.bounds_padding = 0;
 
         /**
          * A cache of the local bounds to prevent recalculation.
          *
-         * @member {Rectangle}
          * @private
          */
         this._localBounds = new Bounds();
@@ -146,33 +143,32 @@ export default class Graphics extends Node2D {
          * Used to detect if the graphics object has changed. If this is set to true then the graphics
          * object will be recalculated.
          *
-         * @member {boolean}
          * @private
          */
         this.dirty = 0;
 
         /**
          * Used to detect if we need to do a fast rect check using the id compare method
-         * @type {Number}
+         * @type {number}
          */
         this.fast_rect_dirty = -1;
 
         /**
          * Used to detect if we clear the graphics webGL data
-         * @type {Number}
+         * @type {number}
          */
         this.clear_dirty = 0;
 
         /**
          * Used to detect if we we need to recalculate local bounds
-         * @type {Number}
+         * @type {number}
          */
         this.bounds_dirty = -1;
 
         /**
          * Used to detect if the cached sprite object needs to be updated.
          *
-         * @member {boolean}
+         * @type {boolean}
          * @private
          */
         this.cached_sprite_dirty = false;
@@ -182,19 +178,6 @@ export default class Graphics extends Node2D {
 
         this._prevRectTint = null;
         this._prevRectFillColor = null;
-
-        /**
-         * When cacheAsBitmap is set to true the graphics object will be rendered as if it was a sprite.
-         * This is useful if your graphics element does not change often, as it will speed up the rendering
-         * of the object in exchange for taking up texture memory. It is also useful if you need the graphics
-         * object to be anti-aliased, because it will be rendered using canvas. This is not recommended if
-         * you are constantly redrawing the graphics element.
-         *
-         * @name cacheAsBitmap
-         * @member {boolean}
-         * @memberof Graphics#
-         * @default false
-         */
     }
 
     _load_data(data) {
@@ -268,8 +251,6 @@ export default class Graphics extends Node2D {
     /**
      * Creates a new Graphics object with the same values as this one.
      * Note that the only the properties of the object are cloned, not its transform (position,scale,etc)
-     *
-     * @return {Graphics} A clone of the graphics object
      */
     clone() {
         const clone = new Graphics();
@@ -300,23 +281,19 @@ export default class Graphics extends Node2D {
 
     /**
      * Calculate length of quadratic curve
-     * @see {@link http://www.malczak.linuxpl.com/blog/quadratic-bezier-curve-length/}
-     * for the detailed explanation of math behind this.
      *
-     * @private
-     * @param {number} fromX - x-coordinate of curve start point
-     * @param {number} fromY - y-coordinate of curve start point
-     * @param {number} cpX - x-coordinate of curve control point
-     * @param {number} cpY - y-coordinate of curve control point
-     * @param {number} toX - x-coordinate of curve end point
-     * @param {number} toY - y-coordinate of curve end point
-     * @return {number} Length of quadratic curve
+     * @param {number} from_x - x-coordinate of curve start point
+     * @param {number} from_y - y-coordinate of curve start point
+     * @param {number} cp_x - x-coordinate of curve control point
+     * @param {number} cp_y - y-coordinate of curve control point
+     * @param {number} to_x - x-coordinate of curve end point
+     * @param {number} to_y - y-coordinate of curve end point
      */
-    _quadraticCurveLength(fromX, fromY, cpX, cpY, toX, toY) {
-        const ax = fromX - ((2.0 * cpX) + toX);
-        const ay = fromY - ((2.0 * cpY) + toY);
-        const bx = 2.0 * ((cpX - 2.0) * fromX);
-        const by = 2.0 * ((cpY - 2.0) * fromY);
+    _quadraticCurveLength(from_x, from_y, cp_x, cp_y, to_x, to_y) {
+        const ax = from_x - ((2.0 * cp_x) + to_x);
+        const ay = from_y - ((2.0 * cp_y) + to_y);
+        const bx = 2.0 * ((cp_x - 2.0) * from_x);
+        const by = 2.0 * ((cp_y - 2.0) * from_y);
         const a = 4.0 * ((ax * ax) + (ay * ay));
         const b = 4.0 * ((ax * bx) + (ay * by));
         const c = (bx * bx) + (by * by);
@@ -334,8 +311,7 @@ export default class Graphics extends Node2D {
                 ((4.0 * c * a) - (b * b))
                 * Math.log(((2.0 * a2) + ba + s) / (ba + c2))
             )
-        )
-            / (4.0 * a32);
+        ) / (4.0 * a32);
     }
 
     /**
@@ -343,7 +319,6 @@ export default class Graphics extends Node2D {
      * Analytical solution is impossible, since it involves an integral that does not integrate in general.
      * Therefore numerical solution is used.
      *
-     * @private
      * @param {number} fromX - Starting point x
      * @param {number} fromY - Starting point y
      * @param {number} cpX - Control point x
@@ -352,7 +327,6 @@ export default class Graphics extends Node2D {
      * @param {number} cpY2 - Second Control point y
      * @param {number} toX - Destination point x
      * @param {number} toY - Destination point y
-     * @return {number} Length of bezier curve
      */
     _bezierCurveLength(fromX, fromY, cpX, cpY, cpX2, cpY2, toX, toY) {
         const n = 10;
@@ -396,15 +370,13 @@ export default class Graphics extends Node2D {
      *
      * @private
      * @param {number} length - length of curve
-     * @return {number} Number of segments
      */
     _segmentsCount(length) {
         let result = Math.ceil(length / Graphics.CURVES.maxLength);
 
         if (result < Graphics.CURVES.minSegments) {
             result = Graphics.CURVES.minSegments;
-        }
-        else if (result > Graphics.CURVES.maxSegments) {
+        } else if (result > Graphics.CURVES.maxSegments) {
             result = Graphics.CURVES.maxSegments;
         }
 
@@ -419,7 +391,6 @@ export default class Graphics extends Node2D {
      * @param {number} [color=0] - color of the line to draw, will update the objects stored style
      * @param {number} [alpha=1] - alpha of the line to draw, will update the objects stored style
      * @param {number} [alignment=0.5] - alignment of the line to draw, (0 = inner, 0.5 = middle, 1 = outter)
-     * @return {Graphics} This Graphics object. Good for chaining method calls
      */
     set_line_style(line_width = 0, color = 0, alpha = 1, alignment = 0.5) {
         this.line_width = line_width;
@@ -435,8 +406,7 @@ export default class Graphics extends Node2D {
                 shape.closed = false;
 
                 this.draw_shape(shape);
-            }
-            else {
+            } else {
                 // otherwise its empty so lets just set the line properties
                 this.current_path.line_width = this.line_width;
                 this.current_path.line_color = this.line_color;
@@ -453,7 +423,6 @@ export default class Graphics extends Node2D {
      *
      * @param {number} x - the X coordinate to move to
      * @param {number} y - the Y coordinate to move to
-     * @return {Graphics} This Graphics object. Good for chaining method calls
      */
     move_to(x, y) {
         const shape = new Polygon([x, y]);
@@ -470,7 +439,6 @@ export default class Graphics extends Node2D {
      *
      * @param {number} x - the X coordinate to draw to
      * @param {number} y - the Y coordinate to draw to
-     * @return {Graphics} This Graphics object. Good for chaining method calls
      */
     line_to(x, y) {
         const points = this.current_path.shape.points;
@@ -501,8 +469,7 @@ export default class Graphics extends Node2D {
             if (this.current_path.shape.points.length === 0) {
                 this.current_path.shape.points = [0, 0];
             }
-        }
-        else {
+        } else {
             this.move_to(0, 0);
         }
 
@@ -544,15 +511,13 @@ export default class Graphics extends Node2D {
      * @param {number} cpY2 - Second Control point y
      * @param {number} toX - Destination point x
      * @param {number} toY - Destination point y
-     * @return {Graphics} This Graphics object. Good for chaining method calls
      */
     bezier_curve_to(cpX, cpY, cpX2, cpY2, toX, toY) {
         if (this.current_path) {
             if (this.current_path.shape.points.length === 0) {
                 this.current_path.shape.points = [0, 0];
             }
-        }
-        else {
+        } else {
             this.move_to(0, 0);
         }
 
@@ -583,15 +548,13 @@ export default class Graphics extends Node2D {
      * @param {number} x2 - The x-coordinate of the end of the arc
      * @param {number} y2 - The y-coordinate of the end of the arc
      * @param {number} radius - The radius of the arc
-     * @return {Graphics} This Graphics object. Good for chaining method calls
      */
     arc_to(x1, y1, x2, y2, radius) {
         if (this.current_path) {
             if (this.current_path.shape.points.length === 0) {
                 this.current_path.shape.points.push(x1, y1);
             }
-        }
-        else {
+        } else {
             this.move_to(x1, y1);
         }
 
@@ -608,8 +571,7 @@ export default class Graphics extends Node2D {
             if (points[points.length - 2] !== x1 || points[points.length - 1] !== y1) {
                 points.push(x1, y1);
             }
-        }
-        else {
+        } else {
             const dd = (a1 * a1) + (b1 * b1);
             const cc = (a2 * a2) + (b2 * b2);
             const tt = (a1 * a2) + (b1 * b2);
@@ -646,7 +608,6 @@ export default class Graphics extends Node2D {
      * @param {boolean} [anticlockwise=false] - Specifies whether the drawing should be
      *  counter-clockwise or clockwise. False is default, and indicates clockwise, while true
      *  indicates counter-clockwise.
-     * @return {Graphics} This Graphics object. Good for chaining method calls
      */
     arc(cx, cy, radius, startAngle, endAngle, anticlockwise = false) {
         if (startAngle === endAngle) {
@@ -655,8 +616,7 @@ export default class Graphics extends Node2D {
 
         if (!anticlockwise && endAngle <= startAngle) {
             endAngle += PI2;
-        }
-        else if (anticlockwise && startAngle <= endAngle) {
+        } else if (anticlockwise && startAngle <= endAngle) {
             startAngle += PI2;
         }
 
@@ -683,12 +643,10 @@ export default class Graphics extends Node2D {
             if (xDiff < 0.001 && yDiff < 0.001) {
                 // If the point is very close, we don't add it, since this would lead to artifacts
                 // during tesselation due to floating point imprecision.
-            }
-            else {
+            } else {
                 points.push(startX, startY);
             }
-        }
-        else {
+        } else {
             this.move_to(startX, startY);
             points = this.current_path.shape.points;
         }
@@ -728,7 +686,6 @@ export default class Graphics extends Node2D {
      *
      * @param {number} [color=0] - the color of the fill
      * @param {number} [alpha=1] - the alpha of the fill
-     * @return {Graphics} This Graphics object. Good for chaining method calls
      */
     begin_fill(color = 0, alpha = 1) {
         this.filling = true;
@@ -748,8 +705,6 @@ export default class Graphics extends Node2D {
 
     /**
      * Applies a fill to the lines and shapes that were added since the last call to the begin_fill() method.
-     *
-     * @return {Graphics} This Graphics object. Good for chaining method calls
      */
     end_fill() {
         this.filling = false;
@@ -765,7 +720,6 @@ export default class Graphics extends Node2D {
      * @param {number} y - The Y coord of the top-left of the rectangle
      * @param {number} width - The width of the rectangle
      * @param {number} height - The height of the rectangle
-     * @return {Graphics} This Graphics object. Good for chaining method calls
      */
     draw_rect(x, y, width, height) {
         this.draw_shape(new Rectangle(x, y, width, height));
@@ -780,7 +734,6 @@ export default class Graphics extends Node2D {
      * @param {number} width - The width of the rectangle
      * @param {number} height - The height of the rectangle
      * @param {number} radius - Radius of the rectangle corners
-     * @return {Graphics} This Graphics object. Good for chaining method calls
      */
     draw_rounded_rect(x, y, width, height, radius) {
         this.draw_shape(new RoundedRectangle(x, y, width, height, radius));
@@ -794,7 +747,6 @@ export default class Graphics extends Node2D {
      * @param {number} x - The X coordinate of the center of the circle
      * @param {number} y - The Y coordinate of the center of the circle
      * @param {number} radius - The radius of the circle
-     * @return {Graphics} This Graphics object. Good for chaining method calls
      */
     draw_circle(x, y, radius) {
         this.draw_shape(new Circle(x, y, radius));
@@ -809,7 +761,6 @@ export default class Graphics extends Node2D {
      * @param {number} y - The Y coordinate of the center of the ellipse
      * @param {number} width - The half width of the ellipse
      * @param {number} height - The half height of the ellipse
-     * @return {Graphics} This Graphics object. Good for chaining method calls
      */
     draw_ellipse(x, y, width, height) {
         this.draw_shape(new Ellipse(x, y, width, height));
@@ -821,7 +772,6 @@ export default class Graphics extends Node2D {
      * Draws a polygon using the given path.
      *
      * @param {number[]|Vector2[]} path - The path data used to construct the polygon.
-     * @return {Graphics} This Graphics object. Good for chaining method calls
      */
     draw_polygon(path) {
         // prevents an argument assignment deopt
@@ -863,7 +813,6 @@ export default class Graphics extends Node2D {
      * @param {number} radius - The outer radius of the star
      * @param {number} [inner_radius] - The inner radius between points, default half `radius`
      * @param {number} [rotation=0] - The rotation of the star in radians, where 0 is vertical
-     * @return {Graphics} This Graphics object. Good for chaining method calls
      */
     draw_star(x, y, points, radius, inner_radius, rotation = 0) {
         inner_radius = inner_radius || radius / 2;
@@ -888,8 +837,6 @@ export default class Graphics extends Node2D {
 
     /**
      * Clears the graphics that were drawn to this Graphics object, and resets fill and line style settings.
-     *
-     * @return {Graphics} This Graphics object. Good for chaining method calls
      */
     clear() {
         if (this.line_width || this.filling || this.graphics_data.length > 0) {
@@ -914,8 +861,6 @@ export default class Graphics extends Node2D {
     /**
      * True if graphics consists of one rectangle, and thus, can be drawn like a Sprite and
      * masked with gl.scissor.
-     *
-     * @returns {boolean} True if only 1 rect.
      */
     is_fast_rect() {
         return this.graphics_data.length === 1
@@ -939,8 +884,7 @@ export default class Graphics extends Node2D {
         // TODO this check can be moved to dirty?
         if (this._fastRect) {
             this._renderSpriteRect(renderer);
-        }
-        else {
+        } else {
             renderer.set_object_renderer(renderer.plugins.graphics);
             renderer.plugins.graphics.render(this);
         }
@@ -963,8 +907,7 @@ export default class Graphics extends Node2D {
 
         if (this.tint === 0xffffff) {
             sprite.tint = this.graphics_data[0].fillColor;
-        }
-        else {
+        } else {
             const t1 = temp_color_1;
             const t2 = temp_color_2;
 
@@ -1015,7 +958,6 @@ export default class Graphics extends Node2D {
      * Tests if a point is inside this graphics object
      *
      * @param {Vector2} point - the point to test
-     * @return {boolean} the result of the test
      */
     contains_point(point) {
         this.world_transform.xform_inv(point, temp_point);
@@ -1086,8 +1028,7 @@ export default class Graphics extends Node2D {
 
                     min_y = y < min_y ? y : min_y;
                     max_y = y + h > max_y ? y + h : max_y;
-                }
-                else if (type === SHAPES.CIRC) {
+                } else if (type === SHAPES.CIRC) {
                     x = shape.x;
                     y = shape.y;
                     w = shape.radius + (line_width / 2);
@@ -1098,8 +1039,7 @@ export default class Graphics extends Node2D {
 
                     min_y = y - h < min_y ? y - h : min_y;
                     max_y = y + h > max_y ? y + h : max_y;
-                }
-                else if (type === SHAPES.ELIP) {
+                } else if (type === SHAPES.ELIP) {
                     x = shape.x;
                     y = shape.y;
                     w = shape.width + (line_width / 2);
@@ -1110,8 +1050,7 @@ export default class Graphics extends Node2D {
 
                     min_y = y - h < min_y ? y - h : min_y;
                     max_y = y + h > max_y ? y + h : max_y;
-                }
-                else {
+                } else {
                     // POLY
                     const points = shape.points;
                     let x2 = 0;
@@ -1150,8 +1089,7 @@ export default class Graphics extends Node2D {
                     }
                 }
             }
-        }
-        else {
+        } else {
             min_x = 0;
             max_x = 0;
             min_y = 0;
@@ -1171,7 +1109,6 @@ export default class Graphics extends Node2D {
      * Draws the given shape to this Graphics object. Can be any of Circle, Rectangle, Ellipse, Line or Polygon.
      *
      * @param {Circle|Ellipse|Polygon|Rectangle|RoundedRectangle} shape - The shape object to draw.
-     * @return {GraphicsData} The generated GraphicsData object.
      */
     draw_shape(shape) {
         if (this.current_path) {
@@ -1210,8 +1147,6 @@ export default class Graphics extends Node2D {
 
     /**
      * Closes the current path.
-     *
-     * @return {Graphics} Returns itself.
      */
     close_path() {
         // ok so close path assumes next one is a hole!
@@ -1226,8 +1161,6 @@ export default class Graphics extends Node2D {
 
     /**
      * Adds a hole in the current path.
-     *
-     * @return {Graphics} Returns itself.
      */
     add_hole() {
         // this is a hole!
@@ -1281,9 +1214,6 @@ Graphics._SPRITE_TEXTURE = null;
  *
  * @static
  * @constant
- * @memberof Graphics
- * @name CURVES
- * @type {object}
  * @property {boolean} adaptive=false - flag indicating if the resolution should be adaptive
  * @property {number} maxLength=10 - maximal length of a single segment of the curve (if adaptive = false, ignored)
  * @property {number} minSegments=8 - minimal number of segments in the curve (if adaptive = false, ignored)

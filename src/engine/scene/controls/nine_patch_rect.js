@@ -1,4 +1,4 @@
-import Control from './Control';
+import Control from './control';
 import { Margin } from './const';
 import Texture from 'engine/textures/Texture';
 import WebGLRenderer from 'engine/renderers/WebGLRenderer';
@@ -21,31 +21,29 @@ export default class NinePatchRect extends Control {
     /**
      * The texture that the sprite is using
      *
-     * @member {Texture}
+     * @type {Texture}
      */
     get texture() {
         return this._texture;
     }
     set texture(p_value) {
+        this.set_texture(p_value);
+    }
+    /**
+     * @param {string|Texture} p_value
+     */
+    set_texture(p_value) {
         this.mesh.texture = p_value;
         this._texture = this.mesh.texture;
 
         this.minimum_size_changed();
         this.emit_signal('texture_changed');
-    }
-    /**
-     * @param {string|Texture} value
-     * @returns {this}
-     */
-    set_texture(value) {
-        // @ts-ignore
-        this.texture = value;
+
         return this;
     }
 
     /**
      * @param {boolean} value
-     * @returns {this}
      */
     set_draw_center(value) {
         this.draw_center = value;
@@ -54,7 +52,6 @@ export default class NinePatchRect extends Control {
 
     /**
      * @param {number} value
-     * @returns {this}
      */
     set_axis_stretch_horizontal(value) {
         this.axis_stretch_horizontal = value;
@@ -63,7 +60,6 @@ export default class NinePatchRect extends Control {
 
     /**
      * @param {number} value
-     * @returns {this}
      */
     set_axis_stretch_vertical(value) {
         this.axis_stretch_vertical = value;
