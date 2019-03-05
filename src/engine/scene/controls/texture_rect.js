@@ -3,8 +3,8 @@ import Texture from 'engine/textures/Texture';
 import WebGLRenderer from 'engine/renderers/WebGLRenderer';
 import { node_class_map } from 'engine/registry';
 import { Vector2 } from 'engine/math/index';
-import Sprite from '../sprites/Sprite';
-import TilingSprite from '../sprites/TilingSprite';
+import Sprite from '../sprites/sprite';
+import TilingSprite from '../sprites/tiling_sprite';
 
 /**
  * @enum {number}

@@ -6,8 +6,8 @@ import { Vector2, clamp } from "engine/math/index";
 import { node_class_map } from "engine/registry";
 import { TextureCache } from "engine/utils/index";
 import WebGLRenderer from "engine/renderers/WebGLRenderer";
-import Sprite from "../sprites/Sprite";
-import TilingSprite from "../sprites/TilingSprite";
+import Sprite from "../sprites/sprite";
+import TilingSprite from "../sprites/tiling_sprite";
 import NineSlicePlane from "../mesh/NineSlicePlane";
 import Graphics from "../graphics/Graphics";
 

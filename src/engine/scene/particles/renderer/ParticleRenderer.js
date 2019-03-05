@@ -9,7 +9,7 @@ import { Matrix } from 'engine/math/index';
 import ParticleShader from './ParticleShader';
 import ParticleBuffer from './ParticleBuffer';
 import ParticleNode2D from '../ParticleNode2D';
-import Sprite from 'engine/scene/sprites/Sprite';
+import Sprite from 'engine/scene/sprites/sprite';
 
 /**
  * @author Mat Groves

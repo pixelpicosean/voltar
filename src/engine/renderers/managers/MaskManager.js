@@ -1,8 +1,8 @@
 import WebGLManager from './WebGLManager';
 import AlphaMaskFilter from '../filters/sprite_mask/SpriteMaskFilter';
 import WebGLRenderer from '../WebGLRenderer';
-import Node2D from 'engine/scene/Node2D';
-import Sprite from 'engine/scene/sprites/Sprite';
+import Node2D from 'engine/scene/node_2d';
+import Sprite from 'engine/scene/sprites/sprite';
 import Graphics from 'engine/scene/graphics/Graphics';
 import RenderTarget from '../utils/RenderTarget';
 

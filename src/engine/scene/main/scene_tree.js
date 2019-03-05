@@ -1,7 +1,7 @@
 import VisualServer from '../../servers/visual/visual_server';
 import PhysicsServer from 'engine/servers/physics_2d/physics_server';
 import MessageQueue from '../../MessageQueue';
-import Node2D from '../Node2D';
+import Node2D from '../node_2d';
 import Vector from '../../math/Vector2';
 import { shared as shared_ticker } from '../../ticker/index';
 import Loader from 'engine/core/io/Loader';
@@ -9,7 +9,7 @@ import { mixins, deep_merge } from '../../utils/index';
 
 import { outer_box_resize } from '../../resize';
 import { optional, scene_class_map, node_class_map, res_procs } from '../../registry';
-import Theme, { default_font_name } from '../resources/Theme';
+import Theme, { default_font_name } from '../resources/theme';
 import { registered_bitmap_fonts } from '../text/res';
 import { assemble_scene, settings, SCALE_MODES } from '../../index';
 import World2D from '../resources/world_2d';

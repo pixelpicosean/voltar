@@ -9,8 +9,8 @@ loader_use_procs.push(bitmap_font_parser);
 // Register to global node class map
 import { node_class_map } from 'engine/registry';
 
-import Text from './Text';
-import BitmapText from './BitmapText';
+import Text from './text';
+import BitmapText from './bitmap_text';
 
 node_class_map['Text'] = Text;
 node_class_map['BitmapText'] = BitmapText;

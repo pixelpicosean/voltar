@@ -31,7 +31,7 @@ export const node_plugins = {
 
 /**
  * @typedef PackedScene
- * @property {() => import('./scene/Node2D').default} instance
+ * @property {() => import('./scene/node_2d').default} instance
  */
 /**
  * Scene class looking table

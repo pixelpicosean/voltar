@@ -1,7 +1,7 @@
 import { remove_items } from 'engine/dep/index';
 import { Vector2, ObservableVector2, Rectangle } from 'engine/math/index';
-import Node2D from '../Node2D';
-import Sprite from '../sprites/Sprite';
+import Node2D from '../node_2d';
+import Sprite from '../sprites/sprite';
 import { registered_bitmap_fonts } from './res';
 
 /**
@@ -28,7 +28,7 @@ import { registered_bitmap_fonts } from './res';
  *
  * ```js
  * // in this case the font is in a file called 'desyrel.fnt'
- * let bitmapText = new extras.BitmapText("text using a fancy font!", {font: "35px Desyrel", align: "right"});
+ * let bitmapText = new BitmapText("text using a fancy font!", {font: "35px Desyrel", align: "right"});
  * ```
  *
  * http://www.angelcode.com/products/bmfont/ for windows or

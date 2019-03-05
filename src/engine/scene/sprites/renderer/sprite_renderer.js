@@ -9,7 +9,7 @@ import GLBuffer from 'engine/drivers/webgl/gl_buffer';
 
 import BaseTexture from 'engine/textures/BaseTexture';
 
-import Buffer from './BatchBuffer';
+import Buffer from './batch_buffer';
 import create_indices_for_quads from 'engine/utils/create_indices_for_quads';
 import generate_multi_texture_shader from './generate_multi_texture_shader';
 
@@ -87,7 +87,7 @@ export default class SpriteRenderer extends ObjectRenderer {
             this.groups[k] = { textures: [], texture_count: 0, ids: [], size: 0, start: 0, blend: 0 };
         }
 
-        /** @type {import('../Sprite').default[]} */
+        /** @type {import('../sprite').default[]} */
         this.sprites = [];
 
         /** @type {BaseTexture[]} */

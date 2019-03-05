@@ -4,7 +4,7 @@ import { RENDERER_TYPE } from '../const';
 import { say_hello, hex2string, hex2rgb } from '../utils/index';
 import { Matrix, Rectangle } from '../math/index';
 import { VObject } from 'engine/dep/index';
-import Node2D from '../scene/Node2D';
+import Node2D from '../scene/node_2d';
 import RenderTexture from '../textures/RenderTexture';
 
 const temp_matrix = new Matrix();

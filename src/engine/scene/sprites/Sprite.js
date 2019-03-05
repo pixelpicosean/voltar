@@ -5,7 +5,7 @@ import WebGLRenderer from 'engine/renderers/WebGLRenderer';
 
 import Texture from 'engine/textures/Texture';
 
-import Node2D from '../Node2D';
+import Node2D from '../node_2d';
 
 const temp_point = new Vector2();
 
@@ -438,7 +438,7 @@ export default class Sprite extends Node2D {
 
     /**
      * Destroys this sprite and optionally its texture and children
-     * @param {import('../Node2D').DestroyOption|boolean} [options] - Options parameter. A boolean will act as if all options
+     * @param {import('../node_2d').DestroyOption|boolean} [options] - Options parameter. A boolean will act as if all options
      *  have been set to that value
      */
     destroy(options) {

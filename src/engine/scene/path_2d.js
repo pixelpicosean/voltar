@@ -1,4 +1,4 @@
-import Node2D from './Node2D';
+import Node2D from './node_2d';
 import { Curve2D } from './resources/curve';
 import { node_class_map } from 'engine/registry';
 import {

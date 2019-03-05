@@ -12,17 +12,17 @@ export * from 'engine/dep/index';
 // ------------------------------------------------------------------
 // Node
 // ------------------------------------------------------------------
-import Node2D from './scene/Node2D';
+import Node2D from './scene/node_2d';
 
 export { default as Viewport } from './scene/main/viewport';
 export { default as CanvasLayer } from './scene/main/canvas_layer';
 
-export { default as Node2D } from './scene/Node2D';
+export { default as Node2D } from './scene/node_2d';
 
-export { default as Sprite } from './scene/sprites/Sprite';
-export { default as AnimatedSprite } from './scene/sprites/AnimatedSprite';
-export { default as TilingSprite } from './scene/sprites/TilingSprite';
-export { default as NineSliceSprite } from './scene/sprites/NineSliceSprite';
+export { default as Sprite } from './scene/sprites/sprite';
+export { default as AnimatedSprite } from './scene/sprites/animated_sprite';
+export { default as TilingSprite } from './scene/sprites/tiling_sprite';
+export { default as NineSliceSprite } from './scene/sprites/nine_slice_sprite';
 
 export { default as Control } from './scene/controls/control';
 export { default as Container } from './scene/controls/container';
@@ -39,8 +39,8 @@ export { default as GridContainer } from './scene/controls/grid_container';
 
 export { default as Graphics } from './scene/graphics/Graphics';
 
-export { default as BitmapText } from './scene/text/BitmapText';
-export { default as Text } from './scene/text/Text';
+export { default as BitmapText } from './scene/text/bitmap_text';
+export { default as Text } from './scene/text/text';
 
 export { default as TileMap } from './scene/map/tile_map';
 
@@ -83,7 +83,7 @@ export {
 } from './scene/visibility_notifier_2d';
 
 export { default as Camera2D } from './scene/camera_2d';
-export { default as Timer } from './scene/Timer';
+export { default as Timer } from './scene/timer';
 
 export { default as InteractionEvent } from './interaction/InteractionEvent';
 

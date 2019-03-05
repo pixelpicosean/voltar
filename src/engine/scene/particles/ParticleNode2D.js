@@ -1,7 +1,7 @@
 import { BLEND_MODES } from 'engine/const';
 import { hex2rgb } from 'engine/utils/index';
 
-import Node2D from '../Node2D';
+import Node2D from '../node_2d';
 
 /**
  * The ParticleNode2D class is a really fast version of the Node2D built solely for speed,

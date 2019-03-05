@@ -1,4 +1,4 @@
-import Node2D from "../Node2D";
+import Node2D from "../node_2d";
 import { Vector2, rad2deg, deg2rad, Matrix, Transform, ObservableVector2 } from "engine/math/index";
 import { node_class_map } from "engine/registry";
 

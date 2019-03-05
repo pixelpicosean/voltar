@@ -1,4 +1,4 @@
-import Node2D from "../Node2D";
+import Node2D from "../node_2d";
 import { Rectangle, Vector2 } from "engine/math/index";
 import ConvexPolygonShape2D from "../resources/convex_polygon_shape_2d";
 import decompose_in_convex from "engine/math/convex";

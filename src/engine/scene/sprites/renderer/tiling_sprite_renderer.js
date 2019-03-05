@@ -10,7 +10,7 @@ import Quad from 'engine/renderers/utils/Quad';
 import { Matrix } from 'engine/math/index';
 import { premultiply_tint_to_rgba, correct_blend_mode } from 'engine/utils/index';
 
-import TilingSprite from '../TilingSprite';
+import TilingSprite from '../tiling_sprite';
 
 import Vert from './tiling_sprite.vert';
 import Frag from './tiling_sprite.frag';

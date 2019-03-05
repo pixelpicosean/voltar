@@ -8,7 +8,6 @@ export default class StyleBox {
     /**
      * @param {Margin} margin
      * @param {number} value
-     * @returns {this}
      */
     set_default_margin(margin, value) {
         this.margin[margin] = value;
@@ -16,14 +15,12 @@ export default class StyleBox {
     }
     /**
      * @param {Margin} margin
-     * @returns {number}
      */
     get_default_margin(margin) {
         return this.margin[margin];
     }
     /**
      * @param {Margin} margin
-     * @returns {number}
      */
     get_margin(margin) {
         if (this.margin[margin] < 0) {
@@ -34,14 +31,12 @@ export default class StyleBox {
     }
     /**
      * @param {Margin} margin
-     * @returns {number}
      */
     get_style_margin(margin) {
         return 0;
     }
     /**
      * @param {Vector2} size
-     * @returns {Vector2}
      */
     get_center_size(size) {
         return size.set(0, 0);
@@ -49,7 +44,6 @@ export default class StyleBox {
 
     /**
      * @param {Vector2} size
-     * @returns {Vector2}
      */
     get_minimum_size(size) {
         return size.set(
@@ -59,7 +53,6 @@ export default class StyleBox {
     }
     /**
      * @param {Vector2} size
-     * @returns {Vector2}
      */
     get_offset(size) {
         return size.set(this.get_margin(Margin.Left), this.get_margin(Margin.Top));

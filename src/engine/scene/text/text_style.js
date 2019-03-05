@@ -1,6 +1,3 @@
-// disabling eslint for now, going to rewrite this in v5
-/* eslint-disable */
-
 import { TEXT_GRADIENT } from 'engine/const';
 import { hex2string } from 'engine/utils/index';
 
@@ -622,14 +619,12 @@ export default class TextStyle {
 /**
  * Utility function to convert hexadecimal colors to strings, and simply return the color if it's a string.
  *
- * @param {number|number[]} color
- * @return {string} The color as a string.
+ * @param {number|string} color
  */
 function getSingleColor(color) {
     if (typeof color === 'number') {
         return hex2string(color);
-    }
-    else if (typeof color === 'string') {
+    } else if (typeof color === 'string') {
         if (color.indexOf('0x') === 0) {
             color = color.replace('0x', '#');
         }
@@ -642,14 +637,12 @@ function getSingleColor(color) {
  * Utility function to convert hexadecimal colors to strings, and simply return the color if it's a string.
  * This version can also convert array of colors
  *
- * @param {number|number[]} color
- * @return {string} The color as a string.
+ * @param {number|string} color
  */
 function getColor(color) {
     if (!Array.isArray(color)) {
         return getSingleColor(color);
-    }
-    else {
+    } else {
         for (let i = 0; i < color.length; ++i) {
             color[i] = getSingleColor(color[i]);
         }

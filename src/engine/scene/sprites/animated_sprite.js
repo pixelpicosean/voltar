@@ -2,7 +2,7 @@ import { TextureCache, SpriteFramesCache } from 'engine/utils/index';
 import { Rectangle } from 'engine/math/index';
 import remove_items from 'remove-array-items';
 import Texture from 'engine/textures/Texture';
-import Sprite from './Sprite';
+import Sprite from './sprite';
 
 export class Anim {
     constructor() {
@@ -359,7 +359,7 @@ export default class AnimatedSprite extends Sprite {
     }
 
     /**
-     * @param {string} anim
+     * @param {string} [anim]
      * @param {boolean} [restart]
      */
     play(anim, restart = false) {
@@ -385,6 +385,9 @@ export default class AnimatedSprite extends Sprite {
         this.timeout = this._get_frame_duration();
         this.is_over = false;
     }
+    /**
+     * @param {boolean} playing
+     */
     _set_playing(playing) {
         if (this._playing === playing) {
             return;
@@ -490,7 +493,7 @@ export default class AnimatedSprite extends Sprite {
     /**
      * Stops the AnimatedSprite and destroys it
      *
-     * @param {import('../Node2D').DestroyOption|boolean} [options] - Options parameter. A boolean will act as if all options
+     * @param {import('../node_2d').DestroyOption|boolean} [options] - Options parameter. A boolean will act as if all options
      *  have been set to that value
      */
     destroy(options) {

@@ -1,7 +1,7 @@
 import remove_items from 'remove-array-items';
 import { Vector2 } from '../math/index';
 import keyboard from './keyboard';
-import Node2D from 'engine/scene/Node2D';
+import Node2D from 'engine/scene/node_2d';
 import { InteractionEvent } from 'engine/interaction/enable';
 
 

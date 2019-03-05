@@ -4,7 +4,7 @@ import InteractionEvent from './InteractionEvent';
 import InteractionTrackingData from './InteractionTrackingData';
 import interactive_target from './interactive_target';
 import { mixins } from 'engine/utils/index';
-import Node2D from 'engine/scene/Node2D';
+import Node2D from 'engine/scene/node_2d';
 import WebGLRenderer from 'engine/renderers/WebGLRenderer';
 import Vector2 from 'engine/math/Vector2';
 import * as ticker from 'engine/ticker/index';

@@ -1,5 +1,5 @@
 // Based on pixi-tilemap master~02218a043cacd310b49e2801a117423cb46b23d3
-import Node2D from '../Node2D';
+import Node2D from '../node_2d';
 
 import { TextureCache } from 'engine/utils/index';
 import { Matrix, Vector2 } from 'engine/math/index';

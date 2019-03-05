@@ -1,4 +1,4 @@
-import Node2D from './Node2D';
+import Node2D from './node_2d';
 import { node_class_map } from 'engine/registry';
 
 export default class Timer extends Node2D {
@@ -16,6 +16,9 @@ export default class Timer extends Node2D {
         this.has_transform = false;
     }
 
+    /**
+     * @param {number} time
+     */
     set_wait_time(time) {
         this.wait_time = time;
     }
@@ -23,6 +26,9 @@ export default class Timer extends Node2D {
         return this.wait_time;
     }
 
+    /**
+     * @param {boolean} one_shot
+     */
     set_one_shot(one_shot) {
         this.one_shot = one_shot;
     }
@@ -30,6 +36,9 @@ export default class Timer extends Node2D {
         return this.one_shot;
     }
 
+    /**
+     * @param {boolean} autostart
+     */
     set_autostart(autostart) {
         this.autostart = autostart;
     }
@@ -47,6 +56,9 @@ export default class Timer extends Node2D {
         this.autostart = false;
     }
 
+    /**
+     * @param {boolean} paused
+     */
     set_paused(paused) {
         if (this.paused === paused) {
             return;
@@ -79,6 +91,9 @@ export default class Timer extends Node2D {
 
         this._ready();
     }
+    /**
+     * @param {number} delta
+     */
     _propagate_process(delta) {
         if (this.processing) {
             this.time_left -= delta;

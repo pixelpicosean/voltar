@@ -1,4 +1,4 @@
-import Node2D from './Node2D';
+import Node2D from './node_2d';
 import { node_class_map } from 'engine/registry';
 
 /**

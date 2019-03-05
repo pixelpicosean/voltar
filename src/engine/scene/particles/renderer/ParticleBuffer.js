@@ -1,4 +1,4 @@
-import Node2D from '../../Node2D';
+import Node2D from '../../node_2d';
 import create_indices_for_quads from 'engine/utils/create_indices_for_quads';
 import GLBuffer from 'engine/drivers/webgl/gl_buffer';
 import VertexArrayObject from 'engine/drivers/webgl/vao';

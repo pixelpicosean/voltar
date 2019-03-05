@@ -1,4 +1,4 @@
-import Node2D from '../Node2D';
+import Node2D from '../node_2d';
 import { Matrix } from 'engine/math/index';
 import Shape2D from '../resources/shape_2d';
 import PhysicsServer from 'engine/servers/physics_2d/physics_server';
@@ -64,8 +64,10 @@ export default class CollisionObject2D extends Node2D {
         this.only_update_transform_changes = false;
 
         if (p_area) {
+            // @ts-ignore
             PhysicsServer.singleton.area_attach_object_instance(/** @type {Area2DSW} */(this.rid), this);
         } else {
+            // @ts-ignore
             PhysicsServer.singleton.body_attach_object_instance(/** @type {Body2DSW} */(this.rid), this);
         }
     }

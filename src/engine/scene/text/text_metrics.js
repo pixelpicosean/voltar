@@ -1,18 +1,17 @@
+import TextStyle from "./text_style";
+
 /**
  * The TextMetrics object represents the measurement of a block of text with a specified style.
  *
  * ```js
- * let style = new v.TextStyle({fontFamily : 'Arial', fontSize: 24, fill : 0xff1010, align : 'center'})
- * let textMetrics = v.TextMetrics.measureText('Your text', style)
+ * let style = new TextStyle({fontFamily : 'Arial', fontSize: 24, fill : 0xff1010, align : 'center'})
+ * let textMetrics = TextMetrics.measureText('Your text', style)
  * ```
- *
- * @class
- * @memberOf v
  */
 export default class TextMetrics {
     /**
      * @param {string} text - the text that was measured
-     * @param {v.TextStyle} style - the style that was measured
+     * @param {TextStyle} style - the style that was measured
      * @param {number} width - the measured width of the text
      * @param {number} height - the measured height of the text
      * @param {array} lines - an array of the lines of text broken by new lines and wrapping if specified in style
@@ -37,10 +36,10 @@ export default class TextMetrics {
      * Measures the supplied string of text and returns a Rectangle.
      *
      * @param {string} text - the text to measure.
-     * @param {v.TextStyle} style - the text style to use for measuring
+     * @param {TextStyle} style - the text style to use for measuring
      * @param {boolean} [wordWrap] - optional override for if word-wrap should be applied to the text.
      * @param {HTMLCanvasElement} [canvas] - optional specification of the canvas to use for measuring.
-     * @return {v.TextMetrics} measured width and height of the text.
+     * @return {TextMetrics} measured width and height of the text.
      */
     static measureText(text, style, wordWrap, canvas = TextMetrics._canvas) {
         wordWrap = (wordWrap === undefined || wordWrap === null) ? style.wordWrap : wordWrap;
@@ -94,7 +93,7 @@ export default class TextMetrics {
      *
      * @private
      * @param {string} text - String to apply word wrapping to
-     * @param {v.TextStyle} style - the style to use when wrapping
+     * @param {TextStyle} style - the style to use when wrapping
      * @param {HTMLCanvasElement} [canvas] - optional specification of the canvas to use for measuring.
      * @return {string} New string with new lines applied where required
      */
@@ -462,7 +461,6 @@ export default class TextMetrics {
      *
      * @static
      * @param {string} font - String representing the style of the font
-     * @return {v.TextMetrics~FontMetrics} Font properties object
      */
     static measureFont(font) {
         // as this method is used for preparing assets, don't recalculate things if we don't need to

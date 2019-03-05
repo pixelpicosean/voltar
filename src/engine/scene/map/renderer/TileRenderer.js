@@ -1,7 +1,7 @@
 import ObjectRenderer from 'engine/renderers/utils/ObjectRenderer';
 
 import RenderTexture from 'engine/textures/RenderTexture';
-import Sprite from '../../sprites/Sprite';
+import Sprite from '../../sprites/sprite';
 import { WRAP_MODES, BLEND_MODES } from 'engine/const';
 
 import GLBuffer from 'engine/drivers/webgl/gl_buffer';

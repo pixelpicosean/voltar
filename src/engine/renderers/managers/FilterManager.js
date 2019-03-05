@@ -8,7 +8,7 @@ import RenderTarget from '../utils/RenderTarget';
 import Filter from '../filters/Filter';
 
 import Quad from '../utils/Quad';
-import Node2D from 'engine/scene/Node2D';
+import Node2D from 'engine/scene/node_2d';
 
 export class FilterState {
     constructor() {

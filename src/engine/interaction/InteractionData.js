@@ -1,5 +1,5 @@
 import { Vector2 } from "engine/math/index";
-import Node2D from "engine/scene/Node2D";
+import Node2D from "engine/scene/node_2d";
 
 /**
  * Holds all information related to an Interaction event

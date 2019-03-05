@@ -31,23 +31,14 @@ export default class Font {
         this.char_map = {};
     }
 
-    /**
-     * @returns {number}
-     */
     get_height() {
         return this.height;
     }
 
-    /**
-     * @returns {number}
-     */
     get_ascent() {
         return this.ascent;
     }
 
-    /**
-     * @returns {number}
-     */
     get_descent() {
         return this.height - this.ascent;
     }
@@ -56,7 +47,6 @@ export default class Font {
      * @param {Vector2} size
      * @param {string} char
      * @param {string} [next]
-     * @returns {Vector2}
      */
     get_char_size(size, char, next = '') {
         const c = this.char_map[char.charCodeAt(0)];
@@ -82,7 +72,6 @@ export default class Font {
     /**
      * @param {Vector2} size
      * @param {string} string
-     * @returns {Vector2}
      */
     get_string_size(size, string) {
         let w = 0;

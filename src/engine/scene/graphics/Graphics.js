@@ -1,7 +1,7 @@
-import Node2D from '../Node2D';
+import Node2D from '../node_2d';
 import Texture from '../../textures/Texture';
 import GraphicsData from './GraphicsData';
-import Sprite from '../sprites/Sprite';
+import Sprite from '../sprites/sprite';
 import { Vector2, Rectangle, RoundedRectangle, Ellipse, Polygon, Circle, Bounds, PI2 } from '../../math/index';
 import { hex2rgb, rgb2hex } from '../../utils/index';
 import { SHAPES, BLEND_MODES } from '../../const';

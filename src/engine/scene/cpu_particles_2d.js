@@ -1,4 +1,4 @@
-import Node2D from './Node2D';
+import Node2D from './node_2d';
 import Color from 'engine/Color';
 import {
     Vector2,
@@ -9,7 +9,7 @@ import {
     PI2,
 } from 'engine/math/index';
 import { randf, rand_range_i } from 'engine/rnd';
-import Sprite from './sprites/Sprite';
+import Sprite from './sprites/sprite';
 import WebGLRenderer from 'engine/renderers/WebGLRenderer';
 import { node_class_map } from 'engine/registry';
 import { Curve } from './resources/curve';

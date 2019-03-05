@@ -1,7 +1,7 @@
 import Filter from '../Filter';
 import { Matrix } from 'engine/math/index';
 import TextureMatrix from 'engine/textures/TextureMatrix';
-import Sprite from 'engine/scene/sprites/Sprite';
+import Sprite from 'engine/scene/sprites/sprite';
 import RenderTarget from '../../utils/RenderTarget';
 import FilterManager from '../../managers/FilterManager';
 

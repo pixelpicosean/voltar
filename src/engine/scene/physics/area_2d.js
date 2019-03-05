@@ -5,7 +5,7 @@ import { AreaSpaceOverrideMode, ShapeType } from 'engine/scene/physics/const';
 import { Vector2, Circle, Rectangle } from 'engine/math/index';
 import Area2DSW from 'engine/servers/physics_2d/area_2d_sw';
 import { remove_items } from 'engine/dep/index';
-import Node2D from '../Node2D';
+import Node2D from '../node_2d';
 import { PhysicsBody2D } from './physics_body_2d';
 import { CircleShape2D } from 'engine/index';
 import { SHAPES } from 'engine/const';
@@ -366,16 +366,21 @@ export default class Area2D extends CollisionObject2D {
             if (!shape) {
                 shape = this._first_shape = this.shape_find_owner(0);
             }
+            // @ts-ignore
             if (shape.shape) {
+                // @ts-ignore
                 switch (shape.shape.shape.type) {
                     case ShapeType.RECTANGLE: {
+                        // @ts-ignore
                         this.hit_area = shape.shape.get_rect();
                     } break;
                     case ShapeType.CIRCLE: {
+                        // @ts-ignore
                         const shape_inst = /** @type {CircleShape2D} */ (shape.shape);
                         this.hit_area = new Circle(shape.x, shape.y, shape_inst.radius);
                     } break;
                     default: {
+                        // @ts-ignore
                         console.log(`Area2D hit area with "${shape.shape.shape.type}" shape is not supported!`);
                     } break;
                 }

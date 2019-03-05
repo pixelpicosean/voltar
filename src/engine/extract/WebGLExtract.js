@@ -1,7 +1,7 @@
 import Rectangle from "engine/math/shapes/Rectangle";
 import WebGLRenderer from "engine/renderers/WebGLRenderer";
 import RenderTexture from "engine/textures/RenderTexture";
-import Node2D from "engine/scene/Node2D";
+import Node2D from "engine/scene/node_2d";
 import CanvasRenderTarget from "engine/renderers/utils/CanvasRenderTarget";
 
 const TEMP_RECT = new Rectangle();

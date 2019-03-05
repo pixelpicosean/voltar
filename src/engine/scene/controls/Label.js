@@ -1,5 +1,5 @@
 import Control from "./control";
-import Sprite from "../sprites/Sprite";
+import Sprite from "../sprites/sprite";
 
 import { Vector2, Rectangle } from "engine/math/index";
 import Color from "engine/Color";

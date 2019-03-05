@@ -1,5 +1,5 @@
-import Node2D from '../Node2D';
-import Sprite from './Sprite';
+import Node2D from '../node_2d';
+import Sprite from './sprite';
 import Texture from 'engine/textures/Texture';
 import { Rectangle } from 'engine/math/index';
 import { TextureCache } from 'engine/utils/index';

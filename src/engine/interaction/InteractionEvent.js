@@ -1,4 +1,4 @@
-import Node2D from "engine/scene/Node2D";
+import Node2D from "engine/scene/node_2d";
 import InteractionData from "./InteractionData";
 
 /**

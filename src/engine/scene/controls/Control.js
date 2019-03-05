@@ -7,7 +7,7 @@ import {
 } from 'engine/math/index';
 import MessageQueue from 'engine/MessageQueue';
 import { BLEND_MODES } from 'engine/const';
-import Node2D from '../Node2D';
+import Node2D from '../node_2d';
 import { node_class_map } from 'engine/registry';
 
 import {
@@ -16,9 +16,9 @@ import {
     SizeFlag,
     GrowDirection,
 } from './const';
-import Theme from '../resources/Theme';
-import StyleBox from '../resources/StyleBox';
-import Font from '../resources/Font';
+import Theme from '../resources/theme';
+import StyleBox from '../resources/style_box';
+import Font from '../resources/font';
 import Color from 'engine/Color';
 
 const tmp_vec = new Vector2();

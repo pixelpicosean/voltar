@@ -1,4 +1,4 @@
-import Node2D from "../Node2D";
+import Node2D from "../node_2d";
 import Shape2D from "../resources/shape_2d";
 import { Rectangle } from "engine/math/index";
 import { res_class_map } from "engine/registry";
@@ -88,6 +88,7 @@ export default class CollisionShape2D extends Node2D {
         super._load_data(p_data);
 
         if (p_data.shape !== undefined) {
+            // @ts-ignore
             this.set_shape(new res_class_map[p_data.shape.type]()._load_data(p_data.shape));
         }
 
