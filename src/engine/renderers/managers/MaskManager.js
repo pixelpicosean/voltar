@@ -31,10 +31,6 @@ export default class MaskManager extends WebGLManager {
      * @param {Sprite|Graphics} mask_data - The masking data.
      */
     push_mask(target, mask_data) {
-        // TODO the root check means scissor rect will not
-        // be used on render textures more info here:
-        // https://github.com/pixijs/pixi.js/pull/3545
-
         // @ts-ignore
         if (mask_data.texture) {
             // @ts-ignore

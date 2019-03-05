@@ -846,7 +846,7 @@ export default class Node2D extends VObject {
 
     /**
      * The scale factor of the object.
-     * Assignment by value since pixi-v4.
+     * Assignment by value.
      *
      * @type {ObservableVector2}
      */
@@ -884,7 +884,7 @@ export default class Node2D extends VObject {
 
     /**
      * The pivot point of the node that it rotates around
-     * Assignment by value since pixi-v4.
+     * Assignment by value.
      *
      * @type {ObservableVector2}
      */
@@ -918,7 +918,7 @@ export default class Node2D extends VObject {
 
     /**
      * The skew factor for the object in radians.
-     * Assignment by value since pixi-v4.
+     * Assignment by value.
      *
      * @type {ObservableVector2}
      */

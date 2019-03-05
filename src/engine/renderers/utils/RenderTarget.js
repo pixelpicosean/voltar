@@ -172,7 +172,7 @@ export default class RenderTarget {
     attach_stencil_buffer() {
         // TODO check if stencil is done?
         /**
-         * The stencil buffer is used for masking in pixi
+         * The stencil buffer is used for masking.
          * lets create one and then add attach it to the framebuffer..
          */
         if (!this.root) {

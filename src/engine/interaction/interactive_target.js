@@ -39,7 +39,7 @@ export default {
 
     /**
      * Determines if the children to the node can be clicked/touched
-     * Setting this to false allows pixi to bypass a recursive `hit_test` function
+     * Setting this to false to bypass a recursive `hit_test` function
      *
      * @type {boolean}
      */

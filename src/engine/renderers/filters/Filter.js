@@ -81,7 +81,7 @@ export default class Filter {
         this.enabled = true;
 
         /**
-         * If enabled, pixi will fit the filter area into boundaries for better performance.
+         * If enabled, engine will fit the filter area into boundaries for better performance.
          * Switch it off if it does not work for specific shader.
          */
         this.auto_fit = true;

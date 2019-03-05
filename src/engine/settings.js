@@ -135,7 +135,7 @@ export default {
     GC_MAX_CHECK_COUNT: 60 * 10,
 
     /**
-     * Default wrap modes that are supported by pixi.
+     * Default wrap modes that are supported.
      *
      * @type {WRAP_MODES}
      * @default WRAP_MODES.CLAMP
@@ -143,7 +143,7 @@ export default {
     WRAP_MODE: WRAP_MODES.CLAMP,
 
     /**
-     * The scale modes that are supported by pixi.
+     * The scale modes that are supported.
      *
      * @type {SCALE_MODES}
      * @default SCALE_MODES.LINEAR

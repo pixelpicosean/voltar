@@ -27,7 +27,7 @@ const DIV_HOOK_ZINDEX = 2;
 
 /**
  * The Accessibility manager recreates the ability to tab and have content read by screen
- * readers. This is very important as it can possibly help people with disabilities access pixi
+ * readers. This is very important as it can possibly help people with disabilities access
  * content.
  *
  * Much like interaction any Node2D can be made accessible. This manager will map the
@@ -45,7 +45,7 @@ export default class AccessibilityManager {
             this.create_touch_hook();
         }
 
-        // first we create a div that will sit over the pixi element. This is where the div overlays will go.
+        // first we create a div that will sit over the game element. This is where the div overlays will go.
         const div = document.createElement('div');
 
         div.style.width = `${DIV_TOUCH_SIZE}px`;
@@ -56,7 +56,7 @@ export default class AccessibilityManager {
         div.style.zIndex = `${DIV_TOUCH_ZINDEX}`;
 
         /**
-         * This is the dom element that will sit over the pixi element. This is where the div overlays will go.
+         * This is the dom element that will sit over the game element. This is where the div overlays will go.
          *
          * @type {HTMLElement}
          * @private
@@ -391,7 +391,7 @@ export default class AccessibilityManager {
     }
 
     /**
-     * Maps the div button press to pixi's InteractionManager (click)
+     * Maps the div button press to game's InteractionManager (click)
      *
      * @private
      * @param {MouseEvent} e - The click event.
@@ -403,7 +403,7 @@ export default class AccessibilityManager {
     }
 
     /**
-     * Maps the div focus events to pixi's InteractionManager (mouseover)
+     * Maps the div focus events to game's InteractionManager (mouseover)
      *
      * @private
      * @param {FocusEvent} e - The focus event.
@@ -418,7 +418,7 @@ export default class AccessibilityManager {
     }
 
     /**
-     * Maps the div focus events to pixi's InteractionManager (mouseout)
+     * Maps the div focus events to game's InteractionManager (mouseout)
      *
      * @private
      * @param {FocusEvent} e - The focusout event.

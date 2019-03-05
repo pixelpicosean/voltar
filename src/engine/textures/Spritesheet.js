@@ -204,7 +204,7 @@ export default class Spritesheet {
                     data.anchor
                 );
 
-                // lets also add the frame to pixi's global cache for from_frame and from_image functions
+                // lets also add the frame to global cache for from_frame and from_image functions
                 Texture.add_to_cache(this.textures[i], i);
             }
 

@@ -1,7 +1,7 @@
 import { BLEND_MODES } from '../const';
 
 /**
- * Corrects pixi blend, takes premultiplied alpha into account
+ * Corrects blend, takes premultiplied alpha into account
  *
  * @param {number[][]} [array] - The array to output into.
  * @return {number[][]} Mapped modes.

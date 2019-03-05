@@ -273,7 +273,7 @@ export default class FilterManager extends WebGLManager {
         const tex = this.renderer.empty_textures[0];
 
         this.renderer.bound_textures[0] = tex;
-        // this syncs the pixi filters  uniforms with glsl uniforms
+        // this syncs the filters  uniforms with glsl uniforms
         this.sync_uniforms(shader, filter);
 
         renderer.state.set_blend_mode(filter.blend_mode);
@@ -296,7 +296,7 @@ export default class FilterManager extends WebGLManager {
         const uniform_data = filter.uniform_data;
         const uniforms = filter.uniforms;
 
-        // 0 is reserved for the pixi texture so we start at 1!
+        // 0 is reserved for the texture so we start at 1!
         let texture_count = 1;
         /** @type {FilterState} */
         let current_state = null;
@@ -362,7 +362,7 @@ export default class FilterManager extends WebGLManager {
 
                 texture_count++;
             } else if (type === 'mat3') {
-                // check if its pixi matrix..
+                // check if its matrix..
                 if (uniforms[i].a !== undefined) {
                     shader.uniforms[i] = uniforms[i].to_array(true);
                 }

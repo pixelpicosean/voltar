@@ -3,7 +3,7 @@ import { PI2, Rectangle } from '../index';
 import { Circle } from './index';
 
 /**
- * The pixi Matrix class as an object, which makes it a lot faster,
+ * The Matrix class as an object, which makes it a lot faster,
  * here is a representation of it :
  * | a | c | tx|
  * | b | d | ty|

@@ -75,9 +75,9 @@ export const DRAW_MODES = {
 };
 
 /**
- * The scale modes that are supported by pixi.
+ * Supported scale modes.
  *
- * The {@link SCALE_MODE} scale mode affects the default scaling mode of future operations.
+ * The scale mode affects the default scaling mode of future operations.
  * It can be re-assigned to either LINEAR or NEAREST, depending upon suitability.
  *
  * @enum {number}
@@ -88,9 +88,9 @@ export const SCALE_MODES = {
 };
 
 /**
- * The wrap modes that are supported by pixi.
+ * Supported wrap modes.
  *
- * The {@link WRAP_MODE} wrap mode affects the default wrapping mode of future operations.
+ * The wrap mode affects the default wrapping mode of future operations.
  * It can be re-assigned to either CLAMP or REPEAT, depending upon suitability.
  * If the texture is non power of two then clamp will be used regardless as webGL can
  * only use REPEAT if the texture is po2.
@@ -106,9 +106,9 @@ export const WRAP_MODES = {
 };
 
 /**
- * The gc modes that are supported by pixi.
+ * The supported gc modes.
  *
- * The {@link GC_MODE} Garbage Collection mode for pixi textures is AUTO
+ * The Garbage Collection mode for textures is AUTO
  * If set to GC_MODE, the renderer will occasionally check textures usage. If they are not
  * used for a specified period of time they will be removed from the GPU. They will of course
  * be uploaded again when they are required. This is a silent behind the scenes process that

@@ -323,7 +323,7 @@ export default class Texture extends VObject {
             name = image_url;
         }
 
-        // lets also add the frame to pixi's global cache for from_frame and from_image fucntions
+        // lets also add the frame to global cache for from_frame and from_image fucntions
         BaseTexture.add_to_cache(texture.base_texture, name);
         Texture.add_to_cache(texture, name);
 
