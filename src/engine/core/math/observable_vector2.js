@@ -1,4 +1,4 @@
-import Vector2 from './Vector2';
+import Vector2 from './_vector2';
 import { CMP_EPSILON } from './const';
 
 const tmp_point = new Vector2();
@@ -101,7 +101,7 @@ export default class ObservableVector2 {
     /**
      * Copies the data from another point
      *
-     * @param {import('./Vector2').Vector2Like|ObservableVector2} point - point to copy from
+     * @param {import('./_vector2').Vector2Like|ObservableVector2} point - point to copy from
      */
     copy(point) {
         if (this._x !== point.x || this._y !== point.y) {
@@ -170,7 +170,7 @@ export default class ObservableVector2 {
     snapped(by) { }
 
     /**
-     * @param {import('./Vector2').Vector2Like} b
+     * @param {import('./_vector2').Vector2Like} b
      */
     equals(b) {
         const a0 = this._x, a1 = this._y;
@@ -185,8 +185,8 @@ export default class ObservableVector2 {
     /**
      * Add the vector by another vector or number.
      *
-     * @param {import('./Vector2').Vector2Like|number} x
-     * @param {import('./Vector2').Vector2Like|number} [y]
+     * @param {import('./_vector2').Vector2Like|number} x
+     * @param {import('./_vector2').Vector2Like|number} [y]
      * @returns {this}
      */
     add(x, y) {
@@ -207,8 +207,8 @@ export default class ObservableVector2 {
     /**
      * Subtract the vector by another vector or number.
      *
-     * @param {import('./Vector2').Vector2Like|number} x
-     * @param {import('./Vector2').Vector2Like|number} [y]
+     * @param {import('./_vector2').Vector2Like|number} x
+     * @param {import('./_vector2').Vector2Like|number} [y]
      * @returns {this}
      */
     subtract(x, y) {
@@ -229,8 +229,8 @@ export default class ObservableVector2 {
     /**
      * Multiply the vector by another vector or number.
      *
-     * @param {import('./Vector2').Vector2Like|number} x
-     * @param {import('./Vector2').Vector2Like|number} [y]
+     * @param {import('./_vector2').Vector2Like|number} x
+     * @param {import('./_vector2').Vector2Like|number} [y]
      * @returns {this}
      */
     multiply(x, y) {
@@ -251,8 +251,8 @@ export default class ObservableVector2 {
     /**
      * Divide x and y by another vector or number.
      *
-     * @param {import('./Vector2').Vector2Like|number} x
-     * @param {import('./Vector2').Vector2Like|number} [y]
+     * @param {import('./_vector2').Vector2Like|number} x
+     * @param {import('./_vector2').Vector2Like|number} [y]
      * @returns {this}
      */
     divide(x, y) {
@@ -273,7 +273,7 @@ export default class ObservableVector2 {
     /**
      * Dot multiply another vector.
      *
-     * @param {import('./Vector2').Vector2Like} b
+     * @param {import('./_vector2').Vector2Like} b
      * @returns {number}
      */
     dot(b) {
@@ -282,7 +282,7 @@ export default class ObservableVector2 {
     /**
      * Cross multiply another vector.
      *
-     * @param {import('./Vector2').Vector2Like} b
+     * @param {import('./_vector2').Vector2Like} b
      * @returns {number}
      */
     cross(b) {

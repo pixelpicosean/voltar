@@ -1,5 +1,5 @@
-import Vector2 from './Vector2';
-import Transform from './Transform';
+import Vector2 from './_vector2';
+import Transform from './_transform';
 import Rectangle from './shapes/rectangle';
 
 /**

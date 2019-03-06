@@ -1,5 +1,5 @@
-import ObservableVector2 from './ObservableVector2';
-import Matrix from './Matrix';
+import ObservableVector2 from './observable_vector2';
+import Matrix from './_matrix';
 
 /**
  * Transform that takes care about its versions

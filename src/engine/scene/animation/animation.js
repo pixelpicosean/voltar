@@ -1,4 +1,4 @@
-import Vector2 from "engine/core/math/Vector2";
+import Vector2 from "engine/core/math/_vector2";
 
 /**
  * @enum {number}

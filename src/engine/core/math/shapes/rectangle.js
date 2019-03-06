@@ -1,5 +1,5 @@
 import { SHAPES } from 'engine/const';
-import Vector2 from '../Vector2';
+import Vector2 from '../_vector2';
 
 /**
  * @type {Rectangle[]}
