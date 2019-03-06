@@ -17,7 +17,7 @@ import TextureGarbageCollector from './TextureGarbageCollector';
 import RenderTarget from './utils/RenderTarget';
 import WebGLState from './WebGLState';
 
-import Texture from 'engine/textures/Texture';
+import Texture from 'engine/textures/texture';
 import BaseTexture from 'engine/textures/BaseTexture';
 import RenderTexture from 'engine/textures/RenderTexture';
 

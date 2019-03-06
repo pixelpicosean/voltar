@@ -1,5 +1,5 @@
 import { Matrix } from '../math/index';
-import Texture from './Texture';
+import Texture from './texture';
 
 const temp_mat = new Matrix();
 

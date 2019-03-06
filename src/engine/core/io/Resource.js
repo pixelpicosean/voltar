@@ -1,6 +1,6 @@
 import parse_uri from './parse_uri';
 import { VObject } from 'engine/dep/index';
-import Texture from 'engine/textures/Texture';
+import Texture from 'engine/textures/texture';
 import Spritesheet from 'engine/textures/Spritesheet';
 import Font from 'engine/scene/resources/font';
 

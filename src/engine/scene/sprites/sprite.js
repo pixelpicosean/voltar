@@ -3,7 +3,7 @@ import { Vector2, ObservableVector2, Rectangle } from 'engine/math/index';
 import { sign, TextureCache } from 'engine/utils/index';
 import WebGLRenderer from 'engine/renderers/WebGLRenderer';
 
-import Texture from 'engine/textures/Texture';
+import Texture from 'engine/textures/texture';
 
 import Node2D from '../node_2d';
 

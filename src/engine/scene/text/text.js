@@ -3,7 +3,7 @@ import { TEXT_GRADIENT } from 'engine/const';
 import { Rectangle } from 'engine/math/index';
 import { sign, rgb2hex, hex2string } from 'engine/utils/index';
 import trim_canvas from 'engine/utils/trim_canvas';
-import Texture from 'engine/textures/Texture';
+import Texture from 'engine/textures/texture';
 import Sprite from 'engine/scene/sprites/sprite';
 
 import TextStyle from './text_style';

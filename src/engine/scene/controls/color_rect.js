@@ -1,8 +1,8 @@
 import Control from './control';
 
 import WebGLRenderer from 'engine/renderers/WebGLRenderer';
-import Texture from 'engine/textures/Texture';
-import Color from 'engine/Color';
+import Texture from 'engine/textures/texture';
+import Color from 'engine/color';
 
 import { rgb2hex } from 'engine/utils/index';
 import { node_class_map } from 'engine/registry';

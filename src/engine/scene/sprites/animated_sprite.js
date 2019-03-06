@@ -1,7 +1,7 @@
 import { TextureCache, SpriteFramesCache } from 'engine/utils/index';
 import { Rectangle } from 'engine/math/index';
 import remove_items from 'remove-array-items';
-import Texture from 'engine/textures/Texture';
+import Texture from 'engine/textures/texture';
 import Sprite from './sprite';
 
 export class Anim {

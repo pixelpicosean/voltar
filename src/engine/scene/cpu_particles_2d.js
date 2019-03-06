@@ -1,5 +1,5 @@
 import Node2D from './node_2d';
-import Color from 'engine/Color';
+import Color from 'engine/color';
 import {
     Vector2,
     Matrix,

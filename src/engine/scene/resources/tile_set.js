@@ -1,7 +1,7 @@
 import Shape2D from './shape_2d';
 import { Matrix, Vector2, Rectangle } from 'engine/math/index';
-import Color from 'engine/Color';
-import Texture from 'engine/textures/Texture';
+import Color from 'engine/color';
+import Texture from 'engine/textures/texture';
 import { TextureCache } from 'engine/utils/index';
 import { res_procs } from 'engine/registry';
 

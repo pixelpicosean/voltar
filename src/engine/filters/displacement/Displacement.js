@@ -7,7 +7,7 @@ import RenderTarget from 'engine/renderers/utils/RenderTarget';
 
 import VertShader from '../fragments/default_filter_matrix.vert';
 import FragShader from './displacement.frag';
-import Texture from 'engine/textures/Texture';
+import Texture from 'engine/textures/texture';
 
 /**
  * The Displacement class uses the pixel values from the specified texture

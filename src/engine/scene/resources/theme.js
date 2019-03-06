@@ -1,7 +1,7 @@
 import StyleBox from "./style_box";
 import { Margin } from "../controls/const";
 import Font from "./font";
-import Color from "engine/Color";
+import Color from "engine/color";
 
 export const default_font_name = '04b03';
 

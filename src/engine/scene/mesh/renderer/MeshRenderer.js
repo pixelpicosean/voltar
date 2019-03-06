@@ -8,7 +8,7 @@ import VertexArrayObject from 'engine/drivers/webgl/vao';
 import ObjectRenderer from 'engine/renderers/utils/ObjectRenderer';
 import WebGLRenderer from 'engine/renderers/WebGLRenderer';
 
-import Mesh from '../Mesh';
+import Mesh from '../mesh';
 
 import Vert from './mesh.vert';
 import Frag from './mesh.frag';

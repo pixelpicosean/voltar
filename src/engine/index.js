@@ -46,10 +46,10 @@ export { default as TileMap } from './scene/map/tile_map';
 
 export { default as CPUParticles2D } from './scene/cpu_particles_2d';
 
-export { default as Mesh } from './scene/mesh/Mesh';
-export { default as Plane } from './scene/mesh/Plane';
+export { default as Mesh } from './scene/mesh/mesh';
+export { default as Plane } from './scene/mesh/plane';
 export { default as NineSlicePlane } from './scene/mesh/NineSlicePlane';
-export { default as Rope } from './scene/mesh/Rope';
+export { default as Rope } from './scene/mesh/rope';
 
 export { default as Area2D } from './scene/physics/area_2d';
 export {
@@ -95,14 +95,14 @@ export { default as Resource } from 'engine/core/io/Resource';
 // ------------------------------------------------------------------
 export { default as OS } from './core/os';
 
-export { default as Color } from './Color';
+export { default as Color } from './color';
 export { Curve, Curve2D } from './scene/resources/curve';
 
 export { default as TextureUvs } from './textures/TextureUvs';
 export { default as TextureMatrix } from './textures/TextureMatrix';
 
 export { default as BaseTexture } from './textures/BaseTexture';
-export { default as Texture } from './textures/Texture';
+export { default as Texture } from './textures/texture';
 
 export { default as BaseRenderTexture } from './textures/BaseRenderTexture';
 export { default as RenderTexture } from './textures/RenderTexture';

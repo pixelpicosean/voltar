@@ -19,7 +19,7 @@ import {
 import ObservableVector2 from 'engine/math/ObservableVector2';
 import Filter from 'engine/renderers/filters/Filter';
 import { rgb2hex } from 'engine/utils/index';
-import Color from 'engine/Color';
+import Color from 'engine/color';
 
 const tmp_color = new Color(1, 1, 1, 1);
 

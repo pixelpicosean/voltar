@@ -1,5 +1,5 @@
 import Resource from 'engine/core/io/Resource';
-import Texture from 'engine/textures/Texture';
+import Texture from 'engine/textures/texture';
 
 export default function () {
     return function texture_parser(/** @type {Resource} */ resource, /** @type {Function} */next) {

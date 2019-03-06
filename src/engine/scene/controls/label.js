@@ -2,7 +2,7 @@ import Control from "./control";
 import Sprite from "../sprites/sprite";
 
 import { Vector2, Rectangle } from "engine/math/index";
-import Color from "engine/Color";
+import Color from "engine/color";
 import { SizeFlag, Margin } from "./const";
 
 import { node_class_map } from "engine/registry";

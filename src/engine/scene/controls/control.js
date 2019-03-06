@@ -19,7 +19,7 @@ import {
 import Theme from '../resources/theme';
 import StyleBox from '../resources/style_box';
 import Font from '../resources/font';
-import Color from 'engine/Color';
+import Color from 'engine/color';
 
 const tmp_vec = new Vector2();
 const tmp_vec2 = new Vector2();

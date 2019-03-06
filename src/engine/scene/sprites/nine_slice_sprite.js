@@ -1,6 +1,6 @@
 import Node2D from '../node_2d';
 import Sprite from './sprite';
-import Texture from 'engine/textures/Texture';
+import Texture from 'engine/textures/texture';
 import { Rectangle } from 'engine/math/index';
 import { TextureCache } from 'engine/utils/index';
 

@@ -1,7 +1,7 @@
 import { Rectangle } from '../math/index';
 import { get_resolution_of_url } from '../utils/index';
 import BaseTexture from './BaseTexture';
-import Texture from './Texture';
+import Texture from './texture';
 
 /**
  * Utility class for maintaining reference to a collection

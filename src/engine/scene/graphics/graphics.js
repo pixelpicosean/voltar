@@ -1,7 +1,7 @@
 import Node2D from '../node_2d';
 import Sprite from '../sprites/sprite';
 import GraphicsData from './graphics_data';
-import Texture from '../../textures/Texture';
+import Texture from '../../textures/texture';
 import {
     PI2,
     Vector2,

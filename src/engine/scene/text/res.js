@@ -1,5 +1,5 @@
 import settings from 'engine/settings';
-import Texture from 'engine/textures/Texture';
+import Texture from 'engine/textures/texture';
 import { get_resolution_of_url } from 'engine/utils/index';
 import { Rectangle } from 'engine/math/index';
 import Font, { Character } from '../resources/font';

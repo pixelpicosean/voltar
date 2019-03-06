@@ -4,7 +4,7 @@ import GLTexture from 'engine/drivers/webgl/gl_texture';
 import RenderTarget from './utils/RenderTarget';
 import WebGLRenderer from './WebGLRenderer';
 import BaseTexture from 'engine/textures/BaseTexture';
-import Texture from 'engine/textures/Texture';
+import Texture from 'engine/textures/texture';
 
 /**
  * Helper class to create a webGL Texture

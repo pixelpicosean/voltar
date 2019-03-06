@@ -1,4 +1,4 @@
-import Ticker from './Ticker';
+import Ticker from './ticker';
 
 /**
  * The shared ticker instance used by {@link interaction.InteractionManager}.

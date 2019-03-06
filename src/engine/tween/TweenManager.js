@@ -1,4 +1,4 @@
-import Tween from './Tween';
+import Tween from './tween';
 import { remove_items } from 'engine/dep/index';
 
 export default class TweenManager {

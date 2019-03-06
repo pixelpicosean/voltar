@@ -1,7 +1,7 @@
 import { Margin } from "./const";
-import Color from "engine/Color";
+import Color from "engine/color";
 import Range from "./range";
-import Texture from "engine/textures/Texture";
+import Texture from "engine/textures/texture";
 import { Vector2, clamp } from "engine/math/index";
 import { node_class_map } from "engine/registry";
 import { TextureCache } from "engine/utils/index";
