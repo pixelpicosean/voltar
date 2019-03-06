@@ -99,7 +99,7 @@ export default class Rectangle {
     /**
      * returns the left edge of the rectangle
      *
-     * @member {number}
+     * @type {number}
      */
     get left() {
         return this.x;
@@ -108,7 +108,7 @@ export default class Rectangle {
     /**
      * returns the right edge of the rectangle
      *
-     * @member {number}
+     * @type {number}
      */
     get right() {
         return this.x + this.width;
@@ -117,7 +117,7 @@ export default class Rectangle {
     /**
      * returns the top edge of the rectangle
      *
-     * @member {number}
+     * @type {number}
      */
     get top() {
         return this.y;
@@ -126,7 +126,7 @@ export default class Rectangle {
     /**
      * returns the bottom edge of the rectangle
      *
-     * @member {number}
+     * @type {number}
      */
     get bottom() {
         return this.y + this.height;
@@ -134,8 +134,6 @@ export default class Rectangle {
 
     /**
      * Creates a clone of this Rectangle
-     *
-     * @return {Rectangle} a copy of the rectangle
      */
     clone() {
         return Rectangle.new(this.x, this.y, this.width, this.height);
@@ -145,7 +143,6 @@ export default class Rectangle {
      * Copies another rectangle to this one.
      *
      * @param {Rectangle} rectangle - The rectangle to copy.
-     * @return {Rectangle} Returns itself.
      */
     copy(rectangle) {
         this.x = rectangle.x;
@@ -172,7 +169,6 @@ export default class Rectangle {
      *
      * @param {number} x - The X coordinate of the point to test
      * @param {number} y - The Y coordinate of the point to test
-     * @return {boolean} Whether the x/y coordinates are within this Rectangle
      */
     contains(x, y) {
         if (this.width <= 0 || this.height <= 0) {
@@ -332,7 +328,6 @@ export default class Rectangle {
 
     /**
      * @param {Rectangle} p_rect
-     * @returns {boolean}
      */
     intersects(p_rect) {
         return !(
@@ -351,7 +346,6 @@ export default class Rectangle {
      * @param {Vector2} p_to
      * @param {Vector2} [r_pos]
      * @param {Vector2} [r_normal]
-     * @returns {boolean}
      */
     intersects_segment(p_from, p_to, r_pos = undefined, r_normal = undefined) {
         let min = 0, max = 1;

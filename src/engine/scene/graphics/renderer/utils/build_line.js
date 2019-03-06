@@ -1,36 +1,30 @@
 import { Vector2 } from 'engine/math/index';
 import { hex2rgb } from 'engine/utils/index';
 import GraphicsData from '../../GraphicsData';
+import WebGLGraphicsData from '../WebGLGraphicsData';
 
 /**
  * Builds a line to draw
  *
- * Ignored from docs since it is not directly exposed.
- *
  * @param {GraphicsData} graphics_data - The graphics object containing all the necessary properties
- * @param {object} webgl_data - an object containing all the webGL-specific information to create this shape
- * @param {object} webgl_data_native_lines - an object containing all the webGL-specific information to create native_lines
+ * @param {WebGLGraphicsData} webgl_data - an object containing all the webGL-specific information to create this shape
+ * @param {WebGLGraphicsData} webgl_data_native_lines - an object containing all the webGL-specific information to create native_lines
  */
-export default function(graphics_data, webgl_data, webgl_data_native_lines) {
+export default function build_line(graphics_data, webgl_data, webgl_data_native_lines) {
     if (graphics_data.native_lines) {
-        build_native_line(graphics_data, webgl_data_native_lines);
-    }
-    else {
-        build_line(graphics_data, webgl_data);
+        _build_native_line(graphics_data, webgl_data_native_lines);
+    } else {
+        _build_line(graphics_data, webgl_data);
     }
 }
 
 /**
- * Builds a line to draw using the poligon method.
+ * Builds a line to draw using the polygon method.
  *
- * Ignored from docs since it is not directly exposed.
- *
- * @ignore
- * @private
  * @param {GraphicsData} graphics_data - The graphics object containing all the necessary properties
- * @param {object} webGLData - an object containing all the webGL-specific information to create this shape
+ * @param {WebGLGraphicsData} webgl_data - an object containing all the webGL-specific information to create this shape
  */
-function build_line(graphics_data, webGLData) {
+function _build_line(graphics_data, webgl_data) {
     // TODO: OPTIMISE!
     let points = graphics_data.points;
 
@@ -48,31 +42,31 @@ function build_line(graphics_data, webGLData) {
     // }
 
     // get first and last point.. figure out the middle!
-    const firstPoint = new Vector2(points[0], points[1]);
-    let lastPoint = new Vector2(points[points.length - 2], points[points.length - 1]);
+    const first_point = new Vector2(points[0], points[1]);
+    let last_point = new Vector2(points[points.length - 2], points[points.length - 1]);
 
     // if the first point is the last point - gonna have issues :)
-    if (firstPoint.x === lastPoint.x && firstPoint.y === lastPoint.y) {
+    if (first_point.x === last_point.x && first_point.y === last_point.y) {
         // need to clone as we are going to slightly modify the shape..
         points = points.slice();
 
         points.pop();
         points.pop();
 
-        lastPoint = new Vector2(points[points.length - 2], points[points.length - 1]);
+        last_point = new Vector2(points[points.length - 2], points[points.length - 1]);
 
-        const midPointX = lastPoint.x + ((firstPoint.x - lastPoint.x) * 0.5);
-        const midPointY = lastPoint.y + ((firstPoint.y - lastPoint.y) * 0.5);
+        const mid_point_x = last_point.x + ((first_point.x - last_point.x) * 0.5);
+        const mid_point_y = last_point.y + ((first_point.y - last_point.y) * 0.5);
 
-        points.unshift(midPointX, midPointY);
-        points.push(midPointX, midPointY);
+        points.unshift(mid_point_x, mid_point_y);
+        points.push(mid_point_x, mid_point_y);
     }
 
-    const verts = webGLData.points;
-    const indices = webGLData.indices;
+    const verts = webgl_data.points;
+    const indices = webgl_data.indices;
     const length = points.length / 2;
-    let indexCount = points.length;
-    let indexStart = verts.length / 6;
+    let index_count = points.length;
+    let index_start = verts.length / 6;
 
     // DRAW the Line
     const width = graphics_data.line_width / 2;
@@ -105,7 +99,7 @@ function build_line(graphics_data, webGLData) {
     perpx *= width;
     perpy *= width;
 
-    const ratio = graphics_data.lineAlignment;// 0.5;
+    const ratio = graphics_data.line_alignment; // 0.5
     const r1 = (1 - ratio) * 2;
     const r2 = ratio * 2;
 
@@ -199,9 +193,8 @@ function build_line(graphics_data, webGLData) {
             verts.push(p2x - (perp3x * r2 * r1), p2y - (perp3y * r1));
             verts.push(r, g, b, alpha);
 
-            indexCount++;
-        }
-        else {
+            index_count++;
+        } else {
             verts.push(p2x + ((px - p2x) * r1), p2y + ((py - p2y) * r1));
             verts.push(r, g, b, alpha);
 
@@ -231,32 +224,28 @@ function build_line(graphics_data, webGLData) {
     verts.push(p2x + (perpx * r2), p2y + (perpy * r2));
     verts.push(r, g, b, alpha);
 
-    indices.push(indexStart);
+    indices.push(index_start);
 
-    for (let i = 0; i < indexCount; ++i) {
-        indices.push(indexStart++);
+    for (let i = 0; i < index_count; ++i) {
+        indices.push(index_start++);
     }
 
-    indices.push(indexStart - 1);
+    indices.push(index_start - 1);
 }
 
 /**
  * Builds a line to draw using the gl.drawArrays(gl.LINES) method
  *
- * Ignored from docs since it is not directly exposed.
- *
- * @ignore
- * @private
  * @param {GraphicsData} graphics_data - The graphics object containing all the necessary properties
- * @param {object} webGLData - an object containing all the webGL-specific information to create this shape
+ * @param {WebGLGraphicsData} webgl_data - an object containing all the webGL-specific information to create this shape
  */
-function build_native_line(graphics_data, webGLData) {
+function _build_native_line(graphics_data, webgl_data) {
     let i = 0;
     const points = graphics_data.points;
 
     if (points.length === 0) return;
 
-    const verts = webGLData.points;
+    const verts = webgl_data.points;
     const length = points.length / 2;
 
     // sort color

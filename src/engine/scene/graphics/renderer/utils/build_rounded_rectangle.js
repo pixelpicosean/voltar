@@ -1,26 +1,29 @@
 import earcut from 'earcut';
-import buildLine from './build_line';
+import { Rectangle, Circle } from 'engine/math/index';
 import { hex2rgb } from 'engine/utils/index';
+import GraphicsData from '../../GraphicsData';
 import WebGLGraphicsData from '../WebGLGraphicsData';
+import build_line from './build_line';
 
 /**
  * Builds a rounded rectangle to draw
  *
- * Ignored from docs since it is not directly exposed.
- *
- * @param {WebGLGraphicsData} graphics_data - The graphics object containing all the necessary properties
- * @param {object} webgl_data - an object containing all the webGL-specific information to create this shape
- * @param {object} webgl_data_native_lines - an object containing all the webGL-specific information to create native_lines
+ * @param {GraphicsData} graphics_data - The graphics object containing all the necessary properties
+ * @param {WebGLGraphicsData} webgl_data - an object containing all the webGL-specific information to create this shape
+ * @param {WebGLGraphicsData} webgl_data_native_lines - an object containing all the webGL-specific information to create native_lines
  */
 export default function build_rounded_rectangle(graphics_data, webgl_data, webgl_data_native_lines) {
-    const rect_data = graphics_data.shape;
+    const circ_data = /** @type {Circle} */(graphics_data.shape);
+    const rect_data = /** @type {Rectangle} */(graphics_data.shape);
+
+    const radius = circ_data.radius;
+
     const x = rect_data.x;
     const y = rect_data.y;
     const width = rect_data.width;
     const height = rect_data.height;
 
-    const radius = rect_data.radius;
-
+    /** @type {number[]} */
     const rect_points = [];
 
     rect_points.push(x, y + radius);
@@ -33,7 +36,7 @@ export default function build_rounded_rectangle(graphics_data, webgl_data, webgl
     // TODO - fix this properly, this is not very elegant.. but it works for now.
 
     if (graphics_data.fill) {
-        const color = hex2rgb(graphics_data.fillColor);
+        const color = hex2rgb(graphics_data.fill_color);
         const alpha = graphics_data.fill_alpha;
 
         const r = color[0] * alpha;
@@ -65,7 +68,7 @@ export default function build_rounded_rectangle(graphics_data, webgl_data, webgl
 
         graphics_data.points = rect_points;
 
-        buildLine(graphics_data, webgl_data, webgl_data_native_lines);
+        build_line(graphics_data, webgl_data, webgl_data_native_lines);
 
         graphics_data.points = temp_points;
     }
@@ -76,17 +79,12 @@ export default function build_rounded_rectangle(graphics_data, webgl_data, webgl
  * Utility function used by quadraticBezierCurve.
  * Ignored from docs since it is not directly exposed.
  *
- * @ignore
- * @private
  * @param {number} n1 - first number
  * @param {number} n2 - second number
  * @param {number} perc - percentage
- * @return {number} the result
- *
  */
 function get_point(n1, n2, perc) {
     const diff = n2 - n1;
-
     return n1 + (diff * perc);
 }
 
@@ -94,20 +92,15 @@ function get_point(n1, n2, perc) {
  * Calculate the points for a quadratic bezier curve. (helper function..)
  * Based on: https://stackoverflow.com/questions/785097/how-do-i-implement-a-bezier-curve-in-c
  *
- * Ignored from docs since it is not directly exposed.
- *
- * @ignore
- * @private
- * @param {number} fromX - Origin point x
- * @param {number} fromY - Origin point x
- * @param {number} cpX - Control point x
- * @param {number} cpY - Control point y
- * @param {number} toX - Destination point x
- * @param {number} toY - Destination point y
- * @param {number[]} [out=[]] - The output array to add points into. If not passed, a new array is created.
- * @return {number[]} an array of points
+ * @param {number} from_x - Origin point x
+ * @param {number} from_y - Origin point x
+ * @param {number} cp_x - Control point x
+ * @param {number} cp_y - Control point y
+ * @param {number} to_x - Destination point x
+ * @param {number} to_y - Destination point y
+ * @param {number[]} [out] - The output array to add points into. If not passed, a new array is created.
  */
-function quadratic_bezier_curve(fromX, fromY, cpX, cpY, toX, toY, out = []) {
+function quadratic_bezier_curve(from_x, from_y, cp_x, cp_y, to_x, to_y, out = []) {
     const n = 20;
     const points = out;
 
@@ -122,10 +115,10 @@ function quadratic_bezier_curve(fromX, fromY, cpX, cpY, toX, toY, out = []) {
         j = i / n;
 
         // The Green Line
-        xa = get_point(fromX, cpX, j);
-        ya = get_point(fromY, cpY, j);
-        xb = get_point(cpX, toX, j);
-        yb = get_point(cpY, toY, j);
+        xa = get_point(from_x, cp_x, j);
+        ya = get_point(from_y, cp_y, j);
+        xb = get_point(cp_x, to_x, j);
+        yb = get_point(cp_y, to_y, j);
 
         // The Black Dot
         x = get_point(xa, xb, j);

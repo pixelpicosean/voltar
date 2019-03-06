@@ -23,6 +23,7 @@ export default class WebGLGraphicsData {
          * @type {number[]}
          */
         this.color = [0, 0, 0];
+        this.alpha = 0;
 
         /**
          * An array of points to draw

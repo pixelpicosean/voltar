@@ -1,4 +1,4 @@
-import Rectangle from './Rectangle';
+import Rectangle from './rectangle';
 import { SHAPES } from '../../const';
 
 /**
@@ -6,32 +6,32 @@ import { SHAPES } from '../../const';
  */
 export default class Ellipse {
     /**
-     * @param {number} [x=0] - The X coordinate of the center of this circle
-     * @param {number} [y=0] - The Y coordinate of the center of this circle
-     * @param {number} [width=0] - The half width of this ellipse
-     * @param {number} [height=0] - The half height of this ellipse
+     * @param {number} [x] - The X coordinate of the center of this circle
+     * @param {number} [y] - The Y coordinate of the center of this circle
+     * @param {number} [width] - The half width of this ellipse
+     * @param {number} [height] - The half height of this ellipse
      */
     constructor(x = 0, y = 0, width = 0, height = 0) {
         /**
-         * @member {number}
+         * @type {number}
          * @default 0
          */
         this.x = x;
 
         /**
-         * @member {number}
+         * @type {number}
          * @default 0
          */
         this.y = y;
 
         /**
-         * @member {number}
+         * @type {number}
          * @default 0
          */
         this.width = width;
 
         /**
-         * @member {number}
+         * @type {number}
          * @default 0
          */
         this.height = height;
@@ -39,18 +39,14 @@ export default class Ellipse {
         /**
          * The type of the object, mainly used to avoid `instanceof` checks
          *
-         * @member {number}
+         * @type {number}
          * @readOnly
-         * @default SHAPES.ELIP
-         * @see SHAPES
          */
         this.type = SHAPES.ELIP;
     }
 
     /**
      * Creates a clone of this Ellipse instance
-     *
-     * @return {Ellipse} a copy of the ellipse
      */
     clone() {
         return new Ellipse(this.x, this.y, this.width, this.height);
@@ -61,7 +57,6 @@ export default class Ellipse {
      *
      * @param {number} x - The X coordinate of the point to test
      * @param {number} y - The Y coordinate of the point to test
-     * @return {boolean} Whether the x/y coords are within this ellipse
      */
     contains(x, y) {
         if (this.width <= 0 || this.height <= 0) {
@@ -80,8 +75,6 @@ export default class Ellipse {
 
     /**
      * Returns the framing rectangle of the ellipse as a Rectangle object
-     *
-     * @return {Rectangle} the framing rectangle
      */
     get_bounds() {
         return new Rectangle(this.x - this.width, this.y - this.height, this.width, this.height);

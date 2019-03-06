@@ -1,18 +1,19 @@
-import { hex2rgb } from 'engine/utils/index';
-import build_line from './build_line';
 import earcut from 'earcut';
+import { hex2rgb } from 'engine/utils/index';
+import { Polygon } from 'engine/math/index';
+import build_line from './build_line';
+import GraphicsData from '../../GraphicsData';
+import WebGLGraphicsData from '../WebGLGraphicsData';
 
 /**
  * Builds a polygon to draw
  *
- * Ignored from docs since it is not directly exposed.
- *
- * @param {WebGLGraphicsData} graphics_data - The graphics object containing all the necessary properties
- * @param {object} webgl_data - an object containing all the webGL-specific information to create this shape
- * @param {object} webgl_data_native_lines - an object containing all the webGL-specific information to create native_lines
+ * @param {GraphicsData} graphics_data - The graphics object containing all the necessary properties
+ * @param {WebGLGraphicsData} webgl_data - an object containing all the webGL-specific information to create this shape
+ * @param {WebGLGraphicsData} webgl_data_native_lines - an object containing all the webGL-specific information to create native_lines
  */
 export default function build_poly(graphics_data, webgl_data, webgl_data_native_lines) {
-    graphics_data.points = graphics_data.shape.points.slice();
+    graphics_data.points = /** @type {Polygon} */(graphics_data.shape).points.slice();
 
     let points = graphics_data.points;
 
@@ -36,7 +37,7 @@ export default function build_poly(graphics_data, webgl_data, webgl_data_native_
         const length = points.length / 2;
 
         // sort color
-        const color = hex2rgb(graphics_data.fillColor);
+        const color = hex2rgb(graphics_data.fill_color);
         const alpha = graphics_data.fill_alpha;
         const r = color[0] * alpha;
         const g = color[1] * alpha;
@@ -59,8 +60,10 @@ export default function build_poly(graphics_data, webgl_data, webgl_data_native_
         }
 
         for (let i = 0; i < length; i++) {
-            verts.push(points[i * 2], points[(i * 2) + 1],
-                r, g, b, alpha);
+            verts.push(
+                points[i * 2], points[(i * 2) + 1],
+                r, g, b, alpha
+            );
         }
     }
 

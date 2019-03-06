@@ -1,4 +1,4 @@
-import Rectangle from "engine/math/shapes/Rectangle";
+import Rectangle from "engine/math/shapes/rectangle";
 import WebGLRenderer from "engine/renderers/WebGLRenderer";
 import RenderTexture from "engine/textures/RenderTexture";
 import Node2D from "engine/scene/node_2d";

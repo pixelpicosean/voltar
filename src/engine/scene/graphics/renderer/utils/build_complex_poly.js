@@ -1,16 +1,17 @@
 import { hex2rgb } from 'engine/utils/index';
+import { Polygon } from 'engine/math/index';
+import GraphicsData from '../../GraphicsData';
+import WebGLGraphicsData from '../WebGLGraphicsData';
 
 /**
  * Builds a complex polygon to draw
  *
- * Ignored from docs since it is not directly exposed.
- *
- * @param {import('engine/index').Graphics} graphics_data - The graphics object containing all the necessary properties
- * @param {object} webgl_data - an object containing all the webGL-specific information to create this shape
+ * @param {GraphicsData} graphics_data - The graphics object containing all the necessary properties
+ * @param {WebGLGraphicsData} webgl_data - an object containing all the webGL-specific information to create this shape
  */
 export default function build_complex_poly(graphics_data, webgl_data) {
     // TODO - no need to copy this as it gets turned into a Float32Array anyways..
-    const points = graphics_data.points.slice();
+    const points = /** @type {Polygon} */(graphics_data.shape).points.slice();
 
     if (points.length < 6) {
         return;
@@ -21,7 +22,7 @@ export default function build_complex_poly(graphics_data, webgl_data) {
 
     webgl_data.points = points;
     webgl_data.alpha = graphics_data.fill_alpha;
-    webgl_data.color = hex2rgb(graphics_data.fillColor);
+    webgl_data.color = /** @type {number[]} */(hex2rgb(graphics_data.fill_color));
 
     // calculate the bounds..
     let min_x = Infinity;
@@ -46,10 +47,12 @@ export default function build_complex_poly(graphics_data, webgl_data) {
     }
 
     // add a quad to the end cos there is no point making another buffer!
-    points.push(min_x, min_y,
+    points.push(
+        min_x, min_y,
         max_x, min_y,
         max_x, max_y,
-        min_x, max_y);
+        min_x, max_y
+    );
 
     // push a quad onto the end..
 

@@ -196,13 +196,13 @@ export default class VertexArrayObject {
     /**
      * @param type  {number}
      * @param size  {number}
-     * @param start {number}
+     * @param [start] {number}
      */
-    draw(type, size, start) {
+    draw(type, size, start = 0) {
         const gl = this.gl;
 
         if (this.index_buffer) {
-            gl.drawElements(type, size || /** @type {SharedArrayBuffer} */(this.index_buffer.data).length, gl.UNSIGNED_SHORT, (start || 0) * 2);
+            gl.drawElements(type, size || /** @type {SharedArrayBuffer} */(this.index_buffer.data).length, gl.UNSIGNED_SHORT, start * 2);
         } else {
             // TODO need a better way to calculate size..
             gl.drawArrays(type, start, size || this.get_size());

@@ -62,7 +62,7 @@ export function hex2string(hex_num) {
 /**
  * Converts a color as an [R, G, B] array to a hex number
  *
- * @param {number[]} rgb - rgb array
+ * @param {number[]|Float32Array} rgb - rgb array
  * @return {number} The color number
  */
 export function rgb2hex(rgb) {

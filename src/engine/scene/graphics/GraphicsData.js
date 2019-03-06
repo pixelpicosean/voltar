@@ -32,7 +32,7 @@ export default class GraphicsData {
          * @type {number}
          * @default 0
          */
-        this.lineAlignment = line_alignment;
+        this.line_alignment = line_alignment;
         /**
          * @type {boolean} if true the liens will be draw using LINES instead of TRIANGLE_STRIP
          */
@@ -56,7 +56,7 @@ export default class GraphicsData {
         /**
          * @type {number} the color of the fill
          */
-        this.fillColor = fill_color;
+        this.fill_color = fill_color;
 
         /**
          * @type {number} the alpha of the fill
@@ -66,13 +66,16 @@ export default class GraphicsData {
         /**
          * @type {number} cached tint of the fill
          */
-        this._fillTint = fill_color;
+        this._fill_tint = fill_color;
 
         /**
          * @type {boolean} whether or not the shape is filled with a colour
          */
         this.fill = fill;
 
+        /**
+         * @type {Polygon[]}
+         */
         this.holes = [];
 
         /**
@@ -93,27 +96,25 @@ export default class GraphicsData {
 
     /**
      * Creates a new GraphicsData object with the same values as this one.
-     *
-     * @return {GraphicsData} Cloned GraphicsData object
      */
     clone() {
         return new GraphicsData(
             this.line_width,
             this.line_color,
             this.line_alpha,
-            this.fillColor,
+            this.fill_color,
             this.fill_alpha,
             this.fill,
             this.native_lines,
             this.shape,
-            this.lineAlignment
+            this.line_alignment
         );
     }
 
     /**
      * Adds a hole to the shape.
      *
-     * @param {Rectangle|Circle} shape - The shape of the hole.
+     * @param {Polygon} shape - The shape of the hole.
      */
     add_hole(shape) {
         this.holes.push(shape);

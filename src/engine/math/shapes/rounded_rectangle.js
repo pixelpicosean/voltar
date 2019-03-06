@@ -6,39 +6,39 @@ import { SHAPES } from '../../const';
  */
 export default class RoundedRectangle {
     /**
-     * @param {number} [x=0] - The X coordinate of the upper-left corner of the rounded rectangle
-     * @param {number} [y=0] - The Y coordinate of the upper-left corner of the rounded rectangle
-     * @param {number} [width=0] - The overall width of this rounded rectangle
-     * @param {number} [height=0] - The overall height of this rounded rectangle
-     * @param {number} [radius=20] - Controls the radius of the rounded corners
+     * @param {number} [x] - The X coordinate of the upper-left corner of the rounded rectangle
+     * @param {number} [y] - The Y coordinate of the upper-left corner of the rounded rectangle
+     * @param {number} [width] - The overall width of this rounded rectangle
+     * @param {number} [height] - The overall height of this rounded rectangle
+     * @param {number} [radius] - Controls the radius of the rounded corners
      */
     constructor(x = 0, y = 0, width = 0, height = 0, radius = 20) {
         /**
-         * @member {number}
+         * @type {number}
          * @default 0
          */
         this.x = x;
 
         /**
-         * @member {number}
+         * @type {number}
          * @default 0
          */
         this.y = y;
 
         /**
-         * @member {number}
+         * @type {number}
          * @default 0
          */
         this.width = width;
 
         /**
-         * @member {number}
+         * @type {number}
          * @default 0
          */
         this.height = height;
 
         /**
-         * @member {number}
+         * @type {number}
          * @default 20
          */
         this.radius = radius;
@@ -46,18 +46,14 @@ export default class RoundedRectangle {
         /**
          * The type of the object, mainly used to avoid `instanceof` checks
          *
-         * @member {number}
+         * @type {number}
          * @readonly
-         * @default SHAPES.RREC
-         * @see SHAPES
          */
         this.type = SHAPES.RREC;
     }
 
     /**
      * Creates a clone of this Rounded Rectangle
-     *
-     * @return {RoundedRectangle} a copy of the rounded rectangle
      */
     clone() {
         return new RoundedRectangle(this.x, this.y, this.width, this.height, this.radius);
@@ -68,7 +64,6 @@ export default class RoundedRectangle {
      *
      * @param {number} x - The X coordinate of the point to test
      * @param {number} y - The Y coordinate of the point to test
-     * @return {boolean} Whether the x/y coordinates are within this Rounded Rectangle
      */
     contains(x, y) {
         if (this.width <= 0 || this.height <= 0) {

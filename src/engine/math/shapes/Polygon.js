@@ -12,14 +12,14 @@ export default class Polygon {
         /**
          * An array of the points of this polygon
          *
-         * @member {number[]}
+         * @type {number[]}
          */
         this.points = [];
 
         // if passed points is an array of points, convert it to a flat array of numbers
         if (points) {
             if (typeof (points[0]) === 'number') {
-                this.points = this.points.concat(points);
+                this.points = this.points.concat(/** @type {number[]} */(points));
             } else {
                 for (let i = 0, il = points.length; i < il; i++) {
                     // @ts-ignore
@@ -33,17 +33,14 @@ export default class Polygon {
         /**
          * The type of the object, mainly used to avoid `instanceof` checks
          *
-         * @member {number}
+         * @type {number}
          * @readOnly
-         * @default SHAPES.POLY
          */
         this.type = SHAPES.POLY;
     }
 
     /**
      * Creates a clone of this polygon
-     *
-     * @return {Polygon} a copy of the polygon
      */
     clone() {
         return new Polygon(this.points.slice());
@@ -66,7 +63,6 @@ export default class Polygon {
      *
      * @param {number} x - The X coordinate of the point to test
      * @param {number} y - The Y coordinate of the point to test
-     * @return {boolean} Whether the x/y coordinates are within this polygon
      */
     contains(x, y) {
         let inside = false;

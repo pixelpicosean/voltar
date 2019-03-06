@@ -1,6 +1,6 @@
 import Vector2 from './Vector2';
 import Transform from './Transform';
-import Rectangle from './shapes/Rectangle';
+import Rectangle from './shapes/rectangle';
 
 /**
  * 'Builder' pattern for bounds rectangles

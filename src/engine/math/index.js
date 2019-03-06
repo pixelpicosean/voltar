@@ -11,11 +11,11 @@ export { default as Bounds } from './Bounds';
 
 export { default as Transform } from './Transform';
 
-export { default as Circle } from './shapes/Circle';
-export { default as Ellipse } from './shapes/Ellipse';
-export { default as Polygon } from './shapes/Polygon';
-export { default as Rectangle } from './shapes/Rectangle';
-export { default as RoundedRectangle } from './shapes/RoundedRectangle';
+export { default as Circle } from './shapes/circle';
+export { default as Ellipse } from './shapes/ellipse';
+export { default as Polygon } from './shapes/polygon';
+export { default as Rectangle } from './shapes/rectangle';
+export { default as RoundedRectangle } from './shapes/rounded_rectangle';
 
 export * from './const';
 

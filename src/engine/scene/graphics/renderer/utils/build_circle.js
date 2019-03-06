@@ -1,68 +1,61 @@
-import build_line from './build_line';
 import { SHAPES } from 'engine/const';
 import { hex2rgb } from 'engine/utils/index';
+import { Circle, Rectangle } from 'engine/math/index';
 import GraphicsData from '../../GraphicsData';
+import WebGLGraphicsData from '../WebGLGraphicsData';
+import build_line from './build_line';
 
 /**
  * Builds a circle to draw
  *
- * Ignored from docs since it is not directly exposed.
- *
  * @param {GraphicsData} graphics_data - The graphics object to draw
- * @param {object} webGLData - an object containing all the webGL-specific information to create this shape
- * @param {object} webGLDataNativeLines - an object containing all the webGL-specific information to create native_lines
+ * @param {WebGLGraphicsData} webgl_data - an object containing all the webGL-specific information to create this shape
+ * @param {WebGLGraphicsData} webgl_data_native_lines - an object containing all the webGL-specific information to create native_lines
  */
-export default function build_circle(graphics_data, webGLData, webGLDataNativeLines) {
+export default function build_circle(graphics_data, webgl_data, webgl_data_native_lines) {
     // need to convert points to a nice regular data
-    const circle_data = graphics_data.shape;
-    // @ts-ignore
+    const circle_data = /** @type {Circle} */(graphics_data.shape);
+    const rect_data = /** @type {Rectangle} */(graphics_data.shape);
     const x = circle_data.x;
-    // @ts-ignore
     const y = circle_data.y;
-    let width;
-    let height;
+    let width = 0;
+    let height = 0;
 
     // TODO - bit hacky??
     if (graphics_data.type === SHAPES.CIRC) {
-        // @ts-ignore
         width = circle_data.radius;
-        // @ts-ignore
         height = circle_data.radius;
-    }
-    else {
-        // @ts-ignore
-        width = circle_data.width;
-        // @ts-ignore
-        height = circle_data.height;
+    } else {
+        width = rect_data.width;
+        height = rect_data.height;
     }
 
     if (width === 0 || height === 0) {
         return;
     }
 
-    // @ts-ignore
-    const totalSegs = Math.floor(30 * Math.sqrt(circle_data.radius))
-        // @ts-ignore
-        || Math.floor(15 * Math.sqrt(circle_data.width + circle_data.height));
+    const total_segs = Math.floor(30 * Math.sqrt(circle_data.radius))
+        ||
+        Math.floor(15 * Math.sqrt(rect_data.width + rect_data.height));
 
-    const seg = (Math.PI * 2) / totalSegs;
+    const seg = (Math.PI * 2) / total_segs;
 
     if (graphics_data.fill) {
-        const color = hex2rgb(graphics_data.fillColor);
+        const color = hex2rgb(graphics_data.fill_color);
         const alpha = graphics_data.fill_alpha;
 
         const r = color[0] * alpha;
         const g = color[1] * alpha;
         const b = color[2] * alpha;
 
-        const verts = webGLData.points;
-        const indices = webGLData.indices;
+        const verts = webgl_data.points;
+        const indices = webgl_data.indices;
 
-        let vecPos = verts.length / 6;
+        let vec_pos = verts.length / 6;
 
-        indices.push(vecPos);
+        indices.push(vec_pos);
 
-        for (let i = 0; i < totalSegs + 1; i++) {
+        for (let i = 0; i < total_segs + 1; i++) {
             verts.push(x, y, r, g, b, alpha);
 
             verts.push(
@@ -71,10 +64,10 @@ export default function build_circle(graphics_data, webGLData, webGLDataNativeLi
                 r, g, b, alpha
             );
 
-            indices.push(vecPos++, vecPos++);
+            indices.push(vec_pos++, vec_pos++);
         }
 
-        indices.push(vecPos - 1);
+        indices.push(vec_pos - 1);
     }
 
     if (graphics_data.line_width) {
@@ -82,7 +75,7 @@ export default function build_circle(graphics_data, webGLData, webGLDataNativeLi
 
         graphics_data.points = [];
 
-        for (let i = 0; i < totalSegs; i++) {
+        for (let i = 0; i < total_segs; i++) {
             graphics_data.points.push(
                 x + (Math.sin(seg * -i) * width),
                 y + (Math.cos(seg * -i) * height)
@@ -94,7 +87,7 @@ export default function build_circle(graphics_data, webGLData, webGLDataNativeLi
             graphics_data.points[1]
         );
 
-        build_line(graphics_data, webGLData, webGLDataNativeLines);
+        build_line(graphics_data, webgl_data, webgl_data_native_lines);
 
         graphics_data.points = temp_points;
     }

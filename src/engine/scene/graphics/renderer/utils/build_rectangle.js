@@ -1,28 +1,28 @@
 import build_line from './build_line';
 import { hex2rgb } from 'engine/utils/index';
+import { Rectangle } from 'engine/math/index';
+import GraphicsData from '../../GraphicsData';
 import WebGLGraphicsData from '../WebGLGraphicsData';
 
 /**
  * Builds a rectangle to draw
  *
- * Ignored from docs since it is not directly exposed.
- *
- * @param {WebGLGraphicsData} graphics_data - The graphics object containing all the necessary properties
- * @param {object} webgl_data - an object containing all the webGL-specific information to create this shape
- * @param {object} webgl_data_native_lines - an object containing all the webGL-specific information to create native_lines
+ * @param {GraphicsData} graphics_data - The graphics object containing all the necessary properties
+ * @param {WebGLGraphicsData} webgl_data - an object containing all the webGL-specific information to create this shape
+ * @param {WebGLGraphicsData} webgl_data_native_lines - an object containing all the webGL-specific information to create native_lines
  */
 export default function build_rectangle(graphics_data, webgl_data, webgl_data_native_lines) {
-    // --- //
+    //
     // need to convert points to a nice regular data
     //
-    const rect_data = graphics_data.shape;
+    const rect_data = /** @type {Rectangle} */(graphics_data.shape);
     const x = rect_data.x;
     const y = rect_data.y;
     const width = rect_data.width;
     const height = rect_data.height;
 
     if (graphics_data.fill) {
-        const color = hex2rgb(graphics_data.fillColor);
+        const color = hex2rgb(graphics_data.fill_color);
         const alpha = graphics_data.fill_alpha;
 
         const r = color[0] * alpha;
@@ -52,16 +52,17 @@ export default function build_rectangle(graphics_data, webgl_data, webgl_data_na
     }
 
     if (graphics_data.line_width) {
-        const tempPoints = graphics_data.points;
+        const temp_points = graphics_data.points;
 
         graphics_data.points = [x, y,
-            x + width, y,
-            x + width, y + height,
-            x, y + height,
-            x, y];
+            x + width, y          ,
+            x + width, y + height ,
+            x,         y + height ,
+            x,         y          ,
+        ];
 
         build_line(graphics_data, webgl_data, webgl_data_native_lines);
 
-        graphics_data.points = tempPoints;
+        graphics_data.points = temp_points;
     }
 }
