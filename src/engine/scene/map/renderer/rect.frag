@@ -1,13 +1,13 @@
 varying vec2 v_texture_coord;
-varying vec4 vFrame;
+varying vec4 v_frame;
 varying float v_texture_id;
-uniform vec4 shadowColor;
+uniform vec4 shadow_color;
 uniform sampler2D u_samplers[%count%];
-uniform vec2 uSamplerSize[%count%];
+uniform vec2 u_sampler_size[%count%];
 
 void main(void){
-   vec2 textureCoord = clamp(v_texture_coord, vFrame.xy, vFrame.zw);
-   float textureId = floor(v_texture_id + 0.5);
+   vec2 texture_coord = clamp(v_texture_coord, v_frame.xy, v_frame.zw);
+   float texture_id = floor(v_texture_id + 0.5);
 
    vec4 color;
    %forloop%

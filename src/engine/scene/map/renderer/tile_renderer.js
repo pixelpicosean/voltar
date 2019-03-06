@@ -1,18 +1,29 @@
 import { WRAP_MODES, BLEND_MODES } from 'engine/const';
 import GLBuffer from 'engine/drivers/webgl/gl_buffer';
 import GLTexture from 'engine/drivers/webgl/gl_texture';
+import GLShader from 'engine/drivers/webgl/gl_shader';
+import VertexArrayObject from 'engine/drivers/webgl/vao';
 import ObjectRenderer from 'engine/servers/visual/utils/object_renderer';
 import WebGLRenderer from 'engine/servers/visual/webgl_renderer';
 import RenderTexture from 'engine/scene/resources/textures/render_texture';
+import Texture from 'engine/scene/resources/textures/texture';
 
 import Sprite from '../../sprites/sprite';
-
 import RectTileShader from './rect_tile_shader';
+
+/**
+ * @typedef VertexBufferPack
+ * @property {number} id
+ * @property {GLBuffer} vb
+ * @property {VertexArrayObject} vao
+ * @property {number} last_time_access
+ * @property {RectTileShader} shader
+ */
 
 /**
  * @param {GLTexture} tex
  * @param {Sprite} sprite
- * @param {boolean} clear_buffer
+ * @param {Uint8Array} [clear_buffer]
  * @param {number} [clear_width]
  * @param {number} [clear_height]
  */
@@ -40,24 +51,29 @@ export default class TileRenderer extends ObjectRenderer {
         super(renderer);
 
         this.renderer = renderer;
+        /** @type {WebGLRenderingContext} */
         this.gl = null;
+        /** @type {Object<number, VertexBufferPack>} */
         this.vbs = {};
         this.indices = new Uint16Array(0);
         this.index_buffer = null;
         this.clear_buffer = null;
         this.last_time_check = 0;
         this.max_textures = 4;
+        /** @type {number[]} */
         this.tex_loc = [];
 
         this.rect_shader = null;
+        /** @type {Sprite[]} */
         this.bound_sprites = null;
+        /** @type {RenderTexture[]} */
         this.gl_textures = null;
     }
 
     on_context_change() {
         const gl = this.renderer.gl;
-        const maxTextures = this.max_textures;
-        this.rect_shader = new RectTileShader(gl, maxTextures);
+        const max_textures = this.max_textures;
+        this.rect_shader = new RectTileShader(gl, max_textures);
         this.check_index_buffer(2000);
         this.rect_shader.index_buffer = this.index_buffer;
         this.vbs = {};
@@ -67,7 +83,6 @@ export default class TileRenderer extends ObjectRenderer {
     }
 
     init_bounds() {
-        const gl = this.renderer.gl;
         for (let i = 0; i < this.max_textures; i++) {
             const rt = RenderTexture.create(2048, 2048);
             rt.base_texture.premultiplied_alpha = true;
@@ -85,6 +100,11 @@ export default class TileRenderer extends ObjectRenderer {
         }
     }
 
+    /**
+     * @param {WebGLRenderer} renderer
+     * @param {GLShader} shader
+     * @param {Texture[]} textures
+     */
     bind_textures(renderer, shader, textures) {
         const len = textures.length;
         const max_textures = this.max_textures;
@@ -102,16 +122,19 @@ export default class TileRenderer extends ObjectRenderer {
         for (i = 0; i < len; i++) {
             const texture = textures[i];
             if (!texture || !textures[i].valid) continue;
-            const bs = bounds[i];
-            if (!bs.texture ||
-                bs.texture.base_texture !== texture.base_texture) {
-                bs.texture = texture;
+            const bounds_spr = bounds[i];
+            if (
+                !bounds_spr.texture
+                ||
+                bounds_spr.texture.base_texture !== texture.base_texture
+            ) {
+                bounds_spr.texture = texture;
                 const glt = glts[i >> 2];
                 renderer.bind_texture(glt, 0, true);
                 if (do_clear) {
-                    hack_sub_image((glt.base_texture)._gl_textures[renderer.CONTEXT_UID], bs, this.clear_buffer, 1024, 1024);
+                    hack_sub_image((glt.base_texture)._gl_textures[renderer.CONTEXT_UID], bounds_spr, this.clear_buffer, 1024, 1024);
                 } else {
-                    hack_sub_image((glt.base_texture)._gl_textures[renderer.CONTEXT_UID], bs);
+                    hack_sub_image((glt.base_texture)._gl_textures[renderer.CONTEXT_UID], bounds_spr);
                 }
             }
         }
@@ -143,11 +166,14 @@ export default class TileRenderer extends ObjectRenderer {
         //sorry, nothing
     }
 
+    /**
+     * @param {number} id
+     */
     get_vb(id) {
         this.check_leaks();
         const vb = this.vbs[id];
         if (vb) {
-            vb.lastAccessTime = Date.now();
+            vb.last_time_access = Date.now();
             return vb;
         }
         return null;
@@ -158,17 +184,21 @@ export default class TileRenderer extends ObjectRenderer {
         const shader = this.get_shader();
         const gl = this.renderer.gl;
         const vb = GLBuffer.create_vertex_buffer(gl, null, gl.STREAM_DRAW);
+        /** @type {VertexBufferPack} */
         const stuff = {
             id: id,
             vb: vb,
             vao: shader.createVao(this.renderer, vb),
             last_time_access: Date.now(),
-            shader: shader
+            shader: shader,
         };
         this.vbs[id] = stuff;
         return stuff;
     }
 
+    /**
+     * @param {string} id
+     */
     remove_vb(id) {
         if (this.vbs[id]) {
             this.vbs[id].vb.destroy();
@@ -177,6 +207,9 @@ export default class TileRenderer extends ObjectRenderer {
         }
     }
 
+    /**
+     * @param {number} size
+     */
     check_index_buffer(size) {
         // the total number of indices in our array, there are 6 points per quad.
         const total_indices = size * 6;
@@ -205,7 +238,7 @@ export default class TileRenderer extends ObjectRenderer {
         if (this.index_buffer) {
             this.index_buffer.upload(indices);
         } else {
-            let gl = this.renderer.gl;
+            const gl = this.renderer.gl;
             this.index_buffer = GLBuffer.create_index_buffer(gl, this.indices, gl.STATIC_DRAW);
         }
     }

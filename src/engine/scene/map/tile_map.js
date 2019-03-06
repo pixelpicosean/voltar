@@ -1,10 +1,10 @@
 // Based on pixi-tilemap master~02218a043cacd310b49e2801a117423cb46b23d3
 import Node2D from '../node_2d';
 
-import { TextureCache } from 'engine/utils/index';
 import { Matrix, Vector2 } from 'engine/core/math/index';
-import Texture from 'engine/scene/resources/textures/texture';
 import { node_class_map } from 'engine/registry';
+import Texture from 'engine/scene/resources/textures/texture';
+
 import TileSet from '../resources/tile_set';
 
 export default class TileMap extends Node2D {
@@ -30,11 +30,14 @@ export default class TileMap extends Node2D {
          */
         this.tile_set = new TileSet();
 
-
         // Rendering caches
+        /** @type {number[]} */
         this.points_buf = [];
+
         this._temp_size = new Float32Array([0, 0]);
         this._temp_tex_size = 1;
+
+        /** @type {number} */
         this.modification_marker = 0;
 
         this.vb_id = 0;
@@ -111,6 +114,10 @@ export default class TileMap extends Node2D {
      * @param {import('engine/servers/visual/webgl_renderer').default} renderer
      */
     _render_webgl(renderer) {
+        const gl = renderer.gl;
+        /** @type {import('./renderer/tile_renderer').default} */
+        const tile = renderer.plugins.tilemap;
+
         // Check whether we need to redraw the whole map
         if (this._needs_redraw) {
             this._needs_redraw = false;
@@ -118,77 +125,84 @@ export default class TileMap extends Node2D {
         }
 
         // Start to render
-        var gl = renderer.gl;
-        var shader = renderer.plugins.tilemap.get_shader();
+        const shader = tile.get_shader();
         renderer.set_object_renderer(renderer.plugins.tilemap);
         renderer.bind_shader(shader);
         this._global_mat.copy(renderer._active_render_target.projection_matrix).append(this.world_transform);
         shader.uniforms.projection_matrix = this._global_mat.to_array(true);
 
-        var points = this.points_buf;
+        const points = this.points_buf;
         if (points.length === 0) return;
-        var rects_count = points.length / 7;
-        var tile = renderer.plugins.tilemap;
-        var gl = renderer.gl;
+        const rects_count = points.length / 7;
         tile.check_index_buffer(rects_count);
 
-        var textures = this.textures;
+        const textures = this.textures;
         if (textures.length === 0) return;
-        var len = textures.length;
-        if (this._temp_tex_size < shader.maxTextures) {
-            this._temp_tex_size = shader.maxTextures;
-            this._temp_size = new Float32Array(2 * shader.maxTextures);
+        const len = textures.length;
+        if (this._temp_tex_size < shader.max_textures) {
+            this._temp_tex_size = shader.max_textures;
+            this._temp_size = new Float32Array(2 * shader.max_textures);
         }
-        // var samplerSize = this._tempSize;
-        for (var i = 0; i < len; i++) {
+        for (let i = 0; i < len; i++) {
             if (!textures[i] || !textures[i].valid) return;
         }
         tile.bind_textures(renderer, shader, textures);
-        // shader.uniforms.uSamplerSize = samplerSize;
-        //lost context! recover!
-        var vb = tile.get_vb(this.vb_id);
+
+        // lost context! recover!
+        let vb = tile.get_vb(this.vb_id);
         if (!vb) {
             vb = tile.create_vb();
             this.vb_id = vb.id;
             this.vb_buffer = null;
             this.modification_marker = 0;
         }
-        var vao = vb.vao;
+        const vao = vb.vao;
         renderer.bind_vao(vao);
-        var vertexBuf = vb.vb;
-        //if layer was changed, re-upload vertices
-        vertexBuf.bind();
-        var vertices = rects_count * shader.vertPerQuad;
+
+        const vertex_buf = vb.vb;
+
+        // if layer was changed, re-upload vertices
+        vertex_buf.bind();
+
+        const vertices = rects_count * shader.vert_per_quad;
         if (vertices === 0) return;
-        if (this.modification_marker != vertices) {
+        if (this.modification_marker !== vertices) {
             this.modification_marker = vertices;
-            var vs = shader.stride * vertices;
+            const vs = shader.stride * vertices;
             if (!this.vb_buffer || this.vb_buffer.byteLength < vs) {
                 //!@#$ happens, need resize
-                var bk = shader.stride;
+                let bk = shader.stride;
                 while (bk < vs) {
                     bk *= 2;
                 }
                 this.vb_buffer = new ArrayBuffer(bk);
                 this.vb_array = new Float32Array(this.vb_buffer);
                 this.vb_ints = new Uint32Array(this.vb_buffer);
-                vertexBuf.upload(this.vb_buffer, 0, true);
+                vertex_buf.upload(this.vb_buffer, 0, true);
             }
 
-            var arr = this.vb_array, ints = this.vb_ints;
+            const arr = this.vb_array;
             //upload vertices!
-            var sz = 0;
-            var textureId, shiftU, shiftV;
+            let sz = 0;
+            let texture_id = 0, shift_u = 0, shift_v = 0;
 
-            var tint = -1;
-            for (i = 0; i < points.length; i += 7) {
-                var eps = 0.5;
-                textureId = (points[i + 6] >> 2);
-                shiftU = 1024 * (points[i + 6] & 1);
-                shiftV = 1024 * ((points[i + 6] >> 1) & 1);
-                var x = points[i + 2], y = points[i + 3];
-                var w = points[i + 4], h = points[i + 5];
-                var u = points[i] + shiftU, v = points[i + 1] + shiftV;
+            for (let i = 0, len = points.length; i < len; i += 7) {
+                const eps = 0.5;
+
+                texture_id = (points[i + 6] >> 2);
+
+                shift_u = 1024 * (points[i + 6] & 1);
+                shift_v = 1024 * ((points[i + 6] >> 1) & 1);
+
+                const x = points[i + 2];
+                const y = points[i + 3];
+
+                const w = points[i + 4];
+                const h = points[i + 5];
+
+                const u = points[i] + shift_u;
+                const v = points[i + 1] + shift_v;
+
                 arr[sz++] = x;
                 arr[sz++] = y;
                 arr[sz++] = u;
@@ -197,7 +211,7 @@ export default class TileMap extends Node2D {
                 arr[sz++] = v + eps;
                 arr[sz++] = u + w - eps;
                 arr[sz++] = v + h - eps;
-                arr[sz++] = textureId;
+                arr[sz++] = texture_id;
                 arr[sz++] = x + w;
                 arr[sz++] = y;
                 arr[sz++] = u + w;
@@ -206,7 +220,7 @@ export default class TileMap extends Node2D {
                 arr[sz++] = v + eps;
                 arr[sz++] = u + w - eps;
                 arr[sz++] = v + h - eps;
-                arr[sz++] = textureId;
+                arr[sz++] = texture_id;
                 arr[sz++] = x + w;
                 arr[sz++] = y + h;
                 arr[sz++] = u + w;
@@ -215,7 +229,7 @@ export default class TileMap extends Node2D {
                 arr[sz++] = v + eps;
                 arr[sz++] = u + w - eps;
                 arr[sz++] = v + h - eps;
-                arr[sz++] = textureId;
+                arr[sz++] = texture_id;
                 arr[sz++] = x;
                 arr[sz++] = y + h;
                 arr[sz++] = u;
@@ -224,9 +238,9 @@ export default class TileMap extends Node2D {
                 arr[sz++] = v + eps;
                 arr[sz++] = u + w - eps;
                 arr[sz++] = v + h - eps;
-                arr[sz++] = textureId;
+                arr[sz++] = texture_id;
             }
-            vertexBuf.upload(arr, 0, true);
+            vertex_buf.upload(arr, 0, true);
         }
         gl.drawElements(gl.TRIANGLES, rects_count * 6, gl.UNSIGNED_SHORT, 0);
     }

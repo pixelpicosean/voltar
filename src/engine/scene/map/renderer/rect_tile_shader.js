@@ -20,9 +20,9 @@ export default class RectTileShader extends TilemapShader {
             generate_fragment_src(max_textures, rect_shader_frag)
         );
 
-        this.vertSize = 9;
-        this.vertPerQuad = 4;
-        this.stride = this.vertSize * 4;
+        this.vert_size = 9;
+        this.vert_per_quad = 4;
+        this.stride = this.vert_size * 4;
 
         fill_samplers(this, this.max_textures);
     }
@@ -37,7 +37,7 @@ export default class RectTileShader extends TilemapShader {
             .add_index(this.index_buffer)
             .add_attribute(vb, this.attributes.a_vertex_position, gl.FLOAT, false, this.stride, 0)
             .add_attribute(vb, this.attributes.a_texture_coord, gl.FLOAT, false, this.stride, 2 * 4)
-            .add_attribute(vb, this.attributes.aFrame, gl.FLOAT, false, this.stride, 4 * 4)
+            .add_attribute(vb, this.attributes.a_frame, gl.FLOAT, false, this.stride, 4 * 4)
             .add_attribute(vb, this.attributes.a_texture_id, gl.FLOAT, false, this.stride, 8 * 4)
     }
 }
