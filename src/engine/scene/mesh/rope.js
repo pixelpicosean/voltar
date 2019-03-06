@@ -1,5 +1,5 @@
 import Mesh from './mesh';
-import Texture from 'engine/textures/texture';
+import Texture from 'engine/scene/resources/textures/texture';
 import { Vector2 } from 'engine/core/math/index';
 
 /**

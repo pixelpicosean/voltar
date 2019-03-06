@@ -1,6 +1,6 @@
-import Resource from 'engine/core/io/Resource';
 import url from 'url';
-import Spritesheet from 'engine/textures/Spritesheet';
+import Resource from 'engine/core/io/Resource';
+import Spritesheet from 'engine/scene/resources/textures/spritesheet';
 
 export default () => {
     return function spritesheet_parser(/** @type {Resource} */ resource, /** @type {Function} */ next) {

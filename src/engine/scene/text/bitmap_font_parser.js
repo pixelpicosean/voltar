@@ -1,5 +1,5 @@
 import Resource from 'engine/core/io/Resource';
-import Texture from 'engine/textures/texture';
+import Texture from 'engine/scene/resources/textures/texture';
 import { register_font } from './res';
 
 /**

@@ -1,5 +1,5 @@
 import Mesh from './mesh';
-import Texture from 'engine/textures/texture';
+import Texture from 'engine/scene/resources/textures/texture';
 
 /**
  * The Plane allows you to draw a texture across several points and them manipulate these points

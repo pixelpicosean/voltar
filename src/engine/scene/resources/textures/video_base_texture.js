@@ -2,7 +2,7 @@ import { UPDATE_PRIORITY } from 'engine/const';
 import { uid, BaseTextureCache } from 'engine/utils/index';
 import { shared } from 'engine/ticker/index';
 import determine_cross_origin from 'engine/utils/determine_cross_origin';
-import BaseTexture from './BaseTexture';
+import BaseTexture from './base_texture';
 
 /**
  * @typedef VideoURLObj

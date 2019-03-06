@@ -1,8 +1,8 @@
-import parse_uri from './parse_uri';
 import { VObject } from 'engine/dep/index';
-import Texture from 'engine/textures/texture';
-import Spritesheet from 'engine/textures/Spritesheet';
+import Texture from 'engine/scene/resources/textures/texture';
+import Spritesheet from 'engine/scene/resources/textures/spritesheet';
 import Font from 'engine/scene/resources/font';
+import parse_uri from './parse_uri';
 
 let temp_anchor = null;
 

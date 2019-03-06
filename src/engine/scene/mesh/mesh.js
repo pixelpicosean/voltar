@@ -2,8 +2,8 @@ import settings from 'engine/settings';
 import { BLEND_MODES } from 'engine/const';
 import { Vector2, Polygon } from 'engine/core/math/index';
 import { rgb2hex, hex2rgb, TextureCache } from 'engine/utils/index';
-import Texture from 'engine/textures/texture';
-import TextureMatrix from 'engine/textures/TextureMatrix';
+import Texture from 'engine/scene/resources/textures/texture';
+import TextureMatrix from 'engine/scene/resources/textures/texture_matrix';
 import Node2D from '../node_2d';
 import WebGLRenderer from 'engine/renderers/WebGLRenderer';
 

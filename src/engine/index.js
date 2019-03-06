@@ -2,7 +2,7 @@
 // Polyfills
 // Done as an export to make sure polyfills are imported first.
 // ------------------------------------------------------------------
-export * from './polyfill/index';
+export * from 'engine/polyfill/index';
 
 // ------------------------------------------------------------------
 // 3rd party libs
@@ -12,80 +12,80 @@ export * from 'engine/dep/index';
 // ------------------------------------------------------------------
 // Node
 // ------------------------------------------------------------------
-import Node2D from './scene/node_2d';
+import Node2D from 'engine/scene/node_2d';
 
-export { default as Viewport } from './scene/main/viewport';
-export { default as CanvasLayer } from './scene/main/canvas_layer';
+export { default as Viewport } from 'engine/scene/main/viewport';
+export { default as CanvasLayer } from 'engine/scene/main/canvas_layer';
 
-export { default as Node2D } from './scene/node_2d';
+export { default as Node2D } from 'engine/scene/node_2d';
 
-export { default as Sprite } from './scene/sprites/sprite';
-export { default as AnimatedSprite } from './scene/sprites/animated_sprite';
-export { default as TilingSprite } from './scene/sprites/tiling_sprite';
-export { default as NineSliceSprite } from './scene/sprites/nine_slice_sprite';
+export { default as Sprite } from 'engine/scene/sprites/sprite';
+export { default as AnimatedSprite } from 'engine/scene/sprites/animated_sprite';
+export { default as TilingSprite } from 'engine/scene/sprites/tiling_sprite';
+export { default as NineSliceSprite } from 'engine/scene/sprites/nine_slice_sprite';
 
-export { default as Control } from './scene/controls/control';
-export { default as Container } from './scene/controls/container';
-export { default as Label } from './scene/controls/label';
-export { default as ColorRect } from './scene/controls/color_rect';
-export { default as TextureRect } from './scene/controls/texture_rect';
-export { default as NinePatchRect } from './scene/controls/nine_patch_rect';
-export { default as TextureButton } from './scene/controls/texture_button';
-export { default as TextureProgress } from './scene/controls/texture_progress';
-export { default as MarginContainer } from './scene/controls/margin_container';
-export { default as CenterContainer } from './scene/controls/center_container';
-export { VBoxContainer, HBoxContainer } from './scene/controls/box_container';
-export { default as GridContainer } from './scene/controls/grid_container';
+export { default as Control } from 'engine/scene/controls/control';
+export { default as Container } from 'engine/scene/controls/container';
+export { default as Label } from 'engine/scene/controls/label';
+export { default as ColorRect } from 'engine/scene/controls/color_rect';
+export { default as TextureRect } from 'engine/scene/controls/texture_rect';
+export { default as NinePatchRect } from 'engine/scene/controls/nine_patch_rect';
+export { default as TextureButton } from 'engine/scene/controls/texture_button';
+export { default as TextureProgress } from 'engine/scene/controls/texture_progress';
+export { default as MarginContainer } from 'engine/scene/controls/margin_container';
+export { default as CenterContainer } from 'engine/scene/controls/center_container';
+export { VBoxContainer, HBoxContainer } from 'engine/scene/controls/box_container';
+export { default as GridContainer } from 'engine/scene/controls/grid_container';
 
-export { default as Graphics } from './scene/graphics/graphics';
+export { default as Graphics } from 'engine/scene/graphics/graphics';
 
-export { default as BitmapText } from './scene/text/bitmap_text';
-export { default as Text } from './scene/text/text';
+export { default as BitmapText } from 'engine/scene/text/bitmap_text';
+export { default as Text } from 'engine/scene/text/text';
 
-export { default as TileMap } from './scene/map/tile_map';
+export { default as TileMap } from 'engine/scene/map/tile_map';
 
-export { default as CPUParticles2D } from './scene/cpu_particles_2d';
+export { default as CPUParticles2D } from 'engine/scene/cpu_particles_2d';
 
-export { default as Mesh } from './scene/mesh/mesh';
-export { default as Plane } from './scene/mesh/plane';
-export { default as NineSlicePlane } from './scene/mesh/NineSlicePlane';
-export { default as Rope } from './scene/mesh/rope';
+export { default as Mesh } from 'engine/scene/mesh/mesh';
+export { default as Plane } from 'engine/scene/mesh/plane';
+export { default as NineSlicePlane } from 'engine/scene/mesh/NineSlicePlane';
+export { default as Rope } from 'engine/scene/mesh/rope';
 
-export { default as Area2D } from './scene/physics/area_2d';
+export { default as Area2D } from 'engine/scene/physics/area_2d';
 export {
     StaticBody2D,
     KinematicBody2D, KinematicCollision2D,
-} from './scene/physics/physics_body_2d';
-export { default as RayCast2D } from './scene/physics/ray_cast_2d';
+} from 'engine/scene/physics/physics_body_2d';
+export { default as RayCast2D } from 'engine/scene/physics/ray_cast_2d';
 
-export { default as CollisionShape2D } from './scene/physics/collision_shape_2d';
-export { default as CollisionPolygon2D } from './scene/physics/collision_polygon_2d';
+export { default as CollisionShape2D } from 'engine/scene/physics/collision_shape_2d';
+export { default as CollisionPolygon2D } from 'engine/scene/physics/collision_polygon_2d';
 
-export { RayShape2D, SegmentShape2D } from './scene/resources/segment_shape_2d';
-export { default as CircleShape2D } from './scene/resources/circle_shape_2d';
-export { default as RectangleShape2D } from './scene/resources/rectangle_shape_2d';
-export { default as ConvexPolygonShape2D } from './scene/resources/convex_polygon_shape_2d';
+export { RayShape2D, SegmentShape2D } from 'engine/scene/resources/segment_shape_2d';
+export { default as CircleShape2D } from 'engine/scene/resources/circle_shape_2d';
+export { default as RectangleShape2D } from 'engine/scene/resources/rectangle_shape_2d';
+export { default as ConvexPolygonShape2D } from 'engine/scene/resources/convex_polygon_shape_2d';
 
 export {
     RayResult,
-} from './servers/physics_2d/state';
+} from 'engine/servers/physics_2d/state';
 
-export { Path2D, PathFollow2D } from './scene/path_2d';
+export { Path2D, PathFollow2D } from 'engine/scene/path_2d';
 
-export { default as AnimationPlayer } from './scene/animation/animation_player';
+export { default as AnimationPlayer } from 'engine/scene/animation/animation_player';
 
-export { default as RemoteTransform2D } from './scene/remote_transform_2d';
-export { default as YSort } from './scene/y_sort';
+export { default as RemoteTransform2D } from 'engine/scene/remote_transform_2d';
+export { default as YSort } from 'engine/scene/y_sort';
 
 export {
     VisibilityNotifier2D,
     VisibilityEnabler2D,
-} from './scene/visibility_notifier_2d';
+} from 'engine/scene/visibility_notifier_2d';
 
-export { default as Camera2D } from './scene/camera_2d';
-export { default as Timer } from './scene/timer';
+export { default as Camera2D } from 'engine/scene/camera_2d';
+export { default as Timer } from 'engine/scene/timer';
 
-export { default as InteractionEvent } from './interaction/InteractionEvent';
+export { default as InteractionEvent } from 'engine/interaction/InteractionEvent';
 
 export { default as Loader } from 'engine/core/io/Loader';
 export { default as Resource } from 'engine/core/io/Resource';
@@ -93,40 +93,40 @@ export { default as Resource } from 'engine/core/io/Resource';
 // ------------------------------------------------------------------
 // Useful class
 // ------------------------------------------------------------------
-export { default as OS } from './core/os';
+export { default as OS } from 'engine/core/os';
 
-export { default as Color } from './core/color';
-export { Curve, Curve2D } from './scene/resources/curve';
+export { default as Color } from 'engine/core/color';
+export { Curve, Curve2D } from 'engine/scene/resources/curve';
 
-export { default as TextureUvs } from './textures/TextureUvs';
-export { default as TextureMatrix } from './textures/TextureMatrix';
+export { default as TextureUvs } from 'engine/scene/resources/textures/texture_uvs';
+export { default as TextureMatrix } from 'engine/scene/resources/textures/texture_matrix';
 
-export { default as BaseTexture } from './textures/BaseTexture';
-export { default as Texture } from './textures/texture';
+export { default as BaseTexture } from 'engine/scene/resources/textures/base_texture';
+export { default as Texture } from 'engine/scene/resources/textures/texture';
 
-export { default as BaseRenderTexture } from './textures/BaseRenderTexture';
-export { default as RenderTexture } from './textures/RenderTexture';
+export { default as BaseRenderTexture } from 'engine/scene/resources/textures/base_render_texture';
+export { default as RenderTexture } from 'engine/scene/resources/textures/render_texture';
 
-export { default as VideoBaseTexture } from './textures/VideoBaseTexture';
+export { default as VideoBaseTexture } from 'engine/scene/resources/textures/video_base_texture';
 
 // ------------------------------------------------------------------
 // Global constant, setting and function
 // ------------------------------------------------------------------
-import settings from './settings';
-export * from './const';
-export * from './core/math/index';
-export * from './core/math/random_pcg';
-export { default as yield } from './core/yield';
+import settings from 'engine/settings';
+export * from 'engine/const';
+export * from 'engine/core/math/index';
+export * from 'engine/core/math/random_pcg';
+export { default as yield } from 'engine/core/yield';
 
 // ------------------------------------------------------------------
 // Namespace
 // ------------------------------------------------------------------
-import * as utils from './utils/index';
-import * as ticker from './ticker/index';
-import * as audio from './audio/index';
-import * as filters from './filters/index';
+import * as utils from 'engine/utils/index';
+import * as ticker from 'engine/ticker/index';
+import * as audio from 'engine/audio/index';
+import * as filters from 'engine/filters/index';
 
-export { registered_bitmap_fonts as bitmap_fonts } from './scene/text/res';
+export { registered_bitmap_fonts as bitmap_fonts } from 'engine/scene/text/res';
 
 export {
     settings,
@@ -141,9 +141,9 @@ export {
 // ------------------------------------------------------------------
 // Instances
 // ------------------------------------------------------------------
-import Input from './input/index';
-import SceneTree from './scene/main/scene_tree';
-import Loader from './core/io/Loader';
+import Input from 'engine/input/index';
+import SceneTree from 'engine/scene/main/scene_tree';
+import Loader from 'engine/core/io/Loader';
 
 import resource_map from 'resources.json';
 

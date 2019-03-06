@@ -1,6 +1,6 @@
-import TextureMatrix from 'engine/textures/TextureMatrix';
-import BaseTexture from 'engine/textures/BaseTexture';
-import Texture from 'engine/textures/texture';
+import TextureMatrix from 'engine/scene/resources/textures/texture_matrix';
+import BaseTexture from 'engine/scene/resources/textures/base_texture';
+import Texture from 'engine/scene/resources/textures/texture';
 import { Vector2, Transform, Rectangle } from 'engine/core/math/index';
 import { TextureCache } from 'engine/utils/index';
 import Sprite from './sprite';

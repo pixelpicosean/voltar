@@ -17,9 +17,9 @@ import TextureGarbageCollector from './TextureGarbageCollector';
 import RenderTarget from './utils/RenderTarget';
 import WebGLState from './WebGLState';
 
-import Texture from 'engine/textures/texture';
-import BaseTexture from 'engine/textures/BaseTexture';
-import RenderTexture from 'engine/textures/RenderTexture';
+import Texture from 'engine/scene/resources/textures/texture';
+import BaseTexture from 'engine/scene/resources/textures/base_texture';
+import RenderTexture from 'engine/scene/resources/textures/render_texture';
 
 import map_webgl_draw_modes_to_voltar from './utils/map_webgl_draw_modes_to_voltar';
 import { Matrix } from 'engine/core/math/index';

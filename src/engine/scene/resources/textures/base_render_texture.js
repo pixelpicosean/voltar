@@ -1,6 +1,6 @@
-import settings from '../settings';
-import BaseTexture from './BaseTexture';
+import settings from 'engine/settings';
 import RenderTarget from 'engine/renderers/utils/RenderTarget';
+import BaseTexture from './base_texture';
 
 /**
  * A BaseRenderTexture is a special texture that allows any Pixi display object to be rendered to it.

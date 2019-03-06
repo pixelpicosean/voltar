@@ -1,4 +1,4 @@
-import { GroupD8, Rectangle } from '../math/index';
+import { GroupD8, Rectangle } from 'engine/core/math/index';
 
 /**
  * A standard object to store the Uvs of a texture

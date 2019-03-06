@@ -1,8 +1,8 @@
+import Resource from "engine/core/io/Resource";
+import BaseTexture from "engine/scene/resources/textures/base_texture";
 import SoundLibrary from "../SoundLibrary";
 import Sound from "../Sound";
 import WebAudioMedia from "../webaudio/WebAudioMedia";
-import { Resource } from "resource-loader";
-import BaseTexture from "engine/textures/BaseTexture";
 
 /**
  * @typedef RenderOptions
@@ -12,7 +12,7 @@ import BaseTexture from "engine/textures/BaseTexture";
  */
 
 /**
- * @typedef ExtensionMap {[key: string]: boolean}
+ * @typedef {[key: string]: boolean} ExtensionMap
  */
 
 /**

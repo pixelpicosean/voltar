@@ -1,9 +1,9 @@
+import { Rectangle, Vector2 } from 'engine/core/math/index';
+import { uid, TextureCache, get_resolution_of_url } from 'engine/utils/index';
 import { VObject } from 'engine/dep/index';
-import BaseTexture from './BaseTexture';
-import TextureUvs from './TextureUvs';
-import TextureMatrix from './TextureMatrix';
-import { Rectangle, Vector2 } from '../math/index';
-import { uid, TextureCache, get_resolution_of_url } from '../utils/index';
+import BaseTexture from './base_texture';
+import TextureUvs from './texture_uvs';
+import TextureMatrix from './texture_matrix';
 
 /**
  * A texture stores the information that represents an image or part of an image. It cannot be added

@@ -1,7 +1,7 @@
 import Control from './control';
 
 import WebGLRenderer from 'engine/renderers/WebGLRenderer';
-import Texture from 'engine/textures/texture';
+import Texture from 'engine/scene/resources/textures/texture';
 import Color from 'engine/core/color';
 
 import { node_class_map } from 'engine/registry';

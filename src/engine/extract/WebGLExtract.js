@@ -1,5 +1,5 @@
 import WebGLRenderer from "engine/renderers/WebGLRenderer";
-import RenderTexture from "engine/textures/RenderTexture";
+import RenderTexture from "engine/scene/resources/textures/render_texture";
 import CanvasRenderTarget from "engine/renderers/utils/CanvasRenderTarget";
 import Rectangle from "engine/core/math/shapes/rectangle";
 import Node2D from "engine/scene/node_2d";

@@ -1,7 +1,7 @@
-import BaseRenderTexture from './BaseRenderTexture';
-import Texture from './texture';
-import { Rectangle } from 'engine/core/math/index';
 import settings from 'engine/settings';
+import { Rectangle } from 'engine/core/math/index';
+import BaseRenderTexture from './base_render_texture';
+import Texture from './texture';
 
 /**
  * A RenderTexture is a special texture that allows any Pixi display object to be rendered to it.

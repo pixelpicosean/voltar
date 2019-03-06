@@ -7,7 +7,7 @@ import VertexArrayObject from 'engine/drivers/webgl/vao';
 import GLShader from 'engine/drivers/webgl/gl_shader';
 import GLBuffer from 'engine/drivers/webgl/gl_buffer';
 
-import BaseTexture from 'engine/textures/BaseTexture';
+import BaseTexture from 'engine/scene/resources/textures/base_texture';
 
 import Buffer from './batch_buffer';
 import create_indices_for_quads from 'engine/utils/create_indices_for_quads';

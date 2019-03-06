@@ -1,6 +1,6 @@
 import Filter from '../Filter';
 import { Matrix } from 'engine/core/math/index';
-import TextureMatrix from 'engine/textures/TextureMatrix';
+import TextureMatrix from 'engine/scene/resources/textures/texture_matrix';
 import Sprite from 'engine/scene/sprites/sprite';
 import RenderTarget from '../../utils/RenderTarget';
 import FilterManager from '../../managers/FilterManager';

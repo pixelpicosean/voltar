@@ -3,8 +3,8 @@ import { remove_items } from 'engine/dep/index';
 import GLTexture from 'engine/drivers/webgl/gl_texture';
 import RenderTarget from './utils/RenderTarget';
 import WebGLRenderer from './WebGLRenderer';
-import BaseTexture from 'engine/textures/BaseTexture';
-import Texture from 'engine/textures/texture';
+import BaseTexture from 'engine/scene/resources/textures/base_texture';
+import Texture from 'engine/scene/resources/textures/texture';
 
 /**
  * Helper class to create a webGL Texture

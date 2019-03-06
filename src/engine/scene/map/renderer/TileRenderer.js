@@ -1,6 +1,6 @@
 import ObjectRenderer from 'engine/renderers/utils/ObjectRenderer';
 
-import RenderTexture from 'engine/textures/RenderTexture';
+import RenderTexture from 'engine/scene/resources/textures/render_texture';
 import Sprite from '../../sprites/sprite';
 import { WRAP_MODES, BLEND_MODES } from 'engine/const';
 

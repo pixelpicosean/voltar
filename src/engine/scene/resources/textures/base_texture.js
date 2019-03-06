@@ -1,4 +1,4 @@
-import settings from '../settings';
+import settings from 'engine/settings';
 import {
     uid,
     get_svg_size,
@@ -6,10 +6,10 @@ import {
     get_url_file_extension,
     decompose_data_uri,
     BaseTextureCache, TextureCache,
-} from '../utils/index';
+} from 'engine/utils/index';
 import { is_po2 } from 'engine/core/math/index';
 import { VObject } from 'engine/dep/index';
-import determine_cross_origin from '../utils/determine_cross_origin';
+import determine_cross_origin from 'engine/utils/determine_cross_origin';
 import RenderTarget from 'engine/renderers/utils/RenderTarget';
 import GLTexture from 'engine/drivers/webgl/gl_texture';
 

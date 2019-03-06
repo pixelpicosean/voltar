@@ -1,11 +1,11 @@
-import settings from '../settings';
-import { RENDERER_TYPE } from '../const';
-
-import { say_hello, hex2string, hex2rgb } from '../utils/index';
-import { Matrix, Rectangle } from 'engine/core/math/index';
+import settings from 'engine/settings';
+import { RENDERER_TYPE } from 'engine/const';
 import { VObject } from 'engine/dep/index';
-import Node2D from '../scene/node_2d';
-import RenderTexture from '../textures/RenderTexture';
+import { Matrix, Rectangle } from 'engine/core/math/index';
+import { say_hello, hex2string, hex2rgb } from 'engine/utils/index';
+
+import RenderTexture from 'engine/scene/resources/textures/render_texture';
+import Node2D from 'engine/scene/node_2d';
 
 const temp_matrix = new Matrix();
 
