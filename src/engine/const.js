@@ -4,7 +4,7 @@
  * @constant
  * @type {string}
  */
-export const VERSION = '3.1.0-dev';
+export const VERSION = '3.2.0-dev';
 
 /**
  * Constant to identify the Renderer Type.
