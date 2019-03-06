@@ -4,50 +4,50 @@
 export default class TickerListener {
     /**
      * @param {Function} fn - The listener function to be added for one update
-     * @param {Function} [context=null] - The listener context
-     * @param {number} [priority=0] - The priority for emitting
-     * @param {boolean} [once=false] - If the handler should fire once
+     * @param {Function} [context] - The listener context
+     * @param {number} [priority] - The priority for emitting
+     * @param {boolean} [once] - If the handler should fire once
      */
     constructor(fn, context = null, priority = 0, once = false) {
         /**
          * The handler function to execute.
-         * @member {Function}
+         * @type {Function}
          */
         this.fn = fn;
 
         /**
          * The calling to execute.
-         * @member {Function}
+         * @type {any}
          */
         this.context = context;
 
         /**
          * The current priority.
-         * @member {number}
+         * @type {number}
          */
         this.priority = priority;
 
         /**
          * If this should only execute once.
-         * @member {boolean}
+         * @type {boolean}
          */
         this.once = once;
 
         /**
          * The next item in chain.
-         * @member {TickerListener}
+         * @type {TickerListener}
          */
         this.next = null;
 
         /**
          * The previous item in chain.
-         * @member {TickerListener}
+         * @type {TickerListener}
          */
         this.previous = null;
 
         /**
          * `true` if this listener has been destroyed already.
-         * @member {boolean}
+         * @type {boolean}
          * @private
          */
         this._destroyed = false;
@@ -57,12 +57,10 @@ export default class TickerListener {
      * Simple compare function to figure out if a function and context match.
      *
      * @param {Function} fn - The listener function to be added for one update
-     * @param {Function} context - The listener context
+     * @param {any} [context] - The listener context
      * @return {boolean} `true` if the listener match the arguments
      */
-    match(fn, context) {
-        context = context || null;
-
+    match(fn, context = null) {
         return this.fn === fn && this.context === context;
     }
 
@@ -75,8 +73,7 @@ export default class TickerListener {
         if (this.fn) {
             if (this.context) {
                 this.fn.call(this.context, delta_time);
-            }
-            else {
+            } else {
                 this.fn(delta_time);
             }
         }
@@ -111,7 +108,7 @@ export default class TickerListener {
 
     /**
      * Destroy and don't use after this.
-     * @param {boolean} [hard = false] `true` to remove the `next` reference, this
+     * @param {boolean} [hard] `true` to remove the `next` reference, this
      *        is considered a hard destroy. Soft destroy maintains the next reference.
      * @return {TickerListener} The listener to redirect while emitting or removing.
      */

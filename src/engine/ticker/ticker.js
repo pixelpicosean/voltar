@@ -1,6 +1,6 @@
 import settings from '../settings';
 import { UPDATE_PRIORITY } from '../const';
-import TickerListener from './TickerListener';
+import TickerListener from './ticker_listener';
 
 /**
  * A Ticker class that runs an update loop that other objects listen to.
