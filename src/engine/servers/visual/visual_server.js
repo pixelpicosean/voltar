@@ -1,8 +1,6 @@
-import settings from '../../settings';
-import { SCALE_MODES } from '../../const';
-import { is_webgl_supported } from '../../utils/index';
+import { is_webgl_supported } from 'engine/utils/index';
 import { loader_use_procs } from 'engine/registry';
-import WebGLRenderer from '../../renderers/WebGLRenderer';
+import WebGLRenderer from 'engine/renderers/WebGLRenderer';
 import texture_parser from 'engine/scene/resources/textures/texture_parser';
 import spritesheet_parser from 'engine/scene/resources/textures/spritesheet_parser';
 
@@ -19,7 +17,7 @@ export default class VisualServer {
         /**
          * Collection of methods for extracting data (image, pixels, etc.) from a display object or render texture
          *
-         * @type {import('../../extract/WebGLExtract').default}
+         * @type {import('../../extract/webgl_extract').default}
          */
         this.extract = null;
     }

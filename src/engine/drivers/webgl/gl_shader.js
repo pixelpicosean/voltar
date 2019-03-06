@@ -1,8 +1,9 @@
+import settings from 'engine/settings';
+
 import compile_program from './shader/compile_program';
 import extract_attributes from './shader/extract_attributes';
 import extract_uniforms from './shader/extract_uniforms';
 import generate_uniform_access_object from './shader/generate_uniform_access_object';
-import settings from 'engine/settings';
 
 /**
  * @param {string} src

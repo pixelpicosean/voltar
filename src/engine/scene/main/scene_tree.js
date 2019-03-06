@@ -1,21 +1,25 @@
-import VisualServer from '../../servers/visual/visual_server';
-import PhysicsServer from 'engine/servers/physics_2d/physics_server';
-import MessageQueue from '../../core/message_queue';
-import Node2D from '../node_2d';
-import Vector from 'engine/core/math/vector2';
-import { shared as shared_ticker } from '../../ticker/index';
-import Loader from 'engine/core/io/Loader';
-import { mixins, deep_merge } from '../../utils/index';
+import { assemble_scene, settings, SCALE_MODES } from 'engine/index';
+import { outer_box_resize } from 'engine/resize';
+import { mixins, deep_merge } from 'engine/utils/index';
+import { optional, scene_class_map, node_class_map, res_procs } from 'engine/registry';
 
-import { outer_box_resize } from '../../resize';
-import { optional, scene_class_map, node_class_map, res_procs } from '../../registry';
-import Theme, { default_font_name } from '../resources/theme';
-import { registered_bitmap_fonts } from '../text/res';
-import { assemble_scene, settings, SCALE_MODES } from '../../index';
-import World2D from '../resources/world_2d';
-import Viewport from './viewport';
+import MessageQueue from 'engine/core/message_queue';
+import Vector from 'engine/core/math/vector2';
+import Loader from 'engine/core/io/Loader';
 import VObject from 'engine/core/v_object';
+
+import { shared as shared_ticker } from 'engine/ticker/index';
+
 import Input from 'engine/input/index';
+import VisualServer from 'engine/servers/visual/visual_server';
+import PhysicsServer from 'engine/servers/physics_2d/physics_server';
+
+import { registered_bitmap_fonts } from '../text/res';
+import World2D from '../resources/world_2d';
+import Theme, { default_font_name } from '../resources/theme';
+
+import Viewport from './viewport';
+import Node2D from '../node_2d';
 
 /**
  * @typedef ApplicationSettings
@@ -303,7 +307,7 @@ export default class SceneTree {
         this.preload_queue = preload_queue;
         this.visual_server = new VisualServer();
         /**
-         * @type {import('engine/extract/WebGLExtract').default}
+         * @type {import('engine/extract/webgl_extract').default}
          */
         this.extract = null;
         this.physics_server = PhysicsServer.get_singleton();

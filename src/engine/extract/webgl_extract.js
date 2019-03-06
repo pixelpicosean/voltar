@@ -25,7 +25,6 @@ export default class WebGLExtract {
      *
      * @param {Node2D|RenderTexture} target - A node or render_texture
      *  to convert. If left empty will use use the main renderer
-     * @return {HTMLImageElement} HTML Image of the target
      */
     image(target) {
         const image = new Image();
@@ -41,7 +40,6 @@ export default class WebGLExtract {
      *
      * @param {Node2D|RenderTexture} target - A node or render_texture
      *  to convert. If left empty will use use the main renderer
-     * @return {string} A base64 encoded string of the texture.
      */
     base64(target) {
         return this.canvas(target).toDataURL();
@@ -52,7 +50,6 @@ export default class WebGLExtract {
      *
      * @param {Node2D|RenderTexture} target - A node or render_texture
      *  to convert. If left empty will use use the main renderer
-     * @return {HTMLCanvasElement} A Canvas element with the texture rendered on.
      */
     canvas(target) {
         const renderer = this.renderer;
@@ -143,7 +140,6 @@ export default class WebGLExtract {
      *
      * @param {Node2D|RenderTexture} target - A node or render_texture
      *  to convert. If left empty will use use the main renderer
-     * @return {Uint8Array} One-dimensional array containing the pixel data of the entire texture
      */
     pixels(target) {
         const renderer = this.renderer;
@@ -206,7 +202,6 @@ export default class WebGLExtract {
 
     /**
      * Destroys the extract
-     *
      */
     destroy() {
         this.renderer = null;
