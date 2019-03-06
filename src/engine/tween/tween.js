@@ -1,5 +1,5 @@
 import { VObject, remove_items } from 'engine/dep/index';
-import { Vector2, clamp } from 'engine/math/index';
+import { Vector2, clamp } from 'engine/core/math/index';
 import flatten_key_url from './flatten_key_url';
 import { Easing } from './easing';
 

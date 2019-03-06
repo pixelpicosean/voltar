@@ -1,4 +1,4 @@
-import { Vector2, Rectangle } from "engine/math/index";
+import { Vector2, Rectangle } from "engine/core/math/index";
 
 const ZeroVector = Object.freeze(new Vector2(0, 0));
 

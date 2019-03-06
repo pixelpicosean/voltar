@@ -1,5 +1,5 @@
 import Node2D from "../node_2d";
-import { Vector2 } from "engine/math/index";
+import { Vector2 } from "engine/core/math/index";
 import PhysicsServer from "engine/servers/physics_2d/physics_server";
 import { RayResult } from "engine/servers/physics_2d/state";
 import CollisionObject2D from "./collision_object_2d";

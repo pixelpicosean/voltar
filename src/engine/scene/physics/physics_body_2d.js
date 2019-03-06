@@ -1,7 +1,7 @@
 import CollisionObject2D from "./collision_object_2d";
 import PhysicsServer from "engine/servers/physics_2d/physics_server";
 import { BodyMode } from "./const";
-import { Vector2, Matrix } from "engine/math/index";
+import { Vector2, Matrix } from "engine/core/math/index";
 import Body2DSW from "engine/servers/physics_2d/body_2d_sw";
 import PhysicsMaterial from "../resources/physics_material";
 import Node2D from "../node_2d";

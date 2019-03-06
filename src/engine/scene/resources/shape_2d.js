@@ -1,4 +1,4 @@
-import { Rectangle, Matrix, Vector2 } from "engine/math/index";
+import { Rectangle, Matrix, Vector2 } from "engine/core/math/index";
 import { Shape2DSW } from "engine/servers/physics_2d/shape_2d_sw";
 import PhysicsServer from "engine/servers/physics_2d/physics_server";
 

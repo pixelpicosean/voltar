@@ -1,8 +1,8 @@
 import Control from "./control";
 import Sprite from "../sprites/sprite";
 
-import { Vector2, Rectangle } from "engine/math/index";
-import Color from "engine/color";
+import { Vector2, Rectangle } from "engine/core/math/index";
+import Color from "engine/core/color";
 import { SizeFlag, Margin } from "./const";
 
 import { node_class_map } from "engine/registry";

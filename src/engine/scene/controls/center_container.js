@@ -1,5 +1,5 @@
 import Container from "./container";
-import { Vector2, Rectangle } from "engine/math/index";
+import { Vector2, Rectangle } from "engine/core/math/index";
 import { node_class_map } from "engine/registry";
 
 const tmp_vec = new Vector2();

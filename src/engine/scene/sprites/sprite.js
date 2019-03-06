@@ -1,5 +1,5 @@
 import { BLEND_MODES, COLOR_MODES } from 'engine/const';
-import { Vector2, ObservableVector2, Rectangle } from 'engine/math/index';
+import { Vector2, ObservableVector2, Rectangle } from 'engine/core/math/index';
 import { sign, TextureCache } from 'engine/utils/index';
 import WebGLRenderer from 'engine/renderers/WebGLRenderer';
 
@@ -520,7 +520,7 @@ export default class Sprite extends Node2D {
         return this._anchor;
     }
     /**
-     * @param {import('engine/math/Vector2').Vector2Like} value
+     * @param {import('engine/core/math/Vector2').Vector2Like} value
      */
     set_anchor(value) {
         this._anchor.copy(value);
@@ -537,7 +537,7 @@ export default class Sprite extends Node2D {
         return this._offset;
     }
     /**
-     * @param {import('engine/math/Vector2').Vector2Like} value
+     * @param {import('engine/core/math/Vector2').Vector2Like} value
      */
     set_offset(value) {
         this._offset.copy(value);

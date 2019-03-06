@@ -2,7 +2,7 @@ import settings from '../settings';
 import { RENDERER_TYPE } from '../const';
 
 import { say_hello, hex2string, hex2rgb } from '../utils/index';
-import { Matrix, Rectangle } from '../math/index';
+import { Matrix, Rectangle } from 'engine/core/math/index';
 import { VObject } from 'engine/dep/index';
 import Node2D from '../scene/node_2d';
 import RenderTexture from '../textures/RenderTexture';

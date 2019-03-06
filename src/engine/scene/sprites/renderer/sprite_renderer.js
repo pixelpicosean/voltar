@@ -15,7 +15,7 @@ import generate_multi_texture_shader from './generate_multi_texture_shader';
 
 import check_max_if_statments_in_shader from 'engine/renderers/utils/check_max_if_statments_in_shader';
 import { premultiply_blend_mode, premultiply_tint } from 'engine/utils/index';
-import { nearest_po2, log_base_2 } from 'engine/math/index';
+import { nearest_po2, log_base_2 } from 'engine/core/math/index';
 
 let tick = 0;
 let texture_tick = 0;

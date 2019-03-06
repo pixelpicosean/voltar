@@ -1,6 +1,6 @@
 import settings from 'engine/settings';
 import { BLEND_MODES } from 'engine/const';
-import { Vector2, Polygon } from 'engine/math/index';
+import { Vector2, Polygon } from 'engine/core/math/index';
 import { rgb2hex, hex2rgb, TextureCache } from 'engine/utils/index';
 import Texture from 'engine/textures/texture';
 import TextureMatrix from 'engine/textures/TextureMatrix';

@@ -1,5 +1,5 @@
 import { hex2rgb } from 'engine/utils/index';
-import { Polygon } from 'engine/math/index';
+import { Polygon } from 'engine/core/math/index';
 import GraphicsData from '../../graphics_data';
 import WebGLGraphicsData from '../webgl_graphics_data';
 

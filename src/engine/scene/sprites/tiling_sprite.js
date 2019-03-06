@@ -1,7 +1,7 @@
 import TextureMatrix from 'engine/textures/TextureMatrix';
 import BaseTexture from 'engine/textures/BaseTexture';
 import Texture from 'engine/textures/texture';
-import { Vector2, Transform, Rectangle } from 'engine/math/index';
+import { Vector2, Transform, Rectangle } from 'engine/core/math/index';
 import { TextureCache } from 'engine/utils/index';
 import Sprite from './sprite';
 

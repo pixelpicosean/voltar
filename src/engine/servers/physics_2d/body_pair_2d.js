@@ -1,5 +1,5 @@
 import Constraint2DSW from "./constraint_2d_sw";
-import { Vector2, Matrix, clamp, CMP_EPSILON, log_base_2 } from "engine/math/index";
+import { Vector2, Matrix, clamp, CMP_EPSILON, log_base_2 } from "engine/core/math/index";
 import Body2DSW from "./body_2d_sw";
 import Space2DSW from "./space_2d_sw";
 import { BodyMode, CCDMode } from "engine/scene/physics/const";

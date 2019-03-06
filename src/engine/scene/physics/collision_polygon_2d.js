@@ -1,8 +1,8 @@
-import Node2D from "../node_2d";
-import { Rectangle, Vector2 } from "engine/math/index";
+import { Rectangle, Vector2 } from "engine/core/math/index";
+import decompose_in_convex from "engine/core/math/convex";
+import { is_polygon_clockwise } from "engine/core/math/geometry";
 import ConvexPolygonShape2D from "../resources/convex_polygon_shape_2d";
-import decompose_in_convex from "engine/math/convex";
-import { is_polygon_clockwise } from "engine/math/geometry";
+import Node2D from "../node_2d";
 
 /**
  * @param {Vector2[]} arr

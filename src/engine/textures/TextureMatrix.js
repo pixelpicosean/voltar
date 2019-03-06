@@ -1,4 +1,4 @@
-import { Matrix } from '../math/index';
+import { Matrix } from 'engine/core/math/index';
 import Texture from './texture';
 
 const temp_mat = new Matrix();

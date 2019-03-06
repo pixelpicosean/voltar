@@ -2,7 +2,7 @@
 import Node2D from '../node_2d';
 
 import { TextureCache } from 'engine/utils/index';
-import { Matrix, Vector2 } from 'engine/math/index';
+import { Matrix, Vector2 } from 'engine/core/math/index';
 import Texture from 'engine/textures/texture';
 import { node_class_map } from 'engine/registry';
 import TileSet from '../resources/tile_set';

@@ -5,7 +5,7 @@ import {
     Vector2,
     posmod,
     clamp,
-} from 'engine/math/index';
+} from 'engine/core/math/index';
 
 export class Path2D extends Node2D {
     constructor() {

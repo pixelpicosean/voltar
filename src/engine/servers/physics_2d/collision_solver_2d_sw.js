@@ -1,4 +1,4 @@
-import { Vector2, Matrix } from "engine/math/index";
+import { Vector2, Matrix } from "engine/core/math/index";
 import { Shape2DSW } from "./shape_2d_sw";
 import { sat_2d_calculate_penetration as collision_solver } from './collision_solver_2d_sat';
 import { ShapeType } from "engine/scene/physics/const";

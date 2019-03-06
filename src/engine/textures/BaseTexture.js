@@ -7,7 +7,7 @@ import {
     decompose_data_uri,
     BaseTextureCache, TextureCache,
 } from '../utils/index';
-import { is_po2 } from 'engine/math/index';
+import { is_po2 } from 'engine/core/math/index';
 import { VObject } from 'engine/dep/index';
 import determine_cross_origin from '../utils/determine_cross_origin';
 import RenderTarget from 'engine/renderers/utils/RenderTarget';

@@ -1,6 +1,6 @@
 import Mesh from './mesh';
 import Texture from 'engine/textures/texture';
-import { Vector2 } from 'engine/math/index';
+import { Vector2 } from 'engine/core/math/index';
 
 /**
  * The rope allows you to draw a texture across several points and them manipulate these points

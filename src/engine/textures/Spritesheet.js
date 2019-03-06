@@ -1,4 +1,4 @@
-import { Rectangle } from '../math/index';
+import { Rectangle } from 'engine/core/math/index';
 import { get_resolution_of_url } from '../utils/index';
 import BaseTexture from './BaseTexture';
 import Texture from './texture';

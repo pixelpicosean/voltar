@@ -1,4 +1,4 @@
-import { Matrix, Rectangle, Vector2 } from "engine/math/index";
+import { Matrix, Rectangle, Vector2 } from "engine/core/math/index";
 import { Shape2DSW } from "./shape_2d_sw";
 import Space2DSW from "./space_2d_sw";
 import { CollisionObjectType } from "engine/scene/physics/const";

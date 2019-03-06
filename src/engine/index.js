@@ -95,7 +95,7 @@ export { default as Resource } from 'engine/core/io/Resource';
 // ------------------------------------------------------------------
 export { default as OS } from './core/os';
 
-export { default as Color } from './color';
+export { default as Color } from './core/color';
 export { Curve, Curve2D } from './scene/resources/curve';
 
 export { default as TextureUvs } from './textures/TextureUvs';
@@ -114,8 +114,8 @@ export { default as VideoBaseTexture } from './textures/VideoBaseTexture';
 // ------------------------------------------------------------------
 import settings from './settings';
 export * from './const';
-export * from './math/index';
-export * from './rnd';
+export * from './core/math/index';
+export * from './core/math/random_pcg';
 export { default as yield } from './core/yield';
 
 // ------------------------------------------------------------------

@@ -1,5 +1,5 @@
 import Node2D from '../node_2d';
-import { Matrix } from 'engine/math/index';
+import { Matrix } from 'engine/core/math/index';
 import Shape2D from '../resources/shape_2d';
 import PhysicsServer from 'engine/servers/physics_2d/physics_server';
 import { remove_items } from 'engine/dep/index';

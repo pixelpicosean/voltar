@@ -1,5 +1,5 @@
 import GLShader from 'engine/drivers/webgl/gl_shader';
-import { Rectangle, Matrix, nearest_po2 } from 'engine/math/index';
+import { Rectangle, Matrix, nearest_po2 } from 'engine/core/math/index';
 import * as filter_transforms from '../filters/filter_transforms';
 
 import WebGLRenderer from '../WebGLRenderer';

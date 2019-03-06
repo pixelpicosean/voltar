@@ -4,8 +4,8 @@ import {
     rad2deg,
     deg2rad,
     clamp,
-} from 'engine/math/index';
-import MessageQueue from 'engine/MessageQueue';
+} from 'engine/core/math/index';
+import MessageQueue from 'engine/core/MessageQueue';
 import { BLEND_MODES } from 'engine/const';
 import Node2D from '../node_2d';
 import { node_class_map } from 'engine/registry';
@@ -17,9 +17,8 @@ import {
     GrowDirection,
 } from './const';
 import Theme from '../resources/theme';
-import StyleBox from '../resources/style_box';
 import Font from '../resources/font';
-import Color from 'engine/color';
+import Color from 'engine/core/color';
 
 const tmp_vec = new Vector2();
 const tmp_vec2 = new Vector2();
@@ -266,7 +265,7 @@ export default class Control extends Node2D {
         this._size_changed();
     }
     /**
-     * @param {number|import('engine/math/Vector2').Vector2Like} x
+     * @param {number|import('engine/core/math/Vector2').Vector2Like} x
      * @param {number} [y]
      */
     set_rect_size(x, y) {
@@ -294,7 +293,7 @@ export default class Control extends Node2D {
         this._size_changed();
     }
     /**
-     * @param {number|import('engine/math/Vector2').Vector2Like} x
+     * @param {number|import('engine/core/math/Vector2').Vector2Like} x
      * @param {number} [y]
      */
     set_rect_position(x, y) {
@@ -325,7 +324,7 @@ export default class Control extends Node2D {
         this.set_rect_min_size(value);
     }
     /**
-     * @param {number|import('engine/math/Vector2').Vector2Like} x
+     * @param {number|import('engine/core/math/Vector2').Vector2Like} x
      * @param {number} [y]
      */
     set_rect_min_size(x, y) {
@@ -373,7 +372,7 @@ export default class Control extends Node2D {
         this.data.scale.copy(value);
     }
     /**
-     * @param {number|import('engine/math/Vector2').Vector2Like} x
+     * @param {number|import('engine/core/math/Vector2').Vector2Like} x
      * @param {number} [y]
      */
     set_rect_scale(x, y) {
@@ -401,7 +400,7 @@ export default class Control extends Node2D {
         }
     }
     /**
-     * @param {number|import('engine/math/Vector2').Vector2Like} x
+     * @param {number|import('engine/core/math/Vector2').Vector2Like} x
      * @param {number} [y]
      */
     set_rect_global_position(x, y) {
@@ -425,7 +424,7 @@ export default class Control extends Node2D {
         this.data.pivot_offset.copy(value);
     }
     /**
-     * @param {number|import('engine/math/Vector2').Vector2Like} x
+     * @param {number|import('engine/core/math/Vector2').Vector2Like} x
      * @param {number} [y]
      */
     set_rect_pivot_offset(x, y) {

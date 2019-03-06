@@ -1,4 +1,4 @@
-import { rgb2hex } from "./utils/index";
+import { rgb2hex } from "engine/utils/index";
 
 export default class Color {
     get r() {

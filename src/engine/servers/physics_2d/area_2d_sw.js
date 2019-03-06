@@ -2,7 +2,7 @@ import SelfList from "engine/core/self_list";
 import {
     Vector2,
     Matrix,
-} from "engine/math/index";
+} from "engine/core/math/index";
 import {
     CollisionObjectType,
     AreaSpaceOverrideMode,

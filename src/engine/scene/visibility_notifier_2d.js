@@ -1,6 +1,6 @@
 import Node2D from "./node_2d";
 import { node_class_map } from "engine/registry";
-import { Rectangle } from "engine/math/index";
+import { Rectangle } from "engine/core/math/index";
 import { Viewport, AnimationPlayer, AnimatedSprite } from "engine/index";
 
 export class VisibilityNotifier2D extends Node2D {

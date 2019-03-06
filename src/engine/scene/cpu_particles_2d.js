@@ -1,5 +1,5 @@
 import Node2D from './node_2d';
-import Color from 'engine/color';
+import Color from 'engine/core/color';
 import {
     Vector2,
     Matrix,
@@ -7,8 +7,8 @@ import {
     lerp,
     deg2rad,
     PI2,
-} from 'engine/math/index';
-import { randf, rand_range_i } from 'engine/rnd';
+} from 'engine/core/math/index';
+import { randf, rand_range_i } from 'engine/core/math/random_pcg';
 import Sprite from './sprites/sprite';
 import WebGLRenderer from 'engine/renderers/WebGLRenderer';
 import { node_class_map } from 'engine/registry';

@@ -1,6 +1,6 @@
 import BaseRenderTexture from './BaseRenderTexture';
 import Texture from './texture';
-import { Rectangle } from '../math/index';
+import { Rectangle } from 'engine/core/math/index';
 import settings from 'engine/settings';
 
 /**

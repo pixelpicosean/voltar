@@ -2,7 +2,7 @@ import {
     Vector2,
     Matrix,
     Rectangle,
-} from "engine/math/index";
+} from "engine/core/math/index";
 import {
     INTERSECTION_QUERY_MAX,
     CollisionObjectType,

@@ -1,4 +1,4 @@
-import { Matrix } from 'engine/math/index';
+import { Matrix } from 'engine/core/math/index';
 import { correct_blend_mode, premultiply_rgba } from 'engine/utils/index';
 
 import GLBuffer from 'engine/drivers/webgl/gl_buffer';

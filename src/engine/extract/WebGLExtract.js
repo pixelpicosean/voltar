@@ -1,8 +1,8 @@
-import Rectangle from "engine/math/shapes/rectangle";
 import WebGLRenderer from "engine/renderers/WebGLRenderer";
 import RenderTexture from "engine/textures/RenderTexture";
-import Node2D from "engine/scene/node_2d";
 import CanvasRenderTarget from "engine/renderers/utils/CanvasRenderTarget";
+import Rectangle from "engine/core/math/shapes/rectangle";
+import Node2D from "engine/scene/node_2d";
 
 const TEMP_RECT = new Rectangle();
 const BYTES_PER_PIXEL = 4;

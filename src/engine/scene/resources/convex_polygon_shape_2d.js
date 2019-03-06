@@ -1,7 +1,13 @@
-import { Rectangle, Vector2 } from "engine/math/index";
 import PhysicsServer from "engine/servers/physics_2d/physics_server";
 import Shape2D from "./shape_2d";
-import { is_polygon_clockwise, convex_hull_2d } from "engine/math/geometry";
+import {
+    Rectangle,
+    Vector2,
+} from "engine/core/math/index";
+import {
+    is_polygon_clockwise,
+    convex_hull_2d,
+} from "engine/core/math/geometry";
 
 export default class ConvexPolygonShape2D extends Shape2D {
     get points() {

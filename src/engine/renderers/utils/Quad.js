@@ -3,7 +3,7 @@ import GLShader from 'engine/drivers/webgl/gl_shader';
 import VertexArrayObject from 'engine/drivers/webgl/vao'
 
 import create_indices_for_quads from 'engine/utils/create_indices_for_quads';
-import { Rectangle } from 'engine/math/index';
+import { Rectangle } from 'engine/core/math/index';
 
 /**
  * Helper class to create a quad

@@ -1,4 +1,4 @@
-import { SHAPES } from '../../const';
+import { SHAPES } from 'engine/const';
 
 /**
  * The Rounded Rectangle object is an area that has nice rounded corners, as indicated by its

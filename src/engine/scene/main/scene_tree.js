@@ -1,8 +1,8 @@
 import VisualServer from '../../servers/visual/visual_server';
 import PhysicsServer from 'engine/servers/physics_2d/physics_server';
-import MessageQueue from '../../MessageQueue';
+import MessageQueue from '../../core/MessageQueue';
 import Node2D from '../node_2d';
-import Vector from '../../math/Vector2';
+import Vector from 'engine/core/math/Vector2';
 import { shared as shared_ticker } from '../../ticker/index';
 import Loader from 'engine/core/io/Loader';
 import { mixins, deep_merge } from '../../utils/index';

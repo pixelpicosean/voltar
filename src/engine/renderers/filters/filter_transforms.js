@@ -1,4 +1,4 @@
-import { Matrix, Rectangle } from 'engine/math/index';
+import { Matrix, Rectangle } from 'engine/core/math/index';
 
 /**
  * Calculates the mapped matrix

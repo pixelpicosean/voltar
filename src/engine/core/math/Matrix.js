@@ -1,6 +1,7 @@
+import { PI2 } from './const';
 import Vector2 from './Vector2';
-import { PI2, Rectangle } from '../index';
-import { Circle } from './index';
+import Circle from './shapes/circle';
+import Rectangle from './shapes/rectangle';
 
 /**
  * The Matrix class as an object, which makes it a lot faster,

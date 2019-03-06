@@ -4,7 +4,7 @@ import {
     Vector2,
     Rectangle,
     CMP_EPSILON,
-} from "engine/math/index";
+} from "engine/core/math/index";
 import BroadPhase2D from "./broad_phase_2d_sw";
 import { Shape2DSW } from "./shape_2d_sw";
 import CollisionObject2DSW from "./collision_object_2d_sw";

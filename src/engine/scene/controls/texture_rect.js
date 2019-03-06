@@ -2,7 +2,7 @@ import Control from './control';
 import Texture from 'engine/textures/texture';
 import WebGLRenderer from 'engine/renderers/WebGLRenderer';
 import { node_class_map } from 'engine/registry';
-import { Vector2 } from 'engine/math/index';
+import { Vector2 } from 'engine/core/math/index';
 import Sprite from '../sprites/sprite';
 import TilingSprite from '../sprites/tiling_sprite';
 

@@ -1,6 +1,6 @@
 import Shape2D from "./shape_2d";
 import PhysicsServer from "engine/servers/physics_2d/physics_server";
-import { Vector2, Rectangle } from "engine/math/index";
+import { Vector2, Rectangle } from "engine/core/math/index";
 
 export class SegmentShape2D extends Shape2D {
     get a() {
@@ -11,7 +11,7 @@ export class SegmentShape2D extends Shape2D {
         this._update_shape();
     }
     /**
-     * @param {import("engine/math/Vector2").Vector2Like|number} x
+     * @param {import("engine/core/math/Vector2").Vector2Like|number} x
      * @param {number} y
      */
     set_a(x, y = undefined) {
@@ -33,7 +33,7 @@ export class SegmentShape2D extends Shape2D {
         this._update_shape();
     }
     /**
-     * @param {import("engine/math/Vector2").Vector2Like|number} x
+     * @param {import("engine/core/math/Vector2").Vector2Like|number} x
      * @param {number} y
      */
     set_b(x, y = undefined) {

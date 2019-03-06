@@ -5,7 +5,7 @@ import {
     Ellipse,
     Polygon,
     RoundedRectangle,
-} from 'engine/math/index';
+} from 'engine/core/math/index';
 
 /**
  * Default property values of interactive objects

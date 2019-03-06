@@ -1,4 +1,4 @@
-import { SHAPES } from '../../const';
+import { SHAPES } from 'engine/const';
 
 export default class Polygon {
     /**

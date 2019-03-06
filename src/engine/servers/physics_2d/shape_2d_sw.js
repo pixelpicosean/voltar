@@ -1,6 +1,6 @@
-import { Rectangle, Vector2, Matrix, CMP_EPSILON } from "engine/math/index";
+import { Rectangle, Vector2, Matrix, CMP_EPSILON } from "engine/core/math/index";
 import { ShapeType, CollisionObjectType } from "engine/scene/physics/const";
-import { segment_intersects_segment_2d } from "engine/math/geometry";
+import { segment_intersects_segment_2d } from "engine/core/math/geometry";
 
 const _SEGMENT_IS_VALID_SUPPORT_THRESHOLD = 0.99998;
 
@@ -212,9 +212,9 @@ export class SegmentShape2DSW extends Shape2DSW {
     }
 
     /**
-     * @param {import("engine/math/Vector2").Vector2Like} [p_a]
-     * @param {import("engine/math/Vector2").Vector2Like} [p_b]
-     * @param {import("engine/math/Vector2").Vector2Like} [p_normal]
+     * @param {import("engine/core/math/Vector2").Vector2Like} [p_a]
+     * @param {import("engine/core/math/Vector2").Vector2Like} [p_b]
+     * @param {import("engine/core/math/Vector2").Vector2Like} [p_normal]
      */
     constructor(p_a = Vector2.ZERO, p_b = Vector2.ZERO, p_normal = Vector2.ZERO) {
         super();

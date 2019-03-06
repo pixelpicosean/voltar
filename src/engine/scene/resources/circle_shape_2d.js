@@ -1,4 +1,4 @@
-import { Rectangle } from "engine/math/index";
+import { Rectangle } from "engine/core/math/index";
 import PhysicsServer from "engine/servers/physics_2d/physics_server";
 import Shape2D from "./shape_2d";
 

@@ -1,4 +1,4 @@
-import { Vector2 } from "engine/math/index";
+import { Vector2 } from "engine/core/math/index";
 import Node2D from "engine/scene/node_2d";
 
 /**

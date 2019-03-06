@@ -1,7 +1,7 @@
 import {
     Vector2,
     Matrix,
-} from "engine/math/index";
+} from "engine/core/math/index";
 
 import {
     AreaSpaceOverrideMode, AreaParameter,

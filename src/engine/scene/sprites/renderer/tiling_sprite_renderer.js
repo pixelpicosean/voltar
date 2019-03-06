@@ -7,7 +7,7 @@ import GLShader from 'engine/drivers/webgl/gl_shader';
 
 import Quad from 'engine/renderers/utils/Quad';
 
-import { Matrix } from 'engine/math/index';
+import { Matrix } from 'engine/core/math/index';
 import { premultiply_tint_to_rgba, correct_blend_mode } from 'engine/utils/index';
 
 import TilingSprite from '../tiling_sprite';

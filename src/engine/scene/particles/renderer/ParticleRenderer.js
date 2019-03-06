@@ -5,7 +5,7 @@ import {
     correct_blend_mode,
     premultiply_rgba,
 } from 'engine/utils/index';
-import { Matrix } from 'engine/math/index';
+import { Matrix } from 'engine/core/math/index';
 import ParticleShader from './ParticleShader';
 import ParticleBuffer from './ParticleBuffer';
 import ParticleNode2D from '../ParticleNode2D';

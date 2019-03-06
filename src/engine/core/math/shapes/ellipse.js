@@ -1,5 +1,5 @@
 import Rectangle from './rectangle';
-import { SHAPES } from '../../const';
+import { SHAPES } from 'engine/const';
 
 /**
  * The Ellipse object can be used to specify a hit area for displayObjects

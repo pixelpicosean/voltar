@@ -2,7 +2,7 @@ import CollisionSolver2DSW from "./collision_solver_2d_sw";
 import Constraint2DSW from "./constraint_2d_sw";
 import Area2DSW from "./area_2d_sw";
 import Body2DSW from "./body_2d_sw";
-import { Vector2, Matrix } from "engine/math/index";
+import { Vector2, Matrix } from "engine/core/math/index";
 import { BodyMode, AreaSpaceOverrideMode } from "engine/scene/physics/const";
 
 export class AreaPair2DSW extends Constraint2DSW {

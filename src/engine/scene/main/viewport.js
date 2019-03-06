@@ -1,6 +1,6 @@
 import Node2D from "../node_2d";
 import World2D from "../resources/world_2d";
-import { Vector2, Matrix, Rectangle } from "engine/math/index";
+import { Vector2, Matrix, Rectangle } from "engine/core/math/index";
 
 export default class Viewport extends Node2D {
     constructor() {

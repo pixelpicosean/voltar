@@ -2,9 +2,8 @@ import Control from './control';
 
 import WebGLRenderer from 'engine/renderers/WebGLRenderer';
 import Texture from 'engine/textures/texture';
-import Color from 'engine/color';
+import Color from 'engine/core/color';
 
-import { rgb2hex } from 'engine/utils/index';
 import { node_class_map } from 'engine/registry';
 import { COLOR_MODES } from 'engine/const';
 

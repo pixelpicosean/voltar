@@ -1,4 +1,4 @@
-import { Vector2, deg2rad, clamp, CMP_EPSILON, lerp } from 'engine/math/index';
+import { Vector2, deg2rad, clamp, CMP_EPSILON, lerp } from 'engine/core/math/index';
 import { VObject, remove_items } from 'engine/dep/index';
 
 const tmp = new Vector2();

@@ -15,11 +15,10 @@ import {
     RoundedRectangle,
     Ellipse,
     Matrix,
-} from 'engine/math/index';
-import ObservableVector2 from 'engine/math/ObservableVector2';
+} from 'engine/core/math/index';
+import ObservableVector2 from 'engine/core/math/ObservableVector2';
 import Filter from 'engine/renderers/filters/Filter';
-import { rgb2hex } from 'engine/utils/index';
-import Color from 'engine/color';
+import Color from 'engine/core/color';
 
 const tmp_color = new Color(1, 1, 1, 1);
 
@@ -823,7 +822,7 @@ export default class Node2D extends VObject {
         return this.transform.position;
     }
     /**
-     * @param {import('engine/math/Vector2').Vector2Like|number} x
+     * @param {import('engine/core/math/Vector2').Vector2Like|number} x
      * @param {number} [y]
      * @returns {this}
      */
@@ -861,7 +860,7 @@ export default class Node2D extends VObject {
         return this.transform.scale;
     }
     /**
-     * @param {import('engine/math/Vector2').Vector2Like|number} x
+     * @param {import('engine/core/math/Vector2').Vector2Like|number} x
      * @param {number} [y]
      * @returns {this}
      */
@@ -899,7 +898,7 @@ export default class Node2D extends VObject {
         return this.transform.pivot;
     }
     /**
-     * @param {import('engine/math/Vector2').Vector2Like|number} x
+     * @param {import('engine/core/math/Vector2').Vector2Like|number} x
      * @param {number} [y]
      * @returns {this}
      */
@@ -933,7 +932,7 @@ export default class Node2D extends VObject {
         return this.transform.skew;
     }
     /**
-     * @param {import('engine/math/Vector2').Vector2Like|number} x
+     * @param {import('engine/core/math/Vector2').Vector2Like|number} x
      * @param {number} [y]
      * @returns {this}
      */

@@ -1,4 +1,4 @@
-import { Rectangle, Matrix } from 'engine/math/index';
+import { Rectangle, Matrix } from 'engine/core/math/index';
 import { SCALE_MODES } from 'engine/const';
 import settings from 'engine/settings';
 import GLFramebuffer from 'engine/drivers/webgl/gl_frame_buffer';

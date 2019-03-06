@@ -1,5 +1,5 @@
 import Filter from '../Filter';
-import { Matrix } from 'engine/math/index';
+import { Matrix } from 'engine/core/math/index';
 import TextureMatrix from 'engine/textures/TextureMatrix';
 import Sprite from 'engine/scene/sprites/sprite';
 import RenderTarget from '../../utils/RenderTarget';

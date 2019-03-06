@@ -1,5 +1,5 @@
 import { remove_items } from 'engine/dep/index';
-import { Vector2, ObservableVector2, Rectangle } from 'engine/math/index';
+import { Vector2, ObservableVector2, Rectangle } from 'engine/core/math/index';
 import Node2D from '../node_2d';
 import Sprite from '../sprites/sprite';
 import { registered_bitmap_fonts } from './res';

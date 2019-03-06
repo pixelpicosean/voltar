@@ -4,7 +4,7 @@ import {
     Ellipse,
     Polygon,
     RoundedRectangle,
-} from "engine/math/index";
+} from "engine/core/math/index";
 
 /**
  * A GraphicsData object.

@@ -1,6 +1,6 @@
 import { Shape2DSW, CircleShape2DSW, RectangleShape2DSW, SegmentShape2DSW, ConvexPolygonShape2DSW } from "./shape_2d_sw";
-import { Matrix, Vector2, CMP_EPSILON } from "engine/math/index";
-import { get_closest_point_to_segment_uncapped_2d } from "engine/math/geometry";
+import { Matrix, Vector2, CMP_EPSILON } from "engine/core/math/index";
+import { get_closest_point_to_segment_uncapped_2d } from "engine/core/math/geometry";
 
 /** @typedef {(A: Shape2DSW, xform_A: Matrix, B: Shape2DSW, xform_B: Matrix, collector: _CollectorCallback2D, motion_A: Vector2, motion_B: Vector2, margin_A: number, margin_B: number) => void} CollisionFunc */
 

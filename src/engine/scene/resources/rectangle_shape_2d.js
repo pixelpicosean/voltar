@@ -1,4 +1,4 @@
-import { Rectangle, Vector2 } from "engine/math/index";
+import { Rectangle, Vector2 } from "engine/core/math/index";
 import PhysicsServer from "engine/servers/physics_2d/physics_server";
 import Shape2D from "./shape_2d";
 
@@ -14,8 +14,8 @@ export default class RectangleShape2D extends Shape2D {
         this._update_shape();
     }
     /**
-     * @param {import("engine/math/Vector2").Vector2Like|number} x
-     * @param {import("engine/math/Vector2").Vector2Like|number} [y]
+     * @param {import("engine/core/math/Vector2").Vector2Like|number} x
+     * @param {import("engine/core/math/Vector2").Vector2Like|number} [y]
      * @returns {this}
      */
     set_extents(x, y = undefined) {

@@ -1,7 +1,7 @@
 import Control from './control';
 import { SizeFlag, Anchor } from "./const";
-import { Rectangle, Vector2 } from 'engine/math/index';
-import MessageQueue from 'engine/MessageQueue';
+import { Rectangle, Vector2 } from 'engine/core/math/index';
+import MessageQueue from 'engine/core/MessageQueue';
 import { node_class_map } from 'engine/registry';
 
 const tmp_vec = new Vector2();

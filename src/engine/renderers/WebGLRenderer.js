@@ -22,7 +22,7 @@ import BaseTexture from 'engine/textures/BaseTexture';
 import RenderTexture from 'engine/textures/RenderTexture';
 
 import map_webgl_draw_modes_to_voltar from './utils/map_webgl_draw_modes_to_voltar';
-import Matrix from 'engine/math/Matrix';
+import { Matrix } from 'engine/core/math/index';
 
 import { plugin_target } from 'engine/utils/index';
 

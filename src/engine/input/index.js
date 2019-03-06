@@ -1,9 +1,8 @@
-import remove_items from 'remove-array-items';
-import { Vector2 } from '../math/index';
+import { remove_items } from 'engine/dep/index';
+import { Vector2 } from 'engine/core/math/index';
+import { InteractionEvent } from 'engine/interaction/enable';
 import keyboard from './keyboard';
 import Node2D from 'engine/scene/node_2d';
-import { InteractionEvent } from 'engine/interaction/enable';
-
 
 /**
  * Input system which provides key bindings.

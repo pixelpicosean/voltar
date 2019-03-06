@@ -1,8 +1,8 @@
 import { Margin } from "./const";
-import Color from "engine/color";
+import Color from "engine/core/color";
 import Range from "./range";
 import Texture from "engine/textures/texture";
-import { Vector2, clamp } from "engine/math/index";
+import { Vector2, clamp } from "engine/core/math/index";
 import { node_class_map } from "engine/registry";
 import { TextureCache } from "engine/utils/index";
 import WebGLRenderer from "engine/renderers/WebGLRenderer";
@@ -56,7 +56,7 @@ export default class TextureProgress extends Range {
         this._radial_center_offset.copy(value);
     }
     /**
-     * @param {number|import("engine/math/Vector2").Vector2Like} x
+     * @param {number|import("engine/core/math/Vector2").Vector2Like} x
      * @param {number} [y]
      */
     set_radial_center_offset(x, y) {

@@ -2,7 +2,7 @@ import CollisionObject2D from './collision_object_2d';
 import { node_class_map } from 'engine/registry';
 import PhysicsServer from 'engine/servers/physics_2d/physics_server';
 import { AreaSpaceOverrideMode, ShapeType } from 'engine/scene/physics/const';
-import { Vector2, Circle, Rectangle } from 'engine/math/index';
+import { Vector2, Circle, Rectangle } from 'engine/core/math/index';
 import Area2DSW from 'engine/servers/physics_2d/area_2d_sw';
 import { remove_items } from 'engine/dep/index';
 import Node2D from '../node_2d';

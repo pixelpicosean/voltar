@@ -1,6 +1,6 @@
 import Node2D from "../node_2d";
 import Shape2D from "../resources/shape_2d";
-import { Rectangle } from "engine/math/index";
+import { Rectangle } from "engine/core/math/index";
 import { res_class_map } from "engine/registry";
 
 export default class CollisionShape2D extends Node2D {
