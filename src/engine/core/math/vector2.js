@@ -16,21 +16,20 @@ export default class Vector2 {
      * @param {number} [p_y]
      */
     static new(p_x = 0, p_y = 0) {
-        // const vec = pool.pop();
-        // if (!vec) {
-        //     return new Vector2(p_x, p_y);
-        // } else {
-        //     return vec.set(p_x, p_y);
-        // }
-        return new Vector2(p_x, p_y);
+        const vec = pool.pop();
+        if (!vec) {
+            return new Vector2(p_x, p_y);
+        } else {
+            return vec.set(p_x, p_y);
+        }
     }
     /**
      * @param {Vector2} vec
      */
     static free(vec) {
-        // if (vec) {
-        //     pool.push(vec);
-        // }
+        if (vec && pool.length < 2019) {
+            pool.push(vec);
+        }
         return Vector2;
     }
 

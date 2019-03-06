@@ -20,21 +20,20 @@ export default class Matrix {
      * @param {number} [ty=0] - y translation
      */
     static new(a = 1, b = 0, c = 0, d = 1, tx = 0, ty = 0) {
-        // const m = pool.pop();
-        // if (m) {
-        //     return m.set(a, b, c, d, tx, ty);
-        // } else {
-        //     return new Matrix(a, b, c, d, tx, ty);
-        // }
-        return new Matrix(a, b, c, d, tx, ty);
+        const m = pool.pop();
+        if (m) {
+            return m.set(a, b, c, d, tx, ty);
+        } else {
+            return new Matrix(a, b, c, d, tx, ty);
+        }
     }
     /**
      * @param {Matrix} m
      */
     static free(m) {
-        // if (m) {
-        //     pool.push(m);
-        // }
+        if (m && pool.length < 2019) {
+            pool.push(m);
+        }
         return Matrix;
     }
 
