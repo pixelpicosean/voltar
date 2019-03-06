@@ -1,6 +1,6 @@
 import { Rectangle, Vector2 } from 'engine/core/math/index';
 import { uid, TextureCache, get_resolution_of_url } from 'engine/utils/index';
-import { VObject } from 'engine/dep/index';
+import VObject from 'engine/core/v_object';
 import BaseTexture from './base_texture';
 import TextureUvs from './texture_uvs';
 import TextureMatrix from './texture_matrix';

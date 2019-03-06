@@ -1,4 +1,4 @@
-import { VObject } from 'engine/dep/index';
+import VObject from 'engine/core/v_object';
 import * as ticker from 'engine/ticker/index';
 import HTMLAudioMedia from './HTMLAudioMedia';
 

@@ -1,4 +1,4 @@
-import { VObject } from 'engine/dep/index';
+import VObject from 'engine/core/v_object';
 import InteractionData from './InteractionData';
 import InteractionEvent from './InteractionEvent';
 import InteractionTrackingData from './InteractionTrackingData';

@@ -1,4 +1,4 @@
-import { VObject } from 'engine/dep/index';
+import VObject from 'engine/core/v_object';
 
 /**
  * The fallback version of WebAudioContext which uses `<audio>` instead of WebAudio API.

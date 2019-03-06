@@ -1,7 +1,6 @@
-import Node2D from '../node_2d';
-import Sprite from '../sprites/sprite';
-import GraphicsData from './graphics_data';
-import Texture from '../../textures/texture';
+import Texture from 'engine/scene/resources/textures/texture';
+import Node2D from 'engine/scene/node_2d';
+import Sprite from 'engine/scene/sprites/sprite';
 import {
     PI2,
     Vector2,
@@ -11,11 +10,13 @@ import {
     RoundedRectangle,
     Ellipse,
     Polygon,
-} from '../../math/index';
-import { hex2rgb, rgb2hex } from '../../utils/index';
-import { SHAPES, BLEND_MODES } from '../../const';
+} from 'engine/core/math/index';
+import { hex2rgb, rgb2hex } from 'engine/utils/index';
+import { SHAPES, BLEND_MODES } from 'engine/const';
+
 import bezier_curve_to from './utils/bezier_curve_to';
 import WebGLGraphicsData from './renderer/webgl_graphics_data';
+import GraphicsData from './graphics_data';
 
 const temp_point = new Vector2();
 const temp_color_1 = new Float32Array(4);

@@ -1,8 +1,8 @@
 /// <reference path="../tween/index.d.ts" />
 
+import VObject from 'engine/core/v_object';
 import { node_plugins, node_class_map } from 'engine/registry';
 import {
-    VObject,
     remove_items,
 } from 'engine/dep/index';
 import {

@@ -1,4 +1,4 @@
-import { VObject } from 'engine/dep/index';
+import VObject from 'engine/core/v_object';
 import Texture from 'engine/scene/resources/textures/texture';
 import Spritesheet from 'engine/scene/resources/textures/spritesheet';
 import Font from 'engine/scene/resources/font';

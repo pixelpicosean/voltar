@@ -1,4 +1,4 @@
-import { VObject } from "engine/dep/index";
+import VObject from "engine/core/v_object";
 
 export default class PhysicsMaterial extends VObject {
     get friction() {

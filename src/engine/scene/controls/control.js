@@ -5,7 +5,7 @@ import {
     deg2rad,
     clamp,
 } from 'engine/core/math/index';
-import MessageQueue from 'engine/core/MessageQueue';
+import MessageQueue from 'engine/core/message_queue';
 import { BLEND_MODES } from 'engine/const';
 import Node2D from '../node_2d';
 import { node_class_map } from 'engine/registry';

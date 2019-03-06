@@ -1,6 +1,6 @@
 import VisualServer from '../../servers/visual/visual_server';
 import PhysicsServer from 'engine/servers/physics_2d/physics_server';
-import MessageQueue from '../../core/MessageQueue';
+import MessageQueue from '../../core/message_queue';
 import Node2D from '../node_2d';
 import Vector from 'engine/core/math/vector2';
 import { shared as shared_ticker } from '../../ticker/index';
@@ -14,7 +14,7 @@ import { registered_bitmap_fonts } from '../text/res';
 import { assemble_scene, settings, SCALE_MODES } from '../../index';
 import World2D from '../resources/world_2d';
 import Viewport from './viewport';
-import { VObject } from 'engine/dep/index';
+import VObject from 'engine/core/v_object';
 import Input from 'engine/input/index';
 
 /**

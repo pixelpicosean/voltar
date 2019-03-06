@@ -1,6 +1,6 @@
 import settings from 'engine/settings';
 import { RENDERER_TYPE } from 'engine/const';
-import { VObject } from 'engine/dep/index';
+import VObject from 'engine/core/v_object';
 import { Matrix, Rectangle } from 'engine/core/math/index';
 import { say_hello, hex2string, hex2rgb } from 'engine/utils/index';
 

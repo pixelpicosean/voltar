@@ -8,7 +8,7 @@ import {
     BaseTextureCache, TextureCache,
 } from 'engine/utils/index';
 import { is_po2 } from 'engine/core/math/index';
-import { VObject } from 'engine/dep/index';
+import VObject from 'engine/core/v_object';
 import determine_cross_origin from 'engine/utils/determine_cross_origin';
 import RenderTarget from 'engine/renderers/utils/RenderTarget';
 import GLTexture from 'engine/drivers/webgl/gl_texture';
