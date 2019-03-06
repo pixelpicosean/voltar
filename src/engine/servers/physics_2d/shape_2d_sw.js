@@ -212,9 +212,9 @@ export class SegmentShape2DSW extends Shape2DSW {
     }
 
     /**
-     * @param {import("engine/core/math/_vector2").Vector2Like} [p_a]
-     * @param {import("engine/core/math/_vector2").Vector2Like} [p_b]
-     * @param {import("engine/core/math/_vector2").Vector2Like} [p_normal]
+     * @param {import("engine/core/math/vector2").Vector2Like} [p_a]
+     * @param {import("engine/core/math/vector2").Vector2Like} [p_b]
+     * @param {import("engine/core/math/vector2").Vector2Like} [p_normal]
      */
     constructor(p_a = Vector2.ZERO, p_b = Vector2.ZERO, p_normal = Vector2.ZERO) {
         super();

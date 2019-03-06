@@ -11,7 +11,7 @@ export class SegmentShape2D extends Shape2D {
         this._update_shape();
     }
     /**
-     * @param {import("engine/core/math/_vector2").Vector2Like|number} x
+     * @param {import("engine/core/math/vector2").Vector2Like|number} x
      * @param {number} y
      */
     set_a(x, y = undefined) {
@@ -33,7 +33,7 @@ export class SegmentShape2D extends Shape2D {
         this._update_shape();
     }
     /**
-     * @param {import("engine/core/math/_vector2").Vector2Like|number} x
+     * @param {import("engine/core/math/vector2").Vector2Like|number} x
      * @param {number} y
      */
     set_b(x, y = undefined) {

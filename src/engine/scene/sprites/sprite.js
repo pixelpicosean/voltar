@@ -520,7 +520,7 @@ export default class Sprite extends Node2D {
         return this._anchor;
     }
     /**
-     * @param {import('engine/core/math/_vector2').Vector2Like} value
+     * @param {import('engine/core/math/vector2').Vector2Like} value
      */
     set_anchor(value) {
         this._anchor.copy(value);
@@ -537,7 +537,7 @@ export default class Sprite extends Node2D {
         return this._offset;
     }
     /**
-     * @param {import('engine/core/math/_vector2').Vector2Like} value
+     * @param {import('engine/core/math/vector2').Vector2Like} value
      */
     set_offset(value) {
         this._offset.copy(value);

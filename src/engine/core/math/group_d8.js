@@ -1,5 +1,5 @@
 // Your friendly neighbour https://en.wikipedia.org/wiki/Dihedral_group of order 16
-import Matrix from './_matrix';
+import Matrix from './matrix';
 
 const ux = [1, 1, 0, -1, -1, -1, 0, 1, 1, 1, 0, -1, -1, -1, 0, 1];
 const uy = [0, 1, 1, 1, 0, -1, -1, -1, 0, 1, 1, 1, 0, -1, -1, -1];

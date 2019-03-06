@@ -1,4 +1,4 @@
-import Vector2 from "./_vector2";
+import Vector2 from "./vector2";
 import { CMP_EPSILON } from "./const";
 import { clamp } from "./index";
 

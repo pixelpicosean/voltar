@@ -1,5 +1,5 @@
 import { PI2 } from './const';
-import Vector2 from './_vector2';
+import Vector2 from './vector2';
 import Circle from './shapes/circle';
 import Rectangle from './shapes/rectangle';
 
@@ -602,8 +602,8 @@ export default class Matrix {
     /**
      * Decomposes the matrix (x, y, scaleX, scaleY, and rotation) and sets the properties on to a transform.
      *
-     * @param {import('./_transform').default} transform - The transform to apply the properties to.
-     * @return {import('./_transform').default} The transform with the newly applied properties
+     * @param {import('./transform').default} transform - The transform to apply the properties to.
+     * @return {import('./transform').default} The transform with the newly applied properties
      */
     decompose(transform) {
         // sort out rotation / skew..

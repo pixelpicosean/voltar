@@ -265,7 +265,7 @@ export default class Control extends Node2D {
         this._size_changed();
     }
     /**
-     * @param {number|import('engine/core/math/_vector2').Vector2Like} x
+     * @param {number|import('engine/core/math/vector2').Vector2Like} x
      * @param {number} [y]
      */
     set_rect_size(x, y) {
@@ -293,7 +293,7 @@ export default class Control extends Node2D {
         this._size_changed();
     }
     /**
-     * @param {number|import('engine/core/math/_vector2').Vector2Like} x
+     * @param {number|import('engine/core/math/vector2').Vector2Like} x
      * @param {number} [y]
      */
     set_rect_position(x, y) {
@@ -324,7 +324,7 @@ export default class Control extends Node2D {
         this.set_rect_min_size(value);
     }
     /**
-     * @param {number|import('engine/core/math/_vector2').Vector2Like} x
+     * @param {number|import('engine/core/math/vector2').Vector2Like} x
      * @param {number} [y]
      */
     set_rect_min_size(x, y) {
@@ -372,7 +372,7 @@ export default class Control extends Node2D {
         this.data.scale.copy(value);
     }
     /**
-     * @param {number|import('engine/core/math/_vector2').Vector2Like} x
+     * @param {number|import('engine/core/math/vector2').Vector2Like} x
      * @param {number} [y]
      */
     set_rect_scale(x, y) {
@@ -400,7 +400,7 @@ export default class Control extends Node2D {
         }
     }
     /**
-     * @param {number|import('engine/core/math/_vector2').Vector2Like} x
+     * @param {number|import('engine/core/math/vector2').Vector2Like} x
      * @param {number} [y]
      */
     set_rect_global_position(x, y) {
@@ -424,7 +424,7 @@ export default class Control extends Node2D {
         this.data.pivot_offset.copy(value);
     }
     /**
-     * @param {number|import('engine/core/math/_vector2').Vector2Like} x
+     * @param {number|import('engine/core/math/vector2').Vector2Like} x
      * @param {number} [y]
      */
     set_rect_pivot_offset(x, y) {

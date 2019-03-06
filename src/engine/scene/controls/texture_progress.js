@@ -56,7 +56,7 @@ export default class TextureProgress extends Range {
         this._radial_center_offset.copy(value);
     }
     /**
-     * @param {number|import("engine/core/math/_vector2").Vector2Like} x
+     * @param {number|import("engine/core/math/vector2").Vector2Like} x
      * @param {number} [y]
      */
     set_radial_center_offset(x, y) {

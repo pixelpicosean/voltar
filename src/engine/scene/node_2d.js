@@ -822,7 +822,7 @@ export default class Node2D extends VObject {
         return this.transform.position;
     }
     /**
-     * @param {import('engine/core/math/_vector2').Vector2Like|number} x
+     * @param {import('engine/core/math/vector2').Vector2Like|number} x
      * @param {number} [y]
      * @returns {this}
      */
@@ -860,7 +860,7 @@ export default class Node2D extends VObject {
         return this.transform.scale;
     }
     /**
-     * @param {import('engine/core/math/_vector2').Vector2Like|number} x
+     * @param {import('engine/core/math/vector2').Vector2Like|number} x
      * @param {number} [y]
      * @returns {this}
      */
@@ -898,7 +898,7 @@ export default class Node2D extends VObject {
         return this.transform.pivot;
     }
     /**
-     * @param {import('engine/core/math/_vector2').Vector2Like|number} x
+     * @param {import('engine/core/math/vector2').Vector2Like|number} x
      * @param {number} [y]
      * @returns {this}
      */
@@ -932,7 +932,7 @@ export default class Node2D extends VObject {
         return this.transform.skew;
     }
     /**
-     * @param {import('engine/core/math/_vector2').Vector2Like|number} x
+     * @param {import('engine/core/math/vector2').Vector2Like|number} x
      * @param {number} [y]
      * @returns {this}
      */

@@ -1,4 +1,4 @@
-import Vector2 from "./_vector2";
+import Vector2 from "./vector2";
 
 /**
  * @param {Vector2[]} vertices
