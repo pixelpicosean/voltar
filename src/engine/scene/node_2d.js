@@ -261,7 +261,7 @@ export default class Node2D extends VObject {
          * The original, cached mask of the object
          *
          * @private
-         * @type {import('./graphics/Graphics').default|import('./sprites/sprite').default}
+         * @type {import('./graphics/graphics').default|import('./sprites/sprite').default}
          */
         this._mask = null;
 
@@ -1005,7 +1005,7 @@ export default class Node2D extends VObject {
      * Graphics or a Sprite object. This allows for much faster masking in canvas as it
      * utilises shape clipping. To remove a mask, set this property to null.
      *
-     * @type {import('./graphics/Graphics').default|import('./sprites/sprite').default}
+     * @type {import('./graphics/graphics').default|import('./sprites/sprite').default}
      */
     get mask() {
         return this._mask;
@@ -1026,7 +1026,7 @@ export default class Node2D extends VObject {
     }
 
     /**
-     * @param {import('./graphics/Graphics').default|import('./sprites/sprite').default} value
+     * @param {import('./graphics/graphics').default|import('./sprites/sprite').default} value
      */
     set_mask(value) {
         this.mask = value;

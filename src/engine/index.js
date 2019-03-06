@@ -37,7 +37,7 @@ export { default as CenterContainer } from './scene/controls/center_container';
 export { VBoxContainer, HBoxContainer } from './scene/controls/box_container';
 export { default as GridContainer } from './scene/controls/grid_container';
 
-export { default as Graphics } from './scene/graphics/Graphics';
+export { default as Graphics } from './scene/graphics/graphics';
 
 export { default as BitmapText } from './scene/text/bitmap_text';
 export { default as Text } from './scene/text/text';

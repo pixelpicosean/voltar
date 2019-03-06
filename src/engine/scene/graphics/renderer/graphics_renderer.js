@@ -11,8 +11,8 @@ import { SHAPES } from 'engine/const';
 
 import PrimitiveShader from './shaders/primitive_shader';
 
-import WebGLGraphicsData from './WebGLGraphicsData';
-import Graphics from '../Graphics';
+import WebGLGraphicsData from './webgl_graphics_data';
+import Graphics from '../graphics';
 
 /**
  * Renders the graphics object.
@@ -188,7 +188,7 @@ export default class GraphicsRenderer extends ObjectRenderer {
     }
 
     /**
-     * @param {import('../Graphics').GraphicRenderInfo} webgl - the current WebGL drawing context
+     * @param {import('../graphics').GraphicRenderInfo} webgl - the current WebGL drawing context
      * @param {boolean} [native_lines] - indicate whether the webGLData use for native_lines.
      */
     get_webgl_data(webgl, native_lines = false) {

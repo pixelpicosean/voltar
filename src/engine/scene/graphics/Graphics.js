@@ -1,6 +1,6 @@
 import Node2D from '../node_2d';
 import Sprite from '../sprites/sprite';
-import GraphicsData from './GraphicsData';
+import GraphicsData from './graphics_data';
 import Texture from '../../textures/Texture';
 import {
     PI2,
@@ -15,7 +15,7 @@ import {
 import { hex2rgb, rgb2hex } from '../../utils/index';
 import { SHAPES, BLEND_MODES } from '../../const';
 import bezier_curve_to from './utils/bezier_curve_to';
-import WebGLGraphicsData from './renderer/WebGLGraphicsData';
+import WebGLGraphicsData from './renderer/webgl_graphics_data';
 
 const temp_point = new Vector2();
 const temp_color_1 = new Float32Array(4);

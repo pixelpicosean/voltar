@@ -1,8 +1,8 @@
 import build_line from './build_line';
 import { hex2rgb } from 'engine/utils/index';
 import { Rectangle } from 'engine/math/index';
-import GraphicsData from '../../GraphicsData';
-import WebGLGraphicsData from '../WebGLGraphicsData';
+import GraphicsData from '../../graphics_data';
+import WebGLGraphicsData from '../webgl_graphics_data';
 
 /**
  * Builds a rectangle to draw

@@ -9,7 +9,7 @@ import WebGLRenderer from "engine/renderers/WebGLRenderer";
 import Sprite from "../sprites/sprite";
 import TilingSprite from "../sprites/tiling_sprite";
 import NineSlicePlane from "../mesh/NineSlicePlane";
-import Graphics from "../graphics/Graphics";
+import Graphics from "../graphics/graphics";
 
 const tmp_vec = new Vector2();
 

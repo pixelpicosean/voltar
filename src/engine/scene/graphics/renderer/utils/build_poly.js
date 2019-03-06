@@ -2,8 +2,8 @@ import earcut from 'earcut';
 import { hex2rgb } from 'engine/utils/index';
 import { Polygon } from 'engine/math/index';
 import build_line from './build_line';
-import GraphicsData from '../../GraphicsData';
-import WebGLGraphicsData from '../WebGLGraphicsData';
+import GraphicsData from '../../graphics_data';
+import WebGLGraphicsData from '../webgl_graphics_data';
 
 /**
  * Builds a polygon to draw

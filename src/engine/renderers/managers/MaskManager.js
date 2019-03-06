@@ -3,7 +3,7 @@ import AlphaMaskFilter from '../filters/sprite_mask/SpriteMaskFilter';
 import WebGLRenderer from '../WebGLRenderer';
 import Node2D from 'engine/scene/node_2d';
 import Sprite from 'engine/scene/sprites/sprite';
-import Graphics from 'engine/scene/graphics/Graphics';
+import Graphics from 'engine/scene/graphics/graphics';
 import RenderTarget from '../utils/RenderTarget';
 
 export default class MaskManager extends WebGLManager {
