@@ -723,9 +723,6 @@ export default class SceneTree {
             if (this.current_scene) {
                 this.viewport.remove_children();
 
-                // TODO: clean up physics server during scene switching
-                // this.physics_server.clean();
-
                 this.current_scene = null;
             }
 

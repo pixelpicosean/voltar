@@ -58,6 +58,40 @@ class C_Point {
      * @param {TangentMode} [p_left_mode]
      * @param {TangentMode} [p_right_mode]
      */
+    static new(
+        p_pos,
+        p_left = 0,
+        p_right = 0,
+        p_left_mode = TangentMode.FREE,
+        p_right_mode = TangentMode.FREE
+    ) {
+        const p = C_PointCache.pop();
+        if (!p) {
+            return new C_Point(p_pos, p_left, p_right, p_left_mode, p_right_mode);
+        } else {
+            p.pos.set(p_pos.x, p_pos.y);
+            p.left_tangent = p_left;
+            p.right_tangent = p_right;
+            p.left_mode = p_left_mode;
+            p.right_mode = p_right_mode;
+            return p;
+        }
+    }
+    /**
+     * @param {C_Point} p
+     */
+    static free(p) {
+        if (p && C_PointCache.length < 2019) {
+            C_PointCache.push(p);
+        }
+    }
+    /**
+     * @param {Vector2} p_pos
+     * @param {number} [p_left]
+     * @param {number} [p_right]
+     * @param {TangentMode} [p_left_mode]
+     * @param {TangentMode} [p_right_mode]
+     */
     constructor(
         p_pos,
         p_left = 0,
@@ -164,7 +198,9 @@ export class Curve extends VObject {
         this.mark_dirty();
     }
     clear_points() {
-        // TODO: cache and reuse
+        for (const p of this._points) {
+            C_Point.free(p);
+        }
         this._points.length = 0;
         this.mark_dirty();
     }
@@ -464,7 +500,7 @@ export class Curve extends VObject {
             const p = this._points[j];
             const i = j * ELEMS;
 
-            output[i] = new Vector2().copy(p.pos);
+            output[i] = p.pos.clone();
             output[i + 1] = p.left_tangent;
             output[i + 2] = p.right_tangent;
             output[i + 3] = p.left_mode;
@@ -479,14 +515,16 @@ export class Curve extends VObject {
     set_data(input) {
         const ELEMS = 5;
 
-        // TODO: cache
+        for (const p of this._points) {
+            C_Point.free(p);
+        }
+
         this._points.length = input.length / ELEMS;
 
         for (let j = 0; j < this._points.length; j++) {
             const p = this._points[j] = new C_Point(tmp.set(0, 0));
             const i = j * ELEMS;
 
-            // @ts-ignore
             p.pos.copy(input[i]);
             p.left_tangent = input[i + 1];
             p.right_tangent = input[i + 2];
@@ -526,7 +564,7 @@ export class Curve extends VObject {
      * @param {number} p_resolution
      */
     set_bake_resolution(p_resolution) {
-        this._bake_resolution =p_resolution;
+        this._bake_resolution = p_resolution;
         this._baked_cache_dirty = true;
     }
 
@@ -597,6 +635,9 @@ class Point {
             return new Point();
         }
     }
+    /**
+     * @param {Point} p
+     */
     static free(p) {
         PointPool.push(p);
     }
@@ -646,10 +687,15 @@ export class Curve2D extends VObject {
             const points = data.points;
             const pc = points.length / 6;
 
-            // TODO: cache exist points
+            // Recycle points
+            for (const p of this.points) {
+                Point.free(p);
+            }
+
+            // Add new ones
             this.points.length = pc;
             for (let i = 0; i < pc; i++) {
-                const p = new Point();
+                const p = Point.new();
                 p.in.set(points[i * 6 + 0], points[i * 6 + 1]);
                 p.out.set(points[i * 6 + 2], points[i * 6 + 3]);
                 p.pos.set(points[i * 6 + 4], points[i * 6 + 5]);

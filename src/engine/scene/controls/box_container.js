@@ -278,8 +278,7 @@ export default class BoxContainer extends Container {
 
             let size = to - from;
 
-            // TODO: cache it
-            let rect = new Rectangle();
+            const rect = Rectangle.new();
 
             if (this.vertical) {
                 rect.x = 0;
@@ -294,6 +293,8 @@ export default class BoxContainer extends Container {
             }
 
             this.fit_child_in_rect(c, rect);
+
+            Rectangle.free(rect);
 
             ofs = to;
             idx++;

@@ -59,6 +59,15 @@ const get_sr = () => {
     return sr;
 }
 
+const cd = [new Vector2(), new Vector2()];
+const get_cd = () => {
+    cd[0].set(0, 0);
+    cd[1].set(0, 0);
+    return cd;
+}
+
+const cbk = new CollCbkData();
+
 /**
  * @param {Vector2} p_point_A
  * @param {Vector2} p_point_B
@@ -119,7 +128,24 @@ class _RestCallbackData2D {
         this.valid_depth = 0;
         this.min_allowed_depth = 0;
     }
+    reset() {
+        this.object = null;
+        this.best_object = null;
+        this.local_shape = 0;
+        this.best_local_shape = 0;
+        this.shape = 0;
+        this.best_shape = 0;
+        this.best_contact.set(0, 0);
+        this.best_normal.set(0, 0);
+        this.best_len = 0;
+        this.valid_dir.set(0, 0);
+        this.valid_depth = 0;
+        this.min_allowed_depth = 0;
+        return this;
+    }
 }
+
+const rcd = new _RestCallbackData2D();
 
 export default class Space2DSW {
     get active() {
@@ -403,8 +429,7 @@ export default class Space2DSW {
             const sr = get_sr();
 
             do {
-                // TODO: cache CollCbkData
-                const cbk = new CollCbkData();
+                cbk.reset();
                 cbk.max = max_results;
                 cbk.amount = 0;
                 cbk.passed = 0;
@@ -442,8 +467,9 @@ export default class Space2DSW {
                         const col_obj_shape_xform = col_obj.transform.clone().append(col_obj.shapes[shape_index].xform);
 
                         if (col_obj.shapes[shape_index].one_way_collision) {
-                            // TODO: cache the get_axis() result
-                            cbk.valid_dir.copy(col_obj_shape_xform.get_axis(1)).normalize();
+                            const axis = col_obj_shape_xform.get_axis(1);
+                            cbk.valid_dir.copy(axis).normalize();
+                            Vector2.free(axis);
 
                             cbk.valid_depth = p_margin;
                             cbk.invalid_by_dir = 0;
@@ -602,7 +628,6 @@ export default class Space2DSW {
                         const ofs = (low + hi) * 0.5;
 
                         sep.copy(mnormal);
-                        // TODO: cache array and other Vector2, Matrix
                         const collided = CollisionSolver2DSW.solve(body_shape.shape, body_shape_xform, p_motion.clone().scale(ofs), against_shape.shape, col_obj_shape_xform, Vector2.ZERO, null, null, [sep], 0);
 
                         if (collided) {
@@ -613,26 +638,38 @@ export default class Space2DSW {
                     }
 
                     if (against_shape.one_way_collision) {
-                        const cd = [new Vector2(), new Vector2()];
-                        const cbk = new CollCbkData();
+                        const cd = get_cd();;
+                        cbk.reset();
                         cbk.max = 1;
                         cbk.amount = 0;
                         cbk.ptr = cd;
-                        cbk.valid_dir.copy(col_obj_shape_xform.get_axis(1)).normalize();
+                        const axis = col_obj_shape_xform.get_axis(1);
+                        cbk.valid_dir.copy(axis).normalize();
 
                         cbk.valid_depth = Number.MAX_VALUE;
 
-                        const sep = [mnormal.clone()];
-                        const collided = CollisionSolver2DSW.solve(body_shape.shape, body_shape_xform, p_motion.clone().scale(hi + this.contact_max_allowed_penetration), against_shape.shape, col_obj_shape_xform, Vector2.ZERO, _shape_col_cbk, cbk, sep, 0);
+                        const seps = [mnormal.clone()];
+
+                        const collided = CollisionSolver2DSW.solve(body_shape.shape, body_shape_xform, p_motion.clone().scale(hi + this.contact_max_allowed_penetration), against_shape.shape, col_obj_shape_xform, Vector2.ZERO, _shape_col_cbk, cbk, seps, 0);
                         if (!collided || cbk.amount === 0) {
+                            Vector2.free(mnormal);
+                            Vector2.free(sep);
+                            Vector2.free(axis);
+                            Vector2.free(seps[0]);
                             continue;
                         }
+
+                        Vector2.free(axis);
+                        Vector2.free(seps[0]);
                     }
 
                     if (low < best_safe) {
                         best_safe = low;
                         best_unsafe = hi;
                     }
+
+                    Vector2.free(mnormal);
+                    Vector2.free(sep);
                 }
 
                 if (stuck) {
@@ -650,6 +687,8 @@ export default class Space2DSW {
                     best_shape = body_shape_idx;
                 }
             }
+
+            Rectangle.free(motion_aabb);
         }
 
         let collided = false;
@@ -663,8 +702,7 @@ export default class Space2DSW {
             ugt.tx += p_motion.x * unsafe;
             ugt.ty += p_motion.y * unsafe;
 
-            // TODO: cache _RestCallbackData2D
-            const rcd = new _RestCallbackData2D();
+            rcd.reset();
             rcd.best_len = 0;
             rcd.best_object = null;
             rcd.best_shape = 0;
@@ -751,12 +789,16 @@ export default class Space2DSW {
 
                 collided = true;
             }
+
+            Matrix.free(ugt);
         }
 
         if (!collided && r_result) {
             r_result.motion.copy(p_motion);
             r_result.remainder.set(0, 0);
-            r_result.motion.add(body_transform.origin.clone().subtract(p_from.origin));
+            const origin = body_transform.origin.clone();
+            r_result.motion.add(origin.subtract(p_from.origin));
+            Vector2.free(origin);
         }
 
         return collided;
@@ -808,11 +850,10 @@ export default class Space2DSW {
         {
             // raycast and separate
 
-            const max_results = 32;
             let recover_attempts = 4;
             /** @type {Vector2[]} */
-            const sr = new Array(max_results * 2); for (let i = 0; i < max_results * 2; i++) sr[i] = new Vector2();
-            const cbk = new CollCbkData();
+            const sr = get_sr();
+            cbk.reset();
             const cbkres = _shape_col_cbk;
 
             do {
@@ -928,6 +969,9 @@ export default class Space2DSW {
         }
 
         r_recover_motion.set(body_transform.tx, body_transform.ty).subtract(p_transform.tx, p_transform.ty);
+
+        Rectangle.free(body_aabb);
+
         return rays_found;
     }
 

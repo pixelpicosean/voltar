@@ -5,10 +5,16 @@ const ux = [1, 1, 0, -1, -1, -1, 0, 1, 1, 1, 0, -1, -1, -1, 0, 1];
 const uy = [0, 1, 1, 1, 0, -1, -1, -1, 0, 1, 1, 1, 0, -1, -1, -1];
 const vx = [0, -1, -1, -1, 0, 1, 1, 1, 0, 1, 1, 1, 0, -1, -1, -1];
 const vy = [1, 1, 0, -1, -1, -1, 0, 1, -1, -1, 0, 1, 1, 1, 0, -1];
-const tempMatrices = [];
 
+/** @type {Matrix[]} */
+const temp_matrices = [];
+
+/** @type {number[][]} */
 const mul = [];
 
+/**
+ * @param {number} x
+ */
 function signum(x) {
     if (x < 0) {
         return -1;
@@ -45,7 +51,7 @@ function init() {
         const mat = new Matrix();
 
         mat.set(ux[i], uy[i], vx[i], vy[i], 0, 0);
-        tempMatrices.push(mat);
+        temp_matrices.push(mat);
     }
 }
 
@@ -74,26 +80,24 @@ const GroupD8 = {
     NE: 7,
     MIRROR_VERTICAL: 8,
     MIRROR_HORIZONTAL: 12,
-    u_x: (ind) => ux[ind],
-    u_y: (ind) => uy[ind],
-    v_x: (ind) => vx[ind],
-    v_y: (ind) => vy[ind],
-    inv: (rotation) => {
+    u_x: (/** @type {number} */ind) => ux[ind],
+    u_y: (/** @type {number} */ind) => uy[ind],
+    v_x: (/** @type {number} */ind) => vx[ind],
+    v_y: (/** @type {number} */ind) => vy[ind],
+    inv: (/** @type {number} */rotation) => {
         if (rotation & 8) {
             return rotation & 15;
         }
 
         return (-rotation) & 7;
     },
-    add: (rotationSecond, rotationFirst) => mul[rotationSecond][rotationFirst],
-    sub: (rotationSecond, rotationFirst) => mul[rotationSecond][GroupD8.inv(rotationFirst)],
+    add: (/** @type {number} */rotation_second, /** @type {number} */rotation_first) => mul[rotation_second][rotation_first],
+    sub: (/** @type {number} */rotation_second, /** @type {number} */rotation_first) => mul[rotation_second][GroupD8.inv(rotation_first)],
 
     /**
      * Adds 180 degrees to rotation. Commutative operation.
      *
-     * @memberof GroupD8
      * @param {number} rotation - The number to rotate.
-     * @returns {number} rotated number
      */
     rotate180: (rotation) => rotation ^ 4,
 
@@ -107,11 +111,8 @@ const GroupD8 = {
     is_vertical: (rotation) => (rotation & 3) === 2,
 
     /**
-     * @memberof GroupD8
-     * @param {number} dx - TODO
-     * @param {number} dy - TODO
-     *
-     * @return {number} TODO
+     * @param {number} dx
+     * @param {number} dy
      */
     by_direction: (dx, dy) => {
         if (Math.abs(dx) * 2 <= Math.abs(dy)) {
@@ -145,7 +146,6 @@ const GroupD8 = {
     /**
      * Helps sprite to compensate texture packer rotation.
      *
-     * @memberof GroupD8
      * @param {Matrix} matrix - sprite world matrix
      * @param {number} rotation - The rotation factor to use.
      * @param {number} tx - sprite anchoring
@@ -153,7 +153,7 @@ const GroupD8 = {
      */
     matrix_append_rotation_inv: (matrix, rotation, tx = 0, ty = 0) => {
         // Packer used "rotation", we use "inv(rotation)"
-        const mat = tempMatrices[GroupD8.inv(rotation)];
+        const mat = temp_matrices[GroupD8.inv(rotation)];
 
         mat.tx = tx;
         mat.ty = ty;

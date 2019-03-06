@@ -42,8 +42,8 @@ function _build_line(graphics_data, webgl_data) {
     // }
 
     // get first and last point.. figure out the middle!
-    const first_point = new Vector2(points[0], points[1]);
-    let last_point = new Vector2(points[points.length - 2], points[points.length - 1]);
+    const first_point = Vector2.new(points[0], points[1]);
+    const last_point = Vector2.new(points[points.length - 2], points[points.length - 1]);
 
     // if the first point is the last point - gonna have issues :)
     if (first_point.x === last_point.x && first_point.y === last_point.y) {
@@ -53,7 +53,7 @@ function _build_line(graphics_data, webgl_data) {
         points.pop();
         points.pop();
 
-        last_point = new Vector2(points[points.length - 2], points[points.length - 1]);
+        last_point.set(points[points.length - 2], points[points.length - 1]);
 
         const mid_point_x = last_point.x + ((first_point.x - last_point.x) * 0.5);
         const mid_point_y = last_point.y + ((first_point.y - last_point.y) * 0.5);
@@ -61,6 +61,9 @@ function _build_line(graphics_data, webgl_data) {
         points.unshift(mid_point_x, mid_point_y);
         points.push(mid_point_x, mid_point_y);
     }
+
+    Vector2.free(first_point);
+    Vector2.free(last_point);
 
     const verts = webgl_data.points;
     const indices = webgl_data.indices;

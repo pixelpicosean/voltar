@@ -389,8 +389,8 @@ export class Physics2DDirectSpaceStateSW {
         // closest point to ray origin, sort and stop evaluating results when beyond first collision
 
         let collided = false;
-        const res_point = new Vector2();
-        const res_normal = new Vector2();
+        const res_point = Vector2.new();
+        const res_normal = Vector2.new();
         let res_shape = 0;
         /** @type {import('./collision_object_2d_sw').default} */
         let res_obj = null;
@@ -448,6 +448,8 @@ export class Physics2DDirectSpaceStateSW {
         r_result.shape = res_shape;
 
         // TODO: cache tons of temp objects
+        Vector2.free(res_point);
+        Vector2.free(res_normal);
 
         return true;
     }
@@ -669,6 +671,16 @@ export class CollCbkData {
          * @type {Vector2[]}
          */
         this.ptr = null;
+    }
+    reset() {
+        this.valid_dir.set(0, 0);
+        this.valid_depth = 0;
+        this.max = 0;
+        this.amount = 0;
+        this.passed = 0;
+        this.invalid_by_dir = 0;
+        this.ptr = null;
+        return this;
     }
 }
 

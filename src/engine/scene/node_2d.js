@@ -522,8 +522,6 @@ export default class Node2D extends VObject {
 
     /**
      * Updates the object transform for rendering
-     *
-     * TODO - Optimization pass!
      * @private
      */
     _update_transform() {

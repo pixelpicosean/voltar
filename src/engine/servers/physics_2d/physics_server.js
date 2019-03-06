@@ -582,7 +582,6 @@ export default class PhysicsServer {
 
         this.is_initialized = true;
     }
-    // TODO: free owners
     free(rid) { }
 
     set_active(p_active) {

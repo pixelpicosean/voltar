@@ -149,11 +149,11 @@ export default class Bounds {
     /**
      * Adds sprite frame, transformed.
      *
-     * @param {Transform} transform - TODO
-     * @param {number} x0 - TODO
-     * @param {number} y0 - TODO
-     * @param {number} x1 - TODO
-     * @param {number} y1 - TODO
+     * @param {Transform} transform
+     * @param {number} x0
+     * @param {number} y0
+     * @param {number} x1
+     * @param {number} y1
      */
     add_frame(transform, x0, y0, x1, y1) {
         const matrix = transform.world_transform;
@@ -207,10 +207,10 @@ export default class Bounds {
     /**
      * Add an array of vertices
      *
-     * @param {Transform} transform - TODO
-     * @param {Float32Array} vertices - TODO
-     * @param {number} beginOffset - TODO
-     * @param {number} endOffset - TODO
+     * @param {Transform} transform
+     * @param {Float32Array} vertices
+     * @param {number} beginOffset
+     * @param {number} endOffset
      */
     add_vertices(transform, vertices, beginOffset, endOffset) {
         const matrix = transform.world_transform;
@@ -247,7 +247,7 @@ export default class Bounds {
     /**
      * Adds other Bounds
      *
-     * @param {Bounds} bounds - TODO
+     * @param {Bounds} bounds
      */
     add_bounds(bounds) {
         const min_x = this.min_x;
@@ -264,8 +264,8 @@ export default class Bounds {
     /**
      * Adds other Bounds, masked with Bounds
      *
-     * @param {Bounds} bounds - TODO
-     * @param {Bounds} mask - TODO
+     * @param {Bounds} bounds
+     * @param {Bounds} mask
      */
     add_bounds_mask(bounds, mask) {
         const _min_x = bounds.min_x > mask.min_x ? bounds.min_x : mask.min_x;
@@ -289,8 +289,8 @@ export default class Bounds {
     /**
      * Adds other Bounds, masked with Rectangle
      *
-     * @param {Bounds} bounds - TODO
-     * @param {Rectangle} area - TODO
+     * @param {Bounds} bounds
+     * @param {Rectangle} area
      */
     add_bounds_area(bounds, area) {
         const _min_x = bounds.min_x > area.x ? bounds.min_x : area.x;
