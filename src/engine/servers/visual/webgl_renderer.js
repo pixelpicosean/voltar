@@ -6,16 +6,16 @@ import GLTexture from 'engine/drivers/webgl/gl_texture';
 import create_context from 'engine/drivers/webgl/create_context';
 import validate_context from './utils/validate_context';
 
-import SystemRenderer from './SystemRenderer';
-import ObjectRenderer from './utils/ObjectRenderer';
+import SystemRenderer from './system_renderer';
+import ObjectRenderer from './utils/object_renderer';
 
-import MaskManager from './managers/MaskManager';
-import StencilManager from './managers/StencilManager';
-import FilterManager from './managers/FilterManager';
-import TextureManager from './TextureManager';
-import TextureGarbageCollector from './TextureGarbageCollector';
-import RenderTarget from './utils/RenderTarget';
-import WebGLState from './WebGLState';
+import MaskManager from './managers/mask_manager';
+import StencilManager from './managers/stencil_manager';
+import FilterManager from './managers/filter_manager';
+import TextureManager from './texture_manager';
+import TextureGarbageCollector from './texture_garbage_collector';
+import RenderTarget from './utils/render_target';
+import WebGLState from './webgl_state';
 
 import Texture from 'engine/scene/resources/textures/texture';
 import BaseTexture from 'engine/scene/resources/textures/base_texture';
@@ -36,7 +36,7 @@ let CONTEXT_UID = 0;
  */
 export default class WebGLRenderer extends SystemRenderer {
     /**
-     * @param {import('./SystemRenderer').RendererDesc} [options] - The optional renderer parameters
+     * @param {import('./system_renderer').RendererDesc} [options] - The optional renderer parameters
      */
     constructor(options) {
         super('WebGL', options);

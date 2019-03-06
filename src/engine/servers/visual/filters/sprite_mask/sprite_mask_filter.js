@@ -1,9 +1,10 @@
-import Filter from '../Filter';
 import { Matrix } from 'engine/core/math/index';
 import TextureMatrix from 'engine/scene/resources/textures/texture_matrix';
 import Sprite from 'engine/scene/sprites/sprite';
-import RenderTarget from '../../utils/RenderTarget';
-import FilterManager from '../../managers/FilterManager';
+
+import RenderTarget from '../../utils/render_target';
+import FilterManager from '../../managers/filter_manager';
+import Filter from '../filter';
 
 import Vert from './sprite_mask_filter.vert';
 import Frag from './sprite_mask_filter.frag';

@@ -17,8 +17,9 @@ import {
     Matrix,
 } from 'engine/core/math/index';
 import ObservableVector2 from 'engine/core/math/observable_vector2';
-import Filter from 'engine/renderers/filters/Filter';
 import Color from 'engine/core/color';
+
+import Filter from 'engine/servers/visual/filters/filter';
 
 const tmp_color = new Color(1, 1, 1, 1);
 
@@ -1684,7 +1685,7 @@ export default class Node2D extends VObject {
     /**
      * Renders the object using the WebGL renderer
      *
-     * @param {import('engine/renderers/WebGLRenderer').default} renderer - The renderer
+     * @param {import('engine/servers/visual/webgl_renderer').default} renderer - The renderer
      */
     render_webgl(renderer) {
         // if the object is not visible or the alpha is 0 then no need to render this element
@@ -1711,7 +1712,7 @@ export default class Node2D extends VObject {
      * Render the object using the WebGL renderer and advanced features.
      *
      * @private
-     * @param {import('engine/renderers/WebGLRenderer').default} renderer - The renderer
+     * @param {import('engine/servers/visual/webgl_renderer').default} renderer - The renderer
      */
     render_advanced_webgl(renderer) {
         this._update_color();
@@ -1767,7 +1768,7 @@ export default class Node2D extends VObject {
      * To be overridden by the subclasses.
      *
      * @private
-     * @param {import('engine/renderers/WebGLRenderer').default} renderer - The renderer
+     * @param {import('engine/servers/visual/webgl_renderer').default} renderer - The renderer
      */
     _render_webgl(renderer) { }
 

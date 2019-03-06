@@ -389,7 +389,7 @@ export default class Text extends Sprite {
     /**
      * Renders the object using the WebGL renderer
      *
-     * @param {import('engine/renderers/WebGLRenderer').default} renderer - The renderer
+     * @param {import('engine/servers/visual/webgl_renderer').default} renderer - The renderer
      */
     render_webgl(renderer) {
         if (this.resolution !== renderer.resolution) {

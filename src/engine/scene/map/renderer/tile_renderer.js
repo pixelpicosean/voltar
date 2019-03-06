@@ -1,15 +1,22 @@
-import ObjectRenderer from 'engine/renderers/utils/ObjectRenderer';
-
-import RenderTexture from 'engine/scene/resources/textures/render_texture';
-import Sprite from '../../sprites/sprite';
 import { WRAP_MODES, BLEND_MODES } from 'engine/const';
-
 import GLBuffer from 'engine/drivers/webgl/gl_buffer';
+import GLTexture from 'engine/drivers/webgl/gl_texture';
+import ObjectRenderer from 'engine/servers/visual/utils/object_renderer';
+import WebGLRenderer from 'engine/servers/visual/webgl_renderer';
+import RenderTexture from 'engine/scene/resources/textures/render_texture';
 
-import RectTileShader from './RectTileShader';
+import Sprite from '../../sprites/sprite';
 
+import RectTileShader from './rect_tile_shader';
 
-function hack_sub_image(tex, sprite, clear_buffer, clear_width, clear_height) {
+/**
+ * @param {GLTexture} tex
+ * @param {Sprite} sprite
+ * @param {boolean} clear_buffer
+ * @param {number} [clear_width]
+ * @param {number} [clear_height]
+ */
+function hack_sub_image(tex, sprite, clear_buffer, clear_width = 0, clear_height = 0) {
     const gl = tex.gl;
     const base_tex = sprite.texture.base_texture;
     if (clear_buffer && clear_width > 0 && clear_height > 0) {
@@ -26,6 +33,9 @@ function hack_sub_image(tex, sprite, clear_buffer, clear_width, clear_height) {
  * @param {WebGLRenderer} renderer The renderer this sprite batch works for.
  */
 export default class TileRenderer extends ObjectRenderer {
+    /**
+     * @param {WebGLRenderer} renderer
+     */
     constructor(renderer) {
         super(renderer);
 
@@ -62,7 +72,7 @@ export default class TileRenderer extends ObjectRenderer {
             const rt = RenderTexture.create(2048, 2048);
             rt.base_texture.premultiplied_alpha = true;
             rt.base_texture.wrap_mode = WRAP_MODES.CLAMP;
-            this.renderer.texture_manager.update_texture(rt);
+            this.renderer.texture_manager.update_texture(rt.base_texture);
 
             this.gl_textures.push(rt);
             const bounds = this.bound_sprites;
@@ -129,7 +139,7 @@ export default class TileRenderer extends ObjectRenderer {
     }
 
     start() {
-        this.renderer.state.setBlendMode(BLEND_MODES.NORMAL);
+        this.renderer.state.set_blend_mode(BLEND_MODES.NORMAL);
         //sorry, nothing
     }
 

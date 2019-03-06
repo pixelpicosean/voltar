@@ -1,15 +1,16 @@
-import ObjectRenderer from 'engine/renderers/utils/ObjectRenderer';
-import WebGLRenderer from 'engine/renderers/WebGLRenderer';
 import {
     premultiply_tint,
     correct_blend_mode,
     premultiply_rgba,
 } from 'engine/utils/index';
 import { Matrix } from 'engine/core/math/index';
-import ParticleShader from './ParticleShader';
-import ParticleBuffer from './ParticleBuffer';
-import ParticleNode2D from '../ParticleNode2D';
+import ObjectRenderer from 'engine/servers/visual/utils/object_renderer';
+import WebGLRenderer from 'engine/servers/visual/webgl_renderer';
 import Sprite from 'engine/scene/sprites/sprite';
+
+import ParticleNode2D from '../particle_node_2d';
+import ParticleShader from './particle_shader';
+import ParticleBuffer from './particle_buffer';
 
 /**
  * @author Mat Groves

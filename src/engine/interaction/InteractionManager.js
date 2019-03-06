@@ -5,11 +5,11 @@ import InteractionTrackingData from './InteractionTrackingData';
 import interactive_target from './interactive_target';
 import { mixins } from 'engine/utils/index';
 import Node2D from 'engine/scene/node_2d';
-import WebGLRenderer from 'engine/renderers/WebGLRenderer';
+import WebGLRenderer from 'engine/servers/visual/webgl_renderer';
 import Vector2 from 'engine/core/math/vector2';
 import * as ticker from 'engine/ticker/index';
 import { UPDATE_PRIORITY } from 'engine/const';
-import SystemRenderer from 'engine/renderers/SystemRenderer';
+import SystemRenderer from 'engine/servers/visual/system_renderer';
 
 // Mix interactive_target into Node2D.prototype, after deprecation has been handled
 mixins.delay_mixin(

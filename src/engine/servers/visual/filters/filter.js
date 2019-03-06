@@ -2,7 +2,7 @@ import { uid } from 'engine/utils/index';
 import { BLEND_MODES } from 'engine/const';
 import settings from 'engine/settings';
 import extract_uniforms_from_src from './extract_uniforms_from_src';
-import RenderTarget from '../utils/RenderTarget';
+import RenderTarget from '../utils/render_target';
 
 const SOURCE_KEY_MAP = {};
 
@@ -90,7 +90,7 @@ export default class Filter {
     /**
      * Applies the filter
      *
-     * @param {import('../managers/FilterManager').default} filter_manager - The renderer to retrieve the filter from
+     * @param {import('../managers/filter_manager').default} filter_manager - The renderer to retrieve the filter from
      * @param {RenderTarget} input - The input render target.
      * @param {RenderTarget} output - The target to output to.
      * @param {boolean} clear - Should the output be cleared before rendering to it

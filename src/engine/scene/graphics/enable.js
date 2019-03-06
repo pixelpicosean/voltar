@@ -2,7 +2,7 @@
 import 'engine/scene/sprites/enable';
 
 // Inject renderer
-import WebGLRenderer from "engine/renderers/WebGLRenderer";
+import WebGLRenderer from "engine/servers/visual/webgl_renderer";
 
 import GraphicsRenderer from "./renderer/graphics_renderer";
 WebGLRenderer.register_plugin('graphics', GraphicsRenderer);

@@ -1,4 +1,4 @@
-import WebGLRenderer from "../WebGLRenderer";
+import WebGLRenderer from "../webgl_renderer";
 
 export default class WebGLManager {
     /**

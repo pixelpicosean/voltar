@@ -1,9 +1,10 @@
 import settings from 'engine/settings';
+import Filter from 'engine/servers/visual/filters/filter';
+import FilterManager from 'engine/servers/visual/managers/filter_manager';
+import RenderTarget from 'engine/servers/visual/utils/render_target';
+
 import BlurX from './blur_x';
 import BlurY from './blur_y';
-import Filter from 'engine/renderers/filters/Filter';
-import FilterManager from 'engine/renderers/managers/FilterManager';
-import RenderTarget from 'engine/renderers/utils/RenderTarget';
 
 /**
  * The BlurFilter applies a Gaussian blur to an object.

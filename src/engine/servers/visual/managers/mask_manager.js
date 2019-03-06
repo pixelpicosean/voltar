@@ -1,10 +1,10 @@
-import WebGLManager from './WebGLManager';
-import AlphaMaskFilter from '../filters/sprite_mask/SpriteMaskFilter';
-import WebGLRenderer from '../WebGLRenderer';
 import Node2D from 'engine/scene/node_2d';
 import Sprite from 'engine/scene/sprites/sprite';
 import Graphics from 'engine/scene/graphics/graphics';
-import RenderTarget from '../utils/RenderTarget';
+import WebGLRenderer from '../webgl_renderer';
+import RenderTarget from '../utils/render_target';
+import AlphaMaskFilter from '../filters/sprite_mask/sprite_mask_filter';
+import WebGLManager from './webgl_manager';
 
 export default class MaskManager extends WebGLManager {
     /**

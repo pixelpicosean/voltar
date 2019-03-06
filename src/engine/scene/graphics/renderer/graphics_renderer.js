@@ -1,18 +1,16 @@
-import WebGLRenderer from 'engine/renderers/WebGLRenderer';
-import ObjectRenderer from 'engine/renderers/utils/ObjectRenderer';
+import { hex2rgb } from 'engine/utils/index';
+import { SHAPES } from 'engine/const';
+import WebGLRenderer from 'engine/servers/visual/webgl_renderer';
+import ObjectRenderer from 'engine/servers/visual/utils/object_renderer';
+
+import Graphics from '../graphics';
 
 import build_poly from './utils/build_poly';
 import build_rectangle from './utils/build_rectangle';
 import build_rounded_rectangle from './utils/build_rounded_rectangle';
 import build_circle from './utils/build_circle';
-
-import { hex2rgb } from 'engine/utils/index';
-import { SHAPES } from 'engine/const';
-
-import PrimitiveShader from './shaders/primitive_shader';
-
 import WebGLGraphicsData from './webgl_graphics_data';
-import Graphics from '../graphics';
+import PrimitiveShader from './shaders/primitive_shader';
 
 /**
  * Renders the graphics object.

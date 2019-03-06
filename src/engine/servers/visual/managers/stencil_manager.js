@@ -1,6 +1,7 @@
-import WebGLManager from './WebGLManager';
-import WebGLRenderer from '../WebGLRenderer';
 import Graphics from 'engine/scene/graphics/graphics';
+
+import WebGLRenderer from '../webgl_renderer';
+import WebGLManager from './webgl_manager';
 
 export default class StencilManager extends WebGLManager {
     /**

@@ -1,6 +1,6 @@
 // Renderer
-import WebGLRenderer from "engine/renderers/WebGLRenderer";
-import MeshRenderer from "./renderer/MeshRenderer";
+import WebGLRenderer from "engine/servers/visual/webgl_renderer";
+import MeshRenderer from "./renderer/mesh_renderer";
 
 WebGLRenderer.register_plugin('mesh', MeshRenderer);
 
@@ -8,7 +8,7 @@ WebGLRenderer.register_plugin('mesh', MeshRenderer);
 import { node_class_map } from 'engine/registry';
 
 import Mesh from './mesh';
-import NineSlicePlane from './NineSlicePlane';
+import NineSlicePlane from './nine_slice_plane';
 import Plane from './plane';
 import Rope from './rope';
 

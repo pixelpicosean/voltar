@@ -1,8 +1,6 @@
 import TextureMatrix from 'engine/scene/resources/textures/texture_matrix';
-import BaseTexture from 'engine/scene/resources/textures/base_texture';
 import Texture from 'engine/scene/resources/textures/texture';
 import { Vector2, Transform, Rectangle } from 'engine/core/math/index';
-import { TextureCache } from 'engine/utils/index';
 import Sprite from './sprite';
 
 const temp_point = new Vector2();
@@ -157,7 +155,7 @@ export default class TilingSprite extends Sprite {
      * Renders the object using the WebGL renderer
      *
      * @private
-     * @param {import('engine/renderers/WebGLRenderer').default} renderer - The renderer
+     * @param {import('engine/servers/visual/webgl_renderer').default} renderer - The renderer
      */
     _render_webgl(renderer) {
         // tweak our texture temporarily..

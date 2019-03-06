@@ -38,7 +38,7 @@ export function calculate_normalized_screen_space_matrix(output_matrix, filter_a
  * @param output_matrix {Matrix}
  * @param filter_area {Rectangle} The filter area
  * @param texture_size {Rectangle} Size of the texture
- * @param sprite {import('../../scene/sprites/sprite').default}
+ * @param sprite {import('engine/scene/sprites/sprite').default}
  */
 export function calculate_sprite_matrix(output_matrix, filter_area, texture_size, sprite) {
     const orig = sprite._texture.orig;

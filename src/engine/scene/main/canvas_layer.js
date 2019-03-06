@@ -1,6 +1,12 @@
-import Node2D from "../node_2d";
-import { Vector2, rad2deg, deg2rad, Matrix, Transform, ObservableVector2 } from "engine/core/math/index";
 import { node_class_map } from "engine/registry";
+import {
+    Vector2,
+    rad2deg,
+    deg2rad,
+    Transform,
+    ObservableVector2,
+} from "engine/core/math/index";
+import Node2D from "../node_2d";
 
 export default class CanvasLayer extends Node2D {
     /**
@@ -103,7 +109,7 @@ export default class CanvasLayer extends Node2D {
     /**
      * Renders the object using the WebGL renderer
      *
-     * @param {import('engine/renderers/WebGLRenderer').default} renderer - The renderer
+     * @param {import('engine/servers/visual/webgl_renderer').default} renderer - The renderer
      */
     render_webgl(renderer) {
         // Finish current rendering batch

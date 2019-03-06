@@ -1,5 +1,5 @@
 // Inject renderers
-import WebGLRenderer from 'engine/renderers/WebGLRenderer';
+import WebGLRenderer from 'engine/servers/visual/webgl_renderer';
 
 import SpriteRenderer from './renderer/sprite_renderer';
 WebGLRenderer.register_plugin('sprite', SpriteRenderer);

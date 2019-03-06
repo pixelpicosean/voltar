@@ -1,13 +1,13 @@
-import Filter from 'engine/renderers/filters/Filter';
 import Matrix from 'engine/core/math/matrix';
-import Sprite from 'engine/scene/sprites/sprite';
 import Vector2 from 'engine/core/math/vector2';
-import FilterManager from 'engine/renderers/managers/FilterManager';
-import RenderTarget from 'engine/renderers/utils/RenderTarget';
+import Filter from 'engine/servers/visual/filters/filter';
+import FilterManager from 'engine/servers/visual/managers/filter_manager';
+import RenderTarget from 'engine/servers/visual/utils/render_target';
+import Texture from 'engine/scene/resources/textures/texture';
+import Sprite from 'engine/scene/sprites/sprite';
 
 import VertShader from '../fragments/default_filter_matrix.vert';
 import FragShader from './displacement.frag';
-import Texture from 'engine/scene/resources/textures/texture';
 
 /**
  * The Displacement class uses the pixel values from the specified texture

@@ -2,8 +2,8 @@
 import 'engine/scene/sprites/enable';
 
 // Inject renderer
-import WebGLRenderer from 'engine/renderers/WebGLRenderer';
-import TileRenderer from './renderer/TileRenderer';
+import WebGLRenderer from 'engine/servers/visual/webgl_renderer';
+import TileRenderer from './renderer/tile_renderer';
 WebGLRenderer.register_plugin('tilemap', TileRenderer);
 
 // Register to global node class map

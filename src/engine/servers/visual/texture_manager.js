@@ -1,10 +1,10 @@
 import { WRAP_MODES, SCALE_MODES } from 'engine/const';
 import { remove_items } from 'engine/dep/index';
 import GLTexture from 'engine/drivers/webgl/gl_texture';
-import RenderTarget from './utils/RenderTarget';
-import WebGLRenderer from './WebGLRenderer';
 import BaseTexture from 'engine/scene/resources/textures/base_texture';
 import Texture from 'engine/scene/resources/textures/texture';
+import RenderTarget from './utils/render_target';
+import WebGLRenderer from './webgl_renderer';
 
 /**
  * Helper class to create a webGL Texture
@@ -50,7 +50,7 @@ export default class TextureManager {
      * Updates and/or Creates a WebGL texture for the renderer's context.
      *
      * @param {BaseTexture} texture - the texture to update
-     * @param {number} location - the location the texture will be bound to.
+     * @param {number} [location] - the location the texture will be bound to.
      */
     update_texture(texture, location) {
         const gl = this.gl;

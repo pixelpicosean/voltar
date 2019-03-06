@@ -1,4 +1,4 @@
-import WebGLManager from '../managers/WebGLManager';
+import WebGLManager from '../managers/webgl_manager';
 
 /**
  * Base for a common object renderer that can be used as a system renderer plugin.

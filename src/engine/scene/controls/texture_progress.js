@@ -1,15 +1,16 @@
-import { Margin } from "./const";
 import Color from "engine/core/color";
-import Range from "./range";
-import Texture from "engine/scene/resources/textures/texture";
-import { Vector2, clamp } from "engine/core/math/index";
 import { node_class_map } from "engine/registry";
 import { TextureCache } from "engine/utils/index";
-import WebGLRenderer from "engine/renderers/WebGLRenderer";
+import { Vector2, clamp } from "engine/core/math/index";
+import WebGLRenderer from "engine/servers/visual/webgl_renderer";
+import Texture from "engine/scene/resources/textures/texture";
+
 import Sprite from "../sprites/sprite";
 import TilingSprite from "../sprites/tiling_sprite";
-import NineSlicePlane from "../mesh/NineSlicePlane";
+import NineSlicePlane from "../mesh/nine_slice_plane";
 import Graphics from "../graphics/graphics";
+import { Margin } from "./const";
+import Range from "./range";
 
 const tmp_vec = new Vector2();
 

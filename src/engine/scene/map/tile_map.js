@@ -108,7 +108,7 @@ export default class TileMap extends Node2D {
     }
 
     /**
-     * @param {import('engine/renderers/WebGLRenderer').default} renderer
+     * @param {import('engine/servers/visual/webgl_renderer').default} renderer
      */
     _render_webgl(renderer) {
         // Check whether we need to redraw the whole map

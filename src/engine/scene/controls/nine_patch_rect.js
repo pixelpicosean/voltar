@@ -1,10 +1,11 @@
-import Control from './control';
-import { Margin } from './const';
-import Texture from 'engine/scene/resources/textures/texture';
-import WebGLRenderer from 'engine/renderers/WebGLRenderer';
 import { node_class_map } from 'engine/registry';
 import { Vector2 } from 'engine/core/math/index';
-import NineSlicePlane from '../mesh/NineSlicePlane';
+import Texture from 'engine/scene/resources/textures/texture';
+import WebGLRenderer from 'engine/servers/visual/webgl_renderer';
+
+import NineSlicePlane from '../mesh/nine_slice_plane';
+import { Margin } from './const';
+import Control from './control';
 
 /**
  * @enum {number}

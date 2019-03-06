@@ -10,8 +10,8 @@ import {
 import { is_po2 } from 'engine/core/math/index';
 import VObject from 'engine/core/v_object';
 import determine_cross_origin from 'engine/utils/determine_cross_origin';
-import RenderTarget from 'engine/renderers/utils/RenderTarget';
 import GLTexture from 'engine/drivers/webgl/gl_texture';
+import RenderTarget from 'engine/servers/visual/utils/render_target';
 
 /**
  * @typedef {HTMLImageElement|HTMLCanvasElement|HTMLVideoElement} BaseTextureSource

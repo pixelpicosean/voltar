@@ -15,7 +15,7 @@
  */
 
 // Inject renderer
-import WebGLRenderer from 'engine/renderers/WebGLRenderer';
+import WebGLRenderer from 'engine/servers/visual/webgl_renderer';
 import WebGLExtract from './webgl_extract';
 WebGLRenderer.register_plugin('extract', WebGLExtract);
 

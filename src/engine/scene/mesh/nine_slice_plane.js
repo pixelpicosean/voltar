@@ -1,5 +1,6 @@
-import Plane from './plane';
 import Texture from 'engine/scene/resources/textures/texture';
+
+import Plane from './plane';
 
 const DEFAULT_BORDER_SIZE = 10;
 

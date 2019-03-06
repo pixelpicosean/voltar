@@ -1,6 +1,6 @@
 import Control from './control';
 
-import WebGLRenderer from 'engine/renderers/WebGLRenderer';
+import WebGLRenderer from 'engine/servers/visual/webgl_renderer';
 import Texture from 'engine/scene/resources/textures/texture';
 import Color from 'engine/core/color';
 

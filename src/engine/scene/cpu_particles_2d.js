@@ -10,7 +10,7 @@ import {
 } from 'engine/core/math/index';
 import { randf, rand_range_i } from 'engine/core/math/random_pcg';
 import Sprite from './sprites/sprite';
-import WebGLRenderer from 'engine/renderers/WebGLRenderer';
+import WebGLRenderer from 'engine/servers/visual/webgl_renderer';
 import { node_class_map } from 'engine/registry';
 import { Curve } from './resources/curve';
 import { TextureCache } from 'engine/utils/index';

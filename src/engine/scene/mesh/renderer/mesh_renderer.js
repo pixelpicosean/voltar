@@ -1,12 +1,11 @@
 import { Matrix } from 'engine/core/math/index';
-import { correct_blend_mode, premultiply_rgba } from 'engine/utils/index';
-
 import GLBuffer from 'engine/drivers/webgl/gl_buffer';
 import GLShader from 'engine/drivers/webgl/gl_shader';
 import VertexArrayObject from 'engine/drivers/webgl/vao';
+import WebGLRenderer from 'engine/servers/visual/webgl_renderer';
+import ObjectRenderer from 'engine/servers/visual/utils/object_renderer';
 
-import ObjectRenderer from 'engine/renderers/utils/ObjectRenderer';
-import WebGLRenderer from 'engine/renderers/WebGLRenderer';
+import { correct_blend_mode, premultiply_rgba } from 'engine/utils/index';
 
 import Mesh from '../mesh';
 

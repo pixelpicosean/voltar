@@ -891,7 +891,7 @@ export default class Graphics extends Node2D {
      * Renders the object using the WebGL renderer
      *
      * @private
-     * @param {import('engine/renderers/WebGLRenderer').default} renderer - The renderer
+     * @param {import('engine/servers/visual/webgl_renderer').default} renderer - The renderer
      */
     _render_webgl(renderer) {
         // if the sprite is not visible or the alpha is 0 then no need to render this element
@@ -913,7 +913,7 @@ export default class Graphics extends Node2D {
      * Renders a sprite rectangle.
      *
      * @private
-     * @param {import('engine/renderers/WebGLRenderer').default} renderer - The renderer
+     * @param {import('engine/servers/visual/webgl_renderer').default} renderer - The renderer
      */
     _render_sprite_rect(renderer) {
         const rect = /** @type {Rectangle} */(this.graphics_data[0].shape);

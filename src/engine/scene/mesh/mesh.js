@@ -4,8 +4,8 @@ import { Vector2, Polygon } from 'engine/core/math/index';
 import { rgb2hex, hex2rgb, TextureCache } from 'engine/utils/index';
 import Texture from 'engine/scene/resources/textures/texture';
 import TextureMatrix from 'engine/scene/resources/textures/texture_matrix';
+import WebGLRenderer from 'engine/servers/visual/webgl_renderer';
 import Node2D from '../node_2d';
-import WebGLRenderer from 'engine/renderers/WebGLRenderer';
 
 const temp_point = new Vector2();
 const temp_polygon = new Polygon();

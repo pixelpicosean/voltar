@@ -24,18 +24,17 @@ import Node2D from '../node_2d';
  *
  * And here you have a hundred sprites that will be renderer at the speed of light.
  */
-// @ts-ignore
 export default class ParticleNode2D extends Node2D {
     /**
-     * @param {number} [maxSize=1500] - The maximum number of particles that can be renderer by the container.
+     * @param {number} [maxSize] - The maximum number of particles that can be renderer by the container.
      * @param {object} [properties] - The properties of children that should be uploaded to the gpu and applied.
-     * @param {boolean} [properties.vertices=false] - When true, scale be uploaded and applied. if sprite's ` scale/anchor/trim/frame/orig` is dynamic, please set `true`.
-     * @param {boolean} [properties.position=true] - When true, position be uploaded and applied.
-     * @param {boolean} [properties.rotation=false] - When true, rotation be uploaded and applied.
-     * @param {boolean} [properties.uvs=false] - When true, uvs be uploaded and applied.
-     * @param {boolean} [properties.alpha=false] - When true, alpha be uploaded and applied.
-     * @param {number} [batch_size=15000] - Number of particles per batch.
-     * @param {boolean} [auto_resize=false] If true, container allocates more batches in case
+     * @param {boolean} [properties.vertices] - When true, scale be uploaded and applied. if sprite's ` scale/anchor/trim/frame/orig` is dynamic, please set `true`.
+     * @param {boolean} [properties.position] - When true, position be uploaded and applied.
+     * @param {boolean} [properties.rotation] - When true, rotation be uploaded and applied.
+     * @param {boolean} [properties.uvs] - When true, uvs be uploaded and applied.
+     * @param {boolean} [properties.alpha] - When true, alpha be uploaded and applied.
+     * @param {number} [batch_size] - Number of particles per batch.
+     * @param {boolean} [auto_resize] If true, container allocates more batches in case
      *  there are more than `maxSize` particles.
      */
     constructor(maxSize = 1500, properties, batch_size = 16384, auto_resize = false) {
@@ -198,7 +197,7 @@ export default class ParticleNode2D extends Node2D {
      * Renders the container using the WebGL renderer
      *
      * @private
-     * @param {import('engine/renderers/WebGLRenderer').default} renderer - The webgl renderer
+     * @param {import('engine/servers/visual/webgl_renderer').default} renderer - The webgl renderer
      */
     render_webgl(renderer) {
         if (!this.visible || this.world_alpha <= 0 || !this.children.length || !this.renderable) {

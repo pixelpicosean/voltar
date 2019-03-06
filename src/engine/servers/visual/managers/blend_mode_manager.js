@@ -1,5 +1,5 @@
-import WebGLManager from './WebGLManager';
-import WebGLRenderer from '../WebGLRenderer';
+import WebGLRenderer from '../webgl_renderer';
+import WebGLManager from './webgl_manager';
 
 export default class BlendModeManager extends WebGLManager {
     /**

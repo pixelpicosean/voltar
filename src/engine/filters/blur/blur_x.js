@@ -1,10 +1,12 @@
 import settings from 'engine/settings';
+import Filter from 'engine/servers/visual/filters/filter';
+import FilterManager from 'engine/servers/visual/managers/filter_manager';
+import RenderTarget from 'engine/servers/visual/utils/render_target';
+
+import get_max_blur_kernel_size from './get_max_kernel_size';
+
 import generate_blur_vert_source from './generate_blur_vert_source';
 import generate_blur_frag_source from './generate_blur_frag_source';
-import get_max_blur_kernel_size from './get_max_kernel_size';
-import Filter from 'engine/renderers/filters/Filter';
-import FilterManager from 'engine/renderers/managers/FilterManager';
-import RenderTarget from 'engine/renderers/utils/RenderTarget';
 
 /**
  * The BlurXFilter applies a horizontal Gaussian blur to an object.

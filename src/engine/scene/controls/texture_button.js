@@ -1,7 +1,8 @@
-import Texture from 'engine/scene/resources/textures/texture';
-import WebGLRenderer from 'engine/renderers/WebGLRenderer';
 import { node_class_map } from 'engine/registry';
+import Texture from 'engine/scene/resources/textures/texture';
+import WebGLRenderer from 'engine/servers/visual/webgl_renderer';
 import { Vector2 } from 'engine/core/math/index';
+
 import Sprite from '../sprites/sprite';
 import TilingSprite from '../sprites/tiling_sprite';
 import BaseButton, { DrawMode } from './base_button';

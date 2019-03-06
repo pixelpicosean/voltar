@@ -1,14 +1,12 @@
 import { WRAP_MODES } from 'engine/const';
-
-import WebGLRenderer from 'engine/renderers/WebGLRenderer';
-import ObjectRenderer from 'engine/renderers/utils/ObjectRenderer';
+import { Matrix } from 'engine/core/math/index';
+import { premultiply_tint_to_rgba, correct_blend_mode } from 'engine/utils/index';
 
 import GLShader from 'engine/drivers/webgl/gl_shader';
 
-import Quad from 'engine/renderers/utils/Quad';
-
-import { Matrix } from 'engine/core/math/index';
-import { premultiply_tint_to_rgba, correct_blend_mode } from 'engine/utils/index';
+import WebGLRenderer from 'engine/servers/visual/webgl_renderer';
+import ObjectRenderer from 'engine/servers/visual/utils/object_renderer';
+import Quad from 'engine/servers/visual/utils/quad';
 
 import TilingSprite from '../tiling_sprite';
 

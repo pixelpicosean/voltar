@@ -48,7 +48,7 @@ export { default as CPUParticles2D } from 'engine/scene/cpu_particles_2d';
 
 export { default as Mesh } from 'engine/scene/mesh/mesh';
 export { default as Plane } from 'engine/scene/mesh/plane';
-export { default as NineSlicePlane } from 'engine/scene/mesh/NineSlicePlane';
+export { default as NineSlicePlane } from 'engine/scene/mesh/nine_slice_plane';
 export { default as Rope } from 'engine/scene/mesh/rope';
 
 export { default as Area2D } from 'engine/scene/physics/area_2d';

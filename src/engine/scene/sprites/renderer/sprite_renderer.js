@@ -1,21 +1,20 @@
 import settings from 'engine/settings';
-
-import WebGLRenderer from 'engine/renderers/WebGLRenderer';
-import ObjectRenderer from 'engine/renderers/utils/ObjectRenderer';
+import { premultiply_blend_mode, premultiply_tint } from 'engine/utils/index';
+import { nearest_po2, log_base_2 } from 'engine/core/math/index';
+import create_indices_for_quads from 'engine/utils/create_indices_for_quads';
 
 import VertexArrayObject from 'engine/drivers/webgl/vao';
 import GLShader from 'engine/drivers/webgl/gl_shader';
 import GLBuffer from 'engine/drivers/webgl/gl_buffer';
 
+import WebGLRenderer from 'engine/servers/visual/webgl_renderer';
+import ObjectRenderer from 'engine/servers/visual/utils/object_renderer';
+import check_max_if_statments_in_shader from 'engine/servers/visual/utils/check_max_if_statments_in_shader';
 import BaseTexture from 'engine/scene/resources/textures/base_texture';
 
-import Buffer from './batch_buffer';
-import create_indices_for_quads from 'engine/utils/create_indices_for_quads';
 import generate_multi_texture_shader from './generate_multi_texture_shader';
+import Buffer from './batch_buffer';
 
-import check_max_if_statments_in_shader from 'engine/renderers/utils/check_max_if_statments_in_shader';
-import { premultiply_blend_mode, premultiply_tint } from 'engine/utils/index';
-import { nearest_po2, log_base_2 } from 'engine/core/math/index';
 
 let tick = 0;
 let texture_tick = 0;

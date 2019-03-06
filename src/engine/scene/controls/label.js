@@ -491,7 +491,7 @@ export default class Label extends Control {
     }
 
     /**
-     * @param {import('engine/renderers/WebGLRenderer').default} renderer - The renderer
+     * @param {import('engine/servers/visual/webgl_renderer').default} renderer - The renderer
      */
     _render_webgl(renderer) {
         this._update_transform();

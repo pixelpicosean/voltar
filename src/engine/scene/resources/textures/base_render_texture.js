@@ -1,5 +1,6 @@
 import settings from 'engine/settings';
-import RenderTarget from 'engine/renderers/utils/RenderTarget';
+import RenderTarget from 'engine/servers/visual/utils/render_target';
+
 import BaseTexture from './base_texture';
 
 /**

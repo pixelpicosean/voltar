@@ -1,4 +1,4 @@
-import Filter from 'engine/renderers/filters/Filter';
+import Filter from 'engine/servers/visual/filters/filter';
 
 import Vert from './fxaa.vert';
 import Frag from './fxaa.frag';

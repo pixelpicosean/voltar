@@ -1,6 +1,6 @@
 import { is_webgl_supported } from 'engine/utils/index';
 import { loader_use_procs } from 'engine/registry';
-import WebGLRenderer from 'engine/renderers/WebGLRenderer';
+import WebGLRenderer from 'engine/servers/visual/webgl_renderer';
 import texture_parser from 'engine/scene/resources/textures/texture_parser';
 import spritesheet_parser from 'engine/scene/resources/textures/spritesheet_parser';
 
@@ -23,7 +23,7 @@ export default class VisualServer {
     }
 
     /**
-     * @param {import('engine/renderers/SystemRenderer').RendererDesc} config
+     * @param {import('engine/servers/visual/system_renderer').RendererDesc} config
      */
     init(config) {
         if (this.is_initialized) {

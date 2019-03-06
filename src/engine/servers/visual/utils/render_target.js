@@ -99,12 +99,12 @@ export default class RenderTarget {
         /**
          * Stores filter data for the render target
          *
-         * @type {{index: number, stack: import('../managers/FilterManager').FilterState[]}}
+         * @type {{index: number, stack: import('../managers/filter_manager').FilterState[]}}
          */
         this.filter_data = null;
 
         /**
-         * @type {{index: number, stack: import('../managers/FilterManager').FilterState[]}}
+         * @type {{index: number, stack: import('../managers/filter_manager').FilterState[]}}
          */
         this.filter_stack = null;
 

@@ -1,6 +1,6 @@
-import { GC_MODES } from '../const';
-import settings from '../settings';
-import TextureManager from './TextureManager';
+import { GC_MODES } from 'engine/const';
+import settings from 'engine/settings';
+import TextureManager from './texture_manager';
 
 /**
  * @typedef HasTextureManager
@@ -81,12 +81,12 @@ export default class TextureGarbageCollector {
     /**
      * Removes all the textures within the specified node and its children from the GPU
      *
-     * @param {import('../scene/node_2d').default} node - the node to remove the textures from.
+     * @param {import('../../scene/node_2d').default} node - the node to remove the textures from.
      */
     unload(node) {
         const tm = this.renderer.texture_manager;
 
-        const sprite = /** @type {import('../scene/sprites/sprite').default} */(node);
+        const sprite = /** @type {import('../../scene/sprites/sprite').default} */(node);
 
         // only destroy non generated textures
         if (sprite._texture && sprite._texture.base_texture && sprite._texture.base_texture._gl_render_targets) {
