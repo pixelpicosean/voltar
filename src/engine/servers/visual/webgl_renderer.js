@@ -363,7 +363,13 @@ export default class WebGLRenderer extends SystemRenderer {
      */
     set_projection_matrix(matrix) {
         this.current_projection_matrix.copy(matrix);
-        this.bind_render_target(this._active_render_target);
+
+        this.root_render_target.calculate_projection(this.root_render_target.size);
+        this.root_render_target.projection_matrix.append(matrix);
+
+        if (this._active_shader) {
+            this._active_shader.uniforms.projection_matrix = this.root_render_target.projection_matrix.to_array(true);
+        }
     }
 
     /**
@@ -425,15 +431,6 @@ export default class WebGLRenderer extends SystemRenderer {
         if (render_target !== this._active_render_target) {
             this._active_render_target = render_target;
             render_target.activate();
-        }
-
-        if (this._active_render_target === this.root_render_target) {
-            this.root_render_target.calculate_projection(this.root_render_target.size);
-            this.root_render_target.projection_matrix.append(this.current_projection_matrix);
-        }
-
-        if (this._active_shader) {
-            this._active_shader.uniforms.projection_matrix = render_target.projection_matrix.to_array(true);
         }
 
         this.stencil_manager.set_mask_stack(render_target.stencil_mask_stack);
