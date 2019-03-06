@@ -3,6 +3,21 @@ import max_recommended_textures from './utils/max_recommended_textures';
 import can_upload_same_buffer from './utils/can_upload_same_buffer';
 
 /**
+ * @typedef RenderOptions
+ * @property {HTMLCanvasElement} view
+ * @property {boolean} antialias
+ * @property {boolean} auto_resize
+ * @property {boolean} transparent
+ * @property {number} background_color
+ * @property {boolean} clear_before_render
+ * @property {boolean} preserve_drawing_buffer
+ * @property {boolean} pixel_snap
+ * @property {number} width
+ * @property {number} height
+ * @property {boolean} legacy
+ */
+
+/**
  * User's customizable globals for overriding the default V settings, such
  * as a renderer's default resolution, framerate, float percision, etc.
  * @example
@@ -78,21 +93,7 @@ export default {
 
     /**
      * The default render options if none are supplied to {@link WebGLRenderer}
-     * or {@link CanvasRenderer}.
-     *
-     * @type {object}
-     * @property {HTMLCanvasElement} view=null
-     * @property {number} resolution=1
-     * @property {boolean} antialias=false
-     * @property {boolean} auto_resize=false
-     * @property {boolean} transparent=false
-     * @property {number} background_color=0x000000
-     * @property {boolean} clear_before_render=true
-     * @property {boolean} preserve_drawing_buffer=false
-     * @property {boolean} pixel_snap=false
-     * @property {number} width=800
-     * @property {number} height=600
-     * @property {boolean} legacy=false
+     * @type {RenderOptions}
      */
     RENDER_OPTIONS: {
         view: null,
@@ -175,7 +176,6 @@ export default {
 
     /**
      * Default Mesh `canvasPadding`.
-     *
      * @type {number}
      */
     MESH_CANVAS_PADDING: 0,

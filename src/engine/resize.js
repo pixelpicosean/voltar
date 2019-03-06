@@ -12,13 +12,12 @@
  * @param {number} container_height
  * @param {number} content_width
  * @param {number} content_height
- *
- * @return {ScaleBox}
  */
 export function outer_box_resize(container_width, container_height, content_width, content_height) {
     const pRatio = container_width / container_height;
     const cRatio = content_width / content_height;
 
+    /** @type {ScaleBox} */
     const result = { left: 0, top: 0, scale: 1 };
     if (pRatio > cRatio) {
         result.scale = container_height / content_height;
@@ -38,13 +37,12 @@ export function outer_box_resize(container_width, container_height, content_widt
  * @param {number} container_height
  * @param {number} content_width
  * @param {number} content_height
- *
- * @return {ScaleBox}
  */
 export function inner_box_resize(container_width, container_height, content_width, content_height) {
     const pRatio = container_width / container_height;
     const cRatio = content_width / content_height;
 
+    /** @type {ScaleBox} */
     const result = { left: 0, top: 0, scale: 1 };
     if (pRatio < cRatio) {
         result.scale = container_height / content_height;

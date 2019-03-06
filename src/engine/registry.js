@@ -6,7 +6,7 @@ class ResourceInterface {
 
 /**
  * Node class looking table
- * @type {Object}
+ * @type {Object<string, any>}
  */
 export const node_class_map = {};
 
@@ -23,7 +23,7 @@ export const res_procs = {};
 
 /**
  * Plugins to be used in Node2D class
- * @type {Object}
+ * @type {Object<string, any>}
  */
 export const node_plugins = {
     TweenManager: null,
@@ -49,6 +49,7 @@ export const loader_pre_procs = [];
  */
 export const loader_use_procs = [];
 
+/** @type {Object<string, any>} */
 export const optional = {
     Extract: null,
 }

@@ -40,6 +40,12 @@ declare namespace tween {
         | 'Back.In' | 'Back.Out' | 'Back.InOut'
         | 'Bounce.In' | 'Bounce.Out' | 'Bounce.InOut';
 
+    class EventListener {
+        context: any;
+        fn: Function;
+        once: boolean;
+    }
+
     export class Tween {
         is_removed: boolean;
 
@@ -50,8 +56,7 @@ declare namespace tween {
 
         interpolates: InterpolateData[];
 
-        _events: any[];
-        _eventsCount: number;
+        _events: Map<string|Symbol, EventListener[]>;
 
         constructor();
 
@@ -60,8 +65,8 @@ declare namespace tween {
         disconnect(event: string, fn: Function, context?: any): any;
         disconnect_all(event: string): any;
         emit_signal(event: string, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any): boolean;
-        get_signal_list(): any[];
-        get_signal_connection_list(): any[];
+        get_signal_list(): IterableIterator<string|Symbol>;
+        get_signal_connection_listeners(): EventListener[];
         get_signal_connection_count(): number;
         is_connected(event: string | Symbol, fn: Function, context: any): boolean;
 
@@ -111,7 +116,6 @@ declare namespace tween {
          * Add a tween instance to the manager
          *
          * @param {Tween} tween
-         * @returns {Tween} The added tween
          */
         add(tween: Tween): Tween;
         /**
@@ -124,7 +128,6 @@ declare namespace tween {
          * Create a tween instance
          *
          * @param {boolean} [add] Whether add to update list
-         * @returns {Tween} Created tween
          */
         create(add?: boolean): Tween;
 

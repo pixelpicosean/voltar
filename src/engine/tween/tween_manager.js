@@ -3,14 +3,11 @@ import { remove_items } from 'engine/dep/index';
 
 export default class TweenManager {
     constructor() {
-        /**
-         * @type {Array<Tween>}
-         */
+        /** @type {Tween[]} */
         this.tweens = [];
     }
     /**
      * @param {Tween} tween
-     * @returns {Tween} The added tween
      */
     add(tween) {
         this.tweens.push(tween);
@@ -27,7 +24,6 @@ export default class TweenManager {
      * Create a tween instance
      *
      * @param {boolean} [add] Whether add to update list
-     * @returns {Tween} Created tween
      */
     create(add) {
         if (add === undefined) {
@@ -46,10 +42,8 @@ export default class TweenManager {
      * @param {number} delta
      */
     _process(delta) {
-        /**
-         * @type {Tween}
-         */
-        let tween;
+        /** @type {Tween} */
+        let tween = null;
         for (let i = 0; i < this.tweens.length; i++) {
             tween = this.tweens[i];
 
@@ -67,10 +61,8 @@ export default class TweenManager {
         }
     }
     _stop_all() {
-        /**
-         * @type {Tween}
-         */
-        let tween;
+        /** @type {Tween} */
+        let tween = null;
         for (let i = 0; i < this.tweens.length; i++) {
             tween = this.tweens[i];
 
