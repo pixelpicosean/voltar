@@ -15,9 +15,9 @@ const vert_template = `
 
 /**
  * @param {number} kernel_size
- * @param {number} x
+ * @param {boolean} invert_uv
  */
-export default function generate_vert_blur_source(kernel_size, x) {
+export default function generate_vert_blur_source(kernel_size, invert_uv = false) {
     const half_length = Math.ceil(kernel_size / 2);
 
     let vert_source = vert_template;
@@ -25,7 +25,7 @@ export default function generate_vert_blur_source(kernel_size, x) {
     let blur_loop = '';
     let template;
 
-    if (x) {
+    if (invert_uv) {
         template = 'v_blur_tex_coords[%index%] = a_texture_coord + vec2(%sample_index% * strength, 0.0);';
     } else {
         template = 'v_blur_tex_coords[%index%] = a_texture_coord + vec2(0.0, %sample_index% * strength);';

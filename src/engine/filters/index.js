@@ -10,11 +10,11 @@
  * // Add a blur filter
  * rect.filters = [new filters.Blur()];
  */
-export { default as FXAA } from './fxaa/FXAA';
-export { default as Noise } from './noise/Noise';
-export { default as Displacement } from './displacement/Displacement';
-export { default as Blur } from './blur/Blur';
-export { default as BlurX } from './blur/BlurX';
-export { default as BlurY } from './blur/BlurY';
-export { default as ColorMatrix } from './colormatrix/ColorMatrix';
-export { default as Alpha } from './alpha/Alpha';
+export { default as FXAA } from './fxaa/_fxaa';
+export { default as Noise } from './noise/_noise';
+export { default as Displacement } from './displacement/_displacement';
+export { default as Blur } from './blur/_blur';
+export { default as BlurX } from './blur/blur_x';
+export { default as BlurY } from './blur/blur_y';
+export { default as ColorMatrix } from './colormatrix/color_matrix';
+export { default as Alpha } from './alpha/_alpha';
