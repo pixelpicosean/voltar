@@ -19,7 +19,7 @@ const frag_template = `
             gl_FragColor = color * v_color;
         } else {
             // solid color + texture alpha
-            gl_FragColor = vec4(v_color.rgb, v_color.a * color.a);
+            gl_FragColor = vec4(v_color) * color.a;
         }
     }
 `
