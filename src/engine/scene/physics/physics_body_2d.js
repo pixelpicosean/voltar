@@ -432,11 +432,6 @@ export class KinematicBody2D extends PhysicsBody2D {
 
         this.last_valid_transform.copy(this.get_global_transform());
     }
-    _propagate_exit_tree() {
-
-    }
-
-    // TODO: "local_transform_changed" notification
 
     /**
      * @param {Vector2} p_motion

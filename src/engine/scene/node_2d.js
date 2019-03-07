@@ -1110,12 +1110,10 @@ export default class Node2D extends VObject {
      * @returns {this}
      */
     queue_free() {
-        if (!this.is_inside_tree) {
-            if (this.parent) {
-                this.parent.remove_child(this);
-            }
-            return;
+        if (this.parent) {
+            this.parent.remove_child(this);
         }
+        this.parent = null;
 
         if (this.scene_tree) {
             this.scene_tree.queue_delete(this);
