@@ -11,7 +11,6 @@ import 'engine/scene/particles/enable';
 import 'engine/scene/sprites/enable';
 import 'engine/scene/text/enable';
 import 'engine/scene/physics/enable';
-import 'engine/tween/enable';
 
 // Our preloader
 import Preloader from 'game/preloader/Preloader';
