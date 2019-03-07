@@ -15,6 +15,7 @@ export { default as VObject } from 'engine/core/v_object';
 // Node
 // ------------------------------------------------------------------
 import Node2D from 'engine/scene/node_2d';
+export { PauseMode } from 'engine/scene/node_2d';
 
 export { default as Viewport } from 'engine/scene/main/viewport';
 export { default as CanvasLayer } from 'engine/scene/main/canvas_layer';

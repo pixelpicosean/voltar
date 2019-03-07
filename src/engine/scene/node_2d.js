@@ -27,6 +27,15 @@ const tmp_color = new Color(1, 1, 1, 1);
 let uid = 0;
 
 /**
+ * @enum {number}
+ */
+export const PauseMode = {
+    INHERIT: 0,
+    STOP: 1,
+    PROCESS: 2,
+};
+
+/**
  * @typedef DestroyOption
  * @property {boolean} children if set to true, all the children will have their
  *                              destroy method called as well. 'options' will be passed on to those calls.
@@ -72,21 +81,6 @@ export default class Node2D extends VObject {
     get alpha() {
         return this.modulate.a * this.self_modulate.a;
     }
-
-    // NOTE: code below is wrong, but disable alpha setter will break old games
-    // /**
-    //  * @param {number} value
-    //  */
-    // set alpha(value) {
-    //     this.modulate.a = value;
-    // }
-    // /**
-    //  * @param {number} value
-    //  */
-    // set_alpha(value) {
-    //     this.alpha = value;
-    //     return this;
-    // }
 
     constructor() {
         super();
@@ -208,6 +202,14 @@ export default class Node2D extends VObject {
          * @type {Array}
          */
         this._enabled_filters = null;
+
+        /**
+         * @type {Node2D}
+         * @private
+         */
+        this.pause_owner = null;
+
+        this._pause_mode = PauseMode.INHERIT;
 
         /**
          * The bounds object, this is used to calculate and store the bounds of the node
@@ -373,6 +375,10 @@ export default class Node2D extends VObject {
         }
         if (data.scale !== undefined) {
             this.scale.copy(data.scale);
+        }
+
+        if (data.pause_mode !== undefined) {
+            this.pause_mode = data.pause_mode;
         }
 
         if (data.has_transform !== undefined) {
@@ -1145,6 +1151,16 @@ export default class Node2D extends VObject {
     _propagate_unparent() { }
 
     _propagate_enter_tree() {
+        if (this._pause_mode === PauseMode.INHERIT) {
+            if (this.parent) {
+                this.pause_owner = this.parent.pause_owner;
+            } else {
+                this.pause_owner = null;
+            }
+        } else {
+            this.pause_owner = this;
+        }
+
         this._update_transform();
 
         // Add to scene tree groups
@@ -1180,7 +1196,8 @@ export default class Node2D extends VObject {
      * @param {number} delta
      */
     _propagate_process(delta) {
-        if (this.idle_process) this._process(delta);
+        if (this.idle_process && this.can_process()) this._process(delta);
+        const can = this.can_process();
 
         for (let i = 0, l = this.children.length; i < l; i++) {
             this.children[i]._propagate_process(delta);
@@ -1194,7 +1211,8 @@ export default class Node2D extends VObject {
      * @param {number} delta
      */
     _propagate_physics_process(delta) {
-        if (this.physics_process) this._physics_process(delta);
+        if (this.physics_process && this.can_process()) this._physics_process(delta);
+        const can = this.can_process();
 
         for (let i = 0, l = this.children.length; i < l; i++) {
             this.children[i]._propagate_physics_process(delta);
@@ -1229,6 +1247,44 @@ export default class Node2D extends VObject {
         this._is_ready = false;
         this.is_inside_tree = false;
         this.scene_tree = null;
+    }
+
+    /**
+     * @param {Node2D} p_owner
+     */
+    _propagate_pause_owner(p_owner) {
+        if (this !== p_owner && this._pause_mode !== PauseMode.INHERIT) {
+            return;
+        }
+        this.pause_owner = p_owner;
+        for (let c of this.children) {
+            c._propagate_pause_owner(p_owner);
+        }
+    }
+
+    can_process() {
+        if (this.scene_tree.paused) {
+            if (this._pause_mode === PauseMode.STOP) {
+                return false;
+            }
+            if (this._pause_mode === PauseMode.PROCESS) {
+                return true;
+            }
+            if (this._pause_mode === PauseMode.INHERIT) {
+                if (!this.pause_owner) {
+                    return false;
+                }
+
+                if (this.pause_owner._pause_mode === PauseMode.PROCESS) {
+                    return true;
+                }
+                if (this.pause_owner._pause_mode === PauseMode.STOP) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -1287,6 +1343,11 @@ export default class Node2D extends VObject {
             child.is_inside_tree = true;
             child._propagate_enter_tree();
 
+            // // Force pause_mode process
+            // const pause_mode = child._pause_mode;
+            // child._pause_mode = -1;
+            // child.pause_mode = pause_mode;
+
             if (this._is_ready) {
                 child._propagate_ready();
             }
@@ -1300,62 +1361,10 @@ export default class Node2D extends VObject {
     }
 
     /**
-     * Adds a child to the container at a specified index. If the index is out of bounds an error will be thrown
-     *
-     * @template {Node2D} T
-     * @param {T} child - The child to add
-     * @param {number} index - The index to place the child in
-     * @return {T} The child that was added.
-     */
-    add_child_at(child, index) {
-        if (index < 0 || index > this.children.length) {
-            throw new Error(`${child}add_child_at: The index ${index} supplied is out of bounds ${this.children.length}`);
-        }
-
-        if (child.parent) {
-            child.parent.remove_child(child);
-        }
-
-        child.parent = this;
-        child.scene_tree = this.scene_tree;
-        // ensure child transform will be recalculated
-        child.transform._parent_id = -1;
-
-        this.children.splice(index, 0, child);
-
-        // add to name hash
-        if (child.name.length > 0) {
-            this._validate_child_name(child);
-        }
-
-        // ensure bounds will be recalculated
-        this._bounds_id++;
-
-        child._propagate_parent();
-
-        if (this.is_inside_tree) {
-            child.is_inside_tree = true;
-            child._propagate_enter_tree();
-        }
-
-        // TODO - lets either do all callbacks or all events.. not both!
-        this.on_children_change(this.children.length - 1);
-        this.add_child_notify(child);
-
-        if (this._is_ready) {
-            child._propagate_ready();
-        }
-
-        return child;
-    }
-
-    /**
      * Swaps the position of 2 Display Objects within this container.
      *
-     * @template {Node2D} T
-     * @param {T} child - First display object to swap
-     * @param {T} child2 - Second display object to swap
-     * @returns {this}
+     * @param {Node2D} child - First display object to swap
+     * @param {Node2D} child2 - Second display object to swap
      */
     swap_children(child, child2) {
         if (child === child2) {
@@ -1365,9 +1374,7 @@ export default class Node2D extends VObject {
         const index1 = this.get_child_index(child);
         const index2 = this.get_child_index(child2);
 
-        // @ts-ignore
         this.children[index1] = child2;
-        // @ts-ignore
         this.children[index2] = child;
         this.on_children_change(index1 < index2 ? index1 : index2);
 
@@ -1377,12 +1384,10 @@ export default class Node2D extends VObject {
     /**
      * Returns the index position of a child Node2D instance
      *
-     * @template {Node2D} T
-     * @param {T} child - The Node2D instance to identify
+     * @param {Node2D} child - The Node2D instance to identify
      * @return {number} The index position of the child display object to identify
      */
     get_child_index(child) {
-        // @ts-ignore
         const index = this.children.indexOf(child);
 
         if (index === -1) {
@@ -1395,10 +1400,8 @@ export default class Node2D extends VObject {
     /**
      * Changes the position of an existing child in the display object container
      *
-     * @template {Node2D} T
-     * @param {T} child - The child Node2D instance for which you want to change the index number
+     * @param {Node2D} child - The child Node2D instance for which you want to change the index number
      * @param {number} index - The resulting index number for the child display object
-     * @returns {this}
      */
     move_child(child, index) {
         if (index < 0 || index >= this.children.length) {
@@ -1408,7 +1411,6 @@ export default class Node2D extends VObject {
         const current_index = this.get_child_index(child);
 
         remove_items(this.children, current_index, 1); // remove from old position
-        // @ts-ignore
         this.children.splice(index, 0, child); // add at new position
 
         this.on_children_change(index);
@@ -1811,12 +1813,11 @@ export default class Node2D extends VObject {
     /**
      * The width of the Node2D, setting this will actually modify the scale to achieve the value set
      *
-     * @member {number}
+     * @type {number}
      */
     get width() {
         return this.scale.x * this.get_local_bounds().width;
     }
-
     set width(value) {
         const width = this.get_local_bounds().width;
 
@@ -1832,12 +1833,11 @@ export default class Node2D extends VObject {
     /**
      * The height of the Node2D, setting this will actually modify the scale to achieve the value set
      *
-     * @member {number}
+     * @type {number}
      */
     get height() {
         return this.scale.y * this.get_local_bounds().height;
     }
-
     set height(value) {
         const height = this.get_local_bounds().height;
 
@@ -1848,6 +1848,40 @@ export default class Node2D extends VObject {
         }
 
         this._height = value;
+    }
+
+    /**
+     * @type {PauseMode}
+     */
+    get pause_mode() {
+        return this._pause_mode;
+    }
+    set pause_mode(p_mode) {
+        if (this._pause_mode === p_mode) {
+            return;
+        }
+
+        const prev_inherits = this._pause_mode === PauseMode.INHERIT;
+        this._pause_mode = p_mode;
+        if (!this.is_inside_tree) {
+            return;
+        }
+        if ((this._pause_mode === PauseMode.INHERIT) === prev_inherits) {
+            return;
+        }
+
+        /** @type {Node2D} */
+        let owner = null;
+
+        if (this._pause_mode === PauseMode.INHERIT) {
+            if (this.parent) {
+                owner = this.parent.pause_owner;
+            }
+        } else {
+            owner = this;
+        }
+
+        this._propagate_pause_owner(owner);
     }
 }
 

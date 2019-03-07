@@ -584,6 +584,9 @@ export default class PhysicsServer {
     }
     free(rid) { }
 
+    /**
+     * @param {boolean} p_active
+     */
     set_active(p_active) {
         this.active = p_active;
     }

@@ -20,6 +20,7 @@ module.exports = (data) => {
         position: Vector2(data.prop.position),
         rotation: real(data.prop.rotation),
         scale: Vector2(data.prop.scale),
+        pause_mode: int(data.prop.pause_mode),
         modulate: Color(data.prop.modulate),
         self_modulate: Color(data.prop.self_modulate),
         visible: boolean(data.prop.visible),

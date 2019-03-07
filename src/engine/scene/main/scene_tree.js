@@ -227,6 +227,17 @@ res_procs['PackedScene'] = (key, data, resource_map) => {
  */
 
 export default class SceneTree {
+    get paused() {
+        return this._paused;
+    }
+    set paused(p_enabled) {
+        if (p_enabled === this._paused) {
+            return;
+        }
+        this._paused = p_enabled;
+        PhysicsServer.singleton.set_active(!p_enabled);
+    }
+
     /**
      * @param {Input} input
      * @param {{ is_complete: boolean, queue: (string|Object)[][]}} preload_queue
@@ -244,7 +255,7 @@ export default class SceneTree {
         this.root_lock = 0;
         this.node_count = 0;
 
-        this.paused = false;
+        this._paused = false;
 
         this.debug_collisions_hint = false;
 
@@ -477,12 +488,6 @@ export default class SceneTree {
         this._next_scene = this._current_scene_ctor;
     }
 
-    /**
-     * Set pause state of the whole game
-     *
-     * @param {boolean} pause
-     */
-    set_pause(pause) { }
     /**
      * @param {number} scale
      */
