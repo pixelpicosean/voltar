@@ -40,36 +40,27 @@ class RC {
     }
 }
 
-class PosKey {
-    constructor() {
-        this.key = 0;
-    }
-    /**
-     * @param {PosKey} key
-     */
-    copy(key) {
-        this.key = key.key;
-        return this;
-    }
-
-    hash() {
-        let k = this.key;
-        k = (~k) + (k << 18); // k = (k << 18) - k - 1;
-        k = k ^ (k >> 31);
-        k = k * 21; // k = (k + (k << 2)) + (k << 4);
-        k = k ^ (k >> 11);
-        k = k + (k << 6);
-        k = k ^ (k >> 22);
-        return k;
-    }
-    /**
-     * @param {PosKey} p_key
-     * @returns {boolean}
-     */
-    equal(p_key) { return this.key === p_key.key }
-}
-
+/** @type {PosBin[]} */
+const PosBinPool = [];
 class PosBin {
+    static new() {
+        const p = PosBinPool.pop();
+        if (!p) {
+            return new PosBin();
+        } else {
+            return p.reset();
+        }
+    }
+    /**
+     * @param {PosBin} p
+     */
+    static free(p) {
+        console.log(`PosBin: ${PosBinPool.length}`)
+        if (p && PosBinPool.length < 2019) {
+            PosBinPool.push(p);
+        }
+        return PosBin;
+    }
     constructor() {
         this.key = new Vector2();
 
@@ -86,6 +77,12 @@ class PosBin {
          * @type {PosBin}
          */
         this.next = null;
+    }
+    reset() {
+        this.key.set(0, 0);
+        this.object_set.clear();
+        this.static_object_set.clear();
+        return this;
     }
 }
 
@@ -257,8 +254,8 @@ export default class BroadPhase2D {
         delta.x = this.cell_size / delta.x;
         delta.y = this.cell_size / delta.y;
 
-        const pos = p_from.clone().divide(this.cell_size, this.cell_size).floor();
-        const end = p_to.clone().divide(this.cell_size, this.cell_size).floor();
+        const pos = p_from.clone().scale(1 / this.cell_size).floor();
+        const end = p_to.clone().scale(1 / this.cell_size).floor();
 
         const step = Vector2.new(Math.sign(dir.x), Math.sign(dir.y));
 
@@ -460,7 +457,7 @@ export default class BroadPhase2D {
                 let entered = false;
 
                 if (!pb) {
-                    pb = new PosBin();
+                    pb = PosBin.new();
                     pb.key.set(i, j);
                     pb.next = r.get(j);
                     r.set(j, pb);
@@ -618,14 +615,35 @@ export default class BroadPhase2D {
                 }
 
                 if (pb.object_set.size === 0 && pb.static_object_set.size === 0) {
+                    PosBin.free(pb);
+
                     if (r.get(j) === pb) {
-                        r.set(j, pb.next);
+                        if (pb.next) {
+                            r.set(j, pb.next);
+                        } else {
+                            // So this spatial is empty now
+                            r.delete(j);
+                            // Is the while row empty?
+                            if (r.size === 0) {
+                                this.hash_table.delete(i);
+                            }
+                        }
                     } else {
                         let px = r.get(j);
 
                         while (px) {
                             if (px.next === pb) {
                                 px.next = pb.next;
+
+                                // So this spatial is empty now
+                                if (!pb.next) {
+                                    r.delete(j);
+                                    // Is the while row empty?
+                                    if (r.size === 0) {
+                                        this.hash_table.delete(i);
+                                    }
+                                }
+
                                 break;
                             }
 

@@ -112,6 +112,7 @@ export default class Transform {
      * Updates the values of the object and applies the parent's transform.
      *
      * @param {Transform} parent_transform - The transform of the parent of this object
+     * @returns {boolean} Whether world transform is updated
      */
     update_transform(parent_transform) {
         const lt = this.local_transform;
@@ -147,7 +148,11 @@ export default class Transform {
 
             // update the id of the transform..
             this._world_id++;
+
+            return true;
         }
+
+        return false;
     }
 
     /**

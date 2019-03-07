@@ -96,7 +96,7 @@ function _rest_cbk_result(p_point_A, p_point_B, rd) {
 
     rd.best_len = len;
     rd.best_contact.copy(p_point_B);
-    rd.best_normal.copy(contact_rel).divide(len, len);
+    rd.best_normal.copy(contact_rel).scale(1 / len);
     rd.best_object = rd.object;
     rd.best_shape = rd.shape;
     rd.best_local_shape = rd.local_shape;

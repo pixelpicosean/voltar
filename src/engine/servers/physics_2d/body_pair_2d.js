@@ -396,7 +396,7 @@ export default class BodyPair2DSW extends Constraint2DSW {
             return false;
         }
 
-        const mnormal = motion.clone().divide(mlen, mlen);
+        const mnormal = motion.clone().scale(1 / mlen);
 
         let res = { min: 0, max: 0 };
         p_A.get_shape(p_shape_A).project_rangev(mnormal, p_xform_A, res);

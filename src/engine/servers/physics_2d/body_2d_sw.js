@@ -588,7 +588,7 @@ export default class Body2DSW extends CollisionObject2DSW {
         if (this.mode === BodyMode.KINEMATIC) {
             // compute motion, angular and etc. velocities from prev transform
             motion.copy(this.new_transform.origin).subtract(this.transform.origin);
-            this.linear_velocity.copy(motion).divide(p_step);
+            this.linear_velocity.copy(motion).scale(1 / p_step);
 
             const rot = this.new_transform.rotation - this.transform.rotation;
             this.angular_velocity = rot / p_step;

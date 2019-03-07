@@ -531,8 +531,9 @@ export default class Node2D extends VObject {
         }
 
         if (this.has_transform) {
-            this.transform.update_transform(parent.transform);
-            this._notify_transform_changed();
+            if (this.transform.update_transform(parent.transform)) {
+                this._notify_transform_changed();
+            }
 
             this._bounds.update_id++;
         }
@@ -548,13 +549,15 @@ export default class Node2D extends VObject {
         if (this.parent) {
             this.parent._recursive_post_update_transform();
             if (this.has_transform) {
-                this.transform.update_transform(this.parent.transform);
-                this._notify_transform_changed();
+                if (this.transform.update_transform(this.parent.transform)) {
+                    this._notify_transform_changed();
+                }
             }
         } else {
             if (this.has_transform) {
-                this.transform.update_transform(this._temp_node_2d_parent.transform);
-                this._notify_transform_changed();
+                if (this.transform.update_transform(this._temp_node_2d_parent.transform)) {
+                    this._notify_transform_changed();
+                }
             }
         }
     }
@@ -562,13 +565,12 @@ export default class Node2D extends VObject {
     /**
      * Retrieves the bounds of the node as a rectangle object.
      *
-     * @param {boolean} [skip_update=false] - setting to true will stop the transforms of the scene graph from
+     * @param {boolean} [skip_update] - setting to true will stop the transforms of the scene graph from
      *  being updated. This means the calculation returned MAY be out of date BUT will give you a
      *  nice performance boost
      * @param {Rectangle} [rect] - Optional rectangle to store the result of the bounds calculation
-     * @return {Rectangle} the rectangular bounding area
      */
-    get_bounds(skip_update, rect) {
+    get_bounds(skip_update = false, rect) {
         if (!skip_update) {
             if (!this.parent) {
                 this.parent = this._temp_node_2d_parent;
@@ -712,6 +714,9 @@ export default class Node2D extends VObject {
         this.skew.y = skew_y;
         this.pivot.x = pivot_x;
         this.pivot.y = pivot_y;
+
+        // Mark transform as changed
+        this.transform._local_id = -1;
 
         return this;
     }
@@ -1072,6 +1077,12 @@ export default class Node2D extends VObject {
             .append(p_transform);
         this.transform.set_from_matrix(xform).update_transform(this.parent.transform);
         Matrix.free(xform);
+
+        // Always mark transform as changed when this is set,
+        // so other systems (like the physics) will be able to receive
+        // transform change notification.
+        this.transform.on_change();
+
         return this;
     }
 
@@ -1128,6 +1139,8 @@ export default class Node2D extends VObject {
     _propagate_unparent() { }
 
     _propagate_enter_tree() {
+        this._update_transform();
+
         // Add to scene tree groups
         if (this.groups && this.groups.size > 0) {
             for (let g of this.groups) {
@@ -1237,8 +1250,6 @@ export default class Node2D extends VObject {
     /**
      * Adds one or more children to the container.
      *
-     * Multiple items can be added like so: `myNode2D.add_child(thingOne, thingTwo, thingThree)`
-     *
      * @template {Node2D} T
      * @param {T} child - The Node2D to add to the container
      * @return {T} The child that was added.
@@ -1269,16 +1280,15 @@ export default class Node2D extends VObject {
         if (this.is_inside_tree) {
             child.is_inside_tree = true;
             child._propagate_enter_tree();
-            child.update_transform();
+
+            if (this._is_ready) {
+                child._propagate_ready();
+            }
         }
 
         // TODO - lets either do all callbacks or all events.. not both!
         this.on_children_change(this.children.length - 1);
         this.add_child_notify(child);
-
-        if (this._is_ready) {
-            child._propagate_ready();
-        }
 
         return child;
     }
@@ -1318,9 +1328,8 @@ export default class Node2D extends VObject {
         child._propagate_parent();
 
         if (this.is_inside_tree) {
-            // child.is_inside_tree = true;
+            child.is_inside_tree = true;
             child._propagate_enter_tree();
-            child.update_transform();
         }
 
         // TODO - lets either do all callbacks or all events.. not both!
@@ -1598,17 +1607,18 @@ export default class Node2D extends VObject {
         if (this.has_transform) {
             this._bounds_id++;
 
-            this.transform.update_transform(parent.transform);
-            this._notify_transform_changed();
+            if (this.transform.update_transform(parent.transform)) {
+                this._notify_transform_changed();
+            }
 
-            let t = this.transform.world_transform;
+            const t = this.transform.world_transform;
             this._world_position.set(t.tx, t.ty);
             this._world_scale.copy(parent._world_scale)
                 .multiply(this.scale);
             this._world_rotation = parent._world_rotation + this.transform.rotation;
         }
 
-        for (let child of this.children) {
+        for (const child of this.children) {
             if (child.visible) {
                 child.update_transform();
             }

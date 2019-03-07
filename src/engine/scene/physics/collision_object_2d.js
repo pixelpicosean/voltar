@@ -78,13 +78,9 @@ export default class CollisionObject2D extends Node2D {
     _propagate_enter_tree() {
         super._propagate_enter_tree();
 
-        if (this.area) {
-            /** @type {Area2DSW} */(this.rid).set_transform(this.get_global_transform());
-        } else {
-            /** @type {Body2DSW} */(this.rid).set_state(BodyState.TRANSFORM, this.get_global_transform());
-        }
-
+        // Update initial transform
         this.last_transform.copy(this.get_global_transform());
+        this.rid._set_transform(this.last_transform);
 
         const space = this.get_world_2d().space;
         if (this.area) {
