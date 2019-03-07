@@ -1,10 +1,28 @@
 import ObservableVector2 from './observable_vector2';
 import Matrix from './matrix';
 
+/** @type {Transform[]} */
+const Transform_Pool = [];
+
 /**
  * Transform that takes care about its versions
  */
 export default class Transform {
+    static new() {
+        const t = Transform_Pool.pop();
+        if (!t) {
+            return new Transform();
+        } else {
+            return t.reset();
+        }
+    }
+    static free(t) {
+        if (t) {
+            Transform_Pool.push(t);
+        }
+        return Transform;
+    }
+
     constructor() {
         /**
          * The global matrix transform. It can be swapped temporarily by some functions like get_local_Bounds()
@@ -61,6 +79,32 @@ export default class Transform {
         this._local_id = 0;
 
         this._current_local_id = 0;
+    }
+
+    reset() {
+        this.world_transform.reset();
+        this.local_transform.reset();
+
+        this.position.set(0, 0);
+        this.scale.set(0, 0);
+        this.pivot.set(0, 0);
+        this.skew.set(0, 0);
+
+        this._rotation = 0;
+
+        this._cx = 1;
+        this._sx = 0;
+        this._cy = 0;
+        this._sy = 1;
+
+        this._parent_id = 0;
+
+        this._world_id = 0;
+        this._local_id = 0;
+
+        this._current_local_id = 0;
+
+        return this;
     }
 
     /**

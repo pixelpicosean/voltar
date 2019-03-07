@@ -169,6 +169,16 @@ export default class Matrix {
         this.ty = array[5];
     }
 
+    reset() {
+        this.a = 1;
+        this.b = 0;
+        this.c = 0;
+        this.d = 1;
+        this.tx = 0;
+        this.ty = 0;
+        return this;
+    }
+
     /**
      * sets the matrix properties
      *
@@ -278,7 +288,8 @@ export default class Matrix {
      * @param {Vector2} [r_out] - The point that the new position is assigned to (allowed to be same as input)
      * @return {Vector2} The new point, transformed through this matrix
      */
-    basis_xform(p_vec, r_out = Vector2.new()) {
+    basis_xform(p_vec, r_out) {
+        r_out = r_out || Vector2.new();
         const x = (this.a * p_vec.x) + (this.c * p_vec.y);
         const y = (this.b * p_vec.x) + (this.d * p_vec.y);
 
@@ -290,7 +301,8 @@ export default class Matrix {
      * @param {Vector2} [r_out] - The point that the new position is assigned to (allowed to be same as input)
      * @return {Vector2} The new point, inverse-transformed through this matrix
      */
-    basis_xform_inv(p_vec, r_out = Vector2.new()) {
+    basis_xform_inv(p_vec, r_out) {
+        r_out = r_out || Vector2.new();
         const x = (this.a * p_vec.x) + (this.b * p_vec.y);
         const y = (this.c * p_vec.x) + (this.d * p_vec.y);
 
@@ -305,7 +317,8 @@ export default class Matrix {
      * @param {Vector2} [r_out] - The point that the new position is assigned to (allowed to be same as input)
      * @return {Vector2} The new point, transformed through this matrix
      */
-    xform(p_vec, r_out = Vector2.new()) {
+    xform(p_vec, r_out) {
+        r_out = r_out || Vector2.new();
         const x = (this.a * p_vec.x) + (this.c * p_vec.y) + this.tx;
         const y = (this.b * p_vec.x) + (this.d * p_vec.y) + this.ty;
 
@@ -320,7 +333,8 @@ export default class Matrix {
      * @param {Vector2} [r_out] - The point that the new position is assigned to (allowed to be same as input)
      * @return {Vector2} The new point, inverse-transformed through this matrix
      */
-    xform_inv(p_vec, r_out = Vector2.new()) {
+    xform_inv(p_vec, r_out) {
+        r_out = r_out || Vector2.new();
         const x = this.a * (p_vec.x - this.tx) + this.b * (p_vec.y - this.ty);
         const y = this.c * (p_vec.x - this.tx) + this.d * (p_vec.y - this.ty);
 
@@ -331,7 +345,8 @@ export default class Matrix {
      * @param {Rectangle} p_rect
      * @param {Rectangle} [r_out]
      */
-    xform_rect(p_rect, r_out = Rectangle.new()) {
+    xform_rect(p_rect, r_out) {
+        r_out = r_out || Rectangle.new();
         const x = Vector2.new(this.a * p_rect.width, this.b * p_rect.width);
         const y = Vector2.new(this.c * p_rect.height, this.d * p_rect.height);
         const pos = Vector2.new(p_rect.x, p_rect.y);
@@ -356,7 +371,8 @@ export default class Matrix {
      * @param {Rectangle} p_rect
      * @param {Rectangle} [r_out]
      */
-    xform_inv_rect(p_rect, r_out = Rectangle.new()) {
+    xform_inv_rect(p_rect, r_out) {
+        r_out = r_out || Rectangle.new();
         const ends_0 = Vector2.new(p_rect.x, p_rect.y);
         const ends_1 = Vector2.new(p_rect.x, p_rect.y + p_rect.height);
         const ends_2 = Vector2.new(p_rect.x + p_rect.width, p_rect.y + p_rect.height);
@@ -385,7 +401,8 @@ export default class Matrix {
      * @param {Circle} p_circle
      * @param {Circle} [r_out]
      */
-    xform_circle(p_circle, r_out = Circle.new()) {
+    xform_circle(p_circle, r_out) {
+        r_out = r_out || Circle.new();
         const pos = Vector2.new(p_circle.x, p_circle.y);
         this.xform(pos, pos);
 

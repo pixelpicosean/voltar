@@ -282,10 +282,10 @@ export class StaticBody2D extends PhysicsBody2D {
 }
 
 /** @type {Collision[]} */
-const collision_pool = [];
+const Collision_Pool = [];
 class Collision {
     static new() {
-        const i = collision_pool.pop();
+        const i = Collision_Pool.pop();
         if (i) {
             return i.reset();
         } else {
@@ -296,7 +296,9 @@ class Collision {
      * @param {Collision} c
      */
     static free(c) {
-        if (c) collision_pool.push(c);
+        if (c && Collision_Pool.length < 2019) {
+            Collision_Pool.push(c);
+        }
         return Collision;
     }
     constructor() {
@@ -327,7 +329,23 @@ class Collision {
     }
 }
 
+/** @type {KinematicCollision2D[]} */
+const KinematicCollision2D_Pool = [];
 export class KinematicCollision2D {
+    static new() {
+        const k = KinematicCollision2D_Pool.pop();
+        if (!k) {
+            return new KinematicCollision2D();
+        } else {
+            return k.reset();
+        }
+    }
+    static free(k) {
+        if (k && KinematicCollision2D_Pool.length < 2019) {
+            KinematicCollision2D_Pool.push(k);
+        }
+        return KinematicCollision2D;
+    }
     get position() { return this.collision.collision }
     get normal() { return this.collision.normal }
     get travel() { return this.collision.travel }
@@ -349,7 +367,13 @@ export class KinematicCollision2D {
         /** @type {KinematicBody2D} */
         this.owner = null;
         this.collision = new Collision();
-        this.metadata = Object.freeze(Object.create({}));
+        this.metadata = {};
+    }
+    reset() {
+        this.owner = null;
+        this.collision.reset();
+        this.metadata = {};
+        return this;
     }
 }
 
@@ -408,6 +432,9 @@ export class KinematicBody2D extends PhysicsBody2D {
 
         this.last_valid_transform.copy(this.get_global_transform());
     }
+    _propagate_exit_tree() {
+
+    }
 
     // TODO: "local_transform_changed" notification
 
@@ -422,7 +449,7 @@ export class KinematicBody2D extends PhysicsBody2D {
 
         if (this._move(p_motion, p_infinite_inertia, col, p_exclude_raycast_shapes, p_test_only)) {
             if (!this.motion_cache) {
-                this.motion_cache = new KinematicCollision2D();
+                this.motion_cache = KinematicCollision2D.new();
                 this.motion_cache.owner = this;
             }
 

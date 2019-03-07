@@ -883,6 +883,7 @@ export default class SceneTree {
             n = this.delete_queue[i];
             if (n.parent) {
                 n.parent.remove_child(n);
+                n.destroy();
             }
         }
         this.delete_queue.length = 0;

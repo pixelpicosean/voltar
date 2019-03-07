@@ -1,6 +1,27 @@
 import { rgb2hex } from "engine/utils/index";
 
+/** @type {Color[]} */
+const Color_Pool = [];
+
 export default class Color {
+    static new(r = 1, g = 1, b = 1, a = 1) {
+        const c = Color_Pool.pop();
+        if (!c) {
+            return new Color(r, g, b, a);
+        } else {
+            return c.set(r, g, b, a);
+        }
+    }
+    /**
+     * @param {Color} c
+     */
+    static free(c) {
+        if (c) {
+            Color_Pool.push(c);
+        }
+        return Color;
+    }
+
     get r() {
         return this._rgb[0];
     }

@@ -92,12 +92,6 @@ export default class Node2D extends VObject {
         super();
 
         /**
-         * @private
-         * @type {Node2D}
-         */
-        this.temp_node_2d_parent = null;
-
-        /**
          * Data loaded from `_load_data` method
          * @type {any}
          */
@@ -246,12 +240,12 @@ export default class Node2D extends VObject {
          * @private
          * @type {Vector2}
          */
-        this._world_position = new Vector2();
+        this._world_position = Vector2.new();
         /**
          * @private
          * @type {Vector2}
          */
-        this._world_scale = new Vector2(1, 1);
+        this._world_scale = Vector2.new(1, 1);
         /**
          * @private
          * @type {number}
@@ -310,8 +304,8 @@ export default class Node2D extends VObject {
         this.tweens = TweenManager.new();
 
         this.tint = 0xFFFFFF;
-        this.modulate = new Color(1, 1, 1, 1);
-        this.self_modulate = new Color(1, 1, 1, 1);
+        this.modulate = Color.new(1, 1, 1, 1);
+        this.self_modulate = Color.new(1, 1, 1, 1);
 
         this.toplevel = false;
 
@@ -429,11 +423,7 @@ export default class Node2D extends VObject {
      * @type {Node2D}
      */
     get _temp_node_2d_parent() {
-        if (this.temp_node_2d_parent === null) {
-            this.temp_node_2d_parent = Object.freeze(new Node2D());
-        }
-
-        return this.temp_node_2d_parent;
+        return const_node_2d;
     }
 
     /**
@@ -726,20 +716,40 @@ export default class Node2D extends VObject {
      * after calling `destroy`.
      */
     destroy() {
-        // TODO: how do we cleanup an `VObject`
         this.disconnect_all();
+
         if (this.parent) {
             this.parent.remove_child(this);
+            this.parent = null;
         }
+
+        Transform.free(this.transform);
         this.transform = null;
 
-        this.parent = null;
+        Vector2.free(this._world_position);
+        this._world_position = null;
+        Vector2.free(this._world_scale);
+        this._world_scale = null;
 
-        this._bounds = null;
-        this._current_bounds = null;
+        this.instance_data = null;
         this._mask = null;
 
-        this.filter_area = null;
+        Color.free(this.modulate);
+        this.modulate = null;
+        Color.free(this.self_modulate);
+        this.self_modulate = null;
+
+        TweenManager.free(this.tweens);
+        this.tweens = null;
+
+        // TODO: recycle Bound
+        this._bounds = null;
+        this._current_bounds = null;
+
+        if (this.filter_area) {
+            Rectangle.free(this.filter_area);
+            this.filter_area = null;
+        }
 
         this.interactive = false;
         this.interactive_children = false;
@@ -1674,7 +1684,7 @@ export default class Node2D extends VObject {
     }
 
     _update_color() {
-        const parent = this.parent || this.temp_node_2d_parent;
+        const parent = this.parent || const_node_2d;
 
         // Calculate real color
         tmp_color
@@ -1850,3 +1860,5 @@ export default class Node2D extends VObject {
 Node2D.prototype.node2d_update_transform = Node2D.prototype.update_transform;
 
 node_class_map['Node2D'] = Node2D;
+
+const const_node_2d = Object.freeze(new Node2D());
