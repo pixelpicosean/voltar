@@ -55,7 +55,6 @@ class PosBin {
      * @param {PosBin} p
      */
     static free(p) {
-        console.log(`PosBin: ${PosBinPool.length}`)
         if (p && PosBinPool.length < 2019) {
             PosBinPool.push(p);
         }
