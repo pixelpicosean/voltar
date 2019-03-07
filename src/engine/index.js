@@ -100,6 +100,8 @@ export { default as OS } from 'engine/core/os';
 export { default as Color } from 'engine/core/color';
 export { Curve, Curve2D } from 'engine/scene/resources/curve';
 
+export { default as TweenManager } from 'engine/tween/tween_manager';
+
 export { default as TextureUvs } from 'engine/scene/resources/textures/texture_uvs';
 export { default as TextureMatrix } from 'engine/scene/resources/textures/texture_matrix';
 

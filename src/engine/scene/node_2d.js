@@ -1,7 +1,7 @@
 /// <reference path="../tween/index.d.ts" />
 
 import VObject from 'engine/core/v_object';
-import { node_plugins, node_class_map } from 'engine/registry';
+import { node_class_map } from 'engine/registry';
 import {
     remove_items,
 } from 'engine/dep/index';
@@ -20,6 +20,7 @@ import ObservableVector2 from 'engine/core/math/observable_vector2';
 import Color from 'engine/core/color';
 
 import Filter from 'engine/servers/visual/filters/filter';
+import TweenManager from 'engine/tween/tween_manager';
 
 const tmp_color = new Color(1, 1, 1, 1);
 
@@ -304,12 +305,9 @@ export default class Node2D extends VObject {
         this.groups = null;
 
         /**
-         * @type {tween.TweenManager}
+         * Manager that provide tween support
          */
-        this.tweens = null;
-        if (node_plugins.TweenManager) {
-            this.tweens = new node_plugins.TweenManager();
-        }
+        this.tweens = TweenManager.new();
 
         this.tint = 0xFFFFFF;
         this.modulate = new Color(1, 1, 1, 1);

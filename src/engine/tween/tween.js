@@ -131,18 +131,47 @@ class InterpolateData {
 /**
  * @type {Array<InterpolateData>}
  */
-const pool = [];
+const Interpolate_Pool = [];
 /**
  * @returns {InterpolateData}
  */
 const create_interpolate = () => {
-    let data = pool.pop();
+    let data = Interpolate_Pool.pop();
     if (!data) data = new InterpolateData();
     return data._init();
 };
 
+/** @type {Tween[]} */
+const Tween_Pool = [];
+
 // TODO: better easing support (https://github.com/rezoner/ease)
 export default class Tween extends VObject {
+    static new() {
+        const t = Tween_Pool.pop();
+        if (!t) {
+            return new Tween();
+        } else {
+            return t;
+        }
+    }
+    /**
+     * @param {Tween} t
+     */
+    static free(t) {
+        if (t) {
+            t.is_removed = false;
+            t.autoplay = false;
+            t.active = false;
+            t.repeat = false;
+            t.speed_scale = 1;
+            for (const i of t.interpolates) {
+                Interpolate_Pool.push(i);
+            }
+            t.interpolates.length = 0;
+        }
+        return Tween;
+    }
+
     constructor() {
         super();
 
@@ -288,7 +317,7 @@ export default class Tween extends VObject {
             data = this.interpolates[i];
             if (data.obj === obj && (data.key === key || key.length === 0)) {
                 remove_items(this.interpolates, i--, 1);
-                pool.push(data);
+                Interpolate_Pool.push(data);
                 if (first_only) {
                     break;
                 }
@@ -303,7 +332,7 @@ export default class Tween extends VObject {
         this.active = false;
 
         for (let i = 0; i < this.interpolates.length; i++) {
-            pool.push(this.interpolates[i]);
+            Interpolate_Pool.push(this.interpolates[i]);
         }
         this.interpolates.length = 0;
 
@@ -830,7 +859,7 @@ export default class Tween extends VObject {
                 data = this.interpolates[i];
                 if (data.finish) {
                     remove_items(this.interpolates, i--, 1);
-                    pool.push(data);
+                    Interpolate_Pool.push(data);
                 }
             }
 

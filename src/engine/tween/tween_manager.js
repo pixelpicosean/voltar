@@ -1,7 +1,33 @@
-import Tween from './tween';
+import { node_plugins } from 'engine/registry';
 import { remove_items } from 'engine/dep/index';
 
+import Tween from './tween';
+
+/** @type {TweenManager[]} */
+const TweenManager_Pool = [];
+
 export default class TweenManager {
+    static new() {
+        const t = TweenManager_Pool.pop();
+        if (!t) {
+            return new TweenManager();
+        } else {
+            return t;
+        }
+    }
+    /**
+     * @param {TweenManager} t
+     */
+    static free(t) {
+        if (t) {
+            for (const tween of t.tweens) {
+                Tween.free(tween);
+            }
+            t.tweens.length = 0;
+            TweenManager_Pool.push(t);
+        }
+        return TweenManager;
+    }
     constructor() {
         /** @type {Tween[]} */
         this.tweens = [];
@@ -73,3 +99,5 @@ export default class TweenManager {
         this.tweens.length = 0;
     }
 }
+
+node_plugins['TweenManager'] = TweenManager;
