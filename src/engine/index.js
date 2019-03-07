@@ -242,9 +242,19 @@ export function attach_script(url, scene) {
 }
 
 /**
+ * @typedef NodeData
+ * @property {string} type
+ * @property {NodeData[]} children
+ * @property {string} [filename]
+ * @property {boolean} [_is_proxy_]
+ * @property {string} [prop_key]
+ * @property {any} [prop_value]
+ */
+
+/**
  * Assemble a scene(Node2D) with hierarchy data
  * @param {Node2D} scn
- * @param {any} data data
+ * @param {NodeData} data data
  * @returns {Node2D}
  */
 export function assemble_scene(scn, data) {
@@ -257,7 +267,7 @@ export function assemble_scene(scn, data) {
 
 /**
  * @param {Node2D} node
- * @param {any} children
+ * @param {NodeData[]} children
  */
 function assemble_node(node, children) {
     if (!children || children.length === 0) {

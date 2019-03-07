@@ -137,10 +137,12 @@ export function get_closest_point_to_segment_uncapped_2d(p_point, p_segment) {
 
         return p_segment[0];
     }
-    n.divide(l, l);
+    n.scale(1 / l);
 
     const d = n.dot(p);
 
+    Vector2.free(p);
+    Vector2.free(n);
     return p_segment[0].clone().add(n.scale(d));
 }
 
