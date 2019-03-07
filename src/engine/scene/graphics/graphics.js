@@ -1201,8 +1201,8 @@ export default class Graphics extends Node2D {
     /**
      * Destroys the Graphics object.
      */
-    destroy() {
-        super.destroy();
+    free() {
+        super.free();
 
         // destroy each of the GraphicsData objects
         for (let i = 0; i < this.graphics_data.length; ++i) {
@@ -1217,7 +1217,7 @@ export default class Graphics extends Node2D {
         }
 
         if (this._sprite_rect) {
-            this._sprite_rect.destroy();
+            this._sprite_rect.free();
         }
 
         this.graphics_data = null;

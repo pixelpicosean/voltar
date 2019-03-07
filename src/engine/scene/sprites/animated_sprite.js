@@ -496,8 +496,8 @@ export default class AnimatedSprite extends Sprite {
      * @param {import('../node_2d').DestroyOption|boolean} [options] - Options parameter. A boolean will act as if all options
      *  have been set to that value
      */
-    destroy(options) {
+    free(options) {
         this.stop();
-        super.destroy(options);
+        super.free(options);
     }
 }

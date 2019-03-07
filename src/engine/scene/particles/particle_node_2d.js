@@ -234,8 +234,8 @@ export default class ParticleNode2D extends Node2D {
     /**
      * Destroys the container
      */
-    destroy() {
-        super.destroy();
+    free() {
+        super.free();
 
         if (this._buffers) {
             for (let i = 0; i < this._buffers.length; ++i) {

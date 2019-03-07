@@ -441,8 +441,8 @@ export default class Sprite extends Node2D {
      * @param {import('../node_2d').DestroyOption|boolean} [options] - Options parameter. A boolean will act as if all options
      *  have been set to that value
      */
-    destroy(options) {
-        super.destroy();
+    free(options) {
+        super.free();
 
         this._texture.disconnect('update', this._on_texture_update, this);
 

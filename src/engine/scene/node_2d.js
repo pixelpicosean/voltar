@@ -715,7 +715,7 @@ export default class Node2D extends VObject {
      * all current event listeners and internal references. Do not use a Node2D
      * after calling `destroy`.
      */
-    destroy() {
+    free() {
         this.disconnect_all();
 
         if (this.parent) {

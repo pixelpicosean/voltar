@@ -530,14 +530,14 @@ export default class Text extends Sprite {
      * @param {import('../node_2d').DestroyOption|boolean} [options] - Options parameter. A boolean will act as if all options
      *  have been set to that value
      */
-    destroy(options) {
+    free(options) {
         if (typeof options === 'boolean') {
             options = { children: options };
         }
 
         options = Object.assign({}, defaultDestroyOptions, options);
 
-        super.destroy(options);
+        super.free(options);
 
         // make sure to reset the the context and canvas.. dont want this hanging around in memory!
         this.context = null;

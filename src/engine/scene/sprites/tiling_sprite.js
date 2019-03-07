@@ -244,8 +244,8 @@ export default class TilingSprite extends Sprite {
      * @param {import('../node_2d').DestroyOption|boolean} [options] - Options parameter. A boolean will act as if all options
      *  have been set to that value
      */
-    destroy(options) {
-        super.destroy(options);
+    free(options) {
+        super.free(options);
 
         this.tile_transform = null;
         this.uv_transform = null;

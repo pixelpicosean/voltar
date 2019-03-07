@@ -325,7 +325,7 @@ export default class Mesh extends Node2D {
     /**
      * Destroys the Mesh object.
      */
-    destroy() {
+    free() {
         // for each webgl data entry, destroy the WebGLGraphicsData
         for (const id in this._gl_datas) {
             const data = this._gl_datas[id];
@@ -355,7 +355,7 @@ export default class Mesh extends Node2D {
 
         this._gl_datas = null;
 
-        super.destroy();
+        super.free();
     }
 }
 
