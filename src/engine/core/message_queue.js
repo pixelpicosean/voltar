@@ -1,7 +1,5 @@
-/**
- * @type {Message[]}
- */
-const pool = [];
+/** @type {Message[]} */
+const Message_Pool = [];
 
 class Message {
     constructor() {
@@ -39,7 +37,7 @@ export default class MessageQueue {
             }
         }
 
-        let msg = pool.pop();
+        let msg = Message_Pool.pop();
         if (!msg) msg = new Message();
 
         msg.obj = obj;
@@ -51,10 +49,10 @@ export default class MessageQueue {
     flush() {
         for (const msg of this.messages) {
             msg.obj[msg.method](msg.args);
-            pool.push(msg);
+            Message_Pool.push(msg);
         }
 
         this.messages.length = 0;
     }
 }
-let message_queue = new MessageQueue();
+const message_queue = new MessageQueue();

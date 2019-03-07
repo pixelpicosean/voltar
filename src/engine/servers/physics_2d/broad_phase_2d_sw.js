@@ -258,7 +258,7 @@ export default class BroadPhase2D {
 
         const step = Vector2.new(Math.sign(dir.x), Math.sign(dir.y));
 
-        const max = new Vector2();
+        const max = Vector2.new();
 
         if (dir.x < 0) {
             max.x = (Math.floor(pos.x) * this.cell_size - p_from.x) / dir.x;
@@ -330,6 +330,11 @@ export default class BroadPhase2D {
             cullcount++;
         }
 
+        Vector2.free(dir);
+        Vector2.free(delta);
+        Vector2.free(pos);
+        Vector2.free(end);
+        Vector2.free(max);
         return cullcount;
     }
     /**
@@ -546,6 +551,7 @@ export default class BroadPhase2D {
             if (this.large_elements.get(p_elem).dec() === 0) {
                 this.large_elements.delete(p_elem);
             }
+            Vector2.free(sz);
             return;
         }
 

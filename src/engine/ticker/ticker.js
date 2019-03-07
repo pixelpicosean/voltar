@@ -316,11 +316,13 @@ export default class Ticker {
      * frame callbacks if the ticker instance has been started
      * and listeners are added.
      *
-     * @param {number} [current_time=performance.now()] - the current time of execution
+     * @param {number} [current_time] - the current time of execution
      */
-    update(current_time = performance.now()) {
+    update(current_time = -1) {
+        current_time = current_time || performance.now();
+
         /** @type {number} */
-        let elapsed_ms;
+        let elapsed_ms = 0;
 
         // If the difference in time is zero or negative, we ignore most of the work done here.
         // If there is no valid difference, then should be no reason to let anyone know about it.

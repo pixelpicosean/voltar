@@ -33,6 +33,8 @@ const hit_test_event = {
 };
 hit_test_event.data.global = null;
 
+const tmp_rect = { left: 0, top: 0, width: 0, height: 0 };
+
 /**
  * The interaction manager deals with mouse, touch and pointer events. Any Node2D can be interactive
  * if its interactive parameter is set to true
@@ -94,9 +96,9 @@ export default class InteractionManager extends VObject {
          * Actively tracked InteractionData
          *
          * @private
-         * @type {Object.<number, InteractionData>}
+         * @type {Object<number, InteractionData>}
          */
-        this.active_interaction_data = {};
+        this.active_interaction_data = Object.create(null);
         this.active_interaction_data[MOUSE_POINTER_ID] = this.mouse;
 
         /**
@@ -118,7 +120,7 @@ export default class InteractionManager extends VObject {
          * The DOM element to bind to.
          *
          * @private
-         * @type {HTMLElement}
+         * @type {HTMLCanvasElement}
          */
         this.interaction_dom_element = null;
 
@@ -438,25 +440,22 @@ export default class InteractionManager extends VObject {
         // but there was a scenario of a display object moving under a static mouse cursor.
         // In this case, mouseover and mouseevents would not pass the flag test in dispatch_event function
         for (const k in this.active_interaction_data) {
-            // eslint-disable-next-line no-prototype-builtins
-            if (this.active_interaction_data.hasOwnProperty(k)) {
-                const interaction_data = this.active_interaction_data[k];
+            const interaction_data = this.active_interaction_data[k];
 
-                if (interaction_data.original_event && interaction_data.pointer_type !== 'touch') {
-                    const interaction_event = this.configure_interaction_event_for_dom_event(
-                        this.event_data,
-                        // @ts-ignore
-                        interaction_data.original_event,
-                        interaction_data
-                    );
+            if (interaction_data.original_event && interaction_data.pointer_type !== 'touch') {
+                const interaction_event = this.configure_interaction_event_for_dom_event(
+                    this.event_data,
+                    // @ts-ignore
+                    interaction_data.original_event,
+                    interaction_data
+                );
 
-                    this.process_interactive(
-                        interaction_event,
-                        this.renderer._last_object_rendered,
-                        this.process_pointer_over_out,
-                        true
-                    );
-                }
+                this.process_interactive(
+                    interaction_event,
+                    this.renderer._last_object_rendered,
+                    this.process_pointer_over_out,
+                    true
+                );
             }
         }
 
@@ -533,21 +532,19 @@ export default class InteractionManager extends VObject {
      * @param  {number} y - the y coord of the position to map
      */
     map_position_to_point(point, x, y) {
-        let rect;
+        /** @type {{ left: number, top: number, width: number, height: number }} */
+        let rect = tmp_rect;
 
         // IE 11 fix
         if (!this.interaction_dom_element.parentElement) {
-            rect = { x: 0, y: 0, width: 0, height: 0 };
+            rect.left = 0; rect.top = 0; rect.width = 0; rect.height = 0;
         } else {
             rect = this.interaction_dom_element.getBoundingClientRect();
         }
 
-        // @ts-ignore
         const resolution_multiplier = 1.0 / this.resolution;
 
-        // @ts-ignore
         point.x = ((x - rect.left) * (this.interaction_dom_element.width / rect.width)) * resolution_multiplier;
-        // @ts-ignore
         point.y = ((y - rect.top) * (this.interaction_dom_element.height / rect.height)) * resolution_multiplier;
     }
 

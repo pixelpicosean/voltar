@@ -425,13 +425,17 @@ export default class Body2DSW extends CollisionObject2DSW {
                     this.set_active(true);
                     if (this.first_time_kinematic) {
                         this._set_transform(p_value);
-                        this._set_inv_transform(this.transform.clone().affine_inverse());
+                        const inv_transform = this.transform.clone().affine_inverse();
+                        this._set_inv_transform(inv_transform);
                         this.first_time_kinematic = false;
+                        Matrix.free(inv_transform);
                     }
                 } else if (this.mode === BodyMode.STATIC) {
                     this._set_transform(p_value);
-                    this._set_inv_transform(this.transform.clone().affine_inverse());
+                    const inv_transform = this.transform.clone().affine_inverse();
+                    this._set_inv_transform(inv_transform);
                     this.wakeup_neighbours();
+                    Matrix.free(inv_transform);
                 } else {
                     /** @type {Matrix} */
                     const t = p_value;
@@ -441,7 +445,9 @@ export default class Body2DSW extends CollisionObject2DSW {
                         break;
                     }
                     this._set_transform(t);
-                    this._set_inv_transform(this.transform.inverse());
+                    const inv_transform = this.transform.inverse();
+                    this._set_inv_transform(inv_transform);
+                    Matrix.free(inv_transform);
                 }
                 this.wakeup();
             } break;
@@ -619,6 +625,8 @@ export default class Body2DSW extends CollisionObject2DSW {
 
                 this.linear_velocity.add(force.scale(this._inv_mass * p_step));
                 this.angular_velocity += this._inv_inertia * torque * p_step;
+
+                Vector2.free(force);
             }
 
             if (this.continuous_cd_mode !== CCDMode.DISABLED) {
@@ -637,6 +645,8 @@ export default class Body2DSW extends CollisionObject2DSW {
 
         this.def_area = null; // clear the area, so it is set in the next frame
         this.contact_count = 0;
+
+        Vector2.free(motion);
     }
     /**
      * @param {number} p_step
@@ -652,10 +662,12 @@ export default class Body2DSW extends CollisionObject2DSW {
 
         if (this.mode === BodyMode.KINEMATIC) {
             this._set_transform(this.new_transform, false);
-            this._set_inv_transform(this.new_transform.clone().affine_inverse());
+            const inv_transform = this.new_transform.clone().affine_inverse();
+            this._set_inv_transform(inv_transform);
             if (this.contacts.length === 0 && this.linear_velocity.is_zero() && this.angular_velocity === 0) {
                 this.set_active(false); // stopped moving, deactivate
             }
+            Matrix.free(inv_transform);
             return;
         }
 
@@ -672,6 +684,10 @@ export default class Body2DSW extends CollisionObject2DSW {
         if (this.continuous_cd_mode !== CCDMode.DISABLED) {
             this.new_transform.copy(this.transform);
         }
+
+        Vector2.free(total_linear_velocity);
+        Vector2.free(pos);
+        Matrix.free(t);
     }
 
     get_motion() {

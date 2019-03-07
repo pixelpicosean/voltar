@@ -484,7 +484,10 @@ export default class Space2DSW {
                                     const motion = lv.multiply(Physics2DDirectBodyStateSW.singleton.step);
                                     const motion_len = motion.length();
                                     motion.normalize();
-                                    cbk.valid_depth += motion_len * Math.max(motion.dot(cbk.valid_dir.clone().negate()), 0);
+                                    const neg_dir = cbk.valid_dir.clone().negate();
+                                    cbk.valid_depth += motion_len * Math.max(motion.dot(neg_dir), 0);
+                                    Vector2.free(lv);
+                                    Vector2.free(neg_dir);
                                 }
                             }
                         } else {
@@ -514,7 +517,10 @@ export default class Space2DSW {
                         if (did_collide) {
                             collided = true;
                         }
+
+                        Matrix.free(col_obj_shape_xform);
                     }
+                    Matrix.free(body_shape_xform);
                 }
 
                 if (!collided) {
@@ -605,12 +611,14 @@ export default class Space2DSW {
                     const col_obj_shape_xform = col_obj.transform.clone().append(against_shape.xform);
                     // test initial overlap, does it collide if going all the way?
                     if (!CollisionSolver2DSW.solve(body_shape.shape, body_shape_xform, p_motion, against_shape.shape, col_obj_shape_xform, Vector2.ZERO, null, null, null, 0)) {
+                        Matrix.free(col_obj_shape_xform);
                         continue;
                     }
 
                     // test initial overlap
                     if (CollisionSolver2DSW.solve(body_shape.shape, body_shape_xform, Vector2.ZERO, against_shape.shape, col_obj_shape_xform, Vector2.ZERO, null, null, null, 0)) {
                         if (against_shape.one_way_collision) {
+                            Matrix.free(col_obj_shape_xform);
                             continue;
                         }
 
@@ -656,6 +664,7 @@ export default class Space2DSW {
                             Vector2.free(sep);
                             Vector2.free(axis);
                             Vector2.free(seps[0]);
+                            Matrix.free(col_obj_shape_xform);
                             continue;
                         }
 
@@ -667,6 +676,8 @@ export default class Space2DSW {
                         best_safe = low;
                         best_unsafe = hi;
                     }
+
+                    Matrix.free(col_obj_shape_xform);
 
                     Vector2.free(mnormal);
                     Vector2.free(sep);
@@ -686,6 +697,8 @@ export default class Space2DSW {
                     unsafe = best_unsafe;
                     best_shape = body_shape_idx;
                 }
+
+                Matrix.free(body_shape_xform);
             }
 
             Rectangle.free(motion_aabb);
@@ -755,6 +768,8 @@ export default class Space2DSW {
                         rcd.valid_depth = 0;
                     }
 
+                    Matrix.free(col_obj_shape_xform);
+
                     rcd.object = col_obj;
                     rcd.shape = shape_idx;
                     rcd.local_shape = j;
@@ -763,6 +778,8 @@ export default class Space2DSW {
                         continue;
                     }
                 }
+
+                Matrix.free(body_shape_xform);
             }
 
             if (rcd.best_len !== 0) {
@@ -785,6 +802,8 @@ export default class Space2DSW {
                     r_result.motion.copy(p_motion).scale(safe);
                     r_result.remainder.copy(p_motion).subtract(r_result.motion);
                     r_result.motion.add(body_transform.origin).subtract(p_from.origin);
+
+                    Vector2.free(rel_vec);
                 }
 
                 collided = true;
@@ -801,6 +820,8 @@ export default class Space2DSW {
             Vector2.free(origin);
         }
 
+        Rectangle.free(body_aabb);
+        Matrix.free(body_transform);
         return collided;
     }
     /**

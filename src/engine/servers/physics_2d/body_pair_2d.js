@@ -130,15 +130,15 @@ export default class BodyPair2DSW extends Constraint2DSW {
         const shape_B_ptr = B.get_shape(this.shape_B);
 
         /** @type {Vector2} */
-        let motion_A;
+        let motion_A = null;
         /** @type {Vector2} */
-        let motion_B;
+        let motion_B = null;
 
         if (A.continuous_cd_mode === CCDMode.CAST_SHAPE) {
-            motion_A.copy(A.get_motion());
+            motion_A = A.get_motion();
         }
         if (B.continuous_cd_mode === CCDMode.CAST_SHAPE) {
-            motion_B.copy(B.get_motion());
+            motion_B = B.get_motion();
         }
         // faster to set than to check..
 
@@ -160,11 +160,28 @@ export default class BodyPair2DSW extends Constraint2DSW {
 
             if (!this.collided) {
                 this.oneway_disabled = false;
+
+                Vector2.free(motion_A);
+                Vector2.free(motion_B);
+
+                Vector2.free(offset_A);
+                Matrix.free(xform_Au);
+                Matrix.free(xform_A);
+                Matrix.free(xform_Bu);
+                Matrix.free(xform_B);
                 return false;
             }
         }
 
         if (this.oneway_disabled) {
+            Vector2.free(motion_A);
+            Vector2.free(motion_B);
+
+            Vector2.free(offset_A);
+            Matrix.free(xform_Au);
+            Matrix.free(xform_A);
+            Matrix.free(xform_Bu);
+            Matrix.free(xform_B);
             return false;
         }
 
@@ -190,8 +207,21 @@ export default class BodyPair2DSW extends Constraint2DSW {
                 if (!valid) {
                     this.collided = false;
                     this.oneway_disabled = true;
+
+                    Vector2.free(direction);
+
+                    Vector2.free(motion_A);
+                    Vector2.free(motion_B);
+
+                    Vector2.free(offset_A);
+                    Matrix.free(xform_Au);
+                    Matrix.free(xform_A);
+                    Matrix.free(xform_Bu);
+                    Matrix.free(xform_B);
                     return false;
                 }
+
+                Vector2.free(direction);
             }
 
             if (B.is_shape_one_way_collision(this.shape_B)) {
@@ -215,8 +245,21 @@ export default class BodyPair2DSW extends Constraint2DSW {
                 if (!valid) {
                     this.collided = false;
                     this.oneway_disabled = true;
+
+                    Vector2.free(direction);
+
+                    Vector2.free(motion_A);
+                    Vector2.free(motion_B);
+
+                    Vector2.free(offset_A);
+                    Matrix.free(xform_Au);
+                    Matrix.free(xform_A);
+                    Matrix.free(xform_Bu);
+                    Matrix.free(xform_B);
                     return false;
                 }
+
+                Vector2.free(direction);
             }
         }
 
@@ -316,6 +359,14 @@ export default class BodyPair2DSW extends Constraint2DSW {
             do_process = true;
         }
 
+        Vector2.free(motion_A);
+        Vector2.free(motion_B);
+
+        Vector2.free(offset_A);
+        Matrix.free(xform_Au);
+        Matrix.free(xform_A);
+        Matrix.free(xform_Bu);
+        Matrix.free(xform_B);
         return do_process;
     }
     /**
