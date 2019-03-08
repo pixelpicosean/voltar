@@ -348,6 +348,8 @@ function parse_block(block) {
                         }
                         // the dictionary just end here
                         else if (rest_line.indexOf(']') >= 0) {
+                            // close current array
+                            tokens.pop();
                             const pack = stack.pop();
                             const parent = (stack.length > 0) ? _.last(stack).value : data.prop;
                             parent[pack.key] = pack.value;
@@ -557,6 +559,7 @@ const resource_normalizers = {
     BitmapFont: (res, meta) => path.basename(res.path, '.fnt'),
     RectangleShape2D: (res, meta, parent) => res,
     CircleShape2D: (res, meta, parent) => res,
+    ConvexPolygonShape2D: (res) => res,
     TileSet: (res, meta) => {
         const real_url = normalize_res_real_url(res.path);
         const text_data = fs.readFileSync(real_url, 'utf8');
@@ -567,14 +570,16 @@ const resource_normalizers = {
 
         let result = undefined;
         let tile_map = undefined;
-        const res_table = {};
+        const ext_res_table = {};
+        const sub_res_table = {};
         const head = sections.shift();
         for (let i = 0; i < head.attr.load_steps; i++) {
             const sec = sections[i];
             if (sec.key === 'ext_resource') {
-                res_table[sec.id] = resource_normalizers[sec.type](sec);
+                ext_res_table[sec.id] = resource_normalizers[sec.type](sec);
             } else if (sec.key === 'sub_resource') {
-                throw 'sub_resource in "tres" is not supported yet';
+                sub_res_table[sec.id] = resource_normalizers[sec.type](sec);
+                // throw 'sub_resource in "tres" is not supported yet';
             } else if (sec.key === 'resource') {
                 const prop = sec.prop;
                 // TODO: make this a general function
@@ -591,8 +596,25 @@ const resource_normalizers = {
                         }
 
                         let value = prop[k];
-                        if (_.startsWith(value, 'ExtResource')) {
-                            value = res_table[get_function_params(value)];
+                        if (typeof(value) === 'number') {
+                            // do nothing
+                        } else if (typeof(value) === 'boolean') {
+                            // do nothing
+                        } else if (Array.isArray(value)) {
+                            if (value.length > 0) {
+                                // Shape list
+                                if (k.indexOf('shapes') >= 0) {
+                                    for (const s of value) {
+                                        s.autotile_coord = Vector2(s.autotile_coord);
+                                        s.shape = sub_res_table[get_function_params(s.shape)];
+                                        s.shape_transform = get_function_params(s.shape_transform).map(parseFloat);
+                                    }
+                                }
+                            }
+                        } else if (_.startsWith(value, 'ExtResource')) {
+                            value = ext_res_table[get_function_params(value)];
+                        } else if (_.startsWith(value, 'SubResource')) {
+                            value = sub_res_table[get_function_params(value)];
                         } else if (_.startsWith(value, 'Vector2')) {
                             value = Vector2(value);
                         } else if (_.startsWith(value, 'Color')) {
