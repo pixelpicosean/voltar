@@ -8,9 +8,54 @@
                 "x": 3.42513,
                 "y": 0.856277
             },
-            "children": [],
+            "children": [
+                {
+                    "type": "Node2D",
+                    "name": "stop",
+                    "children": [
+                        {
+                            "type": "Sprite",
+                            "name": "icon_s",
+                            "position": {
+                                "x": 242.809,
+                                "y": 183.792
+                            },
+                            "scale": {
+                                "x": 0.302594,
+                                "y": 0.302594
+                            },
+                            "pause_mode": 1,
+                            "texture": "@ext#1",
+                            "children": []
+                        }
+                    ]
+                },
+                {
+                    "type": "Node2D",
+                    "name": "process",
+                    "pause_mode": 2,
+                    "children": [
+                        {
+                            "type": "Sprite",
+                            "name": "icon_p",
+                            "position": {
+                                "x": 242.809,
+                                "y": 410.627
+                            },
+                            "scale": {
+                                "x": 0.302594,
+                                "y": 0.302594
+                            },
+                            "texture": "@ext#1",
+                            "children": []
+                        }
+                    ]
+                }
+            ],
             "__meta__": {
-                "ext": {},
+                "ext": {
+                    "1": "icon"
+                },
                 "sub": {}
             }
         }

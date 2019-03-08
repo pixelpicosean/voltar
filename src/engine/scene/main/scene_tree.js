@@ -721,6 +721,9 @@ export default class SceneTree {
         shared_ticker.start();
         this._loop_id = requestAnimationFrame(this._iteration_bind);
     }
+    /**
+     * @param {number} timestamp
+     */
     iteration(timestamp) {
         this._loop_id = requestAnimationFrame(this._iteration_bind);
 
