@@ -496,9 +496,15 @@ function construct_scene(blocks) {
  * @returns {string}
  */
 function normalize_image_res_url(url) {
-    // "res://" = 6, "/image/" = 6
+    // "res://" = 6, "image/" = 6
     const without_prefix = url.substring(6 + 6);
     const without_ext = without_prefix.substring(0, without_prefix.indexOf(path.extname(without_prefix)));
+
+    if (_.startsWith(without_prefix, 'standalone')) {
+        const final_url = without_prefix.replace(/^standalone\//, 'media/');
+        return final_url;
+    }
+
     return without_ext.substring(without_ext.indexOf('/') + 1);
 }
 /**

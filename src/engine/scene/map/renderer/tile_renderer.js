@@ -188,7 +188,7 @@ export default class TileRenderer extends ObjectRenderer {
         const stuff = {
             id: id,
             vb: vb,
-            vao: shader.createVao(this.renderer, vb),
+            vao: shader.create_vao(this.renderer, vb),
             last_time_access: Date.now(),
             shader: shader,
         };
