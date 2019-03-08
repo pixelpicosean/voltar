@@ -63,6 +63,10 @@ export default class TileMap extends Node2D {
         this.tile_set = TileSet.with_key(data.tile_set);
         this.data = data.tile_data;
 
+        if (data.cell_size !== undefined) {
+            this.cell_size.copy(data.cell_size);
+        }
+
         this._needs_redraw = true;
 
         return this;
