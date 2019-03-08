@@ -1,6 +1,7 @@
 // Based on pixi-tilemap master~02218a043cacd310b49e2801a117423cb46b23d3
 import { node_class_map } from 'engine/registry';
-import { Matrix, Vector2 } from 'engine/core/math/index';
+import { Matrix, Vector2, Rectangle } from 'engine/core/math/index';
+import SelfList from 'engine/core/self_list';
 import Texture from 'engine/scene/resources/textures/texture';
 
 import TileSet from '../resources/tile_set';
@@ -8,13 +9,115 @@ import TileRenderer from './renderer/tile_renderer';
 
 import Node2D from '../node_2d';
 
+export const Mode = {
+    SQUARE: 0,
+    ISOMETRIC: 1,
+    CUSTOM: 2,
+}
+
+export const HalfOffset = {
+    X: 0,
+    Y: 1,
+    DISABLED: 2,
+}
+
+export const TileOrigin = {
+    TOP_LEFT: 0,
+    CENTER: 1,
+    BOTTOM_LEFT: 2,
+}
+
+class Cell {
+    constructor() {
+        this.id = 0;
+        this.flip_h = false;
+        this.flip_v = false;
+        this.transpose = false;
+        this.autotile_coord_x = 0;
+        this.autotile_coord_y = 0;
+    }
+}
+
+class NavPoly {
+    constructor() {
+        this.id = 0;
+        this.xform = new Matrix();
+    }
+}
+
+class Occluder {
+    constructor() {
+        this.id = 0;
+        this.xform = new Matrix();
+    }
+}
+
+class Quadrant {
+    constructor() {
+        this.pos = new Vector2();
+        this.canvas_items = [];
+        this.body = null;
+
+        /**
+         * @type {SelfList<Quadrant>}
+         */
+        this.dirty_list = new SelfList(this);
+
+        /**
+         * @type {Map<number, Map<number, NavPoly>>}
+         */
+        this.navpoly_ids = new Map();
+
+        /**
+         * @type {Map<number, Map<number, Occluder>>}
+         */
+        this.occluder_instances = new Map();
+
+        /**
+         * @type {import('engine/core/math/vector2').Vector2Like[]}
+         */
+        this.cells = [];
+    }
+}
+
 export default class TileMap extends Node2D {
     constructor() {
         super();
 
         this.type = 'TileMap';
 
+        this.mode = Mode.SQUARE;
+
+        this.cell_clip_uv = false;
+        this.cell_custom_transform = new Matrix();
+        this.cell_half_offset = HalfOffset.DISABLED;
+        this.cell_quadrant_size = 0;
         this.cell_size = new Vector2(64, 64);
+        this.cell_tile_origin = TileOrigin.TOP_LEFT;
+        this.cell_y_sort = false;
+
+        /**
+         * @type {Map<number, Map<number, Cell>>}
+         */
+        this.tile_map = new Map();
+
+        /**
+         * @type {Map<number, Map<number, Quadrant>>}
+         */
+        this.quadrant_map = new Map();
+
+        /**
+         * @type {SelfList<Quadrant>}
+         */
+        this.dirty_quadrant_list = null;
+
+        this.pending_updates = false;
+
+        this.rect_cache = new Rectangle();
+        this.rect_cache_dirty = false;
+        this.used_size_cache = new Rectangle();
+        this.used_size_cache_dirty = false;
+        this.quadrant_order_dirty = false;
 
         /**
          * @type {Texture[]}
