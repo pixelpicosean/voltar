@@ -1,9 +1,11 @@
-import Shape2D from './shape_2d';
-import { Matrix, Vector2, Rectangle } from 'engine/core/math/index';
-import Color from 'engine/core/color';
-import Texture from 'engine/scene/resources/textures/texture';
-import { TextureCache } from 'engine/utils/index';
 import { res_procs } from 'engine/registry';
+import { TextureCache } from 'engine/utils/index';
+import Color from 'engine/core/color';
+import { Matrix, Vector2, Rectangle } from 'engine/core/math/index';
+import Texture from 'engine/scene/resources/textures/texture';
+
+import Shape2D from './shape_2d';
+import ConvexPolygonShape2D from './convex_polygon_shape_2d';
 
 class ShapeData {
     constructor() {
@@ -15,6 +17,30 @@ class ShapeData {
         this.autotile_coord = new Vector2();
         this.one_way_collision = false;
         this.one_way_collision_margin = 1.0;
+    }
+    _load_data(data) {
+        if (data.autotile_coord !== undefined) {
+            this.autotile_coord.copy(data.autotile_coord);
+        }
+        if (data.one_way !== undefined) {
+            this.one_way_collision = data.one_way;
+        }
+        if (data.one_way_margin !== undefined) {
+            this.one_way_collision_margin = data.one_way_margin;
+        }
+        if (data.shape_transform !== undefined) {
+            this.shape_transform.from_array(data.shape_transform);
+        }
+        if (data.shape !== undefined) {
+            if (data.shape.type === 'ConvexPolygonShape2D') {
+                this.shape = new ConvexPolygonShape2D();
+                /** @type {ConvexPolygonShape2D} */(this.shape).set_points_in_pool_vec2(data.shape.points);
+            } else {
+                console.warn(`${data.shape.type} shape in TileSet is not supported yet!`);
+            }
+        }
+
+        return this;
     }
 }
 
@@ -73,7 +99,15 @@ class TileData {
         if (data.region !== undefined) {
             this.region.copy(data.region);
         }
-        // TODO: support other properties
+        if (data.shapes !== undefined) {
+            this.shapes_data = data.shapes.map(s_data => new ShapeData()._load_data(s_data));
+        }
+        if (data.tile_mode !== undefined) {
+            this.tile_mode = data.tile_mode;
+        }
+        if (data.modulate !== undefined) {
+            this.modulate.copy(data.modulate);
+        }
         return this;
     }
 }
