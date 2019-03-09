@@ -3,8 +3,15 @@
         "name": "voltar"
     },
     "display": {
-        "width": 500,
+        "width": 160,
+        "height": 160,
         "stretch_mode": "viewport",
         "stretch_aspect": "keep"
+    },
+    "layer_map": {
+        "physics": {
+            "solid": 1,
+            "hero": 2
+        }
     }
 }
