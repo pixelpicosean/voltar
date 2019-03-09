@@ -61,7 +61,7 @@ export const BIND_BOTTOM = 128;
 export const BIND_BOTTOM_RIGHT = 256;
 
 // @enum TileMode
-export const SINGLE_TITLE = 0;
+export const SINGLE_TILE = 0;
 export const AUTO_TILE = 1;
 export const ATLAS_TILE = 2;
 
@@ -88,7 +88,7 @@ class TileData {
         this.occluder = null;
         this.navigation_polygon_offset = new Vector2();
         this.navigation_polygon = null;
-        this.tile_mode = SINGLE_TITLE;
+        this.tile_mode = SINGLE_TILE;
         this.modulate = new Color(1, 1, 1, 1);
         this.autotile_data = new AutotileData();
     }
@@ -112,6 +112,7 @@ class TileData {
     }
 }
 
+/** @type {Object<string, TileSet>} */
 const tile_set_map = {};
 
 export default class TileSet {
@@ -143,6 +144,19 @@ export default class TileSet {
 
     clear() {
         this.tile_map.length = 0;
+    }
+
+    /**
+     * @param {number} id
+     */
+    has_tile(id) {
+        return id < this.tile_map.length;
+    }
+    /**
+     * @param {number} id
+     */
+    get_tile(id) {
+        return this.tile_map[id];
     }
 }
 
