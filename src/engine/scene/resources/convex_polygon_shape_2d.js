@@ -69,6 +69,23 @@ export default class ConvexPolygonShape2D extends Shape2D {
     }
 
     /**
+     * Load points from Godot PoolVector2Array data (array of numbers)
+     * @param {number[]} p_points
+     */
+    set_points_in_pool_vec2(p_points) {
+        const p_len = Math.floor(p_points.length / 2);
+        const points = this._points;
+        points.length = 0;
+
+        for (let i = 0; i < p_len; i++) {
+            points.push(new Vector2(p_points[i * 2], p_points[i * 2 + 1]));
+        }
+        this.points = points;
+
+        return this;
+    }
+
+    /**
      * @param {Vector2[]} p_points
      */
     set_point_cloud(p_points) {
