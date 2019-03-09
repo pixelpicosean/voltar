@@ -608,6 +608,41 @@ const resource_normalizers = {
                                         s.autotile_coord = Vector2(s.autotile_coord);
                                         s.shape = sub_res_table[get_function_params(s.shape)];
                                         s.shape_transform = get_function_params(s.shape_transform).map(parseFloat);
+
+                                        // FIXME: should we delete the key and id here?
+                                        s.shape.key = undefined;
+                                        s.shape.id = undefined;
+
+                                        // FIXME: should we remove the properties if they are default value?
+                                        if (s.autotile_coord.x === 0 && s.autotile_coord.y === 0) {
+                                            s.autotile_coord = undefined;
+                                        }
+
+                                        if (s.one_way === false) {
+                                            s.one_way = undefined;
+                                        }
+
+                                        if (s.one_way_margin === 1) {
+                                            s.one_way_margin = undefined;
+                                        }
+
+                                        /** @type {number[]} */
+                                        const t = s.shape_transform;
+                                        if (
+                                            t[0] === 1
+                                            &&
+                                            t[1] === 0
+                                            &&
+                                            t[2] === 0
+                                            &&
+                                            t[3] === 1
+                                            &&
+                                            t[4] === 0
+                                            &&
+                                            t[5] === 0
+                                        ) {
+                                            s.shape_transform = undefined;
+                                        }
                                     }
                                 }
                             }
@@ -688,6 +723,7 @@ const resource_normalizers = {
 
             result = {
                 texture: texture,
+                tile_mode: tile_mode,
                 tile_map: tile_map,
             };
         }
