@@ -42,6 +42,11 @@ export default class VisualServer {
      */
     render(viewport) {
         // TODO: transform should be stretch_transform * global_canvas_transform * canvas_transform
+
+        // FIXME: should we force integer transform here?
+        viewport.canvas_transform.tx = viewport.canvas_transform.tx | 0;
+        viewport.canvas_transform.ty = viewport.canvas_transform.ty | 0;
+
         this.renderer.render(viewport, undefined, true, viewport.canvas_transform, true);
     }
 }
