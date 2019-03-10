@@ -715,19 +715,19 @@ export default class CPUParticles2D extends Node2D {
                 if (restart_time >= prev_time && restart_time < this.time) {
                     restart = true;
                     if (this.fract_delta) {
-                        local_delta = (this.time - restart_time) * this.lifetime;
+                        local_delta = this.time - restart_time;
                     }
                 }
             } else if (local_delta > 0) {
                 if (restart_time >= prev_time) {
                     restart = true;
                     if (this.fract_delta) {
-                        local_delta = (1 - restart_time + this.time) * this.lifetime;
+                        local_delta = this.lifetime - restart_time + this.time;
                     }
                 } else if (restart_time < this.time) {
                     restart = true;
                     if (this.fract_delta) {
-                        local_delta = (this.time - restart_time) * this.lifetime;
+                        local_delta = this.time - restart_time;
                     }
                 }
             }
