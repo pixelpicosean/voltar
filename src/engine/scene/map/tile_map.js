@@ -420,7 +420,6 @@ export default class TileMap extends Node2D {
         }
 
         const ps = PhysicsServer.singleton;
-        window.ps = ps;
         const tofs = this.get_cell_draw_offset();
 
         // TODO: navigation support

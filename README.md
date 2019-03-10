@@ -29,6 +29,9 @@ Scenes should be saved into the `assets/scene`, and uses assets located inside
 Textures should **ALWAYS** go into `assets/image/*` and uses the texture packer
 to generated atlas exported to `media` folder. Otherwise it won't work.
 
+Single images that will be copied into `media` folder should be put in
+the `assets/image/standalone` folder, so they will be copied automatically (even after you modified).
+
 ### Steps
 
 Make sure you've installed dependencies of the importer. In case you're not:
@@ -43,25 +46,41 @@ file, and then import these files or preload them as assets in your code.
 
 ### Supported Godot features
 
-- [x] Node2D
-- [x] Sprite
-- [x] AnimatedSprite
-- [x] Text (as `Text` or `BitmapText` based on the font)
-- [x] AnimationPlayer
+- [x] screen stretch mode/aspect
+- [x] `CanvasLayer`
+- [x] `Camera2D`
+- [x] `Path2D`
+- [x] `Node2D`
+- [x] `YSort`
+- [x] `RemoteTransform2D`
+- [x] `VisibilityNotifier2D`
+- [x] `Timer`
+- [x] `Sprite`
+- [x] `Control`, `Container` and sub-classes
+- [x] `Label`
+- [x] `TextureButton`
+- [x] `TextureProgress`
+- [x] `TextureRect`
+- [x] `NinePatchRect`
+- [x] `AnimatedSprite`
+- [x] `AnimationPlayer`
 - [x] Tween (tweens are no longer nodes, they are just data and runs through `tweens`)
 - [x] Input
-- [ ] Control and tons of UI elements (WIP)
-- [ ] Particle (WIP)
-- [ ] Tilemap (WIP)
-- [ ] More complex physics (WIP)
+- [x] `CPUParticle2D`
+- [x] `TileMap` (limit to 1 texture per `TileSet`, only render and collision are supported)
+- [x] `Area2D`
+- [x] `RayCast2D`
+- [x] `StaticBody2D`
+- [x] `KinematicBody2D`
+- [x] shapes, font, curve
+- [ ] `RigidBody2D` (WIP)
+- [ ] `Viewport` (WIP)
 
 ### Extra features
 
-- [x] Cutout animation exported from `Spriter`
+- [x] Convert Godot scene/resource into JSON and load
 - [x] Extract anything rendered to HTML5 image
 - [x] Several simple mesh nodes (Plane, Rope, NineSlice)
-- [x] Tilemap (this is very different from Godot, but impact.js like)
 - [x] Graphics (Flash like primitive shape rendering)
 - [x] Sound (also different from Godot, sounds are much more simpler/less features)
-- [x] Accessibility
 - [x] Several built-in filters (Material/Shaders)
