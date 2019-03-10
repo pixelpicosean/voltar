@@ -451,14 +451,13 @@ export default class TileMap extends Node2D {
 
                     // Draw tiles
                     const wofs = this._map_to_world(x, y);
-                    const offset = wofs.clone().subtract(q.pos).add(tofs);
+                    const offset = wofs.subtract(q.pos).add(tofs);
                     this._push_tile(
                         q.pos.x + offset.x, q.pos.y + offset.y,
                         tile.region.x, tile.region.y,
                         tile.region.width, tile.region.height
                     );
                     Vector2.free(offset);
-                    Vector2.free(wofs);
 
                     // Add shapes
                     for (const sd of tile.shapes_data) {
@@ -667,8 +666,8 @@ export default class TileMap extends Node2D {
 
         pb.push(u);
         pb.push(v);
-        pb.push(x);
-        pb.push(y);
+        pb.push(x | 0);
+        pb.push(y | 0);
         pb.push(tile_width);
         pb.push(tile_height);
         pb.push(texture_index);
