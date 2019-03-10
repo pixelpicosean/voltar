@@ -249,7 +249,9 @@ export default class Camera2D extends Node2D {
         }
 
         if (this.current) {
-            this.scene_tree.viewport.canvas_transform.copy(this.get_camera_transform());
+            const xform = this.get_camera_transform();
+            this.scene_tree.viewport.canvas_transform.copy(xform);
+            Matrix.free(xform);
         }
     }
 
@@ -261,7 +263,7 @@ export default class Camera2D extends Node2D {
         const screen_size = this.scene_tree.viewport_rect.size;
 
         const new_camera_pos = this.get_global_position();
-        const ret_camera_pos = new Vector2();
+        const ret_camera_pos = Vector2.new();
 
         if (!this.first) {
             if (this.anchor_mode === AnchorMode.DRAG_CENTER) {
@@ -388,6 +390,9 @@ export default class Camera2D extends Node2D {
         xform.scale_basis(this.zoom.x, this.zoom.y);
         xform.tx = screen_rect.x;
         xform.ty = screen_rect.y;
+
+        Vector2.free(screen_offset);
+        Vector2.free(ret_camera_pos);
 
         return xform.affine_inverse();
     }
