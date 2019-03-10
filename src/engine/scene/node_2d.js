@@ -1130,8 +1130,7 @@ export default class Node2D extends VObject {
     /**
      * Call the method at the beginning of next frame
      * @param {string} method
-     * @param {any} args
-     * @returns {this}
+     * @param {any} [args]
      */
     call_deferred(method, args) {
         if (!this.is_inside_tree) {

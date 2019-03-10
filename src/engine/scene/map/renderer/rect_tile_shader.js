@@ -31,8 +31,8 @@ export default class RectTileShader extends TilemapShader {
      * @param {WebGLRenderer} renderer
      * @param {GLBuffer} vb
      */
-    createVao(renderer, vb) {
-        var gl = renderer.gl;
+    create_vao(renderer, vb) {
+        const gl = renderer.gl;
         return renderer.create_vao()
             .add_index(this.index_buffer)
             .add_attribute(vb, this.attributes.a_vertex_position, gl.FLOAT, false, this.stride, 0)

@@ -525,7 +525,7 @@ export default class PhysicsServer {
 
     /**
      * @param {Body2DSW} p_body
-     * @param {import('engine/scene/physics/physics_body_2d').PhysicsBody2D} id
+     * @param {import('engine/scene/node_2d').default} id
      */
     body_attach_object_instance(p_body, id) {
         p_body.instance = id;

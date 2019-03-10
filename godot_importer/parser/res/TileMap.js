@@ -14,6 +14,10 @@ module.exports = (data) => {
         tile_set: data.prop.tile_set,
     });
 
+    if (!data.prop.tile_data) {
+        return res;
+    }
+
     const buffer = new ArrayBuffer(12);
     const view = new DataView(buffer);
 

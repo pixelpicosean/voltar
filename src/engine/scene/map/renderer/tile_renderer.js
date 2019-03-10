@@ -1,4 +1,4 @@
-import { WRAP_MODES, BLEND_MODES } from 'engine/const';
+import { WRAP_MODES, BLEND_MODES, SCALE_MODES } from 'engine/const';
 import GLBuffer from 'engine/drivers/webgl/gl_buffer';
 import GLTexture from 'engine/drivers/webgl/gl_texture';
 import GLShader from 'engine/drivers/webgl/gl_shader';
@@ -10,6 +10,8 @@ import Texture from 'engine/scene/resources/textures/texture';
 
 import Sprite from '../../sprites/sprite';
 import RectTileShader from './rect_tile_shader';
+import TilemapShader from './tilemap_shader';
+import { MAX_TEXTURES, BUFFER_SIZE, BOUND_COUNT_PER_BUFFER, BOUND_SIZE } from './const';
 
 /**
  * @typedef VertexBufferPack
@@ -56,24 +58,27 @@ export default class TileRenderer extends ObjectRenderer {
         /** @type {Object<number, VertexBufferPack>} */
         this.vbs = {};
         this.indices = new Uint16Array(0);
+        /** @type {GLBuffer} */
         this.index_buffer = null;
-        this.clear_buffer = null;
         this.last_time_check = 0;
-        this.max_textures = 4;
         /** @type {number[]} */
         this.tex_loc = [];
 
+        /** @type {RectTileShader} */
         this.rect_shader = null;
         /** @type {Sprite[]} */
         this.bound_sprites = null;
         /** @type {RenderTexture[]} */
         this.gl_textures = null;
+
+        /** @type {Uint8Array} */
+        this._clear_buffer = null;
     }
 
     on_context_change() {
         const gl = this.renderer.gl;
-        const max_textures = this.max_textures;
-        this.rect_shader = new RectTileShader(gl, max_textures);
+
+        this.rect_shader = new RectTileShader(gl, MAX_TEXTURES);
         this.check_index_buffer(2000);
         this.rect_shader.index_buffer = this.index_buffer;
         this.vbs = {};
@@ -83,45 +88,46 @@ export default class TileRenderer extends ObjectRenderer {
     }
 
     init_bounds() {
-        for (let i = 0; i < this.max_textures; i++) {
-            const rt = RenderTexture.create(2048, 2048);
+        for (let i = 0; i < MAX_TEXTURES; i++) {
+            const rt = RenderTexture.create(BUFFER_SIZE, BUFFER_SIZE);
             rt.base_texture.premultiplied_alpha = true;
+            rt.base_texture.scale_mode = TileRenderer.SCALE_MODE;
             rt.base_texture.wrap_mode = WRAP_MODES.CLAMP;
             this.renderer.texture_manager.update_texture(rt.base_texture);
 
             this.gl_textures.push(rt);
-            const bounds = this.bound_sprites;
-            for (let j = 0; j < 4; j++) {
+            for (let j = 0; j < BOUND_COUNT_PER_BUFFER; j++) {
                 const spr = new Sprite();
-                spr.position.x = 1024 * (j & 1);
-                spr.position.y = 1024 * (j >> 1);
-                bounds.push(spr);
+                spr.position.x = BOUND_SIZE * (j & 1);
+                spr.position.y = BOUND_SIZE * (j >> 1);
+                this.bound_sprites.push(spr);
             }
         }
     }
 
     /**
      * @param {WebGLRenderer} renderer
-     * @param {GLShader} shader
+     * @param {TilemapShader} shader
      * @param {Texture[]} textures
      */
     bind_textures(renderer, shader, textures) {
         const len = textures.length;
-        const max_textures = this.max_textures;
-        if (len > 4 * max_textures) {
+        if (len > BOUND_COUNT_PER_BUFFER * MAX_TEXTURES) {
             return;
         }
         const do_clear = TileRenderer.DO_CLEAR;
-        if (do_clear && !this.clear_buffer) {
-            this.clear_buffer = new Uint8Array(1024 * 1024 * 4);
+        if (do_clear && !this._clear_buffer) {
+            this._clear_buffer = new Uint8Array(BOUND_SIZE * BOUND_SIZE * 4);
         }
         const glts = this.gl_textures;
         const bounds = this.bound_sprites;
 
-        let i;
+        const old_active_render_target = this.renderer._active_render_target;
+
+        let i = 0;
         for (i = 0; i < len; i++) {
             const texture = textures[i];
-            if (!texture || !textures[i].valid) continue;
+            if (!texture || !texture.valid) continue;
             const bounds_spr = bounds[i];
             if (
                 !bounds_spr.texture
@@ -132,14 +138,21 @@ export default class TileRenderer extends ObjectRenderer {
                 const glt = glts[i >> 2];
                 renderer.bind_texture(glt, 0, true);
                 if (do_clear) {
-                    hack_sub_image((glt.base_texture)._gl_textures[renderer.CONTEXT_UID], bounds_spr, this.clear_buffer, 1024, 1024);
+                    hack_sub_image((glt.base_texture)._gl_textures[renderer.CONTEXT_UID], bounds_spr, this._clear_buffer, BOUND_SIZE, BOUND_SIZE);
                 } else {
                     hack_sub_image((glt.base_texture)._gl_textures[renderer.CONTEXT_UID], bounds_spr);
                 }
             }
         }
+
+        // fix in case we are inside of filter or render_texture
+        if (!old_active_render_target) {
+            this.renderer._active_render_target.frame_buffer.bind();
+        }
+
         this.tex_loc.length = 0;
-        for (i = 0; i < max_textures; i++) {
+        const glts_used = (i + 3) >> 2;
+        for (i = 0; i < glts_used; i++) {
             //remove "i, true" after resolving a bug
             this.tex_loc.push(renderer.bind_texture(glts[i], i, true))
         }
@@ -163,7 +176,6 @@ export default class TileRenderer extends ObjectRenderer {
 
     start() {
         this.renderer.state.set_blend_mode(BLEND_MODES.NORMAL);
-        //sorry, nothing
     }
 
     /**
@@ -183,12 +195,15 @@ export default class TileRenderer extends ObjectRenderer {
         const id = ++TileRenderer.vb_auto_increment;
         const shader = this.get_shader();
         const gl = this.renderer.gl;
+
+        this.renderer.bind_vao(null);
+
         const vb = GLBuffer.create_vertex_buffer(gl, null, gl.STREAM_DRAW);
         /** @type {VertexBufferPack} */
         const stuff = {
             id: id,
             vb: vb,
-            vao: shader.createVao(this.renderer, vb),
+            vao: shader.create_vao(this.renderer, vb),
             last_time_access: Date.now(),
             shader: shader,
         };
@@ -256,3 +271,4 @@ export default class TileRenderer extends ObjectRenderer {
 
 TileRenderer.vb_auto_increment = 0;
 TileRenderer.DO_CLEAR = false;
+TileRenderer.SCALE_MODE = SCALE_MODES.LINEAR;

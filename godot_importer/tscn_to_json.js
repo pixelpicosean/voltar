@@ -348,6 +348,8 @@ function parse_block(block) {
                         }
                         // the dictionary just end here
                         else if (rest_line.indexOf(']') >= 0) {
+                            // close current array
+                            tokens.pop();
                             const pack = stack.pop();
                             const parent = (stack.length > 0) ? _.last(stack).value : data.prop;
                             parent[pack.key] = pack.value;
@@ -496,9 +498,15 @@ function construct_scene(blocks) {
  * @returns {string}
  */
 function normalize_image_res_url(url) {
-    // "res://" = 6, "/image/" = 6
+    // "res://" = 6, "image/" = 6
     const without_prefix = url.substring(6 + 6);
     const without_ext = without_prefix.substring(0, without_prefix.indexOf(path.extname(without_prefix)));
+
+    if (_.startsWith(without_prefix, 'standalone')) {
+        const final_url = without_prefix.replace(/^standalone\//, 'media/');
+        return final_url;
+    }
+
     return without_ext.substring(without_ext.indexOf('/') + 1);
 }
 /**
@@ -551,6 +559,7 @@ const resource_normalizers = {
     BitmapFont: (res, meta) => path.basename(res.path, '.fnt'),
     RectangleShape2D: (res, meta, parent) => res,
     CircleShape2D: (res, meta, parent) => res,
+    ConvexPolygonShape2D: (res) => res,
     TileSet: (res, meta) => {
         const real_url = normalize_res_real_url(res.path);
         const text_data = fs.readFileSync(real_url, 'utf8');
@@ -561,14 +570,16 @@ const resource_normalizers = {
 
         let result = undefined;
         let tile_map = undefined;
-        const res_table = {};
+        const ext_res_table = {};
+        const sub_res_table = {};
         const head = sections.shift();
         for (let i = 0; i < head.attr.load_steps; i++) {
             const sec = sections[i];
             if (sec.key === 'ext_resource') {
-                res_table[sec.id] = resource_normalizers[sec.type](sec);
+                ext_res_table[sec.id] = resource_normalizers[sec.type](sec);
             } else if (sec.key === 'sub_resource') {
-                throw 'sub_resource in "tres" is not supported yet';
+                sub_res_table[sec.id] = resource_normalizers[sec.type](sec);
+                // throw 'sub_resource in "tres" is not supported yet';
             } else if (sec.key === 'resource') {
                 const prop = sec.prop;
                 // TODO: make this a general function
@@ -585,8 +596,60 @@ const resource_normalizers = {
                         }
 
                         let value = prop[k];
-                        if (_.startsWith(value, 'ExtResource')) {
-                            value = res_table[get_function_params(value)];
+                        if (typeof(value) === 'number') {
+                            // do nothing
+                        } else if (typeof(value) === 'boolean') {
+                            // do nothing
+                        } else if (Array.isArray(value)) {
+                            if (value.length > 0) {
+                                // Shape list
+                                if (k.indexOf('shapes') >= 0) {
+                                    for (const s of value) {
+                                        s.autotile_coord = Vector2(s.autotile_coord);
+                                        s.shape = sub_res_table[get_function_params(s.shape)];
+                                        s.shape_transform = get_function_params(s.shape_transform).map(parseFloat);
+
+                                        // FIXME: should we delete the key and id here?
+                                        s.shape.key = undefined;
+                                        s.shape.id = undefined;
+
+                                        // FIXME: should we remove the properties if they are default value?
+                                        if (s.autotile_coord.x === 0 && s.autotile_coord.y === 0) {
+                                            s.autotile_coord = undefined;
+                                        }
+
+                                        if (s.one_way === false) {
+                                            s.one_way = undefined;
+                                        }
+
+                                        if (s.one_way_margin === 1) {
+                                            s.one_way_margin = undefined;
+                                        }
+
+                                        /** @type {number[]} */
+                                        const t = s.shape_transform;
+                                        if (
+                                            t[0] === 1
+                                            &&
+                                            t[1] === 0
+                                            &&
+                                            t[2] === 0
+                                            &&
+                                            t[3] === 1
+                                            &&
+                                            t[4] === 0
+                                            &&
+                                            t[5] === 0
+                                        ) {
+                                            s.shape_transform = undefined;
+                                        }
+                                    }
+                                }
+                            }
+                        } else if (_.startsWith(value, 'ExtResource')) {
+                            value = ext_res_table[get_function_params(value)];
+                        } else if (_.startsWith(value, 'SubResource')) {
+                            value = sub_res_table[get_function_params(value)];
                         } else if (_.startsWith(value, 'Vector2')) {
                             value = Vector2(value);
                         } else if (_.startsWith(value, 'Color')) {
@@ -660,6 +723,7 @@ const resource_normalizers = {
 
             result = {
                 texture: texture,
+                tile_mode: tile_mode,
                 tile_map: tile_map,
             };
         }

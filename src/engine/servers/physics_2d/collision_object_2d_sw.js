@@ -59,7 +59,9 @@ export default class CollisionObject2DSW {
     constructor(p_type) {
         this.type = p_type;
         this.self = this;
+        /** @type {import('engine/scene/node_2d').default} */
         this.instance = null;
+        /** @type {import('engine/scene/node_2d').default} */
         this.canvas_instance = null;
         this.pickable = true;
 

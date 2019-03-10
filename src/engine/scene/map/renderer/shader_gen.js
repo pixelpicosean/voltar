@@ -1,21 +1,24 @@
 import GLShader from "engine/drivers/webgl/gl_shader";
+import { BUFFER_SIZE } from "./const";
 
 /**
  * @param {GLShader} shader
  * @param {number} max_textures
  */
 export function fill_samplers(shader, max_textures) {
-    var sample_values = [];
-    for (var i = 0; i < max_textures; i++) {
+    /** @type {number[]} */
+    const sample_values = [];
+    for (let i = 0; i < max_textures; i++) {
         sample_values[i] = i;
     }
     shader.bind();
     shader.uniforms.u_samplers = sample_values;
 
-    var sampler_size = [];
-    for (i = 0; i < max_textures; i++) {
-        sampler_size.push(1.0 / 2048);
-        sampler_size.push(1.0 / 2048);
+    /** @type {number[]} */
+    const sampler_size = [];
+    for (let i = 0; i < max_textures; i++) {
+        sampler_size.push(1.0 / BUFFER_SIZE);
+        sampler_size.push(1.0 / BUFFER_SIZE);
     }
     shader.uniforms.u_sampler_size = sampler_size;
 }
@@ -25,7 +28,7 @@ export function fill_samplers(shader, max_textures) {
  * @param {string} fragment_src
  */
 export function generate_fragment_src(max_textures, fragment_src) {
-    return fragment_src.replace(/%count%/gi, max_textures + "")
+    return fragment_src.replace(/%count%/gi, `${max_textures}`)
         .replace(/%forloop%/gi, generate_sample_src(max_textures));
 }
 
@@ -33,13 +36,13 @@ export function generate_fragment_src(max_textures, fragment_src) {
  * @param {number} max_textures
  */
 export function generate_sample_src(max_textures) {
-    var src = '';
+    let src = '';
 
     src += '\n';
     src += '\n';
 
     src += 'if (v_texture_id <= -1.0) {';
-    src += '\n\tcolor = vec4(0.0, 0.0, 0.0, 0.5);';
+    src += '\n    color = shadow_color;';
     src += '\n}';
 
     for (var i = 0; i < max_textures; i++) {
