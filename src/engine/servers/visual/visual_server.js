@@ -20,6 +20,8 @@ export default class VisualServer {
          * @type {import('../../extract/webgl_extract').default}
          */
         this.extract = null;
+
+        this.config = null;
     }
 
     /**
@@ -35,6 +37,7 @@ export default class VisualServer {
             throw 'Voltar only support WebGL rendering!';
         }
 
+        this.config = config;
         this.renderer = new WebGLRenderer(config);
     }
     /**
@@ -44,8 +47,10 @@ export default class VisualServer {
         // TODO: transform should be stretch_transform * global_canvas_transform * canvas_transform
 
         // FIXME: should we force integer transform here?
-        viewport.canvas_transform.tx = viewport.canvas_transform.tx | 0;
-        viewport.canvas_transform.ty = viewport.canvas_transform.ty | 0;
+        if (this.config.pixel_snap) {
+            viewport.canvas_transform.tx = viewport.canvas_transform.tx | 0;
+            viewport.canvas_transform.ty = viewport.canvas_transform.ty | 0;
+        }
 
         this.renderer.render(viewport, undefined, true, viewport.canvas_transform, true);
     }

@@ -92,7 +92,7 @@ const DefaultSettings = {
         background_color: 0x4C4C4C,
 
         antialias: false,
-        pixel_snap: true,
+        pixel_snap: false,
         scale_mode: 'linear',
 
         stretch_mode: 'viewport',

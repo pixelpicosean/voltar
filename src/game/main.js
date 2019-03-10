@@ -35,6 +35,7 @@ v.scene_tree.init(
         },
         display: {
             scale_mode: 'nearest',
+            pixel_snap: true, // for linear scale_mode you may not need this
         },
     })
 );
