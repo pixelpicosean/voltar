@@ -42,12 +42,16 @@ export default class Matrix {
     }
     set origin(value) {
         this._origin.copy(value);
+        this.tx = value.x;
+        this.ty = value.y;
     }
     /**
      * @param {Vector2} value
      */
     set_origin(value) {
         this._origin.copy(value);
+        this.tx = value.x;
+        this.ty = value.y;
         return this;
     }
 
