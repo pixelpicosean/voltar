@@ -95,7 +95,7 @@ export default class TileMap extends Node2D {
 
         this.type = 'TileMap';
 
-        this.mode = Mode.SQUARE;
+        this._mode = Mode.SQUARE;
 
         this.collision_layer = 1;
         this.collision_mask = 1;
@@ -176,6 +176,10 @@ export default class TileMap extends Node2D {
     _load_data(data) {
         super._load_data(data);
 
+        if (data.mode !== undefined) {
+            this.set_mode(data.mode);
+        }
+
         if (data.tile_set !== undefined) {
             this.set_tile_set(data.tile_set);
         }
@@ -211,6 +215,22 @@ export default class TileMap extends Node2D {
 
         this.points_buf.length = 0;
         this.modification_marker = 0;
+    }
+
+    get mode() {
+        return this._mode;
+    }
+    set mode(value) {
+        this.set_mode(value);
+    }
+    /**
+     * @param {number} value
+     */
+    set_mode(value) {
+        this._clear_quadrants();
+        this._mode = value;
+        this._recreate_quadrants();
+        return this;
     }
 
     get cell_size() {
@@ -666,8 +686,8 @@ export default class TileMap extends Node2D {
 
         pb.push(u);
         pb.push(v);
-        pb.push(x | 0);
-        pb.push(y | 0);
+        pb.push(x);
+        pb.push(y);
         pb.push(tile_width);
         pb.push(tile_height);
         pb.push(texture_index);
