@@ -592,7 +592,7 @@ export default class TileMap extends Node2D {
                 let Q = VMap_get(this.quadrant_map, q.x, q.y);
                 if (!Q) {
                     Q = this._create_quadrant(q.x, q.y);
-                    this.dirty_quadrant_list.add(Q.dirty_list);
+                    this.dirty_quadrant_list.add_last(Q.dirty_list);
                 }
 
                 VMap_set(Q.cells, x, y, 1);
@@ -614,7 +614,7 @@ export default class TileMap extends Node2D {
      */
     _make_quadrant_dirty(q, update = true) {
         if (!q.dirty_list.in_list()) {
-            this.dirty_quadrant_list.add(q.dirty_list);
+            this.dirty_quadrant_list.add_last(q.dirty_list);
         }
 
         if (this.pending_updates) {
@@ -723,25 +723,6 @@ export default class TileMap extends Node2D {
         }
         Matrix.free(cell_mat);
         return ret;
-    }
-
-    _draw_tiles() {
-        // Reset
-        this.points_buf.length = 0;
-        this.modification_marker = 0;
-
-        // Upload textures
-        this.textures[0] = this._tile_set.texture;
-
-        // Create tiles
-        for (let i = 0; i < this._data.length; i += 3) {
-            const tile = this._tile_set.tile_map[this._data[i + 2]];
-            this._push_tile(
-                this._data[i + 0] * this._cell_size.x, this._data[i + 1] * this._cell_size.y,
-                tile.region.x, tile.region.y,
-                tile.region.width, tile.region.height
-            );
-        }
     }
 
     /**
