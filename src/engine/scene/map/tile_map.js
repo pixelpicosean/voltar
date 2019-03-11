@@ -89,6 +89,9 @@ class Quadrant {
     }
 }
 
+const buffer = new ArrayBuffer(12);
+const view = new DataView(buffer);
+
 export default class TileMap extends Node2D {
     constructor() {
         super();
@@ -200,12 +203,20 @@ export default class TileMap extends Node2D {
 
         const data = this._data;
         if (data.length > 0) {
-            for (let i = 0, len = Math.floor(data.length / 3); i < len; i++) {
-                this.set_cell(
-                    data[i * 3 + 0],
-                    data[i * 3 + 1],
-                    data[i * 3 + 2]
-                )
+            for (let i = 0; i < data.length; i += 3) {
+                // Insert int32 data
+                view.setInt32(0, data[i + 0]); // 0 - 4 byte
+                view.setInt32(4, data[i + 1]); // 4 - 8 byte
+                view.setInt32(8, data[i + 2]); // 8 - 12 byte
+
+                // Decode real data from the buffer
+                const y = view.getInt16(0); // 0 - 2 byte
+                const x = view.getInt16(2); // 2 - 4 byte
+                const t = view.getUint32(4); // 4 - 8 byte
+
+                // TODO: parse tile flags `view.getUint32(8)` // 8 - 12 byte
+
+                this.set_cell(x, y, t);
             }
         }
     }
