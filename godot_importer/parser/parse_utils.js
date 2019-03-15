@@ -65,7 +65,7 @@ module.exports.int = (num) => {
         return undefined;
     }
 
-    if (typeof(num) === 'string') {
+    if (typeof (num) === 'string') {
         num = num.replace(/"/g, '');
     }
 
@@ -277,29 +277,29 @@ module.exports.GeneralArray = (value) => {
         return [];
     }
 
-    let first_item_str = arr[0];
+    const res = arr.map(item => {
+        // number | boolean | string
+        if (item.indexOf('(') < 0) {
+            // boolean
+            if (item.indexOf('true') >= 0 || item.indexOf('false') >= 0) {
+                return module.exports.boolean(item);
+            }
+            // string
+            else if (item[0] === '"' && _.last(item) === '"') {
+                return remove_first_n_last(item);
+            }
+            // number
+            else if (_.isNumber(parseFloat(item))) {
+                return parseFloat(item);
+            }
+            // unknown value, keep it as string
+            else {
+                return item;
+            }
+        }
+    })
 
-    // number | boolean | string
-    if (first_item_str.indexOf('(') < 0) {
-        // boolean
-        if (first_item_str.indexOf('true') >= 0 || first_item_str.indexOf('false') >= 0) {
-            return arr.map(module.exports.boolean);
-        }
-        // string
-        else if (first_item_str[0] === '"' && _.last(first_item_str) === '"') {
-            return arr.map(remove_first_n_last);
-        }
-        // number
-        else if (_.isNumber(parseFloat(first_item_str))) {
-            return arr.map(parseFloat);
-        }
-        // unknown value
-        else {
-            return arr;
-        }
-    }
-
-    return arr;
+    return res;
 };
 
 /**
