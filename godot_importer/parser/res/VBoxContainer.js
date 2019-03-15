@@ -10,6 +10,7 @@ module.exports = (data) => {
     });
 
     res.alignment = int(data.prop.alignment);
+    res.separation = int(data.prop['custom_constants/separation']);
 
     return res;
 };

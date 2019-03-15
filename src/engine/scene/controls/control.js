@@ -865,6 +865,16 @@ export default class Control extends Node2D {
         this._theme_changed();
         return this;
     }
+    /**
+     * @param {string} name
+     * @param {number} p_constant
+     */
+    add_constant_override(name, p_constant) {
+        this.data.constant_override = this.data.constant_override || {};
+        this.data.constant_override[name] = p_constant;
+        this._theme_changed();
+        return this;
+    }
 
     /**
      * @param {Rectangle} rect

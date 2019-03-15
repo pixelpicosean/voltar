@@ -64,6 +64,9 @@ export default class BoxContainer extends Container {
         if (data.alignment !== undefined) {
             this.alignment = data.alignment;
         }
+        if (data.separation !== undefined) {
+            this.add_constant_override('separation', data.separation);
+        }
 
         return this;
     }
