@@ -395,27 +395,44 @@ function convert_block(block) {
     }
 }
 
+// Fetch node block list
+const make_node_block_list = (blocks) => (blocks
+    .filter(b => b.key === 'node' || b.key === 'inherited_node')
+    .map(n => {
+        const node = _.cloneDeep(n);
+
+        node.__self_meta__ = {};
+        node.children = [];
+
+        if (node.key === 'inherited_node') {
+            node.type = '';
+        }
+
+        delete node.key;
+        delete node.index;
+
+        return node;
+    })
+);
+
+const fetch_res = (type, blocks) => fp.flow(
+    fp.filter(b => b.key === `${type}_resource`),
+    fp.reduce((hash, b) => {
+        // @ts-ignore
+        hash[b.id] = b;
+
+        return hash;
+    }, {})
+)(blocks);
+
 /**
  *
  * @param {any[]} blocks
+ * @param {Object<string, any>} scene_db
  */
-function construct_scene(blocks) {
+function construct_scene(blocks, scene_db) {
     // Fetch node block list
-    const node_list = fp.flow(
-        // @ts-ignore
-        fp.filter(b => b.key === 'node' || b.key === 'inherited_node'),
-        fp.forEach(n => {
-            n.__self_meta__ = {};
-            n.children = [];
-
-            if (n.key === 'inherited_node') {
-                n.type = '';
-            }
-
-            delete n.key;
-            delete n.index;
-        })
-    )(blocks);
+    const node_list = make_node_block_list(blocks);
 
     // Combine nodes into scene tree
     const root_node = fp.find(n => !n.parent)(node_list);
@@ -423,6 +440,50 @@ function construct_scene(blocks) {
     const node_db = {
         '.': root_node,
     };
+
+    if (root_node.type === 'Scene') {
+        const ext = fetch_res('ext', blocks);
+        const parent_scene = scene_db[ext[get_function_params(root_node.instance)].path].data;
+        const inherited_nodes = parent_scene.__node_db__;
+        for (const k in inherited_nodes) {
+            if (!node_db[k]) {
+                const paths = k.split('/');
+                let parent = root_node;
+                let i = 0;
+                for (const p of paths) {
+                    let current_path = '';
+                    for (let j = 0; j < i; j++) current_path += paths[j];
+
+                    let found = false;
+                    loop_children: for (const c of parent.children) {
+                        if (c.name === p) {
+                            parent = c;
+                            found = true;
+                            break loop_children;
+                        }
+                    }
+
+                    if (!found) {
+                        const node_path = current_path.length > 0 ? `${current_path}/${p}` : p;
+                        const c = {
+                            name: p,
+                            type: inherited_nodes[node_path].type,
+                            children: [],
+                            __self_meta__: {
+                                path: node_path,
+                            },
+                        }
+                        parent.children.push(c);
+                        parent = c;
+                    }
+
+                    i++;
+                }
+                node_db[k] = parent;
+            }
+        }
+    }
+
     // @ts-ignore
     const child_node_list = fp.filter(b => !!b.parent)(node_list);
     for (let i = 0; i < child_node_list.length; i++) {
@@ -437,9 +498,6 @@ function construct_scene(blocks) {
             continue;
         }
 
-        // Add as child of parent node
-        parent.children.push(n);
-
         // Calculate path of the node
         // @ts-ignore
         if (n.parent === '.') {
@@ -450,13 +508,36 @@ function construct_scene(blocks) {
             n.__self_meta__.path = `${parent.__self_meta__.path}/${n.name}`;
         }
 
+        // Add type info if this scene is inherited from another scene
+        if (!n.type && root_node.type === 'Scene') {
+            const ext = fetch_res('ext', blocks);
+            const parent_scene = scene_db[ext[get_function_params(root_node.instance)].path].data;
+            const inherited_nodes = parent_scene.__node_db__;
+            n.type = inherited_nodes[n.__self_meta__.path].type;
+
+            // Instead of add a new node, we should override it
+            const parser = require(`./parser/res/${n.type}`);
+            n.attr = n._attr;
+            const parsed_node = parser(n);
+            const nn = Object.assign(node_db[n.__self_meta__.path], parsed_node);
+
+            // Delete properties which is no longer used
+            delete nn.parent;
+            delete nn.index;
+
+            continue;
+        }
+
+        // Add as child of parent node
+        parent.children.push(n);
+
         // Insert into node db
         // @ts-ignore
         node_db[n.__self_meta__.path] = n;
 
-        // Delete parent property which is no longer used
-        // @ts-ignore
+        // Delete properties which is no longer used
         delete n.parent;
+        delete n.index;
     }
 
     // Remove metadata of nodes
@@ -470,25 +551,22 @@ function construct_scene(blocks) {
     })(root_node);
 
     // Add resources into root_node.__self_meta__
-    const fetch_res = (type) => fp.flow(
-        fp.filter(b => b.key === `${type}_resource`),
-        fp.reduce((hash, b) => {
-            // @ts-ignore
-            hash[b.id] = b;
-
-            // @ts-ignore
-            delete b.key;
-            // @ts-ignore
-            delete b.id;
-
-            return hash;
-        }, {})
-    )(blocks);
-
     root_node.__meta__ = {
-        ext_resource: fetch_res('ext'),
-        sub_resource: fetch_res('sub'),
+        ext_resource: fetch_res('ext', blocks),
+        sub_resource: fetch_res('sub', blocks),
     };
+
+    // Cleanup node_db data
+    const node_db_fixed = {};
+    for (const k in node_db) {
+        node_db_fixed[k] = {
+            name: node_db[k].name,
+            type: node_db[k].type,
+            __self_meta__: node_db[k].__self_meta__,
+            children: [],
+        }
+    }
+    root_node.__node_db__ = node_db_fixed;
 
     return root_node;
 }
@@ -866,16 +944,8 @@ function clean_up_unused_data(node) {
     }
 }
 
-function convert_scene(tscn_path) {
-    console.log(`  - import "${path.basename(tscn_path)}"`);
-
-    const data = fs.readFileSync(tscn_path, 'utf8');
-
-    const scene = construct_scene(
-        split_to_blocks(data)
-            .map(parse_block)
-            .map(convert_block)
-    );
+function convert_scene(data, scene_db) {
+    const scene = construct_scene(data, scene_db);
 
     // Normalize resources
     scene.__final_meta__ = { ext: {}, sub: {} };
@@ -886,19 +956,23 @@ function convert_scene(tscn_path) {
 
 module.exports.convert_scenes = (/** @type {string} */scene_root_url_p) => {
     const scene_root_url = path.normalize(scene_root_url_p);
-    const generated_data = [];
+
+    const file_db = {};
     walk.walkSync(scene_root_url, {
         listeners: {
             file: function (root, file_stats, next) {
                 if (path.extname(file_stats.name) === '.tscn') {
                     const url = path.resolve(root, file_stats.name);
                     const relative_to_root = path.relative(scene_root_url, root);
-                    const data = convert_scene(url);
-                    generated_data.push({
+                    const filename = `res://${(path.join(relative_to_root, file_stats.name))}`;
+
+                    console.log(`  - import "${path.basename(url)}"`);
+                    file_db[filename] = {
                         url: url.replace(/\.tscn$/, '.json'),
-                        filename: `res://${(path.join(relative_to_root, file_stats.name))}`,
-                        data: data,
-                    })
+                        relative_to_root: relative_to_root,
+                        filename: filename,
+                        data: fs.readFileSync(url, 'utf8'),
+                    };
                 } else {
                     next();
                 }
@@ -906,12 +980,84 @@ module.exports.convert_scenes = (/** @type {string} */scene_root_url_p) => {
         },
     });
 
-    // Parse scene instance override properties
-    const scene_db = {};
-    for (let s of generated_data) {
-        scene_db[s.filename] = s;
+    // Construct dependencies map
+    const dependence_map = {};
+    for (let f in file_db) {
+        const pack = file_db[f];
+
+        // Parse blocks and override
+        const parsed_data = split_to_blocks(pack.data)
+            .map(parse_block)
+            .map(convert_block)
+        pack.data = parsed_data;
+
+        // Find all the dependent scenes (as ext_resource)
+        const ext = fetch_res('ext', parsed_data);
+        for (let k in ext) {
+            if (file_db.hasOwnProperty(ext[k].path)) {
+                const dep_list = dependence_map[pack.filename] || [];
+                dep_list.push(ext[k].path);
+                dependence_map[pack.filename] = dep_list;
+            }
+        }
     }
 
+    // Sort scenes based on dependency
+    let scene_path_list = [];
+    for (let f in file_db) {
+        scene_path_list.push(f);
+    }
+
+    const dependence_amount_map = {};
+    for (const k in dependence_map) {
+        dependence_amount_map[k] = 0;
+    }
+    const get_dep_list = (name) => {
+        if (!dependence_map[name]) {
+            return [name];
+        }
+        return _.flatMap(dependence_map[name].map(get_dep_list));
+    };
+    const dep_full_list = _.flatMap(scene_path_list.map(get_dep_list));
+    const scene_dep_frequent_map = dep_full_list.reduce((res, path) => {
+        if (!res[path]) {
+            res[path] = 0;
+        }
+        res[path] += 1;
+
+        return res;
+    }, {});
+
+    let scene_dep_frequent_list = [];
+    for (const k in scene_dep_frequent_map) {
+        scene_dep_frequent_list.push({ k: k, v: scene_dep_frequent_map[k] });
+    }
+    scene_dep_frequent_list = _.sortBy(scene_dep_frequent_list, ['v'])
+        .reverse()
+        .map((freq) => (freq.k))
+
+    for (const f of scene_path_list) {
+        if (scene_dep_frequent_list.indexOf(f) < 0) {
+            scene_dep_frequent_list.push(f);
+        }
+    }
+
+    const ordered_scene_load_list = scene_dep_frequent_list.map(p => file_db[p]);
+    const scene_db = {};
+    const generated_data = [];
+
+    for (const pack of ordered_scene_load_list) {
+        const scene = convert_scene(pack.data, scene_db);
+        const scene_pack = {
+            filename: pack.filename,
+            url: file_db[pack.filename].url,
+            data: scene,
+        };
+        scene_db[pack.filename] = scene_pack;
+        generated_data.push(scene_pack);
+    }
+
+    // Parse scene instance override properties
     for (let s of generated_data) {
         const scene = s.data;
         const meta = scene.__final_meta__;
@@ -975,31 +1121,6 @@ module.exports.convert_scenes = (/** @type {string} */scene_root_url_p) => {
                 if (node._is_root) {
                     meta.inherit = true;
                 }
-            } else if (node.type.length === 0) {
-                // Find the scene inherited from
-                const filename = meta.ext[scene.filename.substring(5)]
-                const parent_scene = scene_db[filename].data;
-                find: for (const c of parent_scene.children) {
-                    if (c.__self_meta__.path === node.__self_meta__.path) {
-                        node.type = c.type;
-                        break find;
-                    }
-                }
-
-                const res = require(`./parser/res/${node.type}`)({
-                    attr: node._attr || {},
-                    prop: node.prop,
-                });
-                for (let k in res) {
-                    if (res[k] !== undefined) {
-                        node[k] = res[k];
-                    }
-                }
-
-                delete node.prop;
-                delete node.parent;
-
-                return;
             }
 
             for (let c of node.children) {
