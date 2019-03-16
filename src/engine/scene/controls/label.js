@@ -179,6 +179,21 @@ export default class Label extends Control {
         return this;
     }
 
+    /**
+     * @param {Align} align
+     */
+    set_align(align) {
+        this.align = align;
+        return this;
+    }
+    /**
+     * @param {VAlign} valign
+     */
+    set_valign(valign) {
+        this.valign = valign;
+        return this;
+    }
+
     constructor() {
         super();
 
@@ -685,5 +700,8 @@ export default class Label extends Control {
         }
     }
 }
+
+Label.Align = Align;
+Label.VAlign = VAlign;
 
 node_class_map['Label'] = Label;
