@@ -96,6 +96,20 @@ export default class Matrix {
     }
 
     /**
+     * @param {number} p_rot
+     * @param {Vector2} p_scale
+     */
+    set_rotation_and_scale(p_rot, p_scale) {
+        const c = Math.cos(p_rot);
+        const s = Math.sin(p_rot);
+        this.a = c * p_scale.x;
+        this.d = c * p_scale.x;
+        this.c = -s * p_scale.x;
+        this.b = s * p_scale.x;
+        return this;
+    }
+
+    /**
      * @param {number} [a=1] - x scale
      * @param {number} [b=0] - x skew
      * @param {number} [c=0] - y skew
