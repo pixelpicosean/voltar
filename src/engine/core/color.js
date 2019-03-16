@@ -1,9 +1,19 @@
-import { rgb2hex } from "engine/utils/index";
+import { rgb2hex, hex2rgb } from "engine/utils/index";
 
 /** @type {Color[]} */
 const Color_Pool = [];
 
 export default class Color {
+    /** @param {number} p_hex */
+    static hex(p_hex) {
+        const rgb = hex2rgb(p_hex);
+        return Color.new(rgb[0], rgb[1], rgb[2]);
+    }
+    /** @param {string} p_color */
+    static html(p_color) {
+        return Color.hex(parseInt(p_color, 16));
+    }
+
     static new(r = 1, g = 1, b = 1, a = 1) {
         const c = Color_Pool.pop();
         if (!c) {
