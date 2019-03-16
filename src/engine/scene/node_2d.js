@@ -1204,9 +1204,8 @@ export default class Node2D extends VObject {
      */
     _propagate_process(delta) {
         if (this.idle_process && this.can_process()) this._process(delta);
-        const can = this.can_process();
 
-        for (let i = 0, l = this.children.length; i < l; i++) {
+        for (let i = this.children.length - 1; i >= 0; i--) {
             this.children[i]._propagate_process(delta);
         }
 
@@ -1219,9 +1218,8 @@ export default class Node2D extends VObject {
      */
     _propagate_physics_process(delta) {
         if (this.physics_process && this.can_process()) this._physics_process(delta);
-        const can = this.can_process();
 
-        for (let i = 0, l = this.children.length; i < l; i++) {
+        for (let i = this.children.length - 1; i >= 0; i--) {
             this.children[i]._propagate_physics_process(delta);
         }
 
