@@ -231,7 +231,7 @@ export function register_scene_class(key, ctor) {
  */
 export function attach_script(url, scene) {
     // Add `instance` static method
-    scene['instance'] = () => {
+    scene.instance = () => {
         return assemble_scene(new scene(), resource_map[url]);
     };
 
@@ -279,26 +279,26 @@ export function assemble_scene(scn, data) {
 function instanciate_scene(data) {
     let inst = null;
 
-    // Scene data (converted from ".tscn")
-    const parent_scene = resource_map[data.filename];
+    // Let's see whether it is registered
+    const scene_class = has.call(scene_class_map, data.filename) ? scene_class_map[data.filename] : undefined;
 
-    if (parent_scene.type === 'Scene') {
-        inst = instanciate_scene(parent_scene);
+    if (scene_class) {
+        inst = scene_class.instance();
     } else {
-        // Let's see whether it is registered
-        let scene_class = has.call(scene_class_map, data.filename) ? scene_class_map[data.filename] : undefined;
+        // Scene data (converted from ".tscn")
+        const parent_scene = resource_map[data.filename];
 
-        if (scene_class) {
-            inst = scene_class.instance();
+        if (parent_scene.type === 'Scene') {
+            inst = instanciate_scene(parent_scene);
         } else {
             inst = new (node_class_map[parent_scene.type])();
+
+            // Create child nodes of parent scene
+            assemble_node(inst, parent_scene.children);
+
+            // Load parent scene data
+            inst._load_data(parent_scene);
         }
-
-        // Create child nodes of parent scene
-        assemble_node(inst, parent_scene.children);
-
-        // Load parent scene data
-        inst._load_data(parent_scene);
     }
 
     // Create child nodes

@@ -53,6 +53,8 @@ export const PauseMode = {
  * ```
  */
 export default class Node2D extends VObject {
+    static instance() { return new Node2D() }
+
     /**
      * The visibility of the object. If false the object will not be drawn, and
      * the update_transform function will not be called.
