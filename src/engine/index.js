@@ -232,9 +232,7 @@ export function register_scene_class(key, ctor) {
 export function attach_script(url, scene) {
     // Add `instance` static method
     scene['instance'] = () => {
-        const scene_data = resource_map[url];
-        // TODO: support inherited scene (as root node)
-        return assemble_scene(new scene(), scene_data);
+        return assemble_scene(new scene(), resource_map[url]);
     };
 
     // @ts-ignore
@@ -247,6 +245,7 @@ export function attach_script(url, scene) {
 /**
  * @typedef NodeData
  * @property {string} type
+ * @property {string} name
  * @property {NodeData[]} children
  * @property {string} [filename]
  * @property {boolean} [_is_proxy_]
@@ -257,15 +256,58 @@ export function attach_script(url, scene) {
 /**
  * Assemble a scene(Node2D) with hierarchy data
  * @param {Node2D} scn
- * @param {NodeData} data data
+ * @param {NodeData} data
  * @returns {Node2D}
  */
 export function assemble_scene(scn, data) {
-    scn._load_data(data);
+    if (data.type === 'Scene') {
+        assemble_scene(scn, resource_map[data.filename]);
+    }
+
     if (data.children) {
         assemble_node(scn, data.children);
     }
+
+    scn._load_data(data);
+
     return scn;
+}
+
+/**
+ * @param {NodeData} data
+ */
+function instanciate_scene(data) {
+    let inst = null;
+
+    // Scene data (converted from ".tscn")
+    const parent_scene = resource_map[data.filename];
+
+    if (parent_scene.type === 'Scene') {
+        inst = instanciate_scene(parent_scene);
+    } else {
+        // Let's see whether it is registered
+        let scene_class = has.call(scene_class_map, data.filename) ? scene_class_map[data.filename] : undefined;
+
+        if (scene_class) {
+            inst = scene_class.instance();
+        } else {
+            inst = new (node_class_map[parent_scene.type])();
+        }
+
+        // Create child nodes of parent scene
+        assemble_node(inst, parent_scene.children);
+
+        // Load parent scene data
+        inst._load_data(parent_scene);
+    }
+
+    // Create child nodes
+    assemble_node(inst, data.children);
+
+    // Load override data from parent scene
+    inst._load_data(data);
+
+    return inst;
 }
 
 /**
@@ -281,77 +323,34 @@ function assemble_node(node, children) {
     for (i = 0; i < children.length; i++) {
         data = children[i];
 
-        if (data.type === 'Scene') {
-            // Scene data (converted from ".tscn")
-            const packed_scene = resource_map[data.filename];
-
-            // Let's see whether it is registered
-            let scene_class = has.call(scene_class_map, data.filename) ? scene_class_map[data.filename] : undefined;
-
-            // Custom scene class?
-            if (scene_class) {
-                inst = scene_class.instance();
-            }
-            // Inherit from another scene?
-            else if (packed_scene.inherit) {
-                scene_class = has.call(scene_class_map, packed_scene.filename) ? scene_class_map[packed_scene.filename] : undefined;
-                const parent_packed_scene = resource_map[packed_scene.filename];
-
-                if (scene_class) {
-                    inst = scene_class.instance();
-                    inst._load_data(parent_packed_scene);
-
-                    // Instead of re-create/override child nodes,
-                    // let's override their data.
-                    for (const c of packed_scene.children) {
-                        let child = inst.named_children.get(c.name);
-                        if (child) {
-                            child._load_data(c);
-                        }
+        // Override an existing node
+        const child = node.named_children.get(data.name);
+        if (child) {
+            child._load_data(data);
+            assemble_node(node, data.children);
+        }
+        // Insert new child node
+        else {
+            if (data.type === 'Scene') {
+                inst = instanciate_scene(data);
+            } else {
+                if (data._is_proxy_) {
+                    if (res_class_map.hasOwnProperty(data.prop_value.type)) {
+                        inst = new (res_class_map[data.prop_value.type])()._load_data(data.prop_value);
+                    } else {
+                        inst = data.prop_value;
                     }
                 } else {
-                    inst = new (node_class_map[parent_packed_scene.type])();
-
-                    // Create child nodes of parent scene
-                    assemble_node(inst, parent_packed_scene.children);
-
-                    // Load parent scene data
-                    inst._load_data(parent_packed_scene);
-
-                    // TODO: make this a recursive function, so we can support
-                    // multiple level inheritance
+                    inst = new (node_class_map[data.type])()._load_data(data);
                 }
             }
-            // Or we simply create it as a "collapsed scene tree"
-            else {
-                inst = new (node_class_map[packed_scene.type])();
 
-                // Create child nodes
-                assemble_node(inst, packed_scene.children);
-            }
-
-            // Load scene's local data
-            inst._load_data(packed_scene);
-
-            // Load override data from parent scene
-            inst._load_data(data);
-        } else {
             if (data._is_proxy_) {
-                if (res_class_map.hasOwnProperty(data.prop_value.type)) {
-                    inst = new (res_class_map[data.prop_value.type])()._load_data(data.prop_value);
-                } else {
-                    inst = data.prop_value;
-                }
+                node[`set_${data.prop_key}`](inst);
             } else {
-                inst = new (node_class_map[data.type])()._load_data(data);
+                assemble_node(inst, data.children);
+                node.add_child(inst);
             }
-        }
-
-        if (data._is_proxy_) {
-            node[`set_${data.prop_key}`](inst);
-        } else {
-            assemble_node(inst, data.children);
-            node.add_child(inst);
         }
     }
 }
