@@ -597,7 +597,11 @@ export default class InteractionManager extends VObject {
         // We should ignore Control otherwise it may jump children's hit test
         if (node.hit_area && node.type !== 'Control') {
             if (hit_test) {
-                node.scene_tree.viewport.canvas_transform.xform_inv(point, this._temp_point);
+                if (node.layer_transform_owner) {
+                    this._temp_point.copy(point);
+                } else {
+                    node.scene_tree.viewport.canvas_transform.xform_inv(point, this._temp_point);
+                }
                 node.world_transform.xform_inv(this._temp_point, this._temp_point);
 
                 if (!node.hit_area.contains(this._temp_point.x, this._temp_point.y)) {

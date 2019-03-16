@@ -324,6 +324,8 @@ export default class Node2D extends VObject {
          */
         this.cursor = null;
         this.button_mode = false;
+
+        this.layer_transform_owner = null;
     }
 
     /**
@@ -1162,6 +1164,10 @@ export default class Node2D extends VObject {
             this.pause_owner = this;
         }
 
+        if (this.parent && this.parent.layer_transform_owner) {
+            this.layer_transform_owner = this.parent.layer_transform_owner;
+        }
+
         this._update_transform();
 
         // Add to scene tree groups
@@ -1248,6 +1254,7 @@ export default class Node2D extends VObject {
         this._is_ready = false;
         this.is_inside_tree = false;
         this.scene_tree = null;
+        this.layer_transform_owner = null;
     }
 
     /**

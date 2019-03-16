@@ -88,6 +88,8 @@ export default class CanvasLayer extends Node2D {
 
         this.custom_transform = new Transform();
 
+        this.layer_transform_owner = this;
+
         /**
          * @type {import('./viewport').default}
          */
