@@ -10,6 +10,8 @@ module.exports = (data) => {
     });
 
     res.columns = int(data.prop.columns);
+    res.hseparation = int(data.prop['custom_constants/hseparation']);
+    res.vseparation = int(data.prop['custom_constants/vseparation']);
 
     return res;
 };

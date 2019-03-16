@@ -41,6 +41,12 @@ export default class GridContainer extends Container {
         if (data.columns !== undefined) {
             this.columns = data.columns;
         }
+        if (data.hseparation !== undefined) {
+            this.add_constant_override('hseparation', data.hseparation);
+        }
+        if (data.vseparation !== undefined) {
+            this.add_constant_override('vseparation', data.vseparation);
+        }
 
         return this;
     }

@@ -13,6 +13,25 @@ export default class MarginContainer extends Container {
         this.type = 'MarginContainer';
     }
 
+    _load_data(data) {
+        super._load_data(data);
+
+        if (data.margin_bottom !== undefined) {
+            this.add_constant_override('margin_bottom', data.margin_bottom);
+        }
+        if (data.margin_left !== undefined) {
+            this.add_constant_override('margin_left', data.margin_left);
+        }
+        if (data.margin_right !== undefined) {
+            this.add_constant_override('margin_right', data.margin_right);
+        }
+        if (data.margin_top !== undefined) {
+            this.add_constant_override('margin_top', data.margin_top);
+        }
+
+        return this;
+    }
+
     _children_sorted() {
         const margin_left = this.get_constant('margin_left');
         const margin_top = this.get_constant('margin_top');
