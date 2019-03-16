@@ -4,6 +4,7 @@ import {
     rad2deg,
     deg2rad,
     clamp,
+    Matrix,
 } from 'engine/core/math/index';
 import MessageQueue from 'engine/core/message_queue';
 import { BLEND_MODES } from 'engine/const';
@@ -533,6 +534,10 @@ export default class Control extends Node2D {
         return this;
     }
 
+    get_parent_control() {
+        return this.data.parent;
+    }
+
     constructor() {
         super();
         const self = this;
@@ -674,8 +679,7 @@ export default class Control extends Node2D {
     _propagate_enter_tree() {
         this.data.parent_canvas_item = this.get_parent_item();
         if (this.parent.is_control) {
-            // @ts-ignore
-            this.data.parent = this.parent;
+            this.data.parent = /** @type {Control} */(this.parent);
         }
 
         this.data.minimum_size_valid = false;
@@ -683,6 +687,8 @@ export default class Control extends Node2D {
 
         super._propagate_enter_tree();
     }
+
+    _get_minimum_size() { return Vector2.new(0, 0) }
 
     /**
      *
@@ -718,7 +724,12 @@ export default class Control extends Node2D {
      * @param {Vector2} size
      */
     get_minimum_size(size) {
-        return size.copy(this.rect_min_size);
+        const min_size = this._get_minimum_size();
+        size.copy(min_size);
+        if (min_size !== Vector2.ZERO) {
+            Vector2.free(min_size);
+        }
+        return size;
     }
     /**
      * @param {Vector2} size
@@ -918,10 +929,6 @@ export default class Control extends Node2D {
         MessageQueue.get_singleton().push_call(this, '_update_minimum_size');
     }
     _size_changed() {
-        if (!this.is_inside_tree) {
-            return;
-        }
-
         const parent_rect = this.get_parent_anchorable_rect(tmp_rect3);
         margin_pos[0] = 0;
         margin_pos[1] = 0;
@@ -995,10 +1002,6 @@ export default class Control extends Node2D {
         }
     }
     _update_minimum_size_cache() {
-        if (!this.is_inside_tree) {
-            return;
-        }
-
         const minsize = this.get_minimum_size(tmp_vec3);
         minsize.x = Math.max(minsize.x, this.data.custom_minimum_size.x);
         minsize.y = Math.max(minsize.y, this.data.custom_minimum_size.y);
