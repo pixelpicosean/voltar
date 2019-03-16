@@ -418,7 +418,8 @@ export default class Sprite extends Node2D {
      * @param {Vector2} point - the point to test
      */
     contains_point(point) {
-        this.world_transform.xform_inv(point, temp_point);
+        this.scene_tree.viewport.canvas_transform.xform_inv(point, temp_point);
+        this.world_transform.xform_inv(temp_point, temp_point);
 
         const width = this._texture.orig.width;
         const height = this._texture.orig.height;
