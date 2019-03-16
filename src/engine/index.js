@@ -327,7 +327,7 @@ function assemble_node(node, children) {
         const child = node.named_children.get(data.name);
         if (child) {
             child._load_data(data);
-            assemble_node(node, data.children);
+            assemble_node(child, data.children);
         }
         // Insert new child node
         else {
@@ -348,8 +348,8 @@ function assemble_node(node, children) {
             if (data._is_proxy_) {
                 node[`set_${data.prop_key}`](inst);
             } else {
-                assemble_node(inst, data.children);
                 node.add_child(inst);
+                assemble_node(inst, data.children);
             }
         }
     }
