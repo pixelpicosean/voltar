@@ -674,9 +674,9 @@ const resource_normalizers = {
                         }
 
                         let value = prop[k];
-                        if (typeof(value) === 'number') {
+                        if (typeof (value) === 'number') {
                             // do nothing
-                        } else if (typeof(value) === 'boolean') {
+                        } else if (typeof (value) === 'boolean') {
                             // do nothing
                         } else if (Array.isArray(value)) {
                             if (value.length > 0) {
@@ -886,6 +886,11 @@ function normalize_resource(node, meta, __final_meta__) {
         let value = node[k];
 
         if (value === undefined) {
+            continue;
+        }
+
+        if (k === 'script') {
+            node.script = undefined;
             continue;
         }
 
