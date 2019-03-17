@@ -292,10 +292,10 @@ module.exports.GeneralArray = (value) => {
             else if (_.isNumber(parseFloat(item))) {
                 return parseFloat(item);
             }
-            // unknown value, keep it as string
-            else {
-                return item;
-            }
+        }
+        // unknown value, keep it as string
+        else {
+            return item;
         }
     })
 
