@@ -350,9 +350,9 @@ export default class TextureProgress extends Range {
         this._tint_progress = new Color(1, 1, 1);
         this._tint_over = new Color(1, 1, 1);
 
-        this.sprite_under = new Sprite();
-        this.sprite_progress = new TilingSprite();
-        this.sprite_over = new Sprite();
+        this.sprite_under = new Sprite(); this.sprite_under.anchor.set(0, 0);
+        this.sprite_progress = new TilingSprite(); this.sprite_progress.anchor.set(0, 0);
+        this.sprite_over = new Sprite(); this.sprite_over.anchor.set(0, 0);
 
         this.mesh_under = new NineSlicePlane(Texture.WHITE);
         this.mesh_progress = new NineSlicePlane(Texture.WHITE);
@@ -612,7 +612,7 @@ export default class TextureProgress extends Range {
                         mask.end_fill();
                     } break;
                     case FillMode.BILINEAR_LEFT_AND_RIGHT: {
-                        this.sprite_progress.position.add(Math.round(s.x * 0.5 - s.x* this.ratio * 0.5), 0);
+                        this.sprite_progress.position.add(Math.round(s.x * 0.5 - s.x * this.ratio * 0.5), 0);
                         this.sprite_progress.tile_position.copy(this.sprite_progress.position);
                         this.sprite_progress.width = Math.round(s.x * this.ratio);
                         this.sprite_progress.height = Math.round(s.y);
