@@ -84,6 +84,22 @@ export default class Camera2D extends Node2D {
         // TODO: set current
     }
 
+    /** @type {number} */
+    get offset_h() {
+        return this.offset.x;
+    }
+    set offset_h(value) {
+        this.offset.x = value;
+    }
+
+    /** @type {number} */
+    get offset_v() {
+        return this.offset.y;
+    }
+    set offset_v(value) {
+        this.offset.y = value;
+    }
+
     constructor() {
         super();
 
@@ -102,8 +118,6 @@ export default class Camera2D extends Node2D {
         ];
         this.limit_smoothed = false;
         this.offset = new Vector2();
-        this.offset_h = 0;
-        this.offset_v = 0;
         this.process_mode = Camera2DProcessMode.IDLE;
         this.rotating = false;
         this.smoothing_enabled = false;

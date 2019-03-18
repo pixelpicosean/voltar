@@ -493,6 +493,7 @@ export default class SceneTree {
      */
     set_time_scale(scale) {
         this.time_scale = Math.max(0, scale);
+        return this;
     }
 
     /**
