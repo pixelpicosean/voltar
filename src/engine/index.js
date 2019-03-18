@@ -227,7 +227,6 @@ export function register_scene_class(key, ctor) {
 /**
  * @param {String} url path to the scene (JSON from .tscn)
  * @param {typeof Node2D} scene Scene class
- * @returns {typeof Node2D}
  */
 export function attach_script(url, scene) {
     // Add `instance` static method
@@ -235,7 +234,6 @@ export function attach_script(url, scene) {
         return assemble_scene(new scene(), resource_map[url]);
     };
 
-    // @ts-ignore
     // Register as scene
     register_scene_class(url, scene);
 
@@ -255,9 +253,9 @@ export function attach_script(url, scene) {
 
 /**
  * Assemble a scene(Node2D) with hierarchy data
- * @param {Node2D} scn
+ * @template {Node2D} T
+ * @param {T} scn
  * @param {NodeData} data
- * @returns {Node2D}
  */
 export function assemble_scene(scn, data) {
     if (data.type === 'Scene') {
@@ -311,7 +309,8 @@ function instanciate_scene(data) {
 }
 
 /**
- * @param {Node2D} node
+ * @template {Node2D} T
+ * @param {T} node
  * @param {NodeData[]} children
  */
 function assemble_node(node, children) {
