@@ -143,36 +143,43 @@ export default class TextureRect extends Control {
     _render_webgl(renderer) {
         this.node2d_update_transform();
 
+        let sprite = null;
+
         switch (this._stretch_mode) {
             case StretchMode.SCALE_ON_EXPAND:
             case StretchMode.SCALE:
             case StretchMode.KEEP:
             case StretchMode.KEEP_CENTERED: {
-                this.sprite.transform.set_from_matrix(this.transform.world_transform);
+                sprite = this.sprite;
+
+                sprite.transform.set_from_matrix(this.transform.world_transform);
                 if (this._stretch_mode === StretchMode.KEEP_CENTERED) {
-                    this.sprite.position.add(
+                    sprite.position.add(
                         (this.rect_size.x - this._texture.width) * 0.5,
                         (this.rect_size.y - this._texture.height) * 0.5
                     );
                 }
                 if (this._expand || this._stretch_mode === StretchMode.SCALE) {
-                    this.sprite.width = this.rect_size.x;
-                    this.sprite.height = this.rect_size.y;
+                    sprite.width = this.rect_size.x;
+                    sprite.height = this.rect_size.y;
                 } else {
-                    this.sprite.scale.copy(this.rect_scale);
+                    sprite.scale.copy(this.rect_scale);
                 }
 
                 // TODO: sync more properties for rendering
-                this.sprite._update_transform();
-                this.sprite.tint = this.tint;
-                this.sprite.self_modulate.a = this.alpha;
-                this.sprite.blend_mode = this.blend_mode;
+                sprite._update_transform();
+                sprite.modulate.copy(this.modulate);
+                sprite.self_modulate.copy(this.self_modulate);
+                sprite._update_color();
+                sprite.blend_mode = this.blend_mode;
 
-                this.sprite._render_webgl(renderer);
+                sprite._render_webgl(renderer);
             } break;
             case StretchMode.KEEP_ASPECT_CENTERED:
             case StretchMode.KEEP_ASPECT: {
-                this.sprite.transform.set_from_matrix(this.transform.world_transform);
+                sprite = this.sprite;
+
+                sprite.transform.set_from_matrix(this.transform.world_transform);
                 let tex_width = this._texture.width * this.rect_size.y / this._texture.height;
                 let tex_height = this.rect_size.y;
 
@@ -189,52 +196,59 @@ export default class TextureRect extends Control {
                     ofs_y += (this.rect_size.y - tex_height) * 0.5;
                 }
 
-                this.sprite.position.add(ofs_x, ofs_y);
-                this.sprite.width = tex_width;
-                this.sprite.height = tex_height;
+                sprite.position.add(ofs_x, ofs_y);
+                sprite.width = tex_width;
+                sprite.height = tex_height;
 
                 // TODO: sync more properties for rendering
-                this.sprite._update_transform();
-                this.sprite.tint = this.tint;
-                this.sprite.self_modulate.a = this.alpha;
-                this.sprite.blend_mode = this.blend_mode;
+                sprite._update_transform();
+                sprite.modulate.copy(this.modulate);
+                sprite.self_modulate.copy(this.self_modulate);
+                sprite._update_color();
+                sprite.blend_mode = this.blend_mode;
 
-                this.sprite._render_webgl(renderer);
+                sprite._render_webgl(renderer);
             } break;
             case StretchMode.TILE: {
-                this.tsprite.transform.set_from_matrix(this.transform.world_transform);
-                this.tsprite.width = this.rect_size.x;
-                this.tsprite.height = this.rect_size.y;
+                sprite = this.tsprite;
+
+                sprite.transform.set_from_matrix(this.transform.world_transform);
+                sprite.width = this.rect_size.x;
+                sprite.height = this.rect_size.y;
 
                 // TODO: sync more properties for rendering
-                this.tsprite._update_transform();
-                this.tsprite.clamp_margin = -0.5;
-                this.tsprite.tint = this.tint;
-                this.tsprite.self_modulate.a = this.alpha;
-                this.tsprite.blend_mode = this.blend_mode;
+                sprite._update_transform();
+                sprite.clamp_margin = -0.5;
+                sprite.modulate.copy(this.modulate);
+                sprite.self_modulate.copy(this.self_modulate);
+                sprite._update_color();
+                sprite.blend_mode = this.blend_mode;
 
-                this.tsprite._render_webgl(renderer);
+                sprite._render_webgl(renderer);
             } break;
             case StretchMode.KEEP_ASPECT_COVERED: {
-                this.tsprite.transform.set_from_matrix(this.transform.world_transform);
-                this.tsprite.width = this.rect_size.x;
-                this.tsprite.height = this.rect_size.y;
+                sprite = this.tsprite;
+
+                sprite.transform.set_from_matrix(this.transform.world_transform);
+                sprite.width = this.rect_size.x;
+                sprite.height = this.rect_size.y;
 
                 const scale_size = tmp_vec.set(this.rect_size.x / this._texture.width, this.rect_size.y / this._texture.height);
                 const scale = scale_size.x > scale_size.y ? scale_size.x : scale_size.y;
-                this.tsprite.tile_scale.set(scale, scale);
-                this.tsprite.tile_position.set(this._texture.width * scale, this._texture.height * scale)
+                sprite.tile_scale.set(scale, scale);
+                sprite.tile_position.set(this._texture.width * scale, this._texture.height * scale)
                     .subtract(this.rect_size)
                     .scale(-0.5)
 
                 // TODO: sync more properties for rendering
-                this.tsprite._update_transform();
-                this.tsprite.clamp_margin = -0.5;
-                this.tsprite.tint = this.tint;
-                this.tsprite.self_modulate.a = this.alpha;
-                this.tsprite.blend_mode = this.blend_mode;
+                sprite._update_transform();
+                sprite.clamp_margin = -0.5;
+                sprite.modulate.copy(this.modulate);
+                sprite.self_modulate.copy(this.self_modulate);
+                sprite._update_color();
+                sprite.blend_mode = this.blend_mode;
 
-                this.tsprite._render_webgl(renderer);
+                sprite._render_webgl(renderer);
             } break;
         }
     }
