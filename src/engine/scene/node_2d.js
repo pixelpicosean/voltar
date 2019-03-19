@@ -523,7 +523,7 @@ export default class Node2D extends VObject {
      * @private
      */
     _update_transform() {
-        if (this._destroyed || this.is_queued_for_deletion) return false;
+        if (this._destroyed || this.is_queued_for_deletion) return;
 
         let parent = this.parent;
         if (!parent) {
@@ -546,7 +546,7 @@ export default class Node2D extends VObject {
      * @private
      */
     _recursive_post_update_transform() {
-        if (this._destroyed || this.is_queued_for_deletion) return false;
+        if (this._destroyed || this.is_queued_for_deletion) return;
 
         if (this.parent) {
             this.parent._recursive_post_update_transform();
@@ -1626,7 +1626,7 @@ export default class Node2D extends VObject {
      * Updates the transform on all children of this container for rendering
      */
     update_transform() {
-        if (this._destroyed || this.is_queued_for_deletion) return false;
+        if (this._destroyed || this.is_queued_for_deletion) return;
 
         let parent = this.parent;
         if (!parent) {
