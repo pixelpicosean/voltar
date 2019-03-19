@@ -1705,7 +1705,7 @@ export default class Node2D extends VObject {
     }
 
     _update_color() {
-        if (this._destroyed || this.is_queued_for_deletion) return false;
+        if (this._destroyed || this.is_queued_for_deletion) return;
 
         const parent = this.parent || const_node_2d;
 
@@ -1727,7 +1727,7 @@ export default class Node2D extends VObject {
      * @param {import('engine/servers/visual/webgl_renderer').default} renderer - The renderer
      */
     render_webgl(renderer) {
-        if (this._destroyed || this.is_queued_for_deletion) return false;
+        if (this._destroyed || this.is_queued_for_deletion) return;
 
         // if the object is not visible or the alpha is 0 then no need to render this element
         if (!this.visible || this.world_alpha <= 0 || !this.renderable) {
@@ -1756,7 +1756,7 @@ export default class Node2D extends VObject {
      * @param {import('engine/servers/visual/webgl_renderer').default} renderer - The renderer
      */
     render_advanced_webgl(renderer) {
-        if (this._destroyed || this.is_queued_for_deletion) return false;
+        if (this._destroyed || this.is_queued_for_deletion) return;
 
         this._update_color();
 

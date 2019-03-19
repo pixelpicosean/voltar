@@ -156,7 +156,7 @@ export default class Area2DSW extends CollisionObject2DSW {
     add_body_to_query(p_body, p_body_shape, p_area_shape) {
         let E;
         for (let [bk, s] of this.monitored_bodies) {
-            if (bk.instance === p_body && bk.body_shape === p_body_shape && bk.area_shape === p_area_shape) {
+            if (bk.rid === p_body && bk.body_shape === p_body_shape && bk.area_shape === p_area_shape) {
                 E = s;
                 break;
             }
@@ -181,7 +181,7 @@ export default class Area2DSW extends CollisionObject2DSW {
     remove_body_from_query(p_body, p_body_shape, p_area_shape) {
         let E;
         for (let [bk, s] of this.monitored_bodies) {
-            if (bk.instance === p_body && bk.body_shape === p_body_shape && bk.area_shape === p_area_shape) {
+            if (bk.rid === p_body && bk.body_shape === p_body_shape && bk.area_shape === p_area_shape) {
                 E = s;
                 break;
             }
@@ -207,7 +207,7 @@ export default class Area2DSW extends CollisionObject2DSW {
     add_area_to_query(p_area, p_area_shape, p_self_shape) {
         let E;
         for (let [bk, s] of this.monitored_areas) {
-            if (bk.instance === p_area && bk.area_shape === p_area_shape && bk.body_shape === p_self_shape) {
+            if (bk.rid === p_area && bk.area_shape === p_area_shape && bk.body_shape === p_self_shape) {
                 E = s;
                 break;
             }

@@ -25,7 +25,7 @@ export default class ObjectRenderer extends WebGLManager {
     /**
      * Renders an object
      *
-     * @param {import('../../scene/node_2d').default} node - The object to render.
+     * @param {import('engine/scene/node_2d').default} node - The object to render.
      */
     render(node) { }
 }

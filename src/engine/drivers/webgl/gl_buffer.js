@@ -5,7 +5,7 @@ export default class GLBuffer {
      * Helper class to create a webGL buffer
      * @param gl {WebGLRenderingContext} The current WebGL rendering context
      * @param [type] {number} gl.ARRAY_BUFFER | gl.ELEMENT_ARRAY_BUFFER
-     * @param [data] {ArrayBuffer|SharedArrayBuffer|ArrayBufferView} an array of data
+     * @param [data] {ArrayBuffer|ArrayBufferView} an array of data
      * @param [draw_type] {number} gl.STATIC_DRAW | gl.DYNAMIC_DRAW | gl.STREAM_DRAW
      */
     constructor(gl, type, data, draw_type) {
@@ -40,7 +40,7 @@ export default class GLBuffer {
         /**
          * The data in the buffer, as a typed array
          *
-         * @type {ArrayBuffer|SharedArrayBuffer|ArrayBufferView}
+         * @type {ArrayBuffer|ArrayBufferView}
          */
         this.data = EMPTY_ARRAY_BUFFER;
 
@@ -53,7 +53,7 @@ export default class GLBuffer {
 
     /**
      * Uploads the buffer to the GPU
-     * @param [data] {ArrayBuffer|SharedArrayBuffer|ArrayBufferView} an array of data to upload
+     * @param [data] {ArrayBuffer|ArrayBufferView} an array of data to upload
      * @param [offset] {number} if only a subset of the data should be uploaded, this is the amount of data to subtract
      * @param [dont_bind] {boolean} whether to bind the buffer before uploading it
      */

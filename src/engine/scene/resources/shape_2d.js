@@ -30,6 +30,11 @@ export default class Shape2D {
     }
 
     /**
+     * @param {*} data
+     */
+    _load_data(data) { return this }
+
+    /**
      * @param {Matrix} p_local_xform
      * @param {Vector2} p_local_motion
      * @param {Shape2D} p_shape

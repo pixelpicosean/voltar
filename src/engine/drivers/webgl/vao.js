@@ -202,7 +202,7 @@ export default class VertexArrayObject {
         const gl = this.gl;
 
         if (this.index_buffer) {
-            gl.drawElements(type, size || /** @type {SharedArrayBuffer} */(this.index_buffer.data).length, gl.UNSIGNED_SHORT, start * 2);
+            gl.drawElements(type, size || /** @type {Uint16Array} */(this.index_buffer.data).length, gl.UNSIGNED_SHORT, start * 2);
         } else {
             // TODO need a better way to calculate size..
             gl.drawArrays(type, start, size || this.get_size());
@@ -231,7 +231,7 @@ export default class VertexArrayObject {
 
     get_size() {
         var attrib = this.attributes[0];
-        return /** @type {SharedArrayBuffer} */(attrib.buffer.data).length / ((attrib.stride / 4) || attrib.attribute.size);
+        return /** @type {Uint16Array} */(attrib.buffer.data).length / ((attrib.stride / 4) || attrib.attribute.size);
     }
 }
 

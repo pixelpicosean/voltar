@@ -92,7 +92,7 @@ export default class RenderTarget {
         /**
          * The data structure for the stencil masks
          *
-         * @type {import('../../scene/graphics/graphics').default[]}
+         * @type {import('engine/scene/graphics/graphics').default[]}
          */
         this.stencil_mask_stack = [];
 
