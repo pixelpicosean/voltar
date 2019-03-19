@@ -353,6 +353,8 @@ export default class Area2D extends CollisionObject2D {
     }
     _propagate_exit_tree() {
         this._clear_monitoring();
+
+        super._propagate_exit_tree();
     }
 
     /**
@@ -510,6 +512,10 @@ export default class Area2D extends CollisionObject2D {
          */
         const node = (p_instance.is_node ? p_instance : null);
         let E = this.area_map.get(p_instance);
+
+        if (!p_area_in && !E) {
+            return; // does not exist because it was likely removed from the tree
+        }
 
         if (p_area_in) {
             if (!E) {

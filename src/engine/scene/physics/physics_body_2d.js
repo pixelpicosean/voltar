@@ -4,7 +4,6 @@ import { BodyMode } from "./const";
 import { Vector2, Matrix } from "engine/core/math/index";
 import Body2DSW from "engine/servers/physics_2d/body_2d_sw";
 import PhysicsMaterial from "../resources/physics_material";
-import Node2D from "../node_2d";
 import { MotionResult, SeparationResult, Physics2DDirectBodyStateSW } from "engine/servers/physics_2d/state";
 
 export class PhysicsBody2D extends CollisionObject2D {

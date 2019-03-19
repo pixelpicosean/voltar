@@ -523,6 +523,8 @@ export default class Node2D extends VObject {
      * @private
      */
     _update_transform() {
+        if (this._destroyed || this.is_queued_for_deletion) return false;
+
         let parent = this.parent;
         if (!parent) {
             parent = this._temp_node_2d_parent;
@@ -544,6 +546,8 @@ export default class Node2D extends VObject {
      * @private
      */
     _recursive_post_update_transform() {
+        if (this._destroyed || this.is_queued_for_deletion) return false;
+
         if (this.parent) {
             this.parent._recursive_post_update_transform();
             if (this.has_transform) {
@@ -1120,14 +1124,15 @@ export default class Node2D extends VObject {
      * @returns {this}
      */
     queue_free() {
-        if (this.parent) {
-            this.parent.remove_child(this);
+        if (this.is_queued_for_deletion) {
+            return;
         }
-        this.parent = null;
 
         if (this.scene_tree) {
             this.scene_tree.queue_delete(this);
         }
+
+        this.is_queued_for_deletion = true;
 
         return this;
     }
@@ -1203,6 +1208,8 @@ export default class Node2D extends VObject {
      * @param {number} delta
      */
     _propagate_process(delta) {
+        if (this._destroyed || this.is_queued_for_deletion) return;
+
         if (this.idle_process && this.can_process()) this._process(delta);
 
         for (let i = this.children.length - 1; i >= 0; i--) {
@@ -1217,6 +1224,8 @@ export default class Node2D extends VObject {
      * @param {number} delta
      */
     _propagate_physics_process(delta) {
+        if (this._destroyed || this.is_queued_for_deletion) return;
+
         if (this.physics_process && this.can_process()) this._physics_process(delta);
 
         for (let i = this.children.length - 1; i >= 0; i--) {
@@ -1269,6 +1278,8 @@ export default class Node2D extends VObject {
     }
 
     can_process() {
+        if (this._destroyed || this.is_queued_for_deletion) return false;
+
         if (this.scene_tree.paused) {
             if (this._pause_mode === PauseMode.STOP) {
                 return false;
@@ -1330,6 +1341,8 @@ export default class Node2D extends VObject {
 
         child.parent = this;
         child.scene_tree = this.scene_tree;
+        child._destroyed = false;
+        child.is_queued_for_deletion = false;
         // ensure child transform will be recalculated
         child.transform._parent_id = -1;
 
@@ -1613,6 +1626,8 @@ export default class Node2D extends VObject {
      * Updates the transform on all children of this container for rendering
      */
     update_transform() {
+        if (this._destroyed || this.is_queued_for_deletion) return false;
+
         let parent = this.parent;
         if (!parent) {
             parent = this._temp_node_2d_parent;
@@ -1690,6 +1705,8 @@ export default class Node2D extends VObject {
     }
 
     _update_color() {
+        if (this._destroyed || this.is_queued_for_deletion) return false;
+
         const parent = this.parent || const_node_2d;
 
         // Calculate real color
@@ -1710,6 +1727,8 @@ export default class Node2D extends VObject {
      * @param {import('engine/servers/visual/webgl_renderer').default} renderer - The renderer
      */
     render_webgl(renderer) {
+        if (this._destroyed || this.is_queued_for_deletion) return false;
+
         // if the object is not visible or the alpha is 0 then no need to render this element
         if (!this.visible || this.world_alpha <= 0 || !this.renderable) {
             return;
@@ -1737,6 +1756,8 @@ export default class Node2D extends VObject {
      * @param {import('engine/servers/visual/webgl_renderer').default} renderer - The renderer
      */
     render_advanced_webgl(renderer) {
+        if (this._destroyed || this.is_queued_for_deletion) return false;
+
         this._update_color();
 
         renderer.flush();
