@@ -12,7 +12,7 @@ import WebAudioMedia from "../webaudio/WebAudioMedia";
  */
 
 /**
- * @typedef {[key: string]: boolean} ExtensionMap
+ * @typedef {{ [key: string]: boolean }} ExtensionMap
  */
 
 /**
