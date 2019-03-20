@@ -443,7 +443,7 @@ function construct_scene(blocks, scene_db) {
 
     if (root_node.type === 'Scene') {
         const ext = fetch_res('ext', blocks);
-        const parent_scene = scene_db[ext[get_function_params(root_node.instance)].path].data;
+        const parent_scene = scene_db[ext[get_function_params(root_node.instance)[0]].path].data;
         const inherited_nodes = parent_scene.__node_db__;
         for (const k in inherited_nodes) {
             if (!node_db[k]) {
@@ -511,7 +511,7 @@ function construct_scene(blocks, scene_db) {
         // Add type info if this scene is inherited from another scene
         if (!n.type && root_node.type === 'Scene') {
             const ext = fetch_res('ext', blocks);
-            const parent_scene = scene_db[ext[get_function_params(root_node.instance)].path].data;
+            const parent_scene = scene_db[ext[get_function_params(root_node.instance)[0]].path].data;
             const inherited_nodes = parent_scene.__node_db__;
             n.type = inherited_nodes[n.__self_meta__.path].type;
 

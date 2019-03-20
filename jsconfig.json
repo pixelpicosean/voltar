@@ -3,7 +3,14 @@
     "checkJs": true,
     "module": "es2015",
     "target": "es2015",
-    "baseUrl": "./src"
+    "baseUrl": "./src",
+    "paths": {
+      "*": [
+        "*",
+        "../assets/*",
+        "../assets/scene/*"
+      ]
+    }
   },
   "exclude": [
     "dist"
