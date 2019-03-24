@@ -13,7 +13,7 @@ import 'engine/scene/text/enable';
 import 'engine/scene/physics/enable';
 
 // Our preloader
-import Preloader from 'game/preloader/Preloader';
+import Preloader from 'game/preloader/preloader';
 
 // First scene after preloader
 import Main from 'game/demo/demo';

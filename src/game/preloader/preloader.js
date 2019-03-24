@@ -1,5 +1,5 @@
 import * as v from 'engine/index';
-import data from './Preloader.json';
+import data from './preloader.json';
 
 export default class Boot extends v.Node2D {
     static instance() {
@@ -7,15 +7,17 @@ export default class Boot extends v.Node2D {
     }
 
     _enter_tree() {
-        const bg = this.get_node('bg').set_visible(true);
+        const bg = /** @type {v.Sprite} */(this.get_node('bg'))
+            .set_visible(true)
+            .set_anchor(0, 0.5)
 
-        const bar = /** @type {v.Sprite} */ (this.get_node('bar'));
-        const full_bar_width = bar.width;
+        const bar = /** @type {v.Sprite} */ (this.get_node('bar'))
+        const full_bar_width = bar.width
 
-        bg.x = bar.x = v.scene_tree.viewport_rect.size.x / 2;
-        bg.y = bar.y = v.scene_tree.viewport_rect.size.y / 2;
-        bar.width = 0;
-        bar.visible = true;
+        bg.x = bar.x = v.scene_tree.viewport_rect.size.x / 2 - full_bar_width / 2
+        bg.y = bar.y = v.scene_tree.viewport_rect.size.y / 2
+        bar.width = 0
+        bar.visible = true
 
         const on_load_progress = (/** @type {v.Loader} */loader) => {
             bar.width = Math.round(full_bar_width * (loader.progress / 100));
