@@ -1,6 +1,7 @@
 import Resource from "engine/core/io/Resource";
 
 class ResourceInterface {
+    /** @param {any} data */
     _load_data(data) { }
 }
 
@@ -12,7 +13,7 @@ export const node_class_map = {};
 
 /**
  * Resource class looking table
- * @type {Object<string, typeof ResourceInterface>}
+ * @type {Object<string, ResourceInterface>}
  */
 export const res_class_map = {};
 

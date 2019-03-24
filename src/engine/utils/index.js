@@ -4,6 +4,9 @@ import plugin_target from './plugin_target';
 import * as mixins from './mixin';
 import map_premultiplied_blend_modes from './map_premultiplied_blend_modes';
 import deep_merge from './deep_merge';
+import Texture from 'engine/scene/resources/textures/texture';
+import BaseTexture from 'engine/scene/resources/textures/base_texture';
+import { SpriteFrames } from 'engine/scene/sprites/animated_sprite';
 
 let next_uid = 0;
 
@@ -33,8 +36,8 @@ export function uid() {
  * Converts a hex color number to an [R, G, B] array
  *
  * @param {number} hex - The number to convert
- * @param  {number[]|Float32Array} [out=[]] If supplied, this array will be used rather than returning a new one
- * @return {number[]|Float32Array} An array representing the [R, G, B] of the color.
+ * @param  {number[] | Float32Array} [out] If supplied, this array will be used rather than returning a new one
+ * @return {number[] | Float32Array} An array representing the [R, G, B] of the color.
  */
 export function hex2rgb(hex, out) {
     out = out || [];
@@ -62,7 +65,7 @@ export function hex2string(hex_num) {
 /**
  * Converts a color as an [R, G, B] array to a hex number
  *
- * @param {number[]|Float32Array} rgb - rgb array
+ * @param {number[] | Float32Array} rgb - rgb array
  * @return {number} The color number
  */
 export function rgb2hex(rgb) {
@@ -102,11 +105,11 @@ export function get_resolution_of_url(url, default_value = 1) {
  * Split a data URI into components. Returns undefined if
  * parameter `dataUri` is not a valid data URI.
  *
- * @param {string} dataUri - the data URI to check
- * @return {DecomposedDataUri|undefined} The decomposed data uri or undefined
+ * @param {string} data_uri - the data URI to check
+ * @return {DecomposedDataUri | undefined} The decomposed data uri or undefined
  */
-export function decompose_data_uri(dataUri) {
-    const data_uri_match = DATA_URI.exec(dataUri);
+export function decompose_data_uri(data_uri) {
+    const data_uri_match = DATA_URI.exec(data_uri);
 
     if (data_uri_match) {
         return {
@@ -125,7 +128,7 @@ export function decompose_data_uri(dataUri) {
  * Get type of the image by regexp for extension. Returns undefined for unknown extensions.
  *
  * @param {string} url - the image path
- * @return {string|undefined} image extension
+ * @return {string | undefined} image extension
  */
 export function get_url_file_extension(url) {
     const extension = URL_FILE_EXTENSION.exec(url);
@@ -149,7 +152,7 @@ export function get_url_file_extension(url) {
  * Get size from an svg string using regexp.
  *
  * @param {string} svg_string - a serialized svg element
- * @return {Size|undefined} image extension
+ * @return {Size | undefined} image extension
  */
 export function get_svg_size(svg_string) {
     const size_match = SVG_SIZE.exec(svg_string);
@@ -187,26 +190,22 @@ export function is_webgl_supported() {
         }
 
         const canvas = document.createElement('canvas');
-        /** @type {WebGLRenderingContext} */
-        let gl;
-        // @ts-ignore
-        gl = canvas.getContext('webgl', context_desc) || canvas.getContext('experimental-webgl', context_desc);
+        let gl = /** @type {WebGLRenderingContext} */(canvas.getContext('webgl', context_desc) || canvas.getContext('experimental-webgl', context_desc));
 
         const success = !!(gl && gl.getContextAttributes().stencil);
 
         if (gl) {
-            const loseContext = gl.getExtension('WEBGL_lose_context');
+            const lose_context = gl.getExtension('WEBGL_lose_context');
 
-            if (loseContext) {
-                loseContext.loseContext();
+            if (lose_context) {
+                lose_context.loseContext();
             }
         }
 
         gl = null;
 
         return success;
-    }
-    catch (e) {
+    } catch (e) {
         return false;
     }
 }
@@ -215,7 +214,7 @@ export function is_webgl_supported() {
  * Returns sign of number
  *
  * @param {number} n - the number to check the sign of
- * @returns {number} 0 if `n` is 0, -1 if `n` is negative, 1 if `n` is positive
+ * @returns 0 if `n` is 0, -1 if `n` is negative, 1 if `n` is positive
  */
 export function sign(n) {
     if (n === 0) return 0;
@@ -224,8 +223,9 @@ export function sign(n) {
 }
 
 /**
- * @param {Array} array Array to be shuffled
- * @returns {Array} The modified array
+ * @template T
+ * @param {T[]} array Array to be shuffled
+ * @returns The modified array
  */
 export function shuffle(array) {
     const len = array.length - 1;
@@ -242,12 +242,12 @@ export function shuffle(array) {
 }
 
 /**
- * @todo Describe property usage
+ * @type {{ [key: string]: Texture }}
  */
 export const TextureCache = Object.create(null);
 
 /**
- * @todo Describe property usage
+ * @type {{ [key: string]: BaseTexture }}
  */
 export const BaseTextureCache = Object.create(null);
 
@@ -280,7 +280,7 @@ export function clear_texture_cache() {
 }
 
 /**
- * @todo Describe property usage
+ * @type {{ [key: string]: SpriteFrames }}
  */
 export const SpriteFramesCache = Object.create(null);
 
@@ -295,7 +295,7 @@ export const premultiply_blend_mode = map_premultiplied_blend_modes();
  *
  * @param {number} blend_mode supposed blend mode
  * @param {boolean} premultiplied  whether source is premultiplied
- * @returns {number} true blend mode for this texture
+ * @returns true blend mode for this texture
  */
 export function correct_blend_mode(blend_mode, premultiplied) {
     return premultiply_blend_mode[premultiplied ? 1 : 0][blend_mode];
@@ -329,11 +329,11 @@ export function premultiply_tint(tint, alpha) {
 /**
  * combines rgb and alpha to out array
  *
- * @param {Float32Array|number[]} rgb input rgb
+ * @param {Float32Array} rgb input rgb
  * @param {number} alpha alpha param
  * @param {Float32Array} [out] output
- * @param {boolean} [premultiply=true] do premultiply it
- * @returns {Float32Array} vec4 rgba
+ * @param {boolean} [premultiply] do premultiply it
+ * @returns vec4 rgba
  */
 export function premultiply_rgba(rgb, alpha, out, premultiply) {
     out = out || new Float32Array(4);
@@ -341,8 +341,7 @@ export function premultiply_rgba(rgb, alpha, out, premultiply) {
         out[0] = rgb[0] * alpha;
         out[1] = rgb[1] * alpha;
         out[2] = rgb[2] * alpha;
-    }
-    else {
+    } else {
         out[0] = rgb[0];
         out[1] = rgb[1];
         out[2] = rgb[2];
@@ -358,7 +357,7 @@ export function premultiply_rgba(rgb, alpha, out, premultiply) {
  * @param {number} tint input tint
  * @param {number} alpha alpha param
  * @param {Float32Array} [out] output
- * @param {boolean} [premultiply=true] do premultiply it
+ * @param {boolean} [premultiply] do premultiply it
  * @returns {Float32Array} vec4 rgba
  */
 export function premultiply_tint_to_rgba(tint, alpha, out, premultiply) {

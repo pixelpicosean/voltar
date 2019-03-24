@@ -1,5 +1,6 @@
 import _url from 'url';
 
+/** @type {HTMLAnchorElement} */
 let temp_anchor;
 
 /**
@@ -9,8 +10,8 @@ let temp_anchor;
  * Nipped from the resource loader!
  *
  * @param {string} url_str - The url to test.
- * @param {object} [loc=window.location] - The location object to test against.
- * @return {string} The crossOrigin value to use (or empty string for none).
+ * @param {object} [loc] - The location object to test against.
+ * @return The crossOrigin value to use (or empty string for none).
  */
 export default function determine_cross_origin(url_str, loc = window.location) {
     // data: and javascript: urls are considered same-origin
