@@ -14,7 +14,7 @@ import WebGLRenderer from 'engine/servers/visual/webgl_renderer';
 import { node_class_map } from 'engine/registry';
 import { Curve } from './resources/curve';
 import { TextureCache } from 'engine/utils/index';
-import { Texture } from 'engine/index';
+import { Texture, BLEND_MODES } from 'engine/index';
 
 /**
  * @param {number} value
@@ -142,7 +142,7 @@ export default class CPUParticles2D extends Node2D {
         return this._texture;
     }
     set texture(value) {
-        if (typeof(value) === 'string') {
+        if (typeof (value) === 'string') {
             this._texture = TextureCache[value];
         } else {
             this._texture = value;
@@ -375,6 +375,8 @@ export default class CPUParticles2D extends Node2D {
         this.frame_remainder = 0;
         this.cycle = 0;
 
+        this.blend_mode = BLEND_MODES.NORMAL;
+
         /**
          * @type {Particle[]}
          */
@@ -420,7 +422,7 @@ export default class CPUParticles2D extends Node2D {
         if (data.one_shot !== undefined) this.one_shot = data.one_shot;
         if (data.explosiveness !== undefined) this.explosiveness = data.explosiveness;
         if (data.preprocess !== undefined) this.preprocess = data.preprocess;
-        if (data.randomness !== undefined) this.randomness = data.randomness;
+        if (data.randomness !== undefined) this.randomness_ratio = data.randomness;
         if (data.speed_scale !== undefined) this.speed_scale = data.speed_scale;
         if (data.spread !== undefined) this.spread = data.spread;
         if (data.local_coords !== undefined) this.local_coords = data.local_coords;
@@ -430,6 +432,8 @@ export default class CPUParticles2D extends Node2D {
         if (data.flatness !== undefined) this.flatness = data.flatness;
         if (data.fract_delta !== undefined) this.fract_delta = data.fract_delta;
         if (data.draw_order !== undefined) this.draw_order = data.draw_order;
+
+        if (data.blend_mode !== undefined) this.blend_mode = data.blend_mode;
 
         if (data.color !== undefined) this.color.copy(data.color);
         // if (data.color_ramp !== undefined) this.color_ramp = data.data;
@@ -1014,7 +1018,9 @@ export default class CPUParticles2D extends Node2D {
             p.sprite.texture = this.texture;
 
             // Color
-            p.sprite.modulate.copy(p.color).multiply(this.modulate);
+            p.sprite.blend_mode = this.blend_mode;
+            p.sprite.modulate.copy(p.color).multiply(this.modulate).multiply(this.self_modulate);
+            p.sprite._update_color();
 
             renderer.plugins.sprite.render(p.sprite);
         }
