@@ -1,4 +1,3 @@
-import { node_plugins } from 'engine/registry';
 import { remove_items } from 'engine/dep/index';
 
 import Tween from './tween';
@@ -99,5 +98,3 @@ export default class TweenManager {
         this.tweens.length = 0;
     }
 }
-
-node_plugins['TweenManager'] = TweenManager;
