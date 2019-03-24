@@ -1,5 +1,5 @@
 import { BLEND_MODES, COLOR_MODES } from 'engine/const';
-import { Vector2, ObservableVector2, Rectangle } from 'engine/core/math/index';
+import { Vector2, ObservableVector2, Rectangle, Vector2Like } from 'engine/core/math/index';
 import { sign, TextureCache } from 'engine/utils/index';
 import WebGLRenderer from 'engine/servers/visual/webgl_renderer';
 
@@ -525,10 +525,15 @@ export default class Sprite extends Node2D {
         return this._anchor;
     }
     /**
-     * @param {import('engine/core/math/vector2').Vector2Like} value
+     * @param {Vector2Like | number} value
+     * @param {number} [y]
      */
-    set_anchor(value) {
-        this._anchor.copy(value);
+    set_anchor(value, y) {
+        if (y !== undefined) {
+            this._anchor.set(/** @type {number} */(value), y);
+        } else {
+            this._anchor.copy(/** @type {Vector2Like} */(value));
+        }
         return this;
     }
 
@@ -542,10 +547,15 @@ export default class Sprite extends Node2D {
         return this._offset;
     }
     /**
-     * @param {import('engine/core/math/vector2').Vector2Like} value
+     * @param {Vector2Like | number} value
+     * @param {number} [y]
      */
-    set_offset(value) {
-        this._offset.copy(value);
+    set_offset(value, y) {
+        if (y !== undefined) {
+            this._offset.set(/** @type {number} */(value), y);
+        } else {
+            this._offset.copy(/** @type {Vector2Like} */(value));
+        }
         return this;
     }
 

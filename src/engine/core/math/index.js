@@ -3,7 +3,7 @@ import { PI, PI2, DEG_TO_RAD, RAD_TO_DEG } from './const';
 /**
  * Math classes and utilities mixed into v namespace.
  */
-export { default as Vector2 } from './vector2';
+export { default as Vector2, Vector2Like } from './vector2';
 export { default as ObservableVector2 } from './observable_vector2';
 export { default as Matrix } from './matrix';
 export { default as GroupD8 } from './group_d8';

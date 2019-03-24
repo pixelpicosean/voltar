@@ -1,10 +1,14 @@
 import { CMP_EPSILON } from './const';
 
 /**
- * @typedef Vector2Like
- * @property {number} x
- * @property {number} y
+ * @interface
  */
+export class Vector2Like {
+    constructor() {
+        this.x = 0;
+        this.y = 0;
+    }
+}
 
 /**
  * The Vector2 object represents a location in a two-dimensional coordinate system, where x represents
