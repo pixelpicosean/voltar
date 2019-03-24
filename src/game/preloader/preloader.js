@@ -11,7 +11,9 @@ export default class Boot extends v.Node2D {
             .set_visible(true)
             .set_anchor(0, 0.5)
 
-        const bar = /** @type {v.Sprite} */ (this.get_node('bar'));
+        const bar = /** @type {v.Sprite} */ (this.get_node('bar'))
+            .set_anchor(0, 0.5)
+
         const full_bar_width = bar.width;
 
         bg.x = bar.x = v.scene_tree.viewport_rect.size.x / 2 - full_bar_width / 2;
