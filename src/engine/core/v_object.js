@@ -7,7 +7,7 @@ class EventListener {
     /**
      * @param {Function} fn The listener function.
      * @param {any} context The context to invoke the listener with.
-     * @param {Boolean} [once=false] Specify if the listener is a one-time listener.
+     * @param {boolean} [once] Specify if the listener is a one-time listener.
      */
     constructor(fn, context, once = false) {
         this.fn = fn;
@@ -20,11 +20,10 @@ class EventListener {
  * Add a listener for a given event.
  *
  * @param {VObject} emitter Reference to the `VObject` instance.
- * @param {string|Symbol} event The event name.
+ * @param {string | Symbol} event The event name.
  * @param {Function} fn The listener function.
  * @param {any} context The context to invoke the listener with.
- * @param {Boolean} once Specify if the listener is a one-time listener.
- * @returns {VObject}
+ * @param {boolean} once Specify if the listener is a one-time listener.
  * @private
  */
 function add_listener(emitter, event, fn, context, once) {
@@ -51,7 +50,7 @@ function add_listener(emitter, event, fn, context, once) {
 export default class VObject {
     constructor() {
         /**
-         * @type {Map<string|Symbol, EventListener[]>}
+         * @type {Map<string | Symbol, EventListener[]>}
          */
         this._events = new Map();
     }
@@ -67,7 +66,7 @@ export default class VObject {
     /**
      * Return the listeners registered for a given event.
      *
-     * @param {string|Symbol} event The event name.
+     * @param {string | Symbol} event The event name.
      */
     get_signal_connection_listeners(event) {
         return this._events.get(event);
@@ -76,7 +75,7 @@ export default class VObject {
     /**
      * Return the number of listeners listening to a given event.
      *
-     * @param {string|Symbol} event The event name.
+     * @param {string | Symbol} event The event name.
      */
     get_signal_connection_count(event) {
         const listeners = this._events.get(event);
@@ -91,7 +90,7 @@ export default class VObject {
     /**
      * Calls each of the listeners registered for a given event.
      *
-     * @param {string|Symbol} event The event name.
+     * @param {string | Symbol} event The event name.
      * @param {any} [args]
      */
     emit_signal(event, ...args) {
@@ -116,7 +115,7 @@ export default class VObject {
     /**
      * Add a listener for a given event.
      *
-     * @param {string|Symbol} event The event name.
+     * @param {string | Symbol} event The event name.
      * @param {Function} fn The listener function.
      * @param {any} [context=this] The context to invoke the listener with.
      */
@@ -127,7 +126,7 @@ export default class VObject {
     /**
      * Add a one-time listener for a given event.
      *
-     * @param {string|Symbol} event The event name.
+     * @param {string | Symbol} event The event name.
      * @param {Function} fn The listener function.
      * @param {any} [context=this] The context to invoke the listener with.
      */
@@ -138,10 +137,10 @@ export default class VObject {
     /**
      * Remove the listeners of a given event.
      *
-     * @param {string|Symbol} event The event name.
+     * @param {string | Symbol} event The event name.
      * @param {Function} fn Only remove the listeners that match this function.
      * @param {any} [context] Only remove the listeners that have this context.
-     * @param {Boolean} [once] Only remove one-time listeners.
+     * @param {boolean} [once] Only remove one-time listeners.
      */
     disconnect(event, fn, context = undefined, once = undefined) {
         const listeners = this._events.get(event);
@@ -169,10 +168,9 @@ export default class VObject {
     /**
      * Whether an function(with context) is connected to this object.
      *
-     * @param {string|Symbol} event The event name.
+     * @param {string | Symbol} event The event name.
      * @param {Function} fn
      * @param {any} [context]
-     * @returns {boolean}
      */
     is_connected(event, fn, context) {
         const listeners = this._events.get(event);
@@ -196,11 +194,14 @@ export default class VObject {
     /**
      * Remove all listeners, or those of the specified event.
      *
-     * @param {string|Symbol} [event] The event name.
-     * @returns {VObject} `this`.
+     * @param {string | Symbol} [event] The event name.
      */
     disconnect_all(event) {
-        this._events.delete(event);
+        if (!event) {
+            this._events.clear();
+        } else {
+            this._events.delete(event);
+        }
 
         return this;
     }
