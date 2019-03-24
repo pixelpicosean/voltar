@@ -16,7 +16,7 @@ import 'engine/scene/physics/enable';
 import Preloader from 'game/preloader/Preloader';
 
 // First scene after preloader
-import Main from 'game/game/demo';
+import Main from 'game/demo/demo';
 
 // Settings exported from Godot
 import Settings from 'project.json';
@@ -25,7 +25,6 @@ import Settings from 'project.json';
 // while in Godot you do not need to use atlas, keep using single images.
 // This may change in the future, but will keep as is right now.
 v.preload('media/sprites.json');
-v.preload('media/dungeon.png');
 
 v.scene_tree.init(
     v.utils.deep_merge(Settings, {
