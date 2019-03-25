@@ -62,6 +62,18 @@ export default class TweenManager {
 
         return t;
     }
+    stop_all() {
+        /** @type {Tween} */
+        let tween = null;
+        for (let i = 0; i < this.tweens.length; i++) {
+            tween = this.tweens[i];
+
+            tween.clear_events();
+            tween.remove_all();
+            tween = null;
+        }
+        this.tweens.length = 0;
+    }
 
     /**
      * @param {number} delta
@@ -84,17 +96,5 @@ export default class TweenManager {
                 }
             }
         }
-    }
-    _stop_all() {
-        /** @type {Tween} */
-        let tween = null;
-        for (let i = 0; i < this.tweens.length; i++) {
-            tween = this.tweens[i];
-
-            tween.clear_events();
-            tween.remove_all();
-            tween = null;
-        }
-        this.tweens.length = 0;
     }
 }

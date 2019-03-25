@@ -1230,7 +1230,7 @@ export default class Node2D extends VObject {
 
     _propagate_exit_tree() {
         // Stop animations
-        this.tweens && this.tweens._stop_all();
+        this.tweens && this.tweens.stop_all();
 
         // Remove from scene tree groups
         if (this.groups && this.groups.size > 0) {
