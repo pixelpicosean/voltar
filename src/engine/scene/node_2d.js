@@ -1614,6 +1614,14 @@ export default class Node2D extends VObject {
         return node;
     }
 
+    get_global_mouse_position() {
+        return this.get_tree().input.mouse;
+    }
+    get_local_mouse_position() {
+        this.node2d_update_transform();
+        return this.world_transform.xform_inv(this.get_tree().input.mouse);
+    }
+
     /**
      * Updates the transform on all children of this container for rendering
      */

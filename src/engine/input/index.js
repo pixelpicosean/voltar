@@ -2,23 +2,27 @@ import { remove_items } from 'engine/dep/index';
 import { Vector2 } from 'engine/core/math/index';
 import { InteractionEvent } from 'engine/interaction/enable';
 import keyboard from './keyboard';
-import Node2D from 'engine/scene/node_2d';
 
 /**
  * Input system which provides key bindings.
  */
 export default class Input {
     constructor() {
+        /** @type {{ [key: string]: string[] }} */
         this.bindings = {};
+        /** @type {string[]} */
         this.key_list = [];
+        /** @type {{ [key: string]: boolean }} */
         this.actions = {};
+        /** @type {{ [key: string]: boolean }} */
         this.last_pressed = {};
+        /** @type {{ [key: string]: boolean }} */
         this.last_released = {};
 
         this.mouse = new Vector2(0, 0);
     }
     /**
-     * @param {Node2D} viewport
+     * @param {import('engine/scene/node_2d').default} viewport
      */
     _init(viewport) {
         // Keyboard
@@ -104,7 +108,7 @@ export default class Input {
      *
      * @param  {string} key    Key to bind
      * @param  {string} action Action name
-     * @return {Input} Self for chaining
+     * @return {InputManager} Self for chaining
      */
     bind(key, action) {
         if (Array.isArray(this.bindings[key])) {
@@ -127,7 +131,7 @@ export default class Input {
      *
      * @param  {string} key    Key to unbind
      * @param  {string} action Action to unbind
-     * @return {Input}   Self for chaining
+     * @return {InputManager}   Self for chaining
      */
     unbind(key, action) {
         if (Array.isArray(this.bindings[key])) {
