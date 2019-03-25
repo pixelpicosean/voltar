@@ -1,5 +1,3 @@
-/// <reference path="../tween/index.d.ts" />
-
 import VObject from 'engine/core/v_object';
 import { node_class_map } from 'engine/registry';
 import {
@@ -345,12 +343,6 @@ export default class Node2D extends VObject {
             for (const g of data.groups) {
                 this.add_to_group(g);
             }
-        }
-        if (data.width !== undefined) {
-            this.width = data.width;
-        }
-        if (data.height !== undefined) {
-            this.height = data.height;
         }
         if (data.rotation !== undefined) {
             this.rotation = data.rotation;
@@ -1835,46 +1827,6 @@ export default class Node2D extends VObject {
         }
 
         return this;
-    }
-
-    /**
-     * The width of the Node2D, setting this will actually modify the scale to achieve the value set
-     *
-     * @type {number}
-     */
-    get width() {
-        return this.scale.x * this.get_local_bounds().width;
-    }
-    set width(value) {
-        const width = this.get_local_bounds().width;
-
-        if (width !== 0) {
-            this.scale.x = value / width;
-        } else {
-            this.scale.x = 1;
-        }
-
-        this._width = value;
-    }
-
-    /**
-     * The height of the Node2D, setting this will actually modify the scale to achieve the value set
-     *
-     * @type {number}
-     */
-    get height() {
-        return this.scale.y * this.get_local_bounds().height;
-    }
-    set height(value) {
-        const height = this.get_local_bounds().height;
-
-        if (height !== 0) {
-            this.scale.y = value / height;
-        } else {
-            this.scale.y = 1;
-        }
-
-        this._height = value;
     }
 
     /**

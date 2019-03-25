@@ -4,8 +4,6 @@
         {
             "name": "bg",
             "type": "Sprite",
-            "width": 400,
-            "height": 20,
             "self_modulate": {
                 "r": 1,
                 "g": 1,
@@ -18,8 +16,6 @@
         {
             "name": "bar",
             "type": "Sprite",
-            "width": 400,
-            "height": 20,
             "visible": false,
             "texture": "_white_"
         }

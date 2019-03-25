@@ -14,18 +14,24 @@ export default class Boot extends v.Node2D {
         const bar = /** @type {v.Sprite} */ (this.get_node('bar'))
             .set_anchor(0, 0.5)
 
-        const full_bar_width = bar.width;
+        const bar_width_pct = 0.8;
+        const full_bar_scale = v.scene_tree.viewport_rect.size.width * bar_width_pct / bar.texture.width;
+        bg.scale.x = full_bar_scale;
+        bg.scale.y = full_bar_scale * 0.02;
 
-        bg.x = bar.x = v.scene_tree.viewport_rect.size.x / 2 - full_bar_width / 2;
+        bar.scale.x = 0;
+        bar.scale.y = bg.scale.y;
+
+        bg.x = bar.x = v.scene_tree.viewport_rect.size.width * ((1 - bar_width_pct) / 2);
         bg.y = bar.y = v.scene_tree.viewport_rect.size.y / 2;
-        bar.width = 0;
+
         bar.visible = true;
 
         const on_load_progress = (/** @type {v.Loader} */loader) => {
-            bar.width = Math.round(full_bar_width * (loader.progress / 100));
+            bar.scale.x = (loader.progress / 100) * full_bar_scale;
         };
         const on_load_complete = () => {
-            bar.width = full_bar_width;
+            bar.scale.x = 1.0;
 
             v.scene_tree.loader.disconnect('progress', on_load_progress);
 
