@@ -6,7 +6,6 @@ import map_premultiplied_blend_modes from './map_premultiplied_blend_modes';
 import deep_merge from './deep_merge';
 import Texture from 'engine/scene/resources/textures/texture';
 import BaseTexture from 'engine/scene/resources/textures/base_texture';
-import { SpriteFrames } from 'engine/scene/sprites/animated_sprite';
 
 let next_uid = 0;
 
@@ -280,7 +279,7 @@ export function clear_texture_cache() {
 }
 
 /**
- * @type {{ [key: string]: SpriteFrames }}
+ * @type {{ [key: string]: import('engine/scene/sprites/animated_sprite').SpriteFrames }}
  */
 export const SpriteFramesCache = Object.create(null);
 
