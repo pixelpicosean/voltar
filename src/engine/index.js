@@ -266,16 +266,18 @@ export function assemble_scene(scn, data) {
 }
 
 /**
+ * @template {Node2D} T
  * @param {NodeData} data
  */
-function instanciate_scene(data) {
+export function instanciate_scene(data) {
+    /** @type {T} */
     let inst = null;
 
     // Let's see whether it is registered
     const scene_class = has.call(scene_class_map, data.filename) ? scene_class_map[data.filename] : undefined;
 
     if (scene_class) {
-        inst = scene_class.instance();
+        inst = /** @type {T} */(scene_class.instance());
     } else {
         // Scene data (converted from ".tscn")
         const parent_scene = resource_map[data.filename];
@@ -329,6 +331,7 @@ function assemble_node(node, children) {
             } else {
                 if (data._is_proxy_) {
                     if (res_class_map.hasOwnProperty(data.prop_value.type)) {
+                        // @ts-ignore
                         inst = new (res_class_map[data.prop_value.type])()._load_data(data.prop_value);
                     } else {
                         inst = data.prop_value;
