@@ -1114,19 +1114,15 @@ module.exports.convert_scenes = (/** @type {string} */scene_root_url_p) => {
                         node[k] = res[k];
                     }
                 }
+            }
 
-                // Check whether we have script exported properties
-                for (let k in node._prop) {
-                    if (node._prop[k] !== undefined && !node.hasOwnProperty(k)) {
-                        node[k] = node._prop[k];
-                    }
-                }
-                delete node._prop;
-
-                if (node._is_root) {
-                    meta.inherit = true;
+            // Check whether we have script exported properties
+            for (let k in node._prop) {
+                if (node._prop[k] !== undefined && !node.hasOwnProperty(k)) {
+                    node[k] = node._prop[k];
                 }
             }
+            delete node._prop;
 
             for (let c of node.children) {
                 parse(c);
