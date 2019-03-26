@@ -156,6 +156,22 @@ export const input = new Input();
 export const scene_tree = new SceneTree(input, preload_queue, resource_map);
 export const sound = audio.SoundLibrary.init();
 
+/**
+ * Get the data from resource url
+ * @param {string} url
+ */
+export function get_resource(url) {
+    return resource_map[url];
+}
+
+/**
+ * Get the packed scene class or data
+ * @param {string} url
+ */
+export function get_packed_scene(url) {
+    return scene_class_map[url] || resource_map[url];
+}
+
 // ------------------------------------------------------------------
 // Global functions
 // ------------------------------------------------------------------
