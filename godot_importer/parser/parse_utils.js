@@ -130,6 +130,10 @@ module.exports.Vector2 = (vec) => {
         return undefined;
     }
 
+    if (typeof (vec) !== 'string') {
+        return vec;
+    }
+
     const arr = get_function_params(vec);
     return { x: parseFloat(arr[0]), y: parseFloat(arr[1]) };
 };
@@ -142,6 +146,10 @@ module.exports.Color = (color) => {
         return undefined;
     }
 
+    if (typeof (color) !== 'string') {
+        return color;
+    }
+
     const arr = get_function_params(color);
     return { r: parseFloat(arr[0]), g: parseFloat(arr[1]), b: parseFloat(arr[2]), a: parseFloat(arr[3]) };
 };
@@ -152,6 +160,10 @@ module.exports.Color = (color) => {
 module.exports.Rect2 = (rect) => {
     if (!rect) {
         return undefined;
+    }
+
+    if (typeof (rect) !== 'string') {
+        return rect;
     }
 
     const arr = get_function_params(rect);
@@ -182,6 +194,10 @@ module.exports.NodePath = (path) => {
 module.exports.PoolIntArray = (arr) => {
     if (arr === undefined) return undefined;
 
+    if (typeof (arr) !== 'string') {
+        return arr;
+    }
+
     return get_function_params(arr).map(module.exports.int);
 };
 /**
@@ -191,6 +207,10 @@ module.exports.PoolIntArray = (arr) => {
 module.exports.PoolRealArray = (arr) => {
     if (arr === undefined) return undefined;
 
+    if (typeof (arr) !== 'string') {
+        return arr;
+    }
+
     return get_function_params(arr).map(module.exports.real);
 };
 /**
@@ -199,6 +219,10 @@ module.exports.PoolRealArray = (arr) => {
  */
 module.exports.Vector2Array = (arr) => {
     if (arr === undefined) return undefined;
+
+    if (typeof (arr) !== 'string') {
+        return arr;
+    }
 
     const vec_strs = arr.replace(/\[|\]/g, '').split('),').map((s, i, a) => (i < a.length - 1) ? `${s})`.trim() : s.trim());
     for (let i = 0; i < vec_strs.length - 1; i++) {
@@ -215,6 +239,10 @@ module.exports.Vector2Array = (arr) => {
  * @returns {{ x: number, y: number, width: number, height: number }[]}
  */
 module.exports.Rect2Array = (arr) => {
+    if (typeof (arr) !== 'string') {
+        return arr;
+    }
+
     const rect_strs = arr.replace(/\[|\]/g, '').split('),').map((s, i, a) => (i < a.length - 1) ? `${s})`.trim() : s.trim());
     rect_strs[0] += ')';
     return rect_strs.map(rect => {
@@ -228,6 +256,10 @@ module.exports.Rect2Array = (arr) => {
  * @returns {{ r: number, g: number, b: number, a: number }[]}
  */
 module.exports.ColorArray = (arr) => {
+    if (typeof (arr) !== 'string') {
+        return arr;
+    }
+
     const color_strs = arr.replace(/\[|\]/g, '').split('),').map((s, i, a) => (i < a.length - 1) ? `${s})`.trim() : s.trim());
     for (let i = 0; i < color_strs.length - 1; i++) {
         color_strs[i] += ' )';
@@ -244,33 +276,33 @@ module.exports.ColorArray = (arr) => {
  * @returns {any[]}
  */
 module.exports.GeneralArray = (value) => {
+    if (typeof (value) !== 'string') {
+        return value;
+    }
+
     /** @type {string[]} */
     let arr;
 
-    if (typeof (value) === 'string') {
-        // Empty string?
-        if (value.length === 0) {
-            return [];
-        }
-
-        const tmp_arr = value.replace(/\[|\]/g, '').split(')').map(s => s.trim());
-        const last_elem = (tmp_arr[tmp_arr.length - 1] !== '') ? tmp_arr[tmp_arr.length - 1] : tmp_arr[tmp_arr.length - 2];
-
-        // Static type array?
-        if (tmp_arr[0].indexOf('Vector2(') >= 0 && last_elem.indexOf('Vector2(') >= 0) {
-            return module.exports.Vector2Array(value);
-        }
-        if (tmp_arr[0].indexOf('Rect2(') >= 0 && last_elem.indexOf('Rect2(') >= 0) {
-            return module.exports.Rect2Array(value);
-        }
-        if (tmp_arr[0].indexOf('Color(') >= 0 && last_elem.indexOf('Color(') >= 0) {
-            return module.exports.ColorArray(value);
-        }
-
-        arr = value.replace(/\[|\]/g, '').split(',').map(s => s.trim());
-    } else {
-        return value;
+    // Empty string?
+    if (value.length === 0) {
+        return [];
     }
+
+    const tmp_arr = value.replace(/\[|\]/g, '').split(')').map(s => s.trim());
+    const last_elem = (tmp_arr[tmp_arr.length - 1] !== '') ? tmp_arr[tmp_arr.length - 1] : tmp_arr[tmp_arr.length - 2];
+
+    // Static type array?
+    if (tmp_arr[0].indexOf('Vector2(') >= 0 && last_elem.indexOf('Vector2(') >= 0) {
+        return module.exports.Vector2Array(value);
+    }
+    if (tmp_arr[0].indexOf('Rect2(') >= 0 && last_elem.indexOf('Rect2(') >= 0) {
+        return module.exports.Rect2Array(value);
+    }
+    if (tmp_arr[0].indexOf('Color(') >= 0 && last_elem.indexOf('Color(') >= 0) {
+        return module.exports.ColorArray(value);
+    }
+
+    arr = value.replace(/\[|\]/g, '').split(',').map(s => s.trim());
 
     // Empty array
     if (arr.length === 1 && arr[0] === '') {

@@ -24,6 +24,15 @@ const gd_scene = require('./parser/gd_scene');
 const node = require('./parser/node');
 const resource = require('./parser/resource');
 
+const built_in_functions = {
+    Vector2: Vector2,
+    Color: Color,
+    PoolVector2Array: (str) => {
+        const params = str.split('(')[1].split(')')[0];
+        return params.split(',').map(value => value.trim()).map(parseFloat)
+    },
+};
+
 /**
  * @param {string} data
  * @returns {string[][]}
@@ -283,9 +292,22 @@ function parse_block(block) {
                                 value: (value_res.value + '\n'),
                             });
                         }
-                        // array or dictionary
                         else {
-                            push_tokens_in_a_line(data.prop, value_res.value, tokens, stack, key);
+                            // maybe a data packed into a function?
+                            let function_name_found = false;
+                            if (value_res.value.indexOf('(') > 0 && value_res.value[value_res.value.length - 1] === ')') {
+                                const func = value_res.value.split('(')[0];
+                                if (built_in_functions[func]) {
+                                    function_name_found = true;
+                                    value_res.value = built_in_functions[func](value_res.value);
+                                    data.prop[key] = value_res.value;
+                                }
+                            }
+
+                            // array or dictionary
+                            if (!function_name_found) {
+                                push_tokens_in_a_line(data.prop, value_res.value, tokens, stack, key);
+                            }
                         }
                     }
                 }
