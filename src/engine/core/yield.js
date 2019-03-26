@@ -1,9 +1,13 @@
 import VObject from "engine/core/v_object";
 
 /**
- * @param {VObject} obj
+ * @param {Promise | VObject} obj
  * @param {string | Symbol} event
  */
-export default function(obj, event) {
-    return new Promise(res => obj.connect_once(event, res));
+export default function _yield(obj, event) {
+    if (obj instanceof Promise) {
+        return obj.then((target) => _yield(target, event));
+    }
+
+    return new Promise(res => obj.connect_once(event, () => res(obj)));
 }
