@@ -27,7 +27,11 @@ const resource = require('./parser/resource');
 const built_in_functions = {
     Vector2: Vector2,
     Color: Color,
-    PoolVector2Array: (str) => {
+    PoolVector2Array: (/** @type {string} */str) => {
+        const params = str.split('(')[1].split(')')[0];
+        return params.split(',').map(value => value.trim()).map(parseFloat)
+    },
+    PoolVector3Array: (/** @type {string} */str) => {
         const params = str.split('(')[1].split(')')[0];
         return params.split(',').map(value => value.trim()).map(parseFloat)
     },
