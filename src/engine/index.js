@@ -283,11 +283,27 @@ export function assemble_scene(scn, data) {
 
 /**
  * @template {Node2D} T
- * @param {NodeData} data
+ * @param {NodeData | typeof Node2D} p_data
  */
-export function instanciate_scene(data) {
+export function instanciate_scene(p_data) {
+    /** @type {NodeData} */
+    let data = null;
+    /** @type {typeof Node2D} */
+    let ctor = null;
+
+    if (typeof (p_data) === 'function') {
+        ctor = p_data;
+    } else {
+        data = p_data;
+    }
+
     /** @type {T} */
     let inst = null;
+
+    if (ctor) {
+        inst = /** @type {T} */(ctor.instance());
+        return inst;
+    }
 
     // Let's see whether it is registered
     const scene_class = has.call(scene_class_map, data.filename) ? scene_class_map[data.filename] : undefined;
