@@ -1,7 +1,9 @@
-import { TextureCache, SpriteFramesCache } from 'engine/utils/index';
+import { remove_items } from 'engine/dep/index';
 import { Rectangle } from 'engine/core/math/index';
-import remove_items from 'remove-array-items';
+import { TextureCache, SpriteFramesCache } from 'engine/utils/index';
 import Texture from 'engine/scene/resources/textures/texture';
+import BaseTexture from 'engine/scene/resources/textures/base_texture';
+
 import Sprite from './sprite';
 
 export class Anim {
@@ -20,10 +22,10 @@ export class Anim {
  * @param {Texture[]|string[]} frames
  */
 function normalize_frame_list(frames) {
-    /** @type {Texture[]} */
+    /** @type {BaseTexture[]} */
     const result = new Array(frames.length);
     for (let i = 0; i < result.length; i++) {
-        result[i] = (/** @type {Texture} */(frames[i]).base_texture ? /** @type {Texture} */(frames[i]).base_texture : TextureCache[/** @type {string} */(frames[i])]);
+        result[i] = (/** @type {Texture} */(frames[i]).base_texture ? /** @type {Texture} */(frames[i]).base_texture : TextureCache[/** @type {string} */(frames[i])].base_texture);
     }
     return result;
 }
