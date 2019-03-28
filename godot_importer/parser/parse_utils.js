@@ -288,50 +288,63 @@ module.exports.GeneralArray = (value) => {
         return [];
     }
 
-    const tmp_arr = value.replace(/\[|\]/g, '').split(')').map(s => s.trim());
-    const last_elem = (tmp_arr[tmp_arr.length - 1] !== '') ? tmp_arr[tmp_arr.length - 1] : tmp_arr[tmp_arr.length - 2];
+    const arr_content = value.replace(/\[|\]/g, '').trim();
 
-    // Static type array?
-    if (tmp_arr[0].indexOf('Vector2(') >= 0 && last_elem.indexOf('Vector2(') >= 0) {
-        return module.exports.Vector2Array(value);
-    }
-    if (tmp_arr[0].indexOf('Rect2(') >= 0 && last_elem.indexOf('Rect2(') >= 0) {
-        return module.exports.Rect2Array(value);
-    }
-    if (tmp_arr[0].indexOf('Color(') >= 0 && last_elem.indexOf('Color(') >= 0) {
-        return module.exports.ColorArray(value);
-    }
-
-    arr = value.replace(/\[|\]/g, '').split(',').map(s => s.trim());
-
-    // Empty array
-    if (arr.length === 1 && arr[0] === '') {
-        return [];
-    }
-
-    const res = arr.map(item => {
-        // number | boolean | string
-        if (item.indexOf('(') < 0) {
-            // boolean
-            if (item.indexOf('true') >= 0 || item.indexOf('false') >= 0) {
-                return module.exports.boolean(item);
-            }
-            // string
-            else if (item[0] === '"' && _.last(item) === '"') {
-                return remove_first_n_last(item);
-            }
-            // number
-            else if (_.isNumber(parseFloat(item))) {
-                return parseFloat(item);
-            }
+    // split content into logical partitions
+    const segments = [];
+    const stack = [];
+    const frags = arr_content.split(',').map(s => s.trim())
+    for (let i = 0; i < frags.length; i++) {
+        const frag = frags[i];
+        if (frag.indexOf('(') >= 0) {
+            stack.push({
+                func: frag.substring(0, frag.indexOf('(')).trim(),
+                value: [
+                    frag.substring(frag.indexOf('(') + 1).trim(),
+                ],
+            })
         }
-        // unknown value, keep it as string
+        else if (frag.indexOf(')') >= 0) {
+            stack[stack.length - 1].value.push(frag.substring(0, frag.indexOf(')')).trim());
+            const seg = stack.pop();
+            const func = module.exports[seg.func];
+            const param = seg.value.join(',');
+            let value = param;
+            if (func) {
+                value = func(`${seg.func}( ${param} )`);
+            }
+            segments.push(value);
+        }
         else {
-            return item;
+            // so we are inside a segment
+            if (stack.length > 0) {
+                stack[stack.length - 1].value.push(frag);
+            }
+            // so this is just a segment
+            else {
+                // string
+                if (frag.indexOf('"') >= 0 || frag.indexOf('\'') >= 0) {
+                    segments.push(frag);
+                }
+                else if (Number.isFinite(parseFloat(frag))) {
+                    segments.push(parseFloat(frag));
+                }
+                else if (frag === 'true' || frag === 'false') {
+                    if (frag === 'true') {
+                        segments.push(true);
+                    }
+                    else if (frag === 'false') {
+                        segments.push(false);
+                    }
+                }
+                else {
+                    console.error('invalid value');
+                }
+            }
         }
-    })
+    }
 
-    return res;
+    return segments;
 };
 
 /**
