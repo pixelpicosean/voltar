@@ -54,9 +54,6 @@ export default class BaseButton extends Control {
         return this.toggle_mode ? this.status.pressed : this.status.press_attempt;
     }
     set pressed(value) {
-        if (!this.toggle_mode) {
-            return;
-        }
         if (this.status.pressed === value) {
             return;
         }
