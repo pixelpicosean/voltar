@@ -280,9 +280,6 @@ module.exports.GeneralArray = (value) => {
         return value;
     }
 
-    /** @type {string[]} */
-    let arr;
-
     // Empty string?
     if (value.length === 0) {
         return [];
@@ -296,7 +293,10 @@ module.exports.GeneralArray = (value) => {
     const frags = arr_content.split(',').map(s => s.trim())
     for (let i = 0; i < frags.length; i++) {
         const frag = frags[i];
-        if (frag.indexOf('(') >= 0) {
+        if (frag.indexOf('(') >= 0 && frag.indexOf(')') >= 0) {
+            segments.push(frag);
+        }
+        else if (frag.indexOf('(') >= 0) {
             stack.push({
                 func: frag.substring(0, frag.indexOf('(')).trim(),
                 value: [
