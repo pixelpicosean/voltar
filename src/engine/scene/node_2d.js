@@ -1730,7 +1730,7 @@ export default class Node2D extends VObject {
         if (this._destroyed || this.is_queued_for_deletion) return;
 
         // if the object is not visible or the alpha is 0 then no need to render this element
-        if (!this.visible || this.world_alpha <= 0 || !this.renderable) {
+        if (!this.visible || !this.renderable) {
             return;
         }
 
