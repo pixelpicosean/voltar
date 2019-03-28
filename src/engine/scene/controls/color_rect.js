@@ -91,17 +91,33 @@ export default class ColorRect extends Control {
         vertex_data[6] = (a * w1) + (c * h0) + tx;
         vertex_data[7] = (d * h0) + (b * w1) + ty;
     }
+
+    _update_color() {
+        if (this._destroyed || this.is_queued_for_deletion) return;
+
+        const tmp_color = Color.new().copy(this.color);
+
+        // Calculate real color
+        if (this.parent) {
+            tmp_color.multiply(this.parent.self_modulate).multiply(this.parent.modulate)
+        }
+
+        tmp_color.multiply(this.modulate).multiply(this.self_modulate)
+
+        // Update our world alpha
+        this.world_alpha = tmp_color.a;
+
+        // Update our tint
+        this.tint = tmp_color.as_hex();
+
+        Color.free(tmp_color);
+    }
     /**
-     *
-     * Renders the object using the WebGL renderer
-     *
-     * @private
      * @param {WebGLRenderer} renderer - The webgl renderer to use.
      */
     _render_webgl(renderer) {
-        this._update_transform();
-
         this.calculate_vertices();
+        this._update_color();
 
         renderer.set_object_renderer(renderer.plugins[this.renderer_plugin]);
         renderer.plugins[this.renderer_plugin].render(this);
