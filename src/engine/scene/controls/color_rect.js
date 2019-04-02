@@ -108,7 +108,8 @@ export default class ColorRect extends Control {
         this.world_alpha = tmp_color.a;
 
         // Update our tint
-        this.tint = tmp_color.as_hex();
+        const tint = tmp_color.as_hex();
+        this._tint_rgb = (tint >> 16) + (tint & 0xff00) + ((tint & 0xff) << 16);
 
         Color.free(tmp_color);
     }
