@@ -12,7 +12,6 @@ const frag_template = `
 
     void main(void) {
         vec4 color;
-        float texture_id = floor(v_texture_id + 0.5);
         %forloop%
         if (v_color_mode == 0.0) {
             // multiply texture and color
@@ -64,7 +63,7 @@ function generate_sample_src(max_textures) {
         }
 
         if (i < max_textures - 1) {
-            src += `if (texture_id == ${i}.0)`;
+            src += `if (v_texture_id < ${i}.5)`;
         }
 
         src += '\n{';
