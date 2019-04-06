@@ -6,4 +6,4 @@ export default class Demo extends v.Node2D {
     }
 }
 
-v.attach_script('res://scene/Demo.tscn', Demo);
+v.attach_script('res://scene/demo.tscn', Demo);
