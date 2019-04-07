@@ -1,9 +1,9 @@
 {
-    "res://scene/Demo.tscn": {
+    "res://scene/demo.tscn": {
         "@type#": "PackedScene",
         "data": {
             "type": "Node2D",
-            "name": "Demo",
+            "name": "demo",
             "children": [],
             "__meta__": {
                 "ext": {},

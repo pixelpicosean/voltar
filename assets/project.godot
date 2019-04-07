@@ -20,8 +20,7 @@ config/icon="res://icon.png"
 
 [display]
 
-window/size/width=160
-window/size/height=160
+window/size/width=800
 window/size/resizable=false
 window/stretch/mode="viewport"
 window/stretch/aspect="keep"
