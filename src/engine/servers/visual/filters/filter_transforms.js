@@ -43,7 +43,7 @@ export function calculate_normalized_screen_space_matrix(output_matrix, filter_a
 export function calculate_sprite_matrix(output_matrix, filter_area, texture_size, sprite) {
     const orig = sprite._texture.orig;
     const mapped_matrix = output_matrix.set(texture_size.width, 0, 0, texture_size.height, filter_area.x, filter_area.y);
-    const world_transform = sprite.world_transform.copy(Matrix.TEMP_MATRIX);
+    const world_transform = Matrix.TEMP_MATRIX.copy(sprite.world_transform);
 
     world_transform.invert();
     mapped_matrix.prepend(world_transform);

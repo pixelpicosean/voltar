@@ -431,9 +431,13 @@ export default class WebGLRenderer extends SystemRenderer {
         if (render_target !== this._active_render_target) {
             this._active_render_target = render_target;
             render_target.activate();
-        }
 
-        this.stencil_manager.set_mask_stack(render_target.stencil_mask_stack);
+            if (this._active_shader) {
+                this._active_shader.uniforms.projection_matrix = render_target.projection_matrix.to_array(true);
+            }
+
+            this.stencil_manager.set_mask_stack(render_target.stencil_mask_stack);
+        }
 
         return this;
     }

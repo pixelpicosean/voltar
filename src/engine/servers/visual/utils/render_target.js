@@ -288,6 +288,10 @@ export default class RenderTarget {
      *
      */
     destroy() {
+        if (this.frame_buffer.stencil) {
+            this.gl.deleteRenderbuffer(this.frame_buffer.stencil);
+        }
+
         this.frame_buffer.destroy();
 
         this.frame_buffer = null;

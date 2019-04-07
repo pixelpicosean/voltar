@@ -1,9 +1,10 @@
 import settings from 'engine/settings';
+
 import Filter from 'engine/servers/visual/filters/filter';
 import FilterManager from 'engine/servers/visual/managers/filter_manager';
 import RenderTarget from 'engine/servers/visual/utils/render_target';
 
-import getMaxBlurKernelSize from './get_max_kernel_size';
+import get_max_blur_kernel_size from './get_max_kernel_size';
 
 import generate_blur_vert_source from './generate_blur_vert_source';
 import generate_blur_frag_source from './generate_blur_frag_source';
@@ -51,7 +52,7 @@ export default class BlurY extends Filter {
     apply(filter_manager, input, output, clear) {
         if (this.first_run) {
             const gl = filter_manager.renderer.gl;
-            const kernel_size = getMaxBlurKernelSize(gl);
+            const kernel_size = get_max_blur_kernel_size(gl);
 
             this.vertex_src = generate_blur_vert_source(kernel_size, false);
             this.fragment_src = generate_blur_frag_source(kernel_size);
