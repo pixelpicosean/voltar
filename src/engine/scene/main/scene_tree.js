@@ -20,6 +20,7 @@ import Theme, { default_font_name } from '../resources/theme';
 
 import Viewport from './viewport';
 import Node2D from '../node_2d';
+import { remove_items } from 'engine/dep/index';
 
 /**
  * @typedef ApplicationSettings
@@ -155,6 +156,17 @@ export const StretchAspect = {
     'KEEP_WIDTH': 'keep_width',
     'KEEP_HEIGHT': 'keep_height',
     'EXPAND': 'expand',
+}
+
+/**
+ * @enum {number}
+ */
+export const GroupCallFlags = {
+    DEFAULT: 0,
+    REVERSE: 1,
+    REALTIME: 2,
+    UNIQUE: 4,
+    MULTILEVEL: 8,
 }
 
 export class Group {
@@ -410,10 +422,53 @@ export default class SceneTree {
     }
 
     /**
+     * @param {string} p_group
+     * @param {Node2D} p_node
+     */
+    add_to_group(p_group, p_node) {
+        let E = this.group_map.get(p_group);
+        if (!E) {
+            E = new Group();
+            this.group_map.set(p_group, E);
+        }
+
+        if (E.nodes.indexOf(p_node) >= 0) {
+            console.error(`Already in group: ${p_group}`);
+            return;
+        }
+        E.nodes.push(p_node);
+        E.changed = true;
+        return E;
+    }
+    /**
+     * @param {string} p_group
+     * @param {Node2D} p_node
+     */
+    remove_from_group(p_group, p_node) {
+        const E = this.group_map.get(p_group);
+        if (!E) {
+            return;
+        }
+
+        remove_items(E.nodes, E.nodes.indexOf(p_node), 1);
+        if (E.nodes.length === 0) {
+            this.group_map.delete(p_group);
+        }
+    }
+    /**
      * @param {string} p_identifier
      */
     has_group(p_identifier) {
         return this.group_map.has(p_identifier);
+    }
+    /**
+     * @param {string} p_group
+     */
+    make_group_changed(p_group) {
+        const E = this.group_map.get(p_group);
+        if (E) {
+            E.changed = true;
+        }
     }
     /**
      * @param {string} p_group
@@ -434,6 +489,53 @@ export default class SceneTree {
         }
         for (let n of E.nodes) {
             p_list.push(n);
+        }
+    }
+    /**
+     * @param {number} p_call_flags
+     * @param {string} p_group
+     * @param {string} p_function
+     * @param {any} p_args
+     */
+    call_group_flags(p_call_flags, p_group, p_function, ...p_args) {
+        const g = this.group_map.get(p_group);
+        if (!g) {
+            return;
+        }
+        if (g.nodes.length === 0) {
+            return;
+        }
+
+        if (p_call_flags & GroupCallFlags.UNIQUE && !(p_call_flags & GroupCallFlags.REALTIME)) {
+            // TODO
+        }
+
+        this._update_group_order(g);
+
+        if (p_call_flags & GroupCallFlags.REVERSE) {
+            for (let i = g.nodes.length - 1; i >= 0; i--) {
+                const node = g.nodes[i];
+                if (p_call_flags & GroupCallFlags.REALTIME) {
+                    // TODO: call_multilevel
+                    if (p_function in node) {
+                        node[p_function](...p_args);
+                    }
+                } else {
+                    this.message_queue.push_call(node, p_function, ...p_args);
+                }
+            }
+        } else {
+            for (let i = 0, len = g.nodes.length; i < len; i++) {
+                const node = g.nodes[i];
+                if (p_call_flags & GroupCallFlags.REALTIME) {
+                    // TODO: call_multilevel
+                    if (p_function in node) {
+                        node[p_function](...p_args);
+                    }
+                } else {
+                    this.message_queue.push_call(node, p_function, ...p_args);
+                }
+            }
         }
     }
     /**

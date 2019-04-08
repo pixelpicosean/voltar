@@ -82,6 +82,26 @@ export default class Node2D extends VObject {
         return this.modulate.a * this.self_modulate.a;
     }
 
+    get process_priority() {
+        return this._process_priority;
+    }
+    /** @param {number} value */
+    set process_priority(value) {
+        this._process_priority = value;
+
+        if (this.idle_process) {
+            this.scene_tree.make_group_changed('idle_process')
+        }
+        if (this.physics_process) {
+            this.scene_tree.make_group_changed('physics_process')
+        }
+    }
+    /** @param {number} value */
+    set_process_priority(value) {
+        this.process_priority = value;
+        return this;
+    }
+
     constructor() {
         super();
 
@@ -309,6 +329,7 @@ export default class Node2D extends VObject {
         this.modulate = Color.new(1, 1, 1, 1);
         this.self_modulate = Color.new(1, 1, 1, 1);
 
+        this._process_priority = 0;
         this.toplevel = false;
 
         this.interactive = false;
@@ -449,6 +470,13 @@ export default class Node2D extends VObject {
      */
     set_process(p) {
         this.idle_process = !!p;
+
+        if (this.idle_process) {
+            this.add_to_group('idle_process', false);
+        } else {
+            this.remove_from_group('idle_process');
+        }
+
         return this;
     }
     /**
@@ -457,14 +485,21 @@ export default class Node2D extends VObject {
      */
     set_physics_process(p) {
         this.physics_process = !!p;
+
+        if (this.physics_process) {
+            this.add_to_group('physics_process', false);
+        } else {
+            this.remove_from_group('physics_process');
+        }
+
         return this;
     }
 
     /**
      * @param {string} group
-     * @returns {this}
+     * @param {boolean} [p_persistent]
      */
-    add_to_group(group) {
+    add_to_group(group, p_persistent = false) {
         if (!this.groups) {
             this.groups = new Set();
         }
@@ -473,7 +508,7 @@ export default class Node2D extends VObject {
         if (!in_group) {
             this.groups.add(group);
             if (this.is_inside_tree) {
-                // this.scene_tree.add_node_to_group(this, group);
+                this.scene_tree.add_to_group(group, this);
             }
         }
 
@@ -485,7 +520,6 @@ export default class Node2D extends VObject {
      */
     remove_from_group(group) {
         if (!this.groups) {
-            this.groups = new Set();
             return this;
         }
 
@@ -493,7 +527,7 @@ export default class Node2D extends VObject {
             this.groups.delete(group);
 
             if (this.is_inside_tree) {
-                // this.scene_tree.remove_node_from_group(this, group);
+                this.scene_tree.remove_from_group(group, this);
             }
         }
         return this;
@@ -1170,7 +1204,7 @@ export default class Node2D extends VObject {
         // Add to scene tree groups
         if (this.groups && this.groups.size > 0) {
             for (let g of this.groups) {
-                // this.scene_tree.add_node_to_group(this, g);
+                this.scene_tree.add_to_group(g, this);
             }
         }
 
@@ -1234,8 +1268,8 @@ export default class Node2D extends VObject {
 
         // Remove from scene tree groups
         if (this.groups && this.groups.size > 0) {
-            for (let i = 0; i < this.groups.size; i++) {
-                // this.scene_tree.remove_node_from_group(this, this.groups[i]);
+            for (const g of this.groups) {
+                this.scene_tree.remove_from_group(g, this);
             }
         }
 
