@@ -157,7 +157,7 @@ export default class FilterManager extends WebGLManager {
         render_target.set_frame(destination_frame, source_frame);
 
         // bind the render target
-        renderer.bind_render_target(render_target);
+        renderer.bind_render_target(render_target, true);
         render_target.clear();
     }
 
@@ -254,7 +254,7 @@ export default class FilterManager extends WebGLManager {
 
         renderer.bind_vao(this.quad.vao);
 
-        renderer.bind_render_target(output);
+        renderer.bind_render_target(output, true);
 
         if (clear) {
             gl.disable(gl.SCISSOR_TEST);
