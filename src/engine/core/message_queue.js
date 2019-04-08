@@ -29,26 +29,19 @@ export default class MessageQueue {
      * @param {string} method
      * @param {any} [args]
      */
-    push_call(obj, method, args = null) {
-        // Multiple equal message call is not allowed in a single frame
-        for (const m of this.messages) {
-            if (m.obj === obj && m.method === method && m.args === args) {
-                return;
-            }
-        }
-
+    push_call(obj, method, ...args) {
         let msg = Message_Pool.pop();
         if (!msg) msg = new Message();
 
         msg.obj = obj;
         msg.method = method;
-        msg.args = args;
+        msg.args = [...args];
 
         this.messages.push(msg);
     }
     flush() {
         for (const msg of this.messages) {
-            msg.obj[msg.method](msg.args);
+            msg.obj[msg.method](...msg.args);
             Message_Pool.push(msg);
         }
 
