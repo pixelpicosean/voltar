@@ -426,10 +426,15 @@ export default class WebGLRenderer extends SystemRenderer {
      * Changes the current render target to the one given in parameter
      *
      * @param {RenderTarget} render_target - the new render target
+     * @param {boolean} [ignore_canvas_xform] - if true canvas xform are not appended
      */
-    bind_render_target(render_target) {
+    bind_render_target(render_target, ignore_canvas_xform = false) {
         if (render_target !== this._active_render_target) {
             this._active_render_target = render_target;
+
+            if (!ignore_canvas_xform) {
+                render_target.transform = this.current_projection_matrix;
+            }
             render_target.activate();
 
             if (this._active_shader) {

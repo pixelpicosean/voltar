@@ -52,6 +52,6 @@ export default class VisualServer {
             viewport.canvas_transform.ty = viewport.canvas_transform.ty | 0;
         }
 
-        this.renderer.render(viewport, undefined, true, viewport.canvas_transform, true);
+        this.renderer.render(viewport, undefined, true, undefined, true);
     }
 }
