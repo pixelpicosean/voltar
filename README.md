@@ -48,6 +48,8 @@ file, and then import these files or preload them as assets in your code.
 
 - [x] screen stretch mode/aspect
 - [x] `CanvasLayer`
+- [x] `ParallaxBackground`
+- [x] `ParallaxLayer`
 - [x] `Camera2D`
 - [x] `Path2D`
 - [x] `Node2D`
