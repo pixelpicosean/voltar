@@ -282,6 +282,14 @@ export default class Matrix {
         }
     }
 
+    get_scale() {
+        const basis_determinant = Math.sign(this.a * this.d - this.b * this.c);
+        return Vector2.new(
+            Math.sqrt(this.a * this.a + this.b * this.b),
+            Math.sqrt(this.c * this.c + this.d * this.d) * basis_determinant
+        );
+    }
+
     /**
      * @param {Matrix} p_matrix
      */
