@@ -114,6 +114,8 @@ export default class CanvasLayer extends Node2D {
      * @param {import('engine/servers/visual/webgl_renderer').default} renderer - The renderer
      */
     render_webgl(renderer) {
+        if (this._destroyed || this.is_queued_for_deletion) return;
+
         // Finish current rendering batch
         renderer.current_renderer.flush();
 

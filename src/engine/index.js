@@ -79,6 +79,9 @@ export {
     VisibilityEnabler2D,
 } from 'engine/scene/visibility_notifier_2d';
 
+export { ParallaxBackground } from 'engine/scene/parallax_background';
+export { ParallaxLayer } from 'engine/scene/parallax_layer';
+
 export { default as Camera2D } from 'engine/scene/camera_2d';
 export { default as Timer } from 'engine/scene/timer';
 
