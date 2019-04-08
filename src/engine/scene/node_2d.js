@@ -1572,6 +1572,10 @@ export default class Node2D extends VObject {
         return this.scene_tree;
     }
 
+    get_viewport_size() {
+        return this.scene_tree.viewport_rect.size;
+    }
+
     /**
      * @param {string} path
      * @returns {Node2D}
