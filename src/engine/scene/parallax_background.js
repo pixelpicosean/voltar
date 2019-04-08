@@ -19,6 +19,8 @@ export class ParallaxBackground extends CanvasLayer {
         this.scroll_scale = 1.0;
         this.screen_offset = new Vector2();
         this.final_offset = new Vector2();
+
+        this.group_name = '';
     }
 
     _load_data(data) {
@@ -34,12 +36,19 @@ export class ParallaxBackground extends CanvasLayer {
         return this;
     }
 
+    _propagate_enter_tree() {
+        super._propagate_enter_tree();
+
+        this.group_name = '__cameras_0';
+        this.add_to_group(this.group_name);
+    }
+
     _update_scroll() {
         if (!this.is_inside_tree) {
             return;
         }
 
-        const ofs = this.offset.clone().multiply(this.scroll_base_scale).add(this.scroll_base_offset);
+        const ofs = this.scroll_offset.clone().multiply(this.scroll_base_scale).add(this.scroll_base_offset);
         const vps = this.get_viewport_size();
 
         ofs.negate();
