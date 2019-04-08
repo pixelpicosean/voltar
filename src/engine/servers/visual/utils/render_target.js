@@ -41,7 +41,7 @@ export default class RenderTarget {
         /**
          * The background colour of this render target, as an array of [r,g,b,a] values
          */
-        this.clearColor = [0, 0, 0, 0];
+        this.clear_color = [0, 0, 0, 0];
 
         /**
          * The size of the object as a rectangle
@@ -160,7 +160,7 @@ export default class RenderTarget {
      * @param {number[]} [clear_color] - Array of [r,g,b,a] to clear the framebuffer
      */
     clear(clear_color) {
-        const cc = clear_color || this.clearColor;
+        const cc = clear_color || this.clear_color;
 
         this.frame_buffer.clear(cc[0], cc[1], cc[2], cc[3]);// r,g,b,a);
     }
@@ -193,7 +193,6 @@ export default class RenderTarget {
 
     /**
      * Binds the buffers and initialises the viewport.
-     *
      */
     activate() {
         // TODO: refactor usage of frame..

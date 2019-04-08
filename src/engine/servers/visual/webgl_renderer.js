@@ -207,7 +207,7 @@ export default class WebGLRenderer extends SystemRenderer {
         this.state.reset_to_default();
 
         this.root_render_target = new RenderTarget(gl, this.width, this.height, null, this.resolution, true);
-        this.root_render_target.clearColor = this._background_color_rgba;
+        this.root_render_target.clear_color = this._background_color_rgba;
 
         this.bind_render_target(this.root_render_target);
 
