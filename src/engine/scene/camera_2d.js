@@ -2,6 +2,7 @@ import Node2D from './node_2d';
 import { Vector2, Matrix, clamp, Rectangle } from 'engine/core/math/index';
 import { Margin } from './controls/const';
 import { node_class_map } from 'engine/registry';
+import { GroupCallFlags } from './main/scene_tree';
 
 /**
  * @enum {number}
@@ -128,6 +129,8 @@ export default class Camera2D extends Node2D {
         this.camera_pos = new Vector2();
         this.smoothed_camera_pos = new Vector2();
         this.camera_screen_center = new Vector2();
+
+        this.group_name = '__cameras_0';
     }
 
     _load_data(data) {
@@ -266,6 +269,13 @@ export default class Camera2D extends Node2D {
             const xform = this.get_camera_transform();
             this.scene_tree.viewport.canvas_transform.copy(xform);
             Matrix.free(xform);
+
+            const screen_size = this.scene_tree.viewport_rect.size;
+            const screen_offset = (this.anchor_mode === AnchorMode.DRAG_CENTER ? (screen_size.clone().scale(0.5)) : Vector2.new(0, 0));
+
+            this.get_tree().call_group_flags(GroupCallFlags.REALTIME, this.group_name, '_camera_moved', xform, screen_offset);
+
+            Vector2.free(screen_offset);
         }
     }
 
