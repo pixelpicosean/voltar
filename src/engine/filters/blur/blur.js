@@ -12,9 +12,9 @@ import BlurY from './blur_y';
  */
 export default class Blur extends Filter {
     /**
-     * @param {number} strength - The strength of the blur filter.
-     * @param {number} quality - The quality of the blur filter.
-     * @param {number} resolution - The resolution of the blur filter.
+     * @param {number} [strength] - The strength of the blur filter.
+     * @param {number} [quality] - The quality of the blur filter.
+     * @param {number} [resolution] - The resolution of the blur filter.
      * @param {number} [kernel_size] - The kernelSize of the blur filter.Options: 5, 7, 9, 11, 13, 15.
      */
     constructor(strength = 8, quality = 4, resolution, kernel_size = 5) {
