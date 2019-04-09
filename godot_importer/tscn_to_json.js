@@ -1136,10 +1136,20 @@ module.exports.convert_scenes = (/** @type {string} */scene_root_url_p) => {
 
                 // Add instance data to the Scene node
                 for (let k in res) {
+                    if (k === 'prop') {
+                        for (let prop_k in res[k]) {
+                            if (res[k][prop_k] !== undefined) {
+                                node[prop_k] = res[k][prop_k];
+                            }
+                        }
+                    }
                     if (res[k] !== undefined) {
                         node[k] = res[k];
                     }
                 }
+
+                delete node.prop;
+                delete node.index;
             }
 
             // Check whether we have script exported properties
