@@ -3,6 +3,8 @@ import { Vector2 } from 'engine/core/math/index';
 import { InteractionEvent } from 'engine/interaction/enable';
 import keyboard from './keyboard';
 
+/** @typedef {'BUTTON_LEFT' | 'BUTTON_MIDDLE' | 'BUTTON_RIGHT' | 'BACKSPACE' | 'TAB' | 'ENTER' | 'SHIFT' | 'CTRL' | 'ALT' | 'PAUSE' | 'CAPS_LOCK' | 'ESC' | 'SPACE' | 'PAGE_UP' | 'PAGE_DOWN' | 'END' | 'HOME' | 'LEFT' | 'UP' | 'RIGHT' | 'DOWN' | 'PRINT_SCREEN' | 'INSERT' | 'DELETE' | '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M' | 'N' | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z' | 'NUM_0' | 'NUM_1' | 'NUM_2' | 'NUM_3' | 'NUM_4' | 'NUM_5' | 'NUM_6' | 'NUM_7' | 'NUM_8' | 'NUM_9' | 'NUM_MULTIPLY' | 'NUM_PLUS' | 'NUM_MINUS' | 'NUM_PERIOD' | 'NUM_DIVISION' | 'F1' | 'F2' | 'F3' | 'F4' | 'F5' | 'F6' | 'F7' | 'F8' | 'F9' | 'F10' | 'F11' | 'F12' | 'SEMICOLON' | 'PLUS' | 'MINUS' | 'GRAVE_ACCENT' | 'SINGLE_QUOTE'} KeyName */
+
 /**
  * Input system which provides key bindings.
  */
@@ -106,9 +108,8 @@ export default class Input {
     /**
      * Bind a key to a specific action.
      *
-     * @param  {string} key    Key to bind
+     * @param  {KeyName} key    Key to bind
      * @param  {string} action Action name
-     * @return {InputManager} Self for chaining
      */
     bind(key, action) {
         if (Array.isArray(this.bindings[key])) {
@@ -129,9 +130,8 @@ export default class Input {
     /**
      * Unbind an action from a key.
      *
-     * @param  {string} key    Key to unbind
+     * @param  {KeyName} key    Key to unbind
      * @param  {string} action Action to unbind
-     * @return {InputManager}   Self for chaining
      */
     unbind(key, action) {
         if (Array.isArray(this.bindings[key])) {
@@ -216,7 +216,7 @@ export default class Input {
     /**
      * Key down listener
      *
-     * @param {string} k Name of the key
+     * @param {KeyName} k Name of the key
      * @private
      */
     _keydown(k) {
@@ -231,7 +231,7 @@ export default class Input {
     /**
      * Key up listener
      *
-     * @param {string} k Name of the key
+     * @param {KeyName} k Name of the key
      * @private
      */
     _keyup(k) {
