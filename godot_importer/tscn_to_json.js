@@ -35,6 +35,16 @@ const built_in_functions = {
         const params = str.split('(')[1].split(')')[0];
         return params.split(',').map(value => value.trim()).map(parseFloat)
     },
+    Rect2: (/** @type {string} */str) => {
+        const params_str = str.split('(')[1].split(')')[0];
+        const params = params_str.split(',').map(value => value.trim()).map(parseFloat)
+        return {
+            x: params[0],
+            y: params[1],
+            width: params[2],
+            height: params[3],
+        };
+    },
 };
 
 /**
