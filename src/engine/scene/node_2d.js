@@ -1491,9 +1491,8 @@ export default class Node2D extends VObject {
 
         if (index === -1) return null;
 
-        child.parent = null;
         child._propagate_unparent();
-        // ensure child transform will be recalculated
+        child.parent = null;
         child.transform._parent_id = -1;
 
         remove_items(this.children, index, 1);
@@ -1507,6 +1506,7 @@ export default class Node2D extends VObject {
         this._bounds_id++;
 
         child._propagate_exit_tree();
+        child.scene_tree = null;
 
         // TODO - lets either do all callbacks or all events.. not both!
         this.on_children_change(index);
@@ -1525,12 +1525,9 @@ export default class Node2D extends VObject {
     remove_child_at(index) {
         const child = this.get_child(index);
 
-        // ensure child transform will be recalculated..
-        child.parent = null;
-        child.scene_tree = null;
-        child.transform._parent_id = -1;
-
         child._propagate_unparent();
+        child.parent = null;
+        child.transform._parent_id = -1;
 
         remove_items(this.children, index, 1);
 
@@ -1543,6 +1540,7 @@ export default class Node2D extends VObject {
         this._bounds_id++;
 
         child._propagate_exit_tree();
+        child.scene_tree = null;
 
         // TODO - lets either do all callbacks or all events.. not both!
         this.on_children_change(index);
@@ -1569,12 +1567,11 @@ export default class Node2D extends VObject {
             removed = this.children.splice(begin, range);
 
             for (let i = 0; i < removed.length; ++i) {
-                removed[i].parent = null;
-                removed[i].scene_tree = null;
                 if (removed[i].transform) {
                     removed[i].transform._parent_id = -1;
                 }
                 removed[i]._propagate_unparent();
+                removed[i].parent = null;
 
                 // remove from name hash
                 if (removed[i].name.length > 0) {
@@ -1582,6 +1579,7 @@ export default class Node2D extends VObject {
                 }
 
                 removed[i]._propagate_exit_tree();
+                removed[i].scene_tree = null;
 
                 this.remove_child_notify(removed[i]);
             }
