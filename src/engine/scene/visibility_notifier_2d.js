@@ -1,6 +1,6 @@
 import Node2D from "./node_2d";
 import { node_class_map } from "engine/registry";
-import { Rectangle } from "engine/core/math/index";
+import { Rectangle, Matrix } from "engine/core/math/index";
 import { Viewport, AnimationPlayer, AnimatedSprite } from "engine/index";
 
 export class VisibilityNotifier2D extends Node2D {
@@ -38,8 +38,9 @@ export class VisibilityNotifier2D extends Node2D {
     _propagate_process(delta) {
         super._propagate_process(delta);
 
-        // TODO: move the rect check to transform change event
-        this.world_transform.xform_rect(this.rect, this._rect_on_screen);
+        const m = this.world_transform.clone().append(this.get_tree().viewport.canvas_transform);
+        m.xform_rect(this.rect, this._rect_on_screen);
+        Matrix.free(m);
 
         const viewport = this.scene_tree.viewport;
         const v_rect_origin = this.scene_tree.viewport_rect;
