@@ -81,8 +81,11 @@ export default class Camera2D extends Node2D {
         return this._current;
     }
     set current(value) {
+        if (value) {
+            this.make_current();
+        }
+
         this._current = value;
-        // TODO: set current
     }
 
     /** @type {number} */
@@ -193,7 +196,10 @@ export default class Camera2D extends Node2D {
     }
 
     clear_current() {
-        this.current = false;
+        this._current = false;
+        if (this.is_inside_tree) {
+            this.scene_tree.call_group_flags(GroupCallFlags.REALTIME, this.group_name, '_make_current', null);
+        }
     }
 
     force_update_scroll() {
@@ -209,8 +215,10 @@ export default class Camera2D extends Node2D {
     }
 
     make_current() {
-        if (!this.scene_tree) {
-            this.current = true;
+        if (!this.is_inside_tree) {
+            this._current = true;
+        } else {
+            this.scene_tree.call_group_flags(GroupCallFlags.REALTIME, this.group_name, '_make_current', this);
         }
         this._udpate_scroll();
     }
@@ -223,13 +231,18 @@ export default class Camera2D extends Node2D {
     _propagate_enter_tree() {
         super._propagate_enter_tree();
 
+        this.group_name = '__cameras_0';
+        this.add_to_group(this.group_name);
+
         this._udpate_scroll();
         this.first = true;
     }
     _propagate_exit_tree() {
-        if (this.current) {
+        if (this._current) {
             this.scene_tree.viewport.canvas_transform.set(1, 0, 0, 1, 0, 0);
         }
+
+        this.remove_from_group(this.group_name);
 
         super._propagate_exit_tree();
     }
@@ -276,6 +289,17 @@ export default class Camera2D extends Node2D {
             this.get_tree().call_group_flags(GroupCallFlags.REALTIME, this.group_name, '_camera_moved', xform, screen_offset);
 
             Vector2.free(screen_offset);
+        }
+    }
+
+    /**
+     * @param {Camera2D} p_which
+     */
+    _make_current(p_which) {
+        if (p_which === this) {
+            this.current = true;
+        } else {
+            this.current = false;
         }
     }
 
