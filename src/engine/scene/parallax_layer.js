@@ -36,6 +36,8 @@ export class ParallaxLayer extends Node2D {
         this.orig_offset.copy(this.position);
         this.orig_scale.copy(this.scale);
         this._update_mirroring();
+
+        this._on_motion_scale_changed();
     }
 
     /**
@@ -44,7 +46,7 @@ export class ParallaxLayer extends Node2D {
      * @param {Vector2} p_screen_offset
      */
     set_base_offset_and_scale(p_offset, p_scale, p_screen_offset) {
-        this.screen_offset.copy(p_offset);
+        this.screen_offset.copy(p_screen_offset);
 
         if (!this.is_inside_tree) {
             return;
@@ -78,13 +80,13 @@ export class ParallaxLayer extends Node2D {
 
     _on_motion_scale_changed() {
         const pb = /** @type {import('./parallax_background').ParallaxBackground} */(this.parent);
-        if (pb.type === 'ParallaxBackground' && this.is_inside_tree) {
+        if (this.is_inside_tree && pb.type === 'ParallaxBackground') {
             this.set_base_offset_and_scale(pb.final_offset, pb.scroll_scale, this.screen_offset);
         }
     }
     _on_motion_offset_changed() {
         const pb = /** @type {import('./parallax_background').ParallaxBackground} */(this.parent);
-        if (pb.type === 'ParallaxBackground' && this.is_inside_tree) {
+        if (this.is_inside_tree && pb.type === 'ParallaxBackground') {
             this.set_base_offset_and_scale(pb.final_offset, pb.scroll_scale, this.screen_offset);
         }
     }
