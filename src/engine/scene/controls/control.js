@@ -688,8 +688,6 @@ export default class Control extends Node2D {
         super._propagate_enter_tree();
     }
 
-    _get_minimum_size() { return Vector2.new(0, 0) }
-
     /**
      *
      * @param {Node2D} child
@@ -723,14 +721,7 @@ export default class Control extends Node2D {
     /**
      * @param {Vector2} size
      */
-    get_minimum_size(size) {
-        const min_size = this._get_minimum_size();
-        size.copy(min_size);
-        if (min_size !== Vector2.ZERO) {
-            Vector2.free(min_size);
-        }
-        return size;
-    }
+    get_minimum_size(size) { return Vector2.new(0, 0) }
     /**
      * @param {Vector2} size
      */
