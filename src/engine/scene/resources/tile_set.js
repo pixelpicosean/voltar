@@ -135,6 +135,7 @@ export default class TileSet {
     _load_data(data) {
         this.tile_map.length = data.tile_map.length;
         for (let i = 0; i < this.tile_map.length; i++) {
+            if (!data.tile_map[i]) continue;
             this.tile_map[i] = new TileData()._load_data(data.tile_map[i]);
         }
         this.texture = TextureCache[data.texture] || Texture.WHITE;
@@ -150,7 +151,7 @@ export default class TileSet {
      * @param {number} id
      */
     has_tile(id) {
-        return id < this.tile_map.length;
+        return (id < this.tile_map.length) && !!(this.tile_map[id]);
     }
     /**
      * @param {number} id
