@@ -240,13 +240,13 @@ export default class GridContainer extends Container {
 
         for (let k of col_minw) {
             if (k !== undefined) {
-                ms.x += col_minw[k];
+                ms.x += k;
             }
         }
 
         for (let k of row_minh) {
             if (k !== undefined) {
-                ms.y += row_minh[k];
+                ms.y += k;
             }
         }
 
