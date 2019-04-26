@@ -410,6 +410,10 @@ export default class Space2DSW {
         }
 
         if (!shapes_found) {
+            if (r_result) {
+                r_result.reset();
+                r_result.motion.copy(p_motion);
+            }
             return false;
         }
 
@@ -471,7 +475,7 @@ export default class Space2DSW {
                             cbk.valid_dir.copy(axis).normalize();
                             Vector2.free(axis);
 
-                            cbk.valid_depth = p_margin;
+                            cbk.valid_depth = Math.max(p_margin, col_obj.shapes[shape_index].one_way_collision_margin);
                             cbk.invalid_by_dir = 0;
 
                             if (col_obj.type === CollisionObjectType.BODY) {
@@ -481,7 +485,7 @@ export default class Space2DSW {
                                     // how much it moved in the give direction
                                     const lv = b.linear_velocity.clone();
                                     // compute displacement from linear velocity
-                                    const motion = lv.multiply(Physics2DDirectBodyStateSW.singleton.step);
+                                    const motion = lv.scale(Physics2DDirectBodyStateSW.singleton.step);
                                     const motion_len = motion.length();
                                     motion.normalize();
                                     const neg_dir = cbk.valid_dir.clone().negate();
@@ -727,6 +731,11 @@ export default class Space2DSW {
 
             for (let j = from_shape; j < to_shape; j++) {
                 const body_shape = p_body.shapes[j];
+
+                if (body_shape.disabled) {
+                    continue;
+                }
+
                 const body_shape_xform = ugt.clone().append(body_shape.xform);
 
                 body_aabb.x += p_motion.x * unsafe;
@@ -762,7 +771,7 @@ export default class Space2DSW {
 
                     if (against_shape.one_way_collision) {
                         rcd.valid_dir.copy(col_obj_shape_xform.get_axis(1)).normalize();
-                        rcd.valid_depth = Number.MAX_VALUE;
+                        rcd.valid_depth = 10e20;
                     } else {
                         rcd.valid_dir.set(0, 0);
                         rcd.valid_depth = 0;
@@ -800,7 +809,7 @@ export default class Space2DSW {
                     ).add(body.linear_velocity);
 
                     r_result.motion.copy(p_motion).scale(safe);
-                    r_result.remainder.copy(p_motion).subtract(r_result.motion);
+                    r_result.remainder.copy(p_motion).subtract(p_motion.x * safe, p_motion.y * safe);
                     r_result.motion.add(body_transform.origin).subtract(p_from.origin);
 
                     Vector2.free(rel_vec);
