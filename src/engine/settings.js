@@ -79,9 +79,9 @@ export default {
      * The default aims to balance desktop and mobile devices.
      *
      * @type {number}
-     * @default 4096
+     * @default 2000
      */
-    SPRITE_BATCH_SIZE: 4096,
+    SPRITE_BATCH_SIZE: 2000,
 
     /**
      * The prefix that denotes a URL is for a retina asset.

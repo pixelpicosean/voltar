@@ -390,14 +390,6 @@ export default class Area2D extends CollisionObject2D {
                 // TODO: supoort CollisionPolygon2D
             }
         }
-
-        if (this.hit_area) {
-            if (this.hit_area.type === SHAPES.RECT) {
-                this._first_shape.transform.world_transform.xform_rect(/** @type {Rectangle} */(this.hit_area));
-            } else if (this.hit_area.type === SHAPES.CIRC) {
-                this._first_shape.transform.world_transform.xform_circle(/** @type {Circle} */(this.hit_area));
-            }
-        }
     }
 
     /**
