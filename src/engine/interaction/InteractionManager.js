@@ -1107,7 +1107,7 @@ export default class InteractionManager extends VObject {
 
             // only change the cursor if it has not already been changed (by something deeper in the
             // display tree)
-            if (is_mouse && this.cursor === null) {
+            if (is_mouse && !this.cursor) {
                 this.cursor = node.cursor;
             }
         }
