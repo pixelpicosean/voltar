@@ -91,6 +91,12 @@ export default class CollisionShape2D extends Node2D {
             // @ts-ignore
             this.set_shape(new res_class_map[p_data.shape.type]()._load_data(p_data.shape));
         }
+        if (p_data.disabled !== undefined) {
+            this.disabled = p_data.disabled;
+        }
+        if (p_data.one_way_collision !== undefined) {
+            this.one_way_collision = p_data.one_way_collision;
+        }
 
         return this;
     }
