@@ -34,7 +34,7 @@ export const TileOrigin = {
 export const INVALID_CELL = -1;
 
 class Cell {
-    constructor(id = 0, ) {
+    constructor(id = 0) {
         this.id = 0;
         this.flip_h = false;
         this.flip_v = false;
