@@ -298,8 +298,8 @@ export default class Area2D extends CollisionObject2D {
         this.collision_mask = 1;
         this.collision_layer = 1;
         this.priority = 0;
-        this._monitoring = false;
-        this._monitorable = false;
+        this._monitoring = true;
+        this._monitorable = true;
         this._first_shape = null;
 
         /**
@@ -314,8 +314,6 @@ export default class Area2D extends CollisionObject2D {
 
         this.gravity = 98;
         this.gravity_vec = new Vector2(0, 1);
-        this.monitoring = true;
-        this.monitorable = true;
         this.pickable = true;
     }
     _load_data(data) {
@@ -345,11 +343,27 @@ export default class Area2D extends CollisionObject2D {
         if (data.gravity_vec !== undefined) {
             this.gravity_vec = data.gravity_vec;
         }
+        if (data.monitorable !== undefined) {
+            this._monitorable = data.monitorable;
+        }
+        if (data.monitoring !== undefined) {
+            this._monitoring = data.monitoring;
+        }
         if (data.pickable !== undefined) {
             this.pickable = data.pickable;
         }
 
         return this;
+    }
+    _propagate_enter_tree() {
+        super._propagate_enter_tree();
+
+        // force update monitor* properties
+        this._monitorable = !this._monitorable;
+        this.monitorable = !this._monitorable;
+
+        this._monitoring = !this._monitoring;
+        this.monitoring = !this._monitoring;
     }
     _propagate_exit_tree() {
         this._clear_monitoring();
@@ -388,6 +402,14 @@ export default class Area2D extends CollisionObject2D {
                 }
             } else {
                 // TODO: supoort CollisionPolygon2D
+            }
+        }
+
+        if (this.hit_area) {
+            if (this.hit_area.type === SHAPES.RECT) {
+                this._first_shape.transform.world_transform.xform_rect(/** @type {Rectangle} */(this.hit_area));
+            } else if (this.hit_area.type === SHAPES.CIRC) {
+                this._first_shape.transform.world_transform.xform_circle(/** @type {Circle} */(this.hit_area));
             }
         }
     }
