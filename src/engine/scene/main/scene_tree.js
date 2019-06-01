@@ -863,74 +863,38 @@ export default class SceneTree {
             }
             _process_tmp.last = timestamp;
 
-            // If the logic time is spiraling upwards, skip a frame entirely
-            if (_process_tmp.spiraling > 1) {
-                // Reset the delta_time accumulator which will cause all pending dropped frames to be permanently skipped
-                _process_tmp.delta_time = 0;
-                _process_tmp.spiraling = 0;
-            }
-            else {
-                // Step size
-                _process_tmp.step = 1000.0 / this.settings.physics.physics_fps;
-                _process_tmp.slow_step = _process_tmp.step * this.time_scale;
-                _process_tmp.slow_step_sec = _process_tmp.step * 0.001 * this.time_scale;
-                this.physics_process_time = _process_tmp.slow_step_sec;
+            /* Physics update */
 
-                // Accumulate time until the step threshold is met or exceeded... up to a limit of 3 catch-up frames at step intervals
-                _process_tmp.delta_time += Math.max(Math.min(_process_tmp.step * 3, _process_tmp.real_delta), 0);
+            this.physics_process_time = _process_tmp.real_delta * 0.001;
 
-                // Call the game update logic multiple times if necessary to "catch up" with dropped frames
-                // unless forceSingleUpdate is true
-                _process_tmp.count = 0;
+            // - flush_transform_notifications
+            this.viewport.parent = this.viewport._temp_node_2d_parent;
+            this.viewport.update_transform();
+            this.viewport.parent = null;
 
-                while (_process_tmp.delta_time >= _process_tmp.step) {
-                    _process_tmp.delta_time -= _process_tmp.step;
+            // - update physics server
+            this.physics_server.sync();
+            this.physics_server.flush_queries();
 
-                    // Physics update
+            // - process nodes
+            this.current_scene._propagate_physics_process(this.physics_process_time);
 
-                    // - flush_transform_notifications
-                    this.viewport.parent = this.viewport._temp_node_2d_parent;
-                    this.viewport.update_transform();
-                    this.viewport.parent = null;
+            this.message_queue.flush();
 
-                    // - update physics server
-                    this.physics_server.sync();
-                    this.physics_server.flush_queries();
+            this.physics_server.end_sync();
+            this.physics_server.step(this.physics_process_time);
 
-                    // - process nodes
-                    this.current_scene._propagate_physics_process(this.physics_process_time);
+            // - flush_transform_notifications
+            this.viewport.parent = this.viewport._temp_node_2d_parent;
+            this.viewport.update_transform();
+            this.viewport.update_worlds(this.physics_process_time);
+            this.viewport.parent = null;
 
-                    this.message_queue.flush();
+            this._flush_delete_queue();
 
-                    this.physics_server.end_sync();
-                    this.physics_server.step(this.physics_process_time);
+            this.message_queue.flush();
 
-                    // - flush_transform_notifications
-                    this.viewport.parent = this.viewport._temp_node_2d_parent;
-                    this.viewport.update_transform();
-                    this.viewport.update_worlds(this.physics_process_time);
-                    this.viewport.parent = null;
-
-                    this._flush_delete_queue();
-
-                    this.message_queue.flush();
-
-                    _process_tmp.count += 1;
-                }
-
-                // Detect spiraling (if the catch-up loop isn't fast enough, the number of iterations will increase constantly)
-                if (_process_tmp.count > _process_tmp.last_count) {
-                    _process_tmp.spiraling += 1;
-                }
-                else if (_process_tmp.count < _process_tmp.last_count) {
-                    // Looks like it caught up successfully, reset the spiral alert counter
-                    _process_tmp.spiraling = 0;
-                }
-
-                _process_tmp.last_count = _process_tmp.count;
-            }
-
-            // Idle update
+            /* Idle update */
 
             this.idle_process_time = _process_tmp.real_delta * 0.001;
 
