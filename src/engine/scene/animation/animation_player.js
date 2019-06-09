@@ -395,14 +395,14 @@ export default class AnimationPlayer extends Node2D {
      * @property {number}
      */
     get current_animation_length() {
-        return 0;
+        return this.playback.current.from.animation.length;
     }
 
     /**
      * @property {number}
      */
     get current_animation_position() {
-        return 0;
+        return this.playback.current.pos;
     }
 
     /**
