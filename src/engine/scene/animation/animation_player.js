@@ -652,7 +652,17 @@ export default class AnimationPlayer extends Node2D {
                     }
                 } break;
                 case TrackType.TYPE_METHOD: {
+                    if (seeked) break;
                     let t = /** @type {MethodTrack} */(track);
+                    for (const k of t.methods) {
+                        if (
+                            ((delta > 0) && (time < k.time && k.time < time + delta))
+                            ||
+                            ((delta < 0) && (time + delta < k.time && k.time < time))
+                        ) {
+                            node[k.value.method].apply(node, k.value.args);
+                        }
+                    }
                 } break;
             }
         }

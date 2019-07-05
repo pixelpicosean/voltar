@@ -187,11 +187,21 @@ export class MethodTrack extends Track {
 
         this.type = TrackType.TYPE_METHOD;
 
-        /** @type Key<{method: string, params: Array<any>|undefined}>[] */
+        /** @type Key<{method: string, args: Array<any>|undefined}>[] */
         this.methods = [];
     }
     load(data) {
         super.load(data);
+
+        this.methods.length = 0;
+        for (let i = 0; i < data.keys.times.length; i++) {
+            /** @type {Key<{method: string, args: Array<any>|undefined}>} */
+            let key = new Key();
+            key.time = data.keys.times[i];
+            key.value = data.keys.values[i];
+            this.methods.push(key);
+        }
+
         return this;
     }
 }
