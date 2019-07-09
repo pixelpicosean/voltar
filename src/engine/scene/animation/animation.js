@@ -98,6 +98,8 @@ export class ValueTrack extends Track {
     load(data) {
         super.load(data);
 
+        this.update_mode = data.keys.update;
+
         this.values.length = 0;
         for (let i = 0; i < data.keys.times.length; i++) {
             let key = new Key();
