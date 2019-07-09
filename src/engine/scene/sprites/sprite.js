@@ -188,6 +188,12 @@ export default class Sprite extends Node2D {
             }
         }
 
+        if (data.material !== undefined) {
+            if (data.material.blend_mode !== undefined) {
+                this.blend_mode = data.material.blend_mode;
+            }
+        }
+
         this._on_anchor_update();
 
         return this;
