@@ -353,7 +353,7 @@ module.exports.GeneralArray = (value) => {
  */
 module.exports.MethodArray = (arr) => {
     return arr.map(({ args, method }) => ({
-        args: module.exports.GeneralArray(trim_string(args.replace(/,$/, ''))),
+        args: module.exports.GeneralArray(args),
         method: method.replace(/"/g, ''),
     }))
 };
