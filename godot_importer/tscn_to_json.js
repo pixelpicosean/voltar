@@ -860,6 +860,7 @@ const resource_normalizers = {
     PackedScene: (res) => res.path,
     Curve2D: (res) => ({ points: res.points }),
     Curve: (res) => res,
+    CanvasItemMaterial: (res) => ({ blend_mode: res.blend_mode }),
 };
 
 const post_resource_actions = {
