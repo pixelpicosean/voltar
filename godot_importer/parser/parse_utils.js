@@ -337,8 +337,11 @@ module.exports.GeneralArray = (value) => {
                         segments.push(false);
                     }
                 }
+                else if (frag === 'null') {
+                    segments.push(null);
+                }
                 else {
-                    console.error('invalid value');
+                    console.error(`invalid value: ${frag}`);
                 }
             }
         }
