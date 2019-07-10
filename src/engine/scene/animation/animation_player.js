@@ -96,7 +96,7 @@ function find_track_key(keys, time) {
         middle -= 1;
     }
 
-    return middle;
+    return Math.max(0, middle);
 }
 /**
  * @param {string} path
