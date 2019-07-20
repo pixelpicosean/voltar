@@ -401,6 +401,10 @@ export default class Space2DSW {
                 continue;
             }
 
+            if (p_exclude_raycast_shapes && s.shape.type === ShapeType.RAY) {
+                continue;
+            }
+
             if (!shapes_found) {
                 body_aabb.copy(s.aabb_cache);
                 shapes_found = true;
@@ -849,6 +853,10 @@ export default class Space2DSW {
 
         for (let s of p_body.shapes) {
             if (s.disabled) {
+                continue;
+            }
+
+            if (s.shape.type !== ShapeType.RAY) {
                 continue;
             }
 
