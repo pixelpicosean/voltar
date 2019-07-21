@@ -27,7 +27,7 @@ generated_files.forEach(({ url, data }) => {
     }
     // Save the JSON besides original tscn file,
     // so we can check them out instead of big "resources.json".
-    fs.writeFileSync(url, JSON.stringify(data, null, 4));
+    // fs.writeFileSync(url, JSON.stringify(data, null, 4));
     console.log(`  - export "${path.basename(url)}"`)
 })
 
