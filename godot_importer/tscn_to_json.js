@@ -699,82 +699,90 @@ const resource_normalizers = {
                 // TODO: make this a general function
                 const keys = Object.keys(prop);
                 // Array?
-                if (_.startsWith(keys[0], '0/')) {
-                    const array = [];
-                    for (const k in prop) {
-                        const key_list = k.split('/');
-                        const index = parseInt(key_list[0]);
-                        if (array.length < index + 1) {
-                            array.length = index + 1;
-                            array[index] = {};
-                        }
+                // format is "number/"
+                const slash_idx = keys[0].indexOf('/')
+                if (slash_idx >= 0) {
+                    const num_str = keys[0].substring(0, slash_idx);
+                    if (Number.isFinite(parseInt(num_str))) {
+                        const array = [];
+                        for (const k in prop) {
+                            const key_list = k.split('/');
+                            const index = parseInt(key_list[0]);
+                            if (array.length < index + 1) {
+                                array.length = index + 1;
+                                array[index] = {};
+                            }
 
-                        let value = prop[k];
-                        if (typeof (value) === 'number') {
-                            // do nothing
-                        } else if (typeof (value) === 'boolean') {
-                            // do nothing
-                        } else if (Array.isArray(value)) {
-                            if (value.length > 0) {
-                                // Shape list
-                                if (k.indexOf('shapes') >= 0) {
-                                    for (const s of value) {
-                                        s.autotile_coord = Vector2(s.autotile_coord);
-                                        s.shape = sub_res_table[get_function_params(s.shape)];
-                                        s.shape_transform = get_function_params(s.shape_transform).map(parseFloat);
+                            let value = prop[k];
+                            if (typeof (value) === 'number') {
+                                // do nothing
+                            } else if (typeof (value) === 'boolean') {
+                                // do nothing
+                            } else if (Array.isArray(value)) {
+                                if (value.length > 0) {
+                                    // Shape list
+                                    if (k.indexOf('shapes') >= 0) {
+                                        for (const s of value) {
+                                            s.autotile_coord = Vector2(s.autotile_coord);
+                                            s.shape = sub_res_table[get_function_params(s.shape)];
+                                            s.shape_transform = get_function_params(s.shape_transform).map(parseFloat);
 
-                                        // FIXME: should we delete the key and id here?
-                                        s.shape.key = undefined;
-                                        s.shape.id = undefined;
+                                            // FIXME: should we delete the key and id here?
+                                            s.shape.key = undefined;
+                                            s.shape.id = undefined;
 
-                                        // FIXME: should we remove the properties if they are default value?
-                                        if (s.autotile_coord.x === 0 && s.autotile_coord.y === 0) {
-                                            s.autotile_coord = undefined;
-                                        }
+                                            // FIXME: should we remove the properties if they are default value?
+                                            if (s.autotile_coord.x === 0 && s.autotile_coord.y === 0) {
+                                                s.autotile_coord = undefined;
+                                            }
 
-                                        if (s.one_way === false) {
-                                            s.one_way = undefined;
-                                        }
+                                            if (s.one_way === false) {
+                                                s.one_way = undefined;
+                                            }
 
-                                        if (s.one_way_margin === 1) {
-                                            s.one_way_margin = undefined;
-                                        }
+                                            if (s.one_way_margin === 1) {
+                                                s.one_way_margin = undefined;
+                                            }
 
-                                        /** @type {number[]} */
-                                        const t = s.shape_transform;
-                                        if (
-                                            t[0] === 1
-                                            &&
-                                            t[1] === 0
-                                            &&
-                                            t[2] === 0
-                                            &&
-                                            t[3] === 1
-                                            &&
-                                            t[4] === 0
-                                            &&
-                                            t[5] === 0
-                                        ) {
-                                            s.shape_transform = undefined;
+                                            /** @type {number[]} */
+                                            const t = s.shape_transform;
+                                            if (
+                                                t[0] === 1
+                                                &&
+                                                t[1] === 0
+                                                &&
+                                                t[2] === 0
+                                                &&
+                                                t[3] === 1
+                                                &&
+                                                t[4] === 0
+                                                &&
+                                                t[5] === 0
+                                            ) {
+                                                s.shape_transform = undefined;
+                                            }
                                         }
                                     }
                                 }
+                            } else if (_.startsWith(value, 'ExtResource')) {
+                                value = ext_res_table[get_function_params(value)];
+                            } else if (_.startsWith(value, 'SubResource')) {
+                                value = sub_res_table[get_function_params(value)];
+                            } else if (_.startsWith(value, 'Vector2')) {
+                                value = Vector2(value);
+                            } else if (_.startsWith(value, 'Color')) {
+                                value = Color(value);
+                            } else if (_.startsWith(value, 'Rect2')) {
+                                value = Rect2(value);
                             }
-                        } else if (_.startsWith(value, 'ExtResource')) {
-                            value = ext_res_table[get_function_params(value)];
-                        } else if (_.startsWith(value, 'SubResource')) {
-                            value = sub_res_table[get_function_params(value)];
-                        } else if (_.startsWith(value, 'Vector2')) {
-                            value = Vector2(value);
-                        } else if (_.startsWith(value, 'Color')) {
-                            value = Color(value);
-                        } else if (_.startsWith(value, 'Rect2')) {
-                            value = Rect2(value);
-                        }
 
-                        array[index][key_list[1]] = value;
+                            array[index][key_list[1]] = value;
+                        }
+                        tile_map = array;
+                    } else {
+                        // Dictionary?
+                        tile_map = prop;
                     }
-                    tile_map = array;
                 }
                 // Dictionary?
                 else {
@@ -783,10 +791,15 @@ const resource_normalizers = {
             }
         }
 
-        if (tile_map.length > 0) {
-            const texture = tile_map[0].texture;
-            const tile_mode = tile_map[0].tile_mode;
-            tile_map = tile_map.map(tile => {
+        const valid_only_tile_map = tile_map.filter((value) => !!value)
+        if (valid_only_tile_map.length > 0) {
+            const texture = valid_only_tile_map[0].texture;
+            const tile_mode = valid_only_tile_map[0].tile_mode;
+            tile_map = tile_map.map((tile) => {
+                if (!tile) {
+                    return null;
+                }
+
                 const data = {};
                 if (tile.modulate) {
                     if (
