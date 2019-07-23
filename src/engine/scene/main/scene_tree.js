@@ -860,6 +860,9 @@ export default class SceneTree {
 
             if (_process_tmp.last > 0) {
                 _process_tmp.real_delta = timestamp - _process_tmp.last;
+
+                // limit max delta to 1/20 second, larger than that would be out of control
+                _process_tmp.real_delta = Math.min(_process_tmp.real_delta, 1000 / 20) | 0;
             }
             _process_tmp.last = timestamp;
 
