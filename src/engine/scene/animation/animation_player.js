@@ -381,7 +381,7 @@ export default class AnimationPlayer extends Node2D {
      * @property {string}
      */
     get current_animation() {
-        return (this.is_playing ? '' : '');
+        return (this.is_playing ? this.playback.assigned : '');
     }
     set current_animation(anim) {
         if (anim === '[stop]' || anim.length === 0) {
