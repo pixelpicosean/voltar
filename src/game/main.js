@@ -31,6 +31,7 @@ v.scene_tree.init(
         application: {
             preloader: Preloader,
             main_scene: Main,
+            pause_on_blur: false,
         },
         display: {
             scale_mode: 'nearest',

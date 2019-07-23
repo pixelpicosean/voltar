@@ -27,6 +27,7 @@ import { remove_items } from 'engine/dep/index';
  * @prop {string} name
  * @prop {typeof Node2D} preloader
  * @prop {string|typeof Node2D} main_scene
+ * @prop {boolean} pause_on_blur
  */
 
 /**
@@ -81,6 +82,7 @@ const DefaultSettings = {
         name: 'Voltar',
         preloader: undefined,
         main_scene: undefined,
+        pause_on_blur: false,
     },
     display: {
         view: 'game',
@@ -268,6 +270,7 @@ export default class SceneTree {
         this.node_count = 0;
 
         this._paused = false;
+        this.view_focused = true;
 
         this.debug_collisions_hint = false;
 
@@ -396,6 +399,18 @@ export default class SceneTree {
 
         window.addEventListener('load', this._initialize, false);
         document.addEventListener('DOMContentLoaded', this._initialize, false);
+        window.addEventListener('blur', () => {
+            if (this.settings.application.pause_on_blur) {
+                this.view_focused = false;
+                this.view.style.filter = 'brightness(50%)';
+            }
+        }, false)
+        window.addEventListener('focus', () => {
+            if (this.settings.application.pause_on_blur) {
+                this.view_focused = true;
+                this.view.style.filter = 'none';
+            }
+        }, false)
     }
 
     is_paused() { }
@@ -829,6 +844,12 @@ export default class SceneTree {
      */
     iteration(timestamp) {
         this._loop_id = requestAnimationFrame(this._iteration_bind);
+
+        if (this.settings.application.pause_on_blur && !this.view_focused) {
+            // timestamp should always be updated, so our game can actually be "paused"
+            this._process_tmp.last = timestamp;
+            return;
+        }
 
         if (this._next_scene) {
             if (this.current_scene) {
