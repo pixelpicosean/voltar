@@ -410,6 +410,10 @@ export default class WebGLRenderer extends SystemRenderer {
             this.unbind_texture(base_texture);
 
             render_target = base_texture._gl_render_targets[this.CONTEXT_UID];
+            render_target.clear_color[0] = base_texture.clear_color._rgb[0];
+            render_target.clear_color[1] = base_texture.clear_color._rgb[0];
+            render_target.clear_color[2] = base_texture.clear_color._rgb[0];
+            render_target.clear_color[3] = base_texture.clear_color.a;
             render_target.set_frame(render_texture.frame);
         } else {
             render_target = this.root_render_target;

@@ -66,6 +66,9 @@ export default class RenderTexture extends Texture {
 
         this.legacy_renderer = _legacy_renderer;
 
+        /** @type {BaseRenderTexture} */
+        this.base_texture;
+
         /**
          * This will let the renderer know if the texture is valid. If it's not then it cannot be rendered.
          */

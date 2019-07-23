@@ -2,6 +2,7 @@ import settings from 'engine/settings';
 import RenderTarget from 'engine/servers/visual/utils/render_target';
 
 import BaseTexture from './base_texture';
+import Color from 'engine/core/color';
 
 /**
  * A BaseRenderTexture is a special texture that allows any Pixi display object to be rendered to it.
@@ -57,6 +58,8 @@ export default class BaseRenderTexture extends BaseTexture {
 
         this.scale_mode = scale_mode !== undefined ? scale_mode : settings.SCALE_MODE;
         this.has_loaded = true;
+
+        this.clear_color = new Color(0, 0, 0, 0);
 
         /**
          * A map of renderer IDs to webgl renderTargets
