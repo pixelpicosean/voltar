@@ -399,7 +399,7 @@ export default class FilterManager extends WebGLManager {
      * @param {boolean} clear - Should we clear the render texture when we get it?
      * @param {number} [resolution] - The resolution of the target.
      */
-    get_render_rarget(clear, resolution) {
+    get_render_target(clear, resolution) {
         const current_state = this.filter_data.stack[this.filter_data.index];
         const render_target = this.get_pot_render_target(
             this.renderer.gl,
@@ -418,7 +418,7 @@ export default class FilterManager extends WebGLManager {
      *
      * @param {RenderTarget} render_target - The render target to return.
      */
-    return_render_rarget(render_target) {
+    return_render_target(render_target) {
         this.free_pot_render_target(render_target);
     }
 
