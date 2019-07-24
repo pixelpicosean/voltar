@@ -16,6 +16,8 @@ export { default as ColorMatrix } from './colormatrix/color_matrix';
 export { default as Displacement } from './displacement/displacement';
 export { default as Dot } from './dot/dot';
 export { default as FXAA } from './fxaa/fxaa';
+export { default as KawaseBlur } from './kawase_blur/blur';
 export { default as Noise } from './noise/noise';
 export { default as Outline } from './outline/outline';
+export { default as SharpBlur } from './sharp_blur/blur';
 export { default as SimpleOutline } from './simple_outline/outline';

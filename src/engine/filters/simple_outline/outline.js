@@ -1,8 +1,8 @@
+import { rgb2hex, hex2rgb } from 'engine/utils/index';
 import Filter from 'engine/servers/visual/filters/filter';
 
 import vertex from '../fragments/default.vert';
 import fragment from './outline.frag';
-import { rgb2hex, hex2rgb } from 'engine/utils/index';
 
 /**
  * SimpleOutlineFilter
