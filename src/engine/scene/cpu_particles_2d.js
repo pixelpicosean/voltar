@@ -344,7 +344,6 @@ export default class CPUParticles2D extends Node2D {
 
         this.spread = 45;
 
-        this.flag_align_y = 0;
         this.gravity = new Vector2(0, 98);
 
         /** @type {Curve} */
@@ -430,7 +429,7 @@ export default class CPUParticles2D extends Node2D {
         if (data.local_coords !== undefined) this.local_coords = data.local_coords;
         if (data.fixed_fps !== undefined) this.fixed_fps = data.fixed_fps;
         if (data.emitting !== undefined) this.emitting = data.emitting;
-        if (data.flag_align_y !== undefined) this.flag_align_y = data.flag_align_y;
+        if (data.flag_align_y !== undefined) this.flags[Flags.ALIGN_Y_TO_VELOCITY] = data.flag_align_y;
         if (data.flatness !== undefined) this.flatness = data.flatness;
         if (data.fract_delta !== undefined) this.fract_delta = data.fract_delta;
         if (data.draw_order !== undefined) this.draw_order = data.draw_order;
