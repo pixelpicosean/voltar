@@ -61,7 +61,7 @@ const Flags = {
  */
 const EmissionShape = {
     POINT: 0,
-    CIRCLE: 1,
+    SPHERE: 1,
     RECTANGLE: 2,
     POINTS: 3,
     DIRECTED_POINTS: 4,
@@ -345,7 +345,7 @@ export default class CPUParticles2D extends Node2D {
         this.spread = 45;
 
         this.flag_align_y = 0;
-        this.gravity = new Vector2(0, 98.8);
+        this.gravity = new Vector2(0, 98);
 
         /** @type {Curve} */
         this.angle_curve = null;
@@ -402,6 +402,8 @@ export default class CPUParticles2D extends Node2D {
         this.amount = 8;
 
         this.set_param(Parameter.INITIAL_LINEAR_VELOCITY, 1);
+        this.set_param(Parameter.ANGULAR_VELOCITY, 0);
+        this.set_param(Parameter.ORBIT_VELOCITY, 0);
         this.set_param(Parameter.LINEAR_ACCEL, 0);
         this.set_param(Parameter.RADIAL_ACCEL, 0);
         this.set_param(Parameter.TANGENTIAL_ACCEL, 0);
@@ -698,6 +700,8 @@ export default class CPUParticles2D extends Node2D {
             velocity_xform.ty = 0;
         }
 
+        const system_phase = this.time / this.lifetime;
+
         for (let i = 0; i < pcount; i++) {
             const p = parray[i];
 
@@ -705,14 +709,16 @@ export default class CPUParticles2D extends Node2D {
                 continue;
             }
 
-            let restart_time = i / pcount * this.lifetime;
             let local_delta = p_delta;
 
+            let restart_phase = i / pcount;
+
             if (this.randomness_ratio > 0) {
-                restart_time += this.randomness_ratio * randf() / pcount;
+                restart_phase += this.randomness_ratio * randf() / pcount;
             }
 
-            restart_time *= (1 - this.explosiveness_ratio);
+            restart_phase *= (1 - this.explosiveness_ratio);
+            const restart_time = restart_phase * this.lifetime;
             let restart = false;
 
             if (this.time > prev_time) {
@@ -777,7 +783,8 @@ export default class CPUParticles2D extends Node2D {
                 switch (this.emission_shape) {
                     case EmissionShape.POINT: {
                     } break;
-                    case EmissionShape.CIRCLE: {
+                    // TODO: new sphere emit shape implementation
+                    case EmissionShape.SPHERE: {
                         vec.set(randf() * 2 - 1, randf() * 2 - 1)
                             .normalize()
                             .scale(this.emission_sphere_radius);
@@ -828,6 +835,11 @@ export default class CPUParticles2D extends Node2D {
                 let tex_linear_velocity = 0;
                 if (this.curve_parameters[Parameter.INITIAL_LINEAR_VELOCITY]) {
                     tex_linear_velocity = this.curve_parameters[Parameter.INITIAL_LINEAR_VELOCITY].interpolate(p.custom[1]);
+                }
+
+                let tex_orbit_velocity = 0;
+                if (this.curve_parameters[Parameter.ORBIT_VELOCITY]) {
+                    tex_orbit_velocity = this.curve_parameters[Parameter.ORBIT_VELOCITY].interpolate(p.custom[1]);
                 }
 
                 let tex_angular_velocity = 0;
@@ -890,11 +902,27 @@ export default class CPUParticles2D extends Node2D {
                 // Apply tangential acceleration
                 const yx = Vector2.new(diff.y, diff.x);
                 if (yx.length_squared() > 0) {
-                    force.add(yx.multiply(-1, 1).scale((this.parameters[Parameter.TANGENTIAL_ACCEL] + tex_tangential_accel) * lerp(1, randf(), this.randomness[Parameter.TANGENTIAL_ACCEL])));
+                    yx.multiply(-1, 1).normalize()
+                        .scale((this.parameters[Parameter.TANGENTIAL_ACCEL] + tex_tangential_accel) * lerp(1, randf(), this.randomness[Parameter.TANGENTIAL_ACCEL]))
+                    force.add(yx);
                 }
+                Vector2.free(yx);
                 // Apply attractor forces
                 p.velocity.add(force.x * local_delta, force.y * local_delta);
                 // Orbit velocity
+                const orbit_amount = (this.parameters[Parameter.ORBIT_VELOCITY] + tex_orbit_velocity) * lerp(1, randf(), this.randomness[Parameter.ORBIT_VELOCITY]);
+                if (orbit_amount !== 0) {
+                    const ang = orbit_amount * local_delta * Math.PI * 2;
+                    const rot = Matrix.new();
+                    rot.rotate(-ang);
+                    const x_diff = rot.basis_xform(diff);
+                    p.transform.tx -= diff.x;
+                    p.transform.ty -= diff.y;
+                    p.transform.tx += x_diff.x;
+                    p.transform.ty += x_diff.y;
+                    Vector2.free(x_diff);
+                    Matrix.free(rot);
+                }
                 if (this.curve_parameters[Parameter.INITIAL_LINEAR_VELOCITY]) {
                     p.velocity.normalize().scale(tex_linear_velocity);
                 }
@@ -958,6 +986,8 @@ export default class CPUParticles2D extends Node2D {
             if (this.flags[Flags.ALIGN_Y_TO_VELOCITY]) {
                 if (p.velocity.length_squared() > 0) {
                     const vel_n = p.velocity.normalized();
+                    p.transform.c = vel_n.x;
+                    p.transform.d = vel_n.y;
                     const tan = vel_n.set(p.transform.c, p.transform.d).tangent();
                     p.transform.a = tan.x;
                     p.transform.b = tan.y;
