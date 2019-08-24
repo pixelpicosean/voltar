@@ -495,6 +495,7 @@ export class KinematicBody2D extends PhysicsBody2D {
      * @param {boolean} [p_test_only]
      */
     _move(p_motion, p_infinite_inertia, r_collision, p_exclude_raycast_shapes = true, p_test_only = false) {
+        this._update_transform();
         const gt = this.transform.world_transform.clone();
         motion_result.reset();
         const colliding = PhysicsServer.singleton.body_test_motion(this.rid, gt, p_motion, p_infinite_inertia, this.margin, motion_result, p_exclude_raycast_shapes);
