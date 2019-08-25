@@ -1127,6 +1127,7 @@ export default class Node2D extends VObject {
         Matrix.free(xform);
 
         this._update_transform();
+        this.transform.on_change();
 
         return this;
     }
