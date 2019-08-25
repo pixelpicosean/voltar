@@ -1126,10 +1126,7 @@ export default class Node2D extends VObject {
         this.transform.set_from_matrix(xform).update_transform(this.parent.transform);
         Matrix.free(xform);
 
-        // Always mark transform as changed when this is set,
-        // so other systems (like the physics) will be able to receive
-        // transform change notification.
-        this.transform.on_change();
+        this._update_transform();
 
         return this;
     }
