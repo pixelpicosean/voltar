@@ -363,7 +363,7 @@ export class Curve extends VObject {
         local_offset /= d;
         d /= 3;
         const yac = a.pos.y + d * a.right_tangent;
-        const ybc = b.pos.y + d * b.left_tangent;
+        const ybc = b.pos.y - d * b.left_tangent;
 
         return _bezier_interp(local_offset, a.pos.y, yac, ybc, b.pos.y);
     }
