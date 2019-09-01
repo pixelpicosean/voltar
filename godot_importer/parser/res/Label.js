@@ -28,11 +28,13 @@ module.exports = (data) => {
 
     if (data.prop['custom_fonts/font']) {
         res.font = data.prop['custom_fonts/font'];
+        delete data.prop['custom_fonts/font']
     }
     if (data.prop['custom_colors/font_color']) {
         res.custom_colors = {
             font_color: Color(data.prop['custom_colors/font_color']),
         };
+        delete data.prop['custom_colors/font_color']
     }
 
     return res;
