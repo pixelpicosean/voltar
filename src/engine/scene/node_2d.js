@@ -1240,7 +1240,9 @@ export default class Node2D extends VObject {
             this.children[i]._propagate_process(delta);
         }
 
-        this.tweens && this.tweens._process(delta);
+        if (this.tweens && !this.get_tree().paused) {
+            this.tweens._process(delta);
+        }
     }
 
     /**
@@ -1257,7 +1259,6 @@ export default class Node2D extends VObject {
         }
 
         // TODO: support tweens with physics_process mode
-        // this.tweens && this.tweens._physics_process(delta);
     }
 
     _propagate_exit_tree() {

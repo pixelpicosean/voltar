@@ -59,6 +59,7 @@ import { remove_items } from 'engine/dep/index';
   * @prop {number} default_angular_damp
   * @prop {number} default_linear_damp
   * @prop {Gravity} gravity
+  * @prop {number} iteration
   */
 
 /**
@@ -109,6 +110,7 @@ const DefaultSettings = {
         default_linear_damp: 0.1,
         default_angular_damp: 1,
         gravity: { x: 0, y: 98 },
+        iteration: 2,
     },
     layer_map: {
         physics: {},
@@ -901,7 +903,10 @@ export default class SceneTree {
             this.physics_server.flush_queries();
 
             // - process nodes
-            this.current_scene._propagate_physics_process(this.physics_process_time);
+            const physics_delta = this.physics_process_time / this.settings.physics.iteration
+            for (let i = 0; i < this.settings.physics.iteration; i++) {
+                this.current_scene._propagate_physics_process(physics_delta);
+            }
 
             this.message_queue.flush();
 
