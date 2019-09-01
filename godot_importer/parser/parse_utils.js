@@ -323,8 +323,17 @@ module.exports.GeneralArray = (value) => {
             // so this is just a segment
             else {
                 // string
-                if (frag.indexOf('"') >= 0 || frag.indexOf('\'') >= 0) {
-                    segments.push(frag);
+                if (frag.indexOf('"') >= 0 || frag.indexOf("'") >= 0) {
+                    // remove quote at beginning and end if exist
+                    if (
+                        (frag.startsWith('"') && frag.endsWith('"'))
+                        ||
+                        (frag.startsWith("'") && frag.endsWith("'"))
+                    ) {
+                        segments.push(frag.substr(1, frag.length - 2))
+                    } else {
+                        segments.push(frag);
+                    }
                 }
                 else if (Number.isFinite(parseFloat(frag))) {
                     segments.push(parseFloat(frag));
