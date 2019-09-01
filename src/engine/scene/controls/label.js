@@ -527,11 +527,13 @@ export default class Label extends Control {
         const font_color = this.get_color('font_color');
         const line_spacing = this.get_constant('line_spacing');
 
-        const color_hex = tmp_color
+        tmp_color
             .copy(font_color)
             .multiply(this.modulate)
             .multiply(this.self_modulate)
-            .as_hex();
+
+        const color_hex = tmp_color.as_hex();
+        const opacity = tmp_color.a;
 
         // TODO: draw stylebox
 
@@ -679,6 +681,7 @@ export default class Label extends Control {
                         g.texture = char.texture;
                         g.position.set(x_ofs + char.h_align, y_ofs - font.ascent + char.v_align);
                         g.tint = color_hex;
+                        g.world_alpha = opacity;
 
                         // Update transform
                         g.parent = this;
