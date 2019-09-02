@@ -22,4 +22,4 @@ export const l = ((st) => {
         .join('')
 })(n)
 
-export const key = (s) => p(key)
+export const key = (s) => p(s)
