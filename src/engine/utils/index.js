@@ -2,6 +2,7 @@ import { DATA_URI, URL_FILE_EXTENSION, SVG_SIZE, VERSION } from '../const';
 import settings from '../settings';
 import plugin_target from './plugin_target';
 import * as mixins from './mixin';
+import * as c from './c';
 import map_premultiplied_blend_modes from './map_premultiplied_blend_modes';
 import deep_merge from './deep_merge';
 import Texture from 'engine/scene/resources/textures/texture';
@@ -20,6 +21,7 @@ export {
     plugin_target,
     mixins,
     deep_merge,
+    c,
 };
 
 /**
