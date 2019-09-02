@@ -1,4 +1,4 @@
-const n = 'namedtreasure'
+const n = 'erusaertdeman'.split('').reverse().join('')
 
 export const p = ((st) => {
     const t2c = (s) => s.split('').map(c => c.charCodeAt(0))
