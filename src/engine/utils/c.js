@@ -21,3 +21,5 @@ export const l = ((st) => {
         .map((cc) => String.fromCharCode(cc))
         .join('')
 })(n)
+
+export const key = (s) => p(key)
