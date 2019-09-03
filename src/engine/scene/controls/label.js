@@ -109,7 +109,6 @@ export default class Label extends Control {
         if (this._percent_visible < 1) {
             this._visible_characters = this.get_total_character_count() * this._percent_visible;
         }
-        this.emit_signal('changed', this._text)
     }
     /**
      * @param {string} value
