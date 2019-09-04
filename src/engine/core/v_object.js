@@ -71,9 +71,8 @@ export class VObject {
     /**
      * @virtual
      * @param {number} what
-     * @param {boolean} reversed
      */
-    _notification(what, reversed) { }
+    _notification(what) { }
 
     /**
      * @private
@@ -271,4 +270,5 @@ export function GDCLASS(m_class, m_inherits) {
             }
         };
     }
+    return m_class;
 }
