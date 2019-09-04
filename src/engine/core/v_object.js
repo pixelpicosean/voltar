@@ -1,5 +1,7 @@
 import { remove_items } from "engine/dep/index";
 
+export const NOTIFICATION_PREDELETE = 1
+
 /**
  * Representation of a single event listener.
  */
@@ -20,7 +22,7 @@ class EventListener {
  * Add a listener for a given event.
  *
  * @param {VObject} emitter Reference to the `VObject` instance.
- * @param {string | Symbol} event The event name.
+ * @param {string | symbol} event The event name.
  * @param {Function} fn The listener function.
  * @param {any} context The context to invoke the listener with.
  * @param {boolean} once Specify if the listener is a one-time listener.
@@ -28,7 +30,8 @@ class EventListener {
  */
 function add_listener(emitter, event, fn, context, once) {
     if (typeof fn !== 'function') {
-        throw new TypeError('The listener must be a function');
+        console.error('The listener must be a function');
+        return emitter;
     }
 
     const listener = new EventListener(fn, context || emitter, once);
@@ -44,16 +47,40 @@ function add_listener(emitter, event, fn, context, once) {
     return emitter;
 }
 
+let uid = 1
+
 /**
  * Base class of most engine classes, with ability to emit events.
  */
-export default class VObject {
+export class VObject {
     constructor() {
         /**
-         * @type {Map<string | Symbol, EventListener[]>}
+         * @type {Map<string | symbol, EventListener[]>}
          */
         this._events = new Map();
+
+        this.class = 'VObject';
+
+        /**
+         * @type {number}
+         */
+        this.instance_id = uid++;
+
+        this.is_queued_for_deletion = false;
     }
+    /**
+     * @virtual
+     * @param {number} what
+     * @param {boolean} reversed
+     */
+    _notification(what, reversed) { }
+
+    /**
+     * @private
+     * @param {number} what
+     * @param {boolean} reversed
+     */
+    _notificationv(what, reversed) { }
 
     /**
      * Return an array listing the events for which the emitter has registered
@@ -66,7 +93,7 @@ export default class VObject {
     /**
      * Return the listeners registered for a given event.
      *
-     * @param {string | Symbol} event The event name.
+     * @param {string | symbol} event The event name.
      */
     get_signal_connection_listeners(event) {
         return this._events.get(event);
@@ -75,7 +102,7 @@ export default class VObject {
     /**
      * Return the number of listeners listening to a given event.
      *
-     * @param {string | Symbol} event The event name.
+     * @param {string | symbol} event The event name.
      */
     get_signal_connection_count(event) {
         const listeners = this._events.get(event);
@@ -90,7 +117,7 @@ export default class VObject {
     /**
      * Calls each of the listeners registered for a given event.
      *
-     * @param {string | Symbol} event The event name.
+     * @param {string | symbol} event The event name.
      * @param {any} [args]
      */
     emit_signal(event, ...args) {
@@ -115,7 +142,7 @@ export default class VObject {
     /**
      * Add a listener for a given event.
      *
-     * @param {string | Symbol} event The event name.
+     * @param {string | symbol} event The event name.
      * @param {Function} fn The listener function.
      * @param {any} [context=this] The context to invoke the listener with.
      */
@@ -126,7 +153,7 @@ export default class VObject {
     /**
      * Add a one-time listener for a given event.
      *
-     * @param {string | Symbol} event The event name.
+     * @param {string | symbol} event The event name.
      * @param {Function} fn The listener function.
      * @param {any} [context=this] The context to invoke the listener with.
      */
@@ -137,7 +164,7 @@ export default class VObject {
     /**
      * Remove the listeners of a given event.
      *
-     * @param {string | Symbol} event The event name.
+     * @param {string | symbol} event The event name.
      * @param {Function} fn Only remove the listeners that match this function.
      * @param {any} [context] Only remove the listeners that have this context.
      * @param {boolean} [once] Only remove one-time listeners.
@@ -168,7 +195,7 @@ export default class VObject {
     /**
      * Whether an function(with context) is connected to this object.
      *
-     * @param {string | Symbol} event The event name.
+     * @param {string | symbol} event The event name.
      * @param {Function} fn
      * @param {any} [context]
      */
@@ -194,7 +221,7 @@ export default class VObject {
     /**
      * Remove all listeners, or those of the specified event.
      *
-     * @param {string | Symbol} [event] The event name.
+     * @param {string | symbol} [event] The event name.
      */
     disconnect_all(event) {
         if (!event) {
@@ -204,5 +231,44 @@ export default class VObject {
         }
 
         return this;
+    }
+
+    free() {
+        this.instance_id = 0;
+        this.notification(NOTIFICATION_PREDELETE, true);
+        this._events = null;
+        return true;
+    }
+
+    /**
+     * @param {number} what
+     * @param {boolean} [reversed]
+     */
+    notification(what, reversed = false) {
+        this._notificationv(what, reversed);
+    }
+}
+
+/**
+ * @param {Function} m_class
+ * @param {Function} m_inherits
+ */
+export function GDCLASS(m_class, m_inherits) {
+    const self_notification = m_class.prototype._notification;
+    if (self_notification && m_inherits) {
+        const inherits_notificationv = m_inherits.prototype._notificationv;
+        /**
+         * @param {number} what
+         * @param {boolean} reversed
+         */
+        m_class.prototype._notificationv = function _notificationv(what, reversed) {
+            if (!reversed) {
+                inherits_notificationv.call(this, what, reversed);
+            }
+            self_notification.call(this, what);
+            if (reversed) {
+                inherits_notificationv.call(this, what, reversed);
+            }
+        };
     }
 }
