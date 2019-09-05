@@ -1,5 +1,6 @@
 import { is_webgl_supported } from 'engine/utils/index';
 import { loader_use_procs } from 'engine/registry';
+import { Matrix } from 'engine/core/math/index';
 import WebGLRenderer from 'engine/servers/visual/webgl_renderer';
 import texture_parser from 'engine/scene/resources/textures/texture_parser';
 import spritesheet_parser from 'engine/scene/resources/textures/spritesheet_parser';
@@ -52,6 +53,9 @@ export default class VisualServer {
             viewport.canvas_transform.ty = viewport.canvas_transform.ty | 0;
         }
 
-        this.renderer.render(viewport, undefined, true, viewport.canvas_transform, true);
+        const scene = /** @type {import('engine/scene/node_2d').default} */(viewport.data.children[viewport.data.children.length - 1]);
+        const xform = viewport.canvas_transform.clone().append(viewport.stretch_transform);
+        this.renderer.render(scene, undefined, true, xform, true);
+        Matrix.free(xform);
     }
 }

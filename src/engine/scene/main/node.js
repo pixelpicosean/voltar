@@ -46,13 +46,13 @@ class Data {
         this.pos = -1;
         this.depth = -1;
         this.name = '';
-        /** @type {import('./scene_tree').SceneTree} */
+        /** @type {import('./scene_tree').default} */
         this.tree = null;
         this.inside_tree = false;
         this.ready_notified = false;
         this.ready_first = true;
 
-        /** @type {import('./viewport').Viewport} */
+        /** @type {import('./viewport').default} */
         this.viewport = null;
 
         this.pause_mode = PAUSE_MODE_INHERIT;
@@ -269,7 +269,7 @@ export class Node extends VObject {
         }
 
         if (this.class === 'Viewport') {
-            this.data.viewport = /** @type {import('./viewport').Viewport} */(/** @type {unknown} */(this));
+            this.data.viewport = /** @type {import('./viewport').default} */(/** @type {unknown} */(this));
         } else {
             this.data.viewport = this.data.parent.data.viewport;
         }
@@ -399,7 +399,7 @@ export class Node extends VObject {
     }
 
     /**
-     * @param {import('./scene_tree').SceneTree} p_tree
+     * @param {import('./scene_tree').default} p_tree
      */
     _set_tree(p_tree) {
         let tree_changed_a = null;
@@ -736,10 +736,10 @@ export class Node extends VObject {
      */
     find_node(p_mask, p_recursive = true, p_owned = true) {
         // TODO: support Godot like `find_node` behavior
-        if (this.named_children.has(p_mask)) {
-            return this.named_children.get(p_mask);
+        let ret = this.named_children.has(p_mask);
+        if (ret) {
+            return ret;
         }
-        let ret = null;
         if (p_recursive) {
             for (const c of this.data.children) {
                 ret = c.find_node(p_mask, true, p_owned);

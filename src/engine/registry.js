@@ -1,5 +1,3 @@
-import Resource from "engine/core/io/Resource";
-
 class ResourceInterface {
     /** @param {any} data */
     _load_data(data) { }
@@ -32,7 +30,7 @@ export const node_plugins = {
 
 /**
  * @typedef PackedScene
- * @property {() => import('./scene/node_2d').default} instance
+ * @property {() => import('engine/scene/main/node').Node} instance
  */
 /**
  * Scene class looking table
@@ -41,12 +39,12 @@ export const node_plugins = {
 export const scene_class_map = Object.create(null);
 
 /**
- * @type {Array<() => ((res: Resource, next: Function) => void)>}
+ * @type {Array<() => ((res: import("engine/core/io/Resource").default, next: Function) => void)>}
  */
 export const loader_pre_procs = [];
 
 /**
- * @type {Array<() => ((res: Resource, next: Function) => void)>}
+ * @type {Array<() => ((res: import("engine/core/io/Resource").default, next: Function) => void)>}
  */
 export const loader_use_procs = [];
 

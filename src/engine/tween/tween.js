@@ -1,6 +1,6 @@
 import { Vector2, Vector2Like, clamp } from 'engine/core/math/index';
 import { remove_items } from 'engine/dep/index';
-import VObject from 'engine/core/v_object';
+import { VObject } from 'engine/core/v_object';
 import flatten_key_url from './flatten_key_url';
 import { Easing } from './easing';
 

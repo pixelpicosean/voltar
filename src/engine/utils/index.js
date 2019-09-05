@@ -5,8 +5,6 @@ import * as mixins from './mixin';
 import * as c from './c';
 import map_premultiplied_blend_modes from './map_premultiplied_blend_modes';
 import deep_merge from './deep_merge';
-import Texture from 'engine/scene/resources/textures/texture';
-import BaseTexture from 'engine/scene/resources/textures/base_texture';
 
 let next_uid = 0;
 
@@ -242,43 +240,43 @@ export function shuffle(array) {
     return array;
 }
 
-/**
- * @type {{ [key: string]: Texture }}
- */
-export const TextureCache = Object.create(null);
+// /**
+//  * @type {{ [key: string]: Texture }}
+//  */
+// export const TextureCache = Object.create(null);
 
-/**
- * @type {{ [key: string]: BaseTexture }}
- */
-export const BaseTextureCache = Object.create(null);
+// /**
+//  * @type {{ [key: string]: BaseTexture }}
+//  */
+// export const BaseTextureCache = Object.create(null);
 
 /**
  * Destroys all texture in the cache
  */
-export function destroy_texture_cache() {
-    let key;
+// export function destroy_texture_cache() {
+//     let key;
 
-    for (key in TextureCache) {
-        TextureCache[key].destroy();
-    }
-    for (key in BaseTextureCache) {
-        BaseTextureCache[key].destroy();
-    }
-}
+//     for (key in TextureCache) {
+//         TextureCache[key].destroy();
+//     }
+//     for (key in BaseTextureCache) {
+//         BaseTextureCache[key].destroy();
+//     }
+// }
 
 /**
  * Removes all textures from cache, but does not destroy them
  */
-export function clear_texture_cache() {
-    let key;
+// export function clear_texture_cache() {
+//     let key;
 
-    for (key in TextureCache) {
-        delete TextureCache[key];
-    }
-    for (key in BaseTextureCache) {
-        delete BaseTextureCache[key];
-    }
-}
+//     for (key in TextureCache) {
+//         delete TextureCache[key];
+//     }
+//     for (key in BaseTextureCache) {
+//         delete BaseTextureCache[key];
+//     }
+// }
 
 /**
  * @type {{ [key: string]: import('engine/scene/sprites/animated_sprite').SpriteFrames }}

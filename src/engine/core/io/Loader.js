@@ -1,4 +1,4 @@
-import VObject from 'engine/core/v_object';
+import { VObject } from 'engine/core/v_object';
 
 import parse_uri from './parse_uri';
 import { queue, each_series } from './async';

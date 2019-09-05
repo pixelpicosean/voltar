@@ -3,14 +3,15 @@
 // ------------------------------------------------------------------
 export * from 'engine/dep/index';
 
-export { default as VObject } from 'engine/core/v_object';
+export { VObject } from 'engine/core/v_object';
 
 // ------------------------------------------------------------------
 // Node
 // ------------------------------------------------------------------
-import Node2D from 'engine/scene/node_2d';
+import { Node } from 'engine/scene/main/node';
 export { PauseMode } from 'engine/scene/node_2d';
 
+export { Node } from 'engine/scene/main/node';
 export { default as Viewport } from 'engine/scene/main/viewport';
 export { default as CanvasLayer } from 'engine/scene/main/canvas_layer';
 
@@ -221,7 +222,7 @@ const has = Object.prototype.hasOwnProperty;
 
 /**
  * @typedef PackedScene
- * @property {() => Node2D} instance
+ * @property {() => Node} instance
  */
 // Functions
 /**
@@ -239,7 +240,7 @@ export function register_scene_class(key, ctor) {
 
 /**
  * @param {String} url path to the scene (JSON from .tscn)
- * @param {typeof Node2D} scene Scene class
+ * @param {typeof Node} scene Scene class
  */
 export function attach_script(url, scene) {
     // Add `instance` static method
@@ -265,8 +266,8 @@ export function attach_script(url, scene) {
  */
 
 /**
- * Assemble a scene(Node2D) with hierarchy data
- * @template {Node2D} T
+ * Assemble a scene(Node) with hierarchy data
+ * @template {Node} T
  * @param {T} scn
  * @param {NodeData} data
  */
@@ -285,13 +286,13 @@ export function assemble_scene(scn, data) {
 }
 
 /**
- * @template {Node2D} T
- * @param {NodeData | typeof Node2D} p_data
+ * @template {Node} T
+ * @param {NodeData | typeof Node} p_data
  */
 export function instanciate_scene(p_data) {
     /** @type {NodeData} */
     let data = null;
-    /** @type {typeof Node2D} */
+    /** @type {typeof Node} */
     let ctor = null;
 
     if (typeof (p_data) === 'function') {
@@ -340,7 +341,7 @@ export function instanciate_scene(p_data) {
 }
 
 /**
- * @template {Node2D} T
+ * @template {Node} T
  * @param {T} node
  * @param {NodeData[]} children
  */
