@@ -1,4 +1,5 @@
 import { remove_items } from "engine/dep/index";
+import MessageQueue from "./message_queue";
 
 export const NOTIFICATION_PREDELETE = 1
 
@@ -246,6 +247,14 @@ export class VObject {
     notification(what, reversed = false) {
         this._notificationv(what, reversed);
     }
+
+    /**
+     * @param {string} p_method
+     * @param  {...any} p_args
+     */
+    call_deferred(p_method, ...p_args) {
+        MessageQueue.get_singleton().push_call(this, p_method, ...p_args);
+    }
 }
 
 /**
@@ -255,6 +264,7 @@ export class VObject {
 export function GDCLASS(m_class, m_inherits) {
     const self_notification = m_class.prototype._notification;
     if (self_notification && m_inherits) {
+        const inherits_notification = m_inherits.prototype._notification;
         const inherits_notificationv = m_inherits.prototype._notificationv;
         /**
          * @param {number} what
@@ -264,7 +274,9 @@ export function GDCLASS(m_class, m_inherits) {
             if (!reversed) {
                 inherits_notificationv.call(this, what, reversed);
             }
-            self_notification.call(this, what);
+            if (self_notification !== inherits_notification) {
+                self_notification.call(this, what);
+            }
             if (reversed) {
                 inherits_notificationv.call(this, what, reversed);
             }
