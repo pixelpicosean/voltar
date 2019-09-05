@@ -23,7 +23,6 @@ import { remove_items } from 'engine/dep/index';
 import { MainLoop, NOTIFICATION_WM_MOUSE_ENTER, NOTIFICATION_WM_MOUSE_EXIT, NOTIFICATION_WM_FOCUS_IN, NOTIFICATION_WM_FOCUS_OUT, NOTIFICATION_TRANSLATION_CHANGED, NOTIFICATION_WM_UNFOCUS_REQUEST } from 'engine/core/main_loop';
 import Vector2, { Vector2Like } from 'engine/core/math/vector2';
 import { List } from 'engine/core/self_list';
-import { ProjectSettings } from 'engine/core/project_settings';
 
 const NOTIFICATION_TRANSFORM_CHANGED = 2000;
 

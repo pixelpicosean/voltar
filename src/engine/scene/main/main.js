@@ -90,6 +90,8 @@ export const Main = {
         }
 
         this.iterating--;
+
+        this.raf_id = requestAnimationFrame(this.iteration);
     },
 
     start_loop() {
