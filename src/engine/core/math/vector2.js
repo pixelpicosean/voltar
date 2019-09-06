@@ -14,7 +14,7 @@ export class Vector2Like {
  * The Vector2 object represents a location in a two-dimensional coordinate system, where x represents
  * the horizontal axis and y represents the vertical axis.
  */
-export default class Vector2 {
+export class Vector2 {
     /**
      * @param {number} [p_x]
      * @param {number} [p_y]

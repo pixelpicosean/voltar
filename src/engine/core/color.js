@@ -3,7 +3,7 @@ import { rgb2hex, hex2rgb } from "engine/utils/index";
 /** @type {Color[]} */
 const Color_Pool = [];
 
-export default class Color {
+export class Color {
     /** @param {number} p_hex */
     static hex(p_hex) {
         const rgb = hex2rgb(p_hex);
