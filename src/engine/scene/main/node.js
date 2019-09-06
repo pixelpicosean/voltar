@@ -1,12 +1,12 @@
 import { remove_items } from 'engine/dep/index';
 import { node_class_map } from 'engine/registry';
-
+import MessageQueue from 'engine/core/message_queue';
 import {
     VObject,
     GDCLASS,
     NOTIFICATION_PREDELETE,
-} from '../../core/v_object';
-import MessageQueue from 'engine/core/message_queue';
+} from 'engine/core/v_object';
+
 
 export const PAUSE_MODE_INHERIT = 0;
 export const PAUSE_MODE_STOP = 1;
@@ -30,6 +30,7 @@ export const NOTIFICATION_INTERNAL_PROCESS = 25;
 export const NOTIFICATION_INTERNAL_PHYSICS_PROCESS = 26;
 export const NOTIFICATION_POST_ENTER_TREE = 27;
 
+
 class Data {
     constructor() {
         this.filename = '';
@@ -46,13 +47,13 @@ class Data {
         this.pos = -1;
         this.depth = -1;
         this.name = '';
-        /** @type {import('./scene_tree').default} */
+        /** @type {import('./scene_tree').SceneTree} */
         this.tree = null;
         this.inside_tree = false;
         this.ready_notified = false;
         this.ready_first = true;
 
-        /** @type {import('./viewport').default} */
+        /** @type {import('./viewport').Viewport} */
         this.viewport = null;
 
         this.pause_mode = PAUSE_MODE_INHERIT;
@@ -79,6 +80,7 @@ class Data {
         this.path_cache = null;
     }
 }
+
 
 export class Node extends VObject {
     static instance() { return new Node() }
@@ -168,14 +170,14 @@ export class Node extends VObject {
     constructor() {
         super();
 
+        this.class = 'Node';
+
         // Flags to avoid call of `instanceof` for better performance
         this.is_node = true;
         this.is_canvas_item = false;
         this.is_node_2d = false;
         this.is_control = false;
         this.is_collision_object = false;
-
-        this.class = 'Node';
 
         this.data = new Data();
         /** @type {Map<string, Node>} */
@@ -193,11 +195,29 @@ export class Node extends VObject {
     }
 
     /* virtuals */
+
     /**
      * @param {any} data
-     * @returns {this}
      */
     _load_data(data) {
+        this.instance_data = data;
+
+        if (data.filename !== undefined) {
+            this.filename = data.filename;
+        }
+        if (data.name !== undefined) {
+            this.name = data.name;
+        }
+        if (data.groups !== undefined) {
+            for (const g of data.groups) {
+                this.add_to_group(g);
+            }
+        }
+
+        if (data.pause_mode !== undefined) {
+            this.pause_mode = data.pause_mode;
+        }
+
         return this;
     }
 
@@ -269,7 +289,7 @@ export class Node extends VObject {
         }
 
         if (this.class === 'Viewport') {
-            this.data.viewport = /** @type {import('./viewport').default} */(/** @type {unknown} */(this));
+            this.data.viewport = /** @type {import('./viewport').Viewport} */(/** @type {unknown} */(this));
         } else {
             this.data.viewport = this.data.parent.data.viewport;
         }
@@ -399,7 +419,7 @@ export class Node extends VObject {
     }
 
     /**
-     * @param {import('./scene_tree').default} p_tree
+     * @param {import('./scene_tree').SceneTree} p_tree
      */
     _set_tree(p_tree) {
         let tree_changed_a = null;

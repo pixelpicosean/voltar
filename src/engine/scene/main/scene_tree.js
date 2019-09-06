@@ -4,12 +4,11 @@ import {
 } from 'engine/registry';
 
 import MessageQueue from 'engine/core/message_queue';
-// import Loader from 'engine/core/io/Loader';
 import { VObject, GDCLASS } from 'engine/core/v_object';
 
-// import World2D from '../resources/world_2d';
+import World2D from '../resources/world_2d';
 
-import Viewport from './viewport';
+import { Viewport } from './viewport';
 import {
     Node,
     NOTIFICATION_INTERNAL_PHYSICS_PROCESS,
@@ -20,9 +19,18 @@ import {
     NOTIFICATION_UNPAUSED,
 } from '../main/node';
 import { remove_items } from 'engine/dep/index';
-import { MainLoop, NOTIFICATION_WM_MOUSE_ENTER, NOTIFICATION_WM_MOUSE_EXIT, NOTIFICATION_WM_FOCUS_IN, NOTIFICATION_WM_FOCUS_OUT, NOTIFICATION_TRANSLATION_CHANGED, NOTIFICATION_WM_UNFOCUS_REQUEST } from 'engine/core/main_loop';
-import Vector2, { Vector2Like } from 'engine/core/math/vector2';
+import {
+    MainLoop,
+    NOTIFICATION_WM_MOUSE_ENTER,
+    NOTIFICATION_WM_MOUSE_EXIT,
+    NOTIFICATION_WM_FOCUS_IN,
+    NOTIFICATION_WM_FOCUS_OUT,
+    NOTIFICATION_TRANSLATION_CHANGED,
+    NOTIFICATION_WM_UNFOCUS_REQUEST,
+} from 'engine/core/main_loop';
+import { Vector2, Vector2Like } from 'engine/core/math/vector2';
 import { List } from 'engine/core/self_list';
+
 
 const NOTIFICATION_TRANSFORM_CHANGED = 2000;
 
@@ -152,7 +160,7 @@ res_procs['PackedScene'] = (key, data, resource_map) => {
  * @property {any} data
  */
 
-export default class SceneTree extends MainLoop {
+export class SceneTree extends MainLoop {
     get paused() {
         return this._paused;
     }
@@ -241,7 +249,7 @@ export default class SceneTree extends MainLoop {
          */
         this.timers = [];
 
-        // this.world_2d = new World2D();
+        this.world_2d = new World2D();
 
 
         this.init = this.init.bind(this);
@@ -250,20 +258,7 @@ export default class SceneTree extends MainLoop {
         this.view = null;
         /** @type {HTMLElement} */
         this.container = null;
-        this.view_focused = true;
-        // this.resource_map = resource_map;
-        /**
-         * Global time scale
-         * @default 1.0
-         */
-        this.time_scale = 1;
 
-        /**
-         * A premade instance of the loader that can be used to load resources.
-         * @type {Loader}
-         */
-        // this.loader = null;
-        // this.preload_queue = preload_queue;
         this._current_packed_scene = null;
     }
     free() {

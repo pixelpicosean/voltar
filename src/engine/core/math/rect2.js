@@ -51,6 +51,8 @@ export class Rect2 {
      * @param {number} [height=0] - The overall height of this rectangle
      */
     constructor(x = 0, y = 0, width = 0, height = 0) {
+        this.class = 'Rect2';
+
         /**
          * @type {number}
          */
@@ -70,14 +72,6 @@ export class Rect2 {
          * @type {number}
          */
         this.height = Number(height);
-
-        /**
-         * The type of the object, mainly used to avoid `instanceof` checks
-         *
-         * @type {number}
-         * @readOnly
-         */
-        this.type = SHAPES.RECT;
     }
 
     /**

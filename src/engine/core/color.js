@@ -64,6 +64,8 @@ export class Color {
      * @param {number} [a]
      */
     constructor(r = 1, g = 1, b = 1, a = 1) {
+        this.class = 'Color';
+
         this._rgb = [r, g, b];
         this.alpha = a;
     }
@@ -109,5 +111,18 @@ export class Color {
 
     as_hex() {
         return rgb2hex(this._rgb);
+    }
+
+    /**
+     * @param {Color} value
+     */
+    equals(value) {
+        return this.r === value.r
+            &&
+            this.g === value.g
+            &&
+            this.b === value.b
+            &&
+            this.a === value.a
     }
 };

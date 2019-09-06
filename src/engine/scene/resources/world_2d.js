@@ -1,7 +1,11 @@
-import { VisibilityNotifier2D } from "../visibility_notifier_2d";
-import { Rectangle, Vector2 } from "engine/core/math/index";
-import Viewport from "../main/viewport";
+import { Vector2 } from "engine/core/math/vector2";
+import { Rect2 } from "engine/core/math/rect2";
+
 import PhysicsServer from "engine/servers/physics_2d/physics_server";
+
+import { Viewport } from "../main/viewport";
+import { VisibilityNotifier2D } from "../visibility_notifier_2d";
+
 
 class CellRef {
     constructor() { this.ref = 0 }
@@ -32,7 +36,7 @@ class ViewportData {
          * @type {Map<VisibilityNotifier2D, number>}
          */
         this.notifiers = new Map();
-        this.rect = new Rectangle();
+        this.rect = new Rect2();
     }
 }
 
@@ -45,7 +49,7 @@ class SpatialIndexer2D {
         this.cell_size = 100;
 
         /**
-         * @type {Map<VisibilityNotifier2D, Rectangle>}
+         * @type {Map<VisibilityNotifier2D, Rect2>}
          */
         this.notifiers = new Map();
 
@@ -61,20 +65,20 @@ class SpatialIndexer2D {
 
     /**
      * @param {VisibilityNotifier2D} p_notifier
-     * @param {Rectangle} p_rect
+     * @param {Rect2} p_rect
      * @param {boolean} p_add
      */
     _notifier_update_cells(p_notifier, p_rect, p_add) { }
 
     /**
      * @param {VisibilityNotifier2D} p_notifier
-     * @param {Rectangle} p_rect
+     * @param {Rect2} p_rect
      */
     _notifier_add(p_notifier, p_rect) { }
 
     /**
      * @param {VisibilityNotifier2D} p_notifier
-     * @param {Rectangle} p_rect
+     * @param {Rect2} p_rect
      */
     _notifier_update(p_notifier, p_rect) { }
 
@@ -85,12 +89,12 @@ class SpatialIndexer2D {
 
     /**
      * @param {Viewport} p_viewport
-     * @param {Rectangle} p_rect
+     * @param {Rect2} p_rect
      */
     _add_viewport(p_viewport, p_rect) { }
     /**
      * @param {Viewport} p_viewport
-     * @param {Rectangle} p_rect
+     * @param {Rect2} p_rect
      */
     _update_viewport(p_viewport, p_rect) { }
     /**
@@ -119,8 +123,8 @@ export default class World2D {
     constructor() {
         this.canvas = null;
 
-        this.space = PhysicsServer.singleton.space_create();
-        PhysicsServer.singleton.space_set_active(this.space, true);
+        this.space = PhysicsServer.get_singleton().space_create();
+        PhysicsServer.get_singleton().space_set_active(this.space, true);
         // TODO: load data from `project.godot`
         this.space.default_area.gravity = 98;
         this.space.default_area.gravity_vector = new Vector2(0, 1);
@@ -130,12 +134,12 @@ export default class World2D {
         this.indexer = new SpatialIndexer2D();
     }
     free() {
-        PhysicsServer.singleton.free(this.space);
+        PhysicsServer.get_singleton().free(this.space);
     }
 
     /**
      * @param {Viewport} p_viewport
-     * @param {Rectangle} p_rect
+     * @param {Rect2} p_rect
      */
     _register_viewport(p_viewport, p_rect) {
         this.indexer._add_viewport(p_viewport, p_rect);
@@ -143,7 +147,7 @@ export default class World2D {
 
     /**
      * @param {Viewport} p_viewport
-     * @param {Rectangle} p_rect
+     * @param {Rect2} p_rect
      */
     _update_viewport(p_viewport, p_rect) {
         this.indexer._update_viewport(p_viewport, p_rect);

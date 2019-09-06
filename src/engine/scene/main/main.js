@@ -2,6 +2,7 @@ import { mixins } from "engine/utils/index";
 import { ProjectSettings } from "engine/core/project_settings";
 import SceneTree from "./scene_tree";
 import MessageQueue from "engine/core/message_queue";
+import { VisualServer } from "engine/servers/visual_server";
 
 export const Main = {
     last_ticks: 0,
@@ -13,7 +14,7 @@ export const Main = {
     raf_id: -1,
     iterating: 0,
 
-    force_redraw_requested: 0,
+    force_redraw_requested: false,
 
     /** @type {SceneTree} */
     tree: null,
@@ -60,8 +61,11 @@ export const Main = {
         }
         this.last_ticks = timestamp;
 
+        // TODO: scaled_step = step * time_scale;
+        const scaled_step = step * 1.0;
+
         const max_physics_steps = 4;
-        const frame_slice = step / max_physics_steps;
+        const frame_slice = scaled_step / max_physics_steps;
 
         for (let iters = 0; iters < max_physics_steps; iters++) {
             // Physics2DServer.get_singleton().sync();
@@ -77,10 +81,15 @@ export const Main = {
             MessageQueue.get_singleton().flush();
         }
 
-        SceneTree.get_singleton().idle(step);
+        SceneTree.get_singleton().idle(scaled_step);
         MessageQueue.get_singleton().flush();
 
-        // VisualServer.get_singleton().sync();
+        VisualServer.get_singleton().sync();
+
+        // TODO: if (can_draw() && !disable_render_loop)
+        // TODO: force_redraw_requested && is_in_low_processor_usage_mode()
+        VisualServer.get_singleton().draw(scaled_step);
+        this.force_redraw_requested = false;
 
         this.frames++;
         if (this.frame > 1000000) {
