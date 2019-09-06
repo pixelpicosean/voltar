@@ -1,8 +1,7 @@
-import { SHAPES } from 'engine/const';
-import Vector2 from '../vector2';
+import { Vector2, Vector2Like } from './vector2';
 
 /**
- * @type {Rectangle[]}
+ * @type {Rect2[]}
  */
 const pool = [];
 
@@ -10,7 +9,7 @@ const pool = [];
  * Rectangle object is an area defined by its position, as indicated by its top-left corner
  * point (x, y) and by its width and its height.
  */
-export default class Rectangle {
+export class Rect2 {
     /**
      * @param {number} p_x
      * @param {number} p_y
@@ -20,19 +19,19 @@ export default class Rectangle {
     static new(p_x = 0, p_y = 0, p_width = 0, p_height = 0) {
         const r = pool.pop();
         if (!r) {
-            return new Rectangle(p_x, p_y, p_width, p_height);
+            return new Rect2(p_x, p_y, p_width, p_height);
         } else {
             return r.set(p_x, p_y, p_width, p_height);
         }
     }
     /**
-     * @param {Rectangle} p_rect
+     * @param {Rect2} p_rect
      */
     static free(p_rect) {
         if (p_rect && pool.length < 2019) {
             pool.push(p_rect);
         }
-        return Rectangle;
+        return Rect2;
     }
 
     /**
@@ -42,7 +41,7 @@ export default class Rectangle {
      * @constant
      */
     static get EMPTY() {
-        return Object.freeze(new Rectangle(0, 0, 0, 0));
+        return Object.freeze(new Rect2(0, 0, 0, 0));
     }
 
     /**
@@ -135,13 +134,13 @@ export default class Rectangle {
      * Creates a clone of this Rectangle
      */
     clone() {
-        return Rectangle.new(this.x, this.y, this.width, this.height);
+        return Rect2.new(this.x, this.y, this.width, this.height);
     }
 
     /**
      * Copies another rectangle to this one.
      *
-     * @param {Rectangle} rectangle - The rectangle to copy.
+     * @param {Rect2} rectangle - The rectangle to copy.
      */
     copy(rectangle) {
         this.x = rectangle.x;
@@ -157,7 +156,7 @@ export default class Rectangle {
     }
 
     /**
-     * @param {Rectangle} rect
+     * @param {Rect2} rect
      */
     equals(rect) {
         return this.x === rect.x && this.y === rect.y && this.width === rect.width && this.height === rect.height;
@@ -181,6 +180,87 @@ export default class Rectangle {
         }
 
         return false;
+    }
+
+    has_no_area() {
+        return this.width <= 0 || this.height <= 0;
+    }
+    /**
+     * @param {Vector2Like} p_point
+     */
+    has_point(p_point) {
+        if (p_point.x < this.x) {
+            return false;
+        }
+        if (p_point.y < this.y) {
+            return false;
+        }
+
+        if (p_point.x >= (this.x + this.width)) {
+            return false;
+        }
+        if (p_point.y >= (this.y + this.height)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    get_area() {
+        return this.width * this.height;
+    }
+
+    abs() {
+        return this.clone().abs_to();
+    }
+
+    abs_to() {
+        this.x = this.x + Math.min(this.width, 0);
+        this.y = this.y + Math.min(this.height, 0);
+        this.width = Math.abs(this.width);
+        this.height = Math.abs(this.height);
+    }
+
+    /**
+     * @param {Rect2} p_rect
+     */
+    clip(p_rect) {
+        return this.clone().clip_to(p_rect);
+    }
+
+    /**
+     * @param {Rect2} p_rect
+     */
+    clip_to(p_rect) {
+        if (!this.intersects(p_rect)) {
+            return this.set(0, 0, 0, 0);
+        }
+
+        const x = Math.max(p_rect.x, this.x);
+        const y = Math.max(p_rect.y, this.y);
+
+        const p_rect_end_x = p_rect.x + p_rect.width;
+        const p_rect_end_y = p_rect.y + p_rect.height;
+        const end_x = this.x + this.width;
+        const end_y = this.y + this.height;
+
+        this.x = x;
+        this.y = y;
+        this.width = Math.min(p_rect_end_x, end_x) - x;
+        this.height = Math.min(p_rect_end_y, end_y) - y;
+
+        return this;
+    }
+
+    /**
+     * @param {Rect2} p_rect
+     */
+    encloses(p_rect) {
+        return (p_rect.x >= this.x) && (p_rect.y >= this.y)
+            &&
+            ((p_rect.x + p_rect.width) < (this.x + this.width))
+            &&
+            ((p_rect.y + p_rect.height) < (this.y + this.height))
     }
 
     /**
@@ -262,7 +342,7 @@ export default class Rectangle {
     /**
      * Fits this rectangle around the passed one.
      *
-     * @param {Rectangle} p_rect - The rectangle to fit.
+     * @param {Rect2} p_rect - The rectangle to fit.
      */
     fit_to(p_rect) {
         if (this.x < p_rect.x) {
@@ -300,7 +380,7 @@ export default class Rectangle {
     /**
      * Merge the given rectangle and return a new one.
      *
-     * @param {Rectangle} p_rect - The rectangle to merge.
+     * @param {Rect2} p_rect - The rectangle to merge.
      */
     merge(p_rect) {
         return this.clone().merge_to(p_rect);
@@ -309,7 +389,7 @@ export default class Rectangle {
     /**
      * Merge this rectangle with the passed rectangle
      *
-     * @param {Rectangle} p_rect - The rectangle to merge.
+     * @param {Rect2} p_rect - The rectangle to merge.
      */
     merge_to(p_rect) {
         const x1 = Math.min(this.x, p_rect.x);
@@ -326,7 +406,7 @@ export default class Rectangle {
     }
 
     /**
-     * @param {Rectangle} p_rect
+     * @param {Rect2} p_rect
      */
     intersects(p_rect) {
         return !(
