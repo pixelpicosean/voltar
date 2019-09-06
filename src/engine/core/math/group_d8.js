@@ -1,12 +1,12 @@
 // Your friendly neighbour https://en.wikipedia.org/wiki/Dihedral_group of order 16
-import Matrix from './matrix';
+import { Transform2D } from './transform_2d';
 
 const ux = [1, 1, 0, -1, -1, -1, 0, 1, 1, 1, 0, -1, -1, -1, 0, 1];
 const uy = [0, 1, 1, 1, 0, -1, -1, -1, 0, 1, 1, 1, 0, -1, -1, -1];
 const vx = [0, -1, -1, -1, 0, 1, 1, 1, 0, 1, 1, 1, 0, -1, -1, -1];
 const vy = [1, 1, 0, -1, -1, -1, 0, 1, -1, -1, 0, 1, 1, 1, 0, -1];
 
-/** @type {Matrix[]} */
+/** @type {Transform2D[]} */
 const temp_matrices = [];
 
 /** @type {number[][]} */
@@ -48,7 +48,7 @@ function init() {
     }
 
     for (let i = 0; i < 16; i++) {
-        const mat = new Matrix();
+        const mat = new Transform2D();
 
         mat.set(ux[i], uy[i], vx[i], vy[i], 0, 0);
         temp_matrices.push(mat);
@@ -146,7 +146,7 @@ const GroupD8 = {
     /**
      * Helps sprite to compensate texture packer rotation.
      *
-     * @param {Matrix} matrix - sprite world matrix
+     * @param {Transform2D} matrix - sprite world matrix
      * @param {number} rotation - The rotation factor to use.
      * @param {number} tx - sprite anchoring
      * @param {number} ty - sprite anchoring

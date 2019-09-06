@@ -1,25 +1,6 @@
 import { PI, PI2, DEG_TO_RAD, RAD_TO_DEG } from './const';
 
 /**
- * Math classes and utilities mixed into v namespace.
- */
-export { default as Vector2, Vector2Like } from './vector2';
-export { default as ObservableVector2 } from './observable_vector2';
-export { default as Matrix } from './matrix';
-export { default as GroupD8 } from './group_d8';
-export { default as Bounds } from './bounds';
-
-export { default as Transform } from './transform';
-
-export { default as Circle } from './shapes/circle';
-export { default as Ellipse } from './shapes/ellipse';
-export { default as Polygon } from './shapes/polygon';
-export { default as Rectangle } from './shapes/rectangle';
-export { default as RoundedRectangle } from './shapes/rounded_rectangle';
-
-export * from './const';
-
-/**
  * Force a value within the boundaries by clamping `x` to the range `[a, b]`.
  *
  * @param {number} x Target value to clamp

@@ -1,7 +1,6 @@
 import { PI2 } from './const';
 import { Vector2 } from './vector2';
-import Circle from './shapes/circle';
-import Rectangle from './shapes/rectangle';
+import { Rect2 } from './rect2';
 
 /**
  * The Matrix class as an object, which makes it a lot faster,
@@ -368,11 +367,11 @@ export class Transform2D {
     }
 
     /**
-     * @param {Rectangle} p_rect
-     * @param {Rectangle} [r_out]
+     * @param {Rect2} p_rect
+     * @param {Rect2} [r_out]
      */
     xform_rect(p_rect, r_out) {
-        r_out = r_out || Rectangle.new();
+        r_out = r_out || Rect2.new();
         const x = Vector2.new(this.a * p_rect.width, this.b * p_rect.width);
         const y = Vector2.new(this.c * p_rect.height, this.d * p_rect.height);
         const pos = Vector2.new(p_rect.x, p_rect.y);
@@ -394,11 +393,11 @@ export class Transform2D {
     }
 
     /**
-     * @param {Rectangle} p_rect
-     * @param {Rectangle} [r_out]
+     * @param {Rect2} p_rect
+     * @param {Rect2} [r_out]
      */
     xform_inv_rect(p_rect, r_out) {
-        r_out = r_out || Rectangle.new();
+        r_out = r_out || Rect2.new();
         const ends_0 = Vector2.new(p_rect.x, p_rect.y);
         const ends_1 = Vector2.new(p_rect.x, p_rect.y + p_rect.height);
         const ends_2 = Vector2.new(p_rect.x + p_rect.width, p_rect.y + p_rect.height);
@@ -419,25 +418,6 @@ export class Transform2D {
         Vector2.free(ends_1);
         Vector2.free(ends_2);
         Vector2.free(ends_3);
-
-        return r_out;
-    }
-
-    /**
-     * @param {Circle} p_circle
-     * @param {Circle} [r_out]
-     */
-    xform_circle(p_circle, r_out) {
-        r_out = r_out || Circle.new();
-        const pos = Vector2.new(p_circle.x, p_circle.y);
-        this.xform(pos, pos);
-
-        r_out.x = pos.x;
-        r_out.y = pos.y;
-
-        p_circle.scale = Math.sqrt((this.a * this.a) + (this.b * this.b));
-
-        Vector2.free(pos);
 
         return r_out;
     }
@@ -644,8 +624,8 @@ export class Transform2D {
     /**
      * Decomposes the matrix (x, y, scaleX, scaleY, and rotation) and sets the properties on to a transform.
      *
-     * @param {import('./transform').default} transform - The transform to apply the properties to.
-     * @return {import('./transform').default} The transform with the newly applied properties
+     * @param {*} transform - The transform to apply the properties to.
+     * @return {*} The transform with the newly applied properties
      */
     decompose(transform) {
         // sort out rotation / skew..
