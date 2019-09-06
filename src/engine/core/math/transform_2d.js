@@ -1,5 +1,5 @@
 import { PI2 } from './const';
-import Vector2 from './vector2';
+import { Vector2 } from './vector2';
 import Circle from './shapes/circle';
 import Rectangle from './shapes/rectangle';
 
@@ -10,7 +10,7 @@ import Rectangle from './shapes/rectangle';
  * | b | d | ty|
  * | 0 | 0 | 1 |
  */
-export default class Matrix {
+export class Transform2D {
     /**
      * @param {number} [a=1] - x scale
      * @param {number} [b=0] - x skew
@@ -24,17 +24,17 @@ export default class Matrix {
         if (m) {
             return m.set(a, b, c, d, tx, ty);
         } else {
-            return new Matrix(a, b, c, d, tx, ty);
+            return new Transform2D(a, b, c, d, tx, ty);
         }
     }
     /**
-     * @param {Matrix} m
+     * @param {Transform2D} m
      */
     static free(m) {
         if (m && pool.length < 2019) {
             pool.push(m);
         }
-        return Matrix;
+        return Transform2D;
     }
 
     get origin() {
@@ -207,7 +207,7 @@ export default class Matrix {
      * @param {number} tx - Matrix component
      * @param {number} ty - Matrix component
      *
-     * @return {Matrix} This matrix. Good for chaining method calls.
+     * @return {Transform2D} This matrix. Good for chaining method calls.
      */
     set(a, b, c, d, tx, ty) {
         this.a = a;
@@ -291,7 +291,7 @@ export default class Matrix {
     }
 
     /**
-     * @param {Matrix} p_matrix
+     * @param {Transform2D} p_matrix
      */
     equals(p_matrix) {
         return (
@@ -447,7 +447,7 @@ export default class Matrix {
      *
      * @param {number} x How much to translate x by
      * @param {number} y How much to translate y by
-     * @return {Matrix} This matrix. Good for chaining method calls.
+     * @return {Transform2D} This matrix. Good for chaining method calls.
      */
     translate(x, y) {
         this.tx += x;
@@ -470,7 +470,7 @@ export default class Matrix {
      *
      * @param {number} x The amount to scale horizontally
      * @param {number} y The amount to scale vertically
-     * @return {Matrix} This matrix. Good for chaining method calls.
+     * @return {Transform2D} This matrix. Good for chaining method calls.
      */
     scale(x, y) {
         this.a *= x;
@@ -500,7 +500,7 @@ export default class Matrix {
      * Applies a rotation transformation to the matrix.
      *
      * @param {number} angle - The angle in radians.
-     * @return {Matrix} This matrix. Good for chaining method calls.
+     * @return {Transform2D} This matrix. Good for chaining method calls.
      */
     rotate(angle) {
         const cos = Math.cos(angle);
@@ -570,8 +570,8 @@ export default class Matrix {
     /**
      * Appends the given Matrix to this Matrix.
      *
-     * @param {Matrix} matrix - The matrix to append.
-     * @return {Matrix} This matrix. Good for chaining method calls.
+     * @param {Transform2D} matrix - The matrix to append.
+     * @return {Transform2D} This matrix. Good for chaining method calls.
      */
     append(matrix) {
         const a1 = this.a;
@@ -602,7 +602,7 @@ export default class Matrix {
      * @param {number} rotation - Rotation in radians
      * @param {number} skew_x - Skew on the x axis
      * @param {number} skew_y - Skew on the y axis
-     * @return {Matrix} This matrix. Good for chaining method calls.
+     * @return {Transform2D} This matrix. Good for chaining method calls.
      */
     set_transform(x, y, pivot_x, pivot_y, scale_x, scale_y, rotation, skew_x, skew_y) {
         this.a = Math.cos(rotation + skew_y) * scale_x;
@@ -619,8 +619,8 @@ export default class Matrix {
     /**
      * Prepends the given Matrix to this Matrix (`Matrix_A *= Matrix_B` in Godot)
      *
-     * @param {Matrix} matrix - The matrix to prepend
-     * @return {Matrix} This matrix. Good for chaining method calls.
+     * @param {Transform2D} matrix - The matrix to prepend
+     * @return {Transform2D} This matrix. Good for chaining method calls.
      */
     prepend(matrix) {
         const tx1 = this.tx;
@@ -683,7 +683,7 @@ export default class Matrix {
     /**
      * Inverts this matrix
      *
-     * @return {Matrix} This matrix. Good for chaining method calls.
+     * @return {Transform2D} This matrix. Good for chaining method calls.
      */
     affine_inverse() {
         const det = (this.a * this.d) - (this.b * this.c);
@@ -710,7 +710,7 @@ export default class Matrix {
     /**
      * Resets this Matix to an identity (default) matrix.
      *
-     * @return {Matrix} This matrix. Good for chaining method calls.
+     * @return {Transform2D} This matrix. Good for chaining method calls.
      */
     identity() {
         this.a = 1;
@@ -726,10 +726,10 @@ export default class Matrix {
     /**
      * Creates a new Matrix object with the same values as this one.
      *
-     * @return {Matrix} A copy of this matrix. Good for chaining method calls.
+     * @return {Transform2D} A copy of this matrix. Good for chaining method calls.
      */
     clone() {
-        return Matrix.new(
+        return Transform2D.new(
             this.a,
             this.b,
             this.c,
@@ -742,8 +742,8 @@ export default class Matrix {
     /**
      * Copy the values of given matrix to this one.
      *
-     * @param {Matrix} matrix - The matrix to copy from.
-     * @return {Matrix} The matrix given in parameter with its values updated.
+     * @param {Transform2D} matrix - The matrix to copy from.
+     * @return {Transform2D} The matrix given in parameter with its values updated.
      */
     copy(matrix) {
         this.a = matrix.a;
@@ -763,13 +763,13 @@ export default class Matrix {
      * @const
      */
     static get TEMP_MATRIX() {
-        return new Matrix();
+        return new Transform2D();
     }
 }
 
-Matrix.IDENTITY = Object.freeze(new Matrix());
+Transform2D.IDENTITY = Object.freeze(new Transform2D());
 
 /**
- * @type {Matrix[]}
+ * @type {Transform2D[]}
  */
 const pool = [];
