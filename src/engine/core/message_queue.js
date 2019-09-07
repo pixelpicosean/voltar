@@ -17,12 +17,14 @@ class Message {
     }
 }
 
-export default class MessageQueue {
+export class MessageQueue {
     static get_singleton() {
         return message_queue;
     }
 
     constructor() {
+        if (!message_queue) message_queue = this;
+
         /**
          * Message list
          *
@@ -80,4 +82,6 @@ export default class MessageQueue {
         this.messages.length = 0;
     }
 }
-const message_queue = new MessageQueue();
+
+/** @type {MessageQueue} */
+let message_queue = null;

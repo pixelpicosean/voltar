@@ -1,10 +1,8 @@
 import { remove_items } from "engine/dep/index";
 import SelfList from "engine/core/self_list";
-import {
-    Vector2,
-    Matrix,
-} from "engine/core/math/index";
-import CollisionObject2DSW from "./collision_object_2d_sw";
+import { Vector2 } from "engine/core/math/vector2";
+import { Transform2D } from "engine/core/math/transform_2d";
+
 import {
     BodyMode,
     CollisionObjectType,
@@ -14,6 +12,8 @@ import {
 import {
     Physics2DDirectBodyStateSW,
 } from "./state";
+import CollisionObject2DSW from "./collision_object_2d_sw";
+
 
 class AreaCMP { }
 
@@ -39,7 +39,7 @@ class ForceIntegrationCallback {
     }
 }
 
-export default class Body2DSW extends CollisionObject2DSW {
+export class Body2DSW extends CollisionObject2DSW {
     get inv_mass() {
         return this._inv_mass;
     }
@@ -160,7 +160,7 @@ export default class Body2DSW extends CollisionObject2DSW {
         this.can_sleep = false;
         this.first_time_kinematic = false;
         this.first_integration = false;
-        this.new_transform = new Matrix();
+        this.new_transform = new Transform2D();
 
         /**
          * @type {Map<import('./constraint_2d_sw').default, number>}
@@ -200,7 +200,7 @@ export default class Body2DSW extends CollisionObject2DSW {
     }
 
     /**
-     * @param {import('./area_2d_sw').default} p_area
+     * @param {import('./area_2d_sw').Area2DSW} p_area
      */
     _compute_area_gravity_and_dampenings(p_area) {
         if (p_area.gravity_is_point) {
@@ -216,7 +216,7 @@ export default class Body2DSW extends CollisionObject2DSW {
     set_force_integration_callback(p_id, p_method, p_udata = {}) { }
 
     /**
-     * @param {import('./area_2d_sw').default} p_area
+     * @param {import('./area_2d_sw').Area2DSW} p_area
      */
     add_area(p_area) {
         const index = this.areas.indexOf(p_area);
@@ -226,7 +226,7 @@ export default class Body2DSW extends CollisionObject2DSW {
         }
     }
     /**
-     * @param {import('./area_2d_sw').default} p_area
+     * @param {import('./area_2d_sw').Area2DSW} p_area
      */
     remove_area(p_area) {
         const index = this.areas.indexOf(p_area);
@@ -428,16 +428,16 @@ export default class Body2DSW extends CollisionObject2DSW {
                         const inv_transform = this.transform.clone().affine_inverse();
                         this._set_inv_transform(inv_transform);
                         this.first_time_kinematic = false;
-                        Matrix.free(inv_transform);
+                        Transform2D.free(inv_transform);
                     }
                 } else if (this.mode === BodyMode.STATIC) {
                     this._set_transform(p_value);
                     const inv_transform = this.transform.clone().affine_inverse();
                     this._set_inv_transform(inv_transform);
                     this.wakeup_neighbours();
-                    Matrix.free(inv_transform);
+                    Transform2D.free(inv_transform);
                 } else {
-                    /** @type {Matrix} */
+                    /** @type {Transform2D} */
                     const t = p_value;
                     t.orthonormalize();
                     this.new_transform.copy(this.transform);
@@ -447,7 +447,7 @@ export default class Body2DSW extends CollisionObject2DSW {
                     this._set_transform(t);
                     const inv_transform = this.transform.inverse();
                     this._set_inv_transform(inv_transform);
-                    Matrix.free(inv_transform);
+                    Transform2D.free(inv_transform);
                 }
                 this.wakeup();
             } break;
@@ -512,7 +512,7 @@ export default class Body2DSW extends CollisionObject2DSW {
     add_torque(p_torque) { }
 
     /**
-     * @param {import('./space_2d_sw').default} p_space
+     * @param {import('./space_2d_sw').Space2DSW} p_space
      */
     set_space(p_space) {
         if (this.space) {
@@ -667,7 +667,7 @@ export default class Body2DSW extends CollisionObject2DSW {
             if (this.contacts.length === 0 && this.linear_velocity.is_zero() && this.angular_velocity === 0) {
                 this.set_active(false); // stopped moving, deactivate
             }
-            Matrix.free(inv_transform);
+            Transform2D.free(inv_transform);
             return;
         }
 
@@ -677,7 +677,7 @@ export default class Body2DSW extends CollisionObject2DSW {
         const angle = this.transform.rotation + total_angular_velocity * p_step;
         const pos = this.transform.origin.clone().add(total_linear_velocity.scale(p_step));
 
-        const t = Matrix.new().rotate(angle).translate(pos.x, pos.y);
+        const t = Transform2D.new().rotate(angle).translate(pos.x, pos.y);
         this._set_transform(t, this.continuous_cd_mode === CCDMode.DISABLED);
         this._set_inv_transform(this.transform.inverse());
 
@@ -687,7 +687,7 @@ export default class Body2DSW extends CollisionObject2DSW {
 
         Vector2.free(total_linear_velocity);
         Vector2.free(pos);
-        Matrix.free(t);
+        Transform2D.free(t);
     }
 
     get_motion() {

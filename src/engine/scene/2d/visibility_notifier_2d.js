@@ -1,16 +1,38 @@
-import Node2D from "./node_2d";
 import { node_class_map } from "engine/registry";
-import { Rectangle, Matrix } from "engine/core/math/index";
-import { Viewport, AnimationPlayer, AnimatedSprite } from "engine/index";
+import { GDCLASS } from "engine/core/v_object";
+import { Rect2 } from "engine/core/math/rect2";
+
+import { AnimationPlayer } from "../animation/animation_player";
+import { Viewport } from "../main/viewport";
+import {
+    NOTIFICATION_ENTER_TREE,
+    NOTIFICATION_EXIT_TREE,
+} from "../main/node";
+import {
+    NOTIFICATION_TRANSFORM_CHANGED,
+    NOTIFICATION_DRAW,
+} from "./canvas_item";
+import { Node2D } from "./node_2d";
+
 
 export class VisibilityNotifier2D extends Node2D {
+    /** @property {Rect2} */
+    get rect() {
+        return this._rect;
+    }
+    set rect(p_rect) {
+        this._rect.copy(p_rect);
+        if (this.is_inside_tree()) {
+            this.get_world_2d()._update_notifier(this, this.get_global_transform().xform_rect(this._rect));
+        }
+    }
+
     constructor() {
         super();
 
-        this.type = 'VisibilityNotifier2D';
+        this.class = 'VisibilityNotifier2D';
 
-        this.rect = new Rectangle(-10, 10, 20, 20);
-        this._rect_on_screen = new Rectangle();
+        this._rect = new Rect2(-10, 10, 20, 20);
 
         /**
          * @type {Set<Viewport>}
@@ -22,45 +44,33 @@ export class VisibilityNotifier2D extends Node2D {
         super._load_data(data);
 
         if (data.rect !== undefined) {
-            this.rect.copy(data.rect);
+            this.rect = data.rect;
         }
 
         return this;
     }
 
-    is_on_screen() {
-        return this.viewports.size > 0;
+    /**
+     * @param {number} p_what
+     */
+    _notification(p_what) {
+        switch (p_what) {
+            case NOTIFICATION_ENTER_TREE: {
+                this.get_world_2d()._register_notifier(this, this.get_global_transform().xform_rect(this._rect));
+            } break;
+            case NOTIFICATION_TRANSFORM_CHANGED: {
+                this.get_world_2d()._update_notifier(this, this.get_global_transform().xform_rect(this._rect));
+            } break;
+            case NOTIFICATION_DRAW: {
+            } break;
+            case NOTIFICATION_EXIT_TREE: {
+                this.get_world_2d()._remove_notifier(this);
+            } break;
+        }
     }
 
-    /**
-     * @param {number} delta
-     */
-    _propagate_process(delta) {
-        super._propagate_process(delta);
-
-        const m = this.world_transform.clone().append(this.get_tree().viewport.canvas_transform);
-        m.xform_rect(this.rect, this._rect_on_screen);
-        Matrix.free(m);
-
-        const viewport = this.scene_tree.viewport;
-        const v_rect_origin = this.scene_tree.viewport_rect;
-        const v_rect = Rectangle.new(v_rect_origin.position.x, v_rect_origin.position.y, v_rect_origin.size.x, v_rect_origin.size.y);
-        const is_overlapping = (
-            v_rect.contains(this._rect_on_screen.left, this._rect_on_screen.top)
-            ||
-            v_rect.contains(this._rect_on_screen.right, this._rect_on_screen.top)
-            ||
-            v_rect.contains(this._rect_on_screen.left, this._rect_on_screen.bottom)
-            ||
-            v_rect.contains(this._rect_on_screen.right, this._rect_on_screen.bottom)
-        );
-        if (is_overlapping && !this.viewports.has(viewport)) {
-            this._enter_viewport(viewport);
-        }
-        if (!is_overlapping && this.viewports.has(viewport)) {
-            this._exit_viewport(viewport);
-        }
-        Rectangle.free(v_rect);
+    is_on_screen() {
+        return this.viewports.size > 0;
     }
 
     /**
@@ -73,7 +83,7 @@ export class VisibilityNotifier2D extends Node2D {
             this.emit_signal('screen_entered');
             this._screen_enter();
         }
-        this.emit_signal('viewport_entered');
+        this.emit_signal('viewport_entered', viewport);
     }
     /**
      * @param {Viewport} viewport
@@ -81,7 +91,7 @@ export class VisibilityNotifier2D extends Node2D {
     _exit_viewport(viewport) {
         this.viewports.delete(viewport);
 
-        this.emit_signal('viewport_exited');
+        this.emit_signal('viewport_exited', viewport);
         if (this.viewports.size === 0) {
             this.emit_signal('screen_exited');
             this._screen_exit();
@@ -91,12 +101,14 @@ export class VisibilityNotifier2D extends Node2D {
     _screen_enter() { }
     _screen_exit() { }
 }
+node_class_map['VisibilityEnabler2D'] = GDCLASS(VisibilityNotifier2D, Node2D)
+
 
 export class VisibilityEnabler2D extends VisibilityNotifier2D {
     constructor() {
         super();
 
-        this.type = 'VisibilityEnabler2D';
+        this.class = 'VisibilityEnabler2D';
 
         this.freeze_bodies = true;
         this.pause_animated_sprites = true;
@@ -182,19 +194,19 @@ export class VisibilityEnabler2D extends VisibilityNotifier2D {
         }
 
         if (this.pause_animations) {
-            if (p_node.type === 'AnimationPlayer') {
+            if (p_node.class === 'AnimationPlayer') {
                 add = true;
             }
         }
 
         if (this.pause_animated_sprites) {
-            if (p_node.type === 'AnimatedSprite') {
+            if (p_node.class === 'AnimatedSprite') {
                 add = true;
             }
         }
 
         if (this.pause_particles) {
-            if (p_node.type === 'Particle') {
+            if (p_node.class === 'Particle') {
                 add = true;
             }
         }
@@ -252,20 +264,20 @@ export class VisibilityEnabler2D extends VisibilityNotifier2D {
      * @param {boolean} p_enabled
      */
     _change_node_state(p_node, p_enabled) {
-        if (p_node.type === 'RigidBody2D') {
+        if (p_node.class === 'RigidBody2D') {
             // TODO: sleep RigidBody2D
         }
-        if (p_node.type === 'AnimationPlayer') {
+        if (p_node.class === 'AnimationPlayer') {
             /** @type {AnimationPlayer} */ (p_node).playback_active = p_enabled;
         }
-        if (p_node.type === 'AnimatedSprite') {
+        if (p_node.class === 'AnimatedSprite') {
             if (p_enabled) {
                 /** @type {AnimatedSprite} */ (p_node).play();
             } else {
                 /** @type {AnimatedSprite} */ (p_node).stop();
             }
         }
-        if (p_node.type === 'RigidBody2D') {
+        if (p_node.class === 'RigidBody2D') {
             // TODO: disable particle
         }
     }
@@ -280,6 +292,4 @@ export class VisibilityEnabler2D extends VisibilityNotifier2D {
         this.nodes.delete(p_node);
     }
 }
-
-node_class_map['VisibilityNotifier2D'] = VisibilityNotifier2D;
-node_class_map['VisibilityEnabler2D'] = VisibilityEnabler2D;
+node_class_map['VisibilityEnabler2D'] = GDCLASS(VisibilityEnabler2D, VisibilityNotifier2D)

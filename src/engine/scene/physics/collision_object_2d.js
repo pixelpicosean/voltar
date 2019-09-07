@@ -1,14 +1,18 @@
-import Node2D from '../node_2d';
-import { Matrix } from 'engine/core/math/index';
-import Shape2D from '../resources/shape_2d';
-import PhysicsServer from 'engine/servers/physics_2d/physics_server';
 import { remove_items } from 'engine/dep/index';
-import CollisionObject2DSW from 'engine/servers/physics_2d/collision_object_2d_sw';
-import Area2DSW from 'engine/servers/physics_2d/area_2d_sw';
+
+import { Physics2DServer } from 'engine/servers/physics_2d/physics_2d_server';
+import { CollisionObject2DSW } from 'engine/servers/physics_2d/collision_object_2d_sw';
+import { Area2DSW } from 'engine/servers/physics_2d/area_2d_sw';
+
+import { Node2D } from '../2d/node_2d';
+import { Shape2D } from '../resources/shape_2d';
 import CollisionShape2D from './collision_shape_2d';
 import { BodyState } from './const';
-import Body2DSW from 'engine/servers/physics_2d/body_2d_sw';
-import CollisionPolygon2D from './collision_polygon_2d';
+import { Body2DSW } from 'engine/servers/physics_2d/body_2d_sw';
+import { CollisionPolygon2D } from './collision_polygon_2d';
+import { Transform2D } from 'engine/core/math/transform_2d';
+import { GDCLASS } from 'engine/core/v_object';
+
 
 class Shape {
     constructor() {
@@ -22,7 +26,7 @@ class Shape {
 class ShapeData {
     constructor() {
         this.owner = null;
-        this.xform = new Matrix();
+        this.xform = new Transform2D();
         /**
          * @type {Shape[]}
          */
@@ -42,13 +46,15 @@ export const CollisionObjectTypes = {
     STATIC: 4,
 };
 
-export default class CollisionObject2D extends Node2D {
+export class CollisionObject2D extends Node2D {
     /**
      * @param {CollisionObject2DSW} p_rid
      * @param {boolean} p_area
      */
     constructor(p_rid, p_area) {
         super();
+
+        this.class = 'CollisionObject2D';
 
         this.is_collision_object = true;
 
@@ -60,19 +66,20 @@ export default class CollisionObject2D extends Node2D {
          * @type {Map<CollisionShape2D|CollisionPolygon2D, ShapeData>}
          */
         this.shapes = new Map();
-        this.last_transform = new Matrix();
+        this.last_transform = new Transform2D();
         this.only_update_transform_changes = false;
 
         if (p_area) {
             // @ts-ignore
-            PhysicsServer.singleton.area_attach_object_instance(/** @type {Area2DSW} */(this.rid), this);
+            Physics2DServer.get_singleton().area_attach_object_instance(/** @type {Area2DSW} */(this.rid), this);
         } else {
             // @ts-ignore
-            PhysicsServer.singleton.body_attach_object_instance(/** @type {Body2DSW} */(this.rid), this);
+            Physics2DServer.get_singleton().body_attach_object_instance(/** @type {Body2DSW} */(this.rid), this);
         }
     }
     free() {
-        PhysicsServer.singleton.free(this.rid);
+        Physics2DServer.get_singleton().free_rid(this.rid);
+        return super.free();
     }
 
     _propagate_enter_tree() {
@@ -84,9 +91,9 @@ export default class CollisionObject2D extends Node2D {
 
         const space = this.get_world_2d().space;
         if (this.area) {
-            PhysicsServer.singleton.area_set_space(/** @type {Area2DSW} */(this.rid), space);
+            Physics2DServer.get_singleton().area_set_space(/** @type {Area2DSW} */(this.rid), space);
         } else {
-            PhysicsServer.singleton.body_set_space(/** @type {Body2DSW} */(this.rid), space);
+            Physics2DServer.get_singleton().body_set_space(/** @type {Body2DSW} */(this.rid), space);
         }
     }
     _notify_transform_changed() {
@@ -100,9 +107,9 @@ export default class CollisionObject2D extends Node2D {
     }
     _propagate_exit_tree() {
         if (this.area) {
-            PhysicsServer.singleton.area_set_space(/** @type {Area2DSW} */(this.rid), null);
+            Physics2DServer.get_singleton().area_set_space(/** @type {Area2DSW} */(this.rid), null);
         } else {
-            PhysicsServer.singleton.body_set_space(/** @type {Body2DSW} */(this.rid), null);
+            Physics2DServer.get_singleton().body_set_space(/** @type {Body2DSW} */(this.rid), null);
         }
 
         super._propagate_exit_tree();
@@ -130,16 +137,16 @@ export default class CollisionObject2D extends Node2D {
 
     /**
      * @param {CollisionShape2D|CollisionPolygon2D} p_owner
-     * @param {Matrix} p_transform
+     * @param {Transform2D} p_transform
      */
     shape_owner_set_transform(p_owner, p_transform) {
         const sd = this.shapes.get(p_owner);
         sd.xform.copy(p_transform);
         for (let s of sd.shapes) {
             if (this.area) {
-                PhysicsServer.singleton.area_set_shape_transform(/** @type {Area2DSW} */(this.rid), s.index, p_transform);
+                Physics2DServer.get_singleton().area_set_shape_transform(/** @type {Area2DSW} */(this.rid), s.index, p_transform);
             } else {
-                PhysicsServer.singleton.body_set_shape_transform(/** @type {Body2DSW} */(this.rid), s.index, p_transform);
+                Physics2DServer.get_singleton().body_set_shape_transform(/** @type {Body2DSW} */(this.rid), s.index, p_transform);
             }
         }
     }
@@ -165,9 +172,9 @@ export default class CollisionObject2D extends Node2D {
         sd.disabled = p_disabled;
         for (let i = 0; i < sd.shapes.length; i++) {
             if (this.area) {
-                PhysicsServer.singleton.area_set_shape_disabled(/** @type {Area2DSW} */(this.rid), i, p_disabled);
+                Physics2DServer.get_singleton().area_set_shape_disabled(/** @type {Area2DSW} */(this.rid), i, p_disabled);
             } else {
-                PhysicsServer.singleton.body_set_shape_disabled(/** @type {Body2DSW} */(this.rid), i, p_disabled);
+                Physics2DServer.get_singleton().body_set_shape_disabled(/** @type {Body2DSW} */(this.rid), i, p_disabled);
             }
         }
     }
@@ -190,7 +197,7 @@ export default class CollisionObject2D extends Node2D {
         const sd = this.shapes.get(p_owner);
         sd.one_way_collision = p_enable;
         for (let s of sd.shapes) {
-            PhysicsServer.singleton.body_set_shape_as_one_way_collision(/** @type {Body2DSW} */(this.rid), s.index, sd.one_way_collision, sd.one_way_collision_margin);
+            Physics2DServer.get_singleton().body_set_shape_as_one_way_collision(/** @type {Body2DSW} */(this.rid), s.index, sd.one_way_collision, sd.one_way_collision_margin);
         }
     }
     /**
@@ -212,7 +219,7 @@ export default class CollisionObject2D extends Node2D {
         const sd = this.shapes.get(p_owner);
         sd.one_way_collision_margin = p_margin;
         for (let s of sd.shapes) {
-            PhysicsServer.singleton.body_set_shape_as_one_way_collision(/** @type {Body2DSW} */(this.rid), s.index, sd.one_way_collision, sd.one_way_collision_margin);
+            Physics2DServer.get_singleton().body_set_shape_as_one_way_collision(/** @type {Body2DSW} */(this.rid), s.index, sd.one_way_collision, sd.one_way_collision_margin);
         }
     }
     /**
@@ -232,9 +239,9 @@ export default class CollisionObject2D extends Node2D {
         s.index = this.total_subshapes;
         s.shape = p_shape;
         if (this.area) {
-            PhysicsServer.singleton.area_add_shape(/** @type {Area2DSW} */(this.rid), p_shape.shape, sd.xform);
+            Physics2DServer.get_singleton().area_add_shape(/** @type {Area2DSW} */(this.rid), p_shape.shape, sd.xform);
         } else {
-            PhysicsServer.singleton.body_add_shape(/** @type {Body2DSW} */(this.rid), p_shape.shape, sd.xform);
+            Physics2DServer.get_singleton().body_add_shape(/** @type {Body2DSW} */(this.rid), p_shape.shape, sd.xform);
         }
         sd.shapes.push(s);
 
@@ -268,9 +275,9 @@ export default class CollisionObject2D extends Node2D {
     shape_owner_remove_shape(p_owner, p_shape) {
         const index_to_remove = this.shapes.get(p_owner).shapes[p_shape].index;
         if (this.area) {
-            PhysicsServer.singleton.area_remove_shape(/** @type {Area2DSW} */(this.rid), index_to_remove);
+            Physics2DServer.get_singleton().area_remove_shape(/** @type {Area2DSW} */(this.rid), index_to_remove);
         } else {
-            PhysicsServer.singleton.body_remove_shape(/** @type {Body2DSW} */(this.rid), index_to_remove);
+            Physics2DServer.get_singleton().body_remove_shape(/** @type {Body2DSW} */(this.rid), index_to_remove);
         }
 
         remove_items(this.shapes.get(p_owner).shapes, p_shape, 1);
@@ -309,3 +316,5 @@ export default class CollisionObject2D extends Node2D {
         return null;
     }
 }
+
+GDCLASS(CollisionObject2D, Node2D)

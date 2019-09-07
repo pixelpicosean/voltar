@@ -1,18 +1,18 @@
 import SelfList from "engine/core/self_list";
-import {
-    Vector2,
-    Matrix,
-} from "engine/core/math/index";
+import { Vector2 } from "engine/core/math/vector2";
+import { Transform2D } from "engine/core/math/transform_2d";
 import {
     CollisionObjectType,
     AreaSpaceOverrideMode,
     AreaParameter,
 } from "engine/scene/physics/const";
+
 import CollisionObject2DSW from "./collision_object_2d_sw";
+
 
 class BodyKey {
     /**
-     * @param {Area2DSW|import('./body_2d_sw').default} p_body
+     * @param {Area2DSW | import('./body_2d_sw').Body2DSW} p_body
      * @param {number} p_body_shape
      * @param {number} p_area_shape
      */
@@ -30,7 +30,7 @@ class BodyState {
     constructor() { this.state = 0 }
 }
 
-export default class Area2DSW extends CollisionObject2DSW {
+export class Area2DSW extends CollisionObject2DSW {
     constructor() {
         super(CollisionObjectType.AREA);
 
@@ -79,7 +79,7 @@ export default class Area2DSW extends CollisionObject2DSW {
         this.monitored_areas = new Map();
 
         /**
-         * @type {Set<import('./constraint_2d_sw').default>}
+         * @type {Set<import('./constraint_2d_sw').Constraint2DSW>}
          */
         this.constraints = new Set();
 
@@ -149,7 +149,7 @@ export default class Area2DSW extends CollisionObject2DSW {
     }
 
     /**
-     * @param {import('./body_2d_sw').default} p_body
+     * @param {import('./body_2d_sw').Body2DSW} p_body
      * @param {number} p_body_shape
      * @param {number} p_area_shape
      */
@@ -306,7 +306,7 @@ export default class Area2DSW extends CollisionObject2DSW {
     }
 
     /**
-     * @param {Matrix} p_transform
+     * @param {Transform2D} p_transform
      */
     set_transform(p_transform) {
         if (!this.moved_list.in_list() && this.space) {
@@ -317,11 +317,11 @@ export default class Area2DSW extends CollisionObject2DSW {
 
         const m = p_transform.clone().affine_inverse();
         this._set_inv_transform(m);
-        Matrix.free(m);
+        Transform2D.free(m);
     }
 
     /**
-     * @param {import('./space_2d_sw').default} p_sapce
+     * @param {import('./space_2d_sw').Space2DSW} p_sapce
      */
     set_space(p_sapce) {
         if (this.space) {

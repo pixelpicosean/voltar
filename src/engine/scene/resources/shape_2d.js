@@ -1,8 +1,12 @@
-import { Rectangle, Matrix, Vector2 } from "engine/core/math/index";
-import { Shape2DSW } from "engine/servers/physics_2d/shape_2d_sw";
-import PhysicsServer from "engine/servers/physics_2d/physics_server";
+import { Vector2 } from "engine/core/math/vector2";
+import { Rect2 } from "engine/core/math/rect2";
+import { Transform2D } from "engine/core/math/transform_2d";
 
-export default class Shape2D {
+import { Shape2DSW } from "engine/servers/physics_2d/shape_2d_sw";
+import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server";
+
+
+export class Shape2D {
     get custom_solver_bias() {
         return this.custom_bias;
     }
@@ -35,25 +39,25 @@ export default class Shape2D {
     _load_data(data) { return this }
 
     /**
-     * @param {Matrix} p_local_xform
+     * @param {Transform2D} p_local_xform
      * @param {Vector2} p_local_motion
      * @param {Shape2D} p_shape
-     * @param {Matrix} p_shape_xform
+     * @param {Transform2D} p_shape_xform
      * @param {Vector2} p_shape_motion
      */
     collide_with_motion(p_local_xform, p_local_motion, p_shape, p_shape_xform, p_shape_motion) {
-        return PhysicsServer.singleton.shape_collide(this.shape, p_local_xform, p_local_motion, p_shape.shape, p_shape_xform, p_shape_motion, null, 0, { value: 0 });
+        return Physics2DServer.get_singleton().shape_collide(this.shape, p_local_xform, p_local_motion, p_shape.shape, p_shape_xform, p_shape_motion, null, 0, { value: 0 });
     }
     /**
-     * @param {Matrix} p_local_xform
+     * @param {Transform2D} p_local_xform
      * @param {Shape2D} p_shape
-     * @param {Matrix} p_shape_xform
+     * @param {Transform2D} p_shape_xform
      */
     collide(p_local_xform, p_shape, p_shape_xform) {
         const v0 = Vector2.new();
         const v1 = Vector2.new();
 
-        const res = PhysicsServer.singleton.shape_collide(this.shape, p_local_xform, v0, p_shape.shape, p_shape_xform, v1, null, 0, { value: 0 });
+        const res = Physics2DServer.get_singleton().shape_collide(this.shape, p_local_xform, v0, p_shape.shape, p_shape_xform, v1, null, 0, { value: 0 });
 
         Vector2.free(v0);
         Vector2.free(v1);
@@ -61,10 +65,10 @@ export default class Shape2D {
         return res;
     }
     /**
-     * @param {Matrix} p_local_xform
+     * @param {Transform2D} p_local_xform
      * @param {Vector2} p_local_motion
      * @param {Shape2D} p_shape
-     * @param {Matrix} p_shape_xform
+     * @param {Transform2D} p_shape_xform
      * @param {Vector2} p_shape_motion
      * @returns {Vector2[]}
      */
@@ -74,7 +78,7 @@ export default class Shape2D {
         for (let i = 0; i < max_contacts; i++) result[i] = Vector2.new();
         const contacts = { value: 0 };
 
-        if (!PhysicsServer.singleton.shape_collide(this.shape, p_local_xform, p_local_motion, p_shape.shape, p_shape_xform, p_shape_motion, result, max_contacts, contacts)) {
+        if (!Physics2DServer.get_singleton().shape_collide(this.shape, p_local_xform, p_local_motion, p_shape.shape, p_shape_xform, p_shape_motion, result, max_contacts, contacts)) {
             return null;
         }
 
@@ -84,9 +88,9 @@ export default class Shape2D {
         return result;
     }
     /**
-     * @param {Matrix} p_local_xform
+     * @param {Transform2D} p_local_xform
      * @param {Shape2D} p_shape
-     * @param {Matrix} p_shape_xform
+     * @param {Transform2D} p_shape_xform
      * @returns {Vector2[]}
      */
     collide_and_get_contacts(p_local_xform, p_shape, p_shape_xform) {
@@ -97,7 +101,7 @@ export default class Shape2D {
 
         const v0 = Vector2.new();
         const v1 = Vector2.new();
-        if (!PhysicsServer.singleton.shape_collide(this.shape, p_local_xform, v0, p_shape.shape, p_shape_xform, v1, result, max_contacts, contacts)) {
+        if (!Physics2DServer.get_singleton().shape_collide(this.shape, p_local_xform, v0, p_shape.shape, p_shape_xform, v1, result, max_contacts, contacts)) {
             Vector2.free(v0);
             Vector2.free(v1);
             return null;
@@ -111,7 +115,7 @@ export default class Shape2D {
         return result;
     }
 
-    get_rect(rect = Rectangle.new()) {
+    get_rect(rect = Rect2.new()) {
         rect.x = rect.y = rect.width = rect.height = 0;
         return rect;
     }

@@ -1,10 +1,19 @@
-import CollisionObject2D from "./collision_object_2d";
-import PhysicsServer from "engine/servers/physics_2d/physics_server";
-import { BodyMode } from "./const";
-import { Vector2, Matrix } from "engine/core/math/index";
-import Body2DSW from "engine/servers/physics_2d/body_2d_sw";
+import { node_class_map } from "engine/registry";
+import { GDCLASS } from "engine/core/v_object";
+import { Vector2 } from "engine/core/math/vector2";
+import { Transform2D } from "engine/core/math/transform_2d";
+import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server";
+import { Body2DSW } from "engine/servers/physics_2d/body_2d_sw";
+import {
+    MotionResult,
+    SeparationResult,
+    Physics2DDirectBodyStateSW,
+} from "engine/servers/physics_2d/state";
+
 import PhysicsMaterial from "../resources/physics_material";
-import { MotionResult, SeparationResult, Physics2DDirectBodyStateSW } from "engine/servers/physics_2d/state";
+import { BodyMode } from "./const";
+import { CollisionObject2D } from "./collision_object_2d";
+
 
 export class PhysicsBody2D extends CollisionObject2D {
     /**
@@ -123,7 +132,9 @@ export class PhysicsBody2D extends CollisionObject2D {
      * @param {BodyMode} p_mode
      */
     constructor(p_mode) {
-        super(PhysicsServer.singleton.body_create(), false);
+        super(Physics2DServer.get_singleton().body_create(), false);
+
+        this.class = 'PhysicsBody2D';
 
         this.collision_layer = 1;
         this.collision_mask = 1;
@@ -152,6 +163,9 @@ export class PhysicsBody2D extends CollisionObject2D {
     add_collision_exception_with(p_node) { }
     remove_collision_exception_with(p_node) { }
 }
+
+GDCLASS(PhysicsBody2D, CollisionObject2D)
+
 
 export class StaticBody2D extends PhysicsBody2D {
     get friction() {
@@ -239,7 +253,7 @@ export class StaticBody2D extends PhysicsBody2D {
     constructor() {
         super(BodyMode.STATIC);
 
-        this.type = 'StaticBody2D';
+        this.class = 'StaticBody2D';
 
         this.constant_linear_velocity = new Vector2();
         this.constant_angular_velocity = 0;
@@ -279,6 +293,9 @@ export class StaticBody2D extends PhysicsBody2D {
         }
     }
 }
+
+node_class_map['StaticBody2D'] = GDCLASS(StaticBody2D, PhysicsBody2D)
+
 
 /** @type {Collision[]} */
 const Collision_Pool = [];
@@ -395,7 +412,7 @@ export class KinematicBody2D extends PhysicsBody2D {
     constructor() {
         super(BodyMode.KINEMATIC);
 
-        this.type = 'KinematicBody2D';
+        this.class = 'KinematicBody2D';
 
         this.margin = 0.08;
 
@@ -414,7 +431,7 @@ export class KinematicBody2D extends PhysicsBody2D {
         /** @type {KinematicCollision2D} */
         this.motion_cache = null;
 
-        this.last_valid_transform = new Matrix();
+        this.last_valid_transform = new Transform2D();
     }
     _load_data(data) {
         super._load_data(data);
@@ -498,7 +515,7 @@ export class KinematicBody2D extends PhysicsBody2D {
         this._update_transform();
         const gt = this.transform.world_transform.clone();
         motion_result.reset();
-        const colliding = PhysicsServer.singleton.body_test_motion(this.rid, gt, p_motion, p_infinite_inertia, this.margin, motion_result, p_exclude_raycast_shapes);
+        const colliding = Physics2DServer.get_singleton().body_test_motion(this.rid, gt, p_motion, p_infinite_inertia, this.margin, motion_result, p_exclude_raycast_shapes);
 
         if (colliding) {
             r_collision.collider_metadata = motion_result.collider_metadata;
@@ -519,17 +536,17 @@ export class KinematicBody2D extends PhysicsBody2D {
             this.set_global_transform(gt);
         }
 
-        Matrix.free(gt);
+        Transform2D.free(gt);
         return colliding;
     }
 
     /**
-     * @param {Matrix} p_from
+     * @param {Transform2D} p_from
      * @param {Vector2} p_motion
      * @param {boolean} [p_infinite_inertia]
      */
     test_move(p_from, p_motion, p_infinite_inertia = true) {
-        return PhysicsServer.singleton.body_test_motion(this.rid, p_from, p_motion, p_infinite_inertia, this.margin);
+        return Physics2DServer.get_singleton().body_test_motion(this.rid, p_from, p_motion, p_infinite_inertia, this.margin);
     }
 
     /**
@@ -567,11 +584,11 @@ export class KinematicBody2D extends PhysicsBody2D {
             r_collision.travel.copy(recover);
             r_collision.remainder.set(0, 0);
 
-            Matrix.free(gt);
+            Transform2D.free(gt);
             Vector2.free(recover);
             return true;
         } else {
-            Matrix.free(gt);
+            Transform2D.free(gt);
             Vector2.free(recover);
             return false;
         }
@@ -663,7 +680,7 @@ export class KinematicBody2D extends PhysicsBody2D {
                                     Vector2.free(lv_n);
                                     Collision.free(collision);
                                     Vector2.free(vec);
-                                    Matrix.free(gt);
+                                    Transform2D.free(gt);
                                     return Vector2.new(0, 0);
                                 }
                             }
@@ -741,7 +758,7 @@ export class KinematicBody2D extends PhysicsBody2D {
         }
 
         Collision.free(col);
-        Matrix.free(gt);
+        Transform2D.free(gt);
         Vector2.free(n_floor_dir);
         return ret;
     }
@@ -756,3 +773,5 @@ export class KinematicBody2D extends PhysicsBody2D {
         return this.colliders[p_bounce];
     }
 }
+
+node_class_map['KinematicBody2D'] = GDCLASS(KinematicBody2D, PhysicsBody2D)

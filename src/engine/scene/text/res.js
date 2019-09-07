@@ -1,7 +1,7 @@
 import settings from 'engine/settings';
 import Texture from 'engine/scene/resources/textures/texture';
 import { get_resolution_of_url } from 'engine/utils/index';
-import { Rectangle } from 'engine/core/math/index';
+import { Rectangle } from 'engine/core/math/math_funcs';
 import Font, { Character } from '../resources/font';
 
 /**

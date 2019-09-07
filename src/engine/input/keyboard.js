@@ -1,4 +1,4 @@
-export default {
+export const Keyboard = {
     /**
      * @type {Object.<string, boolean>}}
      * @private

@@ -1,4 +1,4 @@
-import { Vector2 } from 'engine/core/math/index';
+import { Vector2 } from 'engine/core/math/math_funcs';
 import { Margin } from '../controls/const';
 
 export default class StyleBox {

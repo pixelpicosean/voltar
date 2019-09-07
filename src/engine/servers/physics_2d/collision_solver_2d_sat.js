@@ -1,8 +1,18 @@
-import { Shape2DSW, CircleShape2DSW, RectangleShape2DSW, SegmentShape2DSW, ConvexPolygonShape2DSW } from "./shape_2d_sw";
-import { Matrix, Vector2, CMP_EPSILON } from "engine/core/math/index";
+import { CMP_EPSILON } from "engine/core/math/math_defs";
+import { Vector2 } from "engine/core/math/vector2";
+import { Transform2D } from "engine/core/math/transform_2d";
 import { get_closest_point_to_segment_uncapped_2d } from "engine/core/math/geometry";
 
-/** @typedef {(A: Shape2DSW, xform_A: Matrix, B: Shape2DSW, xform_B: Matrix, collector: _CollectorCallback2D, motion_A: Vector2, motion_B: Vector2, margin_A: number, margin_B: number) => void} CollisionFunc */
+import {
+    Shape2DSW,
+    CircleShape2DSW,
+    RectangleShape2DSW,
+    SegmentShape2DSW,
+    ConvexPolygonShape2DSW,
+} from "./shape_2d_sw";
+
+
+/** @typedef {(A: Shape2DSW, xform_A: Transform2D, B: Shape2DSW, xform_B: Transform2D, collector: _CollectorCallback2D, motion_A: Vector2, motion_B: Vector2, margin_A: number, margin_B: number) => void} CollisionFunc */
 
 /**
  * @param {number} n
@@ -26,6 +36,7 @@ const reset_vec_array = (arr) => {
 const max_supports = 2;
 const supports_vec_1 = create_vec_array(max_supports);
 const supports_vec_2 = create_vec_array(max_supports);
+
 
 class _CollectorCallback2D {
     constructor() {
@@ -53,12 +64,13 @@ class _CollectorCallback2D {
 }
 
 const tmp_callback = new _CollectorCallback2D();
+
 /**
  * @param {Shape2DSW} p_shape_A
- * @param {Matrix} p_transform_A
+ * @param {Transform2D} p_transform_A
  * @param {Vector2} p_motion_A
  * @param {Shape2DSW} p_shape_B
- * @param {Matrix} p_transform_B
+ * @param {Transform2D} p_transform_B
  * @param {Vector2} p_motion_B
  * @param {import("./collision_solver_2d_sw").CallbackResult} p_result_callback
  * @param {any} p_userdata
@@ -277,8 +289,8 @@ class SeparatorAxisTest2D {
         this.best_axis = new Vector2();
         this.shape_A = null;
         this.shape_B = null;
-        this.transform_A = new Matrix();
-        this.transform_B = new Matrix();
+        this.transform_A = new Transform2D();
+        this.transform_B = new Transform2D();
         this.motion_A = new Vector2();
         this.motion_B = new Vector2();
 
@@ -286,9 +298,9 @@ class SeparatorAxisTest2D {
     }
     /**
      * @param {ShapeA} p_shape_A
-     * @param {Matrix} p_transform_A
+     * @param {Transform2D} p_transform_A
      * @param {ShapeB} p_shape_B
-     * @param {Matrix} p_transform_B
+     * @param {Transform2D} p_transform_B
      * @param {_CollectorCallback2D} p_collector
      * @param {Vector2} p_motion_A
      * @param {Vector2} p_motion_B
@@ -512,9 +524,9 @@ const _collision_segment_segment = (cast_A, cast_B, with_margin) => {
 
     /**
      * @param {SegmentShape2DSW} p_segment_A
-     * @param {Matrix} p_transform_A
+     * @param {Transform2D} p_transform_A
      * @param {SegmentShape2DSW} p_segment_B
-     * @param {Matrix} p_transform_B
+     * @param {Transform2D} p_transform_B
      * @param {_CollectorCallback2D} p_collector
      * @param {Vector2} p_motion_A
      * @param {Vector2} p_motion_B
@@ -568,9 +580,9 @@ const _collision_segment_circle = (cast_A, cast_B, with_margin) => {
 
     /**
      * @param {SegmentShape2DSW} p_segment_A
-     * @param {Matrix} p_transform_A
+     * @param {Transform2D} p_transform_A
      * @param {CircleShape2DSW} p_circle_B
-     * @param {Matrix} p_transform_B
+     * @param {Transform2D} p_transform_B
      * @param {_CollectorCallback2D} p_collector
      * @param {Vector2} p_motion_A
      * @param {Vector2} p_motion_B
@@ -620,9 +632,9 @@ const _collision_segment_rectangle = (cast_A, cast_B, with_margin) => {
 
     /**
      * @param {SegmentShape2DSW} p_segment_A
-     * @param {Matrix} p_transform_A
+     * @param {Transform2D} p_transform_A
      * @param {RectangleShape2DSW} p_rect_B
-     * @param {Matrix} p_transform_B
+     * @param {Transform2D} p_transform_B
      * @param {_CollectorCallback2D} p_collector
      * @param {Vector2} p_motion_A
      * @param {Vector2} p_motion_B
@@ -756,9 +768,9 @@ const _collision_circle_circle = (cast_A, cast_B, with_margin) => {
 
     /**
      * @param {CircleShape2DSW} p_circle_A
-     * @param {Matrix} p_transform_A
+     * @param {Transform2D} p_transform_A
      * @param {CircleShape2DSW} p_circle_B
-     * @param {Matrix} p_transform_B
+     * @param {Transform2D} p_transform_B
      * @param {_CollectorCallback2D} p_collector
      * @param {Vector2} p_motion_A
      * @param {Vector2} p_motion_B
@@ -796,9 +808,9 @@ const _collision_circle_rectangle = (cast_A, cast_B, with_margin) => {
 
     /**
      * @param {CircleShape2DSW} p_circle_A
-     * @param {Matrix} p_transform_A
+     * @param {Transform2D} p_transform_A
      * @param {RectangleShape2DSW} p_rectangle_B
-     * @param {Matrix} p_transform_B
+     * @param {Transform2D} p_transform_B
      * @param {_CollectorCallback2D} p_collector
      * @param {Vector2} p_motion_A
      * @param {Vector2} p_motion_B
@@ -841,7 +853,7 @@ const _collision_circle_rectangle = (cast_A, cast_B, with_margin) => {
                 Vector2.free(sphere);
                 Vector2.free(axis_0);
                 Vector2.free(axis_1);
-                Matrix.free(binv);
+                Transform2D.free(binv);
 
                 Vector2.free(c_axis);
                 return;
@@ -856,7 +868,7 @@ const _collision_circle_rectangle = (cast_A, cast_B, with_margin) => {
                 Vector2.free(sphere);
                 Vector2.free(axis_0);
                 Vector2.free(axis_1);
-                Matrix.free(binv);
+                Transform2D.free(binv);
 
                 Vector2.free(sphereofs);
                 Vector2.free(c_axis);
@@ -873,7 +885,7 @@ const _collision_circle_rectangle = (cast_A, cast_B, with_margin) => {
                 Vector2.free(sphere);
                 Vector2.free(axis_0);
                 Vector2.free(axis_1);
-                Matrix.free(binv);
+                Transform2D.free(binv);
 
                 Vector2.free(sphereofs);
                 Vector2.free(c_axis);
@@ -890,7 +902,7 @@ const _collision_circle_rectangle = (cast_A, cast_B, with_margin) => {
                 Vector2.free(sphere);
                 Vector2.free(axis_0);
                 Vector2.free(axis_1);
-                Matrix.free(binv);
+                Transform2D.free(binv);
 
                 Vector2.free(sphereofs);
                 Vector2.free(c_axis);
@@ -903,7 +915,7 @@ const _collision_circle_rectangle = (cast_A, cast_B, with_margin) => {
         Vector2.free(sphere);
         Vector2.free(axis_0);
         Vector2.free(axis_1);
-        Matrix.free(binv);
+        Transform2D.free(binv);
 
         separator.generate_contacts();
     }
@@ -929,9 +941,9 @@ const _collision_circle_convex_polygon = (cast_A, cast_B, with_margin) => {
 
     /**
      * @param {CircleShape2DSW} p_circle_A
-     * @param {Matrix} p_transform_A
+     * @param {Transform2D} p_transform_A
      * @param {ConvexPolygonShape2DSW} p_convex_B
-     * @param {Matrix} p_transform_B
+     * @param {Transform2D} p_transform_B
      * @param {_CollectorCallback2D} p_collector
      * @param {Vector2} p_motion_A
      * @param {Vector2} p_motion_B
@@ -984,9 +996,9 @@ const _collision_rectangle_rectangle = (cast_A, cast_B, with_margin) => {
 
     /**
      * @param {RectangleShape2DSW} p_rectangle_A
-     * @param {Matrix} p_transform_A
+     * @param {Transform2D} p_transform_A
      * @param {RectangleShape2DSW} p_rectangle_B
-     * @param {Matrix} p_transform_B
+     * @param {Transform2D} p_transform_B
      * @param {_CollectorCallback2D} p_collector
      * @param {Vector2} p_motion_A
      * @param {Vector2} p_motion_B
@@ -1046,8 +1058,8 @@ const _collision_rectangle_rectangle = (cast_A, cast_B, with_margin) => {
             const inv_B = p_transform_B.clone().affine_inverse();
 
             if (!separator.test_axis(p_rectangle_A.get_box_axis(p_transform_A, inv_A, p_rectangle_B, p_transform_B, inv_B))) {
-                Matrix.free(inv_A);
-                Matrix.free(inv_B);
+                Transform2D.free(inv_A);
+                Transform2D.free(inv_B);
                 return;
             }
 
@@ -1066,12 +1078,12 @@ const _collision_rectangle_rectangle = (cast_A, cast_B, with_margin) => {
                 if (cast_A) {
                     const box_axis = p_rectangle_A.get_box_axis(aofs, aofsinv, p_rectangle_B, p_transform_B, inv_B);
                     if (!separator.test_axis(box_axis)) {
-                        Matrix.free(inv_A);
-                        Matrix.free(inv_B);
-                        Matrix.free(aofs);
-                        Matrix.free(aofsinv);
-                        Matrix.free(bofs);
-                        Matrix.free(bofsinv);
+                        Transform2D.free(inv_A);
+                        Transform2D.free(inv_B);
+                        Transform2D.free(aofs);
+                        Transform2D.free(aofsinv);
+                        Transform2D.free(bofs);
+                        Transform2D.free(bofsinv);
                         Vector2.free(box_axis);
                         return;
                     }
@@ -1080,12 +1092,12 @@ const _collision_rectangle_rectangle = (cast_A, cast_B, with_margin) => {
                 if (cast_B) {
                     const box_axis = p_rectangle_A.get_box_axis(p_transform_A, inv_A, p_rectangle_B, bofs, bofsinv);
                     if (!separator.test_axis(box_axis)) {
-                        Matrix.free(inv_A);
-                        Matrix.free(inv_B);
-                        Matrix.free(aofs);
-                        Matrix.free(aofsinv);
-                        Matrix.free(bofs);
-                        Matrix.free(bofsinv);
+                        Transform2D.free(inv_A);
+                        Transform2D.free(inv_B);
+                        Transform2D.free(aofs);
+                        Transform2D.free(aofsinv);
+                        Transform2D.free(bofs);
+                        Transform2D.free(bofsinv);
                         Vector2.free(box_axis);
                         return;
                     }
@@ -1094,12 +1106,12 @@ const _collision_rectangle_rectangle = (cast_A, cast_B, with_margin) => {
                 if (cast_A && cast_B) {
                     const box_axis = p_rectangle_A.get_box_axis(aofs, aofsinv, p_rectangle_B, bofs, bofsinv);
                     if (!separator.test_axis(box_axis)) {
-                        Matrix.free(inv_A);
-                        Matrix.free(inv_B);
-                        Matrix.free(aofs);
-                        Matrix.free(aofsinv);
-                        Matrix.free(bofs);
-                        Matrix.free(bofsinv);
+                        Transform2D.free(inv_A);
+                        Transform2D.free(inv_B);
+                        Transform2D.free(aofs);
+                        Transform2D.free(aofsinv);
+                        Transform2D.free(bofs);
+                        Transform2D.free(bofsinv);
                         Vector2.free(box_axis);
                         return;
                     }
@@ -1131,9 +1143,9 @@ const _collision_rectangle_convex_polygon = (cast_A, cast_B, with_margin) => {
 
     /**
      * @param {RectangleShape2DSW} p_rectangle_A
-     * @param {Matrix} p_transform_A
+     * @param {Transform2D} p_transform_A
      * @param {ConvexPolygonShape2DSW} p_convex_B
-     * @param {Matrix} p_transform_B
+     * @param {Transform2D} p_transform_B
      * @param {_CollectorCallback2D} p_collector
      * @param {Vector2} p_motion_A
      * @param {Vector2} p_motion_B
@@ -1165,7 +1177,7 @@ const _collision_rectangle_convex_polygon = (cast_A, cast_B, with_margin) => {
         }
 
         // convex faces
-        const boxinv = Matrix.new();
+        const boxinv = Transform2D.new();
         if (with_margin) {
             boxinv.copy(p_transform_A).affine_inverse();
         }
@@ -1173,7 +1185,7 @@ const _collision_rectangle_convex_polygon = (cast_A, cast_B, with_margin) => {
             const normal = p_convex_B.get_xformed_segment_normal(p_transform_B, i);
             if (!separator.test_axis(normal)) {
                 Vector2.free(normal);
-                Matrix.free(boxinv);
+                Transform2D.free(boxinv);
                 Vector2.free(vec);
                 return;
             }
@@ -1186,7 +1198,7 @@ const _collision_rectangle_convex_polygon = (cast_A, cast_B, with_margin) => {
                 if (!separator.test_axis(axis)) {
                     Vector2.free(point);
                     Vector2.free(axis);
-                    Matrix.free(boxinv);
+                    Transform2D.free(boxinv);
                     Vector2.free(vec);
                     return;
                 }
@@ -1196,7 +1208,7 @@ const _collision_rectangle_convex_polygon = (cast_A, cast_B, with_margin) => {
                     if (!separator.test_axis(axis)) {
                         Vector2.free(point);
                         Vector2.free(axis);
-                        Matrix.free(boxinv);
+                        Transform2D.free(boxinv);
                         Vector2.free(vec);
                         return;
                     }
@@ -1207,7 +1219,7 @@ const _collision_rectangle_convex_polygon = (cast_A, cast_B, with_margin) => {
                     if (!separator.test_axis(axis)) {
                         Vector2.free(point);
                         Vector2.free(axis);
-                        Matrix.free(boxinv);
+                        Transform2D.free(boxinv);
                         Vector2.free(vec);
                         return;
                     }
@@ -1218,14 +1230,14 @@ const _collision_rectangle_convex_polygon = (cast_A, cast_B, with_margin) => {
                     if (!separator.test_axis(axis)) {
                         Vector2.free(point);
                         Vector2.free(axis);
-                        Matrix.free(boxinv);
+                        Transform2D.free(boxinv);
                         Vector2.free(vec);
                         return;
                     }
                 }
             }
         }
-        Matrix.free(boxinv);
+        Transform2D.free(boxinv);
 
         Vector2.free(vec);
 

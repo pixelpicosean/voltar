@@ -1,9 +1,9 @@
-import Vector2 from "./vector2";
+import { Vector2 } from "./vector2";
 
 /**
  * @param {Vector2[]} vertices
  */
-export default function decompose_in_convex(vertices) {
+export function decompose_in_convex(vertices) {
     /** @type {Vector2[]} */
     var vec = [];
     var i = 0, n = 0, j = 0;

@@ -14,6 +14,12 @@ export const NOTIFICATION_CRASH = 1012;
 export const NOTIFICATION_OS_IME_UPDATE = 1013;
 
 export class MainLoop extends VObject {
+    constructor() {
+        super();
+
+        this.class = 'MainLoop';
+    }
+
     /* public */
     input_event(p_event) {
         this._input_event(p_event);
@@ -66,5 +72,4 @@ export class MainLoop extends VObject {
      */
     _drop_files(p_files) { }
 }
-
-GDCLASS(MainLoop, VObject);
+GDCLASS(MainLoop, VObject)

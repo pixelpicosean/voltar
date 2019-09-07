@@ -1,13 +1,14 @@
 import { node_class_map } from 'engine/registry';
 import { GDCLASS } from 'engine/core/v_object';
-import { CMP_EPSILON } from 'engine/core/math/const';
-import { deg2rad, rad2deg } from 'engine/core/math/index';
+import { CMP_EPSILON } from 'engine/core/math/math_defs';
+import { deg2rad, rad2deg } from 'engine/core/math/math_funcs';
 import { Vector2 } from 'engine/core/math/vector2';
 import { Transform2D } from 'engine/core/math/transform_2d';
 
+import { VSG } from 'engine/servers/visual/visual_server_globals';
+
 import { Node } from '../main/node';
 import { CanvasItem } from './canvas_item';
-import { VSG } from 'engine/servers/visual/visual_server_globals';
 
 
 export class Node2D extends CanvasItem {
@@ -341,6 +342,4 @@ export class Node2D extends CanvasItem {
         this._xform_dirty = false;
     }
 }
-GDCLASS(Node2D, CanvasItem)
-
-node_class_map['Node2D'] = Node2D;
+node_class_map['Node2D'] = GDCLASS(Node2D, CanvasItem)

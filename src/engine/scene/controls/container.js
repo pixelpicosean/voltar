@@ -1,6 +1,6 @@
 import Control from './control';
 import { SizeFlag, Anchor } from "./const";
-import { Rectangle, Vector2 } from 'engine/core/math/index';
+import { Rectangle, Vector2 } from 'engine/core/math/math_funcs';
 import MessageQueue from 'engine/core/message_queue';
 import { node_class_map } from 'engine/registry';
 

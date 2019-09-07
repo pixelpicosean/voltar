@@ -1,8 +1,9 @@
-import { Rectangle } from "engine/core/math/index";
-import PhysicsServer from "engine/servers/physics_2d/physics_server";
-import Shape2D from "./shape_2d";
+import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server";
+import { Shape2D } from "./shape_2d";
+import { Rect2 } from "engine/core/math/rect2";
 
-export default class CircleShape2D extends Shape2D {
+
+export class CircleShape2D extends Shape2D {
     get radius() {
         return this._radius;
     }
@@ -23,7 +24,7 @@ export default class CircleShape2D extends Shape2D {
     }
 
     constructor() {
-        super(PhysicsServer.singleton.circle_shape_create());
+        super(Physics2DServer.get_singleton().circle_shape_create());
 
         this._radius = 10;
         this._update_shape();
@@ -36,10 +37,10 @@ export default class CircleShape2D extends Shape2D {
     }
 
     /**
-     * @param {Rectangle} [p_rect]
-     * @returns {Rectangle}
+     * @param {Rect2} [p_rect]
+     * @returns {Rect2}
      */
-    get_rect(p_rect = new Rectangle()) {
+    get_rect(p_rect = new Rect2()) {
         p_rect.x = -this._radius;
         p_rect.y = -this._radius;
         p_rect.width = p_rect.height = this._radius * 2;

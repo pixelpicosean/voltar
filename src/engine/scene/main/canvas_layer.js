@@ -5,7 +5,7 @@ import { Transform2D } from "engine/core/math/transform_2d";
 import {
     rad2deg,
     deg2rad,
-} from "engine/core/math/index";
+} from "engine/core/math/math_funcs";
 
 import { VSG } from "engine/servers/visual/visual_server_globals";
 
@@ -255,6 +255,4 @@ export class CanvasLayer extends Node {
         }
     }
 }
-GDCLASS(CanvasLayer, Node)
-
-node_class_map['CanvasLayer'] = CanvasLayer;
+node_class_map['CanvasLayer'] = GDCLASS(CanvasLayer, Node)

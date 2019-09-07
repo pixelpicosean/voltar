@@ -1,4 +1,10 @@
-import { PI, PI2, DEG_TO_RAD, RAD_TO_DEG } from './const';
+import {
+    Math_PI,
+    DEG_TO_RAD,
+    RAD_TO_DEG,
+} from './math_defs';
+
+const Math_PI2 = Math_PI * 2;
 
 /**
  * Force a value within the boundaries by clamping `x` to the range `[a, b]`.
@@ -57,7 +63,7 @@ export const lerp = (a, b, fct) => a + (b - a) * fct;
 /**
  * wrap to [-PI, +PI]
  */
-export const wrap_angle = (a) => (a + PI) % PI2 - PI;
+export const wrap_angle = (a) => (a + Math_PI) % Math_PI2 - Math_PI;
 
 /**
  * Minimal difference between 2 angles
@@ -65,7 +71,7 @@ export const wrap_angle = (a) => (a + PI) % PI2 - PI;
  * @param {number} b
  * @returns {number}
  */
-export const angle_difference = (a, b) => mod((b - a + PI), PI2) - PI;
+export const angle_difference = (a, b) => mod((b - a + Math_PI), Math_PI2) - Math_PI;
 
 /**
  * @param {number} p_x

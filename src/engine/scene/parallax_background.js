@@ -1,5 +1,5 @@
 import { node_class_map } from "engine/registry";
-import { Vector2, Matrix, ObservableVector2 } from "engine/core/math/index";
+import { Vector2, Matrix, ObservableVector2 } from "engine/core/math/math_funcs";
 
 import CanvasLayer from "./main/canvas_layer";
 

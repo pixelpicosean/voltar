@@ -1,8 +1,11 @@
-import { Rectangle, Vector2 } from "engine/core/math/index";
-import decompose_in_convex from "engine/core/math/convex";
+import { Vector2 } from "engine/core/math/vector2";
+import { decompose_in_convex } from "engine/core/math/convex";
 import { is_polygon_clockwise } from "engine/core/math/geometry";
-import ConvexPolygonShape2D from "../resources/convex_polygon_shape_2d";
-import Node2D from "../node_2d";
+
+import { ConvexPolygonShape2D } from "../resources/convex_polygon_shape_2d";
+import { Node2D } from "../2d/node_2d";
+import { Rect2 } from "engine/core/math/rect2";
+import { GDCLASS } from "engine/core/v_object";
 
 /**
  * @param {Vector2[]} arr
@@ -35,7 +38,7 @@ export const BuildMode = {
     SEGMENTS: 1,
 }
 
-export default class CollisionPolygon2D extends Node2D {
+export class CollisionPolygon2D extends Node2D {
     get disabled() {
         return this._disabled;
     }
@@ -162,16 +165,16 @@ export default class CollisionPolygon2D extends Node2D {
     constructor() {
         super();
 
-        this.type = 'CollisionPolygon2D';
+        this.class = 'CollisionPolygon2D';
 
         this._disabled = false;
         this._one_way_collision = false;
         this._one_way_collision_margin = 1.0;
         /**
-         * @type {import('./collision_object_2d').default}
+         * @type {import('./collision_object_2d').CollisionObject2D}
          */
         this.parent = null;
-        this.aabb = new Rectangle(-10, -10, 20, 20);
+        this.aabb = new Rect2(-10, -10, 20, 20);
         this._build_mode = BuildMode.SOLIDS;
         /**
          * @type {Vector2[]}
@@ -251,3 +254,4 @@ export default class CollisionPolygon2D extends Node2D {
         return decompose_in_convex(this._polygon).map(arr => arr.reverse());
     }
 }
+GDCLASS(CollisionPolygon2D, Node2D)

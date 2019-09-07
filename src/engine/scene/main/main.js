@@ -1,8 +1,21 @@
 import { mixins } from "engine/utils/index";
 import { ProjectSettings } from "engine/core/project_settings";
-import SceneTree from "./scene_tree";
-import MessageQueue from "engine/core/message_queue";
+import { SceneTree } from "./scene_tree";
+import { MessageQueue } from "engine/core/message_queue";
 import { VisualServer } from "engine/servers/visual_server";
+import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server";
+
+/** @type {MessageQueue} */
+let message_queue = null;
+
+/** @type {VisualServer} */
+let visual_server = null;
+
+/** @type {Physics2DServer} */
+let physics_2d_server = null;
+
+/** @type {SceneTree} */
+let scene_tree = null;
 
 export const Main = {
     last_ticks: 0,
@@ -28,22 +41,40 @@ export const Main = {
         // Handle mixins now, after all code has been added
         mixins.perform_mixins();
 
-        this.tree = new SceneTree();
         this.global = new ProjectSettings(settings);
+        message_queue = new MessageQueue();
 
-        document.title = this.global.application.name;
+        window.addEventListener('load', this.setup2, false);
+        document.addEventListener('DOMContentLoaded', this.setup2, false);
+    },
 
-        window.addEventListener('load', this.start, false);
-        document.addEventListener('DOMContentLoaded', this.start, false);
+    setup2() {
+        window.removeEventListener('load', this.setup2, false);
+        document.removeEventListener('DOMContentLoaded', this.setup2, false);
+
+        visual_server = new VisualServer();
+        visual_server.init();
+
+        physics_2d_server = new Physics2DServer();
+        physics_2d_server.init();
+
+        this.start();
     },
 
     start() {
-        window.removeEventListener('load', this.start, false);
-        document.removeEventListener('DOMContentLoaded', this.start, false);
-
-        const scene = this.global.application.preloader.instance();
-
+        scene_tree = new SceneTree();
         SceneTree.get_singleton().init();
+
+        // TODO: autoload first pass, load constants
+        // TODO: autoload second pass, instantiate nodes into global constants
+
+        // TODO: load and setup screen stretch
+
+        // read and apply global settings
+        document.title = this.global.application.name;
+
+        // load and start main scene (preloader here instead)
+        const scene = this.global.application.preloader.instance();
         SceneTree.get_singleton().add_current_scene(scene);
 
         this.start_loop();
@@ -111,5 +142,5 @@ export const Main = {
     },
 };
 
-Main.start = Main.start.bind(Main);
+Main.setup2 = Main.setup2.bind(Main);
 Main.iteration = Main.iteration.bind(Main);

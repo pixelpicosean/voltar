@@ -1,5 +1,6 @@
 import { remove_items } from "engine/dep/index";
-import MessageQueue from "./message_queue";
+import { MessageQueue } from "./message_queue";
+
 
 export const NOTIFICATION_PREDELETE = 1
 

@@ -1,6 +1,6 @@
 import settings from 'engine/settings';
 import { TEXT_GRADIENT } from 'engine/const';
-import { Rectangle } from 'engine/core/math/index';
+import { Rectangle } from 'engine/core/math/math_funcs';
 import { sign, rgb2hex, hex2string } from 'engine/utils/index';
 import trim_canvas from 'engine/utils/trim_canvas';
 import Texture from 'engine/scene/resources/textures/texture';
@@ -527,7 +527,7 @@ export default class Text extends Sprite {
      * Note* Unlike a Sprite, a Text object will automatically destroy its base_texture and texture as
      * the majority of the time the texture will not be shared with any other Sprites.
      *
-     * @param {import('../node_2d').DestroyOption|boolean} [options] - Options parameter. A boolean will act as if all options
+     * @param {import('../2d/node_2d').DestroyOption|boolean} [options] - Options parameter. A boolean will act as if all options
      *  have been set to that value
      */
     free(options) {

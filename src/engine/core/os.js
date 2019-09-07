@@ -1,8 +1,8 @@
-export default class OS {
-    static get_singleton() {
-        return OS.singleton;
-    }
+export class OS {
+    static get_singleton() { return singleton }
     constructor() {
+        if (!singleton) singleton = this;
+
         this.start_date = performance.now();
     }
     get_ticks_msec() {
@@ -12,4 +12,6 @@ export default class OS {
         return this.get_ticks_msec() * 1000;
     }
 }
-OS.singleton = new OS();
+
+/** @type {OS} */
+let singleton = null;

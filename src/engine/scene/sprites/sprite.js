@@ -1,11 +1,11 @@
 import { BLEND_MODES, COLOR_MODES } from 'engine/const';
-import { Vector2, ObservableVector2, Rectangle, Vector2Like } from 'engine/core/math/index';
+import { Vector2, ObservableVector2, Rectangle, Vector2Like } from 'engine/core/math/math_funcs';
 import { sign, TextureCache } from 'engine/utils/index';
 import WebGLRenderer from 'engine/servers/visual/webgl_renderer';
 
 import Texture from 'engine/scene/resources/textures/texture';
 
-import Node2D from '../node_2d';
+import Node2D from '../2d/node_2d';
 
 const temp_point = new Vector2();
 
@@ -449,7 +449,7 @@ export default class Sprite extends Node2D {
 
     /**
      * Destroys this sprite and optionally its texture and children
-     * @param {import('../node_2d').DestroyOption|boolean} [options] - Options parameter. A boolean will act as if all options
+     * @param {import('../2d/node_2d').DestroyOption|boolean} [options] - Options parameter. A boolean will act as if all options
      *  have been set to that value
      */
     free(options) {

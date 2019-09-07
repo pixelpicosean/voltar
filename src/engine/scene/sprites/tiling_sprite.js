@@ -1,6 +1,6 @@
 import TextureMatrix from 'engine/scene/resources/textures/texture_matrix';
 import Texture from 'engine/scene/resources/textures/texture';
-import { Vector2, Transform, Rectangle } from 'engine/core/math/index';
+import { Vector2, Transform, Rectangle } from 'engine/core/math/math_funcs';
 import Sprite from './sprite';
 
 const temp_point = new Vector2();
@@ -241,7 +241,7 @@ export default class TilingSprite extends Sprite {
     /**
      * Destroys this sprite and optionally its texture and children
      *
-     * @param {import('../node_2d').DestroyOption|boolean} [options] - Options parameter. A boolean will act as if all options
+     * @param {import('../2d/node_2d').DestroyOption|boolean} [options] - Options parameter. A boolean will act as if all options
      *  have been set to that value
      */
     free(options) {

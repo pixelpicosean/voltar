@@ -1,69 +1,39 @@
-/**
- * @enum {number}
- */
-export const Margin = {
-    Left: 0,
-    Top: 1,
-    Right: 2,
-    Bottom: 3,
-}
+export const MARGIN_LEFT = 0;
+export const MARGIN_TOP = 1;
+export const MARGIN_RIGHT = 2;
+export const MARGIN_BOTTOM = 3;
 
-/**
- * @enum {number}
- */
-export const SizeFlag = {
-    FILL: 1,
-    EXPAND: 2,
-    EXPAND_FILL: 3,
-    SHRINK_CENTER: 4,
-    SHRINK_END: 8,
-}
+export const SIZE_FILL = 1;
+export const SIZE_EXPAND = 2;
+export const SIZE_EXPAND_FILL = SIZE_EXPAND | SIZE_FILL;
+export const SIZE_SHRINK_CENTER = 4;
+export const SIZE_SHRINK_END = 8;
 
-/**
- * @enum {number}
- */
-export const GrowDirection = {
-    BEGIN: 0,
-    END: 1,
-    BOTH: 2,
-}
+export const Grow_Direction_BEGIN = 0;
+export const Grow_Direction_END = 1;
+export const Grow_Direction_BOTH = 2;
 
-/**
- * @enum {number}
- */
-export const Anchor = {
-    BEGIN: 0,
-    END: 1,
-}
+export const ANCHOR_BEGIN = 0;
+export const ANCHOR_END = 1;
 
-/**
- * @enum {number}
- */
-export const LayoutPresetMode = {
-    MINSIZE: 0,
-    KEEP_WIDTH: 1,
-    KEEP_HEIGHT: 2,
-    KEEP_SIZE: 3,
-}
+export const PRESET_MODE_MINSIZE = 0;
+export const PRESET_MODE_KEEP_WIDTH = 1;
+export const PRESET_MODE_KEEP_HEIGHT = 2;
+export const PRESET_MODE_KEEP_SIZE = 3;
 
-/**
- * @enum {number}
- */
-export const LayoutPreset = {
-    TOP_LEFT: 0,
-    TOP_RIGHT: 1,
-    BOTTOM_LEFT: 2,
-    BOTTOM_RIGHT: 3,
-    CENTER_LEFT: 4,
-    CENTER_TOP: 5,
-    CENTER_RIGHT: 6,
-    CENTER_BOTTOM: 7,
-    CENTER: 8,
-    LEFT_WIDE: 9,
-    TOP_WIDE: 10,
-    RIGHT_WIDE: 11,
-    BOTTOM_WIDE: 12,
-    VCENTER_WIDE: 13,
-    HCENTER_WIDE: 14,
-    WIDE: 15,
-}
+export const PRESET_TOP_LEFT = 0;
+export const PRESET_TOP_RIGHT = 1;
+export const PRESET_BOTTOM_LEFT = 2;
+export const PRESET_BOTTOM_RIGHT = 3;
+export const PRESET_CENTER_LEFT = 4;
+export const PRESET_CENTER_TOP = 5;
+export const PRESET_CENTER_RIGHT = 6;
+export const PRESET_CENTER_BOTTOM = 7;
+export const PRESET_CENTER = 8;
+export const PRESET_LEFT_WIDE = 9;
+export const PRESET_TOP_WIDE = 10;
+export const PRESET_RIGHT_WIDE = 11;
+export const PRESET_BOTTOM_WIDE = 12;
+export const PRESET_VCENTER_WIDE = 13;
+export const PRESET_HCENTER_WIDE = 14;
+export const PRESET_WIDE = 15;

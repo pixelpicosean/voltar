@@ -5,10 +5,10 @@ import {
     deg2rad,
     clamp,
     Matrix,
-} from 'engine/core/math/index';
+} from 'engine/core/math/math_funcs';
 import MessageQueue from 'engine/core/message_queue';
 import { BLEND_MODES } from 'engine/const';
-import Node2D from '../node_2d';
+import Node2D from '../2d/node_2d';
 import { node_class_map } from 'engine/registry';
 
 import {

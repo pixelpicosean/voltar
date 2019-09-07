@@ -1,7 +1,7 @@
 import Color from "engine/core/color";
 import { node_class_map } from "engine/registry";
 import { TextureCache } from "engine/utils/index";
-import { Vector2, clamp } from "engine/core/math/index";
+import { Vector2, clamp } from "engine/core/math/math_funcs";
 import WebGLRenderer from "engine/servers/visual/webgl_renderer";
 import Texture from "engine/scene/resources/textures/texture";
 

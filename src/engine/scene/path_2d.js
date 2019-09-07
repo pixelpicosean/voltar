@@ -1,11 +1,11 @@
-import Node2D from './node_2d';
+import Node2D from './2d/node_2d';
 import { Curve2D } from './resources/curve';
 import { node_class_map } from 'engine/registry';
 import {
     Vector2,
     posmod,
     clamp,
-} from 'engine/core/math/index';
+} from 'engine/core/math/math_funcs';
 
 export class Path2D extends Node2D {
     constructor() {

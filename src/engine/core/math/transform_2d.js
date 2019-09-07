@@ -1,6 +1,8 @@
-import { PI2 } from './const';
+import { Math_PI } from './math_defs';
 import { Vector2 } from './vector2';
 import { Rect2 } from './rect2';
+
+const Math_PI2 = Math_PI * 2;
 
 /**
  * The Matrix class as an object, which makes it a lot faster,
@@ -67,7 +69,7 @@ export class Transform2D {
         const delta = Math.abs(skew_x + skew_y);
 
         let rotation = 0;
-        if (delta < 0.00001 || Math.abs(PI2 - delta) < 0.00001) {
+        if (delta < 0.00001 || Math.abs(Math_PI2 - delta) < 0.00001) {
             rotation = skew_y;
 
             if (a < 0 && d >= 0) {
@@ -639,7 +641,7 @@ export class Transform2D {
 
         const delta = Math.abs(skew_x + skew_y);
 
-        if (delta < 0.00001 || Math.abs(PI2 - delta) < 0.00001) {
+        if (delta < 0.00001 || Math.abs(Math_PI2 - delta) < 0.00001) {
             transform.rotation = skew_y;
             transform.skew.x = transform.skew.y = 0;
         }

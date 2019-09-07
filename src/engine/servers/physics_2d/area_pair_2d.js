@@ -1,9 +1,11 @@
-import CollisionSolver2DSW from "./collision_solver_2d_sw";
-import Constraint2DSW from "./constraint_2d_sw";
-import Area2DSW from "./area_2d_sw";
-import Body2DSW from "./body_2d_sw";
-import { Vector2, Matrix } from "engine/core/math/index";
+import { Vector2 } from "engine/core/math/vector2";
+import { Transform2D } from "engine/core/math/transform_2d";
 import { BodyMode, AreaSpaceOverrideMode } from "engine/scene/physics/const";
+import { CollisionSolver2DSW } from "./collision_solver_2d_sw";
+import { Constraint2DSW } from "./constraint_2d_sw";
+import { Area2DSW } from "./area_2d_sw";
+import { Body2DSW } from "./body_2d_sw";
+
 
 export class AreaPair2DSW extends Constraint2DSW {
     /**
@@ -127,8 +129,8 @@ export class Area2Pair2DSW extends Constraint2DSW {
                 result = true;
             }
 
-            Matrix.free(xform_a);
-            Matrix.free(xform_b);
+            Transform2D.free(xform_a);
+            Transform2D.free(xform_b);
         }
 
         if (result !== this.colliding) {

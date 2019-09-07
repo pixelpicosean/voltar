@@ -1,17 +1,21 @@
-import { Matrix, Rectangle, Vector2 } from "engine/core/math/index";
-import { Shape2DSW } from "./shape_2d_sw";
-import Space2DSW from "./space_2d_sw";
-import { CollisionObjectType } from "engine/scene/physics/const";
 import { remove_items } from "engine/dep/index";
+import { Vector2 } from "engine/core/math/vector2";
+import { Rect2 } from "engine/core/math/rect2";
+import { Transform2D } from "engine/core/math/transform_2d";
+import { CollisionObjectType } from "engine/scene/physics/const";
+import { Shape2DSW } from "./shape_2d_sw";
+import { Space2DSW } from "./space_2d_sw";
 
-const IDTransform = Object.freeze(new Matrix());
+
+const IDTransform = Object.freeze(new Transform2D());
+
 
 class Shape {
     constructor() {
-        this.xform = new Matrix();
-        this.xform_inv = new Matrix();
+        this.xform = new Transform2D();
+        this.xform_inv = new Transform2D();
         this.bpid = 0;
-        this.aabb_cache = new Rectangle();
+        this.aabb_cache = new Rect2();
         /**
          * @type {Shape2DSW}
          */
@@ -23,7 +27,7 @@ class Shape {
     }
 }
 
-export default class CollisionObject2DSW {
+export class CollisionObject2DSW {
     get static() {
         return this._static;
     }
@@ -59,9 +63,9 @@ export default class CollisionObject2DSW {
     constructor(p_type) {
         this.type = p_type;
         this.self = this;
-        /** @type {import('engine/scene/node_2d').default} */
+        /** @type {import('engine/scene/2d/node_2d').Node2D} */
         this.instance = null;
-        /** @type {import('engine/scene/node_2d').default} */
+        /** @type {import('engine/scene/2d/node_2d').Node2D} */
         this.canvas_instance = null;
         this.pickable = true;
 
@@ -73,8 +77,8 @@ export default class CollisionObject2DSW {
          * @type {Space2DSW}
          */
         this.space = null;
-        this.transform = new Matrix();
-        this.inv_transform = new Matrix();
+        this.transform = new Transform2D();
+        this.inv_transform = new Transform2D();
         this.collision_mask = 1;
         this.collision_layer = 1;
         this._static = true;
@@ -102,7 +106,7 @@ export default class CollisionObject2DSW {
             xform.xform_rect(shape_aabb, shape_aabb);
             s.aabb_cache.copy(shape_aabb);
             s.aabb_cache.grow_to((s.aabb_cache.width + s.aabb_cache.height) * 0.5 * 0.05);
-            Rectangle.free(shape_aabb);
+            Rect2.free(shape_aabb);
 
             this.space.broadphase.move(s.bpid, s.aabb_cache);
         }
@@ -132,10 +136,10 @@ export default class CollisionObject2DSW {
             const xform = this.transform.clone().append(s.xform);
             xform.xform_rect(shape_aabb, shape_aabb);
             s.aabb_cache.copy(shape_aabb);
-            const rect = Rectangle.new(shape_aabb.x + p_motion.x, shape_aabb.y + p_motion.y, shape_aabb.width, shape_aabb.height);
+            const rect = Rect2.new(shape_aabb.x + p_motion.x, shape_aabb.y + p_motion.y, shape_aabb.width, shape_aabb.height);
             s.aabb_cache.merge_to(rect);
-            Rectangle.free(shape_aabb);
-            Rectangle.free(rect);
+            Rect2.free(shape_aabb);
+            Rect2.free(rect);
 
             this.space.broadphase.move(s.bpid, s.aabb_cache);
         }
@@ -150,7 +154,7 @@ export default class CollisionObject2DSW {
     }
 
     /**
-     * @param {Matrix} p_transform
+     * @param {Transform2D} p_transform
      * @param {boolean} [p_update_shapes]
      */
     _set_transform(p_transform, p_update_shapes = true) {
@@ -160,7 +164,7 @@ export default class CollisionObject2DSW {
         }
     }
     /**
-     * @param {Matrix} p_transform
+     * @param {Transform2D} p_transform
      */
     _set_inv_transform(p_transform) {
         this.inv_transform.copy(p_transform);
@@ -203,7 +207,7 @@ export default class CollisionObject2DSW {
 
     /**
      * @param {Shape2DSW} p_shape
-     * @param {Matrix} [p_transform]
+     * @param {Transform2D} [p_transform]
      */
     add_shape(p_shape, p_transform = IDTransform) {
         const s = new Shape();
@@ -232,7 +236,7 @@ export default class CollisionObject2DSW {
     }
     /**
      * @param {number} p_index
-     * @param {Matrix} p_transform
+     * @param {Transform2D} p_transform
      */
     set_shape_transform(p_index, p_transform) {
         this.shapes[p_index].xform.copy(p_transform);

@@ -1,19 +1,21 @@
-import { Vector2, Matrix } from "engine/core/math/index";
+import { Vector2 } from "engine/core/math/vector2";
+import { Transform2D } from "engine/core/math/transform_2d";
+import { ShapeType } from "engine/scene/physics/const";
 import { Shape2DSW } from "./shape_2d_sw";
 import { sat_2d_calculate_penetration as collision_solver } from './collision_solver_2d_sat';
-import { ShapeType } from "engine/scene/physics/const";
+
 
 /**
  * @typedef {(p_point_A: Vector2, p_point_B: Vector2, p_userdata: any) => void} CallbackResult
  */
 
-export default class CollisionSolver2DSW {
+export class CollisionSolver2DSW {
     /**
      * @param {Shape2DSW} p_shape_A
-     * @param {Matrix} p_transform_A
+     * @param {Transform2D} p_transform_A
      * @param {Vector2} p_motion_A
      * @param {Shape2DSW} p_shape_B
-     * @param {Matrix} p_transform_B
+     * @param {Transform2D} p_transform_B
      * @param {Vector2} p_motion_B
      * @param {CallbackResult} p_result_callback
      * @param {any} p_userdata
@@ -66,9 +68,9 @@ export default class CollisionSolver2DSW {
 
 /**
  * @param {Shape2DSW} p_shape_A
- * @param {Matrix} p_transform_A
+ * @param {Transform2D} p_transform_A
  * @param {Shape2DSW} p_shape_B
- * @param {Matrix} p_transform_B
+ * @param {Transform2D} p_transform_B
  * @param {CallbackResult} p_result_callback
  * @param {any} p_userdata
  * @returns {boolean}
@@ -85,9 +87,9 @@ function solve_concave() { }
 /**
  * @param {Shape2DSW} p_shape_A
  * @param {Vector2} p_motion_A
- * @param {Matrix} p_transform_A
+ * @param {Transform2D} p_transform_A
  * @param {Shape2DSW} p_shape_B
- * @param {Matrix} p_transform_B
+ * @param {Transform2D} p_transform_B
  * @param {CallbackResult} p_result_callback
  * @param {any} p_userdata
  * @param {Vector2[]} [sep_axis]

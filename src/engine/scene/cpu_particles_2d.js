@@ -1,4 +1,4 @@
-import Node2D from './node_2d';
+import Node2D from './2d/node_2d';
 import Color from 'engine/core/color';
 import {
     Vector2,
@@ -7,7 +7,7 @@ import {
     lerp,
     deg2rad,
     PI2,
-} from 'engine/core/math/index';
+} from 'engine/core/math/math_funcs';
 import { randf, rand_range_i } from 'engine/core/math/random_pcg';
 import Sprite from './sprites/sprite';
 import WebGLRenderer from 'engine/servers/visual/webgl_renderer';

@@ -51,8 +51,6 @@ export class Rect2 {
      * @param {number} [height=0] - The overall height of this rectangle
      */
     constructor(x = 0, y = 0, width = 0, height = 0) {
-        this.class = 'Rect2';
-
         /**
          * @type {number}
          */

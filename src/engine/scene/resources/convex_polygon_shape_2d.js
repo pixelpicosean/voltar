@@ -1,15 +1,16 @@
-import PhysicsServer from "engine/servers/physics_2d/physics_server";
-import Shape2D from "./shape_2d";
-import {
-    Rectangle,
-    Vector2,
-} from "engine/core/math/index";
+import { Vector2 } from "engine/core/math/vector2";
+import { Rect2 } from "engine/core/math/rect2";
 import {
     is_polygon_clockwise,
     convex_hull_2d,
 } from "engine/core/math/geometry";
 
-export default class ConvexPolygonShape2D extends Shape2D {
+import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server";
+
+import { Shape2D } from "./shape_2d";
+
+
+export class ConvexPolygonShape2D extends Shape2D {
     get points() {
         return this._points;
     }
@@ -29,7 +30,7 @@ export default class ConvexPolygonShape2D extends Shape2D {
     }
 
     constructor() {
-        super(PhysicsServer.singleton.convex_polygon_shape_create());
+        super(Physics2DServer.get_singleton().convex_polygon_shape_create());
 
         /**
          * @type {Vector2[]}
@@ -44,10 +45,10 @@ export default class ConvexPolygonShape2D extends Shape2D {
     }
 
     /**
-     * @param {Rectangle} [p_rect]
-     * @returns {Rectangle}
+     * @param {Rect2} [p_rect]
+     * @returns {Rect2}
      */
-    get_rect(p_rect = Rectangle.new()) {
+    get_rect(p_rect = Rect2.new()) {
         p_rect.set(0, 0, 0, 0);
         for (let i = 0, len = this._points.length; i < len; i++) {
             if (i === 0) {

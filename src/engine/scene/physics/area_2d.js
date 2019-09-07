@@ -1,14 +1,16 @@
-import CollisionObject2D from './collision_object_2d';
-import { node_class_map } from 'engine/registry';
-import PhysicsServer from 'engine/servers/physics_2d/physics_server';
-import { AreaSpaceOverrideMode, ShapeType } from 'engine/scene/physics/const';
-import { Vector2, Circle, Rectangle } from 'engine/core/math/index';
-import Area2DSW from 'engine/servers/physics_2d/area_2d_sw';
 import { remove_items } from 'engine/dep/index';
-import Node2D from '../node_2d';
+import { GDCLASS } from 'engine/core/v_object';
+import { node_class_map } from 'engine/registry';
+import { Vector2 } from 'engine/core/math/vector2';
+
+import { Physics2DServer } from 'engine/servers/physics_2d/physics_2d_server';
+import { AreaSpaceOverrideMode, ShapeType } from 'engine/scene/physics/const';
+import { Area2DSW } from 'engine/servers/physics_2d/area_2d_sw';
+
+import { Node2D } from '../2d/node_2d';
+import { CollisionObject2D } from './collision_object_2d';
 import { PhysicsBody2D } from './physics_body_2d';
-import { CircleShape2D } from 'engine/index';
-import { SHAPES } from 'engine/const';
+
 
 class ShapePair {
     /**
@@ -70,7 +72,7 @@ class AreaState {
     }
 }
 
-export default class Area2D extends CollisionObject2D {
+export class Area2D extends CollisionObject2D {
     /**
      * @returns {number}
      */
@@ -222,11 +224,11 @@ export default class Area2D extends CollisionObject2D {
         this._monitoring = value;
 
         if (this._monitoring) {
-            PhysicsServer.singleton.area_set_monitor_callback(this.rid, this, this._body_inout);
-            PhysicsServer.singleton.area_set_area_monitor_callback(this.rid, this, this._area_inout);
+            Physics2DServer.get_singleton().area_set_monitor_callback(this.rid, this, this._body_inout);
+            Physics2DServer.get_singleton().area_set_area_monitor_callback(this.rid, this, this._area_inout);
         } else {
-            PhysicsServer.singleton.area_set_monitor_callback(this.rid, null, null);
-            PhysicsServer.singleton.area_set_area_monitor_callback(this.rid, null, null);
+            Physics2DServer.get_singleton().area_set_monitor_callback(this.rid, null, null);
+            Physics2DServer.get_singleton().area_set_area_monitor_callback(this.rid, null, null);
             this._clear_monitoring();
         }
     }
@@ -251,7 +253,7 @@ export default class Area2D extends CollisionObject2D {
 
         this._monitorable = p_enable;
 
-        PhysicsServer.singleton.area_set_monitorable(this.rid, this._monitorable);
+        Physics2DServer.get_singleton().area_set_monitorable(this.rid, this._monitorable);
     }
     /**
      * @param {boolean} value
@@ -279,9 +281,9 @@ export default class Area2D extends CollisionObject2D {
     }
 
     constructor() {
-        super(PhysicsServer.singleton.area_create(), true);
+        super(Physics2DServer.get_singleton().area_create(), true);
 
-        this.type = 'Area2D';
+        this.class = 'Area2D';
 
         /**
          * @type {Area2DSW}
@@ -369,49 +371,6 @@ export default class Area2D extends CollisionObject2D {
         this._clear_monitoring();
 
         super._propagate_exit_tree();
-    }
-
-    /**
-     * @param {number} delta
-     */
-    _propagate_process(delta) {
-        super._propagate_process(delta);
-
-        if (this.interactive && !this.hit_area) {
-            let shape = this._first_shape;
-            if (!shape) {
-                shape = this._first_shape = this.shape_find_owner(0);
-            }
-            // @ts-ignore
-            if (shape.shape) {
-                // @ts-ignore
-                switch (shape.shape.shape.type) {
-                    case ShapeType.RECTANGLE: {
-                        // @ts-ignore
-                        this.hit_area = shape.shape.get_rect();
-                    } break;
-                    case ShapeType.CIRCLE: {
-                        // @ts-ignore
-                        const shape_inst = /** @type {CircleShape2D} */ (shape.shape);
-                        this.hit_area = new Circle(shape.x, shape.y, shape_inst.radius);
-                    } break;
-                    default: {
-                        // @ts-ignore
-                        console.log(`Area2D hit area with "${shape.shape.shape.type}" shape is not supported!`);
-                    } break;
-                }
-            } else {
-                // TODO: supoort CollisionPolygon2D
-            }
-        }
-
-        if (this.hit_area) {
-            if (this.hit_area.type === SHAPES.RECT) {
-                this._first_shape.transform.world_transform.xform_rect(/** @type {Rectangle} */(this.hit_area));
-            } else if (this.hit_area.type === SHAPES.CIRC) {
-                this._first_shape.transform.world_transform.xform_circle(/** @type {Circle} */(this.hit_area));
-            }
-        }
     }
 
     /**
@@ -657,4 +616,4 @@ export default class Area2D extends CollisionObject2D {
     }
 }
 
-node_class_map['Area2D'] = Area2D;
+node_class_map['Area2D'] = GDCLASS(Area2D, CollisionObject2D)

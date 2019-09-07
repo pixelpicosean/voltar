@@ -1,4 +1,4 @@
-import { Vector2, deg2rad, clamp, CMP_EPSILON, lerp } from 'engine/core/math/index';
+import { Vector2, deg2rad, clamp, CMP_EPSILON, lerp } from 'engine/core/math/math_funcs';
 import { remove_items } from 'engine/dep/index';
 import VObject from 'engine/core/v_object';
 

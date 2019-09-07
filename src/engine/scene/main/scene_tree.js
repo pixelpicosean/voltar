@@ -1,13 +1,23 @@
+import { remove_items } from 'engine/dep/index';
 import {
     scene_class_map,
     res_procs,
 } from 'engine/registry';
-
-import MessageQueue from 'engine/core/message_queue';
+import { List } from 'engine/core/self_list';
 import { VObject, GDCLASS } from 'engine/core/v_object';
+import { Vector2, Vector2Like } from 'engine/core/math/vector2';
+import { MessageQueue } from 'engine/core/message_queue';
+import {
+    MainLoop,
+    NOTIFICATION_WM_MOUSE_ENTER,
+    NOTIFICATION_WM_MOUSE_EXIT,
+    NOTIFICATION_WM_FOCUS_IN,
+    NOTIFICATION_WM_FOCUS_OUT,
+    NOTIFICATION_TRANSLATION_CHANGED,
+    NOTIFICATION_WM_UNFOCUS_REQUEST,
+} from 'engine/core/main_loop';
 
 import World2D from '../resources/world_2d';
-
 import { Viewport } from './viewport';
 import {
     Node,
@@ -18,18 +28,6 @@ import {
     NOTIFICATION_PAUSED,
     NOTIFICATION_UNPAUSED,
 } from '../main/node';
-import { remove_items } from 'engine/dep/index';
-import {
-    MainLoop,
-    NOTIFICATION_WM_MOUSE_ENTER,
-    NOTIFICATION_WM_MOUSE_EXIT,
-    NOTIFICATION_WM_FOCUS_IN,
-    NOTIFICATION_WM_FOCUS_OUT,
-    NOTIFICATION_TRANSLATION_CHANGED,
-    NOTIFICATION_WM_UNFOCUS_REQUEST,
-} from 'engine/core/main_loop';
-import { Vector2, Vector2Like } from 'engine/core/math/vector2';
-import { List } from 'engine/core/self_list';
 
 
 const NOTIFICATION_TRANSFORM_CHANGED = 2000;
@@ -181,6 +179,8 @@ export class SceneTree extends MainLoop {
         super();
 
         if (!singleton) singleton = this;
+
+        this.class = 'SceneTree';
 
         /** @type {Viewport} */
         this.root = new Viewport();
@@ -987,7 +987,7 @@ export class SceneTree extends MainLoop {
         this.idle_callbacks.push(p_callback);
     }
 }
+GDCLASS(SceneTree, MainLoop)
+
 /** @type {SceneTree} */
 let singleton = null;
-
-GDCLASS(SceneTree, MainLoop);

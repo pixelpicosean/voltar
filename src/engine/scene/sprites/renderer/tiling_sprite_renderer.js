@@ -1,5 +1,5 @@
 import { WRAP_MODES } from 'engine/const';
-import { Matrix } from 'engine/core/math/index';
+import { Matrix } from 'engine/core/math/math_funcs';
 import { premultiply_tint_to_rgba, correct_blend_mode } from 'engine/utils/index';
 
 import GLShader from 'engine/drivers/webgl/gl_shader';

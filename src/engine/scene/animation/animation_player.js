@@ -1,8 +1,34 @@
-import Node2D from "../node_2d";
-
 import { node_class_map } from 'engine/registry';
+import { GDCLASS } from "engine/core/v_object";
+import { MessageQueue } from 'engine/core/message_queue';
 
-import Animation, { TrackType, UpdateMode, Key, ValueTrack, InterpolationType, PropType, MethodTrack } from './animation';
+import {
+    Node,
+    NOTIFICATION_ENTER_TREE,
+    NOTIFICATION_READY,
+    NOTIFICATION_INTERNAL_PROCESS,
+    NOTIFICATION_INTERNAL_PHYSICS_PROCESS,
+    NOTIFICATION_EXIT_TREE,
+} from "engine/scene/main/node";
+
+import {
+    Animation,
+    TrackType,
+    UpdateMode,
+    Key,
+    ValueTrack,
+    InterpolationType,
+    PropType,
+    MethodTrack,
+} from './animation';
+
+
+export const ANIMATION_PROCESS_PHYSICS = 0;
+export const ANIMATION_PROCESS_IDLE = 1;
+export const ANIMATION_PROCESS_MANUAL = 2;
+
+export const ANIMATION_METHOD_CALL_DEFERRED = 0;
+export const ANIMATION_METHOD_CALL_IMMEDIATE = 1;
 
 /**
  * @param {number} p_x
@@ -111,7 +137,7 @@ function anim_prop(path) {
     return path.split(':')[1];
 }
 /**
- * @param {Node2D} node
+ * @param {Node} node
  * @param {PropType} type
  * @param {string} key
  * @param {any} value
@@ -139,7 +165,7 @@ function apply_immediate_value(node, type, key, value) {
     }
 }
 /**
- * @param {Node2D} node
+ * @param {Node} node
  * @param {PropType} type
  * @param {string} key
  * @param {any} value_a
@@ -174,7 +200,7 @@ function apply_interpolate_value(node, type, key, value_a, value_b, c) {
     }
 }
 /**
- * @param {Node2D} node
+ * @param {Node} node
  * @param {Animation} anim
  * @param {ValueTrack} track
  * @param {number} time
@@ -308,7 +334,7 @@ function interpolate_track_on_node(node, anim, track, time, interp, loop_wrap) {
     }
 }
 /**
- * @param {Node2D} node
+ * @param {Node} node
  * @param {Animation} anim
  * @param {ValueTrack} track
  * @param {number} time
@@ -330,7 +356,7 @@ class AnimationData {
         this.name = '';
         this.next = '';
 
-        /** @type {Object<string, Node2D>} */
+        /** @type {Object<string, Node>} */
         this.node_cache = {};
         this.node_cache_size = 0; // Remember to update size with `node_cache`
 
@@ -365,15 +391,22 @@ class Playback {
     }
 }
 
-export default class AnimationPlayer extends Node2D {
+export class AnimationPlayer extends Node {
     /**
      * If playing the current animation, otherwise the last played one.
      * @property {string}
      */
     get assigned_animation() {
-        return '';
+        return this.playback.assigned;
     }
-    set assigned_animation(anim) {
+    set assigned_animation(p_anim) {
+        if (this.is_playing()) {
+            this.play(p_anim);
+        } else {
+            this.playback.current.pos = 0;
+            this.playback.current.from = this.animation_set[p_anim];
+            this.playback.assigned = p_anim;
+        }
     }
 
     /**
@@ -381,12 +414,14 @@ export default class AnimationPlayer extends Node2D {
      * @property {string}
      */
     get current_animation() {
-        return (this.is_playing ? this.playback.assigned : '');
+        return (this.is_playing() ? this.playback.assigned : '');
     }
-    set current_animation(anim) {
-        if (anim === '[stop]' || anim.length === 0) {
+    set current_animation(p_anim) {
+        if (p_anim === '[stop]' || p_anim.length === 0) {
             this.stop();
-        } else if (this.is_playing/*  || this.playback.assigned !== anim */) {
+        } else if (this.is_playing() || this.playback.assigned !== p_anim) {
+            this.play(p_anim);
+        } else {
             // Same animation, do not replay from start
         }
     }
@@ -416,13 +451,33 @@ export default class AnimationPlayer extends Node2D {
         this.default_blend_time = time;
     }
 
+    /**
+     * @property {number}
+     */
+    get animation_process_mode() {
+        return this._animation_process_mode;
+    }
+    set animation_process_mode(p_mode) {
+        if (this._animation_process_mode === p_mode) {
+            return;
+        }
+        const pr = this.processing;
+        if (pr) {
+            this._set_process(false);
+        }
+        this._animation_process_mode = p_mode;
+        if (pr) {
+            this._set_process(true);
+        }
+    }
+
     constructor() {
         super();
 
-        /**
-         * AnimationPlayer does not have transforms
-         */
-        this.has_transform = false;
+        this.class = 'AnimationPlayer';
+
+        this.accum_pass = 0;
+        this.default_blend_time = 0;
 
         this.autoplay = '';
         this.playback_speed = 1;
@@ -431,9 +486,15 @@ export default class AnimationPlayer extends Node2D {
         /** @type {string[]} */
         this.queued = [];
 
-        this.is_playing = false;
+        this.playing = false;
         this.end_reached = false;
         this.end_notify = false;
+
+        this.processing = false;
+        this.active = false;
+
+        this._animation_process_mode = ANIMATION_PROCESS_IDLE;
+        this.method_call_mode = ANIMATION_METHOD_CALL_IMMEDIATE;
 
         /**
          * If true, updates animations in response to process-related notifications.
@@ -456,6 +517,9 @@ export default class AnimationPlayer extends Node2D {
 
         this.playback = new Playback();
     }
+
+    /* virtual */
+
     _load_data(data) {
         super._load_data(data);
 
@@ -478,225 +542,52 @@ export default class AnimationPlayer extends Node2D {
         return this;
     }
 
-    _propagate_ready() {
-        for (let i = 0, l = this.children.length; i < l; i++) {
-            this.children[i]._propagate_ready();
-        }
-
-        this._is_ready = true;
-
-        this._ready();
-
-        this.play(this.autoplay);
-        this._animation_process(0);
-    }
-
     /**
-     * Updates the object transform for rendering.
-     *
-     * @private
-     * @param {number} delta - Time since last tick.
+     * @param {number} p_what
      */
-    _propagate_process(delta) {
-        if (this.idle_process && this.playback_active) {
-            this._animation_process(delta);
-        }
-
-        super._propagate_process(delta);
-    }
-
-    /**
-     * Update animation
-     * @param {number} delta Delta time since last frame
-     */
-    _animation_process(delta) {
-        if (this.playback.current.from) {
-            this.end_reached = false;
-            this.end_notify = false;
-            this._animation_process2(delta, this.playback.started);
-
-            if (this.playback.started) {
-                this.playback.started = false;
-            }
-
-            if (this.end_reached) {
-                if (this.queued.length > 0) {
-                    const old = this.playback.assigned;
-                    const new_name = this.queued.shift();
-                    this.play(new_name);
-                    if (this.end_notify) {
-                        this.emit_signal('animation_changed', old, new_name);
-                    }
-                } else {
-                    this.is_playing = false;
-                    this.playback.current.pos = 0;
-                    this.set_process(false);
-                    if (this.end_notify) {
-                        this.emit_signal('animation_finished');
-                    }
+    _notification(p_what) {
+        switch (p_what) {
+            case NOTIFICATION_ENTER_TREE: {
+                if (!this.processing) {
+                    this.set_physics_process_internal(false);
+                    this.set_process_internal(false);
                 }
-                this.end_reached = false;
-            }
-        } else {
-            this.set_process(false);
-        }
-    }
-    /**
-     * Update animation
-     *
-     * @param {number} delta Delta time since last frame
-     * @param {boolean} started
-     */
-    _animation_process2(delta, started) {
-        const c = this.playback;
-
-        this._animation_process_data(c.current, delta, 1.0, c.seeked && !equals(delta, 0), started);
-        if (!equals(delta, 0)) {
-            c.seeked = false;
-        }
-
-        for (let i = c.blend.length - 1; i >= 0; i--) {
-            let b = c.blend[i];
-            let blend = b.blend_left / b.blend_time;
-            this._animation_process_data(b.data, delta, blend, false, false);
-
-            b.blend_left -= Math.abs(this.playback_speed * delta);
-
-            if (b.blend_left < 0) {
-                c.blend.splice(i, 1);
-            }
-        }
-    }
-    /**
-     * @param {PlaybackData} cd
-     * @param {number} delta
-     * @param {number} blend
-     * @param {boolean} seeked
-     * @param {boolean} started
-     */
-    _animation_process_data(cd, delta, blend, seeked, started) {
-        delta = delta * this.playback_speed * cd.speed_scale;
-        let next_pos = cd.pos + delta;
-
-        let len = cd.from.animation.length;
-        let loop = cd.from.animation.loop;
-
-        if (!loop) {
-            if (next_pos < 0) {
-                next_pos = 0;
-            } else if (next_pos > len) {
-                next_pos = len;
-            }
-
-            // fix delta
-            delta = next_pos - cd.pos;
-
-            if (cd === this.playback.current) {
-                let backwards = delta < 0;
-
-                if (!backwards && cd.pos <= len && next_pos === len) {
-                    // playback finished
-                    this.end_reached = true;
-                    this.end_notify = cd.pos < len; // Notify only if not already at the end
+                this.clear_caches();
+            } break;
+            case NOTIFICATION_READY: {
+                if (this.animation_set[this.autoplay]) {
+                    this.play(this.autoplay);
+                    this._animation_process(0);
+                }
+            } break;
+            case NOTIFICATION_INTERNAL_PROCESS: {
+                if (this._animation_process_mode === ANIMATION_PROCESS_PHYSICS) {
+                    break;
                 }
 
-                if (backwards && cd.pos >= 0 && next_pos === 0) {
-                    // playback finished
-                    this.end_reached = true;
-                    this.end_notify = cd.pos > 0;  // Notify only if not already at the end
+                if (this.processing) {
+                    this._animation_process(this.get_process_delta_time());
                 }
-            }
-        } else {
-            let looped_next_pos = posmod(next_pos, len);
-            if (looped_next_pos === 0 && next_pos !== 0) {
-                // Loop multiples of the length to it, rather than 0
-                // so state at time=length is previewable in the editor
-                next_pos = len;
-            } else {
-                next_pos = looped_next_pos;
-            }
-        }
+            } break;
+            case NOTIFICATION_INTERNAL_PHYSICS_PROCESS: {
+                if (this._animation_process_mode === ANIMATION_PROCESS_IDLE) {
+                    break;
+                }
 
-        cd.pos = next_pos;
-
-        this._animation_process_animation(cd.from, cd.pos, delta, blend, cd === this.playback.current, seeked, started);
-    }
-    /**
-     * @param {AnimationData} anim
-     * @param {number} time
-     * @param {number} delta
-     * @param {number} interp
-     * @param {boolean} is_current
-     * @param {boolean} seeked
-     * @param {boolean} started
-     */
-    _animation_process_animation(anim, time, delta, interp, is_current, seeked, started) {
-        this._ensure_node_caches(anim);
-
-        let a = anim.animation;
-        let can_call = this.is_inside_tree;
-
-        for (let i = 0; i < a.tracks.length; i++) {
-            let track = a.tracks[i];
-            let node = anim.node_cache[anim_path_without_prop(track.path)];
-
-            switch (track.type) {
-                case TrackType.TYPE_VALUE: {
-                    let t = /** @type {ValueTrack} */(track);
-                    let update_mode = t.update_mode;
-
-                    if (update_mode === UpdateMode.UPDATE_CONTINUOUS || update_mode === UpdateMode.UPDATE_CAPTURE || (equals(delta, 0) && update_mode === UpdateMode.UPDATE_DISCRETE)) { // delta == 0 means seek
-                        interpolate_track_on_node(node, a, t, time, update_mode === UpdateMode.UPDATE_CONTINUOUS ? t.interp : InterpolationType.INTERPOLATION_NEAREST, t.loop_wrap);
-                    } else if (is_current && !equals(delta, CMP_EPSILON)) {
-                        immediate_track_on_node(node, a, t, time, t.loop_wrap);
-                    }
-                } break;
-                case TrackType.TYPE_METHOD: {
-                    if (seeked) break;
-                    let t = /** @type {MethodTrack} */(track);
-                    for (const k of t.methods) {
-                        if (
-                            ((delta > 0) && (time < k.time && k.time < time + delta))
-                            ||
-                            ((delta < 0) && (time + delta < k.time && k.time < time))
-                        ) {
-                            node[k.value.method].apply(node, k.value.args);
-                        }
-                    }
-                } break;
-            }
+                if (this.processing) {
+                    this._animation_process(this.get_physics_process_delta_time());
+                }
+            } break;
+            case NOTIFICATION_EXIT_TREE: {
+                this.clear_caches();
+            } break;
         }
     }
 
-    /**
-     * @param {AnimationData} anim
-     */
-    _ensure_node_caches(anim) {
-        // Already cached?
-        if (anim.node_cache_size === anim.animation.tracks.length) {
-            return;
-        }
+    /* public */
 
-        /** @type {Node2D} */
-        let parent = this.get_node(this.root_node);
-
-        if (!parent) {
-            return;
-        }
-
-        let a = anim.animation;
-
-        for (let i = 0; i < a.tracks.length; i++) {
-            let track = a.tracks[i];
-            let child = parent.get_node(anim_path_without_prop(track.path));
-            if (!child) {
-                console.log(`On Animation: '${anim.name}', couldn't resolve track : '${track.path}'`)
-                continue;
-            }
-
-            anim.node_cache[anim_path_without_prop(track.path)] = child;
-            anim.node_cache_size += 1;
-        }
+    is_playing() {
+        return this.playing;
     }
 
     /**
@@ -828,12 +719,12 @@ export default class AnimationPlayer extends Node2D {
             name = this.playback.assigned;
         }
         if (name.length === 0) {
-            return this;
+            return;
         }
 
         if (!this.animation_set[name]) {
             console.log(`Animation not found: ${name}`);
-            return this;
+            return;
         }
 
         const c = this.playback;
@@ -869,13 +760,21 @@ export default class AnimationPlayer extends Node2D {
             }
         }
 
+        if (this.current_animation !== name) {
+            this._stop_playing_caches();
+        }
+
         c.current.from = this.animation_set[name];
 
         if (c.assigned !== name) { // reset
             c.current.pos = from_end ? c.current.from.animation.length : 0;
-        } else if (from_end && c.current.pos === 0) {
-            // Animation reset BUT played backwards, set position to the end
-            c.current.pos = c.current.from.animation.length;
+        } else {
+            if (from_end && c.current.pos === 0) {
+                // Animation reset BUT played backwards, set position to the end
+                c.current.pos = c.current.from.animation.length;
+            } else if (!from_end && c.current.pos === c.current.from.animation.length) {
+                c.current.pos = 0;
+            }
         }
 
         c.current.speed_scale = custom_scale;
@@ -886,8 +785,8 @@ export default class AnimationPlayer extends Node2D {
         if (!this.end_reached) {
             this.queued.length = 0;
         }
-        this.set_process(true);
-        this.is_playing = true;
+        this._set_process(true);
+        this.playing = true;
 
         this.emit_signal('animation_started', c.assigned);
 
@@ -895,8 +794,6 @@ export default class AnimationPlayer extends Node2D {
         if (next && this.animation_set[next]) {
             this.queue(next);
         }
-
-        return this;
     }
 
     /**
@@ -914,12 +811,11 @@ export default class AnimationPlayer extends Node2D {
      * @param {string} name
      */
     queue(name) {
-        if (!this.is_playing) {
+        if (!this.is_playing()) {
             this.play(name);
         } else {
             this.queued.push(name);
         }
-        return this;
     }
 
     /**
@@ -942,7 +838,6 @@ export default class AnimationPlayer extends Node2D {
         if (update) {
             this._animation_process(0);
         }
-        return this;
     }
 
     /**
@@ -958,7 +853,6 @@ export default class AnimationPlayer extends Node2D {
         } else {
             this.blend_times[`${animation1}->${animation2}`] = time;
         }
-        return this;
     }
 
     /**
@@ -967,20 +861,262 @@ export default class AnimationPlayer extends Node2D {
      * @param {boolean} [reset]
      */
     stop(reset = true) {
-        const c = this.playback;
+        this._stop_playing_caches();
 
+        const c = this.playback;
         c.blend.length = 0;
         if (reset) {
             c.current.from = null;
             c.current.speed_scale = 1;
             c.current.pos = 0;
         }
-        this.set_process(false);
+        this._set_process(false);
         this.queued.length = 0;
-        this.is_playing = false;
+        this.playing = false;
+    }
 
-        return this;
+    /* private */
+
+    /**
+     * @param {boolean} p_process
+     * @param {boolean} [p_force]
+     */
+    _set_process(p_process, p_force = false) {
+        if (this.processing === p_process && !p_force) {
+            return;
+        }
+
+        switch (this._animation_process_mode) {
+            case ANIMATION_PROCESS_PHYSICS: {
+                this.set_physics_process_internal(p_process && this.active);
+            } break;
+            case ANIMATION_PROCESS_IDLE: {
+                this.set_process_internal(p_process && this.active);
+            } break;
+            case ANIMATION_PROCESS_MANUAL: {
+            } break;
+        }
+
+        this.processing = p_process;
+    }
+
+    _stop_playing_caches() { }
+
+    _animation_update_transforms() { }
+
+    /**
+     * Update animation
+     * @param {number} delta Delta time since last frame
+     */
+    _animation_process(delta) {
+        if (this.playback.current.from) {
+            this.end_reached = false;
+            this.end_notify = false;
+            this._animation_process2(delta, this.playback.started);
+
+            if (this.playback.started) {
+                this.playback.started = false;
+            }
+
+            this._animation_update_transforms();
+            if (this.end_reached) {
+                if (this.queued.length > 0) {
+                    const old = this.playback.assigned;
+                    const new_name = this.queued.shift();
+                    this.play(new_name);
+                    if (this.end_notify) {
+                        this.emit_signal('animation_changed', old, new_name);
+                    }
+                } else {
+                    this.playing = false;
+                    this._set_process(false);
+                    if (this.end_notify) {
+                        this.emit_signal('animation_finished', this.playback.assigned);
+                    }
+                }
+                this.end_reached = false;
+            }
+        } else {
+            this._set_process(false);
+        }
+    }
+    /**
+     * Update animation
+     *
+     * @param {number} delta Delta time since last frame
+     * @param {boolean} started
+     */
+    _animation_process2(delta, started) {
+        const c = this.playback;
+
+        this._animation_process_data(c.current, delta, 1.0, c.seeked && !equals(delta, 0), started);
+        if (!equals(delta, 0)) {
+            c.seeked = false;
+        }
+
+        for (let i = c.blend.length - 1; i >= 0; i--) {
+            let b = c.blend[i];
+            let blend = b.blend_left / b.blend_time;
+            this._animation_process_data(b.data, delta, blend, false, false);
+
+            b.blend_left -= Math.abs(this.playback_speed * delta);
+
+            if (b.blend_left < 0) {
+                c.blend.splice(i, 1);
+            }
+        }
+    }
+    /**
+     * @param {PlaybackData} cd
+     * @param {number} delta
+     * @param {number} blend
+     * @param {boolean} seeked
+     * @param {boolean} started
+     */
+    _animation_process_data(cd, delta, blend, seeked, started) {
+        delta = delta * this.playback_speed * cd.speed_scale;
+        let next_pos = cd.pos + delta;
+
+        let len = cd.from.animation.length;
+        let loop = cd.from.animation.loop;
+
+        if (!loop) {
+            if (next_pos < 0) {
+                next_pos = 0;
+            } else if (next_pos > len) {
+                next_pos = len;
+            }
+
+            // fix delta
+            delta = next_pos - cd.pos;
+
+            if (cd === this.playback.current) {
+                let backwards = delta < 0;
+
+                if (!backwards && cd.pos <= len && next_pos === len) {
+                    // playback finished
+                    this.end_reached = true;
+                    this.end_notify = cd.pos < len; // Notify only if not already at the end
+                }
+
+                if (backwards && cd.pos >= 0 && next_pos === 0) {
+                    // playback finished
+                    this.end_reached = true;
+                    this.end_notify = cd.pos > 0;  // Notify only if not already at the end
+                }
+            }
+        } else {
+            let looped_next_pos = posmod(next_pos, len);
+            if (looped_next_pos === 0 && next_pos !== 0) {
+                // Loop multiples of the length to it, rather than 0
+                // so state at time=length is previewable in the editor
+                next_pos = len;
+            } else {
+                next_pos = looped_next_pos;
+            }
+        }
+
+        cd.pos = next_pos;
+
+        this._animation_process_animation(cd.from, cd.pos, delta, blend, cd === this.playback.current, seeked, started);
+    }
+    /**
+     * @param {AnimationData} p_anim
+     * @param {number} p_time
+     * @param {number} p_delta
+     * @param {number} p_interp
+     * @param {boolean} is_current
+     * @param {boolean} p_seeked
+     * @param {boolean} p_started
+     */
+    _animation_process_animation(p_anim, p_time, p_delta, p_interp, is_current, p_seeked, p_started) {
+        this._ensure_node_caches(p_anim);
+
+        const a = p_anim.animation;
+        const can_call = this.is_inside_tree();
+
+        for (let i = 0; i < a.tracks.length; i++) {
+            if (p_anim.node_cache_size === p_anim.animation.tracks.length) {
+                this._ensure_node_caches(p_anim);
+            }
+
+            const track = a.tracks[i];
+            const node = p_anim.node_cache[anim_path_without_prop(track.path)];
+
+            if (!node) {
+                continue;
+            }
+
+            switch (track.type) {
+                case TrackType.TYPE_VALUE: {
+                    const t = /** @type {ValueTrack} */(track);
+                    const update_mode = t.update_mode;
+
+                    if (update_mode === UpdateMode.UPDATE_CONTINUOUS || update_mode === UpdateMode.UPDATE_CAPTURE || (equals(p_delta, 0) && update_mode === UpdateMode.UPDATE_DISCRETE)) { // delta == 0 means seek
+                        interpolate_track_on_node(node, a, t, p_time, update_mode === UpdateMode.UPDATE_CONTINUOUS ? t.interp : InterpolationType.INTERPOLATION_NEAREST, t.loop_wrap);
+                    } else if (is_current && !equals(p_delta, CMP_EPSILON)) {
+                        immediate_track_on_node(node, a, t, p_time, t.loop_wrap);
+                    }
+                } break;
+                case TrackType.TYPE_METHOD: {
+                    if (p_seeked) break;
+                    const t = /** @type {MethodTrack} */(track);
+                    for (const k of t.methods) {
+                        if (
+                            ((p_delta > 0) && (p_time < k.time && k.time < p_time + p_delta))
+                            ||
+                            ((p_delta < 0) && (p_time + p_delta < k.time && k.time < p_time))
+                        ) {
+                            if (can_call) {
+                                if (this.method_call_mode === ANIMATION_METHOD_CALL_DEFERRED) {
+                                    MessageQueue.get_singleton().push_call(node, k.value.method, ...k.value.args);
+                                } else {
+                                    node[k.value.method].apply(node, k.value.args);
+                                }
+                            }
+                        }
+                    }
+                } break;
+                case TrackType.TYPE_BEZIER: {
+                } break;
+                case TrackType.TYPE_ANIMATION: {
+                    if (node.class !== 'AnimationPlayer') {
+                        continue;
+                    }
+                } break;
+            }
+        }
+    }
+
+    /**
+     * @param {AnimationData} anim
+     */
+    _ensure_node_caches(anim) {
+        // Already cached?
+        if (anim.node_cache_size === anim.animation.tracks.length) {
+            return;
+        }
+
+        /** @type {Node} */
+        let parent = this.get_node(this.root_node);
+
+        if (!parent) {
+            return;
+        }
+
+        let a = anim.animation;
+
+        for (let i = 0; i < a.tracks.length; i++) {
+            let track = a.tracks[i];
+            let child = parent.get_node(anim_path_without_prop(track.path));
+            if (!child) {
+                console.log(`On Animation: '${anim.name}', couldn't resolve track : '${track.path}'`)
+                continue;
+            }
+
+            anim.node_cache[anim_path_without_prop(track.path)] = child;
+            anim.node_cache_size += 1;
+        }
     }
 }
-
-node_class_map['AnimationPlayer'] = AnimationPlayer;
+node_class_map['AnimationPlayer'] = GDCLASS(AnimationPlayer, Node)

@@ -1,6 +1,6 @@
-import Node2D from "../node_2d";
+import Node2D from "../2d/node_2d";
 import Shape2D from "../resources/shape_2d";
-import { Rectangle } from "engine/core/math/index";
+import { Rect2 } from "engine/core/math/rect2";
 import { res_class_map } from "engine/registry";
 
 export default class CollisionShape2D extends Node2D {
@@ -103,7 +103,7 @@ export default class CollisionShape2D extends Node2D {
          * @type {import('./collision_object_2d').default}
          */
         this.parent = null;
-        this.rect = new Rectangle(-10, -10, 20, 20);
+        this.rect = new Rect2(-10, -10, 20, 20);
     }
     _load_data(p_data) {
         super._load_data(p_data);

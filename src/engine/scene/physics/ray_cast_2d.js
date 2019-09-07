@@ -1,15 +1,20 @@
-import Node2D from "../node_2d";
-import { Vector2 } from "engine/core/math/index";
-import PhysicsServer from "engine/servers/physics_2d/physics_server";
+import { node_class_map } from "engine/registry";
+import { GDCLASS } from "engine/core/v_object";
+import { Vector2 } from "engine/core/math/vector2";
+import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server";
 import { RayResult } from "engine/servers/physics_2d/state";
-import CollisionObject2D from "./collision_object_2d";
-import CollisionObject2DSW from "engine/servers/physics_2d/collision_object_2d_sw";
+import { CollisionObject2DSW } from "engine/servers/physics_2d/collision_object_2d_sw";
 
-export default class RayCast2D extends Node2D {
+import { Node2D } from "../2d/node_2d";
+import { CollisionObject2D } from "./collision_object_2d";
+
+
+
+export class RayCast2D extends Node2D {
     constructor() {
         super();
 
-        this.type = 'RayCast2D';
+        this.class = 'RayCast2D';
 
         this.enabled = false;
         this.collided = false;
@@ -81,7 +86,7 @@ export default class RayCast2D extends Node2D {
     }
 
     _update_raycast_state() {
-        const dss = PhysicsServer.singleton.space_get_direct_state(this.get_world_2d().space);
+        const dss = Physics2DServer.get_singleton().space_get_direct_state(this.get_world_2d().space);
 
         const gt = this.get_global_transform().clone();
 
@@ -105,3 +110,5 @@ export default class RayCast2D extends Node2D {
         }
     }
 }
+
+node_class_map['RayCast2D'] = GDCLASS(RayCast2D, Node2D)

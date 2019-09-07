@@ -1,11 +1,10 @@
+import { Vector2 } from 'engine/core/math/vector2';
+import { Transform2D } from 'engine/core/math/transform_2d';
 import {
-    Vector2,
-    Matrix,
-} from "engine/core/math/index";
+    AreaSpaceOverrideMode,
+    AreaParameter,
+} from 'engine/scene/physics/const';
 
-import {
-    AreaSpaceOverrideMode, AreaParameter,
-} from '../../scene/physics/const';
 import {
     ShapeResult,
     Physics2DDirectSpaceStateSW,
@@ -15,11 +14,19 @@ import {
     _shape_col_cbk,
 } from "./state";
 import Step2DSW from "./step_2d_sw";
-import { CircleShape2DSW, Shape2DSW, RectangleShape2DSW, SegmentShape2DSW, RayShape2DSW, ConvexPolygonShape2DSW } from "./shape_2d_sw";
-import CollisionSolver2DSW from "./collision_solver_2d_sw";
-import Space2DSW from "./space_2d_sw";
-import Area2DSW from "./area_2d_sw";
-import Body2DSW from "./body_2d_sw";
+import {
+    Shape2DSW,
+    CircleShape2DSW,
+    RectangleShape2DSW,
+    SegmentShape2DSW,
+    ConvexPolygonShape2DSW,
+    RayShape2DSW,
+} from "./shape_2d_sw";
+import { CollisionSolver2DSW } from "./collision_solver_2d_sw";
+import { Space2DSW } from "./space_2d_sw";
+import { Area2DSW } from "./area_2d_sw";
+import { Body2DSW } from "./body_2d_sw";
+
 
 class RayResult {
     constructor() {
@@ -43,11 +50,13 @@ class Physics2DShapeQueryResult {
     get_result_object_shape() { }
 }
 
-export default class PhysicsServer {
+export class Physics2DServer {
     static get_singleton() {
-        return PhysicsServer.singleton;
+        return singleton;
     }
     constructor() {
+        if (!singleton) singleton = this;
+
         this.active = true;
         this.iterations = 0;
         this.doing_sync = false;
@@ -123,10 +132,10 @@ export default class PhysicsServer {
 
     /**
      * @param {Shape2DSW} p_shape_A
-     * @param {Matrix} p_xform_A
+     * @param {Transform2D} p_xform_A
      * @param {Vector2} p_motion_A
      * @param {Shape2DSW} p_shape_B
-     * @param {Matrix} p_xform_B
+     * @param {Transform2D} p_xform_B
      * @param {Vector2} p_motion_B
      * @param {Vector2[]} r_results
      * @param {number} p_result_max
@@ -235,9 +244,9 @@ export default class PhysicsServer {
     /**
      * @param {Area2DSW} p_area
      * @param {Shape2DSW} p_shape
-     * @param {Matrix} p_transform
+     * @param {Transform2D} p_transform
      */
-    area_add_shape(p_area, p_shape, p_transform = Matrix.IDENTITY) {
+    area_add_shape(p_area, p_shape, p_transform = Transform2D.IDENTITY) {
         p_area.add_shape(p_shape, p_transform);
     }
     /**
@@ -251,7 +260,7 @@ export default class PhysicsServer {
     /**
      * @param {Area2DSW} p_area
      * @param {number} p_shape_idx
-     * @param {Matrix} p_transform
+     * @param {Transform2D} p_transform
      */
     area_set_shape_transform(p_area, p_shape_idx, p_transform) {
         p_area.set_shape_transform(p_shape_idx, p_transform);
@@ -439,7 +448,7 @@ export default class PhysicsServer {
     /**
      * @param {Body2DSW} p_body
      * @param {Shape2DSW} p_shape
-     * @param {Matrix} p_transform
+     * @param {Transform2D} p_transform
      */
     body_add_shape(p_body, p_shape, p_transform) {
         p_body.add_shape(p_shape, p_transform);
@@ -477,7 +486,7 @@ export default class PhysicsServer {
     /**
      * @param {Body2DSW} p_body
      * @param {number} p_shape_idx
-     * @param {Matrix} p_transform
+     * @param {Transform2D} p_transform
      */
     body_set_shape_transform(p_body, p_shape_idx, p_transform) {
         p_body.set_shape_transform(p_shape_idx, p_transform);
@@ -525,7 +534,7 @@ export default class PhysicsServer {
 
     /**
      * @param {Body2DSW} p_body
-     * @param {import('engine/scene/node_2d').default} id
+     * @param {import('engine/scene/2d/node_2d').Node2D} id
      */
     body_attach_object_instance(p_body, id) {
         p_body.instance = id;
@@ -549,7 +558,7 @@ export default class PhysicsServer {
 
     /**
      * @param {Body2DSW} p_body
-     * @param {Matrix} p_from
+     * @param {Transform2D} p_from
      * @param {Vector2} p_motion
      * @param {boolean} p_infinite_inertia
      * @param {number} [p_margin]
@@ -582,7 +591,7 @@ export default class PhysicsServer {
 
         this.is_initialized = true;
     }
-    free(rid) { }
+    free_rid(rid) { }
 
     /**
      * @param {boolean} p_active
@@ -639,4 +648,6 @@ export default class PhysicsServer {
 
     is_flushing_queries() { }
 }
-PhysicsServer.singleton = new PhysicsServer();
+
+/** @type {Physics2DServer} */
+let singleton = null;

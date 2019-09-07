@@ -1,14 +1,15 @@
 import { remove_items } from 'engine/dep/index';
-import { Vector2 } from 'engine/core/math/index';
-import { InteractionEvent } from 'engine/interaction/enable';
-import keyboard from './keyboard';
+import { Vector2 } from 'engine/core/math/vector2';
+
+import { Keyboard } from './keyboard';
+
 
 /** @typedef {'BUTTON_LEFT' | 'BUTTON_MIDDLE' | 'BUTTON_RIGHT' | 'BACKSPACE' | 'TAB' | 'ENTER' | 'SHIFT' | 'CTRL' | 'ALT' | 'PAUSE' | 'CAPS_LOCK' | 'ESC' | 'SPACE' | 'PAGE_UP' | 'PAGE_DOWN' | 'END' | 'HOME' | 'LEFT' | 'UP' | 'RIGHT' | 'DOWN' | 'PRINT_SCREEN' | 'INSERT' | 'DELETE' | '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M' | 'N' | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z' | 'NUM_0' | 'NUM_1' | 'NUM_2' | 'NUM_3' | 'NUM_4' | 'NUM_5' | 'NUM_6' | 'NUM_7' | 'NUM_8' | 'NUM_9' | 'NUM_MULTIPLY' | 'NUM_PLUS' | 'NUM_MINUS' | 'NUM_PERIOD' | 'NUM_DIVISION' | 'F1' | 'F2' | 'F3' | 'F4' | 'F5' | 'F6' | 'F7' | 'F8' | 'F9' | 'F10' | 'F11' | 'F12' | 'SEMICOLON' | 'PLUS' | 'MINUS' | 'GRAVE_ACCENT' | 'SINGLE_QUOTE'} KeyName */
 
 /**
  * Input system which provides key bindings.
  */
-export default class Input {
+export class Input {
     constructor() {
         /** @type {{ [key: string]: string[] }} */
         this.bindings = {};
@@ -23,78 +24,14 @@ export default class Input {
 
         this.mouse = new Vector2(0, 0);
     }
-    /**
-     * @param {import('engine/scene/node_2d').default} viewport
-     */
-    _init(viewport) {
-        // Keyboard
-        keyboard._init(this);
-
-        // Mouse
-        viewport.interactive = true;
-
-        // @ts-ignore
-        viewport.contains_point = () => true;
-        const down = (/** @type {InteractionEvent} */e) => {
-            this.mouse.copy(e.data.global);
-            if (e.data.pointer_type)
-                this._keydown('BUTTON_LEFT');
-        };
-        const move = (/** @type {InteractionEvent} */e) => {
-            this.mouse.copy(e.data.global);
-        };
-        const up = (/** @type {InteractionEvent} */e) => {
-            this.mouse.copy(e.data.global);
-            this._keyup('BUTTON_LEFT');
-        };
-        const upoutside = (/** @type {InteractionEvent} */e) => {
-            this.mouse.copy(e.data.global);
-            this._keyup('BUTTON_LEFT');
-        };
-
-        const rightdown = (/** @type {InteractionEvent} */e) => {
-            this._keydown('BUTTON_RIGHT');
-        };
-        const rightup = (/** @type {InteractionEvent} */e) => {
-            this._keyup('BUTTON_RIGHT');
-        };
-        const rightupoutside = (/** @type {InteractionEvent} */e) => {
-            this._keyup('BUTTON_RIGHT');
-        };
-
-        const middledown = (/** @type {InteractionEvent} */e) => {
-            this._keydown('BUTTON_MIDDLE');
-        };
-        const middleup = (/** @type {InteractionEvent} */e) => {
-            this._keyup('BUTTON_MIDDLE');
-        };
-        const middleupoutside = (/** @type {InteractionEvent} */e) => {
-            this._keyup('BUTTON_MIDDLE');
-        };
-
-        viewport.connect('touchstart', down);
-        viewport.connect('touchmove', move);
-        viewport.connect('touchend', up);
-        viewport.connect('touchendoutside', upoutside);
-
-        viewport.connect('mousedown', down);
-        viewport.connect('mousemove', move);
-        viewport.connect('mouseup', up);
-        viewport.connect('mouseupoutside', upoutside);
-
-        viewport.connect('rightdown', rightdown);
-        viewport.connect('rightup', rightup);
-        viewport.connect('rightupoutside', rightupoutside);
-
-        viewport.connect('middledown', middledown);
-        viewport.connect('middleup', middleup);
-        viewport.connect('middleupoutside', middleupoutside);
+    _init() {
+        Keyboard._init(this);
     }
     /**
      * @param {number} delta
      */
     _process(delta) {
-        keyboard._process(delta);
+        Keyboard._process(delta);
 
         // Mark press/release action as false
         for (const k in this.last_pressed) {

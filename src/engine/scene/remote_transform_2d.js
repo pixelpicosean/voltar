@@ -1,4 +1,4 @@
-import Node2D from './node_2d';
+import Node2D from './2d/node_2d';
 import { node_class_map } from 'engine/registry';
 
 export default class RemoteTransform2D extends Node2D {

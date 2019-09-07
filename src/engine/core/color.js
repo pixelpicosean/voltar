@@ -64,8 +64,6 @@ export class Color {
      * @param {number} [a]
      */
     constructor(r = 1, g = 1, b = 1, a = 1) {
-        this.class = 'Color';
-
         this._rgb = [r, g, b];
         this.alpha = a;
     }

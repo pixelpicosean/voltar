@@ -1,4 +1,5 @@
-import Vector2 from "engine/core/math/vector2";
+import { Vector2 } from "engine/core/math/vector2";
+
 
 /**
  * @enum {number}
@@ -238,7 +239,7 @@ export class AnimationTrack extends Track {
     }
 }
 
-export default class Animation {
+export class Animation {
     constructor() {
         this.name = '';
 

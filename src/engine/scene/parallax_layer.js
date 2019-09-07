@@ -1,7 +1,7 @@
-import { Vector2, ObservableVector2, Matrix } from "engine/core/math/index";
+import { Vector2, ObservableVector2, Matrix } from "engine/core/math/math_funcs";
 import { node_class_map } from "engine/registry";
 
-import Node2D from "./node_2d";
+import Node2D from "./2d/node_2d";
 
 export class ParallaxLayer extends Node2D {
     constructor() {

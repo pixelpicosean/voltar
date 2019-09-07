@@ -1,18 +1,9 @@
 import SelfList, { List } from "engine/core/self_list";
-import {
-    Matrix,
-    Vector2,
-    Rectangle,
-    CMP_EPSILON,
-} from "engine/core/math/index";
-import BroadPhase2D from "./broad_phase_2d_sw";
-import { Shape2DSW } from "./shape_2d_sw";
-import CollisionObject2DSW from "./collision_object_2d_sw";
-import Area2DSW from "./area_2d_sw";
-import Body2DSW from "./body_2d_sw";
-import Constraint2DSW from "./constraint_2d_sw";
-import { Area2Pair2DSW, AreaPair2DSW } from "./area_pair_2d";
-import BodyPair2DSW from "./body_pair_2d";
+import { CMP_EPSILON } from "engine/core/math/math_defs";
+import { Vector2 } from "engine/core/math/vector2";
+import { Rect2 } from "engine/core/math/rect2";
+import { Transform2D } from "engine/core/math/transform_2d";
+
 import {
     Physics2DDirectSpaceStateSW,
     MotionResult,
@@ -27,7 +18,16 @@ import {
     ShapeType,
     BodyMode,
 } from "../../scene/physics/const";
-import CollisionSolver2DSW from "./collision_solver_2d_sw";
+import { BroadPhase2D } from "./broad_phase_2d_sw";
+import { Shape2DSW } from "./shape_2d_sw";
+import { CollisionObject2DSW } from "./collision_object_2d_sw";
+import { Area2DSW } from "./area_2d_sw";
+import { Body2DSW } from "./body_2d_sw";
+import { Constraint2DSW } from "./constraint_2d_sw";
+import { Area2Pair2DSW, AreaPair2DSW } from "./area_pair_2d";
+import { BodyPair2DSW } from "./body_pair_2d";
+import { CollisionSolver2DSW } from "./collision_solver_2d_sw";
+
 
 class ExcludedShapeSW {
     constructor() {
@@ -147,7 +147,7 @@ class _RestCallbackData2D {
 
 const rcd = new _RestCallbackData2D();
 
-export default class Space2DSW {
+export class Space2DSW {
     get active() {
         return this._active;
     }
@@ -224,7 +224,7 @@ export default class Space2DSW {
 
     /**
      * @param {Body2DSW} p_body
-     * @param {Rectangle} p_aabb
+     * @param {Rect2} p_aabb
      */
     _cull_aabb_for_body(p_body, p_aabb) {
         let amount = this.broadphase.cull_aabb(p_aabb, this.intersection_query_results, INTERSECTION_QUERY_MAX, this.intersection_query_subindex_results);
@@ -379,7 +379,7 @@ export default class Space2DSW {
 
     /**
      * @param {Body2DSW} p_body
-     * @param {Matrix} p_from
+     * @param {Transform2D} p_from
      * @param {Vector2} p_motion
      * @param {boolean} p_infinite_inertia
      * @param {number} p_margin
@@ -391,7 +391,7 @@ export default class Space2DSW {
             r_result.collider_id = null;
             r_result.collider_shape = 0;
         }
-        const body_aabb = Rectangle.new();
+        const body_aabb = Rect2.new();
 
         let shapes_found = false;
 
@@ -526,9 +526,9 @@ export default class Space2DSW {
                             collided = true;
                         }
 
-                        Matrix.free(col_obj_shape_xform);
+                        Transform2D.free(col_obj_shape_xform);
                     }
-                    Matrix.free(body_shape_xform);
+                    Transform2D.free(body_shape_xform);
                 }
 
                 if (!collided) {
@@ -619,14 +619,14 @@ export default class Space2DSW {
                     const col_obj_shape_xform = col_obj.transform.clone().append(against_shape.xform);
                     // test initial overlap, does it collide if going all the way?
                     if (!CollisionSolver2DSW.solve(body_shape.shape, body_shape_xform, p_motion, against_shape.shape, col_obj_shape_xform, Vector2.ZERO, null, null, null, 0)) {
-                        Matrix.free(col_obj_shape_xform);
+                        Transform2D.free(col_obj_shape_xform);
                         continue;
                     }
 
                     // test initial overlap
                     if (CollisionSolver2DSW.solve(body_shape.shape, body_shape_xform, Vector2.ZERO, against_shape.shape, col_obj_shape_xform, Vector2.ZERO, null, null, null, 0)) {
                         if (against_shape.one_way_collision) {
-                            Matrix.free(col_obj_shape_xform);
+                            Transform2D.free(col_obj_shape_xform);
                             continue;
                         }
 
@@ -672,7 +672,7 @@ export default class Space2DSW {
                             Vector2.free(sep);
                             Vector2.free(axis);
                             Vector2.free(seps[0]);
-                            Matrix.free(col_obj_shape_xform);
+                            Transform2D.free(col_obj_shape_xform);
                             continue;
                         }
 
@@ -685,7 +685,7 @@ export default class Space2DSW {
                         best_unsafe = hi;
                     }
 
-                    Matrix.free(col_obj_shape_xform);
+                    Transform2D.free(col_obj_shape_xform);
 
                     Vector2.free(mnormal);
                     Vector2.free(sep);
@@ -706,10 +706,10 @@ export default class Space2DSW {
                     best_shape = body_shape_idx;
                 }
 
-                Matrix.free(body_shape_xform);
+                Transform2D.free(body_shape_xform);
             }
 
-            Rectangle.free(motion_aabb);
+            Rect2.free(motion_aabb);
         }
 
         let collided = false;
@@ -781,7 +781,7 @@ export default class Space2DSW {
                         rcd.valid_depth = 0;
                     }
 
-                    Matrix.free(col_obj_shape_xform);
+                    Transform2D.free(col_obj_shape_xform);
 
                     rcd.object = col_obj;
                     rcd.shape = shape_idx;
@@ -792,7 +792,7 @@ export default class Space2DSW {
                     }
                 }
 
-                Matrix.free(body_shape_xform);
+                Transform2D.free(body_shape_xform);
             }
 
             if (rcd.best_len !== 0) {
@@ -822,7 +822,7 @@ export default class Space2DSW {
                 collided = true;
             }
 
-            Matrix.free(ugt);
+            Transform2D.free(ugt);
         }
 
         if (!collided && r_result) {
@@ -833,13 +833,13 @@ export default class Space2DSW {
             Vector2.free(origin);
         }
 
-        Rectangle.free(body_aabb);
-        Matrix.free(body_transform);
+        Rect2.free(body_aabb);
+        Transform2D.free(body_transform);
         return collided;
     }
     /**
      * @param {Body2DSW} p_body
-     * @param {Matrix} p_transform
+     * @param {Transform2D} p_transform
      * @param {boolean} p_infinite_inertia
      * @param {Vector2} r_recover_motion
      * @param {SeparationResult[]} r_results
@@ -847,7 +847,7 @@ export default class Space2DSW {
      * @param {number} p_margin
      */
     test_body_ray_separation(p_body, p_transform, p_infinite_inertia, r_recover_motion, r_results, p_result_max, p_margin) {
-        const body_aabb = Rectangle.new();
+        const body_aabb = Rect2.new();
 
         let shapes_found = false;
 
@@ -1008,7 +1008,7 @@ export default class Space2DSW {
 
         r_recover_motion.set(body_transform.tx, body_transform.ty).subtract(p_transform.tx, p_transform.ty);
 
-        Rectangle.free(body_aabb);
+        Rect2.free(body_aabb);
 
         return rays_found;
     }

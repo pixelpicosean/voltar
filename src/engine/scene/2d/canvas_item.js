@@ -1,6 +1,7 @@
+import { node_class_map } from "engine/registry";
 import { GDCLASS } from "engine/core/v_object";
-import MessageQueue from "engine/core/message_queue";
-import SelfList from "engine/core/self_list";
+import { MessageQueue } from "engine/core/message_queue";
+import { SelfList } from "engine/core/self_list";
 import { Color } from "engine/core/color";
 import { Transform2D } from "engine/core/math/transform_2d";
 import { Rect2 } from "engine/core/math/rect2";
@@ -588,7 +589,7 @@ export class CanvasItem extends Node {
         return CanvasItem.current_item_drawn;
     }
 }
-GDCLASS(CanvasItem, Node)
+node_class_map['CanvasItem'] = GDCLASS(CanvasItem, Node)
 
 /**
  * @type {CanvasItem}

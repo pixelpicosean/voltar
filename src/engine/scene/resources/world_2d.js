@@ -1,10 +1,10 @@
 import { Vector2 } from "engine/core/math/vector2";
 import { Rect2 } from "engine/core/math/rect2";
 
-import PhysicsServer from "engine/servers/physics_2d/physics_server";
+import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server";
 
 import { Viewport } from "../main/viewport";
-import { VisibilityNotifier2D } from "../visibility_notifier_2d";
+import { VisibilityNotifier2D } from "../2d/visibility_notifier_2d";
 
 
 class CellRef {
@@ -123,8 +123,8 @@ export default class World2D {
     constructor() {
         this.canvas = null;
 
-        this.space = PhysicsServer.get_singleton().space_create();
-        PhysicsServer.get_singleton().space_set_active(this.space, true);
+        this.space = Physics2DServer.get_singleton().space_create();
+        Physics2DServer.get_singleton().space_set_active(this.space, true);
         // TODO: load data from `project.godot`
         this.space.default_area.gravity = 98;
         this.space.default_area.gravity_vector = new Vector2(0, 1);
@@ -133,8 +133,8 @@ export default class World2D {
 
         this.indexer = new SpatialIndexer2D();
     }
-    free() {
-        PhysicsServer.get_singleton().free(this.space);
+    free_rid() {
+        Physics2DServer.get_singleton().free_rid(this.space);
     }
 
     /**

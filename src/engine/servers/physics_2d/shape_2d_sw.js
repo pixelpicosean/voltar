@@ -1,10 +1,15 @@
-import { Rectangle, Vector2, Matrix, CMP_EPSILON } from "engine/core/math/index";
-import { ShapeType, CollisionObjectType } from "engine/scene/physics/const";
+import { ShapeType } from "engine/scene/physics/const";
+import { CMP_EPSILON } from "engine/core/math/math_defs";
+import { Vector2, Vector2Like } from "engine/core/math/vector2";
+import { Rect2 } from "engine/core/math/rect2";
+import { Transform2D } from "engine/core/math/transform_2d";
 import { segment_intersects_segment_2d } from "engine/core/math/geometry";
+
 
 const _SEGMENT_IS_VALID_SUPPORT_THRESHOLD = 0.99998;
 
 const tmp_vec = new Vector2();
+
 
 /**
  * @typedef ShapeOwner2DSW
@@ -22,7 +27,7 @@ export class Shape2DSW {
 
     constructor() {
         this.self = this;
-        this.aabb = new Rectangle();
+        this.aabb = new Rect2();
         this.configured = false;
         this.custom_bias = 0;
 
@@ -63,7 +68,7 @@ export class Shape2DSW {
 
     /**
      * @param {Vector2} p_normal
-     * @param {Matrix} p_transform
+     * @param {Transform2D} p_transform
      * @param {{min: number, max: number}} r_result
      * @return {{min: number, max: number}}
      */
@@ -73,7 +78,7 @@ export class Shape2DSW {
     /**
      * @param {Vector2} p_cast
      * @param {Vector2} p_normal
-     * @param {Matrix} p_transform
+     * @param {Transform2D} p_transform
      * @param {{min: number, max: number}} r_result
      * @return {{min: number, max: number}}
      */
@@ -152,7 +157,7 @@ export class Shape2DSW {
     /**
      * @param {Vector2} p_cast
      * @param {Vector2} p_normal
-     * @param {Matrix} p_xform
+     * @param {Transform2D} p_xform
      * @param {Vector2[]} r_supports
      * @returns {number}
      */
@@ -188,7 +193,7 @@ export class Shape2DSW {
     /**
      * @param {Vector2} p_cast
      * @param {Vector2} p_normal
-     * @param {Matrix} p_transform
+     * @param {Transform2D} p_transform
      * @param {{min: number, max: number}} r_result
      * @return {{min: number, max: number}}
      */
@@ -212,9 +217,9 @@ export class SegmentShape2DSW extends Shape2DSW {
     }
 
     /**
-     * @param {import("engine/core/math/vector2").Vector2Like} [p_a]
-     * @param {import("engine/core/math/vector2").Vector2Like} [p_b]
-     * @param {import("engine/core/math/vector2").Vector2Like} [p_normal]
+     * @param {Vector2Like} [p_a]
+     * @param {Vector2Like} [p_b]
+     * @param {Vector2Like} [p_normal]
      */
     constructor(p_a = Vector2.ZERO, p_b = Vector2.ZERO, p_normal = Vector2.ZERO) {
         super();
@@ -225,7 +230,7 @@ export class SegmentShape2DSW extends Shape2DSW {
     }
 
     /**
-     * @param {Matrix} p_xform
+     * @param {Transform2D} p_xform
      */
     get_xformed_normal(p_xform) {
         const aa = p_xform.xform(this.a);
@@ -238,7 +243,7 @@ export class SegmentShape2DSW extends Shape2DSW {
 
     /**
      * @param {Vector2} p_normal
-     * @param {Matrix} p_transform
+     * @param {Transform2D} p_transform
      * @param {{min: number, max: number}} r_result
      * @return {{min: number, max: number}}
      */
@@ -313,7 +318,7 @@ export class SegmentShape2DSW extends Shape2DSW {
     }
 
     /**
-     * @param {Rectangle} p_data
+     * @param {Rect2} p_data
      */
     set_data(p_data) {
         this.a.set(p_data.x, p_data.y);
@@ -322,7 +327,7 @@ export class SegmentShape2DSW extends Shape2DSW {
         const n = sub.tangent();
         this.normal.copy(n);
 
-        const aabb = Rectangle.new(this.a.x, this.a.y);
+        const aabb = Rect2.new(this.a.x, this.a.y);
         aabb.expand_to(this.b);
         if (aabb.width === 0) {
             aabb.width = 0.001;
@@ -334,15 +339,15 @@ export class SegmentShape2DSW extends Shape2DSW {
 
         Vector2.free(sub);
         Vector2.free(n);
-        Rectangle.free(aabb);
+        Rect2.free(aabb);
     }
     get_data() {
-        return Rectangle.new(this.a.x, this.a.y, this.b.x, this.b.y);
+        return Rect2.new(this.a.x, this.a.y, this.b.x, this.b.y);
     }
 
     /**
      * @param {Vector2} p_normal
-     * @param {Matrix} p_transform
+     * @param {Transform2D} p_transform
      * @param {{min: number, max: number}} r_result
      * @return {{min: number, max: number}}
      */
@@ -381,7 +386,7 @@ export class RayShape2DSW extends Shape2DSW {
 
     /**
      * @param {Vector2} p_normal
-     * @param {Matrix} p_transform
+     * @param {Transform2D} p_transform
      * @param {{min: number, max: number}} r_result
      * @return {{min: number, max: number}}
      */
@@ -455,7 +460,7 @@ export class RayShape2DSW extends Shape2DSW {
 
     /**
      * @param {Vector2} p_normal
-     * @param {Matrix} p_transform
+     * @param {Transform2D} p_transform
      * @param {{min: number, max: number}} r_result
      * @return {{min: number, max: number}}
      */
@@ -488,7 +493,7 @@ export class CircleShape2DSW extends Shape2DSW {
 
     /**
      * @param {Vector2} p_normal
-     * @param {Matrix} p_transform
+     * @param {Transform2D} p_transform
      * @param {{min: number, max: number}} r_result
      * @return {{min: number, max: number}}
      */
@@ -566,7 +571,7 @@ export class CircleShape2DSW extends Shape2DSW {
 
     /**
      * @param {Vector2} p_normal
-     * @param {Matrix} p_transform
+     * @param {Transform2D} p_transform
      * @param {{min: number, max: number}} r_result
      * @return {{min: number, max: number}}
      */
@@ -600,7 +605,7 @@ export class RectangleShape2DSW extends Shape2DSW {
 
     /**
      * @param {Vector2} p_normal
-     * @param {Matrix} p_transform
+     * @param {Transform2D} p_transform
      * @param {{min: number, max: number}} r_result
      * @return {{min: number, max: number}}
      */
@@ -705,7 +710,7 @@ export class RectangleShape2DSW extends Shape2DSW {
 
     /**
      * @param {Vector2} p_normal
-     * @param {Matrix} p_transform
+     * @param {Transform2D} p_transform
      * @param {{min: number, max: number}} r_result
      * @return {{min: number, max: number}}
      */
@@ -738,8 +743,8 @@ export class RectangleShape2DSW extends Shape2DSW {
     }
 
     /**
-     * @param {Matrix} p_xform
-     * @param {Matrix} p_xform_inv
+     * @param {Transform2D} p_xform
+     * @param {Transform2D} p_xform_inv
      * @param {Vector2} p_circle
      */
     get_circle_axis(p_xform, p_xform_inv, p_circle) {
@@ -752,11 +757,11 @@ export class RectangleShape2DSW extends Shape2DSW {
         return p_xform.xform(he, he).subtract(p_circle).normalize();
     }
     /**
-     * @param {Matrix} p_xform
-     * @param {Matrix} p_xform_inv
+     * @param {Transform2D} p_xform
+     * @param {Transform2D} p_xform_inv
      * @param {RectangleShape2DSW} p_B
-     * @param {Matrix} p_B_xform
-     * @param {Matrix} p_B_xform_inv
+     * @param {Transform2D} p_B_xform
+     * @param {Transform2D} p_B_xform_inv
      */
     get_box_axis(p_xform, p_xform_inv, p_B, p_B_xform, p_B_xform_inv) {
         const a = Vector2.new();
@@ -846,7 +851,7 @@ export class ConvexPolygonShape2DSW extends Shape2DSW {
         return this._points[p_idx].normal;
     }
     /**
-     * @param {Matrix} p_xform
+     * @param {Transform2D} p_xform
      * @param {number} p_idx
      */
     get_xformed_segment_normal(p_xform, p_idx) {
@@ -864,7 +869,7 @@ export class ConvexPolygonShape2DSW extends Shape2DSW {
 
     /**
      * @param {Vector2} p_normal
-     * @param {Matrix} p_transform
+     * @param {Transform2D} p_transform
      * @param {{min: number, max: number}} r_result
      * @return {{min: number, max: number}}
      */
@@ -962,7 +967,7 @@ export class ConvexPolygonShape2DSW extends Shape2DSW {
      * @returns {number}
      */
     get_moment_of_inertia(p_mass, p_scale) {
-        const aabb = Rectangle.new();
+        const aabb = Rect2.new();
         const pos = Vector2.new();
         const size = Vector2.new();
 
@@ -976,7 +981,7 @@ export class ConvexPolygonShape2DSW extends Shape2DSW {
 
         Vector2.free(size);
         Vector2.free(pos);
-        Rectangle.free(aabb);
+        Rect2.free(aabb);
         return res;
     }
 
@@ -996,7 +1001,7 @@ export class ConvexPolygonShape2DSW extends Shape2DSW {
         Vector2.free(t);
         Vector2.free(n);
 
-        const aabb = Rectangle.new();
+        const aabb = Rect2.new();
         aabb.x = this._points[0].pos.x;
         aabb.y = this._points[0].pos.y;
         for (let i = 1; i < point_count; i++) {
@@ -1011,7 +1016,7 @@ export class ConvexPolygonShape2DSW extends Shape2DSW {
 
     /**
      * @param {Vector2} p_normal
-     * @param {Matrix} p_transform
+     * @param {Transform2D} p_transform
      * @param {{min: number, max: number}} r_result
      * @return {{min: number, max: number}}
      */

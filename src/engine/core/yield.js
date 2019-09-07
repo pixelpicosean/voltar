@@ -1,8 +1,8 @@
-import VObject from "engine/core/v_object";
+import { VObject } from "engine/core/v_object";
 
 /**
  * @param {Promise | VObject} obj
- * @param {string | Symbol} event
+ * @param {string | symbol} event
  */
 export default function _yield(obj, event) {
     if (obj instanceof Promise) {

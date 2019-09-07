@@ -1,6 +1,6 @@
 import { remove_items } from 'engine/dep/index';
 import { node_class_map } from 'engine/registry';
-import MessageQueue from 'engine/core/message_queue';
+import { MessageQueue } from 'engine/core/message_queue';
 import {
     VObject,
     GDCLASS,
@@ -1206,5 +1206,4 @@ export class Node extends VObject {
         return this.data.viewport;
     }
 }
-
-node_class_map['Node'] = GDCLASS(Node, VObject);
+node_class_map['Node'] = GDCLASS(Node, VObject)
