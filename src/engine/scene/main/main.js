@@ -49,7 +49,7 @@ export const Main = {
         document.removeEventListener('DOMContentLoaded', this.setup2, false);
 
         visual_server = new VisualServer();
-        visual_server.init();
+        visual_server.init(/** @type {HTMLCanvasElement} */(document.getElementById('game')));
 
         physics_2d_server = new Physics2DServer();
         physics_2d_server.init();

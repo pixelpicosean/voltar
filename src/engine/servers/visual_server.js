@@ -140,8 +140,11 @@ export class VisualServer extends VObject {
     has_changed() {
         return this.changes > 0;
     }
-    init() {
-        VSG.rasterizer.initialize();
+    /**
+     * @param {HTMLCanvasElement} canvas
+     */
+    init(canvas) {
+        VSG.rasterizer.initialize(canvas);
     }
     finish() {
         VSG.rasterizer.finalize();

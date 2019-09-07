@@ -223,7 +223,7 @@ export class Rect2 {
     /**
      * @param {Rect2} p_rect
      */
-    clip_to(p_rect) {
+    clip_by(p_rect) {
         if (!this.intersects(p_rect)) {
             return this.set(0, 0, 0, 0);
         }

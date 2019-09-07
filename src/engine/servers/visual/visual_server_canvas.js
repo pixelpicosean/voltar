@@ -7,6 +7,10 @@ import { CMP_EPSILON } from 'engine/core/math/math_defs';
 import { Color } from 'engine/core/color';
 import { Texture } from 'engine/scene/resources/texture';
 
+import { VisualServer } from '../visual_server';
+import { VSG } from './visual_server_globals';
+
+
 let uid = 0;
 
 const TYPE_ITEM = 0;
@@ -151,9 +155,9 @@ export class Item {
 }
 
 /** @type {Item[]} */
-const VSC_Item_pool = [];
+const Item_pool = [];
 function create_Item() {
-    let item = VSC_Item_pool.pop();
+    let item = Item_pool.pop();
     if (!item) {
         item = new Item();
     }
@@ -163,7 +167,7 @@ function create_Item() {
  * @param {Item} item
  */
 function free_Item(item) {
-    if (item) VSC_Item_pool.push(item);
+    if (item) Item_pool.push(item);
 }
 
 const z_range = CANVAS_ITEM_Z_MAX - CANVAS_ITEM_Z_MIN + 1;
@@ -184,7 +188,7 @@ function get_z_last_list(reset = false) {
     return z_last_list;
 }
 
-const WHITE = new Color(1, 1, 1, 1);
+const WHITE = Object.freeze(new Color(1, 1, 1, 1));
 
 /**
  * @param {Item} p_left
@@ -252,6 +256,9 @@ export class VisualServerCanvas {
         this.clear_before_render = true;
 
         this.disable_scale = false;
+
+        this.z_last = null;
+        this.z_last_list = null;
 
         this.screen = new Rect2();
     }
@@ -463,7 +470,6 @@ export class VisualServerCanvas {
         return true;
     }
 
-
     /**
      * @param {Canvas} p_canvas
      * @param {Transform2D} p_transform
@@ -644,7 +650,7 @@ export class VisualServerCanvas {
         }
 
         if (ci.update_when_visible) {
-            // TODO: [@low_priority] VisualServer.redraw_request()
+            VisualServer.changes++;
         }
 
         if (ci.commands.length > 0 && p_clip_rect.intersects(global_rect)) {

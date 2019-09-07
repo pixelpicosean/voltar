@@ -4,6 +4,8 @@ import { RasterizerStorageThree } from "./rasterizer_storage_three";
 import { RasterizerCanvasThree } from "./rasterizer_canvas_three";
 import { RasterizerSceneThree } from "./rasterizer_scene_three";
 
+import { WebGLRenderer } from "three/src/renderers/WebGLRenderer";
+
 
 export class RasterizerThree {
     constructor() {
@@ -19,8 +21,15 @@ export class RasterizerThree {
         this.scene.storage = this.storage;
     }
 
-    initialize() {
+    /**
+     * @param {HTMLCanvasElement} canvas
+     */
+    initialize(canvas) {
         console.log('Using Three.js rendering backend');
+
+        this.renderer = new WebGLRenderer({
+            canvas: canvas,
+        });
 
         this.storage.initialize();
         this.canvas.initialize();

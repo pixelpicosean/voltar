@@ -5,12 +5,12 @@ import {
     FORMAT_RGB8,
 } from "engine/core/image";
 
-import { Texture } from 'three/src/textures/Texture';
 import {
     RGBFormat,
     RGBAFormat,
-    WebGLRenderTarget,
-} from 'three/src/Three';
+} from 'three/src/constants';
+import { Texture } from 'three/src/textures/Texture';
+import { WebGLRenderTarget } from 'three/src/renderers/WebGLRenderTarget';
 
 
 /**
