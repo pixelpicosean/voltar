@@ -1,5 +1,5 @@
 import settings from 'engine/settings';
-import { premultiply_blend_mode, premultiply_tint } from 'engine/utils/index';
+import { premultiply_blend_mode, premultiply_tint } from 'engine/utils/color';
 import { nearest_po2, log_base_2 } from 'engine/core/math/math_funcs';
 import create_indices_for_quads from 'engine/utils/create_indices_for_quads';
 

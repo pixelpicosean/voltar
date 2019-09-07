@@ -1,7 +1,7 @@
 import settings from 'engine/settings';
 import { TEXT_GRADIENT } from 'engine/const';
 import { Rectangle } from 'engine/core/math/math_funcs';
-import { sign, rgb2hex, hex2string } from 'engine/utils/index';
+import { sign, rgb2hex, hex2string } from 'engine/utils/color';
 import trim_canvas from 'engine/utils/trim_canvas';
 import Texture from 'engine/scene/resources/textures/texture';
 import Sprite from 'engine/scene/sprites/sprite';

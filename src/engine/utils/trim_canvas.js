@@ -4,7 +4,7 @@
  * @param {HTMLCanvasElement} canvas - the canvas to trim
  * @returns {{width: number, height: number, data: ImageData}} Trim data
  */
-export default function trim_canvas(canvas) {
+export function trim_canvas(canvas) {
     // https://gist.github.com/remy/784508
 
     let width = canvas.width;

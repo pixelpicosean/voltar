@@ -1,6 +1,5 @@
 import { VObject, GDCLASS } from "engine/core/v_object";
 import { Color } from "engine/core/color";
-import { Image } from "engine/core/image";
 
 import {
     MARGIN_LEFT,

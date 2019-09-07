@@ -18,7 +18,7 @@ import {
 import {
     Texture,
 } from "../resources/texture";
-import World2D from "../resources/world_2d";
+import { World2D } from "../resources/world_2d";
 
 import { VSG } from "engine/servers/visual/visual_server_globals";
 
@@ -149,7 +149,7 @@ export class Viewport extends Node {
     }
     set canvas_transform(p_xform) {
         this._canvas_transform.copy(p_xform);
-        VSG.viewport.viewport_set_canvas_transform(this.viewport, this.find_world_2d().get_canvas(), this._canvas_transform);
+        VSG.viewport.viewport_set_canvas_transform(this.viewport, this.find_world_2d().canvas, this._canvas_transform);
     }
 
     get global_canvas_transform() {
@@ -187,7 +187,7 @@ export class Viewport extends Node {
         }
 
         if (this.is_inside_tree()) {
-            this.current_canvas = this.find_world_2d().get_canvas();
+            this.current_canvas = this.find_world_2d().canvas;
             VSG.viewport.viewport_attach_canvas(this.viewport, this.current_canvas);
             this.find_world_2d()._register_viewport(this, Rect2.EMPTY);
         }
@@ -293,7 +293,7 @@ export class Viewport extends Node {
                     this.parent = null;
                 }
 
-                this.current_canvas = this.find_world_2d().get_canvas();
+                this.current_canvas = this.find_world_2d().canvas;
                 // VSG.viewport.viewport_set_scenario(this.viewport, this.find_world().get_scenario());
                 VSG.viewport.viewport_attach_canvas(this.viewport, this.current_canvas);
 
@@ -533,6 +533,9 @@ export class Viewport extends Node {
         return r;
     }
 
+    /**
+     * @returns {World2D}
+     */
     find_world_2d() {
         if (this.world_2d) {
             return this.world_2d;

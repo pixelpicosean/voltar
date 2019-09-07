@@ -1,5 +1,5 @@
 import { remove_items } from "engine/dep/index";
-import SelfList from "engine/core/self_list";
+import { SelfList } from "engine/core/self_list";
 import { Vector2 } from "engine/core/math/vector2";
 import { Transform2D } from "engine/core/math/transform_2d";
 
@@ -9,10 +9,11 @@ import {
     CCDMode,
     BodyState,
 } from "engine/scene/physics/const";
+
 import {
     Physics2DDirectBodyStateSW,
 } from "./state";
-import CollisionObject2DSW from "./collision_object_2d_sw";
+import { CollisionObject2DSW } from "./collision_object_2d_sw";
 
 
 class AreaCMP { }

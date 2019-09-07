@@ -13,7 +13,7 @@ import Sprite from './sprites/sprite';
 import WebGLRenderer from 'engine/servers/visual/webgl_renderer';
 import { node_class_map } from 'engine/registry';
 import { Curve } from './resources/curve';
-import { TextureCache } from 'engine/utils/index';
+import { TextureCache } from 'engine/utils/color';
 import { Texture, BLEND_MODES } from 'engine/index';
 
 /**

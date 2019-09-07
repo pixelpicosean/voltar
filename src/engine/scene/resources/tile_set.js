@@ -1,5 +1,5 @@
 import { res_procs } from 'engine/registry';
-import { TextureCache } from 'engine/utils/index';
+import { TextureCache } from 'engine/utils/color';
 import Color from 'engine/core/color';
 import { Matrix, Vector2, Rectangle } from 'engine/core/math/math_funcs';
 import Texture from 'engine/scene/resources/textures/texture';

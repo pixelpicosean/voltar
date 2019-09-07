@@ -1,11 +1,7 @@
 export class VisualServerScene {
-    render_camera(camera, scenario, size, shadow_atlas) {
-        throw new Error("Method not implemented.");
-    }
+    render_camera(camera, scenario, size, shadow_atlas) { }
 
-    render_probes() {
-        throw new Error("Method not implemented.");
-    }
+    render_probes() { }
 
     free_rid(rid) {
         return false;

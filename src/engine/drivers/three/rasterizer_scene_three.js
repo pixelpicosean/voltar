@@ -9,11 +9,7 @@ export class RasterizerSceneThree {
     free_rid(p_rid) {
         return false;
     }
-    update() {
-        throw new Error("Method not implemented.");
-    }
+    update() { }
 
-    iteration() {
-        throw new Error("Method not implemented.");
-    }
+    iteration() { }
 }

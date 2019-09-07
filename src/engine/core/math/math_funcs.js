@@ -160,3 +160,15 @@ export function log_base_2(v) {
     shift = (v > 0x3) << 1; v >>>= shift; r |= shift;
     return r | (v >> 1);
 }
+
+/**
+ * Returns sign of number
+ *
+ * @param {number} n - the number to check the sign of
+ * @returns 0 if `n` is 0, -1 if `n` is negative, 1 if `n` is positive
+ */
+export function sign(n) {
+    if (n === 0) return 0;
+
+    return n < 0 ? -1 : 1;
+}

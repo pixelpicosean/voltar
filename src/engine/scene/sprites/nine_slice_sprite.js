@@ -2,7 +2,7 @@ import Node2D from '../2d/node_2d';
 import Sprite from './sprite';
 import Texture from 'engine/scene/resources/textures/texture';
 import { Rectangle } from 'engine/core/math/math_funcs';
-import { TextureCache } from 'engine/utils/index';
+import { TextureCache } from 'engine/utils/color';
 
 export default class NineSliceSprite extends Node2D {
     /**

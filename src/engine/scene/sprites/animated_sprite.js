@@ -1,6 +1,6 @@
 import { remove_items } from 'engine/dep/index';
 import { Rectangle } from 'engine/core/math/math_funcs';
-import { TextureCache, SpriteFramesCache } from 'engine/utils/index';
+import { TextureCache, SpriteFramesCache } from 'engine/utils/color';
 import Texture from 'engine/scene/resources/textures/texture';
 import BaseTexture from 'engine/scene/resources/textures/base_texture';
 

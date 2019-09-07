@@ -17,7 +17,7 @@ import {
     NOTIFICATION_WM_UNFOCUS_REQUEST,
 } from 'engine/core/main_loop';
 
-import World2D from '../resources/world_2d';
+import { World2D } from '../resources/world_2d';
 import { Viewport } from './viewport';
 import {
     Node,

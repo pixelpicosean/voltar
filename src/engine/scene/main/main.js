@@ -1,4 +1,3 @@
-import { mixins } from "engine/utils/index";
 import { ProjectSettings } from "engine/core/project_settings";
 import { SceneTree } from "./scene_tree";
 import { MessageQueue } from "engine/core/message_queue";
@@ -38,9 +37,6 @@ export const Main = {
      * @param {import("engine/core/project_settings").Settings} settings
      */
     setup(settings) {
-        // Handle mixins now, after all code has been added
-        mixins.perform_mixins();
-
         this.global = new ProjectSettings(settings);
         message_queue = new MessageQueue();
 

@@ -1,6 +1,7 @@
 import { Vector2 } from "engine/core/math/vector2";
 import { Rect2 } from "engine/core/math/rect2";
 
+import { VSG } from "engine/servers/visual/visual_server_globals";
 import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server";
 
 import { Viewport } from "../main/viewport";
@@ -115,15 +116,15 @@ class SpatialIndexer2D {
     }
 }
 
-export default class World2D {
+export class World2D {
     get direct_space_state() {
         return this.space.direct_access;
     }
 
     constructor() {
-        this.canvas = null;
-
+        this.canvas = VSG.canvas.canvas_create();
         this.space = Physics2DServer.get_singleton().space_create();
+
         Physics2DServer.get_singleton().space_set_active(this.space, true);
         // TODO: load data from `project.godot`
         this.space.default_area.gravity = 98;

@@ -89,8 +89,15 @@ export class RasterizerStorageThree {
     }
 
     update_dirty_resources() {
-        throw new Error("Method not implemented.");
+        this.update_dirty_shaders();
+        this.update_dirty_materials();
+        this.update_dirty_skeletons();
+        this.update_dirty_multimeshes();
     }
+    update_dirty_shaders() { }
+    update_dirty_materials() { }
+    update_dirty_skeletons() { }
+    update_dirty_multimeshes() { }
 
     /* Texture API */
 

@@ -1,4 +1,4 @@
-import { rgb2hex, hex2rgb } from "engine/utils/index";
+import { rgb2hex, hex2rgb } from "engine/utils/color";
 
 /** @type {Color[]} */
 const Color_Pool = [];

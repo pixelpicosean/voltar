@@ -1,6 +1,4 @@
-import {
-    deep_merge,
-} from "engine/utils/index";
+import { deep_merge } from "engine/utils/deep_merge";
 
 /**
  * @typedef ApplicationSettings

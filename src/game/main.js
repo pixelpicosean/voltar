@@ -1,7 +1,7 @@
 import { Main } from 'engine/scene/main/main';
 
 import Settings from 'project.json';
-import { deep_merge } from 'engine/utils/index';
+import { deep_merge } from 'engine/utils/deep_merge';
 import { Node } from 'engine/scene/main/node';
 import { GDCLASS } from 'engine/core/v_object';
 

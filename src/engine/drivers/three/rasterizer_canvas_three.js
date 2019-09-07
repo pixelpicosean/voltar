@@ -9,10 +9,6 @@ export class RasterizerCanvasThree {
 
     initialize() { }
 
-    draw_window_margins(black_margin, black_image) {
-        throw new Error("Method not implemented.");
-    }
-    update() {
-        throw new Error("Method not implemented.");
-    }
+    draw_window_margins(black_margin, black_image) { }
+    update() { }
 }

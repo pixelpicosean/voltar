@@ -1,4 +1,4 @@
-import SelfList from "engine/core/self_list";
+import { SelfList } from "engine/core/self_list";
 import { Vector2 } from "engine/core/math/vector2";
 import { Transform2D } from "engine/core/math/transform_2d";
 import {
@@ -7,7 +7,7 @@ import {
     AreaParameter,
 } from "engine/scene/physics/const";
 
-import CollisionObject2DSW from "./collision_object_2d_sw";
+import { CollisionObject2DSW } from "./collision_object_2d_sw";
 
 
 class BodyKey {
@@ -174,7 +174,7 @@ export class Area2DSW extends CollisionObject2DSW {
         }
     }
     /**
-     * @param {import('./body_2d_sw').default} p_body
+     * @param {import('./body_2d_sw').Body2DSW} p_body
      * @param {number} p_body_shape
      * @param {number} p_area_shape
      */
@@ -275,13 +275,13 @@ export class Area2DSW extends CollisionObject2DSW {
     }
 
     /**
-     * @param {import('./constraint_2d_sw').default} p_constraint
+     * @param {import('./constraint_2d_sw').Constraint2DSW} p_constraint
      */
     add_constraint(p_constraint) {
         this.constraints.add(p_constraint);
     }
     /**
-     * @param {import('./constraint_2d_sw').default} p_constraint
+     * @param {import('./constraint_2d_sw').Constraint2DSW} p_constraint
      */
     remove_constraint(p_constraint) {
         this.constraints.delete(p_constraint);

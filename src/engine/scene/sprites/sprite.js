@@ -1,6 +1,6 @@
 import { BLEND_MODES, COLOR_MODES } from 'engine/const';
 import { Vector2, ObservableVector2, Rectangle, Vector2Like } from 'engine/core/math/math_funcs';
-import { sign, TextureCache } from 'engine/utils/index';
+import { sign, TextureCache } from 'engine/utils/color';
 import WebGLRenderer from 'engine/servers/visual/webgl_renderer';
 
 import Texture from 'engine/scene/resources/textures/texture';
