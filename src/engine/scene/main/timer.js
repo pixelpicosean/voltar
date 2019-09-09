@@ -13,16 +13,18 @@ export const TIMER_PROCESS_PHYSICS = 0;
 export const TIMER_PROCESS_IDLE = 1;
 
 export class Timer extends Node {
+    get class() { return 'Timer' }
+
     /** @property {number} */
-    get process_mode() {
-        return this._process_mode;
+    get_process_mode() {
+        return this.process_mode;
     }
-    set process_mode(p_mode) {
-        if (this._process_mode === p_mode) {
+    set_process_mode(p_mode) {
+        if (this.process_mode === p_mode) {
             return;
         }
 
-        switch (this._process_mode) {
+        switch (this.process_mode) {
             case TIMER_PROCESS_PHYSICS: {
                 if (this.is_physics_process_internal()) {
                     this.set_physics_process_internal(false);
@@ -36,37 +38,44 @@ export class Timer extends Node {
                 }
             } break;
         }
-        this._process_mode = p_mode;
+        this.process_mode = p_mode;
     }
 
     /** @property {boolean} */
-    get paused() {
-        return this._paused;
+    get_paused() {
+        return this.paused;
     }
-    set paused(paused) {
-        if (this._paused === paused) {
+    set_paused(paused) {
+        if (this.paused === paused) {
             return;
         }
 
-        this._paused = paused;
+        this.paused = paused;
         this._set_process(this.processing);
     }
 
     constructor() {
         super();
 
-        this.class = 'Timer';
-
         this.wait_time = 1;
         this.autostart = false;
         this.one_shot = false;
         this.processing = false;
-        this._paused = false;
-        this._process_mode = TIMER_PROCESS_IDLE;
+        this.paused = false;
+        this.process_mode = TIMER_PROCESS_IDLE;
         this.time_left = -1;
     }
 
     /* virtual */
+
+    _load_data(data) {
+        if (data.wait_time !== undefined) this.wait_time = data.wait_time;
+        if (data.autostart !== undefined) this.autostart = data.autostart;
+        if (data.one_shot !== undefined) this.one_shot = data.one_shot;
+        if (data.process_mode !== undefined) this.set_process_mode(data.process_mode);
+
+        return super._load_data(data);
+    }
 
     /**
      * @param {number} p_what
@@ -80,7 +89,7 @@ export class Timer extends Node {
                 }
             } break;
             case NOTIFICATION_INTERNAL_PROCESS: {
-                if (this._process_mode === TIMER_PROCESS_PHYSICS || !this.is_process_internal()) {
+                if (this.process_mode === TIMER_PROCESS_PHYSICS || !this.is_process_internal()) {
                     return;
                 }
                 this.time_left -= this.get_process_delta_time();
@@ -96,7 +105,7 @@ export class Timer extends Node {
                 }
             } break;
             case NOTIFICATION_INTERNAL_PHYSICS_PROCESS: {
-                if (this._process_mode === TIMER_PROCESS_IDLE || !this.is_physics_process_internal()) {
+                if (this.process_mode === TIMER_PROCESS_IDLE || !this.is_physics_process_internal()) {
                     return;
                 }
                 this.time_left -= this.get_physics_process_delta_time();
@@ -140,12 +149,12 @@ export class Timer extends Node {
      * @param {boolean} [p_force]
      */
     _set_process(p_process, p_force = false) {
-        switch (this._process_mode) {
+        switch (this.process_mode) {
             case TIMER_PROCESS_PHYSICS: {
-                this.set_physics_process_internal(p_process && !this._paused);
+                this.set_physics_process_internal(p_process && !this.paused);
             } break;
             case TIMER_PROCESS_IDLE: {
-                this.set_process_internal(p_process && !this._paused);
+                this.set_process_internal(p_process && !this.paused);
             } break;
         }
     }

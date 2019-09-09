@@ -14,10 +14,10 @@ export const NOTIFICATION_CRASH = 1012;
 export const NOTIFICATION_OS_IME_UPDATE = 1013;
 
 export class MainLoop extends VObject {
+    get class() { return 'MainLoop' }
+
     constructor() {
         super();
-
-        this.class = 'MainLoop';
     }
 
     /* public */

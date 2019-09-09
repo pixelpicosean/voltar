@@ -2,6 +2,7 @@ import { Math_PI } from './math_defs';
 import { Vector2 } from './vector2';
 import { Rect2 } from './rect2';
 
+
 const Math_PI2 = Math_PI * 2;
 
 /**

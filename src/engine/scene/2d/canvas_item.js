@@ -35,18 +35,20 @@ export const BLEND_MODE_DISABLE = 5;
 
 
 export class CanvasItem extends Node {
+    get class() { return 'CanvasItem' }
+
     /**
      * @param {boolean} p_visible
      */
-    set visible(p_visible) {
+    set_visible(p_visible) {
         if (p_visible) {
             this.show();
         } else {
             this.hide();
         }
     }
-    get visible() {
-        return this._visible;
+    get_visible() {
+        return this.visible;
     }
 
     is_visible_in_tree() {
@@ -67,11 +69,11 @@ export class CanvasItem extends Node {
         return true;
     }
     show() {
-        if (this._visible) {
+        if (this.visible) {
             return;
         }
 
-        this._visible = true;
+        this.visible = true;
         VSG.canvas.canvas_item_set_visible(this.canvas_item, true);
 
         if (!this.is_inside_tree()) {
@@ -81,11 +83,11 @@ export class CanvasItem extends Node {
         this._propagate_visibility_changed(true);
     }
     hide() {
-        if (!this._visible) {
+        if (!this.visible) {
             return;
         }
 
-        this._visible = false;
+        this.visible = false;
         VSG.canvas.canvas_item_set_visible(this.canvas_item, false);
 
         if (!this.is_inside_tree()) {
@@ -98,49 +100,47 @@ export class CanvasItem extends Node {
     /**
      * @param {boolean} value
      */
-    set show_behind_parent(value) {
-        if (this.behind === value) {
+    set_show_behind_parent(value) {
+        if (this.show_behind_parent === value) {
             return;
         }
-        this.behind = value;
-        VSG.canvas.canvas_item_set_draw_behind_parent(this.canvas_item, this.behind);
+        this.show_behind_parent = value;
+        VSG.canvas.canvas_item_set_draw_behind_parent(this.canvas_item, this.show_behind_parent);
     }
-    get show_behind_parent() {
-        return this.behind;
+    get_show_behind_parent() {
+        return this.show_behind_parent;
     }
 
     /**
      * @param {Color} value
      */
-    set modulate(value) {
-        if (this._modulate.equals(value)) {
+    set_modulate(value) {
+        if (this.modulate.equals(value)) {
             return;
         }
-        this._modulate.copy(value);
-        VSG.canvas.canvas_item_set_modulate(this.canvas_item, this._modulate);
+        this.modulate.copy(value);
+        VSG.canvas.canvas_item_set_modulate(this.canvas_item, this.modulate);
     }
-    get modulate() {
-        return this._modulate;
+    get_modulate() {
+        return this.modulate;
     }
 
     /**
      * @param {Color} value
      */
-    set self_modulate(value) {
-        if (this._self_modulate.equals(value)) {
+    set_self_modulate(value) {
+        if (this.self_modulate.equals(value)) {
             return;
         }
-        this._self_modulate.copy(value);
-        VSG.canvas.canvas_item_set_self_modulate(this.canvas_item, this._self_modulate);
+        this.self_modulate.copy(value);
+        VSG.canvas.canvas_item_set_self_modulate(this.canvas_item, this.self_modulate);
     }
-    get self_modulate() {
-        return this._self_modulate;
+    get_self_modulate() {
+        return this.self_modulate;
     }
 
     constructor() {
         super();
-
-        this.class = 'CanvasItem';
 
         this.is_canvas_item = true;
 
@@ -154,8 +154,8 @@ export class CanvasItem extends Node {
 
         this.canvas_layer = null;
 
-        this._modulate = new Color(1, 1, 1, 1);
-        this._self_modulate = new Color(1, 1, 1, 1);
+        this.modulate = new Color(1, 1, 1, 1);
+        this.self_modulate = new Color(1, 1, 1, 1);
 
         /**
          * @type {Set<CanvasItem>}
@@ -165,12 +165,12 @@ export class CanvasItem extends Node {
         this.light_mask = 1;
 
         this.first_draw = false;
-        this._visible = true;
+        this.visible = true;
         this.pending_update = false;
         this.toplevel = false;
         this.drawing = false;
         this.block_transform_notify = false;
-        this.behind = false;
+        this.show_behind_parent = false;
         this.use_parent_material = true;
         this.notify_local_transform = false;
         this.notify_transform = false;
@@ -194,10 +194,10 @@ export class CanvasItem extends Node {
         super._load_data(data);
 
         if (data.modulate !== undefined) {
-            this.modulate = data.modulate;
+            this.set_modulate(data.modulate);
         }
         if (data.self_modulate !== undefined) {
-            this.self_modulate = data.self_modulate;
+            this.set_self_modulate(data.self_modulate);
         }
 
         return this;
@@ -287,7 +287,7 @@ export class CanvasItem extends Node {
         if (this.canvas_layer) {
             return this.canvas_layer.get_transform().clone().append(this.get_global_transform());
         } else if (this.is_inside_tree()) {
-            return this.get_viewport().canvas_transform.clone().append(this.get_global_transform());
+            return this.get_viewport().get_canvas_transform().clone().append(this.get_global_transform());
         } else {
             return this.get_global_transform();
         }
@@ -300,7 +300,7 @@ export class CanvasItem extends Node {
             const c = /** @type {CanvasItem} */(this.get_parent());
             return c.get_canvas_transform();
         } else {
-            return this.get_viewport().canvas_transform;
+            return this.get_viewport().get_canvas_transform();
         }
     }
     get_viewport_transform() {
@@ -311,7 +311,7 @@ export class CanvasItem extends Node {
                 return this.canvas_layer.get_transform();
             }
         } else {
-            return this.get_viewport().get_final_transform().append(this.get_viewport().canvas_transform);
+            return this.get_viewport().get_final_transform().append(this.get_viewport().get_canvas_transform());
         }
     }
 
@@ -446,7 +446,7 @@ export class CanvasItem extends Node {
         for (const child of this.data.children) {
             const c = /** @type {CanvasItem} */(child);
 
-            if (c.is_canvas_item && c._visible) {
+            if (c.is_canvas_item && c.visible) {
                 c._propagate_visibility_changed(p_visible);
             }
         }

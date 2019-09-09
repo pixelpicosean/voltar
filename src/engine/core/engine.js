@@ -23,6 +23,9 @@ export class Engine {
     is_in_physics_frame() { return this.in_physics_frame }
 
     get_main_loop() { return this.main_loop }
+    set_main_loop(value) {
+        this.main_loop = value;
+    }
 }
 
 /** @type {Engine} */

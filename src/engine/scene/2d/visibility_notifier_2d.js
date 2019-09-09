@@ -16,23 +16,23 @@ import { Node2D } from "./node_2d";
 
 
 export class VisibilityNotifier2D extends Node2D {
+    get class() { return 'VisibilityNotifier2D' }
+
     /** @property {Rect2} */
-    get rect() {
-        return this._rect;
+    get_rect() {
+        return this.rect;
     }
-    set rect(p_rect) {
-        this._rect.copy(p_rect);
+    set_rect(p_rect) {
+        this.rect.copy(p_rect);
         if (this.is_inside_tree()) {
-            this.get_world_2d()._update_notifier(this, this.get_global_transform().xform_rect(this._rect));
+            this.get_world_2d()._update_notifier(this, this.get_global_transform().xform_rect(this.rect));
         }
     }
 
     constructor() {
         super();
 
-        this.class = 'VisibilityNotifier2D';
-
-        this._rect = new Rect2(-10, 10, 20, 20);
+        this.rect = new Rect2(-10, 10, 20, 20);
 
         /**
          * @type {Set<Viewport>}
@@ -44,7 +44,7 @@ export class VisibilityNotifier2D extends Node2D {
         super._load_data(data);
 
         if (data.rect !== undefined) {
-            this.rect = data.rect;
+            this.set_rect(data.rect);
         }
 
         return this;
@@ -56,10 +56,10 @@ export class VisibilityNotifier2D extends Node2D {
     _notification(p_what) {
         switch (p_what) {
             case NOTIFICATION_ENTER_TREE: {
-                this.get_world_2d()._register_notifier(this, this.get_global_transform().xform_rect(this._rect));
+                this.get_world_2d()._register_notifier(this, this.get_global_transform().xform_rect(this.rect));
             } break;
             case NOTIFICATION_TRANSFORM_CHANGED: {
-                this.get_world_2d()._update_notifier(this, this.get_global_transform().xform_rect(this._rect));
+                this.get_world_2d()._update_notifier(this, this.get_global_transform().xform_rect(this.rect));
             } break;
             case NOTIFICATION_DRAW: {
             } break;
@@ -105,10 +105,9 @@ node_class_map['VisibilityEnabler2D'] = GDCLASS(VisibilityNotifier2D, Node2D)
 
 
 export class VisibilityEnabler2D extends VisibilityNotifier2D {
+    get class() { return 'VisibilityEnabler2D' }
     constructor() {
         super();
-
-        this.class = 'VisibilityEnabler2D';
 
         this.freeze_bodies = true;
         this.pause_animated_sprites = true;

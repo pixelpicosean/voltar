@@ -134,6 +134,8 @@ class GUI {
 
 
 export class Viewport extends Node {
+    get class() { return 'Viewport' }
+
     get_size() { return this._size }
     set_size(p_size) {
         if (this._size.x === Math.floor(p_size.x) && this._size.y === Math.floor(p_size.y)) {
@@ -163,14 +165,14 @@ export class Viewport extends Node {
         this._update_global_transform();
     }
 
-    /**
-     * @type {World2D}
-     */
-    get world_2d() {
-        return this._world_2d;
+    get_world_2d() {
+        return this.world_2d;
     }
-    set world_2d(p_world_2d) {
-        if (this._world_2d === p_world_2d) {
+    /**
+     * @param {World2D} p_world_2d
+     */
+    set_world_2d(p_world_2d) {
+        if (this.world_2d === p_world_2d) {
             return;
         }
 
@@ -184,9 +186,9 @@ export class Viewport extends Node {
         }
 
         if (p_world_2d) {
-            this._world_2d = p_world_2d;
+            this.world_2d = p_world_2d;
         } else {
-            this._world_2d = new World2D();
+            this.world_2d = new World2D();
         }
 
         if (this.is_inside_tree()) {
@@ -225,8 +227,6 @@ export class Viewport extends Node {
 
     constructor() {
         super();
-
-        this.class = 'Viewport';
 
         this.input_group = `_vp_input${this.instance_id}`;
         this.gui_input_group = `_vp_gui_input${this.instance_id}`;
@@ -271,7 +271,7 @@ export class Viewport extends Node {
         /**
          * @type {World2D}
          */
-        this._world_2d = new World2D();
+        this.world_2d = new World2D();
 
         this.disable_3d = true;
         this.keep_3d_linear = false;

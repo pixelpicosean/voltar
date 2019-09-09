@@ -392,14 +392,16 @@ class Playback {
 }
 
 export class AnimationPlayer extends Node {
+    get class() { return 'AnimationPlayer' }
+
     /**
      * If playing the current animation, otherwise the last played one.
      * @property {string}
      */
-    get assigned_animation() {
+    get_assigned_animation() {
         return this.playback.assigned;
     }
-    set assigned_animation(p_anim) {
+    set_assigned_animation(p_anim) {
         if (this.is_playing()) {
             this.play(p_anim);
         } else {
@@ -413,10 +415,10 @@ export class AnimationPlayer extends Node {
      * The name of current animation.
      * @property {string}
      */
-    get current_animation() {
+    get_current_animation() {
         return (this.is_playing() ? this.playback.assigned : '');
     }
-    set current_animation(p_anim) {
+    set_current_animation(p_anim) {
         if (p_anim === '[stop]' || p_anim.length === 0) {
             this.stop();
         } else if (this.is_playing() || this.playback.assigned !== p_anim) {
@@ -429,14 +431,14 @@ export class AnimationPlayer extends Node {
     /**
      * @property {number}
      */
-    get current_animation_length() {
+    get_current_animation_length() {
         return this.playback.current.from.animation.length;
     }
 
     /**
      * @property {number}
      */
-    get current_animation_position() {
+    get_current_animation_position() {
         return this.playback.current.pos;
     }
 
@@ -444,28 +446,28 @@ export class AnimationPlayer extends Node {
      * The default time in which to blend animations.
      * @property {number}
      */
-    get playback_default_blend_time() {
+    get_playback_default_blend_time() {
         return this.default_blend_time;
     }
-    set playback_default_blend_time(time) {
+    set_playback_default_blend_time(time) {
         this.default_blend_time = time;
     }
 
     /**
      * @property {number}
      */
-    get animation_process_mode() {
-        return this._animation_process_mode;
+    get_animation_process_mode() {
+        return this.animation_process_mode;
     }
-    set animation_process_mode(p_mode) {
-        if (this._animation_process_mode === p_mode) {
+    set_animation_process_mode(p_mode) {
+        if (this.animation_process_mode === p_mode) {
             return;
         }
         const pr = this.processing;
         if (pr) {
             this._set_process(false);
         }
-        this._animation_process_mode = p_mode;
+        this.animation_process_mode = p_mode;
         if (pr) {
             this._set_process(true);
         }
@@ -473,8 +475,6 @@ export class AnimationPlayer extends Node {
 
     constructor() {
         super();
-
-        this.class = 'AnimationPlayer';
 
         this.accum_pass = 0;
         this.default_blend_time = 0;
@@ -493,7 +493,7 @@ export class AnimationPlayer extends Node {
         this.processing = false;
         this.active = false;
 
-        this._animation_process_mode = ANIMATION_PROCESS_IDLE;
+        this.animation_process_mode = ANIMATION_PROCESS_IDLE;
         this.method_call_mode = ANIMATION_METHOD_CALL_IMMEDIATE;
 
         /**
@@ -561,7 +561,7 @@ export class AnimationPlayer extends Node {
                 }
             } break;
             case NOTIFICATION_INTERNAL_PROCESS: {
-                if (this._animation_process_mode === ANIMATION_PROCESS_PHYSICS) {
+                if (this.animation_process_mode === ANIMATION_PROCESS_PHYSICS) {
                     break;
                 }
 
@@ -570,7 +570,7 @@ export class AnimationPlayer extends Node {
                 }
             } break;
             case NOTIFICATION_INTERNAL_PHYSICS_PROCESS: {
-                if (this._animation_process_mode === ANIMATION_PROCESS_IDLE) {
+                if (this.animation_process_mode === ANIMATION_PROCESS_IDLE) {
                     break;
                 }
 
@@ -760,7 +760,7 @@ export class AnimationPlayer extends Node {
             }
         }
 
-        if (this.current_animation !== name) {
+        if (this.get_current_animation() !== name) {
             this._stop_playing_caches();
         }
 
@@ -886,7 +886,7 @@ export class AnimationPlayer extends Node {
             return;
         }
 
-        switch (this._animation_process_mode) {
+        switch (this.animation_process_mode) {
             case ANIMATION_PROCESS_PHYSICS: {
                 this.set_physics_process_internal(p_process && this.active);
             } break;

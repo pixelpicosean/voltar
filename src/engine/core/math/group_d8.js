@@ -1,6 +1,7 @@
 // Your friendly neighbour https://en.wikipedia.org/wiki/Dihedral_group of order 16
 import { Transform2D } from './transform_2d';
 
+
 const ux = [1, 1, 0, -1, -1, -1, 0, 1, 1, 1, 0, -1, -1, -1, 0, 1];
 const uy = [0, 1, 1, 1, 0, -1, -1, -1, 0, 1, 1, 1, 0, -1, -1, -1];
 const vx = [0, -1, -1, -1, 0, 1, 1, 1, 0, 1, 1, 1, 0, -1, -1, -1];

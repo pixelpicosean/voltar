@@ -36,8 +36,6 @@ export const SCREEN_SENSOR = 6;
  * @property {HTMLCanvasElement} canvas
  */
 
-const window_size = new Vector2();
-
 let shift_key = false;
 let alt_key = false;
 let ctrl_key = false;
@@ -46,24 +44,28 @@ let meta_key = false;
 export class OS {
     static get_singleton() { return singleton }
 
-    /** @type {Vector2Like} */
-    get window_size() {
-        return window_size.set(
+    get_window_size() {
+        return this.window_size.set(
             this.canvas.width,
             this.canvas.height
         )
     }
-    set window_size(p_size) {
+    /**
+     * @param {Vector2Like} p_size
+     */
+    set_window_size(p_size) {
         this.canvas.width = p_size.x;
         this.canvas.height = p_size.y;
     }
 
-    /** @type {MainLoop} */
-    get main_loop() {
-        return this._main_loop;
+    get_main_loop() {
+        return this.main_loop;
     }
-    set main_loop(value) {
-        this._main_loop = value;
+    /**
+     * @param {MainLoop} value
+     */
+    set_main_loop(value) {
+        this.main_loop = value;
         this.input.main_loop = value;
     }
 
@@ -79,13 +81,15 @@ export class OS {
 
         this.input = null;
 
+
         this.last_click_pos = new Vector2();
         this.last_click_ms = 0;
         this.last_click_button_index = 0;
 
         /** @type {MainLoop} */
-        this._main_loop = null;
+        this.main_loop = null;
         this.video_driver_index = VIDEO_DRIVER_GLES2;
+        this.window_size = new Vector2();
 
         this.low_processor_usage_mode = false;
         this.no_window = false;

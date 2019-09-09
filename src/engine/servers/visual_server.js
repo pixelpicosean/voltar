@@ -46,15 +46,14 @@ export const TEXTURE_TYPE_3D = 3;
  */
 
 export class VisualServer extends VObject {
+    get class() { return 'VisualServer' }
+
     static get_singleton() { return singleton }
-    static create() { }
 
     constructor() {
         super();
 
         if (!singleton) singleton = this;
-
-        this.class = 'VisualServer';
 
         this.black_margin = [0, 0, 0, 0];
         this.black_image = [null, null, null, null];

@@ -87,17 +87,19 @@ class Data {
 export class Node extends VObject {
     static instance() { return new Node() }
 
-    set filename(name) {
+    get class() { return 'Node' }
+
+    set_filename(name) {
         this.data.filename = name;
     }
-    get filename() {
+    get_filename() {
         return this.data.filename;
     }
 
     /**
      * @param {string} p_name
      */
-    set name(p_name) {
+    set_name(p_name) {
         this.data.name = p_name;
         if (this.data.parent) {
             this.data.parent._validate_child_name(this);
@@ -110,14 +112,17 @@ export class Node extends VObject {
             this.get_tree().tree_changed();
         }
     }
-    get name() {
+    get_name() {
         return this.data.name;
     }
 
-    get owner() {
+    get_owner() {
         return this.data.owner;
     }
-    set owner(p_owner) {
+    /**
+     * @param {Node} p_owner
+     */
+    set_owner(p_owner) {
         if (this.data.owner) {
             this.owner.data.owned.splice(this.owner.data.owned.indexOf(this), 1);
             this.data.owner = null;
@@ -140,10 +145,10 @@ export class Node extends VObject {
         this._set_owner_no_check(p_owner);
     }
 
-    get pause_mode() {
+    get_pause_mode() {
         return this.data.pause_mode;
     }
-    set pause_mode(mode) {
+    set_pause_mode(mode) {
         if (this.data.pause_mode === mode) {
             return;
         }
@@ -171,8 +176,6 @@ export class Node extends VObject {
 
     constructor() {
         super();
-
-        this.class = 'Node';
 
         // Flags to avoid call of `instanceof` for better performance
         this.is_node = true;
@@ -205,10 +208,10 @@ export class Node extends VObject {
         this.instance_data = data;
 
         if (data.filename !== undefined) {
-            this.filename = data.filename;
+            this.set_filename(data.filename);
         }
         if (data.name !== undefined) {
-            this.name = data.name;
+            this.set_name(data.name);
         }
         if (data.groups !== undefined) {
             for (const g of data.groups) {
@@ -217,7 +220,7 @@ export class Node extends VObject {
         }
 
         if (data.pause_mode !== undefined) {
-            this.pause_mode = data.pause_mode;
+            this.set_pause_mode(data.pause_mode);
         }
 
         return this;

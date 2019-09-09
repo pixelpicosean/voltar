@@ -55,13 +55,13 @@ let uid = 1
  * Base class of most engine classes, with ability to emit events.
  */
 export class VObject {
+    get class() { return 'VObject' }
+
     constructor() {
         /**
          * @type {Map<string | symbol, EventListener[]>}
          */
         this._events = new Map();
-
-        this.class = 'VObject';
 
         /**
          * @type {number}

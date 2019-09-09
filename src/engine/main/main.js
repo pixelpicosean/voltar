@@ -72,7 +72,7 @@ export const Main = {
         os.initialize({
             canvas: /** @type {HTMLCanvasElement} */(document.getElementById('game')),
         });
-        os.window_size = { x: this.global.display.width, y: this.global.display.height }
+        os.set_window_size({ x: this.global.display.width, y: this.global.display.height });
 
         visual_server = new VisualServer();
         visual_server.init();
@@ -86,7 +86,7 @@ export const Main = {
     start() {
         scene_tree = new SceneTree();
         SceneTree.get_singleton().init();
-        this.engine.main_loop = scene_tree;
+        this.engine.set_main_loop(scene_tree);
 
         // TODO: autoload first pass, load constants
         // TODO: autoload second pass, instantiate nodes into global constants
@@ -100,7 +100,7 @@ export const Main = {
         const scene = this.global.application.preloader.instance();
         scene_tree.add_current_scene(scene);
 
-        os.main_loop = scene_tree;
+        os.set_main_loop(scene_tree);
 
         this.start_loop();
     },

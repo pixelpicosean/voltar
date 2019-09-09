@@ -145,14 +145,16 @@ res_procs['PackedScene'] = (key, data, resource_map) => {
  */
 
 export class SceneTree extends MainLoop {
-    get paused() {
-        return this._paused;
+    get class() { return 'SceneTree' }
+
+    get_paused() {
+        return this.paused;
     }
-    set paused(p_enabled) {
-        if (p_enabled === this._paused) {
+    set_paused(p_enabled) {
+        if (p_enabled === this.paused) {
             return;
         }
-        this._paused = p_enabled;
+        this.paused = p_enabled;
         // PhysicsServer.get_singleton().set_active(!p_enabled);
         if (this.root) {
             this.root.propagate_notification(p_enabled ? NOTIFICATION_PAUSED : NOTIFICATION_UNPAUSED);
@@ -166,14 +168,12 @@ export class SceneTree extends MainLoop {
 
         if (!singleton) singleton = this;
 
-        this.class = 'SceneTree';
-
         /** @type {Viewport} */
         this.root = new Viewport();
         this.root.name = 'root';
         this.root.set_handle_input_locally(false);
-        if (!this.root.world_2d) {
-            // this.root.world_2d = new World2D();
+        if (!this.root.get_world_2d()) {
+            this.root.set_world_2d(new World2D());
         }
 
         this.tree_version = 1;
@@ -182,7 +182,7 @@ export class SceneTree extends MainLoop {
 
         this.initialized = false;
         this.input_handled = false;
-        this._paused = false;
+        this.paused = false;
 
         this.current_frame = 0;
         this.current_event = 0;
@@ -259,7 +259,7 @@ export class SceneTree extends MainLoop {
     }
 
     is_paused() {
-        return this._paused;
+        return this.paused;
     }
 
     /**

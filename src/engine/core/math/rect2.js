@@ -217,7 +217,7 @@ export class Rect2 {
      * @param {Rect2} p_rect
      */
     clip(p_rect) {
-        return this.clone().clip_to(p_rect);
+        return this.clone().clip_by(p_rect);
     }
 
     /**
