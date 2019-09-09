@@ -217,10 +217,10 @@ export class Viewport extends Node {
      */
     set_attach_to_screen_rect(p_rect) {
         VSG.viewport.viewport_attach_to_screen(this.viewport, p_rect);
-        this.to_screen_rect.copy(p_rect);
+        this.attach_to_screen_rect.copy(p_rect);
     }
     get_attach_to_screen_rect() {
-        return this.to_screen_rect;
+        return this.attach_to_screen_rect;
     }
 
     constructor() {
@@ -247,7 +247,7 @@ export class Viewport extends Node {
         this.stretch_transform = new Transform2D();
 
         this._size = new Vector2();
-        this.to_screen_rect = new Rect2();
+        this.attach_to_screen_rect = new Rect2();
         this.render_direct_to_screen = false;
 
         this.size_override = false;
@@ -392,6 +392,9 @@ export class Viewport extends Node {
             this._gui_input_event(p_event);
         }
     }
+    /**
+     * @param {InputEvent} p_event
+     */
     unhandled_input(p_event) {
         this.get_tree()._call_input_pause(this.unhandled_input_group, '_unhandled_input', p_event);
         if (!this.get_tree().input_handled && p_event.class === 'InputKeyEvent') {
@@ -448,10 +451,10 @@ export class Viewport extends Node {
 
     _get_input_pre_xform() {
         const pre_xf = Transform2D.new();
-        if (!this.to_screen_rect.is_zero()) {
-            pre_xf.tx = -this.to_screen_rect.x;
-            pre_xf.ty = -this.to_screen_rect.y;
-            pre_xf.scale(this.get_size().x / this.to_screen_rect.width, this.get_size().y / this.to_screen_rect.height);
+        if (!this.attach_to_screen_rect.is_zero()) {
+            pre_xf.tx = -this.attach_to_screen_rect.x;
+            pre_xf.ty = -this.attach_to_screen_rect.y;
+            pre_xf.scale(this.get_size().x / this.attach_to_screen_rect.width, this.get_size().y / this.attach_to_screen_rect.height);
         }
         return pre_xf;
     }
@@ -461,8 +464,7 @@ export class Viewport extends Node {
      */
     _vp_input(p_ev) {
         if (this.disable_input) return;
-
-        if (this.to_screen_rect.is_zero()) return;
+        if (this.attach_to_screen_rect.is_zero()) return;
 
         const ev = this._make_input_local(p_ev);
         this.input(ev);
@@ -471,7 +473,16 @@ export class Viewport extends Node {
      * @param {string} p_text
      */
     _vp_input_text(p_text) { }
-    _vp_unhandled_input() { }
+    /**
+     * @param {InputEvent} p_ev
+     */
+    _vp_unhandled_input(p_ev) {
+        if (this.disable_input) return;
+        if (this.attach_to_screen_rect.is_zero()) return;
+
+        const ev = this._make_input_local(p_ev);
+        this.unhandled_input(ev);
+    }
     /**
      * @param {InputEvent} ev
      */

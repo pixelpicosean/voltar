@@ -20,6 +20,8 @@ class Preloader extends Node {
     }
     _ready() {
         console.log('_ready')
+        this.set_process_input(true)
+        this.set_process_unhandled_input(true)
     }
     _exit_tree() {
         console.log('_exit_tree')
@@ -31,7 +33,20 @@ class Preloader extends Node {
     _input(event) {
         if (event.class === 'InputEventMouseButton') {
             const e = /** @type {InputEventMouseButton} */(event);
-            console.log(e.is_pressed() ? 'press' : 'release');
+            console.log('input -> ' + (e.is_pressed() ? 'press' : 'release'));
+
+            if (e.is_pressed()) {
+                this.get_tree().set_input_as_handled();
+            }
+        }
+    }
+    /**
+     * @param {InputEvent} event
+     */
+    _unhandled_input(event) {
+        if (event.class === 'InputEventMouseButton') {
+            const e = /** @type {InputEventMouseButton} */(event);
+            console.log('unhandled_input -> ' + (e.is_pressed() ? 'press' : 'release'));
         }
     }
 }
