@@ -6,6 +6,8 @@ import {
     GDCLASS,
     NOTIFICATION_PREDELETE,
 } from 'engine/core/v_object';
+import { InputEvent } from 'engine/core/os/input_event';
+import { Engine } from 'engine/core/engine';
 
 
 export const PAUSE_MODE_INHERIT = 0;
@@ -223,9 +225,18 @@ export class Node extends VObject {
 
     _enter_tree() { }
     _ready() { }
-    _input() { }
-    _unhandled_input() { }
-    _unhandled_key_input() { }
+    /**
+     * @param {InputEvent} event
+     */
+    _input(event) { }
+    /**
+     * @param {InputEvent} event
+     */
+    _unhandled_input(event) { }
+    /**
+     * @param {InputEvent} event
+     */
+    _unhandled_key_input(event) { }
     /**
      * @param {number} delta
      */
@@ -1099,7 +1110,11 @@ export class Node extends VObject {
             return;
         }
 
-        // TODO: enable input process
+        if (p_enable) {
+            this.add_to_group(`_vp_input${this.get_viewport().instance_id}`);
+        } else {
+            this.remove_from_group(`_vp_input${this.get_viewport().instance_id}`);
+        }
     }
     is_processing_input() {
         return this.data.input;
@@ -1118,7 +1133,11 @@ export class Node extends VObject {
             return;
         }
 
-        // TODO: enable unhandled input process
+        if (p_enable) {
+            this.add_to_group(`_vp_unhandled_input${this.get_viewport().instance_id}`);
+        } else {
+            this.remove_from_group(`_vp_unhandled_input${this.get_viewport().instance_id}`);
+        }
     }
     is_processing_unhandled_input() {
         return this.data.unhandled_input;
@@ -1137,7 +1156,11 @@ export class Node extends VObject {
             return;
         }
 
-        // TODO: enable unhandled key input process
+        if (p_enable) {
+            this.add_to_group(`_vp_unhandled_key_input${this.get_viewport().instance_id}`);
+        } else {
+            this.remove_from_group(`_vp_unhandled_key_input${this.get_viewport().instance_id}`);
+        }
     }
     is_processing_unhandled_key_input() {
         return this.data.unhandled_key_input;
@@ -1193,8 +1216,7 @@ export class Node extends VObject {
         if (this.is_inside_tree()) {
             this.get_tree().queue_delete(this);
         } else {
-            // TODO: get scene tree from global space
-            // SceneTree.get_singleton().queue_delete(this);
+            Engine.get_singleton().get_main_loop().queue_delete(this);
         }
     }
 

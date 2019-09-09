@@ -1,11 +1,18 @@
 import { ProjectSettings } from "engine/core/project_settings";
-import { SceneTree } from "./scene_tree";
+import { InputMap } from "engine/core/input_map";
 import { MessageQueue } from "engine/core/message_queue";
+import { OS } from "engine/core/os/os";
+import { Engine } from "engine/core/engine";
+import { SceneTree } from "engine/scene/main/scene_tree";
 import { VisualServer } from "engine/servers/visual_server";
 import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server";
 
+
 /** @type {MessageQueue} */
 let message_queue = null;
+
+/** @type {OS} */
+let os = null;
 
 /** @type {VisualServer} */
 let visual_server = null;
@@ -28,18 +35,32 @@ export const Main = {
 
     force_redraw_requested: false,
 
+    /** @type {Engine} */
+    engine: null,
     /** @type {SceneTree} */
     tree: null,
     /** @type {ProjectSettings} */
     global: null,
+    /** @type {InputMap} */
+    input_map: null,
 
     /**
      * @param {import("engine/core/project_settings").Settings} settings
      */
     setup(settings) {
+        os = new OS();
+        os.initialize_core();
+
+        this.engine = new Engine();
+
         this.global = new ProjectSettings(settings);
+        this.input_map = new InputMap();
+
+        this.input_map.load_from_globals();
+
         message_queue = new MessageQueue();
 
+        os.screen_orientation = this.global.display.orientation;
         window.addEventListener('load', this.setup2, false);
         document.addEventListener('DOMContentLoaded', this.setup2, false);
     },
@@ -48,8 +69,13 @@ export const Main = {
         window.removeEventListener('load', this.setup2, false);
         document.removeEventListener('DOMContentLoaded', this.setup2, false);
 
+        os.initialize({
+            canvas: /** @type {HTMLCanvasElement} */(document.getElementById('game')),
+        });
+        os.window_size = { x: this.global.display.width, y: this.global.display.height }
+
         visual_server = new VisualServer();
-        visual_server.init(/** @type {HTMLCanvasElement} */(document.getElementById('game')));
+        visual_server.init();
 
         physics_2d_server = new Physics2DServer();
         physics_2d_server.init();
@@ -60,6 +86,7 @@ export const Main = {
     start() {
         scene_tree = new SceneTree();
         SceneTree.get_singleton().init();
+        this.engine.main_loop = scene_tree;
 
         // TODO: autoload first pass, load constants
         // TODO: autoload second pass, instantiate nodes into global constants
@@ -71,7 +98,9 @@ export const Main = {
 
         // load and start main scene (preloader here instead)
         const scene = this.global.application.preloader.instance();
-        SceneTree.get_singleton().add_current_scene(scene);
+        scene_tree.add_current_scene(scene);
+
+        os.main_loop = scene_tree;
 
         this.start_loop();
     },

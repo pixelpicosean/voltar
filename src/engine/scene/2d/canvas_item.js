@@ -8,7 +8,7 @@ import { Rect2 } from "engine/core/math/rect2";
 
 import { VSG } from "engine/servers/visual/visual_server_globals";
 
-import { GroupCallFlags } from "../main/scene_tree";
+import { GROUP_CALL_UNIQUE } from "../main/scene_tree";
 import { CanvasLayer } from "../main/canvas_layer";
 import {
     Node,
@@ -225,7 +225,7 @@ export class CanvasItem extends Node {
                 }
 
                 if (this.group.length > 0) {
-                    this.get_tree().call_group_flags(GroupCallFlags.UNIQUE, this.group, '_toplevel_raise_self');
+                    this.get_tree().call_group_flags(GROUP_CALL_UNIQUE, this.group, '_toplevel_raise_self');
                 } else {
                     const p = this.get_parent_item();
                     VSG.canvas.canvas_item_set_draw_index(this.canvas_item, this.get_index());
@@ -512,7 +512,7 @@ export class CanvasItem extends Node {
                 this.get_viewport().gui_reset_canvas_sort_index();
             }
 
-            this.get_tree().call_group_flags(GroupCallFlags.UNIQUE, this.group, '_toplevel_raise_self');
+            this.get_tree().call_group_flags(GROUP_CALL_UNIQUE, this.group, '_toplevel_raise_self');
         } else {
             const parent = this.get_parent_item();
             this.canvas_layer = parent.canvas_layer;

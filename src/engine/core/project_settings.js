@@ -15,6 +15,7 @@ import { deep_merge } from "engine/utils/deep_merge";
   * @prop {number} [width]
   * @prop {number} [height]
   * @prop {number} [resolution]
+  * @prop {number} [orientation]
   * @prop {number} [background_color]
   * @prop {boolean} [antialias]
   * @prop {boolean} [pixel_snap]
@@ -41,6 +42,10 @@ import { deep_merge } from "engine/utils/deep_merge";
   */
 
 /**
+ * @typedef {Object<string, string>} InputSettings
+ */
+
+/**
  * @typedef LayerMap
  * @prop {Object<string, number>} [physics]
  */
@@ -50,6 +55,7 @@ import { deep_merge } from "engine/utils/deep_merge";
  * @prop {ApplicationSettings} [application]
  * @prop {DisplaySettings} [display]
  * @prop {PhysicsSettings} [physics]
+ * @prop {InputSettings} [input]
  * @prop {LayerMap} [layer_map]
  */
 
@@ -70,6 +76,7 @@ const DefaultSettings = {
         width: 1024,
         height: 600,
         resolution: 1,
+        orientation: 0,
 
         background_color: 0x4C4C4C,
 
@@ -90,6 +97,7 @@ const DefaultSettings = {
         gravity: { x: 0, y: 98 },
         iteration: 2,
     },
+    input: {},
     layer_map: {
         physics: {},
     },
@@ -107,6 +115,7 @@ export class ProjectSettings {
         this.application = DefaultSettings.application;
         this.display = DefaultSettings.display;
         this.physics = DefaultSettings.physics;
+        this.input = DefaultSettings.input;
         this.layer_map = DefaultSettings.layer_map;
 
         deep_merge(this, settings);

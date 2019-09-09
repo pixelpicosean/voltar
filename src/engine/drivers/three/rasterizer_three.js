@@ -1,4 +1,5 @@
 import { Color } from "engine/core/color";
+import { OS } from "engine/core/os/os";
 
 import { RasterizerStorageThree } from "./rasterizer_storage_three";
 import { RasterizerCanvasThree } from "./rasterizer_canvas_three";
@@ -19,21 +20,19 @@ export class RasterizerThree {
         this.storage.canvas = this.canvas;
         this.storage.scene = this.scene;
         this.scene.storage = this.storage;
+
+        this.renderer = null;
     }
 
-    /**
-     * @param {HTMLCanvasElement} canvas
-     */
-    initialize(canvas) {
-        console.log('Using Three.js rendering backend');
-
+    initialize() {
         this.renderer = new WebGLRenderer({
-            canvas: canvas,
+            canvas: OS.get_singleton().canvas,
+            antialias: false,
         });
 
-        this.storage.initialize();
-        this.canvas.initialize();
-        this.scene.initialize();
+        this.storage.initialize(this.renderer);
+        this.canvas.initialize(this.renderer);
+        this.scene.initialize(this.renderer);
     }
 
     /**

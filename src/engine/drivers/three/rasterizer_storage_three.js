@@ -11,6 +11,7 @@ import {
 } from 'three/src/constants';
 import { Texture } from 'three/src/textures/Texture';
 import { WebGLRenderTarget } from 'three/src/renderers/WebGLRenderTarget';
+import { WebGLRenderer } from "three/src/renderers/WebGLRenderer";
 
 
 /**
@@ -75,9 +76,17 @@ export class RasterizerStorageThree {
         this.canvas = null;
         /** @type {import('./rasterizer_scene_three').RasterizerSceneThree} */
         this.scene = null;
+
+        // private
+        this.renderer = null;
     }
 
-    initialize() { }
+    /**
+     * @param {WebGLRenderer} renderer
+     */
+    initialize(renderer) {
+        this.renderer = renderer;
+    }
 
     /**
      * @param {any} rid

@@ -7,6 +7,7 @@ import {
     NOTIFICATION_WM_MOUSE_EXIT,
     NOTIFICATION_WM_FOCUS_OUT,
 } from "engine/core/main_loop";
+import { InputEvent } from "engine/core/os/input_event";
 import {
     Node,
     NOTIFICATION_ENTER_TREE,
@@ -40,6 +41,8 @@ export const USAGE_2D_NO_SAMPLING = 1;
 export const USAGE_3D = 2;
 export const USAGE_3D_NO_EFFECTS = 3;
 
+const VEC2_NEG = Object.freeze(new Vector2(-1, -1));
+
 
 class ViewportTexture extends Texture {
     get viewport_path() {
@@ -71,9 +74,9 @@ class ViewportTexture extends Texture {
         return super.free();
     }
 
-    get_width() { return this.vp.size.width }
-    get_height() { return this.vp.size.height }
-    get_size() { return this.vp.size }
+    get_width() { return this.vp.get_size().width }
+    get_height() { return this.vp.get_size().height }
+    get_size() { return this.vp.get_size() }
 
     /* private */
 
@@ -131,8 +134,8 @@ class GUI {
 
 
 export class Viewport extends Node {
-    get size() { return this._size }
-    set size(p_size) {
+    get_size() { return this._size }
+    set_size(p_size) {
         if (this._size.x === Math.floor(p_size.x) && this._size.y === Math.floor(p_size.y)) {
             return;
         }
@@ -144,18 +147,18 @@ export class Viewport extends Node {
         this.emit_signal('size_changed');
     }
 
-    get canvas_transform() {
+    get_canvas_transform() {
         return this._canvas_transform;
     }
-    set canvas_transform(p_xform) {
+    set_canvas_transform(p_xform) {
         this._canvas_transform.copy(p_xform);
         VSG.viewport.viewport_set_canvas_transform(this.viewport, this.find_world_2d().canvas, this._canvas_transform);
     }
 
-    get global_canvas_transform() {
+    get_global_canvas_transform() {
         return this._global_canvas_transform;
     }
-    set global_canvas_transform(p_xform) {
+    set_global_canvas_transform(p_xform) {
         this._global_canvas_transform.copy(p_xform);
         this._update_global_transform();
     }
@@ -193,20 +196,31 @@ export class Viewport extends Node {
         }
     }
 
-    get render_target_update_mode() {
+    get_render_target_update_mode() {
         return this._render_target_update_mode;
     }
-    set render_target_update_mode(value) {
+    set_render_target_update_mode(value) {
         this._render_target_update_mode = value;
         VSG.viewport.viewport_set_update_mode(this.viewport, value);
     }
 
-    get clear_mode() {
+    get_clear_mode() {
         return this._clear_mode;
     }
-    set clear_mode(value) {
+    set_clear_mode(value) {
         this._clear_mode = value;
         VSG.viewport.viewport_set_clear_mode(this.viewport, value);
+    }
+
+    /**
+     * @param {Rect2} p_rect
+     */
+    set_attach_to_screen_rect(p_rect) {
+        VSG.viewport.viewport_attach_to_screen(this.viewport, p_rect);
+        this.to_screen_rect.copy(p_rect);
+    }
+    get_attach_to_screen_rect() {
+        return this.to_screen_rect;
     }
 
     constructor() {
@@ -275,7 +289,7 @@ export class Viewport extends Node {
 
         this.gui = new GUI();
 
-        this.disable_input = true;
+        this.disable_input = false;
     }
 
     /* virtual */
@@ -364,6 +378,9 @@ export class Viewport extends Node {
             this.get_tree().set_input_as_handled();
         }
     }
+    /**
+     * @param {InputEvent} p_event
+     */
     input(p_event) {
         this.local_input_handled = false;
 
@@ -419,19 +436,55 @@ export class Viewport extends Node {
         const abstracted_rect = this.get_visible_rect();
         abstracted_rect.x = abstracted_rect.y = 0;
 
-        const xformed_rect = this.global_canvas_transform.clone().append(this.canvas_transform).affine_inverse().xform_rect(abstracted_rect);
+        const xformed_rect = this.get_global_canvas_transform().clone()
+            .append(this.get_canvas_transform())
+            .affine_inverse()
+            .xform_rect(abstracted_rect);
         this.find_world_2d()._update_viewport(this, xformed_rect);
         this.find_world_2d()._update();
 
         Rect2.free(abstracted_rect);
     }
 
-    _get_input_re_xform() { }
+    _get_input_pre_xform() {
+        const pre_xf = Transform2D.new();
+        if (!this.to_screen_rect.is_zero()) {
+            pre_xf.tx = -this.to_screen_rect.x;
+            pre_xf.ty = -this.to_screen_rect.y;
+            pre_xf.scale(this.get_size().x / this.to_screen_rect.width, this.get_size().y / this.to_screen_rect.height);
+        }
+        return pre_xf;
+    }
 
-    _vp_input() { }
-    _vp_input_text() { }
+    /**
+     * @param {InputEvent} p_ev
+     */
+    _vp_input(p_ev) {
+        if (this.disable_input) return;
+
+        if (this.to_screen_rect.is_zero()) return;
+
+        const ev = this._make_input_local(p_ev);
+        this.input(ev);
+    }
+    /**
+     * @param {string} p_text
+     */
+    _vp_input_text(p_text) { }
     _vp_unhandled_input() { }
-    _make_input_local() { }
+    /**
+     * @param {InputEvent} ev
+     */
+    _make_input_local(ev) {
+        const vp_ofs = this._get_window_offset().clone().negate();
+        const pre_xform = this._get_input_pre_xform();
+        const ai = this.get_final_transform().affine_inverse().append(pre_xform);
+        const local_ev = ev.xformed_by(ai, vp_ofs);
+        Transform2D.free(pre_xform);
+        Transform2D.free(ai);
+        Vector2.free(vp_ofs);
+        return local_ev;
+    }
 
     _gui_add_root_control() { }
     _gui_add_subwindow_control() { }
@@ -467,7 +520,17 @@ export class Viewport extends Node {
 
     _gui_get_focus_owner() { }
 
-    _get_window_offset() { }
+    /**
+     * @returns {Vector2}
+     */
+    _get_window_offset() {
+        const parent = this.get_parent();
+        if (parent && 'get_global_position' in parent) {
+            // @ts-ignore
+            return parent.get_global_position();
+        }
+        return Vector2.ZERO;
+    }
 
     _gui_drop(p_at_control, p_at_pos, p_just_check) { }
 
@@ -517,12 +580,12 @@ export class Viewport extends Node {
     get_visible_rect() {
         const r = Rect2.new();
 
-        if (this.size.is_zero()) {
+        if (this.get_size().is_zero()) {
             r.width = window.innerWidth;
             r.height = window.innerHeight;
         } else {
-            r.width = this.size.width;
-            r.height = this.size.height;
+            r.width = this.get_size().width;
+            r.height = this.get_size().height;
         }
 
         if (this.size_override) {
@@ -553,9 +616,9 @@ export class Viewport extends Node {
     /**
      * @param {boolean} p_enabled
      * @param {Vector2Like} p_size
-     * @param {Vector2Like} p_margin
+     * @param {Vector2Like} [p_margin]
      */
-    set_size_override(p_enabled, p_size, p_margin) {
+    set_size_override(p_enabled, p_size = VEC2_NEG, p_margin = Vector2.ZERO) {
         if (this.size_override === p_enabled && this.size_override_size.equals(p_size)) {
             return;
         }
@@ -592,7 +655,7 @@ export class Viewport extends Node {
     }
 
     get_final_transform() {
-        return this.stretch_transform.clone().append(this.global_canvas_transform);
+        return this.stretch_transform.clone().append(this.get_global_canvas_transform());
     }
 
     set_handle_input_locally(p_locally) { }
@@ -626,8 +689,8 @@ export class Viewport extends Node {
         if (this.size_override_stretch && this.size_override) {
             this.stretch_transform.reset();
             const scale = Vector2.new(
-                this.size.x / (this.size_override_size.x + this.size_override_margin.x * 2),
-                this.size.y / (this.size_override_size.y + this.size_override_margin.y * 2)
+                this.get_size().x / (this.size_override_size.x + this.size_override_margin.x * 2),
+                this.get_size().y / (this.size_override_size.y + this.size_override_margin.y * 2)
             );
             this.stretch_transform.scale(scale.x, scale.y);
             this.stretch_transform.tx = this.size_override_margin.x * scale.x;
@@ -639,7 +702,8 @@ export class Viewport extends Node {
         this._update_global_transform();
     }
     _update_global_transform() {
-        const sxform = this.stretch_transform.clone().append(this.global_canvas_transform);
+        const sxform = this.stretch_transform.clone()
+            .append(this.get_global_canvas_transform());
         VSG.viewport.viewport_set_global_canvas_transform(this.viewport, sxform);
         Transform2D.free(sxform);
     }

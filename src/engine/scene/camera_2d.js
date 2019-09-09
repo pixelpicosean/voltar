@@ -1,5 +1,5 @@
 import { node_class_map } from 'engine/registry';
-import { GroupCallFlags } from './main/scene_tree';
+import { GROUP_CALL_REALTIME } from './main/scene_tree';
 
 import { Node2D } from './2d/node_2d';
 
@@ -198,7 +198,7 @@ export default class Camera2D extends Node2D {
     clear_current() {
         this._current = false;
         if (this.is_inside_tree) {
-            this.scene_tree.call_group_flags(GroupCallFlags.REALTIME, this.group_name, '_make_current', null);
+            this.scene_tree.call_group_flags(GROUP_CALL_REALTIME, this.group_name, '_make_current', null);
         }
     }
 
@@ -218,7 +218,7 @@ export default class Camera2D extends Node2D {
         if (!this.is_inside_tree) {
             this._current = true;
         } else {
-            this.scene_tree.call_group_flags(GroupCallFlags.REALTIME, this.group_name, '_make_current', this);
+            this.scene_tree.call_group_flags(GROUP_CALL_REALTIME, this.group_name, '_make_current', this);
         }
         this._udpate_scroll();
     }
@@ -286,7 +286,7 @@ export default class Camera2D extends Node2D {
             const screen_size = this.scene_tree.viewport_rect.size;
             const screen_offset = (this.anchor_mode === AnchorMode.DRAG_CENTER ? (screen_size.clone().scale(0.5)) : Vector2.new(0, 0));
 
-            this.get_tree().call_group_flags(GroupCallFlags.REALTIME, this.group_name, '_camera_moved', xform, screen_offset);
+            this.get_tree().call_group_flags(GROUP_CALL_REALTIME, this.group_name, '_camera_moved', xform, screen_offset);
 
             Vector2.free(screen_offset);
         }

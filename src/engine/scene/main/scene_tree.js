@@ -28,6 +28,7 @@ import {
     NOTIFICATION_PAUSED,
     NOTIFICATION_UNPAUSED,
 } from '../main/node';
+import { Rect2 } from 'engine/core/math/rect2';
 
 
 const NOTIFICATION_TRANSFORM_CHANGED = 2000;
@@ -58,36 +59,21 @@ export class SceneTreeTimer extends VObject {
 /** @type {SceneTreeTimer[]} */
 SceneTreeTimer.pool = [];
 
-/**
- * @enum {string}
- */
-export const StretchMode = {
-    'DISABLED': 'disabled',
-    '2D': '2d',
-    'VIEWPORT': 'viewport',
-}
+export const STRETCH_MODE_DISABLED = 0;
+export const STRETCH_MODE_2D = 1;
+export const STRETCH_MODE_VIEWPORT = 2;
 
-/**
- * @enum {string}
- */
-export const StretchAspect = {
-    'IGNORE': 'disabled',
-    'KEEP': 'keep',
-    'KEEP_WIDTH': 'keep_width',
-    'KEEP_HEIGHT': 'keep_height',
-    'EXPAND': 'expand',
-}
+export const STRETCH_ASPECT_IGNORE = 0;
+export const STRETCH_ASPECT_KEEP = 1;
+export const STRETCH_ASPECT_KEEP_WIDTH = 2;
+export const STRETCH_ASPECT_KEEP_HEIGHT = 3;
+export const STRETCH_ASPECT_EXPAND = 4;
 
-/**
- * @enum {number}
- */
-export const GroupCallFlags = {
-    DEFAULT: 0,
-    REVERSE: 1,
-    REALTIME: 2,
-    UNIQUE: 4,
-    MULTILEVEL: 8,
-}
+export const GROUP_CALL_DEFAULT = 0;
+export const GROUP_CALL_REVERSE = 1;
+export const GROUP_CALL_REALTIME = 2;
+export const GROUP_CALL_UNIQUE = 4;
+export const GROUP_CALL_MULTILEVEL = 8;
 
 export class Group {
     constructor() {
@@ -208,8 +194,8 @@ export class SceneTree extends MainLoop {
 
         this.node_count = 0;
 
-        this.stretch_mode = 'disable';
-        this.stretch_aspect = 'ignore';
+        this.stretch_mode = STRETCH_MODE_DISABLED;
+        this.stretch_aspect = STRETCH_ASPECT_IGNORE;
         this.stretch_min = new Vector2();
         this.stretch_shrink = 1;
         this.last_screen_size = new Vector2(window.innerWidth, window.innerHeight);
@@ -383,7 +369,7 @@ export class SceneTree extends MainLoop {
             return;
         }
 
-        if (p_call_flags & GroupCallFlags.UNIQUE && !(p_call_flags & GroupCallFlags.REALTIME)) {
+        if (p_call_flags & GROUP_CALL_UNIQUE && !(p_call_flags & GROUP_CALL_REALTIME)) {
             let call_pack = this.unique_group_calls.get(p_group);
             if (call_pack) {
                 if (call_pack.has(p_function)) {
@@ -402,7 +388,7 @@ export class SceneTree extends MainLoop {
 
         this.call_lock++;
 
-        if (p_call_flags & GroupCallFlags.REVERSE) {
+        if (p_call_flags & GROUP_CALL_REVERSE) {
             for (let i = g.nodes.length - 1; i >= 0; i--) {
                 const node = g.nodes[i];
 
@@ -410,7 +396,7 @@ export class SceneTree extends MainLoop {
                     continue;
                 }
 
-                if (p_call_flags & GroupCallFlags.REALTIME) {
+                if (p_call_flags & GROUP_CALL_REALTIME) {
                     if (p_function in node) {
                         node[p_function](...p_args);
                     }
@@ -426,7 +412,7 @@ export class SceneTree extends MainLoop {
                     continue;
                 }
 
-                if (p_call_flags & GroupCallFlags.REALTIME) {
+                if (p_call_flags & GROUP_CALL_REALTIME) {
                     if (p_function in node) {
                         node[p_function](...p_args);
                     }
@@ -549,7 +535,7 @@ export class SceneTree extends MainLoop {
 
         this.call_lock++;
 
-        if (p_call_flags & GroupCallFlags.REVERSE) {
+        if (p_call_flags & GROUP_CALL_REVERSE) {
             for (let i = g.nodes.length - 1; i >= 0; i--) {
                 const node = g.nodes[i];
 
@@ -557,7 +543,7 @@ export class SceneTree extends MainLoop {
                     continue;
                 }
 
-                if (p_call_flags & GroupCallFlags.REALTIME) {
+                if (p_call_flags & GROUP_CALL_REALTIME) {
                     node.notification(p_notification);
                 } else {
                     MessageQueue.get_singleton().push_notification(node, p_notification);
@@ -571,7 +557,7 @@ export class SceneTree extends MainLoop {
                     continue;
                 }
 
-                if (p_call_flags & GroupCallFlags.REALTIME) {
+                if (p_call_flags & GROUP_CALL_REALTIME) {
                     node.notification(p_notification);
                 } else {
                     MessageQueue.get_singleton().push_notification(node, p_notification);
@@ -640,7 +626,7 @@ export class SceneTree extends MainLoop {
 
         next_scene = scene_class_map[path];
         if (!next_scene) {
-            next_scene = this.resource_map[path];
+            // next_scene = this.resource_map[path];
         }
 
         this.change_scene_to(next_scene);
@@ -690,8 +676,8 @@ export class SceneTree extends MainLoop {
     }
 
     /**
-     * @param {string} mode
-     * @param {string} aspect
+     * @param {number} mode
+     * @param {number} aspect
      * @param {Vector2Like} minsize
      * @param {number} p_shrink
      */
@@ -765,7 +751,7 @@ export class SceneTree extends MainLoop {
                 this.root.propagate_notification(p_notification);
             } break;
             case NOTIFICATION_WM_UNFOCUS_REQUEST: {
-                this.notify_group_flags(GroupCallFlags.REALTIME | GroupCallFlags.MULTILEVEL, 'input', NOTIFICATION_WM_UNFOCUS_REQUEST);
+                this.notify_group_flags(GROUP_CALL_REALTIME | GROUP_CALL_MULTILEVEL, 'input', NOTIFICATION_WM_UNFOCUS_REQUEST);
             } break;
             default: {
             } break;
@@ -805,7 +791,7 @@ export class SceneTree extends MainLoop {
         this._flush_ugc();
         MessageQueue.get_singleton().flush();
         this.flush_transform_notifications();
-        this.call_group_flags(GroupCallFlags.REALTIME, '_viewports', 'update_worlds');
+        this.call_group_flags(GROUP_CALL_REALTIME, '_viewports', 'update_worlds');
         this.root_lock--;
 
         this._flush_delete_queue();
@@ -835,7 +821,7 @@ export class SceneTree extends MainLoop {
         this._flush_ugc();
         MessageQueue.get_singleton().flush();
         this.flush_transform_notifications();
-        this.call_group_flags(GroupCallFlags.REALTIME, '_viewports', 'update_worlds');
+        this.call_group_flags(GROUP_CALL_REALTIME, '_viewports', 'update_worlds');
 
         this.root_lock--;
 
@@ -899,14 +885,14 @@ export class SceneTree extends MainLoop {
 
         super.input_event(p_event);
 
-        this.call_group_flags(GroupCallFlags.REALTIME, '_viewports', '_vp_input', p_event);
+        this.call_group_flags(GROUP_CALL_REALTIME, '_viewports', '_vp_input', p_event);
 
         this._flush_ugc();
         this.root_lock--;
 
         this.root_lock++;
         if (!this.input_handled) {
-            this.call_group_flags(GroupCallFlags.REALTIME, '_viewports', '_vp_unhandled_input', p_event);
+            this.call_group_flags(GROUP_CALL_REALTIME, '_viewports', '_vp_unhandled_input', p_event);
             this._flush_ugc();
             this.root_lock--;
         } else {
@@ -920,7 +906,7 @@ export class SceneTree extends MainLoop {
      */
     input_text(p_text) {
         this.root_lock++;
-        this.call_group_flags(GroupCallFlags.REALTIME, '_viewports', '_vp_input_text', p_text);
+        this.call_group_flags(GROUP_CALL_REALTIME, '_viewports', '_vp_input_text', p_text);
         this.root_lock--;
     }
     /**
@@ -941,7 +927,22 @@ export class SceneTree extends MainLoop {
     }
 
     _update_root_rect() {
-        // TODO: update root rect for resize
+        if (this.stretch_mode === STRETCH_MODE_DISABLED) {
+            const vec = Vector2.new();
+            this.root.set_size(
+                vec.copy(this.last_screen_size)
+                    .scale(1 / this.stretch_shrink)
+                    .floor()
+            );
+            const rect = Rect2.new();
+            rect.width = this.last_screen_size.x;
+            rect.height = this.last_screen_size.y;
+            this.root.set_attach_to_screen_rect(rect);
+            this.root.set_size_override_stretch(false);
+            this.root.set_size_override(false, Vector2.ZERO);
+            this.root.update_canvas_items();
+            return;
+        }
     }
 
     _flush_ugc() {
@@ -949,7 +950,7 @@ export class SceneTree extends MainLoop {
 
         for (const [group, call_pack] of this.unique_group_calls) {
             for (const [method, args] of call_pack) {
-                this.call_group_flags(GroupCallFlags.REALTIME, group, method, ...args);
+                this.call_group_flags(GROUP_CALL_REALTIME, group, method, ...args);
             }
             call_pack.clear();
         }
