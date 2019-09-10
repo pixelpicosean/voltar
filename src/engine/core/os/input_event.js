@@ -305,7 +305,94 @@ export class InputEventMouseButton extends InputEventMouse {
     }
 
     is_action_type() { return true }
-    as_text() { return '' }
+
+    as_text() {
+        let button_index_string = '';
+        switch (this.button_index) {
+            case BUTTON_LEFT: button_index_string = 'BUTTON_LEFT'; break;
+            case BUTTON_MIDDLE: button_index_string = 'BUTTON_MIDDLE'; break;
+            case BUTTON_RIGHT: button_index_string = 'BUTTON_RIGHT'; break;
+            default: button_index_string = `${this.button_index}`; break;
+        }
+        return `InputEventMouseButton : button_index=${button_index_string}, pressed=${this.pressed ? 'true' : 'false'}, position=(${this.position.x}, ${this.position.y}), button_mask=${this.button_mask}, doubleclick=${this.doubleclick ? 'true' : 'false'}`
+    }
+}
+
+export class InputEventMouseMotion extends InputEventMouse {
+    get class() { return 'InputEventMouseMotion' }
+
+    constructor() {
+        super();
+
+        this.relative = new Vector2();
+        this.speed = new Vector2();
+    }
+
+    /* private */
+
+    /**
+     * @param {Transform2D} p_xform
+     * @param {Vector2Like} p_local_ofs
+     */
+    xformed_by(p_xform, p_local_ofs = Vector2.ZERO) {
+        const mm = new InputEventMouseMotion();
+        mm.device = this.device;
+        mm.set_modifiers_from_event(this);
+
+        p_xform.xform(mm.position.copy(this.position).add(p_local_ofs), mm.position);
+        mm.global_position.copy(this.global_position);
+
+        mm.button_mask = this.button_mask;
+        mm.relative.copy(this.relative);
+        mm.speed.copy(this.speed);
+        return mm;
+    }
+
+    as_text() {
+        let button_mask_string = '';
+        switch (this.button_mask) {
+            case BUTTON_MASK_LEFT: button_mask_string = 'BUTTON_MASK_LEFT'; break;
+            case BUTTON_MASK_MIDDLE: button_mask_string = 'BUTTON_MASK_MIDDLE'; break;
+            case BUTTON_MASK_RIGHT: button_mask_string = 'BUTTON_MASK_RIGHT'; break;
+            default: button_mask_string = `${this.button_mask}`; break;
+        }
+        return `InputEventMouseMotion : button_mask=${button_mask_string}, position=(${this.position.x}, ${this.position.y}), relative=(${this.relative.x}, ${this.relative.y}, speed=(${this.speed.x}, ${this.speed.y}))`
+    }
+
+    /**
+     * @param {InputEvent} p_event
+     */
+    accumulate(p_event) {
+        if (p_event.class !== 'InputEventMouseMotion') return false;
+
+        const motion = /** @type {InputEventMouseMotion} */(p_event);
+
+        if (this.is_pressed() !== motion.is_pressed()) {
+            return false;
+        }
+        if (this.button_mask !== motion.button_mask) {
+            return false;
+        }
+        if (this.shift !== motion.shift) {
+            return false;
+        }
+        if (this.control !== motion.control) {
+            return false;
+        }
+        if (this.alt !== motion.alt) {
+            return false;
+        }
+        if (this.meta !== motion.meta) {
+            return false;
+        }
+
+        this.position.copy(motion.position);
+        this.global_position.copy(motion.global_position);
+        this.speed.copy(motion.speed);
+        this.relative.add(motion.relative);
+
+        return true;
+    }
 }
 
 export class InputEventAction extends InputEvent {

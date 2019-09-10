@@ -3,11 +3,14 @@ import {
     MainLoop,
     NOTIFICATION_WM_MOUSE_ENTER,
     NOTIFICATION_WM_MOUSE_EXIT,
+    NOTIFICATION_WM_FOCUS_IN,
+    NOTIFICATION_WM_FOCUS_OUT,
 } from "engine/core/main_loop";
 import { Input } from "engine/main/input";
 import {
-    InputEventMouseButton,
     InputEventWithModifiers,
+    InputEventMouseButton,
+    InputEventMouseMotion,
     BUTTON_LEFT,
     BUTTON_MIDDLE,
     BUTTON_RIGHT,
@@ -36,11 +39,6 @@ export const SCREEN_SENSOR = 6;
  * @typedef OS_InitOptions
  * @property {HTMLCanvasElement} canvas
  */
-
-let shift_key = false;
-let alt_key = false;
-let ctrl_key = false;
-let meta_key = false;
 
 export class OS {
     static get_singleton() { return singleton }
@@ -122,14 +120,26 @@ export class OS {
 
         const mouse_pos = new Vector2();
         let cursor_inside_canvas = true;
-        const on_pointer_move = (e) => {
+        const on_pointer_move = (/** @type {MouseEvent | PointerEvent} */e) => {
             const input_mask = this.input.get_mouse_button_mask();
             map_position_to_canvas_local(mouse_pos, canvas, e.clientX, e.clientY);
             if (!cursor_inside_canvas && !input_mask) {
                 return false;
             }
+
+            const ev = new InputEventMouseMotion();
+            map_position_to_canvas_local(ev.position, canvas, e.clientX, e.clientY);
+            ev.global_position.copy(ev.position);
+            ev.button_mask = input_mask;
+
+            ev.relative.set(e.movementX, e.movementY);
+            this.input.set_mouse_position(ev.position);
+            ev.speed.copy(this.input.get_last_mouse_speed());
+
+            this.input.parse_input_event(ev);
+            return false;
         };
-        const on_pointer_button = (/** @type {MouseEvent} */e, /** @type {boolean} */is_down) => {
+        const on_pointer_button = (/** @type {MouseEvent | PointerEvent} */e, /** @type {boolean} */is_down) => {
             const ev = new InputEventMouseButton();
             ev.pressed = is_down;
             map_position_to_canvas_local(ev.position, canvas, e.clientX, e.clientY);
@@ -178,33 +188,19 @@ export class OS {
             // TODO: resume audio driver after input in case autoplay was denied
             return true;
         }
-        const on_pointer_over = (e) => {
-            cursor_inside_canvas = true;
-            this.main_loop.notification(NOTIFICATION_WM_MOUSE_ENTER);
-        }
-        const on_pointer_out = (e) => {
-            cursor_inside_canvas = false;
-            this.main_loop.notification(NOTIFICATION_WM_MOUSE_EXIT);
-        }
-        const on_pointer_cancel = (e) => {
-            map_position_to_canvas_local(mouse_pos, canvas, e.clientX, e.clientY);
-        }
 
+        // mouse events
         if (support_pointer_events) {
             window.addEventListener('pointermove', on_pointer_move, true);
             canvas.addEventListener('pointerdown', (e) => on_pointer_button(e, true), true);
-            canvas.addEventListener('pointerleave', on_pointer_out, true);
-            canvas.addEventListener('pointerover', on_pointer_over, true);
-            window.addEventListener('pointercancel', on_pointer_cancel, true);
             window.addEventListener('pointerup', (e) => on_pointer_button(e, false), true);
         } else {
             window.addEventListener('mousemove', on_pointer_move, true);
             canvas.addEventListener('mousedown', (e) => on_pointer_button(e, true), true);
-            canvas.addEventListener('mouseout', on_pointer_out, true);
-            canvas.addEventListener('mouseover', on_pointer_over, true);
             window.addEventListener('mouseup', (e) => on_pointer_button(e, false), true);
         }
 
+        // touch events
         if (support_touch_events) {
             // canvas.addEventListener('touchstart', (e) => on_pointer_button(e, true), true);
             // canvas.addEventListener('touchcancel', on_pointer_cancel, true);
@@ -212,9 +208,27 @@ export class OS {
             // canvas.addEventListener('touchmove', on_pointer_move, true);
         }
 
+        // keyboard events
         window.addEventListener('keydown', (e) => {
 
         })
+
+        // over/leave and focus/blur events
+        canvas.addEventListener('mouseover', () => {
+            cursor_inside_canvas = true;
+            this.main_loop.notification(NOTIFICATION_WM_MOUSE_ENTER);
+        })
+        canvas.addEventListener('mouseleave', () => {
+            cursor_inside_canvas = false;
+            this.main_loop.notification(NOTIFICATION_WM_MOUSE_EXIT);
+        })
+        canvas.addEventListener('focus', () => {
+            this.main_loop.notification(NOTIFICATION_WM_FOCUS_IN);
+        })
+        canvas.addEventListener('blur', () => {
+            this.main_loop.notification(NOTIFICATION_WM_FOCUS_OUT);
+        })
+
         visual_server.init();
     }
 
