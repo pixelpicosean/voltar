@@ -603,6 +603,10 @@ export class Vector2 {
         return r_out.set(this.y, -this.x);
     }
 
+    aspect() {
+        return this.x / this.y;
+    }
+
     is_zero() {
         return this.x === 0 && this.y === 0;
     }
