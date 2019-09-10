@@ -5,7 +5,11 @@ import Settings from 'project.json';
 import { deep_merge } from 'engine/utils/deep_merge';
 import { Node } from 'engine/scene/main/node';
 import { GDCLASS } from 'engine/core/v_object';
-import { InputEvent, InputEventMouseButton } from 'engine/core/os/input_event';
+import {
+    InputEvent,
+    InputEventMouseButton,
+    InputEventMouseMotion,
+} from 'engine/core/os/input_event';
 
 
 class Preloader extends Node {
@@ -34,10 +38,6 @@ class Preloader extends Node {
         if (event.class === 'InputEventMouseButton') {
             const e = /** @type {InputEventMouseButton} */(event);
             console.log('input -> ' + (e.is_pressed() ? 'press' : 'release'));
-
-            if (e.is_pressed()) {
-                this.get_tree().set_input_as_handled();
-            }
         }
     }
     /**
@@ -47,6 +47,9 @@ class Preloader extends Node {
         if (event.class === 'InputEventMouseButton') {
             const e = /** @type {InputEventMouseButton} */(event);
             console.log('unhandled_input -> ' + (e.is_pressed() ? 'press' : 'release'));
+        } else if (event.class === 'InputEventMouseMotion') {
+            const e = /** @type {InputEventMouseMotion} */(event);
+            // console.log(`mouse pos=(${e.position.x}, ${e.position.y})`);
         }
     }
 }
