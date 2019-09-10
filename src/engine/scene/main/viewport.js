@@ -137,6 +137,9 @@ export class Viewport extends Node {
     get class() { return 'Viewport' }
 
     get_size() { return this._size }
+    /**
+     * @param {Vector2Like} p_size
+     */
     set_size(p_size) {
         if (this._size.x === Math.floor(p_size.x) && this._size.y === Math.floor(p_size.y)) {
             return;

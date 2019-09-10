@@ -29,6 +29,9 @@ import {
     NOTIFICATION_UNPAUSED,
 } from '../main/node';
 import { Rect2 } from 'engine/core/math/rect2';
+import { OS } from 'engine/core/os/os';
+import { is_equal_approx } from 'engine/core/math/math_funcs';
+import { VisualServer } from 'engine/servers/visual_server';
 
 
 const NOTIFICATION_TRANSFORM_CHANGED = 2000;
@@ -170,7 +173,7 @@ export class SceneTree extends MainLoop {
 
         /** @type {Viewport} */
         this.root = new Viewport();
-        this.root.name = 'root';
+        this.root.set_name('root');
         this.root.set_handle_input_locally(false);
         if (!this.root.get_world_2d()) {
             this.root.set_world_2d(new World2D());
@@ -934,15 +937,111 @@ export class SceneTree extends MainLoop {
                     .scale(1 / this.stretch_shrink)
                     .floor()
             );
-            const rect = Rect2.new();
-            rect.width = this.last_screen_size.x;
-            rect.height = this.last_screen_size.y;
+            const rect = Rect2.new(0, 0, this.last_screen_size.x, this.last_screen_size.y);
             this.root.set_attach_to_screen_rect(rect);
             this.root.set_size_override_stretch(false);
             this.root.set_size_override(false, Vector2.ZERO);
             this.root.update_canvas_items();
+            Rect2.free(rect);
+            Vector2.free(vec);
             return;
         }
+
+        // actual screen video mode
+        const video_mode = Vector2.new(OS.get_singleton().get_window_size().width, OS.get_singleton().get_window_size().height);
+        const desired_res = this.stretch_min.clone();
+
+        const viewport_size = Vector2.new();
+        const screen_size = Vector2.new();
+
+        const viewport_aspect = desired_res.aspect();
+        const video_mode_aspect = video_mode.aspect();
+
+        if (this.stretch_aspect === STRETCH_ASPECT_IGNORE || is_equal_approx(viewport_aspect, video_mode_aspect)) {
+            // same aspect or ignore aspect
+            viewport_size.copy(desired_res);
+            screen_size.copy(video_mode);
+        } else if (viewport_aspect < video_mode_aspect) {
+            // screen ratio is smaller vertically
+            if (this.stretch_aspect === STRETCH_ASPECT_KEEP_HEIGHT || this.stretch_aspect === STRETCH_ASPECT_EXPAND) {
+                // will stretch horizontally
+                viewport_size.x = desired_res.y * video_mode_aspect;
+                viewport_size.y = desired_res.y;
+                screen_size.copy(video_mode);
+            } else {
+                // will need black bars
+                viewport_size.copy(desired_res);
+                screen_size.x = video_mode.y * viewport_aspect;
+                screen_size.y = video_mode.y;
+            }
+        } else {
+            // screen ratio is smaller horizontally
+            if (this.stretch_aspect === STRETCH_ASPECT_KEEP_WIDTH || this.stretch_aspect === STRETCH_ASPECT_EXPAND) {
+                // will stretch horizontally
+                viewport_size.x = desired_res.x;
+                viewport_size.y = desired_res.x / video_mode_aspect;
+                screen_size.copy(video_mode);
+            } else {
+                // will need black bars
+                viewport_size.copy(desired_res);
+                screen_size.x = video_mode.x;
+                screen_size.y = video_mode.x / video_mode_aspect;
+            }
+        }
+
+        screen_size.floor();
+        viewport_size.floor();
+
+        const margin = Vector2.new();
+        const offset = Vector2.new();
+        // black bars and margin
+        if (this.stretch_aspect !== STRETCH_ASPECT_EXPAND && screen_size.x < video_mode.x) {
+            margin.x = Math.round((video_mode.x - screen_size.x) / 2);
+            VisualServer.get_singleton().black_bars_set_margins(margin.x, 0, margin.x, 0);
+            offset.x = Math.round(margin.x * viewport_size.y / screen_size.y);
+        } else if (this.stretch_aspect !== STRETCH_ASPECT_EXPAND && screen_size.y < video_mode.y) {
+            margin.y = Math.round((video_mode.y - screen_size.y) / 2);
+            VisualServer.get_singleton().black_bars_set_margins(0, margin.y, 0, margin.y);
+            offset.y = Math.round(margin.y * viewport_size.x / screen_size.x);
+        } else {
+            VisualServer.get_singleton().black_bars_set_margins(0, 0, 0, 0);
+        }
+
+        switch (this.stretch_mode) {
+            case STRETCH_MODE_DISABLED: {
+            } break;
+            case STRETCH_MODE_2D: {
+                let shrink_size = screen_size.clone().divide(this.stretch_shrink).floor();
+                let rect = Rect2.new(margin.x, margin.y, screen_size.x, screen_size.y);
+                this.root.set_size(shrink_size);
+                this.root.set_attach_to_screen_rect(rect);
+                this.root.set_size_override_stretch(true);
+                this.root.set_size_override(true, shrink_size);
+                this.root.update_canvas_items();
+                Rect2.free(rect);
+                Vector2.free(shrink_size);
+            } break;
+            case STRETCH_MODE_VIEWPORT: {
+                let shrink_size = screen_size.clone().divide(this.stretch_shrink).floor();
+                let rect = Rect2.new(margin.x, margin.y, screen_size.x, screen_size.y);
+                this.root.set_size(shrink_size);
+                this.root.set_attach_to_screen_rect(rect);
+                this.root.set_size_override_stretch(false);
+                this.root.set_size_override(false, Vector2.ZERO);
+                this.root.update_canvas_items();
+                Rect2.free(rect);
+                Vector2.free(shrink_size);
+            } break;
+        }
+
+        Vector2.free(offset);
+        Vector2.free(margin);
+
+        Vector2.free(screen_size);
+        Vector2.free(viewport_size);
+
+        Vector2.free(desired_res);
+        Vector2.free(video_mode);
     }
 
     _flush_ugc() {
