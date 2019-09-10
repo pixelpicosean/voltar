@@ -12,6 +12,7 @@ import {
     BUTTON_MIDDLE,
     BUTTON_RIGHT,
 } from "./input_event";
+import { VisualServer } from "engine/servers/visual_server";
 
 
 export const MOUSE_MODE_VISIBLE = 0;
@@ -108,6 +109,7 @@ export class OS {
     initialize({ canvas }) {
         this.canvas = canvas;
 
+        const visual_server = new VisualServer();
         this.input = new Input();
 
 
@@ -213,6 +215,7 @@ export class OS {
         window.addEventListener('keydown', (e) => {
 
         })
+        visual_server.init();
     }
 
     get_ticks_msec() {

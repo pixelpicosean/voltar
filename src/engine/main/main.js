@@ -14,9 +14,6 @@ let message_queue = null;
 /** @type {OS} */
 let os = null;
 
-/** @type {VisualServer} */
-let visual_server = null;
-
 /** @type {Physics2DServer} */
 let physics_2d_server = null;
 
@@ -73,9 +70,6 @@ export const Main = {
             canvas: /** @type {HTMLCanvasElement} */(document.getElementById('game')),
         });
         os.set_window_size({ x: this.global.display.width, y: this.global.display.height });
-
-        visual_server = new VisualServer();
-        visual_server.init();
 
         physics_2d_server = new Physics2DServer();
         physics_2d_server.init();
