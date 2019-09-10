@@ -94,7 +94,7 @@ export class OS {
         this.no_window = false;
         this.screen_orientation = SCREEN_LANDSCAPE;
 
-        this.start_date = performance.now();
+        this.start_date = 0;
 
         this.canvas = null;
     }
@@ -230,6 +230,8 @@ export class OS {
         })
 
         visual_server.init();
+
+        this.start_date = performance.now();
     }
 
     get_ticks_msec() {
@@ -244,7 +246,10 @@ export class OS {
     }
 
     get_mouse_position() {
-
+        return this.input.get_mouse_position();
+    }
+    get_mouse_button_state() {
+        return this.input.get_mouse_button_mask();
     }
 }
 
