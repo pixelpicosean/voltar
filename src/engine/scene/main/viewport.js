@@ -3,6 +3,7 @@ import { GDCLASS } from "engine/core/v_object";
 import { Vector2, Vector2Like } from "engine/core/math/vector2";
 import { Transform2D } from "engine/core/math/transform_2d";
 import { Rect2 } from "engine/core/math/rect2";
+import { OS } from "engine/core/os/os";
 import {
     NOTIFICATION_WM_MOUSE_EXIT,
     NOTIFICATION_WM_FOCUS_OUT,
@@ -16,15 +17,12 @@ import {
     NOTIFICATION_INTERNAL_PROCESS,
     NOTIFICATION_INTERNAL_PHYSICS_PROCESS,
 } from "engine/scene/main/node";
-import {
-    Texture,
-} from "../resources/texture";
-import { World2D } from "../resources/world_2d";
-
 import { VSG } from "engine/servers/visual/visual_server_globals";
+import { Texture } from "engine/scene/resources/texture";
+import { World2D } from "engine/scene/resources/world_2d";
+import { CanvasItem } from "engine/scene/2d/canvas_item";
 
 import { CanvasLayer } from "./canvas_layer";
-import { CanvasItem } from "../2d/canvas_item";
 
 
 export const UPDATE_MODE_DISABLED = 0;
@@ -595,8 +593,9 @@ export class Viewport extends Node {
         const r = Rect2.new();
 
         if (this.get_size().is_zero()) {
-            r.width = window.innerWidth;
-            r.height = window.innerHeight;
+            const window_size = OS.get_singleton().get_window_size();
+            r.width = window_size.x;
+            r.height = window_size.y;
         } else {
             r.width = this.get_size().width;
             r.height = this.get_size().height;
@@ -672,16 +671,25 @@ export class Viewport extends Node {
         return this.stretch_transform.clone().append(this.get_global_canvas_transform());
     }
 
-    set_handle_input_locally(p_locally) { }
-
     /**
      * @param {Node} p_node
      */
     _propagate_enter_world(p_node) {
         if (p_node !== this) {
-            if (!p_node.is_inside_tree()) {
-                return;
+            if (!p_node.is_inside_tree()) return;
+
+            if (p_node.is_spatial || p_node.class === 'WorldEnvironment') {
+                // p_node.notification(NOTIFICATION_ENTER_WORLD);
+            } else {
+                if (p_node.class === 'Viewport') {
+                    // const v = /** @type {Viewport} */(p_node);
+                    // TODO: [World] if (!v.world || !v.own_world) return;
+                }
             }
+        }
+
+        for (const c of p_node.data.children) {
+            this._propagate_enter_world(c);
         }
     }
     _propagate_exit_world() { }
@@ -709,6 +717,7 @@ export class Viewport extends Node {
             this.stretch_transform.scale(scale.x, scale.y);
             this.stretch_transform.tx = this.size_override_margin.x * scale.x;
             this.stretch_transform.ty = this.size_override_margin.y * scale.y;
+            Vector2.free(scale);
         } else {
             this.stretch_transform.reset();
         }

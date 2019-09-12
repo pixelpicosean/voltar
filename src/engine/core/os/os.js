@@ -16,6 +16,7 @@ import {
     BUTTON_RIGHT,
 } from "./input_event";
 import { VisualServer } from "engine/servers/visual_server";
+import { device } from "engine/dep/index";
 
 
 export const MOUSE_MODE_VISIBLE = 0;
@@ -23,9 +24,10 @@ export const MOUSE_MODE_HIDDEN = 1;
 export const MOUSE_MODE_CAPTURED = 2;
 export const MOUSE_MODE_CONFINED = 3;
 
-export const VIDEO_DRIVER_GLES3 = 0;
-export const VIDEO_DRIVER_GLES2 = 1;
-export const VIDEO_DRIVER_MAX = 2;
+export const VIDEO_DRIVER_GLES3 = 0; // webgl2
+export const VIDEO_DRIVER_GLES2 = 1; // webgl
+export const VIDEO_DRIVER_GLES2_LEGACY = 2; // older wegbl 1
+export const VIDEO_DRIVER_MAX = 3;
 
 export const SCREEN_LANDSCAPE = 0;
 export const SCREEN_PORTRAIT = 1;
@@ -97,6 +99,7 @@ export class OS {
         this.start_date = 0;
 
         this.canvas = null;
+        this.gl = null;
     }
 
     initialize_core() { }
@@ -106,6 +109,31 @@ export class OS {
      */
     initialize({ canvas }) {
         this.canvas = canvas;
+        // TODO: support force GLES2_LEGACY setting from ProjectSettings
+        if (device.phone || device.tablet) {
+            this.video_driver_index = VIDEO_DRIVER_GLES2;
+        } else {
+            this.video_driver_index = VIDEO_DRIVER_GLES3;
+        }
+        const options = {
+            alpha: false,
+            antialias: false,
+            depth: true,
+            powerPreference: 'default',
+            premultipliedAlpha: false,
+            preserveDrawingBuffer: false,
+            stencil: true,
+        };
+        /** @type {WebGLRenderingContext} */
+        let gl = null;
+        if (this.video_driver_index === VIDEO_DRIVER_GLES3) {
+            gl = /** @type {WebGLRenderingContext} */(this.canvas.getContext('webgl2', options));
+        }
+        if (!gl) {
+            this.video_driver_index = VIDEO_DRIVER_GLES2;
+            gl = /** @type {WebGLRenderingContext} */(this.canvas.getContext('webgl', options));
+        }
+        this.gl = gl;
 
         const visual_server = new VisualServer();
         this.input = new Input();

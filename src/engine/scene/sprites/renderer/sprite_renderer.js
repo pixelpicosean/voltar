@@ -3,9 +3,9 @@ import { premultiply_blend_mode, premultiply_tint } from 'engine/utils/color';
 import { nearest_po2, log_base_2 } from 'engine/core/math/math_funcs';
 import create_indices_for_quads from 'engine/utils/create_indices_for_quads';
 
-import VertexArrayObject from 'engine/drivers/webgl/vao';
-import GLShader from 'engine/drivers/webgl/gl_shader';
-import GLBuffer from 'engine/drivers/webgl/gl_buffer';
+import VertexArrayObject from 'engine/drivers/pixi/vao';
+import GLShader from 'engine/drivers/pixi/gl_shader';
+import GLBuffer from 'engine/drivers/pixi/gl_buffer';
 
 import WebGLRenderer from 'engine/servers/visual/webgl_renderer';
 import ObjectRenderer from 'engine/servers/visual/utils/object_renderer';

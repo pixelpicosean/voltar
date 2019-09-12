@@ -1,4 +1,4 @@
-import GLShader from 'engine/drivers/webgl/gl_shader';
+import GLShader from 'engine/drivers/pixi/gl_shader';
 
 import vertex_src from './texture.vert';
 

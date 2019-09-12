@@ -24,18 +24,17 @@ declare module 'ismobilejs' {
         tablet: boolean,
         device: string,
     };
-    export const seven_inch: boolean;
     export const other: {
-        blackberry_10: boolean,
         blackberry: boolean,
+        blackberry_10: boolean,
         opera: boolean,
         firefox: boolean,
         chrome: boolean,
         device: string,
     };
-    export const any: boolean;
     export const phone: boolean;
     export const tablet: boolean;
+    export const any: boolean;
 }
 
 declare module 'earcut' {

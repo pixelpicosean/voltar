@@ -182,6 +182,7 @@ export class Node extends VObject {
         this.is_canvas_item = false;
         this.is_node_2d = false;
         this.is_control = false;
+        this.is_spatial = false;
         this.is_collision_object = false;
 
         this.data = new Data();
@@ -256,13 +257,13 @@ export class Node extends VObject {
      * @param {Node} child
      */
     _validate_child_name(child) {
-        const name = child.name;
-        let n = child.name;
+        const name = child.get_name();
+        let n = name;
         let i = 2;
         while (this.named_children.has(n)) {
             n = `${name}_${i++}`;
         }
-        child.name = n;
+        child.set_name(n);
         this.named_children.set(n, child);
     }
     _generate_serial_child_name(p_child, name) { }
@@ -620,7 +621,7 @@ export class Node extends VObject {
         if (this.is_a_parent_of(p_node)) {
             this.move_child(p_child, p_node.get_position_in_parent() + 1);
         } else {
-            console.warn(`Cannot move under node ${p_node.name} as ${p_child.name} does not share a parent.`);
+            console.warn(`Cannot move under node ${p_node.get_name()} as ${p_child.get_name()} does not share a parent.`);
         }
     }
     /**
@@ -647,7 +648,7 @@ export class Node extends VObject {
         p_child.notification(NOTIFICATION_UNPARENTED);
 
         remove_items(children, idx, 1);
-        this.named_children.delete(p_child.name);
+        this.named_children.delete(p_child.get_name());
 
         // update pointer and size
         child_count = children.length;
@@ -826,7 +827,7 @@ export class Node extends VObject {
         let path = [];
 
         while (n) {
-            path.push(n.name);
+            path.push(n.get_name());
             n = n.data.parent;
         }
 

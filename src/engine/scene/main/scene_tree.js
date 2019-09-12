@@ -6,7 +6,11 @@ import {
 import { List } from 'engine/core/self_list';
 import { VObject, GDCLASS } from 'engine/core/v_object';
 import { Vector2, Vector2Like } from 'engine/core/math/vector2';
+import { Rect2 } from 'engine/core/math/rect2';
+import { is_equal_approx } from 'engine/core/math/math_funcs';
+import { OS } from 'engine/core/os/os';
 import { MessageQueue } from 'engine/core/message_queue';
+import { VisualServer } from 'engine/servers/visual_server';
 import {
     MainLoop,
     NOTIFICATION_WM_MOUSE_ENTER,
@@ -28,10 +32,6 @@ import {
     NOTIFICATION_PAUSED,
     NOTIFICATION_UNPAUSED,
 } from '../main/node';
-import { Rect2 } from 'engine/core/math/rect2';
-import { OS } from 'engine/core/os/os';
-import { is_equal_approx } from 'engine/core/math/math_funcs';
-import { VisualServer } from 'engine/servers/visual_server';
 
 
 const NOTIFICATION_TRANSFORM_CHANGED = 2000;
@@ -174,7 +174,7 @@ export class SceneTree extends MainLoop {
         /** @type {Viewport} */
         this.root = new Viewport();
         this.root.set_name('root');
-        this.root.set_handle_input_locally(false);
+        this.root.handle_input_locally = false;
         if (!this.root.get_world_2d()) {
             this.root.set_world_2d(new World2D());
         }
@@ -201,7 +201,7 @@ export class SceneTree extends MainLoop {
         this.stretch_aspect = STRETCH_ASPECT_IGNORE;
         this.stretch_min = new Vector2();
         this.stretch_shrink = 1;
-        this.last_screen_size = new Vector2(window.innerWidth, window.innerHeight);
+        this.last_screen_size = OS.get_singleton().get_window_size().clone();
         this._update_root_rect();
 
         /** @type {Map<string, Map<string, Array>>} group -> call -> args */

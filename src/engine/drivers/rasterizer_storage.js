@@ -1,26 +1,30 @@
 import { Color } from "engine/core/color";
 import {
     Image,
-    FORMAT_RGBA8,
-    FORMAT_RGB8,
 } from "engine/core/image";
 
-import {
-    RGBFormat,
-    RGBAFormat,
-} from 'three/src/constants';
-import { Texture } from 'three/src/textures/Texture';
-import { WebGLRenderTarget } from 'three/src/renderers/WebGLRenderTarget';
-import { WebGLRenderer } from "three/src/renderers/WebGLRenderer";
+import RenderTexture from "./renderTexture/RenderTexture";
+import { RENDER_TARGET_FLAG_MAX } from "./constants";
 
 
-/**
- * @param {number} format
- */
-function image_format_to_three(format) {
-    switch (format) {
-        case FORMAT_RGB8: return RGBFormat;
-        case FORMAT_RGBA8: return RGBAFormat;
+class RenderTarget {
+    constructor() {
+        /** @type {RenderTexture} */
+        this.fbo = null;
+        this.x = 0;
+        this.y = 0;
+        this.width = 0;
+        this.height = 0;
+        this.flags = new Array(RENDER_TARGET_FLAG_MAX);
+
+        this.used_in_frame = false;
+
+        this.external = {
+            /** @type {RenderTexture} */
+            fbo: null,
+            color: new Color(),
+            texture: null,
+        }
     }
 }
 
@@ -50,9 +54,10 @@ class Render {
     }
 }
 
-export class RasterizerStorageThree {
+export class RasterizerStorage {
     constructor() {
         this.frame = {
+            /** @type {RenderTarget} */
             current_rt: null,
 
             clear_request: false,
@@ -72,30 +77,84 @@ export class RasterizerStorageThree {
             snap: new Render(),
         };
 
-        /** @type {import('./rasterizer_canvas_three').RasterizerCanvasThree} */
+        this.resources = {
+            /** @type {WebGLTexture} */
+            white_tex: null,
+            /** @type {WebGLTexture} */
+            black_tex: null,
+            /** @type {WebGLTexture} */
+            normal_tex: null,
+            /** @type {WebGLTexture} */
+            aniso_tex: null,
+
+            mipmap_blur_fbo: 0,
+            mipmap_blur_color: 0,
+
+            radical_inverse_vdc_cache_tex: 0,
+            use_rgba_2d_shadows: 0,
+
+            quadie: 0,
+
+            skeleton_transform_buffer_size: 0,
+            skeleton_transform_buffer: 0,
+            skeleton_transform_cpu_buffer: [],
+        };
+
+        /** @type {import('./rasterizer_canvas').RasterizerCanvas} */
         this.canvas = null;
-        /** @type {import('./rasterizer_scene_three').RasterizerSceneThree} */
+        /** @type {import('./rasterizer_scene').RasterizerScene} */
         this.scene = null;
 
         // private
-        this.renderer = null;
+        this.gl = null;
     }
 
     /**
-     * @param {WebGLRenderer} renderer
+     * @param {WebGLRenderingContext} gl
      */
-    initialize(renderer) {
-        this.renderer = renderer;
+    initialize(gl) {
+        this.gl = gl;
+
+        // default textures
+        const create_texture = (/** @type {Uint8Array} */texdata) => {
+            // return new DataTexture(texdata, 8, 8, RGBFormat);
+            let tex = gl.createTexture();
+            return tex;
+        }
+        // - white
+        const white_texdata = new Uint8Array(8 * 8 * 3);
+        for (let i = 0; i < 8 * 8 * 3; i++) {
+            white_texdata[i] = 255;
+        }
+        this.resources.white_tex = create_texture(white_texdata);
+        // - black
+        const black_texdata = new Uint8Array(8 * 8 * 3);
+        for (let i = 0; i < 8 * 8 * 3; i++) {
+            black_texdata[i] = 0;
+        }
+        this.resources.black_tex = create_texture(black_texdata);
+        // - normal
+        const normal_texdata = new Uint8Array(8 * 8 * 3);
+        for (let i = 0; i < 8 * 8 * 3; i += 3) {
+            normal_texdata[i+0] = 128;
+            normal_texdata[i+1] = 128;
+            normal_texdata[i+2] = 255;
+        }
+        this.resources.normal_tex = create_texture(normal_texdata);
+        // - aniso
+        const aniso_texdata = new Uint8Array(8 * 8 * 3);
+        for (let i = 0; i < 8 * 8 * 3; i += 3) {
+            aniso_texdata[i+0] = 255;
+            aniso_texdata[i+1] = 128;
+            aniso_texdata[i+2] = 0;
+        }
+        this.resources.aniso_tex = create_texture(aniso_texdata);
     }
 
     /**
      * @param {any} rid
      */
-    free_rid(rid) {
-        if (rid instanceof Texture) {
-            return true;
-        }
-    }
+    free_rid(rid) { return false }
 
     update_dirty_resources() {
         this.update_dirty_shaders();

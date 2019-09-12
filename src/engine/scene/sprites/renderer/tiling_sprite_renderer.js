@@ -2,7 +2,7 @@ import { WRAP_MODES } from 'engine/const';
 import { Matrix } from 'engine/core/math/math_funcs';
 import { premultiply_tint_to_rgba, correct_blend_mode } from 'engine/utils/color';
 
-import GLShader from 'engine/drivers/webgl/gl_shader';
+import GLShader from 'engine/drivers/pixi/gl_shader';
 
 import WebGLRenderer from 'engine/servers/visual/webgl_renderer';
 import ObjectRenderer from 'engine/servers/visual/utils/object_renderer';

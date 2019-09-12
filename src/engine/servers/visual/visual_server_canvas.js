@@ -30,7 +30,6 @@ export class Item {
         this.visible = true;
         this.behind = false;
         this.update_when_visible = false;
-        this.light_mask = 1;
         this.commands = [];
         this.custom_rect = false;
         this.rect_dirty = true;
@@ -38,8 +37,6 @@ export class Item {
         this.material = null;
         this.skeleton = null;
 
-        this.color_mode = 0;
-        this.blend_mode = 0;
         this.final_modulate = new Color(1, 1, 1, 1);
         this.final_transform = new Transform2D();
         this.final_clip_rect = new Rect2();
@@ -121,6 +118,8 @@ export class Item {
                 this.rect.merge(r);
             }
         }
+        Rect2.free(r);
+        Transform2D.free(xf);
 
         this.rect_dirty = false;
         return this.rect;
@@ -272,17 +271,6 @@ export class VisualServerCanvas {
 
     free_rid(rid) {
         return false;
-    }
-
-    /**
-     * @param {number} width
-     * @param {number} height
-     */
-    resize(width, height) {
-        this.screen.width = width;
-        this.screen.height = height;
-        this.view.width = width * this.resolution;
-        this.view.height = height * this.resolution;
     }
 
     canvas_set_item_mirroring(p_canvas) { }

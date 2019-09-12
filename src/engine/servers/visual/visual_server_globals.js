@@ -1,11 +1,11 @@
 export const VSG = {
-    /** @type {import('engine/drivers/three/rasterizer_storage_three').RasterizerStorageThree} */
+    /** @type {import('engine/drivers/rasterizer_storage').RasterizerStorage} */
     storage: null,
-    /** @type {import('engine/drivers/three/rasterizer_canvas_three').RasterizerCanvasThree} */
+    /** @type {import('engine/drivers/rasterizer_canvas').RasterizerCanvas} */
     canvas_render: null,
-    /** @type {import('engine/drivers/three/rasterizer_scene_three').RasterizerSceneThree} */
+    /** @type {import('engine/drivers/rasterizer_scene').RasterizerScene} */
     scene_render: null,
-    /** @type {import('engine/drivers/three/rasterizer_three').RasterizerThree} */
+    /** @type {import('engine/drivers/rasterizer').Rasterizer} */
     rasterizer: null,
 
     /** @type {import('engine/servers/visual/visual_server_canvas').VisualServerCanvas} */

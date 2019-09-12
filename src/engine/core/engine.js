@@ -10,6 +10,8 @@ export class Engine {
         this.physics_jitter_fix = 0.5;
         this.time_scale = 1.0;
 
+        this.use_pixel_snap = false;
+
         /* private */
 
         this.in_physics_frame = false;

@@ -180,11 +180,14 @@ export class VisualServerViewport {
      * @param {Viewport} p_viewport
      * @param {Rect2} p_rect
      */
-    viewport_attach_to_screen(p_viewport, p_rect) {
+    viewport_attach_to_screen(p_viewport, p_rect/* , p_screen */) {
         if (p_viewport.viewport_render_direct_to_screen) {
             VSG.storage.render_target_set_size(p_viewport.render_target, p_rect.width, p_rect.height);
             VSG.storage.render_target_set_position(p_viewport.render_target, p_rect.x, p_rect.y);
         }
+
+        p_viewport.viewport_to_screen_rect.copy(p_rect);
+        p_viewport.viewport_to_screen = 0/* p_screen */;
     }
     /**
      * @param {Viewport} p_viewport

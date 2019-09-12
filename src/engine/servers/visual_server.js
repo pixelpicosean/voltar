@@ -13,7 +13,7 @@ import { VisualServerCanvas } from "./visual/visual_server_canvas";
 import { VisualServerScene } from "./visual/visual_server_scene";
 import { VisualServerViewport } from "./visual/visual_server_viewport";
 
-import { RasterizerThree } from "engine/drivers/three/rasterizer_three";
+import { Rasterizer } from "engine/drivers/rasterizer";
 
 
 export const NO_INDEX_ARRAY = -1;
@@ -66,7 +66,7 @@ export class VisualServer extends VObject {
         VSG.canvas = new VisualServerCanvas();
         VSG.viewport = new VisualServerViewport();
         VSG.scene = new VisualServerScene();
-        VSG.rasterizer = new RasterizerThree();
+        VSG.rasterizer = new Rasterizer();
         VSG.storage = VSG.rasterizer.get_storage();
         VSG.canvas_render = VSG.rasterizer.get_canvas();
         VSG.scene_render = VSG.rasterizer.get_scene();
@@ -114,6 +114,10 @@ export class VisualServer extends VObject {
      * @param {number} frame_step
      */
     draw(frame_step) {
+        if (VSG.rasterizer.context.isLost) {
+            return;
+        }
+
         this.emit_signal('frame_pre_draw');
 
         this.changes = 0;

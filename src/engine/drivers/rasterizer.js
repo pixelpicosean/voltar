@@ -1,38 +1,41 @@
 import { Color } from "engine/core/color";
 import { OS } from "engine/core/os/os";
 
-import { RasterizerStorageThree } from "./rasterizer_storage_three";
-import { RasterizerCanvasThree } from "./rasterizer_canvas_three";
-import { RasterizerSceneThree } from "./rasterizer_scene_three";
+import { RasterizerStorage } from "./rasterizer_storage";
+import { RasterizerCanvas } from "./rasterizer_canvas";
+import { RasterizerScene } from "./rasterizer_scene";
+import { ContextManager } from "./context_manager";
 
-import { WebGLRenderer } from "three/src/renderers/WebGLRenderer";
 
-
-export class RasterizerThree {
+export class Rasterizer {
     constructor() {
         this.time_total = 0;
 
-        this.storage = new RasterizerStorageThree();
-        this.canvas = new RasterizerCanvasThree();
-        this.scene = new RasterizerSceneThree();
+        this.storage = new RasterizerStorage();
+        this.canvas = new RasterizerCanvas();
+        this.scene = new RasterizerScene();
         this.canvas.storage = this.storage;
         this.canvas.scene_render = this.scene;
         this.storage.canvas = this.canvas;
         this.storage.scene = this.scene;
         this.scene.storage = this.storage;
 
-        this.renderer = null;
+        this.render_canvas = null;
+        this.gl = null;
+
+        this.context = null;
     }
 
     initialize() {
-        this.renderer = new WebGLRenderer({
-            canvas: OS.get_singleton().canvas,
-            antialias: false,
-        });
+        this.render_canvas = OS.get_singleton().canvas;
+        this.gl = OS.get_singleton().gl;
 
-        this.storage.initialize(this.renderer);
-        this.canvas.initialize(this.renderer);
-        this.scene.initialize(this.renderer);
+        this.storage.initialize(this.gl);
+        this.canvas.initialize(this.gl);
+        this.scene.initialize(this.gl);
+
+        this.context = new ContextManager(this.render_canvas, this.gl);
+        // TODO: call contextChange
     }
 
     /**
@@ -76,7 +79,9 @@ export class RasterizerThree {
         // TODO: reset viewport, camera?
     }
 
-    end_frame() { }
+    end_frame() {
+        this.context.postrender();
+    }
     finalize() { }
 
     get_storage() { return this.storage }
