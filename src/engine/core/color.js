@@ -1,5 +1,14 @@
 import { rgb2hex, hex2rgb } from "engine/utils/color";
 
+export class ColorLike {
+    constructor() {
+        this.r = 1.0;
+        this.g = 1.0;
+        this.b = 1.0;
+        this.a = 1.0;
+    }
+}
+
 /** @type {Color[]} */
 const Color_Pool = [];
 
@@ -14,7 +23,7 @@ export class Color {
         return Color.hex(parseInt(p_color, 16));
     }
 
-    static new(r = 1, g = 1, b = 1, a = 1) {
+    static new(r = 1.0, g = 1.0, b = 1.0, a = 1.0) {
         const c = Color_Pool.pop();
         if (!c) {
             return new Color(r, g, b, a);
@@ -50,11 +59,11 @@ export class Color {
     set b(value) {
         this._rgb[2] = value;
     }
-    get a() {
-        return this.alpha;
+    get alpha() {
+        return this.a;
     }
-    set a(value) {
-        this.alpha = value;
+    set alpha(value) {
+        this.a = value;
     }
 
     /**
@@ -63,9 +72,9 @@ export class Color {
      * @param {number} [b]
      * @param {number} [a]
      */
-    constructor(r = 1, g = 1, b = 1, a = 1) {
+    constructor(r = 1.0, g = 1.0, b = 1.0, a = 1.0) {
         this._rgb = [r, g, b];
-        this.alpha = a;
+        this.a = a;
     }
 
     /**
@@ -74,35 +83,43 @@ export class Color {
      * @param {number} b
      * @param {number} [a]
      */
-    set(r, g, b, a) {
+    set(r, g, b, a = 1.0) {
         this._rgb[0] = r;
         this._rgb[1] = g;
         this._rgb[2] = b;
-        this.alpha = a;
+        this.a = a;
+
+        return this;
+    }
+    /**
+     * @param {number} hex
+     */
+    set_with_hex(hex) {
+        hex2rgb(hex, this._rgb);
 
         return this;
     }
 
     /**
-     * @param {Color} c
+     * @param {ColorLike} c
      */
     copy(c) {
         this._rgb[0] = c.r;
         this._rgb[1] = c.g;
         this._rgb[2] = c.b;
-        this.alpha = c.a;
+        this.a = c.a;
 
         return this;
     }
 
     /**
-     * @param {Color} c
+     * @param {ColorLike} c
      */
     multiply(c) {
         this._rgb[0] *= c.r;
         this._rgb[1] *= c.g;
         this._rgb[2] *= c.b;
-        this.alpha *= c.a;
+        this.a *= c.a;
 
         return this;
     }
@@ -112,7 +129,7 @@ export class Color {
     }
 
     /**
-     * @param {Color} value
+     * @param {ColorLike} value
      */
     equals(value) {
         return this.r === value.r
