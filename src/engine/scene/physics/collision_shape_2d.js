@@ -1,4 +1,4 @@
-import { res_class_map } from "engine/registry";
+import { res_class_map, node_class_map } from "engine/registry";
 import { Rect2 } from "engine/core/math/rect2";
 
 import { Node2D } from "../2d/node_2d";
@@ -11,6 +11,7 @@ import {
     NOTIFICATION_LOCAL_TRANSFORM_CHANGED,
 } from "../2d/canvas_item";
 import { Shape2D } from "../resources/shape_2d";
+import { GDCLASS } from "engine/core/v_object";
 
 
 export class CollisionShape2D extends Node2D {
@@ -151,3 +152,4 @@ export class CollisionShape2D extends Node2D {
         this.parent.shape_owner_set_one_way_collision_margin(this.owner, this.one_way_collision_margin);
     }
 }
+node_class_map['CollisionShape2D'] = GDCLASS(CollisionShape2D, Node2D)

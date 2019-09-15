@@ -1,17 +1,24 @@
-import Node2D from './2d/node_2d';
-import { Curve2D } from './resources/curve';
 import { node_class_map } from 'engine/registry';
+import { GDCLASS } from 'engine/core/v_object';
 import {
-    Vector2,
     posmod,
     clamp,
 } from 'engine/core/math/math_funcs';
+import { Vector2 } from 'engine/core/math/vector2';
+
+import {
+    NOTIFICATION_ENTER_TREE,
+    NOTIFICATION_EXIT_TREE,
+} from './main/node';
+import { Curve2D } from './resources/curve';
+import { Node2D } from './2d/node_2d';
+
 
 export class Path2D extends Node2D {
+    get class() { return 'Path2D' }
+
     constructor() {
         super();
-
-        this.type = 'Path2D';
 
         /**
          * @type {Curve2D}
@@ -29,53 +36,66 @@ export class Path2D extends Node2D {
         return this;
     }
 }
+node_class_map['Path2D'] = GDCLASS(Path2D, Node2D)
+
 
 export class PathFollow2D extends Node2D {
-    set h_offset(p_h_offset) {
-        this._h_offset = p_h_offset;
+    get class() { return 'PathFollow2D' }
+
+    /**
+     * @param {number} p_h_offset
+     */
+    set_h_offset(p_h_offset) {
+        this.h_offset = p_h_offset;
         if (this.path) {
             this._update_transform();
         }
     }
-    get h_offset() {
-        return this._h_offset;
-    }
 
-    set offset(p_offset) {
-        this._offset = p_offset;
+    /**
+     * @param {number} p_offset
+     */
+    set_offset(p_offset) {
+        this.offset = p_offset;
         if (this.path) {
             this._update_transform();
         }
     }
-    get offset() {
-        return this._offset;
-    }
 
-    set unit_offset(p_unit_offset) {
+    /**
+     * @param {number} p_unit_offset
+     */
+    set_unit_offset(p_unit_offset) {
         if (this.path && this.path.curve && this.path.curve.get_baked_length()) {
             this.offset = p_unit_offset * this.path.curve.get_baked_length();
         }
     }
-    get unit_offset() {
+    get_unit_offset() {
         if (this.path && this.path.curve && this.path.curve.get_baked_length()) {
             return this.offset / this.path.curve.get_baked_length();
         }
     }
 
-    set v_offset(p_v_offset) {
-        this._v_offset = p_v_offset;
+    /**
+     * @param {number} p_v_offset
+     */
+    set_v_offset(p_v_offset) {
+        this.v_offset = p_v_offset;
         if (this.path) {
             this._update_transform();
         }
     }
-    get v_offset() {
-        return this._v_offset;
+
+    /**
+     * @param {boolean} p_rotate
+     */
+    set_rotating(p_rotate) {
+        this.rotating = p_rotate;
+        this._update_transform();
     }
 
     constructor() {
         super();
-
-        this.type = 'PathFollow2D'
 
         /**
          * @type {Path2D}
@@ -85,17 +105,17 @@ export class PathFollow2D extends Node2D {
         /**
          * @type {number}
          */
-        this._offset = 0;
+        this.offset = 0;
 
         /**
          * @type {number}
          */
-        this._h_offset = 0;
+        this.h_offset = 0;
 
         /**
          * @type {number}
          */
-        this._v_offset = 0;
+        this.v_offset = 0;
 
         /**
          * @type {number}
@@ -115,8 +135,10 @@ export class PathFollow2D extends Node2D {
         /**
          * @type {boolean}
          */
-        this.rotate = true;
+        this.rotating = true;
     }
+
+    /* virtual */
 
     _load_data(data) {
         super._load_data(data);
@@ -145,37 +167,47 @@ export class PathFollow2D extends Node2D {
             this.loop = data.loop;
         }
 
-        if (data.rotate !== undefined) {
-            this.rotate = data.rotate;
+        if (data.rotating !== undefined) {
+            this.rotating = data.rotating;
         }
 
         return this;
     }
 
-    _propagate_enter_tree() {
-        super._propagate_enter_tree();
-
-        // @ts-ignore
-        this.path = (this.parent.type === 'Path2D') ? this.parent : null;
-        if (this.path) {
-            this._update_transform();
+    /**
+     * @param {number} p_what
+     */
+    _notification(p_what) {
+        switch (p_what) {
+            case NOTIFICATION_ENTER_TREE: {
+                const path = /** @type {Path2D} */(this.get_parent());
+                if (path.class === 'Path2D') {
+                    this._update_transform();
+                }
+            } break;
+            case NOTIFICATION_EXIT_TREE: {
+                this.path = null;
+            } break;
         }
     }
 
+    /* private */
+
     _update_transform() {
         if (!this.path) {
-            super._update_transform();
             return;
         }
 
         const c = this.path.curve;
         if (!c) {
-            super._update_transform();
             return;
         }
 
         let path_length = c.get_baked_length();
-        let bounded_offset = this._offset;
+        if (path_length === 0) {
+            return;
+        }
+        let bounded_offset = this.offset;
         if (this.loop) {
             bounded_offset = posmod(bounded_offset, path_length);
         } else {
@@ -184,7 +216,7 @@ export class PathFollow2D extends Node2D {
 
         const pos = c.interpolate_baked(bounded_offset, this.cubic_interp);
 
-        if (this.rotate) {
+        if (this.rotating) {
             let ahead = bounded_offset + this.lookahead;
 
             if (this.loop && ahead >= path_length) {
@@ -216,25 +248,21 @@ export class PathFollow2D extends Node2D {
 
             this.rotation = tangent_to_curve.angle();
 
-            pos.add(tangent_to_curve.scale(this._h_offset));
-            pos.add(normal_of_curve.scale(this._v_offset));
+            pos.add(tangent_to_curve.scale(this.h_offset));
+            pos.add(normal_of_curve.scale(this.v_offset));
 
             Vector2.free(ahead_pos);
             Vector2.free(tangent_to_curve);
             Vector2.free(negated);
             Vector2.free(normal_of_curve);
         } else {
-            pos.x += this._h_offset;
-            pos.y += this._v_offset;
+            pos.x += this.h_offset;
+            pos.y += this.v_offset;
         }
 
-        this.position.copy(pos);
+        this.set_position(pos);
 
         Vector2.free(pos);
-
-        super._update_transform();
     }
 }
-
-node_class_map['Path2D'] = Path2D;
-node_class_map['PathFollow2D'] = PathFollow2D;
+node_class_map['PathFollow2D'] = GDCLASS(PathFollow2D, Node2D)
