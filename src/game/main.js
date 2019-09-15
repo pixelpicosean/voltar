@@ -19,6 +19,7 @@ class Preloader extends Node {
     constructor() {
         super();
 
+        this.spr = null;
         console.log('init Preloader')
     }
     _enter_tree() {
@@ -30,16 +31,28 @@ class Preloader extends Node {
                 const sprite = new Sprite();
                 sprite.set_texture(tex.texture);
                 this.add_child(sprite);
-                // sprite.set_position({ x: 100, y: 100 });
+                sprite.set_position_n(100, 100);
+                sprite.set_self_modulate_n(0, 0, 0);
+                this.spr = sprite;
             })
     }
     _ready() {
         console.log('_ready')
+        this.set_process(true)
         this.set_process_input(true)
         this.set_process_unhandled_input(true)
     }
     _exit_tree() {
         console.log('_exit_tree')
+    }
+
+    /**
+     * @param {number} delta
+     */
+    _process(delta) {
+        if (this.spr) {
+            this.spr.set_rotation(this.spr.rotation + Math.PI * delta)
+        }
     }
 
     /**
