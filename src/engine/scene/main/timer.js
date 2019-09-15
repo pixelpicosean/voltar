@@ -146,9 +146,8 @@ export class Timer extends Node {
 
     /**
      * @param {boolean} p_process
-     * @param {boolean} [p_force]
      */
-    _set_process(p_process, p_force = false) {
+    _set_process(p_process) {
         switch (this.process_mode) {
             case TIMER_PROCESS_PHYSICS: {
                 this.set_physics_process_internal(p_process && !this.paused);

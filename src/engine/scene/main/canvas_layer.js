@@ -27,10 +27,17 @@ export class CanvasLayer extends Node {
      * @param {Vector2} value
      */
     set_offset(value) {
+        this.set_offset_n(value.x, value.y);
+    }
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
+    set_offset_n(x, y) {
         if (this.locrotscale_dirty) {
             this._update_locrotscale();
         }
-        this.offset.copy(value);
+        this.offset.set(x, y);
         this._update_xform();
     }
     reset_sort_index() {
@@ -68,10 +75,17 @@ export class CanvasLayer extends Node {
      * @param {Vector2} value
      */
     set_scale(value) {
+        this.set_scale_n(value.x, value.y);
+    }
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
+    set_scale_n(x, y) {
         if (this.locrotscale_dirty) {
             this._update_locrotscale();
         }
-        this.scale.copy(value);
+        this.scale.set(x, y);
         this._update_xform();
     }
 
@@ -180,7 +194,9 @@ export class CanvasLayer extends Node {
     _load_data(data) {
         super._load_data(data);
 
-        if (data.transform !== undefined) { }
+        if (data.transform !== undefined) {
+            this.set_transform(data.transform);
+        }
 
         return this;
     }
@@ -227,8 +243,14 @@ export class CanvasLayer extends Node {
 
     /* private */
 
-    _update_locrotscale() { }
-    _update_xform() { }
+    _update_locrotscale() {
+        this.offset.set(this.transform.tx, this.transform.ty);
+        this.rotation = this.transform.rotation;
+        this.transform.get_scale(this.scale);
+    }
+    _update_xform() {
+        this.transform.set_rotation_and_scale(this.rotation, this.scale);
+    }
     _update_follow_viewport(p_force_exit = false) {
         if (!this.is_inside_tree()) {
             return;
