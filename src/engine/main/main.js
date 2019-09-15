@@ -107,7 +107,7 @@ export const Main = {
 
         let step = 0;
         if (this.last_ticks > 0) {
-            step = timestamp - this.last_ticks;
+            step = (timestamp - this.last_ticks) * 0.001;
         }
         this.last_ticks = timestamp;
 
