@@ -85,7 +85,7 @@ export default class TextureUvs
      *
      * @protected
      * @param {Rect2} frame - The frame of the texture
-     * @param {Rect2} baseFrame - The base frame of the texture
+     * @param {{ width: number, height: number }} baseFrame - The base frame of the texture
      * @param {number} rotate - Rotation of frame, see {@link GroupD8}
      */
     set(frame, baseFrame, rotate)

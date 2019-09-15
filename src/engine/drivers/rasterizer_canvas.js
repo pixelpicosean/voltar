@@ -26,6 +26,8 @@ import { Runner } from './runner';
 import { VSG } from 'engine/servers/visual/visual_server_globals';
 import { VObject } from 'engine/core/v_object';
 import { RENDER_TARGET_TRANSPARENT, RENDER_TARGET_DIRECT_TO_SCREEN } from './constants';
+import { Item } from 'engine/servers/visual/visual_server_canvas';
+import { TYPE_RECT } from 'engine/servers/visual/commands';
 
 
 export class RasterizerCanvas extends VObject {
@@ -60,7 +62,7 @@ export class RasterizerCanvas extends VObject {
 
         // private
 
-        this.gl = null;
+        this.gl = OS.get_singleton().gl;
         this.extensions = {};
         this.screen = new Rect2(0, 0, 800, 600);
         this.transparent = false;
@@ -109,9 +111,6 @@ export class RasterizerCanvas extends VObject {
 
         this._backgroundColorRgba = [0,0,0,0];
         this._activeRenderTarget = null;
-
-        const size = OS.get_singleton().get_window_size();
-        this.resize(size.width, size.height);
     }
 
     /* API */
@@ -120,9 +119,20 @@ export class RasterizerCanvas extends VObject {
      * @param {WebGLRenderingContext} gl
      */
     initialize(gl) {
+        this.context_change(gl);
+    }
+    /**
+     * @param {WebGLRenderingContext} gl
+     */
+    context_change(gl) {
         this.gl = gl;
 
         this.get_extensions();
+
+        this.runners.contextChange.run(this.gl);
+
+        const size = OS.get_singleton().get_window_size();
+        this.resize(size.width, size.height);
     }
     get_extensions() {
         const gl = this.gl;
@@ -168,7 +178,7 @@ export class RasterizerCanvas extends VObject {
         let viewport_x = 0, viewport_y = 0, viewport_width = 0, viewport_height = 0;
 
         if (frame.current_rt) {
-            this.renderTexture.bind(frame.current_rt.fbo);
+            this.renderTexture.bind(frame.current_rt.texture);
             this.states.using_transparent_rt = frame.current_rt.flags[RENDER_TARGET_TRANSPARENT];
 
             if (frame.current_rt.flags[RENDER_TARGET_DIRECT_TO_SCREEN]) {
@@ -178,9 +188,9 @@ export class RasterizerCanvas extends VObject {
                 viewport_height = frame.current_rt.height;
                 viewport_x = frame.current_rt.x;
                 viewport_y = OS.get_singleton().window_size.height - viewport_height - frame.current_rt.y;
-                gl.scissor(viewport_x, viewport_y, viewport_width, viewport_height);
-                gl.viewport(viewport_x, viewport_y, viewport_width, viewport_height);
-                gl.enable(gl.SCISSOR_TEST);
+                // gl.scissor(viewport_x, viewport_y, viewport_width, viewport_height);
+                // gl.viewport(viewport_x, viewport_y, viewport_width, viewport_height);
+                // gl.enable(gl.SCISSOR_TEST);
             } else {
                 this.renderingToScreen = false;
             }
@@ -189,39 +199,35 @@ export class RasterizerCanvas extends VObject {
         // FIXME: should we bind empty render target here?
         this.renderTexture.bind(null);
 
+        this.reset_canvas();
+
+        this.projection.transform = null;
+
+        this.batch.currentRenderer.start();
+
         if (frame.clear_request) {
             this._backgroundColorRgba[0] = frame.clear_request_color.r;
             this._backgroundColorRgba[1] = frame.clear_request_color.g;
             this._backgroundColorRgba[2] = frame.clear_request_color.b;
             this._backgroundColorRgba[3] = this.states.using_transparent_rt ? frame.clear_request_color.a : 1.0;
-            this.renderTexture.clear();
+            this.renderTexture.clear(this._backgroundColorRgba);
             frame.clear_request = false;
         }
-
-        this.reset_canvas();
-
-        // TODO: upload projection_matrix uniform
-        // this.projection.transform = transform;
-
-        // TODO: upload final_modulate uniform
-        // TODO: upload identity modelview_matrix uniform
-        // TODO: upload identity extra_matrix uniform
-
-        this.batch.currentRenderer.start();
     }
 
     canvas_end() {
         const frame = this.storage.frame;
         this.batch.currentRenderer.flush();
 
-        if (frame.current_rt && frame.current_rt.fbo) {
-            frame.current_rt.fbo.baseTexture.update();
+        if (frame.current_rt && frame.current_rt.texture) {
+            frame.current_rt.texture.baseTexture.update();
         }
 
         this.runners.postrender.run();
-        this.emit_signal('postrender');
 
         this.projection.transform = null;
+
+        this.emit_signal('postrender');
 
         // TODO: reset viewport to full window size while drawing to screen?
 
@@ -232,8 +238,8 @@ export class RasterizerCanvas extends VObject {
     }
 
     reset_canvas() {
-        const gl = this.gl;
-        gl.disable(gl.DEPTH_TEST);
+        // const gl = this.gl;
+        // gl.disable(gl.DEPTH_TEST);
     }
 
     /**
@@ -244,10 +250,27 @@ export class RasterizerCanvas extends VObject {
      * @param {Transform2D} p_base_transform
      */
     canvas_render_items(p_item_list, p_z, p_modulate, p_light, p_base_transform) {
-
+        while (p_item_list) {
+            this._canvas_item_render_commands(p_item_list);
+            p_item_list = /** @type {Item} */(p_item_list.next);
+        }
     }
 
     /* private */
+
+    /**
+     * @param {Item} p_item
+     */
+    _canvas_item_render_commands(p_item) {
+        for (let c of p_item.commands) {
+            switch (c.type) {
+                case TYPE_RECT: {
+                    c.calculate_vertices(p_item.final_transform);
+                    this.batch.currentRenderer.render(c);
+                } break;
+            }
+        }
+    }
 
     /**
      * @template T

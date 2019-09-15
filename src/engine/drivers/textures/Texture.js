@@ -291,7 +291,7 @@ export default class Texture extends VObject
      * The source can be - frame id, image url, video url, canvas element, video element, base texture
      *
      * @static
-     * @param {number|string|HTMLImageElement|HTMLCanvasElement|HTMLVideoElement|BaseTexture} source
+     * @param {string|HTMLImageElement|HTMLCanvasElement|HTMLVideoElement|BaseTexture} source
      *        Source to create texture from
      * @param {object} [options] See {@link BaseTexture}'s constructor for options.
      * @return {Texture} The newly created texture
@@ -300,26 +300,24 @@ export default class Texture extends VObject
     {
         let cacheId = null;
 
-        if (typeof source === 'string')
-        {
+        if (typeof source === 'string') {
             cacheId = source;
-        }
-        else
-        {
-            if (!source._pixiId)
+        } else if (source instanceof BaseTexture) {
+            return new Texture(source);
+        } else {
+            if (!source._tex_id)
             {
-                source._pixiId = `pixiid_${uid()}`;
+                source._tex_id = `volt_id_${uid()}`;
             }
 
-            cacheId = source._pixiId;
+            cacheId = source._tex_id;
         }
 
         let texture = TextureCache[cacheId];
 
-        if (!texture)
-        {
-            if (!options.resolution)
-            {
+        if (!texture) {
+            if (!options.resolution) {
+                // @ts-ignore
                 options.resolution = getResolutionOfUrl(source);
             }
 
@@ -330,7 +328,6 @@ export default class Texture extends VObject
             Texture.addToCache(texture, cacheId);
         }
 
-        // lets assume its a base texture!
         return texture;
     }
 
@@ -362,6 +359,7 @@ export default class Texture extends VObject
      */
     static fromLoader(source, imageUrl, name)
     {
+        // @ts-ignore
         const resource = new ImageResource(source);
 
         resource.url = imageUrl;

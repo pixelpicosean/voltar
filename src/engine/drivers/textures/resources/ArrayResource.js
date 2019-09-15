@@ -1,7 +1,8 @@
-import Resource from './Resource';
+import TextureResource from './Resource';
 import BaseTexture from '../BaseTexture';
 import { TARGETS } from '../../constants';
 import { autoDetectResource } from './autoDetectResource';
+import GLTexture from '../GLTexture';
 
 /**
  * A resource that contains a number of sources.
@@ -12,7 +13,7 @@ import { autoDetectResource } from './autoDetectResource';
  * @param {number} [options.width] - Width of the resource
  * @param {number} [options.height] - Height of the resource
  */
-export default class ArrayResource extends Resource
+export default class ArrayResource extends TextureResource
 {
     constructor(source, options)
     {
@@ -94,7 +95,7 @@ export default class ArrayResource extends Resource
     /**
      * Set a resource by ID
      *
-     * @param {Resource} resource
+     * @param {TextureResource} resource
      * @param {number} index - Zero-based index of resource to set
      * @return {ArrayResource} Instance for chaining
      */
@@ -183,9 +184,9 @@ export default class ArrayResource extends Resource
 
     /**
      * Upload the resources to the GPU.
-     * @param {PIXI.Renderer} renderer
-     * @param {PIXI.BaseTexture} texture
-     * @param {PIXI.GLTexture} glTexture
+     * @param {import('../../rasterizer_canvas').RasterizerCanvas} renderer
+     * @param {BaseTexture} texture
+     * @param {GLTexture} glTexture
      * @returns {boolean} whether texture was uploaded
      */
     upload(renderer, texture, glTexture)
@@ -195,7 +196,9 @@ export default class ArrayResource extends Resource
 
         if (glTexture.dirtyId < 0)
         {
+            // @ts-ignore
             gl.texImage3D(
+                // @ts-ignore
                 gl.TEXTURE_2D_ARRAY,
                 0,
                 texture.format,
@@ -218,7 +221,9 @@ export default class ArrayResource extends Resource
                 itemDirtyIds[i] = item.dirtyId;
                 if (item.valid)
                 {
+                    // @ts-ignore
                     gl.texSubImage3D(
+                        // @ts-ignore
                         gl.TEXTURE_2D_ARRAY,
                         0,
                         0, // xoffset

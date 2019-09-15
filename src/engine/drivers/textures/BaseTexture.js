@@ -1,7 +1,7 @@
 import { VObject } from 'engine/core/v_object';
 import { FORMATS, SCALE_MODES, TARGETS, TYPES, MIPMAP_MODES, WRAP_MODES } from '../constants';
 
-import Resource from './resources/Resource';
+import TextureResource from './resources/Resource';
 import BufferResource from './resources/BufferResource';
 import { autoDetectResource } from './resources/autoDetectResource';
 
@@ -21,7 +21,7 @@ const defaultBufferOptions = {
  * All textures have a base texture, which contains information about the source.
  * Therefore you can have many textures all using a single BaseTexture
  *
- * @param {Resource|string|HTMLImageElement|HTMLCanvasElement|HTMLVideoElement} [resource=null]
+ * @param {TextureResource|string|HTMLImageElement|HTMLCanvasElement|HTMLVideoElement} [resource=null]
  *        The current resource to use, for things that aren't Resource objects, will be converted
  *        into a Resource.
  * @param {Object} [options] - Collection of options
@@ -51,7 +51,7 @@ export default class BaseTexture extends VObject
             wrapMode, format, type, target, resolution, resourceOptions } = options;
 
         // Convert the resource to a Resource object
-        if (resource && !(resource instanceof Resource))
+        if (resource && !(resource instanceof TextureResource))
         {
             resource = autoDetectResource(resource, resourceOptions);
             resource.internal = true;
@@ -428,7 +428,7 @@ export default class BaseTexture extends VObject
     /**
      * Sets the resource if it wasn't set. Throws error if resource already present
      *
-     * @param {Resource} resource - that is managing this BaseTexture
+     * @param {TextureResource} resource - that is managing this BaseTexture
      * @returns {BaseTexture} this
      */
     setResource(resource)
@@ -542,12 +542,12 @@ export default class BaseTexture extends VObject
         }
         else
         {
-            if (!source._pixiId)
+            if (!source._tex_id)
             {
-                source._pixiId = `pixiid_${uid()}`;
+                source._tex_id = `volt_id_${uid()}`;
             }
 
-            cacheId = source._pixiId;
+            cacheId = source._tex_id;
         }
 
         let baseTexture = BaseTextureCache[cacheId];

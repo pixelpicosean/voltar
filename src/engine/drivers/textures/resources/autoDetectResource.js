@@ -1,9 +1,10 @@
 import ImageResource from './ImageResource';
+import TextureResource from './Resource';
 
 /**
- * Collection of installed resource types, class must extend {@link PIXI.resources.Resource}.
+ * Collection of installed resource types, class must extend {@link TextureResource}.
  * @example
- * class CustomResource extends PIXI.resources.Resource {
+ * class CustomResource extends TextureResource {
  *   // MUST have source, options constructor signature
  *   // for auto-detected resources to be created.
  *   constructor(source, options) {
@@ -19,9 +20,8 @@ import ImageResource from './ImageResource';
  *   }
  * }
  * // Install the new resource type
- * PIXI.resources.INSTALLED.push(CustomResource);
+ * INSTALLED.push(CustomResource);
  *
- * @name PIXI.resources.INSTALLED
  * @type {Array<*>}
  * @static
  * @readonly
@@ -55,7 +55,7 @@ export const INSTALLED = [];
  * @param {boolean} [options.autoPlay=true] - Video option to start playing video immediately
  * @param {number} [options.updateFPS=0] - Video option to update how many times a second the
  *        texture should be updated from the video. Leave at 0 to update at every render
- * @return {PIXI.resources.Resource} The created resource.
+ * @return {TextureResource} The created resource.
  */
 export function autoDetectResource(source, options)
 {

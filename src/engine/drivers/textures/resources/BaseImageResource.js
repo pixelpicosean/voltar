@@ -1,10 +1,10 @@
-import Resource from './Resource';
+import TextureResource from './Resource';
 import { determineCrossOrigin } from '../../utils/determineCrossOrigin';
 
 /**
  * Base for all the image/canvas resources
  */
-export default class BaseImageResource extends Resource
+export default class BaseImageResource extends TextureResource
 {
     /**
      * @param {HTMLImageElement|HTMLCanvasElement|HTMLVideoElement|SVGElement} source
@@ -67,6 +67,7 @@ export default class BaseImageResource extends Resource
 
         if (baseTexture.target === gl.TEXTURE_2D && glTexture.width === width && glTexture.height === height)
         {
+            // @ts-ignore
             gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, baseTexture.format, baseTexture.type, source);
         }
         else
@@ -74,6 +75,7 @@ export default class BaseImageResource extends Resource
             glTexture.width = width;
             glTexture.height = height;
 
+            // @ts-ignore
             gl.texImage2D(baseTexture.target, 0, baseTexture.format, baseTexture.format, baseTexture.type, source);
         }
 

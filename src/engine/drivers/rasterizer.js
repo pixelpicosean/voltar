@@ -30,12 +30,16 @@ export class Rasterizer {
         this.render_canvas = OS.get_singleton().canvas;
         this.gl = OS.get_singleton().gl;
 
+        this.context = new ContextManager(this.render_canvas, this.gl);
+        this.context.connect('context_change', (gl) => {
+            this.storage.context_change(gl);
+            this.canvas.context_change(gl);
+            this.scene.context_change(gl);
+        })
+
         this.storage.initialize(this.gl);
         this.canvas.initialize(this.gl);
         this.scene.initialize(this.gl);
-
-        this.context = new ContextManager(this.render_canvas, this.gl);
-        // TODO: call contextChange
     }
 
     /**

@@ -235,7 +235,7 @@ export default class AbstractBatchRenderer extends ObjectRenderer
         this.MAX_TEXTURES = 1;
 
         this.renderer.connect('prerender', this.onPrerender, this);
-        renderer.runners.contextChange.add(this);
+        this.renderer.runners.contextChange.add(this);
     }
 
     /**
@@ -303,12 +303,12 @@ export default class AbstractBatchRenderer extends ObjectRenderer
             return;
         }
 
-        if (this._vertexCount + (element.vertexData.length / 2) > this.size)
+        if (this._vertexCount + (element.vertex_data.length / 2) > this.size)
         {
             this.flush();
         }
 
-        this._vertexCount += element.vertexData.length / 2;
+        this._vertexCount += element.vertex_data.length / 2;
         this._indexCount += element.indices.length;
         this._bufferedElements[this._bufferSize++] = element;
     }
@@ -409,7 +409,7 @@ export default class AbstractBatchRenderer extends ObjectRenderer
                 indexBuffer, index, _indexCount);
 
             // push a graphics..
-            index += (sprite.vertexData.length / 2) * vertexSize;
+            index += (sprite.vertex_data.length / 2) * vertexSize;
             _indexCount += sprite.indices.length;
         }
 
@@ -584,7 +584,7 @@ export default class AbstractBatchRenderer extends ObjectRenderer
      * Takes the four batching parameters of `element`, interleaves
      * and pushes them into the batching attribute/index buffers given.
      *
-     * It uses these properties: `vertexData` `uvs`, `textureId` and
+     * It uses these properties: `vertex_data` `uvs`, `textureId` and
      * `indicies`. It also uses the "tint" of the base-texture, if
      * present.
      *
@@ -604,7 +604,7 @@ export default class AbstractBatchRenderer extends ObjectRenderer
         const packedVertices = aIndex / this.vertexSize;
         const uvs = element.uvs;
         const indicies = element.indices;
-        const vertexData = element.vertexData;
+        const vertex_data = element.vertex_data;
         const textureId = element._texture.baseTexture._id;
 
         const alpha = Math.min(element.worldAlpha, 1.0);
@@ -614,10 +614,10 @@ export default class AbstractBatchRenderer extends ObjectRenderer
             : element._tintRGB + (alpha * 255 << 24);
 
         // lets not worry about tint! for now..
-        for (let i = 0; i < vertexData.length; i += 2)
+        for (let i = 0; i < vertex_data.length; i += 2)
         {
-            float32View[aIndex++] = vertexData[i];
-            float32View[aIndex++] = vertexData[i + 1];
+            float32View[aIndex++] = vertex_data[i];
+            float32View[aIndex++] = vertex_data[i + 1];
             float32View[aIndex++] = uvs[i];
             float32View[aIndex++] = uvs[i + 1];
             uint32View[aIndex++] = argb;

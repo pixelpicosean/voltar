@@ -40,6 +40,7 @@ export const SCREEN_SENSOR = 6;
 /**
  * @typedef OS_InitOptions
  * @property {HTMLCanvasElement} canvas
+ * @property {Vector2Like} size
  */
 
 export class OS {
@@ -107,8 +108,11 @@ export class OS {
     /**
      * @param {OS_InitOptions} param0
      */
-    initialize({ canvas }) {
+    initialize({ canvas, size }) {
         this.canvas = canvas;
+        this.canvas.width = size.x;
+        this.canvas.height = size.y;
+
         // TODO: support force GLES2_LEGACY setting from ProjectSettings
         if (device.phone || device.tablet) {
             this.video_driver_index = VIDEO_DRIVER_GLES2;

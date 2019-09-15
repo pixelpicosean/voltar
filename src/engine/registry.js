@@ -39,12 +39,12 @@ export const node_plugins = {
 export const scene_class_map = Object.create(null);
 
 /**
- * @type {Array<() => ((res: import("engine/core/io/Resource").default, next: Function) => void)>}
+ * @type {Array<() => ((res: import("engine/core/io/io_resource").default, next: Function) => void)>}
  */
 export const loader_pre_procs = [];
 
 /**
- * @type {Array<() => ((res: import("engine/core/io/Resource").default, next: Function) => void)>}
+ * @type {Array<() => ((res: import("engine/core/io/io_resource").default, next: Function) => void)>}
  */
 export const loader_use_procs = [];
 

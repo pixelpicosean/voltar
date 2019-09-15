@@ -11,9 +11,6 @@ import { nextPow2 } from '../utils/pow2';
  *
  * If you use custom RenderTexturePool for your filters, you can use methods
  * `getFilterTexture` and `returnFilterTexture` same as in
- *
- * @class
- * @memberof PIXI
  */
 export default class RenderTexturePool
 {
@@ -30,7 +27,7 @@ export default class RenderTexturePool
          *
          * Automatically sets to true after `setScreenSize`
          *
-         * @member {boolean}
+         * @type {boolean}
          * @default false
          */
         this.enableFullScreen = false;

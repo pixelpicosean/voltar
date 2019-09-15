@@ -1,5 +1,6 @@
 import BaseImageResource from './BaseImageResource';
 import * as settings from '../../settings';
+import GLTexture from '../GLTexture';
 
 /**
  * Resource type for HTMLImageElement.
@@ -8,8 +9,9 @@ export default class ImageResource extends BaseImageResource
 {
     /**
      * @param {HTMLImageElement|string} source - image source or URL
+     * @param {object} [options]
      * @param {boolean} [options.autoLoad=true] start loading process
-     * @param {boolean} [options.createBitmap=PIXI.settings.CREATE_IMAGE_BITMAP] whether its required to create
+     * @param {boolean} [options.createBitmap=CREATE_IMAGE_BITMAP] whether its required to create
      *        a bitmap before upload
      * @param {boolean} [options.crossorigin=true] - Load image using cross origin
      * @param {boolean} [options.premultiplyAlpha=true] - Premultiply image alpha in bitmap
@@ -101,7 +103,7 @@ export default class ImageResource extends BaseImageResource
      * returns a promise when image will be loaded and processed
      *
      * @param {boolean} [createBitmap=true] whether process image into bitmap
-     * @returns {Promise<void>}
+     * @returns {Promise}
      */
     load(createBitmap)
     {
@@ -117,6 +119,7 @@ export default class ImageResource extends BaseImageResource
 
         this._load = new Promise((resolve) =>
         {
+            // @ts-ignore
             this.url = this.source.src;
             const { source } = this;
 
@@ -129,6 +132,7 @@ export default class ImageResource extends BaseImageResource
                 source.onload = null;
                 source.onerror = null;
 
+                // @ts-ignore
                 this.resize(source.width, source.height);
                 this._load = null;
 
@@ -142,6 +146,7 @@ export default class ImageResource extends BaseImageResource
                 }
             };
 
+            // @ts-ignore
             if (source.complete && source.src)
             {
                 completed();
@@ -159,7 +164,7 @@ export default class ImageResource extends BaseImageResource
      * Called when we need to convert image into BitmapImage.
      * Can be called multiple times, real promise is cached inside.
      *
-     * @returns {Promise<void>} cached promise to fill that bitmap
+     * @returns {Promise} cached promise to fill that bitmap
      */
     process()
     {
@@ -173,7 +178,9 @@ export default class ImageResource extends BaseImageResource
         }
 
         this._process = window.createImageBitmap(this.source,
+            // @ts-ignore
             0, 0, this.source.width, this.source.height,
+            // @ts-ignore
             {
                 premultiplyAlpha: this.premultiplyAlpha ? 'premultiply' : 'none',
             })
@@ -197,7 +204,7 @@ export default class ImageResource extends BaseImageResource
      * Upload the image resource to GPU.
      *
      * @param {import('../../rasterizer_canvas').RasterizerCanvas} renderer - Renderer to upload to
-     * @param {BaseTexture} baseTexture - BaseTexture for this resource
+     * @param {import('../BaseTexture').default} baseTexture - BaseTexture for this resource
      * @param {GLTexture} glTexture - GLTexture to use
      * @returns {boolean} true is success
      */

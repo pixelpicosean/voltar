@@ -1,4 +1,6 @@
-import Resource from './Resource';
+import TextureResource from './Resource';
+import GLTexture from '../GLTexture';
+import BaseTexture from '../BaseTexture';
 
 /**
  * @interface SharedArrayBuffer
@@ -7,7 +9,7 @@ import Resource from './Resource';
 /**
  * Buffer resource with data of typed array.
  */
-export default class BufferResource extends Resource
+export default class BufferResource extends TextureResource
 {
     /**
      * @param {Float32Array|Uint8Array|Uint32Array} source - Source buffer

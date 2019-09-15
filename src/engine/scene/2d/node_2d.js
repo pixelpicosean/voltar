@@ -2,7 +2,7 @@ import { node_class_map } from 'engine/registry';
 import { GDCLASS } from 'engine/core/v_object';
 import { CMP_EPSILON } from 'engine/core/math/math_defs';
 import { deg2rad, rad2deg } from 'engine/core/math/math_funcs';
-import { Vector2 } from 'engine/core/math/vector2';
+import { Vector2, Vector2Like } from 'engine/core/math/vector2';
 import { Transform2D } from 'engine/core/math/transform_2d';
 
 import { VSG } from 'engine/servers/visual/visual_server_globals';
@@ -15,7 +15,7 @@ export class Node2D extends CanvasItem {
     get class() { return 'Node2D' }
 
     /**
-     * @param {Vector2} value
+     * @param {Vector2Like} value
      */
     set_position(value) {
         if (this._xform_dirty) {
@@ -62,7 +62,7 @@ export class Node2D extends CanvasItem {
     }
 
     /**
-     * @param {Vector2} value
+     * @param {Vector2Like} value
      */
     set_scale(value) {
         if (this._xform_dirty) {
@@ -104,7 +104,7 @@ export class Node2D extends CanvasItem {
     }
 
     /**
-     * @param {Vector2} value
+     * @param {Vector2Like} value
      */
     set_global_position(value) {
         const inv = Transform2D.new();
@@ -148,7 +148,7 @@ export class Node2D extends CanvasItem {
     }
 
     /**
-     * @param {Vector2} value
+     * @param {Vector2Like} value
      */
     set_global_scale(value) {
         const pi = this.get_parent_item();

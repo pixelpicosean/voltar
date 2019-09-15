@@ -1,10 +1,10 @@
 import ArrayResource from './ArrayResource';
 import { TARGETS } from '../../constants';
-import Resource from './Resource';
+import TextureResource from './Resource';
 
 /**
  * Resource for a CubeTexture which contains six resources.
- * @param {Array<string|Resource>} [source] Collection of URLs or resources
+ * @param {Array<string|TextureResource>} [source] Collection of URLs or resources
  *        to use as the sides of the cube.
  * @param {object} [options] - ImageResource options
  * @param {number} [options.width] - Width of resource
@@ -38,7 +38,7 @@ export default class CubeResource extends ArrayResource
      * Add binding
      *
      * @override
-     * @param {PIXI.BaseTexture} baseTexture - parent base texture
+     * @param {import('../BaseTexture').default} baseTexture - parent base texture
      */
     bind(baseTexture)
     {

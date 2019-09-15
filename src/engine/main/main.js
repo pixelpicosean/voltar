@@ -68,8 +68,8 @@ export const Main = {
 
         os.initialize({
             canvas: /** @type {HTMLCanvasElement} */(document.getElementById('game')),
+            size: { x: this.global.display.width, y: this.global.display.height },
         });
-        os.set_window_size({ x: this.global.display.width, y: this.global.display.height });
 
         physics_2d_server = new Physics2DServer();
         physics_2d_server.init();

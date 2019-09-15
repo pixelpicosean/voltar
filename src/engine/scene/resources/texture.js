@@ -13,6 +13,7 @@ import { VSG } from "engine/servers/visual/visual_server_globals";
 const White = Object.freeze(new Color(1, 1, 1, 1));
 
 export class Texture extends Resource {
+    get class() { return 'Texture' }
     get flags() {
         return this._flags;
     }
@@ -22,8 +23,6 @@ export class Texture extends Resource {
 
     constructor() {
         super();
-
-        this.class = 'Texture';
 
         this._flags = 0;
     }
@@ -80,18 +79,19 @@ export const STORAGE_COMPRESS_LOSSY = 1;
 export const STORAGE_COMPRESS_LOSSLESS = 2;
 
 export class ImageTexture extends Texture {
+    get class() { return 'ImageTexture' }
+
+    get width() { return this.texture.width }
+    get height() { return this.texture.height }
+
     constructor() {
         super();
-
-        this.class = 'ImageTexture';
 
         this.storage = STORAGE_RAW;
         this.lossy_quality = 0.7;
 
-        this.texture = null;
+        this.texture = VSG.storage.texture_2d_create();
         this.format = 0;
-        this.width = 0;
-        this.height = 0;
         this.size_override = new Vector2();
         this.image_stored = false;
     }

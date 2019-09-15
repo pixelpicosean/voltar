@@ -147,7 +147,7 @@ export default class SVGResource extends BaseImageResource
 
             canvas.width = width;
             canvas.height = height;
-            canvas._pixiId = `canvas_${uid()}`;
+            canvas._tex_id = `canvas_${uid()}`;
 
             // Draw the Svg to the canvas
             canvas

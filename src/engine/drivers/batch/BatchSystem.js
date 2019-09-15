@@ -1,4 +1,6 @@
 import ObjectRenderer from './ObjectRenderer';
+import { BatchRenderer } from './BatchPluginFactory';
+import AbstractBatchRenderer from './AbstractBatchRenderer';
 
 /**
  * System plugin to the renderer to manage batching.
@@ -24,7 +26,7 @@ export default class BatchSystem
          *
          * @type {ObjectRenderer}
          */
-        this.currentRenderer = this.emptyRenderer;
+        this.currentRenderer = new BatchRenderer(this.renderer);
     }
 
     /**

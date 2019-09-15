@@ -24,18 +24,17 @@ export default class BatchPluginFactory
      *     gl_FragColor = vColor * vec4(color.a - color.rgb, color.a);
      * }
      * `;
-     * const InvertBatchRenderer = PIXI.BatchPluginFactory.create({ fragment });
-     * PIXI.Renderer.registerPlugin('invert', InvertBatchRenderer);
-     * const sprite = new PIXI.Sprite();
+     * const InvertBatchRenderer = BatchPluginFactory.create({ fragment });
+     * Renderer.registerPlugin('invert', InvertBatchRenderer);
+     * const sprite = new Sprite();
      * sprite.pluginName = 'invert';
      *
      * @static
      * @param {object} [options]
-     * @param {string} [options.vertex=PIXI.BatchPluginFactory.defaultVertexSrc] - Vertex shader source
-     * @param {string} [options.fragment=PIXI.BatchPluginFactory.defaultFragmentTemplate] - Fragment shader template
+     * @param {string} [options.vertex=defaultVertexSrc] - Vertex shader source
+     * @param {string} [options.fragment=defaultFragmentTemplate] - Fragment shader template
      * @param {number} [options.vertexSize=6] - Vertex size
-     * @param {object} [options.geometryClass=PIXI.BatchGeometry]
-     * @return {*} New batch renderer plugin
+     * @param {object} [options.geometryClass=BatchGeometry]
      */
     static create(options)
     {

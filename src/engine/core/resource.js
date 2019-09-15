@@ -2,10 +2,9 @@ import { VObject, GDCLASS } from "./v_object";
 import { Node } from "engine/scene/main/node";
 
 export class Resource extends VObject {
+    get class() { return 'Resource' }
     constructor() {
         super();
-
-        this.class = 'Resource';
 
         this.resource_name = '';
         this.resource_path = '';

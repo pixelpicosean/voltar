@@ -6,6 +6,7 @@ import { Color } from "engine/core/color";
 
 import { VSG } from "./visual_server_globals";
 import { Canvas } from "./visual_server_canvas";
+import { RenderTarget } from "engine/drivers/rasterizer_storage";
 
 
 const VIEWPORT_UPDATE_DISABLED = 0;
@@ -53,8 +54,8 @@ export class Viewport {
         this.camera = null;
         this.scenario = null;
 
+        /** @type {RenderTarget} */
         this.render_target = null;
-        this.render_target_texture = null;
         this.update_mode = VIEWPORT_UPDATE_WHEN_VISIBLE;
 
         this.viewport_to_screen = 0;
@@ -75,7 +76,7 @@ export class Viewport {
         this.render_info = new Array(VIEWPORT_RENDER_INFO_MAX);
         for (let i = 0; i < VIEWPORT_RENDER_INFO_MAX; i++) this.render_info[i] = 0;
 
-        this.clear_mode = VIEWPORT_CLEAR_ONLY_NEXT_FRAME;
+        this.clear_mode = VIEWPORT_CLEAR_ALWAYS;
 
         this.transparent_bg = false;
 
@@ -153,7 +154,7 @@ export class VisualServerViewport {
      */
     viewport_set_size(p_viewport, p_width, p_height) {
         p_viewport.size.set(p_width, p_height);
-        p_viewport.render_target.setSize(p_width, p_height);
+        VSG.storage.render_target_set_size(p_viewport.render_target, p_width, p_height);
     }
     /**
      * @param {Viewport} p_viewport

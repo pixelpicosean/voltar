@@ -1,31 +1,49 @@
 import { Color } from "engine/core/color";
 import {
+    FORMAT_RGB8,
+    FORMAT_RGBA8,
     Image,
 } from "engine/core/image";
 
 import RenderTexture from "./renderTexture/RenderTexture";
-import { RENDER_TARGET_FLAG_MAX } from "./constants";
+import { RENDER_TARGET_FLAG_MAX, FORMATS } from "./constants";
+import Texture from "./textures/Texture";
+import BaseRenderTexture from "./renderTexture/BaseRenderTexture";
+import BaseTexture from "./textures/BaseTexture";
+import { autoDetectResource } from "./textures/resources/index";
 
 
-class RenderTarget {
+/**
+ * @param {number} format
+ */
+function image_format_to_texture(format) {
+    switch (format) {
+        case FORMATS.RGB: return FORMAT_RGB8;
+        case FORMATS.RGBA: return FORMAT_RGBA8;
+    }
+}
+
+
+export class RenderTarget {
     constructor() {
-        /** @type {RenderTexture} */
-        this.fbo = null;
         this.x = 0;
         this.y = 0;
         this.width = 0;
         this.height = 0;
         this.flags = new Array(RENDER_TARGET_FLAG_MAX);
 
+        /** @type {RenderTexture} */
+        this.texture = null;
+
         this.used_in_frame = false;
 
         this.external = {
-            /** @type {RenderTexture} */
-            fbo: null,
             color: new Color(),
+            /** @type {RenderTexture} */
             texture: null,
         }
     }
+    free() { }
 }
 
 class Render {
@@ -113,11 +131,16 @@ export class RasterizerStorage {
      * @param {WebGLRenderingContext} gl
      */
     initialize(gl) {
+        this.context_change(gl);
+    }
+    /**
+     * @param {WebGLRenderingContext} gl
+     */
+    context_change(gl) {
         this.gl = gl;
 
         // default textures
         const create_texture = (/** @type {Uint8Array} */texdata) => {
-            // return new DataTexture(texdata, 8, 8, RGBFormat);
             let tex = gl.createTexture();
             return tex;
         }
@@ -170,7 +193,7 @@ export class RasterizerStorage {
     /* Texture API */
 
     /**
-     * @param {any} p_texture
+     * @param {Texture} p_texture
      * @param {number} p_width
      * @param {number} p_height
      * @param {number} p_depth
@@ -179,29 +202,18 @@ export class RasterizerStorage {
      * @param {number} [p_flags]
      */
     texture_allocate(p_texture, p_width, p_height, p_depth, p_format, p_type, p_flags) {
-        const texture = new Texture();
-        texture.format = image_format_to_three(p_format);
-        return texture;
+        p_texture.baseTexture.setSize(p_width, p_height);
+        p_texture.baseTexture.format = image_format_to_texture(p_format);
     }
-    /**
-     * @param {Image} p_image
-     */
-    texture_2d_create(p_image) {
-        const texture = new Texture();
-        if (p_image) {
-            texture.image = p_image.data;
-            texture.format = image_format_to_three(p_image.format);
-            texture.needsUpdate = true;
-        }
-        return texture;
+    texture_2d_create() {
+        return new Texture(new BaseTexture());
     }
     /**
      * @param {Texture} rid
      * @param {Image} p_image
      */
     texture_set_data(rid, p_image) {
-        rid.image = p_image.data;
-        rid.needsUpdate = true;
+        rid.baseTexture.setResource(autoDetectResource(p_image));
     }
     /**
      * @param {Texture} rid
@@ -212,39 +224,40 @@ export class RasterizerStorage {
     /* RenderTarget API */
 
     render_target_create() {
-        return new WebGLRenderTarget(0, 0);
+        const rt = new RenderTarget();
+        const t = new RenderTexture(new BaseRenderTexture({
+            width: 0,
+            height: 0,
+        }));
+        rt.texture = t;
+        return rt;
     }
     /**
-     * @param {WebGLRenderTarget} render_target
+     * @param {RenderTarget} render_target
      * @param {number} x
      * @param {number} y
      */
     render_target_set_position(render_target, x, y) {
-        render_target.viewport.x = x;
-        render_target.viewport.y = y;
-        render_target.scissor.x = x;
-        render_target.scissor.y = y;
+        render_target.x = x;
+        render_target.y = y;
     }
     /**
-     * @param {WebGLRenderTarget} render_target
+     * @param {RenderTarget} render_target
      * @param {number} width
      * @param {number} height
      */
     render_target_set_size(render_target, width, height) {
-        // keep x/y
-        const x = render_target.viewport.x;
-        const y = render_target.viewport.y;
+        if (width === render_target.width && height == render_target.height) {
+            return;
+        }
 
-        render_target.setSize(width, height);
+        render_target.width = width;
+        render_target.height = height;
 
-        // reset x/y
-        render_target.viewport.x = x;
-        render_target.viewport.y = y;
-        render_target.scissor.x = x;
-        render_target.scissor.y = y;
+        render_target.texture.resize(width, height, true);
     }
     /**
-     * @param {WebGLRenderTarget} render_target
+     * @param {RenderTarget} render_target
      */
     render_target_get_texture(render_target) {
         return render_target.texture;

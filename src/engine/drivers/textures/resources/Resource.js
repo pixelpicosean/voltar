@@ -1,11 +1,12 @@
 import { Runner } from '../../runner';
+import GLTexture from '../GLTexture';
 
 /**
  * Base resource class for textures that manages validation and uploading, depending on its type.
  *
  * Uploading of a base texture to the GPU is required.
  */
-export default class Resource
+export default class TextureResource
 {
     /**
      * @param {number} [width=0] Width of the resource
@@ -65,7 +66,7 @@ export default class Resource
     /**
      * Bind to a parent BaseTexture
      *
-     * @param {BaseTexture} baseTexture - Parent texture
+     * @param {import('../BaseTexture').default} baseTexture - Parent texture
      */
     bind(baseTexture)
     {
@@ -83,7 +84,7 @@ export default class Resource
     /**
      * Unbind to a parent BaseTexture
      *
-     * @param {BaseTexture} baseTexture - Parent texture
+     * @param {import('../BaseTexture').default} baseTexture - Parent texture
      */
     unbind(baseTexture)
     {
@@ -162,7 +163,7 @@ export default class Resource
      * Uploads the texture or returns false if it cant for some reason. Override this.
      *
      * @param {import('../../rasterizer_canvas').RasterizerCanvas} renderer - yeah, renderer!
-     * @param {BaseTexture} baseTexture - the texture
+     * @param {import('../BaseTexture').default} baseTexture - the texture
      * @param {GLTexture} glTexture - texture instance for this webgl context
      * @returns {boolean} true is success
      */
@@ -175,7 +176,7 @@ export default class Resource
      * Set the style, optional to override
      *
      * @param {import('../../rasterizer_canvas').RasterizerCanvas} renderer - yeah, renderer!
-     * @param {BaseTexture} baseTexture - the texture
+     * @param {import('../BaseTexture').default} baseTexture - the texture
      * @param {GLTexture} glTexture - texture instance for this webgl context
      * @returns {boolean} `true` is success
      */

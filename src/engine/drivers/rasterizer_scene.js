@@ -11,6 +11,12 @@ export class RasterizerScene {
      * @param {WebGLRenderingContext} gl
      */
     initialize(gl) {
+        this.context_change(gl);
+    }
+    /**
+     * @param {WebGLRenderingContext} gl
+     */
+    context_change(gl) {
         this.gl = gl;
     }
 

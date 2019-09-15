@@ -132,7 +132,7 @@ export default function generateUniformsSync(group, uniformData)
             {
                 // TODO and some smart caching dirty ids here!
                 func += `
-                gl.uniformMatrix3fv(ud.${i}.location, false, uv.${i}.toArray(true));
+                gl.uniformMatrix3fv(ud.${i}.location, false, uv.${i}.to_array(true));
                 \n`;
             }
             else

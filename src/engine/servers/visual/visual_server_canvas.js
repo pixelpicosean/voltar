@@ -5,10 +5,11 @@ import { Rect2 } from 'engine/core/math/rect2';
 import { clamp } from 'engine/core/math/math_funcs';
 import { CMP_EPSILON } from 'engine/core/math/math_defs';
 import { Color } from 'engine/core/color';
-import { Texture } from 'engine/scene/resources/texture';
+import { Texture, ImageTexture } from 'engine/scene/resources/texture';
 
 import { VisualServer } from '../visual_server';
 import { VSG } from './visual_server_globals';
+import { CommandRect, TYPE_RECT, TYPE_CLIP_IGNORE } from './commands';
 
 
 let uid = 0;
@@ -30,6 +31,7 @@ export class Item {
         this.visible = true;
         this.behind = false;
         this.update_when_visible = false;
+        /** @type {CommandRect[]} */
         this.commands = [];
         this.custom_rect = false;
         this.rect_dirty = true;
@@ -97,14 +99,14 @@ export class Item {
             const c = cmd[i];
             r.set(0, 0, 0, 0);
 
-            // switch (c.type) {
-            //     case TYPE_RECT: {
-            //         const crect = /** @type {CommandRect} */(c);
-            //         r.copy(crect.rect);
-            //     } break;
-            //     case TYPE_CLIP_IGNORE: {
-            //     } break;
-            // }
+            switch (c.type) {
+                case TYPE_RECT: {
+                    const crect = /** @type {CommandRect} */(c);
+                    r.copy(crect.rect);
+                } break;
+                case TYPE_CLIP_IGNORE: {
+                } break;
+            }
 
             if (found_xform) {
                 xf.xform_rect(r, r);
@@ -372,10 +374,19 @@ export class VisualServerCanvas {
     /**
      * @param {Item} p_item
      * @param {Rect2} p_rect
-     * @param {Texture} p_texture
+     * @param {ImageTexture} p_texture
+     * @param {boolean} p_tile
      * @param {Color} p_modulate
      */
-    canvas_item_add_texture_rect(p_item, p_rect, p_texture, p_modulate) { }
+    canvas_item_add_texture_rect(p_item, p_rect, p_texture, p_tile, p_modulate, p_transpose, p_normal_map) {
+        const rect = new CommandRect();
+        rect._texture = p_texture.texture;
+        rect.modulate.copy(p_modulate);
+        rect.rect.copy(p_rect);
+        rect.flags = 0;
+        p_item.rect_dirty = true;
+        p_item.commands.push(rect);
+    }
     canvas_item_add_texture_rect_region() { }
     canvas_item_add_nine_patch() { }
     canvas_item_add_primitive() { }

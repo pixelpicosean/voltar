@@ -24,3 +24,7 @@ interface HTMLVideoElement {
     _tex_id: string;
     complete: boolean;
 }
+
+interface SVGElement {
+    _tex_id: string;
+}

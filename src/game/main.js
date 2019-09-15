@@ -10,6 +10,8 @@ import {
     InputEventMouseButton,
     InputEventMouseMotion,
 } from 'engine/core/os/input_event';
+import { load } from 'engine/index';
+import { Sprite } from 'engine/scene/2d/sprite';
 
 
 class Preloader extends Node {
@@ -21,6 +23,15 @@ class Preloader extends Node {
     }
     _enter_tree() {
         console.log('_enter_tree')
+        load(['media/sprites.png'])
+            .connect_once('complete', (loader) => {
+                console.log('load completed')
+                const tex = loader.resources['media/sprites.png'];
+                const sprite = new Sprite();
+                sprite.set_texture(tex.texture);
+                this.add_child(sprite);
+                // sprite.set_position({ x: 100, y: 100 });
+            })
     }
     _ready() {
         console.log('_ready')
