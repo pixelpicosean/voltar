@@ -1,114 +1,84 @@
-import Node2D from './2d/node_2d';
 import { node_class_map } from 'engine/registry';
+import { GDCLASS } from 'engine/core/v_object';
 
-export default class RemoteTransform2D extends Node2D {
+import { NOTIFICATION_ENTER_TREE } from './main/node';
+import { NOTIFICATION_TRANSFORM_CHANGED } from './2d/canvas_item';
+import { Node2D } from './2d/node_2d';
+
+
+export class RemoteTransform2D extends Node2D {
+    get class() { return 'RemoteTransform2D' }
+
     /**
      * @param {string} value
      */
-    set remote_path(value) {
-        this._remote_path = value;
-        if (this.scene_tree) {
+    set_remote_path(value) {
+        this.remote_path = value;
+        if (this.is_inside_tree()) {
             this._update_cache();
             this._update_remote();
         }
     }
-    get remote_path() {
-        return this._remote_path;
-    }
-    set_remote_path(value) {
-        this.remote_path = value;
-        return this;
-    }
 
     /**
      * @param {boolean} value
      */
-    set update_position(value) {
-        this._update_position = value;
-        this._update_remote();
-    }
-    get update_position() {
-        return this._update_position;
-    }
     set_update_position(value) {
         this.update_position = value;
-        return this;
+        this._update_remote();
     }
 
     /**
      * @param {boolean} value
      */
-    set update_rotation(value) {
-        this._update_rotation = value;
-        this._update_remote();
-    }
-    get update_rotation() {
-        return this._update_rotation;
-    }
     set_update_rotation(value) {
         this.update_rotation = value;
-        return this;
+        this._update_remote();
     }
 
     /**
      * @param {boolean} value
      */
-    set update_scale(value) {
-        this._update_scale = value;
-        this._update_remote();
-    }
-    get update_scale() {
-        return this._update_scale;
-    }
     set_update_scale(value) {
         this.update_scale = value;
-        return this;
+        this._update_remote();
     }
 
     /**
      * @param {boolean} value
      */
-    set use_global_coordinates(value) {
-        this._use_global_coordinates = value;
-        this._update_remote();
-    }
-    get use_global_coordinates() {
-        return this._use_global_coordinates;
-    }
     set_use_global_coordinates(value) {
         this.use_global_coordinates = value;
-        return this;
+        this._update_remote();
     }
 
     constructor() {
         super();
 
-        this.type = 'RemoteTransform2D';
-
         /**
          * @type {string}
          */
-        this._remote_path = null;
+        this.remote_path = null;
 
         /**
          * @type {boolean}
          */
-        this._update_position = true;
+        this.update_position = true;
 
         /**
          * @type {boolean}
          */
-        this._update_rotation = true;
+        this.update_rotation = true;
 
         /**
          * @type {boolean}
          */
-        this._update_scale = true;
+        this.update_scale = true;
 
         /**
          * @type {boolean}
          */
-        this._use_global_coordinates = true;
+        this.use_global_coordinates = true;
 
         /**
          * @type {Node2D}
@@ -116,51 +86,48 @@ export default class RemoteTransform2D extends Node2D {
         this.cache = null;
     }
 
+    /* virtual */
+
     _load_data(data) {
         super._load_data(data);
 
         if (data.remote_path !== undefined) {
-            this.remote_path = data.remote_path;
+            this.set_remote_path(data.remote_path);
         }
         if (data.update_position !== undefined) {
-            this.update_position = data.update_position;
+            this.set_update_position(data.update_position);
         }
         if (data.update_rotation !== undefined) {
-            this.update_rotation = data.update_rotation;
+            this.set_update_rotation(data.update_rotation);
         }
         if (data.update_scale !== undefined) {
-            this.update_scale = data.update_scale;
+            this.set_update_scale(data.update_scale);
         }
         if (data.use_global_coordinates !== undefined) {
-            this.use_global_coordinates = data.use_global_coordinates;
+            this.set_use_global_coordinates(data.use_global_coordinates);
         }
 
         return this;
     }
 
-    _propagate_ready() {
-        super._propagate_ready();
-
-        this._update_cache();
-    }
-    /**
-     * @param {number} delta
-     */
-    _propagate_process(delta) {
-        super._propagate_process(delta);
-        this._notify_transform_changed();
-    }
-    _notify_transform_changed() {
-        if (!this.scene_tree) {
-            return;
-        }
-        if (this.cache) {
-            this._update_remote();
+    _notification(p_what) {
+        switch (p_what) {
+            case NOTIFICATION_ENTER_TREE: {
+                this._update_cache();
+            } break;
+            case NOTIFICATION_TRANSFORM_CHANGED: {
+                if (!this.is_inside_tree()) {
+                    break;
+                }
+                if (this.cache) {
+                    this._update_remote();
+                }
+            } break;
         }
     }
 
     _update_remote() {
-        if (!this.scene_tree) {
+        if (!this.is_inside_tree()) {
             return;
         }
 
@@ -170,39 +137,54 @@ export default class RemoteTransform2D extends Node2D {
 
         const n = this.cache;
 
-        if (!n.scene_tree) {
+        if (!n.is_node_2d || !n.is_inside_tree()) {
             return;
         }
 
-        if (this._use_global_coordinates) {
-            if (this._update_position && this._update_rotation && this._update_scale) {
+        if (this.use_global_coordinates) {
+            if (this.update_position && this.update_rotation && this.update_scale) {
                 n.set_global_transform(this.get_global_transform());
             } else {
                 const n_trans = n.get_global_transform();
                 const our_trans = this.get_global_transform();
-                if (this._update_position) {
+                const n_scale = n.get_scale();
+
+                if (!this.update_position) {
                     n_trans.set_origin(our_trans.origin);
                 }
-                if (this._update_rotation) {
+                if (!this.update_rotation) {
                     n_trans.set_rotation(our_trans.rotation);
                 }
-                if (this._update_scale) {
+
+                n.set_global_transform(our_trans);
+
+                if (this.update_scale) {
                     n.set_scale(this.get_global_scale());
+                } else {
+                    n.set_scale(n_scale);
                 }
             }
         } else {
-            if (this._update_position && this._update_rotation && this._update_scale) {
-                n.transform.set_from_matrix(this.transform.local_transform);
-                n.node2d_update_transform();
+            if (this.update_position && this.update_rotation && this.update_scale) {
+                n.set_transform(this.get_transform());
             } else {
-                if (this._update_position) {
-                    n.position.copy(this.position);
+                const n_trans = n.get_transform();
+                const our_trans = this.get_transform();
+                const n_scale = n.get_scale();
+
+                if (!this.update_position) {
+                    n_trans.set_origin(our_trans.origin);
                 }
-                if (this._update_rotation) {
-                    n.rotation = this.rotation;
+                if (!this.update_rotation) {
+                    n_trans.set_rotation(our_trans.rotation);
                 }
-                if (this._update_scale) {
-                    n.scale.copy(this.scale);
+
+                n.set_transform(our_trans);
+
+                if (this.update_scale) {
+                    n.set_scale(this.get_scale());
+                } else {
+                    n.set_scale(n_scale);
                 }
             }
         }
@@ -211,13 +193,12 @@ export default class RemoteTransform2D extends Node2D {
     _update_cache() {
         this.cache = null;
 
-        const node = this.get_node(this._remote_path);
-        if (!node || this === node) {
+        const node = /** @type {Node2D} */(this.get_node(this.remote_path));
+        if (!node || this === node || node.is_a_parent_of(this) || this.is_a_parent_of(node)) {
             return;
         }
 
         this.cache = node;
     }
 }
-
-node_class_map['RemoteTransform2D'] = RemoteTransform2D;
+node_class_map['RemoteTransform2D'] = GDCLASS(RemoteTransform2D, Node2D)

@@ -42,10 +42,8 @@ export class Transform2D {
     get origin() {
         return this._origin.set(this.tx, this.ty);
     }
-    set origin(value) {
-        this._origin.copy(value);
-        this.tx = value.x;
-        this.ty = value.y;
+    get_origin() {
+        return this._origin.set(this.tx, this.ty);
     }
     /**
      * @param {Vector2} value
@@ -54,7 +52,15 @@ export class Transform2D {
         this._origin.copy(value);
         this.tx = value.x;
         this.ty = value.y;
-        return this;
+    }
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
+    set_origin_n(x, y) {
+        this._origin.set(x, y);
+        this.tx = x;
+        this.ty = y;
     }
 
     get rotation() {
