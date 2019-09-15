@@ -15,10 +15,21 @@ import {
     NOTIFICATION_EXIT_TREE,
     NOTIFICATION_MOVED_IN_PARENT,
 } from "./node";
+import { Rect2 } from "engine/core/math/rect2";
 
 
 export class CanvasLayer extends Node {
     get class() { return 'CanvasLayer' }
+
+    /**
+     * @param {number} p_layer
+     */
+    set_layer(p_layer) {
+        this.layer = p_layer;
+        if (this.viewport) {
+            VSG.viewport.viewport_set_canvas_stacking(this.viewport, this.canvas, this.layer, this.get_position_in_parent());
+        }
+    }
 
     get_offset() {
         return this.offset;
@@ -162,6 +173,16 @@ export class CanvasLayer extends Node {
         if (this.viewport) {
             VSG.viewport.viewport_set_canvas_transform(this.viewport, this.canvas, this.transform);
         }
+    }
+
+    get_viewport_size() {
+        if (!this.is_inside_tree()) {
+            return Vector2.new(1, 1);
+        }
+        const rect = this.vp.get_visible_rect();
+        const r = Vector2.new(rect.width, rect.height);
+        Rect2.free(rect);
+        return r;
     }
 
     constructor() {

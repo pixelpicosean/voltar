@@ -285,7 +285,7 @@ export class Transform2D {
     }
 
     /**
-     * @param {Vector2Like} [out]
+     * @param {Vector2Like} out
      */
     get_scale(out) {
         const basis_determinant = Math.sign(this.a * this.d - this.b * this.c);

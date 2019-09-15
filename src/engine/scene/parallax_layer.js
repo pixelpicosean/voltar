@@ -1,17 +1,78 @@
-import { Vector2, ObservableVector2, Matrix } from "engine/core/math/math_funcs";
 import { node_class_map } from "engine/registry";
+import { GDCLASS } from "engine/core/v_object";
+import { Vector2, Vector2Like } from "engine/core/math/vector2";
+import { Node2D } from "./2d/node_2d";
+import { ParallaxBackground } from "./parallax_background";
+import { VSG } from "engine/servers/visual/visual_server_globals";
+import { NOTIFICATION_ENTER_TREE, NOTIFICATION_EXIT_TREE } from "./main/node";
 
-import Node2D from "./2d/node_2d";
 
 export class ParallaxLayer extends Node2D {
+    get class() { return 'ParallaxLayer' }
+
+    /**
+     * @param {Vector2Like} p_mirroring
+     */
+    set_motion_mirroring(p_mirroring) {
+        this.set_modulate_n(p_mirroring.x, p_mirroring.y);
+    }
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
+    set_motion_mirroring_n(x, y) {
+        this.motion_mirroring.set(x, y);
+        if (this.motion_mirroring.x < 0) {
+            this.motion_mirroring.x = 0;
+        }
+        if (this.motion_mirroring.y < 0) {
+            this.motion_mirroring.y = 0;
+        }
+        this._update_mirroring();
+    }
+
+    /**
+     * @param {Vector2Like} p_offset
+     */
+    set_motion_offset(p_offset) {
+        this.set_modulate_n(p_offset.x, p_offset.y);
+    }
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
+    set_motion_offset_n(x, y) {
+        this.motion_offset.set(x, y);
+        const pb = /** @type {ParallaxBackground} */(this.get_parent());
+        if (pb.class === 'ParallaxBackground' && this.is_inside_tree()) {
+            this.set_base_offset_and_scale(pb.final_offset, pb.scroll_scale, this.screen_offset);
+        }
+    }
+
+    /**
+     * @param {Vector2Like} p_scale
+     */
+    set_motion_scale(p_scale) {
+        this.set_modulate_n(p_scale.x, p_scale.y);
+    }
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
+    set_motion_scale_n(x, y) {
+        this.motion_scale.set(x, y);
+        const pb = /** @type {ParallaxBackground} */(this.get_parent());
+        if (pb.class === 'ParallaxBackground' && this.is_inside_tree()) {
+            this.set_base_offset_and_scale(pb.final_offset, pb.scroll_scale, this.screen_offset);
+        }
+    }
+
     constructor() {
         super();
 
-        this.type = 'ParallaxLayer';
-
-        this.motion_mirroring = new ObservableVector2(this._on_motion_mirror_changed, this);
-        this.motion_offset = new ObservableVector2(this._on_motion_offset_changed, this);
-        this.motion_scale = new ObservableVector2(this._on_motion_scale_changed, this);
+        this.motion_mirroring = new Vector2();
+        this.motion_offset = new Vector2();
+        this.motion_scale = new Vector2(1, 1);
 
         this.orig_offset = new Vector2();
         this.orig_scale = new Vector2();
@@ -20,25 +81,42 @@ export class ParallaxLayer extends Node2D {
         this._mirror_scale = new Vector2();
     }
 
+    /* virtual */
+
     _load_data(data) {
         super._load_data(data);
 
-        if (data.motion_mirroring !== undefined) this.motion_mirroring.copy(data.motion_mirroring);
-        if (data.motion_offset !== undefined) this.motion_offset.copy(data.motion_offset);
-        if (data.motion_scale !== undefined) this.motion_scale.copy(data.motion_scale);
+        if (data.motion_mirroring !== undefined) {
+            this.set_motion_mirroring(data.motion_mirroring);
+        }
+        if (data.motion_offset !== undefined) {
+            this.set_motion_offset(data.motion_offset);
+        }
+        if (data.motion_scale !== undefined) {
+            this.set_motion_scale(data.motion_scale);
+        }
 
         return this;
     }
 
-    _propagate_enter_tree() {
-        super._propagate_enter_tree();
-
-        this.orig_offset.copy(this.position);
-        this.orig_scale.copy(this.scale);
-        this._update_mirroring();
-
-        this._on_motion_scale_changed();
+    /**
+     * @param {number} p_what
+     */
+    _notification(p_what) {
+        switch (p_what) {
+            case NOTIFICATION_ENTER_TREE: {
+                this.orig_offset.copy(this.get_position());
+                this.orig_scale.copy(this.get_scale());
+                this._update_mirroring();
+            } break;
+            case NOTIFICATION_EXIT_TREE: {
+                this.set_position(this.orig_offset);
+                this.set_scale(this.orig_scale);
+            } break;
+        }
     }
+
+    /* private */
 
     /**
      * @param {Vector2} p_offset
@@ -48,7 +126,7 @@ export class ParallaxLayer extends Node2D {
     set_base_offset_and_scale(p_offset, p_scale, p_screen_offset) {
         this.screen_offset.copy(p_screen_offset);
 
-        if (!this.is_inside_tree) {
+        if (!this.is_inside_tree()) {
             return;
         }
 
@@ -68,88 +146,26 @@ export class ParallaxLayer extends Node2D {
             new_ofs.y -= den * Math.ceil(new_ofs.y / den);
         }
 
-        this.position.copy(new_ofs);
-        this.scale.copy(this.orig_scale).scale(p_scale);
+        this.set_position(new_ofs);
+        const scale = this.orig_scale.clone().scale(p_scale)
+        this.set_scale(scale);
+        Vector2.free(scale);
 
         this._update_mirroring();
     }
 
     _update_mirroring() {
-        this._mirror_scale.copy(this.motion_mirroring).multiply(this.scale);
-    }
-
-    _on_motion_scale_changed() {
-        const pb = /** @type {import('./parallax_background').ParallaxBackground} */(this.parent);
-        if (this.is_inside_tree && pb.type === 'ParallaxBackground') {
-            this.set_base_offset_and_scale(pb.final_offset, pb.scroll_scale, this.screen_offset);
-        }
-    }
-    _on_motion_offset_changed() {
-        const pb = /** @type {import('./parallax_background').ParallaxBackground} */(this.parent);
-        if (this.is_inside_tree && pb.type === 'ParallaxBackground') {
-            this.set_base_offset_and_scale(pb.final_offset, pb.scroll_scale, this.screen_offset);
-        }
-    }
-    _on_motion_mirror_changed() {
-        if (this.motion_mirroring.x < 0) {
-            this.motion_mirroring.x = 0;
-        }
-        if (this.motion_mirroring.y < 0) {
-            this.motion_mirroring.y = 0;
-        }
-        this._update_mirroring();
-    }
-
-    /**
-     * Renders the object using the WebGL renderer
-     *
-     * @param {import('engine/servers/visual/webgl_renderer').default} renderer - The renderer
-     */
-    render_webgl(renderer) {
-        if (this._destroyed || this.is_queued_for_deletion) return;
-
-        this._render_webgl(renderer);
-
-        // simply render children!
-        for (let c of this.children) {
-            c.render_webgl(renderer);
+        if (!this.is_inside_tree()) {
+            return;
         }
 
-        // render mirroring children
-        const canvas_transform = renderer.current_projection_matrix.clone();
-
-        const xform = Matrix.new();
-        if (this.motion_mirroring.x !== 0) {
-            xform.copy(canvas_transform).translate(this.motion_mirroring.x, 0);
-
-            renderer.current_renderer.flush();
-            renderer.set_projection_matrix(xform);
-            for (let c of this.children) {
-                c.render_webgl(renderer);
-            }
+        const pb = /** @type {ParallaxBackground} */(this.get_parent());
+        if (pb.class === 'ParallaxBackground') {
+            const c = pb.get_canvas();
+            const mirror_scale = this.get_scale().clone().multiply(this.motion_mirroring);
+            VSG.canvas.canvas_set_item_mirroring(c, this.canvas_item, mirror_scale);
+            Vector2.free(mirror_scale);
         }
-        if (this.motion_mirroring.y !== 0) {
-            xform.copy(canvas_transform).translate(0, this.motion_mirroring.y);
-
-            renderer.current_renderer.flush();
-            renderer.set_projection_matrix(xform);
-            for (let c of this.children) {
-                c.render_webgl(renderer);
-            }
-        }
-        if (this.motion_mirroring.x !== 0 && this.motion_mirroring.y !== 0) {
-            xform.copy(canvas_transform).translate(this.motion_mirroring.x, this.motion_mirroring.y);
-
-            renderer.current_renderer.flush();
-            renderer.set_projection_matrix(xform);
-            for (let c of this.children) {
-                c.render_webgl(renderer);
-            }
-        }
-
-        renderer.current_renderer.flush();
-        renderer.set_projection_matrix(canvas_transform);
     }
 }
-
-node_class_map['ParallaxLayer'] = ParallaxLayer;
+node_class_map['ParallaxLayer'] = GDCLASS(ParallaxLayer, Node2D);

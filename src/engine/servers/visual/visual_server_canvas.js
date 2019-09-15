@@ -7,7 +7,7 @@ import {
     MARGIN_BOTTOM,
 } from 'engine/core/math/math_defs';
 import { clamp } from 'engine/core/math/math_funcs';
-import { Vector2 } from 'engine/core/math/vector2';
+import { Vector2, Vector2Like } from 'engine/core/math/vector2';
 import { Rect2 } from 'engine/core/math/rect2';
 import { Transform2D } from 'engine/core/math/transform_2d';
 import { Color } from 'engine/core/color';
@@ -297,8 +297,21 @@ export class VisualServerCanvas {
         return false;
     }
 
-    canvas_set_item_mirroring(p_canvas) { }
-    canvas_set_modulate(p_canvas) { }
+    /**
+     * @param {Canvas} p_canvas
+     * @param {Item} p_item
+     * @param {Vector2Like} p_mirroring
+     */
+    canvas_set_item_mirroring(p_canvas, p_item, p_mirroring) {
+        p_item.mirror.copy(p_mirroring);
+    }
+    /**
+     * @param {Canvas} p_canvas
+     * @param {Color} p_color
+     */
+    canvas_set_modulate(p_canvas, p_color) {
+        p_canvas.modulate.copy(p_color);
+    }
     /**
      * @param {Canvas} p_canvas
      * @param {Canvas} p_parent
@@ -309,7 +322,12 @@ export class VisualServerCanvas {
         p_canvas.parent_scale = p_scale;
     }
 
-    canvas_set_disable_scale(p_canvas) { }
+    /**
+     * @param {boolean} p_disable
+     */
+    canvas_set_disable_scale(p_disable) {
+        this.disable_scale = p_disable;
+    }
 
 
     canvas_create() { return new Canvas() }
@@ -869,7 +887,7 @@ export class VisualServerCanvas {
                 if (r_items) {
                     r_items[r_index] = item;
                     item.ysort_xform.copy(p_transform);
-                    item.ysort_pos = p_transform.xform(item.xform.origin, item.ysort_pos);
+                    p_transform.xform(item.xform.origin, item.ysort_pos);
                 }
 
                 r_index++;

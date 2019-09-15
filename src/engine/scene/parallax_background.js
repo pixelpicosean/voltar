@@ -1,50 +1,154 @@
 import { node_class_map } from "engine/registry";
-import { Vector2, Matrix, ObservableVector2 } from "engine/core/math/math_funcs";
+import { GDCLASS } from "engine/core/v_object";
+import { Vector2, Vector2Like } from "engine/core/math/vector2";
+import { Transform2D } from "engine/core/math/transform_2d";
 
-import CanvasLayer from "./main/canvas_layer";
+import { CanvasLayer } from "./main/canvas_layer";
+import { NOTIFICATION_ENTER_TREE, NOTIFICATION_EXIT_TREE } from "./main/node";
+
 
 export class ParallaxBackground extends CanvasLayer {
+    get class() { return 'ParallaxBackground' }
+
+    /**
+     * @param {Vector2Like} p_offset
+     */
+    set_scroll_offset(p_offset) {
+        this.set_scroll_offset_n(p_offset.x, p_offset.y);
+    }
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
+    set_scroll_offset_n(x, y) {
+        this.scroll_offset.set(x, y);
+        this._update_scroll();
+    }
+
+    /**
+     * @param {Vector2Like} p_base_offset
+     */
+    set_scroll_base_offset(p_base_offset) {
+        this.set_scroll_base_offset_n(p_base_offset.x, p_base_offset.y);
+    }
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
+    set_scroll_base_offset_n(x, y) {
+        this.scroll_base_offset.set(x, y);
+        this._update_scroll();
+    }
+
+    /**
+     * @param {Vector2Like} p_base_scale
+     */
+    set_scroll_base_scale(p_base_scale) {
+        this.set_scroll_base_scale_n(p_base_scale.x, p_base_scale.y);
+    }
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
+    set_scroll_base_scale_n(x, y) {
+        this.scroll_base_scale.set(x, y);
+    }
+
+    /**
+     * @param {Vector2Like} p_limit_begin
+     */
+    set_scroll_limit_begin(p_limit_begin) {
+        this.set_scroll_limit_begin_n(p_limit_begin.x, p_limit_begin.y);
+    }
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
+    set_scroll_limit_begin_n(x, y) {
+        this.scroll_limit_begin.set(x, y);
+        this._update_scroll();
+    }
+
+    /**
+     * @param {Vector2Like} p_limit_end
+     */
+    set_scroll_limit_end(p_limit_end) {
+        this.set_scroll_limit_end_n(p_limit_end.x, p_limit_end.y);
+    }
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
+    set_scroll_limit_end_n(x, y) {
+        this.scroll_limit_end.set(x, y);
+        this._update_scroll();
+    }
+
     constructor() {
         super();
 
-        this.type = 'ParallaxBackground';
-
-        this.scroll_base_offset = new ObservableVector2(this._update_scroll, this);
-        this.scroll_base_scale = new ObservableVector2(this._update_scroll, this, 1, 1);
+        this.scroll_base_offset = new Vector2();
+        this.scroll_base_scale = new Vector2(1, 1);
         this.scroll_ignore_camera_zoom = false;
-        this.scroll_limit_begin = new ObservableVector2(this._update_scroll, this);
-        this.scroll_limit_end = new ObservableVector2(this._update_scroll, this);
-        this.scroll_offset = new ObservableVector2(this._update_scroll, this);
+        this.scroll_limit_begin = new Vector2();
+        this.scroll_limit_end = new Vector2();
+        this.scroll_offset = new Vector2();
 
         this.scroll_scale = 1.0;
         this.screen_offset = new Vector2();
         this.final_offset = new Vector2();
 
         this.group_name = '';
+
+        this.set_layer(-100);
     }
+
+    /* virtual */
 
     _load_data(data) {
         super._load_data(data);
 
-        if (data.scroll_base_offset !== undefined) this.scroll_base_offset.copy(data.scroll_base_offset);
-        if (data.scroll_base_scale !== undefined) this.scroll_base_scale.copy(data.scroll_base_scale);
-        if (data.scroll_ignore_camera_zoom !== undefined) this.scroll_ignore_camera_zoom = data.scroll_ignore_camera_zoom;
-        if (data.scroll_limit_begin !== undefined) this.scroll_limit_begin.copy(data.scroll_limit_begin);
-        if (data.scroll_limit_end !== undefined) this.scroll_limit_end.copy(data.scroll_limit_end);
-        if (data.scroll_offset !== undefined) this.scroll_offset.copy(data.scroll_offset);
+        if (data.scroll_base_offset !== undefined) {
+            this.set_scroll_base_offset(data.scroll_base_offset);
+        }
+        if (data.scroll_base_scale !== undefined) {
+            this.set_scroll_base_scale(data.scroll_base_scale);
+        }
+        if (data.scroll_ignore_camera_zoom !== undefined) {
+            this.scroll_ignore_camera_zoom = data.scroll_ignore_camera_zoom;
+        }
+        if (data.scroll_limit_begin !== undefined) {
+            this.set_scroll_limit_begin(data.scroll_limit_begin);
+        }
+        if (data.scroll_limit_end !== undefined) {
+            this.set_scroll_limit_end(data.scroll_limit_end);
+        }
+        if (data.scroll_offset !== undefined) {
+            this.set_scroll_offset(data.scroll_offset);
+        }
 
         return this;
     }
 
-    _propagate_enter_tree() {
-        super._propagate_enter_tree();
-
-        this.group_name = '__cameras_0';
-        this.add_to_group(this.group_name);
+    /**
+     * @param {number} p_what
+     */
+    _notification(p_what) {
+        switch (p_what) {
+            case NOTIFICATION_ENTER_TREE: {
+                this.group_name = '__cameras_0';
+                this.add_to_group(this.group_name);
+            } break;
+            case NOTIFICATION_EXIT_TREE: {
+                this.remove_from_group(this.group_name);
+            } break;
+        }
     }
 
+    /* private */
+
     _update_scroll() {
-        if (!this.is_inside_tree) {
+        if (!this.is_inside_tree()) {
             return;
         }
 
@@ -71,8 +175,8 @@ export class ParallaxBackground extends CanvasLayer {
 
         this.final_offset.copy(ofs);
 
-        for (const c of this.children) {
-            if (c.type !== 'ParallaxLayer') {
+        for (let c of this.data.children) {
+            if (c.class !== 'ParallaxLayer') {
                 continue;
             }
 
@@ -85,24 +189,25 @@ export class ParallaxBackground extends CanvasLayer {
             }
         }
 
+        Vector2.free(vps);
         Vector2.free(ofs);
     }
 
     /**
-     * @param {Matrix} p_transform
+     * @param {Transform2D} p_transform
      * @param {Vector2} p_screen_offset
      */
     _camera_moved(p_transform, p_screen_offset) {
-        p_screen_offset.copy(p_screen_offset);
+        this.screen_offset.copy(p_screen_offset);
 
         const vec = Vector2.new(0.5, 0.5);
-        const scale = p_transform.get_scale();
+        const scale = Vector2.new();
+        p_transform.get_scale(scale);
         this.scroll_scale = scale.dot(vec);
         Vector2.free(scale);
         Vector2.free(vec);
 
-        this.scroll_offset.set(p_transform.tx, p_transform.ty);
+        this.set_scroll_offset_n(p_transform.tx, p_transform.ty);
     }
 }
-
-node_class_map['ParallaxBackground'] = ParallaxBackground;
+node_class_map['ParallaxBackground'] = GDCLASS(ParallaxBackground, CanvasLayer);
