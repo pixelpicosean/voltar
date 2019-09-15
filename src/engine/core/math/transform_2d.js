@@ -1,5 +1,5 @@
 import { Math_PI } from './math_defs';
-import { Vector2 } from './vector2';
+import { Vector2, Vector2Like } from './vector2';
 import { Rect2 } from './rect2';
 
 
@@ -99,7 +99,7 @@ export class Transform2D {
 
     /**
      * @param {number} p_rot
-     * @param {Vector2} p_scale
+     * @param {Vector2Like} p_scale
      */
     set_rotation_and_scale(p_rot, p_scale) {
         const c = Math.cos(p_rot);
@@ -284,12 +284,15 @@ export class Transform2D {
         }
     }
 
-    get_scale() {
+    /**
+     * @param {Vector2Like} [out]
+     */
+    get_scale(out) {
         const basis_determinant = Math.sign(this.a * this.d - this.b * this.c);
-        return Vector2.new(
-            Math.sqrt(this.a * this.a + this.b * this.b),
-            Math.sqrt(this.c * this.c + this.d * this.d) * basis_determinant
-        );
+        if (!out) out = Vector2.new();
+        out.x = Math.sqrt(this.a * this.a + this.b * this.b)
+        out.y = Math.sqrt(this.c * this.c + this.d * this.d) * basis_determinant;
+        return out;
     }
 
     /**
@@ -312,61 +315,57 @@ export class Transform2D {
     }
 
     /**
-     * @param {Vector2} p_vec - The origin
-     * @param {Vector2} [r_out] - The point that the new position is assigned to (allowed to be same as input)
-     * @return {Vector2} The new point, transformed through this matrix
+     * @param {Vector2Like} p_vec - The origin
+     * @param {Vector2Like} [r_out] - The point that the new position is assigned to (allowed to be same as input)
+     * @return {Vector2Like} The new point, transformed through this matrix
      */
     basis_xform(p_vec, r_out) {
         r_out = r_out || Vector2.new();
-        const x = (this.a * p_vec.x) + (this.c * p_vec.y);
-        const y = (this.b * p_vec.x) + (this.d * p_vec.y);
-
-        return r_out.set(x, y);
+        r_out.x = (this.a * p_vec.x) + (this.c * p_vec.y);
+        r_out.y = (this.b * p_vec.x) + (this.d * p_vec.y);
+        return r_out;
     }
 
     /**
-     * @param {Vector2} p_vec - The origin
-     * @param {Vector2} [r_out] - The point that the new position is assigned to (allowed to be same as input)
-     * @return {Vector2} The new point, inverse-transformed through this matrix
+     * @param {Vector2Like} p_vec - The origin
+     * @param {Vector2Like} [r_out] - The point that the new position is assigned to (allowed to be same as input)
+     * @return {Vector2Like} The new point, inverse-transformed through this matrix
      */
     basis_xform_inv(p_vec, r_out) {
         r_out = r_out || Vector2.new();
-        const x = (this.a * p_vec.x) + (this.b * p_vec.y);
-        const y = (this.c * p_vec.x) + (this.d * p_vec.y);
-
-        return r_out.set(x, y);
+        r_out.x = (this.a * p_vec.x) + (this.b * p_vec.y);
+        r_out.y = (this.c * p_vec.x) + (this.d * p_vec.y);
+        return r_out;
     }
 
     /**
      * Get a new position with the current transformation applied.
      * Can be used to go from a child's coordinate space to the world coordinate space. (e.g. rendering)
      *
-     * @param {Vector2} p_vec - The origin
-     * @param {Vector2} [r_out] - The point that the new position is assigned to (allowed to be same as input)
-     * @return {Vector2} The new point, transformed through this matrix
+     * @param {Vector2Like} p_vec - The origin
+     * @param {Vector2Like} [r_out] - The point that the new position is assigned to (allowed to be same as input)
+     * @return {Vector2Like} The new point, transformed through this matrix
      */
     xform(p_vec, r_out) {
         r_out = r_out || Vector2.new();
-        const x = (this.a * p_vec.x) + (this.c * p_vec.y) + this.tx;
-        const y = (this.b * p_vec.x) + (this.d * p_vec.y) + this.ty;
-
-        return r_out.set(x, y);
+        r_out.x = (this.a * p_vec.x) + (this.c * p_vec.y) + this.tx;
+        r_out.y = (this.b * p_vec.x) + (this.d * p_vec.y) + this.ty;
+        return r_out;
     }
 
     /**
      * Get a new position with the inverse of the current transformation applied.
      * Can be used to go from the world coordinate space to a child's coordinate space. (e.g. input)
      *
-     * @param {Vector2} p_vec - The origin
-     * @param {Vector2} [r_out] - The point that the new position is assigned to (allowed to be same as input)
-     * @return {Vector2} The new point, inverse-transformed through this matrix
+     * @param {Vector2Like} p_vec - The origin
+     * @param {Vector2Like} [r_out] - The point that the new position is assigned to (allowed to be same as input)
+     * @return {Vector2Like} The new point, inverse-transformed through this matrix
      */
     xform_inv(p_vec, r_out) {
         r_out = r_out || Vector2.new();
-        const x = this.a * (p_vec.x - this.tx) + this.b * (p_vec.y - this.ty);
-        const y = this.c * (p_vec.x - this.tx) + this.d * (p_vec.y - this.ty);
-
-        return r_out.set(x, y);
+        r_out.x = this.a * (p_vec.x - this.tx) + this.b * (p_vec.y - this.ty);
+        r_out.y = this.c * (p_vec.x - this.tx) + this.d * (p_vec.y - this.ty);
+        return r_out;
     }
 
     /**
@@ -622,45 +621,6 @@ export class Transform2D {
         this.ty = (tx1 * matrix.b) + (this.ty * matrix.d) + matrix.ty;
 
         return this;
-    }
-
-    /**
-     * Decomposes the matrix (x, y, scaleX, scaleY, and rotation) and sets the properties on to a transform.
-     *
-     * @param {*} transform - The transform to apply the properties to.
-     * @return {*} The transform with the newly applied properties
-     */
-    decompose(transform) {
-        // sort out rotation / skew..
-        const a = this.a;
-        const b = this.b;
-        const c = this.c;
-        const d = this.d;
-
-        const skew_x = -Math.atan2(-c, d);
-        const skew_y = Math.atan2(b, a);
-
-        const delta = Math.abs(skew_x + skew_y);
-
-        if (delta < 0.00001 || Math.abs(Math_PI2 - delta) < 0.00001) {
-            transform.rotation = skew_y;
-            transform.skew.x = transform.skew.y = 0;
-        }
-        else {
-            transform.rotation = 0;
-            transform.skew.x = skew_x;
-            transform.skew.y = skew_y;
-        }
-
-        // next set scale
-        transform.scale.x = Math.sqrt((a * a) + (b * b));
-        transform.scale.y = Math.sqrt((c * c) + (d * d));
-
-        // next set position
-        transform.position.x = this.tx;
-        transform.position.y = this.ty;
-
-        return transform;
     }
 
     /**

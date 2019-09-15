@@ -27,4 +27,6 @@ interface HTMLVideoElement {
 
 interface SVGElement {
     _tex_id: string;
+    width: number;
+    height: number;
 }
