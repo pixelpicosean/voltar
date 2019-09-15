@@ -298,7 +298,7 @@ export default class AbstractBatchRenderer extends ObjectRenderer
      */
     render(element)
     {
-        if (!element._texture.valid)
+        if (!element.texture.valid)
         {
             return;
         }
@@ -361,7 +361,7 @@ export default class AbstractBatchRenderer extends ObjectRenderer
             const sprite = elements[i];
 
             elements[i] = null;
-            nextTexture = sprite._texture.baseTexture;
+            nextTexture = sprite.texture.baseTexture;
 
             const spriteBlendMode = premultiplyBlendMode[
                 nextTexture.premultiplyAlpha ? 1 : 0][sprite.blendMode];
@@ -605,13 +605,13 @@ export default class AbstractBatchRenderer extends ObjectRenderer
         const uvs = element.uvs;
         const indicies = element.indices;
         const vertex_data = element.vertex_data;
-        const textureId = element._texture.baseTexture._id;
+        const textureId = element.texture.baseTexture._id;
 
-        const alpha = Math.min(element.worldAlpha, 1.0);
-        const argb = (alpha < 1.0
-          && element._texture.baseTexture.premultiplyAlpha)
-            ? premultiplyTint(element._tintRGB, alpha)
-            : element._tintRGB + (alpha * 255 << 24);
+        const tint = element.modulate.as_hex();
+        const alpha = Math.min(element.modulate.a, 1.0);
+        const argb = (alpha < 1.0 && element.texture.baseTexture.premultiplyAlpha)
+            ? premultiplyTint(tint, alpha)
+            : tint + (alpha * 255 << 24);
 
         // lets not worry about tint! for now..
         for (let i = 0; i < vertex_data.length; i += 2)

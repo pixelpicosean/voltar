@@ -266,6 +266,9 @@ export class RasterizerCanvas extends VObject {
             switch (c.type) {
                 case TYPE_RECT: {
                     c.calculate_vertices(p_item.final_transform);
+                    c.modulate.copy(p_item.final_modulate);
+                    // TODO: add blend mode support, maybe a material system just like Godot
+                    // c.blendMode = p_item.blend_mode;
                     this.batch.currentRenderer.render(c);
                 } break;
             }

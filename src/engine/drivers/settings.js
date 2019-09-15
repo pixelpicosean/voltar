@@ -1,10 +1,11 @@
 import { maxRecommendedTextures } from './utils/max_recommended_textures';
 import { device } from 'engine/dep/index';
+import { WRAP_MODES, SCALE_MODES, MIPMAP_MODES } from './constants';
 
 /**
  * Mipmapping will only succeed if the base texture uploaded has power of two dimensions.
  */
-export const MIPMAP_TEXTURES = 1;
+export const MIPMAP_TEXTURES = MIPMAP_MODES.POW2;
 
 /**
  * Default anisotropic filtering level of textures.
@@ -79,12 +80,12 @@ export const GC_MAX_CHECK_COUNT = 60 * 10;
 /**
  * Default wrap modes that are supported by pixi.
  */
-export const WRAP_MODE = 33071;
+export const WRAP_MODE = WRAP_MODES.CLAMP;
 
 /**
  * Default scale mode for textures.
  */
-export const SCALE_MODE = 1;
+export const SCALE_MODE = SCALE_MODES.LINEAR;
 
 /**
  * Default specify float precision in vertex shader.

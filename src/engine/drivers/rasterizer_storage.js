@@ -6,7 +6,7 @@ import {
 } from "engine/core/image";
 
 import RenderTexture from "./renderTexture/RenderTexture";
-import { RENDER_TARGET_FLAG_MAX, FORMATS } from "./constants";
+import { RENDER_TARGET_FLAG_MAX, FORMATS, MIPMAP_MODES, WRAP_MODES } from "./constants";
 import Texture from "./textures/Texture";
 import BaseRenderTexture from "./renderTexture/BaseRenderTexture";
 import BaseTexture from "./textures/BaseTexture";
@@ -96,13 +96,13 @@ export class RasterizerStorage {
         };
 
         this.resources = {
-            /** @type {WebGLTexture} */
+            /** @type {Texture} */
             white_tex: null,
-            /** @type {WebGLTexture} */
+            /** @type {Texture} */
             black_tex: null,
-            /** @type {WebGLTexture} */
+            /** @type {Texture} */
             normal_tex: null,
-            /** @type {WebGLTexture} */
+            /** @type {Texture} */
             aniso_tex: null,
 
             mipmap_blur_fbo: 0,
@@ -141,7 +141,11 @@ export class RasterizerStorage {
 
         // default textures
         const create_texture = (/** @type {Uint8Array} */texdata) => {
-            let tex = gl.createTexture();
+            const tex = Texture.fromBuffer(texdata, 8, 8, {
+                format: FORMATS.RGB,
+                mipmap: MIPMAP_MODES.OFF,
+                wrapMode: WRAP_MODES.CLAMP,
+            })
             return tex;
         }
         // - white

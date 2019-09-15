@@ -5,6 +5,7 @@ import { Transform2D } from "engine/core/math/transform_2d";
 import Texture from "engine/drivers/textures/Texture";
 import { BLEND_MODES } from "engine/drivers/constants";
 
+
 export const CANVAS_RECT_REGION = 1;
 export const CANVAS_RECT_TILE = 2;
 export const CANVAS_RECT_FLIP_H = 4;
@@ -25,21 +26,23 @@ export const TYPE_CIRCLE = 9;
 export const TYPE_TRANSFORM = 10;
 export const TYPE_CLIP_IGNORE = 11;
 
-const indices = new Uint16Array([0, 1, 2, 0, 2, 3]);
+
+const quad_indices = new Uint16Array([0, 1, 2, 0, 2, 3]);
+
 
 export class CommandRect {
+    get type() { return TYPE_RECT }
     constructor() {
-        this.type = TYPE_RECT;
-
         this.rect = new Rect2();
         /** @type {Texture} */
-        this._texture = null;
+        this.texture = null;
+        /** @type {Texture} */
         this.normal_map = null;
         this.modulate = new Color();
         this.source = new Rect2();
         this.flags = 0;
         this.vertex_data = new Float32Array(8);
-        this.indices = indices;
+        this.indices = quad_indices;
         /** @type {Float32Array} */
         this.uvs = null;
         this.blendMode = BLEND_MODES.NORMAL;
@@ -48,7 +51,7 @@ export class CommandRect {
      * @param {Transform2D} transform
      */
     calculate_vertices(transform) {
-        const texture = this._texture;
+        const texture = this.texture;
         const wt = transform;
         const a = wt.a;
         const b = wt.b;

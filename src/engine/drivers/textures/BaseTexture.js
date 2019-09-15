@@ -61,7 +61,7 @@ export default class BaseTexture extends VObject
          * The width of the base texture set when the image has loaded
          *
          * @readonly
-         * @member {number}
+         * @type {number}
          */
         this.width = width || 0;
 
@@ -69,14 +69,14 @@ export default class BaseTexture extends VObject
          * The height of the base texture set when the image has loaded
          *
          * @readonly
-         * @member {number}
+         * @type {number}
          */
         this.height = height || 0;
 
         /**
          * The resolution / device pixel ratio of the texture
          *
-         * @member {number}
+         * @type {number}
          * @default settings.RESOLUTION
          */
         this.resolution = resolution || settings.RESOLUTION;
@@ -84,7 +84,7 @@ export default class BaseTexture extends VObject
         /**
          * Mipmap mode of the texture, affects downscaled images
          *
-         * @member {MIPMAP_MODES}
+         * @type {MIPMAP_MODES}
          * @default settings.MIPMAP_TEXTURES
          */
         this.mipmap = mipmap !== undefined ? mipmap : settings.MIPMAP_TEXTURES;
@@ -92,21 +92,21 @@ export default class BaseTexture extends VObject
         /**
          * Anisotropic filtering level of texture
          *
-         * @member {number}
+         * @type {number}
          * @default settings.ANISOTROPIC_LEVEL
          */
         this.anisotropicLevel = anisotropicLevel !== undefined ? anisotropicLevel : settings.ANISOTROPIC_LEVEL;
 
         /**
          * How the texture wraps
-         * @member {number}
+         * @type {number}
          */
         this.wrapMode = wrapMode || settings.WRAP_MODE;
 
         /**
          * The scale mode to apply when scaling this texture
          *
-         * @member {SCALE_MODES}
+         * @type {SCALE_MODES}
          * @default settings.SCALE_MODE
          */
         this.scaleMode = scaleMode !== undefined ? scaleMode : settings.SCALE_MODE;
@@ -114,7 +114,7 @@ export default class BaseTexture extends VObject
         /**
          * The pixel format of the texture
          *
-         * @member {FORMATS}
+         * @type {FORMATS}
          * @default FORMATS.RGBA
          */
         this.format = format || FORMATS.RGBA;
@@ -122,7 +122,7 @@ export default class BaseTexture extends VObject
         /**
          * The type of resource data
          *
-         * @member {TYPES}
+         * @type {TYPES}
          * @default TYPES.UNSIGNED_BYTE
          */
         this.type = type || TYPES.UNSIGNED_BYTE;
@@ -130,7 +130,7 @@ export default class BaseTexture extends VObject
         /**
          * The target type
          *
-         * @member {TARGETS}
+         * @type {TARGETS}
          * @default TARGETS.TEXTURE_2D
          */
         this.target = target || TARGETS.TEXTURE_2D;
@@ -138,7 +138,7 @@ export default class BaseTexture extends VObject
         /**
          * Set to true to enable pre-multiplied alpha
          *
-         * @member {boolean}
+         * @type {boolean}
          * @default true
          */
         this.premultiplyAlpha = premultiplyAlpha !== false;
@@ -146,7 +146,7 @@ export default class BaseTexture extends VObject
         /**
          * Global unique identifier for this BaseTexture
          *
-         * @member {string}
+         * @type {number}
          * @protected
          */
         this.uid = uid();
@@ -154,7 +154,7 @@ export default class BaseTexture extends VObject
         /**
          * Used by automatic texture Garbage Collection, stores last GC tick when it was bound
          *
-         * @member {number}
+         * @type {number}
          * @protected
          */
         this.touched = 0;
@@ -164,7 +164,7 @@ export default class BaseTexture extends VObject
          * as you can
          *
          * @readonly
-         * @member {boolean}
+         * @type {boolean}
          * @default false
          */
         this.isPowerOfTwo = false;
@@ -173,7 +173,7 @@ export default class BaseTexture extends VObject
         /**
          * The map of render context textures where this is bound
          *
-         * @member {Object}
+         * @type {Object}
          * @private
          */
         this._glTextures = {};
@@ -183,7 +183,7 @@ export default class BaseTexture extends VObject
          * Please call `update()` to increment it.
          *
          * @readonly
-         * @member {number}
+         * @type {number}
          */
         this.dirtyId = 0;
 
@@ -191,21 +191,21 @@ export default class BaseTexture extends VObject
          * Used by TextureSystem to only update texture style when needed.
          *
          * @protected
-         * @member {number}
+         * @type {number}
          */
         this.dirtyStyleId = 0;
 
         /**
          * Currently default cache ID.
          *
-         * @member {string}
+         * @type {string}
          */
         this.cacheId = null;
 
         /**
          * Generally speaking means when resource is loaded.
          * @readonly
-         * @member {boolean}
+         * @type {boolean}
          */
         this.valid = width > 0 && height > 0;
 
@@ -213,7 +213,7 @@ export default class BaseTexture extends VObject
          * The collection of alternative cache ids, since some BaseTextures
          * can have more than one ID, short name and longer full URL
          *
-         * @member {Array<string>}
+         * @type {Array<string>}
          * @readonly
          */
         this.textureCacheIds = [];
@@ -221,7 +221,7 @@ export default class BaseTexture extends VObject
         /**
          * Flag if BaseTexture has been destroyed.
          *
-         * @member {boolean}
+         * @type {boolean}
          * @readonly
          */
         this.destroyed = false;
@@ -231,7 +231,7 @@ export default class BaseTexture extends VObject
          * be one resource per BaseTexture, but textures can share
          * resources.
          *
-         * @member {Resource}
+         * @type {TextureResource}
          * @readonly
          */
         this.resource = null;
@@ -239,7 +239,7 @@ export default class BaseTexture extends VObject
         /**
          * Number of the texture batch, used by multi-texture renderers
          *
-         * @member {number}
+         * @type {number}
          */
         this._batchEnabled = 0;
 
@@ -299,7 +299,7 @@ export default class BaseTexture extends VObject
      * Pixel width of the source of this texture
      *
      * @readonly
-     * @member {number}
+     * @type {number}
      */
     get realWidth()
     {
@@ -310,7 +310,7 @@ export default class BaseTexture extends VObject
      * Pixel height of the source of this texture
      *
      * @readonly
-     * @member {number}
+     * @type {number}
      */
     get realHeight()
     {
@@ -656,6 +656,6 @@ export default class BaseTexture extends VObject
  * Global number of the texture batch, used by multi-texture renderers
  *
  * @static
- * @member {number}
+ * @type {number}
  */
 BaseTexture._globalBatch = 0;

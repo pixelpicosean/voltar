@@ -5,7 +5,7 @@ import { Rect2 } from 'engine/core/math/rect2';
 import { clamp } from 'engine/core/math/math_funcs';
 import { CMP_EPSILON } from 'engine/core/math/math_defs';
 import { Color } from 'engine/core/color';
-import { Texture, ImageTexture } from 'engine/scene/resources/texture';
+import { ImageTexture } from 'engine/scene/resources/texture';
 
 import { VisualServer } from '../visual_server';
 import { VSG } from './visual_server_globals';
@@ -380,7 +380,7 @@ export class VisualServerCanvas {
      */
     canvas_item_add_texture_rect(p_item, p_rect, p_texture, p_tile, p_modulate, p_transpose, p_normal_map) {
         const rect = new CommandRect();
-        rect._texture = p_texture.texture;
+        rect.texture = p_texture.texture;
         rect.modulate.copy(p_modulate);
         rect.rect.copy(p_rect);
         rect.flags = 0;
