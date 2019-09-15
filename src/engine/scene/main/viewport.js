@@ -405,7 +405,10 @@ export class Viewport extends Node {
         // TODO: if (physics_object_picking)
     }
 
-    get_mouse_position() { }
+    get_mouse_position() {
+        // TODO: real get_mouse_position()
+        return Vector2.ZERO;
+    }
     warp_mouse(p_pos) { }
 
     get_viewport_rid() {

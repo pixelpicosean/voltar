@@ -2,7 +2,7 @@ import { node_class_map } from "engine/registry";
 import { GDCLASS } from "engine/core/v_object";
 import { MessageQueue } from "engine/core/message_queue";
 import { SelfList } from "engine/core/self_list";
-import { Color } from "engine/core/color";
+import { Color, ColorLike } from "engine/core/color";
 import { Transform2D } from "engine/core/math/transform_2d";
 import { Rect2 } from "engine/core/math/rect2";
 
@@ -112,28 +112,54 @@ export class CanvasItem extends Node {
     }
 
     /**
-     * @param {Color} value
+     * @param {number} r color as hex number or red channel
+     * @param {number} [g] green channel
+     * @param {number} [b] blue channel
+     * @param {number} [a=1.0] alpha channel
      */
-    set_modulate(value) {
-        if (this.modulate.equals(value)) {
-            return;
+    set_modulate_n(r, g, b, a = 1.0) {
+        // r, g, b, a
+        if (Number.isFinite(g)) {
+            this.modulate.set(r, g, b, a);
         }
-        this.modulate.copy(value);
-        VSG.canvas.canvas_item_set_modulate(this.canvas_item, this.modulate);
+        // hex
+        else {
+            this.modulate.set_with_hex(r);
+        }
+    }
+    /**
+     * @param {ColorLike} color
+     */
+    set_modulate(color) {
+        this.modulate.copy(color);
     }
     get_modulate() {
         return this.modulate;
     }
 
     /**
-     * @param {Color} value
+     * @param {number} r color as hex number or red channel
+     * @param {number} [g] green channel
+     * @param {number} [b] blue channel
+     * @param {number} [a=1.0] alpha channel
      */
-    set_self_modulate(value) {
-        if (this.self_modulate.equals(value)) {
-            return;
+    set_self_modulate_n(r, g, b, a = 1.0) {
+        // r, g, b, a
+        if (g !== undefined) {
+            this.self_modulate.set(/** @type {number} */(r), g, b, a);
         }
-        this.self_modulate.copy(value);
+        // hex
+        else {
+            this.self_modulate.set_with_hex(r);
+        }
+
         VSG.canvas.canvas_item_set_self_modulate(this.canvas_item, this.self_modulate);
+    }
+    /**
+     * @param {ColorLike} color
+     */
+    set_self_modulate(color) {
+        this.set_self_modulate_n(color.r, color.g, color.b, color.a);
     }
     get_self_modulate() {
         return this.self_modulate;
@@ -152,6 +178,7 @@ export class CanvasItem extends Node {
         this.canvas_item = VSG.canvas.canvas_item_create();
         this.group = '';
 
+        /** @type {CanvasLayer} */
         this.canvas_layer = null;
 
         this.modulate = new Color(1, 1, 1, 1);
@@ -177,7 +204,7 @@ export class CanvasItem extends Node {
 
         this.material = null;
 
-        this._global_transform = new Transform2D();
+        this.global_transform = new Transform2D();
         this.global_invalid = false;
     }
     free() {
@@ -273,15 +300,15 @@ export class CanvasItem extends Node {
         if (this.global_invalid) {
             const pi = this.get_parent_item();
             if (pi) {
-                this._global_transform.copy(pi.get_global_transform()).append(this.get_transform());
+                this.global_transform.copy(pi.get_global_transform()).append(this.get_transform());
             } else {
-                this._global_transform.copy(this.get_transform());
+                this.global_transform.copy(this.get_transform());
             }
 
             this.global_invalid = false;
         }
 
-        return this._global_transform;
+        return this.global_transform;
     }
     get_global_transform_with_canvas() {
         if (this.canvas_layer) {
@@ -293,6 +320,9 @@ export class CanvasItem extends Node {
         }
     }
 
+    /**
+     * @returns {Transform2D}
+     */
     get_canvas_transform() {
         if (this.canvas_layer) {
             return this.canvas_layer.get_transform();
@@ -352,7 +382,12 @@ export class CanvasItem extends Node {
         return Rect2.new();
     }
 
-    get_global_mouse_position() { }
+    get_global_mouse_position() {
+        const xform = this.get_canvas_transform().clone().affine_inverse()
+        const pos = xform.xform(this.get_viewport().get_mouse_position());
+        Transform2D.free(xform);
+        return pos;
+    }
     get_local_mouse_position() { }
 
     update() {

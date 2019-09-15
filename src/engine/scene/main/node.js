@@ -89,6 +89,9 @@ export class Node extends VObject {
 
     get class() { return 'Node' }
 
+    /**
+     * @param {string} name
+     */
     set_filename(name) {
         this.data.filename = name;
     }
@@ -148,6 +151,9 @@ export class Node extends VObject {
     get_pause_mode() {
         return this.data.pause_mode;
     }
+    /**
+     * @param {number} mode
+     */
     set_pause_mode(mode) {
         if (this.data.pause_mode === mode) {
             return;

@@ -33,6 +33,9 @@ export class CanvasLayer extends Node {
         this.offset.copy(value);
         this._update_xform();
     }
+    reset_sort_index() {
+        this.sort_index = 0;
+    }
 
     get_rotation() {
         return this.rotation;
