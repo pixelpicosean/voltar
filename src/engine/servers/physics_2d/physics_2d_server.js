@@ -13,7 +13,7 @@ import {
     CollCbkData,
     _shape_col_cbk,
 } from "./state";
-import Step2DSW from "./step_2d_sw";
+import { Step2DSW } from "./step_2d_sw";
 import {
     Shape2DSW,
     CircleShape2DSW,
@@ -314,7 +314,7 @@ export class Physics2DServer {
 
     /**
      * @param {Area2DSW} p_area
-     * @param {import('engine/scene/physics/area_2d').default} id
+     * @param {import('engine/scene/physics/area_2d').Area2D} id
      */
     area_attach_object_instance(p_area, id) {
         p_area.instance = id;
@@ -328,7 +328,7 @@ export class Physics2DServer {
 
     /**
      * @param {Area2DSW} p_area
-     * @param {import('engine/scene/physics/area_2d').default} id
+     * @param {import('engine/scene/physics/area_2d').Area2D} id
      */
     area_attach_canvas_instance(p_area, id) {
         p_area.instance = id;

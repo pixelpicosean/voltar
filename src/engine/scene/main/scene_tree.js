@@ -11,6 +11,7 @@ import { is_equal_approx } from 'engine/core/math/math_funcs';
 import { OS } from 'engine/core/os/os';
 import { MessageQueue } from 'engine/core/message_queue';
 import { VisualServer } from 'engine/servers/visual_server';
+import { Physics2DServer } from 'engine/servers/physics_2d/physics_2d_server';
 import {
     MainLoop,
     NOTIFICATION_WM_MOUSE_ENTER,
@@ -158,7 +159,7 @@ export class SceneTree extends MainLoop {
             return;
         }
         this.paused = p_enabled;
-        // PhysicsServer.get_singleton().set_active(!p_enabled);
+        Physics2DServer.get_singleton().set_active(!p_enabled);
         if (this.root) {
             this.root.propagate_notification(p_enabled ? NOTIFICATION_PAUSED : NOTIFICATION_UNPAUSED);
         }

@@ -164,7 +164,7 @@ export class Body2DSW extends CollisionObject2DSW {
         this.new_transform = new Transform2D();
 
         /**
-         * @type {Map<import('./constraint_2d_sw').default, number>}
+         * @type {Map<import('./constraint_2d_sw').Constraint2DSW, number>}
          */
         this.constraint_map = new Map();
 
@@ -329,14 +329,14 @@ export class Body2DSW extends CollisionObject2DSW {
     }
 
     /**
-     * @param {import('./constraint_2d_sw').default} p_constraint
+     * @param {import('./constraint_2d_sw').Constraint2DSW} p_constraint
      * @param {number} p_pos
      */
     add_constraint(p_constraint, p_pos) {
         this.constraint_map.set(p_constraint, p_pos);
     }
     /**
-     * @param {import('./constraint_2d_sw').default} p_constraint
+     * @param {import('./constraint_2d_sw').Constraint2DSW} p_constraint
      */
     remove_constraint(p_constraint) {
         this.constraint_map.delete(p_constraint);

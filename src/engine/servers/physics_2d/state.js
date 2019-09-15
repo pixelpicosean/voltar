@@ -201,7 +201,7 @@ export class Physics2DDirectBodyStateSW {
 
     Physics2DDirectBodyStateSW() {
         /**
-         * @type {import('./body_2d_sw').default}
+         * @type {import('./body_2d_sw').Body2DSW}
          */
         this.body = null;
 
@@ -331,7 +331,7 @@ class ShapeRestInfo {
 
 /**
  *
- * @param {import('./collision_object_2d_sw').default} p_object
+ * @param {import('./collision_object_2d_sw').CollisionObject2DSW} p_object
  * @param {number} p_collision_mask
  * @param {boolean} p_collide_with_bodies
  * @param {boolean} p_collide_with_areas
@@ -373,7 +373,7 @@ export class Physics2DDirectSpaceStateSW {
      * @param {Vector2} p_from
      * @param {Vector2} p_to
      * @param {RayResult} r_result
-     * @param {Set<import('./collision_object_2d_sw').default>} [p_exclude]
+     * @param {Set<import('./collision_object_2d_sw').CollisionObject2DSW>} [p_exclude]
      * @param {number} [p_collision_mask]
      * @param {boolean} [p_collide_with_bodies=true]
      * @param {boolean} [p_collide_with_areas=false]
@@ -392,7 +392,7 @@ export class Physics2DDirectSpaceStateSW {
         const res_point = Vector2.new();
         const res_normal = Vector2.new();
         let res_shape = 0;
-        /** @type {import('./collision_object_2d_sw').default} */
+        /** @type {import('./collision_object_2d_sw').CollisionObject2DSW} */
         let res_obj = null;
         let min_d = 1e10;
 

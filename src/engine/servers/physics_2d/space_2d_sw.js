@@ -1,4 +1,4 @@
-import SelfList, { List } from "engine/core/self_list";
+import { SelfList, List } from "engine/core/self_list";
 import { CMP_EPSILON } from "engine/core/math/math_defs";
 import { Vector2 } from "engine/core/math/vector2";
 import { Rect2 } from "engine/core/math/rect2";

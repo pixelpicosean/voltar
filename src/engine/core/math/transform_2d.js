@@ -285,7 +285,7 @@ export class Transform2D {
     }
 
     /**
-     * @param {Vector2Like} out
+     * @param {Vector2} out
      */
     get_scale(out) {
         const basis_determinant = Math.sign(this.a * this.d - this.b * this.c);
@@ -315,9 +315,9 @@ export class Transform2D {
     }
 
     /**
-     * @param {Vector2Like} p_vec - The origin
-     * @param {Vector2Like} [r_out] - The point that the new position is assigned to (allowed to be same as input)
-     * @return {Vector2Like} The new point, transformed through this matrix
+     * @param {Vector2} p_vec - The origin
+     * @param {Vector2} [r_out] - The point that the new position is assigned to (allowed to be same as input)
+     * @return {Vector2} The new point, transformed through this matrix
      */
     basis_xform(p_vec, r_out) {
         r_out = r_out || Vector2.new();
@@ -327,9 +327,9 @@ export class Transform2D {
     }
 
     /**
-     * @param {Vector2Like} p_vec - The origin
-     * @param {Vector2Like} [r_out] - The point that the new position is assigned to (allowed to be same as input)
-     * @return {Vector2Like} The new point, inverse-transformed through this matrix
+     * @param {Vector2} p_vec - The origin
+     * @param {Vector2} [r_out] - The point that the new position is assigned to (allowed to be same as input)
+     * @return {Vector2} The new point, inverse-transformed through this matrix
      */
     basis_xform_inv(p_vec, r_out) {
         r_out = r_out || Vector2.new();
@@ -342,9 +342,9 @@ export class Transform2D {
      * Get a new position with the current transformation applied.
      * Can be used to go from a child's coordinate space to the world coordinate space. (e.g. rendering)
      *
-     * @param {Vector2Like} p_vec - The origin
-     * @param {Vector2Like} [r_out] - The point that the new position is assigned to (allowed to be same as input)
-     * @return {Vector2Like} The new point, transformed through this matrix
+     * @param {Vector2} p_vec - The origin
+     * @param {Vector2} [r_out] - The point that the new position is assigned to (allowed to be same as input)
+     * @return {Vector2} The new point, transformed through this matrix
      */
     xform(p_vec, r_out) {
         r_out = r_out || Vector2.new();
@@ -357,9 +357,9 @@ export class Transform2D {
      * Get a new position with the inverse of the current transformation applied.
      * Can be used to go from the world coordinate space to a child's coordinate space. (e.g. input)
      *
-     * @param {Vector2Like} p_vec - The origin
-     * @param {Vector2Like} [r_out] - The point that the new position is assigned to (allowed to be same as input)
-     * @return {Vector2Like} The new point, inverse-transformed through this matrix
+     * @param {Vector2} p_vec - The origin
+     * @param {Vector2} [r_out] - The point that the new position is assigned to (allowed to be same as input)
+     * @return {Vector2} The new point, inverse-transformed through this matrix
      */
     xform_inv(p_vec, r_out) {
         r_out = r_out || Vector2.new();

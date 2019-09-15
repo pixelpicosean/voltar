@@ -30,6 +30,8 @@ export const Main = {
     raf_id: -1,
     iterating: 0,
 
+    disable_render_loop: false,
+
     force_redraw_requested: false,
 
     /** @type {Engine} */
@@ -111,22 +113,22 @@ export const Main = {
         }
         this.last_ticks = timestamp;
 
-        // TODO: scaled_step = step * time_scale;
-        const scaled_step = step * 1.0;
+        const time_scale = Engine.get_singleton().time_scale;
+        const scaled_step = step * time_scale;
 
         const max_physics_steps = 4;
         const frame_slice = scaled_step / max_physics_steps;
 
         for (let iters = 0; iters < max_physics_steps; iters++) {
-            // Physics2DServer.get_singleton().sync();
-            // Physics2DServer.get_singleton().flush_queries();
+            Physics2DServer.get_singleton().sync();
+            Physics2DServer.get_singleton().flush_queries();
 
             SceneTree.get_singleton().iteration(frame_slice);
 
             MessageQueue.get_singleton().flush();
 
-            // Physics2DServer.get_singleton().end_sync();
-            // Physics2DServer.get_singleton().step(frame_slice);
+            Physics2DServer.get_singleton().end_sync();
+            Physics2DServer.get_singleton().step(frame_slice);
 
             MessageQueue.get_singleton().flush();
         }
@@ -136,12 +138,14 @@ export const Main = {
 
         VisualServer.get_singleton().sync();
 
-        // TODO: if (can_draw() && !disable_render_loop)
-        // TODO: force_redraw_requested && is_in_low_processor_usage_mode()
-        VisualServer.get_singleton().draw(scaled_step);
-        this.force_redraw_requested = false;
+        if (OS.get_singleton().can_draw() && !this.disable_render_loop) {
+            // TODO: force_redraw_requested && is_in_low_processor_usage_mode()
+            VisualServer.get_singleton().draw(scaled_step);
+            this.force_redraw_requested = false;
+        }
 
         this.frames++;
+        Engine.get_singleton().idle_frames++;
         if (this.frame > 1000000) {
             // TODO: calculation FPS
             this.frame %= 1000000;
