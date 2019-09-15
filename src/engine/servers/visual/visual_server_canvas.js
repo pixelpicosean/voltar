@@ -1,16 +1,38 @@
 import { remove_items } from 'engine/dep/index';
-import { Vector2 } from 'engine/core/math/vector2';
-import { Transform2D } from 'engine/core/math/transform_2d';
-import { Rect2 } from 'engine/core/math/rect2';
+import {
+    CMP_EPSILON,
+    MARGIN_LEFT,
+    MARGIN_TOP,
+    MARGIN_RIGHT,
+    MARGIN_BOTTOM,
+} from 'engine/core/math/math_defs';
 import { clamp } from 'engine/core/math/math_funcs';
-import { CMP_EPSILON } from 'engine/core/math/math_defs';
+import { Vector2 } from 'engine/core/math/vector2';
+import { Rect2 } from 'engine/core/math/rect2';
+import { Transform2D } from 'engine/core/math/transform_2d';
 import { Color } from 'engine/core/color';
-import { ImageTexture } from 'engine/scene/resources/texture';
 
 import { VisualServer } from '../visual_server';
 import { VSG } from './visual_server_globals';
-import { CommandRect, TYPE_RECT, TYPE_CLIP_IGNORE } from './commands';
+import {
+    TYPE_RECT,
+    TYPE_CLIP_IGNORE,
+    CANVAS_RECT_TILE,
+    CANVAS_RECT_REGION,
+    CANVAS_RECT_FLIP_H,
+    CANVAS_RECT_FLIP_V,
+    CANVAS_RECT_TRANSPOSE,
+    NINE_PATCH_STRETCH,
+    Command,
+    CommandRect,
+    CommandTransform,
+    CommandNinePatch,
+    CommandCircle,
+} from './commands';
+import Texture from 'engine/drivers/textures/Texture';
 
+
+const white = Object.freeze(new Color(1, 1, 1, 1));
 
 let uid = 0;
 
@@ -31,7 +53,7 @@ export class Item {
         this.visible = true;
         this.behind = false;
         this.update_when_visible = false;
-        /** @type {CommandRect[]} */
+        /** @type {Command[]} */
         this.commands = [];
         this.custom_rect = false;
         this.rect_dirty = true;
@@ -369,35 +391,162 @@ export class VisualServerCanvas {
     canvas_item_add_line() { }
     canvas_item_add_polyline() { }
     canvas_item_add_multiline() { }
-    canvas_item_add_rect() { }
-    canvas_item_add_circle() { }
     /**
      * @param {Item} p_item
      * @param {Rect2} p_rect
-     * @param {ImageTexture} p_texture
-     * @param {boolean} p_tile
-     * @param {Color} p_modulate
+     * @param {Color} p_color
      */
-    canvas_item_add_texture_rect(p_item, p_rect, p_texture, p_tile, p_modulate, p_transpose, p_normal_map) {
+    canvas_item_add_rect(p_item, p_rect, p_color) {
         const rect = new CommandRect();
-        rect.texture = p_texture.texture;
+        rect.modulate.copy(p_color);
+        rect.rect.copy(p_rect);
+        p_item.rect_dirty = true;
+
+        p_item.commands.push(rect);
+    }
+    /**
+     * @param {Item} p_item
+     * @param {Vector2} p_pos
+     * @param {number} p_radius
+     * @param {Color} p_color
+     */
+    canvas_item_add_circle(p_item, p_pos, p_radius, p_color) {
+        const circle = new CommandCircle();
+        circle.color.copy(p_color);
+        circle.pos.copy(p_pos);
+        circle.radius = p_radius;
+
+        p_item.commands.push(circle);
+    }
+    /**
+     * @param {Item} p_item
+     * @param {Rect2} p_rect
+     * @param {Texture} p_texture
+     * @param {boolean} [p_tile=false]
+     * @param {Color} [p_modulate]
+     * @param {boolean} [p_transpose=false]
+     * @param {Texture} [p_normal_map]
+     */
+    canvas_item_add_texture_rect(p_item, p_rect, p_texture, p_tile = false, p_modulate = white, p_transpose = false, p_normal_map = null) {
+        const rect = new CommandRect();
         rect.modulate.copy(p_modulate);
         rect.rect.copy(p_rect);
         rect.flags = 0;
+        if (p_tile) {
+            rect.flags |= CANVAS_RECT_TILE;
+            rect.flags |= CANVAS_RECT_REGION;
+            rect.source.set(0, 0, Math.abs(p_rect.width), Math.abs(p_rect.height));
+        }
+
+        if (p_rect.width < 0) {
+            rect.flags |= CANVAS_RECT_FLIP_H;
+            rect.rect.width = -rect.rect.width;
+        }
+        if (p_rect.height < 0) {
+            rect.flags |= CANVAS_RECT_FLIP_V;
+            rect.rect.height = -rect.rect.height;
+        }
+        if (p_transpose) {
+            rect.flags |= CANVAS_RECT_TRANSPOSE;
+            const t = rect.rect.height;
+            rect.rect.height = rect.rect.width;
+            rect.rect.width = t;
+        }
+        rect.texture = p_texture;
+        rect.normal_map = p_normal_map;
         p_item.rect_dirty = true;
         p_item.commands.push(rect);
     }
-    canvas_item_add_texture_rect_region() { }
-    canvas_item_add_nine_patch() { }
+    /**
+     * @param {Item} p_item
+     * @param {Rect2} p_rect
+     * @param {Texture} p_texture
+     * @param {Rect2} p_src_rect
+     * @param {Color} [p_modulate]
+     * @param {boolean} [p_transpose=false]
+     * @param {Texture} [p_normal_map]
+     * @param {boolean} [p_clip_uv=false]
+     */
+    canvas_item_add_texture_rect_region(p_item, p_rect, p_texture, p_src_rect, p_modulate = white, p_transpose = false, p_normal_map = null, p_clip_uv = false) {
+        const rect = new CommandRect();
+        rect.modulate.copy(p_modulate);
+        rect.rect.copy(p_rect);
+        rect.texture = p_texture;
+        rect.normal_map = p_normal_map;
+        rect.flags = CANVAS_RECT_REGION;
+
+        if (p_rect.width < 0) {
+            rect.flags |= CANVAS_RECT_FLIP_H;
+            rect.rect.width = -rect.rect.width;
+        }
+        if (p_rect.height < 0) {
+            rect.flags |= CANVAS_RECT_FLIP_V;
+            rect.rect.height = -rect.rect.height;
+        }
+        if (p_transpose) {
+            rect.flags |= CANVAS_RECT_TRANSPOSE;
+            const t = rect.rect.height;
+            rect.rect.height = rect.rect.width;
+            rect.rect.width = t;
+        }
+        p_item.rect_dirty = true;
+        p_item.commands.push(rect);
+    }
+    /**
+     * @param {Item} p_item
+     * @param {Rect2} p_rect
+     * @param {Rect2} p_source
+     * @param {Texture} p_texture
+     * @param {Vector2} p_topleft
+     * @param {Vector2} p_bottomright
+     * @param {number} [p_x_axis_mode]
+     * @param {number} [p_y_axis_mode]
+     * @param {boolean} [p_draw_center=true]
+     * @param {Color} [p_modulate=white]
+     * @param {Texture} [p_normal_map]
+     */
+    canvas_item_add_nine_patch(p_item, p_rect, p_source, p_texture, p_topleft, p_bottomright, p_x_axis_mode = NINE_PATCH_STRETCH, p_y_axis_mode = NINE_PATCH_STRETCH, p_draw_center = true, p_modulate = white, p_normal_map = null) {
+        const style = new CommandNinePatch();
+        style.texture = p_texture;
+        style.normal_map = p_normal_map;
+        style.rect.copy(p_rect);
+        style.source.copy(p_source);
+        style.draw_center = p_draw_center;
+        style.color.copy(p_modulate);
+        style.margin[MARGIN_LEFT] = p_topleft.x;
+        style.margin[MARGIN_TOP] = p_topleft.y;
+        style.margin[MARGIN_RIGHT] = p_bottomright.x;
+        style.margin[MARGIN_BOTTOM] = p_bottomright.y;
+        style.axis_x = p_x_axis_mode;
+        style.axis_y = p_y_axis_mode;
+        p_item.rect_dirty = true;
+
+        p_item.commands.push(style);
+    }
     canvas_item_add_primitive() { }
     canvas_item_add_polygon() { }
     canvas_item_add_triangle_array() { }
     canvas_item_add_mesh() { }
     canvas_item_add_multimesh() { }
     canvas_item_add_particles() { }
-    canvas_item_add_set_transform() { }
+    /**
+     * @param {Item} p_item
+     * @param {Transform2D} p_transform
+     */
+    canvas_item_add_set_transform(p_item, p_transform) {
+        const tr = new CommandTransform();
+        tr.xform.copy(p_transform);
+        p_item.commands.push(tr);
+    }
     canvas_item_add_clip_ignore() { }
-    canvas_item_set_sort_children_by_y(p_item, p_enabled) { }
+    /**
+     * @param {Item} p_item
+     * @param {boolean} p_enabled
+     */
+    canvas_item_set_sort_children_by_y(p_item, p_enabled) {
+        p_item.sort_y = p_enabled;
+        this._mark_ysort_dirty(p_item);
+    }
     /**
      * @param {Item} p_item
      * @param {number} p_z
@@ -412,7 +561,6 @@ export class VisualServerCanvas {
     canvas_item_set_z_as_relative_to_parent(p_item, p_enable) {
         p_item.z_relative = p_enable;
     }
-    canvas_item_set_copy_to_backbuffer() { }
 
     canvas_item_attach_skeleton() { }
 

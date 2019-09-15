@@ -4,6 +4,7 @@ import { Transform2D } from "engine/core/math/transform_2d";
 
 import Texture from "engine/drivers/textures/Texture";
 import { BLEND_MODES } from "engine/drivers/constants";
+import { Vector2 } from "engine/core/math/vector2";
 
 
 export const CANVAS_RECT_REGION = 1;
@@ -26,9 +27,16 @@ export const TYPE_CIRCLE = 9;
 export const TYPE_TRANSFORM = 10;
 export const TYPE_CLIP_IGNORE = 11;
 
+export const NINE_PATCH_STRETCH = 0;
+export const NINE_PATCH_TILE = 1;
+export const NINE_PATCH_TILE_FIT = 2;
+
 
 const quad_indices = new Uint16Array([0, 1, 2, 0, 2, 3]);
 
+export class Command {
+    get type() { return -1 }
+}
 
 export class CommandRect {
     get type() { return TYPE_RECT }
@@ -51,7 +59,11 @@ export class CommandRect {
      * @param {Transform2D} transform
      */
     calculate_vertices(transform) {
-        const texture = this.texture;
+        // We don't use orig, trim and rotation from texture atlas,
+        // so we'll be able to support more Godot drawing configs.
+        // Also we can add a special atlas packer to CLI.
+
+        // Vertex
         const wt = transform;
         const a = wt.a;
         const b = wt.b;
@@ -59,47 +71,58 @@ export class CommandRect {
         const d = wt.d;
         const tx = wt.tx;
         const ty = wt.ty;
+
+        const w1 = this.rect.x;
+        const w0 = w1 + this.rect.width;
+        const h1 = this.rect.y;
+        const h0 = h1 + this.rect.height;
+
         const vertex_data = this.vertex_data;
-        const trim = texture.trim;
-        const orig = texture.orig;
 
-        let w0 = 0;
-        let w1 = 0;
-        let h0 = 0;
-        let h1 = 0;
-
-        if (trim) {
-            // if the sprite is trimmed and is not a tilingsprite then we need to add the extra
-            // space before transforming the sprite coords.
-            w1 = trim.x + this.rect.x;
-            w0 = w1 + trim.width;
-
-            h1 = trim.y + this.rect.y;
-            h0 = h1 + trim.height;
-        } else {
-            w1 = this.rect.x;
-            w0 = w1 + orig.width;
-
-            h1 = this.rect.y;
-            h0 = h1 + orig.height;
-        }
-
-        // xy
         vertex_data[0] = (a * w1) + (c * h1) + tx;
         vertex_data[1] = (d * h1) + (b * w1) + ty;
 
-        // xy
         vertex_data[2] = (a * w0) + (c * h1) + tx;
         vertex_data[3] = (d * h1) + (b * w0) + ty;
 
-        // xy
         vertex_data[4] = (a * w0) + (c * h0) + tx;
         vertex_data[5] = (d * h0) + (b * w0) + ty;
 
-        // xy
         vertex_data[6] = (a * w1) + (c * h0) + tx;
         vertex_data[7] = (d * h0) + (b * w1) + ty;
 
-        this.uvs = texture._uvs.uvsFloat32;
+        // UV
+        this.uvs = this.texture._uvs.uvsFloat32;
+    }
+}
+
+export class CommandNinePatch {
+    get type() { return TYPE_NINEPATCH }
+    constructor() {
+        this.rect = new Rect2();
+        this.source = new Rect2();
+        this.texture = null;
+        this.normal_map = null;
+        this.margin = [0, 0, 0, 0];
+        this.draw_center = true;
+        this.color = new Color();
+        this.axis_x = NINE_PATCH_STRETCH;
+        this.axis_y = NINE_PATCH_STRETCH;
+    }
+}
+
+export class CommandCircle {
+    get type() { return TYPE_CIRCLE }
+    constructor() {
+        this.pos = new Vector2();
+        this.radius = 0;
+        this.color = new Color();
+    }
+}
+
+export class CommandTransform {
+    get type() { return TYPE_TRANSFORM }
+    constructor() {
+        this.xform = new Transform2D();
     }
 }

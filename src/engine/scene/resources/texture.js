@@ -8,6 +8,7 @@ import {
     TEXTURE_TYPE_2D,
 } from "engine/servers/visual_server";
 import { VSG } from "engine/servers/visual/visual_server_globals";
+import { Item } from "engine/servers/visual/visual_server_canvas";
 
 
 const White = Object.freeze(new Color(1, 1, 1, 1));
@@ -46,7 +47,7 @@ export class Texture extends Resource {
      * @param {Vector2Like} p_pos
      * @param {Color} [p_modulate]
      * @param {boolean} [p_transpose]
-     * @param {Texture} [p_normal_map]
+     * @param {ImageTexture} [p_normal_map]
      */
     draw(p_canvas_item, p_pos, p_modulate = White, p_transpose = false, p_normal_map = null) { }
 
@@ -56,7 +57,7 @@ export class Texture extends Resource {
      * @param {boolean} [p_tile]
      * @param {Color} [p_modulate]
      * @param {boolean} [p_transpose]
-     * @param {Texture} [p_normal_map]
+     * @param {ImageTexture} [p_normal_map]
      */
     draw_rect(p_canvas_item, p_rect, p_tile = false, p_modulate = White, p_transpose = false, p_normal_map = null) { }
 
@@ -66,7 +67,7 @@ export class Texture extends Resource {
      * @param {Rect2} p_src_rect
      * @param {Color} [p_modulate]
      * @param {boolean} [p_transpose]
-     * @param {Texture} [p_normal_map]
+     * @param {ImageTexture} [p_normal_map]
      * @param {boolean} [p_clip_uv]
      */
     draw_rect_region(p_canvas_item, p_rect, p_src_rect, p_modulate = White, p_transpose = false, p_normal_map = null, p_clip_uv = true) { }
@@ -117,8 +118,6 @@ export class ImageTexture extends Texture {
      */
     create_from_image(p_image, p_flags) {
         this._flags = p_flags;
-        this.width = p_image.width;
-        this.height = p_image.height;
         this.format = p_image.format;
 
         VSG.storage.texture_allocate(this.texture, this.width, this.height, 0, this.format, TEXTURE_TYPE_2D, this.flags);
@@ -133,6 +132,44 @@ export class ImageTexture extends Texture {
     set_data(p_image) {
         VSG.storage.texture_set_data(this.texture, p_image);
         this.image_stored = true;
+    }
+
+    /**
+     * @param {Item} p_canvas_item
+     * @param {Vector2Like} p_pos
+     * @param {Color} [p_modulate]
+     * @param {boolean} [p_transpose]
+     * @param {ImageTexture} [p_normal_map]
+     */
+    draw(p_canvas_item, p_pos, p_modulate = White, p_transpose = false, p_normal_map = null) {
+        const rect = Rect2.new(p_pos.x, p_pos.y, this.width, this.height);
+        VSG.canvas.canvas_item_add_texture_rect(p_canvas_item, rect, this.texture, false, p_modulate, p_transpose, p_normal_map && p_normal_map.texture);
+        Rect2.free(rect);
+    }
+
+    /**
+     * @param {Item} p_canvas_item
+     * @param {Vector2Like} p_rect
+     * @param {boolean} [p_tile]
+     * @param {Color} [p_modulate]
+     * @param {boolean} [p_transpose]
+     * @param {ImageTexture} [p_normal_map]
+     */
+    draw_rect(p_canvas_item, p_rect, p_tile = false, p_modulate = White, p_transpose = false, p_normal_map = null) {
+        VSG.canvas.canvas_item_add_texture_rect(p_canvas_item, p_rect, this.texture, p_tile, p_modulate, p_transpose, p_normal_map && p_normal_map.texture);
+    }
+
+    /**
+     * @param {Item} p_canvas_item
+     * @param {Rect2} p_rect
+     * @param {Rect2} p_src_rect
+     * @param {Color} [p_modulate]
+     * @param {boolean} [p_transpose]
+     * @param {ImageTexture} [p_normal_map]
+     * @param {boolean} [p_clip_uv]
+     */
+    draw_rect_region(p_canvas_item, p_rect, p_src_rect, p_modulate = White, p_transpose = false, p_normal_map = null, p_clip_uv = true) {
+        VSG.canvas.canvas_item_add_texture_rect_region(p_canvas_item, p_rect, this.texture, p_src_rect, p_modulate, p_transpose, p_normal_map && p_normal_map.texture, p_clip_uv);
     }
 }
 GDCLASS(ImageTexture, Texture)

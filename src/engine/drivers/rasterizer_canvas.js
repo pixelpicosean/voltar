@@ -23,11 +23,15 @@ import UniformGroup from './shader/UniformGroup';
 import BatchSystem from './batch/BatchSystem';
 import TextureGCSystem from './textures/TextureGCSystem';
 import { Runner } from './runner';
-import { VSG } from 'engine/servers/visual/visual_server_globals';
 import { VObject } from 'engine/core/v_object';
-import { RENDER_TARGET_TRANSPARENT, RENDER_TARGET_DIRECT_TO_SCREEN } from './constants';
+import { RENDER_TARGET_TRANSPARENT, RENDER_TARGET_DIRECT_TO_SCREEN, RENDER_TARGET_VFLIP } from './constants';
 import { Item } from 'engine/servers/visual/visual_server_canvas';
-import { TYPE_RECT } from 'engine/servers/visual/commands';
+import {
+    TYPE_RECT,
+    CommandRect,
+    TYPE_CIRCLE,
+    CommandCircle,
+} from 'engine/servers/visual/commands';
 
 
 export class RasterizerCanvas extends VObject {
@@ -169,7 +173,6 @@ export class RasterizerCanvas extends VObject {
 
     canvas_begin() {
         const gl = this.gl;
-        // TODO: bind canvas shader
 
         this.runners.prerender.run();
         this.emit_signal('prerender');
@@ -188,9 +191,9 @@ export class RasterizerCanvas extends VObject {
                 viewport_height = frame.current_rt.height;
                 viewport_x = frame.current_rt.x;
                 viewport_y = OS.get_singleton().window_size.height - viewport_height - frame.current_rt.y;
-                // gl.scissor(viewport_x, viewport_y, viewport_width, viewport_height);
-                // gl.viewport(viewport_x, viewport_y, viewport_width, viewport_height);
-                // gl.enable(gl.SCISSOR_TEST);
+                gl.scissor(viewport_x, viewport_y, viewport_width, viewport_height);
+                gl.viewport(viewport_x, viewport_y, viewport_width, viewport_height);
+                gl.enable(gl.SCISSOR_TEST);
             } else {
                 this.renderingToScreen = false;
             }
@@ -216,6 +219,8 @@ export class RasterizerCanvas extends VObject {
     }
 
     canvas_end() {
+        const gl = this.gl;
+
         const frame = this.storage.frame;
         this.batch.currentRenderer.flush();
 
@@ -229,7 +234,11 @@ export class RasterizerCanvas extends VObject {
 
         this.emit_signal('postrender');
 
-        // TODO: reset viewport to full window size while drawing to screen?
+        if (frame.current_rt && frame.current_rt.flags[RENDER_TARGET_DIRECT_TO_SCREEN]) {
+            const size = OS.get_singleton().get_window_size();
+            gl.viewport(0, 0, size.x, size.y);
+            gl.scissor(0, 0, size.x, size.y);
+        }
 
         this.states.using_texture_rect = false;
         this.states.using_skeleton = false;
@@ -238,8 +247,8 @@ export class RasterizerCanvas extends VObject {
     }
 
     reset_canvas() {
-        // const gl = this.gl;
-        // gl.disable(gl.DEPTH_TEST);
+        const gl = this.gl;
+        gl.disable(gl.DEPTH_TEST);
     }
 
     /**
@@ -265,11 +274,15 @@ export class RasterizerCanvas extends VObject {
         for (let c of p_item.commands) {
             switch (c.type) {
                 case TYPE_RECT: {
-                    c.calculate_vertices(p_item.final_transform);
-                    c.modulate.copy(p_item.final_modulate);
+                    let rect = /** @type {CommandRect} */(c);
+                    rect.calculate_vertices(p_item.final_transform);
+                    rect.modulate.copy(p_item.final_modulate);
                     // TODO: add blend mode support, maybe a material system just like Godot
-                    // c.blendMode = p_item.blend_mode;
-                    this.batch.currentRenderer.render(c);
+                    // rect.blendMode = p_item.blend_mode;
+                    this.batch.currentRenderer.render(rect);
+                } break;
+                case TYPE_CIRCLE: {
+                    let circle = /** @type {CommandCircle} */(c);
                 } break;
             }
         }
