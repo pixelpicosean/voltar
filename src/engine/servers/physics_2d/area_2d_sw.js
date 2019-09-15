@@ -45,7 +45,7 @@ export class Area2DSW extends CollisionObject2DSW {
         this.point_attenuation = 1;
         this.linear_damp = 0.1;
         this.angular_damp = 1;
-        this.priotity = 0;
+        this.priority = 0;
         this.monitorable = false;
 
         this.monitor_callback_scope = null;

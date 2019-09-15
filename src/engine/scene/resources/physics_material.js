@@ -1,90 +1,51 @@
-import VObject from "engine/core/v_object";
+import { VObject } from "engine/core/v_object";
 
-export default class PhysicsMaterial extends VObject {
-    get friction() {
-        return this._friction;
-    }
-    /**
-     * @param {number} p_value
-     */
-    set friction(p_value) {
-        this._friction = p_value;
-        this.emit_signal('changed');
-    }
+export class PhysicsMaterial extends VObject {
     /**
      * @param {number} p_value
      */
     set_friction(p_value) {
-        this._friction = p_value;
-        return this;
-    }
-
-    get rough() {
-        return this._rough;
-    }
-    /**
-     * @param {boolean} p_value
-     */
-    set rough(p_value) {
-        this._rough = p_value;
+        this.friction = p_value;
         this.emit_signal('changed');
     }
+
     /**
      * @param {boolean} p_value
      */
     set_rough(p_value) {
-        this._rough = p_value;
-        return this;
-    }
-
-    get bounce() {
-        return this._bounce;
-    }
-    /**
-     * @param {number} p_value
-     */
-    set bounce(p_value) {
-        this._bounce = p_value;
+        this.rough = p_value;
         this.emit_signal('changed');
     }
+
     /**
      * @param {number} p_value
      */
     set_bounce(p_value) {
-        this._bounce = p_value;
-        return this;
-    }
-
-    get absorbent() {
-        return this._absorbent;
-    }
-    /**
-     * @param {boolean} p_value
-     */
-    set absorbent(p_value) {
-        this._absorbent = p_value;
+        this.bounce = p_value;
         this.emit_signal('changed');
     }
+
     /**
      * @param {boolean} p_value
      */
     set_absorbent(p_value) {
-        this._absorbent = p_value;
-        return this;
+        this.absorbent = p_value;
+        this.emit_signal('changed');
     }
 
-    get computed_friction() {
+    get_computed_friction() {
         return this.rough ? -this.friction : this.friction;
     }
-    get computed_bounce() {
+    get_computed_bounce() {
         return this.absorbent ? -this.bounce : this.bounce;
     }
+
     constructor() {
         super();
 
-        this._friction = 1;
-        this._rough = false;
-        this._bounce = 0;
-        this._absorbent = false;
+        this.friction = 1;
+        this.rough = false;
+        this.bounce = 0;
+        this.absorbent = false;
     }
 }

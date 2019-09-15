@@ -1,6 +1,6 @@
 import { node_class_map } from "engine/registry";
 import { GDCLASS } from "engine/core/v_object";
-import { Vector2 } from "engine/core/math/vector2";
+import { Vector2, Vector2Like } from "engine/core/math/vector2";
 import { Transform2D } from "engine/core/math/transform_2d";
 import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server";
 import { Body2DSW } from "engine/servers/physics_2d/body_2d_sw";
@@ -10,15 +10,17 @@ import {
     Physics2DDirectBodyStateSW,
 } from "engine/servers/physics_2d/state";
 
-import PhysicsMaterial from "../resources/physics_material";
-import { BodyMode } from "./const";
+import { PhysicsMaterial } from "../resources/physics_material";
+import { BodyMode, BodyState } from "./const";
 import { CollisionObject2D } from "./collision_object_2d";
+import { NOTIFICATION_ENTER_TREE } from "../main/node";
+import { NOTIFICATION_LOCAL_TRANSFORM_CHANGED } from "../2d/canvas_item";
+import { Engine } from "engine/core/engine";
 
 
 export class PhysicsBody2D extends CollisionObject2D {
-    /**
-     * @returns {number}
-     */
+    get class() { return 'PhysicsBody2D' }
+
     get_collision_layer() {
         return this.collision_layer;
     }
@@ -27,22 +29,18 @@ export class PhysicsBody2D extends CollisionObject2D {
      * other areas will collide with this one on the given layer.
      *
      * @param {number} bit
-     * @returns {boolean}
      */
     get_collision_layer_bit(bit) {
-        return !!(this.collision_layer & (1 << (bit - 1)));
+        return !!(this.collision_layer & (1 << bit));
     }
     /**
      * @param {number} layer
-     * @returns {this}
      */
     set_collision_layer(layer) {
         this.collision_layer = layer;
         if (this.rid) {
             this.rid.collision_layer = this.collision_layer;
         }
-
-        return this;
     }
     /**
      * Set/clear individual bits on the layer mask. This makes
@@ -50,25 +48,19 @@ export class PhysicsBody2D extends CollisionObject2D {
      *
      * @param {number} bit
      * @param {boolean} value
-     * @returns {this}
      */
     set_collision_layer_bit(bit, value) {
         if (value) {
-            this.collision_layer |= (1 << (bit - 1));
+            this.collision_layer |= (1 << bit);
         } else {
-            this.collision_layer &= ~(1 << (bit - 1));
+            this.collision_layer &= ~(1 << bit);
         }
 
         if (this.rid) {
             this.rid.collision_layer = this.collision_layer;
         }
-
-        return this;
     }
 
-    /**
-     * @returns {number}
-     */
     get_collision_mask() {
         return this.collision_mask;
     }
@@ -77,14 +69,12 @@ export class PhysicsBody2D extends CollisionObject2D {
      * this area will collide with others on the given layer.
      *
      * @param {number} bit
-     * @returns {boolean}
      */
     get_collision_mask_bit(bit) {
-        return !!(this.collision_mask & (1 << (bit - 1)));
+        return !!(this.collision_mask & (1 << bit));
     }
     /**
      * @param {number} mask
-     * @returns {this}
      */
     set_collision_mask(mask) {
         this.collision_mask = mask;
@@ -92,8 +82,6 @@ export class PhysicsBody2D extends CollisionObject2D {
         if (this.rid) {
             this.rid.collision_mask = this.collision_mask;
         }
-
-        return this;
     }
     /**
      * Set/clear individual bits on the collision mask. This makes
@@ -101,20 +89,17 @@ export class PhysicsBody2D extends CollisionObject2D {
      *
      * @param {number} bit
      * @param {boolean} value
-     * @returns {this}
      */
     set_collision_mask_bit(bit, value) {
         if (value) {
-            this.collision_mask |= (1 << (bit - 1));
+            this.collision_mask |= (1 << bit);
         } else {
-            this.collision_mask &= ~(1 << (bit - 1));
+            this.collision_mask &= ~(1 << bit);
         }
 
         if (this.rid) {
             this.rid.collision_mask = this.collision_mask;
         }
-
-        return this;
     }
 
     /**
@@ -133,8 +118,6 @@ export class PhysicsBody2D extends CollisionObject2D {
      */
     constructor(p_mode) {
         super(Physics2DServer.get_singleton().body_create(), false);
-
-        this.class = 'PhysicsBody2D';
 
         this.collision_layer = 1;
         this.collision_mask = 1;
@@ -163,97 +146,53 @@ export class PhysicsBody2D extends CollisionObject2D {
     add_collision_exception_with(p_node) { }
     remove_collision_exception_with(p_node) { }
 }
-
 GDCLASS(PhysicsBody2D, CollisionObject2D)
 
 
 export class StaticBody2D extends PhysicsBody2D {
-    get friction() {
-        if (!this._physics_material_override) {
-            return 1;
-        }
+    get class() { return 'StaticBody2D' }
 
-        return this._physics_material_override._friction;
-    }
-    /**
-     * @param {number} p_friction
-     */
-    set friction(p_friction) {
-        if (p_friction === 1) {
-            return;
-        }
-
-        if (!this._physics_material_override) {
-            this.physics_material_override = new PhysicsMaterial();
-        }
-        this._physics_material_override.friction = p_friction;
-    }
-    /**
-     * @param {number} p_friction
-     */
-    set_friction(p_friction) {
-        this.friction = p_friction;
-        return this;
-    }
-
-    get bounce() {
-        if (!this._physics_material_override) {
-            return 1;
-        }
-
-        return this._physics_material_override._bounce;
-    }
-    /**
-     * @param {number} p_bounce
-     */
-    set bounce(p_bounce) {
-        if (p_bounce === 0) {
-            return;
-        }
-
-        if (!this._physics_material_override) {
-            this.physics_material_override = new PhysicsMaterial();
-        }
-        this._physics_material_override.bounce = p_bounce;
-    }
-    /**
-     * @param {number} p_bounce
-     */
-    set_bounce(p_bounce) {
-        this.bounce = p_bounce;
-        return this;
-    }
-
-    get physics_material_override() {
-        return this._physics_material_override;
-    }
     /**
      * @param {PhysicsMaterial} p_physics_material_override
      */
-    set physics_material_override(p_physics_material_override) {
-        if (this._physics_material_override) {
-            this._physics_material_override.disconnect('changed', this._reload_physics_characteristics, this);
+    set_physics_material_override(p_physics_material_override) {
+        if (this.physics_material_override) {
+            this.physics_material_override.disconnect('changed', this._reload_physics_characteristics, this);
         }
 
-        this._physics_material_override = p_physics_material_override;
+        this.physics_material_override = p_physics_material_override;
 
         if (p_physics_material_override) {
             p_physics_material_override.connect('changed', this._reload_physics_characteristics, this);
         }
         this._reload_physics_characteristics();
     }
+
     /**
-     * @param {PhysicsMaterial} p_physics_material_override
+     * @param {Vector2Like} p_linear_velocity
      */
-    set_physics_material_override(p_physics_material_override) {
-        this.physics_material_override = p_physics_material_override;
-        return this;
+    set_constant_linear_velocity(p_linear_velocity) {
+        this.set_constant_linear_velocity_n(p_linear_velocity.x, p_linear_velocity.y);
+    }
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
+    set_constant_linear_velocity_n(x, y) {
+        this.constant_linear_velocity.set(x, y);
+        this.rid.set_state(BodyState.LINEAR_VELOCITY, this.constant_linear_velocity);
+    }
+
+    /**
+     * @param {number} p_angular_velocity
+     */
+    set_constant_angular_velocity(p_angular_velocity) {
+        this.constant_angular_velocity = p_angular_velocity;
+        this.rid.set_state(BodyState.ANGULAR_VELOCITY, this.constant_angular_velocity);
     }
 
     constructor() {
         super(BodyMode.STATIC);
-
-        this.class = 'StaticBody2D';
 
         this.constant_linear_velocity = new Vector2();
         this.constant_angular_velocity = 0;
@@ -261,39 +200,35 @@ export class StaticBody2D extends PhysicsBody2D {
         /**
          * @type {PhysicsMaterial}
          */
-        this._physics_material_override = null;
+        this.physics_material_override = null;
     }
 
     _load_data(data) {
         super._load_data(data);
 
-        if (data.bounce !== undefined) {
-            this.bounce = data.bounce;
-        }
         if (data.constant_angular_velocity !== undefined) {
             this.constant_angular_velocity = data.constant_angular_velocity;
         }
         if (data.constant_linear_velocity !== undefined) {
             this.constant_linear_velocity.copy(data.constant_linear_velocity);
         }
-        if (data.friction !== undefined) {
-            this.friction = data.friction;
+        if (data.physics_material_override !== undefined) {
+            // TODO: load physics_material_override
         }
 
         return this;
     }
 
     _reload_physics_characteristics() {
-        if (!this._physics_material_override) {
+        if (!this.physics_material_override) {
             this.rid.bounce = 0;
             this.rid.friction = 1;
         } else {
-            this.rid.bounce = this._physics_material_override.computed_bounce;
-            this.rid.friction = this._physics_material_override.computed_friction;
+            this.rid.bounce = this.physics_material_override.get_computed_bounce();
+            this.rid.friction = this.physics_material_override.get_computed_friction();
         }
     }
 }
-
 node_class_map['StaticBody2D'] = GDCLASS(StaticBody2D, PhysicsBody2D)
 
 
@@ -409,10 +344,10 @@ const get_sep_res = () => {
 const FLOOR_ANGLE_THRESHOLD = 0.01;
 
 export class KinematicBody2D extends PhysicsBody2D {
+    get class() { return 'KinematicBody2D' }
+
     constructor() {
         super(BodyMode.KINEMATIC);
-
-        this.class = 'KinematicBody2D';
 
         this.margin = 0.08;
 
@@ -433,6 +368,9 @@ export class KinematicBody2D extends PhysicsBody2D {
 
         this.last_valid_transform = new Transform2D();
     }
+
+    /* virtual */
+
     _load_data(data) {
         super._load_data(data);
 
@@ -443,10 +381,30 @@ export class KinematicBody2D extends PhysicsBody2D {
         return this;
     }
 
-    _propagate_enter_tree() {
-        super._propagate_enter_tree();
+    /**
+     * @param {number} p_what
+     */
+    _notification(p_what) {
+        switch (p_what) {
+            case NOTIFICATION_ENTER_TREE: {
+                this.last_valid_transform.copy(this.get_global_transform());
 
-        this.last_valid_transform.copy(this.get_global_transform());
+                // reset move_and_slide data
+                this.on_floor = false;
+                this.on_floor_body = null;
+                this.on_ceiling = false;
+                this.on_wall = false;
+                this.colliders.length = 0;
+                this.floor_velocity.set(0, 0);
+            } break;
+            case NOTIFICATION_LOCAL_TRANSFORM_CHANGED: {
+                const new_transform = this.get_global_transform();
+                this.rid.set_state(BodyState.TRANSFORM, new_transform);
+                this.set_notify_local_transform(false);
+                this.set_global_transform(this.last_valid_transform);
+                this.set_notify_local_transform(true);
+            } break;
+        }
     }
 
     /**
@@ -499,9 +457,9 @@ export class KinematicBody2D extends PhysicsBody2D {
         }
 
         this.last_valid_transform.copy(p_state.get_transform());
-        this.notify_local_transform = false;
+        this.set_notify_local_transform(false);
         this.set_global_transform(this.last_valid_transform);
-        this.notify_local_transform = true;
+        this.set_notify_local_transform(true);
     }
 
     /**
@@ -512,8 +470,7 @@ export class KinematicBody2D extends PhysicsBody2D {
      * @param {boolean} [p_test_only]
      */
     _move(p_motion, p_infinite_inertia, r_collision, p_exclude_raycast_shapes = true, p_test_only = false) {
-        this._update_transform();
-        const gt = this.transform.world_transform.clone();
+        const gt = this.get_global_transform().clone();
         motion_result.reset();
         const colliding = Physics2DServer.get_singleton().body_test_motion(this.rid, gt, p_motion, p_infinite_inertia, this.margin, motion_result, p_exclude_raycast_shapes);
 
@@ -614,7 +571,7 @@ export class KinematicBody2D extends PhysicsBody2D {
         }
 
         // hack in order to work with calling from _process as well as from _physics_process
-        const motion = floor_motion.clone().add(p_linear_velocity).scale(this.scene_tree.physics_process_time);
+        const motion = floor_motion.clone().add(p_linear_velocity).scale(Engine.get_singleton().is_in_physics_frame() ? this.get_physics_process_delta_time() : this.get_process_delta_time());
         const lv = p_linear_velocity.clone();
 
         this.on_floor = false;
@@ -657,7 +614,8 @@ export class KinematicBody2D extends PhysicsBody2D {
                         // all is a wall
                         this.on_wall = true;
                     } else {
-                        if (collision.normal.dot(p_floor_direction) >= Math.cos(p_floor_max_angle + FLOOR_ANGLE_THRESHOLD)) { // floor
+                        const negate_floor_direction = p_floor_direction.clone().negate();
+                        if (Math.acos(collision.normal.dot(p_floor_direction)) <= p_floor_max_angle + FLOOR_ANGLE_THRESHOLD) { // floor
                             this.on_floor = true;
                             // @ts-ignore
                             this.on_floor_body = collision.collider;
@@ -684,19 +642,16 @@ export class KinematicBody2D extends PhysicsBody2D {
                                     return Vector2.new(0, 0);
                                 }
                             }
-                        } else if (collision.normal.dot(p_floor_direction.clone().negate()) >= Math.cos(p_floor_max_angle + FLOOR_ANGLE_THRESHOLD)) { // ceiling
+                        } else if (Math.acos(collision.normal.dot(negate_floor_direction)) <= p_floor_max_angle + FLOOR_ANGLE_THRESHOLD) { // ceiling
                             this.on_ceiling = true;
                         } else {
                             this.on_wall = true;
                         }
+                        Vector2.free(negate_floor_direction);
                     }
 
                     motion.slide(collision.normal);
                     lv.slide(collision.normal);
-                }
-
-                if (p_stop_on_slope) {
-                    break;
                 }
             }
 
@@ -773,5 +728,4 @@ export class KinematicBody2D extends PhysicsBody2D {
         return this.colliders[p_bounce];
     }
 }
-
 node_class_map['KinematicBody2D'] = GDCLASS(KinematicBody2D, PhysicsBody2D)

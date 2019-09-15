@@ -1,15 +1,16 @@
 import { remove_items } from 'engine/dep/index';
 import { GDCLASS } from 'engine/core/v_object';
 import { node_class_map } from 'engine/registry';
-import { Vector2 } from 'engine/core/math/vector2';
+import { Vector2, Vector2Like } from 'engine/core/math/vector2';
 
-import { Physics2DServer } from 'engine/servers/physics_2d/physics_2d_server';
+import { Physics2DServer, AREA_BODY_ADDED } from 'engine/servers/physics_2d/physics_2d_server';
 import { AreaSpaceOverrideMode, ShapeType } from 'engine/scene/physics/const';
 import { Area2DSW } from 'engine/servers/physics_2d/area_2d_sw';
 
 import { Node2D } from '../2d/node_2d';
 import { CollisionObject2D } from './collision_object_2d';
 import { PhysicsBody2D } from './physics_body_2d';
+import { NOTIFICATION_EXIT_TREE, Node } from '../main/node';
 
 
 class ShapePair {
@@ -73,9 +74,8 @@ class AreaState {
 }
 
 export class Area2D extends CollisionObject2D {
-    /**
-     * @returns {number}
-     */
+    get class() { return 'Area2D' }
+
     get_collision_layer() {
         return this.collision_layer;
     }
@@ -84,22 +84,18 @@ export class Area2D extends CollisionObject2D {
      * other areas will collide with this one on the given layer.
      *
      * @param {number} bit
-     * @returns {boolean}
      */
     get_collision_layer_bit(bit) {
-        return !!(this.collision_layer & (1 << (bit - 1)));
+        return !!(this.collision_layer & (1 << bit));
     }
     /**
      * @param {number} layer
-     * @returns {this}
      */
     set_collision_layer(layer) {
         this.collision_layer = layer;
         if (this.rid) {
             this.rid.collision_layer = this.collision_layer;
         }
-
-        return this;
     }
     /**
      * Set/clear individual bits on the layer mask. This makes
@@ -107,20 +103,17 @@ export class Area2D extends CollisionObject2D {
      *
      * @param {number} bit
      * @param {boolean} value
-     * @returns {this}
      */
     set_collision_layer_bit(bit, value) {
         if (value) {
-            this.collision_layer |= (1 << (bit - 1));
+            this.collision_layer |= (1 << bit);
         } else {
-            this.collision_layer &= ~(1 << (bit - 1));
+            this.collision_layer &= ~(1 << bit);
         }
 
         if (this.rid) {
             this.rid.collision_layer = this.collision_layer;
         }
-
-        return this;
     }
 
     /**
@@ -134,14 +127,12 @@ export class Area2D extends CollisionObject2D {
      * this area will collide with others on the given layer.
      *
      * @param {number} bit
-     * @returns {boolean}
      */
     get_collision_mask_bit(bit) {
-        return !!(this.collision_mask & (1 << (bit - 1)));
+        return !!(this.collision_mask & (1 << bit));
     }
     /**
      * @param {number} mask
-     * @returns {this}
      */
     set_collision_mask(mask) {
         this.collision_mask = mask;
@@ -149,8 +140,6 @@ export class Area2D extends CollisionObject2D {
         if (this.rid) {
             this.rid.collision_mask = this.collision_mask;
         }
-
-        return this;
     }
     /**
      * Set/clear individual bits on the collision mask. This makes
@@ -158,72 +147,70 @@ export class Area2D extends CollisionObject2D {
      *
      * @param {number} bit
      * @param {boolean} value
-     * @returns {this}
      */
     set_collision_mask_bit(bit, value) {
         if (value) {
-            this.collision_mask |= (1 << (bit - 1));
+            this.collision_mask |= (1 << bit);
         } else {
-            this.collision_mask &= ~(1 << (bit - 1));
+            this.collision_mask &= ~(1 << bit);
         }
 
         if (this.rid) {
             this.rid.collision_mask = this.collision_mask;
         }
-
-        return this;
     }
 
-    get gravity() {
-        return this._gravity;
-    }
-    /**
-     * @param {number} value
-     */
-    set gravity(value) {
-        this._gravity = value;
-        this.rid.gravity = this._gravity;
-    }
     /**
      * @param {number} value
      */
     set_gravity(value) {
         this.gravity = value;
-        return this;
+        this.rid.gravity = this.gravity;
     }
 
-    get gravity_vec() {
-        return this._gravity_vec;
-    }
     /**
-     * @param {Vector2} value
-     */
-    set gravity_vec(value) {
-        this._gravity_vec.copy(value);
-        this.rid.gravity_vector.copy(this._gravity_vec);
-    }
-    /**
-     * @param {Vector2} value
+     * @param {Vector2Like} value
      */
     set_gravity_vec(value) {
-        this.gravity_vec = value;
-        return this;
+        this.gravity_vec.copy(value);
+        this.rid.gravity_vector.copy(this.gravity_vec);
+    }
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
+    set_gravity_vec_n(x, y) {
+        this.gravity_vec.set(x, y);
+        this.rid.gravity_vector.copy(this.gravity_vec);
     }
 
-    get monitoring() {
-        return this._monitoring;
+    /**
+     * @param {number} p_gravity_distance_scale
+     */
+    set_gravity_distance_scale(p_gravity_distance_scale) {
+        this.gravity_distance_scale = p_gravity_distance_scale;
+        this.rid.gravity_distance_scale = p_gravity_distance_scale;
     }
+
+    /**
+     * @param {boolean} p_gravity_point
+     */
+    set_gravity_point(p_gravity_point) {
+        this.gravity_point = p_gravity_point;
+        this.rid.gravity_is_point = p_gravity_point;
+    }
+
     /**
      * @param {boolean} value
      */
-    set monitoring(value) {
-        if (value === this._monitoring) {
+    set_monitoring(value) {
+        if (value === this.monitoring) {
             return;
         }
 
-        this._monitoring = value;
+        this.monitoring = value;
 
-        if (this._monitoring) {
+        if (this.monitoring) {
             Physics2DServer.get_singleton().area_set_monitor_callback(this.rid, this, this._body_inout);
             Physics2DServer.get_singleton().area_set_area_monitor_callback(this.rid, this, this._area_inout);
         } else {
@@ -232,58 +219,54 @@ export class Area2D extends CollisionObject2D {
             this._clear_monitoring();
         }
     }
-    /**
-     * @param {boolean} value
-     */
-    set_monitoring(value) {
-        this.monitoring = value;
-        return this;
-    }
 
-    get monitorable() {
-        return this._monitorable;
-    }
     /**
      * @param {boolean} p_enable
      */
-    set monitorable(p_enable) {
-        if (p_enable === this._monitorable) {
+    set_monitorable(p_enable) {
+        if (p_enable === this.monitorable) {
             return;
         }
 
-        this._monitorable = p_enable;
+        this.monitorable = p_enable;
 
-        Physics2DServer.get_singleton().area_set_monitorable(this.rid, this._monitorable);
-    }
-    /**
-     * @param {boolean} value
-     */
-    set_monitorable(value) {
-        this.monitorable = value;
-        return this;
+        Physics2DServer.get_singleton().area_set_monitorable(this.rid, this.monitorable);
     }
 
-    get pickable() {
-        return this.interactive;
-    }
     /**
-     * @param {boolean} value
+     * @param {number} p_linear_damp
      */
-    set pickable(value) {
-        this.interactive = value;
+    set_linear_damp(p_linear_damp) {
+        this.linear_damp = p_linear_damp;
+        this.rid.linear_damp = p_linear_damp;
     }
+
     /**
-     * @param {boolean} value
+     * @param {number} p_angular_damp
      */
-    set_pickable(value) {
-        this.pickable = value;
-        return this;
+    set_angular_damp(p_angular_damp) {
+        this.angular_damp = p_angular_damp;
+        this.rid.angular_damp = p_angular_damp;
+    }
+
+    /**
+     * @param {number} p_priority
+     */
+    set_priority(p_priority) {
+        this.priority = p_priority;
+        this.rid.priority = p_priority;
+    }
+
+    /**
+     * @param {number} p_space_override
+     */
+    set_space_override(p_space_override) {
+        this.space_override = p_space_override;
+        this.rid.space_override_mode = p_space_override;
     }
 
     constructor() {
         super(Physics2DServer.get_singleton().area_create(), true);
-
-        this.class = 'Area2D';
 
         /**
          * @type {Area2DSW}
@@ -291,8 +274,8 @@ export class Area2D extends CollisionObject2D {
         this.rid;
 
         this.space_override = AreaSpaceOverrideMode.DISABLED;
-        this._gravity_vec = new Vector2(0, 1);
-        this._gravity = 98;
+        this.gravity_vec = new Vector2(0, 1);
+        this.gravity = 98;
         this.gravity_point = false;
         this.gravity_distance_scale = 0;
         this.linear_damp = 0.1;
@@ -300,8 +283,8 @@ export class Area2D extends CollisionObject2D {
         this.collision_mask = 1;
         this.collision_layer = 1;
         this.priority = 0;
-        this._monitoring = true;
-        this._monitorable = true;
+        this.monitoring = true;
+        this.monitorable = true;
         this._first_shape = null;
 
         /**
@@ -316,8 +299,10 @@ export class Area2D extends CollisionObject2D {
 
         this.gravity = 98;
         this.gravity_vec = new Vector2(0, 1);
-        this.pickable = true;
     }
+
+    /* virtual */
+
     _load_data(data) {
         super._load_data(data);
 
@@ -334,7 +319,7 @@ export class Area2D extends CollisionObject2D {
             this.gravity_distance_scale = data.gravity_distance_scale;
         }
         if (data.gravity !== undefined) {
-            this.gravity = data.gravity;
+            this.set_gravity(data.gravity);
         }
         if (data.linear_damp !== undefined) {
             this.linear_damp = data.linear_damp;
@@ -343,60 +328,92 @@ export class Area2D extends CollisionObject2D {
             this.angular_damp = data.angular_damp;
         }
         if (data.gravity_vec !== undefined) {
-            this.gravity_vec = data.gravity_vec;
+            this.set_gravity_vec(data.gravity_vec);
         }
         if (data.monitorable !== undefined) {
-            this._monitorable = data.monitorable;
+            this.set_monitorable(data.monitorable);
         }
         if (data.monitoring !== undefined) {
-            this._monitoring = data.monitoring;
-        }
-        if (data.pickable !== undefined) {
-            this.pickable = data.pickable;
+            this.set_monitoring(data.monitoring);
         }
 
         return this;
     }
-    _propagate_enter_tree() {
-        super._propagate_enter_tree();
 
-        // force update monitor* properties
-        this._monitorable = !this._monitorable;
-        this.monitorable = !this._monitorable;
-
-        this._monitoring = !this._monitoring;
-        this.monitoring = !this._monitoring;
+    /**
+     * @param {number} p_what
+     */
+    _notification(p_what) {
+        switch (p_what) {
+            case NOTIFICATION_EXIT_TREE: {
+                this._clear_monitoring();
+            } break;
+        }
     }
-    _propagate_exit_tree() {
-        this._clear_monitoring();
 
-        super._propagate_exit_tree();
+    /* public */
+
+    get_overlapping_areas() {
+        /** @type {Area2D[]} */
+        const ret = new Array(this.area_map.size);
+        let i = 0;
+        for (let area of this.area_map.keys()) {
+            ret[i] = area;
+            i++;
+        }
+        return ret;
+    }
+
+    get_overlapping_bodies() {
+        /** @type {PhysicsBody2D[]} */
+        const ret = new Array(this.body_map.size);
+        let i = 0;
+        for (let area of this.body_map.keys()) {
+            ret[i] = area;
+            i++;
+        }
+        return ret;
     }
 
     /**
-     * @param {number} p_body_in
+     * @param {Area2D} p_area
+     */
+    overlaps_area(p_area) {
+        return this.area_map.has(p_area);
+    }
+
+    /**
+     * @param {PhysicsBody2D} p_body
+     */
+    overlaps_body(p_body) {
+        return this.body_map.has(p_body);
+    }
+
+    /* private */
+
+    /**
+     * @param {number} p_status
      * @param {PhysicsBody2D} p_body
      * @param {any} p_instance
      * @param {number} p_body_shape
      * @param {number} p_area_shape
      */
-    _body_inout(p_body_in, p_body, p_instance, p_body_shape, p_area_shape) {
+    _body_inout(p_status, p_body, p_instance, p_body_shape, p_area_shape) {
+        const body_in = (p_status === AREA_BODY_ADDED);
         const obj = p_instance;
-        /**
-         * @type {Node2D}
-         */
+        /** @type {Node} */
         const node = (p_instance.is_node ? p_instance : null);
         let E = this.body_map.get(p_instance);
 
-        if (!p_body_in && !E) {
+        if (!body_in && !E) {
             return; // does not exist because it was likely removed from the tree
         }
 
-        if (p_body_in) {
+        if (body_in) {
             if (!E) {
                 E = new BodyState();
                 E.rc = 0;
-                E.in_tree = node && node.is_inside_tree;
+                E.in_tree = node && node.is_inside_tree();
                 this.body_map.set(p_instance, E);
                 if (node) {
                     node.connect('tree_entered', this._body_enter_tree, this);
@@ -472,29 +489,28 @@ export class Area2D extends CollisionObject2D {
     }
 
     /**
-     * @param {boolean} p_area_in
+     * @param {number} p_status
      * @param {Area2D} p_area
      * @param {any} p_instance
      * @param {number} p_area_shape
      * @param {number} p_self_shape
      */
-    _area_inout(p_area_in, p_area, p_instance, p_area_shape, p_self_shape) {
+    _area_inout(p_status, p_area, p_instance, p_area_shape, p_self_shape) {
+        const area_in = (p_status === AREA_BODY_ADDED);
         const obj = p_instance;
-        /**
-         * @type {Node2D}
-         */
+        /** @type {Node} */
         const node = (p_instance.is_node ? p_instance : null);
         let E = this.area_map.get(p_instance);
 
-        if (!p_area_in && !E) {
+        if (!area_in && !E) {
             return; // does not exist because it was likely removed from the tree
         }
 
-        if (p_area_in) {
+        if (area_in) {
             if (!E) {
                 E = new AreaState();
                 E.rc = 0;
-                E.in_tree = node && node.is_inside_tree;
+                E.in_tree = node && node.is_inside_tree();
                 this.area_map.set(p_instance, E);
                 if (node) {
                     node.connect('tree_entered', this._area_enter_tree, this);
@@ -572,12 +588,12 @@ export class Area2D extends CollisionObject2D {
     _clear_monitoring() {
         {
             for (let [node, bs] of this.body_map) {
-                if (node._destroyed) {
+                if (node.is_queued_for_deletion) {
                     continue;
                 }
 
-                node.disconnect('tree_entered', this._body_enter_tree);
-                node.disconnect('tree_exited', this._body_exit_tree);
+                node.disconnect('tree_entered', this._body_enter_tree, this);
+                node.disconnect('tree_exited', this._body_exit_tree, this);
 
                 if (!bs.in_tree) {
                     continue;
@@ -594,12 +610,12 @@ export class Area2D extends CollisionObject2D {
 
         {
             for (let [node, as] of this.area_map) {
-                if (node._destroyed) {
+                if (node.is_queued_for_deletion) {
                     continue;
                 }
 
-                node.disconnect('tree_entered', this._area_enter_tree);
-                node.disconnect('tree_exited', this._area_exit_tree);
+                node.disconnect('tree_entered', this._area_enter_tree, this);
+                node.disconnect('tree_exited', this._area_exit_tree, this);
 
                 if (!as.in_tree) {
                     continue;

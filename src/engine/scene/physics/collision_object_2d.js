@@ -1,17 +1,26 @@
 import { remove_items } from 'engine/dep/index';
+import { GDCLASS } from 'engine/core/v_object';
+import { Transform2D } from 'engine/core/math/transform_2d';
 
 import { Physics2DServer } from 'engine/servers/physics_2d/physics_2d_server';
 import { CollisionObject2DSW } from 'engine/servers/physics_2d/collision_object_2d_sw';
 import { Area2DSW } from 'engine/servers/physics_2d/area_2d_sw';
-
-import { Node2D } from '../2d/node_2d';
-import { Shape2D } from '../resources/shape_2d';
-import CollisionShape2D from './collision_shape_2d';
-import { BodyState } from './const';
 import { Body2DSW } from 'engine/servers/physics_2d/body_2d_sw';
+
+import { Shape2D } from '../resources/shape_2d';
+import {
+    NOTIFICATION_ENTER_TREE,
+    NOTIFICATION_EXIT_TREE,
+} from '../main/node';
+import { Node2D } from '../2d/node_2d';
+import { CollisionShape2D } from './collision_shape_2d';
 import { CollisionPolygon2D } from './collision_polygon_2d';
-import { Transform2D } from 'engine/core/math/transform_2d';
-import { GDCLASS } from 'engine/core/v_object';
+import { BodyState } from './const';
+import {
+    NOTIFICATION_ENTER_CANVAS,
+    NOTIFICATION_TRANSFORM_CHANGED,
+    NOTIFICATION_EXIT_CANVAS,
+} from '../2d/canvas_item';
 
 
 class Shape {
@@ -47,6 +56,14 @@ export const CollisionObjectTypes = {
 };
 
 export class CollisionObject2D extends Node2D {
+    get class() { return 'CollisionObject2D' }
+
+    set_pickable(p_enabled) {
+        if (this.pickable === p_enabled) return;
+        this.pickable = p_enabled;
+        this._update_pickable();
+    }
+
     /**
      * @param {CollisionObject2DSW} p_rid
      * @param {boolean} p_area
@@ -54,9 +71,9 @@ export class CollisionObject2D extends Node2D {
     constructor(p_rid, p_area) {
         super();
 
-        this.class = 'CollisionObject2D';
-
         this.is_collision_object = true;
+
+        this.pickable = false;
 
         this.area = p_area;
         this.rid = p_rid;
@@ -69,6 +86,8 @@ export class CollisionObject2D extends Node2D {
         this.last_transform = new Transform2D();
         this.only_update_transform_changes = false;
 
+        this.set_notify_transform(true);
+
         if (p_area) {
             // @ts-ignore
             Physics2DServer.get_singleton().area_attach_object_instance(/** @type {Area2DSW} */(this.rid), this);
@@ -77,43 +96,78 @@ export class CollisionObject2D extends Node2D {
             Physics2DServer.get_singleton().body_attach_object_instance(/** @type {Body2DSW} */(this.rid), this);
         }
     }
+
+    /* virtual */
     free() {
         Physics2DServer.get_singleton().free_rid(this.rid);
         return super.free();
     }
 
-    _propagate_enter_tree() {
-        super._propagate_enter_tree();
+    /**
+     * @param {number} p_what
+     */
+    _notification(p_what) {
+        switch (p_what) {
+            case NOTIFICATION_ENTER_TREE: {
+                const global_transform = this.get_global_transform();
 
-        // Update initial transform
-        this.last_transform.copy(this.get_global_transform());
-        this.rid._set_transform(this.last_transform);
+                if (this.area) {
+                    Physics2DServer.get_singleton().area_set_transform(/** @type {Area2DSW} */(this.rid), global_transform);
+                } else {
+                    Physics2DServer.get_singleton().body_set_state(/** @type {Body2DSW} */(this.rid), BodyState.TRANSFORM, global_transform);
+                }
 
-        const space = this.get_world_2d().space;
-        if (this.area) {
-            Physics2DServer.get_singleton().area_set_space(/** @type {Area2DSW} */(this.rid), space);
-        } else {
-            Physics2DServer.get_singleton().body_set_space(/** @type {Body2DSW} */(this.rid), space);
+                this.last_transform.copy(global_transform);
+
+                const space = this.get_world_2d().space;
+                if (this.area) {
+                    Physics2DServer.get_singleton().area_set_space(/** @type {Area2DSW} */(this.rid), space);
+                } else {
+                    Physics2DServer.get_singleton().body_set_space(/** @type {Body2DSW} */(this.rid), space);
+                }
+
+                this._update_pickable();
+            } break;
+            case NOTIFICATION_ENTER_CANVAS: {
+                this._update_pickable();
+            } break;
+            case NOTIFICATION_TRANSFORM_CHANGED: {
+                const global_transform = this.get_global_transform();
+
+                if (this.only_update_transform_changes && global_transform.equals(this.last_transform)) {
+                    return;
+                }
+
+                if (this.area) {
+                    Physics2DServer.get_singleton().area_set_transform(/** @type {Area2DSW} */(this.rid), global_transform);
+                } else {
+                    Physics2DServer.get_singleton().body_set_state(/** @type {Body2DSW} */(this.rid), BodyState.TRANSFORM, global_transform);
+                }
+            } break;
+            case NOTIFICATION_EXIT_TREE: {
+                if (this.area) {
+                    Physics2DServer.get_singleton().area_set_space(/** @type {Area2DSW} */(this.rid), null);
+                } else {
+                    Physics2DServer.get_singleton().body_set_space(/** @type {Body2DSW} */(this.rid), null);
+                }
+            } break;
+            case NOTIFICATION_EXIT_CANVAS: {
+                if (this.area) {
+                    // @ts-ignore
+                    Physics2DServer.get_singleton().area_attach_object_instance(/** @type {Area2DSW} */(this.rid), null);
+                } else {
+                    // @ts-ignore
+                    Physics2DServer.get_singleton().body_attach_object_instance(/** @type {Body2DSW} */(this.rid), null);
+                }
+            } break;
         }
     }
-    _notify_transform_changed() {
-        if (this.area) {
-            /** @type {Area2DSW} */(this.rid).set_transform(this.get_global_transform());
-        } else {
-            /** @type {Body2DSW} */(this.rid).set_state(BodyState.TRANSFORM, this.get_global_transform());
-        }
 
-        this.last_transform.copy(this.get_global_transform());
-    }
-    _propagate_exit_tree() {
-        if (this.area) {
-            Physics2DServer.get_singleton().area_set_space(/** @type {Area2DSW} */(this.rid), null);
-        } else {
-            Physics2DServer.get_singleton().body_set_space(/** @type {Body2DSW} */(this.rid), null);
-        }
+    _input_event(p_viewport, p_input_event, p_shape) { }
+    _mouse_enter() { }
+    _mouse_exit() { }
 
-        super._propagate_exit_tree();
-    }
+    /* public */
 
     /**
      * @param {CollisionShape2D|CollisionPolygon2D} p_shape
@@ -315,6 +369,16 @@ export class CollisionObject2D extends Node2D {
 
         return null;
     }
-}
 
+    _update_pickable() {
+        if (!this.is_inside_tree()) return;
+
+        const is_pickable = this.pickable && this.is_visible_in_tree();
+        if (this.area) {
+            Physics2DServer.get_singleton().area_set_pickable(/** @type {Area2DSW} */(this.rid), is_pickable);
+        } else {
+            Physics2DServer.get_singleton().body_set_pickable(/** @type {Body2DSW} */(this.rid), is_pickable);
+        }
+    }
+}
 GDCLASS(CollisionObject2D, Node2D)

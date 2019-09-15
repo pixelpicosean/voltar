@@ -3,6 +3,7 @@ import { Transform2D } from 'engine/core/math/transform_2d';
 import {
     AreaSpaceOverrideMode,
     AreaParameter,
+    BodyState,
 } from 'engine/scene/physics/const';
 
 import {
@@ -27,6 +28,9 @@ import { Space2DSW } from "./space_2d_sw";
 import { Area2DSW } from "./area_2d_sw";
 import { Body2DSW } from "./body_2d_sw";
 
+
+export const AREA_BODY_ADDED = 0;
+export const AREA_BODY_REMOVED = 1;
 
 class RayResult {
     constructor() {
@@ -165,7 +169,7 @@ export class Physics2DServer {
         const area = this.area_create();
         space.default_area = area;
         area.space = space;
-        area.priotity = -1;
+        area.priority = -1;
 
         return space;
     }
@@ -413,7 +417,9 @@ export class Physics2DServer {
     /**
      * @param {Area2DSW} p_area
      */
-    area_set_pickable(p_area, p_pickable) { }
+    area_set_pickable(p_area, p_pickable) {
+        p_area.pickable = p_pickable;
+    }
 
     /* BODY API */
 
@@ -443,6 +449,14 @@ export class Physics2DServer {
      */
     body_get_space(p_body) {
         return p_body.space;
+    }
+    /**
+     * @param {Body2DSW} p_body
+     * @param {BodyState} p_state
+     * @param {any} p_var
+     */
+    body_set_state(p_body, p_state, p_var) {
+        p_body.set_state(p_state, p_var);
     }
 
     /**
@@ -567,6 +581,14 @@ export class Physics2DServer {
      */
     body_test_motion(p_body, p_from, p_motion, p_infinite_inertia, p_margin = 0.001, r_result = null, p_exclude_raycast_shapes = true) {
         return p_body.space.test_body_motion(p_body, p_from, p_motion, p_infinite_inertia, p_margin, r_result, p_exclude_raycast_shapes);
+    }
+
+    /**
+     * @param {Body2DSW} p_body
+     * @param {boolean} p_pickable
+     */
+    body_set_pickable(p_body, p_pickable) {
+        p_body.pickable = p_pickable;
     }
 
     /* JOINT API */
