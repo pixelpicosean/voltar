@@ -576,9 +576,18 @@ export class CanvasItem extends Node {
         }
     }
     /**
-     * @param {CanvasItem} p_node
+     * @param {CanvasItem} [p_node]
      */
     _notify_transform(p_node) {
+        if (!p_node) {
+            if (!this.is_inside_tree()) return;
+            this._notify_transform(this);
+            if (!this.block_transform_notify && this.notify_local_transform) {
+                this.notification(NOTIFICATION_LOCAL_TRANSFORM_CHANGED);
+            }
+            return;
+        }
+
         if (p_node.global_invalid) {
             return;
         }

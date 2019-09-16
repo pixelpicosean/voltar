@@ -1,17 +1,12 @@
-export const MARGIN_LEFT = 0;
-export const MARGIN_TOP = 1;
-export const MARGIN_RIGHT = 2;
-export const MARGIN_BOTTOM = 3;
-
 export const SIZE_FILL = 1;
 export const SIZE_EXPAND = 2;
 export const SIZE_EXPAND_FILL = SIZE_EXPAND | SIZE_FILL;
 export const SIZE_SHRINK_CENTER = 4;
 export const SIZE_SHRINK_END = 8;
 
-export const Grow_Direction_BEGIN = 0;
-export const Grow_Direction_END = 1;
-export const Grow_Direction_BOTH = 2;
+export const GROW_DIRECTION_BEGIN = 0;
+export const GROW_DIRECTION_END = 1;
+export const GROW_DIRECTION_BOTH = 2;
 
 export const ANCHOR_BEGIN = 0;
 export const ANCHOR_END = 1;

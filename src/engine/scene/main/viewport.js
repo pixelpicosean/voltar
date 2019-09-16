@@ -23,6 +23,7 @@ import { World2D } from "engine/scene/resources/world_2d";
 import { CanvasItem } from "engine/scene/2d/canvas_item";
 
 import { CanvasLayer } from "./canvas_layer";
+import { remove_items } from "engine/dep/index";
 
 
 export const UPDATE_MODE_DISABLED = 0;
@@ -100,13 +101,19 @@ GDCLASS(ViewportTexture, Texture)
 class GUI {
     constructor() {
         this.key_event_accepted = false;
+        /** @type {import('../controls/control').Control} */
         this.mouse_focus = null;
-        this.last_mouse_focus = false;
+        /** @type {import('../controls/control').Control} */
+        this.last_mouse_focus = null;
         this.mouse_click_grabber = null;
         this.mouse_focus_mask = 0;
+        /** @type {import('../controls/control').Control} */
         this.key_focus = null;
-        this.mouse_over = false;
+        /** @type {import('../controls/control').Control} */
+        this.mouse_over = null;
+        /** @type {import('../controls/control').Control} */
         this.tooltip = null;
+        /** @type {import('../controls/control').Control} */
         this.tooltip_popup = null;
         this.tooltip_label = null;
         this.tooltip_pos = false;
@@ -117,14 +124,18 @@ class GUI {
         this.drag_preview = false;
         this.tooltip_timer = -1;
         this.tooltip_delay = 0.5;
-        this.modal_stack = false;
+        /** @type {import('../controls/control').Control[]} */
+        this.modal_stack = [];
         this.focus_inv_xform = false;
         this.subwindow_order_dirty = false;
         this.subwindow_visibility_dirty = false;
-        this.subwindows = false;
-        this.all_known_subwindows = false;
+        /** @type {import('../controls/control').Control[]} */
+        this.subwindows = [];
+        /** @type {import('../controls/control').Control[]} */
+        this.all_known_subwindows = [];
         this.roots_order_dirty = false;
-        this.roots = false;
+        /** @type {import('../controls/control').Control[]} */
+        this.roots = [];
         this.canvas_sort_index = 0;
         this.dragging = false;
     }
@@ -501,28 +512,118 @@ export class Viewport extends Node {
         return local_ev;
     }
 
-    _gui_add_root_control() { }
-    _gui_add_subwindow_control() { }
+    /**
+     * @param {import('../controls/control').Control} p_control
+     */
+    _gui_add_root_control(p_control) {
+        this.gui.roots_order_dirty = true;
+        return this.gui.roots.push(p_control);
+    }
+
+    /**
+     * @param {import('../controls/control').Control} p_control
+     */
+    _gui_add_subwindow_control(p_control) {
+        p_control.connect('visibility_changed', this._subwindow_visibility_changed, this);
+
+        if (p_control.is_visible_in_tree()) {
+            this.gui.subwindow_order_dirty = true;
+            this.gui.subwindows.push(p_control);
+        }
+
+        return this.gui.all_known_subwindows.push(p_control);
+    }
 
     _gui_set_subwindow_order_dirty() { }
     _gui_set_root_order_dirty() { }
 
-    _gui_remove_modal_control() { }
-    _gui_remove_from_modal_stack() { }
-    _gui_remove_root_control() { }
-    _gui_remove_subwindow_control() { }
+    /**
+     * @param {import('../controls/control').Control} p_control
+     */
+    _gui_remove_modal_control(p_control) { }
+    /**
+     * @param {import('../controls/control').Control} MI
+     * @param {import('../controls/control').Control} p_prev_focus_owner
+     */
+    _gui_remove_from_modal_stack(MI, p_prev_focus_owner) {
+        // TODO: modal stack support
+    }
+    /**
+     * @param {import('../controls/control').Control} p_control
+     */
+    _gui_remove_root_control(p_control) {
+        remove_items(this.gui.roots, this.gui.roots.indexOf(p_control), 1);
+    }
+    /**
+     * @param {import('../controls/control').Control} p_control
+     */
+    _gui_remove_subwindow_control(p_control) { }
 
     _gui_get_tooltip() { }
-    _gui_cancel_tooltip() { }
+    _gui_cancel_tooltip() {
+        this.gui.tooltip = null;
+        this.gui.tooltip_timer = -1;
+        if (this.gui.tooltip_popup) {
+            this.gui.tooltip_popup.queue_free();
+            this.gui.tooltip_popup = null;
+            this.gui.tooltip_label = null;
+        }
+    }
     _gui_show_tooltip() { }
 
-    _gui_remove_control() { }
-    _gui_hid_control() { }
+    /**
+     * @param {import('../controls/control').Control} p_control
+     */
+    _gui_remove_control(p_control) {
+        const gui = this.gui;
+        if (gui.mouse_focus === p_control) {
+            gui.mouse_focus = null;
+            gui.mouse_focus_mask = 0;
+        }
+        if (gui.last_mouse_focus === p_control) {
+            gui.last_mouse_focus = null;
+        }
+        if (gui.key_focus === p_control) {
+            gui.key_focus = null;
+        }
+        if (gui.mouse_over === p_control) {
+            gui.mouse_over = null;
+        }
+        if (gui.tooltip === p_control) {
+            gui.tooltip = null;
+        }
+        if (gui.tooltip_popup === p_control) {
+            this._gui_cancel_tooltip();
+        }
+    }
+    /**
+     * @param {import('../controls/control').Control} p_control
+     */
+    _gui_hid_control(p_control) {
+        if (this.gui.mouse_focus === p_control) {
+            this._drop_mouse_focus();
+        }
+
+        if (this.gui.key_focus === p_control) {
+            this._gui_remove_focus();
+        }
+        if (this.gui.mouse_over === p_control) {
+            this.gui.mouse_over = null;
+        }
+        if (this.gui.tooltip === p_control) {
+            this._gui_cancel_tooltip();
+        }
+    }
 
     _gui_force_drag() { }
     _gui_set_drag_preview() { }
 
-    _gui_is_modal_on_top() { }
+    /**
+     * @param {import('../controls/control').Control} p_control
+     */
+    _gui_is_modal_on_top(p_control) {
+        return (this.gui.modal_stack.length && this.gui.modal_stack[this.gui.modal_stack.length - 1] === p_control);
+    }
     _gui_show_modal() { }
 
     _gui_remove_focus() { }
@@ -732,6 +833,10 @@ export class Viewport extends Node {
             .append(this.get_global_canvas_transform());
         VSG.viewport.viewport_set_global_canvas_transform(this.viewport, sxform);
         Transform2D.free(sxform);
+    }
+
+    _subwindow_visibility_changed() {
+        this.gui.subwindow_visibility_dirty = true;
     }
 }
 node_class_map['Viewport'] = GDCLASS(Viewport, Node)

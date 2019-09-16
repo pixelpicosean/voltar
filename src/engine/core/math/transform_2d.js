@@ -321,7 +321,7 @@ export class Transform2D {
     }
 
     /**
-     * @param {Vector2} p_vec - The origin
+     * @param {Vector2Like} p_vec - The origin
      * @param {Vector2} [r_out] - The point that the new position is assigned to (allowed to be same as input)
      * @return {Vector2} The new point, transformed through this matrix
      */
@@ -333,7 +333,7 @@ export class Transform2D {
     }
 
     /**
-     * @param {Vector2} p_vec - The origin
+     * @param {Vector2Like} p_vec - The origin
      * @param {Vector2} [r_out] - The point that the new position is assigned to (allowed to be same as input)
      * @return {Vector2} The new point, inverse-transformed through this matrix
      */
@@ -348,7 +348,7 @@ export class Transform2D {
      * Get a new position with the current transformation applied.
      * Can be used to go from a child's coordinate space to the world coordinate space. (e.g. rendering)
      *
-     * @param {Vector2} p_vec - The origin
+     * @param {Vector2Like} p_vec - The origin
      * @param {Vector2} [r_out] - The point that the new position is assigned to (allowed to be same as input)
      * @return {Vector2} The new point, transformed through this matrix
      */
@@ -363,7 +363,7 @@ export class Transform2D {
      * Get a new position with the inverse of the current transformation applied.
      * Can be used to go from the world coordinate space to a child's coordinate space. (e.g. input)
      *
-     * @param {Vector2} p_vec - The origin
+     * @param {Vector2Like} p_vec - The origin
      * @param {Vector2} [r_out] - The point that the new position is assigned to (allowed to be same as input)
      * @return {Vector2} The new point, inverse-transformed through this matrix
      */

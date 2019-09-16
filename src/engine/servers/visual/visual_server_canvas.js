@@ -377,9 +377,23 @@ export class VisualServerCanvas {
     canvas_item_set_transform(p_item, p_xform) {
         p_item.xform.copy(p_xform);
     }
-    canvas_item_set_clip() { }
+    /**
+     * @param {Item} p_item
+     * @param {boolean} p_clip
+     */
+    canvas_item_set_clip(p_item, p_clip) {
+        p_item.clip = p_clip;
+    }
     canvas_item_set_distance_field_mode() { }
-    canvas_item_set_custom_rect() { }
+    /**
+     * @param {Item} p_item
+     * @param {boolean} p_custom_rect
+     * @param {Rect2} p_rect
+     */
+    canvas_item_set_custom_rect(p_item, p_custom_rect, p_rect) {
+        p_item.custom_rect = p_custom_rect;
+        p_item.rect.copy(p_rect);
+    }
     /**
      * @param {Item} canvas_item
      * @param {Color} modulate
