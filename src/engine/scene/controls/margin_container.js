@@ -1,17 +1,20 @@
-import Container from "./container";
-import { Vector2, Rectangle } from "engine/core/math/math_funcs";
 import { node_class_map } from "engine/registry";
+import { GDCLASS } from "engine/core/v_object";
+import { Vector2 } from "engine/core/math/vector2";
+import { Rect2 } from "engine/core/math/rect2";
 
-const tmp_vec = new Vector2();
-const tmp_vec2 = new Vector2();
-const tmp_rect = new Rectangle();
+import { Container, NOTIFICATION_SORT_CHILDREN } from "./container";
+import { NOTIFICATION_THEME_CHANGED } from "./control";
 
-export default class MarginContainer extends Container {
+
+export class MarginContainer extends Container {
+    get class() { return 'MarginContainer' }
+
     constructor() {
         super();
-
-        this.type = 'MarginContainer';
     }
+
+    /* virtual */
 
     _load_data(data) {
         super._load_data(data);
@@ -32,64 +35,68 @@ export default class MarginContainer extends Container {
         return this;
     }
 
-    _children_sorted() {
-        const margin_left = this.get_constant('margin_left');
-        const margin_top = this.get_constant('margin_top');
-        const margin_right = this.get_constant('margin_right');
-        const margin_bottom = this.get_constant('margin_bottom');
+    /**
+     * @param {number} p_what
+     */
+    _notification(p_what) {
+        switch (p_what) {
+            case NOTIFICATION_SORT_CHILDREN: {
+                const margin_left = this.get_constant('margin_left');
+                const margin_top = this.get_constant('margin_top');
+                const margin_right = this.get_constant('margin_right');
+                const margin_bottom = this.get_constant('margin_bottom');
 
-        const s = tmp_vec2.set(0, 0);
+                const s = this.rect_size.clone();
 
-        for (const node of this.children) {
-            const c = /** @type {Container} */(node);
+                for (const node of this.data.children) {
+                    const c = /** @type {Container} */(node);
 
-            if (!c.is_control || !c.world_visible) {
-                continue;
-            }
-            if (c.toplevel) {
-                continue;
-            }
+                    if (!c.is_control || c.is_set_as_toplevel()) {
+                        continue;
+                    }
 
-            const w = s.x - margin_left - margin_right;
-            const h = s.y - margin_top - margin_bottom;
+                    const w = s.x - margin_left - margin_right;
+                    const h = s.y - margin_top - margin_bottom;
 
-            tmp_rect.x = margin_left;
-            tmp_rect.y = margin_top;
-            tmp_rect.width = w;
-            tmp_rect.height = h;
+                    const rect = Rect2.new(margin_left, margin_top, w, h);
+                    this.fit_child_in_rect(c, rect);
+                    Rect2.free(rect);
+                }
 
-            this.fit_child_in_rect(c, tmp_rect);
+                Vector2.free(s);
+            } break;
+            case NOTIFICATION_THEME_CHANGED: {
+                this.minimum_size_changed();
+            } break;
         }
     }
 
     /**
-     * @param {Vector2} size
+     * returns new Vector2
      */
-    get_minimum_size(size) {
+    get_minimum_size() {
         const margin_left = this.get_constant('margin_left');
         const margin_top = this.get_constant('margin_top');
         const margin_right = this.get_constant('margin_right');
         const margin_bottom = this.get_constant('margin_bottom');
 
-        const max = size.set(0, 0);
+        const max = Vector2.new();
 
-        for (const node of this.children) {
+        for (const node of this.data.children) {
             const c = /** @type {Container} */(node);
 
-            if (!c.is_control || !c.world_visible) {
-                continue;
-            }
-            if (c.toplevel) {
+            if (!c.is_control || c.is_set_as_toplevel() || !c.visible) {
                 continue;
             }
 
-            const s = c.get_combined_minimum_size(tmp_vec);
+            const s = c.get_combined_minimum_size();
             if (s.x > max.x) {
                 max.x = s.x;
             }
             if (s.y > max.y) {
                 max.y = s.y;
             }
+            Vector2.free(s);
         }
 
         max.add(margin_left + margin_right, margin_top + margin_bottom);
@@ -97,5 +104,4 @@ export default class MarginContainer extends Container {
         return max;
     }
 }
-
-node_class_map['MarginContainer'] = MarginContainer;
+node_class_map['MarginContainer'] = GDCLASS(MarginContainer, Container)

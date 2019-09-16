@@ -1,82 +1,77 @@
-import Container from "./container";
-import { Vector2, Rectangle } from "engine/core/math/math_funcs";
 import { node_class_map } from "engine/registry";
+import { GDCLASS } from "engine/core/v_object";
+import { Vector2 } from "engine/core/math/vector2";
 
-const tmp_vec = new Vector2();
-const tmp_vec2 = new Vector2();
-const tmp_rect = new Rectangle();
+import { Container, NOTIFICATION_SORT_CHILDREN } from "./container";
+import { Rect2 } from "engine/core/math/rect2";
 
-export default class CenterContainer extends Container {
-    get use_top_left() {
-        return this._use_top_left;
-    }
-    set use_top_left(value) {
-        this._use_top_left = value;
-        this.queue_sort();
-    }
+
+export class CenterContainer extends Container {
+    get class() { return 'CenterContainer' }
+
     /**
-     * @param {number} value
-     * @returns {this}
+     * @param {boolean} value
      */
     set_use_top_left(value) {
         this.use_top_left = value;
-        return this;
+        this.queue_sort();
     }
 
     constructor() {
         super();
 
-        this.type = 'CenterContainer';
-
-        this._use_top_left = false;
+        this.use_top_left = false;
     }
 
-    _children_sorted() {
-        for (const node of this.children) {
-            const c = /** @type {Container} */(node);
+    /**
+     * @param {number} p_what
+     */
+    _notification(p_what) {
+        if (p_what === NOTIFICATION_SORT_CHILDREN) {
+            for (const node of this.data.children) {
+                const c = /** @type {Container} */(node);
 
-            if (!c.is_control || !c.world_visible) {
-                continue;
-            }
-            if (c.toplevel) {
-                continue;
-            }
+                if (!c.is_control || c.is_set_as_toplevel()) {
+                    continue;
+                }
 
-            const minsize = c.get_combined_minimum_size(tmp_vec2);
-            tmp_rect.x = Math.floor(this._use_top_left ? (-minsize.x * 0.5) : ((this.rect_size.x - minsize.x) * 0.5));
-            tmp_rect.y = Math.floor(this._use_top_left ? (-minsize.y * 0.5) : ((this.rect_size.y - minsize.y) * 0.5));
-            tmp_rect.width = minsize.x;
-            tmp_rect.height = minsize.y;
-            this.fit_child_in_rect(c, tmp_rect);
+                const minsize = c.get_combined_minimum_size();
+                const rect = Rect2.new(
+                    Math.floor(this.use_top_left ? (-minsize.x * 0.5) : ((this.rect_size.x - minsize.x) * 0.5)),
+                    Math.floor(this.use_top_left ? (-minsize.y * 0.5) : ((this.rect_size.y - minsize.y) * 0.5)),
+                    minsize.x,
+                    minsize.y
+                )
+                this.fit_child_in_rect(c, rect);
+                Vector2.free(minsize);
+                Rect2.free(rect);
+            }
         }
     }
 
     /**
-     * @param {Vector2} size
+     * returns new Vector2
      */
-    get_minimum_size(size) {
-        const ms = size.set(0, 0);
+    get_minimum_size() {
+        const ms = Vector2.new(0, 0);
 
-        if (this._use_top_left) {
+        if (this.use_top_left) {
             return ms;
         }
 
-        for (const node of this.children) {
+        for (const node of this.data.children) {
             const c = /** @type {Container} */(node);
 
-            if (!c.is_control || !c.world_visible) {
-                continue;
-            }
-            if (c.toplevel) {
+            if (!c.is_control || c.is_set_as_toplevel() || !c.visible) {
                 continue;
             }
 
-            const minsize = c.get_combined_minimum_size(tmp_vec);
+            const minsize = c.get_combined_minimum_size();
             ms.set(Math.max(ms.x, minsize.x), Math.max(ms.y, minsize.y));
+            Vector2.free(minsize);
         }
 
         return ms;
     }
 }
-
-node_class_map['CenterContainer'] = CenterContainer;
+node_class_map['CenterContainer'] = GDCLASS(CenterContainer, Container)

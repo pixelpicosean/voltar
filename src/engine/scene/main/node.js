@@ -537,19 +537,6 @@ export class Node extends VObject {
     }
 
     /**
-     * @param {Node} p_child
-     */
-    add_child_notifty(p_child) { }
-    /**
-     * @param {Node} p_child
-     */
-    remove_child_notifty(p_child) { }
-    /**
-     * @param {Node} p_child
-     */
-    move_child_notifty(p_child) { }
-
-    /**
      * @param {Node} p_owner
      * @param {Node} p_by_owner
      */
@@ -581,7 +568,7 @@ export class Node extends VObject {
         }
 
         p_child.data.parent_owned = this.data.is_constructor;
-        this.add_child_notifty(p_child);
+        this.add_child_notify(p_child);
     }
     /**
      * @param {Node} p_owner
@@ -650,7 +637,7 @@ export class Node extends VObject {
 
         p_child._set_tree(null);
 
-        this.remove_child_notifty(p_child);
+        this.remove_child_notify(p_child);
         p_child.notification(NOTIFICATION_UNPARENTED);
 
         remove_items(children, idx, 1);
@@ -920,7 +907,7 @@ export class Node extends VObject {
         for (let i = motion_from; i <= motion_to; i++) {
             this.data.children[i].data.pos = i;
         }
-        this.move_child_notifty(p_child);
+        this.move_child_notify(p_child);
         for (let i = motion_from; i <= motion_to; i++) {
             this.data.children[i].notification(NOTIFICATION_MOVED_IN_PARENT);
         }

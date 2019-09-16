@@ -15,6 +15,7 @@ import { Sprite } from 'engine/scene/2d/sprite';
 import { ColorRect } from 'engine/scene/controls/color_rect';
 import { rand_range } from 'engine/core/math/math_funcs';
 import { OS } from 'engine/core/os/os';
+import { CenterContainer } from 'engine/scene/controls/center_container';
 
 
 class Preloader extends Node {
@@ -39,16 +40,20 @@ class Preloader extends Node {
                 this.spr = sprite;
             })
 
-        const rect = new ColorRect();
-        this.add_child(rect);
-        rect.set_rect_size_n(100, 100);
-        rect.set_color_n(0, 1, 1);
 
-        // let y = 0;
-        setInterval(() => {
-            rect.set_color_n(rand_range(0, 1), rand_range(0, 1), rand_range(0, 1))
-            // rect.set_rect_position_n(0, (y += 100) % OS.get_singleton().get_window_size().y)
-        }, 1000);
+        const center_container = new CenterContainer()
+        this.add_child(center_container)
+        center_container.set_anchor_right(1);
+        center_container.set_anchor_bottom(1);
+        center_container.set_margin_left(0);
+        center_container.set_margin_right(0);
+        center_container.set_margin_top(0);
+        center_container.set_margin_bottom(0);
+
+        const rect = new ColorRect();
+        center_container.add_child(rect);
+        rect.set_rect_min_size_n(100, 100);
+        rect.set_color_n(0, 1, 1);
     }
     _ready() {
         console.log('_ready')
