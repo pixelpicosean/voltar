@@ -1,3 +1,4 @@
+import { device } from "engine/dep/index";
 import { Vector2, Vector2Like } from "engine/core/math/vector2";
 import {
     MainLoop,
@@ -16,7 +17,7 @@ import {
     BUTTON_RIGHT,
 } from "./input_event";
 import { VisualServer } from "engine/servers/visual_server";
-import { device } from "engine/dep/index";
+import { VSG } from "engine/servers/visual/visual_server_globals";
 
 
 export const MOUSE_MODE_VISIBLE = 0;
@@ -37,27 +38,28 @@ export const SCREEN_SENSOR_LANDSCAPE = 4;
 export const SCREEN_SENSOR_PORTRAIT = 5;
 export const SCREEN_SENSOR = 6;
 
-/**
- * @typedef OS_InitOptions
- * @property {HTMLCanvasElement} canvas
- * @property {Vector2Like} size
- */
-
 export class OS {
     static get_singleton() { return singleton }
 
     get_window_size() {
         return this.window_size.set(
-            this.canvas.width,
-            this.canvas.height
+            this.video_mode.resizable ? window.innerWidth : this.canvas.width,
+            this.video_mode.resizable ? window.innerHeight : this.canvas.height
         )
     }
     /**
      * @param {Vector2Like} p_size
      */
     set_window_size(p_size) {
-        this.canvas.width = p_size.x;
-        this.canvas.height = p_size.y;
+        this.set_window_size_n(p_size.x, p_size.y);
+    }
+    /**
+     * @param {number} width
+     * @param {number} height
+     */
+    set_window_size_n(width, height) {
+        this.canvas.width = width;
+        this.canvas.height = height;
     }
 
     get_main_loop() {
@@ -78,7 +80,7 @@ export class OS {
             width: 1024,
             height: 600,
             fullscreen: false,
-            resizable: true,
+            resizable: false,
         }
 
         this.input = null;
@@ -106,12 +108,17 @@ export class OS {
     initialize_core() { }
 
     /**
-     * @param {OS_InitOptions} param0
+     * @param {HTMLCanvasElement} canvas
      */
-    initialize({ canvas, size }) {
+    initialize(canvas) {
         this.canvas = canvas;
-        this.canvas.width = size.x;
-        this.canvas.height = size.y;
+        if (this.video_mode.resizable) {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        } else {
+            canvas.width = this.video_mode.width;
+            canvas.height = this.video_mode.height;
+        }
 
         // TODO: support force GLES2_LEGACY setting from ProjectSettings
         if (device.phone || device.tablet) {
@@ -261,7 +268,40 @@ export class OS {
             this.main_loop.notification(NOTIFICATION_WM_FOCUS_OUT);
         })
 
+        const resize_canvas = () => {
+            if (this.video_mode.resizable) {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            } else {
+                // adjust the canvas style, to fit the window
+                const window_size = Vector2.new(window.innerWidth, window.innerHeight);
+                const game_size = Vector2.new(this.video_mode.width, this.video_mode.height);
+                const window_aspect = window_size.aspect();
+                const game_aspect = game_size.aspect();
+                VSG.canvas_render.resize(game_size.x, game_size.y);
+                const canvas = OS.get_singleton().canvas;
+                // - window is taller
+                if (window_aspect < game_aspect) {
+                    canvas.style.width = `${window_size.x}px`;
+                    canvas.style.height = `${window_size.x / game_aspect}px`;
+                }
+                // - game is taller
+                else if (window_aspect > game_aspect) {
+                    canvas.style.height = `${window_size.y}px`;
+                    canvas.style.width = `${window_size.y * game_aspect}px`;
+                }
+                else {
+                    canvas.style.width = `${window_size.x}px`;
+                    canvas.style.height = `${window_size.y}px`;
+                }
+                Vector2.free(game_size);
+                Vector2.free(window_size);
+            }
+        }
+        window.addEventListener('resize', resize_canvas)
+
         visual_server.init();
+        resize_canvas();
 
         this.start_date = performance.now();
     }

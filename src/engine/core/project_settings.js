@@ -1,4 +1,5 @@
 import { deep_merge } from "engine/utils/deep_merge";
+import { STRETCH_MODE_DISABLED, STRETCH_ASPECT_IGNORE, STRETCH_ASPECT_KEEP } from "engine/scene/main/scene_tree";
 
 /**
  * @typedef ApplicationSettings
@@ -20,8 +21,9 @@ import { deep_merge } from "engine/utils/deep_merge";
   * @prop {boolean} [antialias]
   * @prop {boolean} [pixel_snap]
   * @prop {string} [scale_mode]
-  * @prop {string} [stretch_mode]
-  * @prop {string} [stretch_aspect]
+  * @prop {number} [stretch_mode]
+  * @prop {number} [stretch_aspect]
+  * @prop {boolean} [resizable]
   */
 
 /**
@@ -84,8 +86,9 @@ const DefaultSettings = {
         pixel_snap: false,
         scale_mode: 'linear',
 
-        stretch_mode: 'viewport',
-        stretch_aspect: 'keep',
+        stretch_mode: STRETCH_MODE_DISABLED,
+        stretch_aspect: STRETCH_ASPECT_KEEP,
+        resizable: false,
     },
     physics: {
         physics_fps: 60,

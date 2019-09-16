@@ -59,7 +59,11 @@ export const Main = {
 
         message_queue = new MessageQueue();
 
+        os.video_mode.width = this.global.display.width;
+        os.video_mode.height = this.global.display.height;
+        os.video_mode.resizable = this.global.display.resizable;
         os.screen_orientation = this.global.display.orientation;
+
         window.addEventListener('load', this.setup2, false);
         document.addEventListener('DOMContentLoaded', this.setup2, false);
     },
@@ -68,10 +72,7 @@ export const Main = {
         window.removeEventListener('load', this.setup2, false);
         document.removeEventListener('DOMContentLoaded', this.setup2, false);
 
-        os.initialize({
-            canvas: /** @type {HTMLCanvasElement} */(document.getElementById('game')),
-            size: { x: this.global.display.width, y: this.global.display.height },
-        });
+        os.initialize(/** @type {HTMLCanvasElement} */(document.getElementById('game')));
 
         physics_2d_server = new Physics2DServer();
         physics_2d_server.init();
@@ -81,13 +82,15 @@ export const Main = {
 
     start() {
         scene_tree = new SceneTree();
-        SceneTree.get_singleton().init();
+        scene_tree.init();
+        scene_tree.stretch_mode = this.global.display.stretch_mode;
+        scene_tree.stretch_aspect = this.global.display.stretch_aspect;
+
         this.engine.set_main_loop(scene_tree);
+        this.engine.use_pixel_snap = this.global.display.pixel_snap;
 
         // TODO: autoload first pass, load constants
         // TODO: autoload second pass, instantiate nodes into global constants
-
-        // TODO: load and setup screen stretch
 
         // read and apply global settings
         document.title = this.global.application.name;
