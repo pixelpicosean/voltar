@@ -13,6 +13,7 @@ import {
 import { load } from 'engine/index';
 import { Sprite } from 'engine/scene/2d/sprite';
 import { ColorRect } from 'engine/scene/controls/color_rect';
+import { rand_range } from 'engine/core/math/math_funcs';
 
 
 class Preloader extends Node {
@@ -41,6 +42,10 @@ class Preloader extends Node {
         this.add_child(rect);
         rect.set_rect_size_n(100, 100);
         rect.set_color_n(0, 1, 1);
+
+        setInterval(() => {
+            rect.set_color_n(rand_range(0, 1), rand_range(0, 1), rand_range(0, 1))
+        }, 1000);
     }
     _ready() {
         console.log('_ready')
