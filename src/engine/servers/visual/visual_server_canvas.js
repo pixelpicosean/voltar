@@ -431,7 +431,7 @@ export class VisualServerCanvas {
      * @param {ColorLike} p_color
      */
     canvas_item_add_rect(p_item, p_rect, p_color) {
-        const rect = new CommandRect();
+        const rect = CommandRect.instance();
         rect.modulate.copy(p_color);
         rect.rect.copy(p_rect);
         p_item.rect_dirty = true;
@@ -445,7 +445,7 @@ export class VisualServerCanvas {
      * @param {ColorLike} p_color
      */
     canvas_item_add_circle(p_item, p_pos, p_radius, p_color) {
-        const circle = new CommandCircle();
+        const circle = CommandCircle.instance();
         circle.color.copy(p_color);
         circle.pos.copy(p_pos);
         circle.radius = p_radius;
@@ -462,7 +462,7 @@ export class VisualServerCanvas {
      * @param {Texture} [p_normal_map]
      */
     canvas_item_add_texture_rect(p_item, p_rect, p_texture, p_tile = false, p_modulate = white, p_transpose = false, p_normal_map = null) {
-        const rect = new CommandRect();
+        const rect = CommandRect.instance();
         rect.modulate.copy(p_modulate);
         rect.rect.copy(p_rect);
         rect.flags = 0;
@@ -502,7 +502,7 @@ export class VisualServerCanvas {
      * @param {boolean} [p_clip_uv=false]
      */
     canvas_item_add_texture_rect_region(p_item, p_rect, p_texture, p_src_rect, p_modulate = white, p_transpose = false, p_normal_map = null, p_clip_uv = false) {
-        const rect = new CommandRect();
+        const rect = CommandRect.instance();
         rect.modulate.copy(p_modulate);
         rect.rect.copy(p_rect);
         rect.texture = p_texture;
@@ -540,7 +540,7 @@ export class VisualServerCanvas {
      * @param {Texture} [p_normal_map]
      */
     canvas_item_add_nine_patch(p_item, p_rect, p_source, p_texture, p_topleft, p_bottomright, p_x_axis_mode = NINE_PATCH_STRETCH, p_y_axis_mode = NINE_PATCH_STRETCH, p_draw_center = true, p_modulate = white, p_normal_map = null) {
-        const style = new CommandNinePatch();
+        const style = CommandNinePatch.instance();
         style.texture = p_texture;
         style.normal_map = p_normal_map;
         style.rect.copy(p_rect);
@@ -568,7 +568,7 @@ export class VisualServerCanvas {
      * @param {Transform2D} p_transform
      */
     canvas_item_add_set_transform(p_item, p_transform) {
-        const tr = new CommandTransform();
+        const tr = CommandTransform.instance();
         tr.xform.copy(p_transform);
         p_item.commands.push(tr);
     }

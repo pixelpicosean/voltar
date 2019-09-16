@@ -79,6 +79,7 @@ export class Command {
 
 export class CommandRect extends Command {
     get type() { return TYPE_RECT }
+    static instance() { return new CommandRect() } // for TypeScript type checking
 
     constructor() {
         super();
@@ -155,6 +156,7 @@ create_pool(TYPE_RECT, CommandRect)
 
 export class CommandNinePatch extends Command {
     get type() { return TYPE_NINEPATCH }
+    static instance() { return new CommandNinePatch() } // for TypeScript type checking
     constructor() {
         super();
 
@@ -185,6 +187,7 @@ create_pool(TYPE_NINEPATCH, CommandNinePatch)
 
 export class CommandCircle extends Command {
     get type() { return TYPE_CIRCLE }
+    static instance() { return new CommandCircle() } // for TypeScript type checking
     constructor() {
         super();
 
@@ -203,6 +206,7 @@ create_pool(TYPE_CIRCLE, CommandCircle)
 
 export class CommandTransform extends Command {
     get type() { return TYPE_TRANSFORM }
+    static instance() { return new CommandTransform() } // for TypeScript type checking
     constructor() {
         super();
 
