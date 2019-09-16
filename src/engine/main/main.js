@@ -1,3 +1,4 @@
+import { Color } from "engine/core/color";
 import { ProjectSettings } from "engine/core/project_settings";
 import { InputMap } from "engine/core/input_map";
 import { MessageQueue } from "engine/core/message_queue";
@@ -6,6 +7,7 @@ import { Engine } from "engine/core/engine";
 import { SceneTree } from "engine/scene/main/scene_tree";
 import { VisualServer } from "engine/servers/visual_server";
 import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server";
+import { VSG } from "engine/servers/visual/visual_server_globals";
 
 
 /** @type {MessageQueue} */
@@ -73,6 +75,8 @@ export const Main = {
         document.removeEventListener('DOMContentLoaded', this.setup2, false);
 
         os.initialize(/** @type {HTMLCanvasElement} */(document.getElementById('game')));
+
+        VSG.viewport.set_default_clear_color(Color.hex(this.global.display.background_color));
 
         physics_2d_server = new Physics2DServer();
         physics_2d_server.init();

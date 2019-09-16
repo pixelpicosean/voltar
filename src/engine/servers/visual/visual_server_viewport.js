@@ -2,7 +2,7 @@ import { remove_items } from "engine/dep/index";
 import { Vector2 } from "engine/core/math/vector2";
 import { Rect2 } from "engine/core/math/rect2";
 import { Transform2D } from "engine/core/math/transform_2d";
-import { Color } from "engine/core/color";
+import { Color, ColorLike } from "engine/core/color";
 
 import { VSG } from "./visual_server_globals";
 import { Canvas } from "./visual_server_canvas";
@@ -110,10 +110,10 @@ export class VisualServerViewport {
     }
 
     /**
-     * @param {Color} p_color
+     * @param {ColorLike} p_color
      */
     set_default_clear_color(p_color) {
-        throw new Error("Method not implemented.");
+        this.clear_color.copy(p_color);
     }
 
     free_rid(rid) {
