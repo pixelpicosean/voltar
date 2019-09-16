@@ -10,10 +10,11 @@ import {
     InputEventMouseButton,
     InputEventMouseMotion,
 } from 'engine/core/os/input_event';
-import { load } from 'engine/index';
+import { load, STRETCH_MODE_VIEWPORT, STRETCH_ASPECT_KEEP } from 'engine/index';
 import { Sprite } from 'engine/scene/2d/sprite';
 import { ColorRect } from 'engine/scene/controls/color_rect';
 import { rand_range } from 'engine/core/math/math_funcs';
+import { OS } from 'engine/core/os/os';
 
 
 class Preloader extends Node {
@@ -43,8 +44,10 @@ class Preloader extends Node {
         rect.set_rect_size_n(100, 100);
         rect.set_color_n(0, 1, 1);
 
+        // let y = 0;
         setInterval(() => {
             rect.set_color_n(rand_range(0, 1), rand_range(0, 1), rand_range(0, 1))
+            // rect.set_rect_position_n(0, (y += 100) % OS.get_singleton().get_window_size().y)
         }, 1000);
     }
     _ready() {
@@ -91,6 +94,11 @@ class Preloader extends Node {
 GDCLASS(Preloader, Node)
 
 Main.setup(deep_merge({
+    display: {
+        resizable: false,
+        stretch_mode: STRETCH_MODE_VIEWPORT,
+        stretch_aspect: STRETCH_ASPECT_KEEP,
+    },
     application: {
         preloader: Preloader,
     },
