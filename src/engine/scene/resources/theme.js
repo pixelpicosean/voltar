@@ -1,23 +1,30 @@
-import StyleBox from "./style_box";
-import { Margin } from "../controls/const";
-import Font from "./font";
-import Color from "engine/core/color";
+import { Color } from "engine/core/color";
+import {
+    MARGIN_LEFT,
+    MARGIN_BOTTOM,
+    MARGIN_TOP,
+    MARGIN_RIGHT,
+} from "engine/core/math/math_defs";
+
+import { StyleBox } from "./style_box";
+import { Font } from "./font";
+
 
 export const default_font_name = '04b03';
 
 let default_font = null;
 const default_style = (() => {
     const style = new StyleBox();
-    style.set_default_margin(Margin.Bottom, 0);
-    style.set_default_margin(Margin.Left, 0);
-    style.set_default_margin(Margin.Top, 0);
-    style.set_default_margin(Margin.Right, 0);
+    style.set_default_margin(MARGIN_BOTTOM, 0);
+    style.set_default_margin(MARGIN_LEFT, 0);
+    style.set_default_margin(MARGIN_TOP, 0);
+    style.set_default_margin(MARGIN_RIGHT, 0);
     return style;
 })();
 
 const White = Object.freeze(new Color(1, 1, 1, 1));
 
-export default class Theme {
+export class Theme {
     static get_default() {
         return default_theme;
     }

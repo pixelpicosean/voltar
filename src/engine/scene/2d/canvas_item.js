@@ -275,6 +275,23 @@ export class CanvasItem extends Node {
         }
     }
 
+    /* public */
+
+    /**
+     * @param {Rect2} p_rect
+     * @param {ColorLike} p_color
+     * @param {boolean} [p_filled=true]
+     * @param {number} [p_width=1]
+     * @param {boolean} [p_antialiased=false]
+     */
+    draw_rect(p_rect, p_color, p_filled = true, p_width = 1.0, p_antialiased = false) {
+        if (p_filled) {
+            VSG.canvas.canvas_item_add_rect(this.canvas_item, p_rect, p_color);
+        } else {
+            // TODO: draw stroke
+        }
+    }
+
     get_canvas_layer() {
         if (this.canvas_layer) {
             return this.canvas_layer.layer;

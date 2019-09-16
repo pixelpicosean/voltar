@@ -1,12 +1,18 @@
-import { Vector2 } from 'engine/core/math/math_funcs';
-import { Margin } from '../controls/const';
+import {
+    MARGIN_LEFT,
+    MARGIN_RIGHT,
+    MARGIN_TOP,
+    MARGIN_BOTTOM,
+} from "engine/core/math/math_defs";
+import { Vector2 } from "engine/core/math/vector2";
 
-export default class StyleBox {
+
+export class StyleBox {
     constructor() {
         this.margin = [-1, -1, -1, -1];
     }
     /**
-     * @param {Margin} margin
+     * @param {number} margin
      * @param {number} value
      */
     set_default_margin(margin, value) {
@@ -14,13 +20,13 @@ export default class StyleBox {
         return this;
     }
     /**
-     * @param {Margin} margin
+     * @param {number} margin
      */
     get_default_margin(margin) {
         return this.margin[margin];
     }
     /**
-     * @param {Margin} margin
+     * @param {number} margin
      */
     get_margin(margin) {
         if (this.margin[margin] < 0) {
@@ -30,7 +36,7 @@ export default class StyleBox {
         }
     }
     /**
-     * @param {Margin} margin
+     * @param {number} margin
      */
     get_style_margin(margin) {
         return 0;
@@ -47,14 +53,14 @@ export default class StyleBox {
      */
     get_minimum_size(size) {
         return size.set(
-            this.get_margin(Margin.Left) + this.get_margin(Margin.Right),
-            this.get_margin(Margin.Top) + this.get_margin(Margin.Bottom)
+            this.get_margin(MARGIN_LEFT) + this.get_margin(MARGIN_RIGHT),
+            this.get_margin(MARGIN_TOP) + this.get_margin(MARGIN_BOTTOM)
         );
     }
     /**
      * @param {Vector2} size
      */
     get_offset(size) {
-        return size.set(this.get_margin(Margin.Left), this.get_margin(Margin.Top));
+        return size.set(this.get_margin(MARGIN_LEFT), this.get_margin(MARGIN_TOP));
     }
 }

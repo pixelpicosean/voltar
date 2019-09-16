@@ -1,20 +1,22 @@
-import Node2D from './2d/node_2d';
-import Color from 'engine/core/color';
+import { node_class_map } from 'engine/registry';
+import { GDCLASS } from 'engine/core/v_object';
+import { Vector2 } from 'engine/core/math/vector2';
+import { Transform2D } from 'engine/core/math/transform_2d';
+import { Color } from 'engine/core/color';
 import {
-    Vector2,
-    Matrix,
-    PI,
     lerp,
     deg2rad,
-    PI2,
+    randf,
+    rand_range_i,
 } from 'engine/core/math/math_funcs';
-import { randf, rand_range_i } from 'engine/core/math/random_pcg';
-import Sprite from './sprites/sprite';
-import WebGLRenderer from 'engine/servers/visual/webgl_renderer';
-import { node_class_map } from 'engine/registry';
+import { Math_PI } from 'engine/core/math/math_defs';
+import { BLEND_MODES } from 'engine/drivers/constants';
+
 import { Curve } from './resources/curve';
-import { TextureCache } from 'engine/utils/color';
-import { Texture, BLEND_MODES } from 'engine/index';
+import { Node2D } from './2d/node_2d';
+
+
+const Math_PI2 = Math_PI * 2;
 
 /**
  * @param {number} value
@@ -69,7 +71,7 @@ const EmissionShape = {
 
 class Particle {
     constructor() {
-        this.transform = new Matrix();
+        this.transform = new Transform2D();
         this.color = new Color(1, 1, 1, 1);
         this.custom = [0, 0, 0, 0];
         this.rotation = 0;
@@ -690,8 +692,8 @@ export default class CPUParticles2D extends Node2D {
             }
         }
 
-        const emission_xform = Matrix.new();
-        const velocity_xform = Matrix.new();
+        const emission_xform = Transform2D.new();
+        const velocity_xform = Transform2D.new();
         if (!this.local_coords) {
             emission_xform.copy(this.get_global_transform());
             velocity_xform.copy(emission_xform);
@@ -763,7 +765,7 @@ export default class CPUParticles2D extends Node2D {
                 p.hue_rot_rand = randf();
                 p.anim_offset_rand = randf();
 
-                let angle1_rad = (randf() * 2 - 1) * PI * this.spread / 180;
+                let angle1_rad = (randf() * 2 - 1) * Math_PI * this.spread / 180;
                 const rot = Vector2.new(Math.cos(angle1_rad), Math.sin(angle1_rad));
                 p.velocity.copy(rot).scale(this.parameters[Parameter.INITIAL_LINEAR_VELOCITY] * lerp(1, randf(), this.randomness[Parameter.INITIAL_LINEAR_VELOCITY]));
 
@@ -823,7 +825,7 @@ export default class CPUParticles2D extends Node2D {
                     velocity_xform.xform(p.velocity, p.velocity);
                     const t = p.transform.clone();
                     p.transform.copy(emission_xform).append(t);
-                    Matrix.free(t);
+                    Transform2D.free(t);
                 }
             } else if (!p.active) {
                 continue;
@@ -911,8 +913,8 @@ export default class CPUParticles2D extends Node2D {
                 // Orbit velocity
                 const orbit_amount = (this.parameters[Parameter.ORBIT_VELOCITY] + tex_orbit_velocity) * lerp(1, randf(), this.randomness[Parameter.ORBIT_VELOCITY]);
                 if (orbit_amount !== 0) {
-                    const ang = orbit_amount * local_delta * Math.PI * 2;
-                    const rot = Matrix.new();
+                    const ang = orbit_amount * local_delta * Math_PI * 2;
+                    const rot = Transform2D.new();
                     rot.rotate(-ang);
                     const x_diff = rot.basis_xform(diff);
                     p.transform.tx -= diff.x;
@@ -920,7 +922,7 @@ export default class CPUParticles2D extends Node2D {
                     p.transform.tx += x_diff.x;
                     p.transform.ty += x_diff.y;
                     Vector2.free(x_diff);
-                    Matrix.free(rot);
+                    Transform2D.free(rot);
                 }
                 if (this.curve_parameters[Parameter.INITIAL_LINEAR_VELOCITY]) {
                     p.velocity.normalize().scale(tex_linear_velocity);
@@ -955,7 +957,7 @@ export default class CPUParticles2D extends Node2D {
                 tex_hue_variation = this.curve_parameters[Parameter.HUE_VARIATION].interpolate(p.custom[1]);
             }
 
-            let hue_rot_angle = (this.parameters[Parameter.HUE_VARIATION] + tex_hue_variation) * PI2 * lerp(1, p.hue_rot_rand * 2 - 1, this.randomness[Parameter.HUE_VARIATION]);
+            let hue_rot_angle = (this.parameters[Parameter.HUE_VARIATION] + tex_hue_variation) * Math_PI2 * lerp(1, p.hue_rot_rand * 2 - 1, this.randomness[Parameter.HUE_VARIATION]);
             let hue_rot_c = Math.cos(hue_rot_angle);
             let hue_rot_s = Math.sin(hue_rot_angle);
 
@@ -1055,10 +1057,9 @@ export default class CPUParticles2D extends Node2D {
         }
     }
 }
+node_class_map['CPUParticles2D'] = GDCLASS(CPUParticles2D, Node2D)
 
 CPUParticles2D.DrawOrder = DrawOrder;
 CPUParticles2D.Parameter = Parameter;
 CPUParticles2D.Flags = Flags;
 CPUParticles2D.EmissionShape = EmissionShape;
-
-node_class_map['CPUParticles2D'] = CPUParticles2D;

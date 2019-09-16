@@ -18,8 +18,8 @@ import { Color } from 'engine/core/color';
 import { MessageQueue } from 'engine/core/message_queue';
 import { BLEND_MODES } from 'engine/drivers/constants';
 
-import Theme from '../resources/theme';
-import Font from '../resources/font';
+import { Theme } from '../resources/theme';
+import { Font } from '../resources/font';
 import {
     Node,
     NOTIFICATION_ENTER_TREE,

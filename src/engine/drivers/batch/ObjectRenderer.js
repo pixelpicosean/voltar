@@ -1,4 +1,13 @@
 /**
+ * @typedef RenderElement
+ * @property {any} texture
+ * @property {any} vertex_data
+ * @property {any} indices
+ * @property {number} blendMode
+ */
+
+
+/**
  * Base for a common object renderer that can be used as a
  * system renderer plugin.
  */
@@ -53,7 +62,7 @@ export default class ObjectRenderer {
      * Keeps the object to render. It doesn't have to be
      * rendered immediately.
      *
-     * @param {any} object - The object to render.
+     * @param {RenderElement} object - The object to render.
      */
     render(object) // eslint-disable-line no-unused-vars
     {

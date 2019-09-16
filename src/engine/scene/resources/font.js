@@ -1,4 +1,6 @@
-import { Vector2, Rectangle } from "engine/core/math/math_funcs";
+import { Vector2 } from "engine/core/math/vector2";
+import { Rect2 } from "engine/core/math/rect2";
+
 
 const ZeroVector = Object.freeze(new Vector2(0, 0));
 
@@ -9,7 +11,7 @@ export class Character {
         this.h_align = 0;
         this.v_align = 0;
         this.advance = 0;
-        this.rect = new Rectangle();
+        this.rect = new Rect2();
         this.texture = null;
         /**
          * @type {Object<string, number>}
@@ -18,7 +20,7 @@ export class Character {
     }
 }
 
-export default class Font {
+export class Font {
     constructor() {
         this.name = '';
 

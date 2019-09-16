@@ -16,6 +16,14 @@ import { premultiplyBlendMode, premultiplyTint } from '../utils/color/premultipl
 
 
 /**
+ * From hex color number to tint color for rendering
+ * @param {number} hex
+ */
+function hex2tint(hex) {
+    return (hex >> 16) + (hex & 0xff00) + ((hex & 0xff) << 16);
+}
+
+/**
  * Renderer dedicated to drawing and batching sprites.
  *
  * This is the default batch renderer. It buffers objects
@@ -293,18 +301,15 @@ export default class AbstractBatchRenderer extends ObjectRenderer
      * Buffers the "batchable" object. It need not be rendered
      * immediately.
      *
-     * @param {any} element - the sprite to render when
+     * @param {import('./ObjectRenderer').RenderElement} element - the sprite to render when
      *    using this spritebatch
      */
-    render(element)
-    {
-        if (!element.texture.valid)
-        {
+    render(element) {
+        if (!element.texture || !element.texture.valid) {
             return;
         }
 
-        if (this._vertexCount + (element.vertex_data.length / 2) > this.size)
-        {
+        if (this._vertexCount + (element.vertex_data.length / 2) > this.size) {
             this.flush();
         }
 
@@ -607,7 +612,7 @@ export default class AbstractBatchRenderer extends ObjectRenderer
         const vertex_data = element.vertex_data;
         const textureId = element.texture.baseTexture._id;
 
-        const tint = element.modulate.as_hex();
+        const tint = hex2tint(element.modulate.as_hex());
         const alpha = Math.min(element.modulate.a, 1.0);
         const argb = (alpha < 1.0 && element.texture.baseTexture.premultiplyAlpha)
             ? premultiplyTint(tint, alpha)

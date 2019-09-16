@@ -12,6 +12,7 @@ import {
 } from 'engine/core/os/input_event';
 import { load } from 'engine/index';
 import { Sprite } from 'engine/scene/2d/sprite';
+import { ColorRect } from 'engine/scene/controls/color_rect';
 
 
 class Preloader extends Node {
@@ -30,11 +31,16 @@ class Preloader extends Node {
                 const tex = loader.resources['media/sprites.png'];
                 const sprite = new Sprite();
                 sprite.set_texture(tex.texture);
-                this.add_child(sprite);
+                // this.add_child(sprite);
                 sprite.set_position_n(100, 100);
                 sprite.set_self_modulate_n(0, 0, 0);
                 this.spr = sprite;
             })
+
+        const rect = new ColorRect();
+        this.add_child(rect);
+        rect.set_rect_size_n(100, 100);
+        rect.set_color_n(0, 1, 1);
     }
     _ready() {
         console.log('_ready')

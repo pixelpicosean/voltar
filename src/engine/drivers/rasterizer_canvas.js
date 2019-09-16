@@ -1,7 +1,7 @@
 import { Vector2 } from 'engine/core/math/vector2';
 import { Rect2 } from 'engine/core/math/rect2';
 import { Transform2D } from 'engine/core/math/transform_2d';
-import { Color } from 'engine/core/color';
+import { Color, ColorLike } from 'engine/core/color';
 import {
     OS,
     VIDEO_DRIVER_GLES2_LEGACY,
@@ -32,6 +32,7 @@ import {
     TYPE_CIRCLE,
     CommandCircle,
 } from 'engine/servers/visual/commands';
+import { VSG } from 'engine/servers/visual/visual_server_globals';
 
 
 export class RasterizerCanvas extends VObject {
@@ -254,7 +255,7 @@ export class RasterizerCanvas extends VObject {
     /**
      * @param {import('engine/servers/visual/visual_server_canvas').Item} p_item_list
      * @param {number} p_z
-     * @param {Color} p_modulate
+     * @param {ColorLike} p_modulate
      * @param {any} p_light
      * @param {Transform2D} p_base_transform
      */
@@ -271,12 +272,13 @@ export class RasterizerCanvas extends VObject {
      * @param {Item} p_item
      */
     _canvas_item_render_commands(p_item) {
+        const color = Color.new();
         for (let c of p_item.commands) {
             switch (c.type) {
                 case TYPE_RECT: {
                     let rect = /** @type {CommandRect} */(c);
-                    rect.calculate_vertices(p_item.final_transform);
-                    rect.modulate.copy(p_item.final_modulate);
+                    if (!rect.texture) rect.texture = VSG.storage.resources.white_tex;
+                    rect.calculate_vertices(p_item.final_transform, p_item.final_modulate);
                     // TODO: add blend mode support, maybe a material system just like Godot
                     // rect.blendMode = p_item.blend_mode;
                     this.batch.currentRenderer.render(rect);

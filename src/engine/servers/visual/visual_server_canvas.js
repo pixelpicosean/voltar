@@ -10,7 +10,7 @@ import { clamp } from 'engine/core/math/math_funcs';
 import { Vector2, Vector2Like } from 'engine/core/math/vector2';
 import { Rect2 } from 'engine/core/math/rect2';
 import { Transform2D } from 'engine/core/math/transform_2d';
-import { Color } from 'engine/core/color';
+import { Color, ColorLike } from 'engine/core/color';
 
 import { VisualServer } from '../visual_server';
 import { VSG } from './visual_server_globals';
@@ -167,7 +167,9 @@ export class Item {
     }
 
     clear() {
-        // TODO: cache commands
+        for (let c of this.commands) {
+            c.free();
+        }
         this.commands.length = 0;
         this.clip = false;
         this.rect_dirty = true;
@@ -307,7 +309,7 @@ export class VisualServerCanvas {
     }
     /**
      * @param {Canvas} p_canvas
-     * @param {Color} p_color
+     * @param {ColorLike} p_color
      */
     canvas_set_modulate(p_canvas, p_color) {
         p_canvas.modulate.copy(p_color);
@@ -396,14 +398,14 @@ export class VisualServerCanvas {
     }
     /**
      * @param {Item} canvas_item
-     * @param {Color} modulate
+     * @param {ColorLike} modulate
      */
     canvas_item_set_modulate(canvas_item, modulate) {
         canvas_item.modulate.copy(modulate);
     }
     /**
      * @param {Item} canvas_item
-     * @param {Color} modulate
+     * @param {ColorLike} modulate
      */
     canvas_item_set_self_modulate(canvas_item, modulate) {
         canvas_item.self_modulate.copy(modulate);
@@ -426,7 +428,7 @@ export class VisualServerCanvas {
     /**
      * @param {Item} p_item
      * @param {Rect2} p_rect
-     * @param {Color} p_color
+     * @param {ColorLike} p_color
      */
     canvas_item_add_rect(p_item, p_rect, p_color) {
         const rect = new CommandRect();
@@ -440,7 +442,7 @@ export class VisualServerCanvas {
      * @param {Item} p_item
      * @param {Vector2} p_pos
      * @param {number} p_radius
-     * @param {Color} p_color
+     * @param {ColorLike} p_color
      */
     canvas_item_add_circle(p_item, p_pos, p_radius, p_color) {
         const circle = new CommandCircle();
@@ -455,7 +457,7 @@ export class VisualServerCanvas {
      * @param {Rect2} p_rect
      * @param {Texture} p_texture
      * @param {boolean} [p_tile=false]
-     * @param {Color} [p_modulate]
+     * @param {ColorLike} [p_modulate]
      * @param {boolean} [p_transpose=false]
      * @param {Texture} [p_normal_map]
      */
@@ -494,7 +496,7 @@ export class VisualServerCanvas {
      * @param {Rect2} p_rect
      * @param {Texture} p_texture
      * @param {Rect2} p_src_rect
-     * @param {Color} [p_modulate]
+     * @param {ColorLike} [p_modulate]
      * @param {boolean} [p_transpose=false]
      * @param {Texture} [p_normal_map]
      * @param {boolean} [p_clip_uv=false]
@@ -534,7 +536,7 @@ export class VisualServerCanvas {
      * @param {number} [p_x_axis_mode]
      * @param {number} [p_y_axis_mode]
      * @param {boolean} [p_draw_center=true]
-     * @param {Color} [p_modulate=white]
+     * @param {ColorLike} [p_modulate=white]
      * @param {Texture} [p_normal_map]
      */
     canvas_item_add_nine_patch(p_item, p_rect, p_source, p_texture, p_topleft, p_bottomright, p_x_axis_mode = NINE_PATCH_STRETCH, p_y_axis_mode = NINE_PATCH_STRETCH, p_draw_center = true, p_modulate = white, p_normal_map = null) {
@@ -721,7 +723,7 @@ export class VisualServerCanvas {
      * @param {Item} p_canvas_item
      * @param {Transform2D} p_transform
      * @param {Rect2} p_clip_rect
-     * @param {Color} p_module
+     * @param {ColorLike} p_module
      * @param {any} p_lights
      */
     _render_canvas_item_tree(p_canvas_item, p_transform, p_clip_rect, p_module, p_lights) {
@@ -739,7 +741,7 @@ export class VisualServerCanvas {
      * @param {Item} p_canvas_item
      * @param {Transform2D} p_transform
      * @param {Rect2} p_clip_rect
-     * @param {Color} p_module
+     * @param {ColorLike} p_module
      * @param {number} p_z
      * @param {Item[]} z_list
      * @param {Item[]} z_last_list
