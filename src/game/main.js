@@ -17,6 +17,7 @@ import { rand_range, randf } from 'engine/core/math/math_funcs';
 import { OS } from 'engine/core/os/os';
 import { CenterContainer } from 'engine/scene/controls/center_container';
 import { GridContainer } from 'engine/scene/controls/grid_container';
+import { VBoxContainer } from 'engine/scene/controls/box_container';
 
 
 class Preloader extends Node {
@@ -67,6 +68,18 @@ class Preloader extends Node {
             rect.set_rect_min_size_n(20, 20);
             rect.set_color_n(randf(), randf(), randf());
             grid.add_child(rect);
+        }
+
+        const v_box = new VBoxContainer();
+        this.add_child(v_box);
+        v_box.set_rect_position_n(80, 0);
+        v_box.add_constant_override('separation', 10);
+
+        for (let i = 0; i < 10; i++) {
+            let rect = new ColorRect();
+            rect.set_rect_min_size_n(60, 30);
+            rect.set_color_n(randf(), randf(), randf());
+            v_box.add_child(rect);
         }
     }
     _ready() {

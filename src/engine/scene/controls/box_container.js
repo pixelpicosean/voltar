@@ -1,17 +1,16 @@
-import Container from "./container";
-import Control from "./control";
-import { SizeFlag } from "./const";
-import { Vector2, Rectangle } from "engine/core/math/math_funcs";
 import { node_class_map } from "engine/registry";
+import { GDCLASS } from "engine/core/v_object";
 
-/**
- * @enum {number}
- */
-export const AlignMode = {
-    BEGIN: 0,
-    CENTER: 1,
-    END: 2,
-}
+import { Control, NOTIFICATION_THEME_CHANGED } from "./control";
+import { Container, NOTIFICATION_SORT_CHILDREN } from "./container";
+import { SIZE_EXPAND_FILL, SIZE_EXPAND } from "./const";
+import { Vector2 } from "engine/core/math/vector2";
+import { Rect2 } from "engine/core/math/rect2";
+
+
+export const ALIGN_BEGIN = 0;
+export const ALIGN_CENTER = 1;
+export const ALIGN_END = 2;
 
 class MinSizeCache {
     constructor() {
@@ -26,43 +25,31 @@ class MinSizeCache {
     }
 }
 
-const tmp_vec = new Vector2();
-const tmp_vec2 = new Vector2();
-const tmp_vec3 = new Vector2();
+export class BoxContainer extends Container {
+    get class() { return 'BoxContainer' }
 
-export default class BoxContainer extends Container {
-    get alignment() {
-        return this.align;
-    }
     /**
-     * @param {AlignMode} value
-     */
-    set alignment(value) {
-        this.align = value;
-        this._resort();
-    }
-    /**
-     * @param {AlignMode} value
+     * @param {number} value
      */
     set_alignment(value) {
-        this.align = value;
-        return this;
+        this.alignment = value;
+        this._resort();
     }
 
     constructor(vertical = false) {
         super();
 
-        this.type = 'BoxContainer';
-
         this.vertical = vertical;
-        this.align = AlignMode.BEGIN;
+        this.alignment = ALIGN_BEGIN;
     }
+
+    /* virtual */
 
     _load_data(data) {
         super._load_data(data);
 
         if (data.alignment !== undefined) {
-            this.alignment = data.alignment;
+            this.set_alignment(data.alignment);
         }
         if (data.separation !== undefined) {
             this.add_constant_override('separation', data.separation);
@@ -71,45 +58,34 @@ export default class BoxContainer extends Container {
         return this;
     }
 
-    _children_sorted() {
-        this._resort();
-    }
-
-    add_spacer(begin = false) {
-        const c = new Control();
-
-        if (this.vertical) {
-            c.size_flags_vertical = SizeFlag.EXPAND_FILL;
-        } else {
-            c.size_flags_horizontal = SizeFlag.EXPAND_FILL;
-        }
-
-        this.add_child(c);
-        if (begin) {
-            this.move_child(c, 0);
-        }
-    }
-
     /**
-     * @param {Vector2} size
+     * @param {number} p_what
      */
-    get_minimum_size(size) {
-        const minimum = size.set(0, 0);
+    _notification(p_what) {
+        switch (p_what) {
+            case NOTIFICATION_SORT_CHILDREN: {
+                this._resort();
+            } break;
+            case NOTIFICATION_THEME_CHANGED: {
+                this.minimum_size_changed();
+            } break;
+        }
+    }
+
+    get_minimum_size() {
+        const minimum = Vector2.new(0, 0);
         const sep = this.get_constant('separation');
 
         let first = true;
 
-        for (const node of this.children) {
+        for (const node of this.data.children) {
             const c = /** @type {Container} */(node);
 
-            if (!c.is_control || !c.world_visible) {
-                continue;
-            }
-            if (c.toplevel) {
+            if (!c.is_control || c.is_toplevel_control() || !c.visible) {
                 continue;
             }
 
-            const size = c.get_combined_minimum_size(tmp_vec3);
+            const size = c.get_combined_minimum_size();
 
             if (this.vertical) {
                 if (size.width > minimum.width) {
@@ -126,10 +102,31 @@ export default class BoxContainer extends Container {
             }
 
             first = false;
+
+            Vector2.free(size);
         }
 
         return minimum;
     }
+
+    /* public */
+
+    add_spacer(begin = false) {
+        const c = new Control();
+
+        if (this.vertical) {
+            c.set_size_flags_vertical(SIZE_EXPAND_FILL);
+        } else {
+            c.set_size_flags_horizontal(SIZE_EXPAND_FILL);
+        }
+
+        this.add_child(c);
+        if (begin) {
+            this.move_child(c, 0);
+        }
+    }
+
+    /* private */
 
     _resort() {
         if (!this.is_inside_tree) {
@@ -151,27 +148,24 @@ export default class BoxContainer extends Container {
          */
         const min_size_cache = {};
 
-        for (const node of this.children) {
+        for (const node of this.data.children) {
             const c = /** @type {Container} */(node);
 
-            if (!c.is_control || !c.world_visible) {
-                continue;
-            }
-            if (c.toplevel) {
+            if (!c.is_control || c.is_set_as_toplevel() || !c.is_visible_in_tree()) {
                 continue;
             }
 
-            const size = c.get_combined_minimum_size(tmp_vec);
+            const size = c.get_combined_minimum_size();
             const msc = new MinSizeCache();
 
             if (this.vertical) {
                 stretch_min += size.height;
                 msc.min_size = size.height;
-                msc.will_stretch = !!(c.size_flags_vertical & SizeFlag.EXPAND);
+                msc.will_stretch = !!(c.size_flags_vertical & SIZE_EXPAND);
             } else {
                 stretch_min += size.width;
                 msc.min_size = size.width;
-                msc.will_stretch = !!(c.size_flags_horizontal & SizeFlag.EXPAND);
+                msc.will_stretch = !!(c.size_flags_horizontal & SIZE_EXPAND);
             }
 
             if (msc.will_stretch) {
@@ -179,8 +173,10 @@ export default class BoxContainer extends Container {
                 stretch_ratio_total += c.size_flags_stretch_ratio;
             }
             msc.final_size = msc.min_size;
-            min_size_cache[c.id] = msc;
+            min_size_cache[c.instance_id] = msc;
             children_count++;
+
+            Vector2.free(size);
         }
 
         if (children_count === 0) {
@@ -205,15 +201,14 @@ export default class BoxContainer extends Container {
             has_stretched = true;
             let refit_successful = true;
 
-            for (let c of this.children) {
-                if (!(c instanceof Control) || !c.world_visible) {
-                    continue;
-                }
-                if (c.toplevel) {
+            for (let node of this.data.children) {
+                const c = /** @type {Container} */(node);
+
+                if (!c.is_control || c.is_set_as_toplevel() || !c.is_visible_in_tree()) {
                     continue;
                 }
 
-                let msc = min_size_cache[c.id];
+                let msc = min_size_cache[c.instance_id];
 
                 if (msc.will_stretch) {
                     let final_pixel_size = stretch_avail * c.size_flags_stretch_ratio / stretch_ratio_total;
@@ -239,13 +234,13 @@ export default class BoxContainer extends Container {
 
         let ofs = 0;
         if (!has_stretched) {
-            switch (this.align) {
-                case AlignMode.BEGIN: {
+            switch (this.alignment) {
+                case ALIGN_BEGIN: {
                 } break;
-                case AlignMode.CENTER: {
+                case ALIGN_CENTER: {
                     ofs = stretch_diff * 0.5;
                 } break;
-                case AlignMode.END: {
+                case ALIGN_END: {
                     ofs = stretch_diff;
                 } break;
             }
@@ -254,17 +249,14 @@ export default class BoxContainer extends Container {
         first = true;
         let idx = 0;
 
-        for (const node of this.children) {
+        for (const node of this.data.children) {
             const c = /** @type {Container} */(node);
 
-            if (!c.is_control || !c.world_visible) {
-                continue;
-            }
-            if (c.toplevel) {
+            if (!c.is_control || c.is_set_as_toplevel() || !c.is_visible_in_tree()) {
                 continue;
             }
 
-            let msc = min_size_cache[c.id];
+            let msc = min_size_cache[c.instance_id];
 
             if (first) {
                 first = false;
@@ -281,7 +273,7 @@ export default class BoxContainer extends Container {
 
             let size = to - from;
 
-            const rect = Rectangle.new();
+            const rect = Rect2.new();
 
             if (this.vertical) {
                 rect.x = 0;
@@ -297,29 +289,36 @@ export default class BoxContainer extends Container {
 
             this.fit_child_in_rect(c, rect);
 
-            Rectangle.free(rect);
+            Rect2.free(rect);
 
             ofs = to;
             idx++;
         }
     }
 }
+GDCLASS(BoxContainer, Container)
 
 export class HBoxContainer extends BoxContainer {
+    get class() { return 'HBoxContainer' }
     constructor() {
         super(false);
-
-        this.type = 'HBoxContainer';
     }
 }
+node_class_map['HBoxContainer'] = GDCLASS(HBoxContainer, BoxContainer)
 
 export class VBoxContainer extends BoxContainer {
+    get class() { return 'VBoxContainer' }
     constructor() {
         super(true);
+    }
 
-        this.type = 'VBoxContainer';
+    /**
+     * @param {string} p_label
+     * @param {Control} p_control
+     * @param {boolean} p_expand
+     */
+    add_margin_child(p_label, p_control, p_expand = false) {
+        // TODO: add label and margin container here
     }
 }
-
-node_class_map['VBoxContainer'] = VBoxContainer;
-node_class_map['HBoxContainer'] = HBoxContainer;
+node_class_map['VBoxContainer'] = GDCLASS(VBoxContainer, BoxContainer)
