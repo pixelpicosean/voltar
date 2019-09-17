@@ -3,8 +3,8 @@ import { GDCLASS } from "engine/core/v_object";
 import { Vector2 } from "engine/core/math/vector2";
 import { Rect2 } from "engine/core/math/rect2";
 
-import { Container, NOTIFICATION_SORT_CHILDREN } from "./container";
 import { NOTIFICATION_THEME_CHANGED } from "./control";
+import { Container, NOTIFICATION_SORT_CHILDREN } from "./container";
 
 
 export class MarginContainer extends Container {

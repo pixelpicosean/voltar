@@ -3,8 +3,8 @@ import { GDCLASS } from 'engine/core/v_object';
 import { Rect2 } from 'engine/core/math/rect2';
 import { Color, ColorLike } from 'engine/core/color';
 
-import { Control } from './control';
 import { NOTIFICATION_DRAW } from '../2d/canvas_item';
+import { Control } from './control';
 
 
 export class ColorRect extends Control {

@@ -1,5 +1,5 @@
 import Control from "./control";
-import InteractiveEvent from 'engine/interaction/InteractionEvent';
+import InteractiveEvent from 'engine/scene/gui/engine/interaction/InteractionEvent';
 
 /**
  * @enum {number}

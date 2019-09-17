@@ -8,11 +8,11 @@ import {
 } from 'engine/core/math/math_defs';
 import { Vector2 } from 'engine/core/math/vector2';
 import { Rect2 } from 'engine/core/math/rect2';
+import { VSG } from 'engine/servers/visual/visual_server_globals';
 
 import { ImageTexture } from '../resources/texture';
-import { Control } from './control';
 import { NOTIFICATION_DRAW } from '../2d/canvas_item';
-import { VSG } from 'engine/servers/visual/visual_server_globals';
+import { Control } from './control';
 
 
 export const AXIS_STRETCH_MODE_STRETCH = 0;

@@ -101,19 +101,19 @@ GDCLASS(ViewportTexture, Texture)
 class GUI {
     constructor() {
         this.key_event_accepted = false;
-        /** @type {import('../controls/control').Control} */
+        /** @type {import('../gui/control').Control} */
         this.mouse_focus = null;
-        /** @type {import('../controls/control').Control} */
+        /** @type {import('../gui/control').Control} */
         this.last_mouse_focus = null;
         this.mouse_click_grabber = null;
         this.mouse_focus_mask = 0;
-        /** @type {import('../controls/control').Control} */
+        /** @type {import('../gui/control').Control} */
         this.key_focus = null;
-        /** @type {import('../controls/control').Control} */
+        /** @type {import('../gui/control').Control} */
         this.mouse_over = null;
-        /** @type {import('../controls/control').Control} */
+        /** @type {import('../gui/control').Control} */
         this.tooltip = null;
-        /** @type {import('../controls/control').Control} */
+        /** @type {import('../gui/control').Control} */
         this.tooltip_popup = null;
         this.tooltip_label = null;
         this.tooltip_pos = false;
@@ -124,17 +124,17 @@ class GUI {
         this.drag_preview = false;
         this.tooltip_timer = -1;
         this.tooltip_delay = 0.5;
-        /** @type {import('../controls/control').Control[]} */
+        /** @type {import('../gui/control').Control[]} */
         this.modal_stack = [];
         this.focus_inv_xform = false;
         this.subwindow_order_dirty = false;
         this.subwindow_visibility_dirty = false;
-        /** @type {import('../controls/control').Control[]} */
+        /** @type {import('../gui/control').Control[]} */
         this.subwindows = [];
-        /** @type {import('../controls/control').Control[]} */
+        /** @type {import('../gui/control').Control[]} */
         this.all_known_subwindows = [];
         this.roots_order_dirty = false;
-        /** @type {import('../controls/control').Control[]} */
+        /** @type {import('../gui/control').Control[]} */
         this.roots = [];
         this.canvas_sort_index = 0;
         this.dragging = false;
@@ -513,7 +513,7 @@ export class Viewport extends Node {
     }
 
     /**
-     * @param {import('../controls/control').Control} p_control
+     * @param {import('../gui/control').Control} p_control
      */
     _gui_add_root_control(p_control) {
         this.gui.roots_order_dirty = true;
@@ -521,7 +521,7 @@ export class Viewport extends Node {
     }
 
     /**
-     * @param {import('../controls/control').Control} p_control
+     * @param {import('../gui/control').Control} p_control
      */
     _gui_add_subwindow_control(p_control) {
         p_control.connect('visibility_changed', this._subwindow_visibility_changed, this);
@@ -538,24 +538,24 @@ export class Viewport extends Node {
     _gui_set_root_order_dirty() { }
 
     /**
-     * @param {import('../controls/control').Control} p_control
+     * @param {import('../gui/control').Control} p_control
      */
     _gui_remove_modal_control(p_control) { }
     /**
-     * @param {import('../controls/control').Control} MI
-     * @param {import('../controls/control').Control} p_prev_focus_owner
+     * @param {import('../gui/control').Control} MI
+     * @param {import('../gui/control').Control} p_prev_focus_owner
      */
     _gui_remove_from_modal_stack(MI, p_prev_focus_owner) {
         // TODO: modal stack support
     }
     /**
-     * @param {import('../controls/control').Control} p_control
+     * @param {import('../gui/control').Control} p_control
      */
     _gui_remove_root_control(p_control) {
         remove_items(this.gui.roots, this.gui.roots.indexOf(p_control), 1);
     }
     /**
-     * @param {import('../controls/control').Control} p_control
+     * @param {import('../gui/control').Control} p_control
      */
     _gui_remove_subwindow_control(p_control) { }
 
@@ -572,7 +572,7 @@ export class Viewport extends Node {
     _gui_show_tooltip() { }
 
     /**
-     * @param {import('../controls/control').Control} p_control
+     * @param {import('../gui/control').Control} p_control
      */
     _gui_remove_control(p_control) {
         const gui = this.gui;
@@ -597,7 +597,7 @@ export class Viewport extends Node {
         }
     }
     /**
-     * @param {import('../controls/control').Control} p_control
+     * @param {import('../gui/control').Control} p_control
      */
     _gui_hid_control(p_control) {
         if (this.gui.mouse_focus === p_control) {
@@ -619,7 +619,7 @@ export class Viewport extends Node {
     _gui_set_drag_preview() { }
 
     /**
-     * @param {import('../controls/control').Control} p_control
+     * @param {import('../gui/control').Control} p_control
      */
     _gui_is_modal_on_top(p_control) {
         return (this.gui.modal_stack.length && this.gui.modal_stack[this.gui.modal_stack.length - 1] === p_control);

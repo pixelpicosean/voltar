@@ -1,11 +1,11 @@
 import { node_class_map } from "engine/registry";
 import { GDCLASS } from "engine/core/v_object";
-
-import { Control, NOTIFICATION_THEME_CHANGED } from "./control";
-import { Container, NOTIFICATION_SORT_CHILDREN } from "./container";
-import { SIZE_EXPAND_FILL, SIZE_EXPAND } from "./const";
 import { Vector2 } from "engine/core/math/vector2";
 import { Rect2 } from "engine/core/math/rect2";
+
+import { SIZE_EXPAND_FILL, SIZE_EXPAND } from "./const";
+import { Control, NOTIFICATION_THEME_CHANGED } from "./control";
+import { Container, NOTIFICATION_SORT_CHILDREN } from "./container";
 
 
 export const ALIGN_BEGIN = 0;

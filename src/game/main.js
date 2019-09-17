@@ -12,13 +12,13 @@ import {
 } from 'engine/core/os/input_event';
 import { load, STRETCH_MODE_VIEWPORT, STRETCH_ASPECT_KEEP } from 'engine/index';
 import { Sprite } from 'engine/scene/2d/sprite';
-import { ColorRect } from 'engine/scene/controls/color_rect';
+import { ColorRect } from 'engine/scene/gui/color_rect';
 import { randf } from 'engine/core/math/math_funcs';
-import { CenterContainer } from 'engine/scene/controls/center_container';
-import { GridContainer } from 'engine/scene/controls/grid_container';
-import { VBoxContainer } from 'engine/scene/controls/box_container';
-import { TextureRect } from 'engine/scene/controls/texture_rect';
-import { NinePatchRect } from 'engine/scene/controls/nine_patch_rect';
+import { CenterContainer } from 'engine/scene/gui/center_container';
+import { GridContainer } from 'engine/scene/gui/grid_container';
+import { VBoxContainer } from 'engine/scene/gui/box_container';
+import { TextureRect } from 'engine/scene/gui/texture_rect';
+import { NinePatchRect } from 'engine/scene/gui/nine_patch_rect';
 
 
 class Preloader extends Node {

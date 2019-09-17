@@ -16,7 +16,9 @@ import { Rect2 } from 'engine/core/math/rect2';
 import { Transform2D } from 'engine/core/math/transform_2d';
 import { Color } from 'engine/core/color';
 import { MessageQueue } from 'engine/core/message_queue';
+import { NOTIFICATION_WM_UNFOCUS_REQUEST } from 'engine/core/main_loop';
 import { BLEND_MODES } from 'engine/drivers/constants';
+import { VSG } from 'engine/servers/visual/visual_server_globals';
 
 import { Theme } from '../resources/theme';
 import { Font } from '../resources/font';
@@ -61,8 +63,6 @@ import {
     PRESET_MODE_KEEP_WIDTH,
     PRESET_MODE_KEEP_HEIGHT,
 } from './const';
-import { VSG } from 'engine/servers/visual/visual_server_globals';
-import { NOTIFICATION_WM_UNFOCUS_REQUEST } from 'engine/core/main_loop';
 
 
 export const NOTIFICATION_RESIZED = 40;

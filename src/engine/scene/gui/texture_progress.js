@@ -9,7 +9,6 @@ import Sprite from "../sprites/sprite";
 import TilingSprite from "../sprites/tiling_sprite";
 import NineSlicePlane from "../mesh/nine_slice_plane";
 import Graphics from "../graphics/graphics";
-import { Margin } from "./const";
 import Range from "./range";
 
 const tmp_vec = new Vector2();
@@ -57,7 +56,7 @@ export default class TextureProgress extends Range {
         this._radial_center_offset.copy(value);
     }
     /**
-     * @param {number|import("engine/core/math/vector2").Vector2Like} x
+     * @param {number|import("engine/scene/gui/engine/core/math/vector2").Vector2Like} x
      * @param {number} [y]
      */
     set_radial_center_offset(x, y) {

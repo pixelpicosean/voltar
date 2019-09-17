@@ -1,11 +1,11 @@
 import Control from "./control";
 import Sprite from "../sprites/sprite";
 
-import { Vector2, Rectangle } from "engine/core/math/math_funcs";
-import Color from "engine/core/color";
+import { Vector2, Rectangle } from "engine/scene/gui/engine/core/math/math_funcs";
+import Color from "engine/scene/gui/engine/core/color";
 import { SizeFlag, Margin } from "./const";
 
-import { node_class_map } from "engine/registry";
+import { node_class_map } from "engine/scene/gui/engine/registry";
 import { registered_bitmap_fonts } from "../text/res";
 
 const tmp_vec = new Vector2();
@@ -506,7 +506,7 @@ export default class Label extends Control {
     }
 
     /**
-     * @param {import('engine/servers/visual/webgl_renderer').default} renderer - The renderer
+     * @param {import('engine/scene/gui/engine/servers/visual/webgl_renderer').default} renderer - The renderer
      */
     _render_webgl(renderer) {
         this._update_transform();

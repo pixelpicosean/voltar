@@ -2,14 +2,14 @@ import { remove_items } from "engine/dep/index";
 import { node_class_map } from "engine/registry";
 import { GDCLASS } from "engine/core/v_object";
 import { Vector2 } from "engine/core/math/vector2";
+import { Rect2 } from "engine/core/math/rect2";
 
+import { SIZE_EXPAND } from "./const";
+import { NOTIFICATION_THEME_CHANGED } from "./control";
 import {
     Container,
     NOTIFICATION_SORT_CHILDREN,
 } from "./container";
-import { SIZE_EXPAND } from "./const";
-import { Rect2 } from "engine/core/math/rect2";
-import { NOTIFICATION_THEME_CHANGED } from "./control";
 
 
 export class GridContainer extends Container {

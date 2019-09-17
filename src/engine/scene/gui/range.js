@@ -1,6 +1,6 @@
 import Control from "./control";
-import { Vector2, Rectangle, clamp } from "engine/core/math/math_funcs";
-import { remove_items } from "engine/dep/index";
+import { Vector2, Rectangle, clamp } from "engine/scene/gui/engine/core/math/math_funcs";
+import { remove_items } from "engine/scene/gui/engine/dep/index";
 
 const tmp_vec = new Vector2();
 const tmp_vec2 = new Vector2();
