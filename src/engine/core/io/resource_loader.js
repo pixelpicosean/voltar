@@ -22,7 +22,7 @@ const shared_resources = {};
 /**
  * Manages the state and loading of multiple resources to load.
  */
-export default class Loader extends VObject {
+export class ResourceLoader extends VObject {
     /**
      * @param {string} [base_url=''] - The base url for all resources loaded by this loader.
      * @param {number} [concurrency=10] - The number of resources to load concurrently.
@@ -121,13 +121,13 @@ export default class Loader extends VObject {
         this.resources = shared_resources;
 
         // Add default before middleware
-        for (let i = 0; i < Loader._default_before_middleware.length; ++i) {
-            this.pre(Loader._default_before_middleware[i]);
+        for (let i = 0; i < ResourceLoader._default_before_middleware.length; ++i) {
+            this.pre(ResourceLoader._default_before_middleware[i]);
         }
 
         // Add default after middleware
-        for (let i = 0; i < Loader._default_after_middleware.length; ++i) {
-            this.use(Loader._default_after_middleware[i]);
+        for (let i = 0; i < ResourceLoader._default_after_middleware.length; ++i) {
+            this.use(ResourceLoader._default_after_middleware[i]);
         }
 
         for (let i = 0; i < loader_pre_procs.length; ++i) {
@@ -513,9 +513,9 @@ export default class Loader extends VObject {
      * @param {Function} fn - The middleware function to register.
      */
     static LoaderPreStatic(fn) {
-        Loader._default_before_middleware.push(fn);
+        ResourceLoader._default_before_middleware.push(fn);
 
-        return Loader;
+        return ResourceLoader;
     }
 
     /**
@@ -525,9 +525,9 @@ export default class Loader extends VObject {
      * @param {Function} fn - The middleware function to register.
      */
     static LoaderUseStatic(fn) {
-        Loader._default_after_middleware.push(fn);
+        ResourceLoader._default_after_middleware.push(fn);
 
-        return Loader;
+        return ResourceLoader;
     }
 }
 
@@ -537,7 +537,7 @@ export default class Loader extends VObject {
  *
  * @type {Function[]}
  */
-Loader._default_before_middleware = [];
+ResourceLoader._default_before_middleware = [];
 
 /**
  * A default array of middleware to run after loading each resource.
@@ -545,4 +545,4 @@ Loader._default_before_middleware = [];
  *
  * @type {Function[]}
  */
-Loader._default_after_middleware = [];
+ResourceLoader._default_after_middleware = [];
