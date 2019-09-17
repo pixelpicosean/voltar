@@ -15,9 +15,7 @@ class Action {
 let last_id = 1;
 const action_status = {
     pressed: false,
-    pressed_valid: false,
     strength: 0,
-    strength_valid: false,
 };
 
 export class InputMap {
@@ -67,7 +65,7 @@ export class InputMap {
      */
     action_add_event(p_action, p_event) {
         const action = this.input_map.get(p_action);
-        if (!this._find_event(action, p_event)) {
+        if (this._find_event(action, p_event)) {
             return;
         }
         action.inputs.push(p_event);
@@ -120,9 +118,9 @@ export class InputMap {
     /**
      * @param {import('engine/core/os/input_event').InputEvent} p_event
      * @param {string} p_action
-     * @param {import('engine/core/os/input_event').ActionStatusRet} p_ret
+     * @param {import('engine/core/os/input_event').ActionStatusRet} r_ret
      */
-    event_get_action_status(p_event, p_action, p_ret) {
+    event_get_action_status(p_event, p_action, r_ret) {
         const E = this.input_map.get(p_action);
 
         if (p_event.class === 'InputEventAction') {
@@ -130,15 +128,9 @@ export class InputMap {
 
         const event = this._find_event(E, p_event, action_status);
         if (event) {
-            if (p_ret) {
-                if (action_status.pressed_valid) {
-                    p_ret.pressed = action_status.pressed;
-                }
-                p_ret.pressed_valid = action_status.pressed_valid;
-                if (action_status.strength_valid) {
-                    p_ret.strength = action_status.strength;
-                }
-                p_ret.strength_valid = action_status.strength_valid;
+            if (r_ret) {
+                r_ret.pressed = action_status.pressed;
+                r_ret.strength = action_status.strength;
             }
             return true;
         } else {

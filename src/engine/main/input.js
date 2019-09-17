@@ -4,6 +4,7 @@ import { OS } from "engine/core/os/os";
 import { Engine } from "engine/core/engine";
 import { MainLoop } from "engine/core/main_loop";
 import { InputEvent, InputEventKey, InputEventMouseButton } from "engine/core/os/input_event";
+import { InputMap } from "engine/core/input_map";
 
 
 class Action {
@@ -63,8 +64,12 @@ class SpeedTrack {
 }
 
 export class Input extends VObject {
+    static get_singleton() { return singleton }
+
     constructor() {
         super();
+
+        if (!singleton) singleton = this;
 
         this.mouse_button_mask = 0;
 
@@ -103,6 +108,7 @@ export class Input extends VObject {
         if (Engine.get_singleton().is_in_physics_frame()) {
             return E.pressed && E.physics_frame === Engine.get_singleton().physics_frames;
         } else {
+            const idle_frames = Engine.get_singleton().idle_frames;
             return E.pressed && E.idle_frame === Engine.get_singleton().idle_frames;
         }
     }
@@ -155,6 +161,49 @@ export class Input extends VObject {
      * @param {InputEvent} p_event
      */
     parse_input_event(p_event) {
+        this._parse_input_event_impl(p_event, false);
+    }
+
+    /**
+     * @param {string} p_action
+     * @param {number} p_strength
+     */
+    action_press(p_action, p_strength = 1.0) {
+        let action = this.action_state.get(p_action);
+        if (!action) {
+            action = new Action();
+        }
+        action.physics_frame = Engine.get_singleton().physics_frames;
+        action.idle_frame = Engine.get_singleton().idle_frames;
+        action.pressed = true;
+        action.strength = p_strength;
+
+        this.action_state.set(p_action, action);
+    }
+    /**
+     * @param {string} p_action
+     */
+    action_release(p_action) {
+        let action = this.action_state.get(p_action);
+        if (!action) {
+            action = new Action();
+        }
+        action.physics_frame = Engine.get_singleton().physics_frames;
+        action.idle_frame = Engine.get_singleton().idle_frames;
+        action.pressed = false;
+        action.strength = 0.0;
+
+        this.action_state.set(p_action, action);
+    }
+
+    release_pressed_events() { }
+
+    /**
+
+     * @param {InputEvent} p_event
+     * @param {boolean} p_is_emulated
+     */
+    _parse_input_event_impl(p_event, p_is_emulated) {
         // Notes on mouse-touch emulation:
         // - Emulated mouse events are parsed, that is, re-routed to this method, so they make the same effects
         //   as true mouse events. The only difference is the situation is flagged as emulated so they are not
@@ -201,43 +250,27 @@ export class Input extends VObject {
             case 'InputEventGesture': { } break;
         }
 
+        const action_map = InputMap.get_singleton().input_map;
+        for (let [key, _] of action_map) {
+            if (InputMap.get_singleton().event_is_action(p_event, key)) {
+                if (!p_event.is_echo() && this.is_action_pressed(key) !== p_event.is_action_pressed(key)) {
+                    const action = new Action();
+                    action.physics_frame = Engine.get_singleton().physics_frames;
+                    action.idle_frame = Engine.get_singleton().idle_frames;
+                    action.pressed = p_event.is_action_pressed(key);
+                    action.strength = 0;
+                    this.action_state.set(key, action);
+                }
+                this.action_state.get(key).strength = p_event.get_action_strength(key);
+            }
+        }
+
         if (this.main_loop) {
             this.main_loop.input_event(p_event);
         }
     }
-
-    /**
-     * @param {string} p_action
-     * @param {number} p_strength
-     */
-    action_press(p_action, p_strength = 1.0) {
-        let action = this.action_state.get(p_action);
-        if (!action) {
-            action = new Action();
-        }
-        action.physics_frame = Engine.get_singleton().physics_frames;
-        action.idle_frame = Engine.get_singleton().idle_frames;
-        action.pressed = true;
-        action.strength = p_strength;
-
-        this.action_state.set(p_action, action);
-    }
-    /**
-     * @param {string} p_action
-     */
-    action_release(p_action) {
-        let action = this.action_state.get(p_action);
-        if (!action) {
-            action = new Action();
-        }
-        action.physics_frame = Engine.get_singleton().physics_frames;
-        action.idle_frame = Engine.get_singleton().idle_frames;
-        action.pressed = false;
-        action.strength = 0.0;
-
-        this.action_state.set(p_action, action);
-    }
-
-    release_pressed_events() { }
 }
 GDCLASS(Input, VObject)
+
+/** @type {Input} */
+let singleton = null;

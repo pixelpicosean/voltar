@@ -31,16 +31,12 @@ export const BUTTON_MASK_XBUTTON2 = (1 << (BUTTON_XBUTTON2 - 1));
 /**
  * @typedef ActionStatusRet
  * @property {boolean} pressed
- * @property {boolean} pressed_valid
  * @property {number} strength
- * @property {boolean} strength_valid
  */
 
 const action_status = {
     pressed: false,
-    pressed_valid: false,
     strength: 0,
-    strength_valid: false,
 };
 
 export class InputEvent {
@@ -180,10 +176,10 @@ export class InputEventKey extends InputEventWithModifiers {
 
     /**
      * @param {InputEvent} p_event
-     * @param {ActionStatusRet} p_ret
+     * @param {ActionStatusRet} r_ret
      * @param {number} p_deadzone
      */
-    action_match(p_event, p_ret, p_deadzone) {
+    action_match(p_event, r_ret, p_deadzone) {
         if (p_event.class !== 'InputEventKey') {
             return false;
         }
@@ -194,15 +190,9 @@ export class InputEventKey extends InputEventWithModifiers {
 
         const match = this.scancode === key.scancode && (!key.is_pressed() || (code & event_code) === code);
         if (match) {
-            if (p_ret) {
-                if (action_status.pressed_valid) {
-                    p_ret.pressed = key.is_pressed();
-                }
-                p_ret.pressed_valid = action_status.pressed_valid;
-                if (action_status.strength_valid) {
-                    p_ret.strength = key.is_pressed() ? 1 : 0;
-                }
-                p_ret.strength_valid = action_status.strength_valid;
+            if (r_ret) {
+                r_ret.pressed = key.is_pressed();
+                r_ret.strength = key.is_pressed() ? 1 : 0;
             }
         }
         return match;
@@ -279,10 +269,10 @@ export class InputEventMouseButton extends InputEventMouse {
 
     /**
      * @param {InputEvent} p_event
-     * @param {ActionStatusRet} p_ret
+     * @param {ActionStatusRet} r_ret
      * @param {number} p_deadzone
      */
-    action_match(p_event, p_ret, p_deadzone) {
+    action_match(p_event, r_ret, p_deadzone) {
         if (p_event.class !== 'InputEventMouseButton') {
             return false;
         }
@@ -290,15 +280,9 @@ export class InputEventMouseButton extends InputEventMouse {
         const mb = /** @type {InputEventMouseButton} */(p_event);
         const match = (this.button_index === mb.button_index);
         if (match) {
-            if (p_ret) {
-                if (action_status.pressed_valid) {
-                    p_ret.pressed = mb.pressed;
-                }
-                p_ret.pressed_valid = action_status.pressed_valid;
-                if (action_status.strength_valid) {
-                    p_ret.strength = mb.pressed ? 1 : 0;
-                }
-                p_ret.strength_valid = action_status.strength_valid;
+            if (r_ret) {
+                r_ret.pressed = mb.pressed;
+                r_ret.strength = mb.pressed ? 1 : 0;
             }
         }
         return match;
@@ -415,10 +399,10 @@ export class InputEventAction extends InputEvent {
 
     /**
      * @param {InputEvent} p_event
-     * @param {ActionStatusRet} p_ret
+     * @param {ActionStatusRet} r_ret
      * @param {number} p_deadzone
      */
-    action_match(p_event, p_ret, p_deadzone) {
+    action_match(p_event, r_ret, p_deadzone) {
         if (p_event.class !== 'InputEventAction') {
             return false;
         }
@@ -426,15 +410,9 @@ export class InputEventAction extends InputEvent {
         const act = /** @type {InputEventAction} */(p_event);
         const match = (this.action === act.action);
         if (match) {
-            if (p_ret) {
-                if (action_status.pressed_valid) {
-                    p_ret.pressed = act.pressed;
-                }
-                p_ret.pressed_valid = action_status.pressed_valid;
-                if (action_status.strength_valid) {
-                    p_ret.strength = act.pressed ? 1 : 0;
-                }
-                p_ret.strength_valid = action_status.strength_valid;
+            if (r_ret) {
+                r_ret.pressed = act.pressed;
+                r_ret.strength = act.pressed ? 1 : 0;
             }
         }
         return match;
