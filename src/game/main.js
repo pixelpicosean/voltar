@@ -18,6 +18,7 @@ import { OS } from 'engine/core/os/os';
 import { CenterContainer } from 'engine/scene/controls/center_container';
 import { GridContainer } from 'engine/scene/controls/grid_container';
 import { VBoxContainer } from 'engine/scene/controls/box_container';
+import { TextureRect } from 'engine/scene/controls/texture_rect';
 
 
 class Preloader extends Node {
@@ -31,17 +32,20 @@ class Preloader extends Node {
     _enter_tree() {
         console.log('_enter_tree')
         load(['media/sprites.png'])
-            .connect_once('complete', (loader) => {
-                console.log('load completed')
-                const tex = loader.resources['media/sprites.png'];
-                const sprite = new Sprite();
-                sprite.set_texture(tex.texture);
-                // this.add_child(sprite);
-                sprite.set_position_n(100, 100);
-                sprite.set_self_modulate_n(0, 0, 0);
-                this.spr = sprite;
-            })
+            .connect_once('complete', this.on_resource_loaded, this)
+    }
 
+    on_resource_loaded(loader) {
+        console.log('load completed')
+
+        const tex = loader.resources['media/sprites.png'].texture;
+        const sprite = new Sprite();
+        sprite.set_texture(tex);
+        this.add_child(sprite);
+        sprite.set_position_n(400, 120);
+        sprite.set_self_modulate_n(0, 0, 0);
+        sprite.set_scale_n(0.3, 0.3)
+        this.spr = sprite;
 
         const center_container = new CenterContainer()
         this.add_child(center_container)
@@ -81,6 +85,12 @@ class Preloader extends Node {
             rect.set_color_n(randf(), randf(), randf());
             v_box.add_child(rect);
         }
+
+        const tex_rect = new TextureRect();
+        this.add_child(tex_rect);
+        tex_rect.set_texture(tex);
+        tex_rect.set_flip_v(true);
+        tex_rect.set_rect_position_n(500, 10);
     }
     _ready() {
         console.log('_ready')

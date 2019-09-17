@@ -1,39 +1,19 @@
 import { node_class_map } from 'engine/registry';
 import { GDCLASS } from 'engine/core/v_object';
-
-import { Color } from 'engine/core/color';
-import { VSG } from 'engine/servers/visual/visual_server_globals';
-
-import { NOTIFICATION_DRAW } from '../2d/canvas_item';
-import { Node2D } from '../2d/node_2d';
-import { Rect2 } from 'engine/core/math/rect2';
 import { Vector2, Vector2Like } from 'engine/core/math/vector2';
-import { ImageTexture } from '../resources/texture';
+import { Rect2 } from 'engine/core/math/rect2';
+import { Color } from 'engine/core/color';
 import { Engine } from 'engine/core/engine';
 
+import { ImageTexture } from '../resources/texture';
+import { NOTIFICATION_DRAW } from '../2d/canvas_item';
+import { Node2D } from '../2d/node_2d';
 
-const rect = new Rect2();
+
 const white = new Color(1, 1, 1);
 
 export class Sprite extends Node2D {
     get class() { return 'Sprite' }
-
-    /**
-     * @param {ImageTexture} p_texture
-     */
-    set_texture(p_texture) {
-        if (this.texture === p_texture) return;
-        this.texture = p_texture;
-        this.update();
-        this.item_rect_changed();
-    }
-    /**
-     * @param {ImageTexture} p_texture
-     */
-    set_normal_map(p_texture) {
-        this.normal_map = p_texture;
-        this.update();
-    }
 
     /**
      * @param {boolean} p_center
@@ -156,7 +136,7 @@ export class Sprite extends Node2D {
         if (this.region_enabled) {
             s.set(this.region_rect.width, this.region_rect.height);
         } else {
-            s.set(this.texture.width, this.texture.height);
+            s.set(this.texture.get_width(), this.texture.get_height());
         }
 
         s.x /= this.hframes;
@@ -202,7 +182,7 @@ export class Sprite extends Node2D {
         this.normal_map = null;
     }
 
-    /* private */
+    /* virtual */
 
     /**
      * @param {number} p_what
@@ -226,6 +206,27 @@ export class Sprite extends Node2D {
         }
     }
 
+    /* public */
+
+    /**
+     * @param {ImageTexture} p_texture
+     */
+    set_texture(p_texture) {
+        if (this.texture === p_texture) return;
+        this.texture = p_texture;
+        this.update();
+        this.item_rect_changed();
+    }
+    /**
+     * @param {ImageTexture} p_texture
+     */
+    set_normal_map(p_texture) {
+        this.normal_map = p_texture;
+        this.update();
+    }
+
+    /* private */
+
     /**
      * @param {Rect2} r_src_rect
      * @param {Rect2} r_dst_rect
@@ -240,8 +241,8 @@ export class Sprite extends Node2D {
             base_rect.copy(this.region_rect);
         } else {
             r_filter_clip = false;
-            base_rect.width = this.texture.width;
-            base_rect.height = this.texture.height;
+            base_rect.width = this.texture.get_width();
+            base_rect.height = this.texture.get_height();
         }
 
         const frame_size = Vector2.new(base_rect.width / this.hframes, base_rect.height / this.vframes);

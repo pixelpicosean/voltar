@@ -8,6 +8,7 @@ import { Rect2 } from "engine/core/math/rect2";
 
 import { VSG } from "engine/servers/visual/visual_server_globals";
 
+import { ImageTexture } from "../resources/texture";
 import { GROUP_CALL_UNIQUE } from "../main/scene_tree";
 import { CanvasLayer } from "../main/canvas_layer";
 import {
@@ -33,6 +34,7 @@ export const BLEND_MODE_MUL = 3;
 export const BLEND_MODE_PREMULT_ALPHA = 4;
 export const BLEND_MODE_DISABLE = 5;
 
+const white = Object.freeze(new Color(1, 1, 1, 1));
 
 export class CanvasItem extends Node {
     get class() { return 'CanvasItem' }
@@ -290,6 +292,31 @@ export class CanvasItem extends Node {
         } else {
             // TODO: draw stroke
         }
+    }
+
+    /**
+     * @param {ImageTexture} p_texture
+     * @param {Rect2} p_rect
+     * @param {boolean} [p_tile=false]
+     * @param {ColorLike} [p_modulate=white]
+     * @param {boolean} [p_transpose=false]
+     * @param {ImageTexture} [p_normal_map]
+     */
+    draw_texture_rect(p_texture, p_rect, p_tile = false, p_modulate = white, p_transpose = false, p_normal_map) {
+        p_texture.draw_rect(this.canvas_item, p_rect, p_tile, p_modulate, p_transpose, p_normal_map);
+    }
+
+    /**
+     * @param {ImageTexture} p_texture
+     * @param {Rect2} p_rect
+     * @param {Rect2} p_src_rect
+     * @param {ColorLike} [p_modulate=white]
+     * @param {boolean} [p_transpose=false]
+     * @param {ImageTexture} [p_normal_map]
+     * @param {boolean} [p_clip_uv=false]
+     */
+    draw_texture_rect_region(p_texture, p_rect, p_src_rect, p_modulate = white, p_transpose = false, p_normal_map = undefined, p_clip_uv = false) {
+        p_texture.draw_rect_region(this.canvas_item, p_rect, p_src_rect, p_modulate, p_transpose, p_normal_map, p_clip_uv);
     }
 
     get_canvas_layer() {

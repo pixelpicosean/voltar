@@ -1,257 +1,197 @@
-import Control from './control';
-import Texture from 'engine/scene/resources/textures/texture';
-import WebGLRenderer from 'engine/servers/visual/webgl_renderer';
 import { node_class_map } from 'engine/registry';
-import { Vector2 } from 'engine/core/math/math_funcs';
-import Sprite from '../sprites/sprite';
-import TilingSprite from '../sprites/tiling_sprite';
+import { GDCLASS } from 'engine/core/v_object';
+import { Vector2 } from 'engine/core/math/vector2';
 
-/**
- * @enum {number}
- */
-export const StretchMode = {
-    SCALE_ON_EXPAND: 0,
-    SCALE: 1,
-    TILE: 2,
-    KEEP: 3,
-    KEEP_CENTERED: 4,
-    KEEP_ASPECT: 5,
-    KEEP_ASPECT_CENTERED: 6,
-    KEEP_ASPECT_COVERED: 7,
-}
+import { ImageTexture } from '../resources/texture';
+import { Control } from './control';
+import { NOTIFICATION_DRAW } from '../2d/canvas_item';
+import { Rect2 } from 'engine/core/math/rect2';
 
-const tmp_vec = new Vector2();
 
-export default class TextureRect extends Control {
+export const STRETCH_SCALE_ON_EXPAND = 0;
+export const STRETCH_SCALE = 1;
+export const STRETCH_TILE = 2;
+export const STRETCH_KEEP = 3;
+export const STRETCH_KEEP_CENTERED = 4;
+export const STRETCH_KEEP_ASPECT = 5;
+export const STRETCH_KEEP_ASPECT_CENTERED = 6;
+export const STRETCH_KEEP_ASPECT_COVERED = 7;
+
+export class TextureRect extends Control {
+    get class() { return 'TextureRect' }
+
     /**
-     * The texture that the sprite is using
-     *
-     * @type {Texture}
+     * @param {ImageTexture} p_value
      */
-    get texture() {
-        return this._texture;
-    }
-    set texture(p_value) {
-        this.sprite.texture = p_value;
-        this.tsprite.texture = p_value;
-
-        this._texture = this.sprite._texture;
-
-        // wait for the texture to load
-        if (this._texture.base_texture.has_loaded) {
-            this._on_texture_update();
-        } else {
-            this._texture.connect_once('update', this._on_texture_update, this);
-        }
-    }
-    /**
-     * @param {string|Texture} value
-     */
-    set_texture(value) {
-        // @ts-ignore
-        this.texture = value;
-        return this;
-    }
-
-    get expand() {
-        return this._expand;
-    }
-    /**
-     * @param {boolean} value
-     */
-    set expand(value) {
-        this._expand = value;
+    set_texture(p_value) {
+        this.texture = p_value;
+        this.update();
         this.minimum_size_changed();
     }
+
     /**
      * @param {boolean} value
      */
     set_expand(value) {
         this.expand = value;
-        return this;
+        this.update();
+        this.minimum_size_changed();
     }
 
-    get stretch_mode() {
-        return this._stretch_mode;
-    }
-    /**
-     * @param {number} value
-     */
-    set stretch_mode(value) {
-        this._stretch_mode = value;
-    }
     /**
      * @param {number} value
      */
     set_stretch_mode(value) {
         this.stretch_mode = value;
-        return this;
+        this.update();
+    }
+
+    /**
+     * @param {boolean} value
+     */
+    set_flip_h(value) {
+        this.flip_h = value;
+        this.update();
+    }
+    /**
+     * @param {boolean} value
+     */
+    set_flip_v(value) {
+        this.flip_v = value;
+        this.update();
     }
 
     constructor() {
         super();
 
-        this.type = 'TextureRect';
-
-        this.sprite = new Sprite(); this.sprite.anchor.set(0, 0);
-        this.tsprite = new TilingSprite(); this.tsprite.anchor.set(0, 0);
-
-        this._expand = false;
-        this._stretch_mode = StretchMode.SCALE_ON_EXPAND;
+        this.expand = false;
+        this.flip_h = false;
+        this.flip_v = false;
+        this.stretch_mode = STRETCH_SCALE_ON_EXPAND;
 
         /**
-         * @type {Texture}
+         * @type {ImageTexture}
          */
-        this._texture = null;
+        this.texture = null;
     }
+
+    /* virtual */
+
     _load_data(data) {
         super._load_data(data);
 
         if (data.expand !== undefined) {
-            this.expand = data.expand;
+            this.set_expand(data.expand);
         }
         if (data.stretch_mode !== undefined) {
-            this.stretch_mode = data.stretch_mode;
+            this.set_stretch_mode(data.stretch_mode);
         }
         if (data.texture !== undefined) {
-            this.texture = data.texture;
+            this.set_texture(data.texture);
+        }
+        if (data.flip_h !== undefined) {
+            this.set_flip_h(data.flip_h);
+        }
+        if (data.flip_v !== undefined) {
+            this.set_flip_v(data.flip_v);
         }
 
         return this;
     }
 
-    /**
-     * @param {Vector2} size
-     */
-    get_minimum_size(size) {
-        if (!this.expand && this._texture && this._texture.valid) {
-            return size.set(this._texture.width, this._texture.height);
+    get_minimum_size() {
+        if (!this.expand && this.texture) {
+            return this.texture.get_size();
+        } else {
+            return Vector2.new(0, 0);
         }
-        return size.set(0, 0);
-    }
-
-    _on_texture_update() {
-        this._update_minimum_size_cache();
     }
 
     /**
-     * Renders the object using the WebGL renderer
-     *
-     * @private
-     * @param {WebGLRenderer} renderer - The webgl renderer to use.
+     * @param {number} p_what
      */
-    _render_webgl(renderer) {
-        this.node2d_update_transform();
+    _notification(p_what) {
+        if (p_what === NOTIFICATION_DRAW) {
+            if (!this.texture) {
+                return;
+            }
 
-        let sprite = null;
+            /** @type {Vector2} */
+            let size = null;
+            const offset = Vector2.new();
+            const region = Rect2.new();
+            let tile = false;
 
-        switch (this._stretch_mode) {
-            case StretchMode.SCALE_ON_EXPAND:
-            case StretchMode.SCALE:
-            case StretchMode.KEEP:
-            case StretchMode.KEEP_CENTERED: {
-                sprite = this.sprite;
+            switch (this.stretch_mode) {
+                case STRETCH_SCALE_ON_EXPAND: {
+                    size = this.expand ? this.rect_size.clone() : this.texture.get_size();
+                } break;
+                case STRETCH_SCALE: {
+                    size = this.rect_size.clone();
+                } break;
+                case STRETCH_TILE: {
+                    size = this.rect_size.clone();
+                    tile = true;
+                } break;
+                case STRETCH_KEEP: {
+                    size = this.texture.get_size();
+                } break;
+                case STRETCH_KEEP_CENTERED: {
+                    offset.copy(this.rect_size)
+                        .subtract(this.texture.get_width(), this.texture.get_height())
+                        .scale(0.5)
+                    size = this.texture.get_size();
+                } break;
+                case STRETCH_KEEP_ASPECT_CENTERED:
+                case STRETCH_KEEP_ASPECT: {
+                    size = this.rect_size.clone();
+                    let tex_width = this.texture.get_width() * size.y / this.texture.get_height();
+                    let tex_height = size.y;
 
-                sprite.transform.set_from_matrix(this.transform.world_transform);
-                if (this._stretch_mode === StretchMode.KEEP_CENTERED) {
-                    sprite.position.add(
-                        (this.rect_size.x - this._texture.width) * 0.5,
-                        (this.rect_size.y - this._texture.height) * 0.5
-                    );
-                }
-                if (this._expand || this._stretch_mode === StretchMode.SCALE) {
-                    sprite.width = this.rect_size.x;
-                    sprite.height = this.rect_size.y;
-                } else {
-                    sprite.scale.copy(this.rect_scale);
-                }
+                    if (tex_width > size.x) {
+                        tex_width = size.x;
+                        tex_height = this.texture.get_height() * tex_width / this.texture.get_width();
+                    }
 
-                // TODO: sync more properties for rendering
-                sprite._update_transform();
-                sprite.modulate.copy(this.modulate);
-                sprite.self_modulate.copy(this.self_modulate);
-                sprite._update_color();
-                sprite.blend_mode = this.blend_mode;
+                    if (this.stretch_mode === STRETCH_KEEP_ASPECT_CENTERED) {
+                        offset.x += (size.x - tex_width) * 0.5;
+                        offset.y += (size.y - tex_height) * 0.5;
+                    }
 
-                sprite._render_webgl(renderer);
-            } break;
-            case StretchMode.KEEP_ASPECT_CENTERED:
-            case StretchMode.KEEP_ASPECT: {
-                sprite = this.sprite;
+                    size.x = tex_width;
+                    size.y = tex_height;
+                } break;
+                case STRETCH_KEEP_ASPECT_COVERED: {
+                    size = this.rect_size.clone();
 
-                sprite.transform.set_from_matrix(this.transform.world_transform);
-                let tex_width = this._texture.width * this.rect_size.y / this._texture.height;
-                let tex_height = this.rect_size.y;
+                    const tex_size = this.texture.get_size();
+                    const scale = Math.max(size.x / tex_size.x, size.y / tex_size.y);
+                    tex_size.scale(scale);
 
-                if (tex_width > this.rect_size.x) {
-                    tex_width = this.rect_size.x;
-                    tex_height = this._texture.height * tex_width / this._texture.width;
-                }
+                    region.x = Math.abs((tex_size.x - size.x) / scale) * 0.5;
+                    region.y = Math.abs((tex_size.y - size.y) / scale) * 0.5;
+                    region.width = size.x / scale;
+                    region.height = size.y / scale;
 
-                let ofs_x = 0;
-                let ofs_y = 0;
+                    Vector2.free(tex_size);
+                } break;
+            }
 
-                if (this._stretch_mode === StretchMode.KEEP_ASPECT_CENTERED) {
-                    ofs_x += (this.rect_size.x - tex_width) * 0.5;
-                    ofs_y += (this.rect_size.y - tex_height) * 0.5;
-                }
+            size.x *= this.flip_h ? -1 : 1;
+            size.y *= this.flip_v ? -1 : 1;
 
-                sprite.position.add(ofs_x, ofs_y);
-                sprite.width = tex_width;
-                sprite.height = tex_height;
+            const rect = Rect2.new(offset.x, offset.y, size.x, size.y);
+            if (region.has_no_area()) {
+                this.draw_texture_rect(this.texture, rect, tile);
+            } else {
+                this.draw_texture_rect_region(this.texture, rect, region);
+            }
+            Rect2.free(rect);
 
-                // TODO: sync more properties for rendering
-                sprite._update_transform();
-                sprite.modulate.copy(this.modulate);
-                sprite.self_modulate.copy(this.self_modulate);
-                sprite._update_color();
-                sprite.blend_mode = this.blend_mode;
-
-                sprite._render_webgl(renderer);
-            } break;
-            case StretchMode.TILE: {
-                sprite = this.tsprite;
-
-                sprite.transform.set_from_matrix(this.transform.world_transform);
-                sprite.width = this.rect_size.x;
-                sprite.height = this.rect_size.y;
-
-                // TODO: sync more properties for rendering
-                sprite._update_transform();
-                sprite.clamp_margin = -0.5;
-                sprite.modulate.copy(this.modulate);
-                sprite.self_modulate.copy(this.self_modulate);
-                sprite._update_color();
-                sprite.blend_mode = this.blend_mode;
-
-                sprite._render_webgl(renderer);
-            } break;
-            case StretchMode.KEEP_ASPECT_COVERED: {
-                sprite = this.tsprite;
-
-                sprite.transform.set_from_matrix(this.transform.world_transform);
-                sprite.width = this.rect_size.x;
-                sprite.height = this.rect_size.y;
-
-                const scale_size = tmp_vec.set(this.rect_size.x / this._texture.width, this.rect_size.y / this._texture.height);
-                const scale = scale_size.x > scale_size.y ? scale_size.x : scale_size.y;
-                sprite.tile_scale.set(scale, scale);
-                sprite.tile_position.set(this._texture.width * scale, this._texture.height * scale)
-                    .subtract(this.rect_size)
-                    .scale(-0.5)
-
-                // TODO: sync more properties for rendering
-                sprite._update_transform();
-                sprite.clamp_margin = -0.5;
-                sprite.modulate.copy(this.modulate);
-                sprite.self_modulate.copy(this.self_modulate);
-                sprite._update_color();
-                sprite.blend_mode = this.blend_mode;
-
-                sprite._render_webgl(renderer);
-            } break;
+            Rect2.free(region);
+            Vector2.free(offset);
+            Vector2.free(size);
         }
     }
 }
-
-node_class_map['TextureRect'] = TextureRect;
+node_class_map['TextureRect'] = GDCLASS(TextureRect, Control)
