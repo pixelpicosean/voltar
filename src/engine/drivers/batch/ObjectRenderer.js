@@ -1,11 +1,4 @@
-/**
- * @typedef RenderElement
- * @property {any} texture
- * @property {any} vertex_data
- * @property {any} indices
- * @property {number} blendMode
- */
-
+import { Command } from 'engine/servers/visual/commands';
 
 /**
  * Base for a common object renderer that can be used as a
@@ -18,6 +11,7 @@ export default class ObjectRenderer {
     constructor(renderer)
     {
         this.renderer = renderer;
+        this.drawcalls_of_last_frame = 0;
     }
 
     /**
@@ -62,7 +56,7 @@ export default class ObjectRenderer {
      * Keeps the object to render. It doesn't have to be
      * rendered immediately.
      *
-     * @param {RenderElement} object - The object to render.
+     * @param {Command} object - The object to render.
      */
     render(object) // eslint-disable-line no-unused-vars
     {

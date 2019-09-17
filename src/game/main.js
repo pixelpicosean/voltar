@@ -13,8 +13,7 @@ import {
 import { load, STRETCH_MODE_VIEWPORT, STRETCH_ASPECT_KEEP } from 'engine/index';
 import { Sprite } from 'engine/scene/2d/sprite';
 import { ColorRect } from 'engine/scene/controls/color_rect';
-import { rand_range, randf } from 'engine/core/math/math_funcs';
-import { OS } from 'engine/core/os/os';
+import { randf } from 'engine/core/math/math_funcs';
 import { CenterContainer } from 'engine/scene/controls/center_container';
 import { GridContainer } from 'engine/scene/controls/grid_container';
 import { VBoxContainer } from 'engine/scene/controls/box_container';

@@ -125,7 +125,7 @@ export default class AbstractBatchRenderer extends ObjectRenderer
         /**
          * Buffer of objects that are yet to be rendered.
          *
-         * @type {any[]}
+         * @type {Command[]}
          * @private
          */
         this._bufferedElements = [];
@@ -244,6 +244,8 @@ export default class AbstractBatchRenderer extends ObjectRenderer
          */
         this.MAX_TEXTURES = 1;
 
+        this.drawcalls_of_last_frame = 0;
+
         this.renderer.connect('prerender', this.onPrerender, this);
         this.renderer.runners.contextChange.add(this);
     }
@@ -297,14 +299,14 @@ export default class AbstractBatchRenderer extends ObjectRenderer
     onPrerender()
     {
         this._flushId = 0;
+        this.drawcalls_of_last_frame = 0;
     }
 
     /**
-     * Buffers the "batchable" object. It need not be rendered
+     * Buffers the "batchable" rendering command. It need not be rendered
      * immediately.
      *
-     * @param {import('./ObjectRenderer').RenderElement} element - the sprite to render when
-     *    using this spritebatch
+     * @param {Command} element
      */
     render(element) {
         if (!element.texture || !element.texture.valid) {
@@ -329,6 +331,7 @@ export default class AbstractBatchRenderer extends ObjectRenderer
         {
             return;
         }
+        this.drawcalls_of_last_frame += 1;
 
         const attributeBuffer = this.getAttributeBuffer(this._vertexCount);
         const indexBuffer = this.getIndexBuffer(this._indexCount);
@@ -405,7 +408,7 @@ export default class AbstractBatchRenderer extends ObjectRenderer
 
                     nextTexture.touched = touch;
                     nextTexture._batchEnabled = TICK;
-                    nextTexture._id = textureCount;
+                    nextTexture._render_index = textureCount;
 
                     currentGroup.textures[currentGroup.textureCount++] = nextTexture;
                     textureCount++;
@@ -612,7 +615,7 @@ export default class AbstractBatchRenderer extends ObjectRenderer
         const uvs = element.uvs;
         const indicies = element.indices;
         const vertex_data = element.vertex_data;
-        const textureId = element.texture.baseTexture._id;
+        const textureId = element.texture.baseTexture._render_index;
 
         const tint = hex2tint(element.final_modulate.as_hex());
         const alpha = Math.min(element.final_modulate.a, 1.0);

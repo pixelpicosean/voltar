@@ -226,6 +226,7 @@ export class RasterizerCanvas extends VObject {
 
         const frame = this.storage.frame;
         this.batch.currentRenderer.flush();
+        // console.log(`draw calls: ${this.batch.currentRenderer.drawcalls_of_last_frame}`)
 
         if (frame.current_rt && frame.current_rt.texture) {
             frame.current_rt.texture.baseTexture.update();

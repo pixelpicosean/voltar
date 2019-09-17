@@ -173,7 +173,7 @@ export default class BaseTexture extends VObject
         /**
          * The map of render context textures where this is bound
          *
-         * @type {Object}
+         * @type {Object<number, { texture: WebGLTexture }>}
          * @private
          */
         this._glTextures = {};
@@ -183,7 +183,6 @@ export default class BaseTexture extends VObject
          * Please call `update()` to increment it.
          *
          * @readonly
-         * @type {number}
          */
         this.dirtyId = 0;
 
@@ -191,7 +190,6 @@ export default class BaseTexture extends VObject
          * Used by TextureSystem to only update texture style when needed.
          *
          * @protected
-         * @type {number}
          */
         this.dirtyStyleId = 0;
 
@@ -205,7 +203,6 @@ export default class BaseTexture extends VObject
         /**
          * Generally speaking means when resource is loaded.
          * @readonly
-         * @type {boolean}
          */
         this.valid = width > 0 && height > 0;
 
@@ -221,7 +218,6 @@ export default class BaseTexture extends VObject
         /**
          * Flag if BaseTexture has been destroyed.
          *
-         * @type {boolean}
          * @readonly
          */
         this.destroyed = false;
@@ -238,10 +234,13 @@ export default class BaseTexture extends VObject
 
         /**
          * Number of the texture batch, used by multi-texture renderers
-         *
-         * @type {number}
          */
         this._batchEnabled = 0;
+
+        /**
+         * Index of current binded textures. Used by batch renderer internally.
+         */
+        this._render_index = 0;
 
         /**
          * Fired when a not-immediately-available source finishes loading.
