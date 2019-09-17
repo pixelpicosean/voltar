@@ -39,6 +39,17 @@ export class Texture extends Resource {
     get_width() { return 0 }
     get_height() { return 0 }
     get_size() { return Vector2.ZERO }
+    /**
+     * @param {Rect2} p_rect
+     * @param {Rect2} p_src_rect
+     * @param {Rect2} r_rect
+     * @param {Rect2} r_src_rect
+     */
+    get_rect_region(p_rect, p_src_rect, r_rect, r_src_rect) {
+        r_rect.copy(p_rect);
+        r_src_rect.copy(p_src_rect);
+        return true;
+    }
 
     has_alpha() { return false }
 

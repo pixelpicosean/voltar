@@ -19,6 +19,7 @@ import { CenterContainer } from 'engine/scene/controls/center_container';
 import { GridContainer } from 'engine/scene/controls/grid_container';
 import { VBoxContainer } from 'engine/scene/controls/box_container';
 import { TextureRect } from 'engine/scene/controls/texture_rect';
+import { NinePatchRect } from 'engine/scene/controls/nine_patch_rect';
 
 
 class Preloader extends Node {
@@ -31,8 +32,11 @@ class Preloader extends Node {
     }
     _enter_tree() {
         console.log('_enter_tree')
-        load(['media/sprites.png'])
-            .connect_once('complete', this.on_resource_loaded, this)
+        load([
+            'media/sprites.png',
+            'media/green_button.png',
+        ])
+        .connect_once('complete', this.on_resource_loaded, this)
     }
 
     on_resource_loaded(loader) {
@@ -91,6 +95,18 @@ class Preloader extends Node {
         tex_rect.set_texture(tex);
         tex_rect.set_flip_v(true);
         tex_rect.set_rect_position_n(500, 10);
+
+        const nine_tex = loader.resources['media/green_button.png'].texture;
+
+        const nine_rect = new NinePatchRect();
+        this.add_child(nine_rect);
+        nine_rect.set_rect_position_n(300, 400);
+        nine_rect.set_rect_size_n(200, 50);
+        nine_rect.set_texture(nine_tex);
+        nine_rect.patch_margin_left = 10;
+        nine_rect.patch_margin_right = 10;
+        nine_rect.patch_margin_top = 10;
+        nine_rect.patch_margin_bottom = 10;
     }
     _ready() {
         console.log('_ready')

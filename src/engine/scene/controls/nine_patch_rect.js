@@ -1,54 +1,33 @@
 import { node_class_map } from 'engine/registry';
-import { Vector2 } from 'engine/core/math/math_funcs';
-import Texture from 'engine/scene/resources/textures/texture';
-import WebGLRenderer from 'engine/servers/visual/webgl_renderer';
+import { GDCLASS } from 'engine/core/v_object';
+import {
+    MARGIN_LEFT,
+    MARGIN_RIGHT,
+    MARGIN_TOP,
+    MARGIN_BOTTOM,
+} from 'engine/core/math/math_defs';
+import { Vector2 } from 'engine/core/math/vector2';
+import { Rect2 } from 'engine/core/math/rect2';
 
-import NineSlicePlane from '../mesh/nine_slice_plane';
-import { Margin } from './const';
-import Control from './control';
+import { ImageTexture } from '../resources/texture';
+import { Control } from './control';
+import { NOTIFICATION_DRAW } from '../2d/canvas_item';
+import { VSG } from 'engine/servers/visual/visual_server_globals';
 
-/**
- * @enum {number}
- */
-export const AxisStretchMode = {
-    STRETCH: 0,
-    TILE: 1,
-    TILE_FIT: 2,
-}
 
-const tmp_vec = new Vector2();
+export const AXIS_STRETCH_MODE_STRETCH = 0;
+export const AXIS_STRETCH_MODE_TILE = 1;
+export const AXIS_STRETCH_MODE_TILE_FIT = 2;
 
-export default class NinePatchRect extends Control {
-    /**
-     * The texture that the sprite is using
-     *
-     * @type {Texture}
-     */
-    get texture() {
-        return this._texture;
-    }
-    set texture(p_value) {
-        this.set_texture(p_value);
-    }
-    /**
-     * @param {string|Texture} p_value
-     */
-    set_texture(p_value) {
-        this.mesh.texture = p_value;
-        this._texture = this.mesh.texture;
-
-        this.minimum_size_changed();
-        this.emit_signal('texture_changed');
-
-        return this;
-    }
+export class NinePatchRect extends Control {
+    get class() { return 'NinePatchRect' }
 
     /**
      * @param {boolean} value
      */
     set_draw_center(value) {
         this.draw_center = value;
-        return this;
+        this.update();
     }
 
     /**
@@ -56,7 +35,7 @@ export default class NinePatchRect extends Control {
      */
     set_axis_stretch_horizontal(value) {
         this.axis_stretch_horizontal = value;
-        return this;
+        this.update();
     }
 
     /**
@@ -64,103 +43,102 @@ export default class NinePatchRect extends Control {
      */
     set_axis_stretch_vertical(value) {
         this.axis_stretch_vertical = value;
-        return this;
+        this.update();
+    }
+
+    /**
+     * @param {number} p_margin
+     * @param {number} p_size
+     */
+    set_patch_margin(p_margin, p_size) {
+        this.margin[p_margin] = p_size;
+        this.update();
+        this.minimum_size_changed();
+    }
+
+    /**
+     * @param {Rect2} p_region_rect
+     */
+    set_region_rect(p_region_rect) {
+        if (this.region_rect.equals(p_region_rect)) {
+            return;
+        }
+        this.region_rect.copy(p_region_rect);
+        this.item_rect_changed();
+    }
+    /**
+     * @param {number} x
+     * @param {number} y
+     * @param {number} w
+     * @param {number} h
+     */
+    set_region_rect_n(x, y, w, h) {
+        const rect = Rect2.new(x, y, w, h);
+        this.set_region_rect(rect);
+        Rect2.free(rect);
     }
 
     get patch_margin_bottom() {
-        return this.margin[Margin.Bottom];
+        return this.margin[MARGIN_BOTTOM];
     }
     set patch_margin_bottom(value) {
-        this.margin[Margin.Bottom] = value;
-        this.minimum_size_changed();
-
-        this.mesh.bottom_height = value;
-    }
-    set_patch_margin_bottom(value) {
-        this.patch_margin_bottom = value;
-        return this;
+        this.set_patch_margin(MARGIN_BOTTOM, value);
     }
 
     get patch_margin_left() {
-        return this.margin[Margin.Left];
+        return this.margin[MARGIN_LEFT];
     }
     set patch_margin_left(value) {
-        this.margin[Margin.Left] = value;
-        this.minimum_size_changed();
-
-        this.mesh.left_width = value;
-    }
-    set_patch_margin_left(value) {
-        this.patch_margin_left = value;
-        return this;
+        this.set_patch_margin(MARGIN_LEFT, value);
     }
 
     get patch_margin_top() {
-        return this.margin[Margin.Top];
+        return this.margin[MARGIN_TOP];
     }
     set patch_margin_top(value) {
-        this.margin[Margin.Top] = value;
-        this.minimum_size_changed();
-
-        this.mesh.top_height = value;
-    }
-    set_patch_margin_top(value) {
-        this.patch_margin_top = value;
-        return this;
+        this.set_patch_margin(MARGIN_TOP, value);
     }
 
     get patch_margin_right() {
-        return this.margin[Margin.Right];
+        return this.margin[MARGIN_RIGHT];
     }
     set patch_margin_right(value) {
-        this.margin[Margin.Right] = value;
-        this.minimum_size_changed();
-
-        this.mesh.right_width = value;
-    }
-    set_patch_margin_right(value) {
-        this.patch_margin_right = value;
-        return this;
+        this.set_patch_margin(MARGIN_RIGHT, value);
     }
 
     constructor() {
         super();
 
-        this.type = 'NinePatchRect';
-
         this.margin = [0, 0, 0, 0];
-
-        this._need_redraw = false;
-
-        this.mesh = new NineSlicePlane(Texture.WHITE);
+        this.region_rect = new Rect2();
 
         this.draw_center = true;
-        this.axis_stretch_horizontal = AxisStretchMode.STRETCH;
-        this.axis_stretch_vertical = AxisStretchMode.STRETCH;
+        this.axis_stretch_horizontal = AXIS_STRETCH_MODE_STRETCH;
+        this.axis_stretch_vertical = AXIS_STRETCH_MODE_STRETCH;
 
         /**
-         * @type {Texture}
+         * @type {ImageTexture}
          */
-        this._texture = null;
+        this.texture = null;
     }
+
+    /* virtual */
+
     _load_data(data) {
         super._load_data(data);
 
-        if (data.draw_center !== undefined) {
-            this.draw_center = data.draw_center;
+        if (data.texture !== undefined) {
+            this.set_texture(data.texture);
         }
-
+        if (data.draw_center !== undefined) {
+            this.set_draw_center(data.draw_center);
+        }
         if (data.axis_stretch_horizontal !== undefined) {
-            this.axis_stretch_horizontal = data.axis_stretch_horizontal;
+            this.set_axis_stretch_horizontal(data.axis_stretch_horizontal);
         }
         if (data.axis_stretch_vertical !== undefined) {
-            this.axis_stretch_vertical = data.axis_stretch_vertical;
+            this.set_axis_stretch_vertical(data.axis_stretch_vertical);
         }
-
-        if (data.texture !== undefined) {
-            this.texture = data.texture;
-        }
-
         if (data.patch_margin_bottom !== undefined) {
             this.patch_margin_bottom = data.patch_margin_bottom;
         }
@@ -178,38 +156,48 @@ export default class NinePatchRect extends Control {
     }
 
     /**
-     * @param {Vector2} size
+     * @param {number} p_what
      */
-    get_minimum_size(size) {
-        if (!this.draw_center && this._texture && this._texture.valid) {
-            return size.set(this._texture.width, this._texture.height);
+    _notification(p_what) {
+        if (p_what === NOTIFICATION_DRAW) {
+            if (!this.texture) return;
+
+            const rect = Rect2.new(0, 0, this.rect_size.x, this.rect_size.y);
+            const src_rect = this.region_rect.clone();
+
+            this.texture.get_rect_region(rect, src_rect, rect, src_rect);
+
+            const topleft = Vector2.new(this.margin[MARGIN_LEFT], this.margin[MARGIN_TOP]);
+            const bottomright = Vector2.new(this.margin[MARGIN_RIGHT], this.margin[MARGIN_BOTTOM]);
+            VSG.canvas.canvas_item_add_nine_patch(this.canvas_item, rect, src_rect, this.texture.texture, topleft, bottomright, this.axis_stretch_horizontal, this.axis_stretch_vertical, this.draw_center);
+            Vector2.free(bottomright);
+            Vector2.free(topleft);
+
+            Rect2.free(src_rect);
+            Rect2.free(rect);
         }
-        return size.set(0, 0);
     }
+
+    get_minimum_size() {
+        return Vector2.new(
+            this.margin[MARGIN_LEFT] + this.margin[MARGIN_RIGHT],
+            this.margin[MARGIN_TOP] + this.margin[MARGIN_BOTTOM]
+        )
+    }
+
+    /* public */
 
     /**
-     * Renders the object using the WebGL renderer
-     *
-     * @private
-     * @param {WebGLRenderer} renderer - The webgl renderer to use.
+     * @param {ImageTexture} p_value
      */
-    _render_webgl(renderer) {
-        this._update_transform();
-
-        this.mesh.transform.set_from_matrix(this.transform.world_transform);
-
-        this.mesh._width = this.rect_size.x;
-        this.mesh._height = this.rect_size.y;
-        this.mesh._refresh();
-
-        // TODO: sync more properties for rendering
-        this.mesh._update_transform();
-        this.mesh.tint = this.tint;
-        this.mesh.self_modulate.a = this.alpha;
-        this.mesh.blend_mode = this.blend_mode;
-
-        this.mesh._render_webgl(renderer);
+    set_texture(p_value) {
+        if (this.texture === p_value) {
+            return;
+        }
+        this.texture = p_value;
+        this.update();
+        this.minimum_size_changed();
+        this.emit_signal('texture_changed');
     }
 }
-
-node_class_map['NinePatchRect'] = NinePatchRect;
+node_class_map['NinePatchRect'] = GDCLASS(NinePatchRect, Control)
