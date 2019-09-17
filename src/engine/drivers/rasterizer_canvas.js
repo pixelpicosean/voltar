@@ -24,13 +24,15 @@ import BatchSystem from './batch/BatchSystem';
 import TextureGCSystem from './textures/TextureGCSystem';
 import { Runner } from './runner';
 import { VObject } from 'engine/core/v_object';
-import { RENDER_TARGET_TRANSPARENT, RENDER_TARGET_DIRECT_TO_SCREEN, RENDER_TARGET_VFLIP } from './constants';
+import { RENDER_TARGET_TRANSPARENT, RENDER_TARGET_DIRECT_TO_SCREEN } from './constants';
 import { Item } from 'engine/servers/visual/visual_server_canvas';
 import {
     TYPE_RECT,
     CommandRect,
     TYPE_CIRCLE,
     CommandCircle,
+    TYPE_NINEPATCH,
+    CommandNinePatch,
 } from 'engine/servers/visual/commands';
 import { VSG } from 'engine/servers/visual/visual_server_globals';
 
@@ -272,19 +274,22 @@ export class RasterizerCanvas extends VObject {
      * @param {Item} p_item
      */
     _canvas_item_render_commands(p_item) {
-        const color = Color.new();
+        const white_tex = VSG.storage.resources.white_tex;
         for (let c of p_item.commands) {
             switch (c.type) {
                 case TYPE_RECT: {
                     let rect = /** @type {CommandRect} */(c);
-                    if (!rect.texture) rect.texture = VSG.storage.resources.white_tex;
+                    if (!rect.texture) rect.texture = white_tex;
                     rect.calculate_vertices(p_item.final_transform, p_item.final_modulate);
                     // TODO: add blend mode support, maybe a material system just like Godot
                     // rect.blendMode = p_item.blend_mode;
                     this.batch.currentRenderer.render(rect);
                 } break;
-                case TYPE_CIRCLE: {
-                    let circle = /** @type {CommandCircle} */(c);
+                case TYPE_NINEPATCH: {
+                    let np = /** @type {CommandNinePatch} */(c);
+                    if (!np.texture) np.texture = white_tex;
+                    np.calculate_vertices(p_item.final_transform, p_item.final_modulate);
+                    this.batch.currentRenderer.render(np);
                 } break;
             }
         }
