@@ -5,7 +5,7 @@ import {
     CollisionObjectType,
     AreaSpaceOverrideMode,
     AreaParameter,
-} from "engine/scene/physics/const";
+} from "engine/scene/2d/const";
 
 import { CollisionObject2DSW } from "./collision_object_2d_sw";
 

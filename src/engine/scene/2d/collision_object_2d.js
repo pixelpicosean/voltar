@@ -12,15 +12,15 @@ import {
     NOTIFICATION_ENTER_TREE,
     NOTIFICATION_EXIT_TREE,
 } from '../main/node';
-import { Node2D } from '../2d/node_2d';
-import { CollisionShape2D } from './collision_shape_2d';
-import { CollisionPolygon2D } from './collision_polygon_2d';
-import { BodyState } from './const';
+import { Node2D } from './node_2d';
 import {
     NOTIFICATION_ENTER_CANVAS,
     NOTIFICATION_TRANSFORM_CHANGED,
     NOTIFICATION_EXIT_CANVAS,
-} from '../2d/canvas_item';
+} from './canvas_item';
+import { BodyState } from './const';
+import { CollisionShape2D } from './collision_shape_2d';
+import { CollisionPolygon2D } from './collision_polygon_2d';
 
 
 class Shape {

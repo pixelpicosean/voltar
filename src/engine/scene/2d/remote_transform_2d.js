@@ -1,9 +1,9 @@
 import { node_class_map } from 'engine/registry';
 import { GDCLASS } from 'engine/core/v_object';
 
-import { NOTIFICATION_ENTER_TREE } from './main/node';
-import { NOTIFICATION_TRANSFORM_CHANGED } from './2d/canvas_item';
-import { Node2D } from './2d/node_2d';
+import { NOTIFICATION_ENTER_TREE } from '../main/node';
+import { Node2D } from './node_2d';
+import { NOTIFICATION_TRANSFORM_CHANGED } from './canvas_item';
 
 
 export class RemoteTransform2D extends Node2D {

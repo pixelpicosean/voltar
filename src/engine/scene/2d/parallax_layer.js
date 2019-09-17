@@ -1,10 +1,11 @@
 import { node_class_map } from "engine/registry";
 import { GDCLASS } from "engine/core/v_object";
 import { Vector2, Vector2Like } from "engine/core/math/vector2";
-import { Node2D } from "./2d/node_2d";
-import { ParallaxBackground } from "./parallax_background";
+
 import { VSG } from "engine/servers/visual/visual_server_globals";
-import { NOTIFICATION_ENTER_TREE, NOTIFICATION_EXIT_TREE } from "./main/node";
+import { NOTIFICATION_ENTER_TREE, NOTIFICATION_EXIT_TREE } from "../main/node";
+import { Node2D } from "./node_2d";
+import { ParallaxBackground } from "./parallax_background";
 
 
 export class ParallaxLayer extends Node2D {

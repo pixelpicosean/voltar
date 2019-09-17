@@ -1,6 +1,7 @@
 import { Vector2 } from "engine/core/math/vector2";
 import { Transform2D } from "engine/core/math/transform_2d";
-import { ShapeType } from "engine/scene/physics/const";
+import { ShapeType } from "engine/scene/2d/const";
+
 import { Shape2DSW } from "./shape_2d_sw";
 import { sat_2d_calculate_penetration as collision_solver } from './collision_solver_2d_sat';
 

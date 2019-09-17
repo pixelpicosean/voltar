@@ -10,8 +10,8 @@ import {
     NOTIFICATION_ENTER_TREE,
     NOTIFICATION_UNPARENTED,
 } from "../main/node";
-import { Node2D } from "../2d/node_2d";
 import { ConvexPolygonShape2D } from "../resources/convex_polygon_shape_2d";
+import { Node2D } from "./node_2d";
 
 
 /**

@@ -4,7 +4,7 @@ import {
     AreaSpaceOverrideMode,
     AreaParameter,
     BodyState,
-} from 'engine/scene/physics/const';
+} from 'engine/scene/2d/const';
 
 import {
     ShapeResult,
@@ -318,7 +318,7 @@ export class Physics2DServer {
 
     /**
      * @param {Area2DSW} p_area
-     * @param {import('engine/scene/physics/area_2d').Area2D} id
+     * @param {import('engine/scene/2d/area_2d').Area2D} id
      */
     area_attach_object_instance(p_area, id) {
         p_area.instance = id;
@@ -332,7 +332,7 @@ export class Physics2DServer {
 
     /**
      * @param {Area2DSW} p_area
-     * @param {import('engine/scene/physics/area_2d').Area2D} id
+     * @param {import('engine/scene/2d/area_2d').Area2D} id
      */
     area_attach_canvas_instance(p_area, id) {
         p_area.instance = id;
@@ -555,7 +555,7 @@ export class Physics2DServer {
     }
 
     /**
-     * @param {import('engine/scene/physics/physics_body_2d').PhysicsBody2D} p_body
+     * @param {import('engine/scene/2d/physics_body_2d').PhysicsBody2D} p_body
      * @param {number} p_layer
      */
     body_set_collision_layer(p_body, p_layer) {
@@ -563,7 +563,7 @@ export class Physics2DServer {
     }
 
     /**
-     * @param {import('engine/scene/physics/physics_body_2d').PhysicsBody2D} p_body
+     * @param {import('engine/scene/2d/physics_body_2d').PhysicsBody2D} p_body
      * @param {number} p_mask
      */
     body_set_collision_mask(p_body, p_mask) {

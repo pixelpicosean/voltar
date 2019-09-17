@@ -3,14 +3,13 @@ import { GDCLASS } from 'engine/core/v_object';
 import { node_class_map } from 'engine/registry';
 import { Vector2, Vector2Like } from 'engine/core/math/vector2';
 
+import { NOTIFICATION_EXIT_TREE, Node } from '../main/node';
+import { AreaSpaceOverrideMode } from 'engine/scene/2d/const';
 import { Physics2DServer, AREA_BODY_ADDED } from 'engine/servers/physics_2d/physics_2d_server';
-import { AreaSpaceOverrideMode, ShapeType } from 'engine/scene/physics/const';
 import { Area2DSW } from 'engine/servers/physics_2d/area_2d_sw';
 
-import { Node2D } from '../2d/node_2d';
 import { CollisionObject2D } from './collision_object_2d';
 import { PhysicsBody2D } from './physics_body_2d';
-import { NOTIFICATION_EXIT_TREE, Node } from '../main/node';
 
 
 class ShapePair {

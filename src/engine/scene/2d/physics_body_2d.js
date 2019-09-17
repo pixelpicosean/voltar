@@ -2,6 +2,7 @@ import { node_class_map } from "engine/registry";
 import { GDCLASS } from "engine/core/v_object";
 import { Vector2, Vector2Like } from "engine/core/math/vector2";
 import { Transform2D } from "engine/core/math/transform_2d";
+import { Engine } from "engine/core/engine";
 import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server";
 import { Body2DSW } from "engine/servers/physics_2d/body_2d_sw";
 import {
@@ -10,12 +11,11 @@ import {
     Physics2DDirectBodyStateSW,
 } from "engine/servers/physics_2d/state";
 
+import { NOTIFICATION_ENTER_TREE } from "../main/node";
 import { PhysicsMaterial } from "../resources/physics_material";
 import { BodyMode, BodyState } from "./const";
+import { NOTIFICATION_LOCAL_TRANSFORM_CHANGED } from "./canvas_item";
 import { CollisionObject2D } from "./collision_object_2d";
-import { NOTIFICATION_ENTER_TREE } from "../main/node";
-import { NOTIFICATION_LOCAL_TRANSFORM_CHANGED } from "../2d/canvas_item";
-import { Engine } from "engine/core/engine";
 
 
 export class PhysicsBody2D extends CollisionObject2D {

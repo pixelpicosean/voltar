@@ -8,7 +8,7 @@ import {
     CollisionObjectType,
     CCDMode,
     BodyState,
-} from "engine/scene/physics/const";
+} from "engine/scene/2d/const";
 
 import {
     Physics2DDirectBodyStateSW,

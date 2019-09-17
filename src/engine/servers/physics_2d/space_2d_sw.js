@@ -11,13 +11,14 @@ import {
     _shape_col_cbk,
     Physics2DDirectBodyStateSW,
     SeparationResult,
-} from "../../servers/physics_2d/state";
+} from "engine/servers/physics_2d/state";
 import {
     INTERSECTION_QUERY_MAX,
     CollisionObjectType,
     ShapeType,
     BodyMode,
-} from "../../scene/physics/const";
+} from "engine/scene/2d/const";
+
 import { BroadPhase2D } from "./broad_phase_2d_sw";
 import { Shape2DSW } from "./shape_2d_sw";
 import { CollisionObject2DSW } from "./collision_object_2d_sw";

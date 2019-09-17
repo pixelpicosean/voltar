@@ -6,7 +6,7 @@ import {
     INTERSECTION_QUERY_MAX,
     CollisionObjectType,
     BodyState,
-} from "engine/scene/physics/const";
+} from "engine/scene/2d/const";
 
 
 export class Physics2DDirectBodyStateSW {

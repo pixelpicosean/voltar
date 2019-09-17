@@ -12,8 +12,8 @@ import {
 import { Math_PI } from 'engine/core/math/math_defs';
 import { BLEND_MODES } from 'engine/drivers/constants';
 
-import { Curve } from './resources/curve';
-import { Node2D } from './2d/node_2d';
+import { Curve } from '../resources/curve';
+import { Node2D } from './node_2d';
 
 
 const Math_PI2 = Math_PI * 2;
