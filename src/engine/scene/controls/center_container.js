@@ -28,6 +28,7 @@ export class CenterContainer extends Container {
      */
     _notification(p_what) {
         if (p_what === NOTIFICATION_SORT_CHILDREN) {
+            const rect = Rect2.new();
             for (const node of this.data.children) {
                 const c = /** @type {Container} */(node);
 
@@ -36,7 +37,7 @@ export class CenterContainer extends Container {
                 }
 
                 const minsize = c.get_combined_minimum_size();
-                const rect = Rect2.new(
+                rect.set(
                     Math.floor(this.use_top_left ? (-minsize.x * 0.5) : ((this.rect_size.x - minsize.x) * 0.5)),
                     Math.floor(this.use_top_left ? (-minsize.y * 0.5) : ((this.rect_size.y - minsize.y) * 0.5)),
                     minsize.x,
@@ -44,8 +45,8 @@ export class CenterContainer extends Container {
                 )
                 this.fit_child_in_rect(c, rect);
                 Vector2.free(minsize);
-                Rect2.free(rect);
             }
+            Rect2.free(rect);
         }
     }
 

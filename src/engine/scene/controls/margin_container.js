@@ -48,6 +48,7 @@ export class MarginContainer extends Container {
 
                 const s = this.rect_size.clone();
 
+                const rect = Rect2.new();
                 for (const node of this.data.children) {
                     const c = /** @type {Container} */(node);
 
@@ -58,10 +59,10 @@ export class MarginContainer extends Container {
                     const w = s.x - margin_left - margin_right;
                     const h = s.y - margin_top - margin_bottom;
 
-                    const rect = Rect2.new(margin_left, margin_top, w, h);
+                    rect.set(margin_left, margin_top, w, h);
                     this.fit_child_in_rect(c, rect);
-                    Rect2.free(rect);
                 }
+                Rect2.free(rect);
 
                 Vector2.free(s);
             } break;

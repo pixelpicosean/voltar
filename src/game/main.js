@@ -13,9 +13,10 @@ import {
 import { load, STRETCH_MODE_VIEWPORT, STRETCH_ASPECT_KEEP } from 'engine/index';
 import { Sprite } from 'engine/scene/2d/sprite';
 import { ColorRect } from 'engine/scene/controls/color_rect';
-import { rand_range } from 'engine/core/math/math_funcs';
+import { rand_range, randf } from 'engine/core/math/math_funcs';
 import { OS } from 'engine/core/os/os';
 import { CenterContainer } from 'engine/scene/controls/center_container';
+import { GridContainer } from 'engine/scene/controls/grid_container';
 
 
 class Preloader extends Node {
@@ -54,6 +55,19 @@ class Preloader extends Node {
         center_container.add_child(rect);
         rect.set_rect_min_size_n(100, 100);
         rect.set_color_n(0, 1, 1);
+
+        const grid = new GridContainer();
+        this.add_child(grid);
+        grid.set_columns(3);
+        grid.add_constant_override('hseparation', 5);
+        grid.add_constant_override('vseparation', 5);
+
+        for (let i = 0; i < 3 * 4 + 2; i++) {
+            let rect = new ColorRect();
+            rect.set_rect_min_size_n(20, 20);
+            rect.set_color_n(randf(), randf(), randf());
+            grid.add_child(rect);
+        }
     }
     _ready() {
         console.log('_ready')
