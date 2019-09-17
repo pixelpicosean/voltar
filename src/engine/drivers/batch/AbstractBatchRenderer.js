@@ -14,6 +14,8 @@ import { nextPow2, log2 } from '../utils/pow2';
 import { OS, VIDEO_DRIVER_GLES2_LEGACY } from 'engine/core/os/os';
 import { premultiplyBlendMode, premultiplyTint } from '../utils/color/premultiply';
 
+import { Command } from 'engine/servers/visual/commands';
+
 
 /**
  * From hex color number to tint color for rendering
@@ -593,7 +595,7 @@ export default class AbstractBatchRenderer extends ObjectRenderer
      * `indicies`. It also uses the "tint" of the base-texture, if
      * present.
      *
-     * @param {any} element - element being rendered
+     * @param {Command} element - element being rendered
      * @param {ViewableBuffer} attributeBuffer - attribute buffer.
      * @param {Uint16Array} indexBuffer - index buffer
      * @param {number} aIndex - number of floats already in the attribute buffer
@@ -612,8 +614,8 @@ export default class AbstractBatchRenderer extends ObjectRenderer
         const vertex_data = element.vertex_data;
         const textureId = element.texture.baseTexture._id;
 
-        const tint = hex2tint(element.modulate.as_hex());
-        const alpha = Math.min(element.modulate.a, 1.0);
+        const tint = hex2tint(element.final_modulate.as_hex());
+        const alpha = Math.min(element.final_modulate.a, 1.0);
         const argb = (alpha < 1.0 && element.texture.baseTexture.premultiplyAlpha)
             ? premultiplyTint(tint, alpha)
             : tint + (alpha * 255 << 24);
