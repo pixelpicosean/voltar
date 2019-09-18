@@ -72,7 +72,11 @@ class PreloaderScene extends v.Node {
     on_resource_loaded() { }
 
     on_loading_bar_filled() {
-        this.get_tree().change_scene_to(main_scene);
+        if (typeof(main_scene) === 'string') {
+            this.get_tree().change_scene(main_scene);
+        } else {
+            this.get_tree().change_scene_to(main_scene);
+        }
     }
 }
 v.GDCLASS(PreloaderScene, v.Node)

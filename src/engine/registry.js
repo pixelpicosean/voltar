@@ -11,7 +11,7 @@ export const node_class_map = {};
 
 /**
  * Resource class looking table
- * @type {Object<string, ResourceInterface>}
+ * @type {Object<string, typeof ResourceInterface>}
  */
 export const res_class_map = {};
 

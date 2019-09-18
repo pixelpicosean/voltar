@@ -131,4 +131,4 @@ export class MainScene extends v.Node {
 }
 v.GDCLASS(MainScene, v.Node)
 
-// v.attach_script('res://scene/demo.tscn', MainScene);
+v.attach_script('res://scene/demo.tscn', MainScene);

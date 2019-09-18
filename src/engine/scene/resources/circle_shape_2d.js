@@ -1,6 +1,9 @@
-import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server";
-import { Shape2D } from "./shape_2d";
+import { res_class_map } from "engine/registry";
 import { Rect2 } from "engine/core/math/rect2";
+
+import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server";
+
+import { Shape2D } from "./shape_2d";
 
 
 export class CircleShape2D extends Shape2D {
@@ -50,3 +53,4 @@ export class CircleShape2D extends Shape2D {
         this.shape.set_data(this._radius);
     }
 }
+res_class_map['CircleShape2D'] = CircleShape2D

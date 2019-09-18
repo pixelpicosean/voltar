@@ -1,3 +1,4 @@
+import { res_class_map } from "engine/registry";
 import { Vector2 } from "engine/core/math/vector2";
 import { Rect2 } from "engine/core/math/rect2";
 import {
@@ -95,3 +96,4 @@ export class ConvexPolygonShape2D extends Shape2D {
         return this;
     }
 }
+res_class_map['ConvexPolygonShape2D'] = ConvexPolygonShape2D

@@ -12,6 +12,6 @@ v.Main.setup(Settings, {
         stretch_aspect: v.STRETCH_ASPECT_KEEP,
     },
     application: {
-        main_scene: Preloader(MainScene),
+        main_scene: Preloader('res://scene/demo.tscn'),
     },
 });

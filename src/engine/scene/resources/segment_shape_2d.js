@@ -1,5 +1,7 @@
+import { res_class_map } from "engine/registry";
 import { Vector2, Vector2Like } from "engine/core/math/vector2";
 import { Rect2 } from "engine/core/math/rect2";
+
 import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server";
 
 import { Shape2D } from "./shape_2d";
@@ -76,6 +78,7 @@ export class SegmentShape2D extends Shape2D {
         Rect2.free(r);
     }
 }
+res_class_map['SegmentShape2D'] = SegmentShape2D
 
 export class RayShape2D extends Shape2D {
     get length() {
@@ -145,3 +148,4 @@ export class RayShape2D extends Shape2D {
         })
     }
 }
+res_class_map['RayShape2D'] = RayShape2D

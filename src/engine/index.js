@@ -151,7 +151,11 @@ Main.events.connect_once('started', () => {
 // Resource loading functions
 // ------------------------------------------------------------------
 import { ResourceLoader } from './core/io/resource_loader';
-import { preload_queue } from './registry';
+import {
+    scene_class_map,
+    resource_map,
+    preload_queue,
+} from './registry';
 
 /**
  * Preload a resource before game start.
@@ -169,4 +173,25 @@ export function preload(...settings) {
  */
 export function load(...settings) {
     return new ResourceLoader().add(...settings).load();
+}
+
+/**
+ * Get the data from resource url
+ * @param {string} url
+ */
+export function get_resource(url) {
+    return resource_map[url];
+}
+
+// ------------------------------------------------------------------
+// Node assemble functions
+// ------------------------------------------------------------------
+export * from 'engine/scene/assembler';
+
+/**
+ * Get the packed scene class or data
+ * @param {string} url
+ */
+export function get_packed_scene(url) {
+    return scene_class_map[url] || resource_map[url];
 }
