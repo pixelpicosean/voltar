@@ -128,6 +128,7 @@ export class CanvasItem extends Node {
         else {
             this.modulate.set_with_hex(r);
         }
+        VSG.canvas.canvas_item_set_modulate(this.canvas_item, this.modulate);
     }
     /**
      * @param {ColorLike} color
@@ -154,7 +155,6 @@ export class CanvasItem extends Node {
         else {
             this.self_modulate.set_with_hex(r);
         }
-
         VSG.canvas.canvas_item_set_self_modulate(this.canvas_item, this.self_modulate);
     }
     /**
