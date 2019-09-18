@@ -152,10 +152,6 @@ export class CommandRect extends Command {
      * @param {Color} modulate
      */
     calculate_vertices(transform, modulate) {
-        // We don't use orig, trim and rotation from texture atlas,
-        // so we'll be able to support more Godot drawing configs.
-        // Also we can add a special atlas packer to CLI.
-
         // vertex
         const wt = transform;
         const a = wt.a;
@@ -227,10 +223,6 @@ export class CommandNinePatch extends Command {
      * @param {Color} modulate
      */
     calculate_vertices(transform, modulate) {
-        // We don't use orig, trim and rotation from texture atlas,
-        // so we'll be able to support more Godot drawing configs.
-        // Also we can add a special atlas packer to CLI.
-
         // vertex and uv
         const wt = transform;
         const a = wt.a;
@@ -250,7 +242,6 @@ export class CommandNinePatch extends Command {
         const m_t = this.margin[MARGIN_TOP];
         const m_b = this.margin[MARGIN_BOTTOM];
 
-        // FIXME: uv calculation does not support rotate/trim textures in an atlas
         const uv_x0 = this.texture._uvs.x0;
         const uv_y0 = this.texture._uvs.y0;
         const uv_x1 = this.texture._uvs.x2;
