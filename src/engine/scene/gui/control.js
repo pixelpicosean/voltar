@@ -1553,7 +1553,7 @@ export class Control extends CanvasItem {
             if (size_changed) {
                 this.notification(NOTIFICATION_RESIZED);
             }
-            if (pos_changed && size_changed) {
+            if (pos_changed || size_changed) {
                 this.item_rect_changed(size_changed);
                 this._notify_transform();
             }
