@@ -1,6 +1,6 @@
 import * as v from 'engine/index';
 
-v.preload('media/sprites.json')
+v.preload('media/sprites-0.json')
 v.preload('button', 'media/green_button.png')
 
 export class MainScene extends v.Node {
@@ -80,7 +80,6 @@ export class MainScene extends v.Node {
         nine_rect.patch_margin_bottom = 10;
     }
     _ready() {
-        console.log('_ready')
         this.set_process(true)
         // this.set_process_input(true)
         // this.set_process_unhandled_input(true)

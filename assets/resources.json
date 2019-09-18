@@ -4,9 +4,48 @@
         "data": {
             "type": "Node2D",
             "name": "demo",
-            "children": [],
+            "children": [
+                {
+                    "type": "Sprite",
+                    "name": "icon-1",
+                    "position": {
+                        "x": 256.221,
+                        "y": 320.28
+                    },
+                    "texture": "@ext#1",
+                    "children": []
+                },
+                {
+                    "type": "Sprite",
+                    "name": "icon-2",
+                    "position": {
+                        "x": 541.093,
+                        "y": 529.452
+                    },
+                    "texture": "@ext#2",
+                    "children": []
+                },
+                {
+                    "type": "NinePatchRect",
+                    "name": "NinePatchRect",
+                    "margin_bottom": 257,
+                    "margin_left": 455,
+                    "margin_top": 11,
+                    "margin_right": 508,
+                    "texture": "@ext#3",
+                    "patch_margin_bottom": 12,
+                    "patch_margin_left": 8,
+                    "patch_margin_top": 8,
+                    "patch_margin_right": 8,
+                    "children": []
+                }
+            ],
             "__meta__": {
-                "ext": {},
+                "ext": {
+                    "1": "icon-1",
+                    "2": "icon-2",
+                    "3": "blue_button06"
+                },
                 "sub": {}
             }
         }

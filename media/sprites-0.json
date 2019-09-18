@@ -1,0 +1,44 @@
+{"frames": {
+
+"blue_button06":
+{
+	"frame": {"x":1,"y":1,"w":49,"h":49},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":49,"h":49},
+	"sourceSize": {"w":49,"h":49}
+},
+"icon-1":
+{
+	"frame": {"x":52,"y":1,"w":95,"h":439},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":4,"y":38,"w":95,"h":439},
+	"sourceSize": {"w":102,"h":512}
+},
+"icon-2":
+{
+	"frame": {"x":1,"y":98,"w":464,"h":89},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":24,"y":7,"w":464,"h":89},
+	"sourceSize": {"w":512,"h":102}
+},
+"icon":
+{
+	"frame": {"x":1,"y":189,"w":466,"h":440},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":23,"y":37,"w":466,"h":440},
+	"sourceSize": {"w":512,"h":512}
+}},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "sprites-0.png",
+	"format": "RGBA8888",
+	"size": {"w":492,"h":630},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:2d477393f7cfe7eedf8a61e0e2b017d8:5244f6d443175eaf64b86204df2243fc:7921bf998741302c2028590beb4e1a86$"
+}
+}
