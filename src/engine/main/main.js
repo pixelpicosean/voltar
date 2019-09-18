@@ -1,4 +1,5 @@
 import { Color } from "engine/core/color";
+import { VObject } from "engine/core/v_object";
 import { ProjectSettings } from "engine/core/project_settings";
 import { InputMap } from "engine/core/input_map";
 import { MessageQueue } from "engine/core/message_queue";
@@ -44,6 +45,8 @@ export const Main = {
     global: null,
     /** @type {InputMap} */
     input_map: null,
+
+    events: new VObject(),
 
     /**
      * @param {import("engine/core/project_settings").Settings} settings
@@ -99,6 +102,8 @@ export const Main = {
         // read and apply global settings
         document.title = this.global.application.name;
 
+        this.events.emit_signal('started');
+
         // load and start main scene (preloader here instead)
         const scene = this.global.application.preloader.instance();
         scene_tree.add_current_scene(scene);
@@ -138,6 +143,8 @@ export const Main = {
             Physics2DServer.get_singleton().step(frame_slice);
 
             MessageQueue.get_singleton().flush();
+
+            Engine.get_singleton().physics_frames++;
         }
 
         SceneTree.get_singleton().idle(scaled_step);

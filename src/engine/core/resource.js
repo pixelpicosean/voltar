@@ -1,5 +1,4 @@
 import { VObject, GDCLASS } from "./v_object";
-import { Node } from "engine/scene/main/node";
 
 export class Resource extends VObject {
     get class() { return 'Resource' }
@@ -11,7 +10,7 @@ export class Resource extends VObject {
 
         this.resource_local_to_scene = false;
 
-        /** @type {Node} */
+        /** @type {import("engine/scene/main/node").Node} */
         this.local_scene = null;
     }
 
