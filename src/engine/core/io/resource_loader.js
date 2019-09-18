@@ -5,8 +5,11 @@ import { queue, each_series } from './async';
 import Resource from './io_resource';
 import blob_middleware_factory from './middlewares/parsing/blob';
 
-import { loader_pre_procs, loader_use_procs, resource_map, raw_resource_map } from 'engine/registry';
+import { loader_pre_procs, loader_use_procs, raw_resource_map } from 'engine/registry';
+
 import { texture_loader } from './texture_loader';
+import { atlas_loader } from './atlas_loader';
+
 
 // some constants
 const MAX_PROGRESS = 100;
@@ -130,6 +133,7 @@ export class ResourceLoader extends VObject {
         // parse any blob into more usable objects (e.g. Image)
         this.use(blob_middleware_factory());
         this.use(texture_loader);
+        this.use(atlas_loader);
         for (let i = 0; i < loader_use_procs.length; ++i) {
             this.use(loader_use_procs[i]());
         }

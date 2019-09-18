@@ -145,6 +145,19 @@ export class ImageTexture extends Texture {
     }
 
     /**
+     * @param {any} p_atlas
+     * @param {number} p_flags
+     */
+    create_from_atlas(p_atlas, p_flags) {
+        this.texture = p_atlas;
+        this.width = this.texture.width;
+        this.height = this.texture.height;
+        this.set_flags(p_flags);
+
+        this.image_stored = false;
+    }
+
+    /**
      * @param {Image} p_image
      */
     set_data(p_image) {

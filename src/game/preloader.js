@@ -42,7 +42,7 @@ class PreloaderScene extends v.Node {
         this.bar_fill = bar_fill;
 
         v.Engine.start_preload((progress) => {
-            this.average_speed = (this.average_speed + (progress * 0.001 - this.target_pct) / this.timer) / 2;
+            this.average_speed = (this.average_speed + (progress * 0.001 - this.target_pct) / Math.max(1 / 60, this.timer)) / 2;
             this.target_pct = progress * 0.001;
             this.timer = 1 / 60;
         }, () => {

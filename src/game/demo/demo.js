@@ -1,6 +1,6 @@
 import * as v from 'engine/index';
 
-v.preload('sprites', 'media/sprites.png')
+v.preload('media/sprites.json')
 v.preload('button', 'media/green_button.png')
 
 export class MainScene extends v.Node {
@@ -13,7 +13,7 @@ export class MainScene extends v.Node {
     }
 
     _enter_tree() {
-        const tex = v.resource_map['media/sprites.png'];
+        const tex = v.resource_map['icon'];
         const sprite = new v.Sprite();
         sprite.set_texture(tex);
         this.add_child(sprite);

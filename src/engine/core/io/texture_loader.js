@@ -25,7 +25,7 @@ export function texture_loader(resource, next) {
         resource_map[resource.url] = texture;
 
         // do not store inside the resource loader
-        resource.data = null;
+        resource.internal = texture.texture;
     }
     next();
 }

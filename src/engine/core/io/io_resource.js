@@ -107,29 +107,10 @@ export default class Resource extends VObject {
         this.data = null;
 
         /**
-         * @type {ImageTexture}
-         */
-        this.texture = null;
-
-        /**
-         * @type {Object<string, any>}
-         */
-        this.textures = null;
-
-        /**
+         * DO NOT MODIIFY, it is used to keep internal data
          * @type {any}
          */
-        this.spritesheet = null;
-
-        /**
-         * @type {any}
-         */
-        this.sound = null;
-
-        /**
-         * @type {any}
-         */
-        this.bitmap_font = null;
+        this.internal = null;
 
         /**
          * @type {any}
