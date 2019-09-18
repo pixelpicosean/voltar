@@ -9,6 +9,7 @@ import { loader_pre_procs, loader_use_procs, raw_resource_map } from 'engine/reg
 
 import { texture_loader } from './texture_loader';
 import { atlas_loader } from './atlas_loader';
+import { bmfont_loader } from './bmfont_loader';
 
 
 // some constants
@@ -134,6 +135,7 @@ export class ResourceLoader extends VObject {
         this.use(blob_middleware_factory());
         this.use(texture_loader);
         this.use(atlas_loader);
+        this.use(bmfont_loader);
         for (let i = 0; i < loader_use_procs.length; ++i) {
             this.use(loader_use_procs[i]());
         }

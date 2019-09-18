@@ -242,6 +242,7 @@ export default class Resource extends VObject {
      *      of a video/audio elment. If the urls are an array, you can pass this as an array as well
      *      where each index is the mime type to use for the corresponding url index.
      * @property {any} [image_metadata]
+     * @property {any} [extra]
      */
 
     /**
