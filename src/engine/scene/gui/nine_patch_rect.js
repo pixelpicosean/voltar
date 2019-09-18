@@ -1,4 +1,4 @@
-import { node_class_map } from 'engine/registry';
+import { node_class_map, resource_map } from 'engine/registry';
 import { GDCLASS } from 'engine/core/v_object';
 import {
     MARGIN_LEFT,
@@ -188,13 +188,16 @@ export class NinePatchRect extends Control {
     /* public */
 
     /**
-     * @param {ImageTexture} p_value
+     * @param {string | ImageTexture} p_texture
      */
-    set_texture(p_value) {
-        if (this.texture === p_value) {
+    set_texture(p_texture) {
+        /** @type {ImageTexture} */
+        const texture = (typeof (p_texture) === 'string') ? resource_map[p_texture] : p_texture;
+
+        if (this.texture === texture) {
             return;
         }
-        this.texture = p_value;
+        this.texture = texture;
         this.update();
         this.minimum_size_changed();
         this.emit_signal('texture_changed');

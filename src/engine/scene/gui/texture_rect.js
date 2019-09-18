@@ -1,4 +1,4 @@
-import { node_class_map } from 'engine/registry';
+import { node_class_map, resource_map } from 'engine/registry';
 import { GDCLASS } from 'engine/core/v_object';
 import { Vector2 } from 'engine/core/math/vector2';
 import { Rect2 } from 'engine/core/math/rect2';
@@ -21,10 +21,13 @@ export class TextureRect extends Control {
     get class() { return 'TextureRect' }
 
     /**
-     * @param {ImageTexture} p_value
+     * @param {string | ImageTexture} p_texture
      */
-    set_texture(p_value) {
-        this.texture = p_value;
+    set_texture(p_texture) {
+        /** @type {ImageTexture} */
+        const texture = (typeof (p_texture) === 'string') ? resource_map[p_texture] : p_texture;
+
+        this.texture = texture;
         this.update();
         this.minimum_size_changed();
     }

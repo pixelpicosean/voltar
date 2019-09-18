@@ -1,4 +1,4 @@
-import { node_class_map } from 'engine/registry';
+import { node_class_map, resource_map } from 'engine/registry';
 import { GDCLASS } from 'engine/core/v_object';
 import { Vector2, Vector2Like } from 'engine/core/math/vector2';
 import { Rect2 } from 'engine/core/math/rect2';
@@ -46,14 +46,14 @@ export class Sprite extends Node2D {
      * @param {boolean} p_flip
      */
     set_flip_h(p_flip) {
-        this.hflip = p_flip;
+        this.flip_h = p_flip;
         this.update();
     }
     /**
      * @param {boolean} p_flip
      */
     set_flip_v(p_flip) {
-        this.vflip = p_flip;
+        this.flip_v = p_flip;
         this.update();
     }
 
@@ -69,7 +69,7 @@ export class Sprite extends Node2D {
     /**
      * @param {Rect2} p_rect
      */
-    set_rect_region(p_rect) {
+    set_region_rect(p_rect) {
         if (this.region_rect.equals(p_rect)) return;
         this.region_rect.copy(p_rect);
         if (this.region_enabled) {
@@ -163,8 +163,8 @@ export class Sprite extends Node2D {
 
         this.centered = true;
         this.offset = new Vector2(0, 0);
-        this.hflip = false;
-        this.vflip = false;
+        this.flip_h = false;
+        this.flip_v = false;
         this.region_enabled = false;
         this.region_filter_clip = false;
         this.region_rect = new Rect2();
@@ -183,6 +183,28 @@ export class Sprite extends Node2D {
     }
 
     /* virtual */
+
+    _load_data(data) {
+        super._load_data(data);
+
+        if (data.centered !== undefined) this.set_centered(data.centered);
+        if (data.offset !== undefined) this.set_offset(data.offset);
+        if (data.flip_h !== undefined) this.set_flip_h(data.flip_h);
+        if (data.flip_v !== undefined) this.set_flip_v(data.flip_v);
+        if (data.region_enabled !== undefined) this.set_region_enabled(data.region_enabled);
+        if (data.region_filter_clip !== undefined) this.set_region_filter_clip(data.region_filter_clip);
+        if (data.region_rect !== undefined) this.set_region_rect(data.region_rect);
+
+        if (data.frame !== undefined) this.set_frame(data.frame);
+        if (data.frame_coords !== undefined) this.set_frame_coords(data.frame_coords);
+
+        if (data.hframes !== undefined) this.set_hframes(data.hframes);
+        if (data.vframes !== undefined) this.set_vframes(data.vframes);
+
+        if (data.texture !== undefined) this.set_texture(data.texture);
+
+        return this;
+    }
 
     /**
      * @param {number} p_what
@@ -209,11 +231,14 @@ export class Sprite extends Node2D {
     /* public */
 
     /**
-     * @param {ImageTexture} p_texture
+     * @param {string | ImageTexture} p_texture
      */
     set_texture(p_texture) {
-        if (this.texture === p_texture) return;
-        this.texture = p_texture;
+        /** @type {ImageTexture} */
+        const texture = (typeof(p_texture) === 'string') ? resource_map[p_texture] : p_texture;
+
+        if (this.texture === texture) return;
+        this.texture = texture;
         this.update();
         this.item_rect_changed();
     }
@@ -265,10 +290,10 @@ export class Sprite extends Node2D {
 
         r_dst_rect.set(dest_offset.x, dest_offset.y, frame_size.x, frame_size.y);
 
-        if (this.hflip) {
+        if (this.flip_h) {
             r_dst_rect.width = -r_dst_rect.width;
         }
-        if (this.vflip) {
+        if (this.flip_v) {
             r_dst_rect.height = - r_dst_rect.height;
         }
 

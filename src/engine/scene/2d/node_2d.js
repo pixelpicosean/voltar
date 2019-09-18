@@ -268,6 +268,20 @@ export class Node2D extends CanvasItem {
         this._xform_dirty = false;
     }
 
+    /* virtual */
+
+    _load_data(data) {
+        super._load_data(data);
+
+        if (data.position !== undefined) this.set_position(data.position);
+        if (data.rotation !== undefined) this.set_rotation(data.rotation);
+        if (data.scale !== undefined) this.set_scale(data.scale);
+        if (data.z_index !== undefined) this.set_z_index(data.z_index);
+        if (data.z_relative !== undefined) this.set_z_relative(data.z_relative);
+
+        return this;
+    }
+
     /**
      * @param {Vector2} p_pos
      */
