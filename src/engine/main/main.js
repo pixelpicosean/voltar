@@ -105,8 +105,7 @@ export const Main = {
 
         this.events.emit_signal('started');
 
-        // load and start main scene (preloader here instead)
-        const scene = this.global.application.preloader.instance();
+        const scene = this.global.application.main_scene.instance();
         scene_tree.add_current_scene(scene);
 
         os.set_main_loop(scene_tree);

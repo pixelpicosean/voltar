@@ -13,8 +13,7 @@ import {
 /**
  * @typedef ApplicationSettings
  * @prop {string} [name]
- * @prop {{ instance: () => import('engine/scene/main/node').Node }} [preloader]
- * @prop {string|typeof Node} [main_scene]
+ * @prop {{ instance: () => import('engine/scene/main/node').Node }} [main_scene]
  * @prop {boolean} [pause_on_blur]
  */
 
@@ -76,7 +75,6 @@ import {
 const DefaultSettings = {
     application: {
         name: 'Voltar',
-        preloader: undefined,
         main_scene: undefined,
         pause_on_blur: false,
     },
