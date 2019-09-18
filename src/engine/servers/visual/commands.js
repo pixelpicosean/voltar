@@ -129,8 +129,8 @@ export class CommandRect extends Command {
     constructor() {
         super();
 
-        this.rect = new Rect2();
         this.modulate = new Color();
+        this.rect = new Rect2();
         this.source = new Rect2();
         this.flags = 0;
         this.vertex_data = new Float32Array(8);
@@ -141,6 +141,7 @@ export class CommandRect extends Command {
     }
     init() {
         super.init();
+        this.modulate.set(1, 1, 1, 1);
         this.rect.set(0, 0, 0, 0);
         this.source.set(0, 0, 0, 0);
         this.flags = 0;
@@ -214,7 +215,7 @@ export class CommandNinePatch extends Command {
         super.init();
         this.rect.set(0, 0, 0, 0);
         this.source.set(0, 0, 0, 0);
-        this.color.set(0, 0, 0, 0);
+        this.color.set(1, 1, 1, 1);
         this.margin[0] = this.margin[1] = this.margin[2] = this.margin[3] = 0;
         this.draw_cente = true;
         this.axis_x = NINE_PATCH_STRETCH;
@@ -386,7 +387,7 @@ export class CommandCircle extends Command {
     init() {
         this.pos.set(0, 0);
         this.radius = 0;
-        this.color.set(0, 0, 0, 0);
+        this.color.set(1, 1, 1, 1);
         return this;
     }
 }
