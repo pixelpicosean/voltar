@@ -201,10 +201,6 @@ export class Node extends VObject {
          */
         this.instance_data = null;
     }
-    free() {
-        this.data = null;
-        return super.free();
-    }
 
     /* virtuals */
 
