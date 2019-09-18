@@ -15,6 +15,8 @@ const DEFAULT_UVS = new TextureUvs();
 
 export default class Texture extends VObject
 {
+    get class() { return 'Texture' }
+
     /**
      * @param {BaseTexture} baseTexture - The base texture source to create the texture from
      * @param {Rect2} [frame] - The rectangle frame of the texture to show

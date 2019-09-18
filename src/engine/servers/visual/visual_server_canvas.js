@@ -750,7 +750,7 @@ export class VisualServerCanvas {
     _render_canvas_item(p_canvas_item, p_transform, p_clip_rect, p_module, p_z, z_list, z_last_list, p_canvas_clip) {
         const ci = p_canvas_item;
 
-        if (!ci.visible) {
+        if (!ci.visible || ci.final_modulate.a < 0.001) {
             return;
         }
 
@@ -899,7 +899,7 @@ export class VisualServerCanvas {
         for (let i = 0; i < child_item_count; i++) {
             const item = child_items[i];
 
-            if (item.visible) {
+            if (item.visible && item.final_modulate.a > 0.001) {
                 if (r_items) {
                     r_items[r_index] = item;
                     item.ysort_xform.copy(p_transform);

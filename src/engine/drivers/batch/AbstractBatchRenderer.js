@@ -312,6 +312,9 @@ export default class AbstractBatchRenderer extends ObjectRenderer
         if (!element.texture || !element.texture.valid) {
             return;
         }
+        if (element.final_modulate.a < 0.001) {
+            return;
+        }
 
         if (this._vertexCount + (element.vertex_data.length / 2) > this.size) {
             this.flush();
