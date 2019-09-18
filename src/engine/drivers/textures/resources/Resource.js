@@ -61,6 +61,8 @@ export default class TextureResource
          * @private
          */
         this.onUpdate = new Runner('update');
+
+        this.url = '';
     }
 
     /**

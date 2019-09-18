@@ -12,6 +12,8 @@ export class Resource extends VObject {
 
         /** @type {import("engine/scene/main/node").Node} */
         this.local_scene = null;
+
+        this.data = null;
     }
 
     /* virtual */

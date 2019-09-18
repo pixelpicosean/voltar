@@ -4,6 +4,9 @@ import Settings from 'project.json';
 
 import { Node } from 'engine/scene/main/node';
 
+v.preload('sprites', 'media/sprites.png')
+v.preload('button', 'media/green_button.png')
+
 class Preloader extends Node {
     static instance() { return new Preloader() }
     constructor() {
@@ -14,17 +17,18 @@ class Preloader extends Node {
     }
     _enter_tree() {
         console.log('_enter_tree')
-        v.load([
-            'media/sprites.png',
-            'media/green_button.png',
-        ])
-        .connect_once('complete', this.on_resource_loaded, this)
+        v.Engine.start_preload((progress) => {
+            console.log(`load progress: ${progress}`)
+        }, () => {
+            console.log('load complete')
+            this.on_resource_loaded();
+        })
     }
 
-    on_resource_loaded(loader) {
+    on_resource_loaded() {
         console.log('load completed')
 
-        const tex = loader.resources['media/sprites.png'].texture;
+        const tex = v.resource_map['media/sprites.png'];
         const sprite = new v.Sprite();
         sprite.set_texture(tex);
         this.add_child(sprite);
@@ -78,7 +82,7 @@ class Preloader extends Node {
         tex_rect.set_flip_v(true);
         tex_rect.set_rect_position_n(500, 10);
 
-        const nine_tex = loader.resources['media/green_button.png'].texture;
+        const nine_tex = v.resource_map['button'];
 
         const nine_rect = new v.NinePatchRect();
         this.add_child(nine_rect);
@@ -142,7 +146,7 @@ class Preloader extends Node {
 }
 v.GDCLASS(Preloader, Node)
 
-v.Main.setup(v.deep_merge({
+v.Main.setup(Settings, {
     display: {
         resizable: false,
         stretch_mode: v.STRETCH_MODE_VIEWPORT,
@@ -150,5 +154,6 @@ v.Main.setup(v.deep_merge({
     },
     application: {
         preloader: Preloader,
+        // main_scene: StartScene,
     },
-}, Settings));
+});

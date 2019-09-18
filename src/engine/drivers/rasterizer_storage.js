@@ -18,8 +18,8 @@ import { autoDetectResource } from "./textures/resources/index";
  */
 function image_format_to_texture(format) {
     switch (format) {
-        case FORMATS.RGB: return FORMAT_RGB8;
-        case FORMATS.RGBA: return FORMAT_RGBA8;
+        case FORMAT_RGB8: return FORMATS.RGB;
+        case FORMAT_RGBA8: return FORMATS.RGBA;
     }
 }
 
@@ -217,7 +217,7 @@ export class RasterizerStorage {
      * @param {Image} p_image
      */
     texture_set_data(rid, p_image) {
-        rid.baseTexture.setResource(autoDetectResource(p_image));
+        rid.baseTexture.setResource(autoDetectResource(p_image.data));
     }
     /**
      * @param {Texture} rid

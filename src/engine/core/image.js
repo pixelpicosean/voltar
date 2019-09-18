@@ -8,10 +8,9 @@ export const FORMAT_RGB8 = 5;
 export const FORMAT_RGBA8 = 6;
 
 export class Image extends Resource {
+    get class() { return 'Image' }
     constructor() {
         super();
-
-        this.class = 'Image';
 
         this.format = FORMAT_RGBA8;
         /** @type {HTMLImageElement | HTMLCanvasElement | HTMLVideoElement} */

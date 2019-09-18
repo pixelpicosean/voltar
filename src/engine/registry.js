@@ -48,7 +48,16 @@ export const loader_pre_procs = [];
  */
 export const loader_use_procs = [];
 
+export const preload_queue = {
+    is_start: false,
+    is_complete: false,
+    /** @type {(string|Object)[][]} */
+    queue: [],
+};
+
+import resources from 'resources.json';
 /** @type {Object<string, any>} */
-export const optional = {
-    Extract: null,
-}
+export const resource_map = resources;
+
+/** @type {Object<string, any>} */
+export const raw_resource_map = resources;

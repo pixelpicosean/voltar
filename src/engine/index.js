@@ -91,6 +91,8 @@ export * from 'engine/scene/gui/center_container';
 export * from 'engine/scene/gui/box_container';
 export * from 'engine/scene/gui/grid_container';
 
+export * from 'engine/registry';
+
 // ------------------------------------------------------------------
 // Singletons
 // ------------------------------------------------------------------
@@ -149,6 +151,18 @@ Main.events.connect_once('started', () => {
 // Resource loading functions
 // ------------------------------------------------------------------
 import { ResourceLoader } from './core/io/resource_loader';
+import { preload_queue } from './registry';
+
+/**
+ * Preload a resource before game start.
+ * @param {...(string|Object)} settings
+ */
+export function preload(...settings) {
+    if (!preload_queue.is_start && preload_queue.is_complete) {
+        throw new Error('"preload" can only be called before launch!');
+    }
+    preload_queue.queue.push(settings);
+}
 
 /**
  * @param  {...(string | Object)} settings

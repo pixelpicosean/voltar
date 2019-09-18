@@ -93,11 +93,14 @@ export const STORAGE_COMPRESS_LOSSLESS = 2;
 export class ImageTexture extends Texture {
     get class() { return 'ImageTexture' }
 
-    get_width() { return this.texture.width }
-    get_height() { return this.texture.height }
+    get_width() { return this.width }
+    get_height() { return this.height }
 
     constructor() {
         super();
+
+        this.width = 0;
+        this.height = 0;
 
         this.storage = STORAGE_RAW;
         this.lossy_quality = 0.7;
@@ -112,7 +115,7 @@ export class ImageTexture extends Texture {
         return this.format;
     }
     get_size() {
-        return Vector2.new(this.texture.width, this.texture.height);
+        return Vector2.new(this.width, this.height);
     }
 
     /**
@@ -133,8 +136,9 @@ export class ImageTexture extends Texture {
     create_from_image(p_image, p_flags) {
         this._flags = p_flags;
         this.format = p_image.format;
-
-        VSG.storage.texture_allocate(this.texture, this.get_width(), this.get_height(), 0, this.format, TEXTURE_TYPE_2D, this.flags);
+        this.width = p_image.width;
+        this.height = p_image.height;
+        VSG.storage.texture_allocate(this.texture, this.width, this.height, 0, this.format, TEXTURE_TYPE_2D, this.flags);
         VSG.storage.texture_set_data(this.texture, p_image);
 
         this.image_stored = true;

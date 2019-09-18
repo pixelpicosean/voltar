@@ -5,19 +5,12 @@ import { queue, each_series } from './async';
 import Resource from './io_resource';
 import blob_middleware_factory from './middlewares/parsing/blob';
 
-import { loader_pre_procs, loader_use_procs } from 'engine/registry';
+import { loader_pre_procs, loader_use_procs, resource_map, raw_resource_map } from 'engine/registry';
 import { texture_loader } from './texture_loader';
 
 // some constants
 const MAX_PROGRESS = 100;
 const rgx_extract_url_hash = /(#[\w-]+)?$/;
-
-/**
- * All the resources for this loader keyed by name.
- *
- * @type {Object<string, Resource>}
- */
-const shared_resources = {};
 
 /**
  * Manages the state and loading of multiple resources to load.
@@ -118,7 +111,7 @@ export class ResourceLoader extends VObject {
 
         this._queue.pause();
 
-        this.resources = shared_resources;
+        this.resources = {};
 
         // Add default before middleware
         for (let i = 0; i < ResourceLoader._default_before_middleware.length; ++i) {
@@ -211,8 +204,9 @@ export class ResourceLoader extends VObject {
         }
 
         // check if resource already exists.
-        if (this.resources[name]) {
-            throw new Error(`Resource named "${name}" already exists.`);
+        if (raw_resource_map[name]) {
+            console.warn(`Resource named "${name}" already exists.`);
+            // TODO: update old resource with new one
         }
 
         // add base url if this isn't an absolute url
@@ -457,7 +451,7 @@ export class ResourceLoader extends VObject {
     _on_complete() {
         this.progress = MAX_PROGRESS;
         this.loading = false;
-        this.emit_signal('complete', this, this.resources);
+        this.emit_signal('complete');
     }
 
     /**

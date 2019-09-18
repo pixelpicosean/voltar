@@ -49,15 +49,16 @@ export const Main = {
     events: new VObject(),
 
     /**
-     * @param {import("engine/core/project_settings").Settings} settings
+     * Pass as much settings as you want, but next one will be merged into previous
+     * @param {...import("engine/core/project_settings").Settings} settings
      */
-    setup(settings) {
+    setup(...settings) {
         os = new OS();
         os.initialize_core();
 
         this.engine = new Engine();
 
-        this.global = new ProjectSettings(settings);
+        this.global = new ProjectSettings(...settings);
         this.input_map = new InputMap();
 
         this.input_map.load_from_globals();

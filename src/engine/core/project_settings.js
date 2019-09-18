@@ -119,9 +119,9 @@ export class ProjectSettings {
     static get_singleton() { return singleton }
 
     /**
-    * @param {Settings} settings
-    */
-    constructor(settings) {
+     * @param {...Settings} settings
+     */
+    constructor(...settings) {
         if (!singleton) singleton = this;
 
         this.application = DefaultSettings.application;
@@ -130,7 +130,9 @@ export class ProjectSettings {
         this.input = DefaultSettings.input;
         this.layer_map = DefaultSettings.layer_map;
 
-        deep_merge(this, settings);
+        for (let s of settings) {
+            deep_merge(this, s);
+        }
     }
 }
 
