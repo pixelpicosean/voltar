@@ -32,10 +32,12 @@ export const VERTICAL = 1;
 export const HALIGN_LEFT = 0;
 export const HALIGN_CENTER = 1;
 export const HALIGN_RIGHT = 2;
+export const HALIGN_FILL = 3;
 
 export const VALIGN_TOP = 0;
 export const VALIGN_CENTER = 1;
 export const VALIGN_BOTTOM = 2;
+export const VALIGN_FILL = 3;
 
 export const MARGIN_LEFT = 0;
 export const MARGIN_TOP = 1;

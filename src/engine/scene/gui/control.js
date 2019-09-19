@@ -1431,6 +1431,7 @@ export class Control extends CanvasItem {
     get_font(name, type) {
         if (!type) {
             if (this.c_data.font_override) {
+                /** @type {Font} */
                 const font = this.c_data.font_override[name];
                 if (font !== undefined) {
                     return font;

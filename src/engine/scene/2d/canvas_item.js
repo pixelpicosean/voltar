@@ -228,6 +228,12 @@ export class CanvasItem extends Node {
         if (data.self_modulate !== undefined) {
             this.set_self_modulate(data.self_modulate);
         }
+        if (data.show_behind_parent !== undefined) {
+            this.set_show_behind_parent(data.show_behind_parent);
+        }
+        if (data.visible !== undefined) {
+            this.set_visible(data.visible);
+        }
 
         return this;
     }
