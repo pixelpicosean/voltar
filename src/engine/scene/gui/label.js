@@ -410,7 +410,7 @@ export class Label extends Control {
 
                             let g = this._glyphs[glyph_idx];
                             if (!g) {
-                                this._glyphs[glyph_idx] = g = new CommandRect();
+                                this._glyphs[glyph_idx] = g = CommandRect.instance();
                             }
 
                             // Update char sprite info
