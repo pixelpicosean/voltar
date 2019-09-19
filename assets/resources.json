@@ -2,7 +2,7 @@
     "res://scene/demo.tscn": {
         "@type#": "PackedScene",
         "data": {
-            "type": "Node2D",
+            "type": "Node",
             "name": "demo",
             "children": [
                 {
@@ -12,6 +12,7 @@
                         "x": 256.221,
                         "y": 320.28
                     },
+                    "rotation": -0.124678,
                     "texture": "@ext#1",
                     "children": []
                 },
@@ -28,23 +29,72 @@
                 {
                     "type": "NinePatchRect",
                     "name": "NinePatchRect",
-                    "margin_bottom": 257,
-                    "margin_left": 455,
-                    "margin_top": 11,
-                    "margin_right": 508,
+                    "margin_bottom": 123,
+                    "margin_left": 145,
+                    "margin_top": 7,
+                    "margin_right": 685,
                     "texture": "@ext#3",
                     "patch_margin_bottom": 12,
                     "patch_margin_left": 8,
                     "patch_margin_top": 8,
                     "patch_margin_right": 8,
                     "children": []
+                },
+                {
+                    "type": "Label",
+                    "name": "Label",
+                    "margin_bottom": 112.299,
+                    "margin_left": 167.342,
+                    "margin_top": 13.2987,
+                    "margin_right": 668.342,
+                    "align": 1,
+                    "text": "Hi, I'm Voltar.\nNice to meet you :)",
+                    "valign": 1,
+                    "font": "@ext#4",
+                    "custom_colors": {
+                        "font_color": {
+                            "r": 0.662745,
+                            "g": 0.305882,
+                            "b": 0.74902,
+                            "a": 1
+                        }
+                    },
+                    "children": []
+                },
+                {
+                    "type": "CenterContainer",
+                    "name": "CenterContainer",
+                    "anchor_bottom": 1,
+                    "anchor_right": 1,
+                    "children": [
+                        {
+                            "type": "ColorRect",
+                            "name": "color_rect",
+                            "margin_bottom": 350,
+                            "margin_left": 350,
+                            "margin_top": 250,
+                            "margin_right": 450,
+                            "rect_min_size": {
+                                "x": 100,
+                                "y": 100
+                            },
+                            "color": {
+                                "r": 0,
+                                "g": 1,
+                                "b": 1,
+                                "a": 1
+                            },
+                            "children": []
+                        }
+                    ]
                 }
             ],
             "__meta__": {
                 "ext": {
                     "1": "icon-1",
                     "2": "icon-2",
-                    "3": "blue_button06"
+                    "3": "blue_button06",
+                    "4": "mini"
                 },
                 "sub": {}
             }

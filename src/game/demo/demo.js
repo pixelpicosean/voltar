@@ -22,20 +22,6 @@ export class MainScene extends v.Node {
         sprite.set_scale_n(0.3, 0.3)
         this.spr = sprite;
 
-        const center_container = new v.CenterContainer()
-        this.add_child(center_container)
-        center_container.set_anchor_right(1);
-        center_container.set_anchor_bottom(1);
-        center_container.set_margin_left(0);
-        center_container.set_margin_right(0);
-        center_container.set_margin_top(0);
-        center_container.set_margin_bottom(0);
-
-        const rect = new v.ColorRect();
-        center_container.add_child(rect);
-        rect.set_rect_min_size_n(100, 100);
-        rect.set_color_n(0, 1, 1);
-
         const grid = new v.GridContainer();
         this.add_child(grid);
         grid.set_columns(3);
