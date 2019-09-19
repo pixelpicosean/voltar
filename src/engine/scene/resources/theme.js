@@ -10,7 +10,7 @@ import { StyleBox } from "./style_box";
 import { Font } from "./font";
 
 
-export const default_font_name = '04b03';
+export const default_font_name = 'mini';
 
 let default_font = null;
 const default_style = (() => {
