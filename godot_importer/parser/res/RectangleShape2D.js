@@ -1,4 +1,3 @@
-const _ = require('lodash');
 const {
     Vector2,
 } = require('../parse_utils');

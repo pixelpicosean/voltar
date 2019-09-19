@@ -1,6 +1,5 @@
 const {
     int,
-    url,
 } = require('../parse_utils');
 
 module.exports = (data) => {

@@ -1,4 +1,3 @@
-const _ = require('lodash');
 const {
     int,
     Vector2,
@@ -13,6 +12,7 @@ module.exports = (data) => {
         cell_size: Vector2(data.prop.cell_size),
         mode: int(data.prop.mode),
         tile_set: data.prop.tile_set,
+        tile_data: undefined,
     });
 
     if (!data.prop.tile_data) {

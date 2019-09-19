@@ -1,7 +1,8 @@
-const Node = require('./Node');
 const {
     PoolRealArray,
 } = require('../parse_utils');
+
+const Node = require('./Node');
 
 module.exports = (data) => {
     return Object.assign(Node(data), {

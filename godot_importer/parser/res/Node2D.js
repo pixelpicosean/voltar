@@ -1,37 +1,21 @@
-const _ = require('lodash');
 const {
-    string,
-    path,
     int,
     real,
     boolean,
     Vector2,
-    Color,
 } = require('../parse_utils');
 
+const CanvasItem = require('./CanvasItem');
+
 module.exports = (data) => {
-    const node = {
-        key: data.key,
-        index: int(data.attr.index),
+    const res = Object.assign({}, CanvasItem(data), {
         type: 'Node2D',
-        name: string(data.attr.name),
-        parent: path(data.attr.parent),
-        groups: undefined,
         position: Vector2(data.prop.position),
         rotation: real(data.prop.rotation),
         scale: Vector2(data.prop.scale),
-        pause_mode: int(data.prop.pause_mode),
-        modulate: Color(data.prop.modulate),
-        self_modulate: Color(data.prop.self_modulate),
-        visible: boolean(data.prop.visible),
-    };
+        z_as_relative: boolean(data.prop.z_as_relative),
+        z_index: int(data.prop.z_index),
+    });
 
-    if (Array.isArray(data.attr.groups)) {
-        node.groups = data.attr.groups.filter(g => g.length > 0);
-    }
-
-    // Save properties so we can do some post-process
-    node._prop = data.prop;
-
-    return node;
+    return res;
 };

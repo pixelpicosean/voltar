@@ -1,4 +1,5 @@
 const {
+    int,
     boolean,
     Vector2,
     Nullable,
@@ -9,15 +10,17 @@ const Node2D = require('./Node2D');
 module.exports = (data) => {
     const res = Object.assign({}, Node2D(data), {
         type: 'Sprite',
-        texture: Nullable(data.prop.texture),
+        centered: boolean(data.prop.centered),
+        flip_h: boolean(data.prop.flip_h),
+        flip_v: boolean(data.prop.flip_v),
+        frame: int(data.prop.frame),
+        frame_coords: Vector2(data.prop.frame_coords),
+        hframe: int(data.prop.hframe),
+        vframe: int(data.prop.vframe),
         offset: Vector2(data.prop.offset),
+        region_enabled: boolean(data.prop.region_enabled),
+        region_rect: Vector2(data.prop.region_rect),
+        texture: Nullable(data.prop.texture),
     });
-
-    // Set anchor based on `center`
-    const centered = boolean(data.prop.centered);
-    if (centered !== undefined && !centered) {
-        res.anchor = { x: 0, y: 0 };
-    }
-
     return res;
 };

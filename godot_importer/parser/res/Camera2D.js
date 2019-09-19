@@ -1,4 +1,4 @@
-const Node2D = require('./Node2D');
+const Node2D = require('./CanvasItem');
 
 module.exports = (data) => {
     return Object.assign(Node2D(data), {

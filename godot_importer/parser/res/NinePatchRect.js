@@ -1,5 +1,6 @@
 const {
     int,
+    real,
     boolean,
 } = require('../parse_utils');
 
@@ -8,19 +9,15 @@ const Control = require('./Control');
 module.exports = (data) => {
     const res = Object.assign({}, Control(data), {
         type: 'NinePatchRect',
+        texture: data.prop.texture,
+        draw_center: boolean(data.prop.draw_center),
+        axis_stretch_horizontal: int(data.prop.axis_stretch_horizontal),
+        axis_stretch_vertical: int(data.prop.axis_stretch_vertical),
+        patch_margin_bottom: real(data.prop.patch_margin_bottom),
+        patch_margin_left: real(data.prop.patch_margin_left),
+        patch_margin_top: real(data.prop.patch_margin_top),
+        patch_margin_right: real(data.prop.patch_margin_right),
     });
-
-    res.texture = data.prop.texture;
-
-    res.draw_center = boolean(data.prop.draw_center);
-
-    res.axis_stretch_horizontal = int(data.prop.axis_stretch_horizontal);
-    res.axis_stretch_vertical = int(data.prop.axis_stretch_vertical);
-
-    res.patch_margin_bottom = int(data.prop.patch_margin_bottom);
-    res.patch_margin_left = int(data.prop.patch_margin_left);
-    res.patch_margin_top = int(data.prop.patch_margin_top);
-    res.patch_margin_right = int(data.prop.patch_margin_right);
 
     return res;
 };

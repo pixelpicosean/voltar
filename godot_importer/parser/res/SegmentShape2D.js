@@ -1,4 +1,3 @@
-const _ = require('lodash');
 const {
     real,
 } = require('../parse_utils');

@@ -1,8 +1,9 @@
-const Node2D = require('./Node2D');
 const {
     Vector2,
     Color,
 } = require('../parse_utils');
+
+const Node2D = require('./CanvasItem');
 
 module.exports = (data) => {
     return Object.assign(Node2D(data), {
