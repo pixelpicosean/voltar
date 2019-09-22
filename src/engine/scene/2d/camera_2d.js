@@ -27,23 +27,13 @@ import {
 } from './canvas_item';
 
 
-/**
- * @enum {number}
- */
-export const AnchorMode = {
-    FIXED_TOP_LEFT: 0,
-    DRAG_CENTER: 1,
-}
+export const ANCHOR_MODE_FIXED_TOP_LEFT = 0;
+export const ANCHOR_MODE_DRAG_CENTER = 1;
 
-/**
- * @enum {number}
- */
-export const Camera2DProcessMode = {
-    PHYSICS: 0,
-    IDLE: 1,
-}
+export const CAMERA2D_PROCESS_PHYSICS = 0;
+export const CAMERA2D_PROCESS_IDLE = 1;
 
-export default class Camera2D extends Node2D {
+export class Camera2D extends Node2D {
     get class() { return 'Camera2D' }
 
     get drag_margin_left() {
@@ -102,88 +92,32 @@ export default class Camera2D extends Node2D {
         this.limit[MARGIN_BOTTOM] = value;
     }
 
-    set_current(value) {
-        if (value) {
-            this.make_current();
-        }
+    get _current() { return this._current }
+    set _current(value) { this.set_current(value) }
 
-        this.current = value;
-    }
+    get _offset_h() { return this._offset_h }
+    set _offset_h(value) { this.set_offset_h(value) }
 
-    set_offset_h(value) {
-        this.offset_h = value;
-        this.h_offset_changed = true;
-        this._udpate_scroll();
-    }
+    get _offset_v() { return this._offset_v }
+    set _offset_v(value) { this.set_offset_v(value) }
 
-    set_offset_v(value) {
-        this.offset_v = value;
-        this.v_offset_changed = true;
-        this._udpate_scroll();
-    }
+    get _offset() { return this._offset }
+    set _offset(value) { this.set_offset(value) }
 
-    /**
-     * @param {Vector2Like} p_offset
-     */
-    set_offset(p_offset) {
-        this.set_offset_n(p_offset.x, p_offset.y);
-    }
-    /**
-     * @param {number} x
-     * @param {number} y
-     */
-    set_offset_n(x, y) {
-        this.offset.set(x, y);
-        this._udpate_scroll();
-    }
+    get _anchor_mode() { return this._anchor_mode }
+    set _anchor_mode(value) { this.set_anchor_mode(value) }
 
-    /**
-     * @param {AnchorMode} p_anchor_mode
-     */
-    set_anchor_mode(p_anchor_mode) {
-        this.anchor_mode = p_anchor_mode;
-        this._udpate_scroll();
-    }
+    get _rotating() { return this._rotating }
+    set _rotating(value) { this.set_rotating(value) }
 
-    /**
-     * @param {boolean} p_rotating
-     */
-    set_rotating(p_rotating) {
-        this.rotating = p_rotating;
-        this._udpate_scroll();
-    }
+    get _process_mode() { return this._process_mode }
+    set _process_mode(value) { this.set_process_mode(value) }
 
-    /**
-     * @param {Camera2DProcessMode} p_mode
-     */
-    set_process_mode(p_mode) {
-        if (this.process_mode === p_mode) {
-            return;
-        }
+    get smoothing_enabled() { return this._smoothing_enabled }
+    set smoothing_enabled(value) { this.set_smoothing_enabled(value) }
 
-        this.process_mode = p_mode;
-        this._update_process_mode();
-    }
-
-    /**
-     * @param {boolean} p_smoothing_enabled
-     */
-    set_smoothing_enabled(p_smoothing_enabled) {
-        this.smoothing_enabled = p_smoothing_enabled;
-        this._udpate_scroll();
-    }
-
-    /**
-     * @param {number} p_smoothing_speed
-     */
-    set_smoothing_speed(p_smoothing_speed) {
-        this.smoothing_speed = p_smoothing_speed;
-        if (this.smooth_speed > 0) {
-            this.set_process_internal(true);
-        } else {
-            this.set_process_internal(false);
-        }
-    }
+    get smoothing_speed() { return this._smoothing_speed }
+    set smoothing_speed(value) { this.set_smoothing_speed(value) }
 
     constructor() {
         super();
@@ -194,8 +128,8 @@ export default class Camera2D extends Node2D {
         this.viewport = null;
         this.canvas = null;
 
-        this.anchor_mode = AnchorMode.DRAG_CENTER;
-        this.current = false;
+        this._anchor_mode = ANCHOR_MODE_DRAG_CENTER;
+        this._current = false;
         this.drag_margin = [0.2, 0.2, 0.2, 0.2];
         this.drag_margin_h_enabled = true;
         this.drag_margin_v_enabled = true;
@@ -206,14 +140,14 @@ export default class Camera2D extends Node2D {
             +10000000,
         ];
         this.limit_smoothed = false;
-        this.offset = new Vector2();
-        this.offset_h = 0;
-        this.offset_v = 0;
-        this.process_mode = Camera2DProcessMode.IDLE;
-        this.rotating = false;
-        this.smoothing_enabled = false;
+        this._offset = new Vector2();
+        this._offset_h = 0;
+        this._offset_v = 0;
+        this._process_mode = CAMERA2D_PROCESS_IDLE;
+        this._rotating = false;
+        this._smoothing_enabled = false;
 
-        this.smoothing_speed = 5.0;
+        this._smoothing_speed = 5.0;
         this.zoom = new Vector2(1, 1);
 
         this.first = true;
@@ -235,7 +169,7 @@ export default class Camera2D extends Node2D {
     _load_data(data) {
         super._load_data(data);
 
-        if (data.anchor_mode !== undefined) this.anchor_mode = data.anchor_mode;
+        if (data.anchor_mode !== undefined) this._anchor_mode = data.anchor_mode;
         if (data.current !== undefined) this.set_current(data.current);
 
         if (data.drag_margin_left !== undefined) this.drag_margin_left = data.drag_margin_left;
@@ -253,13 +187,13 @@ export default class Camera2D extends Node2D {
 
         if (data.limit_smoothed !== undefined) this.limit_smoothed = data.limit_smoothed;
 
-        if (data.offset !== undefined) this.offset.copy(data.offset);
-        if (data.offset_h !== undefined) this.offset_h = data.offset_h;
-        if (data.offset_v !== undefined) this.offset_v = data.offset_v;
+        if (data.offset !== undefined) this._offset.copy(data.offset);
+        if (data.offset_h !== undefined) this._offset_h = data.offset_h;
+        if (data.offset_v !== undefined) this._offset_v = data.offset_v;
 
-        if (data.process_mode !== undefined) this.process_mode = data.process_mode;
+        if (data.process_mode !== undefined) this._process_mode = data.process_mode;
 
-        if (data.rotating !== undefined) this.rotating = data.rotating;
+        if (data.rotating !== undefined) this._rotating = data.rotating;
 
         if (data.smooth_enabled !== undefined) this.smooth_enabled = data.smooth_enabled;
         if (data.smooth_speed !== undefined) this.smooth_speed = data.smooth_speed;
@@ -302,7 +236,7 @@ export default class Camera2D extends Node2D {
                 this.first = true;
             } break;
             case NOTIFICATION_EXIT_TREE: {
-                if (this.current) {
+                if (this._current) {
                     if (this.viewport && this.custom_viewport) {
                         this.viewport.set_canvas_transform(Transform2D.IDENTITY);
                     }
@@ -357,18 +291,18 @@ export default class Camera2D extends Node2D {
         const screen_size = Vector2.new(rect.width, rect.height);
 
         const current_camera_pos = this.get_global_transform().origin;
-        if (this.anchor_mode === AnchorMode.DRAG_CENTER) {
-            if (this.offset_h < 0) {
-                this.camera_pos.x = current_camera_pos.x + screen_size.x * 0.5 * this.drag_margin[MARGIN_RIGHT] * this.offset_h;
+        if (this._anchor_mode === ANCHOR_MODE_DRAG_CENTER) {
+            if (this._offset_h < 0) {
+                this.camera_pos.x = current_camera_pos.x + screen_size.x * 0.5 * this.drag_margin[MARGIN_RIGHT] * this._offset_h;
             } else {
-                this.camera_pos.x = current_camera_pos.x + screen_size.x * 0.5 * this.drag_margin[MARGIN_LEFT] * this.offset_h;
+                this.camera_pos.x = current_camera_pos.x + screen_size.x * 0.5 * this.drag_margin[MARGIN_LEFT] * this._offset_h;
             }
-            if (this.offset_v < 0) {
-                this.camera_pos.y = current_camera_pos.y + screen_size.y * 0.5 * this.drag_margin[MARGIN_TOP] * this.offset_v;
+            if (this._offset_v < 0) {
+                this.camera_pos.y = current_camera_pos.y + screen_size.y * 0.5 * this.drag_margin[MARGIN_TOP] * this._offset_v;
             } else {
-                this.camera_pos.y = current_camera_pos.y + screen_size.y * 0.5 * this.drag_margin[MARGIN_BOTTOM] * this.offset_v;
+                this.camera_pos.y = current_camera_pos.y + screen_size.y * 0.5 * this.drag_margin[MARGIN_BOTTOM] * this._offset_v;
             }
-        } else if (this.anchor_mode === AnchorMode.FIXED_TOP_LEFT) {
+        } else if (this._anchor_mode === ANCHOR_MODE_FIXED_TOP_LEFT) {
             this.camera_pos.copy(current_camera_pos);
         }
 
@@ -376,7 +310,7 @@ export default class Camera2D extends Node2D {
     }
 
     clear_current() {
-        this.current = false;
+        this._current = false;
         if (this.is_inside_tree()) {
             this.get_tree().call_group_flags(GROUP_CALL_REALTIME, this.group_name, '_make_current', null);
         }
@@ -396,7 +330,7 @@ export default class Camera2D extends Node2D {
 
     make_current() {
         if (!this.is_inside_tree()) {
-            this.current = true;
+            this._current = true;
         } else {
             this.get_tree().call_group_flags(GROUP_CALL_REALTIME, this.group_name, '_make_current', this);
         }
@@ -408,6 +342,91 @@ export default class Camera2D extends Node2D {
         this._udpate_scroll();
     }
 
+    set_current(value) {
+        if (value) {
+            this.make_current();
+        }
+
+        this._current = value;
+    }
+
+    set_offset_h(value) {
+        this._offset_h = value;
+        this.h_offset_changed = true;
+        this._udpate_scroll();
+    }
+
+    set_offset_v(value) {
+        this._offset_v = value;
+        this.v_offset_changed = true;
+        this._udpate_scroll();
+    }
+
+    /**
+     * @param {Vector2Like} p_offset
+     */
+    set_offset(p_offset) {
+        this.set_offset_n(p_offset.x, p_offset.y);
+    }
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
+    set_offset_n(x, y) {
+        this._offset.set(x, y);
+        this._udpate_scroll();
+    }
+
+    /**
+     * @param {number} p_anchor_mode
+     */
+    set_anchor_mode(p_anchor_mode) {
+        this._anchor_mode = p_anchor_mode;
+        this._udpate_scroll();
+    }
+
+    /**
+     * @param {boolean} p_rotating
+     */
+    set_rotating(p_rotating) {
+        this._rotating = p_rotating;
+        this._udpate_scroll();
+    }
+
+    /**
+     * @param {number} p_mode
+     */
+    set_process_mode(p_mode) {
+        if (this._process_mode === p_mode) {
+            return;
+        }
+
+        this._process_mode = p_mode;
+        this._update_process_mode();
+    }
+
+    /**
+     * @param {boolean} p_smoothing_enabled
+     */
+    set_smoothing_enabled(p_smoothing_enabled) {
+        this._smoothing_enabled = p_smoothing_enabled;
+        this._udpate_scroll();
+    }
+
+    /**
+     * @param {number} p_smoothing_speed
+     */
+    set_smoothing_speed(p_smoothing_speed) {
+        this._smoothing_speed = p_smoothing_speed;
+        if (this.smooth_speed > 0) {
+            this.set_process_internal(true);
+        } else {
+            this.set_process_internal(false);
+        }
+    }
+
+    /* private */
+
     _udpate_scroll() {
         if (!this.is_inside_tree()) {
             return;
@@ -417,14 +436,14 @@ export default class Camera2D extends Node2D {
             return;
         }
 
-        if (this.current) {
+        if (this._current) {
             const xform = this.get_camera_transform();
             this.viewport.set_canvas_transform(xform);
             Transform2D.free(xform);
 
             const rect = this.viewport.get_visible_rect();
             const screen_size = Vector2.new(rect.width, rect.height);
-            const screen_offset = (this.anchor_mode === AnchorMode.DRAG_CENTER ? (screen_size.clone().scale(0.5)) : Vector2.new(0, 0));
+            const screen_offset = (this._anchor_mode === ANCHOR_MODE_DRAG_CENTER ? (screen_size.clone().scale(0.5)) : Vector2.new(0, 0));
 
             this.get_tree().call_group_flags(GROUP_CALL_REALTIME, this.group_name, '_camera_moved', xform, screen_offset);
 
@@ -433,7 +452,7 @@ export default class Camera2D extends Node2D {
         }
     }
     _update_process_mode() {
-        if (this.process_mode === Camera2DProcessMode.IDLE) {
+        if (this._process_mode === CAMERA2D_PROCESS_IDLE) {
             this.set_process_internal(true);
             this.set_physics_process_internal(false);
         } else {
@@ -447,9 +466,9 @@ export default class Camera2D extends Node2D {
      */
     _make_current(p_which) {
         if (p_which === this) {
-            this.current = true;
+            this._current = true;
         } else {
-            this.current = false;
+            this._current = false;
         }
     }
 
@@ -465,17 +484,17 @@ export default class Camera2D extends Node2D {
         const ret_camera_pos = Vector2.new();
 
         if (!this.first) {
-            if (this.anchor_mode === AnchorMode.DRAG_CENTER) {
+            if (this._anchor_mode === ANCHOR_MODE_DRAG_CENTER) {
                 if (this.drag_margin_h_enabled && this.h_offset_changed) {
                     this.camera_pos.x = clamp(this.camera_pos.x,
                         (new_camera_pos.x - screen_size.x * 0.5 * this.zoom.x * this.drag_margin[MARGIN_RIGHT]),
                         (new_camera_pos.x + screen_size.x * 0.5 * this.zoom.x * this.drag_margin[MARGIN_LEFT])
                     );
                 } else {
-                    if (this.offset_h < 0) {
-                        this.camera_pos.x = new_camera_pos.x + screen_size.x * 0.5 * this.drag_margin[MARGIN_RIGHT] * this.offset_h;
+                    if (this._offset_h < 0) {
+                        this.camera_pos.x = new_camera_pos.x + screen_size.x * 0.5 * this.drag_margin[MARGIN_RIGHT] * this._offset_h;
                     } else {
-                        this.camera_pos.x = new_camera_pos.x + screen_size.x * 0.5 * this.drag_margin[MARGIN_LEFT] * this.offset_h;
+                        this.camera_pos.x = new_camera_pos.x + screen_size.x * 0.5 * this.drag_margin[MARGIN_LEFT] * this._offset_h;
                     }
 
                     this.h_offset_changed = false;
@@ -487,19 +506,19 @@ export default class Camera2D extends Node2D {
                         (new_camera_pos.y + screen_size.y * 0.5 * this.zoom.y * this.drag_margin[MARGIN_TOP])
                     );
                 } else {
-                    if (this.offset_v < 0) {
-                        this.camera_pos.y = new_camera_pos.y + screen_size.y * 0.5 * this.drag_margin[MARGIN_TOP] * this.offset_v;
+                    if (this._offset_v < 0) {
+                        this.camera_pos.y = new_camera_pos.y + screen_size.y * 0.5 * this.drag_margin[MARGIN_TOP] * this._offset_v;
                     } else {
-                        this.camera_pos.y = new_camera_pos.y + screen_size.y * 0.5 * this.drag_margin[MARGIN_BOTTOM] * this.offset_v;
+                        this.camera_pos.y = new_camera_pos.y + screen_size.y * 0.5 * this.drag_margin[MARGIN_BOTTOM] * this._offset_v;
                     }
 
                     this.v_offset_changed = false;
                 }
-            } else if (this.anchor_mode === AnchorMode.FIXED_TOP_LEFT) {
+            } else if (this._anchor_mode === ANCHOR_MODE_FIXED_TOP_LEFT) {
                 this.camera_pos.copy(new_camera_pos);
             }
 
-            const screen_offset = (this.anchor_mode === AnchorMode.DRAG_CENTER ? (screen_size.clone().scale(0.5).multiply(this.zoom)) : Vector2.new(0, 0));
+            const screen_offset = (this._anchor_mode === ANCHOR_MODE_DRAG_CENTER ? (screen_size.clone().scale(0.5).multiply(this.zoom)) : Vector2.new(0, 0));
             const screen_rect = Rect2.new(
                 -screen_offset.x + this.camera_pos.x, -screen_offset.y + this.camera_pos.y,
                 screen_size.x * this.zoom.x, screen_size.y * this.zoom.y
@@ -523,8 +542,8 @@ export default class Camera2D extends Node2D {
                 }
             }
 
-            if (this.smoothing_enabled) {
-                const c = this.smoothing_speed * (this.process_mode === Camera2DProcessMode.PHYSICS ? this.get_physics_process_delta_time() : this.get_process_delta_time());
+            if (this._smoothing_enabled) {
+                const c = this._smoothing_speed * (this._process_mode === CAMERA2D_PROCESS_PHYSICS ? this.get_physics_process_delta_time() : this.get_process_delta_time());
                 const pos = this.camera_pos.clone().subtract(this.smoothed_camera_pos).scale(c)
                 this.smoothed_camera_pos.add(pos);
                 Vector2.free(pos);
@@ -537,10 +556,10 @@ export default class Camera2D extends Node2D {
             this.first = false;
         }
 
-        const screen_offset = (this.anchor_mode === AnchorMode.DRAG_CENTER ? (screen_size.clone().scale(0.5).multiply(this.zoom)) : Vector2.new(0, 0));
+        const screen_offset = (this._anchor_mode === ANCHOR_MODE_DRAG_CENTER ? (screen_size.clone().scale(0.5).multiply(this.zoom)) : Vector2.new(0, 0));
 
         let angle = this.get_global_transform().rotation;
-        if (this.rotating) {
+        if (this._rotating) {
             screen_offset.rotate(angle);
         }
 
@@ -561,9 +580,9 @@ export default class Camera2D extends Node2D {
             screen_rect.y = this.limit[MARGIN_TOP];
         }
 
-        if (!this.offset.is_zero()) {
-            screen_rect.x += this.offset.x;
-            screen_rect.y += this.offset.y;
+        if (!this._offset.is_zero()) {
+            screen_rect.x += this._offset.x;
+            screen_rect.y += this._offset.y;
         }
 
         this.camera_screen_center.set(
@@ -572,7 +591,7 @@ export default class Camera2D extends Node2D {
         );
 
         const xform = Transform2D.new();
-        if (this.rotating) {
+        if (this._rotating) {
             xform.set_rotation(angle);
         }
         xform.scale_basis(this.zoom.x, this.zoom.y);
