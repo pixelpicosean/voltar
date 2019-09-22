@@ -591,6 +591,25 @@ export class Physics2DServer {
         p_body.pickable = p_pickable;
     }
 
+    /**
+     * @param {Body2DSW} p_body
+     * @param {Function} p_method
+     * @param {any} p_scope
+     * @param {any} [p_params]
+     */
+    body_set_force_integration_callback(p_body, p_method, p_scope, p_params) {
+        if (p_body.fi_callback) {
+            p_body.fi_callback = null;
+        }
+        if (p_method && p_scope) {
+            p_body.fi_callback = {
+                method: p_method,
+                scope: p_scope,
+                params: p_params,
+            }
+        }
+    }
+
     /* JOINT API */
 
     /* MISC */
