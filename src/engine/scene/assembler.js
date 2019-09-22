@@ -68,6 +68,10 @@ export function assemble_scene(scn, data) {
 
     scn._load_data(data);
 
+    if (scn.data.filename.length === 0) {
+        scn.data.filename = '_scene_without_filename_';
+    }
+
     return scn;
 }
 
@@ -122,6 +126,10 @@ export function instanciate_scene(p_data) {
 
     // Load override data from parent scene
     inst._load_data(data);
+
+    if (inst.data.filename.length === 0) {
+        inst.data.filename = '_scene_without_filename_';
+    }
 
     return inst;
 }

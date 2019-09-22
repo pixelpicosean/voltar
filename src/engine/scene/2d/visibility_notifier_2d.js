@@ -7,27 +7,21 @@ import { Viewport } from "../main/viewport";
 import {
     NOTIFICATION_ENTER_TREE,
     NOTIFICATION_EXIT_TREE,
+    Node,
 } from "../main/node";
 import {
     NOTIFICATION_TRANSFORM_CHANGED,
     NOTIFICATION_DRAW,
 } from "./canvas_item";
 import { Node2D } from "./node_2d";
+import CPUParticles2D from "./cpu_particles_2d";
 
 
 export class VisibilityNotifier2D extends Node2D {
     get class() { return 'VisibilityNotifier2D' }
 
-    /** @property {Rect2} */
-    get_rect() {
-        return this.rect;
-    }
-    set_rect(p_rect) {
-        this.rect.copy(p_rect);
-        if (this.is_inside_tree()) {
-            this.get_world_2d()._update_notifier(this, this.get_global_transform().xform_rect(this.rect));
-        }
-    }
+    get rect() { return this.rect }
+    set rect(value) { this.set_rect(value) }
 
     constructor() {
         super();
@@ -39,6 +33,8 @@ export class VisibilityNotifier2D extends Node2D {
          */
         this.viewports = new Set();
     }
+
+    /* virtual */
 
     _load_data(data) {
         super._load_data(data);
@@ -69,9 +65,26 @@ export class VisibilityNotifier2D extends Node2D {
         }
     }
 
+    _screen_enter() { }
+    _screen_exit() { }
+
+    /* public */
+
     is_on_screen() {
         return this.viewports.size > 0;
     }
+
+    /**
+     * @param {Rect2} p_rect
+     */
+    set_rect(p_rect) {
+        this.rect.copy(p_rect);
+        if (this.is_inside_tree()) {
+            this.get_world_2d()._update_notifier(this, this.get_global_transform().xform_rect(this.rect));
+        }
+    }
+
+    /* private */
 
     /**
      * @param {Viewport} viewport
@@ -97,9 +110,6 @@ export class VisibilityNotifier2D extends Node2D {
             this._screen_exit();
         }
     }
-
-    _screen_enter() { }
-    _screen_exit() { }
 }
 node_class_map['VisibilityEnabler2D'] = GDCLASS(VisibilityNotifier2D, Node2D)
 
@@ -116,12 +126,15 @@ export class VisibilityEnabler2D extends VisibilityNotifier2D {
         this.physics_process_parent = false;
         this.process_parent = false;
 
-        this.notifier_visible = false;
+        this.visible = false;
+
         /**
-         * @type {Map<Node2D, any>}
+         * @type {Map<Node, any>}
          */
         this.nodes = new Map();
     }
+
+    /* virtual */
 
     _load_data(data) {
         super._load_data(data);
@@ -148,42 +161,42 @@ export class VisibilityEnabler2D extends VisibilityNotifier2D {
         return this;
     }
 
-    _propagate_enter_tree() {
-        super._propagate_enter_tree();
+    /**
+     * @param {number} p_what
+     */
+    _notification(p_what) {
+        if (p_what === NOTIFICATION_ENTER_TREE) {
+            /** @type {Node} */
+            let from = this;
+            while (from.get_parent() && from.filename.length === 0) {
+                from = from.get_parent();
+            }
 
-        /** @type {Node2D} */
-        let from = this;
-        while (from.parent && from.filename.length === 0) {
-            from = from.parent;
+            this._find_nodes(from);
+
+            const parent = this.get_parent();
+            if (this.physics_process_parent && parent) {
+                parent.set_physics_process(false);
+            }
+            if (this.process_parent && parent) {
+                parent.set_process(false);
+            }
         }
 
-        this._find_nodes(from);
+        if (p_what === NOTIFICATION_EXIT_TREE) {
+            for (const [E_key, E_get] of this.nodes) {
+                if (!this.visible) {
+                    this._change_node_state(E_key, true);
+                }
+                E_key.disconnect('tree_exiting', this._node_removed, this);
+            }
 
-        if (this.parent) {
-            if (this.physics_process_parent) {
-                this.parent.set_physics_process(false);
-            }
-            if (this.process_parent) {
-                this.parent.set_process(false);
-            }
+            this.nodes.clear();
         }
-    }
-
-    _propagate_exit_tree() {
-        super._propagate_exit_tree();
-
-        for (let [E] of this.nodes) {
-            if (!this.notifier_visible) {
-                this._change_node_state(E, true);
-            }
-            E.disconnect('tree_exiting', this._node_removed, this);
-        }
-
-        this.nodes.clear();
     }
 
     /**
-     * @param {Node2D} p_node
+     * @param {Node} p_node
      */
     _find_nodes(p_node) {
         let add = false;
@@ -216,8 +229,8 @@ export class VisibilityEnabler2D extends VisibilityNotifier2D {
             this._change_node_state(p_node, false);
         }
 
-        for (let c of this.children) {
-            if (c.filename.length > 0) {
+        for (let c of p_node.data.children) {
+            if (c.data.filename.length > 0) {
                 continue;
             }
 
@@ -226,40 +239,36 @@ export class VisibilityEnabler2D extends VisibilityNotifier2D {
     }
 
     _screen_enter() {
-        for (let [n] of this.nodes) {
-            this._change_node_state(n, true);
+        for (let [E_key] of this.nodes) {
+            this._change_node_state(E_key, true);
         }
 
-        if (this.parent) {
-            if (this.physics_process_parent) {
-                this.parent.set_physics_process(true);
-            }
-            if (this.process_parent) {
-                this.parent.set_process(true);
-            }
+        if (this.physics_process_parent) {
+            this.get_parent().set_physics_process(true);
+        }
+        if (this.process_parent) {
+            this.get_parent().set_process(true);
         }
 
-        this.notifier_visible = true;
+        this.visible = true;
     }
     _screen_exit() {
-        for (let [n] of this.nodes) {
-            this._change_node_state(n, false);
+        for (let [E_key] of this.nodes) {
+            this._change_node_state(E_key, false);
         }
 
-        if (this.parent) {
-            if (this.physics_process_parent) {
-                this.parent.set_physics_process(false);
-            }
-            if (this.process_parent) {
-                this.parent.set_process(false);
-            }
+        if (this.physics_process_parent) {
+            this.get_parent().set_physics_process(false);
+        }
+        if (this.process_parent) {
+            this.get_parent().set_process(false);
         }
 
-        this.notifier_visible = false;
+        this.visible = false;
     }
 
     /**
-     * @param {Node2D} p_node
+     * @param {Node} p_node
      * @param {boolean} p_enabled
      */
     _change_node_state(p_node, p_enabled) {
@@ -267,17 +276,17 @@ export class VisibilityEnabler2D extends VisibilityNotifier2D {
             // TODO: sleep RigidBody2D
         }
         if (p_node.class === 'AnimationPlayer') {
-            /** @type {AnimationPlayer} */ (p_node).playback_active = p_enabled;
+            /** @type {AnimationPlayer} */(p_node).playback_active = p_enabled;
         }
         if (p_node.class === 'AnimatedSprite') {
-            if (p_enabled) {
-                /** @type {AnimatedSprite} */ (p_node).play();
-            } else {
-                /** @type {AnimatedSprite} */ (p_node).stop();
-            }
+            // if (p_enabled) {
+            //     /** @type {AnimatedSprite} */ (p_node).play();
+            // } else {
+            //     /** @type {AnimatedSprite} */ (p_node).stop();
+            // }
         }
-        if (p_node.class === 'RigidBody2D') {
-            // TODO: disable particle
+        if (p_node.class === 'CPUParticle2D') {
+            // /** @type {CPUParticles2D} */(p_node).emitting = p_enabled;
         }
     }
 
@@ -285,7 +294,7 @@ export class VisibilityEnabler2D extends VisibilityNotifier2D {
      * @param {Node2D} p_node
      */
     _node_removed(p_node) {
-        if (!this.notifier_visible) {
+        if (!this.visible) {
             this._change_node_state(p_node, true);
         }
         this.nodes.delete(p_node);
