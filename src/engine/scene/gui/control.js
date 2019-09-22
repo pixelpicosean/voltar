@@ -83,190 +83,77 @@ const margin_pos = [0, 0, 0, 0];
 export class Control extends CanvasItem {
     get class() { return 'Control' }
 
-    /**
-     * @type {number}
-     */
-    get anchor_bottom() {
-        return this.c_data.anchor[MARGIN_BOTTOM];
-    }
-    set anchor_bottom(value) {
-        this.set_anchor(MARGIN_BOTTOM, value);
-    }
-    /**
-     * @param {number} value
-     */
-    set_anchor_bottom(value) {
-        this.set_anchor(MARGIN_BOTTOM, value);
-        return this;
-    }
+    get anchor_bottom() { return this.c_data.anchor[MARGIN_BOTTOM] }
+    set anchor_bottom(value) { this.set_anchor(MARGIN_BOTTOM, value) }
 
-    /**
-     * @type {number}
-     */
-    get anchor_left() {
-        return this.c_data.anchor[MARGIN_LEFT];
-    }
-    set anchor_left(value) {
-        this.set_anchor(MARGIN_LEFT, value);
-    }
-    /**
-     * @param {number} value
-     */
-    set_anchor_left(value) {
-        this.set_anchor(MARGIN_LEFT, value);
-        return this;
-    }
+    get anchor_left() { return this.c_data.anchor[MARGIN_LEFT] }
+    set anchor_left(value) { this.set_anchor(MARGIN_LEFT, value) }
 
-    /**
-     * @type {number}
-     */
-    get anchor_top() {
-        return this.c_data.anchor[MARGIN_TOP];
-    }
-    set anchor_top(value) {
-        this.set_anchor(MARGIN_TOP, value);
-    }
-    /**
-     * @param {number} value
-     */
-    set_anchor_top(value) {
-        this.set_anchor(MARGIN_TOP, value);
-        return this;
-    }
+    get anchor_top() { return this.c_data.anchor[MARGIN_TOP] }
+    set anchor_top(value) { this.set_anchor(MARGIN_TOP, value) }
 
-    /**
-     * @type {number}
-     */
-    get anchor_right() {
-        return this.c_data.anchor[MARGIN_RIGHT];
-    }
-    set anchor_right(value) {
-        this.set_anchor(MARGIN_RIGHT, value);
-    }
-    /**
-     * @param {number} value
-     */
-    set_anchor_right(value) {
-        this.set_anchor(MARGIN_RIGHT, value);
-        return this;
-    }
+    get anchor_right() { return this.c_data.anchor[MARGIN_RIGHT] }
+    set anchor_right(value) { this.set_anchor(MARGIN_RIGHT, value) }
 
-    /**
-     * @type {number}
-     */
-    get margin_bottom() {
-        return this.c_data.margin[MARGIN_BOTTOM];
-    }
-    set margin_bottom(value) {
-        this.set_margin(MARGIN_BOTTOM, value);
-    }
-    /**
-     * @param {number} value
-     */
-    set_margin_bottom(value) {
-        this.set_margin(MARGIN_BOTTOM, value);
-        return this;
-    }
+    get margin_bottom() { return this.c_data.margin[MARGIN_BOTTOM] }
+    set margin_bottom(value) { this.set_margin(MARGIN_BOTTOM, value) }
 
-    /**
-     * @type {number}
-     */
-    get margin_left() {
-        return this.c_data.margin[MARGIN_LEFT];
-    }
-    set margin_left(value) {
-        this.set_margin(MARGIN_LEFT, value);
-    }
-    /**
-     * @param {number} value
-     */
-    set_margin_left(value) {
-        this.set_margin(MARGIN_LEFT, value);
-        return this;
-    }
+    get margin_left() { return this.c_data.margin[MARGIN_LEFT] }
+    set margin_left(value) { this.set_margin(MARGIN_LEFT, value) }
 
-    /**
-     * @type {number}
-     */
-    get margin_top() {
-        return this.c_data.margin[MARGIN_TOP];
-    }
-    set margin_top(value) {
-        this.set_margin(MARGIN_TOP, value);
-    }
-    /**
-     * @param {number} value
-     */
-    set_margin_top(value) {
-        this.set_margin(MARGIN_TOP, value);
-        return this;
-    }
+    get margin_top() { return this.c_data.margin[MARGIN_TOP] }
+    set margin_top(value) { this.set_margin(MARGIN_TOP, value) }
 
-    /**
-     * @type {number}
-     */
-    get margin_right() {
-        return this.c_data.margin[MARGIN_RIGHT];
-    }
-    set margin_right(value) {
-        this.set_margin(MARGIN_RIGHT, value);
-    }
-    /**
-     * @param {number} value
-     */
-    set_margin_right(value) {
-        this.set_margin(MARGIN_RIGHT, value);
-        return this;
-    }
+    get margin_right() { return this.c_data.margin[MARGIN_RIGHT] }
+    set margin_right(value) { this.set_margin(MARGIN_RIGHT, value) }
 
-    /**
-     * @type {string}
-     */
-    get mouse_default_cursor_shape() {
-        return this.cursor;
-    }
-    set mouse_default_cursor_shape(value) {
-        this.cursor = value;
-    }
-    /**
-     * @param {string} value
-     */
-    set_mouse_default_cursor_shape(value) {
-        this.cursor = value;
-        return this;
-    }
+    get mouse_default_cursor_shape() { return this.cursor }
+    set mouse_default_cursor_shape(value) { this.cursor = value }
 
-    get rect_min_size() {
-        return this.c_data.custom_minimum_size;
-    }
-    set_rect_min_size(value) {
-        if (this.c_data.custom_minimum_size.equals(value)) {
-            return;
-        }
+    get rect_min_size() { return this.c_data.custom_minimum_size }
+    set rect_min_size(value) { this.set_rect_min_size(value) }
 
-        this.c_data.custom_minimum_size.copy(value);
-        this.minimum_size_changed();
-    }
-    /**
-     * @param {number} x
-     * @param {number} y
-     */
-    set_rect_min_size_n(x, y) {
-        const size = Vector2.new(x, y);
-        this.set_rect_min_size(size);
-        Vector2.free(size);
-    }
+    get rect_clip_content() { return this.c_data.clip_contents }
+    set rect_clip_content(value) { this.set_rect_clip_content(value) }
 
-    get rect_clip_content() {
-        return this.c_data.clip_contents;
-    }
-    /**
-     * @param {boolean} value
-     */
-    set_rect_clip_content(value) {
-        this.c_data.rect_clip_content = value;
-        this.update();
-    }
+    get rect_position() { return this.c_data.pos_cache }
+    set rect_position(value) { this.set_rect_position(value) }
+
+    get rect_global_position() { return this.get_global_transform().origin }
+    set rect_global_position(value) { this.set_rect_global_position(value) }
+
+    get rect_size() { return this.c_data.size_cache }
+    set rect_size(value) { this.set_rect_size(value) }
+
+    get rect_rotation() { return this.c_data.rotation }
+    set rect_rotation(value) { this.set_rect_rotation(value) }
+
+    get rect_rotation_degrees() { return rad2deg(this.c_data.rotation) }
+    set rect_rotation_degrees(value) { this.set_rect_rotation(deg2rad(value)) }
+
+    get grow_horizontal() { return this.c_data.h_grow }
+    set grow_horizontal(value) { this.set_grow_horizontal(value) }
+
+    get grow_vertical() { return this.c_data.v_grow }
+    set grow_vertical(value) { this.set_grow_vertical(value) }
+
+    get rect_pivot_offset() { return this.c_data.pivot_offset }
+    set rect_pivot_offset(value) { this.set_rect_pivot_offset(value) }
+
+    get rect_scale() { return this.c_data.scale }
+    set rect_scale(value) { this.set_rect_scale(value) }
+
+    get size_flags_horizontal() { return this.c_data.h_size_flags }
+    set size_flags_horizontal(value) { this.set_size_flags_horizontal(value) }
+
+    get size_flags_vertical() { return this.c_data.v_size_flags }
+    set size_flags_vertical(value) { this.set_size_flags_vertical(value) }
+
+    get size_flags_stretch_ratio() { return this.c_data.expand }
+    set size_flags_stretch_ratio(value) { this.set_size_flags_stretch_ratio(value) }
+
+    get theme() { return this.c_data.theme }
+    set theme(value) { this.set_theme(value) }
 
     constructor() {
         super();
@@ -313,7 +200,7 @@ export class Control extends CanvasItem {
             modal_frame: 0,
             theme: null,
             /**
-             * @type {CanvasItem}
+             * @type {Control}
              */
             theme_owner: null,
 
@@ -621,6 +508,100 @@ export class Control extends CanvasItem {
         if (this.is_inside_tree()) {
             this.get_viewport()._gui_accept_event();
         }
+    }
+
+    /* public */
+
+    /**
+     * @param {number} value
+     */
+    set_anchor_bottom(value) {
+        this.set_anchor(MARGIN_BOTTOM, value);
+    }
+
+    /**
+     * @param {number} value
+     */
+    set_anchor_left(value) {
+        this.set_anchor(MARGIN_LEFT, value);
+        return this;
+    }
+
+    /**
+     * @param {number} value
+     */
+    set_anchor_top(value) {
+        this.set_anchor(MARGIN_TOP, value);
+        return this;
+    }
+
+    /**
+     * @param {number} value
+     */
+    set_anchor_right(value) {
+        this.set_anchor(MARGIN_RIGHT, value);
+        return this;
+    }
+
+    /**
+     * @param {number} value
+     */
+    set_margin_bottom(value) {
+        this.set_margin(MARGIN_BOTTOM, value);
+        return this;
+    }
+
+    /**
+     * @param {number} value
+     */
+    set_margin_left(value) {
+        this.set_margin(MARGIN_LEFT, value);
+        return this;
+    }
+
+    /**
+     * @param {number} value
+     */
+    set_margin_top(value) {
+        this.set_margin(MARGIN_TOP, value);
+        return this;
+    }
+
+    /**
+     * @param {number} value
+     */
+    set_margin_right(value) {
+        this.set_margin(MARGIN_RIGHT, value);
+        return this;
+    }
+
+    /**
+     * @param {Vector2Like} value
+     */
+    set_rect_min_size(value) {
+        if (this.c_data.custom_minimum_size.equals(value)) {
+            return;
+        }
+
+        this.c_data.custom_minimum_size.copy(value);
+        this.minimum_size_changed();
+    }
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
+    set_rect_min_size_n(x, y) {
+        const size = Vector2.new(x, y);
+        this.set_rect_min_size(size);
+        Vector2.free(size);
+    }
+
+    /**
+     * @param {boolean} value
+     */
+    set_rect_clip_content(value) {
+        this.c_data.rect_clip_content = value;
+        this.update();
     }
 
     get_minimum_size() {
@@ -1058,9 +1039,6 @@ export class Control extends CanvasItem {
         return Vector2.new(this.c_data.margin[2], this.c_data.margin[3]);
     }
 
-    get rect_position() {
-        return this.c_data.pos_cache;
-    }
     /**
      * @param {Vector2Like} value
      * @param {boolean} [p_keep_margins=false]
@@ -1084,9 +1062,6 @@ export class Control extends CanvasItem {
         Rect2.free(rect);
     }
 
-    get rect_global_position() {
-        return this.get_global_transform().origin;
-    }
     /**
      * @param {Vector2Like} value
      * @param {boolean} [p_keep_margins=false]
@@ -1110,9 +1085,6 @@ export class Control extends CanvasItem {
         Transform2D.free(inv);
     }
 
-    get rect_size() {
-        return this.c_data.size_cache;
-    }
     /**
      * @param {Vector2Like} value
      * @param {boolean} [p_keep_margins=false]
@@ -1180,9 +1152,6 @@ export class Control extends CanvasItem {
         return Rect2.new(0, 0, this.c_data.size_cache.x, this.c_data.size_cache.y);
     }
 
-    get rect_rotation() {
-        return this.c_data.rotation;
-    }
     /**
      * @param {number} value
      */
@@ -1192,9 +1161,6 @@ export class Control extends CanvasItem {
         this._notify_transform();
     }
 
-    get rect_rotation_degrees() {
-        return rad2deg(this.c_data.rotation);
-    }
     /**
      * @param {number} value
      */
@@ -1202,9 +1168,6 @@ export class Control extends CanvasItem {
         this.set_rect_rotation(deg2rad(value));
     }
 
-    get grow_horizontal() {
-        return this.c_data.h_grow;
-    }
     /**
      * @param {number} value
      */
@@ -1213,9 +1176,6 @@ export class Control extends CanvasItem {
         this._size_changed();
     }
 
-    get grow_vertical() {
-        return this.c_data.v_grow;
-    }
     /**
      * @param {number} value
      */
@@ -1224,9 +1184,6 @@ export class Control extends CanvasItem {
         this._size_changed();
     }
 
-    get rect_pivot_offset() {
-        return this.c_data.pivot_offset;
-    }
     /**
      * @param {Vector2Like} value
      */
@@ -1243,9 +1200,6 @@ export class Control extends CanvasItem {
         this._notify_transform();
     }
 
-    get rect_scale() {
-        return this.c_data.scale;
-    }
     /**
      * @param {Vector2Like} value
      */
@@ -1262,14 +1216,30 @@ export class Control extends CanvasItem {
         this._notify_transform();
     }
 
+    /**
+     * @param {Theme} p_theme
+     */
+    set_theme(p_theme) {
+        if (this.c_data.theme === p_theme) {
+            return;
+        }
+
+        this.c_data.theme = p_theme;
+        if (p_theme) {
+            this.c_data.theme_owner = this;
+            this._propagate_theme_changed(this, this);
+        } else {
+            const parent = /** @type {Control} */(this.get_parent());
+            if (parent.is_control && parent.c_data.theme_owner) {
+                this._propagate_theme_changed(this, parent.c_data.theme_owner);
+            } else {
+                this._propagate_theme_changed(this, null);
+            }
+        }
+    }
+
     show_model() { }
 
-    set_theme() { }
-    get_theme() { }
-
-    get size_flags_horizontal() {
-        return this.c_data.h_size_flags;
-    }
     /**
      * @param {number} value
      */
@@ -1281,9 +1251,6 @@ export class Control extends CanvasItem {
         this.emit_signal('size_flags_changed');
     }
 
-    get size_flags_vertical() {
-        return this.c_data.v_size_flags;
-    }
     /**
      * @param {number} value
      */
@@ -1295,9 +1262,6 @@ export class Control extends CanvasItem {
         this.emit_signal('size_flags_changed');
     }
 
-    get size_flags_stretch_ratio() {
-        return this.c_data.expand;
-    }
     /**
      * @param {number} value
      */
@@ -1505,7 +1469,7 @@ export class Control extends CanvasItem {
      * @param {Control} p_owner
      * @param {boolean} p_assign
      */
-    _propagate_theme_changed(p_at, p_owner, p_assign) { }
+    _propagate_theme_changed(p_at, p_owner, p_assign = true) { }
 
     _theme_changed() {
         this._propagate_theme_changed(this, this, false);
