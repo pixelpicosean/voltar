@@ -56,7 +56,7 @@ export class Texture extends Resource {
     /**
      * @param {any} p_canvas_item
      * @param {Vector2Like} p_pos
-     * @param {Color} [p_modulate]
+     * @param {ColorLike} [p_modulate]
      * @param {boolean} [p_transpose]
      * @param {ImageTexture} [p_normal_map]
      */
@@ -66,7 +66,7 @@ export class Texture extends Resource {
      * @param {any} p_canvas_item
      * @param {Vector2Like} p_rect
      * @param {boolean} [p_tile]
-     * @param {Color} [p_modulate]
+     * @param {ColorLike} [p_modulate]
      * @param {boolean} [p_transpose]
      * @param {ImageTexture} [p_normal_map]
      */
@@ -76,7 +76,7 @@ export class Texture extends Resource {
      * @param {any} p_canvas_item
      * @param {Rect2} p_rect
      * @param {Rect2} p_src_rect
-     * @param {Color} [p_modulate]
+     * @param {ColorLike} [p_modulate]
      * @param {boolean} [p_transpose]
      * @param {ImageTexture} [p_normal_map]
      * @param {boolean} [p_clip_uv]
@@ -168,7 +168,7 @@ export class ImageTexture extends Texture {
     /**
      * @param {Item} p_canvas_item
      * @param {Vector2Like} p_pos
-     * @param {Color} [p_modulate]
+     * @param {ColorLike} [p_modulate]
      * @param {boolean} [p_transpose]
      * @param {ImageTexture} [p_normal_map]
      */

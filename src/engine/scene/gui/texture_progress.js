@@ -1,342 +1,94 @@
-import Color from "engine/core/color";
-import { node_class_map } from "engine/registry";
-import { TextureCache } from "engine/utils/color";
-import { Vector2, clamp } from "engine/core/math/math_funcs";
-import WebGLRenderer from "engine/servers/visual/webgl_renderer";
-import Texture from "engine/scene/resources/textures/texture";
+import { node_class_map, resource_map } from "engine/registry";
+import { GDCLASS } from "engine/core/v_object";
+import { clamp } from "engine/core/math/math_funcs";
+import {
+    MARGIN_BOTTOM,
+    MARGIN_LEFT,
+    MARGIN_TOP,
+    MARGIN_RIGHT,
+} from "engine/core/math/math_defs";
+import { Vector2Like, Vector2 } from "engine/core/math/vector2";
+import { Rect2 } from "engine/core/math/rect2";
+import { Color, ColorLike } from "engine/core/color";
 
-import Sprite from "../sprites/sprite";
-import TilingSprite from "../sprites/tiling_sprite";
-import NineSlicePlane from "../mesh/nine_slice_plane";
-import Graphics from "../graphics/graphics";
-import Range from "./range";
+import { ImageTexture } from "../resources/texture";
+import { NOTIFICATION_DRAW } from "../2d/canvas_item";
+import { Range } from "./range";
 
-const tmp_vec = new Vector2();
 
-/**
- * @enum {number}
- */
-export const FillMode = {
-    LEFT_TO_RIGHT: 0,
-    RIGHT_TO_LEFT: 1,
-    TOP_TO_BOTTOM: 2,
-    BOTTOM_TO_TOP: 3,
-    CLOCKWISE: 4,
-    COUNTER_CLOCKWISE: 5,
-    BILINEAR_LEFT_AND_RIGHT: 6,
-    BILINEAR_TOP_AND_BOTTOM: 7,
-}
+export const FILL_LEFT_TO_RIGHT = 0;
+export const FILL_RIGHT_TO_LEFT = 1;
+export const FILL_TOP_TO_BOTTOM = 2;
+export const FILL_BOTTOM_TO_TOP = 3;
+export const FILL_CLOCKWISE = 4;
+export const FILL_COUNTER_CLOCKWISE = 5;
+export const FILL_BILINEAR_LEFT_AND_RIGHT = 6;
+export const FILL_BILINEAR_TOP_AND_BOTTOM = 7;
+export const FILL_CLOCKWISE_AND_COUNTER_CLOCKWISE = 8;
 
-export default class TextureProgress extends Range {
-    get nine_patch_stretch() {
-        return this._nine_patch_stretch;
-    }
-    /**
-     * @param {boolean} value
-     */
-    set nine_patch_stretch(value) {
-        this._nine_patch_stretch = value;
-        this.minimum_size_changed();
-    }
-    /**
-     * @param {boolean} value
-     */
-    set_nine_patch_stretch(value) {
-        this.nine_patch_stretch = value;
-        return this;
-    }
+const corners = [ -0.125, -0.375, -0.625, -0.875, 0.125, 0.375, 0.625, 0.875, 1.125, 1.375, 1.625, 1.875 ];
 
-    get radial_center_offset() {
-        return this._radial_center_offset;
-    }
-    /**
-     * @param {Vector2} value
-     */
-    set radial_center_offset(value) {
-        this._radial_center_offset.copy(value);
-    }
-    /**
-     * @param {number|import("engine/scene/gui/engine/core/math/vector2").Vector2Like} x
-     * @param {number} [y]
-     */
-    set_radial_center_offset(x, y) {
-        if (y !== undefined) {
-            // @ts-ignore
-            this.radial_center_offset.set(x, y);
-        } else {
-            // @ts-ignore
-            this.radial_center_offset.copy(x);
-        }
+export class TextureProgress extends Range {
+    get class() { return 'TextureProgress' }
 
-        return this;
-    }
+    get fill_mode() { return this._fill_mode }
+    set fill_mode(value) { this.set_fill_mode(value) }
 
-    get radial_fill_degrees() {
-        return this._radial_fill_degrees;
-    }
-    /**
-     * @param {number} value
-     */
-    set radial_fill_degrees(value) {
-        this._radial_fill_degrees = clamp(value, 0, 360);
-    }
-    /**
-     * @param {number} value
-     */
-    set_radial_fill_degrees(value) {
-        this.radial_fill_degrees = value;
-        return this;
-    }
+    get nine_patch_stretch() { return this._nine_patch_stretch }
+    set nine_patch_stretch(value) { this.set_nine_patch_stretch(value) }
 
-    get radial_initial_angle() {
-        return this._radial_initial_angle;
-    }
-    /**
-     * @param {number} value
-     */
-    set radial_initial_angle(value) {
-        while (value > 360) {
-            value -= 360;
-        }
-        while (value < 0) {
-            value += 360;
-        }
-        this._radial_initial_angle = value;
-    }
-    /**
-     * @param {number} value
-     */
-    set_radial_initial_angle(value) {
-        this.radial_initial_angle = value;
-        return this;
-    }
+    get radial_center_offset() { return this._radial_center_offset }
+    set radial_center_offset(value) { this.set_radial_center_offset(value) }
 
-    get stretch_margin_bottom() {
-        return this.stretch_margin[Margin.Bottom];
-    }
-    /**
-     * @param {number} value
-     */
-    set stretch_margin_bottom(value) {
-        this.set_stretch_margin(Margin.Bottom, value);
-    }
-    /**
-     * @param {number} value
-     */
-    set_stretch_margin_bottom(value) {
-        this.stretch_margin_bottom = value;
-        return this;
-    }
+    get radial_fill_degrees() { return this._radial_fill_degrees }
+    set radial_fill_degrees(value) { this.set_radial_fill_degrees(value) }
 
-    get stretch_margin_left() {
-        return this.stretch_margin[Margin.Left];
-    }
-    /**
-     * @param {number} value
-     */
-    set stretch_margin_left(value) {
-        this.set_stretch_margin(Margin.Left, value);
-    }
-    /**
-     * @param {number} value
-     */
-    set_stretch_margin_left(value) {
-        this.stretch_margin_left = value;
-        return this;
-    }
+    get radial_initial_angle() { return this._radial_initial_angle }
+    set radial_initial_angle(value) { this.set_radial_initial_angle(value) }
 
-    get stretch_margin_top() {
-        return this.stretch_margin[Margin.Top];
-    }
-    /**
-     * @param {number} value
-     */
-    set stretch_margin_top(value) {
-        this.set_stretch_margin(Margin.Top, value);
-    }
-    /**
-     * @param {number} value
-     */
-    set_stretch_margin_top(value) {
-        this.stretch_margin_top = value;
-        return this;
-    }
+    get stretch_margin_bottom() { return this.stretch_margin[MARGIN_BOTTOM] }
+    set stretch_margin_bottom(value) { this.set_stretch_margin(MARGIN_BOTTOM, value) }
 
-    get stretch_margin_right() {
-        return this.stretch_margin[Margin.Right];
-    }
-    /**
-     * @param {number} value
-     */
-    set stretch_margin_right(value) {
-        this.set_stretch_margin(Margin.Right, value);
-    }
-    /**
-     * @param {number} value
-     */
-    set_stretch_margin_right(value) {
-        this.stretch_margin_right = value;
-        return this;
-    }
+    get stretch_margin_left() { return this.stretch_margin[MARGIN_LEFT] }
+    set stretch_margin_left(value) { this.set_stretch_margin(MARGIN_LEFT, value) }
 
-    get tint_over() {
-        return this._tint_over;
-    }
-    /**
-     * @param {Color} value
-     */
-    set tint_over(value) {
-        this._tint_over.set(value.r, value.g, value.b);
-    }
-    /**
-     * @param {number|Color} r
-     * @param {number} [g]
-     * @param {number} [b]
-     */
-    set_tint_over(r, g, b) {
-        if (g !== undefined) {
-            // @ts-ignore
-            this._tint_over.set(r, g, b);
-        } else {
-            // @ts-ignore
-            this._tint_over.set(r.r, r.g, r.b);
-        }
-        return this;
-    }
+    get stretch_margin_top() { return this.stretch_margin[MARGIN_TOP] }
+    set stretch_margin_top(value) { this.set_stretch_margin(MARGIN_TOP, value) }
 
-    get tint_progress() {
-        return this._tint_progress;
-    }
-    /**
-     * @param {Color} value
-     */
-    set tint_progress(value) {
-        this._tint_progress.set(value.r, value.g, value.b);
-    }
-    /**
-     * @param {number|Color} r
-     * @param {number} [g]
-     * @param {number} [b]
-     */
-    set_tint_progress(r, g, b) {
-        if (g !== undefined) {
-            // @ts-ignore
-            this._tint_progress.set(r, g, b);
-        } else {
-            // @ts-ignore
-            this._tint_progress.set(r.r, r.g, r.b);
-        }
-        return this;
-    }
+    get stretch_margin_right() { return this.stretch_margin[MARGIN_RIGHT] }
+    set stretch_margin_right(value) { this.set_stretch_margin(MARGIN_RIGHT, value) }
 
-    get tint_under() {
-        return this._tint_under;
-    }
-    /**
-     * @param {Color} value
-     */
-    set tint_under(value) {
-        this._tint_under.set(value.r, value.g, value.b);
-    }
-    /**
-     * @param {number|Color} r
-     * @param {number} [g]
-     * @param {number} [b]
-     */
-    set_tint_under(r, g, b) {
-        if (g !== undefined) {
-            // @ts-ignore
-            this._tint_under.set(r, g, b);
-        } else {
-            // @ts-ignore
-            this._tint_under.set(r.r, r.g, r.b);
-        }
-        return this;
-    }
+    get texture_over() { return this._texture_over }
+    set texture_over(value) { this.set_texture_over(value) }
 
-    get texture_over() {
-        return this._texture_over;
-    }
-    /**
-     * @param {string|Texture} value
-     */
-    set texture_over(value) {
-        if (typeof (value) === 'string') {
-            value = TextureCache[value];
-        }
-        // @ts-ignore
-        this._texture_over = value;
-        if (!this._texture_under) {
-            this.minimum_size_changed();
-        }
-    }
-    /**
-     * @param {string|Texture} value
-     */
-    set_texture_over(value) {
-        this.texture_over = value;
-        return this;
-    }
+    get texture_progress() { return this._texture_progress }
+    set texture_progress(value) { this.set_texture_progress(value) }
 
-    get texture_progress() {
-        return this._texture_progress;
-    }
-    /**
-     * @param {string|Texture} value
-     */
-    set texture_progress(value) {
-        if (typeof (value) === 'string') {
-            value = TextureCache[value];
-        }
-        // @ts-ignore
-        this._texture_progress = value;
-        this.minimum_size_changed();
-    }
-    /**
-     * @param {string|Texture} value
-     */
-    set_texture_progress(value) {
-        this.texture_progress = value;
-        return this;
-    }
+    get texture_under() { return this._texture_under }
+    set texture_under(value) { this.set_texture_under(value) }
 
-    get texture_under() {
-        return this._texture_under;
-    }
-    /**
-     * @param {string|Texture} value
-     */
-    set texture_under(value) {
-        if (typeof (value) === 'string') {
-            value = TextureCache[value];
-        }
-        // @ts-ignore
-        this._texture_under = value;
-        this.minimum_size_changed();
-    }
-    /**
-     * @param {string|Texture} value
-     */
-    set_texture_under(value) {
-        this.texture_under = value;
-        return this;
-    }
+    get tint_over() { return this._tint_over }
+    set tint_over(value) { this.set_tint_over(value) }
+
+    get tint_progress() { return this._tint_progress }
+    set tint_progress(value) { this.set_tint_progress(value) }
+
+    get tint_under() { return this._tint_under }
+    set tint_under(value) { this.set_tint_under(value) }
 
     constructor() {
         super();
 
-        this.type = 'TextureProgress';
-
-        this.fill_mode = FillMode.LEFT_TO_RIGHT;
+        this._fill_mode = FILL_LEFT_TO_RIGHT;
         this._nine_patch_stretch = false;
 
-        /** @type {Texture} */
+        /** @type {ImageTexture} */
         this._texture_over = null;
 
-        /** @type {Texture} */
+        /** @type {ImageTexture} */
         this._texture_progress = null;
 
-        /** @type {Texture} */
+        /** @type {ImageTexture} */
         this._texture_under = null;
 
         this._radial_initial_angle = 0;
@@ -348,316 +100,331 @@ export default class TextureProgress extends Range {
         this._tint_under = new Color(1, 1, 1);
         this._tint_progress = new Color(1, 1, 1);
         this._tint_over = new Color(1, 1, 1);
-
-        this.sprite_under = new Sprite(); this.sprite_under.anchor.set(0, 0);
-        this.sprite_progress = new TilingSprite(); this.sprite_progress.anchor.set(0, 0);
-        this.sprite_over = new Sprite(); this.sprite_over.anchor.set(0, 0);
-
-        this.mesh_under = new NineSlicePlane(Texture.WHITE);
-        this.mesh_progress = new NineSlicePlane(Texture.WHITE);
-        this.mesh_over = new NineSlicePlane(Texture.WHITE);
-
-        this.render_mask = new Graphics();
-        this.render_mask.renderable = false;
-        this.render_mask.is_mask = true;
     }
+
+    /* virtual */
+
     _load_data(data) {
         super._load_data(data);
 
-        if (data.fill_mode !== undefined) {
-            this.fill_mode = data.fill_mode;
-        }
+        if (data.fill_mode !== undefined)
+            this.set_fill_mode(data.fill_mode);
 
-        if (data.nine_patch_stretch !== undefined) {
-            this.nine_patch_stretch = data.nine_patch_stretch;
-        }
+        if (data.nine_patch_stretch !== undefined)
+            this.set_nine_patch_stretch(data.nine_patch_stretch);
 
-        if (data.radial_initial_angle !== undefined) {
-            this.radial_initial_angle = data.radial_initial_angle;
-        }
-        if (data.radial_center_offset !== undefined) {
-            this.radial_center_offset = data.radial_center_offset;
-        }
-        if (data.radial_fill_degrees !== undefined) {
-            this.radial_fill_degrees = data.radial_fill_degrees;
-        }
+        if (data.radial_initial_angle !== undefined)
+            this.set_radial_initial_angle(data.radial_initial_angle);
+        if (data.radial_center_offset !== undefined)
+            this.set_radial_center_offset(data.radial_center_offset);
+        if (data.radial_fill_degrees !== undefined)
+            this.set_radial_fill_degrees(data.radial_fill_degrees);
 
-        if (data.stretch_margin_bottom !== undefined) {
+        if (data.stretch_margin_bottom !== undefined)
             this.stretch_margin_bottom = data.stretch_margin_bottom;
-        }
-        if (data.stretch_margin_left !== undefined) {
+        if (data.stretch_margin_left !== undefined)
             this.stretch_margin_left = data.stretch_margin_left;
-        }
-        if (data.stretch_margin_top !== undefined) {
+        if (data.stretch_margin_top !== undefined)
             this.stretch_margin_top = data.stretch_margin_top;
-        }
-        if (data.stretch_margin_right !== undefined) {
+        if (data.stretch_margin_right !== undefined)
             this.stretch_margin_right = data.stretch_margin_right;
-        }
 
-        if (data.texture_under !== undefined) {
-            this.texture_under = data.texture_under;
-        }
-        if (data.texture_progress !== undefined) {
-            this.texture_progress = data.texture_progress;
-        }
-        if (data.texture_over !== undefined) {
-            this.texture_over = data.texture_over;
-        }
+        if (data.texture_under !== undefined)
+            this.set_texture_under(data.texture_under);
+        if (data.texture_progress !== undefined)
+            this.set_texture_progress(data.texture_progress);
+        if (data.texture_over !== undefined)
+            this.set_texture_over(data.texture_over);
 
-        if (data.tint_under !== undefined) {
-            this.tint_under = data.tint_under;
-        }
-        if (data.tint_progress !== undefined) {
-            this.tint_progress = data.tint_progress;
-        }
-        if (data.tint_over !== undefined) {
-            this.tint_over = data.tint_over;
-        }
+        if (data.tint_under !== undefined)
+            this.set_tint_under(data.tint_under);
+        if (data.tint_progress !== undefined)
+            this.set_tint_progress(data.tint_progress);
+        if (data.tint_over !== undefined)
+            this.set_tint_over(data.tint_over);
 
         return this;
     }
 
+    /**
+     * @param {number} p_what
+     */
+    _notification(p_what) {
+        switch (p_what) {
+            case NOTIFICATION_DRAW: {
+                if (this._nine_patch_stretch && (this._fill_mode === FILL_LEFT_TO_RIGHT || this._fill_mode === FILL_RIGHT_TO_LEFT || this._fill_mode === FILL_TOP_TO_BOTTOM || this._fill_mode === FILL_BOTTOM_TO_TOP)) {
+                    if (this._texture_under) {
+                        this.draw_nine_patch_stretched(this._texture_under, FILL_LEFT_TO_RIGHT, 1.0, this._tint_under);
+                    }
+                    if (this._texture_progress) {
+                        this.draw_nine_patch_stretched(this._texture_progress, this._fill_mode, this.ratio, this._tint_progress);
+                    }
+                    if (this._texture_over) {
+                        this.draw_nine_patch_stretched(this._texture_over, FILL_LEFT_TO_RIGHT, 1.0, this._tint_over);
+                    }
+                } else {
+                    if (this._texture_under) {
+                        this.draw_texture(this._texture_under, Vector2.ZERO, this._tint_under);
+                    }
+                    if (this._texture_progress) {
+                        const s = this._texture_progress.get_size();
+                        const region = Rect2.new();
+                        switch (this._fill_mode) {
+                            case FILL_LEFT_TO_RIGHT: {
+                                region.set(0, 0, s.x * this.ratio, s.y);
+                                this.draw_texture_rect_region(this._texture_progress, region, region, this._tint_progress);
+                            } break;
+                            case FILL_RIGHT_TO_LEFT: {
+                                region.set(s.x - s.x * this.ratio, 0, s.x * this.ratio, s.y);
+                                this.draw_texture_rect_region(this._texture_progress, region, region, this._tint_progress);
+                            } break;
+                            case FILL_TOP_TO_BOTTOM: {
+                                region.set(0, 0, s.x, s.y * this.ratio);
+                                this.draw_texture_rect_region(this._texture_progress, region, region, this._tint_progress);
+                            } break;
+                            case FILL_BOTTOM_TO_TOP: {
+                                region.set(0, s.y - s.y * this.ratio, s.x, s.y * this.ratio);
+                                this.draw_texture_rect_region(this._texture_progress, region, region, this._tint_progress);
+                            } break;
+                            case FILL_CLOCKWISE:
+                            case FILL_COUNTER_CLOCKWISE:
+                            case FILL_CLOCKWISE_AND_COUNTER_CLOCKWISE: {
+                                const val = this.ratio * this._radial_fill_degrees / 360;
+                                if (val === 1) {
+                                    region.set(0, 0, s.x, s.y);
+                                    this.draw_texture_rect_region(this._texture_progress, region, region, this._tint_progress);
+                                } else if (val !== 0) {
+                                    // TODO: draw circle progress
+                                    break;
+
+                                    const pts = [];
+                                    const direction = (this._fill_mode === FILL_COUNTER_CLOCKWISE) ? -1 : 1;
+                                    let start = 0.0;
+                                    if (this._fill_mode === FILL_CLOCKWISE_AND_COUNTER_CLOCKWISE) {
+                                        start = this._radial_initial_angle / 360 - val * 0.5;
+                                    } else {
+                                        start = this.radial_initial_angle / 360;
+                                    }
+
+                                    const end = start + direction * val;
+                                    pts.push(start);
+                                    pts.push(end);
+                                    const from = Math.min(start, end);
+                                    const to = Math.max(start, end);
+                                    for (let i = 0; i < 12; i++) {
+                                        if (corners[i] > from && corners[i] < to) {
+                                            pts.push(corners[i]);
+                                        }
+                                    }
+                                    pts.sort();
+                                    const uvs = [];
+                                    const points = [];
+                                }
+                            } break;
+                            case FILL_BILINEAR_LEFT_AND_RIGHT: {
+                                region.set(s.x * 0.5 - s.x * this.ratio * 0.5, 0, s.x * this.ratio, s.y);
+                                this.draw_texture_rect_region(this._texture_progress, region, region, this._tint_progress);
+                            } break;
+                            case FILL_BILINEAR_TOP_AND_BOTTOM: {
+                                region.set(0, s.y * 0.5 - s.y * this.ratio * 0.5, s.x, s.y * this.ratio);
+                                this.draw_texture_rect_region(this._texture_progress, region, region, this._tint_progress);
+                            } break;
+                            default: {
+                                region.set(0, 0, s.x * this.ratio, s.y);
+                                this.draw_texture_rect_region(this._texture_progress, region, region, this._tint_progress);
+                            } break;
+                        }
+                        Rect2.free(region);
+                    }
+                    if (this._texture_over) {
+                        this.draw_texture(this._texture_over, Vector2.ZERO, this._tint_over);
+                    }
+                }
+            } break;
+        }
+    }
+
+    /**
+     * @param {number} margin
+     * @param {number} size
+     */
     set_stretch_margin(margin, size) {
         this.stretch_margin[margin] = size;
+        this.minimum_size_changed();
+    }
 
-        this.mesh_under.bottom_height = this.stretch_margin[Margin.Bottom];
-        this.mesh_under.left_width = this.stretch_margin[Margin.Left];
-        this.mesh_under.top_height = this.stretch_margin[Margin.Top];
-        this.mesh_under.right_width = this.stretch_margin[Margin.Right];
+    get_minimum_size() {
+        const size = Vector2.new();
+        if (this._nine_patch_stretch) {
+            return size.set(
+                this.stretch_margin[MARGIN_LEFT] + this.stretch_margin[MARGIN_RIGHT],
+                this.stretch_margin[MARGIN_TOP] + this.stretch_margin[MARGIN_BOTTOM]
+            );
+        } else if (this._texture_under) {
+            return size.set(this._texture_under.width, this._texture_under.height);
+        } else if (this._texture_over) {
+            return size.set(this._texture_over.width, this._texture_over.height);
+        } else if (this._texture_progress) {
+            return size.set(this._texture_progress.width, this._texture_progress.height);
+        }
+        return size.set(1, 1);
+    }
 
-        this.mesh_progress.bottom_height = this.stretch_margin[Margin.Bottom];
-        this.mesh_progress.left_width = this.stretch_margin[Margin.Left];
-        this.mesh_progress.top_height = this.stretch_margin[Margin.Top];
-        this.mesh_progress.right_width = this.stretch_margin[Margin.Right];
+    /* public */
 
-        this.mesh_over.bottom_height = this.stretch_margin[Margin.Bottom];
-        this.mesh_over.left_width = this.stretch_margin[Margin.Left];
-        this.mesh_over.top_height = this.stretch_margin[Margin.Top];
-        this.mesh_over.right_width = this.stretch_margin[Margin.Right];
+    /**
+     * @param {number} p_fill
+     */
+    set_fill_mode(p_fill) {
+        this._fill_mode = p_fill;
+        this.update();
+    }
 
+    /**
+     * @param {boolean} value
+     */
+    set_nine_patch_stretch(value) {
+        this._nine_patch_stretch = value;
+        this.update();
         this.minimum_size_changed();
     }
 
     /**
-     * @param {Vector2} size
+     * @param {Vector2Like} value
      */
-    get_minimum_size(size) {
-        if (this._nine_patch_stretch) {
-            return size.set(
-                this.stretch_margin[Margin.Left] + this.stretch_margin[Margin.Right],
-                this.stretch_margin[Margin.Top] + this.stretch_margin[Margin.Bottom]
-            );
-        } else if (this._texture_under && this._texture_under.valid) {
-            return size.set(this._texture_under.width, this._texture_under.height);
-        } else if (this._texture_over && this._texture_over.valid) {
-            return size.set(this._texture_over.width, this._texture_over.height);
-        } else if (this._texture_progress && this._texture_progress.valid) {
-            return size.set(this._texture_progress.width, this._texture_progress.height);
-        }
-
-        return size.set(1, 1);
+    set_radial_center_offset(value) {
+        this.set_radial_center_offset_n(value.x, value.y);
+    }
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
+    set_radial_center_offset_n(x, y) {
+        this._radial_center_offset.set(x, y);
+        this.update();
     }
 
     /**
-     * @param {WebGLRenderer} renderer
+     * @param {number} value
      */
-    _render_webgl(renderer) {
-        this._update_transform();
+    set_radial_fill_degrees(value) {
+        this._radial_fill_degrees = clamp(value, 0, 360);
+        this.update();
+    }
 
-        if (this._nine_patch_stretch && (this.fill_mode === FillMode.LEFT_TO_RIGHT || this.fill_mode === FillMode.RIGHT_TO_LEFT || this.fill_mode === FillMode.TOP_TO_BOTTOM || this.fill_mode === FillMode.BOTTOM_TO_TOP)) {
-            if (this._texture_under && this._texture_under.valid) {
-                this.mesh_under.transform.set_from_matrix(this.transform.world_transform);
-                this.mesh_under.texture = this._texture_under;
+    /**
+     * @param {number} value
+     */
+    set_radial_initial_angle(value) {
+        while (value > 360) {
+            value -= 360;
+        }
+        while (value < 0) {
+            value += 360;
+        }
+        this._radial_initial_angle = value;
+        this.update();
+    }
 
-                this.mesh_under._width = this.rect_size.x;
-                this.mesh_under._height = this.rect_size.y;
-                this.mesh_under._refresh();
-
-                // TODO: sync more properties for rendering
-                this.mesh_under._update_transform();
-                this.mesh_under.tint = this._tint_under.as_hex();
-                this.mesh_under.self_modulate.a = this.alpha;
-                this.mesh_under.blend_mode = this.blend_mode;
-
-                this.mesh_under._render_webgl(renderer);
-            }
-            if (this._texture_progress && this._texture_progress.valid) {
-                this.mesh_progress.transform.set_from_matrix(this.transform.world_transform);
-                this.mesh_progress.texture = this._texture_progress;
-
-                const s = tmp_vec.copy(this.rect_size);
-
-                this.mesh_progress._width = s.x;
-                this.mesh_progress._height = s.y;
-                this.mesh_progress._refresh();
-
-                const mask = this.render_mask;
-                mask.transform.set_from_matrix(this.transform.world_transform);
-                mask.clear().begin_fill(0xFFFFFF);
-
-                switch (this.fill_mode) {
-                    case FillMode.LEFT_TO_RIGHT: {
-                        mask.draw_rect(0, 0, Math.round(s.x * this.ratio), Math.round(s.y));
-                    } break;
-                    case FillMode.RIGHT_TO_LEFT: {
-                        mask.draw_rect(Math.round(s.x * (1 - this.ratio)), 0, Math.round(s.x * this.ratio), Math.round(s.y));
-                    } break;
-                    case FillMode.TOP_TO_BOTTOM: {
-                        mask.draw_rect(0, 0, Math.round(s.x), Math.round(s.y * this.ratio));
-                    } break;
-                    case FillMode.BOTTOM_TO_TOP: {
-                        mask.draw_rect(0, Math.round(s.y * (1 - this.ratio)), Math.round(s.x), Math.round(s.y * this.ratio));
-                    } break;
-                    default: {
-                        mask.draw_rect(0, 0, Math.round(s.x * this.ratio), Math.round(s.y));
-                    } break;
-                }
-
-                mask.end_fill();
-
-                // TODO: sync more properties for rendering
-                this.mesh_progress._update_transform();
-                this.mesh_progress.tint = this._tint_under.as_hex();
-                this.mesh_progress.self_modulate.a = this.alpha;
-                this.mesh_progress.blend_mode = this.blend_mode;
-
-                renderer.flush();
-                renderer.mask_manager.push_mask(this.mesh_progress, mask);
-                this.mesh_progress._render_webgl(renderer);
-                renderer.mask_manager.pop_mask(this.mesh_progress, mask);
-                renderer.flush();
-            }
-            if (this._texture_over && this._texture_over.valid) {
-                this.mesh_over.transform.set_from_matrix(this.transform.world_transform);
-                this.mesh_over.texture = this._texture_over;
-
-                this.mesh_over._width = this.rect_size.x;
-                this.mesh_over._height = this.rect_size.y;
-                this.mesh_over._refresh();
-
-                // TODO: sync more properties for rendering
-                this.mesh_over._update_transform();
-                this.mesh_over.tint = this._tint_under.as_hex();
-                this.mesh_over.self_modulate.a = this.alpha;
-                this.mesh_over.blend_mode = this.blend_mode;
-
-                this.mesh_over._render_webgl(renderer);
-            }
+    /**
+     * @param {ColorLike} value
+     */
+    set_tint_over(value) {
+        this.set_tint_over_n(value.r, value.g, value.b);
+    }
+    /**
+     * @param {number} r
+     * @param {number} [g]
+     * @param {number} [b]
+     */
+    set_tint_over_n(r, g, b) {
+        if (g !== undefined) {
+            this._tint_over.set(r, g, b);
         } else {
-            if (this._texture_under && this._texture_under.valid) {
-                this.sprite_under.transform.set_from_matrix(this.transform.world_transform);
-                this.sprite_under._texture = this._texture_under;
+            this._tint_over.set_with_hex(r);
+        }
+        this.update();
+    }
 
-                // TODO: sync more properties for rendering
-                this.sprite_under._update_transform();
-                this.sprite_under.tint = this._tint_under.as_hex();
-                this.sprite_under.self_modulate.a = this.alpha;
-                this.sprite_under.blend_mode = this.blend_mode;
+    /**
+     * @param {Color} value
+     */
+    set_tint_progress(value) {
+        this.set_tint_progress_n(value.r, value.g, value.b);
+    }
+    /**
+     * @param {number} r
+     * @param {number} [g]
+     * @param {number} [b]
+     */
+    set_tint_progress_n(r, g, b) {
+        if (g !== undefined) {
+            this._tint_progress.set(r, g, b);
+        } else {
+            this._tint_progress.set_with_hex(r);
+        }
+        this.update();
+    }
 
-                this.sprite_under._render_webgl(renderer);
-            }
-            if (this._texture_progress && this._texture_progress.valid) {
-                this.sprite_progress.transform.set_from_matrix(this.transform.world_transform);
-                this.sprite_progress.texture = this._texture_progress;
+    /**
+     * @param {ColorLike} color
+     */
+    set_tint_under(color) {
+        this.set_tint_under_n(color.r, color.g, color.b);
+    }
+    /**
+     * @param {number} r
+     * @param {number} [g]
+     * @param {number} [b]
+     */
+    set_tint_under_n(r, g, b) {
+        if (g !== undefined) {
+            this._tint_under.set(r, g, b);
+        } else {
+            this._tint_under.set_with_hex(r);
+        }
+        this.update();
+    }
 
-                let mask;
-
-                const s = tmp_vec.set(this._texture_progress.width, this._texture_progress.height);
-                switch (this.fill_mode) {
-                    case FillMode.LEFT_TO_RIGHT: {
-                        this.sprite_progress.width = Math.round(s.x * this.ratio);
-                        this.sprite_progress.height = Math.round(s.y);
-                    } break;
-                    case FillMode.RIGHT_TO_LEFT: {
-                        this.sprite_progress.width = Math.round(s.x * this.ratio);
-                        this.sprite_progress.x += Math.round(s.x * (1 - this.ratio));
-                        this.sprite_progress.tile_position.x = -this.sprite_progress.x;
-                        this.sprite_progress.height = Math.round(s.y);
-                    } break;
-                    case FillMode.TOP_TO_BOTTOM: {
-                        this.sprite_progress.width = Math.round(s.x);
-                        this.sprite_progress.height = Math.round(s.y * this.ratio);
-                    } break;
-                    case FillMode.BOTTOM_TO_TOP: {
-                        this.sprite_progress.width = Math.round(s.x);
-                        this.sprite_progress.y += Math.round(s.y * (1 - this.ratio));
-                        this.sprite_progress.tile_position.y = -this.sprite_progress.y;
-                        this.sprite_progress.height = Math.round(s.y * this.ratio);
-                    } break;
-                    case FillMode.CLOCKWISE:
-                    case FillMode.COUNTER_CLOCKWISE: {
-                        this.sprite_progress.width = s.x;
-                        this.sprite_progress.height = s.y;
-
-                        mask = this.render_mask;
-                        mask.transform.set_from_matrix(this.transform.world_transform);
-                        mask.position.add(s.x * 0.5 * this.rect_scale.x, s.y * 0.5 * this.rect_scale.y);
-                        mask._update_transform();
-
-                        const rr = s.x > s.y ? s.x : s.y;
-                        const r = rr * 0.5;
-                        mask.clear().begin_fill(0xFFFFFF);
-                        if (this.ratio === 1) {
-                            mask.draw_circle(0, 0, r);
-                        } else {
-                            mask.move_to(0, 0)
-                            if (this.fill_mode === FillMode.COUNTER_CLOCKWISE) {
-                                mask.arc(0, 0, r, -Math.PI * 0.5, (1 - this.ratio) * Math.PI * 2 - Math.PI * 0.5, true)
-                            } else {
-                                mask.arc(0, 0, r, -Math.PI * 0.5, this.ratio * Math.PI * 2 - Math.PI * 0.5, false)
-                            }
-                        }
-                        mask.end_fill();
-                    } break;
-                    case FillMode.BILINEAR_LEFT_AND_RIGHT: {
-                        this.sprite_progress.position.add(Math.round(s.x * 0.5 - s.x * this.ratio * 0.5), 0);
-                        this.sprite_progress.tile_position.copy(this.sprite_progress.position);
-                        this.sprite_progress.width = Math.round(s.x * this.ratio);
-                        this.sprite_progress.height = Math.round(s.y);
-                    } break;
-                    case FillMode.BILINEAR_TOP_AND_BOTTOM: {
-                        this.sprite_progress.position.add(0, Math.round(s.y * 0.5 - s.y * this.ratio * 0.5));
-                        this.sprite_progress.tile_position.copy(this.sprite_progress.position);
-                        this.sprite_progress.width = Math.round(s.y);
-                        this.sprite_progress.height = Math.round(s.y * this.ratio);
-                    } break;
-                    default: {
-                        this.sprite_progress.width = Math.round(s.x * this.ratio);
-                        this.sprite_progress.height = Math.round(s.y);
-                    } break;
-                }
-
-                // TODO: sync more properties for rendering
-                this.sprite_progress._update_transform();
-                this.sprite_progress.tint = this._tint_progress.as_hex();
-                this.sprite_progress.self_modulate.a = this.alpha;
-                this.sprite_progress.blend_mode = this.blend_mode;
-
-                if (mask) {
-                    renderer.flush();
-                    renderer.mask_manager.push_mask(this.sprite_progress, mask);
-                    this.sprite_progress._render_webgl(renderer);
-                    renderer.mask_manager.pop_mask(this.sprite_progress, mask);
-                    renderer.flush();
-                } else {
-                    this.sprite_progress._render_webgl(renderer);
-                }
-            }
-            if (this._texture_over && this._texture_over.valid) {
-                this.sprite_over.transform.set_from_matrix(this.transform.world_transform);
-                this.sprite_over._texture = this._texture_over;
-
-                // TODO: sync more properties for rendering
-                this.sprite_over._update_transform();
-                this.sprite_over.tint = this._tint_over.as_hex();
-                this.sprite_over.self_modulate.a = this.alpha;
-                this.sprite_over.blend_mode = this.blend_mode;
-
-                this.sprite_over._render_webgl(renderer);
-            }
+    /**
+     * @param {string | ImageTexture} p_texture
+     */
+    set_texture_over(p_texture) {
+        this._texture_over = (typeof (p_texture) === 'string') ? resource_map[p_texture] : p_texture;
+        this.update();
+        if (!this._texture_under) {
+            this.minimum_size_changed();
         }
     }
-}
 
-node_class_map['TextureProgress'] = TextureProgress;
+    /**
+     * @param {string | ImageTexture} p_texture
+     */
+    set_texture_progress(p_texture) {
+        this._texture_progress = (typeof (p_texture) === 'string') ? resource_map[p_texture] : p_texture;
+        this.update();
+        this.minimum_size_changed();
+    }
+
+    /**
+     * @param {string | ImageTexture} p_texture
+     */
+    set_texture_under(p_texture) {
+        this._texture_under = (typeof (p_texture) === 'string') ? resource_map[p_texture] : p_texture;
+        this.update();
+        this.minimum_size_changed();
+    }
+
+    /* private */
+
+    /**
+     * @param {ImageTexture} p_texture
+     * @param {number} p_mode
+     * @param {number} p_ratio
+     * @param {ColorLike} p_modulate
+     */
+    draw_nine_patch_stretched(p_texture, p_mode, p_ratio, p_modulate) {
+
+    }
+}
+node_class_map['TextureProgress'] = GDCLASS(TextureProgress, Range)

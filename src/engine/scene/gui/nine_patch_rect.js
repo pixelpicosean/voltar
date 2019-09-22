@@ -22,104 +22,47 @@ export const AXIS_STRETCH_MODE_TILE_FIT = 2;
 export class NinePatchRect extends Control {
     get class() { return 'NinePatchRect' }
 
-    /**
-     * @param {boolean} value
-     */
-    set_draw_center(value) {
-        this.draw_center = value;
-        this.update();
-    }
+    get draw_center() { return this._draw_center }
+    set draw_center(value) { this.set_draw_center(value) }
 
-    /**
-     * @param {number} value
-     */
-    set_axis_stretch_horizontal(value) {
-        this.axis_stretch_horizontal = value;
-        this.update();
-    }
+    get axis_stretch_horizontal() { return this._axis_stretch_horizontal }
+    set axis_stretch_horizontal(value) { this.set_axis_stretch_horizontal(value) }
 
-    /**
-     * @param {number} value
-     */
-    set_axis_stretch_vertical(value) {
-        this.axis_stretch_vertical = value;
-        this.update();
-    }
+    get axis_stretch_vertical() { return this._axis_stretch_vertical }
+    set axis_stretch_vertical(value) { this.set_axis_stretch_vertical(value) }
 
-    /**
-     * @param {number} p_margin
-     * @param {number} p_size
-     */
-    set_patch_margin(p_margin, p_size) {
-        this.margin[p_margin] = p_size;
-        this.update();
-        this.minimum_size_changed();
-    }
+    get region_rect() { return this._region_rect }
+    set region_rect(value) { this.set_region_rect(value) }
 
-    /**
-     * @param {Rect2} p_region_rect
-     */
-    set_region_rect(p_region_rect) {
-        if (this.region_rect.equals(p_region_rect)) {
-            return;
-        }
-        this.region_rect.copy(p_region_rect);
-        this.item_rect_changed();
-    }
-    /**
-     * @param {number} x
-     * @param {number} y
-     * @param {number} w
-     * @param {number} h
-     */
-    set_region_rect_n(x, y, w, h) {
-        const rect = Rect2.new(x, y, w, h);
-        this.set_region_rect(rect);
-        Rect2.free(rect);
-    }
+    get texture() { return this._texture }
+    set texture(value) { this.set_texture(value) }
 
-    get patch_margin_bottom() {
-        return this.margin[MARGIN_BOTTOM];
-    }
-    set patch_margin_bottom(value) {
-        this.set_patch_margin(MARGIN_BOTTOM, value);
-    }
+    get patch_margin_bottom() { return this.margin[MARGIN_BOTTOM] }
+    set patch_margin_bottom(value) { this.set_patch_margin(MARGIN_BOTTOM, value) }
 
-    get patch_margin_left() {
-        return this.margin[MARGIN_LEFT];
-    }
-    set patch_margin_left(value) {
-        this.set_patch_margin(MARGIN_LEFT, value);
-    }
+    get patch_margin_left() { return this.margin[MARGIN_LEFT] }
+    set patch_margin_left(value) { this.set_patch_margin(MARGIN_LEFT, value) }
 
-    get patch_margin_top() {
-        return this.margin[MARGIN_TOP];
-    }
-    set patch_margin_top(value) {
-        this.set_patch_margin(MARGIN_TOP, value);
-    }
+    get patch_margin_top() { return this.margin[MARGIN_TOP] }
+    set patch_margin_top(value) { this.set_patch_margin(MARGIN_TOP, value) }
 
-    get patch_margin_right() {
-        return this.margin[MARGIN_RIGHT];
-    }
-    set patch_margin_right(value) {
-        this.set_patch_margin(MARGIN_RIGHT, value);
-    }
+    get patch_margin_right() { return this.margin[MARGIN_RIGHT] }
+    set patch_margin_right(value) { this.set_patch_margin(MARGIN_RIGHT, value) }
 
     constructor() {
         super();
 
         this.margin = [0, 0, 0, 0];
-        this.region_rect = new Rect2();
+        this._region_rect = new Rect2();
 
-        this.draw_center = true;
-        this.axis_stretch_horizontal = AXIS_STRETCH_MODE_STRETCH;
-        this.axis_stretch_vertical = AXIS_STRETCH_MODE_STRETCH;
+        this._draw_center = true;
+        this._axis_stretch_horizontal = AXIS_STRETCH_MODE_STRETCH;
+        this._axis_stretch_vertical = AXIS_STRETCH_MODE_STRETCH;
 
         /**
          * @type {ImageTexture}
          */
-        this.texture = null;
+        this._texture = null;
     }
 
     /* virtual */
@@ -160,16 +103,16 @@ export class NinePatchRect extends Control {
      */
     _notification(p_what) {
         if (p_what === NOTIFICATION_DRAW) {
-            if (!this.texture) return;
+            if (!this._texture) return;
 
             const rect = Rect2.new(0, 0, this.rect_size.x, this.rect_size.y);
-            const src_rect = this.region_rect.clone();
+            const src_rect = this._region_rect.clone();
 
-            this.texture.get_rect_region(rect, src_rect, rect, src_rect);
+            this._texture.get_rect_region(rect, src_rect, rect, src_rect);
 
             const topleft = Vector2.new(this.margin[MARGIN_LEFT], this.margin[MARGIN_TOP]);
             const bottomright = Vector2.new(this.margin[MARGIN_RIGHT], this.margin[MARGIN_BOTTOM]);
-            VSG.canvas.canvas_item_add_nine_patch(this.canvas_item, rect, src_rect, this.texture.texture, topleft, bottomright, this.axis_stretch_horizontal, this.axis_stretch_vertical, this.draw_center);
+            VSG.canvas.canvas_item_add_nine_patch(this.canvas_item, rect, src_rect, this._texture.texture, topleft, bottomright, this._axis_stretch_horizontal, this._axis_stretch_vertical, this._draw_center);
             Vector2.free(bottomright);
             Vector2.free(topleft);
 
@@ -188,16 +131,72 @@ export class NinePatchRect extends Control {
     /* public */
 
     /**
+     * @param {boolean} value
+     */
+    set_draw_center(value) {
+        this._draw_center = value;
+        this.update();
+    }
+
+    /**
+     * @param {number} value
+     */
+    set_axis_stretch_horizontal(value) {
+        this._axis_stretch_horizontal = value;
+        this.update();
+    }
+
+    /**
+     * @param {number} value
+     */
+    set_axis_stretch_vertical(value) {
+        this._axis_stretch_vertical = value;
+        this.update();
+    }
+
+    /**
+     * @param {number} p_margin
+     * @param {number} p_size
+     */
+    set_patch_margin(p_margin, p_size) {
+        this.margin[p_margin] = p_size;
+        this.update();
+        this.minimum_size_changed();
+    }
+
+    /**
+     * @param {Rect2} p_region_rect
+     */
+    set_region_rect(p_region_rect) {
+        if (this._region_rect.equals(p_region_rect)) {
+            return;
+        }
+        this._region_rect.copy(p_region_rect);
+        this.item_rect_changed();
+    }
+    /**
+     * @param {number} x
+     * @param {number} y
+     * @param {number} w
+     * @param {number} h
+     */
+    set_region_rect_n(x, y, w, h) {
+        const rect = Rect2.new(x, y, w, h);
+        this.set_region_rect(rect);
+        Rect2.free(rect);
+    }
+
+    /**
      * @param {string | ImageTexture} p_texture
      */
     set_texture(p_texture) {
         /** @type {ImageTexture} */
         const texture = (typeof (p_texture) === 'string') ? resource_map[p_texture] : p_texture;
 
-        if (this.texture === texture) {
+        if (this._texture === texture) {
             return;
         }
-        this.texture = texture;
+        this._texture = texture;
         this.update();
         this.minimum_size_changed();
         this.emit_signal('texture_changed');

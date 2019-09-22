@@ -6,6 +6,8 @@ import { Rect2 } from "engine/core/math/rect2";
 import { SIZE_EXPAND_FILL, SIZE_EXPAND } from "./const";
 import { Control, NOTIFICATION_THEME_CHANGED } from "./control";
 import { Container, NOTIFICATION_SORT_CHILDREN } from "./container";
+import { MarginContainer } from "./margin_container";
+import { Label } from "./label";
 
 
 export const ALIGN_BEGIN = 0;
@@ -28,19 +30,14 @@ class MinSizeCache {
 export class BoxContainer extends Container {
     get class() { return 'BoxContainer' }
 
-    /**
-     * @param {number} value
-     */
-    set_alignment(value) {
-        this.alignment = value;
-        this._resort();
-    }
+    get alignment() { return this._alignment }
+    set alignment(value) { this.set_alignment(value) }
 
     constructor(vertical = false) {
         super();
 
         this.vertical = vertical;
-        this.alignment = ALIGN_BEGIN;
+        this._alignment = ALIGN_BEGIN;
     }
 
     /* virtual */
@@ -124,6 +121,14 @@ export class BoxContainer extends Container {
         if (begin) {
             this.move_child(c, 0);
         }
+    }
+
+    /**
+     * @param {number} value
+     */
+    set_alignment(value) {
+        this._alignment = value;
+        this._resort();
     }
 
     /* private */
@@ -234,7 +239,7 @@ export class BoxContainer extends Container {
 
         let ofs = 0;
         if (!has_stretched) {
-            switch (this.alignment) {
+            switch (this._alignment) {
                 case ALIGN_BEGIN: {
                 } break;
                 case ALIGN_CENTER: {
@@ -318,7 +323,16 @@ export class VBoxContainer extends BoxContainer {
      * @param {boolean} p_expand
      */
     add_margin_child(p_label, p_control, p_expand = false) {
-        // TODO: add label and margin container here
+        const l = new Label();
+        l.set_text(p_label);
+        this.add_child(l);
+        const mc = new MarginContainer();
+        mc.add_constant_override('margin_left', 0);
+        mc.add_child(p_control);
+        this.add_child(mc);
+        if (p_expand) {
+            mc.set_size_flags_vertical(SIZE_EXPAND_FILL);
+        }
     }
 }
 node_class_map['VBoxContainer'] = GDCLASS(VBoxContainer, BoxContainer)

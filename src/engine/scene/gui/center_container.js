@@ -9,18 +9,23 @@ import { Container, NOTIFICATION_SORT_CHILDREN } from "./container";
 export class CenterContainer extends Container {
     get class() { return 'CenterContainer' }
 
-    /**
-     * @param {boolean} value
-     */
-    set_use_top_left(value) {
-        this.use_top_left = value;
-        this.queue_sort();
-    }
+    get use_top_left() { return this._use_top_left }
+    set use_top_left(value) { this.set_use_top_left(value) }
 
     constructor() {
         super();
 
-        this.use_top_left = false;
+        this._use_top_left = false;
+    }
+
+    /* virtual */
+
+    _load_data(data) {
+        super._load_data(data);
+
+        if (data.use_top_left !== undefined) this.set_use_top_left(data.use_top_left);
+
+        return this;
     }
 
     /**
@@ -38,8 +43,8 @@ export class CenterContainer extends Container {
 
                 const minsize = c.get_combined_minimum_size();
                 rect.set(
-                    Math.floor(this.use_top_left ? (-minsize.x * 0.5) : ((this.rect_size.x - minsize.x) * 0.5)),
-                    Math.floor(this.use_top_left ? (-minsize.y * 0.5) : ((this.rect_size.y - minsize.y) * 0.5)),
+                    Math.floor(this._use_top_left ? (-minsize.x * 0.5) : ((this.rect_size.x - minsize.x) * 0.5)),
+                    Math.floor(this._use_top_left ? (-minsize.y * 0.5) : ((this.rect_size.y - minsize.y) * 0.5)),
                     minsize.x,
                     minsize.y
                 )
@@ -56,7 +61,7 @@ export class CenterContainer extends Container {
     get_minimum_size() {
         const ms = Vector2.new(0, 0);
 
-        if (this.use_top_left) {
+        if (this._use_top_left) {
             return ms;
         }
 
@@ -73,6 +78,16 @@ export class CenterContainer extends Container {
         }
 
         return ms;
+    }
+
+    /* public */
+
+    /**
+     * @param {boolean} value
+     */
+    set_use_top_left(value) {
+        this._use_top_left = value;
+        this.queue_sort();
     }
 }
 node_class_map['CenterContainer'] = GDCLASS(CenterContainer, Container)

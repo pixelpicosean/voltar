@@ -55,123 +55,54 @@ class WordCache {
 export class Label extends Control {
     get class() { return 'Label' }
 
-    /**
-     * @param {boolean} value
-     */
-    set_autowrap(value) {
-        this.autowrap = value;
-        this.word_cache_dirty = true;
-        this.update();
-    }
+    get align() { return this._align }
+    set align(value) { this.set_align(value) }
 
-    /**
-     * @param {boolean} value
-     */
-    set_uppercase(value) {
-        this.uppercase = value;
-        this.word_cache_dirty = true;
-        this.update();
-    }
+    get autowrap() { return this._autowrap }
+    set autowrap(value) { this.set_autowrap(value) }
 
-    /**
-     * @param {string} value
-     */
-    set_text(value) {
-        if (this.text === value) {
-            return;
-        }
-        this.text = value;
-        this.word_cache_dirty = true;
-        if (this.percent_visible < 1) {
-            this.visible_characters = this.get_total_character_count() * this.percent_visible;
-        }
-        this.update();
-    }
+    get clip_text() { return this._clip_text }
+    set clip_text(value) { this.set_clip_text(value) }
 
-    /**
-     * @param {boolean} value
-     */
-    set_clip_text(value) {
-        this.clip_text = value;
-        this.update();
-        this.minimum_size_changed();
-    }
+    get lines_skipped() { return this._lines_skipped }
+    set lines_skipped(value) { this.set_lines_skipped(value) }
 
-    /**
-     * @param {number} value
-     */
-    set_visible_characters(value) {
-        this.visible_characters = value;
-        if (this.get_total_character_count() > 0) {
-            this.percent_visible = value / this.total_char_cache;
-        }
-        this.update();
-    }
+    get max_lines_visible() { return this._max_lines_visible }
+    set max_lines_visible(value) { this.set_max_lines_visible(value) }
 
-    /**
-     * @param {number} value
-     */
-    set_percent_visible(value) {
-        if (value < 0 || value >= 1) {
-            this.percent_visible = 1;
-            this.visible_characters = -1;
-        } else {
-            this.percent_visible = value;
-            this.visible_characters = this.get_total_character_count() * this.percent_visible;
-        }
-        this.update();
-    }
+    get percent_visible() { return this._percent_visible }
+    set percent_visible(value) { this.set_percent_visible(value) }
 
-    /**
-     * @param {number} p_align
-     */
-    set_align(p_align) {
-        this.align = p_align;
-        this.update();
-    }
+    get text() { return this._text }
+    set text(value) { this.set_text(value) }
 
-    /**
-     * @param {number} p_align
-     */
-    set_valign(p_align) {
-        this.valign = p_align;
-        this.update();
-    }
+    get uppercase() { return this._uppercase }
+    set uppercase(value) { this.set_uppercase(value) }
 
-    /**
-     * @param {number} p_lines
-     */
-    set_lines_skipped(p_lines) {
-        this.lines_skipped = p_lines;
-        this.update();
-    }
+    get valign() { return this._valign }
+    set valign(value) { this.set_valign(value) }
 
-    /**
-     * @param {number} p_lines
-     */
-    set_max_lines_visible(p_lines) {
-        this.max_lines_visible = p_lines;
-        this.update();
-    }
+    get visible_characters() { return this._visible_characters }
+    set visible_characters(value) { this.set_visible_characters(value) }
 
     constructor() {
         super();
 
-        this.align = HALIGN_LEFT;
-        this.autowrap = false;
+        this._align = HALIGN_LEFT;
+        this._autowrap = false;
         this.line_count = 0;
-        this.clip_text = false;
+        this._clip_text = false;
         this.minsize = new Vector2();
-        this.lines_skipped = 0;
-        this.max_lines_visible = -1;
-        this.percent_visible = 1;
+        this._lines_skipped = 0;
+        this._max_lines_visible = -1;
+        this._percent_visible = 1;
         /**
          * @type {string}
          */
-        this.text = '';
-        this.uppercase = false;
-        this.valign = VALIGN_TOP;
-        this.visible_characters = -1;
+        this._text = '';
+        this._uppercase = false;
+        this._valign = VALIGN_TOP;
+        this._visible_characters = -1;
 
         this.word_cache_dirty = false;
         this.word_cache = null;
@@ -240,11 +171,11 @@ export class Label extends Control {
             this.regenerate_word_cache();
         }
 
-        if (this.autowrap) {
-            return size.copy(min_style).add(1, this.clip_text ? 1 : this.minsize.y);
+        if (this._autowrap) {
+            return size.copy(min_style).add(1, this._clip_text ? 1 : this.minsize.y);
         } else {
             size.copy(this.minsize);
-            if (this.clip_text) {
+            if (this._clip_text) {
                 size.x = 1;
             }
             return size.add(min_style);
@@ -258,7 +189,7 @@ export class Label extends Control {
         // TODO: translation support
 
         if (p_what === NOTIFICATION_DRAW) {
-            if (this.clip_text) {
+            if (this._clip_text) {
                 VSG.canvas.canvas_item_set_clip(this.canvas_item, true);
             }
 
@@ -267,7 +198,7 @@ export class Label extends Control {
             }
 
             /** @type {string} */
-            const text = this.text;
+            const text = this._text;
             const size = this.rect_size;
             const style = this.get_stylebox('normal');
             const font = this.get_font('font');
@@ -289,12 +220,12 @@ export class Label extends Control {
                 lines_visible = this.line_count;
             }
 
-            if (this.max_lines_visible >= 0 && lines_visible > this.max_lines_visible) {
-                lines_visible = this.max_lines_visible;
+            if (this._max_lines_visible >= 0 && lines_visible > this._max_lines_visible) {
+                lines_visible = this._max_lines_visible;
             }
 
             if (lines_visible > 0) {
-                switch (this.valign) {
+                switch (this._valign) {
                     case VALIGN_TOP: {
                         // nothing
                     } break;
@@ -323,13 +254,13 @@ export class Label extends Control {
             }
 
             let line = 0;
-            let line_to = this.lines_skipped + (lines_visible > 0 ? lines_visible : 1);
+            let line_to = this._lines_skipped + (lines_visible > 0 ? lines_visible : 1);
             let glyph_idx = 0;
             while (wc) {
                 if (line >= line_to) {
                     break;
                 }
-                if (line < this.lines_skipped) {
+                if (line < this._lines_skipped) {
                     while (wc && wc.char_pos >= 0) {
                         wc = wc.next;
                     }
@@ -364,7 +295,7 @@ export class Label extends Control {
 
                 let x_ofs = 0;
 
-                switch (this.align) {
+                switch (this._align) {
                     case HALIGN_FILL:
                     case HALIGN_LEFT: {
                         x_ofs = style.get_offset(tmp_vec8).x;
@@ -378,7 +309,7 @@ export class Label extends Control {
                 }
 
                 let y_ofs = style.get_offset(tmp_vec9).y;
-                y_ofs += (line - this.lines_skipped) * font_h + font.ascent;
+                y_ofs += (line - this._lines_skipped) * font_h + font.ascent;
                 y_ofs += vbegin + line * vsep;
 
                 while (from !== to) {
@@ -390,16 +321,16 @@ export class Label extends Control {
                     if (from.space_count) {
                         // spacing
                         x_ofs += space_w * from.space_count;
-                        if (can_fill && this.align === HALIGN_FILL && spaces) {
+                        if (can_fill && this._align === HALIGN_FILL && spaces) {
                             x_ofs += Math.floor((size.x - (taken + space_w * spaces)) / spaces);
                         }
                     }
 
                     for (let i = 0; i < from.word_len; i++) {
-                        if (this.visible_characters < 0 || chars_total < this.visible_characters) {
+                        if (this._visible_characters < 0 || chars_total < this._visible_characters) {
                             let c = text[i + pos];
                             let n = text[i + pos + 1];
-                            if (this.uppercase) {
+                            if (this._uppercase) {
                                 c = c.toUpperCase();
                                 n = n.toUpperCase();
                             }
@@ -449,10 +380,10 @@ export class Label extends Control {
         let max_line_width = 0;
         let line_width = 0;
 
-        for (let i = 0; i < this.text.length; i++) {
+        for (let i = 0; i < this._text.length; i++) {
             /** @type {string} */
-            let current = this.text[i];
-            if (this.uppercase) {
+            let current = this._text[i];
+            if (this._uppercase) {
                 current = current.toUpperCase();
             }
 
@@ -464,7 +395,7 @@ export class Label extends Control {
                     line_width = 0;
                 }
             } else {
-                let char_width = Math.ceil(font.get_char_size(tmp_vec5, current, this.text[i + 1]).x);
+                let char_width = Math.ceil(font.get_char_size(tmp_vec5, current, this._text[i + 1]).x);
                 line_width += char_width;
             }
         }
@@ -507,8 +438,8 @@ export class Label extends Control {
             lines_visible = this.line_count;
         }
 
-        if (this.max_lines_visible >= 0 && lines_visible > this.max_lines_visible) {
-            lines_visible = this.max_lines_visible;
+        if (this._max_lines_visible >= 0 && lines_visible > this._max_lines_visible) {
+            lines_visible = this._max_lines_visible;
         }
 
         return lines_visible;
@@ -522,10 +453,10 @@ export class Label extends Control {
         this.word_cache = null;
 
         /** @type {string} */
-        const text = this.text;
+        const text = this._text;
 
         const style = this.get_stylebox('normal');
-        const width = this.autowrap ? (this.rect_size.x - style.get_minimum_size(tmp_vec3).x) : this.get_longest_line_width();
+        const width = this._autowrap ? (this.rect_size.x - style.get_minimum_size(tmp_vec3).x) : this.get_longest_line_width();
         const font = this.get_font('font');
 
         let current_word_size = 0;
@@ -544,7 +475,7 @@ export class Label extends Control {
             // always a space at the end, so the algorithm works
             let current = i < text.length ? text[i] : ' ';
 
-            if (this.uppercase) {
+            if (this._uppercase) {
                 current = current.toUpperCase();
             }
 
@@ -596,7 +527,7 @@ export class Label extends Control {
                 this.total_char_cache++;
             }
 
-            if ((this.autowrap && (line_width >= width) && ((last && last.char_pos >= 0) || separatable)) || insert_newline) {
+            if ((this._autowrap && (line_width >= width) && ((last && last.char_pos >= 0) || separatable)) || insert_newline) {
                 if (separatable) {
                     if (current_word_size > 0) {
                         const wc = new WordCache();
@@ -634,20 +565,119 @@ export class Label extends Control {
             }
         }
 
-        if (!this.autowrap) {
+        if (!this._autowrap) {
             this.minsize.x = width;
         }
 
-        if (this.max_lines_visible > 0 && this.line_count > this.max_lines_visible) {
-            this.minsize.y = (font.height * this.max_lines_visible) + (line_spacing * (this.max_lines_visible - 1));
+        if (this._max_lines_visible > 0 && this.line_count > this._max_lines_visible) {
+            this.minsize.y = (font.height * this._max_lines_visible) + (line_spacing * (this._max_lines_visible - 1));
         } else {
             this.minsize.y = (font.height * this.line_count) + (line_spacing * (this.line_count - 1));
         }
 
-        if (!this.autowrap || !this.clip_text) {
+        if (!this._autowrap || !this._clip_text) {
             this.minimum_size_changed();
         }
         this.word_cache_dirty = false;
+    }
+
+    /**
+     * @param {boolean} value
+     */
+    set_autowrap(value) {
+        this._autowrap = value;
+        this.word_cache_dirty = true;
+        this.update();
+    }
+
+    /**
+     * @param {boolean} value
+     */
+    set_uppercase(value) {
+        this._uppercase = value;
+        this.word_cache_dirty = true;
+        this.update();
+    }
+
+    /**
+     * @param {string} value
+     */
+    set_text(value) {
+        if (this._text === value) {
+            return;
+        }
+        this._text = value;
+        this.word_cache_dirty = true;
+        if (this._percent_visible < 1) {
+            this._visible_characters = this.get_total_character_count() * this._percent_visible;
+        }
+        this.update();
+    }
+
+    /**
+     * @param {boolean} value
+     */
+    set_clip_text(value) {
+        this._clip_text = value;
+        this.update();
+        this.minimum_size_changed();
+    }
+
+    /**
+     * @param {number} value
+     */
+    set_visible_characters(value) {
+        this._visible_characters = value;
+        if (this.get_total_character_count() > 0) {
+            this._percent_visible = value / this.total_char_cache;
+        }
+        this.update();
+    }
+
+    /**
+     * @param {number} value
+     */
+    set_percent_visible(value) {
+        if (value < 0 || value >= 1) {
+            this._percent_visible = 1;
+            this._visible_characters = -1;
+        } else {
+            this._percent_visible = value;
+            this._visible_characters = this.get_total_character_count() * this._percent_visible;
+        }
+        this.update();
+    }
+
+    /**
+     * @param {number} p_align
+     */
+    set_align(p_align) {
+        this._align = p_align;
+        this.update();
+    }
+
+    /**
+     * @param {number} p_align
+     */
+    set_valign(p_align) {
+        this._valign = p_align;
+        this.update();
+    }
+
+    /**
+     * @param {number} p_lines
+     */
+    set_lines_skipped(p_lines) {
+        this._lines_skipped = p_lines;
+        this.update();
+    }
+
+    /**
+     * @param {number} p_lines
+     */
+    set_max_lines_visible(p_lines) {
+        this._max_lines_visible = p_lines;
+        this.update();
     }
 }
 node_class_map['Label'] = GDCLASS(Label, Control)

@@ -1,10 +1,8 @@
-import Control from "./control";
-import { Vector2, Rectangle, clamp } from "engine/scene/gui/engine/core/math/math_funcs";
-import { remove_items } from "engine/scene/gui/engine/dep/index";
+import { remove_items } from "engine/dep/index";
+import { clamp } from "engine/core/math/math_funcs";
 
-const tmp_vec = new Vector2();
-const tmp_vec2 = new Vector2();
-const tmp_rect = new Rectangle();
+import { Control } from "./control";
+
 
 class Shared {
     /**
@@ -51,53 +49,129 @@ class Shared {
     }
 }
 
-export default class Range extends Control {
-    get allow_greater() {
-        return this.shared.allow_greater;
+export class Range extends Control {
+    get allow_greater() { return this.shared.allow_greater }
+    set allow_greater(val) { this.set_allow_greater(val) }
+
+    get allow_lesser() { return this.shared.allow_lesser }
+    set allow_lesser(val) { this.set_allow_lesser(val) }
+
+    get exp_edit() { return this.shared.exp_ratio }
+    set exp_edit(val) { this.set_exp_edit(val) }
+
+    get value() { return this.shared.val }
+    set value(val) { this.set_value(val) }
+
+    get min_value() { return this.shared.min }
+    set min_value(val) { this.set_min_value(val) }
+
+    get max_value() { return this.shared.max }
+    set max_value(val) { this.set_max_value(val) }
+
+    get step() { return this.shared.step }
+    set step(val) { this.set_step(val) }
+
+    get page() { return this.shared.page }
+    set page(val) { this.set_page(val) }
+
+    get ratio() {
+        if (this.shared.exp_ratio && this.min_value >= 0) {
+            const exp_min = this.min_value === 0 ? 0.0 : Math.log(this.min_value) / Math.log(2);
+            const exp_max = Math.log(this.max_value) / Math.log(2);
+            const value = clamp(this.value, this.shared.min, this.shared.max);
+            const v = Math.log(value) / Math.log(2);
+
+            return clamp((v - exp_min) / (exp_max - exp_min), 0, 1);
+        } else {
+            const value = clamp(this.value, this.shared.min, this.shared.max);
+            return clamp((value - this.min_value) / (this.max_value - this.min_value), 0, 1);
+        }
     }
-    set allow_greater(val) {
-        this.shared.allow_greater = val;
+    set ratio(val) { this.set_ratio(val) }
+
+    constructor() {
+        super();
+
+        this.type = 'Range';
+
+        this.shared = new Shared(this);
+
+        this.rounded = false;
     }
+
+    /* virtual */
+
+    _load_data(data) {
+        super._load_data(data);
+
+        if (data.allow_greater !== undefined) {
+            this.set_allow_greater(data.allow_greater);
+        }
+        if (data.allow_lesser !== undefined) {
+            this.set_allow_lesser(data.allow_lesser);
+        }
+
+        if (data.exp_edit !== undefined) {
+            this.set_exp_edit(data.exp_edit);
+        }
+
+        if (data.max_value !== undefined) {
+            this.set_max_value(data.max_value);
+        }
+        if (data.min_value !== undefined) {
+            this.set_min_value(data.min_value);
+        }
+
+        if (data.page !== undefined) {
+            this.set_page(data.page);
+        }
+        if (data.ratio !== undefined) {
+            this.set_ratio(data.ratio);
+        }
+
+        if (data.rounded !== undefined) {
+            this.set_rounded(data.rounded);
+        }
+
+        if (data.step !== undefined) {
+            this.set_step(data.step);
+        }
+
+        if (data.value !== undefined) {
+            this.set_value(data.value);
+        }
+
+        return this;
+    }
+
+    /* public */
+
     /**
      * @param {boolean} val
      */
     set_allow_greater(val) {
-        this.allow_greater = val;
-        return this;
+        this.shared.allow_greater = val;
     }
 
-    get allow_lesser() {
-        return this.shared.allow_lesser;
-    }
-    set allow_lesser(val) {
-        this.shared.allow_lesser = val;
-    }
     /**
      * @param {boolean} val
      */
     set_allow_lesser(val) {
+        this.shared.allow_lesser = val;
         this.allow_lesser = val;
-        return this;
     }
 
-    get exp_edit() {
-        return this.shared.exp_ratio;
-    }
-    set exp_edit(val) {
-        this.shared.exp_ratio = val;
-    }
     /**
      * @param {boolean} val
      */
     set_exp_edit(val) {
-        this.exp_edit = val;
-        return this;
+        this.shared.exp_ratio = val
     }
 
-    get value() {
-        return this.shared.val;
-    }
-    set value(val) {
+    /**
+     * @param {number} val
+     */
+    set_value(val) {
         if (this.shared.step > 0) {
             val = Math.round(val / this.shared.step) * this.shared.step;
         }
@@ -122,94 +196,49 @@ export default class Range extends Control {
 
         this.shared.emit_value_changed();
     }
-    /**
-     * @param {number} val
-     */
-    set_value(val) {
-        this.value = val;
-        return this;
-    }
 
-    get min_value() {
-        return this.shared.min;
-    }
-    set min_value(val) {
-        this.shared.min = val;
-        this.value = this.shared.val;
-
-        this.shared.emit_changed('min');
-    }
     /**
      * @param {number} val
      */
     set_min_value(val) {
-        this.min_value = val;
-        return this;
+        this.shared.min = val;
+        this.set_value(this.shared.val);
+
+        this.shared.emit_changed('min');
     }
 
-    get max_value() {
-        return this.shared.max;
-    }
-    set max_value(val) {
-        this.shared.max = val;
-        this.value = this.shared.val;
-
-        this.shared.emit_changed('max');
-    }
     /**
      * @param {number} val
      */
     set_max_value(val) {
-        this.max_value = val;
-        return this;
+        this.shared.max = val;
+        this.set_value(this.shared.val);
+
+        this.shared.emit_changed('max');
     }
 
-    get step() {
-        return this.shared.step;
-    }
-    set step(val) {
-        this.shared.step = val;
-        this.shared.emit_changed('step');
-    }
     /**
      * @param {number} val
      */
     set_step(val) {
-        this.step = val;
-        return this;
+        this.shared.step = val;
+        this.shared.emit_changed('step');
     }
 
-    get page() {
-        return this.shared.page;
-    }
-    set page(val) {
-        this.shared.page = val;
-        this.value = this.shared.val;
-
-        this.shared.emit_changed('page');
-    }
     /**
      * @param {number} val
      */
     set_page(val) {
-        this.page = val;
-        return this;
+        this.shared.page = val;
+        this.set_value(this.shared.val);
+
+        this.shared.emit_changed('page');
     }
 
-    get ratio() {
-        if (this.shared.exp_ratio && this.min_value >= 0) {
-            const exp_min = this.min_value === 0 ? 0.0 : Math.log(this.min_value) / Math.log(2);
-            const exp_max = Math.log(this.max_value) / Math.log(2);
-            const value = clamp(this.value, this.shared.min, this.shared.max);
-            const v = Math.log(value) / Math.log(2);
-
-            return (v - exp_min) / (exp_max - exp_min);
-        } else {
-            const value = clamp(this.value, this.shared.min, this.shared.max);
-            return (value - this.min_value) / (this.max_value - this.min_value);
-        }
-    }
-    set ratio(val) {
+    /**
+     * @param {number} val
+     */
+    set_ratio(val) {
         let v = 0;
 
         if (this.shared.exp_ratio && this.min_value >= 0) {
@@ -226,14 +255,7 @@ export default class Range extends Control {
             }
         }
         v = clamp(v, this.min_value, this.max_value);
-        this.value = v;
-    }
-    /**
-     * @param {number} val
-     */
-    set_ratio(val) {
-        this.ratio = val;
-        return this;
+        this.set_value(v);
     }
 
     /**
@@ -244,57 +266,7 @@ export default class Range extends Control {
         return this;
     }
 
-    constructor() {
-        super();
-
-        this.type = 'Range';
-
-        this.shared = new Shared(this);
-
-        this.rounded = false;
-    }
-    _load_data(data) {
-        super._load_data(data);
-
-        if (data.allow_greater !== undefined) {
-            this.allow_greater = data.allow_greater;
-        }
-        if (data.allow_lesser !== undefined) {
-            this.allow_lesser = data.allow_lesser;
-        }
-
-        if (data.exp_edit !== undefined) {
-            this.exp_edit = data.exp_edit;
-        }
-
-        if (data.max_value !== undefined) {
-            this.max_value = data.max_value;
-        }
-        if (data.min_value !== undefined) {
-            this.min_value = data.min_value;
-        }
-
-        if (data.page !== undefined) {
-            this.page = data.page;
-        }
-        if (data.ratio !== undefined) {
-            this.ratio = data.ratio;
-        }
-
-        if (data.rounded !== undefined) {
-            this.rounded = data.rounded;
-        }
-
-        if (data.step !== undefined) {
-            this.step = data.step;
-        }
-
-        if (data.value !== undefined) {
-            this.value = data.value;
-        }
-
-        return this;
-    }
+    /* private */
 
     /**
      * @param {any} value

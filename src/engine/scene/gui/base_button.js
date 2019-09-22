@@ -34,42 +34,11 @@ export const DRAW_HOVER_PRESSED = 4;
 export class BaseButton extends Control {
     get class() { return 'BaseButton' }
 
-    get disabled() {
-        return this.status.disabled;
-    }
+    get disabled() { return this.status.disabled }
     set disabled(value) { this.set_disabled(value) }
-    set_disabled(value) {
-        if (this.status.disabled === value) return;
 
-        this.status.disabled = value;
-        if (value) {
-            if (!this.toggle_mode) {
-                this.status.pressed = false;
-            }
-            this.status.press_attempt = false;
-            this.status.pressing_inside = false;
-        }
-        this.update();
-    }
-    is_disabled() { return this.status.disabled }
-
-    get pressed() {
-        return this.toggle_mode ? this.status.pressed : this.status.press_attempt;
-    }
+    get pressed() { return this.toggle_mode ? this.status.pressed : this.status.press_attempt }
     set pressed(value) { this.set_pressed(value) }
-    set_pressed(value) {
-        if (!this.toggle_mode) return;
-        if (this.status.pressed === value) return;
-
-        this.status.pressed = value;
-
-        if (value) {
-            this._unpress_group();
-        }
-        this.__toggled(this.status.pressed);
-
-        this.update();
-    }
 
     constructor() {
         super();
@@ -171,6 +140,37 @@ export class BaseButton extends Control {
      * @param {boolean} pressed
      */
     _toggled(pressed) { }
+
+    /* public */
+
+    set_disabled(value) {
+        if (this.status.disabled === value) return;
+
+        this.status.disabled = value;
+        if (value) {
+            if (!this.toggle_mode) {
+                this.status.pressed = false;
+            }
+            this.status.press_attempt = false;
+            this.status.pressing_inside = false;
+        }
+        this.update();
+    }
+    is_disabled() { return this.status.disabled }
+
+    set_pressed(value) {
+        if (!this.toggle_mode) return;
+        if (this.status.pressed === value) return;
+
+        this.status.pressed = value;
+
+        if (value) {
+            this._unpress_group();
+        }
+        this.__toggled(this.status.pressed);
+
+        this.update();
+    }
 
     /**
      * @param {InputEvent} p_event
