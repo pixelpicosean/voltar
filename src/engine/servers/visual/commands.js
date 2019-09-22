@@ -87,6 +87,7 @@ const nine_patch_indices = new Uint16Array([
     10, 11, 15,
     10, 15, 14,
 ])
+const nine_patch_uvs_cache = new Float32Array(8)
 
 /**
  * Swap values of 2 vertex (position or uv or any 2 component array)
@@ -104,6 +105,33 @@ function swap_vertices(arr, idx_a, idx_b) {
     v = arr[idx_a * 2 + 1];
     arr[idx_a * 2 + 1] = arr[idx_b * 2 + 1];
     arr[idx_b * 2 + 1] = v;
+}
+
+/**
+ * @param {Float32Array} r_uvs
+ * @param {Float32Array} tex_uvs
+ * @param {number} tex_width
+ * @param {number} tex_height
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ * @param {number} height
+ */
+function get_uvs_of_sub_rect(r_uvs, tex_uvs, tex_width, tex_height, x, y, width, height) {
+    const uv_w = tex_uvs[4] - tex_uvs[0];
+    const uv_h = tex_uvs[5] - tex_uvs[1];
+    const topleft_x = tex_uvs[0] + uv_w * (x / tex_width);
+    const topleft_y = tex_uvs[1] + uv_h * (y / tex_height);
+    const bottomright_x = topleft_x + uv_w * (width / tex_width);
+    const bottomright_y = topleft_y + uv_h * (height / tex_height);
+    r_uvs[0] = topleft_x;
+    r_uvs[1] = topleft_y;
+    r_uvs[2] = bottomright_x;
+    r_uvs[3] = topleft_y;
+    r_uvs[4] = bottomright_x;
+    r_uvs[5] = bottomright_y;
+    r_uvs[6] = topleft_x;
+    r_uvs[7] = bottomright_y;
 }
 
 export class Command {
@@ -201,28 +229,12 @@ export class CommandRect extends Command {
         const tex_uvs = this.texture._uvs.uvsFloat32;
         const uvs = this.uvs;
         if (this.flags & CANVAS_RECT_REGION) {
-            const sx_pct = this.source.x / this.texture.width;
-            const sy_pct = this.source.y / this.texture.height;
-            const w_pct = this.source.width / this.texture.width;
-            const h_pct = this.source.height / this.texture.height;
-            const uv_x0 = tex_uvs[0];
-            const uv_y0 = tex_uvs[1];
-            const uv_x1 = tex_uvs[4];
-            const uv_y1 = tex_uvs[5];
-            const uv_w = uv_x1 - uv_x0;
-            const uv_h = uv_y1 - uv_y0;
-
-            uvs[0] = uv_x0 + uv_w * sx_pct;
-            uvs[1] = uv_y0 + uv_h * sy_pct;
-
-            uvs[2] = uv_x0 + uv_w * w_pct;
-            uvs[3] = uvs[1];
-
-            uvs[4] = uv_x0 + uv_w * w_pct;
-            uvs[5] = uv_y0 + uv_h * h_pct;
-
-            uvs[6] = uvs[0];
-            uvs[7] = uv_y0 + uv_h * h_pct;
+            get_uvs_of_sub_rect(
+                uvs, tex_uvs,
+                this.texture.width, this.texture.height,
+                this.source.x, this.source.y,
+                this.source.width, this.source.height
+            )
         } else {
             for (let i = 0; i < 8; i++) {
                 uvs[i] = tex_uvs[i];
@@ -300,15 +312,25 @@ export class CommandNinePatch extends Command {
         const m_t = this.margin[MARGIN_TOP];
         const m_b = this.margin[MARGIN_BOTTOM];
 
-        const uv_x0 = this.texture._uvs.x0;
-        const uv_y0 = this.texture._uvs.y0;
-        const uv_x1 = this.texture._uvs.x2;
-        const uv_y1 = this.texture._uvs.y2;
+        const s_w = this.source.width || this.texture.width;
+        const s_h = this.source.height || this.texture.height;
 
-        const uv_m_l = (uv_x1 - uv_x0) * (m_l / this.texture.width);
-        const uv_m_r = (uv_x1 - uv_x0) * (m_r / this.texture.width);
-        const uv_m_t = (uv_y1 - uv_y0) * (m_t / this.texture.height);
-        const uv_m_b = (uv_y1 - uv_y0) * (m_b / this.texture.height);
+        get_uvs_of_sub_rect(
+            nine_patch_uvs_cache, this.texture._uvs.uvsFloat32,
+            this.texture.width, this.texture.height,
+            this.source.x, this.source.y,
+            s_w, s_h
+        )
+
+        const uv_x0 = nine_patch_uvs_cache[0];
+        const uv_y0 = nine_patch_uvs_cache[1];
+        const uv_x1 = nine_patch_uvs_cache[4];
+        const uv_y1 = nine_patch_uvs_cache[5];
+
+        const uv_m_l = (uv_x1 - uv_x0) * (m_l / s_w);
+        const uv_m_r = (uv_x1 - uv_x0) * (m_r / s_w);
+        const uv_m_t = (uv_y1 - uv_y0) * (m_t / s_h);
+        const uv_m_b = (uv_y1 - uv_y0) * (m_b / s_h);
 
         const vertex_data = this.vertex_data;
         const uv = this.uvs;
