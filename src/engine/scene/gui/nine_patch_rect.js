@@ -73,6 +73,9 @@ export class NinePatchRect extends Control {
         if (data.texture !== undefined) {
             this.set_texture(data.texture);
         }
+        if (data.region_rect !== undefined) {
+            this.set_region_rect(data.region_rect);
+        }
         if (data.draw_center !== undefined) {
             this.set_draw_center(data.draw_center);
         }

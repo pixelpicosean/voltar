@@ -2,6 +2,7 @@ const {
     int,
     real,
     boolean,
+    Rect2,
 } = require('../parse_utils');
 
 const Control = require('./Control');
@@ -10,6 +11,7 @@ module.exports = (data) => {
     const res = Object.assign({}, Control(data), {
         type: 'NinePatchRect',
         texture: data.prop.texture,
+        region_rect: Rect2(data.prop.region_rect),
         draw_center: boolean(data.prop.draw_center),
         axis_stretch_horizontal: int(data.prop.axis_stretch_horizontal),
         axis_stretch_vertical: int(data.prop.axis_stretch_vertical),
