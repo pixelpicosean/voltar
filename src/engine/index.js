@@ -91,6 +91,8 @@ export * from 'engine/scene/gui/center_container';
 export * from 'engine/scene/gui/box_container';
 export * from 'engine/scene/gui/grid_container';
 export * from 'engine/scene/gui/label';
+export * from 'engine/scene/gui/base_button';
+export * from 'engine/scene/gui/texture_button';
 
 export * from 'engine/registry';
 

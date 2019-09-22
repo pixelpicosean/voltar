@@ -1,389 +1,300 @@
-import { node_class_map } from 'engine/scene/gui/engine/registry';
-import Texture from 'engine/scene/gui/engine/scene/resources/textures/texture';
-import WebGLRenderer from 'engine/scene/gui/engine/servers/visual/webgl_renderer';
-import { Vector2 } from 'engine/scene/gui/engine/core/math/math_funcs';
+import { node_class_map, resource_map } from 'engine/registry';
+import { GDCLASS } from 'engine/core/v_object';
+import { ImageTexture } from '../resources/texture';
 
-import Sprite from '../sprites/sprite';
-import TilingSprite from '../sprites/tiling_sprite';
-import BaseButton, { DrawMode } from './base_button';
+import {
+    BaseButton,
+    DRAW_NORMAL,
+    DRAW_HOVER,
+    DRAW_HOVER_PRESSED,
+    DRAW_PRESSED,
+    DRAW_DISABLED,
+} from './base_button';
+import { Vector2Like, Vector2 } from 'engine/core/math/vector2';
+import { NOTIFICATION_DRAW } from '../2d/canvas_item';
+import {
+    STRETCH_SCALE,
+    STRETCH_TILE,
+    STRETCH_KEEP,
+    STRETCH_KEEP_CENTERED,
+    STRETCH_KEEP_ASPECT,
+    STRETCH_KEEP_ASPECT_CENTERED,
+    STRETCH_KEEP_ASPECT_COVERED,
+} from './texture_rect';
+import { Rect2 } from 'engine/core/math/rect2';
 
-/**
- * @enum {number}
- */
-export const StretchMode = {
-    SCALE: 0,
-    TILE: 1,
-    KEEP: 2,
-    KEEP_CENTERED: 3,
-    KEEP_ASPECT: 4,
-    KEEP_ASPECT_CENTERED: 5,
-    KEEP_ASPECT_COVERED: 6,
-}
 
-const tmp_vec = new Vector2();
-const tmp_vec2 = new Vector2();
-const tmp_vec3 = new Vector2();
-const tmp_vec4 = new Vector2();
+export class TextureButton extends BaseButton {
+    get class() { return 'TextureButton' }
 
-export default class TextureButton extends BaseButton {
-    /**
-     * @type {Texture}
-     */
-    get texture_normal() {
-        return this._texture_normal;
-    }
-    set texture_normal(p_value) {
-        this.set_texture_normal(p_value);
-    }
-    /**
-     * @param {string|Texture} p_value
-     */
-    set_texture_normal(p_value) {
-        this.sprite.set_texture(p_value);
+    get texture_normal() { return this._texture_normal }
+    set texture_normal(p_value) { this.set_texture_normal(p_value) }
 
-        this._texture_normal = this.sprite._texture;
+    get texture_pressed() { return this._texture_pressed }
+    set texture_pressed(p_value) { this.set_texture_pressed(p_value) }
 
-        // wait for the texture to load
-        if (this._texture_normal.base_texture.has_loaded) {
-            this._on_texture_update();
-        } else {
-            this._texture_normal.connect_once('update', this._on_texture_update, this);
-        }
+    get texture_hover() { return this._texture_hover }
+    set texture_hover(p_value) { this.set_texture_hover(p_value) }
 
-        return this;
-    }
+    get texture_disabled() { return this._texture_disabled }
+    set texture_disabled(p_value) { this.set_texture_disabled(p_value) }
 
-    /**
-     * @type {Texture}
-     */
-    get texture_pressed() {
-        return this._texture_pressed;
-    }
-    set texture_pressed(p_value) {
-        this.sprite.texture = p_value;
+    get expand() { return this._expand }
+    set expand(value) { this.set_expand(value) }
 
-        this._texture_pressed = this.sprite._texture;
-
-        // wait for the texture to load
-        if (this._texture_pressed.base_texture.has_loaded) {
-            this._on_texture_update();
-        } else {
-            this._texture_pressed.connect_once('update', this._on_texture_update, this);
-        }
-    }
-    /**
-     * @param {string|Texture} value
-     */
-    set_texture_pressed(value) {
-        // @ts-ignore
-        this.texture_pressed = value;
-        return this;
-    }
-
-    /**
-     * @type {Texture}
-     */
-    get texture_hover() {
-        return this._texture_hover;
-    }
-    set texture_hover(p_value) {
-        this.sprite.texture = p_value;
-
-        this._texture_hover = this.sprite._texture;
-
-        // wait for the texture to load
-        if (this._texture_hover.base_texture.has_loaded) {
-            this._on_texture_update();
-        } else {
-            this._texture_hover.connect_once('update', this._on_texture_update, this);
-        }
-    }
-    /**
-     * @param {string|Texture} value
-     */
-    set_texture_hover(value) {
-        // @ts-ignore
-        this.texture_hover = value;
-        return this;
-    }
-
-    /**
-     * @type {Texture}
-     */
-    get texture_disabled() {
-        return this._texture_disabled;
-    }
-    set texture_disabled(p_value) {
-        this.sprite.texture = p_value;
-
-        this._texture_disabled = this.sprite._texture;
-
-        // wait for the texture to load
-        if (this._texture_disabled.base_texture.has_loaded) {
-            this._on_texture_update();
-        } else {
-            this._texture_disabled.connect_once('update', this._on_texture_update, this);
-        }
-    }
-    /**
-     * @param {string|Texture} value
-     */
-    set_texture_disabled(value) {
-        // @ts-ignore
-        this.texture_disabled = value;
-        return this;
-    }
-
-    get expand() {
-        return this._expand;
-    }
-    /**
-     * @param {boolean} value
-     */
-    set expand(value) {
-        this._expand = value;
-        this._need_redraw = true;
-        this.minimum_size_changed();
-    }
-    /**
-     * @param {boolean} value
-     */
-    set_expand(value) {
-        this.expand = value;
-        return this;
-    }
-
-    get stretch_mode() {
-        return this._stretch_mode;
-    }
-    /**
-     * @param {number} value
-     */
-    set stretch_mode(value) {
-        this._stretch_mode = value;
-        this._need_redraw = true;
-    }
-    /**
-     * @param {number} value
-     */
-    set_stretch_mode(value) {
-        this.stretch_mode = value;
-        return this;
-    }
+    get stretch_mode() { return this._stretch_mode }
+    set stretch_mode(value) { this.set_stretch_mode(value) }
 
     constructor() {
         super();
 
-        this.type = 'TextureButton';
-
-        this._need_redraw = false;
-        this.sprite = new Sprite(); this.sprite.anchor.set(0, 0);
-        this.tsprite = new TilingSprite(); this.tsprite.anchor.set(0, 0);
-
         this._expand = false;
-        this._stretch_mode = StretchMode.SCALE;
+        this._stretch_mode = STRETCH_SCALE;
+
+        this._texture_region = new Rect2();
+        this._position_rect = new Rect2();
         this._tile = false;
 
-        /** @type {Texture} */
+        /** @type {ImageTexture} */
         this._texture_normal = null;
-        /** @type {Texture} */
+        /** @type {ImageTexture} */
         this._texture_pressed = null;
-        /** @type {Texture} */
+        /** @type {ImageTexture} */
         this._texture_hover = null;
-        /** @type {Texture} */
+        /** @type {ImageTexture} */
         this._texture_disabled = null;
     }
+
+    /* virtual */
+
     _load_data(data) {
         super._load_data(data);
 
         if (data.expand !== undefined) {
-            this.expand = data.expand;
+            this.set_expand(data.expand);
         }
         if (data.stretch_mode !== undefined) {
-            this.stretch_mode = data.stretch_mode;
+            this.set_stretch_mode(data.stretch_mode);
         }
 
         if (data.texture_normal !== undefined) {
-            this.texture_normal = data.texture_normal;
+            this.set_texture_normal(data.texture_normal);
         }
         if (data.texture_pressed !== undefined) {
-            this.texture_pressed = data.texture_pressed;
+            this.set_texture_pressed(data.texture_pressed);
         }
         if (data.texture_hover !== undefined) {
-            this.texture_hover = data.texture_hover;
+            this.set_texture_hover(data.texture_hover);
         }
         if (data.texture_disabled !== undefined) {
-            this.texture_disabled = data.texture_disabled;
+            this.set_texture_disabled(data.texture_disabled);
         }
 
         return this;
     }
 
     /**
-     * @param {Vector2} size
+     * @param {number} p_what
      */
-    get_minimum_size(size) {
-        size = super.get_minimum_size(size);
+    _notification(p_what) {
+        switch (p_what) {
+            case NOTIFICATION_DRAW: {
+                const draw_mode = this.get_draw_mode();
+
+                /** @type {ImageTexture} */
+                let texdraw = null;
+
+                switch (draw_mode) {
+                    case DRAW_NORMAL: {
+                        texdraw = this._texture_normal;
+                    } break;
+                    case DRAW_HOVER_PRESSED:
+                    case DRAW_PRESSED: {
+                        if (this._texture_pressed) {
+                            texdraw = this._texture_pressed;
+                        } else if (this._texture_hover) {
+                            texdraw = this._texture_hover;
+                        } else if (this._texture_normal) {
+                            texdraw = this._texture_normal;
+                        }
+                    } break;
+                    case DRAW_HOVER: {
+                        if (this._texture_hover) {
+                            texdraw = this._texture_hover;
+                        } else {
+                            if (this._texture_pressed && this.pressed) {
+                                texdraw = this._texture_pressed;
+                            } else if (this._texture_normal) {
+                                texdraw = this._texture_normal;
+                            }
+                        }
+                    } break;
+                    case DRAW_DISABLED: {
+                        if (this._texture_disabled) {
+                            texdraw = this._texture_disabled;
+                        } else if (this._texture_normal) {
+                            texdraw = this._texture_normal;
+                        }
+                    } break;
+                }
+
+                if (texdraw) {
+                    const ofs = Vector2.new(0, 0);
+                    const size = texdraw.get_size().clone();
+                    this._texture_region.set(0, 0, size.x, size.y);
+                    this._tile = false;
+                    if (this._expand) {
+                        switch (this._stretch_mode) {
+                            case STRETCH_SCALE: {
+                                size.copy(this.rect_size);
+                            } break;
+                            case STRETCH_TILE: {
+                                size.copy(this.rect_size);
+                                this._tile = true;
+                            } break;
+                            case STRETCH_KEEP_CENTERED: {
+                                ofs.set(
+                                    (this.rect_size.x - texdraw.get_width()) * 0.5,
+                                    (this.rect_size.y - texdraw.get_height()) * 0.5
+                                )
+                                size.copy(texdraw.get_size());
+                            } break;
+                            case STRETCH_KEEP_ASPECT_CENTERED:
+                            case STRETCH_KEEP_ASPECT: {
+                                size.copy(this.rect_size);
+                                let tex_width = texdraw.get_width() * size.y / texdraw.get_height();
+                                let tex_height = size.y;
+
+                                if (tex_width > size.x) {
+                                    tex_width = size.x;
+                                    tex_height = texdraw.get_height() * tex_width / texdraw.get_width();
+                                }
+
+                                if (this._stretch_mode === STRETCH_KEEP_ASPECT_CENTERED) {
+                                    ofs.x = (size.x - tex_width) * 0.5;
+                                    ofs.y = (size.y - tex_height) * 0.5;
+                                }
+                                size.x = tex_width;
+                                size.y = tex_height;
+                            } break;
+                            case STRETCH_KEEP_ASPECT_COVERED: {
+                                size.copy(this.rect_size);
+                                const tex_size = texdraw.get_size().clone();
+                                const scale_size = Vector2.new(size.x / tex_size.x, size.y / tex_size.y);
+                                const scale = scale_size.x > scale_size.y ? scale_size.x : scale_size.y;
+                                scale_size.scale(scale);
+                                this._texture_region.set(
+                                    Math.abs((scale_size.x - size.x) / scale),
+                                    Math.abs((scale_size.y - size.y) / scale),
+                                    size.x / scale,
+                                    size.y / scale
+                                )
+                                Vector2.free(scale_size);
+                                Vector2.free(tex_size);
+                            } break;
+                        }
+                    }
+
+                    this._position_rect.set(ofs.x, ofs.y, size.x, size.y);
+                    if (this._tile) {
+                        this.draw_texture_rect(texdraw, this._position_rect, this._tile);
+                    } else {
+                        this.draw_texture_rect_region(texdraw, this._position_rect, this._texture_region);
+                    }
+
+                    // TODO: focus support
+
+                    Vector2.free(size);
+                    Vector2.free(ofs);
+                }
+            } break;
+        }
+    }
+
+    get_minimum_size() {
+        const rscale = super.get_minimum_size();
 
         if (!this.expand) {
-            if (this._texture_normal && this._texture_normal.valid) {
-                return size.set(this._texture_normal.width, this._texture_normal.height);
-            } else if (this._texture_pressed && this._texture_pressed.valid) {
-                return size.set(this._texture_pressed.width, this._texture_pressed.height);
-            } else if (this._texture_hover && this._texture_hover.valid) {
-                return size.set(this._texture_hover.width, this._texture_hover.height);
+            if (!this._texture_normal) {
+                if (!this._texture_pressed) {
+                    if (!this._texture_hover) {
+                        rscale.set(0, 0);
+                    } else {
+                        rscale.copy(this._texture_hover.get_size());
+                    }
+                } else {
+                    rscale.copy(this._texture_pressed.get_size());
+                }
+            } else {
+                rscale.copy(this._texture_normal.get_size());
             }
         }
 
-        return size.abs();
-    }
-
-    _on_texture_update() {
-        this._update_minimum_size_cache();
+        return rscale.abs();
     }
 
     /**
-     * Renders the object using the WebGL renderer
-     *
-     * @private
-     * @param {WebGLRenderer} renderer - The webgl renderer to use.
+     * @param {Vector2Like} p_point
      */
-    _render_webgl(renderer) {
-        this.node2d_update_transform();
+    has_point_(p_point) {
+        // TODO: bitmap click mask
 
-        let texture = undefined;
+        return super.has_point_(p_point);
+    }
 
-        switch (this.get_draw_mode()) {
-            case DrawMode.NORMAL: {
-                texture = this._texture_normal;
-            } break;
-            case DrawMode.HOVER_PRESSED:
-            case DrawMode.PRESSED: {
-                if (this._texture_pressed && this._texture_pressed.valid) {
-                    texture = this._texture_pressed;
-                } else if (this._texture_hover && this._texture_hover.valid) {
-                    texture = this._texture_hover;
-                } else if (this._texture_normal && this._texture_normal.valid) {
-                    texture = this._texture_normal;
-                }
-            } break;
-            case DrawMode.HOVER: {
-                if (this._texture_hover && this._texture_hover.valid) {
-                    texture = this._texture_hover;
-                } else {
-                    if (this._texture_pressed && this._texture_pressed.valid && this.is_pressed()) {
-                        texture = this._texture_pressed;
-                    } else if (this._texture_normal && this._texture_normal.valid) {
-                        texture = this._texture_normal;
-                    }
-                }
-            } break;
-            case DrawMode.DISABLED: {
-                if (this._texture_disabled && this._texture_disabled.valid) {
-                    texture = this._texture_disabled;
-                } else if (this._texture_normal && this._texture_normal.valid) {
-                    texture = this._texture_normal;
-                }
-            } break;
-        }
+    /* public */
 
-        if (!texture) {
-            return;
-        }
+    /**
+     * @param {string|ImageTexture} p_texture
+     */
+    set_texture_normal(p_texture) {
+        this._texture_normal = (typeof (p_texture) === 'string') ? resource_map[p_texture] : p_texture;
+        this.minimum_size_changed();
+        this.update();
+    }
 
-        const ofs = tmp_vec2.set(0, 0);
-        const size = tmp_vec3.set(texture.width * this.rect_scale.x, texture.height * this.rect_scale.y);
-        this._tile = false;
-        if (this._expand) {
-            switch (this._stretch_mode) {
-                case StretchMode.SCALE: {
-                    size.copy(this.rect_size);
-                } break;
-                case StretchMode.TILE: {
-                    size.copy(this.rect_size);
-                    this._tile = true;
-                } break;
-                case StretchMode.KEEP_CENTERED: {
-                    ofs.set(
-                        (this.rect_size.x - texture.width) * 0.5,
-                        (this.rect_size.x - texture.width) * 0.5
-                    )
-                } break;
-                case StretchMode.KEEP_ASPECT_CENTERED:
-                case StretchMode.KEEP_ASPECT: {
-                    size.copy(this.rect_size);
-                    let tex_width = texture.width * size.y / texture.height;
-                    let tex_height = size.y;
+    /**
+     * @param {string|ImageTexture} p_texture
+     */
+    set_texture_hover(p_texture) {
+        this._texture_hover = (typeof (p_texture) === 'string') ? resource_map[p_texture] : p_texture;
+        this.minimum_size_changed();
+        this.update();
+    }
 
-                    if (tex_width > size.x) {
-                        tex_width = size.x;
-                        tex_height = texture.height * tex_width / texture.width;
-                    }
+    /**
+     * @param {string|ImageTexture} p_texture
+     */
+    set_texture_pressed(p_texture) {
+        this._texture_pressed = (typeof (p_texture) === 'string') ? resource_map[p_texture] : p_texture;
+        this.minimum_size_changed();
+        this.update();
+    }
 
-                    if (this._stretch_mode === StretchMode.KEEP_ASPECT_CENTERED) {
-                        ofs.x = (size.x - tex_width) * 0.5;
-                        ofs.y = (size.y - tex_height) * 0.5;
-                    }
-                    size.x = tex_width;
-                    size.y = tex_height;
-                } break;
-                case StretchMode.KEEP_ASPECT_COVERED: {
-                    this.tsprite.transform.set_from_matrix(this.transform.world_transform);
-                    this.tsprite.width = this.rect_size.x;
-                    this.tsprite.height = this.rect_size.y;
+    /**
+     * @param {string|ImageTexture} p_texture
+     */
+    set_texture_disabled(p_texture) {
+        this._texture_disabled = (typeof (p_texture) === 'string') ? resource_map[p_texture] : p_texture;
+        this.minimum_size_changed();
+        this.update();
+    }
 
-                    const scale_size = tmp_vec4.set(this.rect_size.x / texture.width, this.rect_size.y / texture.height);
-                    const scale = scale_size.x > scale_size.y ? scale_size.x : scale_size.y;
-                    this.tsprite.tile_scale.set(scale, scale);
-                    this.tsprite.tile_position.set(texture.width * scale, texture.height * scale)
-                        .subtract(this.rect_size)
-                        .scale(-0.5)
+    /**
+     * @param {boolean} value
+     */
+    set_expand(value) {
+        this._expand = value;
+        this.minimum_size_changed();
+        this.update();
+    }
 
-                    // TODO: sync more properties for rendering
-                    this.tsprite._update_transform();
-                    this.tsprite.texture = texture;
-                    this.tsprite.clamp_margin = -0.5;
-                    this.tsprite.tint = this.tint;
-                    this.tsprite.self_modulate.a = this.alpha;
-                    this.tsprite.blend_mode = this.blend_mode;
-
-                    this.tsprite._render_webgl(renderer);
-
-                    return;
-                } break;
-            }
-        }
-        if (this._tile) {
-            this.tsprite.transform.set_from_matrix(this.transform.world_transform);
-            this.tsprite.position.add(ofs);
-            this.tsprite.width = size.x;
-            this.tsprite.height = size.y;
-
-            // TODO: sync more properties for rendering
-            this.tsprite._update_transform();
-            this.tsprite.texture = texture;
-            this.tsprite.clamp_margin = -0.5;
-            this.tsprite.tint = this.tint;
-            this.tsprite.self_modulate.a = this.alpha;
-            this.tsprite.blend_mode = this.blend_mode;
-
-            this.tsprite._render_webgl(renderer);
-        } else {
-            this.sprite.transform.set_from_matrix(this.transform.world_transform);
-            this.sprite.position.add(ofs);
-            this.sprite.width = size.x;
-            this.sprite.height = size.y;
-
-            // TODO: sync more properties for rendering
-            this.sprite._update_transform();
-            this.sprite._texture = texture;
-            this.sprite.tint = this.tint;
-            this.sprite.self_modulate.a = this.alpha;
-            this.sprite.blend_mode = this.blend_mode;
-
-            this.sprite._render_webgl(renderer);
-        }
+    /**
+     * @param {number} value
+     */
+    set_stretch_mode(value) {
+        this._stretch_mode = value;
+        this.update();
     }
 }
-
-node_class_map['TextureButton'] = TextureButton;
+node_class_map['TextureButton'] = GDCLASS(TextureButton, BaseButton)

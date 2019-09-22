@@ -15,6 +15,7 @@ import { Vector2, Vector2Like } from 'engine/core/math/vector2';
 import { Rect2 } from 'engine/core/math/rect2';
 import { Transform2D } from 'engine/core/math/transform_2d';
 import { Color } from 'engine/core/color';
+import { InputEvent } from 'engine/core/os/input_event';
 import { MessageQueue } from 'engine/core/message_queue';
 import { NOTIFICATION_WM_UNFOCUS_REQUEST } from 'engine/core/main_loop';
 import { BLEND_MODES } from 'engine/drivers/constants';
@@ -36,6 +37,7 @@ import {
     NOTIFICATION_DRAW,
     NOTIFICATION_VISIBILITY_CHANGED,
 } from '../2d/canvas_item';
+
 import {
     GROW_DIRECTION_END,
     SIZE_FILL,
@@ -593,8 +595,26 @@ export class Control extends CanvasItem {
         }
     }
 
+    /**
+     * @param {Vector2Like} p_point
+     */
+    has_point(p_point) { return undefined }
+
     _get_minimum_size() {
         return /** @type {Vector2} */(null);
+    }
+
+    /**
+     * @param {InputEvent} p_event
+     */
+    _gui_input(p_event) { }
+
+    /**
+     * @private
+     * @param {InputEvent} p_event
+     */
+    __gui_input(p_event) {
+        this._gui_input(p_event);
     }
 
     accept_event() {
@@ -1358,6 +1378,20 @@ export class Control extends CanvasItem {
     /* cursor */
 
     /* private */
+
+    /**
+     * @param {Vector2Like} p_point
+     */
+    has_point_(p_point) {
+        let ret = this.has_point(p_point);
+        if (ret !== undefined) {
+            return ret;
+        }
+
+        const rect = Rect2.new(0, 0, this.rect_size.x, this.rect_size.y);
+        ret = rect.has_point(p_point);
+        return ret;
+    }
 
     /**
      * returns new Rect2

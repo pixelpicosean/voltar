@@ -1,33 +1,45 @@
-import Control from "./control";
-import InteractiveEvent from 'engine/scene/gui/engine/interaction/InteractionEvent';
+import { GDCLASS } from "engine/core/v_object";
+import {
+    InputEvent,
+    InputEventMouseButton,
+    InputEventMouseMotion,
+    BUTTON_MASK_LEFT,
+} from "engine/core/os/input_event";
+import { Resource } from "engine/core/resource";
 
-/**
- * @enum {number}
- */
-export const ActionMode = {
-    BUTTON_PRESS: 0,
-    BUTTON_RELEASE: 1,
-}
+import {
+    NOTIFICATION_DRAG_BEGIN,
+    NOTIFICATION_EXIT_TREE,
+} from "../main/node";
+import { NOTIFICATION_VISIBILITY_CHANGED } from "../2d/canvas_item";
+import {
+    Control,
+    NOTIFICATION_MOUSE_ENTER,
+    NOTIFICATION_MOUSE_EXIT,
+    NOTIFICATION_SCROLL_BEGIN,
+    NOTIFICATION_FOCUS_ENTER,
+    NOTIFICATION_FOCUS_EXIT,
+} from "./control";
 
-/**
- * @enum {number}
- */
-export const DrawMode = {
-    NORMAL: 0,
-    PRESSED: 1,
-    HOVER: 2,
-    DISABLED: 3,
-    HOVER_PRESSED: 4,
-}
 
-export default class BaseButton extends Control {
+export const ACTION_MODE_BUTTON_PRESS = 0;
+export const ACTION_MODE_BUTTON_RELEASE = 1;
+
+export const DRAW_NORMAL = 0;
+export const DRAW_PRESSED = 1;
+export const DRAW_HOVER = 2;
+export const DRAW_DISABLED = 3;
+export const DRAW_HOVER_PRESSED = 4;
+
+export class BaseButton extends Control {
+    get class() { return 'BaseButton' }
+
     get disabled() {
         return this.status.disabled;
     }
-    set disabled(value) {
-        if (this.status.disabled === value) {
-            return;
-        }
+    set disabled(value) { this.set_disabled(value) }
+    set_disabled(value) {
+        if (this.status.disabled === value) return;
 
         this.status.disabled = value;
         if (value) {
@@ -36,44 +48,40 @@ export default class BaseButton extends Control {
             }
             this.status.press_attempt = false;
             this.status.pressing_inside = false;
-            this.status.pressing_button = 0;
         }
-
-        this.interactive = true;
+        this.update();
     }
-    /**
-     * @param {boolean} value
-     * @returns {this}
-     */
-    set_disabled(value) {
-        this.disabled = value;
-        return this;
-    }
+    is_disabled() { return this.status.disabled }
 
     get pressed() {
         return this.toggle_mode ? this.status.pressed : this.status.press_attempt;
     }
-    set pressed(value) {
-        if (this.status.pressed === value) {
-            return;
-        }
+    set pressed(value) { this.set_pressed(value) }
+    set_pressed(value) {
+        if (!this.toggle_mode) return;
+        if (this.status.pressed === value) return;
 
         this.status.pressed = value;
-    }
-    /**
-     * @param {boolean} value
-     * @returns {this}
-     */
-    set_pressed(value) {
-        this.pressed = value;
-        return this;
+
+        if (value) {
+            this._unpress_group();
+        }
+        this.__toggled(this.status.pressed);
+
+        this.update();
     }
 
     constructor() {
         super();
 
-        this.action_mode = ActionMode.BUTTON_RELEASE;
+        this.button_mask = BUTTON_MASK_LEFT;
         this.toggle_mode = false;
+        this.shortcut_in_tooltip = true;
+        this.keep_pressed_outside = false;
+        this.enabled_focus_mode = 0;
+        this.shortcut = null;
+
+        this.action_mode = ACTION_MODE_BUTTON_RELEASE;
 
         this.status = {
             pressed: false,
@@ -85,13 +93,12 @@ export default class BaseButton extends Control {
             pressing_button: 0,
         };
 
-        this.interactive = true;
-        this.connect('pointerover', this._pointer_over, this);
-        this.connect('pointerout', this._pointer_out, this);
-        this.connect('pointerdown', this._pointer_down, this);
-        this.connect('pointerup', this._pointer_up, this);
-        this.connect('pointerupoutside', this._pointer_up_outside, this);
+        /** @type {ButtonGroup} */
+        this.button_group = null;
     }
+
+    /* virtual */
+
     _load_data(data) {
         super._load_data(data);
 
@@ -99,10 +106,10 @@ export default class BaseButton extends Control {
             this.action_mode = data.action_mode;
         }
         if (data.disabled !== undefined) {
-            this.disabled = data.disabled;
+            this.set_disabled(data.disabled);
         }
         if (data.pressed !== undefined) {
-            this.pressed = data.pressed;
+            this.set_pressed(data.pressed);
         }
         if (data.toggle_mode !== undefined) {
             this.toggle_mode = data.toggle_mode;
@@ -111,14 +118,51 @@ export default class BaseButton extends Control {
         return this;
     }
 
-    _visibility_changed() {
-        if (!this.toggle_mode) {
-            this.status.pressed = false;
+    /**
+     * @param {number} p_what
+     */
+    _notification(p_what) {
+        if (p_what === NOTIFICATION_MOUSE_ENTER) {
+            this.status.hovering = true;
+            this.update();
         }
-        this.status.hovering = false;
-        this.status.press_attempt = false;
-        this.status.pressing_inside = false;
-        this.status.pressing_button = 0;
+
+        if (p_what === NOTIFICATION_MOUSE_EXIT) {
+            this.status.hovering = false;
+            this.update();
+        }
+
+        if (p_what === NOTIFICATION_DRAG_BEGIN || p_what === NOTIFICATION_SCROLL_BEGIN) {
+            if (this.status.press_attempt) {
+                this.status.press_attempt = false;
+                this.update();
+            }
+        }
+
+        if (p_what === NOTIFICATION_FOCUS_ENTER) {
+            this.status.hovering = true;
+            this.update();
+        }
+
+        if (p_what === NOTIFICATION_FOCUS_EXIT) {
+            if (this.status.press_attempt) {
+                this.status.press_attempt = false;
+                this.status.hovering = false;
+                this.update();
+            } else if (this.status.hovering) {
+                this.status.hovering = false;
+                this.update();
+            }
+        }
+
+        if (p_what === NOTIFICATION_EXIT_TREE || (p_what === NOTIFICATION_VISIBILITY_CHANGED && !this.is_visible_in_tree())) {
+            if (this.toggle_mode) {
+                this.status.pressed = false;
+            }
+            this.status.hovering = false;
+            this.status.press_attempt = false;
+            this.status.pressing_inside = false;
+        }
     }
 
     _pressed() { }
@@ -128,21 +172,52 @@ export default class BaseButton extends Control {
      */
     _toggled(pressed) { }
 
+    /**
+     * @param {InputEvent} p_event
+     */
+    __gui_input(p_event) {
+        super.__gui_input(p_event);
+
+        if (this.status.disabled) return;
+
+        const mouse_button = (p_event.class === 'InputEventMouseButton') ? /** @type {InputEventMouseButton} */(p_event) : null;
+        const ui_accept = p_event.is_action('ui_accept') && !p_event.is_echo();
+
+        const button_masked = mouse_button && ((1 << (mouse_button.button_index - 1)) & this.button_mask) > 0;
+        if (button_masked || ui_accept) {
+            this.on_action_event(p_event);
+            return;
+        }
+
+        if (p_event.class === 'InputEventMouseMotion') {
+            const mouse_motion = /** @type {InputEventMouseMotion} */(p_event);
+            if (this.status.press_attempt) {
+                const last_press_inside = this.status.pressing_inside;
+                this.status.pressing_inside = this.has_point_(mouse_motion.position);
+                if (last_press_inside !== this.status.pressing_inside) {
+                    this.update();
+                }
+            }
+        }
+    }
+
+    /* public */
+
     get_draw_mode() {
         if (this.status.disabled) {
-            return DrawMode.DISABLED;
+            return DRAW_DISABLED;
         }
 
         if (!this.status.press_attempt && this.status.hovering) {
             if (this.status.pressed) {
-                return DrawMode.HOVER_PRESSED;
+                return DRAW_HOVER_PRESSED;
             }
 
-            return DrawMode.HOVER;
+            return DRAW_HOVER;
         } else {
             let pressing = false;
             if (this.status.press_attempt) {
-                pressing = this.status.pressing_inside;
+                pressing = (this.status.pressing_inside || this.keep_pressed_outside);
                 if (this.status.pressed) {
                     pressing = !pressing;
                 }
@@ -151,95 +226,100 @@ export default class BaseButton extends Control {
             }
 
             if (pressing) {
-                return DrawMode.PRESSED;
+                return DRAW_PRESSED;
             } else {
-                return DrawMode.NORMAL;
+                return DRAW_NORMAL;
             }
         }
     }
-    is_pressed() {
-        return this.toggle_mode ? this.status.pressed : this.status.press_attempt;
-    }
+
     is_hovered() {
         return this.status.hovering;
     }
 
-    /**
-    * @param {InteractiveEvent} e
-    */
-    _pointer_over(e) {
-        this.status.hovering = true;
+    /* private */
+
+    _unpress_group() {
+        if (!this.button_group) return;
+
+        if (this.toggle_mode) {
+            this.status.pressed = true;
+        }
+
+        for (let E of this.button_group.buttons) {
+            if (E === this) continue;
+            E.set_pressed(false);
+        }
     }
+
     /**
-     * @param {InteractiveEvent} e
+     * @param {InputEvent} p_event
      */
-    _pointer_out(e) {
-        this.status.hovering = false;
-    }
-    /**
-     * @param {InteractiveEvent} e
-     */
-    _pointer_down(e) {
-        e.stop_propagation();
-
-        if (this.action_mode === ActionMode.BUTTON_PRESS) {
-            this.emit_signal('button_down');
-
-            if (!this.toggle_mode) {
-                this.status.press_attempt = true;
-                this.status.pressing_inside = true;
-
-                this._pressed();
-                this.emit_signal('pressed');
-            } else {
-                this.status.pressed = !this.status.pressed;
-
-                this._pressed();
-                this.emit_signal('pressed');
-
-                this._toggled(this.status.pressed);
-                this.emit_signal('toggled', this.status.pressed);
-            }
-        } else {
+    on_action_event(p_event) {
+        if (p_event.is_pressed()) {
             this.status.press_attempt = true;
             this.status.pressing_inside = true;
             this.emit_signal('button_down');
         }
-    }
-    /**
-     * @param {InteractiveEvent} e
-     */
-    _pointer_up(e) {
-        e.stop_propagation();
 
-        if (this.action_mode === ActionMode.BUTTON_PRESS) {
-            this.emit_signal('button_up');
-            this.status.press_attempt = false;
-        } else {
-            this.emit_signal('button_up');
-
-            if (this.status.press_attempt && this.status.pressing_inside) {
-                if (!this.toggle_mode) {
-                    this._pressed();
-                    this.emit_signal('pressed');
-                } else {
+        if (this.status.press_attempt && this.status.pressing_inside) {
+            if (this.toggle_mode) {
+                if ((p_event.is_pressed() && this.action_mode === ACTION_MODE_BUTTON_PRESS) || (!p_event.is_pressed() && this.action_mode === ACTION_MODE_BUTTON_RELEASE)) {
+                    if (this.action_mode === ACTION_MODE_BUTTON_PRESS) {
+                        this.status.press_attempt = false;
+                        this.status.pressing_inside = false;
+                    }
                     this.status.pressed = !this.status.pressed;
-
-                    this._pressed();
-                    this.emit_signal('pressed');
-
-                    this._toggled(this.status.pressed);
-                    this.emit_signal('toggled', this.status.pressed);
+                    this._unpress_group();
+                    this.__toggled(this.status.pressed);
+                    this.__pressed();
+                }
+            } else {
+                if (!p_event.is_pressed()) {
+                    this.__pressed();
                 }
             }
+        }
 
+        if (!p_event.is_pressed()) {
+            this.emit_signal('button_up');
             this.status.press_attempt = false;
         }
+
+        this.update();
     }
+
+    __pressed() {
+        this._pressed();
+        this.pressed_();
+        this.emit_signal('pressed');
+    }
+
     /**
-     * @param {InteractiveEvent} e
+     * @param {boolean} pressed
      */
-    _pointer_up_outside(e) {
-        this.status.press_attempt = false;
+    __toggled(pressed) {
+        this._toggled(pressed);
+        this.toggled_(pressed);
+        this.emit_signal('toggled', pressed);
     }
+
+    pressed_() { }
+
+    /**
+     * @param {boolean} pressed
+     */
+    toggled_(pressed) { }
 }
+GDCLASS(BaseButton, Control)
+
+export class ButtonGroup extends Resource {
+    constructor() {
+        super();
+
+        /** @type {BaseButton[]} */
+        this.buttons = [];
+    }
+    get_pressed_button() { }
+}
+GDCLASS(ButtonGroup, Resource)
