@@ -88,6 +88,24 @@ const nine_patch_indices = new Uint16Array([
     10, 15, 14,
 ])
 
+/**
+ * Swap values of 2 vertex (position or uv or any 2 component array)
+ * @param {Float32Array | Uint8Array | Uint16Array} arr
+ * @param {number} idx_a
+ * @param {number} idx_b
+ */
+function swap_vertices(arr, idx_a, idx_b) {
+    let v = 0;
+    // x
+    v = arr[idx_a * 2];
+    arr[idx_a * 2] = arr[idx_b * 2];
+    arr[idx_b * 2] = v;
+    // y
+    v = arr[idx_a * 2 + 1];
+    arr[idx_a * 2 + 1] = arr[idx_b * 2 + 1];
+    arr[idx_b * 2 + 1] = v;
+}
+
 export class Command {
     get type() { return -1 }
     static instance() { return new Command() }
@@ -130,13 +148,12 @@ export class CommandRect extends Command {
         super();
 
         this.modulate = new Color();
-        this.rect = new Rect2();
         this.source = new Rect2();
+        this.rect = new Rect2();
         this.flags = 0;
         this.vertex_data = new Float32Array(8);
         this.indices = quad_indices;
-        /** @type {Float32Array} */
-        this.uvs = null;
+        this.uvs = new Float32Array(8);
         this.blendMode = BLEND_MODES.NORMAL;
     }
     init() {
@@ -181,7 +198,48 @@ export class CommandRect extends Command {
         vertex_data[7] = (d * y1) + (b * x0) + ty;
 
         // uv
-        this.uvs = this.texture._uvs.uvsFloat32;
+        const tex_uvs = this.texture._uvs.uvsFloat32;
+        const uvs = this.uvs;
+        if (this.flags & CANVAS_RECT_REGION) {
+            const sx_pct = this.source.x / this.texture.width;
+            const sy_pct = this.source.y / this.texture.height;
+            const w_pct = this.source.width / this.texture.width;
+            const h_pct = this.source.height / this.texture.height;
+            const uv_x0 = tex_uvs[0];
+            const uv_y0 = tex_uvs[1];
+            const uv_x1 = tex_uvs[4];
+            const uv_y1 = tex_uvs[5];
+            const uv_w = uv_x1 - uv_x0;
+            const uv_h = uv_y1 - uv_y0;
+
+            uvs[0] = uv_x0 + uv_w * sx_pct;
+            uvs[1] = uv_y0 + uv_h * sy_pct;
+
+            uvs[2] = uv_x0 + uv_w * w_pct;
+            uvs[3] = uvs[1];
+
+            uvs[4] = uv_x0 + uv_w * w_pct;
+            uvs[5] = uv_y0 + uv_h * h_pct;
+
+            uvs[6] = uvs[0];
+            uvs[7] = uv_y0 + uv_h * h_pct;
+        } else {
+            for (let i = 0; i < 8; i++) {
+                uvs[i] = tex_uvs[i];
+            }
+        }
+
+        if (this.flags & CANVAS_RECT_TRANSPOSE) {
+            swap_vertices(uvs, 1, 3);
+        }
+        if (this.flags & CANVAS_RECT_FLIP_H) {
+            swap_vertices(uvs, 0, 1);
+            swap_vertices(uvs, 2, 3);
+        }
+        if (this.flags & CANVAS_RECT_FLIP_V) {
+            swap_vertices(uvs, 0, 3);
+            swap_vertices(uvs, 1, 2);
+        }
 
         // color
         this.final_modulate.copy(this.modulate).multiply(modulate);
