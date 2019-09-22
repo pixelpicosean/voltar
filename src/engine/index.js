@@ -93,6 +93,8 @@ export * from 'engine/scene/gui/grid_container';
 export * from 'engine/scene/gui/label';
 export * from 'engine/scene/gui/base_button';
 export * from 'engine/scene/gui/texture_button';
+export * from 'engine/scene/gui/range';
+export * from 'engine/scene/gui/texture_progress';
 
 export * from 'engine/registry';
 
