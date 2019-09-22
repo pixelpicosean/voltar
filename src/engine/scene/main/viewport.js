@@ -73,9 +73,9 @@ class ViewportTexture extends Texture {
         return super.free();
     }
 
-    get_width() { return this.vp.get_size().width }
-    get_height() { return this.vp.get_size().height }
-    get_size() { return this.vp.get_size() }
+    get_width() { return this.vp.size.width }
+    get_height() { return this.vp.size.height }
+    get_size() { return this.vp.size }
 
     /* private */
 
@@ -145,97 +145,23 @@ class GUI {
 export class Viewport extends Node {
     get class() { return 'Viewport' }
 
-    get_size() { return this._size }
-    /**
-     * @param {Vector2Like} p_size
-     */
-    set_size(p_size) {
-        if (this._size.x === Math.floor(p_size.x) && this._size.y === Math.floor(p_size.y)) {
-            return;
-        }
-        this._size.copy(p_size).floor();
-        VSG.viewport.viewport_set_size(this.viewport, this._size.x, this._size.y);
+    get render_target_update_mode() { return this._render_target_update_mode }
+    set render_target_update_mode(value) { this.set_render_target_update_mode(value) }
 
-        this._update_stretch_transform();
+    get render_target_clear_mode() { return this._render_target_clear_mode }
+    set render_target_clear_mode(value) { this.set_render_target_clear_mode(value) }
 
-        this.emit_signal('size_changed');
-    }
+    get size() { return this._size }
+    set size(value) { this.set_size(value) }
 
-    get_canvas_transform() {
-        return this._canvas_transform;
-    }
-    set_canvas_transform(p_xform) {
-        this._canvas_transform.copy(p_xform);
-        VSG.viewport.viewport_set_canvas_transform(this.viewport, this.find_world_2d().canvas, this._canvas_transform);
-    }
+    get canvas_transform() { return this._canvas_transform }
+    set canvas_transform(value) { this.set_canvas_transform(value) }
 
-    get_global_canvas_transform() {
-        return this._global_canvas_transform;
-    }
-    set_global_canvas_transform(p_xform) {
-        this._global_canvas_transform.copy(p_xform);
-        this._update_global_transform();
-    }
+    get global_canvas_transform() { return this._global_canvas_transform }
+    set global_canvas_transform(value) { this.set_global_canvas_transform(value) }
 
-    get_world_2d() {
-        return this.world_2d;
-    }
-    /**
-     * @param {World2D} p_world_2d
-     */
-    set_world_2d(p_world_2d) {
-        if (this.world_2d === p_world_2d) {
-            return;
-        }
-
-        if (this.parent && this.parent.find_world_2d() === p_world_2d) {
-            return;
-        }
-
-        if (this.is_inside_tree()) {
-            this.find_world_2d()._remove_viewport(this);
-            VSG.viewport.viewport_remove_canvas(this.viewport, this.current_canvas);
-        }
-
-        if (p_world_2d) {
-            this.world_2d = p_world_2d;
-        } else {
-            this.world_2d = new World2D();
-        }
-
-        if (this.is_inside_tree()) {
-            this.current_canvas = this.find_world_2d().canvas;
-            VSG.viewport.viewport_attach_canvas(this.viewport, this.current_canvas);
-            this.find_world_2d()._register_viewport(this, Rect2.EMPTY);
-        }
-    }
-
-    get_render_target_update_mode() {
-        return this._render_target_update_mode;
-    }
-    set_render_target_update_mode(value) {
-        this._render_target_update_mode = value;
-        VSG.viewport.viewport_set_update_mode(this.viewport, value);
-    }
-
-    get_clear_mode() {
-        return this._clear_mode;
-    }
-    set_clear_mode(value) {
-        this._clear_mode = value;
-        VSG.viewport.viewport_set_clear_mode(this.viewport, value);
-    }
-
-    /**
-     * @param {Rect2} p_rect
-     */
-    set_attach_to_screen_rect(p_rect) {
-        VSG.viewport.viewport_attach_to_screen(this.viewport, p_rect);
-        this.attach_to_screen_rect.copy(p_rect);
-    }
-    get_attach_to_screen_rect() {
-        return this.attach_to_screen_rect;
-    }
+    get _world_2d() { return this._world_2d }
+    set _world_2d(value) { this.set_world_2d(value) }
 
     constructor() {
         super();
@@ -271,7 +197,7 @@ export class Viewport extends Node {
 
         this.transparent_bg = false;
         this.vflip = false;
-        this._clear_mode = CLEAR_MODE_ALWAYS;
+        this._render_target_clear_mode = CLEAR_MODE_ALWAYS;
         this.filter = false;
         this.gen_mipmaps = false;
 
@@ -283,7 +209,7 @@ export class Viewport extends Node {
         /**
          * @type {World2D}
          */
-        this.world_2d = new World2D();
+        this._world_2d = new World2D();
 
         this.disable_3d = true;
         this.keep_3d_linear = false;
@@ -335,8 +261,8 @@ export class Viewport extends Node {
             } break;
             case NOTIFICATION_EXIT_TREE: {
                 this._gui_cancel_tooltip();
-                if (this.world_2d) {
-                    this.world_2d._remove_viewport(this);
+                if (this._world_2d) {
+                    this._world_2d._remove_viewport(this);
                 }
 
                 // VSG.viewport.viewport_set_scenario(this.viewport, null);
@@ -433,7 +359,93 @@ export class Viewport extends Node {
         return this.gui.canvas_sort_index++;
     }
 
+    /**
+     * @param {Vector2Like} p_size
+     */
+    set_size(p_size) {
+        if (this._size.x === Math.floor(p_size.x) && this._size.y === Math.floor(p_size.y)) {
+            return;
+        }
+        this._size.copy(p_size).floor();
+        VSG.viewport.viewport_set_size(this.viewport, this._size.x, this._size.y);
+
+        this._update_stretch_transform();
+
+        this.emit_signal('size_changed');
+    }
+
+    /**
+     * @param {Transform2D} p_xform
+     */
+    set_canvas_transform(p_xform) {
+        this._canvas_transform.copy(p_xform);
+        VSG.viewport.viewport_set_canvas_transform(this.viewport, this.find_world_2d().canvas, this._canvas_transform);
+    }
+
+    /**
+     * @param {Transform2D} p_xform
+     */
+    set_global_canvas_transform(p_xform) {
+        this._global_canvas_transform.copy(p_xform);
+        this._update_global_transform();
+    }
+
+    /**
+     * @param {World2D} p_world_2d
+     */
+    set_world_2d(p_world_2d) {
+        if (this._world_2d === p_world_2d) {
+            return;
+        }
+
+        if (this.parent && this.parent.find_world_2d() === p_world_2d) {
+            return;
+        }
+
+        if (this.is_inside_tree()) {
+            this.find_world_2d()._remove_viewport(this);
+            VSG.viewport.viewport_remove_canvas(this.viewport, this.current_canvas);
+        }
+
+        if (p_world_2d) {
+            this._world_2d = p_world_2d;
+        } else {
+            this._world_2d = new World2D();
+        }
+
+        if (this.is_inside_tree()) {
+            this.current_canvas = this.find_world_2d().canvas;
+            VSG.viewport.viewport_attach_canvas(this.viewport, this.current_canvas);
+            this.find_world_2d()._register_viewport(this, Rect2.EMPTY);
+        }
+    }
+
+    /**
+     * @param {number} value
+     */
+    set_render_target_update_mode(value) {
+        this._render_target_update_mode = value;
+        VSG.viewport.viewport_set_update_mode(this.viewport, value);
+    }
+
+    /**
+     * @param {number} value
+     */
+    set_render_target_clear_mode(value) {
+        this._render_target_clear_mode = value;
+        VSG.viewport.viewport_set_clear_mode(this.viewport, value);
+    }
+
+    /**
+     * @param {Rect2} p_rect
+     */
+    set_attach_to_screen_rect(p_rect) {
+        VSG.viewport.viewport_attach_to_screen(this.viewport, p_rect);
+        this.attach_to_screen_rect.copy(p_rect);
+    }
+
     /* private */
+
     _gui_call_input() { }
     _gui_call_notification() { }
 
@@ -454,8 +466,8 @@ export class Viewport extends Node {
         const abstracted_rect = this.get_visible_rect();
         abstracted_rect.x = abstracted_rect.y = 0;
 
-        const xformed_rect = this.get_global_canvas_transform().clone()
-            .append(this.get_canvas_transform())
+        const xformed_rect = this.global_canvas_transform.clone()
+            .append(this.canvas_transform)
             .affine_inverse()
             .xform_rect(abstracted_rect);
         this.find_world_2d()._update_viewport(this, xformed_rect);
@@ -469,7 +481,7 @@ export class Viewport extends Node {
         if (!this.attach_to_screen_rect.is_zero()) {
             pre_xf.tx = -this.attach_to_screen_rect.x;
             pre_xf.ty = -this.attach_to_screen_rect.y;
-            pre_xf.scale(this.get_size().x / this.attach_to_screen_rect.width, this.get_size().y / this.attach_to_screen_rect.height);
+            pre_xf.scale(this.size.x / this.attach_to_screen_rect.width, this.size.y / this.attach_to_screen_rect.height);
         }
         return pre_xf;
     }
@@ -696,13 +708,13 @@ export class Viewport extends Node {
     get_visible_rect() {
         const r = Rect2.new();
 
-        if (this.get_size().is_zero()) {
+        if (this.size.is_zero()) {
             const window_size = OS.get_singleton().get_window_size();
             r.width = window_size.x;
             r.height = window_size.y;
         } else {
-            r.width = this.get_size().width;
-            r.height = this.get_size().height;
+            r.width = this.size.width;
+            r.height = this.size.height;
         }
 
         if (this.size_override) {
@@ -717,8 +729,8 @@ export class Viewport extends Node {
      * @returns {World2D}
      */
     find_world_2d() {
-        if (this.world_2d) {
-            return this.world_2d;
+        if (this._world_2d) {
+            return this._world_2d;
         } else if (this.parent) {
             return this.parent.find_world_2d();
         } else {
@@ -772,7 +784,7 @@ export class Viewport extends Node {
     }
 
     get_final_transform() {
-        return this.stretch_transform.clone().append(this.get_global_canvas_transform());
+        return this.stretch_transform.clone().append(this.global_canvas_transform);
     }
 
     /**
@@ -815,8 +827,8 @@ export class Viewport extends Node {
         if (this.size_override_stretch && this.size_override) {
             this.stretch_transform.reset();
             const scale = Vector2.new(
-                this.get_size().x / (this.size_override_size.x + this.size_override_margin.x * 2),
-                this.get_size().y / (this.size_override_size.y + this.size_override_margin.y * 2)
+                this.size.x / (this.size_override_size.x + this.size_override_margin.x * 2),
+                this.size.y / (this.size_override_size.y + this.size_override_margin.y * 2)
             );
             this.stretch_transform.scale(scale.x, scale.y);
             this.stretch_transform.tx = this.size_override_margin.x * scale.x;
@@ -830,7 +842,7 @@ export class Viewport extends Node {
     }
     _update_global_transform() {
         const sxform = this.stretch_transform.clone()
-            .append(this.get_global_canvas_transform());
+            .append(this.global_canvas_transform);
         VSG.viewport.viewport_set_global_canvas_transform(this.viewport, sxform);
         Transform2D.free(sxform);
     }

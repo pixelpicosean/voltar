@@ -278,7 +278,7 @@ export class CanvasLayer extends Node {
         if (p_force_exit || !this._follow_viewport_enable) {
             VSG.canvas.canvas_set_parent(this.canvas, null, 1);
         } else {
-            VSG.canvas.canvas_set_parent(this.canvas, this.vp.world_2d.canvas, this._follow_viewport_scale);
+            VSG.canvas.canvas_set_parent(this.canvas, this.vp._world_2d.canvas, this._follow_viewport_scale);
         }
     }
 }
