@@ -11,6 +11,9 @@ import { Vector2Like, Vector2 } from "engine/core/math/vector2";
 import { Rect2 } from "engine/core/math/rect2";
 import { Color, ColorLike } from "engine/core/color";
 
+import { VSG } from "engine/servers/visual/visual_server_globals";
+import { NINE_PATCH_STRETCH } from "engine/servers/visual/commands";
+
 import { ImageTexture } from "../resources/texture";
 import { NOTIFICATION_DRAW } from "../2d/canvas_item";
 import { Range } from "./range";
@@ -424,7 +427,97 @@ export class TextureProgress extends Range {
      * @param {ColorLike} p_modulate
      */
     draw_nine_patch_stretched(p_texture, p_mode, p_ratio, p_modulate) {
+        const texture_size = p_texture.get_size();
 
+        const topleft = Vector2.new(this.stretch_margin[MARGIN_LEFT], this.stretch_margin[MARGIN_TOP]);
+        const bottomright = Vector2.new(this.stretch_margin[MARGIN_RIGHT], this.stretch_margin[MARGIN_BOTTOM])
+
+        const src_rect = Rect2.new(0, 0, texture_size.x, texture_size.y);
+        const dst_rect = Rect2.new(0, 0, this.rect_size.x, this.rect_size.y);
+
+        if (p_ratio < 1) {
+            let width_total = 0;
+            let width_texture = 0;
+            let first_section_size = 0;
+            let last_section_size = 0;
+            switch (this._fill_mode) {
+                case FILL_LEFT_TO_RIGHT:
+                case FILL_RIGHT_TO_LEFT: {
+                    width_total = dst_rect.width;
+                    width_texture = texture_size.x;
+                    first_section_size = topleft.x;
+                    last_section_size = bottomright.x;
+                } break;
+                case FILL_TOP_TO_BOTTOM:
+                case FILL_BOTTOM_TO_TOP: {
+                    width_total = dst_rect.height;
+                    width_texture = texture_size.y;
+                    first_section_size = topleft.y;
+                    last_section_size = bottomright.y;
+                } break;
+                case FILL_BILINEAR_LEFT_AND_RIGHT: {
+                    // TODO: not implemented in Godot yet
+                } break;
+                case FILL_BILINEAR_TOP_AND_BOTTOM: {
+                    // TODO: not implemented in Godot yet
+                } break;
+            }
+
+            let width_filled = width_total * p_ratio;
+            let middle_section_size = Math.max(0, width_texture - first_section_size - last_section_size);
+
+            middle_section_size *= Math.min(1, Math.max(0, width_filled - first_section_size) / Math.max(1, width_total - first_section_size - last_section_size));
+            last_section_size = Math.max(0, last_section_size - (width_total - width_filled));
+            first_section_size = Math.min(first_section_size, width_filled);
+            width_texture = Math.min(width_texture, first_section_size + middle_section_size + last_section_size);
+
+            switch (this._fill_mode) {
+                case FILL_LEFT_TO_RIGHT: {
+                    src_rect.width = width_texture;
+                    dst_rect.width = width_filled;
+                    topleft.x = first_section_size;
+                    bottomright.x = last_section_size;
+                } break;
+                case FILL_RIGHT_TO_LEFT: {
+                    src_rect.x += (src_rect.width - width_texture);
+                    src_rect.width = width_texture;
+                    dst_rect.x += (width_total - width_filled);
+                    dst_rect.width = width_filled;
+                    topleft.x = last_section_size;
+                    bottomright.x = first_section_size;
+                } break;
+                case FILL_TOP_TO_BOTTOM: {
+                    src_rect.height = width_texture;
+                    dst_rect.height = width_filled;
+                    bottomright.y = last_section_size;
+                    topleft.y = first_section_size;
+                } break;
+                case FILL_BOTTOM_TO_TOP: {
+                    src_rect.y += (src_rect.height - width_texture);
+                    src_rect.height = width_texture;
+                    dst_rect.y += (width_total - width_filled);
+                    dst_rect.height = width_filled;
+                    topleft.y = last_section_size;
+                    bottomright.y = first_section_size;
+                } break;
+                case FILL_BILINEAR_LEFT_AND_RIGHT: {
+                    // TODO: not implemented in Godot yet
+                } break;
+                case FILL_BILINEAR_TOP_AND_BOTTOM: {
+                    // TODO: not implemented in Godot yet
+                } break;
+            }
+        }
+
+        p_texture.get_rect_region(dst_rect, src_rect, dst_rect, src_rect);
+
+        VSG.canvas.canvas_item_add_nine_patch(this.canvas_item, dst_rect, src_rect, p_texture.texture, topleft, bottomright, NINE_PATCH_STRETCH, NINE_PATCH_STRETCH, true, p_modulate);
+
+        Rect2.free(dst_rect);
+        Rect2.free(src_rect);
+
+        Vector2.free(bottomright);
+        Vector2.free(topleft);
     }
 }
 node_class_map['TextureProgress'] = GDCLASS(TextureProgress, Range)
