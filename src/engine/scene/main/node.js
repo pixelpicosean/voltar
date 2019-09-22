@@ -196,6 +196,7 @@ export class Node extends VObject {
 
         if (this.is_inside_tree()) {
             this.emit_signal('renamed');
+            this.get_tree().node_renamed(this);
             this.get_tree().tree_changed();
         }
     }
@@ -261,13 +262,14 @@ export class Node extends VObject {
      * @param {Node} child
      */
     _validate_child_name(child) {
-        const name = child.name;
+        const name = child.data.name;
         let n = name;
         let i = 2;
         while (this.named_children.has(n)) {
             n = `${name}_${i++}`;
         }
-        child.set_name(n);
+        this.named_children.delete(name);
+        child.data.name = n;
         this.named_children.set(n, child);
     }
     _generate_serial_child_name(p_child, name) { }
