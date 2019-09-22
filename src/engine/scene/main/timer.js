@@ -15,44 +15,11 @@ export const TIMER_PROCESS_IDLE = 1;
 export class Timer extends Node {
     get class() { return 'Timer' }
 
-    /** @property {number} */
-    get_process_mode() {
-        return this.process_mode;
-    }
-    set_process_mode(p_mode) {
-        if (this.process_mode === p_mode) {
-            return;
-        }
+    get process_mode() { return this._process_mode }
+    set process_mode(value) { this.set_process_mode(value) }
 
-        switch (this.process_mode) {
-            case TIMER_PROCESS_PHYSICS: {
-                if (this.is_physics_process_internal()) {
-                    this.set_physics_process_internal(false);
-                    this.set_process_internal(true);
-                }
-            } break;
-            case TIMER_PROCESS_IDLE: {
-                if (this.is_process_internal()) {
-                    this.set_process_internal(false);
-                    this.set_physics_process_internal(true);
-                }
-            } break;
-        }
-        this.process_mode = p_mode;
-    }
-
-    /** @property {boolean} */
-    get_paused() {
-        return this.paused;
-    }
-    set_paused(paused) {
-        if (this.paused === paused) {
-            return;
-        }
-
-        this.paused = paused;
-        this._set_process(this.processing);
-    }
+    get paused() { return this._paused }
+    set paused(value) { this.set_paused(value) }
 
     constructor() {
         super();
@@ -61,8 +28,8 @@ export class Timer extends Node {
         this.autostart = false;
         this.one_shot = false;
         this.processing = false;
-        this.paused = false;
-        this.process_mode = TIMER_PROCESS_IDLE;
+        this._paused = false;
+        this._process_mode = TIMER_PROCESS_IDLE;
         this.time_left = -1;
     }
 
@@ -140,6 +107,43 @@ export class Timer extends Node {
 
     is_stopped() {
         return this.get_time_left() <= 0;
+    }
+
+    /**
+     * @param {number} p_mode
+     */
+    set_process_mode(p_mode) {
+        if (this.process_mode === p_mode) {
+            return;
+        }
+
+        switch (this.process_mode) {
+            case TIMER_PROCESS_PHYSICS: {
+                if (this.is_physics_process_internal()) {
+                    this.set_physics_process_internal(false);
+                    this.set_process_internal(true);
+                }
+            } break;
+            case TIMER_PROCESS_IDLE: {
+                if (this.is_process_internal()) {
+                    this.set_process_internal(false);
+                    this.set_physics_process_internal(true);
+                }
+            } break;
+        }
+        this.process_mode = p_mode;
+    }
+
+    /**
+     * @param {boolean} paused
+     */
+    set_paused(paused) {
+        if (this.paused === paused) {
+            return;
+        }
+
+        this.paused = paused;
+        this._set_process(this.processing);
     }
 
     /* private */
