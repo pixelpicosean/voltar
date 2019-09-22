@@ -81,7 +81,7 @@ export class BoxContainer extends Container {
         for (const node of this.data.children) {
             const c = /** @type {Container} */(node);
 
-            if (!c.is_control || c.is_toplevel_control() || !c.visible) {
+            if (!c.is_control || c.is_toplevel_control() || !c._visible) {
                 continue;
             }
 

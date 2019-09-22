@@ -86,7 +86,7 @@ export class MarginContainer extends Container {
         for (const node of this.data.children) {
             const c = /** @type {Container} */(node);
 
-            if (!c.is_control || c.is_set_as_toplevel() || !c.visible) {
+            if (!c.is_control || c.is_set_as_toplevel() || !c._visible) {
                 continue;
             }
 

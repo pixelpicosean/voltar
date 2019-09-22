@@ -39,133 +39,23 @@ const white = Object.freeze(new Color(1, 1, 1, 1));
 export class CanvasItem extends Node {
     get class() { return 'CanvasItem' }
 
-    /**
-     * @param {boolean} p_visible
-     */
-    set_visible(p_visible) {
-        if (p_visible) {
-            this.show();
-        } else {
-            this.hide();
-        }
-    }
-    get_visible() {
-        return this.visible;
-    }
+    get modulate() { return this._modulate }
+    set modulate(value) { this.set_modulate(value) }
 
-    is_visible_in_tree() {
-        if (!this.is_inside_tree()) {
-            return false;
-        }
+    get self_modulate() { return this._self_modulate }
+    set self_modulate(value) { this.set_self_modulate(value) }
 
-        /** @type {CanvasItem} */
-        let p = this;
+    get show_behind_parent() { return this._show_behind_parent }
+    set show_behind_parent(value) { this.set_show_behind_parent(value) }
 
-        while (p) {
-            if (!p.visible) {
-                return false;
-            }
-            p = p.get_parent_item();
-        }
+    get show_on_top() { return !this._show_behind_parent }
+    set show_on_top(value) { this.set_show_behind_parent(!value) }
 
-        return true;
-    }
-    show() {
-        if (this.visible) {
-            return;
-        }
+    get use_parent_material() { return this._use_parent_material }
+    set use_parent_material(value) { this.set_use_parent_material(value) }
 
-        this.visible = true;
-        VSG.canvas.canvas_item_set_visible(this.canvas_item, true);
-
-        if (!this.is_inside_tree()) {
-            return;
-        }
-
-        this._propagate_visibility_changed(true);
-    }
-    hide() {
-        if (!this.visible) {
-            return;
-        }
-
-        this.visible = false;
-        VSG.canvas.canvas_item_set_visible(this.canvas_item, false);
-
-        if (!this.is_inside_tree()) {
-            return;
-        }
-
-        this._propagate_visibility_changed(false);
-    }
-
-    /**
-     * @param {boolean} value
-     */
-    set_show_behind_parent(value) {
-        if (this.show_behind_parent === value) {
-            return;
-        }
-        this.show_behind_parent = value;
-        VSG.canvas.canvas_item_set_draw_behind_parent(this.canvas_item, this.show_behind_parent);
-    }
-    get_show_behind_parent() {
-        return this.show_behind_parent;
-    }
-
-    /**
-     * @param {number} r color as hex number or red channel
-     * @param {number} [g] green channel
-     * @param {number} [b] blue channel
-     * @param {number} [a=1.0] alpha channel
-     */
-    set_modulate_n(r, g, b, a = 1.0) {
-        // r, g, b, a
-        if (Number.isFinite(g)) {
-            this.modulate.set(r, g, b, a);
-        }
-        // hex
-        else {
-            this.modulate.set_with_hex(r);
-        }
-        VSG.canvas.canvas_item_set_modulate(this.canvas_item, this.modulate);
-    }
-    /**
-     * @param {ColorLike} color
-     */
-    set_modulate(color) {
-        this.modulate.copy(color);
-    }
-    get_modulate() {
-        return this.modulate;
-    }
-
-    /**
-     * @param {number} r color as hex number or red channel
-     * @param {number} [g] green channel
-     * @param {number} [b] blue channel
-     * @param {number} [a=1.0] alpha channel
-     */
-    set_self_modulate_n(r, g, b, a = 1.0) {
-        // r, g, b, a
-        if (g !== undefined) {
-            this.self_modulate.set(/** @type {number} */(r), g, b, a);
-        }
-        // hex
-        else {
-            this.self_modulate.set_with_hex(r);
-        }
-        VSG.canvas.canvas_item_set_self_modulate(this.canvas_item, this.self_modulate);
-    }
-    /**
-     * @param {ColorLike} color
-     */
-    set_self_modulate(color) {
-        this.set_self_modulate_n(color.r, color.g, color.b, color.a);
-    }
-    get_self_modulate() {
-        return this.self_modulate;
-    }
+    get visible() { return this._visible }
+    set visible(value) { this.set_visible(value) }
 
     constructor() {
         super();
@@ -178,13 +68,12 @@ export class CanvasItem extends Node {
         this.xform_change = new SelfList(this);
 
         this.canvas_item = VSG.canvas.canvas_item_create();
-        this.group = '';
 
         /** @type {CanvasLayer} */
         this.canvas_layer = null;
 
-        this.modulate = new Color(1, 1, 1, 1);
-        this.self_modulate = new Color(1, 1, 1, 1);
+        this._modulate = new Color(1, 1, 1, 1);
+        this._self_modulate = new Color(1, 1, 1, 1);
 
         /**
          * @type {Set<CanvasItem>}
@@ -194,13 +83,13 @@ export class CanvasItem extends Node {
         this.light_mask = 1;
 
         this.first_draw = false;
-        this.visible = true;
+        this._visible = true;
         this.pending_update = false;
         this.toplevel = false;
         this.drawing = false;
         this.block_transform_notify = false;
-        this.show_behind_parent = false;
-        this.use_parent_material = true;
+        this._show_behind_parent = false;
+        this._use_parent_material = true;
         this.notify_local_transform = false;
         this.notify_transform = false;
 
@@ -282,6 +171,8 @@ export class CanvasItem extends Node {
             } break;
         }
     }
+
+    _draw() { }
 
     /* public */
 
@@ -516,6 +407,131 @@ export class CanvasItem extends Node {
     /**
      * @param {boolean} p_visible
      */
+    set_visible(p_visible) {
+        if (p_visible) {
+            this.show();
+        } else {
+            this.hide();
+        }
+    }
+
+    is_visible_in_tree() {
+        if (!this.is_inside_tree()) {
+            return false;
+        }
+
+        /** @type {CanvasItem} */
+        let p = this;
+
+        while (p) {
+            if (!p._visible) {
+                return false;
+            }
+            p = p.get_parent_item();
+        }
+
+        return true;
+    }
+    show() {
+        if (this._visible) {
+            return;
+        }
+
+        this._visible = true;
+        VSG.canvas.canvas_item_set_visible(this.canvas_item, true);
+
+        if (!this.is_inside_tree()) {
+            return;
+        }
+
+        this._propagate_visibility_changed(true);
+    }
+    hide() {
+        if (!this._visible) {
+            return;
+        }
+
+        this._visible = false;
+        VSG.canvas.canvas_item_set_visible(this.canvas_item, false);
+
+        if (!this.is_inside_tree()) {
+            return;
+        }
+
+        this._propagate_visibility_changed(false);
+    }
+
+    /**
+     * @param {boolean} value
+     */
+    set_show_behind_parent(value) {
+        if (this._show_behind_parent === value) {
+            return;
+        }
+        this._show_behind_parent = value;
+        VSG.canvas.canvas_item_set_draw_behind_parent(this.canvas_item, this._show_behind_parent);
+    }
+
+    /**
+     * @param {number} r color as hex number or red channel
+     * @param {number} [g] green channel
+     * @param {number} [b] blue channel
+     * @param {number} [a=1.0] alpha channel
+     */
+    set_modulate_n(r, g, b, a = 1.0) {
+        // r, g, b, a
+        if (Number.isFinite(g)) {
+            this._modulate.set(r, g, b, a);
+        }
+        // hex
+        else {
+            this._modulate.set_with_hex(r);
+        }
+        VSG.canvas.canvas_item_set_modulate(this.canvas_item, this._modulate);
+    }
+    /**
+     * @param {ColorLike} color
+     */
+    set_modulate(color) {
+        this._modulate.copy(color);
+    }
+
+    /**
+     * @param {number} r color as hex number or red channel
+     * @param {number} [g] green channel
+     * @param {number} [b] blue channel
+     * @param {number} [a=1.0] alpha channel
+     */
+    set_self_modulate_n(r, g, b, a = 1.0) {
+        // r, g, b, a
+        if (g !== undefined) {
+            this._self_modulate.set(/** @type {number} */(r), g, b, a);
+        }
+        // hex
+        else {
+            this._self_modulate.set_with_hex(r);
+        }
+        VSG.canvas.canvas_item_set_self_modulate(this.canvas_item, this._self_modulate);
+    }
+    /**
+     * @param {ColorLike} color
+     */
+    set_self_modulate(color) {
+        this.set_self_modulate_n(color.r, color.g, color.b, color.a);
+    }
+
+    /**
+     * @param {boolean} p_value
+     */
+    set_use_parent_material(p_value) {
+        this._use_parent_material = p_value;
+    }
+
+    /* private */
+
+    /**
+     * @param {boolean} p_visible
+     */
     _propagate_visibility_changed(p_visible) {
         if (p_visible && this.first_draw) {
             this.first_draw = false;
@@ -531,7 +547,7 @@ export class CanvasItem extends Node {
         for (const child of this.data.children) {
             const c = /** @type {CanvasItem} */(child);
 
-            if (c.is_canvas_item && c.visible) {
+            if (c.is_canvas_item && c._visible) {
                 c._propagate_visibility_changed(p_visible);
             }
         }
@@ -610,7 +626,6 @@ export class CanvasItem extends Node {
 
         this.notification(NOTIFICATION_ENTER_CANVAS);
     }
-    _draw() { }
     _exit_canvas() {
         this.notification(NOTIFICATION_EXIT_CANVAS, true);
         VSG.canvas.canvas_item_set_parent(this.canvas_item, null);
