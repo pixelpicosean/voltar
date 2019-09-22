@@ -89,96 +89,17 @@ export class Node extends VObject {
 
     get class() { return 'Node' }
 
-    /**
-     * @param {string} name
-     */
-    set_filename(name) {
-        this.data.filename = name;
-    }
-    get_filename() {
-        return this.data.filename;
-    }
+    get filename() { return this.data.filename }
+    set filename(value) { this.data.filename = value }
 
-    /**
-     * @param {string} p_name
-     */
-    set_name(p_name) {
-        this.data.name = p_name;
-        if (this.data.parent) {
-            this.data.parent._validate_child_name(this);
-        }
+    get name() { return this.data.name }
+    set name(value) { this.set_name(value) }
 
-        this.propagate_notification(NOTIFICATION_PATH_CHANGED);
+    get owner() { return this.data.owner }
+    set owner(value) { this.set_owner(value) }
 
-        if (this.is_inside_tree()) {
-            this.emit_signal('renamed');
-            this.get_tree().tree_changed();
-        }
-    }
-    get_name() {
-        return this.data.name;
-    }
-
-    get_owner() {
-        return this.data.owner;
-    }
-    /**
-     * @param {Node} p_owner
-     */
-    set_owner(p_owner) {
-        if (this.data.owner) {
-            this.owner.data.owned.splice(this.owner.data.owned.indexOf(this), 1);
-            this.data.owner = null;
-        }
-
-        if (!p_owner) {
-            return;
-        }
-
-        let check = this.get_parent();
-
-        while (check) {
-            if (check === p_owner) {
-                break;
-            }
-
-            check = check.data.parent;
-        }
-
-        this._set_owner_no_check(p_owner);
-    }
-
-    get_pause_mode() {
-        return this.data.pause_mode;
-    }
-    /**
-     * @param {number} mode
-     */
-    set_pause_mode(mode) {
-        if (this.data.pause_mode === mode) {
-            return;
-        }
-        const prev_inherits = this.data.pause_mode === PAUSE_MODE_INHERIT;
-        this.data.pause_mode = mode;
-        if (!this.is_inside_tree()) {
-            return;
-        }
-        if ((this.data.pause_mode === PAUSE_MODE_INHERIT) === prev_inherits) {
-            return;
-        }
-
-        let owner = null;
-
-        if (this.data.pause_mode === PAUSE_MODE_INHERIT) {
-            if (this.data.parent) {
-                owner = this.data.parent.data.pause_owner;
-            }
-        } else {
-            owner = this;
-        }
-
-        this._propagate_pause_owner(owner);
-    }
+    get pause_mode() { return this.data.pause_mode }
+    set pause_mode(value) { this.set_pause_mode(value) }
 
     constructor() {
         super();
@@ -216,14 +137,14 @@ export class Node extends VObject {
         if (data.name !== undefined) {
             this.set_name(data.name);
         }
+        if (data.pause_mode !== undefined) {
+            this.set_pause_mode(data.pause_mode);
+        }
+
         if (data.groups !== undefined) {
             for (const g of data.groups) {
                 this.add_to_group(g);
             }
-        }
-
-        if (data.pause_mode !== undefined) {
-            this.set_pause_mode(data.pause_mode);
         }
 
         return this;
@@ -253,13 +174,94 @@ export class Node extends VObject {
     _physics_process(delta) { }
     _exit_tree() { }
 
+    /* public */
+
+    /**
+     * @param {string} name
+     */
+    set_filename(name) {
+        this.data.filename = name;
+    }
+
+    /**
+     * @param {string} p_name
+     */
+    set_name(p_name) {
+        this.data.name = p_name;
+        if (this.data.parent) {
+            this.data.parent._validate_child_name(this);
+        }
+
+        this.propagate_notification(NOTIFICATION_PATH_CHANGED);
+
+        if (this.is_inside_tree()) {
+            this.emit_signal('renamed');
+            this.get_tree().tree_changed();
+        }
+    }
+
+    /**
+     * @param {Node} p_owner
+     */
+    set_owner(p_owner) {
+        if (this.data.owner) {
+            this.owner.data.owned.splice(this.owner.data.owned.indexOf(this), 1);
+            this.data.owner = null;
+        }
+
+        if (!p_owner) {
+            return;
+        }
+
+        let check = this.get_parent();
+
+        while (check) {
+            if (check === p_owner) {
+                break;
+            }
+
+            check = check.data.parent;
+        }
+
+        this._set_owner_no_check(p_owner);
+    }
+
+    /**
+     * @param {number} mode
+     */
+    set_pause_mode(mode) {
+        if (this.data.pause_mode === mode) {
+            return;
+        }
+        const prev_inherits = this.data.pause_mode === PAUSE_MODE_INHERIT;
+        this.data.pause_mode = mode;
+        if (!this.is_inside_tree()) {
+            return;
+        }
+        if ((this.data.pause_mode === PAUSE_MODE_INHERIT) === prev_inherits) {
+            return;
+        }
+
+        let owner = null;
+
+        if (this.data.pause_mode === PAUSE_MODE_INHERIT) {
+            if (this.data.parent) {
+                owner = this.data.parent.data.pause_owner;
+            }
+        } else {
+            owner = this;
+        }
+
+        this._propagate_pause_owner(owner);
+    }
+
     /* private */
 
     /**
      * @param {Node} child
      */
     _validate_child_name(child) {
-        const name = child.get_name();
+        const name = child.name;
         let n = name;
         let i = 2;
         while (this.named_children.has(n)) {
@@ -610,7 +612,7 @@ export class Node extends VObject {
         if (this.is_a_parent_of(p_node)) {
             this.move_child(p_child, p_node.get_position_in_parent() + 1);
         } else {
-            console.warn(`Cannot move under node ${p_node.get_name()} as ${p_child.get_name()} does not share a parent.`);
+            console.warn(`Cannot move under node ${p_node.name} as ${p_child.name} does not share a parent.`);
         }
     }
     /**
@@ -637,7 +639,7 @@ export class Node extends VObject {
         p_child.notification(NOTIFICATION_UNPARENTED);
 
         remove_items(children, idx, 1);
-        this.named_children.delete(p_child.get_name());
+        this.named_children.delete(p_child.name);
 
         // update pointer and size
         child_count = children.length;
@@ -816,7 +818,7 @@ export class Node extends VObject {
         let path = [];
 
         while (n) {
-            path.push(n.get_name());
+            path.push(n.name);
             n = n.data.parent;
         }
 
