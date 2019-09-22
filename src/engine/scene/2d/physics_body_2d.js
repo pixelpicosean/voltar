@@ -21,97 +21,17 @@ import { CollisionObject2D } from "./collision_object_2d";
 export class PhysicsBody2D extends CollisionObject2D {
     get class() { return 'PhysicsBody2D' }
 
-    get_collision_layer() {
-        return this.collision_layer;
-    }
-    /**
-     * Return an individual bit on the layer mask. Describes whether
-     * other areas will collide with this one on the given layer.
-     *
-     * @param {number} bit
-     */
-    get_collision_layer_bit(bit) {
-        return !!(this.collision_layer & (1 << bit));
-    }
-    /**
-     * @param {number} layer
-     */
-    set_collision_layer(layer) {
-        this.collision_layer = layer;
-        if (this.rid) {
-            this.rid.collision_layer = this.collision_layer;
-        }
-    }
-    /**
-     * Set/clear individual bits on the layer mask. This makes
-     * getting an area in/out of only one layer easier.
-     *
-     * @param {number} bit
-     * @param {boolean} value
-     */
-    set_collision_layer_bit(bit, value) {
-        if (value) {
-            this.collision_layer |= (1 << bit);
-        } else {
-            this.collision_layer &= ~(1 << bit);
-        }
+    get collision_layer() { return this._collision_layer }
+    set collision_layer(value) { this.set_collision_layer(value) }
 
-        if (this.rid) {
-            this.rid.collision_layer = this.collision_layer;
-        }
-    }
+    get collision_mask() { return this._collision_mask }
+    set collision_mask(value) { this.set_collision_mask(value) }
 
-    get_collision_mask() {
-        return this.collision_mask;
-    }
-    /**
-     * Return an individual bit on the collision mask. Describes whether
-     * this area will collide with others on the given layer.
-     *
-     * @param {number} bit
-     */
-    get_collision_mask_bit(bit) {
-        return !!(this.collision_mask & (1 << bit));
-    }
-    /**
-     * @param {number} mask
-     */
-    set_collision_mask(mask) {
-        this.collision_mask = mask;
-
-        if (this.rid) {
-            this.rid.collision_mask = this.collision_mask;
-        }
-    }
-    /**
-     * Set/clear individual bits on the collision mask. This makes
-     * selecting the areas scanned easier.
-     *
-     * @param {number} bit
-     * @param {boolean} value
-     */
-    set_collision_mask_bit(bit, value) {
-        if (value) {
-            this.collision_mask |= (1 << bit);
-        } else {
-            this.collision_mask &= ~(1 << bit);
-        }
-
-        if (this.rid) {
-            this.rid.collision_mask = this.collision_mask;
-        }
-    }
-
-    /**
-     * @param {number} p_mask
-     */
-    _set_layers(p_mask) {
+    get layers() { return this._collision_layer }
+    set layers(p_mask) {
         this.set_collision_layer(p_mask);
         this.set_collision_mask(p_mask);
-    }
-    _get_layers() {
-        return this.collision_layer;
-    }
+     }
 
     /**
      * @param {BodyMode} p_mode
@@ -119,8 +39,8 @@ export class PhysicsBody2D extends CollisionObject2D {
     constructor(p_mode) {
         super(Physics2DServer.get_singleton().body_create(), false);
 
-        this.collision_layer = 1;
-        this.collision_mask = 1;
+        this._collision_layer = 1;
+        this._collision_mask = 1;
 
         /**
          * @type {Body2DSW}
@@ -145,6 +65,83 @@ export class PhysicsBody2D extends CollisionObject2D {
     get_collision_exception() { }
     add_collision_exception_with(p_node) { }
     remove_collision_exception_with(p_node) { }
+
+    /* public */
+
+    /**
+     * Return an individual bit on the layer mask. Describes whether
+     * other areas will collide with this one on the given layer.
+     *
+     * @param {number} bit
+     */
+    get_collision_layer_bit(bit) {
+        return !!(this._collision_layer & (1 << bit));
+    }
+    /**
+     * @param {number} layer
+     */
+    set_collision_layer(layer) {
+        this._collision_layer = layer;
+        if (this.rid) {
+            this.rid.collision_layer = this._collision_layer;
+        }
+    }
+    /**
+     * Set/clear individual bits on the layer mask. This makes
+     * getting an area in/out of only one layer easier.
+     *
+     * @param {number} bit
+     * @param {boolean} value
+     */
+    set_collision_layer_bit(bit, value) {
+        if (value) {
+            this._collision_layer |= (1 << bit);
+        } else {
+            this._collision_layer &= ~(1 << bit);
+        }
+
+        if (this.rid) {
+            this.rid.collision_layer = this._collision_layer;
+        }
+    }
+
+    /**
+     * Return an individual bit on the collision mask. Describes whether
+     * this area will collide with others on the given layer.
+     *
+     * @param {number} bit
+     */
+    get_collision_mask_bit(bit) {
+        return !!(this._collision_mask & (1 << bit));
+    }
+    /**
+     * @param {number} mask
+     */
+    set_collision_mask(mask) {
+        this._collision_mask = mask;
+
+        if (this.rid) {
+            this.rid.collision_mask = this._collision_mask;
+        }
+    }
+    /**
+     * Set/clear individual bits on the collision mask. This makes
+     * selecting the areas scanned easier.
+     *
+     * @param {number} bit
+     * @param {boolean} value
+     */
+    set_collision_mask_bit(bit, value) {
+        if (value) {
+            this._collision_mask |= (1 << bit);
+        } else {
+            this._collision_mask &= ~(1 << bit);
+        }
+
+        if (this.rid) {
+            this.rid.collision_mask = this._collision_mask;
+        }
+    }
 }
 GDCLASS(PhysicsBody2D, CollisionObject2D)
 
@@ -152,15 +149,56 @@ GDCLASS(PhysicsBody2D, CollisionObject2D)
 export class StaticBody2D extends PhysicsBody2D {
     get class() { return 'StaticBody2D' }
 
+    get constant_angular_velocity() { return this._constant_angular_velocity }
+    set constant_angular_velocity(value) { this.set_constant_angular_velocity(value) }
+
+    get constant_linear_velocity() { return this._constant_linear_velocity }
+    set constant_linear_velocity(value) { this.set_constant_linear_velocity(value) }
+
+    get physics_material_override() { return this._physics_material_override }
+    set physics_material_override(value) { this.set_physics_material_override(value) }
+
+    constructor() {
+        super(BodyMode.STATIC);
+
+        this._constant_linear_velocity = new Vector2();
+        this._constant_angular_velocity = 0;
+
+        /**
+         * @type {PhysicsMaterial}
+         */
+        this._physics_material_override = null;
+    }
+
+    /* virtual */
+
+    _load_data(data) {
+        super._load_data(data);
+
+        if (data.constant_angular_velocity !== undefined) {
+            this._constant_angular_velocity = data.constant_angular_velocity;
+        }
+        if (data.constant_linear_velocity !== undefined) {
+            this._constant_linear_velocity.copy(data.constant_linear_velocity);
+        }
+        if (data.physics_material_override !== undefined) {
+            // TODO: load physics_material_override
+        }
+
+        return this;
+    }
+
+    /* public */
+
     /**
      * @param {PhysicsMaterial} p_physics_material_override
      */
     set_physics_material_override(p_physics_material_override) {
-        if (this.physics_material_override) {
-            this.physics_material_override.disconnect('changed', this._reload_physics_characteristics, this);
+        if (this._physics_material_override) {
+            this._physics_material_override.disconnect('changed', this._reload_physics_characteristics, this);
         }
 
-        this.physics_material_override = p_physics_material_override;
+        this._physics_material_override = p_physics_material_override;
 
         if (p_physics_material_override) {
             p_physics_material_override.connect('changed', this._reload_physics_characteristics, this);
@@ -179,53 +217,27 @@ export class StaticBody2D extends PhysicsBody2D {
      * @param {number} y
      */
     set_constant_linear_velocity_n(x, y) {
-        this.constant_linear_velocity.set(x, y);
-        this.rid.set_state(BodyState.LINEAR_VELOCITY, this.constant_linear_velocity);
+        this._constant_linear_velocity.set(x, y);
+        this.rid.set_state(BodyState.LINEAR_VELOCITY, this._constant_linear_velocity);
     }
 
     /**
      * @param {number} p_angular_velocity
      */
     set_constant_angular_velocity(p_angular_velocity) {
-        this.constant_angular_velocity = p_angular_velocity;
-        this.rid.set_state(BodyState.ANGULAR_VELOCITY, this.constant_angular_velocity);
+        this._constant_angular_velocity = p_angular_velocity;
+        this.rid.set_state(BodyState.ANGULAR_VELOCITY, this._constant_angular_velocity);
     }
 
-    constructor() {
-        super(BodyMode.STATIC);
-
-        this.constant_linear_velocity = new Vector2();
-        this.constant_angular_velocity = 0;
-
-        /**
-         * @type {PhysicsMaterial}
-         */
-        this.physics_material_override = null;
-    }
-
-    _load_data(data) {
-        super._load_data(data);
-
-        if (data.constant_angular_velocity !== undefined) {
-            this.constant_angular_velocity = data.constant_angular_velocity;
-        }
-        if (data.constant_linear_velocity !== undefined) {
-            this.constant_linear_velocity.copy(data.constant_linear_velocity);
-        }
-        if (data.physics_material_override !== undefined) {
-            // TODO: load physics_material_override
-        }
-
-        return this;
-    }
+    /* private */
 
     _reload_physics_characteristics() {
-        if (!this.physics_material_override) {
+        if (!this._physics_material_override) {
             this.rid.bounce = 0;
             this.rid.friction = 1;
         } else {
-            this.rid.bounce = this.physics_material_override.get_computed_bounce();
-            this.rid.friction = this.physics_material_override.get_computed_friction();
+            this.rid.bounce = this._physics_material_override.get_computed_bounce();
+            this.rid.friction = this._physics_material_override.get_computed_friction();
         }
     }
 }
@@ -346,6 +358,9 @@ const FLOOR_ANGLE_THRESHOLD = 0.01;
 export class KinematicBody2D extends PhysicsBody2D {
     get class() { return 'KinematicBody2D' }
 
+    get sync_to_physics() { return this._sync_to_physics }
+    set sync_to_physics(value) { this.set_sync_to_physics(value) }
+
     constructor() {
         super(BodyMode.KINEMATIC);
 
@@ -357,7 +372,7 @@ export class KinematicBody2D extends PhysicsBody2D {
         this.on_floor = false;
         this.on_ceiling = false;
         this.on_wall = false;
-        this.sync_to_physics = false;
+        this._sync_to_physics = false;
 
         /** @type {Collision[]} */
         this.colliders = [];
@@ -407,6 +422,8 @@ export class KinematicBody2D extends PhysicsBody2D {
         }
     }
 
+    /* public */
+
     /**
      * @param {Vector2} p_motion
      * @param {boolean} [p_infinite_inertia]
@@ -429,73 +446,7 @@ export class KinematicBody2D extends PhysicsBody2D {
 
         return null;
     }
-    /**
-     * @param {number} p_bounce
-     */
-    _get_slide_collision(p_bounce) {
-        if (p_bounce >= this.slide_colliders.length) {
-            this.slide_colliders.length = p_bounce + 1;
-        }
 
-        let inst = this.slide_colliders[p_bounce];
-        if (!inst) {
-            inst = new KinematicCollision2D();
-            inst.owner = this;
-            this.slide_colliders[p_bounce] = inst;
-        }
-
-        inst.collision = this.colliders[p_bounce];
-        return inst;
-    }
-
-    /**
-     * @param {Physics2DDirectBodyStateSW} p_state
-     */
-    _direct_state_changed(p_state) {
-        if (!this.sync_to_physics) {
-            return;
-        }
-
-        this.last_valid_transform.copy(p_state.get_transform());
-        this.set_notify_local_transform(false);
-        this.set_global_transform(this.last_valid_transform);
-        this.set_notify_local_transform(true);
-    }
-
-    /**
-     * @param {Vector2} p_motion
-     * @param {boolean} p_infinite_inertia
-     * @param {Collision} r_collision
-     * @param {boolean} [p_exclude_raycast_shapes]
-     * @param {boolean} [p_test_only]
-     */
-    _move(p_motion, p_infinite_inertia, r_collision, p_exclude_raycast_shapes = true, p_test_only = false) {
-        const gt = this.get_global_transform().clone();
-        motion_result.reset();
-        const colliding = Physics2DServer.get_singleton().body_test_motion(this.rid, gt, p_motion, p_infinite_inertia, this.margin, motion_result, p_exclude_raycast_shapes);
-
-        if (colliding) {
-            r_collision.collider_metadata = motion_result.collider_metadata;
-            r_collision.collider_shape = motion_result.collider_shape;
-            r_collision.collider_vel.copy(motion_result.collider_velocity);
-            r_collision.collision.copy(motion_result.collision_point);
-            r_collision.normal.copy(motion_result.collision_normal);
-            r_collision.collider = motion_result.collider_id;
-            r_collision.collider_rid = motion_result.collider;
-            r_collision.travel.copy(motion_result.motion);
-            r_collision.remainder.copy(motion_result.remainder);
-            r_collision.local_shape = motion_result.collision_local_shape;
-        }
-
-        if (!p_test_only) {
-            gt.tx += motion_result.motion.x;
-            gt.ty += motion_result.motion.y;
-            this.set_global_transform(gt);
-        }
-
-        Transform2D.free(gt);
-        return colliding;
-    }
 
     /**
      * @param {Transform2D} p_from
@@ -726,6 +677,94 @@ export class KinematicBody2D extends PhysicsBody2D {
      */
     get_slide_collision(p_bounce) {
         return this.colliders[p_bounce];
+    }
+
+    /**
+     * @param {boolean} p_enabled
+     */
+    set_sync_to_physics(p_enabled) {
+        if (this._sync_to_physics === p_enabled) return;
+        this._sync_to_physics = p_enabled;
+
+        if (p_enabled) {
+            Physics2DServer.get_singleton().body_set_force_integration_callback(this.rid, this._direct_state_changed, this);
+            this.only_update_transform_changes = true;
+            this.set_notify_local_transform(true);
+        } else {
+            Physics2DServer.get_singleton().body_set_force_integration_callback(this.rid, null, null);
+            this.only_update_transform_changes = false;
+            this.set_notify_local_transform(false);
+        }
+    }
+
+    /* private */
+
+    /**
+     * @param {number} p_bounce
+     */
+    _get_slide_collision(p_bounce) {
+        if (p_bounce >= this.slide_colliders.length) {
+            this.slide_colliders.length = p_bounce + 1;
+        }
+
+        let inst = this.slide_colliders[p_bounce];
+        if (!inst) {
+            inst = new KinematicCollision2D();
+            inst.owner = this;
+            this.slide_colliders[p_bounce] = inst;
+        }
+
+        inst.collision = this.colliders[p_bounce];
+        return inst;
+    }
+
+    /**
+     * @param {Physics2DDirectBodyStateSW} p_state
+     */
+    _direct_state_changed(p_state) {
+        if (!this.sync_to_physics) {
+            return;
+        }
+
+        this.last_valid_transform.copy(p_state.get_transform());
+        this.set_notify_local_transform(false);
+        this.set_global_transform(this.last_valid_transform);
+        this.set_notify_local_transform(true);
+    }
+
+    /**
+     * @param {Vector2} p_motion
+     * @param {boolean} p_infinite_inertia
+     * @param {Collision} r_collision
+     * @param {boolean} [p_exclude_raycast_shapes]
+     * @param {boolean} [p_test_only]
+     */
+    _move(p_motion, p_infinite_inertia, r_collision, p_exclude_raycast_shapes = true, p_test_only = false) {
+        const gt = this.get_global_transform().clone();
+        motion_result.reset();
+        const colliding = Physics2DServer.get_singleton().body_test_motion(this.rid, gt, p_motion, p_infinite_inertia, this.margin, motion_result, p_exclude_raycast_shapes);
+
+        if (colliding) {
+            r_collision.collider_metadata = motion_result.collider_metadata;
+            r_collision.collider_shape = motion_result.collider_shape;
+            r_collision.collider_vel.copy(motion_result.collider_velocity);
+            r_collision.collision.copy(motion_result.collision_point);
+            r_collision.normal.copy(motion_result.collision_normal);
+            r_collision.collider = motion_result.collider_id;
+            r_collision.collider_rid = motion_result.collider;
+            r_collision.travel.copy(motion_result.motion);
+            r_collision.remainder.copy(motion_result.remainder);
+            r_collision.local_shape = motion_result.collision_local_shape;
+        }
+
+        if (!p_test_only) {
+            gt.tx += motion_result.motion.x;
+            gt.ty += motion_result.motion.y;
+            this.set_global_transform(gt);
+        }
+
+        Transform2D.free(gt);
+        return colliding;
     }
 }
 node_class_map['KinematicBody2D'] = GDCLASS(KinematicBody2D, PhysicsBody2D)
