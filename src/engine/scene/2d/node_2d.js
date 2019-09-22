@@ -14,6 +14,42 @@ import { CanvasItem } from './canvas_item';
 export class Node2D extends CanvasItem {
     get class() { return 'Node2D' }
 
+    get global_position() { return this.get_global_position() }
+    set global_position(value) { this.set_global_position(value) }
+
+    get global_rotation() { return this.get_global_rotation() }
+    set global_rotation(value) { this.set_global_rotation(value) }
+
+    get global_rotation_degrees() { return this.get_global_rotation_degrees() }
+    set global_rotation_degrees(value) { this.set_global_rotation_degrees(value) }
+
+    get global_scale() { return this.get_global_scale() }
+    set global_scale(value) { this.set_global_scale(value) }
+
+    get global_transform() { return this.get_global_transform() }
+    set global_transform(value) { this.set_global_transform(value) }
+
+    get position() { return this.get_position() }
+    set position(value) { this.set_position(value) }
+
+    get rotation() { return this.get_rotation() }
+    set rotation(value) { this.set_rotation(value) }
+
+    get rotation_degrees() { return this.get_rotation_degrees() }
+    set rotation_degrees(value) { this.set_rotation_degrees(value) }
+
+    get scale() { return this.get_scale() }
+    set scale(value) { this.set_scale(value) }
+
+    get transform() { return this._transform }
+    set transform(value) { this.set_transform(value) }
+
+    get z_as_relative() { return this._z_as_relative }
+    set z_as_relative(value) { this.set_z_as_relative(value) }
+
+    get z_index() { return this._z_index }
+    set z_index(value) { this.set_z_index(value) }
+
     /**
      * @param {number} x
      * @param {number} y
@@ -22,7 +58,7 @@ export class Node2D extends CanvasItem {
         if (this._xform_dirty) {
             this._update_xform_values();
         }
-        this.position.set(x, y);
+        this._position.set(x, y);
         this._update_transform();
     }
     /**
@@ -35,7 +71,7 @@ export class Node2D extends CanvasItem {
         if (this._xform_dirty) {
             this._update_xform_values();
         }
-        return this.position;
+        return this._position;
     }
 
     /**
@@ -45,27 +81,27 @@ export class Node2D extends CanvasItem {
         if (this._xform_dirty) {
             this._update_xform_values();
         }
-        this.rotation = value;
+        this._rotation = value;
         this._update_transform();
     }
     get_rotation() {
         if (this._xform_dirty) {
             this._update_xform_values();
         }
-        return this.rotation;
+        return this._rotation;
     }
 
     /**
      * @param {number} value
      */
     set_rotation_degrees(value) {
-        this.rotation = deg2rad(value);
+        this._rotation = deg2rad(value);
     }
     get_rotation_degrees() {
         if (this._xform_dirty) {
             this._update_xform_values();
         }
-        return rad2deg(this.rotation);
+        return rad2deg(this._rotation);
     }
 
     /**
@@ -76,12 +112,12 @@ export class Node2D extends CanvasItem {
         if (this._xform_dirty) {
             this._update_xform_values();
         }
-        this.scale.set(x, y);
-        if (this.scale.x === 0) {
-            this.scale.x = CMP_EPSILON;
+        this._scale.set(x, y);
+        if (this._scale.x === 0) {
+            this._scale.x = CMP_EPSILON;
         }
-        if (this.scale.y === 0) {
-            this.scale.y = CMP_EPSILON;
+        if (this._scale.y === 0) {
+            this._scale.y = CMP_EPSILON;
         }
         this._update_transform();
     }
@@ -95,7 +131,7 @@ export class Node2D extends CanvasItem {
         if (this._xform_dirty) {
             this._update_xform_values();
         }
-        return this.scale;
+        return this._scale;
     }
 
     /**
@@ -107,10 +143,10 @@ export class Node2D extends CanvasItem {
      * @param {number} ty
      */
     set_transform_n(a, b, c, d, tx, ty) {
-        this.transform.set(a, b, c, d, tx, ty);
+        this._transform.set(a, b, c, d, tx, ty);
         this._xform_dirty = true;
 
-        VSG.canvas.canvas_item_set_transform(this.canvas_item, this.transform);
+        VSG.canvas.canvas_item_set_transform(this.canvas_item, this._transform);
 
         if (!this.is_inside_tree()) {
             return;
@@ -124,9 +160,6 @@ export class Node2D extends CanvasItem {
     set_transform(mat) {
         this.set_transform_n(mat.a, mat.b, mat.c, mat.d, mat.tx, mat.ty);
     }
-    get_transform() {
-        return this.transform;
-    }
 
     /**
      * @param {number} x
@@ -136,7 +169,7 @@ export class Node2D extends CanvasItem {
         const pi = this.get_parent_item();
         if (pi) {
             const inv = pi.get_global_transform().clone().affine_inverse();
-            this.set_position(inv.xform(this.position.set(x, y)));
+            this.set_position(inv.xform(this._position.set(x, y)));
             Transform2D.free(inv);
         } else {
             this.set_position_n(x, y);
@@ -221,7 +254,7 @@ export class Node2D extends CanvasItem {
     set_global_transform(xform) {
         const pi = this.get_parent_item();
         if (pi) {
-            const mat = pi.global_transform.clone().affine_inverse().append(xform);
+            const mat = pi._global_transform.clone().affine_inverse().append(xform);
             this.set_transform(mat);
             Transform2D.free(mat);
         } else {
@@ -233,22 +266,16 @@ export class Node2D extends CanvasItem {
      * @param {number} value
      */
     set_z_index(value) {
-        this.z_index = value;
-        VSG.canvas.canvas_item_set_z_index(this.canvas_item, this.z_index);
-    }
-    get_z_index() {
-        return this.z_index;
+        this._z_index = value;
+        VSG.canvas.canvas_item_set_z_index(this.canvas_item, this._z_index);
     }
 
     /**
      * @param {boolean} value
      */
-    set_z_relative(value) {
-        this.z_relative = value;
+    set_z_as_relative(value) {
+        this._z_as_relative = value;
         VSG.canvas.canvas_item_set_z_as_relative_to_parent(this.canvas_item, value);
-    }
-    get_z_relative() {
-        return this.z_relative;
     }
 
     constructor() {
@@ -256,12 +283,12 @@ export class Node2D extends CanvasItem {
 
         this.is_node_2d = true;
 
-        this.position = new Vector2();
-        this.rotation = 0;
-        this.scale = new Vector2(1, 1);
-        this.z_index = 0;
-        this.z_relative = false;
-        this.transform = new Transform2D();
+        this._position = new Vector2();
+        this._rotation = 0;
+        this._scale = new Vector2(1, 1);
+        this._z_index = 0;
+        this._z_as_relative = false;
+        this._transform = new Transform2D();
 
         /* private */
 
@@ -277,7 +304,7 @@ export class Node2D extends CanvasItem {
         if (data.rotation !== undefined) this.set_rotation(data.rotation);
         if (data.scale !== undefined) this.set_scale(data.scale);
         if (data.z_index !== undefined) this.set_z_index(data.z_index);
-        if (data.z_relative !== undefined) this.set_z_relative(data.z_relative);
+        if (data.z_relative !== undefined) this.set_z_as_relative(data.z_relative);
 
         return this;
     }
@@ -286,7 +313,7 @@ export class Node2D extends CanvasItem {
      * @param {Vector2} p_pos
      */
     get_angle_to(p_pos) {
-        const vec = this.to_local(p_pos).multiply(this.scale);
+        const vec = this.to_local(p_pos).multiply(this._scale);
         const angle = vec.angle();
         Vector2.free(vec);
         return angle;
@@ -306,9 +333,9 @@ export class Node2D extends CanvasItem {
         }
 
         if (p_parent === parent_2d) {
-            return this.transform;
+            return this._transform;
         } else {
-            return parent_2d.get_relative_transform_to_parent(p_parent).clone().append(this.transform);
+            return parent_2d.get_relative_transform_to_parent(p_parent).clone().append(this._transform);
         }
     }
 
@@ -316,7 +343,7 @@ export class Node2D extends CanvasItem {
      * @param {number} p_radians
      */
     rotate(p_radians) {
-        this.rotation += p_radians;
+        this._rotation += p_radians;
     }
     /**
      * @param {Vector2} p_pos
@@ -329,7 +356,7 @@ export class Node2D extends CanvasItem {
      * @param {Vector2Like} p_amount
      */
     translate(p_amount) {
-        this.set_position_n(this.position.x + p_amount.x, this.position.y + p_amount.y);
+        this.set_position_n(this._position.x + p_amount.x, this._position.y + p_amount.y);
     }
     /**
      * @param {Vector2Like} p_amount
@@ -343,7 +370,7 @@ export class Node2D extends CanvasItem {
      * @param {boolean} [p_scaled]
      */
     move_local_x(p_delta, p_scaled = false) {
-        const t = this.transform;
+        const t = this._transform;
         const m = Vector2.new(t.a, t.b);
         if (!p_scaled) {
             m.normalize();
@@ -357,7 +384,7 @@ export class Node2D extends CanvasItem {
      * @param {boolean} [p_scaled]
      */
     move_local_y(p_delta, p_scaled = false) {
-        const t = this.transform;
+        const t = this._transform;
         const m = Vector2.new(t.c, t.d);
         if (!p_scaled) {
             m.normalize();
@@ -371,7 +398,7 @@ export class Node2D extends CanvasItem {
      * @param {Vector2Like} p_amount
      */
     apply_scale(p_amount) {
-        this.set_scale_n(this.scale.x * p_amount.x, this.scale.y * p_amount.y);
+        this.set_scale_n(this._scale.x * p_amount.x, this._scale.y * p_amount.y);
     }
 
     /**
@@ -393,11 +420,11 @@ export class Node2D extends CanvasItem {
     /* private */
 
     _update_transform() {
-        this.transform.set_rotation_and_scale(this.rotation, this.scale);
-        this.transform.tx = this.position.x;
-        this.transform.ty = this.position.y;
+        this._transform.set_rotation_and_scale(this._rotation, this._scale);
+        this._transform.tx = this._position.x;
+        this._transform.ty = this._position.y;
 
-        VSG.canvas.canvas_item_set_transform(this.canvas_item, this.transform);
+        VSG.canvas.canvas_item_set_transform(this.canvas_item, this._transform);
 
         if (!this.is_inside_tree()) {
             return;
@@ -407,10 +434,10 @@ export class Node2D extends CanvasItem {
     }
 
     _update_xform_values() {
-        this.position.set(this.transform.tx, this.transform.ty);
-        this.rotation = this.transform.rotation;
-        const scale = this.transform.get_scale();
-        this.scale.copy(scale);
+        this._position.set(this._transform.tx, this._transform.ty);
+        this._rotation = this._transform.rotation;
+        const scale = this._transform.get_scale();
+        this._scale.copy(scale);
         Vector2.free(scale);
         this._xform_dirty = false;
     }

@@ -95,7 +95,7 @@ export class CanvasItem extends Node {
 
         this.material = null;
 
-        this.global_transform = new Transform2D();
+        this._global_transform = new Transform2D();
         this.global_invalid = false;
     }
     free() {
@@ -241,15 +241,15 @@ export class CanvasItem extends Node {
         if (this.global_invalid) {
             const pi = this.get_parent_item();
             if (pi) {
-                this.global_transform.copy(pi.get_global_transform()).append(this.get_transform());
+                this._global_transform.copy(pi.get_global_transform()).append(this.get_transform());
             } else {
-                this.global_transform.copy(this.get_transform());
+                this._global_transform.copy(this.get_transform());
             }
 
             this.global_invalid = false;
         }
 
-        return this.global_transform;
+        return this._global_transform;
     }
     get_global_transform_with_canvas() {
         if (this.canvas_layer) {
