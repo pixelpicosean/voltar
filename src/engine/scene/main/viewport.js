@@ -160,8 +160,8 @@ export class Viewport extends Node {
     get global_canvas_transform() { return this._global_canvas_transform }
     set global_canvas_transform(value) { this.set_global_canvas_transform(value) }
 
-    get _world_2d() { return this._world_2d }
-    set _world_2d(value) { this.set_world_2d(value) }
+    get world_2d() { return this._world_2d }
+    set world_2d(value) { this.set_world_2d(value) }
 
     constructor() {
         super();

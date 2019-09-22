@@ -176,7 +176,7 @@ export class SceneTree extends MainLoop {
         this.root = new Viewport();
         this.root.set_name('root');
         this.root.handle_input_locally = false;
-        if (!this.root.get_world_2d()) {
+        if (!this.root.world_2d) {
             this.root.set_world_2d(new World2D());
         }
 
