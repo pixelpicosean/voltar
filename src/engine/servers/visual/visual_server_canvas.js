@@ -507,6 +507,7 @@ export class VisualServerCanvas {
         rect.rect.copy(p_rect);
         rect.texture = p_texture;
         rect.normal_map = p_normal_map;
+        rect.source.copy(p_src_rect);
         rect.flags = CANVAS_RECT_REGION;
 
         if (p_rect.width < 0) {
