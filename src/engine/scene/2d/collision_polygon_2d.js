@@ -48,85 +48,27 @@ export const BuildMode = {
 export class CollisionPolygon2D extends Node2D {
     get class() { return 'CollisionPolygon2D' }
 
-    /**
-     * @param {boolean} p_disabled
-     */
-    set_disabled(p_disabled) {
-        this.disabled = p_disabled;
-        if (this.parent) {
-            this.parent.shape_owner_set_disabled(this.owner, p_disabled);
-        }
-    }
+    get build_mode() { return this._build_mode }
+    set build_mode(value) { this.set_build_mode(value) }
 
-    /**
-     * @param {boolean} p_one_way_collision
-     */
-    set_one_way_collision(p_one_way_collision) {
-        this.one_way_collision = p_one_way_collision;
-        if (this.parent) {
-            this.parent.shape_owner_set_one_way_collision(this.owner, p_one_way_collision);
-        }
-    }
+    get disabled() { return this._disabled }
+    set disabled(value) { this.set_disabled(value) }
 
-    /**
-     * @param {number} p_one_way_collision_margin
-     */
-    set_one_way_collision_margin(p_one_way_collision_margin) {
-        this.one_way_collision_margin = p_one_way_collision_margin;
-        if (this.parent) {
-            this.parent.shape_owner_set_one_way_collision_margin(this.owner, p_one_way_collision_margin);
-        }
-    }
+    get one_way_collision() { return this._one_way_collision }
+    set one_way_collision(value) { this.set_one_way_collision(value) }
 
-    /**
-     * @param {Vector2[]} p_polygon
-     */
-    set_polygon(p_polygon) {
-        this.polygon = p_polygon;
+    get one_way_collision_margin() { return this._one_way_collision_margin }
+    set one_way_collision_margin(value) { this.set_one_way_collision_margin(value) }
 
-        {
-            for (let i = 0; i < p_polygon.length; i++) {
-                if (i === 0) {
-                    this.aabb.set(p_polygon[i].x, p_polygon[i].y, 0, 0);
-                } else {
-                    this.aabb.expand_to(p_polygon[i]);
-                }
-            }
-            if (this.aabb.is_zero()) {
-                this.aabb.set(-10, -10, 20, 20);
-            } else {
-                this.aabb.x -= this.aabb.width * 0.3;
-                this.aabb.y -= this.aabb.height * 0.3;
-                this.aabb.width += this.aabb.width * 0.6;
-                this.aabb.height += this.aabb.height * 0.6;
-            }
-        }
-
-        if (is_polygon_clockwise(this.polygon)) {
-            this.polygon.reverse();
-        }
-
-        if (this.parent) {
-            this._build_polygon();
-        }
-    }
-
-    /**
-     * @param {BuildMode} p_build_mode
-     */
-    set_build_mode(p_build_mode) {
-        this._build_mode = p_build_mode;
-        if (this.parent) {
-            this._build_polygon();
-        }
-    }
+    get polygon() { return this._polygon }
+    set polygon(value) { this.set_polygon(value) }
 
     constructor() {
         super();
 
-        this.disabled = false;
-        this.one_way_collision = false;
-        this.one_way_collision_margin = 1.0;
+        this._disabled = false;
+        this._one_way_collision = false;
+        this._one_way_collision_margin = 1.0;
         /**
          * @type {import('./collision_object_2d').CollisionObject2D}
          */
@@ -136,11 +78,14 @@ export class CollisionPolygon2D extends Node2D {
         /**
          * @type {Vector2[]}
          */
-        this.polygon = [];
+        this._polygon = [];
 
         /** @type {CollisionPolygon2D | import('./collision_shape_2d').CollisionShape2D} */
         this.owner = null;
     }
+
+    /* virtual */
+
     _load_data(p_data) {
         super._load_data(p_data);
 
@@ -179,6 +124,83 @@ export class CollisionPolygon2D extends Node2D {
         }
     }
 
+    /* public */
+
+    /**
+     * @param {boolean} p_disabled
+     */
+    set_disabled(p_disabled) {
+        this._disabled = p_disabled;
+        if (this.parent) {
+            this.parent.shape_owner_set_disabled(this.owner, p_disabled);
+        }
+    }
+
+    /**
+     * @param {boolean} p_one_way_collision
+     */
+    set_one_way_collision(p_one_way_collision) {
+        this._one_way_collision = p_one_way_collision;
+        if (this.parent) {
+            this.parent.shape_owner_set_one_way_collision(this.owner, p_one_way_collision);
+        }
+    }
+
+    /**
+     * @param {number} p_one_way_collision_margin
+     */
+    set_one_way_collision_margin(p_one_way_collision_margin) {
+        this._one_way_collision_margin = p_one_way_collision_margin;
+        if (this.parent) {
+            this.parent.shape_owner_set_one_way_collision_margin(this.owner, p_one_way_collision_margin);
+        }
+    }
+
+    /**
+     * @param {Vector2[]} p_polygon
+     */
+    set_polygon(p_polygon) {
+        this._polygon = p_polygon;
+
+        {
+            for (let i = 0; i < p_polygon.length; i++) {
+                if (i === 0) {
+                    this.aabb.set(p_polygon[i].x, p_polygon[i].y, 0, 0);
+                } else {
+                    this.aabb.expand_to(p_polygon[i]);
+                }
+            }
+            if (this.aabb.is_zero()) {
+                this.aabb.set(-10, -10, 20, 20);
+            } else {
+                this.aabb.x -= this.aabb.width * 0.3;
+                this.aabb.y -= this.aabb.height * 0.3;
+                this.aabb.width += this.aabb.width * 0.6;
+                this.aabb.height += this.aabb.height * 0.6;
+            }
+        }
+
+        if (is_polygon_clockwise(this._polygon)) {
+            this._polygon.reverse();
+        }
+
+        if (this.parent) {
+            this._build_polygon();
+        }
+    }
+
+    /**
+     * @param {BuildMode} p_build_mode
+     */
+    set_build_mode(p_build_mode) {
+        this._build_mode = p_build_mode;
+        if (this.parent) {
+            this._build_polygon();
+        }
+    }
+
+    /* private */
+
     /**
      * @param {boolean} [p_xform_only]
      */
@@ -187,15 +209,15 @@ export class CollisionPolygon2D extends Node2D {
         if (p_xform_only) {
             return;
         }
-        this.parent.shape_owner_set_disabled(this, this.disabled);
-        this.parent.shape_owner_set_one_way_collision(this, this.one_way_collision);
-        this.parent.shape_owner_set_one_way_collision_margin(this, this.one_way_collision_margin);
+        this.parent.shape_owner_set_disabled(this, this._disabled);
+        this.parent.shape_owner_set_one_way_collision(this, this._one_way_collision);
+        this.parent.shape_owner_set_one_way_collision_margin(this, this._one_way_collision_margin);
     }
 
     _build_polygon() {
         this.parent.shape_owner_clear_shapes(this);
 
-        if (this.polygon.length === 0) {
+        if (this._polygon.length === 0) {
             return;
         }
 
@@ -215,7 +237,7 @@ export class CollisionPolygon2D extends Node2D {
     }
 
     _decompose_in_convex() {
-        return decompose_in_convex(this.polygon).map(arr => arr.reverse());
+        return decompose_in_convex(this._polygon).map(arr => arr.reverse());
     }
 }
 node_class_map['CollisionPolygon2D'] = GDCLASS(CollisionPolygon2D, Node2D)

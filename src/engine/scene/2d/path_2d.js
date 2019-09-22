@@ -26,6 +26,8 @@ export class Path2D extends Node2D {
         this.curve = new Curve2D();
     }
 
+    /* virtual */
+
     _load_data(data) {
         super._load_data(data);
 
@@ -42,57 +44,20 @@ node_class_map['Path2D'] = GDCLASS(Path2D, Node2D)
 export class PathFollow2D extends Node2D {
     get class() { return 'PathFollow2D' }
 
-    /**
-     * @param {number} p_h_offset
-     */
-    set_h_offset(p_h_offset) {
-        this.h_offset = p_h_offset;
-        if (this.path) {
-            this._update_transform();
-        }
-    }
+    get _offset() { return this._offset }
+    set _offset(value) { this.set_offset(value) }
 
-    /**
-     * @param {number} p_offset
-     */
-    set_offset(p_offset) {
-        this.offset = p_offset;
-        if (this.path) {
-            this._update_transform();
-        }
-    }
+    get _h_offset() { return this._h_offset }
+    set _h_offset(value) { this.set_h_offset(value) }
 
-    /**
-     * @param {number} p_unit_offset
-     */
-    set_unit_offset(p_unit_offset) {
-        if (this.path && this.path.curve && this.path.curve.get_baked_length()) {
-            this.offset = p_unit_offset * this.path.curve.get_baked_length();
-        }
-    }
-    get_unit_offset() {
-        if (this.path && this.path.curve && this.path.curve.get_baked_length()) {
-            return this.offset / this.path.curve.get_baked_length();
-        }
-    }
+    get _v_offset() { return this._v_offset }
+    set _v_offset(value) { this.set_v_offset(value) }
 
-    /**
-     * @param {number} p_v_offset
-     */
-    set_v_offset(p_v_offset) {
-        this.v_offset = p_v_offset;
-        if (this.path) {
-            this._update_transform();
-        }
-    }
+    get unit_offset() { return this.get_unit_offset() }
+    set unit_offset(value) { this.set_unit_offset(value) }
 
-    /**
-     * @param {boolean} p_rotate
-     */
-    set_rotating(p_rotate) {
-        this.rotating = p_rotate;
-        this._update_transform();
-    }
+    get rotating() { return this._rotate }
+    set rotating(value) { this.set_rotate(value) }
 
     constructor() {
         super();
@@ -101,41 +66,13 @@ export class PathFollow2D extends Node2D {
          * @type {Path2D}
          */
         this.path = null;
-
-        /**
-         * @type {number}
-         */
-        this.offset = 0;
-
-        /**
-         * @type {number}
-         */
-        this.h_offset = 0;
-
-        /**
-         * @type {number}
-         */
-        this.v_offset = 0;
-
-        /**
-         * @type {number}
-         */
+        this._offset = 0;
+        this._h_offset = 0;
+        this._v_offset = 0;
         this.lookahead = 4;
-
-        /**
-         * @type {boolean}
-         */
         this.cubic_interp = true;
-
-        /**
-         * @type {boolean}
-         */
         this.loop = true;
-
-        /**
-         * @type {boolean}
-         */
-        this.rotating = true;
+        this._rotate = true;
     }
 
     /* virtual */
@@ -144,15 +81,15 @@ export class PathFollow2D extends Node2D {
         super._load_data(data);
 
         if (data.offset !== undefined) {
-            this.offset = data.offset;
+            this._offset = data.offset;
         }
 
         if (data.v_offset !== undefined) {
-            this.v_offset = data.v_offset;
+            this._v_offset = data.v_offset;
         }
 
         if (data.h_offset !== undefined) {
-            this.h_offset = data.h_offset;
+            this._h_offset = data.h_offset;
         }
 
         if (data.lookahead !== undefined) {
@@ -168,7 +105,7 @@ export class PathFollow2D extends Node2D {
         }
 
         if (data.rotating !== undefined) {
-            this.rotating = data.rotating;
+            this._rotate = data.rotating;
         }
 
         return this;
@@ -191,6 +128,61 @@ export class PathFollow2D extends Node2D {
         }
     }
 
+    /* public */
+
+    /**
+     * @param {number} p_h_offset
+     */
+    set_h_offset(p_h_offset) {
+        this._h_offset = p_h_offset;
+        if (this.path) {
+            this._update_transform();
+        }
+    }
+
+    /**
+     * @param {number} p_offset
+     */
+    set_offset(p_offset) {
+        this._offset = p_offset;
+        if (this.path) {
+            this._update_transform();
+        }
+    }
+
+    /**
+     * @param {number} p_unit_offset
+     */
+    set_unit_offset(p_unit_offset) {
+        if (this.path && this.path.curve && this.path.curve.get_baked_length()) {
+            this._offset = p_unit_offset * this.path.curve.get_baked_length();
+        }
+    }
+    get_unit_offset() {
+        if (this.path && this.path.curve && this.path.curve.get_baked_length()) {
+            return this._offset / this.path.curve.get_baked_length();
+        }
+    }
+
+    /**
+     * @param {number} p_v_offset
+     */
+    set_v_offset(p_v_offset) {
+        this._v_offset = p_v_offset;
+        if (this.path) {
+            this._update_transform();
+        }
+    }
+
+    /**
+     * @param {boolean} p_rotate
+     */
+    set_rotate(p_rotate) {
+        this._rotate = p_rotate;
+        this._update_transform();
+    }
+
+
     /* private */
 
     _update_transform() {
@@ -207,7 +199,7 @@ export class PathFollow2D extends Node2D {
         if (path_length === 0) {
             return;
         }
-        let bounded_offset = this.offset;
+        let bounded_offset = this._offset;
         if (this.loop) {
             bounded_offset = posmod(bounded_offset, path_length);
         } else {
@@ -216,7 +208,7 @@ export class PathFollow2D extends Node2D {
 
         const pos = c.interpolate_baked(bounded_offset, this.cubic_interp);
 
-        if (this.rotating) {
+        if (this._rotate) {
             let ahead = bounded_offset + this.lookahead;
 
             if (this.loop && ahead >= path_length) {
@@ -246,18 +238,18 @@ export class PathFollow2D extends Node2D {
             const negated = tangent_to_curve.clone().negate();
             const normal_of_curve = negated.tangent();
 
-            this.rotation = tangent_to_curve.angle();
+            this._rotation = tangent_to_curve.angle();
 
-            pos.add(tangent_to_curve.scale(this.h_offset));
-            pos.add(normal_of_curve.scale(this.v_offset));
+            pos.add(tangent_to_curve.scale(this._h_offset));
+            pos.add(normal_of_curve.scale(this._v_offset));
 
             Vector2.free(ahead_pos);
             Vector2.free(tangent_to_curve);
             Vector2.free(negated);
             Vector2.free(normal_of_curve);
         } else {
-            pos.x += this.h_offset;
-            pos.y += this.v_offset;
+            pos.x += this._h_offset;
+            pos.y += this._v_offset;
         }
 
         this.set_position(pos);

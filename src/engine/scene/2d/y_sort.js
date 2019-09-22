@@ -8,22 +8,16 @@ import { Node2D } from './node_2d';
 export class YSort extends Node2D {
     get class() { return 'YSort' }
 
-    /**
-     * @property {boolean}
-     */
-    get_sort_enabled() {
-        return this.sort_enabled;
-    }
-    set_sort_enabled(p_enabled) {
-        this.sort_enabled = p_enabled;
-        VSG.canvas.canvas_item_set_sort_children_by_y(this.canvas_item, this.sort_enabled);
-    }
+    get sort_enabled() { return this._sort_enabled }
+    set sort_enabled(value) { this.set_sort_enabled(value) }
 
     constructor() {
         super();
 
-        this.sort_enabled = true;
+        this._sort_enabled = true;
     }
+
+    /* virtual */
 
     _load_data(data) {
         super._load_data(data);
@@ -33,6 +27,13 @@ export class YSort extends Node2D {
         }
 
         return this;
+    }
+
+    /* public */
+
+    set_sort_enabled(p_enabled) {
+        this._sort_enabled = p_enabled;
+        VSG.canvas.canvas_item_set_sort_children_by_y(this.canvas_item, this._sort_enabled);
     }
 }
 node_class_map['YSort'] = GDCLASS(YSort, Node2D)
