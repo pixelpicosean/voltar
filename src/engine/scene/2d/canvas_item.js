@@ -218,7 +218,7 @@ export class CanvasItem extends Node {
 
     get_canvas_layer() {
         if (this.canvas_layer) {
-            return this.canvas_layer.layer;
+            return this.canvas_layer._layer;
         } else {
             return 0;
         }
@@ -253,7 +253,7 @@ export class CanvasItem extends Node {
     }
     get_global_transform_with_canvas() {
         if (this.canvas_layer) {
-            return this.canvas_layer.get_transform().clone().append(this.get_global_transform());
+            return this.canvas_layer.transform.clone().append(this.get_global_transform());
         } else if (this.is_inside_tree()) {
             return this.get_viewport().get_canvas_transform().clone().append(this.get_global_transform());
         } else {
@@ -266,7 +266,7 @@ export class CanvasItem extends Node {
      */
     get_canvas_transform() {
         if (this.canvas_layer) {
-            return this.canvas_layer.get_transform();
+            return this.canvas_layer.transform;
         } else if (this.get_parent().is_canvas_item) {
             const c = /** @type {CanvasItem} */(this.get_parent());
             return c.get_canvas_transform();
@@ -277,9 +277,9 @@ export class CanvasItem extends Node {
     get_viewport_transform() {
         if (this.canvas_layer) {
             if (this.get_viewport()) {
-                return this.get_viewport().get_final_transform().append(this.canvas_layer.get_transform());
+                return this.get_viewport().get_final_transform().append(this.canvas_layer.transform);
             } else {
-                return this.canvas_layer.get_transform();
+                return this.canvas_layer.transform;
             }
         } else {
             return this.get_viewport().get_final_transform().append(this.get_viewport().get_canvas_transform());
@@ -295,7 +295,7 @@ export class CanvasItem extends Node {
 
     get_canvas() {
         if (this.canvas_layer) {
-            return this.canvas_layer.get_canvas();
+            return this.canvas_layer.canvas;
         } else {
             return this.get_viewport().find_world_2d().canvas;
         }
@@ -597,7 +597,7 @@ export class CanvasItem extends Node {
 
             let canvas = null;
             if (this.canvas_layer) {
-                canvas = this.canvas_layer.get_canvas();
+                canvas = this.canvas_layer.canvas;
             } else {
                 canvas = this.get_viewport().find_world_2d().canvas;
             }
