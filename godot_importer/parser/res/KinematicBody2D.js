@@ -1,6 +1,6 @@
 const {
     real,
-} = require('../parse_utils');
+} = require('../type_converters');
 
 const CollisionObject2D = require('./CollisionObject2D');
 

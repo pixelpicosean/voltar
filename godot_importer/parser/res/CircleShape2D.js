@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const {
     real,
-} = require('../parse_utils');
+} = require('../type_converters');
 
 module.exports = (data) => {
     const res = {

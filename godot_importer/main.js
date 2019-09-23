@@ -1,18 +1,21 @@
-const fs = require('fs');
 const path = require('path');
-const _ = require('lodash');
+// const fs = require('fs');
+// const _ = require('lodash');
 
-const {
-    convert_scenes,
-    convert_project_settings,
-    get_resource_map,
-} = require('./tscn_to_json');
+// const {
+//     convert_scenes,
+//     get_resource_map,
+// } = require('./tscn_to_json');
+
+const { convert_project_settings } = require('./convert_project_settings');
 
 console.log(`[started]`)
 
 // 1. project settings
 console.log(`1. project settings`)
 convert_project_settings(path.normalize(path.join(__dirname, '../assets/project.godot')));
+
+/*
 
 // 2. scenes
 console.log(`2. scenes`)
@@ -43,3 +46,5 @@ fs.writeFileSync(path.normalize(path.join(__dirname, '../assets/resources.json')
 console.log(`3. resources`)
 
 console.log('[finished]')
+
+*/

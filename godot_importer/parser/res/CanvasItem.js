@@ -2,7 +2,7 @@ const Node = require('./Node');
 const {
     Color,
     boolean,
-} = require('../parse_utils');
+} = require('../type_converters');
 
 module.exports = (data) => {
     const res = Object.assign({}, Node(data), {

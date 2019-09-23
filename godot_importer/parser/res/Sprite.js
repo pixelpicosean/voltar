@@ -3,7 +3,7 @@ const {
     boolean,
     Vector2,
     Nullable,
-} = require('../parse_utils');
+} = require('../type_converters');
 
 const Node2D = require('./Node2D');
 

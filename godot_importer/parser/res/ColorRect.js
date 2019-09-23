@@ -1,6 +1,6 @@
 const {
     Color,
-} = require('../parse_utils');
+} = require('../type_converters');
 
 const Control = require('./Control');
 

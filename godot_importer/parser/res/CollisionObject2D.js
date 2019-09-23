@@ -1,7 +1,7 @@
 const {
     int,
     boolean,
-} = require('../parse_utils');
+} = require('../type_converters');
 
 const Node2D = require('./CanvasItem');
 

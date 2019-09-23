@@ -3,7 +3,7 @@ const {
     real,
     boolean,
     Rect2,
-} = require('../parse_utils');
+} = require('../type_converters');
 
 const Control = require('./Control');
 

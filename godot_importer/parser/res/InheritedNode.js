@@ -2,7 +2,7 @@ const {
     path,
     int,
     string,
-} = require('../parse_utils');
+} = require('../type_converters');
 
 module.exports = (data) => {
     return {

@@ -1,7 +1,7 @@
 const {
     Vector2,
     Color,
-} = require('../parse_utils');
+} = require('../type_converters');
 
 const Node2D = require('./CanvasItem');
 

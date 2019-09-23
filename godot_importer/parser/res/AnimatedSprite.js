@@ -1,5 +1,5 @@
 const {
-} = require('../parse_utils');
+} = require('../type_converters');
 
 const Sprite = require('./Sprite');
 

@@ -5,7 +5,7 @@ const {
     Vector2,
     Color,
     Nullable,
-} = require('../parse_utils');
+} = require('../type_converters');
 
 const Range = require('./Range');
 

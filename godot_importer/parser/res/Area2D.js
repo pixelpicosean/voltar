@@ -2,7 +2,7 @@ const {
     real,
     boolean,
     Vector2,
-} = require('../parse_utils');
+} = require('../type_converters');
 
 const CollisionObject2D = require('./CollisionObject2D');
 

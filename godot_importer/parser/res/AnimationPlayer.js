@@ -2,7 +2,7 @@ const {
     string,
     real,
     NodePath,
-} = require('../parse_utils');
+} = require('../type_converters');
 
 const Node = require('./Node');
 

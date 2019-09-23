@@ -8,7 +8,7 @@ const {
     PoolRealArray,
     GeneralArray,
     MethodArray,
-} = require('../parse_utils');
+} = require('../type_converters');
 
 const get_prop_name = (path) => _.last(path.split(':'));
 

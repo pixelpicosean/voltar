@@ -1,6 +1,6 @@
 const {
     PoolRealArray,
-} = require('../parse_utils');
+} = require('../type_converters');
 const Node2D = require('./CanvasItem');
 
 module.exports = (data) => {

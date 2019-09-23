@@ -1,7 +1,7 @@
 const {
     boolean,
     Vector2,
-} = require('../parse_utils');
+} = require('../type_converters');
 
 const CanvasLayer = require('./CanvasLayer');
 
