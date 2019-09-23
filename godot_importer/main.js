@@ -2,12 +2,8 @@ const path = require('path');
 // const fs = require('fs');
 // const _ = require('lodash');
 
-// const {
-//     convert_scenes,
-//     get_resource_map,
-// } = require('./tscn_to_json');
-
 const { convert_project_settings } = require('./convert_project_settings');
+const { convert_scenes } = require('./convert_scenes');
 
 console.log(`[started]`)
 
@@ -15,11 +11,11 @@ console.log(`[started]`)
 console.log(`1. project settings`)
 convert_project_settings(path.normalize(path.join(__dirname, '../assets/project.godot')));
 
-/*
 
 // 2. scenes
 console.log(`2. scenes`)
 const generated_files = convert_scenes(path.normalize(path.join(__dirname, '../assets')));
+/*
 generated_files.forEach(({ url, data }) => {
     // Remove flag header used internally
     const ext = data.__meta__.ext;

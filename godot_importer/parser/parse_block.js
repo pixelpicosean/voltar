@@ -89,10 +89,9 @@ function push_tokens_in_a_line(db, line, tokens, stack, key = undefined) {
 
 /**
  * @param {string} attr_str
- * @returns {any}
  */
 function parse_attr(attr_str) {
-    const attr = {};
+    const attr = { type: /** @type {string} */(undefined) };
 
     let str = attr_str;
     let idx = str.indexOf('=');
@@ -163,7 +162,6 @@ function parse_attr(attr_str) {
 };
 /**
  * @param {string} str
- * @returns {{key: string, attr: any}}
  */
 function parse_section(str) {
     if (str[0] !== '[' || _.last(str) !== ']') {
@@ -182,7 +180,6 @@ function parse_section(str) {
 
 /**
  * @param {string[]} block
- * @returns {any}
  */
 module.exports.parse_block = (block) => {
     const data = Object.assign({

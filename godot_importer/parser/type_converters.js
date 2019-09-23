@@ -5,8 +5,6 @@ const {
     remove_first_n_last,
 } = require('./utils');
 
-const { path_modifiers } = require('./registry');
-
 
 /**
  * @param {any} value
@@ -217,10 +215,6 @@ module.exports.NodePath = (path) => {
     }
 
     let result = module.exports.string(get_function_params(path)[0]);
-
-    for (let f of path_modifiers) {
-        result = f(result);
-    }
 
     return result;
 };
