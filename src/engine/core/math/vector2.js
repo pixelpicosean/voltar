@@ -38,73 +38,55 @@ export class Vector2 {
         return Vector2;
     }
 
-    get width() { return this._x }
+    get width() { return this.x }
     /**
      * @param {number} value
      */
     set width(value) {
-        this._x = value;
-        this.callback && this.callback();
+        this.x = value;
     }
     /**
      * @param {number} value
      */
     set_width(value) {
-        this._x = value;
-        this.callback && this.callback();
+        this.x = value;
     }
 
-    get height() { return this._y }
+    get height() { return this.y }
     /**
      * @param {number} value
      */
     set height(value) {
-        this._y = value;
-        this.callback && this.callback();
+        this.y = value;
     }
     /**
      * @param {number} value
      */
     set_height(value) {
-        this._y = value;
-        this.callback && this.callback();
+        this.y = value;
     }
 
-    get x() { return this._x }
-    set x(value) {
-        this._x = value;
-        this.callback && this.callback();
-    }
     /**
      * @param {number} value
      */
     set_x(value) {
-        this._x = value;
-        this.callback && this.callback();
+        this.x = value;
     }
 
-    get y() { return this._y }
-    set y(value) {
-        this._y = value;
-        this.callback && this.callback();
-    }
     /**
      * @param {number} value
      */
     set_y(value) {
-        this._y = value;
-        this.callback && this.callback();
+        this.y = value;
     }
 
     /**
      * @param {number} [x=0]
      * @param {number} [y=0]
-     * @param {Function} [callback]
      */
-    constructor(x = 0, y = 0, callback = null) {
-        this._x = x;
-        this._y = y;
-        this.callback = callback;
+    constructor(x = 0, y = 0) {
+        this.x = x;
+        this.y = y;
     }
 
     /**
@@ -121,9 +103,8 @@ export class Vector2 {
         if (y === undefined) {
             y = x;
         }
-        this._x = x;
-        this._y = y;
-        this.callback && this.callback();
+        this.x = x;
+        this.y = y;
         return this;
     }
     /**
@@ -133,9 +114,8 @@ export class Vector2 {
      * @returns {Vector2} self for chaining
      */
     copy(p_b) {
-        this._x = p_b.x;
-        this._y = p_b.y;
-        this.callback && this.callback();
+        this.x = p_b.x;
+        this.y = p_b.y;
         return this;
     }
 
@@ -145,7 +125,7 @@ export class Vector2 {
      * @returns {Vector2}
      */
     clone() {
-        return new Vector2(this._x, this._y);
+        return new Vector2(this.x, this.y);
     }
     random(scale) {
         // TODO: requires random module
@@ -190,7 +170,7 @@ export class Vector2 {
      * @returns {boolean}
      */
     equals(p_b) {
-        const a0 = this._x, a1 = this._y;
+        const a0 = this.x, a1 = this.y;
         const b0 = p_b.x, b1 = p_b.y;
         return (Math.abs(a0 - b0) <= CMP_EPSILON * Math.max(1.0, Math.abs(a0), Math.abs(b0)) &&
             Math.abs(a1 - b1) <= CMP_EPSILON * Math.max(1.0, Math.abs(a1), Math.abs(b1)));
@@ -202,7 +182,7 @@ export class Vector2 {
      * @returns {boolean}
      */
     exact_equals(p_b) {
-        return (this._x === p_b.x) && (this._y === p_b.y);
+        return (this.x === p_b.x) && (this.y === p_b.y);
     }
 
     /**
@@ -215,16 +195,15 @@ export class Vector2 {
     add(x, y) {
         if (y === undefined) {
             // @ts-ignore
-            this._x += x.x;
+            this.x += x.x;
             // @ts-ignore
-            this._y += x.y;
+            this.y += x.y;
         } else {
             // @ts-ignore
-            this._x += x;
+            this.x += x;
             // @ts-ignore
-            this._y += y;
+            this.y += y;
         }
-        this.callback && this.callback();
         return this;
     }
 
@@ -238,16 +217,15 @@ export class Vector2 {
     subtract(x, y) {
         if (y === undefined) {
             // @ts-ignore
-            this._x -= x.x;
+            this.x -= x.x;
             // @ts-ignore
-            this._y -= x.y;
+            this.y -= x.y;
         } else {
             // @ts-ignore
-            this._x -= x;
+            this.x -= x;
             // @ts-ignore
-            this._y -= y;
+            this.y -= y;
         }
-        this.callback && this.callback();
         return this;
     }
 
@@ -261,16 +239,15 @@ export class Vector2 {
     multiply(x, y) {
         if (y === undefined) {
             // @ts-ignore
-            this._x *= x.x;
+            this.x *= x.x;
             // @ts-ignore
-            this._y *= x.y;
+            this.y *= x.y;
         } else {
             // @ts-ignore
-            this._x *= x;
+            this.x *= x;
             // @ts-ignore
-            this._y *= y;
+            this.y *= y;
         }
-        this.callback && this.callback();
         return this;
     }
 
@@ -284,16 +261,15 @@ export class Vector2 {
     divide(x, y) {
         if (y === undefined) {
             // @ts-ignore
-            this._x /= x.x;
+            this.x /= x.x;
             // @ts-ignore
-            this._y /= x.y;
+            this.y /= x.y;
         } else {
             // @ts-ignore
-            this._x /= x;
+            this.x /= x;
             // @ts-ignore
-            this._y /= y;
+            this.y /= y;
         }
-        this.callback && this.callback();
         return this;
     }
 
@@ -304,7 +280,7 @@ export class Vector2 {
      * @returns {number}
      */
     dot(p_b) {
-        return this._x * p_b.x + this._y * p_b.y;
+        return this.x * p_b.x + this.y * p_b.y;
     }
 
     /**
@@ -314,7 +290,7 @@ export class Vector2 {
      * @returns {number}
      */
     cross(p_b) {
-        return this._x * p_b.y - this._y * p_b.x;
+        return this.x * p_b.y - this.y * p_b.x;
     }
 
     /**
@@ -323,9 +299,8 @@ export class Vector2 {
      * @returns {Vector2}
      */
     abs() {
-        this._x = Math.abs(this._x);
-        this._y = Math.abs(this._y);
-        this.callback && this.callback();
+        this.x = Math.abs(this.x);
+        this.y = Math.abs(this.y);
         return this;
     }
 
@@ -335,9 +310,8 @@ export class Vector2 {
      * @returns {Vector2}
      */
     ceil() {
-        this._x = Math.ceil(this._x);
-        this._y = Math.ceil(this._y);
-        this.callback && this.callback();
+        this.x = Math.ceil(this.x);
+        this.y = Math.ceil(this.y);
         return this;
     }
 
@@ -347,9 +321,8 @@ export class Vector2 {
      * @returns {Vector2}
      */
     floor() {
-        this._x = Math.floor(this._x);
-        this._y = Math.floor(this._y);
-        this.callback && this.callback();
+        this.x = Math.floor(this.x);
+        this.y = Math.floor(this.y);
         return this;
     }
 
@@ -359,9 +332,8 @@ export class Vector2 {
      * @returns {Vector2}
      */
     round() {
-        this._x = Math.round(this._x);
-        this._y = Math.round(this._y);
-        this.callback && this.callback();
+        this.x = Math.round(this.x);
+        this.y = Math.round(this.y);
         return this;
     }
 
@@ -386,9 +358,8 @@ export class Vector2 {
      * @returns {Vector2}
      */
     scale(b) {
-        this._x *= b;
-        this._y *= b;
-        this.callback && this.callback();
+        this.x *= b;
+        this.y *= b;
         return this;
     }
 
@@ -398,9 +369,8 @@ export class Vector2 {
      * @returns {Vector2}
      */
     negate() {
-        this._x = -this._x;
-        this._y = -this._y;
-        this.callback && this.callback();
+        this.x = -this.x;
+        this.y = -this.y;
         return this;
     }
 
@@ -410,9 +380,8 @@ export class Vector2 {
      * @returns {Vector2}
      */
     inverse() {
-        this._x = 1.0 / this._x;
-        this._y = 1.0 / this._y;
-        this.callback && this.callback();
+        this.x = 1.0 / this.x;
+        this.y = 1.0 / this.y;
         return this;
     }
 
@@ -422,14 +391,13 @@ export class Vector2 {
      * @returns {Vector2}
      */
     normalize() {
-        const x = this._x, y = this._y;
+        const x = this.x, y = this.y;
         let len = x * x + y * y;
         if (len > 0) {
             len = 1 / Math.sqrt(len);
-            this._x *= len;
-            this._y *= len;
+            this.x *= len;
+            this.y *= len;
         }
-        this.callback && this.callback();
         return this;
     }
 
@@ -440,11 +408,10 @@ export class Vector2 {
      * @returns {Vector2}
      */
     rotate(p_rotation) {
-        const x = this._x, y = this._y;
+        const x = this.x, y = this.y;
         const c = Math.cos(p_rotation), s = Math.sin(p_rotation);
-        this._x = x * c - y * s;
-        this._y = x * s + y * c;
-        this.callback && this.callback();
+        this.x = x * c - y * s;
+        this.y = x * s + y * c;
         return this;
     }
 
@@ -456,10 +423,9 @@ export class Vector2 {
      * @return {Vector2} Self for chaining.
      */
     perp() {
-        const x = this._x;
-        this._x = this._y;
-        this._y = -x;
-        this.callback && this.callback();
+        const x = this.x;
+        this.x = this.y;
+        this.y = -x;
         return this;
     }
 
@@ -482,9 +448,8 @@ export class Vector2 {
      */
     project(p_b) {
         const amt = this.dot(p_b) / p_b.length_squared();
-        this._x = amt * p_b.x;
-        this._y = amt * p_b.y;
-        this.callback && this.callback();
+        this.x = amt * p_b.x;
+        this.y = amt * p_b.y;
         return this;
     }
 
@@ -496,9 +461,8 @@ export class Vector2 {
      */
     project_n(p_b) {
         const amt = this.dot(p_b);
-        this._x = amt * p_b.x;
-        this._y = amt * p_b.y;
-        this.callback && this.callback();
+        this.x = amt * p_b.x;
+        this.y = amt * p_b.y;
         return this;
     }
 
@@ -510,9 +474,8 @@ export class Vector2 {
      */
     reflect(axis) {
         const dot = this.dot(axis);
-        this._x = 2 * axis.x * dot - this._x;
-        this._y = 2 * axis.y * dot - this._y;
-        this.callback && this.callback();
+        this.x = 2 * axis.x * dot - this.x;
+        this.y = 2 * axis.y * dot - this.y;
         return this;
     }
 
@@ -542,8 +505,8 @@ export class Vector2 {
      * @returns {number}
      */
     length() {
-        const x = this._x;
-        const y = this._y;
+        const x = this.x;
+        const y = this.y;
         return Math.sqrt(x * x + y * y);
     }
 
@@ -554,8 +517,8 @@ export class Vector2 {
      * @returns {number}
      */
     length_squared() {
-        const x = this._x;
-        const y = this._y;
+        const x = this.x;
+        const y = this.y;
         return x * x + y * y;
     }
 
@@ -565,7 +528,7 @@ export class Vector2 {
      * @returns {number}
      */
     angle() {
-        return Math.atan2(this._y, this._x);
+        return Math.atan2(this.y, this.x);
     }
 
     /**
@@ -583,7 +546,7 @@ export class Vector2 {
      * @returns {number}
      */
     angle_to_point(b) {
-        return Math.atan2(this._y - b.y, this._x - b.x);
+        return Math.atan2(this.y - b.y, this.x - b.x);
     }
 
     /**
@@ -593,8 +556,8 @@ export class Vector2 {
      * @returns {number}
      */
     distance_to(b) {
-        const x = b.x - this._x;
-        const y = b.y - this._y;
+        const x = b.x - this.x;
+        const y = b.y - this.y;
         return Math.sqrt(x * x + y * y);
     }
 
@@ -606,8 +569,8 @@ export class Vector2 {
      * @returns {number}
      */
     distance_squared_to(b) {
-        const x = b.x - this._x;
-        const y = b.y - this._y;
+        const x = b.x - this.x;
+        const y = b.y - this.y;
         return x * x + y * y;
     }
 
@@ -617,15 +580,15 @@ export class Vector2 {
      * @return {Vector2}
      */
     tangent(r_out = Vector2.new()) {
-        return r_out.set(this._y, -this._x);
+        return r_out.set(this.y, -this.x);
     }
 
     aspect() {
-        return this._x / this._y;
+        return this.x / this.y;
     }
 
     is_zero() {
-        return this._x === 0 && this._y === 0;
+        return this.x === 0 && this.y === 0;
     }
 
     /**
@@ -635,8 +598,8 @@ export class Vector2 {
     linear_interpolate(p_b, p_t) {
         const res = this.clone();
 
-        res.x += (p_t * (p_b.x - this._x));
-        res.y += (p_t * (p_b.y - this._y));
+        res.x += (p_t * (p_b.x - this.x));
+        res.y += (p_t * (p_b.y - this.y));
 
         return res;
     }
@@ -651,8 +614,8 @@ export class Vector2 {
         const t2 = p_t * p_t;
         const t3 = t2 * p_t;
         return Vector2.new(
-            0.5 * ((this._x * 2) + (-p_pre_a.x + p_b.x) * p_t + (2 * p_pre_a.x - 5 * this._x + 4 * p_b.x - p_post_b.x) * t2 + (-p_pre_a.x + 3 * this._x - 3 * p_b.x + p_post_b.x) * t3),
-            0.5 * ((this._y * 2) + (-p_pre_a.y + p_b.y) * p_t + (2 * p_pre_a.y - 5 * this._y + 4 * p_b.y - p_post_b.y) * t2 + (-p_pre_a.y + 3 * this._y - 3 * p_b.y + p_post_b.y) * t3)
+            0.5 * ((this.x * 2) + (-p_pre_a.x + p_b.x) * p_t + (2 * p_pre_a.x - 5 * this.x + 4 * p_b.x - p_post_b.x) * t2 + (-p_pre_a.x + 3 * this.x - 3 * p_b.x + p_post_b.x) * t3),
+            0.5 * ((this.y * 2) + (-p_pre_a.y + p_b.y) * p_t + (2 * p_pre_a.y - 5 * this.y + 4 * p_b.y - p_post_b.y) * t2 + (-p_pre_a.y + 3 * this.y - 3 * p_b.y + p_post_b.y) * t3)
         );
     }
 }
