@@ -159,7 +159,8 @@ function apply_immediate_value(node, type, key, value) {
     switch (type) {
         case PROP_TYPE_NUMBER:
         case PROP_TYPE_BOOLEAN:
-        case PROP_TYPE_STRING: {
+        case PROP_TYPE_STRING:
+        case PROP_TYPE_ANY: {
             node[key] = value;
         } break;
         case PROP_TYPE_VECTOR: {
@@ -172,10 +173,16 @@ function apply_immediate_value(node, type, key, value) {
             node[key].b = value.b;
             node[key].a = value.a;
         } break;
-        case PROP_TYPE_ANY: {
-            node._set_value(key, value);
-        } break;
     }
+}
+/**
+ * @param {Node} node
+ * @param {number} type
+ * @param {Function} setter
+ * @param {any} value
+ */
+function apply_immediate_value_with_setter(node, type, setter, value) {
+    setter.call(node, value);
 }
 /**
  * @param {Node} node
@@ -187,12 +194,13 @@ function apply_immediate_value(node, type, key, value) {
  */
 function apply_interpolate_value(node, type, key, value_a, value_b, c) {
     switch (type) {
+        case PROP_TYPE_BOOLEAN:
+        case PROP_TYPE_STRING:
+        case PROP_TYPE_ANY: {
+            node[key] = value_a;
+        } break;
         case PROP_TYPE_NUMBER: {
             node[key] = interpolate_number(value_a, value_b, c);
-        } break;
-        case PROP_TYPE_BOOLEAN:
-        case PROP_TYPE_STRING: {
-            node[key] = value_a;
         } break;
         case PROP_TYPE_VECTOR: {
             node[key].x = interpolate_number(value_a.x, value_b.x, c);
@@ -204,8 +212,40 @@ function apply_interpolate_value(node, type, key, value_a, value_b, c) {
             node[key].b = interpolate_number(value_a.b, value_b.b, c);
             node[key].a = interpolate_number(value_a.a, value_b.a, c);
         } break;
+    }
+}
+
+const interp_vec2 = { x: 0, y: 0 };
+const interp_color = { r: 0, g: 0, b: 0, a: 0 };
+/**
+ * @param {Node} node
+ * @param {number} type
+ * @param {Function} setter
+ * @param {any} value_a
+ * @param {any} value_b
+ * @param {number} c
+ */
+function apply_interpolate_value_with_setter(node, type, setter, value_a, value_b, c) {
+    switch (type) {
+        case PROP_TYPE_NUMBER: {
+            setter.call(node, interpolate_number(value_a, value_b, c));
+        } break;
+        case PROP_TYPE_BOOLEAN:
+        case PROP_TYPE_STRING:
         case PROP_TYPE_ANY: {
-            node._set_lerp_value(key, value_a, value_b, c);
+            setter.call(node, value_a);
+        } break;
+        case PROP_TYPE_VECTOR: {
+            interp_vec2.x = interpolate_number(value_a.x, value_b.x, c);
+            interp_vec2.y = interpolate_number(value_a.y, value_b.y, c);
+            setter.call(node, interp_vec2);
+        } break;
+        case PROP_TYPE_COLOR: {
+            interp_color.r = interpolate_number(value_a.r, value_b.r, c);
+            interp_color.g = interpolate_number(value_a.g, value_b.g, c);
+            interp_color.b = interpolate_number(value_a.b, value_b.b, c);
+            interp_color.a = interpolate_number(value_a.a, value_b.a, c);
+            setter.call(node, interp_color);
         } break;
     }
 }
@@ -216,8 +256,9 @@ function apply_interpolate_value(node, type, key, value_a, value_b, c) {
  * @param {number} time
  * @param {number} interp
  * @param {boolean} loop_wrap
+ * @param {Object<string, Function>} setter_cache
  */
-function interpolate_track_on_node(node, anim, track, time, interp, loop_wrap) {
+function interpolate_track_on_node(node, anim, track, time, interp, loop_wrap, setter_cache) {
     let keys = track.values;
     let len = find_track_key(keys, anim.length) + 1;
 
@@ -307,11 +348,17 @@ function interpolate_track_on_node(node, anim, track, time, interp, loop_wrap) {
         return;
     }
 
+    const setter = setter_cache[track.path];
+
     let tr = keys[idx].transition;
 
     if (tr === 0 || idx === next) {
         // don't interpolate if not needed
-        apply_immediate_value(node, track.prop_type, track.prop_key, keys[idx].value);
+        if (setter) {
+            apply_immediate_value_with_setter(node, track.prop_type, setter, keys[idx].value);
+        } else {
+            apply_immediate_value(node, track.prop_type, track.prop_key, keys[idx].value);
+        }
     }
 
     if (!equals(tr, 1)) {
@@ -320,26 +367,33 @@ function interpolate_track_on_node(node, anim, track, time, interp, loop_wrap) {
 
     switch (interp) {
         case INTERPOLATION_NEAREST: {
-            apply_immediate_value(node, track.prop_type, track.prop_key, keys[idx].value);
+            if (setter) {
+                apply_immediate_value_with_setter(node, track.prop_type, setter, keys[idx].value);
+            } else {
+                apply_immediate_value(node, track.prop_type, track.prop_key, keys[idx].value);
+            }
         } break;
         case INTERPOLATION_LINEAR: {
-            apply_interpolate_value(node, track.prop_type, track.prop_key, keys[idx].value, keys[next].value, c);
+            if (setter) {
+                apply_interpolate_value_with_setter(node, track.prop_type, setter, keys[idx].value, keys[next].value, c);
+            } else {
+                apply_interpolate_value(node, track.prop_type, track.prop_key, keys[idx].value, keys[next].value, c);
+            }
         } break;
         case INTERPOLATION_CUBIC: {
-            // let pre = idx - 1;
-            // if (pre < 0) {
-            //     pre = 0;
-            // }
-            // let post = next + 1;
-            // if (post >= len) {
-            //     post = next;
-            // }
-            // cubic_interpolate_number(keys[pre].value, keys[idx].value, keys[next].value, keys[post].value, c);
-            // apply_interpolate_value(node, track.prop_type, track.prop_key, keys[idx].value, keys[next].value, c);
+            let pre = idx - 1;
+            if (pre < 0) {
+                pre = 0;
+            }
+            let post = next + 1;
+            if (post >= len) {
+                post = next;
+            }
+            cubic_interpolate_number(keys[pre].value, keys[idx].value, keys[next].value, keys[post].value, c);
         } break;
         default: {
             return keys[idx].value;
-        } break;
+        };
     }
 }
 /**
@@ -367,6 +421,8 @@ class AnimationData {
 
         /** @type {Object<string, Node>} */
         this.node_cache = {};
+        /** @type {Object<string, Function>} */
+        this.setter_cache = {};
         this.node_cache_size = 0; // Remember to update size with `node_cache`
 
         /** @type {Animation} */
@@ -1058,7 +1114,7 @@ export class AnimationPlayer extends Node {
                     const update_mode = t.update_mode;
 
                     if (update_mode === UPDATE_CONTINUOUS || update_mode === UPDATE_CAPTURE || (equals(p_delta, 0) && update_mode === UPDATE_DISCRETE)) { // delta == 0 means seek
-                        interpolate_track_on_node(node, a, t, p_time, update_mode === UPDATE_CONTINUOUS ? t.interp : INTERPOLATION_NEAREST, t.loop_wrap);
+                        interpolate_track_on_node(node, a, t, p_time, update_mode === UPDATE_CONTINUOUS ? t.interp : INTERPOLATION_NEAREST, t.loop_wrap, p_anim.setter_cache);
                     } else if (is_current && !equals(p_delta, CMP_EPSILON)) {
                         immediate_track_on_node(node, a, t, p_time, t.loop_wrap);
                     }
@@ -1127,6 +1183,11 @@ export class AnimationPlayer extends Node {
             }
 
             anim.node_cache[anim_path_without_prop(track.path)] = child;
+            const prop_name = anim_prop(track.path);
+            const prop_setter = child[`set_${prop_name}`];
+            if (typeof (prop_setter) === 'function') {
+                anim.setter_cache[track.path] = prop_setter;
+            }
             anim.node_cache_size += 1;
         }
     }
