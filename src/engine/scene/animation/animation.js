@@ -203,10 +203,6 @@ export class BezierTrack extends Track {
         /** @type Key<{in_handle: Vector2, out_handle: Vector2, value: number}>[] */
         this.values = [];
     }
-    load(data) {
-        super.load(data);
-        return this;
-    }
 }
 
 export class AnimationTrack extends Track {
@@ -217,10 +213,6 @@ export class AnimationTrack extends Track {
 
         /** @type Key<string>[] */
         this.values = [];
-    }
-    load(data) {
-        super.load(data);
-        return this;
     }
 }
 

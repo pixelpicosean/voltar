@@ -32,6 +32,7 @@ import {
     UPDATE_CONTINUOUS,
     UPDATE_CAPTURE,
     UPDATE_DISCRETE,
+    BezierTrack,
 } from './animation';
 
 
@@ -189,11 +190,8 @@ function apply_interpolate_value(node, type, key, value_a, value_b, c) {
         case PROP_TYPE_NUMBER: {
             node[key] = interpolate_number(value_a, value_b, c);
         } break;
-        case PROP_TYPE_BOOLEAN: {
-            node[key] = value_a;
-        } break;
+        case PROP_TYPE_BOOLEAN:
         case PROP_TYPE_STRING: {
-            // TODO: animating a text?
             node[key] = value_a;
         } break;
         case PROP_TYPE_VECTOR: {
@@ -323,11 +321,10 @@ function interpolate_track_on_node(node, anim, track, time, interp, loop_wrap) {
     switch (interp) {
         case INTERPOLATION_NEAREST: {
             apply_immediate_value(node, track.prop_type, track.prop_key, keys[idx].value);
-        }
+        } break;
         case INTERPOLATION_LINEAR: {
-            // console.log(`key<${track.prop_key}>[${idx} -> ${next}]: factor=${c}`)
             apply_interpolate_value(node, track.prop_type, track.prop_key, keys[idx].value, keys[next].value, c);
-        }
+        } break;
         case INTERPOLATION_CUBIC: {
             // let pre = idx - 1;
             // if (pre < 0) {
@@ -338,11 +335,11 @@ function interpolate_track_on_node(node, anim, track, time, interp, loop_wrap) {
             //     post = next;
             // }
             // cubic_interpolate_number(keys[pre].value, keys[idx].value, keys[next].value, keys[post].value, c);
-            apply_interpolate_value(node, track.prop_type, track.prop_key, keys[idx].value, keys[next].value, c);
-        }
+            // apply_interpolate_value(node, track.prop_type, track.prop_key, keys[idx].value, keys[next].value, c);
+        } break;
         default: {
             return keys[idx].value;
-        }
+        } break;
     }
 }
 /**
@@ -403,17 +400,24 @@ class Playback {
     }
 }
 
+class BezierAnim {
+    constructor() {
+        /** @type {string[]} */
+        this.bezier_property = [];
+        this.bezier_accum = 0;
+        this.object = null;
+        this.accum_pass = 0;
+    }
+}
+
 export class AnimationPlayer extends Node {
     get class() { return 'AnimationPlayer' }
 
     /**
      * If playing the current animation, otherwise the last played one.
-     * @property {string}
      */
-    get_assigned_animation() {
-        return this.playback.assigned;
-    }
-    set_assigned_animation(p_anim) {
+    get assigned_animation() { return this.playback.assigned }
+    set assigned_animation(p_anim) {
         if (this.is_playing()) {
             this.play(p_anim);
         } else {
@@ -425,75 +429,67 @@ export class AnimationPlayer extends Node {
 
     /**
      * The name of current animation.
-     * @property {string}
      */
-    get_current_animation() {
-        return (this.is_playing() ? this.playback.assigned : '');
-    }
-    set_current_animation(p_anim) {
+    get current_animation() { return (this.is_playing() ? this.playback.assigned : '') }
+    set current_animation(p_anim) {
         if (p_anim === '[stop]' || p_anim.length === 0) {
             this.stop();
-        } else if (this.is_playing() || this.playback.assigned !== p_anim) {
+        } else if (!this.is_playing() || this.playback.assigned !== p_anim) {
             this.play(p_anim);
         } else {
             // Same animation, do not replay from start
         }
     }
 
-    /**
-     * @property {number}
-     */
-    get_current_animation_length() {
-        return this.playback.current.from.animation.length;
-    }
+    get current_animation_length() { return this.playback.current.from.animation.length }
 
-    /**
-     * @property {number}
-     */
-    get_current_animation_position() {
-        return this.playback.current.pos;
-    }
+    get current_animation_position() { return this.playback.current.pos }
 
-    /**
-     * The default time in which to blend animations.
-     * @property {number}
-     */
-    get_playback_default_blend_time() {
-        return this.default_blend_time;
-    }
-    set_playback_default_blend_time(time) {
-        this.default_blend_time = time;
-    }
-
-    /**
-     * @property {number}
-     */
-    get_animation_process_mode() {
-        return this.animation_process_mode;
-    }
-    set_animation_process_mode(p_mode) {
-        if (this.animation_process_mode === p_mode) {
+    get playback_process_mode() { return this._playback_process_mode }
+    set playback_process_mode(p_mode) {
+        if (this._playback_process_mode === p_mode) {
             return;
         }
         const pr = this.processing;
         if (pr) {
             this._set_process(false);
         }
-        this.animation_process_mode = p_mode;
+        this._playback_process_mode = p_mode;
         if (pr) {
             this._set_process(true);
         }
     }
 
+    get root_node() { return this._root_node }
+    set root_node(value) {
+        this._root_node = value;
+        this.clear_caches();
+    }
+
+    /**
+     * If true, updates animations in response to process-related notifications.
+     */
+    get playback_active() { return this._playback_active }
+    set playback_active(value) {
+        if (this._playback_active === value) {
+            return;
+        }
+        this._playback_active = value;
+        this._set_process(this.processing, true);
+    }
+
     constructor() {
         super();
 
-        this.accum_pass = 0;
-        this.default_blend_time = 0;
+        this.accum_pass = 1;
+        /**
+         * The default time in which to blend animations.
+         */
+        this.playback_default_blend_time = 0;
 
         this.autoplay = '';
         this.playback_speed = 1;
-        this.root_node = '..';
+        this._root_node = '..';
 
         /** @type {string[]} */
         this.queued = [];
@@ -503,16 +499,10 @@ export class AnimationPlayer extends Node {
         this.end_notify = false;
 
         this.processing = false;
-        this.active = false;
+        this._playback_active = true;
 
-        this.animation_process_mode = ANIMATION_PROCESS_IDLE;
+        this._playback_process_mode = ANIMATION_PROCESS_IDLE;
         this.method_call_mode = ANIMATION_METHOD_CALL_IMMEDIATE;
-
-        /**
-         * If true, updates animations in response to process-related notifications.
-         * @type {boolean}
-         */
-        this.playback_active = true;
 
         /**
          * @type {Object<string, Animation>}
@@ -528,6 +518,9 @@ export class AnimationPlayer extends Node {
         this.blend_times = {};
 
         this.playback = new Playback();
+
+        /** @type {Map<string, BezierAnim>} */
+        this.bezier_anim = null;
     }
 
     /* virtual */
@@ -573,7 +566,7 @@ export class AnimationPlayer extends Node {
                 }
             } break;
             case NOTIFICATION_INTERNAL_PROCESS: {
-                if (this.animation_process_mode === ANIMATION_PROCESS_PHYSICS) {
+                if (this._playback_process_mode === ANIMATION_PROCESS_PHYSICS) {
                     break;
                 }
 
@@ -582,7 +575,7 @@ export class AnimationPlayer extends Node {
                 }
             } break;
             case NOTIFICATION_INTERNAL_PHYSICS_PROCESS: {
-                if (this.animation_process_mode === ANIMATION_PROCESS_IDLE) {
+                if (this._playback_process_mode === ANIMATION_PROCESS_IDLE) {
                     break;
                 }
 
@@ -762,8 +755,8 @@ export class AnimationPlayer extends Node {
                 }
             }
 
-            if (custom_blend < 0 && equals(blend_time, 0) && this.default_blend_time) {
-                blend_time = this.default_blend_time;
+            if (custom_blend < 0 && equals(blend_time, 0) && this.playback_default_blend_time) {
+                blend_time = this.playback_default_blend_time;
             }
             if (blend_time > 0) {
                 let b = new Blend(blend_time, blend_time);
@@ -772,7 +765,7 @@ export class AnimationPlayer extends Node {
             }
         }
 
-        if (this.get_current_animation() !== name) {
+        if (this.current_animation !== name) {
             this._stop_playing_caches();
         }
 
@@ -898,12 +891,12 @@ export class AnimationPlayer extends Node {
             return;
         }
 
-        switch (this.animation_process_mode) {
+        switch (this._playback_process_mode) {
             case ANIMATION_PROCESS_PHYSICS: {
-                this.set_physics_process_internal(p_process && this.active);
+                this.set_physics_process_internal(p_process && this._playback_active);
             } break;
             case ANIMATION_PROCESS_IDLE: {
-                this.set_process_internal(p_process && this.active);
+                this.set_process_internal(p_process && this._playback_active);
             } break;
             case ANIMATION_PROCESS_MANUAL: {
             } break;
@@ -1055,7 +1048,7 @@ export class AnimationPlayer extends Node {
             const track = a.tracks[i];
             const node = p_anim.node_cache[anim_path_without_prop(track.path)];
 
-            if (!node) {
+            if (!node || !track.enabled) {
                 continue;
             }
 
@@ -1073,11 +1066,12 @@ export class AnimationPlayer extends Node {
                 case TRACK_TYPE_METHOD: {
                     if (p_seeked) break;
                     const t = /** @type {MethodTrack} */(track);
-                    for (const k of t.methods) {
+                    for (let i = 0; i < t.methods.length; i++) {
+                        const k = t.methods[i];
                         if (
                             ((p_delta > 0) && (p_time < k.time && k.time < p_time + p_delta))
                             ||
-                            ((p_delta < 0) && (p_time + p_delta < k.time && k.time < p_time))
+                            ((p_delta < 0) && (k.time < p_time && p_time + p_delta < k.time))
                         ) {
                             if (can_call) {
                                 if (this.method_call_mode === ANIMATION_METHOD_CALL_DEFERRED) {
@@ -1090,11 +1084,17 @@ export class AnimationPlayer extends Node {
                     }
                 } break;
                 case TRACK_TYPE_BEZIER: {
+                    // TODO: bezier track support
                 } break;
                 case TRACK_TYPE_ANIMATION: {
                     if (node.class !== 'AnimationPlayer') {
                         continue;
                     }
+                    const player = /** @type {AnimationPlayer} */(node);
+                    if (p_delta === 0 || p_seeked) {
+                        // seek
+                    }
+                    // TODO: animation track support
                 } break;
             }
         }
@@ -1110,7 +1110,7 @@ export class AnimationPlayer extends Node {
         }
 
         /** @type {Node} */
-        let parent = this.get_node(this.root_node);
+        let parent = this.get_node(this._root_node);
 
         if (!parent) {
             return;
