@@ -206,17 +206,27 @@ module.exports.Rect2 = (rect) => {
     return undefined;
 };
 /**
- * @param {string} path
+ * @param {string} node_path
  * @returns {string}
  */
-module.exports.NodePath = (path) => {
-    if (!path) {
-        return undefined;
+module.exports.NodePath = (node_path) => {
+    if (typeof (node_path) === 'string') {
+        let path_str = '';
+        if (node_path.trim().startsWith('NodePath')) {
+            path_str = get_function_params(node_path.trim())[0];
+        } else {
+            path_str = node_path.trim();
+        }
+        if (
+            (path_str.startsWith('"') && path_str.endsWith('"'))
+            ||
+            (path_str.startsWith("'") && path_str.endsWith("'"))
+        ) {
+            path_str = remove_first_n_last(path_str);
+        }
+        return path_str;
     }
-
-    let result = module.exports.string(get_function_params(path)[0]);
-
-    return result;
+    return undefined;
 };
 
 /**

@@ -6,6 +6,13 @@ const { parse_block } = require('../parser/parse_block');
 
 
 /**
+ * @typedef Tres
+ * @property {string} key
+ * @property {import('../parser/parse_block').TresAttr} attr
+ * @property {any} prop
+ */
+
+/**
  * @param {string} root
  * @param {string} filename
  * @returns {string}
@@ -17,7 +24,7 @@ function normalize_res_real_url(root, filename) {
 /**
  * @param {string} root
  * @param {string} filename
- * @param {any} tres_map
+ * @param {Object<string, Tres[]>} tres_map
  */
 module.exports.load_tres = (root, filename, tres_map) => {
     const real_url = normalize_res_real_url(root, filename);

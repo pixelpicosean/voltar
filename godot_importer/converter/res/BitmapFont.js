@@ -1,3 +1,5 @@
+const path = require('path');
+
 const {
     int,
     url,
@@ -12,3 +14,10 @@ module.exports = (data) => {
 };
 
 module.exports.is_tres = () => false;
+module.exports.get_resource_path = (res) => {
+    /** @type {string} */
+    const url = res.attr.path;
+    return path.basename(url, '.fnt');
+}
+
+// TODO: add bitmap font to preload assets list in `resources.json`

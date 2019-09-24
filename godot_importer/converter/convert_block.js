@@ -1,17 +1,17 @@
-const gd_scene = require('./gd_scene');
 const node = require('./node');
 const resource = require('./resource');
 
 
+/**
+ * @returns {{ key?: string, id?: string, attr?: any, prop?: any, _prop?: any }}
+ */
 module.exports.convert_block = (block) => {
     switch (block.key) {
         case 'gd_scene': {
-            return gd_scene(block);
+            return block;
         };
         case 'ext_resource': {
-            return Object.assign({
-                key: 'ext_resource',
-            }, resource(block));
+            return block;
         };
         case 'sub_resource': {
             return Object.assign({

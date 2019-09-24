@@ -11,6 +11,11 @@ const {
     remove_first_n_last,
 } = require('./utils');
 
+/**
+ * @typedef TresAttr
+ * @property {string} [type]
+ * @property {string} [path]
+ */
 
 /**
  * @param {any} db
@@ -91,7 +96,8 @@ function push_tokens_in_a_line(db, line, tokens, stack, key = undefined) {
  * @param {string} attr_str
  */
 function parse_attr(attr_str) {
-    const attr = { type: /** @type {string} */(undefined) };
+    /** @type {TresAttr} */
+    const attr = {};
 
     let str = attr_str;
     let idx = str.indexOf('=');

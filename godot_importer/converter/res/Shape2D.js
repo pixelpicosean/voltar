@@ -1,7 +1,3 @@
-const {
-    Vector2,
-} = require('../../parser/type_converters');
-
 module.exports = (data) => {
     const res = {
         id: data.attr.id,
