@@ -256,22 +256,6 @@ export class VObject {
     call_deferred(p_method, ...p_args) {
         MessageQueue.get_singleton().push_call(this, p_method, ...p_args);
     }
-
-    /**
-     * Set value of this object with key, values and lerp factor
-     * @param {string} key
-     * @param {any} a
-     * @param {any} b
-     * @param {number} c
-     */
-    _set_lerp_value(key, a, b, c) { }
-
-    /**
-     * Set value of this object with key
-     * @param {string} key
-     * @param {any} value
-     */
-    _set_value(key, value) { }
 }
 
 /**
