@@ -283,9 +283,9 @@ export class Node2D extends CanvasItem {
 
         this.is_node_2d = true;
 
-        this._position = new Vector2();
+        this._position = new Vector2(0, 0, this._posrotscale_changed.bind(this));
         this._rotation = 0;
-        this._scale = new Vector2(1, 1);
+        this._scale = new Vector2(1, 1, this._posrotscale_changed.bind(this));
         this._z_index = 0;
         this._z_as_relative = false;
         this._transform = new Transform2D();
@@ -419,6 +419,13 @@ export class Node2D extends CanvasItem {
 
     /* private */
 
+    _posrotscale_changed() {
+        if (this._xform_dirty) {
+            this._update_xform_values();
+        }
+        this._update_transform();
+    }
+
     _update_transform() {
         this._transform.set_rotation_and_scale(this._rotation, this._scale);
         this._transform.tx = this._position.x;
@@ -430,15 +437,13 @@ export class Node2D extends CanvasItem {
             return;
         }
 
-        this._notify_transform_self();
+        this._notify_transform();
     }
 
     _update_xform_values() {
         this._position.set(this._transform.tx, this._transform.ty);
         this._rotation = this._transform.rotation;
-        const scale = this._transform.get_scale();
-        this._scale.copy(scale);
-        Vector2.free(scale);
+        this._transform.get_scale(this._scale);
         this._xform_dirty = false;
     }
 }
