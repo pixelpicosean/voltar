@@ -401,15 +401,19 @@ export class Rect2 {
      * @param {Rect2} p_rect
      */
     intersects(p_rect) {
-        return !(
-            this.bottom <= p_rect.top
-            ||
-            this.top >= p_rect.bottom
-            ||
-            this.left >= p_rect.right
-            ||
-            this.right <= p_rect.left
-        );
+        if (this.x >= p_rect.x + p_rect.width) {
+            return false;
+        }
+        if (this.x + this.width <= p_rect.x) {
+            return false;
+        }
+        if (this.y >= p_rect.y + p_rect.height) {
+            return false;
+        }
+        if (this.y + this.height <= p_rect.y) {
+            return false;
+        }
+        return true;
     }
 
     /**

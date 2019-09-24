@@ -16,7 +16,7 @@ import { VisualServer } from '../visual_server';
 import { VSG } from './visual_server_globals';
 import {
     TYPE_RECT,
-    TYPE_CLIP_IGNORE,
+    TYPE_NINEPATCH,
     CANVAS_RECT_TILE,
     CANVAS_RECT_REGION,
     CANVAS_RECT_FLIP_H,
@@ -126,7 +126,9 @@ export class Item {
                     const crect = /** @type {CommandRect} */(c);
                     r.copy(crect.rect);
                 } break;
-                case TYPE_CLIP_IGNORE: {
+                case TYPE_NINEPATCH: {
+                    const style = /** @type {CommandNinePatch} */(c);
+                    r.copy(style.rect);
                 } break;
             }
 
@@ -751,7 +753,7 @@ export class VisualServerCanvas {
     _render_canvas_item(p_canvas_item, p_transform, p_clip_rect, p_module, p_z, z_list, z_last_list, p_canvas_clip) {
         const ci = p_canvas_item;
 
-        if (!ci.visible || ci.final_modulate.a < 0.001) {
+        if (!ci.visible) {
             return;
         }
 
@@ -825,7 +827,11 @@ export class VisualServerCanvas {
                 continue;
             }
             if (ci.sort_y) {
-                this._render_canvas_item(item, xform.clone().append(item.ysort_xform), p_clip_rect, /* modulate */null, p_z, z_list, z_last_list, /** @type {Item} */(ci.final_clip_owner));
+                const xf = xform.clone().append(item.ysort_xform);
+                const mo = Color.new().copy(modulate);
+                this._render_canvas_item(item, xf, p_clip_rect, /* mo.multiply(item.ysort_modulate) */null, p_z, z_list, z_last_list, /** @type {Item} */(ci.final_clip_owner));
+                Color.free(mo);
+                Transform2D.free(xf);
             } else {
                 this._render_canvas_item(item, xform, p_clip_rect, modulate, p_z, z_list, z_last_list, /** @type {Item} */(ci.final_clip_owner));
             }
