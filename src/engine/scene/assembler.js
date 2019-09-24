@@ -13,7 +13,7 @@ const has = Object.prototype.hasOwnProperty;
 /**
  * Register scene class, for packed scene instancing process
  * @param {string} key  Key of the scene class
- * @param {import('engine/registry').PackedScene} ctor Class to be registered
+ * @param {typeof Node} ctor Class to be registered
  */
 export function register_scene_class(key, ctor) {
     if (!scene_class_map[key]) {
@@ -24,17 +24,16 @@ export function register_scene_class(key, ctor) {
 }
 
 /**
- * @param {String} url path to the scene (JSON from .tscn)
+ * @param {string} url path to the scene (JSON from .tscn)
  * @param {typeof Node} scene Scene class
  */
 export function attach_script(url, scene) {
     // Add `instance` static method
-    scene.instance = () => {
-        return assemble_scene(new scene(), resource_map[url]);
+    scene['instance'] = () => {
+        return assemble_scene(new scene, resource_map[url], url);
     };
 
     // Register as scene
-    // @ts-ignore
     register_scene_class(url, scene);
 
     return scene;
@@ -44,139 +43,61 @@ export function attach_script(url, scene) {
  * @typedef NodeData
  * @property {string} type
  * @property {string} name
- * @property {NodeData[]} children
  * @property {string} [filename]
- * @property {boolean} [_is_proxy_]
- * @property {string} [prop_key]
- * @property {any} [prop_value]
+ * @property {string} [parent]
+ *
+ * @typedef PackedSceneData
+ * @property {NodeData[]} nodes
+ * @property {Object<string, any>} sub
+ * @property {Object<string, any>} ext
  */
 
 /**
  * Assemble a scene(Node) with hierarchy data
  * @template {Node} T
  * @param {T} scn
- * @param {NodeData} data
+ * @param {PackedSceneData} data
+ * @param {string} url
  */
-export function assemble_scene(scn, data) {
-    if (data.type === 'Scene') {
-        assemble_scene(scn, resource_map[data.filename]);
+export function assemble_scene(scn, data, url) {
+    /** @type {Object<string, Node>} */
+    const node_cache = {};
+
+    const nodes = data.nodes;
+    for (let i = 0; i < nodes.length; i++) {
+        const node_data = nodes[i];
+
+        // find parent if any
+        /** @type {Node} */
+        let parent = null;
+        if (i > 0) {
+            parent = node_cache[node_data.parent];
+            if (!parent) {
+                console.warn(`Parent path '${node_data.parent}' for node '${node_data.name}' has vanished when instancing: '${url}'`);
+            }
+        }
+
+        // inheritance
+        if (i === 0) {
+            scn.set_filename(url);
+            scn._load_data(node_data);
+            node_cache['.'] = scn;
+        }
+
+        // instanciate child nodes
+        if (i > 0) {
+            /** @type {Node} */
+            const node = new (node_class_map[node_data.type]);
+            parent.add_child(node);
+            node._load_data(node_data);
+            node_cache[node.name] = node;
+        }
     }
-
-    if (data.children) {
-        assemble_node(scn, data.children);
-    }
-
-    scn._load_data(data);
-
-    if (scn.data.filename.length === 0) {
-        scn.data.filename = '_scene_without_filename_';
-    }
-
     return scn;
 }
 
 /**
- * @template {Node} T
  * @param {NodeData | typeof Node} p_data
  */
 export function instanciate_scene(p_data) {
-    /** @type {NodeData} */
-    let data = null;
-    /** @type {typeof Node} */
-    let ctor = null;
-
-    if (typeof (p_data) === 'function') {
-        ctor = p_data;
-    } else {
-        data = p_data;
-    }
-
-    /** @type {T} */
-    let inst = null;
-
-    if (ctor) {
-        inst = /** @type {T} */(ctor.instance());
-        return inst;
-    }
-
-    // Let's see whether it is registered
-    const scene_class = has.call(scene_class_map, data.filename) ? scene_class_map[data.filename] : undefined;
-
-    if (scene_class) {
-        inst = /** @type {T} */(scene_class.instance());
-    } else {
-        // Scene data (converted from ".tscn")
-        const parent_scene = resource_map[data.filename];
-
-        if (parent_scene.type === 'Scene') {
-            inst = instanciate_scene(parent_scene);
-        } else {
-            inst = new (node_class_map[parent_scene.type])();
-
-            // Create child nodes of parent scene
-            assemble_node(inst, parent_scene.children);
-
-            // Load parent scene data
-            inst._load_data(parent_scene);
-        }
-    }
-
-    // Create child nodes
-    assemble_node(inst, data.children);
-
-    // Load override data from parent scene
-    inst._load_data(data);
-
-    if (inst.data.filename.length === 0) {
-        inst.data.filename = '_scene_without_filename_';
-    }
-
-    return inst;
-}
-
-/**
- * @template {Node} T
- * @param {T} node
- * @param {NodeData[]} children
- */
-function assemble_node(node, children) {
-    if (!children || children.length === 0) {
-        return;
-    }
-
-    let i, data, inst;
-    for (i = 0; i < children.length; i++) {
-        data = children[i];
-
-        // Override an existing node
-        const child = node.named_children.get(data.name);
-        if (child) {
-            child._load_data(data);
-            assemble_node(child, data.children);
-        }
-        // Insert new child node
-        else {
-            if (data.type === 'Scene') {
-                inst = instanciate_scene(data);
-            } else {
-                if (data._is_proxy_) {
-                    if (res_class_map.hasOwnProperty(data.prop_value.type)) {
-                        // @ts-ignore
-                        inst = new (res_class_map[data.prop_value.type])()._load_data(data.prop_value);
-                    } else {
-                        inst = data.prop_value;
-                    }
-                } else {
-                    inst = new (node_class_map[data.type])()._load_data(data);
-                }
-            }
-
-            if (data._is_proxy_) {
-                node[`set_${data.prop_key}`](inst);
-            } else {
-                node.add_child(inst);
-                assemble_node(inst, data.children);
-            }
-        }
-    }
 }

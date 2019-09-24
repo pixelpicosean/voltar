@@ -1,11 +1,13 @@
-import { res_procs } from 'engine/registry';
-import { TextureCache } from 'engine/utils/color';
-import Color from 'engine/core/color';
-import { Matrix, Vector2, Rectangle } from 'engine/core/math/math_funcs';
-import Texture from 'engine/scene/resources/textures/texture';
+import { res_class_map } from 'engine/registry';
+import { Vector2 } from 'engine/core/math/vector2';
+import { Rect2 } from 'engine/core/math/rect2';
+import { Transform2D } from 'engine/core/math/transform_2d';
+import { Color } from 'engine/core/color';
 
-import Shape2D from './shape_2d';
-import ConvexPolygonShape2D from './convex_polygon_shape_2d';
+import { Shape2D } from './shape_2d';
+import { ConvexPolygonShape2D } from './convex_polygon_shape_2d';
+import { ImageTexture } from './texture';
+
 
 class ShapeData {
     constructor() {
@@ -13,7 +15,7 @@ class ShapeData {
          * @type {Shape2D}
          */
         this.shape = null;
-        this.shape_transform = new Matrix();
+        this.shape_transform = new Transform2D();
         this.autotile_coord = new Vector2();
         this.one_way_collision = false;
         this.one_way_collision_margin = 1.0;
@@ -81,7 +83,7 @@ class AutotileData {
 class TileData {
     constructor() {
         this.offset = new Vector2();
-        this.region = new Rectangle();
+        this.region = new Rect2();
         /** @type {ShapeData[]} */
         this.shapes_data = [];
         this.occluder_offset = new Vector2();
@@ -128,7 +130,7 @@ export default class TileSet {
          */
         this.tile_map = [];
         /**
-         * @type {Texture}
+         * @type {ImageTexture}
          */
         this.texture = null;
     }
@@ -138,7 +140,7 @@ export default class TileSet {
             if (!data.tile_map[i]) continue;
             this.tile_map[i] = new TileData()._load_data(data.tile_map[i]);
         }
-        this.texture = TextureCache[data.texture] || Texture.WHITE;
+        this.texture = data.texture;
 
         return this;
     }
@@ -160,18 +162,4 @@ export default class TileSet {
         return this.tile_map[id];
     }
 }
-
-res_procs['TileSet'] = (key, data, resource_map) => {
-    let res = tile_set_map[key];
-
-    // Create tile set for each resource
-    if (!res) {
-        res = Object.freeze(new TileSet()._load_data(data));
-        tile_set_map[key] = res;
-    }
-
-    // Save tile set to global resource_map
-    resource_map[key] = res;
-
-    return res;
-}
+res_class_map['TileSet'] = TileSet

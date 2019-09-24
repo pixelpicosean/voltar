@@ -55,8 +55,7 @@ export class CollisionShape2D extends Node2D {
         super._load_data(p_data);
 
         if (p_data.shape !== undefined) {
-            // @ts-ignore
-            this.set_shape(new res_class_map[p_data.shape.type]()._load_data(p_data.shape));
+            this.set_shape(p_data.shape);
         }
         if (p_data.disabled !== undefined) {
             this._disabled = p_data.disabled;

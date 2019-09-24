@@ -7,32 +7,8 @@ import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server";
 import { Shape2D } from "./shape_2d";
 
 export class RectangleShape2D extends Shape2D {
-    get extents() {
-        return this._extents;
-    }
-    /**
-     * @param {Vector2} value
-     */
-    set extents(value) {
-        this._extents.copy(value);
-        this._update_shape();
-    }
-    /**
-     * @param {Vector2Like|number} x
-     * @param {Vector2Like|number} [y]
-     * @returns {this}
-     */
-    set_extents(x, y = undefined) {
-        if (y === undefined) {
-            // @ts-ignore
-            this._extents.copy(x);
-        } else {
-            // @ts-ignore
-            this._extents.set(x, y);
-        }
-        this._update_shape();
-        return this;
-    }
+    get extents() { return this._extents }
+    set extents(value) { this.set_extents_n(value.x, value.y) }
 
     constructor() {
         super(Physics2DServer.get_singleton().rectangle_shape_create());
@@ -40,11 +16,31 @@ export class RectangleShape2D extends Shape2D {
         this._extents = new Vector2(10, 10);
         this._update_shape();
     }
+
+    /* virtual */
+
     _load_data(p_data) {
         if (p_data.extents !== undefined) {
             this.set_extents(p_data.extents);
         }
         return this;
+    }
+
+    /* public */
+
+    /**
+     * @param {Vector2Like} extents
+     */
+    set_extents(extents) {
+        this.set_extents_n(extents.x, extents.y);
+    }
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
+    set_extents_n(x, y) {
+        this._extents.set(x, y);
+        this._update_shape();
     }
 
     /**
@@ -58,6 +54,9 @@ export class RectangleShape2D extends Shape2D {
         p_rect.height = this._extents.height * 2;
         return p_rect;
     }
+
+    /* private */
+
     _update_shape() {
         this.shape.set_data(this._extents);
     }

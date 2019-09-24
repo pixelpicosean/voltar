@@ -16,19 +16,6 @@ export const node_class_map = {};
 export const res_class_map = {};
 
 /**
- * @type {Object<string, (key: string, data: any, resource_map: Object<string, any>) => any>}
- */
-export const res_procs = {};
-
-/**
- * Plugins to be used in Node2D class
- * @type {Object<string, any>}
- */
-export const node_plugins = {
-    TweenManager: null,
-};
-
-/**
  * @typedef PackedScene
  * @property {() => import('engine/scene/main/node').Node} instance
  */

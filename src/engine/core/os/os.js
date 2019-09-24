@@ -128,7 +128,7 @@ export class OS {
         }
         const options = {
             alpha: false,
-            antialias: false,
+            antialias: false, // let's use FXAA instead
             depth: true,
             powerPreference: 'default',
             premultipliedAlpha: false,

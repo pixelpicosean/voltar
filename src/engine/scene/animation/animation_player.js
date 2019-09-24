@@ -12,14 +12,26 @@ import {
 } from "engine/scene/main/node";
 
 import {
-    Animation,
-    TrackType,
-    UpdateMode,
     Key,
     ValueTrack,
-    InterpolationType,
-    PropType,
     MethodTrack,
+    Animation,
+    PROP_TYPE_NUMBER,
+    PROP_TYPE_BOOLEAN,
+    PROP_TYPE_STRING,
+    PROP_TYPE_VECTOR,
+    PROP_TYPE_COLOR,
+    PROP_TYPE_ANY,
+    INTERPOLATION_NEAREST,
+    INTERPOLATION_LINEAR,
+    INTERPOLATION_CUBIC,
+    TRACK_TYPE_BEZIER,
+    TRACK_TYPE_ANIMATION,
+    TRACK_TYPE_METHOD,
+    TRACK_TYPE_VALUE,
+    UPDATE_CONTINUOUS,
+    UPDATE_CAPTURE,
+    UPDATE_DISCRETE,
 } from './animation';
 
 
@@ -138,35 +150,35 @@ function anim_prop(path) {
 }
 /**
  * @param {Node} node
- * @param {PropType} type
+ * @param {number} type
  * @param {string} key
  * @param {any} value
  */
 function apply_immediate_value(node, type, key, value) {
     switch (type) {
-        case PropType.NUMBER:
-        case PropType.BOOLEAN:
-        case PropType.STRING: {
+        case PROP_TYPE_NUMBER:
+        case PROP_TYPE_BOOLEAN:
+        case PROP_TYPE_STRING: {
             node[key] = value;
         } break;
-        case PropType.VECTOR: {
+        case PROP_TYPE_VECTOR: {
             node[key].x = value.x;
             node[key].y = value.y;
         } break;
-        case PropType.COLOR: {
+        case PROP_TYPE_COLOR: {
             node[key].r = value.r;
             node[key].g = value.g;
             node[key].b = value.b;
             node[key].a = value.a;
         } break;
-        case PropType.ANY: {
+        case PROP_TYPE_ANY: {
             node._set_value(key, value);
         } break;
     }
 }
 /**
  * @param {Node} node
- * @param {PropType} type
+ * @param {number} type
  * @param {string} key
  * @param {any} value_a
  * @param {any} value_b
@@ -174,27 +186,27 @@ function apply_immediate_value(node, type, key, value) {
  */
 function apply_interpolate_value(node, type, key, value_a, value_b, c) {
     switch (type) {
-        case PropType.NUMBER: {
+        case PROP_TYPE_NUMBER: {
             node[key] = interpolate_number(value_a, value_b, c);
         } break;
-        case PropType.BOOLEAN: {
+        case PROP_TYPE_BOOLEAN: {
             node[key] = value_a;
         } break;
-        case PropType.STRING: {
+        case PROP_TYPE_STRING: {
             // TODO: animating a text?
             node[key] = value_a;
         } break;
-        case PropType.VECTOR: {
+        case PROP_TYPE_VECTOR: {
             node[key].x = interpolate_number(value_a.x, value_b.x, c);
             node[key].y = interpolate_number(value_a.y, value_b.y, c);
         } break;
-        case PropType.COLOR: {
+        case PROP_TYPE_COLOR: {
             node[key].r = interpolate_number(value_a.r, value_b.r, c);
             node[key].g = interpolate_number(value_a.g, value_b.g, c);
             node[key].b = interpolate_number(value_a.b, value_b.b, c);
             node[key].a = interpolate_number(value_a.a, value_b.a, c);
         } break;
-        case PropType.ANY: {
+        case PROP_TYPE_ANY: {
             node._set_lerp_value(key, value_a, value_b, c);
         } break;
     }
@@ -309,14 +321,14 @@ function interpolate_track_on_node(node, anim, track, time, interp, loop_wrap) {
     }
 
     switch (interp) {
-        case InterpolationType.INTERPOLATION_NEAREST: {
+        case INTERPOLATION_NEAREST: {
             apply_immediate_value(node, track.prop_type, track.prop_key, keys[idx].value);
         }
-        case InterpolationType.INTERPOLATION_LINEAR: {
+        case INTERPOLATION_LINEAR: {
             // console.log(`key<${track.prop_key}>[${idx} -> ${next}]: factor=${c}`)
             apply_interpolate_value(node, track.prop_type, track.prop_key, keys[idx].value, keys[next].value, c);
         }
-        case InterpolationType.INTERPOLATION_CUBIC: {
+        case INTERPOLATION_CUBIC: {
             // let pre = idx - 1;
             // if (pre < 0) {
             //     pre = 0;
@@ -525,7 +537,7 @@ export class AnimationPlayer extends Node {
 
         if (data.anims !== undefined) {
             for (let key in data.anims) {
-                this.add_animation(key, new Animation().load(data.anims[key]));
+                this.add_animation(key, data.anims[key]);
             }
         }
 
@@ -1048,17 +1060,17 @@ export class AnimationPlayer extends Node {
             }
 
             switch (track.type) {
-                case TrackType.TYPE_VALUE: {
+                case TRACK_TYPE_VALUE: {
                     const t = /** @type {ValueTrack} */(track);
                     const update_mode = t.update_mode;
 
-                    if (update_mode === UpdateMode.UPDATE_CONTINUOUS || update_mode === UpdateMode.UPDATE_CAPTURE || (equals(p_delta, 0) && update_mode === UpdateMode.UPDATE_DISCRETE)) { // delta == 0 means seek
-                        interpolate_track_on_node(node, a, t, p_time, update_mode === UpdateMode.UPDATE_CONTINUOUS ? t.interp : InterpolationType.INTERPOLATION_NEAREST, t.loop_wrap);
+                    if (update_mode === UPDATE_CONTINUOUS || update_mode === UPDATE_CAPTURE || (equals(p_delta, 0) && update_mode === UPDATE_DISCRETE)) { // delta == 0 means seek
+                        interpolate_track_on_node(node, a, t, p_time, update_mode === UPDATE_CONTINUOUS ? t.interp : INTERPOLATION_NEAREST, t.loop_wrap);
                     } else if (is_current && !equals(p_delta, CMP_EPSILON)) {
                         immediate_track_on_node(node, a, t, p_time, t.loop_wrap);
                     }
                 } break;
-                case TrackType.TYPE_METHOD: {
+                case TRACK_TYPE_METHOD: {
                     if (p_seeked) break;
                     const t = /** @type {MethodTrack} */(track);
                     for (const k of t.methods) {
@@ -1077,9 +1089,9 @@ export class AnimationPlayer extends Node {
                         }
                     }
                 } break;
-                case TrackType.TYPE_BEZIER: {
+                case TRACK_TYPE_BEZIER: {
                 } break;
-                case TrackType.TYPE_ANIMATION: {
+                case TRACK_TYPE_ANIMATION: {
                     if (node.class !== 'AnimationPlayer') {
                         continue;
                     }

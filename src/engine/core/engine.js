@@ -1,11 +1,13 @@
 import { default_font_name } from 'engine/scene/resources/theme';
-import { preload_queue, resource_map, res_procs } from 'engine/registry';
+import { preload_queue, resource_map, res_class_map } from 'engine/registry';
 import { ResourceLoader } from './io/resource_loader';
 
 /**
  * @typedef {(percent: number) => any} ProgressCallback
  * @typedef {Function} CompleteCallback
  */
+
+const empty = Object.freeze(Object.create(null));
 
 export class Engine {
     static get_singleton() { return singleton }
@@ -67,15 +69,42 @@ export class Engine {
             preload_queue.is_complete = true;
             // Theme.set_default_font(registered_bitmap_fonts[default_font_name]);
 
-            // Process imported resources
-            const has = Object.prototype.hasOwnProperty;
-            const type_key = '@type#';
-            for (let k in resource_map) {
-                if (has.call(resource_map[k], type_key)) {
-                    resource_map[k] = res_procs[resource_map[k][type_key]](k, resource_map[k].data, resource_map);
+            // create real resources from data imported from Godot
+            const res_head = 'res://';
+            for (const key in resource_map) {
+                const res = resource_map[key];
+                if (key.startsWith(res_head) && res.type) {
+                    const ctor = res_class_map[res.type];
+                    if (ctor) {
+                        resource_map[key] = (new ctor)._load_data(res);
+                    }
                 }
             }
-            resource_map;
+
+            for (const key in resource_map) {
+                const res = resource_map[key];
+                if (key.startsWith(res_head)) {
+                    // PackedScene, which has `ext` and `sub`
+                    if (res.ext && res.sub) {
+                        // create instance of sub resources
+                        for (let id in res.sub) {
+                            const data = res.sub[id];
+                            const ctor = res_class_map[data.type];
+                            if (ctor) {
+                                res.sub[id] = (new ctor)._load_data(data);
+                            }
+                        }
+
+                        // normalize ext
+                        for (let id in res.ext) {
+                            res.ext[id] = resource_map[res.ext[id]];
+                        }
+
+                        // now let's replace ext/sub references inside this resource with real instances
+                        normalize_resource_array(res.nodes, res.ext, res.sub);
+                    }
+                }
+            }
 
             complete_callback && complete_callback();
         });
@@ -84,3 +113,54 @@ export class Engine {
 
 /** @type {Engine} */
 let singleton = null;
+
+
+const sub_head = '@sub#'; const sub_offset = sub_head.length;
+const ext_head = '@ext#'; const ext_offset = ext_head.length;
+/**
+ * @param {string} key
+ * @param {any} ext
+ * @param {any} sub
+ */
+function normalize_res(key, ext, sub) {
+    if (key.startsWith(sub_head)) {
+        return sub[key.substr(sub_offset)];
+    } else if (key.startsWith(ext_head)) {
+        return ext[key.substr(ext_offset)];
+    }
+    return key;
+}
+/**
+ * @param {any} obj
+ * @param {any} ext
+ * @param {any} sub
+ */
+function normalize_resource_object(obj, ext, sub) {
+    for (const k in obj) {
+        const value = obj[k];
+        if (typeof (value) === 'string') {
+            obj[k] = normalize_res(value, ext, sub);
+        } else if (typeof (value) === 'object') {
+            if (Array.isArray(value)) {
+                normalize_resource_array(value, ext, sub);
+            } else {
+                normalize_resource_object(value, ext, sub);
+            }
+        }
+    }
+}
+/**
+ * @param {any[]} arr
+ * @param {any} ext
+ * @param {any} sub
+ */
+function normalize_resource_array(arr, ext, sub) {
+    for (let i = 0; i < arr.length; i++) {
+        const value = arr[i];
+        if (typeof (value) === 'string') {
+            arr[i] = normalize_res(value, ext, sub);
+        } else if (typeof (value) === 'object') {
+            normalize_resource_object(value, ext, sub);
+        }
+    }
+}

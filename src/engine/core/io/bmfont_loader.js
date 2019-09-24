@@ -1,6 +1,7 @@
 import Resource from 'engine/core/io/io_resource';
 import Texture from 'engine/drivers/textures/Texture';
 import { register_font } from 'engine/scene/resources/font';
+import { resource_map } from 'engine/registry';
 
 
 /**
@@ -25,7 +26,11 @@ function dirname(url) {
  * @param {Object<string, Texture>|Texture|Texture[]} textures - Reference to texture.
  */
 export function parse(resource, textures) {
-    resource.internal = register_font(resource.data, textures);
+    const font = register_font(resource.data, textures);
+    resource.internal = font;
+
+    // add to global resource map
+    resource_map[font.name] = font;
 }
 
 export function bmfont_loader(/** @type {Resource} */ resource, /** @type {Function} */ next) {

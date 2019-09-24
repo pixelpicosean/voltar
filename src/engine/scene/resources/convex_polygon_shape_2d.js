@@ -1,5 +1,5 @@
 import { res_class_map } from "engine/registry";
-import { Vector2 } from "engine/core/math/vector2";
+import { Vector2, Vector2Like } from "engine/core/math/vector2";
 import { Rect2 } from "engine/core/math/rect2";
 import {
     is_polygon_clockwise,
@@ -12,23 +12,8 @@ import { Shape2D } from "./shape_2d";
 
 
 export class ConvexPolygonShape2D extends Shape2D {
-    get points() {
-        return this._points;
-    }
-    /**
-     * @param {Vector2[]} p_points
-     */
-    set points(p_points) {
-        this._points = p_points;
-        this._update_shape();
-    }
-    /**
-     * @param {Vector2[]} p_points
-     */
-    set_points(p_points) {
-        this.points = p_points;
-        return this;
-    }
+    get points() { return this._points }
+    set points(p_points) { this.set_points(p_points) }
 
     constructor() {
         super(Physics2DServer.get_singleton().convex_polygon_shape_create());
@@ -39,9 +24,30 @@ export class ConvexPolygonShape2D extends Shape2D {
         this._points = [];
         const pcount = 3;
         for (let i = pcount - 1; i >= 0; i--) {
-            this._points.push(new Vector2(Math.sin(i * Math.PI * 2 / pcount), -Math.cos(i * Math.PI * 2 / pcount)).scale(10));
+            this._points.push(Vector2.new(Math.sin(i * Math.PI * 2 / pcount), -Math.cos(i * Math.PI * 2 / pcount)).scale(10));
         }
 
+        this._update_shape();
+    }
+
+    /* public */
+
+    /**
+     * @param {Vector2Like[]} p_points
+     */
+    set_points(p_points) {
+        if (this._points.length > p_points.length) {
+            for (let i = 0; i < this._points.length - p_points.length; i++) {
+                Vector2.free(this._points.pop());
+            }
+        } else if (this._points.length < p_points.length) {
+            for (let i = 0; i < p_points.length - this._points.length; i++) {
+                this._points.push(Vector2.new());
+            }
+        }
+        for (let i = 0; i < p_points.length; i++) {
+            this._points[i].copy(p_points[i]);
+        }
         this._update_shape();
     }
 
@@ -60,14 +66,6 @@ export class ConvexPolygonShape2D extends Shape2D {
             }
         }
         return p_rect;
-    }
-    _update_shape() {
-        let final_points = this._points;
-        // needs to be counter clockwise
-        if (is_polygon_clockwise(final_points)) {
-            final_points = final_points.reverse();
-        }
-        this.shape.set_data(final_points);
     }
 
     /**
@@ -94,6 +92,17 @@ export class ConvexPolygonShape2D extends Shape2D {
         const hull = convex_hull_2d(p_points);
         this.points = hull;
         return this;
+    }
+
+    /* private */
+
+    _update_shape() {
+        let final_points = this._points;
+        // needs to be counter clockwise
+        if (is_polygon_clockwise(final_points)) {
+            final_points = final_points.reverse();
+        }
+        this.shape.set_data(final_points);
     }
 }
 res_class_map['ConvexPolygonShape2D'] = ConvexPolygonShape2D

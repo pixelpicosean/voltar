@@ -151,7 +151,7 @@ export class Label extends Control {
             this.set_visible_characters(data.visible_characters);
         }
         if (data.font) {
-            this.add_font_override('font', registered_bitmap_fonts[data.font]);
+            this.add_font_override('font', data.font);
         }
         if (data.custom_colors) {
             for (let k in data.custom_colors) {
