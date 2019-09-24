@@ -1,103 +1,172 @@
 {
-    "res://scene/demo.tscn": {
-        "@type#": "PackedScene",
-        "data": {
-            "type": "Node",
-            "name": "demo",
-            "children": [
-                {
-                    "type": "Sprite",
-                    "name": "icon-1",
-                    "position": {
-                        "x": 256.221,
-                        "y": 320.28
-                    },
-                    "rotation": -0.124678,
-                    "texture": "@ext#1",
-                    "children": []
-                },
-                {
-                    "type": "Sprite",
-                    "name": "icon-2",
-                    "position": {
-                        "x": 541.093,
-                        "y": 529.452
-                    },
-                    "texture": "@ext#2",
-                    "children": []
-                },
-                {
-                    "type": "NinePatchRect",
-                    "name": "NinePatchRect",
-                    "margin_bottom": 123,
-                    "margin_left": 145,
-                    "margin_top": 7,
-                    "margin_right": 685,
-                    "texture": "@ext#3",
-                    "patch_margin_bottom": 12,
-                    "patch_margin_left": 8,
-                    "patch_margin_top": 8,
-                    "patch_margin_right": 8,
-                    "children": []
-                },
-                {
-                    "type": "Label",
-                    "name": "Label",
-                    "margin_bottom": 112.299,
-                    "margin_left": 167.342,
-                    "margin_top": 13.2987,
-                    "margin_right": 668.342,
-                    "align": 1,
-                    "text": "Hi, I'm Voltar.\nNice to meet you :)",
-                    "valign": 1,
-                    "font": "@ext#4",
-                    "custom_colors": {
-                        "font_color": {
-                            "r": 0.662745,
-                            "g": 0.305882,
-                            "b": 0.74902,
-                            "a": 1
-                        }
-                    },
-                    "children": []
-                },
-                {
-                    "type": "CenterContainer",
-                    "name": "CenterContainer",
-                    "anchor_bottom": 1,
-                    "anchor_right": 1,
-                    "children": [
-                        {
-                            "type": "ColorRect",
-                            "name": "color_rect",
-                            "margin_bottom": 350,
-                            "margin_left": 350,
-                            "margin_top": 250,
-                            "margin_right": 450,
-                            "rect_min_size": {
-                                "x": 100,
-                                "y": 100
-                            },
-                            "color": {
-                                "r": 0,
-                                "g": 1,
-                                "b": 1,
-                                "a": 1
-                            },
-                            "children": []
-                        }
-                    ]
-                }
-            ],
-            "__meta__": {
-                "ext": {
-                    "1": "icon-1",
-                    "2": "icon-2",
-                    "3": "blue_button06",
-                    "4": "mini"
-                },
-                "sub": {}
-            }
+    "res://scene/new_rectangleshape2d.tres": {
+        "type": "RectangleShape2D",
+        "extents": {
+            "x": 20,
+            "y": 32
         }
+    },
+    "res://scene/demo.tscn": {
+        "type": "PackedScene",
+        "ext": {
+            "1": "blue_button06",
+            "2": "mini",
+            "3": "res://scene/new_rectangleshape2d.tres"
+        },
+        "sub": {
+            "1": {
+                "type": "Animation",
+                "name": "anim",
+                "loop": true,
+                "tracks": [
+                    {
+                        "type": "value",
+                        "path": "sprite:rotation",
+                        "interp": 1,
+                        "loop_wrap": true,
+                        "enabled": true,
+                        "keys": {
+                            "times": [
+                                0,
+                                1
+                            ],
+                            "transitions": [
+                                1,
+                                1
+                            ],
+                            "update": 0,
+                            "values": [
+                                0,
+                                6.283185307179586
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        "nodes": [
+            {
+                "type": "Node",
+                "name": "demo"
+            },
+            {
+                "type": "NinePatchRect",
+                "name": "NinePatchRect",
+                "parent": ".",
+                "margin_bottom": 123,
+                "margin_left": 145,
+                "margin_top": 7,
+                "margin_right": 685,
+                "texture": "@ext#1",
+                "region_rect": {
+                    "x": 0,
+                    "y": 0,
+                    "width": 49,
+                    "height": 49
+                },
+                "patch_margin_bottom": 12,
+                "patch_margin_left": 8,
+                "patch_margin_top": 8,
+                "patch_margin_right": 8
+            },
+            {
+                "type": "Label",
+                "name": "Label",
+                "parent": ".",
+                "margin_bottom": 112.299,
+                "margin_left": 167.342,
+                "margin_top": 13.2987,
+                "margin_right": 668.342,
+                "align": 1,
+                "text": "Hi, I'm Voltar.\nNice to meet you :)",
+                "valign": 1,
+                "font": "@ext#2",
+                "custom_colors": {
+                    "font_color": {
+                        "r": 0.662745,
+                        "g": 0.305882,
+                        "b": 0.74902,
+                        "a": 1
+                    }
+                }
+            },
+            {
+                "type": "CenterContainer",
+                "name": "CenterContainer",
+                "parent": ".",
+                "anchor_bottom": 1,
+                "anchor_right": 1
+            },
+            {
+                "type": "ColorRect",
+                "name": "color_rect",
+                "parent": "CenterContainer",
+                "margin_bottom": 350,
+                "margin_left": 350,
+                "margin_top": 250,
+                "margin_right": 450,
+                "rect_min_size": {
+                    "x": 100,
+                    "y": 100
+                },
+                "color": {
+                    "r": 0,
+                    "g": 1,
+                    "b": 1,
+                    "a": 1
+                }
+            },
+            {
+                "type": "TextureButton",
+                "name": "texture_button",
+                "parent": ".",
+                "margin_bottom": 575.19,
+                "margin_left": 376.255,
+                "margin_top": 526.19,
+                "margin_right": 425.255,
+                "texture_normal": "@ext#1"
+            },
+            {
+                "type": "TextureProgress",
+                "name": "texture_progress",
+                "parent": ".",
+                "margin_bottom": 505,
+                "margin_left": 273,
+                "margin_top": 456,
+                "margin_right": 530,
+                "value": 50,
+                "texture_progress": "@ext#1",
+                "nine_patch_stretch": true,
+                "stretch_margin_bottom": 12,
+                "stretch_margin_left": 12,
+                "stretch_margin_top": 12,
+                "stretch_margin_right": 12
+            },
+            {
+                "type": "AnimationPlayer",
+                "name": "animation_player",
+                "parent": ".",
+                "autoplay": "anim",
+                "anims": {
+                    "anim": "@sub#1"
+                }
+            },
+            {
+                "type": "Sprite",
+                "name": "sprite",
+                "parent": ".",
+                "position": {
+                    "x": 483.329,
+                    "y": 479.56
+                },
+                "texture": "@ext#1"
+            },
+            {
+                "type": "CollisionShape2D",
+                "name": "collision_shape_2d",
+                "parent": ".",
+                "shape": "@ext#3"
+            }
+        ]
     }
 }
