@@ -124,6 +124,20 @@ export class Color {
         return this;
     }
 
+    /**
+     * return new Color
+     * @param {ColorLike} p_b
+     * @param {number} p_t
+     */
+    linear_interpolate(p_b, p_t) {
+        const res = Color.new();
+        res.r += (p_t * (p_b.r - this.r));
+        res.g += (p_t * (p_b.g - this.g));
+        res.b += (p_t * (p_b.b - this.b));
+        res.a += (p_t * (p_b.a - this.a));
+        return res;
+    }
+
     as_hex() {
         return rgb2hex(this._rgb);
     }
