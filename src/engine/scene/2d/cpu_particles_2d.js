@@ -1,4 +1,4 @@
-import { node_class_map } from 'engine/registry';
+import { node_class_map, resource_map } from 'engine/registry';
 import { GDCLASS } from 'engine/core/v_object';
 import { Vector2 } from 'engine/core/math/vector2';
 import { Transform2D } from 'engine/core/math/transform_2d';
@@ -11,9 +11,20 @@ import {
 } from 'engine/core/math/math_funcs';
 import { Math_PI } from 'engine/core/math/math_defs';
 import { BLEND_MODES } from 'engine/drivers/constants';
+import { CommandRect } from 'engine/servers/visual/commands';
 
+import {
+    NOTIFICATION_ENTER_TREE,
+    NOTIFICATION_EXIT_TREE,
+    NOTIFICATION_INTERNAL_PROCESS,
+} from '../main/node';
+import { ImageTexture } from '../resources/texture';
 import { Curve } from '../resources/curve';
+import { Gradient } from '../resources/gradient';
+import { NOTIFICATION_DRAW, NOTIFICATION_TRANSFORM_CHANGED } from './canvas_item';
 import { Node2D } from './node_2d';
+import { VisualServer } from 'engine/servers/visual_server';
+import { VSG } from 'engine/servers/visual/visual_server_globals';
 
 
 const Math_PI2 = Math_PI * 2;
@@ -23,51 +34,33 @@ const Math_PI2 = Math_PI * 2;
  */
 const validate_frac = (value) => (value < 0) ? 0 : ((value > 1) ? 1 : value);
 
-/**
- * @enum {number}
- */
-const DrawOrder = {
-    INDEX: 0,
-    LIFETIME: 1,
-};
+export const DRAW_ORDER_INDEX = 0;
+export const DRAW_ORDER_LIFETIME = 1;
 
-/**
- * @enum {number}
- */
-const Parameter = {
-    INITIAL_LINEAR_VELOCITY: 0,
-    ANGULAR_VELOCITY: 1,
-    ORBIT_VELOCITY: 2,
-    LINEAR_ACCEL: 3,
-    RADIAL_ACCEL: 4,
-    TANGENTIAL_ACCEL: 5,
-    DAMPING: 6,
-    ANGLE: 7,
-    SCALE: 8,
-    HUE_VARIATION: 9,
-    ANIM_SPEED: 10,
-    ANIM_OFFSET: 11,
-    MAX: 12,
-};
+export const PARAM_INITIAL_LINEAR_VELOCITY = 0;
+export const PARAM_ANGULAR_VELOCITY = 1;
+export const PARAM_ORBIT_VELOCITY = 2;
+export const PARAM_LINEAR_ACCEL = 3;
+export const PARAM_RADIAL_ACCEL = 4;
+export const PARAM_TANGENTIAL_ACCEL = 5;
+export const PARAM_DAMPING = 6;
+export const PARAM_ANGLE = 7;
+export const PARAM_SCALE = 8;
+export const PARAM_HUE_VARIATION = 9;
+export const PARAM_ANIM_SPEED = 10;
+export const PARAM_ANIM_OFFSET = 11;
+export const PARAM_MAX = 12;
 
-/**
- * @enum {number}
- */
-const Flags = {
-    ALIGN_Y_TO_VELOCITY: 0,
-    MAX: 1,
-};
+export const FLAG_ALIGN_Y_TO_VELOCITY = 0;
+export const FLAG_ROTATE_Y = 1;
+export const FLAG_DISABLE_Z = 2;
+export const FLAG_MAX = 3;
 
-/**
- * @enum {number}
- */
-const EmissionShape = {
-    POINT: 0,
-    SPHERE: 1,
-    RECTANGLE: 2,
-    POINTS: 3,
-    DIRECTED_POINTS: 4,
-};
+export const EMISSION_SHAPE_POINT = 0;
+export const EMISSION_SHAPE_SPHERE = 1;
+export const EMISSION_SHAPE_RECTANGLE = 2;
+export const EMISSION_SHAPE_POINTS = 3;
+export const EMISSION_SHAPE_DIRECTED_POINTS = 4;
 
 class Particle {
     constructor() {
@@ -82,11 +75,12 @@ class Particle {
         this.hue_rot_rand = 0;
         this.anim_offset_rand = 0;
         this.time = 0;
+        this.lifetime = 0;
         this.base_color = new Color(1, 1, 1, 1);
 
         this.seed = 0;
 
-        this.sprite = new Sprite();
+        this.command = new CommandRect();
     }
     static new() {
         const p = ParticlePool.pop();
@@ -112,13 +106,10 @@ const mat3 = basis(0.168, 0.330, -0.497, -0.328, 0.035, 0.292, 1.250, -1.050, -0
 
 const hue_rot_mat = basis();
 
-export default class CPUParticles2D extends Node2D {
-    /**
-     * @type {number}
-     */
-    get amount() {
-        return this._amount;
-    }
+export class CPUParticles2D extends Node2D {
+    get class() { return 'CPUParticles2D' }
+
+    get amount() { return this._amount }
     set amount(value) {
         const len = this.particles.length;
         if (len > value) {
@@ -137,164 +128,154 @@ export default class CPUParticles2D extends Node2D {
         }
     }
 
-    /**
-     * @type {Texture}
-     */
-    get texture() {
-        return this._texture;
-    }
-    set texture(value) {
-        if (typeof (value) === 'string') {
-            this._texture = TextureCache[value];
-        } else {
-            this._texture = value;
-        }
-        if (!this._texture) {
-            this._texture = Texture.WHITE;
-        }
+    get texture() { return this._texture }
+    set texture(p_texture) {
+        /** @type {ImageTexture} */
+        const texture = (typeof (p_texture) === 'string') ? resource_map[p_texture] : p_texture;
+        this._texture = texture;
     }
 
     get angle() {
-        return this.parameters[Parameter.ANGLE];
+        return this.parameters[PARAM_ANGLE];
     }
     set angle(value) {
-        this.parameters[Parameter.ANGLE] = value;
+        this.parameters[PARAM_ANGLE] = value;
     }
     get angle_random() {
-        return this.randomness[Parameter.ANGLE];
+        return this.randomness[PARAM_ANGLE];
     }
     set angle_random(value) {
-        this.randomness[Parameter.ANGLE] = value;
+        this.randomness[PARAM_ANGLE] = value;
     }
 
     get angular_velocity() {
-        return this.parameters[Parameter.ANGULAR_VELOCITY];
+        return this.parameters[PARAM_ANGULAR_VELOCITY];
     }
     set angular_velocity(value) {
-        this.parameters[Parameter.ANGULAR_VELOCITY] = value;
+        this.parameters[PARAM_ANGULAR_VELOCITY] = value;
     }
     get angular_velocity_random() {
-        return this.randomness[Parameter.ANGULAR_VELOCITY];
+        return this.randomness[PARAM_ANGULAR_VELOCITY];
     }
     set angular_velocity_random(value) {
-        this.randomness[Parameter.ANGULAR_VELOCITY] = value;
+        this.randomness[PARAM_ANGULAR_VELOCITY] = value;
     }
 
     get anim_offset() {
-        return this.parameters[Parameter.ANIM_OFFSET];
+        return this.parameters[PARAM_ANIM_OFFSET];
     }
     set anim_offset(value) {
-        this.parameters[Parameter.ANIM_OFFSET] = value;
+        this.parameters[PARAM_ANIM_OFFSET] = value;
     }
     get anim_offset_random() {
-        return this.randomness[Parameter.ANIM_OFFSET];
+        return this.randomness[PARAM_ANIM_OFFSET];
     }
     set anim_offset_random(value) {
-        this.randomness[Parameter.ANIM_OFFSET] = value;
+        this.randomness[PARAM_ANIM_OFFSET] = value;
     }
 
     get anim_speed() {
-        return this.parameters[Parameter.ANIM_SPEED];
+        return this.parameters[PARAM_ANIM_SPEED];
     }
     set anim_speed(value) {
-        this.parameters[Parameter.ANIM_SPEED] = value;
+        this.parameters[PARAM_ANIM_SPEED] = value;
     }
     get anim_speed_random() {
-        return this.randomness[Parameter.ANIM_SPEED];
+        return this.randomness[PARAM_ANIM_SPEED];
     }
     set anim_speed_random(value) {
-        this.randomness[Parameter.ANIM_SPEED] = value;
+        this.randomness[PARAM_ANIM_SPEED] = value;
     }
 
     get damping() {
-        return this.parameters[Parameter.DAMPING];
+        return this.parameters[PARAM_DAMPING];
     }
     set damping(value) {
-        this.parameters[Parameter.DAMPING] = value;
+        this.parameters[PARAM_DAMPING] = value;
     }
     get damping_random() {
-        return this.randomness[Parameter.DAMPING];
+        return this.randomness[PARAM_DAMPING];
     }
     set damping_random(value) {
-        this.randomness[Parameter.DAMPING] = value;
+        this.randomness[PARAM_DAMPING] = value;
     }
 
     get hue_variation() {
-        return this.parameters[Parameter.HUE_VARIATION];
+        return this.parameters[PARAM_HUE_VARIATION];
     }
     set hue_variation(value) {
-        this.parameters[Parameter.HUE_VARIATION] = value;
+        this.parameters[PARAM_HUE_VARIATION] = value;
     }
     get hue_variation_random() {
-        return this.randomness[Parameter.HUE_VARIATION];
+        return this.randomness[PARAM_HUE_VARIATION];
     }
     set hue_variation_random(value) {
-        this.randomness[Parameter.HUE_VARIATION] = value;
+        this.randomness[PARAM_HUE_VARIATION] = value;
     }
 
     get linear_accel() {
-        return this.parameters[Parameter.LINEAR_ACCEL];
+        return this.parameters[PARAM_LINEAR_ACCEL];
     }
     set linear_accel(value) {
-        this.parameters[Parameter.LINEAR_ACCEL] = value;
+        this.parameters[PARAM_LINEAR_ACCEL] = value;
     }
     get linear_accel_random() {
-        return this.randomness[Parameter.LINEAR_ACCEL];
+        return this.randomness[PARAM_LINEAR_ACCEL];
     }
     set linear_accel_random(value) {
-        this.randomness[Parameter.LINEAR_ACCEL] = value;
+        this.randomness[PARAM_LINEAR_ACCEL] = value;
     }
 
     get radial_accel() {
-        return this.parameters[Parameter.RADIAL_ACCEL];
+        return this.parameters[PARAM_RADIAL_ACCEL];
     }
     set radial_accel(value) {
-        this.parameters[Parameter.RADIAL_ACCEL] = value;
+        this.parameters[PARAM_RADIAL_ACCEL] = value;
     }
     get radial_accel_random() {
-        return this.randomness[Parameter.RADIAL_ACCEL];
+        return this.randomness[PARAM_RADIAL_ACCEL];
     }
     set radial_accel_random(value) {
-        this.randomness[Parameter.RADIAL_ACCEL] = value;
+        this.randomness[PARAM_RADIAL_ACCEL] = value;
     }
 
     get scale_amount() {
-        return this.parameters[Parameter.SCALE];
+        return this.parameters[PARAM_SCALE];
     }
     set scale_amount(value) {
-        this.parameters[Parameter.SCALE] = value;
+        this.parameters[PARAM_SCALE] = value;
     }
     get scale_amount_random() {
-        return this.randomness[Parameter.SCALE];
+        return this.randomness[PARAM_SCALE];
     }
     set scale_amount_random(value) {
-        this.randomness[Parameter.SCALE] = value;
+        this.randomness[PARAM_SCALE] = value;
     }
 
     get tangential_accel() {
-        return this.parameters[Parameter.TANGENTIAL_ACCEL];
+        return this.parameters[PARAM_TANGENTIAL_ACCEL];
     }
     set tangential_accel(value) {
-        this.parameters[Parameter.TANGENTIAL_ACCEL] = value;
+        this.parameters[PARAM_TANGENTIAL_ACCEL] = value;
     }
     get tangential_accel_random() {
-        return this.randomness[Parameter.TANGENTIAL_ACCEL];
+        return this.randomness[PARAM_TANGENTIAL_ACCEL];
     }
     set tangential_accel_random(value) {
-        this.randomness[Parameter.TANGENTIAL_ACCEL] = value;
+        this.randomness[PARAM_TANGENTIAL_ACCEL] = value;
     }
 
     get initial_velocity() {
-        return this.parameters[Parameter.INITIAL_LINEAR_VELOCITY];
+        return this.parameters[PARAM_INITIAL_LINEAR_VELOCITY];
     }
     set initial_velocity(value) {
-        this.parameters[Parameter.INITIAL_LINEAR_VELOCITY] = value;
+        this.parameters[PARAM_INITIAL_LINEAR_VELOCITY] = value;
     }
     get initial_velocity_random() {
-        return this.randomness[Parameter.INITIAL_LINEAR_VELOCITY];
+        return this.randomness[PARAM_INITIAL_LINEAR_VELOCITY];
     }
     set initial_velocity_random(value) {
-        this.randomness[Parameter.INITIAL_LINEAR_VELOCITY] = value;
+        this.randomness[PARAM_INITIAL_LINEAR_VELOCITY] = value;
     }
 
     constructor() {
@@ -316,17 +297,19 @@ export default class CPUParticles2D extends Node2D {
         this.explosiveness_ratio = 0;
 
         /** @type {number[]} */
-        this.parameters = new Array(Parameter.MAX);
+        this.parameters = new Array(PARAM_MAX);
         /** @type {Curve[]} */
-        this.curve_parameters = new Array(Parameter.MAX);
+        this.curve_parameters = new Array(PARAM_MAX);
         /** @type {number[]} */
-        this.randomness = new Array(Parameter.MAX);
+        this.randomness = new Array(PARAM_MAX);
         /** @type {boolean[]} */
-        this.flags = new Array(Flags.MAX);
+        this.flags = new Array(FLAG_MAX);
 
         this.color = new Color(1, 1, 1, 1);
+        /** @type {Gradient} */
         this.color_ramp = null;
 
+        /** @type {ImageTexture} */
         this._texture = null;
         this.normalmap = null;
 
@@ -337,8 +320,10 @@ export default class CPUParticles2D extends Node2D {
         /** @type {Vector2[]} */
         this.emission_points = [];
         this.emission_rect_extents = new Vector2(1, 1);
-        this.emission_shape = EmissionShape.POINT;
+        this.emission_shape = EMISSION_SHAPE_POINT;
         this.emission_sphere_radius = 1;
+
+        this.inv_emission_transform = new Transform2D();
 
         this.fixed_fps = 0;
 
@@ -369,12 +354,13 @@ export default class CPUParticles2D extends Node2D {
         /** @type {Curve} */
         this.tangential_accel_curve = null;
 
-        this.draw_order = DrawOrder.INDEX;
+        this.draw_order = DRAW_ORDER_INDEX;
 
         this.time = 0;
         this.inactive_time = 0;
         this.frame_remainder = 0;
         this.cycle = 0;
+        this.redraw = false;
 
         this.blend_mode = BLEND_MODES.NORMAL;
 
@@ -385,36 +371,42 @@ export default class CPUParticles2D extends Node2D {
         /**
          * @type {number[]}
          */
+        this.particle_data = [];
+        /**
+         * @type {number[]}
+         */
         this.particle_order = [];
 
         this.internal_process = true;
 
         // initialize
-        for (let i = 0; i < Parameter.MAX; i++) {
+        for (let i = 0; i < PARAM_MAX; i++) {
             this.parameters[i] = 0;
         }
-        for (let i = 0; i < Parameter.MAX; i++) {
+        for (let i = 0; i < PARAM_MAX; i++) {
             this.randomness[i] = 0;
         }
-        for (let i = 0; i < Flags.MAX; i++) {
+        for (let i = 0; i < FLAG_MAX; i++) {
             this.flags[i] = false;
         }
 
         this.amount = 8;
 
-        this.set_param(Parameter.INITIAL_LINEAR_VELOCITY, 1);
-        this.set_param(Parameter.ANGULAR_VELOCITY, 0);
-        this.set_param(Parameter.ORBIT_VELOCITY, 0);
-        this.set_param(Parameter.LINEAR_ACCEL, 0);
-        this.set_param(Parameter.RADIAL_ACCEL, 0);
-        this.set_param(Parameter.TANGENTIAL_ACCEL, 0);
-        this.set_param(Parameter.DAMPING, 0);
-        this.set_param(Parameter.ANGLE, 0);
-        this.set_param(Parameter.SCALE, 1);
-        this.set_param(Parameter.HUE_VARIATION, 0);
-        this.set_param(Parameter.ANIM_SPEED, 0);
-        this.set_param(Parameter.ANIM_OFFSET, 0);
+        this.set_param(PARAM_INITIAL_LINEAR_VELOCITY, 1);
+        this.set_param(PARAM_ANGULAR_VELOCITY, 0);
+        this.set_param(PARAM_ORBIT_VELOCITY, 0);
+        this.set_param(PARAM_LINEAR_ACCEL, 0);
+        this.set_param(PARAM_RADIAL_ACCEL, 0);
+        this.set_param(PARAM_TANGENTIAL_ACCEL, 0);
+        this.set_param(PARAM_DAMPING, 0);
+        this.set_param(PARAM_ANGLE, 0);
+        this.set_param(PARAM_SCALE, 1);
+        this.set_param(PARAM_HUE_VARIATION, 0);
+        this.set_param(PARAM_ANIM_SPEED, 0);
+        this.set_param(PARAM_ANIM_OFFSET, 0);
     }
+
+    /* virtual */
 
     _load_data(data) {
         super._load_data(data);
@@ -431,7 +423,7 @@ export default class CPUParticles2D extends Node2D {
         if (data.local_coords !== undefined) this.local_coords = data.local_coords;
         if (data.fixed_fps !== undefined) this.fixed_fps = data.fixed_fps;
         if (data.emitting !== undefined) this.emitting = data.emitting;
-        if (data.flag_align_y !== undefined) this.flags[Flags.ALIGN_Y_TO_VELOCITY] = data.flag_align_y;
+        if (data.flag_align_y !== undefined) this.flags[FLAG_ALIGN_Y_TO_VELOCITY] = data.flag_align_y;
         if (data.flatness !== undefined) this.flatness = data.flatness;
         if (data.fract_delta !== undefined) this.fract_delta = data.fract_delta;
         if (data.draw_order !== undefined) this.draw_order = data.draw_order;
@@ -448,23 +440,23 @@ export default class CPUParticles2D extends Node2D {
         if (data.initial_velocity_random !== undefined) this.initial_velocity_random = data.initial_velocity_random;
 
         if (data.angle !== undefined) this.angle = data.angle;
-        if (data.angle_curve !== undefined) this.set_param_curve(Parameter.ANGLE, new Curve().set_data(data.angle_curve.data));
+        if (data.angle_curve !== undefined) this.set_param_curve(PARAM_ANGLE, new Curve().set_data(data.angle_curve.data));
         if (data.angle_random !== undefined) this.angle_random = data.angle_random;
 
         if (data.angular_velocity !== undefined) this.angular_velocity = data.angular_velocity;
-        if (data.angular_velocity_curve !== undefined) this.set_param_curve(Parameter.ANGULAR_VELOCITY, new Curve().set_data(data.angular_velocity_curve.data));
+        if (data.angular_velocity_curve !== undefined) this.set_param_curve(PARAM_ANGULAR_VELOCITY, new Curve().set_data(data.angular_velocity_curve.data));
         if (data.angular_velocity_random !== undefined) this.angular_velocity_random = data.angular_velocity_random;
 
         if (data.anim_offset !== undefined) this.anim_offset = data.anim_offset;
-        if (data.anim_offset_curve !== undefined) this.set_param_curve(Parameter.ANIM_OFFSET, new Curve().set_data(data.anim_offset_curve.data));
+        if (data.anim_offset_curve !== undefined) this.set_param_curve(PARAM_ANIM_OFFSET, new Curve().set_data(data.anim_offset_curve.data));
         if (data.anim_offset_random !== undefined) this.anim_offset_random = data.anim_offset_random;
 
         if (data.anim_speed !== undefined) this.anim_speed = data.anim_speed;
-        if (data.anim_speed_curve !== undefined) this.set_param_curve(Parameter.ANIM_SPEED, new Curve().set_data(data.anim_speed_curve.data));
+        if (data.anim_speed_curve !== undefined) this.set_param_curve(PARAM_ANIM_SPEED, new Curve().set_data(data.anim_speed_curve.data));
         if (data.anim_speed_random !== undefined) this.anim_speed_random = data.anim_speed_random;
 
         if (data.damping !== undefined) this.damping = data.damping;
-        if (data.damping_curve !== undefined) this.set_param_curve(Parameter.DAMPING, new Curve().set_data(data.damping_curve.data));
+        if (data.damping_curve !== undefined) this.set_param_curve(PARAM_DAMPING, new Curve().set_data(data.damping_curve.data));
         if (data.damping_random !== undefined) this.damping_random = data.damping_random;
 
         // if (data.emission_colors !== undefined) this.emission_colors = data.emission_colors;
@@ -476,27 +468,125 @@ export default class CPUParticles2D extends Node2D {
         if (data.emission_sphere_radius !== undefined) this.emission_sphere_radius = data.emission_sphere_radius;
 
         if (data.hue_variation !== undefined) this.hue_variation = data.hue_variation;
-        if (data.hue_variation_curve !== undefined) this.set_param_curve(Parameter.HUE_VARIATION, new Curve().set_data(data.hue_variation_curve.data));
+        if (data.hue_variation_curve !== undefined) this.set_param_curve(PARAM_HUE_VARIATION, new Curve().set_data(data.hue_variation_curve.data));
         if (data.hue_variation_random !== undefined) this.hue_variation_random = data.hue_variation_random;
 
         if (data.linear_accel !== undefined) this.linear_accel = data.linear_accel;
-        if (data.linear_accel_curve !== undefined) this.set_param_curve(Parameter.LINEAR_ACCEL, new Curve().set_data(data.linear_accel_curve.data));
+        if (data.linear_accel_curve !== undefined) this.set_param_curve(PARAM_LINEAR_ACCEL, new Curve().set_data(data.linear_accel_curve.data));
         if (data.linear_accel_random !== undefined) this.linear_accel_random = data.linear_accel_random;
 
         if (data.radial_accel !== undefined) this.radial_accel = data.radial_accel;
-        if (data.radial_accel_curve !== undefined) this.set_param_curve(Parameter.RADIAL_ACCEL, new Curve().set_data(data.radial_accel_curve.data));
+        if (data.radial_accel_curve !== undefined) this.set_param_curve(PARAM_RADIAL_ACCEL, new Curve().set_data(data.radial_accel_curve.data));
         if (data.radial_accel_random !== undefined) this.radial_accel_random = data.radial_accel_random;
 
         if (data.scale_amount !== undefined) this.scale_amount = data.scale_amount;
-        if (data.scale_amount_curve !== undefined) this.set_param_curve(Parameter.SCALE, new Curve().set_data(data.scale_amount_curve.data));
+        if (data.scale_amount_curve !== undefined) this.set_param_curve(PARAM_SCALE, new Curve().set_data(data.scale_amount_curve.data));
         if (data.scale_amount_random !== undefined) this.scale_amount_random = data.scale_amount_random;
 
         if (data.tangential_accel !== undefined) this.tangential_accel = data.tangential_accel;
-        if (data.tangential_accel_curve !== undefined) this.set_param_curve(Parameter.TANGENTIAL_ACCEL, new Curve().set_data(data.tangential_accel_curve.data));
+        if (data.tangential_accel_curve !== undefined) this.set_param_curve(PARAM_TANGENTIAL_ACCEL, new Curve().set_data(data.tangential_accel_curve.data));
         if (data.tangential_accel_random !== undefined) this.tangential_accel_random = data.tangential_accel_random;
 
         return this;
     }
+
+    /**
+     * @param {number} p_what
+     */
+    _notification(p_what) {
+        if (p_what === NOTIFICATION_ENTER_TREE) {
+            this.set_process_internal(this.emitting);
+        }
+
+        if (p_what === NOTIFICATION_EXIT_TREE) {
+            this._set_redraw(false);
+        }
+
+        if (p_what === NOTIFICATION_DRAW) {
+            if (!this.redraw) {
+                return;
+            }
+        }
+
+        if (p_what === NOTIFICATION_INTERNAL_PROCESS) {
+            if (this.particles.length === 0 || !this.is_visible_in_tree()) {
+                this._set_redraw(false);
+                return;
+            }
+
+            const delta = this.get_process_delta_time();
+            if (this.emitting) {
+                this.inactive_time = 0;
+            } else {
+                this.inactive_time += delta;
+                if (this.inactive_time > this.lifetime * 1.2) {
+                    this.set_process_internal(false);
+                    this._set_redraw(false);
+
+                    // reset variables
+                    this.time = 0;
+                    this.inactive_time = 0;
+                    this.frame_remainder = 0;
+                    this.cycle = 0;
+                    return;
+                }
+            }
+            this._set_redraw(true);
+
+            if (this.time === 0 && this.preprocess > 0) {
+                let frame_time = 0;
+                if (this.fixed_fps > 0) {
+                    frame_time = 1 / this.fixed_fps;
+                } else {
+                    frame_time = 1 / 30;
+                }
+
+                let todo = this.preprocess;
+
+                while (todo >= 0) {
+                    this._particles_process(frame_time);
+                    todo -= frame_time;
+                }
+            }
+
+            if (this.fixed_fps > 0) {
+                let frame_time = 1 / this.fixed_fps;
+                let decr = frame_time;
+
+                let ldelta = delta;
+                if (ldelta > 0.1) {
+                    ldelta = 0.1;
+                } else if (ldelta <= 0) {
+                    ldelta = 0.001;
+                }
+                let todo = this.frame_remainder + ldelta;
+
+                while (todo >= frame_time) {
+                    this._particles_process(frame_time);
+                    todo -= decr;
+                }
+
+                this.frame_remainder = todo;
+            } else {
+                this._particles_process(delta);
+            }
+
+            this._update_particle_data_buffer();
+        }
+
+        if (p_what === NOTIFICATION_TRANSFORM_CHANGED) {
+            this.inv_emission_transform = this.get_global_transform().clone().affine_inverse();
+
+            if (!this.local_coords) {
+                const pc = this.particles.length;
+
+                for (let i = 0; i < pc; i++) {
+                }
+            }
+        }
+    }
+
+    /* public */
 
     restart() {
         this.time = 0;
@@ -510,28 +600,28 @@ export default class CPUParticles2D extends Node2D {
     }
 
     /**
-     * @param {Parameter} p_param
+     * @param {number} p_param
      * @param {number} p_value
      */
     set_param(p_param, p_value) {
         this.parameters[p_param] = p_value;
     }
     /**
-     * @param {Parameter} p_param
+     * @param {number} p_param
      */
     get_param(p_param) {
         return this.parameters[p_param];
     }
 
     /**
-     * @param {Parameter} p_param
+     * @param {number} p_param
      * @param {number} p_value
      */
     set_param_randomness(p_param, p_value) {
         this.randomness[p_param] = p_value;
     }
     /**
-     * @param {Parameter} p_param
+     * @param {number} p_param
      */
     get_param_randomness(p_param) {
         return this.randomness[p_param];
@@ -551,126 +641,55 @@ export default class CPUParticles2D extends Node2D {
     }
 
     /**
-     * @param {Parameter} p_param
+     * @param {number} p_param
      * @param {Curve} p_curve
      */
     set_param_curve(p_param, p_curve) {
         this.curve_parameters[p_param] = p_curve;
 
         switch (p_param) {
-            case Parameter.INITIAL_LINEAR_VELOCITY: {
+            case PARAM_INITIAL_LINEAR_VELOCITY: {
                 //do none for this one
             } break;
-            case Parameter.ANGULAR_VELOCITY: {
+            case PARAM_ANGULAR_VELOCITY: {
                 this._adjust_curve_range(p_curve, -360, 360);
             } break;
-            /*case Parameter.ORBIT_VELOCITY: {
+            /*case PARAM_ORBIT_VELOCITY: {
                 this._adjust_curve_range(p_curve, -500, 500);
             } break;*/
-            case Parameter.LINEAR_ACCEL: {
+            case PARAM_LINEAR_ACCEL: {
                 this._adjust_curve_range(p_curve, -200, 200);
             } break;
-            case Parameter.RADIAL_ACCEL: {
+            case PARAM_RADIAL_ACCEL: {
                 this._adjust_curve_range(p_curve, -200, 200);
             } break;
-            case Parameter.TANGENTIAL_ACCEL: {
+            case PARAM_TANGENTIAL_ACCEL: {
                 this._adjust_curve_range(p_curve, -200, 200);
             } break;
-            case Parameter.DAMPING: {
+            case PARAM_DAMPING: {
                 this._adjust_curve_range(p_curve, 0, 100);
             } break;
-            case Parameter.ANGLE: {
+            case PARAM_ANGLE: {
                 this._adjust_curve_range(p_curve, -360, 360);
             } break;
-            case Parameter.SCALE: {
+            case PARAM_SCALE: {
             } break;
-            case Parameter.HUE_VARIATION: {
+            case PARAM_HUE_VARIATION: {
                 this._adjust_curve_range(p_curve, -1, 1);
             } break;
-            case Parameter.ANIM_SPEED: {
+            case PARAM_ANIM_SPEED: {
                 this._adjust_curve_range(p_curve, 0, 200);
             } break;
-            case Parameter.ANIM_OFFSET: {
+            case PARAM_ANIM_OFFSET: {
             } break;
             default: { }
         }
     }
     /**
-     * @param {Parameter} p_param
+     * @param {number} p_param
      */
     get_param_curve(p_param) {
         return this.curve_parameters[p_param];
-    }
-
-    /**
-     * @param {number} delta
-     */
-    _propagate_process(delta) {
-        super._propagate_process(delta);
-
-        if (!this.internal_process) {
-            return;
-        }
-
-        if (this.particles.length === 0 || !this.world_visible) {
-            return;
-        }
-
-        if (this.emitting) {
-            this.inactive_time = 0;
-        } else {
-            this.inactive_time += delta;
-            if (this.inactive_time > this.lifetime * 1.2) {
-                this.internal_process = false;
-
-                // reset variables
-                this.time = 0;
-                this.inactive_time = 0;
-                this.frame_remainder = 0;
-                this.cycle = 0;
-                return;
-            }
-        }
-
-        if (this.time === 0 && this.preprocess > 0) {
-            let frame_time = 0;
-            if (this.fixed_fps > 0) {
-                frame_time += 1 / this.fixed_fps;
-            } else {
-                frame_time += 1 / 30;
-            }
-
-            let todo = this.preprocess;
-
-            while (todo >= 0) {
-                this._particles_process(frame_time);
-                todo -= frame_time;
-            }
-        }
-
-        if (this.fixed_fps > 0) {
-            let frame_time = 1 / this.fixed_fps;
-            let decr = frame_time;
-
-            let ldelta = delta;
-            if (ldelta > 0.1) {
-                ldelta = 0.1;
-            } else if (ldelta <= 0) {
-                ldelta = 0.001;
-            }
-            let todo = this.frame_remainder + ldelta;
-
-            while (todo >= frame_time) {
-                this._particles_process(frame_time);
-                todo -= decr;
-            }
-
-            this.frame_remainder = todo;
-        } else {
-            this._particles_process(delta);
-        }
-
-        this._update_particle_data_buffer();
     }
 
     /**
@@ -751,13 +770,13 @@ export default class CPUParticles2D extends Node2D {
                 p.active = true;
 
                 let tex_angle = 0;
-                if (this.curve_parameters[Parameter.ANGLE]) {
-                    tex_angle = this.curve_parameters[Parameter.ANGLE].interpolate(0);
+                if (this.curve_parameters[PARAM_ANGLE]) {
+                    tex_angle = this.curve_parameters[PARAM_ANGLE].interpolate(0);
                 }
 
                 let tex_anim_offset = 0;
-                if (this.curve_parameters[Parameter.ANGLE]) {
-                    tex_anim_offset = this.curve_parameters[Parameter.ANGLE].interpolate(0);
+                if (this.curve_parameters[PARAM_ANGLE]) {
+                    tex_anim_offset = this.curve_parameters[PARAM_ANGLE].interpolate(0);
                 }
 
                 p.angle_rand = randf();
@@ -767,14 +786,14 @@ export default class CPUParticles2D extends Node2D {
 
                 let angle1_rad = (randf() * 2 - 1) * Math_PI * this.spread / 180;
                 const rot = Vector2.new(Math.cos(angle1_rad), Math.sin(angle1_rad));
-                p.velocity.copy(rot).scale(this.parameters[Parameter.INITIAL_LINEAR_VELOCITY] * lerp(1, randf(), this.randomness[Parameter.INITIAL_LINEAR_VELOCITY]));
+                p.velocity.copy(rot).scale(this.parameters[PARAM_INITIAL_LINEAR_VELOCITY] * lerp(1, randf(), this.randomness[PARAM_INITIAL_LINEAR_VELOCITY]));
 
-                let base_angle = (this.parameters[Parameter.ANGLE] + tex_angle) * lerp(1, p.angle_rand, this.randomness[Parameter.ANGLE]);
+                let base_angle = (this.parameters[PARAM_ANGLE] + tex_angle) * lerp(1, p.angle_rand, this.randomness[PARAM_ANGLE]);
                 p.rotation = deg2rad(base_angle);
 
                 p.custom[0] = 0; // unused
                 p.custom[1] = 0; // phase [0..1]
-                p.custom[2] = (this.parameters[Parameter.ANIM_OFFSET] + tex_anim_offset) * lerp(1, p.anim_offset_rand, this.randomness[Parameter.ANIM_OFFSET]);
+                p.custom[2] = (this.parameters[PARAM_ANIM_OFFSET] + tex_anim_offset) * lerp(1, p.anim_offset_rand, this.randomness[PARAM_ANIM_OFFSET]);
                 p.custom[3] = 0;
                 p.transform.set(1, 0, 0, 1, 0, 0);
                 p.time = 0;
@@ -782,24 +801,24 @@ export default class CPUParticles2D extends Node2D {
 
                 const vec = Vector2.new();
                 switch (this.emission_shape) {
-                    case EmissionShape.POINT: {
+                    case EMISSION_SHAPE_POINT: {
                     } break;
                     // TODO: new sphere emit shape implementation
-                    case EmissionShape.SPHERE: {
+                    case EMISSION_SHAPE_SPHERE: {
                         vec.set(randf() * 2 - 1, randf() * 2 - 1)
                             .normalize()
                             .scale(this.emission_sphere_radius);
                         p.transform.tx = vec.x;
                         p.transform.ty = vec.y;
                     } break;
-                    case EmissionShape.RECTANGLE: {
+                    case EMISSION_SHAPE_RECTANGLE: {
                         vec.set(randf() * 2 - 1, randf() * 2 - 1)
                             .multiply(this.emission_rect_extents);
                         p.transform.tx = vec.x;
                         p.transform.ty = vec.y;
                     } break;
-                    case EmissionShape.POINTS:
-                    case EmissionShape.DIRECTED_POINTS: {
+                    case EMISSION_SHAPE_POINTS:
+                    case EMISSION_SHAPE_DIRECTED_POINTS: {
                         const pc = this.emission_points.length;
                         if (pc === 0) {
                             break;
@@ -811,7 +830,7 @@ export default class CPUParticles2D extends Node2D {
                         p.transform.tx = pos.x;
                         p.transform.ty = pos.y;
 
-                        if (this.emission_shape === EmissionShape.DIRECTED_POINTS && this.emission_normals.length === pc) {
+                        if (this.emission_shape === EMISSION_SHAPE_DIRECTED_POINTS && this.emission_normals.length === pc) {
                             p.velocity.copy(pos);
                         }
 
@@ -834,53 +853,53 @@ export default class CPUParticles2D extends Node2D {
                 p.custom[1] = p.time / this.lifetime;
 
                 let tex_linear_velocity = 0;
-                if (this.curve_parameters[Parameter.INITIAL_LINEAR_VELOCITY]) {
-                    tex_linear_velocity = this.curve_parameters[Parameter.INITIAL_LINEAR_VELOCITY].interpolate(p.custom[1]);
+                if (this.curve_parameters[PARAM_INITIAL_LINEAR_VELOCITY]) {
+                    tex_linear_velocity = this.curve_parameters[PARAM_INITIAL_LINEAR_VELOCITY].interpolate(p.custom[1]);
                 }
 
                 let tex_orbit_velocity = 0;
-                if (this.curve_parameters[Parameter.ORBIT_VELOCITY]) {
-                    tex_orbit_velocity = this.curve_parameters[Parameter.ORBIT_VELOCITY].interpolate(p.custom[1]);
+                if (this.curve_parameters[PARAM_ORBIT_VELOCITY]) {
+                    tex_orbit_velocity = this.curve_parameters[PARAM_ORBIT_VELOCITY].interpolate(p.custom[1]);
                 }
 
                 let tex_angular_velocity = 0;
-                if (this.curve_parameters[Parameter.ANGULAR_VELOCITY]) {
-                    tex_angular_velocity = this.curve_parameters[Parameter.ANGULAR_VELOCITY].interpolate(p.custom[1]);
+                if (this.curve_parameters[PARAM_ANGULAR_VELOCITY]) {
+                    tex_angular_velocity = this.curve_parameters[PARAM_ANGULAR_VELOCITY].interpolate(p.custom[1]);
                 }
 
                 let tex_linear_accel = 0;
-                if (this.curve_parameters[Parameter.LINEAR_ACCEL]) {
-                    tex_linear_accel = this.curve_parameters[Parameter.LINEAR_ACCEL].interpolate(p.custom[1]);
+                if (this.curve_parameters[PARAM_LINEAR_ACCEL]) {
+                    tex_linear_accel = this.curve_parameters[PARAM_LINEAR_ACCEL].interpolate(p.custom[1]);
                 }
 
                 let tex_tangential_accel = 0;
-                if (this.curve_parameters[Parameter.TANGENTIAL_ACCEL]) {
-                    tex_tangential_accel = this.curve_parameters[Parameter.TANGENTIAL_ACCEL].interpolate(p.custom[1]);
+                if (this.curve_parameters[PARAM_TANGENTIAL_ACCEL]) {
+                    tex_tangential_accel = this.curve_parameters[PARAM_TANGENTIAL_ACCEL].interpolate(p.custom[1]);
                 }
 
                 let tex_radial_accel = 0;
-                if (this.curve_parameters[Parameter.RADIAL_ACCEL]) {
-                    tex_radial_accel = this.curve_parameters[Parameter.RADIAL_ACCEL].interpolate(p.custom[1]);
+                if (this.curve_parameters[PARAM_RADIAL_ACCEL]) {
+                    tex_radial_accel = this.curve_parameters[PARAM_RADIAL_ACCEL].interpolate(p.custom[1]);
                 }
 
                 let tex_damping = 0;
-                if (this.curve_parameters[Parameter.DAMPING]) {
-                    tex_damping = this.curve_parameters[Parameter.DAMPING].interpolate(p.custom[1]);
+                if (this.curve_parameters[PARAM_DAMPING]) {
+                    tex_damping = this.curve_parameters[PARAM_DAMPING].interpolate(p.custom[1]);
                 }
 
                 let tex_angle = 0;
-                if (this.curve_parameters[Parameter.ANGLE]) {
-                    tex_angle = this.curve_parameters[Parameter.ANGLE].interpolate(p.custom[1]);
+                if (this.curve_parameters[PARAM_ANGLE]) {
+                    tex_angle = this.curve_parameters[PARAM_ANGLE].interpolate(p.custom[1]);
                 }
 
                 let tex_anim_speed = 0;
-                if (this.curve_parameters[Parameter.ANIM_SPEED]) {
-                    tex_anim_speed = this.curve_parameters[Parameter.ANIM_SPEED].interpolate(p.custom[1]);
+                if (this.curve_parameters[PARAM_ANIM_SPEED]) {
+                    tex_anim_speed = this.curve_parameters[PARAM_ANIM_SPEED].interpolate(p.custom[1]);
                 }
 
                 let tex_anim_offset = 0;
-                if (this.curve_parameters[Parameter.ANIM_OFFSET]) {
-                    tex_anim_offset = this.curve_parameters[Parameter.ANIM_OFFSET].interpolate(p.custom[1]);
+                if (this.curve_parameters[PARAM_ANIM_OFFSET]) {
+                    tex_anim_offset = this.curve_parameters[PARAM_ANIM_OFFSET].interpolate(p.custom[1]);
                 }
 
                 const force = this.gravity.clone();
@@ -890,7 +909,7 @@ export default class CPUParticles2D extends Node2D {
                 if (p.velocity.length_squared() > 0) {
                     force.add(
                         p.velocity.normalized().scale(
-                            (this.parameters[Parameter.LINEAR_ACCEL] + tex_linear_accel) * lerp(1, randf(), this.randomness[Parameter.LINEAR_ACCEL])
+                            (this.parameters[PARAM_LINEAR_ACCEL] + tex_linear_accel) * lerp(1, randf(), this.randomness[PARAM_LINEAR_ACCEL])
                         )
                     );
                 }
@@ -898,20 +917,20 @@ export default class CPUParticles2D extends Node2D {
                 const org = emission_xform.origin.clone();
                 const diff = pos.clone().subtract(org);
                 if (diff.length_squared() > 0) {
-                    force.add(diff.normalized().scale((this.parameters[Parameter.RADIAL_ACCEL] + tex_radial_accel) * lerp(1, randf(), this.randomness[Parameter.RADIAL_ACCEL])));
+                    force.add(diff.normalized().scale((this.parameters[PARAM_RADIAL_ACCEL] + tex_radial_accel) * lerp(1, randf(), this.randomness[PARAM_RADIAL_ACCEL])));
                 }
                 // Apply tangential acceleration
                 const yx = Vector2.new(diff.y, diff.x);
                 if (yx.length_squared() > 0) {
                     yx.multiply(-1, 1).normalize()
-                        .scale((this.parameters[Parameter.TANGENTIAL_ACCEL] + tex_tangential_accel) * lerp(1, randf(), this.randomness[Parameter.TANGENTIAL_ACCEL]))
+                        .scale((this.parameters[PARAM_TANGENTIAL_ACCEL] + tex_tangential_accel) * lerp(1, randf(), this.randomness[PARAM_TANGENTIAL_ACCEL]))
                     force.add(yx);
                 }
                 Vector2.free(yx);
                 // Apply attractor forces
                 p.velocity.add(force.x * local_delta, force.y * local_delta);
                 // Orbit velocity
-                const orbit_amount = (this.parameters[Parameter.ORBIT_VELOCITY] + tex_orbit_velocity) * lerp(1, randf(), this.randomness[Parameter.ORBIT_VELOCITY]);
+                const orbit_amount = (this.parameters[PARAM_ORBIT_VELOCITY] + tex_orbit_velocity) * lerp(1, randf(), this.randomness[PARAM_ORBIT_VELOCITY]);
                 if (orbit_amount !== 0) {
                     const ang = orbit_amount * local_delta * Math_PI * 2;
                     const rot = Transform2D.new();
@@ -924,13 +943,13 @@ export default class CPUParticles2D extends Node2D {
                     Vector2.free(x_diff);
                     Transform2D.free(rot);
                 }
-                if (this.curve_parameters[Parameter.INITIAL_LINEAR_VELOCITY]) {
+                if (this.curve_parameters[PARAM_INITIAL_LINEAR_VELOCITY]) {
                     p.velocity.normalize().scale(tex_linear_velocity);
                 }
 
-                if (this.parameters[Parameter.DAMPING] + tex_damping > 0) {
+                if (this.parameters[PARAM_DAMPING] + tex_damping > 0) {
                     let v = p.velocity.length();
-                    let damp = (this.parameters[Parameter.DAMPING] + tex_damping) * lerp(1, randf(), this.randomness[Parameter.DAMPING]);
+                    let damp = (this.parameters[PARAM_DAMPING] + tex_damping) * lerp(1, randf(), this.randomness[PARAM_DAMPING]);
                     v -= damp * local_delta;
                     if (v < 0) {
                         p.velocity.set(0, 0);
@@ -938,26 +957,26 @@ export default class CPUParticles2D extends Node2D {
                         p.velocity.normalize().scale(v);
                     }
                 }
-                let base_angle = (this.parameters[Parameter.ANGLE] + tex_angle) * lerp(1, p.angle_rand, this.randomness[Parameter.ANGLE]);
-                base_angle += p.custom[1] * this.lifetime * (this.parameters[Parameter.ANGULAR_VELOCITY] + tex_angular_velocity) * lerp(1, randf() * 2 - 1, this.randomness[Parameter.ANGULAR_VELOCITY]);
+                let base_angle = (this.parameters[PARAM_ANGLE] + tex_angle) * lerp(1, p.angle_rand, this.randomness[PARAM_ANGLE]);
+                base_angle += p.custom[1] * this.lifetime * (this.parameters[PARAM_ANGULAR_VELOCITY] + tex_angular_velocity) * lerp(1, randf() * 2 - 1, this.randomness[PARAM_ANGULAR_VELOCITY]);
                 p.rotation = deg2rad(base_angle);
-                let animation_phase = (this.parameters[Parameter.ANIM_OFFSET] + tex_anim_offset) * lerp(1, p.anim_offset_rand, this.randomness[Parameter.ANIM_OFFSET]) + p.custom[1] * (this.parameters[Parameter.ANIM_SPEED] + tex_anim_speed) * lerp(1, randf(), this.randomness[Parameter.ANIM_SPEED]);
+                let animation_phase = (this.parameters[PARAM_ANIM_OFFSET] + tex_anim_offset) * lerp(1, p.anim_offset_rand, this.randomness[PARAM_ANIM_OFFSET]) + p.custom[1] * (this.parameters[PARAM_ANIM_SPEED] + tex_anim_speed) * lerp(1, randf(), this.randomness[PARAM_ANIM_SPEED]);
                 p.custom[2] = animation_phase;
             }
             // Apply color
             // Apply hue rotation
 
             let tex_scale = 1;
-            if (this.curve_parameters[Parameter.SCALE]) {
-                tex_scale = this.curve_parameters[Parameter.SCALE].interpolate(p.custom[1]);
+            if (this.curve_parameters[PARAM_SCALE]) {
+                tex_scale = this.curve_parameters[PARAM_SCALE].interpolate(p.custom[1]);
             }
 
             let tex_hue_variation = 0;
-            if (this.curve_parameters[Parameter.HUE_VARIATION]) {
-                tex_hue_variation = this.curve_parameters[Parameter.HUE_VARIATION].interpolate(p.custom[1]);
+            if (this.curve_parameters[PARAM_HUE_VARIATION]) {
+                tex_hue_variation = this.curve_parameters[PARAM_HUE_VARIATION].interpolate(p.custom[1]);
             }
 
-            let hue_rot_angle = (this.parameters[Parameter.HUE_VARIATION] + tex_hue_variation) * Math_PI2 * lerp(1, p.hue_rot_rand * 2 - 1, this.randomness[Parameter.HUE_VARIATION]);
+            let hue_rot_angle = (this.parameters[PARAM_HUE_VARIATION] + tex_hue_variation) * Math_PI2 * lerp(1, p.hue_rot_rand * 2 - 1, this.randomness[PARAM_HUE_VARIATION]);
             let hue_rot_c = Math.cos(hue_rot_angle);
             let hue_rot_s = Math.sin(hue_rot_angle);
 
@@ -967,8 +986,13 @@ export default class CPUParticles2D extends Node2D {
                 hue_rot_mat[j][2] = mat1[j][2] + mat2[j][2] * hue_rot_c + mat3[j][2] * hue_rot_s;
             }
 
-            // TODO: gradient/color ramp
-            p.color.copy(this.color);
+            if (this.color_ramp) {
+                const color = this.color_ramp.interpolate(p.custom[1]).multiply(this.color);
+                p.color.copy(color);
+                Color.free(color);
+            } else {
+                p.color.copy(this.color);
+            }
 
             const r = p.color.r;
             const g = p.color.g;
@@ -984,7 +1008,7 @@ export default class CPUParticles2D extends Node2D {
             p.color.b = validate_frac(p.color.b);
             p.color.a = validate_frac(p.color.a);
 
-            if (this.flags[Flags.ALIGN_Y_TO_VELOCITY]) {
+            if (this.flags[FLAG_ALIGN_Y_TO_VELOCITY]) {
                 if (p.velocity.length_squared() > 0) {
                     const vel_n = p.velocity.normalized();
                     p.transform.c = vel_n.x;
@@ -1005,7 +1029,7 @@ export default class CPUParticles2D extends Node2D {
             }
 
             // Scale by scale
-            let base_scale = lerp(this.parameters[Parameter.SCALE] * tex_scale, 1, p.scale_rand * this.randomness[Parameter.SCALE]);
+            let base_scale = lerp(this.parameters[PARAM_SCALE] * tex_scale, 1, p.scale_rand * this.randomness[PARAM_SCALE]);
             if (base_scale === 0) {
                 base_scale = 0.000001;
             }
@@ -1022,44 +1046,26 @@ export default class CPUParticles2D extends Node2D {
 
     _update_particle_data_buffer() { }
 
+    _update_render_thread() {
+        // TODO: multimesh_set_as_bulk_array
+    }
+
     /**
-     * Renders the object using the WebGL renderer
-     *
-     * @private
-     * @param {WebGLRenderer} renderer - The webgl renderer to use.
+     * @param {boolean} p_redraw
      */
-    _render_webgl(renderer) {
-        renderer.set_object_renderer(renderer.plugins.sprite);
-
-        for (let p of this.particles) {
-            if (!p.active) {
-                continue;
-            }
-
-            // Update transform
-            p.transform.decompose(p.sprite.transform);
-            if (this.local_coords) {
-                p.sprite.transform.update_transform(this.transform);
-            } else {
-                p.sprite.transform.update_transform(this._temp_node_2d_parent.transform);
-            }
-            p.sprite.calculate_vertices();
-
-            // Update texture
-            p.sprite.texture = this.texture;
-
-            // Color
-            p.sprite.blend_mode = this.blend_mode;
-            p.sprite.modulate.copy(p.color).multiply(this.modulate).multiply(this.self_modulate);
-            p.sprite._update_color();
-
-            renderer.plugins.sprite.render(p.sprite);
+    _set_redraw(p_redraw) {
+        if (this.redraw === p_redraw) {
+            return;
         }
+        this.redraw = p_redraw;
+        if (this.redraw) {
+            VisualServer.get_singleton().connect('frame_pre_draw', this._update_render_thread, this);
+            VSG.canvas.canvas_item_set_update_when_visible(this.canvas_item, true);
+        } else {
+            VisualServer.get_singleton().disconnect('frame_pre_draw', this._update_render_thread, this);
+            VSG.canvas.canvas_item_set_update_when_visible(this.canvas_item, false);
+        }
+        this.update();
     }
 }
 node_class_map['CPUParticles2D'] = GDCLASS(CPUParticles2D, Node2D)
-
-CPUParticles2D.DrawOrder = DrawOrder;
-CPUParticles2D.Parameter = Parameter;
-CPUParticles2D.Flags = Flags;
-CPUParticles2D.EmissionShape = EmissionShape;

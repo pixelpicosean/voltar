@@ -372,7 +372,13 @@ export class VisualServerCanvas {
         }
     }
 
-    canvas_item_set_update_when_visible() { }
+    /**
+     * @param {Item} p_item
+     * @param {boolean} p_update
+     */
+    canvas_item_set_update_when_visible(p_item, p_update) {
+        p_item.update_when_visible = p_update;
+    }
 
     /**
      * @param {Item} p_item
