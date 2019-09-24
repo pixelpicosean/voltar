@@ -327,9 +327,9 @@ export class Transform2D {
      */
     basis_xform(p_vec, r_out) {
         r_out = r_out || Vector2.new();
-        r_out.x = (this.a * p_vec.x) + (this.c * p_vec.y);
-        r_out.y = (this.b * p_vec.x) + (this.d * p_vec.y);
-        return r_out;
+        const x = (this.a * p_vec.x) + (this.c * p_vec.y);
+        const y = (this.b * p_vec.x) + (this.d * p_vec.y);
+        return r_out.set(x, y);
     }
 
     /**
@@ -339,9 +339,9 @@ export class Transform2D {
      */
     basis_xform_inv(p_vec, r_out) {
         r_out = r_out || Vector2.new();
-        r_out.x = (this.a * p_vec.x) + (this.b * p_vec.y);
-        r_out.y = (this.c * p_vec.x) + (this.d * p_vec.y);
-        return r_out;
+        const x = (this.a * p_vec.x) + (this.b * p_vec.y);
+        const y = (this.c * p_vec.x) + (this.d * p_vec.y);
+        return r_out.set(x, y);
     }
 
     /**
@@ -354,9 +354,9 @@ export class Transform2D {
      */
     xform(p_vec, r_out) {
         r_out = r_out || Vector2.new();
-        r_out.x = (this.a * p_vec.x) + (this.c * p_vec.y) + this.tx;
-        r_out.y = (this.b * p_vec.x) + (this.d * p_vec.y) + this.ty;
-        return r_out;
+        const x = (this.a * p_vec.x) + (this.c * p_vec.y) + this.tx;
+        const y = (this.b * p_vec.x) + (this.d * p_vec.y) + this.ty;
+        return r_out.set(x, y);
     }
 
     /**
@@ -369,9 +369,9 @@ export class Transform2D {
      */
     xform_inv(p_vec, r_out) {
         r_out = r_out || Vector2.new();
-        r_out.x = this.a * (p_vec.x - this.tx) + this.b * (p_vec.y - this.ty);
-        r_out.y = this.c * (p_vec.x - this.tx) + this.d * (p_vec.y - this.ty);
-        return r_out;
+        const x = this.a * (p_vec.x - this.tx) + this.b * (p_vec.y - this.ty);
+        const y = this.c * (p_vec.x - this.tx) + this.d * (p_vec.y - this.ty);
+        return r_out.set(x, y);
     }
 
     /**
