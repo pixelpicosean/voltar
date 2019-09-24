@@ -28,6 +28,7 @@ import {
     CommandTransform,
     CommandNinePatch,
     CommandCircle,
+    CommandMultiMesh,
 } from './commands';
 import Texture from 'engine/drivers/textures/Texture';
 
@@ -570,7 +571,21 @@ export class VisualServerCanvas {
     canvas_item_add_polygon() { }
     canvas_item_add_triangle_array() { }
     canvas_item_add_mesh() { }
-    canvas_item_add_multimesh() { }
+    /**
+     * @param {Item} p_item
+     * @param {any} p_mesh
+     * @param {Texture} p_texture
+     * @param {Texture} p_normal_map
+     */
+    canvas_item_add_multimesh(p_item, p_mesh, p_texture, p_normal_map) {
+        const mm = CommandMultiMesh.instance();
+        mm.multimesh = p_mesh;
+        mm.texture = p_texture;
+        mm.normal_map = p_normal_map;
+
+        p_item.rect_dirty = true;
+        p_item.commands.push(mm);
+    }
     canvas_item_add_particles() { }
     /**
      * @param {Item} p_item

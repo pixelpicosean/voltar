@@ -464,6 +464,17 @@ export class CommandCircle extends Command {
 }
 create_pool(TYPE_CIRCLE, CommandCircle)
 
+export class CommandMultiMesh extends Command {
+    get type() { return TYPE_MULTIMESH }
+    static instance() { return new CommandMultiMesh() } // for TypeScript type checking
+    constructor() {
+        super();
+
+        this.multimesh = null;
+    }
+}
+create_pool(TYPE_MULTIMESH, CommandMultiMesh)
+
 export class CommandTransform extends Command {
     get type() { return TYPE_TRANSFORM }
     static instance() { return new CommandTransform() } // for TypeScript type checking
