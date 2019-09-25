@@ -244,6 +244,9 @@ export class CanvasItem extends Node {
         return (parent.is_canvas_item) ? /** @type {CanvasItem} */(parent) : null;
     }
 
+    /**
+     * return new Transform2D
+     */
     get_transform() {
         return Transform2D.new();
     }
@@ -254,7 +257,9 @@ export class CanvasItem extends Node {
             if (pi) {
                 this._global_transform.copy(pi.get_global_transform()).append(this.get_transform());
             } else {
-                this._global_transform.copy(this.get_transform());
+                const xform = this.get_transform();
+                this._global_transform.copy(xform);
+                Transform2D.free(xform);
             }
 
             this.global_invalid = false;
@@ -262,6 +267,10 @@ export class CanvasItem extends Node {
 
         return this._global_transform;
     }
+
+    /**
+     * returns new Transform2D
+     */
     get_global_transform_with_canvas() {
         if (this.canvas_layer) {
             return this.canvas_layer.transform.clone().append(this.get_global_transform());
