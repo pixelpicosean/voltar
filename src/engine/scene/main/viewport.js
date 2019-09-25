@@ -8,7 +8,17 @@ import {
     NOTIFICATION_WM_MOUSE_EXIT,
     NOTIFICATION_WM_FOCUS_OUT,
 } from "engine/core/main_loop";
-import { InputEvent } from "engine/core/os/input_event";
+import {
+    InputEvent,
+    InputEventMouseButton,
+    InputEventMouseMotion,
+    BUTTON_LEFT,
+    BUTTON_WHEEL_DOWN,
+    BUTTON_WHEEL_UP,
+    BUTTON_WHEEL_LEFT,
+    BUTTON_WHEEL_RIGHT,
+    BUTTON_MASK_LEFT,
+} from "engine/core/os/input_event";
 import {
     Node,
     NOTIFICATION_ENTER_TREE,
@@ -16,6 +26,7 @@ import {
     NOTIFICATION_EXIT_TREE,
     NOTIFICATION_INTERNAL_PROCESS,
     NOTIFICATION_INTERNAL_PHYSICS_PROCESS,
+    NOTIFICATION_DRAG_END,
 } from "engine/scene/main/node";
 import { VSG } from "engine/servers/visual/visual_server_globals";
 import { Texture } from "engine/scene/resources/texture";
@@ -24,6 +35,23 @@ import { CanvasItem } from "engine/scene/2d/canvas_item";
 
 import { CanvasLayer } from "./canvas_layer";
 import { remove_items } from "engine/dep/index";
+import { Input } from "engine/main/input";
+import { Engine } from "engine/core/engine";
+import {
+    FOCUS_NONE,
+    MOUSE_FILTER_STOP,
+    MOUSE_FILTER_IGNORE,
+} from "../gui/const";
+import {
+    Control,
+    NOTIFICATION_MODAL_CLOSE,
+    NOTIFICATION_MOUSE_EXIT,
+    NOTIFICATION_MOUSE_ENTER,
+    CComparator,
+    NOTIFICATION_FOCUS_EXIT,
+    NOTIFICATION_FOCUS_ENTER,
+} from "../gui/control";
+import { GROUP_CALL_REALTIME } from "./scene_tree";
 
 
 export const UPDATE_MODE_DISABLED = 0;
@@ -101,40 +129,41 @@ GDCLASS(ViewportTexture, Texture)
 class GUI {
     constructor() {
         this.key_event_accepted = false;
-        /** @type {import('../gui/control').Control} */
+        /** @type {Control} */
         this.mouse_focus = null;
-        /** @type {import('../gui/control').Control} */
+        /** @type {Control} */
         this.last_mouse_focus = null;
         this.mouse_click_grabber = null;
         this.mouse_focus_mask = 0;
-        /** @type {import('../gui/control').Control} */
+        /** @type {Control} */
         this.key_focus = null;
-        /** @type {import('../gui/control').Control} */
+        /** @type {Control} */
         this.mouse_over = null;
-        /** @type {import('../gui/control').Control} */
+        /** @type {Control} */
         this.tooltip = null;
-        /** @type {import('../gui/control').Control} */
+        /** @type {Control} */
         this.tooltip_popup = null;
         this.tooltip_label = null;
-        this.tooltip_pos = false;
-        this.last_mouse_pos = false;
-        this.drag_accum = false;
+        this.tooltip_pos = new Vector2;
+        this.last_mouse_pos = new Vector2;
+        this.drag_accum = new Vector2;
         this.drag_attempted = false;
         this.drag_data = false;
-        this.drag_preview = false;
+        /** @type {Control} */
+        this.drag_preview = null;
         this.tooltip_timer = -1;
         this.tooltip_delay = 0.5;
-        /** @type {import('../gui/control').Control[]} */
+        /** @type {Control[]} */
         this.modal_stack = [];
-        this.focus_inv_xform = false;
+        this.focus_inv_xform = new Transform2D;
         this.subwindow_order_dirty = false;
         this.subwindow_visibility_dirty = false;
-        /** @type {import('../gui/control').Control[]} */
+        /** @type {Control[]} */
         this.subwindows = [];
-        /** @type {import('../gui/control').Control[]} */
+        /** @type {Control[]} */
         this.all_known_subwindows = [];
         this.roots_order_dirty = false;
-        /** @type {import('../gui/control').Control[]} */
+        /** @type {Control[]} */
         this.roots = [];
         this.canvas_sort_index = 0;
         this.dragging = false;
@@ -342,9 +371,19 @@ export class Viewport extends Node {
         // TODO: if (physics_object_picking)
     }
 
+    /**
+     * returns new Vector2
+     */
     get_mouse_position() {
-        // TODO: real get_mouse_position()
-        return Vector2.ZERO;
+        const xform = this.get_final_transform().affine_inverse()
+        const input_pre_xform = this._get_input_pre_xform();
+        xform.append(input_pre_xform);
+        Transform2D.free(input_pre_xform);
+        const pos = Input.get_singleton().get_mouse_position().clone()
+            .subtract(this._get_window_offset())
+        xform.xform(pos, pos);
+        Transform2D.free(xform);
+        return pos;
     }
     warp_mouse(p_pos) { }
 
@@ -446,17 +485,553 @@ export class Viewport extends Node {
 
     /* private */
 
-    _gui_call_input() { }
-    _gui_call_notification() { }
+    /**
+     * @param {Control} p_control
+     * @param {InputEvent} p_input
+     */
+    _gui_call_input(p_control, p_input) {
+        const mb = /** @type {InputEventMouseButton} */(p_input);
+        let cant_stop_me_now = (
+            mb.class === 'InputEventMouseButton'
+            &&
+            (
+                mb.button_index === BUTTON_WHEEL_DOWN
+                ||
+                mb.button_index === BUTTON_WHEEL_UP
+                ||
+                mb.button_index === BUTTON_WHEEL_LEFT
+                ||
+                mb.button_index === BUTTON_WHEEL_RIGHT
+            )
+        )
+        cant_stop_me_now = (p_input.class === 'InputEventPanGesture') || cant_stop_me_now;
 
-    _gui_prepare_subwindows() { }
-    _gui_sort_subwindows() { }
-    _gui_sort_roots() { }
+        const ismouse = (p_input.class === 'InputEventMouseButton') || (p_input.class === 'InputEventMouseMotion');
+
+        let ci = p_control;
+        while (ci) {
+            if (ci.is_control) {
+                if (ci.c_data.mouse_filter !== MOUSE_FILTER_IGNORE) {
+                    ci.emit_signal('gui_input', p_input);
+                }
+                if (this.gui.key_event_accepted) {
+                    break;
+                }
+                if (!ci.is_inside_tree()) {
+                    break;
+                }
+
+                if (ci.c_data.mouse_filter !== MOUSE_FILTER_IGNORE) {
+                    ci.__gui_input(p_input);
+                }
+
+                if (!ci.is_inside_tree() || ci.is_set_as_toplevel()) {
+                    break;
+                }
+                if (this.gui.key_event_accepted) {
+                    break;
+                }
+                if (!cant_stop_me_now && ci.c_data.mouse_filter === MOUSE_FILTER_STOP && ismouse) {
+                    break;
+                }
+            }
+
+            if (ci.is_set_as_toplevel()) {
+                break;
+            }
+
+            const ev = p_input.xformed_by(ci.get_transform());
+            ci = /** @type {Control} */(ci.get_parent_item());
+        }
+    }
+    /**
+     * @param {Control} p_control
+     * @param {number} p_what
+     */
+    _gui_call_notification(p_control, p_what) {
+        let ci = p_control;
+        while (ci) {
+            if (ci.is_control) {
+                if (ci.c_data.mouse_filter !== MOUSE_FILTER_IGNORE) {
+                    ci.notification(p_what);
+                }
+
+                if (!ci.is_inside_tree()) {
+                    break;
+                }
+
+                if (!ci.is_inside_tree() || ci.is_set_as_toplevel()) {
+                    break;
+                }
+                if (ci.c_data.mouse_filter === MOUSE_FILTER_STOP) {
+                    break;
+                }
+            }
+
+            if (ci.is_set_as_toplevel()) {
+                break;
+            }
+
+            ci = /** @type {Control} */(ci.get_parent_item());
+        }
+    }
+
+    _gui_prepare_subwindows() {
+        if (this.gui.subwindow_visibility_dirty) {
+            this.gui.subwindows.length = 0;
+            for (const E of this.gui.all_known_subwindows) {
+                if (E.is_visible_in_tree()) {
+                    this.gui.subwindows.push(E);
+                }
+            }
+
+            this.gui.subwindow_visibility_dirty = false;
+            this.gui.subwindow_order_dirty = true;
+        }
+
+        this._gui_sort_subwindows();
+    }
+    _gui_sort_subwindows() {
+        if (!this.gui.subwindow_order_dirty) return;
+
+        this.gui.modal_stack.sort(CComparator);
+        this.gui.subwindows.sort(CComparator);
+
+        this.gui.subwindow_order_dirty = false;
+    }
+    _gui_sort_roots() {
+        if (!this.gui.roots_order_dirty) {
+            return;
+        }
+        this.gui.roots.sort(CComparator);
+        this.gui.roots_order_dirty = false;
+    }
     _gui_sort_modal_stack() { }
-    _gui_find_control() { }
-    _gui_find_control_at_pos() { }
+    /**
+     * @param {Vector2Like} p_global
+     */
+    _gui_find_control(p_global) {
+        this._gui_prepare_subwindows();
 
-    _gui_input_event(p_event) { }
+        const subwindows = this.gui.subwindows;
+        for (let i = subwindows.length - 1; i >= 0; i--) {
+            const sw = subwindows[i];
+            if (!sw.is_visible_in_tree()) continue;
+
+            /** @type {Transform2D} */
+            let xform = null;
+            const pci = sw.get_parent_item();
+            if (pci) {
+                xform = pci.get_global_transform_with_canvas();
+            } else {
+                xform = sw.get_canvas_transform().clone();
+            }
+
+            const ret = this._gui_find_control_at_pos(sw, p_global, xform, this.gui.focus_inv_xform);
+            Transform2D.free(xform);
+
+            if (ret) {
+                return ret;
+            }
+        }
+
+        this._gui_sort_roots();
+
+        const roots = this.gui.roots;
+        for (let i = roots.length - 1; i >= 0; i--) {
+            const sw = roots[i];
+            if (!sw.is_visible_in_tree()) continue;
+
+            /** @type {Transform2D} */
+            let xform = null;
+            const pci = sw.get_parent_item();
+            if (pci) {
+                xform = pci.get_global_transform_with_canvas();
+            } else {
+                xform = sw.get_canvas_transform().clone();
+            }
+
+            const ret = this._gui_find_control_at_pos(sw, p_global, xform, this.gui.focus_inv_xform);
+            Transform2D.free(xform);
+
+            if (ret) {
+                return ret;
+            }
+        }
+
+        return null;
+    }
+    /**
+     * @param {CanvasItem} p_node
+     * @param {Vector2Like} p_global
+     * @param {Transform2D} p_xform
+     * @param {Transform2D} r_inv_xform
+     */
+    _gui_find_control_at_pos(p_node, p_global, p_xform, r_inv_xform) {
+        if (p_node.class === 'Viewport') {
+            return null;
+        }
+
+        if (!p_node.visible) {
+            return null;
+        }
+
+        const node_xform = p_node.get_transform();
+        const matrix = p_xform.clone().append(node_xform);
+        if (matrix.basis_determinant() === 0) {
+            Transform2D.free(matrix);
+            Transform2D.free(node_xform);
+            return null;
+        }
+
+        const c = /** @type {Control} */(p_node);
+        const matrix_inv = matrix.clone().affine_inverse();
+        const xform_global = matrix_inv.xform(p_global);
+        const has = c.has_point_(xform_global);
+        if (!c.is_control || !c.clips_input() || c.has_point_(xform_global)) {
+            for (let i = p_node.data.children.length - 1; i >= 0; i--) {
+                if (p_node === this.gui.tooltip_popup) {
+                    continue;
+                }
+
+                const ci = /** @type {CanvasItem} */(p_node.data.children[i]);
+                if (!ci.is_canvas_item || ci.is_set_as_toplevel()) {
+                    continue;
+                }
+
+                const ret = this._gui_find_control_at_pos(ci, p_global, matrix, r_inv_xform);
+                if (ret) {
+                    Vector2.free(xform_global);
+                    Transform2D.free(matrix_inv);
+                    Transform2D.free(matrix);
+                    Transform2D.free(node_xform);
+                    return ret;
+                }
+            }
+        }
+
+        if (!c.is_control) {
+            return null;
+        }
+
+        matrix.affine_inverse();
+
+        const xform_global2 = matrix.xform(p_global);
+        const has2 = c.has_point_(xform_global2);
+        if (c.c_data.mouse_filter !== MOUSE_FILTER_IGNORE && c.has_point_(xform_global2) && (!this.gui.drag_preview || (c !== this.gui.drag_preview && !this.gui.drag_preview.is_a_parent_of(c)))) {
+            r_inv_xform.copy(matrix);
+
+            Vector2.free(xform_global2);
+            Vector2.free(xform_global);
+            Transform2D.free(matrix_inv);
+            Transform2D.free(matrix);
+            Transform2D.free(node_xform);
+            return c;
+        }
+
+        Vector2.free(xform_global2);
+        Vector2.free(xform_global);
+        Transform2D.free(matrix_inv);
+        Transform2D.free(matrix);
+        Transform2D.free(node_xform);
+
+        return null;
+    }
+
+    /**
+     * @param {InputEvent} p_event
+     */
+    _gui_input_event(p_event) {
+        const gui = this.gui;
+
+        if (p_event.class === 'InputEventMouseButton') {
+            let mb = /** @type {InputEventMouseButton} */(p_event);
+            gui.key_event_accepted = false;
+
+            const mpos = mb.position;
+            if (mb.is_pressed()) {
+                const pos = mpos.clone();
+
+                if (gui.mouse_focus_mask) {
+                    gui.mouse_focus_mask |= (1 << (mb.button_index - 1));
+                } else {
+                    let is_handled = false;
+
+                    this._gui_sort_modal_stack();
+                    while (gui.modal_stack.length > 0) {
+                        const top = gui.modal_stack[gui.modal_stack.length - 1];
+                        const gt = top.get_global_transform_with_canvas();
+                        const pos2 = gt.affine_inverse().xform(mpos);
+                        if (!top.has_point_(pos2)) {
+                            if (top.c_data.modal_exclusive || top.c_data.modal_frame === Engine.get_singleton().get_frames_drawn()) {
+                                this.set_input_as_handled();
+                                return;
+                            }
+
+                            top.notification(NOTIFICATION_MODAL_CLOSE);
+                            top._modal_stack_remove();
+                            top.hide();
+
+                            if (!top.pass_on_modal_close_click()) {
+                                is_handled = true;
+                            }
+                        } else {
+                            break;
+                        }
+
+                        Vector2.free(pos2);
+                        Transform2D.free(gt);
+                    }
+
+                    if (is_handled) {
+                        this.set_input_as_handled();
+                        return;
+                    }
+
+                    gui.mouse_focus = this._gui_find_control(pos);
+                    gui.last_mouse_focus = gui.mouse_focus;
+
+                    if (!gui.mouse_focus) {
+                        gui.mouse_focus_mask = 0;
+                        return;
+                    }
+
+                    gui.mouse_focus_mask = (1 << (mb.button_index - 1));
+
+                    if (mb.button_index === BUTTON_LEFT) {
+                        gui.drag_accum.set(0, 0);
+                        gui.drag_attempted = false;
+                    }
+                }
+
+                mb = mb.xformed_by(Transform2D.IDENTITY);
+                mb.global_position.copy(pos);
+                gui.focus_inv_xform.xform(pos, pos);
+                mb.position.copy(pos);
+
+                if (mb.button_index === BUTTON_LEFT) {
+                    let ci = gui.mouse_focus;
+                    while (ci) {
+                        if (ci.is_control) {
+                            if (ci.focus_mode !== FOCUS_NONE) {
+                                if (ci !== gui.key_focus) {
+                                    ci.grab_focus();
+                                }
+                                break;
+                            }
+
+                            if (ci.c_data.mouse_filter === MOUSE_FILTER_STOP) {
+                                break;
+                            }
+                        }
+
+                        if (ci.is_set_as_toplevel()) {
+                            break;
+                        }
+
+                        ci = /** @type {Control} */(ci.get_parent_item());
+                    }
+                }
+
+                if (gui.mouse_focus && gui.mouse_focus.can_process()) {
+                    this._gui_call_input(gui.mouse_focus, mb);
+                }
+
+                this.set_input_as_handled();
+
+                if (gui.drag_data && mb.button_index === BUTTON_LEFT) {
+                    if (gui.mouse_focus) {
+                        this._gui_drop(gui.mouse_focus, pos, false);
+                    }
+
+                    gui.drag_data = null;
+                    gui.dragging = false;
+
+                    if (gui.drag_preview) {
+                        // FIXME: should we free this `gui.drag_preview`?
+                        gui.drag_preview = null;
+                    }
+                    this._propagate_viewport_notification(this, NOTIFICATION_DRAG_END);
+                }
+
+                this._gui_cancel_tooltip();
+
+                Vector2.free(pos);
+            } else {
+                if (gui.drag_data && mb.button_index === BUTTON_LEFT) {
+                    if (gui.mouse_over) {
+                        const pos = mpos.clone();
+                        gui.focus_inv_xform.xform(pos, pos);
+                        this._gui_drop(gui.mouse_over, pos, false);
+                        Vector2.free(pos);
+                    }
+
+                    if (gui.drag_preview && mb.button_index === BUTTON_LEFT) {
+                        // FIXME: should we free this `gui.drag_preview`?
+                        gui.drag_preview = null;
+                    }
+
+                    gui.drag_data = null;
+                    gui.dragging = false;
+                    this._propagate_viewport_notification(this, NOTIFICATION_DRAG_END);
+                }
+
+                gui.mouse_focus_mask &= ~(1 << (mb.button_index - 1));
+
+                if (!gui.mouse_focus) {
+                    return;
+                }
+
+                const pos = mpos.clone();
+                mb = mb.xformed_by(Transform2D.IDENTITY);
+                mb.global_position.copy(pos);
+                gui.focus_inv_xform.xform(pos, pos);
+                mb.position.copy(pos);
+                Vector2.free(pos);
+
+                const mouse_focus = gui.mouse_focus;
+
+                if (gui.mouse_focus_mask === 0) {
+                    gui.mouse_focus = null;
+                }
+
+                if (mouse_focus && mouse_focus.can_process()) {
+                    this._gui_call_input(mouse_focus, mb);
+                }
+
+                this.set_input_as_handled();
+            }
+        }
+
+        if (p_event.class === 'InputEventMouseMotion') {
+            let mm = /** @type {InputEventMouseMotion} */(p_event);
+
+            gui.key_event_accepted = false;
+            const mpos = mm.position.clone();
+
+            gui.last_mouse_pos.copy(mpos);
+
+            /** @type {Control} */
+            let over = null;
+
+            if (!gui.drag_attempted && gui.mouse_focus && mm.button_mask & BUTTON_MASK_LEFT) {
+                // TODO
+            }
+
+            if (gui.mouse_focus) {
+                over = gui.mouse_focus;
+            } else {
+                over = this._gui_find_control(mpos);
+            }
+
+            if (gui.drag_data && gui.modal_stack.length > 0) {
+                // TODO
+            }
+
+            if (over !== gui.mouse_over) {
+                if (gui.mouse_over) {
+                    this._gui_call_notification(gui.mouse_over, NOTIFICATION_MOUSE_EXIT);
+                }
+
+                this._gui_cancel_tooltip();
+
+                if (over) {
+                    this._gui_call_notification(over, NOTIFICATION_MOUSE_ENTER);
+                }
+            }
+
+            gui.mouse_over = over;
+
+            if (gui.drag_preview) {
+                gui.drag_preview.set_position(mpos);
+            }
+
+            if (!over) {
+                // TODO: OS.get_singleton().set_cursor_shape()
+                return;
+            }
+
+            const localizer = over.get_global_transform_with_canvas().affine_inverse();
+            const pos = localizer.xform(mpos);
+            const speed = localizer.basis_xform(mm.speed);
+            const rel = localizer.basis_xform(mm.relative);
+
+            // TODO: recycle input events
+            mm = mm.xformed_by(Transform2D.IDENTITY);
+
+            mm.global_position.copy(mpos);
+            mm.speed.copy(speed);
+            mm.relative.copy(rel);
+
+            if (mm.button_mask === 0) {
+                let can_tooltip = true;
+
+                if (gui.modal_stack.length > 0) {
+                    const last = gui.modal_stack[gui.modal_stack.length - 1];
+                    if (last !== over && !last.is_a_parent_of(over)) {
+                        can_tooltip = false;
+                    }
+                }
+
+                let is_tooltip_shown = false;
+
+                if (gui.tooltip_popup) {
+                    if (can_tooltip && gui.tooltip) {
+                        const p = gui.tooltip.get_global_transform().xform_inv(mpos);
+                        const tooltip = this._gui_get_tooltip(over, p);
+
+                        if (tooltip.length === 0) {
+                            this._gui_cancel_tooltip();
+                        } else if (gui.tooltip_label) {
+                            if (tooltip === gui.tooltip_label.text) {
+                                is_tooltip_shown = true;
+                            }
+                        } else if (tooltip === /** @type {any} */(gui.tooltip_popup).get_tooltip_text()) {
+                            is_tooltip_shown = true;
+                        }
+
+                        Vector2.free(p);
+                    } else {
+                        this._gui_cancel_tooltip();
+                    }
+                }
+
+                if (can_tooltip && !is_tooltip_shown) {
+                    gui.tooltip = over;
+                    gui.tooltip_pos.copy(mpos);
+                    gui.tooltip_timer = gui.tooltip_delay;
+                }
+            }
+
+            mm.position.copy(pos);
+
+            // TODO: update cursor
+
+            if (over && over.can_process()) {
+                this._gui_call_input(over, mm);
+            }
+
+            this.set_input_as_handled();
+
+            if (gui.drag_data && mm.button_mask === BUTTON_MASK_LEFT) {
+                const can_drop = this._gui_drop(over, pos, true);
+
+                // TODO: update cursor
+                if (!can_drop) {}
+            }
+
+            Vector2.free(rel);
+            Vector2.free(speed);
+            Vector2.free(pos);
+            Transform2D.free(localizer);
+
+            Vector2.free(mpos);
+        }
+
+        if (p_event.class === 'InputEventScreenTouch') { }
+        if (p_event.class === 'InputEventGesture') { }
+        if (p_event.class === 'InputEventScreenDrag') { }
+    }
 
     update_worlds() {
         if (!this.is_inside_tree) {
@@ -476,6 +1051,9 @@ export class Viewport extends Node {
         Rect2.free(abstracted_rect);
     }
 
+    /**
+     * returns new Transform2D
+     */
     _get_input_pre_xform() {
         const pre_xf = Transform2D.new();
         if (!this.attach_to_screen_rect.is_zero()) {
@@ -525,7 +1103,7 @@ export class Viewport extends Node {
     }
 
     /**
-     * @param {import('../gui/control').Control} p_control
+     * @param {Control} p_control
      */
     _gui_add_root_control(p_control) {
         this.gui.roots_order_dirty = true;
@@ -533,7 +1111,7 @@ export class Viewport extends Node {
     }
 
     /**
-     * @param {import('../gui/control').Control} p_control
+     * @param {Control} p_control
      */
     _gui_add_subwindow_control(p_control) {
         p_control.connect('visibility_changed', this._subwindow_visibility_changed, this);
@@ -550,24 +1128,24 @@ export class Viewport extends Node {
     _gui_set_root_order_dirty() { }
 
     /**
-     * @param {import('../gui/control').Control} p_control
+     * @param {Control} p_control
      */
     _gui_remove_modal_control(p_control) { }
     /**
-     * @param {import('../gui/control').Control} MI
-     * @param {import('../gui/control').Control} p_prev_focus_owner
+     * @param {Control} MI
+     * @param {Control} p_prev_focus_owner
      */
     _gui_remove_from_modal_stack(MI, p_prev_focus_owner) {
         // TODO: modal stack support
     }
     /**
-     * @param {import('../gui/control').Control} p_control
+     * @param {Control} p_control
      */
     _gui_remove_root_control(p_control) {
         remove_items(this.gui.roots, this.gui.roots.indexOf(p_control), 1);
     }
     /**
-     * @param {import('../gui/control').Control} p_control
+     * @param {Control} p_control
      */
     _gui_remove_subwindow_control(p_control) { }
 
@@ -584,7 +1162,7 @@ export class Viewport extends Node {
     _gui_show_tooltip() { }
 
     /**
-     * @param {import('../gui/control').Control} p_control
+     * @param {Control} p_control
      */
     _gui_remove_control(p_control) {
         const gui = this.gui;
@@ -609,7 +1187,7 @@ export class Viewport extends Node {
         }
     }
     /**
-     * @param {import('../gui/control').Control} p_control
+     * @param {Control} p_control
      */
     _gui_hid_control(p_control) {
         if (this.gui.mouse_focus === p_control) {
@@ -631,31 +1209,113 @@ export class Viewport extends Node {
     _gui_set_drag_preview() { }
 
     /**
-     * @param {import('../gui/control').Control} p_control
+     * @param {Control} p_control
      */
     _gui_is_modal_on_top(p_control) {
         return (this.gui.modal_stack.length && this.gui.modal_stack[this.gui.modal_stack.length - 1] === p_control);
     }
     _gui_show_modal() { }
 
-    _gui_remove_focus() { }
-    _gui_unfocus_control(p_control) { }
-    _gui_control_has_focus(p_control) { }
-    _gui_control_grab_focus(p_control) { }
-    _gui_grab_click_focus(p_control) { }
-    _post_gui_grab_click_focus() { }
-    _gui_accept_event() { }
+    _gui_remove_focus() {
+        if (this.gui.key_focus) {
+            const f = this.gui.key_focus;
+            this.gui.key_focus = null;
+            f.notification(NOTIFICATION_FOCUS_EXIT, true);
+        }
+    }
+    /**
+     * @param {Control} p_control
+     */
+    _gui_unfocus_control(p_control) {
+        if (this.gui.key_focus === p_control) {
+            this.gui.key_focus.release_focus();
+        }
+    }
+    /**
+     * @param {Control} p_control
+     */
+    _gui_control_has_focus(p_control) {
+        return this.gui.key_focus === p_control;
+    }
+    /**
+     * @param {Control} p_control
+     */
+    _gui_control_grab_focus(p_control) {
+        if (this.gui.key_focus && this.gui.key_focus === p_control) {
+            return;
+        }
+        this.get_tree().call_group_flags(GROUP_CALL_REALTIME, '_viewports', '_gui_remove_focus');
+        this.gui.key_focus = p_control;
+        p_control.notification(NOTIFICATION_FOCUS_ENTER);
+        p_control.update();
+    }
+    /**
+     * @param {Control} p_control
+     */
+    _gui_grab_click_focus(p_control) {
+        this.gui.mouse_click_grabber = p_control;
+        this.call_deferred('_post_gui_grab_click_focus');
+    }
+    _post_gui_grab_click_focus() {
+        const focus_grabber = this.gui.mouse_click_grabber;
+        if (!focus_grabber) {
+            return;
+        }
+        this.gui.mouse_click_grabber = null;
+
+        if (this.gui.mouse_focus) {
+            if (this.gui.mouse_focus === focus_grabber) {
+                return;
+            }
+
+            const mask = this.gui.mouse_focus_mask;
+            const xform_inv = this.gui.mouse_focus.get_global_transform_with_canvas().affine_inverse();
+            const click = xform_inv.xform(this.gui.last_mouse_pos);
+
+            for (let i = 0; i < 3; i++) {
+                if (mask & (1 << i)) {
+                    const mb = InputEventMouseButton.instance();
+                    mb.position.copy(click);
+                    mb.button_index = i + 1;
+                    mb.pressed = false;
+                    this.gui.mouse_focus.__gui_input(mb);
+                    mb.free();
+                }
+            }
+
+            this.gui.mouse_focus = focus_grabber;
+            const focus_xform_inv = this.gui.mouse_focus.get_global_transform_with_canvas().affine_inverse();
+            this.gui.focus_inv_xform.copy(focus_xform_inv);
+            const xform_last_pos = focus_xform_inv.xform(this.gui.last_mouse_pos);
+            click.copy(xform_last_pos);
+            Vector2.free(xform_last_pos);
+            Transform2D.free(focus_xform_inv);
+
+            for (let i = 0; i < 3; i++) {
+                if (mask & (1 << i)) {
+                    const mb = InputEventMouseButton.instance();
+                    mb.position.copy(click);
+                    mb.button_index = i + 1;
+                    mb.pressed = true;
+                    this.gui.mouse_focus.__gui_input(mb);
+                    mb.free();
+                }
+            }
+        }
+    }
+    _gui_accept_event() {
+        this.gui.key_event_accepted = true;
+        if (this.is_inside_tree()) {
+            this.set_input_as_handled();
+        }
+    }
 
     _gui_get_focus_owner() { }
 
-    /**
-     * @returns {Vector2}
-     */
     _get_window_offset() {
         const parent = this.get_parent();
         if (parent && 'get_global_position' in parent) {
-            // @ts-ignore
-            return parent.get_global_position();
+            return /** @type {Vector2} */(/** @type {any} */(parent).get_global_position());
         }
         return Vector2.ZERO;
     }
@@ -783,6 +1443,9 @@ export class Viewport extends Node {
         return this.size_override_stretch;
     }
 
+    /**
+     * returns new Transform2D
+     */
     get_final_transform() {
         return this.stretch_transform.clone().append(this.global_canvas_transform);
     }

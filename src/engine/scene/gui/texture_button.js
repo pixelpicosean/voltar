@@ -238,7 +238,6 @@ export class TextureButton extends BaseButton {
      */
     has_point_(p_point) {
         // TODO: bitmap click mask
-
         return super.has_point_(p_point);
     }
 

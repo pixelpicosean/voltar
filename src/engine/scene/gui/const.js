@@ -32,3 +32,11 @@ export const PRESET_BOTTOM_WIDE = 12;
 export const PRESET_VCENTER_WIDE = 13;
 export const PRESET_HCENTER_WIDE = 14;
 export const PRESET_WIDE = 15;
+
+export const FOCUS_NONE = 0;
+export const FOCUS_CLICK = 1;
+export const FOCUS_ALL = 2;
+
+export const MOUSE_FILTER_STOP = 0;
+export const MOUSE_FILTER_PASS = 1;
+export const MOUSE_FILTER_IGNORE = 2;

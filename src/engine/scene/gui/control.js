@@ -64,6 +64,8 @@ import {
     PRESET_MODE_MINSIZE,
     PRESET_MODE_KEEP_WIDTH,
     PRESET_MODE_KEEP_HEIGHT,
+    FOCUS_NONE,
+    MOUSE_FILTER_STOP,
 } from './const';
 
 
@@ -155,6 +157,9 @@ export class Control extends CanvasItem {
     get theme() { return this.c_data.theme }
     set theme(value) { this.set_theme(value) }
 
+    get focus_mode() { return this.c_data.focus_mode }
+    set focus_mode(value) { this.set_focus_mode(value) }
+
     constructor() {
         super();
 
@@ -171,6 +176,7 @@ export class Control extends CanvasItem {
 
             margin: [0, 0, 0, 0],
             anchor: [ANCHOR_BEGIN, ANCHOR_BEGIN, ANCHOR_BEGIN, ANCHOR_BEGIN],
+            focus_mode: FOCUS_NONE,
             h_grow: GROW_DIRECTION_END,
             v_grow: GROW_DIRECTION_END,
 
@@ -185,7 +191,9 @@ export class Control extends CanvasItem {
             expand: 1,
             custom_minimum_size: new Vector2(),
 
-            pass_on_modal_close_click: false,
+            pass_on_modal_close_click: true,
+
+            mouse_filter: MOUSE_FILTER_STOP,
 
             clip_contents: false,
 
@@ -196,6 +204,7 @@ export class Control extends CanvasItem {
              * @type {Control}
              */
             parent: null,
+            drag_owner: null,
             modal_exclusive: false,
             modal_frame: 0,
             theme: null,
@@ -230,8 +239,6 @@ export class Control extends CanvasItem {
         };
 
         this.blend_mode = BLEND_MODES.NORMAL;
-
-        this.hit_area = new Rect2();
     }
 
     /* virtual */
@@ -485,7 +492,9 @@ export class Control extends CanvasItem {
     /**
      * @param {Vector2Like} p_point
      */
-    has_point(p_point) { return undefined }
+    has_point(p_point) {
+        return /** @type {boolean} */(undefined)
+    }
 
     _get_minimum_size() {
         return /** @type {Vector2} */(null);
@@ -495,6 +504,8 @@ export class Control extends CanvasItem {
      * @param {InputEvent} p_event
      */
     _gui_input(p_event) { }
+
+    _clips_input() { return false }
 
     /**
      * @private
@@ -508,6 +519,10 @@ export class Control extends CanvasItem {
         if (this.is_inside_tree()) {
             this.get_viewport()._gui_accept_event();
         }
+    }
+
+    clips_input(){
+        return this._clips_input();
     }
 
     /* public */
@@ -601,6 +616,32 @@ export class Control extends CanvasItem {
      */
     set_rect_clip_content(value) {
         this.c_data.rect_clip_content = value;
+        this.update();
+    }
+
+    /**
+     * @param {number} p_focus_mode
+     */
+    set_focus_mode(p_focus_mode) {
+        if (this.is_inside_tree() && p_focus_mode === FOCUS_NONE && this.c_data.focus_mode !== FOCUS_NONE && this.has_focus()) {
+            this.release_focus();
+        }
+        this.c_data.focus_mode = p_focus_mode;
+    }
+
+    has_focus() {
+        return this.is_inside_tree() && this.get_viewport()._gui_control_has_focus(this);
+    }
+
+    grab_focus() {
+        this.get_viewport()._gui_control_grab_focus(this);
+    }
+    release_focus() {
+        if (!this.has_focus()) {
+            return;
+        }
+
+        this.get_viewport()._gui_remove_focus();
         this.update();
     }
 
@@ -1344,6 +1385,16 @@ export class Control extends CanvasItem {
     /* private */
 
     /**
+     * @param {boolean} p_pass_on
+     */
+    set_pass_on_modal_close_click(p_pass_on) {
+        this.c_data.pass_on_modal_close_click = p_pass_on;
+    }
+    pass_on_modal_close_click() {
+        return this.c_data.pass_on_modal_close_click;
+    }
+
+    /**
      * @param {Vector2Like} p_point
      */
     has_point_(p_point) {
@@ -1380,6 +1431,13 @@ export class Control extends CanvasItem {
         const size = Vector2.new(rect.width, rect.height);
         Rect2.free(rect);
         return size;
+    }
+
+    get_transform() {
+        const xform = this._get_internal_transform();
+        xform.tx += this.c_data.pos_cache.x;
+        xform.ty += this.c_data.pos_cache.y;
+        return xform;
     }
 
     /**
@@ -1583,6 +1641,9 @@ export class Control extends CanvasItem {
         Transform2D.free(xform);
     }
 
+    /**
+     * returns new Transform2D
+     */
     _get_internal_transform() {
         const rot_scale = Transform2D.new();
         rot_scale.set_rotation_and_scale(this.c_data.rotation, this.c_data.scale);
@@ -1648,3 +1709,14 @@ export class Control extends CanvasItem {
     }
 }
 node_class_map['Control'] = GDCLASS(Control, CanvasItem)
+
+/**
+ * @param {Control} p_a
+ * @param {Control} p_b
+ */
+export function CComparator(p_a, p_b) {
+    if (p_a.get_canvas_layer() === p_b.get_canvas_layer()) {
+        return p_b.is_greater_than(p_a) ? -1 : 1;
+    }
+    return p_a.get_canvas_layer() - p_b.get_canvas_layer();
+}
