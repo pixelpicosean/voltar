@@ -32,6 +32,10 @@ export const NOTIFICATION_INTERNAL_PROCESS = 25;
 export const NOTIFICATION_INTERNAL_PHYSICS_PROCESS = 26;
 export const NOTIFICATION_POST_ENTER_TREE = 27;
 
+/** @type {number[]} */
+const this_stack = [];
+/** @type {number[]} */
+const that_stack = [];
 
 class Data {
     constructor() {
@@ -254,6 +258,49 @@ export class Node extends VObject {
         }
 
         this._propagate_pause_owner(owner);
+    }
+
+    /**
+     * @param {Node} p_node
+     */
+    is_greater_than(p_node) {
+        this_stack.length = this.data.depth;
+        that_stack.length = p_node.data.depth;
+
+        /** @type {Node} */
+        let n = this;
+        let idx = this.data.depth - 1;
+        while (n) {
+            this_stack[idx--] = n.data.pos;
+            n = n.data.parent;
+        }
+        n = p_node;
+        idx = p_node.data.depth - 1;
+        while (n) {
+            that_stack[idx--] = n.data.pos;
+            n = n.data.parent;
+        }
+        idx = 0;
+
+        let res = false;
+        while (true) {
+            const this_idx = (idx >= this.data.depth) ? -2 : this_stack[idx];
+            const that_idx = (idx >= p_node.data.depth) ? -2 : that_stack[idx];
+
+            if (this_idx > that_idx) {
+                res = true;
+                break;
+            } else if (this_idx < that_idx) {
+                res = false;
+                break;
+            } else if (this_idx === -2) {
+                res = false;
+                break;
+            }
+            idx++;
+        }
+
+        return res;
     }
 
     /* private */
