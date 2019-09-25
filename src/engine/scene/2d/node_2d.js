@@ -161,6 +161,10 @@ export class Node2D extends CanvasItem {
         this.set_transform_n(mat.a, mat.b, mat.c, mat.d, mat.tx, mat.ty);
     }
 
+    get_transform() {
+        return this._transform.clone();
+    }
+
     /**
      * @param {number} x
      * @param {number} y
