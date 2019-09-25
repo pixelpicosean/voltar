@@ -236,7 +236,7 @@ export class Input extends VObject {
 
                 if (this.main_loop && this.emulate_touch_from_mouse && mb.button_index === 1) {
                     // TODO: emulate touch from mouse
-                    // const touch_event = new InputEventScreenTouch();
+                    // const touch_event = InputEventScreenTouch.instance();
                     // touch_event.pressed = mb.is_pressed();
                     // touch_event.position.copy(mb.position);
                     // this.main_loop.input_event(touch_event);

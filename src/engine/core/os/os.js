@@ -15,6 +15,7 @@ import {
     BUTTON_LEFT,
     BUTTON_MIDDLE,
     BUTTON_RIGHT,
+    InputEventKey,
 } from "./input_event";
 import { VisualServer } from "engine/servers/visual_server";
 import { VSG } from "engine/servers/visual/visual_server_globals";
@@ -162,11 +163,12 @@ export class OS {
         const on_pointer_move = (/** @type {MouseEvent | PointerEvent} */e) => {
             const input_mask = this.input.get_mouse_button_mask();
             map_position_to_canvas_local(mouse_pos, canvas, e.clientX, e.clientY);
-            if (!cursor_inside_canvas && !input_mask) {
-                return false;
-            }
+            // FIXME: should we only care about mouse motion when cursor is inside canvas?
+            // if (!cursor_inside_canvas && !input_mask) {
+            //     return false;
+            // }
 
-            const ev = new InputEventMouseMotion();
+            const ev = InputEventMouseMotion.instance();
             map_position_to_canvas_local(ev.position, canvas, e.clientX, e.clientY);
             ev.global_position.copy(ev.position);
             ev.button_mask = input_mask;
@@ -179,7 +181,7 @@ export class OS {
             return false;
         };
         const on_pointer_button = (/** @type {MouseEvent | PointerEvent} */e, /** @type {boolean} */is_down) => {
-            const ev = new InputEventMouseButton();
+            const ev = InputEventMouseButton.instance();
             ev.pressed = is_down;
             map_position_to_canvas_local(ev.position, canvas, e.clientX, e.clientY);
             ev.global_position.copy(ev.position);
@@ -247,9 +249,39 @@ export class OS {
             // canvas.addEventListener('touchmove', on_pointer_move, true);
         }
 
+        /**
+         * @param {KeyboardEvent} e
+         */
+        function setup_key_event(e) {
+            const ev = InputEventKey.instance();
+            ev.echo = e.repeat;
+            ev.alt = e.altKey;
+            ev.shift = e.shiftKey;
+            ev.meta = e.metaKey;
+            ev.control = e.ctrlKey;
+            ev.scancode = e.keyCode;
+            ev.unicode = e.char;
+            return ev;
+        }
+
         // keyboard events
         window.addEventListener('keydown', (e) => {
-
+            const ev = setup_key_event(e);
+            ev.pressed = true;
+            if (/** @type {any} */(ev.unicode) === 0) {
+                // TODO: defer to keypress event for legacy unicode retrieval
+                // return false;
+            }
+            this.input.parse_input_event(ev);
+            // TODO: resume audio context after input
+            return true;
+        })
+        window.addEventListener('keyup', (e) => {
+            const ev = setup_key_event(e);
+            ev.pressed = false;
+            this.input.parse_input_event(ev);
+            // TODO: resume audio context after input
+            return /** @type {any} */(ev.unicode) !== 0;
         })
 
         // over/leave and focus/blur events

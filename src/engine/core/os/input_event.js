@@ -28,6 +28,24 @@ export const BUTTON_MASK_MIDDLE = (1 << (BUTTON_MIDDLE - 1));
 export const BUTTON_MASK_XBUTTON1 = (1 << (BUTTON_XBUTTON1 - 1));
 export const BUTTON_MASK_XBUTTON2 = (1 << (BUTTON_XBUTTON2 - 1));
 
+/** @type {Object<string, InputEvent[]>} */
+const pool_map = {};
+/**
+ * @param {string} type
+ * @param {typeof InputEvent} ctor
+ */
+function create_pool(type, ctor) {
+    pool_map[type] = [];
+
+    ctor.instance = () => {
+        let inst = pool_map[type].pop();
+        if (!inst) {
+            return new ctor;
+        }
+        return inst.init();
+    }
+}
+
 /**
  * @typedef ActionStatusRet
  * @property {boolean} pressed
@@ -42,8 +60,17 @@ const action_status = {
 export class InputEvent {
     get class() { return 'InputEvent' }
 
+    static instance() { return new InputEvent }
+
     constructor() {
         this.device = 0;
+    }
+    init() {
+        this.device = 0;
+        return this;
+    }
+    free() {
+        pool_map[this.class].push(this);
     }
 
     /**
@@ -89,7 +116,7 @@ export class InputEvent {
      * @param {Transform2D} p_xform
      * @param {Vector2Like} p_local_ofs
      */
-    xformed_by(p_xform, p_local_ofs = Vector2.ZERO) { return /** @type {InputEvent} */(null) }
+    xformed_by(p_xform, p_local_ofs = Vector2.ZERO) { return /** @type {InputEvent} */(this) }
 
     /**
      * @param {InputEvent} p_event
@@ -98,9 +125,12 @@ export class InputEvent {
      */
     action_match(p_event, p_ret, p_deadzone) { return false }
 }
+create_pool('InputEvent', InputEvent);
 
 export class InputEventWithModifiers extends InputEvent {
     get class() { return 'InputEventWithModifiers' }
+
+    static instance() { return new InputEventWithModifiers }
 
     constructor() {
         super();
@@ -109,6 +139,13 @@ export class InputEventWithModifiers extends InputEvent {
         this.control = false;
         this.meta = false;
         this.shift = false;
+    }
+    init() {
+        this.alt = false;
+        this.control = false;
+        this.meta = false;
+        this.shift = false;
+        return this;
     }
 
     /* private */
@@ -123,9 +160,12 @@ export class InputEventWithModifiers extends InputEvent {
         this.meta = event.meta;
     }
 }
+create_pool('InputEventWithModifiers', InputEventWithModifiers)
 
 export class InputEventKey extends InputEventWithModifiers {
     get class() { return 'InputEventKey' }
+
+    static instance() { return new InputEventKey }
 
     constructor() {
         super();
@@ -133,10 +173,20 @@ export class InputEventKey extends InputEventWithModifiers {
         this.pressed = false;
 
         this.scancode = 0;
-        this.unicode = 0;
+        this.unicode = '';
 
         this.echo = false;
     }
+    init() {
+        this.pressed = false;
+
+        this.scancode = 0;
+        this.unicode = '';
+
+        this.echo = false;
+        return this;
+    }
+
     is_pressed() { return this.pressed }
 
     get_scancode_with_modifiers() {
@@ -218,9 +268,12 @@ export class InputEventKey extends InputEventWithModifiers {
         return kc;
     }
 }
+create_pool('InputEventKey', InputEventKey)
 
 export class InputEventMouse extends InputEventWithModifiers {
     get class() { return 'InputEventMouse' }
+
+    static instance() { return new InputEventMouse }
 
     constructor() {
         super();
@@ -230,10 +283,19 @@ export class InputEventMouse extends InputEventWithModifiers {
         this.position = new Vector2();
         this.global_position = new Vector2();
     }
+    init() {
+        this.button_mask = 0;
+        this.position.set(0, 0);
+        this.global_position.set(0, 0);
+        return this;
+    }
 }
+create_pool('InputEventMouse', InputEventMouse)
 
 export class InputEventMouseButton extends InputEventMouse {
     get class() { return 'InputEventMouseButton' }
+
+    static instance() { return new InputEventMouseButton }
 
     constructor() {
         super();
@@ -243,16 +305,25 @@ export class InputEventMouseButton extends InputEventMouse {
         this.factor = 1;
         this.pressed = false;
     }
+    init() {
+        this.button_index = 0;
+        this.doubleclick = false;
+        this.factor = 1;
+        this.pressed = false;
+        return this;
+    }
+
     is_pressed() { return this.pressed }
 
     /* private */
 
     /**
+     * returns new InputEventMouseButton
      * @param {Transform2D} p_xform
      * @param {Vector2Like} p_local_ofs
      */
     xformed_by(p_xform, p_local_ofs = Vector2.ZERO) {
-        const mb = new InputEventMouseButton();
+        const mb = InputEventMouseButton.instance();
         mb.device = this.device;
         mb.set_modifiers_from_event(this);
 
@@ -301,15 +372,23 @@ export class InputEventMouseButton extends InputEventMouse {
         return `InputEventMouseButton : button_index=${button_index_string}, pressed=${this.pressed ? 'true' : 'false'}, position=(${this.position.x}, ${this.position.y}), button_mask=${this.button_mask}, doubleclick=${this.doubleclick ? 'true' : 'false'}`
     }
 }
+create_pool('InputEventMouseButton', InputEventMouseButton)
 
 export class InputEventMouseMotion extends InputEventMouse {
     get class() { return 'InputEventMouseMotion' }
+
+    static instance() { return new InputEventMouseMotion }
 
     constructor() {
         super();
 
         this.relative = new Vector2();
         this.speed = new Vector2();
+    }
+    init() {
+        this.relative.set(0, 0);
+        this.speed.set(0, 0);
+        return this;
     }
 
     /* private */
@@ -319,7 +398,7 @@ export class InputEventMouseMotion extends InputEventMouse {
      * @param {Vector2Like} p_local_ofs
      */
     xformed_by(p_xform, p_local_ofs = Vector2.ZERO) {
-        const mm = new InputEventMouseMotion();
+        const mm = InputEventMouseMotion.instance();
         mm.device = this.device;
         mm.set_modifiers_from_event(this);
 
@@ -378,9 +457,12 @@ export class InputEventMouseMotion extends InputEventMouse {
         return true;
     }
 }
+create_pool('InputEventMouseMotion', InputEventMouseMotion)
 
 export class InputEventAction extends InputEvent {
     get class() { return 'InputEventAction' }
+
+    static instance() { return new InputEventAction }
 
     constructor() {
         super();
@@ -388,6 +470,12 @@ export class InputEventAction extends InputEvent {
         this.action = '';
         this.pressed = false;
         this.strength = 1;
+    }
+    init() {
+        this.action = '';
+        this.pressed = false;
+        this.strength = 1;
+        return this;
     }
 
     /**
@@ -427,3 +515,4 @@ export class InputEventAction extends InputEvent {
     is_action_type() { return true }
     as_text() { return `InputEventAction : action=${this.action}, pressed=(${this.pressed ? 'true' : 'false'})` }
 }
+create_pool('InputEventAction', InputEventAction)
