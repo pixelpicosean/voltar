@@ -301,6 +301,10 @@ export class Transform2D {
         return out;
     }
 
+    basis_determinant() {
+        return this.a * this.d - this.b * this.c;
+    }
+
     /**
      * @param {Transform2D} p_matrix
      */
