@@ -74,6 +74,20 @@ export class MainScene extends v.Node {
         const mouse_left = new v.InputEventMouseButton();
         mouse_left.button_index = 1;
         v.InputMap.action_add_event('left', mouse_left);
+
+        const btn = /** @type {v.TextureButton} */(this.get_node('texture_button'))
+        btn
+            .connect('mouse_entered', () => {
+                console.log('button mouse_entered')
+            })
+            .connect('pressed', () => {
+                console.log('button pressed')
+            })
+
+        this.get_node('CenterContainer')
+            .connect('mouse_entered', () => {
+                console.log('CenterContainer mouse_entered')
+            })
     }
     _exit_tree() {
         console.log('_exit_tree')
@@ -83,12 +97,14 @@ export class MainScene extends v.Node {
      * @param {number} delta
      */
     _process(delta) {
-        if (this.spr) {
-            this.spr.set_rotation(this.spr.rotation + Math.PI * delta)
-        }
+        this.spr.rotation += Math.PI * 0.5 * delta;
 
         if (v.Input.is_action_just_pressed('left')) {
-            console.log('pressed left')
+            // console.log('pressed left')
+        }
+
+        if (v.Input.is_action_just_pressed('ui_accept')) {
+            console.log('ui_accept')
         }
     }
 
