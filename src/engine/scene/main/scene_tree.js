@@ -32,6 +32,7 @@ import {
     NOTIFICATION_PAUSED,
     NOTIFICATION_UNPAUSED,
 } from '../main/node';
+import { InputEvent } from 'engine/core/os/input_event';
 
 
 const NOTIFICATION_TRANSFORM_CHANGED = 2000;
@@ -827,6 +828,9 @@ export class SceneTree extends MainLoop {
             this.root = null;
         }
     }
+    /**
+     * @param {InputEvent} p_event
+     */
     input_event(p_event) {
         this.current_event++;
         this.root_lock++;
@@ -850,6 +854,9 @@ export class SceneTree extends MainLoop {
         }
 
         this._call_idle_callbacks();
+
+        // recycle input events not consumed yet
+        p_event.free();
     }
     /**
      * @param {string} p_text

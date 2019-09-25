@@ -1,13 +1,12 @@
-import { default_font_name } from 'engine/scene/resources/theme';
 import { preload_queue, resource_map, res_class_map } from 'engine/registry';
+import { default_font_name } from 'engine/scene/resources/theme';
 import { ResourceLoader } from './io/resource_loader';
+
 
 /**
  * @typedef {(percent: number) => any} ProgressCallback
  * @typedef {Function} CompleteCallback
  */
-
-const empty = Object.freeze(Object.create(null));
 
 export class Engine {
     static get_singleton() { return singleton }
@@ -29,6 +28,8 @@ export class Engine {
         this.physics_frames = 0;
         this.idle_frames = 0;
 
+        this.frames_drawn = 0;
+
         /** @type {import('engine/scene/main/scene_tree').SceneTree} */
         this.main_loop = null;
 
@@ -38,10 +39,10 @@ export class Engine {
 
     is_in_physics_frame() { return this.in_physics_frame }
 
+    get_frames_drawn() { return this.frames_drawn }
+
     get_main_loop() { return this.main_loop }
-    set_main_loop(value) {
-        this.main_loop = value;
-    }
+    set_main_loop(value) { this.main_loop = value }
 
     /**
      * @param {(percent: number) => any} progress_callback

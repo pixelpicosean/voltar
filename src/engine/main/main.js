@@ -155,6 +155,7 @@ export const Main = {
         if (OS.get_singleton().can_draw() && !this.disable_render_loop) {
             // TODO: force_redraw_requested && is_in_low_processor_usage_mode()
             VisualServer.get_singleton().draw(scaled_step);
+            Engine.get_singleton().frames_drawn++;
             this.force_redraw_requested = false;
         }
 

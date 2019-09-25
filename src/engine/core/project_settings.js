@@ -9,6 +9,8 @@ import {
     STRETCH_ASPECT_KEEP_HEIGHT,
     STRETCH_ASPECT_EXPAND,
 } from "engine/scene/main/scene_tree";
+import { InputEventKey } from "./os/input_event";
+import { KEYS } from "./os/keyboard";
 
 /**
  * @typedef ApplicationSettings
@@ -52,7 +54,7 @@ import {
   */
 
 /**
- * @typedef {Object<string, string>} InputSettings
+ * @typedef {Object<string, { deadzone?: number, events: any[] }>} InputSettings
  */
 
 /**
@@ -127,6 +129,107 @@ export class ProjectSettings {
         this.physics = DefaultSettings.physics;
         this.input = DefaultSettings.input;
         this.layer_map = DefaultSettings.layer_map;
+
+        // [Begin] pre-defined keys
+        let action = null;
+        let events = null;
+        let key = null;
+
+        action = { deadzone: 0.5, events: [] };
+        events = action.events;
+        key = InputEventKey.instance();
+        key.scancode = KEYS['ENTER'];
+        events.push(key);
+        key = InputEventKey.instance();
+        key.scancode = KEYS['SPACE'];
+        events.push(key);
+        this.input['ui_accept'] = action;
+
+        action = { deadzone: 0.5, events: [] };
+        events = action.events;
+        key = InputEventKey.instance();
+        key.scancode = KEYS['SPACE'];
+        events.push(key);
+        this.input['ui_select'] = action;
+
+        action = { deadzone: 0.5, events: [] };
+        events = action.events;
+        key = InputEventKey.instance();
+        key.scancode = KEYS['ESC'];
+        events.push(key);
+        this.input['ui_cancel'] = action;
+
+        action = { deadzone: 0.5, events: [] };
+        events = action.events;
+        key = InputEventKey.instance();
+        key.scancode = KEYS['TAB'];
+        events.push(key);
+        this.input['ui_focus_next'] = action;
+
+        action = { deadzone: 0.5, events: [] };
+        events = action.events;
+        key = InputEventKey.instance();
+        key.scancode = KEYS['TAB'];
+        key.shift = true;
+        events.push(key);
+        this.input['ui_focus_prev'] = action;
+
+        action = { deadzone: 0.5, events: [] };
+        events = action.events;
+        key = InputEventKey.instance();
+        key.scancode = KEYS['LEFT'];
+        events.push(key);
+        this.input['ui_left'] = action;
+
+        action = { deadzone: 0.5, events: [] };
+        events = action.events;
+        key = InputEventKey.instance();
+        key.scancode = KEYS['RIGHT'];
+        events.push(key);
+        this.input['ui_right'] = action;
+
+        action = { deadzone: 0.5, events: [] };
+        events = action.events;
+        key = InputEventKey.instance();
+        key.scancode = KEYS['UP'];
+        events.push(key);
+        this.input['ui_up'] = action;
+
+        action = { deadzone: 0.5, events: [] };
+        events = action.events;
+        key = InputEventKey.instance();
+        key.scancode = KEYS['DOWN'];
+        events.push(key);
+        this.input['ui_down'] = action;
+
+        action = { deadzone: 0.5, events: [] };
+        events = action.events;
+        key = InputEventKey.instance();
+        key.scancode = KEYS['PAGE_UP'];
+        events.push(key);
+        this.input['ui_page_up'] = action;
+
+        action = { deadzone: 0.5, events: [] };
+        events = action.events;
+        key = InputEventKey.instance();
+        key.scancode = KEYS['PAGE_DOWN'];
+        events.push(key);
+        this.input['ui_page_down'] = action;
+
+        action = { deadzone: 0.5, events: [] };
+        events = action.events;
+        key = InputEventKey.instance();
+        key.scancode = KEYS['HOME'];
+        events.push(key);
+        this.input['ui_home'] = action;
+
+        action = { deadzone: 0.5, events: [] };
+        events = action.events;
+        key = InputEventKey.instance();
+        key.scancode = KEYS['END'];
+        events.push(key);
+        this.input['ui_end'] = action;
+        // [End] pre-defined keys
 
         for (let s of settings) {
             deep_merge(this, s);

@@ -110,7 +110,15 @@ export class InputMap {
     load_from_globals() {
         this.input_map.clear();
         const inputs = ProjectSettings.get_singleton().input;
-        // TODO: load input from global settings
+        for (const name in inputs) {
+            const action = inputs[name];
+            const events = action.events;
+
+            this.add_action(name, action.deadzone !== undefined ? action.deadzone : 0.5);
+            for (const e of events) {
+                if (e) this.action_add_event(name, e);
+            }
+        }
     }
 
     /* private */
