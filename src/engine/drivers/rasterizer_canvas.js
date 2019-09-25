@@ -279,7 +279,7 @@ export class RasterizerCanvas extends VObject {
         for (let c of p_item.commands) {
             switch (c.type) {
                 case TYPE_RECT: {
-                    let rect = /** @type {CommandRect} */(c);
+                    const rect = /** @type {CommandRect} */(c);
                     if (!rect.texture) rect.texture = white_tex;
                     rect.calculate_vertices(p_item.final_transform, p_item.final_modulate);
                     // TODO: add blend mode support, maybe a material system just like Godot
@@ -287,7 +287,7 @@ export class RasterizerCanvas extends VObject {
                     this.batch.currentRenderer.render(rect);
                 } break;
                 case TYPE_NINEPATCH: {
-                    let np = /** @type {CommandNinePatch} */(c);
+                    const np = /** @type {CommandNinePatch} */(c);
                     if (!np.texture) np.texture = white_tex;
                     np.calculate_vertices(p_item.final_transform, p_item.final_modulate);
                     this.batch.currentRenderer.render(np);

@@ -11,7 +11,7 @@ import {
 } from 'engine/core/math/math_funcs';
 import { Math_PI } from 'engine/core/math/math_defs';
 import { BLEND_MODES } from 'engine/drivers/constants';
-import { CommandRect } from 'engine/servers/visual/commands';
+import { } from 'engine/servers/visual/commands';
 
 import {
     NOTIFICATION_ENTER_TREE,
@@ -79,8 +79,6 @@ class Particle {
         this.base_color = new Color(1, 1, 1, 1);
 
         this.seed = 0;
-
-        this.command = new CommandRect();
     }
     static new() {
         const p = ParticlePool.pop();
@@ -1044,7 +1042,11 @@ export class CPUParticles2D extends Node2D {
         }
     }
 
-    _update_particle_data_buffer() { }
+    _update_particle_data_buffer() {
+        if (this.draw_order !== DRAW_ORDER_INDEX) {
+            // TODO: sort particle_order
+        }
+    }
 
     _update_render_thread() {
         // TODO: multimesh_set_as_bulk_array
