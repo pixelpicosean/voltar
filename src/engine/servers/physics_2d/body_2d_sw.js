@@ -593,14 +593,20 @@ export class Body2DSW extends CollisionObject2DSW {
         let do_motion = false;
 
         if (this.mode === BodyMode.KINEMATIC) {
+            const new_origin = this.new_transform.get_origin();
+            const origin = this.transform.get_origin();
+
             // compute motion, angular and etc. velocities from prev transform
-            motion.copy(this.new_transform.origin).subtract(this.transform.origin);
+            motion.copy(new_origin).subtract(origin);
             this.linear_velocity.copy(motion).scale(1 / p_step);
 
-            const rot = this.new_transform.rotation - this.transform.rotation;
+            const rot = this.new_transform.get_rotation() - this.transform.get_rotation();
             this.angular_velocity = rot / p_step;
 
             do_motion = true;
+
+            Vector2.free(origin);
+            Vector2.free(new_origin);
         } else {
             if (!this.omit_force_integration && !this.first_integration) {
                 // overridden by direct state query
@@ -675,8 +681,8 @@ export class Body2DSW extends CollisionObject2DSW {
         const total_angular_velocity = this.angular_velocity + this.biased_angular_velocity;
         const total_linear_velocity = this.linear_velocity.clone().add(this.biased_linear_velocity);
 
-        const angle = this.transform.rotation + total_angular_velocity * p_step;
-        const pos = this.transform.origin.clone().add(total_linear_velocity.scale(p_step));
+        const angle = this.transform.get_rotation() + total_angular_velocity * p_step;
+        const pos = this.transform.get_origin().add(total_linear_velocity.scale(p_step));
 
         const t = Transform2D.new().rotate(angle).translate(pos.x, pos.y);
         this._set_transform(t, this.continuous_cd_mode === CCDMode.DISABLED);
@@ -693,9 +699,15 @@ export class Body2DSW extends CollisionObject2DSW {
 
     get_motion() {
         if (this.mode > BodyMode.KINEMATIC) {
-            return this.new_transform.origin.clone().subtract(this.transform.origin);
+            const origin = this.transform.get_origin();
+            const motion = this.new_transform.get_origin().subtract(origin);
+            Vector2.free(origin);
+            return motion;
         } else if (this.mode === BodyMode.KINEMATIC) {
-            return this.transform.origin.clone().subtract(this.new_transform.origin);
+            const origin = this.new_transform.get_origin();
+            const motion = this.transform.get_origin().subtract(origin);
+            Vector2.free(origin);
+            return motion;
         }
         return Vector2.new(0, 0);
     }

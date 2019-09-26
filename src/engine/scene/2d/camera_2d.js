@@ -290,7 +290,7 @@ export class Camera2D extends Node2D {
         const rect = this.viewport.get_visible_rect();
         const screen_size = Vector2.new(rect.width, rect.height);
 
-        const current_camera_pos = this.get_global_transform().origin;
+        const current_camera_pos = this.get_global_transform().get_origin();
         if (this._anchor_mode === ANCHOR_MODE_DRAG_CENTER) {
             if (this._offset_h < 0) {
                 this.camera_pos.x = current_camera_pos.x + screen_size.x * 0.5 * this.drag_margin[MARGIN_RIGHT] * this._offset_h;
@@ -305,6 +305,7 @@ export class Camera2D extends Node2D {
         } else if (this._anchor_mode === ANCHOR_MODE_FIXED_TOP_LEFT) {
             this.camera_pos.copy(current_camera_pos);
         }
+        Vector2.free(current_camera_pos);
 
         this._udpate_scroll();
     }
@@ -480,7 +481,7 @@ export class Camera2D extends Node2D {
         const rect = this.viewport.get_visible_rect();
         const screen_size = Vector2.new(rect.width, rect.height);
 
-        const new_camera_pos = this.get_global_transform().origin;
+        const new_camera_pos = this.get_global_transform().get_origin();
         const ret_camera_pos = Vector2.new();
 
         if (!this.first) {

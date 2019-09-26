@@ -607,16 +607,22 @@ const _collision_segment_circle = (cast_A, cast_B, with_margin) => {
             return;
         }
 
+        const B_origin = p_transform_B.get_origin();
+
         // endpoint a vs circle
-        if (TEST_POINT(separator, cast_A, cast_B, p_motion_A, p_motion_B, p_transform_A.xform(p_segment_A.a), p_transform_B.origin)) {
+        if (TEST_POINT(separator, cast_A, cast_B, p_motion_A, p_motion_B, p_transform_A.xform(p_segment_A.a), B_origin)) {
+            Vector2.free(B_origin);
             return;
         }
         // endpoint b vs circle
-        if (TEST_POINT(separator, cast_A, cast_B, p_motion_A, p_motion_B, p_transform_A.xform(p_segment_A.b), p_transform_B.origin)) {
+        if (TEST_POINT(separator, cast_A, cast_B, p_motion_A, p_motion_B, p_transform_A.xform(p_segment_A.b), B_origin)) {
+            Vector2.free(B_origin);
             return;
         }
 
         separator.generate_contacts();
+
+        Vector2.free(B_origin);
     }
 
     return solve;
@@ -788,11 +794,19 @@ const _collision_circle_circle = (cast_A, cast_B, with_margin) => {
             return;
         }
 
-        if (TEST_POINT(separator, cast_A, cast_B, p_motion_A, p_motion_B, p_transform_A.origin, p_transform_B.origin)) {
+        const A_origin = p_transform_A.get_origin();
+        const B_origin = p_transform_B.get_origin();
+
+        if (TEST_POINT(separator, cast_A, cast_B, p_motion_A, p_motion_B, A_origin, B_origin)) {
+            Vector2.free(A_origin);
+            Vector2.free(B_origin);
             return;
         }
 
         separator.generate_contacts();
+
+        Vector2.free(A_origin);
+        Vector2.free(B_origin);
     }
 
     return solve;
@@ -964,7 +978,9 @@ const _collision_circle_convex_polygon = (cast_A, cast_B, with_margin) => {
         // poly faces and poly points vs circle
         const point = Vector2.new();
         for (let i = 0, len = p_convex_B.get_point_count(); i < len; i++) {
-            if (TEST_POINT(separator, cast_A, cast_B, p_motion_A, p_motion_B, p_transform_A.origin, p_transform_B.xform(p_convex_B._points[i].pos, point))) {
+            const A_origin = p_transform_A.get_origin();
+            if (TEST_POINT(separator, cast_A, cast_B, p_motion_A, p_motion_B, A_origin, p_transform_B.xform(p_convex_B._points[i].pos, point))) {
+                Vector2.free(A_origin);
                 Vector2.free(point);
                 return;
             }
@@ -972,10 +988,12 @@ const _collision_circle_convex_polygon = (cast_A, cast_B, with_margin) => {
             const normal = p_convex_B.get_xformed_segment_normal(p_transform_B, i);
             if (!separator.test_axis(normal)) {
                 Vector2.free(normal);
+                Vector2.free(A_origin);
                 Vector2.free(point);
                 return;
             }
             Vector2.free(normal);
+            Vector2.free(A_origin);
         }
         Vector2.free(point);
 

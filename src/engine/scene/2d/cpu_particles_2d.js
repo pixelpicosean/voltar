@@ -687,14 +687,17 @@ export class CPUParticles2D extends Node2D {
         }
 
         if (p_what === NOTIFICATION_TRANSFORM_CHANGED) {
-            this.inv_emission_transform = this.get_global_transform().clone().affine_inverse();
+            this.inv_emission_transform.copy(this.get_global_transform()).affine_inverse();
 
             if (!this.local_coords) {
                 const inv_xform = this.inv_emission_transform;
                 const xform = Transform2D.new();
                 for (const p of this.particles) {
-                    xform.copy(p.transform);
-                    p.transform.copy(inv_xform).append(xform);
+                    if (p.active) {
+                        xform.copy(p.transform);
+                        // p.transform.copy(inv_xform).append(xform);
+                        p.transform.copy(xform).append(inv_xform);
+                    }
                 }
                 Transform2D.free(xform);
             }
@@ -769,9 +772,9 @@ export class CPUParticles2D extends Node2D {
             case PARAM_ANGULAR_VELOCITY: {
                 this._adjust_curve_range(p_curve, -360, 360);
             } break;
-            /*case PARAM_ORBIT_VELOCITY: {
+            case PARAM_ORBIT_VELOCITY: {
                 this._adjust_curve_range(p_curve, -500, 500);
-            } break;*/
+            } break;
             case PARAM_LINEAR_ACCEL: {
                 this._adjust_curve_range(p_curve, -200, 200);
             } break;
@@ -1029,7 +1032,7 @@ export class CPUParticles2D extends Node2D {
                     );
                 }
                 // Apply radial acceleration
-                const org = emission_xform.origin.clone();
+                const org = emission_xform.get_origin();
                 const diff = pos.clone().subtract(org);
                 if (diff.length_squared() > 0) {
                     force.add(diff.normalized().scale((this.parameters[PARAM_RADIAL_ACCEL] + tex_radial_accel) * lerp(1, randf(), this.randomness[PARAM_RADIAL_ACCEL])));

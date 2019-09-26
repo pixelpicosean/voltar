@@ -4,6 +4,7 @@ import { GDCLASS } from 'engine/core/v_object';
 import { NOTIFICATION_ENTER_TREE } from '../main/node';
 import { Node2D } from './node_2d';
 import { NOTIFICATION_TRANSFORM_CHANGED } from './canvas_item';
+import { Vector2 } from 'engine/core/math/vector2';
 
 
 export class RemoteTransform2D extends Node2D {
@@ -155,10 +156,12 @@ export class RemoteTransform2D extends Node2D {
                 const n_scale = n.get_scale();
 
                 if (!this._update_position) {
-                    n_trans.set_origin(our_trans.origin);
+                    const origin = our_trans.get_origin();
+                    n_trans.set_origin(origin);
+                    Vector2.free(origin);
                 }
                 if (!this._update_rotation) {
-                    n_trans.set_rotation(our_trans.rotation);
+                    n_trans.set_rotation(our_trans.get_rotation());
                 }
 
                 n.set_global_transform(our_trans);
@@ -178,10 +181,12 @@ export class RemoteTransform2D extends Node2D {
                 const n_scale = n.get_scale();
 
                 if (!this._update_position) {
-                    n_trans.set_origin(our_trans.origin);
+                    const origin = our_trans.get_origin();
+                    n_trans.set_origin(origin);
+                    Vector2.free(origin);
                 }
                 if (!this._update_rotation) {
-                    n_trans.set_rotation(our_trans.rotation);
+                    n_trans.set_rotation(our_trans.get_rotation());
                 }
 
                 n.set_transform(our_trans);

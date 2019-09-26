@@ -121,7 +121,7 @@ export class Control extends CanvasItem {
     get rect_position() { return this.c_data.pos_cache }
     set rect_position(value) { this.set_rect_position(value) }
 
-    get rect_global_position() { return this.get_global_transform().origin }
+    get rect_global_position() { return this.get_global_transform().get_origin() }
     set rect_global_position(value) { this.set_rect_global_position(value) }
 
     get rect_size() { return this.c_data.size_cache }

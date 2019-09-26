@@ -807,7 +807,10 @@ export class Space2DSW {
                     r_result.collider_metadata = rcd.best_object.get_shape_metadata(rcd.best_shape);
 
                     const body = /** @type {Body2DSW} */ (rcd.best_object);
-                    const rel_vec = r_result.collision_point.clone().subtract(body.transform.origin);
+                    const body_origin = body.transform.get_origin();
+                    const from_origin = p_from.get_origin();
+
+                    const rel_vec = r_result.collision_point.clone().subtract(body_origin);
                     r_result.collider_velocity.set(
                         -body.angular_velocity * rel_vec.y,
                         body.angular_velocity * rel_vec.x
@@ -815,8 +818,10 @@ export class Space2DSW {
 
                     r_result.motion.copy(p_motion).scale(safe);
                     r_result.remainder.copy(p_motion).subtract(p_motion.x * safe, p_motion.y * safe);
-                    r_result.motion.add(body_transform.origin).subtract(p_from.origin);
+                    r_result.motion.add(body_origin).subtract(from_origin);
 
+                    Vector2.free(from_origin);
+                    Vector2.free(body_origin);
                     Vector2.free(rel_vec);
                 }
 
@@ -829,8 +834,9 @@ export class Space2DSW {
         if (!collided && r_result) {
             r_result.motion.copy(p_motion);
             r_result.remainder.set(0, 0);
-            const origin = body_transform.origin.clone();
-            r_result.motion.add(origin.subtract(p_from.origin));
+            const origin = body_transform.get_origin();
+            const from_origin = p_from.get_origin();
+            r_result.motion.add(origin.subtract(from_origin));
             Vector2.free(origin);
         }
 
@@ -969,11 +975,13 @@ export class Space2DSW {
                                         if (col_obj.type === CollisionObjectType.BODY) {
                                             const body = /** @type {Body2DSW} */ (col_obj);
 
-                                            const rel_vec = b.subtract(body.transform.origin);
+                                            const origin = body.transform.get_origin();
+                                            const rel_vec = b.subtract(origin);
                                             result.collider_velocity.set(
                                                 -body.angular_velocity * rel_vec.y,
                                                 body.angular_velocity * rel_vec.x
                                             ).add(body.linear_velocity);
+                                            Vector2.free(origin);
                                         }
                                     }
                                 }

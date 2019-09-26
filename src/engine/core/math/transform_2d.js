@@ -39,67 +39,90 @@ export class Transform2D {
         return Transform2D;
     }
 
-    get origin() {
-        return this._origin.set(this.tx, this.ty);
-    }
-    get_origin() {
-        return this._origin.set(this.tx, this.ty);
+    /**
+     * returns new Vector2
+     * @param {Vector2} [out]
+     */
+    get_origin(out) {
+        out = out || Vector2.new();
+        return out.set(this.tx, this.ty);
     }
     /**
-     * @param {Vector2} value
+     * @param {Vector2Like} value
      */
     set_origin(value) {
-        this._origin.copy(value);
         this.tx = value.x;
         this.ty = value.y;
+        return this;
     }
     /**
      * @param {number} x
      * @param {number} y
      */
     set_origin_n(x, y) {
-        this._origin.set(x, y);
         this.tx = x;
         this.ty = y;
+        return this;
     }
 
-    get rotation() {
-        // sort out rotation / skew..
-        const a = this.a;
-        const b = this.b;
-        const c = this.c;
-        const d = this.d;
-
-        const skew_x = -Math.atan2(-c, d);
-        const skew_y = Math.atan2(b, a);
-
-        const delta = Math.abs(skew_x + skew_y);
-
-        let rotation = 0;
-        if (delta < 0.00001 || Math.abs(Math_PI2 - delta) < 0.00001) {
-            rotation = skew_y;
-
-            if (a < 0 && d >= 0) {
-                rotation += (rotation <= 0) ? Math.PI : -Math.PI;
-            }
+    get_rotation() {
+        const det = this.basis_determinant();
+        const m = this.orthonormalized();
+        if (det < 0) {
+            m.scale_basis(1, -1);
         }
-        else {
-            rotation = 0;
-        }
-
-        return rotation;
+        const rot = Math.atan2(m.b, m.a);
+        Transform2D.free(m);
+        return rot;
     }
-    set rotation(value) {
-        // TODO: do not support skew, since it is not supported by Godot
+    set_rotation(value) {
+        const scale = this.get_scale();
         const cr = Math.cos(value);
         const sr = Math.sin(value);
         this.a = cr;
         this.b = sr;
         this.c = -sr;
         this.d = cr;
+        Vector2.free(scale);
+        return this;
     }
-    set_rotation(value) {
-        this.rotation = value;
+
+    /**
+     * returns new Vector2
+     * @param {Vector2} [out]
+     */
+    get_scale(out) {
+        const basis_determinant = Math.sign(this.a * this.d - this.b * this.c);
+        out = out || Vector2.new();
+        out.x = Math.sqrt(this.a * this.a + this.b * this.b)
+        out.y = Math.sqrt(this.c * this.c + this.d * this.d) * basis_determinant;
+        return out;
+    }
+    /**
+     * @param {Vector2Like} scale
+     */
+    set_scale(scale) {
+        const vec = Vector2.new();
+        vec.set(this.a, this.b).normalize();
+        this.a = vec.x * scale.x;
+        this.b = vec.y * scale.x;
+        vec.set(this.c, this.d).normalize();
+        this.c = vec.x * scale.y;
+        this.d = vec.y * scale.y;
+        return this;
+    }
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
+    set_scale_n(x, y) {
+        const vec = Vector2.new();
+        vec.set(this.a, this.b).normalize();
+        this.a = vec.x * x;
+        this.b = vec.y * x;
+        vec.set(this.c, this.d).normalize();
+        this.c = vec.x * y;
+        this.d = vec.y * y;
         return this;
     }
 
@@ -167,11 +190,6 @@ export class Transform2D {
          * @private
          */
         this.array = null;
-        /**
-         * @type {Vector2}
-         * @private
-         */
-        this._origin = new Vector2();
     }
 
     /**
@@ -288,17 +306,6 @@ export class Transform2D {
             case 1: return Vector2.new(this.c, this.d);
             case 2: return Vector2.new(this.tx, this.ty);
         }
-    }
-
-    /**
-     * @param {Vector2} [out]
-     */
-    get_scale(out) {
-        const basis_determinant = Math.sign(this.a * this.d - this.b * this.c);
-        if (!out) out = Vector2.new();
-        out.x = Math.sqrt(this.a * this.a + this.b * this.b)
-        out.y = Math.sqrt(this.c * this.c + this.d * this.d) * basis_determinant;
-        return out;
     }
 
     basis_determinant() {

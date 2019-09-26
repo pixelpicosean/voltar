@@ -185,8 +185,11 @@ export class Node2D extends CanvasItem {
     set_global_position(value) {
         this.set_global_position_n(value.x, value.y);
     }
+    /**
+     * returns new Vector2
+     */
     get_global_position() {
-        return this.get_global_transform().origin;
+        return this.get_global_transform().get_origin();
     }
 
     /**
@@ -195,14 +198,14 @@ export class Node2D extends CanvasItem {
     set_global_rotation(value) {
         const pi = this.get_parent_item();
         if (pi) {
-            const parent_global_rot = pi.get_global_transform().rotation;
+            const parent_global_rot = pi.get_global_transform().get_rotation();
             this.set_rotation(value - parent_global_rot);
         } else {
             this.set_rotation(value);
         }
     }
     get_global_rotation() {
-        return this.get_global_transform().rotation;
+        return this.get_global_transform().get_rotation();
     }
 
     /**
@@ -439,7 +442,7 @@ export class Node2D extends CanvasItem {
 
     _update_xform_values() {
         this._position.set(this._transform.tx, this._transform.ty);
-        this._rotation = this._transform.rotation;
+        this._rotation = this._transform.get_rotation();
         this._transform.get_scale(this._scale);
         this._xform_dirty = false;
     }

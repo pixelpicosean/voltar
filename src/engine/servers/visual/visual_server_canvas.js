@@ -939,7 +939,9 @@ export class VisualServerCanvas {
                 if (r_items) {
                     r_items[r_index] = item;
                     item.ysort_xform.copy(p_transform);
-                    p_transform.xform(item.xform.origin, item.ysort_pos);
+                    const origin = item.xform.get_origin();
+                    p_transform.xform(origin, item.ysort_pos);
+                    Vector2.free(origin);
                 }
 
                 r_index++;

@@ -394,11 +394,13 @@ export class RayShape2DSW extends Shape2DSW {
         // real large
         const vec = Vector2.new(0, this.length);
 
-        r_result.max = p_normal.dot(p_transform.origin);
+        const origin = p_transform.get_origin();
+        r_result.max = p_normal.dot(origin);
         r_result.min = p_normal.dot(p_transform.xform(vec, vec));
         if (r_result.max < r_result.min) {
             let tmp = r_result.max; r_result.max = r_result.min; r_result.min = tmp;
         }
+        Vector2.free(origin);
 
         return r_result;
     }
@@ -467,12 +469,14 @@ export class RayShape2DSW extends Shape2DSW {
     project_range(p_normal, p_transform, r_result) {
         // real large
         const vec = Vector2.new(0, this.length);
-        r_result.max = p_normal.dot(p_transform.origin);
+        const origin = p_transform.get_origin();
+        r_result.max = p_normal.dot(origin);
         r_result.min = p_normal.dot(p_transform.xform(vec, vec));
         if (r_result.max < r_result.min) {
             let tmp = r_result.max; r_result.max = r_result.min; r_result.min = tmp;
         }
 
+        Vector2.free(origin);
         Vector2.free(vec);
         return r_result;
     }
@@ -576,8 +580,10 @@ export class CircleShape2DSW extends Shape2DSW {
      * @return {{min: number, max: number}}
      */
     project_range(p_normal, p_transform, r_result) {
+        const origin = p_transform.get_origin();
+
         // real large
-        const d = p_normal.dot(p_transform.origin);
+        const d = p_normal.dot(origin);
 
         // figure out scale at point
         const local_normal = p_transform.basis_xform_inv(p_normal);
@@ -585,6 +591,8 @@ export class CircleShape2DSW extends Shape2DSW {
 
         r_result.min = d - (this.radius) * scale;
         r_result.max = d + (this.radius) * scale;
+
+        Vector2.free(origin);
 
         return r_result;
     }
@@ -769,7 +777,9 @@ export class RectangleShape2DSW extends Shape2DSW {
 
         {
             const local_v = Vector2.new();
-            p_xform_inv.xform(p_B_xform.origin, local_v);
+            const B_origin = p_B_xform.get_origin();
+            p_xform_inv.xform(B_origin, local_v);
+            Vector2.free(B_origin);
 
             const he = Vector2.new(
                 (local_v.x < 0) ? -this.half_extents.x : this.half_extents.x,
@@ -783,7 +793,9 @@ export class RectangleShape2DSW extends Shape2DSW {
         }
         {
             const local_v = Vector2.new();
-            p_B_xform_inv.xform(p_xform.origin, local_v);
+            const origin = p_xform.get_origin();
+            p_B_xform_inv.xform(origin, local_v);
+            Vector2.free(origin);
 
             const he = Vector2.new(
                 (local_v.x < 0) ? -p_B.half_extents.x : p_B.half_extents.x,

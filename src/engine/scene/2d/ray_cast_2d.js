@@ -208,7 +208,8 @@ export class RayCast2D extends Node2D {
 
         const rr = new RayResult();
 
-        if (dss.intersect_ray(gt.origin, gt.xform(to, to), rr, this.exclude, this._collision_mask, this.collide_with_bodies, this.collide_with_areas)) {
+        const origin = gt.get_origin();
+        if (dss.intersect_ray(origin, gt.xform(to, to), rr, this.exclude, this._collision_mask, this.collide_with_bodies, this.collide_with_areas)) {
             this.collided = true;
             this.against = rr.collider_id;
             this.collision_point.copy(rr.position);
@@ -219,6 +220,7 @@ export class RayCast2D extends Node2D {
             this.against = null;
             this.against_shape = 0;
         }
+        Vector2.free(origin);
     }
 }
 node_class_map['RayCast2D'] = GDCLASS(RayCast2D, Node2D)

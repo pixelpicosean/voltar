@@ -119,17 +119,23 @@ export class BodyPair2DSW extends Constraint2DSW {
         }
 
         // use local A coordinates to avoid numerical issues on collision detection
-        this.offset_B.copy(B.transform.origin).subtract(A.transform.origin);
+        const a_origin = A.transform.get_origin();
+        const b_origin = B.transform.get_origin();
+        this.offset_B.copy(b_origin).subtract(a_origin);
+        Vector2.free(b_origin);
+        Vector2.free(a_origin);
 
         this._validate_contacts();
 
-        const offset_A = A.transform.origin.clone();
+        const offset_A = A.transform.get_origin();
         const xform_Au = A.transform.untranslated();
         const xform_A = xform_Au.clone().append(A.get_shape_transform(this.shape_A));
 
         const xform_Bu = B.transform.clone();
-        xform_Bu.tx -= A.transform.origin.x;
-        xform_Bu.ty -= A.transform.origin.y;
+        const A_origin = A.transform.get_origin();
+        xform_Bu.tx -= A_origin.x;
+        xform_Bu.ty -= A_origin.y;
+        Vector2.free(A_origin);
         const xform_B = xform_Bu.clone().append(B.get_shape_transform(this.shape_B));
 
         const shape_A_ptr = A.get_shape(this.shape_A);
