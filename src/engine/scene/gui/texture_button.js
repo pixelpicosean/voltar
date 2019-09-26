@@ -236,9 +236,9 @@ export class TextureButton extends BaseButton {
     /**
      * @param {Vector2Like} p_point
      */
-    has_point_(p_point) {
+    _has_point_(p_point) {
         // TODO: bitmap click mask
-        return super.has_point_(p_point);
+        return super._has_point_(p_point);
     }
 
     /* public */

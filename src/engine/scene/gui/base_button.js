@@ -175,8 +175,8 @@ export class BaseButton extends Control {
     /**
      * @param {InputEvent} p_event
      */
-    __gui_input(p_event) {
-        super.__gui_input(p_event);
+    _gui_input_(p_event) {
+        super._gui_input_(p_event);
 
         if (this.status.disabled) return;
 
@@ -193,7 +193,7 @@ export class BaseButton extends Control {
             const mouse_motion = /** @type {InputEventMouseMotion} */(p_event);
             if (this.status.press_attempt) {
                 const last_press_inside = this.status.pressing_inside;
-                this.status.pressing_inside = this.has_point_(mouse_motion.position);
+                this.status.pressing_inside = this._has_point_(mouse_motion.position);
                 if (last_press_inside !== this.status.pressing_inside) {
                     this.update();
                 }

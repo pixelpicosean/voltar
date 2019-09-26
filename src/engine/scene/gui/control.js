@@ -490,6 +490,22 @@ export class Control extends CanvasItem {
     }
 
     /**
+     * @virtual
+     * @param {Vector2Like} p_pos
+     * @param {any} p_data
+     * @param {Control} p_from
+     */
+    can_drop_data_fw(p_pos, p_data, p_from) { return false }
+
+    /**
+     * @virtual
+     * @param {Vector2Like} p_pos
+     * @param {any} p_data
+     * @param {Control} p_from
+     */
+    drop_data_fw(p_pos, p_data, p_from) { }
+
+    /**
      * @param {Vector2Like} p_point
      */
     has_point(p_point) {
@@ -511,7 +527,7 @@ export class Control extends CanvasItem {
      * @private
      * @param {InputEvent} p_event
      */
-    __gui_input(p_event) {
+    _gui_input_(p_event) {
         this._gui_input(p_event);
     }
 
@@ -1194,6 +1210,58 @@ export class Control extends CanvasItem {
     }
 
     /**
+     * @param {Vector2Like} p_pos
+     */
+    get_tooltip(p_pos) {
+        return this.c_data.tooltip;
+    }
+
+    /**
+     * @virtual
+     * @param {Vector2Like} p_point
+     * @param {any} p_data
+     */
+    can_drop_data(p_point, p_data) { return false }
+
+    /**
+     * @virtual
+     * @param {Vector2Like} p_point
+     * @param {any} p_data
+     */
+    drop_data(p_point, p_data) { return false }
+
+    /**
+     * Please override `can_drop_data`, this is internal methon
+     * @private
+     * @param {Vector2Like} p_point
+     * @param {any} p_data
+     */
+    _can_drop_data_(p_point, p_data) {
+        if (this.c_data.drag_owner) {
+            const c = /** @type {Control} */(this.c_data.drag_owner);
+            return c.can_drop_data_fw(p_point, p_data, this);
+        }
+
+        this.can_drop_data(p_point, p_data);
+    }
+
+    /**
+     * Please override `drop_data`, this is internal methon
+     * @private
+     * @param {Vector2Like} p_point
+     * @param {any} p_data
+     */
+    _drop_data_(p_point, p_data) {
+        if (this.c_data.drag_owner) {
+            const c = /** @type {Control} */(this.c_data.drag_owner);
+            c.drop_data_fw(p_point, p_data, this);
+            return;
+        }
+
+        this.drop_data(p_point, p_data);
+    }
+
+    /**
      * @param {number} value
      */
     set_rect_rotation(value) {
@@ -1397,7 +1465,7 @@ export class Control extends CanvasItem {
     /**
      * @param {Vector2Like} p_point
      */
-    has_point_(p_point) {
+    _has_point_(p_point) {
         let ret = this.has_point(p_point);
         if (ret !== undefined) {
             return ret;

@@ -522,7 +522,7 @@ export class Viewport extends Node {
                 }
 
                 if (ci.c_data.mouse_filter !== MOUSE_FILTER_IGNORE) {
-                    ci.__gui_input(p_input);
+                    ci._gui_input_(p_input);
                 }
 
                 if (!ci.is_inside_tree() || ci.is_set_as_toplevel()) {
@@ -687,8 +687,8 @@ export class Viewport extends Node {
         const c = /** @type {Control} */(p_node);
         const matrix_inv = matrix.clone().affine_inverse();
         const xform_global = matrix_inv.xform(p_global);
-        const has = c.has_point_(xform_global);
-        if (!c.is_control || !c.clips_input() || c.has_point_(xform_global)) {
+        const has = c._has_point_(xform_global);
+        if (!c.is_control || !c.clips_input() || c._has_point_(xform_global)) {
             for (let i = p_node.data.children.length - 1; i >= 0; i--) {
                 if (p_node === this.gui.tooltip_popup) {
                     continue;
@@ -717,8 +717,8 @@ export class Viewport extends Node {
         matrix.affine_inverse();
 
         const xform_global2 = matrix.xform(p_global);
-        const has2 = c.has_point_(xform_global2);
-        if (c.c_data.mouse_filter !== MOUSE_FILTER_IGNORE && c.has_point_(xform_global2) && (!this.gui.drag_preview || (c !== this.gui.drag_preview && !this.gui.drag_preview.is_a_parent_of(c)))) {
+        const has2 = c._has_point_(xform_global2);
+        if (c.c_data.mouse_filter !== MOUSE_FILTER_IGNORE && c._has_point_(xform_global2) && (!this.gui.drag_preview || (c !== this.gui.drag_preview && !this.gui.drag_preview.is_a_parent_of(c)))) {
             r_inv_xform.copy(matrix);
 
             Vector2.free(xform_global2);
@@ -762,7 +762,7 @@ export class Viewport extends Node {
                         const top = gui.modal_stack[gui.modal_stack.length - 1];
                         const gt = top.get_global_transform_with_canvas();
                         const pos2 = gt.affine_inverse().xform(mpos);
-                        if (!top.has_point_(pos2)) {
+                        if (!top._has_point_(pos2)) {
                             if (top.c_data.modal_exclusive || top.c_data.modal_frame === Engine.get_singleton().get_frames_drawn()) {
                                 this.set_input_as_handled();
                                 return;
@@ -943,7 +943,7 @@ export class Viewport extends Node {
             gui.mouse_over = over;
 
             if (gui.drag_preview) {
-                gui.drag_preview.set_position(mpos);
+                gui.drag_preview.set_rect_position(mpos);
             }
 
             if (!over) {
@@ -1149,7 +1149,42 @@ export class Viewport extends Node {
      */
     _gui_remove_subwindow_control(p_control) { }
 
-    _gui_get_tooltip() { }
+    /**
+     * @param {Control} p_control
+     * @param {Vector2} p_pos
+     * @param {{ from: Control }} [r_which]
+     */
+    _gui_get_tooltip(p_control, p_pos, r_which) {
+        const pos = p_pos.clone();
+        let tooltip = '';
+
+        while (p_control) {
+            tooltip = p_control.get_tooltip(pos);
+            if (r_which) {
+                r_which.from = p_control;
+            }
+
+            if (tooltip.length > 0) {
+                break;
+            }
+            const xform = p_control.get_transform();
+            xform.xform(pos, pos);
+            Transform2D.free(xform);
+
+            if (p_control.c_data.mouse_filter === MOUSE_FILTER_STOP) {
+                break;
+            }
+            if (p_control.is_set_as_toplevel()) {
+                break;
+            }
+
+            p_control = p_control.get_parent_control();
+        }
+
+        Vector2.free(pos);
+
+        return tooltip;
+    }
     _gui_cancel_tooltip() {
         this.gui.tooltip = null;
         this.gui.tooltip_timer = -1;
@@ -1278,7 +1313,7 @@ export class Viewport extends Node {
                     mb.position.copy(click);
                     mb.button_index = i + 1;
                     mb.pressed = false;
-                    this.gui.mouse_focus.__gui_input(mb);
+                    this.gui.mouse_focus._gui_input_(mb);
                     mb.free();
                 }
             }
@@ -1297,7 +1332,7 @@ export class Viewport extends Node {
                     mb.position.copy(click);
                     mb.button_index = i + 1;
                     mb.pressed = true;
-                    this.gui.mouse_focus.__gui_input(mb);
+                    this.gui.mouse_focus._gui_input_(mb);
                     mb.free();
                 }
             }
@@ -1320,7 +1355,47 @@ export class Viewport extends Node {
         return Vector2.ZERO;
     }
 
-    _gui_drop(p_at_control, p_at_pos, p_just_check) { }
+    /**
+     * @param {Control} p_at_control
+     * @param {Vector2} p_at_pos
+     * @param {boolean} p_just_check
+     */
+    _gui_drop(p_at_control, p_at_pos, p_just_check) {
+        let at_pos = p_at_pos.clone();
+
+        /** @type {CanvasItem} */
+        let ci = p_at_control;
+        while (ci) {
+            const control = /** @type {Control} */(ci);
+            if (ci.is_control) {
+                if (control._can_drop_data_(at_pos, this.gui.drag_data)) {
+                    if (!p_just_check) {
+                        control._drop_data_(at_pos, this.gui.drag_data);
+                    }
+
+                    return true;
+                }
+
+                if (control.c_data.mouse_filter === MOUSE_FILTER_STOP) {
+                    break;
+                }
+            }
+
+            const xform = ci.get_transform();
+            xform.xform(at_pos, at_pos);
+            Transform2D.free(xform);
+
+            if (ci.is_set_as_toplevel()) {
+                break;
+            }
+
+            ci = ci.get_parent_item();
+        }
+
+        Vector2.free(at_pos);
+
+        return false;
+    }
 
     /**
      * @param {CanvasLayer} p_layer
