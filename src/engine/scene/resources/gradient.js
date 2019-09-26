@@ -29,8 +29,6 @@ function free_Point(p) {
     Point_pool.push(p);
 }
 
-const black = Object.freeze(new Color(0, 0, 0, 1));
-
 /**
  * @param {Point} a
  * @param {Point} b
@@ -122,7 +120,7 @@ export class Gradient extends VObject {
      */
     interpolate(p_offset) {
         if (this.points.length === 0) {
-            return black;
+            return Color.new(0, 0, 0, 1);
         }
 
         if (!this.is_sorted) {
@@ -142,7 +140,7 @@ export class Gradient extends VObject {
             } else if (p.offset < p_offset) {
                 low = middle + 1;
             } else {
-                return p.color;
+                return p.color.clone();
             }
         }
 
@@ -152,10 +150,10 @@ export class Gradient extends VObject {
         const first = middle;
         const second = middle + 1;
         if (second >= this.points.length) {
-            return this.points[this.points.length - 1].color;
+            return this.points[this.points.length - 1].color.clone();
         }
         if (first < 0) {
-            return this.points[0].color;
+            return this.points[0].color.clone();
         }
         const point_first = this.points[first];
         const point_second = this.points[second];
