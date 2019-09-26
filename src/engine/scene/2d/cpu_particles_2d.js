@@ -88,12 +88,34 @@ class BatchGroup {
         if (!this.active) return;
 
         const wt = this.transform;
-        const a = wt.a;
-        const b = wt.b;
-        const c = wt.c;
-        const d = wt.d;
-        const tx = wt.tx;
-        const ty = wt.ty;
+        let a = wt.a;
+        let b = wt.b;
+        let c = wt.c;
+        let d = wt.d;
+        let tx = wt.tx;
+        let ty = wt.ty;
+
+        if (!item_wt.equals(Transform2D.IDENTITY)) {
+            const item_a = item_wt.a;
+            const item_b = item_wt.b;
+            const item_c = item_wt.c;
+            const item_d = item_wt.d;
+
+            const self_wt = this.transform;
+            const self_a = self_wt.a;
+            const self_b = self_wt.b;
+            const self_c = self_wt.c;
+            const self_d = self_wt.d;
+            const self_tx = self_wt.tx;
+            const self_ty = self_wt.ty;
+
+            a = (self_a * item_a) + (self_b * item_c);
+            b = (self_a * item_b) + (self_b * item_d);
+            c = (self_c * item_a) + (self_d * item_c);
+            d = (self_c * item_b) + (self_d * item_d);
+            tx = (self_tx * item_a) + (self_ty * item_c) + item_wt.tx;
+            ty = (self_tx * item_b) + (self_ty * item_d) + item_wt.ty;
+        }
 
         // vertex
         const x0 = 0;
@@ -128,6 +150,8 @@ class CommandCPUParticle extends Command {
     constructor() {
         super();
 
+        this.local_coords = true;
+
         /** @type {BatchGroup[]} */
         this.batches = [];
         // FIXME: calculate rect of particle
@@ -139,7 +163,7 @@ class CommandCPUParticle extends Command {
      */
     calculate_vertices(transform, modulate) {
         for (const b of this.batches) {
-            b.calculate_vertices(transform, modulate);
+            b.calculate_vertices(this.local_coords ? transform : Transform2D.IDENTITY, modulate);
         }
     }
     free() {
@@ -420,8 +444,6 @@ export class CPUParticles2D extends Node2D {
         this.emission_shape = EMISSION_SHAPE_POINT;
         this.emission_sphere_radius = 1;
 
-        this.inv_emission_transform = new Transform2D();
-
         this.fixed_fps = 0;
 
         this.speed_scale = 1;
@@ -673,22 +695,6 @@ export class CPUParticles2D extends Node2D {
             }
 
             this._update_particle_data_buffer();
-        }
-
-        if (p_what === NOTIFICATION_TRANSFORM_CHANGED) {
-            this.inv_emission_transform.copy(this.get_global_transform()).affine_inverse();
-
-            if (!this.local_coords) {
-                const inv_xform = this.inv_emission_transform;
-                const xform = Transform2D.new();
-                for (const p of this.particles) {
-                    if (p.active) {
-                        xform.copy(p.transform);
-                        p.transform.copy(inv_xform).append(xform);
-                    }
-                }
-                Transform2D.free(xform);
-            }
         }
     }
 
@@ -1188,19 +1194,13 @@ export class CPUParticles2D extends Node2D {
             batch = p.batch;
             // we only draw active particles
             if (batch.active) {
-                if (!this.local_coords) {
-                    const xform = Transform2D.new();
-                    xform.copy(p.transform);
-                    p.transform.copy(this.inv_emission_transform).append(xform);
-                    Transform2D.free(xform);
-                }
-
                 // sync texture
                 batch.texture = this._texture.texture;
                 batches.push(batch);
             }
         }
 
+        this._command.local_coords = this.local_coords;
         this.canvas_item.commands.length = 1;
         this.canvas_item.commands[0] = this._command;
     }
