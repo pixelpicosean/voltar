@@ -3,10 +3,10 @@ const {
     Color,
 } = require('../../parser/type_converters');
 
-const Node2D = require('./CanvasItem');
+const Node2D = require('./Node2D');
 
 module.exports = (data) => {
-    return Object.assign(Node2D(data), {
+    const res = Object.assign(Node2D(data), {
         type: 'CPUParticles2D',
 
         amount: data.prop.amount,
@@ -68,6 +68,8 @@ module.exports = (data) => {
         tangential_accel_random: data.prop.tangential_accel_random,
         texture: data.prop.texture,
     });
+
+    return res;
 };
 
 module.exports.is_tres = () => true;
