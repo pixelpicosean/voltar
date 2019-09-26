@@ -32,6 +32,7 @@ export const TYPE_PARTICLES = 8;
 export const TYPE_CIRCLE = 9;
 export const TYPE_TRANSFORM = 10;
 export const TYPE_CLIP_IGNORE = 11;
+export const TYPE_CUSTOM = 100;
 
 export const NINE_PATCH_STRETCH = 0;
 export const NINE_PATCH_TILE = 1;
@@ -150,6 +151,8 @@ export class Command {
         this.uvs = null;
         this.blendMode = BLEND_MODES.NORMAL;
         this.final_modulate = new Color();
+        /** @type {any[]} for custom commands only */
+        this.batches = null;
     }
     // FIXME: do we really need this `init` method?
     init() {

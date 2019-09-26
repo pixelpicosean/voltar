@@ -1,7 +1,7 @@
 import { Vector2 } from 'engine/core/math/vector2';
 import { Rect2 } from 'engine/core/math/rect2';
 import { Transform2D } from 'engine/core/math/transform_2d';
-import { Color, ColorLike } from 'engine/core/color';
+import { ColorLike } from 'engine/core/color';
 import {
     OS,
     VIDEO_DRIVER_GLES2_LEGACY,
@@ -26,14 +26,6 @@ import { Runner } from './runner';
 import { VObject } from 'engine/core/v_object';
 import { RENDER_TARGET_TRANSPARENT, RENDER_TARGET_DIRECT_TO_SCREEN } from './constants';
 import { Item } from 'engine/servers/visual/visual_server_canvas';
-import {
-    TYPE_RECT,
-    CommandRect,
-    TYPE_CIRCLE,
-    CommandCircle,
-    TYPE_NINEPATCH,
-    CommandNinePatch,
-} from 'engine/servers/visual/commands';
 import { VSG } from 'engine/servers/visual/visual_server_globals';
 
 
@@ -275,23 +267,18 @@ export class RasterizerCanvas extends VObject {
      * @param {Item} p_item
      */
     _canvas_item_render_commands(p_item) {
-        const white_tex = VSG.storage.resources.white_tex;
-        for (let c of p_item.commands) {
-            switch (c.type) {
-                case TYPE_RECT: {
-                    const rect = /** @type {CommandRect} */(c);
-                    if (!rect.texture) rect.texture = white_tex;
-                    rect.calculate_vertices(p_item.final_transform, p_item.final_modulate);
-                    // TODO: add blend mode support, maybe a material system just like Godot
-                    // rect.blendMode = p_item.blend_mode;
-                    this.batch.currentRenderer.render(rect);
-                } break;
-                case TYPE_NINEPATCH: {
-                    const np = /** @type {CommandNinePatch} */(c);
-                    if (!np.texture) np.texture = white_tex;
-                    np.calculate_vertices(p_item.final_transform, p_item.final_modulate);
-                    this.batch.currentRenderer.render(np);
-                } break;
+        const renderer = this.batch.currentRenderer;
+        for (const c of p_item.commands) {
+            if (c.batches) {
+                c.calculate_vertices(p_item.final_transform, p_item.final_modulate);
+                for (const b of c.batches) {
+                    renderer.render(b);
+                }
+            } else {
+                if (c.texture) {
+                    c.calculate_vertices(p_item.final_transform, p_item.final_modulate);
+                    renderer.render(c);
+                }
             }
         }
     }

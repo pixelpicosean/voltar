@@ -1,6 +1,7 @@
 import { node_class_map, resource_map } from 'engine/registry';
 import { GDCLASS } from 'engine/core/v_object';
 import { Vector2 } from 'engine/core/math/vector2';
+import { Rect2 } from 'engine/core/math/rect2';
 import { Transform2D } from 'engine/core/math/transform_2d';
 import { Color } from 'engine/core/color';
 import {
@@ -11,7 +12,7 @@ import {
 } from 'engine/core/math/math_funcs';
 import { Math_PI } from 'engine/core/math/math_defs';
 import { BLEND_MODES } from 'engine/drivers/constants';
-import { } from 'engine/servers/visual/commands';
+import { Command, TYPE_CUSTOM } from 'engine/servers/visual/commands';
 
 import {
     NOTIFICATION_ENTER_TREE,
@@ -62,10 +63,105 @@ export const EMISSION_SHAPE_RECTANGLE = 2;
 export const EMISSION_SHAPE_POINTS = 3;
 export const EMISSION_SHAPE_DIRECTED_POINTS = 4;
 
-class Particle {
+const quad_indices = new Uint16Array([
+    0, 1, 2,
+    0, 2, 3,
+]);
+class BatchGroup {
     constructor() {
+        this.texture = null;
         this.transform = new Transform2D();
-        this.color = new Color(1, 1, 1, 1);
+        this.modulate = new Color();
+        this.final_modulate = new Color();
+        this.vertex_data = new Float32Array(8);
+        this.indices = quad_indices;
+        /** @type {Float32Array} */
+        this.uvs = null;
+        this.blendMode = BLEND_MODES.NORMAL;
+    }
+    /**
+     * @param {Transform2D} item_wt
+     * @param {Color} modulate
+     */
+    calculate_vertices(item_wt, modulate) {
+        // transform
+        const self_wt = this.transform;
+        const self_a = self_wt.a;
+        const self_b = self_wt.b;
+        const self_c = self_wt.c;
+        const self_d = self_wt.d;
+
+        const item_a = item_wt.a;
+        const item_b = item_wt.b;
+        const item_c = item_wt.c;
+        const item_d = item_wt.d;
+        const item_tx = item_wt.tx;
+        const item_ty = item_wt.ty;
+
+        const a = (item_a * self_a) + (item_b * self_c);
+        const b = (item_a * self_b) + (item_b * self_d);
+        const c = (item_c * self_a) + (item_d * self_c);
+        const d = (item_c * self_b) + (item_d * self_d);
+        const tx = (item_tx * self_a) + (item_ty * self_c) + self_wt.tx;
+        const ty = (item_tx * self_b) + (item_ty * self_d) + self_wt.ty;
+
+        // vertex
+        const x0 = 0;
+        const x1 = x0 + this.texture.width;
+        const y0 = 0;
+        const y1 = y0 + this.texture.height;
+
+        const vertex_data = this.vertex_data;
+
+        vertex_data[0] = (a * x0) + (c * y0) + tx;
+        vertex_data[1] = (d * y0) + (b * x0) + ty;
+
+        vertex_data[2] = (a * x1) + (c * y0) + tx;
+        vertex_data[3] = (d * y0) + (b * x1) + ty;
+
+        vertex_data[4] = (a * x1) + (c * y1) + tx;
+        vertex_data[5] = (d * y1) + (b * x1) + ty;
+
+        vertex_data[6] = (a * x0) + (c * y1) + tx;
+        vertex_data[7] = (d * y1) + (b * x0) + ty;
+
+        // uv
+        this.uvs = this.texture._uvs.uvsFloat32;
+
+        // color
+        this.final_modulate.copy(this.modulate).multiply(modulate);
+    }
+}
+
+class CommandCPUParticle extends Command {
+    get type() { return TYPE_CUSTOM }
+    constructor() {
+        super();
+
+        /** @type {BatchGroup[]} */
+        this.batches = [];
+        // FIXME: calculate rect of particle
+        this.rect = new Rect2(0, 0, 1000, 1000);
+    }
+    /**
+     * @param {Transform2D} transform
+     * @param {Color} modulate
+     */
+    calculate_vertices(transform, modulate) {
+        for (const b of this.batches) {
+            b.calculate_vertices(transform, modulate);
+        }
+    }
+    free() {
+        // do nothing
+    }
+}
+
+class Particle {
+    get transform() { return this.batch.transform }
+    get color() { return this.batch.modulate }
+
+    constructor() {
         this.custom = [0, 0, 0, 0];
         this.rotation = 0;
         this.velocity = new Vector2();
@@ -79,6 +175,8 @@ class Particle {
         this.base_color = new Color(1, 1, 1, 1);
 
         this.seed = 0;
+
+        this.batch = new BatchGroup();
     }
     static new() {
         const p = ParticlePool.pop();
@@ -103,6 +201,14 @@ const mat2 = basis(0.701, -0.587, -0.114, -0.299, 0.413, -0.114, -0.300, -0.588,
 const mat3 = basis(0.168, 0.330, -0.497, -0.328, 0.035, 0.292, 1.250, -1.050, -0.203);
 
 const hue_rot_mat = basis();
+
+/**
+ * @param {Particle} a
+ * @param {Particle} b
+ */
+function sort_lifetime(a, b) {
+    return b.lifetime - a.lifetime;
+}
 
 export class CPUParticles2D extends Node2D {
     get class() { return 'CPUParticles2D' }
@@ -402,6 +508,8 @@ export class CPUParticles2D extends Node2D {
         this.set_param(PARAM_HUE_VARIATION, 0);
         this.set_param(PARAM_ANIM_SPEED, 0);
         this.set_param(PARAM_ANIM_OFFSET, 0);
+
+        this._command = new CommandCPUParticle();
     }
 
     /* virtual */
@@ -504,6 +612,7 @@ export class CPUParticles2D extends Node2D {
             if (!this.redraw) {
                 return;
             }
+            this.canvas_item.rect_dirty = true;
         }
 
         if (p_what === NOTIFICATION_INTERNAL_PROCESS) {
@@ -1044,13 +1153,26 @@ export class CPUParticles2D extends Node2D {
 
     _update_particle_data_buffer() {
         if (this.draw_order !== DRAW_ORDER_INDEX) {
-            // TODO: sort particle_order
+            if (this.draw_order === DRAW_ORDER_LIFETIME) {
+                this.particles.sort(sort_lifetime);
+            }
         }
+
+        const batches = this._command.batches;
+        const particles = this.particles;
+
+        batches.length = particles.length;
+        let batch = null;
+        for (let i = 0, len = particles.length; i < len; i++) {
+            batch = batches[i] = particles[i].batch;
+            batch.texture = this._texture.texture;
+        }
+
+        this.canvas_item.commands.length = 1;
+        this.canvas_item.commands[0] = this._command;
     }
 
-    _update_render_thread() {
-        // TODO: multimesh_set_as_bulk_array
-    }
+    _update_render_thread() { }
 
     /**
      * @param {boolean} p_redraw

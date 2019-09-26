@@ -65,7 +65,7 @@ export * from 'engine/scene/2d/canvas_item';
 export * from 'engine/scene/2d/node_2d';
 export * from 'engine/scene/2d/sprite';
 export * from 'engine/scene/2d/path_2d';
-// export * from 'engine/scene/2d/cpu_particles_2d';
+export * from 'engine/scene/2d/cpu_particles_2d';
 
 export * from 'engine/scene/2d/collision_object_2d';
 export * from 'engine/scene/2d/collision_shape_2d';
