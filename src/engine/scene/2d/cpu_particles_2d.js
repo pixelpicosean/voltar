@@ -69,6 +69,7 @@ const quad_indices = new Uint16Array([
 ]);
 class BatchGroup {
     constructor() {
+        this.active = false;
         this.texture = null;
         this.transform = new Transform2D();
         this.modulate = new Color();
@@ -84,26 +85,28 @@ class BatchGroup {
      * @param {Color} modulate
      */
     calculate_vertices(item_wt, modulate) {
+        if (!this.active) return;
+
         // transform
+        const item_a = item_wt.a;
+        const item_b = item_wt.b;
+        const item_c = item_wt.c;
+        const item_d = item_wt.d;
+
         const self_wt = this.transform;
         const self_a = self_wt.a;
         const self_b = self_wt.b;
         const self_c = self_wt.c;
         const self_d = self_wt.d;
+        const self_tx = self_wt.tx;
+        const self_ty = self_wt.ty;
 
-        const item_a = item_wt.a;
-        const item_b = item_wt.b;
-        const item_c = item_wt.c;
-        const item_d = item_wt.d;
-        const item_tx = item_wt.tx;
-        const item_ty = item_wt.ty;
-
-        const a = (item_a * self_a) + (item_b * self_c);
-        const b = (item_a * self_b) + (item_b * self_d);
-        const c = (item_c * self_a) + (item_d * self_c);
-        const d = (item_c * self_b) + (item_d * self_d);
-        const tx = (item_tx * self_a) + (item_ty * self_c) + self_wt.tx;
-        const ty = (item_tx * self_b) + (item_ty * self_d) + self_wt.ty;
+        const a = (self_a * item_a) + (self_b * item_c);
+        const b = (self_a * item_b) + (self_b * item_d);
+        const c = (self_c * item_a) + (self_d * item_c);
+        const d = (self_c * item_b) + (self_d * item_d);
+        const tx = (self_tx * item_a) + (self_ty * item_c) + item_wt.tx;
+        const ty = (self_tx * item_b) + (self_ty * item_d) + item_wt.ty;
 
         // vertex
         const x0 = 0;
@@ -161,11 +164,13 @@ class Particle {
     get transform() { return this.batch.transform }
     get color() { return this.batch.modulate }
 
+    get active() { return this.batch.active }
+    set active(value) { this.batch.active = value }
+
     constructor() {
         this.custom = [0, 0, 0, 0];
         this.rotation = 0;
         this.velocity = new Vector2();
-        this.active = false;
         this.angle_rand = 0;
         this.scale_rand = 0;
         this.hue_rot_rand = 0;
@@ -537,10 +542,10 @@ export class CPUParticles2D extends Node2D {
         if (data.blend_mode !== undefined) this.blend_mode = data.blend_mode;
 
         if (data.color !== undefined) this.color.copy(data.color);
-        // if (data.color_ramp !== undefined) this.color_ramp = data.data;
+        if (data.color_ramp !== undefined) this.color_ramp = data.data;
 
         if (data.texture !== undefined) this.texture = data.texture;
-        // if (data.normalmap !== undefined) this.normalmap = data.normalmap;
+        if (data.normalmap !== undefined) this.normalmap = data.normalmap;
 
         if (data.initial_velocity !== undefined) this.initial_velocity = data.initial_velocity;
         if (data.initial_velocity_random !== undefined) this.initial_velocity_random = data.initial_velocity_random;
@@ -565,9 +570,9 @@ export class CPUParticles2D extends Node2D {
         if (data.damping_curve !== undefined) this.set_param_curve(PARAM_DAMPING, new Curve().set_data(data.damping_curve.data));
         if (data.damping_random !== undefined) this.damping_random = data.damping_random;
 
-        // if (data.emission_colors !== undefined) this.emission_colors = data.emission_colors;
-        // if (data.emission_normals !== undefined) this.emission_normals = data.emission_normals;
-        // if (data.emission_points !== undefined) this.emission_points = data.emission_points;
+        if (data.emission_colors !== undefined) this.emission_colors = data.emission_colors;
+        if (data.emission_normals !== undefined) this.emission_normals = data.emission_normals;
+        if (data.emission_points !== undefined) this.emission_points = data.emission_points;
 
         if (data.emission_rect_extents !== undefined) this.emission_rect_extents = data.emission_rect_extents;
         if (data.emission_shape !== undefined) this.emission_shape = data.emission_shape;
@@ -685,10 +690,13 @@ export class CPUParticles2D extends Node2D {
             this.inv_emission_transform = this.get_global_transform().clone().affine_inverse();
 
             if (!this.local_coords) {
-                const pc = this.particles.length;
-
-                for (let i = 0; i < pc; i++) {
+                const inv_xform = this.inv_emission_transform;
+                const xform = Transform2D.new();
+                for (const p of this.particles) {
+                    xform.copy(p.transform);
+                    p.transform.copy(inv_xform).append(xform);
                 }
+                Transform2D.free(xform);
             }
         }
     }
@@ -1161,11 +1169,16 @@ export class CPUParticles2D extends Node2D {
         const batches = this._command.batches;
         const particles = this.particles;
 
-        batches.length = particles.length;
+        batches.length = 0;
         let batch = null;
         for (let i = 0, len = particles.length; i < len; i++) {
-            batch = batches[i] = particles[i].batch;
-            batch.texture = this._texture.texture;
+            batch = particles[i].batch;
+            // we only draw active particles
+            if (batch.active) {
+                // sync texture
+                batch.texture = this._texture.texture;
+                batches.push(batch);
+            }
         }
 
         this.canvas_item.commands.length = 1;
