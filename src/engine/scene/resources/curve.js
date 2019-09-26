@@ -3,6 +3,7 @@ import { deg2rad, clamp, lerp } from 'engine/core/math/math_funcs';
 import { CMP_EPSILON } from 'engine/core/math/math_defs';
 import { Vector2 } from 'engine/core/math/vector2';
 import { VObject } from 'engine/core/v_object';
+import { res_class_map } from 'engine/registry';
 
 
 /**
@@ -128,6 +129,13 @@ export class Curve extends VObject {
         this._bake_resolution = 100;
         this._min_value = 0;
         this._max_value = 1;
+    }
+
+    _load_data(data) {
+        if (data.data !== undefined) {
+            this.set_data(data.data);
+        }
+        return this;
     }
 
     get_point_count() {
@@ -631,6 +639,7 @@ export class Curve extends VObject {
         this.emit_signal('changed');
     }
 }
+res_class_map['Curve'] = Curve
 
 const PointPool = [];
 class Point {
@@ -713,6 +722,7 @@ export class Curve2D extends VObject {
 
             this.baked_cache_dirty = true;
         }
+        return this;
     }
 
     get_point_count() {
@@ -1132,3 +1142,4 @@ export class Curve2D extends VObject {
         }
     }
 }
+res_class_map['Curve2D'] = Curve2D
