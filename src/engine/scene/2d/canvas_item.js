@@ -664,13 +664,10 @@ export class CanvasItem extends Node {
      * @param {CanvasItem} [p_node]
      */
     _notify_transform(p_node) {
-        if (!p_node) {
-            if (!this.is_inside_tree()) return;
-            this._notify_transform(this);
-            if (!this.block_transform_notify && this.notify_local_transform) {
-                this.notification(NOTIFICATION_LOCAL_TRANSFORM_CHANGED);
-            }
-            return;
+        if (!this.is_inside_tree()) return;
+        let has_param = !!p_node;
+        if (!has_param) {
+            p_node = this;
         }
 
         if (p_node.global_invalid) {
@@ -692,6 +689,12 @@ export class CanvasItem extends Node {
                 continue;
             }
             this._notify_transform(ci);
+        }
+
+        if (!has_param) {
+            if (!this.block_transform_notify && this.notify_local_transform) {
+                this.notification(NOTIFICATION_LOCAL_TRANSFORM_CHANGED);
+            }
         }
     }
 
