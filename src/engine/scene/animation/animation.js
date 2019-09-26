@@ -229,6 +229,9 @@ export class Animation {
     }
 
     _load_data(data) {
+        if (data.name !== undefined) {
+            this.name = data.name;
+        }
         if (data.length !== undefined) {
             this.length = data.length;
         }

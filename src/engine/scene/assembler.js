@@ -62,6 +62,8 @@ export function attach_script(url, scene) {
 export function assemble_scene(scn, data, url) {
     /** @type {Object<string, Node>} */
     const node_cache = {};
+    /** @type {Object<string, string>} */
+    const path_cache = {};
 
     const nodes = data.nodes;
     for (let i = 0; i < nodes.length; i++) {
@@ -82,6 +84,7 @@ export function assemble_scene(scn, data, url) {
             scn.set_filename(url);
             scn._load_data(node_data);
             node_cache['.'] = scn;
+            path_cache['.'] = '';
         }
 
         // instanciate child nodes
@@ -90,7 +93,12 @@ export function assemble_scene(scn, data, url) {
             const node = new (node_class_map[node_data.type]);
             parent.add_child(node);
             node._load_data(node_data);
-            node_cache[node.name] = node;
+            let path = node.name;
+            if (node_data.parent !== '.') {
+                path = `${path_cache[node_data.parent]}/${path}`;
+            }
+            path_cache[path] = path;
+            node_cache[path] = node;
         }
     }
     return scn;
