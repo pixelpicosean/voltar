@@ -261,6 +261,38 @@ module.exports.PoolRealArray = (arr) => {
 };
 /**
  * @param {any} arr
+ * @returns {{ r: number, g: number, b: number, a: number }[]}
+ */
+module.exports.PoolColorArray = (arr) => {
+    if (Array.isArray(arr)) {
+        // already valid data
+        if (typeof(arr[0]) === 'object' && typeof(arr[0].r) === 'number') {
+            return arr;
+        }
+        // array of numbers
+        else if (typeof(arr[0]) === 'number') {
+            const res = [];
+            for (let i = 0; i < arr.length; i += 4) {
+                res.push({
+                    r: arr[i + 0],
+                    g: arr[i + 1],
+                    b: arr[i + 2],
+                    a: arr[i + 3],
+                })
+            }
+            return res;
+        }
+    }
+
+    if (typeof (arr) === 'string') {
+        const number_arr = get_function_params(arr).map(module.exports.real);
+        return module.exports.PoolColorArray(number_arr);
+    }
+
+    return undefined;
+};
+/**
+ * @param {any} arr
  * @returns {{ x: number, y: number }[]}
  */
 module.exports.Vector2Array = (arr) => {
