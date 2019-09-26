@@ -17,7 +17,6 @@ import { Color } from "engine/core/color";
 import { VSG } from "engine/servers/visual/visual_server_globals";
 import { CommandRect } from "engine/servers/visual/commands";
 
-import { registered_bitmap_fonts } from "../resources/font";
 import { NOTIFICATION_DRAW } from "../2d/canvas_item";
 import { SIZE_SHRINK_CENTER } from "./const";
 import {
@@ -109,10 +108,6 @@ export class Label extends Control {
         this.total_char_cache = 0;
 
         this.set_size_flags_vertical(SIZE_SHRINK_CENTER);
-
-        // FIXME: should we use commands directly?
-        /** @type {CommandRect[]} */
-        this._glyphs = [];
     }
 
     /* virtual */
@@ -339,12 +334,8 @@ export class Label extends Control {
 
                             const char = font.char_map[c.charCodeAt(0)];
 
-                            let g = this._glyphs[glyph_idx];
-                            if (!g) {
-                                this._glyphs[glyph_idx] = g = CommandRect.instance();
-                            }
-
                             // Update char sprite info
+                            const g = CommandRect.instance();
                             g.texture = char.texture;
                             g.rect.set(x_ofs + char.h_align, y_ofs - font.ascent + char.v_align, g.texture.width, g.texture.height);
                             g.modulate.copy(font_color);
