@@ -87,26 +87,13 @@ class BatchGroup {
     calculate_vertices(item_wt, modulate) {
         if (!this.active) return;
 
-        // transform
-        const item_a = item_wt.a;
-        const item_b = item_wt.b;
-        const item_c = item_wt.c;
-        const item_d = item_wt.d;
-
-        const self_wt = this.transform;
-        const self_a = self_wt.a;
-        const self_b = self_wt.b;
-        const self_c = self_wt.c;
-        const self_d = self_wt.d;
-        const self_tx = self_wt.tx;
-        const self_ty = self_wt.ty;
-
-        const a = (self_a * item_a) + (self_b * item_c);
-        const b = (self_a * item_b) + (self_b * item_d);
-        const c = (self_c * item_a) + (self_d * item_c);
-        const d = (self_c * item_b) + (self_d * item_d);
-        const tx = (self_tx * item_a) + (self_ty * item_c) + item_wt.tx;
-        const ty = (self_tx * item_b) + (self_ty * item_d) + item_wt.ty;
+        const wt = this.transform;
+        const a = wt.a;
+        const b = wt.b;
+        const c = wt.c;
+        const d = wt.d;
+        const tx = wt.tx;
+        const ty = wt.ty;
 
         // vertex
         const x0 = 0;
@@ -394,6 +381,7 @@ export class CPUParticles2D extends Node2D {
 
         this._amount = 8;
         this.lifetime = 1;
+        this.lifetime_randomness = 0;
 
         this.local_coords = true;
         this.one_shot = false;
@@ -438,6 +426,7 @@ export class CPUParticles2D extends Node2D {
 
         this.speed_scale = 1;
 
+        this.direction = new Vector2();
         this.spread = 45;
 
         this.gravity = new Vector2(0, 98);
@@ -695,8 +684,7 @@ export class CPUParticles2D extends Node2D {
                 for (const p of this.particles) {
                     if (p.active) {
                         xform.copy(p.transform);
-                        // p.transform.copy(inv_xform).append(xform);
-                        p.transform.copy(xform).append(inv_xform);
+                        p.transform.copy(inv_xform).append(xform);
                     }
                 }
                 Transform2D.free(xform);
@@ -880,6 +868,10 @@ export class CPUParticles2D extends Node2D {
                 }
             }
 
+            if (p.time * (1 - this.explosiveness_ratio) > p.lifetime) {
+                restart = true;
+            }
+
             if (restart) {
                 if (!this.emitting) {
                     p.active = false;
@@ -902,7 +894,7 @@ export class CPUParticles2D extends Node2D {
                 p.hue_rot_rand = randf();
                 p.anim_offset_rand = randf();
 
-                let angle1_rad = (randf() * 2 - 1) * Math_PI * this.spread / 180;
+                let angle1_rad = Math.atan2(this.direction.y, this.direction.x) + (randf() * 2 - 1) * Math_PI * this.spread / 180;
                 const rot = Vector2.new(Math.cos(angle1_rad), Math.sin(angle1_rad));
                 p.velocity.copy(rot).scale(this.parameters[PARAM_INITIAL_LINEAR_VELOCITY] * lerp(1, randf(), this.randomness[PARAM_INITIAL_LINEAR_VELOCITY]));
 
@@ -913,8 +905,9 @@ export class CPUParticles2D extends Node2D {
                 p.custom[1] = 0; // phase [0..1]
                 p.custom[2] = (this.parameters[PARAM_ANIM_OFFSET] + tex_anim_offset) * lerp(1, p.anim_offset_rand, this.randomness[PARAM_ANIM_OFFSET]);
                 p.custom[3] = 0;
-                p.transform.set(1, 0, 0, 1, 0, 0);
+                p.transform.reset();
                 p.time = 0;
+                p.lifetime = this.lifetime * (1 - randf() * this.lifetime_randomness);
                 p.base_color.set(1, 1, 1, 1);
 
                 const vec = Vector2.new();
@@ -923,9 +916,9 @@ export class CPUParticles2D extends Node2D {
                     } break;
                     // TODO: new sphere emit shape implementation
                     case EMISSION_SHAPE_SPHERE: {
-                        vec.set(randf() * 2 - 1, randf() * 2 - 1)
-                            .normalize()
-                            .scale(this.emission_sphere_radius);
+                        const s = randf(), t = 2 * Math.PI * randf();
+                        vec.set(Math.cos(t), Math.sin(t))
+                            .scale(this.emission_sphere_radius * Math.sqrt(1 - s * s));
                         p.transform.tx = vec.x;
                         p.transform.ty = vec.y;
                     } break;
@@ -964,8 +957,13 @@ export class CPUParticles2D extends Node2D {
                     p.transform.copy(emission_xform).append(t);
                     Transform2D.free(t);
                 }
+
+                Vector2.free(vec);
+                Vector2.free(rot);
             } else if (!p.active) {
                 continue;
+            } else if (p.time > p.lifetime) {
+                p.active = false;
             } else {
                 p.time += local_delta;
                 p.custom[1] = p.time / this.lifetime;
@@ -1034,8 +1032,9 @@ export class CPUParticles2D extends Node2D {
                 // Apply radial acceleration
                 const org = emission_xform.get_origin();
                 const diff = pos.clone().subtract(org);
+                const diff_n = diff.normalized();
                 if (diff.length_squared() > 0) {
-                    force.add(diff.normalized().scale((this.parameters[PARAM_RADIAL_ACCEL] + tex_radial_accel) * lerp(1, randf(), this.randomness[PARAM_RADIAL_ACCEL])));
+                    force.add(diff_n.scale((this.parameters[PARAM_RADIAL_ACCEL] + tex_radial_accel) * lerp(1, randf(), this.randomness[PARAM_RADIAL_ACCEL])));
                 }
                 // Apply tangential acceleration
                 const yx = Vector2.new(diff.y, diff.x);
@@ -1044,7 +1043,6 @@ export class CPUParticles2D extends Node2D {
                         .scale((this.parameters[PARAM_TANGENTIAL_ACCEL] + tex_tangential_accel) * lerp(1, randf(), this.randomness[PARAM_TANGENTIAL_ACCEL]))
                     force.add(yx);
                 }
-                Vector2.free(yx);
                 // Apply attractor forces
                 p.velocity.add(force.x * local_delta, force.y * local_delta);
                 // Orbit velocity
@@ -1080,6 +1078,13 @@ export class CPUParticles2D extends Node2D {
                 p.rotation = deg2rad(base_angle);
                 let animation_phase = (this.parameters[PARAM_ANIM_OFFSET] + tex_anim_offset) * lerp(1, p.anim_offset_rand, this.randomness[PARAM_ANIM_OFFSET]) + p.custom[1] * (this.parameters[PARAM_ANIM_SPEED] + tex_anim_speed) * lerp(1, randf(), this.randomness[PARAM_ANIM_SPEED]);
                 p.custom[2] = animation_phase;
+
+                Vector2.free(yx);
+                Vector2.free(diff_n);
+                Vector2.free(diff);
+                Vector2.free(org);
+                Vector2.free(pos);
+                Vector2.free(force);
             }
             // Apply color
             // Apply hue rotation
@@ -1134,8 +1139,8 @@ export class CPUParticles2D extends Node2D {
                     const tan = vel_n.set(p.transform.c, p.transform.d).tangent();
                     p.transform.a = tan.x;
                     p.transform.b = tan.y;
-                    Vector2.free(vel_n);
                     Vector2.free(tan);
+                    Vector2.free(vel_n);
                 }
             } else {
                 const c = Math.cos(p.rotation);
@@ -1160,6 +1165,9 @@ export class CPUParticles2D extends Node2D {
             p.transform.tx += p.velocity.x * local_delta;
             p.transform.ty += p.velocity.y * local_delta;
         }
+
+        Transform2D.free(emission_xform);
+        Transform2D.free(velocity_xform);
     }
 
     _update_particle_data_buffer() {
@@ -1174,10 +1182,19 @@ export class CPUParticles2D extends Node2D {
 
         batches.length = 0;
         let batch = null;
+        let p = null;
         for (let i = 0, len = particles.length; i < len; i++) {
-            batch = particles[i].batch;
+            p = particles[i]
+            batch = p.batch;
             // we only draw active particles
             if (batch.active) {
+                if (!this.local_coords) {
+                    const xform = Transform2D.new();
+                    xform.copy(p.transform);
+                    p.transform.copy(this.inv_emission_transform).append(xform);
+                    Transform2D.free(xform);
+                }
+
                 // sync texture
                 batch.texture = this._texture.texture;
                 batches.push(batch);
