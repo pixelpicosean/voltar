@@ -97,7 +97,7 @@ export class CanvasItem extends Node {
         this.material = null;
 
         this._global_transform = new Transform2D();
-        this.global_invalid = false;
+        this.global_invalid = true;
     }
     free() {
         VSG.canvas.free_item(this.canvas_item);
@@ -254,13 +254,13 @@ export class CanvasItem extends Node {
     get_global_transform() {
         if (this.global_invalid) {
             const pi = this.get_parent_item();
+            const xform = this.get_transform();
             if (pi) {
-                this._global_transform.copy(pi.get_global_transform()).append(this.get_transform());
+                this._global_transform.copy(pi.get_global_transform()).append(xform);
             } else {
-                const xform = this.get_transform();
                 this._global_transform.copy(xform);
-                Transform2D.free(xform);
             }
+            Transform2D.free(xform);
 
             this.global_invalid = false;
         }
@@ -653,13 +653,6 @@ export class CanvasItem extends Node {
         this.group = '';
     }
 
-    _notify_transform_self() {
-        if (!this.is_inside_tree()) return;
-        this._notify_transform(this);
-        if (!this.block_transform_notify && this.notify_local_transform) {
-            this.notification(NOTIFICATION_LOCAL_TRANSFORM_CHANGED);
-        }
-    }
     /**
      * @param {CanvasItem} [p_node]
      */

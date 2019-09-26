@@ -152,7 +152,7 @@ export class Node2D extends CanvasItem {
             return;
         }
 
-        this._notify_transform_self();
+        this._notify_transform();
     }
     /**
      * @param {Transform2D} mat
