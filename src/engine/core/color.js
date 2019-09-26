@@ -111,6 +111,9 @@ export class Color {
 
         return this;
     }
+    clone() {
+        return Color.new().copy(this);
+    }
 
     /**
      * @param {ColorLike} c
@@ -130,7 +133,7 @@ export class Color {
      * @param {number} p_t
      */
     linear_interpolate(p_b, p_t) {
-        const res = Color.new();
+        const res = Color.new(this.r, this.g, this.b, this.a);
         res.r += (p_t * (p_b.r - this.r));
         res.g += (p_t * (p_b.g - this.g));
         res.b += (p_t * (p_b.b - this.b));
