@@ -256,16 +256,16 @@ export class Node2D extends CanvasItem {
         Transform2D.free(mat);
     }
     /**
-     * @param {Transform2D} xform
+     * @param {Transform2D} p_transform
      */
-    set_global_transform(xform) {
+    set_global_transform(p_transform) {
         const pi = this.get_parent_item();
         if (pi) {
-            const mat = pi._global_transform.clone().affine_inverse().append(xform);
+            const mat = pi.get_global_transform().clone().affine_inverse().append(p_transform);
             this.set_transform(mat);
             Transform2D.free(mat);
         } else {
-            this.set_transform(xform);
+            this.set_transform(p_transform);
         }
     }
 
@@ -326,6 +326,7 @@ export class Node2D extends CanvasItem {
         return angle;
     }
     /**
+     * return new Transform2D
      * @param {Node} p_parent
      * @returns {Transform2D}
      */

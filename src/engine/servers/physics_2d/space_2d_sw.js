@@ -547,6 +547,7 @@ export class Space2DSW {
 
                 if (recover_motion.is_zero()) {
                     collided = false;
+                    Vector2.free(recover_motion);
                     break;
                 }
 
@@ -557,6 +558,8 @@ export class Space2DSW {
                 body_aabb.y += recover_motion.y;
 
                 recover_attempts--;
+
+                Vector2.free(recover_motion);
 
             } while (recover_attempts);
         }
@@ -807,7 +810,7 @@ export class Space2DSW {
                     r_result.collider_metadata = rcd.best_object.get_shape_metadata(rcd.best_shape);
 
                     const body = /** @type {Body2DSW} */ (rcd.best_object);
-                    const body_origin = body.transform.get_origin();
+                    const body_origin = body_transform.get_origin();
                     const from_origin = p_from.get_origin();
 
                     const rel_vec = r_result.collision_point.clone().subtract(body_origin);
