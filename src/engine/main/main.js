@@ -128,9 +128,10 @@ export const Main = {
         const time_scale = Engine.get_singleton().time_scale;
         const scaled_step = step * time_scale;
 
-        const max_physics_steps = 4;
+        const max_physics_steps = 1;
         const frame_slice = scaled_step / max_physics_steps;
 
+        Engine.get_singleton().in_physics_frame = true;
         for (let iters = 0; iters < max_physics_steps; iters++) {
             Physics2DServer.get_singleton().sync();
             Physics2DServer.get_singleton().flush_queries();
@@ -146,6 +147,7 @@ export const Main = {
 
             Engine.get_singleton().physics_frames++;
         }
+        Engine.get_singleton().in_physics_frame = false;
 
         SceneTree.get_singleton().idle(scaled_step);
         MessageQueue.get_singleton().flush();
