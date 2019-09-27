@@ -12,6 +12,7 @@ import {
     NOTIFICATION_LOCAL_TRANSFORM_CHANGED,
 } from "./canvas_item";
 import { Node2D } from "./node_2d";
+import { CollisionObject2D } from "./collision_object_2d";
 
 
 export class CollisionShape2D extends Node2D {
@@ -76,8 +77,8 @@ export class CollisionShape2D extends Node2D {
     _notification(p_what) {
         switch (p_what) {
             case NOTIFICATION_PARENTED: {
-                const parent = this.get_parent();
-                if (parent.is_collision_object) {
+                this.parent = /** @type {CollisionObject2D} */(this.get_parent());
+                if (this.parent.is_collision_object) {
                     this.owner = this.parent.create_shape_owner(this);
                     if (this._shape) {
                         this.parent.shape_owner_add_shape(this.owner, this._shape);

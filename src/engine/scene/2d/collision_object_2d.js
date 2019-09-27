@@ -17,6 +17,7 @@ import {
     NOTIFICATION_ENTER_CANVAS,
     NOTIFICATION_TRANSFORM_CHANGED,
     NOTIFICATION_EXIT_CANVAS,
+    NOTIFICATION_VISIBILITY_CHANGED,
 } from './canvas_item';
 import { BodyState } from './const';
 import { CollisionShape2D } from './collision_shape_2d';
@@ -128,7 +129,7 @@ export class CollisionObject2D extends Node2D {
 
                 this._update_pickable();
             } break;
-            case NOTIFICATION_ENTER_CANVAS: {
+            case NOTIFICATION_VISIBILITY_CHANGED: {
                 this._update_pickable();
             } break;
             case NOTIFICATION_TRANSFORM_CHANGED: {
@@ -143,6 +144,8 @@ export class CollisionObject2D extends Node2D {
                 } else {
                     Physics2DServer.get_singleton().body_set_state(/** @type {Body2DSW} */(this.rid), BodyState.TRANSFORM, global_transform);
                 }
+
+                this.last_transform.copy(global_transform);
             } break;
             case NOTIFICATION_EXIT_TREE: {
                 if (this.area) {

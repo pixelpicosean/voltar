@@ -20,7 +20,7 @@ import {
 import { Vector2Like } from "engine/core/math/vector2";
 
 
-export const NOTIFICATION_TRANSFORM_CHANGED = 0;
+export const NOTIFICATION_TRANSFORM_CHANGED = 2000;
 export const NOTIFICATION_DRAW = 30;
 export const NOTIFICATION_VISIBILITY_CHANGED = 31;
 export const NOTIFICATION_ENTER_CANVAS = 32;

@@ -20,6 +20,7 @@ import {
     NOTIFICATION_TRANSLATION_CHANGED,
     NOTIFICATION_WM_UNFOCUS_REQUEST,
 } from 'engine/core/main_loop';
+import { InputEvent } from 'engine/core/os/input_event';
 
 import { World2D } from '../resources/world_2d';
 import { Viewport } from './viewport';
@@ -32,10 +33,7 @@ import {
     NOTIFICATION_PAUSED,
     NOTIFICATION_UNPAUSED,
 } from '../main/node';
-import { InputEvent } from 'engine/core/os/input_event';
-
-
-const NOTIFICATION_TRANSFORM_CHANGED = 2000;
+import { NOTIFICATION_TRANSFORM_CHANGED } from '../2d/canvas_item';
 
 
 export class SceneTreeTimer extends VObject {

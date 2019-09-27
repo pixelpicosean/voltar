@@ -22,7 +22,7 @@ import {
 import { ImageTexture } from '../resources/texture';
 import { Curve } from '../resources/curve';
 import { Gradient } from '../resources/gradient';
-import { NOTIFICATION_DRAW, NOTIFICATION_TRANSFORM_CHANGED } from './canvas_item';
+import { NOTIFICATION_DRAW } from './canvas_item';
 import { Node2D } from './node_2d';
 import { VisualServer } from 'engine/servers/visual_server';
 import { VSG } from 'engine/servers/visual/visual_server_globals';
