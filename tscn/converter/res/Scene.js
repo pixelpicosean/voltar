@@ -5,19 +5,21 @@ const {
 } = require('../../parser/type_converters');
 
 module.exports = (data) => {
-    return {
+    const res = {
+        // keep these, will be handled later
         _attr: data.attr,
+        _prop: data.prop,
 
         key: data.key,
-        index: int(data.attr.index),
         type: 'Scene',
+        index: int(data.attr.index),
         name: string(data.attr.name),
-        filename: data.attr.instance,
         parent: path(data.attr.parent),
-        instance: data.attr.instance,
 
-        prop: data.prop,
+        instance: data.attr.instance,
     };
+
+    return res;
 };
 
 module.exports.is_tres = () => true;

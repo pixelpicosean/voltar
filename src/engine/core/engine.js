@@ -1,6 +1,7 @@
-import { preload_queue, resource_map, res_class_map } from 'engine/registry';
+import { preload_queue, resource_map, res_class_map, scene_class_map } from 'engine/registry';
 import { default_font_name } from 'engine/scene/resources/theme';
 import { ResourceLoader } from './io/resource_loader';
+import { assemble_scene, instanciate_scene } from 'engine/scene/assembler';
 
 
 /**
@@ -98,7 +99,23 @@ export class Engine {
 
                         // normalize ext
                         for (let id in res.ext) {
-                            res.ext[id] = resource_map[res.ext[id]];
+                            const resource_filename = res.ext[id];
+                            const resource = resource_map[resource_filename];
+
+                            // is it a registered scene?
+                            if (scene_class_map[resource_filename]) {
+                                res.ext[id] = scene_class_map[resource_filename];
+                            }
+                            // is it a PackedScene, let's make it a object with `instance` factory function
+                            else if (resource.type === 'PackedScene') {
+                                res.ext[id] = () => {
+                                    return instanciate_scene(resource, resource_filename);
+                                };
+                            }
+                            // ok, it is just a normal one
+                            else {
+                                res.ext[id] = resource;
+                            }
                         }
 
                         // now let's replace ext/sub references inside this resource with real instances

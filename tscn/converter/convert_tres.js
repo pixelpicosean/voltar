@@ -1,52 +1,7 @@
 const _ = require('lodash');
 
-const { get_function_params } = require('../parser/type_converters');
 const { convert_block } = require('./convert_block');
-
-
-/**
- * @param {string} key
- */
-function normalize_res_key(key) {
-    if (key.startsWith('SubResource')) {
-        return `@sub#${get_function_params(key)[0]}`;
-    } else if (key.startsWith('ExtResource')) {
-        return `@ext#${get_function_params(key)[0]}`;
-    }
-    return key;
-}
-
-/**
- * @param {any} obj
- */
-function normalize_resource_object(obj) {
-    for (const k in obj) {
-        const value = obj[k];
-        if (typeof (value) === 'string') {
-            obj[k] = normalize_res_key(value);
-        } else if (typeof (value) === 'object') {
-            if (Array.isArray(value)) {
-                normalize_resource_array(value);
-            } else {
-                normalize_resource_object(value);
-            }
-        }
-    }
-}
-
-/**
- * @param {any[]} arr
- */
-function normalize_resource_array(arr) {
-    for (let i = 0; i < arr.length; i++) {
-        const value = arr[i];
-        if (typeof (value) === 'string') {
-            arr[i] = normalize_res_key(value);
-        } else if (typeof (value) === 'object') {
-            normalize_resource_object(value);
-        }
-    }
-}
+const { normalize_resource_object } = require('./resource_normalizer');
 
 /**
  * @param {{ key: string, attr: any, prop: any }[]} blocks
@@ -82,9 +37,13 @@ module.exports.convert_tres = (blocks) => {
                 sec.key = undefined;
                 sec.id = undefined;
             } else if (sec.key === 'node') {
-                sec._prop = undefined;
-                sec.key = undefined;
-                normalize_resource_object(sec);
+                // we don't normalize instance nodes now
+                // since we don't know their type yet
+                if (!sec.instance) {
+                    sec._prop = undefined;
+                    sec.key = undefined;
+                    normalize_resource_object(sec);
+                }
                 nodes.push(sec);
             }
         }

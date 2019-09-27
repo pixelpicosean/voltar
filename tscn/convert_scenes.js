@@ -2,8 +2,11 @@ const _ = require('lodash');
 const path = require('path');
 const walk = require('walk');
 
+const { get_function_params } = require('./parser/type_converters');
+
 const { load_tres } = require('./converter/load_tres');
 const { convert_tres } = require('./converter/convert_tres');
+const { normalize_resource_object } = require('./converter/resource_normalizer');
 
 
 // /**
@@ -373,6 +376,52 @@ module.exports.convert_scenes = (/** @type {string} */scene_root_url_p) => {
         map[filename] = convert_tres(blocks);
         return map;
     }, {});
+
+    // now we can normalize instanced nodes
+    for (const filename in resource_map) {
+        const res = resource_map[filename];
+        if (res.nodes && Array.isArray(res.nodes)) {
+            for (let i = 0; i < res.nodes.length; i++) {
+                const node = res.nodes[i];
+
+                if (node.instance) {
+                    // find real type of this node
+                    let node_type = null;
+                    let parent_class = node;
+                    let curr_res = res;
+                    while (parent_class) {
+                        node_type = parent_class.type;
+                        if (node_type && node_type !== 'Scene') {
+                            break;
+                        }
+                        const instance_idx = get_function_params(parent_class.instance)[0];
+                        const parent_res = resource_map[curr_res.ext[instance_idx]];
+                        parent_class = parent_res.nodes[0];
+                    }
+
+                    // use converter to process its data
+                    node.attr = node._attr; node._attr = undefined;
+                    node.prop = node._prop; node._prop = undefined;
+                    const converter = require(`./converter/res/${node_type}`);
+                    const parsed_data = converter(node);
+                    parsed_data._prop = undefined;
+
+                    // remove its type, which is already defined in its own scene
+                    parsed_data.type = undefined;
+                    parsed_data.key = undefined;
+
+                    // and add instance back to data
+                    parsed_data.instance = node.instance;
+
+                    // normalize its resource
+                    normalize_resource_object(parsed_data);
+
+                    // override
+                    res.nodes[i] = parsed_data;
+                }
+            }
+        }
+    }
 
     return resource_map;
 }

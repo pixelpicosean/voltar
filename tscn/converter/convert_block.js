@@ -1,9 +1,19 @@
 const node = require('./node');
 const resource = require('./resource');
 
+/**
+ * @typedef NodeBlock
+ * @property {string} [key]
+ * @property {string} [id]
+ * @property {any} [attr]
+ * @property {any} [prop]
+ * @property {any} [_attr]
+ * @property {any} [_prop]
+ * @property {string} [instance]
+ */
 
 /**
- * @returns {{ key?: string, id?: string, attr?: any, prop?: any, _prop?: any }}
+ * @returns {NodeBlock}
  */
 module.exports.convert_block = (block) => {
     switch (block.key) {

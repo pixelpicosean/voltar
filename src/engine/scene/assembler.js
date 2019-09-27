@@ -1,13 +1,10 @@
 import {
     node_class_map,
-    res_class_map,
     scene_class_map,
     resource_map,
 } from 'engine/registry';
 import { Node } from './main/node';
 
-
-const has = Object.prototype.hasOwnProperty;
 
 // Functions
 /**
@@ -43,7 +40,7 @@ export function attach_script(url, scene) {
  * @typedef NodeData
  * @property {string} type
  * @property {string} name
- * @property {string} [filename]
+ * @property {() => Node} [instance]
  * @property {string} [parent]
  *
  * @typedef PackedSceneData
@@ -90,7 +87,12 @@ export function assemble_scene(scn, data, url) {
         // instanciate child nodes
         if (i > 0) {
             /** @type {Node} */
-            const node = new (node_class_map[node_data.type]);
+            let node = null;
+            if (node_data.instance) {
+                node = node_data.instance();
+            } else {
+                node = new (node_class_map[node_data.type]);
+            }
             parent.add_child(node);
             node._load_data(node_data);
             let path = node.name;
@@ -105,7 +107,29 @@ export function assemble_scene(scn, data, url) {
 }
 
 /**
- * @param {NodeData | typeof Node} p_data
+ * @param {PackedSceneData | string} p_data
+ * @param {string} [url]
  */
-export function instanciate_scene(p_data) {
+export function instanciate_scene(p_data, url) {
+    if (typeof (p_data) === 'string') {
+        const ctor = scene_class_map[p_data];
+        if (ctor) {
+            return ctor.instance();
+        } else {
+            return instanciate_scene(/** @type{any} */(ctor), p_data);
+        }
+    }
+
+    const node_data = p_data.nodes[0];
+    /** @type {Node} */
+    let node = null;
+    if (node_data.type) {
+        node = new (node_class_map[node_data.type]);
+    } else {
+        node = node_data.instance();
+    }
+
+    assemble_scene(node, p_data, url);
+
+    return node;
 }
