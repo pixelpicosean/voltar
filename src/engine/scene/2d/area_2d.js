@@ -129,8 +129,8 @@ export class Area2D extends CollisionObject2D {
         this._collision_mask = 1;
         this._collision_layer = 1;
         this._priority = 0;
-        this._monitoring = true;
-        this._monitorable = true;
+        this._monitoring = false;
+        this._monitorable = false;
         this._first_shape = null;
 
         /**
@@ -145,6 +145,9 @@ export class Area2D extends CollisionObject2D {
 
         this._gravity = 98;
         this._gravity_vec = new Vector2(0, 1);
+
+        this.set_monitoring(true);
+        this.set_monitorable(true);
     }
 
     /* virtual */

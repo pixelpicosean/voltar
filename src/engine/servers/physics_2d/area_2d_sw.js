@@ -8,6 +8,7 @@ import {
 } from "engine/scene/2d/const";
 
 import { CollisionObject2DSW } from "./collision_object_2d_sw";
+import { AREA_BODY_ADDED, AREA_BODY_REMOVED } from "./physics_2d_server";
 
 
 class BodyKey {
@@ -354,7 +355,7 @@ export class Area2DSW extends CollisionObject2DSW {
                 }
 
                 this.monitor_callback_method.call(this.monitor_callback_scope,
-                    bs.state > 0,
+                    bs.state > 0 ? AREA_BODY_ADDED : AREA_BODY_REMOVED,
                     bk.rid,
                     bk.instance,
                     bk.body_shape,
@@ -379,7 +380,7 @@ export class Area2DSW extends CollisionObject2DSW {
                 }
 
                 this.area_monitor_callback_method.call(this.area_monitor_callback_scope,
-                    bs.state > 0,
+                    bs.state > 0 ? AREA_BODY_ADDED : AREA_BODY_REMOVED,
                     bk.rid,
                     bk.instance,
                     bk.body_shape,
