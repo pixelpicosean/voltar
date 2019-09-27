@@ -291,7 +291,7 @@ export class Control extends CanvasItem {
             this.set_rect_min_size(data.rect_min_size);
         }
         if (data.rect_rotation !== undefined) {
-            this.set_rect_rotation(data.rect_rotation);
+            this.set_rect_rotation_degrees(data.rect_rotation);
         }
         if (data.rect_scale !== undefined) {
             this.set_rect_scale(data.rect_scale);
