@@ -121,8 +121,14 @@ export class Control extends CanvasItem {
     get rect_position() { return this.c_data.pos_cache }
     set rect_position(value) { this.set_rect_position(value) }
 
+    get position() { return this.c_data.pos_cache }
+    set position(value) { this.set_rect_position(value) }
+
     get rect_global_position() { return this.get_global_transform().get_origin() }
     set rect_global_position(value) { this.set_rect_global_position(value) }
+
+    get global_position() { return this.get_global_transform().get_origin() }
+    set global_position(value) { this.set_rect_global_position(value) }
 
     get rect_size() { return this.c_data.size_cache }
     set rect_size(value) { this.set_rect_size(value) }
@@ -130,8 +136,14 @@ export class Control extends CanvasItem {
     get rect_rotation() { return this.c_data.rotation }
     set rect_rotation(value) { this.set_rect_rotation(value) }
 
+    get rotation() { return this.c_data.rotation }
+    set rotation(value) { this.set_rect_rotation(value) }
+
     get rect_rotation_degrees() { return rad2deg(this.c_data.rotation) }
     set rect_rotation_degrees(value) { this.set_rect_rotation(deg2rad(value)) }
+
+    get rotation_degrees() { return rad2deg(this.c_data.rotation) }
+    set rotation_degrees(value) { this.set_rect_rotation(deg2rad(value)) }
 
     get grow_horizontal() { return this.c_data.h_grow }
     set grow_horizontal(value) { this.set_grow_horizontal(value) }
@@ -144,6 +156,9 @@ export class Control extends CanvasItem {
 
     get rect_scale() { return this.c_data.scale }
     set rect_scale(value) { this.set_rect_scale(value) }
+
+    get scale() { return this.c_data.scale }
+    set scale(value) { this.set_rect_scale(value) }
 
     get size_flags_horizontal() { return this.c_data.h_size_flags }
     set size_flags_horizontal(value) { this.set_size_flags_horizontal(value) }
@@ -1118,6 +1133,12 @@ export class Control extends CanvasItem {
         this._size_changed();
         Rect2.free(rect);
     }
+    /**
+     * @param {Vector2Like} value
+     */
+    set_position(value) {
+        this.set_rect_position_n(value.x, value.y);
+    }
 
     /**
      * @param {Vector2Like} value
@@ -1140,6 +1161,19 @@ export class Control extends CanvasItem {
         this.set_rect_position(inv.xform(point, point), p_keep_margins);
         Vector2.free(point);
         Transform2D.free(inv);
+    }
+    /**
+     * @param {Vector2Like} value
+     */
+    set_global_position(value) {
+        this.set_rect_global_position_n(value.x, value.y);
+    }
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
+    set_global_position_n(x, y) {
+        this.set_rect_global_position_n(x, y);
     }
 
     /**
@@ -1269,11 +1303,22 @@ export class Control extends CanvasItem {
         this.update();
         this._notify_transform();
     }
-
     /**
      * @param {number} value
      */
     set_rect_rotation_degrees(value) {
+        this.set_rect_rotation(deg2rad(value));
+    }
+    /**
+     * @param {number} value
+     */
+    set_rotation(value) {
+        this.set_rect_rotation(value);
+    }
+    /**
+     * @param {number} value
+     */
+    set_rotation_degrees(value) {
         this.set_rect_rotation(deg2rad(value));
     }
 
@@ -1323,6 +1368,19 @@ export class Control extends CanvasItem {
         this.c_data.scale.set(x, y);
         this.update();
         this._notify_transform();
+    }
+    /**
+     * @param {Vector2Like} value
+     */
+    set_scale(value) {
+        this.set_rect_scale_n(value.x, value.y);
+    }
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
+    set_scale_n(x, y) {
+        this.set_rect_scale_n(x, y);
     }
 
     /**
