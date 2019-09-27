@@ -14,7 +14,7 @@ import {
     NOTIFICATION_DRAW,
 } from "./canvas_item";
 import { Node2D } from "./node_2d";
-import CPUParticles2D from "./cpu_particles_2d";
+import { CPUParticles2D } from "./cpu_particles_2d";
 
 
 export class VisibilityNotifier2D extends Node2D {
@@ -286,7 +286,7 @@ export class VisibilityEnabler2D extends VisibilityNotifier2D {
             // }
         }
         if (p_node.class === 'CPUParticle2D') {
-            // /** @type {CPUParticles2D} */(p_node).emitting = p_enabled;
+            /** @type {CPUParticles2D} */(p_node).emitting = p_enabled;
         }
     }
 
