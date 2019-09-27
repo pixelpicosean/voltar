@@ -375,7 +375,7 @@ export class Node extends VObject {
 
         this._enter_tree();
 
-        this.emit_signal('tree_entered');
+        this.emit_signal('tree_entered', this);
 
         this.data.tree.node_added(this);
 
@@ -406,7 +406,7 @@ export class Node extends VObject {
 
         this._exit_tree();
 
-        this.emit_signal('tree_exiting');
+        this.emit_signal('tree_exiting', this);
 
         this.notification(NOTIFICATION_EXIT_TREE, true);
 
@@ -436,7 +436,7 @@ export class Node extends VObject {
         for (const c of this.data.children) {
             c._propagate_after_exit_tree();
         }
-        this.emit_signal('tree_exited');
+        this.emit_signal('tree_exited', this);
     }
     _propagate_validate_owner() {
         if (this.data.owner) {

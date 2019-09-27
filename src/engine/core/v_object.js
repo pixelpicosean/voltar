@@ -237,7 +237,6 @@ export class VObject {
     free() {
         this.instance_id = 0;
         this.notification(NOTIFICATION_PREDELETE, true);
-        this._events = null;
         return true;
     }
 

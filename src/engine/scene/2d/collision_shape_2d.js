@@ -98,7 +98,7 @@ export class CollisionShape2D extends Node2D {
             } break;
             case NOTIFICATION_UNPARENTED: {
                 if (this.parent) {
-                    this.parent.remove_shape_owner(this.owner);
+                    this.parent.remove_shape_owner(this);
                 }
                 this.owner = null;
                 this.parent = null;

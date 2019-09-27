@@ -448,7 +448,7 @@ export class Area2D extends CollisionObject2D {
                 this.body_map.set(p_instance, E);
                 if (node) {
                     node.connect('tree_entered', this._body_enter_tree, this);
-                    node.connect('tree_exited', this._body_exit_tree, this);
+                    node.connect('tree_exiting', this._body_exit_tree, this);
                     if (E.in_tree) {
                         this.emit_signal('body_entered', node);
                     }
@@ -479,7 +479,7 @@ export class Area2D extends CollisionObject2D {
             if (E.rc === 0) {
                 if (node) {
                     node.disconnect('tree_entered', this._body_enter_tree, this);
-                    node.disconnect('tree_exited', this._body_exit_tree, this);
+                    node.disconnect('tree_exiting', this._body_exit_tree, this);
                     if (E.in_tree) {
                         this.emit_signal('body_exited', node);
                     }
@@ -545,7 +545,7 @@ export class Area2D extends CollisionObject2D {
                 this.area_map.set(p_instance, E);
                 if (node) {
                     node.connect('tree_entered', this._area_enter_tree, this);
-                    node.connect('tree_exited', this._area_exit_tree, this);
+                    node.connect('tree_exiting', this._area_exit_tree, this);
                     if (E.in_tree) {
                         this.emit_signal('area_entered', node);
                     }
@@ -576,7 +576,7 @@ export class Area2D extends CollisionObject2D {
             if (E.rc === 0) {
                 if (node) {
                     node.disconnect('tree_entered', this._area_enter_tree, this);
-                    node.disconnect('tree_exited', this._area_exit_tree, this);
+                    node.disconnect('tree_exiting', this._area_exit_tree, this);
                     if (E.in_tree) {
                         this.emit_signal('area_exited', node);
                     }
@@ -624,7 +624,7 @@ export class Area2D extends CollisionObject2D {
                 }
 
                 node.disconnect('tree_entered', this._body_enter_tree, this);
-                node.disconnect('tree_exited', this._body_exit_tree, this);
+                node.disconnect('tree_exiting', this._body_exit_tree, this);
 
                 if (!bs.in_tree) {
                     continue;
@@ -646,7 +646,7 @@ export class Area2D extends CollisionObject2D {
                 }
 
                 node.disconnect('tree_entered', this._area_enter_tree, this);
-                node.disconnect('tree_exited', this._area_exit_tree, this);
+                node.disconnect('tree_exiting', this._area_exit_tree, this);
 
                 if (!as.in_tree) {
                     continue;
