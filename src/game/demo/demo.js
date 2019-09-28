@@ -68,7 +68,7 @@ export class MainScene extends v.Node {
     _ready() {
         this.set_process(true)
         // this.set_process_input(true)
-        // this.set_process_unhandled_input(true)
+        this.set_process_unhandled_input(true)
 
         v.InputMap.add_action('left');
         const mouse_left = new v.InputEventMouseButton();
