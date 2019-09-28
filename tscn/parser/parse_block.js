@@ -306,6 +306,15 @@ module.exports.parse_block = (block) => {
                     }
                 }
             } break;
+            case '[': {
+                if (line.indexOf(']') >= 0) {
+                    // close current array
+                    tokens.pop();
+                    const pack = stack.pop();
+                    const parent = (stack.length > 0) ? _.last(stack).value : data.prop;
+                    parent[pack.key] = pack.value;
+                }
+            } break;
         }
     }
 
