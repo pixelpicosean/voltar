@@ -79,11 +79,14 @@ export class CollisionShape2D extends Node2D {
             case NOTIFICATION_PARENTED: {
                 this.parent = /** @type {CollisionObject2D} */(this.get_parent());
                 if (this.parent.is_collision_object) {
+                    // owner is also self
                     this.owner = this.parent.create_shape_owner(this);
                     if (this._shape) {
                         this.parent.shape_owner_add_shape(this.owner, this._shape);
                     }
                     this._update_in_shape_owner();
+                } else {
+                    this.parent = null;
                 }
             } break;
             case NOTIFICATION_ENTER_TREE: {
@@ -113,6 +116,7 @@ export class CollisionShape2D extends Node2D {
      */
     set_shape(p_shape) {
         this._shape = p_shape;
+        this.update();
         if (this.parent) {
             this.parent.shape_owner_clear_shapes(this.owner);
             if (this._shape) {
@@ -126,6 +130,7 @@ export class CollisionShape2D extends Node2D {
      */
     set_disabled(p_disabled) {
         this._disabled = p_disabled;
+        this.update();
         if (this.parent) {
             this.parent.shape_owner_set_disabled(this.owner, p_disabled);
         }
@@ -136,6 +141,7 @@ export class CollisionShape2D extends Node2D {
      */
     set_one_way_collision(p_one_way_collision) {
         this._one_way_collision = p_one_way_collision;
+        this.update();
         if (this.parent) {
             this.parent.shape_owner_set_one_way_collision(this.owner, p_one_way_collision);
         }
