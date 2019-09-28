@@ -99,8 +99,8 @@ export class MainScene extends v.Node {
     _process(delta) {
         this.spr.rotation += Math.PI * 0.5 * delta;
 
-        if (v.Input.is_action_just_pressed('left')) {
-            // console.log('pressed left')
+        if (v.Input.is_action_just_pressed('special')) {
+            console.log('"special" is pressed, defined in Godot input map')
         }
 
         if (v.Input.is_action_just_pressed('ui_accept')) {

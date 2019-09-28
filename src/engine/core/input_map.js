@@ -1,5 +1,13 @@
 import { remove_items } from 'engine/dep/index';
 import { ProjectSettings } from './project_settings';
+import { res_class_map } from 'engine/registry';
+
+/**
+ * make some type alias
+ * @typedef {import('engine/core/os/input_event').InputEvent} InputEvent
+ * @typedef {import('engine/core/os/input_event').ActionStatusRet} ActionStatusRet
+ */
+
 
 const ALL_DEVICES = -1;
 
@@ -7,7 +15,7 @@ class Action {
     constructor() {
         this.id = 0;
         this.deadzone = 0;
-        /** @type {import('engine/core/os/input_event').InputEvent[]} */
+        /** @type {InputEvent[]} */
         this.inputs = [];
     }
 }
@@ -17,6 +25,8 @@ const action_status = {
     pressed: false,
     strength: 0,
 };
+
+const has = Object.prototype.hasOwnProperty;
 
 export class InputMap {
     static get_singleton() { return singleton }
@@ -61,25 +71,32 @@ export class InputMap {
     }
     /**
      * @param {string} p_action
-     * @param {import('engine/core/os/input_event').InputEvent} p_event
+     * @param {InputEvent | { type: string }} p_event
      */
     action_add_event(p_action, p_event) {
+        /** @type {InputEvent} */
+        let event = /** @type {InputEvent} */(p_event);
+        // this event maybe a plain object
+        if ('type' in p_event) {
+            event = /** @type {InputEvent} */(new (res_class_map[p_event.type]));
+            event._load_data(p_event);
+        }
         const action = this.input_map.get(p_action);
-        if (this._find_event(action, p_event)) {
+        if (this._find_event(action, event)) {
             return;
         }
-        action.inputs.push(p_event);
+        action.inputs.push(event);
     }
     /**
      * @param {string} p_action
-     * @param {import('engine/core/os/input_event').InputEvent} p_event
+     * @param {InputEvent} p_event
      */
     action_has_event(p_action, p_event) {
         return !!(this._find_event(this.input_map.get(p_action), p_event));
     }
     /**
      * @param {string} p_action
-     * @param {import('engine/core/os/input_event').InputEvent} p_event
+     * @param {InputEvent} p_event
      */
     action_erase_event(p_action, p_event) {
         const action = this.input_map.get(p_action);
@@ -100,7 +117,7 @@ export class InputMap {
      */
     get_action_list(p_action) { }
     /**
-     * @param {import('engine/core/os/input_event').InputEvent} p_event
+     * @param {InputEvent} p_event
      * @param {string} p_action
      */
     event_is_action(p_event, p_action) {
@@ -116,7 +133,7 @@ export class InputMap {
 
             this.add_action(name, action.deadzone !== undefined ? action.deadzone : 0.5);
             for (const e of events) {
-                if (e) this.action_add_event(name, e);
+                this.action_add_event(name, e);
             }
         }
     }
@@ -124,9 +141,9 @@ export class InputMap {
     /* private */
 
     /**
-     * @param {import('engine/core/os/input_event').InputEvent} p_event
+     * @param {InputEvent} p_event
      * @param {string} p_action
-     * @param {import('engine/core/os/input_event').ActionStatusRet} r_ret
+     * @param {ActionStatusRet} r_ret
      */
     event_get_action_status(p_event, p_action, r_ret) {
         const E = this.input_map.get(p_action);
@@ -148,8 +165,8 @@ export class InputMap {
 
     /**
      * @param {Action} p_action
-     * @param {import('engine/core/os/input_event').InputEvent} p_event
-     * @param {import('engine/core/os/input_event').ActionStatusRet} [p_ret]
+     * @param {InputEvent} p_event
+     * @param {ActionStatusRet} [p_ret]
      */
     _find_event(p_action, p_event, p_ret) {
         let device = 0;
