@@ -11,6 +11,7 @@ import {
     find_keycode_name,
     KEYS,
 } from "./keyboard";
+import { res_class_map } from "engine/registry";
 
 
 export const BUTTON_LEFT = 1;
@@ -67,6 +68,10 @@ export class InputEvent {
     }
     init() {
         this.device = 0;
+        return this;
+    }
+    _load_data(data) {
+        Object.assign(this, data);
         return this;
     }
     free() {
@@ -126,6 +131,7 @@ export class InputEvent {
     action_match(p_event, p_ret, p_deadzone) { return false }
 }
 create_pool('InputEvent', InputEvent);
+res_class_map['InputEvent'] = InputEvent;
 
 export class InputEventWithModifiers extends InputEvent {
     get class() { return 'InputEventWithModifiers' }
@@ -161,6 +167,7 @@ export class InputEventWithModifiers extends InputEvent {
     }
 }
 create_pool('InputEventWithModifiers', InputEventWithModifiers)
+res_class_map['InputEventWithModifiers'] = InputEventWithModifiers;
 
 export class InputEventKey extends InputEventWithModifiers {
     get class() { return 'InputEventKey' }
@@ -269,6 +276,7 @@ export class InputEventKey extends InputEventWithModifiers {
     }
 }
 create_pool('InputEventKey', InputEventKey)
+res_class_map['InputEventKey'] = InputEventKey;
 
 export class InputEventMouse extends InputEventWithModifiers {
     get class() { return 'InputEventMouse' }
@@ -291,6 +299,7 @@ export class InputEventMouse extends InputEventWithModifiers {
     }
 }
 create_pool('InputEventMouse', InputEventMouse)
+res_class_map['InputEventMouse'] = InputEventMouse;
 
 export class InputEventMouseButton extends InputEventMouse {
     get class() { return 'InputEventMouseButton' }
@@ -373,6 +382,7 @@ export class InputEventMouseButton extends InputEventMouse {
     }
 }
 create_pool('InputEventMouseButton', InputEventMouseButton)
+res_class_map['InputEventMouseButton'] = InputEventMouseButton;
 
 export class InputEventMouseMotion extends InputEventMouse {
     get class() { return 'InputEventMouseMotion' }
@@ -458,6 +468,7 @@ export class InputEventMouseMotion extends InputEventMouse {
     }
 }
 create_pool('InputEventMouseMotion', InputEventMouseMotion)
+res_class_map['InputEventMouseMotion'] = InputEventMouseMotion;
 
 export class InputEventAction extends InputEvent {
     get class() { return 'InputEventAction' }
@@ -516,3 +527,4 @@ export class InputEventAction extends InputEvent {
     as_text() { return `InputEventAction : action=${this.action}, pressed=(${this.pressed ? 'true' : 'false'})` }
 }
 create_pool('InputEventAction', InputEventAction)
+res_class_map['InputEventAction'] = InputEventAction;

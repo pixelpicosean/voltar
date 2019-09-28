@@ -1,7 +1,7 @@
 import { preload_queue, resource_map, res_class_map, scene_class_map } from 'engine/registry';
 import { default_font_name } from 'engine/scene/resources/theme';
 import { ResourceLoader } from './io/resource_loader';
-import { assemble_scene, instanciate_scene } from 'engine/scene/assembler';
+import { instanciate_scene } from 'engine/scene/assembler';
 
 
 /**
