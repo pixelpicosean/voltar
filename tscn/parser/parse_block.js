@@ -85,72 +85,17 @@ function push_tokens_in_a_line(db, line, tokens, stack, key = undefined) {
             push_tokens_in_a_line(db, rest_line, tokens, stack, 0);
         }
     }
-    // - Function(param1, param2, param3)
+    // - data wrapped by a function call: Function(param1, param2, param3)
     else if (line.indexOf('(') >= 0 && line.indexOf(')') >= 0 && get_function_params(line).length > 0) {
         const trimmed_line = line.trim();
         const function_name = trimmed_line.substring(0, trimmed_line.indexOf('('));
-        const param_str = remove_first_n_last(trimmed_line.substring(function_name.length).trim()).trim();
-        if (function_name === 'Object') {
-            // object type is the word before first ","
-            const object_type = param_str.substring(0, param_str.indexOf(',')).trim();
-            const properties_str = param_str.substring(param_str.indexOf(',') + 1).trim();
-            const naive_split_arr = properties_str.split(/\s*,\s*/);
-            const correct_param_arr = [];
-            for (let i = 0; i < naive_split_arr.length - 1; i++) {
-                if (
-                    (naive_split_arr[i].indexOf('(') >= 0 && naive_split_arr[i].indexOf(')') < 0) // "(" is not closed
-                    &&
-                    naive_split_arr[i + 1].indexOf(')') >= 0 // found the close ")" in next line
-                ) {
-                    // merge these 2 lines
-                    correct_param_arr.push(`${naive_split_arr[i]}, ${naive_split_arr[i + 1]}`);
-                    i += 1;
-                } else {
-                    correct_param_arr.push(naive_split_arr[i]);
-                }
-            }
-
-            const obj = { type: object_type };
-            for (const pair of correct_param_arr) {
-                const pair_arr = pair.split(':');
-                const key = remove_first_n_last(pair_arr[0]);
-                const value_res = parse_as_primitive(pair_arr[1]);
-                if (value_res.is_valid) {
-                    obj[key] = value_res.value;
-                } else {
-                    const src = pair_arr[1];
-                    // a special data structure?
-                    if (src.indexOf('(') >= 0 && src.indexOf(')') >= 0) {
-                        const vec = built_in_functions.Vector2(src);
-                        if (vec !== undefined) {
-                            obj[key] = vec;
-                            continue;
-                        }
-                        const color = built_in_functions.Color(src);
-                        if (color !== undefined) {
-                            obj[key] = color;
-                            continue;
-                        }
-                        const rect = built_in_functions.Rect2(src);
-                        if (rect !== undefined) {
-                            obj[key] = rect;
-                            continue;
-                        }
-                        const arr = built_in_functions.GeneralArray(src);
-                        if (arr !== undefined) {
-                            obj[key] = arr;
-                            continue;
-                        }
-                    }
-                    // we don't know what it is
-                    else {
-                        obj[key] = src;
-                    }
-                }
-            }
-
+        const converter = built_in_functions[function_name];
+        if (converter) {
             const parent = (stack.length > 0) ? _.last(stack).value : db;
-            parent[key] = obj;
+            parent[key] = converter(trimmed_line);
+        } else {
+            const parent = (stack.length > 0) ? _.last(stack).value : db;
+            parent[key] = line;
         }
     }
     // let's just keep the others for now
