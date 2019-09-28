@@ -157,6 +157,9 @@ export class Control extends CanvasItem {
     get focus_mode() { return this.c_data.focus_mode }
     set focus_mode(value) { this.set_focus_mode(value) }
 
+    get mouse_filter() { return this.c_data.mouse_filter }
+    set mouse_filter(value) { this.c_data.mouse_filter = value }
+
     constructor() {
         super();
 

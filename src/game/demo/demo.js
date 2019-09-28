@@ -51,6 +51,7 @@ export class MainScene extends v.Node {
         this.add_child(tex_rect);
         tex_rect.set_texture(tex);
         tex_rect.set_flip_v(true);
+        tex_rect.mouse_filter = v.MOUSE_FILTER_IGNORE;
         tex_rect.set_rect_position_n(500, 10);
 
         const nine_tex = v.resource_map['button'];
@@ -86,7 +87,10 @@ export class MainScene extends v.Node {
 
         this.get_node('CenterContainer')
             .connect('mouse_entered', () => {
-                console.log('CenterContainer mouse_entered')
+                console.log('mouse entered CenterContainer')
+            })
+            .connect('mouse_exited', () => {
+                console.log('mouse exited CenterContainer')
             })
     }
     _exit_tree() {
