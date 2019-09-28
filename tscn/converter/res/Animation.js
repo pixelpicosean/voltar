@@ -10,26 +10,6 @@ const {
     MethodArray,
 } = require('../../parser/type_converters');
 
-
-const get_prop_name = (path) => _.last(path.split(':'));
-
-const trans_rotation_track = (track) => {
-    track.path = track.path.replace(get_prop_name(track.path), 'rotation');
-    track.keys.values = track.keys.values.map(deg => deg / 180 * Math.PI);
-    return track;
-};
-
-const TrackProcs = {
-    'rotation_degrees': trans_rotation_track,
-    'rect_rotation': trans_rotation_track,
-};
-const transform_track = (track) => {
-    const type = get_prop_name(track.path);
-    if (_.keys(TrackProcs).indexOf(type) >= 0) {
-        TrackProcs[type](track);
-    }
-};
-
 module.exports = (data) => {
     const anim = {
         id: int(data.attr.id),
@@ -68,7 +48,6 @@ module.exports = (data) => {
                 values: (track_type === 'method') ? MethodArray(keys_data.values) : GeneralArray(keys_data.values),
             },
         };
-        transform_track(track);
 
         anim.tracks.push(track);
     }
