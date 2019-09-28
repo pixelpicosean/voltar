@@ -152,6 +152,9 @@ module.exports.convert_project_settings = (project_url) => {
 
         real_settings.physics = physics;
     }
+    if (settings.input) {
+        real_settings.input = settings.input;
+    }
     if (settings.layer_names) {
         const layer_values = {};
         for (const k in settings.layer_names) {
