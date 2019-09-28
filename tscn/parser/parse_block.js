@@ -50,7 +50,7 @@ function push_tokens_in_a_line(db, line, tokens, stack, key = undefined) {
         const rest_line = line.substring(b_idx + 1);
 
         // the array is ended in this line
-        if (rest_line.indexOf(']') === rest_line.lastIndexOf(']')) {
+        if (rest_line.indexOf(']') >= 0 && rest_line.indexOf(']') === rest_line.lastIndexOf(']')) {
             const items_str = rest_line.substring(0, rest_line.indexOf(']')).trim();
             const items = GeneralArray(items_str);
 
