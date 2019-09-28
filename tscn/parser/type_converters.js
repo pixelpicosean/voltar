@@ -206,6 +206,80 @@ module.exports.Rect2 = (rect) => {
     return undefined;
 };
 /**
+ * @param {any} line
+ * @returns {Object<string, any> & { type: string }}
+ */
+module.exports.Object = (line) => {
+    if (typeof (line) !== 'string') {
+        return line;
+    }
+
+    const trimmed_line = line.trim();
+    const function_name = trimmed_line.substring(0, trimmed_line.indexOf('('));
+    const param_str = remove_first_n_last(trimmed_line.substring(function_name.length).trim()).trim();
+
+    // object type is the word before first ","
+    const object_type = param_str.substring(0, param_str.indexOf(',')).trim();
+
+    const properties_str = param_str.substring(param_str.indexOf(',') + 1).trim();
+    const naive_split_arr = properties_str.split(/\s*,\s*/);
+    const correct_param_arr = [];
+    for (let i = 0; i < naive_split_arr.length - 1; i++) {
+        if (
+            (naive_split_arr[i].indexOf('(') >= 0 && naive_split_arr[i].indexOf(')') < 0) // "(" is not closed
+            &&
+            naive_split_arr[i + 1].indexOf(')') >= 0 // found the close ")" in next line
+        ) {
+            // merge these 2 lines
+            correct_param_arr.push(`${naive_split_arr[i]}, ${naive_split_arr[i + 1]}`);
+            i += 1;
+        } else {
+            correct_param_arr.push(naive_split_arr[i]);
+        }
+    }
+
+    const obj = { type: object_type };
+    for (const pair of correct_param_arr) {
+        const pair_arr = pair.split(':');
+        const key = remove_first_n_last(pair_arr[0]);
+        const value_res = module.exports.parse_as_primitive(pair_arr[1]);
+        if (value_res.is_valid) {
+            obj[key] = value_res.value;
+        } else {
+            const src = pair_arr[1];
+            // a special data structure?
+            if (src.indexOf('(') >= 0 && src.indexOf(')') >= 0) {
+                const vec = module.exports.Vector2(src);
+                if (vec !== undefined) {
+                    obj[key] = vec;
+                    continue;
+                }
+                const color = module.exports.Color(src);
+                if (color !== undefined) {
+                    obj[key] = color;
+                    continue;
+                }
+                const rect = module.exports.Rect2(src);
+                if (rect !== undefined) {
+                    obj[key] = rect;
+                    continue;
+                }
+                const arr = module.exports.GeneralArray(src);
+                if (arr !== undefined) {
+                    obj[key] = arr;
+                    continue;
+                }
+            }
+            // we don't know what it is
+            else {
+                obj[key] = src;
+            }
+        }
+    }
+
+    return obj;
+}
+/**
  * @param {string} node_path
  * @returns {string}
  */
