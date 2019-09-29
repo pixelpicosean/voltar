@@ -134,8 +134,8 @@ export class Transform2D {
         const c = Math.cos(p_rot);
         const s = Math.sin(p_rot);
         this.a = c * p_scale.x;
-        this.d = c * p_scale.x;
-        this.c = -s * p_scale.x;
+        this.d = c * p_scale.y;
+        this.c = -s * p_scale.y;
         this.b = s * p_scale.x;
         return this;
     }

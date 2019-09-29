@@ -106,7 +106,7 @@ export class Node2D extends CanvasItem {
 
     /**
      * @param {number} x
-     * @param {number} [y]
+     * @param {number} y
      */
     set_scale_n(x, y) {
         if (this._xform_dirty) {

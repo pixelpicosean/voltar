@@ -194,29 +194,16 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">sprites/icon-1.png</key>
+            <key type="filename">sprites/drop.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0,0</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>26,128,51,256</rect>
+                <rect>2,2,4,4</rect>
                 <key>scale9Paddings</key>
-                <rect>26,128,51,256</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">sprites/icon-2.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0,0</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>128,26,256,51</rect>
-                <key>scale9Paddings</key>
-                <rect>128,26,256,51</rect>
+                <rect>2,2,4,4</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -230,6 +217,19 @@
                 <rect>128,128,256,256</rect>
                 <key>scale9Paddings</key>
                 <rect>128,128,256,256</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">sprites/rain.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>2,16,4,32</rect>
+                <key>scale9Paddings</key>
+                <rect>2,16,4,32</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>

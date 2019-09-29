@@ -61,6 +61,14 @@
             -ms-user-select: none;
             user-select: none;
             -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+
+            /* Pixelated, remove these lines for smooth scaling */
+            image-rendering: optimizeSpeed;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: -o-crisp-edges;
+            image-rendering: pixelated;
+            -ms-interpolation-mode: nearest-neighbor;
         }
     </style>
 </head>
