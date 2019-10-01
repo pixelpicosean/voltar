@@ -810,6 +810,8 @@ export class SceneTree extends MainLoop {
             }
         }
 
+        this.flush_transform_notifications();
+
         this._call_idle_callbacks();
     }
     finish() {
