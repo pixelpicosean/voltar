@@ -1,6 +1,5 @@
 import * as v from 'engine/index';
 
-v.preload('media/sprites-0.json')
 v.preload('button', 'media/green_button.png')
 
 const content = [
