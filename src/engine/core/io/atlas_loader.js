@@ -1,10 +1,6 @@
 import url from 'url';
 import { Rect2 } from 'engine/core/math/rect2';
 
-import BaseTexture from 'engine/drivers/textures/BaseTexture';
-import Texture from 'engine/drivers/textures/Texture';
-import * as settings from 'engine/drivers/settings';
-
 import Resource from './io_resource';
 import { raw_resource_map, resource_map } from 'engine/registry';
 import { ImageTexture } from 'engine/scene/resources/texture';
@@ -15,11 +11,11 @@ import { ImageTexture } from 'engine/scene/resources/texture';
  * @param {number} [default_value=1]
  */
 function get_resolution_of_url(url, default_value = 1) {
-    const resolution = settings.RETINA_PREFIX.exec(url);
+    // const resolution = settings.RETINA_PREFIX.exec(url);
 
-    if (resolution) {
-        return parseFloat(resolution[1]);
-    }
+    // if (resolution) {
+    //     return parseFloat(resolution[1]);
+    // }
 
     return default_value !== undefined ? default_value : 1;
 }
@@ -40,22 +36,19 @@ class Spritesheet {
     }
 
     /**
-     * @param {BaseTexture} base_texture Reference to the source BaseTexture object.
-     * @param {{ frames: string[], animations: string[][], meta: { scale?: string }}} data - Spritesheet image data.
-     * @param {string} [resolution_filename] - The filename to consider when determining
-     *        the resolution of the spritesheet. If not provided, the image_url will
-     *        be used on the BaseTexture.
+     * @param {ImageTexture} base_texture Reference to the source BaseTexture object.
+     * @param {{ frames: string[], meta: { scale?: string }}} data - Spritesheet image data.
      */
-    constructor(base_texture, data, resolution_filename = null) {
+    constructor(base_texture, data) {
         /**
          * Reference to ths source texture
-         * @type {BaseTexture}
+         * @type {ImageTexture}
          */
         this.base_texture = base_texture;
 
         /**
          * Map of spritesheet textures.
-         * @type {Object<string, Texture>}
+         * @type {Object<string, ImageTexture>}
          */
         this.textures = {};
 
@@ -68,9 +61,7 @@ class Spritesheet {
          * The resolution of the spritesheet.
          * @type {number}
          */
-        this.resolution = this._update_resolution(
-            resolution_filename || (this.base_texture.resource ? this.base_texture.resource.url : null)
-        );
+        this.resolution = 1;
 
         /**
          * Map of spritesheet frames.
@@ -99,35 +90,6 @@ class Spritesheet {
          * @private
          */
         this._callback = null;
-    }
-
-    /**
-     * Generate the resolution from the filename or fallback
-     * to the meta.scale field of the JSON data.
-     *
-     * @private
-     * @param {string} resolution_filename - The filename to use for resolving
-     *        the default resolution.
-     * @return {number} Resolution to use for spritesheet.
-     */
-    _update_resolution(resolution_filename) {
-        const scale = this.data.meta.scale;
-
-        // Use a defaultValue of `null` to check if a url-based resolution is set
-        let resolution = get_resolution_of_url(resolution_filename, null);
-
-        // No resolution found via URL
-        if (resolution === null) {
-            // Use the scale value or default to 1
-            resolution = (scale !== undefined) ? parseFloat(scale) : 1;
-        }
-
-        // For non-1 resolutions, update base_texture
-        if (resolution !== 1) {
-            this.base_texture.setResolution(resolution);
-        }
-
-        return resolution;
     }
 
     /**
@@ -161,60 +123,10 @@ class Spritesheet {
 
         while (frame_index - initial_frame_index < max_frames && frame_index < this._frame_keys.length) {
             const i = this._frame_keys[frame_index];
-            const data = this._frames[i];
-            const rect = data.frame;
-
-            if (rect) {
-                let frame = null;
-                let trim = null;
-                const source_size = data.trimmed !== false && data.sourceSize
-                    ? data.sourceSize : data.frame;
-
-                const orig = new Rect2(
-                    0,
-                    0,
-                    Math.floor(source_size.w) / this.resolution,
-                    Math.floor(source_size.h) / this.resolution
-                );
-
-                if (data.rotated) {
-                    frame = new Rect2(
-                        Math.floor(rect.x) / this.resolution,
-                        Math.floor(rect.y) / this.resolution,
-                        Math.floor(rect.h) / this.resolution,
-                        Math.floor(rect.w) / this.resolution
-                    );
-                } else {
-                    frame = new Rect2(
-                        Math.floor(rect.x) / this.resolution,
-                        Math.floor(rect.y) / this.resolution,
-                        Math.floor(rect.w) / this.resolution,
-                        Math.floor(rect.h) / this.resolution
-                    );
-                }
-
-                //  Check to see if the sprite is trimmed
-                if (data.trimmed !== false && data.spriteSourceSize) {
-                    trim = new Rect2(
-                        Math.floor(data.spriteSourceSize.x) / this.resolution,
-                        Math.floor(data.spriteSourceSize.y) / this.resolution,
-                        Math.floor(rect.w) / this.resolution,
-                        Math.floor(rect.h) / this.resolution
-                    );
-                }
-
-                this.textures[i] = new Texture(
-                    this.base_texture,
-                    frame,
-                    orig,
-                    trim,
-                    data.rotated ? 2 : 0,
-                    data.anchor
-                );
-
-                // lets also add the frame to global cache for from_frame and from_image functions
-                Texture.addToCache(this.textures[i], i);
-            }
+            const rect = this._frames[i].frame;
+            const tex = new ImageTexture()
+            tex.create_from_region(this.base_texture, rect.x, rect.y, rect.width, rect.height);
+            this.textures[i] = tex;
 
             frame_index++;
         }
@@ -248,25 +160,6 @@ class Spritesheet {
                 this._parse_complete();
             }
         }, 0);
-    }
-
-    /**
-     * Destroy Spritesheet and don't use after this.
-     *
-     * @param {boolean} [destroy_base] Whether to destroy the base texture as well
-     */
-    destroy(destroy_base = false) {
-        for (const i in this.textures) {
-            this.textures[i].destroy();
-        }
-        this._frames = null;
-        this._frame_keys = null;
-        this.data = null;
-        this.textures = null;
-        if (destroy_base) {
-            this.base_texture.destroy();
-        }
-        this.base_texture = null;
     }
 }
 
@@ -305,9 +198,8 @@ export function atlas_loader(/** @type {Resource} */ resource, /** @type {Functi
         }
 
         const spritesheet = new Spritesheet(
-            res.internal.baseTexture,
-            resource.data,
-            resource.url
+            res.internal,
+            resource.data
         );
 
         spritesheet.parse(() => {
@@ -318,9 +210,7 @@ export function atlas_loader(/** @type {Resource} */ resource, /** @type {Functi
 
             // textures from spritesheet
             for (let k in spritesheet.textures) {
-                let tex = new ImageTexture();
-                tex.create_from_atlas(spritesheet.textures[k], 0);
-                resource_map[k] = tex;
+                resource_map[k] = spritesheet.textures[k];
             }
 
             next();

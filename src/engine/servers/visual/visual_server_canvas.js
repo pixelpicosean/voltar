@@ -11,6 +11,7 @@ import { Vector2, Vector2Like } from 'engine/core/math/vector2';
 import { Rect2 } from 'engine/core/math/rect2';
 import { Transform2D } from 'engine/core/math/transform_2d';
 import { Color, ColorLike } from 'engine/core/color';
+import { ImageTexture } from 'engine/scene/resources/texture';
 
 import { VisualServer } from '../visual_server';
 import { VSG } from './visual_server_globals';
@@ -31,7 +32,6 @@ import {
     CommandMultiMesh,
     TYPE_CUSTOM,
 } from './commands';
-import Texture from 'engine/drivers/textures/Texture';
 
 
 const white = Object.freeze(new Color(1, 1, 1, 1));
@@ -472,13 +472,12 @@ export class VisualServerCanvas {
     /**
      * @param {Item} p_item
      * @param {Rect2} p_rect
-     * @param {Texture} p_texture
+     * @param {ImageTexture} p_texture
      * @param {boolean} [p_tile=false]
      * @param {ColorLike} [p_modulate]
      * @param {boolean} [p_transpose=false]
-     * @param {Texture} [p_normal_map]
      */
-    canvas_item_add_texture_rect(p_item, p_rect, p_texture, p_tile = false, p_modulate = white, p_transpose = false, p_normal_map = null) {
+    canvas_item_add_texture_rect(p_item, p_rect, p_texture, p_tile = false, p_modulate = white, p_transpose = false) {
         const rect = CommandRect.instance();
         rect.modulate.copy(p_modulate);
         rect.rect.copy(p_rect);
@@ -504,26 +503,22 @@ export class VisualServerCanvas {
             rect.rect.width = t;
         }
         rect.texture = p_texture;
-        rect.normal_map = p_normal_map;
         p_item.rect_dirty = true;
         p_item.commands.push(rect);
     }
     /**
      * @param {Item} p_item
      * @param {Rect2} p_rect
-     * @param {Texture} p_texture
+     * @param {ImageTexture} p_texture
      * @param {Rect2} p_src_rect
      * @param {ColorLike} [p_modulate]
      * @param {boolean} [p_transpose=false]
-     * @param {Texture} [p_normal_map]
-     * @param {boolean} [p_clip_uv=false]
      */
-    canvas_item_add_texture_rect_region(p_item, p_rect, p_texture, p_src_rect, p_modulate = white, p_transpose = false, p_normal_map = null, p_clip_uv = false) {
+    canvas_item_add_texture_rect_region(p_item, p_rect, p_texture, p_src_rect, p_modulate = white, p_transpose = false) {
         const rect = CommandRect.instance();
         rect.modulate.copy(p_modulate);
         rect.rect.copy(p_rect);
         rect.texture = p_texture;
-        rect.normal_map = p_normal_map;
         rect.source.copy(p_src_rect);
         rect.flags = CANVAS_RECT_REGION;
 
@@ -548,19 +543,17 @@ export class VisualServerCanvas {
      * @param {Item} p_item
      * @param {Rect2} p_rect
      * @param {Rect2} p_source
-     * @param {Texture} p_texture
+     * @param {ImageTexture} p_texture
      * @param {Vector2} p_topleft
      * @param {Vector2} p_bottomright
      * @param {number} [p_x_axis_mode]
      * @param {number} [p_y_axis_mode]
      * @param {boolean} [p_draw_center=true]
      * @param {ColorLike} [p_modulate=white]
-     * @param {Texture} [p_normal_map]
      */
-    canvas_item_add_nine_patch(p_item, p_rect, p_source, p_texture, p_topleft, p_bottomright, p_x_axis_mode = NINE_PATCH_STRETCH, p_y_axis_mode = NINE_PATCH_STRETCH, p_draw_center = true, p_modulate = white, p_normal_map = null) {
+    canvas_item_add_nine_patch(p_item, p_rect, p_source, p_texture, p_topleft, p_bottomright, p_x_axis_mode = NINE_PATCH_STRETCH, p_y_axis_mode = NINE_PATCH_STRETCH, p_draw_center = true, p_modulate = white) {
         const style = CommandNinePatch.instance();
         style.texture = p_texture;
-        style.normal_map = p_normal_map;
         style.rect.copy(p_rect);
         style.source.copy(p_source);
         style.draw_center = p_draw_center;
@@ -582,14 +575,12 @@ export class VisualServerCanvas {
     /**
      * @param {Item} p_item
      * @param {any} p_mesh
-     * @param {Texture} p_texture
-     * @param {Texture} p_normal_map
+     * @param {ImageTexture} p_texture
      */
-    canvas_item_add_multimesh(p_item, p_mesh, p_texture, p_normal_map) {
+    canvas_item_add_multimesh(p_item, p_mesh, p_texture) {
         const mm = CommandMultiMesh.instance();
         mm.multimesh = p_mesh;
         mm.texture = p_texture;
-        mm.normal_map = p_normal_map;
 
         p_item.rect_dirty = true;
         p_item.commands.push(mm);

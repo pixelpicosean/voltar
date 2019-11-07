@@ -12,7 +12,7 @@ import { VisualServerCanvas } from "./visual/visual_server_canvas";
 import { VisualServerScene } from "./visual/visual_server_scene";
 import { VisualServerViewport } from "./visual/visual_server_viewport";
 
-import { Rasterizer } from "engine/drivers/rasterizer";
+import { Rasterizer } from "engine/drivers/webgl/rasterizer";
 
 
 export const NO_INDEX_ARRAY = -1;
@@ -23,18 +23,33 @@ export const MAX_GLOW_LEVELS = 7;
 
 export const MAX_CURSORS = 8;
 
-export const TEXTURE_FLAG_MIPMAPS = 1;
-export const TEXTURE_FLAG_REPEAT = 2;
-export const TEXTURE_FLAG_FILTER = 4;
-export const TEXTURE_FLAG_ANISOTROPIC_FILTER = 8;
-export const TEXTURE_FLAG_CONVERT_TO_LINEAR = 16;
-export const TEXTURE_FLAG_MIRRORED_REPEAT = 32;
-export const TEXTURE_FLAGS_DEFAULT = TEXTURE_FLAG_REPEAT | TEXTURE_FLAG_MIPMAPS | TEXTURE_FLAG_FILTER;
+export const USAGE_IMMUTABLE = WebGLRenderingContext.STATIC_DRAW;
+export const USAGE_DYNAMIC = WebGLRenderingContext.DYNAMIC_DRAW;
+export const USAGE_STREAM = WebGLRenderingContext.STREAM_DRAW;
 
-export const TEXTURE_TYPE_2D = 0;
-export const TEXTURE_TYPE_CUBEMAP = 1;
-export const TEXTURE_TYPE_2D_ARRAY = 2;
-export const TEXTURE_TYPE_3D = 3;
+export const INDEX_TYPE_NONE = WebGLRenderingContext.NONE;
+export const INDEX_TYPE_UINT16 = WebGLRenderingContext.UNSIGNED_SHORT;
+export const INDEX_TYPE_UINT32 = WebGLRenderingContext.UNSIGNED_INT;
+
+export const PRIMITIVE_TYPE_INVALID = 0;
+export const PRIMITIVE_TYPE_POINTS = WebGLRenderingContext.POINTS;
+export const PRIMITIVE_TYPE_LINES = WebGLRenderingContext.LINES;
+export const PRIMITIVE_TYPE_LINE_STRIP = WebGLRenderingContext.LINE_STRIP;
+export const PRIMITIVE_TYPE_TRIANGLES = WebGLRenderingContext.TRIANGLES;
+export const PRIMITIVE_TYPE_TRIANGLE_STRIP = WebGLRenderingContext.TRIANGLE_STRIP;
+export const PRIMITIVE_TYPE_TRIANGLE_FAN = WebGLRenderingContext.TRIANGLE_FAN;
+
+export const TEXTURE_TYPE_2D = WebGLRenderingContext.TEXTURE_2D;
+export const TEXTURE_TYPE_CUBEMAP = WebGLRenderingContext.TEXTURE_CUBE_MAP;
+// export const TEXTURE_TYPE_2D_ARRAY = WebGL2RenderingContext.TEXTURE_2D_ARRAY;
+// export const TEXTURE_TYPE_3D = WebGL2RenderingContext.TEXTURE_3D;
+
+export const FILTER_NEAREST = WebGLRenderingContext.NEAREST;
+export const FILTER_LINEAR = WebGLRenderingContext.LINEAR;
+
+export const WRAP_REPEAT = WebGLRenderingContext.REPEAT;
+export const WRAP_MIRRORED_REPEAT = WebGLRenderingContext.MIRRORED_REPEAT;
+export const WRAP_CLAMP_TO_EDGE = WebGLRenderingContext.CLAMP_TO_EDGE;
 
 
 /**
@@ -113,10 +128,6 @@ export class VisualServer extends VObject {
      * @param {number} frame_step
      */
     draw(frame_step) {
-        if (VSG.rasterizer.context.isLost) {
-            return;
-        }
-
         this.emit_signal('frame_pre_draw');
 
         this.changes = 0;

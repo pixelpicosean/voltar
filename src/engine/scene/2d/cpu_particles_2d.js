@@ -11,7 +11,6 @@ import {
     rand_range_i,
 } from 'engine/core/math/math_funcs';
 import { Math_PI } from 'engine/core/math/math_defs';
-import { BLEND_MODES } from 'engine/drivers/constants';
 import { Command, TYPE_CUSTOM } from 'engine/servers/visual/commands';
 
 import {
@@ -78,7 +77,6 @@ class BatchGroup {
         this.indices = quad_indices;
         /** @type {Float32Array} */
         this.uvs = null;
-        this.blendMode = BLEND_MODES.NORMAL;
     }
     /**
      * @param {Transform2D} item_wt
@@ -161,7 +159,7 @@ class CommandCPUParticle extends Command {
      * @param {Transform2D} transform
      * @param {Color} modulate
      */
-    calculate_vertices(transform, modulate) {
+    render(transform, modulate) {
         for (const b of this.batches) {
             b.calculate_vertices(this.local_coords ? transform : Transform2D.IDENTITY, modulate);
         }
@@ -481,8 +479,6 @@ export class CPUParticles2D extends Node2D {
         this.frame_remainder = 0;
         this.cycle = 0;
         this.redraw = false;
-
-        this.blend_mode = BLEND_MODES.NORMAL;
 
         /**
          * @type {Particle[]}

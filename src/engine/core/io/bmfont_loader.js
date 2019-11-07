@@ -1,7 +1,9 @@
-import Resource from 'engine/core/io/io_resource';
-import Texture from 'engine/drivers/textures/Texture';
-import { register_font } from 'engine/scene/resources/font';
 import { resource_map } from 'engine/registry';
+
+import { ImageTexture } from 'engine/scene/resources/texture';
+import { register_font } from 'engine/scene/resources/font';
+
+import Resource from 'engine/core/io/io_resource';
 
 
 /**
@@ -23,7 +25,7 @@ function dirname(url) {
  *
  * @function parse_bitmap_font_data
  * @param {Resource} resource - Loader resource.
- * @param {Object<string, Texture>|Texture|Texture[]} textures - Reference to texture.
+ * @param {Object<string, ImageTexture>} textures - Reference to texture.
  */
 export function parse(resource, textures) {
     const font = register_font(resource.data, textures);
@@ -78,7 +80,7 @@ export function bmfont_loader(/** @type {Resource} */ resource, /** @type {Funct
     }
 
     const pages = resource.data.getElementsByTagName('page');
-    /** @type Object<string, Texture> */
+    /** @type {Object<string, ImageTexture>} */
     const textures = {};
 
     // Handle completed, when the number of textures

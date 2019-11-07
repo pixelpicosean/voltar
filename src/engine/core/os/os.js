@@ -121,20 +121,18 @@ export class OS {
             canvas.height = this.video_mode.height;
         }
 
-        // TODO: support force GLES2_LEGACY setting from ProjectSettings
-        if (device.phone || device.tablet) {
+        // if (device.phone || device.tablet) {
             this.video_driver_index = VIDEO_DRIVER_GLES2;
-        } else {
-            this.video_driver_index = VIDEO_DRIVER_GLES3;
-        }
+        // } else {
+        //     this.video_driver_index = VIDEO_DRIVER_GLES3;
+        // }
         const options = {
             alpha: false,
-            antialias: false, // let's use FXAA instead
+            antialias: false,
             depth: true,
-            powerPreference: 'default',
+            stencil: true,
             premultipliedAlpha: false,
             preserveDrawingBuffer: false,
-            stencil: true,
         };
         /** @type {WebGLRenderingContext} */
         let gl = null;

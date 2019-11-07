@@ -1,15 +1,31 @@
 import { GDCLASS } from "engine/core/v_object";
 import { Vector2, Vector2Like } from "engine/core/math/vector2";
 import { Color, ColorLike } from "engine/core/color";
-import { Image } from "engine/core/image";
 import { Resource } from "engine/core/resource";
 import { Rect2 } from "engine/core/math/rect2";
-import {
-    TEXTURE_TYPE_2D,
-} from "engine/servers/visual_server";
+
 import { VSG } from "engine/servers/visual/visual_server_globals";
 import { Item } from "engine/servers/visual/visual_server_canvas";
 
+
+export const PIXEL_FORMAT_NONE = 0;
+export const PIXEL_FORMAT_L8 = 1;
+export const PIXEL_FORMAT_LA8 = 2;
+export const PIXEL_FORMAT_RGB8 = 3;
+export const PIXEL_FORMAT_RGBA8 = 4;
+export const PIXEL_FORMAT_RGBA4 = 5;
+export const PIXEL_FORMAT_RGBA5551 = 6;
+
+/**
+ * @typedef {HTMLImageElement | HTMLCanvasElement | HTMLVideoElement} DOMImageData
+ * @typedef {Uint8Array | Uint16Array | Float32Array} RawImageData
+ *
+ * @typedef ImageFlags
+ * @property {number} [min_filter]
+ * @property {number} [mag_filter]
+ * @property {number} [wrap_u]
+ * @property {number} [wrap_v]
+ */
 
 const white = Object.freeze(new Color(1, 1, 1, 1));
 
@@ -25,15 +41,21 @@ export class Texture extends Resource {
     constructor() {
         super();
 
-        this._flags = 0;
+        /** @type {ImageFlags} */
+        this._flags = {
+            min_filter: WebGLRenderingContext.NEAREST,
+            mag_filter: WebGLRenderingContext.NEAREST,
+            wrap_u: WebGLRenderingContext.CLAMP_TO_EDGE,
+            wrap_v: WebGLRenderingContext.CLAMP_TO_EDGE,
+        };
     }
 
     /**
-     * @param {number} value
+     * @param {ImageFlags} value
      */
     set_flags(value) { }
 
-    /** @return {Image} */
+    /** @return {DOMImageData | RawImageData} */
     get_data() { return null }
 
     get_width() { return 0 }
@@ -102,13 +124,16 @@ export class ImageTexture extends Texture {
         this.width = 0;
         this.height = 0;
 
-        this.storage = STORAGE_RAW;
-        this.lossy_quality = 0.7;
+        /** @type {import('engine/drivers/webgl/rasterizer_storage').Texture_t} */
+        this.texture = null;
+        this.format = PIXEL_FORMAT_RGBA8;
 
-        this.texture = VSG.storage.texture_2d_create();
-        this.format = 0;
-        this.size_override = new Vector2();
-        this.image_stored = false;
+        /** for atlas texture only */
+        this.x = 0;
+        /** for atlas texture only */
+        this.y = 0;
+
+        this.uvs = [0, 0, 1, 1];
     }
 
     get_format() {
@@ -119,50 +144,70 @@ export class ImageTexture extends Texture {
     }
 
     /**
-     * @param {number} p_flags
+     * @param {DOMImageData} p_image
+     * @param {ImageFlags} [p_flags]
      */
-    set_flags(p_flags) {
+    create_from_image(p_image, p_flags = {}) {
         this._flags = p_flags;
-        if (this.get_width() === 0 || this.get_height() === 0) {
-            return;
-        }
-        VSG.storage.texture_set_flags(this.texture, this._flags);
-    }
-
-    /**
-     * @param {Image} p_image
-     * @param {number} p_flags
-     */
-    create_from_image(p_image, p_flags) {
-        this._flags = p_flags;
-        this.format = p_image.format;
         this.width = p_image.width;
         this.height = p_image.height;
-        VSG.storage.texture_allocate(this.texture, this.width, this.height, 0, this.format, TEXTURE_TYPE_2D, this.flags);
-        VSG.storage.texture_set_data(this.texture, p_image);
-
-        this.image_stored = true;
+        if (!this.texture) {
+            this.texture = VSG.storage.texture_2d_create();
+        }
+        VSG.storage.texture_allocate(this.texture, this.width, this.height, this.flags);
+        VSG.storage.texture_set_image(this.texture, p_image);
     }
 
     /**
-     * @param {any} p_atlas
-     * @param {number} p_flags
+     * @param {RawImageData} p_data
+     * @param {number} p_width
+     * @param {number} p_height
+     * @param {ImageFlags} [p_flags]
      */
-    create_from_atlas(p_atlas, p_flags) {
-        this.texture = p_atlas;
-        this.width = this.texture.width;
-        this.height = this.texture.height;
-        this.set_flags(p_flags);
-
-        this.image_stored = false;
+    create_from_data(p_data, p_width, p_height, p_flags = {}) {
+        this._flags = p_flags;
+        this.width = p_width;
+        this.height = p_height;
+        if (!this.texture) {
+            this.texture = VSG.storage.texture_2d_create();
+        }
+        VSG.storage.texture_allocate(this.texture, this.width, this.height, this.flags);
+        VSG.storage.texture_set_data(this.texture, p_data);
     }
 
     /**
-     * @param {Image} p_image
+     * @param {ImageTexture} p_texture
+     * @param {number} p_x
+     * @param {number} p_y
+     * @param {number} p_width
+     * @param {number} p_height
      */
-    set_data(p_image) {
-        VSG.storage.texture_set_data(this.texture, p_image);
-        this.image_stored = true;
+    create_from_region(p_texture, p_x, p_y, p_width, p_height) {
+        this._flags = p_texture._flags;
+        this.x = p_x;
+        this.y = p_y;
+        this.width = p_width;
+        this.height = p_height;
+        this.texture = p_texture.texture;
+
+        this.uvs[0] = this.x / this.texture.width;
+        this.uvs[1] = this.y / this.texture.height;
+        this.uvs[2] = (this.x + this.width) / this.texture.width;
+        this.uvs[3] = (this.y + this.height) / this.texture.height;
+    }
+
+    /**
+     * @param {DOMImageData} p_image
+     */
+    set_image(p_image) {
+        VSG.storage.texture_set_image(this.texture, p_image);
+    }
+
+    /**
+     * @param {RawImageData} p_data
+     */
+    set_data(p_data) {
+        VSG.storage.texture_set_data(this.texture, p_data);
     }
 
     /**
@@ -170,11 +215,10 @@ export class ImageTexture extends Texture {
      * @param {Vector2Like} p_pos
      * @param {ColorLike} [p_modulate]
      * @param {boolean} [p_transpose]
-     * @param {ImageTexture} [p_normal_map]
      */
-    draw(p_canvas_item, p_pos, p_modulate = white, p_transpose = false, p_normal_map = null) {
+    draw(p_canvas_item, p_pos, p_modulate = white, p_transpose = false) {
         const rect = Rect2.new(p_pos.x, p_pos.y, this.get_width(), this.get_height());
-        VSG.canvas.canvas_item_add_texture_rect(p_canvas_item, rect, this.texture, false, p_modulate, p_transpose, p_normal_map && p_normal_map.texture);
+        VSG.canvas.canvas_item_add_texture_rect(p_canvas_item, rect, this, false, p_modulate, p_transpose);
         Rect2.free(rect);
     }
 
@@ -184,10 +228,9 @@ export class ImageTexture extends Texture {
      * @param {boolean} [p_tile]
      * @param {ColorLike} [p_modulate]
      * @param {boolean} [p_transpose]
-     * @param {ImageTexture} [p_normal_map]
      */
-    draw_rect(p_canvas_item, p_rect, p_tile = false, p_modulate = white, p_transpose = false, p_normal_map = null) {
-        VSG.canvas.canvas_item_add_texture_rect(p_canvas_item, p_rect, this.texture, p_tile, p_modulate, p_transpose, p_normal_map && p_normal_map.texture);
+    draw_rect(p_canvas_item, p_rect, p_tile = false, p_modulate = white, p_transpose = false) {
+        VSG.canvas.canvas_item_add_texture_rect(p_canvas_item, p_rect, this, p_tile, p_modulate, p_transpose);
     }
 
     /**
@@ -196,11 +239,9 @@ export class ImageTexture extends Texture {
      * @param {Rect2} p_src_rect
      * @param {ColorLike} [p_modulate]
      * @param {boolean} [p_transpose]
-     * @param {ImageTexture} [p_normal_map]
-     * @param {boolean} [p_clip_uv]
      */
-    draw_rect_region(p_canvas_item, p_rect, p_src_rect, p_modulate = white, p_transpose = false, p_normal_map = null, p_clip_uv = true) {
-        VSG.canvas.canvas_item_add_texture_rect_region(p_canvas_item, p_rect, this.texture, p_src_rect, p_modulate, p_transpose, p_normal_map && p_normal_map.texture, p_clip_uv);
+    draw_rect_region(p_canvas_item, p_rect, p_src_rect, p_modulate = white, p_transpose = false) {
+        VSG.canvas.canvas_item_add_texture_rect_region(p_canvas_item, p_rect, this, p_src_rect, p_modulate, p_transpose);
     }
 }
 GDCLASS(ImageTexture, Texture)

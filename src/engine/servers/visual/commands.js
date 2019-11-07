@@ -2,8 +2,6 @@ import { Rect2 } from "engine/core/math/rect2";
 import { Color } from "engine/core/color";
 import { Transform2D } from "engine/core/math/transform_2d";
 
-import Texture from "engine/drivers/textures/Texture";
-import { BLEND_MODES } from "engine/drivers/constants";
 import { Vector2 } from "engine/core/math/vector2";
 import {
     MARGIN_LEFT,
@@ -11,6 +9,8 @@ import {
     MARGIN_TOP,
     MARGIN_BOTTOM,
 } from "engine/core/math/math_defs";
+
+import { ImageTexture } from "engine/scene/resources/texture";
 
 
 export const CANVAS_RECT_REGION = 1;
@@ -56,10 +56,6 @@ function create_pool(type, ctor) {
     }
 }
 
-const quad_indices = new Uint16Array([
-    0, 1, 2,
-    0, 2, 3,
-]);
 const nine_patch_indices = new Uint16Array([
     0, 1, 5,
     0, 5, 4,
@@ -88,86 +84,18 @@ const nine_patch_indices = new Uint16Array([
     10, 11, 15,
     10, 15, 14,
 ])
-const nine_patch_uvs_cache = new Float32Array(8)
-
-/**
- * Swap values of 2 vertex (position or uv or any 2 component array)
- * @param {Float32Array | Uint8Array | Uint16Array} arr
- * @param {number} idx_a
- * @param {number} idx_b
- */
-function swap_vertices(arr, idx_a, idx_b) {
-    let v = 0;
-    // x
-    v = arr[idx_a * 2];
-    arr[idx_a * 2] = arr[idx_b * 2];
-    arr[idx_b * 2] = v;
-    // y
-    v = arr[idx_a * 2 + 1];
-    arr[idx_a * 2 + 1] = arr[idx_b * 2 + 1];
-    arr[idx_b * 2 + 1] = v;
-}
-
-/**
- * @param {Float32Array} r_uvs
- * @param {Float32Array} tex_uvs
- * @param {number} tex_width
- * @param {number} tex_height
- * @param {number} x
- * @param {number} y
- * @param {number} width
- * @param {number} height
- */
-function get_uvs_of_sub_rect(r_uvs, tex_uvs, tex_width, tex_height, x, y, width, height) {
-    const uv_w = tex_uvs[4] - tex_uvs[0];
-    const uv_h = tex_uvs[5] - tex_uvs[1];
-    const topleft_x = tex_uvs[0] + uv_w * (x / tex_width);
-    const topleft_y = tex_uvs[1] + uv_h * (y / tex_height);
-    const bottomright_x = topleft_x + uv_w * (width / tex_width);
-    const bottomright_y = topleft_y + uv_h * (height / tex_height);
-    r_uvs[0] = topleft_x;
-    r_uvs[1] = topleft_y;
-    r_uvs[2] = bottomright_x;
-    r_uvs[3] = topleft_y;
-    r_uvs[4] = bottomright_x;
-    r_uvs[5] = bottomright_y;
-    r_uvs[6] = topleft_x;
-    r_uvs[7] = bottomright_y;
-}
 
 export class Command {
     get type() { return -1 }
     static instance() { return new Command() }
     constructor() {
-        /** @type {Texture} */
+        /** @type {ImageTexture} */
         this.texture = null;
-        /** @type {Texture} */
-        this.normal_map = null;
-        /** @type {Float32Array} */
-        this.vertex_data = null;
-        /** @type {Uint16Array} */
-        this.indices = null;
-        /** @type {Float32Array} */
-        this.uvs = null;
-        this.blendMode = BLEND_MODES.NORMAL;
-        this.final_modulate = new Color();
-        /** @type {any[]} for custom commands only */
-        this.batches = null;
     }
-    // FIXME: do we really need this `init` method?
     init() {
         this.texture = null;
-        this.normal_map = null;
-        this.blendMode = BLEND_MODES.NORMAL;
-        this.final_modulate.set(0, 0, 0, 0);
         return this;
     }
-    /**
-     * Please OVERRIDE, apply item owner transform and color
-     * @param {Transform2D} transform
-     * @param {Color} modulate
-     */
-    calculate_vertices(transform, modulate) { }
     free() { pool_map[this.type].push(this) }
 }
 
@@ -182,10 +110,6 @@ export class CommandRect extends Command {
         this.source = new Rect2();
         this.rect = new Rect2();
         this.flags = 0;
-        this.vertex_data = new Float32Array(8);
-        this.indices = quad_indices;
-        this.uvs = new Float32Array(8);
-        this.blendMode = BLEND_MODES.NORMAL;
     }
     init() {
         super.init();
@@ -194,70 +118,6 @@ export class CommandRect extends Command {
         this.source.set(0, 0, 0, 0);
         this.flags = 0;
         return this;
-    }
-    /**
-     * @param {Transform2D} transform
-     * @param {Color} modulate
-     */
-    calculate_vertices(transform, modulate) {
-        // vertex
-        const wt = transform;
-        const a = wt.a;
-        const b = wt.b;
-        const c = wt.c;
-        const d = wt.d;
-        const tx = wt.tx;
-        const ty = wt.ty;
-
-        const x0 = this.rect.x;
-        const x1 = x0 + this.rect.width;
-        const y0 = this.rect.y;
-        const y1 = y0 + this.rect.height;
-
-        const vertex_data = this.vertex_data;
-
-        vertex_data[0] = (a * x0) + (c * y0) + tx;
-        vertex_data[1] = (d * y0) + (b * x0) + ty;
-
-        vertex_data[2] = (a * x1) + (c * y0) + tx;
-        vertex_data[3] = (d * y0) + (b * x1) + ty;
-
-        vertex_data[4] = (a * x1) + (c * y1) + tx;
-        vertex_data[5] = (d * y1) + (b * x1) + ty;
-
-        vertex_data[6] = (a * x0) + (c * y1) + tx;
-        vertex_data[7] = (d * y1) + (b * x0) + ty;
-
-        // uv
-        const tex_uvs = this.texture._uvs.uvsFloat32;
-        const uvs = this.uvs;
-        if (this.flags & CANVAS_RECT_REGION) {
-            get_uvs_of_sub_rect(
-                uvs, tex_uvs,
-                this.texture.width, this.texture.height,
-                this.source.x, this.source.y,
-                this.source.width, this.source.height
-            )
-        } else {
-            for (let i = 0; i < 8; i++) {
-                uvs[i] = tex_uvs[i];
-            }
-        }
-
-        if (this.flags & CANVAS_RECT_TRANSPOSE) {
-            swap_vertices(uvs, 1, 3);
-        }
-        if (this.flags & CANVAS_RECT_FLIP_H) {
-            swap_vertices(uvs, 0, 1);
-            swap_vertices(uvs, 2, 3);
-        }
-        if (this.flags & CANVAS_RECT_FLIP_V) {
-            swap_vertices(uvs, 0, 3);
-            swap_vertices(uvs, 1, 2);
-        }
-
-        // color
-        this.final_modulate.copy(this.modulate).multiply(modulate);
     }
 }
 create_pool(TYPE_RECT, CommandRect)
@@ -295,7 +155,7 @@ export class CommandNinePatch extends Command {
      * @param {Transform2D} transform
      * @param {Color} modulate
      */
-    calculate_vertices(transform, modulate) {
+    /* render(transform, modulate) {
         // vertex and uv
         const wt = transform;
         const a = wt.a;
@@ -444,7 +304,7 @@ export class CommandNinePatch extends Command {
 
         // color
         this.final_modulate.copy(this.color).multiply(modulate);
-    }
+    } */
 }
 create_pool(TYPE_NINEPATCH, CommandNinePatch)
 

@@ -18,7 +18,6 @@ import { Color } from 'engine/core/color';
 import { InputEvent } from 'engine/core/os/input_event';
 import { MessageQueue } from 'engine/core/message_queue';
 import { NOTIFICATION_WM_UNFOCUS_REQUEST } from 'engine/core/main_loop';
-import { BLEND_MODES } from 'engine/drivers/constants';
 import { VSG } from 'engine/servers/visual/visual_server_globals';
 
 import { Theme } from '../resources/theme';
@@ -237,8 +236,6 @@ export class Control extends CanvasItem {
             color_override: undefined,
             constant_override: undefined,
         };
-
-        this.blend_mode = BLEND_MODES.NORMAL;
     }
 
     /* virtual */

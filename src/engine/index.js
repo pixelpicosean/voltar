@@ -32,7 +32,6 @@ export * from 'engine/utils/trim_canvas';
 // Resource
 // ------------------------------------------------------------------
 export * from 'engine/core/resource';
-export * from 'engine/core/image';
 export * from 'engine/core/os/input_event';
 export * from 'engine/core/os/keyboard';
 // export * from 'engine/scene/resources/tile_set';

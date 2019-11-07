@@ -6,7 +6,6 @@ import { Color, ColorLike } from "engine/core/color";
 
 import { VSG } from "./visual_server_globals";
 import { Canvas } from "./visual_server_canvas";
-import { RenderTarget } from "engine/drivers/rasterizer_storage";
 
 
 const VIEWPORT_UPDATE_DISABLED = 0;
@@ -54,7 +53,7 @@ export class Viewport {
         this.camera = null;
         this.scenario = null;
 
-        /** @type {RenderTarget} */
+        /** @type {import('engine/drivers/webgl/rasterizer_storage').RenderTarget_t} */
         this.render_target = null;
         this.update_mode = VIEWPORT_UPDATE_WHEN_VISIBLE;
 
@@ -125,7 +124,8 @@ export class VisualServerViewport {
      */
     free(p_viewport) {
         if (p_viewport && p_viewport._id >= 0) {
-            p_viewport.render_target.free();
+            // TODO: free render target
+            // p_viewport.render_target.free();
 
             for (const [_, canvas] of p_viewport.canvas_map) {
                 canvas.canvas.viewports.delete(p_viewport);
@@ -184,7 +184,7 @@ export class VisualServerViewport {
     viewport_attach_to_screen(p_viewport, p_rect/* , p_screen */) {
         if (p_viewport.viewport_render_direct_to_screen) {
             VSG.storage.render_target_set_size(p_viewport.render_target, p_rect.width, p_rect.height);
-            VSG.storage.render_target_set_position(p_viewport.render_target, p_rect.x, p_rect.y);
+            // VSG.storage.render_target_set_position(p_viewport.render_target, p_rect.x, p_rect.y);
         }
 
         p_viewport.viewport_to_screen_rect.copy(p_rect);
@@ -200,16 +200,15 @@ export class VisualServerViewport {
         }
 
         if (!p_enable) {
-            VSG.storage.render_target_set_position(p_viewport.render_target, 0, 0);
+            // VSG.storage.render_target_set_position(p_viewport.render_target, 0, 0);
             VSG.storage.render_target_set_size(p_viewport.render_target, p_viewport.size.x, p_viewport.size.y);
         }
 
-        // TODO: VSG.storage.render_target_set_flag()
         p_viewport.viewport_render_direct_to_screen = p_enable;
 
         if (!p_viewport.viewport_to_screen_rect.is_zero() && p_enable) {
             VSG.storage.render_target_set_size(p_viewport.render_target, p_viewport.viewport_to_screen_rect.width, p_viewport.viewport_to_screen_rect.height);
-            VSG.storage.render_target_set_position(p_viewport.render_target, p_viewport.viewport_to_screen_rect.x, p_viewport.viewport_to_screen_rect.y);
+            // VSG.storage.render_target_set_position(p_viewport.render_target, p_viewport.viewport_to_screen_rect.x, p_viewport.viewport_to_screen_rect.y);
         }
     }
     /**
@@ -217,7 +216,7 @@ export class VisualServerViewport {
      */
     viewport_detach(p_viewport) {
         if (p_viewport.viewport_render_direct_to_screen) {
-            VSG.storage.render_target_set_position(p_viewport.render_target, 0, 0);
+            // VSG.storage.render_target_set_position(p_viewport.render_target, 0, 0);
             VSG.storage.render_target_set_size(p_viewport.render_target, p_viewport.size.x, p_viewport.size.y);
         }
 
@@ -242,7 +241,7 @@ export class VisualServerViewport {
      * @param {Viewport} p_viewport
      */
     viewport_get_texture(p_viewport) {
-        return VSG.storage.render_target_get_texture(p_viewport.render_target);
+        return p_viewport.render_target.texture;
     }
 
     /**
@@ -309,7 +308,7 @@ export class VisualServerViewport {
                 continue;
             }
 
-            let visible = !vp.viewport_to_screen_rect.is_zero() || vp.update_mode === VIEWPORT_UPDATE_ALWAYS || vp.update_mode === VIEWPORT_UPDATE_ONCE || (vp.update_mode === VIEWPORT_UPDATE_WHEN_VISIBLE && vp.render_target.was_used);
+            let visible = !vp.viewport_to_screen_rect.is_zero() || vp.update_mode === VIEWPORT_UPDATE_ALWAYS || vp.update_mode === VIEWPORT_UPDATE_ONCE || (vp.update_mode === VIEWPORT_UPDATE_WHEN_VISIBLE && false/* && vp.render_target.was_used */);
             visible = visible && vp.size.x > 1 && vp.size.y > 1;
 
             if (!visible) {
@@ -394,7 +393,7 @@ export class VisualServerViewport {
         if (!p_viewport.hide_canvas) {
             clip_rect.set(0, 0, p_viewport.size.width, p_viewport.size.height);
 
-            VSG.rasterizer.restore_render_target(false);
+            VSG.rasterizer.restore_render_target();
 
             for (const [_, c] of p_viewport.canvas_map) {
                 const canvas = c.canvas;

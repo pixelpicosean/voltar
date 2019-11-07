@@ -1,8 +1,6 @@
 import { Vector2 } from "engine/core/math/vector2";
 import { Rect2 } from "engine/core/math/rect2";
-import { get_resolution_of_url } from 'engine/utils/network';
-import * as settings from 'engine/drivers/settings';
-import Texture from 'engine/drivers/textures/Texture';
+import { ImageTexture } from "./texture";
 
 
 const ZeroVector = Object.freeze(new Vector2(0, 0));
@@ -15,6 +13,7 @@ export class Character {
         this.v_align = 0;
         this.advance = 0;
         this.rect = new Rect2();
+        /** @type {ImageTexture} */
         this.texture = null;
         /**
          * @type {Object<string, number>}
@@ -102,7 +101,7 @@ export const registered_bitmap_fonts = {};
  *
  * @static
  * @param {XMLDocument} xml - The XML document data.
- * @param {Object<string, Texture>|Texture|Texture[]} textures - List of textures for each page.
+ * @param {Object<string, ImageTexture>} textures - List of textures for each page.
  *  If providing an object, the key is the `<page>` element's `file` attribute in the FNT file.
  */
 export function register_font(xml, textures) {
@@ -111,7 +110,7 @@ export function register_font(xml, textures) {
     const info = xml.getElementsByTagName('info')[0];
     const common = xml.getElementsByTagName('common')[0];
     const pages = xml.getElementsByTagName('page');
-    const res = get_resolution_of_url(pages[0].getAttribute('file'), settings.RESOLUTION);
+    const res = 1;
     const pages_textures = {};
 
     font.name = info.getAttribute('face');
@@ -119,18 +118,13 @@ export function register_font(xml, textures) {
     font.height = parseInt(common.getAttribute('lineHeight'), 10) / res;
     font.ascent = parseInt(common.getAttribute('base'), 10) / res;
 
-    // Single texture, convert to list
-    if (textures instanceof Texture) {
-        textures = [textures];
-    }
-
     // Convert the input Texture, Textures or object
     // into a page Texture lookup by "id"
     for (let i = 0; i < pages.length; i++) {
         const id = pages[i].getAttribute('id');
         const file = pages[i].getAttribute('file');
 
-        pages_textures[id] = Array.isArray(textures) ? textures[i] : textures[file];
+        pages_textures[id] = textures[file];
     }
 
     // parse letters
@@ -142,8 +136,8 @@ export function register_font(xml, textures) {
         const page = letter.getAttribute('page') || 0;
         const texture = pages_textures[page];
         const texture_rect = new Rect2(
-            (parseInt(letter.getAttribute('x'), 10) / res) + (pages_textures[page].frame.x / res),
-            (parseInt(letter.getAttribute('y'), 10) / res) + (pages_textures[page].frame.y / res),
+            (parseInt(letter.getAttribute('x'), 10) / res) + (pages_textures[page].x / res),
+            (parseInt(letter.getAttribute('y'), 10) / res) + (pages_textures[page].y / res),
             parseInt(letter.getAttribute('width'), 10) / res,
             parseInt(letter.getAttribute('height'), 10) / res
         );
@@ -153,7 +147,8 @@ export function register_font(xml, textures) {
         char.v_align = parseInt(letter.getAttribute('yoffset'), 10) / res;
         char.advance = parseInt(letter.getAttribute('xadvance'), 10) / res;
         char.rect.copy(texture_rect);
-        char.texture = new Texture(texture.baseTexture, texture_rect);
+        char.texture = new ImageTexture;
+        char.texture.create_from_region(texture, texture_rect.x, texture_rect.y, texture_rect.width, texture_rect.height);
     }
 
     // parse kernings

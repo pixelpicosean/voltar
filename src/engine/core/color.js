@@ -9,6 +9,46 @@ export class ColorLike {
     }
 }
 
+const int8 = new Int8Array(4)
+const int32 = new Int32Array(int8.buffer, 0, 1)
+const float32 = new Float32Array(int8.buffer, 0, 1)
+/**
+ * @param {number} i
+ */
+const int_bits_to_float = (i) => {
+    int32[0] = i
+    return float32[0]
+}
+/**
+ * @param {number} value
+ */
+const int_to_float_color = (value) => {
+    return int_bits_to_float(value & 0xfeffffff)
+}
+
+/**
+ * Pack float color (1.0, 1.0, 1.0, 1.0) into a float32 number
+ * @param {number} r
+ * @param {number} g
+ * @param {number} b
+ * @param {number} a
+ */
+const pack_color_f = (r, g, b, a) => {
+    var bits = (((a * 255) | 0) << 24 | ((b * 255) | 0) << 16 | ((g * 255) | 0) << 8 | ((r * 255) | 0))
+    return int_to_float_color(bits)
+}
+/**
+ * Pack uint color (255, 255, 255, 255) into a float32 number
+ * @param {number} r
+ * @param {number} g
+ * @param {number} b
+ * @param {number} a
+ */
+const pack_color_u = (r, g, b, a) => {
+    var bits = (a << 24 | b << 16 | g << 8 | r)
+    return int_to_float_color(bits)
+}
+
 /** @type {Color[]} */
 const Color_Pool = [];
 
@@ -143,6 +183,10 @@ export class Color {
 
     as_hex() {
         return rgb2hex(this._rgb);
+    }
+
+    as_rgba8() {
+        return pack_color_f(this.r, this.g, this.b, this.a);
     }
 
     /**
