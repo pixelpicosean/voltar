@@ -13,8 +13,8 @@ import {
     VIDEO_DRIVER_GLES2,
     VIDEO_DRIVER_GLES3,
 } from 'engine/core/os/os';
-
 import { VObject } from 'engine/core/v_object';
+
 import { Item } from 'engine/servers/visual/visual_server_canvas';
 import { VSG } from 'engine/servers/visual/visual_server_globals';
 import {
@@ -27,6 +27,7 @@ import {
     CANVAS_RECT_FLIP_H,
     CANVAS_RECT_FLIP_V,
 } from 'engine/servers/visual/commands';
+import { ImageTexture } from 'engine/scene/resources/texture';
 
 import vs from './shaders/canvas.vert';
 import fs from './shaders/canvas.frag';
@@ -87,7 +88,8 @@ class DrawGroup_t {
         this.i_length = 0;
 
         /** @type {WebGLTexture} */
-        this.tex = null;
+        this.gl_tex = null;
+        this.tex_key = '';
 
         return this;
     }
@@ -416,7 +418,7 @@ export class RasterizerCanvas extends VObject {
                     const rect = /** @type {CommandRect} */(cmd);
                     const tex = rect.texture;
 
-                    this.check_draw_group_state(4, 6, tex ? tex.texture : null);
+                    this.check_draw_group_state(4, 6, tex);
 
                     const {
                         v: vertices,
@@ -523,7 +525,7 @@ export class RasterizerCanvas extends VObject {
                     const np = /** @type {CommandNinePatch} */(cmd);
                     const tex = np.texture;
 
-                    this.check_draw_group_state(32, 54, tex ? tex.texture : null);
+                    this.check_draw_group_state(32, 54, tex);
 
                     const {
                         v: vertices,
@@ -727,7 +729,7 @@ export class RasterizerCanvas extends VObject {
     /**
      * @param {number} num_vertex
      * @param {number} num_index
-     * @param {import('./rasterizer_storage').Texture_t} tex
+     * @param {ImageTexture} tex
      */
     check_draw_group_state(num_vertex, num_index, tex) {
         let need_new_group = false;
@@ -738,15 +740,15 @@ export class RasterizerCanvas extends VObject {
         if (
             tex
             &&
-            tex !== this.states.texture
+            tex.texture !== this.states.texture
         ) {
             // we can use same group if no texture is currently active
             if (this.states.texture) {
                 need_new_group = true;
+                this.current_draw_group.gl_tex = this.states.texture.gl_tex;
             }
 
-            this.states.texture = tex;
-            this.current_draw_group.tex = tex.gl_tex;
+            this.states.texture = tex.texture;
         }
 
         // buffer overflow?
@@ -778,7 +780,8 @@ export class RasterizerCanvas extends VObject {
             new_group.vert_slot = this.states.active_vert_slot;
             new_group.v_start = this.states.v_index;
             new_group.i_start = this.states.i_index;
-            new_group.tex = tex.gl_tex;
+            new_group.gl_tex = tex.texture.gl_tex;
+            new_group.tex_key = tex.resource_name;
 
             this.draw_groups.push(new_group);
             this.current_draw_group = new_group;
@@ -792,8 +795,8 @@ export class RasterizerCanvas extends VObject {
 
         // apply data binding
         // - texture
-        if (group.tex) {
-            gl.bindTexture(gl.TEXTURE_2D, group.tex);
+        if (group.gl_tex) {
+            gl.bindTexture(gl.TEXTURE_2D, group.gl_tex);
         }
 
         // - attributes
