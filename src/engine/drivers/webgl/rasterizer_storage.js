@@ -59,8 +59,10 @@ function get_gl_internal_format(format) {
     return 0;
 }
 
+let tex_uid = 0;
 export class Texture_t {
     constructor() {
+        this.uid = tex_uid++;
         this.name = '';
 
         this.type = TEXTURE_TYPE_2D;

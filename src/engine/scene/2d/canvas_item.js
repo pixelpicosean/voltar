@@ -196,10 +196,9 @@ export class CanvasItem extends Node {
      * @param {ImageTexture} p_texture
      * @param {Vector2Like} p_pos
      * @param {ColorLike} [p_modulate=white]
-     * @param {ImageTexture} [p_normal_map]
      */
-    draw_texture(p_texture, p_pos, p_modulate = white, p_normal_map) {
-        p_texture.draw(this.canvas_item, p_pos, p_modulate, false, p_normal_map);
+    draw_texture(p_texture, p_pos, p_modulate = white) {
+        p_texture.draw(this.canvas_item, p_pos, p_modulate, false);
     }
 
     /**

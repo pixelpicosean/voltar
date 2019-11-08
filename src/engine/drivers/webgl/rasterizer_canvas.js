@@ -27,8 +27,9 @@ import fs from './shaders/canvas.frag';
 const ATTR_VERTEX = 0;
 const ATTR_UV = 1;
 const ATTR_COLOR = 2;
+const ATTR_FLAGS = 3;
 
-const VTX_COMP = 5;
+const VTX_COMP = (2 + 2 + 1 + 1); // position(2) + uv(2) + color(1) + flag(1)
 const VTX_STRIDE = VTX_COMP * 4;
 
 const VERTEX_BUFFER_LENGTH = 4096 * VTX_COMP;
@@ -190,6 +191,7 @@ export class RasterizerCanvas extends VObject {
                 'position',
                 'uv',
                 'color',
+                'flags',
             ],
             [
                 { name: 'projection_matrix', type: 'mat4' },
@@ -262,10 +264,9 @@ export class RasterizerCanvas extends VObject {
         this.states.uniforms.time[0] = frame.time[0];
 
         // reset states
-        this.states.texture = this.storage.resources.white_tex.texture;
+        this.states.texture = null;
 
         this.current_draw_group = DrawGroup_new();
-        this.current_draw_group.tex = this.states.texture.gl_tex;
         this.draw_groups.push(this.current_draw_group);
     }
 
@@ -376,8 +377,9 @@ export class RasterizerCanvas extends VObject {
             switch (cmd.type) {
                 case TYPE_RECT: {
                     const rect = /** @type {CommandRect} */(cmd);
+                    const tex = rect.texture;
 
-                    this.check_draw_group_state(4, 6, rect.texture.texture);
+                    this.check_draw_group_state(4, 6, tex ? tex.texture : null);
 
                     const {
                         v: vertices,
@@ -417,39 +419,41 @@ export class RasterizerCanvas extends VObject {
                     vertices[vb_idx + VTX_COMP * 3 + 1] = (d * y1) + (b * x0) + ty;
 
                     // - uv
-                    const tex_uvs = rect.texture.uvs;
-                    if (rect.flags & CANVAS_RECT_REGION) {
-                        get_uvs_of_sub_rect(
-                            vertices, vb_idx,
-                            tex_uvs,
-                            rect.texture.width, rect.texture.height,
-                            rect.source.x, rect.source.y,
-                            rect.source.width, rect.source.height
-                        )
-                    } else {
-                        vertices[vb_idx + VTX_COMP * 0 + 2] = tex_uvs[0];
-                        vertices[vb_idx + VTX_COMP * 0 + 3] = tex_uvs[1];
+                    if (tex) {
+                        const tex_uvs = rect.texture.uvs;
+                        if (rect.flags & CANVAS_RECT_REGION) {
+                            get_uvs_of_sub_rect(
+                                vertices, vb_idx,
+                                tex_uvs,
+                                rect.texture.width, rect.texture.height,
+                                rect.source.x, rect.source.y,
+                                rect.source.width, rect.source.height
+                            )
+                        } else {
+                            vertices[vb_idx + VTX_COMP * 0 + 2] = tex_uvs[0];
+                            vertices[vb_idx + VTX_COMP * 0 + 3] = tex_uvs[1];
 
-                        vertices[vb_idx + VTX_COMP * 1 + 2] = tex_uvs[2];
-                        vertices[vb_idx + VTX_COMP * 1 + 3] = tex_uvs[1];
+                            vertices[vb_idx + VTX_COMP * 1 + 2] = tex_uvs[2];
+                            vertices[vb_idx + VTX_COMP * 1 + 3] = tex_uvs[1];
 
-                        vertices[vb_idx + VTX_COMP * 2 + 2] = tex_uvs[2];
-                        vertices[vb_idx + VTX_COMP * 2 + 3] = tex_uvs[3];
+                            vertices[vb_idx + VTX_COMP * 2 + 2] = tex_uvs[2];
+                            vertices[vb_idx + VTX_COMP * 2 + 3] = tex_uvs[3];
 
-                        vertices[vb_idx + VTX_COMP * 3 + 2] = tex_uvs[0];
-                        vertices[vb_idx + VTX_COMP * 3 + 3] = tex_uvs[3];
-                    }
+                            vertices[vb_idx + VTX_COMP * 3 + 2] = tex_uvs[0];
+                            vertices[vb_idx + VTX_COMP * 3 + 3] = tex_uvs[3];
+                        }
 
-                    if (rect.flags & CANVAS_RECT_TRANSPOSE) {
-                        swap_vertices(vertices, vb_idx + VTX_COMP * 1 + 2, vb_idx + VTX_COMP * 3 + 2);
-                    }
-                    if (rect.flags & CANVAS_RECT_FLIP_H) {
-                        swap_vertices(vertices, vb_idx + VTX_COMP * 0 + 2, vb_idx + VTX_COMP * 1 + 2);
-                        swap_vertices(vertices, vb_idx + VTX_COMP * 2 + 2, vb_idx + VTX_COMP * 3 + 2);
-                    }
-                    if (rect.flags & CANVAS_RECT_FLIP_V) {
-                        swap_vertices(vertices, vb_idx + VTX_COMP * 0 + 2, vb_idx + VTX_COMP * 3 + 2);
-                        swap_vertices(vertices, vb_idx + VTX_COMP * 1 + 2, vb_idx + VTX_COMP * 2 + 2);
+                        if (rect.flags & CANVAS_RECT_TRANSPOSE) {
+                            swap_vertices(vertices, vb_idx + VTX_COMP * 1 + 2, vb_idx + VTX_COMP * 3 + 2);
+                        }
+                        if (rect.flags & CANVAS_RECT_FLIP_H) {
+                            swap_vertices(vertices, vb_idx + VTX_COMP * 0 + 2, vb_idx + VTX_COMP * 1 + 2);
+                            swap_vertices(vertices, vb_idx + VTX_COMP * 2 + 2, vb_idx + VTX_COMP * 3 + 2);
+                        }
+                        if (rect.flags & CANVAS_RECT_FLIP_V) {
+                            swap_vertices(vertices, vb_idx + VTX_COMP * 0 + 2, vb_idx + VTX_COMP * 3 + 2);
+                            swap_vertices(vertices, vb_idx + VTX_COMP * 1 + 2, vb_idx + VTX_COMP * 2 + 2);
+                        }
                     }
 
                     // - color
@@ -458,6 +462,18 @@ export class RasterizerCanvas extends VObject {
                     vertices[vb_idx + VTX_COMP * 1 + 4] = color_num;
                     vertices[vb_idx + VTX_COMP * 2 + 4] = color_num;
                     vertices[vb_idx + VTX_COMP * 3 + 4] = color_num;
+
+                    // - flags
+                    color.set(0, 0, 0, 0);
+                    if (!rect.texture) {
+                        color.r = 1;
+                    }
+                    // TODO: fill mode
+                    const flags = color.as_rgba8();
+                    vertices[vb_idx + VTX_COMP * 0 + 5] = flags;
+                    vertices[vb_idx + VTX_COMP * 1 + 5] = flags;
+                    vertices[vb_idx + VTX_COMP * 2 + 5] = flags;
+                    vertices[vb_idx + VTX_COMP * 3 + 5] = flags;
 
                     // index
                     indices[ib_idx++] = v_idx + 0;
@@ -483,13 +499,21 @@ export class RasterizerCanvas extends VObject {
      */
     check_draw_group_state(num_vertex, num_index, tex) {
         let need_new_group = false;
+
         let use_new_buffer = false;
 
         // different texture?
         if (
+            tex
+            &&
             tex !== this.states.texture
         ) {
-            need_new_group = true;
+            // we can use same group if no texture is currently active
+            if (this.states.texture) {
+                need_new_group = true;
+            }
+
+            this.states.texture = tex;
         }
 
         // buffer overflow?
@@ -514,7 +538,6 @@ export class RasterizerCanvas extends VObject {
                 this.states.v_index = 0;
                 this.states.i_index = 0;
             }
-            this.states.texture = tex;
 
             // start a new group
             const new_group = DrawGroup_new();
@@ -522,7 +545,7 @@ export class RasterizerCanvas extends VObject {
             new_group.vert_slot = this.states.active_vert_slot;
             new_group.v_start = this.states.v_index;
             new_group.i_start = this.states.i_index;
-            new_group.tex = tex.gl_tex || this.storage.resources.white_tex.texture.gl_tex;
+            new_group.tex = tex.gl_tex;
 
             this.draw_groups.push(new_group);
             this.current_draw_group = new_group;
@@ -536,7 +559,9 @@ export class RasterizerCanvas extends VObject {
 
         // apply data binding
         // - texture
-        gl.bindTexture(gl.TEXTURE_2D, group.tex);
+        if (group.tex) {
+            gl.bindTexture(gl.TEXTURE_2D, group.tex);
+        }
 
         // - attributes
         gl.vertexAttribPointer(ATTR_VERTEX, 2, gl.FLOAT, false, VTX_STRIDE, 0);
@@ -547,6 +572,9 @@ export class RasterizerCanvas extends VObject {
 
         gl.vertexAttribPointer(ATTR_COLOR, 4, gl.UNSIGNED_BYTE, true, VTX_STRIDE, 4 * 4);
         gl.enableVertexAttribArray(ATTR_COLOR);
+
+        gl.vertexAttribPointer(ATTR_FLAGS, 4, gl.UNSIGNED_BYTE, false, VTX_STRIDE, 5 * 4);
+        gl.enableVertexAttribArray(ATTR_FLAGS);
 
         // draw
         gl.drawElements(gl.TRIANGLES, group.i_length, gl.UNSIGNED_SHORT, group.i_start * 2);

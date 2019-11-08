@@ -447,7 +447,6 @@ export class VisualServerCanvas {
      */
     canvas_item_add_rect(p_item, p_rect, p_color) {
         const rect = CommandRect.instance();
-        rect.texture = VSG.storage.resources.white_tex;
         rect.modulate.copy(p_color);
         rect.rect.copy(p_rect);
         p_item.rect_dirty = true;
@@ -462,7 +461,6 @@ export class VisualServerCanvas {
      */
     canvas_item_add_circle(p_item, p_pos, p_radius, p_color) {
         const circle = CommandCircle.instance();
-        circle.texture = VSG.storage.resources.white_tex;
         circle.color.copy(p_color);
         circle.pos.copy(p_pos);
         circle.radius = p_radius;
