@@ -126,6 +126,7 @@ class Spritesheet {
             const rect = this._frames[i].frame;
             const tex = new ImageTexture;
             tex.create_from_region(this.base_texture, rect.x, rect.y, rect.w, rect.h);
+            tex.resource_name = i;
             this.textures[i] = tex;
 
             frame_index++;
