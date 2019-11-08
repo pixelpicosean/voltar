@@ -1,3 +1,9 @@
+import {
+    MARGIN_LEFT,
+    MARGIN_RIGHT,
+    MARGIN_TOP,
+    MARGIN_BOTTOM,
+} from 'engine/core/math/math_defs';
 import { Transform2D } from 'engine/core/math/transform_2d';
 import { identity_mat4, translate_mat4, scale_mat4 } from 'engine/core/math/transform';
 import { ColorLike, Color } from 'engine/core/color';
@@ -13,7 +19,9 @@ import { Item } from 'engine/servers/visual/visual_server_canvas';
 import { VSG } from 'engine/servers/visual/visual_server_globals';
 import {
     TYPE_RECT,
+    TYPE_NINEPATCH,
     CommandRect,
+    CommandNinePatch,
     CANVAS_RECT_REGION,
     CANVAS_RECT_TRANSPOSE,
     CANVAS_RECT_FLIP_H,
@@ -35,6 +43,35 @@ const VTX_STRIDE = VTX_COMP * 4;
 const VERTEX_BUFFER_LENGTH = 4096 * VTX_COMP;
 const INDEX_BUFFER_LENGTH = 4096;
 
+
+const NinePatchIndices = [
+    0, 1, 5,
+    0, 5, 4,
+
+    1, 2, 6,
+    1, 6, 5,
+
+    2, 3, 7,
+    2, 7, 6,
+
+    4, 5, 9,
+    4, 9, 8,
+
+    5, 6, 10,
+    5, 10, 9,
+
+    6, 7, 11,
+    6, 11, 10,
+
+    8, 9, 13,
+    8, 13, 12,
+
+    9, 10, 14,
+    9, 14, 13,
+
+    10, 11, 15,
+    10, 15, 14,
+];
 
 class DrawGroup_t {
     constructor() {
@@ -464,12 +501,8 @@ export class RasterizerCanvas extends VObject {
                     vertices[vb_idx + VTX_COMP * 3 + 4] = color_num;
 
                     // - flags
-                    color.set(0, 0, 0, 0);
-                    if (!rect.texture) {
-                        color.r = 1;
-                    }
                     // TODO: fill mode
-                    const flags = color.as_rgba8();
+                    const flags = color.set(tex ? 0 : 1, 0, 0, 0).as_rgba8();
                     vertices[vb_idx + VTX_COMP * 0 + 5] = flags;
                     vertices[vb_idx + VTX_COMP * 1 + 5] = flags;
                     vertices[vb_idx + VTX_COMP * 2 + 5] = flags;
@@ -485,6 +518,205 @@ export class RasterizerCanvas extends VObject {
 
                     this.states.v_index += 4;
                     this.states.i_index += 6;
+                } break;
+                case TYPE_NINEPATCH: {
+                    const np = /** @type {CommandNinePatch} */(cmd);
+                    const tex = np.texture;
+
+                    this.check_draw_group_state(32, 54, tex ? tex.texture : null);
+
+                    const {
+                        v: vertices,
+                        i: indices,
+                    } = this.vertices[this.states.active_vert_slot];
+
+                    const v_idx = this.states.v_index;
+
+                    let vb_idx = this.states.v_index * VTX_COMP;
+                    let ib_idx = this.states.i_index;
+
+                    // vertex
+                    const wt = p_item.final_transform;
+                    const a = wt.a;
+                    const b = wt.b;
+                    const c = wt.c;
+                    const d = wt.d;
+                    const tx = wt.tx;
+                    const ty = wt.ty;
+
+                    const x0 = np.rect.x;
+                    const x1 = x0 + np.rect.width;
+                    const y0 = np.rect.y;
+                    const y1 = y0 + np.rect.height;
+
+                    const m_l = np.margin[MARGIN_LEFT];
+                    const m_r = np.margin[MARGIN_RIGHT];
+                    const m_t = np.margin[MARGIN_TOP];
+                    const m_b = np.margin[MARGIN_BOTTOM];
+
+                    const s_w = np.source.width || np.texture.width;
+                    const s_h = np.source.height || np.texture.height;
+
+                    const uv_x0 = tex ? tex.uvs[0] : 0;
+                    const uv_y0 = tex ? tex.uvs[1] : 0;
+                    const uv_x1 = tex ? tex.uvs[2] : 0;
+                    const uv_y1 = tex ? tex.uvs[3] : 0;
+
+                    const uv_m_l = (uv_x1 - uv_x0) * (m_l / s_w);
+                    const uv_m_r = (uv_x1 - uv_x0) * (m_r / s_w);
+                    const uv_m_t = (uv_y1 - uv_y0) * (m_t / s_h);
+                    const uv_m_b = (uv_y1 - uv_y0) * (m_b / s_h);
+
+                    // - first row
+
+                    vertices[vb_idx + VTX_COMP * 0 + 0] = (a * x0) + (c * y0) + tx;
+                    vertices[vb_idx + VTX_COMP * 0 + 1] = (d * y0) + (b * x0) + ty;
+
+                    vertices[vb_idx + VTX_COMP * 0 + 2] = uv_x0;
+                    vertices[vb_idx + VTX_COMP * 0 + 3] = uv_y0;
+
+                    vertices[vb_idx + VTX_COMP * 1 + 0] = (a * (x0 + m_l)) + (c * y0) + tx;
+                    vertices[vb_idx + VTX_COMP * 1 + 1] = (d * y0) + (b * (x0 + m_l)) + ty;
+
+                    vertices[vb_idx + VTX_COMP * 1 + 2] = uv_x0 + uv_m_l;
+                    vertices[vb_idx + VTX_COMP * 1 + 3] = uv_y0;
+
+                    vertices[vb_idx + VTX_COMP * 2 + 0] = (a * (x1 - m_r)) + (c * y0) + tx;
+                    vertices[vb_idx + VTX_COMP * 2 + 1] = (d * y0) + (b * (x1 - m_r)) + ty;
+
+                    vertices[vb_idx + VTX_COMP * 2 + 2] = uv_x1 - uv_m_r;
+                    vertices[vb_idx + VTX_COMP * 2 + 3] = uv_y0;
+
+                    vertices[vb_idx + VTX_COMP * 3 + 0] = (a * x1) + (c * y0) + tx;
+                    vertices[vb_idx + VTX_COMP * 3 + 1] = (d * y0) + (b * x1) + ty;
+
+                    vertices[vb_idx + VTX_COMP * 3 + 2] = uv_x1;
+                    vertices[vb_idx + VTX_COMP * 3 + 3] = uv_y0;
+
+                    // - second row
+
+                    vertices[vb_idx + VTX_COMP * 4 + 0] = (a * x0) + (c * (y0 + m_t)) + tx;
+                    vertices[vb_idx + VTX_COMP * 4 + 1] = (d * (y0 + m_t)) + (b * x0) + ty;
+
+                    vertices[vb_idx + VTX_COMP * 4 + 2] = uv_x0;
+                    vertices[vb_idx + VTX_COMP * 4 + 3] = uv_y0 + uv_m_t;
+
+                    vertices[vb_idx + VTX_COMP * 5 + 0] = (a * (x0 + m_l)) + (c * (y0 + m_t)) + tx;
+                    vertices[vb_idx + VTX_COMP * 5 + 1] = (d * (y0 + m_t)) + (b * (x0 + m_l)) + ty;
+
+                    vertices[vb_idx + VTX_COMP * 5 + 2] = uv_x0 + uv_m_l;
+                    vertices[vb_idx + VTX_COMP * 5 + 3] = uv_y0 + uv_m_t;
+
+                    vertices[vb_idx + VTX_COMP * 6 + 0] = (a * (x1 - m_r)) + (c * (y0 + m_t)) + tx;
+                    vertices[vb_idx + VTX_COMP * 6 + 1] = (d * (y0 + m_t)) + (b * (x1 - m_r)) + ty;
+
+                    vertices[vb_idx + VTX_COMP * 6 + 2] = uv_x1 - uv_m_r;
+                    vertices[vb_idx + VTX_COMP * 6 + 3] = uv_y0 + uv_m_t;
+
+                    vertices[vb_idx + VTX_COMP * 7 + 0] = (a * x1) + (c * (y0 + m_t)) + tx;
+                    vertices[vb_idx + VTX_COMP * 7 + 1] = (d * (y0 + m_t)) + (b * x1) + ty;
+
+                    vertices[vb_idx + VTX_COMP * 7 + 2] = uv_x1;
+                    vertices[vb_idx + VTX_COMP * 7 + 3] = uv_y0 + uv_m_t;
+
+                    // - third row
+
+                    vertices[vb_idx + VTX_COMP * 8 + 0] = (a * x0) + (c * (y1 - m_b)) + tx;
+                    vertices[vb_idx + VTX_COMP * 8 + 1] = (d * (y1 - m_b)) + (b * x0) + ty;
+
+                    vertices[vb_idx + VTX_COMP * 8 + 2] = uv_x0;
+                    vertices[vb_idx + VTX_COMP * 8 + 3] = uv_y1 - uv_m_b;
+
+                    vertices[vb_idx + VTX_COMP * 9 + 0] = (a * (x0 + m_l)) + (c * (y1 - m_b)) + tx;
+                    vertices[vb_idx + VTX_COMP * 9 + 1] = (d * (y1 - m_b)) + (b * (x0 + m_l)) + ty;
+
+                    vertices[vb_idx + VTX_COMP * 9 + 2] = uv_x0 + uv_m_l;
+                    vertices[vb_idx + VTX_COMP * 9 + 3] = uv_y1 - uv_m_b;
+
+                    vertices[vb_idx + VTX_COMP * 10 + 0] = (a * (x1 - m_r)) + (c * (y1 - m_b)) + tx;
+                    vertices[vb_idx + VTX_COMP * 10 + 1] = (d * (y1 - m_b)) + (b * (x1 - m_r)) + ty;
+
+                    vertices[vb_idx + VTX_COMP * 10 + 2] = uv_x1 - uv_m_r;
+                    vertices[vb_idx + VTX_COMP * 10 + 3] = uv_y1 - uv_m_b;
+
+                    vertices[vb_idx + VTX_COMP * 11 + 0] = (a * x1) + (c * (y1 - m_b)) + tx;
+                    vertices[vb_idx + VTX_COMP * 11 + 1] = (d * (y1 - m_b)) + (b * x1) + ty;
+
+                    vertices[vb_idx + VTX_COMP * 11 + 2] = uv_x1;
+                    vertices[vb_idx + VTX_COMP * 11 + 3] = uv_y1 - uv_m_b;
+
+                    // - forth row
+
+                    vertices[vb_idx + VTX_COMP * 12 + 0] = (a * x0) + (c * y1) + tx;
+                    vertices[vb_idx + VTX_COMP * 12 + 1] = (d * y1) + (b * x0) + ty;
+
+                    vertices[vb_idx + VTX_COMP * 12 + 2] = uv_x0;
+                    vertices[vb_idx + VTX_COMP * 12 + 3] = uv_y1;
+
+                    vertices[vb_idx + VTX_COMP * 13 + 0] = (a * (x0 + m_l)) + (c * y1) + tx;
+                    vertices[vb_idx + VTX_COMP * 13 + 1] = (d * y1) + (b * (x0 + m_l)) + ty;
+
+                    vertices[vb_idx + VTX_COMP * 13 + 2] = uv_x0 + uv_m_l;
+                    vertices[vb_idx + VTX_COMP * 13 + 3] = uv_y1;
+
+                    vertices[vb_idx + VTX_COMP * 14 + 0] = (a * (x1 - m_r)) + (c * y1) + tx;
+                    vertices[vb_idx + VTX_COMP * 14 + 1] = (d * y1) + (b * (x1 - m_r)) + ty;
+
+                    vertices[vb_idx + VTX_COMP * 14 + 2] = uv_x1 - uv_m_r;
+                    vertices[vb_idx + VTX_COMP * 14 + 3] = uv_y1;
+
+                    vertices[vb_idx + VTX_COMP * 15 + 0] = (a * x1) + (c * y1) + tx;
+                    vertices[vb_idx + VTX_COMP * 15 + 1] = (d * y1) + (b * x1) + ty;
+
+                    vertices[vb_idx + VTX_COMP * 15 + 2] = uv_x1;
+                    vertices[vb_idx + VTX_COMP * 15 + 3] = uv_y1;
+
+                    // - color
+                    const color_num = color.copy(np.color).multiply(p_item.final_modulate).as_rgba8();
+                    vertices[vb_idx + VTX_COMP * 0 + 4] = color_num;
+                    vertices[vb_idx + VTX_COMP * 1 + 4] = color_num;
+                    vertices[vb_idx + VTX_COMP * 2 + 4] = color_num;
+                    vertices[vb_idx + VTX_COMP * 3 + 4] = color_num;
+                    vertices[vb_idx + VTX_COMP * 4 + 4] = color_num;
+                    vertices[vb_idx + VTX_COMP * 5 + 4] = color_num;
+                    vertices[vb_idx + VTX_COMP * 6 + 4] = color_num;
+                    vertices[vb_idx + VTX_COMP * 7 + 4] = color_num;
+                    vertices[vb_idx + VTX_COMP * 8 + 4] = color_num;
+                    vertices[vb_idx + VTX_COMP * 9 + 4] = color_num;
+                    vertices[vb_idx + VTX_COMP * 10 + 4] = color_num;
+                    vertices[vb_idx + VTX_COMP * 11 + 4] = color_num;
+                    vertices[vb_idx + VTX_COMP * 12 + 4] = color_num;
+                    vertices[vb_idx + VTX_COMP * 13 + 4] = color_num;
+                    vertices[vb_idx + VTX_COMP * 14 + 4] = color_num;
+                    vertices[vb_idx + VTX_COMP * 15 + 4] = color_num;
+
+                    // - flags
+                    // TODO: fill mode
+                    const flags = color.set(tex ? 0 : 1, 0, 0, 0).as_rgba8();
+                    vertices[vb_idx + VTX_COMP * 0 + 5] = flags;
+                    vertices[vb_idx + VTX_COMP * 1 + 5] = flags;
+                    vertices[vb_idx + VTX_COMP * 2 + 5] = flags;
+                    vertices[vb_idx + VTX_COMP * 3 + 5] = flags;
+                    vertices[vb_idx + VTX_COMP * 4 + 5] = flags;
+                    vertices[vb_idx + VTX_COMP * 5 + 5] = flags;
+                    vertices[vb_idx + VTX_COMP * 6 + 5] = flags;
+                    vertices[vb_idx + VTX_COMP * 7 + 5] = flags;
+                    vertices[vb_idx + VTX_COMP * 8 + 5] = flags;
+                    vertices[vb_idx + VTX_COMP * 9 + 5] = flags;
+                    vertices[vb_idx + VTX_COMP * 10 + 5] = flags;
+                    vertices[vb_idx + VTX_COMP * 11 + 5] = flags;
+                    vertices[vb_idx + VTX_COMP * 12 + 5] = flags;
+                    vertices[vb_idx + VTX_COMP * 13 + 5] = flags;
+                    vertices[vb_idx + VTX_COMP * 14 + 5] = flags;
+                    vertices[vb_idx + VTX_COMP * 15 + 5] = flags;
+
+                    // index
+                    for (let i = 0; i < NinePatchIndices.length; i++) {
+                        indices[ib_idx++] = v_idx + NinePatchIndices[i];
+                    }
+
+                    this.states.v_index += 32;
+                    this.states.i_index += 54;
                 } break;
             }
         }
@@ -514,6 +746,7 @@ export class RasterizerCanvas extends VObject {
             }
 
             this.states.texture = tex;
+            this.current_draw_group.tex = tex.gl_tex;
         }
 
         // buffer overflow?

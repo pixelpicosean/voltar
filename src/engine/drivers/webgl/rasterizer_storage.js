@@ -1,3 +1,6 @@
+import { is_po2, nearest_po2 } from "engine/core/math/math_funcs";
+import { Color } from "engine/core/color";
+
 import {
     PIXEL_FORMAT_L8,
     PIXEL_FORMAT_LA8,
@@ -15,8 +18,6 @@ import {
     WRAP_REPEAT,
     WRAP_CLAMP_TO_EDGE,
 } from "engine/servers/visual_server";
-import { Color } from "engine/core/color";
-import { is_po2 } from "engine/core/math/math_funcs";
 
 
 /**
@@ -478,7 +479,7 @@ export class RasterizerStorage {
     buffer_create(type, size, usage = WebGLRenderingContext.STREAM_DRAW) {
         const gl = this.gl;
 
-        const size_po2 = next_po2(size);
+        const size_po2 = nearest_po2(size);
         const buffers = this.buffers[size_po2] = this.buffers[size_po2] || [];
         const buffer = buffers.pop() || {
             size: size_po2,
