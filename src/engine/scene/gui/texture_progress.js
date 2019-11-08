@@ -511,7 +511,7 @@ export class TextureProgress extends Range {
 
         p_texture.get_rect_region(dst_rect, src_rect, dst_rect, src_rect);
 
-        VSG.canvas.canvas_item_add_nine_patch(this.canvas_item, dst_rect, src_rect, p_texture.texture, topleft, bottomright, NINE_PATCH_STRETCH, NINE_PATCH_STRETCH, true, p_modulate);
+        VSG.canvas.canvas_item_add_nine_patch(this.canvas_item, dst_rect, src_rect, p_texture, topleft, bottomright, NINE_PATCH_STRETCH, NINE_PATCH_STRETCH, true, p_modulate);
 
         Rect2.free(dst_rect);
         Rect2.free(src_rect);

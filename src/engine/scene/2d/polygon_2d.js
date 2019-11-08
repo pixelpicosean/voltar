@@ -4,42 +4,10 @@ import { Vector2, Vector2Like } from "engine/core/math/vector2";
 import { Rect2 } from "engine/core/math/rect2";
 import { Color, ColorLike } from "engine/core/color";
 
-import BatchGeometry from "engine/drivers/batch/BatchGeometry";
-
 import { ImageTexture } from "../resources/texture";
 import { NOTIFICATION_DRAW } from "./canvas_item";
 import { Node2D } from "./node_2d";
 
-
-class PolygonGeometry extends BatchGeometry {
-    constructor() {
-        super();
-
-        /** @type {number[]} */
-        this.points = [];
-
-        /** @type {number[]} */
-        this.colors = [];
-
-        /** @type {number[]} */
-        this.uvs = [];
-
-        /** @type {number[]} */
-        this.indices = [];
-
-        /** @type {number[]} */
-        this.texture_ids = [];
-
-        this.polygons = [];
-
-        this.dirty = 0;
-        this.batch_dirty = -1;
-        this.cache_dirty = -1;
-        this.clear_dirty = 0;
-        this.draw_calls = [];
-        this.batches = [];
-    }
-}
 
 export class Polygon2D extends Node2D {
     get class() { return 'Polygon2D'}

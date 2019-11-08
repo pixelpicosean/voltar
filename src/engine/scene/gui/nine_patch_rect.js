@@ -115,7 +115,7 @@ export class NinePatchRect extends Control {
 
             const topleft = Vector2.new(this.margin[MARGIN_LEFT], this.margin[MARGIN_TOP]);
             const bottomright = Vector2.new(this.margin[MARGIN_RIGHT], this.margin[MARGIN_BOTTOM]);
-            VSG.canvas.canvas_item_add_nine_patch(this.canvas_item, rect, src_rect, this._texture.texture, topleft, bottomright, this._axis_stretch_horizontal, this._axis_stretch_vertical, this._draw_center);
+            VSG.canvas.canvas_item_add_nine_patch(this.canvas_item, rect, src_rect, this._texture, topleft, bottomright, this._axis_stretch_horizontal, this._axis_stretch_vertical, this._draw_center);
             Vector2.free(bottomright);
             Vector2.free(topleft);
 

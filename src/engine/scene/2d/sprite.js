@@ -118,8 +118,8 @@ export class Sprite extends Node2D {
                 const src_rect = Rect2.new();
                 const dst_rect = Rect2.new();
 
-                const filter_clip = this._get_rects(src_rect, dst_rect);
-                this._texture.draw_rect_region(this.canvas_item, dst_rect, src_rect, white, false, this._normal_map, filter_clip);
+                this._get_rects(src_rect, dst_rect);
+                this._texture.draw_rect_region(this.canvas_item, dst_rect, src_rect, white, false);
 
                 Rect2.free(src_rect);
                 Rect2.free(dst_rect);

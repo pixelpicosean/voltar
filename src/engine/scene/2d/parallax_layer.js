@@ -173,7 +173,7 @@ export class ParallaxLayer extends Node2D {
 
         const pb = /** @type {ParallaxBackground} */(this.get_parent());
         if (pb.class === 'ParallaxBackground') {
-            const c = pb.get_canvas();
+            const c = pb.canvas;
             const mirror_scale = this.get_scale().clone().multiply(this._motion_mirroring);
             VSG.canvas.canvas_set_item_mirroring(c, this.canvas_item, mirror_scale);
             Vector2.free(mirror_scale);
