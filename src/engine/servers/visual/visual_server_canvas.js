@@ -26,7 +26,6 @@ import {
     NINE_PATCH_STRETCH,
     Command,
     CommandRect,
-    CommandTransform,
     CommandNinePatch,
     CommandCircle,
     CommandMultiMesh,
@@ -584,15 +583,6 @@ export class VisualServerCanvas {
         p_item.commands.push(mm);
     }
     canvas_item_add_particles() { }
-    /**
-     * @param {Item} p_item
-     * @param {Transform2D} p_transform
-     */
-    canvas_item_add_set_transform(p_item, p_transform) {
-        const tr = CommandTransform.instance();
-        tr.xform.copy(p_transform);
-        p_item.commands.push(tr);
-    }
     canvas_item_add_clip_ignore() { }
     /**
      * @param {Item} p_item

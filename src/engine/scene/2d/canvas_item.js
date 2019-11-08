@@ -207,10 +207,9 @@ export class CanvasItem extends Node {
      * @param {boolean} [p_tile=false]
      * @param {ColorLike} [p_modulate=white]
      * @param {boolean} [p_transpose=false]
-     * @param {ImageTexture} [p_normal_map]
      */
-    draw_texture_rect(p_texture, p_rect, p_tile = false, p_modulate = white, p_transpose = false, p_normal_map) {
-        p_texture.draw_rect(this.canvas_item, p_rect, p_tile, p_modulate, p_transpose, p_normal_map);
+    draw_texture_rect(p_texture, p_rect, p_tile = false, p_modulate = white, p_transpose = false) {
+        p_texture.draw_rect(this.canvas_item, p_rect, p_tile, p_modulate, p_transpose);
     }
 
     /**
@@ -219,11 +218,9 @@ export class CanvasItem extends Node {
      * @param {Rect2} p_src_rect
      * @param {ColorLike} [p_modulate=white]
      * @param {boolean} [p_transpose=false]
-     * @param {ImageTexture} [p_normal_map]
-     * @param {boolean} [p_clip_uv=false]
      */
-    draw_texture_rect_region(p_texture, p_rect, p_src_rect, p_modulate = white, p_transpose = false, p_normal_map = undefined, p_clip_uv = false) {
-        p_texture.draw_rect_region(this.canvas_item, p_rect, p_src_rect, p_modulate, p_transpose, p_normal_map, p_clip_uv);
+    draw_texture_rect_region(p_texture, p_rect, p_src_rect, p_modulate = white, p_transpose = false) {
+        p_texture.draw_rect_region(this.canvas_item, p_rect, p_src_rect, p_modulate, p_transpose);
     }
 
     get_canvas_layer() {
