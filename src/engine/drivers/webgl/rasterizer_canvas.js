@@ -31,9 +31,43 @@ const ATTR_COLOR = 2;
 const VTX_COMP = 5;
 const VTX_STRIDE = VTX_COMP * 4;
 
-const VERTEX_BUFFER_LENGTH = 4000 * (2 + 1 + 2);
-const INDEX_BUFFER_LENGTH = 4000;
+const VERTEX_BUFFER_LENGTH = 4096 * VTX_COMP;
+const INDEX_BUFFER_LENGTH = 4096;
 
+
+class DrawGroup_t {
+    constructor() {
+        this.init();
+    }
+    init() {
+        this.vert_slot = 0;
+
+        this.v_start = 0;
+        this.v_length = 0;
+
+        this.i_start = 0;
+        this.i_length = 0;
+
+        /** @type {WebGLTexture} */
+        this.tex = null;
+
+        return this;
+    }
+}
+/** @type {DrawGroup_t[]} */
+const DrawGroup_pool = [];
+function DrawGroup_new() {
+    const dp = DrawGroup_pool.pop();
+    if (dp) {
+        return dp.init();
+    } else {
+        return new DrawGroup_t;
+    }
+}
+/** @param {DrawGroup_t} dg */
+function DrawGroup_free(dg) {
+    DrawGroup_pool.push(dg);
+}
 
 /**
  * Swap values of 2 vertex
@@ -71,14 +105,14 @@ function get_uvs_of_sub_rect(r_vts, vt_start, tex_uvs, tex_width, tex_height, x,
     const topleft_y = tex_uvs[1] + uv_h * (y / tex_height);
     const bottomright_x = topleft_x + uv_w * (width / tex_width);
     const bottomright_y = topleft_y + uv_h * (height / tex_height);
-    r_vts[vt_start + VTX_COMP * 0 + 3] = topleft_x;
-    r_vts[vt_start + VTX_COMP * 0 + 4] = topleft_y;
-    r_vts[vt_start + VTX_COMP * 1 + 3] = bottomright_x;
-    r_vts[vt_start + VTX_COMP * 1 + 4] = topleft_y;
-    r_vts[vt_start + VTX_COMP * 2 + 3] = bottomright_x;
-    r_vts[vt_start + VTX_COMP * 2 + 4] = bottomright_y;
-    r_vts[vt_start + VTX_COMP * 3 + 3] = topleft_x;
-    r_vts[vt_start + VTX_COMP * 3 + 4] = bottomright_y;
+    r_vts[vt_start + VTX_COMP * 0 + 2] = topleft_x;
+    r_vts[vt_start + VTX_COMP * 0 + 3] = topleft_y;
+    r_vts[vt_start + VTX_COMP * 1 + 2] = bottomright_x;
+    r_vts[vt_start + VTX_COMP * 1 + 3] = topleft_y;
+    r_vts[vt_start + VTX_COMP * 2 + 2] = bottomright_x;
+    r_vts[vt_start + VTX_COMP * 2 + 3] = bottomright_y;
+    r_vts[vt_start + VTX_COMP * 3 + 2] = topleft_x;
+    r_vts[vt_start + VTX_COMP * 3 + 3] = bottomright_y;
 }
 
 export class RasterizerCanvas extends VObject {
@@ -93,11 +127,14 @@ export class RasterizerCanvas extends VObject {
 
         this.states = {
             /** @type {import('./rasterizer_storage').Material_t} */
-            current_material: null,
+            material: null,
             /** @type {import('./rasterizer_storage').Texture_t} */
-            current_tex: null,
-            current_v_index: 0,
-            current_i_index: 0,
+            texture: null,
+
+            active_vert_slot: 0,
+            active_buffer_slot: 0,
+            v_index: 0,
+            i_index: 0,
 
             uniforms: {
                 projection_matrix: [
@@ -116,14 +153,22 @@ export class RasterizerCanvas extends VObject {
 
         this.gl = OS.get_singleton().gl;
 
-        this.vertices = new Float32Array(VERTEX_BUFFER_LENGTH);
-        this.indices = new Uint16Array(INDEX_BUFFER_LENGTH);
+        this.vertices = [
+            {
+                v: new Float32Array(VERTEX_BUFFER_LENGTH),
+                i: new Uint16Array(INDEX_BUFFER_LENGTH),
+            },
+        ]
+
+        /** @type {DrawGroup_t} */
+        this.current_draw_group = null;
+        /** @type {DrawGroup_t[]} */
+        this.draw_groups = [];
 
         /** @type {WebGLBuffer[]} */
         this.vbs = [];
         /** @type {WebGLBuffer[]} */
         this.ibs = [];
-        this.active_buffer_index = 0;
     }
 
     /* API */
@@ -151,8 +196,8 @@ export class RasterizerCanvas extends VObject {
                 { name: 'time', type: '1f' },
             ]
         );
-        this.states.current_material = VSG.storage.material_create(flat_shader);
-        this.states.current_material.name = 'flat';
+        this.states.material = VSG.storage.material_create(flat_shader);
+        this.states.material.name = 'flat';
     }
     get_extensions() {
         const gl = this.gl;
@@ -206,53 +251,103 @@ export class RasterizerCanvas extends VObject {
 
         this.reset_canvas();
 
+        // update uniforms
         const canvas_transform = identity_mat4(this.states.uniforms.projection_matrix);
-
         if (frame.current_rt) {
         } else {
             const ssize = OS.get_singleton().get_window_size();
             translate_mat4(canvas_transform, canvas_transform, [-ssize.width / 2, -ssize.height / 2, 0]);
             scale_mat4(canvas_transform, canvas_transform, [2 / ssize.width, -2 / ssize.height, 1]);
-
-            // const left = 0;
-            // const right = ssize.width;
-            // const top = 0;
-            // const bottom = ssize.height;
-            // const near = 0.5;
-            // const far = 1;
-
-            // var lr = 1 / (left - right);
-            // var bt = 1 / (bottom - top);
-            // var nf = 1 / (near - far);
-            // canvas_transform[0] = -2 * lr;
-            // canvas_transform[1] = 0;
-            // canvas_transform[2] = 0;
-            // canvas_transform[3] = 0;
-            // canvas_transform[4] = 0;
-            // canvas_transform[5] = -2 * bt;
-            // canvas_transform[6] = 0;
-            // canvas_transform[7] = 0;
-            // canvas_transform[8] = 0;
-            // canvas_transform[9] = 0;
-            // canvas_transform[10] = 2 * nf;
-            // canvas_transform[11] = 0;
-            // canvas_transform[12] = (left + right) * lr;
-            // canvas_transform[13] = (top + bottom) * bt;
-            // canvas_transform[14] = (far + near) * nf;
-            // canvas_transform[15] = 1;
         }
-
         this.states.uniforms.time[0] = frame.time[0];
 
-        this.states.current_tex = this.storage.resources.white_tex.texture;
+        // reset states
+        this.states.texture = this.storage.resources.white_tex.texture;
+
+        this.current_draw_group = DrawGroup_new();
+        this.current_draw_group.tex = this.states.texture.gl_tex;
+        this.draw_groups.push(this.current_draw_group);
     }
 
     canvas_end() {
-        this.flush();
+        const gl = this.gl;
+
+        // end last active group
+        this.current_draw_group.v_length = this.states.v_index - this.current_draw_group.v_start;
+        this.current_draw_group.i_length = this.states.i_index - this.current_draw_group.i_start;
+
+        // apply pipeline
+        // TODO: support different pipelines
+        const mat = this.states.material;
+        gl.useProgram(mat.shader.gl_prog);
+        const global_uniforms = this.states.uniforms;
+        const uniforms = mat.shader.uniforms;
+        for (const k in uniforms) {
+            const u = uniforms[k];
+            switch (u.type) {
+                case '1f': gl.uniform1fv(u.gl_loc, global_uniforms[k] ? global_uniforms[k] : mat.params[k]); break;
+                case '2f': gl.uniform2fv(u.gl_loc, global_uniforms[k] ? global_uniforms[k] : mat.params[k]); break;
+                case '3f': gl.uniform3fv(u.gl_loc, global_uniforms[k] ? global_uniforms[k] : mat.params[k]); break;
+                case '4f': gl.uniform4fv(u.gl_loc, global_uniforms[k] ? global_uniforms[k] : mat.params[k]); break;
+                case 'mat3': gl.uniformMatrix3fv(u.gl_loc, false, global_uniforms[k] ? global_uniforms[k] : mat.params[k]); break;
+                case 'mat4': gl.uniformMatrix4fv(u.gl_loc, false, global_uniforms[k] ? global_uniforms[k] : mat.params[k]); break;
+            }
+        }
+
+        // TODO: support different blend modes
+        gl.enable(gl.BLEND);
+        gl.blendEquation(gl.FUNC_ADD);
+        gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+
+        let current_buffer_slot = -1;
+        for (let i = 0; i < this.draw_groups.length; i++) {
+            const group = this.draw_groups[i];
+
+            // uses different vertices array? let's upload them to GPU
+            if (group.vert_slot !== current_buffer_slot) {
+                const {
+                    v: vertices,
+                    i: indices,
+                } = this.vertices[group.vert_slot];
+
+                let vb = this.vbs[this.states.active_buffer_slot];
+                if (!vb) {
+                    vb = this.vbs[this.states.active_buffer_slot] = gl.createBuffer();
+                }
+                gl.bindBuffer(gl.ARRAY_BUFFER, vb);
+                gl.bufferData(gl.ARRAY_BUFFER, vertices.subarray(0, this.states.v_index * VTX_COMP), gl.DYNAMIC_DRAW);
+
+                let ib = this.ibs[this.states.active_buffer_slot];
+                if (!ib) {
+                    ib = this.ibs[this.states.active_buffer_slot] = gl.createBuffer();
+                }
+                gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ib);
+                gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices.subarray(0, this.states.i_length), gl.DYNAMIC_DRAW);
+
+                current_buffer_slot = group.vert_slot;
+            }
+
+            // issue a draw call for this group
+            this.flush_group(group);
+        }
+
+        // recycle draw group data
+        for (const g of this.draw_groups) {
+            DrawGroup_free(g);
+        }
+        this.draw_groups.length = 0;
     }
 
     reset_canvas() {
-        this.active_buffer_index = 0;
+        this.states.active_buffer_slot = 0;
+        this.states.active_vert_slot = 0;
+
+        // start from group 0
+        this.states.draw_group = 0;
+
+        // reset vertices and indices offset/index
+        this.states.v_index = 0;
+        this.states.i_index = 0;
     }
 
     /**
@@ -278,19 +373,21 @@ export class RasterizerCanvas extends VObject {
         const color = Color.new();
 
         for (const cmd of p_item.commands) {
-            const vertices = this.vertices;
-            const indices = this.indices;
-
-            const v_idx = this.states.current_v_index;
-
-            let vb_idx = v_idx * VTX_COMP;
-            let ib_idx = this.states.current_i_index;
-
             switch (cmd.type) {
                 case TYPE_RECT: {
                     const rect = /** @type {CommandRect} */(cmd);
 
-                    this.check_draw_states(4, 6, rect.texture.texture);
+                    this.check_draw_group_state(4, 6, rect.texture.texture);
+
+                    const {
+                        v: vertices,
+                        i: indices,
+                    } = this.vertices[this.states.active_vert_slot];
+
+                    const v_idx = this.states.v_index;
+
+                    let vb_idx = this.states.v_index * VTX_COMP;
+                    let ib_idx = this.states.i_index;
 
                     // vertex
                     const wt = p_item.final_transform;
@@ -369,6 +466,9 @@ export class RasterizerCanvas extends VObject {
                     indices[ib_idx++] = v_idx + 0;
                     indices[ib_idx++] = v_idx + 2;
                     indices[ib_idx++] = v_idx + 3;
+
+                    this.states.v_index += 4;
+                    this.states.i_index += 6;
                 } break;
             }
         }
@@ -381,76 +481,62 @@ export class RasterizerCanvas extends VObject {
      * @param {number} num_index
      * @param {import('./rasterizer_storage').Texture_t} tex
      */
-    check_draw_states(num_vertex, num_index, tex) {
+    check_draw_group_state(num_vertex, num_index, tex) {
+        let need_new_group = false;
+        let use_new_buffer = false;
+
+        // different texture?
         if (
-            (tex !== this.states.current_tex)
-            ||
-            (this.states.current_v_index + num_vertex * VTX_COMP >= VERTEX_BUFFER_LENGTH)
-            ||
-            (this.states.current_i_index + num_index >= INDEX_BUFFER_LENGTH)
+            tex !== this.states.texture
         ) {
-            this.flush();
+            need_new_group = true;
         }
 
-        this.states.current_v_index += num_vertex;
-        this.states.current_i_index += num_index;
+        // buffer overflow?
+        if (
+            ((this.states.v_index + num_vertex) * VTX_COMP >= VERTEX_BUFFER_LENGTH)
+            ||
+            (this.states.i_index + num_index >= INDEX_BUFFER_LENGTH)
+        ) {
+            need_new_group = true;
+            use_new_buffer = true;
 
-        if (tex && tex.gl_tex) {
-            this.states.current_tex = tex;
-        } else {
-            this.states.current_tex === this.storage.resources.white_tex.texture;
+            this.states.active_vert_slot += 1;
+        }
+
+        if (need_new_group) {
+            // finish current group
+            this.current_draw_group.v_length = this.states.v_index - this.current_draw_group.v_start;
+            this.current_draw_group.i_length = this.states.i_index - this.current_draw_group.i_start;
+
+            // update states
+            if (use_new_buffer) {
+                this.states.v_index = 0;
+                this.states.i_index = 0;
+            }
+            this.states.texture = tex;
+
+            // start a new group
+            const new_group = DrawGroup_new();
+
+            new_group.vert_slot = this.states.active_vert_slot;
+            new_group.v_start = this.states.v_index;
+            new_group.i_start = this.states.i_index;
+            new_group.tex = tex.gl_tex || this.storage.resources.white_tex.texture.gl_tex;
+
+            this.draw_groups.push(new_group);
+            this.current_draw_group = new_group;
         }
     }
-    flush() {
-        if (this.states.current_v_index === 0 || this.states.current_i_index === 0) {
-            return;
-        }
-
+    /**
+     * @param {DrawGroup_t} group
+     */
+    flush_group(group) {
         const gl = this.gl;
-
-        // apply pipeline
-        const mat = this.states.current_material;
-        gl.useProgram(mat.shader.gl_prog);
-        const global_uniforms = this.states.uniforms;
-        const uniforms = mat.shader.uniforms;
-        for (const k in uniforms) {
-            const u = uniforms[k];
-            switch (u.type) {
-                case '1f': gl.uniform1fv(u.gl_loc, global_uniforms[k] ? global_uniforms[k] : mat.params[k]); break;
-                case '2f': gl.uniform2fv(u.gl_loc, global_uniforms[k] ? global_uniforms[k] : mat.params[k]); break;
-                case '3f': gl.uniform3fv(u.gl_loc, global_uniforms[k] ? global_uniforms[k] : mat.params[k]); break;
-                case '4f': gl.uniform4fv(u.gl_loc, global_uniforms[k] ? global_uniforms[k] : mat.params[k]); break;
-                case 'mat3': gl.uniformMatrix3fv(u.gl_loc, false, global_uniforms[k] ? global_uniforms[k] : mat.params[k]); break;
-                case 'mat4': gl.uniformMatrix4fv(u.gl_loc, false, global_uniforms[k] ? global_uniforms[k] : mat.params[k]); break;
-            }
-        }
-
-        gl.enable(gl.BLEND);
-        gl.blendEquation(gl.FUNC_ADD);
-        gl.blendFuncSeparate(gl.ONE, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
         // apply data binding
         // - texture
-        gl.bindTexture(gl.TEXTURE_2D, this.states.current_tex.gl_tex);
-
-        // - buffers
-        let vb = this.vbs[this.active_buffer_index];
-        if (!vb) {
-            vb = this.vbs[this.active_buffer_index] = gl.createBuffer();
-            gl.bindBuffer(gl.ARRAY_BUFFER, vb);
-            gl.bufferData(gl.ARRAY_BUFFER, VERTEX_BUFFER_LENGTH * 4, gl.STREAM_DRAW);
-        }
-        gl.bindBuffer(gl.ARRAY_BUFFER, vb);
-        gl.bufferSubData(gl.ARRAY_BUFFER, 0, this.vertices);
-
-        let ib = this.ibs[this.active_buffer_index];
-        if (!ib) {
-            ib = this.ibs[this.active_buffer_index] = gl.createBuffer();
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ib);
-            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, INDEX_BUFFER_LENGTH * 2, gl.STREAM_DRAW);
-        }
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ib);
-        gl.bufferSubData(gl.ELEMENT_ARRAY_BUFFER, 0, this.indices);
+        gl.bindTexture(gl.TEXTURE_2D, group.tex);
 
         // - attributes
         gl.vertexAttribPointer(ATTR_VERTEX, 2, gl.FLOAT, false, VTX_STRIDE, 0);
@@ -463,11 +549,7 @@ export class RasterizerCanvas extends VObject {
         gl.enableVertexAttribArray(ATTR_COLOR);
 
         // draw
-        gl.drawElements(gl.TRIANGLES, this.states.current_i_index, gl.UNSIGNED_SHORT, 0);
-
-        // reset states
-        this.states.current_v_index = 0;
-        this.states.current_i_index = 0;
+        gl.drawElements(gl.TRIANGLES, group.i_length, gl.UNSIGNED_SHORT, group.i_start * 2);
     }
 
     /**

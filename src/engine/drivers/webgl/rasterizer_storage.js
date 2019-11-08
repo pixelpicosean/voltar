@@ -16,13 +16,7 @@ import {
     WRAP_CLAMP_TO_EDGE,
 } from "engine/servers/visual_server";
 import { Color } from "engine/core/color";
-
-/**
- * @param {number} value
- */
-function is_pow2(value) {
-    return (value & (value - 1)) === 0;
-}
+import { is_po2 } from "engine/core/math/math_funcs";
 
 
 /**
@@ -79,6 +73,7 @@ export class Texture_t {
         this.mag_filter = FILTER_NEAREST;
         this.wrap_u = WRAP_REPEAT;
         this.wrap_v = WRAP_REPEAT;
+        this.has_mipmap = false;
 
         /** @type {WebGLRenderbuffer} */
         this.gl_depth_render_buffer = null;
@@ -139,10 +134,10 @@ export class RasterizerStorage {
 
         this.frame = {
             clear_request: true,
-            clear_request_color: new Color(0,0,0,1),
+            clear_request_color: new Color(0, 0, 0, 1),
             /** @type {RenderTarget_t} */
             current_rt: null,
-            time: [0,0,0,0],
+            time: [0, 0, 0, 0],
             count: 0,
             delta: 0,
         };
@@ -160,6 +155,16 @@ export class RasterizerStorage {
             /** @type {WebGLBuffer} */
             quadie: null,
         };
+
+        /**
+         * @typedef BufferPack
+         * @property {number} size
+         * @property {WebGLBuffer} gl_buf
+         */
+        /** @type {Object<number, BufferPack[]>} */
+        this.buffers = {};
+        /** @type {BufferPack[]} */
+        this.used_buffers = [];
 
         /** @type {import('./rasterizer_canvas').RasterizerCanvas} */
         this.canvas = null;
@@ -244,11 +249,19 @@ export class RasterizerStorage {
         this.update_dirty_materials();
         this.update_dirty_skeletons();
         this.update_dirty_multimeshes();
+        this.update_dirty_buffers();
     }
     update_dirty_shaders() { }
     update_dirty_materials() { }
     update_dirty_skeletons() { }
     update_dirty_multimeshes() { }
+    update_dirty_buffers() {
+        // recycle used buffers to
+        for (const b of this.used_buffers) {
+            this.buffers[b.size].push(b);
+        }
+        this.used_buffers.length = 0;
+    }
 
     /* Texture API */
 
@@ -259,7 +272,7 @@ export class RasterizerStorage {
      * @param {Texture_t} rid
      * @param {number} p_width
      * @param {number} p_height
-     * @param {{ min_filter?: number, mag_filter?: number, wrap_u?: number, wrap_v?: number }} [p_flags]
+     * @param {{ min_filter?: number, mag_filter?: number, wrap_u?: number, wrap_v?: number, has_mipmap?: boolean }} [p_flags]
      */
     texture_allocate(rid, p_width, p_height, p_flags = {}) {
         const gl = this.gl;
@@ -269,9 +282,8 @@ export class RasterizerStorage {
 
         rid.min_filter = p_flags.min_filter || FILTER_NEAREST;
         rid.mag_filter = p_flags.mag_filter || FILTER_NEAREST;
-        const po2 = is_pow2(p_width) && is_pow2(p_height);
-        rid.wrap_u = p_flags.wrap_u || (po2 ? WRAP_REPEAT : WRAP_CLAMP_TO_EDGE);
-        rid.wrap_v = p_flags.wrap_v || (po2 ? WRAP_REPEAT : WRAP_CLAMP_TO_EDGE);
+        rid.wrap_u = p_flags.wrap_u || WRAP_CLAMP_TO_EDGE;
+        rid.wrap_v = p_flags.wrap_v || WRAP_CLAMP_TO_EDGE;
 
         rid.gl_tex = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_2D, rid.gl_tex);
@@ -280,6 +292,11 @@ export class RasterizerStorage {
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, rid.wrap_u);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, rid.wrap_v);
         gl.texImage2D(gl.TEXTURE_2D, 0, get_gl_internal_format(rid.pixel_format), rid.width, rid.height, 0, get_gl_pixel_format(rid.pixel_format), get_gl_texture_type(rid.pixel_format), null);
+
+        if (p_flags.has_mipmap && is_po2(rid.width) && is_po2(rid.height)) {
+            rid.has_mipmap = true;
+            gl.generateMipmap(gl.TEXTURE_2D);
+        }
 
         rid.initialized = true;
     }
@@ -449,5 +466,24 @@ export class RasterizerStorage {
                 mt.params[k][i] = param[k][i];
             }
         }
+    }
+
+    /**
+     * @param {number} type
+     * @param {number} size
+     * @param {number} [usage]
+     */
+    buffer_create(type, size, usage = WebGLRenderingContext.STREAM_DRAW) {
+        const gl = this.gl;
+
+        const size_po2 = next_po2(size);
+        const buffers = this.buffers[size_po2] = this.buffers[size_po2] || [];
+        const buffer = buffers.pop() || {
+            size: size_po2,
+            gl_buf: gl.createBuffer(),
+        }
+        gl.bindBuffer(type, buffer.gl_buf);
+        gl.bufferData(type, buffer.size, usage);
+        return buffer;
     }
 }
