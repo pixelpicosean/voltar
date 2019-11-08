@@ -124,8 +124,8 @@ class Spritesheet {
         while (frame_index - initial_frame_index < max_frames && frame_index < this._frame_keys.length) {
             const i = this._frame_keys[frame_index];
             const rect = this._frames[i].frame;
-            const tex = new ImageTexture()
-            tex.create_from_region(this.base_texture, rect.x, rect.y, rect.width, rect.height);
+            const tex = new ImageTexture;
+            tex.create_from_region(this.base_texture, rect.x, rect.y, rect.w, rect.h);
             this.textures[i] = tex;
 
             frame_index++;
