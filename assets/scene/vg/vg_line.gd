@@ -43,15 +43,14 @@ func _draw() -> void:
 	else:
 		var steps: int = max(MinStepsPerHalfCircle, half_width * 5 / (200 + half_width * 5) * MaxStepsPerHalfCircle)
 		var angle_per_step := PI / steps
-		steps += 1
-		points.resize(steps * 2 + 1)
+		points.resize(steps * 2 + 2 + 1)
 		var start_angle := angle + PI / 2
-		for i in steps:
+		for i in steps + 1:
 			points[i] = Vector2(half_width, 0).rotated(start_angle + angle_per_step * i) + start
 		start_angle = angle - PI / 2
-		for i in steps:
-			points[steps + i] = Vector2(half_width, 0).rotated(start_angle + angle_per_step * i) + end
-		points[steps * 2] = points[0]
+		for i in steps + 1:
+			points[steps + 1 + i] = Vector2(half_width, 0).rotated(start_angle + angle_per_step * i) + end
+		points[steps * 2 + 2] = points[0]
 
 	draw_colored_polygon(points, color)
 
