@@ -404,6 +404,13 @@ module.exports.convert_scenes = (/** @type {string} */scene_root_url_p) => {
                     node.prop = node._prop; node._prop = undefined;
                     const converter = require(`./converter/res/${node_type}`);
                     const parsed_data = converter(node);
+
+                    // copy extra properties (may come from scripts)
+                    for (const k in node.prop) {
+                        if (parsed_data[k] === undefined) {
+                            parsed_data[k] = node.prop[k];
+                        }
+                    }
                     parsed_data._prop = undefined;
 
                     // remove its type, which is already defined in its own scene
