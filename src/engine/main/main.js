@@ -78,7 +78,7 @@ export const Main = {
         window.removeEventListener('load', this.setup2, false);
         document.removeEventListener('DOMContentLoaded', this.setup2, false);
 
-        os.initialize(/** @type {HTMLCanvasElement} */(document.getElementById('game')));
+        os.initialize(/** @type {HTMLCanvasElement} */(document.getElementById('game')), this.global);
 
         VSG.viewport.set_default_clear_color(Color.hex(this.global.display.background_color));
 
@@ -111,6 +111,8 @@ export const Main = {
         os.set_main_loop(scene_tree);
 
         this.start_loop();
+
+        console.log(`[Voltar] driver: ${this.global.display.webgl2 ? 'WebGL2' : 'WebGL'}, antialias: ${this.global.display.antialias ? 'ON' : 'OFF'}`)
     },
 
     /**

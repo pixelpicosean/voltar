@@ -78,6 +78,12 @@ module.exports.convert_project_settings = (project_url) => {
             display.height = int(settings.display['window/size/height']) || 600;
         }
 
+        // driver
+        let driver = string(settings.rendering['quality/driver/driver_name'])
+        if (driver !== undefined) {
+            display.webgl2 = driver === 'GLES3';
+        }
+
         // clear color
         let clear_color = Color(settings.rendering['environment/default_clear_color']);
         if (clear_color !== undefined) {
@@ -104,6 +110,12 @@ module.exports.convert_project_settings = (project_url) => {
         let use_nearest = boolean(settings.rendering['quality/filters/use_nearest_mipmap_filter']);
         if (use_nearest !== undefined) {
             display.scale_mode = use_nearest ? 'nearest' : 'linear';
+        }
+
+        // AA
+        let use_antialias = int(settings.rendering['quality/filters/msaa']);
+        if (use_antialias !== undefined) {
+            display.antialias = use_antialias > 0;
         }
 
         real_settings.display = display;

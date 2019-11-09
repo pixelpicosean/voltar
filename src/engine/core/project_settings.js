@@ -23,6 +23,7 @@ import { KEYS } from "./os/keyboard";
   * @typedef DisplaySettings
   * @prop {string} [view]
   * @prop {string} [container]
+  * @prop {boolean} [webgl2]
   * @prop {number} [width]
   * @prop {number} [height]
   * @prop {number} [resolution]
@@ -86,6 +87,7 @@ const DefaultSettings = {
 
         width: 1024,
         height: 600,
+        webgl2: false,
         resolution: 1,
         orientation: 0,
 
@@ -97,7 +99,7 @@ const DefaultSettings = {
 
         stretch_mode: STRETCH_MODE_DISABLED,
         stretch_aspect: STRETCH_ASPECT_IGNORE,
-        resizable: true,
+        resizable: false,
     },
     physics: {
         physics_fps: 60,

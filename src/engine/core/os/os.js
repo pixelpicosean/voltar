@@ -110,8 +110,9 @@ export class OS {
 
     /**
      * @param {HTMLCanvasElement} canvas
+     * @param {import('../project_settings').ProjectSettings} settings
      */
-    initialize(canvas) {
+    initialize(canvas, settings) {
         this.canvas = canvas;
         if (this.video_mode.resizable) {
             canvas.width = window.innerWidth;
@@ -121,14 +122,14 @@ export class OS {
             canvas.height = this.video_mode.height;
         }
 
-        // if (device.phone || device.tablet) {
+        if (settings.display.webgl2) {
+            this.video_driver_index = VIDEO_DRIVER_GLES3;
+        } else {
             this.video_driver_index = VIDEO_DRIVER_GLES2;
-        // } else {
-        //     this.video_driver_index = VIDEO_DRIVER_GLES3;
-        // }
+        }
         const options = {
             alpha: false,
-            antialias: true,
+            antialias: settings.display.antialias,
             depth: true,
             stencil: true,
             premultipliedAlpha: false,
