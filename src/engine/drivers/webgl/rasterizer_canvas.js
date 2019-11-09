@@ -20,8 +20,10 @@ import { VSG } from 'engine/servers/visual/visual_server_globals';
 import {
     TYPE_RECT,
     TYPE_NINEPATCH,
+    TYPE_POLYGON,
     CommandRect,
     CommandNinePatch,
+    CommandPolygon,
     CANVAS_RECT_REGION,
     CANVAS_RECT_TRANSPOSE,
     CANVAS_RECT_FLIP_H,
@@ -719,6 +721,66 @@ export class RasterizerCanvas extends VObject {
 
                     this.states.v_index += 32;
                     this.states.i_index += 54;
+                } break;
+                case TYPE_POLYGON: {
+                    const polygon = /** @type {CommandPolygon} */(cmd);
+                    const tex = polygon.texture;
+
+                    const vert_count = polygon.get_vert_count();
+                    const indi_count = polygon.indices.length;
+
+                    this.check_draw_group_state(vert_count, indi_count, tex);
+
+                    const {
+                        v: vertices,
+                        i: indices,
+                    } = this.vertices[this.states.active_vert_slot];
+
+                    const v_idx = this.states.v_index;
+
+                    let vb_idx = this.states.v_index * VTX_COMP;
+                    let ib_idx = this.states.i_index;
+
+                    // vertex
+                    const wt = p_item.final_transform;
+                    const a = wt.a;
+                    const b = wt.b;
+                    const c = wt.c;
+                    const d = wt.d;
+                    const tx = wt.tx;
+                    const ty = wt.ty;
+
+                    const points = polygon.points;
+                    const colors = polygon.colors;
+                    const s_color = (colors.length === 4);
+                    const s_color_num = s_color ? color.set(colors[0], colors[1], colors[2], colors[3]).multiply(p_item.final_modulate).as_rgba8() : 0;
+                    const uvs = polygon.uvs;
+                    const p_indices = polygon.indices;
+                    const flags = color.set(tex ? 0 : 1, 0, 0, 0).as_rgba8();
+
+                    for (let i = 0, len = vert_count; i < len; i++) {
+                        // position
+                        vertices[vb_idx + VTX_COMP * i + 0] = (a * points[i*2]) + (c * points[i*2+1]) + tx;
+                        vertices[vb_idx + VTX_COMP * i + 1] = (d * points[i*2+1]) + (b * points[i*2]) + ty;
+                        // uv
+                        // TODO: support uv calculation from atlas textures
+                        if (uvs && uvs.length) {
+                            vertices[vb_idx + VTX_COMP * i + 2] = uvs[i*2];
+                            vertices[vb_idx + VTX_COMP * i + 3] = uvs[i*2+1];
+                        }
+                        // color
+                        vertices[vb_idx + VTX_COMP * i + 4] = s_color ? s_color_num : color.set(color[i*4], color[i*4+1], color[i*4+2], color[i*4+3]).multiply(p_item.final_modulate).as_rgba8();
+                        // flags
+                        vertices[vb_idx + VTX_COMP * i + 5] = flags;
+                    }
+
+                    // index
+                    for (let i = 0; i < p_indices.length; i++) {
+                        indices[ib_idx++] = v_idx + p_indices[i];
+                    }
+
+                    this.states.v_index += vert_count;
+                    this.states.i_index += indi_count;
                 } break;
             }
         }
