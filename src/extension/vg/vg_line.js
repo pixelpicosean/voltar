@@ -30,6 +30,13 @@ export class VGLine extends v.Node2D {
     /* public */
 
     /**
+     * @param {v.Vector2Like} vec
+     */
+    set_start(vec) {
+        this.start.copy(vec);
+        this.update();
+    }
+    /**
      * @param {number} x
      * @param {number} y
      */
@@ -38,11 +45,25 @@ export class VGLine extends v.Node2D {
         this.update();
     }
     /**
+     * @param {v.Vector2Like} vec
+     */
+    set_end(vec) {
+        this.end.copy(vec);
+        this.update();
+    }
+    /**
      * @param {number} x
      * @param {number} y
      */
     set_end_n(x, y) {
         this.end.set(x, y);
+        this.update();
+    }
+    /**
+     * @param {v.ColorLike} color
+     */
+    set_color(color) {
+        this.color.copy(color);
         this.update();
     }
     /**
@@ -80,8 +101,6 @@ export class VGLine extends v.Node2D {
         if (data.color !== undefined) this.set_color_n(data.color.r, data.color.g, data.color.b, data.color.a);
         if (data.width !== undefined) this.set_width(data.width);
         if (data.line_cap !== undefined) this.set_line_cap(data.line_cap);
-
-        console.log(this)
 
         return this;
     }

@@ -13,9 +13,15 @@ _global_script_classes=[ {
 "class": "VGLine",
 "language": "GDScript",
 "path": "res://scene/vg/vg_line.gd"
+}, {
+"base": "Node2D",
+"class": "VGRect",
+"language": "GDScript",
+"path": "res://scene/vg/vg_rect.gd"
 } ]
 _global_script_class_icons={
-"VGLine": ""
+"VGLine": "",
+"VGRect": ""
 }
 
 [application]
