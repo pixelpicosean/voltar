@@ -2,9 +2,11 @@ import { node_class_map } from "engine/registry";
 import { GDCLASS } from "engine/core/v_object";
 import { MessageQueue } from "engine/core/message_queue";
 import { SelfList } from "engine/core/self_list";
-import { Color, ColorLike } from "engine/core/color";
+import { Vector2Like } from "engine/core/math/vector2";
+import { PoolVector2Array } from "engine/core/math/pool_vector2_array";
 import { Transform2D } from "engine/core/math/transform_2d";
 import { Rect2 } from "engine/core/math/rect2";
+import { Color, ColorLike } from "engine/core/color";
 
 import { VSG } from "engine/servers/visual/visual_server_globals";
 
@@ -17,7 +19,6 @@ import {
     NOTIFICATION_MOVED_IN_PARENT,
     NOTIFICATION_EXIT_TREE,
 } from "../main/node";
-import { Vector2Like } from "engine/core/math/vector2";
 
 
 export const NOTIFICATION_TRANSFORM_CHANGED = 2000;
@@ -221,6 +222,19 @@ export class CanvasItem extends Node {
      */
     draw_texture_rect_region(p_texture, p_rect, p_src_rect, p_modulate = white, p_transpose = false) {
         p_texture.draw_rect_region(this.canvas_item, p_rect, p_src_rect, p_modulate, p_transpose);
+    }
+
+    /**
+     * @param {PoolVector2Array | number[]} p_points
+     * @param {Color} p_color
+     * @param {PoolVector2Array | number[]} [p_uvs]
+     * @param {ImageTexture} [p_texture]
+     * @param {number[]} [p_indices]
+     */
+    draw_colored_polygon(p_points, p_color, p_uvs = null, p_texture = null, p_indices) {
+        const points = Array.isArray(p_points) ? p_points : p_points.data;
+        const uvs = p_uvs ? Array.isArray(p_uvs) ? p_uvs : p_uvs.data : null;
+        VSG.canvas.canvas_item_add_polygon(this.canvas_item, points, [p_color.r, p_color.g, p_color.b, p_color.a], uvs, p_texture, p_indices);
     }
 
     get_canvas_layer() {

@@ -24,12 +24,13 @@ import {
     CANVAS_RECT_FLIP_V,
     CANVAS_RECT_TRANSPOSE,
     NINE_PATCH_STRETCH,
+    TYPE_CUSTOM,
     Command,
     CommandRect,
     CommandNinePatch,
     CommandCircle,
     CommandMultiMesh,
-    TYPE_CUSTOM,
+    CommandPolygon,
 } from './commands';
 
 
@@ -566,7 +567,32 @@ export class VisualServerCanvas {
         p_item.commands.push(style);
     }
     canvas_item_add_primitive() { }
-    canvas_item_add_polygon() { }
+    /**
+     * Unlike same method of Godot, we accept indices array as optional parameter,
+     * we will not triangulate if it is provided (could be faster).
+     * @param {Item} p_item
+     * @param {number[]} p_points [x, y]
+     * @param {number[]} p_colors [r, g, b, a]
+     * @param {number[]} [p_uvs] [u, v]
+     * @param {ImageTexture} [p_texture]
+     * @param {number[]} [p_indices]
+     */
+    canvas_item_add_polygon(p_item, p_points, p_colors, p_uvs, p_texture, p_indices) {
+        const polygon = CommandPolygon.instance();
+        polygon.texture = p_texture;
+        polygon.points = p_points.slice();
+        polygon.colors = p_colors.slice();
+        if (p_uvs) polygon.uvs = p_uvs.slice();
+        if (p_indices) {
+            polygon.indices = p_indices.slice();
+        } else {
+            // TODO: use earcut to triangulate the polygon
+        }
+
+        p_item.rect_dirty = true;
+
+        p_item.commands.push(polygon);
+    }
     canvas_item_add_triangle_array() { }
     canvas_item_add_mesh() { }
     /**

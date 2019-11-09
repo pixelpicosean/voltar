@@ -1,7 +1,6 @@
 import { Vector2 } from "engine/core/math/vector2";
 import { Rect2 } from "engine/core/math/rect2";
 import { Color } from "engine/core/color";
-import { Transform2D } from "engine/core/math/transform_2d";
 
 import { ImageTexture } from "engine/scene/resources/texture";
 
@@ -132,6 +131,34 @@ export class CommandCircle extends Command {
     }
 }
 create_pool(TYPE_CIRCLE, CommandCircle)
+
+export class CommandPolygon extends Command {
+    get type() { return TYPE_POLYGON }
+    static instance() { return new CommandPolygon() } // for TypeScript type checking
+
+    constructor() {
+        super();
+
+        /** @type {number[]} */
+        this.points = [];
+        /** @type {number[]} */
+        this.uvs = [];
+        /** @type {number[]} */
+        this.colors = [];
+        /** @type {number[]} */
+        this.indices = [];
+    }
+    init() {
+        super.init();
+        this.points.length = 0;
+        this.uvs.length = 0;
+        this.colors.length = 0;
+        this.indices.length = 0;
+        return this;
+    }
+    get_vert_count() { return (this.points.length / 2) | 0 }
+}
+create_pool(TYPE_RECT, CommandRect)
 
 export class CommandMultiMesh extends Command {
     get type() { return TYPE_MULTIMESH }
