@@ -21,9 +21,11 @@ import {
     TYPE_RECT,
     TYPE_NINEPATCH,
     TYPE_POLYGON,
+    TYPE_CIRCLE,
     CommandRect,
     CommandNinePatch,
     CommandPolygon,
+    CommandCircle,
     CANVAS_RECT_REGION,
     CANVAS_RECT_TRANSPOSE,
     CANVAS_RECT_FLIP_H,
@@ -46,6 +48,8 @@ const VTX_STRIDE = VTX_COMP * 4;
 const VERTEX_BUFFER_LENGTH = 4096 * VTX_COMP;
 const INDEX_BUFFER_LENGTH = 4096;
 
+const MAX_STEPS_PER_CIRCLE = 64;
+const MIN_STEPS_PER_CIRCLE = 20;
 
 const NinePatchIndices = [
     0, 1, 5,
@@ -781,6 +785,62 @@ export class RasterizerCanvas extends VObject {
 
                     this.states.v_index += vert_count;
                     this.states.i_index += indi_count;
+                } break;
+                case TYPE_CIRCLE: {
+                    const circle = /** @type {CommandCircle} */(cmd);
+                    const radius = circle.radius;
+                    const tex = circle.texture;
+
+                    const wt = p_item.final_transform;
+                    const a = wt.a;
+                    const b = wt.b;
+                    const c = wt.c;
+                    const d = wt.d;
+                    const tx = wt.tx;
+                    const ty = wt.ty;
+
+                    const scaled_radius = Math.max(Math.sqrt(a * a + b * b), Math.sqrt(c * c + b * b)) * radius;
+
+                    const steps = Math.max(MIN_STEPS_PER_CIRCLE, scaled_radius * 5 / (200 + scaled_radius * 5) * MAX_STEPS_PER_CIRCLE) | 0;
+                    const angle_per_step = Math.PI * 2 / steps;
+
+                    this.check_draw_group_state(steps, (steps - 2) * 3, tex);
+
+                    const {
+                        v: vertices,
+                        i: indices,
+                    } = this.vertices[this.states.active_vert_slot];
+
+                    const v_idx = this.states.v_index;
+
+                    let vb_idx = this.states.v_index * VTX_COMP;
+                    let ib_idx = this.states.i_index;
+
+                    // vertex
+                    const x0 = circle.pos.x;
+                    const y0 = circle.pos.y;
+
+                    const color_num = color.copy(circle.color).multiply(p_item.final_modulate).as_rgba8();
+                    const flags = color.set(tex ? 0 : 1, 0, 0, 0).as_rgba8();
+
+                    for (let i = 0; i < steps; i++) {
+                        const x = Math.cos(angle_per_step * i) * radius + x0;
+                        const y = Math.sin(angle_per_step * i) * radius + y0;
+                        vertices[vb_idx + VTX_COMP * i + 0] = (a * x) + (c * y) + tx;
+                        vertices[vb_idx + VTX_COMP * i + 1] = (d * y) + (b * x) + ty;
+                        vertices[vb_idx + VTX_COMP * i + 4] = color_num;
+                        vertices[vb_idx + VTX_COMP * i + 5] = flags;
+                    }
+
+                    // index
+                    for (let i = 0; i < steps - 2; i++) {
+                        indices[ib_idx + i * 3] = v_idx + 0;
+                        indices[ib_idx + i * 3 + 1] = v_idx + i + 1;
+                        indices[ib_idx + i * 3 + 2] = v_idx + i + 2;
+                    }
+
+                    this.states.v_index += steps;
+                    this.states.i_index += (steps - 2) * 3;
                 } break;
             }
         }

@@ -455,7 +455,7 @@ export class VisualServerCanvas {
     }
     /**
      * @param {Item} p_item
-     * @param {Vector2} p_pos
+     * @param {Vector2Like} p_pos
      * @param {number} p_radius
      * @param {ColorLike} p_color
      */
@@ -464,6 +464,7 @@ export class VisualServerCanvas {
         circle.color.copy(p_color);
         circle.pos.copy(p_pos);
         circle.radius = p_radius;
+        p_item.rect_dirty = true;
 
         p_item.commands.push(circle);
     }

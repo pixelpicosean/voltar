@@ -194,6 +194,15 @@ export class CanvasItem extends Node {
     }
 
     /**
+     * @param {Vector2Like} p_pos
+     * @param {number} p_radius
+     * @param {ColorLike} p_color
+     */
+    draw_circle(p_pos, p_radius, p_color) {
+        VSG.canvas.canvas_item_add_circle(this.canvas_item, p_pos, p_radius, p_color);
+    }
+
+    /**
      * @param {ImageTexture} p_texture
      * @param {Vector2Like} p_pos
      * @param {ColorLike} [p_modulate=white]
