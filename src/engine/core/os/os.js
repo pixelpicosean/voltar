@@ -128,7 +128,7 @@ export class OS {
         // }
         const options = {
             alpha: false,
-            antialias: false,
+            antialias: true,
             depth: true,
             stencil: true,
             premultipliedAlpha: false,
@@ -302,6 +302,8 @@ export class OS {
             if (this.video_mode.resizable) {
                 this.canvas.width = window.innerWidth;
                 this.canvas.height = window.innerHeight;
+                this.canvas.style.width = `${window.innerWidth}px`;
+                this.canvas.style.height = `${window.innerHeight}px`;
             } else {
                 // adjust the canvas style, to fit the window
                 const window_size = Vector2.new(window.innerWidth, window.innerHeight);
