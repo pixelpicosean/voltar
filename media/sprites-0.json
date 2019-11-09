@@ -2,7 +2,7 @@
 
 "blue_button06":
 {
-	"frame": {"x":77,"y":1,"w":49,"h":49},
+	"frame": {"x":515,"y":67,"w":49,"h":49},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":49,"h":49},
@@ -10,7 +10,7 @@
 },
 "drop":
 {
-	"frame": {"x":67,"y":1,"w":8,"h":8},
+	"frame": {"x":525,"y":1,"w":8,"h":8},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":8,"h":8},
@@ -18,16 +18,16 @@
 },
 "icon":
 {
-	"frame": {"x":1,"y":52,"w":466,"h":440},
+	"frame": {"x":1,"y":1,"w":512,"h":512},
 	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":23,"y":37,"w":466,"h":440},
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":512,"h":512},
 	"sourceSize": {"w":512,"h":512}
 },
 "rain":
 {
-	"frame": {"x":1,"y":1,"w":8,"h":64},
-	"rotated": true,
+	"frame": {"x":515,"y":1,"w":8,"h":64},
+	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":8,"h":64},
 	"sourceSize": {"w":8,"h":64}
@@ -37,8 +37,8 @@
 	"version": "1.0",
 	"image": "sprites-0.png",
 	"format": "RGBA8888",
-	"size": {"w":468,"h":493},
+	"size": {"w":565,"h":514},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:86a891aa38dcae84bfb8fafc66f5dd8c:6d689cf26e51509d7d373eae0540946c:7921bf998741302c2028590beb4e1a86$"
+	"smartupdate": "$TexturePacker:SmartUpdate:76656dbd2dcea09f8bdd3caf47efa969:6d689cf26e51509d7d373eae0540946c:7921bf998741302c2028590beb4e1a86$"
 }
 }
