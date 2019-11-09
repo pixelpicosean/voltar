@@ -55,4 +55,4 @@ module.exports = (data) => {
     return anim;
 };
 
-module.exports.is_tres = () => true;
+module.exports.is_tres = true;

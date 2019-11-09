@@ -4,4 +4,4 @@ module.exports = (data) => {
     return Node2D(data);
 };
 
-module.exports.is_tres = () => true;
+module.exports.is_tres = true;

@@ -10,4 +10,4 @@ module.exports = (data) => {
     };
 };
 
-module.exports.is_tres = () => true;
+module.exports.is_tres = true;

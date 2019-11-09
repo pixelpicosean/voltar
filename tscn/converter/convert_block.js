@@ -16,6 +16,8 @@ const resource = require('./resource');
  * @returns {NodeBlock}
  */
 module.exports.convert_block = (block) => {
+    if (!block.key) return undefined;
+
     switch (block.key) {
         case 'gd_scene': {
             return block;

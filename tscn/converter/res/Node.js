@@ -25,4 +25,4 @@ module.exports = (data) => {
     return node;
 };
 
-module.exports.is_tres = () => true;
+module.exports.is_tres = true;

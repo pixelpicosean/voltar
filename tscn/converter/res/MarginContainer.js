@@ -16,4 +16,4 @@ module.exports = (data) => {
     return res;
 };
 
-module.exports.is_tres = () => true;
+module.exports.is_tres = true;

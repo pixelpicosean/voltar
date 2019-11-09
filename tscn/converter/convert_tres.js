@@ -7,7 +7,9 @@ const { normalize_resource_object } = require('./resource_normalizer');
  * @param {{ key: string, attr: any, prop: any }[]} blocks
  */
 module.exports.convert_tres = (blocks) => {
-    const sections = blocks.map(convert_block)
+    const sections = blocks
+        .map(convert_block)
+        .filter(a => !!a) // remove all striped sections
 
     const head = sections.shift();
 
