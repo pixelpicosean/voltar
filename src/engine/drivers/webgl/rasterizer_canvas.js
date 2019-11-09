@@ -303,7 +303,7 @@ export class RasterizerCanvas extends VObject {
         this.states.uniforms.time[0] = frame.time[0];
 
         // reset states
-        this.states.texture = null;
+        this.states.texture = this.storage.resources.white_tex.texture;
 
         this.current_draw_group = DrawGroup_new();
         this.draw_groups.push(this.current_draw_group);
