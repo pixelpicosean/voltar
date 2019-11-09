@@ -40,7 +40,7 @@ export function attach_script(url, scene) {
  * @typedef NodeData
  * @property {string} type
  * @property {string} name
- * @property {() => Node} [instance]
+ * @property {{ instance: () => Node }} [instance]
  * @property {string} [parent]
  *
  * @typedef PackedSceneData
@@ -89,7 +89,7 @@ export function assemble_scene(scn, data, url) {
             /** @type {Node} */
             let node = null;
             if (node_data.instance) {
-                node = node_data.instance();
+                node = node_data.instance.instance();
             } else {
                 node = new (node_class_map[node_data.type]);
             }
@@ -126,7 +126,7 @@ export function instanciate_scene(p_data, url) {
     if (node_data.type) {
         node = new (node_class_map[node_data.type]);
     } else {
-        node = node_data.instance();
+        node = node_data.instance.instance();
     }
 
     assemble_scene(node, p_data, url);
