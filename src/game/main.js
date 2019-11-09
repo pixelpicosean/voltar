@@ -4,6 +4,8 @@ import Settings from 'project.json';
 
 import { Preloader } from 'game/preloader';
 // import { MainScene } from 'game/demo/demo';
+/* load our own extensions */
+import 'extension/vg/vg_line';
 
 v.preload('media/sprites-0.json')
 
