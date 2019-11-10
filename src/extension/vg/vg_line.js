@@ -14,7 +14,6 @@ export class VGLine extends v.Node2D {
     constructor() {
         super();
 
-        this.start = new v.Vector2;
         this.end = new v.Vector2;
 
         this.color = new v.Color(1, 1, 1, 1);
@@ -29,21 +28,6 @@ export class VGLine extends v.Node2D {
 
     /* public */
 
-    /**
-     * @param {v.Vector2Like} vec
-     */
-    set_start(vec) {
-        this.start.copy(vec);
-        this.update();
-    }
-    /**
-     * @param {number} x
-     * @param {number} y
-     */
-    set_start_n(x, y) {
-        this.start.set(x, y);
-        this.update();
-    }
     /**
      * @param {v.Vector2Like} vec
      */
@@ -96,7 +80,6 @@ export class VGLine extends v.Node2D {
     _load_data(data) {
         super._load_data(data);
 
-        if (data.start !== undefined) this.set_start_n(data.start.x, data.start.y);
         if (data.end !== undefined) this.set_end_n(data.end.x, data.end.y);
         if (data.color !== undefined) this.set_color_n(data.color.r, data.color.g, data.color.b, data.color.a);
         if (data.width !== undefined) this.set_width(data.width);
@@ -105,13 +88,13 @@ export class VGLine extends v.Node2D {
         return this;
     }
     _draw() {
-        const angle = Math.atan2(this.end.y - this.start.y, this.end.x - this.start.x);
+        const angle = Math.atan2(this.end.y, this.end.x);
         const c = Math.cos(angle);
         const s = Math.sin(angle);
 
         const half_width = this.width * 0.5;
 
-        const p0 = this.start.clone();
+        const p0 = v.Vector2.new();
         const p1 = this.end.clone();
 
         if (this.line_cap === LineCap_SQUARE) {
@@ -139,7 +122,7 @@ export class VGLine extends v.Node2D {
             let start_angle = angle + Math.PI * 0.5;
             const vec = v.Vector2.new();
             for (let i = 0; i < steps + 1; i++) {
-                this.points.set(i, vec.set(half_width, 0).rotate(start_angle + angle_per_step * i).add(this.start));
+                this.points.set(i, vec.set(half_width, 0).rotate(start_angle + angle_per_step * i));
             }
             start_angle = angle - Math.PI * 0.5;
             for (let i = 0; i < steps + 1; i++) {

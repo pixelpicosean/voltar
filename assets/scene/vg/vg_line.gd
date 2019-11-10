@@ -5,7 +5,6 @@ class_name VGLine
 const MaxStepsPerHalfCircle := 32
 const MinStepsPerHalfCircle := 10
 
-export (Vector2) var start: Vector2 setget _set_start
 export (Vector2) var end: Vector2 setget _set_end
 
 export (Color) var color: Color = Color.white setget _set_color
@@ -22,13 +21,13 @@ var is_vg_node := true
 var vg_type := "Line"
 
 func _draw() -> void:
-	var angle := atan2(end.y - start.y, end.x - start.x)
+	var angle := atan2(end.y, end.x)
 	var c := cos(angle)
 	var s := sin(angle)
 
 	var half_width := width / 2
 
-	var p0 := start
+	var p0 := Vector2()
 	var p1 := end
 
 	if line_cap == LineCap.SQUARE:
@@ -48,17 +47,13 @@ func _draw() -> void:
 		points.resize(steps * 2 + 2 + 1)
 		var start_angle := angle + PI / 2
 		for i in steps + 1:
-			points[i] = Vector2(half_width, 0).rotated(start_angle + angle_per_step * i) + start
+			points[i] = Vector2(half_width, 0).rotated(start_angle + angle_per_step * i)
 		start_angle = angle - PI / 2
 		for i in steps + 1:
 			points[steps + 1 + i] = Vector2(half_width, 0).rotated(start_angle + angle_per_step * i) + end
 		points[steps * 2 + 2] = points[0]
 
 	draw_colored_polygon(points, color)
-
-func _set_start(val: Vector2) -> void:
-	start = val
-	update()
 
 func _set_end(val: Vector2) -> void:
 	end = val

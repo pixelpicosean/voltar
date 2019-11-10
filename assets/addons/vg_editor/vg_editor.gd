@@ -65,16 +65,6 @@ func forward_canvas_draw_over_viewport(overlay: Control) -> void:
 			var position: Vector2
 			var hit_area: Rect2
 
-			position = transform.xform(node.start)
-			hit_area = Rect2(position - tex_size / 2, tex_size)
-			overlay.draw_texture(anchor_icon, hit_area.position)
-			handles.append({
-				node = node,
-				position = position,
-				hit_area = hit_area,
-				anchor = "start",
-			})
-
 			position = transform.xform(node.end)
 			hit_area = Rect2(position - tex_size / 2, tex_size)
 			overlay.draw_texture(anchor_icon, hit_area.position)
@@ -85,8 +75,8 @@ func forward_canvas_draw_over_viewport(overlay: Control) -> void:
 				anchor = "end",
 			})
 
-			var width: Vector2 = node.end - node.start
-			position = transform.xform(width.rotated(-PI / 2).normalized() * node.width / 2 + node.start)
+			var width: Vector2 = node.end
+			position = transform.xform(width.rotated(-PI / 2).normalized() * node.width / 2)
 			hit_area = Rect2(position - tex_size / 2, tex_size)
 			overlay.draw_texture(anchor_icon, hit_area.position)
 			handles.append({
@@ -111,12 +101,10 @@ func drag_handle_to(position: Vector2) -> void:
 			node.radius = abs(position.x)
 		"Line":
 			match dragging_handle.anchor:
-				"start":
-					node.start = position
 				"end":
 					node.end = position
 				"width":
-					node.width = position.distance_to(node.start) * 2
+					node.width = position.length() * 2
 
 func forward_canvas_gui_input(event: InputEvent) -> bool:
 	if not node or not node.visible:
@@ -126,7 +114,6 @@ func forward_canvas_gui_input(event: InputEvent) -> bool:
 		var undo := get_undo_redo()
 		undo.commit_action()
 		undo.undo()
-		update_overlays()
 		dragging_handle = null
 		return true
 
@@ -150,7 +137,6 @@ func forward_canvas_gui_input(event: InputEvent) -> bool:
 				"Circle":
 					undo.add_do_property(dragging_handle.node, "radius", dragging_handle.node.radius)
 				"Line":
-					undo.add_do_property(dragging_handle.node, "start", dragging_handle.node.start)
 					undo.add_do_property(dragging_handle.node, "end", dragging_handle.node.end)
 					undo.add_do_property(dragging_handle.node, "width", dragging_handle.node.width)
 			undo.commit_action()
@@ -161,15 +147,16 @@ func forward_canvas_gui_input(event: InputEvent) -> bool:
 		for handle in handles:
 			if handle.hit_area.has_point(event.position):
 				var undo := get_undo_redo()
-				undo.create_action("Move anchor")
 				match handle.node.get("vg_type"):
 					"Rect":
+						undo.create_action("Edit VGRect")
 						undo.add_undo_property(handle.node, "width", handle.node.width)
 						undo.add_undo_property(handle.node, "height", handle.node.height)
 					"Circle":
+						undo.create_action("Edit VGCircle")
 						undo.add_undo_property(handle.node, "radius", handle.node.radius)
 					"Line":
-						undo.add_undo_property(handle.node, "start", handle.node.start)
+						undo.create_action("Edit VGLine")
 						undo.add_undo_property(handle.node, "end", handle.node.end)
 						undo.add_undo_property(handle.node, "width", handle.node.width)
 				dragging_handle = handle
