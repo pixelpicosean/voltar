@@ -12,8 +12,6 @@ export class VGRect extends v.Node2D {
         this.width = 32;
         this.height = 32;
 
-        this.centered = true;
-
         this.color = new v.Color(1, 1, 1, 1);
     }
 
@@ -31,13 +29,6 @@ export class VGRect extends v.Node2D {
      */
     set_height(height) {
         this.height = height;
-        this.update();
-    }
-    /**
-     * @param {boolean} centered
-     */
-    set_centered(centered) {
-        this.centered = centered;
         this.update();
     }
     /**
@@ -70,11 +61,7 @@ export class VGRect extends v.Node2D {
         return this;
     }
     _draw() {
-        if (this.centered) {
-            this.draw_rect(rect.set(-this.width * 0.5, -this.height * 0.5, this.width, this.height), this.color, true);
-        } else {
-            this.draw_rect(rect.set(0, 0, this.width, this.height), this.color, true);
-        }
+        this.draw_rect(rect.set(-this.width * 0.5, -this.height * 0.5, this.width, this.height), this.color, true);
     }
 }
 v.GDCLASS(VGRect, v.Node2D)

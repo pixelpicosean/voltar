@@ -18,6 +18,8 @@ export (LineCap) var line_cap := LineCap.BUTT setget _set_line_cap
 
 var points: PoolVector2Array
 
+var is_vg_node := true
+var vg_type := "Line"
 
 func _draw() -> void:
 	var angle := atan2(end.y - start.y, end.x - start.x)

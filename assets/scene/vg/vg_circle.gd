@@ -11,6 +11,9 @@ export (Color) var color := Color.white setget _set_color
 
 var points: PoolVector2Array
 
+var is_vg_node := true
+var vg_type := "Circle"
+
 func _draw() -> void:
 	var steps: int = max(MinStepsPerCircle, radius * 5 / (200 + radius * 5) * MaxStepsPerCircle)
 	var angle_per_step := PI * 2 / steps

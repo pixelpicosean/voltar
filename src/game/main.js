@@ -5,6 +5,7 @@ import Settings from 'project.json';
 /* load our own extensions */
 import 'extension/vg/vg_line';
 import 'extension/vg/vg_rect';
+import 'extension/vg/vg_circle';
 
 import { Preloader } from 'game/preloader';
 import { MainScene } from 'game/demo/demo';
