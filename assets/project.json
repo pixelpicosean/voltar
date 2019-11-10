@@ -5,6 +5,7 @@
     "display": {
         "width": 320,
         "height": 240,
+        "webgl2": false,
         "stretch_mode": "viewport",
         "stretch_aspect": "keep"
     },

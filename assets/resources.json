@@ -10,10 +10,34 @@
             }
         ]
     },
+    "res://scene/vg/vg_circle.tscn": {
+        "type": "PackedScene",
+        "ext": {},
+        "sub": {},
+        "nodes": [
+            {
+                "type": "Node2D",
+                "name": "VGCircle"
+            }
+        ]
+    },
+    "res://scene/vg/vg_rect.tscn": {
+        "type": "PackedScene",
+        "ext": {},
+        "sub": {},
+        "nodes": [
+            {
+                "type": "Node2D",
+                "name": "VGRect"
+            }
+        ]
+    },
     "res://scene/demo.tscn": {
         "type": "PackedScene",
         "ext": {
-            "1": "res://scene/vg/vg_line.tscn"
+            "1": "res://scene/vg/vg_rect.tscn",
+            "2": "res://scene/vg/vg_circle.tscn",
+            "3": "res://scene/vg/vg_line.tscn"
         },
         "sub": {},
         "nodes": [
@@ -22,25 +46,58 @@
                 "name": "demo"
             },
             {
+                "name": "VGRect",
+                "parent": ".",
+                "position": {
+                    "x": 34.6408,
+                    "y": 31.3106
+                },
+                "width": 45.1123,
+                "height": 41.0705,
+                "color": {
+                    "r": 1,
+                    "g": 1,
+                    "b": 1,
+                    "a": 1
+                },
+                "instance": "@ext#1"
+            },
+            {
+                "name": "VGCircle",
+                "parent": ".",
+                "position": {
+                    "x": 101.96,
+                    "y": 30.0126
+                },
+                "radius": 25.5676,
+                "color": {
+                    "r": 1,
+                    "g": 1,
+                    "b": 1,
+                    "a": 1
+                },
+                "instance": "@ext#2"
+            },
+            {
                 "name": "VGLine",
                 "parent": ".",
                 "position": {
-                    "x": 34.1576,
-                    "y": 83.6414
+                    "x": 36.4882,
+                    "y": 90.4481
                 },
                 "end": {
-                    "x": 120,
-                    "y": 120
+                    "x": 136.172,
+                    "y": 1.80776
                 },
                 "color": {
-                    "r": 0.411765,
-                    "g": 0.639216,
-                    "b": 0.560784,
+                    "r": 1,
+                    "g": 1,
+                    "b": 1,
                     "a": 1
                 },
-                "width": 60,
+                "width": 49.0453,
                 "line_cap": 1,
-                "instance": "@ext#1"
+                "instance": "@ext#3"
             }
         ]
     }

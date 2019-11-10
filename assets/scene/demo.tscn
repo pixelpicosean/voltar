@@ -1,3 +1,25 @@
-[gd_scene format=2]
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://scene/vg/vg_rect.tscn" type="PackedScene" id=1]
+[ext_resource path="res://scene/vg/vg_circle.tscn" type="PackedScene" id=2]
+[ext_resource path="res://scene/vg/vg_line.tscn" type="PackedScene" id=3]
 
 [node name="demo" type="Node2D"]
+
+[node name="VGRect" parent="." instance=ExtResource( 1 )]
+position = Vector2( 34.6408, 31.3106 )
+width = 45.1123
+height = 41.0705
+color = Color( 1, 1, 1, 1 )
+
+[node name="VGCircle" parent="." instance=ExtResource( 2 )]
+position = Vector2( 101.96, 30.0126 )
+radius = 25.5676
+color = Color( 1, 1, 1, 1 )
+
+[node name="VGLine" parent="." instance=ExtResource( 3 )]
+position = Vector2( 36.4882, 90.4481 )
+end = Vector2( 136.172, 1.80776 )
+color = Color( 1, 1, 1, 1 )
+width = 49.0453
+line_cap = 1

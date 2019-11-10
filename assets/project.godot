@@ -43,6 +43,10 @@ window/size/resizable=false
 window/stretch/mode="viewport"
 window/stretch/aspect="keep"
 
+[editor_plugins]
+
+enabled=PoolStringArray( "vg_editor" )
+
 [importer_defaults]
 
 texture={
