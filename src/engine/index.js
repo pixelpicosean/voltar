@@ -42,6 +42,7 @@ export * from 'engine/scene/resources/shape_2d';
 export * from 'engine/scene/resources/segment_shape_2d';
 export * from 'engine/scene/resources/circle_shape_2d';
 export * from 'engine/scene/resources/rectangle_shape_2d';
+export * from 'engine/scene/resources/capsule_shape_2d';
 export * from 'engine/scene/resources/convex_polygon_shape_2d';
 export * from 'engine/scene/resources/physics_material';
 export * from 'engine/scene/resources/space_2d';

@@ -7,6 +7,8 @@ import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server";
 import { Shape2D } from "./shape_2d";
 
 export class RectangleShape2D extends Shape2D {
+    get type() { return 0 }
+
     get extents() { return this._extents }
     set extents(value) { this.set_extents_n(value.x, value.y) }
 

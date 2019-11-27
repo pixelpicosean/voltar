@@ -7,6 +7,8 @@ import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server";
 
 
 export class Shape2D {
+    get type() { return -1 }
+
     get custom_solver_bias() {
         return this.custom_bias;
     }

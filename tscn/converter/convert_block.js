@@ -10,6 +10,8 @@ const resource = require('./resource');
  * @property {any} [_attr]
  * @property {any} [_prop]
  * @property {string} [instance]
+ * @property {string} [type]
+ * @property {boolean} [extra_process]
  */
 
 /**
@@ -39,6 +41,9 @@ module.exports.convert_block = (block) => {
         case 'resource': {
             return block;
         };
+        case 'extra_process': {
+            return block;
+        } break;
         default: {
             throw `Block with key "${block.key}" is not supported!`;
         };

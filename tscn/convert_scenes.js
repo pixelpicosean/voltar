@@ -296,7 +296,7 @@ const { normalize_resource_object } = require('./converter/resource_normalizer')
 module.exports.convert_scenes = (/** @type {string} */scene_root_url_p) => {
     const scene_root_url = path.normalize(scene_root_url_p);
 
-    /** @type {Object<string, { key: string, attr: any, prop: any }[]>} */
+    /** @type {Object<string, { key: string, attr: any, prop: any, extra_process?: boolean }[]>} */
     const tres_map = {};
 
     walk.walkSync(scene_root_url, {
@@ -321,6 +321,7 @@ module.exports.convert_scenes = (/** @type {string} */scene_root_url_p) => {
 
         // find all the dependent tres (ext_resource)
         const ext = tres.filter((res) => res.key === 'ext_resource')
+            .filter((res) => !res.extra_process)
 
         // build our dependence map
         ext.forEach((res) => {

@@ -39,6 +39,9 @@ module.exports.load_tres = (root, filename, tres_map) => {
         const res_converter = require(`./res/${ext.attr.type}`);
         if (res_converter.is_tres) {
             this.load_tres(root, ext.attr.path, tres_map);
+        } else if (res_converter.extra_process) {
+            Object.assign(ext, res_converter.extra_process(ext));
+            ext.extra_process = true;
         } else if (res_converter.ignore) {
             ext.attr = null;
             ext.key = null;

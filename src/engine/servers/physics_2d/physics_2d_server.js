@@ -103,7 +103,9 @@ export class Physics2DServer {
     rectangle_shape_create() {
         return new RectangleShape2DSW();
     }
-    capsule_shape_create() { }
+    capsule_shape_create() {
+        return new Shape2DSW;
+    }
     convex_polygon_shape_create() {
         return new ConvexPolygonShape2DSW();
     }
