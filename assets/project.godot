@@ -9,25 +9,13 @@
 config_version=4
 
 _global_script_classes=[ {
-"base": "Node2D",
-"class": "VGCircle",
+"base": "CollisionShape2D",
+"class": "VectorGraphic",
 "language": "GDScript",
-"path": "res://scene/vg/vg_circle.gd"
-}, {
-"base": "Node2D",
-"class": "VGLine",
-"language": "GDScript",
-"path": "res://scene/vg/vg_line.gd"
-}, {
-"base": "Node2D",
-"class": "VGRect",
-"language": "GDScript",
-"path": "res://scene/vg/vg_rect.gd"
+"path": "res://extension/2d/vector_graphic.gd"
 } ]
 _global_script_class_icons={
-"VGCircle": "",
-"VGLine": "",
-"VGRect": ""
+"VectorGraphic": ""
 }
 
 [application]
@@ -45,7 +33,7 @@ window/stretch/aspect="keep"
 
 [editor_plugins]
 
-enabled=PoolStringArray( "vg_editor" )
+enabled=PoolStringArray(  )
 
 [importer_defaults]
 

@@ -1,103 +1,39 @@
 {
-    "res://scene/vg/vg_line.tscn": {
-        "type": "PackedScene",
-        "ext": {},
-        "sub": {},
-        "nodes": [
-            {
-                "type": "Node2D",
-                "name": "VGLine"
-            }
-        ]
-    },
-    "res://scene/vg/vg_circle.tscn": {
-        "type": "PackedScene",
-        "ext": {},
-        "sub": {},
-        "nodes": [
-            {
-                "type": "Node2D",
-                "name": "VGCircle"
-            }
-        ]
-    },
-    "res://scene/vg/vg_rect.tscn": {
-        "type": "PackedScene",
-        "ext": {},
-        "sub": {},
-        "nodes": [
-            {
-                "type": "Node2D",
-                "name": "VGRect"
-            }
-        ]
-    },
     "res://scene/demo.tscn": {
         "type": "PackedScene",
-        "ext": {
-            "1": "res://scene/vg/vg_rect.tscn",
-            "2": "res://scene/vg/vg_circle.tscn",
-            "3": "res://scene/vg/vg_line.tscn"
+        "ext": {},
+        "sub": {
+            "1": {
+                "type": "CapsuleShape2D",
+                "radius": 31.9656,
+                "height": 76.9942
+            }
         },
-        "sub": {},
         "nodes": [
             {
                 "type": "Node2D",
                 "name": "demo"
             },
             {
-                "name": "VGRect",
-                "parent": ".",
-                "position": {
-                    "x": 34.6408,
-                    "y": 31.3106
-                },
-                "width": 45.1123,
-                "height": 41.0705,
-                "color": {
-                    "r": 1,
-                    "g": 1,
-                    "b": 1,
-                    "a": 1
-                },
-                "instance": "@ext#1"
+                "type": "Node2D",
+                "name": "ground",
+                "parent": "."
             },
             {
-                "name": "VGCircle",
-                "parent": ".",
+                "type": "VectorGraphic",
+                "name": "VectorGraphic",
+                "parent": "ground",
                 "position": {
-                    "x": 101.96,
-                    "y": 30.0126
+                    "x": 160.57,
+                    "y": 119.371
                 },
-                "radius": 25.5676,
+                "shape": "@sub#1",
                 "color": {
-                    "r": 1,
-                    "g": 1,
-                    "b": 1,
+                    "r": 0.160784,
+                    "g": 0.870588,
+                    "b": 0.337255,
                     "a": 1
-                },
-                "instance": "@ext#2"
-            },
-            {
-                "name": "VGLine",
-                "parent": ".",
-                "position": {
-                    "x": 36.4882,
-                    "y": 90.4481
-                },
-                "end": {
-                    "x": 136.172,
-                    "y": 1.80776
-                },
-                "color": {
-                    "r": 1,
-                    "g": 1,
-                    "b": 1,
-                    "a": 1
-                },
-                "width": 49.0453,
-                "line_cap": 1,
-                "instance": "@ext#3"
+                }
             }
         ]
     }

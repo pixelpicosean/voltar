@@ -388,9 +388,6 @@ export class RasterizerCanvas extends VObject {
         this.states.active_buffer_slot = 0;
         this.states.active_vert_slot = 0;
 
-        // start from group 0
-        this.states.draw_group = 0;
-
         // reset vertices and indices offset/index
         this.states.v_index = 0;
         this.states.i_index = 0;
