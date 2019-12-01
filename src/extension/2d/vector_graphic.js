@@ -75,7 +75,7 @@ export class VectorGraphic extends v.Node2D {
 
         switch (shape.type) {
             case RECT: {
-                this.draw_rect(rect.set(-shape.extents.x, -shape.extents.y, shape.extents.x, shape.extents.y), this.color);
+                this.draw_rect(rect.set(-shape.extents.x, -shape.extents.y, shape.extents.x * 2, shape.extents.y * 2), this.color);
             } break;
             case CIRCLE: {
                 this.draw_circle(v.Vector2.ZERO, shape.radius, this.color);
