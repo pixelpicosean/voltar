@@ -46,7 +46,7 @@ module.exports.convert_tres = (blocks) => {
                 sec.id = undefined;
             } else if (sec.key === 'node') {
                 if (sec._prop && sec._prop.script) {
-                    const ext_idx = get_function_params(sec._prop.script);
+                    const ext_idx = get_function_params(sec._prop.script)[0];
                     const script_pack = ext[ext_idx];
                     if (script_pack.type === 'ReplaceNode') {
                         sec.key = 'node';
@@ -72,7 +72,6 @@ module.exports.convert_tres = (blocks) => {
 
                         sec = parsed_sec;
                     }
-                    ext[ext_idx] = undefined;
                 }
 
                 // we don't normalize instance nodes now
@@ -83,6 +82,13 @@ module.exports.convert_tres = (blocks) => {
                     normalize_resource_object(sec);
                 }
                 nodes.push(sec);
+            }
+        }
+
+        // remove ext_resource marked as "extra_process"
+        for (const k in ext) {
+            if (ext[k].extra_process) {
+                ext[k] = undefined;
             }
         }
 
