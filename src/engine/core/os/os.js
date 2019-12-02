@@ -122,6 +122,13 @@ export class OS {
             canvas.height = this.video_mode.height;
         }
 
+        if (settings.display.antialias) {
+            canvas.style.imageRendering = 'auto';
+        } else {
+            canvas.style.imageRendering = 'crisp-edges';
+            canvas.style.imageRendering = 'pixelated';
+        }
+
         if (settings.display.webgl2) {
             this.video_driver_index = VIDEO_DRIVER_GLES3;
         } else {
