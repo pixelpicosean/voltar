@@ -517,9 +517,9 @@ export class RasterizerCanvas extends VObject {
                     indices[ib_idx++] = v_idx + 0;
                     indices[ib_idx++] = v_idx + 1;
                     indices[ib_idx++] = v_idx + 2;
-                    indices[ib_idx++] = v_idx + 0;
                     indices[ib_idx++] = v_idx + 2;
                     indices[ib_idx++] = v_idx + 3;
+                    indices[ib_idx++] = v_idx + 0;
 
                     this.states.v_index += 4;
                     this.states.i_index += 6;

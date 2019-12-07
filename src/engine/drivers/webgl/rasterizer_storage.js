@@ -1,3 +1,4 @@
+import { SelfList, List } from "engine/core/self_list";
 import { is_po2, nearest_po2 } from "engine/core/math/math_funcs";
 import { Color } from "engine/core/color";
 
@@ -130,6 +131,88 @@ export class Material_t {
     }
 }
 
+/**
+ * @typedef VertAttrib
+ * @property {boolean} enabled
+ * @property {number} index
+ * @property {number} type
+ * @property {number} size
+ * @property {boolean} normalized
+ * @property {number} stride
+ * @property {number} offset
+ *
+ * @typedef VertAttribDef
+ * @property {number} type
+ * @property {number} size
+ * @property {boolean} [normalized]
+ * @property {number} stride
+ * @property {number} offset
+ */
+
+class Surface_t {
+    constructor() {
+        /** @type {Material_t} */
+        this.material = null;
+
+        /** @type {VertAttrib[]} */
+        this.attribs = [];
+
+        /** @type {Mesh_t} */
+        this.mesh = null;
+
+        /** @type {WebGLBuffer} */
+        this.vertex_id = null;
+        /** @type {WebGLBuffer} */
+        this.index_id = null;
+
+        this.array_len = 0;
+        this.index_array_len = 0;
+
+        this.array_byte_size = 0;
+        this.index_array_byte_size = 0;
+
+        this.primitive = WebGLRenderingContext.TRIANGLES;
+
+        this.active = false;
+
+        /** @type {Float32Array} */
+        this.data = null;
+        /** @type {Uint16Array} */
+        this.index_data = null;
+    }
+}
+
+export class Mesh_t {
+    constructor() {
+        this.active = false;
+
+        /** @type {List<MultiMesh_t>} */
+        this.multimeshes = new List;
+
+        /** @type {Surface_t[]} */
+        this.surfaces = [];
+    }
+    update_multimeshes() { }
+}
+
+export class MultiMesh_t {
+    constructor() {
+        /** @type {Mesh_t} */
+        this.mesh = null;
+        this.size = 0;
+
+        /** @type {SelfList<MultiMesh_t>} */
+        this.update_list = new SelfList(this);
+        /** @type {SelfList<MultiMesh_t>} */
+        this.mesh_list = new SelfList(this);
+
+        /** @type {number[]} */
+        this.data = [];
+
+        this.visible_instances = 0;
+    }
+}
+
 export class RasterizerStorage {
     constructor() {
         /** @type {WebGLRenderingContext} */
@@ -144,6 +227,9 @@ export class RasterizerStorage {
             count: 0,
             delta: 0,
         };
+
+        /** @type {List<MultiMesh_t>} */
+        this.multimesh_update_list = new List;
 
         this.resources = {
             /** @type {ImageTexture} */
@@ -468,6 +554,114 @@ export class RasterizerStorage {
             for (let i = 0; i < mt.params[k].length; i++) {
                 mt.params[k][i] = param[k][i];
             }
+        }
+    }
+
+    /* Mesh API */
+
+    mesh_create() {
+        return new Mesh_t;
+    }
+    /**
+     * @param {Mesh_t} mesh
+     * @param {number} surf_index
+     */
+    mesh_remove_surface(mesh, surf_index) {
+        const gl = this.gl;
+
+        const surface = mesh.surfaces[surf_index];
+
+        if (surface.material) {
+            // TODO: this._material_remove_geometry(surface.material, surface);
+        }
+
+        gl.deleteBuffer(surface.vertex_id);
+        if (surface.index_id) {
+            gl.deleteBuffer(surface.index_id);
+        }
+
+        mesh.surfaces.splice(surf_index, 1);
+    }
+    /**
+     * @param {Mesh_t} mesh
+     */
+    mesh_clear(mesh) {
+        while (mesh.surfaces.length > 0) {
+            this.mesh_remove_surface(mesh, 0);
+        }
+    }
+    /**
+     * @param {Mesh_t} mesh
+     * @param {number} primitive
+     * @param {VertAttribDef[]} attribs
+     * @param {Float32Array} vertices
+     * @param {Uint16Array} [indices]
+     */
+    mesh_add_surface_from_data(mesh, primitive, attribs, vertices, indices) {
+        const gl = this.gl;
+
+        const surface = new Surface_t;
+        surface.active = true;
+        surface.data = vertices;
+        surface.array_len = vertices.length;
+        surface.array_byte_size = vertices.byteLength;
+        if (indices) {
+            surface.index_data = indices;
+            surface.index_array_len = indices.length;
+            surface.index_array_byte_size = indices.byteLength;
+        }
+        surface.primitive = primitive;
+        surface.mesh = mesh;
+        for (let i = 0; i < attribs.length; i++) {
+            const a = attribs[i];
+
+            surface.attribs[i] = {
+                enabled: true,
+                index: i,
+
+                type: a.type,
+                size: a.size,
+                normalized: a.normalized || false,
+                stride: a.stride,
+                offset: a.offset,
+            }
+        }
+
+        surface.vertex_id = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, surface.vertex_id);
+        gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+        if (indices) {
+            surface.index_id = gl.createBuffer();
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, surface.index_id);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+        }
+
+        mesh.surfaces.push(surface);
+    }
+
+    multimesh_create() {
+        return new MultiMesh_t;
+    }
+    /**
+     * @param {MultiMesh_t} multimesh
+     * @param {Mesh_t} mesh
+     */
+    multimesh_set_mesh(multimesh, mesh) {
+        if (multimesh.mesh) {
+            multimesh.mesh.multimeshes.remove(multimesh.mesh_list);
+        }
+
+        multimesh.mesh = mesh;
+
+        if (multimesh.mesh && mesh) {
+            mesh.multimeshes.add(multimesh.mesh_list);
+        }
+
+        if (!multimesh.update_list.in_list()) {
+            this.multimesh_update_list.add(multimesh.update_list);
         }
     }
 
