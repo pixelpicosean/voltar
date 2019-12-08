@@ -1,6 +1,8 @@
 import { remove_items } from 'engine/dep/index';
 import {
+    resource_map,
     scene_class_map,
+    node_class_map,
 } from 'engine/registry';
 import { List } from 'engine/core/self_list';
 import { VObject, GDCLASS } from 'engine/core/v_object';
@@ -34,6 +36,7 @@ import {
     NOTIFICATION_UNPAUSED,
 } from '../main/node';
 import { NOTIFICATION_TRANSFORM_CHANGED } from '../2d/canvas_item';
+import { assemble_scene } from '../assembler';
 
 
 export class SceneTreeTimer extends VObject {
@@ -86,6 +89,8 @@ export class Group {
         this.changed = false;
     }
 }
+
+let next_scene_path = '';
 
 /**
  * @typedef FoldedResource
@@ -575,7 +580,8 @@ export class SceneTree extends MainLoop {
 
         next_scene = scene_class_map[path];
         if (!next_scene) {
-            // next_scene = this.resource_map[path];
+            next_scene = resource_map[path];
+            next_scene_path = path;
         }
 
         this.change_scene_to(next_scene);
@@ -596,9 +602,9 @@ export class SceneTree extends MainLoop {
         }
         // Instance from pure scene data?
         else {
-            // new_scene = new (node_class_map[next_scene.type])();
-            // new_scene._load_data(next_scene);
-            // assemble_scene(new_scene, next_scene);
+            new_scene = new (node_class_map[next_scene.nodes[0].type]);
+            new_scene._load_data(next_scene);
+            assemble_scene(new_scene, next_scene, next_scene_path);
         }
         this.call_deferred('_change_scene', new_scene);
     }
