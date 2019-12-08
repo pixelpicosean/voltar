@@ -12,6 +12,7 @@ const resource = require('./resource');
  * @property {string} [instance]
  * @property {string} [type]
  * @property {boolean} [extra_process]
+ * @property {boolean} [contains_ext]
  */
 
 /**

@@ -41,6 +41,8 @@ module.exports.convert_tres = (blocks) => {
                     ext[sec.attr.id] = sec.attr.path;
                 }
             } else if (sec.key === 'sub_resource') {
+                normalize_resource_object(sec);
+
                 sub[sec.id] = sec;
                 sec.key = undefined;
                 sec.id = undefined;
