@@ -108,10 +108,14 @@ export class ValueTrack extends Track {
                 this.prop_type = PROP_TYPE_STRING;
             } break;
             case 'object': {
-                if (first_value.x !== undefined && first_value.y !== undefined) {
+                if (first_value.class === 'ImageTexture') {
+                    this.prop_type = PROP_TYPE_ANY;
+                } else if (first_value.x !== undefined && first_value.y !== undefined) {
                     this.prop_type = PROP_TYPE_VECTOR;
                 } else if (first_value.r !== undefined && first_value.g !== undefined && first_value.b !== undefined && first_value.a !== undefined) {
                     this.prop_type = PROP_TYPE_COLOR;
+                } else {
+                    this.prop_type = PROP_TYPE_ANY;
                 }
             } break;
             default: {
