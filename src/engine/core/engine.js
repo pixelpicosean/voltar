@@ -88,16 +88,7 @@ export class Engine {
                 if (key.startsWith(res_head)) {
                     // PackedScene, which has `ext` and `sub`
                     if (res.ext && res.sub) {
-                        // create instance of sub resources
-                        for (let id in res.sub) {
-                            const data = res.sub[id];
-                            const ctor = res_class_map[data.type];
-                            if (ctor) {
-                                res.sub[id] = (new ctor)._load_data(data);
-                            }
-                        }
-
-                        // normalize ext
+                        // create ext resource objects
                         for (let id in res.ext) {
                             const resource_filename = res.ext[id];
                             const resource = resource_map[resource_filename];
@@ -115,6 +106,17 @@ export class Engine {
                             // ok, it is just a normal one
                             else {
                                 res.ext[id] = resource;
+                            }
+                        }
+
+                        // create sub resource objects
+                        for (let id in res.sub) {
+                            const data = res.sub[id];
+                            normalize_resource_object(data, res.ext, res.sub);
+
+                            const ctor = res_class_map[data.type];
+                            if (ctor) {
+                                res.sub[id] = (new ctor)._load_data(data);
                             }
                         }
 
