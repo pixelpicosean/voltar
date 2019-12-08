@@ -1107,7 +1107,8 @@ export class Viewport extends Node {
      */
     _gui_add_root_control(p_control) {
         this.gui.roots_order_dirty = true;
-        return this.gui.roots.push(p_control);
+        this.gui.roots.push(p_control);
+        return p_control;
     }
 
     /**
