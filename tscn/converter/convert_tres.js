@@ -76,6 +76,16 @@ module.exports.convert_tres = (blocks) => {
                     }
                 }
 
+                // copy extra properties (may come from scripts)
+                if (sec._prop) {
+                    for (const k in sec._prop) {
+                        if (k === 'script') continue;
+                        if (sec[k] === undefined) {
+                            sec[k] = sec._prop[k];
+                        }
+                    }
+                }
+
                 // we don't normalize instance nodes now
                 // since we don't know their type yet
                 if (!sec.instance) {
