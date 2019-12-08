@@ -127,6 +127,9 @@ export const Main = {
         }
         this.last_ticks = timestamp;
 
+        // limit step to not larger than min update step
+        step = Math.min(step, this.global.application.min_update_step);
+
         const time_scale = Engine.get_singleton().time_scale;
         const scaled_step = step * time_scale;
 

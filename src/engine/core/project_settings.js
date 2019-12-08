@@ -17,6 +17,7 @@ import { KEYS } from "./os/keyboard";
  * @prop {string} [name]
  * @prop {{ instance: () => import('engine/scene/main/node').Node }} [main_scene]
  * @prop {boolean} [pause_on_blur]
+ * @prop {number} [min_update_step]
  */
 
 /**
@@ -80,6 +81,7 @@ const DefaultSettings = {
         name: 'Voltar',
         main_scene: undefined,
         pause_on_blur: false,
+        min_update_step: 1 / 10,
     },
     display: {
         view: 'game',
