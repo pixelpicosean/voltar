@@ -497,9 +497,10 @@ export class TileMap extends Node2D {
      * @param {boolean} [p_flip_x]
      * @param {boolean} [p_flip_y]
      * @param {boolean} [p_transpose]
-     * @param {Vector2} [p_autotile_coord]
+     * @param {number} [p_autotile_coord_x]
+     * @param {number} [p_autotile_coord_y]
      */
-    set_cell(p_x, p_y, p_tile, p_flip_x = false, p_flip_y = false, p_transpose = false, p_autotile_coord = Vector2.ZERO) {
+    set_cell(p_x, p_y, p_tile, p_flip_x = false, p_flip_y = false, p_transpose = false, p_autotile_coord_x = 0, p_autotile_coord_y = 0) {
         this.tile_map[p_x] = this.tile_map[p_x] || {};
 
         let E = this.tile_map[p_x][p_y];
@@ -545,9 +546,9 @@ export class TileMap extends Node2D {
                 &&
                 E.transpose === p_transpose
                 &&
-                E.autotile_coord_x === p_autotile_coord.x
+                E.autotile_coord_x === p_autotile_coord_x
                 &&
-                E.autotile_coord_y === p_autotile_coord.y
+                E.autotile_coord_y === p_autotile_coord_y
             ) {
                 return; // nothing changed
             }
@@ -557,8 +558,8 @@ export class TileMap extends Node2D {
         E.flip_h = p_flip_x;
         E.flip_v = p_flip_y;
         E.transpose = p_transpose;
-        E.autotile_coord_y = p_autotile_coord.x;
-        E.autotile_coord_y = p_autotile_coord.y;
+        E.autotile_coord_x = p_autotile_coord_x;
+        E.autotile_coord_y = p_autotile_coord_y;
 
         this._make_quadrant_dirty(q);
         this.used_size_cache_dirty = true;
@@ -676,12 +677,12 @@ export class TileMap extends Node2D {
                 const tile_ofs = tile.offset.clone();
 
                 const wofs = this.map_to_world(x, y);
-                const offset = wofs.clone().subtract(q.pos).add(tofs);
+                const offset = wofs.subtract(q.pos).add(tofs);
 
-                const z_index = tile.z_index;
+                let z_index = tile.z_index;
 
                 if (tile.tile_mode === AUTO_TILE || tile.tile_mode === ATLAS_TILE) {
-                    // TODO: autotile z_index
+                    z_index += tile.autotile_data.get_z_index(c.autotile_coord_x, c.autotile_coord_y);
                 }
 
                 /** @type {Item} */
@@ -702,10 +703,13 @@ export class TileMap extends Node2D {
                     canvas_item = prev_canvas_item;
                 }
 
-                const r = tile.region;
+                const r = tile.region.clone();
                 if (tile.tile_mode === AUTO_TILE || tile.tile_mode === ATLAS_TILE) {
-                    const spacing = tile;
-                    // TODO: autotile
+                    const spacing = tile.autotile_data.spacing;
+                    r.width = tile.autotile_data.size.x;
+                    r.height = tile.autotile_data.size.y;
+                    r.x += (r.width + spacing) * c.autotile_coord_x;
+                    r.y += (r.height + spacing) * c.autotile_coord_y;
                 }
 
                 const s = Vector2.new();
@@ -758,6 +762,7 @@ export class TileMap extends Node2D {
                 Vector2.free(tile_ofs);
                 Rect2.free(rect);
                 Vector2.free(wofs);
+                Rect2.free(r);
                 Vector2.free(s);
 
                 // add shapes
@@ -815,13 +820,18 @@ export class TileMap extends Node2D {
             view.setInt32(4, p_data[i + 1]);
             view.setInt32(8, p_data[i + 2]);
 
-            const y = view.getInt16(0);
-            const x = view.getInt16(2);
-            const t = view.getInt32(4);
+            const x = view.getUint16(2);
+            const y = view.getUint16(0);
 
-            // TODO: tile flags
+            let v = view.getUint32(4);
+            const flip_h = !!(v & (1 << 29));
+            const flip_v = !!(v & (1 << 30));
+            const transpose = !!(v & (1 << 31));
+            v &= (1 << 29) - 1;
+            const coord_x = view.getUint16(10);
+            const coord_y = view.getUint16(8);
 
-            this.set_cell(x, y, t);
+            this.set_cell(x, y, v, flip_h, flip_v, transpose, coord_x, coord_y);
         }
     }
     _get_tile_data() { }
