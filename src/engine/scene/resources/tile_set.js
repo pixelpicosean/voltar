@@ -76,7 +76,26 @@ class AutotileData {
         this.occluder_map = {};
         this.navpoly_map = {};
         this.priority_map = {};
+        /** @type {Object<string, number>} */
         this.z_index_map = {};
+    }
+    _load_data(data) {
+        if (data.bitmask_mode !== undefined) this.bitmask_mode = data.bitmask_mode;
+        if (data.tile_size !== undefined) this.size.copy(data.tile_size);
+        if (data.spacing !== undefined) this.spacing = data.spacing;
+        if (data.flags !== undefined) this.flags = data.flags;
+        if (data.occluder_map !== undefined) this.occluder_map = data.occluder_map;
+        if (data.navpoly_map !== undefined) this.navpoly_map = data.navpoly_map;
+        if (data.priority_map !== undefined) this.priority_map = data.priority_map;
+        if (data.z_index_map !== undefined) this.z_index_map = data.z_index_map;
+        return this;
+    }
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
+    get_z_index(x, y) {
+        return this.z_index_map[`${x}.${y}`] || 0;
     }
 }
 
@@ -99,27 +118,14 @@ class TileData {
         this.z_index = 0;
     }
     _load_data(data) {
-        if (data.texture !== undefined) {
-            this.texture = data.texture;
-        }
-        if (data.offset !== undefined) {
-            this.offset.copy(data.offset);
-        }
-        if (data.region !== undefined) {
-            this.region.copy(data.region);
-        }
-        if (data.shapes !== undefined) {
-            this.shapes_data = data.shapes.map(s_data => new ShapeData()._load_data(s_data));
-        }
-        if (data.tile_mode !== undefined) {
-            this.tile_mode = data.tile_mode;
-        }
-        if (data.modulate !== undefined) {
-            this.modulate.copy(data.modulate);
-        }
-        if (data.z_index !== undefined) {
-            this.z_index = data.z_index;
-        }
+        if (data.texture !== undefined) this.texture = data.texture;
+        if (data.offset !== undefined) this.offset.copy(data.offset);
+        if (data.region !== undefined) this.region.copy(data.region);
+        if (data.shapes !== undefined) this.shapes_data = data.shapes.map(s_data => new ShapeData()._load_data(s_data));
+        if (data.tile_mode !== undefined) this.tile_mode = data.tile_mode;
+        if (data.modulate !== undefined) this.modulate.copy(data.modulate);
+        if (data.autotile !== undefined) this.autotile_data._load_data(data.autotile);
+        if (data.z_index !== undefined) this.z_index = data.z_index;
         return this;
     }
 }
@@ -134,10 +140,12 @@ export class TileSet {
         this.tile_map = [];
     }
     _load_data(data) {
-        this.tile_map.length = data.resource.length;
-        for (let i = 0; i < this.tile_map.length; i++) {
-            if (!data.resource[i]) continue;
-            this.tile_map[i] = new TileData()._load_data(data.resource[i]);
+        if (data.resource.length) {
+            this.tile_map.length = data.resource.length;
+            for (let i = 0; i < this.tile_map.length; i++) {
+                if (!data.resource[i]) continue;
+                this.tile_map[i] = new TileData()._load_data(data.resource[i]);
+            }
         }
 
         return this;
