@@ -173,7 +173,7 @@ export class CollisionObject2D extends Node2D {
     /* public */
 
     /**
-     * @param {CollisionShape2D|CollisionPolygon2D} p_shape
+     * @param {any} p_shape
      */
     create_shape_owner(p_shape) {
         const sd = new ShapeData();
@@ -182,7 +182,7 @@ export class CollisionObject2D extends Node2D {
         return p_shape;
     }
     /**
-     * @param {CollisionShape2D|CollisionPolygon2D} p_owner
+     * @param {any} p_owner
      */
     remove_shape_owner(p_owner) {
         this.shape_owner_clear_shapes(p_owner);

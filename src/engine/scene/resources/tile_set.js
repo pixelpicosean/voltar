@@ -35,7 +35,7 @@ class ShapeData {
         }
         if (data.shape !== undefined) {
             if (data.shape.type === 'ConvexPolygonShape2D') {
-                this.shape = new ConvexPolygonShape2D();
+                this.shape = new ConvexPolygonShape2D;
                 /** @type {ConvexPolygonShape2D} */(this.shape).set_points_in_pool_vec2(data.shape.points);
             } else {
                 console.warn(`${data.shape.type} shape in TileSet is not supported yet!`);
@@ -72,29 +72,36 @@ class AutotileData {
         this.bitmask_mode = BITMASK_2X2;
         this.size = new Vector2(64, 64);
         this.spacing = 0;
-        this.flags = new Map();
-        this.occluder_map = new Map();
-        this.navpoly_map = new Map();
-        this.priority_map = new Map();
-        this.z_index_map = new Map();
+        this.flags = {};
+        this.occluder_map = {};
+        this.navpoly_map = {};
+        this.priority_map = {};
+        this.z_index_map = {};
     }
 }
 
 class TileData {
     constructor() {
-        this.offset = new Vector2();
-        this.region = new Rect2();
+        this.name = '';
+        /** @type {ImageTexture} */
+        this.texture = null;
+        this.offset = new Vector2;
+        this.region = new Rect2;
         /** @type {ShapeData[]} */
         this.shapes_data = [];
-        this.occluder_offset = new Vector2();
+        this.occluder_offset = new Vector2;
         this.occluder = null;
-        this.navigation_polygon_offset = new Vector2();
+        this.navigation_polygon_offset = new Vector2;
         this.navigation_polygon = null;
         this.tile_mode = SINGLE_TILE;
         this.modulate = new Color(1, 1, 1, 1);
-        this.autotile_data = new AutotileData();
+        this.autotile_data = new AutotileData;
+        this.z_index = 0;
     }
     _load_data(data) {
+        if (data.texture !== undefined) {
+            this.texture = data.texture;
+        }
         if (data.offset !== undefined) {
             this.offset.copy(data.offset);
         }
@@ -110,37 +117,28 @@ class TileData {
         if (data.modulate !== undefined) {
             this.modulate.copy(data.modulate);
         }
+        if (data.z_index !== undefined) {
+            this.z_index = data.z_index;
+        }
         return this;
     }
 }
 
-/** @type {Object<string, TileSet>} */
-const tile_set_map = {};
+export class TileSet {
+    get class() { return 'TileSet' }
 
-export default class TileSet {
-    /**
-     * @param {string} key
-     */
-    static with_key(key) {
-        return tile_set_map[key];
-    }
     constructor() {
         /**
          * @type {TileData[]}
          */
         this.tile_map = [];
-        /**
-         * @type {ImageTexture}
-         */
-        this.texture = null;
     }
     _load_data(data) {
-        this.tile_map.length = data.tile_map.length;
+        this.tile_map.length = data.resource.length;
         for (let i = 0; i < this.tile_map.length; i++) {
-            if (!data.tile_map[i]) continue;
-            this.tile_map[i] = new TileData()._load_data(data.tile_map[i]);
+            if (!data.resource[i]) continue;
+            this.tile_map[i] = new TileData()._load_data(data.resource[i]);
         }
-        this.texture = data.texture;
 
         return this;
     }

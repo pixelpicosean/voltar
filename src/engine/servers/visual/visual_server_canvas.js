@@ -97,6 +97,7 @@ export class Item {
     }
     free() {
         this.clear();
+        free_Item(this);
     }
 
     get_rect() {

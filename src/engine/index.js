@@ -7,7 +7,6 @@ export * from 'engine/dep/index';
 // Core
 // ------------------------------------------------------------------
 export * from 'engine/core/v_array';
-export * from 'engine/core/v_map';
 export * from 'engine/core/v_object';
 
 export * from 'engine/core/math/convex';
@@ -78,6 +77,7 @@ export * from 'engine/scene/2d/ray_cast_2d';
 
 export * from 'engine/scene/2d/camera_2d';
 export * from 'engine/scene/2d/visibility_notifier_2d';
+export * from 'engine/scene/2d/tile_map';
 export * from 'engine/scene/2d/parallax_background';
 export * from 'engine/scene/2d/parallax_layer';
 export * from 'engine/scene/2d/y_sort';

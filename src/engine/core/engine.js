@@ -75,19 +75,8 @@ export class Engine {
             const res_head = 'res://';
             for (const key in resource_map) {
                 const res = resource_map[key];
-                if (key.startsWith(res_head) && res.type) {
-                    const ctor = res_class_map[res.type];
-                    if (ctor) {
-                        resource_map[key] = (new ctor)._load_data(res);
-                    }
-                }
-            }
-
-            for (const key in resource_map) {
-                const res = resource_map[key];
                 if (key.startsWith(res_head)) {
-                    // PackedScene, which has `ext` and `sub`
-                    if (res.ext && res.sub) {
+                    if (res.ext) {
                         // create ext resource objects
                         for (let id in res.ext) {
                             const resource_filename = res.ext[id];
@@ -108,7 +97,8 @@ export class Engine {
                                 res.ext[id] = resource;
                             }
                         }
-
+                    }
+                    if (res.sub) {
                         // create sub resource objects
                         for (let id in res.sub) {
                             const data = res.sub[id];
@@ -119,10 +109,25 @@ export class Engine {
                                 res.sub[id] = (new ctor)._load_data(data);
                             }
                         }
-
-                        // now let's replace ext/sub references inside this resource with real instances
-                        normalize_resource_array(res.nodes, res.ext, res.sub);
                     }
+
+                    // process resource first
+                    if (res.type !== 'PackedScene') {
+                        normalize_resource_array(res.resource, res.ext || {}, res.sub || {});
+
+                        const ctor = res_class_map[res.type];
+                        if (ctor) {
+                            resource_map[key] = (new ctor)._load_data(res);
+                        }
+                    }
+                }
+            }
+
+            for (const key in resource_map) {
+                const res = resource_map[key];
+                if (key.startsWith(res_head) && res.type === 'PackedScene') {
+                    // now let's replace ext/sub references inside this resource with real instances
+                    normalize_resource_array(res.nodes, res.ext || {}, res.sub || {});
                 }
             }
 
