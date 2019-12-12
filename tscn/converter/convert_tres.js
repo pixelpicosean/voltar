@@ -2,7 +2,10 @@ const _ = require('lodash');
 
 const { convert_block } = require('./convert_block');
 const { normalize_resource_object } = require('./resource_normalizer');
-const { get_function_params } = require('../parser/type_converters');
+const {
+    get_function_params,
+    get_array_index_and_prop_key,
+} = require('../parser/type_converters');
 
 /**
  * @param {any} obj
@@ -47,9 +50,8 @@ module.exports.convert_tres = (blocks) => {
             sec.id = undefined;
         } else if (sec.key === 'resource') {
             for (const key in sec.prop) {
-                const index = parseInt(key.substring(0, key.indexOf('/')));
-                const prop_key = key.substring(key.indexOf('/') + 1);
-                if (Number.isFinite(index)) {
+                const { index, prop_key } = get_array_index_and_prop_key(key);
+                if (_.isFinite(index) && _.isString(prop_key)) {
                     resource[index] = resource[index] || {};
                     resource[index][prop_key] = sec.prop[key];
                 }

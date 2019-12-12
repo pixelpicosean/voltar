@@ -132,6 +132,19 @@ function get_function_params(src) {
 module.exports.get_function_params = get_function_params;
 
 /**
+ * @param {string} key
+ */
+function get_array_index_and_prop_key(key) {
+    const index = parseInt(key.substring(0, key.indexOf('/')));
+    const prop_key = key.substring(key.indexOf('/') + 1);
+    if (Number.isFinite(index)) {
+        return { index, prop_key };
+    }
+    return {};
+}
+module.exports.get_array_index_and_prop_key = get_array_index_and_prop_key;
+
+/**
  * @param {any} vec
  * @returns {{ x: number, y: number }}
  */
