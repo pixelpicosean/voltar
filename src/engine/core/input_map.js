@@ -78,8 +78,12 @@ export class InputMap {
         let event = /** @type {InputEvent} */(p_event);
         // this event maybe a plain object
         if ('type' in p_event) {
-            event = /** @type {InputEvent} */(new (res_class_map[p_event.type]));
-            event._load_data(p_event);
+            if (p_event.type in res_class_map) {
+                event = /** @type {InputEvent} */(new (res_class_map[p_event.type]));
+                event._load_data(p_event);
+            } else {
+                return;
+            }
         }
         const action = this.input_map.get(p_action);
         if (this._find_event(action, event)) {
