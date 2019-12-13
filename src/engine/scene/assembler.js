@@ -40,7 +40,7 @@ export function attach_script(url, scene) {
  * @typedef NodeData
  * @property {string} type
  * @property {string} name
- * @property {{ instance: () => Node }} [instance]
+ * @property {any} [instance]
  * @property {string} [parent]
  *
  * @typedef PackedSceneData
@@ -89,7 +89,11 @@ export function assemble_scene(scn, data, url) {
             /** @type {Node} */
             let node = null;
             if (node_data.instance) {
-                node = node_data.instance.instance();
+                if (node_data.instance.instance) {
+                    node = node_data.instance.instance();
+                } else {
+                    node = node_data.instance();
+                }
             } else {
                 node = new (node_class_map[node_data.type]);
             }
