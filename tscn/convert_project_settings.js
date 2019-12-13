@@ -14,6 +14,8 @@ const {
 
 const { color2hex } = require('./parser/utils');
 
+const { gd_scancode_to_voltar } = require('./converter/key_map');
+
 
 /**
  * @param {string} project_url
@@ -165,6 +167,13 @@ module.exports.convert_project_settings = (project_url) => {
         real_settings.physics = physics;
     }
     if (settings.input) {
+        for (const action in settings.input) {
+            for (const event of settings.input[action].events) {
+                if (event.type === 'InputEventKey') {
+                    event.scancode = gd_scancode_to_voltar(event.scancode);
+                }
+            }
+        }
         real_settings.input = settings.input;
     }
     if (settings.layer_names) {

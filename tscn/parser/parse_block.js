@@ -326,6 +326,10 @@ module.exports.parse_block = (block) => {
                     const pack = stack.pop();
                     const parent = (stack.length > 0) ? _.last(stack).value : data.prop;
                     parent[pack.key] = pack.value;
+                } else if (line.trimLeft().startsWith(',')) {
+                    // this array is continue
+                    const el_str = line.trimLeft().substr(1).trim();
+                    push_tokens_in_a_line(data.prop, el_str, tokens, stack, _.last(stack).value.length);
                 }
             } break;
         }
