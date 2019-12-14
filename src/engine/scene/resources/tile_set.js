@@ -33,9 +33,14 @@ class ShapeData {
         if (data.shape_transform !== undefined) {
             this.shape_transform.from_array(data.shape_transform);
         }
-        if (data.shape !== undefined && data.shape.type >= 0) {
-            this.shape = new ConvexPolygonShape2D;
-            /** @type {ConvexPolygonShape2D} */(this.shape).set_points_in_pool_vec2(data.shape.points);
+        if (data.shape !== undefined) {
+            if (data.shape.type === -1) {
+                /* already instanced from shape class */
+                this.shape = data.shape;
+            } else {
+                this.shape = new ConvexPolygonShape2D;
+                /** @type {ConvexPolygonShape2D} */(this.shape).set_points_in_pool_vec2(data.shape.points);
+            }
         }
 
         return this;
