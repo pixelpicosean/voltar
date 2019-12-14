@@ -149,7 +149,7 @@ export class Item {
                 this.rect.copy(r);
                 first = false;
             } else {
-                this.rect.merge(r);
+                this.rect.merge_to(r);
             }
         }
         Rect2.free(r);

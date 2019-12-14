@@ -1112,7 +1112,7 @@ export class TileMap extends Node2D {
 
         for (const x in this.quadrant_map) {
             const x_map = this.quadrant_map[x];
-            for (const y in this.quadrant_map[x]) {
+            for (const y in x_map) {
                 const q = x_map[y];
 
                 xform.identity();
