@@ -219,6 +219,22 @@ module.exports.Rect2 = (rect) => {
     return undefined;
 };
 /**
+ * @param {any} xform
+ * @returns {number[]}
+ */
+module.exports.Transform2D = (xform) => {
+    if (_.isArray(xform)) {
+        return xform;
+    }
+
+    if (typeof (xform) === 'string') {
+        const arr = get_function_params(xform);
+        return arr.map(str => parseFloat(str));
+    }
+
+    return undefined;
+};
+/**
  * @param {any} line
  * @returns {Object<string, any> & { type: string }}
  */
@@ -353,11 +369,11 @@ module.exports.PoolRealArray = (arr) => {
 module.exports.PoolColorArray = (arr) => {
     if (Array.isArray(arr)) {
         // already valid data
-        if (typeof(arr[0]) === 'object' && typeof(arr[0].r) === 'number') {
+        if (typeof (arr[0]) === 'object' && typeof (arr[0].r) === 'number') {
             return arr;
         }
         // array of numbers
-        else if (typeof(arr[0]) === 'number') {
+        else if (typeof (arr[0]) === 'number') {
             const res = [];
             for (let i = 0; i < arr.length; i += 4) {
                 res.push({
