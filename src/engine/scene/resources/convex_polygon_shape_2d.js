@@ -30,6 +30,14 @@ export class ConvexPolygonShape2D extends Shape2D {
         this._update_shape();
     }
 
+    /**
+     * @param {*} data
+     */
+    _load_data(data) {
+        if (data.points) this.set_points_in_pool_vec2(data.points);
+        return this;
+    }
+
     /* public */
 
     /**
