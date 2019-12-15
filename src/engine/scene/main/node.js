@@ -313,6 +313,7 @@ export class Node extends VObject {
         let n = name;
         let i = 2;
         while (this.named_children.has(n)) {
+            if (this.named_children.get(n) === child) break;
             n = `${name}_${i++}`;
         }
         this.named_children.delete(name);
