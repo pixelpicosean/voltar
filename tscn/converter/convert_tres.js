@@ -74,9 +74,62 @@ module.exports.convert_tres = (blocks) => {
 
         for (let i = 0; i < sections.length; i++) {
             let sec = sections[i];
-            if (sec.key !== 'node') continue;
 
-            if (sec._prop && sec._prop.script) {
+            // script = null
+            if (sec['script'] && sec['script'] === 'null') {
+                sec['script'] = undefined;
+            }
+            if (sec._prop && sec._prop['script'] && sec._prop['script'] === 'null') {
+                sec._prop['script'] = undefined;
+            }
+            if (sec.prop && sec.prop['script'] && sec.prop['script'] === 'null') {
+                sec.prop['script'] = undefined;
+            }
+
+            // __meta__
+            if (sec['__meta__']) {
+                sec['__meta__'] = undefined;
+            }
+            if (sec._prop && sec._prop['__meta__']) {
+                sec._prop['__meta__'] = undefined;
+            }
+            if (sec.prop && sec.prop['__meta__']) {
+                sec.prop['__meta__'] = undefined;
+            }
+
+            // node index is not necessary
+            if (sec['index']) {
+                sec['index'] = undefined;
+            }
+            if (sec._attr && sec._attr['index']) {
+                sec._attr['index'] = undefined;
+            }
+            if (sec.attr && sec.attr['index']) {
+                sec.attr['index'] = undefined;
+            }
+
+            if (sec.key === 'inherited_node') {
+                // copy extra properties (they are inherited, so type is unknown to us)
+                if (sec._prop) {
+                    for (const k in sec._prop) {
+                        if (k === 'script') continue;
+                        if (sec[k] === undefined) {
+                            sec[k] = sec._prop[k];
+                        }
+                    }
+                }
+
+                sec._attr = undefined;
+                sec._prop = undefined;
+                sec.key = undefined;
+                normalize_resource_object(sec);
+                nodes.push(sec);
+                continue;
+            } else if (sec.key !== 'node') {
+                continue;
+            }
+
+            if (sec._prop && sec._prop.script/*  && sec._prop.script !== 'null' */) {
                 const ext_idx = get_function_params(sec._prop.script)[0];
                 const script_pack = ext[ext_idx];
                 if (script_pack.type === 'ReplaceNode') {

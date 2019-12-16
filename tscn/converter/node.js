@@ -14,6 +14,7 @@ module.exports = (data) => {
     // Node of inherited scene?
     else {
         return Object.assign(require(`./res/Scene`)(data), {
+            type: undefined,
             key: 'inherited_node',
         });
     }

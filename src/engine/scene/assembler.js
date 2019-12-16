@@ -94,10 +94,16 @@ export function assemble_scene(scn, data, url) {
                 } else {
                     node = node_data.instance();
                 }
-            } else {
+            } else if (node_data.type) {
                 node = new (node_class_map[node_data.type]);
             }
-            parent.add_child(node);
+
+            if (node) {
+                parent.add_child(node);
+            } else {
+                /* inherited node */
+                node = parent.get_node(node_data.name);
+            }
             node._load_data(node_data);
             let path = node.name;
             if (node_data.parent !== '.') {
