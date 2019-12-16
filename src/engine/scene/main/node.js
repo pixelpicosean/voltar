@@ -191,6 +191,8 @@ export class Node extends VObject {
      * @param {string} p_name
      */
     set_name(p_name) {
+        if (this.data.name === p_name) return;
+
         this.data.name = p_name;
         if (this.data.parent) {
             this.data.parent._validate_child_name(this);
