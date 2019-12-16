@@ -102,9 +102,9 @@ export class CollisionPolygon2D extends Node2D {
     _notification(p_what) {
         switch (p_what) {
             case NOTIFICATION_PARENTED: {
-                const parent = /** @type {import('./collision_object_2d').CollisionObject2D} */(this.get_parent());
-                if (parent.is_collision_object) {
-                    this.owner = parent.create_shape_owner(this);
+                this.parent = /** @type {import('./collision_object_2d').CollisionObject2D} */(this.get_parent());
+                if (this.parent.is_collision_object) {
+                    this.owner = this.parent.create_shape_owner(this);
                     this._build_polygon();
                     this._update_in_shape_owner();
                 }
