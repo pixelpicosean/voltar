@@ -345,6 +345,9 @@ export class RasterizerCanvas extends VObject {
         gl.blendEquation(gl.FUNC_ADD);
         gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, this.storage.resources.white_tex.texture.gl_tex);
+
         let current_buffer_slot = -1;
         for (let i = 0; i < this.draw_groups.length; i++) {
             const group = this.draw_groups[i];
