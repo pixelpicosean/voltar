@@ -27,8 +27,24 @@ export function register_scene_class(key, ctor) {
 export function attach_script(url, scene) {
     // Add `instance` static method
     scene['instance'] = () => {
-        return assemble_scene(new scene, resource_map[url], url);
+        const node = new scene;
+
+        // data inherited from parent scene?
+        const data = scene['@data'];
+        if (data && data.length > 1) {
+            for (let i = 0; i < data.length - 1; i++) {
+                node._load_data(data[i]);
+            }
+        }
+
+        const res = resource_map[url];
+
+        // assemble the scene and load data
+        assemble_scene(node, res, url);
+
+        return node;
     };
+    scene['filename'] = url;
 
     // Register as scene
     register_scene_class(url, scene);
@@ -89,8 +105,8 @@ export function assemble_scene(scn, data, url) {
             /** @type {Node} */
             let node = null;
             if (node_data.instance) {
-                if (node_data.instance.instance) {
-                    node = node_data.instance.instance();
+                if (node_data.instance.ctor) {
+                    node = node_data.instance.ctor.instance();
                 } else {
                     node = node_data.instance();
                 }

@@ -84,7 +84,23 @@ export class Engine {
 
                             // is it a registered scene?
                             if (scene_class_map[resource_filename]) {
-                                res.ext[id] = scene_class_map[resource_filename];
+                                const self_data = resource.nodes[0];
+                                const data_chain = [self_data];
+                                if (self_data.instance) {
+                                    const idx = self_data.instance.substr(ext_offset);
+                                    const parent = resource.ext[idx];
+                                    for (const d of parent.data) {
+                                        data_chain.unshift(d);
+                                    }
+                                }
+                                const data = {
+                                    data: data_chain,
+                                    ctor: scene_class_map[resource_filename],
+                                    filename: resource_filename,
+                                };
+                                res.ext[id] = data;
+
+                                scene_class_map[resource_filename]['@data'] = data_chain;
                             }
                             // is it a PackedScene, let's make it a object with `instance` factory function
                             else if (resource.type === 'PackedScene') {
