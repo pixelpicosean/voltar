@@ -920,14 +920,14 @@ export class VisualServerCanvas {
      * @param {Item} ysort_owner
      */
     _mark_ysort_dirty(ysort_owner) {
-        while (ysort_owner && ysort_owner.sort_y) {
+        do {
             ysort_owner.ysort_children_count = -1;
-            if (ysort_owner.parent.type === TYPE_ITEM) {
+            if (ysort_owner.parent && ysort_owner.parent.type === TYPE_ITEM) {
                 ysort_owner = /** @type {Item} */(ysort_owner.parent);
             } else {
                 ysort_owner = null;
             }
-        }
+        } while (ysort_owner && ysort_owner.sort_y);
     }
 
     /**

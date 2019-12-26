@@ -3,6 +3,7 @@ import { GDCLASS } from 'engine/core/v_object';
 import { VSG } from 'engine/servers/visual/visual_server_globals';
 
 import { Node2D } from './node_2d';
+import { NOTIFICATION_PARENTED } from '../main/node';
 
 
 export class YSort extends Node2D {
@@ -15,6 +16,7 @@ export class YSort extends Node2D {
         super();
 
         this._sort_enabled = true;
+        VSG.canvas.canvas_item_set_sort_children_by_y(this.canvas_item, this._sort_enabled);
     }
 
     /* virtual */
@@ -31,6 +33,9 @@ export class YSort extends Node2D {
 
     /* public */
 
+    /**
+     * @param {boolean} p_enabled
+     */
     set_sort_enabled(p_enabled) {
         this._sort_enabled = p_enabled;
         VSG.canvas.canvas_item_set_sort_children_by_y(this.canvas_item, this._sort_enabled);
