@@ -62,6 +62,31 @@ export class Command {
     free() { pool_map[this.type].push(this) }
 }
 
+export class CommandLine extends Command {
+    get type() { return TYPE_LINE }
+    static instance() { return new CommandLine() } // for TypeScript type checking
+
+    constructor() {
+        super();
+
+        this.color = new Color();
+        this.from = new Vector2();
+        this.to = new Vector2();
+        this.width = 1.0;
+        this.antialiased = false;
+    }
+    init() {
+        super.init();
+        this.color.set(1, 1, 1, 1);
+        this.from.set(0, 0);
+        this.to.set(0, 0);
+        this.width = 1.0;
+        this.antialiased = false;
+        return this;
+    }
+}
+create_pool(TYPE_LINE, CommandLine)
+
 export class CommandRect extends Command {
     get type() { return TYPE_RECT }
     static instance() { return new CommandRect() } // for TypeScript type checking

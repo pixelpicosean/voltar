@@ -179,6 +179,17 @@ export class CanvasItem extends Node {
     /* public */
 
     /**
+     * @param {Vector2Like} p_from
+     * @param {Vector2Like} p_to
+     * @param {ColorLike} p_color
+     * @param {number} p_width
+     * @param {boolean} [p_antialiased]
+     */
+    draw_line(p_from, p_to, p_color, p_width = 1.0, p_antialiased = false) {
+        VSG.canvas.canvas_item_add_line(this.canvas_item, p_from, p_to, p_color, p_width, p_antialiased);
+    }
+
+    /**
      * @param {Rect2} p_rect
      * @param {ColorLike} p_color
      * @param {boolean} [p_filled=true]

@@ -18,10 +18,12 @@ import { VObject } from 'engine/core/v_object';
 import { Item } from 'engine/servers/visual/visual_server_canvas';
 import { VSG } from 'engine/servers/visual/visual_server_globals';
 import {
+    TYPE_LINE,
     TYPE_RECT,
     TYPE_NINEPATCH,
     TYPE_POLYGON,
     TYPE_CIRCLE,
+    CommandLine,
     CommandRect,
     CommandNinePatch,
     CommandPolygon,
@@ -184,10 +186,10 @@ export class RasterizerCanvas extends VObject {
 
             uniforms: {
                 projection_matrix: [
-                    1,0,0,0,
-                    0,1,0,0,
-                    0,0,1,0,
-                    0,0,0,1,
+                    1, 0, 0, 0,
+                    0, 1, 0, 0,
+                    0, 0, 1, 0,
+                    0, 0, 0, 1,
                 ],
                 time: [0],
             },
@@ -420,6 +422,90 @@ export class RasterizerCanvas extends VObject {
 
         for (const cmd of p_item.commands) {
             switch (cmd.type) {
+                case TYPE_LINE: {
+                    const line = /** @type {CommandLine} */(cmd);
+
+                    this.check_draw_group_state(4, 6, null);
+
+                    const {
+                        v: vertices,
+                        i: indices,
+                    } = this.vertices[this.states.active_vert_slot];
+
+                    const v_idx = this.states.v_index;
+
+                    let vb_idx = this.states.v_index * VTX_COMP;
+                    let ib_idx = this.states.i_index;
+
+                    // vertex
+                    const wt = p_item.final_transform;
+                    const a = wt.a;
+                    const b = wt.b;
+                    const c = wt.c;
+                    const d = wt.d;
+                    const tx = wt.tx;
+                    const ty = wt.ty;
+
+                    const angle = line.from.angle_to_point(line.to);
+                    const offset_x = line.width * 0.5 * Math.sin(angle);
+                    const offset_y = line.width * 0.5 * Math.cos(angle);
+                    const x0 = line.from.x;
+                    const y0 = line.from.y;
+                    const x1 = line.to.x;
+                    const y1 = line.to.y;
+
+                    // - position
+                    vertices[vb_idx + VTX_COMP * 0 + 0] = (a * (x0 - offset_x)) + (c * (y0 - offset_y)) + tx;
+                    vertices[vb_idx + VTX_COMP * 0 + 1] = (d * (y0 - offset_y)) + (b * (x0 - offset_x)) + ty;
+
+                    vertices[vb_idx + VTX_COMP * 1 + 0] = (a * (x1 - offset_x)) + (c * (y0 - offset_y)) + tx;
+                    vertices[vb_idx + VTX_COMP * 1 + 1] = (d * (y0 - offset_y)) + (b * (x1 - offset_x)) + ty;
+
+                    vertices[vb_idx + VTX_COMP * 2 + 0] = (a * (x1 + offset_x)) + (c * (y1 + offset_y)) + tx;
+                    vertices[vb_idx + VTX_COMP * 2 + 1] = (d * (y1 + offset_y)) + (b * (x1 + offset_x)) + ty;
+
+                    vertices[vb_idx + VTX_COMP * 3 + 0] = (a * (x0 + offset_x)) + (c * (y1 + offset_y)) + tx;
+                    vertices[vb_idx + VTX_COMP * 3 + 1] = (d * (y1 + offset_y)) + (b * (x0 + offset_x)) + ty;
+
+                    // - uv
+                    vertices[vb_idx + VTX_COMP * 0 + 2] = 0;
+                    vertices[vb_idx + VTX_COMP * 0 + 3] = 0;
+
+                    vertices[vb_idx + VTX_COMP * 1 + 2] = 0;
+                    vertices[vb_idx + VTX_COMP * 1 + 3] = 0;
+
+                    vertices[vb_idx + VTX_COMP * 2 + 2] = 0;
+                    vertices[vb_idx + VTX_COMP * 2 + 3] = 0;
+
+                    vertices[vb_idx + VTX_COMP * 3 + 2] = 0;
+                    vertices[vb_idx + VTX_COMP * 3 + 3] = 0;
+
+                    // - color
+                    const color_num = color.copy(line.color).multiply(p_item.final_modulate).as_rgba8();
+                    vertices[vb_idx + VTX_COMP * 0 + 4] = color_num;
+                    vertices[vb_idx + VTX_COMP * 1 + 4] = color_num;
+                    vertices[vb_idx + VTX_COMP * 2 + 4] = color_num;
+                    vertices[vb_idx + VTX_COMP * 3 + 4] = color_num;
+
+                    // - flags
+                    // TODO: fill mode
+                    const flags = color.set(1, 0, 0, 0).as_rgba8();
+                    vertices[vb_idx + VTX_COMP * 0 + 5] = flags;
+                    vertices[vb_idx + VTX_COMP * 1 + 5] = flags;
+                    vertices[vb_idx + VTX_COMP * 2 + 5] = flags;
+                    vertices[vb_idx + VTX_COMP * 3 + 5] = flags;
+
+                    // index
+                    indices[ib_idx++] = v_idx + 0;
+                    indices[ib_idx++] = v_idx + 1;
+                    indices[ib_idx++] = v_idx + 2;
+                    indices[ib_idx++] = v_idx + 2;
+                    indices[ib_idx++] = v_idx + 3;
+                    indices[ib_idx++] = v_idx + 0;
+
+                    this.states.v_index += 4;
+                    this.states.i_index += 6;
+                } break;
                 case TYPE_RECT: {
                     const rect = /** @type {CommandRect} */(cmd);
                     const tex = rect.texture;
@@ -764,16 +850,16 @@ export class RasterizerCanvas extends VObject {
 
                     for (let i = 0, len = vert_count; i < len; i++) {
                         // position
-                        vertices[vb_idx + VTX_COMP * i + 0] = (a * points[i*2]) + (c * points[i*2+1]) + tx;
-                        vertices[vb_idx + VTX_COMP * i + 1] = (d * points[i*2+1]) + (b * points[i*2]) + ty;
+                        vertices[vb_idx + VTX_COMP * i + 0] = (a * points[i * 2]) + (c * points[i * 2 + 1]) + tx;
+                        vertices[vb_idx + VTX_COMP * i + 1] = (d * points[i * 2 + 1]) + (b * points[i * 2]) + ty;
                         // uv
                         // TODO: support uv calculation from atlas textures
                         if (uvs && uvs.length) {
-                            vertices[vb_idx + VTX_COMP * i + 2] = uvs[i*2];
-                            vertices[vb_idx + VTX_COMP * i + 3] = uvs[i*2+1];
+                            vertices[vb_idx + VTX_COMP * i + 2] = uvs[i * 2];
+                            vertices[vb_idx + VTX_COMP * i + 3] = uvs[i * 2 + 1];
                         }
                         // color
-                        vertices[vb_idx + VTX_COMP * i + 4] = s_color ? s_color_num : color.set(color[i*4], color[i*4+1], color[i*4+2], color[i*4+3]).multiply(p_item.final_modulate).as_rgba8();
+                        vertices[vb_idx + VTX_COMP * i + 4] = s_color ? s_color_num : color.set(color[i * 4], color[i * 4 + 1], color[i * 4 + 2], color[i * 4 + 3]).multiply(p_item.final_modulate).as_rgba8();
                         // flags
                         vertices[vb_idx + VTX_COMP * i + 5] = flags;
                     }

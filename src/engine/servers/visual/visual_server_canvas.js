@@ -31,6 +31,7 @@ import {
     CommandCircle,
     CommandMultiMesh,
     CommandPolygon,
+    CommandLine,
 } from './commands';
 
 
@@ -438,7 +439,25 @@ export class VisualServerCanvas {
     canvas_item_set_default_texture_filter() { }
     canvas_item_set_default_texture_repeat() { }
 
-    canvas_item_add_line() { }
+    /**
+     * @param {Item} p_item
+     * @param {Vector2Like} p_from
+     * @param {Vector2Like} p_to
+     * @param {ColorLike} p_color
+     * @param {number} p_width
+     * @param {boolean} p_antialiased
+     */
+    canvas_item_add_line(p_item, p_from, p_to, p_color, p_width, p_antialiased) {
+        const line = CommandLine.instance();
+        line.color.copy(p_color);
+        line.from.copy(p_from);
+        line.to.copy(p_to);
+        line.width = p_width;
+        line.antialiased = p_antialiased;
+        p_item.rect_dirty = true;
+
+        p_item.commands.push(line);
+    }
     canvas_item_add_polyline() { }
     canvas_item_add_multiline() { }
     /**
