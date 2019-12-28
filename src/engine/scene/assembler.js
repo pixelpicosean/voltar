@@ -152,7 +152,7 @@ export function instanciate_scene(p_data, url) {
     if (node_data.type) {
         node = new (node_class_map[node_data.type]);
     } else {
-        node = node_data.instance.instance();
+        node = node_data.instance.ctor.instance();
     }
 
     assemble_scene(node, p_data, url);
