@@ -35,7 +35,7 @@ export * from 'engine/utils/trim_canvas';
 export * from 'engine/core/resource';
 export * from 'engine/core/os/input_event';
 export * from 'engine/core/os/keyboard';
-// export * from 'engine/scene/resources/tile_set';
+export * from 'engine/scene/resources/tile_set';
 export * from 'engine/scene/resources/texture';
 export * from 'engine/scene/resources/shape_2d';
 export * from 'engine/scene/resources/segment_shape_2d';
@@ -65,6 +65,7 @@ export * from 'engine/scene/2d/const';
 export * from 'engine/scene/2d/canvas_item';
 export * from 'engine/scene/2d/node_2d';
 export * from 'engine/scene/2d/sprite';
+export * from 'engine/scene/2d/animated_sprite';
 export * from 'engine/scene/2d/path_2d';
 export * from 'engine/scene/2d/cpu_particles_2d';
 

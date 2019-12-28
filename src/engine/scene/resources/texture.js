@@ -139,6 +139,9 @@ export class ImageTexture extends Texture {
     get_format() {
         return this.format;
     }
+    /**
+     * returns new Vector2.
+     */
     get_size() {
         return Vector2.new(this.width, this.height);
     }

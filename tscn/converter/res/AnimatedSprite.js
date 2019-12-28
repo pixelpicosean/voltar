@@ -1,7 +1,7 @@
-const Sprite = require('./Sprite');
+const Node2D = require('./Node2D');
 
 module.exports = (data) => {
-    const res = Object.assign({}, Sprite(data), {
+    const res = Object.assign({}, Node2D(data), {
         type: 'AnimatedSprite',
     });
 
@@ -10,6 +10,9 @@ module.exports = (data) => {
     res.frame = data.prop.frame;
     res.playing = data.prop.playing;
     res.speed_scale = data.prop.speed_scale;
+    res.centered = data.prop.centered;
+    res.flip_h = data.prop.flip_h;
+    res.flip_v = data.prop.flip_v;
 
     return res;
 };
