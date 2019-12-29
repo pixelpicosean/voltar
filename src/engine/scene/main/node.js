@@ -578,9 +578,7 @@ export class Node extends VObject {
 
                 const children = this.data.children;
                 while (children.length > 0) {
-                    const child = children[children.length - 1];
-                    this.remove_child(child);
-                    child.free();
+                    this.remove_child(children[children.length - 1]);
                 }
             } break;
         }
