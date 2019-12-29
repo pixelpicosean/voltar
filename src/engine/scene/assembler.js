@@ -108,7 +108,7 @@ export function assemble_scene(scn, data, url) {
                 if (node_data.instance.ctor) {
                     node = node_data.instance.ctor.instance();
                 } else {
-                    node = node_data.instance();
+                    node = node_data.instance.instance();
                 }
             } else if (node_data.type) {
                 node = new (node_class_map[node_data.type]);

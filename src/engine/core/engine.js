@@ -104,8 +104,10 @@ export class Engine {
                             }
                             // is it a PackedScene, let's make it a object with `instance` factory function
                             else if (resource.type === 'PackedScene') {
-                                res.ext[id] = () => {
-                                    return instanciate_scene(resource, resource_filename);
+                                res.ext[id] = {
+                                    instance: () => {
+                                        return instanciate_scene(resource, resource_filename);
+                                    },
                                 };
                             }
                             // ok, it is just a normal one
