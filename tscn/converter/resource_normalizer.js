@@ -9,6 +9,7 @@ function normalize_res_key(key) {
     } else if (key.startsWith('ExtResource')) {
         return `@ext#${get_function_params(key)[0]}`;
     }
+    if (key === 'null') return null;
     return key;
 }
 
