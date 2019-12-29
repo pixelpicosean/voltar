@@ -71,6 +71,8 @@ export class CanvasItem extends Node {
 
         this.canvas_item = VSG.canvas.canvas_item_create();
 
+        this.group = '';
+
         /** @type {CanvasLayer} */
         this.canvas_layer = null;
 
