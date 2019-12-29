@@ -59,6 +59,9 @@ export class CanvasItem extends Node {
     get visible() { return this._visible }
     set visible(value) { this.set_visible(value) }
 
+    get fill_mode() { return this._fill_mode }
+    set fill_mode(mode) { this.set_fill_mode(mode) }
+
     constructor() {
         super();
 
@@ -70,7 +73,6 @@ export class CanvasItem extends Node {
         this.xform_change = new SelfList(this);
 
         this.canvas_item = VSG.canvas.canvas_item_create();
-
         this.group = '';
 
         /** @type {CanvasLayer} */
@@ -78,6 +80,8 @@ export class CanvasItem extends Node {
 
         this._modulate = new Color(1, 1, 1, 1);
         this._self_modulate = new Color(1, 1, 1, 1);
+        /** 0 = normal, 1 = fill with modulate */
+        this._fill_mode = 0;
 
         /**
          * @type {Set<CanvasItem>}
@@ -522,6 +526,14 @@ export class CanvasItem extends Node {
         }
         this._show_behind_parent = value;
         VSG.canvas.canvas_item_set_draw_behind_parent(this.canvas_item, this._show_behind_parent);
+    }
+
+    /**
+     * 0 = normal, 1 = fill with modulate
+     * @param {number} p_mode
+     */
+    set_fill_mode(p_mode) {
+        this.canvas_item.fill_mode = p_mode;
     }
 
     /**
