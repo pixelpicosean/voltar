@@ -534,7 +534,7 @@ export class Control extends CanvasItem {
         }
     }
 
-    clips_input(){
+    clips_input() {
         return this._clips_input();
     }
 
@@ -1535,16 +1535,16 @@ export class Control extends CanvasItem {
      * @param {string} [type]
      */
     get_constant(name, type) {
-        if (!type) {
+        if (!type || type.length === 0 || type === this.class) {
             if (this.c_data.constant_override) {
                 const c = this.c_data.constant_override[name];
                 if (c !== undefined) {
                     return c;
                 }
             }
-
-            type = this.class;
         }
+
+        type = this.class;
 
         // TODO: Loop through theme owners and find the value
 

@@ -19,17 +19,17 @@ export class MarginContainer extends Container {
     _load_data(data) {
         super._load_data(data);
 
-        if (data.margin_bottom !== undefined) {
-            this.add_constant_override('margin_bottom', data.margin_bottom);
+        if (data['custom_constants/margin_bottom'] !== undefined) {
+            this.add_constant_override('margin_bottom', data['custom_constants/margin_bottom']);
         }
-        if (data.margin_left !== undefined) {
-            this.add_constant_override('margin_left', data.margin_left);
+        if (data['custom_constants/margin_left'] !== undefined) {
+            this.add_constant_override('margin_left', data['custom_constants/margin_left']);
         }
-        if (data.margin_right !== undefined) {
-            this.add_constant_override('margin_right', data.margin_right);
+        if (data['custom_constants/margin_right'] !== undefined) {
+            this.add_constant_override('margin_right', data['custom_constants/margin_right']);
         }
-        if (data.margin_top !== undefined) {
-            this.add_constant_override('margin_top', data.margin_top);
+        if (data['custom_constants/margin_top'] !== undefined) {
+            this.add_constant_override('margin_top', data['custom_constants/margin_top']);
         }
 
         return this;

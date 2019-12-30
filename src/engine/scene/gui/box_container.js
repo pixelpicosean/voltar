@@ -48,8 +48,8 @@ export class BoxContainer extends Container {
         if (data.alignment !== undefined) {
             this.set_alignment(data.alignment);
         }
-        if (data.separation !== undefined) {
-            this.add_constant_override('separation', data.separation);
+        if (data['custom_constants/separation'] !== undefined) {
+            this.add_constant_override('separation', data['custom_constants/separation']);
         }
 
         return this;

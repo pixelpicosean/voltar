@@ -32,11 +32,11 @@ export class GridContainer extends Container {
         if (data.columns !== undefined) {
             this.set_columns(data.columns);
         }
-        if (data.hseparation !== undefined) {
-            this.add_constant_override('hseparation', data.hseparation);
+        if (data['custom_constants/hseparation'] !== undefined) {
+            this.add_constant_override('hseparation', data['custom_constants/hseparation']);
         }
-        if (data.vseparation !== undefined) {
-            this.add_constant_override('vseparation', data.vseparation);
+        if (data['custom_constants/vseparation'] !== undefined) {
+            this.add_constant_override('vseparation', data['custom_constants/vseparation']);
         }
 
         return this;

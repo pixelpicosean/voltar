@@ -9,7 +9,7 @@ module.exports = (data) => {
     const res = Object.assign({}, Container(data), {
         type: 'HBoxContainer',
         alignment: int(data.prop.alignment),
-        separation: real(data.prop['custom_constants/separation']),
+        'custom_constants/separation': real(data.prop['custom_constants/separation']),
     });
 
     return res;
