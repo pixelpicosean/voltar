@@ -117,8 +117,6 @@ export class Node extends VObject {
         this.is_collision_object = false;
 
         this.data = new Data();
-        /** @type {Map<string, Node>} */
-        this.named_children = new Map();
 
         /**
          * Data loaded from `_load_data` method
@@ -312,15 +310,20 @@ export class Node extends VObject {
      */
     _validate_child_name(child) {
         const name = child.data.name;
+
         let n = name;
         let i = 2;
-        while (this.named_children.has(n)) {
-            if (this.named_children.get(n) === child) break;
-            n = `${name}_${i++}`;
+        /** @type {Node} */
+        let du_named = null;
+        while (du_named = this._get_child_by_name(n)) {
+            if (du_named !== child) {
+                n = `${name}${i++}`;
+            } else {
+                break;
+            }
         }
-        this.named_children.delete(name);
+
         child.data.name = n;
-        this.named_children.set(n, child);
     }
     _generate_serial_child_name(p_child, name) { }
 
@@ -486,7 +489,10 @@ export class Node extends VObject {
      * @param {string} p_name
      */
     _get_child_by_name(p_name) {
-        return this.named_children.get(p_name);
+        for (const c of this.data.children) {
+            if (c.data.name === p_name) return c;
+        }
+        return null;
     }
 
     /**
@@ -609,8 +615,6 @@ export class Node extends VObject {
         p_child.data.parent = this;
         p_child.notification(NOTIFICATION_PARENTED);
 
-        this.named_children.set(p_name, p_child);
-
         if (this.data.tree) {
             p_child._set_tree(this.data.tree);
         }
@@ -689,7 +693,6 @@ export class Node extends VObject {
         p_child.notification(NOTIFICATION_UNPARENTED);
 
         remove_items(children, idx, 1);
-        this.named_children.delete(p_child.name);
 
         // update pointer and size
         child_count = children.length;
@@ -785,7 +788,7 @@ export class Node extends VObject {
                     }
                 } break;
                 default: {
-                    node = node.named_children.get(name);
+                    node = node._get_child_by_name(name);
                     if (!node) {
                         return null;
                     }
@@ -812,7 +815,7 @@ export class Node extends VObject {
      */
     find_node(p_mask, p_recursive = true, p_owned = true) {
         // TODO: support Godot like `find_node` behavior
-        let ret = this.named_children.has(p_mask);
+        let ret = this._get_child_by_name(p_mask);
         if (ret) {
             return ret;
         }
