@@ -51,6 +51,9 @@ class Cell {
         this.transpose = false;
         this.autotile_coord_x = 0;
         this.autotile_coord_y = 0;
+
+        this._x = 0;
+        this._y = 0;
     }
 }
 
@@ -532,6 +535,8 @@ export class TileMap extends Node2D {
             E = new Cell;
             this.tile_map[p_x] = this.tile_map[p_x] || {};
             this.tile_map[p_x][p_y] = E;
+            E._x = p_x;
+            E._y = p_y;
             if (!q) {
                 q = this._create_quadrant(qk_x, qk_y);
             }
@@ -619,6 +624,41 @@ export class TileMap extends Node2D {
         }
 
         return out;
+    }
+
+    get_used_rect() {
+        if (this.used_size_cache_dirty) {
+            let first = true;
+            const vec = Vector2.new();
+            for (const x in this.tile_map) {
+                const x_map = this.tile_map[x];
+                for (const y in x_map) {
+                    const cell = x_map[y];
+                    const _x = cell._x;
+                    const _y = cell._y;
+                    if (cell) {
+                        if (first) {
+                            first = false;
+                            this.used_size_cache.set(_x, _y, 0, 0);
+                        }
+
+                        this.used_size_cache.expand_to(vec.set(_x, _y));
+                    }
+                }
+            }
+            if (first) {
+                /* empty map! */
+                this.used_size_cache.set(0, 0, 0, 0);
+            } else {
+                this.used_size_cache.width += 1;
+                this.used_size_cache.height += 1;
+            }
+            Vector2.free(vec);
+
+            this.used_size_cache_dirty = false;
+        }
+
+        return this.used_size_cache;
     }
 
     update_dirty_quadrants() {
@@ -928,8 +968,9 @@ export class TileMap extends Node2D {
         for (const x in this.tile_map) {
             const x_map = this.tile_map[x];
             for (const y in x_map) {
-                const _x = parseInt(x);
-                const _y = parseInt(y);
+                const cell = x_map[y];
+                const _x = cell._x;
+                const _y = cell._y;
                 const qk_x = Math.floor(_x / this._cell_quadrant_size);
                 const qk_y = Math.floor(_y / this._cell_quadrant_size);
 
