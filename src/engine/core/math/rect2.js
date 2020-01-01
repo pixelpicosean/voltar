@@ -123,7 +123,7 @@ export class Rect2 {
     }
 
     /**
-     * Creates a clone of this Rectangle
+     * Returns new Rect2 with same value.
      */
     clone() {
         return Rect2.new(this.x, this.y, this.width, this.height);
@@ -202,6 +202,9 @@ export class Rect2 {
         return this.width * this.height;
     }
 
+    /**
+     * Returns new Rect2 with absolute values.
+     */
     abs() {
         return this.clone().abs_to();
     }
@@ -214,6 +217,7 @@ export class Rect2 {
     }
 
     /**
+     * Returns new Rect2.
      * @param {Rect2} p_rect
      */
     clip(p_rect) {
@@ -257,6 +261,7 @@ export class Rect2 {
 
     /**
      * Pads the rectangle making it grow in all directions.
+     * Returns new Rect2.
      *
      * @param {number} p_by - The horizontal padding amount.
      */
@@ -278,6 +283,7 @@ export class Rect2 {
     }
 
     /**
+     * Returns new Rect2.
      * @param {number} p_left
      * @param {number} p_top
      * @param {number} p_right
@@ -293,6 +299,7 @@ export class Rect2 {
     }
 
     /**
+     * Returns new Rect2.
      * @param {Vector2} p_vector
      */
     expand(p_vector) {
@@ -371,6 +378,7 @@ export class Rect2 {
 
     /**
      * Merge the given rectangle and return a new one.
+     * Returns new Rect2.
      *
      * @param {Rect2} p_rect - The rectangle to merge.
      */

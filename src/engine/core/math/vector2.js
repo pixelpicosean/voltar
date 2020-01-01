@@ -120,29 +120,21 @@ export class Vector2 {
     }
 
     /**
-     * Clone self
-     *
-     * @returns {Vector2}
+     * Returns new Vector2 with same value.
      */
     clone() {
         return new Vector2(this.x, this.y);
     }
-    random(scale) {
-        // TODO: requires random module
-    }
     /**
-     * Create a normalized clone
-     *
-     * @returns {Vector2}
+     * Returns new Vector2 but normalized.
      */
     normalized() {
         return this.clone().normalize();
     }
     /**
-     * Create a clamped vector.
+     * Returns new Vector2 but clamped.
      *
      * @param {number} p_length
-     * @returns {Vector2}
      */
     clamped(p_length) {
         const len = this.length();
@@ -153,10 +145,9 @@ export class Vector2 {
         return v;
     }
     /**
-     * Create a rotated vector.
+     * Returns new Vector2 but rotated.
      *
      * @param {number} p_rotation
-     * @returns {Vector2}
      */
     rotated(p_rotation) {
         return this.clone().rotate(p_rotation);
@@ -167,7 +158,6 @@ export class Vector2 {
      * Whether this equals to another point
      *
      * @param {Vector2Like} p_b
-     * @returns {boolean}
      */
     equals(p_b) {
         const a0 = this.x, a1 = this.y;
@@ -179,7 +169,6 @@ export class Vector2 {
      * Whether this equals to another point(precisely)
      *
      * @param {Vector2Like} p_b
-     * @returns {boolean}
      */
     exact_equals(p_b) {
         return (this.x === p_b.x) && (this.y === p_b.y);
@@ -190,7 +179,7 @@ export class Vector2 {
      *
      * @param {Vector2Like|number} x
      * @param {number} [y]
-     * @returns {this}
+     * @returns {Vector2} self for chaining
      */
     add(x, y) {
         if (y === undefined) {
@@ -212,7 +201,7 @@ export class Vector2 {
      *
      * @param {Vector2Like|number} x
      * @param {number} [y]
-     * @returns {this}
+     * @returns {Vector2} self for chaining
      */
     subtract(x, y) {
         if (y === undefined) {
@@ -234,7 +223,7 @@ export class Vector2 {
      *
      * @param {Vector2Like|number} x
      * @param {number} [y]
-     * @returns {this}
+     * @returns {Vector2} self for chaining
      */
     multiply(x, y) {
         if (y === undefined) {
@@ -256,7 +245,7 @@ export class Vector2 {
      *
      * @param {Vector2Like|number} x
      * @param {number} [y]
-     * @returns {this}
+     * @returns {Vector2} self for chaining
      */
     divide(x, y) {
         if (y === undefined) {
@@ -430,6 +419,7 @@ export class Vector2 {
     }
 
     /**
+     * Returns new Vector2.
      * @param {number} p_d
      * @param {Vector2} p_vec
      */
@@ -592,6 +582,7 @@ export class Vector2 {
     }
 
     /**
+     * Returns new Vector2.
      * @param {Vector2Like} p_b
      * @param {number} p_t
      */
@@ -605,6 +596,7 @@ export class Vector2 {
     }
 
     /**
+     * Returns new Vector2.
      * @param {Vector2} p_b
      * @param {Vector2} p_pre_a
      * @param {Vector2} p_post_b
