@@ -135,6 +135,7 @@ export function assemble_scene(scn, data, url) {
 /**
  * @param {PackedSceneData | string} p_data
  * @param {string} [url]
+ * @returns {Node}
  */
 export function instanciate_scene(p_data, url) {
     if (typeof (p_data) === 'string') {
@@ -142,7 +143,7 @@ export function instanciate_scene(p_data, url) {
         if (ctor) {
             return ctor.instance();
         } else {
-            return instanciate_scene(/** @type{any} */(ctor), p_data);
+            return instanciate_scene(/** @type{any} */(resource_map[p_data]), p_data);
         }
     }
 
