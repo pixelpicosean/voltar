@@ -88,6 +88,9 @@ export function assemble_scene(scn, data, url) {
         if (i > 0) {
             parent = node_cache[node_data.parent];
             if (!parent) {
+                parent = scn.get_node_or_null(node_data.parent);
+            }
+            if (!parent) {
                 console.warn(`Parent path '${node_data.parent}' for node '${node_data.name}' has vanished when instancing: '${url}'`);
             }
         }
