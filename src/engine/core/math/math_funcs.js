@@ -6,7 +6,6 @@ import {
 } from './math_defs';
 import { RandomDataGenerator } from './random_pcg';
 
-
 const Math_PI2 = Math_PI * 2;
 
 /**
@@ -77,7 +76,24 @@ export const posmod = (p_x, p_y) => {
 export const lerp = (a, b, fct) => a + (b - a) * fct;
 
 /**
+ * @param {number} a
+ * @param {number} b
+ * @param {number} fct
+ */
+export const lerp_angle = (a, b, fct) => {
+    if (Math.abs(a - b) >= Math_PI) {
+        if (a > b) {
+            a = wrap_angle(a) - 2.0 * Math_PI;
+        } else {
+            b = wrap_angle(b) - 2.0 * Math_PI;
+        }
+    }
+    return lerp(a, b, fct);
+}
+
+/**
  * wrap to [-PI, +PI]
+ * @param {number} a
  */
 export const wrap_angle = (a) => (a + Math_PI) % Math_PI2 - Math_PI;
 
