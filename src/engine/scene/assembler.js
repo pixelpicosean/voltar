@@ -33,7 +33,7 @@ export function attach_script(url, scene) {
         const data = scene['@data'];
         if (data && data.length > 1) {
             for (let i = 0; i < data.length - 1; i++) {
-                node._load_data(data[i]);
+                assemble_scene(node, data[i], '');
             }
         }
 

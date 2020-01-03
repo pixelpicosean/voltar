@@ -85,7 +85,7 @@ export class Engine {
                             // is it a registered scene?
                             if (scene_class_map[resource_filename]) {
                                 const self_data = resource.nodes[0];
-                                const data_chain = [self_data];
+                                const data_chain = [resource];
                                 if (self_data.instance) {
                                     const idx = self_data.instance.substr(ext_offset);
                                     const parent = resource.ext[idx];
