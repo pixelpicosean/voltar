@@ -44,16 +44,18 @@ export class ConvexPolygonShape2D extends Shape2D {
      * @param {Vector2Like[]} p_points
      */
     set_points(p_points) {
-        if (this._points.length > p_points.length) {
-            for (let i = 0; i < this._points.length - p_points.length; i++) {
+        const self_len = this._points.length;
+        const new_len = p_points.length;
+        if (self_len > new_len) {
+            for (let i = 0; i < self_len - new_len; i++) {
                 Vector2.free(this._points.pop());
             }
-        } else if (this._points.length < p_points.length) {
-            for (let i = 0; i < p_points.length - this._points.length; i++) {
+        } else if (self_len < new_len) {
+            for (let i = 0; i < new_len - self_len; i++) {
                 this._points.push(Vector2.new());
             }
         }
-        for (let i = 0; i < p_points.length; i++) {
+        for (let i = 0; i < new_len; i++) {
             this._points[i].copy(p_points[i]);
         }
         this._update_shape();
