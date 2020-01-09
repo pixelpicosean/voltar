@@ -31,6 +31,7 @@ module.exports = (data) => {
         rect_clip_content: boolean(data.prop.rect_clip_content),
 
         mouse_default_cursor_shape: int(data.prop.mouse_default_cursor_shape),
+        mouse_filter: int(data.prop.mouse_filter),
 
         size_flags_horizontal: int(data.prop.size_flags_horizontal),
         size_flags_vertical: int(data.prop.size_flags_vertical),

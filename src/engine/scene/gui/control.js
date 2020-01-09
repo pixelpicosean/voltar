@@ -292,6 +292,9 @@ export class Control extends CanvasItem {
             this.set_grow_vertical(data.grow_vertical);
         }
 
+        if (data.mouse_filter !== undefined) {
+            this.mouse_filter = data.mouse_filter;
+        }
         if (data.mouse_default_cursor_shape !== undefined) {
             this.mouse_default_cursor_shape = data.mouse_default_cursor_shape;
         }
