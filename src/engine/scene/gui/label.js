@@ -18,7 +18,7 @@ import { VSG } from "engine/servers/visual/visual_server_globals";
 import { CommandRect } from "engine/servers/visual/commands";
 
 import { NOTIFICATION_DRAW } from "../2d/canvas_item";
-import { SIZE_SHRINK_CENTER } from "./const";
+import { SIZE_SHRINK_CENTER, MOUSE_FILTER_IGNORE } from "./const";
 import {
     Control,
     NOTIFICATION_THEME_CHANGED,
@@ -106,6 +106,8 @@ export class Label extends Control {
         this.word_cache_dirty = false;
         this.word_cache = null;
         this.total_char_cache = 0;
+
+        this.mouse_filter = MOUSE_FILTER_IGNORE;
 
         this.set_size_flags_vertical(SIZE_SHRINK_CENTER);
     }
