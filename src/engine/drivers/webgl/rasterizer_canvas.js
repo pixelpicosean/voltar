@@ -448,7 +448,7 @@ export class RasterizerCanvas extends VObject {
 
                     const angle = line.from.angle_to_point(line.to);
                     const offset_x = line.width * 0.5 * Math.sin(angle);
-                    const offset_y = line.width * 0.5 * Math.cos(angle);
+                    const offset_y = -line.width * 0.5 * Math.cos(angle);
                     const x0 = line.from.x;
                     const y0 = line.from.y;
                     const x1 = line.to.x;
@@ -458,14 +458,14 @@ export class RasterizerCanvas extends VObject {
                     vertices[vb_idx + VTX_COMP * 0 + 0] = (a * (x0 - offset_x)) + (c * (y0 - offset_y)) + tx;
                     vertices[vb_idx + VTX_COMP * 0 + 1] = (d * (y0 - offset_y)) + (b * (x0 - offset_x)) + ty;
 
-                    vertices[vb_idx + VTX_COMP * 1 + 0] = (a * (x1 - offset_x)) + (c * (y0 - offset_y)) + tx;
-                    vertices[vb_idx + VTX_COMP * 1 + 1] = (d * (y0 - offset_y)) + (b * (x1 - offset_x)) + ty;
+                    vertices[vb_idx + VTX_COMP * 1 + 0] = (a * (x1 - offset_x)) + (c * (y1 - offset_y)) + tx;
+                    vertices[vb_idx + VTX_COMP * 1 + 1] = (d * (y1 - offset_y)) + (b * (x1 - offset_x)) + ty;
 
                     vertices[vb_idx + VTX_COMP * 2 + 0] = (a * (x1 + offset_x)) + (c * (y1 + offset_y)) + tx;
                     vertices[vb_idx + VTX_COMP * 2 + 1] = (d * (y1 + offset_y)) + (b * (x1 + offset_x)) + ty;
 
-                    vertices[vb_idx + VTX_COMP * 3 + 0] = (a * (x0 + offset_x)) + (c * (y1 + offset_y)) + tx;
-                    vertices[vb_idx + VTX_COMP * 3 + 1] = (d * (y1 + offset_y)) + (b * (x0 + offset_x)) + ty;
+                    vertices[vb_idx + VTX_COMP * 3 + 0] = (a * (x0 + offset_x)) + (c * (y0 + offset_y)) + tx;
+                    vertices[vb_idx + VTX_COMP * 3 + 1] = (d * (y0 + offset_y)) + (b * (x0 + offset_x)) + ty;
 
                     // - uv
                     vertices[vb_idx + VTX_COMP * 0 + 2] = -1;
