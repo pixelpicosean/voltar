@@ -32,6 +32,8 @@ import {
     CommandMultiMesh,
     CommandPolygon,
     CommandLine,
+    TYPE_LINE,
+    TYPE_CIRCLE,
 } from './commands';
 
 
@@ -128,6 +130,18 @@ export class Item {
             r.set(0, 0, 0, 0);
 
             switch (c.type) {
+                case TYPE_LINE: {
+                    const line = /** @type {CommandLine} */(c);
+                    r.x = line.from.x;
+                    r.y = line.from.y;
+                    r.expand_to(line.to);
+                } break;
+                case TYPE_CIRCLE: {
+                    const circle = /** @type {CommandCircle} */(c);
+                    r.x = -circle.radius + circle.pos.x;
+                    r.y = -circle.radius + circle.pos.y;
+                    r.width = r.height = circle.radius * 2;
+                } break;
                 case TYPE_RECT: {
                     const crect = /** @type {CommandRect} */(c);
                     r.copy(crect.rect);
