@@ -246,10 +246,7 @@ export class OS {
             canvas.addEventListener('mousedown', (e) => on_pointer_button(e, true), true);
             window.addEventListener('mouseup', (e) => on_pointer_button(e, false), true);
         }
-        window.oncontextmenu = (e) => {
-            on_pointer_button(e, true);
-            return false;
-        }
+        window.oncontextmenu = (e) => false;
 
         // touch events
         if (support_touch_events) {
