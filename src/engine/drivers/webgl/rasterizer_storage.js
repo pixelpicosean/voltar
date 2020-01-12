@@ -504,7 +504,7 @@ export class RasterizerStorage {
         gl.deleteShader(gl_fs);
 
         if (!gl.getProgramParameter(gl_prog, gl.LINK_STATUS)) {
-            console.error(`Failed to link shader program!`);
+            console.error(`Failed to link shader program: ${gl.getProgramInfoLog(gl_prog)}`);
             gl.deleteProgram(gl_prog);
             return null;
         }
