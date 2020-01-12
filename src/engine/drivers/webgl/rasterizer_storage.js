@@ -123,6 +123,8 @@ export class Material_t {
     constructor() {
         this.name = '';
 
+        this.batchable = false;
+
         /** @type {Shader_t} */
         this.shader = null;
 
@@ -274,10 +276,10 @@ export class RasterizerStorage {
             const buf = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, buf);
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
-                -1,-1,  0,0,
-                -1,+1,  0,1,
-                +1,+1,  1,1,
-                +1,-1,  1,0,
+                -1, -1, 0, 0,
+                -1, +1, 0, 1,
+                +1, +1, 1, 1,
+                +1, -1, 1, 0,
             ]), gl.STATIC_DRAW);
             gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
@@ -301,28 +303,28 @@ export class RasterizerStorage {
             // - black
             const black_texdata = new Uint8Array(8 * 8 * 4);
             for (let i = 0; i < 8 * 8 * 4; i += 4) {
-                black_texdata[i+0] = 0;
-                black_texdata[i+1] = 0;
-                black_texdata[i+2] = 0;
-                black_texdata[i+3] = 255;
+                black_texdata[i + 0] = 0;
+                black_texdata[i + 1] = 0;
+                black_texdata[i + 2] = 0;
+                black_texdata[i + 3] = 255;
             }
             this.resources.black_tex = create_texture(black_texdata, '_black_');
             // - normal
             const normal_texdata = new Uint8Array(8 * 8 * 4);
             for (let i = 0; i < 8 * 8 * 4; i += 4) {
-                normal_texdata[i+0] = 128;
-                normal_texdata[i+1] = 128;
-                normal_texdata[i+2] = 255;
-                normal_texdata[i+3] = 255;
+                normal_texdata[i + 0] = 128;
+                normal_texdata[i + 1] = 128;
+                normal_texdata[i + 2] = 255;
+                normal_texdata[i + 3] = 255;
             }
             this.resources.normal_tex = create_texture(normal_texdata, '_normal_');
             // - aniso
             const aniso_texdata = new Uint8Array(8 * 8 * 4);
             for (let i = 0; i < 8 * 8 * 4; i += 4) {
-                aniso_texdata[i+0] = 255;
-                aniso_texdata[i+1] = 128;
-                aniso_texdata[i+2] = 0;
-                aniso_texdata[i+3] = 255;
+                aniso_texdata[i + 0] = 255;
+                aniso_texdata[i + 1] = 128;
+                aniso_texdata[i + 2] = 0;
+                aniso_texdata[i + 3] = 255;
             }
             this.resources.aniso_tex = create_texture(aniso_texdata, '_aniso_');
         }
@@ -534,11 +536,11 @@ export class RasterizerStorage {
             const u = shader.uniforms[k];
             switch (u.type) {
                 case '1f': mt.params[k] = param[k] || [0]; break;
-                case '2f': mt.params[k] = param[k] || [0,0]; break;
-                case '3f': mt.params[k] = param[k] || [0,0,0]; break;
-                case '4f': mt.params[k] = param[k] || [0,0,0,0]; break;
-                case 'mat3': mt.params[k] = param[k] || [1,0,0, 0,1,0, 0,0,1]; break;
-                case 'mat4': mt.params[k] = param[k] || [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1]; break;
+                case '2f': mt.params[k] = param[k] || [0, 0]; break;
+                case '3f': mt.params[k] = param[k] || [0, 0, 0]; break;
+                case '4f': mt.params[k] = param[k] || [0, 0, 0, 0]; break;
+                case 'mat3': mt.params[k] = param[k] || [1, 0, 0, 0, 1, 0, 0, 0, 1]; break;
+                case 'mat4': mt.params[k] = param[k] || [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]; break;
             }
         }
 

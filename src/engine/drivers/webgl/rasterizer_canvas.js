@@ -32,11 +32,15 @@ import {
     CANVAS_RECT_TRANSPOSE,
     CANVAS_RECT_FLIP_H,
     CANVAS_RECT_FLIP_V,
+    CANVAS_RECT_TILE,
 } from 'engine/servers/visual/commands';
 import { ImageTexture } from 'engine/scene/resources/texture';
 
-import vs from './shaders/canvas.vert';
-import fs from './shaders/canvas.frag';
+import normal_vs from './shaders/canvas.vert';
+import normal_fs from './shaders/canvas.frag';
+
+import tile_vs from './shaders/canvas_tile.vert';
+import tile_fs from './shaders/canvas_tile.frag';
 
 
 const ATTR_VERTEX = 0;
@@ -98,6 +102,10 @@ class DrawGroup_t {
         /** @type {WebGLTexture} */
         this.gl_tex = null;
         this.tex_key = '';
+
+        /** @type {import('./rasterizer_storage').Material_t} */
+        this.material = null;
+        this.uniforms = Object.create(null);
 
         return this;
     }
@@ -217,6 +225,13 @@ export class RasterizerCanvas extends VObject {
         this.vbs = [];
         /** @type {WebGLBuffer[]} */
         this.ibs = [];
+
+        this.materials = {
+            /** @type {import('./rasterizer_storage').Material_t} */
+            flat: null,
+            /** @type {import('./rasterizer_storage').Material_t} */
+            tile: null,
+        };
     }
 
     /* API */
@@ -232,21 +247,48 @@ export class RasterizerCanvas extends VObject {
         const size = OS.get_singleton().get_window_size();
         this.resize(size.width, size.height);
 
-        const flat_shader = VSG.storage.shader_create(
-            vs, fs,
-            [
-                'position',
-                'uv',
-                'color',
-                'flags',
-            ],
-            [
-                { name: 'projection_matrix', type: 'mat4' },
-                { name: 'time', type: '1f' },
-            ]
-        );
-        this.states.material = VSG.storage.material_create(flat_shader);
-        this.states.material.name = 'flat';
+        this.materials.flat = (() => {
+            const shader = VSG.storage.shader_create(
+                normal_vs, normal_fs,
+                [
+                    'position',
+                    'uv',
+                    'color',
+                    'flags',
+                ],
+                [
+                    { name: 'projection_matrix', type: 'mat4' },
+                    { name: 'time', type: '1f' },
+                ]
+            );
+            const material = VSG.storage.material_create(shader);
+            material.name = 'flat';
+            material.batchable = true;
+            return material;
+        })();
+
+        this.materials.tile = (() => {
+            const shader = VSG.storage.shader_create(
+                tile_vs, tile_fs,
+                [
+                    'position',
+                    'uv',
+                    'color',
+                    'flags',
+                ],
+                [
+                    { name: 'projection_matrix', type: 'mat4' },
+                    { name: 'frame_uv', type: '4f' },
+                    { name: 'time', type: '1f' },
+                ],
+            );
+            const material = VSG.storage.material_create(shader);
+            material.name = 'tile';
+            material.batchable = false;
+            return material;
+        })();
+
+        this.states.material = null;
     }
     get_extensions() {
         const gl = this.gl;
@@ -311,9 +353,11 @@ export class RasterizerCanvas extends VObject {
         this.states.uniforms.time[0] = frame.time[0];
 
         // reset states
+        this.states.material = this.materials.flat;
         this.states.texture = this.storage.resources.white_tex.texture;
 
         this.current_draw_group = DrawGroup_new();
+        this.current_draw_group.material = this.materials.flat;
         this.draw_groups.push(this.current_draw_group);
     }
 
@@ -324,28 +368,8 @@ export class RasterizerCanvas extends VObject {
         this.current_draw_group.v_length = this.states.v_index - this.current_draw_group.v_start;
         this.current_draw_group.i_length = this.states.i_index - this.current_draw_group.i_start;
 
-        // apply pipeline
-        // TODO: support different pipelines
-        const mat = this.states.material;
-        gl.useProgram(mat.shader.gl_prog);
-        const global_uniforms = this.states.uniforms;
-        const uniforms = mat.shader.uniforms;
-        for (const k in uniforms) {
-            const u = uniforms[k];
-            switch (u.type) {
-                case '1f': gl.uniform1fv(u.gl_loc, global_uniforms[k] ? global_uniforms[k] : mat.params[k]); break;
-                case '2f': gl.uniform2fv(u.gl_loc, global_uniforms[k] ? global_uniforms[k] : mat.params[k]); break;
-                case '3f': gl.uniform3fv(u.gl_loc, global_uniforms[k] ? global_uniforms[k] : mat.params[k]); break;
-                case '4f': gl.uniform4fv(u.gl_loc, global_uniforms[k] ? global_uniforms[k] : mat.params[k]); break;
-                case 'mat3': gl.uniformMatrix3fv(u.gl_loc, false, global_uniforms[k] ? global_uniforms[k] : mat.params[k]); break;
-                case 'mat4': gl.uniformMatrix4fv(u.gl_loc, false, global_uniforms[k] ? global_uniforms[k] : mat.params[k]); break;
-            }
-        }
-
-        // TODO: support different blend modes
-        gl.enable(gl.BLEND);
-        gl.blendEquation(gl.FUNC_ADD);
-        gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+        this.states.material = null;
+        this.use_material(this.materials.flat, {});
 
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, this.storage.resources.white_tex.texture.gl_tex);
@@ -415,6 +439,36 @@ export class RasterizerCanvas extends VObject {
     /* private */
 
     /**
+     * @param {import('./rasterizer_storage').Material_t} material
+     * @param {Object<string, number>} uniforms
+     */
+    use_material(material, uniforms) {
+        if (material === this.states.material) return;
+
+        const gl = this.gl;
+
+        // TODO: support different blend modes
+        gl.enable(gl.BLEND);
+        gl.blendEquation(gl.FUNC_ADD);
+        gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+
+        gl.useProgram(material.shader.gl_prog);
+        const global_uniforms = this.states.uniforms;
+        const mat_uniforms = material.shader.uniforms;
+        for (const k in mat_uniforms) {
+            const u = mat_uniforms[k];
+            switch (u.type) {
+                case '1f': gl.uniform1fv(u.gl_loc, uniforms[k] ? uniforms[k] : global_uniforms[k] ? uniforms[k] ? uniforms[k] : global_uniforms[k] : material.params[k]); break;
+                case '2f': gl.uniform2fv(u.gl_loc, uniforms[k] ? uniforms[k] : global_uniforms[k] ? uniforms[k] ? uniforms[k] : global_uniforms[k] : material.params[k]); break;
+                case '3f': gl.uniform3fv(u.gl_loc, uniforms[k] ? uniforms[k] : global_uniforms[k] ? uniforms[k] ? uniforms[k] : global_uniforms[k] : material.params[k]); break;
+                case '4f': gl.uniform4fv(u.gl_loc, uniforms[k] ? uniforms[k] : global_uniforms[k] ? uniforms[k] ? uniforms[k] : global_uniforms[k] : material.params[k]); break;
+                case 'mat3': gl.uniformMatrix3fv(u.gl_loc, false, uniforms[k] ? uniforms[k] : global_uniforms[k] ? uniforms[k] ? uniforms[k] : global_uniforms[k] : material.params[k]); break;
+                case 'mat4': gl.uniformMatrix4fv(u.gl_loc, false, uniforms[k] ? uniforms[k] : global_uniforms[k] ? uniforms[k] ? uniforms[k] : global_uniforms[k] : material.params[k]); break;
+            }
+        }
+    }
+
+    /**
      * @param {Item} p_item
      */
     _canvas_item_render_commands(p_item) {
@@ -425,7 +479,7 @@ export class RasterizerCanvas extends VObject {
                 case TYPE_LINE: {
                     const line = /** @type {CommandLine} */(cmd);
 
-                    this.check_draw_group_state(4, 6, null);
+                    this.check_draw_group_state(4, 6, null, this.materials.flat);
 
                     const {
                         v: vertices,
@@ -509,7 +563,7 @@ export class RasterizerCanvas extends VObject {
                     const rect = /** @type {CommandRect} */(cmd);
                     const tex = rect.texture;
 
-                    this.check_draw_group_state(4, 6, tex);
+                    this.check_draw_group_state(4, 6, tex, (rect.flags & CANVAS_RECT_TILE) ? this.materials.tile : this.materials.flat);
 
                     const {
                         v: vertices,
@@ -552,13 +606,35 @@ export class RasterizerCanvas extends VObject {
                     if (tex) {
                         const tex_uvs = rect.texture.uvs;
                         if (rect.flags & CANVAS_RECT_REGION) {
-                            get_uvs_of_sub_rect(
-                                vertices, vb_idx,
-                                tex_uvs,
-                                rect.texture.width, rect.texture.height,
-                                rect.source.x, rect.source.y,
-                                rect.source.width, rect.source.height
-                            )
+                            if (rect.flags & CANVAS_RECT_TILE) {
+                                this.current_draw_group.uniforms = this.current_draw_group.uniforms || Object.create(null);
+                                this.current_draw_group.uniforms.frame_uv = [
+                                    tex_uvs[0],
+                                    tex_uvs[1],
+                                    tex_uvs[2],
+                                    tex_uvs[3],
+                                ];
+
+                                const u_pct = rect.source.width / rect.texture.width;
+                                const v_pct = rect.source.height / rect.texture.height;
+
+                                vertices[vb_idx + VTX_COMP * 0 + 2] = 0;
+                                vertices[vb_idx + VTX_COMP * 0 + 3] = 0;
+                                vertices[vb_idx + VTX_COMP * 1 + 2] = u_pct;
+                                vertices[vb_idx + VTX_COMP * 1 + 3] = 0;
+                                vertices[vb_idx + VTX_COMP * 2 + 2] = u_pct;
+                                vertices[vb_idx + VTX_COMP * 2 + 3] = v_pct;
+                                vertices[vb_idx + VTX_COMP * 3 + 2] = 0;
+                                vertices[vb_idx + VTX_COMP * 3 + 3] = v_pct;
+                            } else {
+                                get_uvs_of_sub_rect(
+                                    vertices, vb_idx,
+                                    tex_uvs,
+                                    rect.texture.width, rect.texture.height,
+                                    rect.source.x, rect.source.y,
+                                    rect.source.width, rect.source.height
+                                )
+                            }
                         } else {
                             vertices[vb_idx + VTX_COMP * 0 + 2] = tex_uvs[0];
                             vertices[vb_idx + VTX_COMP * 0 + 3] = tex_uvs[1];
@@ -627,7 +703,7 @@ export class RasterizerCanvas extends VObject {
                     const np = /** @type {CommandNinePatch} */(cmd);
                     const tex = np.texture;
 
-                    this.check_draw_group_state(32, 54, tex);
+                    this.check_draw_group_state(32, 54, tex, this.materials.flat);
 
                     const {
                         v: vertices,
@@ -828,7 +904,7 @@ export class RasterizerCanvas extends VObject {
                     const vert_count = polygon.get_vert_count();
                     const indi_count = polygon.indices.length;
 
-                    this.check_draw_group_state(vert_count, indi_count, tex);
+                    this.check_draw_group_state(vert_count, indi_count, tex, this.materials.flat);
 
                     const {
                         v: vertices,
@@ -902,7 +978,7 @@ export class RasterizerCanvas extends VObject {
                     const steps = Math.max(MIN_STEPS_PER_CIRCLE, scaled_radius * 5 / (200 + scaled_radius * 5) * MAX_STEPS_PER_CIRCLE) | 0;
                     const angle_per_step = Math.PI * 2 / steps;
 
-                    this.check_draw_group_state(steps, (steps - 2) * 3, tex);
+                    this.check_draw_group_state(steps, (steps - 2) * 3, tex, this.materials.flat);
 
                     const {
                         v: vertices,
@@ -951,18 +1027,19 @@ export class RasterizerCanvas extends VObject {
     /**
      * @param {number} num_vertex
      * @param {number} num_index
-     * @param {ImageTexture} tex
+     * @param {ImageTexture} texture
+     * @param {import('./rasterizer_storage').Material_t} material
      */
-    check_draw_group_state(num_vertex, num_index, tex) {
+    check_draw_group_state(num_vertex, num_index, texture, material) {
         let need_new_group = false;
 
         let use_new_buffer = false;
 
         // different texture?
         if (
-            tex
+            texture
             &&
-            tex.texture !== this.states.texture
+            texture.texture !== this.states.texture
         ) {
             // we can use same group if no texture is currently active
             if (this.states.texture) {
@@ -970,7 +1047,18 @@ export class RasterizerCanvas extends VObject {
                 this.current_draw_group.gl_tex = this.states.texture.gl_tex;
             }
 
-            this.states.texture = tex.texture;
+            this.states.texture = texture.texture;
+        }
+
+        // different material?
+        if (
+            (material && material !== this.states.material)
+            ||
+            (this.states.material && !this.states.material.batchable)
+        ) {
+            need_new_group = true;
+            this.current_draw_group.material = this.states.material;
+            this.states.material = material;
         }
 
         // buffer overflow?
@@ -1002,8 +1090,11 @@ export class RasterizerCanvas extends VObject {
             new_group.vert_slot = this.states.active_vert_slot;
             new_group.v_start = this.states.v_index;
             new_group.i_start = this.states.i_index;
-            new_group.gl_tex = tex.texture.gl_tex;
-            new_group.tex_key = tex.resource_name;
+            if (texture) {
+                new_group.gl_tex = texture.texture.gl_tex;
+                new_group.tex_key = texture.resource_name;
+            }
+            new_group.material = material;
 
             this.draw_groups.push(new_group);
             this.current_draw_group = new_group;
@@ -1014,6 +1105,9 @@ export class RasterizerCanvas extends VObject {
      */
     flush_group(group) {
         const gl = this.gl;
+
+        // shader
+        this.use_material(group.material, group.uniforms);
 
         // apply data binding
         // - texture
