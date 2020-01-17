@@ -19,15 +19,17 @@ import { Item } from 'engine/servers/visual/visual_server_canvas';
 import { VSG } from 'engine/servers/visual/visual_server_globals';
 import {
     TYPE_LINE,
+    TYPE_POLYLINE,
+    TYPE_CIRCLE,
     TYPE_RECT,
     TYPE_NINEPATCH,
     TYPE_POLYGON,
-    TYPE_CIRCLE,
     CommandLine,
+    CommandPolyLine,
+    CommandCircle,
     CommandRect,
     CommandNinePatch,
     CommandPolygon,
-    CommandCircle,
     CANVAS_RECT_REGION,
     CANVAS_RECT_TRANSPOSE,
     CANVAS_RECT_FLIP_H,
@@ -1017,6 +1019,66 @@ export class RasterizerCanvas extends VObject {
 
                     this.states.v_index += steps;
                     this.states.i_index += (steps - 2) * 3;
+                } break;
+                case TYPE_POLYLINE: {
+                    const pline = /** @type {CommandPolyLine} */(cmd);
+                    const tex = pline.texture;
+
+                    const vert_count = Math.floor(pline.triangles.length / 2);
+                    const indi_count = (vert_count - 2) * 3;
+
+                    this.check_draw_group_state(vert_count, indi_count, tex, this.materials.flat);
+
+                    const {
+                        v: vertices,
+                        i: indices,
+                    } = this.vertices[this.states.active_vert_slot];
+
+                    const v_idx = this.states.v_index;
+
+                    let vb_idx = this.states.v_index * VTX_COMP;
+                    let ib_idx = this.states.i_index;
+
+                    // vertex
+                    const wt = p_item.final_transform;
+                    const a = wt.a;
+                    const b = wt.b;
+                    const c = wt.c;
+                    const d = wt.d;
+                    const tx = wt.tx;
+                    const ty = wt.ty;
+
+                    const points = pline.triangles;
+                    const colors = pline.triangle_colors;
+                    const s_color = (colors.length === 4);
+                    const s_color_num = s_color ? color.set(colors[0], colors[1], colors[2], colors[3]).multiply(p_item.final_modulate).as_rgba8() : 0;
+                    const flags = color.set(p_item.fill_mode, 0, 0, 0).as_rgba8();
+
+                    for (let i = 0, len = vert_count; i < len; i++) {
+                        // position
+                        vertices[vb_idx + VTX_COMP * i + 0] = (a * points[i * 2]) + (c * points[i * 2 + 1]) + tx;
+                        vertices[vb_idx + VTX_COMP * i + 1] = (d * points[i * 2 + 1]) + (b * points[i * 2]) + ty;
+                        // uv
+                        vertices[vb_idx + VTX_COMP * i + 2] = -1;
+                        vertices[vb_idx + VTX_COMP * i + 3] = -1;
+                        // color
+                        vertices[vb_idx + VTX_COMP * i + 4] = s_color ? s_color_num : color.set(color[i * 4], color[i * 4 + 1], color[i * 4 + 2], color[i * 4 + 3]).multiply(p_item.final_modulate).as_rgba8();
+                        // flags
+                        vertices[vb_idx + VTX_COMP * i + 5] = flags;
+                    }
+
+                    // index
+                    for (let i = 0, len = Math.floor((vert_count - 2) / 2); i < len; i++) {
+                        indices[ib_idx + i * 6 + 0] = v_idx + i * 2 + 0;
+                        indices[ib_idx + i * 6 + 1] = v_idx + i * 2 + 1;
+                        indices[ib_idx + i * 6 + 2] = v_idx + i * 2 + 2;
+                        indices[ib_idx + i * 6 + 3] = v_idx + i * 2 + 1;
+                        indices[ib_idx + i * 6 + 4] = v_idx + i * 2 + 3;
+                        indices[ib_idx + i * 6 + 5] = v_idx + i * 2 + 2;
+                    }
+
+                    this.states.v_index += vert_count;
+                    this.states.i_index += indi_count;
                 } break;
             }
         }

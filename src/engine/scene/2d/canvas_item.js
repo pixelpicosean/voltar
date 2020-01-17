@@ -11,6 +11,7 @@ import { Color, ColorLike } from "engine/core/color";
 import { VSG } from "engine/servers/visual/visual_server_globals";
 
 import { ImageTexture } from "../resources/texture";
+import { StyleBox } from "../resources/style_box";
 import { GROUP_CALL_UNIQUE } from "../main/scene_tree";
 import { CanvasLayer } from "../main/canvas_layer";
 import {
@@ -196,6 +197,34 @@ export class CanvasItem extends Node {
     }
 
     /**
+     * @param {PoolVector2Array | number[]} p_points
+     * @param {ColorLike} p_color
+     * @param {number} [p_width]
+     * @param {boolean} [p_antialiased]
+     */
+    draw_polyline(p_points, p_color, p_width = 1.0, p_antialiased = false) {
+        if (Array.isArray(p_points)) {
+            VSG.canvas.canvas_item_add_polyline(this.canvas_item, p_points, [p_color.r, p_color.g, p_color.b, p_color.a], p_width, p_antialiased);
+        } else {
+            VSG.canvas.canvas_item_add_polyline(this.canvas_item, p_points.data, [p_color.r, p_color.g, p_color.b, p_color.a], p_width, p_antialiased);
+        }
+    }
+
+    /**
+     * @param {PoolVector2Array | number[]} p_points
+     * @param {number[]} p_colors
+     * @param {number} [p_width]
+     * @param {boolean} [p_antialiased]
+     */
+    draw_polyline_colors(p_points, p_colors, p_width = 1.0, p_antialiased = false) {
+        if (Array.isArray(p_points)) {
+            VSG.canvas.canvas_item_add_polyline(this.canvas_item, p_points, p_colors, p_width, p_antialiased);
+        } else {
+            VSG.canvas.canvas_item_add_polyline(this.canvas_item, p_points.data, p_colors, p_width, p_antialiased);
+        }
+    }
+
+    /**
      * @param {Rect2} p_rect
      * @param {ColorLike} p_color
      * @param {boolean} [p_filled=true]
@@ -217,6 +246,71 @@ export class CanvasItem extends Node {
      */
     draw_circle(p_pos, p_radius, p_color) {
         VSG.canvas.canvas_item_add_circle(this.canvas_item, p_pos, p_radius, p_color);
+    }
+
+    /**
+     * @param {Vector2Like} p_center
+     * @param {number} p_radius
+     * @param {number} p_start_angle
+     * @param {number} p_end_angle
+     * @param {number} p_point_count
+     * @param {ColorLike} p_color
+     * @param {number} [p_width]
+     * @param {boolean} [p_antialiased]
+     */
+    draw_arc(p_center, p_radius, p_start_angle, p_end_angle, p_point_count, p_color, p_width = 1.0, p_antialiased = false) {
+        const points = new Array(p_point_count);
+        const delta_angle = p_end_angle - p_start_angle;
+        for (let i = 0; i < p_point_count; i++) {
+            const theta = i / (p_point_count - 1) * delta_angle + p_start_angle;
+            points[i] = {
+                x: Math.cos(theta) * p_radius + p_center.x,
+                y: Math.sin(theta) * p_radius + p_center.y,
+            };
+        }
+
+        this.draw_polyline(points, p_color, p_width, p_antialiased);
+    }
+
+    /**
+     * @param {StyleBox} p_style_box
+     * @param {Rect2} p_rect
+     */
+    draw_style_box(p_style_box, p_rect) {
+        p_style_box.draw(this.canvas_item, p_rect);
+    }
+
+    draw_string() { }
+    draw_char() { }
+
+    /**
+     * @param {Vector2Like} p_offset
+     * @param {number} p_rot
+     * @param {Vector2Like} p_scale
+     */
+    draw_set_transform(p_offset, p_rot, p_scale) {
+        const xform = Transform2D.new();
+        const cr = Math.cos(p_rot);
+        const sr = Math.sin(p_rot);
+        xform.a = cr;
+        xform.b = sr;
+        xform.c = -sr;
+        xform.d = cr;
+        xform.tx = p_offset.x;
+        xform.ty = p_offset.y;
+        xform.scale_basis(p_scale.x, p_scale.y);
+        VSG.canvas.canvas_item_add_set_transform(this.canvas_item, xform.to_array(false));
+        Transform2D.free(xform);
+    }
+    /**
+     * @param {Transform2D | number[]} p_matrix
+     */
+    draw_set_transform_matrix(p_matrix) {
+        if (Array.isArray(p_matrix)) {
+            VSG.canvas.canvas_item_add_set_transform(this.canvas_item, p_matrix);
+        } else {
+            VSG.canvas.canvas_item_add_set_transform(this.canvas_item, p_matrix.to_array(false));
+        }
     }
 
     /**
@@ -248,6 +342,19 @@ export class CanvasItem extends Node {
      */
     draw_texture_rect_region(p_texture, p_rect, p_src_rect, p_modulate = white, p_transpose = false) {
         p_texture.draw_rect_region(this.canvas_item, p_rect, p_src_rect, p_modulate, p_transpose);
+    }
+
+    /**
+     * @param {PoolVector2Array | number[]} p_points
+     * @param {Color} p_colors
+     * @param {PoolVector2Array | number[]} [p_uvs]
+     * @param {ImageTexture} [p_texture]
+     * @param {number[]} [p_indices]
+     */
+    draw_polygon(p_points, p_colors, p_uvs = null, p_texture = null, p_indices) {
+        const points = Array.isArray(p_points) ? p_points : p_points.data;
+        const uvs = p_uvs ? Array.isArray(p_uvs) ? p_uvs : p_uvs.data : null;
+        VSG.canvas.canvas_item_add_polygon(this.canvas_item, points, [p_colors.r, p_colors.g, p_colors.b, p_colors.a], uvs, p_texture, p_indices);
     }
 
     /**

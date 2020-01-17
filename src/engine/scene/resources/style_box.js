@@ -5,6 +5,8 @@ import {
     MARGIN_BOTTOM,
 } from "engine/core/math/math_defs";
 import { Vector2 } from "engine/core/math/vector2";
+import { Item } from "engine/servers/visual/visual_server_canvas";
+import { Rect2 } from "engine/core/math/rect2";
 
 
 export class StyleBox {
@@ -63,4 +65,10 @@ export class StyleBox {
     get_offset(size) {
         return size.set(this.get_margin(MARGIN_LEFT), this.get_margin(MARGIN_TOP));
     }
+
+    /**
+     * @param {Item} p_item
+     * @param {Rect2} p_rect
+     */
+    draw(p_item, p_rect) { }
 }
