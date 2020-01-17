@@ -16,24 +16,28 @@ import { ImageTexture } from 'engine/scene/resources/texture';
 import { VisualServer } from '../visual_server';
 import { VSG } from './visual_server_globals';
 import {
+    TYPE_LINE,
+    TYPE_POLYLINE,
+    TYPE_CIRCLE,
     TYPE_RECT,
     TYPE_NINEPATCH,
+    TYPE_TRANSFORM,
+    TYPE_CUSTOM,
     CANVAS_RECT_TILE,
     CANVAS_RECT_REGION,
     CANVAS_RECT_FLIP_H,
     CANVAS_RECT_FLIP_V,
     CANVAS_RECT_TRANSPOSE,
     NINE_PATCH_STRETCH,
-    TYPE_CUSTOM,
     Command,
+    CommandCircle,
     CommandRect,
     CommandNinePatch,
-    CommandCircle,
-    CommandMultiMesh,
-    CommandPolygon,
     CommandLine,
-    TYPE_LINE,
-    TYPE_CIRCLE,
+    CommandPolyLine,
+    CommandPolygon,
+    CommandMultiMesh,
+    CommandTransform,
 } from './commands';
 
 
@@ -136,6 +140,20 @@ export class Item {
                     r.y = line.from.y;
                     r.expand_to(line.to);
                 } break;
+                case TYPE_POLYLINE: {
+                    const pline = /** @type {CommandPolyLine} */(c);
+                    const vec = Vector2.new();
+                    const tri = pline.triangles;
+                    for (let j = 0, len = Math.floor(tri.length / 2); j < len; j++) {
+                        if (j === 0) {
+                            r.x = tri[j * 2];
+                            r.y = tri[j * 2 + 1];
+                        } else {
+                            r.expand_to(vec.set(tri[j * 2], tri[j * 2 + 1]));
+                        }
+                    }
+                    Vector2.free(vec);
+                } break;
                 case TYPE_CIRCLE: {
                     const circle = /** @type {CommandCircle} */(c);
                     r.x = -circle.radius + circle.pos.x;
@@ -149,6 +167,11 @@ export class Item {
                 case TYPE_NINEPATCH: {
                     const style = /** @type {CommandNinePatch} */(c);
                     r.copy(style.rect);
+                } break;
+                case TYPE_TRANSFORM: {
+                    const transform = /** @type {CommandTransform} */(c);
+                    xf.copy(transform.xform);
+                    found_xform = true;
                 } break;
                 case TYPE_CUSTOM: {
                     if (/** @type {any} */(c).rect) {
@@ -474,7 +497,87 @@ export class VisualServerCanvas {
 
         p_item.commands.push(line);
     }
-    canvas_item_add_polyline() { }
+    /**
+     * @param {Item} p_item
+     * @param {number[]} p_points
+     * @param {number[]} p_colors
+     * @param {number} [p_width]
+     * @param {boolean} [p_antialiased]
+     */
+    canvas_item_add_polyline(p_item, p_points, p_colors, p_width = 1.0, p_antialiased = false) {
+        const pline = CommandPolyLine.instance();
+
+        pline.antialiased = p_antialiased;
+
+        /* make a triangle strip for drawing */
+        let prev_x = 0, prev_y = 0;
+        pline.triangles.length = p_points.length * 2;
+
+        if (p_colors.length === 0) {
+            pline.triangle_colors.push(1, 1, 1, 1);
+        } else if (p_colors.length === 4) {
+            for (let i = 0; i < p_colors.length; i++) {
+                pline.triangle_colors[i] = p_colors[i];
+            }
+        } else {
+            if (p_colors.length * 4 !== p_points.length * 2) {
+                pline.triangle_colors.push(p_colors[0], p_colors[1], p_colors[2], p_colors[3]);
+            } else {
+                pline.triangle_colors.length = pline.triangles.length / 2 * 4;
+            }
+        }
+
+        const t = Vector2.new();
+        const tangent = Vector2.new();
+        for (let i = 0, len = Math.floor(p_points.length / 2); i < len; i++) {
+            const index = i * 2;
+
+            if (i === len - 1) {
+                t.x = prev_x;
+                t.y = prev_y;
+            } else {
+                const _t = t.set(
+                    p_points[(i + 1) * 2 + 0] - p_points[index + 0],
+                    p_points[(i + 1) * 2 + 1] - p_points[index + 1]
+                )
+                .normalize().tangent();
+                t.copy(_t);
+                Vector2.free(_t);
+
+                if (i === 0) {
+                    prev_x = t.x;
+                    prev_y = t.y;
+                }
+            }
+
+            tangent.copy(t).add(prev_x, prev_y).normalize().scale(p_width * 0.5);
+
+            pline.triangles[index * 2 + 0] = p_points[index + 0] + tangent.x;
+            pline.triangles[index * 2 + 1] = p_points[index + 1] + tangent.y;
+            pline.triangles[index * 2 + 2] = p_points[index + 0] - tangent.x;
+            pline.triangles[index * 2 + 3] = p_points[index + 1] - tangent.y;
+
+            if (pline.triangle_colors.length > 4) {
+                pline.triangle_colors[index * 2 + 0] = p_colors[i * 2 + 0];
+                pline.triangle_colors[index * 2 + 1] = p_colors[i * 2 + 1];
+                pline.triangle_colors[index * 2 + 2] = p_colors[i * 2 + 2];
+                pline.triangle_colors[index * 2 + 3] = p_colors[i * 2 + 3];
+
+                pline.triangle_colors[index * 2 + 4] = p_colors[i * 2 + 0];
+                pline.triangle_colors[index * 2 + 5] = p_colors[i * 2 + 1];
+                pline.triangle_colors[index * 2 + 6] = p_colors[i * 2 + 2];
+                pline.triangle_colors[index * 2 + 7] = p_colors[i * 2 + 3];
+            }
+
+            prev_x = t.x;
+            prev_y = t.y;
+        }
+        Vector2.free(tangent);
+        Vector2.free(t);
+
+        p_item.rect_dirty = true;
+        p_item.commands.push(pline);
+    }
     canvas_item_add_multiline() { }
     /**
      * @param {Item} p_item
@@ -644,6 +747,16 @@ export class VisualServerCanvas {
 
         p_item.rect_dirty = true;
         p_item.commands.push(mm);
+    }
+    /**
+     * @param {Item} p_item
+     * @param {number[]} p_transform
+     */
+    canvas_item_add_set_transform(p_item, p_transform) {
+        const tr = CommandTransform.instance();
+        tr.xform.from_array(p_transform);
+
+        p_item.commands.push(tr);
     }
     canvas_item_add_particles() { }
     canvas_item_add_clip_ignore() { }

@@ -3,6 +3,7 @@ import { Rect2 } from "engine/core/math/rect2";
 import { Color } from "engine/core/color";
 
 import { ImageTexture } from "engine/scene/resources/texture";
+import { Transform2D } from "engine/core/math/transform_2d";
 
 
 export const CANVAS_RECT_REGION = 1;
@@ -86,6 +87,37 @@ export class CommandLine extends Command {
     }
 }
 create_pool(TYPE_LINE, CommandLine)
+
+export class CommandPolyLine extends Command {
+    get type() { return TYPE_POLYLINE }
+    static instance() { return new CommandPolyLine() } // for TypeScript type checking
+
+    constructor() {
+        super();
+
+        this.width = 1.0;
+        this.antialiased = false;
+        /** @type {number[]} */
+        this.triangles = [];
+        /** @type {number[]} */
+        this.triangle_colors = [];
+        /** @type {number[]} */
+        // this.lines = [];
+        /** @type {number[]} */
+        // this.line_colors = [];
+    }
+    init() {
+        super.init();
+        this.width = 1.0;
+        this.antialiased = false;
+        this.triangles.length = 0;
+        this.triangle_colors.length = 0;
+        // this.lines.length = 0;
+        // this.line_colors.length = 0;
+        return this;
+    }
+}
+create_pool(TYPE_POLYLINE, CommandPolyLine)
 
 export class CommandRect extends Command {
     get type() { return TYPE_RECT }
@@ -195,3 +227,18 @@ export class CommandMultiMesh extends Command {
     }
 }
 create_pool(TYPE_MULTIMESH, CommandMultiMesh)
+
+export class CommandTransform extends Command {
+    get type() { return TYPE_TRANSFORM }
+    static instance() { return new CommandTransform() } // for TypeScript type checking
+    constructor() {
+        super();
+
+        this.xform = new Transform2D;
+    }
+    init() {
+        this.xform.identity();
+        return this;
+    }
+}
+create_pool(TYPE_TRANSFORM, CommandTransform)
