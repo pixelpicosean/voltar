@@ -250,10 +250,43 @@ export class Transform2D {
      * Creates an array from the current Matrix object.
      *
      * @param {boolean} p_transpose - Whether we need to transpose the matrix or not
+     * @param {number[]} [r_out] - If provided the array will be assigned to out
+     * @return {number[]} the newly created array which contains the matrix
+     */
+    to_array(p_transpose, r_out = []) {
+        if (p_transpose) {
+            r_out[0] = this.a;
+            r_out[1] = this.b;
+            r_out[2] = 0;
+            r_out[3] = this.c;
+            r_out[4] = this.d;
+            r_out[5] = 0;
+            r_out[6] = this.tx;
+            r_out[7] = this.ty;
+            r_out[8] = 1;
+        } else {
+            r_out[0] = this.a;
+            r_out[1] = this.c;
+            r_out[2] = this.tx;
+            r_out[3] = this.b;
+            r_out[4] = this.d;
+            r_out[5] = this.ty;
+            r_out[6] = 0;
+            r_out[7] = 0;
+            r_out[8] = 1;
+        }
+
+        return r_out;
+    }
+
+    /**
+     * Creates a Float32Array from the current Matrix object.
+     *
+     * @param {boolean} p_transpose - Whether we need to transpose the matrix or not
      * @param {Float32Array} [r_out] - If provided the array will be assigned to out
      * @return {Float32Array} the newly created array which contains the matrix
      */
-    to_array(p_transpose, r_out) {
+    to_typed_array(p_transpose, r_out) {
         if (!this.array) {
             this.array = new Float32Array(9);
         }
@@ -270,8 +303,7 @@ export class Transform2D {
             array[6] = this.tx;
             array[7] = this.ty;
             array[8] = 1;
-        }
-        else {
+        } else {
             array[0] = this.a;
             array[1] = this.c;
             array[2] = this.tx;
