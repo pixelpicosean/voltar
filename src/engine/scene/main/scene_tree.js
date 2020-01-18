@@ -36,7 +36,7 @@ import {
     NOTIFICATION_UNPAUSED,
 } from '../main/node';
 import { NOTIFICATION_TRANSFORM_CHANGED } from '../2d/canvas_item';
-import { assemble_scene } from '../assembler';
+import { assemble_scene, instanciate_scene } from '../assembler';
 
 
 export class SceneTreeTimer extends VObject {
@@ -602,9 +602,7 @@ export class SceneTree extends MainLoop {
         }
         // Instance from pure scene data?
         else {
-            new_scene = new (node_class_map[next_scene.nodes[0].type]);
-            new_scene._load_data(next_scene);
-            assemble_scene(new_scene, next_scene, next_scene_path);
+            new_scene = instanciate_scene(next_scene);
         }
         this.call_deferred('_change_scene', new_scene);
     }
