@@ -860,8 +860,8 @@ export class TileMap extends Node2D {
             view.setInt32(4, p_data[i + 1]);
             view.setInt32(8, p_data[i + 2]);
 
-            const x = view.getUint16(2);
-            const y = view.getUint16(0);
+            const x = view.getInt16(2);
+            const y = view.getInt16(0);
 
             let v = view.getUint32(4);
             const flip_h = !!(v & (1 << 29));
