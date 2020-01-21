@@ -83,6 +83,10 @@ export class Viewport {
         /** @type {Map<Canvas, CanvasData>} */
         this.canvas_map = new Map();
     }
+
+    get_id() {
+        return this._id;
+    }
 }
 
 /**
@@ -395,12 +399,21 @@ export class VisualServerViewport {
 
             VSG.rasterizer.restore_render_target();
 
-            for (const [_, c] of p_viewport.canvas_map) {
-                const canvas = c.canvas;
+
+            const map_list = [...p_viewport.canvas_map.entries()].sort(canvas_sort)
+            for (const [canvas, c] of map_list) {
                 const xform = this._canvas_get_transform(p_viewport, canvas, c, clip_rect);
                 VSG.canvas.render_canvas(canvas, xform, null, null, clip_rect);
                 Transform2D.free(xform);
             }
         }
     }
+}
+
+/**
+ * @param {[Canvas, CanvasData]} a
+ * @param {[Canvas, CanvasData]} b
+ */
+function canvas_sort(a, b) {
+    return (a[1].layer + a[1].sublayer) - (b[1].layer + b[1].sublayer);
 }
