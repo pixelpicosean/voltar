@@ -756,7 +756,7 @@ export class CanvasItem extends Node {
             this.canvas_layer = null;
 
             while (n) {
-                if (n.class === 'CanvasLayer') {
+                if (n instanceof CanvasLayer) {
                     this.canvas_layer = /** @type {CanvasLayer} */(n);
                     break;
                 }
