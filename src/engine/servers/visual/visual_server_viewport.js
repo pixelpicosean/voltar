@@ -399,6 +399,7 @@ export class VisualServerViewport {
 
             VSG.rasterizer.restore_render_target();
 
+            VSG.canvas_render.prepare();
 
             const map_list = [...p_viewport.canvas_map.entries()].sort(canvas_sort)
             for (const [canvas, c] of map_list) {

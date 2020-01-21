@@ -94,6 +94,7 @@ class DrawGroup_t {
     }
     init() {
         this.vert_slot = 0;
+        this.buffer_slot = 0;
 
         this.v_start = 0;
         this.v_length = 0;
@@ -191,6 +192,8 @@ export class RasterizerCanvas extends VObject {
 
             active_vert_slot: 0,
             active_buffer_slot: 0,
+            v_start: 0,
+            i_start: 0,
             v_index: 0,
             i_index: 0,
 
@@ -322,6 +325,20 @@ export class RasterizerCanvas extends VObject {
 
     update() { }
 
+    prepare() {
+        this.states.material = this.materials.flat;
+        this.states.texture = this.storage.resources.white_tex.texture;
+
+        this.states.active_vert_slot = 0;
+        this.states.active_buffer_slot = 0;
+
+        this.states.v_start = 0;
+        this.states.i_start = 0;
+
+        this.states.v_index = 0;
+        this.states.i_index = 0;
+    }
+
     canvas_begin() {
         const gl = this.gl;
 
@@ -344,7 +361,7 @@ export class RasterizerCanvas extends VObject {
 
         this.reset_canvas();
 
-        // update uniforms
+        // update general uniform data
         const canvas_transform = identity_mat4(this.states.uniforms.projection_matrix);
         if (frame.current_rt) {
         } else {
@@ -357,72 +374,13 @@ export class RasterizerCanvas extends VObject {
         // reset states
         this.states.material = this.materials.flat;
         this.states.texture = this.storage.resources.white_tex.texture;
-
-        this.current_draw_group = DrawGroup_new();
-        this.current_draw_group.material = this.materials.flat;
-        this.draw_groups.push(this.current_draw_group);
     }
 
     canvas_end() {
-        const gl = this.gl;
-
-        // end last active group
-        this.current_draw_group.v_length = this.states.v_index - this.current_draw_group.v_start;
-        this.current_draw_group.i_length = this.states.i_index - this.current_draw_group.i_start;
-
-        this.states.material = null;
-        this.use_material(this.materials.flat, {});
-
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, this.storage.resources.white_tex.texture.gl_tex);
-
-        let current_buffer_slot = -1;
-        for (let i = 0; i < this.draw_groups.length; i++) {
-            const group = this.draw_groups[i];
-
-            // uses different vertices array? let's upload them to GPU
-            if (group.vert_slot !== current_buffer_slot) {
-                const {
-                    v: vertices,
-                    i: indices,
-                } = this.vertices[group.vert_slot];
-
-                let vb = this.vbs[this.states.active_buffer_slot];
-                if (!vb) {
-                    vb = this.vbs[this.states.active_buffer_slot] = gl.createBuffer();
-                }
-                gl.bindBuffer(gl.ARRAY_BUFFER, vb);
-                gl.bufferData(gl.ARRAY_BUFFER, vertices.subarray(0, this.states.v_index * VTX_COMP), gl.DYNAMIC_DRAW);
-
-                let ib = this.ibs[this.states.active_buffer_slot];
-                if (!ib) {
-                    ib = this.ibs[this.states.active_buffer_slot] = gl.createBuffer();
-                }
-                gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ib);
-                gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices.subarray(0, this.states.i_length), gl.DYNAMIC_DRAW);
-
-                current_buffer_slot = group.vert_slot;
-            }
-
-            // issue a draw call for this group
-            this.flush_group(group);
-        }
-
-        // recycle draw group data
-        for (const g of this.draw_groups) {
-            DrawGroup_free(g);
-        }
-        this.draw_groups.length = 0;
+        this.flush();
     }
 
-    reset_canvas() {
-        this.states.active_buffer_slot = 0;
-        this.states.active_vert_slot = 0;
-
-        // reset vertices and indices offset/index
-        this.states.v_index = 0;
-        this.states.i_index = 0;
-    }
+    reset_canvas() { }
 
     /**
      * @param {import('engine/servers/visual/visual_server_canvas').Item} p_item_list
@@ -442,11 +400,9 @@ export class RasterizerCanvas extends VObject {
 
     /**
      * @param {import('./rasterizer_storage').Material_t} material
-     * @param {Object<string, number>} uniforms
+     * @param {Object<string, number[]>} uniforms
      */
     use_material(material, uniforms) {
-        if (material === this.states.material) return;
-
         const gl = this.gl;
 
         // TODO: support different blend modes
@@ -481,14 +437,14 @@ export class RasterizerCanvas extends VObject {
                 case TYPE_LINE: {
                     const line = /** @type {CommandLine} */(cmd);
 
-                    this.check_draw_group_state(4, 6, null, this.materials.flat);
+                    this.check_batch_state(4, 6, null, this.materials.flat);
 
                     const {
                         v: vertices,
                         i: indices,
                     } = this.vertices[this.states.active_vert_slot];
 
-                    const v_idx = this.states.v_index;
+                    const v_idx = this.states.v_index - this.states.v_start;
 
                     let vb_idx = this.states.v_index * VTX_COMP;
                     let ib_idx = this.states.i_index;
@@ -565,14 +521,14 @@ export class RasterizerCanvas extends VObject {
                     const rect = /** @type {CommandRect} */(cmd);
                     const tex = rect.texture;
 
-                    this.check_draw_group_state(4, 6, tex, (rect.flags & CANVAS_RECT_TILE) ? this.materials.tile : this.materials.flat);
+                    this.check_batch_state(4, 6, tex, (rect.flags & CANVAS_RECT_TILE) ? this.materials.tile : this.materials.flat);
 
                     const {
                         v: vertices,
                         i: indices,
                     } = this.vertices[this.states.active_vert_slot];
 
-                    const v_idx = this.states.v_index;
+                    const v_idx = this.states.v_index - this.states.v_start;
 
                     let vb_idx = this.states.v_index * VTX_COMP;
                     let ib_idx = this.states.i_index;
@@ -609,8 +565,7 @@ export class RasterizerCanvas extends VObject {
                         const tex_uvs = rect.texture.uvs;
                         if (rect.flags & CANVAS_RECT_REGION) {
                             if (rect.flags & CANVAS_RECT_TILE) {
-                                this.current_draw_group.uniforms = this.current_draw_group.uniforms || Object.create(null);
-                                this.current_draw_group.uniforms.frame_uv = [
+                                this.states.uniforms.frame_uv = [
                                     tex_uvs[0],
                                     tex_uvs[1],
                                     tex_uvs[2],
@@ -705,14 +660,14 @@ export class RasterizerCanvas extends VObject {
                     const np = /** @type {CommandNinePatch} */(cmd);
                     const tex = np.texture;
 
-                    this.check_draw_group_state(32, 54, tex, this.materials.flat);
+                    this.check_batch_state(32, 54, tex, this.materials.flat);
 
                     const {
                         v: vertices,
                         i: indices,
                     } = this.vertices[this.states.active_vert_slot];
 
-                    const v_idx = this.states.v_index;
+                    const v_idx = this.states.v_index - this.states.v_start;
 
                     let vb_idx = this.states.v_index * VTX_COMP;
                     let ib_idx = this.states.i_index;
@@ -906,14 +861,14 @@ export class RasterizerCanvas extends VObject {
                     const vert_count = polygon.get_vert_count();
                     const indi_count = polygon.indices.length;
 
-                    this.check_draw_group_state(vert_count, indi_count, tex, this.materials.flat);
+                    this.check_batch_state(vert_count, indi_count, tex, this.materials.flat);
 
                     const {
                         v: vertices,
                         i: indices,
                     } = this.vertices[this.states.active_vert_slot];
 
-                    const v_idx = this.states.v_index;
+                    const v_idx = this.states.v_index - this.states.v_start;
 
                     let vb_idx = this.states.v_index * VTX_COMP;
                     let ib_idx = this.states.i_index;
@@ -980,14 +935,14 @@ export class RasterizerCanvas extends VObject {
                     const steps = Math.max(MIN_STEPS_PER_CIRCLE, scaled_radius * 5 / (200 + scaled_radius * 5) * MAX_STEPS_PER_CIRCLE) | 0;
                     const angle_per_step = Math.PI * 2 / steps;
 
-                    this.check_draw_group_state(steps, (steps - 2) * 3, tex, this.materials.flat);
+                    this.check_batch_state(steps, (steps - 2) * 3, tex, this.materials.flat);
 
                     const {
                         v: vertices,
                         i: indices,
                     } = this.vertices[this.states.active_vert_slot];
 
-                    const v_idx = this.states.v_index;
+                    const v_idx = this.states.v_index - this.states.v_start;
 
                     let vb_idx = this.states.v_index * VTX_COMP;
                     let ib_idx = this.states.i_index;
@@ -1027,14 +982,14 @@ export class RasterizerCanvas extends VObject {
                     const vert_count = Math.floor(pline.triangles.length / 2);
                     const indi_count = (vert_count - 2) * 3;
 
-                    this.check_draw_group_state(vert_count, indi_count, tex, this.materials.flat);
+                    this.check_batch_state(vert_count, indi_count, tex, this.materials.flat);
 
                     const {
                         v: vertices,
                         i: indices,
                     } = this.vertices[this.states.active_vert_slot];
 
-                    const v_idx = this.states.v_index;
+                    const v_idx = this.states.v_index - this.states.v_start;
 
                     let vb_idx = this.states.v_index * VTX_COMP;
                     let ib_idx = this.states.i_index;
@@ -1092,9 +1047,8 @@ export class RasterizerCanvas extends VObject {
      * @param {ImageTexture} texture
      * @param {import('./rasterizer_storage').Material_t} material
      */
-    check_draw_group_state(num_vertex, num_index, texture, material) {
-        let need_new_group = false;
-
+    check_batch_state(num_vertex, num_index, texture, material) {
+        let batch_broken = false;
         let use_new_buffer = false;
 
         // different texture?
@@ -1103,13 +1057,9 @@ export class RasterizerCanvas extends VObject {
             &&
             texture.texture !== this.states.texture
         ) {
-            // we can use same group if no texture is currently active
             if (this.states.texture) {
-                need_new_group = true;
-                this.current_draw_group.gl_tex = this.states.texture.gl_tex;
+                batch_broken = true;
             }
-
-            this.states.texture = texture.texture;
         }
 
         // different material?
@@ -1118,64 +1068,77 @@ export class RasterizerCanvas extends VObject {
             ||
             (this.states.material && !this.states.material.batchable)
         ) {
-            need_new_group = true;
-            this.current_draw_group.material = this.states.material;
-            this.states.material = material;
+            batch_broken = true;
         }
 
         // buffer overflow?
         if (
-            ((this.states.v_index + num_vertex) * VTX_COMP >= VERTEX_BUFFER_LENGTH)
+            ((this.states.v_index + num_vertex) * VTX_COMP > VERTEX_BUFFER_LENGTH)
             ||
-            (this.states.i_index + num_index >= INDEX_BUFFER_LENGTH)
+            (this.states.i_index + num_index > INDEX_BUFFER_LENGTH)
         ) {
-            need_new_group = true;
+            batch_broken = true;
             use_new_buffer = true;
-
-            this.states.active_vert_slot += 1;
         }
 
-        if (need_new_group) {
-            // finish current group
-            this.current_draw_group.v_length = this.states.v_index - this.current_draw_group.v_start;
-            this.current_draw_group.i_length = this.states.i_index - this.current_draw_group.i_start;
+        if (batch_broken) {
+            this.flush();
 
-            // update states
+            // update states with new batch data
+            this.states.texture = texture.texture;
+            this.states.material = material;
+
             if (use_new_buffer) {
+                this.states.v_start = 0;
+                this.states.i_start = 0;
                 this.states.v_index = 0;
                 this.states.i_index = 0;
+
+                this.states.active_vert_slot += 1;
+                if (!this.vertices[this.states.active_vert_slot]) {
+                    this.vertices[this.states.active_vert_slot] = {
+                        v: new Float32Array(VERTEX_BUFFER_LENGTH),
+                        i: new Uint16Array(INDEX_BUFFER_LENGTH),
+                    };
+                }
             }
-
-            // start a new group
-            const new_group = DrawGroup_new();
-
-            new_group.vert_slot = this.states.active_vert_slot;
-            new_group.v_start = this.states.v_index;
-            new_group.i_start = this.states.i_index;
-            if (texture) {
-                new_group.gl_tex = texture.texture.gl_tex;
-                new_group.tex_key = texture.resource_name;
-            }
-            new_group.material = material;
-
-            this.draw_groups.push(new_group);
-            this.current_draw_group = new_group;
         }
     }
-    /**
-     * @param {DrawGroup_t} group
-     */
-    flush_group(group) {
+    flush() {
+        const v_length = this.states.v_index - this.states.v_start;
+        const i_length = this.states.i_index - this.states.i_start;
+        if (v_length === 0 || i_length === 0) return;
+
         const gl = this.gl;
 
-        // shader
-        this.use_material(group.material, group.uniforms);
+        // - material
+        this.use_material(this.states.material, this.states.uniforms);
 
-        // apply data binding
         // - texture
-        if (group.gl_tex) {
-            gl.bindTexture(gl.TEXTURE_2D, group.gl_tex);
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, this.states.texture.gl_tex);
+
+        // - upload vertices/indices
+        const {
+            v: vertices,
+            i: indices,
+        } = this.vertices[this.states.active_vert_slot];
+
+        let vb = this.vbs[this.states.active_buffer_slot];
+        if (!vb) {
+            vb = this.vbs[this.states.active_buffer_slot] = gl.createBuffer();
         }
+        gl.bindBuffer(gl.ARRAY_BUFFER, vb);
+        gl.bufferData(gl.ARRAY_BUFFER, vertices.subarray(this.states.v_start * VTX_COMP, this.states.v_index * VTX_COMP), gl.DYNAMIC_DRAW);
+
+        let ib = this.ibs[this.states.active_buffer_slot];
+        if (!ib) {
+            ib = this.ibs[this.states.active_buffer_slot] = gl.createBuffer();
+        }
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ib);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices.subarray(this.states.i_start, this.states.i_index), gl.DYNAMIC_DRAW);
+
+        this.states.active_buffer_slot += 1;
 
         // - attributes
         gl.vertexAttribPointer(ATTR_VERTEX, 2, gl.FLOAT, false, VTX_STRIDE, 0);
@@ -1190,17 +1153,21 @@ export class RasterizerCanvas extends VObject {
         gl.vertexAttribPointer(ATTR_FLAGS, 4, gl.UNSIGNED_BYTE, false, VTX_STRIDE, 5 * 4);
         gl.enableVertexAttribArray(ATTR_FLAGS);
 
-        // draw
-        gl.drawElements(gl.TRIANGLES, group.i_length, gl.UNSIGNED_SHORT, group.i_start * 2);
+        // - draw call
+        gl.drawElements(gl.TRIANGLES, i_length, gl.UNSIGNED_SHORT, 0);
+
+        // - update states
+        this.states.v_start = this.states.v_index;
+        this.states.i_start = this.states.i_index;
     }
 
     /**
      * Resizes the WebGL view to the specified width and height.
      *
-     * @param {number} screenWidth - The new width of the screen.
-     * @param {number} screenHeight - The new height of the screen.
+     * @param {number} width - The new width of the screen.
+     * @param {number} height - The new height of the screen.
      */
-    resize(screenWidth, screenHeight) { }
+    resize(width, height) { }
 
     reset() {
         return this;
@@ -1210,13 +1177,4 @@ export class RasterizerCanvas extends VObject {
      * Clear the frame buffer
      */
     clear() { }
-
-    /**
-     * Removes everything from the renderer (event listeners, spritebatch, etc...)
-     */
-    free() {
-        this.gl = null;
-
-        return super.free();
-    }
 }
