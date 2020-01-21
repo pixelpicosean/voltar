@@ -75,7 +75,7 @@ export class ParallaxLayer extends Node2D {
      * @param {Vector2Like} p_mirroring
      */
     set_motion_mirroring(p_mirroring) {
-        this.set_modulate_n(p_mirroring.x, p_mirroring.y);
+        this.set_motion_mirroring_n(p_mirroring.x, p_mirroring.y);
     }
     /**
      * @param {number} x
