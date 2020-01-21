@@ -914,7 +914,7 @@ export class VisualServerCanvas {
      * @param {any} p_lights
      */
     _render_canvas_item_tree(p_canvas_item, p_transform, p_clip_rect, p_module, p_lights) {
-        this._render_canvas_item(p_canvas_item, p_transform, p_clip_rect, WHITE, 0, get_z_list(), get_z_last_list(), null);
+        this._render_canvas_item(p_canvas_item, p_transform, p_clip_rect, WHITE, 0, get_z_list(true), get_z_last_list(true), null);
 
         for (let i = 0; i < z_range; i++) {
             if (!z_list[i]) {
