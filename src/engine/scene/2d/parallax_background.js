@@ -77,7 +77,7 @@ export class ParallaxBackground extends CanvasLayer {
     _notification(p_what) {
         switch (p_what) {
             case NOTIFICATION_ENTER_TREE: {
-                this.group_name = '__cameras_0';
+                this.group_name = `__cameras_${this.get_viewport().get_id()}`;
                 this.add_to_group(this.group_name);
             } break;
             case NOTIFICATION_EXIT_TREE: {

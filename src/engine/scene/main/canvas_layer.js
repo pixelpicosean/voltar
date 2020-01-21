@@ -251,6 +251,10 @@ export class CanvasLayer extends Node {
         }
     }
 
+    // @ts-ignore
+    get_viewport() {
+        return this.viewport;
+    }
     get_viewport_size() {
         if (!this.is_inside_tree()) {
             return Vector2.new(1, 1);
@@ -265,7 +269,7 @@ export class CanvasLayer extends Node {
 
     _update_locrotscale() {
         this._offset.set(this.transform.tx, this.transform.ty);
-        this._rotation = this.transform.rotation;
+        this._rotation = this.transform.get_rotation();
         this.transform.get_scale(this._scale);
     }
     _update_xform() {
