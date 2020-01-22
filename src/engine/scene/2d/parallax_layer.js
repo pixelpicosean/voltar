@@ -96,7 +96,7 @@ export class ParallaxLayer extends Node2D {
      * @param {Vector2Like} p_offset
      */
     set_motion_offset(p_offset) {
-        this.set_modulate_n(p_offset.x, p_offset.y);
+        this.set_motion_offset_n(p_offset.x, p_offset.y);
     }
     /**
      * @param {number} x
@@ -114,7 +114,7 @@ export class ParallaxLayer extends Node2D {
      * @param {Vector2Like} p_scale
      */
     set_motion_scale(p_scale) {
-        this.set_modulate_n(p_scale.x, p_scale.y);
+        this.set_motion_scale_n(p_scale.x, p_scale.y);
     }
     /**
      * @param {number} x
