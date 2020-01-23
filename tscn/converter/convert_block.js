@@ -46,7 +46,8 @@ module.exports.convert_block = (block) => {
             return block;
         } break;
         default: {
-            throw `Block with key "${block.key}" is not supported!`;
+            console.warn(`Block with key "${block.key}" is not supported!`);
+            return undefined;
         };
     }
 }
