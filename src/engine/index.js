@@ -85,6 +85,7 @@ export * from 'engine/scene/2d/y_sort';
 export * from 'engine/scene/2d/remote_transform_2d';
 
 export * from 'engine/scene/gui/const';
+export * from 'engine/scene/gui/control';
 export * from 'engine/scene/gui/color_rect';
 export * from 'engine/scene/gui/texture_rect';
 export * from 'engine/scene/gui/nine_patch_rect';
