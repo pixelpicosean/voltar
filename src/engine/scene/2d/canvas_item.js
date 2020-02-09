@@ -664,7 +664,7 @@ export class CanvasItem extends Node {
      * @param {ColorLike} color
      */
     set_modulate(color) {
-        this._modulate.copy(color);
+        this.set_modulate_n(color.r, color.g, color.b, color.a);
     }
 
     /**
