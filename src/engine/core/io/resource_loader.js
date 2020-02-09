@@ -497,6 +497,10 @@ export class ResourceLoader extends VObject {
 
                 this._resources_parsing.splice(this._resources_parsing.indexOf(resource), 1);
 
+                if (!raw_resource_map[resource.name]) {
+                    raw_resource_map[resource.name] = resource;
+                }
+
                 // do completion check
                 if (this._queue.idle() && this._resources_parsing.length === 0) {
                     this._on_complete();
