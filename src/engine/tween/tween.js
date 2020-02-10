@@ -2,13 +2,14 @@ import { remove_items } from 'engine/dep/index';
 import { VObject } from 'engine/core/v_object';
 import { clamp } from 'engine/core/math/math_funcs';
 import { Vector2, Vector2Like } from 'engine/core/math/vector2';
+import { Color, ColorLike } from 'engine/core/color';
 
 import { flatten_key_url } from './flatten_key_url';
 import { Easing } from './easing';
 
 
 /**
- * @typedef {string | number | boolean | Vector2Like} Tweenable
+ * @typedef {string | number | boolean | Vector2Like | ColorLike} Tweenable
  */
 
 /**
@@ -31,6 +32,7 @@ const NUMBER = 0;
 const BOOL = 1;
 const STRING = 2;
 const VECTOR2 = 3;
+const COLOR = 4;
 
 /**
  * @param {any} obj
@@ -73,8 +75,25 @@ function set_vec_property(obj, key, value) {
     res.x = value.x;
     res.y = value.y;
 }
+/**
+ * @param {any} obj
+ * @param {string} key
+ * @param {ColorLike} value
+ */
+function set_color_property(obj, key, value) {
+    let idx = 0, res = obj;
+    while (idx < key.length - 1) {
+        res = res[key[idx]];
+        idx++;
+    }
+    res = res[key[key.length - 1]];
+    res.r = value.r;
+    res.g = value.g;
+    res.b = value.b;
+    res.a = value.a;
+}
 
-const _tmp_vec2 = new Vector2();
+const _tmp_vec2 = new Vector2;
 
 /**
  * @type {Array<Vector2>}
@@ -90,6 +109,26 @@ const create_vector = (x, y) => {
     if (!vec) vec = new Vector2(x, y);
     vec.set(x, y);
     return vec;
+};
+
+const _tmp_color = new Color;
+
+/**
+ * @type {Array<Color>}
+ */
+const COLOR_ARR = [];
+/**
+ * @param {number} r
+ * @param {number} g
+ * @param {number} b
+ * @param {number} a
+ * @returns {Color}
+ */
+const create_color = (r, g, b, a) => {
+    let color = COLOR_ARR.pop();
+    if (!color) color = new Color(r, g, b, a);
+    color.set(r, g, b, a);
+    return color;
 };
 
 
@@ -450,6 +489,13 @@ export default class Tween extends VObject {
                     data.final_val = create_vector(final_val.x, final_val.y);
                     data.delta_val = create_vector(0, 0);
                     data.val_type = VECTOR2;
+                } else if (('r' in initial_val) && ('g' in initial_val) && ('b' in initial_val) && ('a' in initial_val)) {
+                    // @ts-ignore
+                    data.initial_val = create_color(initial_val.r, initial_val.g, initial_val.b, initial_val.a);
+                    // @ts-ignore
+                    data.final_val = create_color(final_val.r, final_val.g, final_val.b, final_val.a);
+                    data.delta_val = create_color(1, 1, 1, 1);
+                    data.val_type = COLOR;
                 }
                 break;
         }
@@ -516,6 +562,13 @@ export default class Tween extends VObject {
                     data.final_val = create_vector(final_val.x, final_val.y);
                     data.delta_val = create_vector(0, 0);
                     data.val_type = VECTOR2;
+                } else if (('r' in initial_val) && ('g' in initial_val) && ('b' in initial_val) && ('a' in initial_val)) {
+                    // @ts-ignore
+                    data.initial_val = create_color(initial_val.r, initial_val.g, initial_val.b, initial_val.a);
+                    // @ts-ignore
+                    data.final_val = create_color(final_val.r, final_val.g, final_val.b, final_val.a);
+                    data.delta_val = create_color(1, 1, 1, 1);
+                    data.val_type = COLOR;
                 }
                 break;
         }
@@ -632,6 +685,13 @@ export default class Tween extends VObject {
                     data.final_val = create_vector(0, 0);
                     data.delta_val = create_vector(0, 0);
                     data.val_type = VECTOR2;
+                } else if (('r' in initial_val) && ('g' in initial_val) && ('b' in initial_val) && ('a' in initial_val)) {
+                    // @ts-ignore
+                    data.initial_val = create_color(initial_val.r, initial_val.g, initial_val.b, initial_val.a);
+                    // @ts-ignore
+                    data.final_val = create_color(final_val.r, final_val.g, final_val.b, final_val.a);
+                    data.delta_val = create_color(1, 1, 1, 1);
+                    data.val_type = COLOR;
                 }
                 break;
         }
@@ -696,6 +756,13 @@ export default class Tween extends VObject {
                     data.final_val = create_vector(0, 0);
                     data.delta_val = create_vector(0, 0);
                     data.val_type = VECTOR2;
+                } else if (('r' in initial_val) && ('g' in initial_val) && ('b' in initial_val) && ('a' in initial_val)) {
+                    // @ts-ignore
+                    data.initial_val = create_color(initial_val.r, initial_val.g, initial_val.b, initial_val.a);
+                    // @ts-ignore
+                    data.final_val = create_color(final_val.r, final_val.g, final_val.b, final_val.a);
+                    data.delta_val = create_color(1, 1, 1, 1);
+                    data.val_type = COLOR;
                 }
                 break;
         }
@@ -759,6 +826,13 @@ export default class Tween extends VObject {
                     data.final_val = create_vector(final_val.x, final_val.y);
                     data.delta_val = create_vector(0, 0);
                     data.val_type = VECTOR2;
+                } else if (('r' in initial_val) && ('g' in initial_val) && ('b' in initial_val) && ('a' in initial_val)) {
+                    // @ts-ignore
+                    data.initial_val = create_color(initial_val.r, initial_val.g, initial_val.b, initial_val.a);
+                    // @ts-ignore
+                    data.final_val = create_color(final_val.r, final_val.g, final_val.b, final_val.a);
+                    data.delta_val = create_color(1, 1, 1, 1);
+                    data.val_type = COLOR;
                 }
                 break;
         }
@@ -831,6 +905,13 @@ export default class Tween extends VObject {
                     data.final_val = create_vector(final_val.x, final_val.y);
                     data.delta_val = create_vector(0, 0);
                     data.val_type = VECTOR2;
+                } else if (('r' in initial_val) && ('g' in initial_val) && ('b' in initial_val) && ('a' in initial_val)) {
+                    // @ts-ignore
+                    data.initial_val = create_color(initial_val.r, initial_val.g, initial_val.b, initial_val.a);
+                    // @ts-ignore
+                    data.final_val = create_color(final_val.r, final_val.g, final_val.b, final_val.a);
+                    data.delta_val = create_color(1, 1, 1, 1);
+                    data.val_type = COLOR;
                 }
                 break;
         }
@@ -978,7 +1059,7 @@ export default class Tween extends VObject {
                 } else {
                     initial_val = obj[p_data.target_key]();
                 }
-                if (p_data.val_type === VECTOR2) {
+                if (p_data.val_type === VECTOR2 || p_data.val_type === COLOR) {
                     p_data.initial_val.copy(initial_val);
                 } else {
                     p_data.initial_val = initial_val;
@@ -1007,7 +1088,7 @@ export default class Tween extends VObject {
                 } else {
                     final_val = obj[/** @type {string} */(/** @type {unknown} */(p_data.flat_target_key))]();
                 }
-                if (p_data.val_type === VECTOR2) {
+                if (p_data.val_type === VECTOR2 || p_data.val_type === COLOR) {
                     p_data.final_val.copy(final_val);
                 } else {
                     p_data.final_val = final_val;
@@ -1052,6 +1133,16 @@ export default class Tween extends VObject {
                 // @ts-ignore
                 data.delta_val.y = final_val.y - initial_val.y;
                 break;
+            case COLOR: {
+                // @ts-ignore
+                data.delta_val.r = final_val.r - initial_val.r;
+                // @ts-ignore
+                data.delta_val.g = final_val.g - initial_val.g;
+                // @ts-ignore
+                data.delta_val.b = final_val.b - initial_val.b;
+                // @ts-ignore
+                data.delta_val.a = final_val.a - initial_val.a;
+            } break;
         }
         return true;
     }
@@ -1077,6 +1168,13 @@ export default class Tween extends VObject {
                 _tmp_vec2.x += delta_val.x * mod;
                 _tmp_vec2.y += delta_val.y * mod;
                 return _tmp_vec2;
+            case COLOR:
+                _tmp_color.copy(initial_val);
+                _tmp_color.r += delta_val.r * mod;
+                _tmp_color.g += delta_val.g * mod;
+                _tmp_color.b += delta_val.b * mod;
+                _tmp_color.a += delta_val.a * mod;
+                return _tmp_color;
             default:
                 return undefined;
         }
@@ -1095,6 +1193,8 @@ export default class Tween extends VObject {
                     setter.call(data.obj, value);
                 } else if (data.val_type === VECTOR2) {
                     set_vec_property(data.obj, data.flat_key, value);
+                } else if (data.val_type === COLOR) {
+                    set_color_property(data.obj, data.flat_key, value);
                 } else {
                     set_property(data.obj, data.flat_key, value);
                 }
