@@ -687,7 +687,7 @@ export class Viewport extends Node {
         const c = /** @type {Control} */(p_node);
         const matrix_inv = matrix.clone().affine_inverse();
         const xform_global = matrix_inv.xform(p_global);
-        const has = c._has_point_(xform_global);
+        // const has = c._has_point_(xform_global);
         if (!c.is_control || !c.clips_input() || c._has_point_(xform_global)) {
             for (let i = p_node.data.children.length - 1; i >= 0; i--) {
                 if (p_node === this.gui.tooltip_popup) {
