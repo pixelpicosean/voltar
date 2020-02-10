@@ -187,6 +187,7 @@ export default class Tween extends VObject {
                 Interpolate_Pool.push(i);
             }
             t.interpolates.length = 0;
+            t.setter_cache = {};
         }
         return Tween;
     }
@@ -205,6 +206,7 @@ export default class Tween extends VObject {
          * @type {InterpolateData<any, any, any>[]}
          */
         this.interpolates = [];
+        this.setter_cache = {};
     }
 
     /**
@@ -451,6 +453,11 @@ export default class Tween extends VObject {
                 }
                 break;
         }
+        const setter = obj[`set_${property}`];
+        if (typeof setter === 'function') {
+            // @ts-ignore
+            this.setter_cache[property] = setter;
+        }
 
         if (!this._calc_delta_val(data.initial_val, data.final_val, data)) {
             return this;
@@ -502,7 +509,7 @@ export default class Tween extends VObject {
                 data.val_type = STRING;
                 break;
             case 'object':
-            if (('x' in initial_val) && ('y' in initial_val)) {
+                if (('x' in initial_val) && ('y' in initial_val)) {
                     // @ts-ignore
                     data.initial_val = create_vector(initial_val.x, initial_val.y);
                     // @ts-ignore
@@ -619,7 +626,7 @@ export default class Tween extends VObject {
                 data.val_type = STRING;
                 break;
             case 'object':
-            if (('x' in initial_val) && ('y' in initial_val)) {
+                if (('x' in initial_val) && ('y' in initial_val)) {
                     // @ts-ignore
                     data.initial_val = create_vector(initial_val.x, initial_val.y);
                     data.final_val = create_vector(0, 0);
@@ -627,6 +634,11 @@ export default class Tween extends VObject {
                     data.val_type = VECTOR2;
                 }
                 break;
+        }
+        const setter = obj[`set_${property}`];
+        if (typeof setter === 'function') {
+            // @ts-ignore
+            this.setter_cache[property] = setter;
         }
 
         this.interpolates.push(data);
@@ -661,6 +673,7 @@ export default class Tween extends VObject {
         data.flat_key = [method];
         data.initial_val = initial_val;
         data.target_obj = target;
+        // @ts-ignore
         data.target_key = target_method;
         data.flat_target_key = [/** @type {string} */(/** @type {unknown} */(target_method))];
         data.duration = duration;
@@ -677,7 +690,7 @@ export default class Tween extends VObject {
                 data.val_type = STRING;
                 break;
             case 'object':
-            if (('x' in initial_val) && ('y' in initial_val)) {
+                if (('x' in initial_val) && ('y' in initial_val)) {
                     // @ts-ignore
                     data.initial_val = create_vector(initial_val.x, initial_val.y);
                     data.final_val = create_vector(0, 0);
@@ -721,6 +734,7 @@ export default class Tween extends VObject {
         data.flat_key = flatten_key_url(/** @type {string} */(/** @type {unknown} */(property)));
         data.final_val = final_val;
         data.target_obj = initial;
+        // @ts-ignore
         data.target_key = initial_property;
         data.flat_target_key = flatten_key_url(/** @type {string} */(/** @type {unknown} */(initial_property)));
         data.duration = duration;
@@ -747,6 +761,11 @@ export default class Tween extends VObject {
                     data.val_type = VECTOR2;
                 }
                 break;
+        }
+        const setter = obj[`set_${property}`];
+        if (typeof setter === 'function') {
+            // @ts-ignore
+            this.setter_cache[property] = setter;
         }
 
         if (!this._calc_delta_val(data.initial_val, data.final_val, data)) {
@@ -787,6 +806,7 @@ export default class Tween extends VObject {
         data.flat_key = [method]
         data.final_val = final_val;
         data.target_obj = initial;
+        // @ts-ignore
         data.target_key = initial_method;
         data.flat_target_key = [/** @type {string} */(/** @type {unknown} */(initial_method))];
         data.duration = duration;
@@ -1069,22 +1089,25 @@ export default class Tween extends VObject {
         switch (data.type) {
             case INTER_PROPERTY:
             case FOLLOW_PROPERTY:
-            case TARGETING_PROPERTY:
-                if (data.val_type === VECTOR2) {
+            case TARGETING_PROPERTY: {
+                const setter = this.setter_cache[data.flat_key];
+                if (setter) {
+                    setter.call(data.obj, value);
+                } else if (data.val_type === VECTOR2) {
                     set_vec_property(data.obj, data.flat_key, value);
                 } else {
                     set_property(data.obj, data.flat_key, value);
                 }
-                break;
+            } break;
 
             case INTER_METHOD:
             case FOLLOW_METHOD:
-            case TARGETING_METHOD:
+            case TARGETING_METHOD: {
                 data.obj[data.key](value);
-                break;
+            } break;
 
-            case INTER_CALLBACK:
-                break;
+            case INTER_CALLBACK: {
+            } break;
         }
         return true;
     }
