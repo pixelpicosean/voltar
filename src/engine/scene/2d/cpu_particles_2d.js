@@ -394,7 +394,6 @@ export class CPUParticles2D extends Node2D {
          * @type {number[]}
          */
         this.particle_data = [];
-        this.particle_data_idx = 0;
         /**
          * @type {number[]}
          */
@@ -553,7 +552,7 @@ export class CPUParticles2D extends Node2D {
                 const t = Transform2D.new();
 
                 const ptr = this.particle_data;
-                const ptr_idx = this.particle_data_idx;
+                let ptr_idx = 0;
                 for (let i = 0; i < pc; i++) {
                     const r = this.particles[i];
                     t.copy(this.inv_emission_transform).append(r.transform);
@@ -578,7 +577,7 @@ export class CPUParticles2D extends Node2D {
                         ptr[ptr_idx + 7] = 0;
                     }
 
-                    this.particle_data_idx += 16;
+                    ptr_idx += 16;
                 }
 
                 Transform2D.free(t);
@@ -1134,7 +1133,7 @@ export class CPUParticles2D extends Node2D {
         const pc = this.particles.length;
         const r = this.particles;
         const ptr = this.particle_data;
-        const ptr_idx = this.particle_data_idx;
+        let ptr_idx = 0;
 
         /** @type {number[]} */
         let order = null;
@@ -1194,7 +1193,7 @@ export class CPUParticles2D extends Node2D {
             ptr[ptr_idx + 14] = r[idx].custom[2];
             ptr[ptr_idx + 15] = r[idx].custom[3];
 
-            this.particle_data_idx += 16;
+            ptr_idx += 16;
         }
 
         Transform2D.free(tt);
