@@ -11,7 +11,6 @@ import {
     rand_range_i,
 } from 'engine/core/math/math_funcs';
 import { Math_PI } from 'engine/core/math/math_defs';
-import { Command, TYPE_CUSTOM } from 'engine/servers/visual/commands';
 
 import {
     NOTIFICATION_ENTER_TREE,
@@ -21,7 +20,7 @@ import {
 import { ImageTexture } from '../resources/texture';
 import { Curve } from '../resources/curve';
 import { Gradient } from '../resources/gradient';
-import { NOTIFICATION_DRAW } from './canvas_item';
+import { NOTIFICATION_DRAW, NOTIFICATION_TRANSFORM_CHANGED } from './canvas_item';
 import { Node2D } from './node_2d';
 import { VisualServer } from 'engine/servers/visual_server';
 import { VSG } from 'engine/servers/visual/visual_server_globals';
@@ -62,142 +61,30 @@ export const EMISSION_SHAPE_RECTANGLE = 2;
 export const EMISSION_SHAPE_POINTS = 3;
 export const EMISSION_SHAPE_DIRECTED_POINTS = 4;
 
-const quad_indices = new Uint16Array([
-    0, 1, 2,
-    0, 2, 3,
-]);
-class BatchGroup {
-    constructor() {
-        this.active = false;
-        this.texture = null;
-        this.transform = new Transform2D();
-        this.modulate = new Color();
-        this.final_modulate = new Color();
-        this.vertex_data = new Float32Array(8);
-        this.indices = quad_indices;
-        /** @type {Float32Array} */
-        this.uvs = null;
-    }
-    /**
-     * @param {Transform2D} item_wt
-     * @param {Color} modulate
-     */
-    calculate_vertices(item_wt, modulate) {
-        if (!this.active) return;
-
-        const wt = this.transform;
-        let a = wt.a;
-        let b = wt.b;
-        let c = wt.c;
-        let d = wt.d;
-        let tx = wt.tx;
-        let ty = wt.ty;
-
-        if (!item_wt.equals(Transform2D.IDENTITY)) {
-            const item_a = item_wt.a;
-            const item_b = item_wt.b;
-            const item_c = item_wt.c;
-            const item_d = item_wt.d;
-
-            const self_wt = this.transform;
-            const self_a = self_wt.a;
-            const self_b = self_wt.b;
-            const self_c = self_wt.c;
-            const self_d = self_wt.d;
-            const self_tx = self_wt.tx;
-            const self_ty = self_wt.ty;
-
-            a = (self_a * item_a) + (self_b * item_c);
-            b = (self_a * item_b) + (self_b * item_d);
-            c = (self_c * item_a) + (self_d * item_c);
-            d = (self_c * item_b) + (self_d * item_d);
-            tx = (self_tx * item_a) + (self_ty * item_c) + item_wt.tx;
-            ty = (self_tx * item_b) + (self_ty * item_d) + item_wt.ty;
-        }
-
-        // vertex
-        const x0 = 0;
-        const x1 = x0 + this.texture.width;
-        const y0 = 0;
-        const y1 = y0 + this.texture.height;
-
-        const vertex_data = this.vertex_data;
-
-        vertex_data[0] = (a * x0) + (c * y0) + tx;
-        vertex_data[1] = (d * y0) + (b * x0) + ty;
-
-        vertex_data[2] = (a * x1) + (c * y0) + tx;
-        vertex_data[3] = (d * y0) + (b * x1) + ty;
-
-        vertex_data[4] = (a * x1) + (c * y1) + tx;
-        vertex_data[5] = (d * y1) + (b * x1) + ty;
-
-        vertex_data[6] = (a * x0) + (c * y1) + tx;
-        vertex_data[7] = (d * y1) + (b * x0) + ty;
-
-        // uv
-        this.uvs = this.texture._uvs.uvsFloat32;
-
-        // color
-        this.final_modulate.copy(this.modulate).multiply(modulate);
-    }
-}
-
-class CommandCPUParticle extends Command {
-    get type() { return TYPE_CUSTOM }
-    constructor() {
-        super();
-
-        this.local_coords = true;
-
-        /** @type {BatchGroup[]} */
-        this.batches = [];
-        // FIXME: calculate rect of particle
-        this.rect = new Rect2(0, 0, 1000, 1000);
-    }
-    /**
-     * @param {Transform2D} transform
-     * @param {Color} modulate
-     */
-    render(transform, modulate) {
-        for (const b of this.batches) {
-            b.calculate_vertices(this.local_coords ? transform : Transform2D.IDENTITY, modulate);
-        }
-    }
-    free() {
-        // do nothing
-    }
-}
-
 class Particle {
-    get transform() { return this.batch.transform }
-    get color() { return this.batch.modulate }
-
-    get active() { return this.batch.active }
-    set active(value) { this.batch.active = value }
-
     constructor() {
+        this.transform = new Transform2D;
+        this.color = new Color;
         this.custom = [0, 0, 0, 0];
         this.rotation = 0;
-        this.velocity = new Vector2();
+        this.velocity = new Vector2;
+        this.active = false;
         this.angle_rand = 0;
         this.scale_rand = 0;
         this.hue_rot_rand = 0;
         this.anim_offset_rand = 0;
         this.time = 0;
         this.lifetime = 0;
-        this.base_color = new Color(1, 1, 1, 1);
+        this.base_color = new Color;
 
         this.seed = 0;
-
-        this.batch = new BatchGroup();
     }
     static new() {
         const p = ParticlePool.pop();
         if (p) {
             return p;
         } else {
-            return new Particle();
+            return new Particle;
         }
     }
 }
@@ -226,6 +113,20 @@ function sort_lifetime(a, b) {
 
 export class CPUParticles2D extends Node2D {
     get class() { return 'CPUParticles2D' }
+
+    get emitting() {
+        return this._emitting;
+    }
+    set emitting(p_emitting) {
+        if (this._emitting === p_emitting) {
+            return;
+        }
+
+        this._emitting = p_emitting;
+        if (this._emitting) {
+            this.set_process_internal(true);
+        }
+    }
 
     get amount() { return this._amount }
     set amount(value) {
@@ -399,7 +300,7 @@ export class CPUParticles2D extends Node2D {
     constructor() {
         super();
 
-        this.emitting = true;
+        this._emitting = true;
 
         this._amount = 8;
         this.lifetime = 1;
@@ -430,7 +331,6 @@ export class CPUParticles2D extends Node2D {
 
         /** @type {ImageTexture} */
         this._texture = null;
-        this.normalmap = null;
 
         /** @type {Color[]} */
         this.emission_colors = [];
@@ -472,6 +372,8 @@ export class CPUParticles2D extends Node2D {
         /** @type {Curve} */
         this.tangential_accel_curve = null;
 
+        this.inv_emission_transform = new Transform2D;
+
         this.draw_order = DRAW_ORDER_INDEX;
 
         this.time = 0;
@@ -479,6 +381,10 @@ export class CPUParticles2D extends Node2D {
         this.frame_remainder = 0;
         this.cycle = 0;
         this.redraw = false;
+
+        this.mesh = VSG.storage.mesh_create();
+        this.multimesh = VSG.storage.multimesh_create();
+        VSG.storage.multimesh_set_mesh(this.multimesh, this.mesh);
 
         /**
          * @type {Particle[]}
@@ -488,12 +394,11 @@ export class CPUParticles2D extends Node2D {
          * @type {number[]}
          */
         this.particle_data = [];
+        this.particle_data_idx = 0;
         /**
          * @type {number[]}
          */
         this.particle_order = [];
-
-        this.internal_process = true;
 
         // initialize
         for (let i = 0; i < PARAM_MAX; i++) {
@@ -521,7 +426,11 @@ export class CPUParticles2D extends Node2D {
         this.set_param(PARAM_ANIM_SPEED, 0);
         this.set_param(PARAM_ANIM_OFFSET, 0);
 
-        this._command = new CommandCPUParticle();
+        this._update_mesh_texture();
+    }
+    free() {
+        // TODO: free mesh and multimesh
+        return super.free();
     }
 
     /* virtual */
@@ -552,7 +461,6 @@ export class CPUParticles2D extends Node2D {
         if (data.color_ramp !== undefined) this.color_ramp = data.color_ramp;
 
         if (data.texture !== undefined) this.texture = data.texture;
-        if (data.normalmap !== undefined) this.normalmap = data.normalmap;
 
         if (data.initial_velocity !== undefined) this.initial_velocity = data.initial_velocity;
         if (data.initial_velocity_random !== undefined) this.initial_velocity_random = data.initial_velocity_random;
@@ -613,7 +521,7 @@ export class CPUParticles2D extends Node2D {
      */
     _notification(p_what) {
         if (p_what === NOTIFICATION_ENTER_TREE) {
-            this.set_process_internal(this.emitting);
+            this.set_process_internal(this._emitting);
         }
 
         if (p_what === NOTIFICATION_EXIT_TREE) {
@@ -621,76 +529,60 @@ export class CPUParticles2D extends Node2D {
         }
 
         if (p_what === NOTIFICATION_DRAW) {
+            if (this._emitting && this.time === 0) {
+                this._update_internal();
+            }
+
             if (!this.redraw) {
                 return;
             }
-            this.canvas_item.rect_dirty = true;
+
+            VSG.canvas.canvas_item_add_multimesh(this.canvas_item, this.multimesh, this._texture);
         }
 
         if (p_what === NOTIFICATION_INTERNAL_PROCESS) {
-            if (this.particles.length === 0 || !this.is_visible_in_tree()) {
-                this._set_redraw(false);
-                return;
+            this._update_internal();
+        }
+
+        if (p_what === NOTIFICATION_TRANSFORM_CHANGED) {
+            this.inv_emission_transform.copy(this.get_global_transform()).affine_inverse();
+
+            if (!this.local_coords) {
+                const pc = this.particles.length;
+
+                const t = Transform2D.new();
+
+                const ptr = this.particle_data;
+                const ptr_idx = this.particle_data_idx;
+                for (let i = 0; i < pc; i++) {
+                    const r = this.particles[i];
+                    t.copy(this.inv_emission_transform).append(r.transform);
+
+                    if (r.active) {
+                        ptr[ptr_idx + 0] = t.a;
+                        ptr[ptr_idx + 1] = t.c;
+                        ptr[ptr_idx + 2] = 0;
+                        ptr[ptr_idx + 3] = t.tx;
+                        ptr[ptr_idx + 4] = t.b;
+                        ptr[ptr_idx + 5] = t.d;
+                        ptr[ptr_idx + 6] = 0;
+                        ptr[ptr_idx + 7] = t.ty;
+                    } else {
+                        ptr[ptr_idx + 0] = 0;
+                        ptr[ptr_idx + 1] = 0;
+                        ptr[ptr_idx + 2] = 0;
+                        ptr[ptr_idx + 3] = 0;
+                        ptr[ptr_idx + 4] = 0;
+                        ptr[ptr_idx + 5] = 0;
+                        ptr[ptr_idx + 6] = 0;
+                        ptr[ptr_idx + 7] = 0;
+                    }
+
+                    this.particle_data_idx += 16;
+                }
+
+                Transform2D.free(t);
             }
-
-            const delta = this.get_process_delta_time();
-            if (this.emitting) {
-                this.inactive_time = 0;
-            } else {
-                this.inactive_time += delta;
-                if (this.inactive_time > this.lifetime * 1.2) {
-                    this.set_process_internal(false);
-                    this._set_redraw(false);
-
-                    // reset variables
-                    this.time = 0;
-                    this.inactive_time = 0;
-                    this.frame_remainder = 0;
-                    this.cycle = 0;
-                    return;
-                }
-            }
-            this._set_redraw(true);
-
-            if (this.time === 0 && this.preprocess > 0) {
-                let frame_time = 0;
-                if (this.fixed_fps > 0) {
-                    frame_time = 1 / this.fixed_fps;
-                } else {
-                    frame_time = 1 / 30;
-                }
-
-                let todo = this.preprocess;
-
-                while (todo >= 0) {
-                    this._particles_process(frame_time);
-                    todo -= frame_time;
-                }
-            }
-
-            if (this.fixed_fps > 0) {
-                let frame_time = 1 / this.fixed_fps;
-                let decr = frame_time;
-
-                let ldelta = delta;
-                if (ldelta > 0.1) {
-                    ldelta = 0.1;
-                } else if (ldelta <= 0) {
-                    ldelta = 0.001;
-                }
-                let todo = this.frame_remainder + ldelta;
-
-                while (todo >= frame_time) {
-                    this._particles_process(frame_time);
-                    todo -= decr;
-                }
-
-                this.frame_remainder = todo;
-            } else {
-                this._particles_process(delta);
-            }
-
-            this._update_particle_data_buffer();
         }
     }
 
@@ -833,7 +725,7 @@ export class CPUParticles2D extends Node2D {
         for (let i = 0; i < pcount; i++) {
             const p = parray[i];
 
-            if (!this.emitting && !p.active) {
+            if (!this._emitting && !p.active) {
                 continue;
             }
 
@@ -875,7 +767,7 @@ export class CPUParticles2D extends Node2D {
             }
 
             if (restart) {
-                if (!this.emitting) {
+                if (!this._emitting) {
                     p.active = false;
                     continue;
                 }
@@ -1172,36 +1064,168 @@ export class CPUParticles2D extends Node2D {
         Transform2D.free(velocity_xform);
     }
 
-    _update_particle_data_buffer() {
-        if (this.draw_order !== DRAW_ORDER_INDEX) {
-            if (this.draw_order === DRAW_ORDER_LIFETIME) {
-                this.particles.sort(sort_lifetime);
+    _update_internal() {
+        if (this.particles.length === 0 || !this.is_visible_in_tree()) {
+            this._set_redraw(false);
+            return;
+        }
+
+        const delta = this.get_process_delta_time();
+        if (this._emitting) {
+            this.inactive_time = 0;
+        } else {
+            this.inactive_time += delta;
+            if (this.inactive_time > this.lifetime * 1.2) {
+                this.set_process_internal(false);
+                this._set_redraw(false);
+
+                // reset
+                this.time = 0;
+                this.inactive_time = 0;
+                this.frame_remainder = 0;
+                this.cycle = 0;
+                return;
+            }
+        }
+        this._set_redraw(true);
+
+        if (this.time === 0 && this.preprocess > 0) {
+            let frame_time = 0;
+            if (this.fixed_fps > 0) {
+                frame_time = 1 / this.fixed_fps;
+            } else {
+                frame_time = 1 / 30;
+            }
+
+            let todo = this.preprocess;
+
+            while (todo >= 0) {
+                this._particles_process(frame_time);
+                todo -= frame_time;
             }
         }
 
-        const batches = this._command.batches;
-        const particles = this.particles;
+        if (this.fixed_fps > 0) {
+            const frame_time = 1 / this.fixed_fps;
+            const decr = frame_time;
 
-        batches.length = 0;
-        let batch = null;
-        let p = null;
-        for (let i = 0, len = particles.length; i < len; i++) {
-            p = particles[i]
-            batch = p.batch;
-            // we only draw active particles
-            if (batch.active) {
-                // sync texture
-                batch.texture = this._texture.texture;
-                batches.push(batch);
+            let ldelta = delta;
+            if (ldelta > 0.1) {
+                ldelta = 0.1;
+            } else if (ldelta <= 0) {
+                ldelta = 0.001;
             }
+            let todo = this.frame_remainder + ldelta;
+
+            while (todo >= frame_time) {
+                this._particles_process(frame_time);
+                todo -= decr;
+            }
+
+            this.frame_remainder = todo;
+        } else {
+            this._particles_process(delta);
         }
 
-        this._command.local_coords = this.local_coords;
-        this.canvas_item.commands.length = 1;
-        this.canvas_item.commands[0] = this._command;
+        this._update_particle_data_buffer();
     }
 
-    _update_render_thread() { }
+    _update_particle_data_buffer() {
+        const pc = this.particles.length;
+        const r = this.particles;
+        const ptr = this.particle_data;
+        const ptr_idx = this.particle_data_idx;
+
+        /** @type {number[]} */
+        let order = null;
+
+        if (this.draw_order !== DRAW_ORDER_INDEX) {
+            order = this.particle_order;
+
+            for (let i = 0; i < pc; i++) {
+                order[i] = i;
+            }
+            if (this.draw_order === DRAW_ORDER_LIFETIME) {
+                order.sort((p_a, p_b) => (this.particles[p_a].time - this.particles[p_b].time));
+            }
+        }
+
+        const tt = Transform2D.new();
+
+        for (let i = 0; i < pc; i++) {
+            const idx = order ? order[i] : i;
+
+            const t = r[idx].transform;
+
+            if (!this.local_coords) {
+                tt.copy(t);
+                t.copy(this.inv_emission_transform).append(tt);
+            }
+
+            if (r[idx].active) {
+                ptr[ptr_idx + 0] = t.a;
+                ptr[ptr_idx + 1] = t.c;
+                ptr[ptr_idx + 2] = 0;
+                ptr[ptr_idx + 3] = t.tx;
+                ptr[ptr_idx + 4] = t.b;
+                ptr[ptr_idx + 5] = t.d;
+                ptr[ptr_idx + 6] = 0;
+                ptr[ptr_idx + 7] = t.ty;
+            } else {
+                ptr[ptr_idx + 0] = 0;
+                ptr[ptr_idx + 1] = 0;
+                ptr[ptr_idx + 2] = 0;
+                ptr[ptr_idx + 3] = 0;
+                ptr[ptr_idx + 4] = 0;
+                ptr[ptr_idx + 5] = 0;
+                ptr[ptr_idx + 6] = 0;
+                ptr[ptr_idx + 7] = 0;
+            }
+
+            const c = r[idx].color;
+
+            ptr[ptr_idx + 8] = c.r;
+            ptr[ptr_idx + 9] = c.g;
+            ptr[ptr_idx + 10] = c.b;
+            ptr[ptr_idx + 11] = c.a;
+
+            ptr[ptr_idx + 12] = r[idx].custom[0];
+            ptr[ptr_idx + 13] = r[idx].custom[1];
+            ptr[ptr_idx + 14] = r[idx].custom[2];
+            ptr[ptr_idx + 15] = r[idx].custom[3];
+
+            this.particle_data_idx += 16;
+        }
+
+        Transform2D.free(tt);
+    }
+
+    _update_render_thread() {
+        VSG.storage.multimesh_set_as_bulk_array(this.multimesh, this.particle_data);
+    }
+
+    _update_mesh_texture() {
+        const w = this._texture.get_width();
+        const h = this._texture.get_height();
+        const color = Color.new(1, 1, 1, 1);
+        const color_num = color.as_rgba8();
+        Color.free(color);
+
+        const vertices = new Float32Array([
+            -w * 0.5, -h * 0.5,    this._texture.uvs[0], this._texture.uvs[1],   color_num,
+            +w * 0.5, -h * 0.5,    this._texture.uvs[2], this._texture.uvs[1],   color_num,
+            +w * 0.5, +h * 0.5,    this._texture.uvs[2], this._texture.uvs[3],   color_num,
+            -w * 0.5, +h * 0.5,    this._texture.uvs[0], this._texture.uvs[3],   color_num,
+        ]);
+        const indices = new Uint16Array([0, 1, 2, 2, 3, 0]);
+
+        VSG.storage.mesh_clear(this.mesh);
+        VSG.storage.mesh_add_surface_from_data(this.mesh, WebGLRenderingContext.TRIANGLES, [
+            { type: WebGLRenderingContext.FLOAT, size: 2, stride: 5 * 4, offset: 0 },
+            { type: WebGLRenderingContext.FLOAT, size: 2, stride: 5 * 4, offset: 2 * 4 },
+            { type: WebGLRenderingContext.UNSIGNED_BYTE, size: 4, stride: 5 * 4, offset: 4 * 4, normalized: true },
+        ], vertices, indices);
+    }
 
     /**
      * @param {boolean} p_redraw

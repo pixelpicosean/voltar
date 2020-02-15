@@ -211,6 +211,11 @@ export class MultiMesh_t {
         /** @type {number[]} */
         this.data = [];
 
+        this.aabb = null;
+
+        this.dirty_aabb = true;
+        this.dirty_data = true;
+
         this.visible_instances = 0;
     }
 }
@@ -661,6 +666,24 @@ export class RasterizerStorage {
         if (multimesh.mesh && mesh) {
             mesh.multimeshes.add(multimesh.mesh_list);
         }
+
+        if (!multimesh.update_list.in_list()) {
+            this.multimesh_update_list.add(multimesh.update_list);
+        }
+    }
+    /**
+     * @param {MultiMesh_t} multimesh
+     * @param {number[]} p_array
+     */
+    multimesh_set_as_bulk_array(multimesh, p_array) {
+        const dsize = multimesh.data.length;
+
+        for (let i = 0; i < dsize; i++) {
+            multimesh.data[i] = p_array[i];
+        }
+
+        multimesh.dirty_data = true;
+        multimesh.dirty_aabb = true;
 
         if (!multimesh.update_list.in_list()) {
             this.multimesh_update_list.add(multimesh.update_list);
