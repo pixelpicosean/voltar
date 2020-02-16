@@ -110,14 +110,6 @@ const mat3 = basis(0.168, 0.330, -0.497, -0.328, 0.035, 0.292, 1.250, -1.050, -0
 
 const hue_rot_mat = basis();
 
-/**
- * @param {Particle} a
- * @param {Particle} b
- */
-function sort_lifetime(a, b) {
-    return b.lifetime - a.lifetime;
-}
-
 export class CPUParticles2D extends Node2D {
     get class() { return 'CPUParticles2D' }
 
@@ -819,7 +811,6 @@ export class CPUParticles2D extends Node2D {
                 switch (this.emission_shape) {
                     case EMISSION_SHAPE_POINT: {
                     } break;
-                    // TODO: new sphere emit shape implementation
                     case EMISSION_SHAPE_SPHERE: {
                         const s = randf(), t = 2 * Math.PI * randf();
                         vec.set(Math.cos(t), Math.sin(t))

@@ -1,10 +1,55 @@
 {
     "res://scene/demo.tscn": {
         "type": "PackedScene",
+        "ext": {
+            "1": "particle"
+        },
+        "sub": {
+            "1": {
+                "type": "Gradient",
+                "colors": [
+                    {
+                        "r": 1,
+                        "g": 1,
+                        "b": 1,
+                        "a": 1
+                    },
+                    {
+                        "r": 1,
+                        "g": 1,
+                        "b": 1,
+                        "a": 0
+                    }
+                ]
+            }
+        },
         "nodes": [
             {
                 "type": "Node2D",
                 "name": "demo"
+            },
+            {
+                "type": "CPUParticles2D",
+                "name": "cpu_particles_2d",
+                "parent": ".",
+                "position": {
+                    "x": 160,
+                    "y": 114
+                },
+                "amount": 16,
+                "color_ramp": "@sub#1",
+                "flag_align_y": true,
+                "gravity": {
+                    "x": 0,
+                    "y": 0
+                },
+                "hue_variation": 0.83,
+                "hue_variation_random": 0.18,
+                "initial_velocity": 40,
+                "randomness": 1,
+                "scale_amount": 0.1,
+                "spread": 180,
+                "texture": "@ext#1"
             }
         ]
     }
