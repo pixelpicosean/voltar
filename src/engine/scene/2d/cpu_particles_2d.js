@@ -1,7 +1,6 @@
 import { node_class_map, resource_map } from 'engine/registry';
 import { GDCLASS } from 'engine/core/v_object';
 import { Vector2 } from 'engine/core/math/vector2';
-import { Rect2 } from 'engine/core/math/rect2';
 import { Transform2D } from 'engine/core/math/transform_2d';
 import { Color } from 'engine/core/color';
 import {
@@ -20,9 +19,17 @@ import {
 import { ImageTexture } from '../resources/texture';
 import { Curve } from '../resources/curve';
 import { Gradient } from '../resources/gradient';
-import { NOTIFICATION_DRAW, NOTIFICATION_TRANSFORM_CHANGED } from './canvas_item';
+import {
+    NOTIFICATION_DRAW,
+    NOTIFICATION_TRANSFORM_CHANGED,
+} from './canvas_item';
 import { Node2D } from './node_2d';
-import { VisualServer } from 'engine/servers/visual_server';
+import {
+    MULTIMESH_TRANSFORM_2D,
+    MULTIMESH_COLOR_8BIT,
+    MULTIMESH_CUSTOM_DATA_FLOAT,
+    VisualServer,
+} from 'engine/servers/visual_server';
 import { VSG } from 'engine/servers/visual/visual_server_globals';
 
 
@@ -145,6 +152,11 @@ export class CPUParticles2D extends Node2D {
         for (let p of this.particles) {
             p.active = false;
         }
+
+        this.particle_data.length = (8 + 4 + 1) * value;
+        VSG.storage.multimesh_allocate(this.multimesh, value, MULTIMESH_TRANSFORM_2D, MULTIMESH_COLOR_8BIT, MULTIMESH_CUSTOM_DATA_FLOAT);
+
+        this.particle_order.length = value;
     }
 
     get texture() { return this._texture }
@@ -152,6 +164,7 @@ export class CPUParticles2D extends Node2D {
         /** @type {ImageTexture} */
         const texture = (typeof (p_texture) === 'string') ? resource_map[p_texture] : p_texture;
         this._texture = texture;
+        this._update_mesh_texture();
     }
 
     get angle() {
@@ -424,11 +437,10 @@ export class CPUParticles2D extends Node2D {
         this.set_param(PARAM_HUE_VARIATION, 0);
         this.set_param(PARAM_ANIM_SPEED, 0);
         this.set_param(PARAM_ANIM_OFFSET, 0);
-
-        this._update_mesh_texture();
     }
     free() {
-        // TODO: free mesh and multimesh
+        VSG.storage.mesh_free(this.mesh);
+        VSG.storage.multimesh_free(this.multimesh);
         return super.free();
     }
 
@@ -577,7 +589,7 @@ export class CPUParticles2D extends Node2D {
                         ptr[ptr_idx + 7] = 0;
                     }
 
-                    ptr_idx += 16;
+                    ptr_idx += 13;
                 }
 
                 Transform2D.free(t);
@@ -719,7 +731,7 @@ export class CPUParticles2D extends Node2D {
             velocity_xform.ty = 0;
         }
 
-        const system_phase = this.time / this.lifetime;
+        // const system_phase = this.time / this.lifetime;
 
         for (let i = 0; i < pcount; i++) {
             const p = parray[i];
@@ -1181,19 +1193,16 @@ export class CPUParticles2D extends Node2D {
                 ptr[ptr_idx + 7] = 0;
             }
 
-            const c = r[idx].color;
+            const c_8bit = r[idx].color.as_rgba8();
 
-            ptr[ptr_idx + 8] = c.r;
-            ptr[ptr_idx + 9] = c.g;
-            ptr[ptr_idx + 10] = c.b;
-            ptr[ptr_idx + 11] = c.a;
+            ptr[ptr_idx + 8] = c_8bit;
 
-            ptr[ptr_idx + 12] = r[idx].custom[0];
-            ptr[ptr_idx + 13] = r[idx].custom[1];
-            ptr[ptr_idx + 14] = r[idx].custom[2];
-            ptr[ptr_idx + 15] = r[idx].custom[3];
+            ptr[ptr_idx + 9] = r[idx].custom[0];
+            ptr[ptr_idx + 10] = r[idx].custom[1];
+            ptr[ptr_idx + 11] = r[idx].custom[2];
+            ptr[ptr_idx + 12] = r[idx].custom[3];
 
-            ptr_idx += 16;
+            ptr_idx += 13;
         }
 
         Transform2D.free(tt);
@@ -1206,23 +1215,26 @@ export class CPUParticles2D extends Node2D {
     _update_mesh_texture() {
         const w = this._texture.get_width();
         const h = this._texture.get_height();
+
         const color = Color.new(1, 1, 1, 1);
-        const color_num = color.as_rgba8();
+        const c_8bit = color.as_rgba8();
         Color.free(color);
 
         const vertices = new Float32Array([
-            -w * 0.5, -h * 0.5,    this._texture.uvs[0], this._texture.uvs[1],   color_num,
-            +w * 0.5, -h * 0.5,    this._texture.uvs[2], this._texture.uvs[1],   color_num,
-            +w * 0.5, +h * 0.5,    this._texture.uvs[2], this._texture.uvs[3],   color_num,
-            -w * 0.5, +h * 0.5,    this._texture.uvs[0], this._texture.uvs[3],   color_num,
+            -w * 0.5, -h * 0.5,    this._texture.uvs[0], this._texture.uvs[1],   c_8bit,
+            +w * 0.5, -h * 0.5,    this._texture.uvs[2], this._texture.uvs[1],   c_8bit,
+            +w * 0.5, +h * 0.5,    this._texture.uvs[2], this._texture.uvs[3],   c_8bit,
+            -w * 0.5, +h * 0.5,    this._texture.uvs[0], this._texture.uvs[3],   c_8bit,
         ]);
         const indices = new Uint16Array([0, 1, 2, 2, 3, 0]);
 
+        const stride = 5 * 4;
+
         VSG.storage.mesh_clear(this.mesh);
         VSG.storage.mesh_add_surface_from_data(this.mesh, WebGLRenderingContext.TRIANGLES, [
-            { type: WebGLRenderingContext.FLOAT, size: 2, stride: 5 * 4, offset: 0 },
-            { type: WebGLRenderingContext.FLOAT, size: 2, stride: 5 * 4, offset: 2 * 4 },
-            { type: WebGLRenderingContext.UNSIGNED_BYTE, size: 4, stride: 5 * 4, offset: 4 * 4, normalized: true },
+            { type: WebGLRenderingContext.FLOAT, size: 2, stride: stride, offset: 0 },
+            { type: WebGLRenderingContext.FLOAT, size: 2, stride: stride, offset: 2 * 4 },
+            { type: WebGLRenderingContext.UNSIGNED_BYTE, size: 4, stride: stride, offset: 4 * 4, normalized: true },
         ], vertices, indices);
     }
 
@@ -1237,9 +1249,11 @@ export class CPUParticles2D extends Node2D {
         if (this.redraw) {
             VisualServer.get_singleton().connect('frame_pre_draw', this._update_render_thread, this);
             VSG.canvas.canvas_item_set_update_when_visible(this.canvas_item, true);
+            this.multimesh.visible_instances = -1;
         } else {
             VisualServer.get_singleton().disconnect('frame_pre_draw', this._update_render_thread, this);
             VSG.canvas.canvas_item_set_update_when_visible(this.canvas_item, false);
+            this.multimesh.visible_instances = 0;
         }
         this.update();
     }
