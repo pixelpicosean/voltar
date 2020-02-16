@@ -51,6 +51,16 @@ export const WRAP_REPEAT = WebGLRenderingContext.REPEAT;
 export const WRAP_MIRRORED_REPEAT = WebGLRenderingContext.MIRRORED_REPEAT;
 export const WRAP_CLAMP_TO_EDGE = WebGLRenderingContext.CLAMP_TO_EDGE;
 
+export const MULTIMESH_TRANSFORM_2D = 0;
+export const MULTIMESH_TRANSFORM_3D = 1;
+
+export const MULTIMESH_COLOR_NONE = 0;
+export const MULTIMESH_COLOR_8BIT = 1;
+export const MULTIMESH_COLOR_FLOAT = 2;
+
+export const MULTIMESH_CUSTOM_DATA_NONE = 0;
+export const MULTIMESH_CUSTOM_DATA_8BIT = 1;
+export const MULTIMESH_CUSTOM_DATA_FLOAT = 2;
 
 /**
  * @typedef FrameDrawnCallbacks

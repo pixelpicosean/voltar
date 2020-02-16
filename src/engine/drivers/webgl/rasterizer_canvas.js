@@ -24,17 +24,19 @@ import {
     TYPE_RECT,
     TYPE_NINEPATCH,
     TYPE_POLYGON,
+    TYPE_MULTIMESH,
+    CANVAS_RECT_REGION,
+    CANVAS_RECT_TRANSPOSE,
+    CANVAS_RECT_FLIP_H,
+    CANVAS_RECT_FLIP_V,
+    CANVAS_RECT_TILE,
     CommandLine,
     CommandPolyLine,
     CommandCircle,
     CommandRect,
     CommandNinePatch,
     CommandPolygon,
-    CANVAS_RECT_REGION,
-    CANVAS_RECT_TRANSPOSE,
-    CANVAS_RECT_FLIP_H,
-    CANVAS_RECT_FLIP_V,
-    CANVAS_RECT_TILE,
+    CommandMultiMesh,
 } from 'engine/servers/visual/commands';
 import { ImageTexture } from 'engine/scene/resources/texture';
 
@@ -44,11 +46,30 @@ import normal_fs from './shaders/canvas.frag';
 import tile_vs from './shaders/canvas_tile.vert';
 import tile_fs from './shaders/canvas_tile.frag';
 
+import multimesh_vs from './shaders/canvas_multimesh.vert';
+import multimesh_fs from './shaders/canvas_multimesh.frag';
+import {
+    MULTIMESH_TRANSFORM_2D,
+    MULTIMESH_TRANSFORM_3D,
+    MULTIMESH_COLOR_NONE,
+    MULTIMESH_COLOR_8BIT,
+    MULTIMESH_COLOR_FLOAT,
+    MULTIMESH_CUSTOM_DATA_NONE,
+    MULTIMESH_CUSTOM_DATA_8BIT,
+    MULTIMESH_CUSTOM_DATA_FLOAT,
+} from 'engine/servers/visual_server';
+
 
 const ATTR_VERTEX = 0;
 const ATTR_UV = 1;
 const ATTR_COLOR = 2;
 const ATTR_FLAGS = 3;
+
+const ATTR_INST_XFORM0 = 3;
+const ATTR_INST_XFORM1 = 4;
+const ATTR_INST_XFORM2 = 5;
+const ATTR_INST_COLOR = 6;
+const ATTR_INST_DATA = 7;
 
 const VTX_COMP = (2 + 2 + 1 + 1); // position(2) + uv(2) + color(1) + flag(1)
 const VTX_STRIDE = VTX_COMP * 4;
@@ -213,6 +234,7 @@ export class RasterizerCanvas extends VObject {
         // private
 
         this.gl = OS.get_singleton().gl;
+        this.gl_ext = OS.get_singleton().gl_ext;
 
         this.vertices = [
             {
@@ -236,6 +258,8 @@ export class RasterizerCanvas extends VObject {
             flat: null,
             /** @type {import('./rasterizer_storage').Material_t} */
             tile: null,
+            /** @type {import('./rasterizer_storage').Material_t} */
+            multimesh: null,
         };
     }
 
@@ -289,6 +313,34 @@ export class RasterizerCanvas extends VObject {
             );
             const material = VSG.storage.material_create(shader);
             material.name = 'tile';
+            material.batchable = false;
+            return material;
+        })();
+
+        this.materials.multimesh = (() => {
+            const shader = VSG.storage.shader_create(
+                multimesh_vs, multimesh_fs,
+                [
+                    // normal attributes
+                    'position',
+                    'uv',
+                    'color',
+
+                    // instance attributes
+                    'instance_xform0',
+                    'instance_xform1',
+                    'instance_xform2',
+                    'instance_color',
+                    'instance_custom_data',
+                ],
+                [
+                    { name: 'projection_matrix', type: 'mat4' },
+                    { name: 'item_matrix', type: 'mat3' },
+                    { name: 'time', type: '1f' },
+                ],
+            );
+            const material = VSG.storage.material_create(shader);
+            material.name = 'multimesh';
             material.batchable = false;
             return material;
         })();
@@ -1034,6 +1086,123 @@ export class RasterizerCanvas extends VObject {
 
                     this.states.v_index += vert_count;
                     this.states.i_index += indi_count;
+                } break;
+                case TYPE_MULTIMESH: {
+                    // flush and reset states
+                    this.flush();
+                    this.states.texture = null;
+                    this.states.material = null;
+
+                    const mm = /** @type {CommandMultiMesh} */(cmd);
+                    const multimesh = mm.multimesh;
+                    const mesh_data = multimesh.mesh;
+
+                    const gl = this.gl;
+                    const gl_ext = this.gl_ext;
+
+                    // - material
+                    const xform = p_item.final_transform;
+                    this.use_material(this.materials.multimesh, {
+                        item_matrix: xform.to_array(true),
+                    });
+
+                    // - texture
+                    gl.activeTexture(gl.TEXTURE0);
+                    gl.bindTexture(gl.TEXTURE_2D, mm.texture.texture.gl_tex);
+
+                    let amount = Math.min(multimesh.size, multimesh.visible_instances);
+                    if (amount === -1) {
+                        amount = multimesh.size;
+                    }
+
+                    for (let i = 0; i < mesh_data.surfaces.length; i++) {
+                        const s = mesh_data.surfaces[i];
+
+                        // bind mesh data
+                        gl.bindBuffer(gl.ARRAY_BUFFER, s.vertex_id);
+                        if (s.index_id) {
+                            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, s.index_id);
+                        }
+                        const mesh_stride = (2 + 2 + 1) * 4;
+                        gl.vertexAttribPointer(ATTR_VERTEX, 2, gl.FLOAT, false, mesh_stride, 0);
+                        gl.enableVertexAttribArray(ATTR_VERTEX);
+                        gl.vertexAttribPointer(ATTR_UV, 2, gl.FLOAT, false, mesh_stride, 2 * 4);
+                        gl.enableVertexAttribArray(ATTR_UV);
+                        gl.vertexAttribPointer(ATTR_COLOR, 4, gl.UNSIGNED_BYTE, true, mesh_stride, 4 * 4);
+                        gl.enableVertexAttribArray(ATTR_COLOR);
+
+                        // bind instance buffer
+                        gl.bindBuffer(gl.ARRAY_BUFFER, multimesh.buffer);
+
+                        const stride = (multimesh.xform_floats + multimesh.color_floats + multimesh.custom_data_floats) * 4;
+
+                        gl.enableVertexAttribArray(ATTR_INST_XFORM0);
+                        gl.vertexAttribPointer(ATTR_INST_XFORM0, 4, gl.FLOAT, false, stride, 0);
+                        gl_ext.vertexAttribDivisor(ATTR_INST_XFORM0, 1);
+                        gl.enableVertexAttribArray(ATTR_INST_XFORM1);
+                        gl.vertexAttribPointer(ATTR_INST_XFORM1, 4, gl.FLOAT, false, stride, 4 * 4);
+                        gl_ext.vertexAttribDivisor(ATTR_INST_XFORM1, 1);
+
+                        let color_ofs = 0;
+
+                        if (multimesh.transform_format === MULTIMESH_TRANSFORM_3D) {
+                            gl.enableVertexAttribArray(ATTR_INST_XFORM2);
+                            gl.vertexAttribPointer(ATTR_INST_XFORM2, 4, gl.FLOAT, false, stride, 8 * 4);
+                            gl_ext.vertexAttribDivisor(ATTR_INST_XFORM2, 1);
+                            color_ofs = 12 * 4;
+                        } else {
+                            gl.disableVertexAttribArray(ATTR_INST_XFORM2);
+                            gl.vertexAttrib4f(ATTR_INST_XFORM2, 0, 0, 1, 0);
+                            color_ofs = 8 * 4;
+                        }
+
+                        let custom_data_ofs = color_ofs;
+
+                        switch (multimesh.color_format) {
+                            case MULTIMESH_COLOR_NONE: {
+                                gl.disableVertexAttribArray(ATTR_INST_COLOR);
+                                gl.vertexAttrib4f(ATTR_INST_COLOR, 1, 1, 1, 1);
+                            } break;
+                            case MULTIMESH_COLOR_8BIT: {
+                                gl.enableVertexAttribArray(ATTR_INST_COLOR);
+                                gl.vertexAttribPointer(ATTR_INST_COLOR, 4, gl.UNSIGNED_BYTE, true, stride, color_ofs);
+                                gl_ext.vertexAttribDivisor(ATTR_INST_COLOR, 1);
+                                custom_data_ofs += 4;
+                            } break;
+                            case MULTIMESH_COLOR_FLOAT: {
+                                gl.enableVertexAttribArray(ATTR_INST_COLOR);
+                                gl.vertexAttribPointer(ATTR_INST_COLOR, 4, gl.FLOAT, false, stride, color_ofs);
+                                gl_ext.vertexAttribDivisor(ATTR_INST_COLOR, 1);
+                                custom_data_ofs += 4 * 4;
+                            } break;
+                        }
+
+                        switch (multimesh.custom_data_format) {
+                            case MULTIMESH_CUSTOM_DATA_NONE: {
+                                gl.disableVertexAttribArray(ATTR_INST_DATA);
+                                gl.vertexAttrib4f(ATTR_INST_DATA, 1, 1, 1, 1);
+                            } break;
+                            case MULTIMESH_CUSTOM_DATA_8BIT: {
+                                gl.enableVertexAttribArray(ATTR_INST_DATA);
+                                gl.vertexAttribPointer(ATTR_INST_DATA, 4, gl.UNSIGNED_BYTE, true, stride, custom_data_ofs);
+                                gl_ext.vertexAttribDivisor(ATTR_INST_DATA, 1);
+                            } break;
+                            case MULTIMESH_CUSTOM_DATA_FLOAT: {
+                                gl.enableVertexAttribArray(ATTR_INST_DATA);
+                                gl.vertexAttribPointer(ATTR_INST_DATA, 4, gl.FLOAT, false, stride, custom_data_ofs);
+                                gl_ext.vertexAttribDivisor(ATTR_INST_DATA, 1);
+                            } break;
+                        }
+
+                        if (s.index_array_len) {
+                            gl_ext.drawElementsInstanced(s.primitive, s.index_array_len, gl.UNSIGNED_SHORT, 0, amount);
+                        } else {
+                            gl_ext.drawArraysInstanced(s.primitive, 0, s.array_len, amount);
+                        }
+
+                        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+                        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+                    }
                 } break;
             }
         }

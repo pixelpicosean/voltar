@@ -18,6 +18,13 @@ import {
     FILTER_NEAREST,
     WRAP_REPEAT,
     WRAP_CLAMP_TO_EDGE,
+    MULTIMESH_TRANSFORM_2D,
+    MULTIMESH_COLOR_NONE,
+    MULTIMESH_CUSTOM_DATA_NONE,
+    MULTIMESH_COLOR_8BIT,
+    MULTIMESH_COLOR_FLOAT,
+    MULTIMESH_CUSTOM_DATA_8BIT,
+    MULTIMESH_CUSTOM_DATA_FLOAT,
 } from "engine/servers/visual_server";
 
 
@@ -197,19 +204,59 @@ export class Mesh_t {
     update_multimeshes() { }
 }
 
+/** @type {{ [length: string]: Float32Array[] }} */
+const Float32ArrayPool = { }
+/**
+ * @param {number} size
+ */
+function new_float32array(size) {
+    const length = nearest_po2(size);
+    let pool = Float32ArrayPool[length];
+    if (!pool) {
+        pool = Float32ArrayPool[length] = [];
+    }
+    let array = pool.pop();
+    if (!array) {
+        return new Float32Array(length);
+    }
+    return array;
+}
+/**
+ * @param {Float32Array} array
+ */
+function free_float32array(array) {
+    const length = array.length;
+    let pool = Float32ArrayPool[length];
+    if (!pool) {
+        pool = Float32ArrayPool[length] = [];
+    }
+    pool.push(array);
+}
+
 export class MultiMesh_t {
     constructor() {
         /** @type {Mesh_t} */
         this.mesh = null;
         this.size = 0;
 
+        this.transform_format = MULTIMESH_TRANSFORM_2D;
+        this.color_format = MULTIMESH_COLOR_NONE;
+        this.custom_data_format = MULTIMESH_CUSTOM_DATA_NONE;
+
+        this.xform_floats = 0;
+        this.color_floats = 0;
+        this.custom_data_floats = 0;
+
         /** @type {SelfList<MultiMesh_t>} */
         this.update_list = new SelfList(this);
         /** @type {SelfList<MultiMesh_t>} */
         this.mesh_list = new SelfList(this);
 
-        /** @type {number[]} */
-        this.data = [];
+        /** @type {WebGLBuffer} */
+        this.buffer = null;
+
+        /** @type {Float32Array} */
+        this.data = null;
 
         this.aabb = null;
 
@@ -350,7 +397,29 @@ export class RasterizerStorage {
     update_dirty_shaders() { }
     update_dirty_materials() { }
     update_dirty_skeletons() { }
-    update_dirty_multimeshes() { }
+    update_dirty_multimeshes() {
+        const gl = this.gl;
+
+        while (this.multimesh_update_list.first()) {
+            const multimesh = this.multimesh_update_list.first().self();
+
+            if (multimesh.size && multimesh.dirty_data) {
+                if (!multimesh.buffer) {
+                    multimesh.buffer = gl.createBuffer();
+                }
+
+                gl.bindBuffer(gl.ARRAY_BUFFER, multimesh.buffer);
+                gl.bufferSubData(gl.ARRAY_BUFFER, 0, multimesh.data);
+                gl.bindBuffer(gl.ARRAY_BUFFER, null);
+            }
+            multimesh.dirty_data = false;
+
+            // TODO: update AABB of dirty multi-mesh
+            multimesh.dirty_aabb = false;
+
+            this.multimesh_update_list.remove(this.multimesh_update_list.first());
+        }
+    }
     update_dirty_buffers() {
         // recycle used buffers to
         for (const b of this.used_buffers) {
@@ -571,6 +640,12 @@ export class RasterizerStorage {
     }
     /**
      * @param {Mesh_t} mesh
+     */
+    mesh_free(mesh) {
+        this.mesh_clear(mesh);
+    }
+    /**
+     * @param {Mesh_t} mesh
      * @param {number} surf_index
      */
     mesh_remove_surface(mesh, surf_index) {
@@ -654,6 +729,162 @@ export class RasterizerStorage {
     }
     /**
      * @param {MultiMesh_t} multimesh
+     */
+    multimesh_free(multimesh) {
+        const gl = this.gl;
+
+        if (multimesh.buffer) {
+            gl.deleteBuffer(multimesh.buffer);
+            if (multimesh.data) {
+                free_float32array(multimesh.data);
+            }
+            multimesh.buffer = null;
+            multimesh.data = null;
+        }
+
+        multimesh.mesh = null;
+
+        if (multimesh.update_list.in_list()) {
+            this.multimesh_update_list.remove(multimesh.update_list);
+        }
+    }
+    /**
+     * @param {MultiMesh_t} multimesh
+     * @param {number} instances
+     * @param {number} transform_format
+     * @param {number} color_format
+     * @param {number} data_format
+     */
+    multimesh_allocate(multimesh, instances, transform_format, color_format, data_format) {
+        if (
+            multimesh.size === instances
+            &&
+            multimesh.transform_format === transform_format
+            &&
+            multimesh.color_format === color_format
+            &&
+            multimesh.custom_data_format === data_format
+        ) {
+            return;
+        }
+
+        const gl = this.gl;
+
+        if (multimesh.buffer) {
+            gl.deleteBuffer(multimesh.buffer);
+            if (multimesh.data) {
+                free_float32array(multimesh.data);
+            }
+            multimesh.buffer = null;
+            multimesh.data = null;
+        }
+
+        multimesh.size = instances;
+        multimesh.transform_format = transform_format;
+        multimesh.color_format = color_format;
+        multimesh.custom_data_format = data_format;
+
+        if (multimesh.size) {
+            if (multimesh.transform_format === MULTIMESH_TRANSFORM_2D) {
+                multimesh.xform_floats = 8;
+            } else {
+                multimesh.xform_floats = 12;
+            }
+
+            if (multimesh.color_format === MULTIMESH_COLOR_8BIT) {
+                multimesh.color_floats = 1;
+            } else if (multimesh.color_format === MULTIMESH_COLOR_FLOAT) {
+                multimesh.color_floats = 4;
+            } else {
+                multimesh.color_floats = 0;
+            }
+
+            if (multimesh.custom_data_format === MULTIMESH_CUSTOM_DATA_8BIT) {
+                multimesh.custom_data_floats = 1;
+            } else if (multimesh.custom_data_format === MULTIMESH_CUSTOM_DATA_FLOAT) {
+                multimesh.custom_data_floats = 4;
+            } else {
+                multimesh.custom_data_floats = 0;
+            }
+
+            const format_floats = multimesh.color_floats + multimesh.xform_floats + multimesh.custom_data_floats;
+
+            multimesh.data = new_float32array(format_floats * instances);
+            const data = multimesh.data;
+
+            const c = Color.new();
+            const c_8bit = c.set(1, 1, 1, 1).as_rgba8();
+            const d_8bit = c.set(0, 0, 0, 0).as_rgba8();
+            Color.free(c);
+
+            for (let i = 0, len = instances * format_floats; i < len; i += format_floats) {
+                let color_from = 0;
+                let custom_data_from = 0;
+
+                if (multimesh.transform_format === MULTIMESH_TRANSFORM_2D) {
+                    data[i + 0] = 1.0;
+                    data[i + 1] = 0.0;
+                    data[i + 2] = 0.0;
+                    data[i + 3] = 0.0;
+                    data[i + 4] = 0.0;
+                    data[i + 5] = 1.0;
+                    data[i + 6] = 0.0;
+                    data[i + 7] = 0.0;
+                    color_from = 8;
+                    custom_data_from = 8;
+                } else {
+                    data[i + 0] = 1.0;
+                    data[i + 1] = 0.0;
+                    data[i + 2] = 0.0;
+                    data[i + 3] = 0.0;
+                    data[i + 4] = 0.0;
+                    data[i + 5] = 1.0;
+                    data[i + 6] = 0.0;
+                    data[i + 7] = 0.0;
+                    data[i + 8] = 0.0;
+                    data[i + 9] = 0.0;
+                    data[i + 10] = 1.0;
+                    data[i + 11] = 0.0;
+                    color_from = 12;
+                    custom_data_from = 12;
+                }
+
+                if (multimesh.color_format === MULTIMESH_COLOR_8BIT) {
+                    data[i + color_from + 0] = c_8bit;
+                    custom_data_from = color_from + 1;
+                } else if (multimesh.color_format === MULTIMESH_COLOR_FLOAT) {
+                    data[i + color_from + 0] = 1.0;
+                    data[i + color_from + 1] = 1.0;
+                    data[i + color_from + 2] = 1.0;
+                    data[i + color_from + 3] = 1.0;
+                    custom_data_from = color_from + 1;
+                }
+
+                if (multimesh.custom_data_format === MULTIMESH_CUSTOM_DATA_8BIT) {
+                    data[i + custom_data_from + 0] = d_8bit;
+                } else if (multimesh.custom_data_format === MULTIMESH_CUSTOM_DATA_FLOAT) {
+                    data[i + custom_data_from + 0] = 0.0;
+                    data[i + custom_data_from + 1] = 0.0;
+                    data[i + custom_data_from + 2] = 0.0;
+                    data[i + custom_data_from + 3] = 0.0;
+                }
+            }
+
+            multimesh.buffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, multimesh.buffer);
+            gl.bufferData(gl.ARRAY_BUFFER, multimesh.data, gl.STATIC_DRAW);
+            gl.bindBuffer(gl.ARRAY_BUFFER, null);
+        }
+
+        multimesh.dirty_data = true;
+        multimesh.dirty_aabb = true;
+
+        if (!multimesh.update_list.in_list()) {
+            this.multimesh_update_list.add(multimesh.update_list);
+        }
+    }
+    /**
+     * @param {MultiMesh_t} multimesh
      * @param {Mesh_t} mesh
      */
     multimesh_set_mesh(multimesh, mesh) {
@@ -677,9 +908,10 @@ export class RasterizerStorage {
      */
     multimesh_set_as_bulk_array(multimesh, p_array) {
         const dsize = multimesh.data.length;
+        const data = multimesh.data;
 
         for (let i = 0; i < dsize; i++) {
-            multimesh.data[i] = p_array[i];
+            data[i] = p_array[i];
         }
 
         multimesh.dirty_data = true;

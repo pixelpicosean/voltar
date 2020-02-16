@@ -104,6 +104,7 @@ export class OS {
 
         this.canvas = null;
         this.gl = null;
+        this.gl_ext = null;
     }
 
     initialize_core() { }
@@ -142,16 +143,67 @@ export class OS {
             premultipliedAlpha: false,
             preserveDrawingBuffer: false,
         };
-        /** @type {WebGLRenderingContext} */
-        let gl = null;
         if (this.video_driver_index === VIDEO_DRIVER_GLES3) {
-            gl = /** @type {WebGLRenderingContext} */(this.canvas.getContext('webgl2', options));
+            const gl = /** @type {WebGL2RenderingContext} */(this.canvas.getContext('webgl2', options));
+            this.gl_ext = {
+                /* instancing API */
+
+                VERTEX_ATTRIB_ARRAY_DIVISOR: gl.VERTEX_ATTRIB_ARRAY_DIVISOR,
+                /**
+                 * @param {number} index
+                 * @param {number} divisor
+                 */
+                vertexAttribDivisor: (index, divisor) => gl.vertexAttribDivisor(index, divisor),
+                /**
+                 * @param {number} mode
+                 * @param {number} first
+                 * @param {number} count
+                 * @param {number} primcount
+                 */
+                drawArraysInstanced: (mode, first, count, primcount) => gl.drawArraysInstanced(mode, first, count, primcount),
+                /**
+                 * @param {number} mode
+                 * @param {number} count
+                 * @param {number} type
+                 * @param {number} offset
+                 * @param {number} primcount
+                 */
+                drawElementsInstanced: (mode, count, type, offset, primcount) => gl.drawElementsInstanced(mode, count, type, offset, primcount),
+            }
+            this.gl = gl;
         }
-        if (!gl) {
+        if (!this.gl) {
             this.video_driver_index = VIDEO_DRIVER_GLES2;
-            gl = /** @type {WebGLRenderingContext} */(this.canvas.getContext('webgl', options));
+            const gl = /** @type {WebGLRenderingContext} */(this.canvas.getContext('webgl', options));
+
+            const instancing = gl.getExtension("ANGLE_instanced_arrays");
+            this.gl_ext = {
+                /* instancing API */
+
+                VERTEX_ATTRIB_ARRAY_DIVISOR: instancing.VERTEX_ATTRIB_ARRAY_DIVISOR_ANGLE,
+                /**
+                 * @param {number} index
+                 * @param {number} divisor
+                 */
+                vertexAttribDivisor: (index, divisor) => instancing.vertexAttribDivisorANGLE(index, divisor),
+                /**
+                 * @param {number} mode
+                 * @param {number} first
+                 * @param {number} count
+                 * @param {number} primcount
+                 */
+                drawArraysInstanced: (mode, first, count, primcount) => instancing.drawArraysInstancedANGLE(mode, first, count, primcount),
+                /**
+                 * @param {number} mode
+                 * @param {number} count
+                 * @param {number} type
+                 * @param {number} offset
+                 * @param {number} primcount
+                 */
+                drawElementsInstanced: (mode, count, type, offset, primcount) => instancing.drawElementsInstancedANGLE(mode, count, type, offset, primcount),
+            }
+            this.gl = gl;
         }
-        this.gl = gl;
 
         const visual_server = new VisualServer();
         this.input = new Input();

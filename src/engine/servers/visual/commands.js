@@ -223,6 +223,7 @@ export class CommandMultiMesh extends Command {
     constructor() {
         super();
 
+        /** @type {import('engine/drivers/webgl/rasterizer_storage').MultiMesh_t} */
         this.multimesh = null;
     }
 }
