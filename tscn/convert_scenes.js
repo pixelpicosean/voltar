@@ -89,7 +89,7 @@ module.exports.convert_scenes = (/** @type {string} */scene_root_url_p) => {
     const ordered_tres_load_list = tres_dep_frequent_list.map(p => ({ filename: p, blocks: tres_map[p] }));
 
     const resource_map = ordered_tres_load_list.reduce((map, { filename, blocks }) => {
-        map[filename] = convert_tres(blocks);
+        map[filename.replace("\\", "/")] = convert_tres(blocks);
         return map;
     }, {});
 
