@@ -1,4 +1,4 @@
-import Resource from '../../Resource';
+import Resource from '../../io_resource';
 import encode_binary from '../../b64';
 
 // @ts-ignore

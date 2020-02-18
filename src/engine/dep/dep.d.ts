@@ -3,39 +3,41 @@ declare module 'remove-array-items' {
 }
 
 declare module 'ismobilejs' {
-    export const apple: {
-        phone: boolean,
-        ipod: boolean,
-        tablet: boolean,
-        device: string,
+    export declare type isMobileResult = {
+        apple: {
+            phone: boolean;
+            ipod: boolean;
+            tablet: boolean;
+            device: boolean;
+        };
+        amazon: {
+            phone: boolean;
+            tablet: boolean;
+            device: boolean;
+        };
+        android: {
+            phone: boolean;
+            tablet: boolean;
+            device: boolean;
+        };
+        windows: {
+            phone: boolean;
+            tablet: boolean;
+            device: boolean;
+        };
+        other: {
+            blackberry: boolean;
+            blackberry10: boolean;
+            opera: boolean;
+            firefox: boolean;
+            chrome: boolean;
+            device: boolean;
+        };
+        phone: boolean;
+        tablet: boolean;
+        any: boolean;
     };
-    export const android: {
-        phone: boolean,
-        tablet: boolean,
-        device: string,
-    };
-    export const amazon: {
-        phone: boolean,
-        tablet: boolean,
-        device: string,
-    };
-    export const windows: {
-        phone: boolean,
-        tablet: boolean,
-        device: string,
-    };
-    export const seven_inch: boolean;
-    export const other: {
-        blackberry_10: boolean,
-        blackberry: boolean,
-        opera: boolean,
-        firefox: boolean,
-        chrome: boolean,
-        device: string,
-    };
-    export const any: boolean;
-    export const phone: boolean;
-    export const tablet: boolean;
+    export default function isMobile(userAgent?: string): isMobileResult;
 }
 
 declare module 'earcut' {

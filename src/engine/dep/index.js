@@ -2,5 +2,5 @@
 
 export { default as remove_items } from 'remove-array-items';
 
-import * as device_ns from 'ismobilejs';
-export const device = device_ns;
+import ismobilejs from 'ismobilejs';
+export const device = ismobilejs();

@@ -1,6 +1,7 @@
-import Vector2 from "./vector2";
-import { CMP_EPSILON } from "./const";
-import { clamp } from "./index";
+import { clamp } from "./math_funcs";
+import { CMP_EPSILON } from "./math_defs";
+import { Vector2 } from "./vector2";
+
 
 /**
  * @param {Vector2} p_from_a

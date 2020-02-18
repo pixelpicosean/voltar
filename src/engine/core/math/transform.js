@@ -1,231 +1,99 @@
-import ObservableVector2 from './observable_vector2';
-import Matrix from './matrix';
-
-/** @type {Transform[]} */
-const Transform_Pool = [];
-
 /**
- * Transform that takes care about its versions
+ * @param {number[]} out
  */
-export default class Transform {
-    static new() {
-        const t = Transform_Pool.pop();
-        if (!t) {
-            return new Transform();
-        } else {
-            return t.reset();
-        }
-    }
-    static free(t) {
-        if (t) {
-            Transform_Pool.push(t);
-        }
-        return Transform;
-    }
-
-    constructor() {
-        /**
-         * The global matrix transform. It can be swapped temporarily by some functions like get_local_Bounds()
-         *
-         * @member {Matrix}
-         */
-        this.world_transform = new Matrix();
-
-        /**
-         * The local matrix transform
-         *
-         * @member {Matrix}
-         */
-        this.local_transform = new Matrix();
-
-        /**
-         * The coordinate of the object relative to the local coordinates of the parent.
-         *
-         * @member {ObservableVector2}
-         */
-        this.position = new ObservableVector2(this.on_change, this, 0, 0);
-
-        /**
-         * The scale factor of the object.
-         *
-         * @member {ObservableVector2}
-         */
-        this.scale = new ObservableVector2(this.on_change, this, 1, 1);
-
-        /**
-         * The pivot point of the node that it rotates around
-         *
-         * @member {ObservableVector2}
-         */
-        this.pivot = new ObservableVector2(this.on_change, this, 0, 0);
-
-        /**
-         * The skew amount, on the x and y axis.
-         *
-         * @member {ObservableVector2}
-         */
-        this.skew = new ObservableVector2(this.update_skew, this, 0, 0);
-
-        this._rotation = 0;
-
-        this._cx = 1; // cos rotation + skewY;
-        this._sx = 0; // sin rotation + skewY;
-        this._cy = 0; // cos rotation + Math.PI/2 - skewX;
-        this._sy = 1; // sin rotation + Math.PI/2 - skewX;
-
-        this._parent_id = 0;
-
-        this._world_id = 0;
-        this._local_id = 0;
-
-        this._current_local_id = 0;
-    }
-
-    reset() {
-        this.world_transform.reset();
-        this.local_transform.reset();
-
-        this.position.set(0, 0);
-        this.scale.set(0, 0);
-        this.pivot.set(0, 0);
-        this.skew.set(0, 0);
-
-        this._rotation = 0;
-
-        this._cx = 1;
-        this._sx = 0;
-        this._cy = 0;
-        this._sy = 1;
-
-        this._parent_id = 0;
-
-        this._world_id = 0;
-        this._local_id = 0;
-
-        this._current_local_id = 0;
-
-        return this;
-    }
-
-    /**
-     * Called when a value changes.
-     *
-     * @private
-     */
-    on_change() {
-        this._local_id++;
-    }
-
-    /**
-     * Called when skew or rotation changes
-     *
-     * @private
-     */
-    update_skew() {
-        this._cx = Math.cos(this._rotation + this.skew._y);
-        this._sx = Math.sin(this._rotation + this.skew._y);
-        this._cy = -Math.sin(this._rotation - this.skew._x); // cos, added PI/2
-        this._sy = Math.cos(this._rotation - this.skew._x); // sin, added PI/2
-
-        this._local_id++;
-    }
-
-    /**
-     * Updates only local matrix
-     */
-    update_local_transform() {
-        const lt = this.local_transform;
-
-        if (this._local_id !== this._current_local_id) {
-            // get the matrix values of the displayobject based on its transform properties..
-            lt.a = this._cx * this.scale._x;
-            lt.b = this._sx * this.scale._x;
-            lt.c = this._cy * this.scale._y;
-            lt.d = this._sy * this.scale._y;
-
-            lt.tx = this.position._x - ((this.pivot._x * lt.a) + (this.pivot._y * lt.c));
-            lt.ty = this.position._y - ((this.pivot._x * lt.b) + (this.pivot._y * lt.d));
-            this._current_local_id = this._local_id;
-
-            // force an update..
-            this._parent_id = -1;
-        }
-    }
-
-    /**
-     * Updates the values of the object and applies the parent's transform.
-     *
-     * @param {Transform} parent_transform - The transform of the parent of this object
-     * @returns {boolean} Whether world transform is updated
-     */
-    update_transform(parent_transform) {
-        const lt = this.local_transform;
-
-        if (this._local_id !== this._current_local_id) {
-            // get the matrix values of the displayobject based on its transform properties..
-            lt.a = this._cx * this.scale._x;
-            lt.b = this._sx * this.scale._x;
-            lt.c = this._cy * this.scale._y;
-            lt.d = this._sy * this.scale._y;
-
-            lt.tx = this.position._x - ((this.pivot._x * lt.a) + (this.pivot._y * lt.c));
-            lt.ty = this.position._y - ((this.pivot._x * lt.b) + (this.pivot._y * lt.d));
-            this._current_local_id = this._local_id;
-
-            // force an update..
-            this._parent_id = -1;
-        }
-
-        if (this._parent_id !== parent_transform._world_id) {
-            // concat the parent matrix with the objects transform.
-            const pt = parent_transform.world_transform;
-            const wt = this.world_transform;
-
-            wt.a = (lt.a * pt.a) + (lt.b * pt.c);
-            wt.b = (lt.a * pt.b) + (lt.b * pt.d);
-            wt.c = (lt.c * pt.a) + (lt.d * pt.c);
-            wt.d = (lt.c * pt.b) + (lt.d * pt.d);
-            wt.tx = (lt.tx * pt.a) + (lt.ty * pt.c) + pt.tx;
-            wt.ty = (lt.tx * pt.b) + (lt.ty * pt.d) + pt.ty;
-
-            this._parent_id = parent_transform._world_id;
-
-            // update the id of the transform..
-            this._world_id++;
-
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Decomposes a matrix and sets the transforms properties based on it.
-     *
-     * @param {Matrix} matrix - The matrix to decompose
-     */
-    set_from_matrix(matrix) {
-        matrix.decompose(this);
-        this._local_id++;
-        return this;
-    }
-
-    /**
-     * The rotation of the object in radians.
-     *
-     * @member {number}
-     */
-    get rotation() {
-        return this._rotation;
-    }
-
-    set rotation(value) // eslint-disable-line require-jsdoc
-    {
-        if (this._rotation !== value) {
-            this._rotation = value;
-            this.update_skew();
-        }
-    }
+export function identity_mat4(out) {
+    out[0] = 1;
+    out[1] = 0;
+    out[2] = 0;
+    out[3] = 0;
+    out[4] = 0;
+    out[5] = 1;
+    out[6] = 0;
+    out[7] = 0;
+    out[8] = 0;
+    out[9] = 0;
+    out[10] = 1;
+    out[11] = 0;
+    out[12] = 0;
+    out[13] = 0;
+    out[14] = 0;
+    out[15] = 1;
+    return out;
 }
 
-export const IDENTITY = new Transform();
+/**
+ * @param {number[]} out
+ * @param {number[]} a
+ * @param {number[]} v
+ */
+export function translate_mat4(out, a, v) {
+    const x = v[0],
+        y = v[1],
+        z = v[2];
+
+    if (a === out) {
+        out[12] += (a[0] * x + a[4] * y + a[8] * z);
+        out[13] += (a[1] * x + a[5] * y + a[9] * z);
+        out[14] += (a[2] * x + a[6] * y + a[10] * z);
+        out[15] += (a[3] * x + a[7] * y + a[11] * z);
+    } else {
+        const a00 = a[0];
+        const a01 = a[1];
+        const a02 = a[2];
+        const a03 = a[3];
+        const a10 = a[4];
+        const a11 = a[5];
+        const a12 = a[6];
+        const a13 = a[7];
+        const a20 = a[8];
+        const a21 = a[9];
+        const a22 = a[10];
+        const a23 = a[11];
+        out[0] = a00;
+        out[1] = a01;
+        out[2] = a02;
+        out[3] = a03;
+        out[4] = a10;
+        out[5] = a11;
+        out[6] = a12;
+        out[7] = a13;
+        out[8] = a20;
+        out[9] = a21;
+        out[10] = a22;
+        out[11] = a23;
+        out[12] = a00 * x + a10 * y + a20 * z + a[12];
+        out[13] = a01 * x + a11 * y + a21 * z + a[13];
+        out[14] = a02 * x + a12 * y + a22 * z + a[14];
+        out[15] = a03 * x + a13 * y + a23 * z + a[15];
+    }
+
+    return out;
+}
+
+/**
+ * @param {number[]} out
+ * @param {number[]} a
+ * @param {number[]} v
+ */
+export function scale_mat4(out, a, v) {
+    const x = v[0],
+        y = v[1],
+        z = v[2];
+    out[0] = a[0] * x;
+    out[1] = a[1] * x;
+    out[2] = a[2] * x;
+    out[3] = a[3] * x;
+    out[4] = a[4] * y;
+    out[5] = a[5] * y;
+    out[6] = a[6] * y;
+    out[7] = a[7] * y;
+    out[8] = a[8] * z;
+    out[9] = a[9] * z;
+    out[10] = a[10] * z;
+    out[11] = a[11] * z;
+    out[12] = a[12] * x;
+    out[13] = a[13] * y;
+    out[14] = a[14] * z;
+    out[15] = a[15];
+    return out;
+}

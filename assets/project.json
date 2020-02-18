@@ -3,9 +3,42 @@
         "name": "voltar"
     },
     "display": {
-        "width": 800,
+        "width": 320,
+        "height": 240,
+        "webgl2": false,
         "stretch_mode": "viewport",
         "stretch_aspect": "keep"
+    },
+    "input": {
+        "special": {
+            "deadzone": 0.5,
+            "events": [
+                {
+                    "type": "InputEventMouseButton",
+                    "resource_local_to_scene": false,
+                    "resource_name": "",
+                    "device": 0,
+                    "alt": false,
+                    "shift": false,
+                    "control": false,
+                    "meta": false,
+                    "command": false,
+                    "button_mask": 0,
+                    "position": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "global_position": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "factor": 1,
+                    "button_index": 1,
+                    "pressed": false,
+                    "doubleclick": false
+                }
+            ]
+        }
     },
     "layer_map": {
         "physics": {

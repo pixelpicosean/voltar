@@ -1,45 +1,29 @@
-import Vector2 from "engine/core/math/vector2";
+import { Vector2 } from "engine/core/math/vector2";
+import { res_class_map } from "engine/registry";
 
-/**
- * @enum {number}
- */
-export const TrackType = {
-    TYPE_VALUE: 0,      // value
-    TYPE_TRANSFORM: 1,  // transform a node or a bone
-    TYPE_METHOD: 2,     // call any method on a specific node
-    TYPE_BEZIER: 3,     // bezier curve
-    TYPE_AUDIO: 4,
-    TYPE_ANIMATION: 5,
-};
-/**
- * @enum {number}
- */
-export const InterpolationType = {
-    INTERPOLATION_NEAREST: 0,
-    INTERPOLATION_LINEAR: 1,
-    INTERPOLATION_CUBIC: 2,
-};
-/**
- * @enum {number}
- */
-export const UpdateMode = {
-    UPDATE_CONTINUOUS: 0,
-    UPDATE_DISCRETE: 1,
-    UPDATE_TRIGGER: 2,
-    UPDATE_CAPTURE: 3,
-};
 
-/**
- * @enum {number}
- */
-export const PropType = {
-    NUMBER: 0,
-    BOOLEAN: 1,
-    STRING: 2,
-    VECTOR: 3,
-    COLOR: 4,
-    ANY: 5,
-}
+export const TRACK_TYPE_VALUE = 0;      // value
+export const TRACK_TYPE_TRANSFORM = 1;  // transform a node or a bone
+export const TRACK_TYPE_METHOD = 2;     // call any method on a specific node
+export const TRACK_TYPE_BEZIER = 3;     // bezier curve
+export const TRACK_TYPE_AUDIO = 4;
+export const TRACK_TYPE_ANIMATION = 5;
+
+export const INTERPOLATION_NEAREST = 0;
+export const INTERPOLATION_LINEAR = 1;
+export const INTERPOLATION_CUBIC = 2;
+
+export const UPDATE_CONTINUOUS = 0;
+export const UPDATE_DISCRETE = 1;
+export const UPDATE_TRIGGER = 2;
+export const UPDATE_CAPTURE = 3;
+
+export const PROP_TYPE_NUMBER = 0;
+export const PROP_TYPE_BOOLEAN = 1;
+export const PROP_TYPE_STRING = 2;
+export const PROP_TYPE_VECTOR = 3;
+export const PROP_TYPE_COLOR = 4;
+export const PROP_TYPE_ANY = 5;
 
 /**
  * Fetch property key from key path
@@ -64,20 +48,22 @@ export class Key {
 
 export class Track {
     constructor() {
-        this.type = TrackType.TYPE_VALUE;
-        this.interp = InterpolationType.INTERPOLATION_LINEAR;
+        this.type = TRACK_TYPE_VALUE;
+        this.interp = INTERPOLATION_LINEAR;
 
         this.path = '';
         this.prop_key = '';
-        this.prop_type = PropType.ANY;
+        this.prop_type = PROP_TYPE_ANY;
 
-        this.loop_wrap = false;
+        this.loop_wrap = true;
+        this.enabled = true;
     }
     load(data) {
         this.path = data.path;
         this.prop_key = prop_key_from_path(data.path);
 
-        this.loop_wrap = data.loop_wrap;
+        this.loop_wrap = !!data.loop_wrap;
+        this.enabled = !!data.enabled;
 
         return this;
     }
@@ -87,9 +73,9 @@ export class ValueTrack extends Track {
     constructor() {
         super();
 
-        this.type = TrackType.TYPE_VALUE;
+        this.type = TRACK_TYPE_VALUE;
 
-        this.update_mode = UpdateMode.UPDATE_CONTINUOUS;
+        this.update_mode = UPDATE_CONTINUOUS;
         this.update_on_seek = false;
 
         /** @type {Key<any>[]} */
@@ -113,23 +99,27 @@ export class ValueTrack extends Track {
         let first_value = data.keys.values[0];
         switch (typeof first_value) {
             case 'number': {
-                this.prop_type = PropType.NUMBER;
+                this.prop_type = PROP_TYPE_NUMBER;
             } break;
             case 'boolean': {
-                this.prop_type = PropType.BOOLEAN;
+                this.prop_type = PROP_TYPE_BOOLEAN;
             } break;
             case 'string': {
-                this.prop_type = PropType.STRING;
+                this.prop_type = PROP_TYPE_STRING;
             } break;
             case 'object': {
-                if (first_value.x !== undefined && first_value.y !== undefined) {
-                    this.prop_type = PropType.VECTOR;
+                if (first_value.class === 'ImageTexture') {
+                    this.prop_type = PROP_TYPE_ANY;
+                } else if (first_value.x !== undefined && first_value.y !== undefined) {
+                    this.prop_type = PROP_TYPE_VECTOR;
                 } else if (first_value.r !== undefined && first_value.g !== undefined && first_value.b !== undefined && first_value.a !== undefined) {
-                    this.prop_type = PropType.COLOR;
+                    this.prop_type = PROP_TYPE_COLOR;
+                } else {
+                    this.prop_type = PROP_TYPE_ANY;
                 }
             } break;
             default: {
-                this.prop_type = PropType.ANY;
+                this.prop_type = PROP_TYPE_ANY;
             } break;
         }
 
@@ -138,7 +128,7 @@ export class ValueTrack extends Track {
         // easily animated without further more calculation and error check.
         let fixed = false;
         if (this.values.length > 0) {
-            if (this.prop_type === PropType.VECTOR) {
+            if (this.prop_type === PROP_TYPE_VECTOR) {
                 for (let i = 1; i < this.values.length; i++) {
                     let value = this.values[i].value, previous = this.values[i - 1].value;
                     if (value === null) {
@@ -153,7 +143,7 @@ export class ValueTrack extends Track {
                         fixed = true;
                     }
                 }
-            } else if (this.prop_type === PropType.COLOR) {
+            } else if (this.prop_type === PROP_TYPE_COLOR) {
                 for (let i = 1; i < this.values.length; i++) {
                     let value = this.values[i].value, previous = this.values[i - 1].value;
                     if (value === null) {
@@ -187,7 +177,7 @@ export class MethodTrack extends Track {
     constructor() {
         super();
 
-        this.type = TrackType.TYPE_METHOD;
+        this.type = TRACK_TYPE_METHOD;
 
         /** @type Key<{method: string, args: Array<any>|undefined}>[] */
         this.methods = [];
@@ -212,14 +202,10 @@ export class BezierTrack extends Track {
     constructor() {
         super();
 
-        this.type = TrackType.TYPE_BEZIER;
+        this.type = TRACK_TYPE_BEZIER;
 
         /** @type Key<{in_handle: Vector2, out_handle: Vector2, value: number}>[] */
         this.values = [];
-    }
-    load(data) {
-        super.load(data);
-        return this;
     }
 }
 
@@ -227,18 +213,14 @@ export class AnimationTrack extends Track {
     constructor() {
         super();
 
-        this.type = TrackType.TYPE_ANIMATION;
+        this.type = TRACK_TYPE_ANIMATION;
 
         /** @type Key<string>[] */
         this.values = [];
     }
-    load(data) {
-        super.load(data);
-        return this;
-    }
 }
 
-export default class Animation {
+export class Animation {
     constructor() {
         this.name = '';
 
@@ -250,7 +232,10 @@ export default class Animation {
         this.tracks = null;
     }
 
-    load(data) {
+    _load_data(data) {
+        if (data.name !== undefined) {
+            this.name = data.name;
+        }
         if (data.length !== undefined) {
             this.length = data.length;
         }
@@ -286,3 +271,4 @@ export default class Animation {
     // We don't provide more methods since they are not useful,
     // so we can save some bytes here.
 }
+res_class_map['Animation'] = Animation

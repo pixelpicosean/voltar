@@ -1,4 +1,5 @@
-import { CMP_EPSILON } from './const';
+import { CMP_EPSILON } from './math_defs';
+
 
 /**
  * @interface
@@ -14,7 +15,7 @@ export class Vector2Like {
  * The Vector2 object represents a location in a two-dimensional coordinate system, where x represents
  * the horizontal axis and y represents the vertical axis.
  */
-export default class Vector2 {
+export class Vector2 {
     /**
      * @param {number} [p_x]
      * @param {number} [p_y]
@@ -37,9 +38,7 @@ export default class Vector2 {
         return Vector2;
     }
 
-    get width() {
-        return this.x;
-    }
+    get width() { return this.x }
     /**
      * @param {number} value
      */
@@ -48,16 +47,12 @@ export default class Vector2 {
     }
     /**
      * @param {number} value
-     * @returns {this}
      */
     set_width(value) {
         this.x = value;
-        return this;
     }
 
-    get height() {
-        return this.y;
-    }
+    get height() { return this.y }
     /**
      * @param {number} value
      */
@@ -66,45 +61,31 @@ export default class Vector2 {
     }
     /**
      * @param {number} value
-     * @returns {this}
      */
     set_height(value) {
         this.y = value;
-        return this;
     }
 
     /**
      * @param {number} value
-     * @returns {this}
      */
     set_x(value) {
         this.x = value;
-        return this;
     }
+
     /**
      * @param {number} value
-     * @returns {this}
      */
     set_y(value) {
         this.y = value;
-        return this;
     }
 
     /**
-     * @param {number} [x=0] - position of the point on the x axis
-     * @param {number} [y=0] - position of the point on the y axis
+     * @param {number} [x=0]
+     * @param {number} [y=0]
      */
     constructor(x = 0, y = 0) {
-        /**
-         * @member {number}
-         * @default 0
-         */
         this.x = x;
-
-        /**
-         * @member {number}
-         * @default 0
-         */
         this.y = y;
     }
 
@@ -139,29 +120,21 @@ export default class Vector2 {
     }
 
     /**
-     * Clone self
-     *
-     * @returns {Vector2}
+     * Returns new Vector2 with same value.
      */
     clone() {
         return new Vector2(this.x, this.y);
     }
-    random(scale) {
-        // TODO: requires random module
-    }
     /**
-     * Create a normalized clone
-     *
-     * @returns {Vector2}
+     * Returns new Vector2 but normalized.
      */
     normalized() {
         return this.clone().normalize();
     }
     /**
-     * Create a clamped vector.
+     * Returns new Vector2 but clamped.
      *
      * @param {number} p_length
-     * @returns {Vector2}
      */
     clamped(p_length) {
         const len = this.length();
@@ -172,10 +145,9 @@ export default class Vector2 {
         return v;
     }
     /**
-     * Create a rotated vector.
+     * Returns new Vector2 but rotated.
      *
      * @param {number} p_rotation
-     * @returns {Vector2}
      */
     rotated(p_rotation) {
         return this.clone().rotate(p_rotation);
@@ -186,7 +158,6 @@ export default class Vector2 {
      * Whether this equals to another point
      *
      * @param {Vector2Like} p_b
-     * @returns {boolean}
      */
     equals(p_b) {
         const a0 = this.x, a1 = this.y;
@@ -198,7 +169,6 @@ export default class Vector2 {
      * Whether this equals to another point(precisely)
      *
      * @param {Vector2Like} p_b
-     * @returns {boolean}
      */
     exact_equals(p_b) {
         return (this.x === p_b.x) && (this.y === p_b.y);
@@ -209,7 +179,7 @@ export default class Vector2 {
      *
      * @param {Vector2Like|number} x
      * @param {number} [y]
-     * @returns {this}
+     * @returns {Vector2} self for chaining
      */
     add(x, y) {
         if (y === undefined) {
@@ -231,7 +201,7 @@ export default class Vector2 {
      *
      * @param {Vector2Like|number} x
      * @param {number} [y]
-     * @returns {this}
+     * @returns {Vector2} self for chaining
      */
     subtract(x, y) {
         if (y === undefined) {
@@ -253,7 +223,7 @@ export default class Vector2 {
      *
      * @param {Vector2Like|number} x
      * @param {number} [y]
-     * @returns {this}
+     * @returns {Vector2} self for chaining
      */
     multiply(x, y) {
         if (y === undefined) {
@@ -275,7 +245,7 @@ export default class Vector2 {
      *
      * @param {Vector2Like|number} x
      * @param {number} [y]
-     * @returns {this}
+     * @returns {Vector2} self for chaining
      */
     divide(x, y) {
         if (y === undefined) {
@@ -449,6 +419,7 @@ export default class Vector2 {
     }
 
     /**
+     * Returns new Vector2.
      * @param {number} p_d
      * @param {Vector2} p_vec
      */
@@ -602,12 +573,17 @@ export default class Vector2 {
         return r_out.set(this.y, -this.x);
     }
 
+    aspect() {
+        return this.x / this.y;
+    }
+
     is_zero() {
         return this.x === 0 && this.y === 0;
     }
 
     /**
-     * @param {Vector2} p_b
+     * Returns new Vector2.
+     * @param {Vector2Like} p_b
      * @param {number} p_t
      */
     linear_interpolate(p_b, p_t) {
@@ -620,6 +596,7 @@ export default class Vector2 {
     }
 
     /**
+     * Returns new Vector2.
      * @param {Vector2} p_b
      * @param {Vector2} p_pre_a
      * @param {Vector2} p_post_b

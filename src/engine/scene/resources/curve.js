@@ -1,8 +1,10 @@
-import { Vector2, deg2rad, clamp, CMP_EPSILON, lerp } from 'engine/core/math/index';
 import { remove_items } from 'engine/dep/index';
-import VObject from 'engine/core/v_object';
+import { deg2rad, clamp, lerp } from 'engine/core/math/math_funcs';
+import { CMP_EPSILON } from 'engine/core/math/math_defs';
+import { Vector2 } from 'engine/core/math/vector2';
+import { VObject } from 'engine/core/v_object';
+import { res_class_map } from 'engine/registry';
 
-const tmp = new Vector2();
 
 /**
  * @param {number} t
@@ -114,6 +116,8 @@ const MAX_X = 1;
 const MIN_Y_RANGE = 0.01;
 
 export class Curve extends VObject {
+    get class() { return 'Curve' }
+
     constructor() {
         super();
 
@@ -125,6 +129,13 @@ export class Curve extends VObject {
         this._bake_resolution = 100;
         this._min_value = 0;
         this._max_value = 1;
+    }
+
+    _load_data(data) {
+        if (data.data !== undefined) {
+            this.set_data(data.data);
+        }
+        return this;
     }
 
     get_point_count() {
@@ -521,8 +532,9 @@ export class Curve extends VObject {
 
         this._points.length = input.length / ELEMS;
 
+        const vec = Vector2.new();
         for (let j = 0; j < this._points.length; j++) {
-            const p = this._points[j] = new C_Point(tmp.set(0, 0));
+            const p = this._points[j] = new C_Point(vec.set(0, 0));
             const i = j * ELEMS;
 
             p.pos.copy(input[i]);
@@ -531,6 +543,7 @@ export class Curve extends VObject {
             p.left_mode = input[i + 3];
             p.right_mode = input[i + 4];
         }
+        Vector2.free(vec);
 
         this.mark_dirty();
 
@@ -611,12 +624,14 @@ export class Curve extends VObject {
      * @param {number} p_max
      */
     ensure_default_setup(p_min, p_max) {
+        const vec = Vector2.new();
         if (this._points.length === 0 && this._min_value === 0 && this._max_value === 1) {
-            this.add_point(tmp.set(0, 1));
-            this.add_point(tmp.set(1, 1));
+            this.add_point(vec.set(0, 1));
+            this.add_point(vec.set(1, 1));
             this.set_min_value(p_min);
             this.set_max_value(p_max);
         }
+        Vector2.free(vec);
     }
 
     mark_dirty() {
@@ -624,6 +639,7 @@ export class Curve extends VObject {
         this.emit_signal('changed');
     }
 }
+res_class_map['Curve'] = Curve
 
 const PointPool = [];
 class Point {
@@ -656,6 +672,8 @@ class BakedPoint {
 }
 
 export class Curve2D extends VObject {
+    get class() { return 'Curve2D' }
+
     set bake_interval(p_tolerance) {
         this._bake_interval = p_tolerance;
         this.baked_cache_dirty = true;
@@ -704,6 +722,7 @@ export class Curve2D extends VObject {
 
             this.baked_cache_dirty = true;
         }
+        return this;
     }
 
     get_point_count() {
@@ -1123,3 +1142,4 @@ export class Curve2D extends VObject {
         }
     }
 }
+res_class_map['Curve2D'] = Curve2D

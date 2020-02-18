@@ -1,9 +1,9 @@
 import * as v from 'engine/index';
 
-export default class Demo extends v.Node2D {
-    _ready() {
-        console.log('Demo is ready!');
-    }
+export class MainScene extends v.Node2D {
+    static instance() { return new MainScene }
+
+    _ready() { }
 }
 
-v.attach_script('res://scene/demo.tscn', Demo);
+v.attach_script('res://scene/demo.tscn', MainScene);

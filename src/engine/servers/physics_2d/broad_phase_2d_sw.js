@@ -1,5 +1,7 @@
-import { Rectangle, Vector2 } from "engine/core/math/index";
-import CollisionObject2DSW from "./collision_object_2d_sw";
+import { Rect2 } from "engine/core/math/rect2";
+import { Vector2 } from "engine/core/math/vector2";
+import { CollisionObject2DSW } from "./collision_object_2d_sw";
+
 
 const LARGE_ELEMENT_FI = 1.01239812;
 
@@ -16,7 +18,7 @@ class Element {
         this.self = 0;
         this.owner = null;
         this._static = false;
-        this.aabb = new Rectangle();
+        this.aabb = new Rect2();
         this.subindex = 0;
         this.pass = 0;
         /**
@@ -88,7 +90,7 @@ class PosBin {
 /** @typedef {(A: CollisionObject2DSW, p_sub_index_A: number, B: CollisionObject2DSW, p_sub_index_B: number, userdata: any) => void} PairCallback */
 /** @typedef {(A: CollisionObject2DSW, p_sub_index_A: number, B: CollisionObject2DSW, p_sub_index_B: number, data: any, userdata: any) => void} UnpairCallback */
 
-export default class BroadPhase2D {
+export class BroadPhase2D {
     constructor() {
         /**
          * @type {Map<number, Element>}
@@ -149,7 +151,7 @@ export default class BroadPhase2D {
     }
     /**
      * @param {number} p_id
-     * @param {Rectangle} p_aabb
+     * @param {Rect2} p_aabb
      */
     move(p_id, p_aabb) {
         const e = this.element_map.get(p_id);
@@ -271,7 +273,7 @@ export default class BroadPhase2D {
         }
 
         let cullcount = this._cull(false, true,
-            pos, Rectangle.EMPTY, p_from, p_to, p_results, p_max_results, p_result_indices, 0
+            pos, Rect2.EMPTY, p_from, p_to, p_results, p_max_results, p_result_indices, 0
         );
 
         let reached_x = false;
@@ -303,7 +305,7 @@ export default class BroadPhase2D {
             }
 
             cullcount = this._cull(false, true,
-                pos, Rectangle.EMPTY, p_from, p_to, p_results, p_max_results, p_result_indices, cullcount
+                pos, Rect2.EMPTY, p_from, p_to, p_results, p_max_results, p_result_indices, cullcount
             );
 
             if (reached_x && reached_y) {
@@ -338,7 +340,7 @@ export default class BroadPhase2D {
         return cullcount;
     }
     /**
-     * @param {Rectangle} p_aabb
+     * @param {Rect2} p_aabb
      * @param {CollisionObject2DSW[]} p_results
      * @param {number} p_max_results
      * @param {number[]} p_result_indices
@@ -404,7 +406,7 @@ export default class BroadPhase2D {
 
     /**
      * @param {Element} p_elem
-     * @param {Rectangle} p_rect
+     * @param {Rect2} p_rect
      * @param {boolean} p_static
      */
     _enter_grid(p_elem, p_rect, p_static) {
@@ -531,7 +533,7 @@ export default class BroadPhase2D {
     }
     /**
      * @param {Element} p_elem
-     * @param {Rectangle} p_rect
+     * @param {Rect2} p_rect
      * @param {boolean} p_static
      */
     _exit_grid(p_elem, p_rect, p_static) {
@@ -682,7 +684,7 @@ export default class BroadPhase2D {
      * @param {boolean} use_aabb
      * @param {boolean} use_segment
      * @param {Vector2} p_cell
-     * @param {Rectangle} p_aabb
+     * @param {Rect2} p_aabb
      * @param {Vector2} p_from
      * @param {Vector2} p_to
      * @param {CollisionObject2DSW[]} p_results

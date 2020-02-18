@@ -1,7 +1,7 @@
 /**
- * @param {string} full_path 
+ * @param {string} full_path
  * @returns {Array<string>}
  */
-export default function flatten_key_url(full_path) {
+export function flatten_key_url(full_path) {
     return full_path.split('.');
 }

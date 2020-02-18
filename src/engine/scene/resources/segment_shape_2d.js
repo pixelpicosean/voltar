@@ -1,6 +1,11 @@
-import Shape2D from "./shape_2d";
-import PhysicsServer from "engine/servers/physics_2d/physics_server";
-import { Vector2, Rectangle } from "engine/core/math/index";
+import { res_class_map } from "engine/registry";
+import { Vector2, Vector2Like } from "engine/core/math/vector2";
+import { Rect2 } from "engine/core/math/rect2";
+
+import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server";
+
+import { Shape2D } from "./shape_2d";
+
 
 export class SegmentShape2D extends Shape2D {
     get a() {
@@ -11,7 +16,7 @@ export class SegmentShape2D extends Shape2D {
         this._update_shape();
     }
     /**
-     * @param {import("engine/core/math/vector2").Vector2Like|number} x
+     * @param {Vector2Like|number} x
      * @param {number} y
      */
     set_a(x, y = undefined) {
@@ -33,7 +38,7 @@ export class SegmentShape2D extends Shape2D {
         this._update_shape();
     }
     /**
-     * @param {import("engine/core/math/vector2").Vector2Like|number} x
+     * @param {Vector2Like|number} x
      * @param {number} y
      */
     set_b(x, y = undefined) {
@@ -48,7 +53,7 @@ export class SegmentShape2D extends Shape2D {
     }
 
     constructor() {
-        super(PhysicsServer.singleton.segment_shape_create());
+        super(Physics2DServer.get_singleton().segment_shape_create());
 
         this._a = new Vector2();
         this._b = new Vector2();
@@ -65,14 +70,15 @@ export class SegmentShape2D extends Shape2D {
     }
 
     get_rect() {
-        return Rectangle.new(this._a.x, this._a.y).expand_to(this._b);
+        return Rect2.new(this._a.x, this._a.y).expand_to(this._b);
     }
     _update_shape() {
-        const r = Rectangle.new(this._a.x, this._a.y, this._b.x, this._b.y);
+        const r = Rect2.new(this._a.x, this._a.y, this._b.x, this._b.y);
         this.get_rid().set_data(r);
-        Rectangle.free(r);
+        Rect2.free(r);
     }
 }
+res_class_map['SegmentShape2D'] = SegmentShape2D
 
 export class RayShape2D extends Shape2D {
     get length() {
@@ -112,7 +118,7 @@ export class RayShape2D extends Shape2D {
     }
 
     constructor() {
-        super(PhysicsServer.singleton.ray_shape_create());
+        super(Physics2DServer.get_singleton().ray_shape_create());
 
         this._length = 20;
         this._slips_on_slope = false;
@@ -129,7 +135,7 @@ export class RayShape2D extends Shape2D {
     }
 
     get_rect() {
-        const rect = Rectangle.new();
+        const rect = Rect2.new();
         const vec = Vector2.new(0, this._length);
         rect.expand_to(vec).grow_to(0.707 * 4);
         Vector2.free(vec);
@@ -142,3 +148,4 @@ export class RayShape2D extends Shape2D {
         })
     }
 }
+res_class_map['RayShape2D'] = RayShape2D

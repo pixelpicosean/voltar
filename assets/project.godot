@@ -8,9 +8,14 @@
 
 config_version=4
 
-_global_script_classes=[  ]
+_global_script_classes=[ {
+"base": "CollisionShape2D",
+"class": "VectorGraphic",
+"language": "GDScript",
+"path": "res://extension/2d/vector_graphic.gd"
+} ]
 _global_script_class_icons={
-
+"VectorGraphic": ""
 }
 
 [application]
@@ -20,10 +25,15 @@ config/icon="res://icon.png"
 
 [display]
 
-window/size/width=800
+window/size/width=320
+window/size/height=240
 window/size/resizable=false
 window/stretch/mode="viewport"
 window/stretch/aspect="keep"
+
+[editor_plugins]
+
+enabled=PoolStringArray(  )
 
 [importer_defaults]
 
@@ -48,12 +58,25 @@ texture={
 "svg/scale": 1.0
 }
 
+[input]
+
+special={
+"deadzone": 0.5,
+"events": [ Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"button_mask":0,"position":Vector2( 0, 0 ),"global_position":Vector2( 0, 0 ),"factor":1.0,"button_index":1,"pressed":false,"doubleclick":false,"script":null)
+ ]
+}
+
 [layer_names]
 
 2d_physics/layer_1="solid"
 2d_physics/layer_2="hero"
 
+[node]
+
+name_casing=2
+
 [rendering]
 
 quality/driver/driver_name="GLES2"
 environment/default_environment="res://default_env.tres"
+quality/dynamic_fonts/use_oversampling=false

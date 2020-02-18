@@ -15,7 +15,7 @@ function is_object(item) {
  * @param {Object} [sources]
  * @returns [Object]
  */
-export default function deep_merge(target, ...sources) {
+export function deep_merge(target, ...sources) {
     if (!sources.length) return target;
     const source = sources.shift();
 

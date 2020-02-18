@@ -1,0 +1,75 @@
+const {
+    Vector2,
+    Color,
+} = require('../../parser/type_converters');
+
+const Node2D = require('./Node2D');
+
+module.exports = (data) => {
+    const res = Object.assign(Node2D(data), {
+        type: 'CPUParticles2D',
+
+        amount: data.prop.amount,
+        angle: data.prop.angle,
+        angle_curve: data.prop.angle_curve,
+        angle_random: data.prop.angle_random,
+        angular_velocity: data.prop.angular_velocity,
+        angular_velocity_curve: data.prop.angular_velocity_curve,
+        angular_velocity_random: data.prop.angular_velocity_random,
+        anim_offset: data.prop.anim_offset,
+        anim_offset_curve: data.prop.anim_offset_curve,
+        anim_offset_random: data.prop.anim_offset_random,
+        anim_speed: data.prop.anim_speed,
+        anim_speed_curve: data.prop.anim_speed_curve,
+        anim_speed_random: data.prop.anim_speed_random,
+        color: Color(data.prop.color),
+        color_ramp: data.prop.color_ramp,
+        damping: data.prop.damping,
+        damping_curve: data.prop.damping_curve,
+        damping_random: data.prop.damping_random,
+        draw_order: data.prop.draw_order,
+        emission_colors: data.prop.emission_colors,
+        emission_normals: data.prop.emission_normals,
+        emission_points: data.prop.emission_points,
+        emission_rect_extents: Vector2(data.prop.emission_rect_extents),
+        emission_shape: data.prop.emission_shape,
+        emission_sphere_radius: data.prop.emission_sphere_radius,
+        emitting: data.prop.emitting,
+        explosiveness: data.prop.explosiveness,
+        fixed_fps: data.prop.fixed_fps,
+        flag_align_y: data.prop.flag_align_y,
+        flatness: data.prop.flatness,
+        fract_delta: data.prop.fract_delta,
+        gravity: Vector2(data.prop.gravity),
+        hue_variation: data.prop.hue_variation,
+        hue_variation_curve: data.prop.hue_variation_curve,
+        hue_variation_random: data.prop.hue_variation_random,
+        initial_velocity: data.prop.initial_velocity,
+        initial_velocity_random: data.prop.initial_velocity_random,
+        lifetime: data.prop.lifetime,
+        linear_accel: data.prop.linear_accel,
+        linear_accel_curve: data.prop.linear_accel_curve,
+        linear_accel_random: data.prop.linear_accel_random,
+        local_coords: data.prop.local_coords,
+        normalmap: data.prop.normalmap,
+        one_shot: data.prop.one_shot,
+        preprocess: data.prop.preprocess,
+        radial_accel: data.prop.radial_accel,
+        radial_accel_curve: data.prop.radial_accel_curve,
+        radial_accel_random: data.prop.radial_accel_random,
+        randomness: data.prop.randomness,
+        scale_amount: data.prop.scale_amount,
+        scale_amount_curve: data.prop.scale_amount_curve,
+        scale_amount_random: data.prop.scale_amount_random,
+        speed_scale: data.prop.speed_scale,
+        spread: data.prop.spread,
+        tangential_accel: data.prop.tangential_accel,
+        tangential_accel_curve: data.prop.tangential_accel_curve,
+        tangential_accel_random: data.prop.tangential_accel_random,
+        texture: data.prop.texture,
+    });
+
+    return res;
+};
+
+module.exports.is_tres = true;

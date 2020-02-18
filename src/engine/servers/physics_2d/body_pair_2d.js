@@ -1,9 +1,15 @@
-import Constraint2DSW from "./constraint_2d_sw";
-import { Vector2, Matrix, clamp, CMP_EPSILON, log_base_2 } from "engine/core/math/index";
-import Body2DSW from "./body_2d_sw";
-import Space2DSW from "./space_2d_sw";
-import { BodyMode, CCDMode } from "engine/scene/physics/const";
-import CollisionSolver2DSW from "./collision_solver_2d_sw";
+import { clamp } from "engine/core/math/math_funcs";
+import { CMP_EPSILON } from "engine/core/math/math_defs";
+import { Vector2 } from "engine/core/math/vector2";
+import { Transform2D } from "engine/core/math/transform_2d";
+
+import { BodyMode, CCDMode } from "engine/scene/2d/const";
+
+import { Body2DSW } from "./body_2d_sw";
+import { Space2DSW } from "./space_2d_sw";
+import { CollisionSolver2DSW } from "./collision_solver_2d_sw";
+import { Constraint2DSW } from "./constraint_2d_sw";
+
 
 const MAX_CONTACTS = 2;
 
@@ -54,7 +60,7 @@ function combine_friction(A, B) {
     return Math.abs(Math.min(A.friction, B.friction));
 }
 
-export default class BodyPair2DSW extends Constraint2DSW {
+export class BodyPair2DSW extends Constraint2DSW {
     get A() { return this._arr[0] }
     get B() { return this._arr[1] }
     /**
@@ -113,17 +119,23 @@ export default class BodyPair2DSW extends Constraint2DSW {
         }
 
         // use local A coordinates to avoid numerical issues on collision detection
-        this.offset_B.copy(B.transform.origin).subtract(A.transform.origin);
+        const a_origin = A.transform.get_origin();
+        const b_origin = B.transform.get_origin();
+        this.offset_B.copy(b_origin).subtract(a_origin);
+        Vector2.free(b_origin);
+        Vector2.free(a_origin);
 
         this._validate_contacts();
 
-        const offset_A = A.transform.origin.clone();
+        const offset_A = A.transform.get_origin();
         const xform_Au = A.transform.untranslated();
         const xform_A = xform_Au.clone().append(A.get_shape_transform(this.shape_A));
 
         const xform_Bu = B.transform.clone();
-        xform_Bu.tx -= A.transform.origin.x;
-        xform_Bu.ty -= A.transform.origin.y;
+        const A_origin = A.transform.get_origin();
+        xform_Bu.tx -= A_origin.x;
+        xform_Bu.ty -= A_origin.y;
+        Vector2.free(A_origin);
         const xform_B = xform_Bu.clone().append(B.get_shape_transform(this.shape_B));
 
         const shape_A_ptr = A.get_shape(this.shape_A);
@@ -165,10 +177,10 @@ export default class BodyPair2DSW extends Constraint2DSW {
                 Vector2.free(motion_B);
 
                 Vector2.free(offset_A);
-                Matrix.free(xform_Au);
-                Matrix.free(xform_A);
-                Matrix.free(xform_Bu);
-                Matrix.free(xform_B);
+                Transform2D.free(xform_Au);
+                Transform2D.free(xform_A);
+                Transform2D.free(xform_Bu);
+                Transform2D.free(xform_B);
                 return false;
             }
         }
@@ -178,10 +190,10 @@ export default class BodyPair2DSW extends Constraint2DSW {
             Vector2.free(motion_B);
 
             Vector2.free(offset_A);
-            Matrix.free(xform_Au);
-            Matrix.free(xform_A);
-            Matrix.free(xform_Bu);
-            Matrix.free(xform_B);
+            Transform2D.free(xform_Au);
+            Transform2D.free(xform_A);
+            Transform2D.free(xform_Bu);
+            Transform2D.free(xform_B);
             return false;
         }
 
@@ -214,10 +226,10 @@ export default class BodyPair2DSW extends Constraint2DSW {
                     Vector2.free(motion_B);
 
                     Vector2.free(offset_A);
-                    Matrix.free(xform_Au);
-                    Matrix.free(xform_A);
-                    Matrix.free(xform_Bu);
-                    Matrix.free(xform_B);
+                    Transform2D.free(xform_Au);
+                    Transform2D.free(xform_A);
+                    Transform2D.free(xform_Bu);
+                    Transform2D.free(xform_B);
                     return false;
                 }
 
@@ -252,10 +264,10 @@ export default class BodyPair2DSW extends Constraint2DSW {
                     Vector2.free(motion_B);
 
                     Vector2.free(offset_A);
-                    Matrix.free(xform_Au);
-                    Matrix.free(xform_A);
-                    Matrix.free(xform_Bu);
-                    Matrix.free(xform_B);
+                    Transform2D.free(xform_Au);
+                    Transform2D.free(xform_A);
+                    Transform2D.free(xform_Bu);
+                    Transform2D.free(xform_B);
                     return false;
                 }
 
@@ -363,10 +375,10 @@ export default class BodyPair2DSW extends Constraint2DSW {
         Vector2.free(motion_B);
 
         Vector2.free(offset_A);
-        Matrix.free(xform_Au);
-        Matrix.free(xform_A);
-        Matrix.free(xform_Bu);
-        Matrix.free(xform_B);
+        Transform2D.free(xform_Au);
+        Transform2D.free(xform_A);
+        Transform2D.free(xform_Bu);
+        Transform2D.free(xform_B);
         return do_process;
     }
     /**
@@ -434,10 +446,10 @@ export default class BodyPair2DSW extends Constraint2DSW {
      * @param {number} p_step
      * @param {Body2DSW} p_A
      * @param {number} p_shape_A
-     * @param {Matrix} p_xform_A
+     * @param {Transform2D} p_xform_A
      * @param {Body2DSW} p_B
      * @param {number} p_shape_B
-     * @param {Matrix} p_xform_B
+     * @param {Transform2D} p_xform_B
      * @param {boolean} p_swap_result
      */
     _test_ccd(p_step, p_A, p_shape_A, p_xform_A, p_B, p_shape_B, p_xform_B, p_swap_result = false) {

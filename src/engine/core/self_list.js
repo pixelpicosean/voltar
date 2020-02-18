@@ -80,7 +80,7 @@ export class List {
 /**
  * @template T
  */
-export default class SelfList {
+export class SelfList {
     /**
      * @param {T} p_self
      */

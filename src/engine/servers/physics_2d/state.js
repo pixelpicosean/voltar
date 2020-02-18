@@ -1,13 +1,13 @@
-import {
-    Vector2,
-    Matrix,
-    Rectangle,
-} from "engine/core/math/index";
+import { Vector2 } from "engine/core/math/vector2";
+import { Rect2 } from "engine/core/math/rect2";
+import { Transform2D } from "engine/core/math/transform_2d";
+
 import {
     INTERSECTION_QUERY_MAX,
     CollisionObjectType,
     BodyState,
-} from "engine/scene/physics/const";
+} from "engine/scene/2d/const";
+
 
 export class Physics2DDirectBodyStateSW {
     /**
@@ -69,13 +69,13 @@ export class Physics2DDirectBodyStateSW {
     }
 
     /**
-     * @param {Matrix} transform
+     * @param {Transform2D} transform
      */
     set_transform(transform) {
         this.body.set_state(BodyState.TRANSFORM, transform);
     }
     /**
-     * @returns {Matrix}
+     * @returns {Transform2D}
      */
     get_transform() {
         return this.body.transform;
@@ -201,7 +201,7 @@ export class Physics2DDirectBodyStateSW {
 
     Physics2DDirectBodyStateSW() {
         /**
-         * @type {import('./body_2d_sw').default}
+         * @type {import('./body_2d_sw').Body2DSW}
          */
         this.body = null;
 
@@ -222,7 +222,7 @@ let Physics2DDirectBodyStateSW_singleton = null;
 export class Physics2DShapeQueryParameters {
     constructor() {
         this.shape = null;
-        this.transform = new Matrix();
+        this.transform = new Transform2D();
         this.motion = new Vector2();
         this.margin = 0;
         this.exclude = [];
@@ -237,7 +237,7 @@ export class Physics2DShapeQueryParameters {
     }
 
     /**
-     * @param {Matrix} transform
+     * @param {Transform2D} transform
      */
     set_transform(transform) {
         this.transform.copy(transform);
@@ -331,7 +331,7 @@ class ShapeRestInfo {
 
 /**
  *
- * @param {import('./collision_object_2d_sw').default} p_object
+ * @param {import('./collision_object_2d_sw').CollisionObject2DSW} p_object
  * @param {number} p_collision_mask
  * @param {boolean} p_collide_with_bodies
  * @param {boolean} p_collide_with_areas
@@ -365,7 +365,7 @@ export class RayResult {
 
 export class Physics2DDirectSpaceStateSW {
     constructor() {
-        /** @type {import('./space_2d_sw').default} */
+        /** @type {import('./space_2d_sw').Space2DSW} */
         this.space = null;
     }
 
@@ -373,7 +373,7 @@ export class Physics2DDirectSpaceStateSW {
      * @param {Vector2} p_from
      * @param {Vector2} p_to
      * @param {RayResult} r_result
-     * @param {Set<import('./collision_object_2d_sw').default>} [p_exclude]
+     * @param {Set<import('./collision_object_2d_sw').CollisionObject2DSW>} [p_exclude]
      * @param {number} [p_collision_mask]
      * @param {boolean} [p_collide_with_bodies=true]
      * @param {boolean} [p_collide_with_areas=false]
@@ -392,7 +392,7 @@ export class Physics2DDirectSpaceStateSW {
         const res_point = Vector2.new();
         const res_normal = Vector2.new();
         let res_shape = 0;
-        /** @type {import('./collision_object_2d_sw').default} */
+        /** @type {import('./collision_object_2d_sw').CollisionObject2DSW} */
         let res_obj = null;
         let min_d = 1e10;
 
@@ -468,7 +468,7 @@ export class Physics2DDirectSpaceStateSW {
 
     /**
      * @param {any} shape
-     * @param {Matrix} xform
+     * @param {Transform2D} xform
      * @param {Vector2} motion
      * @param {number} margin
      * @param {ShapeResult} result
@@ -483,7 +483,7 @@ export class Physics2DDirectSpaceStateSW {
 
     /**
      * @param {any} shape
-     * @param {Matrix} xform
+     * @param {Transform2D} xform
      * @param {Vector2} motion
      * @param {number} margin
      * @param {number} closest_safe
@@ -498,7 +498,7 @@ export class Physics2DDirectSpaceStateSW {
 
     /**
      * @param {any} shape
-     * @param {Matrix} xform
+     * @param {Transform2D} xform
      * @param {Vector2} motion
      * @param {number} margin
      * @param {ShapeResult} results
@@ -514,7 +514,7 @@ export class Physics2DDirectSpaceStateSW {
 
     /**
      * @param {any} shape
-     * @param {Matrix} xform
+     * @param {Transform2D} xform
      * @param {Vector2} motion
      * @param {number} margin
      * @param {ShapeRestInfo} info
@@ -544,7 +544,7 @@ export class Physics2DDirectSpaceStateSW {
             return 0;
         }
 
-        const aabb = Rectangle.new(
+        const aabb = Rect2.new(
             p_point.x - 0.00001,
             p_point.y - 0.00001,
             0.00002,
@@ -572,7 +572,7 @@ export class Physics2DDirectSpaceStateSW {
                 continue;
             }
 
-            if (p_filter_by_canvas && col_obj.canvas_instance.id !== p_canvas_instance_id) {
+            if (p_filter_by_canvas && col_obj.canvas_instance.instance_id !== p_canvas_instance_id) {
                 continue;
             }
 
@@ -597,7 +597,7 @@ export class Physics2DDirectSpaceStateSW {
             cc++;
         }
 
-        Rectangle.free(aabb);
+        Rect2.free(aabb);
 
         return cc;
     }
