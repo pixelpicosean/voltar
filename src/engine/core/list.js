@@ -87,4 +87,38 @@ export class List {
             this.erase(this.data.last);
         }
     }
+
+    /**
+     * @param {T} value
+     */
+    find(value) {
+        let it = this.front();
+        while (it) {
+            if (it.value === value) return it;
+            it = it.next;
+        }
+        return null;
+    }
+
+    /**
+     * @param {Element<T>} element
+     */
+    erase(element) {
+        if (this.data) {
+            let ret = this.data.erase(element);
+
+            if (this.data.size_cache === 0) {
+                this.data = null;
+            }
+
+            return ret;
+        }
+        return false;
+    }
+
+    clear() {
+        while (this.front()) {
+            this.erase(this.front());
+        }
+    }
 }

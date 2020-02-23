@@ -48,7 +48,6 @@ export class RandomDataGenerator {
     /**
      * Private random helper.
      *
-     * @private
      * @return {number} Random number
      */
     rnd() {

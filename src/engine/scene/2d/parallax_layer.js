@@ -104,7 +104,7 @@ export class ParallaxLayer extends Node2D {
      */
     set_motion_offset_n(x, y) {
         this._motion_offset.set(x, y);
-        const pb = /** @type {ParallaxBackground} */(this.get_parent());
+        const pb = /** @type {ParallaxBackground} */(/** @type {unknown} */(this.get_parent()));
         if (pb.class === 'ParallaxBackground' && this.is_inside_tree()) {
             this.set_base_offset_and_scale(pb.final_offset, pb.scroll_scale, this.screen_offset);
         }
@@ -122,7 +122,7 @@ export class ParallaxLayer extends Node2D {
      */
     set_motion_scale_n(x, y) {
         this._motion_scale.set(x, y);
-        const pb = /** @type {ParallaxBackground} */(this.get_parent());
+        const pb = /** @type {ParallaxBackground} */(/** @type {unknown} */(this.get_parent()));
         if (pb.class === 'ParallaxBackground' && this.is_inside_tree()) {
             this.set_base_offset_and_scale(pb.final_offset, pb.scroll_scale, this.screen_offset);
         }
@@ -171,7 +171,7 @@ export class ParallaxLayer extends Node2D {
             return;
         }
 
-        const pb = /** @type {ParallaxBackground} */(this.get_parent());
+        const pb = /** @type {ParallaxBackground} */(/** @type {unknown} */(this.get_parent()));
         if (pb.class === 'ParallaxBackground') {
             const c = pb.canvas;
             const mirror_scale = this.get_scale().clone().multiply(this._motion_mirroring);

@@ -524,7 +524,6 @@ export class Control extends CanvasItem {
     _clips_input() { return false }
 
     /**
-     * @private
      * @param {InputEvent} p_event
      */
     _gui_input_(p_event) {
@@ -1251,7 +1250,6 @@ export class Control extends CanvasItem {
 
     /**
      * Please override `can_drop_data`, this is internal methon
-     * @private
      * @param {Vector2Like} p_point
      * @param {any} p_data
      */
@@ -1266,7 +1264,6 @@ export class Control extends CanvasItem {
 
     /**
      * Please override `drop_data`, this is internal methon
-     * @private
      * @param {Vector2Like} p_point
      * @param {any} p_data
      */
