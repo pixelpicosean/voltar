@@ -8,7 +8,7 @@ import { Shape2DSW } from "./shape_2d_sw";
 import { Space2DSW } from "./space_2d_sw";
 
 
-const IDTransform = Object.freeze(new Transform2D());
+const IDTransform = new Transform2D;
 
 
 class Shape {
