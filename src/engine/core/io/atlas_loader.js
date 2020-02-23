@@ -1,6 +1,3 @@
-import url from 'url';
-import { Rect2 } from 'engine/core/math/rect2';
-
 import Resource from './io_resource';
 import { raw_resource_map, resource_map } from 'engine/registry';
 import { ImageTexture } from 'engine/scene/resources/texture';
@@ -225,5 +222,15 @@ export function get_resource_path(/** @type {Resource} */ resource, /** @type {s
         return resource.data.meta.image;
     }
 
-    return url.resolve(resource.url.replace(base_url, ''), resource.data.meta.image);
+    return resolve_url(resource.url.replace(base_url, ''), resource.data.meta.image);
+}
+
+/**
+ * @param {string} from
+ * @param {string} to
+ */
+function resolve_url(from, to) {
+    const segs = from.split("/");
+    segs[segs.length - 1] = to;
+    return segs.join("/");
 }
