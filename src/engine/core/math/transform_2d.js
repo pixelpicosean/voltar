@@ -759,7 +759,7 @@ export class Transform2D {
     }
 }
 
-Transform2D.IDENTITY = Object.freeze(new Transform2D());
+Transform2D.IDENTITY = new Transform2D;
 
 /**
  * @type {Transform2D[]}
