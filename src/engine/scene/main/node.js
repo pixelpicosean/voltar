@@ -830,6 +830,9 @@ export class Node extends VObject {
         return null;
     }
 
+    /**
+     * @returns {import("./node").Node}
+     */
     get_parent() {
         return this.data.parent;
     }

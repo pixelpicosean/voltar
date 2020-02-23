@@ -160,7 +160,6 @@ export default class Resource extends VObject {
         /**
          * The error that occurred while loading (if any).
          *
-         * @readonly
          * @type {Error}
          */
         this.error = null;
@@ -169,7 +168,6 @@ export default class Resource extends VObject {
          * The XHR object that was used to load this resource. This is only set
          * when `load_type` is `Resource.LOAD_TYPE.XHR`.
          *
-         * @readonly
          * @type {XMLHttpRequest}
          */
         this.xhr = null;
@@ -177,7 +175,6 @@ export default class Resource extends VObject {
         /**
          * The child resources this resource owns.
          *
-         * @readonly
          * @type {Resource[]}
          */
         this.children = [];
@@ -185,7 +182,6 @@ export default class Resource extends VObject {
         /**
          * The resource type.
          *
-         * @readonly
          * @type {Resource.TYPE}
          */
         this.type = Resource.TYPE.UNKNOWN;
@@ -193,7 +189,6 @@ export default class Resource extends VObject {
         /**
          * The progress chunk owned by this resource.
          *
-         * @readonly
          * @type {number}
          */
         this.progress_chunk = 0;
@@ -202,7 +197,6 @@ export default class Resource extends VObject {
          * The `dequeue` method that will be used a storage place for the async queue dequeue method
          * used privately by the loader.
          *
-         * @private
          * @type {function}
          */
         this._dequeue = _noop;
@@ -210,7 +204,6 @@ export default class Resource extends VObject {
         /**
          * Used a storage place for the on load binding used privately by the loader.
          *
-         * @private
          * @type {function}
          */
         this._on_load_binding = null;
@@ -860,8 +853,6 @@ export default class Resource extends VObject {
 /**
  * The types of resources a resource could represent.
  *
- * @static
- * @readonly
  * @enum {number}
  */
 Resource.STATUS_FLAGS = {
@@ -874,8 +865,6 @@ Resource.STATUS_FLAGS = {
 /**
  * The types of resources a resource could represent.
  *
- * @static
- * @readonly
  * @enum {string}
  */
 Resource.TYPE = {
@@ -891,8 +880,6 @@ Resource.TYPE = {
 /**
  * The types of loading a resource can use.
  *
- * @static
- * @readonly
  * @enum {string}
  */
 Resource.LOAD_TYPE = {
@@ -909,8 +896,6 @@ Resource.LOAD_TYPE = {
 /**
  * The XHR ready states, used internally.
  *
- * @static
- * @readonly
  * @enum {string}
  */
 Resource.XHR_RESPONSE_TYPE = {

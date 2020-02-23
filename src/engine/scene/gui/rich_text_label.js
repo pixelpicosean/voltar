@@ -38,6 +38,8 @@ export const ITEM_RAINBOW = 16;
 export const ITEM_META = 17;
 export const ITEM_CUSTOMFX = 18;
 
+class RickTextEffect {}
+
 class Line {
     constructor() {
         /** @type {Item} */
@@ -351,7 +353,7 @@ export class RichTextLabel extends Control {
         this.bbcode = '';
 
         this.fixed_width = -1;
-        this.set_clip_contents(true);
+        // this.set_clip_contents(true);
     }
 
     /* virtual */
@@ -416,14 +418,14 @@ export class RichTextLabel extends Control {
                 this.visible_line_count = 0;
                 while (y < size.y && from_line < this.main.lines.length) {
                     const text_pos = Vector2.new(text_rect.x, text_rect.y)
-                    this.visible_line_count += this._process_line(this.main, text_pos, y, text_rect.width - this.scroll_w, from_line, PROCESS_DRAW, base_font, base_color, font_color_shadow, use_outline, shadow_ofs, Vector2.ZERO, null, null, null, total_chars);
+                    // this.visible_line_count += this._process_line(this.main, text_pos, y, text_rect.width - this.scroll_w, from_line, PROCESS_DRAW, base_font, base_color, font_color_shadow, use_outline, shadow_ofs, Vector2.ZERO, null, null, null, total_chars);
                     total_chars += this.main.lines[from_line].char_count;
 
                     from_line++;
                 }
             } break;
             case NOTIFICATION_INTERNAL_PROCESS: {
-                this._update_fx(this.main, this.get_process_delta_time());
+                // this._update_fx(this.main, this.get_process_delta_time());
                 this.update();
             } break;
         }
@@ -444,9 +446,7 @@ export class RichTextLabel extends Control {
         }
     }
 
-    parse_bbcode() {
-
-    }
+    parse_bbcode(p_bbcode) { }
 
     clear() {
         this.main._clear_children();
@@ -542,10 +542,10 @@ export class RichTextLabel extends Control {
 
         if (p_ensure_newline) {
             const from = this.current_frame.lines[this.current_frame.lines.length - 1].from;
-            if (this._find_layout_subitem(from, p_item)) {
-                this._invalidate_current_line(this.current_frame);
-                this.current_frame.lines.push(new Line());
-            }
+            // if (this._find_layout_subitem(from, p_item)) {
+            //     this._invalidate_current_line(this.current_frame);
+            //     this.current_frame.lines.push(new Line());
+            // }
         }
 
         if (!this.current_frame.lines[this.current_frame.lines.length - 1].from) {
@@ -581,14 +581,13 @@ export class RichTextLabel extends Control {
     _scroll_changed() { }
 
     /**
-     * @private
      * @param {InputEvent} p_event
      */
     _gui_input_(p_event) {
         this._gui_input(p_event);
     }
 
-    _get_text_rect() { }
+    _get_text_rect() { return Vector2.ZERO }
     _get_custom_effect_by_code() { }
     parse_expressions_for_values() { }
 

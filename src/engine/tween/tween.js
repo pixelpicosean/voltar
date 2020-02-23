@@ -946,7 +946,6 @@ export default class Tween extends VObject {
         return this;
     }
     /**
-     * @private
      * @param {number} p_delta
      */
     _propagate_process(p_delta) {
