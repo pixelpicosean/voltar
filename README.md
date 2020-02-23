@@ -1,7 +1,7 @@
 Voltar
 =============
 
-Next generation of LesserPanda framework.
+Use Godot as visual editor but write game in JavaScript/TypeScript, a magic web game framework :)
 
 ## Voltar CommandLine Tools
 
@@ -9,16 +9,19 @@ Next generation of LesserPanda framework.
 
 ### Commands
 
-`voltar create`: create project, slow and require network. Recommend to copy the whole repo instead.
+`voltar create`: create project, requires internet connection. Recommend to download the repo instead.
 
 `voltar start`: start dev server with live-reloading
 
 `voltar build`: build for production and copy `media` with compiled scripts to `dist`
 
+For TypeScript support pass `-ts` parameter with the commands, and use `src/game/main.ts` as entry point
+instead and you are ready to go.
+
 ## Godot Importer
 
 You can edit scenes from Godot and then use the importer to convert **project setting**
-and **scenes** to JSON format, then load them like normal config data. Voltar editor
+and **scenes** to JSON, which will then be loaded automatically. Voltar editor
 is deprecated in favor of the workflow with Godot and importer.
 
 ### Rules for Godot support
@@ -32,17 +35,21 @@ to generated atlas exported to `media` folder. Otherwise it won't work.
 Single images that will be copied into `media` folder should be put in
 the `assets/image/standalone` folder, so they will be copied automatically (even after you modified).
 
+Bitmap font with BMFont format added to `assets/bitmapfont` will be automatically convert and copy to
+`media` folder too.
+
 ### Steps
 
 Make sure you've installed dependencies of the importer. In case you're not:
-`cd godot_importer && yarn` or `cd godot_importer && npm install`
+`cd tscn && yarn` or `cd tscn && npm install`
 
 Setup Godot project (from project settings)
 
 Create scenes, and save them into the `assets/scene` folder
 
-Run `node godot_importer/main.js` to convert project settings and scenes to `JSON`
-file, and then import these files or preload them as assets in your code.
+Run `node tscn/main.js` to convert project settings and scenes to `JSON`
+file, and then import these files or preload them as assets in your code. 
+(from VSCode you can simply press `F5`)
 
 ### Supported Godot features
 
@@ -58,7 +65,7 @@ file, and then import these files or preload them as assets in your code.
 - [x] `VisibilityNotifier2D`
 - [x] `Timer`
 - [x] `Sprite`
-- [x] `Control`, `Container` and sub-classes
+- [x] `Control`, `Container` and most GUI nodes
 - [x] `Label`
 - [x] `TextureButton`
 - [x] `TextureProgress`
@@ -69,20 +76,12 @@ file, and then import these files or preload them as assets in your code.
 - [x] Tween (tweens are no longer nodes, they are just data and runs through `tweens`)
 - [x] Input
 - [x] `CPUParticle2D`
-- [x] `TileMap` (limit to 1 texture per `TileSet`, only render and collision are supported)
+- [x] `TileMap`
 - [x] `Area2D`
 - [x] `RayCast2D`
 - [x] `StaticBody2D`
 - [x] `KinematicBody2D`
 - [x] shapes, font, curve
+- [x] `Viewport`
+- [ ] `RichTextLabel` (WIP)
 - [ ] `RigidBody2D` (WIP)
-- [ ] `Viewport` (WIP)
-
-### Extra features
-
-- [x] Convert Godot scene/resource into JSON and load
-- [x] Extract anything rendered to HTML5 image
-- [x] Several simple mesh nodes (Plane, Rope, NineSlice)
-- [x] Graphics (Flash like primitive shape rendering)
-- [x] Sound (also different from Godot, sounds are much more simpler/less features)
-- [x] Several built-in filters (Material/Shaders)
