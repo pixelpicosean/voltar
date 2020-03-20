@@ -416,8 +416,8 @@ export class InputEventMouseMotion extends InputEventMouse {
         mm.global_position.copy(this.global_position);
 
         mm.button_mask = this.button_mask;
-        mm.relative.copy(this.relative);
-        mm.speed.copy(this.speed);
+        p_xform.basis_xform(this.relative, mm.relative);
+        p_xform.basis_xform(this.speed, mm.speed);
         return mm;
     }
 
@@ -469,6 +469,51 @@ export class InputEventMouseMotion extends InputEventMouse {
 }
 create_pool('InputEventMouseMotion', InputEventMouseMotion)
 res_class_map['InputEventMouseMotion'] = InputEventMouseMotion;
+
+export class InputEventScreenDrag extends InputEventMouse {
+    get class() { return 'InputEventScreenDrag' }
+
+    static instance() { return new InputEventScreenDrag }
+
+    constructor() {
+        super();
+
+        this.index = 0;
+        this.relative = new Vector2();
+        this.speed = new Vector2();
+    }
+    init() {
+        this.index = 0;
+        this.relative.set(0, 0);
+        this.speed.set(0, 0);
+        return this;
+    }
+
+    /* private */
+
+    /**
+     * @param {Transform2D} p_xform
+     * @param {Vector2Like} p_local_ofs
+     */
+    xformed_by(p_xform, p_local_ofs = Vector2.ZERO) {
+        const sd = InputEventScreenDrag.instance();
+        sd.device = this.device;
+        sd.index = this.index;
+
+        p_xform.xform(sd.position.copy(this.position).add(p_local_ofs), sd.position);
+        sd.global_position.copy(this.global_position);
+
+        p_xform.basis_xform(this.relative, sd.relative);
+        p_xform.basis_xform(this.speed, sd.speed);
+        return sd;
+    }
+
+    as_text() {
+        return `InputEventScreenDrag : index=${this.index}, position=(${this.position.x}, ${this.position.y}), relative=(${this.relative.x}, ${this.relative.y}, speed=(${this.speed.x}, ${this.speed.y}))`
+    }
+}
+create_pool('InputEventScreenDrag', InputEventScreenDrag)
+res_class_map['InputEventScreenDrag'] = InputEventScreenDrag;
 
 export class InputEventAction extends InputEvent {
     get class() { return 'InputEventAction' }

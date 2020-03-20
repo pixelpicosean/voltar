@@ -3,7 +3,13 @@ import { Vector2, Vector2Like } from "engine/core/math/vector2";
 import { OS } from "engine/core/os/os";
 import { Engine } from "engine/core/engine";
 import { MainLoop } from "engine/core/main_loop";
-import { InputEvent, InputEventKey, InputEventMouseButton } from "engine/core/os/input_event";
+import {
+    InputEvent,
+    InputEventKey,
+    InputEventMouseButton,
+    InputEventMouseMotion,
+    InputEventScreenDrag,
+} from "engine/core/os/input_event";
 import { InputMap } from "engine/core/input_map";
 
 
@@ -242,7 +248,23 @@ export class Input extends VObject {
                     // this.main_loop.input_event(touch_event);
                 }
             } break;
-            case 'InputEventMouseMotion': { } break;
+            case 'InputEventMouseMotion': {
+                const mm = /** @type {InputEventMouseMotion} */(p_event);
+                const pos = mm.global_position;
+                if (!this.mouse_pos.equals(pos)) {
+                    this.mouse_pos.copy(pos);
+                }
+
+                if (this.main_loop && this.emulate_touch_from_mouse && !p_is_emulated && mm.button_mask & 1) {
+                    const sd = InputEventScreenDrag.instance();
+
+                    sd.position.copy(mm.position);
+                    sd.relative.copy(mm.relative);
+                    sd.speed.copy(mm.speed);
+
+                    this.main_loop.input_event(sd);
+                }
+            } break;
             case 'InputEventScreenTouch': { } break;
             case 'InputEventScreenDrag': { } break;
             case 'InputEventJoypadButton': { } break;
