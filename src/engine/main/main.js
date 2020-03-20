@@ -70,6 +70,8 @@ export const Main = {
         os.video_mode.resizable = this.global.display.resizable;
         os.screen_orientation = this.global.display.orientation;
 
+        document.title = this.global.application.name;
+
         window.addEventListener('load', this.setup2, false);
         document.addEventListener('DOMContentLoaded', this.setup2, false);
     },
@@ -101,7 +103,6 @@ export const Main = {
         // TODO: autoload second pass, instantiate nodes into global constants
 
         // read and apply global settings
-        document.title = this.global.application.name;
 
         this.events.emit_signal('started');
 
