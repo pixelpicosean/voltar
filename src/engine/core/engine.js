@@ -82,6 +82,10 @@ export class Engine {
                             const resource_filename = res.ext[id];
                             const resource = resource_map[resource_filename];
 
+                            if (!resource) {
+                                throw `Resource with URL [${resource_filename}] not found`;
+                            }
+
                             // is it a registered scene?
                             if (scene_class_map[resource_filename]) {
                                 const self_data = resource.nodes[0];
