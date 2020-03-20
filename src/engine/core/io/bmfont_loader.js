@@ -33,6 +33,7 @@ export function parse(resource, textures) {
 
     // add to global resource map
     resource_map[font.name] = font;
+    resource_map[basename(resource.name).replace(/\.fnt$/, '')] = font;
 }
 
 export function bmfont_loader(/** @type {Resource} */ resource, /** @type {Function} */ next) {
