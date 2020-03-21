@@ -31,7 +31,7 @@ export class PhysicsBody2D extends CollisionObject2D {
     set layers(p_mask) {
         this.set_collision_layer(p_mask);
         this.set_collision_mask(p_mask);
-     }
+    }
 
     /**
      * @param {BodyMode} p_mode
@@ -75,6 +75,7 @@ export class PhysicsBody2D extends CollisionObject2D {
      * @param {number} bit
      */
     get_collision_layer_bit(bit) {
+        bit -= 1;
         return !!(this._collision_layer & (1 << bit));
     }
     /**
@@ -94,6 +95,8 @@ export class PhysicsBody2D extends CollisionObject2D {
      * @param {boolean} value
      */
     set_collision_layer_bit(bit, value) {
+        bit -= 1;
+
         if (value) {
             this._collision_layer |= (1 << bit);
         } else {
@@ -112,6 +115,7 @@ export class PhysicsBody2D extends CollisionObject2D {
      * @param {number} bit
      */
     get_collision_mask_bit(bit) {
+        bit -= 1;
         return !!(this._collision_mask & (1 << bit));
     }
     /**
@@ -132,6 +136,8 @@ export class PhysicsBody2D extends CollisionObject2D {
      * @param {boolean} value
      */
     set_collision_mask_bit(bit, value) {
+        bit -= 1;
+
         if (value) {
             this._collision_mask |= (1 << bit);
         } else {
