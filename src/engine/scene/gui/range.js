@@ -276,6 +276,7 @@ export class Range extends Control {
     _value_changed_notify() {
         this._value_changed(this.shared.val);
         this.emit_signal('value_changed', this.shared.val);
+        this.update();
     }
 
     /**
