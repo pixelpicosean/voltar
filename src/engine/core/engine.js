@@ -1,4 +1,10 @@
-import { preload_queue, resource_map, res_class_map, scene_class_map } from 'engine/registry';
+import {
+    preload_queue,
+    res_class_map,
+    scene_class_map,
+    resource_map,
+    raw_resource_map,
+} from 'engine/registry';
 import { default_font_name } from 'engine/scene/resources/theme';
 import { ResourceLoader } from './io/resource_loader';
 import { instanciate_scene } from 'engine/scene/assembler';
@@ -150,6 +156,12 @@ export class Engine {
                 if (key.startsWith(res_head) && res.type === 'PackedScene') {
                     // now let's replace ext/sub references inside this resource with real instances
                     normalize_resource_array(res.nodes, res.ext || {}, res.sub || {});
+                }
+            }
+
+            for (let k in loader.resources) {
+                if (!raw_resource_map[k]) {
+                    raw_resource_map[k] = loader.resources[k];
                 }
             }
 
