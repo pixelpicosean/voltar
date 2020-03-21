@@ -1,6 +1,11 @@
 import * as v from 'engine/index';
 
+/** @typedef {string | { instance: () => v.Node }} TargetScene */
+
+/** @type {TargetScene} */
 let main_scene = null;
+
+const TIME_PER_ASSET_MIN = 1 / 60 * 0.2;
 
 class PreloaderScene extends v.Node {
     static instance() { return new PreloaderScene() }
@@ -42,9 +47,9 @@ class PreloaderScene extends v.Node {
         this.bar_fill = bar_fill;
 
         v.Engine.start_preload((progress) => {
-            this.average_speed = (this.average_speed + (progress * 0.001 - this.target_pct) / Math.max(1 / 60, this.timer)) / 2;
+            this.average_speed = (this.average_speed + (progress * 0.001 - this.target_pct) / Math.max(TIME_PER_ASSET_MIN, this.timer)) / 2;
             this.target_pct = progress * 0.001;
-            this.timer = 1 / 60;
+            this.timer = TIME_PER_ASSET_MIN;
         }, () => {
             this.target_pct = 1;
             this.on_resource_loaded();
@@ -72,15 +77,17 @@ class PreloaderScene extends v.Node {
     on_resource_loaded() { }
 
     on_loading_bar_filled() {
-        if (typeof(main_scene) === 'string') {
+        if (typeof (main_scene) === 'string') {
             this.get_tree().change_scene(main_scene);
         } else {
             this.get_tree().change_scene_to(main_scene);
         }
     }
 }
-v.GDCLASS(PreloaderScene, v.Node)
 
+/**
+ * @param {TargetScene} scene
+ */
 export function Preloader(scene) {
     main_scene = scene;
     return PreloaderScene;
