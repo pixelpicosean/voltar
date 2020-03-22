@@ -89,7 +89,8 @@ export class Engine {
                             const resource = resource_map[resource_filename];
 
                             if (!resource) {
-                                throw `Resource with URL [${resource_filename}] not found`;
+                                console.warn(`Resource with URL [${resource_filename}] not found`);
+                                continue;
                             }
 
                             // is it a registered scene?
