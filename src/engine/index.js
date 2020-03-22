@@ -21,7 +21,10 @@ export * from 'engine/core/color';
 export * from 'engine/core/math/pool_color_array';
 export * from 'engine/core/self_list';
 
-export { _yield as yield } from 'engine/core/yield';
+export {
+    _yield as yield,
+    _yield_ex as yield_ex
+} from 'engine/core/yield';
 
 export * from 'engine/utils/c';
 export * from 'engine/utils/color';
@@ -114,7 +117,7 @@ import { Input as Input_t } from 'engine/main/input';
 import { InputMap as InputMap_t } from 'engine/core/input_map';
 import { OS as OS_t } from 'engine/core/os/os';
 import { MessageQueue as MessageQueue_t } from 'engine/core/message_queue';
-import { Engine as Engine_t} from 'engine/core/engine';
+import { Engine as Engine_t } from 'engine/core/engine';
 import { VisualServer as VisualServer_t } from 'engine/servers/visual_server';
 import { Physics2DServer as Physics2DServer_t } from 'engine/servers/physics_2d/physics_2d_server';
 import { SceneTree as SceneTree_t } from 'engine/scene/main/scene_tree';
