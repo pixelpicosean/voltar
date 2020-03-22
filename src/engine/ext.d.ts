@@ -12,6 +12,16 @@ declare module "*.vert" {
     export default value;
 }
 
+declare module "*.png" {
+    const value: string;
+    export default value;
+}
+
+declare module "*.jpg" {
+    const value: string;
+    export default value;
+}
+
 interface HTMLImageElement {
     _tex_id: string;
 }
