@@ -19,6 +19,7 @@ import {
 } from "./input_event";
 import { VisualServer } from "engine/servers/visual_server";
 import { VSG } from "engine/servers/visual/visual_server_globals";
+import { AudioServer } from "engine/audio/audio";
 
 
 export const MOUSE_MODE_VISIBLE = 0;
@@ -207,6 +208,8 @@ export class OS {
 
         const visual_server = new VisualServer();
         this.input = new Input();
+
+        this.audio = new AudioServer;
 
 
         const focus_canvas = () => {

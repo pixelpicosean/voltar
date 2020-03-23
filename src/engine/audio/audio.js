@@ -5,10 +5,21 @@ import { Howler, Howl } from "./howler";
  * @property {Howl} sound
  * @property {number} id
  * @property {number} volumn
+ *
+ * @typedef AudioLoadConfig
+ * @property {number} [volume]
+ * @property {boolean} [loop]
+ * @property {boolean} [preload]
+ * @property {boolean} [autoplay]
+ * @property {{ [k: string]: (number|boolean)[] }} [sprite]
  */
 
-class AudioServer {
+export class AudioServer {
+    static get_singleton() { return singleton }
+
     constructor() {
+        if (!singleton) singleton = this;
+
         /** @type {Map<string, Howl>} */
         this.storage = new Map;
         /** @type {PlayingState[]} */
@@ -65,7 +76,20 @@ class AudioServer {
         }
     }
 
-    load() { }
+    /**
+     * @param {string} key
+     * @param {string|string[]} url
+     * @param {AudioLoadConfig} [config]
+     */
+    load(key, url, config) {
+        const sound = new Howl(Object.assign({
+            src: Array.isArray(url) ? url : [url],
+            onloaderror: () => {
+                console.warn(`Failed to load audio from "${url}"`)
+            },
+        }, config));
+        this.storage.set(key, sound);
+    }
 
     /**
      * @param {string} key
@@ -170,4 +194,21 @@ class AudioServer {
 
         sound.loop(loop, id);
     }
+
+    /**
+     * @param {string} key
+     * @param {number} from
+     * @param {number} to
+     * @param {number} duration
+     * @param {number} [id]
+     */
+    fade(key, from, to, duration, id) {
+        const sound = this.storage.get(key);
+        if (!sound) return;
+
+        sound.fade(from, to, duration, id);
+    }
 }
+
+/** @type {AudioServer} */
+let singleton = null;

@@ -121,6 +121,7 @@ import { Engine as Engine_t } from 'engine/core/engine';
 import { VisualServer as VisualServer_t } from 'engine/servers/visual_server';
 import { Physics2DServer as Physics2DServer_t } from 'engine/servers/physics_2d/physics_2d_server';
 import { SceneTree as SceneTree_t } from 'engine/scene/main/scene_tree';
+import { AudioServer as AudioServer_t } from 'engine/audio/audio';
 
 export { VSG } from 'engine/servers/visual/visual_server_globals';
 
@@ -148,6 +149,9 @@ export let Physics2DServer = null;
 /** @type {SceneTree_t} */
 export let SceneTree = null;
 
+/** @type {AudioServer_t} */
+export let Audio = null;
+
 Main.events.connect_once('started', () => {
     Input = Input_t.get_singleton();
     InputMap = InputMap_t.get_singleton();
@@ -157,6 +161,7 @@ Main.events.connect_once('started', () => {
     VisualServer = VisualServer_t.get_singleton();
     Physics2DServer = Physics2DServer_t.get_singleton();
     SceneTree = SceneTree_t.get_singleton();
+    Audio = AudioServer_t.get_singleton();
 })
 
 // ------------------------------------------------------------------
