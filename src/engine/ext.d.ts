@@ -17,11 +17,6 @@ declare module "*.png" {
     export default value;
 }
 
-declare module "*.jpg" {
-    const value: string;
-    export default value;
-}
-
 interface HTMLImageElement {
     _tex_id: string;
 }
@@ -39,4 +34,28 @@ interface SVGElement {
     _tex_id: string;
     width: number;
     height: number;
+}
+
+// for howler.js
+
+interface HTMLAudioElement {
+    _unlocked: boolean;
+}
+
+interface AudioBufferSourceNode {
+    noteOn: (n: number) => void;
+    noteOff: (n: number) => void;
+    noteGrainOn: (a: number, b: number, c: number) => void;
+    noteGrainOff: (a: number, b: number, c: number) => void;
+}
+
+interface AudioContext {
+    createGainNode: () => GainNode;
+}
+
+interface GainNode {
+    paused: boolean;
+    ended: boolean;
+    currentTime: number;
+    bufferSource: AudioBufferSourceNode;
 }
