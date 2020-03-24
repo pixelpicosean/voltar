@@ -772,11 +772,11 @@ Howl.prototype = {
         }
 
         // Determine how long to play for and where to start playing.
-        var seek = Math.max(0, sound._seek > 0 ? sound._seek : self._sprite[sprite][0] / 1000);
-        var duration = Math.max(0, ((self._sprite[sprite][0] + self._sprite[sprite][1]) / 1000) - seek);
+        var seek = Math.max(0, sound._seek > 0 ? sound._seek : self._sprite[sprite].start / 1000);
+        var duration = Math.max(0, ((self._sprite[sprite].start + self._sprite[sprite].end) / 1000) - seek);
         var timeout = (duration * 1000) / Math.abs(sound._rate);
-        var start = self._sprite[sprite][0] / 1000;
-        var stop = (self._sprite[sprite][0] + self._sprite[sprite][1]) / 1000;
+        var start = self._sprite[sprite].start / 1000;
+        var stop = (self._sprite[sprite].start + self._sprite[sprite].end) / 1000;
         sound._sprite = sprite;
 
         // Mark the sound as ended instantly so that this async playback
@@ -789,7 +789,7 @@ Howl.prototype = {
             sound._seek = seek;
             sound._start = start;
             sound._stop = stop;
-            sound._loop = !!(sound._loop || self._sprite[sprite][2]);
+            sound._loop = !!(sound._loop || self._sprite[sprite].loop);
         };
 
         // End the sound instantly if seek is at the end.
@@ -1011,7 +1011,7 @@ Howl.prototype = {
 
                         // Clean up the buffer source.
                         self._cleanBuffer(sound._node);
-                    // @ts-ignore
+                        // @ts-ignore
                     } else if (!isNaN(sound._node.duration) || sound._node.duration === Infinity) {
                         // @ts-ignore
                         sound._node.pause();
@@ -1082,7 +1082,7 @@ Howl.prototype = {
                             // Clean up the buffer source.
                             self._cleanBuffer(sound._node);
                         }
-                    // @ts-ignore
+                        // @ts-ignore
                     } else if (!isNaN(sound._node.duration) || sound._node.duration === Infinity) {
                         sound._node.currentTime = sound._start || 0;
                         // @ts-ignore
@@ -1511,7 +1511,7 @@ Howl.prototype = {
 
                     // Reset the timers.
                     var seek = /** @type {number} */(self.seek(id[i]));
-                    var duration = ((self._sprite[sound._sprite][0] + self._sprite[sound._sprite][1]) / 1000) - seek;
+                    var duration = ((self._sprite[sound._sprite].start + self._sprite[sound._sprite].end) / 1000) - seek;
                     var timeout = (duration * 1000) / Math.abs(sound._rate);
 
                     // Start a new end timer if sound is already playing.
@@ -2286,7 +2286,7 @@ Sound.prototype = {
 
         // Setup a sprite if none is defined.
         if (Object.keys(parent._sprite).length === 0) {
-            parent._sprite = { __default: [0, parent._duration * 1000] };
+            parent._sprite = { __default: { start: 0, end: parent._duration * 1000, loop: false } };
         }
 
         if (parent._state !== 'loaded') {
@@ -2416,7 +2416,7 @@ var loadSound = function (self, buffer) {
 
     // Setup a sprite if none is defined.
     if (Object.keys(self._sprite).length === 0) {
-        self._sprite = { __default: [0, self._duration * 1000] };
+        self._sprite = { __default: { start: 0, end: self._duration * 1000, loop: false } };
     }
 
     // Fire the loaded event.

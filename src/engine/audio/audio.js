@@ -11,7 +11,7 @@ import { Howler, Howl } from "./howler";
  * @property {boolean} [loop]
  * @property {boolean} [preload]
  * @property {boolean} [autoplay]
- * @property {{ [k: string]: (number|boolean)[] }} [sprite]
+ * @property {{ [k: string]: { start: number, end: number, loop: boolean } }} [sprite]
  */
 
 export class AudioServer {
