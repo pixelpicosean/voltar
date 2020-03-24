@@ -56,23 +56,23 @@ export class AudioServer {
     }
 
     /**
-     * @param {boolean} muted
+     * @param {boolean} turn_on
      */
-    toggle_sound(muted) {
-        this.sound_muted = muted;
+    toggle_sound(turn_on) {
+        this.sound_muted = !turn_on;
         for (let i = 0; i < this.sounds_on_playing.length; i++) {
             const s = this.sounds_on_playing[i];
-            s.sound.mute(muted, s.id);
+            s.sound.mute(!turn_on, s.id);
         }
     }
     /**
-     * @param {boolean} muted
+     * @param {boolean} turn_on
      */
-    toggle_music(muted) {
-        this.music_muted = muted;
+    toggle_music(turn_on) {
+        this.music_muted = !turn_on;
         for (let i = 0; i < this.musics_on_playing.length; i++) {
             const s = this.musics_on_playing[i];
-            s.sound.mute(muted, s.id);
+            s.sound.mute(!turn_on, s.id);
         }
     }
 
