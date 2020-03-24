@@ -772,11 +772,11 @@ Howl.prototype = {
         }
 
         // Determine how long to play for and where to start playing.
-        var seek = Math.max(0, sound._seek > 0 ? sound._seek : self._sprite[sprite].start / 1000);
-        var duration = Math.max(0, ((self._sprite[sprite].start + self._sprite[sprite].end) / 1000) - seek);
+        var seek = Math.max(0, sound._seek > 0 ? sound._seek : self._sprite[sprite].offset / 1000);
+        var duration = Math.max(0, ((self._sprite[sprite].offset + self._sprite[sprite].duration) / 1000) - seek);
         var timeout = (duration * 1000) / Math.abs(sound._rate);
-        var start = self._sprite[sprite].start / 1000;
-        var stop = (self._sprite[sprite].start + self._sprite[sprite].end) / 1000;
+        var start = self._sprite[sprite].offset / 1000;
+        var stop = (self._sprite[sprite].offset + self._sprite[sprite].duration) / 1000;
         sound._sprite = sprite;
 
         // Mark the sound as ended instantly so that this async playback
@@ -1511,7 +1511,7 @@ Howl.prototype = {
 
                     // Reset the timers.
                     var seek = /** @type {number} */(self.seek(id[i]));
-                    var duration = ((self._sprite[sound._sprite].start + self._sprite[sound._sprite].end) / 1000) - seek;
+                    var duration = ((self._sprite[sound._sprite].offset + self._sprite[sound._sprite].duration) / 1000) - seek;
                     var timeout = (duration * 1000) / Math.abs(sound._rate);
 
                     // Start a new end timer if sound is already playing.
