@@ -61,6 +61,9 @@ export class AudioServer {
     toggle(turn_on) {
         Howler.mute(!turn_on);
     }
+    is_muted() {
+        return Howler._muted;
+    }
 
     /**
      * @param {boolean} turn_on
