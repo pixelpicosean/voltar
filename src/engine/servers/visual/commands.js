@@ -215,7 +215,7 @@ export class CommandPolygon extends Command {
     }
     get_vert_count() { return (this.points.length / 2) | 0 }
 }
-create_pool(TYPE_RECT, CommandRect)
+create_pool(TYPE_POLYGON, CommandPolygon)
 
 export class CommandMultiMesh extends Command {
     get type() { return TYPE_MULTIMESH }
