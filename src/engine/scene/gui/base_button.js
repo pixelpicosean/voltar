@@ -71,6 +71,9 @@ export class BaseButton extends Control {
     _load_data(data) {
         super._load_data(data);
 
+        if (data.toggle_mode !== undefined) {
+            this.toggle_mode = data.toggle_mode;
+        }
         if (data.action_mode !== undefined) {
             this.action_mode = data.action_mode;
         }
@@ -79,9 +82,6 @@ export class BaseButton extends Control {
         }
         if (data.pressed !== undefined) {
             this.set_pressed(data.pressed);
-        }
-        if (data.toggle_mode !== undefined) {
-            this.toggle_mode = data.toggle_mode;
         }
 
         return this;

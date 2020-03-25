@@ -58,6 +58,13 @@ export class AudioServer {
     /**
      * @param {boolean} turn_on
      */
+    toggle(turn_on) {
+        Howler.mute(!turn_on);
+    }
+
+    /**
+     * @param {boolean} turn_on
+     */
     toggle_sound(turn_on) {
         this.sound_muted = !turn_on;
         for (let i = 0; i < this.sounds_on_playing.length; i++) {
