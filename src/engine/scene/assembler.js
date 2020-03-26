@@ -155,6 +155,8 @@ export function instanciate_scene(p_data, url) {
     let node = null;
     if (node_data.type) {
         node = new (node_class_map[node_data.type]);
+    } else if (node_data.instance.instance) {
+        node = node_data.instance.instance();
     } else {
         node = node_data.instance.ctor.instance();
     }
