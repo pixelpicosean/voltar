@@ -97,17 +97,6 @@ module.exports.convert_tres = (blocks) => {
                 sec.prop['__meta__'] = undefined;
             }
 
-            // node index is not necessary
-            if (sec['index']) {
-                sec['index'] = undefined;
-            }
-            if (sec._attr && sec._attr['index']) {
-                sec._attr['index'] = undefined;
-            }
-            if (sec.attr && sec.attr['index']) {
-                sec.attr['index'] = undefined;
-            }
-
             if (sec.key === 'inherited_node') {
                 // copy extra properties (they are inherited, so type is unknown to us)
                 if (sec._prop) {
