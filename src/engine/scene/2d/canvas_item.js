@@ -102,6 +102,7 @@ export class CanvasItem extends Node {
         this.notify_local_transform = false;
         this.notify_transform = false;
 
+        /** @type {import("engine/drivers/webgl/rasterizer_storage").Material_t} */
         this.material = null;
 
         this._global_transform = new Transform2D();
@@ -299,7 +300,7 @@ export class CanvasItem extends Node {
         xform.tx = p_offset.x;
         xform.ty = p_offset.y;
         xform.scale_basis(p_scale.x, p_scale.y);
-        VSG.canvas.canvas_item_add_set_transform(this.canvas_item, xform.to_array(false));
+        VSG.canvas.canvas_item_add_set_transform(this.canvas_item, [xform.a, xform.b, xform.c, xform.d, xform.tx, xform.ty]);
         Transform2D.free(xform);
     }
     /**
@@ -309,7 +310,7 @@ export class CanvasItem extends Node {
         if (Array.isArray(p_matrix)) {
             VSG.canvas.canvas_item_add_set_transform(this.canvas_item, p_matrix);
         } else {
-            VSG.canvas.canvas_item_add_set_transform(this.canvas_item, p_matrix.to_array(false));
+            VSG.canvas.canvas_item_add_set_transform(this.canvas_item, [p_matrix.a, p_matrix.b, p_matrix.c, p_matrix.d, p_matrix.tx, p_matrix.ty]);
         }
     }
 
