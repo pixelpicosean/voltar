@@ -25,6 +25,7 @@ import {
     TYPE_NINEPATCH,
     TYPE_POLYGON,
     TYPE_MULTIMESH,
+    TYPE_TRANSFORM,
     CANVAS_RECT_REGION,
     CANVAS_RECT_TRANSPOSE,
     CANVAS_RECT_FLIP_H,
@@ -37,6 +38,7 @@ import {
     CommandNinePatch,
     CommandPolygon,
     CommandMultiMesh,
+    CommandTransform,
 } from 'engine/servers/visual/commands';
 import { ImageTexture } from 'engine/scene/resources/texture';
 
@@ -484,6 +486,10 @@ export class RasterizerCanvas extends VObject {
     _canvas_item_render_commands(p_item) {
         const color = Color.new();
 
+        const full_xform = Transform2D.new();
+        /** @type {Transform2D} */
+        let extra_xform = null;
+
         for (const cmd of p_item.commands) {
             switch (cmd.type) {
                 case TYPE_LINE: {
@@ -502,7 +508,7 @@ export class RasterizerCanvas extends VObject {
                     let ib_idx = this.states.i_index;
 
                     // vertex
-                    const wt = p_item.final_transform;
+                    const wt = extra_xform ? full_xform.copy(p_item.final_transform).append(extra_xform) : p_item.final_transform;
                     const a = wt.a;
                     const b = wt.b;
                     const c = wt.c;
@@ -586,7 +592,7 @@ export class RasterizerCanvas extends VObject {
                     let ib_idx = this.states.i_index;
 
                     // vertex
-                    const wt = p_item.final_transform;
+                    const wt = extra_xform ? full_xform.copy(p_item.final_transform).append(extra_xform) : p_item.final_transform;
                     const a = wt.a;
                     const b = wt.b;
                     const c = wt.c;
@@ -725,7 +731,7 @@ export class RasterizerCanvas extends VObject {
                     let ib_idx = this.states.i_index;
 
                     // vertex
-                    const wt = p_item.final_transform;
+                    const wt = extra_xform ? full_xform.copy(p_item.final_transform).append(extra_xform) : p_item.final_transform;
                     const a = wt.a;
                     const b = wt.b;
                     const c = wt.c;
@@ -926,7 +932,7 @@ export class RasterizerCanvas extends VObject {
                     let ib_idx = this.states.i_index;
 
                     // vertex
-                    const wt = p_item.final_transform;
+                    const wt = extra_xform ? full_xform.copy(p_item.final_transform).append(extra_xform) : p_item.final_transform;
                     const a = wt.a;
                     const b = wt.b;
                     const c = wt.c;
@@ -974,7 +980,7 @@ export class RasterizerCanvas extends VObject {
                     const radius = circle.radius;
                     const tex = circle.texture;
 
-                    const wt = p_item.final_transform;
+                    const wt = extra_xform ? full_xform.copy(p_item.final_transform).append(extra_xform) : p_item.final_transform;
                     const a = wt.a;
                     const b = wt.b;
                     const c = wt.c;
@@ -1047,7 +1053,7 @@ export class RasterizerCanvas extends VObject {
                     let ib_idx = this.states.i_index;
 
                     // vertex
-                    const wt = p_item.final_transform;
+                    const wt = extra_xform ? full_xform.copy(p_item.final_transform).append(extra_xform) : p_item.final_transform;
                     const a = wt.a;
                     const b = wt.b;
                     const c = wt.c;
@@ -1101,7 +1107,7 @@ export class RasterizerCanvas extends VObject {
                     const gl_ext = this.gl_ext;
 
                     // - material
-                    const xform = p_item.final_transform;
+                    const xform = extra_xform ? full_xform.copy(p_item.final_transform).append(extra_xform) : p_item.final_transform;
                     this.use_material(this.materials.multimesh, {
                         item_matrix: xform.to_array(true),
                     });
@@ -1204,9 +1210,14 @@ export class RasterizerCanvas extends VObject {
                         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
                     }
                 } break;
+                case TYPE_TRANSFORM: {
+                    const transform = /** @type {CommandTransform} */(cmd);
+                    extra_xform = transform.xform;
+                } break;
             }
         }
 
+        Transform2D.free(full_xform);
         Color.free(color);
     }
 
