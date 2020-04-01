@@ -1,4 +1,3 @@
-import { device } from "engine/dep/index";
 import { Vector2, Vector2Like } from "engine/core/math/vector2";
 import {
     MainLoop,
@@ -322,7 +321,8 @@ export class OS {
             ev.meta = e.metaKey;
             ev.control = e.ctrlKey;
             ev.scancode = e.keyCode;
-            ev.unicode = e.char;
+            ev.key = e.key;
+            ev.unicode = e.key.length === 1 ? e.key : null;
             return ev;
         }
 
@@ -330,20 +330,14 @@ export class OS {
         window.addEventListener('keydown', (e) => {
             const ev = setup_key_event(e);
             ev.pressed = true;
-            if (/** @type {any} */(ev.unicode) === 0) {
-                // TODO: defer to keypress event for legacy unicode retrieval
-                // return false;
-            }
             this.input.parse_input_event(ev);
-            // TODO: resume audio context after input
             return true;
         })
         window.addEventListener('keyup', (e) => {
             const ev = setup_key_event(e);
             ev.pressed = false;
             this.input.parse_input_event(ev);
-            // TODO: resume audio context after input
-            return /** @type {any} */(ev.unicode) !== 0;
+            return !!ev.unicode;
         })
 
         // over/leave and focus/blur events

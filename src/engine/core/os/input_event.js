@@ -180,7 +180,18 @@ export class InputEventKey extends InputEventWithModifiers {
         this.pressed = false;
 
         this.scancode = 0;
-        this.unicode = '';
+
+        /**
+         * Key as text, including "Enter", "Alt"...
+         * @type {string}
+         */
+        this.key = '';
+
+        /**
+         * Only exist when the key is a character with valid unicode value
+         * @type {string}
+         */
+        this.unicode = null;
 
         this.echo = false;
     }
@@ -188,7 +199,8 @@ export class InputEventKey extends InputEventWithModifiers {
         this.pressed = false;
 
         this.scancode = 0;
-        this.unicode = '';
+        this.key = '';
+        this.unicode = null;
 
         this.echo = false;
         return this;
