@@ -2286,7 +2286,7 @@ Sound.prototype = {
 
         // Setup a sprite if none is defined.
         if (Object.keys(parent._sprite).length === 0) {
-            parent._sprite = { __default: { start: 0, end: parent._duration * 1000, loop: false } };
+            parent._sprite = { __default: { offset: 0, duration: parent._duration * 1000, loop: false } };
         }
 
         if (parent._state !== 'loaded') {
@@ -2416,7 +2416,7 @@ var loadSound = function (self, buffer) {
 
     // Setup a sprite if none is defined.
     if (Object.keys(self._sprite).length === 0) {
-        self._sprite = { __default: { start: 0, end: self._duration * 1000, loop: false } };
+        self._sprite = { __default: { offset: 0, duration: self._duration * 1000, loop: false } };
     }
 
     // Fire the loaded event.
