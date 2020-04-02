@@ -123,13 +123,15 @@ export class AudioServer {
     /**
      * @param {string} key
      * @param {number} [volume]
+     * @param {boolean} [loop]
      * @param {string} [sprite]
      * @returns {number} return id of the playing sound
      */
-    play_sound(key, volume, sprite) {
+    play_sound(key, volume = 1.0, loop = false, sprite = undefined) {
         const sound = this.storage.get(key);
         if (!sound) return -1;
         const id = sound.play(sprite);
+        sound.loop(loop, id);
         this.sounds_on_playing.push({
             sound: sound,
             volumn: volume,
