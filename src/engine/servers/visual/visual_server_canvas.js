@@ -97,8 +97,6 @@ export class Item {
 
         this.mirror = new Vector2();
 
-        this.fill_mode = 0;
-
         /** @type {Item | Canvas} */
         this.parent = null;
         /** @type {Item[]} */

@@ -73,7 +73,6 @@ import {
 const ATTR_VERTEX = 0;
 const ATTR_UV = 1;
 const ATTR_COLOR = 2;
-const ATTR_FLAGS = 3;
 
 const ATTR_INST_XFORM0 = 3;
 const ATTR_INST_XFORM1 = 4;
@@ -81,7 +80,7 @@ const ATTR_INST_XFORM2 = 5;
 const ATTR_INST_COLOR = 6;
 const ATTR_INST_DATA = 7;
 
-const VTX_COMP = (2 + 2 + 1 + 1); // position(2) + uv(2) + color(1) + flag(1)
+const VTX_COMP = (2 + 2 + 1); // position(2) + uv(2) + color(1)
 const VTX_STRIDE = VTX_COMP * 4;
 
 const VERTEX_BUFFER_LENGTH = 4096 * VTX_COMP;
@@ -294,7 +293,6 @@ export class RasterizerCanvas extends VObject {
                     'position',
                     'uv',
                     'color',
-                    'flags',
                 ],
                 [
                     { name: 'projection_matrix', type: 'mat4' },
@@ -314,7 +312,6 @@ export class RasterizerCanvas extends VObject {
                     'position',
                     'uv',
                     'color',
-                    'flags',
                 ],
                 [
                     { name: 'projection_matrix', type: 'mat4' },
@@ -594,13 +591,6 @@ export class RasterizerCanvas extends VObject {
                     vertices[vb_idx + VTX_COMP * 2 + 4] = color_num;
                     vertices[vb_idx + VTX_COMP * 3 + 4] = color_num;
 
-                    // - flags
-                    const flags = color.set(p_item.fill_mode, 0, 0, 0).as_rgba8();
-                    vertices[vb_idx + VTX_COMP * 0 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 1 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 2 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 3 + 5] = flags;
-
                     // index
                     indices[ib_idx++] = v_idx + 0;
                     indices[ib_idx++] = v_idx + 1;
@@ -732,13 +722,6 @@ export class RasterizerCanvas extends VObject {
                     vertices[vb_idx + VTX_COMP * 1 + 4] = color_num;
                     vertices[vb_idx + VTX_COMP * 2 + 4] = color_num;
                     vertices[vb_idx + VTX_COMP * 3 + 4] = color_num;
-
-                    // - flags
-                    const flags = color.set(p_item.fill_mode, 0, 0, 0).as_rgba8();
-                    vertices[vb_idx + VTX_COMP * 0 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 1 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 2 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 3 + 5] = flags;
 
                     // index
                     indices[ib_idx++] = v_idx + 0;
@@ -922,25 +905,6 @@ export class RasterizerCanvas extends VObject {
                     vertices[vb_idx + VTX_COMP * 14 + 4] = color_num;
                     vertices[vb_idx + VTX_COMP * 15 + 4] = color_num;
 
-                    // - flags
-                    const flags = color.set(p_item.fill_mode, 0, 0, 0).as_rgba8();
-                    vertices[vb_idx + VTX_COMP * 0 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 1 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 2 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 3 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 4 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 5 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 6 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 7 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 8 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 9 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 10 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 11 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 12 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 13 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 14 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 15 + 5] = flags;
-
                     // index
                     for (let i = 0; i < NinePatchIndices.length; i++) {
                         indices[ib_idx++] = v_idx + NinePatchIndices[i];
@@ -983,7 +947,6 @@ export class RasterizerCanvas extends VObject {
                     const s_color_num = s_color ? color.set(colors[0], colors[1], colors[2], colors[3]).multiply(p_item.final_modulate).as_rgba8() : 0;
                     const uvs = polygon.uvs;
                     const p_indices = polygon.indices;
-                    const flags = color.set(p_item.fill_mode, 0, 0, 0).as_rgba8();
 
                     for (let i = 0, len = vert_count; i < len; i++) {
                         // position
@@ -1000,8 +963,6 @@ export class RasterizerCanvas extends VObject {
                         }
                         // color
                         vertices[vb_idx + VTX_COMP * i + 4] = s_color ? s_color_num : color.set(color[i * 4], color[i * 4 + 1], color[i * 4 + 2], color[i * 4 + 3]).multiply(p_item.final_modulate).as_rgba8();
-                        // flags
-                        vertices[vb_idx + VTX_COMP * i + 5] = flags;
                     }
 
                     // index
@@ -1047,7 +1008,6 @@ export class RasterizerCanvas extends VObject {
                     const y0 = circle.pos.y;
 
                     const color_num = color.copy(circle.color).multiply(p_item.final_modulate).as_rgba8();
-                    const flags = color.set(p_item.fill_mode, 0, 0, 0).as_rgba8();
 
                     for (let i = 0; i < steps; i++) {
                         const x = Math.cos(angle_per_step * i) * radius + x0;
@@ -1057,7 +1017,6 @@ export class RasterizerCanvas extends VObject {
                         vertices[vb_idx + VTX_COMP * i + 2] = -1;
                         vertices[vb_idx + VTX_COMP * i + 3] = -1;
                         vertices[vb_idx + VTX_COMP * i + 4] = color_num;
-                        vertices[vb_idx + VTX_COMP * i + 5] = flags;
                     }
 
                     // index
@@ -1102,7 +1061,6 @@ export class RasterizerCanvas extends VObject {
                     const colors = pline.triangle_colors;
                     const s_color = (colors.length === 4);
                     const s_color_num = s_color ? color.set(colors[0], colors[1], colors[2], colors[3]).multiply(p_item.final_modulate).as_rgba8() : 0;
-                    const flags = color.set(p_item.fill_mode, 0, 0, 0).as_rgba8();
 
                     for (let i = 0, len = vert_count; i < len; i++) {
                         // position
@@ -1113,8 +1071,6 @@ export class RasterizerCanvas extends VObject {
                         vertices[vb_idx + VTX_COMP * i + 3] = -1;
                         // color
                         vertices[vb_idx + VTX_COMP * i + 4] = s_color ? s_color_num : color.set(color[i * 4], color[i * 4 + 1], color[i * 4 + 2], color[i * 4 + 3]).multiply(p_item.final_modulate).as_rgba8();
-                        // flags
-                        vertices[vb_idx + VTX_COMP * i + 5] = flags;
                     }
 
                     // index
@@ -1373,9 +1329,6 @@ export class RasterizerCanvas extends VObject {
 
         gl.vertexAttribPointer(ATTR_COLOR, 4, gl.UNSIGNED_BYTE, true, VTX_STRIDE, 4 * 4);
         gl.enableVertexAttribArray(ATTR_COLOR);
-
-        gl.vertexAttribPointer(ATTR_FLAGS, 4, gl.UNSIGNED_BYTE, false, VTX_STRIDE, 5 * 4);
-        gl.enableVertexAttribArray(ATTR_FLAGS);
 
         // - draw call
         gl.drawElements(gl.TRIANGLES, i_length, gl.UNSIGNED_SHORT, 0);
