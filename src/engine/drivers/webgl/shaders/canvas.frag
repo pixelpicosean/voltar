@@ -1,6 +1,7 @@
 precision mediump float;
 
 uniform sampler2D TEXTURE;
+uniform highp float TIME;
 
 /* UNIFORM */
 

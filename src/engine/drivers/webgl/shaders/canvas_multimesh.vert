@@ -1,6 +1,6 @@
 uniform highp mat4 projection_matrix;
 uniform highp mat3 item_matrix;
-uniform highp float time;
+uniform highp float TIME;
 
 attribute highp vec2 position;
 attribute highp vec2 uv;

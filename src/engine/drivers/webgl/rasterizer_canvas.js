@@ -456,7 +456,7 @@ export class RasterizerCanvas extends VObject {
             // shader code
             .replace(/\/\* SHADER_BEGIN \*\/([\s\S]*?)\/\* SHADER_END \*\//, `{\n${shader_material.fs_code}}`)
             // translate Godot API to GLSL
-            .replace("texture(", "texture2D(")
+            .replace(/texture\(/gm, "texture2D(")
         const shader = VSG.storage.shader_create(
             vs_code, fs_code,
             [
