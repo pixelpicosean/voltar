@@ -133,9 +133,9 @@ export class ShaderMaterial extends Material {
     get class() { return "ShaderMaterial" }
 
     /**
-     * @param {string} name
+     * @param {string} [name]
      */
-    constructor(name) {
+    constructor(name = "unknown") {
         super();
 
         this.name = name;
@@ -151,6 +151,13 @@ export class ShaderMaterial extends Material {
 
         this.fs_code = "";
         this.fs_uniform_code = "";
+    }
+    _load_data(data) {
+        if (data.shader && data.shader.code) {
+            this.set_shader(data.shader.code);
+        }
+
+        return this;
     }
 
     /**

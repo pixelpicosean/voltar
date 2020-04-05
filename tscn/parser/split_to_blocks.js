@@ -8,10 +8,16 @@ const _ = require('lodash');
 module.exports.split_to_blocks = (data) => {
     const blocks = [];
 
-    const lines = data.split('\n').filter(str => str.length > 0);
+    const lines = data.split('\n')
     let i = 0, line, block = [];
     for (i = 0; i < lines.length; i++) {
         line = lines[i];
+
+        // empty line?
+        if (!line.trim()) {
+            block.push(line);
+            continue;
+        }
 
         // Reach a block head
         if (line[0] === '[') {

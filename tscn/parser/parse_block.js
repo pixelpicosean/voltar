@@ -258,7 +258,12 @@ module.exports.parse_block = (block) => {
                 if (idx > 0) {
                     str_after_last_quotation = line.substring(idx + 1);
                 }
-                if (str_after_last_quotation[str_after_last_quotation.length - 1] === '"') {
+                // empty line?
+                if (str_after_last_quotation.length === 0 || str_after_last_quotation === "\n") {
+                    const pack = _.last(stack);
+                    pack.value += line;
+                }
+                else if (str_after_last_quotation[str_after_last_quotation.length - 1] === '"') {
                     // now we found end of this multi-line string
                     const pack = stack.pop();
                     pack.value = pack.value + remove_last(line);
@@ -266,6 +271,11 @@ module.exports.parse_block = (block) => {
 
                     // Pop out current token
                     tokens.pop();
+                }
+                // still content, let's push them all back
+                else {
+                    const pack = _.last(stack);
+                    pack.value += line;
                 }
             } break;
             case '{': {
