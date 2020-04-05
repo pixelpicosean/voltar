@@ -41,6 +41,7 @@ import {
     CommandTransform,
 } from 'engine/servers/visual/commands';
 import { ImageTexture } from 'engine/scene/resources/texture';
+import { ShaderMaterial } from 'engine/scene/resources/material';
 import {
     CanvasItemMaterial,
     BLEND_MODE_MIX,
@@ -235,7 +236,7 @@ export class RasterizerCanvas extends VObject {
                     0, 0, 1, 0,
                     0, 0, 0, 1,
                 ],
-                time: [0],
+                TIME: [0],
             },
 
             vp: null,
@@ -286,44 +287,22 @@ export class RasterizerCanvas extends VObject {
         const size = OS.get_singleton().get_window_size();
         this.resize(size.width, size.height);
 
-        this.materials.flat = (() => {
-            const shader = VSG.storage.shader_create(
-                normal_vs, normal_fs,
-                [
-                    'position',
-                    'uv',
-                    'color',
-                ],
-                [
-                    { name: 'projection_matrix', type: 'mat4' },
-                    { name: 'time', type: '1f' },
-                ]
-            );
-            const material = VSG.storage.material_create(shader);
-            material.name = 'flat';
-            material.batchable = true;
-            return material;
-        })();
-
-        this.materials.tile = (() => {
-            const shader = VSG.storage.shader_create(
-                tile_vs, tile_fs,
-                [
-                    'position',
-                    'uv',
-                    'color',
-                ],
-                [
-                    { name: 'projection_matrix', type: 'mat4' },
-                    { name: 'frame_uv', type: '4f' },
-                    { name: 'time', type: '1f' },
-                ],
-            );
-            const material = VSG.storage.material_create(shader);
-            material.name = 'tile';
-            material.batchable = false;
-            return material;
-        })();
+        const mat = new ShaderMaterial("normal");
+        mat.set_shader(`
+            shader_type = canvas_item;
+            void fragment() {
+                COLOR = texture(TEXTURE, UV);
+            }
+        `);
+        this.materials.flat = this.init_shader_material(mat, normal_vs, normal_fs, [
+            { name: 'projection_matrix', type: 'mat4' },
+            { name: 'TIME', type: '1f' },
+        ], true);
+        this.materials.tile = this.init_shader_material(mat, tile_vs, tile_fs, [
+            { name: 'projection_matrix', type: 'mat4' },
+            { name: 'frame_uv', type: '4f' },
+            { name: 'TIME', type: '1f' },
+        ], false);
 
         this.materials.multimesh = (() => {
             const shader = VSG.storage.shader_create(
@@ -344,7 +323,7 @@ export class RasterizerCanvas extends VObject {
                 [
                     { name: 'projection_matrix', type: 'mat4' },
                     { name: 'item_matrix', type: 'mat3' },
-                    { name: 'time', type: '1f' },
+                    { name: 'TIME', type: '1f' },
                 ],
             );
             const material = VSG.storage.material_create(shader);
@@ -429,7 +408,7 @@ export class RasterizerCanvas extends VObject {
             translate_mat4(canvas_transform, canvas_transform, [-ssize.width / 2, -ssize.height / 2, 0]);
             scale_mat4(canvas_transform, canvas_transform, [2 / ssize.width, -2 / ssize.height, 1]);
         }
-        this.states.uniforms.time[0] = frame.time[0];
+        this.states.uniforms.TIME[0] = frame.time[0];
 
         // reset states
         this.states.material = this.materials.flat;
@@ -457,6 +436,47 @@ export class RasterizerCanvas extends VObject {
     }
 
     /* private */
+
+    /**
+     * @param {ShaderMaterial} shader_material
+     * @param {string} vs
+     * @param {string} fs
+     * @param {{ name: string, type: string }[]} uniforms
+     * @param {boolean} batchable
+     */
+    init_shader_material(shader_material, vs, fs, uniforms, batchable) {
+        const vs_code = vs
+            // uniform
+            .replace("/* UNIFORM */", shader_material.vs_uniform_code)
+            // shader code
+            .replace("/* SHADER */", `{\n${shader_material.vs_code}}`)
+        const fs_code = fs
+            // uniform
+            .replace("/* UNIFORM */", shader_material.fs_uniform_code)
+            // shader code
+            .replace(/\/\* SHADER_BEGIN \*\/([\s\S]*?)\/\* SHADER_END \*\//, `{\n${shader_material.fs_code}}`)
+            // translate Godot API to GLSL
+            .replace("texture(", "texture2D(")
+        const shader = VSG.storage.shader_create(
+            vs_code, fs_code,
+            [
+                'position',
+                'uv',
+                'color',
+            ],
+            // @ts-ignore
+            uniforms.concat(shader_material.uniforms),
+        );
+        const material = VSG.storage.material_create(shader);
+        material.name = shader_material.name;
+        material.batchable = batchable;
+        for (let u of shader_material.uniforms) {
+            if (u.value) {
+                material.params[u.name] = u.value;
+            }
+        }
+        return material;
+    }
 
     /**
      * @param {import('./rasterizer_storage').Material_t} material
@@ -515,12 +535,35 @@ export class RasterizerCanvas extends VObject {
         /** @type {Transform2D} */
         let extra_xform = null;
 
-        const material = p_item.material;
+        let materials = this.materials;
+        let item_material = p_item.material;
+
+        // TODO: cache blend mode
         /** @type {number} */
         let blend_mode = undefined;
-        if (material) {
-            if (material.class === "CanvasItemMaterial") {
-                blend_mode = /** @type {CanvasItemMaterial} */(material).blend_mode;
+        if (item_material) {
+            if (item_material.class === "CanvasItemMaterial") {
+                blend_mode = /** @type {CanvasItemMaterial} */(item_material).blend_mode;
+            } else if (item_material.class === "ShaderMaterial") {
+                const sm = /** @type {ShaderMaterial} */(item_material);
+                if (!sm.materials.flat) {
+                    sm.materials.flat = this.init_shader_material(sm, normal_vs, normal_fs, [
+                        { name: 'projection_matrix', type: 'mat4' },
+                        { name: 'TIME', type: '1f' },
+                    ], true);
+                }
+                if (!sm.materials.tile) {
+                    sm.materials.tile = this.init_shader_material(sm, tile_vs, tile_fs, [
+                        { name: 'projection_matrix', type: 'mat4' },
+                        { name: 'frame_uv', type: '4f' },
+                        { name: 'TIME', type: '1f' },
+                    ], false);
+                }
+                if (!sm.materials.multimesh) {
+                    sm.materials.multimesh = this.materials.multimesh;
+                }
+
+                materials = sm.materials;
             }
         }
 
@@ -606,7 +649,7 @@ export class RasterizerCanvas extends VObject {
                     const rect = /** @type {CommandRect} */(cmd);
                     const tex = rect.texture;
 
-                    this.check_batch_state(4, 6, tex, (rect.flags & CANVAS_RECT_TILE) ? this.materials.tile : this.materials.flat, blend_mode);
+                    this.check_batch_state(4, 6, tex, (rect.flags & CANVAS_RECT_TILE) ? materials.tile : materials.flat, blend_mode);
 
                     const {
                         v: vertices,

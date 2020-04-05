@@ -53,6 +53,7 @@ export * from 'engine/scene/resources/font';
 export * from 'engine/scene/resources/style_box';
 export * from 'engine/scene/resources/theme';
 export * from 'engine/scene/resources/curve';
+export * from 'engine/scene/resources/material';
 
 // ------------------------------------------------------------------
 // Node
