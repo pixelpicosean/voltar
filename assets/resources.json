@@ -2,25 +2,24 @@
     "res://scene/demo.tscn": {
         "type": "PackedScene",
         "ext": {
-            "1": "particle"
+            "1": "palette"
         },
         "sub": {
             "1": {
-                "type": "Gradient",
-                "colors": [
-                    {
-                        "r": 1,
-                        "g": 1,
-                        "b": 1,
-                        "a": 1
-                    },
-                    {
-                        "r": 1,
-                        "g": 1,
-                        "b": 1,
-                        "a": 0
-                    }
-                ]
+                "type": "CanvasItemMaterial",
+                "blend_mode": 1
+            },
+            "2": {
+                "type": "CanvasItemMaterial",
+                "blend_mode": 2
+            },
+            "3": {
+                "type": "Shader",
+                "code": "shader_type canvas_item;\nvoid fragment() {\nvec3 color;\nvec4 ori_color = texture(TEXTURE, UV);\n// color separation\ncolor.r = texture(TEXTURE, vec2(UV.x + 0.003, UV.y)).x;\ncolor.g = texture(TEXTURE, vec2(UV.x + 0.000, UV.y)).y;\ncolor.b = texture(TEXTURE, vec2(UV.x - 0.003, UV.y)).z;\n// increase contrast\ncolor = clamp(color * 0.5 + 0.5 * color * color * 1.2, 0.0, 1.0);\n// vignetting\ncolor *= 0.5 + 0.5 * 16.0 * UV.x * UV.y * (1.0 - UV.x) * (1.0 - UV.y);\n// tinting\ncolor *= vec3(0.8, 1.0, 0.7);\n// tv lines\ncolor *= 0.9 + 0.1 * sin(10.0 * TIME + UV.y * 1800.0);\n// flickering\ncolor *= 0.97 + 0.03 * sin(110.0 * TIME);\nCOLOR = vec4(color, ori_color.a);}"
+            },
+            "4": {
+                "type": "ShaderMaterial",
+                "shader": "@sub#3"
             }
         },
         "nodes": [
@@ -29,26 +28,47 @@
                 "name": "demo"
             },
             {
-                "type": "CPUParticles2D",
-                "name": "cpu_particles_2d",
+                "type": "Sprite",
+                "name": "add",
                 "parent": ".",
+                "material": "@sub#1",
+                "scale": {
+                    "x": 2,
+                    "y": 2
+                },
+                "centered": false,
+                "texture": "@ext#1"
+            },
+            {
+                "type": "Sprite",
+                "name": "sub",
+                "parent": ".",
+                "material": "@sub#2",
+                "position": {
+                    "x": 16,
+                    "y": 16
+                },
+                "scale": {
+                    "x": 2,
+                    "y": 2
+                },
+                "centered": false,
+                "texture": "@ext#1"
+            },
+            {
+                "type": "Sprite",
+                "name": "shader",
+                "parent": ".",
+                "material": "@sub#4",
                 "position": {
                     "x": 160,
-                    "y": 114
-                },
-                "amount": 16,
-                "color_ramp": "@sub#1",
-                "flag_align_y": true,
-                "gravity": {
-                    "x": 0,
                     "y": 0
                 },
-                "hue_variation": 0.83,
-                "hue_variation_random": 0.18,
-                "initial_velocity": 40,
-                "randomness": 1,
-                "scale_amount": 0.1,
-                "spread": 180,
+                "scale": {
+                    "x": 2,
+                    "y": 2
+                },
+                "centered": false,
                 "texture": "@ext#1"
             }
         ]

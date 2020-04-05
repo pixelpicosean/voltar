@@ -41,6 +41,15 @@ import {
     CommandTransform,
 } from 'engine/servers/visual/commands';
 import { ImageTexture } from 'engine/scene/resources/texture';
+import { ShaderMaterial } from 'engine/scene/resources/material';
+import {
+    CanvasItemMaterial,
+    BLEND_MODE_MIX,
+    BLEND_MODE_ADD,
+    BLEND_MODE_SUB,
+    BLEND_MODE_MUL,
+    BLEND_MODE_PREMULT_ALPHA,
+} from 'engine/scene/2d/canvas_item';
 
 import normal_vs from './shaders/canvas.vert';
 import normal_fs from './shaders/canvas.frag';
@@ -65,7 +74,6 @@ import {
 const ATTR_VERTEX = 0;
 const ATTR_UV = 1;
 const ATTR_COLOR = 2;
-const ATTR_FLAGS = 3;
 
 const ATTR_INST_XFORM0 = 3;
 const ATTR_INST_XFORM1 = 4;
@@ -73,7 +81,7 @@ const ATTR_INST_XFORM2 = 5;
 const ATTR_INST_COLOR = 6;
 const ATTR_INST_DATA = 7;
 
-const VTX_COMP = (2 + 2 + 1 + 1); // position(2) + uv(2) + color(1) + flag(1)
+const VTX_COMP = (2 + 2 + 1); // position(2) + uv(2) + color(1)
 const VTX_STRIDE = VTX_COMP * 4;
 
 const VERTEX_BUFFER_LENGTH = 4096 * VTX_COMP;
@@ -212,6 +220,7 @@ export class RasterizerCanvas extends VObject {
             material: null,
             /** @type {import('./rasterizer_storage').Texture_t} */
             texture: null,
+            blend_mode: 0,
 
             active_vert_slot: 0,
             active_buffer_slot: 0,
@@ -227,7 +236,7 @@ export class RasterizerCanvas extends VObject {
                     0, 0, 1, 0,
                     0, 0, 0, 1,
                 ],
-                time: [0],
+                TIME: [0],
             },
 
             vp: null,
@@ -278,46 +287,22 @@ export class RasterizerCanvas extends VObject {
         const size = OS.get_singleton().get_window_size();
         this.resize(size.width, size.height);
 
-        this.materials.flat = (() => {
-            const shader = VSG.storage.shader_create(
-                normal_vs, normal_fs,
-                [
-                    'position',
-                    'uv',
-                    'color',
-                    'flags',
-                ],
-                [
-                    { name: 'projection_matrix', type: 'mat4' },
-                    { name: 'time', type: '1f' },
-                ]
-            );
-            const material = VSG.storage.material_create(shader);
-            material.name = 'flat';
-            material.batchable = true;
-            return material;
-        })();
-
-        this.materials.tile = (() => {
-            const shader = VSG.storage.shader_create(
-                tile_vs, tile_fs,
-                [
-                    'position',
-                    'uv',
-                    'color',
-                    'flags',
-                ],
-                [
-                    { name: 'projection_matrix', type: 'mat4' },
-                    { name: 'frame_uv', type: '4f' },
-                    { name: 'time', type: '1f' },
-                ],
-            );
-            const material = VSG.storage.material_create(shader);
-            material.name = 'tile';
-            material.batchable = false;
-            return material;
-        })();
+        const mat = new ShaderMaterial("normal");
+        mat.set_shader(`
+            shader_type = canvas_item;
+            void fragment() {
+                COLOR = texture(TEXTURE, UV);
+            }
+        `);
+        this.materials.flat = this.init_shader_material(mat, normal_vs, normal_fs, [
+            { name: 'projection_matrix', type: 'mat4' },
+            { name: 'TIME', type: '1f' },
+        ], true);
+        this.materials.tile = this.init_shader_material(mat, tile_vs, tile_fs, [
+            { name: 'projection_matrix', type: 'mat4' },
+            { name: 'frame_uv', type: '4f' },
+            { name: 'TIME', type: '1f' },
+        ], false);
 
         this.materials.multimesh = (() => {
             const shader = VSG.storage.shader_create(
@@ -338,7 +323,7 @@ export class RasterizerCanvas extends VObject {
                 [
                     { name: 'projection_matrix', type: 'mat4' },
                     { name: 'item_matrix', type: 'mat3' },
-                    { name: 'time', type: '1f' },
+                    { name: 'TIME', type: '1f' },
                 ],
             );
             const material = VSG.storage.material_create(shader);
@@ -423,7 +408,7 @@ export class RasterizerCanvas extends VObject {
             translate_mat4(canvas_transform, canvas_transform, [-ssize.width / 2, -ssize.height / 2, 0]);
             scale_mat4(canvas_transform, canvas_transform, [2 / ssize.width, -2 / ssize.height, 1]);
         }
-        this.states.uniforms.time[0] = frame.time[0];
+        this.states.uniforms.TIME[0] = frame.time[0];
 
         // reset states
         this.states.material = this.materials.flat;
@@ -453,16 +438,76 @@ export class RasterizerCanvas extends VObject {
     /* private */
 
     /**
+     * @param {ShaderMaterial} shader_material
+     * @param {string} vs
+     * @param {string} fs
+     * @param {{ name: string, type: string }[]} uniforms
+     * @param {boolean} batchable
+     */
+    init_shader_material(shader_material, vs, fs, uniforms, batchable) {
+        const vs_code = vs
+            // uniform
+            .replace("/* UNIFORM */", shader_material.vs_uniform_code)
+            // shader code
+            .replace("/* SHADER */", `{\n${shader_material.vs_code}}`)
+        const fs_code = fs
+            // uniform
+            .replace("/* UNIFORM */", shader_material.fs_uniform_code)
+            // shader code
+            .replace(/\/\* SHADER_BEGIN \*\/([\s\S]*?)\/\* SHADER_END \*\//, `{\n${shader_material.fs_code}}`)
+            // translate Godot API to GLSL
+            .replace(/texture\(/gm, "texture2D(")
+        const shader = VSG.storage.shader_create(
+            vs_code, fs_code,
+            [
+                'position',
+                'uv',
+                'color',
+            ],
+            // @ts-ignore
+            uniforms.concat(shader_material.uniforms),
+        );
+        const material = VSG.storage.material_create(shader);
+        material.name = shader_material.name;
+        material.batchable = batchable;
+        for (let u of shader_material.uniforms) {
+            if (u.value) {
+                material.params[u.name] = u.value;
+            }
+        }
+        return material;
+    }
+
+    /**
      * @param {import('./rasterizer_storage').Material_t} material
      * @param {Object<string, number[]>} uniforms
      */
     use_material(material, uniforms) {
         const gl = this.gl;
 
-        // TODO: support different blend modes
         gl.enable(gl.BLEND);
-        gl.blendEquation(gl.FUNC_ADD);
-        gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+        switch (this.states.blend_mode) {
+            case BLEND_MODE_MIX: {
+                gl.blendEquation(gl.FUNC_ADD);
+                gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+            } break;
+            case BLEND_MODE_ADD: {
+                gl.blendEquation(gl.FUNC_ADD);
+                gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE, gl.SRC_ALPHA, gl.ONE);
+            } break;
+            case BLEND_MODE_SUB: {
+                gl.blendEquation(gl.FUNC_REVERSE_SUBTRACT);
+                gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE, gl.SRC_ALPHA, gl.ONE);
+            } break;
+            case BLEND_MODE_MUL: {
+                gl.blendEquation(gl.FUNC_ADD);
+                gl.blendFuncSeparate(gl.DST_COLOR, gl.ZERO, gl.DST_ALPHA, gl.ZERO);
+            } break;
+            case BLEND_MODE_PREMULT_ALPHA: {
+                gl.blendEquation(gl.FUNC_ADD);
+                gl.blendFuncSeparate(gl.ONE, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+            } break;
+        }
 
         gl.useProgram(material.shader.gl_prog);
         const global_uniforms = this.states.uniforms;
@@ -490,12 +535,44 @@ export class RasterizerCanvas extends VObject {
         /** @type {Transform2D} */
         let extra_xform = null;
 
+        let materials = this.materials;
+        let item_material = p_item.material;
+
+        // TODO: cache blend mode
+        /** @type {number} */
+        let blend_mode = undefined;
+        if (item_material) {
+            if (item_material.class === "CanvasItemMaterial") {
+                blend_mode = /** @type {CanvasItemMaterial} */(item_material).blend_mode;
+            } else if (item_material.class === "ShaderMaterial") {
+                const sm = /** @type {ShaderMaterial} */(item_material);
+                if (!sm.materials.flat) {
+                    sm.materials.flat = this.init_shader_material(sm, normal_vs, normal_fs, [
+                        { name: 'projection_matrix', type: 'mat4' },
+                        { name: 'TIME', type: '1f' },
+                    ], true);
+                }
+                if (!sm.materials.tile) {
+                    sm.materials.tile = this.init_shader_material(sm, tile_vs, tile_fs, [
+                        { name: 'projection_matrix', type: 'mat4' },
+                        { name: 'frame_uv', type: '4f' },
+                        { name: 'TIME', type: '1f' },
+                    ], false);
+                }
+                if (!sm.materials.multimesh) {
+                    sm.materials.multimesh = this.materials.multimesh;
+                }
+
+                materials = sm.materials;
+            }
+        }
+
         for (const cmd of p_item.commands) {
             switch (cmd.type) {
                 case TYPE_LINE: {
                     const line = /** @type {CommandLine} */(cmd);
 
-                    this.check_batch_state(4, 6, null, this.materials.flat);
+                    this.check_batch_state(4, 6, null, this.materials.flat, blend_mode);
 
                     const {
                         v: vertices,
@@ -557,13 +634,6 @@ export class RasterizerCanvas extends VObject {
                     vertices[vb_idx + VTX_COMP * 2 + 4] = color_num;
                     vertices[vb_idx + VTX_COMP * 3 + 4] = color_num;
 
-                    // - flags
-                    const flags = color.set(p_item.fill_mode, 0, 0, 0).as_rgba8();
-                    vertices[vb_idx + VTX_COMP * 0 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 1 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 2 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 3 + 5] = flags;
-
                     // index
                     indices[ib_idx++] = v_idx + 0;
                     indices[ib_idx++] = v_idx + 1;
@@ -579,7 +649,7 @@ export class RasterizerCanvas extends VObject {
                     const rect = /** @type {CommandRect} */(cmd);
                     const tex = rect.texture;
 
-                    this.check_batch_state(4, 6, tex, (rect.flags & CANVAS_RECT_TILE) ? this.materials.tile : this.materials.flat);
+                    this.check_batch_state(4, 6, tex, (rect.flags & CANVAS_RECT_TILE) ? materials.tile : materials.flat, blend_mode);
 
                     const {
                         v: vertices,
@@ -696,13 +766,6 @@ export class RasterizerCanvas extends VObject {
                     vertices[vb_idx + VTX_COMP * 2 + 4] = color_num;
                     vertices[vb_idx + VTX_COMP * 3 + 4] = color_num;
 
-                    // - flags
-                    const flags = color.set(p_item.fill_mode, 0, 0, 0).as_rgba8();
-                    vertices[vb_idx + VTX_COMP * 0 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 1 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 2 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 3 + 5] = flags;
-
                     // index
                     indices[ib_idx++] = v_idx + 0;
                     indices[ib_idx++] = v_idx + 1;
@@ -718,7 +781,7 @@ export class RasterizerCanvas extends VObject {
                     const np = /** @type {CommandNinePatch} */(cmd);
                     const tex = np.texture;
 
-                    this.check_batch_state(32, 54, tex, this.materials.flat);
+                    this.check_batch_state(32, 54, tex, this.materials.flat, blend_mode);
 
                     const {
                         v: vertices,
@@ -885,25 +948,6 @@ export class RasterizerCanvas extends VObject {
                     vertices[vb_idx + VTX_COMP * 14 + 4] = color_num;
                     vertices[vb_idx + VTX_COMP * 15 + 4] = color_num;
 
-                    // - flags
-                    const flags = color.set(p_item.fill_mode, 0, 0, 0).as_rgba8();
-                    vertices[vb_idx + VTX_COMP * 0 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 1 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 2 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 3 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 4 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 5 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 6 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 7 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 8 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 9 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 10 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 11 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 12 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 13 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 14 + 5] = flags;
-                    vertices[vb_idx + VTX_COMP * 15 + 5] = flags;
-
                     // index
                     for (let i = 0; i < NinePatchIndices.length; i++) {
                         indices[ib_idx++] = v_idx + NinePatchIndices[i];
@@ -919,7 +963,7 @@ export class RasterizerCanvas extends VObject {
                     const vert_count = polygon.get_vert_count();
                     const indi_count = polygon.indices.length;
 
-                    this.check_batch_state(vert_count, indi_count, tex, this.materials.flat);
+                    this.check_batch_state(vert_count, indi_count, tex, this.materials.flat, blend_mode);
 
                     const {
                         v: vertices,
@@ -946,7 +990,6 @@ export class RasterizerCanvas extends VObject {
                     const s_color_num = s_color ? color.set(colors[0], colors[1], colors[2], colors[3]).multiply(p_item.final_modulate).as_rgba8() : 0;
                     const uvs = polygon.uvs;
                     const p_indices = polygon.indices;
-                    const flags = color.set(p_item.fill_mode, 0, 0, 0).as_rgba8();
 
                     for (let i = 0, len = vert_count; i < len; i++) {
                         // position
@@ -963,8 +1006,6 @@ export class RasterizerCanvas extends VObject {
                         }
                         // color
                         vertices[vb_idx + VTX_COMP * i + 4] = s_color ? s_color_num : color.set(color[i * 4], color[i * 4 + 1], color[i * 4 + 2], color[i * 4 + 3]).multiply(p_item.final_modulate).as_rgba8();
-                        // flags
-                        vertices[vb_idx + VTX_COMP * i + 5] = flags;
                     }
 
                     // index
@@ -993,7 +1034,7 @@ export class RasterizerCanvas extends VObject {
                     const steps = Math.max(MIN_STEPS_PER_CIRCLE, scaled_radius * 5 / (200 + scaled_radius * 5) * MAX_STEPS_PER_CIRCLE) | 0;
                     const angle_per_step = Math.PI * 2 / steps;
 
-                    this.check_batch_state(steps, (steps - 2) * 3, tex, this.materials.flat);
+                    this.check_batch_state(steps, (steps - 2) * 3, tex, this.materials.flat, blend_mode);
 
                     const {
                         v: vertices,
@@ -1010,7 +1051,6 @@ export class RasterizerCanvas extends VObject {
                     const y0 = circle.pos.y;
 
                     const color_num = color.copy(circle.color).multiply(p_item.final_modulate).as_rgba8();
-                    const flags = color.set(p_item.fill_mode, 0, 0, 0).as_rgba8();
 
                     for (let i = 0; i < steps; i++) {
                         const x = Math.cos(angle_per_step * i) * radius + x0;
@@ -1020,7 +1060,6 @@ export class RasterizerCanvas extends VObject {
                         vertices[vb_idx + VTX_COMP * i + 2] = -1;
                         vertices[vb_idx + VTX_COMP * i + 3] = -1;
                         vertices[vb_idx + VTX_COMP * i + 4] = color_num;
-                        vertices[vb_idx + VTX_COMP * i + 5] = flags;
                     }
 
                     // index
@@ -1040,7 +1079,7 @@ export class RasterizerCanvas extends VObject {
                     const vert_count = Math.floor(pline.triangles.length / 2);
                     const indi_count = (vert_count - 2) * 3;
 
-                    this.check_batch_state(vert_count, indi_count, tex, this.materials.flat);
+                    this.check_batch_state(vert_count, indi_count, tex, this.materials.flat, blend_mode);
 
                     const {
                         v: vertices,
@@ -1065,7 +1104,6 @@ export class RasterizerCanvas extends VObject {
                     const colors = pline.triangle_colors;
                     const s_color = (colors.length === 4);
                     const s_color_num = s_color ? color.set(colors[0], colors[1], colors[2], colors[3]).multiply(p_item.final_modulate).as_rgba8() : 0;
-                    const flags = color.set(p_item.fill_mode, 0, 0, 0).as_rgba8();
 
                     for (let i = 0, len = vert_count; i < len; i++) {
                         // position
@@ -1076,8 +1114,6 @@ export class RasterizerCanvas extends VObject {
                         vertices[vb_idx + VTX_COMP * i + 3] = -1;
                         // color
                         vertices[vb_idx + VTX_COMP * i + 4] = s_color ? s_color_num : color.set(color[i * 4], color[i * 4 + 1], color[i * 4 + 2], color[i * 4 + 3]).multiply(p_item.final_modulate).as_rgba8();
-                        // flags
-                        vertices[vb_idx + VTX_COMP * i + 5] = flags;
                     }
 
                     // index
@@ -1226,8 +1262,9 @@ export class RasterizerCanvas extends VObject {
      * @param {number} num_index
      * @param {ImageTexture} texture
      * @param {import('./rasterizer_storage').Material_t} material
+     * @param {number} blend_mode no blend mode provided = MIX
      */
-    check_batch_state(num_vertex, num_index, texture, material) {
+    check_batch_state(num_vertex, num_index, texture, material, blend_mode) {
         let batch_broken = false;
         let use_new_buffer = false;
 
@@ -1251,6 +1288,11 @@ export class RasterizerCanvas extends VObject {
             batch_broken = true;
         }
 
+        if (blend_mode === undefined) blend_mode = BLEND_MODE_MIX;
+        if (blend_mode !== this.states.blend_mode) {
+            batch_broken = true;
+        }
+
         // buffer overflow?
         if (
             ((this.states.v_index + num_vertex) * VTX_COMP > VERTEX_BUFFER_LENGTH)
@@ -1267,6 +1309,7 @@ export class RasterizerCanvas extends VObject {
             // update states with new batch data
             this.states.texture = texture.texture;
             this.states.material = material;
+            this.states.blend_mode = blend_mode;
 
             if (use_new_buffer) {
                 this.states.v_start = 0;
@@ -1329,9 +1372,6 @@ export class RasterizerCanvas extends VObject {
 
         gl.vertexAttribPointer(ATTR_COLOR, 4, gl.UNSIGNED_BYTE, true, VTX_STRIDE, 4 * 4);
         gl.enableVertexAttribArray(ATTR_COLOR);
-
-        gl.vertexAttribPointer(ATTR_FLAGS, 4, gl.UNSIGNED_BYTE, false, VTX_STRIDE, 5 * 4);
-        gl.enableVertexAttribArray(ATTR_FLAGS);
 
         // - draw call
         gl.drawElements(gl.TRIANGLES, i_length, gl.UNSIGNED_SHORT, 0);

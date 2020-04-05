@@ -12,6 +12,7 @@ import { Rect2 } from 'engine/core/math/rect2';
 import { Transform2D } from 'engine/core/math/transform_2d';
 import { Color, ColorLike } from 'engine/core/color';
 import { ImageTexture } from 'engine/scene/resources/texture';
+import { Material } from 'engine/scene/resources/material';
 
 import { VisualServer } from '../visual_server';
 import { VSG } from './visual_server_globals';
@@ -67,6 +68,7 @@ export class Item {
         this.custom_rect = false;
         this.rect_dirty = true;
         this.rect = new Rect2();
+        /** @type {Material} */
         this.material = null;
         this.skeleton = null;
 
@@ -94,8 +96,6 @@ export class Item {
         this.ysort_pos = new Vector2();
 
         this.mirror = new Vector2();
-
-        this.fill_mode = 0;
 
         /** @type {Item | Canvas} */
         this.parent = null;
@@ -800,7 +800,13 @@ export class VisualServerCanvas {
         p_item.parent.children_order_dirty = true;
     }
 
-    canvas_item_set_material() { }
+    /**
+     * @param {Item} p_item
+     * @param {Material} p_material
+     */
+    canvas_item_set_material(p_item, p_material) {
+        p_item.material = p_material;
+    }
 
     /**
      * @param {Canvas | Item} p_item

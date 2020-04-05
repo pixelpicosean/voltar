@@ -1,22 +1,66 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=6 format=2]
 
-[ext_resource path="res://image/sprites/particle.png" type="Texture" id=1]
+[ext_resource path="res://image/sprites/palette.png" type="Texture" id=1]
 
-[sub_resource type="Gradient" id=1]
-colors = PoolColorArray( 1, 1, 1, 1, 1, 1, 1, 0 )
+[sub_resource type="CanvasItemMaterial" id=1]
+blend_mode = 1
+
+[sub_resource type="CanvasItemMaterial" id=2]
+blend_mode = 2
+
+[sub_resource type="Shader" id=3]
+code = "shader_type canvas_item;
+
+void fragment() {
+	vec3 color;
+
+	vec4 ori_color = texture(TEXTURE, UV);
+
+	// color separation
+	color.r = texture(TEXTURE, vec2(UV.x + 0.003, UV.y)).x;
+	color.g = texture(TEXTURE, vec2(UV.x + 0.000, UV.y)).y;
+	color.b = texture(TEXTURE, vec2(UV.x - 0.003, UV.y)).z;
+
+	// increase contrast
+	color = clamp(color * 0.5 + 0.5 * color * color * 1.2, 0.0, 1.0);
+
+	// vignetting
+	color *= 0.5 + 0.5 * 16.0 * UV.x * UV.y * (1.0 - UV.x) * (1.0 - UV.y);
+
+	// tinting
+	color *= vec3(0.8, 1.0, 0.7);
+
+	// tv lines
+	color *= 0.9 + 0.1 * sin(10.0 * TIME + UV.y * 1800.0);
+
+	// flickering
+	color *= 0.97 + 0.03 * sin(110.0 * TIME);
+
+	COLOR = vec4(color, ori_color.a);
+}
+"
+
+[sub_resource type="ShaderMaterial" id=4]
+shader = SubResource( 3 )
 
 [node name="demo" type="Node2D"]
 
-[node name="cpu_particles_2d" type="CPUParticles2D" parent="."]
-position = Vector2( 160, 114 )
-amount = 16
-randomness = 1.0
+[node name="add" type="Sprite" parent="."]
+material = SubResource( 1 )
+scale = Vector2( 2, 2 )
 texture = ExtResource( 1 )
-flag_align_y = true
-spread = 180.0
-gravity = Vector2( 0, 0 )
-initial_velocity = 40.0
-scale_amount = 0.1
-color_ramp = SubResource( 1 )
-hue_variation = 0.83
-hue_variation_random = 0.18
+centered = false
+
+[node name="sub" type="Sprite" parent="."]
+material = SubResource( 2 )
+position = Vector2( 16, 16 )
+scale = Vector2( 2, 2 )
+texture = ExtResource( 1 )
+centered = false
+
+[node name="shader" type="Sprite" parent="."]
+material = SubResource( 4 )
+position = Vector2( 160, 0 )
+scale = Vector2( 2, 2 )
+texture = ExtResource( 1 )
+centered = false
