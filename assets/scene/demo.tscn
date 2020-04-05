@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://image/sprites/palette.png" type="Texture" id=1]
 
@@ -8,17 +8,59 @@ blend_mode = 1
 [sub_resource type="CanvasItemMaterial" id=2]
 blend_mode = 2
 
+[sub_resource type="Shader" id=3]
+code = "shader_type canvas_item;
+
+void fragment() {
+	vec3 color;
+
+	vec4 ori_color = texture(TEXTURE, UV);
+
+	// color separation
+	color.r = texture(TEXTURE, vec2(UV.x + 0.003, UV.y)).x;
+	color.g = texture(TEXTURE, vec2(UV.x + 0.000, UV.y)).y;
+	color.b = texture(TEXTURE, vec2(UV.x - 0.003, UV.y)).z;
+
+	// increase contrast
+	color = clamp(color * 0.5 + 0.5 * color * color * 1.2, 0.0, 1.0);
+
+	// vignetting
+	color *= 0.5 + 0.5 * 16.0 * UV.x * UV.y * (1.0 - UV.x) * (1.0 - UV.y);
+
+	// tinting
+	color *= vec3(0.8, 1.0, 0.7);
+
+	// tv lines
+	color *= 0.9 + 0.1 * sin(10.0 * TIME + UV.y * 1800.0);
+
+	// flickering
+	color *= 0.97 + 0.03 * sin(110.0 * TIME);
+
+	COLOR = vec4(color, ori_color.a);
+}
+"
+
+[sub_resource type="ShaderMaterial" id=4]
+shader = SubResource( 3 )
+
 [node name="demo" type="Node2D"]
 
-[node name="palette" type="Sprite" parent="."]
+[node name="add" type="Sprite" parent="."]
 material = SubResource( 1 )
-scale = Vector2( 3, 3 )
+scale = Vector2( 2, 2 )
 texture = ExtResource( 1 )
 centered = false
 
-[node name="palette2" type="Sprite" parent="."]
+[node name="sub" type="Sprite" parent="."]
 material = SubResource( 2 )
-position = Vector2( 24, 24 )
-scale = Vector2( 3, 3 )
+position = Vector2( 16, 16 )
+scale = Vector2( 2, 2 )
+texture = ExtResource( 1 )
+centered = false
+
+[node name="shader" type="Sprite" parent="."]
+material = SubResource( 4 )
+position = Vector2( 160, 0 )
+scale = Vector2( 2, 2 )
 texture = ExtResource( 1 )
 centered = false
