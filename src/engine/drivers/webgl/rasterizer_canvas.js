@@ -1263,7 +1263,7 @@ export class RasterizerCanvas extends VObject {
      * @param {number} num_index
      * @param {ImageTexture} texture
      * @param {import('./rasterizer_storage').Material_t} material
-     * @param {number} blend_mode
+     * @param {number} blend_mode no blend mode provided = MIX
      */
     check_batch_state(num_vertex, num_index, texture, material, blend_mode) {
         let batch_broken = false;
@@ -1289,11 +1289,8 @@ export class RasterizerCanvas extends VObject {
             batch_broken = true;
         }
 
-        if (
-            blend_mode !== undefined
-            &&
-            blend_mode !== this.states.blend_mode
-        ) {
+        if (blend_mode === undefined) blend_mode = BLEND_MODE_MIX;
+        if (blend_mode !== this.states.blend_mode) {
             batch_broken = true;
         }
 
