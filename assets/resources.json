@@ -8,6 +8,10 @@
             "1": {
                 "type": "CanvasItemMaterial",
                 "blend_mode": 1
+            },
+            "2": {
+                "type": "CanvasItemMaterial",
+                "blend_mode": 2
             }
         },
         "nodes": [
@@ -20,6 +24,22 @@
                 "name": "palette",
                 "parent": ".",
                 "material": "@sub#1",
+                "scale": {
+                    "x": 3,
+                    "y": 3
+                },
+                "centered": false,
+                "texture": "@ext#1"
+            },
+            {
+                "type": "Sprite",
+                "name": "palette2",
+                "parent": ".",
+                "material": "@sub#2",
+                "position": {
+                    "x": 24,
+                    "y": 24
+                },
                 "scale": {
                     "x": 3,
                     "y": 3

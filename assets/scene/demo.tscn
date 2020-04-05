@@ -1,14 +1,24 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://image/sprites/palette.png" type="Texture" id=1]
 
 [sub_resource type="CanvasItemMaterial" id=1]
 blend_mode = 1
 
+[sub_resource type="CanvasItemMaterial" id=2]
+blend_mode = 2
+
 [node name="demo" type="Node2D"]
 
 [node name="palette" type="Sprite" parent="."]
 material = SubResource( 1 )
+scale = Vector2( 3, 3 )
+texture = ExtResource( 1 )
+centered = false
+
+[node name="palette2" type="Sprite" parent="."]
+material = SubResource( 2 )
+position = Vector2( 24, 24 )
 scale = Vector2( 3, 3 )
 texture = ExtResource( 1 )
 centered = false
