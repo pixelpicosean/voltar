@@ -1,4 +1,4 @@
-import { node_class_map } from "engine/registry";
+import { node_class_map, res_class_map } from "engine/registry";
 import { GDCLASS } from "engine/core/v_object";
 import { MessageQueue } from "engine/core/message_queue";
 import { SelfList } from "engine/core/self_list";
@@ -12,6 +12,7 @@ import { VSG } from "engine/servers/visual/visual_server_globals";
 
 import { ImageTexture } from "../resources/texture";
 import { StyleBox } from "../resources/style_box";
+import { Material } from "../resources/material";
 import { GROUP_CALL_UNIQUE } from "../main/scene_tree";
 import { CanvasLayer } from "../main/canvas_layer";
 import {
@@ -39,6 +40,31 @@ export const BLEND_MODE_DISABLE = 5;
 
 const white = Object.freeze(new Color(1, 1, 1, 1));
 
+export class CanvasItemMaterial extends Material {
+    get class() { return "CanvasItemMaterial" }
+
+    /**
+     * @param {number} p_mode
+     */
+    set_blend_mode(p_mode) {
+        this.blend_mode = p_mode;
+    }
+    get_blend_mode() {
+        return this.blend_mode;
+    }
+
+    constructor() {
+        super();
+
+        this.blend_mode = BLEND_MODE_MIX;
+    }
+    _load_data(data) {
+        if (data.blend_mode !== undefined) this.blend_mode = data.blend_mode;
+        return this;
+    }
+}
+res_class_map['CanvasItemMaterial'] = CanvasItemMaterial;
+
 export class CanvasItem extends Node {
     get class() { return 'CanvasItem' }
 
@@ -62,6 +88,10 @@ export class CanvasItem extends Node {
 
     get fill_mode() { return this._fill_mode }
     set fill_mode(mode) { this.set_fill_mode(mode) }
+
+    /** @type {Material} */
+    get material() { return this._material }
+    set material(p_mat) { this.set_material(p_mat) }
 
     constructor() {
         super();
@@ -102,8 +132,8 @@ export class CanvasItem extends Node {
         this.notify_local_transform = false;
         this.notify_transform = false;
 
-        /** @type {import("engine/drivers/webgl/rasterizer_storage").Material_t} */
-        this.material = null;
+        /** @type {Material} */
+        this._material = null;
 
         this._global_transform = new Transform2D();
         this.global_invalid = true;
@@ -132,6 +162,9 @@ export class CanvasItem extends Node {
         }
         if (data.visible !== undefined) {
             this.set_visible(data.visible);
+        }
+        if (data.material !== undefined) {
+            this.set_material(data.material);
         }
 
         return this;
@@ -697,6 +730,14 @@ export class CanvasItem extends Node {
      */
     set_use_parent_material(p_value) {
         this._use_parent_material = p_value;
+    }
+
+    /**
+     * @param {Material} p_mat
+     */
+    set_material(p_mat) {
+        this._material = p_mat;
+        VSG.canvas.canvas_item_set_material(this.canvas_item, this.material);
     }
 
     /* private */

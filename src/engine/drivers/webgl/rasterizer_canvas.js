@@ -41,6 +41,14 @@ import {
     CommandTransform,
 } from 'engine/servers/visual/commands';
 import { ImageTexture } from 'engine/scene/resources/texture';
+import {
+    CanvasItemMaterial,
+    BLEND_MODE_MIX,
+    BLEND_MODE_ADD,
+    BLEND_MODE_SUB,
+    BLEND_MODE_MUL,
+    BLEND_MODE_PREMULT_ALPHA,
+} from 'engine/scene/2d/canvas_item';
 
 import normal_vs from './shaders/canvas.vert';
 import normal_fs from './shaders/canvas.frag';
@@ -212,6 +220,7 @@ export class RasterizerCanvas extends VObject {
             material: null,
             /** @type {import('./rasterizer_storage').Texture_t} */
             texture: null,
+            blend_mode: 0,
 
             active_vert_slot: 0,
             active_buffer_slot: 0,
@@ -459,10 +468,29 @@ export class RasterizerCanvas extends VObject {
     use_material(material, uniforms) {
         const gl = this.gl;
 
-        // TODO: support different blend modes
         gl.enable(gl.BLEND);
-        gl.blendEquation(gl.FUNC_ADD);
-        gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+        switch (this.states.blend_mode) {
+            case BLEND_MODE_MIX: {
+                gl.blendEquation(gl.FUNC_ADD);
+                gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+            } break;
+            case BLEND_MODE_ADD: {
+                gl.blendEquation(gl.FUNC_ADD);
+                gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE, gl.SRC_ALPHA, gl.ONE);
+            } break;
+            case BLEND_MODE_SUB: {
+                gl.blendEquation(gl.FUNC_REVERSE_SUBTRACT);
+                gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE, gl.SRC_ALPHA, gl.ONE);
+            } break;
+            case BLEND_MODE_MUL: {
+                gl.blendEquation(gl.FUNC_ADD);
+                gl.blendFuncSeparate(gl.DST_COLOR, gl.ZERO, gl.DST_ALPHA, gl.ZERO);
+            } break;
+            case BLEND_MODE_PREMULT_ALPHA: {
+                gl.blendEquation(gl.FUNC_ADD);
+                gl.blendFuncSeparate(gl.ONE, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+            } break;
+        }
 
         gl.useProgram(material.shader.gl_prog);
         const global_uniforms = this.states.uniforms;
@@ -490,12 +518,21 @@ export class RasterizerCanvas extends VObject {
         /** @type {Transform2D} */
         let extra_xform = null;
 
+        const material = p_item.material;
+        /** @type {number} */
+        let blend_mode = undefined;
+        if (material) {
+            if (material.class === "CanvasItemMaterial") {
+                blend_mode = /** @type {CanvasItemMaterial} */(material).blend_mode;
+            }
+        }
+
         for (const cmd of p_item.commands) {
             switch (cmd.type) {
                 case TYPE_LINE: {
                     const line = /** @type {CommandLine} */(cmd);
 
-                    this.check_batch_state(4, 6, null, this.materials.flat);
+                    this.check_batch_state(4, 6, null, this.materials.flat, blend_mode);
 
                     const {
                         v: vertices,
@@ -579,7 +616,7 @@ export class RasterizerCanvas extends VObject {
                     const rect = /** @type {CommandRect} */(cmd);
                     const tex = rect.texture;
 
-                    this.check_batch_state(4, 6, tex, (rect.flags & CANVAS_RECT_TILE) ? this.materials.tile : this.materials.flat);
+                    this.check_batch_state(4, 6, tex, (rect.flags & CANVAS_RECT_TILE) ? this.materials.tile : this.materials.flat, blend_mode);
 
                     const {
                         v: vertices,
@@ -718,7 +755,7 @@ export class RasterizerCanvas extends VObject {
                     const np = /** @type {CommandNinePatch} */(cmd);
                     const tex = np.texture;
 
-                    this.check_batch_state(32, 54, tex, this.materials.flat);
+                    this.check_batch_state(32, 54, tex, this.materials.flat, blend_mode);
 
                     const {
                         v: vertices,
@@ -919,7 +956,7 @@ export class RasterizerCanvas extends VObject {
                     const vert_count = polygon.get_vert_count();
                     const indi_count = polygon.indices.length;
 
-                    this.check_batch_state(vert_count, indi_count, tex, this.materials.flat);
+                    this.check_batch_state(vert_count, indi_count, tex, this.materials.flat, blend_mode);
 
                     const {
                         v: vertices,
@@ -993,7 +1030,7 @@ export class RasterizerCanvas extends VObject {
                     const steps = Math.max(MIN_STEPS_PER_CIRCLE, scaled_radius * 5 / (200 + scaled_radius * 5) * MAX_STEPS_PER_CIRCLE) | 0;
                     const angle_per_step = Math.PI * 2 / steps;
 
-                    this.check_batch_state(steps, (steps - 2) * 3, tex, this.materials.flat);
+                    this.check_batch_state(steps, (steps - 2) * 3, tex, this.materials.flat, blend_mode);
 
                     const {
                         v: vertices,
@@ -1040,7 +1077,7 @@ export class RasterizerCanvas extends VObject {
                     const vert_count = Math.floor(pline.triangles.length / 2);
                     const indi_count = (vert_count - 2) * 3;
 
-                    this.check_batch_state(vert_count, indi_count, tex, this.materials.flat);
+                    this.check_batch_state(vert_count, indi_count, tex, this.materials.flat, blend_mode);
 
                     const {
                         v: vertices,
@@ -1226,8 +1263,9 @@ export class RasterizerCanvas extends VObject {
      * @param {number} num_index
      * @param {ImageTexture} texture
      * @param {import('./rasterizer_storage').Material_t} material
+     * @param {number} blend_mode
      */
-    check_batch_state(num_vertex, num_index, texture, material) {
+    check_batch_state(num_vertex, num_index, texture, material, blend_mode) {
         let batch_broken = false;
         let use_new_buffer = false;
 
@@ -1251,6 +1289,14 @@ export class RasterizerCanvas extends VObject {
             batch_broken = true;
         }
 
+        if (
+            blend_mode !== undefined
+            &&
+            blend_mode !== this.states.blend_mode
+        ) {
+            batch_broken = true;
+        }
+
         // buffer overflow?
         if (
             ((this.states.v_index + num_vertex) * VTX_COMP > VERTEX_BUFFER_LENGTH)
@@ -1267,6 +1313,7 @@ export class RasterizerCanvas extends VObject {
             // update states with new batch data
             this.states.texture = texture.texture;
             this.states.material = material;
+            this.states.blend_mode = blend_mode;
 
             if (use_new_buffer) {
                 this.states.v_start = 0;

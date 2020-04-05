@@ -1,5 +1,13 @@
 {"frames": {
 
+"palette":
+{
+	"frame": {"x":1,"y":259,"w":64,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
+	"sourceSize": {"w":64,"h":64}
+},
 "particle":
 {
 	"frame": {"x":1,"y":1,"w":59,"h":256},
@@ -13,8 +21,8 @@
 	"version": "1.0",
 	"image": "sprites-0.png",
 	"format": "RGBA8888",
-	"size": {"w":61,"h":258},
+	"size": {"w":66,"h":324},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:4f04c9c10bd47a59ac04f20c8a04250c:35c48fe48d565ea159d6700d8031ec90:7921bf998741302c2028590beb4e1a86$"
+	"smartupdate": "$TexturePacker:SmartUpdate:21d1d531e9d3841e07d7eb38450e4de8:8228e2bb73b71466007903f97430475f:7921bf998741302c2028590beb4e1a86$"
 }
 }

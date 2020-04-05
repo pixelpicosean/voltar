@@ -2,25 +2,12 @@
     "res://scene/demo.tscn": {
         "type": "PackedScene",
         "ext": {
-            "1": "particle"
+            "1": "palette"
         },
         "sub": {
             "1": {
-                "type": "Gradient",
-                "colors": [
-                    {
-                        "r": 1,
-                        "g": 1,
-                        "b": 1,
-                        "a": 1
-                    },
-                    {
-                        "r": 1,
-                        "g": 1,
-                        "b": 1,
-                        "a": 0
-                    }
-                ]
+                "type": "CanvasItemMaterial",
+                "blend_mode": 1
             }
         },
         "nodes": [
@@ -29,26 +16,15 @@
                 "name": "demo"
             },
             {
-                "type": "CPUParticles2D",
-                "name": "cpu_particles_2d",
+                "type": "Sprite",
+                "name": "palette",
                 "parent": ".",
-                "position": {
-                    "x": 160,
-                    "y": 114
+                "material": "@sub#1",
+                "scale": {
+                    "x": 3,
+                    "y": 3
                 },
-                "amount": 16,
-                "color_ramp": "@sub#1",
-                "flag_align_y": true,
-                "gravity": {
-                    "x": 0,
-                    "y": 0
-                },
-                "hue_variation": 0.83,
-                "hue_variation_random": 0.18,
-                "initial_velocity": 40,
-                "randomness": 1,
-                "scale_amount": 0.1,
-                "spread": 180,
+                "centered": false,
                 "texture": "@ext#1"
             }
         ]
