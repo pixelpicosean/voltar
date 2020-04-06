@@ -3,6 +3,7 @@ precision mediump float;
 uniform sampler2D TEXTURE;
 uniform sampler2D SCREEN_TEXTURE;
 uniform highp float TIME;
+uniform vec2 SCREEN_PIXEL_SIZE;
 
 /* UNIFORM */
 
@@ -12,6 +13,7 @@ varying vec2 uv_interp;
 void main() {
     vec4 COLOR = color_interp;
     vec2 UV = uv_interp;
+    vec2 SCREEN_UV = gl_FragCoord.xy * SCREEN_PIXEL_SIZE;
 
     /* SHADER_BEGIN */
     COLOR = texture2D(TEXTURE, UV);

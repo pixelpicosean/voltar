@@ -72,7 +72,9 @@ export class Rasterizer {
         gl.disable(gl.BLEND);
         gl.useProgram(this.canvas.copy_shader.gl_prog);
 
-        gl.activeTexture(gl.TEXTURE0);
+        const texunit = this.storage.config.max_texture_image_units - 1;
+        gl.activeTexture(gl.TEXTURE0 + texunit);
+        gl.uniform1i(this.canvas.copy_shader.tex_uniform_loc["TEXTURE"], texunit);
         gl.bindTexture(gl.TEXTURE_2D, p_render_target.texture.gl_tex);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this.storage.resources.quadie);

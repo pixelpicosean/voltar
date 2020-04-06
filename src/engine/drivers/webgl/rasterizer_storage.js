@@ -136,6 +136,9 @@ export class Shader_t {
 
         /** @type {Object<string, { type: UniformTypes, gl_loc: WebGLUniformLocation }>} */
         this.uniforms = {};
+
+        /** @type {{ [name: string]: WebGLUniformLocation }} */
+        this.tex_uniform_loc = {};
     }
 }
 
@@ -286,6 +289,12 @@ export class RasterizerStorage {
         /** @type {WebGLRenderingContext} */
         this.gl = null;
 
+        this.config = {
+            max_vertex_texture_image_units: 0,
+            max_texture_image_units: 0,
+            max_texture_size: 0,
+        };
+
         this.frame = {
             clear_request: true,
             clear_request_color: new Color(0, 0, 0, 1),
@@ -335,7 +344,10 @@ export class RasterizerStorage {
     initialize(gl) {
         this.gl = gl;
 
-        // get extensions
+        // fetch config values
+        this.config.max_vertex_texture_image_units = gl.getParameter(gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS);
+        this.config.max_texture_image_units = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+        this.config.max_texture_size = gl.getParameter(gl.MAX_TEXTURE_SIZE);
 
         // quad for copying stuff
         {
