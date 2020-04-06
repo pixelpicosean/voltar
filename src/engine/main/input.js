@@ -276,12 +276,15 @@ export class Input extends VObject {
         for (let [key, _] of action_map) {
             if (InputMap.get_singleton().event_is_action(p_event, key)) {
                 if (!p_event.is_echo() && this.is_action_pressed(key) !== p_event.is_action_pressed(key)) {
-                    const action = new Action();
+                    const action = new Action;
                     action.physics_frame = Engine.get_singleton().physics_frames;
                     action.idle_frame = Engine.get_singleton().idle_frames;
                     action.pressed = p_event.is_action_pressed(key);
                     action.strength = 0;
                     this.action_state.set(key, action);
+                }
+                if (!this.action_state.has(key)) {
+                    this.action_state.set(key, new Action);
                 }
                 this.action_state.get(key).strength = p_event.get_action_strength(key);
             }
