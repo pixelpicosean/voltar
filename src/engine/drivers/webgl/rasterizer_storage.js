@@ -95,6 +95,17 @@ export class Texture_t {
     }
 }
 
+class Effect_t {
+    constructor() {
+        this.width = 0;
+        this.height = 0;
+        /** @type {WebGLTexture} */
+        this.gl_color = null;
+        /** @type {WebGLFramebuffer} */
+        this.gl_fbo = null;
+    }
+}
+
 export class RenderTarget_t {
     constructor() {
         this.name = '';
@@ -104,6 +115,8 @@ export class RenderTarget_t {
 
         /** @type {Texture_t} */
         this.texture = null;
+
+        this.copy_screen_effect = new Effect_t;
 
         /** @type {WebGLFramebuffer} */
         this.gl_fbo = null;
@@ -131,6 +144,7 @@ export class Material_t {
         this.name = '';
 
         this.batchable = false;
+        this.uses_screen_texture = false;
 
         /** @type {Shader_t} */
         this.shader = null;
@@ -534,6 +548,22 @@ export class RasterizerStorage {
 
         // TODO: depth
 
+        // copy texscreen buffers
+        rt.copy_screen_effect.gl_color = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, rt.copy_screen_effect.gl_color);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, rt.width, rt.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+        rt.copy_screen_effect.gl_fbo = gl.createFramebuffer();
+        gl.bindFramebuffer(gl.FRAMEBUFFER, rt.copy_screen_effect.gl_fbo);
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, rt.copy_screen_effect.gl_color, 0);
+
+        gl.clearColor(0, 0, 0, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     }
 
@@ -601,10 +631,12 @@ export class RasterizerStorage {
     /**
      * @param {Shader_t} shader
      * @param {Object<string, number[]>} [param]
+     * @param {boolean} [uses_screen_texture]
      */
-    material_create(shader, param = {}) {
+    material_create(shader, param = {}, uses_screen_texture = false) {
         const mt = new Material_t;
         mt.shader = shader;
+        mt.uses_screen_texture = uses_screen_texture;
 
         for (const k in shader.uniforms) {
             const u = shader.uniforms[k];

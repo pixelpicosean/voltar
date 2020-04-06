@@ -291,7 +291,7 @@ export class Canvas {
 
         this._id = uid++;
 
-        /** @type {Set<import('./visual_server_viewport').Viewport>} */
+        /** @type {Set<import('./visual_server_viewport').Viewport_t>} */
         this.viewports = new Set();
 
         this.children_order_dirty = true;

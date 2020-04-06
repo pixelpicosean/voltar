@@ -1,9 +1,11 @@
+import { Rect2 } from "engine/core/math/rect2";
 import { Color } from "engine/core/color";
 import { OS } from "engine/core/os/os";
 
 import { RasterizerStorage } from "./rasterizer_storage";
 import { RasterizerCanvas } from "./rasterizer_canvas";
 import { RasterizerScene } from "./rasterizer_scene";
+import { resource_map } from "engine/registry";
 
 
 export class Rasterizer {
@@ -56,14 +58,69 @@ export class Rasterizer {
         this.scene.iteration();
     }
 
-    prepare_for_blitting_render_targets() { }
-    blit_render_targets_to_screen(p_render_targets) { }
+    /**
+     * @param {import('./rasterizer_storage').RenderTarget_t} p_render_target
+     * @param {Rect2} p_screen_rect
+     * @param {number} p_screen
+     */
+    blit_render_targets_to_screen(p_render_target, p_screen_rect, p_screen) {
+        // TODO: support non-fullscreen blit (for picture-in-picturga viewports)
+        const gl = this.gl;
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+        gl.disable(gl.BLEND);
+        gl.useProgram(this.canvas.copy_shader.gl_prog);
+
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, p_render_target.texture.gl_tex);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.storage.resources.quadie);
+
+        gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 16, 0);
+        gl.enableVertexAttribArray(0);
+        gl.vertexAttribPointer(1, 2, gl.FLOAT, false, 16, 8);
+        gl.enableVertexAttribArray(1);
+
+        gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
+    }
+
     /**
      * @param {Color} p_color
      */
     clear_render_target(p_color) {
         this.storage.frame.clear_request = true;
         this.storage.frame.clear_request_color.copy(p_color);
+    }
+    /**
+     * @param {import('./rasterizer_storage').RenderTarget_t} p_render_target
+     */
+    set_current_render_target(p_render_target) {
+        const gl = this.gl;
+
+        if (!p_render_target && this.storage.frame.current_rt && this.storage.frame.clear_request) {
+            gl.bindFramebuffer(gl.FRAMEBUFFER, this.storage.frame.current_rt.gl_fbo);
+            gl.clearColor(
+                this.storage.frame.clear_request_color.r,
+                this.storage.frame.clear_request_color.g,
+                this.storage.frame.clear_request_color.b,
+                this.storage.frame.clear_request_color.a
+            );
+            gl.clear(gl.COLOR_BUFFER_BIT);
+        }
+
+        if (p_render_target) {
+            this.storage.frame.current_rt = p_render_target;
+            this.storage.frame.clear_request = false;
+
+            gl.viewport(0, 0, p_render_target.width, p_render_target.height);
+        } else {
+            this.storage.frame.current_rt = null;
+            this.storage.frame.clear_request = false;
+            const window_size = OS.get_singleton().get_window_size();
+            gl.viewport(0, 0, window_size.width, window_size.height);
+            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        }
     }
     restore_render_target() {
         const gl = this.gl;

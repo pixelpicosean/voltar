@@ -1,6 +1,7 @@
 precision mediump float;
 
 uniform sampler2D TEXTURE;
+uniform sampler2D SCREEN_TEXTURE;
 uniform highp float TIME;
 uniform highp vec4 frame_uv;
 

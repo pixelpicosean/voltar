@@ -42,7 +42,7 @@ class CanvasData {
 
 let uid = 0;
 
-export class Viewport {
+export class Viewport_t {
     constructor() {
         this._id = uid++;
 
@@ -90,8 +90,8 @@ export class Viewport {
 }
 
 /**
- * @param {Viewport} p_left
- * @param {Viewport} p_right
+ * @param {Viewport_t} p_left
+ * @param {Viewport_t} p_right
  */
 function viewport_sort(p_left, p_right) {
     const left_to_screen = !p_left.viewport_to_screen_rect.is_zero();
@@ -106,7 +106,7 @@ function viewport_sort(p_left, p_right) {
 
 export class VisualServerViewport {
     constructor() {
-        /** @type {Viewport[]} */
+        /** @type {Viewport_t[]} */
         this.active_viewports = [];
 
         this.clear_color = new Color();
@@ -124,7 +124,7 @@ export class VisualServerViewport {
     }
 
     /**
-     * @param {Viewport} p_viewport
+     * @param {Viewport_t} p_viewport
      */
     free(p_viewport) {
         if (p_viewport && p_viewport._id >= 0) {
@@ -143,7 +143,7 @@ export class VisualServerViewport {
     }
 
     viewport_create() {
-        const viewport = new Viewport();
+        const viewport = new Viewport_t();
         viewport.self = viewport;
         viewport.hide_scenario = false;
         viewport.hide_canvas = false;
@@ -152,7 +152,7 @@ export class VisualServerViewport {
         return viewport;
     }
     /**
-     * @param {Viewport} p_viewport
+     * @param {Viewport_t} p_viewport
      * @param {number} p_width
      * @param {number} p_height
      */
@@ -161,7 +161,7 @@ export class VisualServerViewport {
         VSG.storage.render_target_set_size(p_viewport.render_target, p_width, p_height);
     }
     /**
-     * @param {Viewport} p_viewport
+     * @param {Viewport_t} p_viewport
      * @param {boolean} p_active
      */
     viewport_set_active(p_viewport, p_active) {
@@ -174,15 +174,15 @@ export class VisualServerViewport {
         }
     }
     /**
-     * @param {Viewport} p_viewport
-     * @param {Viewport} p_parent_viewport
+     * @param {Viewport_t} p_viewport
+     * @param {Viewport_t} p_parent_viewport
      */
     viewport_set_parent_viewport(p_viewport, p_parent_viewport) {
         p_viewport.parent = p_parent_viewport;
     }
 
     /**
-     * @param {Viewport} p_viewport
+     * @param {Viewport_t} p_viewport
      * @param {Rect2} p_rect
      */
     viewport_attach_to_screen(p_viewport, p_rect/* , p_screen */) {
@@ -195,7 +195,7 @@ export class VisualServerViewport {
         p_viewport.viewport_to_screen = 0/* p_screen */;
     }
     /**
-     * @param {Viewport} p_viewport
+     * @param {Viewport_t} p_viewport
      * @param {boolean} p_enable
      */
     viewport_set_render_direct_to_screen(p_viewport, p_enable) {
@@ -216,7 +216,7 @@ export class VisualServerViewport {
         }
     }
     /**
-     * @param {Viewport} p_viewport
+     * @param {Viewport_t} p_viewport
      */
     viewport_detach(p_viewport) {
         if (p_viewport.viewport_render_direct_to_screen) {
@@ -228,28 +228,28 @@ export class VisualServerViewport {
         p_viewport.viewport_to_screen = 0;
     }
     /**
-     * @param {Viewport} p_viewport
+     * @param {Viewport_t} p_viewport
      * @param {number} p_mode
      */
     viewport_set_update_mode(p_viewport, p_mode) {
         p_viewport.update_mode = p_mode;
     }
     /**
-     * @param {Viewport} p_viewport
+     * @param {Viewport_t} p_viewport
      * @param {number} p_clear_mode
      */
     viewport_set_clear_mode(p_viewport, p_clear_mode) {
         p_viewport.clear_mode = p_clear_mode;
     }
     /**
-     * @param {Viewport} p_viewport
+     * @param {Viewport_t} p_viewport
      */
     viewport_get_texture(p_viewport) {
         return p_viewport.render_target.texture;
     }
 
     /**
-     * @param {Viewport} p_viewport
+     * @param {Viewport_t} p_viewport
      * @param {Canvas} p_canvas
      */
     viewport_attach_canvas(p_viewport, p_canvas) {
@@ -262,7 +262,7 @@ export class VisualServerViewport {
         p_viewport.canvas_map.set(p_canvas, canvas_data);
     }
     /**
-     * @param {Viewport} p_viewport
+     * @param {Viewport_t} p_viewport
      * @param {Canvas} p_canvas
      */
     viewport_remove_canvas(p_viewport, p_canvas) {
@@ -270,7 +270,7 @@ export class VisualServerViewport {
         p_canvas.viewports.delete(p_viewport);
     }
     /**
-     * @param {Viewport} p_viewport
+     * @param {Viewport_t} p_viewport
      * @param {Canvas} p_canvas
      * @param {Transform2D} p_transform
      */
@@ -278,7 +278,7 @@ export class VisualServerViewport {
         p_viewport.canvas_map.get(p_canvas).transform.copy(p_transform);
     }
     /**
-     * @param {Viewport} p_viewport
+     * @param {Viewport_t} p_viewport
      * @param {Canvas} p_canvas
      * @param {number} p_layer
      * @param {number} p_sublayer
@@ -289,7 +289,7 @@ export class VisualServerViewport {
         canvas.sublayer = p_sublayer;
     }
     /**
-     * @param {Viewport} p_viewport
+     * @param {Viewport_t} p_viewport
      * @param {Transform2D} p_xform
      */
     viewport_set_global_canvas_transform(p_viewport, p_xform) {
@@ -297,7 +297,7 @@ export class VisualServerViewport {
     }
 
     /**
-     * @param {Viewport} p_viewport
+     * @param {Viewport_t} p_viewport
      * @param {boolean} p_enabled
      */
     viewport_set_transparent_background(p_viewport, p_enabled) { }
@@ -319,14 +319,22 @@ export class VisualServerViewport {
                 continue;
             }
 
+            VSG.rasterizer.set_current_render_target(vp.render_target);
+            // VSG.rasterizer.set_current_render_target(null);
+
             this._draw_viewport(vp);
+
+            if (!vp.viewport_to_screen_rect.is_zero()) {
+                VSG.rasterizer.set_current_render_target(null);
+                VSG.rasterizer.blit_render_targets_to_screen(vp.render_target, vp.viewport_to_screen_rect, vp.viewport_to_screen);
+            }
         }
     }
 
     /* private */
 
     /**
-     * @param {Viewport} p_viewport
+     * @param {Viewport_t} p_viewport
      * @param {Canvas} p_canvas
      * @param {CanvasData} p_canvas_data
      * @param {Rect2} p_rect
@@ -364,7 +372,7 @@ export class VisualServerViewport {
     }
 
     /**
-     * @param {Viewport} p_viewport
+     * @param {Viewport_t} p_viewport
      * @param {any} [p_eye]
      */
     _draw_3d(p_viewport, p_eye) {
@@ -375,7 +383,7 @@ export class VisualServerViewport {
     }
 
     /**
-     * @param {Viewport} p_viewport
+     * @param {Viewport_t} p_viewport
      * @param {any} [p_eye]
      */
     _draw_viewport(p_viewport, p_eye) {

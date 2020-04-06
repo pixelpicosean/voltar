@@ -324,13 +324,37 @@ export class RasterizerCanvas extends VObject {
                     { name: 'projection_matrix', type: 'mat4' },
                     { name: 'item_matrix', type: 'mat3' },
                     { name: 'TIME', type: '1f' },
-                ],
+                ]
             );
             const material = VSG.storage.material_create(shader);
             material.name = 'multimesh';
             material.batchable = false;
             return material;
         })();
+        this.copy_shader = VSG.storage.shader_create(
+            `
+            attribute vec2 position;
+            attribute vec2 uv;
+            varying vec2 uv_interp;
+            void main() {
+                gl_Position = vec4(position, 0.0, 1.0);
+                uv_interp = uv;
+            }
+            `,
+            `
+            precision mediump float;
+            uniform sampler2D tex;
+            varying vec2 uv_interp;
+            void main() {
+                gl_FragColor = texture2D(tex, uv_interp);
+            }
+            `,
+            [
+                "position",
+                "uv",
+            ],
+            []
+        );
 
         this.states.material = null;
     }
@@ -403,6 +427,11 @@ export class RasterizerCanvas extends VObject {
         // update general uniform data
         const canvas_transform = identity_mat4(this.states.uniforms.projection_matrix);
         if (frame.current_rt) {
+            const csy = 1.0;
+            // TODO: csy = -1.0 if vflip
+            const ssize = this.storage.frame.current_rt;
+            translate_mat4(canvas_transform, canvas_transform, [-ssize.width / 2, -ssize.height / 2, 0]);
+            scale_mat4(canvas_transform, canvas_transform, [2 / ssize.width, csy * (-2) / ssize.height, 1]);
         } else {
             const ssize = OS.get_singleton().get_window_size();
             translate_mat4(canvas_transform, canvas_transform, [-ssize.width / 2, -ssize.height / 2, 0]);
@@ -468,7 +497,7 @@ export class RasterizerCanvas extends VObject {
             // @ts-ignore
             uniforms.concat(shader_material.uniforms),
         );
-        const material = VSG.storage.material_create(shader);
+        const material = VSG.storage.material_create(shader, undefined, shader_material.uses_screen_texture);
         material.name = shader_material.name;
         material.batchable = batchable;
         for (let u of shader_material.uniforms) {
@@ -485,6 +514,12 @@ export class RasterizerCanvas extends VObject {
      */
     use_material(material, uniforms) {
         const gl = this.gl;
+
+        // screen texture support
+        if (material.uses_screen_texture) {
+            // TODO: only copy if not copied before
+            this.copy_screen();
+        }
 
         gl.enable(gl.BLEND);
         switch (this.states.blend_mode) {
@@ -524,6 +559,36 @@ export class RasterizerCanvas extends VObject {
                 case 'mat4': gl.uniformMatrix4fv(u.gl_loc, false, uniforms[k] ? uniforms[k] : global_uniforms[k] ? uniforms[k] ? uniforms[k] : global_uniforms[k] : material.params[k]); break;
             }
         }
+
+        if (material.uses_screen_texture) {
+            if (this.storage.frame.current_rt.copy_screen_effect.gl_color) {
+                // TODO: bind SCREEN_TEXTURE to a specific slot
+                gl.activeTexture(gl.TEXTURE0 + 1);
+                gl.bindTexture(gl.TEXTURE_2D, this.storage.frame.current_rt.copy_screen_effect.gl_color);
+            }
+        }
+    }
+
+    copy_screen() {
+        const gl = this.gl;
+
+        gl.disable(gl.BLEND);
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.storage.frame.current_rt.copy_screen_effect.gl_fbo);
+
+        gl.useProgram(this.copy_shader.gl_prog);
+
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, this.storage.frame.current_rt.texture.gl_tex);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.storage.resources.quadie);
+
+        gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 16, 0);
+        gl.enableVertexAttribArray(0);
+        gl.vertexAttribPointer(1, 2, gl.FLOAT, false, 16, 8);
+        gl.enableVertexAttribArray(1);
+
+        gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
     }
 
     /**

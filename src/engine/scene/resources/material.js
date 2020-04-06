@@ -89,6 +89,8 @@ function parse_shader_code(code) {
     let type_match = code.match(/shader_type (canvas_item|spatial);/);
     let type = type_match ? type_match[1] : "canvas_item";
 
+    let uses_screen_texture = code.indexOf("SCREEN_TEXTURE") >= 0;
+
     // uniform
     let uniforms = [];
     let uniform_lines = code.match(/uniform([\s\S]*?);/gm);
@@ -122,6 +124,7 @@ function parse_shader_code(code) {
 
     return {
         type,
+        uses_screen_texture,
         vs_code, vs_uniform_code,
         fs_code, fs_uniform_code,
         uniforms: uniforms.filter(({ name }) => vs_code.indexOf(name) >= 0 || fs_code.indexOf(name) >= 0)
@@ -142,6 +145,7 @@ export class ShaderMaterial extends Material {
 
         /** @type {string} */
         this.shader_type = "canvas_item";
+        this.uses_screen_texture = false;
 
         /** @type {{ name: string, type: import('engine/drivers/webgl/rasterizer_storage').UniformTypes, value?: number[] }[]} */
         this.uniforms = [];
@@ -167,6 +171,7 @@ export class ShaderMaterial extends Material {
         const parsed_code = parse_shader_code(code);
 
         this.shader_type = parsed_code.type;
+        this.uses_screen_texture = parsed_code.uses_screen_texture;
 
         this.uniforms = parsed_code.uniforms;
 
