@@ -31,7 +31,12 @@ void fragment() {
 [sub_resource type="ShaderMaterial" id=3]
 shader = SubResource( 2 )
 
-[node name="demo" type="Node2D"]
+[node name="demo" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="add" type="Sprite" parent="."]
 scale = Vector2( 2, 2 )
@@ -52,8 +57,8 @@ centered = false
 
 [node name="shader" type="TextureRect" parent="."]
 material = SubResource( 3 )
-margin_right = 320.0
-margin_bottom = 240.0
+anchor_right = 1.0
+anchor_bottom = 1.0
 texture = ExtResource( 1 )
 stretch_mode = 1
 __meta__ = {

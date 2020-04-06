@@ -16,8 +16,10 @@
         },
         "nodes": [
             {
-                "type": "Node2D",
-                "name": "demo"
+                "type": "Control",
+                "name": "demo",
+                "anchor_bottom": 1,
+                "anchor_right": 1
             },
             {
                 "type": "Sprite",
@@ -65,8 +67,8 @@
                 "name": "shader",
                 "parent": ".",
                 "material": "@sub#3",
-                "margin_bottom": 240,
-                "margin_right": 320,
+                "anchor_bottom": 1,
+                "anchor_right": 1,
                 "texture": "@ext#1",
                 "stretch_mode": 1
             }
