@@ -124,7 +124,7 @@ export class RenderTarget_t {
 }
 
 /**
- * @typedef {'1f' | '2f' | '3f' | '4f' | 'mat3' | 'mat4'} UniformTypes
+ * @typedef {'1i' | '1f' | '2f' | '3f' | '4f' | 'mat3' | 'mat4'} UniformTypes
  */
 
 export class Shader_t {
@@ -136,9 +136,6 @@ export class Shader_t {
 
         /** @type {Object<string, { type: UniformTypes, gl_loc: WebGLUniformLocation }>} */
         this.uniforms = {};
-
-        /** @type {{ [name: string]: WebGLUniformLocation }} */
-        this.tex_uniform_loc = {};
     }
 }
 
@@ -562,12 +559,14 @@ export class RasterizerStorage {
 
         // copy texscreen buffers
         rt.copy_screen_effect.gl_color = gl.createTexture();
+        gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, rt.copy_screen_effect.gl_color);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, rt.width, rt.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.bindTexture(gl.TEXTURE_2D, null);
 
         rt.copy_screen_effect.gl_fbo = gl.createFramebuffer();
         gl.bindFramebuffer(gl.FRAMEBUFFER, rt.copy_screen_effect.gl_fbo);

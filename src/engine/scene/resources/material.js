@@ -25,6 +25,7 @@ const UNIFORM_TYPES = {
     "vec4": "4f",
     "mat3": "mat3",
     "mat4": "mat4",
+    "sampler2D": "1i",
 }
 
 /**
@@ -183,3 +184,12 @@ export class ShaderMaterial extends Material {
     }
 }
 res_class_map['ShaderMaterial'] = ShaderMaterial;
+
+export const CANVAS_ITEM_SHADER_UNIFORMS = [
+    { name: 'projection_matrix', type: 'mat4' },
+
+    { name: 'TIME', type: '1f' },
+    { name: 'TEXTURE', type: '1i' },
+    { name: 'SCREEN_TEXTURE', type: '1i' },
+    { name: 'SCREEN_PIXEL_SIZE', type: '2f' },
+]
