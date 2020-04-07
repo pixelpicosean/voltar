@@ -5,7 +5,6 @@ import { OS } from "engine/core/os/os";
 import { RasterizerStorage } from "./rasterizer_storage";
 import { RasterizerCanvas } from "./rasterizer_canvas";
 import { RasterizerScene } from "./rasterizer_scene";
-import { resource_map } from "engine/registry";
 
 
 export class Rasterizer {
