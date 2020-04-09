@@ -1399,7 +1399,9 @@ export class RasterizerCanvas extends VObject {
             this.flush();
 
             // update states with new batch data
-            this.states.texture = texture.texture;
+            if (texture) {
+                this.states.texture = texture.texture;
+            }
             this.states.material = material;
             this.states.blend_mode = blend_mode;
 
