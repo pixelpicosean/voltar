@@ -19,148 +19,167 @@
         },
         "nodes": [
             {
-                "type": "Node2D",
-                "name": "demo"
+                "type": "Control",
+                "name": "demo",
+                "anchor_bottom": 1,
+                "anchor_right": 1
             },
             {
-                "type": "Sprite",
+                "type": "ColorRect",
+                "name": "bg",
+                "parent": ".",
+                "anchor_bottom": 1,
+                "anchor_right": 1,
+                "color": {
+                    "r": 0,
+                    "g": 0,
+                    "b": 0,
+                    "a": 1
+                }
+            },
+            {
+                "type": "TextureRect",
                 "name": "monitor",
                 "parent": ".",
-                "position": {
-                    "x": 128,
-                    "y": 128
-                },
+                "anchor_bottom": 0.5,
+                "anchor_left": 0.5,
+                "anchor_top": 0.5,
+                "anchor_right": 0.5,
+                "margin_bottom": 130,
+                "margin_left": -129.5,
+                "margin_top": -130,
+                "margin_right": 129.5,
                 "texture": "@ext#1"
             },
             {
                 "type": "Sprite",
                 "name": "player",
-                "parent": ".",
+                "parent": "monitor",
                 "position": {
-                    "x": 127.151,
-                    "y": 179.304
+                    "x": 128.651,
+                    "y": 181.304
                 },
                 "texture": "@ext#3"
             },
             {
                 "type": "Sprite",
                 "name": "alien",
-                "parent": ".",
+                "parent": "monitor",
                 "position": {
-                    "x": 49.1791,
-                    "y": 55.8259
+                    "x": 50.6791,
+                    "y": 57.8259
                 },
                 "texture": "@ext#2"
             },
             {
                 "type": "Sprite",
                 "name": "alien2",
-                "parent": ".",
+                "parent": "monitor",
                 "position": {
-                    "x": 87.6798,
-                    "y": 55.8259
+                    "x": 89.1798,
+                    "y": 57.8259
                 },
                 "texture": "@ext#2"
             },
             {
                 "type": "Sprite",
                 "name": "alien3",
-                "parent": ".",
+                "parent": "monitor",
                 "position": {
-                    "x": 126.18,
-                    "y": 55.8259
+                    "x": 127.68,
+                    "y": 57.8259
                 },
                 "texture": "@ext#2"
             },
             {
                 "type": "Sprite",
                 "name": "alien4",
-                "parent": ".",
+                "parent": "monitor",
                 "position": {
-                    "x": 164.681,
-                    "y": 55.8259
+                    "x": 166.181,
+                    "y": 57.8259
                 },
                 "texture": "@ext#2"
             },
             {
                 "type": "Sprite",
                 "name": "alien5",
-                "parent": ".",
+                "parent": "monitor",
                 "position": {
-                    "x": 202.155,
-                    "y": 55.8259
+                    "x": 203.655,
+                    "y": 57.8259
                 },
                 "texture": "@ext#2"
             },
             {
                 "type": "Sprite",
                 "name": "alien10",
-                "parent": ".",
+                "parent": "monitor",
                 "position": {
-                    "x": 49.6925,
-                    "y": 83.5464
+                    "x": 51.1925,
+                    "y": 85.5464
                 },
                 "texture": "@ext#2"
             },
             {
                 "type": "Sprite",
                 "name": "alien9",
-                "parent": ".",
+                "parent": "monitor",
                 "position": {
-                    "x": 88.1931,
-                    "y": 83.5464
+                    "x": 89.6931,
+                    "y": 85.5464
                 },
                 "texture": "@ext#2"
             },
             {
                 "type": "Sprite",
                 "name": "alien8",
-                "parent": ".",
+                "parent": "monitor",
                 "position": {
-                    "x": 126.694,
-                    "y": 83.5464
+                    "x": 128.194,
+                    "y": 85.5464
                 },
                 "texture": "@ext#2"
             },
             {
                 "type": "Sprite",
                 "name": "alien7",
-                "parent": ".",
+                "parent": "monitor",
                 "position": {
-                    "x": 165.194,
-                    "y": 83.5464
+                    "x": 166.694,
+                    "y": 85.5464
                 },
                 "texture": "@ext#2"
             },
             {
                 "type": "Sprite",
                 "name": "alien6",
-                "parent": ".",
+                "parent": "monitor",
                 "position": {
-                    "x": 202.668,
-                    "y": 83.5464
+                    "x": 204.168,
+                    "y": 85.5464
                 },
                 "texture": "@ext#2"
             },
             {
                 "type": "Sprite",
                 "name": "gameover",
-                "parent": ".",
+                "parent": "monitor",
                 "position": {
-                    "x": 128.204,
-                    "y": 121.578
+                    "x": 129.704,
+                    "y": 123.578
                 },
                 "texture": "@ext#4"
             },
             {
                 "type": "ColorRect",
                 "name": "cover",
-                "parent": ".",
+                "parent": "monitor",
                 "material": "@sub#2",
-                "margin_bottom": 199,
-                "margin_left": 17,
-                "margin_top": 26,
-                "margin_right": 238
+                "margin_bottom": 201,
+                "margin_left": 18.5,
+                "margin_top": 28,
+                "margin_right": 239.5
             }
         ]
     }
