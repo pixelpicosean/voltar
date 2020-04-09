@@ -1,19 +1,21 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=7 format=2]
 
-[ext_resource path="res://image/sprites/palette.png" type="Texture" id=1]
+[ext_resource path="res://image/sprites/monitor.png" type="Texture" id=1]
+[ext_resource path="res://image/sprites/alien.png" type="Texture" id=2]
+[ext_resource path="res://image/sprites/player.png" type="Texture" id=3]
+[ext_resource path="res://image/sprites/gameover.png" type="Texture" id=4]
 
-[sub_resource type="Shader" id=2]
+[sub_resource type="Shader" id=1]
 code = "shader_type canvas_item;
 
 void fragment() {
 	vec2 uv = SCREEN_UV;
-	
 	vec3 color;
 	vec4 ori_color = texture(SCREEN_TEXTURE, uv);
 	// color separation
-	color.r = texture(SCREEN_TEXTURE, vec2(uv.x + 0.003, uv.y)).x;
+	color.r = texture(SCREEN_TEXTURE, vec2(uv.x + 0.01, uv.y)).x;
 	color.g = texture(SCREEN_TEXTURE, vec2(uv.x + 0.000, uv.y)).y;
-	color.b = texture(SCREEN_TEXTURE, vec2(uv.x - 0.003, uv.y)).z;
+	color.b = texture(SCREEN_TEXTURE, vec2(uv.x - 0.01, uv.y)).z;
 	// increase contrast
 	color = clamp(color * 0.5 + 0.5 * color * color * 1.2, 0.0, 1.0);
 	// vignetting
@@ -21,46 +23,76 @@ void fragment() {
 	// tinting
 	color *= vec3(0.8, 1.0, 0.7);
 	// tv lines
-	color *= 0.9 + 0.1 * sin(10.0 * TIME + uv.y * 1800.0);
+	color *= 0.8 + 0.2 * sin(10.0 * TIME + uv.y * 1000.0);
 	// flickering
 	color *= 0.97 + 0.03 * sin(110.0 * TIME);
 	COLOR = vec4(color, ori_color.a);
 }
 "
 
-[sub_resource type="ShaderMaterial" id=3]
-shader = SubResource( 2 )
+[sub_resource type="ShaderMaterial" id=2]
+shader = SubResource( 1 )
 
-[node name="demo" type="Control"]
-anchor_right = 1.0
-anchor_bottom = 1.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
+[node name="demo" type="Node2D"]
 
-[node name="add" type="Sprite" parent="."]
-scale = Vector2( 2, 2 )
+[node name="monitor" type="Sprite" parent="."]
+position = Vector2( 128, 128 )
 texture = ExtResource( 1 )
-centered = false
 
-[node name="add2" type="Sprite" parent="."]
-position = Vector2( 192, 0 )
-scale = Vector2( 2, 2 )
-texture = ExtResource( 1 )
-centered = false
+[node name="player" type="Sprite" parent="."]
+position = Vector2( 127.151, 179.304 )
+texture = ExtResource( 3 )
 
-[node name="add3" type="Sprite" parent="."]
-position = Vector2( 96, 112 )
-scale = Vector2( 2, 2 )
-texture = ExtResource( 1 )
-centered = false
+[node name="alien" type="Sprite" parent="."]
+position = Vector2( 49.1791, 55.8259 )
+texture = ExtResource( 2 )
 
-[node name="shader" type="TextureRect" parent="."]
-material = SubResource( 3 )
-anchor_right = 1.0
-anchor_bottom = 1.0
-texture = ExtResource( 1 )
-stretch_mode = 1
+[node name="alien2" type="Sprite" parent="."]
+position = Vector2( 87.6798, 55.8259 )
+texture = ExtResource( 2 )
+
+[node name="alien3" type="Sprite" parent="."]
+position = Vector2( 126.18, 55.8259 )
+texture = ExtResource( 2 )
+
+[node name="alien4" type="Sprite" parent="."]
+position = Vector2( 164.681, 55.8259 )
+texture = ExtResource( 2 )
+
+[node name="alien5" type="Sprite" parent="."]
+position = Vector2( 202.155, 55.8259 )
+texture = ExtResource( 2 )
+
+[node name="alien10" type="Sprite" parent="."]
+position = Vector2( 49.6925, 83.5464 )
+texture = ExtResource( 2 )
+
+[node name="alien9" type="Sprite" parent="."]
+position = Vector2( 88.1931, 83.5464 )
+texture = ExtResource( 2 )
+
+[node name="alien8" type="Sprite" parent="."]
+position = Vector2( 126.694, 83.5464 )
+texture = ExtResource( 2 )
+
+[node name="alien7" type="Sprite" parent="."]
+position = Vector2( 165.194, 83.5464 )
+texture = ExtResource( 2 )
+
+[node name="alien6" type="Sprite" parent="."]
+position = Vector2( 202.668, 83.5464 )
+texture = ExtResource( 2 )
+
+[node name="gameover" type="Sprite" parent="."]
+position = Vector2( 128.204, 121.578 )
+texture = ExtResource( 4 )
+
+[node name="cover" type="ColorRect" parent="."]
+material = SubResource( 2 )
+margin_left = 17.0
+margin_top = 26.0
+margin_right = 238.0
+margin_bottom = 199.0
 __meta__ = {
 "_edit_use_anchors_": false
 }

@@ -2,75 +2,165 @@
     "res://scene/demo.tscn": {
         "type": "PackedScene",
         "ext": {
-            "1": "palette"
+            "1": "monitor",
+            "2": "alien",
+            "3": "player",
+            "4": "gameover"
         },
         "sub": {
-            "2": {
+            "1": {
                 "type": "Shader",
-                "code": "shader_type canvas_item;\nvoid fragment() {\nvec2 uv = SCREEN_UV;\n\nvec3 color;\nvec4 ori_color = texture(SCREEN_TEXTURE, uv);\n// color separation\ncolor.r = texture(SCREEN_TEXTURE, vec2(uv.x + 0.003, uv.y)).x;\ncolor.g = texture(SCREEN_TEXTURE, vec2(uv.x + 0.000, uv.y)).y;\ncolor.b = texture(SCREEN_TEXTURE, vec2(uv.x - 0.003, uv.y)).z;\n// increase contrast\ncolor = clamp(color * 0.5 + 0.5 * color * color * 1.2, 0.0, 1.0);\n// vignetting\ncolor *= 0.5 + 0.5 * 16.0 * uv.x * uv.y * (1.0 - uv.x) * (1.0 - uv.y);\n// tinting\ncolor *= vec3(0.8, 1.0, 0.7);\n// tv lines\ncolor *= 0.9 + 0.1 * sin(10.0 * TIME + uv.y * 1800.0);\n// flickering\ncolor *= 0.97 + 0.03 * sin(110.0 * TIME);\nCOLOR = vec4(color, ori_color.a);}"
+                "code": "shader_type canvas_item;\nvoid fragment() {\nvec2 uv = SCREEN_UV;\nvec3 color;\nvec4 ori_color = texture(SCREEN_TEXTURE, uv);\n// color separation\ncolor.r = texture(SCREEN_TEXTURE, vec2(uv.x + 0.01, uv.y)).x;\ncolor.g = texture(SCREEN_TEXTURE, vec2(uv.x + 0.000, uv.y)).y;\ncolor.b = texture(SCREEN_TEXTURE, vec2(uv.x - 0.01, uv.y)).z;\n// increase contrast\ncolor = clamp(color * 0.5 + 0.5 * color * color * 1.2, 0.0, 1.0);\n// vignetting\ncolor *= 0.5 + 0.5 * 16.0 * uv.x * uv.y * (1.0 - uv.x) * (1.0 - uv.y);\n// tinting\ncolor *= vec3(0.8, 1.0, 0.7);\n// tv lines\ncolor *= 0.8 + 0.2 * sin(10.0 * TIME + uv.y * 1000.0);\n// flickering\ncolor *= 0.97 + 0.03 * sin(110.0 * TIME);\nCOLOR = vec4(color, ori_color.a);}"
             },
-            "3": {
+            "2": {
                 "type": "ShaderMaterial",
-                "shader": "@sub#2"
+                "shader": "@sub#1"
             }
         },
         "nodes": [
             {
-                "type": "Control",
-                "name": "demo",
-                "anchor_bottom": 1,
-                "anchor_right": 1
+                "type": "Node2D",
+                "name": "demo"
             },
             {
                 "type": "Sprite",
-                "name": "add",
-                "parent": ".",
-                "scale": {
-                    "x": 2,
-                    "y": 2
-                },
-                "centered": false,
-                "texture": "@ext#1"
-            },
-            {
-                "type": "Sprite",
-                "name": "add2",
+                "name": "monitor",
                 "parent": ".",
                 "position": {
-                    "x": 192,
-                    "y": 0
+                    "x": 128,
+                    "y": 128
                 },
-                "scale": {
-                    "x": 2,
-                    "y": 2
-                },
-                "centered": false,
                 "texture": "@ext#1"
             },
             {
                 "type": "Sprite",
-                "name": "add3",
+                "name": "player",
                 "parent": ".",
                 "position": {
-                    "x": 96,
-                    "y": 112
+                    "x": 127.151,
+                    "y": 179.304
                 },
-                "scale": {
-                    "x": 2,
-                    "y": 2
-                },
-                "centered": false,
-                "texture": "@ext#1"
+                "texture": "@ext#3"
             },
             {
-                "type": "TextureRect",
-                "name": "shader",
+                "type": "Sprite",
+                "name": "alien",
                 "parent": ".",
-                "material": "@sub#3",
-                "anchor_bottom": 1,
-                "anchor_right": 1,
-                "texture": "@ext#1",
-                "stretch_mode": 1
+                "position": {
+                    "x": 49.1791,
+                    "y": 55.8259
+                },
+                "texture": "@ext#2"
+            },
+            {
+                "type": "Sprite",
+                "name": "alien2",
+                "parent": ".",
+                "position": {
+                    "x": 87.6798,
+                    "y": 55.8259
+                },
+                "texture": "@ext#2"
+            },
+            {
+                "type": "Sprite",
+                "name": "alien3",
+                "parent": ".",
+                "position": {
+                    "x": 126.18,
+                    "y": 55.8259
+                },
+                "texture": "@ext#2"
+            },
+            {
+                "type": "Sprite",
+                "name": "alien4",
+                "parent": ".",
+                "position": {
+                    "x": 164.681,
+                    "y": 55.8259
+                },
+                "texture": "@ext#2"
+            },
+            {
+                "type": "Sprite",
+                "name": "alien5",
+                "parent": ".",
+                "position": {
+                    "x": 202.155,
+                    "y": 55.8259
+                },
+                "texture": "@ext#2"
+            },
+            {
+                "type": "Sprite",
+                "name": "alien10",
+                "parent": ".",
+                "position": {
+                    "x": 49.6925,
+                    "y": 83.5464
+                },
+                "texture": "@ext#2"
+            },
+            {
+                "type": "Sprite",
+                "name": "alien9",
+                "parent": ".",
+                "position": {
+                    "x": 88.1931,
+                    "y": 83.5464
+                },
+                "texture": "@ext#2"
+            },
+            {
+                "type": "Sprite",
+                "name": "alien8",
+                "parent": ".",
+                "position": {
+                    "x": 126.694,
+                    "y": 83.5464
+                },
+                "texture": "@ext#2"
+            },
+            {
+                "type": "Sprite",
+                "name": "alien7",
+                "parent": ".",
+                "position": {
+                    "x": 165.194,
+                    "y": 83.5464
+                },
+                "texture": "@ext#2"
+            },
+            {
+                "type": "Sprite",
+                "name": "alien6",
+                "parent": ".",
+                "position": {
+                    "x": 202.668,
+                    "y": 83.5464
+                },
+                "texture": "@ext#2"
+            },
+            {
+                "type": "Sprite",
+                "name": "gameover",
+                "parent": ".",
+                "position": {
+                    "x": 128.204,
+                    "y": 121.578
+                },
+                "texture": "@ext#4"
+            },
+            {
+                "type": "ColorRect",
+                "name": "cover",
+                "parent": ".",
+                "material": "@sub#2",
+                "margin_bottom": 199,
+                "margin_left": 17,
+                "margin_top": 26,
+                "margin_right": 238
             }
         ]
     }
