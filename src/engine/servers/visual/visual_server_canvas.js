@@ -103,9 +103,18 @@ export class Item {
         this.child_items = [];
         /** @type {Item} */
         this.next = null;
+
+        /** @type {((item: Item) => void)[]} */
+        this.free_listeners = [];
     }
     free() {
         this.clear();
+
+        for (let i = 0; i < this.free_listeners.length; i++) {
+            this.free_listeners[i](this);
+        }
+        this.free_listeners.length = 0;
+
         free_Item(this);
     }
 

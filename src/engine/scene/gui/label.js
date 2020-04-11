@@ -27,6 +27,7 @@ import {
 import { DynamicFont, BitmapFont } from "../resources/font";
 import { Rect2 } from "engine/core/math/rect2";
 
+let pos = new Vector2;
 
 const tmp_vec = new Vector2();
 const tmp_vec2 = new Vector2();
@@ -217,10 +218,32 @@ export class Label extends Control {
 
             if (f.type === "DynamicFont") {
                 const font = /** @type {DynamicFont} */(f);
-
-                const c = font.draw(this._text, null);
-                c.texture.draw(this.canvas_item, { x: 0, y: 0 });
-
+                const texture = font.draw_to_texture(this.canvas_item, this._text, this._align);
+                switch (this._align) {
+                    case HALIGN_LEFT:
+                    case HALIGN_FILL: {
+                        pos.x = 0;
+                    } break;
+                    case HALIGN_RIGHT: {
+                        pos.x = size.x - texture.get_width();
+                    } break;
+                    case HALIGN_CENTER: {
+                        pos.x = (size.x - texture.get_width()) / 2;
+                    } break;
+                }
+                switch (this._valign) {
+                    case VALIGN_TOP:
+                    case VALIGN_FILL: {
+                        pos.y = 0;
+                    } break;
+                    case VALIGN_BOTTOM: {
+                        pos.y = size.y - texture.get_height();
+                    } break;
+                    case VALIGN_CENTER: {
+                        pos.y = (size.y - texture.get_height()) / 2;
+                    } break;
+                }
+                texture.draw(this.canvas_item, pos);
                 return;
             }
 

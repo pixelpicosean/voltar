@@ -1,7 +1,14 @@
 import { Vector2 } from "engine/core/math/vector2";
 import { Rect2 } from "engine/core/math/rect2";
-import { ImageTexture } from "./texture";
 import { res_class_map } from "engine/registry";
+import {
+    HALIGN_LEFT,
+    HALIGN_FILL,
+    HALIGN_CENTER,
+    HALIGN_RIGHT,
+} from "engine/core/math/math_defs";
+
+import { ImageTexture } from "./texture";
 
 class DynamicFontRenderContext {
     constructor() {
@@ -10,9 +17,23 @@ class DynamicFontRenderContext {
         this.texture = new ImageTexture;
     }
 }
+/** @type {DynamicFontRenderContext[]} */
+const DynamicFontRenderContext_pool = [];
+function DynamicFontRenderContext_new() {
+    let ctx = DynamicFontRenderContext_pool.pop();
+    if (!ctx) ctx = new DynamicFontRenderContext;
+    return ctx;
+}
+/** @param {DynamicFontRenderContext} ctx */
+function DynamicFontRenderContext_free(ctx) {
+    DynamicFontRenderContext_pool.push(ctx);
+}
 
-/** @type {HTMLSpanElement} */
-let measure_span = null;
+/** @type {CanvasRenderingContext2D} */
+const measure_ctx = (() => {
+    let c = document.createElement('canvas');
+    return c.getContext('2d');
+})();
 
 export class DynamicFont {
     get type() { return 'DynamicFont' }
@@ -23,9 +44,12 @@ export class DynamicFont {
         this.family = '';
         this.size = 0;
 
-        this.height = 1;
+        this.height = -1;
         this.ascent = 0;
         this.descent = 0;
+
+        /** @type {Map<number, DynamicFontRenderContext>} */
+        this.ctx_table = new Map;
     }
 
     _load_data(data) {
@@ -43,48 +67,76 @@ export class DynamicFont {
      * @param {string} text
      */
     get_text_size(text) {
-        if (!measure_span) {
-            measure_span = document.createElement('span');
-            measure_span.style.margin = '0';
-            measure_span.style.padding = '0';
-            measure_span.style.border = 'none';
-            measure_span.style.position = 'fixed';
-            measure_span.style.left = '-2020px';
-            measure_span.style.top = '-2020px';
-            measure_span.textContent = text;
+        measure_ctx.font = `${this.size}px ${this.family}`;
+
+        // measure line height if not done yet
+        if (this.height < 0) {
+            const m = measure_ctx.measureText('M');
+            this.height = m.width * 1.2;
         }
 
-        measure_span.style.font = `${this.size}px ${this.family}`;
-        document.body.appendChild(measure_span);
-        const width = measure_span.clientWidth;
-        const height = measure_span.clientHeight;
-        document.body.removeChild(measure_span);
+        const lines = text.split('\n');
+
+        let total_height = lines.length * (this.height + 3) - 3;
+        let max_width = 0;
+        for (let i = 0; i < lines.length; i++) {
+            let width = measure_ctx.measureText(lines[i]).width;
+            max_width = Math.max(max_width, width);
+        }
 
         return {
-            width,
-            height,
+            width: max_width,
+            height: total_height,
         }
     }
 
     /**
+     * @param {import('engine/servers/visual/visual_server_canvas').Item} canvas_item
      * @param {string} text
-     * @param {DynamicFontRenderContext} ctx
+     * @param {number} align
      */
-    draw(text, ctx) {
+    draw_to_texture(canvas_item, text, align) {
         const size = this.get_text_size(text);
 
+        let ctx = this.ctx_table.get(canvas_item._id);
         if (!ctx) {
-            ctx = new DynamicFontRenderContext;
+            ctx = DynamicFontRenderContext_new();
+            canvas_item.free_listeners.push((item) => {
+                let ctx = this.ctx_table.get(item._id);
+                if (ctx) {
+                    DynamicFontRenderContext_free(ctx);
+                    this.ctx_table.delete(item._id);
+                }
+            })
         }
 
         ctx.canvas.width = size.width;
         ctx.canvas.height = size.height;
 
         ctx.context.font = `${this.size}px ${this.family}`;
-        ctx.context.textBaseline = 'middle';
-        ctx.context.textAlign = 'center';
+        ctx.context.textBaseline = 'top';
+        ctx.context.textAlign = 'left';
         ctx.context.fillStyle = 'white';
-        ctx.context.fillText(text, size.width / 2, size.height / 2 + 3);
+
+        const lines = text.split('\n');
+
+        for (let i = 0; i < lines.length; i++) {
+            let width = ctx.context.measureText(lines[i]).width;
+            let x = 0;
+            switch (align) {
+                case HALIGN_LEFT:
+                case HALIGN_FILL: {
+                    x = 0;
+                } break;
+                case HALIGN_CENTER: {
+                    x = (size.width - width) / 2;
+                } break;
+                case HALIGN_RIGHT: {
+                    x = size.width - width;
+                } break;
+            }
+            ctx.context.fillText(lines[i], x, 3 + i * (this.height + 3));
+        }
 
         ctx.texture.create_from_image(ctx.canvas, {
             min_filter: WebGLRenderingContext.LINEAR,
@@ -93,7 +145,7 @@ export class DynamicFont {
             wrap_v: WebGLRenderingContext.CLAMP_TO_EDGE,
         });
 
-        return ctx;
+        return ctx.texture;
     }
 }
 res_class_map['DynamicFont'] = DynamicFont;
