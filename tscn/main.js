@@ -4,6 +4,7 @@ const fs = require('fs');
 const { convert_project_settings } = require('./convert_project_settings');
 const { convert_scenes } = require('./convert_scenes');
 const { convert_dynamic_fonts } = require('./convert_dynamic_fonts');
+const record = require('./resource_record');
 
 console.log(`[started]`)
 
@@ -19,5 +20,9 @@ fs.writeFileSync(path.normalize(path.join(__dirname, '../assets/resources.json')
 // 3. process and copy assets (DynamicFont, ...) to media
 console.log(`3. process assets`)
 convert_dynamic_fonts()
+const resource_lookup_skip_list = record.get_resource_lookup_skip_list();
+fs.writeFileSync(path.normalize(path.join(__dirname, '../assets/meta.json')), JSON.stringify({
+    resource_lookup_skip_list,
+}, null, 4));
 
 console.log('[finished]')

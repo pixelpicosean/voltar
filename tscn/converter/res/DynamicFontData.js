@@ -31,5 +31,9 @@ module.exports.get_resource_path = (res) => {
         family,
     });
 
+    // we don't want engine to check this one since
+    // dynamic font are not resource objects
+    record.add_to_resource_lookup_skip_list(family);
+
     return family;
 }
