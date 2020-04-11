@@ -10,6 +10,7 @@
   "author": "Sean Bohan <pixelpicosean@gmail.com>",
   "dependencies": {
     "lodash": "^4.17.4",
+    "opentype.js": "^1.1.0",
     "walk": "^2.3.9"
   }
 }

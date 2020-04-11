@@ -1,6 +1,102 @@
 import { Vector2 } from "engine/core/math/vector2";
 import { Rect2 } from "engine/core/math/rect2";
 import { ImageTexture } from "./texture";
+import { res_class_map } from "engine/registry";
+
+class DynamicFontRenderContext {
+    constructor() {
+        this.canvas = document.createElement('canvas');
+        this.context = this.canvas.getContext('2d');
+        this.texture = new ImageTexture;
+    }
+}
+
+/** @type {HTMLSpanElement} */
+let measure_span = null;
+
+export class DynamicFont {
+    get type() { return 'DynamicFont' }
+
+    constructor() {
+        this.name = '';
+
+        this.family = '';
+        this.size = 0;
+
+        this.height = 1;
+        this.ascent = 0;
+        this.descent = 0;
+    }
+
+    _load_data(data) {
+        this.family = data.font;
+        this.size = data.size;
+
+        return this;
+    }
+
+    get_height() {
+        return this.height;
+    }
+
+    /**
+     * @param {string} text
+     */
+    get_text_size(text) {
+        if (!measure_span) {
+            measure_span = document.createElement('span');
+            measure_span.style.margin = '0';
+            measure_span.style.padding = '0';
+            measure_span.style.border = 'none';
+            measure_span.style.position = 'fixed';
+            measure_span.style.left = '-2020px';
+            measure_span.style.top = '-2020px';
+            measure_span.textContent = text;
+        }
+
+        measure_span.style.font = `${this.size}px ${this.family}`;
+        document.body.appendChild(measure_span);
+        const width = measure_span.clientWidth;
+        const height = measure_span.clientHeight;
+        document.body.removeChild(measure_span);
+
+        return {
+            width,
+            height,
+        }
+    }
+
+    /**
+     * @param {string} text
+     * @param {DynamicFontRenderContext} ctx
+     */
+    draw(text, ctx) {
+        const size = this.get_text_size(text);
+
+        if (!ctx) {
+            ctx = new DynamicFontRenderContext;
+        }
+
+        ctx.canvas.width = size.width;
+        ctx.canvas.height = size.height;
+
+        ctx.context.font = `${this.size}px ${this.family}`;
+        ctx.context.textBaseline = 'middle';
+        ctx.context.textAlign = 'center';
+        ctx.context.fillStyle = 'white';
+        ctx.context.fillText(text, size.width / 2, size.height / 2 + 3);
+
+        ctx.texture.create_from_image(ctx.canvas, {
+            min_filter: WebGLRenderingContext.LINEAR,
+            mag_filter: WebGLRenderingContext.LINEAR,
+            wrap_u: WebGLRenderingContext.CLAMP_TO_EDGE,
+            wrap_v: WebGLRenderingContext.CLAMP_TO_EDGE,
+        });
+
+        return ctx;
+    }
+}
+res_class_map['DynamicFont'] = DynamicFont;
 
 
 const ZeroVector = Object.freeze(new Vector2(0, 0));
@@ -22,7 +118,9 @@ export class Character {
     }
 }
 
-export class Font {
+export class BitmapFont {
+    get type() { return 'BitmapFont' }
+
     constructor() {
         this.name = '';
 
@@ -92,7 +190,7 @@ export class Font {
 }
 
 /**
- * @type {Object<string, Font>}
+ * @type {Object<string, BitmapFont>}
  */
 export const registered_bitmap_fonts = {};
 
@@ -104,8 +202,8 @@ export const registered_bitmap_fonts = {};
  * @param {Object<string, ImageTexture>} textures - List of textures for each page.
  *  If providing an object, the key is the `<page>` element's `file` attribute in the FNT file.
  */
-export function register_font(xml, textures) {
-    const font = new Font();
+export function register_bitmap_font(xml, textures) {
+    const font = new BitmapFont();
 
     const info = xml.getElementsByTagName('info')[0];
     const common = xml.getElementsByTagName('common')[0];

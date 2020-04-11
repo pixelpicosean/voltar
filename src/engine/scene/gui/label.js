@@ -24,6 +24,8 @@ import {
     NOTIFICATION_THEME_CHANGED,
     NOTIFICATION_RESIZED,
 } from "./control";
+import { DynamicFont, BitmapFont } from "../resources/font";
+import { Rect2 } from "engine/core/math/rect2";
 
 
 const tmp_vec = new Vector2();
@@ -115,6 +117,13 @@ export class Label extends Control {
     /* virtual */
 
     _load_data(data) {
+        if (data.font) {
+            this.add_font_override('font', data.font);
+        }
+        if (data.text !== undefined) {
+            this.set_text(data.text);
+        }
+
         super._load_data(data);
 
         if (data.align !== undefined) {
@@ -135,9 +144,6 @@ export class Label extends Control {
         if (data.percent_visible !== undefined) {
             this.set_percent_visible(data.percent_visible);
         }
-        if (data.text !== undefined) {
-            this.set_text(data.text);
-        }
         if (data.uppercase !== undefined) {
             this.set_uppercase(data.uppercase);
         }
@@ -146,9 +152,6 @@ export class Label extends Control {
         }
         if (data.visible_characters !== undefined) {
             this.set_visible_characters(data.visible_characters);
-        }
-        if (data.font) {
-            this.add_font_override('font', data.font);
         }
         if (data.custom_colors) {
             for (let k in data.custom_colors) {
@@ -163,6 +166,16 @@ export class Label extends Control {
     get_minimum_size() {
         const size = Vector2.new();
         const min_style = this.get_stylebox('normal').get_minimum_size(tmp_vec);
+
+        const f = this.get_font('font');
+        if (f.type === 'DynamicFont') {
+            const font = /** @type {DynamicFont} */(f);
+            const s = font.get_text_size(this._text);
+            return size.set(
+                s.width,
+                s.height
+            );
+        }
 
         if (this.word_cache_dirty) {
             this.regenerate_word_cache();
@@ -198,9 +211,20 @@ export class Label extends Control {
             const text = this._text;
             const size = this.rect_size;
             const style = this.get_stylebox('normal');
-            const font = this.get_font('font');
+            const f = this.get_font('font');
             const font_color = this.get_color('font_color');
             const line_spacing = this.get_constant('line_spacing');
+
+            if (f.type === "DynamicFont") {
+                const font = /** @type {DynamicFont} */(f);
+
+                const c = font.draw(this._text, null);
+                c.texture.draw(this.canvas_item, { x: 0, y: 0 });
+
+                return;
+            }
+
+            const font = /** @type {BitmapFont} */(f);
 
             // TODO: draw stylebox
 
@@ -369,7 +393,14 @@ export class Label extends Control {
     /* public */
 
     get_longest_line_width() {
-        const font = this.get_font('font');
+        const f = this.get_font('font');
+        if (f.type === 'DynamicFont') {
+            let font = /** @type {DynamicFont} */(f);
+            return font.get_text_size(this._text).width;
+        }
+
+        const font = /** @type {BitmapFont} */(f);
+
         let max_line_width = 0;
         let line_width = 0;
 
@@ -450,7 +481,11 @@ export class Label extends Control {
 
         const style = this.get_stylebox('normal');
         const width = this._autowrap ? (this.rect_size.x - style.get_minimum_size(tmp_vec3).x) : this.get_longest_line_width();
-        const font = this.get_font('font');
+        const f = this.get_font('font');
+
+        if (f.type === "DynamicFont") return;
+
+        const font = /** @type {BitmapFont} */(f);
 
         let current_word_size = 0;
         let word_pos = 0;
