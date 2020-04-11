@@ -196,21 +196,6 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">sprites/gameover.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0,0</point_f>
-                <key>spriteScale</key>
-                <double>1</double>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>60,8,119,15</rect>
-                <key>scale9Paddings</key>
-                <rect>60,8,119,15</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
             <key type="filename">sprites/monitor.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>

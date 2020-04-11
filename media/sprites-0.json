@@ -8,14 +8,6 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":34,"h":22},
 	"sourceSize": {"w":34,"h":22}
 },
-"gameover":
-{
-	"frame": {"x":1,"y":287,"w":119,"h":15},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":119,"h":15},
-	"sourceSize": {"w":119,"h":15}
-},
 "monitor":
 {
 	"frame": {"x":1,"y":1,"w":259,"h":260},
@@ -55,6 +47,6 @@
 	"format": "RGBA8888",
 	"size": {"w":327,"h":324},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:c448b894f2542413b64486eb146285e5:d2f3a8c13c3d6d226a0836355d134e15:7921bf998741302c2028590beb4e1a86$"
+	"smartupdate": "$TexturePacker:SmartUpdate:4dd4bbba404c7d5c4db5b565fbefdb7f:adda5970432d796905cdf7416ddcfb5d:7921bf998741302c2028590beb4e1a86$"
 }
 }
