@@ -7,4 +7,4 @@ module.exports = (data) => {
     };
 };
 
-module.exports.is_tres = false;
+module.exports.is_tres = true;
