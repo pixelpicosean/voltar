@@ -69,3 +69,11 @@ interface GainNode {
     currentTime: number;
     bufferSource: AudioBufferSourceNode;
 }
+
+// for font face observer
+
+interface Document {
+    fonts: {
+        load: Function;
+    }
+}
