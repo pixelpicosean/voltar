@@ -170,13 +170,17 @@ export class Label extends Control {
 
         const f = this.get_font('font');
         if (f.type === 'DynamicFont') {
-            const font = /** @type {DynamicFont} */(f);
-            const width = this._autowrap ? (this.rect_size.x - min_style.x) : this.get_longest_line_width();
-            const s = font.get_text_size(this._text, width, this.get_constant('line_spacing'));
-            return size.set(
-                s.width,
-                s.height
-            );
+            if (this._autowrap) {
+                return size.copy(min_style).add(1, this._clip_text ? 1 : this.minsize.y);
+            } else {
+                const font = /** @type {DynamicFont} */(f);
+                const width = this._autowrap ? (this.rect_size.x - min_style.x) : this.get_longest_line_width();
+                const s = font.get_text_size(this._text, width, this.get_constant('line_spacing'));
+                return size.set(
+                    s.width,
+                    s.height
+                );
+            }
         }
 
         if (this.word_cache_dirty) {
