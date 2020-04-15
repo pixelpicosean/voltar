@@ -162,7 +162,11 @@ export class DynamicFont extends VObject {
                 current_line = word;
             }
         }
-        lines.push(current_line);
+        if (current_line.indexOf('\n') >= 0) {
+            lines.push(...current_line.split('\n'));
+        } else {
+            lines.push(current_line);
+        }
         return lines;
     }
 
