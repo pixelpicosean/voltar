@@ -21,25 +21,6 @@ class DynamicFontRenderContext {
         this.canvas = document.createElement('canvas');
         this.context = this.canvas.getContext('2d');
         this.texture = new ImageTexture;
-
-        this.canvas_item = null;
-        this.text = '';
-        this.size = new Vector2;
-        this.h_align = 0;
-        this.v_align = 0;
-        this.line_spacing = 0;
-        this.line_count = 0;
-        this.max_width = 0;
-    }
-    set(canvas_item, text, size, h_align, v_align, line_spacing, line_count, max_width) {
-        this.canvas_item = canvas_item;
-        this.text = text;
-        this.size.copy(size);
-        this.h_align = h_align;
-        this.v_align = v_align;
-        this.line_spacing = line_spacing;
-        this.line_count = line_count;
-        this.max_width = max_width;
     }
 }
 /** @type {DynamicFontRenderContext[]} */
@@ -239,6 +220,7 @@ export class DynamicFont extends VObject {
      */
     draw_to_texture(canvas_item, text, size, h_align, v_align, line_spacing, line_count, max_width) {
         // fetch context for drawing
+        // FIXME: do we need a new canvas for drawing?
         let ctx = this.ctx_table.get(canvas_item._id);
         if (!ctx) {
             ctx = DynamicFontRenderContext_new();
@@ -251,7 +233,6 @@ export class DynamicFont extends VObject {
             })
             this.ctx_table.set(canvas_item._id, ctx);
         }
-        ctx.set(canvas_item, text, size, h_align, v_align, line_spacing, line_count, max_width);
 
         const font_h = this.height + line_spacing;
 
