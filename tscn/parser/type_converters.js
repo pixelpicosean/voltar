@@ -582,7 +582,7 @@ module.exports.MethodArray = (arr) => {
  */
 module.exports.parse_as_primitive = (str) => {
     // Make sure the string is trimmed
-    str = str.trim();
+    str = str.trimLeft();
 
     // Remove trailing coma if any
     if (str[str.length - 1] === ',') {

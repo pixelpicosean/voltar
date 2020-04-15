@@ -32,7 +32,7 @@
             },
             "2": {
                 "type": "Shader",
-                "code": "shader_type canvas_item;\nvoid fragment() {\nvec2 uv = SCREEN_UV;\nvec3 color;\nvec4 ori_color = texture(SCREEN_TEXTURE, uv);\n// color separation\ncolor.r = texture(SCREEN_TEXTURE, vec2(uv.x + 0.01, uv.y)).x;\ncolor.g = texture(SCREEN_TEXTURE, vec2(uv.x + 0.000, uv.y)).y;\ncolor.b = texture(SCREEN_TEXTURE, vec2(uv.x - 0.01, uv.y)).z;\n// increase contrast\ncolor = clamp(color * 0.5 + 0.5 * color * color * 1.2, 0.0, 1.0);\n// vignetting\ncolor *= 0.5 + 0.5 * 16.0 * uv.x * uv.y * (1.0 - uv.x) * (1.0 - uv.y);\n// tinting\ncolor *= vec3(0.8, 1.0, 0.7);\n// tv lines\ncolor *= 0.8 + 0.2 * sin(10.0 * TIME + uv.y * 1000.0);\n// flickering\ncolor *= 0.97 + 0.03 * sin(110.0 * TIME);\nCOLOR = vec4(color, ori_color.a);}"
+                "code": "shader_type canvas_item;\nvoid fragment() {\n\nvec2 uv = SCREEN_UV;\n\nvec3 color;\n\nvec4 ori_color = texture(SCREEN_TEXTURE, uv);\n\n// color separation\n\ncolor.r = texture(SCREEN_TEXTURE, vec2(uv.x + 0.01, uv.y)).x;\n\ncolor.g = texture(SCREEN_TEXTURE, vec2(uv.x + 0.000, uv.y)).y;\n\ncolor.b = texture(SCREEN_TEXTURE, vec2(uv.x - 0.01, uv.y)).z;\n\n// increase contrast\n\ncolor = clamp(color * 0.5 + 0.5 * color * color * 1.2, 0.0, 1.0);\n\n// vignetting\n\ncolor *= 0.5 + 0.5 * 16.0 * uv.x * uv.y * (1.0 - uv.x) * (1.0 - uv.y);\n\n// tinting\n\ncolor *= vec3(0.8, 1.0, 0.7);\n\n// tv lines\n\ncolor *= 0.8 + 0.2 * sin(10.0 * TIME + uv.y * 1000.0);\n\n// flickering\n\ncolor *= 0.97 + 0.03 * sin(110.0 * TIME);\n\nCOLOR = vec4(color, ori_color.a);\n}\n"
             },
             "3": {
                 "type": "ShaderMaterial",
@@ -202,7 +202,7 @@
                 "margin_top": -19,
                 "margin_right": 105.5,
                 "align": 1,
-                "text": "GAME OVERg",
+                "text": "GAME\nOVER",
                 "valign": 1,
                 "font": "@sub#1"
             },

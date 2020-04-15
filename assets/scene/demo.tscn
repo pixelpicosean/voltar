@@ -121,7 +121,8 @@ margin_top = -19.0
 margin_right = 105.5
 margin_bottom = 17.0
 custom_fonts/font = SubResource( 1 )
-text = "GAME OVERg"
+text = "GAME
+OVER"
 align = 1
 valign = 1
 __meta__ = {
