@@ -1,3 +1,4 @@
+import { VObject } from "engine/core/v_object";
 import { Vector2, Vector2Like } from "engine/core/math/vector2";
 import { Rect2 } from "engine/core/math/rect2";
 import { res_class_map, resource_map } from "engine/registry";
@@ -13,12 +14,32 @@ import {
 } from "engine/core/math/math_defs";
 
 import { ImageTexture } from "./texture";
+import { FontFaceObserver } from "engine/dep/fontfaceobserver";
 
 class DynamicFontRenderContext {
     constructor() {
         this.canvas = document.createElement('canvas');
         this.context = this.canvas.getContext('2d');
         this.texture = new ImageTexture;
+
+        this.canvas_item = null;
+        this.text = '';
+        this.size = new Vector2;
+        this.h_align = 0;
+        this.v_align = 0;
+        this.line_spacing = 0;
+        this.line_count = 0;
+        this.max_width = 0;
+    }
+    set(canvas_item, text, size, h_align, v_align, line_spacing, line_count, max_width) {
+        this.canvas_item = canvas_item;
+        this.text = text;
+        this.size.copy(size);
+        this.h_align = h_align;
+        this.v_align = v_align;
+        this.line_spacing = line_spacing;
+        this.line_count = line_count;
+        this.max_width = max_width;
     }
 }
 /** @type {DynamicFontRenderContext[]} */
@@ -39,28 +60,44 @@ const measure_ctx = (() => {
     return c.getContext('2d');
 })();
 
-export class DynamicFontData {
+export class DynamicFontData extends VObject {
     get type() { return 'DynamicFontData' }
     constructor() {
+        super();
+
         this.ascender = 0;
         this.descender = 0;
         this.family = '';
+
+        this.loaded = false;
     }
     _load_data(data) {
         this.ascender = data.ascender;
         this.descender = data.descender;
         this.family = data.family;
+
+        let observer = new FontFaceObserver(this.family);
+        observer.load().then(() => {
+            this.loaded = true;
+            this.emit_signal('loaded', this);
+        }, () => {
+            this.loaded = false;
+            console.warn(`Fail to load DynamicFont "${this.family}"!`);
+        })
+
         return this;
     }
 }
 res_class_map['DynamicFontData'] = DynamicFontData;
 
-export class DynamicFont {
+export class DynamicFont extends VObject {
     get type() { return 'DynamicFont' }
 
     get family() { return this.font ? this.font.family : '' }
 
     constructor() {
+        super();
+
         this.name = '';
 
         /** @type {DynamicFontData} */
@@ -95,6 +132,24 @@ export class DynamicFont {
 
         this.font = data;
 
+        this.update_font_info();
+    }
+
+    /**
+     * @param {Function} callback
+     * @param {any} scope
+     */
+    add_load_listener(callback, scope) {
+        if (!this.font) return;
+        if (this.font.loaded) return;
+
+        this.font.connect_once('loaded', callback, scope);
+    }
+
+    update_font_info() {
+        // The calculation is based on Godot behavior, which
+        // is basically how FreeType works. These data generated
+        // from opentype.js during importing.
         this.ascent = Math.ceil(this.size * this.font.ascender / 1000);
         this.descent = Math.ceil(Math.abs(this.size * this.font.descender / 1000));
         this.height = this.ascent + this.descent;
@@ -194,7 +249,9 @@ export class DynamicFont {
                     this.ctx_table.delete(item._id);
                 }
             })
+            this.ctx_table.set(canvas_item._id, ctx);
         }
+        ctx.set(canvas_item, text, size, h_align, v_align, line_spacing, line_count, max_width);
 
         const font_h = this.height + line_spacing;
 

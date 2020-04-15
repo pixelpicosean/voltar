@@ -238,6 +238,7 @@ export class Label extends Control {
 
             if (font.type === 'DynamicFont') {
                 font = /** @type {DynamicFont} */(font);
+                font.add_load_listener(this.update, this);
                 const texture = font.draw_to_texture(
                     this.canvas_item,
                     text,

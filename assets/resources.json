@@ -1,4 +1,11 @@
 {
+    "res://font/GROBOLD.ttf": {
+        "type": "DynamicFontData",
+        "filename": "res://font/GROBOLD.ttf",
+        "family": "GROBOLD",
+        "ascender": 800,
+        "descender": -200
+    },
     "res://scene/ui/input.tscn": {
         "type": "PackedScene",
         "nodes": [
@@ -210,12 +217,5 @@
                 "margin_right": 239.5
             }
         ]
-    },
-    "res://font/GROBOLD.ttf": {
-        "type": "DynamicFontData",
-        "filename": "res://font/GROBOLD.ttf",
-        "family": "GROBOLD",
-        "ascender": 800,
-        "descender": -200
     }
 }
