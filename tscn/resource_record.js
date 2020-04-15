@@ -22,6 +22,27 @@ module.exports.get_list = function(type) {
     return record[type];
 }
 
+/** @type {{ [type: string]: { filename: string }[] }}} */
+let non_tres_record = {}
+
+/**
+ * @param {string} type
+ * @param {{ filename: string }} data
+ */
+module.exports.add_non_tres_data = function(type, data) {
+    let list = non_tres_record[type];
+    if (!list) {
+        list = non_tres_record[type] = [];
+    }
+    if (list.indexOf(data) < 0) {
+        list.push(data);
+    }
+}
+
+module.exports.get_non_tres_resources = function() {
+    return non_tres_record;
+}
+
 /** @type {string[]} */
 let resource_lookup_skip_list = [];
 /**

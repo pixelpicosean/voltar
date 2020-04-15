@@ -11,7 +11,8 @@ import {
     VALIGN_BOTTOM,
     VALIGN_FILL,
 } from "engine/core/math/math_defs";
-import { Vector2 } from "engine/core/math/vector2";
+import { Vector2, Vector2Like } from "engine/core/math/vector2";
+import { Rect2 } from "engine/core/math/rect2";
 import { Color } from "engine/core/color";
 
 import { VSG } from "engine/servers/visual/visual_server_globals";
@@ -25,7 +26,6 @@ import {
     NOTIFICATION_RESIZED,
 } from "./control";
 import { DynamicFont, BitmapFont } from "../resources/font";
-import { Rect2 } from "engine/core/math/rect2";
 
 let pos = new Vector2;
 
@@ -171,7 +171,8 @@ export class Label extends Control {
         const f = this.get_font('font');
         if (f.type === 'DynamicFont') {
             const font = /** @type {DynamicFont} */(f);
-            const s = font.get_text_size(this._text);
+            const width = this._autowrap ? (this.rect_size.x - min_style.x) : this.get_longest_line_width();
+            const s = font.get_text_size(this._text, width, this.get_constant('line_spacing'));
             return size.set(
                 s.width,
                 s.height
@@ -212,42 +213,9 @@ export class Label extends Control {
             const text = this._text;
             const size = this.rect_size;
             const style = this.get_stylebox('normal');
-            const f = this.get_font('font');
             const font_color = this.get_color('font_color');
             const line_spacing = this.get_constant('line_spacing');
-
-            if (f.type === "DynamicFont") {
-                const font = /** @type {DynamicFont} */(f);
-                const texture = font.draw_to_texture(this.canvas_item, this._text, this._align);
-                switch (this._align) {
-                    case HALIGN_LEFT:
-                    case HALIGN_FILL: {
-                        pos.x = 0;
-                    } break;
-                    case HALIGN_RIGHT: {
-                        pos.x = size.x - texture.get_width();
-                    } break;
-                    case HALIGN_CENTER: {
-                        pos.x = (size.x - texture.get_width()) / 2;
-                    } break;
-                }
-                switch (this._valign) {
-                    case VALIGN_TOP:
-                    case VALIGN_FILL: {
-                        pos.y = 0;
-                    } break;
-                    case VALIGN_BOTTOM: {
-                        pos.y = size.y - texture.get_height();
-                    } break;
-                    case VALIGN_CENTER: {
-                        pos.y = (size.y - texture.get_height()) / 2;
-                    } break;
-                }
-                texture.draw(this.canvas_item, pos);
-                return;
-            }
-
-            const font = /** @type {BitmapFont} */(f);
+            let font = this.get_font('font');
 
             // TODO: draw stylebox
 
@@ -266,6 +234,22 @@ export class Label extends Control {
 
             if (this._max_lines_visible >= 0 && lines_visible > this._max_lines_visible) {
                 lines_visible = this._max_lines_visible;
+            }
+
+            if (font.type === 'DynamicFont') {
+                font = /** @type {DynamicFont} */(font);
+                const texture = font.draw_to_texture(
+                    this.canvas_item,
+                    text,
+                    size,
+                    this._align,
+                    this._valign,
+                    line_spacing,
+                    lines_visible,
+                    this._autowrap ? (size.x - style.get_minimum_size(tmp_vec).x) : this.get_longest_line_width()
+                );
+                texture.draw(this.canvas_item, Vector2.ZERO);
+                return;
             }
 
             if (lines_visible > 0) {
@@ -299,7 +283,6 @@ export class Label extends Control {
 
             let line = 0;
             let line_to = this._lines_skipped + (lines_visible > 0 ? lines_visible : 1);
-            let glyph_idx = 0;
             while (wc) {
                 if (line >= line_to) {
                     break;
@@ -356,6 +339,7 @@ export class Label extends Control {
                 y_ofs += (line - this._lines_skipped) * font_h + font.ascent;
                 y_ofs += vbegin + line * vsep;
 
+                font = /** @type {BitmapFont} */(font);
                 while (from !== to) {
                     // draw a word
                     let pos = from.char_pos;
@@ -378,8 +362,6 @@ export class Label extends Control {
                                 c = c.toUpperCase();
                                 n = n.toUpperCase();
                             }
-
-                            glyph_idx++;
 
                             const char = font.char_map[c.charCodeAt(0)];
 
@@ -419,7 +401,7 @@ export class Label extends Control {
         const f = this.get_font('font');
         if (f.type === 'DynamicFont') {
             let font = /** @type {DynamicFont} */(f);
-            return font.get_text_size(this._text).width;
+            return font.get_text_size(this._text, -1, this.get_constant('line_spacing')).width;
         }
 
         const font = /** @type {BitmapFont} */(f);
@@ -506,7 +488,11 @@ export class Label extends Control {
         const width = this._autowrap ? (this.rect_size.x - style.get_minimum_size(tmp_vec3).x) : this.get_longest_line_width();
         const f = this.get_font('font');
 
-        if (f.type === "DynamicFont") return;
+        if (f.type === "DynamicFont") {
+            let font = /** @type {DynamicFont} */(f);
+            this.line_count = font.wrap_lines(text, width).length;
+            return;
+        }
 
         const font = /** @type {BitmapFont} */(f);
 

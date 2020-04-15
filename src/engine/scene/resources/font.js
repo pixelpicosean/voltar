@@ -1,11 +1,15 @@
-import { Vector2 } from "engine/core/math/vector2";
+import { Vector2, Vector2Like } from "engine/core/math/vector2";
 import { Rect2 } from "engine/core/math/rect2";
-import { res_class_map } from "engine/registry";
+import { res_class_map, resource_map } from "engine/registry";
 import {
     HALIGN_LEFT,
     HALIGN_FILL,
     HALIGN_CENTER,
     HALIGN_RIGHT,
+    VALIGN_TOP,
+    VALIGN_CENTER,
+    VALIGN_BOTTOM,
+    VALIGN_FILL,
 } from "engine/core/math/math_defs";
 
 import { ImageTexture } from "./texture";
@@ -35,16 +39,35 @@ const measure_ctx = (() => {
     return c.getContext('2d');
 })();
 
+export class DynamicFontData {
+    get type() { return 'DynamicFontData' }
+    constructor() {
+        this.ascender = 0;
+        this.descender = 0;
+        this.family = '';
+    }
+    _load_data(data) {
+        this.ascender = data.ascender;
+        this.descender = data.descender;
+        this.family = data.family;
+        return this;
+    }
+}
+res_class_map['DynamicFontData'] = DynamicFontData;
+
 export class DynamicFont {
     get type() { return 'DynamicFont' }
+
+    get family() { return this.font ? this.font.family : '' }
 
     constructor() {
         this.name = '';
 
-        this.family = '';
+        /** @type {DynamicFontData} */
+        this.font = null;
         this.size = 0;
 
-        this.height = -1;
+        this.height = 0;
         this.ascent = 0;
         this.descent = 0;
 
@@ -53,10 +76,58 @@ export class DynamicFont {
     }
 
     _load_data(data) {
-        this.family = data.font;
         this.size = data.size;
-
+        this.set_font_data(data.font);
         return this;
+    }
+
+    /**
+     * @param {string | DynamicFontData} font_data
+     */
+    set_font_data(font_data) {
+        /** @type {DynamicFontData} */
+        let data = null;
+        if (typeof (font_data) === 'string') {
+            data = resource_map[font_data];
+        } else {
+            data = font_data;
+        }
+
+        this.font = data;
+
+        this.ascent = Math.ceil(this.size * this.font.ascender / 1000);
+        this.descent = Math.ceil(Math.abs(this.size * this.font.descender / 1000));
+        this.height = this.ascent + this.descent;
+    }
+
+    /**
+     * @param {string} text
+     * @param {number} max_width
+     */
+    wrap_lines(text, max_width) {
+        if (max_width < 0) {
+            return text.split('\n');
+        }
+        max_width = Math.ceil(max_width);
+
+        measure_ctx.font = `${this.size}px ${this.family}`;
+
+        var words = text.split(" ");
+        var lines = [];
+        var current_line = words[0];
+
+        for (var i = 1; i < words.length; i++) {
+            var word = words[i];
+            var width = measure_ctx.measureText(current_line + " " + word).width;
+            if (Math.ceil(width) <= max_width) {
+                current_line += " " + word;
+            } else {
+                lines.push(current_line);
+                current_line = word;
+            }
+        }
+        lines.push(current_line);
+        return lines;
     }
 
     get_height() {
@@ -64,28 +135,39 @@ export class DynamicFont {
     }
 
     /**
-     * @param {string} text
+     * @param {Vector2} size
+     * @param {string} char
+     * @param {string} [next]
      */
-    get_text_size(text) {
+    get_char_size(size, char, next = '') {
+        measure_ctx.font = `${this.size}px ${this.family}`;
+        const m = measure_ctx.measureText(char);
+        return size.set(
+            m.width,
+            m.actualBoundingBoxAscent + m.actualBoundingBoxDescent
+        );
+    }
+
+    /**
+     * @param {string} text
+     * @param {number} max_width
+     * @param {number} line_spacing
+     */
+    get_text_size(text, max_width, line_spacing) {
         measure_ctx.font = `${this.size}px ${this.family}`;
 
-        // measure line height if not done yet
-        if (this.height < 0) {
-            const m = measure_ctx.measureText('M');
-            this.height = m.width * 1.2;
-        }
+        const lines = this.wrap_lines(text, max_width);
 
-        const lines = text.split('\n');
-
-        let total_height = lines.length * (this.height + 3) - 3;
-        let max_width = 0;
+        let total_height = lines.length * (this.height + line_spacing);
+        let width = 0;
         for (let i = 0; i < lines.length; i++) {
-            let width = measure_ctx.measureText(lines[i]).width;
-            max_width = Math.max(max_width, width);
+            let m = measure_ctx.measureText(lines[i]);
+            let w = m.width;
+            width = Math.max(width, w);
         }
 
         return {
-            width: max_width,
+            width: width,
             height: total_height,
         }
     }
@@ -93,11 +175,15 @@ export class DynamicFont {
     /**
      * @param {import('engine/servers/visual/visual_server_canvas').Item} canvas_item
      * @param {string} text
-     * @param {number} align
+     * @param {Vector2Like} size
+     * @param {number} h_align
+     * @param {number} v_align
+     * @param {number} line_spacing
+     * @param {number} line_count
+     * @param {number} max_width
      */
-    draw_to_texture(canvas_item, text, align) {
-        const size = this.get_text_size(text);
-
+    draw_to_texture(canvas_item, text, size, h_align, v_align, line_spacing, line_count, max_width) {
+        // fetch context for drawing
         let ctx = this.ctx_table.get(canvas_item._id);
         if (!ctx) {
             ctx = DynamicFontRenderContext_new();
@@ -110,32 +196,70 @@ export class DynamicFont {
             })
         }
 
-        ctx.canvas.width = size.width;
-        ctx.canvas.height = size.height;
+        const font_h = this.height + line_spacing;
 
-        ctx.context.font = `${this.size}px ${this.family}`;
-        ctx.context.textBaseline = 'top';
-        ctx.context.textAlign = 'left';
-        ctx.context.fillStyle = 'white';
+        let vbegin = 0, vsep = 0;
 
-        const lines = text.split('\n');
+        let lines_visible = Math.floor((size.y + line_spacing) / font_h);
+        if (lines_visible > line_count) {
+            lines_visible = line_count;
+        }
 
-        for (let i = 0; i < lines.length; i++) {
-            let width = ctx.context.measureText(lines[i]).width;
-            let x = 0;
-            switch (align) {
-                case HALIGN_LEFT:
-                case HALIGN_FILL: {
-                    x = 0;
+        if (lines_visible > 0) {
+            switch (v_align) {
+                case VALIGN_TOP: {
+                    // nothing
                 } break;
-                case HALIGN_CENTER: {
-                    x = (size.width - width) / 2;
+                case VALIGN_CENTER: {
+                    vbegin = Math.floor((size.y - (lines_visible * font_h - line_spacing)) / 2);
+                    vsep = 0;
                 } break;
-                case HALIGN_RIGHT: {
-                    x = size.width - width;
+                case VALIGN_BOTTOM: {
+                    vbegin = Math.floor(size.y - (lines_visible * font_h - line_spacing));
+                    vsep = 0;
+                } break;
+                case VALIGN_FILL: {
+                    vbegin = 0;
+                    if (lines_visible > 1) {
+                        vsep = Math.floor((size.y - (lines_visible * font_h - line_spacing)) / (lines_visible - 1));
+                    } else {
+                        vsep = 0;
+                    }
                 } break;
             }
-            ctx.context.fillText(lines[i], x, 3 + i * (this.height + 3));
+        }
+
+        ctx.canvas.width = size.x;
+        ctx.canvas.height = size.y;
+        ctx.context.clearRect(0, 0, size.x, size.y);
+
+        ctx.context.font = `${this.size}px ${this.family}`;
+        ctx.context.fillStyle = 'white';
+
+        const lines = this.wrap_lines(text, max_width);
+
+        let line_to = lines_visible > 0 ? lines_visible : 1;
+        for (let i = 0; i < line_to; i++) {
+            let m = ctx.context.measureText(lines[i]);
+            let width = m.width;
+            let x_ofs = 0;
+            switch (h_align) {
+                case HALIGN_LEFT:
+                case HALIGN_FILL: {
+                    // TODO: stylebox
+                    x_ofs = Math.floor(m.actualBoundingBoxLeft);
+                } break;
+                case HALIGN_CENTER: {
+                    x_ofs = Math.floor((size.x - width) / 2 - m.actualBoundingBoxLeft);
+                } break;
+                case HALIGN_RIGHT: {
+                    x_ofs = Math.floor(size.x - m.actualBoundingBoxRight);
+                } break;
+            }
+            let y_ofs = 0; // TODO: stylebox
+            y_ofs += (i * font_h + this.ascent);
+            y_ofs += (vbegin + i * vsep);
+            ctx.context.fillText(lines[i], x_ofs, y_ofs);
         }
 
         ctx.texture.create_from_image(ctx.canvas, {

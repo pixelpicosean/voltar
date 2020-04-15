@@ -15,13 +15,13 @@
             "1": "monitor",
             "2": "alien",
             "3": "player",
-            "5": "Elephant"
+            "5": "res://font/GROBOLD.ttf"
         },
         "sub": {
             "1": {
                 "type": "DynamicFont",
                 "font": "@ext#5",
-                "size": 20
+                "size": 25
             },
             "2": {
                 "type": "Shader",
@@ -190,12 +190,12 @@
                 "anchor_left": 0.5,
                 "anchor_top": 0.5,
                 "anchor_right": 0.5,
-                "margin_bottom": 37,
+                "margin_bottom": 17,
                 "margin_left": -106.5,
-                "margin_top": -28,
+                "margin_top": -19,
                 "margin_right": 105.5,
                 "align": 1,
-                "text": "GAME OVER",
+                "text": "GAME OVERg",
                 "valign": 1,
                 "font": "@sub#1"
             },
@@ -210,5 +210,12 @@
                 "margin_right": 239.5
             }
         ]
+    },
+    "res://font/GROBOLD.ttf": {
+        "type": "DynamicFontData",
+        "filename": "res://font/GROBOLD.ttf",
+        "family": "GROBOLD",
+        "ascender": 800,
+        "descender": -200
     }
 }

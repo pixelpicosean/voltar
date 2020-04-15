@@ -7,6 +7,7 @@ const { get_function_params } = require('./parser/type_converters');
 const { load_tres } = require('./converter/load_tres');
 const { convert_tres } = require('./converter/convert_tres');
 const { normalize_resource_object } = require('./converter/resource_normalizer');
+const record = require('./resource_record');
 
 module.exports.convert_scenes = (/** @type {string} */scene_root_url_p) => {
     const scene_root_url = path.normalize(scene_root_url_p);
@@ -153,6 +154,9 @@ module.exports.convert_scenes = (/** @type {string} */scene_root_url_p) => {
             }
         }
     }
+
+    // push non-tres resources into our resource map
+    const non_tres = record.get_non_tres_resources();
 
     return resource_map;
 }

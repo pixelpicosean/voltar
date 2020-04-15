@@ -15,6 +15,13 @@ convert_project_settings(path.normalize(path.join(__dirname, '../assets/project.
 // 2. compile and pack scenes into `resources.json`
 console.log(`2. import scenes`)
 const resource_map = convert_scenes(path.normalize(path.join(__dirname, '../assets')));
+// - add all non-tres resources into the map
+let non_tres = record.get_non_tres_resources();
+for (let k in non_tres) {
+    non_tres[k].forEach((res) => {
+        resource_map[res.filename] = res;
+    })
+}
 fs.writeFileSync(path.normalize(path.join(__dirname, '../assets/resources.json')), JSON.stringify(resource_map, null, 4));
 
 // 3. process and copy assets (DynamicFont, ...) to media

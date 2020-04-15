@@ -148,7 +148,9 @@ export class Engine {
 
                     // process resource first
                     if (res.type !== 'PackedScene') {
-                        normalize_resource_array(res.resource, res.ext || {}, res.sub || {});
+                        if (res.resource) {
+                            normalize_resource_array(res.resource, res.ext || {}, res.sub || {});
+                        }
 
                         const ctor = res_class_map[res.type];
                         if (ctor) {
