@@ -1,6 +1,320 @@
-import { Vector2 } from "engine/core/math/vector2";
+import { VObject } from "engine/core/v_object";
+import { Vector2, Vector2Like } from "engine/core/math/vector2";
 import { Rect2 } from "engine/core/math/rect2";
+import { res_class_map, resource_map } from "engine/registry";
+import {
+    HALIGN_LEFT,
+    HALIGN_FILL,
+    HALIGN_CENTER,
+    HALIGN_RIGHT,
+    VALIGN_TOP,
+    VALIGN_CENTER,
+    VALIGN_BOTTOM,
+    VALIGN_FILL,
+} from "engine/core/math/math_defs";
+
 import { ImageTexture } from "./texture";
+import { FontFaceObserver } from "engine/dep/fontfaceobserver";
+
+class DynamicFontRenderContext {
+    constructor() {
+        this.canvas = document.createElement('canvas');
+        this.context = this.canvas.getContext('2d');
+        this.texture = new ImageTexture;
+    }
+}
+/** @type {DynamicFontRenderContext[]} */
+const DynamicFontRenderContext_pool = [];
+function DynamicFontRenderContext_new() {
+    let ctx = DynamicFontRenderContext_pool.pop();
+    if (!ctx) ctx = new DynamicFontRenderContext;
+    return ctx;
+}
+/** @param {DynamicFontRenderContext} ctx */
+function DynamicFontRenderContext_free(ctx) {
+    DynamicFontRenderContext_pool.push(ctx);
+}
+
+/** @type {CanvasRenderingContext2D} */
+const measure_ctx = (() => {
+    let c = document.createElement('canvas');
+    return c.getContext('2d');
+})();
+
+export class DynamicFontData extends VObject {
+    get type() { return 'DynamicFontData' }
+    constructor() {
+        super();
+
+        this.ascender = 0;
+        this.descender = 0;
+        this.family = '';
+
+        this.loaded = false;
+    }
+    _load_data(data) {
+        this.ascender = data.ascender;
+        this.descender = data.descender;
+        this.family = data.family;
+
+        let observer = new FontFaceObserver(this.family);
+        observer.load().then(() => {
+            this.loaded = true;
+            this.emit_signal('loaded', this);
+        }, () => {
+            this.loaded = false;
+            console.warn(`Fail to load DynamicFont "${this.family}"!`);
+        })
+
+        return this;
+    }
+}
+res_class_map['DynamicFontData'] = DynamicFontData;
+
+export class DynamicFont extends VObject {
+    get type() { return 'DynamicFont' }
+
+    get family() { return this.font ? this.font.family : '' }
+
+    constructor() {
+        super();
+
+        this.name = '';
+
+        /** @type {DynamicFontData} */
+        this.font = null;
+        this.size = 0;
+
+        this.height = 0;
+        this.ascent = 0;
+        this.descent = 0;
+
+        /** @type {Map<number, DynamicFontRenderContext>} */
+        this.ctx_table = new Map;
+    }
+
+    _load_data(data) {
+        this.size = data.size;
+        this.set_font_data(data.font);
+        return this;
+    }
+
+    /**
+     * @param {string | DynamicFontData} font_data
+     */
+    set_font_data(font_data) {
+        /** @type {DynamicFontData} */
+        let data = null;
+        if (typeof (font_data) === 'string') {
+            data = resource_map[font_data];
+        } else {
+            data = font_data;
+        }
+
+        this.font = data;
+
+        this.update_font_info();
+    }
+
+    /**
+     * @param {Function} callback
+     * @param {any} scope
+     */
+    add_load_listener(callback, scope) {
+        if (!this.font) return;
+        if (this.font.loaded) return;
+
+        this.font.connect_once('loaded', callback, scope);
+    }
+
+    update_font_info() {
+        // The calculation is based on Godot behavior, which
+        // is basically how FreeType works. These data generated
+        // from opentype.js during importing.
+        this.ascent = Math.ceil(this.size * this.font.ascender / 1000);
+        this.descent = Math.ceil(Math.abs(this.size * this.font.descender / 1000));
+        this.height = this.ascent + this.descent;
+    }
+
+    /**
+     * @param {string} text
+     * @param {number} max_width
+     */
+    wrap_lines(text, max_width) {
+        if (max_width < 0) {
+            return text.split('\n');
+        }
+        max_width = Math.ceil(max_width);
+
+        measure_ctx.font = `${this.size}px ${this.family}`;
+
+        var words = text.split(" ");
+        var lines = [];
+        var current_line = words[0];
+
+        for (var i = 1; i < words.length; i++) {
+            var word = words[i];
+            var width = measure_ctx.measureText(current_line + " " + word).width;
+            if (Math.ceil(width) <= max_width) {
+                current_line += " " + word;
+            } else {
+                lines.push(current_line);
+                current_line = word;
+            }
+        }
+        if (current_line.indexOf('\n') >= 0) {
+            lines.push(...current_line.split('\n'));
+        } else {
+            lines.push(current_line);
+        }
+        return lines;
+    }
+
+    get_height() {
+        return this.height;
+    }
+
+    /**
+     * @param {Vector2} size
+     * @param {string} char
+     * @param {string} [next]
+     */
+    get_char_size(size, char, next = '') {
+        measure_ctx.font = `${this.size}px ${this.family}`;
+        const m = measure_ctx.measureText(char);
+        return size.set(
+            m.width,
+            m.actualBoundingBoxAscent + m.actualBoundingBoxDescent
+        );
+    }
+
+    /**
+     * @param {string} text
+     * @param {number} max_width
+     * @param {number} line_spacing
+     */
+    get_text_size(text, max_width, line_spacing) {
+        measure_ctx.font = `${this.size}px ${this.family}`;
+
+        const lines = this.wrap_lines(text, max_width);
+
+        let total_height = lines.length * (this.height + line_spacing);
+        let width = 0;
+        for (let i = 0; i < lines.length; i++) {
+            let m = measure_ctx.measureText(lines[i]);
+            let w = m.width;
+            width = Math.max(width, w);
+        }
+
+        return {
+            width: width,
+            height: total_height,
+        }
+    }
+
+    /**
+     * @param {import('engine/servers/visual/visual_server_canvas').Item} canvas_item
+     * @param {string} text
+     * @param {Vector2Like} size
+     * @param {number} h_align
+     * @param {number} v_align
+     * @param {number} line_spacing
+     * @param {number} line_count
+     * @param {number} max_width
+     */
+    draw_to_texture(canvas_item, text, size, h_align, v_align, line_spacing, line_count, max_width) {
+        // fetch context for drawing
+        // FIXME: do we need a new canvas for drawing?
+        let ctx = this.ctx_table.get(canvas_item._id);
+        if (!ctx) {
+            ctx = DynamicFontRenderContext_new();
+            canvas_item.free_listeners.push((item) => {
+                let ctx = this.ctx_table.get(item._id);
+                if (ctx) {
+                    DynamicFontRenderContext_free(ctx);
+                    this.ctx_table.delete(item._id);
+                }
+            })
+            this.ctx_table.set(canvas_item._id, ctx);
+        }
+
+        const font_h = this.height + line_spacing;
+
+        let vbegin = 0, vsep = 0;
+
+        let lines_visible = Math.floor((size.y + line_spacing) / font_h);
+        if (lines_visible > line_count) {
+            lines_visible = line_count;
+        }
+
+        if (lines_visible > 0) {
+            switch (v_align) {
+                case VALIGN_TOP: {
+                    // nothing
+                } break;
+                case VALIGN_CENTER: {
+                    vbegin = Math.floor((size.y - (lines_visible * font_h - line_spacing)) / 2);
+                    vsep = 0;
+                } break;
+                case VALIGN_BOTTOM: {
+                    vbegin = Math.floor(size.y - (lines_visible * font_h - line_spacing));
+                    vsep = 0;
+                } break;
+                case VALIGN_FILL: {
+                    vbegin = 0;
+                    if (lines_visible > 1) {
+                        vsep = Math.floor((size.y - (lines_visible * font_h - line_spacing)) / (lines_visible - 1));
+                    } else {
+                        vsep = 0;
+                    }
+                } break;
+            }
+        }
+
+        ctx.canvas.width = size.x;
+        ctx.canvas.height = size.y;
+        ctx.context.clearRect(0, 0, size.x, size.y);
+
+        ctx.context.font = `${this.size}px ${this.family}`;
+        ctx.context.fillStyle = 'white';
+
+        const lines = this.wrap_lines(text, max_width);
+
+        let line_to = lines_visible > 0 ? lines_visible : 1;
+        for (let i = 0; i < line_to; i++) {
+            let m = ctx.context.measureText(lines[i]);
+            let width = m.width;
+            let x_ofs = 0;
+            switch (h_align) {
+                case HALIGN_LEFT:
+                case HALIGN_FILL: {
+                    // TODO: stylebox
+                    x_ofs = Math.floor(m.actualBoundingBoxLeft);
+                } break;
+                case HALIGN_CENTER: {
+                    x_ofs = Math.floor((size.x - width) / 2 - m.actualBoundingBoxLeft);
+                } break;
+                case HALIGN_RIGHT: {
+                    x_ofs = Math.floor(size.x - m.actualBoundingBoxRight);
+                } break;
+            }
+            let y_ofs = 0; // TODO: stylebox
+            y_ofs += (i * font_h + this.ascent);
+            y_ofs += (vbegin + i * vsep);
+            ctx.context.fillText(lines[i], x_ofs, y_ofs);
+        }
+
+        ctx.texture.create_from_image(ctx.canvas, {
+            min_filter: WebGLRenderingContext.LINEAR,
+            mag_filter: WebGLRenderingContext.LINEAR,
+            wrap_u: WebGLRenderingContext.CLAMP_TO_EDGE,
+            wrap_v: WebGLRenderingContext.CLAMP_TO_EDGE,
+        });
+
+        return ctx.texture;
+    }
+}
+res_class_map['DynamicFont'] = DynamicFont;
 
 
 const ZeroVector = Object.freeze(new Vector2(0, 0));
@@ -22,7 +336,9 @@ export class Character {
     }
 }
 
-export class Font {
+export class BitmapFont {
+    get type() { return 'BitmapFont' }
+
     constructor() {
         this.name = '';
 
@@ -92,7 +408,7 @@ export class Font {
 }
 
 /**
- * @type {Object<string, Font>}
+ * @type {Object<string, BitmapFont>}
  */
 export const registered_bitmap_fonts = {};
 
@@ -104,8 +420,8 @@ export const registered_bitmap_fonts = {};
  * @param {Object<string, ImageTexture>} textures - List of textures for each page.
  *  If providing an object, the key is the `<page>` element's `file` attribute in the FNT file.
  */
-export function register_font(xml, textures) {
-    const font = new Font();
+export function register_bitmap_font(xml, textures) {
+    const font = new BitmapFont();
 
     const info = xml.getElementsByTagName('info')[0];
     const common = xml.getElementsByTagName('common')[0];

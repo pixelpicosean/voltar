@@ -199,6 +199,10 @@ export class CommandPolygon extends Command {
         /** @type {number[]} */
         this.points = [];
         /** @type {number[]} */
+        this.bones = [];
+        /** @type {number[]} */
+        this.weights = [];
+        /** @type {number[]} */
         this.uvs = [];
         /** @type {number[]} */
         this.colors = [];
@@ -208,6 +212,8 @@ export class CommandPolygon extends Command {
     init() {
         super.init();
         this.points.length = 0;
+        this.bones.length = 0;
+        this.weights.length = 0;
         this.uvs.length = 0;
         this.colors.length = 0;
         this.indices.length = 0;

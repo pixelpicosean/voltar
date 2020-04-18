@@ -11,7 +11,8 @@ import {
     VALIGN_BOTTOM,
     VALIGN_FILL,
 } from "engine/core/math/math_defs";
-import { Vector2 } from "engine/core/math/vector2";
+import { Vector2, Vector2Like } from "engine/core/math/vector2";
+import { Rect2 } from "engine/core/math/rect2";
 import { Color } from "engine/core/color";
 
 import { VSG } from "engine/servers/visual/visual_server_globals";
@@ -24,7 +25,9 @@ import {
     NOTIFICATION_THEME_CHANGED,
     NOTIFICATION_RESIZED,
 } from "./control";
+import { DynamicFont, BitmapFont } from "../resources/font";
 
+let pos = new Vector2;
 
 const tmp_vec = new Vector2();
 const tmp_vec2 = new Vector2();
@@ -115,6 +118,13 @@ export class Label extends Control {
     /* virtual */
 
     _load_data(data) {
+        if (data.font) {
+            this.add_font_override('font', data.font);
+        }
+        if (data.text !== undefined) {
+            this.set_text(data.text);
+        }
+
         super._load_data(data);
 
         if (data.align !== undefined) {
@@ -135,9 +145,6 @@ export class Label extends Control {
         if (data.percent_visible !== undefined) {
             this.set_percent_visible(data.percent_visible);
         }
-        if (data.text !== undefined) {
-            this.set_text(data.text);
-        }
         if (data.uppercase !== undefined) {
             this.set_uppercase(data.uppercase);
         }
@@ -146,9 +153,6 @@ export class Label extends Control {
         }
         if (data.visible_characters !== undefined) {
             this.set_visible_characters(data.visible_characters);
-        }
-        if (data.font) {
-            this.add_font_override('font', data.font);
         }
         if (data.custom_colors) {
             for (let k in data.custom_colors) {
@@ -163,6 +167,21 @@ export class Label extends Control {
     get_minimum_size() {
         const size = Vector2.new();
         const min_style = this.get_stylebox('normal').get_minimum_size(tmp_vec);
+
+        const f = this.get_font('font');
+        if (f.type === 'DynamicFont') {
+            if (this._autowrap) {
+                return size.copy(min_style).add(1, this._clip_text ? 1 : this.minsize.y);
+            } else {
+                const font = /** @type {DynamicFont} */(f);
+                const width = this._autowrap ? (this.rect_size.x - min_style.x) : this.get_longest_line_width();
+                const s = font.get_text_size(this._text, width, this.get_constant('line_spacing'));
+                return size.set(
+                    s.width,
+                    s.height
+                );
+            }
+        }
 
         if (this.word_cache_dirty) {
             this.regenerate_word_cache();
@@ -198,9 +217,9 @@ export class Label extends Control {
             const text = this._text;
             const size = this.rect_size;
             const style = this.get_stylebox('normal');
-            const font = this.get_font('font');
             const font_color = this.get_color('font_color');
             const line_spacing = this.get_constant('line_spacing');
+            let font = this.get_font('font');
 
             // TODO: draw stylebox
 
@@ -219,6 +238,23 @@ export class Label extends Control {
 
             if (this._max_lines_visible >= 0 && lines_visible > this._max_lines_visible) {
                 lines_visible = this._max_lines_visible;
+            }
+
+            if (font.type === 'DynamicFont') {
+                font = /** @type {DynamicFont} */(font);
+                font.add_load_listener(this.update, this);
+                const texture = font.draw_to_texture(
+                    this.canvas_item,
+                    text,
+                    size,
+                    this._align,
+                    this._valign,
+                    line_spacing,
+                    lines_visible,
+                    this._autowrap ? (size.x - style.get_minimum_size(tmp_vec).x) : this.get_longest_line_width()
+                );
+                texture.draw(this.canvas_item, Vector2.ZERO);
+                return;
             }
 
             if (lines_visible > 0) {
@@ -252,7 +288,6 @@ export class Label extends Control {
 
             let line = 0;
             let line_to = this._lines_skipped + (lines_visible > 0 ? lines_visible : 1);
-            let glyph_idx = 0;
             while (wc) {
                 if (line >= line_to) {
                     break;
@@ -309,6 +344,7 @@ export class Label extends Control {
                 y_ofs += (line - this._lines_skipped) * font_h + font.ascent;
                 y_ofs += vbegin + line * vsep;
 
+                font = /** @type {BitmapFont} */(font);
                 while (from !== to) {
                     // draw a word
                     let pos = from.char_pos;
@@ -331,8 +367,6 @@ export class Label extends Control {
                                 c = c.toUpperCase();
                                 n = n.toUpperCase();
                             }
-
-                            glyph_idx++;
 
                             const char = font.char_map[c.charCodeAt(0)];
 
@@ -369,7 +403,14 @@ export class Label extends Control {
     /* public */
 
     get_longest_line_width() {
-        const font = this.get_font('font');
+        const f = this.get_font('font');
+        if (f.type === 'DynamicFont') {
+            let font = /** @type {DynamicFont} */(f);
+            return font.get_text_size(this._text, -1, this.get_constant('line_spacing')).width;
+        }
+
+        const font = /** @type {BitmapFont} */(f);
+
         let max_line_width = 0;
         let line_width = 0;
 
@@ -450,7 +491,15 @@ export class Label extends Control {
 
         const style = this.get_stylebox('normal');
         const width = this._autowrap ? (this.rect_size.x - style.get_minimum_size(tmp_vec3).x) : this.get_longest_line_width();
-        const font = this.get_font('font');
+        const f = this.get_font('font');
+
+        if (f.type === "DynamicFont") {
+            let font = /** @type {DynamicFont} */(f);
+            this.line_count = font.wrap_lines(text, width).length;
+            return;
+        }
+
+        const font = /** @type {BitmapFont} */(f);
 
         let current_word_size = 0;
         let word_pos = 0;

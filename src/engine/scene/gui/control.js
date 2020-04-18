@@ -21,7 +21,7 @@ import { NOTIFICATION_WM_UNFOCUS_REQUEST } from 'engine/core/main_loop';
 import { VSG } from 'engine/servers/visual/visual_server_globals';
 
 import { Theme } from '../resources/theme';
-import { Font } from '../resources/font';
+import { BitmapFont, DynamicFont } from '../resources/font';
 import {
     Node,
     NOTIFICATION_ENTER_TREE,
@@ -1439,7 +1439,7 @@ export class Control extends CanvasItem {
 
     /**
      * @param {string} name
-     * @param {Font} font
+     * @param {BitmapFont | DynamicFont} font
      */
     add_font_override(name, font) {
         this.c_data.font_override = this.c_data.font_override || {};
@@ -1577,7 +1577,7 @@ export class Control extends CanvasItem {
     get_font(name, type) {
         if (!type) {
             if (this.c_data.font_override) {
-                /** @type {Font} */
+                /** @type {BitmapFont|DynamicFont} */
                 const font = this.c_data.font_override[name];
                 if (font !== undefined) {
                     return font;

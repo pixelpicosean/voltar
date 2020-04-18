@@ -473,6 +473,11 @@ export class RasterizerStorage {
         rid.wrap_u = p_flags.wrap_u || WRAP_CLAMP_TO_EDGE;
         rid.wrap_v = p_flags.wrap_v || WRAP_CLAMP_TO_EDGE;
 
+        if (rid.gl_tex) {
+            gl.deleteTexture(rid.gl_tex);
+            rid.gl_tex = null;
+        }
+
         rid.gl_tex = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_2D, rid.gl_tex);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, rid.min_filter);

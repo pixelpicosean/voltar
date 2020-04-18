@@ -322,7 +322,7 @@ export class OS {
             ev.control = e.ctrlKey;
             ev.scancode = e.keyCode;
             ev.key = e.key;
-            ev.unicode = e.key.length === 1 ? e.key : null;
+            ev.unicode = (e.key && e.key.length === 1) ? e.key : null;
             return ev;
         }
 

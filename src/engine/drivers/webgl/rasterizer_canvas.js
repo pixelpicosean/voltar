@@ -662,7 +662,7 @@ export class RasterizerCanvas extends VObject {
                 case TYPE_LINE: {
                     const line = /** @type {CommandLine} */(cmd);
 
-                    this.check_batch_state(4, 6, null, this.materials.flat, blend_mode);
+                    this.check_batch_state(4, 6, this.storage.resources.white_tex, this.materials.flat, blend_mode);
 
                     const {
                         v: vertices,
@@ -737,7 +737,7 @@ export class RasterizerCanvas extends VObject {
                 } break;
                 case TYPE_RECT: {
                     const rect = /** @type {CommandRect} */(cmd);
-                    const tex = rect.texture;
+                    const tex = rect.texture || this.storage.resources.white_tex;
 
                     this.check_batch_state(4, 6, tex, (rect.flags & CANVAS_RECT_TILE) ? materials.tile : materials.flat, blend_mode);
 
@@ -780,7 +780,7 @@ export class RasterizerCanvas extends VObject {
 
                     // - uv
                     if (tex) {
-                        const tex_uvs = rect.texture.uvs;
+                        const tex_uvs = tex.uvs;
                         if (rect.flags & CANVAS_RECT_REGION) {
                             if (rect.flags & CANVAS_RECT_TILE) {
                                 this.states.uniforms.frame_uv = [
@@ -869,7 +869,7 @@ export class RasterizerCanvas extends VObject {
                 } break;
                 case TYPE_NINEPATCH: {
                     const np = /** @type {CommandNinePatch} */(cmd);
-                    const tex = np.texture;
+                    const tex = np.texture || this.storage.resources.white_tex;
 
                     this.check_batch_state(32, 54, tex, this.materials.flat, blend_mode);
 
@@ -1048,7 +1048,7 @@ export class RasterizerCanvas extends VObject {
                 } break;
                 case TYPE_POLYGON: {
                     const polygon = /** @type {CommandPolygon} */(cmd);
-                    const tex = polygon.texture;
+                    const tex = polygon.texture || this.storage.resources.white_tex;
 
                     const vert_count = polygon.get_vert_count();
                     const indi_count = polygon.indices.length;
@@ -1109,7 +1109,7 @@ export class RasterizerCanvas extends VObject {
                 case TYPE_CIRCLE: {
                     const circle = /** @type {CommandCircle} */(cmd);
                     const radius = circle.radius;
-                    const tex = circle.texture;
+                    const tex = circle.texture || this.storage.resources.white_tex;
 
                     const wt = extra_xform ? full_xform.copy(p_item.final_transform).append(extra_xform) : p_item.final_transform;
                     const a = wt.a;
@@ -1164,7 +1164,7 @@ export class RasterizerCanvas extends VObject {
                 } break;
                 case TYPE_POLYLINE: {
                     const pline = /** @type {CommandPolyLine} */(cmd);
-                    const tex = pline.texture;
+                    const tex = pline.texture || this.storage.resources.white_tex;
 
                     const vert_count = Math.floor(pline.triangles.length / 2);
                     const indi_count = (vert_count - 2) * 3;
@@ -1399,7 +1399,9 @@ export class RasterizerCanvas extends VObject {
             this.flush();
 
             // update states with new batch data
-            this.states.texture = texture.texture;
+            if (texture) {
+                this.states.texture = texture.texture;
+            }
             this.states.material = material;
             this.states.blend_mode = blend_mode;
 

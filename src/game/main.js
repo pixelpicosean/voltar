@@ -1,16 +1,19 @@
 import * as v from 'engine/index';
 
-import Settings from 'project.json';
-
-/* load our own extensions */
 import 'extension/2d/vector_graphic';
 
+
+import 'game/preloader'; // for scene registry side effect
 import { Preloader } from 'game/preloader';
+
+import 'game/demo/demo'; // for scene registry side effect
 import { MainScene } from 'game/demo/demo';
 
 
 v.preload('media/sprites-0.json');
 
+
+import Settings from 'project.json';
 
 v.Main.setup(Settings, {
     display: {

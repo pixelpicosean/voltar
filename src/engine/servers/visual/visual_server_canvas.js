@@ -1,4 +1,5 @@
 import { remove_items } from 'engine/dep/index';
+import earcut from 'earcut';
 import {
     CMP_EPSILON,
     MARGIN_LEFT,
@@ -103,9 +104,18 @@ export class Item {
         this.child_items = [];
         /** @type {Item} */
         this.next = null;
+
+        /** @type {((item: Item) => void)[]} */
+        this.free_listeners = [];
     }
     free() {
         this.clear();
+
+        for (let i = 0; i < this.free_listeners.length; i++) {
+            this.free_listeners[i](this);
+        }
+        this.free_listeners.length = 0;
+
         free_Item(this);
     }
 
@@ -726,14 +736,43 @@ export class VisualServerCanvas {
         if (p_indices) {
             polygon.indices = p_indices.slice();
         } else {
-            // TODO: use earcut to triangulate the polygon
+            polygon.indices = earcut(polygon.points);
         }
 
         p_item.rect_dirty = true;
 
         p_item.commands.push(polygon);
     }
-    canvas_item_add_triangle_array() { }
+    /**
+     * Unlike same method of Godot, we accept indices array as optional parameter,
+     * we will not triangulate if it is provided (could be faster).
+     * @param {Item} p_item
+     * @param {number[]} [p_indices]
+     * @param {number[]} p_points [x, y]
+     * @param {number[]} p_colors [r, g, b, a]
+     * @param {number[]} [p_uvs] [u, v]
+     * @param {number[]} [p_bones]
+     * @param {number[]} [p_weights]
+     * @param {ImageTexture} [p_texture]
+     */
+    canvas_item_add_triangle_array(p_item, p_indices, p_points, p_colors, p_uvs, p_bones, p_weights, p_texture) {
+        const polygon = CommandPolygon.instance();
+        polygon.texture = p_texture;
+        polygon.points = p_points.slice();
+        polygon.colors = p_colors.slice();
+        polygon.bones = p_bones.slice();
+        polygon.weights = p_weights.slice();
+        if (p_uvs) polygon.uvs = p_uvs.slice();
+        if (p_indices) {
+            polygon.indices = p_indices.slice();
+        } else {
+            polygon.indices = earcut(polygon.points);
+        }
+
+        p_item.rect_dirty = true;
+
+        p_item.commands.push(polygon);
+    }
     canvas_item_add_mesh() { }
     /**
      * @param {Item} p_item

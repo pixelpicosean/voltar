@@ -1,13 +1,38 @@
 {
+    "res://font/GROBOLD.ttf": {
+        "type": "DynamicFontData",
+        "filename": "res://font/GROBOLD.ttf",
+        "family": "GROBOLD",
+        "ascender": 800,
+        "descender": -200
+    },
+    "res://scene/ui/input.tscn": {
+        "type": "PackedScene",
+        "nodes": [
+            {
+                "type": "Node2D",
+                "name": "input",
+                "elem_id": "word_input"
+            }
+        ]
+    },
     "res://scene/demo.tscn": {
         "type": "PackedScene",
         "ext": {
-            "1": "palette"
+            "1": "monitor",
+            "2": "alien",
+            "3": "player",
+            "5": "res://font/GROBOLD.ttf"
         },
         "sub": {
+            "1": {
+                "type": "DynamicFont",
+                "font": "@ext#5",
+                "size": 25
+            },
             "2": {
                 "type": "Shader",
-                "code": "shader_type canvas_item;\nvoid fragment() {\nvec2 uv = SCREEN_UV;\n\nvec3 color;\nvec4 ori_color = texture(SCREEN_TEXTURE, uv);\n// color separation\ncolor.r = texture(SCREEN_TEXTURE, vec2(uv.x + 0.003, uv.y)).x;\ncolor.g = texture(SCREEN_TEXTURE, vec2(uv.x + 0.000, uv.y)).y;\ncolor.b = texture(SCREEN_TEXTURE, vec2(uv.x - 0.003, uv.y)).z;\n// increase contrast\ncolor = clamp(color * 0.5 + 0.5 * color * color * 1.2, 0.0, 1.0);\n// vignetting\ncolor *= 0.5 + 0.5 * 16.0 * uv.x * uv.y * (1.0 - uv.x) * (1.0 - uv.y);\n// tinting\ncolor *= vec3(0.8, 1.0, 0.7);\n// tv lines\ncolor *= 0.9 + 0.1 * sin(10.0 * TIME + uv.y * 1800.0);\n// flickering\ncolor *= 0.97 + 0.03 * sin(110.0 * TIME);\nCOLOR = vec4(color, ori_color.a);}"
+                "code": "shader_type canvas_item;\nvoid fragment() {\n\nvec2 uv = SCREEN_UV;\n\nvec3 color;\n\nvec4 ori_color = texture(SCREEN_TEXTURE, uv);\n\n// color separation\n\ncolor.r = texture(SCREEN_TEXTURE, vec2(uv.x + 0.01, uv.y)).x;\n\ncolor.g = texture(SCREEN_TEXTURE, vec2(uv.x + 0.000, uv.y)).y;\n\ncolor.b = texture(SCREEN_TEXTURE, vec2(uv.x - 0.01, uv.y)).z;\n\n// increase contrast\n\ncolor = clamp(color * 0.5 + 0.5 * color * color * 1.2, 0.0, 1.0);\n\n// vignetting\n\ncolor *= 0.5 + 0.5 * 16.0 * uv.x * uv.y * (1.0 - uv.x) * (1.0 - uv.y);\n\n// tinting\n\ncolor *= vec3(0.8, 1.0, 0.7);\n\n// tv lines\n\ncolor *= 0.8 + 0.2 * sin(10.0 * TIME + uv.y * 1000.0);\n\n// flickering\n\ncolor *= 0.97 + 0.03 * sin(110.0 * TIME);\n\nCOLOR = vec4(color, ori_color.a);\n}\n"
             },
             "3": {
                 "type": "ShaderMaterial",
@@ -22,55 +47,175 @@
                 "anchor_right": 1
             },
             {
-                "type": "Sprite",
-                "name": "add",
+                "type": "ColorRect",
+                "name": "bg",
                 "parent": ".",
-                "scale": {
-                    "x": 2,
-                    "y": 2
-                },
-                "centered": false,
-                "texture": "@ext#1"
-            },
-            {
-                "type": "Sprite",
-                "name": "add2",
-                "parent": ".",
-                "position": {
-                    "x": 192,
-                    "y": 0
-                },
-                "scale": {
-                    "x": 2,
-                    "y": 2
-                },
-                "centered": false,
-                "texture": "@ext#1"
-            },
-            {
-                "type": "Sprite",
-                "name": "add3",
-                "parent": ".",
-                "position": {
-                    "x": 96,
-                    "y": 112
-                },
-                "scale": {
-                    "x": 2,
-                    "y": 2
-                },
-                "centered": false,
-                "texture": "@ext#1"
+                "anchor_bottom": 1,
+                "anchor_right": 1,
+                "color": {
+                    "r": 0,
+                    "g": 0,
+                    "b": 0,
+                    "a": 1
+                }
             },
             {
                 "type": "TextureRect",
-                "name": "shader",
+                "name": "monitor",
                 "parent": ".",
+                "anchor_bottom": 0.5,
+                "anchor_left": 0.5,
+                "anchor_top": 0.5,
+                "anchor_right": 0.5,
+                "margin_bottom": 130,
+                "margin_left": -129.5,
+                "margin_top": -130,
+                "margin_right": 129.5,
+                "texture": "@ext#1"
+            },
+            {
+                "type": "Sprite",
+                "name": "player",
+                "parent": "monitor",
+                "position": {
+                    "x": 128.651,
+                    "y": 181.304
+                },
+                "texture": "@ext#3"
+            },
+            {
+                "type": "Sprite",
+                "name": "alien",
+                "parent": "monitor",
+                "position": {
+                    "x": 50.6791,
+                    "y": 57.8259
+                },
+                "texture": "@ext#2"
+            },
+            {
+                "type": "Sprite",
+                "name": "alien2",
+                "parent": "monitor",
+                "position": {
+                    "x": 89.1798,
+                    "y": 57.8259
+                },
+                "texture": "@ext#2"
+            },
+            {
+                "type": "Sprite",
+                "name": "alien3",
+                "parent": "monitor",
+                "position": {
+                    "x": 127.68,
+                    "y": 57.8259
+                },
+                "texture": "@ext#2"
+            },
+            {
+                "type": "Sprite",
+                "name": "alien4",
+                "parent": "monitor",
+                "position": {
+                    "x": 166.181,
+                    "y": 57.8259
+                },
+                "texture": "@ext#2"
+            },
+            {
+                "type": "Sprite",
+                "name": "alien5",
+                "parent": "monitor",
+                "position": {
+                    "x": 203.655,
+                    "y": 57.8259
+                },
+                "texture": "@ext#2"
+            },
+            {
+                "type": "Sprite",
+                "name": "alien10",
+                "parent": "monitor",
+                "position": {
+                    "x": 51.1925,
+                    "y": 85.5464
+                },
+                "texture": "@ext#2"
+            },
+            {
+                "type": "Sprite",
+                "name": "alien9",
+                "parent": "monitor",
+                "position": {
+                    "x": 89.6931,
+                    "y": 85.5464
+                },
+                "texture": "@ext#2"
+            },
+            {
+                "type": "Sprite",
+                "name": "alien8",
+                "parent": "monitor",
+                "position": {
+                    "x": 128.194,
+                    "y": 85.5464
+                },
+                "texture": "@ext#2"
+            },
+            {
+                "type": "Sprite",
+                "name": "alien7",
+                "parent": "monitor",
+                "position": {
+                    "x": 166.694,
+                    "y": 85.5464
+                },
+                "texture": "@ext#2"
+            },
+            {
+                "type": "Sprite",
+                "name": "alien6",
+                "parent": "monitor",
+                "position": {
+                    "x": 204.168,
+                    "y": 85.5464
+                },
+                "texture": "@ext#2"
+            },
+            {
+                "type": "Label",
+                "name": "label",
+                "parent": "monitor",
+                "self_modulate": {
+                    "r": 0.333333,
+                    "g": 0.831373,
+                    "b": 0,
+                    "a": 1
+                },
+                "anchor_bottom": 0.5,
+                "anchor_left": 0.5,
+                "anchor_top": 0.5,
+                "anchor_right": 0.5,
+                "margin_bottom": 26.5,
+                "margin_left": -82,
+                "margin_top": -26.5,
+                "margin_right": 82,
+                "align": 1,
+                "autowrap": true,
+                "text": "GAME OVER",
+                "valign": 1,
+                "font": "@sub#1"
+            },
+            {
+                "type": "ColorRect",
+                "name": "cover",
+                "parent": "monitor",
                 "material": "@sub#3",
-                "anchor_bottom": 1,
-                "anchor_right": 1,
-                "texture": "@ext#1",
-                "stretch_mode": 1
+                "margin_bottom": 201,
+                "margin_left": 18.5,
+                "margin_top": 28,
+                "margin_right": 239.5
             }
         ]
     }

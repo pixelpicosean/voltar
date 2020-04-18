@@ -170,7 +170,7 @@ module.exports.convert_tres = (blocks) => {
         // remove ext_resource marked as "extra_process"
         for (const k in ext) {
             if (ext[k].extra_process) {
-                ext[k] = undefined;
+                ext[k] = ext[k].extra;
             }
         }
 

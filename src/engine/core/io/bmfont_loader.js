@@ -1,7 +1,7 @@
 import { resource_map } from 'engine/registry';
 
 import { ImageTexture } from 'engine/scene/resources/texture';
-import { register_font } from 'engine/scene/resources/font';
+import { register_bitmap_font } from 'engine/scene/resources/font';
 
 import Resource from 'engine/core/io/io_resource';
 
@@ -28,7 +28,7 @@ function dirname(url) {
  * @param {Object<string, ImageTexture>} textures - Reference to texture.
  */
 export function parse(resource, textures) {
-    const font = register_font(resource.data, textures);
+    const font = register_bitmap_font(resource.data, textures);
     resource.internal = font;
 
     // add to global resource map

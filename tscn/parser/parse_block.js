@@ -275,7 +275,7 @@ module.exports.parse_block = (block) => {
                 // still content, let's push them all back
                 else {
                     const pack = _.last(stack);
-                    pack.value += line;
+                    pack.value += (line + '\n');
                 }
             } break;
             case '{': {

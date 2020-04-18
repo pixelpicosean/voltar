@@ -1,0 +1,6 @@
+@font-face {
+    font-family: 'GROBOLD';
+    src: url('media/font/GROBOLD.woff2') format('woff2'),
+         url('media/font/GROBOLD.woff') format('woff'),
+         url('media/font/GROBOLD.ttf') format('truetype');
+}

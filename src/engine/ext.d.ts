@@ -17,6 +17,16 @@ declare module "*.png" {
     export default value;
 }
 
+declare module "*.jpg" {
+    const value: string;
+    export default value;
+}
+
+declare module "*.jpeg" {
+    const value: string;
+    export default value;
+}
+
 interface HTMLImageElement {
     _tex_id: string;
 }
@@ -58,4 +68,12 @@ interface GainNode {
     ended: boolean;
     currentTime: number;
     bufferSource: AudioBufferSourceNode;
+}
+
+// for font face observer
+
+interface Document {
+    fonts: {
+        load: Function;
+    }
 }

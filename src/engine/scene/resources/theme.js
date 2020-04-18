@@ -7,7 +7,7 @@ import {
 } from "engine/core/math/math_defs";
 
 import { StyleBox } from "./style_box";
-import { Font } from "./font";
+import { BitmapFont } from "./font";
 
 
 export const default_font_name = 'mini';
@@ -30,7 +30,7 @@ export class Theme {
     }
 
     /**
-     * @param {Font} font
+     * @param {BitmapFont} font
      */
     static set_default_font(font) {
         default_font = font;
@@ -85,7 +85,7 @@ export class Theme {
     /**
      * @param {string} name
      * @param {string} type
-     * @returns {Font}
+     * @returns {BitmapFont}
      */
     get_font(name, type) {
         if (this.font_map[type]) {

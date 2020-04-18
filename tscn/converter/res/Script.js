@@ -27,6 +27,8 @@ module.exports.extra_process = (data) => {
         return {
             type: 'ReplaceNode',
             meta: pascal_case(filename),
+            // we don't save this as extra resource in the end
+            extra: undefined,
         }
     }
 };

@@ -8,7 +8,7 @@ import {
 import { default_font_name } from 'engine/scene/resources/theme';
 import { ResourceLoader } from './io/resource_loader';
 import { instanciate_scene } from 'engine/scene/assembler';
-
+import meta from 'meta.json';
 
 /**
  * @typedef {(percent: number) => any} ProgressCallback
@@ -77,6 +77,9 @@ export class Engine {
             preload_queue.is_complete = true;
             // Theme.set_default_font(registered_bitmap_fonts[default_font_name]);
 
+            /** @type {string[]} */
+            const resource_lookup_skip_list = meta['resource_lookup_skip_list'];
+
             // create real resources from data imported from Godot
             const res_head = 'res://';
             for (const key in resource_map) {
@@ -89,7 +92,10 @@ export class Engine {
                             const resource = resource_map[resource_filename];
 
                             if (!resource) {
-                                console.warn(`Resource with URL [${resource_filename}] not found`);
+                                // is this one in our lookup skip list?
+                                if (resource_lookup_skip_list.indexOf(resource_filename) < 0) {
+                                    console.warn(`Resource with URL [${resource_filename}] not found`);
+                                }
                                 continue;
                             }
 
@@ -142,7 +148,9 @@ export class Engine {
 
                     // process resource first
                     if (res.type !== 'PackedScene') {
-                        normalize_resource_array(res.resource, res.ext || {}, res.sub || {});
+                        if (res.resource) {
+                            normalize_resource_array(res.resource, res.ext || {}, res.sub || {});
+                        }
 
                         const ctor = res_class_map[res.type];
                         if (ctor) {
