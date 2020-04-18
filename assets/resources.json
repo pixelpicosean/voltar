@@ -16,6 +16,46 @@
             }
         ]
     },
+    "res://scene/demo_3d.tscn": {
+        "type": "PackedScene",
+        "sub": {
+            "1": {
+                "type": "QuadMesh"
+            }
+        },
+        "nodes": [
+            {
+                "type": "Spatial",
+                "name": "spatial"
+            },
+            {
+                "type": "Camera",
+                "name": "camera",
+                "parent": ".",
+                "transform": [
+                    1,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    3
+                ]
+            },
+            {
+                "type": "MeshInstance",
+                "name": "mesh",
+                "parent": ".",
+                "mesh": "@sub#1",
+                "material/0": null
+            }
+        ]
+    },
     "res://scene/demo.tscn": {
         "type": "PackedScene",
         "ext": {

@@ -772,6 +772,17 @@ export class RasterizerStorage {
         mesh.surfaces.push(surface);
     }
 
+    /**
+     * @param {Mesh_t} mesh
+     * @param {number} surface
+     * @param {Material_t} material
+     */
+    mesh_surface_set_material(mesh, surface, material) {
+        if (mesh.surfaces[surface].material === material) return;
+
+        mesh.surfaces[surface].material = material;
+    }
+
     multimesh_create() {
         return new MultiMesh_t;
     }

@@ -6,6 +6,7 @@ import { Color, ColorLike } from "engine/core/color";
 
 import { VSG } from "./visual_server_globals";
 import { Canvas } from "./visual_server_canvas";
+import { Scenario_t } from "./visual_server_scene";
 
 
 const VIEWPORT_UPDATE_DISABLED = 0;
@@ -302,6 +303,14 @@ export class VisualServerViewport {
      */
     viewport_set_transparent_background(p_viewport, p_enabled) { }
 
+    /**
+     * @param {Viewport_t} p_viewport
+     * @param {Scenario_t} p_scenario
+     */
+    viewport_set_scenario(p_viewport, p_scenario) {
+        p_viewport.scenario = p_scenario;
+    }
+
     draw_viewports() {
         // sort viewports
         this.active_viewports.sort(viewport_sort);
@@ -320,7 +329,6 @@ export class VisualServerViewport {
             }
 
             VSG.rasterizer.set_current_render_target(vp.render_target);
-            // VSG.rasterizer.set_current_render_target(null);
 
             this._draw_viewport(vp);
 
@@ -373,23 +381,18 @@ export class VisualServerViewport {
 
     /**
      * @param {Viewport_t} p_viewport
-     * @param {any} [p_eye]
      */
-    _draw_3d(p_viewport, p_eye) {
-        if (/* p_viewport.use_arvr */false) {
-        } else {
-            VSG.scene.render_camera(p_viewport.camera, p_viewport.scenario, p_viewport.size, p_viewport.shadow_atlas);
-        }
+    _draw_3d(p_viewport) {
+        VSG.scene.render_camera(p_viewport.camera, p_viewport.scenario, p_viewport.size);
     }
 
     /**
      * @param {Viewport_t} p_viewport
-     * @param {any} [p_eye]
      */
-    _draw_viewport(p_viewport, p_eye) {
+    _draw_viewport(p_viewport) {
         const scenario_draw_canvas_bg = false;
 
-        const can_draw_3d = !p_viewport.disable_3d && !p_viewport.disable_3d_by_usage/* && VSG.scene.camera_owner.has(p_viewport.camera) */
+        const can_draw_3d = !p_viewport.disable_3d && !p_viewport.disable_3d_by_usage && !!p_viewport.camera;
 
         if (p_viewport.clear_mode !== VIEWPORT_CLEAR_NEVER) {
             VSG.rasterizer.clear_render_target(p_viewport.transparent_bg ? Black : this.clear_color);
@@ -399,7 +402,7 @@ export class VisualServerViewport {
         }
 
         if (!scenario_draw_canvas_bg && can_draw_3d) {
-            this._draw_3d(p_viewport, p_eye);
+            this._draw_3d(p_viewport);
         }
 
         if (!p_viewport.hide_canvas) {

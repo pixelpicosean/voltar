@@ -1,3 +1,6 @@
+import { Vector3, Vector3Like } from "./vector3";
+import { Basis } from "./basis";
+
 /**
  * @param {number[]} out
  */
@@ -96,4 +99,73 @@ export function scale_mat4(out, a, v) {
     out[14] = a[14] * z;
     out[15] = a[15];
     return out;
+}
+
+export class Transform {
+    constructor() {
+        this.basis = new Basis;
+        this.origin = new Vector3;
+    }
+
+    /**
+     * @param {number} m11
+     * @param {number} m12
+     * @param {number} m13
+     * @param {number} m21
+     * @param {number} m22
+     * @param {number} m23
+     * @param {number} m31
+     * @param {number} m32
+     * @param {number} m33
+     * @param {number} x
+     * @param {number} y
+     * @param {number} z
+     */
+    set(m11, m12, m13, m21, m22, m23, m31, m32, m33, x, y, z) {
+        this.basis.elements[0] = m11;
+        this.basis.elements[1] = m12;
+        this.basis.elements[2] = m13;
+        this.basis.elements[3] = m21;
+        this.basis.elements[4] = m22;
+        this.basis.elements[5] = m23;
+        this.basis.elements[6] = m31;
+        this.basis.elements[7] = m32;
+        this.basis.elements[8] = m33;
+        this.origin.set(x, y, z);
+    }
+
+    /**
+     * @param {Transform} other
+     */
+    copy(other) {
+        this.basis.copy(other.basis);
+        this.origin.copy(other.origin);
+        return this;
+    }
+
+    /**
+     * Returns new Vector3.
+     * @param {Vector3Like} vec
+     * @param {Vector3} [out]
+     */
+    xform(vec, out) {
+        if (!out) out = Vector3.new();
+        return out.set(
+            this.basis.row_dot(0, vec) + this.origin.x,
+            this.basis.row_dot(1, vec) + this.origin.y,
+            this.basis.row_dot(2, vec) + this.origin.z
+        );
+    }
+
+    /**
+     * @param {Transform} other
+     */
+    append(other) {
+        this.xform(other.origin, this.origin);
+        this.basis.append(other.basis);
+    }
+
+    orthonormalized() {
+        return new Transform;
+    }
 }

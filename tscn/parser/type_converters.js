@@ -235,6 +235,22 @@ module.exports.Transform2D = (xform) => {
     return undefined;
 };
 /**
+ * @param {any} xform
+ * @returns {number[]}
+ */
+module.exports.Transform = (xform) => {
+    if (_.isArray(xform)) {
+        return xform;
+    }
+
+    if (typeof (xform) === 'string') {
+        const arr = get_function_params(xform);
+        return arr.map(str => parseFloat(str));
+    }
+
+    return undefined;
+};
+/**
  * @param {any} line
  * @returns {Object<string, any> & { type: string }}
  */

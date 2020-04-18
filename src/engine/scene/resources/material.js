@@ -5,12 +5,19 @@ export class Material {
 
     constructor() {
         this.materials = {
+            /* 2D */
+
             /** @type {import('engine/drivers/webgl/rasterizer_storage').Material_t} */
             flat: null,
             /** @type {import('engine/drivers/webgl/rasterizer_storage').Material_t} */
             tile: null,
             /** @type {import('engine/drivers/webgl/rasterizer_storage').Material_t} */
             multimesh: null,
+
+            /* 3D */
+
+            /** @type {import('engine/drivers/webgl/rasterizer_storage').Material_t} */
+            spatial: null,
         };
     }
 }

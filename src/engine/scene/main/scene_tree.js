@@ -24,6 +24,7 @@ import {
 } from 'engine/core/main_loop';
 import { InputEvent } from 'engine/core/os/input_event';
 
+import { World } from '../resources/world';
 import { World2D } from '../resources/world_2d';
 import { Viewport } from './viewport';
 import {
@@ -36,7 +37,7 @@ import {
     NOTIFICATION_UNPAUSED,
 } from '../main/node';
 import { NOTIFICATION_TRANSFORM_CHANGED } from '../2d/canvas_item';
-import { assemble_scene, instanciate_scene } from '../assembler';
+import { instanciate_scene } from '../assembler';
 
 
 export class SceneTreeTimer extends VObject {
@@ -123,11 +124,14 @@ export class SceneTree extends MainLoop {
         if (!singleton) singleton = this;
 
         /** @type {Viewport} */
-        this.root = new Viewport();
+        this.root = new Viewport;
         this.root.set_name('root');
         this.root.handle_input_locally = false;
         if (!this.root.world_2d) {
-            this.root.set_world_2d(new World2D());
+            this.root.set_world_2d(new World2D);
+        }
+        if (!this.root.world) {
+            this.root.set_world(new World);
         }
 
         this.tree_version = 1;

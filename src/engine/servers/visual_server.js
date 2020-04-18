@@ -62,6 +62,16 @@ export const MULTIMESH_CUSTOM_DATA_NONE = 0;
 export const MULTIMESH_CUSTOM_DATA_8BIT = 1;
 export const MULTIMESH_CUSTOM_DATA_FLOAT = 2;
 
+export const INSTANCE_TYPE_NONE = 0;
+export const INSTANCE_TYPE_MESH = 1;
+export const INSTANCE_TYPE_MULTIMESH = 2;
+export const INSTANCE_TYPE_IMMEDIATE = 3;
+export const INSTANCE_TYPE_PARTICLES = 4;
+export const INSTANCE_TYPE_LIGHT = 5;
+export const INSTANCE_TYPE_REFLECTION_PROBE = 6;
+export const INSTANCE_TYPE_GI_PROBE = 7;
+export const INSTANCE_TYPE_LIGHTMAP_CAPTURE = 8;
+
 /**
  * @typedef FrameDrawnCallbacks
  * @property {any} object
@@ -147,7 +157,6 @@ export class VisualServer extends VObject {
         VSG.scene_render.update();
 
         VSG.viewport.draw_viewports();
-        VSG.scene.render_probes();
         VSG.canvas_render.update();
 
         this._draw_margins();

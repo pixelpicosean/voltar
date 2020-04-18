@@ -51,6 +51,12 @@ import {
     NOTIFICATION_FOCUS_EXIT,
     NOTIFICATION_FOCUS_ENTER,
 } from "../gui/control";
+import {
+    NOTIFICATION_LOST_CURRENT,
+    Camera,
+} from "../3d/camera";
+import { World } from "../resources/world";
+import { NOTIFICATION_EXIT_WORLD, NOTIFICATION_ENTER_WORLD } from "../3d/spatial";
 import { GROUP_CALL_REALTIME } from "./scene_tree";
 
 
@@ -203,6 +209,11 @@ export class Viewport extends Node {
         /** @type {Viewport} */
         this.parent = null;
 
+        /** @type {Camera} */
+        this.camera = null;
+        /** @type {Camera[]} */
+        this.cameras = [];
+
         /** @type {Set<CanvasLayer>} */
         this.canvas_layers = new Set();
 
@@ -234,6 +245,11 @@ export class Viewport extends Node {
 
         this.local_input_handled = false;
         this.handle_input_locally = true;
+
+        /** @type {World} */
+        this.world = null;
+        /** @type {World} */
+        this.own_world = null;
 
         /**
          * @type {World2D}
@@ -285,6 +301,17 @@ export class Viewport extends Node {
                 VSG.viewport.viewport_set_active(this.viewport, true);
             } break;
             case NOTIFICATION_READY: {
+                if (this.cameras.length && !this.camera) {
+                    /** @type {Camera} */
+                    let first = null;
+                    for (let i = 0; i < this.cameras.length; i++) {
+                        if (!first || first.is_greater_than(this.cameras[i])) {
+                            first = this.cameras[i];
+                        }
+                    }
+                    if (first) first.make_current();
+                }
+
                 this.set_process_internal(true);
                 this.set_physics_process_internal(true);
             } break;
@@ -484,6 +511,40 @@ export class Viewport extends Node {
     }
 
     /* private */
+
+    /**
+     * @param {Camera} camera
+     */
+    _camera_set(camera) {
+        if (this.camera === camera) return;
+
+        if (this.camera) {
+            this.camera.notification(NOTIFICATION_LOST_CURRENT);
+        }
+        this.camera = camera;
+    }
+
+    /**
+     * @param {Camera} camera
+     */
+    _camera_add(camera) {
+        this.cameras.push(camera);
+        return this.cameras.length === 1;
+    }
+
+    /**
+     * @param {Camera} camera
+     */
+    _camera_remove(camera) {
+        let idx = this.cameras.indexOf(camera);
+        if (idx >= 0) {
+            this.cameras.splice(idx, 1);
+        }
+        if (this.camera === camera) {
+            this.camera.notification(NOTIFICATION_LOST_CURRENT);
+            this.camera = null;
+        }
+    }
 
     /**
      * @param {Control} p_control
@@ -1474,6 +1535,63 @@ export class Viewport extends Node {
         }
     }
 
+    /**
+     * @param {boolean} p_world
+     */
+    set_use_own_world(p_world) {
+        if (!!this.own_world === p_world) return;
+
+        if (this.is_inside_tree()) {
+            this._propagate_exit_world(this);
+        }
+
+        if (!p_world) {
+            this.own_world = null;
+        } else {
+            if (this.world) {
+                this.own_world = this.world.duplicate();
+            } else {
+                this.own_world = new World;
+            }
+        }
+
+        if (this.is_inside_tree()) {
+            this._propagate_enter_world(this);
+            VSG.viewport.viewport_set_scenario(this.viewport, this.find_world().scenario);
+        }
+    }
+
+    /**
+     * @param {World} world
+     */
+    set_world(world) {
+        if (this.world === world) return;
+
+        if (this.is_inside_tree()) {
+            this._propagate_exit_world(this);
+        }
+
+        this.world = world;
+
+        // TODO: own world
+
+        if (this.is_inside_tree()) {
+            this._propagate_enter_world(this);
+
+            VSG.viewport.viewport_set_scenario(this.viewport, this.find_world().scenario);
+        }
+    }
+
+    /**
+     * @returns {World}
+     */
+    find_world() {
+        if (this.own_world) return this.own_world;
+        else if (this.world) return this.world;
+        else if (this.parent) return this.parent.find_world();
+        else return null;
+    }
+
     get_texture() {
         return this.default_texture;
     }
@@ -1534,11 +1652,11 @@ export class Viewport extends Node {
             if (!p_node.is_inside_tree()) return;
 
             if (p_node.is_spatial || p_node.class === 'WorldEnvironment') {
-                // p_node.notification(NOTIFICATION_ENTER_WORLD);
+                p_node.notification(NOTIFICATION_ENTER_WORLD);
             } else {
                 if (p_node.class === 'Viewport') {
-                    // const v = /** @type {Viewport} */(p_node);
-                    // TODO: [World] if (!v.world || !v.own_world) return;
+                    const v = /** @type {Viewport} */(p_node);
+                    if (!v.world || !v.own_world) return;
                 }
             }
         }
@@ -1547,7 +1665,22 @@ export class Viewport extends Node {
             this._propagate_enter_world(c);
         }
     }
-    _propagate_exit_world() { }
+    /**
+     * @param {Node} p_node
+     */
+    _propagate_exit_world(p_node) {
+        if (p_node !== this) {
+            if (!p_node.is_inside_tree()) return;
+
+            if (p_node.is_spatial) {
+                p_node.notification(NOTIFICATION_EXIT_WORLD);
+            }
+        }
+
+        for (let i = 0; i < p_node.data.children.length; i++) {
+            this._propagate_exit_world(p_node.data.children[i]);
+        }
+    }
     /**
      * @param {Node} p_node
      * @param {number} p_what
