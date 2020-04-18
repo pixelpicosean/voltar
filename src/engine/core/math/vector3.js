@@ -1,5 +1,4 @@
 import { CMP_EPSILON } from './math_defs';
-import { Basis } from './basis';
 
 /**
  * @interface
@@ -11,8 +10,6 @@ export class Vector3Like {
         this.z = 0;
     }
 }
-
-const basis = new Basis;
 
 /**
  * The Vector3 object represents a location in a two-dimensional coordinate system, where x represents
@@ -201,7 +198,7 @@ export class Vector3 {
     }
 
     /**
-     * Multiply the vector by another vector or number.
+     * Multiply the vector by another vector.
      *
      * @param {Vector3Like|number} x
      * @param {number} [y]
@@ -224,6 +221,16 @@ export class Vector3 {
             // @ts-ignore
             this.z *= z;
         }
+        return this;
+    }
+
+    /**
+     * @param {number} s
+     */
+    scale(s) {
+        this.x *= s;
+        this.y *= s;
+        this.z *= s;
         return this;
     }
 
@@ -363,19 +370,6 @@ export class Vector3 {
             this.y *= len;
             this.z *= len;
         }
-        return this;
-    }
-
-    /**
-     * Rotates the vector by “phi” radians.
-     *
-     * @param {Vector3Like} p_axis
-     * @param {number} p_phi
-     * @returns {Vector3}
-     */
-    rotate(p_axis, p_phi) {
-        basis.set(p_axis, p_phi);
-        basis.xform(this, this);
         return this;
     }
 }

@@ -101,50 +101,66 @@ export function scale_mat4(out, a, v) {
     return out;
 }
 
+/** @type {Transform[]} */
+const pool = [];
+
 export class Transform {
+    static new() {
+        let b = pool.pop();
+        if (!b) b = new Transform;
+        return b.set(
+            1, 0, 0,
+            0, 1, 0,
+            0, 0, 1,
+            0, 0, 0
+        );
+    }
+
+    /**
+     * @param {Transform} obj
+     */
+    static free(obj) {
+        if (obj && pool.length < 2020) {
+            pool.push(obj);
+        }
+        return Transform;
+    }
+
     constructor() {
         this.basis = new Basis;
         this.origin = new Vector3;
     }
 
     /**
-     * @param {number} m11
-     * @param {number} m12
-     * @param {number} m13
-     * @param {number} m21
-     * @param {number} m22
-     * @param {number} m23
-     * @param {number} m31
-     * @param {number} m32
-     * @param {number} m33
+     * @param {number} xx
+     * @param {number} xy
+     * @param {number} xz
+     * @param {number} yx
+     * @param {number} yy
+     * @param {number} yz
+     * @param {number} zx
+     * @param {number} zy
+     * @param {number} zz
      * @param {number} x
      * @param {number} y
      * @param {number} z
      */
-    set(m11, m12, m13, m21, m22, m23, m31, m32, m33, x, y, z) {
-        this.basis.elements[0] = m11;
-        this.basis.elements[1] = m12;
-        this.basis.elements[2] = m13;
-        this.basis.elements[3] = m21;
-        this.basis.elements[4] = m22;
-        this.basis.elements[5] = m23;
-        this.basis.elements[6] = m31;
-        this.basis.elements[7] = m32;
-        this.basis.elements[8] = m33;
+    set(xx, xy, xz, yx, yy, yz, zx, zy, zz, x, y, z) {
+        this.basis.set(xx, xy, xz, yx, yy, yz, zx, zy, zz);
         this.origin.set(x, y, z);
-    }
-
-    /**
-     * @param {Transform} other
-     */
-    copy(other) {
-        this.basis.copy(other.basis);
-        this.origin.copy(other.origin);
         return this;
     }
 
     /**
-     * Returns new Vector3.
+     * @param {Transform} p_xform
+     */
+    copy(p_xform) {
+        this.basis.copy(p_xform.basis);
+        this.origin.copy(p_xform.origin);
+        return this;
+    }
+
+    /**
      * @param {Vector3Like} vec
      * @param {Vector3} [out]
      */
@@ -158,14 +174,36 @@ export class Transform {
     }
 
     /**
+     * @param {Vector3Like} vec
+     * @param {Vector3} [out]
+     */
+    xform_inv(vec, out) {
+        if (!out) out = Vector3.new();
+        let v = Vector3.new().copy(vec).subtract(this.origin);
+        out.set(
+            this.basis.elements[0].x * v.x + this.basis.elements[1].x * v.y + this.basis.elements[2].x * v.z,
+            this.basis.elements[0].y * v.x + this.basis.elements[1].y * v.y + this.basis.elements[2].y * v.z,
+            this.basis.elements[0].z * v.x + this.basis.elements[1].z * v.y + this.basis.elements[2].z * v.z
+        );
+        Vector3.free(v);
+        return out;
+    }
+
+    /**
      * @param {Transform} other
      */
     append(other) {
         this.xform(other.origin, this.origin);
         this.basis.append(other.basis);
+        return this;
+    }
+
+    orthonormalize() {
+        this.basis.orthonormalize();
+        return this;
     }
 
     orthonormalized() {
-        return new Transform;
+        return Transform.new().copy(this).orthonormalize();
     }
 }
