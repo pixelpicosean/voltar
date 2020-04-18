@@ -237,11 +237,11 @@ export class Spatial extends Node {
                 while (parent && !this.data.viewport) {
                     if (parent.class === "Viewport") {
                         this.data.viewport = /** @type {Viewport} */(parent);
-                        parent = parent.get_parent();
-
-                        this._enter_world();
                     }
+                    parent = parent.get_parent();
                 }
+
+                this._enter_world();
             } break;
             case NOTIFICATION_EXIT_WORLD: {
                 this._exit_world();
