@@ -122,16 +122,17 @@ export class Vector3 {
      * Whether this equals to another point
      *
      * @param {Vector3Like} p_b
+     * @param {number} [eps]
      */
-    equals(p_b) {
+    is_equal_approx(p_b, eps = CMP_EPSILON) {
         const a0 = this.x, a1 = this.y, a2 = this.z;
         const b0 = p_b.x, b1 = p_b.y, b2 = p_b.z;
         return (
-            Math.abs(a0 - b0) <= CMP_EPSILON * Math.max(1.0, Math.abs(a0), Math.abs(b0))
+            Math.abs(a0 - b0) <= eps * Math.max(1.0, Math.abs(a0), Math.abs(b0))
             &&
-            Math.abs(a1 - b1) <= CMP_EPSILON * Math.max(1.0, Math.abs(a1), Math.abs(b1))
+            Math.abs(a1 - b1) <= eps * Math.max(1.0, Math.abs(a1), Math.abs(b1))
             &&
-            Math.abs(a2 - b2) <= CMP_EPSILON * Math.max(1.0, Math.abs(a2), Math.abs(b2))
+            Math.abs(a2 - b2) <= eps * Math.max(1.0, Math.abs(a2), Math.abs(b2))
         );
     }
     /**
@@ -141,6 +142,10 @@ export class Vector3 {
      */
     exact_equals(p_b) {
         return (this.x === p_b.x) && (this.y === p_b.y) && (this.z === p_b.z);
+    }
+
+    length() {
+        return Math.hypot(this.x, this.y, this.z);
     }
 
     /**

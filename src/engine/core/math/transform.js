@@ -1,5 +1,7 @@
 import { Vector3, Vector3Like } from "./vector3";
 import { Basis } from "./basis";
+import { Plane } from "./plane";
+import { AABB } from "./aabb";
 
 /**
  * @param {number[]} out
@@ -160,6 +162,22 @@ export class Transform {
         return this;
     }
 
+    clone() {
+        return Transform.new().copy(this);
+    }
+
+    affine_invert() {
+        this.basis.invert();
+        let v = this.origin.clone().negate();
+        this.basis.xform(v, this.origin);
+        Vector3.free(v);
+        return this;
+    }
+
+    affine_inverse() {
+        return Transform.new().copy(this).affine_invert();
+    }
+
     /**
      * @param {Vector3Like} vec
      * @param {Vector3} [out]
@@ -186,6 +204,66 @@ export class Transform {
             this.basis.elements[0].z * v.x + this.basis.elements[1].z * v.y + this.basis.elements[2].z * v.z
         );
         Vector3.free(v);
+        return out;
+    }
+
+    /**
+     * @param {Plane} p_plane
+     * @param {Plane} [out]
+     */
+    xform_plane(p_plane, out) {
+        if (!out) out = Plane.new();
+
+        let point = p_plane.normal.clone().scale(p_plane.d);
+        let point_dir = point.clone().add(p_plane.normal);
+        this.xform(point, point);
+        this.xform(point_dir, point_dir);
+
+        let normal = point_dir.clone().subtract(point);
+        normal.normalize();
+        let d = normal.dot(point);
+
+        out.set(normal.x, normal.y, normal.z, d);
+
+        Vector3.free(point);
+        Vector3.free(point_dir);
+        Vector3.free(normal);
+
+        return out;
+    }
+
+    /**
+     * @param {AABB} p_aabb
+     * @param {AABB} [out]
+     */
+    xform_aabb(p_aabb, out) {
+        if (!out) out = AABB.new();
+        let min = p_aabb.position;
+        let max = p_aabb.position.clone().add(p_aabb.size);
+        let tmin = [0, 0, 0], tmax = [0, 0, 0];
+        let basis = [
+            this.basis.elements[0].x, this.basis.elements[0].y, this.basis.elements[0].z,
+            this.basis.elements[1].x, this.basis.elements[1].y, this.basis.elements[1].z,
+            this.basis.elements[2].x, this.basis.elements[2].y, this.basis.elements[2].z,
+        ]
+        let origin = [this.origin.x, this.origin.y, this.origin.z];
+        for (let i = 0; i < 3; i++) {
+            tmin[i] = tmax[i] = origin[i];
+            for (let j = 0; j < 3; j++) {
+                let e = basis[i][j] * min[j];
+                let f = basis[i][j] * max[j];
+                if (e < f) {
+                    tmin[i] += e;
+                    tmax[i] += f;
+                } else {
+                    tmin[i] += f;
+                    tmax[i] += e;
+                }
+            }
+        }
+        out.position.set(tmin[0], tmin[1], tmin[2]);
+        out.size.set(tmax[0] - tmin[0], tmax[1] - tmin[1], tmax[2] - tmin[2]);
+        Vector3.free(max);
         return out;
     }
 
