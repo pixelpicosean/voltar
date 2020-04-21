@@ -239,10 +239,21 @@ export class Basis {
 
     constructor() {
         this.elements = [
-            new Vector3,
-            new Vector3,
-            new Vector3,
+            new Vector3(1, 0, 0),
+            new Vector3(0, 1, 0),
+            new Vector3(0, 0, 1),
         ]
+    }
+
+    /**
+     * @param {Basis} other
+     */
+    exact_equals(other) {
+        return this.elements[0].exact_equals(other.elements[0])
+            &&
+            this.elements[1].exact_equals(other.elements[1])
+            &&
+            this.elements[2].exact_equals(other.elements[2])
     }
 
     /**
@@ -344,8 +355,8 @@ export class Basis {
     get_axis(p_axis) {
         switch (p_axis) {
             case 0: return Vector3.new(this.elements[0].x, this.elements[1].x, this.elements[2].x);
-            case 0: return Vector3.new(this.elements[0].y, this.elements[1].y, this.elements[2].y);
-            case 0: return Vector3.new(this.elements[0].z, this.elements[1].z, this.elements[2].z);
+            case 1: return Vector3.new(this.elements[0].y, this.elements[1].y, this.elements[2].y);
+            case 2: return Vector3.new(this.elements[0].z, this.elements[1].z, this.elements[2].z);
         }
     }
 
@@ -410,6 +421,34 @@ export class Basis {
             p_matrix.tdotx(this.elements[1]), p_matrix.tdoty(this.elements[1]), p_matrix.tdotz(this.elements[1]),
             p_matrix.tdotx(this.elements[2]), p_matrix.tdoty(this.elements[2]), p_matrix.tdotz(this.elements[2])
         )
+    }
+
+    /**
+     * @returns new Vector3
+     */
+    get_scale() {
+        let det = this.determinant();
+        let det_sign = det < 0 ? -1 : 1;
+        return Vector3.new(
+            Math.hypot(this.elements[0].x, this.elements[1].x, this.elements[2].x),
+            Math.hypot(this.elements[0].y, this.elements[1].y, this.elements[2].y),
+            Math.hypot(this.elements[0].z, this.elements[1].z, this.elements[2].z)
+        ).scale(det_sign);
+    }
+
+    /**
+     * @returns new Vector3
+     */
+    get_rotation() {
+        let m = this.clone().orthonormalize();
+        let det = m.determinant();
+        if (det < 0) {
+            let s = Vector3.new(-1, -1, -1);
+            m.scale(s);
+            Vector3.free(s);
+        }
+
+        return m.get_euler();
     }
 
     /**
@@ -528,6 +567,9 @@ export class Basis {
         return this;
     }
 
+    /**
+     * @returns new Vector3
+     */
     get_euler() {
         let euler = Vector3.new();
         let m12 = this.elements[1].z;

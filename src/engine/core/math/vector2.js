@@ -89,6 +89,10 @@ export class Vector2 {
         this.y = y;
     }
 
+    as_array() {
+        return [this.x, this.y];
+    }
+
     /**
      * Sets the point to a new x and y position.
      * If y is omitted, both x and y will be set to x.

@@ -44,19 +44,23 @@ import {
 } from "../gui/const";
 import {
     Control,
+    CComparator,
     NOTIFICATION_MODAL_CLOSE,
     NOTIFICATION_MOUSE_EXIT,
     NOTIFICATION_MOUSE_ENTER,
-    CComparator,
     NOTIFICATION_FOCUS_EXIT,
     NOTIFICATION_FOCUS_ENTER,
 } from "../gui/control";
 import {
-    NOTIFICATION_LOST_CURRENT,
     Camera,
+    NOTIFICATION_LOST_CURRENT,
+    NOTIFICATION_BECAME_CURRENT,
 } from "../3d/camera";
 import { World } from "../resources/world";
-import { NOTIFICATION_EXIT_WORLD, NOTIFICATION_ENTER_WORLD } from "../3d/spatial";
+import {
+    NOTIFICATION_EXIT_WORLD,
+    NOTIFICATION_ENTER_WORLD,
+} from "../3d/spatial";
 import { GROUP_CALL_REALTIME } from "./scene_tree";
 
 
@@ -291,7 +295,7 @@ export class Viewport extends Node {
                 }
 
                 this.current_canvas = this.find_world_2d().canvas;
-                // VSG.viewport.viewport_set_scenario(this.viewport, this.find_world().get_scenario());
+                VSG.viewport.viewport_set_scenario(this.viewport, this.find_world().scenario);
                 VSG.viewport.viewport_attach_canvas(this.viewport, this.current_canvas);
 
                 this.find_world_2d()._register_viewport(this, Rect2.EMPTY);
@@ -321,7 +325,7 @@ export class Viewport extends Node {
                     this._world_2d._remove_viewport(this);
                 }
 
-                // VSG.viewport.viewport_set_scenario(this.viewport, null);
+                VSG.viewport.viewport_set_scenario(this.viewport, null);
                 VSG.viewport.viewport_remove_canvas(this.viewport, this.current_canvas);
 
                 this.remove_from_group('_viewports');
@@ -521,7 +525,18 @@ export class Viewport extends Node {
         if (this.camera) {
             this.camera.notification(NOTIFICATION_LOST_CURRENT);
         }
+
         this.camera = camera;
+
+        if (camera) {
+            VSG.viewport.viewport_attach_camera(this.viewport, camera.camera);
+        } else {
+            VSG.viewport.viewport_attach_camera(this.viewport, null);
+        }
+
+        if (camera) {
+            camera.notification(NOTIFICATION_BECAME_CURRENT);
+        }
     }
 
     /**
@@ -545,6 +560,20 @@ export class Viewport extends Node {
             this.camera = null;
         }
     }
+
+    /**
+     * @param {Camera} p_exclude
+     */
+    _camera_make_next_current(p_exclude) {
+        for (let i = 0; i < this.cameras.length; i++) {
+            if (this.cameras[i] === p_exclude) continue;
+            if (!this.cameras[i].is_inside_tree()) continue;
+            if (this.camera) return;
+            this.cameras[i].make_current();
+        }
+    }
+
+    _camera_transform_changed_notify() { }
 
     /**
      * @param {Control} p_control
@@ -1571,9 +1600,20 @@ export class Viewport extends Node {
             this._propagate_exit_world(this);
         }
 
+        if (this.own_world && this.world) {
+            this.world.disconnect('changed', this._own_world_changed, this);
+        }
+
         this.world = world;
 
-        // TODO: own world
+        if (this.own_world) {
+            if (this.world) {
+                this.own_world = this.world.duplicate();
+                this.world.connect('changed', this._own_world_changed, this);
+            } else {
+                this.world = new World;
+            }
+        }
 
         if (this.is_inside_tree()) {
             this._propagate_enter_world(this);
@@ -1721,6 +1761,22 @@ export class Viewport extends Node {
 
     _subwindow_visibility_changed() {
         this.gui.subwindow_visibility_dirty = true;
+    }
+
+    _own_world_changed() {
+        if (this.is_inside_tree()) {
+            this._propagate_exit_world(this);
+        }
+
+        this.own_world = this.world.duplicate();
+
+        if (this.is_inside_tree()) {
+            this._propagate_enter_world(this);
+        }
+
+        if (this.is_inside_tree()) {
+            VSG.viewport.viewport_set_scenario(this.viewport, this.find_world().scenario);
+        }
     }
 }
 node_class_map['Viewport'] = GDCLASS(Viewport, Node)

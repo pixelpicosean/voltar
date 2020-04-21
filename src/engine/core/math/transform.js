@@ -134,6 +134,30 @@ export class Transform {
     }
 
     /**
+     * @param {number[]} [out]
+     */
+    as_array(out) {
+        if (!out) out = Array(16);
+        out[0] = this.basis.elements[0].x;
+        out[1] = this.basis.elements[0].y;
+        out[2] = this.basis.elements[0].z;
+        out[3] = 0;
+        out[4] = this.basis.elements[1].x;
+        out[5] = this.basis.elements[1].y;
+        out[6] = this.basis.elements[1].z;
+        out[7] = 0;
+        out[8] = this.basis.elements[2].x;
+        out[9] = this.basis.elements[2].y;
+        out[10] = this.basis.elements[2].z;
+        out[11] = 0;
+        out[12] = this.origin.x;
+        out[13] = this.origin.y;
+        out[14] = this.origin.z;
+        out[15] = 1;
+        return out;
+    }
+
+    /**
      * @param {number} xx
      * @param {number} xy
      * @param {number} xz
@@ -174,8 +198,24 @@ export class Transform {
         return this;
     }
 
+    /**
+     * @returns new Transform
+     */
     affine_inverse() {
         return Transform.new().copy(this).affine_invert();
+    }
+
+    invert() {
+        this.basis.transpose();
+        this.basis.xform(this.origin.negate(), this.origin);
+        return this;
+    }
+
+    /**
+     * @returns new Transform
+     */
+    inverse() {
+        return Transform.new().copy(this).invert();
     }
 
     /**
@@ -283,5 +323,12 @@ export class Transform {
 
     orthonormalized() {
         return Transform.new().copy(this).orthonormalize();
+    }
+
+    /**
+     * @param {Transform} other
+     */
+    exact_equals(other) {
+        return this.basis.exact_equals(other.basis) && this.origin.exact_equals(other.origin);
     }
 }

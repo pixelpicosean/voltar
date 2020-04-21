@@ -1,5 +1,8 @@
-import { List } from 'engine/core/self_list';
+import { List, SelfList } from 'engine/core/self_list';
 import { Vector2, Vector2Like } from 'engine/core/math/vector2';
+import { Vector3Like } from 'engine/core/math/vector3';
+import { AABB } from 'engine/core/math/aabb';
+import { Plane } from 'engine/core/math/plane';
 import { Transform } from 'engine/core/math/transform';
 import { CameraMatrix } from 'engine/core/math/camera_matrix';
 import { Octree } from 'engine/core/math/octree';
@@ -15,6 +18,10 @@ import {
     INSTANCE_TYPE_LIGHTMAP_CAPTURE,
     INSTANCE_TYPE_GI_PROBE,
 } from '../visual_server';
+import { VSG } from './visual_server_globals';
+import { clamp } from 'engine/core/math/math_funcs';
+
+const MAX_INSTANCE_CULL = 65535;
 
 export const CAMERA_PERSPECTIVE = 0;
 export const CAMERA_ORTHOGONAL = 1;
@@ -42,17 +49,26 @@ export class Scenario_t {
     get class() { return "Scenario_t" }
 
     constructor() {
-        this.octree = new Octree;
+        /** @type {Octree<Instance_t>} */
+        this.octree = new Octree(true);
 
+        /** @type {Instance_t[]} */
+        this.directional_lights = [];
+
+        /** @type {import('engine/drivers/webgl/rasterizer_scene').Environment_t} */
         this.environment = null;
-        /** @type {List<Instance>} */
+
+        /** @type {import('engine/drivers/webgl/rasterizer_scene').Environment_t} */
+        this.fallback_environment = null;
+
+        /** @type {List<Instance_t>} */
         this.instances = new List;
     }
 }
 
 class InstanceBaseData { }
 
-export class Instance {
+export class Instance_t {
     get class() { return "Instance" }
 
     constructor() {
@@ -61,6 +77,7 @@ export class Instance {
         this.base = null;
 
         this.skeleton = null;
+        /** @type {import('engine/drivers/webgl/rasterizer_storage').Material_t} */
         this.materail_override = null;
 
         this.transform = new Transform;
@@ -78,13 +95,53 @@ export class Instance {
 
         this.cast_shadows = 0;
 
+        this.mirror = false;
+        this.receive_shadows = true;
+        this.visible = true;
+        this.redraw_if_visible = false;
+
         this.depth = 0;
 
-        this.octree_id = null;
+        /** @type {SelfList<Instance_t>} */
+        this.dependency_item = new SelfList(this);
+
+        this.octree_id = 0;
+        /** @type {Scenario_t} */
         this.scenario = null;
+        /** @type {SelfList<Instance_t>} */
+        this.scenario_item = new SelfList(this);
+
+        this.update_aabb = false;
+        this.update_materials = false;
+
+        /** @type {SelfList<Instance_t>} */
+        this.update_item = new SelfList(this);
+
+        this.aabb = new AABB;
+        this.transformed_aabb = new AABB;
+        this.extra_margin = 0;
+        /** @type {import('engine/scene/3d/spatial').Spatial} */
+        this.object = null;
+
+        this.last_render_pass = 0;
+        this.last_frame_pass = 0;
 
         /** @type {InstanceBaseData} */
         this.base_data = null;
+
+        this.version = 0;
+    }
+
+    base_removed() {
+        VSG.scene.instance_set_base(this, null);
+    }
+
+    /**
+     * @param {boolean} p_aabb
+     * @param {boolean} p_materials
+     */
+    base_changed(p_aabb, p_materials) {
+        VSG.scene._instance_queue_update(this, p_aabb, p_materials);
     }
 }
 
@@ -113,6 +170,13 @@ class InstanceGeometryData extends InstanceBaseData {
 export class VisualServerScene {
     constructor() {
         this.render_pass = 0;
+
+        /** @type {List<Instance_t>} */
+        this._instance_update_list = new List;
+
+        this.instance_cull_count = 0;
+        /** @type {Instance_t[]} */
+        this.instance_cull_result = [];
     }
 
     camera_create() {
@@ -165,7 +229,7 @@ export class VisualServerScene {
      * @param {Transform} transform
      */
     camera_set_transform(camera, transform) {
-        camera.transform = transform.orthonormalized();
+        camera.transform.copy(transform).orthonormalize();
     }
 
     /**
@@ -243,18 +307,35 @@ export class VisualServerScene {
         this._render_scene(camera.transform, camera_matrix, ortho, camera.env, scenario);
     }
 
-    render_dirty_instances() { }
+    /**
+     * @param {AABB} p_aabb
+     * @param {Scenario_t} p_scenario
+     */
+    instances_cull_aabb(p_aabb, p_scenario) { }
+
+    /**
+     * @param {Vector3Like} p_from
+     * @param {Vector3Like} p_to
+     * @param {Scenario_t} p_scenario
+     */
+    instances_cull_ray(p_from, p_to, p_scenario) { }
+
+    /**
+     * @param {Plane[]} p_convex
+     * @param {Scenario_t} p_scenario
+     */
+    instances_cull_convex(p_convex, p_scenario) { }
 
     free_rid(rid) {
         return false;
     }
 
     instance_create() {
-        return new Instance;
+        return new Instance_t;
     }
 
     /**
-     * @param {Instance} p_instance
+     * @param {Instance_t} p_instance
      * @param {import('engine/drivers/webgl/rasterizer_storage').Mesh_t} p_base
      */
     instance_set_base(p_instance, p_base) {
@@ -291,25 +372,247 @@ export class VisualServerScene {
                 case INSTANCE_TYPE_LIGHTMAP_CAPTURE: { } break;
                 case INSTANCE_TYPE_GI_PROBE: { } break;
             }
+
+            VSG.storage.instance_add_dependency(p_base, p_instance);
+
+            p_instance.base = p_base;
+
+            if (p_instance.scenario) {
+                this._instance_queue_update(p_instance, true, true);
+            }
         }
+    }
+
+    /**
+     * @param {Instance_t} p_instance
+     * @param {Scenario_t} p_scenario
+     */
+    instance_set_scenario(p_instance, p_scenario) {
+        if (p_instance.scenario) {
+            p_instance.scenario.instances.remove(p_instance.scenario_item);
+
+            if (p_instance.octree_id) {
+                p_instance.scenario.octree.erase(p_instance.octree_id);
+                p_instance.octree_id = 0;
+            }
+
+            switch (p_instance.base_type) {
+                case INSTANCE_TYPE_LIGHT: {
+                } break;
+            }
+
+            p_instance.scenario = null;
+        }
+
+        if (p_scenario) {
+            p_instance.scenario = p_scenario;
+
+            p_scenario.instances.add(p_instance.scenario_item);
+
+            switch (p_instance.base_type) {
+                case INSTANCE_TYPE_LIGHT: {
+                } break;
+            }
+
+            this._instance_queue_update(p_instance, true, true);
+        }
+    }
+
+    /**
+     * @param {Instance_t} p_instance
+     * @param {boolean} p_visible
+     */
+    instance_set_visible(p_instance, p_visible) {
+        if (p_instance.visible === p_visible) return;
+
+        p_instance.visible = p_visible;
+
+        switch (p_instance.base_type) {
+            case INSTANCE_TYPE_LIGHT: {
+            } break;
+        }
+    }
+
+    /**
+     * @param {Instance_t} p_instance
+     * @param {Transform} p_transform
+     */
+    instance_set_transform(p_instance, p_transform) {
+        if (p_instance.transform.exact_equals(p_transform)) return;
+        p_instance.transform.copy(p_transform);
+        this._instance_queue_update(p_instance, true);
+    }
+
+    /**
+     * @param {Instance_t} p_instance
+     * @param {import('engine/scene/3d/spatial').Spatial} p_obj
+     */
+    instance_attach_object_instance(p_instance, p_obj) {
+        p_instance.object = p_obj;
+    }
+
+    update_dirty_instances() {
+        VSG.storage.update_dirty_resources();
+
+        while (this._instance_update_list.first()) {
+            this._update_dirty_instance(this._instance_update_list.first().self());
+        }
+    }
+
+    /**
+     * @param {Instance_t} p_instance
+     */
+    _update_dirty_instance(p_instance) {
+        if (p_instance.update_aabb) {
+            this._update_instance_aabb(p_instance);
+        }
+
+        if (p_instance.update_materials) {
+            if (p_instance.base_type === INSTANCE_TYPE_MESH) {
+                let new_mat_count = VSG.storage.mesh_get_surface_count(p_instance.base);
+                p_instance.materials.length = new_mat_count;
+            }
+        }
+
+        this._instance_update_list.remove(p_instance.update_item);
+
+        this._update_instance(p_instance);
+
+        p_instance.update_aabb = false;
+        p_instance.update_materials = false;
+    }
+
+    /**
+     * @param {Instance_t} p_instance
+     */
+    _update_instance_aabb(p_instance) {
+        /** @type {AABB} */
+        let new_aabb = null;
+        switch (p_instance.base_type) {
+            case INSTANCE_TYPE_MESH: {
+                new_aabb = VSG.storage.mesh_get_aabb(p_instance.base);
+            } break;
+            case INSTANCE_TYPE_MULTIMESH: {
+            } break;
+            case INSTANCE_TYPE_IMMEDIATE: {
+            } break;
+            case INSTANCE_TYPE_PARTICLES: {
+            } break;
+            case INSTANCE_TYPE_LIGHT: {
+            } break;
+        }
+        p_instance.aabb.copy(new_aabb);
+        AABB.free(new_aabb);
+    }
+
+    /**
+     * @param {Instance_t} p_instance
+     */
+    _update_instance(p_instance) {
+        p_instance.version++;
+
+        if (p_instance.aabb.has_no_surface()) return;
+
+        p_instance.mirror = p_instance.transform.basis.determinant() < 0;
+
+        let new_aabb = p_instance.transform.xform_aabb(p_instance.aabb);
+        p_instance.transformed_aabb.copy(new_aabb);
+
+        if (!p_instance.scenario) {
+            AABB.free(new_aabb);
+            return;
+        }
+
+        if (p_instance.octree_id === 0) {
+            let base_type = 1 << p_instance.base_type;
+            let pairable_mask = 0;
+            let pairable = false;
+
+            p_instance.octree_id = p_instance.scenario.octree.create(p_instance, new_aabb, 0, pairable, base_type, pairable_mask);
+        } else {
+            p_instance.scenario.octree.move(p_instance.octree_id, new_aabb);
+        }
+
+        AABB.free(new_aabb);
+    }
+
+    /**
+     * @param {Instance_t} p_instance
+     * @param {boolean} p_update_aabb
+     * @param {boolean} [p_update_materials]
+     */
+    _instance_queue_update(p_instance, p_update_aabb, p_update_materials = false) {
+        if (p_update_aabb) {
+            p_instance.update_aabb = true;
+        }
+        if (p_update_materials) {
+            p_instance.update_materials = true;
+        }
+        if (p_instance.update_item.in_list()) return;
+
+        this._instance_update_list.add(p_instance.update_item);
     }
 
     /**
      * @param {Transform} p_cam_transform
      * @param {CameraMatrix} p_cam_projection
      * @param {boolean} p_cam_ortho
-     * @param {any} p_force_env
+     * @param {import('engine/drivers/webgl/rasterizer_scene').Environment_t} p_force_env
      * @param {number} p_visible_layers
      * @param {Scenario_t} p_scenario
      */
-    _prepare_scene(p_cam_transform, p_cam_projection, p_cam_ortho, p_force_env, p_visible_layers, p_scenario) { }
+    _prepare_scene(p_cam_transform, p_cam_projection, p_cam_ortho, p_force_env, p_visible_layers, p_scenario) {
+        this.render_pass++;
+        let camera_layer_mask = p_visible_layers;
+
+        VSG.scene_render.set_scene_pass(this.render_pass);
+
+        let planes = p_cam_projection.get_projection_planes(p_cam_transform);
+
+        let near_plane = Plane.new().set_point_and_normal(
+            p_cam_transform.origin,
+            p_cam_transform.basis.get_axis(2).negate().normalize()
+        );
+        let z_far = p_cam_projection.get_z_far();
+
+        this.instance_cull_count = p_scenario.octree.cull_convex(planes, this.instance_cull_result, MAX_INSTANCE_CULL);
+
+        for (let i = 0; i < this.instance_cull_count; i++) {
+            let inst = this.instance_cull_result[i];
+
+            let keep = false;
+
+            if ((camera_layer_mask & inst.layer_mask) === 0) {
+            } else if (inst.visible) {
+                keep = true;
+
+                inst.depth = near_plane.distance_to(inst.transform.origin);
+                inst.depth_layer = Math.floor(clamp(inst.depth * 16 / z_far, 0, 15));
+            }
+
+            if (!keep) {
+                this.instance_cull_count--;
+                let t = this.instance_cull_result[i];
+                this.instance_cull_result[i] = this.instance_cull_result[this.instance_cull_count];
+                this.instance_cull_result[this.instance_cull_count] = t;
+                i--;
+                inst.last_render_pass = 0;
+            } else {
+                inst.last_render_pass = this.render_pass;
+            }
+        }
+
+        // PROCESS LIGHTS
+    }
 
     /**
      * @param {Transform} p_cam_transform
      * @param {CameraMatrix} p_cam_projection
      * @param {boolean} p_cam_ortho
-     * @param {any} p_force_env
+     * @param {import('engine/drivers/webgl/rasterizer_scene').Environment_t} p_force_env
      * @param {Scenario_t} p_scenario
      */
-    _render_scene(p_cam_transform, p_cam_projection, p_cam_ortho, p_force_env, p_scenario) { }
+    _render_scene(p_cam_transform, p_cam_projection, p_cam_ortho, p_force_env, p_scenario) {
+        VSG.scene_render.render_scene(p_cam_transform, p_cam_projection, p_cam_ortho, this.instance_cull_result, this.instance_cull_count, p_force_env);
+    }
 }

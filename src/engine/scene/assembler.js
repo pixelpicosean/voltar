@@ -98,7 +98,10 @@ export function assemble_scene(scn, data, url) {
         // inheritance
         if (i === 0) {
             scn.set_filename(url);
-            scn._load_data(node_data);
+            scn.set_instance_data(node_data);
+            if (node_data.name) {
+                scn.set_name(node_data.name);
+            }
             node_cache['.'] = scn;
             path_cache['.'] = '';
         }
@@ -126,7 +129,10 @@ export function assemble_scene(scn, data, url) {
                 /* inherited node */
                 node = parent.get_node(node_data.name);
             }
-            node._load_data(node_data);
+            node.set_instance_data(node_data);
+            if (node_data.name) {
+                node.set_name(node_data.name);
+            }
             let path = node.name;
             if (node_data.parent !== '.') {
                 path = `${path_cache[node_data.parent]}/${path}`;

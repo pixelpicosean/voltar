@@ -1,9 +1,18 @@
 import { node_class_map } from "engine/registry";
 import { GDCLASS } from "engine/core/v_object";
 import { Vector2, Vector2Like } from "engine/core/math/vector2";
+import { Vector3 } from "engine/core/math/vector3";
+import { Transform } from "engine/core/math/transform";
 
-import { Spatial, NOTIFICATION_ENTER_WORLD, NOTIFICATION_LOCAL_TRANSFORM_CHANGED_3D, NOTIFICATION_EXIT_WORLD } from "./spatial";
 import { VSG } from "engine/servers/visual/visual_server_globals";
+
+import {
+    Spatial,
+    NOTIFICATION_ENTER_WORLD,
+    NOTIFICATION_EXIT_WORLD,
+    NOTIFICATION_LOCAL_TRANSFORM_CHANGED_3D,
+    NOTIFICATION_TRANSFORM_CHANGED_3D,
+} from "./spatial";
 
 export const PROJECTION_PERSPECTIVE = 0;
 export const PROJECTION_ORTHOGONAL = 1;
@@ -48,6 +57,16 @@ export class Camera extends Spatial {
         VSG.scene.camera_set_cull_mask(this.camera, this.layers);
 
         this.environment = 0;
+
+        this.set_notify_transform(true);
+        this.set_disable_scale(true);
+    }
+
+    /**
+     * @param {boolean} p_enabled
+     */
+    set_disable_scale(p_enabled) {
+        this.d_data.disable_scale = p_enabled;
     }
 
     /**
@@ -60,7 +79,7 @@ export class Camera extends Spatial {
             return;
         }
 
-        this.fov = this.fov;
+        this.fov = fov_degrees;
         this.near = z_near;
         this.far = z_far;
         this.mode = PROJECTION_PERSPECTIVE;
@@ -74,7 +93,20 @@ export class Camera extends Spatial {
      * @param {number} z_near
      * @param {number} z_far
      */
-    set_orthogonal(size, z_near, z_far) { }
+    set_orthogonal(size, z_near, z_far) {
+        if (!this.force_change && this.size === size && this.near === z_near && this.far === z_far && this.mode === PROJECTION_PERSPECTIVE) {
+            return;
+        }
+
+        this.size = size;
+
+        this.near = z_near;
+        this.far = z_far;
+        this.mode = PROJECTION_ORTHOGONAL;
+
+        VSG.scene.camera_set_orthogonal(this.camera, this.size, this.near, this.far);
+        this.force_change = false;
+    }
 
     /**
      * @param {number} size
@@ -82,9 +114,31 @@ export class Camera extends Spatial {
      * @param {number} z_near
      * @param {number} z_far
      */
-    set_frustum(size, offset, z_near, z_far) { }
+    set_frustum(size, offset, z_near, z_far) {
+        if (!this.force_change && this.size === size && this.frustum_offset.equals(offset) && this.near === z_near && this.far === z_far && this.mode === PROJECTION_PERSPECTIVE) {
+            return;
+        }
 
-    set_projection() { }
+        this.size = size;
+        this.frustum_offset.copy(offset);
+
+        this.near = z_near;
+        this.far = z_far;
+        this.mode = PROJECTION_FRUSTUM;
+
+        VSG.scene.camera_set_frustum(this.camera, this.size, this.frustum_offset, this.near, this.far);
+        this.force_change = false;
+    }
+
+    /**
+     * @param {number} p_mode
+     */
+    set_projection(p_mode) {
+        if (p_mode === PROJECTION_PERSPECTIVE || p_mode === PROJECTION_ORTHOGONAL || p_mode === PROJECTION_FRUSTUM) {
+            this.mode = p_mode;
+            this._update_camera_mode();
+        }
+    }
 
     make_current() {
         this.current = true;
@@ -93,10 +147,41 @@ export class Camera extends Spatial {
 
         this.get_viewport()._camera_set(this);
     }
-    clear_current(enable_next = true) { }
-    set_current(current) { }
+    clear_current(enable_next = true) {
+        this.current = false;
+        if (!this.is_inside_tree()) return;
 
-    get_camera_transform() { }
+        if (this.get_viewport().camera === this) {
+            this.get_viewport()._camera_set(null);
+
+            if (enable_next) {
+                this.get_viewport()._camera_make_next_current(this);
+            }
+        }
+    }
+    /**
+     * @param {boolean} current
+     */
+    set_current(current) {
+        if (current) {
+            this.make_current();
+        } else {
+            this.clear_current();
+        }
+    }
+
+    /**
+     * @returns new Transform
+     */
+    get_camera_transform() {
+        let tr = this.get_global_transform().clone().orthonormalize();
+        let v = tr.basis.get_axis(1).scale(this.v_offset);
+        let h = tr.basis.get_axis(0).scale(this.h_offset);
+        tr.origin.add(v).add(h);
+        Vector3.free(v);
+        Vector3.free(h);
+        return tr;
+    }
 
     /* virtual methods */
 
@@ -124,7 +209,7 @@ export class Camera extends Spatial {
                     this.viewport._camera_set(this);
                 }
             } break;
-            case NOTIFICATION_LOCAL_TRANSFORM_CHANGED_3D: {
+            case NOTIFICATION_TRANSFORM_CHANGED_3D: {
                 this._request_camera_update();
             } break;
             case NOTIFICATION_EXIT_WORLD: {
@@ -150,7 +235,7 @@ export class Camera extends Spatial {
         this._update_camera();
     }
 
-    _update_camera() {
+    _update_camera_mode() {
         this.force_change = true;
         switch (this.mode) {
             case PROJECTION_PERSPECTIVE: {
@@ -162,6 +247,23 @@ export class Camera extends Spatial {
             case PROJECTION_FRUSTUM: {
                 this.set_frustum(this.size, this.frustum_offset, this.near, this.far);
             } break;
+        }
+    }
+
+    _update_camera() {
+        if (!this.is_inside_tree()) return;
+
+        let transform = this.get_camera_transform();
+        VSG.scene.camera_set_transform(this.camera, transform);
+        Transform.free(transform);
+
+        if (!this.current) return;
+
+        this.get_viewport()._camera_transform_changed_notify();
+
+        let world = this.get_world();
+        if (world) {
+            world._update_camera(this);
         }
     }
 }

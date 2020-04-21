@@ -1,9 +1,12 @@
+import { VObject } from 'engine/core/v_object';
 import { VSG } from 'engine/servers/visual/visual_server_globals';
 
-export class World {
+export class World extends VObject {
     get class() { return "World" }
 
     constructor() {
+        super();
+
         this.space = null;
         this.scenario = VSG.scene.scenario_create();
 
@@ -15,6 +18,8 @@ export class World {
     free() {
         VSG.scene.free_rid(this.scenario);
         this.scenario = null;
+
+        return super.free();
     }
 
     duplicate() {

@@ -189,6 +189,10 @@ export class Color {
         return pack_color_f(this.r, this.g, this.b, this.a);
     }
 
+    as_array() {
+        return [this.r, this.g, this.b, this.a];
+    }
+
     /**
      * @param {ColorLike} value
      */

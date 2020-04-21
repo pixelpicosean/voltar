@@ -1,6 +1,9 @@
 import { SelfList, List } from "engine/core/self_list";
 import { is_po2, nearest_po2 } from "engine/core/math/math_funcs";
+import { Vector2 } from "engine/core/math/vector2";
+import { Vector3 } from "engine/core/math/vector3";
 import { Color } from "engine/core/color";
+import { AABB } from "engine/core/math/aabb";
 
 import {
     PIXEL_FORMAT_L8,
@@ -26,7 +29,12 @@ import {
     MULTIMESH_CUSTOM_DATA_8BIT,
     MULTIMESH_CUSTOM_DATA_FLOAT,
 } from "engine/servers/visual_server";
+import {
+    Instance_t,
+} from "engine/servers/visual/visual_server_scene";
 
+const SMALL_VEC2 = new Vector2(0.00001, 0.00001);
+const SMALL_VEC3 = new Vector3(0.00001, 0.00001, 0.00001);
 
 /**
  * @param {number} format
@@ -75,7 +83,8 @@ export class Texture_t {
         this.name = '';
 
         this.type = TEXTURE_TYPE_2D;
-        this.render_target = false;
+        /** @type {RenderTarget_t} */
+        this.render_target = null;
         this.width = 0;
         this.height = 0;
         this.usage = USAGE_IMMUTABLE;
@@ -95,12 +104,65 @@ export class Texture_t {
     }
 }
 
+let inst_uid = 0;
+export class Instantiable_t {
+    constructor() {
+        this.uid = inst_uid++;
+
+        /** @type {List<Instance_t>} */
+        this.instance_list = new List;
+    }
+
+    /**
+     * @param {boolean} p_aabb
+     * @param {boolean} p_materials
+     */
+    instance_change_notify(p_aabb, p_materials) {
+        let instances = this.instance_list.first();
+        while (instances) {
+            instances.self().base_changed(p_aabb, p_materials);
+            instances = instances.next();
+        }
+    }
+
+    instance_remove_deps() {
+        let instances = this.instance_list.first();
+        while (instances) {
+            instances.self().base_removed();
+            instances = instances.next();
+        }
+    }
+}
+
+export const GEOMETRY_INVALID = 0;
+export const GEOMETRY_SURFACE = 1;
+export const GEOMETRY_IMMEDIATE = 2;
+export const GEOMETRY_MULTISURFACE = 3;
+
+export class Geometry_t extends Instantiable_t {
+    constructor() {
+        super();
+
+        this.type = GEOMETRY_INVALID;
+
+        /** @type {Material_t} */
+        this.material = null;
+
+        this.last_pass = 0;
+        this.index = 0;
+    }
+}
+
 class Effect_t {
     constructor() {
         this.width = 0;
         this.height = 0;
+
         /** @type {WebGLTexture} */
         this.gl_color = null;
+        /** @type {WebGLTexture} */
+        this.gl_depth = null;
+
         /** @type {WebGLFramebuffer} */
         this.gl_fbo = null;
     }
@@ -110,8 +172,17 @@ export class RenderTarget_t {
     constructor() {
         this.name = '';
 
+        this.x = 0;
+        this.y = 0;
         this.width = 0;
         this.height = 0;
+
+        this.flags = {
+            DIRECT_TO_SCREEN: false,
+            TRANSPARENT: true,
+        };
+
+        this.used_in_frame = false;
 
         /** @type {Texture_t} */
         this.texture = null;
@@ -127,15 +198,44 @@ export class RenderTarget_t {
  * @typedef {'1i' | '1f' | '2f' | '3f' | '4f' | 'mat3' | 'mat4'} UniformTypes
  */
 
+const BLEND_MODE_MIX = 0;
+
+const DEPTH_DRAW_OPAQUE = 0;
+
+const CULL_MODE_FRONT = 0;
+
 export class Shader_t {
     constructor() {
         this.name = '';
+
+        this.last_pass = 0;
+        this.index = 0;
 
         /** @type {WebGLProgram} */
         this.gl_prog = null;
 
         /** @type {Object<string, { type: UniformTypes, gl_loc: WebGLUniformLocation }>} */
         this.uniforms = {};
+
+        this.canvas_item = {
+            blend_mode: BLEND_MODE_MIX,
+
+            uses_screen_texture: false,
+            uses_time: false,
+        };
+
+        this.spatial = {
+            blend_mode: BLEND_MODE_MIX,
+            depth_draw_mode: DEPTH_DRAW_OPAQUE,
+            cull_mode: CULL_MODE_FRONT,
+
+            uses_alpha: false,
+            unshaded: false,
+            no_depth_test: false,
+            uses_screen_texture: false,
+            uses_depth_texture: false,
+            uses_time: false,
+        };
     }
 }
 
@@ -144,13 +244,23 @@ export class Material_t {
         this.name = '';
 
         this.batchable = false;
-        this.uses_screen_texture = false;
+
+        this.render_priority = 0;
+
+        /** @type {Material_t} */
+        this.next_pass = null;
+
+        this.index = 0;
+        this.last_pass = 0;
 
         /** @type {Shader_t} */
         this.shader = null;
 
         /** @type {Object<string, number[]>} */
         this.params = {};
+
+        /** @type {Object<string, Texture_t>} */
+        this.textures = {};
     }
 }
 
@@ -172,10 +282,9 @@ export class Material_t {
  * @property {number} offset
  */
 
-class Surface_t {
+export class Surface_t extends Geometry_t {
     constructor() {
-        /** @type {Material_t} */
-        this.material = null;
+        super();
 
         /** @type {VertAttrib[]} */
         this.attribs = [];
@@ -187,6 +296,8 @@ class Surface_t {
         this.vertex_id = null;
         /** @type {WebGLBuffer} */
         this.index_id = null;
+
+        this.aabb = new AABB;
 
         this.array_len = 0;
         this.index_array_len = 0;
@@ -205,8 +316,10 @@ class Surface_t {
     }
 }
 
-export class Mesh_t {
+export class Mesh_t extends Instantiable_t {
     constructor() {
+        super();
+
         this.active = false;
 
         /** @type {List<MultiMesh_t>} */
@@ -523,7 +636,7 @@ export class RasterizerStorage {
     render_target_create() {
         const rt = new RenderTarget_t;
         rt.texture = new Texture_t;
-        rt.texture.render_target = true;
+        rt.texture.render_target = rt;
         return rt;
     }
     /**
@@ -581,6 +694,16 @@ export class RasterizerStorage {
         gl.clear(gl.COLOR_BUFFER_BIT);
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    }
+
+    /**
+     * @param {RenderTarget_t} rt
+     * @param {number} p_x
+     * @param {number} p_y
+     */
+    render_target_set_position(rt, p_x, p_y) {
+        rt.x = p_x;
+        rt.y = p_y;
     }
 
     /* Material API */
@@ -652,7 +775,7 @@ export class RasterizerStorage {
     material_create(shader, param = {}, uses_screen_texture = false) {
         const mt = new Material_t;
         mt.shader = shader;
-        mt.uses_screen_texture = uses_screen_texture;
+        mt.shader.canvas_item.uses_screen_texture = uses_screen_texture;
 
         for (const k in shader.uniforms) {
             const u = shader.uniforms[k];
@@ -726,8 +849,9 @@ export class RasterizerStorage {
      * @param {VertAttribDef[]} attribs
      * @param {Float32Array} vertices
      * @param {Uint16Array} [indices]
+     * @param {boolean} [use_3d_vertices]
      */
-    mesh_add_surface_from_data(mesh, primitive, attribs, vertices, indices) {
+    mesh_add_surface_from_data(mesh, primitive, attribs, vertices, indices, use_3d_vertices = false) {
         const gl = this.gl;
 
         const surface = new Surface_t;
@@ -742,8 +866,12 @@ export class RasterizerStorage {
         }
         surface.primitive = primitive;
         surface.mesh = mesh;
+
+        let stride = 0;
         for (let i = 0; i < attribs.length; i++) {
             const a = attribs[i];
+
+            if (i === 0) stride = a.stride;
 
             surface.attribs[i] = {
                 enabled: true,
@@ -755,6 +883,36 @@ export class RasterizerStorage {
                 stride: a.stride,
                 offset: a.offset,
             }
+        }
+
+        // calculate AABB
+        if (use_3d_vertices) {
+            let aabb = surface.aabb;
+            let vec = Vector3.new();
+            aabb.set(0, 0, 0, 0, 0, 0);
+            let vert_length = Math.floor(stride / 4);
+            let position_len = Math.floor(vertices.length / vert_length);
+            for (let i = 0; i < position_len; i++) {
+                if (i === 0) {
+                    aabb.set(
+                        vertices[0],
+                        vertices[1],
+                        vertices[2],
+                        SMALL_VEC3.x,
+                        SMALL_VEC3.y,
+                        SMALL_VEC3.z
+                    );
+                } else {
+                    aabb.expand_to(vec.set(
+                        vertices[i * vert_length + 0],
+                        vertices[i * vert_length + 1],
+                        vertices[i * vert_length + 2]
+                    ))
+                }
+            }
+            Vector3.free(vec);
+        } else {
+            // TODO: calculate 2D AABB (Rect2)
         }
 
         surface.vertex_id = gl.createBuffer();
@@ -781,6 +939,28 @@ export class RasterizerStorage {
         if (mesh.surfaces[surface].material === material) return;
 
         mesh.surfaces[surface].material = material;
+    }
+
+    /**
+     * @param {Mesh_t} mesh
+     */
+    mesh_get_aabb(mesh) {
+        let aabb = AABB.new();
+        for (let i = 0; i < mesh.surfaces.length; i++) {
+            if (i === 0) {
+                return aabb.copy(mesh.surfaces[i].aabb);
+            } else {
+                return aabb.merge_with(mesh.surfaces[i].aabb);
+            }
+        }
+        return aabb;
+    }
+
+    /**
+     * @param {Mesh_t} mesh
+     */
+    mesh_get_surface_count(mesh) {
+        return mesh.surfaces.length;
     }
 
     multimesh_create() {
@@ -979,6 +1159,14 @@ export class RasterizerStorage {
         if (!multimesh.update_list.in_list()) {
             this.multimesh_update_list.add(multimesh.update_list);
         }
+    }
+
+    /**
+     * @param {Mesh_t} p_base
+     * @param {Instance_t} p_instance
+     */
+    instance_add_dependency(p_base, p_instance) {
+        p_base.instance_list.add(p_instance.dependency_item);
     }
 
     /**

@@ -212,7 +212,6 @@ export class ResourceLoader extends VObject {
         // check if resource already exists.
         if (raw_resource_map[name]) {
             console.warn(`Resource named "${name}" already exists.`);
-            // TODO: update old resource with new one
         }
 
         // add base url if this isn't an absolute url

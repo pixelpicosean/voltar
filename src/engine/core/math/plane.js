@@ -22,6 +22,7 @@ export class Plane {
 
     constructor() {
         this.normal = new Vector3;
+        /** @type {number} */
         this.d = 0;
     }
 
@@ -70,5 +71,12 @@ export class Plane {
         this.normal.scale(1.0 / l);
         this.d /= l;
         return this;
+    }
+
+    /**
+     * @param {Vector3Like} p_point
+     */
+    distance_to(p_point) {
+        return this.normal.dot(p_point) - this.d;
     }
 }

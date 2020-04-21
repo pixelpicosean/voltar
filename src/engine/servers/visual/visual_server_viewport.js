@@ -6,7 +6,7 @@ import { Color, ColorLike } from "engine/core/color";
 
 import { VSG } from "./visual_server_globals";
 import { Canvas } from "./visual_server_canvas";
-import { Scenario_t } from "./visual_server_scene";
+import { Scenario_t, Camera_t } from "./visual_server_scene";
 
 
 const VIEWPORT_UPDATE_DISABLED = 0;
@@ -185,15 +185,16 @@ export class VisualServerViewport {
     /**
      * @param {Viewport_t} p_viewport
      * @param {Rect2} p_rect
+     * @param {number} [p_screen]
      */
-    viewport_attach_to_screen(p_viewport, p_rect/* , p_screen */) {
+    viewport_attach_to_screen(p_viewport, p_rect, p_screen = 0) {
         if (p_viewport.viewport_render_direct_to_screen) {
             VSG.storage.render_target_set_size(p_viewport.render_target, p_rect.width, p_rect.height);
-            // VSG.storage.render_target_set_position(p_viewport.render_target, p_rect.x, p_rect.y);
+            VSG.storage.render_target_set_position(p_viewport.render_target, p_rect.x, p_rect.y);
         }
 
         p_viewport.viewport_to_screen_rect.copy(p_rect);
-        p_viewport.viewport_to_screen = 0/* p_screen */;
+        p_viewport.viewport_to_screen = p_screen;
     }
     /**
      * @param {Viewport_t} p_viewport
@@ -205,7 +206,7 @@ export class VisualServerViewport {
         }
 
         if (!p_enable) {
-            // VSG.storage.render_target_set_position(p_viewport.render_target, 0, 0);
+            VSG.storage.render_target_set_position(p_viewport.render_target, 0, 0);
             VSG.storage.render_target_set_size(p_viewport.render_target, p_viewport.size.x, p_viewport.size.y);
         }
 
@@ -213,7 +214,7 @@ export class VisualServerViewport {
 
         if (!p_viewport.viewport_to_screen_rect.is_zero() && p_enable) {
             VSG.storage.render_target_set_size(p_viewport.render_target, p_viewport.viewport_to_screen_rect.width, p_viewport.viewport_to_screen_rect.height);
-            // VSG.storage.render_target_set_position(p_viewport.render_target, p_viewport.viewport_to_screen_rect.x, p_viewport.viewport_to_screen_rect.y);
+            VSG.storage.render_target_set_position(p_viewport.render_target, p_viewport.viewport_to_screen_rect.x, p_viewport.viewport_to_screen_rect.y);
         }
     }
     /**
@@ -221,7 +222,7 @@ export class VisualServerViewport {
      */
     viewport_detach(p_viewport) {
         if (p_viewport.viewport_render_direct_to_screen) {
-            // VSG.storage.render_target_set_position(p_viewport.render_target, 0, 0);
+            VSG.storage.render_target_set_position(p_viewport.render_target, 0, 0);
             VSG.storage.render_target_set_size(p_viewport.render_target, p_viewport.size.x, p_viewport.size.y);
         }
 
@@ -309,6 +310,14 @@ export class VisualServerViewport {
      */
     viewport_set_scenario(p_viewport, p_scenario) {
         p_viewport.scenario = p_scenario;
+    }
+
+    /**
+     * @param {Viewport_t} p_viewport
+     * @param {Camera_t} p_camera
+     */
+    viewport_attach_camera(p_viewport, p_camera) {
+        p_viewport.camera = p_camera;
     }
 
     draw_viewports() {

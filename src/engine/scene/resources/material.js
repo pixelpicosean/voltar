@@ -200,3 +200,15 @@ export const CANVAS_ITEM_SHADER_UNIFORMS = [
     { name: 'SCREEN_TEXTURE', type: '1i' },
     { name: 'SCREEN_PIXEL_SIZE', type: '2f' },
 ]
+
+export const SPATIAL_SHADER_UNIFORMS = [
+    { name: 'CAMERA_MATRIX', type: 'mat4' },
+    { name: 'INV_CAMERA_MATRIX', type: 'mat4' },
+    { name: 'PROJECTION_MATRIX', type: 'mat4' },
+    { name: 'INV_PROJECTION_MATRIX', type: 'mat4' },
+    { name: 'WORLD_MATRIX', type: 'mat4' },
+
+    { name: 'TIME', type: '1f' },
+    { name: 'SCREEN_TEXTURE', type: '1i' },
+    { name: 'SCREEN_PIXEL_SIZE', type: '2f' },
+]

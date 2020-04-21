@@ -48,7 +48,6 @@ export default function blob_middleware_factory() {
                 resource.type = Resource.TYPE.IMAGE;
 
                 // cleanup the no longer used blob after the image loads
-                // TODO: Is this correct? Will the image be invalid after revoking?
                 resource.data.onload = () => {
                     Url.revokeObjectURL(src);
                     resource.data.onload = null;

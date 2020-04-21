@@ -386,8 +386,6 @@ export class RasterizerCanvas extends VObject {
 
     draw_window_margins(black_margin, black_image) { }
 
-    update() { }
-
     prepare() {
         this.states.material = this.materials.flat;
         this.states.texture = this.storage.resources.white_tex.texture;
@@ -525,7 +523,7 @@ export class RasterizerCanvas extends VObject {
         const gl = this.gl;
 
         // screen texture support
-        if (material.uses_screen_texture && !this.states.canvas_texscreen_used) {
+        if (material.shader.canvas_item.uses_screen_texture && !this.states.canvas_texscreen_used) {
             this.states.canvas_texscreen_used = true;
 
             this.copy_screen();
@@ -576,7 +574,7 @@ export class RasterizerCanvas extends VObject {
             }
         }
 
-        if (material.uses_screen_texture) {
+        if (material.shader.canvas_item.uses_screen_texture) {
             if (this.storage.frame.current_rt.copy_screen_effect.gl_color) {
                 const texunit = this.storage.config.max_texture_image_units - 4;
                 gl.activeTexture(gl.TEXTURE0 + texunit);

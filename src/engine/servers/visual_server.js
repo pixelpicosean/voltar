@@ -154,17 +154,16 @@ export class VisualServer extends VObject {
 
         VSG.rasterizer.begin_frame(frame_step);
 
-        VSG.scene_render.update();
+        VSG.scene.update_dirty_instances();
 
         VSG.viewport.draw_viewports();
-        VSG.canvas_render.update();
-
         this._draw_margins();
         VSG.rasterizer.end_frame();
 
         for (const c of this.frame_drawn_callbacks) {
             c.object[c.method].call(c.object, c.param);
         }
+        this.frame_drawn_callbacks.length = 0;
 
         this.emit_signal('frame_post_draw');
     }

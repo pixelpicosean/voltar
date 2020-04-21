@@ -71,6 +71,10 @@ export class Vector3 {
         this.z = z;
     }
 
+    as_array() {
+        return [this.x, this.y, this.z];
+    }
+
     /**
      * Sets the point to a new x and y position.
      * If y is omitted, both x and y will be set to x.
@@ -378,6 +382,16 @@ export class Vector3 {
         return this;
     }
 }
+
+Vector3.ZERO = new Vector3(0, 0, 0);
+Vector3.ONE = new Vector3(1, 1, 1);
+Vector3.INF = new Vector3(Infinity, Infinity, Infinity);
+Vector3.LEFT = new Vector3(-1, 0, 0);
+Vector3.RIGHT = new Vector3(1, 0, 0);
+Vector3.UP = new Vector3(0, 1, 0);
+Vector3.DOWN = new Vector3(0, -1, 0);
+Vector3.FORWARD = new Vector3(0, 0, -1);
+Vector3.BACK = new Vector3(0, 0, 1);
 
 /**
  * @type {Vector3[]}

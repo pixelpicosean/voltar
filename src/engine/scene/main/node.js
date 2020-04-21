@@ -130,9 +130,14 @@ export class Node extends VObject {
     /**
      * @param {any} data
      */
-    _load_data(data) {
+    set_instance_data(data) {
         this.instance_data = data;
+    }
 
+    /**
+     * @param {any} data
+     */
+    _load_data(data) {
         if (data.filename !== undefined) {
             this.set_filename(data.filename);
         }
@@ -384,6 +389,11 @@ export class Node extends VObject {
         this.emit_signal('tree_entered', this);
 
         this.data.tree.node_added(this);
+
+        if (this.instance_data) {
+            this._load_data(this.instance_data);
+            this.instance_data = null;
+        }
 
         for (const c of this.data.children) {
             if (!c.is_inside_tree()) {
