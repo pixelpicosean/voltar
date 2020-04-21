@@ -37,22 +37,25 @@ export class CameraMatrix {
     as_array(out) {
         if (!out) out = Array(16);
         let m = this.matrix;
-        out[0] = m[0][0];
-        out[1] = m[0][1];
-        out[2] = m[0][2];
-        out[3] = m[0][3];
-        out[4] = m[0][0];
-        out[5] = m[0][1];
-        out[6] = m[0][2];
-        out[7] = m[0][3];
-        out[8] = m[0][0];
-        out[9] = m[0][1];
-        out[10] = m[0][2];
-        out[11] = m[0][3];
-        out[12] = m[0][0];
-        out[13] = m[0][1];
-        out[14] = m[0][2];
-        out[15] = m[0][3];
+        out[ 0] = m[0][0];
+        out[ 1] = m[0][1];
+        out[ 2] = m[0][2];
+        out[ 3] = m[0][3];
+
+        out[ 4] = m[1][0];
+        out[ 5] = m[1][1];
+        out[ 6] = m[1][2];
+        out[ 7] = m[1][3];
+
+        out[ 8] = m[2][0];
+        out[ 9] = m[2][1];
+        out[10] = m[2][2];
+        out[11] = m[2][3];
+
+        out[12] = m[3][0];
+        out[13] = m[3][1];
+        out[14] = m[3][2];
+        out[15] = m[3][3];
         return out;
     }
 
@@ -239,10 +242,10 @@ export class CameraMatrix {
         let top = size / aspect / 2;
 
         this.matrix[0][0] = 2.0 / (right - left);
-        this.matrix[3][0] = -((right + left) / (right - left));
         this.matrix[1][1] = 2.0 / (top - bottom);
-        this.matrix[3][1] = -((top + bottom) / (top - bottom));
         this.matrix[2][2] = -2.0 / (z_far - z_near);
+        this.matrix[3][0] = -((right + left) / (right - left));
+        this.matrix[3][1] = -((top + bottom) / (top - bottom));
         this.matrix[3][2] = -((z_far + z_near) / (z_far - z_near));
         this.matrix[3][3] = 1.0;
         return this;

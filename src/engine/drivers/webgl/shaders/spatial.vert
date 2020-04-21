@@ -17,11 +17,11 @@ varying vec2 uv_interp;
 void main() {
     uv_interp = uv;
 
-    mat4 MODELVIEW_MATRIX = INV_CAMERA_MATRIX * WORLD_MATRIX;
-
     vec3 VERTEX = position;
     vec3 NORMAL = normal;
     vec3 TANGENT = tangent;
+
+    mat4 MODELVIEW_MATRIX = INV_CAMERA_MATRIX * WORLD_MATRIX;
 
     float POINT_SIZE = 1.0;
 

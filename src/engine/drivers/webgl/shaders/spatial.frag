@@ -22,13 +22,28 @@ uniform float ambient_energy;
 varying vec2 uv_interp;
 
 void main() {
-    vec4 COLOR;
     vec2 UV = uv_interp;
     vec2 SCREEN_UV = gl_FragCoord.xy * SCREEN_PIXEL_SIZE;
 
+    vec3 ALBEDO = vec3(1.0, 1.0, 1.0);
+    float ALPHA = 1.0;
+
     /* SHADER_BEGIN */
-    COLOR = texture2D(TEXTURE, UV);
     /* SHADER_END */
 
-    gl_FragColor = vec4(COLOR.rgb * COLOR.a, COLOR.a);
+    vec3 specular_light = vec3(0.0, 0.0, 0.0);
+    vec3 diffuse_light = vec3(0.0, 0.0, 0.0);
+    vec3 ambient_light = vec3(0.0, 0.0, 0.0);
+
+    ambient_light = ambient_color.rgb;
+    ambient_light *= ambient_energy;
+
+    // mode: unshaded
+    // {
+    //     gl_FragColor = vec4(ALBEDO, ALPHA);
+    // }
+
+    ambient_light *= ALBEDO;
+
+    gl_FragColor = vec4(ambient_light + diffuse_light + specular_light, ALPHA);
 }

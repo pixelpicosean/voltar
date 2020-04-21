@@ -195,8 +195,8 @@ export class RasterizerScene {
             viewport_size: new Vector2,
             screen_pixel_size: new Vector2,
 
-            default_ambient: new Color,
-            default_bg: new Color,
+            default_bg: new Color(0, 0, 0, 1),
+            default_ambient: new Color(0, 0, 0, 1),
 
             /** @type {WebGLTexture} */
             current_main_tex: null,
@@ -227,7 +227,7 @@ export class RasterizerScene {
                     0, 0, 1, 0,
                     0, 0, 0, 1,
                 ],
-                WORLD_TRANSFORM: [
+                WORLD_MATRIX: [
                     1, 0, 0, 0,
                     0, 1, 0, 0,
                     0, 0, 1, 0,
@@ -236,6 +236,11 @@ export class RasterizerScene {
                 TIME: [0],
                 VIEWPORT_SIZE: [0, 0],
                 SCREEN_PIXEL_SIZE: [0, 0],
+
+                bg_color: [0, 0, 0, 1],
+                bg_energy: [1],
+                ambient_color: [0, 0, 0, 1],
+                ambient_energy: [1],
             },
         };
 
@@ -266,7 +271,7 @@ export class RasterizerScene {
             mat.set_shader(`
                 shader_type = spatial;
                 void fragment() {
-                    COLOR = vec4(0.0, 1.0, 0.5, 1.0);
+                    ALBEDO = vec3(1.0, 1.0, 1.0);
                 }
             `);
             this.materials.spatial = this.init_shader_material(mat, normal_vs, normal_fs, SPATIAL_SHADER_UNIFORMS, true);
@@ -360,8 +365,11 @@ export class RasterizerScene {
             gl.clear(gl.COLOR_BUFFER_BIT);
         }
 
-        this.state.default_ambient.copy(clear_color);
-        this.state.default_bg.copy(clear_color);
+        this.state.default_ambient.set(clear_color.r, clear_color.g, clear_color.b, 1.0);
+        this.state.default_bg.set(clear_color.r, clear_color.g, clear_color.b, 1.0);
+
+        // [dev]
+        this.state.default_ambient.set(1.0, clear_color.g, clear_color.b, 1.0);
 
         if (this.storage.frame.current_rt && this.storage.frame.current_rt.flags.DIRECT_TO_SCREEN) {
             gl.disable(gl.SCISSOR_TEST);
@@ -634,17 +642,17 @@ export class RasterizerScene {
                     global_uniforms.ambient_color = p_env.ambient_color;
                     global_uniforms.ambient_energy = p_env.ambient_energy;
                 } else {
-                    global_uniforms.bg_energy = [1.0];
-                    global_uniforms.bg_color = this.state.default_bg.as_array();
-                    global_uniforms.ambient_color = this.state.default_ambient.as_array();
-                    global_uniforms.ambient_energy = [1.0];
+                    global_uniforms.bg_energy[0] = 1.0;
+                    global_uniforms.bg_color = this.state.default_bg.as_array(global_uniforms.bg_color);
+                    global_uniforms.ambient_color = this.state.default_ambient.as_array(global_uniforms.ambient_color);
+                    global_uniforms.ambient_energy[0] = 1.0;
                 }
 
                 // TODO: fog
 
                 global_uniforms.CAMERA_MATRIX = p_view_transform.as_array(global_uniforms.CAMERA_MATRIX);
-                global_uniforms.INV_CAMERA_MATRIX = p_view_transform.as_array(global_uniforms.INV_CAMERA_MATRIX);
-                global_uniforms.PROJECTION_MATRIX = view_transform_inverse.as_array(global_uniforms.PROJECTION_MATRIX);
+                global_uniforms.INV_CAMERA_MATRIX = view_transform_inverse.as_array(global_uniforms.INV_CAMERA_MATRIX);
+                global_uniforms.PROJECTION_MATRIX = p_projection.as_array(global_uniforms.PROJECTION_MATRIX);
                 global_uniforms.INV_PROJECTION_MATRIX = projection_inverse.as_array(global_uniforms.INV_PROJECTION_MATRIX);
                 global_uniforms.TIME[0] = this.storage.frame.time[0];
                 global_uniforms.VIEWPORT_SIZE[0] = this.state.viewport_size.x;
@@ -653,7 +661,7 @@ export class RasterizerScene {
                 global_uniforms.SCREEN_PIXEL_SIZE[1] = this.state.screen_pixel_size.y;
             }
 
-            global_uniforms.WORLD_TRANSFORM = e.instance.transform.as_array(global_uniforms.WORLD_TRANSFORM);
+            global_uniforms.WORLD_MATRIX = e.instance.transform.as_array(global_uniforms.WORLD_MATRIX);
 
             const mat_uniforms = material.shader.uniforms;
             for (const k in mat_uniforms) {
@@ -673,6 +681,9 @@ export class RasterizerScene {
             prev_geometry = e.geometry;
             prev_material = e.material;
         }
+
+        Transform.free(view_transform_inverse);
+        CameraMatrix.free(projection_inverse);
     }
 
     /**

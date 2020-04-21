@@ -211,4 +211,9 @@ export const SPATIAL_SHADER_UNIFORMS = [
     { name: 'TIME', type: '1f' },
     { name: 'SCREEN_TEXTURE', type: '1i' },
     { name: 'SCREEN_PIXEL_SIZE', type: '2f' },
+
+    { name: 'bg_color', type: '4f' },
+    { name: 'bg_energy', type: '1f' },
+    { name: 'ambient_color', type: '4f' },
+    { name: 'ambient_energy', type: '1f' },
 ]

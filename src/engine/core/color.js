@@ -189,8 +189,16 @@ export class Color {
         return pack_color_f(this.r, this.g, this.b, this.a);
     }
 
-    as_array() {
-        return [this.r, this.g, this.b, this.a];
+    /**
+     * @param {number[]} [out]
+     */
+    as_array(out) {
+        if (!out) out = [0, 0, 0, 0]
+        out[0] = this.r;
+        out[1] = this.g;
+        out[2] = this.b;
+        out[3] = this.a;
+        return out;
     }
 
     /**

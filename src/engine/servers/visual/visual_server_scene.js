@@ -266,7 +266,7 @@ export class VisualServerScene {
      * @param {Vector2Like} viewport_size
      */
     render_camera(camera, scenario, viewport_size) {
-        let camera_matrix = new CameraMatrix;
+        let camera_matrix = CameraMatrix.new();
         let ortho = false;
 
         switch (camera.type) {
@@ -305,6 +305,8 @@ export class VisualServerScene {
 
         this._prepare_scene(camera.transform, camera_matrix, ortho, camera.env, camera.visible_layers, scenario);
         this._render_scene(camera.transform, camera_matrix, ortho, camera.env, scenario);
+
+        CameraMatrix.free(camera_matrix);
     }
 
     /**
