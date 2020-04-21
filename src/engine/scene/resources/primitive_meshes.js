@@ -131,8 +131,8 @@ export class QuadMesh extends PrimitiveMesh {
     }
 
     _create_mesh_data() {
-        let w = this.size.x,
-            h = this.size.y;
+        let w = this.size.x * 0.5,
+            h = this.size.y * 0.5;
 
         let stride = VERT_LENGTH * 4;
 
