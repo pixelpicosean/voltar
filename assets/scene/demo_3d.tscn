@@ -7,7 +7,7 @@ func _process(delta: float) -> void:
 	$mesh.rotate_y(PI * 0.4 * delta)
 "
 
-[sub_resource type="QuadMesh" id=1]
+[sub_resource type="CubeMesh" id=3]
 
 [node name="spatial" type="Spatial"]
 script = SubResource( 2 )
@@ -17,5 +17,5 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6 )
 size = 2.0
 
 [node name="mesh" type="MeshInstance" parent="."]
-mesh = SubResource( 1 )
+mesh = SubResource( 3 )
 material/0 = null

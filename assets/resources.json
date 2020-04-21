@@ -19,8 +19,8 @@
     "res://scene/demo_3d.tscn": {
         "type": "PackedScene",
         "sub": {
-            "1": {
-                "type": "QuadMesh"
+            "3": {
+                "type": "CubeMesh"
             },
             "undefined": {}
         },
@@ -53,7 +53,7 @@
                 "type": "MeshInstance",
                 "name": "mesh",
                 "parent": ".",
-                "mesh": "@sub#1",
+                "mesh": "@sub#3",
                 "material/0": null
             }
         ]

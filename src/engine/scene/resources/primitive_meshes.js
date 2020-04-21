@@ -1,6 +1,6 @@
 import { res_class_map } from "engine/registry";
 import { Vector2, Vector2Like } from "engine/core/math/vector2";
-import { Vector3 } from "engine/core/math/vector3";
+import { Vector3, Vector3Like } from "engine/core/math/vector3";
 import { AABB } from "engine/core/math/aabb";
 
 import { VSG } from "engine/servers/visual/visual_server_globals";
@@ -23,8 +23,11 @@ import { Mesh } from "./mesh";
  * - uv       x2
  */
 const VERT_LENGTH = 3 + 3 + 3 + 2;
+const STRIDE = VERT_LENGTH * 4;
 
 export class PrimitiveMesh extends Mesh {
+    get class() { return "PrimitiveMesh" }
+
     constructor() {
         super();
 
@@ -100,6 +103,8 @@ export class PrimitiveMesh extends Mesh {
 }
 
 export class QuadMesh extends PrimitiveMesh {
+    get class() { return "QuadMesh" }
+
     constructor() {
         super();
 
@@ -134,8 +139,6 @@ export class QuadMesh extends PrimitiveMesh {
         let w = this.size.x * 0.5,
             h = this.size.y * 0.5;
 
-        let stride = VERT_LENGTH * 4;
-
         const positions = [
             -w, -h, 0.0,
             -w,  h, 0.0,
@@ -149,7 +152,7 @@ export class QuadMesh extends PrimitiveMesh {
             1, 1,
         ]
 
-        const vertices = new Float32Array(VERT_LENGTH * 6);
+        const vertices = new Float32Array(VERT_LENGTH * 4);
         const indices = new Uint16Array([
             0, 1, 2,
             0, 2, 3,
@@ -181,10 +184,10 @@ export class QuadMesh extends PrimitiveMesh {
         /** @type {MeshData} */
         const mesh_data = {
             attribs: [
-                { type: WebGLRenderingContext.FLOAT, size: 3, stride, offset: 0 },
-                { type: WebGLRenderingContext.FLOAT, size: 3, stride, offset: 3 * 4 },
-                { type: WebGLRenderingContext.FLOAT, size: 3, stride, offset: (3 + 3) * 4 },
-                { type: WebGLRenderingContext.FLOAT, size: 2, stride, offset: (3 + 3 + 3) * 4 },
+                { type: WebGLRenderingContext.FLOAT, size: 3, stride: STRIDE, offset: 0 },
+                { type: WebGLRenderingContext.FLOAT, size: 3, stride: STRIDE, offset: 3 * 4 },
+                { type: WebGLRenderingContext.FLOAT, size: 3, stride: STRIDE, offset: (3 + 3) * 4 },
+                { type: WebGLRenderingContext.FLOAT, size: 2, stride: STRIDE, offset: (3 + 3 + 3) * 4 },
             ],
             vertices,
             indices,
@@ -194,3 +197,335 @@ export class QuadMesh extends PrimitiveMesh {
     }
 }
 res_class_map["QuadMesh"] = QuadMesh;
+
+export class CubeMesh extends PrimitiveMesh {
+    get class() { return "CubeMesh" }
+
+    constructor() {
+        super();
+
+        this.size = new Vector3(2, 2, 2);
+        this.subdivide_width = 0;
+        this.subdivide_height = 0;
+        this.subdivide_depth = 0;
+    }
+
+    /**
+     * @param {Vector3Like} p_size
+     */
+    set_size(p_size) {
+        this.set_size_n(p_size.x, p_size.y, p_size.z);
+    }
+
+    /**
+     * @param {number} x
+     * @param {number} y
+     * @param {number} z
+     */
+    set_size_n(x, y, z) {
+        this.size.set(x, y, z);
+        this._request_update();
+    }
+
+    /**
+     * @param {number} p_divisions
+     */
+    set_subdivide_width(p_divisions) {
+        this.subdivide_width = p_divisions > 0 ? p_divisions : 0;
+        this._request_update();
+    }
+
+    /**
+     * @param {number} p_divisions
+     */
+    set_subdivide_height(p_divisions) {
+        this.subdivide_height = p_divisions > 0 ? p_divisions : 0;
+        this._request_update();
+    }
+
+    /**
+     * @param {number} p_divisions
+     */
+    set_subdivide_depth(p_divisions) {
+        this.subdivide_depth = p_divisions > 0 ? p_divisions : 0;
+        this._request_update();
+    }
+
+    /* virtual methods */
+
+    _load_data(data) {
+        if (data.size) this.set_size(data.size);
+
+        if (data.subdivide_width) this.set_subdivide_width(data.subdivide_width);
+        if (data.subdivide_height) this.set_subdivide_height(data.subdivide_height);
+        if (data.subdivide_depth) this.set_subdivide_depth(data.subdivide_depth);
+
+        return this;
+    }
+
+    _create_mesh_data() {
+        const vertices = new Float32Array(VERT_LENGTH * (
+            (this.subdivide_width + 2) * (this.subdivide_height + 2) * 2
+            +
+            (this.subdivide_height + 2) * (this.subdivide_depth + 2) * 2
+            +
+            (this.subdivide_depth + 2) * (this.subdivide_width + 2) * 2
+        ));
+        const indices = new Uint16Array(
+            ((this.subdivide_width + 2) * (this.subdivide_height + 2) - 1) * 4
+            +
+            ((this.subdivide_height + 2) * (this.subdivide_depth + 2) - 1) * 4
+            +
+            ((this.subdivide_depth + 2) * (this.subdivide_width + 2) - 1) * 4
+        );
+
+        let i = 0, j = 0, prevrow = 0, thisrow = 0, point = 0, i_count = 0;
+        let x = 0, y = 0, z = 0;
+        let onethird = 1 / 3;
+        let twothirds = 2 / 3;
+
+        let start_pos = this.size.clone().scale(-0.5);
+
+        // front + back
+        y = start_pos.y;
+        thisrow = point;
+        prevrow = 0;
+        for (j = 0; j <= this.subdivide_height + 1; j++) {
+            x = start_pos.x;
+            for (i = 0; i <= this.subdivide_width + 1; i++) {
+                let u = i / (3 * (this.subdivide_width + 1));
+                let v = j / (2 * (this.subdivide_height + 1));
+
+                // front
+                vertices[point * VERT_LENGTH + 0] = x;
+                vertices[point * VERT_LENGTH + 1] = -y;
+                vertices[point * VERT_LENGTH + 2] = -start_pos.z;
+
+                vertices[point * VERT_LENGTH + 3 + 0] = 0;
+                vertices[point * VERT_LENGTH + 3 + 1] = 0;
+                vertices[point * VERT_LENGTH + 3 + 2] = 1;
+
+                vertices[point * VERT_LENGTH + 6 + 0] = 1;
+                vertices[point * VERT_LENGTH + 6 + 1] = 0;
+                vertices[point * VERT_LENGTH + 6 + 2] = 0;
+
+                vertices[point * VERT_LENGTH + 9 + 0] = twothirds + u;
+                vertices[point * VERT_LENGTH + 9 + 1] = v;
+
+                point += 1;
+
+                // back
+                vertices[point * VERT_LENGTH + 0] = -x;
+                vertices[point * VERT_LENGTH + 1] = -y;
+                vertices[point * VERT_LENGTH + 2] = start_pos.z;
+
+                vertices[point * VERT_LENGTH + 3 + 0] = 0;
+                vertices[point * VERT_LENGTH + 3 + 1] = 0;
+                vertices[point * VERT_LENGTH + 3 + 2] = -1;
+
+                vertices[point * VERT_LENGTH + 6 + 0] = -1;
+                vertices[point * VERT_LENGTH + 6 + 1] = 0;
+                vertices[point * VERT_LENGTH + 6 + 2] = 0;
+
+                vertices[point * VERT_LENGTH + 9 + 0] = twothirds + u;
+                vertices[point * VERT_LENGTH + 9 + 1] = v;
+
+                point += 1;
+
+                // index
+                if (i > 0 && j > 0) {
+                    let i2 = i * 2;
+
+                    // front
+                    indices[i_count++] = prevrow + i2 - 2;
+                    indices[i_count++] = prevrow + i2;
+                    indices[i_count++] = thisrow + i2 - 2;
+                    indices[i_count++] = prevrow + i2;
+                    indices[i_count++] = thisrow + i2;
+                    indices[i_count++] = thisrow + i2 - 2;
+
+                    // back
+                    indices[i_count++] = prevrow + i2 - 1;
+                    indices[i_count++] = prevrow + i2 + 1;
+                    indices[i_count++] = thisrow + i2 - 1;
+                    indices[i_count++] = prevrow + i2 + 1;
+                    indices[i_count++] = thisrow + i2 + 1;
+                    indices[i_count++] = thisrow + i2 - 1;
+                }
+
+                x += this.size.x / (this.subdivide_width + 1);
+            }
+
+            y += this.size.y / (this.subdivide_height + 1);
+            prevrow = thisrow;
+            thisrow = point;
+        }
+
+        // left + right
+        y = start_pos.y;
+        thisrow = point;
+        prevrow = 0;
+        for (j = 0; j <= this.subdivide_height + 1; j++) {
+            z = start_pos.z;
+            for (i = 0; i <= this.subdivide_depth + 1; i++) {
+                let u = i / (3 * (this.subdivide_depth + 1));
+                let v = j / (2 * (this.subdivide_height + 1));
+
+                // right
+                vertices[point * VERT_LENGTH + 0] = -start_pos.x;
+                vertices[point * VERT_LENGTH + 1] = -y;
+                vertices[point * VERT_LENGTH + 2] = -z;
+
+                vertices[point * VERT_LENGTH + 3 + 0] = 1;
+                vertices[point * VERT_LENGTH + 3 + 1] = 0;
+                vertices[point * VERT_LENGTH + 3 + 2] = 0;
+
+                vertices[point * VERT_LENGTH + 6 + 0] = 0;
+                vertices[point * VERT_LENGTH + 6 + 1] = 0;
+                vertices[point * VERT_LENGTH + 6 + 2] = -1;
+
+                vertices[point * VERT_LENGTH + 9 + 0] = onethird + u;
+                vertices[point * VERT_LENGTH + 9 + 1] = v;
+
+                point += 1;
+
+                // left
+                vertices[point * VERT_LENGTH + 0] = start_pos.x;
+                vertices[point * VERT_LENGTH + 1] = -y;
+                vertices[point * VERT_LENGTH + 2] = z;
+
+                vertices[point * VERT_LENGTH + 3 + 0] = -1;
+                vertices[point * VERT_LENGTH + 3 + 1] = 0;
+                vertices[point * VERT_LENGTH + 3 + 2] = 0;
+
+                vertices[point * VERT_LENGTH + 6 + 0] = 0;
+                vertices[point * VERT_LENGTH + 6 + 1] = 0;
+                vertices[point * VERT_LENGTH + 6 + 2] = 1;
+
+                vertices[point * VERT_LENGTH + 9 + 0] = u;
+                vertices[point * VERT_LENGTH + 9 + 1] = v + 0.5;
+
+                point += 1;
+
+                // index
+                if (i > 0 && j > 0) {
+                    let i2 = i * 2;
+
+                    // right
+                    indices[i_count++] = prevrow + i2 - 2;
+                    indices[i_count++] = prevrow + i2;
+                    indices[i_count++] = thisrow + i2 - 2;
+                    indices[i_count++] = prevrow + i2;
+                    indices[i_count++] = thisrow + i2;
+                    indices[i_count++] = thisrow + i2 - 2;
+
+                    // left
+                    indices[i_count++] = prevrow + i2 - 1;
+                    indices[i_count++] = prevrow + i2 + 1;
+                    indices[i_count++] = thisrow + i2 - 1;
+                    indices[i_count++] = prevrow + i2 + 1;
+                    indices[i_count++] = thisrow + i2 + 1;
+                    indices[i_count++] = thisrow + i2 - 1;
+                }
+
+                z += this.size.z / (this.subdivide_depth + 1);
+            }
+
+            y += this.size.y / (this.subdivide_height + 1);
+            prevrow = thisrow;
+            thisrow = point;
+        }
+
+        // top + bottom
+        z = start_pos.z;
+        thisrow = point;
+        prevrow = 0;
+        for (j = 0; j <= this.subdivide_depth + 1; j++) {
+            x = start_pos.x;
+            for (i = 0; i <= this.subdivide_width + 1; i++) {
+                let u = i / (3 * (this.subdivide_width + 1));
+                let v = j / (2 * (this.subdivide_depth + 1));
+
+                // top
+                vertices[point * VERT_LENGTH + 0] = -x;
+                vertices[point * VERT_LENGTH + 1] = -start_pos.y;
+                vertices[point * VERT_LENGTH + 2] = -z;
+
+                vertices[point * VERT_LENGTH + 3 + 0] = 0;
+                vertices[point * VERT_LENGTH + 3 + 1] = 1;
+                vertices[point * VERT_LENGTH + 3 + 2] = 0;
+
+                vertices[point * VERT_LENGTH + 6 + 0] = -1;
+                vertices[point * VERT_LENGTH + 6 + 1] = 0;
+                vertices[point * VERT_LENGTH + 6 + 2] = 0;
+
+                vertices[point * VERT_LENGTH + 9 + 0] = onethird + u;
+                vertices[point * VERT_LENGTH + 9 + 1] = 0.5 + v;
+
+                point += 1;
+
+                // bottom
+                vertices[point * VERT_LENGTH + 0] = x;
+                vertices[point * VERT_LENGTH + 1] = start_pos.y;
+                vertices[point * VERT_LENGTH + 2] = -z;
+
+                vertices[point * VERT_LENGTH + 3 + 0] = 0;
+                vertices[point * VERT_LENGTH + 3 + 1] = -1;
+                vertices[point * VERT_LENGTH + 3 + 2] = 0;
+
+                vertices[point * VERT_LENGTH + 6 + 0] = 1;
+                vertices[point * VERT_LENGTH + 6 + 1] = 0;
+                vertices[point * VERT_LENGTH + 6 + 2] = 0;
+
+                vertices[point * VERT_LENGTH + 9 + 0] = twothirds + u;
+                vertices[point * VERT_LENGTH + 9 + 1] = 0.5 + v;
+
+                point += 1;
+
+                // index
+                if (i > 0 && j > 0) {
+                    let i2 = i * 2;
+
+                    // top
+                    indices[i_count++] = prevrow + i2 - 2;
+                    indices[i_count++] = prevrow + i2;
+                    indices[i_count++] = thisrow + i2 - 2;
+                    indices[i_count++] = prevrow + i2;
+                    indices[i_count++] = thisrow + i2;
+                    indices[i_count++] = thisrow + i2 - 2;
+
+                    // bottom
+                    indices[i_count++] = prevrow + i2 - 1;
+                    indices[i_count++] = prevrow + i2 + 1;
+                    indices[i_count++] = thisrow + i2 - 1;
+                    indices[i_count++] = prevrow + i2 + 1;
+                    indices[i_count++] = thisrow + i2 + 1;
+                    indices[i_count++] = thisrow + i2 - 1;
+                }
+
+                x += this.size.x / (this.subdivide_width + 1);
+            }
+
+            z += this.size.z / (this.subdivide_depth + 1);
+            prevrow = thisrow;
+            thisrow = point;
+        }
+
+        /** @type {MeshData} */
+        const mesh_data = {
+            attribs: [
+                { type: WebGLRenderingContext.FLOAT, size: 3, stride: STRIDE, offset: 0 },
+                { type: WebGLRenderingContext.FLOAT, size: 3, stride: STRIDE, offset: 3 * 4 },
+                { type: WebGLRenderingContext.FLOAT, size: 3, stride: STRIDE, offset: (3 + 3) * 4 },
+                { type: WebGLRenderingContext.FLOAT, size: 2, stride: STRIDE, offset: (3 + 3 + 3) * 4 },
+            ],
+            vertices,
+            indices,
+        };
+
+        Vector3.free(start_pos);
+
+        return mesh_data;
+    }
+}
+res_class_map["CubeMesh"] = CubeMesh;
