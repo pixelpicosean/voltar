@@ -63,6 +63,38 @@ export class Spatial extends Node {
     }
 
     /**
+     * @param {Vector3Like} offset
+     */
+    translate(offset) {
+        let t = this.get_transform();
+        t.translate(offset);
+        this.set_transform(t);
+    }
+
+    /**
+     * @param {number} x
+     * @param {number} y
+     * @param {number} z
+     */
+    translate_n(x, y, z) {
+        let t = this.get_transform();
+        t.translate_n(x, y, z);
+        this.set_transform(t);
+    }
+
+    /**
+     * @param {Vector3Like} offset
+     */
+    translate_object_local(offset) { }
+
+    /**
+     * @param {number} x
+     * @param {number} y
+     * @param {number} z
+     */
+    translate_object_local_n(x, y, z) { }
+
+    /**
      * @param {number} p_angle
      */
     rotate_x(p_angle) {

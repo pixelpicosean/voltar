@@ -219,6 +219,28 @@ export class Transform {
     }
 
     /**
+     * @param {Vector3Like} p_translation
+     */
+    translate(p_translation) {
+        this.origin.x += this.basis.elements[0].dot(p_translation);
+        this.origin.y += this.basis.elements[1].dot(p_translation);
+        this.origin.z += this.basis.elements[2].dot(p_translation);
+    }
+
+    /**
+     * @param {number} x
+     * @param {number} y
+     * @param {number} z
+     */
+    translate_n(x, y, z) {
+        let vec = Vector3.new(x, y, z);
+        this.origin.x += this.basis.elements[0].dot(vec);
+        this.origin.y += this.basis.elements[1].dot(vec);
+        this.origin.z += this.basis.elements[2].dot(vec);
+        Vector3.free(vec);
+    }
+
+    /**
      * @param {Vector3Like} vec
      * @param {Vector3} [out]
      */
