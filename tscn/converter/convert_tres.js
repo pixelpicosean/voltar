@@ -121,29 +121,31 @@ module.exports.convert_tres = (blocks) => {
             if (sec._prop && sec._prop.script/*  && sec._prop.script !== 'null' */) {
                 const ext_idx = get_function_params(sec._prop.script)[0];
                 const script_pack = ext[ext_idx];
-                if (script_pack.type === 'ReplaceNode') {
-                    sec.key = 'node';
-                    sec.attr = {
-                        type: script_pack.meta,
-                        index: sec['index'],
-                        parent: sec['parent'],
-                        name: sec['name'],
-                    };
-                    sec.prop = sec._prop;
-                    sec._prop = undefined;
-                    const converter = require(`./res/${sec.attr.type}`);
-                    const parsed_sec = converter(sec);
-                    // copy extra properties (may come from scripts)
-                    for (const k in sec.prop) {
-                        if (k === 'script') continue;
-                        if (parsed_sec[k] === undefined) {
-                            parsed_sec[k] = sec.prop[k];
+                if (script_pack) {
+                    if (script_pack.type === 'ReplaceNode') {
+                        sec.key = 'node';
+                        sec.attr = {
+                            type: script_pack.meta,
+                            index: sec['index'],
+                            parent: sec['parent'],
+                            name: sec['name'],
+                        };
+                        sec.prop = sec._prop;
+                        sec._prop = undefined;
+                        const converter = require(`./res/${sec.attr.type}`);
+                        const parsed_sec = converter(sec);
+                        // copy extra properties (may come from scripts)
+                        for (const k in sec.prop) {
+                            if (k === 'script') continue;
+                            if (parsed_sec[k] === undefined) {
+                                parsed_sec[k] = sec.prop[k];
+                            }
                         }
-                    }
-                    parsed_sec.key = undefined;
-                    parsed_sec._prop = undefined;
+                        parsed_sec.key = undefined;
+                        parsed_sec._prop = undefined;
 
-                    sec = parsed_sec;
+                        sec = parsed_sec;
+                    }
                 }
             }
 
