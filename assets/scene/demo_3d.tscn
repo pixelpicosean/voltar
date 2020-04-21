@@ -1,11 +1,20 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=3 format=2]
+
+[sub_resource type="GDScript" id=2]
+script/source = "extends Spatial
+
+func _process(delta: float) -> void:
+	$mesh.rotate_y(PI * 0.4 * delta)
+"
 
 [sub_resource type="QuadMesh" id=1]
 
 [node name="spatial" type="Spatial"]
+script = SubResource( 2 )
 
 [node name="camera" type="Camera" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6 )
+size = 2.0
 
 [node name="mesh" type="MeshInstance" parent="."]
 mesh = SubResource( 1 )

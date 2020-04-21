@@ -9,4 +9,6 @@ ground_horizon_color = Color( 0.482353, 0.788235, 0.952941, 1 )
 ground_curve = 0.01
 
 [resource]
+background_mode = 1
 background_sky = SubResource( 1 )
+ambient_light_color = Color( 1, 0, 0, 1 )

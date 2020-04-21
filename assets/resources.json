@@ -21,7 +21,8 @@
         "sub": {
             "1": {
                 "type": "QuadMesh"
-            }
+            },
+            "undefined": {}
         },
         "nodes": [
             {
@@ -44,8 +45,9 @@
                     1,
                     0,
                     0,
-                    3
-                ]
+                    6
+                ],
+                "size": 2
             },
             {
                 "type": "MeshInstance",
