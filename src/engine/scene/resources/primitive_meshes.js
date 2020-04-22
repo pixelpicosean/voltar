@@ -198,6 +198,136 @@ export class QuadMesh extends PrimitiveMesh {
 }
 res_class_map["QuadMesh"] = QuadMesh;
 
+export class PlaneMesh extends PrimitiveMesh {
+    get class() { return "PlaneMesh" }
+
+    constructor() {
+        super();
+
+        this.size = new Vector2(2, 2);
+        this.subdivide_width = 0;
+        this.subdivide_depth = 0;
+    }
+
+    /**
+     * @param {Vector2Like} p_size
+     */
+    set_size(p_size) {
+        this.set_size_n(p_size.x, p_size.y);
+    }
+
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
+    set_size_n(x, y) {
+        this.size.set(x, y);
+        this._request_update();
+    }
+
+    /**
+     * @param {number} p_divisions
+     */
+    set_subdivide_width(p_divisions) {
+        this.subdivide_width = p_divisions > 0 ? p_divisions : 0;
+        this._request_update();
+    }
+
+    /**
+     * @param {number} p_divisions
+     */
+    set_subdivide_depth(p_divisions) {
+        this.subdivide_depth = p_divisions > 0 ? p_divisions : 0;
+        this._request_update();
+    }
+
+    /* virtual methods */
+
+    _load_data(data) {
+        if (data.size) this.set_size(data.size);
+
+        if (data.subdivide_width) this.set_subdivide_width(data.subdivide_width);
+        if (data.subdivide_depth) this.set_subdivide_depth(data.subdivide_depth);
+
+        return this;
+    }
+
+    _create_mesh_data() {
+        const vertices = new Float32Array(VERT_LENGTH * (
+            (this.subdivide_depth + 2) * (this.subdivide_width + 2)
+        ));
+        const indices = new Uint16Array(
+            ((this.subdivide_depth + 2) * (this.subdivide_width + 2) - 1) * 2
+        );
+
+        let i = 0, j = 0, prevrow = 0, thisrow = 0, point = 0, i_count = 0;
+        let x = 0, z = 0;
+
+        let start_pos = this.size.clone().scale(-0.5);
+
+        z = start_pos.y;
+        thisrow = point;
+        prevrow = 0;
+        for (j = 0; j <= this.subdivide_depth + 1; j++) {
+            x = start_pos.x;
+            for (i = 0; i <= this.subdivide_width + 1; i++) {
+                let u = i / (this.subdivide_width + 1);
+                let v = j / (this.subdivide_depth + 1);
+
+                vertices[point * VERT_LENGTH + 0] = -x;
+                vertices[point * VERT_LENGTH + 1] = 0.0;
+                vertices[point * VERT_LENGTH + 2] = -z;
+
+                vertices[point * VERT_LENGTH + 3 + 0] = 0;
+                vertices[point * VERT_LENGTH + 3 + 1] = 1;
+                vertices[point * VERT_LENGTH + 3 + 2] = 0;
+
+                vertices[point * VERT_LENGTH + 6 + 0] = 1;
+                vertices[point * VERT_LENGTH + 6 + 1] = 0;
+                vertices[point * VERT_LENGTH + 6 + 2] = 0;
+
+                vertices[point * VERT_LENGTH + 9 + 0] = 1 - u;
+                vertices[point * VERT_LENGTH + 9 + 1] = 1 - v;
+
+                point += 1;
+
+                // index
+                if (i > 0 && j > 0) {
+                    indices[i_count++] = prevrow + i - 1;
+                    indices[i_count++] = prevrow + i;
+                    indices[i_count++] = thisrow + i - 1;
+                    indices[i_count++] = prevrow + i;
+                    indices[i_count++] = thisrow + i;
+                    indices[i_count++] = thisrow + i - 1;
+                }
+
+                x += this.size.x / (this.subdivide_width + 1);
+            }
+
+            z += this.size.y / (this.subdivide_depth + 1);
+            prevrow = thisrow;
+            thisrow = point;
+        }
+
+        Vector2.free(start_pos);
+
+        /** @type {MeshData} */
+        const mesh_data = {
+            attribs: [
+                { type: WebGLRenderingContext.FLOAT, size: 3, stride: STRIDE, offset: 0 },
+                { type: WebGLRenderingContext.FLOAT, size: 3, stride: STRIDE, offset: 3 * 4 },
+                { type: WebGLRenderingContext.FLOAT, size: 3, stride: STRIDE, offset: (3 + 3) * 4 },
+                { type: WebGLRenderingContext.FLOAT, size: 2, stride: STRIDE, offset: (3 + 3 + 3) * 4 },
+            ],
+            vertices,
+            indices,
+        };
+
+        return mesh_data;
+    }
+}
+res_class_map["PlaneMesh"] = PlaneMesh;
+
 export class CubeMesh extends PrimitiveMesh {
     get class() { return "CubeMesh" }
 

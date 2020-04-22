@@ -330,20 +330,22 @@ export class VisualServerViewport {
                 continue;
             }
 
-            let visible = !vp.viewport_to_screen_rect.is_zero() || vp.update_mode === VIEWPORT_UPDATE_ALWAYS || vp.update_mode === VIEWPORT_UPDATE_ONCE || (vp.update_mode === VIEWPORT_UPDATE_WHEN_VISIBLE && false/* && vp.render_target.was_used */);
+            let visible = !vp.viewport_to_screen_rect.is_zero() || vp.update_mode === VIEWPORT_UPDATE_ALWAYS || vp.update_mode === VIEWPORT_UPDATE_ONCE || (vp.update_mode === VIEWPORT_UPDATE_WHEN_VISIBLE && VSG.storage.render_target_was_used(vp.render_target));
             visible = visible && vp.size.x > 1 && vp.size.y > 1;
 
             if (!visible) {
                 continue;
             }
 
+            VSG.storage.render_target_clear_used(vp.render_target);
+
             VSG.rasterizer.set_current_render_target(vp.render_target);
 
             this._draw_viewport(vp);
 
-            if (!vp.viewport_to_screen_rect.is_zero()) {
+            if (!vp.viewport_to_screen_rect.is_zero() && !vp.viewport_render_direct_to_screen) {
                 VSG.rasterizer.set_current_render_target(null);
-                VSG.rasterizer.blit_render_targets_to_screen(vp.render_target, vp.viewport_to_screen_rect, vp.viewport_to_screen);
+                VSG.rasterizer.blit_render_target_to_screen(vp.render_target, vp.viewport_to_screen_rect, vp.viewport_to_screen);
             }
         }
     }

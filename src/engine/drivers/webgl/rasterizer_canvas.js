@@ -341,10 +341,11 @@ export class RasterizerCanvas extends VObject {
             `,
             `
             precision mediump float;
+            uniform float vflip;
             uniform sampler2D TEXTURE;
             varying vec2 UV;
             void main() {
-                gl_FragColor = texture2D(TEXTURE, UV);
+                gl_FragColor = texture2D(TEXTURE, (vflip > 0.5) ? (vec2(1.0, 1.0) - UV) : UV);
             }
             `,
             [
@@ -352,6 +353,7 @@ export class RasterizerCanvas extends VObject {
                 "uv",
             ],
             [
+                { name: "vflip", type: "1f" },
                 { name: "TEXTURE", type: "1i" },
             ]
         );
@@ -593,6 +595,8 @@ export class RasterizerCanvas extends VObject {
         gl.bindFramebuffer(gl.FRAMEBUFFER, this.storage.frame.current_rt.copy_screen_effect.gl_fbo);
 
         gl.useProgram(this.copy_shader.gl_prog);
+
+        gl.uniform1f(this.copy_shader.uniforms["vflip"].gl_loc, 0);
 
         const texunit = this.storage.config.max_texture_image_units - 4;
         gl.activeTexture(gl.TEXTURE0 + texunit);

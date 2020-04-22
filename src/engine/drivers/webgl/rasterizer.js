@@ -62,14 +62,15 @@ export class Rasterizer {
      * @param {Rect2} p_screen_rect
      * @param {number} p_screen
      */
-    blit_render_targets_to_screen(p_render_target, p_screen_rect, p_screen) {
-        // TODO: support non-fullscreen blit (for picture-in-picturga viewports)
+    blit_render_target_to_screen(p_render_target, p_screen_rect, p_screen) {
         const gl = this.gl;
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
         gl.disable(gl.BLEND);
         gl.useProgram(this.canvas.copy_shader.gl_prog);
+
+        gl.uniform1f(this.canvas.copy_shader.uniforms["vflip"].gl_loc, 1);
 
         const texunit = this.storage.config.max_texture_image_units - 1;
         gl.activeTexture(gl.TEXTURE0 + texunit);

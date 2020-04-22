@@ -706,6 +706,20 @@ export class RasterizerStorage {
         rt.y = p_y;
     }
 
+    /**
+     * @param {RenderTarget_t} rt
+     */
+    render_target_was_used(rt) {
+        return rt.used_in_frame;
+    }
+
+    /**
+     * @param {RenderTarget_t} rt
+     */
+    render_target_clear_used(rt) {
+        rt.used_in_frame = false;
+    }
+
     /* Material API */
 
     /**
@@ -869,19 +883,25 @@ export class RasterizerStorage {
 
         let stride = 0;
         for (let i = 0; i < attribs.length; i++) {
-            const a = attribs[i];
+            let def = attribs[i];
 
-            if (i === 0) stride = a.stride;
-
-            surface.attribs[i] = {
+            /** @type {VertAttrib} */
+            let attr = surface.attribs[i] = {
                 enabled: true,
                 index: i,
 
-                type: a.type,
-                size: a.size,
-                normalized: a.normalized || false,
-                stride: a.stride,
-                offset: a.offset,
+                type: def.type,
+                size: def.size,
+                normalized: def.normalized || false,
+                stride: def.stride,
+                offset: def.offset,
+            }
+
+            if (!def) {
+                /* pass empty attribute setting to disable it */
+                attr.enabled = false;
+            } else {
+                if (stride === 0) stride = def.stride;
             }
         }
 
