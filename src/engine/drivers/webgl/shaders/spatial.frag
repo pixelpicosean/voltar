@@ -20,6 +20,7 @@ uniform float ambient_energy;
 /* UNIFORM */
 
 varying vec2 uv_interp;
+varying float light_direction;
 
 void main() {
     vec2 UV = uv_interp;
@@ -43,7 +44,10 @@ void main() {
     //     gl_FragColor = vec4(ALBEDO, ALPHA);
     // }
 
-    ambient_light *= ALBEDO;
+    // ambient_light *= ALBEDO;
+
+    vec3 directional_light_color = vec3(1.0, 1.0, 1.0);
+    ambient_light = ALBEDO * (ambient_light + directional_light_color * light_direction);
 
     gl_FragColor = vec4(ambient_light + diffuse_light + specular_light, ALPHA);
 }

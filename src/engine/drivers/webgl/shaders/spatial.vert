@@ -13,6 +13,7 @@ attribute vec3 tangent;
 attribute vec2 uv;
 
 varying vec2 uv_interp;
+varying float light_direction;
 
 void main() {
     uv_interp = uv;
@@ -33,4 +34,9 @@ void main() {
     NORMAL = normalize((MODELVIEW_MATRIX * vec4(NORMAL, 0.0)).xyz);
 
     gl_Position = PROJECTION_MATRIX * vec4(position.xyz, 1.0);
+
+    // light
+    vec3 directional_vector = normalize(vec3(0.85, 0.8, 0.75));
+
+    light_direction = max(dot(NORMAL, directional_vector), 0.0);
 }
