@@ -209,8 +209,28 @@ export const SPATIAL_SHADER_UNIFORMS = [
     { name: 'WORLD_MATRIX', type: 'mat4' },
 
     { name: 'TIME', type: '1f' },
-    { name: 'SCREEN_TEXTURE', type: '1i' },
-    { name: 'SCREEN_PIXEL_SIZE', type: '2f' },
+
+    { name: 'albedo', type: '4f' },
+    { name: 'texture_albedo', type: '1i' },
+    { name: 'specular', type: '1f' },
+    { name: 'metallic', type: '1f' },
+    { name: 'roughness', type: '1f' },
+
+    // light general
+    { name: 'LIGHT_COLOR', type: '4f' },
+    { name: 'LIGHT_SPECULAR', type: '1f' },
+
+    // directional light
+    { name: 'LIGHT_DIRECTION', type: '3f' },
+
+    // omni light
+    { name: 'LIGHT_POSITION', type: '3f' },
+    { name: 'LIGHT_ATTENUATION', type: '1f' },
+
+    // spot light
+    { name: 'LIGHT_SPOT_ATTENUATION', type: '1f' },
+    { name: 'LIGHT_SPOT_RANGE', type: '1f' },
+    { name: 'LIGHT_SPOT_ANGLE', type: '1f' },
 
     { name: 'bg_color', type: '4f' },
     { name: 'bg_energy', type: '1f' },

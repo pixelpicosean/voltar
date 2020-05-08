@@ -427,8 +427,10 @@ export class RasterizerCanvas extends VObject {
         // update general uniform data
         const canvas_transform = identity_mat4(this.states.uniforms.projection_matrix);
         if (frame.current_rt) {
-            const csy = 1.0;
-            // TODO: csy = -1.0 if vflip
+            let csy = 1.0;
+            if (this.storage.frame.current_rt.flags.VFLIP) {
+                csy = -1.0;
+            }
             const ssize = this.storage.frame.current_rt;
             translate_mat4(canvas_transform, canvas_transform, [-ssize.width / 2, -ssize.height / 2, 0]);
             scale_mat4(canvas_transform, canvas_transform, [2 / ssize.width, csy * (-2) / ssize.height, 1]);
@@ -578,7 +580,7 @@ export class RasterizerCanvas extends VObject {
 
         if (material.shader.canvas_item.uses_screen_texture) {
             if (this.storage.frame.current_rt.copy_screen_effect.gl_color) {
-                const texunit = this.storage.config.max_texture_image_units - 4;
+                const texunit = VSG.config.max_texture_image_units - 4;
                 gl.activeTexture(gl.TEXTURE0 + texunit);
                 gl.uniform1i(material.shader.uniforms["SCREEN_TEXTURE"].gl_loc, texunit);
                 gl.bindTexture(gl.TEXTURE_2D, this.storage.frame.current_rt.copy_screen_effect.gl_color);
@@ -598,7 +600,7 @@ export class RasterizerCanvas extends VObject {
 
         gl.uniform1f(this.copy_shader.uniforms["vflip"].gl_loc, 0);
 
-        const texunit = this.storage.config.max_texture_image_units - 4;
+        const texunit = VSG.config.max_texture_image_units - 4;
         gl.activeTexture(gl.TEXTURE0 + texunit);
         gl.uniform1i(this.copy_shader.uniforms["TEXTURE"].gl_loc, texunit);
         gl.bindTexture(gl.TEXTURE_2D, this.storage.frame.current_rt.texture.gl_tex);
@@ -1241,7 +1243,7 @@ export class RasterizerCanvas extends VObject {
                     });
 
                     // - texture
-                    const texunit = this.storage.config.max_texture_image_units - 1;
+                    const texunit = VSG.config.max_texture_image_units - 1;
                     gl.activeTexture(gl.TEXTURE0 + texunit);
                     gl.uniform1i(this.copy_shader.uniforms["TEXTURE"].gl_loc, texunit);
                     gl.bindTexture(gl.TEXTURE_2D, mm.texture.texture.gl_tex);
@@ -1434,7 +1436,7 @@ export class RasterizerCanvas extends VObject {
         this.use_material(this.states.material, this.states.uniforms);
 
         // - texture
-        const texunit = this.storage.config.max_texture_image_units - 1;
+        const texunit = VSG.config.max_texture_image_units - 1;
         gl.activeTexture(gl.TEXTURE0 + texunit);
         gl.uniform1i(this.states.material.shader.uniforms["TEXTURE"].gl_loc, texunit);
         gl.bindTexture(gl.TEXTURE_2D, this.states.texture.gl_tex);

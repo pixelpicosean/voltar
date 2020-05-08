@@ -1,4 +1,5 @@
 import { List, SelfList } from 'engine/core/self_list';
+import { clamp } from 'engine/core/math/math_funcs';
 import { Vector2, Vector2Like } from 'engine/core/math/vector2';
 import { Vector3Like } from 'engine/core/math/vector3';
 import { AABB } from 'engine/core/math/aabb';
@@ -17,11 +18,23 @@ import {
     INSTANCE_TYPE_REFLECTION_PROBE,
     INSTANCE_TYPE_LIGHTMAP_CAPTURE,
     INSTANCE_TYPE_GI_PROBE,
+    LIGHT_DIRECTIONAL,
 } from '../visual_server';
 import { VSG } from './visual_server_globals';
-import { clamp } from 'engine/core/math/math_funcs';
+
+/**
+ * @typedef {import('engine/drivers/webgl/rasterizer_storage').Material_t} Material_t
+ * @typedef {import('engine/drivers/webgl/rasterizer_storage').Instantiable_t} Instantiable_t
+ * @typedef {import('engine/drivers/webgl/rasterizer_storage').Mesh_t} Mesh_t
+ * @typedef {import('engine/drivers/webgl/rasterizer_storage').Light_t} Light_t
+ *
+ * @typedef {import('engine/drivers/webgl/rasterizer_scene').LightInstance_t} LightInstance_t
+ *
+ * @typedef {import('engine/drivers/webgl/rasterizer_scene').Environment_t} Environment_t
+ */
 
 const MAX_INSTANCE_CULL = 65535;
+const MAX_LIGHTS_CULLED = 4096;
 
 export const CAMERA_PERSPECTIVE = 0;
 export const CAMERA_ORTHOGONAL = 1;
@@ -55,10 +68,10 @@ export class Scenario_t {
         /** @type {Instance_t[]} */
         this.directional_lights = [];
 
-        /** @type {import('engine/drivers/webgl/rasterizer_scene').Environment_t} */
+        /** @type {Environment_t} */
         this.environment = null;
 
-        /** @type {import('engine/drivers/webgl/rasterizer_scene').Environment_t} */
+        /** @type {Environment_t} */
         this.fallback_environment = null;
 
         /** @type {List<Instance_t>} */
@@ -73,11 +86,11 @@ export class Instance_t {
 
     constructor() {
         this.base_type = INSTANCE_TYPE_NONE;
-        /** @type {import('engine/drivers/webgl/rasterizer_storage').Mesh_t} */
+        /** @type {Instantiable_t} */
         this.base = null;
 
         this.skeleton = null;
-        /** @type {import('engine/drivers/webgl/rasterizer_storage').Material_t} */
+        /** @type {Material_t} */
         this.materail_override = null;
 
         this.transform = new Transform;
@@ -85,7 +98,9 @@ export class Instance_t {
         this.depth_layer = 0;
         this.layer_mask = 1;
 
+        /** @type {Material_t[]} */
         this.materials = [];
+        /** @type {import('engine/drivers/webgl/rasterizer_scene').LightInstance_t[]} */
         this.light_instances = [];
         this.reflection_probe_instances = [];
         this.gi_probe_instances = [];
@@ -104,6 +119,10 @@ export class Instance_t {
 
         /** @type {SelfList<Instance_t>} */
         this.dependency_item = new SelfList(this);
+
+        this.lightmap_capture = null;
+        this.lightmap = null;
+        this.lightmap_capture_data = null;
 
         this.octree_id = 0;
         /** @type {Scenario_t} */
@@ -167,6 +186,23 @@ class InstanceGeometryData extends InstanceBaseData {
     }
 }
 
+class InstanceLightData extends InstanceBaseData {
+    constructor() {
+        super();
+
+        /** @type {LightInstance_t} */
+        this.instance = null;
+
+        /** @type {Instance_t} */
+        this.D = null;
+
+        /** @type {Instance_t[]} */
+        this.geometries = [];
+
+        this.last_version = 0;
+    }
+}
+
 export class VisualServerScene {
     constructor() {
         this.render_pass = 0;
@@ -177,6 +213,12 @@ export class VisualServerScene {
         this.instance_cull_count = 0;
         /** @type {Instance_t[]} */
         this.instance_cull_result = [];
+        /** @type {Instance_t[]} */
+        this.light_cull_result = [];
+        /** @type {LightInstance_t[]} */
+        this.light_instance_cull_result = [];
+        this.light_cull_count = 0;
+        this.directional_light_count = 0;
     }
 
     camera_create() {
@@ -338,13 +380,31 @@ export class VisualServerScene {
 
     /**
      * @param {Instance_t} p_instance
-     * @param {import('engine/drivers/webgl/rasterizer_storage').Mesh_t} p_base
+     * @param {Instantiable_t} p_base
      */
     instance_set_base(p_instance, p_base) {
+        let scenario = p_instance.scenario;
+
         if (p_instance.base_type !== INSTANCE_TYPE_NONE) {
-            if (p_instance.scenario && p_instance.octree_id) {
-                p_instance.scenario.octree.erase(p_instance.octree_id);
+            if (scenario && p_instance.octree_id) {
+                scenario.octree.erase(p_instance.octree_id);
                 p_instance.octree_id = 0;
+            }
+
+            switch (p_instance.base_type) {
+                case INSTANCE_TYPE_LIGHT: {
+                    let light = /** @type {InstanceLightData} */(p_instance.base_data);
+                    let idx = scenario.directional_lights.indexOf(light.D);
+                    if (scenario && idx >= 0) {
+                        scenario.directional_lights.splice(idx, 1);
+                        light.D = null;
+                    }
+                    light.instance = null;
+                } break;
+            }
+
+            if (p_instance.base_data) {
+                p_instance.base_data = null;
             }
 
             p_instance.blend_values.length = 0;
@@ -355,11 +415,22 @@ export class VisualServerScene {
         p_instance.base = null;
 
         if (p_base) {
-            // TODO: fetch real type instead of hard coded mesh
-            p_instance.base_type = INSTANCE_TYPE_MESH;
+            p_instance.base_type = p_base.i_type;
 
             switch (p_instance.base_type) {
-                case INSTANCE_TYPE_LIGHT: { } break;
+                case INSTANCE_TYPE_LIGHT: {
+                    let light_inst = /** @type {Light_t} */(p_base);
+                    let light = new InstanceLightData;
+
+                    if (scenario && light_inst.type === LIGHT_DIRECTIONAL) {
+                        scenario.directional_lights.push(p_instance);
+                        light.D = p_instance;
+                    }
+
+                    light.instance = VSG.scene_render.light_instance_create(light_inst);
+
+                    p_instance.base_data = light;
+                } break;
                 case INSTANCE_TYPE_MESH:
                 case INSTANCE_TYPE_MULTIMESH:
                 case INSTANCE_TYPE_IMMEDIATE:
@@ -379,7 +450,7 @@ export class VisualServerScene {
 
             p_instance.base = p_base;
 
-            if (p_instance.scenario) {
+            if (scenario) {
                 this._instance_queue_update(p_instance, true, true);
             }
         }
@@ -400,6 +471,12 @@ export class VisualServerScene {
 
             switch (p_instance.base_type) {
                 case INSTANCE_TYPE_LIGHT: {
+                    let light = /** @type {InstanceLightData} */(p_instance.base_data);
+                    let idx = p_instance.scenario.directional_lights.indexOf(light.D);
+                    if (idx >= 0) {
+                        p_instance.scenario.directional_lights.splice(idx, 1);
+                        light.D = null;
+                    }
                 } break;
             }
 
@@ -413,6 +490,12 @@ export class VisualServerScene {
 
             switch (p_instance.base_type) {
                 case INSTANCE_TYPE_LIGHT: {
+                    let light = /** @type {InstanceLightData} */(p_instance.base_data);
+                    let light_inst = /** @type {Light_t} */(p_instance.base);
+                    if (light_inst.type === LIGHT_DIRECTIONAL) {
+                        p_scenario.directional_lights.push(p_instance);
+                        light.D = p_instance;
+                    }
                 } break;
             }
 
@@ -471,7 +554,7 @@ export class VisualServerScene {
 
         if (p_instance.update_materials) {
             if (p_instance.base_type === INSTANCE_TYPE_MESH) {
-                let new_mat_count = VSG.storage.mesh_get_surface_count(p_instance.base);
+                let new_mat_count = VSG.storage.mesh_get_surface_count(/** @type {Mesh_t} */(p_instance.base));
                 p_instance.materials.length = new_mat_count;
             }
         }
@@ -492,7 +575,7 @@ export class VisualServerScene {
         let new_aabb = null;
         switch (p_instance.base_type) {
             case INSTANCE_TYPE_MESH: {
-                new_aabb = VSG.storage.mesh_get_aabb(p_instance.base);
+                new_aabb = VSG.storage.mesh_get_aabb(/** @type {Mesh_t} */(p_instance.base));
             } break;
             case INSTANCE_TYPE_MULTIMESH: {
             } break;
@@ -501,6 +584,7 @@ export class VisualServerScene {
             case INSTANCE_TYPE_PARTICLES: {
             } break;
             case INSTANCE_TYPE_LIGHT: {
+                new_aabb = VSG.storage.light_get_aabb(/** @type {Light_t} */(p_instance.base));
             } break;
         }
         p_instance.aabb.copy(new_aabb);
@@ -512,6 +596,12 @@ export class VisualServerScene {
      */
     _update_instance(p_instance) {
         p_instance.version++;
+
+        if (p_instance.base_type === INSTANCE_TYPE_LIGHT) {
+            let light = /** @type {InstanceLightData} */(p_instance.base_data);
+
+            VSG.scene_render.light_instance_set_transform(light.instance, p_instance.transform);
+        }
 
         if (p_instance.aabb.has_no_surface()) return;
 
@@ -585,6 +675,17 @@ export class VisualServerScene {
             let keep = false;
 
             if ((camera_layer_mask & inst.layer_mask) === 0) {
+            } else if (inst.base_type === INSTANCE_TYPE_LIGHT && inst.visible) {
+                if (this.light_cull_count < MAX_LIGHTS_CULLED) {
+                    let light = /** @type {InstanceLightData} */(inst.base_data);
+                    if (light.geometries.length > 0) {
+                        // do not add this light if no geometry is affected by it
+                        this.light_cull_result[this.light_cull_count] = inst;
+                        this.light_instance_cull_result[this.light_cull_count] = light.instance;
+
+                        this.light_cull_count++;
+                    }
+                }
             } else if (inst.visible) {
                 keep = true;
 
@@ -605,6 +706,23 @@ export class VisualServerScene {
         }
 
         // PROCESS LIGHTS
+        let directional_lights = this.light_instance_cull_result;
+        this.directional_light_count = 0;
+        let start = this.light_cull_count;
+
+        for (let i = 0; i < p_scenario.directional_lights.length; i++) {
+            if (this.light_cull_count + this.directional_light_count >= MAX_LIGHTS_CULLED) {
+                break;
+            }
+            let E = p_scenario.directional_lights[i];
+            if (!E.visible) continue;
+
+            let light = /** @type {InstanceLightData} */(E.base_data);
+
+            if (light) {
+                directional_lights[start + this.directional_light_count++] = light.instance;
+            }
+        }
     }
 
     /**
@@ -615,6 +733,6 @@ export class VisualServerScene {
      * @param {Scenario_t} p_scenario
      */
     _render_scene(p_cam_transform, p_cam_projection, p_cam_ortho, p_force_env, p_scenario) {
-        VSG.scene_render.render_scene(p_cam_transform, p_cam_projection, p_cam_ortho, this.instance_cull_result, this.instance_cull_count, p_force_env);
+        VSG.scene_render.render_scene(p_cam_transform, p_cam_projection, p_cam_ortho, this.instance_cull_result, this.instance_cull_count, this.light_instance_cull_result, this.light_cull_count + this.directional_light_count, p_force_env);
     }
 }

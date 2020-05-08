@@ -72,6 +72,18 @@ export const INSTANCE_TYPE_REFLECTION_PROBE = 6;
 export const INSTANCE_TYPE_GI_PROBE = 7;
 export const INSTANCE_TYPE_LIGHTMAP_CAPTURE = 8;
 
+export const LIGHT_DIRECTIONAL = 0;
+export const LIGHT_OMNI = 1;
+export const LIGHT_SPOT = 2;
+
+export const LIGHT_PARAM_ENERGY = 0;
+export const LIGHT_PARAM_INDIRECT_ENERGY = 1;
+export const LIGHT_PARAM_SPECULAR = 2;
+export const LIGHT_PARAM_RANGE = 3;
+export const LIGHT_PARAM_ATTENUATION = 4;
+export const LIGHT_PARAM_SPOT_ANGLE = 5;
+export const LIGHT_PARAM_SPOT_ATTENUATION = 6;
+
 /**
  * @typedef FrameDrawnCallbacks
  * @property {any} object

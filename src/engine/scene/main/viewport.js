@@ -499,6 +499,22 @@ export class Viewport extends Node {
     }
 
     /**
+     * @param {boolean} p_enabled
+     */
+    set_transparent_bg(p_enabled) {
+        this.transparent_bg = p_enabled;
+        VSG.viewport.viewport_set_transparent_background(this.viewport, p_enabled);
+    }
+
+    /**
+     * @param {boolean} p_enabled
+     */
+    set_vflip(p_enabled) {
+        this.vflip = p_enabled;
+        VSG.viewport.viewport_set_vflip(this.viewport, p_enabled);
+    }
+
+    /**
      * @param {number} value
      */
     set_render_target_clear_mode(value) {

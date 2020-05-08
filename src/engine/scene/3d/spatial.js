@@ -454,6 +454,8 @@ export class Spatial extends Node {
     _load_data(data) {
         super._load_data(data);
 
+        if (data.visible !== undefined) this.set_visible(data.visible);
+
         if (data.transform) this.set_transform_n(
             data.transform[0],
             data.transform[1],

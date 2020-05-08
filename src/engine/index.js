@@ -112,6 +112,7 @@ export * from 'engine/scene/3d/spatial';
 export * from 'engine/scene/3d/camera';
 export * from 'engine/scene/3d/visual_instance';
 export * from 'engine/scene/3d/mesh_instance';
+export * from 'engine/scene/3d/light';
 
 export * from 'engine/registry';
 

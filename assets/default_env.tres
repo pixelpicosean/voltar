@@ -11,4 +11,8 @@ ground_curve = 0.01
 [resource]
 background_mode = 1
 background_sky = SubResource( 1 )
-ambient_light_color = Color( 1, 0, 0, 1 )
+fog_depth_begin = 0.0
+fog_depth_end = 59.6
+dof_blur_near_distance = 1.32
+dof_blur_near_transition = 0.04
+dof_blur_near_amount = 0.21

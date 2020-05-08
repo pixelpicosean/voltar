@@ -21,12 +21,13 @@ _global_script_class_icons={
 [application]
 
 config/name="voltar"
+run/main_scene="res://scene/demo_3d.tscn"
 config/icon="res://icon.png"
 
 [display]
 
-window/size/width=256
-window/size/height=256
+window/size/width=512
+window/size/height=512
 window/size/resizable=false
 window/stretch/mode="viewport"
 window/stretch/aspect="keep"
@@ -78,5 +79,6 @@ name_casing=2
 [rendering]
 
 quality/driver/driver_name="GLES2"
+quality/filters/msaa=2
 environment/default_environment="res://default_env.tres"
 quality/dynamic_fonts/use_oversampling=false

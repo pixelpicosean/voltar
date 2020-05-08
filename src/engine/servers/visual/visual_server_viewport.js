@@ -184,6 +184,15 @@ export class VisualServerViewport {
 
     /**
      * @param {Viewport_t} p_viewport
+     * @param {boolean} p_enabled
+     */
+    viewport_set_vflip(p_viewport, p_enabled) {
+        p_viewport.render_target.flags.VFLIP = p_enabled;
+        VSG.storage.render_target_set_flag(p_viewport.render_target, "VFLIP", p_enabled);
+    }
+
+    /**
+     * @param {Viewport_t} p_viewport
      * @param {Rect2} p_rect
      * @param {number} [p_screen]
      */
@@ -302,7 +311,10 @@ export class VisualServerViewport {
      * @param {Viewport_t} p_viewport
      * @param {boolean} p_enabled
      */
-    viewport_set_transparent_background(p_viewport, p_enabled) { }
+    viewport_set_transparent_background(p_viewport, p_enabled) {
+        VSG.storage.render_target_set_flag(p_viewport.render_target, "TRANSPARENT", p_enabled);
+        p_viewport.transparent_bg = p_enabled;
+    }
 
     /**
      * @param {Viewport_t} p_viewport

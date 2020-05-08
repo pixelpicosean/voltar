@@ -143,6 +143,9 @@ export class OS {
             premultipliedAlpha: false,
             preserveDrawingBuffer: false,
         };
+
+        const driver_config = VSG.config;
+
         if (this.video_driver_index === VIDEO_DRIVER_GLES3) {
             const gl = /** @type {WebGL2RenderingContext} */(this.canvas.getContext('webgl2', options));
             this.gl_ext = {
@@ -171,12 +174,55 @@ export class OS {
                 drawElementsInstanced: (mode, count, type, offset, primcount) => gl.drawElementsInstanced(mode, count, type, offset, primcount),
             }
             this.gl = gl;
+
+            if (gl) {
+                driver_config.support_depth_texture = true;
+                driver_config.depth_internalformat = gl.DEPTH_COMPONENT;
+                driver_config.depth_type = gl.UNSIGNED_INT;
+            }
         }
         if (!this.gl) {
             this.video_driver_index = VIDEO_DRIVER_GLES2;
             const gl = /** @type {WebGLRenderingContext} */(this.canvas.getContext('webgl', options));
 
-            const instancing = gl.getExtension("ANGLE_instanced_arrays");
+            let instancing = gl.getExtension("ANGLE_instanced_arrays");
+
+            // depth texture
+            let depth_texture = gl.getExtension("WEBGL_depth_texture");
+            if (depth_texture) {
+                driver_config.support_depth_texture = true;
+                driver_config.depth_internalformat = gl.DEPTH_COMPONENT;
+                driver_config.depth_type = gl.UNSIGNED_INT;
+            } else {
+                // @ts-ignore
+                depth_texture = {};
+            }
+
+            // compressed textures
+            let s3tc = gl.getExtension("WEBGL_compressed_texture_s3tc");
+            if (s3tc) {
+                driver_config.s3tc_supported = true;
+            } else {
+                // @ts-ignore
+                s3tc = {};
+            }
+
+            let etc1 = gl.getExtension("WEBGL_compressed_texture_etc1");
+            if (etc1) {
+                driver_config.etc1_supported = true;
+            } else {
+                // @ts-ignore
+                etc1 = {};
+            }
+
+            let pvrtc = gl.getExtension("WEBGL_compressed_texture_pvrtc");
+            if (pvrtc) {
+                driver_config.pvrtc_supported = true;
+            } else {
+                // @ts-ignore
+                pvrtc = {};
+            }
+
             this.gl_ext = {
                 /* instancing API */
 
@@ -201,8 +247,38 @@ export class OS {
                  * @param {number} primcount
                  */
                 drawElementsInstanced: (mode, count, type, offset, primcount) => instancing.drawElementsInstancedANGLE(mode, count, type, offset, primcount),
+
+                /* depth texture */
+
+                UNSIGNED_INT_24_8: depth_texture.UNSIGNED_INT_24_8_WEBGL,
+
+                /* compressed textures */
+
+                COMPRESSED_RGBA_S3TC_DXT1: s3tc.COMPRESSED_RGBA_S3TC_DXT1_EXT,
+                COMPRESSED_RGBA_S3TC_DXT3: s3tc.COMPRESSED_RGBA_S3TC_DXT3_EXT,
+                COMPRESSED_RGBA_S3TC_DXT5: s3tc.COMPRESSED_RGBA_S3TC_DXT5_EXT,
+                COMPRESSED_RGB_S3TC_DXT1: s3tc.COMPRESSED_RGB_S3TC_DXT1_EXT,
+
+                COMPRESSED_RGB_ETC1: etc1.COMPRESSED_RGB_ETC1_WEBGL,
+
+                COMPRESSED_RGB_PVRTC_4BPPV1: pvrtc.COMPRESSED_RGB_PVRTC_4BPPV1_IMG,
+                COMPRESSED_RGBA_PVRTC_4BPPV1: pvrtc.COMPRESSED_RGBA_PVRTC_4BPPV1_IMG,
+                COMPRESSED_RGB_PVRTC_2BPPV1: pvrtc.COMPRESSED_RGB_PVRTC_2BPPV1_IMG,
+                COMPRESSED_RGBA_PVRTC_2BPPV1: pvrtc.COMPRESSED_RGBA_PVRTC_2BPPV1_IMG,
             }
             this.gl = gl;
+        }
+
+        {
+            /* update config info */
+
+            const gl = this.gl;
+
+            driver_config.depth_buffer_internalformat = gl.DEPTH_COMPONENT16;
+
+            driver_config.max_vertex_texture_image_units = gl.getParameter(gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS);
+            driver_config.max_texture_image_units = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+            driver_config.max_texture_size = gl.getParameter(gl.MAX_TEXTURE_SIZE);
         }
 
         const visual_server = new VisualServer();

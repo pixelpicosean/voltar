@@ -1,19 +1,9 @@
 import { SelfList, List } from "engine/core/self_list";
-import { is_po2, nearest_po2 } from "engine/core/math/math_funcs";
+import { is_po2, nearest_po2, deg2rad } from "engine/core/math/math_funcs";
 import { Vector2 } from "engine/core/math/vector2";
 import { Vector3 } from "engine/core/math/vector3";
-import { Color } from "engine/core/color";
+import { Color, ColorLike } from "engine/core/color";
 import { AABB } from "engine/core/math/aabb";
-
-import {
-    PIXEL_FORMAT_L8,
-    PIXEL_FORMAT_LA8,
-    PIXEL_FORMAT_RGB8,
-    PIXEL_FORMAT_RGBA8,
-    PIXEL_FORMAT_RGBA4,
-    PIXEL_FORMAT_RGBA5551,
-    ImageTexture,
-} from "engine/scene/resources/texture";
 
 import {
     TEXTURE_TYPE_2D,
@@ -28,10 +18,40 @@ import {
     MULTIMESH_COLOR_FLOAT,
     MULTIMESH_CUSTOM_DATA_8BIT,
     MULTIMESH_CUSTOM_DATA_FLOAT,
+    INSTANCE_TYPE_NONE,
+    INSTANCE_TYPE_MESH,
+    INSTANCE_TYPE_LIGHT,
+    LIGHT_SPOT,
+    LIGHT_OMNI,
+    LIGHT_DIRECTIONAL,
+    LIGHT_PARAM_RANGE,
+    LIGHT_PARAM_SPOT_ANGLE,
+    TEXTURE_TYPE_CUBEMAP,
 } from "engine/servers/visual_server";
 import {
     Instance_t,
 } from "engine/servers/visual/visual_server_scene";
+import { VSG } from "engine/servers/visual/visual_server_globals";
+
+import {
+    PIXEL_FORMAT_L8,
+    PIXEL_FORMAT_LA8,
+    PIXEL_FORMAT_RGB8,
+    PIXEL_FORMAT_RGBA8,
+    PIXEL_FORMAT_RGBA4,
+    PIXEL_FORMAT_RGBA5551,
+    ImageTexture,
+    PIXEL_FORMAT_R8,
+    PIXEL_FORMAT_DXT1,
+    PIXEL_FORMAT_DXT3,
+    PIXEL_FORMAT_DXT5,
+    PIXEL_FORMAT_PVRTC2,
+    PIXEL_FORMAT_PVRTC2A,
+    PIXEL_FORMAT_PVRTC4,
+    PIXEL_FORMAT_PVRTC4A,
+    PIXEL_FORMAT_ETC,
+} from "engine/scene/resources/texture";
+import { OS } from "engine/core/os/os";
 
 const SMALL_VEC2 = new Vector2(0.00001, 0.00001);
 const SMALL_VEC3 = new Vector3(0.00001, 0.00001, 0.00001);
@@ -85,20 +105,49 @@ export class Texture_t {
         this.type = TEXTURE_TYPE_2D;
         /** @type {RenderTarget_t} */
         this.render_target = null;
+        /** @type {(HTMLImageElement | HTMLCanvasElement)[]} */
+        this.images = [];
         this.width = 0;
         this.height = 0;
+        this.depth = 0;
+        this.alloc_width = 0;
+        this.alloc_height = 0;
         this.usage = USAGE_IMMUTABLE;
-        this.pixel_format = PIXEL_FORMAT_RGBA8;
+        this.format = PIXEL_FORMAT_L8;
         this.min_filter = FILTER_NEAREST;
         this.mag_filter = FILTER_NEAREST;
         this.wrap_u = WRAP_REPEAT;
         this.wrap_v = WRAP_REPEAT;
         this.has_mipmap = false;
 
+        this.target = 0;
+        this.gl_format_cache = 0;
+        this.gl_internal_format_cache = 0;
+        this.gl_type_cache = 0;
+
+        this.compressed = false;
+
+        this.srgb = false;
+
+        this.mipmaps = 0;
+
+        this.resize_to_po2 = false;
+
+        this.active = false;
+
+        this.redraw_if_visible = false;
+
         /** @type {WebGLRenderbuffer} */
         this.gl_depth_render_buffer = null;
         /** @type {WebGLTexture} */
         this.gl_tex = null;
+
+        this.path = "";
+        this.flags = {
+            FILTER: false,
+            REPEAT: false,
+            MIPMAPS: false,
+        };
 
         this.initialized = false;
     }
@@ -106,6 +155,8 @@ export class Texture_t {
 
 let inst_uid = 0;
 export class Instantiable_t {
+    get i_type() { return INSTANCE_TYPE_NONE }
+
     constructor() {
         this.uid = inst_uid++;
 
@@ -140,6 +191,8 @@ export const GEOMETRY_IMMEDIATE = 2;
 export const GEOMETRY_MULTISURFACE = 3;
 
 export class Geometry_t extends Instantiable_t {
+    get i_type() { return INSTANCE_TYPE_MESH }
+
     constructor() {
         super();
 
@@ -150,6 +203,37 @@ export class Geometry_t extends Instantiable_t {
 
         this.last_pass = 0;
         this.index = 0;
+    }
+}
+
+export class Light_t extends Instantiable_t {
+    get i_type() { return INSTANCE_TYPE_LIGHT }
+
+    constructor() {
+        super();
+
+        this.type = LIGHT_DIRECTIONAL;
+
+        this.param = [
+            1.0, // energy
+            1.0, // indirect energy
+            0.5, // specular
+            1.0, // range
+            45,  // spot angle
+        ];
+
+        this.color = new Color(1, 1, 1, 1);
+
+        this.projector = null;
+
+        this.negative = false;
+        this.reverse_cull = false;
+
+        this.cull_mask = 0xFFFFFFFF;
+
+        this.directional_blend_splits = false;
+
+        this.version = 0;
     }
 }
 
@@ -179,7 +263,9 @@ export class RenderTarget_t {
 
         this.flags = {
             DIRECT_TO_SCREEN: false,
-            TRANSPARENT: true,
+            TRANSPARENT: false,
+            NO_SAMPLING: false,
+            VFLIP: false,
         };
 
         this.used_in_frame = false;
@@ -191,6 +277,10 @@ export class RenderTarget_t {
 
         /** @type {WebGLFramebuffer} */
         this.gl_fbo = null;
+        /** @type {WebGLTexture} */
+        this.gl_color = null;
+        /** @type {WebGLTexture} */
+        this.gl_depth = null;
     }
 }
 
@@ -198,11 +288,19 @@ export class RenderTarget_t {
  * @typedef {'1i' | '1f' | '2f' | '3f' | '4f' | 'mat3' | 'mat4'} UniformTypes
  */
 
-const BLEND_MODE_MIX = 0;
+export const BLEND_MODE_MIX = 0;
+export const BLEND_MODE_ADD = 1;
+export const BLEND_MODE_SUB = 2;
+export const BLEND_MODE_MUL = 3;
 
-const DEPTH_DRAW_OPAQUE = 0;
+export const DEPTH_DRAW_OPAQUE = 0;
+export const DEPTH_DRAW_ALWAYS = 1;
+export const DEPTH_DRAW_NEVER = 2;
+export const DEPTH_DRAW_ALPHA_PREPASS = 3;
 
-const CULL_MODE_FRONT = 0;
+export const CULL_MODE_FRONT = 0;
+export const CULL_MODE_BACK = 1;
+export const CULL_MODE_DISABLED = 2;
 
 export class Shader_t {
     constructor() {
@@ -317,6 +415,8 @@ export class Surface_t extends Geometry_t {
 }
 
 export class Mesh_t extends Instantiable_t {
+    get i_type() { return INSTANCE_TYPE_MESH }
+
     constructor() {
         super();
 
@@ -399,12 +499,6 @@ export class RasterizerStorage {
         /** @type {WebGLRenderingContext} */
         this.gl = null;
 
-        this.config = {
-            max_vertex_texture_image_units: 0,
-            max_texture_image_units: 0,
-            max_texture_size: 0,
-        };
-
         this.frame = {
             clear_request: true,
             clear_request_color: new Color(0, 0, 0, 1),
@@ -427,6 +521,11 @@ export class RasterizerStorage {
             normal_tex: null,
             /** @type {ImageTexture} */
             aniso_tex: null,
+
+            /** @type {WebGLFramebuffer} */
+            mipmap_blur_fbo: null,
+            /** @type {WebGLTexture} */
+            mipmap_blur_color: null,
 
             /** @type {WebGLBuffer} */
             quadie: null,
@@ -454,20 +553,15 @@ export class RasterizerStorage {
     initialize(gl) {
         this.gl = gl;
 
-        // fetch config values
-        this.config.max_vertex_texture_image_units = gl.getParameter(gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS);
-        this.config.max_texture_image_units = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
-        this.config.max_texture_size = gl.getParameter(gl.MAX_TEXTURE_SIZE);
-
         // quad for copying stuff
         {
             const buf = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, buf);
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
-                -1, -1, 0, 0,
-                -1, +1, 0, 1,
-                +1, +1, 1, 1,
-                +1, -1, 1, 0,
+                -1, -1, 1, 0,
+                -1, +1, 1, 1,
+                +1, +1, 0, 1,
+                +1, -1, 0, 0,
             ]), gl.STATIC_DRAW);
             gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
@@ -566,46 +660,171 @@ export class RasterizerStorage {
 
     /* Texture API */
 
-    texture_2d_create() {
-        return new Texture_t;
+    texture_create() {
+        let texture = new Texture_t;
+        texture.gl_tex = this.gl.createTexture();
+        texture.active = false;
+        return texture;
     }
     /**
-     * @param {Texture_t} rid
+     * @param {Texture_t} texture
      * @param {number} p_width
      * @param {number} p_height
+     * @param {number} p_depth
+     * @param {number} p_format
+     * @param {number} p_type
      * @param {{ min_filter?: number, mag_filter?: number, wrap_u?: number, wrap_v?: number, has_mipmap?: boolean }} [p_flags]
      */
-    texture_allocate(rid, p_width, p_height, p_flags = {}) {
+    texture_allocate(texture, p_width, p_height, p_depth, p_format, p_type, p_flags = {}) {
         const gl = this.gl;
 
-        rid.width = p_width;
-        rid.height = p_height;
+        texture.width = p_width;
+        texture.height = p_height;
+        texture.format = p_format;
+        texture.type = p_type;
 
-        rid.min_filter = p_flags.min_filter || FILTER_NEAREST;
-        rid.mag_filter = p_flags.mag_filter || FILTER_NEAREST;
-        rid.wrap_u = p_flags.wrap_u || WRAP_CLAMP_TO_EDGE;
-        rid.wrap_v = p_flags.wrap_v || WRAP_CLAMP_TO_EDGE;
-
-        if (rid.gl_tex) {
-            gl.deleteTexture(rid.gl_tex);
-            rid.gl_tex = null;
+        switch (p_type) {
+            case TEXTURE_TYPE_2D: {
+                texture.target = gl.TEXTURE_2D;
+                texture.images.length = 1;
+            } break;
+            case TEXTURE_TYPE_CUBEMAP: {
+                texture.target = gl.TEXTURE_CUBE_MAP;
+                texture.images.length = 6;
+            } break;
+            default: {
+                console.error("Unknown texture type!");
+                return;
+            }
         }
 
-        rid.gl_tex = gl.createTexture();
-        gl.bindTexture(gl.TEXTURE_2D, rid.gl_tex);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, rid.min_filter);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, rid.mag_filter);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, rid.wrap_u);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, rid.wrap_v);
-        gl.texImage2D(gl.TEXTURE_2D, 0, get_gl_internal_format(rid.pixel_format), rid.width, rid.height, 0, get_gl_pixel_format(rid.pixel_format), get_gl_texture_type(rid.pixel_format), null);
+        texture.alloc_width = texture.width;
+        texture.alloc_height = texture.alloc_height;
+        texture.resize_to_po2 = false;
 
-        if (p_flags.has_mipmap && is_po2(rid.width) && is_po2(rid.height)) {
-            rid.has_mipmap = true;
-            gl.generateMipmap(gl.TEXTURE_2D);
-        }
+        this._get_gl_image_and_format(texture);
 
-        rid.initialized = true;
+        texture.mipmaps = 1;
+
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(texture.target, texture.gl_tex);
+
+        texture.active = true;
     }
+
+    /**
+     * @param {Texture_t} texture
+     */
+    _get_gl_image_and_format(texture) {
+        const gl = this.gl;
+        const ext = OS.get_singleton().gl_ext;
+
+        switch (texture.format) {
+            case PIXEL_FORMAT_L8: {
+                texture.gl_internal_format_cache = gl.LUMINANCE;
+                texture.gl_format_cache = gl.LUMINANCE;
+                texture.gl_type_cache = gl.UNSIGNED_BYTE;
+            } break;
+            case PIXEL_FORMAT_LA8: {
+                texture.gl_internal_format_cache = gl.LUMINANCE_ALPHA;
+                texture.gl_format_cache = gl.LUMINANCE_ALPHA;
+                texture.gl_type_cache = gl.UNSIGNED_BYTE;
+            } break;
+            case PIXEL_FORMAT_R8: {
+                texture.gl_internal_format_cache = gl.ALPHA;
+                texture.gl_format_cache = gl.ALPHA;
+                texture.gl_type_cache = gl.UNSIGNED_BYTE;
+            } break;
+            case PIXEL_FORMAT_RGB8: {
+                texture.gl_internal_format_cache = gl.RGB;
+                texture.gl_format_cache = gl.RGB;
+                texture.gl_type_cache = gl.UNSIGNED_BYTE;
+            } break;
+            case PIXEL_FORMAT_RGBA8: {
+                texture.gl_internal_format_cache = gl.RGBA;
+                texture.gl_format_cache = gl.RGBA;
+                texture.gl_type_cache = gl.UNSIGNED_BYTE;
+            } break;
+            case PIXEL_FORMAT_RGBA4: {
+                texture.gl_internal_format_cache = gl.RGBA;
+                texture.gl_format_cache = gl.RGBA;
+                texture.gl_type_cache = gl.UNSIGNED_SHORT_4_4_4_4;
+            } break;
+            case PIXEL_FORMAT_DXT1: {
+                if (!VSG.config.s3tc_supported) {
+                    console.error("DXT1 texture not supported!");
+                }
+                texture.gl_internal_format_cache = ext.COMPRESSED_RGBA_S3TC_DXT1;
+                texture.gl_format_cache = gl.RGBA;
+                texture.gl_type_cache = gl.UNSIGNED_BYTE;
+                texture.compressed = true;
+            } break;
+            case PIXEL_FORMAT_DXT3: {
+                if (!VSG.config.s3tc_supported) {
+                    console.error("DXT3 texture not supported!");
+                }
+                texture.gl_internal_format_cache = ext.COMPRESSED_RGBA_S3TC_DXT3;
+                texture.gl_format_cache = gl.RGBA;
+                texture.gl_type_cache = gl.UNSIGNED_BYTE;
+                texture.compressed = true;
+            } break;
+            case PIXEL_FORMAT_DXT5: {
+                if (!VSG.config.s3tc_supported) {
+                    console.error("DXT5 texture not supported!");
+                }
+                texture.gl_internal_format_cache = ext.COMPRESSED_RGBA_S3TC_DXT5;
+                texture.gl_format_cache = gl.RGBA;
+                texture.gl_type_cache = gl.UNSIGNED_BYTE;
+                texture.compressed = true;
+            } break;
+            case PIXEL_FORMAT_ETC: {
+                if (!VSG.config.etc1_supported) {
+                    console.error("ETC texture not supported!");
+                }
+                texture.gl_internal_format_cache = ext.COMPRESSED_RGB_ETC1;
+                texture.gl_format_cache = gl.RGBA;
+                texture.gl_type_cache = gl.UNSIGNED_BYTE;
+                texture.compressed = true;
+            } break;
+            case PIXEL_FORMAT_PVRTC2: {
+                if (!VSG.config.pvrtc_supported) {
+                    console.error("PVRTC2 texture not supported!");
+                }
+                texture.gl_internal_format_cache = ext.COMPRESSED_RGB_PVRTC_2BPPV1;
+                texture.gl_format_cache = gl.RGBA;
+                texture.gl_type_cache = gl.UNSIGNED_BYTE;
+                texture.compressed = true;
+            } break;
+            case PIXEL_FORMAT_PVRTC2A: {
+                if (!VSG.config.pvrtc_supported) {
+                    console.error("PVRTC2A texture not supported!");
+                }
+                texture.gl_internal_format_cache = ext.COMPRESSED_RGBA_PVRTC_2BPPV1;
+                texture.gl_format_cache = gl.RGBA;
+                texture.gl_type_cache = gl.UNSIGNED_BYTE;
+                texture.compressed = true;
+            } break;
+            case PIXEL_FORMAT_PVRTC4: {
+                if (!VSG.config.pvrtc_supported) {
+                    console.error("PVRTC4 texture not supported!");
+                }
+                texture.gl_internal_format_cache = ext.COMPRESSED_RGB_PVRTC_4BPPV1;
+                texture.gl_format_cache = gl.RGBA;
+                texture.gl_type_cache = gl.UNSIGNED_BYTE;
+                texture.compressed = true;
+            } break;
+            case PIXEL_FORMAT_PVRTC4A: {
+                if (!VSG.config.pvrtc_supported) {
+                    console.error("PVRTC4A texture not supported!");
+                }
+                texture.gl_internal_format_cache = ext.COMPRESSED_RGBA_PVRTC_4BPPV1;
+                texture.gl_format_cache = gl.RGBA;
+                texture.gl_type_cache = gl.UNSIGNED_BYTE;
+                texture.compressed = true;
+            } break;
+        }
+    }
+
     /**
      * @param {Texture_t} rid
      * @param {import("engine/scene/resources/texture").DOMImageData} p_data
@@ -616,7 +835,27 @@ export class RasterizerStorage {
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, rid.gl_tex);
 
-        gl.texImage2D(gl.TEXTURE_2D, 0, get_gl_internal_format(rid.pixel_format), get_gl_pixel_format(rid.pixel_format), get_gl_texture_type(rid.pixel_format), p_data);
+        if (rid.flags.FILTER) {
+            gl.texParameteri(rid.target, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+            gl.texParameteri(rid.target, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        } else {
+            gl.texParameteri(rid.target, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+            gl.texParameteri(rid.target, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        }
+
+        if (rid.flags.REPEAT) {
+            gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+            gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+        } else {
+            gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        }
+
+        gl.texImage2D(gl.TEXTURE_2D, 0, get_gl_internal_format(rid.format), get_gl_pixel_format(rid.format), get_gl_texture_type(rid.format), p_data);
+
+        if (rid.flags.MIPMAPS) {
+            gl.generateMipmap(rid.target);
+        }
     }
     /**
      * @param {Texture_t} rid
@@ -628,7 +867,32 @@ export class RasterizerStorage {
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, rid.gl_tex);
 
-        gl.texImage2D(gl.TEXTURE_2D, 0, get_gl_internal_format(rid.pixel_format), rid.width, rid.height, 0, get_gl_pixel_format(rid.pixel_format), get_gl_texture_type(rid.pixel_format), p_data);
+        if (rid.flags.FILTER) {
+            gl.texParameteri(rid.target, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+            gl.texParameteri(rid.target, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        } else {
+            gl.texParameteri(rid.target, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+            gl.texParameteri(rid.target, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        }
+
+        if (rid.flags.REPEAT) {
+            gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+            gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+        } else {
+            gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        }
+
+        if (rid.compressed) {
+            gl.pixelStorei(gl.UNPACK_ALIGNMENT, 4);
+            gl.compressedTexImage2D(gl.TEXTURE_2D, 0, rid.gl_internal_format_cache, rid.width, rid.height, 0, p_data);
+        } else {
+            gl.texImage2D(gl.TEXTURE_2D, 0, get_gl_internal_format(rid.format), rid.width, rid.height, 0, get_gl_pixel_format(rid.format), get_gl_texture_type(rid.format), p_data);
+        }
+
+        if (rid.flags.MIPMAPS) {
+            gl.generateMipmap(rid.target);
+        }
     }
 
     /* RenderTarget API */
@@ -649,51 +913,12 @@ export class RasterizerStorage {
             return;
         }
 
-        const gl = this.gl;
-
-        if (rt.gl_fbo) {
-            gl.deleteFramebuffer(rt.gl_fbo);
-            rt.gl_fbo = null;
-
-            gl.deleteTexture(rt.texture.gl_tex)
-            rt.texture.gl_tex = null;
-
-            if (rt.texture.gl_depth_render_buffer) {
-                gl.deleteRenderbuffer(rt.texture.gl_depth_render_buffer);
-                rt.texture.gl_depth_render_buffer = null;
-            }
-        }
+        this._render_target_clear(rt);
 
         rt.width = p_width;
         rt.height = p_height;
 
-        rt.gl_fbo = gl.createFramebuffer();
-        gl.bindFramebuffer(gl.FRAMEBUFFER, rt.gl_fbo);
-
-        this.texture_allocate(rt.texture, p_width, p_height);
-        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, rt.texture.gl_tex, 0);
-
-        // TODO: depth
-
-        // copy texscreen buffers
-        rt.copy_screen_effect.gl_color = gl.createTexture();
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, rt.copy_screen_effect.gl_color);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, rt.width, rt.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.bindTexture(gl.TEXTURE_2D, null);
-
-        rt.copy_screen_effect.gl_fbo = gl.createFramebuffer();
-        gl.bindFramebuffer(gl.FRAMEBUFFER, rt.copy_screen_effect.gl_fbo);
-        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, rt.copy_screen_effect.gl_color, 0);
-
-        gl.clearColor(0, 0, 0, 0);
-        gl.clear(gl.COLOR_BUFFER_BIT);
-
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        this._render_target_allocate(rt);
     }
 
     /**
@@ -718,6 +943,175 @@ export class RasterizerStorage {
      */
     render_target_clear_used(rt) {
         rt.used_in_frame = false;
+    }
+
+    /**
+     * @param {RenderTarget_t} rt
+     * @param {string} flag
+     * @param {boolean} p_enable
+     */
+    render_target_set_flag(rt, flag, p_enable) {
+        console.log(`rt.set_flag(${flag}, ${p_enable})`)
+        if (flag === "DIRECT_TO_SCREEN") {
+            this._render_target_clear(rt);
+            rt.flags[flag] = p_enable;
+            this._render_target_allocate(rt);
+        }
+
+        rt.flags[flag] = p_enable;
+
+        if (flag === "TRANSPARENT") {
+            this._render_target_clear(rt);
+            this._render_target_allocate(rt);
+        }
+    }
+
+    /**
+     * @param {RenderTarget_t} rt
+     */
+    _render_target_clear(rt) {
+        if (rt.flags.DIRECT_TO_SCREEN) {
+            return;
+        }
+
+        const gl = this.gl;
+
+        if (rt.gl_fbo) {
+            gl.deleteFramebuffer(rt.gl_fbo);
+            gl.deleteTexture(rt.gl_color);
+            rt.gl_fbo = null;
+        }
+
+        if (rt.gl_depth) {
+            if (false) { // depth texture
+            } else {
+                gl.deleteRenderbuffer(rt.gl_depth);
+            }
+            rt.gl_depth = null;
+        }
+
+        let tex = rt.texture;
+        tex.width = tex.height = 0;
+
+        if (rt.copy_screen_effect.gl_color) {
+            gl.deleteFramebuffer(rt.copy_screen_effect.gl_fbo);
+            rt.copy_screen_effect.gl_fbo = null;
+
+            gl.deleteTexture(rt.copy_screen_effect.gl_color);
+            rt.copy_screen_effect.gl_color = null;
+        }
+    }
+
+    /**
+     * @param {RenderTarget_t} rt
+     */
+    _render_target_allocate(rt) {
+        if (rt.width <= 0 || rt.height <= 0) {
+            return;
+        }
+
+        if (rt.flags.DIRECT_TO_SCREEN) {
+            rt.gl_fbo = null;
+            return;
+        }
+
+        const gl = this.gl;
+
+        let color_internal_format = -1;
+        let color_format = -1;
+        let color_type = gl.UNSIGNED_BYTE;
+        let image_format = -1;
+
+        if (rt.flags.TRANSPARENT) {
+            color_internal_format = gl.RGBA;
+            color_format = gl.RGBA;
+            image_format = PIXEL_FORMAT_RGBA8;
+        } else {
+            color_internal_format = gl.RGB;
+            color_format = gl.RGB;
+            image_format = PIXEL_FORMAT_RGB8;
+        }
+
+        {
+            /* front FBO */
+
+            let texture = rt.texture;
+
+            // framebuffer
+            rt.gl_fbo = gl.createFramebuffer();
+            gl.bindFramebuffer(gl.FRAMEBUFFER, rt.gl_fbo);
+
+            // color
+            rt.gl_color = gl.createTexture();
+            gl.bindTexture(gl.TEXTURE_2D, rt.gl_color);
+
+            gl.texImage2D(gl.TEXTURE_2D, 0, color_internal_format, rt.width, rt.height, 0, color_format, color_type, null);
+
+            if (texture.flags.FILTER) {
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+            } else {
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+            }
+
+            gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, rt.gl_color, 0);
+
+            // depth
+            if (VSG.config.support_depth_texture) {
+                // rt.gl_depth = gl.createTexture();
+                // gl.bindTexture(gl.TEXTURE_2D, rt.gl_depth);
+                // gl.texImage2D(gl.TEXTURE_2D, 0, VSG.config.depth_internalformat, rt.width, rt.height, 0, gl.DEPTH_COMPONENT, VSG.config.depth_type, null);
+
+                // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+                // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+                // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+                // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+                // gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, rt.gl_depth, 0);
+            } else {
+                rt.gl_depth = gl.createRenderbuffer();
+                gl.bindRenderbuffer(gl.RENDERBUFFER, rt.gl_depth);
+                gl.renderbufferStorage(gl.RENDERBUFFER, VSG.config.depth_buffer_internalformat, rt.width, rt.height);
+                gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, rt.gl_depth);
+            }
+
+            texture.format = image_format;
+            texture.gl_tex = rt.gl_color;
+            texture.width = rt.width;
+            texture.height = rt.height;
+        }
+
+        gl.clearColor(0, 0, 0, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        if (!rt.flags.NO_SAMPLING) {
+            rt.copy_screen_effect.gl_color = gl.createTexture();
+            gl.bindTexture(gl.TEXTURE_2D, rt.copy_screen_effect.gl_color);
+
+            if (rt.flags.TRANSPARENT) {
+                gl.texImage2D(gl.TEXTURE_2D, 0,  gl.RGBA, rt.width, rt.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+            } else {
+                gl.texImage2D(gl.TEXTURE_2D, 0,  gl.RGB, rt.width, rt.height, 0, gl.RGB, gl.UNSIGNED_BYTE, null);
+            }
+
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+            rt.copy_screen_effect.gl_fbo = gl.createFramebuffer();
+            gl.bindFramebuffer(gl.FRAMEBUFFER, rt.copy_screen_effect.gl_fbo);
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, rt.copy_screen_effect.gl_color, 0);
+
+            gl.clearColor(0, 0, 0, 0);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+        }
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     }
 
     /* Material API */
@@ -800,6 +1194,11 @@ export class RasterizerStorage {
                 case '4f': mt.params[k] = param[k] || [0, 0, 0, 0]; break;
                 case 'mat3': mt.params[k] = param[k] || [1, 0, 0, 0, 1, 0, 0, 0, 1]; break;
                 case 'mat4': mt.params[k] = param[k] || [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]; break;
+
+                // texture
+                case '1i': {
+                    mt.textures[k] = null;
+                } break;
             }
         }
 
@@ -1181,8 +1580,107 @@ export class RasterizerStorage {
         }
     }
 
+    /* Light API */
+
     /**
-     * @param {Mesh_t} p_base
+     * @param {number} p_type
+     */
+    light_create(p_type) {
+        let light = new Light_t;
+        light.type = p_type;
+        return light;
+    }
+
+    /**
+     * @param {Light_t} p_light
+     * @param {ColorLike} p_color
+     */
+    light_set_color(p_light, p_color) {
+        p_light.color.copy(p_color);
+    }
+
+    /**
+     * @param {Light_t} p_light
+     * @param {number} p_param
+     * @param {number} p_value
+     */
+    light_set_param(p_light, p_param, p_value) {
+        switch (p_param) {
+            case LIGHT_PARAM_RANGE:
+            case LIGHT_PARAM_SPOT_ANGLE: {
+                p_light.version++;
+                p_light.instance_change_notify(true, false);
+            } break;
+        }
+        p_light.param[p_param] = p_value;
+    }
+
+    /**
+     * @param {Light_t} p_light
+     * @param {Texture_t} p_texture
+     */
+    light_set_projector(p_light, p_texture) {
+        p_light.projector = p_texture;
+    }
+
+    /**
+     * @param {Light_t} p_light
+     * @param {boolean} p_enable
+     */
+    light_set_negative(p_light, p_enable) {
+        p_light.negative = p_enable;
+    }
+
+    /**
+     * @param {Light_t} p_light
+     * @param {number} p_mask
+     */
+    light_set_cull_mask(p_light, p_mask) {
+        p_light.cull_mask = p_mask;
+
+        p_light.version++;
+        p_light.instance_change_notify(true, false);
+    }
+
+    /**
+     * @param {Light_t} p_light
+     * @param {boolean} p_enabled
+     */
+    light_set_reverse_cull_face_mode(p_light, p_enabled) {
+        p_light.reverse_cull = p_enabled;
+
+        p_light.version++;
+        p_light.instance_change_notify(true, false);
+    }
+
+    /**
+     * @param {Light_t} p_light
+     */
+    light_get_aabb(p_light) {
+        switch (p_light.type) {
+            case LIGHT_SPOT: {
+                let len = p_light.param[LIGHT_PARAM_RANGE];
+                let size = Math.tan(deg2rad(p_light.param[LIGHT_PARAM_SPOT_ANGLE])) * len;
+                let aabb = AABB.new();
+                aabb.set(-size, -size, -len, size * 2, size * 2, len);
+                return aabb;
+            };
+            case LIGHT_OMNI: {
+                let r = p_light.param[LIGHT_PARAM_RANGE];
+                let aabb = AABB.new();
+                aabb.set(-r, -r, -r, r*2, r*2, r*2);
+                return aabb;
+            };
+            case LIGHT_DIRECTIONAL: {
+                return AABB.new();
+            };
+        }
+
+        return AABB.new();
+    }
+
+    /**
+     * @param {Instantiable_t} p_base
      * @param {Instance_t} p_instance
      */
     instance_add_dependency(p_base, p_instance) {

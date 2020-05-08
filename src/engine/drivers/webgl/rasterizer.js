@@ -2,6 +2,8 @@ import { Rect2 } from "engine/core/math/rect2";
 import { Color } from "engine/core/color";
 import { OS } from "engine/core/os/os";
 
+import { VSG } from "engine/servers/visual/visual_server_globals";
+
 import { RasterizerStorage } from "./rasterizer_storage";
 import { RasterizerCanvas } from "./rasterizer_canvas";
 import { RasterizerScene } from "./rasterizer_scene";
@@ -67,12 +69,13 @@ export class Rasterizer {
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
+        // TODO: apply FXAA or SMAA if antialias is enabled
         gl.disable(gl.BLEND);
         gl.useProgram(this.canvas.copy_shader.gl_prog);
 
         gl.uniform1f(this.canvas.copy_shader.uniforms["vflip"].gl_loc, 1);
 
-        const texunit = this.storage.config.max_texture_image_units - 1;
+        const texunit = VSG.config.max_texture_image_units - 1;
         gl.activeTexture(gl.TEXTURE0 + texunit);
         gl.uniform1i(this.canvas.copy_shader.uniforms["TEXTURE"].gl_loc, texunit);
         gl.bindTexture(gl.TEXTURE_2D, p_render_target.texture.gl_tex);

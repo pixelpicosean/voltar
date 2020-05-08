@@ -7,14 +7,24 @@ import { Rect2 } from "engine/core/math/rect2";
 import { VSG } from "engine/servers/visual/visual_server_globals";
 import { Item } from "engine/servers/visual/visual_server_canvas";
 
+const TEXTURE_TYPE_2D = WebGLRenderingContext.TEXTURE_2D;
 
 export const PIXEL_FORMAT_NONE = 0;
 export const PIXEL_FORMAT_L8 = 1;
 export const PIXEL_FORMAT_LA8 = 2;
-export const PIXEL_FORMAT_RGB8 = 3;
-export const PIXEL_FORMAT_RGBA8 = 4;
-export const PIXEL_FORMAT_RGBA4 = 5;
-export const PIXEL_FORMAT_RGBA5551 = 6;
+export const PIXEL_FORMAT_R8 = 3;
+export const PIXEL_FORMAT_RGB8 = 4;
+export const PIXEL_FORMAT_RGBA8 = 5;
+export const PIXEL_FORMAT_RGBA4 = 6;
+export const PIXEL_FORMAT_RGBA5551 = 7;
+export const PIXEL_FORMAT_DXT1 = 8;
+export const PIXEL_FORMAT_DXT3 = 9;
+export const PIXEL_FORMAT_DXT5 = 10;
+export const PIXEL_FORMAT_PVRTC2 = 11;
+export const PIXEL_FORMAT_PVRTC2A = 12;
+export const PIXEL_FORMAT_PVRTC4 = 13;
+export const PIXEL_FORMAT_PVRTC4A = 14;
+export const PIXEL_FORMAT_ETC = 15;
 
 /**
  * @typedef {HTMLImageElement | HTMLCanvasElement | HTMLVideoElement} DOMImageData
@@ -155,9 +165,9 @@ export class ImageTexture extends Texture {
         this.width = p_image.width;
         this.height = p_image.height;
         if (!this.texture) {
-            this.texture = VSG.storage.texture_2d_create();
+            this.texture = VSG.storage.texture_create();
         }
-        VSG.storage.texture_allocate(this.texture, this.width, this.height, this.flags);
+        VSG.storage.texture_allocate(this.texture, this.width, this.height, 0, PIXEL_FORMAT_RGBA8, TEXTURE_TYPE_2D, this.flags);
         VSG.storage.texture_set_image(this.texture, p_image);
     }
 
@@ -172,9 +182,9 @@ export class ImageTexture extends Texture {
         this.width = p_width;
         this.height = p_height;
         if (!this.texture) {
-            this.texture = VSG.storage.texture_2d_create();
+            this.texture = VSG.storage.texture_create();
         }
-        VSG.storage.texture_allocate(this.texture, this.width, this.height, this.flags);
+        VSG.storage.texture_allocate(this.texture, this.width, this.height, 0, PIXEL_FORMAT_RGBA8, TEXTURE_TYPE_2D, this.flags);
         VSG.storage.texture_set_data(this.texture, p_data);
     }
 

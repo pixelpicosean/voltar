@@ -19,8 +19,15 @@
     "res://scene/demo_3d.tscn": {
         "type": "PackedScene",
         "sub": {
-            "3": {
+            "2": {
                 "type": "CubeMesh"
+            },
+            "3": {
+                "type": "QuadMesh",
+                "size": {
+                    "x": 10,
+                    "y": 10
+                }
             },
             "undefined": {}
         },
@@ -50,10 +57,98 @@
                 "size": 2
             },
             {
-                "type": "MeshInstance",
-                "name": "mesh",
+                "type": "DirectionalLight",
+                "name": "green_light",
                 "parent": ".",
+                "transform": [
+                    0.830975,
+                    1.77636e-15,
+                    -0.55631,
+                    0.454793,
+                    0.575904,
+                    0.679336,
+                    0.320381,
+                    -0.817517,
+                    0.478562,
+                    -3.29193,
+                    4.45464,
+                    4.43833
+                ],
+                "visible": false,
+                "light_color": {
+                    "r": 0.54902,
+                    "g": 1,
+                    "b": 0.533333,
+                    "a": 1
+                },
+                "light_energy": 0.6
+            },
+            {
+                "type": "DirectionalLight",
+                "name": "red_light",
+                "parent": ".",
+                "transform": [
+                    0.605327,
+                    -0.598649,
+                    0.524594,
+                    0.293457,
+                    0.780475,
+                    0.552034,
+                    -0.739907,
+                    -0.180215,
+                    0.64812,
+                    4.6955,
+                    4.55845,
+                    4.38108
+                ],
+                "light_color": {
+                    "r": 1,
+                    "g": 0.501961,
+                    "b": 0.501961,
+                    "a": 1
+                }
+            },
+            {
+                "type": "MeshInstance",
+                "name": "cube",
+                "parent": ".",
+                "transform": [
+                    0.707107,
+                    0,
+                    0.707107,
+                    0,
+                    1,
+                    0,
+                    -0.707107,
+                    0,
+                    0.707107,
+                    0,
+                    0,
+                    0
+                ],
+                "mesh": "@sub#2",
+                "material/0": null
+            },
+            {
+                "type": "MeshInstance",
+                "name": "ground",
+                "parent": ".",
+                "transform": [
+                    1,
+                    0,
+                    0,
+                    0,
+                    -4.37114e-8,
+                    1,
+                    0,
+                    -1,
+                    -4.37114e-8,
+                    0,
+                    -1,
+                    0
+                ],
                 "mesh": "@sub#3",
+                "cast_shadow": 0,
                 "material/0": null
             }
         ]

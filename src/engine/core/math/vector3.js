@@ -61,17 +61,29 @@ export class Vector3 {
     }
 
     /**
-     * @param {number} [x=0]
-     * @param {number} [y=0]
-     * @param {number} [z=0]
+     * @param {number} [x]
+     * @param {number} [y]
+     * @param {number} [z]
      */
     constructor(x = 0, y = 0, z = 0) {
+        /** @type {number} */
         this.x = x;
+        /** @type {number} */
         this.y = y;
+        /** @type {number} */
         this.z = z;
     }
 
-    as_array() {
+    /**
+     * @param {number[]} [out]
+     */
+    as_array(out) {
+        if (out) {
+            out[0] = this.x;
+            out[1] = this.y;
+            out[2] = this.z;
+            return out;
+        }
         return [this.x, this.y, this.z];
     }
 

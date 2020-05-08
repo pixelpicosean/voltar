@@ -3,6 +3,11 @@ uniform highp mat4 INV_CAMERA_MATRIX;
 uniform highp mat4 PROJECTION_MATRIX;
 uniform highp mat4 INV_PROJECTION_MATRIX;
 uniform highp mat4 WORLD_MATRIX;
+
+uniform highp vec4 LIGHT_COLOR;
+uniform highp float LIGHT_SPECULAR;
+uniform highp vec3 LIGHT_DIRECTION;
+
 uniform highp float TIME;
 
 /* UNIFORM */
@@ -12,12 +17,11 @@ attribute vec3 normal;
 attribute vec3 tangent;
 attribute vec2 uv;
 
+varying highp vec3 vertex_interp;
+varying vec3 normal_interp;
 varying vec2 uv_interp;
-varying float light_direction;
 
 void main() {
-    uv_interp = uv;
-
     vec3 VERTEX = position;
     vec3 NORMAL = normal;
     vec3 TANGENT = tangent;
@@ -30,13 +34,12 @@ void main() {
 
     gl_PointSize = POINT_SIZE;
 
-    vec4 position = MODELVIEW_MATRIX * vec4(VERTEX, 1.0);
+    vec4 vertex = MODELVIEW_MATRIX * vec4(VERTEX, 1.0);
     NORMAL = normalize((MODELVIEW_MATRIX * vec4(NORMAL, 0.0)).xyz);
 
-    gl_Position = PROJECTION_MATRIX * vec4(position.xyz, 1.0);
+    vertex_interp = vertex.xyz;
+    normal_interp = NORMAL;
+    uv_interp = uv;
 
-    // light
-    vec3 directional_vector = normalize(vec3(0.85, 0.8, 0.75));
-
-    light_direction = max(dot(NORMAL, directional_vector), 0.0);
+    gl_Position = PROJECTION_MATRIX * vec4(vertex.xyz, 1.0);
 }
