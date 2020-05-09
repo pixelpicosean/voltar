@@ -103,17 +103,35 @@ class ViewportTexture extends Texture {
 
         /** @type {Viewport} */
         this.vp = null;
+
+        this.proxy = VSG.storage.texture_create();
     }
     free() {
         if (this.vp) {
             this.vp.viewport_textures.delete(this);
         }
+        VSG.storage.texture_free(this.proxy);
         return super.free();
     }
 
     get_width() { return this.vp.size.width }
     get_height() { return this.vp.size.height }
     get_size() { return this.vp.size }
+
+    set_flags(value) {
+        Object.assign(this._flags, value);
+
+        if (!this.vp) {
+            return;
+        }
+
+        this.vp.texture_flags = this._flags;
+        VSG.storage.texture_set_flags(this.vp.texture_rid, this._flags);
+    }
+
+    get_rid() {
+        return this.proxy;
+    }
 
     /* private */
 
@@ -131,6 +149,11 @@ class ViewportTexture extends Texture {
         this.vp = /** @type {Viewport} */(vpn);
 
         this.vp.viewport_textures.add(this);
+
+        VSG.storage.texture_set_proxy(this.proxy, this.vp.texture_rid);
+
+        Object.assign(this.vp.texture_flags, this._flags);
+        VSG.storage.texture_set_flags(this.vp.texture_rid, this.flags);
     }
 }
 GDCLASS(ViewportTexture, Texture)
@@ -260,23 +283,31 @@ export class Viewport extends Node {
          */
         this._world_2d = new World2D();
 
-        this.disable_3d = true;
+        this.disable_input = false;
+        this.disable_3d = false;
         this.keep_3d_linear = false;
         this._render_target_update_mode = UPDATE_MODE_WHEN_VISIBLE;
         this.texture_rid = VSG.viewport.viewport_get_texture(this.viewport);
-        this.texture_flags = 0;
+        this.texture_flags = {
+            FILTER: false,
+            REPEAT: false,
+            MIPMAP: false,
+        };
 
-        this.usage = USAGE_2D;
+        this.usage = USAGE_3D;
 
         this.shadow_atlas_size = 0;
 
-        this.default_texture = null;
+        /** @type {ViewportTexture} */
+        this.default_texture = new ViewportTexture;
+        this.default_texture.vp = this;
+
         /** @type {Set<ViewportTexture>} */
         this.viewport_textures = new Set();
+        this.viewport_textures.add(this.default_texture);
+        VSG.storage.texture_set_proxy(this.default_texture.proxy, this.texture_rid);
 
         this.gui = new GUI();
-
-        this.disable_input = false;
     }
 
     /* virtual */
@@ -355,8 +386,7 @@ export class Viewport extends Node {
     }
 
     free() {
-        // TODO: erase self from viewport textures
-        // TODO: free by VisualServer
+        VSG.viewport.viewport_free(this.viewport);
         return super.free();
     }
 

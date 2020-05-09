@@ -305,10 +305,9 @@ export class DynamicFont extends VObject {
         }
 
         ctx.texture.create_from_image(ctx.canvas, {
-            min_filter: WebGLRenderingContext.LINEAR,
-            mag_filter: WebGLRenderingContext.LINEAR,
-            wrap_u: WebGLRenderingContext.CLAMP_TO_EDGE,
-            wrap_v: WebGLRenderingContext.CLAMP_TO_EDGE,
+            FILTER: true,
+            REPEAT: false,
+            MIPMAP: false,
         });
 
         return ctx.texture;

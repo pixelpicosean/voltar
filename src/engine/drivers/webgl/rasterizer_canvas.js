@@ -445,7 +445,7 @@ export class RasterizerCanvas extends VObject {
 
     prepare() {
         this.states.material = this.materials.flat;
-        this.states.texture = this.storage.resources.white_tex.texture;
+        this.states.texture = this.storage.resources.white_tex.get_rid();
 
         this.states.active_vert_slot = 0;
         this.states.active_buffer_slot = 0;
@@ -501,7 +501,7 @@ export class RasterizerCanvas extends VObject {
 
         // reset states
         this.states.material = this.materials.flat;
-        this.states.texture = this.storage.resources.white_tex.texture;
+        this.states.texture = this.storage.resources.white_tex.get_rid();
     }
 
     canvas_end() {
@@ -1301,7 +1301,7 @@ export class RasterizerCanvas extends VObject {
                     const texunit = VSG.config.max_texture_image_units - 1;
                     gl.activeTexture(gl.TEXTURE0 + texunit);
                     gl.uniform1i(this.copy_shader.uniforms["TEXTURE"].gl_loc, texunit);
-                    gl.bindTexture(gl.TEXTURE_2D, mm.texture.texture.gl_tex);
+                    gl.bindTexture(gl.TEXTURE_2D, mm.texture.get_rid().gl_tex);
 
                     let amount = Math.min(multimesh.size, multimesh.visible_instances);
                     if (amount === -1) {
@@ -1423,7 +1423,7 @@ export class RasterizerCanvas extends VObject {
         if (
             texture
             &&
-            texture.texture !== this.states.texture
+            texture.get_rid() !== this.states.texture
         ) {
             if (this.states.texture) {
                 batch_broken = true;
@@ -1459,7 +1459,7 @@ export class RasterizerCanvas extends VObject {
 
             // update states with new batch data
             if (texture) {
-                this.states.texture = texture.texture;
+                this.states.texture = texture.get_rid();
             }
             this.states.material = material;
             this.states.blend_mode = blend_mode;

@@ -209,7 +209,7 @@ export class Sprite extends Node2D {
     }
 
     get_rect() {
-        if (!this._texture || !this._texture.texture) {
+        if (!this._texture || !this._texture.get_rid()) {
             return Rect2.new(0, 0, 1, 1);
         }
 

@@ -4,10 +4,7 @@ import { Rect2 } from 'engine/core/math/rect2';
 import { Transform } from 'engine/core/math/transform';
 import { CameraMatrix } from 'engine/core/math/camera_matrix';
 import { Color } from 'engine/core/color';
-import {
-    ShaderMaterial,
-    SPATIAL_SHADER_UNIFORMS,
-} from 'engine/scene/resources/material';
+import { OS } from 'engine/core/os/os';
 
 import {
     INSTANCE_TYPE_MESH,
@@ -22,6 +19,11 @@ import {
     Instance_t,
 } from 'engine/servers/visual/visual_server_scene';
 import { VSG } from 'engine/servers/visual/visual_server_globals';
+
+import {
+    ShaderMaterial,
+    SPATIAL_SHADER_UNIFORMS,
+} from 'engine/scene/resources/material';
 
 import {
     Mesh_t,
@@ -426,17 +428,23 @@ export class RasterizerScene {
         let viewport_x = 0, viewport_y = 0;
         let reverse_cull = false;
 
+        if (this.storage.frame.current_rt && this.storage.frame.current_rt.flags.VFLIP) {
+            let negate_axis = cam_transform.basis.get_axis(1).negate();
+            cam_transform.basis.set_axis(1, negate_axis);
+            reverse_cull = true;
+            Vector3.free(negate_axis);
+        }
+
         let current_fb = this.storage.frame.current_rt.gl_fbo;
 
         viewport_width = this.storage.frame.current_rt.width;
         viewport_height = this.storage.frame.current_rt.height;
         viewport_x = this.storage.frame.current_rt.x;
-        viewport_y = this.storage.frame.current_rt.y;
 
-        if (this.storage.frame.current_rt && this.storage.frame.current_rt.flags.VFLIP) {
-            let negate_axis = cam_transform.basis.get_axis(1).negate();
-            cam_transform.basis.set_axis(1, negate_axis);
-            reverse_cull = true;
+        if (this.storage.frame.current_rt.flags.DIRECT_TO_SCREEN) {
+            viewport_y = OS.get_singleton().get_window_size().height - viewport_height - this.storage.frame.current_rt.y;
+        } else {
+            viewport_y = this.storage.frame.current_rt.y;
         }
 
         this.state.used_screen_texture = false;
@@ -444,7 +452,7 @@ export class RasterizerScene {
         this.state.screen_pixel_size.set(1.0 / viewport_width, 1.0 / viewport_height);
 
         if (p_light_cull_count) {
-            this.render_light_instance_count = Math.min(256, p_light_cull_count);
+            this.render_light_instance_count = Math.min(MAX_LIGHTS, p_light_cull_count);
             this.render_light_instances.length = this.render_light_instance_count;
             this.render_directional_lights = 0;
 
@@ -485,10 +493,11 @@ export class RasterizerScene {
             gl.enable(gl.SCISSOR_TEST);
         }
 
-        gl.depthFunc(gl.LEQUAL);
         gl.depthMask(true);
-        gl.clearDepth(1.0);
+        gl.depthFunc(gl.LEQUAL);
         gl.enable(gl.DEPTH_TEST);
+
+        gl.clearDepth(1.0);
         gl.clear(gl.DEPTH_BUFFER_BIT);
 
         // clear color
@@ -500,7 +509,8 @@ export class RasterizerScene {
             this.storage.frame.clear_request = false;
         } else if (!p_env || p_env.bg_mode === ENV_BG_CLEAR_COLOR || p_env.bg_mode === ENV_BG_SKY) {
             if (this.storage.frame.clear_request) {
-                clear_color.copy(this.storage.frame.clear_request_color);
+                // TODO: env support
+                // clear_color.copy(this.storage.frame.clear_request_color);
                 this.storage.frame.clear_request = false;
             }
         } else if (p_env.bg_mode === ENV_BG_CANVAS || p_env.bg_mode === ENV_BG_COLOR || p_env.bg_mode === ENV_BG_COLOR_SKY) {
@@ -517,9 +527,6 @@ export class RasterizerScene {
 
         this.state.default_ambient.set(clear_color.r, clear_color.g, clear_color.b, 1.0);
         this.state.default_bg.set(clear_color.r, clear_color.g, clear_color.b, 1.0);
-
-        // [dev]
-        // this.state.default_ambient.set(1.0, clear_color.g, clear_color.b, 1.0);
 
         if (this.storage.frame.current_rt && this.storage.frame.current_rt.flags.DIRECT_TO_SCREEN) {
             gl.disable(gl.SCISSOR_TEST);
@@ -544,6 +551,8 @@ export class RasterizerScene {
         // opaque pass first
         this.render_list.sort_by_key(false);
         this._render_render_list(this.render_list.elements, this.render_list.element_count, cam_transform, p_cam_projection, p_env, false);
+
+        // TODO: draw sky
 
         if (this.storage.frame.current_rt && this.state.used_screen_texture) {
             // copy screen texture
@@ -1195,7 +1204,7 @@ export class RasterizerScene {
 
             if (!t) {
                 // TODO: use texture based on their texture hints
-                gl.bindTexture(gl.TEXTURE_2D, this.storage.resources.white_tex.texture.gl_tex);
+                gl.bindTexture(gl.TEXTURE_2D, this.storage.resources.white_tex.get_rid().gl_tex);
 
                 continue;
             }

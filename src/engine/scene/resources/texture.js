@@ -31,10 +31,9 @@ export const PIXEL_FORMAT_ETC = 15;
  * @typedef {Uint8Array | Uint16Array | Float32Array} RawImageData
  *
  * @typedef ImageFlags
- * @property {number} [min_filter]
- * @property {number} [mag_filter]
- * @property {number} [wrap_u]
- * @property {number} [wrap_v]
+ * @property {boolean} [FILTER]
+ * @property {boolean} [REPEAT]
+ * @property {boolean} [MIPMAP]
  */
 
 const white = Object.freeze(new Color(1, 1, 1, 1));
@@ -51,19 +50,19 @@ export class Texture extends Resource {
     constructor() {
         super();
 
-        /** @type {ImageFlags} */
         this._flags = {
-            min_filter: WebGLRenderingContext.NEAREST,
-            mag_filter: WebGLRenderingContext.NEAREST,
-            wrap_u: WebGLRenderingContext.CLAMP_TO_EDGE,
-            wrap_v: WebGLRenderingContext.CLAMP_TO_EDGE,
+            FILTER: false,
+            REPEAT: false,
+            MIPMAP: false,
         };
     }
 
     /**
      * @param {ImageFlags} value
      */
-    set_flags(value) { }
+    set_flags(value) {
+        Object.assign(this._flags, value);
+    }
 
     /** @return {DOMImageData | RawImageData} */
     get_data() { return null }
@@ -146,6 +145,10 @@ export class ImageTexture extends Texture {
         this.uvs = [0, 0, 1, 1];
     }
 
+    get_rid() {
+        return this.texture;
+    }
+
     get_format() {
         return this.format;
     }
@@ -161,7 +164,7 @@ export class ImageTexture extends Texture {
      * @param {ImageFlags} [p_flags]
      */
     create_from_image(p_image, p_flags = {}) {
-        this._flags = p_flags;
+        this.set_flags(p_flags);
         this.width = p_image.width;
         this.height = p_image.height;
         if (!this.texture) {
@@ -178,7 +181,7 @@ export class ImageTexture extends Texture {
      * @param {ImageFlags} [p_flags]
      */
     create_from_data(p_data, p_width, p_height, p_flags = {}) {
-        this._flags = p_flags;
+        this.set_flags(p_flags);
         this.width = p_width;
         this.height = p_height;
         if (!this.texture) {

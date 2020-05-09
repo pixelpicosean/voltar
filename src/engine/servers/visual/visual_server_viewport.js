@@ -154,6 +154,19 @@ export class VisualServerViewport {
     }
     /**
      * @param {Viewport_t} p_viewport
+     */
+    viewport_free(p_viewport) {
+        VSG.storage.render_target_free(p_viewport.render_target);
+
+        for (let [c] of p_viewport.canvas_map) {
+            this.viewport_remove_canvas(p_viewport, c);
+        }
+
+        this.viewport_set_scenario(p_viewport, null);
+        this.active_viewports.splice(this.active_viewports.indexOf(p_viewport), 1);
+    }
+    /**
+     * @param {Viewport_t} p_viewport
      * @param {number} p_width
      * @param {number} p_height
      */
