@@ -69,6 +69,7 @@ import {
     MULTIMESH_CUSTOM_DATA_8BIT,
     MULTIMESH_CUSTOM_DATA_FLOAT,
 } from 'engine/servers/visual_server';
+import { Rect2 } from 'engine/core/math/rect2';
 
 
 const ATTR_VERTEX = 0;
@@ -329,23 +330,23 @@ export class RasterizerCanvas extends VObject {
             material.batchable = false;
             return material;
         })();
-        this.copy_shader = VSG.storage.shader_create(
+        this.copy_shader_with_section = VSG.storage.shader_create(
             `
+            uniform highp vec4 copy_section;
             attribute vec2 position;
             attribute vec2 uv;
-            varying vec2 UV;
+            varying vec2 uv_interp;
             void main() {
-                gl_Position = vec4(position, 0.0, 1.0);
-                UV = uv;
+                uv_interp = copy_section.xy + uv * copy_section.zw;
+                gl_Position = vec4((copy_section.xy + (position * 0.5 + 0.5) * copy_section.zw) * 2.0 - 1.0, 0.0, 1.0);
             }
             `,
             `
             precision mediump float;
-            uniform float vflip;
-            uniform sampler2D TEXTURE;
-            varying vec2 UV;
+            uniform sampler2D source;
+            varying vec2 uv_interp;
             void main() {
-                gl_FragColor = texture2D(TEXTURE, (vflip > 0.5) ? (vec2(1.0, 1.0) - UV) : UV);
+                gl_FragColor = texture2D(source, uv_interp);
             }
             `,
             [
@@ -353,8 +354,62 @@ export class RasterizerCanvas extends VObject {
                 "uv",
             ],
             [
-                { name: "vflip", type: "1f" },
-                { name: "TEXTURE", type: "1i" },
+                { name: "copy_section", type: "4f" },
+                { name: "source", type: "1i" },
+            ]
+        );
+        this.copy_shader_with_display_transform = VSG.storage.shader_create(
+            `
+            uniform highp mat4 display_transform;
+            attribute vec2 position;
+            attribute vec2 uv;
+            varying vec2 uv_interp;
+            void main() {
+                uv_interp = (display_transform * vec4(uv, 1.0, 1.0)).xy;
+                gl_Position = vec4(position, 0.0, 1.0);
+            }
+            `,
+            `
+            precision mediump float;
+            uniform sampler2D source;
+            varying vec2 uv_interp;
+            void main() {
+                gl_FragColor = texture2D(source, uv_interp);
+            }
+            `,
+            [
+                "position",
+                "uv",
+            ],
+            [
+                { name: "display_transform", type: "mat4" },
+                { name: "source", type: "1i" },
+            ]
+        );
+        this.copy_shader = VSG.storage.shader_create(
+            `
+            attribute vec2 position;
+            attribute vec2 uv;
+            varying vec2 uv_interp;
+            void main() {
+                uv_interp = uv;
+                gl_Position = vec4(position, 0.0, 1.0);
+            }
+            `,
+            `
+            precision mediump float;
+            uniform sampler2D source;
+            varying vec2 uv_interp;
+            void main() {
+                gl_FragColor = texture2D(source, uv_interp);
+            }
+            `,
+            [
+                "position",
+                "uv",
+            ],
+            [
+                { name: "source", type: "1i" },
             ]
         );
 
@@ -1497,4 +1552,41 @@ export class RasterizerCanvas extends VObject {
      * Clear the frame buffer
      */
     clear() { }
+
+    /**
+     * @param {Rect2} p_rect
+     */
+    _copy_screen(p_rect) {
+        const gl = this.gl;
+
+        gl.disable(gl.BLEND);
+
+        let w = this.storage.frame.current_rt.width;
+        let h = this.storage.frame.current_rt.height;
+        let copy_section = [
+            p_rect.x / w,
+            p_rect.y / h,
+            p_rect.width / w,
+            p_rect.height / h,
+        ];
+        let shader = p_rect.is_zero() ? this.copy_shader : this.copy_shader_with_section;
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.storage.frame.current_rt.copy_screen_effect.gl_fbo);
+
+        gl.useProgram(shader.gl_prog);
+
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, this.storage.frame.current_rt.gl_color);
+
+        if (!p_rect.is_zero()) {
+            gl.uniform4fv(shader.uniforms.copy_section.gl_loc, copy_section);
+        }
+
+        this.storage.bind_quad_array();
+
+        gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.storage.frame.current_rt.gl_fbo);
+        gl.enable(gl.BLEND);
+    }
 }

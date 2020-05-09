@@ -469,7 +469,7 @@ export class RasterizerScene {
         }
 
         if (p_env && p_env.bg_mode === ENV_BG_CANVAS) {
-            // TODO: copy 2d to screen copy texture
+            this._copy_texture_to_buffer(this.storage.frame.current_rt.gl_color, this.storage.frame.current_rt.copy_screen_effect.gl_fbo);
         }
 
         this.render_list.clear();
@@ -536,7 +536,7 @@ export class RasterizerScene {
                 case ENV_BG_CAMERA_FEED: {
                 } break;
                 case ENV_BG_CANVAS: {
-                    // TODO: use screen copy as background
+                    this._copy_texture_to_buffer(this.storage.frame.current_rt.copy_screen_effect.gl_color, current_fb);
                 } break;
             }
         }
@@ -546,7 +546,9 @@ export class RasterizerScene {
         this._render_render_list(this.render_list.elements, this.render_list.element_count, cam_transform, p_cam_projection, p_env, false);
 
         if (this.storage.frame.current_rt && this.state.used_screen_texture) {
-            // TODO: copy screen texture
+            // copy screen texture
+
+            this.storage.canvas._copy_screen(Rect2.EMPTY);
         }
 
         // alpha pass second
@@ -609,6 +611,33 @@ export class RasterizerScene {
             }
         }
         return material;
+    }
+
+    /**
+     * @param {WebGLTexture} p_texture
+     * @param {WebGLFramebuffer} p_buffer
+     */
+    _copy_texture_to_buffer(p_texture, p_buffer) {
+        const gl = this.gl;
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, p_buffer);
+
+        gl.disable(gl.BLEND);
+        gl.disable(gl.CULL_FACE);
+        gl.disable(gl.DEPTH_TEST);
+        gl.depthMask(false);
+        gl.depthFunc(gl.LEQUAL);
+        gl.colorMask(true, true, true, true);
+
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, p_texture);
+
+        gl.viewport(0, 0, this.storage.frame.current_rt.width, this.storage.frame.current_rt.height);
+
+        this.storage.bind_copy_shader();
+        this.storage.bind_quad_array();
+        gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
     }
 
     /**

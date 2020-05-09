@@ -558,10 +558,10 @@ export class RasterizerStorage {
             const buf = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, buf);
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
-                -1, -1, 1, 0,
-                -1, +1, 1, 1,
-                +1, +1, 0, 1,
-                +1, -1, 0, 0,
+                -1, -1, 0, 0,
+                -1, +1, 0, 1,
+                +1, +1, 1, 1,
+                +1, -1, 1, 0,
             ]), gl.STATIC_DRAW);
             gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
@@ -616,6 +616,23 @@ export class RasterizerStorage {
      * @param {any} rid
      */
     free_rid(rid) { return false }
+
+    bind_copy_shader() {
+        const gl = this.gl;
+
+        gl.useProgram(this.canvas.copy_shader.gl_prog);
+    }
+
+    bind_quad_array() {
+        const gl = this.gl;
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.resources.quadie);
+
+        gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 16, 0);
+        gl.enableVertexAttribArray(0);
+        gl.vertexAttribPointer(1, 2, gl.FLOAT, false, 16, 8);
+        gl.enableVertexAttribArray(1);
+    }
 
     update_dirty_resources() {
         this.update_dirty_shaders();

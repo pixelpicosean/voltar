@@ -69,23 +69,13 @@ export class Rasterizer {
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
-        // TODO: apply FXAA or SMAA if antialias is enabled
         gl.disable(gl.BLEND);
-        gl.useProgram(this.canvas.copy_shader.gl_prog);
 
-        gl.uniform1f(this.canvas.copy_shader.uniforms["vflip"].gl_loc, 1);
+        this.storage.bind_copy_shader();
+        this.storage.bind_quad_array();
 
-        const texunit = VSG.config.max_texture_image_units - 1;
-        gl.activeTexture(gl.TEXTURE0 + texunit);
-        gl.uniform1i(this.canvas.copy_shader.uniforms["TEXTURE"].gl_loc, texunit);
+        gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, p_render_target.texture.gl_tex);
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.storage.resources.quadie);
-
-        gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 16, 0);
-        gl.enableVertexAttribArray(0);
-        gl.vertexAttribPointer(1, 2, gl.FLOAT, false, 16, 8);
-        gl.enableVertexAttribArray(1);
 
         gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
     }
