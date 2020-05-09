@@ -14,7 +14,6 @@ import {
     NOTIFICATION_EXIT_TREE,
 } from "../main/node";
 import {
-    NOTIFICATION_TRANSFORM_CHANGED,
     NOTIFICATION_LOCAL_TRANSFORM_CHANGED,
 } from "./canvas_item";
 import { TileSet, AUTO_TILE, ATLAS_TILE, SINGLE_TILE } from "../resources/tile_set";
@@ -25,6 +24,7 @@ import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server";
 import { BodyState, BodyMode } from "./const";
 import { remove_items } from "engine/dep/index";
 import { VSG } from "engine/servers/visual/visual_server_globals";
+import { NOTIFICATION_TRANSFORM_CHANGED } from "../const";
 
 
 export const MODE_SQUARE = 0;

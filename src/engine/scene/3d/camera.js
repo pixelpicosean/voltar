@@ -11,8 +11,8 @@ import {
     NOTIFICATION_ENTER_WORLD,
     NOTIFICATION_EXIT_WORLD,
     NOTIFICATION_LOCAL_TRANSFORM_CHANGED_3D,
-    NOTIFICATION_TRANSFORM_CHANGED_3D,
 } from "./spatial";
+import { NOTIFICATION_TRANSFORM_CHANGED } from "../const";
 
 export const PROJECTION_PERSPECTIVE = 0;
 export const PROJECTION_ORTHOGONAL = 1;
@@ -253,7 +253,7 @@ export class Camera extends Spatial {
                     this.viewport._camera_set(this);
                 }
             } break;
-            case NOTIFICATION_TRANSFORM_CHANGED_3D: {
+            case NOTIFICATION_TRANSFORM_CHANGED: {
                 this._request_camera_update();
             } break;
             case NOTIFICATION_EXIT_WORLD: {

@@ -3,8 +3,8 @@ import { GDCLASS } from 'engine/core/v_object';
 
 import { NOTIFICATION_ENTER_TREE } from '../main/node';
 import { Node2D } from './node_2d';
-import { NOTIFICATION_TRANSFORM_CHANGED } from './canvas_item';
 import { Vector2 } from 'engine/core/math/vector2';
+import { NOTIFICATION_TRANSFORM_CHANGED } from '../const';
 
 
 export class RemoteTransform2D extends Node2D {

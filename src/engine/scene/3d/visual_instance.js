@@ -8,8 +8,8 @@ import {
     NOTIFICATION_ENTER_WORLD,
     NOTIFICATION_EXIT_WORLD,
     NOTIFICATION_VISIBILITY_CHANGED_3D,
-    NOTIFICATION_TRANSFORM_CHANGED_3D,
 } from "./spatial";
+import { NOTIFICATION_TRANSFORM_CHANGED } from "../const";
 
 export class VisualInstance extends Spatial {
     get class() { return "VisualInstance" }
@@ -45,7 +45,7 @@ export class VisualInstance extends Spatial {
                 VSG.scene.instance_set_scenario(this.instance, this.get_world().scenario);
                 this._update_visibility();
             } break;
-            case NOTIFICATION_TRANSFORM_CHANGED_3D: {
+            case NOTIFICATION_TRANSFORM_CHANGED: {
                 let gt = this.get_global_transform();
                 VSG.scene.instance_set_transform(this.instance, gt);
             } break;

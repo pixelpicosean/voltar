@@ -36,8 +36,8 @@ import {
     NOTIFICATION_PAUSED,
     NOTIFICATION_UNPAUSED,
 } from '../main/node';
-import { NOTIFICATION_TRANSFORM_CHANGED } from '../2d/canvas_item';
 import { instanciate_scene } from '../assembler';
+import { NOTIFICATION_TRANSFORM_CHANGED } from '../const';
 
 
 export class SceneTreeTimer extends VObject {

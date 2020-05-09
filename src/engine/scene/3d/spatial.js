@@ -11,12 +11,12 @@ import {
 } from "../main/node";
 import { Viewport } from "../main/viewport";
 import { Basis } from "engine/core/math/basis";
+import { NOTIFICATION_TRANSFORM_CHANGED } from "../const";
 
 export const NOTIFICATION_ENTER_WORLD = 41;
 export const NOTIFICATION_EXIT_WORLD = 42;
 export const NOTIFICATION_VISIBILITY_CHANGED_3D = 43;
 export const NOTIFICATION_LOCAL_TRANSFORM_CHANGED_3D = 44;
-export const NOTIFICATION_TRANSFORM_CHANGED_3D = 2000;
 
 export const TRANSFORM_DIRTY_NONE = 0;
 export const TRANSFORM_DIRTY_VECTORS = 1;
@@ -442,7 +442,7 @@ export class Spatial extends Node {
         }
         this.get_tree().xform_change_list.remove(this.xform_change);
 
-        this.notification(NOTIFICATION_TRANSFORM_CHANGED_3D);
+        this.notification(NOTIFICATION_TRANSFORM_CHANGED);
     }
 
     get_world() {

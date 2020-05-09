@@ -10,11 +10,11 @@ import {
     Node,
 } from "../main/node";
 import {
-    NOTIFICATION_TRANSFORM_CHANGED,
     NOTIFICATION_DRAW,
 } from "./canvas_item";
 import { Node2D } from "./node_2d";
 import { CPUParticles2D } from "./cpu_particles_2d";
+import { NOTIFICATION_TRANSFORM_CHANGED } from "../const";
 
 
 export class VisibilityNotifier2D extends Node2D {
