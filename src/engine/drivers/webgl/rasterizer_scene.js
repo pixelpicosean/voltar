@@ -78,6 +78,50 @@ export class Environment_t {
         this.bg_color = [0, 0, 0, 1];
         this.ambient_energy = [1.0];
         this.ambient_color = [0, 0, 0, 1];
+
+        // TODO: adjustment post-processing
+        this.adjustments_enabled = false;
+        this.adjustments_brightness = [1.0];
+        this.adjustments_contrast = [1.0];
+        this.adjustments_saturation = [1.0];
+        this.color_correction = null;
+
+        // TODO: fog support, or advanced fog supports color palettes
+        this.fog_enabled = false;
+        this.fog_color = [0.5, 0.5, 0.5, 1.0];
+        this.fog_sun_color = [0.8, 0.8, 0.0, 1.0];
+        this.fog_sun_amount = [0];
+
+        this.fog_depth_enabled = false;
+        this.fog_depth_begin = [10];
+        this.fog_depth_end = [0];
+        this.fog_depth_curve = [1];
+        this.fog_transmit_enabled = false;
+        this.fog_transmit_curve = [1];
+        this.fog_height_enabled = false;
+        this.fog_height_min = [10];
+        this.fog_height_max = [0];
+        this.fog_height_curve = [1];
+    }
+    /**
+     * @param {any} data
+     */
+    _load_data(data) {
+        for (let k in data) {
+            if (this.hasOwnProperty(k)) {
+                let value = data[k];
+                if (typeof (value) === "object") {
+                    if ("r" in value && "g" in value && "b" in value && "a" in value) {
+                        this[k] = [value.r, value.g, value.b, value.a];
+                    }
+                } else if (typeof (value) === "boolean") {
+                    this[k] = value;
+                } else if (typeof (value) === "number") {
+                    this[k] = [value];
+                }
+            }
+        }
+        return this;
     }
 }
 
@@ -386,6 +430,10 @@ export class RasterizerScene {
 
     iteration() { }
 
+    environment_create() {
+        return new Environment_t;
+    }
+
     /**
      * @param {number} p_pass
      */
@@ -509,8 +557,7 @@ export class RasterizerScene {
             this.storage.frame.clear_request = false;
         } else if (!p_env || p_env.bg_mode === ENV_BG_CLEAR_COLOR || p_env.bg_mode === ENV_BG_SKY) {
             if (this.storage.frame.clear_request) {
-                // TODO: env support
-                // clear_color.copy(this.storage.frame.clear_request_color);
+                clear_color.copy(this.storage.frame.clear_request_color);
                 this.storage.frame.clear_request = false;
             }
         } else if (p_env.bg_mode === ENV_BG_CANVAS || p_env.bg_mode === ENV_BG_COLOR || p_env.bg_mode === ENV_BG_COLOR_SKY) {

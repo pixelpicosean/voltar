@@ -733,6 +733,16 @@ export class VisualServerScene {
      * @param {Scenario_t} p_scenario
      */
     _render_scene(p_cam_transform, p_cam_projection, p_cam_ortho, p_force_env, p_scenario) {
-        VSG.scene_render.render_scene(p_cam_transform, p_cam_projection, p_cam_ortho, this.instance_cull_result, this.instance_cull_count, this.light_instance_cull_result, this.light_cull_count + this.directional_light_count, p_force_env);
+        /** @type {import('engine/drivers/webgl/rasterizer_scene').Environment_t} */
+        let environment = null;
+        if (p_force_env) {
+            environment = p_force_env;
+        } else if (p_scenario.environment) {
+            environment = p_scenario.environment;
+        } else {
+            environment = p_scenario.fallback_environment;
+        }
+
+        VSG.scene_render.render_scene(p_cam_transform, p_cam_projection, p_cam_ortho, this.instance_cull_result, this.instance_cull_count, this.light_instance_cull_result, this.light_cull_count + this.directional_light_count, environment);
     }
 }

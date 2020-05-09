@@ -11,13 +11,13 @@ func _process(delta: float) -> void:
 [sub_resource type="CubeMesh" id=2]
 
 [sub_resource type="QuadMesh" id=3]
-size = Vector2( 10, 10 )
+size = Vector2( 60, 60 )
 
 [node name="spatial" type="Spatial"]
 script = SubResource( 1 )
 
 [node name="camera" type="Camera" parent="."]
-transform = Transform( 0.762806, -0.00534719, -0.646606, -0.0429148, 0.997343, -0.0588745, 0.645202, 0.0726587, 0.760549, -4.68235, 3.30796, 6.90294 )
+transform = Transform( 1, 0, 0, 0, 0.923866, 0.382716, 0, -0.382716, 0.923866, 0, 4.31817, 6.29972 )
 size = 2.0
 
 [node name="green_light" type="DirectionalLight" parent="."]
@@ -30,7 +30,7 @@ transform = Transform( 0.605327, -0.598649, 0.524594, 0.293457, 0.780475, 0.5520
 light_color = Color( 1, 0.501961, 0.501961, 1 )
 
 [node name="cube" type="MeshInstance" parent="."]
-transform = Transform( 0.965926, 0, 0.258819, 0, 1, 0, -0.258819, 0, 0.965926, 0.0754509, 1, -0.877176 )
+transform = Transform( 0.801818, 0, 0.597569, 0, 1, 0, -0.597569, 0, 0.801818, 0.0754509, 1, -0.877176 )
 mesh = SubResource( 2 )
 material/0 = null
 

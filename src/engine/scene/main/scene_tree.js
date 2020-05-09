@@ -24,6 +24,8 @@ import {
 } from 'engine/core/main_loop';
 import { InputEvent } from 'engine/core/os/input_event';
 
+import { VSG } from 'engine/servers/visual/visual_server_globals';
+
 import { World } from '../resources/world';
 import { World2D } from '../resources/world_2d';
 import { Viewport } from './viewport';
@@ -38,6 +40,8 @@ import {
 } from '../main/node';
 import { instanciate_scene } from '../assembler';
 import { NOTIFICATION_TRANSFORM_CHANGED } from '../const';
+
+import default_env from 'default_env.json';
 
 
 export class SceneTreeTimer extends VObject {
@@ -205,7 +209,12 @@ export class SceneTree extends MainLoop {
         /** @type {HTMLElement} */
         this.container = null;
 
-        // TODO: load default environment
+        {
+            let env = VSG.scene_render.environment_create()
+                ._load_data(default_env)
+
+            this.root.world.set_fallback_environment(env);
+        }
 
         this._current_packed_scene = null;
     }
