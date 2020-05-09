@@ -139,15 +139,15 @@ export class Transform {
     as_array(out) {
         if (!out) out = Array(16);
         out[0] = this.basis.elements[0].x;
-        out[1] = this.basis.elements[0].y;
-        out[2] = this.basis.elements[0].z;
+        out[1] = this.basis.elements[1].x;
+        out[2] = this.basis.elements[2].x;
         out[3] = 0;
-        out[4] = this.basis.elements[1].x;
+        out[4] = this.basis.elements[0].y;
         out[5] = this.basis.elements[1].y;
-        out[6] = this.basis.elements[1].z;
+        out[6] = this.basis.elements[2].y;
         out[7] = 0;
-        out[8] = this.basis.elements[2].x;
-        out[9] = this.basis.elements[2].y;
+        out[8] = this.basis.elements[0].z;
+        out[9] = this.basis.elements[1].z;
         out[10] = this.basis.elements[2].z;
         out[11] = 0;
         out[12] = this.origin.x;
