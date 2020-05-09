@@ -163,6 +163,8 @@ export class SceneTree extends MainLoop {
         this.unique_group_calls = new Map();
         this.ugc_locked = false;
 
+        this.use_font_oversampling = false;
+
         /**
          * Currently running scene
          * @type {Node}
@@ -202,6 +204,8 @@ export class SceneTree extends MainLoop {
         this.view = null;
         /** @type {HTMLElement} */
         this.container = null;
+
+        // TODO: load default environment
 
         this._current_packed_scene = null;
     }

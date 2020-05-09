@@ -457,6 +457,7 @@ export class Spatial extends Node {
         if (data.visible !== undefined) this.set_visible(data.visible);
 
         if (data.transform) this.set_transform_n(
+            // basis
             data.transform[0],
             data.transform[1],
             data.transform[2],
@@ -466,6 +467,7 @@ export class Spatial extends Node {
             data.transform[6],
             data.transform[7],
             data.transform[8],
+            // origin
             data.transform[9],
             data.transform[10],
             data.transform[11]

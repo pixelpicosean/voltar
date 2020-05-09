@@ -14,12 +14,21 @@ export * from 'engine/core/math/geometry';
 export * from 'engine/core/math/math_defs';
 export * from 'engine/core/math/math_funcs';
 export * from 'engine/core/math/vector2';
+export * from 'engine/core/math/vector3';
 export * from 'engine/core/math/pool_vector2_array';
 export * from 'engine/core/math/rect2';
+export * from 'engine/core/math/aabb';
 export * from 'engine/core/math/transform_2d';
+export * from 'engine/core/math/camera_matrix';
+export * from 'engine/core/math/convex';
+export * from 'engine/core/math/octree';
+export * from 'engine/core/math/plane';
+export * from 'engine/core/math/basis';
+export * from 'engine/core/math/transform';
 export * from 'engine/core/color';
 export * from 'engine/core/math/pool_color_array';
 export * from 'engine/core/self_list';
+
 
 export {
     _yield as yield,
