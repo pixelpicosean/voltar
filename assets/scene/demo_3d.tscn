@@ -4,7 +4,7 @@
 script/source = "extends Spatial
 
 func _process(delta: float) -> void:
-#	$cube.rotate_y(PI * 0.4 * delta)
+	$cube.rotate_y(PI * 0.4 * delta)
 	pass
 "
 
@@ -17,7 +17,7 @@ size = Vector2( 10, 10 )
 script = SubResource( 1 )
 
 [node name="camera" type="Camera" parent="."]
-transform = Transform( 1, 0, 0, 0, 0.852868, 0.522126, 0, -0.522126, 0.852868, 0, 4, 6 )
+transform = Transform( 0.762806, -0.00534719, -0.646606, -0.0429148, 0.997343, -0.0588745, 0.645202, 0.0726587, 0.760549, -4.68235, 3.30796, 6.90294 )
 size = 2.0
 
 [node name="green_light" type="DirectionalLight" parent="."]
@@ -27,16 +27,15 @@ light_energy = 0.6
 
 [node name="red_light" type="DirectionalLight" parent="."]
 transform = Transform( 0.605327, -0.598649, 0.524594, 0.293457, 0.780475, 0.552034, -0.739907, -0.180215, 0.64812, 4.6955, 4.55845, 4.38108 )
-visible = false
 light_color = Color( 1, 0.501961, 0.501961, 1 )
 
 [node name="cube" type="MeshInstance" parent="."]
-transform = Transform( 0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 0, 0, 0 )
+transform = Transform( 0.965926, 0, 0.258819, 0, 1, 0, -0.258819, 0, 0.965926, 0.0754509, 1, -0.877176 )
 mesh = SubResource( 2 )
 material/0 = null
 
 [node name="ground" type="MeshInstance" parent="."]
-transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, -1, 0 )
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0 )
 cast_shadow = 0
 mesh = SubResource( 3 )
 material/0 = null
