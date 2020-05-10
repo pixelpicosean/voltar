@@ -408,7 +408,7 @@ export class Surface_t extends Geometry_t {
 
         this.active = false;
 
-        /** @type {Float32Array} */
+        /** @type {ArrayBuffer | Float32Array} */
         this.data = null;
         /** @type {Uint16Array} */
         this.index_data = null;
@@ -1352,17 +1352,18 @@ export class RasterizerStorage {
      * @param {Mesh_t} mesh
      * @param {number} primitive
      * @param {VertAttribDef[]} attribs
-     * @param {Float32Array} vertices
+     * @param {ArrayBuffer | Float32Array} vertices
      * @param {Uint16Array} [indices]
+     * @param {number} array_len
      * @param {boolean} [use_3d_vertices]
      */
-    mesh_add_surface_from_data(mesh, primitive, attribs, vertices, indices, use_3d_vertices = false) {
+    mesh_add_surface_from_data(mesh, primitive, attribs, vertices, indices, array_len, use_3d_vertices = false) {
         const gl = this.gl;
 
         const surface = new Surface_t;
         surface.active = true;
         surface.data = vertices;
-        surface.array_len = vertices.length;
+        surface.array_len = array_len;
         surface.array_byte_size = vertices.byteLength;
         if (indices) {
             surface.index_data = indices;
@@ -1402,8 +1403,7 @@ export class RasterizerStorage {
             let vec = Vector3.new();
             aabb.set(0, 0, 0, 0, 0, 0);
             let vert_length = Math.floor(stride / 4);
-            let position_len = Math.floor(vertices.length / vert_length);
-            for (let i = 0; i < position_len; i++) {
+            for (let i = 0; i < array_len; i++) {
                 if (i === 0) {
                     aabb.set(
                         vertices[0],
