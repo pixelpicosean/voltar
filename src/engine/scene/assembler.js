@@ -1,7 +1,7 @@
 import {
     node_class_map,
     scene_class_map,
-    resource_map,
+    get_resource_map,
 } from 'engine/registry';
 import { Node } from './main/node';
 
@@ -37,7 +37,7 @@ export function attach_script(url, scene) {
             }
         }
 
-        const res = resource_map[url];
+        const res = get_resource_map()[url];
 
         // assemble the scene and load data
         assemble_scene(node, res, url);
@@ -155,7 +155,7 @@ export function instanciate_scene(p_data, url) {
         if (ctor) {
             return ctor.instance();
         } else {
-            return instanciate_scene(/** @type{any} */(resource_map[p_data]), p_data);
+            return instanciate_scene(/** @type{any} */(get_resource_map()[p_data]), p_data);
         }
     }
 

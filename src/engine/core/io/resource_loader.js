@@ -5,7 +5,11 @@ import { queue, each_series } from './async';
 import Resource from './io_resource';
 import blob_middleware_factory from './middlewares/parsing/blob';
 
-import { loader_pre_procs, loader_use_procs, raw_resource_map } from 'engine/registry';
+import {
+    loader_pre_procs,
+    loader_use_procs,
+    get_raw_resource_map,
+} from 'engine/registry';
 
 import { texture_loader } from './texture_loader';
 import { atlas_loader } from './atlas_loader';
@@ -210,7 +214,7 @@ export class ResourceLoader extends VObject {
         }
 
         // check if resource already exists.
-        if (raw_resource_map[name]) {
+        if (get_raw_resource_map()[name]) {
             console.warn(`Resource named "${name}" already exists.`);
         }
 
@@ -496,8 +500,8 @@ export class ResourceLoader extends VObject {
 
                 this._resources_parsing.splice(this._resources_parsing.indexOf(resource), 1);
 
-                if (!raw_resource_map[resource.name]) {
-                    raw_resource_map[resource.name] = resource;
+                if (!get_raw_resource_map()[resource.name]) {
+                    get_raw_resource_map()[resource.name] = resource;
                 }
 
                 // do completion check

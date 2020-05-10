@@ -1,7 +1,10 @@
 import { VObject } from "engine/core/v_object";
 import { Vector2, Vector2Like } from "engine/core/math/vector2";
 import { Rect2 } from "engine/core/math/rect2";
-import { res_class_map, resource_map } from "engine/registry";
+import {
+    res_class_map,
+    get_resource_map,
+} from "engine/registry";
 import {
     HALIGN_LEFT,
     HALIGN_FILL,
@@ -106,7 +109,7 @@ export class DynamicFont extends VObject {
         /** @type {DynamicFontData} */
         let data = null;
         if (typeof (font_data) === 'string') {
-            data = resource_map[font_data];
+            data = get_resource_map()[font_data];
         } else {
             data = font_data;
         }

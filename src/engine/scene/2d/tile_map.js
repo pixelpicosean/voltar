@@ -1,4 +1,4 @@
-import { node_class_map, resource_map } from "engine/registry";
+import { node_class_map, get_resource_map } from "engine/registry";
 import { SelfList, List } from "engine/core/self_list";
 import { GDCLASS } from "engine/core/v_object";
 import { Vector2 } from "engine/core/math/vector2";
@@ -303,7 +303,7 @@ export class TileMap extends Node2D {
      */
     set_tile_set(value) {
         /** @type {TileSet} */
-        const tile_set = (typeof (value) === 'string') ? resource_map[value] : value;
+        const tile_set = (typeof (value) === 'string') ? get_resource_map()[value] : value;
 
         this._clear_quadrants();
         this._tile_set = tile_set;

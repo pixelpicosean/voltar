@@ -1,4 +1,4 @@
-import { node_class_map, resource_map } from 'engine/registry';
+import { node_class_map, get_resource_map } from 'engine/registry';
 import { GDCLASS } from 'engine/core/v_object';
 import { Vector2 } from 'engine/core/math/vector2';
 import { Transform2D } from 'engine/core/math/transform_2d';
@@ -165,7 +165,7 @@ export class CPUParticles2D extends Node2D {
      */
     set_texture(p_texture) {
         /** @type {ImageTexture} */
-        const texture = (typeof (p_texture) === 'string') ? resource_map[p_texture] : p_texture;
+        const texture = (typeof (p_texture) === 'string') ? get_resource_map()[p_texture] : p_texture;
         this._texture = texture;
         this._update_mesh_texture();
     }
@@ -1204,7 +1204,7 @@ export class CPUParticles2D extends Node2D {
             { type: WebGLRenderingContext.FLOAT, size: 2, stride: stride, offset: 0 },
             { type: WebGLRenderingContext.FLOAT, size: 2, stride: stride, offset: 2 * 4 },
             { type: WebGLRenderingContext.UNSIGNED_BYTE, size: 4, stride: stride, offset: 4 * 4, normalized: true },
-        ], vertices, indices);
+        ], vertices, indices, 4, false);
     }
 
     /**

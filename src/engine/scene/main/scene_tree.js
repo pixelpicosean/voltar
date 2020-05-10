@@ -1,8 +1,7 @@
 import { remove_items } from 'engine/dep/index';
 import {
-    resource_map,
     scene_class_map,
-    node_class_map,
+    get_resource_map,
 } from 'engine/registry';
 import { List } from 'engine/core/self_list';
 import { VObject, GDCLASS } from 'engine/core/v_object';
@@ -597,7 +596,7 @@ export class SceneTree extends MainLoop {
 
         next_scene = scene_class_map[path];
         if (!next_scene) {
-            next_scene = resource_map[path];
+            next_scene = get_resource_map()[path];
             next_scene_path = path;
         }
 

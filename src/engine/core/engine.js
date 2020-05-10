@@ -2,8 +2,10 @@ import {
     preload_queue,
     res_class_map,
     scene_class_map,
-    resource_map,
-    raw_resource_map,
+    set_resource_map,
+    set_raw_resource_map,
+    get_resource_map,
+    get_raw_resource_map,
 } from 'engine/registry';
 import { default_font_name } from 'engine/scene/resources/theme';
 import { ResourceLoader } from './io/resource_loader';
@@ -62,6 +64,7 @@ export class Engine {
         preload_queue.is_start = true;
 
         // Load resources marked as preload
+        preload_queue.queue.unshift([`media/resources.json`]);
         preload_queue.queue.unshift([`media/${default_font_name}.fnt`]);
         for (const settings of preload_queue.queue) {
             loader.add.call(loader, ...settings);
@@ -76,6 +79,19 @@ export class Engine {
         loader.load(() => {
             preload_queue.is_complete = true;
             // Theme.set_default_font(registered_bitmap_fonts[default_font_name]);
+
+            let resources = loader.resources['media/resources.json'].data;
+
+            // fetch resource map updated by loader
+            let resource_map = get_resource_map();
+            let raw_resource_map = get_raw_resource_map();
+
+            // merge resources data into our existing resources
+            resource_map = raw_resource_map = Object.assign(resource_map, resources);
+
+            // override
+            set_resource_map(resource_map);
+            set_raw_resource_map(raw_resource_map);
 
             /** @type {string[]} */
             const resource_lookup_skip_list = meta['resource_lookup_skip_list'];

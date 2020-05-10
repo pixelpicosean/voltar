@@ -190,7 +190,7 @@ Main.events.connect_once('started', () => {
 import { ResourceLoader } from './core/io/resource_loader';
 import {
     scene_class_map,
-    resource_map,
+    get_resource_map,
     preload_queue,
 } from './registry';
 
@@ -217,7 +217,7 @@ export function load(...settings) {
  * @param {string} url
  */
 export function get_resource(url) {
-    return resource_map[url];
+    return get_resource_map()[url];
 }
 
 // ------------------------------------------------------------------
@@ -230,5 +230,5 @@ export * from 'engine/scene/assembler';
  * @param {string} url
  */
 export function get_packed_scene(url) {
-    return scene_class_map[url] || resource_map[url];
+    return scene_class_map[url] || get_resource_map()[url];
 }

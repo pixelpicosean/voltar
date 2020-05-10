@@ -1,4 +1,4 @@
-import { resource_map } from 'engine/registry';
+import { get_resource_map } from 'engine/registry';
 
 import { ImageTexture } from 'engine/scene/resources/texture';
 import { register_bitmap_font } from 'engine/scene/resources/font';
@@ -33,7 +33,7 @@ export function parse(resource, textures) {
 
     // add to global resource map
     // resource_map[font.name] = font;
-    resource_map[basename(resource.name).replace(/\.fnt$/, '')] = font;
+    get_resource_map()[basename(resource.name).replace(/\.fnt$/, '')] = font;
 }
 
 export function bmfont_loader(/** @type {Resource} */ resource, /** @type {Function} */ next) {

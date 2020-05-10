@@ -1,5 +1,8 @@
 import Resource from './io_resource';
-import { raw_resource_map, resource_map } from 'engine/registry';
+import {
+    get_raw_resource_map,
+    get_resource_map,
+} from 'engine/registry';
 import { ImageTexture } from 'engine/scene/resources/texture';
 
 
@@ -204,11 +207,11 @@ export function atlas_loader(/** @type {Resource} */ resource, /** @type {Functi
             resource.internal = spritesheet.textures;
 
             // spritesheet from atlas
-            raw_resource_map[resource.name] = spritesheet;
+            get_raw_resource_map()[resource.name] = spritesheet;
 
             // textures from spritesheet
             for (let k in spritesheet.textures) {
-                resource_map[k] = spritesheet.textures[k];
+                get_resource_map()[k] = spritesheet.textures[k];
             }
 
             next();

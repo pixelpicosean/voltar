@@ -1,6 +1,6 @@
 import Resource from "./io_resource";
 import { ImageTexture } from "engine/scene/resources/texture";
-import { resource_map, raw_resource_map } from "engine/registry";
+import { get_resource_map, get_raw_resource_map } from "engine/registry";
 
 /**
  * @param {Resource} resource
@@ -13,10 +13,10 @@ export function texture_loader(resource, next) {
         image.resource_name = resource.name;
         image.resource_path = resource.url;
         image.texture.name = resource.name;
-        raw_resource_map[resource.name] = image;
+        get_raw_resource_map()[resource.name] = image;
 
-        resource_map[resource.name] = image;
-        resource_map[resource.url] = image;
+        get_resource_map()[resource.name] = image;
+        get_resource_map()[resource.url] = image;
 
         resource.internal = image;
     }

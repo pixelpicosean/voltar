@@ -1,0 +1,792 @@
+{
+    "res://font/GROBOLD.ttf": {
+        "type": "DynamicFontData",
+        "filename": "res://font/GROBOLD.ttf",
+        "family": "GROBOLD",
+        "ascender": 800,
+        "descender": -200
+    },
+    "res://mesh/ebox.escn": {
+        "type": "PackedScene",
+        "sub": {
+            "1": {
+                "type": "SpatialMaterial",
+                "albedo_color": {
+                    "r": 0.903545,
+                    "g": 0.903545,
+                    "b": 0.903545,
+                    "a": 1
+                }
+            },
+            "2": {
+                "type": "ArrayMesh",
+                "surfaces": [
+                    {
+                        "material": "@sub#1",
+                        "primitive": 4,
+                        "arrays": [
+                            {
+                                "compressed": false,
+                                "normalized": false,
+                                "array": [
+                                    -1,
+                                    1,
+                                    -1,
+                                    1,
+                                    1,
+                                    1,
+                                    1,
+                                    1,
+                                    -1,
+                                    1,
+                                    1,
+                                    1,
+                                    -1,
+                                    -1,
+                                    1,
+                                    1,
+                                    -1,
+                                    1,
+                                    -1,
+                                    1,
+                                    1,
+                                    -1,
+                                    -1,
+                                    -1,
+                                    -1,
+                                    -1,
+                                    1,
+                                    1,
+                                    -1,
+                                    -1,
+                                    -1,
+                                    -1,
+                                    1,
+                                    -1,
+                                    -1,
+                                    -1,
+                                    1,
+                                    1,
+                                    -1,
+                                    1,
+                                    -1,
+                                    1,
+                                    1,
+                                    -1,
+                                    -1,
+                                    -1,
+                                    1,
+                                    -1,
+                                    1,
+                                    -1,
+                                    -1,
+                                    -1,
+                                    -1,
+                                    -1,
+                                    -1,
+                                    1,
+                                    1,
+                                    -1,
+                                    1,
+                                    1,
+                                    -1,
+                                    1,
+                                    -1,
+                                    1,
+                                    -1,
+                                    1,
+                                    1,
+                                    1,
+                                    1,
+                                    1,
+                                    1,
+                                    -1
+                                ]
+                            },
+                            {
+                                "compressed": false,
+                                "normalized": false,
+                                "array": [
+                                    0,
+                                    1,
+                                    0,
+                                    0,
+                                    1,
+                                    0,
+                                    0,
+                                    1,
+                                    0,
+                                    0,
+                                    0,
+                                    1,
+                                    0,
+                                    0,
+                                    1,
+                                    0,
+                                    0,
+                                    1,
+                                    -1,
+                                    0,
+                                    0,
+                                    -1,
+                                    0,
+                                    0,
+                                    -1,
+                                    0,
+                                    0,
+                                    0,
+                                    -1,
+                                    0,
+                                    0,
+                                    -1,
+                                    0,
+                                    0,
+                                    -1,
+                                    0,
+                                    1,
+                                    0,
+                                    0,
+                                    1,
+                                    0,
+                                    0,
+                                    1,
+                                    0,
+                                    0,
+                                    0,
+                                    0,
+                                    -1,
+                                    0,
+                                    0,
+                                    -1,
+                                    0,
+                                    0,
+                                    -1,
+                                    0,
+                                    1,
+                                    0,
+                                    0,
+                                    0,
+                                    1,
+                                    -1,
+                                    0,
+                                    0,
+                                    0,
+                                    -1,
+                                    0,
+                                    1,
+                                    0,
+                                    0,
+                                    0,
+                                    0,
+                                    -1
+                                ]
+                            },
+                            {
+                                "compressed": false,
+                                "normalized": false,
+                                "array": [
+                                    -1,
+                                    0,
+                                    0,
+                                    1,
+                                    -1,
+                                    0,
+                                    0,
+                                    1,
+                                    -1,
+                                    0,
+                                    0,
+                                    1,
+                                    0,
+                                    1,
+                                    0,
+                                    1,
+                                    0,
+                                    1,
+                                    0,
+                                    1,
+                                    0,
+                                    1,
+                                    0,
+                                    1,
+                                    0,
+                                    1,
+                                    0,
+                                    1,
+                                    0,
+                                    1,
+                                    0,
+                                    1,
+                                    0,
+                                    1,
+                                    0,
+                                    1,
+                                    1,
+                                    0,
+                                    0,
+                                    1,
+                                    1,
+                                    0,
+                                    0,
+                                    1,
+                                    1,
+                                    0,
+                                    0,
+                                    1,
+                                    0,
+                                    1,
+                                    0,
+                                    1,
+                                    0,
+                                    1,
+                                    0,
+                                    1,
+                                    0,
+                                    1,
+                                    0,
+                                    1,
+                                    0,
+                                    1,
+                                    0,
+                                    1,
+                                    0,
+                                    1,
+                                    0,
+                                    1,
+                                    0,
+                                    1,
+                                    0,
+                                    1,
+                                    -1,
+                                    0,
+                                    0,
+                                    1,
+                                    0,
+                                    1,
+                                    0,
+                                    1,
+                                    0,
+                                    1,
+                                    0,
+                                    1,
+                                    1,
+                                    0,
+                                    0,
+                                    1,
+                                    0,
+                                    1,
+                                    0,
+                                    1,
+                                    0,
+                                    1,
+                                    0,
+                                    1
+                                ]
+                            },
+                            null,
+                            {
+                                "compressed": false,
+                                "normalized": false,
+                                "array": [
+                                    0.875,
+                                    0.5,
+                                    0.625,
+                                    0.25,
+                                    0.625,
+                                    0.5,
+                                    0.625,
+                                    0.25,
+                                    0.375,
+                                    0,
+                                    0.375,
+                                    0.25,
+                                    0.625,
+                                    1,
+                                    0.375,
+                                    0.75,
+                                    0.375,
+                                    1,
+                                    0.375,
+                                    0.5,
+                                    0.125,
+                                    0.25,
+                                    0.125,
+                                    0.5,
+                                    0.625,
+                                    0.5,
+                                    0.375,
+                                    0.25,
+                                    0.375,
+                                    0.5,
+                                    0.625,
+                                    0.75,
+                                    0.375,
+                                    0.5,
+                                    0.375,
+                                    0.75,
+                                    0.875,
+                                    0.25,
+                                    0.625,
+                                    0,
+                                    0.625,
+                                    0.75,
+                                    0.375,
+                                    0.25,
+                                    0.625,
+                                    0.25,
+                                    0.625,
+                                    0.5
+                                ]
+                            },
+                            null,
+                            null,
+                            null,
+                            {
+                                "compressed": false,
+                                "normalized": false,
+                                "array": [
+                                    0,
+                                    2,
+                                    1,
+                                    3,
+                                    5,
+                                    4,
+                                    6,
+                                    8,
+                                    7,
+                                    9,
+                                    11,
+                                    10,
+                                    12,
+                                    14,
+                                    13,
+                                    15,
+                                    17,
+                                    16,
+                                    0,
+                                    1,
+                                    18,
+                                    3,
+                                    4,
+                                    19,
+                                    6,
+                                    7,
+                                    20,
+                                    9,
+                                    10,
+                                    21,
+                                    12,
+                                    13,
+                                    22,
+                                    15,
+                                    16,
+                                    23
+                                ]
+                            }
+                        ],
+                        "morph_arrays": [],
+                        "is_2d": false
+                    }
+                ]
+            }
+        },
+        "nodes": [
+            {
+                "type": "Spatial",
+                "name": "Scene"
+            },
+            {
+                "type": "MeshInstance",
+                "name": "Cube",
+                "parent": ".",
+                "transform": [
+                    1,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    0
+                ],
+                "visible": true,
+                "mesh": "@sub#2"
+            }
+        ]
+    },
+    "res://scene/ui/input.tscn": {
+        "type": "PackedScene",
+        "nodes": [
+            {
+                "type": "Node2D",
+                "name": "input",
+                "elem_id": "word_input"
+            }
+        ]
+    },
+    "res://scene/demo.tscn": {
+        "type": "PackedScene",
+        "ext": {
+            "1": "monitor",
+            "2": "alien",
+            "3": "player",
+            "5": "res://font/GROBOLD.ttf"
+        },
+        "sub": {
+            "1": {
+                "type": "DynamicFont",
+                "font": "@ext#5",
+                "size": 25
+            },
+            "2": {
+                "type": "Shader",
+                "code": "shader_type canvas_item;\nvoid fragment() {\n\nvec2 uv = SCREEN_UV;\n\nvec3 color;\n\nvec4 ori_color = texture(SCREEN_TEXTURE, uv);\n\n// color separation\n\ncolor.r = texture(SCREEN_TEXTURE, vec2(uv.x + 0.01, uv.y)).x;\n\ncolor.g = texture(SCREEN_TEXTURE, vec2(uv.x + 0.000, uv.y)).y;\n\ncolor.b = texture(SCREEN_TEXTURE, vec2(uv.x - 0.01, uv.y)).z;\n\n// increase contrast\n\ncolor = clamp(color * 0.5 + 0.5 * color * color * 1.2, 0.0, 1.0);\n\n// vignetting\n\ncolor *= 0.5 + 0.5 * 16.0 * uv.x * uv.y * (1.0 - uv.x) * (1.0 - uv.y);\n\n// tinting\n\ncolor *= vec3(0.8, 1.0, 0.7);\n\n// tv lines\n\ncolor *= 0.8 + 0.2 * sin(10.0 * TIME + uv.y * 1000.0);\n\n// flickering\n\ncolor *= 0.97 + 0.03 * sin(110.0 * TIME);\n\nCOLOR = vec4(color, ori_color.a);\n}\n"
+            },
+            "3": {
+                "type": "ShaderMaterial",
+                "shader": "@sub#2"
+            }
+        },
+        "nodes": [
+            {
+                "type": "Control",
+                "name": "demo",
+                "anchor_bottom": 1,
+                "anchor_right": 1
+            },
+            {
+                "type": "ColorRect",
+                "name": "bg",
+                "parent": ".",
+                "anchor_bottom": 1,
+                "anchor_right": 1,
+                "color": {
+                    "r": 0,
+                    "g": 0,
+                    "b": 0,
+                    "a": 1
+                }
+            },
+            {
+                "type": "TextureRect",
+                "name": "monitor",
+                "parent": ".",
+                "anchor_bottom": 0.5,
+                "anchor_left": 0.5,
+                "anchor_top": 0.5,
+                "anchor_right": 0.5,
+                "margin_bottom": 130,
+                "margin_left": -129.5,
+                "margin_top": -130,
+                "margin_right": 129.5,
+                "texture": "@ext#1"
+            },
+            {
+                "type": "Sprite",
+                "name": "player",
+                "parent": "monitor",
+                "position": {
+                    "x": 128.651,
+                    "y": 181.304
+                },
+                "texture": "@ext#3"
+            },
+            {
+                "type": "Sprite",
+                "name": "alien",
+                "parent": "monitor",
+                "position": {
+                    "x": 50.6791,
+                    "y": 57.8259
+                },
+                "texture": "@ext#2"
+            },
+            {
+                "type": "Sprite",
+                "name": "alien2",
+                "parent": "monitor",
+                "position": {
+                    "x": 89.1798,
+                    "y": 57.8259
+                },
+                "texture": "@ext#2"
+            },
+            {
+                "type": "Sprite",
+                "name": "alien3",
+                "parent": "monitor",
+                "position": {
+                    "x": 127.68,
+                    "y": 57.8259
+                },
+                "texture": "@ext#2"
+            },
+            {
+                "type": "Sprite",
+                "name": "alien4",
+                "parent": "monitor",
+                "position": {
+                    "x": 166.181,
+                    "y": 57.8259
+                },
+                "texture": "@ext#2"
+            },
+            {
+                "type": "Sprite",
+                "name": "alien5",
+                "parent": "monitor",
+                "position": {
+                    "x": 203.655,
+                    "y": 57.8259
+                },
+                "texture": "@ext#2"
+            },
+            {
+                "type": "Sprite",
+                "name": "alien10",
+                "parent": "monitor",
+                "position": {
+                    "x": 51.1925,
+                    "y": 85.5464
+                },
+                "texture": "@ext#2"
+            },
+            {
+                "type": "Sprite",
+                "name": "alien9",
+                "parent": "monitor",
+                "position": {
+                    "x": 89.6931,
+                    "y": 85.5464
+                },
+                "texture": "@ext#2"
+            },
+            {
+                "type": "Sprite",
+                "name": "alien8",
+                "parent": "monitor",
+                "position": {
+                    "x": 128.194,
+                    "y": 85.5464
+                },
+                "texture": "@ext#2"
+            },
+            {
+                "type": "Sprite",
+                "name": "alien7",
+                "parent": "monitor",
+                "position": {
+                    "x": 166.694,
+                    "y": 85.5464
+                },
+                "texture": "@ext#2"
+            },
+            {
+                "type": "Sprite",
+                "name": "alien6",
+                "parent": "monitor",
+                "position": {
+                    "x": 204.168,
+                    "y": 85.5464
+                },
+                "texture": "@ext#2"
+            },
+            {
+                "type": "Label",
+                "name": "label",
+                "parent": "monitor",
+                "self_modulate": {
+                    "r": 0.333333,
+                    "g": 0.831373,
+                    "b": 0,
+                    "a": 1
+                },
+                "anchor_bottom": 0.5,
+                "anchor_left": 0.5,
+                "anchor_top": 0.5,
+                "anchor_right": 0.5,
+                "margin_bottom": 26.5,
+                "margin_left": -82,
+                "margin_top": -26.5,
+                "margin_right": 82,
+                "align": 1,
+                "autowrap": true,
+                "text": "GAME OVER",
+                "valign": 1,
+                "font": "@sub#1"
+            },
+            {
+                "type": "ColorRect",
+                "name": "cover",
+                "parent": "monitor",
+                "material": "@sub#3",
+                "margin_bottom": 201,
+                "margin_left": 18.5,
+                "margin_top": 28,
+                "margin_right": 239.5
+            }
+        ]
+    },
+    "res://scene/demo_3d.tscn": {
+        "type": "PackedScene",
+        "ext": {
+            "1": "res://mesh/ebox.escn"
+        },
+        "sub": {
+            "2": {
+                "type": "CubeMesh"
+            },
+            "3": {
+                "type": "QuadMesh",
+                "size": {
+                    "x": 60,
+                    "y": 60
+                }
+            },
+            "undefined": {}
+        },
+        "nodes": [
+            {
+                "type": "Spatial",
+                "name": "spatial"
+            },
+            {
+                "type": "Camera",
+                "name": "camera",
+                "parent": ".",
+                "transform": [
+                    1,
+                    0,
+                    0,
+                    0,
+                    0.923866,
+                    0.382716,
+                    0,
+                    -0.382716,
+                    0.923866,
+                    0,
+                    4.31817,
+                    6.29972
+                ],
+                "size": 2
+            },
+            {
+                "type": "DirectionalLight",
+                "name": "green_light",
+                "parent": ".",
+                "transform": [
+                    0.830975,
+                    1.77636e-15,
+                    -0.55631,
+                    0.454793,
+                    0.575904,
+                    0.679336,
+                    0.320381,
+                    -0.817517,
+                    0.478562,
+                    -3.29193,
+                    4.45464,
+                    4.43833
+                ],
+                "light_color": {
+                    "r": 0.54902,
+                    "g": 1,
+                    "b": 0.533333,
+                    "a": 1
+                },
+                "light_energy": 0.6
+            },
+            {
+                "type": "DirectionalLight",
+                "name": "red_light",
+                "parent": ".",
+                "transform": [
+                    0.605327,
+                    -0.598649,
+                    0.524594,
+                    0.293457,
+                    0.780475,
+                    0.552034,
+                    -0.739907,
+                    -0.180215,
+                    0.64812,
+                    4.6955,
+                    4.55845,
+                    4.38108
+                ],
+                "light_color": {
+                    "r": 1,
+                    "g": 0.501961,
+                    "b": 0.501961,
+                    "a": 1
+                }
+            },
+            {
+                "type": "MeshInstance",
+                "name": "cube",
+                "parent": ".",
+                "transform": [
+                    0.801818,
+                    0,
+                    0.597569,
+                    0,
+                    1,
+                    0,
+                    -0.597569,
+                    0,
+                    0.801818,
+                    1.69965,
+                    1,
+                    -0.877176
+                ],
+                "mesh": "@sub#2",
+                "material/0": null
+            },
+            {
+                "type": "MeshInstance",
+                "name": "ground",
+                "parent": ".",
+                "transform": [
+                    1,
+                    0,
+                    0,
+                    0,
+                    -4.37114e-8,
+                    1,
+                    0,
+                    -1,
+                    -4.37114e-8,
+                    0,
+                    0,
+                    0
+                ],
+                "mesh": "@sub#3",
+                "cast_shadow": 0,
+                "material/0": null
+            },
+            {
+                "name": "ebox",
+                "parent": ".",
+                "transform": [
+                    1,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    0,
+                    1,
+                    -1.98268,
+                    1.21699,
+                    -0.848539
+                ],
+                "instance": "@ext#1"
+            }
+        ]
+    }
+}

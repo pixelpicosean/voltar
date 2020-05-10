@@ -1,4 +1,4 @@
-import { node_class_map, resource_map } from 'engine/registry';
+import { node_class_map, get_resource_map } from 'engine/registry';
 import { GDCLASS } from 'engine/core/v_object';
 import { ImageTexture } from '../resources/texture';
 
@@ -247,7 +247,7 @@ export class TextureButton extends BaseButton {
      * @param {string|ImageTexture} p_texture
      */
     set_texture_normal(p_texture) {
-        this._texture_normal = (typeof (p_texture) === 'string') ? resource_map[p_texture] : p_texture;
+        this._texture_normal = (typeof (p_texture) === 'string') ? get_resource_map()[p_texture] : p_texture;
         this.minimum_size_changed();
         this.update();
     }
@@ -256,7 +256,7 @@ export class TextureButton extends BaseButton {
      * @param {string|ImageTexture} p_texture
      */
     set_texture_hover(p_texture) {
-        this._texture_hover = (typeof (p_texture) === 'string') ? resource_map[p_texture] : p_texture;
+        this._texture_hover = (typeof (p_texture) === 'string') ? get_resource_map()[p_texture] : p_texture;
         this.minimum_size_changed();
         this.update();
     }
@@ -265,7 +265,7 @@ export class TextureButton extends BaseButton {
      * @param {string|ImageTexture} p_texture
      */
     set_texture_pressed(p_texture) {
-        this._texture_pressed = (typeof (p_texture) === 'string') ? resource_map[p_texture] : p_texture;
+        this._texture_pressed = (typeof (p_texture) === 'string') ? get_resource_map()[p_texture] : p_texture;
         this.minimum_size_changed();
         this.update();
     }
@@ -274,7 +274,7 @@ export class TextureButton extends BaseButton {
      * @param {string|ImageTexture} p_texture
      */
     set_texture_disabled(p_texture) {
-        this._texture_disabled = (typeof (p_texture) === 'string') ? resource_map[p_texture] : p_texture;
+        this._texture_disabled = (typeof (p_texture) === 'string') ? get_resource_map()[p_texture] : p_texture;
         this.minimum_size_changed();
         this.update();
     }

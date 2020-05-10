@@ -27,7 +27,7 @@ for (let k in non_tres) {
 for (let k in resource_map) {
     final_resources[k] = resource_map[k];
 }
-fs.writeFileSync(path.normalize(path.join(__dirname, '../assets/resources.json')), JSON.stringify(final_resources, null, 4));
+fs.writeFileSync(path.normalize(path.join(__dirname, '../media/resources.json')), JSON.stringify(final_resources, null, 4));
 
 // 3. process and copy assets (DynamicFont, ...) to media
 console.log(`3. process assets`)

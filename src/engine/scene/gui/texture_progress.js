@@ -1,4 +1,4 @@
-import { node_class_map, resource_map } from "engine/registry";
+import { node_class_map, get_resource_map } from "engine/registry";
 import { GDCLASS } from "engine/core/v_object";
 import { clamp } from "engine/core/math/math_funcs";
 import {
@@ -393,7 +393,7 @@ export class TextureProgress extends Range {
      * @param {string | ImageTexture} p_texture
      */
     set_texture_over(p_texture) {
-        this._texture_over = (typeof (p_texture) === 'string') ? resource_map[p_texture] : p_texture;
+        this._texture_over = (typeof (p_texture) === 'string') ? get_resource_map()[p_texture] : p_texture;
         this.update();
         if (!this._texture_under) {
             this.minimum_size_changed();
@@ -404,7 +404,7 @@ export class TextureProgress extends Range {
      * @param {string | ImageTexture} p_texture
      */
     set_texture_progress(p_texture) {
-        this._texture_progress = (typeof (p_texture) === 'string') ? resource_map[p_texture] : p_texture;
+        this._texture_progress = (typeof (p_texture) === 'string') ? get_resource_map()[p_texture] : p_texture;
         this.update();
         this.minimum_size_changed();
     }
@@ -413,7 +413,7 @@ export class TextureProgress extends Range {
      * @param {string | ImageTexture} p_texture
      */
     set_texture_under(p_texture) {
-        this._texture_under = (typeof (p_texture) === 'string') ? resource_map[p_texture] : p_texture;
+        this._texture_under = (typeof (p_texture) === 'string') ? get_resource_map()[p_texture] : p_texture;
         this.update();
         this.minimum_size_changed();
     }

@@ -1,13 +1,6 @@
 {
     "type": "Environment",
     "bg_mode": 1,
-    "ambient_energy": 0.2,
-    "ambient_color": {
-        "r": 0.117647,
-        "g": 0.427451,
-        "b": 0.819608,
-        "a": 1
-    },
     "fog_depth_end": 30,
     "fog_height_enabled": true,
     "fog_height_min": 5,
