@@ -1,22 +1,32 @@
 import { res_class_map } from "engine/registry";
 
+/**
+ * @typedef {import('engine/drivers/webgl/rasterizer_storage').Material_t} Material_t
+ */
+
 export class Material {
     get class() { return "Material" }
 
     constructor() {
+        /** @type {Material_t} */
+        this.material = null;
+        /** @type {Material} */
+        this.next_pass = null;
+        this.render_priority = 0;
+
         this.materials = {
             /* 2D */
 
-            /** @type {import('engine/drivers/webgl/rasterizer_storage').Material_t} */
+            /** @type {Material_t} */
             flat: null,
-            /** @type {import('engine/drivers/webgl/rasterizer_storage').Material_t} */
+            /** @type {Material_t} */
             tile: null,
-            /** @type {import('engine/drivers/webgl/rasterizer_storage').Material_t} */
+            /** @type {Material_t} */
             multimesh: null,
 
             /* 3D */
 
-            /** @type {import('engine/drivers/webgl/rasterizer_storage').Material_t} */
+            /** @type {Material_t} */
             spatial: null,
         };
     }

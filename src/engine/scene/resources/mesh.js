@@ -36,7 +36,6 @@ export class Mesh extends VObject {
     constructor() {
         super();
 
-        this.triangle_mesh = null;
         this.lightmap_size_hint = new Vector2;
 
         /** @type {Mesh_t} */
@@ -45,9 +44,17 @@ export class Mesh extends VObject {
 
     get_surface_count() { return 0 }
 
-    clear_cache() {
-        this.triangle_mesh = null;
-    }
+    /**
+     * @param {number} idx
+     * @returns {Material}
+     */
+    surface_get_material(idx) { return null }
+
+    /**
+     * @param {number} idx
+     * @param {Material} material
+     */
+    surface_set_material(idx, material) { }
 }
 res_class_map["Mesh"] = Mesh;
 
@@ -86,6 +93,28 @@ export class ArrayMesh extends Mesh {
         }
 
         return this;
+    }
+
+    get_surface_count() { return this.surfaces.length }
+
+    /**
+     * @param {number} idx
+     * @returns {Material}
+     */
+    surface_get_material(idx) {
+        return this.surfaces[idx].material;
+    }
+
+    /**
+     * @param {number} idx
+     * @param {Material} material
+     */
+    surface_set_material(idx, material) {
+        if (this.surfaces[idx].material === material) {
+            return;
+        }
+        this.surfaces[idx].material = material;
+        VSG.storage.mesh_surface_set_material(this.mesh, idx, material.materials.spatial);
     }
 
     /**

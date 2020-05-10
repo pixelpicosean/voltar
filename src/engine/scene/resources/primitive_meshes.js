@@ -93,7 +93,7 @@ export class PrimitiveMesh extends Mesh {
 
         this.pending_request = false;
 
-        this.clear_cache();
+        // FIXME: this.clear_cache();
     }
 
     /**

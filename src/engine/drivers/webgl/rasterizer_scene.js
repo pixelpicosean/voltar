@@ -413,7 +413,7 @@ export class RasterizerScene {
                     ALBEDO = albedo.rgb;
                 }
             `);
-            this.materials.spatial = this.init_shader_material(mat, normal_vs, normal_fs, SPATIAL_SHADER_UNIFORMS, true);
+            this.materials.spatial = this.init_shader_material(mat, normal_vs, normal_fs, [], true);
 
             this.materials.spatial.params["albedo"] = [1, 1, 1, 1];
             this.materials.spatial.params["specular"] = [0.5];
@@ -649,7 +649,9 @@ export class RasterizerScene {
                 'position',
                 'normal',
                 'tangent',
+                'color',
                 'uv',
+                'uv2',
             ],
             // @ts-ignore
             [
