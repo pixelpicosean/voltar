@@ -182,7 +182,7 @@
                                 ]
                             },
                             {
-                                "compressed": false,
+                                "compressed": true,
                                 "normalized": false,
                                 "array": [
                                     -1,

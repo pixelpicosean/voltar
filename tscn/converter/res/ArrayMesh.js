@@ -20,12 +20,21 @@ function parse_as_array(data, key) {
     return result;
 }
 
+const compress_list = [
+    2, // tangent
+    3, // color
+]
+
+const normalize_list = [
+    3,
+]
+
 module.exports = (data) => {
     let surfaces = parse_as_array(data.prop, 'surfaces');
     for (let s of surfaces) {
-        let arrays = s.arrays.map(arr => arr ? ({
-            compressed: false,
-            normalized: false,
+        let arrays = s.arrays.map((arr, i) => arr ? ({
+            compressed: compress_list.indexOf(i) >= 0,
+            normalized: normalize_list.indexOf(i) >= 0,
             array: arr,
         }) : null)
         let meta = s.arrays[0].__meta__;

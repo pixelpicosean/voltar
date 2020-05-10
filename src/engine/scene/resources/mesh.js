@@ -184,6 +184,7 @@ export class ArrayMesh extends Mesh {
                 case ARRAY_WEIGHTS:
                 case ARRAY_BONES: {
                     // TODO: merge weight and bone vertices
+                    sizes[i] = 0;
                 } break;
                 case ARRAY_INDEX: {
                     // TODO: support 32bit indices
@@ -200,7 +201,32 @@ export class ArrayMesh extends Mesh {
         let array_size = total_elem_size * array_len;
 
         let vertex_array = new ArrayBuffer(array_size);
-        let index_array = index_array_len > 0 ? new Uint16Array(index_array_len) : null;
+        let index_array = index_array_len > 0 ? new Uint16Array(p_arrays[ARRAY_INDEX].array) : null;
+
+        // create interleaved vertex array
+        var little_endian = (function () {
+            const buffer = new ArrayBuffer(2);
+            new DataView(buffer).setInt16(0, 256, true);
+            return new Int16Array(buffer)[0] === 256;
+        })();
+        let view = new DataView(vertex_array);
+        for (let i = 0, start = 0; i < array_len; i++, start += total_elem_size) {
+            for (let v = 0; v < ARRAY_INDEX; v++) {
+                let array = p_arrays[v] ? p_arrays[v].array : null;
+                if (!array) continue;
+
+                let compressed = p_arrays[v].compressed;
+                let offset = offsets[v];
+
+                for (let s = 0; s < sizes[v]; s++) {
+                    if (compressed) {
+                        view.setUint8(start + offset + s, array[i * sizes[v] + s]);
+                    } else {
+                        view.setFloat32(start + offset + s * 4, array[i * sizes[v] + s], little_endian);
+                    }
+                }
+            }
+        }
 
         return {
             attribs: offsets.slice(0, ARRAY_INDEX)
