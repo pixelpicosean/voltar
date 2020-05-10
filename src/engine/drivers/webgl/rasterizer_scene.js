@@ -151,9 +151,9 @@ export class LightInstance_t {
  */
 const sort_by_key = (a, b) => {
     if (a.depth_layer + a.priority === b.depth_layer + b.priority) {
-        return (a.geometry_index*14 + a.light_index*8 + a.light_type1 + a.light_type2 + a.light_mode*2 + a.material_index*10)
+        return (a.geometry_index + a.light_index*3 + a.light_type1*5 + a.light_type2*4 + a.light_mode*6 + a.material_index*2)
             -
-            (b.geometry_index * 14 + b.light_index * 8 + b.light_type1 + b.light_type2 + b.light_mode * 2 + b.material_index * 10)
+            (b.geometry_index + b.light_index*3 + b.light_type1*5 + b.light_type2*4 + b.light_mode*6 + b.material_index*2)
     } else {
         return (a.depth_layer + a.priority) - (b.depth_layer + b.priority);
     }
