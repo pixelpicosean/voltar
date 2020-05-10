@@ -63,7 +63,7 @@ function push_tokens_in_a_line(db, line, tokens, stack, key = undefined) {
             parent[key] = items;
         }
         // multi-line array
-        else {
+        else if (rest_line.indexOf(",") >= 0) {
             push_tokens_in_a_line(db, rest_line, tokens, stack, 0);
         }
     }
@@ -82,7 +82,9 @@ function push_tokens_in_a_line(db, line, tokens, stack, key = undefined) {
                 value: [],
             })
             const rest_line = line.substring(b_idx + 1);
-            push_tokens_in_a_line(db, rest_line, tokens, stack, 0);
+            if (rest_line.length > 0) {
+                push_tokens_in_a_line(db, rest_line, tokens, stack, 0);
+            }
         }
     }
     // - data wrapped by a function call: Function(param1, param2, param3)
@@ -95,13 +97,19 @@ function push_tokens_in_a_line(db, line, tokens, stack, key = undefined) {
             parent[key] = converter(trimmed_line);
         } else {
             const parent = (stack.length > 0) ? _.last(stack).value : db;
-            parent[key] = line;
+            parent[key] = line.substring(0, line.lastIndexOf(")") + 1);
         }
     }
     // let's just keep the others for now
     else {
         const parent = (stack.length > 0) ? _.last(stack).value : db;
-        parent[key] = line;
+        let trimmed = line.trimRight();
+        let value_res = parse_as_primitive(trimmed);
+        if (value_res.is_valid) {
+            parent[key] = value_res.value;
+            return;
+        }
+        parent[key] = trimmed;
     }
 };
 
@@ -218,7 +226,22 @@ module.exports.parse_block = (block) => {
                 const equal_idx = line.indexOf('=');
                 if (equal_idx > 0) {
                     const key = line.substr(0, equal_idx).trim();
-                    const value_res = parse_as_primitive(line.substring(equal_idx + 1));
+
+                    if (key.indexOf('/') > 0) {
+                        let after_slash = key.substr(key.indexOf('/') + 1);
+                        let index = parseInt(after_slash);
+                        if (Number.isFinite(index)) {
+                            // treat this as an array, but this can be confusion
+                        } else {
+                            // treat this as an object, but this can be confusion
+                        }
+                    }
+
+                    let value_str = line.substring(equal_idx + 1);
+                    if (value_str[value_str.length - 1] !== ' ' && value_str[value_str.length - 1] !== '\n') {
+                        value_str = value_str.trimRight();
+                    }
+                    const value_res = parse_as_primitive(value_str);
                     if (value_res.is_valid) {
                         data.prop[key] = value_res.value;
                     } else {
@@ -339,6 +362,24 @@ module.exports.parse_block = (block) => {
                 } else if (line.trimLeft().startsWith(',')) {
                     // this array is continue
                     const el_str = line.trimLeft().substr(1).trim();
+                    push_tokens_in_a_line(data.prop, el_str, tokens, stack, _.last(stack).value.length);
+                } else if (line.trimRight().endsWith(',')) {
+                    // this array is continue
+                    let el_str = line.trim();
+                    /** @param {string} line */
+                    function remove_comments(line) {
+                        let index = line.lastIndexOf(';');
+                        if (index > 0) {
+                            return line.substring(0, index).trimRight();
+                        } else {
+                            return line;
+                        }
+                    }
+                    el_str = remove_comments(el_str);
+                    push_tokens_in_a_line(data.prop, el_str, tokens, stack, _.last(stack).value.length);
+                } else {
+                    // this array is continue
+                    const el_str = line.trim();
                     push_tokens_in_a_line(data.prop, el_str, tokens, stack, _.last(stack).value.length);
                 }
             } break;

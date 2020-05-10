@@ -22,6 +22,11 @@ module.exports.convert_scenes = (/** @type {string} */scene_root_url_p) => {
                     const filename = `res://${(path.join(relative_to_root, file_stats.name))}`;
 
                     load_tres(scene_root_url, filename, tres_map);
+                } else if (path.extname(file_stats.name) === '.escn') {
+                    const relative_to_root = path.relative(scene_root_url, root);
+                    const filename = `res://${(path.join(relative_to_root, file_stats.name))}`;
+
+                    load_tres(scene_root_url, filename, tres_map);
                 } else {
                     next();
                 }
