@@ -1,5 +1,8 @@
 {
     "resource_lookup_skip_list": [
         "GROBOLD"
+    ],
+    "binary_files": [
+        "media/data0.vt"
     ]
 }
