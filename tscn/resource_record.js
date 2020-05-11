@@ -60,7 +60,7 @@ module.exports.get_resource_lookup_skip_list = function() {
 
 /* binary file API */
 
-const BINARY_PACK_SIZE = 1024 * 1024; // max to 1MB per file
+const BINARY_PACK_SIZE = 1024 * 1024 * 8; // max to 8MB per file
 
 /** @type {Buffer[]} */
 let binary_packs = [];
@@ -111,5 +111,6 @@ module.exports.add_binary_resource = function(binary) {
 }
 
 module.exports.get_binary_packs = function() {
+    trim_current_buffer();
     return binary_packs;
 }
