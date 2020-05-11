@@ -56,3 +56,11 @@ export const set_raw_resource_map = (data) => raw_resource_map_ = data;
 
 export const get_resource_map = () => resource_map_;
 export const get_raw_resource_map = () => raw_resource_map_;
+
+/** @type {Uint8Array[]} */
+let binary_pack_list = [];
+export const set_binary_pack_list = (list) => {
+    binary_pack_list = list.map(ab => new Uint8Array(ab));
+};
+/** @param {number} idx */
+export const get_binary_pack = (idx) => binary_pack_list[idx];

@@ -935,6 +935,9 @@ Resource.load_type_map = {
     // videos
     mp4:        Resource.LOAD_TYPE.VIDEO,
     webm:       Resource.LOAD_TYPE.VIDEO,
+
+    // binary
+    vt:         Resource.LOAD_TYPE.XHR,
 };
 
 Resource.xhr_type_map = {
@@ -968,6 +971,9 @@ Resource.xhr_type_map = {
     // fonts
     ttf:        Resource.XHR_RESPONSE_TYPE.BUFFER,
     otf:        Resource.XHR_RESPONSE_TYPE.BUFFER,
+
+    // binary
+    vt:         Resource.XHR_RESPONSE_TYPE.BUFFER,
 };
 
 // We can't set the `src` attribute to empty string, so on abort we set it to this 1px transparent gif

@@ -1195,15 +1195,16 @@ export class RasterizerScene {
                         gl.enableVertexAttribArray(i);
                         gl.vertexAttribPointer(attr.index, attr.size, attr.type, attr.normalized, attr.stride, attr.offset);
                     } else {
-                        gl.disableVertexAttribArray(i);
-                        switch (i) {
-                            case ARRAY_NORMAL: {
-                                gl.vertexAttrib4f(ARRAY_NORMAL, 0.0, 0.0, 1.0, 1.0);
-                            } break;
-                            case ARRAY_COLOR: {
-                                gl.vertexAttrib4f(ARRAY_COLOR, 1.0, 1.0, 1.0, 1.0);
-                            } break;
-                        }
+                        // FIXME: use predefined array index instead
+                        // gl.disableVertexAttribArray(i);
+                        // switch (i) {
+                        //     case ARRAY_TANGENT: {
+                        //         gl.vertexAttrib4f(ARRAY_TANGENT, 0.0, 0.0, 1.0, 1.0);
+                        //     } break;
+                        //     case ARRAY_COLOR: {
+                        //         gl.vertexAttrib4f(ARRAY_COLOR, 1.0, 1.0, 1.0, 1.0);
+                        //     } break;
+                        // }
                     }
                 }
             } break;

@@ -57,3 +57,59 @@ module.exports.add_to_resource_lookup_skip_list = function(key) {
 module.exports.get_resource_lookup_skip_list = function() {
     return resource_lookup_skip_list;
 }
+
+/* binary file API */
+
+const BINARY_PACK_SIZE = 1024 * 1024; // max to 1MB per file
+
+/** @type {Buffer[]} */
+let binary_packs = [];
+let current_pack_capacity = BINARY_PACK_SIZE;
+
+function append_new_buffer() {
+    let buffer = Buffer.alloc(BINARY_PACK_SIZE);
+    binary_packs.push(buffer);
+    current_pack_capacity = BINARY_PACK_SIZE;
+    return buffer;
+}
+append_new_buffer();
+
+function trim_current_buffer() {
+    let buffer = binary_packs[binary_packs.length - 1];
+    binary_packs[binary_packs.length - 1] = buffer.subarray(0, BINARY_PACK_SIZE - current_pack_capacity);
+}
+
+/**
+ * @param {number} length
+ */
+function fetch_pack_for(length) {
+    /** @type {Buffer} */
+    let buffer = binary_packs[binary_packs.length - 1];
+    if (current_pack_capacity < length) {
+        trim_current_buffer();
+        buffer = append_new_buffer();
+    }
+    return buffer;
+}
+
+/**
+ * @param {ArrayBuffer | Float32Array | Uint8Array | Uint16Array | Uint32Array} binary
+ */
+module.exports.add_binary_resource = function(binary) {
+    let buffer = fetch_pack_for(binary.byteLength);
+    let offset = BINARY_PACK_SIZE - current_pack_capacity;
+
+    buffer.set(binary, offset);
+
+    current_pack_capacity -= binary.byteLength;
+
+    return {
+        index: binary_packs.length - 1,
+        offset,
+        length: binary.byteLength,
+    }
+}
+
+module.exports.get_binary_packs = function() {
+    return binary_packs;
+}

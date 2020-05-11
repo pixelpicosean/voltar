@@ -1,4 +1,7 @@
-import { res_class_map } from "engine/registry";
+import {
+    res_class_map,
+    get_binary_pack,
+} from "engine/registry";
 import { VObject } from "engine/core/v_object";
 import { Vector2 } from "engine/core/math/vector2";
 import { Vector3 } from "engine/core/math/vector3";
@@ -23,11 +26,25 @@ import { Material } from "./material";
 
 /**
  * @typedef {import("engine/drivers/webgl/rasterizer_storage").Mesh_t} Mesh_t
+ * @typedef {import("engine/drivers/webgl/rasterizer_storage").VertAttribDef} VertAttribDef
  *
  * @typedef ArrayDesc
  * @property {boolean} [compressed]
  * @property {boolean} [normalized]
  * @property {number[]} array
+ *
+ * @typedef PackedInfo
+ * @property {number} index
+ * @property {number} offset
+ * @property {number} length
+ *
+ * @typedef PackedArrayDesc
+ * @property {VertAttribDef[]} attribs
+ * @property {PackedInfo} vertex
+ * @property {PackedInfo} index
+ * @property {number} array_len
+ * @property {number} index_array_len
+ * @property {AABB} aabb
  */
 
 export class Mesh extends VObject {
@@ -89,7 +106,7 @@ export class ArrayMesh extends Mesh {
     _load_data(data) {
         for (let i = 0; i < data.surfaces.length; i++) {
             let surface = data.surfaces[i];
-            this.add_surface_from_arrays(surface.primitive, surface.arrays, surface.is_2d);
+            this.add_surface_from_packed_arrays(surface.primitive, surface.arrays, surface.is_2d);
         }
 
         return this;
@@ -141,10 +158,32 @@ export class ArrayMesh extends Mesh {
         }
         this.surfaces.push(s);
 
-        // merge vertex arrays into a interleaved ArrayBuffer
-        let data = this._create_mesh_data(p_arrays, is_2d);
-        VSG.storage.mesh_add_surface_from_data(this.mesh, p_primitive, data.attribs, data.vertices, data.indices, data.array_len, !is_2d);
+        let data = this._create_mesh_data_from_arrays(p_arrays, is_2d);
+        VSG.storage.mesh_add_surface_from_data(this.mesh, p_primitive, data.attribs, data.vertices, data.indices, data.array_len, data.index_array_len, !is_2d);
 
+        this._recompute_aabb();
+    }
+
+    /**
+     * @param {number} p_primitive
+     * @param {PackedArrayDesc} p_arrays
+     * @param {boolean} is_2d
+     */
+    add_surface_from_packed_arrays(p_primitive, p_arrays, is_2d) {
+        let s = new Surface;
+        s.is_2d = is_2d;
+
+        s.aabb.copy(p_arrays.aabb);
+
+        let vertex_pack = get_binary_pack(p_arrays.vertex.index);
+        let vertices = vertex_pack.slice(p_arrays.vertex.offset, p_arrays.vertex.offset + p_arrays.vertex.length);
+
+        let index_pack = get_binary_pack(p_arrays.index.index);
+        let indices = index_pack.slice(p_arrays.index.offset, p_arrays.index.offset + p_arrays.index.length);
+
+        VSG.storage.mesh_add_surface_from_data(this.mesh, p_primitive, p_arrays.attribs, vertices, indices, p_arrays.array_len, p_arrays.index_array_len, !is_2d);
+
+        // FIXME: we may not need this one cause AABB already updated
         this._recompute_aabb();
     }
 
@@ -156,7 +195,7 @@ export class ArrayMesh extends Mesh {
      * @param {ArrayDesc[]} p_arrays
      * @param {boolean} is_2d
      */
-    _create_mesh_data(p_arrays, is_2d) {
+    _create_mesh_data_from_arrays(p_arrays, is_2d) {
         /** @type {number[]} */
         let offsets = Array(ARRAY_MAX);
         /** @type {number[]} */
@@ -269,6 +308,7 @@ export class ArrayMesh extends Mesh {
                 .filter((v) => !!v),
             vertices: vertex_array,
             array_len,
+            index_array_len,
             indices: index_array,
         };
     }

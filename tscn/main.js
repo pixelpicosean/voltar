@@ -31,11 +31,22 @@ fs.writeFileSync(path.normalize(path.join(__dirname, '../media/resources.json'))
 
 // 3. process and copy assets (DynamicFont, ...) to media
 console.log(`3. process assets`)
+// - default environment
 convert_default_env(path.normalize(path.join(__dirname, '../assets/default_env.tres')));
+// - dynamic font
 convert_dynamic_fonts()
+// - binary data
+const binary_files = record.get_binary_packs()
+    .map((pack, i) => {
+        let url = path.normalize(path.join(__dirname, `../media/data${i}.vt`));
+        fs.writeFileSync(url, pack);
+        return `media/data${i}.vt`;
+    })
+// - meta data
 const resource_lookup_skip_list = record.get_resource_lookup_skip_list();
 fs.writeFileSync(path.normalize(path.join(__dirname, '../assets/meta.json')), JSON.stringify({
     resource_lookup_skip_list,
+    binary_files,
 }, null, 4));
 
 console.log('[finished]')

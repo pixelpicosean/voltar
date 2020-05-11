@@ -1204,7 +1204,7 @@ export class CPUParticles2D extends Node2D {
             { type: WebGLRenderingContext.FLOAT, size: 2, stride: stride, offset: 0 },
             { type: WebGLRenderingContext.FLOAT, size: 2, stride: stride, offset: 2 * 4 },
             { type: WebGLRenderingContext.UNSIGNED_BYTE, size: 4, stride: stride, offset: 4 * 4, normalized: true },
-        ], vertices, indices, 4, false);
+        ], vertices, indices, 4, 6, false);
     }
 
     /**

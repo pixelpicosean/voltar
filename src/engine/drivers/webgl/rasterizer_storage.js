@@ -410,7 +410,7 @@ export class Surface_t extends Geometry_t {
 
         /** @type {ArrayBuffer | Float32Array} */
         this.data = null;
-        /** @type {Uint16Array} */
+        /** @type {ArrayBuffer | Uint16Array} */
         this.index_data = null;
     }
 }
@@ -1353,11 +1353,12 @@ export class RasterizerStorage {
      * @param {number} primitive
      * @param {VertAttribDef[]} attribs
      * @param {ArrayBuffer | Float32Array} vertices
-     * @param {Uint16Array} [indices]
+     * @param {ArrayBuffer | Uint16Array} [indices]
      * @param {number} array_len
+     * @param {number} index_array_len
      * @param {boolean} [use_3d_vertices]
      */
-    mesh_add_surface_from_data(mesh, primitive, attribs, vertices, indices, array_len, use_3d_vertices = false) {
+    mesh_add_surface_from_data(mesh, primitive, attribs, vertices, indices, array_len, index_array_len, use_3d_vertices = false) {
         const gl = this.gl;
 
         const surface = new Surface_t;
@@ -1367,7 +1368,7 @@ export class RasterizerStorage {
         surface.array_byte_size = vertices.byteLength;
         if (indices) {
             surface.index_data = indices;
-            surface.index_array_len = indices.length;
+            surface.index_array_len = index_array_len;
             surface.index_array_byte_size = indices.byteLength;
         }
         surface.primitive = primitive;

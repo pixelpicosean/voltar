@@ -6,6 +6,7 @@ import {
     set_raw_resource_map,
     get_resource_map,
     get_raw_resource_map,
+    set_binary_pack_list,
 } from 'engine/registry';
 import { default_font_name } from 'engine/scene/resources/theme';
 import { ResourceLoader } from './io/resource_loader';
@@ -69,6 +70,9 @@ export class Engine {
         for (const settings of preload_queue.queue) {
             loader.add.call(loader, ...settings);
         }
+        for (const b of meta["binary_files"]) {
+            loader.add.call(loader, b);
+        }
 
         if (progress_callback) {
             loader.connect('progress', () => {
@@ -87,11 +91,13 @@ export class Engine {
             let raw_resource_map = get_raw_resource_map();
 
             // merge resources data into our existing resources
-            resource_map = raw_resource_map = Object.assign(resource_map, resources);
+            resource_map = Object.assign(resource_map, resources);
+            raw_resource_map = Object.assign(raw_resource_map, resources, loader.resources);
 
             // override
             set_resource_map(resource_map);
             set_raw_resource_map(raw_resource_map);
+            set_binary_pack_list(meta["binary_files"].map(url => raw_resource_map[url].data));
 
             /** @type {string[]} */
             const resource_lookup_skip_list = meta['resource_lookup_skip_list'];
