@@ -91,7 +91,7 @@ function parse_uniform(code) {
         precision,
         value,
         code: `uniform ${precision} ${type_str} ${name};`
-            .replace('  ', ' '),
+            .replace(/ +/, ' '), // multi space to single
     }
 }
 
@@ -106,7 +106,7 @@ function parse_shader_code(code) {
     const vs_start = code.indexOf("void vertex()");
     const fs_start = code.indexOf("void fragment()");
 
-    let type_match = code.match(/shader_type = (canvas_item|spatial);/);
+    let type_match = code.match(/shader_type\s*=\s*(canvas_item|spatial);/);
     let type = type_match ? type_match[1] : "canvas_item";
 
     let uses_screen_texture = code.indexOf("SCREEN_TEXTURE") >= 0;
@@ -258,12 +258,6 @@ export const SPATIAL_SHADER_UNIFORMS = [
     { name: 'WORLD_MATRIX', type: 'mat4' },
 
     { name: 'TIME', type: '1f' },
-
-    // { name: 'albedo', type: '4f' },
-    // { name: 'texture_albedo', type: '1i' },
-    // { name: 'specular', type: '1f' },
-    // { name: 'metallic', type: '1f' },
-    // { name: 'roughness', type: '1f' },
 
     // light general
     { name: 'LIGHT_COLOR', type: '4f' },

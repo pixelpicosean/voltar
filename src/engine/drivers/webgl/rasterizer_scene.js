@@ -411,7 +411,10 @@ export class RasterizerScene {
             const mat = new ShaderMaterial("spatial");
             mat.set_shader(`
                 shader_type = spatial;
+
+                uniform sampler2D texture_albedo;
                 uniform vec4 albedo;
+
                 void fragment() {
                     ALBEDO = texture(texture_albedo, UV).rgb;
                     ALBEDO *= albedo.rgb;
@@ -1280,6 +1283,8 @@ export class RasterizerScene {
             if (i === 0) {
                 this.state.current_main_tex = t.gl_tex;
             }
+
+            i++;
         }
 
         return shader_rebind;

@@ -1,10 +1,9 @@
-module.exports = (data) => {
-    const res = {
-        id: data.attr.id,
-        type: "QuadMesh",
+const PrimitiveMesh = require('./PrimitiveMesh');
 
+module.exports = (data) => {
+    const res = Object.assign(PrimitiveMesh(data), {
         size: data.prop.size,
-    }
+    })
     return res;
 };
 

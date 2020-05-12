@@ -380,6 +380,21 @@ export class VisualServerScene {
 
     /**
      * @param {Instance_t} p_instance
+     * @param {number} p_surface
+     * @param {Material_t} p_material
+     */
+    instance_set_surface_material(p_instance, p_surface, p_material) {
+        if (p_instance.base_type === INSTANCE_TYPE_MESH) {
+            let mesh = /** @type {Mesh_t} */(p_instance.base);
+            p_instance.materials.length = mesh.surfaces.length;
+        }
+
+        p_instance.materials[p_surface] = p_material;
+        p_instance.base_changed(false, true);
+    }
+
+    /**
+     * @param {Instance_t} p_instance
      * @param {Instantiable_t} p_base
      */
     instance_set_base(p_instance, p_base) {

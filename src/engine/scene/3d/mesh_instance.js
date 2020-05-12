@@ -47,6 +47,15 @@ export class MeshInstance extends GeometryInstance {
         this.base = p_base;
     }
 
+    /**
+     * @param {number} p_surface
+     * @param {Material} p_material
+     */
+    set_surface_material(p_surface, p_material) {
+        this.materials[p_surface] = p_material;
+        VSG.scene.instance_set_surface_material(this.instance, p_surface, p_material.material);
+    }
+
     /* virtual method */
 
     _load_data(data) {

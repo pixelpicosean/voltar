@@ -46,6 +46,20 @@ export class PrimitiveMesh extends Mesh {
         this.primitive_type = WebGLRenderingContext.TRIANGLES;
     }
 
+    _load_data(data) {
+        if (data.material) {
+            this.set_material(data.material);
+        }
+        return this;
+    }
+
+    get_rid() {
+        if (this.pending_request) {
+            this._update();
+        }
+        return this.mesh;
+    }
+
     get_surface_count() {
         if (this.pending_request) {
             this._update();
@@ -54,8 +68,34 @@ export class PrimitiveMesh extends Mesh {
     }
 
     free() {
-        VSG.storage.free_rid(this.mesh);
+        VSG.storage.mesh_free(this.mesh);
         return super.free();
+    }
+
+    /**
+     * @param {Material} p_material
+     */
+    set_material(p_material) {
+        this.material = p_material;
+        if (!this.pending_request) {
+            VSG.storage.mesh_surface_set_material(this.mesh, 0, this.material.material);
+        }
+    }
+
+    /**
+     * @param {number} idx
+     * @returns {Material}
+     */
+    surface_get_material(idx) {
+        return this.material;
+    }
+
+    /**
+     * @param {number} idx
+     * @param {Material} p_material
+     */
+    surface_set_material(idx, p_material) {
+        this.set_material(p_material);
     }
 
     _request_update() {
@@ -89,7 +129,7 @@ export class PrimitiveMesh extends Mesh {
 
         VSG.storage.mesh_clear(this.mesh);
         VSG.storage.mesh_add_surface_from_data(this.mesh, this.primitive_type, data.attribs, data.vertices, data.indices, pc, data.indices ? data.indices.length : 0, true);
-        VSG.storage.mesh_surface_set_material(this.mesh, 0, this.material ? this.material.materials.spatial : null);
+        VSG.storage.mesh_surface_set_material(this.mesh, 0, this.material ? this.material.material : null);
 
         this.pending_request = false;
 
@@ -130,6 +170,8 @@ export class QuadMesh extends PrimitiveMesh {
     /* virtual methods */
 
     _load_data(data) {
+        super._load_data(data);
+
         if (data.size) this.set_size(data.size);
 
         return this;
@@ -244,6 +286,8 @@ export class PlaneMesh extends PrimitiveMesh {
     /* virtual methods */
 
     _load_data(data) {
+        super._load_data(data);
+
         if (data.size) this.set_size(data.size);
 
         if (data.subdivide_width) this.set_subdivide_width(data.subdivide_width);
@@ -384,6 +428,8 @@ export class CubeMesh extends PrimitiveMesh {
     /* virtual methods */
 
     _load_data(data) {
+        super._load_data(data);
+
         if (data.size) this.set_size(data.size);
 
         if (data.subdivide_width) this.set_subdivide_width(data.subdivide_width);

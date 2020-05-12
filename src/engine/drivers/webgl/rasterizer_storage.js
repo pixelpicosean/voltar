@@ -303,8 +303,11 @@ export const CULL_MODE_FRONT = 0;
 export const CULL_MODE_BACK = 1;
 export const CULL_MODE_DISABLED = 2;
 
+let shader_uid = 0;
 export class Shader_t {
     constructor() {
+        this.id = shader_uid++;
+
         this.name = '';
 
         this.last_pass = 0;
@@ -338,6 +341,8 @@ export class Shader_t {
     }
 }
 
+/** @type {{ [name: string]: number }} */
+let mat_clone_record = {};
 export class Material_t {
     constructor() {
         this.name = '';
@@ -360,6 +365,32 @@ export class Material_t {
 
         /** @type {Object<string, Texture_t>} */
         this.textures = {};
+    }
+
+    clone() {
+        let m = new Material_t;
+
+        if (!mat_clone_record[this.name]) {
+            mat_clone_record[this.name] = 1;
+        } else {
+            mat_clone_record[this.name] += 1;
+        }
+        m.name = `${this.name}_${mat_clone_record[this.name]}`;
+
+        m.batchable = this.batchable;
+        m.render_priority = this.render_priority;
+        m.next_pass = this.next_pass;
+
+        m.shader = this.shader;
+
+        for (let k in this.params) {
+            m.params[k] = this.params[k].slice();
+        }
+        for (let k in this.textures) {
+            m.textures[k] = this.textures[k];
+        }
+
+        return m;
     }
 }
 

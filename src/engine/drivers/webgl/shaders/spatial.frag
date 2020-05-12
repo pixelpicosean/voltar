@@ -4,8 +4,6 @@ precision mediump float;
 
 uniform highp float TIME;
 
-uniform sampler2D texture_albedo;
-
 uniform vec4 bg_color;
 uniform float bg_energy;
 
