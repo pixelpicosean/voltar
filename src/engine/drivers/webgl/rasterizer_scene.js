@@ -24,6 +24,11 @@ import {
     ShaderMaterial,
     SPATIAL_SHADER_UNIFORMS,
 } from 'engine/scene/resources/material';
+import {
+    ARRAY_NORMAL,
+    ARRAY_COLOR,
+    ARRAY_MAX,
+} from 'engine/scene/const';
 
 import {
     Mesh_t,
@@ -54,14 +59,6 @@ export const ENV_BG_COLOR_SKY = 3;
 export const ENV_BG_CANVAS = 4;
 export const ENV_BG_KEEP = 5;
 export const ENV_BG_CAMERA_FEED = 6;
-
-const ARRAY_VERTEX = 0;
-const ARRAY_NORMAL = 1;
-const ARRAY_TANGENT = 2;
-const ARRAY_COLOR = 3;
-const ARRAY_UV = 4;
-const ARRAY_UV2 = 5;
-const ARRAY_MAX = 6;
 
 const MAX_LIGHTS = 255;
 
@@ -415,6 +412,7 @@ export class RasterizerScene {
                 void fragment() {
                     ALBEDO = texture(texture_albedo, UV).rgb;
                     ALBEDO *= albedo.rgb;
+                    // ALBEDO = vec3(UV.x, UV.y, 0.0);
                 }
             `);
             this.spatial_material_ref = mat;
@@ -646,7 +644,7 @@ export class RasterizerScene {
             // uniform
             .replace("/* UNIFORM */", shader_material.fs_uniform_code)
             // shader code
-            .replace(/\/\* SHADER_BEGIN \*\/([\s\S]*?)\/\* SHADER_END \*\//, `{\n${shader_material.fs_code}}`)
+            .replace(/\/\* SHADER_BEGIN \*\/([\s\S]*?)\/\* SHADER_END \*\//, `{\n${shader_material.fs_code}\n}`)
             // translate Godot API to GLSL
             .replace(/texture\(/gm, "texture2D(")
             .replace(/FRAGCOORD/gm, "gl_FragCoord")
@@ -1202,22 +1200,21 @@ export class RasterizerScene {
                     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, s.index_id);
                 }
 
-                for (let i = 0; i < s.attribs.length; i++) {
+                for (let i = 0; i < ARRAY_MAX; i++) {
                     let attr = s.attribs[i];
                     if (attr.enabled) {
                         gl.enableVertexAttribArray(i);
                         gl.vertexAttribPointer(attr.index, attr.size, attr.type, attr.normalized, attr.stride, attr.offset);
                     } else {
-                        // FIXME: use predefined array index instead
-                        // gl.disableVertexAttribArray(i);
-                        // switch (i) {
-                        //     case ARRAY_TANGENT: {
-                        //         gl.vertexAttrib4f(ARRAY_TANGENT, 0.0, 0.0, 1.0, 1.0);
-                        //     } break;
-                        //     case ARRAY_COLOR: {
-                        //         gl.vertexAttrib4f(ARRAY_COLOR, 1.0, 1.0, 1.0, 1.0);
-                        //     } break;
-                        // }
+                        gl.disableVertexAttribArray(i);
+                        switch (i) {
+                            case ARRAY_NORMAL: {
+                                gl.vertexAttrib4f(ARRAY_NORMAL, 0.0, 0.0, 1.0, 1.0);
+                            } break;
+                            case ARRAY_COLOR: {
+                                gl.vertexAttrib4f(ARRAY_COLOR, 1.0, 1.0, 1.0, 1.0);
+                            } break;
+                        }
                     }
                 }
             } break;

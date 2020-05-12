@@ -31,7 +31,9 @@ uniform highp float LIGHT_SPOT_ANGLE;
 
 varying highp vec3 vertex_interp;
 varying vec3 normal_interp;
+varying lowp vec4 color_interp;
 varying vec2 uv_interp;
+varying vec2 uv2_interp;
 
 float SchlickFresnel(float u) {
     float m = 1.0 - u;

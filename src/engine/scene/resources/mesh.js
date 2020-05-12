@@ -304,6 +304,7 @@ export class ArrayMesh extends Mesh {
         return {
             attribs: offsets.slice(0, ARRAY_INDEX)
                 .map((offset, i) => p_arrays[i] ? ({
+                    index: i,
                     type: p_arrays[i].compressed ? WebGLRenderingContext.UNSIGNED_BYTE : WebGLRenderingContext.FLOAT,
                     size: sizes[i],
                     stride: total_elem_size,

@@ -52,6 +52,7 @@ import {
     PIXEL_FORMAT_ETC,
 } from "engine/scene/resources/texture";
 import { OS } from "engine/core/os/os";
+import { ARRAY_MAX } from "engine/scene/const";
 
 const SMALL_VEC2 = new Vector2(0.00001, 0.00001);
 const SMALL_VEC3 = new Vector3(0.00001, 0.00001, 0.00001);
@@ -413,6 +414,7 @@ export class Material_t {
  * @property {number} offset
  *
  * @typedef VertAttribDef
+ * @property {number} index
  * @property {number} type
  * @property {number} size
  * @property {boolean} [normalized]
@@ -1414,25 +1416,41 @@ export class RasterizerStorage {
         surface.mesh = mesh;
 
         let stride = 0;
-        for (let i = 0; i < attribs.length; i++) {
-            let def = attribs[i];
-
-            /** @type {VertAttrib} */
-            let attr = surface.attribs[i] = {
-                enabled: true,
-                index: i,
-
-                type: def.type,
-                size: def.size,
-                normalized: def.normalized || false,
-                stride: def.stride,
-                offset: def.offset,
+        for (let i = 0; i < ARRAY_MAX; i++) {
+            /** @type {VertAttribDef} */
+            let def = null;
+            loop_attr: for (let j = 0; j < attribs.length; j++) {
+                let a = attribs[j];
+                if (a.index === i) {
+                    def = a;
+                    break loop_attr;
+                }
             }
 
             if (!def) {
-                /* pass empty attribute setting to disable it */
-                attr.enabled = false;
+                surface.attribs[i] = {
+                    enabled: false,
+                    index: i,
+
+                    type: 0,
+                    size: 0,
+                    normalized: false,
+                    stride: 0,
+                    offset: 0,
+                }
             } else {
+                /** @type {VertAttrib} */
+                surface.attribs[i] = {
+                    enabled: true,
+                    index: i,
+
+                    type: def.type,
+                    size: def.size,
+                    normalized: def.normalized || false,
+                    stride: def.stride,
+                    offset: def.offset,
+                };
+
                 if (stride === 0) stride = def.stride;
             }
         }

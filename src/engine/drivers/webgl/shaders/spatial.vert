@@ -14,17 +14,21 @@ uniform highp float TIME;
 
 attribute highp vec3 position;
 attribute vec3 normal;
-attribute vec3 tangent;
+attribute vec4 tangent;
+attribute lowp vec4 color;
 attribute vec2 uv;
+attribute vec2 uv2;
 
 varying highp vec3 vertex_interp;
 varying vec3 normal_interp;
+varying lowp vec4 color_interp;
 varying vec2 uv_interp;
+varying vec2 uv2_interp;
 
 void main() {
     vec3 VERTEX = position;
     vec3 NORMAL = normal;
-    vec3 TANGENT = tangent;
+    vec3 TANGENT = tangent.xyz;
 
     mat4 MODELVIEW_MATRIX = INV_CAMERA_MATRIX * WORLD_MATRIX;
 

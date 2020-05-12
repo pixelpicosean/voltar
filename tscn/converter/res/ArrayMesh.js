@@ -197,6 +197,7 @@ function pack_as_binary(p_arrays, is_2d) {
         index_array_len,
         attribs: offsets.slice(0, ARRAY_INDEX)
             .map((offset, i) => p_arrays[i] ? ({
+                index: i,
                 type: p_arrays[i].compressed ? 5121 : 5126,
                 size: sizes[i],
                 stride: total_elem_size,

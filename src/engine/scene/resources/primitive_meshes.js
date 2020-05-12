@@ -1,13 +1,19 @@
 import { res_class_map } from "engine/registry";
+import { pack_color_f } from "engine/core/math/math_funcs";
 import { Vector2, Vector2Like } from "engine/core/math/vector2";
 import { Vector3, Vector3Like } from "engine/core/math/vector3";
 import { AABB } from "engine/core/math/aabb";
 
 import { VSG } from "engine/servers/visual/visual_server_globals";
 
+import {
+    ARRAY_VERTEX,
+    ARRAY_NORMAL,
+    ARRAY_TANGENT,
+    ARRAY_TEX_UV,
+} from "../const";
 import { Material } from "./material";
 import { Mesh } from "./mesh";
-import { pack_color_f } from "engine/core/math/math_funcs";
 
 /**
  * @typedef MeshData
@@ -225,10 +231,10 @@ export class QuadMesh extends PrimitiveMesh {
         /** @type {MeshData} */
         const mesh_data = {
             attribs: [
-                { type: WebGLRenderingContext.FLOAT, size: 3, stride: STRIDE, offset: 0 },
-                { type: WebGLRenderingContext.FLOAT, size: 3, stride: STRIDE, offset: 3 * 4 },
-                { type: WebGLRenderingContext.UNSIGNED_BYTE, size: 4, stride: STRIDE, offset: (3 + 3) * 4 },
-                { type: WebGLRenderingContext.FLOAT, size: 2, stride: STRIDE, offset: (3 + 3 + 1) * 4 },
+                { index: ARRAY_VERTEX, type: WebGLRenderingContext.FLOAT, size: 3, stride: STRIDE, offset: 0 },
+                { index: ARRAY_NORMAL, type: WebGLRenderingContext.FLOAT, size: 3, stride: STRIDE, offset: 3 * 4 },
+                { index: ARRAY_TANGENT, type: WebGLRenderingContext.UNSIGNED_BYTE, size: 4, stride: STRIDE, offset: (3 + 3) * 4 },
+                { index: ARRAY_TEX_UV, type: WebGLRenderingContext.FLOAT, size: 2, stride: STRIDE, offset: (3 + 3 + 1) * 4 },
             ],
             vertices,
             indices,
@@ -355,10 +361,10 @@ export class PlaneMesh extends PrimitiveMesh {
         /** @type {MeshData} */
         const mesh_data = {
             attribs: [
-                { type: WebGLRenderingContext.FLOAT, size: 3, stride: STRIDE, offset: 0 },
-                { type: WebGLRenderingContext.FLOAT, size: 3, stride: STRIDE, offset: 3 * 4 },
-                { type: WebGLRenderingContext.UNSIGNED_BYTE, size: 4, stride: STRIDE, offset: (3 + 3) * 4 },
-                { type: WebGLRenderingContext.FLOAT, size: 2, stride: STRIDE, offset: (3 + 3 + 1) * 4 },
+                { index: ARRAY_VERTEX, type: WebGLRenderingContext.FLOAT, size: 3, stride: STRIDE, offset: 0 },
+                { index: ARRAY_NORMAL, type: WebGLRenderingContext.FLOAT, size: 3, stride: STRIDE, offset: 3 * 4 },
+                { index: ARRAY_TANGENT, type: WebGLRenderingContext.UNSIGNED_BYTE, size: 4, stride: STRIDE, offset: (3 + 3) * 4 },
+                { index: ARRAY_TEX_UV, type: WebGLRenderingContext.FLOAT, size: 2, stride: STRIDE, offset: (3 + 3 + 1) * 4 },
             ],
             vertices,
             indices,
@@ -675,10 +681,10 @@ export class CubeMesh extends PrimitiveMesh {
         /** @type {MeshData} */
         const mesh_data = {
             attribs: [
-                { type: WebGLRenderingContext.FLOAT, size: 3, stride: STRIDE, offset: 0 },
-                { type: WebGLRenderingContext.FLOAT, size: 3, stride: STRIDE, offset: 3 * 4 },
-                { type: WebGLRenderingContext.UNSIGNED_BYTE, size: 4, stride: STRIDE, offset: (3 + 3) * 4 },
-                { type: WebGLRenderingContext.FLOAT, size: 2, stride: STRIDE, offset: (3 + 3 + 1) * 4 },
+                { index: ARRAY_VERTEX, type: WebGLRenderingContext.FLOAT, size: 3, stride: STRIDE, offset: 0 },
+                { index: ARRAY_NORMAL, type: WebGLRenderingContext.FLOAT, size: 3, stride: STRIDE, offset: 3 * 4 },
+                { index: ARRAY_TANGENT, type: WebGLRenderingContext.UNSIGNED_BYTE, size: 4, stride: STRIDE, offset: (3 + 3) * 4 },
+                { index: ARRAY_TEX_UV, type: WebGLRenderingContext.FLOAT, size: 2, stride: STRIDE, offset: (3 + 3 + 1) * 4 },
             ],
             vertices,
             indices,
