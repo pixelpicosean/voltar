@@ -488,7 +488,7 @@ export class CubeMesh extends PrimitiveMesh {
 
                 vertices[point * VERT_LENGTH + 6 + 0] = pack_color_f(1, 0, 0, 1);
 
-                vertices[point * VERT_LENGTH + 7 + 0] = twothirds + u;
+                vertices[point * VERT_LENGTH + 7 + 0] = u;
                 vertices[point * VERT_LENGTH + 7 + 1] = v;
 
                 point += 1;
