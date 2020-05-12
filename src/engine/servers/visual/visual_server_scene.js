@@ -395,6 +395,15 @@ export class VisualServerScene {
 
     /**
      * @param {Instance_t} p_instance
+     * @param {Material_t} p_material
+     */
+    instance_geometry_set_material_override(p_instance, p_material) {
+        p_instance.materail_override = p_material;
+        p_instance.base_changed(false, true);
+    }
+
+    /**
+     * @param {Instance_t} p_instance
      * @param {Instantiable_t} p_base
      */
     instance_set_base(p_instance, p_base) {

@@ -3,13 +3,15 @@ import { GDCLASS } from "engine/core/v_object";
 
 import { VSG } from "engine/servers/visual/visual_server_globals";
 
+import { Material } from "../resources/material";
+import { NOTIFICATION_TRANSFORM_CHANGED } from "../const";
 import {
     Spatial,
     NOTIFICATION_ENTER_WORLD,
     NOTIFICATION_EXIT_WORLD,
     NOTIFICATION_VISIBILITY_CHANGED_3D,
 } from "./spatial";
-import { NOTIFICATION_TRANSFORM_CHANGED } from "../const";
+
 
 export class VisualInstance extends Spatial {
     get class() { return "VisualInstance" }
@@ -35,6 +37,16 @@ export class VisualInstance extends Spatial {
     }
 
     /* virtual method */
+
+    _load_data(data) {
+        super._load_data(data);
+
+        if (data.layers) {
+            this.layers = data.layers;
+        }
+
+        return this;
+    }
 
     /**
      * @param {number} p_what
@@ -71,6 +83,38 @@ export class GeometryInstance extends VisualInstance {
 
     constructor() {
         super();
+
+        this.cast_shadow = 1;
+
+        this.extra_cull_margin = 0;
+
+        this.lod_min_distance = 0;
+        this.lod_max_distance = 0;
+        this.lod_min_hysteresis = 0;
+        this.lod_max_hysteresis = 0;
+
+        /** @type {Material} */
+        this.material_override = null;
+
+        this.use_in_baked_light = false;
+    }
+
+    _load_data(data) {
+        super._load_data(data);
+
+        if (data.material_override) {
+            this.set_material_override(data.material_override);
+        }
+
+        return this;
+    }
+
+    /**
+     * @param {Material} p_material
+     */
+    set_material_override(p_material) {
+        this.material_override = p_material;
+        VSG.scene.instance_geometry_set_material_override(this.instance, p_material ? p_material.material : null);
     }
 }
 node_class_map["GeometryInstance"] = GDCLASS(GeometryInstance, Spatial);

@@ -16,6 +16,8 @@ import { Material } from "./material";
 import { Mesh } from "./mesh";
 
 /**
+ * @typedef {import('engine/drivers/webgl/rasterizer_storage').Mesh_t} Mesh_t
+ *
  * @typedef MeshData
  * @property {import('engine/drivers/webgl/rasterizer_storage').VertAttribDef[]} attribs
  * @property {Float32Array} vertices
@@ -38,7 +40,7 @@ export class PrimitiveMesh extends Mesh {
     constructor() {
         super();
 
-        /** @type {import('engine/drivers/webgl/rasterizer_storage').Mesh_t} */
+        /** @type {Mesh_t} */
         this.mesh = VSG.storage.mesh_create();
 
         this.aabb = new AABB;

@@ -8,10 +8,13 @@ module.exports = (data) => {
     const node = {
         key: data.key,
         index: int(data.attr.index),
-        type: 'Node',
+        type: data.attr.type,
+
         name: string(data.attr.name),
         parent: path(data.attr.parent),
+
         groups: undefined,
+
         pause_mode: int(data.prop.pause_mode),
     };
 

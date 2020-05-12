@@ -1,10 +1,15 @@
-import { Mesh } from "../resources/mesh";
-import { Material } from "../resources/material";
-
-import { GeometryInstance } from "./visual_instance";
 import { node_class_map } from "engine/registry";
 import { GDCLASS } from "engine/core/v_object";
+
 import { VSG } from "engine/servers/visual/visual_server_globals";
+
+import { Mesh } from "../resources/mesh";
+import { Material } from "../resources/material";
+import { GeometryInstance } from "./visual_instance";
+
+/**
+ * @typedef {import('engine/drivers/webgl/rasterizer_storage').Mesh_t} Mesh_t
+ */
 
 export class MeshInstance extends GeometryInstance {
     get class() { return "MeshInstance" }
@@ -15,6 +20,7 @@ export class MeshInstance extends GeometryInstance {
         /** @type {Mesh} */
         this.mesh = null;
         this.skeleton_path = "";
+
         /** @type {Material[]} */
         this.materials = [];
     }
@@ -40,7 +46,7 @@ export class MeshInstance extends GeometryInstance {
     }
 
     /**
-     * @param {import('engine/drivers/webgl/rasterizer_storage').Mesh_t} p_base
+     * @param {Mesh_t} p_base
      */
     set_base(p_base) {
         VSG.scene.instance_set_base(this.instance, p_base);
@@ -62,6 +68,11 @@ export class MeshInstance extends GeometryInstance {
         super._load_data(data);
 
         if (data.mesh) this.set_mesh(data.mesh);
+        if (data.materials) {
+            for (let i = 0; i < data.materials.length; i++) {
+                this.set_surface_material(i, data.materials[i]);
+            }
+        }
 
         return this;
     }
