@@ -228,12 +228,20 @@ module.exports.parse_block = (block) => {
                     const key = line.substr(0, equal_idx).trim();
 
                     if (key.indexOf('/') > 0) {
-                        let after_slash = key.substr(key.indexOf('/') + 1);
+                        let after_slash = key.substr(key.indexOf('/') + 1).trimRight();
                         let index = parseInt(after_slash);
-                        if (Number.isFinite(index)) {
-                            // treat this as an array, but this can be confusion
-                        } else {
-                            // treat this as an object, but this can be confusion
+                        if (isFinite(index)) {
+                            let real_key = key.substring(0, key.indexOf('/'));
+                            let value_str = line.substr(equal_idx + 1).trim();
+                            let value_res = parse_as_primitive(value_str);
+                            stack.push({
+                                key: real_key,
+                                value: [
+                                    value_res.is_valid ? value_res.value : value_str,
+                                ],
+                            });
+                            tokens.push('/');
+                            continue;
                         }
                     }
 
@@ -381,6 +389,36 @@ module.exports.parse_block = (block) => {
                     // this array is continue
                     const el_str = line.trim();
                     push_tokens_in_a_line(data.prop, el_str, tokens, stack, _.last(stack).value.length);
+                }
+            } break;
+            case '/': {
+                if (!line.includes('/')) {
+                    tokens.pop();
+                    let pack = stack.pop();
+                    let parent = (stack.length > 0) ? _.last(stack).value : data.prop;
+                    parent[pack.key] = pack.value;
+                } else {
+                    const equal_idx = line.indexOf('=');
+                    if (equal_idx > 0) {
+                        const key = line.substr(0, equal_idx).trim();
+                        if (key.indexOf('/') > 0) {
+                            let after_slash = key.substr(key.indexOf('/') + 1).trimRight();
+                            let index = parseInt(after_slash);
+                            if (isFinite(index)) {
+                                let real_key = key.substring(0, key.indexOf('/'));
+                                let value_str = line.substr(equal_idx + 1).trim();
+                                let value_res = parse_as_primitive(value_str);
+                                stack.push({
+                                    key: real_key,
+                                    value: [
+                                        value_res.is_valid ? value_res.value : value_str,
+                                    ],
+                                });
+                                tokens.push('/');
+                                continue;
+                            }
+                        }
+                    }
                 }
             } break;
         }
