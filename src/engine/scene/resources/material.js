@@ -3,6 +3,8 @@ import { VSG } from "engine/servers/visual/visual_server_globals";
 
 /**
  * @typedef {import('engine/drivers/webgl/rasterizer_storage').Material_t} Material_t
+ * @typedef {import('engine/drivers/webgl/rasterizer_storage').Texture_t} Texture_t
+ * @typedef {import('engine/drivers/webgl/rasterizer_storage').UniformTypes} UniformTypes
  */
 
 export class Material {
@@ -83,6 +85,15 @@ function parse_uniform(code) {
     let value_match = code.match(/=[ ]{0,}([\s\S]*?);/);
     if (value_match) {
         value = parse_value(value_match[1]);
+    }
+
+    // texture value hint
+    if (type_str === "sampler2D") {
+        if (code.includes("hint_white")) {
+            value = VSG.storage.resources.white_tex.texture;
+        } else if (code.includes("hint_black")) {
+            value = VSG.storage.resources.black_tex.texture;
+        }
     }
 
     return {
@@ -167,8 +178,10 @@ export class ShaderMaterial extends Material {
         this.shader_type = "canvas_item";
         this.uses_screen_texture = false;
 
-        /** @type {{ name: string, type: import('engine/drivers/webgl/rasterizer_storage').UniformTypes, value?: number[] }[]} */
+        /** @type {{ name: string, type: UniformTypes, value?: number[] | Texture_t }[]} */
         this.uniforms = [];
+        /** @type {{ [name: string]: Texture_t }} */
+        this.texture_hints = {};
 
         this.vs_code = "";
         this.vs_uniform_code = "";
@@ -194,6 +207,11 @@ export class ShaderMaterial extends Material {
         this.uses_screen_texture = parsed_code.uses_screen_texture;
 
         this.uniforms = parsed_code.uniforms;
+        for (let u of this.uniforms) {
+            if (!Array.isArray(u.value)) {
+                this.texture_hints[u.name] = u.value;
+            }
+        }
 
         this.vs_code = parsed_code.vs_code;
         this.vs_uniform_code = parsed_code.vs_uniform_code;
@@ -240,7 +258,7 @@ export class SpatialMaterial extends Material {
                 } break;
 
                 case 'albedo_texture': {
-                    this.material.textures['texture_albedo'];
+                    this.material.textures['texture_albedo'] = v.texture;
                 } break;
             }
         }
