@@ -332,6 +332,9 @@ export class RasterizerScene {
             /** @type {WebGLTexture} */
             current_main_tex: null,
 
+            /** @type {WebGLProgram} */
+            current_prog: null,
+
             /** @type {Object<string, number[]>} */
             uniforms: {
                 CAMERA_MATRIX: [
@@ -405,12 +408,13 @@ export class RasterizerScene {
         {
             /* default material */
 
-            const mat = new ShaderMaterial("normal");
+            const mat = new ShaderMaterial("spatial");
             mat.set_shader(`
                 shader_type = spatial;
+                uniform vec4 albedo;
                 void fragment() {
-                    vec4 albedo = texture(texture_albedo, UV);
-                    ALBEDO = albedo.rgb;
+                    ALBEDO = texture(texture_albedo, UV).rgb;
+                    ALBEDO *= albedo.rgb;
                 }
             `);
             this.materials.spatial = this.init_shader_material(mat, normal_vs, normal_fs, [], true);
@@ -494,6 +498,8 @@ export class RasterizerScene {
         } else {
             viewport_y = this.storage.frame.current_rt.y;
         }
+
+        this.state.current_prog = null;
 
         this.state.used_screen_texture = false;
         this.state.viewport_size.set(viewport_width, viewport_height);
@@ -660,6 +666,8 @@ export class RasterizerScene {
                 ...shader_material.uniforms,
             ]
         );
+        shader.name = shader_material.name;
+
         const material = VSG.storage.material_create(shader, undefined, shader_material.uses_screen_texture);
         material.name = shader_material.name;
         material.batchable = batchable;
@@ -1077,12 +1085,12 @@ export class RasterizerScene {
             for (const k in mat_uniforms) {
                 const u = mat_uniforms[k];
                 switch (u.type) {
-                    case '1f': gl.uniform1fv(u.gl_loc, global_uniforms[k] ? global_uniforms[k] : global_uniforms[k] ? global_uniforms[k] ? global_uniforms[k] : global_uniforms[k] : material.params[k]); break;
-                    case '2f': gl.uniform2fv(u.gl_loc, global_uniforms[k] ? global_uniforms[k] : global_uniforms[k] ? global_uniforms[k] ? global_uniforms[k] : global_uniforms[k] : material.params[k]); break;
-                    case '3f': gl.uniform3fv(u.gl_loc, global_uniforms[k] ? global_uniforms[k] : global_uniforms[k] ? global_uniforms[k] ? global_uniforms[k] : global_uniforms[k] : material.params[k]); break;
-                    case '4f': gl.uniform4fv(u.gl_loc, global_uniforms[k] ? global_uniforms[k] : global_uniforms[k] ? global_uniforms[k] ? global_uniforms[k] : global_uniforms[k] : material.params[k]); break;
-                    case 'mat3': gl.uniformMatrix3fv(u.gl_loc, false, global_uniforms[k] ? global_uniforms[k] : global_uniforms[k] ? global_uniforms[k] ? global_uniforms[k] : global_uniforms[k] : material.params[k]); break;
-                    case 'mat4': gl.uniformMatrix4fv(u.gl_loc, false, global_uniforms[k] ? global_uniforms[k] : global_uniforms[k] ? global_uniforms[k] ? global_uniforms[k] : global_uniforms[k] : material.params[k]); break;
+                    case '1f': gl.uniform1fv(u.gl_loc, global_uniforms[k] ? global_uniforms[k] : material.params[k]); break;
+                    case '2f': gl.uniform2fv(u.gl_loc, global_uniforms[k] ? global_uniforms[k] : material.params[k]); break;
+                    case '3f': gl.uniform3fv(u.gl_loc, global_uniforms[k] ? global_uniforms[k] : material.params[k]); break;
+                    case '4f': gl.uniform4fv(u.gl_loc, global_uniforms[k] ? global_uniforms[k] : material.params[k]); break;
+                    case 'mat3': gl.uniformMatrix3fv(u.gl_loc, false, global_uniforms[k] ? global_uniforms[k] : material.params[k]); break;
+                    case 'mat4': gl.uniformMatrix4fv(u.gl_loc, false, global_uniforms[k] ? global_uniforms[k] : material.params[k]); break;
                 }
             }
 
@@ -1232,8 +1240,11 @@ export class RasterizerScene {
             gl.bindTexture(gl.TEXTURE_2D, this.storage.frame.current_rt.copy_screen_effect.gl_depth);
         }
 
-        let shader_rebind = true;
-        gl.useProgram(p_material.shader.gl_prog);
+        let shader_rebind = this.state.current_prog != p_material.shader.gl_prog;
+        if (shader_rebind) {
+            gl.useProgram(p_material.shader.gl_prog);
+            this.state.current_prog = p_material.shader.gl_prog;
+        }
 
         if (p_material.shader.spatial.no_depth_test || p_material.shader.spatial.uses_depth_texture) {
             gl.disable(gl.DEPTH_TEST);

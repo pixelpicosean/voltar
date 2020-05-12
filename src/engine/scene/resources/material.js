@@ -1,4 +1,5 @@
 import { res_class_map } from "engine/registry";
+import { VSG } from "engine/servers/visual/visual_server_globals";
 
 /**
  * @typedef {import('engine/drivers/webgl/rasterizer_storage').Material_t} Material_t
@@ -75,7 +76,7 @@ function parse_uniform(code) {
     idx += 1;
 
     // name
-    let name = tokens[idx];
+    let name = tokens[idx].replace(';', '');
 
     // default value
     let value = null;
@@ -89,7 +90,8 @@ function parse_uniform(code) {
         name,
         precision,
         value,
-        code: `uniform ${precision} ${type_str} ${name};`,
+        code: `uniform ${precision} ${type_str} ${name};`
+            .replace('  ', ' '),
     }
 }
 
@@ -104,7 +106,7 @@ function parse_shader_code(code) {
     const vs_start = code.indexOf("void vertex()");
     const fs_start = code.indexOf("void fragment()");
 
-    let type_match = code.match(/shader_type (canvas_item|spatial);/);
+    let type_match = code.match(/shader_type = (canvas_item|spatial);/);
     let type = type_match ? type_match[1] : "canvas_item";
 
     let uses_screen_texture = code.indexOf("SCREEN_TEXTURE") >= 0;
@@ -211,6 +213,43 @@ export const CANVAS_ITEM_SHADER_UNIFORMS = [
     { name: 'SCREEN_PIXEL_SIZE', type: '2f' },
 ]
 
+export class SpatialMaterial extends Material {
+    constructor() {
+        super();
+
+        this.material = VSG.scene_render.materials.spatial.clone();
+    }
+    /**
+     * @param {any} data
+     */
+    _load_data(data) {
+        for (let k in data) {
+            let v = data[k];
+            switch (k) {
+                case 'albedo_color': {
+                    this.material.params['albedo'] = [v.r, v.g, v.b, v.a];
+                } break;
+                case 'metallic_specular': {
+                    this.material.params['specular'] = [v];
+                } break;
+                case 'metallic': {
+                    this.material.params['metallic'] = [v];
+                } break;
+                case 'roughness': {
+                    this.material.params['roughness'] = [v];
+                } break;
+
+                case 'albedo_texture': {
+                    this.material.textures['texture_albedo'];
+                } break;
+            }
+        }
+
+        return this;
+    }
+}
+res_class_map['SpatialMaterial'] = SpatialMaterial;
+
 export const SPATIAL_SHADER_UNIFORMS = [
     { name: 'CAMERA_MATRIX', type: 'mat4' },
     { name: 'INV_CAMERA_MATRIX', type: 'mat4' },
@@ -220,11 +259,11 @@ export const SPATIAL_SHADER_UNIFORMS = [
 
     { name: 'TIME', type: '1f' },
 
-    { name: 'albedo', type: '4f' },
-    { name: 'texture_albedo', type: '1i' },
-    { name: 'specular', type: '1f' },
-    { name: 'metallic', type: '1f' },
-    { name: 'roughness', type: '1f' },
+    // { name: 'albedo', type: '4f' },
+    // { name: 'texture_albedo', type: '1i' },
+    // { name: 'specular', type: '1f' },
+    // { name: 'metallic', type: '1f' },
+    // { name: 'roughness', type: '1f' },
 
     // light general
     { name: 'LIGHT_COLOR', type: '4f' },
