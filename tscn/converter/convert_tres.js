@@ -15,6 +15,15 @@ function optional_empty(obj) {
 }
 
 /**
+ * @param {Array} arr
+ */
+function optional_empty_array(arr) {
+    return arr
+        .filter(e => !!e)
+        .filter(e => optional_empty(e))
+}
+
+/**
  * @param {{ key: string, attr: any, prop: any }[]} blocks
  */
 module.exports.convert_tres = (blocks) => {
@@ -25,7 +34,7 @@ module.exports.convert_tres = (blocks) => {
     const head = sections.shift();
 
     let ext = {};
-    let sub = {};
+    let sub = []; // we need order of sub resources, some may depend on another
     const resource = [];
 
     for (let i = 0; i < sections.length; i++) {
@@ -45,9 +54,8 @@ module.exports.convert_tres = (blocks) => {
         } else if (sec.key === 'sub_resource') {
             normalize_resource_object(sec);
 
-            sub[sec.id] = sec;
+            sub.push(sec);
             sec.key = undefined;
-            sec.id = undefined;
         } else if (sec.key === 'resource') {
             for (const key in sec.prop) {
                 const { index, prop_key } = get_array_index_and_prop_key(key);
@@ -64,7 +72,7 @@ module.exports.convert_tres = (blocks) => {
         const converter = require(`./res/${head.attr.type}`);
         return Object.assign({
             ext: optional_empty(ext),
-            sub: optional_empty(sub),
+            sub: optional_empty_array(sub),
         }, converter({
             attr: head.attr,
             prop: resource,
@@ -179,7 +187,7 @@ module.exports.convert_tres = (blocks) => {
         return {
             type: 'PackedScene',
             ext: optional_empty(ext),
-            sub: optional_empty(sub),
+            sub: optional_empty_array(sub),
             nodes,
         };
     } else {
