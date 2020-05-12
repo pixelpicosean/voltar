@@ -1,4 +1,12 @@
-const { add_binary_resource, get_binary_packs } = require('../../resource_record');
+const {
+    add_binary_resource,
+    add_json_resource,
+} = require('../../resource_record');
+
+
+/* config */
+const pack_array_to_binary = true;
+
 
 /**
  * @param {any} data
@@ -43,7 +51,11 @@ module.exports = (data) => {
         if (meta && meta.func) {
             s.is_2d = (meta.func != "Vector3Array");
         }
-        s.arrays = pack_as_binary(arrays, s.is_2d);
+        if (pack_array_to_binary) {
+            s.arrays = pack_as_binary(arrays, s.is_2d);
+        } else {
+            s.arrays = arrays;
+        }
     }
     return {
         id: data.attr.id,
@@ -175,6 +187,8 @@ function pack_as_binary(p_arrays, is_2d) {
     let index_bin = add_binary_resource(new Uint8Array(index_array.buffer));
 
     return {
+        __type__: 'b',
+
         is_2d,
         aabb: is_2d ? null : get_aabb(p_arrays[ARRAY_VERTEX].array),
         vertex: vertex_bin,

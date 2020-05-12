@@ -64,3 +64,11 @@ export const set_binary_pack_list = (list) => {
 };
 /** @param {number} idx */
 export const get_binary_pack = (idx) => binary_pack_list[idx];
+
+/** @type {any[]} */
+let json_pack_list = [];
+export const set_json_pack_list = (list) => {
+    json_pack_list = list;
+};
+/** @param {number} idx */
+export const get_json_data = (idx) => json_pack_list[idx];

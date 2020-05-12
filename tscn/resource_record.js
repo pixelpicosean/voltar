@@ -44,18 +44,29 @@ module.exports.get_non_tres_resources = function() {
 }
 
 /** @type {string[]} */
-let resource_lookup_skip_list = [];
+let resource_check_ignores = [];
 /**
  * @param {string} key
  */
-module.exports.add_to_resource_lookup_skip_list = function(key) {
-    if (resource_lookup_skip_list.indexOf(key) < 0) {
-        resource_lookup_skip_list.push(key);
+module.exports.add_to_resource_check_ignores = function(key) {
+    if (resource_check_ignores.indexOf(key) < 0) {
+        resource_check_ignores.push(key);
     }
 }
 
-module.exports.get_resource_lookup_skip_list = function() {
-    return resource_lookup_skip_list;
+module.exports.get_resource_check_ignores = function() {
+    return resource_check_ignores;
+}
+
+/* general JSON data API */
+
+let json_data = [];
+module.exports.add_json_resource = function(any) {
+    json_data.push(any);
+    return json_data.length - 1;
+}
+module.exports.get_json_packs = function() {
+    return [json_data];
 }
 
 /* binary file API */

@@ -8,8 +8,12 @@ import {
     get_raw_resource_map,
     set_binary_pack_list,
 } from 'engine/registry';
-import { default_font_name } from 'engine/scene/resources/theme';
+
 import { ResourceLoader } from './io/resource_loader';
+import { decompress } from './io/z';
+
+import { default_font_name, Theme } from 'engine/scene/resources/theme';
+import { registered_bitmap_fonts } from 'engine/scene/resources/font';
 import { instanciate_scene } from 'engine/scene/assembler';
 import meta from 'meta.json';
 
@@ -65,12 +69,15 @@ export class Engine {
         preload_queue.is_start = true;
 
         // Load resources marked as preload
-        preload_queue.queue.unshift([`media/resources.json`]);
         preload_queue.queue.unshift([`media/${default_font_name}.fnt`]);
+        preload_queue.queue.unshift([`media/data.vt`]);
         for (const settings of preload_queue.queue) {
             loader.add.call(loader, ...settings);
         }
         for (const b of meta["binary_files"]) {
+            loader.add.call(loader, b);
+        }
+        for (const b of meta["json_files"]) {
             loader.add.call(loader, b);
         }
 
@@ -82,9 +89,10 @@ export class Engine {
 
         loader.load(() => {
             preload_queue.is_complete = true;
-            // Theme.set_default_font(registered_bitmap_fonts[default_font_name]);
+            Theme.set_default_font(registered_bitmap_fonts[default_font_name]);
 
-            let resources = loader.resources['media/resources.json'].data;
+            let res_str = decompress(loader.resources['media/data.vt'].data);
+            let resources = JSON.parse(res_str);
 
             // fetch resource map updated by loader
             let resource_map = get_resource_map();
@@ -97,10 +105,11 @@ export class Engine {
             // override
             set_resource_map(resource_map);
             set_raw_resource_map(raw_resource_map);
+            set_binary_pack_list(meta["json_files"].map(url => JSON.parse(decompress(raw_resource_map[url].data))));
             set_binary_pack_list(meta["binary_files"].map(url => raw_resource_map[url].data));
 
             /** @type {string[]} */
-            const resource_lookup_skip_list = meta['resource_lookup_skip_list'];
+            const resource_check_ignores = meta['resource_check_ignores'];
 
             // create real resources from data imported from Godot
             const res_head = 'res://';
@@ -115,7 +124,7 @@ export class Engine {
 
                             if (!resource) {
                                 // is this one in our lookup skip list?
-                                if (resource_lookup_skip_list.indexOf(resource_filename) < 0) {
+                                if (resource_check_ignores.indexOf(resource_filename) < 0) {
                                     console.warn(`Resource with URL [${resource_filename}] not found`);
                                 }
                                 continue;

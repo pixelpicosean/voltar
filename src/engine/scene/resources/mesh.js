@@ -106,7 +106,12 @@ export class ArrayMesh extends Mesh {
     _load_data(data) {
         for (let i = 0; i < data.surfaces.length; i++) {
             let surface = data.surfaces[i];
-            this.add_surface_from_packed_arrays(surface.primitive, surface.arrays, surface.is_2d);
+            if (surface.arrays.__type__ === "b") {
+                /* interleaved data from binary files */
+                this.add_surface_from_packed_arrays(surface.primitive, surface.arrays, surface.is_2d);
+            } else {
+                this.add_surface_from_arrays(surface.primitive, surface.arrays, surface.is_2d);
+            }
         }
 
         return this;
