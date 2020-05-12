@@ -91,7 +91,7 @@ export class Instance_t {
 
         this.skeleton = null;
         /** @type {Material_t} */
-        this.materail_override = null;
+        this.material_override = null;
 
         this.transform = new Transform;
 
@@ -398,7 +398,7 @@ export class VisualServerScene {
      * @param {Material_t} p_material
      */
     instance_geometry_set_material_override(p_instance, p_material) {
-        p_instance.materail_override = p_material;
+        p_instance.material_override = p_material;
         p_instance.base_changed(false, true);
     }
 

@@ -751,9 +751,9 @@ export class RasterizerScene {
         /** @type {Material_t} */
         let material = null;
 
-        if (p_instance.materail_override) {
-            material = p_instance.materail_override;
-        } else if (p_material > 0) {
+        if (p_instance.material_override) {
+            material = p_instance.material_override;
+        } else if (p_material >= 0) {
             material = p_instance.materials[p_material];
         } else {
             material = p_geometry.material;
