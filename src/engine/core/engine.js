@@ -166,13 +166,16 @@ export class Engine {
                     }
                     if (res.sub) {
                         // create sub resource objects
-                        for (let id in res.sub) {
-                            const data = res.sub[id];
+                        for (let i = 0; i < res.sub.length; i++) {
+                            let data = res.sub[i];
+                            let id = data.id;
                             normalize_resource_object(data, res.ext, res.sub);
 
                             const ctor = res_class_map[data.type];
                             if (ctor) {
-                                res.sub[id] = (new ctor)._load_data(data);
+                                data = (new ctor)._load_data(data);
+                                data.__rid__ = `${id}`;
+                                res.sub[i] = data;
                             }
                         }
                     }
@@ -219,11 +222,14 @@ const ext_head = '@ext#'; const ext_offset = ext_head.length;
 /**
  * @param {string} key
  * @param {any} ext
- * @param {any} sub
+ * @param {any[]} sub
  */
 function normalize_res(key, ext, sub) {
     if (key.startsWith(sub_head)) {
-        return sub[key.substr(sub_offset)];
+        let id = key.substr(sub_offset);
+        for (let i = 0; i < sub.length; i++) {
+            if (sub[i].__rid__ === id) return sub[i];
+        }
     } else if (key.startsWith(ext_head)) {
         return ext[key.substr(ext_offset)];
     }
@@ -232,7 +238,7 @@ function normalize_res(key, ext, sub) {
 /**
  * @param {any} obj
  * @param {any} ext
- * @param {any} sub
+ * @param {any[]} sub
  */
 function normalize_resource_object(obj, ext, sub) {
     for (const k in obj) {
@@ -251,7 +257,7 @@ function normalize_resource_object(obj, ext, sub) {
 /**
  * @param {any[]} arr
  * @param {any} ext
- * @param {any} sub
+ * @param {any[]} sub
  */
 function normalize_resource_array(arr, ext, sub) {
     for (let i = 0; i < arr.length; i++) {
