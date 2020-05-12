@@ -365,10 +365,18 @@ export class Material_t {
 
         /** @type {Object<string, Texture_t>} */
         this.textures = {};
+
+        /**
+         * Original material if this is cloned
+         * @type {Material_t}
+         */
+        this.origin = null;
     }
 
     clone() {
         let m = new Material_t;
+
+        m.origin = this;
 
         if (!mat_clone_record[this.name]) {
             mat_clone_record[this.name] = 1;

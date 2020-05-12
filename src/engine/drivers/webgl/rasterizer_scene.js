@@ -380,9 +380,6 @@ export class RasterizerScene {
                 ambient_color: [0, 0, 0, 1],
                 ambient_energy: [1],
             },
-
-            /** @type {{ [key: string]: Texture_t }} */
-            textures: {},
         };
 
         this.render_list = new RenderList_t;
@@ -420,6 +417,7 @@ export class RasterizerScene {
                     ALBEDO *= albedo.rgb;
                 }
             `);
+            this.spatial_material_ref = mat;
             this.materials.spatial = this.init_shader_material(mat, normal_vs, normal_fs, [], true);
 
             this.materials.spatial.params["albedo"] = [1, 1, 1, 1];
@@ -676,7 +674,11 @@ export class RasterizerScene {
         material.batchable = batchable;
         for (let u of shader_material.uniforms) {
             if (u.value) {
-                material.params[u.name] = u.value;
+                if (Array.isArray(u.value)) {
+                    material.params[u.name] = u.value;
+                } else {
+                    material.textures[u.name] = u.value;
+                }
             }
         }
         return material;
@@ -1233,6 +1235,8 @@ export class RasterizerScene {
     _setup_material(p_material, p_alpha_pass) {
         const gl = this.gl;
 
+        let uniforms = p_material.shader.uniforms;
+
         if (p_material.shader.spatial.uses_screen_texture && this.storage.frame.current_rt) {
             gl.activeTexture(gl.TEXTURE0 + VSG.config.max_texture_image_units - 4);
             gl.bindTexture(gl.TEXTURE_2D, this.storage.frame.current_rt.copy_screen_effect.gl_color);
@@ -1257,18 +1261,27 @@ export class RasterizerScene {
 
         let i = 0;
         for (let k in p_material.textures) {
+            gl.uniform1i(uniforms[k].gl_loc, i);
             gl.activeTexture(gl.TEXTURE0 + i);
+            i++;
 
             let t = p_material.textures[k];
-            if (t) {
-                this.state.textures[k] = t;
-            } else {
-                t = this.state.textures[k];
-            }
 
             if (!t) {
-                // TODO: use texture based on their texture hints
-                gl.bindTexture(gl.TEXTURE_2D, this.storage.resources.white_tex.get_rid().gl_tex);
+                if (p_material.origin) {
+                    t = p_material.origin.textures[k];
+                }
+
+                if (!t) {
+                    let shader_material = this.spatial_material_ref;
+                    if (p_material.shader === shader_material.material.shader) {
+                        t = shader_material.texture_hints[k];
+                    }
+                }
+
+                if (!t) {
+                    gl.bindTexture(gl.TEXTURE_2D, this.storage.resources.white_tex.get_rid().gl_tex);
+                }
 
                 continue;
             }
@@ -1283,8 +1296,6 @@ export class RasterizerScene {
             if (i === 0) {
                 this.state.current_main_tex = t.gl_tex;
             }
-
-            i++;
         }
 
         return shader_rebind;
