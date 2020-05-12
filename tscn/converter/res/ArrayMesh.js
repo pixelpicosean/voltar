@@ -8,28 +8,6 @@ const {
 const pack_array_to_binary = true;
 
 
-/**
- * @param {any} data
- * @param {string} key
- */
-function parse_as_array(data, key) {
-    const key_s = `${key}/`;
-
-    let result = [];
-
-    for (let k in data) {
-        if (k.indexOf(key_s) >= 0) {
-            let index_str = k.substr(k.indexOf(key_s) + key_s.length);
-            let index = parseInt(index_str);
-            if (Number.isFinite(index)) {
-                result[index] = data[k];
-            }
-        }
-    }
-
-    return result;
-}
-
 const compress_list = [
     2, // tangent
     3, // color
@@ -40,7 +18,7 @@ const normalize_list = [
 ]
 
 module.exports = (data) => {
-    let surfaces = parse_as_array(data.prop, 'surfaces');
+    let surfaces = data.prop.surfaces;
     for (let s of surfaces) {
         let arrays = s.arrays.map((arr, i) => arr ? ({
             compressed: compress_list.indexOf(i) >= 0,

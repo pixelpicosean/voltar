@@ -5,6 +5,8 @@ const {
     remove_first_n_last,
 } = require('./utils');
 
+module.exports.SubResource = (value) => value;
+module.exports.ExtResource = (value) => value;
 
 /**
  * @param {any} value

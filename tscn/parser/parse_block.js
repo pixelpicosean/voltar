@@ -232,15 +232,45 @@ module.exports.parse_block = (block) => {
                         let index = parseInt(after_slash);
                         if (isFinite(index)) {
                             let real_key = key.substring(0, key.indexOf('/'));
-                            let value_str = line.substr(equal_idx + 1).trim();
-                            let value_res = parse_as_primitive(value_str);
+                            let rest_line = line.substr(equal_idx + 1).trim()
+
+                            tokens.push('/');
                             stack.push({
                                 key: real_key,
-                                value: [
-                                    value_res.is_valid ? value_res.value : value_str,
-                                ],
-                            });
-                            tokens.push('/');
+                                value: [],
+                            })
+
+                            let value_res = parse_as_primitive(rest_line);
+                            if (value_res.is_valid) {
+                                _.last(stack).value.push(value_res.is_valid ? value_res.value : rest_line);
+                            } else {
+                                // multi-line string
+                                if (value_res.type === 'multi_line_string') {
+                                    tokens.push('"');
+                                    stack.push({
+                                        key: real_key,
+                                        value: (value_res.value + '\n'),
+                                    });
+                                }
+                                else {
+                                    // maybe a data packed into a function?
+                                    let function_name_found = false;
+                                    if (value_res.value.includes('(') && value_res.value[value_res.value.length - 1] === ')') {
+                                        const func = value_res.value.split('(')[0];
+                                        if (built_in_functions[func]) {
+                                            function_name_found = true;
+                                            value_res.value = built_in_functions[func](value_res.value);
+
+                                            _.last(stack).value.push(value_res.value);
+                                        }
+                                    }
+
+                                    // array or dictionary
+                                    if (!function_name_found) {
+                                        push_tokens_in_a_line(data.prop, value_res.value, tokens, stack, _.last(stack).value.length);
+                                    }
+                                }
+                            }
                             continue;
                         }
                     }
@@ -392,6 +422,8 @@ module.exports.parse_block = (block) => {
                 }
             } break;
             case '/': {
+                if (!line.trim().length && i < block.length - 1) continue;
+
                 if (!line.includes('/')) {
                     tokens.pop();
                     let pack = stack.pop();
