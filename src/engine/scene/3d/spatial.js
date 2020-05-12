@@ -488,7 +488,7 @@ export class Spatial extends Node {
 
         for (let i = 0, children = this.data.children; i < children.length; i++) {
             let c = /** @type {Spatial} */(children[i]);
-            if (c.is_spatial) continue;
+            if (!c.is_spatial) continue;
             if (c.d_data.toplevel_active) continue;
 
             c._propagate_transform_changed(p_origin);
