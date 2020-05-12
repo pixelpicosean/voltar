@@ -42,6 +42,8 @@ if (compress_resources) {
 } else {
     fs.writeFileSync(path.normalize(path.join(__dirname, '../media/resources.json')), JSON.stringify(final_resources, null, 2));
 }
+// - save to assets for development
+fs.writeFileSync(path.normalize(path.join(__dirname, '../assets/resources.json')), JSON.stringify(final_resources, null, 2));
 
 // 3. process and copy assets (DynamicFont, ...) to media
 console.log(`3. process assets`)
