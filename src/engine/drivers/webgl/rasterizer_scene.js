@@ -412,6 +412,7 @@ export class RasterizerScene {
                 void fragment() {
                     ALBEDO = texture(texture_albedo, UV).rgb;
                     ALBEDO *= albedo.rgb;
+                    // ALBEDO = albedo.rgb;
                     // ALBEDO = vec3(UV.x, UV.y, 0.0);
                 }
             `);
