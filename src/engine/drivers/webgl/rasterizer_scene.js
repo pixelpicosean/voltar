@@ -1274,7 +1274,7 @@ export class RasterizerScene {
 
                 if (!t) {
                     let shader_material = this.spatial_material_ref;
-                    if (p_material.shader === shader_material.material.shader) {
+                    if (p_material.shader === this.materials.spatial.shader) {
                         t = shader_material.texture_hints[k];
                     }
                 }

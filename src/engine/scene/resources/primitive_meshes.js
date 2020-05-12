@@ -7,6 +7,7 @@ import { VSG } from "engine/servers/visual/visual_server_globals";
 
 import { Material } from "./material";
 import { Mesh } from "./mesh";
+import { pack_color_f } from "engine/core/math/math_funcs";
 
 /**
  * @typedef MeshData
@@ -19,10 +20,10 @@ import { Mesh } from "./mesh";
  * All vertices in a single Float32Array:
  * - position x3
  * - normal   x3
- * - tangent  x3
+ * - tangent  x4 -> compressed as f32
  * - uv       x2
  */
-const VERT_LENGTH = 3 + 3 + 3 + 2;
+const VERT_LENGTH = 3 + 3 + 1 + 2;
 const STRIDE = VERT_LENGTH * 4;
 
 export class PrimitiveMesh extends Mesh {
@@ -214,13 +215,11 @@ export class QuadMesh extends PrimitiveMesh {
             vertices[j + 3 + 2] = 1;
 
             // tangent
-            vertices[j + 6 + 0] = 1;
-            vertices[j + 6 + 1] = 0;
-            vertices[j + 6 + 2] = 0;
+            vertices[j + 6 + 0] = pack_color_f(1, 0, 0, 1);
 
             // uv
-            vertices[j + 9 + 0] = uvs[i * 2 + 0];
-            vertices[j + 9 + 1] = uvs[i * 2 + 1];
+            vertices[j + 7 + 0] = uvs[i * 2 + 0];
+            vertices[j + 7 + 1] = uvs[i * 2 + 1];
         }
 
         /** @type {MeshData} */
@@ -228,8 +227,8 @@ export class QuadMesh extends PrimitiveMesh {
             attribs: [
                 { type: WebGLRenderingContext.FLOAT, size: 3, stride: STRIDE, offset: 0 },
                 { type: WebGLRenderingContext.FLOAT, size: 3, stride: STRIDE, offset: 3 * 4 },
-                { type: WebGLRenderingContext.FLOAT, size: 3, stride: STRIDE, offset: (3 + 3) * 4 },
-                { type: WebGLRenderingContext.FLOAT, size: 2, stride: STRIDE, offset: (3 + 3 + 3) * 4 },
+                { type: WebGLRenderingContext.UNSIGNED_BYTE, size: 4, stride: STRIDE, offset: (3 + 3) * 4 },
+                { type: WebGLRenderingContext.FLOAT, size: 2, stride: STRIDE, offset: (3 + 3 + 1) * 4 },
             ],
             vertices,
             indices,
@@ -326,12 +325,10 @@ export class PlaneMesh extends PrimitiveMesh {
                 vertices[point * VERT_LENGTH + 3 + 1] = 1;
                 vertices[point * VERT_LENGTH + 3 + 2] = 0;
 
-                vertices[point * VERT_LENGTH + 6 + 0] = 1;
-                vertices[point * VERT_LENGTH + 6 + 1] = 0;
-                vertices[point * VERT_LENGTH + 6 + 2] = 0;
+                vertices[point * VERT_LENGTH + 6 + 0] = pack_color_f(1, 0, 0, 1);
 
-                vertices[point * VERT_LENGTH + 9 + 0] = 1 - u;
-                vertices[point * VERT_LENGTH + 9 + 1] = 1 - v;
+                vertices[point * VERT_LENGTH + 7 + 0] = 1 - u;
+                vertices[point * VERT_LENGTH + 7 + 1] = 1 - v;
 
                 point += 1;
 
@@ -360,8 +357,8 @@ export class PlaneMesh extends PrimitiveMesh {
             attribs: [
                 { type: WebGLRenderingContext.FLOAT, size: 3, stride: STRIDE, offset: 0 },
                 { type: WebGLRenderingContext.FLOAT, size: 3, stride: STRIDE, offset: 3 * 4 },
-                { type: WebGLRenderingContext.FLOAT, size: 3, stride: STRIDE, offset: (3 + 3) * 4 },
-                { type: WebGLRenderingContext.FLOAT, size: 2, stride: STRIDE, offset: (3 + 3 + 3) * 4 },
+                { type: WebGLRenderingContext.UNSIGNED_BYTE, size: 4, stride: STRIDE, offset: (3 + 3) * 4 },
+                { type: WebGLRenderingContext.FLOAT, size: 2, stride: STRIDE, offset: (3 + 3 + 1) * 4 },
             ],
             vertices,
             indices,
@@ -481,12 +478,10 @@ export class CubeMesh extends PrimitiveMesh {
                 vertices[point * VERT_LENGTH + 3 + 1] = 0;
                 vertices[point * VERT_LENGTH + 3 + 2] = 1;
 
-                vertices[point * VERT_LENGTH + 6 + 0] = 1;
-                vertices[point * VERT_LENGTH + 6 + 1] = 0;
-                vertices[point * VERT_LENGTH + 6 + 2] = 0;
+                vertices[point * VERT_LENGTH + 6 + 0] = pack_color_f(1, 0, 0, 1);
 
-                vertices[point * VERT_LENGTH + 9 + 0] = twothirds + u;
-                vertices[point * VERT_LENGTH + 9 + 1] = v;
+                vertices[point * VERT_LENGTH + 7 + 0] = twothirds + u;
+                vertices[point * VERT_LENGTH + 7 + 1] = v;
 
                 point += 1;
 
@@ -499,12 +494,10 @@ export class CubeMesh extends PrimitiveMesh {
                 vertices[point * VERT_LENGTH + 3 + 1] = 0;
                 vertices[point * VERT_LENGTH + 3 + 2] = -1;
 
-                vertices[point * VERT_LENGTH + 6 + 0] = -1;
-                vertices[point * VERT_LENGTH + 6 + 1] = 0;
-                vertices[point * VERT_LENGTH + 6 + 2] = 0;
+                vertices[point * VERT_LENGTH + 6 + 0] = pack_color_f(-1, 0, 0, 1);
 
-                vertices[point * VERT_LENGTH + 9 + 0] = twothirds + u;
-                vertices[point * VERT_LENGTH + 9 + 1] = v;
+                vertices[point * VERT_LENGTH + 7 + 0] = twothirds + u;
+                vertices[point * VERT_LENGTH + 7 + 1] = v;
 
                 point += 1;
 
@@ -556,12 +549,10 @@ export class CubeMesh extends PrimitiveMesh {
                 vertices[point * VERT_LENGTH + 3 + 1] = 0;
                 vertices[point * VERT_LENGTH + 3 + 2] = 0;
 
-                vertices[point * VERT_LENGTH + 6 + 0] = 0;
-                vertices[point * VERT_LENGTH + 6 + 1] = 0;
-                vertices[point * VERT_LENGTH + 6 + 2] = -1;
+                vertices[point * VERT_LENGTH + 6 + 0] = pack_color_f(0, 0, -1, 1);
 
-                vertices[point * VERT_LENGTH + 9 + 0] = onethird + u;
-                vertices[point * VERT_LENGTH + 9 + 1] = v;
+                vertices[point * VERT_LENGTH + 7 + 0] = onethird + u;
+                vertices[point * VERT_LENGTH + 7 + 1] = v;
 
                 point += 1;
 
@@ -574,12 +565,10 @@ export class CubeMesh extends PrimitiveMesh {
                 vertices[point * VERT_LENGTH + 3 + 1] = 0;
                 vertices[point * VERT_LENGTH + 3 + 2] = 0;
 
-                vertices[point * VERT_LENGTH + 6 + 0] = 0;
-                vertices[point * VERT_LENGTH + 6 + 1] = 0;
-                vertices[point * VERT_LENGTH + 6 + 2] = 1;
+                vertices[point * VERT_LENGTH + 6 + 0] = pack_color_f(0, 0, 1, 1);
 
-                vertices[point * VERT_LENGTH + 9 + 0] = u;
-                vertices[point * VERT_LENGTH + 9 + 1] = v + 0.5;
+                vertices[point * VERT_LENGTH + 7 + 0] = u;
+                vertices[point * VERT_LENGTH + 7 + 1] = v + 0.5;
 
                 point += 1;
 
@@ -631,12 +620,10 @@ export class CubeMesh extends PrimitiveMesh {
                 vertices[point * VERT_LENGTH + 3 + 1] = 1;
                 vertices[point * VERT_LENGTH + 3 + 2] = 0;
 
-                vertices[point * VERT_LENGTH + 6 + 0] = -1;
-                vertices[point * VERT_LENGTH + 6 + 1] = 0;
-                vertices[point * VERT_LENGTH + 6 + 2] = 0;
+                vertices[point * VERT_LENGTH + 6 + 0] = pack_color_f(-1, 0, 0, 1);
 
-                vertices[point * VERT_LENGTH + 9 + 0] = onethird + u;
-                vertices[point * VERT_LENGTH + 9 + 1] = 0.5 + v;
+                vertices[point * VERT_LENGTH + 7 + 0] = onethird + u;
+                vertices[point * VERT_LENGTH + 7 + 1] = 0.5 + v;
 
                 point += 1;
 
@@ -649,12 +636,10 @@ export class CubeMesh extends PrimitiveMesh {
                 vertices[point * VERT_LENGTH + 3 + 1] = -1;
                 vertices[point * VERT_LENGTH + 3 + 2] = 0;
 
-                vertices[point * VERT_LENGTH + 6 + 0] = 1;
-                vertices[point * VERT_LENGTH + 6 + 1] = 0;
-                vertices[point * VERT_LENGTH + 6 + 2] = 0;
+                vertices[point * VERT_LENGTH + 6 + 0] = pack_color_f(1, 0, 0, 1);
 
-                vertices[point * VERT_LENGTH + 9 + 0] = twothirds + u;
-                vertices[point * VERT_LENGTH + 9 + 1] = 0.5 + v;
+                vertices[point * VERT_LENGTH + 7 + 0] = twothirds + u;
+                vertices[point * VERT_LENGTH + 7 + 1] = 0.5 + v;
 
                 point += 1;
 
@@ -692,8 +677,8 @@ export class CubeMesh extends PrimitiveMesh {
             attribs: [
                 { type: WebGLRenderingContext.FLOAT, size: 3, stride: STRIDE, offset: 0 },
                 { type: WebGLRenderingContext.FLOAT, size: 3, stride: STRIDE, offset: 3 * 4 },
-                { type: WebGLRenderingContext.FLOAT, size: 3, stride: STRIDE, offset: (3 + 3) * 4 },
-                { type: WebGLRenderingContext.FLOAT, size: 2, stride: STRIDE, offset: (3 + 3 + 3) * 4 },
+                { type: WebGLRenderingContext.UNSIGNED_BYTE, size: 4, stride: STRIDE, offset: (3 + 3) * 4 },
+                { type: WebGLRenderingContext.FLOAT, size: 2, stride: STRIDE, offset: (3 + 3 + 1) * 4 },
             ],
             vertices,
             indices,
