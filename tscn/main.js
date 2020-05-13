@@ -8,7 +8,12 @@ const { convert_default_env } = require('./convert_default_env');
 const to_utf8 = require('./z/to_utf8');
 const { compress } = require('./z/z');
 
-const record = require('./resource_record');
+const {
+    get_json_packs,
+    get_binary_packs,
+    get_non_tres_resources,
+    get_resource_check_ignores,
+} = require('./registry');
 
 
 /* config */
@@ -26,7 +31,7 @@ console.log(`2. import scenes`)
 let resource_map = convert_scenes(path.normalize(path.join(__dirname, '../assets')));
 let final_resources = {};
 // - add all non-tres resources into the map
-let non_tres = record.get_non_tres_resources();
+let non_tres = get_non_tres_resources();
 for (let k in non_tres) {
     non_tres[k].forEach((res) => {
         final_resources[res.filename] = res;
@@ -52,7 +57,7 @@ convert_default_env(path.normalize(path.join(__dirname, '../assets/default_env.t
 // - dynamic font
 convert_dynamic_fonts()
 // - json data
-const json_files = record.get_json_packs()
+const json_files = get_json_packs()
     .map((pack, i) => {
         // skip empty data
         if (pack.length === 0) return undefined;
@@ -65,7 +70,7 @@ const json_files = record.get_json_packs()
     })
     .filter(e => !!e)
 // - binary data
-const binary_files = record.get_binary_packs()
+const binary_files = get_binary_packs()
     .map((pack, i) => {
         let url = `media/data${i}.v`;
         let filepath = path.normalize(path.join(__dirname, `../${url}`));
@@ -73,7 +78,7 @@ const binary_files = record.get_binary_packs()
         return url;
     })
 // - meta data
-const resource_check_ignores = record.get_resource_check_ignores();
+const resource_check_ignores = get_resource_check_ignores();
 fs.writeFileSync(path.normalize(path.join(__dirname, '../assets/meta.json')), JSON.stringify({
     resource_check_ignores,
     json_files,

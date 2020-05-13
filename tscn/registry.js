@@ -5,7 +5,7 @@ let record = {}
  * @param {string} type
  * @param {any} data
  */
-module.exports.add = function(type, data) {
+module.exports.record_data_with_type = function(type, data) {
     let list = record[type];
     if (!list) {
         list = record[type] = [];
@@ -18,7 +18,7 @@ module.exports.add = function(type, data) {
 /**
  * @param {string} type
  */
-module.exports.get_list = function(type) {
+module.exports.get_all_records = function(type) {
     return record[type];
 }
 
