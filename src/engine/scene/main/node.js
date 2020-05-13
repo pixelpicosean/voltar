@@ -120,9 +120,9 @@ export class Node extends VObject {
 
         /**
          * Data loaded from `_load_data` method
-         * @type {any}
+         * @type {any[]}
          */
-        this.instance_data = null;
+        this.instance_data = [];
     }
 
     /* virtuals */
@@ -131,7 +131,13 @@ export class Node extends VObject {
      * @param {any} data
      */
     set_instance_data(data) {
-        this.instance_data = data;
+        this.instance_data[0] = data;
+    }
+    /**
+     * @param {any} data
+     */
+    push_instance_data(data) {
+        this.instance_data.push(data);
     }
 
     /**
@@ -391,7 +397,9 @@ export class Node extends VObject {
         this.data.tree.node_added(this);
 
         if (this.instance_data) {
-            this._load_data(this.instance_data);
+            for (let i = 0; i < this.instance_data.length; i++) {
+                this._load_data(this.instance_data[i]);
+            }
             this.instance_data = null;
         }
 

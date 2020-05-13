@@ -183,7 +183,7 @@ export class Engine {
                     // process resource first
                     if (res.type !== 'PackedScene') {
                         if (res.resource) {
-                            normalize_resource_array(res.resource, res.ext || {}, res.sub || {});
+                            normalize_resource_array(res.resource, res.ext || {}, res.sub || []);
                         }
 
                         const ctor = res_class_map[res.type];
@@ -198,7 +198,7 @@ export class Engine {
                 const res = resource_map[key];
                 if (key.startsWith(res_head) && res.type === 'PackedScene') {
                     // now let's replace ext/sub references inside this resource with real instances
-                    normalize_resource_array(res.nodes, res.ext || {}, res.sub || {});
+                    normalize_resource_array(res.nodes, res.ext || {}, res.sub || []);
                 }
             }
 

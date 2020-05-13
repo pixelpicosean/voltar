@@ -121,6 +121,7 @@ export function assemble_scene(scn, data, url) {
             }
 
             if (node) {
+                node.set_instance_data(node_data);
                 parent.add_child(node);
                 if (Number.isFinite(node_data["index"])) {
                     parent.move_child(node, node_data["index"]);
@@ -128,8 +129,8 @@ export function assemble_scene(scn, data, url) {
             } else {
                 /* inherited node */
                 node = parent.get_node(node_data.name);
+                node.push_instance_data(node_data);
             }
-            node.set_instance_data(node_data);
             if (node_data.name) {
                 node.set_name(node_data.name);
             }
