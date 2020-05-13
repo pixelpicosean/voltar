@@ -8,6 +8,7 @@ import 'game/demo/demo'; // for scene registry side effect
 
 
 v.preload('media/sprites-0.json');
+v.preload('media/house_palette.png');
 
 
 import Settings from 'project.json';

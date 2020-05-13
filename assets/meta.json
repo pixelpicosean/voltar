@@ -1,8 +1,7 @@
 {
-    "resource_lookup_skip_list": [
-        "GROBOLD"
-    ],
+    "resource_check_ignores": [],
+    "json_files": [],
     "binary_files": [
-        "media/data0.vt"
+        "media/data0.v"
     ]
 }
