@@ -1,5 +1,7 @@
 {
-    "resource_check_ignores": [],
+    "resource_check_ignores": [
+        "GROBOLD"
+    ],
     "json_files": [],
     "binary_files": [
         "media/data0.v"

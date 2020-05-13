@@ -59,13 +59,13 @@ transform = Transform( -0.571258, 0, 0.820771, 0, 1, 0, -0.820771, 0, -0.571258,
 transform = Transform( -0.571258, 0, 0.820771, 0, 1, 0, -0.820771, 0, -0.571258, 4.82801, 0.00432737, -7.24089 )
 
 [node name="tree_1" parent="." instance=ExtResource( 2 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.939559, 0, -0.915513 )
+transform = Transform( 0.268673, 0, -0.138774, 0, 0.302396, 0, 0.138774, 0, 0.268673, 0.738655, 0, -1.1146 )
 
-[node name="tree_2" parent="." instance=ExtResource( 2 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 4.62881, 0, -3.53683 )
+[node name="tree_3" parent="." instance=ExtResource( 2 )]
+transform = Transform( 0.299468, 0, 0.0419809, 0, 0.302396, 0, -0.0419809, 0, 0.299468, 4.43786, 0, -3.75688 )
 
-[node name="tree_3" parent="." instance=ExtResource( 4 )]
-transform = Transform( -0.105848, 0, -0.994382, 0, 1, 0, 0.994382, 0, -0.105848, 1.35363, 0, -8.97365 )
+[node name="tree_2" parent="." instance=ExtResource( 4 )]
+transform = Transform( 0.353459, 0, 0.216201, 0, 0.414338, 0, -0.216201, 0, 0.353459, 0.89046, 0, -8.6264 )
 
 [node name="tree_4" parent="." instance=ExtResource( 4 )]
-transform = Transform( 0.799737, 0, 0.60035, 0, 1, 0, -0.60035, 0, 0.799737, -2.75633, 0, -6.12579 )
+transform = Transform( 0.172211, 0, 0.376855, 0, 0.414338, 0, -0.376855, 0, 0.172211, -2.77099, 0, -6.28609 )

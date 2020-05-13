@@ -1,33 +1,29 @@
 {
+  "res://font/GROBOLD.ttf": {
+    "type": "DynamicFontData",
+    "filename": "res://font/GROBOLD.ttf",
+    "family": "GROBOLD",
+    "ascender": 800,
+    "descender": -200
+  },
+  "res://mesh/m.tres": {
+    "ext": {
+      "1": "media/house_palette.png"
+    },
+    "sub": [],
+    "resource": {
+      "type": "SpatialMaterial",
+      "albedo_texture": "@ext#1"
+    }
+  },
   "res://raw_mesh/tree_2.escn": {
     "type": "PackedScene",
     "sub": [
       {
         "id": 1,
-        "type": "SpatialMaterial",
-        "albedo_color": {
-          "r": 0.903545,
-          "g": 0.903545,
-          "b": 0.903545,
-          "a": 1
-        }
-      },
-      {
-        "id": 2,
-        "type": "SpatialMaterial",
-        "albedo_color": {
-          "r": 0.903545,
-          "g": 0.903545,
-          "b": 0.903545,
-          "a": 1
-        }
-      },
-      {
-        "id": 3,
         "type": "ArrayMesh",
         "surfaces": [
           {
-            "material": "@sub#1",
             "primitive": 4,
             "arrays": {
               "__type__": "b",
@@ -46,16 +42,16 @@
               },
               "vertex": {
                 "index": 0,
-                "offset": 62724,
-                "length": 44280
+                "offset": 0,
+                "length": 57240
               },
               "index": {
                 "index": 0,
-                "offset": 107004,
-                "length": 2460
+                "offset": 57240,
+                "length": 3180
               },
-              "array_len": 1230,
-              "index_array_len": 1230,
+              "array_len": 1590,
+              "index_array_len": 1590,
               "attribs": [
                 {
                   "index": 0,
@@ -116,12 +112,12 @@
           0,
           0,
           1.29214,
-          10.8024,
-          0.156775,
+          0,
+          0.0391939,
           0
         ],
         "visible": true,
-        "mesh": "@sub#3",
+        "mesh": "@sub#1",
         "material": []
       }
     ]
@@ -163,12 +159,12 @@
               },
               "vertex": {
                 "index": 0,
-                "offset": 113112,
+                "offset": 60420,
                 "length": 11592
               },
               "index": {
                 "index": 0,
-                "offset": 124704,
+                "offset": 72012,
                 "length": 744
               },
               "array_len": 322,
@@ -248,58 +244,37 @@
     "sub": [
       {
         "id": 1,
-        "type": "SpatialMaterial",
-        "albedo_color": {
-          "r": 0.903545,
-          "g": 0.903545,
-          "b": 0.903545,
-          "a": 1
-        }
-      },
-      {
-        "id": 2,
-        "type": "SpatialMaterial",
-        "albedo_color": {
-          "r": 0.903545,
-          "g": 0.903545,
-          "b": 0.903545,
-          "a": 1
-        }
-      },
-      {
-        "id": 3,
         "type": "ArrayMesh",
         "surfaces": [
           {
-            "material": "@sub#1",
             "primitive": 4,
             "arrays": {
               "__type__": "b",
               "is_2d": false,
               "aabb": {
                 "position": {
-                  "x": -0.917753,
-                  "y": -1,
-                  "z": -1
+                  "x": -4.39903,
+                  "y": -0.0109736,
+                  "z": -5.07957
                 },
                 "size": {
-                  "x": 1.783778,
-                  "y": 2,
-                  "z": 1.869904
+                  "x": 8.79806,
+                  "y": 6.231493599999999,
+                  "z": 10.15914
                 }
               },
               "vertex": {
                 "index": 0,
-                "offset": 109464,
-                "length": 3456
+                "offset": 72756,
+                "length": 34992
               },
               "index": {
                 "index": 0,
-                "offset": 112920,
-                "length": 192
+                "offset": 107748,
+                "length": 1944
               },
-              "array_len": 96,
-              "index_array_len": 96,
+              "array_len": 972,
+              "index_array_len": 972,
               "attribs": [
                 {
                   "index": 0,
@@ -360,12 +335,12 @@
           0,
           0,
           -0.445122,
-          6.14926,
-          0.989026,
+          0,
+          0,
           0
         ],
         "visible": true,
-        "mesh": "@sub#3",
+        "mesh": "@sub#1",
         "material": []
       }
     ]
@@ -396,12 +371,12 @@
               },
               "vertex": {
                 "index": 0,
-                "offset": 125448,
+                "offset": 109692,
                 "length": 103752
               },
               "index": {
                 "index": 0,
-                "offset": 229200,
+                "offset": 213444,
                 "length": 5808
               },
               "array_len": 2882,
@@ -487,33 +462,219 @@
       }
     ]
   },
-  "res://mesh/tree_1.tscn": {
+  "res://scene/demo.tscn": {
     "type": "PackedScene",
     "ext": {
-      "1": "res://raw_mesh/tree_1.escn"
+      "1": "monitor",
+      "2": "alien",
+      "3": "player",
+      "5": "res://font/GROBOLD.ttf"
     },
     "sub": [
       {
         "id": 1,
-        "type": "SpatialMaterial",
-        "albedo_color": {
-          "r": 0.407843,
-          "g": 0.333333,
-          "b": 0.235294,
+        "type": "DynamicFont",
+        "font": "@ext#5",
+        "size": 25
+      },
+      {
+        "id": 2,
+        "type": "Shader",
+        "code": "shader_type canvas_item;\nvoid fragment() {\n\nvec2 uv = SCREEN_UV;\n\nvec3 color;\n\nvec4 ori_color = texture(SCREEN_TEXTURE, uv);\n\n// color separation\n\ncolor.r = texture(SCREEN_TEXTURE, vec2(uv.x + 0.01, uv.y)).x;\n\ncolor.g = texture(SCREEN_TEXTURE, vec2(uv.x + 0.000, uv.y)).y;\n\ncolor.b = texture(SCREEN_TEXTURE, vec2(uv.x - 0.01, uv.y)).z;\n\n// increase contrast\n\ncolor = clamp(color * 0.5 + 0.5 * color * color * 1.2, 0.0, 1.0);\n\n// vignetting\n\ncolor *= 0.5 + 0.5 * 16.0 * uv.x * uv.y * (1.0 - uv.x) * (1.0 - uv.y);\n\n// tinting\n\ncolor *= vec3(0.8, 1.0, 0.7);\n\n// tv lines\n\ncolor *= 0.8 + 0.2 * sin(10.0 * TIME + uv.y * 1000.0);\n\n// flickering\n\ncolor *= 0.97 + 0.03 * sin(110.0 * TIME);\n\nCOLOR = vec4(color, ori_color.a);\n}\n"
+      },
+      {
+        "id": 3,
+        "type": "ShaderMaterial",
+        "shader": "@sub#2"
+      }
+    ],
+    "nodes": [
+      {
+        "type": "Control",
+        "name": "demo",
+        "anchor_bottom": 1,
+        "anchor_right": 1
+      },
+      {
+        "type": "ColorRect",
+        "name": "bg",
+        "parent": ".",
+        "anchor_bottom": 1,
+        "anchor_right": 1,
+        "color": {
+          "r": 0,
+          "g": 0,
+          "b": 0,
           "a": 1
         }
       },
       {
-        "id": 2,
-        "type": "SpatialMaterial",
-        "albedo_color": {
-          "r": 0.286275,
-          "g": 0.619608,
-          "b": 0.286275,
+        "type": "TextureRect",
+        "name": "monitor",
+        "parent": ".",
+        "anchor_bottom": 0.5,
+        "anchor_left": 0.5,
+        "anchor_top": 0.5,
+        "anchor_right": 0.5,
+        "margin_bottom": 130,
+        "margin_left": -129.5,
+        "margin_top": -130,
+        "margin_right": 129.5,
+        "texture": "@ext#1"
+      },
+      {
+        "type": "Sprite",
+        "name": "player",
+        "parent": "monitor",
+        "position": {
+          "x": 128.651,
+          "y": 181.304
+        },
+        "texture": "@ext#3"
+      },
+      {
+        "type": "Sprite",
+        "name": "alien",
+        "parent": "monitor",
+        "position": {
+          "x": 50.6791,
+          "y": 57.8259
+        },
+        "texture": "@ext#2"
+      },
+      {
+        "type": "Sprite",
+        "name": "alien2",
+        "parent": "monitor",
+        "position": {
+          "x": 89.1798,
+          "y": 57.8259
+        },
+        "texture": "@ext#2"
+      },
+      {
+        "type": "Sprite",
+        "name": "alien3",
+        "parent": "monitor",
+        "position": {
+          "x": 127.68,
+          "y": 57.8259
+        },
+        "texture": "@ext#2"
+      },
+      {
+        "type": "Sprite",
+        "name": "alien4",
+        "parent": "monitor",
+        "position": {
+          "x": 166.181,
+          "y": 57.8259
+        },
+        "texture": "@ext#2"
+      },
+      {
+        "type": "Sprite",
+        "name": "alien5",
+        "parent": "monitor",
+        "position": {
+          "x": 203.655,
+          "y": 57.8259
+        },
+        "texture": "@ext#2"
+      },
+      {
+        "type": "Sprite",
+        "name": "alien10",
+        "parent": "monitor",
+        "position": {
+          "x": 51.1925,
+          "y": 85.5464
+        },
+        "texture": "@ext#2"
+      },
+      {
+        "type": "Sprite",
+        "name": "alien9",
+        "parent": "monitor",
+        "position": {
+          "x": 89.6931,
+          "y": 85.5464
+        },
+        "texture": "@ext#2"
+      },
+      {
+        "type": "Sprite",
+        "name": "alien8",
+        "parent": "monitor",
+        "position": {
+          "x": 128.194,
+          "y": 85.5464
+        },
+        "texture": "@ext#2"
+      },
+      {
+        "type": "Sprite",
+        "name": "alien7",
+        "parent": "monitor",
+        "position": {
+          "x": 166.694,
+          "y": 85.5464
+        },
+        "texture": "@ext#2"
+      },
+      {
+        "type": "Sprite",
+        "name": "alien6",
+        "parent": "monitor",
+        "position": {
+          "x": 204.168,
+          "y": 85.5464
+        },
+        "texture": "@ext#2"
+      },
+      {
+        "type": "Label",
+        "name": "label",
+        "parent": "monitor",
+        "self_modulate": {
+          "r": 0.333333,
+          "g": 0.831373,
+          "b": 0,
           "a": 1
-        }
+        },
+        "anchor_bottom": 0.5,
+        "anchor_left": 0.5,
+        "anchor_top": 0.5,
+        "anchor_right": 0.5,
+        "margin_bottom": 26.5,
+        "margin_left": -82,
+        "margin_top": -26.5,
+        "margin_right": 82,
+        "align": 1,
+        "autowrap": true,
+        "text": "GAME OVER",
+        "valign": 1,
+        "font": "@sub#1"
+      },
+      {
+        "type": "ColorRect",
+        "name": "cover",
+        "parent": "monitor",
+        "material": "@sub#3",
+        "margin_bottom": 201,
+        "margin_left": 18.5,
+        "margin_top": 28,
+        "margin_right": 239.5
       }
-    ],
+    ]
+  },
+  "res://mesh/tree_1.tscn": {
+    "type": "PackedScene",
+    "ext": {
+      "1": "res://raw_mesh/tree_1.escn",
+      "2": "res://mesh/m.tres"
+    },
+    "sub": [],
     "nodes": [
       {
         "name": "tree_1",
@@ -523,19 +684,8 @@
         "index": 0,
         "name": "tree_1",
         "parent": ".",
-        "transform": [
-          -0.0977296,
-          0,
-          0,
-          0,
-          0.219557,
-          0,
-          0,
-          0,
-          -0.0977296,
-          0,
-          0.214842,
-          0
+        "material": [
+          "@ext#2"
         ]
       }
     ]
@@ -544,15 +694,9 @@
     "type": "PackedScene",
     "ext": {
       "1": "res://raw_mesh/house.escn",
-      "2": "media/house_palette.png"
+      "2": "res://mesh/m.tres"
     },
-    "sub": [
-      {
-        "id": 1,
-        "type": "SpatialMaterial",
-        "albedo_texture": "@ext#2"
-      }
-    ],
+    "sub": [],
     "nodes": [
       {
         "name": "house",
@@ -563,7 +707,7 @@
         "name": "Cube",
         "parent": ".",
         "material": [
-          "@sub#1"
+          "@ext#2"
         ]
       }
     ]
@@ -571,30 +715,10 @@
   "res://mesh/tree_2.tscn": {
     "type": "PackedScene",
     "ext": {
-      "1": "res://raw_mesh/tree_2.escn"
+      "1": "res://raw_mesh/tree_2.escn",
+      "2": "res://mesh/m.tres"
     },
-    "sub": [
-      {
-        "id": 1,
-        "type": "SpatialMaterial",
-        "albedo_color": {
-          "r": 0.407843,
-          "g": 0.333333,
-          "b": 0.235294,
-          "a": 1
-        }
-      },
-      {
-        "id": 2,
-        "type": "SpatialMaterial",
-        "albedo_color": {
-          "r": 0.286275,
-          "g": 0.619608,
-          "b": 0.286275,
-          "a": 1
-        }
-      }
-    ],
+    "sub": [],
     "nodes": [
       {
         "name": "tree_2",
@@ -604,19 +728,8 @@
         "index": 0,
         "name": "tree_2",
         "parent": ".",
-        "transform": [
-          0.394722,
-          0,
-          0,
-          0,
-          0.394722,
-          0,
-          0,
-          0,
-          0.394722,
-          0,
-          0.00750232,
-          0
+        "material": [
+          "@ext#2"
         ]
       }
     ]
@@ -816,37 +929,18 @@
         "name": "tree_1",
         "parent": ".",
         "transform": [
-          1,
+          0.268673,
           0,
+          -0.138774,
           0,
+          0.302396,
           0,
-          1,
+          0.138774,
           0,
+          0.268673,
+          0.738655,
           0,
-          0,
-          1,
-          0.939559,
-          0,
-          -0.915513
-        ],
-        "instance": "@ext#2"
-      },
-      {
-        "name": "tree_2",
-        "parent": ".",
-        "transform": [
-          1,
-          0,
-          0,
-          0,
-          1,
-          0,
-          0,
-          0,
-          1,
-          4.62881,
-          0,
-          -3.53683
+          -1.1146
         ],
         "instance": "@ext#2"
       },
@@ -854,18 +948,37 @@
         "name": "tree_3",
         "parent": ".",
         "transform": [
-          -0.105848,
+          0.299468,
           0,
-          -0.994382,
+          0.0419809,
           0,
-          1,
+          0.302396,
           0,
-          0.994382,
+          -0.0419809,
           0,
-          -0.105848,
-          1.35363,
+          0.299468,
+          4.43786,
           0,
-          -8.97365
+          -3.75688
+        ],
+        "instance": "@ext#2"
+      },
+      {
+        "name": "tree_2",
+        "parent": ".",
+        "transform": [
+          0.353459,
+          0,
+          0.216201,
+          0,
+          0.414338,
+          0,
+          -0.216201,
+          0,
+          0.353459,
+          0.89046,
+          0,
+          -8.6264
         ],
         "instance": "@ext#4"
       },
@@ -873,18 +986,18 @@
         "name": "tree_4",
         "parent": ".",
         "transform": [
-          0.799737,
+          0.172211,
           0,
-          0.60035,
+          0.376855,
           0,
-          1,
+          0.414338,
           0,
-          -0.60035,
+          -0.376855,
           0,
-          0.799737,
-          -2.75633,
+          0.172211,
+          -2.77099,
           0,
-          -6.12579
+          -6.28609
         ],
         "instance": "@ext#4"
       }
