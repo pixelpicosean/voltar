@@ -1,7 +1,6 @@
 const {
     add_binary_resource,
-    add_json_resource,
-} = require('../../resource_record');
+} = require('../../registry');
 
 
 /* config */

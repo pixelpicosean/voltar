@@ -1,7 +1,7 @@
 module.exports = (data) => {
     return {
         id: data.attr.id,
-        type: "SpatialMaterial",
+        type: data.attr.type,
 
         albedo_color: data.prop.albedo_color,
         albedo_texture: data.prop.albedo_texture,
