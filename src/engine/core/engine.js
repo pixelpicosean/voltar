@@ -181,10 +181,22 @@ export class Engine {
                     }
 
                     // process resource first
-                    if (res.type !== 'PackedScene') {
-                        if (res.resource) {
-                            normalize_resource_array(res.resource, res.ext || {}, res.sub || []);
+                    if (res.resource && res.resource.type) {
+                        /* { ext, sub, resource } */
+
+                        normalize_resource_object(res.resource, res.ext || {}, res.sub || []);
+
+                        const ctor = res_class_map[res.resource.type];
+                        if (ctor) {
+                            resource_map[key] = (new ctor)._load_data(res);
                         }
+                    } else if (res.type != 'PackedScene') {
+                        /* the res itself is the data */
+
+                        // FIXME: pure data does not have a resource property?
+                        // if (res.resource) {
+                        //     normalize_resource_object(res.resource, res.ext || {}, res.sub || []);
+                        // }
 
                         const ctor = res_class_map[res.type];
                         if (ctor) {

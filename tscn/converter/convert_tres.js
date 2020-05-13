@@ -35,7 +35,7 @@ module.exports.convert_tres = (blocks) => {
 
     let ext = {};
     let sub = []; // we need order of sub resources, some may depend on another
-    const resource = [];
+    let resource = {};
 
     for (let i = 0; i < sections.length; i++) {
         let sec = sections[i];
@@ -59,9 +59,14 @@ module.exports.convert_tres = (blocks) => {
         } else if (sec.key === 'resource') {
             for (const key in sec.prop) {
                 const { index, prop_key } = get_array_index_and_prop_key(key);
+                // is array of data
                 if (_.isFinite(index) && _.isString(prop_key)) {
                     resource[index] = resource[index] || {};
                     resource[index][prop_key] = sec.prop[key];
+                }
+                // is just a structure with properties
+                else {
+                    resource[key] = sec.prop[key];
                 }
             }
             normalize_resource_object(resource);
@@ -73,10 +78,11 @@ module.exports.convert_tres = (blocks) => {
         return Object.assign({
             ext: optional_empty(ext),
             sub: optional_empty_array(sub),
-        }, converter({
-            attr: head.attr,
-            prop: resource,
-        }));
+            resource: converter({
+                attr: head.attr,
+                prop: resource,
+            }),
+        });
     } else if (head.key === 'gd_scene') {
         const nodes = [];
 
