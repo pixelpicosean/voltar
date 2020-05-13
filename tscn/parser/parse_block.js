@@ -422,7 +422,15 @@ module.exports.parse_block = (block) => {
                 }
             } break;
             case '/': {
-                if (!line.trim().length && i < block.length - 1) continue;
+                if (!line.trim().length && i < block.length - 1) {
+                    tokens.pop();
+                    let pack = stack.pop();
+                    if (pack) {
+                        let parent = (stack.length > 0) ? _.last(stack).value : data.prop;
+                        parent[pack.key] = pack.value;
+                    }
+                    continue;
+                }
 
                 if (!line.includes('/')) {
                     tokens.pop();
@@ -440,14 +448,33 @@ module.exports.parse_block = (block) => {
                                 let real_key = key.substring(0, key.indexOf('/'));
                                 let value_str = line.substr(equal_idx + 1).trim();
                                 let value_res = parse_as_primitive(value_str);
-                                stack.push({
-                                    key: real_key,
-                                    value: [
-                                        value_res.is_valid ? value_res.value : value_str,
-                                    ],
-                                });
-                                tokens.push('/');
-                                continue;
+
+                                if (value_res.is_valid) {
+                                    let pack = _.last(stack);
+                                    if (pack.key === real_key) {
+                                        /* continue current array */
+                                        pack.value[index] = value_res.is_valid ? value_res.value : value_str;
+                                    } else {
+                                        /* start a new one */
+                                        // - end current one
+                                        tokens.pop();
+                                        let pack = stack.pop();
+                                        let parent = (stack.length > 0) ? _.last(stack).value : data.prop;
+                                        parent[pack.key] = pack.value;
+
+                                        // push a new array
+                                        stack.push({
+                                            key: real_key,
+                                            value: [
+                                                value_res.is_valid ? value_res.value : value_str,
+                                            ],
+                                        });
+                                    }
+                                }
+                                // array or dictionary
+                                else {
+                                    push_tokens_in_a_line(data.prop, value_res.value, tokens, stack, index);
+                                }
                             }
                         }
                     }
