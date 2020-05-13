@@ -188,7 +188,7 @@ export class Engine {
 
                         const ctor = res_class_map[res.resource.type];
                         if (ctor) {
-                            resource_map[key] = (new ctor)._load_data(res);
+                            resource_map[key] = (new ctor)._load_data(res.resource);
                         }
                     } else if (res.type != 'PackedScene') {
                         /* the res itself is the data */
