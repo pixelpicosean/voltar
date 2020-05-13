@@ -68,9 +68,9 @@ export class MeshInstance extends GeometryInstance {
         super._load_data(data);
 
         if (data.mesh) this.set_mesh(data.mesh);
-        if (data.materials && data.materials.length) {
-            for (let i = 0; i < data.materials.length; i++) {
-                this.set_surface_material(i, data.materials[i]);
+        if (data.material && data.material.length) {
+            for (let i = 0; i < data.material.length; i++) {
+                this.set_surface_material(i, data.material[i]);
             }
         }
 

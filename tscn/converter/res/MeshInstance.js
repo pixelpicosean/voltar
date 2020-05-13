@@ -4,11 +4,8 @@ module.exports = (data) => {
     const res = Object.assign({}, GeometryInstance(data), {
         mesh: data.prop.mesh,
 
-        materials: (data.prop.material || []).filter(e => !!e),
+        material: (data.prop.material || []).filter(e => !!e),
     });
-
-    // remove redundent data
-    delete data.prop.material;
 
     return res;
 };
