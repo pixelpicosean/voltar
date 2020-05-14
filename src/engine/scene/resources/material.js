@@ -7,31 +7,18 @@ import { VSG } from "engine/servers/visual/visual_server_globals";
  * @typedef {import('engine/drivers/webgl/rasterizer_storage').UniformTypes} UniformTypes
  */
 
+let mat_uid = 0;
 export class Material {
     get class() { return "Material" }
 
     constructor() {
+        this.id = mat_uid++;
+
         /** @type {Material_t} */
         this.material = null;
         /** @type {Material} */
         this.next_pass = null;
         this.render_priority = 0;
-
-        this.materials = {
-            /* 2D */
-
-            /** @type {Material_t} */
-            flat: null,
-            /** @type {Material_t} */
-            tile: null,
-            /** @type {Material_t} */
-            multimesh: null,
-
-            /* 3D */
-
-            /** @type {Material_t} */
-            spatial: null,
-        };
     }
 }
 

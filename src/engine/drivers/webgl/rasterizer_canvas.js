@@ -70,6 +70,10 @@ import {
 } from 'engine/servers/visual_server';
 import { Rect2 } from 'engine/core/math/rect2';
 
+/**
+ * @typedef {import('./rasterizer_storage').Material_t} Material_t
+ * @typedef {import('./rasterizer_storage').Texture_t} Texture_t
+ */
 
 const ATTR_VERTEX = 0;
 const ATTR_UV = 1;
@@ -137,7 +141,7 @@ class DrawGroup_t {
         this.gl_tex = null;
         this.tex_key = '';
 
-        /** @type {import('./rasterizer_storage').Material_t} */
+        /** @type {Material_t} */
         this.material = null;
         this.uniforms = Object.create(null);
 
@@ -216,9 +220,9 @@ export class RasterizerCanvas extends VObject {
         this.storage = null;
 
         this.states = {
-            /** @type {import('./rasterizer_storage').Material_t} */
+            /** @type {Material_t} */
             material: null,
-            /** @type {import('./rasterizer_storage').Texture_t} */
+            /** @type {Texture_t} */
             texture: null,
             blend_mode: 0,
 
@@ -269,13 +273,15 @@ export class RasterizerCanvas extends VObject {
         this.ibs = [];
 
         this.materials = {
-            /** @type {import('./rasterizer_storage').Material_t} */
+            /** @type {Material_t} */
             flat: null,
-            /** @type {import('./rasterizer_storage').Material_t} */
+            /** @type {Material_t} */
             tile: null,
-            /** @type {import('./rasterizer_storage').Material_t} */
+            /** @type {Material_t} */
             multimesh: null,
         };
+        /** @type {{ [id: number]: { flat: Material_t, tile: Material_t, multimesh: Material_t }}} */
+        this.shader_materials = { };
     }
 
     /* API */
@@ -675,27 +681,36 @@ export class RasterizerCanvas extends VObject {
             if (item_material.class === "CanvasItemMaterial") {
                 blend_mode = /** @type {CanvasItemMaterial} */(item_material).blend_mode;
             } else if (item_material.class === "ShaderMaterial") {
-                const sm = /** @type {ShaderMaterial} */(item_material);
-                if (!sm.materials.flat) {
-                    sm.materials.flat = this.init_shader_material(sm, normal_vs, normal_fs, [
+                let sm = /** @type {ShaderMaterial} */(item_material);
+                let mat_cache = this.shader_materials[sm.id];
+                if (!mat_cache) {
+                    mat_cache = this.shader_materials[sm.id] = {
+                        flat: null,
+                        tile: null,
+                        multimesh: null,
+                    };
+                }
+
+                if (!mat_cache.flat) {
+                    mat_cache.flat = this.init_shader_material(sm, normal_vs, normal_fs, [
                         { name: 'projection_matrix', type: 'mat4' },
                         { name: 'TIME', type: '1f' },
                         { name: 'SCREEN_PIXEL_SIZE', type: '2f' },
                     ], true);
                 }
-                if (!sm.materials.tile) {
-                    sm.materials.tile = this.init_shader_material(sm, tile_vs, tile_fs, [
+                if (!mat_cache.tile) {
+                    mat_cache.tile = this.init_shader_material(sm, tile_vs, tile_fs, [
                         { name: 'projection_matrix', type: 'mat4' },
                         { name: 'frame_uv', type: '4f' },
                         { name: 'TIME', type: '1f' },
                         { name: 'SCREEN_PIXEL_SIZE', type: '2f' },
                     ], false);
                 }
-                if (!sm.materials.multimesh) {
-                    sm.materials.multimesh = this.materials.multimesh;
+                if (!mat_cache.multimesh) {
+                    mat_cache.multimesh = this.materials.multimesh;
                 }
 
-                materials = sm.materials;
+                materials = mat_cache;
             }
         }
 
