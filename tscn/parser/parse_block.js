@@ -227,7 +227,7 @@ module.exports.parse_block = (block) => {
                 if (equal_idx > 0) {
                     const key = line.substr(0, equal_idx).trim();
 
-                    if (key.indexOf('/') > 0) {
+                    if (key.indexOf('/') > 0 && key.indexOf('/') === key.lastIndexOf('/')) {
                         let after_slash = key.substr(key.indexOf('/') + 1).trimRight();
                         let index = parseInt(after_slash);
                         if (isFinite(index)) {
