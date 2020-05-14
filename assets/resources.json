@@ -16,6 +16,218 @@
       "albedo_texture": "@ext#1"
     }
   },
+  "res://raw_mesh/ground.escn": {
+    "type": "PackedScene",
+    "sub": [
+      {
+        "id": 1,
+        "type": "ArrayMesh",
+        "surfaces": [
+          {
+            "primitive": 4,
+            "arrays": {
+              "__type__": "b",
+              "is_2d": false,
+              "aabb": {
+                "position": {
+                  "x": -1,
+                  "y": 0,
+                  "z": -1
+                },
+                "size": {
+                  "x": 2,
+                  "y": 0,
+                  "z": 2
+                }
+              },
+              "vertex": {
+                "index": 0,
+                "offset": 0,
+                "length": 144
+              },
+              "index": {
+                "index": 0,
+                "offset": 144,
+                "length": 12
+              },
+              "array_len": 4,
+              "index_array_len": 6,
+              "attribs": [
+                {
+                  "index": 0,
+                  "type": 5126,
+                  "size": 3,
+                  "stride": 36,
+                  "offset": 0,
+                  "normalized": false
+                },
+                {
+                  "index": 1,
+                  "type": 5126,
+                  "size": 3,
+                  "stride": 36,
+                  "offset": 12,
+                  "normalized": false
+                },
+                {
+                  "index": 2,
+                  "type": 5121,
+                  "size": 4,
+                  "stride": 36,
+                  "offset": 24,
+                  "normalized": false
+                },
+                {
+                  "index": 4,
+                  "type": 5126,
+                  "size": 2,
+                  "stride": 36,
+                  "offset": 28,
+                  "normalized": false
+                }
+              ]
+            },
+            "morph_arrays": [],
+            "is_2d": false
+          }
+        ]
+      }
+    ],
+    "nodes": [
+      {
+        "type": "Spatial",
+        "name": "Scene"
+      },
+      {
+        "type": "MeshInstance",
+        "name": "Plane",
+        "parent": ".",
+        "transform": [
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        "visible": true,
+        "mesh": "@sub#1",
+        "material": []
+      }
+    ]
+  },
+  "res://raw_mesh/road.escn": {
+    "type": "PackedScene",
+    "sub": [
+      {
+        "id": 1,
+        "type": "ArrayMesh",
+        "surfaces": [
+          {
+            "primitive": 4,
+            "arrays": {
+              "__type__": "b",
+              "is_2d": false,
+              "aabb": {
+                "position": {
+                  "x": -2,
+                  "y": -0.165383,
+                  "z": -2.3094
+                },
+                "size": {
+                  "x": 4,
+                  "y": 0.2500007,
+                  "z": 4.6188
+                }
+              },
+              "vertex": {
+                "index": 0,
+                "offset": 156,
+                "length": 4644
+              },
+              "index": {
+                "index": 0,
+                "offset": 4800,
+                "length": 564
+              },
+              "array_len": 129,
+              "index_array_len": 282,
+              "attribs": [
+                {
+                  "index": 0,
+                  "type": 5126,
+                  "size": 3,
+                  "stride": 36,
+                  "offset": 0,
+                  "normalized": false
+                },
+                {
+                  "index": 1,
+                  "type": 5126,
+                  "size": 3,
+                  "stride": 36,
+                  "offset": 12,
+                  "normalized": false
+                },
+                {
+                  "index": 2,
+                  "type": 5121,
+                  "size": 4,
+                  "stride": 36,
+                  "offset": 24,
+                  "normalized": false
+                },
+                {
+                  "index": 4,
+                  "type": 5126,
+                  "size": 2,
+                  "stride": 36,
+                  "offset": 28,
+                  "normalized": false
+                }
+              ]
+            },
+            "morph_arrays": [],
+            "is_2d": false
+          }
+        ]
+      }
+    ],
+    "nodes": [
+      {
+        "type": "Spatial",
+        "name": "Scene"
+      },
+      {
+        "type": "MeshInstance",
+        "name": "road",
+        "parent": ".",
+        "transform": [
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        "visible": true,
+        "mesh": "@sub#1",
+        "material": []
+      }
+    ]
+  },
   "res://raw_mesh/tree_2.escn": {
     "type": "PackedScene",
     "sub": [
@@ -42,12 +254,12 @@
               },
               "vertex": {
                 "index": 0,
-                "offset": 0,
+                "offset": 5364,
                 "length": 57240
               },
               "index": {
                 "index": 0,
-                "offset": 57240,
+                "offset": 62604,
                 "length": 3180
               },
               "array_len": 1590,
@@ -159,12 +371,12 @@
               },
               "vertex": {
                 "index": 0,
-                "offset": 60420,
+                "offset": 65784,
                 "length": 11592
               },
               "index": {
                 "index": 0,
-                "offset": 72012,
+                "offset": 77376,
                 "length": 744
               },
               "array_len": 322,
@@ -265,12 +477,12 @@
               },
               "vertex": {
                 "index": 0,
-                "offset": 72756,
+                "offset": 78120,
                 "length": 34992
               },
               "index": {
                 "index": 0,
-                "offset": 107748,
+                "offset": 113112,
                 "length": 1944
               },
               "array_len": 972,
@@ -371,12 +583,12 @@
               },
               "vertex": {
                 "index": 0,
-                "offset": 109692,
+                "offset": 115056,
                 "length": 103752
               },
               "index": {
                 "index": 0,
-                "offset": 213444,
+                "offset": 218808,
                 "length": 5808
               },
               "array_len": 2882,
@@ -734,42 +946,88 @@
       }
     ]
   },
+  "res://mesh/road.tscn": {
+    "type": "PackedScene",
+    "ext": {
+      "1": "res://raw_mesh/road.escn",
+      "2": "res://mesh/m.tres"
+    },
+    "sub": [],
+    "nodes": [
+      {
+        "name": "road",
+        "instance": "@ext#1"
+      },
+      {
+        "index": 0,
+        "name": "road",
+        "parent": ".",
+        "material": [
+          "@ext#2"
+        ]
+      }
+    ]
+  },
+  "res://mesh/ground.tscn": {
+    "type": "PackedScene",
+    "ext": {
+      "1": "res://raw_mesh/ground.escn",
+      "2": "res://mesh/m.tres"
+    },
+    "sub": [],
+    "nodes": [
+      {
+        "name": "ground",
+        "instance": "@ext#1"
+      },
+      {
+        "index": 0,
+        "name": "Plane",
+        "parent": ".",
+        "material": [
+          "@ext#2"
+        ]
+      }
+    ]
+  },
   "res://scene/demo_3d.tscn": {
     "type": "PackedScene",
     "ext": {
       "1": "media/house_palette.png",
       "2": "res://mesh/tree_1.tscn",
       "3": "res://mesh/house.tscn",
-      "4": "res://mesh/tree_2.tscn"
+      "4": "res://mesh/tree_2.tscn",
+      "5": "res://mesh/road.tscn",
+      "6": "res://mesh/ground.tscn"
     },
     "sub": [
       {
         "id": 2,
+        "type": "QuadMesh",
+        "size": {
+          "x": 60,
+          "y": 20
+        }
+      },
+      {
+        "id": 3,
+        "type": "SpatialMaterial",
+        "albedo_color": {
+          "r": 0.3652,
+          "g": 0.706053,
+          "b": 0.83,
+          "a": 1
+        }
+      },
+      {
+        "id": 4,
         "type": "SpatialMaterial",
         "albedo_texture": "@ext#1"
       },
       {
-        "id": 3,
-        "type": "CubeMesh",
-        "material": "@sub#2"
-      },
-      {
-        "id": 4,
-        "type": "QuadMesh",
-        "size": {
-          "x": 60,
-          "y": 60
-        }
-      },
-      {
         "id": 5,
-        "type": "SpatialMaterial",
-        "albedo_color": {
-          "r": 0.133333,
-          "g": 0.317647,
-          "b": 0.192157,
-          "a": 1
-        }
+        "type": "CubeMesh",
+        "material": "@sub#4"
       }
     ],
     "nodes": [
@@ -778,24 +1036,84 @@
         "name": "spatial"
       },
       {
-        "type": "Camera",
-        "name": "camera",
+        "type": "MeshInstance",
+        "name": "sky",
         "parent": ".",
         "transform": [
           1,
           0,
           0,
           0,
-          0.923866,
-          0.382716,
+          1,
           0,
-          -0.382716,
-          0.923866,
-          1.27755,
-          5.31346,
-          6.29972
+          0,
+          0,
+          1,
+          1.21218,
+          7.24353,
+          -32.528
         ],
-        "size": 2
+        "mesh": "@sub#2",
+        "material": [
+          "@sub#3"
+        ]
+      },
+      {
+        "name": "ground3",
+        "parent": ".",
+        "transform": [
+          22.272,
+          0,
+          0.00701072,
+          0,
+          1,
+          0,
+          -0.0247635,
+          0,
+          6.30536,
+          2.71135,
+          0,
+          -13.1832
+        ],
+        "instance": "@ext#6"
+      },
+      {
+        "name": "ground2",
+        "parent": ".",
+        "transform": [
+          14.1785,
+          0,
+          3.57744,
+          0,
+          1,
+          0,
+          -9.83232,
+          0,
+          5.15878,
+          9.11339,
+          0,
+          5.72153
+        ],
+        "instance": "@ext#6"
+      },
+      {
+        "name": "ground4",
+        "parent": ".",
+        "transform": [
+          10.7671,
+          0,
+          3.57744,
+          0,
+          1,
+          0,
+          -7.46659,
+          0,
+          5.15878,
+          0.368513,
+          0,
+          -5.68483
+        ],
+        "instance": "@ext#6"
       },
       {
         "type": "DirectionalLight",
@@ -824,6 +1142,26 @@
         "light_energy": 0.6
       },
       {
+        "type": "Camera",
+        "name": "camera",
+        "parent": ".",
+        "transform": [
+          1,
+          0,
+          0,
+          0,
+          0.923866,
+          0.382716,
+          0,
+          -0.382716,
+          0.923866,
+          1.27755,
+          5.31346,
+          6.29972
+        ],
+        "size": 2
+      },
+      {
         "type": "MeshInstance",
         "name": "cube",
         "parent": ".",
@@ -837,36 +1175,12 @@
           0.25,
           0.25,
           0.353554,
-          1.00098,
-          3.86127,
-          -4.72529
+          1.15197,
+          3.25732,
+          -4.68754
         ],
-        "mesh": "@sub#3",
+        "mesh": "@sub#5",
         "material": []
-      },
-      {
-        "type": "MeshInstance",
-        "name": "ground",
-        "parent": ".",
-        "transform": [
-          1,
-          0,
-          0,
-          0,
-          -4.37114e-8,
-          1,
-          0,
-          -1,
-          -4.37114e-8,
-          0,
-          0,
-          0
-        ],
-        "cast_shadow": 0,
-        "mesh": "@sub#4",
-        "material": [
-          "@sub#5"
-        ]
       },
       {
         "name": "house",
@@ -926,6 +1240,25 @@
         "instance": "@ext#3"
       },
       {
+        "name": "house4",
+        "parent": ".",
+        "transform": [
+          -0.571258,
+          0,
+          0.820771,
+          0,
+          1,
+          0,
+          -0.820771,
+          0,
+          -0.571258,
+          8.82919,
+          0.00432737,
+          -9.57453
+        ],
+        "instance": "@ext#3"
+      },
+      {
         "name": "tree_1",
         "parent": ".",
         "transform": [
@@ -938,9 +1271,9 @@
           0.138774,
           0,
           0.268673,
-          0.738655,
+          0.655419,
           0,
-          -1.1146
+          -1.33656
         ],
         "instance": "@ext#2"
       },
@@ -957,9 +1290,9 @@
           -0.0419809,
           0,
           0.299468,
-          4.43786,
+          4.41012,
           0,
-          -3.75688
+          -3.81237
         ],
         "instance": "@ext#2"
       },
@@ -983,6 +1316,44 @@
         "instance": "@ext#4"
       },
       {
+        "name": "tree_6",
+        "parent": ".",
+        "transform": [
+          -0.0834177,
+          0,
+          -0.290663,
+          0,
+          0.302396,
+          0,
+          0.290663,
+          0,
+          -0.0834177,
+          8.18933,
+          0,
+          -6.42346
+        ],
+        "instance": "@ext#2"
+      },
+      {
+        "name": "tree_5",
+        "parent": ".",
+        "transform": [
+          0.304174,
+          0,
+          -0.281344,
+          0,
+          0.414338,
+          0,
+          0.281344,
+          0,
+          0.304174,
+          5.26911,
+          0,
+          -11.111
+        ],
+        "instance": "@ext#4"
+      },
+      {
         "name": "tree_4",
         "parent": ".",
         "transform": [
@@ -1000,6 +1371,82 @@
           -6.28609
         ],
         "instance": "@ext#4"
+      },
+      {
+        "name": "road",
+        "parent": ".",
+        "transform": [
+          0.825724,
+          0,
+          0.564074,
+          0,
+          1,
+          0,
+          -0.564074,
+          0,
+          0.825724,
+          -0.054317,
+          -0.0900879,
+          3.27846
+        ],
+        "instance": "@ext#5"
+      },
+      {
+        "name": "road2",
+        "parent": ".",
+        "transform": [
+          0.825724,
+          0,
+          0.564074,
+          0,
+          1,
+          0,
+          -0.564074,
+          0,
+          0.825724,
+          3.17327,
+          -0.0900879,
+          1.07044
+        ],
+        "instance": "@ext#5"
+      },
+      {
+        "name": "road3",
+        "parent": ".",
+        "transform": [
+          0.825724,
+          0,
+          0.564074,
+          0,
+          1,
+          0,
+          -0.564074,
+          0,
+          0.825724,
+          6.4642,
+          -0.0900879,
+          -1.17871
+        ],
+        "instance": "@ext#5"
+      },
+      {
+        "name": "road4",
+        "parent": ".",
+        "transform": [
+          0.825724,
+          0,
+          0.564074,
+          0,
+          1,
+          0,
+          -0.564074,
+          0,
+          0.825724,
+          9.76973,
+          -0.0886038,
+          -3.41014
+        ],
+        "instance": "@ext#5"
       }
     ]
   }
