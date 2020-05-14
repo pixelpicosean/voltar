@@ -69,6 +69,7 @@ import {
     MULTIMESH_CUSTOM_DATA_FLOAT,
 } from 'engine/servers/visual_server';
 import { Rect2 } from 'engine/core/math/rect2';
+import { ARRAY_MAX } from 'engine/scene/const';
 
 /**
  * @typedef {import('./rasterizer_storage').Material_t} Material_t
@@ -520,6 +521,19 @@ export class RasterizerCanvas extends VObject {
 
     canvas_end() {
         this.flush();
+
+        const gl = this.gl;
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+        for (let i = 0; i < ARRAY_MAX; i++) {
+            gl.disableVertexAttribArray(i);
+        }
+
+        if (this.storage.frame.current_rt && this.storage.frame.current_rt.flags.DIRECT_TO_SCREEN) {
+            let ssize = OS.get_singleton().get_window_size();
+            gl.viewport(0, 0, ssize.width, ssize.height);
+            gl.scissor(0, 0, ssize.width, ssize.height);
+        }
     }
 
     reset_canvas() { }
