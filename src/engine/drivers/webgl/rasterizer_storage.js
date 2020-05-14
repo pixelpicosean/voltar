@@ -153,6 +153,10 @@ export class Texture_t {
             MIPMAPS: false,
         };
     }
+    self() {
+        if (this.proxy) return this.proxy;
+        return this;
+    }
 }
 
 let inst_uid = 0;
@@ -781,11 +785,13 @@ export class RasterizerStorage {
     }
 
     /**
-     * @param {Texture_t} texture
+     * @param {Texture_t} p_texture
      */
-    _get_gl_image_and_format(texture) {
+    _get_gl_image_and_format(p_texture) {
         const gl = this.gl;
         const ext = OS.get_singleton().gl_ext;
+
+        let texture = p_texture.self();
 
         switch (texture.format) {
             case PIXEL_FORMAT_L8: {
@@ -1078,7 +1084,6 @@ export class RasterizerStorage {
      * @param {boolean} p_enable
      */
     render_target_set_flag(rt, flag, p_enable) {
-        console.log(`rt.set_flag(${flag}, ${p_enable})`)
         if (flag === "DIRECT_TO_SCREEN") {
             this._render_target_clear(rt);
             rt.flags[flag] = p_enable;

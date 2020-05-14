@@ -55,6 +55,8 @@ export class Texture extends Resource {
             REPEAT: false,
             MIPMAP: false,
         };
+
+        this.uvs = [0, 0, 1, 1];
     }
 
     /**
@@ -85,34 +87,38 @@ export class Texture extends Resource {
     has_alpha() { return false }
 
     /**
-     * @param {any} p_canvas_item
+     * @param {Item} p_canvas_item
      * @param {Vector2Like} p_pos
      * @param {ColorLike} [p_modulate]
      * @param {boolean} [p_transpose]
-     * @param {ImageTexture} [p_normal_map]
      */
-    draw(p_canvas_item, p_pos, p_modulate = white, p_transpose = false, p_normal_map = null) { }
+    draw(p_canvas_item, p_pos, p_modulate = white, p_transpose = false) {
+        const rect = Rect2.new(p_pos.x, p_pos.y, this.get_width(), this.get_height());
+        VSG.canvas.canvas_item_add_texture_rect(p_canvas_item, rect, this, false, p_modulate, p_transpose);
+        Rect2.free(rect);
+    }
 
     /**
-     * @param {any} p_canvas_item
-     * @param {Vector2Like} p_rect
+     * @param {Item} p_canvas_item
+     * @param {Rect2} p_rect
      * @param {boolean} [p_tile]
      * @param {ColorLike} [p_modulate]
      * @param {boolean} [p_transpose]
-     * @param {ImageTexture} [p_normal_map]
      */
-    draw_rect(p_canvas_item, p_rect, p_tile = false, p_modulate = white, p_transpose = false, p_normal_map = null) { }
+    draw_rect(p_canvas_item, p_rect, p_tile = false, p_modulate = white, p_transpose = false) {
+        VSG.canvas.canvas_item_add_texture_rect(p_canvas_item, p_rect, this, p_tile, p_modulate, p_transpose);
+    }
 
     /**
-     * @param {any} p_canvas_item
+     * @param {Item} p_canvas_item
      * @param {Rect2} p_rect
      * @param {Rect2} p_src_rect
      * @param {ColorLike} [p_modulate]
      * @param {boolean} [p_transpose]
-     * @param {ImageTexture} [p_normal_map]
-     * @param {boolean} [p_clip_uv]
      */
-    draw_rect_region(p_canvas_item, p_rect, p_src_rect, p_modulate = white, p_transpose = false, p_normal_map = null, p_clip_uv = true) { }
+    draw_rect_region(p_canvas_item, p_rect, p_src_rect, p_modulate = white, p_transpose = false) {
+        VSG.canvas.canvas_item_add_texture_rect_region(p_canvas_item, p_rect, this, p_src_rect, p_modulate, p_transpose);
+    }
 }
 GDCLASS(Texture, Resource)
 
@@ -141,12 +147,10 @@ export class ImageTexture extends Texture {
         this.x = 0;
         /** for atlas texture only */
         this.y = 0;
-
-        this.uvs = [0, 0, 1, 1];
     }
 
     get_rid() {
-        return this.texture;
+        return this.texture.self();
     }
 
     get_format() {
@@ -204,7 +208,7 @@ export class ImageTexture extends Texture {
         this.y = p_y;
         this.width = p_width;
         this.height = p_height;
-        this.texture = p_texture.texture;
+        this.texture = p_texture.texture.self();
 
         this.uvs[0] = this.x / this.texture.width;
         this.uvs[1] = this.y / this.texture.height;
@@ -224,40 +228,6 @@ export class ImageTexture extends Texture {
      */
     set_data(p_data) {
         VSG.storage.texture_set_data(this.texture, p_data);
-    }
-
-    /**
-     * @param {Item} p_canvas_item
-     * @param {Vector2Like} p_pos
-     * @param {ColorLike} [p_modulate]
-     * @param {boolean} [p_transpose]
-     */
-    draw(p_canvas_item, p_pos, p_modulate = white, p_transpose = false) {
-        const rect = Rect2.new(p_pos.x, p_pos.y, this.get_width(), this.get_height());
-        VSG.canvas.canvas_item_add_texture_rect(p_canvas_item, rect, this, false, p_modulate, p_transpose);
-        Rect2.free(rect);
-    }
-
-    /**
-     * @param {Item} p_canvas_item
-     * @param {Rect2} p_rect
-     * @param {boolean} [p_tile]
-     * @param {ColorLike} [p_modulate]
-     * @param {boolean} [p_transpose]
-     */
-    draw_rect(p_canvas_item, p_rect, p_tile = false, p_modulate = white, p_transpose = false) {
-        VSG.canvas.canvas_item_add_texture_rect(p_canvas_item, p_rect, this, p_tile, p_modulate, p_transpose);
-    }
-
-    /**
-     * @param {Item} p_canvas_item
-     * @param {Rect2} p_rect
-     * @param {Rect2} p_src_rect
-     * @param {ColorLike} [p_modulate]
-     * @param {boolean} [p_transpose]
-     */
-    draw_rect_region(p_canvas_item, p_rect, p_src_rect, p_modulate = white, p_transpose = false) {
-        VSG.canvas.canvas_item_add_texture_rect_region(p_canvas_item, p_rect, this, p_src_rect, p_modulate, p_transpose);
     }
 }
 GDCLASS(ImageTexture, Texture)

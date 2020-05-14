@@ -120,29 +120,6 @@ export class VisualServerViewport {
         this.clear_color.copy(p_color);
     }
 
-    free_rid(rid) {
-        return false;
-    }
-
-    /**
-     * @param {Viewport_t} p_viewport
-     */
-    free(p_viewport) {
-        if (p_viewport && p_viewport._id >= 0) {
-            // TODO: free render target
-            // p_viewport.render_target.free();
-
-            for (const [_, canvas] of p_viewport.canvas_map) {
-                canvas.canvas.viewports.delete(p_viewport);
-            }
-
-            remove_items(this.active_viewports, this.active_viewports.indexOf(p_viewport), 1);
-
-            return true;
-        }
-        return false;
-    }
-
     viewport_create() {
         const viewport = new Viewport_t();
         viewport.self = viewport;

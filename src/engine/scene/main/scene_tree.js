@@ -904,23 +904,6 @@ export class SceneTree extends MainLoop {
     }
 
     _update_root_rect() {
-        if (!OS.get_singleton().video_mode.resizable) {
-            const vec = Vector2.new();
-            this.root.set_size(
-                vec.copy(this.last_screen_size)
-                    .scale(1 / this.stretch_shrink)
-                    .floor()
-            );
-            const rect = Rect2.new(0, 0, this.last_screen_size.x, this.last_screen_size.y);
-            this.root.set_attach_to_screen_rect(rect);
-            this.root.set_size_override_stretch(false);
-            this.root.set_size_override(false, Vector2.ZERO);
-            this.root.update_canvas_items();
-            Rect2.free(rect);
-            Vector2.free(vec);
-            return;
-        }
-
         if (this.stretch_mode === STRETCH_MODE_DISABLED) {
             const vec = Vector2.new();
             this.root.set_size(

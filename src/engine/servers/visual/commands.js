@@ -2,9 +2,8 @@ import { Vector2 } from "engine/core/math/vector2";
 import { Rect2 } from "engine/core/math/rect2";
 import { Color } from "engine/core/color";
 
-import { ImageTexture } from "engine/scene/resources/texture";
+import { Texture } from "engine/scene/resources/texture";
 import { Transform2D } from "engine/core/math/transform_2d";
-
 
 export const CANVAS_RECT_REGION = 1;
 export const CANVAS_RECT_TILE = 2;
@@ -53,7 +52,7 @@ export class Command {
     get type() { return -1 }
     static instance() { return new Command() }
     constructor() {
-        /** @type {ImageTexture} */
+        /** @type {Texture} */
         this.texture = null;
     }
     init() {

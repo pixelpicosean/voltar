@@ -263,7 +263,7 @@ export class Viewport extends Node {
         this.last_vp_rect = new Rect2();
 
         this.transparent_bg = false;
-        this.vflip = false;
+        this.render_target_v_flip = false;
         this._render_target_clear_mode = CLEAR_MODE_ALWAYS;
         this.filter = false;
         this.gen_mipmaps = false;
@@ -311,6 +311,15 @@ export class Viewport extends Node {
     }
 
     /* virtual */
+
+    _load_data(data) {
+        super._load_data(data);
+
+        if (data.size) this.set_size(data.size);
+        if (data.render_target_v_flip !== undefined) this.set_render_target_v_flip(data.render_target_v_flip);
+
+        return this;
+    }
 
     /**
      * @param {number} p_what
@@ -539,8 +548,8 @@ export class Viewport extends Node {
     /**
      * @param {boolean} p_enabled
      */
-    set_vflip(p_enabled) {
-        this.vflip = p_enabled;
+    set_render_target_v_flip(p_enabled) {
+        this.render_target_v_flip = p_enabled;
         VSG.viewport.viewport_set_vflip(this.viewport, p_enabled);
     }
 

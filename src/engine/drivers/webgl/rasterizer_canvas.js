@@ -39,7 +39,7 @@ import {
     CommandMultiMesh,
     CommandTransform,
 } from 'engine/servers/visual/commands';
-import { ImageTexture } from 'engine/scene/resources/texture';
+import { Texture } from 'engine/scene/resources/texture';
 import { ShaderMaterial, CANVAS_ITEM_SHADER_UNIFORMS } from 'engine/scene/resources/material';
 import {
     CanvasItemMaterial,
@@ -857,8 +857,8 @@ export class RasterizerCanvas extends VObject {
                                     tex_uvs[3],
                                 ];
 
-                                const u_pct = rect.source.width / rect.texture.width;
-                                const v_pct = rect.source.height / rect.texture.height;
+                                const u_pct = rect.source.width / rect.texture.get_width();
+                                const v_pct = rect.source.height / rect.texture.get_height();
 
                                 vertices[vb_idx + VTX_COMP * 0 + 2] = 0;
                                 vertices[vb_idx + VTX_COMP * 0 + 3] = 0;
@@ -872,7 +872,7 @@ export class RasterizerCanvas extends VObject {
                                 get_uvs_of_sub_rect(
                                     vertices, vb_idx,
                                     tex_uvs,
-                                    rect.texture.width, rect.texture.height,
+                                    rect.texture.get_width(), rect.texture.get_height(),
                                     rect.source.x, rect.source.y,
                                     rect.source.width, rect.source.height
                                 )
@@ -969,8 +969,8 @@ export class RasterizerCanvas extends VObject {
                     const m_t = np.margin[MARGIN_TOP];
                     const m_b = np.margin[MARGIN_BOTTOM];
 
-                    const s_w = np.source.width || np.texture.width;
-                    const s_h = np.source.height || np.texture.height;
+                    const s_w = np.source.width || np.texture.get_width();
+                    const s_h = np.source.height || np.texture.get_height();
 
                     const uv_x0 = tex ? tex.uvs[0] : -1;
                     const uv_y0 = tex ? tex.uvs[1] : -1;
@@ -1311,6 +1311,10 @@ export class RasterizerCanvas extends VObject {
                     gl.uniform1i(this.copy_shader.uniforms["TEXTURE"].gl_loc, texunit);
                     gl.bindTexture(gl.TEXTURE_2D, mm.texture.get_rid().gl_tex);
 
+                    if (mm.texture.get_rid().render_target) {
+                        mm.texture.get_rid().render_target.used_in_frame = true;
+                    }
+
                     let amount = Math.min(multimesh.size, multimesh.visible_instances);
                     if (amount === -1) {
                         amount = multimesh.size;
@@ -1419,7 +1423,7 @@ export class RasterizerCanvas extends VObject {
     /**
      * @param {number} num_vertex
      * @param {number} num_index
-     * @param {ImageTexture} texture
+     * @param {Texture} texture
      * @param {import('./rasterizer_storage').Material_t} material
      * @param {number} blend_mode no blend mode provided = MIX
      */
@@ -1502,7 +1506,11 @@ export class RasterizerCanvas extends VObject {
         const texunit = VSG.config.max_texture_image_units - 1;
         gl.activeTexture(gl.TEXTURE0 + texunit);
         gl.uniform1i(this.states.material.shader.uniforms["TEXTURE"].gl_loc, texunit);
-        gl.bindTexture(gl.TEXTURE_2D, this.states.texture.gl_tex);
+        gl.bindTexture(gl.TEXTURE_2D, this.states.texture.self().gl_tex);
+
+        if (this.states.texture.self().render_target) {
+            this.states.texture.self().render_target.used_in_frame = true;
+        }
 
         // - upload vertices/indices
         const {
