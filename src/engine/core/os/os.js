@@ -176,6 +176,7 @@ export class OS {
 
             if (gl) {
                 driver_config.support_depth_texture = true;
+                driver_config.use_rgba_3d_shadows = !driver_config.support_depth_texture;
                 driver_config.depth_internalformat = gl.DEPTH_COMPONENT;
                 driver_config.depth_type = gl.UNSIGNED_INT;
             }
@@ -190,6 +191,7 @@ export class OS {
             let depth_texture = gl.getExtension("WEBGL_depth_texture");
             if (depth_texture) {
                 driver_config.support_depth_texture = true;
+                driver_config.use_rgba_3d_shadows = !driver_config.support_depth_texture;
                 driver_config.depth_internalformat = gl.DEPTH_COMPONENT;
                 driver_config.depth_type = gl.UNSIGNED_INT;
             } else {

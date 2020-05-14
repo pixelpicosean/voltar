@@ -264,3 +264,5 @@ export class Transform {
         return this.basis.exact_equals(other.basis) && this.origin.exact_equals(other.origin);
     }
 }
+
+Transform.IDENTITY = new Transform;

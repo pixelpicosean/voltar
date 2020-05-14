@@ -14,6 +14,10 @@ import {
     LIGHT_PARAM_ENERGY,
     LIGHT_PARAM_SPECULAR,
     LIGHT_OMNI,
+    LIGHT_PARAM_SHADOW_BIAS_SPLIT_SCALE,
+    LIGHT_PARAM_RANGE,
+    LIGHT_PARAM_SHADOW_BIAS,
+    LIGHT_PARAM_SHADOW_NORMAL_BIAS,
 } from 'engine/servers/visual_server';
 import {
     Instance_t,

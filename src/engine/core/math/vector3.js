@@ -306,6 +306,13 @@ export class Vector3 {
     }
 
     /**
+     * @param {Vector3Like} p_b
+     */
+    distance_to(p_b) {
+        return Math.hypot(p_b.x - this.x, p_b.y - this.y, p_b.z - this.z);
+    }
+
+    /**
      * Change x and y components to their absolute values.
      *
      * @returns {Vector3}

@@ -1,5 +1,9 @@
 import { Vector3, Vector3Like } from "./vector3";
 
+/**
+ * @typedef {import('./plane').Plane} Plane
+ */
+
 /** @type {AABB[]} */
 const pool = [];
 
@@ -388,5 +392,24 @@ export class AABB {
         return this.position.is_equal_approx(aabb.position)
             &&
             this.size.is_equal_approx(aabb.size);
+    }
+
+    /**
+     * @param {Plane} p_plane
+     * @param {{ min: number, max: number }} result
+     */
+    project_range_in_plane(p_plane, result) {
+        let half_extents = this.size.clone().scale(0.5);
+        let center = this.position.clone().add(half_extents);
+
+        let normal_abs = p_plane.normal.clone().abs();
+        let length = normal_abs.dot(half_extents);
+        let distance = p_plane.distance_to(center);
+        result.min = distance - length;
+        result.max = distance + length;
+
+        Vector3.free(half_extents);
+        Vector3.free(center);
+        Vector3.free(normal_abs);
     }
 }

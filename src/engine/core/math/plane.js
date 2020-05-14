@@ -1,4 +1,5 @@
 import { Vector3, Vector3Like } from "./vector3";
+import { CMP_EPSILON } from "./math_defs";
 
 /** @type {Plane[]} */
 const pool = [];
@@ -78,5 +79,37 @@ export class Plane {
      */
     distance_to(p_point) {
         return this.normal.dot(p_point) - this.d;
+    }
+
+    /**
+     * @param {Plane} plane_1
+     * @param {Plane} plane_2
+     * @param {Vector3} [result]
+     */
+    intersect_3(plane_1, plane_2, result) {
+        let plane_0 = this;
+        let n0 = plane_0.normal;
+        let n1 = plane_1.normal;
+        let n2 = plane_2.normal;
+
+        let denom = n0.cross(n1).dot(n2);
+
+        if (Math.abs(denom) < CMP_EPSILON) {
+            return false;
+        }
+
+        if (result) {
+            result.copy(
+                n1.cross(n2).scale(plane_0.d)
+                .add(
+                    n2.cross(n0).scale(plane_1.d)
+                )
+                .add(
+                    n0.cross(n1).scale(plane_2.d)
+                )
+            ).scale(1 / denom);
+        }
+
+        return true;
     }
 }

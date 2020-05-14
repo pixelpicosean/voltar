@@ -229,15 +229,18 @@ export class Light_t extends Instantiable_t {
         ];
 
         this.color = new Color(1, 1, 1, 1);
+        this.shadow_color = new Color(0, 0, 0, 1);
 
         this.projector = null;
 
+        this.shadow = false;
         this.negative = false;
         this.reverse_cull = false;
 
         this.cull_mask = 0xFFFFFFFF;
 
-        this.directional_blend_splits = false;
+        this.directional_shadow_mode = 0;
+        this.directional_range_mode = 0;
 
         this.version = 0;
     }
@@ -1806,6 +1809,23 @@ export class RasterizerStorage {
 
         p_light.version++;
         p_light.instance_change_notify(true, false);
+    }
+
+    /**
+     * @param {Light_t} p_light
+     * @param {boolean} p_enable
+     */
+    light_set_shadow(p_light, p_enable) {
+        p_light.shadow = p_enable;
+        p_light.version++;
+    }
+
+    /**
+     * @param {Light_t} p_light
+     * @param {ColorLike} p_color
+     */
+    light_set_shadow_color(p_light, p_color) {
+        p_light.color.copy(p_color);
     }
 
     /**

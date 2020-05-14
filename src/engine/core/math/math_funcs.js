@@ -106,6 +106,17 @@ export const wrap_angle = (a) => (a + Math_PI) % Math_PI2 - Math_PI;
 export const angle_difference = (a, b) => mod((b - a + Math_PI), Math_PI2) - Math_PI;
 
 /**
+ * @param {number} value
+ * @param {number} step
+ */
+export const stepify = (value, step) => {
+    if (step !== 0) {
+        value = Math.floor(value / step + 0.5) * step;
+    }
+    return value;
+}
+
+/**
  * @param {number} p_x
  * @param {number} p_c
  * @returns {number}
