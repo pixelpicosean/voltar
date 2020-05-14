@@ -174,9 +174,9 @@ export class Engine {
                             const ctor = res_class_map[data.type];
                             if (ctor) {
                                 data = (new ctor)._load_data(data);
-                                data.__rid__ = `${id}`;
                                 res.sub[i] = data;
                             }
+                            data.__rid__ = `${id}`;
                         }
                     }
 
