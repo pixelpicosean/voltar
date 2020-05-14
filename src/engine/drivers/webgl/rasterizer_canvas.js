@@ -595,7 +595,9 @@ export class RasterizerCanvas extends VObject {
         if (material.shader.canvas_item.uses_screen_texture && !this.states.canvas_texscreen_used) {
             this.states.canvas_texscreen_used = true;
 
-            this.copy_screen();
+            let rect = Rect2.new();
+            this._copy_screen(rect);
+            Rect2.free(rect);
 
             const ssize = this.storage.frame.current_rt;
             this.states.uniforms.SCREEN_PIXEL_SIZE[0] = 1.0 / ssize.width;
@@ -651,33 +653,6 @@ export class RasterizerCanvas extends VObject {
                 gl.bindTexture(gl.TEXTURE_2D, this.storage.frame.current_rt.copy_screen_effect.gl_color);
             }
         }
-    }
-
-    copy_screen() {
-        const gl = this.gl;
-
-        gl.disable(gl.BLEND);
-
-        const current_framebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING);
-        gl.bindFramebuffer(gl.FRAMEBUFFER, this.storage.frame.current_rt.copy_screen_effect.gl_fbo);
-
-        gl.useProgram(this.copy_shader.gl_prog);
-
-        const texunit = VSG.config.max_texture_image_units - 4;
-        gl.activeTexture(gl.TEXTURE0 + texunit);
-        gl.uniform1i(this.copy_shader.uniforms["TEXTURE"].gl_loc, texunit);
-        gl.bindTexture(gl.TEXTURE_2D, this.storage.frame.current_rt.texture.gl_tex);
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.storage.resources.quadie);
-
-        gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 16, 0);
-        gl.enableVertexAttribArray(0);
-        gl.vertexAttribPointer(1, 2, gl.FLOAT, false, 16, 8);
-        gl.enableVertexAttribArray(1);
-
-        gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
-
-        gl.bindFramebuffer(gl.FRAMEBUFFER, current_framebuffer);
     }
 
     /**
