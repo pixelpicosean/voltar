@@ -9,6 +9,11 @@ import {
     LIGHT_PARAM_RANGE,
     LIGHT_PARAM_SPOT_ANGLE,
     LIGHT_DIRECTIONAL,
+    LIGHT_PARAM_CONTACT_SHADOW_SIZE,
+    LIGHT_PARAM_SHADOW_MAX_DISTANCE,
+    LIGHT_PARAM_SHADOW_NORMAL_BIAS,
+    LIGHT_PARAM_SHADOW_BIAS,
+    LIGHT_PARAM_SHADOW_BIAS_SPLIT_SCALE,
 } from "engine/servers/visual_server";
 import { VSG } from "engine/servers/visual/visual_server_globals";
 
@@ -38,6 +43,12 @@ export class Light extends VisualInstance {
         this.cull_mask = 0xFFFFFFFF;
         this.type = p_type;
 
+        this.shadow_bias = 0;
+        this.shadow_color = new Color(0, 0, 0, 1);
+        this.shadow_contact = 0;
+        this.shadow_enabled = false;
+        this.shadow_reverse_cull_face = false;
+
         /** @type {import('engine/drivers/webgl/rasterizer_storage').Light_t} */
         this.light = null;
 
@@ -52,6 +63,10 @@ export class Light extends VisualInstance {
         this.set_param(LIGHT_PARAM_SPECULAR, 0.5);
         this.set_param(LIGHT_PARAM_RANGE, 5);
         this.set_param(LIGHT_PARAM_SPOT_ANGLE, 45);
+        this.set_param(LIGHT_PARAM_CONTACT_SHADOW_SIZE, 0);
+        this.set_param(LIGHT_PARAM_SHADOW_MAX_DISTANCE, 0);
+        this.set_param(LIGHT_PARAM_SHADOW_NORMAL_BIAS, 0);
+        this.set_param(LIGHT_PARAM_SHADOW_BIAS, 0.15);
 
         this.d_data.disable_scale = true;
     }
@@ -104,6 +119,24 @@ export class Light extends VisualInstance {
         VSG.storage.light_set_param(this.light, p_param, p_value);
     }
 
+    set_shadow_bias() { }
+    /**
+     * @param {ColorLike} p_shadow_color
+     */
+    set_shadow_color(p_shadow_color) {
+        this.shadow_color.copy(p_shadow_color);
+        VSG.storage.light_set_shadow_color(this.light, p_shadow_color);
+    }
+    set_shadow_contact() { }
+    /**
+     * @param {boolean} p_enable
+     */
+    set_shadow_enabled(p_enable) {
+        this.shadow_enabled = p_enable;
+        VSG.storage.light_set_shadow(this.light, p_enable);
+    }
+    set_shadow_reverse_cull_face() { }
+
     /* virtual methods */
 
     free() {
@@ -118,6 +151,9 @@ export class Light extends VisualInstance {
         if (data.light_color) this.set_light_color(data.light_color);
         if (data.light_energy) this.set_light_energy(data.light_energy);
         if (data.light_negative) this.set_light_negative(data.light_negative);
+
+        if (data.shadow_color) this.set_shadow_color(data.shadow_color);
+        if (data.shadow_enabled) this.set_shadow_enabled(data.shadow_enabled);
 
         return this;
     }
@@ -144,7 +180,24 @@ export class DirectionalLight extends Light {
 
     constructor() {
         super(LIGHT_DIRECTIONAL);
+
+        /* only ortho is supported right now */
+        this.shadow_mode = 0;
+        this.shadow_max_distance = 0;
+        this.shadow_depth_range = 0;
+        this.shadow_depth_bias = 0;
+
+        this.set_param(LIGHT_PARAM_SHADOW_NORMAL_BIAS, 0.8);
+        this.set_param(LIGHT_PARAM_SHADOW_BIAS, 0.1);
+        this.set_param(LIGHT_PARAM_SHADOW_MAX_DISTANCE, 100);
+        this.set_param(LIGHT_PARAM_SHADOW_BIAS_SPLIT_SCALE, 0.25);
+        // TODO: this.set_shadow_depth_range(LIGHT_PARAM_SHADOW_DEPTH_RANGE_STABLE);
     }
+
+    set_shadow_mode(p) { }
+    set_shadow_max_distance(p) { }
+    set_shadow_depth_bias(p) { }
+    set_shadow_depth_range(p) { }
 
     /* virtual methods */
 

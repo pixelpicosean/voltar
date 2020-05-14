@@ -83,6 +83,14 @@ export const LIGHT_PARAM_RANGE = 3;
 export const LIGHT_PARAM_ATTENUATION = 4;
 export const LIGHT_PARAM_SPOT_ANGLE = 5;
 export const LIGHT_PARAM_SPOT_ATTENUATION = 6;
+export const LIGHT_PARAM_CONTACT_SHADOW_SIZE = 7;
+export const LIGHT_PARAM_SHADOW_MAX_DISTANCE = 8;
+export const LIGHT_PARAM_SHADOW_SPLIT_1_OFFSET = 9;
+export const LIGHT_PARAM_SHADOW_SPLIT_2_OFFSET = 10;
+export const LIGHT_PARAM_SHADOW_SPLIT_3_OFFSET = 11;
+export const LIGHT_PARAM_SHADOW_NORMAL_BIAS = 12;
+export const LIGHT_PARAM_SHADOW_BIAS = 13;
+export const LIGHT_PARAM_SHADOW_BIAS_SPLIT_SCALE = 14;
 
 /**
  * @typedef FrameDrawnCallbacks
