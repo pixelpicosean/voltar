@@ -658,6 +658,18 @@ export class Basis {
     }
 
     /**
+     * @param {number} x
+     * @param {number} y
+     * @param {number} z
+     */
+    scale_n(x, y, z) {
+        this.elements[0].scale(x);
+        this.elements[1].scale(y);
+        this.elements[2].scale(z);
+        return this;
+    }
+
+    /**
      * @param {Basis} target
      * @param {number} t
      */

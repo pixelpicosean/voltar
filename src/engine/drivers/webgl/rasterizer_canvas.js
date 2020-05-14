@@ -5,11 +5,10 @@ import {
     MARGIN_BOTTOM,
 } from 'engine/core/math/math_defs';
 import { Transform2D } from 'engine/core/math/transform_2d';
-import { identity_mat4, translate_mat4, scale_mat4 } from 'engine/core/math/transform';
+import { Transform } from 'engine/core/math/transform';
 import { ColorLike, Color } from 'engine/core/color';
 import {
     OS,
-    VIDEO_DRIVER_GLES2_LEGACY,
     VIDEO_DRIVER_GLES2,
     VIDEO_DRIVER_GLES3,
 } from 'engine/core/os/os';
@@ -222,7 +221,9 @@ export class RasterizerCanvas extends VObject {
             /** @type {import('./rasterizer_storage').Texture_t} */
             texture: null,
             blend_mode: 0,
+
             canvas_texscreen_used: false,
+            using_transparent_rt: false,
 
             active_vert_slot: 0,
             active_buffer_slot: 0,
@@ -418,25 +419,17 @@ export class RasterizerCanvas extends VObject {
     get_extensions() {
         const gl = this.gl;
 
-        if (OS.get_singleton().video_driver_index === VIDEO_DRIVER_GLES2 || OS.get_singleton().video_driver_index === VIDEO_DRIVER_GLES2_LEGACY) {
+        if (OS.get_singleton().video_driver_index === VIDEO_DRIVER_GLES2) {
             this.extensions = {
                 drawBuffers: gl.getExtension('WEBGL_draw_buffers'),
                 depthTexture: gl.getExtension('WEBGL_depth_texture'),
                 loseContext: gl.getExtension('WEBGL_lose_context'),
                 anisotropicFiltering: gl.getExtension('EXT_texture_filter_anisotropic'),
                 uint32ElementIndex: gl.getExtension('OES_element_index_uint'),
-                // Floats and half-floats
-                floatTexture: gl.getExtension('OES_texture_float'),
-                floatTextureLinear: gl.getExtension('OES_texture_float_linear'),
-                textureHalfFloat: gl.getExtension('OES_texture_half_float'),
-                textureHalfFloatLinear: gl.getExtension('OES_texture_half_float_linear'),
             };
         } else if (OS.get_singleton().video_driver_index === VIDEO_DRIVER_GLES3) {
             this.extensions = {
                 anisotropicFiltering: gl.getExtension('EXT_texture_filter_anisotropic'),
-                // Floats and half-floats
-                colorBufferFloat: gl.getExtension('EXT_color_buffer_float'),
-                floatTextureLinear: gl.getExtension('OES_texture_float_linear'),
             };
         }
     }
@@ -460,10 +453,23 @@ export class RasterizerCanvas extends VObject {
     canvas_begin() {
         const gl = this.gl;
 
+        this.states.using_transparent_rt = false;
         const frame = this.storage.frame;
+        let viewport_x = 0, viewport_y = 0, viewport_width = 0, viewport_height = 0;
 
         if (frame.current_rt) {
             gl.bindFramebuffer(gl.FRAMEBUFFER, frame.current_rt.gl_fbo);
+            this.states.using_transparent_rt = frame.current_rt.flags.TRANSPARENT;
+
+            if (frame.current_rt.flags.DIRECT_TO_SCREEN) {
+                viewport_width = frame.current_rt.width;
+                viewport_height = frame.current_rt.height;
+                viewport_x = frame.current_rt.x;
+                viewport_y = OS.get_singleton().get_window_size().height - viewport_height - frame.current_rt.y;
+                gl.scissor(viewport_x, viewport_y, viewport_width, viewport_height);
+                gl.viewport(viewport_x, viewport_y, viewport_width, viewport_height);
+                gl.enable(gl.SCISSOR_TEST);
+            }
         }
 
         if (frame.clear_request) {
@@ -480,23 +486,25 @@ export class RasterizerCanvas extends VObject {
         this.reset_canvas();
 
         // update general uniform data
-        const canvas_transform = identity_mat4(this.states.uniforms.projection_matrix);
-        if (frame.current_rt) {
-            let csy = 1.0;
-            if (this.storage.frame.current_rt.flags.VFLIP) {
-                csy = -1.0;
-            }
-            const ssize = this.storage.frame.current_rt;
-            translate_mat4(canvas_transform, canvas_transform, [-ssize.width / 2, -ssize.height / 2, 0]);
-            scale_mat4(canvas_transform, canvas_transform, [2 / ssize.width, csy * (-2) / ssize.height, 1]);
+        let canvas_transform = Transform.new();
 
-            this.states.uniforms.SCREEN_PIXEL_SIZE[0] = 1.0 / ssize.width;
-            this.states.uniforms.SCREEN_PIXEL_SIZE[1] = 1.0 / ssize.height;
+        if (frame.current_rt) {
+            let csy = 1;
+            if (frame.current_rt && frame.current_rt.flags.VFLIP) {
+                csy = -1;
+            }
+            canvas_transform.translate_n(-(frame.current_rt.width / 2), -(frame.current_rt.height / 2), 0);
+            canvas_transform.scale_n(2 / frame.current_rt.width, csy * (-2) / frame.current_rt.height, 1);
         } else {
-            const ssize = OS.get_singleton().get_window_size();
-            translate_mat4(canvas_transform, canvas_transform, [-ssize.width / 2, -ssize.height / 2, 0]);
-            scale_mat4(canvas_transform, canvas_transform, [2 / ssize.width, -2 / ssize.height, 1]);
+            let ssize = OS.get_singleton().get_window_size();
+            canvas_transform.translate_n(-ssize.width / 2, -ssize.height / 2, 0);
+            canvas_transform.scale_n(2 / ssize.width, -2 / ssize.height, 1);
         }
+
+        canvas_transform.as_array(this.states.uniforms.projection_matrix);
+
+        Transform.free(canvas_transform);
+
         this.states.uniforms.TIME[0] = frame.time[0];
 
         // reset states
@@ -567,8 +575,10 @@ export class RasterizerCanvas extends VObject {
         material.name = shader_material.name;
         material.batchable = batchable;
         for (let u of shader_material.uniforms) {
-            if (u.value) {
+            if (Array.isArray(u.value)) {
                 material.params[u.name] = u.value;
+            } else {
+                material.textures[u.name] = u.value;
             }
         }
         return material;
@@ -652,8 +662,6 @@ export class RasterizerCanvas extends VObject {
         gl.bindFramebuffer(gl.FRAMEBUFFER, this.storage.frame.current_rt.copy_screen_effect.gl_fbo);
 
         gl.useProgram(this.copy_shader.gl_prog);
-
-        gl.uniform1f(this.copy_shader.uniforms["vflip"].gl_loc, 0);
 
         const texunit = VSG.config.max_texture_image_units - 4;
         gl.activeTexture(gl.TEXTURE0 + texunit);

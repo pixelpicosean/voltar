@@ -28,8 +28,7 @@ export const MOUSE_MODE_CONFINED = 3;
 
 export const VIDEO_DRIVER_GLES3 = 0; // webgl2
 export const VIDEO_DRIVER_GLES2 = 1; // webgl
-export const VIDEO_DRIVER_GLES2_LEGACY = 2; // older wegbl 1
-export const VIDEO_DRIVER_MAX = 3;
+export const VIDEO_DRIVER_MAX = 2;
 
 export const SCREEN_LANDSCAPE = 0;
 export const SCREEN_PORTRAIT = 1;
