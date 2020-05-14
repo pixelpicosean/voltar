@@ -30,7 +30,7 @@ class Shared {
     }
     emit_value_changed() {
         for (let e of this.owners) {
-            if (!e.is_inside_tree) {
+            if (!e.is_inside_tree()) {
                 continue;
             }
             e._value_changed_notify();
@@ -41,7 +41,7 @@ class Shared {
      */
     emit_changed(what) {
         for (let e of this.owners) {
-            if (!e.is_inside_tree) {
+            if (!e.is_inside_tree()) {
                 continue;
             }
             e._changed_notify(what);

@@ -1170,7 +1170,7 @@ export class Viewport extends Node {
     }
 
     update_worlds() {
-        if (!this.is_inside_tree) {
+        if (!this.is_inside_tree()) {
             return;
         }
 
