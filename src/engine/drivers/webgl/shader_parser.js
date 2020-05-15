@@ -135,15 +135,26 @@ export function parse_attributes_from_code(code) {
  * Rules:
  * 1. vertex entry has to be: "void vertex()"
  * 2. fragment entry has to be: "void fragment()"
- * 3. vertex always on top and fragment on bottom if both exist
+ * 3. light entry has to be: "void light()"
+ * 4. global code should placed before FIRST entry function
+ * 5. the 3 functions has to be in order: "vertex -> fragment -> light" if all exist
  * @param {string} code
  */
 export function parse_shader_code(code) {
     const vs_start = code.indexOf("void vertex()");
     const fs_start = code.indexOf("void fragment()");
+    const lt_start = code.indexOf("void light()");
 
     let type_match = code.match(/shader_type\s*=\s*(canvas_item|spatial);/);
     let type = type_match ? type_match[1] : "canvas_item";
+
+    let global_start = 0;
+    if (type_match) {
+        global_start = type_match.index + type_match[0].length;
+    }
+
+    let global_code = code.substring(global_start, vs_start < 0 ? fs_start < 0 ? lt_start < 0 ? 0 : lt_start : fs_start : vs_start)
+        .trim()
 
     let uses_screen_texture = code.indexOf("SCREEN_TEXTURE") >= 0;
 
@@ -174,9 +185,19 @@ export function parse_shader_code(code) {
         .map(({ code }) => code)
         .join("\n")
 
+    let lt_code = "";
+    if (lt_start >= 0) {
+        lt_code = code.substring(lt_start);
+
+        // remove entry and its brackets
+        lt_code = lt_code.substring(lt_code.indexOf("{") + 1, lt_code.lastIndexOf("}")).trim();
+    }
+
     return {
         type,
         uses_screen_texture,
+        global_code,
+        lt_code,
         vs_code, vs_uniform_code,
         fs_code, fs_uniform_code,
         uniforms: uniforms.filter(({ name }) => vs_code.indexOf(name) >= 0 || fs_code.indexOf(name) >= 0)

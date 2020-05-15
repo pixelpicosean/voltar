@@ -55,6 +55,9 @@ export class ShaderMaterial extends Material {
 
         this.fs_code = "";
         this.fs_uniform_code = "";
+
+        this.lt_code = "";
+        this.global_code = "";
     }
     _load_data(data) {
         if (data.shader && data.shader.code) {
@@ -85,6 +88,9 @@ export class ShaderMaterial extends Material {
 
         this.fs_code = parsed_code.fs_code;
         this.fs_uniform_code = parsed_code.fs_uniform_code;
+
+        this.lt_code = parsed_code.lt_code;
+        this.global_code = parsed_code.global_code;
     }
 }
 res_class_map['ShaderMaterial'] = ShaderMaterial;
@@ -134,34 +140,3 @@ export class SpatialMaterial extends Material {
     }
 }
 res_class_map['SpatialMaterial'] = SpatialMaterial;
-
-export const SPATIAL_SHADER_UNIFORMS = [
-    { name: 'CAMERA_MATRIX', type: 'mat4' },
-    { name: 'INV_CAMERA_MATRIX', type: 'mat4' },
-    { name: 'PROJECTION_MATRIX', type: 'mat4' },
-    { name: 'INV_PROJECTION_MATRIX', type: 'mat4' },
-    { name: 'WORLD_MATRIX', type: 'mat4' },
-
-    { name: 'TIME', type: '1f' },
-
-    // light general
-    { name: 'LIGHT_COLOR', type: '4f' },
-    { name: 'LIGHT_SPECULAR', type: '1f' },
-
-    // directional light
-    { name: 'LIGHT_DIRECTION', type: '3f' },
-
-    // omni light
-    { name: 'LIGHT_POSITION', type: '3f' },
-    { name: 'LIGHT_ATTENUATION', type: '1f' },
-
-    // spot light
-    { name: 'LIGHT_SPOT_ATTENUATION', type: '1f' },
-    { name: 'LIGHT_SPOT_RANGE', type: '1f' },
-    { name: 'LIGHT_SPOT_ANGLE', type: '1f' },
-
-    { name: 'bg_color', type: '4f' },
-    { name: 'bg_energy', type: '1f' },
-    { name: 'ambient_color', type: '4f' },
-    { name: 'ambient_energy', type: '1f' },
-]

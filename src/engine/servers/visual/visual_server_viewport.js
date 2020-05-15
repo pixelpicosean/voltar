@@ -8,6 +8,10 @@ import { VSG } from "./visual_server_globals";
 import { Canvas } from "./visual_server_canvas";
 import { Scenario_t, Camera_t } from "./visual_server_scene";
 
+/**
+ * @typedef {import('engine/drivers/webgl/rasterizer_storage').RenderTarget_t} RenderTarget_t
+ * @typedef {import('engine/drivers/webgl/rasterizer_scene').ShadowAtlas_t} ShadowAtlas_t
+ */
 
 const VIEWPORT_UPDATE_DISABLED = 0;
 const VIEWPORT_UPDATE_ONCE = 1; //then goes to disabled, must be manually updated
@@ -54,7 +58,7 @@ export class Viewport_t {
         this.camera = null;
         this.scenario = null;
 
-        /** @type {import('engine/drivers/webgl/rasterizer_storage').RenderTarget_t} */
+        /** @type {RenderTarget_t} */
         this.render_target = null;
         this.update_mode = VIEWPORT_UPDATE_WHEN_VISIBLE;
 
@@ -126,6 +130,7 @@ export class VisualServerViewport {
         viewport.hide_scenario = false;
         viewport.hide_canvas = false;
         viewport.render_target = VSG.storage.render_target_create();
+        viewport.shadow_atlas = VSG.scene_render.shadow_atlas_create();
         viewport.viewport_render_direct_to_screen = false;
         return viewport;
     }
@@ -396,7 +401,7 @@ export class VisualServerViewport {
      * @param {Viewport_t} p_viewport
      */
     _draw_3d(p_viewport) {
-        VSG.scene.render_camera(p_viewport.camera, p_viewport.scenario, p_viewport.size);
+        VSG.scene.render_camera(p_viewport.camera, p_viewport.scenario, p_viewport.size, p_viewport.shadow_atlas);
     }
 
     /**

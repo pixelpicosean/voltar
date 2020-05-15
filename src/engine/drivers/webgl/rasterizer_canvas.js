@@ -561,14 +561,14 @@ export class RasterizerCanvas extends VObject {
     init_shader_material(shader_material, vs, fs, batchable) {
         const vs_code = vs
             // uniform
-            .replace("/* UNIFORM */", shader_material.vs_uniform_code)
+            .replace("/* GLOBALS */", shader_material.vs_uniform_code)
             // shader code
-            .replace("/* SHADER */", `{\n${shader_material.vs_code}}`)
+            .replace(/\/\* VERTEX_CODE_BEGIN \*\/([\s\S]*?)\/\* VERTEX_CODE_END \*\//, `{\n${shader_material.vs_code}\n}`)
         const fs_code = fs
             // uniform
-            .replace("/* UNIFORM */", shader_material.fs_uniform_code)
+            .replace("/* GLOBALS */", shader_material.fs_uniform_code)
             // shader code
-            .replace(/\/\* SHADER_BEGIN \*\/([\s\S]*?)\/\* SHADER_END \*\//, `{\n${shader_material.fs_code}\n}`)
+            .replace(/\/\* FRAGMENT_CODE_BEGIN \*\/([\s\S]*?)\/\* FRAGMENT_CODE_END \*\//, `{\n${shader_material.fs_code}\n}`)
             // translate Godot API to GLSL
             .replace(/texture\(/gm, "texture2D(")
             .replace(/FRAGCOORD/gm, "gl_FragCoord")

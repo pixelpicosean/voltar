@@ -3,6 +3,7 @@ import { Transform } from "./transform";
 import { Plane } from "./plane";
 import { rad2deg, deg2rad } from "./math_funcs";
 import { Vector3 } from "./vector3";
+import { Rect2 } from "./rect2";
 
 /** @type {CameraMatrix[]} */
 const pool = [];
@@ -92,6 +93,27 @@ export class CameraMatrix {
 
     clone() {
         return CameraMatrix.new().copy(this);
+    }
+
+    /**
+     * @param {CameraMatrix} p_matrix
+     */
+    append(p_matrix) {
+        let new_m = CameraMatrix.new();
+
+        for (let j = 0; j < 4; j++) {
+            for (let i = 0; i < 4; i++) {
+                let ab = 0;
+                for (let k = 0; k < 4; k++)
+                ab += this.matrix[k][i] * p_matrix.matrix[j][k];
+                new_m.matrix[j][i] = ab;
+            }
+        }
+
+        this.copy(new_m);
+        CameraMatrix.free(new_m);
+
+        return this;
     }
 
     invert() {
@@ -204,6 +226,29 @@ export class CameraMatrix {
                 this.matrix[i][j] = 0;
             }
         }
+        return this;
+    }
+
+    /**
+     * @param {Transform} p_transform
+     */
+    set_transform(p_transform) {
+        this.matrix[0][0] = p_transform.basis.elements[0].x;
+        this.matrix[0][1] = p_transform.basis.elements[1].x;
+        this.matrix[0][2] = p_transform.basis.elements[2].x;
+        this.matrix[0][3] = 0.0;
+        this.matrix[1][0] = p_transform.basis.elements[0].y;
+        this.matrix[1][1] = p_transform.basis.elements[1].y;
+        this.matrix[1][2] = p_transform.basis.elements[2].y;
+        this.matrix[1][3] = 0.0;
+        this.matrix[2][0] = p_transform.basis.elements[0].z;
+        this.matrix[2][1] = p_transform.basis.elements[1].z;
+        this.matrix[2][2] = p_transform.basis.elements[2].z;
+        this.matrix[2][3] = 0.0;
+        this.matrix[3][0] = p_transform.origin.x;
+        this.matrix[3][1] = p_transform.origin.y;
+        this.matrix[3][2] = p_transform.origin.z;
+        this.matrix[3][3] = 1.0;
         return this;
     }
 
@@ -323,6 +368,57 @@ export class CameraMatrix {
         this.matrix[3][1] = 0;
         this.matrix[3][2] = d;
         this.matrix[3][3] = 0;
+
+        return this;
+    }
+
+    set_light_bias() {
+        this.matrix[0][0] = 0.5;
+        this.matrix[0][1] = 0.0;
+        this.matrix[0][2] = 0.0;
+        this.matrix[0][3] = 0.0;
+
+        this.matrix[1][0] = 0.0;
+        this.matrix[1][1] = 0.5;
+        this.matrix[1][2] = 0.0;
+        this.matrix[1][3] = 0.0;
+
+        this.matrix[2][0] = 0.5;
+        this.matrix[2][1] = 0.0;
+        this.matrix[2][2] = 0.5;
+        this.matrix[2][3] = 0.0;
+
+        this.matrix[3][0] = 0.5;
+        this.matrix[3][1] = 0.5;
+        this.matrix[3][2] = 0.5;
+        this.matrix[3][3] = 1.0;
+
+        return this;
+    }
+
+    /**
+     * @param {Rect2} p_rect
+     */
+    set_light_atlas_rect(p_rect) {
+        this.matrix[0][0] = p_rect.width;
+        this.matrix[0][1] = 0.0;
+        this.matrix[0][2] = 0.0;
+        this.matrix[0][3] = 0.0;
+
+        this.matrix[1][0] = 0.0;
+        this.matrix[1][1] = p_rect.height;
+        this.matrix[1][2] = 0.0;
+        this.matrix[1][3] = 0.0;
+
+        this.matrix[2][0] = 0.0;
+        this.matrix[2][1] = 0.0;
+        this.matrix[2][2] = 1.0;
+        this.matrix[2][3] = 0.0;
+
+        this.matrix[3][0] = p_rect.x;
+        this.matrix[3][1] = p_rect.y;
+        this.matrix[3][2] = 0.0;
+        this.matrix[3][3] = 1.0;
 
         return this;
     }

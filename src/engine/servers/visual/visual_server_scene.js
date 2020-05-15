@@ -1,7 +1,7 @@
 import { List, SelfList } from 'engine/core/self_list';
-import { clamp } from 'engine/core/math/math_funcs';
+import { clamp, stepify } from 'engine/core/math/math_funcs';
 import { Vector2, Vector2Like } from 'engine/core/math/vector2';
-import { Vector3Like } from 'engine/core/math/vector3';
+import { Vector3Like, Vector3 } from 'engine/core/math/vector3';
 import { AABB } from 'engine/core/math/aabb';
 import { Plane } from 'engine/core/math/plane';
 import { Transform } from 'engine/core/math/transform';
@@ -19,6 +19,8 @@ import {
     INSTANCE_TYPE_LIGHTMAP_CAPTURE,
     INSTANCE_TYPE_GI_PROBE,
     LIGHT_DIRECTIONAL,
+    LIGHT_PARAM_SHADOW_MAX_DISTANCE,
+    LIGHT_PARAM_SHADOW_SPLIT_1_OFFSET,
 } from '../visual_server';
 import { VSG } from './visual_server_globals';
 
@@ -31,6 +33,7 @@ import { VSG } from './visual_server_globals';
  * @typedef {import('engine/drivers/webgl/rasterizer_scene').LightInstance_t} LightInstance_t
  *
  * @typedef {import('engine/drivers/webgl/rasterizer_scene').Environment_t} Environment_t
+ * @typedef {import('engine/drivers/webgl/rasterizer_scene').ShadowAtlas_t} ShadowAtlas_t
  */
 
 const MAX_INSTANCE_CULL = 65535;
@@ -203,6 +206,20 @@ class InstanceLightData extends InstanceBaseData {
     }
 }
 
+const endpoints = (() => {
+    /** @type {Vector3[]} */
+    let v = Array(8);
+    for (let i = 0; i < 8; i++) v[i] = new Vector3;
+    return v;
+})()
+
+const light_frustum_planes = (() => {
+    /** @type {Plane[]} */
+    let v = Array(6);
+    for (let i = 0; i < 6; i++) v[i] = new Plane;
+    return v;
+})()
+
 export class VisualServerScene {
     constructor() {
         this.render_pass = 0;
@@ -213,6 +230,8 @@ export class VisualServerScene {
         this.instance_cull_count = 0;
         /** @type {Instance_t[]} */
         this.instance_cull_result = [];
+        /** @type {Instance_t[]} */
+        this.instance_shadow_cull_result = [];
         /** @type {Instance_t[]} */
         this.light_cull_result = [];
         /** @type {LightInstance_t[]} */
@@ -306,8 +325,9 @@ export class VisualServerScene {
      * @param {Camera_t} camera
      * @param {Scenario_t} scenario
      * @param {Vector2Like} viewport_size
+     * @param {ShadowAtlas_t} shadow_atlas
      */
-    render_camera(camera, scenario, viewport_size) {
+    render_camera(camera, scenario, viewport_size, shadow_atlas) {
         let camera_matrix = CameraMatrix.new();
         let ortho = false;
 
@@ -345,8 +365,8 @@ export class VisualServerScene {
             } break;
         }
 
-        this._prepare_scene(camera.transform, camera_matrix, ortho, camera.env, camera.visible_layers, scenario);
-        this._render_scene(camera.transform, camera_matrix, ortho, camera.env, scenario);
+        this._prepare_scene(camera.transform, camera_matrix, ortho, camera.env, camera.visible_layers, scenario, shadow_atlas);
+        this._render_scene(camera.transform, camera_matrix, ortho, camera.env, scenario, shadow_atlas);
 
         CameraMatrix.free(camera_matrix);
     }
@@ -676,8 +696,9 @@ export class VisualServerScene {
      * @param {import('engine/drivers/webgl/rasterizer_scene').Environment_t} p_force_env
      * @param {number} p_visible_layers
      * @param {Scenario_t} p_scenario
+     * @param {ShadowAtlas_t} p_shadow_atlas
      */
-    _prepare_scene(p_cam_transform, p_cam_projection, p_cam_ortho, p_force_env, p_visible_layers, p_scenario) {
+    _prepare_scene(p_cam_transform, p_cam_projection, p_cam_ortho, p_force_env, p_visible_layers, p_scenario, p_shadow_atlas) {
         this.render_pass++;
         let camera_layer_mask = p_visible_layers;
 
@@ -734,6 +755,9 @@ export class VisualServerScene {
         this.directional_light_count = 0;
         let start = this.light_cull_count;
 
+        let lights_with_shadow = Array(p_scenario.directional_lights.length);
+        let directional_shadow_count = 0;
+
         for (let i = 0; i < p_scenario.directional_lights.length; i++) {
             if (this.light_cull_count + this.directional_light_count >= MAX_LIGHTS_CULLED) {
                 break;
@@ -744,9 +768,246 @@ export class VisualServerScene {
             let light = /** @type {InstanceLightData} */(E.base_data);
 
             if (light) {
+                let e = /** @type {Light_t} */(E.base);
+                if (p_shadow_atlas && e.shadow) {
+                    lights_with_shadow[directional_shadow_count++] = E;
+                }
                 directional_lights[start + this.directional_light_count++] = light.instance;
             }
         }
+
+        VSG.scene_render.set_directional_shadow_count(directional_shadow_count);
+
+        for (let i = 0; i < directional_shadow_count; i++) {
+            this._light_instance_update_shadow(lights_with_shadow[i], p_cam_transform, p_cam_projection, p_cam_ortho, p_shadow_atlas, p_scenario);
+        }
+    }
+
+    /**
+     * @param {Instance_t} p_instance
+     * @param {Transform} p_cam_transform
+     * @param {CameraMatrix} p_cam_projection
+     * @param {boolean} p_cam_ortho
+     * @param {Scenario_t} p_scenario
+     * @param {ShadowAtlas_t} p_shadow_atlas
+     */
+    _light_instance_update_shadow(p_instance, p_cam_transform, p_cam_projection, p_cam_ortho, p_shadow_atlas, p_scenario) {
+        let light = /** @type {InstanceLightData} */(p_instance.base_data);
+
+        let animated_material_found = false;
+
+        let light_transform = p_instance.transform.clone();
+        light_transform.orthonormalize();
+
+        let light_base = /** @type {Light_t} */(p_instance.base);
+
+        switch (light_base.type) {
+            case LIGHT_DIRECTIONAL: {
+                let max_distance = p_cam_projection.get_z_far();
+                let shadow_max = light_base.param[LIGHT_PARAM_SHADOW_MAX_DISTANCE];
+                if (shadow_max > 0 && !p_cam_ortho) {
+                    max_distance = Math.min(shadow_max, max_distance);
+                }
+                let z_near = p_cam_projection.get_z_near();
+                max_distance = Math.max(max_distance, z_near + 0.001);
+                let min_distance = Math.min(z_near, max_distance);
+
+                /* TODO: support depth range optimized */
+
+                let range = max_distance - min_distance;
+
+                let splits = 1;
+
+                let distances = [min_distance, 0, 0, 0, 0];
+                for (let i = 0; i < splits; i++) {
+                    distances[i + 1] = min_distance + light_base.param[LIGHT_PARAM_SHADOW_SPLIT_1_OFFSET + i] * range;
+                }
+
+                distances[splits] = max_distance;
+
+                let texture_size = VSG.scene_render.get_directional_light_shadow_size(light.instance);
+
+                let first_radius = 0;
+                for (let i = 0; i < splits; i++) {
+                    let camera_matrix = CameraMatrix.new();
+
+                    let aspect = p_cam_projection.get_aspect();
+
+                    if (p_cam_ortho) {
+                        let vp_he = p_cam_projection.get_viewport_half_extents();
+
+                        camera_matrix.set_orthogonal(vp_he.y * 2, aspect, distances[(i === 0) ? i : i - 1], distances[i + 1], false);
+                    } else {
+                        let fov = p_cam_projection.get_fov();
+                        camera_matrix.set_perspective(fov, aspect, distances[(i === 0) ? 1 : i - 1], distances[i + 1], false);
+                    }
+
+                    // obtain the frustum endpoints
+                    camera_matrix.get_endpoints(p_cam_transform, endpoints);
+
+                    // obtain light frustum ranges
+                    let transform = light_transform.clone();
+
+                    let x_vec = transform.basis.get_axis(0).normalize();
+                    let y_vec = transform.basis.get_axis(1).normalize();
+                    let z_vec = transform.basis.get_axis(2).normalize();
+
+                    let x_min = 0, x_max = 0;
+                    let y_min = 0, y_max = 0;
+                    let z_min = 0, z_max = 0;
+
+                    let x_min_cam = 0, x_max_cam = 0;
+                    let y_min_cam = 0, y_max_cam = 0;
+                    let z_min_cam = 0, z_max_cam = 0;
+
+                    let bias_scale = 1;
+
+                    // used for culling
+                    for (let j = 0; j < 8; j++) {
+                        let d_x = x_vec.dot(endpoints[j]);
+                        let d_y = y_vec.dot(endpoints[j]);
+                        let d_z = z_vec.dot(endpoints[j]);
+
+                        if (j === 0 || d_x < x_min) {
+                            x_min = d_x;
+                        }
+                        if (j === 0 || d_x > x_max) {
+                            x_max = d_x;
+                        }
+
+                        if (j === 0 || d_y < y_min) {
+                            y_min = d_y;
+                        }
+                        if (j === 0 || d_y > y_max) {
+                            y_max = d_y;
+                        }
+
+                        if (j === 0 || d_z < z_min) {
+                            z_min = d_z;
+                        }
+                        if (j === 0 || d_z > z_max) {
+                            z_max = d_z;
+                        }
+                    }
+
+                    {
+                        // camera viewport stuff
+
+                        let center = Vector3.new();
+
+                        for (let j = 0; j < 8; j++) {
+                            center.add(endpoints[i]);
+                        }
+                        center.scale(1 / 8);
+
+                        let radius = 0;
+
+                        for (let j = 0; j < 8; j++) {
+                            let d = center.distance_to(endpoints[j]);
+                            if (d > radius) {
+                                radius = d;
+                            }
+                        }
+
+                        radius *= texture_size / (texture_size - 2);
+
+                        if (i === 0) {
+                            first_radius = radius;
+                        } else {
+                            bias_scale = radius / first_radius;
+                        }
+
+                        x_max_cam = x_vec.dot(center) + radius;
+                        x_min_cam = x_vec.dot(center) - radius;
+                        y_max_cam = y_vec.dot(center) + radius;
+                        y_min_cam = y_vec.dot(center) - radius;
+                        z_max_cam = z_vec.dot(center) + radius;
+                        z_min_cam = z_vec.dot(center) - radius;
+
+                        if (true) { // TODO: depth range stable
+                            let unit = radius * 2 / texture_size;
+
+                            x_max_cam = stepify(x_max_cam, unit);
+                            x_min_cam = stepify(x_min_cam, unit);
+                            y_max_cam = stepify(y_max_cam, unit);
+                            y_min_cam = stepify(y_min_cam, unit);
+                        }
+
+                        Vector3.free(center);
+                    }
+
+                    // - right/left
+                    light_frustum_planes[0].set(x_vec.x, x_vec.y, x_vec.z, x_max);
+                    light_frustum_planes[1].set(-x_vec.x, -x_vec.y, -x_vec.z, -x_min);
+                    // - top/bottom
+                    light_frustum_planes[2].set(y_vec.x, y_vec.y, y_vec.z, y_max);
+                    light_frustum_planes[3].set(-y_vec.x, -y_vec.y, -y_vec.z, -y_min);
+                    // - near/far
+                    light_frustum_planes[4].set(z_vec.x, z_vec.y, z_vec.z, z_max + 1e6);
+                    light_frustum_planes[5].set(-z_vec.x, -z_vec.y, -z_vec.z, -z_min);
+
+                    let cull_count = p_scenario.octree.cull_convex(light_frustum_planes, this.instance_shadow_cull_result, MAX_INSTANCE_CULL);
+
+                    let near_plane = Plane.new().set_point_and_normal(light_transform.origin, light_transform.basis.get_axis(2).negate());
+
+                    let tmp_plane = Plane.new();
+                    for (let j = 0; j < cull_count; j++) {
+                        let min = 0, max = 0;
+                        let instance = this.instance_shadow_cull_result[j];
+                        let base_data = /** @type {InstanceGeometryData} */(instance.base_data);
+                        if (!instance.visible || !base_data.can_cast_shadows) {
+                            cull_count--;
+                            this.instance_shadow_cull_result[j] = this.instance_shadow_cull_result[cull_count];
+                            this.instance_shadow_cull_result[cull_count] = instance;
+                            j--;
+                            continue;
+                        }
+
+                        instance.transformed_aabb.project_range_in_plane(tmp_plane.set(z_vec.x, z_vec.y, z_vec.z, 0), { min, max });
+                        instance.depth = near_plane.distance_to(instance.transform.origin);
+                        instance.depth_layer = 0;
+                        if (max > z_max) {
+                            z_max = max;
+                        }
+                    }
+                    Plane.free(tmp_plane);
+
+                    {
+                        let ortho_camera = CameraMatrix.new();
+
+                        let half_x = (x_max_cam - x_min_cam) * 0.5;
+                        let half_y = (y_max_cam - y_min_cam) * 0.5;
+
+                        ortho_camera.set_orthogonal_d(-half_x, half_x, -half_y, half_y, 0, z_max - z_min_cam);
+
+                        let ortho_transform = Transform.new();
+                        ortho_transform.basis.copy(transform.basis);
+                        ortho_transform.origin
+                            .add(x_vec.scale(x_min_cam + half_x))
+                            .add(y_vec.scale(y_min_cam + half_y))
+                            .add(z_vec.scale(z_max))
+
+                        VSG.scene_render.light_instance_set_shadow_transform(
+                            light.instance,
+                            ortho_camera, ortho_transform,
+                            0, distances[i + 1], i, bias_scale
+                        );
+
+                        Transform.free(ortho_transform);
+                        CameraMatrix.free(ortho_camera);
+                    }
+
+                    VSG.scene_render.render_shadow(light.instance, p_shadow_atlas, i, this.instance_shadow_cull_result, cull_count);
+
+                    Transform.free(transform);
+                    CameraMatrix.free(camera_matrix);
+                }
+            } break;
+        }
+
+        Transform.free(light_transform);
+
+        return animated_material_found;
     }
 
     /**
@@ -755,8 +1016,9 @@ export class VisualServerScene {
      * @param {boolean} p_cam_ortho
      * @param {import('engine/drivers/webgl/rasterizer_scene').Environment_t} p_force_env
      * @param {Scenario_t} p_scenario
+     * @param {ShadowAtlas_t} p_shadow_atlas
      */
-    _render_scene(p_cam_transform, p_cam_projection, p_cam_ortho, p_force_env, p_scenario) {
+    _render_scene(p_cam_transform, p_cam_projection, p_cam_ortho, p_force_env, p_scenario, p_shadow_atlas) {
         /** @type {import('engine/drivers/webgl/rasterizer_scene').Environment_t} */
         let environment = null;
         if (p_force_env) {
@@ -767,6 +1029,6 @@ export class VisualServerScene {
             environment = p_scenario.fallback_environment;
         }
 
-        VSG.scene_render.render_scene(p_cam_transform, p_cam_projection, p_cam_ortho, this.instance_cull_result, this.instance_cull_count, this.light_instance_cull_result, this.light_cull_count + this.directional_light_count, environment);
+        VSG.scene_render.render_scene(p_cam_transform, p_cam_projection, p_cam_ortho, this.instance_cull_result, this.instance_cull_count, this.light_instance_cull_result, this.light_cull_count + this.directional_light_count, environment, p_shadow_atlas);
     }
 }

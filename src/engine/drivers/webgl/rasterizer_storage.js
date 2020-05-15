@@ -1344,7 +1344,7 @@ export class RasterizerStorage {
     shader_get_instance_with_defines(shader, id, def_str) {
         let table = shader_with_defines[shader.id];
         if (!table) {
-            table = {};
+            shader_with_defines[shader.id] = table = {};
         }
 
         let shd = table[id];

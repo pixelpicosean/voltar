@@ -1,3 +1,4 @@
+import { lerp } from 'engine/core/math/math_funcs';
 import { Vector2 } from 'engine/core/math/vector2';
 import { Vector3 } from 'engine/core/math/vector3';
 import { Rect2 } from 'engine/core/math/rect2';
@@ -26,7 +27,6 @@ import { VSG } from 'engine/servers/visual/visual_server_globals';
 
 import {
     ShaderMaterial,
-    SPATIAL_SHADER_UNIFORMS,
 } from 'engine/scene/resources/material';
 import {
     ARRAY_NORMAL,
@@ -39,6 +39,7 @@ import {
     Surface_t,
     Geometry_t,
     Texture_t,
+    Shader_t,
     Material_t,
     Light_t,
 
@@ -51,10 +52,19 @@ import {
     CULL_MODE_DISABLED,
     DEPTH_DRAW_OPAQUE,
     DEPTH_DRAW_ALPHA_PREPASS,
+    DEPTH_DRAW_ALWAYS,
+    DEPTH_DRAW_NEVER,
 } from './rasterizer_storage';
 
-import normal_vs from './shaders/spatial.vert';
-import normal_fs from './shaders/spatial.frag';
+import {
+    parse_uniforms_from_code,
+    parse_attributes_from_code,
+} from './shader_parser';
+
+import normal_vs from './shaders/spatial_shadow.vert';
+import normal_fs from './shaders/spatial_shadow.frag';
+// import normal_vs from './shaders/spatial.vert';
+// import normal_fs from './shaders/spatial.frag';
 
 export const ENV_BG_CLEAR_COLOR = 0;
 export const ENV_BG_COLOR = 1;
@@ -126,10 +136,65 @@ export class Environment_t {
     }
 }
 
+class ShadowTransform_t {
+    constructor() {
+        this.camera = new CameraMatrix;
+        this.transform = new Transform;
+        this.farplane = 0;
+        this.split = 0;
+        this.bias_scale = 0;
+    }
+}
+
+class Shadow_t {
+    constructor() {
+        this.version = 0;
+        this.alloc_tick = 0;
+    }
+}
+
+class Quadrant_t {
+    constructor() {
+        this.subdivision = 0;
+        /** @type {Shadow_t[]} */
+        this.shadows = [];
+    }
+}
+
+export class ShadowAtlas_t {
+    constructor() {
+        this.quadrants = [
+            new Quadrant_t,
+            new Quadrant_t,
+            new Quadrant_t,
+            new Quadrant_t,
+        ];
+
+        this.size_order = [0, 0, 0, 0];
+        this.smallest_subdiv = 0;
+
+        this.size = 0;
+
+        /** @type {WebGLTexture} */
+        this.gl_fbo = null;
+        /** @type {WebGLTexture} */
+        this.gl_depth = null;
+        /** @type {WebGLTexture} */
+        this.gl_color = null;
+    }
+}
+
 export class LightInstance_t {
     constructor() {
         /** @type {Light_t} */
         this.light = null;
+
+        this.shadow_transforms = [
+            new ShadowTransform_t,
+            new ShadowTransform_t,
+            new ShadowTransform_t,
+            new ShadowTransform_t,
+        ];
 
         this.transform = new Transform;
 
@@ -138,6 +203,7 @@ export class LightInstance_t {
         this.linear_att = 0;
 
         this.last_scene_pass = 0;
+        this.last_scene_shadow_pass = 0;
 
         this.light_index = 0;
         this.light_directional_index = 0;
@@ -158,6 +224,14 @@ const sort_by_key = (a, b) => {
     } else {
         return (a.depth_layer + a.priority) - (b.depth_layer + b.priority);
     }
+}
+
+/**
+ * @param {Element_t} a
+ * @param {Element_t} b
+ */
+const sort_by_depth = (a, b) => {
+    return a.instance.depth - b.instance.depth;
 }
 
 /**
@@ -288,6 +362,21 @@ class RenderList_t {
     /**
      * @param {boolean} p_alpha
      */
+    sort_by_depth(p_alpha) {
+        if (p_alpha) {
+            let list = this.elements.slice(this.max_elements - this.alpha_element_count);
+            list.sort(sort_by_depth);
+            for (let i = 0; i < list.length; i++) {
+                this.elements[this.alpha_element_count + i] = list[i];
+            }
+        } else {
+            this.elements.sort(sort_by_depth)
+        }
+    }
+
+    /**
+     * @param {boolean} p_alpha
+     */
     sort_by_reverse_depth_and_priority(p_alpha) {
         if (p_alpha) {
             let list = this.elements.slice(this.max_elements - this.alpha_element_count);
@@ -301,6 +390,67 @@ class RenderList_t {
     }
 }
 
+const SHADER_DEF = {
+    USE_SKELETON              : 1 << 0,
+    SHADLESS                  : 1 << 1,
+    BASE_PASS                 : 1 << 2,
+    USE_INSTANCING            : 1 << 3,
+    USE_LIGHTMAP              : 1 << 4,
+    FOG_DEPTH_ENABLED         : 1 << 5,
+    FOG_HEIGHT_ENABLED        : 1 << 6,
+    USE_DEPTH_PREPASS         : 1 << 7,
+    USE_LIGHTING              : 1 << 8,
+    USE_SHADOW                : 1 << 9,
+    RENDER_DEPTH              : 1 << 11,
+    USE_SHADOW_TO_OPACITY     : 1 << 12,
+
+    LIGHT_MODE_DIRECTIONAL    : 1 << 13,
+    LIGHT_MODE_OMNI           : 1 << 14,
+    LIGHT_MODE_SPOT           : 1 << 15,
+
+    DIFFUSE_OREN_NAYAR        : 1 << 16,
+    DIFFUSE_LAMBERT_WRAP      : 1 << 17,
+    DIFFUSE_TOON              : 1 << 18,
+    DIFFUSE_BURLEY            : 1 << 19,
+
+    SPECULAR_BLINN            : 1 << 20,
+    SPECULAR_PHONE            : 1 << 21,
+    SPECULAR_TOON             : 1 << 22,
+};
+
+const DEFAULT_SPATIAL_SHADER = `
+shader_type = spatial;
+
+#define DIFFUSE_BURLEY
+
+uniform sampler2D texture_albedo;
+uniform mediump vec4 albedo;
+
+void fragment() {
+    ALBEDO = texture(texture_albedo, UV).rgb;
+    ALBEDO *= albedo.rgb;
+}
+`
+const DEFAULT_SPATIAL_PARAMS = {
+    "albedo":       [1, 1, 1, 1],
+    "specular":     [0.5],
+    "metallic":     [0],
+    "roughness":    [1],
+}
+
+/**
+ * @param {number} condition
+ */
+function get_shader_def_code(condition) {
+    let code = '';
+    for (let k in SHADER_DEF) {
+        if ((condition & SHADER_DEF[k]) === SHADER_DEF[k]) {
+            code += `#define ${k}\n`;
+        }
+    }
+    return code;
+}
+
 export class RasterizerScene {
     constructor() {
         /** @type {import('./rasterizer_storage').RasterizerStorage} */
@@ -309,10 +459,25 @@ export class RasterizerScene {
         // private
         this.gl = null;
 
-        this.materials = {
+        this.directional_shadow = {
+            /** @type {WebGLFramebuffer} */
+            gl_fbo: null,
+            /** @type {WebGLTexture} */
+            gl_depth: null,
+            /** @type {WebGLTexture} */
+            gl_color: null,
+
+            light_count: 0,
+            size: 0,
+            current_light: 0,
+        };
+
+        this.spatial_material = {
+            /** @type {ShaderMaterial} */
+            mat: null,
             /** @type {Material_t} */
-            spatial: null,
-        }
+            rid: null,
+        };
 
         /** @type {LightInstance_t[]} */
         this.render_light_instances = [];
@@ -324,6 +489,9 @@ export class RasterizerScene {
             cull_front: false,
 
             used_screen_texture: false,
+
+            render_no_shadows: false,
+
             viewport_size: new Vector2,
             screen_pixel_size: new Vector2,
 
@@ -333,8 +501,8 @@ export class RasterizerScene {
             /** @type {WebGLTexture} */
             current_main_tex: null,
 
-            /** @type {WebGLProgram} */
-            current_prog: null,
+            /** @type {Shader_t} */
+            current_shader: null,
 
             /** @type {Object<string, number[]>} */
             uniforms: {
@@ -380,7 +548,22 @@ export class RasterizerScene {
                 bg_energy: [1],
                 ambient_color: [0, 0, 0, 1],
                 ambient_energy: [1],
+
+                light_bias: [0],
+                light_normal_bias: [0],
+
+                shadow_color: [0, 0, 0, 1],
+                shadow_pixel_size: [0, 0],
+                light_shadow_matrix: [
+                    1, 0, 0, 0,
+                    0, 1, 0, 0,
+                    0, 0, 1, 0,
+                    0, 0, 0, 1,
+                ],
             },
+
+            conditions: 0,
+            prev_conditions: 0,
         };
 
         this.render_list = new RenderList_t;
@@ -406,34 +589,60 @@ export class RasterizerScene {
         {
             /* default material */
 
-            const mat = new ShaderMaterial("spatial");
-            mat.set_shader(`
-                shader_type = spatial;
+            this.spatial_material.mat = new ShaderMaterial('spatial');
+            this.spatial_material.mat.set_shader(DEFAULT_SPATIAL_SHADER);
 
-                uniform sampler2D texture_albedo;
-                uniform vec4 albedo;
+            this.spatial_material.rid = this.init_shader_material(
+                this.spatial_material.mat,
+                normal_vs,
+                normal_fs,
+                false
+            );
+            this.spatial_material.rid.params = DEFAULT_SPATIAL_PARAMS;
+        }
 
-                void fragment() {
-                    ALBEDO = texture(texture_albedo, UV).rgb;
-                    ALBEDO *= albedo.rgb;
-                    // ALBEDO = albedo.rgb;
-                    // ALBEDO = vec3(UV.x, UV.y, 0.0);
-                }
-            `);
-            this.spatial_material_ref = mat;
-            this.materials.spatial = this.init_shader_material(mat, normal_vs, normal_fs, [], true);
+        {
+            /* directional shadow */
 
-            this.materials.spatial.params["albedo"] = [1, 1, 1, 1];
-            this.materials.spatial.params["specular"] = [0.5];
-            this.materials.spatial.params["metallic"] = [0];
-            this.materials.spatial.params["roughness"] = [1];
+            this.directional_shadow.light_count = 0;
+            this.directional_shadow.size = 1024;
+
+            this.directional_shadow.gl_fbo = gl.createFramebuffer();
+            gl.bindFramebuffer(gl.FRAMEBUFFER, this.directional_shadow.gl_fbo);
+
+            if (VSG.config.use_rgba_3d_shadows) {
+                this.directional_shadow.gl_depth = gl.createRenderbuffer();
+                gl.bindRenderbuffer(gl.RENDERBUFFER, this.directional_shadow.gl_depth);
+                gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, this.directional_shadow.size, this.directional_shadow.size);
+                gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, this.directional_shadow.gl_depth);
+
+                this.directional_shadow.gl_color = gl.createTexture();
+                gl.bindTexture(gl.TEXTURE_2D, this.directional_shadow.gl_color);
+
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.directional_shadow.size, this.directional_shadow.size, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+                gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.directional_shadow.gl_color, 0);
+            } else {
+                this.directional_shadow.gl_depth = gl.createTexture();
+                gl.bindTexture(gl.TEXTURE_2D, this.directional_shadow.gl_depth);
+
+                gl.texImage2D(gl.TEXTURE_2D, 0, VSG.config.depth_internalformat, this.directional_shadow.size, this.directional_shadow.size, 0, gl.DEPTH_COMPONENT, VSG.config.depth_type, null);
+
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+                gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, this.directional_shadow.gl_depth, 0);
+            }
         }
 
         gl.frontFace(gl.CW);
-    }
-
-    free_rid(p_rid) {
-        return false;
     }
 
     iteration() { }
@@ -447,6 +656,18 @@ export class RasterizerScene {
      */
     set_scene_pass(p_pass) {
         this.scene_pass = p_pass;
+    }
+
+    /**
+     * @param {number} param
+     * @param {boolean} value
+     */
+    set_shader_condition(param, value) {
+        if (value) {
+            this.state.conditions |= param;
+        } else {
+            this.state.conditions &= ~param;
+        }
     }
 
     /**
@@ -468,6 +689,58 @@ export class RasterizerScene {
     }
 
     /**
+     * @param {LightInstance_t} p_light
+     * @param {CameraMatrix} p_projection
+     * @param {Transform} p_transform
+     * @param {number} p_far
+     * @param {number} p_split
+     * @param {number} p_pass
+     * @param {number} p_bias_scale
+     */
+    light_instance_set_shadow_transform(p_light, p_projection, p_transform, p_far, p_split, p_pass, p_bias_scale) {
+        if (p_light.light.type !== LIGHT_DIRECTIONAL) {
+            p_pass = 0;
+        }
+
+        p_light.shadow_transforms[p_pass].camera.copy(p_projection);
+        p_light.shadow_transforms[p_pass].transform.copy(p_transform);
+        p_light.shadow_transforms[p_pass].farplane = p_far;
+        p_light.shadow_transforms[p_pass].split = p_split;
+        p_light.shadow_transforms[p_pass].bias_scale = p_bias_scale;
+    }
+
+    /**
+     * @param {number} p_count
+     */
+    set_directional_shadow_count(p_count) {
+        this.directional_shadow.light_count = p_count;
+        this.directional_shadow.current_light = 0;
+    }
+
+    /**
+     * @param {LightInstance_t} p_light
+     */
+    get_directional_light_shadow_size(p_light) {
+        let shadow_size = 0;
+
+        if (this.directional_shadow.light_count === 1) {
+            shadow_size = this.directional_shadow.size;
+        } else {
+            shadow_size = (this.directional_shadow.size / 2) | 0;
+        }
+
+        return shadow_size;
+    }
+
+    shadow_atlas_create() {
+        let atlas = new ShadowAtlas_t;
+        for (let i = 0; i < 4; i++) {
+            atlas.size_order[i] = i;
+        }
+        return atlas;
+    }
+
+    /**
      * @param {Transform} p_cam_transform
      * @param {CameraMatrix} p_cam_projection
      * @param {boolean} p_cam_ortho
@@ -476,8 +749,9 @@ export class RasterizerScene {
      * @param {LightInstance_t[]} p_light_cull_result
      * @param {number} p_light_cull_count
      * @param {Environment_t} p_env
+     * @param {ShadowAtlas_t} p_shadow_atlas
      */
-    render_scene(p_cam_transform, p_cam_projection, p_cam_ortho, p_cull_result, p_cull_count, p_light_cull_result, p_light_cull_count, p_env) {
+    render_scene(p_cam_transform, p_cam_projection, p_cam_ortho, p_cull_result, p_cull_count, p_light_cull_result, p_light_cull_count, p_env, p_shadow_atlas) {
         let cam_transform = p_cam_transform.clone();
 
         let viewport_width = 0, viewport_height = 0;
@@ -491,6 +765,7 @@ export class RasterizerScene {
             Vector3.free(negate_axis);
         }
 
+        this.state.render_no_shadows = false;
         let current_fb = this.storage.frame.current_rt.gl_fbo;
 
         viewport_width = this.storage.frame.current_rt.width;
@@ -503,7 +778,9 @@ export class RasterizerScene {
             viewport_y = this.storage.frame.current_rt.y;
         }
 
-        this.state.current_prog = null;
+        this.state.current_shader = null;
+        this.state.prev_conditions = -1;
+        this.state.conditions = 0;
 
         this.state.used_screen_texture = false;
         this.state.viewport_size.set(viewport_width, viewport_height);
@@ -539,7 +816,7 @@ export class RasterizerScene {
         }
 
         this.render_list.clear();
-        this._fill_render_list(p_cull_result, p_cull_count, false);
+        this._fill_render_list(p_cull_result, p_cull_count, false, false);
 
         const gl = this.gl;
 
@@ -589,6 +866,8 @@ export class RasterizerScene {
             gl.disable(gl.SCISSOR_TEST);
         }
 
+        gl.vertexAttrib4f(ARRAY_COLOR, 1, 1, 1, 1);
+
         gl.blendEquation(gl.FUNC_ADD);
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
@@ -607,7 +886,7 @@ export class RasterizerScene {
 
         // opaque pass first
         this.render_list.sort_by_key(false);
-        this._render_render_list(this.render_list.elements, this.render_list.element_count, cam_transform, p_cam_projection, p_env, false);
+        this._render_render_list(this.render_list.elements, this.render_list.element_count, cam_transform, p_cam_projection, p_shadow_atlas, p_env, 0, 0, reverse_cull, false, false);
 
         // TODO: draw sky
 
@@ -622,7 +901,7 @@ export class RasterizerScene {
         gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
         this.render_list.sort_by_reverse_depth_and_priority(true);
-        this._render_render_list(this.render_list.elements, this.render_list.alpha_element_count, cam_transform, p_cam_projection, p_env, true);
+        this._render_render_list(this.render_list.elements, this.render_list.alpha_element_count, cam_transform, p_cam_projection, p_shadow_atlas, p_env, 0, 0, reverse_cull, true, false);
 
         this._post_process(p_env, p_cam_projection);
 
@@ -631,44 +910,178 @@ export class RasterizerScene {
     }
 
     /**
+     * @param {LightInstance_t} light_instance
+     * @param {ShadowAtlas_t} p_shadow_atlas
+     * @param {number} p_pass
+     * @param {Instance_t[]} p_cull_result
+     * @param {number} p_cull_count
+     */
+    render_shadow(light_instance, p_shadow_atlas, p_pass, p_cull_result, p_cull_count) {
+        return
+        this.state.render_no_shadows = false;
+
+        let light = light_instance.light;
+
+        let x = 0, y = 0, width = 0, height = 0;
+
+        let zfar = 0;
+        let flip_facing = false;
+        let custom_vp_size = 0;
+        /** @type {WebGLFramebuffer} */
+        let gl_fbo = null;
+
+        let bias = 0;
+        let normal_bias = 0;
+
+        let light_projection = CameraMatrix.new();
+        let light_transform = Transform.new();
+
+        this.state.current_shader = null;
+        this.state.prev_conditions = -1;
+        this.state.conditions = 0;
+
+        if (light.type === LIGHT_DIRECTIONAL) {
+            light_instance.light_directional_index = this.directional_shadow.current_light;
+            light_instance.last_scene_shadow_pass = this.scene_pass;
+
+            this.directional_shadow.current_light++;
+
+            if (this.directional_shadow.light_count === 1) {
+                light_instance.directional_rect.set(0, 0, this.directional_shadow.size, this.directional_shadow.size);
+            } else if (this.directional_shadow.light_count === 2) {
+                light_instance.directional_rect.set(0, 0, this.directional_shadow.size, this.directional_shadow.size * 0.5);
+            } else {
+                /* 3 and 4 */
+                light_instance.directional_rect.set(0, 0, this.directional_shadow.size * 0.5, this.directional_shadow.size * 0.5);
+                if (light_instance.light_directional_index & 1) {
+                    light_instance.directional_rect.x += light_instance.directional_rect.width;
+                }
+                if (light_instance.light_directional_index >= 2) {
+                    light_instance.directional_rect.y += light_instance.directional_rect.height;
+                }
+            }
+
+            light_projection.copy(light_instance.shadow_transforms[p_pass].camera);
+            light_transform.copy(light_instance.shadow_transforms[p_pass].transform);
+
+            x = light_instance.directional_rect.x;
+            y = light_instance.directional_rect.y;
+            width = light_instance.directional_rect.width;
+            height = light_instance.directional_rect.height;
+
+            let bias_mult = lerp(1, light_instance.shadow_transforms[p_pass].bias_scale, light.param[LIGHT_PARAM_SHADOW_BIAS_SPLIT_SCALE]);
+            zfar = light.param[LIGHT_PARAM_RANGE];
+            bias = light.param[LIGHT_PARAM_SHADOW_BIAS] * bias_mult;
+            normal_bias = light.param[LIGHT_PARAM_SHADOW_NORMAL_BIAS] * bias_mult;
+
+            gl_fbo = this.directional_shadow.gl_fbo;
+        } else {
+            // TODO: shadow of omni and point lights
+        }
+
+        this.render_list.clear();
+
+        this._fill_render_list(p_cull_result, p_cull_count, true, true);
+
+        this.render_list.sort_by_depth(false);
+
+        const gl = this.gl;
+
+        gl.disable(gl.BLEND);
+        gl.disable(gl.DITHER);
+        gl.enable(gl.DEPTH_TEST);
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, gl_fbo);
+
+        gl.depthMask(true);
+        if (!VSG.config.use_rgba_3d_shadows) {
+            gl.colorMask(false, false, false, false);
+        }
+
+        if (custom_vp_size) {
+            gl.viewport(0, 0, custom_vp_size, custom_vp_size);
+            gl.scissor(0, 0, custom_vp_size, custom_vp_size);
+        } else {
+            gl.viewport(x, y, width, height);
+            gl.scissor(x, y, width, height);
+        }
+
+        gl.enable(gl.SCISSOR_TEST);
+        gl.clearDepth(1.0);
+        gl.clear(gl.DEPTH_BUFFER_BIT);
+        if (VSG.config.use_rgba_3d_shadows) {
+            gl.clearColor(1, 1, 1, 1);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+        }
+        gl.disable(gl.SCISSOR_TEST);
+
+        if (light.reverse_cull) {
+            flip_facing = !flip_facing;
+        }
+
+        this.set_shader_condition(SHADER_DEF.RENDER_DEPTH, true);
+
+        this._render_render_list(this.render_list.elements, this.render_list.element_count, light_transform, light_projection, null, null, bias, normal_bias, flip_facing, false, true);
+
+        this.set_shader_condition(SHADER_DEF.RENDER_DEPTH, false);
+
+        if (this.storage.frame.current_rt) {
+            gl.viewport(0, 0, this.storage.frame.current_rt.width, this.storage.frame.current_rt.height);
+        }
+        if (!VSG.config.use_rgba_3d_shadows) {
+            gl.colorMask(true, true, true, true);
+        }
+
+        CameraMatrix.free(light_projection);
+        Transform.free(light_transform);
+    }
+
+    /**
      * @param {ShaderMaterial} shader_material
      * @param {string} vs
      * @param {string} fs
-     * @param {{ name: string, type: string }[]} uniforms
      * @param {boolean} batchable
      */
-    init_shader_material(shader_material, vs, fs, uniforms, batchable) {
-        const gl = this.gl;
-
+    init_shader_material(shader_material, vs, fs, batchable) {
         const vs_code = vs
             // uniform
-            .replace("/* UNIFORM */", shader_material.vs_uniform_code)
+            .replace("/* GLOBALS */", `\n${shader_material.global_code}`)
             // shader code
-            .replace("/* SHADER */", `{\n${shader_material.vs_code}}`)
+            .replace(/\/\* FRAGMENT_CODE_BEGIN \*\/([\s\S]*?)\/\* FRAGMENT_CODE_END \*\//, `{\n${shader_material.vs_code}\n}`)
         const fs_code = fs
             // uniform
-            .replace("/* UNIFORM */", shader_material.fs_uniform_code)
+            .replace("/* GLOBALS */", `\n${shader_material.global_code}`)
             // shader code
-            .replace(/\/\* SHADER_BEGIN \*\/([\s\S]*?)\/\* SHADER_END \*\//, `{\n${shader_material.fs_code}\n}`)
+            .replace(/\/\* FRAGMENT_CODE_BEGIN \*\/([\s\S]*?)\/\* FRAGMENT_CODE_END \*\//, `{\n${shader_material.fs_code}\n}`)
+            .replace(/\/\* LIGHT_CODE_BEGIN \*\/([\s\S]*?)\/\* LIGHT_CODE_END \*\//, `{\n${shader_material.lt_code}\n}`)
             // translate Godot API to GLSL
             .replace(/texture\(/gm, "texture2D(")
             .replace(/FRAGCOORD/gm, "gl_FragCoord")
+
+        const vs_uniforms = parse_uniforms_from_code(vs_code)
+            .map(u => ({ type: u.type, name: u.name }))
+        const fs_uniforms = parse_uniforms_from_code(fs_code)
+            .map(u => ({ type: u.type, name: u.name }))
+        const uniforms = [];
+        for (let u of vs_uniforms) {
+            if (!uniforms.find((v) => v.name === u.name)) {
+                uniforms.push(u);
+            }
+        }
+        for (let u of fs_uniforms) {
+            if (!uniforms.find((v) => v.name === u.name)) {
+                uniforms.push(u);
+            }
+        }
+
+        const attribs = parse_attributes_from_code(vs_code)
+            .map(a => a.name)
+
         const shader = VSG.storage.shader_create(
-            vs_code, fs_code,
-            [
-                'position',
-                'normal',
-                'tangent',
-                'color',
-                'uv',
-                'uv2',
-            ],
-            // @ts-ignore
-            [
-                ...SPATIAL_SHADER_UNIFORMS,
-                ...uniforms,
-                ...shader_material.uniforms,
-            ]
+            vs_code,
+            fs_code,
+            attribs,
+            uniforms
         );
         shader.name = shader_material.name;
 
@@ -676,7 +1089,8 @@ export class RasterizerScene {
         material.name = shader_material.name;
         material.batchable = batchable;
         for (let u of shader_material.uniforms) {
-            if (u.value) {
+            let shader_u = shader.uniforms[u.name];
+            if (u.value && shader_u && shader_u.gl_loc) {
                 if (Array.isArray(u.value)) {
                     material.params[u.name] = u.value;
                 } else {
@@ -685,6 +1099,35 @@ export class RasterizerScene {
             }
         }
         return material;
+    }
+
+    /**
+     * @param {Material_t} material
+     * @param {number} conditions
+     */
+    get_shader_with_conditions(material, conditions) {
+        return VSG.storage.shader_get_instance_with_defines(material.shader, conditions, get_shader_def_code(conditions));
+    }
+
+    /**
+     * @param {Material_t} material
+     */
+    bind_scene_shader(material) {
+        let shader = this.get_shader_with_conditions(material, this.state.conditions);
+
+        let rebind = this.state.prev_conditions !== this.state.conditions
+            ||
+            this.state.current_shader !== shader
+
+        if (rebind) {
+            this.gl.useProgram(shader.gl_prog);
+
+            this.state.current_shader = shader;
+        }
+
+        this.state.prev_conditions = this.state.conditions;
+
+        return rebind;
     }
 
     /**
@@ -718,8 +1161,9 @@ export class RasterizerScene {
      * @param {Instance_t[]} p_cull_result
      * @param {number} p_cull_count
      * @param {boolean} p_depth_pass
+     * @param {boolean} p_shadow_pass
      */
-    _fill_render_list(p_cull_result, p_cull_count, p_depth_pass) {
+    _fill_render_list(p_cull_result, p_cull_count, p_depth_pass, p_shadow_pass) {
         this.render_pass++;
         this.current_material_index = 0;
         this.current_geometry_index = 0;
@@ -735,7 +1179,7 @@ export class RasterizerScene {
                     for (let j = 0; j < num_surfaces; j++) {
                         let material_idx = inst.materials[j] ? j : -1;
                         let surface = mesh.surfaces[j];
-                        this._add_geometry(surface, inst, material_idx, p_depth_pass);
+                        this._add_geometry(surface, inst, material_idx, p_depth_pass, p_shadow_pass);
                     }
                 } break;
                 case INSTANCE_TYPE_MULTIMESH: {
@@ -751,8 +1195,9 @@ export class RasterizerScene {
      * @param {Instance_t} p_instance
      * @param {number} p_material
      * @param {boolean} p_depth_pass
+     * @param {boolean} p_shadow_pass
      */
-    _add_geometry(p_geometry, p_instance, p_material, p_depth_pass) {
+    _add_geometry(p_geometry, p_instance, p_material, p_depth_pass, p_shadow_pass) {
         /** @type {Material_t} */
         let material = null;
 
@@ -765,10 +1210,10 @@ export class RasterizerScene {
         }
 
         if (!material) {
-            material = this.materials.spatial;
+            material = this.spatial_material.rid;
         }
 
-        this._add_geometry_with_material(p_geometry, p_instance, material, p_depth_pass);
+        this._add_geometry_with_material(p_geometry, p_instance, material, p_depth_pass, p_shadow_pass);
 
         while (material.next_pass) {
             material = material.next_pass;
@@ -777,7 +1222,7 @@ export class RasterizerScene {
                 break;
             }
 
-            this._add_geometry_with_material(p_geometry, p_instance, material, p_depth_pass);
+            this._add_geometry_with_material(p_geometry, p_instance, material, p_depth_pass, p_shadow_pass);
         }
     }
 
@@ -786,8 +1231,9 @@ export class RasterizerScene {
      * @param {Instance_t} p_instance
      * @param {Material_t} p_material
      * @param {boolean} p_depth_pass
+     * @param {boolean} p_shadow_pass
      */
-    _add_geometry_with_material(p_geometry, p_instance, p_material, p_depth_pass) {
+    _add_geometry_with_material(p_geometry, p_instance, p_material, p_depth_pass, p_shadow_pass) {
         let has_base_alpha = false;
         let has_blend_alpha = false;
         let has_alpha = has_base_alpha || has_blend_alpha;
@@ -799,6 +1245,10 @@ export class RasterizerScene {
         }
 
         if (p_depth_pass) {
+            if (has_blend_alpha || p_material.shader.spatial.uses_depth_texture) {
+                return;
+            }
+
             has_alpha = false;
         }
 
@@ -909,10 +1359,15 @@ export class RasterizerScene {
      * @param {number} p_element_count
      * @param {Transform} p_view_transform
      * @param {CameraMatrix} p_projection
+     * @param {ShadowAtlas_t} p_shadow_atlas
      * @param {Environment_t} p_env
+     * @param {number} p_shadow_bias
+     * @param {number} p_shadow_normal_bias
+     * @param {boolean} p_reverse_cull
      * @param {boolean} p_alpha_pass
+     * @param {boolean} p_shadow
      */
-    _render_render_list(p_elements, p_element_count, p_view_transform, p_projection, p_env, p_alpha_pass) {
+    _render_render_list(p_elements, p_element_count, p_view_transform, p_projection, p_shadow_atlas, p_env, p_shadow_bias, p_shadow_normal_bias, p_reverse_cull, p_alpha_pass, p_shadow) {
         let view_transform_inverse = p_view_transform.inverse();
         let projection_inverse = p_projection.inverse();
 
@@ -926,6 +1381,8 @@ export class RasterizerScene {
         let prev_unshaded = false;
         let prev_instancing = false;
         let prev_depth_prepass = false;
+
+        this.set_shader_condition(SHADER_DEF.SHADLESS, false);
 
         let prev_base_pass = false;
         /** @type {LightInstance_t} */
@@ -958,20 +1415,24 @@ export class RasterizerScene {
             let light = null;
             let rebind_light = false;
 
-            if (material.shader) {
+            if (!p_shadow && material.shader) {
                 let unshaded = material.shader.spatial.unshaded;
 
                 if (unshaded != prev_unshaded) {
                     rebind = true;
-
-                    // TODO: unshaded
-
+                    if (unshaded) {
+                        this.set_shader_condition(SHADER_DEF.SHADLESS, true);
+                        this.set_shader_condition(SHADER_DEF.USE_LIGHTING, false);
+                    } else {
+                        this.set_shader_condition(SHADER_DEF.SHADLESS, false);
+                    }
                     prev_unshaded = unshaded;
                 }
 
                 let base_pass = !accum_pass && !unshaded;
 
                 if (base_pass != prev_base_pass) {
+                    this.set_shader_condition(SHADER_DEF.BASE_PASS, base_pass);
                     rebind = true;
                     prev_base_pass = base_pass;
                 }
@@ -1037,10 +1498,20 @@ export class RasterizerScene {
 
             let depth_prepass = false;
 
+            if (!p_alpha_pass && material.shader.spatial.depth_draw_mode === DEPTH_DRAW_ALPHA_PREPASS) {
+                depth_prepass = true;
+            }
+
+            if (depth_prepass !== prev_depth_prepass) {
+                this.set_shader_condition(SHADER_DEF.USE_DEPTH_PREPASS, depth_prepass);
+                prev_depth_prepass = depth_prepass;
+                rebind = true;
+            }
+
             let instancing = e.instance.base_type === INSTANCE_TYPE_MULTIMESH;
 
             if (instancing != prev_instancing) {
-                // TODO: instancing
+                this.set_shader_condition(SHADER_DEF.USE_INSTANCING, instancing);
                 rebind = true;
             }
 
@@ -1055,22 +1526,27 @@ export class RasterizerScene {
                 shader_rebind = this._setup_material(material, p_alpha_pass);
             }
 
-            this._set_cull(e.front_facing, material.shader.spatial.cull_mode === CULL_MODE_DISABLED, false);
+            this._set_cull(e.front_facing, material.shader.spatial.cull_mode === CULL_MODE_DISABLED, p_reverse_cull);
 
             if (i === 0 || shader_rebind) {
-                if (p_env) {
-                    global_uniforms.bg_energy = p_env.bg_energy;
-                    global_uniforms.bg_color = p_env.bg_color;
-                    global_uniforms.ambient_color = p_env.ambient_color;
-                    global_uniforms.ambient_energy = p_env.ambient_energy;
+                if (p_shadow) {
+                    global_uniforms.light_bias[0] = p_shadow_bias;
+                    global_uniforms.light_normal_bias[0] = p_shadow_normal_bias;
                 } else {
-                    global_uniforms.bg_energy[0] = 1.0;
-                    global_uniforms.bg_color = this.state.default_bg.as_array(global_uniforms.bg_color);
-                    global_uniforms.ambient_color = this.state.default_ambient.as_array(global_uniforms.ambient_color);
-                    global_uniforms.ambient_energy[0] = 1.0;
-                }
+                    if (p_env) {
+                        global_uniforms.bg_energy = p_env.bg_energy;
+                        global_uniforms.bg_color = p_env.bg_color;
+                        global_uniforms.ambient_color = p_env.ambient_color;
+                        global_uniforms.ambient_energy = p_env.ambient_energy;
+                    } else {
+                        global_uniforms.bg_energy[0] = 1.0;
+                        global_uniforms.bg_color = this.state.default_bg.as_array(global_uniforms.bg_color);
+                        global_uniforms.ambient_color = this.state.default_ambient.as_array(global_uniforms.ambient_color);
+                        global_uniforms.ambient_energy[0] = 1.0;
+                    }
 
-                // TODO: fog
+                    // TODO: fog
+                }
 
                 global_uniforms.CAMERA_MATRIX = p_view_transform.as_array(global_uniforms.CAMERA_MATRIX);
                 global_uniforms.INV_CAMERA_MATRIX = view_transform_inverse.as_array(global_uniforms.INV_CAMERA_MATRIX);
@@ -1084,14 +1560,15 @@ export class RasterizerScene {
             }
 
             if (rebind_light && light) {
-                this._setup_light(light, p_view_transform);
+                this._setup_light(light, p_shadow_atlas, p_view_transform, accum_pass);
             }
 
             global_uniforms.WORLD_MATRIX = e.instance.transform.as_array(global_uniforms.WORLD_MATRIX);
 
-            const mat_uniforms = material.shader.uniforms;
+            const mat_uniforms = this.state.current_shader.uniforms;
             for (const k in mat_uniforms) {
                 const u = mat_uniforms[k];
+                if (!u.gl_loc) continue;
                 switch (u.type) {
                     case '1f': gl.uniform1fv(u.gl_loc, global_uniforms[k] ? global_uniforms[k] : material.params[k]); break;
                     case '2f': gl.uniform2fv(u.gl_loc, global_uniforms[k] ? global_uniforms[k] : material.params[k]); break;
@@ -1108,6 +1585,15 @@ export class RasterizerScene {
             prev_material = e.material;
             prev_light = light;
         }
+
+        this.set_shader_condition(SHADER_DEF.USE_SKELETON, false);
+        this.set_shader_condition(SHADER_DEF.SHADLESS, false);
+        this.set_shader_condition(SHADER_DEF.BASE_PASS, false);
+        this.set_shader_condition(SHADER_DEF.USE_INSTANCING, false);
+        this.set_shader_condition(SHADER_DEF.USE_LIGHTMAP, false);
+        this.set_shader_condition(SHADER_DEF.FOG_DEPTH_ENABLED, false);
+        this.set_shader_condition(SHADER_DEF.FOG_HEIGHT_ENABLED, false);
+        this.set_shader_condition(SHADER_DEF.USE_DEPTH_PREPASS, false);
 
         Transform.free(view_transform_inverse);
         CameraMatrix.free(projection_inverse);
@@ -1146,16 +1632,43 @@ export class RasterizerScene {
      * @param {LightInstance_t} p_light
      */
     _setup_light_type(p_light) {
+        const gl = this.gl;
+
+        this.set_shader_condition(SHADER_DEF.USE_LIGHTING, false);
+        this.set_shader_condition(SHADER_DEF.USE_SHADOW, false);
+        this.set_shader_condition(SHADER_DEF.LIGHT_MODE_DIRECTIONAL, false);
+
         if (!p_light) {
             return;
+        }
+
+        this.set_shader_condition(SHADER_DEF.USE_LIGHTING, true);
+
+        switch (p_light.light.type) {
+            case LIGHT_DIRECTIONAL: {
+                this.set_shader_condition(SHADER_DEF.LIGHT_MODE_DIRECTIONAL, true);
+
+                if (!this.state.render_no_shadows && p_light.light.shadow) {
+                    // TODO: enable shadow
+                    // this.set_condition(SHADER_DEF.USE_SHADOW, true);
+                    gl.activeTexture(gl.TEXTURE0 + VSG.config.max_texture_image_units - 3);
+                    if (VSG.config.use_rgba_3d_shadows) {
+                        gl.bindTexture(gl.TEXTURE_2D, this.directional_shadow.gl_color);
+                    } else {
+                        gl.bindTexture(gl.TEXTURE_2D, this.directional_shadow.gl_depth);
+                    }
+                }
+            } break;
         }
     }
 
     /**
      * @param {LightInstance_t} p_light
+     * @param {ShadowAtlas_t} shadow_atlas
      * @param {Transform} p_view_transform
+     * @param {boolean} accum_pass
      */
-    _setup_light(p_light, p_view_transform) {
+    _setup_light(p_light, shadow_atlas, p_view_transform, accum_pass) {
         let uniforms = this.state.uniforms;
 
         let light = p_light.light;
@@ -1163,7 +1676,7 @@ export class RasterizerScene {
         // common parameters
         let energy = light.param[LIGHT_PARAM_ENERGY];
         let specular = light.param[LIGHT_PARAM_SPECULAR];
-        let sign = light.negative ? -1 : 1;
+        let sign = (light.negative && !accum_pass) ? -1 : 1;
 
         uniforms.LIGHT_SPECULAR[0] = specular;
 
@@ -1173,6 +1686,8 @@ export class RasterizerScene {
         uniforms.LIGHT_COLOR[1] *= sign_energy_PI;
         uniforms.LIGHT_COLOR[2] *= sign_energy_PI;
         uniforms.LIGHT_COLOR[3] *= sign_energy_PI;
+
+        uniforms.shadow_color = light.shadow_color.as_array(uniforms.shadow_color);
 
         // specific parameters
         switch (light.type) {
@@ -1185,6 +1700,51 @@ export class RasterizerScene {
                 uniforms.LIGHT_DIRECTION = direction.as_array(uniforms.LIGHT_DIRECTION);
 
                 Vector3.free(direction);
+
+                if (!this.state.render_no_shadows && light.shadow && this.directional_shadow.gl_depth) {
+                    let shadow_count = 1;
+
+                    let matrix = CameraMatrix.new();
+
+                    for (let k = 0; k < shadow_count; k++) {
+                        let x = p_light.directional_rect.x;
+                        let y = p_light.directional_rect.x;
+                        let width = p_light.directional_rect.width;
+                        let height = p_light.directional_rect.height;
+
+                        let _modelview = p_view_transform.inverse()
+                            .append(p_light.shadow_transforms[k].transform)
+                            .affine_invert()
+                        let modelview = CameraMatrix.new().set_transform(_modelview);
+
+                        let bias = CameraMatrix.new();
+                        bias.set_light_bias();
+                        let rectm = CameraMatrix.new();
+                        let atlas_rect = Rect2.new(
+                            x / this.directional_shadow.size,
+                            y / this.directional_shadow.size,
+                            width / this.directional_shadow.size,
+                            height / this.directional_shadow.size
+                        );
+                        rectm.set_light_atlas_rect(atlas_rect);
+
+                        matrix.copy(rectm)
+                            .append(bias)
+                            .append(p_light.shadow_transforms[k].camera)
+                            .append(modelview)
+
+                        Transform.free(_modelview);
+                        CameraMatrix.free(modelview);
+                        CameraMatrix.free(rectm);
+                        CameraMatrix.free(bias);
+                    }
+
+                    uniforms.shadow_pixel_size[0] = 1 / this.directional_shadow.size;
+                    uniforms.shadow_pixel_size[1] = 1 / this.directional_shadow.size;
+                    uniforms.light_shadow_matrix = matrix.as_array(uniforms.light_shadow_matrix);
+
+                    CameraMatrix.free(matrix);
+                }
             } break;
         }
     }
@@ -1237,29 +1797,40 @@ export class RasterizerScene {
     _setup_material(p_material, p_alpha_pass) {
         const gl = this.gl;
 
-        let uniforms = p_material.shader.uniforms;
+        let shader_rebind = this.bind_scene_shader(p_material);
 
-        if (p_material.shader.spatial.uses_screen_texture && this.storage.frame.current_rt) {
+        let shader = this.state.current_shader;
+
+        if (shader.spatial.uses_screen_texture && this.storage.frame.current_rt) {
             gl.activeTexture(gl.TEXTURE0 + VSG.config.max_texture_image_units - 4);
             gl.bindTexture(gl.TEXTURE_2D, this.storage.frame.current_rt.copy_screen_effect.gl_color);
         }
 
-        if (p_material.shader.spatial.uses_depth_texture && this.storage.frame.current_rt) {
+        if (shader.spatial.uses_depth_texture && this.storage.frame.current_rt) {
             gl.activeTexture(gl.TEXTURE0 + VSG.config.max_texture_image_units - 4);
             gl.bindTexture(gl.TEXTURE_2D, this.storage.frame.current_rt.copy_screen_effect.gl_depth);
         }
 
-        let shader_rebind = this.state.current_prog != p_material.shader.gl_prog;
-        if (shader_rebind) {
-            gl.useProgram(p_material.shader.gl_prog);
-            this.state.current_prog = p_material.shader.gl_prog;
-        }
-
-        if (p_material.shader.spatial.no_depth_test || p_material.shader.spatial.uses_depth_texture) {
+        if (shader.spatial.no_depth_test || shader.spatial.uses_depth_texture) {
             gl.disable(gl.DEPTH_TEST);
         } else {
             gl.enable(gl.DEPTH_TEST);
         }
+
+        switch (shader.spatial.depth_draw_mode) {
+            case DEPTH_DRAW_ALPHA_PREPASS:
+            case DEPTH_DRAW_OPAQUE: {
+                gl.depthMask(!p_alpha_pass && !shader.spatial.uses_depth_texture);
+            } break;
+            case DEPTH_DRAW_ALWAYS: {
+                gl.depthMask(true);
+            } break;
+            case DEPTH_DRAW_NEVER: {
+                gl.depthMask(false);
+            } break;
+        }
+
+        let uniforms = shader.uniforms;
 
         let i = 0;
         for (let k in p_material.textures) {
@@ -1275,9 +1846,8 @@ export class RasterizerScene {
                 }
 
                 if (!t) {
-                    let shader_material = this.spatial_material_ref;
-                    if (p_material.shader === this.materials.spatial.shader) {
-                        t = shader_material.texture_hints[k];
+                    if (shader.name === "spatial") {
+                        t = this.spatial_material.mat.texture_hints[k];
                     }
                 }
 

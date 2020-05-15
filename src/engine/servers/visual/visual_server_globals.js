@@ -13,6 +13,8 @@ export const VSG = {
         depth_internalformat: 0,
         depth_type: 0,
         depth_buffer_internalformat: 0,
+
+        use_rgba_3d_shadows: false,
     },
 
     /** @type {import('engine/drivers/webgl/rasterizer_storage').RasterizerStorage} */
