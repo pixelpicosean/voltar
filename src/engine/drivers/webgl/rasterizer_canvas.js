@@ -70,6 +70,7 @@ import {
 } from 'engine/servers/visual_server';
 import { Rect2 } from 'engine/core/math/rect2';
 import { ARRAY_MAX } from 'engine/scene/const';
+import { parse_attributes_from_code, parse_uniforms_from_code } from './shader_parser';
 
 /**
  * @typedef {import('./rasterizer_storage').Material_t} Material_t
@@ -305,11 +306,8 @@ export class RasterizerCanvas extends VObject {
                 COLOR = texture(TEXTURE, UV);
             }
         `);
-        this.materials.flat = this.init_shader_material(mat, normal_vs, normal_fs, CANVAS_ITEM_SHADER_UNIFORMS, true);
-        this.materials.tile = this.init_shader_material(mat, tile_vs, tile_fs, [
-            ...CANVAS_ITEM_SHADER_UNIFORMS,
-            { name: 'frame_uv', type: '4f' },
-        ], false);
+        this.materials.flat = this.init_shader_material(mat, normal_vs, normal_fs, true);
+        this.materials.tile = this.init_shader_material(mat, tile_vs, tile_fs, false);
 
         this.materials.multimesh = (() => {
             const shader = VSG.storage.shader_create(
@@ -558,12 +556,9 @@ export class RasterizerCanvas extends VObject {
      * @param {ShaderMaterial} shader_material
      * @param {string} vs
      * @param {string} fs
-     * @param {{ name: string, type: string }[]} uniforms
      * @param {boolean} batchable
      */
-    init_shader_material(shader_material, vs, fs, uniforms, batchable) {
-        const gl = this.gl;
-
+    init_shader_material(shader_material, vs, fs, batchable) {
         const vs_code = vs
             // uniform
             .replace("/* UNIFORM */", shader_material.vs_uniform_code)
@@ -577,28 +572,45 @@ export class RasterizerCanvas extends VObject {
             // translate Godot API to GLSL
             .replace(/texture\(/gm, "texture2D(")
             .replace(/FRAGCOORD/gm, "gl_FragCoord")
+
+        const vs_uniforms = parse_uniforms_from_code(vs_code)
+            .map(u => ({ type: u.type, name: u.name }))
+        const fs_uniforms = parse_uniforms_from_code(fs_code)
+            .map(u => ({ type: u.type, name: u.name }))
+        const uniforms = [];
+        for (let u of vs_uniforms) {
+            if (!uniforms.find((v) => v.name === u.name)) {
+                uniforms.push(u);
+            }
+        }
+        for (let u of fs_uniforms) {
+            if (!uniforms.find((v) => v.name === u.name)) {
+                uniforms.push(u);
+            }
+        }
+
+        const attribs = parse_attributes_from_code(vs_code)
+            .map(a => a.name)
+
         const shader = VSG.storage.shader_create(
-            vs_code, fs_code,
-            [
-                'position',
-                'uv',
-                'color',
-            ],
-            // @ts-ignore
-            [
-                ...CANVAS_ITEM_SHADER_UNIFORMS,
-                ...uniforms,
-                ...shader_material.uniforms,
-            ]
+            vs_code,
+            fs_code,
+            attribs,
+            uniforms
         );
+        shader.name = shader_material.name;
+
         const material = VSG.storage.material_create(shader, undefined, shader_material.uses_screen_texture);
         material.name = shader_material.name;
         material.batchable = batchable;
         for (let u of shader_material.uniforms) {
-            if (Array.isArray(u.value)) {
-                material.params[u.name] = u.value;
-            } else {
-                material.textures[u.name] = u.value;
+            let shader_u = shader.uniforms[u.name];
+            if (u.value && shader_u && shader_u.gl_loc) {
+                if (Array.isArray(u.value)) {
+                    material.params[u.name] = u.value;
+                } else {
+                    material.textures[u.name] = u.value;
+                }
             }
         }
         return material;
@@ -706,19 +718,10 @@ export class RasterizerCanvas extends VObject {
                 }
 
                 if (!mat_cache.flat) {
-                    mat_cache.flat = this.init_shader_material(sm, normal_vs, normal_fs, [
-                        { name: 'projection_matrix', type: 'mat4' },
-                        { name: 'TIME', type: '1f' },
-                        { name: 'SCREEN_PIXEL_SIZE', type: '2f' },
-                    ], true);
+                    mat_cache.flat = this.init_shader_material(sm, normal_vs, normal_fs, true);
                 }
                 if (!mat_cache.tile) {
-                    mat_cache.tile = this.init_shader_material(sm, tile_vs, tile_fs, [
-                        { name: 'projection_matrix', type: 'mat4' },
-                        { name: 'frame_uv', type: '4f' },
-                        { name: 'TIME', type: '1f' },
-                        { name: 'SCREEN_PIXEL_SIZE', type: '2f' },
-                    ], false);
+                    mat_cache.tile = this.init_shader_material(sm, tile_vs, tile_fs, false);
                 }
                 if (!mat_cache.multimesh) {
                     mat_cache.multimesh = this.materials.multimesh;
@@ -1507,10 +1510,12 @@ export class RasterizerCanvas extends VObject {
         this.use_material(this.states.material, this.states.uniforms);
 
         // - texture
-        const texunit = VSG.config.max_texture_image_units - 1;
-        gl.activeTexture(gl.TEXTURE0 + texunit);
-        gl.uniform1i(this.states.material.shader.uniforms["TEXTURE"].gl_loc, texunit);
-        gl.bindTexture(gl.TEXTURE_2D, this.states.texture.self().gl_tex);
+        if (this.states.material.shader.uniforms["TEXTURE"]) {
+            const texunit = VSG.config.max_texture_image_units - 1;
+            gl.activeTexture(gl.TEXTURE0 + texunit);
+            gl.uniform1i(this.states.material.shader.uniforms["TEXTURE"].gl_loc, texunit);
+            gl.bindTexture(gl.TEXTURE_2D, this.states.texture.self().gl_tex);
+        }
 
         if (this.states.texture.self().render_target) {
             this.states.texture.self().render_target.used_in_frame = true;

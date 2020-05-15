@@ -311,6 +311,8 @@ export const CULL_MODE_FRONT = 0;
 export const CULL_MODE_BACK = 1;
 export const CULL_MODE_DISABLED = 2;
 
+/** @type {{ [id: number]: { [key: string]: Shader_t }}} */
+let shader_with_defines = {};
 let shader_uid = 0;
 export class Shader_t {
     constructor() {
@@ -346,13 +348,24 @@ export class Shader_t {
             uses_depth_texture: false,
             uses_time: false,
         };
+
+        this.data = {
+            vs: '',
+            fs: '',
+            /** @type {string[]} */
+            attrs: [],
+            /** @type {{ name: string, type: UniformTypes }[]} */
+            uniforms: [],
+        };
     }
 }
 
 /** @type {{ [name: string]: number }} */
 let mat_clone_record = {};
+let mat_uid = 0;
 export class Material_t {
     constructor() {
+        this.id = mat_uid++;
         this.name = '';
 
         this.batchable = false;
@@ -1267,6 +1280,10 @@ export class RasterizerStorage {
         const gl = this.gl;
 
         const shd = new Shader_t;
+        shd.data.vs = vs;
+        shd.data.fs = fs;
+        shd.data.attrs = attrs;
+        shd.data.uniforms = uniforms;
 
         const gl_vs = gl.createShader(gl.VERTEX_SHADER);
         gl.shaderSource(gl_vs, vs);
@@ -1307,10 +1324,39 @@ export class RasterizerStorage {
 
         for (let i = 0; i < uniforms.length; i++) {
             const u = uniforms[i]
-            shd.uniforms[u.name] = {
-                type: u.type,
-                gl_loc: gl.getUniformLocation(gl_prog, u.name),
+            let gl_loc = gl.getUniformLocation(gl_prog, u.name);
+            if (gl_loc) {
+                shd.uniforms[u.name] = {
+                    type: u.type,
+                    gl_loc,
+                };
             }
+        }
+
+        return shd;
+    }
+
+    /**
+     * @param {Shader_t} shader
+     * @param {number} id
+     * @param {string} def_str
+     */
+    shader_get_instance_with_defines(shader, id, def_str) {
+        let table = shader_with_defines[shader.id];
+        if (!table) {
+            table = {};
+        }
+
+        let shd = table[id];
+        if (!shd) {
+            shd = this.shader_create(
+                `${def_str}\n${shader.data.vs}`,
+                `${def_str}\n${shader.data.fs}`,
+                shader.data.attrs,
+                shader.data.uniforms
+            );
+            shd.name = shader.name;
+            table[id] = shd;
         }
 
         return shd;
@@ -1328,6 +1374,7 @@ export class RasterizerStorage {
 
         for (const k in shader.uniforms) {
             const u = shader.uniforms[k];
+            if (!u.gl_loc) continue;
             switch (u.type) {
                 case '1f': mt.params[k] = param[k] || [0]; break;
                 case '2f': mt.params[k] = param[k] || [0, 0]; break;

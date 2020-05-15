@@ -218,19 +218,6 @@ export class VisualServer extends VObject {
         VSG.viewport.set_default_clear_color(p_color);
     }
 
-    free_rid(p_rid) {
-        if (VSG.storage.free_rid(p_rid))
-            return;
-        if (VSG.canvas.free_rid(p_rid))
-            return;
-        if (VSG.viewport.free_rid(p_rid))
-            return;
-        if (VSG.scene.free_rid(p_rid))
-            return;
-        if (VSG.scene_render.free_rid(p_rid))
-            return;
-    }
-
     /* private */
 
     _draw_margins() {
