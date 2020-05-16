@@ -55,7 +55,7 @@ export class Light extends VisualInstance {
         this.light = VSG.storage.light_create(p_type);
         VSG.scene.instance_set_base(this.instance, this.light);
 
-        this.set_color_n(1, 1, 1, 1);
+        this.set_light_color_n(1, 1, 1, 1);
         this.set_light_negative(false);
 
         this.set_param(LIGHT_PARAM_ENERGY, 1);
@@ -85,7 +85,7 @@ export class Light extends VisualInstance {
      * @param {number} b
      * @param {number} a
      */
-    set_color_n(r, g, b, a) {
+    set_light_color_n(r, g, b, a) {
         this.light_color.set(r, g, b, a);
         VSG.storage.light_set_color(this.light, this.light_color);
     }

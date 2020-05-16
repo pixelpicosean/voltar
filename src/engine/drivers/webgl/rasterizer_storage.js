@@ -1872,7 +1872,7 @@ export class RasterizerStorage {
      * @param {ColorLike} p_color
      */
     light_set_shadow_color(p_light, p_color) {
-        p_light.color.copy(p_color);
+        p_light.shadow_color.copy(p_color);
     }
 
     /**
