@@ -437,6 +437,17 @@ const DEFAULT_SPATIAL_PARAMS = {
     "roughness":    [1],
 }
 
+const DEFAULT_SPATIAL_ATTRIBS = [
+    'position',
+    'normal',
+    'tangent',
+    'color',
+    'uv',
+    'uv2',
+    'bone_ids',
+    'bone_weights',
+]
+
 /**
  * @param {number} condition
  */
@@ -1080,13 +1091,10 @@ export class RasterizerScene {
             }
         }
 
-        const attribs = parse_attributes_from_code(vs_code)
-            .map(a => a.name)
-
         const shader = VSG.storage.shader_create(
             vs_code,
             fs_code,
-            attribs,
+            DEFAULT_SPATIAL_ATTRIBS,
             uniforms
         );
         shader.name = shader_material.name;

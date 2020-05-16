@@ -13,17 +13,17 @@ const compress_list = [
     3, // color
 ]
 
-const normalize_list = [
-    1, // normal
-    3, // color
-]
+const GL_BYTE = 5120;
+const GL_UNSIGNED_BYTE = 5121;
+const GL_UNSIGNED_SHORT = 5123;
+const GL_UNSIGNED_INT = 5125;
+const GL_FLOAT = 5126;
 
 module.exports = (data) => {
     let surfaces = data.prop.surfaces;
     for (let s of surfaces) {
         let arrays = s.arrays.map((arr, i) => arr ? ({
             compressed: compress_list.indexOf(i) >= 0,
-            normalized: normalize_list.indexOf(i) >= 0,
             array: arr,
         }) : null)
         let meta = s.arrays[0].__meta__;
@@ -58,7 +58,7 @@ const ARRAY_INDEX = 8;
 const ARRAY_MAX = 9;
 
 /**
- * @param {{ compressed: boolean, normalized: boolean, array: number[] }[]} p_arrays
+ * @param {{ compressed: boolean, array: number[] }[]} p_arrays
  * @param {boolean} is_2d
  */
 function pack_as_binary(p_arrays, is_2d) {
@@ -66,6 +66,10 @@ function pack_as_binary(p_arrays, is_2d) {
     let offsets = Array(ARRAY_MAX);
     /** @type {number[]} */
     let sizes = Array(ARRAY_MAX);
+    /** @type {boolean[]} */
+    let normalized = Array(ARRAY_MAX);
+    /** @type {(GL_BYTE | GL_UNSIGNED_BYTE | GL_UNSIGNED_SHORT | GL_UNSIGNED_INT | GL_FLOAT)[]} */
+    let types = Array(ARRAY_MAX);
 
     let array_len = Math.floor(p_arrays[ARRAY_VERTEX].array.length / (is_2d ? 2 : 3));
     let index_array_len = 0;
@@ -84,36 +88,59 @@ function pack_as_binary(p_arrays, is_2d) {
 
         switch (i) {
             case ARRAY_VERTEX: {
-                elem_size = is_2d ? 2 : 3;
-                sizes[i] = elem_size;
-                elem_size *= 4;
-                /* vertex cannot be compressed */
+                if (is_2d) {
+                    elem_size = 4 * 2;
+                } else {
+                    elem_size = 4 * 3;
+                }
+                sizes[i] = is_2d ? 2 : 3;
+                types[i] = GL_FLOAT;
+                // compress requires half float support
+
+                normalized[i] = false;
             } break;
             case ARRAY_NORMAL: {
                 if (p_arrays[i].compressed) {
                     elem_size = 4;
+                    normalized[i] = true;
+                    types[i] = GL_BYTE;
                 } else {
                     elem_size = 4 * 3;
+                    normalized[i] = false;
+                    types[i] = GL_FLOAT;
                 }
                 sizes[i] = 3;
             } break;
-            case ARRAY_TANGENT:
+            case ARRAY_TANGENT: {
+                if (p_arrays[i].compressed) {
+                    elem_size = 4;
+                    normalized[i] = true;
+                    types[i] = GL_BYTE;
+                } else {
+                    elem_size = 4 * 4;
+                    normalized[i] = false;
+                    types[i] = GL_FLOAT;
+                }
+                sizes[i] = 4;
+            } break;
             case ARRAY_COLOR: {
                 if (p_arrays[i].compressed) {
                     elem_size = 4;
+                    normalized[i] = true;
+                    types[i] = GL_UNSIGNED_BYTE;
                 } else {
                     elem_size = 4 * 4;
+                    normalized[i] = false;
+                    types[i] = GL_FLOAT;
                 }
                 sizes[i] = 4;
             } break;
             case ARRAY_TEX_UV:
             case ARRAY_TEX_UV2: {
-                if (p_arrays[i].compressed) {
-                    elem_size = 4;
-                } else {
-                    elem_size = 4 * 2;
-                }
+                elem_size = 4 * 2;
                 sizes[i] = 2;
+                types[i] = GL_FLOAT;
+                // compress requires half float support
             } break;
             case ARRAY_WEIGHTS:
             case ARRAY_BONES: {
@@ -124,6 +151,7 @@ function pack_as_binary(p_arrays, is_2d) {
                 // TODO: support 32bit indices
                 elem_size = 2;
                 offsets[i] = elem_size;
+                types[i] = GL_UNSIGNED_SHORT;
                 continue;
             }
         }
@@ -177,11 +205,11 @@ function pack_as_binary(p_arrays, is_2d) {
         attribs: offsets.slice(0, ARRAY_INDEX)
             .map((offset, i) => p_arrays[i] ? ({
                 index: i,
-                type: p_arrays[i].compressed ? 5121 : 5126,
+                type: types[i],
                 size: sizes[i],
                 stride: total_elem_size,
                 offset: offset,
-                normalized: !!p_arrays[i].normalized,
+                normalized: !!normalized[i],
             }) : null)
             .filter((v) => !!v),
     }

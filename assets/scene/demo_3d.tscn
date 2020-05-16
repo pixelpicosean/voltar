@@ -1,5 +1,6 @@
-[gd_scene load_steps=12 format=2]
+[gd_scene load_steps=11 format=2]
 
+[ext_resource path="res://mesh/m.tres" type="Material" id=1]
 [ext_resource path="res://mesh/tree_1.tscn" type="PackedScene" id=2]
 [ext_resource path="res://mesh/house.tscn" type="PackedScene" id=3]
 [ext_resource path="res://mesh/tree_2.tscn" type="PackedScene" id=4]
@@ -11,7 +12,7 @@ script/source = "extends Spatial
 
 func _process(delta: float) -> void:
 #	$ground.rotate_y(-PI * 0.3 * delta)
-	$cube2.rotate_y(PI * 0.4 * delta)
+	$cube.rotate_y(PI * 0.4 * delta)
 	pass
 "
 
@@ -21,19 +22,8 @@ size = Vector2( 60, 20 )
 [sub_resource type="SpatialMaterial" id=3]
 albedo_color = Color( 0.3652, 0.706053, 0.83, 1 )
 
-[sub_resource type="Shader" id=4]
-code = "shader_type spatial;
-
-void fragment() {
-	ALBEDO = vec3(UV, 0.0);
-}
-"
-
-[sub_resource type="ShaderMaterial" id=5]
-shader = SubResource( 4 )
-
 [sub_resource type="CubeMesh" id=6]
-material = SubResource( 5 )
+material = ExtResource( 1 )
 
 [node name="spatial" type="Spatial"]
 script = SubResource( 1 )
@@ -54,10 +44,10 @@ transform = Transform( 10.7671, 0, 3.57744, 0, 1, 0, -7.46659, 0, 5.15878, 0.368
 
 [node name="sun" type="DirectionalLight" parent="."]
 transform = Transform( 0.830975, 1.77636e-15, -0.55631, 0.454793, 0.575904, 0.679336, 0.320381, -0.817517, 0.478562, -3.29193, 4.45464, 4.43833 )
-visible = false
-shadow_enabled = true
+light_energy = 0.8
 shadow_color = Color( 0.478431, 0.478431, 0.478431, 1 )
 directional_shadow_mode = 0
+directional_shadow_depth_range = 1
 directional_shadow_max_distance = 20.0
 
 [node name="camera" type="Camera" parent="."]
@@ -65,12 +55,6 @@ transform = Transform( 1, 0, 0, 0, 0.923866, 0.382716, 0, -0.382716, 0.923866, 1
 size = 2.0
 
 [node name="cube" type="MeshInstance" parent="."]
-transform = Transform( 0.353554, -0.353553, 0, 0.25, 0.25, -0.353554, 0.25, 0.25, 0.353554, 1.15197, 3.25732, -4.68754 )
-visible = false
-mesh = SubResource( 6 )
-material/0 = null
-
-[node name="cube2" type="MeshInstance" parent="."]
 transform = Transform( 0.353554, -0.353553, 0, 0.25, 0.25, -0.353554, 0.25, 0.25, 0.353554, 1.15197, 3.25732, -4.68754 )
 mesh = SubResource( 6 )
 material/0 = null

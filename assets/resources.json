@@ -63,7 +63,7 @@
                 },
                 {
                   "index": 1,
-                  "type": 5121,
+                  "type": 5120,
                   "size": 3,
                   "stride": 28,
                   "offset": 12,
@@ -71,11 +71,11 @@
                 },
                 {
                   "index": 2,
-                  "type": 5121,
+                  "type": 5120,
                   "size": 4,
                   "stride": 28,
                   "offset": 16,
-                  "normalized": false
+                  "normalized": true
                 },
                 {
                   "index": 4,
@@ -169,7 +169,7 @@
                 },
                 {
                   "index": 1,
-                  "type": 5121,
+                  "type": 5120,
                   "size": 3,
                   "stride": 28,
                   "offset": 12,
@@ -177,11 +177,11 @@
                 },
                 {
                   "index": 2,
-                  "type": 5121,
+                  "type": 5120,
                   "size": 4,
                   "stride": 28,
                   "offset": 16,
-                  "normalized": false
+                  "normalized": true
                 },
                 {
                   "index": 4,
@@ -275,7 +275,7 @@
                 },
                 {
                   "index": 1,
-                  "type": 5121,
+                  "type": 5120,
                   "size": 3,
                   "stride": 28,
                   "offset": 12,
@@ -283,11 +283,11 @@
                 },
                 {
                   "index": 2,
-                  "type": 5121,
+                  "type": 5120,
                   "size": 4,
                   "stride": 28,
                   "offset": 16,
-                  "normalized": false
+                  "normalized": true
                 },
                 {
                   "index": 4,
@@ -392,7 +392,7 @@
                 },
                 {
                   "index": 1,
-                  "type": 5121,
+                  "type": 5120,
                   "size": 3,
                   "stride": 28,
                   "offset": 12,
@@ -400,11 +400,11 @@
                 },
                 {
                   "index": 2,
-                  "type": 5121,
+                  "type": 5120,
                   "size": 4,
                   "stride": 28,
                   "offset": 16,
-                  "normalized": false
+                  "normalized": true
                 },
                 {
                   "index": 4,
@@ -498,7 +498,7 @@
                 },
                 {
                   "index": 1,
-                  "type": 5121,
+                  "type": 5120,
                   "size": 3,
                   "stride": 28,
                   "offset": 12,
@@ -506,11 +506,11 @@
                 },
                 {
                   "index": 2,
-                  "type": 5121,
+                  "type": 5120,
                   "size": 4,
                   "stride": 28,
                   "offset": 16,
-                  "normalized": false
+                  "normalized": true
                 },
                 {
                   "index": 4,
@@ -604,7 +604,7 @@
                 },
                 {
                   "index": 1,
-                  "type": 5121,
+                  "type": 5120,
                   "size": 3,
                   "stride": 28,
                   "offset": 12,
@@ -612,11 +612,11 @@
                 },
                 {
                   "index": 2,
-                  "type": 5121,
+                  "type": 5120,
                   "size": 4,
                   "stride": 28,
                   "offset": 16,
-                  "normalized": false
+                  "normalized": true
                 },
                 {
                   "index": 4,
@@ -997,6 +997,7 @@
   "res://scene/demo_3d.tscn": {
     "type": "PackedScene",
     "ext": {
+      "1": "res://mesh/m.tres",
       "2": "res://mesh/tree_1.tscn",
       "3": "res://mesh/house.tscn",
       "4": "res://mesh/tree_2.tscn",
@@ -1023,19 +1024,9 @@
         }
       },
       {
-        "id": 4,
-        "type": "Shader",
-        "code": "shader_type spatial;\nvoid fragment() {\n\nALBEDO = vec3(UV, 0.0);\n}\n"
-      },
-      {
-        "id": 5,
-        "type": "ShaderMaterial",
-        "shader": "@sub#4"
-      },
-      {
         "id": 6,
         "type": "CubeMesh",
-        "material": "@sub#5"
+        "material": "@ext#1"
       }
     ],
     "nodes": [
@@ -1141,8 +1132,7 @@
           4.45464,
           4.43833
         ],
-        "visible": false,
-        "shadow_enabled": true,
+        "light_energy": 0.8,
         "shadow_color": {
           "r": 0.478431,
           "g": 0.478431,
@@ -1150,6 +1140,7 @@
           "a": 1
         },
         "directional_shadow_mode": 0,
+        "directional_shadow_depth_range": 1,
         "directional_shadow_max_distance": 20
       },
       {
@@ -1175,28 +1166,6 @@
       {
         "type": "MeshInstance",
         "name": "cube",
-        "parent": ".",
-        "transform": [
-          0.353554,
-          -0.353553,
-          0,
-          0.25,
-          0.25,
-          -0.353554,
-          0.25,
-          0.25,
-          0.353554,
-          1.15197,
-          3.25732,
-          -4.68754
-        ],
-        "visible": false,
-        "mesh": "@sub#6",
-        "material": []
-      },
-      {
-        "type": "MeshInstance",
-        "name": "cube2",
         "parent": ".",
         "transform": [
           0.353554,

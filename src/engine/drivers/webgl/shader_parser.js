@@ -123,12 +123,11 @@ export function parse_uniforms_from_code(code) {
  * @param {string} code
  */
 export function parse_attributes_from_code(code) {
-    let uniforms = [];
-    let uniform_lines = code.match(/attribute([\s\S]*?);/gm);
-    if (uniform_lines) {
-        uniforms = uniform_lines.map(parse_attribute);
+    let attrib_lines = code.match(/attribute([\s\S]*?);/gm);
+    if (attrib_lines) {
+        return attrib_lines.map((line, index) => Object.assign(parse_attribute(line), { index }))
     }
-    return uniforms;
+    return [];
 }
 
 /**
