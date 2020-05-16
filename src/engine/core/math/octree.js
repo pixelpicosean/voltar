@@ -43,8 +43,13 @@ class Element {
         /** @type {T} */
         this.userdata = null;
 
-        this.subindex = 0;
         this.last_pass = 0;
+
+        this.pairable = false;
+        this.pairable_type = 0;
+        this.pairable_mask = 0;
+        /** @type {PairData<T>[]} */
+        this.pair_list = [];
 
         /** @type {Octree} */
         this.octree = null;
@@ -62,8 +67,11 @@ class Element {
 
         this.userdata = null;
 
-        this.subindex = 0;
         this.last_pass = 0;
+
+        this.pairable = false;
+        this.pairable_type = 0;
+        this.pairable_mask = 0;
 
         this.octree = null;
 
@@ -85,6 +93,23 @@ function Octant_free(ot) {
     ot_pool.push(ot);
 }
 
+/**
+ * @template T
+ */
+class PairData {
+    constructor() {
+        this.intersect = false;
+        /** @type {Element<T>} */
+        this.A = null;
+        /** @type {Element<T>} */
+        this.B = null;
+        /** @type {any} */
+        this.ud = null;
+
+        this.rc = 0;
+    }
+}
+
 class Octant {
     constructor() {
         this.aabb = new AABB;
@@ -103,6 +128,8 @@ class Octant {
 
         /** @type {Element[]} */
         this.elements = [];
+        /** @type {Element[]} */
+        this.pairable_elements = [];
     }
     reset() {
         this.aabb.set(0, 0, 0, 0, 0, 0);
@@ -114,6 +141,7 @@ class Octant {
         this.parent_index = -1;
 
         this.elements.length = 0;
+        this.pairable_elements.length = 0;
 
         return this;
     }
@@ -123,11 +151,18 @@ class Octant {
  * @template T
  */
 export class Octree {
-    constructor(unit_size = 1.0) {
+    /**
+     * @param {boolean} use_pairs
+     * @param {number} [unit_size]
+     */
+    constructor(use_pairs, unit_size = 1.0) {
         this.last_element_id = 0;
-        this.octant_count = 0;
         this.pass = 0;
 
+        this.octant_count = 0;
+        this.pair_count = 0;
+
+        this.use_pairs = use_pairs;
         this.unit_size = unit_size;
 
         /** @type {Octant} */
@@ -135,26 +170,40 @@ export class Octree {
 
         /** @type {Element[]} */
         this.element_map = [];
+        /** @type {{ [key: string]: PairData<T> }} */
+        this.pair_map = {};
+
+        /** @type {(ud: any, a_id: number, a_ud: any, b_id: number, b_ud: any) => any} */
+        this.pair_callback = (ud, a_id, a_ud, b_id, b_ud) => { };
+        /** @type {(ud: any, a_id: number, a_ud: any, b_id: number, b_ud: any) => void} */
+        this.unpair_callback = (ud, a_id, a_ud, b_id, b_ud) => { };
+        this.pair_callback_userdata = null;
+        this.unpair_callback_userdata = null;
     }
 
     /**
      * @param {T} p_userdata
      */
-    create(p_userdata, p_aabb = new AABB, p_subindex = 0, p_pairable = false, p_pairable_type = 0, p_pairable_mask = 1) {
+    create(p_userdata, p_aabb = new AABB, p_pairable = false, p_pairable_type = 0, p_pairable_mask = 1) {
         let e = this.element_map[this.last_element_id] = Element_new();
 
         this.last_element_id++;
 
         e.aabb.copy(p_aabb);
         e.userdata = p_userdata;
-        e.subindex = p_subindex;
         e.last_pass = 0;
         e.octree = this;
+        e.pairable = p_pairable;
+        e.pairable_type = p_pairable_type;
+        e.pairable_mask = p_pairable_mask;
         e.id = this.last_element_id - 1;
 
         if (!e.aabb.has_no_surface()) {
             this._ensure_valid_root(p_aabb);
             this._insert_element(e, this.root);
+            if (this.use_pairs) {
+                this._element_check_pairs(e);
+            }
         }
 
         return e.id;
@@ -206,12 +255,44 @@ export class Octree {
             common_parent = common_parent.parent;
         }
 
+        e.octant_owners.length = 0;
         e.common_parent = null;
         e.aabb.copy(p_aabb);
 
         this._insert_element(e, common_parent);
 
         this.pass++;
+
+        for (let i = 0; i < e.octant_owners.length; i++) {
+            let owner = e.octant_owners[i];
+            let o = owner.octant;
+
+            if (this.use_pairs && e.pairable) {
+                o.pairable_elements.splice(o.pairable_elements.indexOf(owner.E), 1);
+            } else {
+                o.elements.splice(o.elements.indexOf(owner.E), 1);
+            }
+
+            if (this._remove_element_from_octant(e, o, common_parent.parent)) {
+                e.octant_owners.splice(i, 1);
+                i--;
+            }
+        }
+
+        if (this.use_pairs) {
+            for (let i = 0; i < e.octant_owners.length; i++) {
+                let o = e.octant_owners[i].octant;
+
+                this.pass++;
+                for (let i = 0; i < 8; i++) {
+                    if (o.children[i]) {
+                        this._unpair_element(e, o.children[i]);
+                    }
+                }
+            }
+
+            this._element_check_pairs(e);
+        }
 
         this._optimize();
     }
@@ -237,14 +318,16 @@ export class Octree {
      * @param {Vector3Like} p_to
      * @param {T[]} p_result_array
      * @param {number} p_result_max
+     * @param {number} p_mask
      */
-    cull_segment(p_from, p_to, p_result_array, p_result_max) {
+    cull_segment(p_from, p_to, p_result_array, p_result_max, p_mask = 0xFFFFFFFF) {
         if (!this.root) return 0;
 
         this.pass++;
         let result = {
             index: 0,
             array: p_result_array,
+            mask: p_mask,
         };
         this._cull_segment(this.root, p_from, p_to, p_result_max, result);
 
@@ -255,14 +338,16 @@ export class Octree {
      * @param {AABB} p_aabb
      * @param {T[]} p_result_array
      * @param {number} p_result_max
+     * @param {number} p_mask
      */
-    cull_aabb(p_aabb, p_result_array, p_result_max) {
+    cull_aabb(p_aabb, p_result_array, p_result_max, p_mask = 0xFFFFFFFF) {
         if (!this.root) return 0;
 
         this.pass++;
         let result = {
             index: 0,
             array: p_result_array,
+            mask: p_mask,
         };
         this._cull_aabb(this.root, p_aabb, p_result_max, result);
         return result.index;
@@ -272,8 +357,9 @@ export class Octree {
      * @param {Plane[]} p_convex
      * @param {T[]} p_result_array
      * @param {number} p_result_max
+     * @param {number} p_mask
      */
-    cull_convex(p_convex, p_result_array, p_result_max) {
+    cull_convex(p_convex, p_result_array, p_result_max, p_mask = 0xFFFFFFFF) {
         if (!this.root) return 0;
 
         this.pass++;
@@ -282,6 +368,7 @@ export class Octree {
             planes: p_convex,
             array: p_result_array,
             result_max: p_result_max,
+            mask: p_mask,
         };
         this._cull_convex(this.root, result);
         return result.index;
@@ -291,14 +378,32 @@ export class Octree {
      * @param {Octant} p_octant
      * @param {Vector3Like} p_from
      * @param {Vector3Like} p_to
-     * @param {{ array: T[], index: number }} result
+     * @param {{ array: T[], index: number, mask: number }} result
      */
     _cull_segment(p_octant, p_from, p_to, p_result_max, result) {
         if (p_result_max === result.index) return;
 
         if (p_octant.elements.length > 0) {
             for (let e of p_octant.elements) {
-                if (e.last_pass === this.pass) {
+                if (e.last_pass === this.pass || (this.use_pairs && !(e.pairable_type & result.mask))) {
+                    continue;
+                }
+                e.last_pass = this.pass;
+
+                if (e.aabb.intersects_segment(p_from, p_to)) {
+                    if (result.index < p_result_max) {
+                        result.array[result.index] = e.userdata;
+                        result.index++;
+                    } else {
+                        return;
+                    }
+                }
+            }
+        }
+
+        if (this.use_pairs && p_octant.pairable_elements.length > 0) {
+            for (let e of p_octant.pairable_elements) {
+                if (e.last_pass === this.pass || (this.use_pairs && !(e.pairable_type & result.mask))) {
                     continue;
                 }
                 e.last_pass = this.pass;
@@ -325,14 +430,32 @@ export class Octree {
      * @param {Octant} p_octant
      * @param {AABB} p_aabb
      * @param {number} p_result_max
-     * @param {{ array: T[], index: number }} result
+     * @param {{ array: T[], index: number, mask: number }} result
      */
     _cull_aabb(p_octant, p_aabb, p_result_max, result) {
         if (p_result_max === result.index) return;
 
         if (p_octant.elements.length > 0) {
             for (let e of p_octant.elements) {
-                if (e.last_pass === this.pass) {
+                if (e.last_pass === this.pass || (this.use_pairs && !(e.pairable_type & result.mask))) {
+                    continue;
+                }
+                e.last_pass = this.pass;
+
+                if (p_aabb.intersects_inclusive(e.aabb)) {
+                    if (result.index < p_result_max) {
+                        result.array[result.index] = e.userdata;
+                        result.index++;
+                    } else {
+                        return;
+                    }
+                }
+            }
+        }
+
+        if (this.use_pairs && p_octant.pairable_elements.length > 0) {
+            for (let e of p_octant.pairable_elements) {
+                if (e.last_pass === this.pass || (this.use_pairs && !(e.pairable_type & result.mask))) {
                     continue;
                 }
                 e.last_pass = this.pass;
@@ -357,14 +480,32 @@ export class Octree {
 
     /**
      * @param {Octant} p_octant
-     * @param {{ array: T[], index: number, result_max: number, planes: Plane[] }} p_cull
+     * @param {{ array: T[], index: number, result_max: number, planes: Plane[], mask: number }} p_cull
      */
     _cull_convex(p_octant, p_cull) {
         if (p_cull.result_max === p_cull.index) return;
 
         if (p_octant.elements.length > 0) {
             for (let e of p_octant.elements) {
-                if (e.last_pass === this.pass) {
+                if (e.last_pass === this.pass || (this.use_pairs && !(e.pairable_type & p_cull.mask))) {
+                    continue;
+                }
+                e.last_pass = this.pass;
+
+                if (e.aabb.intersects_convex_shape(p_cull.planes)) {
+                    if (p_cull.index < p_cull.result_max) {
+                        p_cull.array[p_cull.index] = e.userdata;
+                        p_cull.index++;
+                    } else {
+                        return;
+                    }
+                }
+            }
+        }
+
+        if (this.use_pairs && p_octant.pairable_elements.length > 0) {
+            for (let e of p_octant.pairable_elements) {
+                if (e.last_pass === this.pass || (this.use_pairs && !(e.pairable_type & p_cull.mask))) {
                     continue;
                 }
                 e.last_pass = this.pass;
@@ -443,7 +584,7 @@ export class Octree {
     }
 
     /**
-     * @param {Element} p_element
+     * @param {Element<T>} p_element
      * @param {Octant} p_octant
      */
     _insert_element(p_element, p_octant) {
@@ -455,8 +596,13 @@ export class Octree {
                 E: null,
             };
 
-            p_octant.elements.push(p_element);
-            owner.E = p_element;
+            if (this.use_pairs && p_element.pairable) {
+                p_octant.pairable_elements.push(p_element);
+                owner.E = p_element;
+            } else {
+                p_octant.elements.push(p_element);
+                owner.E = p_element;
+            }
 
             p_element.octant_owners.push(owner);
 
@@ -465,6 +611,16 @@ export class Octree {
                 p_element.container_aabb.copy(p_octant.aabb);
             } else {
                 p_element.container_aabb.merge_with(p_octant.aabb);
+            }
+
+            if (this.use_pairs && p_octant.children_count > 0) {
+                this.pass++;
+
+                for (let i = 0; i < 8; i++) {
+                    if (p_octant.children[i]) {
+                        this._pair_element(p_element, p_octant.children[i]);
+                    }
+                }
             }
         } else {
             /* not big enough, send it to sub items */
@@ -506,10 +662,22 @@ export class Octree {
                 p_element.common_parent = p_octant;
             }
         }
+
+        if (this.use_pairs) {
+            for (let e of p_octant.pairable_elements) {
+                this._pair_reference(p_element, e);
+            }
+
+            if (p_element.pairable) {
+                for (let e of p_octant.elements) {
+                    this._pair_reference(p_element, e);
+                }
+            }
+        }
     }
 
     /**
-     * @param {Element} p_element
+     * @param {Element<T>} p_element
      */
     _remove_element(p_element) {
         this.pass++;
@@ -520,18 +688,53 @@ export class Octree {
             this._remove_element_from_octant(p_element, owner.octant);
         }
 
+        if (this.use_pairs) {
+            for (let owner of owners) {
+                let o = owner.octant;
+
+                this.pass++;
+                for (let i = 0; i < 8; i++) {
+                    if (o.children[i]) {
+                        this._unpair_element(p_element, o.children[i]);
+                    }
+                }
+
+                if (p_element.pairable) {
+                    o.pairable_elements.splice(o.pairable_elements.indexOf(owner.E), 1);
+                } else {
+                    o.elements.splice(o.elements.indexOf(owner.E), 1);
+                }
+            }
+        }
+
         p_element.octant_owners.length = 0;
     }
 
     /**
-     * @param {Element} p_element
+     * @param {Element<T>} p_element
      * @param {Octant} p_octant
+     * @param {Octant} [p_limit]
      */
-    _remove_element_from_octant(p_element, p_octant) {
+    _remove_element_from_octant(p_element, p_octant, p_limit = null) {
         let octant_removed = false;
         while (true) {
-            if (!p_octant) {
+            if (p_octant == p_limit) {
                 return octant_removed;
+            }
+
+            let unpaired = false;
+
+            if (this.use_pairs && p_octant.last_pass !== this.pass) {
+                for (let e of p_octant.pairable_elements) {
+                    this._pair_unreference(p_element, e);
+                }
+                if (p_element.pairable) {
+                    for (let e of p_octant.elements) {
+                        this._pair_unreference(p_element, e);
+                    }
+                }
+                p_octant.last_pass = this.pass;
+                unpaired = true;
             }
 
             let removed = false;
@@ -554,7 +757,7 @@ export class Octree {
                 octant_removed = true;
             }
 
-            if (!removed) {
+            if (!removed && !unpaired) {
                 return octant_removed;
             }
 
@@ -562,6 +765,171 @@ export class Octree {
         }
 
         return octant_removed;
+    }
+
+    /**
+     * @param {PairData} p_pair
+     */
+    _pair_check(p_pair) {
+        let intersect = p_pair.A.aabb.intersects_inclusive(p_pair.B.aabb);
+
+        if (intersect !== p_pair.intersect) {
+            if (intersect) {
+                if (this.pair_callback) {
+                    p_pair.ud = this.pair_callback(this.pair_callback_userdata, p_pair.A.id, p_pair.A.userdata, p_pair.B.id, p_pair.B.userdata);
+                }
+                this.pair_count++;
+            } else {
+                if (this.unpair_callback) {
+                    this.unpair_callback(this.pair_callback_userdata, p_pair.A.id, p_pair.A.userdata, p_pair.B.id, p_pair.B.userdata);
+                }
+                this.pair_count--;
+            }
+
+            p_pair.intersect = intersect;
+        }
+    }
+
+    /**
+     * @param {Element<T>} p_A
+     * @param {Element<T>} p_B
+     */
+    _pair_reference(p_A, p_B) {
+        if (p_A === p_B || (p_A.userdata === p_B.userdata && p_A.userdata)) {
+            return;
+        }
+
+        if (
+            !(p_A.pairable_type & p_B.pairable_mask)
+            &&
+            !(p_B.pairable_type & p_A.pairable_mask)
+        ) {
+            return;
+        }
+
+        let key = `${p_A.id}.${p_B.id}`;
+        let e = this.pair_map[key];
+
+        if (!e) {
+            e = new PairData;
+            e.rc = 1;
+            e.A = p_A;
+            e.B = p_B;
+            e.intersect = false;
+            this.pair_map[key] = e;
+            p_A.pair_list.push(e);
+            p_B.pair_list.push(e);
+        } else {
+            e.rc++;
+        }
+    }
+
+    /**
+     * @param {Element<T>} p_A
+     * @param {Element<T>} p_B
+     */
+    _pair_unreference(p_A, p_B) {
+        if (p_A == p_B) return;
+
+        let key = `${p_A.id}.${p_B.id}`;
+        let e = this.pair_map[key];
+        if (!e) return;
+
+        e.rc--;
+
+        if (e.rc === 0) {
+            if (e.intersect) {
+                if (this.unpair_callback) {
+                    this.unpair_callback(this.pair_callback_userdata, p_A.id, p_A.userdata, p_B.id, p_B.userdata);
+                }
+
+                this.pair_count--;
+            }
+
+            if (p_A === e.B) {
+                let t = p_A;
+                p_A = p_B;
+                p_B = t;
+            }
+
+            p_A.pair_list.splice(p_A.pair_list.indexOf(e), 1);
+            p_B.pair_list.splice(p_A.pair_list.indexOf(e), 1);
+            this.pair_map[key] = null;
+        }
+    }
+
+    /**
+     * @param {Element<T>} p_element
+     */
+    _element_check_pairs(p_element) {
+        for (let e of p_element.pair_list) {
+            this._pair_check(e);
+        }
+    }
+
+    /**
+     * @param {Element<T>} p_element
+     * @param {Octant} p_octant
+     */
+    _pair_element(p_element, p_octant) {
+        for (let e of p_octant.pairable_elements) {
+            if (e.last_pass !== this.pass) {
+                this._pair_reference(p_element, e);
+                e.last_pass = this.pass;
+            }
+        }
+
+        if (p_element.pairable) {
+            for (let e of p_octant.elements) {
+                if (e.last_pass !== this.pass) {
+                    this._pair_reference(p_element, e);
+                    e.last_pass = this.pass;
+                }
+            }
+        }
+        p_octant.last_pass = this.pass;
+
+        if (p_octant.children_count === 0) {
+            return;
+        }
+
+        for (let i = 0; i < 8; i++) {
+            if (p_octant.children[i]) {
+                this._pair_element(p_element, p_octant.children[i]);
+            }
+        }
+    }
+    /**
+     * @param {Element<T>} p_element
+     * @param {Octant} p_octant
+     */
+    _unpair_element(p_element, p_octant) {
+        for (let e of p_octant.pairable_elements) {
+            if (e.last_pass !== this.pass) {
+                this._pair_unreference(p_element, e);
+                e.last_pass = this.pass;
+            }
+        }
+
+        if (p_element.pairable) {
+            for (let e of p_octant.elements) {
+                if (e.last_pass !== this.pass) {
+                    this._pair_unreference(p_element, e);
+                    e.last_pass = this.pass;
+                }
+            }
+        }
+        p_octant.last_pass = this.pass;
+
+        if (p_octant.children_count === 0) {
+            return;
+        }
+
+        for (let i = 0; i < 8; i++) {
+            if (p_octant.children[i]) {
+                this._unpair_element(p_element, p_octant.children[i]);
+            }
+        }
     }
 
     _optimize() {

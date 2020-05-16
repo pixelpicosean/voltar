@@ -720,6 +720,13 @@ export class RasterizerScene {
     }
 
     /**
+     * @param {LightInstance_t} p_light
+     */
+    light_instance_mark_visible(p_light) {
+        p_light.last_scene_pass = this.scene_pass;
+    }
+
+    /**
      * @param {number} p_count
      */
     set_directional_shadow_count(p_count) {
@@ -927,7 +934,6 @@ export class RasterizerScene {
      * @param {number} p_cull_count
      */
     render_shadow(light_instance, p_shadow_atlas, p_pass, p_cull_result, p_cull_count) {
-        return
         this.state.render_no_shadows = false;
 
         let light = light_instance.light;
@@ -1600,6 +1606,7 @@ export class RasterizerScene {
             prev_light = light;
         }
 
+        this._setup_light_type(null);
         this.set_shader_condition(SHADER_DEF.USE_SKELETON, false);
         this.set_shader_condition(SHADER_DEF.SHADLESS, false);
         this.set_shader_condition(SHADER_DEF.BASE_PASS, false);
@@ -1664,7 +1671,7 @@ export class RasterizerScene {
 
                 if (!this.state.render_no_shadows && p_light.light.shadow) {
                     // TODO: enable shadow
-                    // this.set_shader_condition(SHADER_DEF.USE_SHADOW, true);
+                    this.set_shader_condition(SHADER_DEF.USE_SHADOW, true);
                     gl.activeTexture(gl.TEXTURE0 + VSG.config.max_texture_image_units - 3);
                     if (VSG.config.use_rgba_3d_shadows) {
                         gl.bindTexture(gl.TEXTURE_2D, this.directional_shadow.gl_color);

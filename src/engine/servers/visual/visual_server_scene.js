@@ -21,6 +21,10 @@ import {
     LIGHT_DIRECTIONAL,
     LIGHT_PARAM_SHADOW_MAX_DISTANCE,
     LIGHT_PARAM_SHADOW_SPLIT_1_OFFSET,
+    LIGHT_DIRECTIONAL_SHADOW_DEPTH_RANGE_OPTIMIZED,
+    LIGHT_DIRECTIONAL_SHADOW_DEPTH_RANGE_STABLE,
+    INSTANCE_GEOMETRY_MASK,
+    SHADOW_CASTING_SETTING_SHADOWS_ONLY,
 } from '../visual_server';
 import { VSG } from './visual_server_globals';
 
@@ -66,7 +70,7 @@ export class Scenario_t {
 
     constructor() {
         /** @type {Octree<Instance_t>} */
-        this.octree = new Octree;
+        this.octree = new Octree(true);
 
         /** @type {Instance_t[]} */
         this.directional_lights = [];
@@ -174,6 +178,7 @@ class InstanceGeometryData extends InstanceBaseData {
     constructor() {
         super();
 
+        /** @type {Instance_t[]} */
         this.lighting = [];
         this.lighting_dirty = false;
         this.can_cast_shadows = true;
@@ -201,6 +206,8 @@ class InstanceLightData extends InstanceBaseData {
 
         /** @type {Instance_t[]} */
         this.geometries = [];
+
+        this.shadow_dirty = false;
 
         this.last_version = 0;
     }
@@ -318,7 +325,71 @@ export class VisualServerScene {
     }
 
     scenario_create() {
-        return new Scenario_t;
+        let s = new Scenario_t;
+
+        // FIXME: remove these we don't need GI and reflection
+        s.octree.pair_callback = this._instance_pair.bind(this);
+        s.octree.unpair_callback = this._instance_unpair.bind(this);
+
+        return s;
+    }
+
+    /**
+     * FIXME: remove these we don't need GI and reflection
+     * @param {any} self
+     * @param {number} id_A
+     * @param {Instance_t} A
+     * @param {number} id_B
+     * @param {Instance_t} B
+     */
+    _instance_pair(self, id_A, A, id_B, B) {
+        if (A.base_type > B.base_type) {
+            let t = A;
+            A = B;
+            B = t;
+        }
+
+        if (B.base_type === INSTANCE_TYPE_LIGHT && ((1 << A.base_type) & INSTANCE_GEOMETRY_MASK)) {
+            let light = /** @type {InstanceLightData} */(B.base_data);
+            let geom = /** @type {InstanceGeometryData} */(A.base_data);
+
+            light.geometries.push(A);
+
+            if (geom.can_cast_shadows) {
+                light.shadow_dirty = true;
+            }
+            geom.lighting_dirty = true;
+        }
+        return null;
+    }
+
+    /**
+     * FIXME: remove these we don't need GI and reflection
+     * @param {any} self
+     * @param {number} id_A
+     * @param {Instance_t} A
+     * @param {number} id_B
+     * @param {Instance_t} B
+     * @param {any} udata
+     */
+    _instance_unpair(self, id_A, A, id_B, B, udata) {
+        if (A.base_type > B.base_type) {
+            let t = A;
+            A = B;
+            B = t;
+        }
+
+        if (B.base_type === INSTANCE_TYPE_LIGHT && ((1 << A.base_type) & INSTANCE_GEOMETRY_MASK)) {
+            let light = /** @type {InstanceLightData} */(B.base_data);
+            let geom = /** @type {InstanceGeometryData} */(A.base_data);
+
+            light.geometries.splice(light.geometries.indexOf(A), 1);
+
+            if (geom.can_cast_shadows) {
+                light.shadow_dirty = true;
+            }
+            geom.lighting_dirty = true;
+        }
     }
 
     /**
@@ -649,6 +720,17 @@ export class VisualServerScene {
 
         if (p_instance.aabb.has_no_surface()) return;
 
+        if ((1 << p_instance.base_type) & INSTANCE_GEOMETRY_MASK) {
+            let geom = /** @type {InstanceGeometryData} */(p_instance.base_data);
+
+            if (geom.can_cast_shadows) {
+                for (let e of geom.lighting) {
+                    let light = /** @type {InstanceLightData} */(e.base_data);
+                    light.shadow_dirty = true;
+                }
+            }
+        }
+
         p_instance.mirror = p_instance.transform.basis.determinant() < 0;
 
         let new_aabb = p_instance.transform.xform_aabb(p_instance.aabb);
@@ -661,8 +743,15 @@ export class VisualServerScene {
 
         if (p_instance.octree_id === 0) {
             let base_type = 1 << p_instance.base_type;
+            let pairable_mask = 0;
+            let pairable = false;
 
-            p_instance.octree_id = p_instance.scenario.octree.create(p_instance, new_aabb, base_type);
+            if (p_instance.base_type === INSTANCE_TYPE_LIGHT) {
+                pairable_mask = p_instance.visible ? INSTANCE_GEOMETRY_MASK : 0;
+                pairable = true;
+            }
+
+            p_instance.octree_id = p_instance.scenario.octree.create(p_instance, new_aabb, pairable, base_type, pairable_mask);
         } else {
             p_instance.scenario.octree.move(p_instance.octree_id, new_aabb);
         }
@@ -729,8 +818,32 @@ export class VisualServerScene {
                         this.light_cull_count++;
                     }
                 }
-            } else if (inst.visible) {
+            } else if (inst.base_type === INSTANCE_TYPE_LIGHT && inst.visible) {
+                let light = /** @type {InstanceLightData} */(inst.base_data);
+
+                if (light.geometries.length > 0) {
+                    this.light_cull_result[this.light_cull_count] = inst;
+                    this.light_instance_cull_result[this.light_cull_count] = light.instance;
+                    if (p_shadow_atlas && (/** @type {Light_t} */(inst.base)).shadow) {
+                        VSG.scene_render.light_instance_mark_visible(light.instance);
+                    }
+                    this.light_cull_count++;
+                }
+            } else if (((1 << inst.base_type) & INSTANCE_GEOMETRY_MASK) && inst.visible && inst.cast_shadows !== SHADOW_CASTING_SETTING_SHADOWS_ONLY) {
                 keep = true;
+
+                let geom = /** @type {InstanceGeometryData} */(inst.base_data);
+                if (geom.lighting_dirty) {
+                    let l = 0;
+                    inst.light_instances.length = geom.lighting.length;
+
+                    for (let e of geom.lighting) {
+                        let light = /** @type {InstanceLightData} */(e.base_data);
+                        inst.light_instances[l++] = light.instance;
+                    }
+
+                    geom.lighting_dirty = false;
+                }
 
                 inst.depth = near_plane.distance_to(inst.transform.origin);
                 inst.depth_layer = Math.floor(clamp(inst.depth * 16 / z_far, 0, 15));
@@ -810,7 +923,43 @@ export class VisualServerScene {
                 max_distance = Math.max(max_distance, z_near + 0.001);
                 let min_distance = Math.min(z_near, max_distance);
 
-                /* TODO: support depth range optimized */
+                let depth_range_mode = light_base.directional_range_mode;
+
+                if (depth_range_mode === LIGHT_DIRECTIONAL_SHADOW_DEPTH_RANGE_OPTIMIZED) {
+                    let planes = p_cam_projection.get_projection_planes(p_cam_transform);
+                    let cull_count = p_scenario.octree.cull_convex(planes, this.instance_shadow_cull_result, MAX_INSTANCE_CULL, INSTANCE_GEOMETRY_MASK);
+                    let base = Plane.new().set_point_and_normal(p_cam_transform.origin, p_cam_transform.basis.get_axis(2).negate());
+
+                    let found_items = false;
+                    let z_max = -1e20;
+                    let z_min = 1e20;
+
+                    for (let i = 0; i < cull_count; i++) {
+                        let instance = this.instance_shadow_cull_result[i];
+                        let geo = /** @type {InstanceGeometryData} */(instance.base_data);
+                        if (!instance.visible || !((1 << instance.base_type) & INSTANCE_GEOMETRY_MASK) || !geo.can_cast_shadows) {
+                            continue;
+                        }
+
+                        let max = 0, min = 0;
+                        instance.transformed_aabb.project_range_in_plane(base, { min, max });
+
+                        if (max > z_max) {
+                            z_max = max;
+                        }
+
+                        if (min < z_min) {
+                            z_min = min;
+                        }
+
+                        found_items = true;
+                    }
+
+                    if (found_items) {
+                        min_distance = Math.max(min_distance, z_min);
+                        max_distance = Math.min(max_distance, z_max);
+                    }
+                }
 
                 let range = max_distance - min_distance;
 
@@ -894,7 +1043,7 @@ export class VisualServerScene {
                         let center = Vector3.new();
 
                         for (let j = 0; j < 8; j++) {
-                            center.add(endpoints[i]);
+                            center.add(endpoints[j]);
                         }
                         center.scale(1 / 8);
 
@@ -922,7 +1071,7 @@ export class VisualServerScene {
                         z_max_cam = z_vec.dot(center) + radius;
                         z_min_cam = z_vec.dot(center) - radius;
 
-                        if (true) { // TODO: depth range stable
+                        if (depth_range_mode === LIGHT_DIRECTIONAL_SHADOW_DEPTH_RANGE_STABLE) { // TODO: depth range stable
                             let unit = radius * 2 / texture_size;
 
                             x_max_cam = stepify(x_max_cam, unit);
@@ -944,7 +1093,7 @@ export class VisualServerScene {
                     light_frustum_planes[4].set(z_vec.x, z_vec.y, z_vec.z, z_max + 1e6);
                     light_frustum_planes[5].set(-z_vec.x, -z_vec.y, -z_vec.z, -z_min);
 
-                    let cull_count = p_scenario.octree.cull_convex(light_frustum_planes, this.instance_shadow_cull_result, MAX_INSTANCE_CULL);
+                    let cull_count = p_scenario.octree.cull_convex(light_frustum_planes, this.instance_shadow_cull_result, MAX_INSTANCE_CULL, INSTANCE_GEOMETRY_MASK);
 
                     let near_plane = Plane.new().set_point_and_normal(light_transform.origin, light_transform.basis.get_axis(2).negate());
 
@@ -953,7 +1102,7 @@ export class VisualServerScene {
                         let min = 0, max = 0;
                         let instance = this.instance_shadow_cull_result[j];
                         let base_data = /** @type {InstanceGeometryData} */(instance.base_data);
-                        if (!instance.visible || !base_data.can_cast_shadows) {
+                        if (!instance.visible || !((1 << instance.base_type) & INSTANCE_GEOMETRY_MASK) || !base_data.can_cast_shadows) {
                             cull_count--;
                             this.instance_shadow_cull_result[j] = this.instance_shadow_cull_result[cull_count];
                             this.instance_shadow_cull_result[cull_count] = instance;
