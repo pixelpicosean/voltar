@@ -43,7 +43,9 @@ export class ShaderMaterial extends Material {
 
         /** @type {string} */
         this.shader_type = "canvas_item";
+
         this.uses_screen_texture = false;
+        this.uses_custom_light = false;
 
         /** @type {{ name: string, type: UniformTypes, value?: number[] | Texture_t }[]} */
         this.uniforms = [];
@@ -74,7 +76,9 @@ export class ShaderMaterial extends Material {
         const parsed_code = parse_shader_code(code);
 
         this.shader_type = parsed_code.type;
+
         this.uses_screen_texture = parsed_code.uses_screen_texture;
+        this.uses_custom_light = parsed_code.uses_custom_light;
 
         this.uniforms = parsed_code.uniforms;
         for (let u of this.uniforms) {

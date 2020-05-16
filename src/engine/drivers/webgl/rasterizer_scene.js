@@ -422,6 +422,7 @@ const DEFAULT_SPATIAL_SHADER = `
 shader_type = spatial;
 
 #define DIFFUSE_BURLEY
+#define SPECULAR_TOON
 
 uniform sampler2D texture_albedo;
 uniform mediump vec4 albedo;
@@ -1043,20 +1044,27 @@ export class RasterizerScene {
      * @param {boolean} batchable
      */
     init_shader_material(shader_material, vs, fs, batchable) {
-        const vs_code = vs
+        let vs_code = vs
             // uniform
-            .replace("/* GLOBALS */", `\n${shader_material.global_code}`)
+            .replace("/* GLOBALS */", `${shader_material.global_code}\n`)
             // shader code
             .replace(/\/\* FRAGMENT_CODE_BEGIN \*\/([\s\S]*?)\/\* FRAGMENT_CODE_END \*\//, `{\n${shader_material.vs_code}\n}`)
-        const fs_code = fs
+
+        let fs_code = fs
             // uniform
-            .replace("/* GLOBALS */", `\n${shader_material.global_code}`)
+            .replace("/* GLOBALS */", `${shader_material.global_code}\n`)
             // shader code
             .replace(/\/\* FRAGMENT_CODE_BEGIN \*\/([\s\S]*?)\/\* FRAGMENT_CODE_END \*\//, `{\n${shader_material.fs_code}\n}`)
-            .replace(/\/\* LIGHT_CODE_BEGIN \*\/([\s\S]*?)\/\* LIGHT_CODE_END \*\//, `{\n${shader_material.lt_code}\n}`)
             // translate Godot API to GLSL
             .replace(/texture\(/gm, "texture2D(")
             .replace(/FRAGCOORD/gm, "gl_FragCoord")
+        if (shader_material.uses_custom_light) {
+            fs_code = fs_code.replace(/\/\* LIGHT_CODE_BEGIN \*\/([\s\S]*?)\/\* LIGHT_CODE_END \*\//, `{\n${shader_material.lt_code}\n}`)
+        } else {
+            fs_code = fs_code
+                .replace("/* LIGHT_CODE_BEGIN */", "")
+                .replace("/* LIGHT_CODE_END */", "")
+        }
 
         const vs_uniforms = parse_uniforms_from_code(vs_code)
             .map(u => ({ type: u.type, name: u.name }))
@@ -1834,7 +1842,10 @@ export class RasterizerScene {
 
         let i = 0;
         for (let k in p_material.textures) {
-            gl.uniform1i(uniforms[k].gl_loc, i);
+            let u = uniforms[k];
+            if (!u) continue;
+
+            gl.uniform1i(u.gl_loc, i);
             gl.activeTexture(gl.TEXTURE0 + i);
             i++;
 

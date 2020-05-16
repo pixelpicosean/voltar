@@ -141,6 +141,11 @@ export function parse_attributes_from_code(code) {
  * @param {string} code
  */
 export function parse_shader_code(code) {
+    // remove comments
+    code = code.split('\n')
+        .filter(line => !line.trim().startsWith('//'))
+        .join('\n')
+
     const vs_start = code.indexOf("void vertex()");
     const fs_start = code.indexOf("void fragment()");
     const lt_start = code.indexOf("void light()");
@@ -157,6 +162,7 @@ export function parse_shader_code(code) {
         .trim()
 
     let uses_screen_texture = code.indexOf("SCREEN_TEXTURE") >= 0;
+    let uses_custom_light = lt_start >= 0;
 
     // uniform
     let uniforms = parse_uniforms_from_code(code);
@@ -176,7 +182,7 @@ export function parse_shader_code(code) {
     // fragment
     let fs_code = "";
     if (fs_start >= 0) {
-        fs_code = code.substring(fs_start);
+        fs_code = (lt_start >= 0) ? code.substring(fs_start, lt_start) : code.substring(fs_start);
 
         // remove entry and its brackets
         fs_code = fs_code.substring(fs_code.indexOf("{") + 1, fs_code.lastIndexOf("}")).trim();
@@ -195,11 +201,16 @@ export function parse_shader_code(code) {
 
     return {
         type,
+
         uses_screen_texture,
+        uses_custom_light,
+
         global_code,
+
         lt_code,
         vs_code, vs_uniform_code,
         fs_code, fs_uniform_code,
+
         uniforms: uniforms.filter(({ name }) => vs_code.indexOf(name) >= 0 || fs_code.indexOf(name) >= 0)
             .map((u) => ({ name: u.name, type: u.type, value: u.value })),
     };
