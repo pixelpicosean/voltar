@@ -240,6 +240,17 @@ export class AABB {
         return true;
     }
 
+    get_longest_axis_size() {
+        let max_size = this.size.x;
+        if (this.size.y > max_size) {
+            max_size = this.size.y;
+        }
+        if (this.size.z > max_size) {
+            max_size = this.size.z;
+        }
+        return max_size;
+    }
+
     /**
      * @param {AABB} p_aabb
      */
@@ -316,7 +327,25 @@ export class AABB {
         return true;
     }
 
-    intersects_plane(plane) { }
+    /**
+     * @param {AABB} p_aabb
+     */
+    intersects_inclusive(p_aabb) {
+        if (this.position.x > (p_aabb.position.x + p_aabb.size.x))
+            return false;
+        if ((this.position.x + this.size.x) < p_aabb.position.x)
+            return false;
+        if (this.position.y > (p_aabb.position.y + p_aabb.size.y))
+            return false;
+        if ((this.position.y + this.size.y) < p_aabb.position.y)
+            return false;
+        if (this.position.z > (p_aabb.position.z + p_aabb.size.z))
+            return false;
+        if ((this.position.z + this.size.z) < p_aabb.position.z)
+            return false;
+
+        return true;
+    }
 
     /**
      * @param {Vector3Like} from
@@ -382,6 +411,36 @@ export class AABB {
                 return false;
         }
 
+        return true;
+    }
+
+    /**
+     * @param {Plane[]} p_planes
+     */
+    intersects_convex_shape(p_planes) {
+        let half_extents = this.size.clone().scale(0.5);
+        let ofs = this.position.clone().add(half_extents);
+
+        let point = Vector3.new();
+
+        for (let i = 0; i < p_planes.length; i++) {
+            let p = p_planes[i];
+            point.set(
+                (p.normal.x > 0) ? -half_extents.x : half_extents.x,
+                (p.normal.y > 0) ? -half_extents.y : half_extents.y,
+                (p.normal.z > 0) ? -half_extents.z : half_extents.z
+            ).add(ofs);
+            if (p.is_point_over(point)) {
+                Vector3.free(ofs);
+                Vector3.free(half_extents);
+                Vector3.free(point);
+                return false;
+            }
+        }
+
+        Vector3.free(ofs);
+        Vector3.free(half_extents);
+        Vector3.free(point);
         return true;
     }
 

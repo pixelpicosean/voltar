@@ -66,7 +66,7 @@ export class Scenario_t {
 
     constructor() {
         /** @type {Octree<Instance_t>} */
-        this.octree = new Octree(true);
+        this.octree = new Octree;
 
         /** @type {Instance_t[]} */
         this.directional_lights = [];
@@ -661,10 +661,8 @@ export class VisualServerScene {
 
         if (p_instance.octree_id === 0) {
             let base_type = 1 << p_instance.base_type;
-            let pairable_mask = 0;
-            let pairable = false;
 
-            p_instance.octree_id = p_instance.scenario.octree.create(p_instance, new_aabb, 0, pairable, base_type, pairable_mask);
+            p_instance.octree_id = p_instance.scenario.octree.create(p_instance, new_aabb, base_type);
         } else {
             p_instance.scenario.octree.move(p_instance.octree_id, new_aabb);
         }

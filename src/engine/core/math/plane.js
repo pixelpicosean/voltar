@@ -112,4 +112,11 @@ export class Plane {
 
         return true;
     }
+
+    /**
+     * @param {Vector3Like} p_point
+     */
+    is_point_over(p_point) {
+        return this.normal.dot(p_point) > this.d;
+    }
 }

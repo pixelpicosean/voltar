@@ -210,13 +210,14 @@ export class Transform {
      */
     xform_aabb(p_aabb, out) {
         if (!out) out = AABB.new();
-        let min = p_aabb.position;
-        let max = p_aabb.position.clone().add(p_aabb.size);
+        let min = [p_aabb.position.x, p_aabb.position.y, p_aabb.position.z];
+        let max_v = p_aabb.position.clone().add(p_aabb.size);
+        let max = [max_v.x, max_v.y, max_v.z];
         let tmin = [0, 0, 0], tmax = [0, 0, 0];
         let basis = [
-            this.basis.elements[0].x, this.basis.elements[0].y, this.basis.elements[0].z,
-            this.basis.elements[1].x, this.basis.elements[1].y, this.basis.elements[1].z,
-            this.basis.elements[2].x, this.basis.elements[2].y, this.basis.elements[2].z,
+            [this.basis.elements[0].x, this.basis.elements[0].y, this.basis.elements[0].z],
+            [this.basis.elements[1].x, this.basis.elements[1].y, this.basis.elements[1].z],
+            [this.basis.elements[2].x, this.basis.elements[2].y, this.basis.elements[2].z],
         ]
         let origin = [this.origin.x, this.origin.y, this.origin.z];
         for (let i = 0; i < 3; i++) {
@@ -235,7 +236,7 @@ export class Transform {
         }
         out.position.set(tmin[0], tmin[1], tmin[2]);
         out.size.set(tmax[0] - tmin[0], tmax[1] - tmin[1], tmax[2] - tmin[2]);
-        Vector3.free(max);
+        Vector3.free(max_v);
         return out;
     }
 
