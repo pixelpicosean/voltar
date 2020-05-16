@@ -136,7 +136,7 @@ export class ArrayMesh extends Mesh {
             return;
         }
         this.surfaces[idx].material = material;
-        VSG.storage.mesh_surface_set_material(this.mesh, idx, material.materials.spatial);
+        VSG.storage.mesh_surface_set_material(this.mesh, idx, material.material);
     }
 
     /**

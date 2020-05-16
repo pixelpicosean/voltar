@@ -61,10 +61,8 @@ import {
     parse_attributes_from_code,
 } from './shader_parser';
 
-import normal_vs from './shaders/spatial_shadow.vert';
-import normal_fs from './shaders/spatial_shadow.frag';
-// import normal_vs from './shaders/spatial.vert';
-// import normal_fs from './shaders/spatial.frag';
+import spatial_vs from './shaders/spatial.vert';
+import spatial_fs from './shaders/spatial.frag';
 
 export const ENV_BG_CLEAR_COLOR = 0;
 export const ENV_BG_COLOR = 1;
@@ -595,8 +593,8 @@ export class RasterizerScene {
 
             this.spatial_material.rid = this.init_shader_material(
                 this.spatial_material.mat,
-                normal_vs,
-                normal_fs,
+                spatial_vs,
+                spatial_fs,
                 false
             );
             this.spatial_material.rid.params = DEFAULT_SPATIAL_PARAMS;
@@ -1658,7 +1656,7 @@ export class RasterizerScene {
 
                 if (!this.state.render_no_shadows && p_light.light.shadow) {
                     // TODO: enable shadow
-                    // this.set_condition(SHADER_DEF.USE_SHADOW, true);
+                    // this.set_shader_condition(SHADER_DEF.USE_SHADOW, true);
                     gl.activeTexture(gl.TEXTURE0 + VSG.config.max_texture_image_units - 3);
                     if (VSG.config.use_rgba_3d_shadows) {
                         gl.bindTexture(gl.TEXTURE_2D, this.directional_shadow.gl_color);
@@ -1776,11 +1774,11 @@ export class RasterizerScene {
                 for (let i = 0; i < ARRAY_MAX; i++) {
                     let attr = s.attribs[i];
                     if (attr.enabled) {
-                        gl.enableVertexAttribArray(i);
+                        gl.enableVertexAttribArray(attr.index);
                         gl.vertexAttribPointer(attr.index, attr.size, attr.type, attr.normalized, attr.stride, attr.offset);
                     } else {
-                        gl.disableVertexAttribArray(i);
-                        switch (i) {
+                        gl.disableVertexAttribArray(attr.index);
+                        switch (attr.index) {
                             case ARRAY_NORMAL: {
                                 gl.vertexAttrib4f(ARRAY_NORMAL, 0.0, 0.0, 1.0, 1.0);
                             } break;

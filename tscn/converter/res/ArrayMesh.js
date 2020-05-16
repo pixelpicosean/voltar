@@ -8,12 +8,14 @@ const pack_array_to_binary = true;
 
 
 const compress_list = [
+    1, // normal
     2, // tangent
     3, // color
 ]
 
 const normalize_list = [
-    3,
+    1, // normal
+    3, // color
 ]
 
 module.exports = (data) => {
