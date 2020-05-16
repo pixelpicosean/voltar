@@ -43,11 +43,11 @@
               "vertex": {
                 "index": 0,
                 "offset": 0,
-                "length": 112
+                "length": 144
               },
               "index": {
                 "index": 0,
-                "offset": 112,
+                "offset": 144,
                 "length": 12
               },
               "array_len": 4,
@@ -57,32 +57,32 @@
                   "index": 0,
                   "type": 5126,
                   "size": 3,
-                  "stride": 28,
+                  "stride": 36,
                   "offset": 0,
                   "normalized": false
                 },
                 {
                   "index": 1,
-                  "type": 5120,
+                  "type": 5126,
                   "size": 3,
-                  "stride": 28,
+                  "stride": 36,
                   "offset": 12,
-                  "normalized": true
+                  "normalized": false
                 },
                 {
                   "index": 2,
                   "type": 5120,
                   "size": 4,
-                  "stride": 28,
-                  "offset": 16,
+                  "stride": 36,
+                  "offset": 24,
                   "normalized": true
                 },
                 {
                   "index": 4,
                   "type": 5126,
                   "size": 2,
-                  "stride": 28,
-                  "offset": 20,
+                  "stride": 36,
+                  "offset": 28,
                   "normalized": false
                 }
               ]
@@ -148,12 +148,12 @@
               },
               "vertex": {
                 "index": 0,
-                "offset": 124,
-                "length": 3612
+                "offset": 156,
+                "length": 4644
               },
               "index": {
                 "index": 0,
-                "offset": 3736,
+                "offset": 4800,
                 "length": 564
               },
               "array_len": 129,
@@ -163,32 +163,32 @@
                   "index": 0,
                   "type": 5126,
                   "size": 3,
-                  "stride": 28,
+                  "stride": 36,
                   "offset": 0,
                   "normalized": false
                 },
                 {
                   "index": 1,
-                  "type": 5120,
+                  "type": 5126,
                   "size": 3,
-                  "stride": 28,
+                  "stride": 36,
                   "offset": 12,
-                  "normalized": true
+                  "normalized": false
                 },
                 {
                   "index": 2,
                   "type": 5120,
                   "size": 4,
-                  "stride": 28,
-                  "offset": 16,
+                  "stride": 36,
+                  "offset": 24,
                   "normalized": true
                 },
                 {
                   "index": 4,
                   "type": 5126,
                   "size": 2,
-                  "stride": 28,
-                  "offset": 20,
+                  "stride": 36,
+                  "offset": 28,
                   "normalized": false
                 }
               ]
@@ -254,12 +254,12 @@
               },
               "vertex": {
                 "index": 0,
-                "offset": 4300,
-                "length": 44520
+                "offset": 5364,
+                "length": 57240
               },
               "index": {
                 "index": 0,
-                "offset": 48820,
+                "offset": 62604,
                 "length": 3180
               },
               "array_len": 1590,
@@ -269,32 +269,32 @@
                   "index": 0,
                   "type": 5126,
                   "size": 3,
-                  "stride": 28,
+                  "stride": 36,
                   "offset": 0,
                   "normalized": false
                 },
                 {
                   "index": 1,
-                  "type": 5120,
+                  "type": 5126,
                   "size": 3,
-                  "stride": 28,
+                  "stride": 36,
                   "offset": 12,
-                  "normalized": true
+                  "normalized": false
                 },
                 {
                   "index": 2,
                   "type": 5120,
                   "size": 4,
-                  "stride": 28,
-                  "offset": 16,
+                  "stride": 36,
+                  "offset": 24,
                   "normalized": true
                 },
                 {
                   "index": 4,
                   "type": 5126,
                   "size": 2,
-                  "stride": 28,
-                  "offset": 20,
+                  "stride": 36,
+                  "offset": 28,
                   "normalized": false
                 }
               ]
@@ -371,12 +371,12 @@
               },
               "vertex": {
                 "index": 0,
-                "offset": 52000,
-                "length": 9016
+                "offset": 65784,
+                "length": 11592
               },
               "index": {
                 "index": 0,
-                "offset": 61016,
+                "offset": 77376,
                 "length": 744
               },
               "array_len": 322,
@@ -386,32 +386,32 @@
                   "index": 0,
                   "type": 5126,
                   "size": 3,
-                  "stride": 28,
+                  "stride": 36,
                   "offset": 0,
                   "normalized": false
                 },
                 {
                   "index": 1,
-                  "type": 5120,
+                  "type": 5126,
                   "size": 3,
-                  "stride": 28,
+                  "stride": 36,
                   "offset": 12,
-                  "normalized": true
+                  "normalized": false
                 },
                 {
                   "index": 2,
                   "type": 5120,
                   "size": 4,
-                  "stride": 28,
-                  "offset": 16,
+                  "stride": 36,
+                  "offset": 24,
                   "normalized": true
                 },
                 {
                   "index": 4,
                   "type": 5126,
                   "size": 2,
-                  "stride": 28,
-                  "offset": 20,
+                  "stride": 36,
+                  "offset": 28,
                   "normalized": false
                 }
               ]
@@ -477,12 +477,12 @@
               },
               "vertex": {
                 "index": 0,
-                "offset": 61760,
-                "length": 27216
+                "offset": 78120,
+                "length": 34992
               },
               "index": {
                 "index": 0,
-                "offset": 88976,
+                "offset": 113112,
                 "length": 1944
               },
               "array_len": 972,
@@ -492,32 +492,32 @@
                   "index": 0,
                   "type": 5126,
                   "size": 3,
-                  "stride": 28,
+                  "stride": 36,
                   "offset": 0,
                   "normalized": false
                 },
                 {
                   "index": 1,
-                  "type": 5120,
+                  "type": 5126,
                   "size": 3,
-                  "stride": 28,
+                  "stride": 36,
                   "offset": 12,
-                  "normalized": true
+                  "normalized": false
                 },
                 {
                   "index": 2,
                   "type": 5120,
                   "size": 4,
-                  "stride": 28,
-                  "offset": 16,
+                  "stride": 36,
+                  "offset": 24,
                   "normalized": true
                 },
                 {
                   "index": 4,
                   "type": 5126,
                   "size": 2,
-                  "stride": 28,
-                  "offset": 20,
+                  "stride": 36,
+                  "offset": 28,
                   "normalized": false
                 }
               ]
@@ -583,12 +583,12 @@
               },
               "vertex": {
                 "index": 0,
-                "offset": 90920,
-                "length": 80696
+                "offset": 115056,
+                "length": 103752
               },
               "index": {
                 "index": 0,
-                "offset": 171616,
+                "offset": 218808,
                 "length": 5808
               },
               "array_len": 2882,
@@ -598,32 +598,32 @@
                   "index": 0,
                   "type": 5126,
                   "size": 3,
-                  "stride": 28,
+                  "stride": 36,
                   "offset": 0,
                   "normalized": false
                 },
                 {
                   "index": 1,
-                  "type": 5120,
+                  "type": 5126,
                   "size": 3,
-                  "stride": 28,
+                  "stride": 36,
                   "offset": 12,
-                  "normalized": true
+                  "normalized": false
                 },
                 {
                   "index": 2,
                   "type": 5120,
                   "size": 4,
-                  "stride": 28,
-                  "offset": 16,
+                  "stride": 36,
+                  "offset": 24,
                   "normalized": true
                 },
                 {
                   "index": 4,
                   "type": 5126,
                   "size": 2,
-                  "stride": 28,
-                  "offset": 20,
+                  "stride": 36,
+                  "offset": 28,
                   "normalized": false
                 }
               ]

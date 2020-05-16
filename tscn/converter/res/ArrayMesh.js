@@ -8,7 +8,7 @@ const pack_array_to_binary = true;
 
 
 const compress_list = [
-    1, // normal
+    // 1, // normal
     2, // tangent
     3, // color
 ]
