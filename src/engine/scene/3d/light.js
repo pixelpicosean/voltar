@@ -3,17 +3,20 @@ import { GDCLASS } from "engine/core/v_object";
 import { Color, ColorLike } from "engine/core/color";
 
 import {
+    LIGHT_DIRECTIONAL,
     LIGHT_PARAM_ENERGY,
     LIGHT_PARAM_INDIRECT_ENERGY,
     LIGHT_PARAM_SPECULAR,
     LIGHT_PARAM_RANGE,
     LIGHT_PARAM_SPOT_ANGLE,
-    LIGHT_DIRECTIONAL,
     LIGHT_PARAM_CONTACT_SHADOW_SIZE,
     LIGHT_PARAM_SHADOW_MAX_DISTANCE,
     LIGHT_PARAM_SHADOW_NORMAL_BIAS,
     LIGHT_PARAM_SHADOW_BIAS,
     LIGHT_PARAM_SHADOW_BIAS_SPLIT_SCALE,
+    LIGHT_PARAM_SHADOW_SPLIT_1_OFFSET,
+    LIGHT_PARAM_SHADOW_SPLIT_2_OFFSET,
+    LIGHT_PARAM_SHADOW_SPLIT_3_OFFSET,
 } from "engine/servers/visual_server";
 import { VSG } from "engine/servers/visual/visual_server_globals";
 
@@ -48,6 +51,7 @@ export class Light extends VisualInstance {
         this.shadow_contact = 0;
         this.shadow_enabled = false;
         this.shadow_reverse_cull_face = false;
+        this.shadow_mode = 0;
 
         /** @type {import('engine/drivers/webgl/rasterizer_storage').Light_t} */
         this.light = null;
@@ -65,6 +69,9 @@ export class Light extends VisualInstance {
         this.set_param(LIGHT_PARAM_SPOT_ANGLE, 45);
         this.set_param(LIGHT_PARAM_CONTACT_SHADOW_SIZE, 0);
         this.set_param(LIGHT_PARAM_SHADOW_MAX_DISTANCE, 0);
+        this.set_param(LIGHT_PARAM_SHADOW_SPLIT_1_OFFSET, 0.1);
+        this.set_param(LIGHT_PARAM_SHADOW_SPLIT_2_OFFSET, 0.2);
+        this.set_param(LIGHT_PARAM_SHADOW_SPLIT_3_OFFSET, 0.5);
         this.set_param(LIGHT_PARAM_SHADOW_NORMAL_BIAS, 0);
         this.set_param(LIGHT_PARAM_SHADOW_BIAS, 0.15);
 
@@ -136,6 +143,10 @@ export class Light extends VisualInstance {
         VSG.storage.light_set_shadow(this.light, p_enable);
     }
     set_shadow_reverse_cull_face() { }
+    set_directional_shadow_mode(mode) {
+        this.shadow_mode = mode;
+        VSG.storage.light_set_shadow_mode(this.light, mode);
+    }
 
     /* virtual methods */
 
@@ -153,7 +164,9 @@ export class Light extends VisualInstance {
         if (data.light_negative) this.set_light_negative(data.light_negative);
 
         if (data.shadow_color) this.set_shadow_color(data.shadow_color);
-        if (data.shadow_enabled) this.set_shadow_enabled(data.shadow_enabled);
+        if (data.shadow_enabled !== undefined) this.set_shadow_enabled(data.shadow_enabled);
+        if (data.directional_shadow_mode !== undefined) this.set_directional_shadow_mode(data.directional_shadow_mode);
+        if (data.directional_shadow_max_distance !== undefined) this.set_param(LIGHT_PARAM_SHADOW_MAX_DISTANCE, data.directional_shadow_max_distance);
 
         return this;
     }

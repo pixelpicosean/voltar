@@ -1201,9 +1201,9 @@ export class CPUParticles2D extends Node2D {
 
         VSG.storage.mesh_clear(this.mesh);
         VSG.storage.mesh_add_surface_from_data(this.mesh, WebGLRenderingContext.TRIANGLES, [
-            { type: WebGLRenderingContext.FLOAT, size: 2, stride: stride, offset: 0 },
-            { type: WebGLRenderingContext.FLOAT, size: 2, stride: stride, offset: 2 * 4 },
-            { type: WebGLRenderingContext.UNSIGNED_BYTE, size: 4, stride: stride, offset: 4 * 4, normalized: true },
+            { index: 0, type: WebGLRenderingContext.FLOAT, size: 2, stride: stride, offset: 0 },
+            { index: 1, type: WebGLRenderingContext.FLOAT, size: 2, stride: stride, offset: 2 * 4 },
+            { index: 2, type: WebGLRenderingContext.UNSIGNED_BYTE, size: 4, stride: stride, offset: 4 * 4, normalized: true },
         ], vertices, indices, 4, 6, false);
     }
 

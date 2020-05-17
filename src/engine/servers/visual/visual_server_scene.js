@@ -109,8 +109,6 @@ export class Instance_t {
         this.materials = [];
         /** @type {import('engine/drivers/webgl/rasterizer_scene').LightInstance_t[]} */
         this.light_instances = [];
-        this.reflection_probe_instances = [];
-        this.gi_probe_instances = [];
 
         /** @type {number[]} */
         this.blend_values = [];
@@ -974,6 +972,8 @@ export class VisualServerScene {
 
                 let texture_size = VSG.scene_render.get_directional_light_shadow_size(light.instance);
 
+                let overlap = false;
+
                 let first_radius = 0;
                 for (let i = 0; i < splits; i++) {
                     let camera_matrix = CameraMatrix.new();
@@ -986,7 +986,7 @@ export class VisualServerScene {
                         camera_matrix.set_orthogonal(vp_he.y * 2, aspect, distances[(i === 0) ? i : i - 1], distances[i + 1], false);
                     } else {
                         let fov = p_cam_projection.get_fov();
-                        camera_matrix.set_perspective(fov, aspect, distances[(i === 0) ? 1 : i - 1], distances[i + 1], false);
+                        camera_matrix.set_perspective(fov, aspect, distances[(i === 0 || !overlap) ? i : i - 1], distances[i + 1], false);
                     }
 
                     // obtain the frustum endpoints
@@ -1005,7 +1005,7 @@ export class VisualServerScene {
 
                     let x_min_cam = 0, x_max_cam = 0;
                     let y_min_cam = 0, y_max_cam = 0;
-                    let z_min_cam = 0, z_max_cam = 0;
+                    let z_min_cam = 0; // , z_max_cam = 0;
 
                     let bias_scale = 1;
 
@@ -1056,7 +1056,7 @@ export class VisualServerScene {
                             }
                         }
 
-                        radius *= texture_size / (texture_size - 2);
+                        radius *= texture_size / (texture_size - 2); // add texel bt each side
 
                         if (i === 0) {
                             first_radius = radius;
@@ -1068,7 +1068,7 @@ export class VisualServerScene {
                         x_min_cam = x_vec.dot(center) - radius;
                         y_max_cam = y_vec.dot(center) + radius;
                         y_min_cam = y_vec.dot(center) - radius;
-                        z_max_cam = z_vec.dot(center) + radius;
+                        // z_max_cam = z_vec.dot(center) + radius;
                         z_min_cam = z_vec.dot(center) - radius;
 
                         if (depth_range_mode === LIGHT_DIRECTIONAL_SHADOW_DEPTH_RANGE_STABLE) { // TODO: depth range stable
@@ -1099,7 +1099,7 @@ export class VisualServerScene {
 
                     let tmp_plane = Plane.new();
                     for (let j = 0; j < cull_count; j++) {
-                        let min = 0, max = 0;
+                        let res = { min: 0, max: 0 };
                         let instance = this.instance_shadow_cull_result[j];
                         let base_data = /** @type {InstanceGeometryData} */(instance.base_data);
                         if (!instance.visible || !((1 << instance.base_type) & INSTANCE_GEOMETRY_MASK) || !base_data.can_cast_shadows) {
@@ -1110,11 +1110,11 @@ export class VisualServerScene {
                             continue;
                         }
 
-                        instance.transformed_aabb.project_range_in_plane(tmp_plane.set(z_vec.x, z_vec.y, z_vec.z, 0), { min, max });
+                        instance.transformed_aabb.project_range_in_plane(tmp_plane.set(z_vec.x, z_vec.y, z_vec.z, 0), res);
                         instance.depth = near_plane.distance_to(instance.transform.origin);
                         instance.depth_layer = 0;
-                        if (max > z_max) {
-                            z_max = max;
+                        if (res.max > z_max) {
+                            z_max = res.max;
                         }
                     }
                     Plane.free(tmp_plane);
@@ -1130,7 +1130,7 @@ export class VisualServerScene {
                         let ortho_transform = Transform.new();
                         ortho_transform.basis.copy(transform.basis);
                         ortho_transform.origin
-                            .add(x_vec.scale(x_min_cam + half_x))
+                            .copy(x_vec.scale(x_min_cam + half_x))
                             .add(y_vec.scale(y_min_cam + half_y))
                             .add(z_vec.scale(z_max))
 
@@ -1145,6 +1145,10 @@ export class VisualServerScene {
                     }
 
                     VSG.scene_render.render_shadow(light.instance, p_shadow_atlas, i, this.instance_shadow_cull_result, cull_count);
+
+                    Vector3.free(x_vec);
+                    Vector3.free(y_vec);
+                    Vector3.free(z_vec);
 
                     Transform.free(transform);
                     CameraMatrix.free(camera_matrix);

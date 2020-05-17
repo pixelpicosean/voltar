@@ -1894,6 +1894,15 @@ export class RasterizerScene {
             }
         }
 
+        // bind other textures
+        // TODO: make extra texture bindings automatic
+        if (this.state.conditions & SHADER_DEF.LIGHT_MODE_DIRECTIONAL) {
+            let gl_loc = gl.getUniformLocation(shader.gl_prog, "light_directional_shadow");
+            if (gl_loc) {
+                gl.uniform1i(gl_loc, VSG.config.max_texture_image_units - 3);
+            }
+        }
+
         return shader_rebind;
     }
 
