@@ -489,6 +489,8 @@ export class Mesh_t extends Instantiable_t {
 
         /** @type {Surface_t[]} */
         this.surfaces = [];
+
+        // TODO: cache and update combined aabb
     }
     update_multimeshes() { }
 }
@@ -1453,8 +1455,9 @@ export class RasterizerStorage {
      * @param {number} array_len
      * @param {number} index_array_len
      * @param {boolean} [use_3d_vertices]
+     * @param {AABB} [p_aabb]
      */
-    mesh_add_surface_from_data(mesh, primitive, attribs, vertices, indices, array_len, index_array_len, use_3d_vertices = false) {
+    mesh_add_surface_from_data(mesh, primitive, attribs, vertices, indices, array_len, index_array_len, use_3d_vertices = false, p_aabb = null) {
         const gl = this.gl;
 
         const surface = new Surface_t;
@@ -1510,33 +1513,37 @@ export class RasterizerStorage {
             }
         }
 
-        // calculate AABB
-        if (use_3d_vertices) {
-            let aabb = surface.aabb;
-            let vec = Vector3.new();
-            aabb.set(0, 0, 0, 0, 0, 0);
-            let vert_length = Math.floor(stride / 4);
-            for (let i = 0; i < array_len; i++) {
-                if (i === 0) {
-                    aabb.set(
-                        vertices[0],
-                        vertices[1],
-                        vertices[2],
-                        SMALL_VEC3.x,
-                        SMALL_VEC3.y,
-                        SMALL_VEC3.z
-                    );
-                } else {
-                    aabb.expand_to(vec.set(
-                        vertices[i * vert_length + 0],
-                        vertices[i * vert_length + 1],
-                        vertices[i * vert_length + 2]
-                    ))
+        // calculate AABB, cannot calculate from u8 array data
+        if (!p_aabb) {
+            if (use_3d_vertices) {
+                let aabb = surface.aabb;
+                let vec = Vector3.new();
+                aabb.set(0, 0, 0, 0, 0, 0);
+                let vert_length = Math.floor(stride / 4);
+                for (let i = 0; i < array_len; i++) {
+                    if (i === 0) {
+                        aabb.set(
+                            vertices[0],
+                            vertices[1],
+                            vertices[2],
+                            SMALL_VEC3.x,
+                            SMALL_VEC3.y,
+                            SMALL_VEC3.z
+                        );
+                    } else {
+                        aabb.expand_to(vec.set(
+                            vertices[i * vert_length + 0],
+                            vertices[i * vert_length + 1],
+                            vertices[i * vert_length + 2]
+                        ))
+                    }
                 }
+                Vector3.free(vec);
+            } else {
+                // TODO: calculate 2D AABB (Rect2)
             }
-            Vector3.free(vec);
         } else {
-            // TODO: calculate 2D AABB (Rect2)
+            surface.aabb.copy(p_aabb);
         }
 
         surface.vertex_id = gl.createBuffer();
@@ -1572,9 +1579,9 @@ export class RasterizerStorage {
         let aabb = AABB.new();
         for (let i = 0; i < mesh.surfaces.length; i++) {
             if (i === 0) {
-                return aabb.copy(mesh.surfaces[i].aabb);
+                aabb.copy(mesh.surfaces[i].aabb);
             } else {
-                return aabb.merge_with(mesh.surfaces[i].aabb);
+                aabb.merge_with(mesh.surfaces[i].aabb);
             }
         }
         return aabb;
@@ -1873,6 +1880,15 @@ export class RasterizerStorage {
      */
     light_set_shadow_color(p_light, p_color) {
         p_light.shadow_color.copy(p_color);
+    }
+
+    /**
+     * @param {Light_t} p_light
+     * @param {number} p_mode
+     */
+    light_set_shadow_mode(p_light, p_mode) {
+        p_light.directional_shadow_mode = p_mode;
+        p_light.version++;
     }
 
     /**

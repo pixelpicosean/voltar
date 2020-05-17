@@ -137,7 +137,7 @@ export class PrimitiveMesh extends Mesh {
         if (this.flip_faces) { }
 
         VSG.storage.mesh_clear(this.mesh);
-        VSG.storage.mesh_add_surface_from_data(this.mesh, this.primitive_type, data.attribs, data.vertices, data.indices, pc, data.indices ? data.indices.length : 0, true);
+        VSG.storage.mesh_add_surface_from_data(this.mesh, this.primitive_type, data.attribs, data.vertices, data.indices, pc, data.indices ? data.indices.length : 0, true, this.aabb);
         VSG.storage.mesh_surface_set_material(this.mesh, 0, this.material ? this.material.material : null);
 
         this.pending_request = false;

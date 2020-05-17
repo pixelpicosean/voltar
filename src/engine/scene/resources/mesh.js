@@ -164,7 +164,7 @@ export class ArrayMesh extends Mesh {
         this.surfaces.push(s);
 
         let data = this._create_mesh_data_from_arrays(p_arrays, is_2d);
-        VSG.storage.mesh_add_surface_from_data(this.mesh, p_primitive, data.attribs, data.vertices, data.indices, data.array_len, data.index_array_len, !is_2d);
+        VSG.storage.mesh_add_surface_from_data(this.mesh, p_primitive, data.attribs, data.vertices, data.indices, data.array_len, data.index_array_len, !is_2d, s.aabb);
 
         this._recompute_aabb();
     }
@@ -186,9 +186,8 @@ export class ArrayMesh extends Mesh {
         let index_pack = get_binary_pack(p_arrays.index.index);
         let indices = index_pack.slice(p_arrays.index.offset, p_arrays.index.offset + p_arrays.index.length);
 
-        VSG.storage.mesh_add_surface_from_data(this.mesh, p_primitive, p_arrays.attribs, vertices, indices, p_arrays.array_len, p_arrays.index_array_len, !is_2d);
+        VSG.storage.mesh_add_surface_from_data(this.mesh, p_primitive, p_arrays.attribs, vertices, indices, p_arrays.array_len, p_arrays.index_array_len, !is_2d, s.aabb);
 
-        // FIXME: we may not need this one cause AABB already updated
         this._recompute_aabb();
     }
 
