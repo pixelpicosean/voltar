@@ -480,10 +480,21 @@ export class Basis {
         let z1 = Vector3.new();
 
         x.normalize();
-        y1.copy(y).subtract(x1.copy(x).scale(x.dot(y)));
-        y.normalize();
-        z1.copy(z).subtract(x1.copy(x).scale(x.dot(z))).subtract(y1.copy(y).scale(y.dot(z)));
-        z.normalize();
+        // formula: y = y - x * (x.dot(y))
+        y1.copy(y)
+            .subtract(
+                x1.copy(x).scale(x.dot(y))
+            );
+        y.copy(y1).normalize();
+        // formula: z = z - x * (x.dot(z)) - y * (y.dot(z))
+        z1.copy(z)
+            .subtract(
+                x1.copy(x).scale(x.dot(z))
+            )
+            .subtract(
+                y1.copy(y).scale(y.dot(z))
+            );
+        z.copy(z1).normalize();
 
         this.set_axis(0, x);
         this.set_axis(1, y);
