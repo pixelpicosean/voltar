@@ -24,9 +24,16 @@ attribute highp vec3 position;
 attribute vec3 normal;
 attribute vec2 uv;
 
+#if defined(RENDER_DEPTH) && defined(USE_RGBA_SHADOWS)
+    varying highp vec4 position_interp;
+#endif
+
 varying highp vec3 vertex_interp;
 varying vec3 normal_interp;
-varying vec2 uv_interp;
+
+#if defined(ENABLE_UV_INTERP)
+    varying vec2 uv_interp;
+#endif
 
 void main() {
     vec3 VERTEX = position;
@@ -46,7 +53,10 @@ void main() {
 
     vertex_interp = vertex.xyz;
     normal_interp = NORMAL;
-    uv_interp = uv;
+
+    #if defined(ENABLE_UV_INTERP)
+        uv_interp = uv;
+    #endif
 
     #ifdef RENDER_DEPTH
         float z_ofs = light_bias;
@@ -61,4 +71,8 @@ void main() {
     #endif
 
     gl_Position = PROJECTION_MATRIX * vec4(vertex.xyz, 1.0);
+
+    #if defined(RENDER_DEPTH) && defined(USE_RGBA_SHADOWS)
+        position_interp = gl_Position;
+    #endif
 }

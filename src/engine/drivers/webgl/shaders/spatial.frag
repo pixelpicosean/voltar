@@ -26,11 +26,13 @@ uniform float ambient_energy;
     uniform highp float LIGHT_SPOT_RANGE;
     uniform highp float LIGHT_SPOT_ANGLE;
 
+    uniform highp float light_range;
     #ifdef USE_SHADOW
         uniform highp vec2 shadow_pixel_size;
 
         #ifdef LIGHT_MODE_DIRECTIONAL
             uniform highp sampler2D light_directional_shadow; // tex: -3
+            uniform highp vec4 light_split_offsets;
         #endif
 
         varying highp vec4 shadow_coord;
@@ -45,9 +47,16 @@ uniform float roughness;
 
 /* GLOBALS */
 
+#if defined(RENDER_DEPTH) && defined(USE_RGBA_SHADOWS)
+    varying highp vec4 position_interp;
+#endif
+
 varying highp vec3 vertex_interp;
 varying vec3 normal_interp;
-varying vec2 uv_interp;
+
+#if defined(ENABLE_UV_INTERP)
+    varying vec2 uv_interp;
+#endif
 
 vec3 F0(float metallic, float specular, vec3 albedo) {
 	float dielectric = 0.16 * specular * specular;
@@ -176,7 +185,11 @@ vec3 F0(float metallic, float specular, vec3 albedo) {
 #endif
 
 #ifdef USE_SHADOW
-    #define SHADOW_DEPTH(m_val) (m_val).r
+    #ifdef USE_RGBA_SHADOWS
+        #define SHADOW_DEPTH(m_val) dot(m_val, vec4(1.0 / (255.0 * 255.0 * 255.0), 1.0 / (255.0 * 255.0), 1.0 / 255.0, 1.0))
+    #else
+        #define SHADOW_DEPTH(m_val) (m_val).r
+    #endif
 
     #define SAMPLE_SHADOW_TEXEL(p_shadow, p_pos, p_depth) step(p_depth, SHADOW_DEPTH(texture2D(p_shadow, p_pos)))
     #define SAMPLE_SHADOW_TEXEL_PROJ(p_shadow, p_pos) step(p_pos.z, SHADOW_DEPTH(texture2DProj(p_shadow, p_pos)))
@@ -188,7 +201,12 @@ vec3 F0(float metallic, float specular, vec3 albedo) {
 
 void main() {
     vec3 NORMAL = normalize(normal_interp);
-    vec2 UV = uv_interp;
+    vec2 UV = vec2(0.0);
+
+    #if defined(ENABLE_UV_INTERP)
+        UV = uv_interp;
+    #endif
+
     vec3 view = -normalize(vertex_interp);
     vec3 ALBEDO = vec3(1.0);
     float ALPHA = 1.0;
@@ -217,8 +235,6 @@ void main() {
         #endif
     #endif
 
-    vec3 light_att = vec3(1.0);
-
     #ifdef BASE_PASS
 
         // IBL precalculations
@@ -226,8 +242,12 @@ void main() {
         vec3 f0 = F0(METALLIC, SPECULAR, ALBEDO);
         vec3 F = f0 + (max(vec3(1.0 - ROUGHNESS), f0) - f0) * pow(1.0 - ndotv, 5.0);
 
-        ambient_light = ambient_color.rgb;
-        specular_light = bg_color.rgb * bg_energy;
+        #ifdef AMBIENT_LIGHT_DISABLED
+            ambient_light = vec3(0.0, 0.0, 0.0);
+        #else
+            ambient_light = ambient_color.rgb;
+            specular_light = bg_color.rgb * bg_energy;
+        #endif
 
         ambient_light *= ambient_energy;
 
@@ -249,8 +269,12 @@ void main() {
         }
     #endif // BASE PASS
 
+    //
+    // Lighting
+    //
     #ifdef USE_LIGHTING
         vec3 L;
+        vec3 light_att = vec3(1.0);
 
         #ifdef LIGHT_MODE_OMNI
         #endif
@@ -259,8 +283,16 @@ void main() {
         #endif
 
         #ifdef LIGHT_MODE_DIRECTIONAL
+            vec3 light_vec = -LIGHT_DIRECTION;
+            L = normalize(light_vec);
+
+            float depth_z = -vertex_interp.z;
+
             #ifdef USE_SHADOW
-                light_att *= mix(shadow_color.rgb, vec3(1.0), sample_shadow(light_directional_shadow, shadow_coord));
+                if (depth_z < light_split_offsets.x) {
+                    float shadow = sample_shadow(light_directional_shadow, shadow_coord);
+                    light_att *= mix(shadow_color.rgb, vec3(1.0), shadow);
+                }
             #endif
         #endif
 
@@ -308,6 +340,13 @@ void main() {
             #ifdef BASE_PASS
                 // TODO: gl_FragColor.rgb += emission;
             #endif
+        #endif
+    #else
+        #ifdef USE_RGBA_SHADOWS
+            highp float depth = ((position_interp.z / position_interp.w) + 1.0) * 0.5 + 0.0; // bias
+            highp vec4 comp = fract(depth * vec4(255.0 * 255.0 * 255.0, 255.0 * 255.0, 255.0, 1.0));
+            comp -= comp.xxyz * vec4(0.0, 1.0 / 255.0, 1.0 / 255.0, 1.0 / 255.0);
+            gl_FragColor = comp;
         #endif
     #endif
 }

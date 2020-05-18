@@ -793,7 +793,7 @@ export class VisualServerScene {
 
         let near_plane = Plane.new().set_point_and_normal(
             p_cam_transform.origin,
-            p_cam_transform.basis.get_axis(2).negate().normalize()
+            p_cam_transform.basis.get_axis(2).normalize().negate()
         );
         let z_far = p_cam_projection.get_z_far();
 
@@ -812,20 +812,11 @@ export class VisualServerScene {
                         // do not add this light if no geometry is affected by it
                         this.light_cull_result[this.light_cull_count] = inst;
                         this.light_instance_cull_result[this.light_cull_count] = light.instance;
-
+                        if (p_shadow_atlas && (/** @type {Light_t} */(inst.base)).shadow) {
+                            VSG.scene_render.light_instance_mark_visible(light.instance);
+                        }
                         this.light_cull_count++;
                     }
-                }
-            } else if (inst.base_type === INSTANCE_TYPE_LIGHT && inst.visible) {
-                let light = /** @type {InstanceLightData} */(inst.base_data);
-
-                if (light.geometries.length > 0) {
-                    this.light_cull_result[this.light_cull_count] = inst;
-                    this.light_instance_cull_result[this.light_cull_count] = light.instance;
-                    if (p_shadow_atlas && (/** @type {Light_t} */(inst.base)).shadow) {
-                        VSG.scene_render.light_instance_mark_visible(light.instance);
-                    }
-                    this.light_cull_count++;
                 }
             } else if (((1 << inst.base_type) & INSTANCE_GEOMETRY_MASK) && inst.visible && inst.cast_shadows !== SHADOW_CASTING_SETTING_SHADOWS_ONLY) {
                 keep = true;
@@ -844,7 +835,7 @@ export class VisualServerScene {
                 }
 
                 inst.depth = near_plane.distance_to(inst.transform.origin);
-                inst.depth_layer = Math.floor(clamp(inst.depth * 16 / z_far, 0, 15));
+                inst.depth_layer = clamp(Math.floor(inst.depth * 16 / z_far), 0, 15);
             }
 
             if (!keep) {
@@ -910,6 +901,8 @@ export class VisualServerScene {
 
         let light_base = /** @type {Light_t} */(p_instance.base);
 
+        let res = { min: 0, max: 0 };
+
         switch (light_base.type) {
             case LIGHT_DIRECTIONAL: {
                 let max_distance = p_cam_projection.get_z_far();
@@ -939,15 +932,14 @@ export class VisualServerScene {
                             continue;
                         }
 
-                        let max = 0, min = 0;
-                        instance.transformed_aabb.project_range_in_plane(base, { min, max });
+                        instance.transformed_aabb.project_range_in_plane(base, res);
 
-                        if (max > z_max) {
-                            z_max = max;
+                        if (res.max > z_max) {
+                            z_max = res.max;
                         }
 
-                        if (min < z_min) {
-                            z_min = min;
+                        if (res.min < z_min) {
+                            z_min = res.min;
                         }
 
                         found_items = true;
@@ -1099,7 +1091,6 @@ export class VisualServerScene {
 
                     let tmp_plane = Plane.new();
                     for (let j = 0; j < cull_count; j++) {
-                        let res = { min: 0, max: 0 };
                         let instance = this.instance_shadow_cull_result[j];
                         let base_data = /** @type {InstanceGeometryData} */(instance.base_data);
                         if (!instance.visible || !((1 << instance.base_type) & INSTANCE_GEOMETRY_MASK) || !base_data.can_cast_shadows) {

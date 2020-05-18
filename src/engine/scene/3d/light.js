@@ -17,6 +17,7 @@ import {
     LIGHT_PARAM_SHADOW_SPLIT_1_OFFSET,
     LIGHT_PARAM_SHADOW_SPLIT_2_OFFSET,
     LIGHT_PARAM_SHADOW_SPLIT_3_OFFSET,
+    LIGHT_DIRECTIONAL_SHADOW_DEPTH_RANGE_STABLE,
 } from "engine/servers/visual_server";
 import { VSG } from "engine/servers/visual/visual_server_globals";
 
@@ -143,10 +144,6 @@ export class Light extends VisualInstance {
         VSG.storage.light_set_shadow(this.light, p_enable);
     }
     set_shadow_reverse_cull_face() { }
-    set_directional_shadow_mode(mode) {
-        this.shadow_mode = mode;
-        VSG.storage.light_set_shadow_mode(this.light, mode);
-    }
 
     /* virtual methods */
 
@@ -165,8 +162,6 @@ export class Light extends VisualInstance {
 
         if (data.shadow_color) this.set_shadow_color(data.shadow_color);
         if (data.shadow_enabled !== undefined) this.set_shadow_enabled(data.shadow_enabled);
-        if (data.directional_shadow_mode !== undefined) this.set_directional_shadow_mode(data.directional_shadow_mode);
-        if (data.directional_shadow_max_distance !== undefined) this.set_param(LIGHT_PARAM_SHADOW_MAX_DISTANCE, data.directional_shadow_max_distance);
 
         return this;
     }
@@ -197,25 +192,36 @@ export class DirectionalLight extends Light {
         /* only ortho is supported right now */
         this.shadow_mode = 0;
         this.shadow_max_distance = 0;
-        this.shadow_depth_range = 0;
+        this.directional_shadow_depth_range = 0;
         this.shadow_depth_bias = 0;
 
         this.set_param(LIGHT_PARAM_SHADOW_NORMAL_BIAS, 0.8);
         this.set_param(LIGHT_PARAM_SHADOW_BIAS, 0.1);
         this.set_param(LIGHT_PARAM_SHADOW_MAX_DISTANCE, 100);
         this.set_param(LIGHT_PARAM_SHADOW_BIAS_SPLIT_SCALE, 0.25);
-        // TODO: this.set_shadow_depth_range(LIGHT_PARAM_SHADOW_DEPTH_RANGE_STABLE);
+        this.set_directional_shadow_depth_range(LIGHT_DIRECTIONAL_SHADOW_DEPTH_RANGE_STABLE);
     }
 
-    set_shadow_mode(p) { }
-    set_shadow_max_distance(p) { }
-    set_shadow_depth_bias(p) { }
-    set_shadow_depth_range(p) { }
+    set_directional_shadow_mode(mode) {
+        this.shadow_mode = mode;
+        VSG.storage.light_directional_set_shadow_mode(this.light, mode);
+    }
+    /**
+     * @param {number} range
+     */
+    set_directional_shadow_depth_range(range) {
+        this.directional_shadow_depth_range = range;
+        VSG.storage.light_directional_set_shadow_depth_range(this.light, range);
+    }
 
     /* virtual methods */
 
     _load_data(data) {
         super._load_data(data);
+
+        if (data.directional_shadow_mode !== undefined) this.set_directional_shadow_mode(data.directional_shadow_mode);
+        if (data.directional_shadow_depth_range !== undefined) this.set_directional_shadow_depth_range(data.directional_shadow_depth_range);
+        if (data.directional_shadow_max_distance !== undefined) this.set_param(LIGHT_PARAM_SHADOW_MAX_DISTANCE, data.directional_shadow_max_distance);
 
         return this;
     }

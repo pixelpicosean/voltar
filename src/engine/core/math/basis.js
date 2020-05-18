@@ -475,26 +475,22 @@ export class Basis {
         let y = this.get_axis(1);
         let z = this.get_axis(2);
 
-        let x1 = Vector3.new();
-        let y1 = Vector3.new();
-        let z1 = Vector3.new();
-
         x.normalize();
-        // formula: y = y - x * (x.dot(y))
-        y1.copy(y)
-            .subtract(
-                x1.copy(x).scale(x.dot(y))
-            );
-        y.copy(y1).normalize();
-        // formula: z = z - x * (x.dot(z)) - y * (y.dot(z))
-        z1.copy(z)
-            .subtract(
-                x1.copy(x).scale(x.dot(z))
-            )
-            .subtract(
-                y1.copy(y).scale(y.dot(z))
-            );
-        z.copy(z1).normalize();
+        let x_dot_y = x.dot(y);
+        y.set(
+            y.x - x.x * x_dot_y,
+            y.y - x.y * x_dot_y,
+            y.z - x.z * x_dot_y
+        )
+        y.normalize();
+        let x_dot_z = x.dot(z);
+        let y_dot_z = y.dot(z);
+        z.set(
+            z.x - x.x * x_dot_z - y.x * y_dot_z,
+            z.y - x.y * x_dot_z - y.y * y_dot_z,
+            z.z - x.z * x_dot_z - y.z * y_dot_z
+        )
+        z.normalize();
 
         this.set_axis(0, x);
         this.set_axis(1, y);
@@ -503,9 +499,6 @@ export class Basis {
         Vector3.free(x);
         Vector3.free(y);
         Vector3.free(z);
-        Vector3.free(x1);
-        Vector3.free(y1);
-        Vector3.free(z1);
 
         return this;
     }

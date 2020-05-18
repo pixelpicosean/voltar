@@ -392,7 +392,9 @@ export class Vector3 {
     normalize() {
         const x = this.x, y = this.y, z = this.z;
         let len = x * x + y * y + z * z;
-        if (len > 0) {
+        if (len === 0) {
+            this.x = this.y = this.z = 0;
+        } else {
             len = 1 / Math.sqrt(len);
             this.x *= len;
             this.y *= len;

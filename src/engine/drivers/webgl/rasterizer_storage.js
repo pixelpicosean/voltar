@@ -1886,9 +1886,17 @@ export class RasterizerStorage {
      * @param {Light_t} p_light
      * @param {number} p_mode
      */
-    light_set_shadow_mode(p_light, p_mode) {
+    light_directional_set_shadow_mode(p_light, p_mode) {
         p_light.directional_shadow_mode = p_mode;
         p_light.version++;
+    }
+
+    /**
+     * @param {Light_t} p_light
+     * @param {number} p_range
+     */
+    light_directional_set_shadow_depth_range(p_light, p_range) {
+        p_light.directional_range_mode = p_range;
     }
 
     /**

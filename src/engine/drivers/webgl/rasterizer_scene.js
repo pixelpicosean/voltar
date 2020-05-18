@@ -389,31 +389,42 @@ class RenderList_t {
 }
 
 const SHADER_DEF = {
-    USE_SKELETON              : 1 << 0,
-    SHADLESS                  : 1 << 1,
-    BASE_PASS                 : 1 << 2,
-    USE_INSTANCING            : 1 << 3,
-    USE_LIGHTMAP              : 1 << 4,
-    FOG_DEPTH_ENABLED         : 1 << 5,
-    FOG_HEIGHT_ENABLED        : 1 << 6,
-    USE_DEPTH_PREPASS         : 1 << 7,
-    USE_LIGHTING              : 1 << 8,
-    USE_SHADOW                : 1 << 9,
-    RENDER_DEPTH              : 1 << 11,
+    SHADLESS                  : 1 << 0,
+    BASE_PASS                 : 1 << 1,
+
+    ENABLE_TANGENT_INTERP     : 1 << 2,
+    ENABLE_NORMALMAP          : 1 << 3,
+    ENABLE_COLOR_INTERP       : 1 << 4,
+    ENABLE_UV_INTERP          : 1 << 5,
+    ENABLE_UV2_INTERP         : 1 << 6,
+    USE_SKELETON              : 1 << 7,
+    USE_INSTANCING            : 1 << 8,
+
+    USE_LIGHTMAP              : 1 << 9,
+    USE_LIGHTING              : 1 << 10,
+
+    USE_SHADOW                : 1 << 11,
     USE_SHADOW_TO_OPACITY     : 1 << 12,
 
-    LIGHT_MODE_DIRECTIONAL    : 1 << 13,
-    LIGHT_MODE_OMNI           : 1 << 14,
-    LIGHT_MODE_SPOT           : 1 << 15,
+    USE_DEPTH_PREPASS         : 1 << 13,
+    RENDER_DEPTH              : 1 << 14,
+    USE_RGBA_SHADOWS          : 1 << 15,
 
-    DIFFUSE_OREN_NAYAR        : 1 << 16,
-    DIFFUSE_LAMBERT_WRAP      : 1 << 17,
-    DIFFUSE_TOON              : 1 << 18,
-    DIFFUSE_BURLEY            : 1 << 19,
+    LIGHT_MODE_DIRECTIONAL    : 1 << 16,
+    LIGHT_MODE_OMNI           : 1 << 17,
+    LIGHT_MODE_SPOT           : 1 << 18,
 
-    SPECULAR_BLINN            : 1 << 20,
-    SPECULAR_PHONE            : 1 << 21,
-    SPECULAR_TOON             : 1 << 22,
+    DIFFUSE_OREN_NAYAR        : 1 << 19,
+    DIFFUSE_LAMBERT_WRAP      : 1 << 20,
+    DIFFUSE_TOON              : 1 << 21,
+    DIFFUSE_BURLEY            : 1 << 22,
+
+    SPECULAR_BLINN            : 1 << 23,
+    SPECULAR_PHONE            : 1 << 24,
+    SPECULAR_TOON             : 1 << 25,
+
+    FOG_DEPTH_ENABLED         : 1 << 26,
+    FOG_HEIGHT_ENABLED        : 1 << 27,
 };
 
 const DEFAULT_SPATIAL_SHADER = `
@@ -570,6 +581,7 @@ export class RasterizerScene {
                     0, 0, 1, 0,
                     0, 0, 0, 1,
                 ],
+                light_split_offsets: [0, 0, 0, 0],
             },
 
             conditions: 0,
@@ -1036,10 +1048,12 @@ export class RasterizerScene {
         }
 
         this.set_shader_condition(SHADER_DEF.RENDER_DEPTH, true);
+        this.set_shader_condition(SHADER_DEF.USE_RGBA_SHADOWS, VSG.config.use_rgba_3d_shadows);
 
         this._render_render_list(this.render_list.elements, this.render_list.element_count, light_transform, light_projection, null, null, bias, normal_bias, flip_facing, false, true);
 
         this.set_shader_condition(SHADER_DEF.RENDER_DEPTH, false);
+        this.set_shader_condition(SHADER_DEF.USE_RGBA_SHADOWS, false);
 
         if (this.storage.frame.current_rt) {
             gl.viewport(0, 0, this.storage.frame.current_rt.width, this.storage.frame.current_rt.height);
@@ -1616,6 +1630,8 @@ export class RasterizerScene {
         this.set_shader_condition(SHADER_DEF.FOG_HEIGHT_ENABLED, false);
         this.set_shader_condition(SHADER_DEF.USE_DEPTH_PREPASS, false);
 
+        this.set_shader_condition(SHADER_DEF.ENABLE_UV_INTERP, false);
+
         Transform.free(view_transform_inverse);
         CameraMatrix.free(projection_inverse);
     }
@@ -1724,6 +1740,7 @@ export class RasterizerScene {
 
                 if (!this.state.render_no_shadows && light.shadow && this.directional_shadow.gl_depth) {
                     let shadow_count = 1;
+                    let split_offsets = uniforms.light_split_offsets;
 
                     let matrix = CameraMatrix.new();
 
@@ -1732,6 +1749,8 @@ export class RasterizerScene {
                         let y = p_light.directional_rect.x;
                         let width = p_light.directional_rect.width;
                         let height = p_light.directional_rect.height;
+
+                        split_offsets[k] = p_light.shadow_transforms[k].split;
 
                         let _modelview = p_view_transform.inverse()
                             .append(p_light.shadow_transforms[k].transform)
@@ -1763,6 +1782,7 @@ export class RasterizerScene {
                     uniforms.shadow_pixel_size[0] = 1 / this.directional_shadow.size;
                     uniforms.shadow_pixel_size[1] = 1 / this.directional_shadow.size;
                     uniforms.light_shadow_matrix = matrix.as_array(uniforms.light_shadow_matrix);
+                    uniforms.light_split_offsets = split_offsets;
 
                     CameraMatrix.free(matrix);
                 }
@@ -1817,6 +1837,8 @@ export class RasterizerScene {
      */
     _setup_material(p_material, p_alpha_pass) {
         const gl = this.gl;
+
+        this.set_shader_condition(SHADER_DEF.ENABLE_UV_INTERP, true);
 
         let shader_rebind = this.bind_scene_shader(p_material);
 
