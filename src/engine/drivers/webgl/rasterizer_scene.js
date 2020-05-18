@@ -1686,7 +1686,6 @@ export class RasterizerScene {
                 this.set_shader_condition(SHADER_DEF.LIGHT_MODE_DIRECTIONAL, true);
 
                 if (!this.state.render_no_shadows && p_light.light.shadow) {
-                    // TODO: enable shadow
                     this.set_shader_condition(SHADER_DEF.USE_SHADOW, true);
                     gl.activeTexture(gl.TEXTURE0 + VSG.config.max_texture_image_units - 3);
                     if (VSG.config.use_rgba_3d_shadows) {

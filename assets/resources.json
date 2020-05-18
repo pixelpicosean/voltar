@@ -1024,7 +1024,7 @@
         }
       },
       {
-        "id": 6,
+        "id": 4,
         "type": "CubeMesh",
         "material": "@ext#1"
       }
@@ -1133,6 +1133,7 @@
           4.43833
         ],
         "light_energy": 0.8,
+        "shadow_enabled": true,
         "shadow_color": {
           "r": 0.478431,
           "g": 0.478431,
@@ -1181,7 +1182,7 @@
           3.25732,
           -4.68754
         ],
-        "mesh": "@sub#6",
+        "mesh": "@sub#4",
         "material": []
       },
       {

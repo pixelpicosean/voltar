@@ -39,6 +39,10 @@ void main() {
     vec3 VERTEX = position;
     vec3 NORMAL = normal;
 
+    #if defined(ENABLE_UV_INTERP)
+        uv_interp = uv;
+    #endif
+
     mat4 MODELVIEW_MATRIX = INV_CAMERA_MATRIX * WORLD_MATRIX;
 
     float POINT_SIZE = 1.0;
@@ -54,15 +58,11 @@ void main() {
     vertex_interp = vertex.xyz;
     normal_interp = NORMAL;
 
-    #if defined(ENABLE_UV_INTERP)
-        uv_interp = uv;
-    #endif
-
     #ifdef RENDER_DEPTH
         float z_ofs = light_bias;
         z_ofs += (1.0 - abs(normal_interp.z)) * light_normal_bias;
 
-        vertex_interp.z -= z_ofs;
+        vertex.z -= z_ofs;
     #endif
 
     #if defined(USE_SHADOW) && defined(USE_LIGHTING)
