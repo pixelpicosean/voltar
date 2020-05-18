@@ -16,3 +16,14 @@ export function shuffle(array) {
 
     return array;
 }
+
+/**
+ * @param {Array} from
+ * @param {Array} to
+ */
+export function copy_array_values(from, to) {
+    for (let i = 0, len = from.length; i < len; i++) {
+        to[i] = from[i];
+    }
+    return to;
+}

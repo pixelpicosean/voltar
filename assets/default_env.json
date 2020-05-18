@@ -7,8 +7,16 @@
         "b": 1,
         "a": 1
     },
-    "fog_depth_end": 30,
+    "fog_enabled": true,
+    "fog_color": {
+        "r": 0.894118,
+        "g": 0.690196,
+        "b": 0.717647,
+        "a": 1
+    },
+    "fog_depth_begin": 15,
+    "fog_depth_end": 28,
     "fog_height_enabled": true,
-    "fog_height_min": 5,
-    "fog_height_max": -2
+    "fog_height_min": 3,
+    "fog_height_max": -1
 }

@@ -6,6 +6,7 @@ import { Transform } from 'engine/core/math/transform';
 import { CameraMatrix } from 'engine/core/math/camera_matrix';
 import { Color } from 'engine/core/color';
 import { OS } from 'engine/core/os/os';
+import { copy_array_values } from 'engine/core/v_array';
 
 import {
     INSTANCE_TYPE_MESH,
@@ -89,25 +90,27 @@ export class Environment_t {
         this.ambient_color = [0, 0, 0, 1];
 
         // TODO: adjustment post-processing
-        this.adjustments_enabled = false;
+        this.adjustments_enabled = [0];
         this.adjustments_brightness = [1.0];
         this.adjustments_contrast = [1.0];
         this.adjustments_saturation = [1.0];
         this.color_correction = null;
 
         // TODO: fog support, or advanced fog supports color palettes
-        this.fog_enabled = false;
+        this.fog_enabled = [0];
         this.fog_color = [0.5, 0.5, 0.5, 1.0];
         this.fog_sun_color = [0.8, 0.8, 0.0, 1.0];
         this.fog_sun_amount = [0];
 
-        this.fog_depth_enabled = false;
+        this.fog_depth_enabled = [1];
         this.fog_depth_begin = [10];
         this.fog_depth_end = [0];
         this.fog_depth_curve = [1];
-        this.fog_transmit_enabled = false;
+
+        this.fog_transmit_enabled = [0];
         this.fog_transmit_curve = [1];
-        this.fog_height_enabled = false;
+
+        this.fog_height_enabled = [0];
         this.fog_height_min = [10];
         this.fog_height_max = [0];
         this.fog_height_curve = [1];
@@ -124,7 +127,7 @@ export class Environment_t {
                         this[k] = [value.r, value.g, value.b, value.a];
                     }
                 } else if (typeof (value) === "boolean") {
-                    this[k] = value;
+                    this[k] = [value ? 1 : 0];
                 } else if (typeof (value) === "number") {
                     this[k] = [value];
                 }
@@ -1466,10 +1469,14 @@ export class RasterizerScene {
 
         let fog_max_distance = 0;
         let using_fog = false;
-        if (p_env && !p_shadow) { // TODO: check whether fog is enabled
-            this.set_shader_condition(SHADER_DEF.FOG_DEPTH_ENABLED, true);
-            this.set_shader_condition(SHADER_DEF.FOG_HEIGHT_ENABLED, true);
-            fog_max_distance = 28;
+        if (p_env && !p_shadow && !!p_env.fog_enabled[0] && (!!p_env.fog_depth_enabled[0] || !!p_env.fog_height_enabled[0])) {
+            this.set_shader_condition(SHADER_DEF.FOG_DEPTH_ENABLED, p_env.fog_depth_enabled[0] > 0);
+            this.set_shader_condition(SHADER_DEF.FOG_HEIGHT_ENABLED, p_env.fog_height_enabled[0] > 0);
+            if (p_env.fog_depth_end[0] > 0) {
+                fog_max_distance = p_env.fog_depth_end[0];
+            } else {
+                fog_max_distance = p_projection.get_z_far();
+            }
             using_fog = true;
         }
 
@@ -1620,25 +1627,20 @@ export class RasterizerScene {
                     rebind_light = true;
 
                     if (using_fog) {
-                        global_uniforms.fog_color_base[0] = 0.894118;
-                        global_uniforms.fog_color_base[1] = 0.690196;
-                        global_uniforms.fog_color_base[2] = 0.717647;
-                        global_uniforms.fog_color_base[3] = 1.0;
+                        copy_array_values(p_env.fog_color, global_uniforms.fog_color_base);
+                        copy_array_values(p_env.fog_sun_color, global_uniforms.fog_sun_color_amount);
+                        global_uniforms.fog_sun_color_amount[3] = p_env.fog_sun_amount[0];
 
-                        global_uniforms.fog_sun_color_amount[0] = 0.8;
-                        global_uniforms.fog_sun_color_amount[1] = 0.8;
-                        global_uniforms.fog_sun_color_amount[2] = 0.0;
-                        global_uniforms.fog_sun_color_amount[3] = 1.0;
+                        copy_array_values(p_env.fog_transmit_enabled, global_uniforms.fog_transmit_enabled);
+                        copy_array_values(p_env.fog_transmit_curve, global_uniforms.fog_transmit_curve);
 
-                        global_uniforms.fog_transmit_enabled[0] = 0;
-
-                        global_uniforms.fog_depth_begin[0] = 15;
-                        global_uniforms.fog_depth_curve[0] = 1;
+                        copy_array_values(p_env.fog_depth_begin, global_uniforms.fog_depth_begin);
+                        copy_array_values(p_env.fog_depth_curve, global_uniforms.fog_depth_curve);
                         global_uniforms.fog_max_distance[0] = fog_max_distance;
 
-                        global_uniforms.fog_height_min[0] = 3;
-                        global_uniforms.fog_height_max[0] = -1;
-                        global_uniforms.fog_height_curve[0] = 1;
+                        copy_array_values(p_env.fog_height_min, global_uniforms.fog_height_min);
+                        copy_array_values(p_env.fog_height_max, global_uniforms.fog_height_max);
+                        copy_array_values(p_env.fog_height_curve, global_uniforms.fog_height_curve);
                     }
                 }
 
