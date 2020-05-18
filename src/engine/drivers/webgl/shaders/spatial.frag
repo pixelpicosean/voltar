@@ -2,6 +2,8 @@ precision mediump float;
 
 #define M_PI 3.14159265359
 
+uniform highp mat4 CAMERA_MATRIX;
+
 uniform highp float TIME;
 
 uniform vec4 bg_color;
@@ -57,6 +59,8 @@ varying vec3 normal_interp;
 #if defined(ENABLE_UV_INTERP)
     varying vec2 uv_interp;
 #endif
+
+/* light */
 
 vec3 F0(float metallic, float specular, vec3 albedo) {
 	float dielectric = 0.16 * specular * specular;
@@ -184,6 +188,8 @@ vec3 F0(float metallic, float specular, vec3 albedo) {
     }
 #endif
 
+/* shadow */
+
 #ifdef USE_SHADOW
     #ifdef USE_RGBA_SHADOWS
         #define SHADOW_DEPTH(m_val) dot(m_val, vec4(1.0 / (255.0 * 255.0 * 255.0), 1.0 / (255.0 * 255.0), 1.0 / 255.0, 1.0))
@@ -199,7 +205,32 @@ vec3 F0(float metallic, float specular, vec3 albedo) {
     }
 #endif
 
+/* fog */
+
+#if defined(FOG_DEPTH_ENABLED) || defined(FOG_HEIGHT_ENABLED)
+    uniform mediump vec4 fog_color_base;
+    #ifdef LIGHT_MODE_DIRECTIONAL
+        uniform mediump vec4 fog_sun_color_amount;
+    #endif
+
+    uniform float fog_transmit_enabled;
+    uniform mediump float fog_transmit_curve;
+
+    #ifdef FOG_DEPTH_ENABLED
+        uniform highp float fog_depth_begin;
+        uniform mediump float fog_depth_curve;
+        uniform mediump float fog_max_distance;
+    #endif
+
+    #ifdef FOG_HEIGHT_ENABLED
+        uniform highp float fog_height_min;
+        uniform highp float fog_height_max;
+        uniform mediump float fog_height_curve;
+    #endif
+#endif
+
 void main() {
+    highp vec3 vertex = vertex_interp;
     vec3 NORMAL = normalize(normal_interp);
     vec2 UV = vec2(0.0);
 
@@ -208,8 +239,12 @@ void main() {
     #endif
 
     vec3 view = -normalize(vertex_interp);
+    vec3 eye_position = view;
+
     vec3 ALBEDO = vec3(1.0);
     float ALPHA = 1.0;
+
+    vec3 EMISSION = vec3(0.0);
 
     float ROUGHNESS = roughness;
     float METALLIC = metallic;
@@ -338,7 +373,44 @@ void main() {
             gl_FragColor = vec4(ambient_light + diffuse_light + specular_light, ALPHA);
 
             #ifdef BASE_PASS
-                // TODO: gl_FragColor.rgb += emission;
+                gl_FragColor.rgb += EMISSION;
+            #endif
+
+            #if defined(FOG_DEPTH_ENABLED) || defined(FOG_HEIGHT_ENABLED)
+                float fog_amount = 0.0;
+
+                #ifdef LIGHT_MODE_DIRECTIONAL
+                    vec3 fog_color = mix(fog_color_base.rgb, fog_sun_color_amount.rgb, fog_sun_color_amount.a * pow(max(dot(eye_position, LIGHT_DIRECTION), 0.0), 8.0));
+                #else
+                    vec3 fog_color = fog_color_base.rgb;
+                #endif
+
+                #ifdef FOG_DEPTH_ENABLED
+                    {
+                        float fog_z = smoothstep(fog_depth_begin, fog_max_distance, length(vertex));
+
+                        fog_amount = pow(fog_z, fog_depth_curve) * fog_color_base.a;
+
+                        if (fog_transmit_enabled > 0.0) {
+                            vec3 total_light = gl_FragColor.rgb;
+                            float transmit = pow(fog_z, fog_transmit_curve);
+                            fog_color = mix(max(total_light, fog_color), fog_color, transmit);
+                        }
+                    }
+                #endif
+
+                #ifdef FOG_HEIGHT_ENABLED
+                    {
+                        float y = (CAMERA_MATRIX * vec4(vertex, 1.0)).y;
+                        fog_amount = max(fog_amount, pow(smoothstep(fog_height_min, fog_height_max, y), fog_height_curve));
+                    }
+                #endif
+
+                #if defined(BASE_PASS)
+                    gl_FragColor.rgb = mix(gl_FragColor.rgb, fog_color, fog_amount);
+                #else
+                    gl_FragColor.rgb *= (1.0 - fog_amount);
+                #endif
             #endif
         #endif
     #else
