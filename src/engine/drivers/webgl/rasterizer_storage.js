@@ -27,6 +27,12 @@ import {
     LIGHT_PARAM_RANGE,
     LIGHT_PARAM_SPOT_ANGLE,
     TEXTURE_TYPE_CUBEMAP,
+    LIGHT_PARAM_SHADOW_MAX_DISTANCE,
+    LIGHT_PARAM_SHADOW_SPLIT_1_OFFSET,
+    LIGHT_PARAM_SHADOW_SPLIT_2_OFFSET,
+    LIGHT_PARAM_SHADOW_SPLIT_3_OFFSET,
+    LIGHT_PARAM_SHADOW_NORMAL_BIAS,
+    LIGHT_PARAM_SHADOW_BIAS,
 } from "engine/servers/visual_server";
 import {
     Instance_t,
@@ -239,8 +245,12 @@ export class Light_t extends Instantiable_t {
 
         this.cull_mask = 0xFFFFFFFF;
 
+        this.directional_blend_splits = false;
         this.directional_shadow_mode = 0;
         this.directional_range_mode = 0;
+
+        this.omni_shadow_mode = 0;
+        this.omni_shadow_detail = 0;
 
         this.version = 0;
     }
@@ -1819,7 +1829,13 @@ export class RasterizerStorage {
     light_set_param(p_light, p_param, p_value) {
         switch (p_param) {
             case LIGHT_PARAM_RANGE:
-            case LIGHT_PARAM_SPOT_ANGLE: {
+            case LIGHT_PARAM_SPOT_ANGLE:
+            case LIGHT_PARAM_SHADOW_MAX_DISTANCE:
+            case LIGHT_PARAM_SHADOW_SPLIT_1_OFFSET:
+            case LIGHT_PARAM_SHADOW_SPLIT_2_OFFSET:
+            case LIGHT_PARAM_SHADOW_SPLIT_3_OFFSET:
+            case LIGHT_PARAM_SHADOW_NORMAL_BIAS:
+            case LIGHT_PARAM_SHADOW_BIAS: {
                 p_light.version++;
                 p_light.instance_change_notify(true, false);
             } break;
@@ -1884,11 +1900,22 @@ export class RasterizerStorage {
 
     /**
      * @param {Light_t} p_light
+     * @param {boolean} p_enabled
+     */
+    light_directional_set_blend_splits(p_light, p_enabled) {
+        p_light.directional_blend_splits = p_enabled;
+        p_light.version++;
+        p_light.instance_change_notify(true, false);
+    }
+
+    /**
+     * @param {Light_t} p_light
      * @param {number} p_mode
      */
     light_directional_set_shadow_mode(p_light, p_mode) {
         p_light.directional_shadow_mode = p_mode;
         p_light.version++;
+        p_light.instance_change_notify(true, false);
     }
 
     /**
@@ -1897,6 +1924,24 @@ export class RasterizerStorage {
      */
     light_directional_set_shadow_depth_range(p_light, p_range) {
         p_light.directional_range_mode = p_range;
+    }
+
+    /**
+     * @param {Light_t} p_light
+     * @param {number} p_mode
+     */
+    light_omni_set_shadow_mode(p_light, p_mode) {
+        p_light.omni_shadow_mode = p_mode;
+        p_light.version++;
+    }
+
+    /**
+     * @param {Light_t} p_light
+     * @param {number} p_detail
+     */
+    light_omni_set_shadow_detail(p_light, p_detail) {
+        p_light.omni_shadow_detail = p_detail;
+        p_light.version++;
     }
 
     /**

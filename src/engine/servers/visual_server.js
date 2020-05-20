@@ -101,6 +101,12 @@ export const SHADOW_CASTING_SETTING_SHADOWS_ONLY = 3;
 export const LIGHT_DIRECTIONAL_SHADOW_DEPTH_RANGE_STABLE = 0;
 export const LIGHT_DIRECTIONAL_SHADOW_DEPTH_RANGE_OPTIMIZED = 1;
 
+export const LIGHT_OMNI_SHADOW_DUAL_PARABOLOID = 0;
+export const LIGHT_OMNI_SHADOW_CUBE = 1;
+
+export const LIGHT_OMNI_SHADOW_DETAIL_VERTICAL = 0;
+export const LIGHT_OMNI_SHADOW_DETAIL_HIRIZONTAL = 1;
+
 /**
  * @typedef FrameDrawnCallbacks
  * @property {any} object

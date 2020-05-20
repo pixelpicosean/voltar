@@ -4,11 +4,16 @@ import { Color, ColorLike } from "engine/core/color";
 
 import {
     LIGHT_DIRECTIONAL,
+    LIGHT_SPOT,
+    LIGHT_OMNI,
+
     LIGHT_PARAM_ENERGY,
     LIGHT_PARAM_INDIRECT_ENERGY,
     LIGHT_PARAM_SPECULAR,
     LIGHT_PARAM_RANGE,
     LIGHT_PARAM_SPOT_ANGLE,
+    LIGHT_PARAM_SPOT_ATTENUATION,
+    LIGHT_PARAM_ATTENUATION,
     LIGHT_PARAM_CONTACT_SHADOW_SIZE,
     LIGHT_PARAM_SHADOW_MAX_DISTANCE,
     LIGHT_PARAM_SHADOW_NORMAL_BIAS,
@@ -17,6 +22,7 @@ import {
     LIGHT_PARAM_SHADOW_SPLIT_1_OFFSET,
     LIGHT_PARAM_SHADOW_SPLIT_2_OFFSET,
     LIGHT_PARAM_SHADOW_SPLIT_3_OFFSET,
+
     LIGHT_DIRECTIONAL_SHADOW_DEPTH_RANGE_STABLE,
 } from "engine/servers/visual_server";
 import { VSG } from "engine/servers/visual/visual_server_globals";
@@ -67,7 +73,9 @@ export class Light extends VisualInstance {
         this.set_param(LIGHT_PARAM_INDIRECT_ENERGY, 1);
         this.set_param(LIGHT_PARAM_SPECULAR, 0.5);
         this.set_param(LIGHT_PARAM_RANGE, 5);
+        this.set_param(LIGHT_PARAM_ATTENUATION, 1);
         this.set_param(LIGHT_PARAM_SPOT_ANGLE, 45);
+        this.set_param(LIGHT_PARAM_SPOT_ATTENUATION, 1);
         this.set_param(LIGHT_PARAM_CONTACT_SHADOW_SIZE, 0);
         this.set_param(LIGHT_PARAM_SHADOW_MAX_DISTANCE, 0);
         this.set_param(LIGHT_PARAM_SHADOW_SPLIT_1_OFFSET, 0.1);
@@ -189,11 +197,10 @@ export class DirectionalLight extends Light {
     constructor() {
         super(LIGHT_DIRECTIONAL);
 
+        this.blend_splits = false;
         /* only ortho is supported right now */
         this.shadow_mode = 0;
-        this.shadow_max_distance = 0;
         this.directional_shadow_depth_range = 0;
-        this.shadow_depth_bias = 0;
 
         this.set_param(LIGHT_PARAM_SHADOW_NORMAL_BIAS, 0.8);
         this.set_param(LIGHT_PARAM_SHADOW_BIAS, 0.1);
@@ -202,6 +209,17 @@ export class DirectionalLight extends Light {
         this.set_directional_shadow_depth_range(LIGHT_DIRECTIONAL_SHADOW_DEPTH_RANGE_STABLE);
     }
 
+    /**
+     * @param {boolean} p_enable
+     */
+    set_directional_blend_splits(p_enable) {
+        this.blend_splits = p_enable;
+        VSG.storage.light_directional_set_blend_splits(this.light, p_enable);
+    }
+
+    /**
+     * @param {number} mode
+     */
     set_directional_shadow_mode(mode) {
         this.shadow_mode = mode;
         VSG.storage.light_directional_set_shadow_mode(this.light, mode);
@@ -220,16 +238,78 @@ export class DirectionalLight extends Light {
         super._load_data(data);
 
         if (data.directional_shadow_mode !== undefined) this.set_directional_shadow_mode(data.directional_shadow_mode);
+        if (data.directional_shadow_split_1 !== undefined) this.set_param(LIGHT_PARAM_SHADOW_SPLIT_1_OFFSET, data.directional_shadow_split_1);
+        if (data.directional_shadow_split_2 !== undefined) this.set_param(LIGHT_PARAM_SHADOW_SPLIT_2_OFFSET, data.directional_shadow_split_2);
+        if (data.directional_shadow_split_3 !== undefined) this.set_param(LIGHT_PARAM_SHADOW_SPLIT_3_OFFSET, data.directional_shadow_split_3);
+        if (data.directional_blend_splits !== undefined) this.set_directional_blend_splits(data.directional_blend_splits);
+        if (data.directional_shadow_normal_bias !== undefined) this.set_param(LIGHT_PARAM_SHADOW_NORMAL_BIAS, data.directional_shadow_normal_bias);
         if (data.directional_shadow_depth_range !== undefined) this.set_directional_shadow_depth_range(data.directional_shadow_depth_range);
         if (data.directional_shadow_max_distance !== undefined) this.set_param(LIGHT_PARAM_SHADOW_MAX_DISTANCE, data.directional_shadow_max_distance);
 
         return this;
     }
-
-    /**
-     * @param {number} p_what
-     */
-    _notification(p_what) { }
 }
 
 node_class_map["DirectionalLight"] = GDCLASS(DirectionalLight, Light)
+
+
+export class OmniLight extends Light {
+    get class() { return "OmniLight" }
+
+    constructor() {
+        super(LIGHT_OMNI);
+
+        this.shadow_mode = 0;
+        this.shadow_detail = 0;
+    }
+
+    /**
+     * @param {number} p_mode
+     */
+    set_shadow_mode(p_mode) {
+        this.shadow_mode = p_mode;
+        VSG.storage.light_omni_set_shadow_mode(this.light, p_mode);
+    }
+
+    /**
+     * @param {number} p_detail
+     */
+    set_shadow_detail(p_detail) {
+        this.shadow_detail = p_detail;
+    }
+
+    _load_data(data) {
+        super._load_data(data);
+
+        if (data.omni_range) this.set_param(LIGHT_PARAM_RANGE, data.omni_range);
+        if (data.omni_attenuation) this.set_param(LIGHT_PARAM_ATTENUATION, data.omni_attenuation);
+        if (data.omni_shadow_mode) this.set_shadow_mode(data.omni_shadow_mode);
+        if (data.omni_shadow_detail) this.set_shadow_detail(data.omni_shadow_detail);
+
+        return this;
+    }
+}
+
+node_class_map["OmniLight"] = GDCLASS(OmniLight, Light)
+
+
+export class SpotLight extends Light {
+    get class() { return "SpotLight" }
+
+    constructor() {
+        super(LIGHT_SPOT);
+    }
+
+    _load_data(data) {
+        super._load_data(data);
+
+        if (data.spot_range) this.set_param(LIGHT_PARAM_RANGE, data.spot_range);
+        if (data.spot_attenuation) this.set_param(LIGHT_PARAM_ATTENUATION, data.spot_attenuation);
+        if (data.spot_angle) this.set_param(LIGHT_PARAM_SPOT_ANGLE, data.spot_angle);
+        if (data.spot_angle_attenuation) this.set_param(LIGHT_PARAM_SPOT_ATTENUATION, data.spot_angle_attenuation);
+
+        return this;
+    }
+}
+
+node_class_map["SpotLight"] = GDCLASS(SpotLight, Light)

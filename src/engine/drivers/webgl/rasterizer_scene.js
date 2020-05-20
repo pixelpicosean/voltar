@@ -1,4 +1,4 @@
-import { lerp } from 'engine/core/math/math_funcs';
+import { lerp, deg2rad } from 'engine/core/math/math_funcs';
 import { Vector2 } from 'engine/core/math/vector2';
 import { Vector3 } from 'engine/core/math/vector3';
 import { Rect2 } from 'engine/core/math/rect2';
@@ -20,6 +20,10 @@ import {
     LIGHT_PARAM_RANGE,
     LIGHT_PARAM_SHADOW_BIAS,
     LIGHT_PARAM_SHADOW_NORMAL_BIAS,
+    LIGHT_SPOT,
+    LIGHT_PARAM_ATTENUATION,
+    LIGHT_PARAM_SPOT_ANGLE,
+    LIGHT_PARAM_SPOT_ATTENUATION,
 } from 'engine/servers/visual_server';
 import {
     Instance_t,
@@ -78,7 +82,6 @@ const MAX_LIGHTS = 255;
 export const LIGHTMODE_NORMAL = 0;
 export const LIGHTMODE_UNSHADED = 1;
 export const LIGHTMODE_LIGHTMAP = 2;
-export const LIGHTMODE_LIGHTMAP_CAPTURE = 3;
 
 export class Environment_t {
     constructor() {
@@ -96,7 +99,6 @@ export class Environment_t {
         this.adjustments_saturation = [1.0];
         this.color_correction = null;
 
-        // TODO: fog support, or advanced fog supports color palettes
         this.fog_enabled = [0];
         this.fog_color = [0.5, 0.5, 0.5, 1.0];
         this.fog_sun_color = [0.8, 0.8, 0.0, 1.0];
@@ -425,23 +427,14 @@ const SHADER_DEF = {
     SPECULAR_BLINN            : 1 << 23,
     SPECULAR_PHONE            : 1 << 24,
     SPECULAR_TOON             : 1 << 25,
+    SPECULAR_SCHLICK_GGX      : 1 << 26,
 
-    FOG_DEPTH_ENABLED         : 1 << 26,
-    FOG_HEIGHT_ENABLED        : 1 << 27,
+    FOG_DEPTH_ENABLED         : 1 << 27,
+    FOG_HEIGHT_ENABLED        : 1 << 28,
 };
 
 const DEFAULT_SPATIAL_CONDITION =
-    SHADER_DEF.ENABLE_UV_INTERP
-    |
-    SHADER_DEF.BASE_PASS
-    |
-    SHADER_DEF.DIFFUSE_BURLEY | SHADER_DEF.SPECULAR_TOON
-    |
-    SHADER_DEF.USE_LIGHTING | SHADER_DEF.LIGHT_MODE_DIRECTIONAL
-    |
-    SHADER_DEF.USE_SHADOW
-    |
-    SHADER_DEF.FOG_DEPTH_ENABLED | SHADER_DEF.FOG_HEIGHT_ENABLEDks
+    SHADER_DEF.DIFFUSE_BURLEY | SHADER_DEF.SPECULAR_SCHLICK_GGX
 
 const DEFAULT_SPATIAL_SHADER = `
 shader_type = spatial;
@@ -577,6 +570,12 @@ export class RasterizerScene {
                 LIGHT_SPECULAR: [0],
                 LIGHT_COLOR: [0, 0, 0, 0],
                 LIGHT_DIRECTION: [0, 0, 0],
+
+                LIGHT_ATTENUATION: [0],
+                LIGHT_SPOT_ATTENUATION: [0],
+                LIGHT_SPOT_RANGE: [0],
+                LIGHT_SPOT_ANGLE: [0],
+                light_range: [0],
 
                 bg_color: [0, 0, 0, 1],
                 bg_energy: [1],
@@ -745,9 +744,9 @@ export class RasterizerScene {
      * @param {number} p_far
      * @param {number} p_split
      * @param {number} p_pass
-     * @param {number} p_bias_scale
+     * @param {number} [p_bias_scale]
      */
-    light_instance_set_shadow_transform(p_light, p_projection, p_transform, p_far, p_split, p_pass, p_bias_scale) {
+    light_instance_set_shadow_transform(p_light, p_projection, p_transform, p_far, p_split, p_pass, p_bias_scale = 1.0) {
         if (p_light.light.type !== LIGHT_DIRECTIONAL) {
             p_pass = 0;
         }
@@ -1411,8 +1410,6 @@ export class RasterizerScene {
 
                 if (e.instance.lightmap) {
                     e.light_mode = LIGHTMODE_LIGHTMAP;
-                } else if (e.instance.lightmap_capture_data) {
-                    e.light_mode = LIGHTMODE_LIGHTMAP_CAPTURE;
                 } else {
                     e.light_mode = LIGHTMODE_NORMAL;
                 }
@@ -1736,6 +1733,8 @@ export class RasterizerScene {
         this.set_shader_condition(SHADER_DEF.USE_LIGHTING, false);
         this.set_shader_condition(SHADER_DEF.USE_SHADOW, false);
         this.set_shader_condition(SHADER_DEF.LIGHT_MODE_DIRECTIONAL, false);
+        this.set_shader_condition(SHADER_DEF.LIGHT_MODE_OMNI, false);
+        this.set_shader_condition(SHADER_DEF.LIGHT_MODE_SPOT, false);
 
         if (!p_light) {
             return;
@@ -1746,6 +1745,32 @@ export class RasterizerScene {
         switch (p_light.light.type) {
             case LIGHT_DIRECTIONAL: {
                 this.set_shader_condition(SHADER_DEF.LIGHT_MODE_DIRECTIONAL, true);
+
+                if (!this.state.render_no_shadows && p_light.light.shadow) {
+                    this.set_shader_condition(SHADER_DEF.USE_SHADOW, true);
+                    gl.activeTexture(gl.TEXTURE0 + VSG.config.max_texture_image_units - 3);
+                    if (VSG.config.use_rgba_3d_shadows) {
+                        gl.bindTexture(gl.TEXTURE_2D, this.directional_shadow.gl_color);
+                    } else {
+                        gl.bindTexture(gl.TEXTURE_2D, this.directional_shadow.gl_depth);
+                    }
+                }
+            } break;
+            case LIGHT_OMNI: {
+                this.set_shader_condition(SHADER_DEF.LIGHT_MODE_OMNI, true);
+
+                if (!this.state.render_no_shadows && p_light.light.shadow) {
+                    this.set_shader_condition(SHADER_DEF.USE_SHADOW, true);
+                    gl.activeTexture(gl.TEXTURE0 + VSG.config.max_texture_image_units - 3);
+                    if (VSG.config.use_rgba_3d_shadows) {
+                        gl.bindTexture(gl.TEXTURE_2D, this.directional_shadow.gl_color);
+                    } else {
+                        gl.bindTexture(gl.TEXTURE_2D, this.directional_shadow.gl_depth);
+                    }
+                }
+            } break;
+            case LIGHT_SPOT: {
+                this.set_shader_condition(SHADER_DEF.LIGHT_MODE_SPOT, true);
 
                 if (!this.state.render_no_shadows && p_light.light.shadow) {
                     this.set_shader_condition(SHADER_DEF.USE_SHADOW, true);
@@ -1847,6 +1872,41 @@ export class RasterizerScene {
 
                     CameraMatrix.free(matrix);
                 }
+            } break;
+            case LIGHT_OMNI: {
+                let position = p_view_transform.xform_inv(p_light.transform.origin);
+
+                uniforms.LIGHT_POSITION = position.as_array(uniforms.LIGHT_POSITION);
+
+                uniforms.light_range[0] = light.param[LIGHT_PARAM_RANGE];
+                uniforms.LIGHT_ATTENUATION[0] = light.param[LIGHT_PARAM_ATTENUATION];
+
+                if (!this.state.render_no_shadows && light.shadow && shadow_atlas) {
+                }
+            } break;
+            case LIGHT_SPOT: {
+                let position = p_view_transform.xform_inv(p_light.transform.origin);
+
+                uniforms.LIGHT_POSITION = position.as_array(uniforms.LIGHT_POSITION);
+
+                let direction = p_view_transform.inverse()
+                    .basis.xform(p_light.transform.basis.xform(Vector3.new(0, 0, -1)))
+                    .normalize()
+                uniforms.LIGHT_DIRECTION = direction.as_array(uniforms.LIGHT_DIRECTION);
+
+                let attenuation = light.param[LIGHT_PARAM_ATTENUATION];
+                let range = light.param[LIGHT_PARAM_RANGE];
+                let spot_attenuation = light.param[LIGHT_PARAM_SPOT_ATTENUATION];
+                let angle = light.param[LIGHT_PARAM_SPOT_ANGLE];
+                angle = Math.cos(deg2rad(angle));
+                uniforms.LIGHT_ATTENUATION[0] = attenuation;
+                uniforms.LIGHT_SPOT_ATTENUATION[0] = spot_attenuation;
+                uniforms.LIGHT_SPOT_RANGE[0] = spot_attenuation;
+                uniforms.LIGHT_SPOT_ANGLE[0] = angle;
+                uniforms.light_range[0] = range;
+
+                Vector3.free(direction);
+                Vector3.free(position);
             } break;
         }
     }

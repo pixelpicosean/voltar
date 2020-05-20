@@ -674,6 +674,272 @@
       }
     ]
   },
+  "res://scene/spot.tscn": {
+    "type": "PackedScene",
+    "sub": [
+      {
+        "id": 1,
+        "type": "QuadMesh"
+      },
+      {
+        "id": 2,
+        "type": "SpatialMaterial",
+        "albedo_color": {
+          "r": 0.247059,
+          "g": 0.435294,
+          "b": 0.545098,
+          "a": 1
+        }
+      }
+    ],
+    "nodes": [
+      {
+        "type": "Spatial",
+        "name": "spot"
+      },
+      {
+        "type": "MeshInstance",
+        "name": "ground",
+        "parent": ".",
+        "transform": [
+          6.02186,
+          0,
+          0,
+          0,
+          -4.37114e-8,
+          1,
+          0,
+          -6.02186,
+          -2.63224e-7,
+          0,
+          0,
+          0
+        ],
+        "mesh": "@sub#1",
+        "material": [
+          "@sub#2"
+        ]
+      },
+      {
+        "type": "MeshInstance",
+        "name": "ground2",
+        "parent": ".",
+        "transform": [
+          0.548706,
+          -8.87609e-7,
+          0.99584,
+          -5.9968,
+          -0.0000010664,
+          0.0911193,
+          9.81084e-7,
+          -6.02186,
+          -1.62921e-7,
+          -3,
+          3,
+          0
+        ],
+        "mesh": "@sub#1",
+        "material": [
+          "@sub#2"
+        ]
+      },
+      {
+        "type": "MeshInstance",
+        "name": "ground3",
+        "parent": ".",
+        "transform": [
+          1.15059e-14,
+          6.02186,
+          2.19512e-7,
+          -6.02186,
+          1.91069e-15,
+          -4.37114e-8,
+          -2.63224e-7,
+          2.19512e-7,
+          1,
+          0,
+          3,
+          -3
+        ],
+        "mesh": "@sub#1",
+        "material": [
+          "@sub#2"
+        ]
+      },
+      {
+        "type": "SpotLight",
+        "name": "spot_light",
+        "parent": ".",
+        "transform": [
+          0.733801,
+          -0.676512,
+          -0.0621864,
+          -8.00235e-9,
+          -0.0915362,
+          0.995802,
+          -0.679365,
+          -0.73072,
+          -0.0671694,
+          -2.5814,
+          3.91953,
+          -2.13665
+        ],
+        "light_energy": 7.62,
+        "spot_angle": 26.7187
+      },
+      {
+        "type": "Camera",
+        "name": "camera",
+        "parent": ".",
+        "transform": [
+          0.528275,
+          0,
+          0.849073,
+          0,
+          1,
+          0,
+          -0.849073,
+          0,
+          0.528275,
+          1.73095,
+          1.19954,
+          1.32291
+        ]
+      }
+    ]
+  },
+  "res://scene/omni.tscn": {
+    "type": "PackedScene",
+    "sub": [
+      {
+        "id": 1,
+        "type": "QuadMesh"
+      },
+      {
+        "id": 2,
+        "type": "SpatialMaterial",
+        "albedo_color": {
+          "r": 0.247059,
+          "g": 0.435294,
+          "b": 0.545098,
+          "a": 1
+        }
+      }
+    ],
+    "nodes": [
+      {
+        "type": "Spatial",
+        "name": "spot"
+      },
+      {
+        "type": "MeshInstance",
+        "name": "ground",
+        "parent": ".",
+        "transform": [
+          6.02186,
+          0,
+          0,
+          0,
+          -4.37114e-8,
+          1,
+          0,
+          -6.02186,
+          -2.63224e-7,
+          0,
+          0,
+          0
+        ],
+        "mesh": "@sub#1",
+        "material": [
+          "@sub#2"
+        ]
+      },
+      {
+        "type": "MeshInstance",
+        "name": "ground2",
+        "parent": ".",
+        "transform": [
+          1.59839e-13,
+          -9.81086e-7,
+          1,
+          -6.02185,
+          -9.81086e-7,
+          0,
+          9.81084e-7,
+          -6.02186,
+          -1.62921e-7,
+          -3,
+          3,
+          0
+        ],
+        "mesh": "@sub#1",
+        "material": [
+          "@sub#2"
+        ]
+      },
+      {
+        "type": "MeshInstance",
+        "name": "ground3",
+        "parent": ".",
+        "transform": [
+          1.15059e-14,
+          6.02186,
+          2.19512e-7,
+          -6.02186,
+          1.91069e-15,
+          -4.37114e-8,
+          -2.63224e-7,
+          2.19512e-7,
+          1,
+          0,
+          3,
+          -3
+        ],
+        "mesh": "@sub#1",
+        "material": [
+          "@sub#2"
+        ]
+      },
+      {
+        "type": "Camera",
+        "name": "camera",
+        "parent": ".",
+        "transform": [
+          0.528275,
+          0,
+          0.849073,
+          0,
+          1,
+          0,
+          -0.849073,
+          0,
+          0.528275,
+          1.73095,
+          1.19954,
+          1.32291
+        ]
+      },
+      {
+        "type": "OmniLight",
+        "name": "omni_light",
+        "parent": ".",
+        "transform": [
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          -2.69615,
+          0.765686,
+          -0.816134
+        ]
+      }
+    ]
+  },
   "res://scene/demo.tscn": {
     "type": "PackedScene",
     "ext": {

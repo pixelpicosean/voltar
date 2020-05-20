@@ -1,0 +1,29 @@
+[gd_scene load_steps=3 format=2]
+
+[sub_resource type="QuadMesh" id=1]
+
+[sub_resource type="SpatialMaterial" id=2]
+albedo_color = Color( 0.247059, 0.435294, 0.545098, 1 )
+
+[node name="spot" type="Spatial"]
+
+[node name="ground" type="MeshInstance" parent="."]
+transform = Transform( 6.02186, 0, 0, 0, -4.37114e-08, 1, 0, -6.02186, -2.63224e-07, 0, 0, 0 )
+mesh = SubResource( 1 )
+material/0 = SubResource( 2 )
+
+[node name="ground2" type="MeshInstance" parent="."]
+transform = Transform( 1.59839e-13, -9.81086e-07, 1, -6.02185, -9.81086e-07, 0, 9.81084e-07, -6.02186, -1.62921e-07, -3, 3, 0 )
+mesh = SubResource( 1 )
+material/0 = SubResource( 2 )
+
+[node name="ground3" type="MeshInstance" parent="."]
+transform = Transform( 1.15059e-14, 6.02186, 2.19512e-07, -6.02186, 1.91069e-15, -4.37114e-08, -2.63224e-07, 2.19512e-07, 1, 0, 3, -3 )
+mesh = SubResource( 1 )
+material/0 = SubResource( 2 )
+
+[node name="camera" type="Camera" parent="."]
+transform = Transform( 0.528275, 0, 0.849073, 0, 1, 0, -0.849073, 0, 0.528275, 1.73095, 1.19954, 1.32291 )
+
+[node name="omni_light" type="OmniLight" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.69615, 0.765686, -0.816134 )

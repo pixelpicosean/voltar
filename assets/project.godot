@@ -21,7 +21,7 @@ _global_script_class_icons={
 [application]
 
 config/name="voltar"
-run/main_scene="res://scene/demo_3d.tscn"
+run/main_scene="res://scene/spot.tscn"
 config/icon="res://icon.png"
 
 [display]

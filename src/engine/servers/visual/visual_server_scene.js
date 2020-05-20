@@ -18,13 +18,20 @@ import {
     INSTANCE_TYPE_REFLECTION_PROBE,
     INSTANCE_TYPE_LIGHTMAP_CAPTURE,
     INSTANCE_TYPE_GI_PROBE,
+    INSTANCE_GEOMETRY_MASK,
+
     LIGHT_DIRECTIONAL,
+    LIGHT_SPOT,
+
     LIGHT_PARAM_SHADOW_MAX_DISTANCE,
     LIGHT_PARAM_SHADOW_SPLIT_1_OFFSET,
+    LIGHT_PARAM_RANGE,
+    LIGHT_PARAM_SPOT_ANGLE,
+
     LIGHT_DIRECTIONAL_SHADOW_DEPTH_RANGE_OPTIMIZED,
     LIGHT_DIRECTIONAL_SHADOW_DEPTH_RANGE_STABLE,
-    INSTANCE_GEOMETRY_MASK,
     SHADOW_CASTING_SETTING_SHADOWS_ONLY,
+    LIGHT_OMNI,
 } from '../visual_server';
 import { VSG } from './visual_server_globals';
 
@@ -125,9 +132,7 @@ export class Instance_t {
         /** @type {SelfList<Instance_t>} */
         this.dependency_item = new SelfList(this);
 
-        this.lightmap_capture = null;
         this.lightmap = null;
-        this.lightmap_capture_data = null;
 
         this.octree_id = 0;
         /** @type {Scenario_t} */
@@ -352,6 +357,7 @@ export class VisualServerScene {
             let geom = /** @type {InstanceGeometryData} */(A.base_data);
 
             light.geometries.push(A);
+            geom.lighting.push(B);
 
             if (geom.can_cast_shadows) {
                 light.shadow_dirty = true;
@@ -798,6 +804,7 @@ export class VisualServerScene {
         let z_far = p_cam_projection.get_z_far();
 
         this.instance_cull_count = p_scenario.octree.cull_convex(planes, this.instance_cull_result, MAX_INSTANCE_CULL);
+        this.light_cull_count = 0;
 
         for (let i = 0; i < this.instance_cull_count; i++) {
             let inst = this.instance_cull_result[i];
@@ -855,6 +862,7 @@ export class VisualServerScene {
         this.directional_light_count = 0;
         let start = this.light_cull_count;
 
+        // - directional
         let lights_with_shadow = Array(p_scenario.directional_lights.length);
         let directional_shadow_count = 0;
 
@@ -881,6 +889,8 @@ export class VisualServerScene {
         for (let i = 0; i < directional_shadow_count; i++) {
             this._light_instance_update_shadow(lights_with_shadow[i], p_cam_transform, p_cam_projection, p_cam_ortho, p_shadow_atlas, p_scenario);
         }
+
+        // - shadow map
     }
 
     /**
@@ -1144,6 +1154,42 @@ export class VisualServerScene {
                     Transform.free(transform);
                     CameraMatrix.free(camera_matrix);
                 }
+            } break;
+            case LIGHT_OMNI: {
+            } break;
+            case LIGHT_SPOT: {
+                let radius = light_base.param[LIGHT_PARAM_RANGE];
+                let angle = light_base.param[LIGHT_PARAM_SPOT_ANGLE];
+
+                let cm = CameraMatrix.new();
+                cm.set_perspective(angle * 2, 1, 0.01, radius);
+
+                let planes = cm.get_projection_planes(light_transform);
+                let cull_count = p_scenario.octree.cull_convex(planes, this.instance_shadow_cull_result, MAX_INSTANCE_CULL, INSTANCE_GEOMETRY_MASK);
+
+                let near_plane = Plane.new().set_point_and_normal(light_transform.origin, light_transform.basis.get_axis(2).negate());
+                for (let j = 0; j < cull_count; j++) {
+                    let instance = this.instance_shadow_cull_result[j];
+                    let base_data = /** @type {InstanceGeometryData} */(instance.base_data);
+                    if (!instance.visible || !((1 << instance.base_type) & INSTANCE_GEOMETRY_MASK) || !base_data.can_cast_shadows) {
+                        cull_count--;
+                        this.instance_shadow_cull_result[j] = this.instance_shadow_cull_result[cull_count];
+                        this.instance_shadow_cull_result[cull_count] = instance;
+                        j--;
+                    } else {
+                        instance.depth = near_plane.distance_to(instance.transform.origin);
+                        instance.depth_layer = 0;
+                    }
+                }
+
+                VSG.scene_render.light_instance_set_shadow_transform(
+                    light.instance,
+                    cm, light_transform,
+                    radius, 0, 0
+                );
+                VSG.scene_render.render_shadow(light.instance, p_shadow_atlas, 0, this.instance_shadow_cull_result, cull_count);
+
+                CameraMatrix.free(cm);
             } break;
         }
 

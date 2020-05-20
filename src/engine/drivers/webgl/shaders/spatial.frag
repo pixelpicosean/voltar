@@ -32,6 +32,10 @@ uniform float ambient_energy;
     #ifdef USE_SHADOW
         uniform highp vec2 shadow_pixel_size;
 
+        #if defined(LIGHT_MODE_SPOT)
+            uniform highp sampler2D light_shadow_atlas; // tex: -3
+        #endif
+
         #ifdef LIGHT_MODE_DIRECTIONAL
             uniform highp sampler2D light_directional_shadow; // tex: -3
             uniform highp vec4 light_split_offsets;
@@ -71,6 +75,18 @@ vec3 F0(float metallic, float specular, vec3 albedo) {
 
 #ifdef USE_LIGHTING
 
+    // This approximates G_GGX_2cos(cos_theta_l, alpha) * G_GGX_2cos(cos_theta_v, alpha)
+    // See Filament docs, Specular G section.
+    float V_GGX(float cos_theta_l, float cos_theta_v, float alpha) {
+        return 0.5 / mix(2.0 * cos_theta_l * cos_theta_v, cos_theta_l + cos_theta_v, alpha);
+    }
+
+    float D_GGX(float cos_theta_m, float alpha) {
+        float alpha2 = alpha * alpha;
+        float d = 1.0 + (alpha2 - 1.0) * cos_theta_m * cos_theta_m;
+        return alpha2 / (M_PI * d * d);
+    }
+
     float SchlickFresnel(float u) {
         float m = 1.0 - u;
         float m2 = m * m;
@@ -102,15 +118,15 @@ vec3 F0(float metallic, float specular, vec3 albedo) {
         float NdotV = dot(N, V);
         float cNdotV = max(abs(NdotV), 1e-6);
 
-        #if defined(DIFFUSE_BURLEY) || defined(SPECULAR_BLINN)
+        #if defined(DIFFUSE_BURLEY) || defined(SPECULAR_BLINN) || defined(SPECULAR_SCHLICK_GGX)
             vec3 H = normalize(V + L);
         #endif
 
-        #if defined(SPECULAR_BLINN)
+        #if defined(SPECULAR_BLINN) || defined(SPECULAR_SCHLICK_GGX)
             float cNdotH = max(dot(N, H), 0.0);
         #endif
 
-        #if defined(DIFFUSE_BURLEY)
+        #if defined(DIFFUSE_BURLEY) || defined(SPECULAR_SCHLICK_GGX)
             float cLdotH = max(dot(L, H), 0.0);
         #endif
 
@@ -153,7 +169,11 @@ vec3 F0(float metallic, float specular, vec3 albedo) {
 
         // specular
         if (roughness > 0.0) {
-            float specular_NL = 0.0;
+            #if defined(SPECULAR_SCHLICK_GGX)
+                vec3 specular_NL = vec3(0.0);
+            #else
+                float specular_NL = 0.0;
+            #endif
 
             #if defined(SPECULAR_BLINN)
                 {
@@ -179,10 +199,24 @@ vec3 F0(float metallic, float specular, vec3 albedo) {
                     mid *= mid;
                     specular_NL = smoothstep(mid - roughness * 0.5, mid + roughness * 0.5, RdotV) * mid;
                 }
+            #elif defined(SPECULAR_SCHLICK_GGX)
+                float alpha_ggx = roughness * roughness;
+                float D = D_GGX(cNdotH, alpha_ggx);
+                float G = V_GGX(cNdotL, cNdotV, alpha_ggx);
+
+                vec3 f0 = F0(metallic, specular, diffuse_color);
+                float cLdotH5 = SchlickFresnel(cLdotH);
+                vec3 F = mix(vec3(cLdotH5), vec3(1.0), f0);
+
+                specular_NL = cNdotL * D * F * G;
             #endif
 
             specular_light += light_color * specular_NL * specular_blob_intensity * attenuation;
         }
+
+        #ifdef USE_SHADOW_TO_OPACITY
+            alpha = min(alpha, clamp(1.0 - length(attenuation), 0.0, 1.0));
+        #endif
 
         /* LIGHT_CODE_END */
     }
@@ -312,9 +346,86 @@ void main() {
         vec3 light_att = vec3(1.0);
 
         #ifdef LIGHT_MODE_OMNI
+            vec3 light_vec = LIGHT_POSITION - vertex;
+            float light_length = length(light_vec);
+
+            float normalized_distance = light_length / light_range;
+            if (normalized_distance < 1.0) {
+                float omni_attenuation = pow(1.0 - normalized_distance, LIGHT_ATTENUATION);
+                light_att = vec3(omni_attenuation);
+            } else {
+                light_att = vec3(0.0);
+            }
+            L = normalize(light_vec);
+
+            #ifdef USE_SHADOW
+                {
+                    highp vec4 splane = shadow_coord;
+                    float shadow_len = length(splane.xyz);
+
+                    splane.xyz = normalize(splane.xyz);
+
+                    vec4 clamp_rect = light_clamp;
+
+                    if (splane.z >= 0.0) {
+                        splane.z += 1.0;
+
+                        clamp_rect.y += clamp_rect.w;
+                    } else {
+                        splane.z = 1.0 - splane.z;
+                    }
+
+                    splane.xy /= splane.z;
+                    splane.xy = splane.xy * 0.5 + 0.5;
+                    splane.z = shadow_len / light_range;
+
+                    splane.xy = clamp_rect.xy + splane.xy * clamp_rect.zw;
+                    splane.w = 1.0;
+
+                    float shadow = sample_shadow(light_shadow_atlas, splane);
+
+                    light_att *= mix(shadow_color.rgb, vec3(1.0), shadow);
+                }
+            #endif
         #endif
 
         #ifdef LIGHT_MODE_SPOT
+            light_att = vec3(1.0);
+
+            vec3 light_rel_vec = LIGHT_POSITION - vertex;
+            float light_length = length(light_rel_vec);
+            float normalized_distance = light_length / light_range;
+
+            if (normalized_distance < 1.0) {
+                float spot_attenuation = pow(1.0 - normalized_distance, LIGHT_ATTENUATION);
+                vec3 spot_dir = LIGHT_DIRECTION;
+
+                float spot_cutoff = LIGHT_SPOT_ANGLE;
+                float angle = dot(-normalize(light_rel_vec), spot_dir);
+
+                if (angle > spot_cutoff) {
+                    float scos = max(angle, spot_cutoff);
+                    float spot_rim = max(0.0001, (1.0 - scos) / (1.0 - spot_cutoff));
+                    spot_attenuation *= 1.0 - pow(spot_rim, LIGHT_SPOT_ATTENUATION);
+
+                    light_att = vec3(spot_attenuation);
+                } else {
+                    light_att = vec3(0.0);
+                }
+            } else {
+                light_att = vec3(0.0);
+            }
+
+            L = normalize(light_rel_vec);
+
+            #ifdef USE_SHADOW
+                {
+                    highp vec4 splane = shadow_coord;
+
+                    float shadow = sample_shadow(light_shadow_atlas, splane);
+                    light_att *= mix(shadow_color.rgb, vec3(1.0), shadow);
+                }
+            #endif
         #endif
 
         #ifdef LIGHT_MODE_DIRECTIONAL
@@ -333,7 +444,7 @@ void main() {
 
         light_compute(
             normal_interp,
-            normalize(-LIGHT_DIRECTION),
+            L,
             view,
 
             LIGHT_COLOR.rgb,
