@@ -32,7 +32,7 @@ uniform float ambient_energy;
     #ifdef USE_SHADOW
         uniform highp vec2 shadow_pixel_size;
 
-        #if defined(LIGHT_MODE_SPOT)
+        #if defined(LIGHT_MODE_OMNI) || defined(LIGHT_MODE_SPOT)
             uniform highp sampler2D light_shadow_atlas; // tex: -3
         #endif
 
@@ -52,6 +52,10 @@ uniform float metallic;
 uniform float roughness;
 
 /* GLOBALS */
+
+#ifdef RENDER_DEPTH_DUAL_PARABOLOID
+    varying highp float dp_clip;
+#endif
 
 #if defined(RENDER_DEPTH) && defined(USE_RGBA_SHADOWS)
     varying highp vec4 position_interp;
@@ -264,6 +268,12 @@ vec3 F0(float metallic, float specular, vec3 albedo) {
 #endif
 
 void main() {
+    #ifdef RENDER_DEPTH_DUAL_PARABOLOID
+        if (dp_clip > 0.0) {
+            discard;
+        }
+    #endif
+
     highp vec3 vertex = vertex_interp;
     vec3 NORMAL = normalize(normal_interp);
     vec2 UV = vec2(0.0);

@@ -165,8 +165,7 @@ export function rad2deg(rad) {
  * @return {number}
  */
 export function nearest_po2(v) {
-    // @ts-ignore
-    v += v === 0;
+    if (v === 0) return 0;
     --v;
     v |= v >>> 1;
     v |= v >>> 2;

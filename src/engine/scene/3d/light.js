@@ -24,6 +24,7 @@ import {
     LIGHT_PARAM_SHADOW_SPLIT_3_OFFSET,
 
     LIGHT_DIRECTIONAL_SHADOW_DEPTH_RANGE_STABLE,
+    LIGHT_OMNI_SHADOW_DETAIL_HORIZONTAL,
 } from "engine/servers/visual_server";
 import { VSG } from "engine/servers/visual/visual_server_globals";
 
@@ -261,6 +262,8 @@ export class OmniLight extends Light {
 
         this.shadow_mode = 0;
         this.shadow_detail = 0;
+
+        this.set_shadow_detail(LIGHT_OMNI_SHADOW_DETAIL_HORIZONTAL);
     }
 
     /**
@@ -276,6 +279,7 @@ export class OmniLight extends Light {
      */
     set_shadow_detail(p_detail) {
         this.shadow_detail = p_detail;
+        VSG.storage.light_omni_set_shadow_detail(this.light, p_detail);
     }
 
     _load_data(data) {

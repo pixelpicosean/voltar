@@ -1,5 +1,5 @@
 import { List, SelfList } from 'engine/core/self_list';
-import { clamp, stepify } from 'engine/core/math/math_funcs';
+import { clamp, stepify, deg2rad } from 'engine/core/math/math_funcs';
 import { Vector2, Vector2Like } from 'engine/core/math/vector2';
 import { Vector3Like, Vector3 } from 'engine/core/math/vector3';
 import { AABB } from 'engine/core/math/aabb';
@@ -32,6 +32,7 @@ import {
     LIGHT_DIRECTIONAL_SHADOW_DEPTH_RANGE_STABLE,
     SHADOW_CASTING_SETTING_SHADOWS_ONLY,
     LIGHT_OMNI,
+    LIGHT_OMNI_SHADOW_DUAL_PARABOLOID,
 } from '../visual_server';
 import { VSG } from './visual_server_globals';
 
@@ -330,7 +331,6 @@ export class VisualServerScene {
     scenario_create() {
         let s = new Scenario_t;
 
-        // FIXME: remove these we don't need GI and reflection
         s.octree.pair_callback = this._instance_pair.bind(this);
         s.octree.unpair_callback = this._instance_unpair.bind(this);
 
@@ -891,6 +891,98 @@ export class VisualServerScene {
         }
 
         // - shadow map
+        {
+            for (let i = 0; i < this.light_cull_count; i++) {
+                let inst = this.light_cull_result[i];
+
+                let light_base = /** @type {Light_t} */(inst.base);
+
+                if (!p_shadow_atlas || !light_base.shadow) {
+                    continue;
+                }
+
+                let light = /** @type {InstanceLightData} */(inst.base_data);
+
+                let coverage = 0.0;
+
+                {
+                    let cam_xf = p_cam_transform.clone();
+                    let zn = p_cam_projection.get_z_near();
+                    let p = Plane.new().set_point_and_normal(
+                        cam_xf.basis.get_axis(2).scale(-zn).add(cam_xf.origin),
+                        cam_xf.basis.get_axis(2).negate()
+                    );
+
+                    let vp_half_extents = p_cam_projection.get_viewport_half_extents();
+
+                    switch (light_base.type) {
+                        case LIGHT_OMNI: {
+                            let radius = light_base.param[LIGHT_PARAM_RANGE];
+
+                            let points = [
+                                inst.transform.origin.clone(),
+                                cam_xf.basis.get_axis(0).scale(radius).add(inst.transform.origin),
+                            ];
+
+                            if (!p_cam_ortho) {
+                                for (let j = 0; j < 2; j++) {
+                                    if (p.distance_to(points[j]) < 0) {
+                                        points[j].z = -zn;
+                                    }
+
+                                    p.intersects_segment(cam_xf.origin, points[j], points[j]);
+                                }
+                            }
+
+                            let screen_diameter = points[0].distance_to(points[1]) * 2;
+                            coverage = screen_diameter / (vp_half_extents.x + vp_half_extents.y);
+                        } break;
+                        case LIGHT_SPOT: {
+                            let radius = light_base.param[LIGHT_PARAM_RANGE];
+                            let angle = light_base.param[LIGHT_PARAM_SPOT_ANGLE];
+
+                            let w = radius * Math.sin(deg2rad(angle));
+                            let d = radius * Math.cos(deg2rad(angle));
+
+                            let base = inst.transform.basis.get_axis(2).normalize().scale(-d)
+                                .add(inst.transform.origin)
+
+                            let points = [
+                                base,
+                                cam_xf.basis.get_axis(0).scale(w).add(base),
+                            ];
+
+                            if (!p_cam_ortho) {
+                                for (let j = 0; j < 2; j++) {
+                                    if (p.distance_to(points[j]) < 0) {
+                                        points[j].z = -zn;
+                                    }
+
+                                    p.intersects_segment(cam_xf.origin, points[j], points[j]);
+                                }
+                            }
+
+                            let screen_diameter = points[0].distance_to(points[1]) * 2;
+                            coverage = screen_diameter / (vp_half_extents.x + vp_half_extents.y);
+                        } break;
+                    }
+
+                    Plane.free(p);
+                    Transform.free(cam_xf);
+                }
+
+                if (light.shadow_dirty) {
+                    light.last_version++;
+                    light.shadow_dirty = false;
+                }
+
+                let redraw = VSG.scene_render.shadow_atlas_update_light(p_shadow_atlas, light.instance, coverage, light.last_version);
+
+                if (redraw) {
+                    light.shadow_dirty = this._light_instance_update_shadow(inst, p_cam_transform, p_cam_projection, p_cam_ortho, p_shadow_atlas, p_scenario);
+                }
+            }
+        }
     }
 
     /**
@@ -1156,6 +1248,56 @@ export class VisualServerScene {
                 }
             } break;
             case LIGHT_OMNI: {
+                let shadow_mode = light_base.omni_shadow_mode;
+
+                if (shadow_mode === LIGHT_OMNI_SHADOW_DUAL_PARABOLOID) {
+                    for (let i = 0; i < 2; i++) {
+                        let radius = light_base.param[LIGHT_PARAM_RANGE];
+
+                        let z = i === 0 ? -1 : 1;
+                        /** @type {Plane[]} */
+                        let planes = Array(5);
+                        let vec = Vector3.new();
+                        planes[0] = light_transform.xform_plane(Plane.new().set(0, 0, z, radius));
+                        vec.set(1, 0, z).normalize();
+                        planes[1] = light_transform.xform_plane(Plane.new().set(vec.x, vec.y, vec.z, radius));
+                        vec.set(-1, 0, z).normalize();
+                        planes[2] = light_transform.xform_plane(Plane.new().set(vec.x, vec.y, vec.z, radius));
+                        vec.set(0, 1, z).normalize();
+                        planes[3] = light_transform.xform_plane(Plane.new().set(vec.x, vec.y, vec.z, radius));
+                        vec.set(0, -1, z).normalize();
+                        planes[4] = light_transform.xform_plane(Plane.new().set(vec.x, vec.y, vec.z, radius));
+                        Vector3.free(vec);
+
+                        let cull_count = p_scenario.octree.cull_convex(planes, this.instance_shadow_cull_result, MAX_INSTANCE_CULL, INSTANCE_GEOMETRY_MASK);
+
+                        let near_plane = Plane.new().set_point_and_normal(light_transform.origin, light_transform.basis.get_axis(2).scale(z));
+
+                        for (let j = 0; j < cull_count; j++) {
+                            let instance = this.instance_shadow_cull_result[j];
+                            let geom = /** @type {InstanceGeometryData} */(instance.base_data);
+                            if (!instance.visible || !((1 << instance.base_type) & INSTANCE_GEOMETRY_MASK) || !geom.can_cast_shadows) {
+                                cull_count--;
+                                let t = this.instance_shadow_cull_result[j];
+                                this.instance_shadow_cull_result[j] = this.instance_shadow_cull_result[cull_count]
+                                this.instance_shadow_cull_result[cull_count] = t;
+                                j--;
+                            } else {
+                                instance.depth = near_plane.distance_to(instance.transform.origin);
+                                instance.depth_layer = 0;
+                            }
+                        }
+
+                        let cm = CameraMatrix.new();
+                        VSG.scene_render.light_instance_set_shadow_transform(
+                            light.instance,
+                            cm, light_transform,
+                            radius, 0, i
+                        )
+                        CameraMatrix.free(cm);
+                        VSG.scene_render.render_shadow(light.instance, p_shadow_atlas, i, this.instance_shadow_cull_result, cull_count);
+                    }
+                }
             } break;
             case LIGHT_SPOT: {
                 let radius = light_base.param[LIGHT_PARAM_RANGE];

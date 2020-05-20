@@ -16,5 +16,5 @@ export class MainScene extends v.Spatial {
 
 // v.attach_script('res://scene/demo.tscn', MainScene);
 // v.attach_script('res://scene/demo_3d.tscn', MainScene);
-v.attach_script('res://scene/spot.tscn', MainScene);
-// v.attach_script('res://scene/omni.tscn', MainScene);
+// v.attach_script('res://scene/spot.tscn', MainScene);
+v.attach_script('res://scene/omni.tscn', MainScene);

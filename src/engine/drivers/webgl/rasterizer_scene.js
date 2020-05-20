@@ -1,4 +1,4 @@
-import { lerp, deg2rad } from 'engine/core/math/math_funcs';
+import { lerp, deg2rad, nearest_po2 } from 'engine/core/math/math_funcs';
 import { Vector2 } from 'engine/core/math/vector2';
 import { Vector3 } from 'engine/core/math/vector3';
 import { Rect2 } from 'engine/core/math/rect2';
@@ -24,6 +24,7 @@ import {
     LIGHT_PARAM_ATTENUATION,
     LIGHT_PARAM_SPOT_ANGLE,
     LIGHT_PARAM_SPOT_ATTENUATION,
+    LIGHT_OMNI_SHADOW_DETAIL_HORIZONTAL,
 } from 'engine/servers/visual_server';
 import {
     Instance_t,
@@ -153,6 +154,8 @@ class Shadow_t {
     constructor() {
         this.version = 0;
         this.alloc_tick = 0;
+        /** @type {LightInstance_t} */
+        this.owner = null;
     }
 }
 
@@ -163,6 +166,9 @@ class Quadrant_t {
         this.shadows = [];
     }
 }
+
+const QUADRANT_SHIFT = 27;
+const SHADOW_INDEX_MASK = (1 << QUADRANT_SHIFT) - 1;
 
 export class ShadowAtlas_t {
     constructor() {
@@ -184,6 +190,9 @@ export class ShadowAtlas_t {
         this.gl_depth = null;
         /** @type {WebGLTexture} */
         this.gl_color = null;
+
+        /** @type {Map<LightInstance_t, number>} */
+        this.shadow_owners = new Map;
     }
 }
 
@@ -212,6 +221,9 @@ export class LightInstance_t {
         this.light_directional_index = 0;
 
         this.directional_rect = new Rect2;
+
+        /** @type {Set<ShadowAtlas_t>} */
+        this.shadow_atlases = new Set;
     }
 }
 
@@ -431,6 +443,8 @@ const SHADER_DEF = {
 
     FOG_DEPTH_ENABLED         : 1 << 27,
     FOG_HEIGHT_ENABLED        : 1 << 28,
+
+    RENDER_DEPTH_DUAL_PARABOLOID: 1 << 29,
 };
 
 const DEFAULT_SPATIAL_CONDITION =
@@ -518,6 +532,9 @@ export class RasterizerScene {
             used_screen_texture: false,
 
             render_no_shadows: false,
+            shadow_is_dual_paraboloid: false,
+            dual_parboloid_direction: 0,
+            dual_parboloid_zfar: 0,
 
             viewport_size: new Vector2,
             screen_pixel_size: new Vector2,
@@ -594,6 +611,10 @@ export class RasterizerScene {
                     0, 0, 0, 1,
                 ],
                 light_split_offsets: [0, 0, 0, 0],
+                light_clamp: [0, 0, 0, 0],
+                dp_clip: [0],
+                shadow_dual_paraboloid_render_zfar: [0],
+                shadow_dual_paraboloid_render_side: [0],
 
                 // fog
                 fog_color_base: [0.5, 0.5, 0.5, 0],
@@ -614,6 +635,8 @@ export class RasterizerScene {
             conditions: 0,
             prev_conditions: 0,
         };
+
+        this.shadow_atlas_realloc_tolerance_msec = 500;
 
         this.render_list = new RenderList_t;
 
@@ -794,6 +817,330 @@ export class RasterizerScene {
             atlas.size_order[i] = i;
         }
         return atlas;
+    }
+
+    /**
+     * @param {ShadowAtlas_t} shadow_atlas
+     * @param {number} p_size
+     */
+    shadow_atlas_set_size(shadow_atlas, p_size) {
+        p_size = nearest_po2(p_size);
+
+        if (p_size === shadow_atlas.size) {
+            return;
+        }
+
+        const gl = this.gl;
+
+        // erase old atlas
+        if (shadow_atlas.gl_fbo) {
+            if (VSG.config.use_rgba_3d_shadows) {
+                gl.deleteRenderbuffer(shadow_atlas.gl_depth);
+            } else {
+                gl.deleteTexture(shadow_atlas.gl_depth);
+            }
+            gl.deleteFramebuffer(shadow_atlas.gl_fbo);
+            if (shadow_atlas.gl_color) {
+                gl.deleteTexture(shadow_atlas.gl_color);
+            }
+        }
+
+        // erase shadow atlas ref from lights
+        for (let [li, _] of shadow_atlas.shadow_owners) {
+            li.shadow_atlases.delete(shadow_atlas);
+        }
+
+        shadow_atlas.shadow_owners.clear();
+
+        shadow_atlas.size = p_size;
+
+        if (shadow_atlas.size) {
+            shadow_atlas.gl_fbo = gl.createFramebuffer();
+            gl.bindFramebuffer(gl.FRAMEBUFFER, shadow_atlas.gl_fbo);
+
+            // create a depth texture
+            gl.activeTexture(gl.TEXTURE0);
+
+            if (VSG.config.use_rgba_3d_shadows) {
+                shadow_atlas.gl_depth = gl.createRenderbuffer();
+                gl.bindRenderbuffer(gl.RENDERBUFFER, shadow_atlas.gl_depth);
+                gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, shadow_atlas.size, shadow_atlas.size);
+                gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, shadow_atlas.gl_depth);
+
+                shadow_atlas.gl_color = gl.createTexture();
+                gl.bindTexture(gl.TEXTURE_2D, shadow_atlas.gl_color);
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, shadow_atlas.size, shadow_atlas.size, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+                gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, shadow_atlas.gl_color, 0);
+            } else {
+                shadow_atlas.gl_depth = gl.createTexture();
+                gl.bindTexture(gl.TEXTURE_2D, shadow_atlas.gl_depth);
+                gl.texImage2D(gl.TEXTURE_2D, 0, VSG.config.depth_internalformat, shadow_atlas.size, shadow_atlas.size, 0, gl.DEPTH_COMPONENT, VSG.config.depth_type, null);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+                gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, shadow_atlas.gl_depth, 0);
+            }
+            gl.viewport(0, 0, shadow_atlas.size, shadow_atlas.size);
+
+            gl.depthMask(true);
+
+            gl.clearDepth(0.0);
+            gl.clear(gl.DEPTH_BUFFER_BIT);
+
+            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        }
+    }
+
+    /**
+     * @param {ShadowAtlas_t} shadow_atlas
+     * @param {number[]} p_quadrants
+     * @param {number} p_quadrant_count
+     * @param {number} p_current_subdiv
+     * @param {number} p_tick
+     * @param {{ quadrant: number, shadow: number }} result
+     */
+    _shadow_atlas_find_shadow(shadow_atlas, p_quadrants, p_quadrant_count, p_current_subdiv, p_tick, result) {
+        for (let i = p_quadrant_count - 1; i >= 0; i--) {
+            let qidx = p_quadrants[i];
+
+            if (shadow_atlas.quadrants[qidx].subdivision === Math.floor(p_current_subdiv)) {
+                return false;
+            }
+
+            let sarr = shadow_atlas.quadrants[qidx].shadows;
+            let sc = sarr.length;
+
+            let found_free_idx = -1;
+            let found_used_idx = -1;
+            let min_pass = 0;
+
+            for (let j = 0; j < sc; j++) {
+                if (!sarr[j].owner) {
+                    found_free_idx = j;
+                    break;
+                }
+
+                let sli = sarr[j].owner;
+
+                if (sli.last_scene_pass !== this.scene_pass) {
+                    if (p_tick - sarr[j].alloc_tick < this.shadow_atlas_realloc_tolerance_msec) {
+                        continue;
+                    }
+
+                    if (found_used_idx === -1 || sli.last_scene_pass < min_pass) {
+                        found_used_idx = j;
+                        min_pass = sli.last_scene_pass;
+                    }
+                }
+            }
+
+            if (found_free_idx === -1 && found_used_idx === -1) {
+                continue;
+            }
+
+            if (found_free_idx === -1 && found_used_idx !== -1) {
+                found_free_idx = found_used_idx;
+            }
+
+            result.quadrant = qidx;
+            result.shadow = found_free_idx;
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @param {ShadowAtlas_t} shadow_atlas
+     * @param {number} p_quadrant
+     * @param {number} p_subdivision
+     */
+    shadow_atlas_set_quadrant_subdivision(shadow_atlas, p_quadrant, p_subdivision) {
+        let subdiv = nearest_po2(Math.floor(p_subdivision));
+
+        subdiv = Math.floor(Math.sqrt(subdiv));
+
+        if (shadow_atlas.quadrants[p_quadrant].shadows.length === subdiv) {
+            return;
+        }
+
+        // erase all data from quadrant
+        for (let s of shadow_atlas.quadrants[p_quadrant].shadows) {
+            if (s.owner) {
+                shadow_atlas.shadow_owners.delete(s.owner);
+                s.owner.shadow_atlases.delete(shadow_atlas);
+            }
+        }
+
+        shadow_atlas.quadrants[p_quadrant].shadows.length = 0;
+        shadow_atlas.quadrants[p_quadrant].shadows.length = subdiv;
+        for (let i = 0; i < subdiv; i++) {
+            shadow_atlas.quadrants[p_quadrant].shadows[i] = new Shadow_t;
+        }
+        shadow_atlas.quadrants[p_quadrant].subdivision = subdiv;
+
+        // cache the smallest subdivision for faster allocation
+
+        shadow_atlas.smallest_subdiv = 1 << 30;
+
+        for (let i = 0; i < 4; i++) {
+            if (shadow_atlas.quadrants[i].subdivision) {
+                shadow_atlas.smallest_subdiv = Math.min(shadow_atlas.smallest_subdiv, shadow_atlas.quadrants[i].subdivision);
+            }
+        }
+
+        if (shadow_atlas.smallest_subdiv === 1 << 30) {
+            shadow_atlas.smallest_subdiv = 0;
+        }
+
+        // re-sort the quadrants
+
+        let swaps = 0;
+        do {
+            swaps = 0;
+
+            for (let i = 0; i < 3; i++) {
+                if (shadow_atlas.quadrants[shadow_atlas.size_order[i]].subdivision < shadow_atlas.quadrants[shadow_atlas.size_order[i + 1]].subdivision) {
+                    let t = shadow_atlas.size_order[i];
+                    shadow_atlas.size_order[i] = shadow_atlas.size_order[i + 1];
+                    shadow_atlas.size_order[i + 1] = t;
+                    swaps++;
+                }
+            }
+        } while (swaps > 0);
+    }
+
+    /**
+     * @param {ShadowAtlas_t} p_shadow_atlas
+     * @param {LightInstance_t} p_light_instance
+     * @param {number} p_coverage
+     * @param {number} p_light_version
+     */
+    shadow_atlas_update_light(p_shadow_atlas, p_light_instance, p_coverage, p_light_version) {
+        if (p_shadow_atlas.size === 0 || p_shadow_atlas.smallest_subdiv === 0) {
+            return false;
+        }
+
+        let quad_size = p_shadow_atlas.size >> 1;
+        let desired_fit = Math.min(quad_size / p_shadow_atlas.smallest_subdiv, nearest_po2(quad_size * p_coverage));
+
+        let valid_quadrants = [0, 0, 0, 0];
+        let valid_quadrant_count = 0;
+        let best_size = -1;
+        let best_subdiv = -1;
+
+        let result = {
+            quadrant: 0,
+            shadow: 0,
+        };
+
+        for (let i = 0; i < 4; i++) {
+            let q = p_shadow_atlas.size_order[i];
+            let sd = p_shadow_atlas.quadrants[q].subdivision;
+
+            if (sd === 0) continue;
+
+            let max_fit = quad_size / sd;
+
+            if (best_size !== -1 && max_fit > best_size) {
+                break;
+            }
+
+            valid_quadrants[valid_quadrant_count] = q;
+            valid_quadrant_count++;
+
+            best_subdiv = sd;
+
+            if (max_fit >= desired_fit) {
+                best_size = max_fit;
+            }
+        }
+
+        let tick = OS.get_singleton().get_ticks_msec();
+
+        if (p_shadow_atlas.shadow_owners.has(p_light_instance)) {
+            // light was already known!
+
+            let key = p_shadow_atlas.shadow_owners.get(p_light_instance);
+            let q = (key >> QUADRANT_SHIFT) & 0x03;
+            let s = key & SHADOW_INDEX_MASK;
+
+            let should_realloc = p_shadow_atlas.quadrants[q].subdivision !== Math.floor(best_subdiv) && (p_shadow_atlas.quadrants[q].shadows[s].alloc_tick - tick > this.shadow_atlas_realloc_tolerance_msec);
+
+            let should_redraw = p_shadow_atlas.quadrants[q].shadows[s].version !== p_light_version;
+
+            if (!should_realloc) {
+                p_shadow_atlas.quadrants[q].shadows[s].version = p_light_version;
+                return should_redraw;
+            }
+
+            // find a better place
+
+            if (this._shadow_atlas_find_shadow(p_shadow_atlas, valid_quadrants, valid_quadrant_count, p_shadow_atlas.quadrants[q].subdivision, tick, result)) {
+                let sh = p_shadow_atlas.quadrants[result.quadrant].shadows[result.shadow];
+
+                if (sh.owner) {
+                    p_shadow_atlas.shadow_owners.delete(sh.owner);
+                    sh.owner.shadow_atlases.delete(p_shadow_atlas);
+                }
+
+                // erase previous
+                p_shadow_atlas.quadrants[q].shadows[s].version = 0;
+                p_shadow_atlas.quadrants[q].shadows[s].owner = null;
+
+                sh.owner = p_light_instance;
+                sh.alloc_tick = tick;
+                sh.version = p_light_version;
+                p_light_instance.shadow_atlases.add(p_shadow_atlas);
+
+                // make a new key
+                key = result.quadrant << QUADRANT_SHIFT;
+                key |= result.shadow;
+
+                // update it in the map
+                p_shadow_atlas.shadow_owners.set(p_light_instance, key);
+
+                // mark it dirty
+                return true;
+            }
+
+            // no better place found, so we keep the current place
+            p_shadow_atlas.quadrants[q].shadows[s].version = p_light_version;
+
+            return should_redraw;
+        }
+
+        if (this._shadow_atlas_find_shadow(p_shadow_atlas, valid_quadrants, valid_quadrant_count, -1, tick, result)) {
+            let sh = p_shadow_atlas.quadrants[result.quadrant].shadows[result.shadow];
+
+            if (sh.owner) {
+                p_shadow_atlas.shadow_owners.delete(sh.owner);
+                sh.owner.shadow_atlases.delete(p_shadow_atlas);
+            }
+
+            sh.owner = p_light_instance;
+            sh.alloc_tick = tick;
+            sh.version = p_light_version;
+            p_light_instance.shadow_atlases.add(p_shadow_atlas);
+
+            // make a new key
+            let key = result.quadrant << QUADRANT_SHIFT;
+            key |= result.shadow;
+
+            // update it in the map
+            p_shadow_atlas.shadow_owners.set(p_light_instance, key);
+
+            // mark it dirty
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -1031,7 +1378,58 @@ export class RasterizerScene {
 
             gl_fbo = this.directional_shadow.gl_fbo;
         } else {
-            // TODO: shadow of omni and point lights
+            gl_fbo = p_shadow_atlas.gl_fbo;
+            let key = p_shadow_atlas.shadow_owners.get(light_instance);
+
+            let quadrant = (key >> QUADRANT_SHIFT) & 0x03;
+            let shadow = key >> SHADOW_INDEX_MASK;
+
+            let quadrant_size = p_shadow_atlas.size >> 1;
+
+            x = (quadrant & 1) * quadrant_size;
+            y = (quadrant >> 1) * quadrant_size;
+
+            let shadow_size = (quadrant_size / p_shadow_atlas.quadrants[quadrant].subdivision);
+            x += Math.floor(shadow % p_shadow_atlas.quadrants[quadrant].subdivision) * shadow_size;
+            y += Math.floor(shadow / p_shadow_atlas.quadrants[quadrant].subdivision) * shadow_size;
+
+            width = shadow_size;
+            height = shadow_size;
+
+            if (light.type === LIGHT_OMNI) {
+                if (false) {
+                    // TODO: cubemap omni shadow
+                } else {
+                    this.state.shadow_is_dual_paraboloid = true;
+                    light_projection.copy(light_instance.shadow_transforms[0].camera);
+                    light_transform.copy(light_instance.shadow_transforms[0].transform);
+
+                    if (light.omni_shadow_detail === LIGHT_OMNI_SHADOW_DETAIL_HORIZONTAL) {
+                        height /= 2;
+                        y += p_pass * height;
+                    } else {
+                        width /= 2;
+                        x += p_pass * width;
+                    }
+
+                    this.state.dual_parboloid_direction = p_pass === 0 ? 1 : -1;
+                    flip_facing = (p_pass === 1);
+                    zfar = light.param[LIGHT_PARAM_RANGE];
+                    bias = light.param[LIGHT_PARAM_SHADOW_BIAS];
+
+                    this.state.dual_parboloid_zfar = zfar;
+
+                    this.set_shader_condition(SHADER_DEF.RENDER_DEPTH_DUAL_PARABOLOID, true);
+                }
+            } else {
+                light_projection.copy(light_instance.shadow_transforms[0].camera);
+                light_transform.copy(light_instance.shadow_transforms[0].transform);
+
+                flip_facing = false;
+                zfar = light.param[LIGHT_PARAM_RANGE];
+                bias = light.param[LIGHT_PARAM_SHADOW_BIAS];
+                normal_bias = light.param[LIGHT_PARAM_SHADOW_NORMAL_BIAS];
+            }
         }
 
         this.render_list.clear();
@@ -1081,6 +1479,7 @@ export class RasterizerScene {
 
         this.set_shader_condition(SHADER_DEF.RENDER_DEPTH, false);
         this.set_shader_condition(SHADER_DEF.USE_RGBA_SHADOWS, false);
+        this.set_shader_condition(SHADER_DEF.RENDER_DEPTH_DUAL_PARABOLOID, false);
 
         if (this.storage.frame.current_rt) {
             gl.viewport(0, 0, this.storage.frame.current_rt.width, this.storage.frame.current_rt.height);
@@ -1518,7 +1917,7 @@ export class RasterizerScene {
                 }
 
                 if (light != prev_light) {
-                    this._setup_light_type(light);
+                    this._setup_light_type(light, p_shadow_atlas);
                     rebind = true;
                     rebind_light = true;
                 }
@@ -1608,6 +2007,10 @@ export class RasterizerScene {
                 if (p_shadow) {
                     global_uniforms.light_bias[0] = p_shadow_bias;
                     global_uniforms.light_normal_bias[0] = p_shadow_normal_bias;
+                    if (this.state.shadow_is_dual_paraboloid) {
+                        global_uniforms.shadow_dual_paraboloid_render_side[0] = this.state.dual_parboloid_direction;
+                        global_uniforms.shadow_dual_paraboloid_render_zfar[0] = this.state.dual_parboloid_zfar;
+                    }
                 } else {
                     if (p_env) {
                         global_uniforms.bg_energy = p_env.bg_energy;
@@ -1679,7 +2082,7 @@ export class RasterizerScene {
             prev_light = light;
         }
 
-        this._setup_light_type(null);
+        this._setup_light_type(null, null);
         this.set_shader_condition(SHADER_DEF.USE_SKELETON, false);
         this.set_shader_condition(SHADER_DEF.SHADLESS, false);
         this.set_shader_condition(SHADER_DEF.BASE_PASS, false);
@@ -1726,8 +2129,9 @@ export class RasterizerScene {
 
     /**
      * @param {LightInstance_t} p_light
+     * @param {ShadowAtlas_t} shadow_atlas
      */
-    _setup_light_type(p_light) {
+    _setup_light_type(p_light, shadow_atlas) {
         const gl = this.gl;
 
         this.set_shader_condition(SHADER_DEF.USE_LIGHTING, false);
@@ -1759,26 +2163,26 @@ export class RasterizerScene {
             case LIGHT_OMNI: {
                 this.set_shader_condition(SHADER_DEF.LIGHT_MODE_OMNI, true);
 
-                if (!this.state.render_no_shadows && p_light.light.shadow) {
+                if (!this.state.render_no_shadows && shadow_atlas && p_light.light.shadow) {
                     this.set_shader_condition(SHADER_DEF.USE_SHADOW, true);
                     gl.activeTexture(gl.TEXTURE0 + VSG.config.max_texture_image_units - 3);
                     if (VSG.config.use_rgba_3d_shadows) {
-                        gl.bindTexture(gl.TEXTURE_2D, this.directional_shadow.gl_color);
+                        gl.bindTexture(gl.TEXTURE_2D, shadow_atlas.gl_color);
                     } else {
-                        gl.bindTexture(gl.TEXTURE_2D, this.directional_shadow.gl_depth);
+                        gl.bindTexture(gl.TEXTURE_2D, shadow_atlas.gl_depth);
                     }
                 }
             } break;
             case LIGHT_SPOT: {
                 this.set_shader_condition(SHADER_DEF.LIGHT_MODE_SPOT, true);
 
-                if (!this.state.render_no_shadows && p_light.light.shadow) {
+                if (!this.state.render_no_shadows && shadow_atlas && p_light.light.shadow) {
                     this.set_shader_condition(SHADER_DEF.USE_SHADOW, true);
                     gl.activeTexture(gl.TEXTURE0 + VSG.config.max_texture_image_units - 3);
                     if (VSG.config.use_rgba_3d_shadows) {
-                        gl.bindTexture(gl.TEXTURE_2D, this.directional_shadow.gl_color);
+                        gl.bindTexture(gl.TEXTURE_2D, shadow_atlas.gl_color);
                     } else {
-                        gl.bindTexture(gl.TEXTURE_2D, this.directional_shadow.gl_depth);
+                        gl.bindTexture(gl.TEXTURE_2D, shadow_atlas.gl_depth);
                     }
                 }
             } break;
@@ -1881,7 +2285,41 @@ export class RasterizerScene {
                 uniforms.light_range[0] = light.param[LIGHT_PARAM_RANGE];
                 uniforms.LIGHT_ATTENUATION[0] = light.param[LIGHT_PARAM_ATTENUATION];
 
-                if (!this.state.render_no_shadows && light.shadow && shadow_atlas) {
+                if (!this.state.render_no_shadows && light.shadow && shadow_atlas && shadow_atlas.shadow_owners.has(p_light)) {
+                    let key = shadow_atlas.shadow_owners.get(p_light);
+
+                    let quadrant = (key >> QUADRANT_SHIFT) & 0x03;
+                    let shadow = key & SHADOW_INDEX_MASK;
+
+                    let atlas_size = shadow_atlas.size;
+                    let quadrant_size = atlas_size >> 1;
+
+                    let x = (quadrant & 1) * quadrant_size;
+                    let y = (quadrant >> 1) * quadrant_size;
+
+                    let shadow_size = (quadrant_size / shadow_atlas.quadrants[quadrant].subdivision);
+                    x += Math.floor(shadow % shadow_atlas.quadrants[quadrant].subdivision) * shadow_size;
+                    y += Math.floor(shadow / shadow_atlas.quadrants[quadrant].subdivision) * shadow_size;
+
+                    let width = shadow_size;
+                    let height = shadow_size;
+
+                    if (light.omni_shadow_detail === LIGHT_OMNI_SHADOW_DETAIL_HORIZONTAL) {
+                        height /= 2;
+                    } else {
+                        width /= 2;
+                    }
+
+                    let proj = p_view_transform.inverse().append(p_light.transform).invert();
+
+                    uniforms.shadow_pixel_size[0] = 1 / shadow_atlas.size;
+                    uniforms.shadow_pixel_size[1] = 1 / shadow_atlas.size;
+                    uniforms.light_shadow_matrix = proj.as_array(uniforms.light_shadow_matrix);
+                    uniforms.light_clamp[0] = x / atlas_size;
+                    uniforms.light_clamp[1] = y / atlas_size;
+                    uniforms.light_clamp[2] = width / atlas_size;
+                    uniforms.light_clamp[3] = height / atlas_size;
+                    // uniforms.light_clamp = [0, 0, 0.5, 0.25];
                 }
             } break;
             case LIGHT_SPOT: {
@@ -1907,6 +2345,10 @@ export class RasterizerScene {
 
                 Vector3.free(direction);
                 Vector3.free(position);
+
+                if (!this.state.render_no_shadows && light.shadow && shadow_atlas && shadow_atlas.shadow_owners.has(p_light)) {
+                    // FIXME: GLES2 spot shadow not work in Godot 3.2, maybe there's a bug
+                }
             } break;
         }
     }
@@ -2037,12 +2479,19 @@ export class RasterizerScene {
             }
         }
 
-        // bind other textures
+        // set built-in texture slots
         // TODO: make extra texture bindings automatic
         if (this.state.conditions & SHADER_DEF.LIGHT_MODE_DIRECTIONAL) {
-            let gl_loc = gl.getUniformLocation(shader.gl_prog, "light_directional_shadow");
-            if (gl_loc) {
-                gl.uniform1i(gl_loc, VSG.config.max_texture_image_units - 3);
+            let u = uniforms["light_directional_shadow"];
+            if (u) {
+                gl.activeTexture(gl.TEXTURE0 + i);
+                gl.uniform1i(u.gl_loc, VSG.config.max_texture_image_units - 3);
+            }
+        } else if (this.state.conditions & SHADER_DEF.LIGHT_MODE_OMNI || this.state.conditions & SHADER_DEF.LIGHT_MODE_SPOT) {
+            let u = uniforms["light_shadow_atlas"];
+            if (u) {
+                gl.activeTexture(gl.TEXTURE0 + i);
+                gl.uniform1i(u.gl_loc, VSG.config.max_texture_image_units - 3);
             }
         }
 

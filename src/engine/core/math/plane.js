@@ -114,6 +114,30 @@ export class Plane {
     }
 
     /**
+     * @param {Vector3} p_begin
+     * @param {Vector3} p_end
+     * @param {Vector3} r_intersection result is saved in this vector
+     */
+    intersects_segment(p_begin, p_end, r_intersection) {
+        let segment = p_begin.clone().subtract(p_end);
+        let den = this.normal.dot(segment);
+
+        if (Math.abs(den) < CMP_EPSILON) {
+            return false;
+        }
+
+        let dist = (this.normal.dot(p_begin) - this.d) / den;
+
+        if (dist < -CMP_EPSILON || dist > (1 + CMP_EPSILON)) {
+            return false;
+        }
+
+        dist = -dist;
+        r_intersection.copy(segment).scale(dist).add(p_begin);
+        return true;
+    }
+
+    /**
      * @param {Vector3Like} p_point
      */
     is_point_over(p_point) {

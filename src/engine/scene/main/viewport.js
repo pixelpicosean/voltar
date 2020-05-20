@@ -1,4 +1,4 @@
-import { node_class_map } from "engine/registry";
+import { node_class_map, preload_queue } from "engine/registry";
 import { GDCLASS } from "engine/core/v_object";
 import { Vector2, Vector2Like } from "engine/core/math/vector2";
 import { Transform2D } from "engine/core/math/transform_2d";
@@ -79,6 +79,8 @@ export const USAGE_3D = 2;
 export const USAGE_3D_NO_EFFECTS = 3;
 
 const VEC2_NEG = Object.freeze(new Vector2(-1, -1));
+
+const subdiv = [0, 1, 4, 16, 64, 256, 1024];
 
 
 class ViewportTexture extends Texture {
@@ -297,6 +299,7 @@ export class Viewport extends Node {
         this.usage = USAGE_3D;
 
         this.shadow_atlas_size = 0;
+        this.shadow_atlas_quadrant_subdiv = [0, 0, 0, 0];
 
         /** @type {ViewportTexture} */
         this.default_texture = new ViewportTexture;
@@ -567,6 +570,32 @@ export class Viewport extends Node {
     set_attach_to_screen_rect(p_rect) {
         VSG.viewport.viewport_attach_to_screen(this.viewport, p_rect);
         this.attach_to_screen_rect.copy(p_rect);
+    }
+
+    /**
+     * @param {number} p_size
+     */
+    set_shadow_atlas_size(p_size) {
+        if (this.shadow_atlas_size === p_size) {
+            return;
+        }
+
+        this.shadow_atlas_size = p_size;
+        this.viewport.shadow_atlas_size = p_size;
+        VSG.scene_render.shadow_atlas_set_size(this.viewport.shadow_atlas, this.viewport.shadow_atlas_size);
+    }
+
+    /**
+     * @param {number} p_quadrant
+     * @param {number} p_subdiv
+     */
+    set_shadow_atlas_quadrant_subdiv(p_quadrant, p_subdiv) {
+        if (this.shadow_atlas_quadrant_subdiv[p_quadrant] === p_subdiv) {
+            return;
+        }
+
+        this.shadow_atlas_quadrant_subdiv[p_quadrant] = p_subdiv;
+        VSG.scene_render.shadow_atlas_set_quadrant_subdivision(this.viewport.shadow_atlas, p_quadrant, subdiv[p_subdiv])
     }
 
     /* private */

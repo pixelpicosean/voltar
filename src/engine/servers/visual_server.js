@@ -105,7 +105,7 @@ export const LIGHT_OMNI_SHADOW_DUAL_PARABOLOID = 0;
 export const LIGHT_OMNI_SHADOW_CUBE = 1;
 
 export const LIGHT_OMNI_SHADOW_DETAIL_VERTICAL = 0;
-export const LIGHT_OMNI_SHADOW_DETAIL_HIRIZONTAL = 1;
+export const LIGHT_OMNI_SHADOW_DETAIL_HORIZONTAL = 1;
 
 /**
  * @typedef FrameDrawnCallbacks

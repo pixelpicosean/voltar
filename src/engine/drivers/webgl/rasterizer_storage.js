@@ -33,6 +33,9 @@ import {
     LIGHT_PARAM_SHADOW_SPLIT_3_OFFSET,
     LIGHT_PARAM_SHADOW_NORMAL_BIAS,
     LIGHT_PARAM_SHADOW_BIAS,
+    LIGHT_OMNI_SHADOW_DETAIL_VERTICAL,
+    LIGHT_DIRECTIONAL_SHADOW_DEPTH_RANGE_STABLE,
+    LIGHT_OMNI_SHADOW_DUAL_PARABOLOID,
 } from "engine/servers/visual_server";
 import {
     Instance_t,
@@ -247,10 +250,10 @@ export class Light_t extends Instantiable_t {
 
         this.directional_blend_splits = false;
         this.directional_shadow_mode = 0;
-        this.directional_range_mode = 0;
+        this.directional_range_mode = LIGHT_DIRECTIONAL_SHADOW_DEPTH_RANGE_STABLE;
 
-        this.omni_shadow_mode = 0;
-        this.omni_shadow_detail = 0;
+        this.omni_shadow_mode = LIGHT_OMNI_SHADOW_DUAL_PARABOLOID;
+        this.omni_shadow_detail = LIGHT_OMNI_SHADOW_DETAIL_VERTICAL;
 
         this.version = 0;
     }
@@ -1942,6 +1945,7 @@ export class RasterizerStorage {
     light_omni_set_shadow_detail(p_light, p_detail) {
         p_light.omni_shadow_detail = p_detail;
         p_light.version++;
+        p_light.instance_change_notify(true, false);
     }
 
     /**

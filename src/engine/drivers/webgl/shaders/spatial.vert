@@ -18,6 +18,12 @@ uniform highp float viewport_size;
     varying highp vec4 shadow_coord;
 #endif
 
+#ifdef RENDER_DEPTH_DUAL_PARABOLOID
+    varying highp float dp_clip;
+    uniform highp float shadow_dual_paraboloid_render_zfar;
+    uniform highp float shadow_dual_paraboloid_render_side;
+#endif
+
 /* GLOBALS */
 
 attribute highp vec3 position;
@@ -59,10 +65,26 @@ void main() {
     normal_interp = NORMAL;
 
     #ifdef RENDER_DEPTH
-        float z_ofs = light_bias;
-        z_ofs += (1.0 - abs(normal_interp.z)) * light_normal_bias;
+        #ifdef RENDER_DEPTH_DUAL_PARABOLOID
+            vertex.z *= shadow_dual_paraboloid_render_side;
+            normal_interp.z *= shadow_dual_paraboloid_render_side;
 
-        vertex.z -= z_ofs;
+            dp_clip = vertex.z;
+
+            highp vec3 vtx = vertex.xyz + normalize(vertex_interp) * light_bias;
+            highp float distance = length(vtx);
+            vtx = normalize(vtx);
+            vtx.xy /= 1.0 - vtx.z;
+            vtx.z = (distance / shadow_dual_paraboloid_render_zfar);
+            vtx.z = vtx.z * 2.0 - 1.0;
+
+            vertex.xyz = vtx;
+        #else
+            float z_ofs = light_bias;
+            z_ofs += (1.0 - abs(normal_interp.z)) * light_normal_bias;
+
+            vertex.z -= z_ofs;
+        #endif
     #endif
 
     #if defined(USE_SHADOW) && defined(USE_LIGHTING)
