@@ -25,6 +25,7 @@ import {
     LIGHT_PARAM_SPOT_ANGLE,
     LIGHT_PARAM_SPOT_ATTENUATION,
     LIGHT_OMNI_SHADOW_DETAIL_HORIZONTAL,
+    LIGHT_OMNI_SHADOW_CUBE,
 } from 'engine/servers/visual_server';
 import {
     Instance_t,
@@ -677,7 +678,7 @@ export class RasterizerScene {
             /* directional shadow */
 
             this.directional_shadow.light_count = 0;
-            this.directional_shadow.size = 1024;
+            this.directional_shadow.size = 2048;
 
             this.directional_shadow.gl_fbo = gl.createFramebuffer();
             gl.bindFramebuffer(gl.FRAMEBUFFER, this.directional_shadow.gl_fbo);
@@ -1397,7 +1398,7 @@ export class RasterizerScene {
             height = shadow_size;
 
             if (light.type === LIGHT_OMNI) {
-                if (false) {
+                if (light.omni_shadow_mode === LIGHT_OMNI_SHADOW_CUBE) {
                     // TODO: cubemap omni shadow
                 } else {
                     this.state.shadow_is_dual_paraboloid = true;

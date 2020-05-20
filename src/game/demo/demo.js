@@ -5,9 +5,9 @@ export class MainScene extends v.Spatial {
     static instance() { return new MainScene }
 
     async _ready() {
-        // this.cube = this.get_node("cube");
+        this.cube = this.get_node("cube");
 
-        // this.set_process(true);
+        this.set_process(true);
     }
     _process(delta) {
         this.cube.rotate_y(Math.PI * 0.4 * delta);
@@ -15,6 +15,4 @@ export class MainScene extends v.Spatial {
 }
 
 // v.attach_script('res://scene/demo.tscn', MainScene);
-// v.attach_script('res://scene/demo_3d.tscn', MainScene);
-// v.attach_script('res://scene/spot.tscn', MainScene);
-v.attach_script('res://scene/omni.tscn', MainScene);
+v.attach_script('res://scene/demo_3d.tscn', MainScene);

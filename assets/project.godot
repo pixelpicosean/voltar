@@ -21,7 +21,7 @@ _global_script_class_icons={
 [application]
 
 config/name="voltar"
-run/main_scene="res://scene/omni.tscn"
+run/main_scene="res://scene/demo_3d.tscn"
 config/icon="res://icon.png"
 
 [display]
@@ -81,6 +81,8 @@ name_casing=2
 quality/driver/driver_name="GLES2"
 quality/directional_shadow/size=2048
 quality/shadows/filter_mode=0
+quality/shading/force_vertex_shading.mobile=false
+quality/shading/force_lambert_over_burley.mobile=false
 quality/filters/msaa=2
 environment/default_environment="res://default_env.tres"
 quality/dynamic_fonts/use_oversampling=false
