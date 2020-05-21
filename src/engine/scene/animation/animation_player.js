@@ -21,6 +21,7 @@ import {
     PROP_TYPE_STRING,
     PROP_TYPE_VECTOR,
     PROP_TYPE_COLOR,
+    PROP_TYPE_TRANSFORM,
     PROP_TYPE_ANY,
     INTERPOLATION_NEAREST,
     INTERPOLATION_LINEAR,
@@ -34,6 +35,9 @@ import {
     UPDATE_DISCRETE,
     BezierTrack,
 } from './animation';
+import { Transform } from 'engine/core/math/transform';
+import { Vector3 } from 'engine/core/math/vector3';
+import { Quat } from 'engine/core/math/basis';
 
 
 export const ANIMATION_PROCESS_PHYSICS = 0;
@@ -174,8 +178,17 @@ function apply_immediate_value(node, type, key, value) {
             node[key].b = value.b;
             node[key].a = value.a;
         } break;
+        case PROP_TYPE_TRANSFORM: {
+            // should not modify transform itself
+        } break;
     }
 }
+
+let interp_xform = new Transform;
+let interp_loc = new Vector3;
+let interp_rot = new Quat;
+let interp_scale = new Vector3;
+
 /**
  * @param {Node} node
  * @param {number} type
@@ -183,7 +196,13 @@ function apply_immediate_value(node, type, key, value) {
  * @param {any} value
  */
 function apply_immediate_value_with_setter(node, type, setter, value) {
-    setter.call(node, value);
+    if (type === PROP_TYPE_TRANSFORM) {
+        interp_xform.origin.copy(value.loc);
+        interp_xform.basis.set_quat_scale(value.rot, value.scale);
+        setter.call(node, interp_xform);
+    } else {
+        setter.call(node, value);
+    }
 }
 /**
  * @param {Node} node
@@ -213,6 +232,9 @@ function apply_interpolate_value(node, type, key, value_a, value_b, c) {
             node[key].g = interpolate_number(value_a.g, value_b.g, c);
             node[key].b = interpolate_number(value_a.b, value_b.b, c);
             node[key].a = interpolate_number(value_a.a, value_b.a, c);
+        } break;
+        case PROP_TYPE_TRANSFORM: {
+            // should not modify transform itself
         } break;
     }
 }
@@ -249,6 +271,21 @@ function apply_interpolate_value_with_setter(node, type, setter, value_a, value_
             interp_color.b = interpolate_number(value_a.b, value_b.b, c);
             interp_color.a = interpolate_number(value_a.a, value_b.a, c);
             setter.call(node, interp_color);
+        } break;
+        case PROP_TYPE_TRANSFORM: {
+            interp_loc.x = interpolate_number(value_a.loc.x, value_b.loc.x, c);
+            interp_loc.y = interpolate_number(value_a.loc.y, value_b.loc.y, c);
+            interp_loc.z = interpolate_number(value_a.loc.z, value_b.loc.z, c);
+
+            value_a.rot.slerp(value_b.rot, c, interp_rot);
+
+            interp_scale.x = interpolate_number(value_a.scale.x, value_b.scale.x, c);
+            interp_scale.y = interpolate_number(value_a.scale.y, value_b.scale.y, c);
+            interp_scale.z = interpolate_number(value_a.scale.z, value_b.scale.z, c);
+
+            interp_xform.origin.copy(interp_loc);
+            interp_xform.basis.set_quat_scale(interp_rot, interp_scale);
+            setter.call(node, interp_xform);
         } break;
     }
 }
@@ -1187,7 +1224,7 @@ export class AnimationPlayer extends Node {
 
             anim.node_cache[anim_path_without_prop(track.path)] = child;
             const prop_name = anim_prop(track.path);
-            const prop_setter = child[`set_${prop_name}`];
+            let prop_setter = child[`set_${prop_name}`];
             if (typeof (prop_setter) === 'function') {
                 anim.setter_cache[track.path] = prop_setter;
             }

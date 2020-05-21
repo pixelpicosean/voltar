@@ -238,24 +238,28 @@ export class Spatial extends Node {
     }
 
     /**
-     * @param {Basis} basis
-     * @param {Vector3Like} origin
+     * @param {number[]} data
      */
-    set_transform_v(basis, origin) {
-        this.set_transform_n(
-            basis.elements[0].x,
-            basis.elements[0].y,
-            basis.elements[0].z,
-            basis.elements[1].x,
-            basis.elements[1].y,
-            basis.elements[1].z,
-            basis.elements[2].x,
-            basis.elements[2].y,
-            basis.elements[2].z,
-            origin.x,
-            origin.y,
-            origin.z
-        )
+    set_transform_v(data) {
+        this.d_data.local_transform.set(
+            data[0],
+            data[1],
+            data[2],
+            data[3],
+            data[4],
+            data[5],
+            data[6],
+            data[7],
+            data[8],
+            data[9],
+            data[10],
+            data[11]
+        );
+        this.d_data.dirty |= TRANSFORM_DIRTY_VECTORS;
+        this._propagate_transform_changed(this);
+        if (this.d_data.notify_local_transform) {
+            this.notification(NOTIFICATION_LOCAL_TRANSFORM_CHANGED_3D);
+        }
     }
 
     /**

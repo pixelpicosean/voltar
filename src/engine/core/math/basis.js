@@ -72,9 +72,12 @@ export class Quat {
     /**
      * @param {Quat} q
      * @param {number} t
+     * @param {Quat} [out]
      */
-    slerp(q, t) {
-        let to1 = Quat.new();
+    slerp(q, t, out) {
+        let to1 = out;
+        if (!to1) to1 = Quat.new();
+
         let omega = 0, cosom = 0, sinom = 0, scale0 = 0, scale1 = 0;
 
         cosom = this.dot(q);
@@ -289,6 +292,15 @@ export class Basis {
             xy + wz, 1.0 - (xx + zz), yz - wx,
             xz - wy, yz + wx, 1.0 - (xx + yy)
         );
+    }
+
+    /**
+     * @param {Quat} p_quat
+     * @param {Vector3Like} p_scale
+     */
+    set_quat_scale(p_quat, p_scale) {
+        this.set_diagonal(p_scale);
+        this.rotate_quat(p_quat);
     }
 
     /**
@@ -566,6 +578,16 @@ export class Basis {
      */
     rotate_euler(p_euler) {
         let b = Basis.new().set_euler(p_euler).append(this);
+        this.copy(b);
+        Basis.free(b);
+        return this;
+    }
+
+    /**
+     * @param {Quat} p_quat
+     */
+    rotate_quat(p_quat) {
+        let b = Basis.new().set_quat(p_quat).append(this);
         this.copy(b);
         Basis.free(b);
         return this;

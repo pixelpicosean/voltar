@@ -1,9 +1,5 @@
 const _ = require('lodash');
 const {
-    string,
-    int,
-    real,
-    boolean,
     NodePath,
     PoolRealArray,
     GeneralArray,
@@ -33,21 +29,25 @@ module.exports = (data) => {
         if (!keys_data.values) {
             console.log('does not have values');
         }
-        let track_type = string(data.prop[`${track_pre}/type`]);
+        let track_type = data.prop[`${track_pre}/type`];
         let track = {
             type: track_type,
             path: NodePath(data.prop[`${track_pre}/path`]),
-            interp: int(data.prop[`${track_pre}/interp`]),
-            loop_wrap: boolean(data.prop[`${track_pre}/loop_wrap`]),
+            interp: data.prop[`${track_pre}/interp`],
+            loop_wrap: data.prop[`${track_pre}/loop_wrap`],
             // imported: boolean(data.prop[`${track_pre}/imported`]),
-            enabled: boolean(data.prop[`${track_pre}/enabled`]),
+            enabled: data.prop[`${track_pre}/enabled`],
             keys: {
                 times: PoolRealArray(keys_data.times),
                 transitions: PoolRealArray(keys_data.transitions),
-                update: int(keys_data.update),
+                update: keys_data.update,
                 values: (track_type === 'method') ? MethodArray(keys_data.values) : GeneralArray(keys_data.values),
             },
         };
+
+        if (track.keys.values.length && track.keys.values[0].length === 12) {
+            track.value_type = "Transform";
+        }
 
         anim.tracks.push(track);
     }

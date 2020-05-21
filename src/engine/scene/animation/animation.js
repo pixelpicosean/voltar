@@ -1,5 +1,6 @@
 import { Vector2 } from "engine/core/math/vector2";
 import { res_class_map } from "engine/registry";
+import { Transform } from "engine/core/math/transform";
 
 
 export const TRACK_TYPE_VALUE = 0;      // value
@@ -23,7 +24,8 @@ export const PROP_TYPE_BOOLEAN = 1;
 export const PROP_TYPE_STRING = 2;
 export const PROP_TYPE_VECTOR = 3;
 export const PROP_TYPE_COLOR = 4;
-export const PROP_TYPE_ANY = 5;
+export const PROP_TYPE_TRANSFORM = 5;
+export const PROP_TYPE_ANY = 6;
 
 /**
  * Fetch property key from key path
@@ -95,6 +97,8 @@ export class ValueTrack extends Track {
             this.values.push(key);
         }
 
+        let t = Transform.new();
+
         // Guess value type of this track
         let first_value = data.keys.values[0];
         switch (typeof first_value) {
@@ -108,7 +112,31 @@ export class ValueTrack extends Track {
                 this.prop_type = PROP_TYPE_STRING;
             } break;
             case 'object': {
-                if (first_value.class === 'ImageTexture') {
+                if (data.value_type === 'Transform') {
+                    this.prop_type = PROP_TYPE_TRANSFORM;
+                    for (let i = 0; i < this.values.length; i++) {
+                        let arr = this.values[i].value;
+                        t.set(
+                            arr[0],
+                            arr[1],
+                            arr[2],
+                            arr[3],
+                            arr[4],
+                            arr[5],
+                            arr[6],
+                            arr[7],
+                            arr[8],
+                            arr[9],
+                            arr[10],
+                            arr[11]
+                        );
+                        this.values[i].value = {
+                            loc: t.origin.clone(),
+                            rot: t.basis.get_quat(),
+                            scale: t.basis.get_scale(),
+                        };
+                    }
+                } else if (first_value.class === 'ImageTexture') {
                     this.prop_type = PROP_TYPE_ANY;
                 } else if (first_value.x !== undefined && first_value.y !== undefined) {
                     this.prop_type = PROP_TYPE_VECTOR;
@@ -122,6 +150,8 @@ export class ValueTrack extends Track {
                 this.prop_type = PROP_TYPE_ANY;
             } break;
         }
+
+        Transform.free(t);
 
         // Fix placeholder keys (Godot uses a placeholder key if it has same value of previous one)
         // Let's replace the placeholder key with same value of previous one, so it can be
