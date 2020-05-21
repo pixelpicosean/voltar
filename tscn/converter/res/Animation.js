@@ -12,12 +12,12 @@ const {
 
 module.exports = (data) => {
     const anim = {
-        id: int(data.attr.id),
+        id: data.attr.id,
         type: 'Animation',
-        name: string(data.prop.resource_name),
-        length: real(data.prop.length),
-        loop: boolean(data.prop.loop),
-        step: real(data.prop.step),
+        name: data.prop.resource_name,
+        length: data.prop.length,
+        loop: data.prop.loop,
+        step: data.prop.step,
         tracks: [],
     };
 

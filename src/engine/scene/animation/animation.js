@@ -132,13 +132,14 @@ export class ValueTrack extends Track {
                 for (let i = 1; i < this.values.length; i++) {
                     let value = this.values[i].value, previous = this.values[i - 1].value;
                     if (value === null) {
-                        value = { x: 0, y: 0 };
+                        value = { x: 0, y: 0, z: 0 };
                     }
 
                     // Usually the placeholder key of vector will be `{ x: null }`
                     if (value.x === null) {
                         value.x = previous.x;
                         value.y = previous.y;
+                        value.z = previous.z || 0;
 
                         fixed = true;
                     }

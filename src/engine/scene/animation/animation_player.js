@@ -166,6 +166,7 @@ function apply_immediate_value(node, type, key, value) {
         case PROP_TYPE_VECTOR: {
             node[key].x = value.x;
             node[key].y = value.y;
+            node[key].z = value.z;
         } break;
         case PROP_TYPE_COLOR: {
             node[key].r = value.r;
@@ -205,6 +206,7 @@ function apply_interpolate_value(node, type, key, value_a, value_b, c) {
         case PROP_TYPE_VECTOR: {
             node[key].x = interpolate_number(value_a.x, value_b.x, c);
             node[key].y = interpolate_number(value_a.y, value_b.y, c);
+            node[key].z = interpolate_number(value_a.z, value_b.z, c);
         } break;
         case PROP_TYPE_COLOR: {
             node[key].r = interpolate_number(value_a.r, value_b.r, c);
@@ -215,7 +217,7 @@ function apply_interpolate_value(node, type, key, value_a, value_b, c) {
     }
 }
 
-const interp_vec2 = { x: 0, y: 0 };
+const interp_vec = { x: 0, y: 0, z: 0 };
 const interp_color = { r: 0, g: 0, b: 0, a: 0 };
 /**
  * @param {Node} node
@@ -236,9 +238,10 @@ function apply_interpolate_value_with_setter(node, type, setter, value_a, value_
             setter.call(node, value_a);
         } break;
         case PROP_TYPE_VECTOR: {
-            interp_vec2.x = interpolate_number(value_a.x, value_b.x, c);
-            interp_vec2.y = interpolate_number(value_a.y, value_b.y, c);
-            setter.call(node, interp_vec2);
+            interp_vec.x = interpolate_number(value_a.x, value_b.x, c);
+            interp_vec.y = interpolate_number(value_a.y, value_b.y, c);
+            interp_vec.z = interpolate_number(value_a.z, value_b.z, c);
+            setter.call(node, interp_vec);
         } break;
         case PROP_TYPE_COLOR: {
             interp_color.r = interpolate_number(value_a.r, value_b.r, c);

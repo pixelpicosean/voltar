@@ -20,7 +20,17 @@ function optional_empty(obj) {
 function optional_empty_array(arr) {
     return arr
         .filter(e => !!e)
-        .filter(e => optional_empty(e))
+        .filter(e => {
+            if (Array.isArray(e)) {
+                return true;
+            }
+            if (typeof e === 'object') {
+                for (let k in e) {
+                    if (e[k] !== undefined) return true;
+                }
+                return false;
+            }
+        })
 }
 
 /**
