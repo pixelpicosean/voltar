@@ -41,6 +41,7 @@ import {
     ARRAY_MAX,
 } from 'engine/scene/const';
 
+import { EffectBlurShader, BLUR_SHADER_DEF } from './shaders/blur';
 import {
     Mesh_t,
     Surface_t,
@@ -89,17 +90,18 @@ export class Environment_t {
     constructor() {
         this.bg_mode = ENV_BG_CLEAR_COLOR;
 
+        this.sky = null;
+        this.sky_custom_fov = [0];
+        this.sky_orientation = [
+            1, 0, 0,
+            0, 1, 0,
+            0, 0, 1,
+        ];
+
         this.bg_energy = [1.0];
         this.bg_color = [0, 0, 0, 1];
         this.ambient_energy = [1.0];
         this.ambient_color = [0, 0, 0, 1];
-
-        // TODO: adjustment post-processing
-        this.adjustments_enabled = [0];
-        this.adjustments_brightness = [1.0];
-        this.adjustments_contrast = [1.0];
-        this.adjustments_saturation = [1.0];
-        this.color_correction = null;
 
         this.fog_enabled = [0];
         this.fog_color = [0.5, 0.5, 0.5, 1.0];
@@ -118,6 +120,31 @@ export class Environment_t {
         this.fog_height_min = [10];
         this.fog_height_max = [0];
         this.fog_height_curve = [1];
+
+        // post-process
+        this.dof_blur_far_enabled = [0];
+        this.dof_blur_far_distance = [10];
+        this.dof_blur_far_transition = [5];
+        this.dof_blur_far_amount = [0.1];
+        this.dof_blur_far_quality = [0];
+
+        this.dof_blur_near_enabled = [0];
+        this.dof_blur_near_distance = [2];
+        this.dof_blur_near_transition = [1];
+        this.dof_blur_near_amount = [0.1];
+        this.dof_blur_near_quality = [0];
+
+        this.glow_enabled = [0];
+        this.glow_levels = [(1 << 2) | (1 << 4)];
+        this.glow_intensity = [0.8];
+        this.glow_strength = [1];
+        this.glow_bloom = [0];
+
+        this.adjustments_enabled = [0];
+        this.adjustments_brightness = [1.0];
+        this.adjustments_contrast = [1.0];
+        this.adjustments_saturation = [1.0];
+        this.color_correction = null;
     }
     /**
      * @param {any} data
@@ -637,6 +664,9 @@ export class RasterizerScene {
             prev_conditions: 0,
         };
 
+        /** @type {EffectBlurShader} */
+        this.effect_blur_shader = null;
+
         this.shadow_atlas_realloc_tolerance_msec = 500;
 
         this.render_list = new RenderList_t;
@@ -713,6 +743,10 @@ export class RasterizerScene {
 
                 gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, this.directional_shadow.gl_depth, 0);
             }
+        }
+
+        {
+            this.effect_blur_shader = new EffectBlurShader;
         }
 
         gl.frontFace(gl.CW);
@@ -2526,5 +2560,181 @@ export class RasterizerScene {
      * @param {Environment_t} p_env
      * @param {CameraMatrix} p_cam_projection
      */
-    _post_process(p_env, p_cam_projection) { }
+    _post_process(p_env, p_cam_projection) {
+        const gl = this.gl;
+
+        gl.depthMask(false);
+        gl.disable(gl.DEPTH_TEST);
+        gl.disable(gl.CULL_FACE);
+        gl.disable(gl.BLEND);
+        gl.depthFunc(gl.LEQUAL);
+        gl.colorMask(true, true, true, true);
+
+        let use_post_process = p_env && !this.storage.frame.current_rt.flags.TRANSPARENT;
+        use_post_process = use_post_process && this.storage.frame.current_rt.width >= 4 && this.storage.frame.current_rt.height >= 4;
+
+        if (p_env) {
+            use_post_process = use_post_process && !!(p_env.adjustments_enabled[0] || p_env.dof_blur_near_enabled[0] || p_env.dof_blur_far_enabled[0]);
+        }
+
+        // always copy final result to offscreen_effects[0]
+        if (use_post_process) {
+            this._copy_texture_to_buffer(this.storage.frame.current_rt.gl_color, this.storage.frame.current_rt.offscreen_effects[0].gl_fbo);
+        } else {
+            return;
+        }
+
+        // 1. DOF blur
+        // 2. Glow
+        // 3. Adjustment
+
+        if (p_env.dof_blur_far_enabled[0]) {
+            let vp_w = this.storage.frame.current_rt.width;
+            let vp_h = this.storage.frame.current_rt.height;
+
+            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.USE_ORTHOGONAL_PROJECTION, p_cam_projection.is_orthogonal());
+            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.DOF_FAR_BLUR, true);
+            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.DOF_QUALITY_LOW, p_env.dof_blur_far_quality[0] === 0);
+            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.DOF_QUALITY_MEDIUM, p_env.dof_blur_far_quality[1] === 1);
+            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.DOF_QUALITY_HIGH, p_env.dof_blur_far_quality[2] === 2);
+
+            this.effect_blur_shader.bind();
+
+            let radius = 0;
+            switch (p_env.dof_blur_far_quality[0]) {
+                case 0: {
+                    radius = (p_env.dof_blur_far_amount[0] * p_env.dof_blur_far_amount[0]) / 4;
+                } break;
+                case 1: {
+                    radius = (p_env.dof_blur_far_amount[0] * p_env.dof_blur_far_amount[0]) / 10;
+                } break;
+                case 2: {
+                    radius = (p_env.dof_blur_far_amount[0] * p_env.dof_blur_far_amount[0]) / 20;
+                } break;
+            }
+
+            this.effect_blur_shader.set_uniform1f('dof_begin', p_env.dof_blur_far_distance[0]);
+            this.effect_blur_shader.set_uniform1f('dof_end', p_env.dof_blur_far_distance[0] + p_env.dof_blur_far_transition[0]);
+            this.effect_blur_shader.set_uniform1f('dof_radius', radius);
+            this.effect_blur_shader.set_uniform2f('pixel_size', 1 / vp_w, 1 / vp_h);
+            this.effect_blur_shader.set_uniform1f('camera_z_near', p_cam_projection.get_z_near());
+            this.effect_blur_shader.set_uniform1f('camera_z_far', p_cam_projection.get_z_far());
+
+            // horizontal
+            this.effect_blur_shader.set_uniform2f('dof_dir', 1, 0);
+
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, this.storage.frame.current_rt.offscreen_effects[0].gl_color);
+
+            gl.activeTexture(gl.TEXTURE1);
+            gl.bindTexture(gl.TEXTURE_2D, this.storage.frame.current_rt.gl_depth);
+
+            gl.bindFramebuffer(gl.FRAMEBUFFER, this.storage.frame.current_rt.offscreen_effects[1].gl_fbo);
+            this.storage._copy_screen();
+
+            // vertical
+            this.effect_blur_shader.set_uniform2f('dof_dir', 0, 1);
+
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, this.storage.frame.current_rt.offscreen_effects[1].gl_color);
+
+            gl.activeTexture(gl.TEXTURE1);
+            gl.bindTexture(gl.TEXTURE_2D, this.storage.frame.current_rt.gl_depth);
+
+            gl.bindFramebuffer(gl.FRAMEBUFFER, this.storage.frame.current_rt.offscreen_effects[0].gl_fbo);
+            this.storage._copy_screen();
+
+            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.DOF_FAR_BLUR, false);
+            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.DOF_QUALITY_LOW, false);
+            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.DOF_QUALITY_MEDIUM, false);
+            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.DOF_QUALITY_HIGH, false);
+            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.USE_ORTHOGONAL_PROJECTION, false);
+        }
+
+        if (p_env.dof_blur_near_enabled[0]) {
+            let vp_w = this.storage.frame.current_rt.width;
+            let vp_h = this.storage.frame.current_rt.height;
+
+            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.USE_ORTHOGONAL_PROJECTION, p_cam_projection.is_orthogonal());
+            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.DOF_NEAR_BLUR, true);
+            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.DOF_NEAR_FIRST_TAP, true);
+
+            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.DOF_QUALITY_LOW, p_env.dof_blur_near_quality[0] === 0);
+            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.DOF_QUALITY_MEDIUM, p_env.dof_blur_near_quality[1] === 1);
+            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.DOF_QUALITY_HIGH, p_env.dof_blur_near_quality[2] === 2);
+
+            this.effect_blur_shader.bind();
+
+            let radius = 0;
+            switch (p_env.dof_blur_near_quality[0]) {
+                case 0: {
+                    radius = (p_env.dof_blur_near_amount[0] * p_env.dof_blur_near_amount[0]) / 4;
+                } break;
+                case 1: {
+                    radius = (p_env.dof_blur_near_amount[0] * p_env.dof_blur_near_amount[0]) / 10;
+                } break;
+                case 2: {
+                    radius = (p_env.dof_blur_near_amount[0] * p_env.dof_blur_near_amount[0]) / 20;
+                } break;
+            }
+
+            this.effect_blur_shader.set_uniform1f('dof_begin', p_env.dof_blur_near_distance[0]);
+            this.effect_blur_shader.set_uniform1f('dof_end', p_env.dof_blur_near_distance[0] - p_env.dof_blur_near_transition[0]);
+            this.effect_blur_shader.set_uniform2f('dof_dir', 1, 0);
+            this.effect_blur_shader.set_uniform1f('dof_radius', radius);
+            this.effect_blur_shader.set_uniform2f('pixel_size', 1 / vp_w, 1 / vp_h);
+            this.effect_blur_shader.set_uniform1f('camera_z_near', p_cam_projection.get_z_near());
+            this.effect_blur_shader.set_uniform1f('camera_z_far', p_cam_projection.get_z_far());
+
+            // horizontal
+
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, this.storage.frame.current_rt.offscreen_effects[0].gl_color);
+
+            gl.activeTexture(gl.TEXTURE1);
+            gl.bindTexture(gl.TEXTURE_2D, this.storage.frame.current_rt.gl_depth);
+
+            gl.bindFramebuffer(gl.FRAMEBUFFER, this.storage.frame.current_rt.offscreen_effects[1].gl_fbo);
+            this.storage._copy_screen();
+
+            // vertical
+            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.DOF_NEAR_FIRST_TAP, false);
+            this.effect_blur_shader.bind();
+
+            this.effect_blur_shader.set_uniform1f('dof_begin', p_env.dof_blur_near_distance[0]);
+            this.effect_blur_shader.set_uniform1f('dof_end', p_env.dof_blur_near_distance[0] - p_env.dof_blur_near_transition[0]);
+            this.effect_blur_shader.set_uniform2f('dof_dir', 0, 1);
+            this.effect_blur_shader.set_uniform1f('dof_radius', radius);
+            this.effect_blur_shader.set_uniform2f('pixel_size', 1 / vp_w, 1 / vp_h);
+            this.effect_blur_shader.set_uniform1f('camera_z_near', p_cam_projection.get_z_near());
+            this.effect_blur_shader.set_uniform1f('camera_z_far', p_cam_projection.get_z_far());
+
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, this.storage.frame.current_rt.offscreen_effects[1].gl_color);
+
+            gl.activeTexture(gl.TEXTURE1);
+            gl.bindTexture(gl.TEXTURE_2D, this.storage.frame.current_rt.gl_depth);
+
+            gl.bindFramebuffer(gl.FRAMEBUFFER, this.storage.frame.current_rt.offscreen_effects[0].gl_fbo);
+            this.storage._copy_screen();
+
+            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.DOF_NEAR_BLUR, false);
+            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.DOF_NEAR_FIRST_TAP, false);
+            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.DOF_QUALITY_LOW, false);
+            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.DOF_QUALITY_MEDIUM, false);
+            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.DOF_QUALITY_HIGH, false);
+            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.USE_ORTHOGONAL_PROJECTION, false);
+
+            this.storage.frame.current_rt.used_dof_blur_near = true;
+        }
+
+        // now draw final result back to current render target
+        this.storage.bind_copy_shader();
+
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, this.storage.frame.current_rt.offscreen_effects[0].gl_color);
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.storage.frame.current_rt.gl_fbo);
+        this.storage._copy_screen();
+    }
 }

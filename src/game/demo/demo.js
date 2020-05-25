@@ -6,6 +6,7 @@ export class MainScene extends v.Spatial {
 
     async _ready() {
         this.cube = this.get_node("cube");
+        // this.get_node("animation_player").play('idle');
 
         this.set_process(true);
     }

@@ -38,6 +38,20 @@ module.exports = (data) => {
         fog_height_min: data.prop.fog_height_min,
         fog_height_max: data.prop.fog_height_max,
         fog_height_curve: data.prop.fog_height_curve,
+
+        // Dof far blur
+        dof_blur_far_enabled: data.prop.dof_blur_far_enabled,
+        dof_blur_far_distance: data.prop.dof_blur_far_distance,
+        dof_blur_far_transition: data.prop.dof_blur_far_transition,
+        dof_blur_far_amount: data.prop.dof_blur_far_amount,
+        dof_blur_far_quality: data.prop.dof_blur_far_quality,
+
+        // Dof near blur
+        dof_blur_near_enabled: data.prop.dof_blur_near_enabled,
+        dof_blur_near_distance: data.prop.dof_blur_near_distance,
+        dof_blur_near_transition: data.prop.dof_blur_near_transition,
+        dof_blur_near_amount: data.prop.dof_blur_near_amount,
+        dof_blur_near_quality: data.prop.dof_blur_near_quality,
     };
 };
 

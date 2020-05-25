@@ -1027,6 +1027,64 @@
         "id": 4,
         "type": "CubeMesh",
         "material": "@ext#1"
+      },
+      {
+        "id": 5,
+        "type": "Animation",
+        "name": "idle",
+        "length": 16,
+        "loop": true,
+        "tracks": [
+          {
+            "type": "value",
+            "path": "camera:transform",
+            "interp": 1,
+            "loop_wrap": true,
+            "enabled": true,
+            "keys": {
+              "times": [
+                0,
+                8
+              ],
+              "transitions": [
+                1,
+                1
+              ],
+              "update": 0,
+              "values": [
+                [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0.923866,
+                  0.382716,
+                  0,
+                  -0.382716,
+                  0.923866,
+                  1.27755,
+                  5.31346,
+                  6.29972
+                ],
+                [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0.999997,
+                  -0.00225109,
+                  0,
+                  0.00225109,
+                  0.999997,
+                  5.92062,
+                  0.685764,
+                  -2.77339
+                ]
+              ]
+            },
+            "value_type": "Transform"
+          }
+        ]
       }
     ],
     "nodes": [
@@ -1049,7 +1107,7 @@
           0,
           1,
           1.21218,
-          7.24353,
+          6.6637,
           -32.528
         ],
         "mesh": "@sub#2",
@@ -1450,6 +1508,15 @@
           -3.42794
         ],
         "instance": "@ext#5"
+      },
+      {
+        "type": "AnimationPlayer",
+        "name": "animation_player",
+        "parent": ".",
+        "anims": {
+          "idle": "@sub#5"
+        },
+        "anims/idle": "@sub#5"
       }
     ]
   }

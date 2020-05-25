@@ -7,7 +7,6 @@
         "b": 1,
         "a": 1
     },
-    "fog_enabled": true,
     "fog_color": {
         "r": 0.894118,
         "g": 0.690196,
@@ -18,5 +17,11 @@
     "fog_depth_end": 28,
     "fog_height_enabled": true,
     "fog_height_min": 3,
-    "fog_height_max": -1
+    "fog_height_max": -1,
+    "dof_blur_far_enabled": true,
+    "dof_blur_far_amount": 0.12,
+    "dof_blur_far_quality": 0,
+    "dof_blur_near_distance": 1.32,
+    "dof_blur_near_transition": 0.04,
+    "dof_blur_near_amount": 0.35
 }

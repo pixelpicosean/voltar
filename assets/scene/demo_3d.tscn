@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=12 format=2]
 
 [ext_resource path="res://mesh/m.tres" type="Material" id=1]
 [ext_resource path="res://mesh/tree_1.tscn" type="PackedScene" id=2]
@@ -9,6 +9,10 @@
 
 [sub_resource type="GDScript" id=1]
 script/source = "extends Spatial
+
+func _ready() -> void:
+#	$animation_player.play(\"idle\")
+	pass
 
 func _process(delta: float) -> void:
 #	$ground.rotate_y(-PI * 0.3 * delta)
@@ -25,11 +29,28 @@ albedo_color = Color( 0.3652, 0.706053, 0.83, 1 )
 [sub_resource type="CubeMesh" id=4]
 material = ExtResource( 1 )
 
+[sub_resource type="Animation" id=5]
+resource_name = "idle"
+length = 16.0
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath("camera:transform")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 8 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Transform( 1, 0, 0, 0, 0.923866, 0.382716, 0, -0.382716, 0.923866, 1.27755, 5.31346, 6.29972 ), Transform( 1, 0, 0, 0, 0.999997, -0.00225109, 0, 0.00225109, 0.999997, 5.92062, 0.685764, -2.77339 ) ]
+}
+
 [node name="spatial" type="Spatial"]
 script = SubResource( 1 )
 
 [node name="sky" type="MeshInstance" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.21218, 7.24353, -32.528 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.21218, 6.6637, -32.528 )
 mesh = SubResource( 2 )
 material/0 = SubResource( 3 )
 
@@ -101,3 +122,6 @@ transform = Transform( 0.825724, 0, 0.564074, 0, 1, 0, -0.564074, 0, 0.825724, 6
 
 [node name="road4" parent="." instance=ExtResource( 5 )]
 transform = Transform( 0.825724, 0, 0.564074, 0, 1, 0, -0.564074, 0, 0.825724, 9.75775, -0.09, -3.42794 )
+
+[node name="animation_player" type="AnimationPlayer" parent="."]
+anims/idle = SubResource( 5 )

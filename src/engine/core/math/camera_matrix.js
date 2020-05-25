@@ -95,6 +95,10 @@ export class CameraMatrix {
         return CameraMatrix.new().copy(this);
     }
 
+    is_orthogonal() {
+        return this.matrix[3][3] === 1;
+    }
+
     /**
      * @param {CameraMatrix} p_matrix
      */

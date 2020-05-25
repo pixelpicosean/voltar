@@ -288,9 +288,15 @@ export class RenderTarget_t {
             TRANSPARENT: false,
             NO_SAMPLING: false,
             VFLIP: false,
+            NO_3D: false,
+            NO_3D_EFFECTS: false,
         };
 
         this.used_in_frame = false;
+        this.used_dof_blur_near = false;
+        this.offscreen_effects_allocated = false;
+
+        this.offscreen_effects = [new Effect_t, new Effect_t];
 
         /** @type {Texture_t} */
         this.texture = null;
@@ -695,9 +701,7 @@ export class RasterizerStorage {
     free_rid(rid) { return false }
 
     bind_copy_shader() {
-        const gl = this.gl;
-
-        gl.useProgram(this.canvas.copy_shader.gl_prog);
+        this.gl.useProgram(this.canvas.copy_shader.gl_prog);
     }
 
     bind_quad_array() {
@@ -709,6 +713,11 @@ export class RasterizerStorage {
         gl.enableVertexAttribArray(0);
         gl.vertexAttribPointer(1, 2, gl.FLOAT, false, 16, 8);
         gl.enableVertexAttribArray(1);
+    }
+
+    _copy_screen() {
+        this.bind_quad_array();
+        this.gl.drawArrays(this.gl.TRIANGLE_FAN, 0, 4);
     }
 
     update_dirty_resources() {
@@ -1195,6 +1204,9 @@ export class RasterizerStorage {
             image_format = PIXEL_FORMAT_RGB8;
         }
 
+        rt.used_dof_blur_near = false;
+        rt.offscreen_effects_allocated = false;
+
         {
             /* front FBO */
 
@@ -1278,6 +1290,32 @@ export class RasterizerStorage {
 
             gl.clearColor(0, 0, 0, 0);
             gl.clear(gl.COLOR_BUFFER_BIT);
+        }
+
+        // alloc textures for post process
+        if (!rt.flags.NO_3D && rt.width >= 2 && rt.height >= 2) {
+            for (let i = 0; i < rt.offscreen_effects.length; i++) {
+                let effect = rt.offscreen_effects[i];
+
+                effect.gl_color = gl.createTexture();
+                gl.bindTexture(gl.TEXTURE_2D, effect.gl_color);
+                gl.texImage2D(gl.TEXTURE_2D, 0, color_internal_format, rt.width, rt.height, 0, color_format, color_type, null);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+                effect.gl_fbo = gl.createFramebuffer();
+                gl.bindFramebuffer(gl.FRAMEBUFFER, effect.gl_fbo);
+
+                gl.bindTexture(gl.TEXTURE_2D, effect.gl_color);
+                gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, effect.gl_color, 0);
+
+                gl.clearColor(1, 0, 1, 0);
+                gl.clear(gl.COLOR_BUFFER_BIT);
+            }
+
+            rt.offscreen_effects_allocated = true;
         }
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);

@@ -224,6 +224,8 @@ export class OS {
                 pvrtc = {};
             }
 
+            gl.getExtension('EXT_shader_texture_lod');
+
             this.gl_ext = {
                 /* instancing API */
 

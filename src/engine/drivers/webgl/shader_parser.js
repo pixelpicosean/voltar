@@ -160,7 +160,7 @@ export function parse_shader_code(code) {
     let global_code = code.substring(global_start, vs_start < 0 ? fs_start < 0 ? lt_start < 0 ? 0 : lt_start : fs_start : vs_start)
         .trim()
 
-    let uses_screen_texture = code.match(/\bSCREEN_TEXTURE\b/g);
+    let uses_screen_texture = !!code.match(/\bSCREEN_TEXTURE\b/g);
     let uses_custom_light = lt_start >= 0;
 
     // uniform
