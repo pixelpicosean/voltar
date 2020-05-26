@@ -47,10 +47,6 @@ uniform float ambient_energy;
     #endif
 #endif
 
-uniform float specular;
-uniform float metallic;
-uniform float roughness;
-
 /* GLOBALS */
 
 #ifdef RENDER_DEPTH_DUAL_PARABOLOID
@@ -285,14 +281,14 @@ void main() {
     vec3 view = -normalize(vertex_interp);
     vec3 eye_position = view;
 
-    vec3 ALBEDO = vec3(1.0);
     float ALPHA = 1.0;
 
+    vec3 ALBEDO = vec3(1.0);
     vec3 EMISSION = vec3(0.0);
 
-    float ROUGHNESS = roughness;
-    float METALLIC = metallic;
-    float SPECULAR = specular;
+    float ROUGHNESS = 1.0;
+    float METALLIC = 0.0;
+    float SPECULAR = 0.5;
 
     float specular_blob_intensity = 1.0;
     #if defined(SPECULAR_TOON)
@@ -340,7 +336,7 @@ void main() {
                 //TODO: this curve is not really designed for gammaspace, should be adjusted
                 const vec4 c0 = vec4(-1.0, -0.0275, -0.572, 0.022);
                 const vec4 c1 = vec4(1.0, 0.0425, 1.04, -0.04);
-                vec4 r = roughness * c0 + c1;
+                vec4 r = ROUGHNESS * c0 + c1;
                 float a004 = min(r.x * r.x, exp2(-9.28 * ndotv)) * r.x + r.y;
                 vec2 env = vec2(-1.04, 1.04) * a004 + r.zw;
                 specular_light *= env.x * F + env.y;

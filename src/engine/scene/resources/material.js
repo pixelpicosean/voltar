@@ -112,33 +112,66 @@ export class SpatialMaterial extends Material {
     constructor() {
         super();
 
-        this.material = VSG.scene_render.spatial_material.rid.clone();
+        /** @type {Material_t} */
+        this.material = null;
     }
     /**
      * @param {any} data
      */
     _load_data(data) {
+        /** @type {Set<string>} */
+        let features = new Set;
+
+        /** @type {{ [name: string]: number[] }} */
+        let params = {};
+        /** @type {{ [name: string]: Texture_t }} */
+        let textures = {};
+
         for (let k in data) {
             let v = data[k];
             switch (k) {
-                case 'albedo_color': {
-                    this.material.params['albedo'] = [v.r, v.g, v.b, v.a];
-                } break;
                 case 'metallic_specular': {
-                    this.material.params['specular'] = [v];
+                    params['m_specular'] = [v];
                 } break;
                 case 'metallic': {
-                    this.material.params['metallic'] = [v];
+                    params['m_metallic'] = [v];
                 } break;
                 case 'roughness': {
-                    this.material.params['roughness'] = [v];
+                    params['m_roughness'] = [v];
                 } break;
 
+                case 'albedo_color': {
+                    params['m_albedo'] = [v.r, v.g, v.b, v.a];
+                    features.add('albedo');
+                } break;
                 case 'albedo_texture': {
-                    this.material.textures['texture_albedo'] = v.texture;
+                    textures['m_texture_albedo'] = v.texture;
+                    features.add('albedo');
+                } break;
+
+                case 'emission_enabled': {
+                    features.add('emission');
+                } break;
+                case 'emission': {
+                    params['m_emission'] = [v.r, v.g, v.b, v.a];
+                } break;
+                case 'emission_energy': {
+                    params['m_emission_energy'] = [v];
+                } break;
+                case 'emission_operator': {
+                    params['m_emission_operator'] = [v];
+                } break;
+                case 'emission_texture': {
+                    textures['m_texture_emission'] = v.texture;
                 } break;
             }
         }
+
+        this.material = VSG.scene_render.metarial_instance_create({
+            features: [...features],
+            params,
+            textures,
+        });
 
         return this;
     }

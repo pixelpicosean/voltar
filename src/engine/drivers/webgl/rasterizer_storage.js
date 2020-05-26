@@ -413,7 +413,7 @@ export class Material_t {
         this.origin = null;
     }
 
-    clone() {
+    fork() {
         let m = new Material_t;
 
         m.origin = this;

@@ -301,7 +301,7 @@ export class RasterizerCanvas extends VObject {
 
         const mat = new ShaderMaterial("normal");
         mat.set_shader(`
-            shader_type = canvas_item;
+            shader_type canvas_item;
             void fragment() {
                 COLOR = texture(TEXTURE, UV);
             }

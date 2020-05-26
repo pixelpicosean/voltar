@@ -25,6 +25,7 @@ const ATTRIBUTRE_TYPES = {
  * @param {string} code
  */
 function parse_value(code) {
+    // FIXME: this cannot handle vector values
     let idx = code.indexOf("(");
     if (idx >= 0) {
         return code.substring(idx + 1, code.lastIndexOf(")")).split(",")
@@ -149,7 +150,7 @@ export function parse_shader_code(code) {
     const fs_start = code.indexOf("void fragment()");
     const lt_start = code.indexOf("void light()");
 
-    let type_match = code.match(/shader_type\s*=\s*(canvas_item|spatial);/);
+    let type_match = code.match(/shader_type\s*(canvas_item|spatial);/);
     let type = type_match ? type_match[1] : "canvas_item";
 
     let global_start = 0;

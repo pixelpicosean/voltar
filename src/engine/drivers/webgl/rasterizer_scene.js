@@ -34,6 +34,7 @@ import { VSG } from 'engine/servers/visual/visual_server_globals';
 
 import {
     ShaderMaterial,
+    SpatialMaterial,
 } from 'engine/scene/resources/material';
 import {
     ARRAY_NORMAL,
@@ -85,6 +86,35 @@ const MAX_LIGHTS = 255;
 export const LIGHTMODE_NORMAL = 0;
 export const LIGHTMODE_UNSHADED = 1;
 export const LIGHTMODE_LIGHTMAP = 2;
+
+/**
+ * @typedef MaterialInstanceConfig
+ * @property {string[]} features
+ * @property {'burley'|'lambert'|'lambert_wrap'|'oren_nayar'|'toon'} [diffuse]
+ * @property {'schlick_ggx'|'blinn'|'toon'|'phone'} [specular]
+ * @property {{ [name: string]: number[] }} params
+ * @property {{ [name: string]: Texture_t }} textures
+ */
+
+/** @type {MaterialInstanceConfig} */
+const DEFAULT_MATERIAL_CONFIG = {
+    diffuse: 'burley',
+    specular: 'schlick_ggx',
+
+    features: [
+        'albedo',
+    ],
+
+    params: {
+        m_specular: [0.5],
+        m_metallic: [0.0],
+        m_roughness: [1.0],
+    },
+    textures: {},
+}
+
+/** @type {{ [key: string]: Material_t }} */
+const material_base_table = {}
 
 export class Environment_t {
     constructor() {
@@ -475,27 +505,6 @@ const SHADER_DEF = {
     RENDER_DEPTH_DUAL_PARABOLOID: 1 << 29,
 };
 
-const DEFAULT_SPATIAL_CONDITION =
-    SHADER_DEF.DIFFUSE_BURLEY | SHADER_DEF.SPECULAR_SCHLICK_GGX
-
-const DEFAULT_SPATIAL_SHADER = `
-shader_type = spatial;
-
-uniform sampler2D texture_albedo;
-uniform mediump vec4 albedo;
-
-void fragment() {
-    ALBEDO = texture(texture_albedo, UV).rgb;
-    ALBEDO *= albedo.rgb;
-}
-`
-const DEFAULT_SPATIAL_PARAMS = {
-    "albedo":       [1, 1, 1, 1],
-    "specular":     [0.5],
-    "metallic":     [0],
-    "roughness":    [1],
-}
-
 const DEFAULT_SPATIAL_ATTRIBS = [
     'position',
     'normal',
@@ -520,6 +529,64 @@ function get_shader_def_code(condition) {
     return code;
 }
 
+/* spatial shader feature begin */
+
+const SPATIAL_FEATURES = {
+    'general': {
+        uniform: `
+            uniform highp float m_roughness;
+            uniform highp float m_specular;
+            uniform highp float m_metallic;
+        `,
+        fragment: `
+            METALLIC = m_metallic;
+            ROUGHNESS = m_roughness;
+            SPECULAR = m_specular;
+        `,
+        value: {
+                'm_roughness': [1],
+                'm_specular': [0.5],
+                'm_metallic': [0],
+        },
+        texture: { },
+    },
+    'albedo': {
+        uniform: `
+            uniform sampler2D m_texture_albedo;
+            uniform highp vec4 m_albedo;
+        `,
+        fragment: `
+            ALBEDO = texture(m_texture_albedo, UV).rgb * m_albedo.rgb;
+        `,
+        value: {
+            'm_albedo': [1, 1, 1, 1],
+        },
+        texture: {
+            'm_texture_albedo': 'white',
+        },
+    },
+    'emission': {
+        uniform: `
+            uniform sampler2D m_texture_emission;
+            uniform highp vec4 m_emission;
+            uniform highp float m_emission_energy;
+        `,
+        fragment: `
+            vec3 m_emission_tex = texture(m_texture_emission, UV).rgb;
+            EMISSION = (m_emission.rgb + m_emission_tex) * m_emission_energy;
+        `,
+        value: {
+            'm_emission': [0, 0, 0, 1],
+            'm_emission_energy': [1],
+        },
+        texture: {
+            'm_texture_emission': 'black',
+        },
+    },
+}
+
+/* spatial shader feature end */
+
 export class RasterizerScene {
     constructor() {
         /** @type {import('./rasterizer_storage').RasterizerStorage} */
@@ -541,12 +608,8 @@ export class RasterizerScene {
             current_light: 0,
         };
 
-        this.spatial_material = {
-            /** @type {ShaderMaterial} */
-            mat: null,
-            /** @type {Material_t} */
-            rid: null,
-        };
+        /** @type {SpatialMaterial} */
+        this.default_material = null;
 
         /** @type {LightInstance_t[]} */
         this.render_light_instances = [];
@@ -691,17 +754,8 @@ export class RasterizerScene {
 
         {
             /* default material */
-
-            this.spatial_material.mat = new ShaderMaterial('spatial');
-            this.spatial_material.mat.set_shader(DEFAULT_SPATIAL_SHADER);
-
-            this.spatial_material.rid = this.init_shader_material(
-                this.spatial_material.mat,
-                spatial_vs,
-                spatial_fs,
-                DEFAULT_SPATIAL_CONDITION
-            );
-            this.spatial_material.rid.params = DEFAULT_SPATIAL_PARAMS;
+            this.default_material = new SpatialMaterial;
+            this.default_material._load_data({ });
         }
 
         {
@@ -756,6 +810,76 @@ export class RasterizerScene {
 
     environment_create() {
         return new Environment_t;
+    }
+
+    /**
+     * @param {MaterialInstanceConfig} config
+     */
+    metarial_instance_create(config) {
+        // find base and make a fork
+        let base = this.material_base_get(config);
+        let inst = base.fork();
+
+        // override params and textures
+        Object.assign(inst.params, config.params);
+        Object.assign(inst.textures, config.textures);
+
+        return inst;
+    }
+
+    /**
+     * @param {MaterialInstanceConfig} config
+     */
+    material_base_get(config) {
+        config = Object.assign({ }, DEFAULT_MATERIAL_CONFIG, config);
+        Object.assign(config.params, DEFAULT_MATERIAL_CONFIG.params, config.params);
+        Object.assign(config.textures, DEFAULT_MATERIAL_CONFIG.textures, config.textures);
+
+        const key = `${config.features.sort().join('.')}.${config.diffuse}.${config.specular}`;
+        let base = material_base_table[key];
+
+        if (!base) {
+            const mat = new ShaderMaterial(`spatial[${key}]`);
+
+            const features = new Set(['general', ...config.features]);
+
+            // shader code
+            let uniforms = ''
+            let fragment = ''
+
+            for (let feature of features) {
+                uniforms += SPATIAL_FEATURES[feature].uniform;
+                fragment += SPATIAL_FEATURES[feature].fragment;
+            }
+
+            mat.set_shader(`shader_type spatial;\n${uniforms}\nvoid fragment() {\n${fragment}\n}`);
+
+            // condition
+            let condition =
+                SHADER_DEF[`DIFFUSE_${config.diffuse.toUpperCase()}`] | SHADER_DEF[`SPECULAR_${config.specular.toUpperCase()}`]
+
+            // create material
+            base = this.init_shader_material(
+                mat,
+                spatial_vs,
+                spatial_fs,
+                condition
+            );
+
+            // default values/textures
+            for (let feature of features) {
+                for (let k in SPATIAL_FEATURES[feature].value) {
+                    base.params[k] = SPATIAL_FEATURES[feature].value[k];
+                }
+                for (let k in SPATIAL_FEATURES[feature].texture) {
+                    base.textures[k] = this.storage.resources[`${SPATIAL_FEATURES[feature].texture[k]}_tex`].texture;
+                }
+            }
+
+            material_base_table[key] = base;
+        }
+
+        return base;
     }
 
     /**
@@ -1538,7 +1662,7 @@ export class RasterizerScene {
             // uniform
             .replace("/* GLOBALS */", `${shader_material.global_code}\n`)
             // shader code
-            .replace(/\/\* FRAGMENT_CODE_BEGIN \*\/([\s\S]*?)\/\* FRAGMENT_CODE_END \*\//, `{\n${shader_material.vs_code}\n}`)
+            .replace(/\/\* VERTEX_CODE_BEGIN \*\/([\s\S]*?)\/\* VERTEX_CODE_END \*\//, `{\n${shader_material.vs_code}\n}`)
 
         let fs_code = fs
             // uniform
@@ -1709,7 +1833,7 @@ export class RasterizerScene {
         }
 
         if (!material) {
-            material = this.spatial_material.rid;
+            material = this.default_material.rid;
         }
 
         this._add_geometry_with_material(p_geometry, p_instance, material, p_depth_pass, p_shadow_pass);
@@ -2491,7 +2615,7 @@ export class RasterizerScene {
 
                 if (!t) {
                     if (shader.name === "spatial") {
-                        t = this.spatial_material.mat.texture_hints[k];
+                        t = this.default_material.mat.texture_hints[k];
                     }
                 }
 
