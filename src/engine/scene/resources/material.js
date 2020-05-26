@@ -130,6 +130,7 @@ export class SpatialMaterial extends Material {
         for (let k in data) {
             let v = data[k];
             switch (k) {
+                // general
                 case 'metallic_specular': {
                     params['m_specular'] = [v];
                 } break;
@@ -140,6 +141,7 @@ export class SpatialMaterial extends Material {
                     params['m_roughness'] = [v];
                 } break;
 
+                // albedo
                 case 'albedo_color': {
                     params['m_albedo'] = [v.r, v.g, v.b, v.a];
                     features.add('albedo');
@@ -149,6 +151,7 @@ export class SpatialMaterial extends Material {
                     features.add('albedo');
                 } break;
 
+                // emission
                 case 'emission_enabled': {
                     features.add('emission');
                 } break;
@@ -163,6 +166,20 @@ export class SpatialMaterial extends Material {
                 } break;
                 case 'emission_texture': {
                     textures['m_texture_emission'] = v.texture;
+                } break;
+
+                // rim
+                case 'rim_enabled': {
+                    features.add('rim');
+                } break;
+                case 'rim': {
+                    params['m_rim'] = [v];
+                } break;
+                case 'rim_tint': {
+                    params['m_rim_tint'] = [v];
+                } break;
+                case 'rim_texture': {
+                    textures['m_texture_rim'] = v.texture;
                 } break;
             }
         }

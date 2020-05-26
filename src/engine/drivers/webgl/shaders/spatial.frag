@@ -101,11 +101,14 @@ vec3 F0(float metallic, float specular, vec3 albedo) {
         vec3 light_color,
         vec3 attenuation,
         vec3 diffuse_color,
+        vec3 transmission,
 
         float specular_blob_intensity,
         float roughness,
         float metallic,
         float specular,
+        float rim,
+        float rim_tint,
 
         inout vec3 diffuse_light,
         inout vec3 specular_light,
@@ -165,6 +168,14 @@ vec3 F0(float metallic, float specular, vec3 albedo) {
             #endif
 
             diffuse_light += light_color * diffuse_color * diffuse_NL * attenuation;
+            #if defined(TRANSMISSION_USED)
+                diffuse_light += light_color * diffuse_color * (vec3(1.0 / M_PI) - diffuse_NL) * transmission * attenuation;
+            #endif
+
+            #if defined(LIGHT_USE_RIM)
+                float rim_light = pow(max(0.0, 1.0 - cNdotV), max(0.0, (1.0 - roughness) * 16.0));
+                diffuse_light += rim_light * rim * mix(vec3(1.0), diffuse_color, rim_tint) * light_color;
+            #endif
         }
 
         // specular
@@ -281,14 +292,16 @@ void main() {
     vec3 view = -normalize(vertex_interp);
     vec3 eye_position = view;
 
-    float ALPHA = 1.0;
-
     vec3 ALBEDO = vec3(1.0);
-    vec3 EMISSION = vec3(0.0);
-
-    float ROUGHNESS = 1.0;
+    vec3 TRANSMISSION = vec3(0.0);
     float METALLIC = 0.0;
     float SPECULAR = 0.5;
+    vec3 EMISSION = vec3(0.0);
+    float ROUGHNESS = 1.0;
+    float RIM = 0.0;
+    float RIM_TINT = 0.0;
+
+    float ALPHA = 1.0;
 
     float specular_blob_intensity = 1.0;
     #if defined(SPECULAR_TOON)
@@ -456,11 +469,14 @@ void main() {
             LIGHT_COLOR.rgb,
             light_att,
             ALBEDO,
+            TRANSMISSION,
 
             specular_blob_intensity * LIGHT_SPECULAR,
             ROUGHNESS,
             METALLIC,
             SPECULAR,
+            RIM,
+            RIM_TINT,
 
             diffuse_light,
             specular_light,

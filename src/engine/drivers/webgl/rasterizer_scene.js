@@ -503,6 +503,8 @@ const SHADER_DEF = {
     FOG_HEIGHT_ENABLED        : 1 << 28,
 
     RENDER_DEPTH_DUAL_PARABOLOID: 1 << 29,
+
+    LIGHT_USE_RIM: 1 << 30,
 };
 
 const DEFAULT_SPATIAL_ATTRIBS = [
@@ -533,6 +535,7 @@ function get_shader_def_code(condition) {
 
 const SPATIAL_FEATURES = {
     'general': {
+        condition: 0,
         uniform: `
             uniform highp float m_roughness;
             uniform highp float m_specular;
@@ -550,7 +553,9 @@ const SPATIAL_FEATURES = {
         },
         texture: { },
     },
+
     'albedo': {
+        condition: 0,
         uniform: `
             uniform sampler2D m_texture_albedo;
             uniform highp vec4 m_albedo;
@@ -566,6 +571,7 @@ const SPATIAL_FEATURES = {
         },
     },
     'emission': {
+        condition: 0,
         uniform: `
             uniform sampler2D m_texture_emission;
             uniform highp vec4 m_emission;
@@ -581,6 +587,26 @@ const SPATIAL_FEATURES = {
         },
         texture: {
             'm_texture_emission': 'black',
+        },
+    },
+    'rim': {
+        condition: SHADER_DEF.LIGHT_USE_RIM,
+        uniform: `
+            uniform sampler2D m_texture_rim;
+            uniform highp float m_rim;
+            uniform highp float m_rim_tint;
+        `,
+        fragment: `
+            vec2 m_rim_tex = texture(m_texture_rim, UV).xy;
+            RIM = m_rim * m_rim_tex.x;
+            RIM_TINT = m_rim_tint * m_rim_tex.y;
+        `,
+        value: {
+            'm_rim': [1],
+            'm_rim_tint': [0.5],
+        },
+        texture: {
+            'm_texture_rim': 'white',
         },
     },
 }
@@ -844,19 +870,18 @@ export class RasterizerScene {
             const features = new Set(['general', ...config.features]);
 
             // shader code
+            let condition =
+                SHADER_DEF[`DIFFUSE_${config.diffuse.toUpperCase()}`] | SHADER_DEF[`SPECULAR_${config.specular.toUpperCase()}`]
             let uniforms = ''
             let fragment = ''
 
             for (let feature of features) {
                 uniforms += SPATIAL_FEATURES[feature].uniform;
                 fragment += SPATIAL_FEATURES[feature].fragment;
+                condition |= SPATIAL_FEATURES[feature].condition;
             }
 
             mat.set_shader(`shader_type spatial;\n${uniforms}\nvoid fragment() {\n${fragment}\n}`);
-
-            // condition
-            let condition =
-                SHADER_DEF[`DIFFUSE_${config.diffuse.toUpperCase()}`] | SHADER_DEF[`SPECULAR_${config.specular.toUpperCase()}`]
 
             // create material
             base = this.init_shader_material(
