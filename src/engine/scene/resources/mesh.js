@@ -253,10 +253,13 @@ export class ArrayMesh extends Mesh {
                     }
                     sizes[i] = 2;
                 } break;
-                case ARRAY_WEIGHTS:
+                case ARRAY_WEIGHTS: {
+                    elem_size = 4 * 4;
+                    sizes[i] = 4;
+                } break;
                 case ARRAY_BONES: {
-                    // TODO: merge weight and bone vertices
-                    sizes[i] = 0;
+                    elem_size = 4;
+                    sizes[i] = 4;
                 } break;
                 case ARRAY_INDEX: {
                     // TODO: support 32bit indices
