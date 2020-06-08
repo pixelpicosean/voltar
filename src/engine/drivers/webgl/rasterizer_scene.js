@@ -44,7 +44,7 @@ import {
     ARRAY_MAX,
 } from 'engine/scene/const';
 
-import { EffectBlurShader, BLUR_SHADER_DEF } from './shaders/blur';
+import { EffectBlurShader } from './shaders/blur';
 import {
     Mesh_t,
     Surface_t,
@@ -2814,11 +2814,11 @@ export class RasterizerScene {
             let vp_w = this.storage.frame.current_rt.width;
             let vp_h = this.storage.frame.current_rt.height;
 
-            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.USE_ORTHOGONAL_PROJECTION, p_cam_projection.is_orthogonal());
-            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.DOF_FAR_BLUR, true);
-            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.DOF_QUALITY_LOW, p_env.dof_blur_far_quality[0] === 0);
-            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.DOF_QUALITY_MEDIUM, p_env.dof_blur_far_quality[1] === 1);
-            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.DOF_QUALITY_HIGH, p_env.dof_blur_far_quality[2] === 2);
+            this.effect_blur_shader.set_conditional("USE_ORTHOGONAL_PROJECTION", p_cam_projection.is_orthogonal());
+            this.effect_blur_shader.set_conditional("DOF_FAR_BLUR", true);
+            this.effect_blur_shader.set_conditional("DOF_QUALITY_LOW", p_env.dof_blur_far_quality[0] === 0);
+            this.effect_blur_shader.set_conditional("DOF_QUALITY_MEDIUM", p_env.dof_blur_far_quality[1] === 1);
+            this.effect_blur_shader.set_conditional("DOF_QUALITY_HIGH", p_env.dof_blur_far_quality[2] === 2);
 
             this.effect_blur_shader.bind();
 
@@ -2866,24 +2866,24 @@ export class RasterizerScene {
             gl.bindFramebuffer(gl.FRAMEBUFFER, this.storage.frame.current_rt.offscreen_effects[0].gl_fbo);
             this.storage._copy_screen();
 
-            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.DOF_FAR_BLUR, false);
-            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.DOF_QUALITY_LOW, false);
-            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.DOF_QUALITY_MEDIUM, false);
-            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.DOF_QUALITY_HIGH, false);
-            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.USE_ORTHOGONAL_PROJECTION, false);
+            this.effect_blur_shader.set_conditional("DOF_FAR_BLUR", false);
+            this.effect_blur_shader.set_conditional("DOF_QUALITY_LOW", false);
+            this.effect_blur_shader.set_conditional("DOF_QUALITY_MEDIUM", false);
+            this.effect_blur_shader.set_conditional("DOF_QUALITY_HIGH", false);
+            this.effect_blur_shader.set_conditional("USE_ORTHOGONAL_PROJECTION", false);
         }
 
         if (p_env.dof_blur_near_enabled[0]) {
             let vp_w = this.storage.frame.current_rt.width;
             let vp_h = this.storage.frame.current_rt.height;
 
-            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.USE_ORTHOGONAL_PROJECTION, p_cam_projection.is_orthogonal());
-            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.DOF_NEAR_BLUR, true);
-            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.DOF_NEAR_FIRST_TAP, true);
+            this.effect_blur_shader.set_conditional("USE_ORTHOGONAL_PROJECTION", p_cam_projection.is_orthogonal());
+            this.effect_blur_shader.set_conditional("DOF_NEAR_BLUR", true);
+            this.effect_blur_shader.set_conditional("DOF_NEAR_FIRST_TAP", true);
 
-            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.DOF_QUALITY_LOW, p_env.dof_blur_near_quality[0] === 0);
-            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.DOF_QUALITY_MEDIUM, p_env.dof_blur_near_quality[1] === 1);
-            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.DOF_QUALITY_HIGH, p_env.dof_blur_near_quality[2] === 2);
+            this.effect_blur_shader.set_conditional("DOF_QUALITY_LOW", p_env.dof_blur_near_quality[0] === 0);
+            this.effect_blur_shader.set_conditional("DOF_QUALITY_MEDIUM", p_env.dof_blur_near_quality[1] === 1);
+            this.effect_blur_shader.set_conditional("DOF_QUALITY_HIGH", p_env.dof_blur_near_quality[2] === 2);
 
             this.effect_blur_shader.bind();
 
@@ -2920,7 +2920,7 @@ export class RasterizerScene {
             this.storage._copy_screen();
 
             // vertical
-            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.DOF_NEAR_FIRST_TAP, false);
+            this.effect_blur_shader.set_conditional("DOF_NEAR_FIRST_TAP", false);
             this.effect_blur_shader.bind();
 
             this.effect_blur_shader.set_uniform1f('dof_begin', p_env.dof_blur_near_distance[0]);
@@ -2940,12 +2940,12 @@ export class RasterizerScene {
             gl.bindFramebuffer(gl.FRAMEBUFFER, this.storage.frame.current_rt.offscreen_effects[0].gl_fbo);
             this.storage._copy_screen();
 
-            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.DOF_NEAR_BLUR, false);
-            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.DOF_NEAR_FIRST_TAP, false);
-            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.DOF_QUALITY_LOW, false);
-            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.DOF_QUALITY_MEDIUM, false);
-            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.DOF_QUALITY_HIGH, false);
-            this.effect_blur_shader.set_conditional(BLUR_SHADER_DEF.USE_ORTHOGONAL_PROJECTION, false);
+            this.effect_blur_shader.set_conditional("DOF_NEAR_BLUR", false);
+            this.effect_blur_shader.set_conditional("DOF_NEAR_FIRST_TAP", false);
+            this.effect_blur_shader.set_conditional("DOF_QUALITY_LOW", false);
+            this.effect_blur_shader.set_conditional("DOF_QUALITY_MEDIUM", false);
+            this.effect_blur_shader.set_conditional("DOF_QUALITY_HIGH", false);
+            this.effect_blur_shader.set_conditional("USE_ORTHOGONAL_PROJECTION", false);
 
             this.storage.frame.current_rt.used_dof_blur_near = true;
         }

@@ -313,10 +313,6 @@ export class RenderTarget_t {
     }
 }
 
-/**
- * @typedef {'1i' | '2i' | '1f' | '2f' | '3f' | '4f' | 'mat3' | 'mat4'} UniformTypes
- */
-
 export const BLEND_MODE_MIX = 0;
 export const BLEND_MODE_ADD = 1;
 export const BLEND_MODE_SUB = 2;
