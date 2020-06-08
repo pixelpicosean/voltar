@@ -35,6 +35,7 @@ import {
     LIGHT_OMNI_SHADOW_DUAL_PARABOLOID,
 } from '../visual_server';
 import { VSG } from './visual_server_globals';
+import { Skeleton_t } from 'engine/drivers/webgl/rasterizer_storage';
 
 /**
  * @typedef {import('engine/drivers/webgl/rasterizer_storage').Material_t} Material_t
@@ -104,6 +105,7 @@ export class Instance_t {
         /** @type {Instantiable_t} */
         this.base = null;
 
+        /** @type {Skeleton_t} */
         this.skeleton = null;
         /** @type {Material_t} */
         this.material_override = null;
@@ -653,6 +655,26 @@ export class VisualServerScene {
      */
     instance_attach_object_instance(p_instance, p_obj) {
         p_instance.object = p_obj;
+    }
+
+    /**
+     * @param {Instance_t} p_instance
+     * @param {Skeleton_t} p_skeleton
+     */
+    instance_attach_skeleton(p_instance, p_skeleton) {
+        if (p_instance.skeleton === p_skeleton) return;
+
+        if (p_instance.skeleton) {
+            VSG.storage.instance_remove_skeleton(p_instance.skeleton, p_instance);
+        }
+
+        p_instance.skeleton = p_skeleton;
+
+        if (p_instance.skeleton) {
+            VSG.storage.instance_add_skeleton(p_instance.skeleton, p_instance);
+        }
+
+        this._instance_queue_update(p_instance, true);
     }
 
     update_dirty_instances() {

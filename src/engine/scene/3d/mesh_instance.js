@@ -5,7 +5,13 @@ import { VSG } from "engine/servers/visual/visual_server_globals";
 
 import { Mesh } from "../resources/mesh";
 import { Material } from "../resources/material";
+import { Skin } from "../resources/skin";
+import { NOTIFICATION_ENTER_TREE } from "../main/node";
 import { GeometryInstance } from "./visual_instance";
+import {
+    SkinReference,
+    Skeleton,
+} from "./skeleton";
 
 export class MeshInstance extends GeometryInstance {
     get class() { return "MeshInstance" }
@@ -15,7 +21,13 @@ export class MeshInstance extends GeometryInstance {
 
         /** @type {Mesh} */
         this.mesh = null;
-        this.skeleton_path = "";
+        /** @type {Skin} */
+        this.skin = null;
+        /** @type {Skin} */
+        this.skin_internal = null;
+        /** @type {SkinReference} */
+        this.skin_ref = null;
+        this.skeleton_path = "..";
 
         /** @type {Material[]} */
         this.materials = [];
@@ -73,8 +85,38 @@ export class MeshInstance extends GeometryInstance {
         return this;
     }
 
+    /**
+     * @param {number} p_what
+     */
+    _notification(p_what) {
+        if (p_what === NOTIFICATION_ENTER_TREE) {
+            this._resolve_skeleton_path();
+        }
+    }
+
+    /* private */
+
     _mesh_changed() {
         this.materials.length = this.mesh.get_surface_count();
+    }
+
+    _resolve_skeleton_path() {
+        /** @type {SkinReference} */
+        let new_skin_ref = null;
+
+        if (this.skeleton_path) {
+            let skeleton = /** @type {Skeleton} */(this.get_node(this.skeleton_path));
+            if (skeleton && skeleton.is_skeleton) {
+                new_skin_ref = skeleton.register_skin(this.skin_internal);
+                if (!this.skin_internal) {
+                    this.skin_internal = new_skin_ref.skin;
+                }
+            }
+        }
+
+        this.skin_ref = new_skin_ref;
+
+        VSG.scene.instance_attach_skeleton(this.instance, this.skin_ref ? this.skin_ref.skeleton : null);
     }
 }
 

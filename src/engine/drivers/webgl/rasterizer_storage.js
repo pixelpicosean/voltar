@@ -1,9 +1,11 @@
 import { SelfList, List } from "engine/core/self_list";
-import { is_po2, nearest_po2, deg2rad } from "engine/core/math/math_funcs";
+import { nearest_po2, deg2rad } from "engine/core/math/math_funcs";
 import { Vector2 } from "engine/core/math/vector2";
 import { Vector3 } from "engine/core/math/vector3";
-import { Color, ColorLike } from "engine/core/color";
 import { AABB } from "engine/core/math/aabb";
+import { Transform } from "engine/core/math/transform";
+import { Color, ColorLike } from "engine/core/color";
+import { OS } from "engine/core/os/os";
 
 import {
     TEXTURE_TYPE_2D,
@@ -60,7 +62,6 @@ import {
     PIXEL_FORMAT_PVRTC4A,
     PIXEL_FORMAT_ETC,
 } from "engine/scene/resources/texture";
-import { OS } from "engine/core/os/os";
 import { ARRAY_MAX } from "engine/scene/const";
 
 const SMALL_VEC2 = new Vector2(0.00001, 0.00001);
@@ -313,7 +314,7 @@ export class RenderTarget_t {
 }
 
 /**
- * @typedef {'1i' | '1f' | '2f' | '3f' | '4f' | 'mat3' | 'mat4'} UniformTypes
+ * @typedef {'1i' | '2i' | '1f' | '2f' | '3f' | '4f' | 'mat3' | 'mat4'} UniformTypes
  */
 
 export const BLEND_MODE_MIX = 0;
@@ -577,6 +578,21 @@ export class MultiMesh_t {
     }
 }
 
+export class Skeleton_t {
+    constructor() {
+        this.size = 0;
+        /** @type {Float32Array} */
+        this.bone_data = null;
+        /** @type {WebGLTexture} */
+        this.gl_tex = null;
+
+        /** @type {SelfList<Skeleton_t>} */
+        this.update_list = new SelfList(this);
+        /** @type {Set<Instance_t>} */
+        this.instances = new Set;
+    }
+}
+
 export class RasterizerStorage {
     constructor() {
         /** @type {WebGLRenderingContext} */
@@ -612,6 +628,11 @@ export class RasterizerStorage {
 
             /** @type {WebGLBuffer} */
             quadie: null,
+
+            skeleton_transform_buffer_size: 0,
+            /** @type {WebGLBuffer} */
+            skeleton_transform_buffer: null,
+            skeleton_transform_cpu_buffer: new Float32Array(1024 * 8),
         };
 
         /**
@@ -623,6 +644,9 @@ export class RasterizerStorage {
         this.buffers = {};
         /** @type {BufferPack[]} */
         this.used_buffers = [];
+
+        /** @type {List<Skeleton_t>} */
+        this.skeleton_update_list = new List;
 
         /** @type {import('./rasterizer_canvas').RasterizerCanvas} */
         this.canvas = null;
@@ -693,6 +717,12 @@ export class RasterizerStorage {
             }
             this.resources.aniso_tex = create_texture(aniso_texdata, '_aniso_');
         }
+
+        // skeleton buffer
+        {
+            this.resources.skeleton_transform_buffer_size = 0;
+            this.resources.skeleton_transform_buffer = gl.createBuffer();
+        }
     }
 
     /**
@@ -729,7 +759,28 @@ export class RasterizerStorage {
     }
     update_dirty_shaders() { }
     update_dirty_materials() { }
-    update_dirty_skeletons() { }
+    update_dirty_skeletons() {
+        if (VSG.config.use_skeleton_software) return;
+
+        const gl = this.gl;
+
+        gl.activeTexture(gl.TEXTURE0);
+
+        while (this.skeleton_update_list.first()) {
+            let skeleton = this.skeleton_update_list.first().self();
+
+            if (skeleton.size) {
+                gl.bindTexture(gl.TEXTURE_2D, skeleton.gl_tex);
+                gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, skeleton.size * 3, 1, gl.RGBA, gl.FLOAT, skeleton.bone_data);
+            }
+
+            for (let E of skeleton.instances) {
+                E.base_changed(true, false);
+            }
+
+            this.skeleton_update_list.remove(this.skeleton_update_list.first());
+        }
+    }
     update_dirty_multimeshes() {
         const gl = this.gl;
 
@@ -2011,6 +2062,93 @@ export class RasterizerStorage {
 
         return AABB.new();
     }
+
+    /* skeleton API */
+
+    skeleton_create() {
+        let skeleton = new Skeleton_t;
+        return skeleton;
+    }
+
+    /**
+     * @param {Skeleton_t} p_skeleton
+     * @param {number} p_bones
+     */
+    skeleton_allocate(p_skeleton, p_bones) {
+        p_skeleton.size = p_bones;
+
+        if (!VSG.config.use_skeleton_software) {
+            const gl = this.gl;
+
+            p_skeleton.gl_tex = this.gl.createTexture();
+
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, p_skeleton.gl_tex);
+
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, p_bones * 3, 1, 0, gl.RGBA, gl.FLOAT, null);
+
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+            gl.bindTexture(gl.TEXTURE_2D, null);
+        }
+        p_skeleton.bone_data = new Float32Array(p_bones * 4 * 3);
+    }
+
+    /**
+     * @param {Skeleton_t} p_skeleton
+     * @param {number} p_bones
+     * @param {Transform} p_transform
+     */
+    skeleton_bone_set_transform(p_skeleton, p_bones, p_transform) {
+        let bone_data = p_skeleton.bone_data;
+        let base_offset = p_bones * 4 * 3;
+
+        bone_data[base_offset + 0] = p_transform.basis.elements[0].x;
+        bone_data[base_offset + 1] = p_transform.basis.elements[0].y;
+        bone_data[base_offset + 2] = p_transform.basis.elements[0].z;
+        bone_data[base_offset + 3] = p_transform.origin.x;
+
+        bone_data[base_offset + 4] = p_transform.basis.elements[1].x;
+        bone_data[base_offset + 5] = p_transform.basis.elements[1].y;
+        bone_data[base_offset + 6] = p_transform.basis.elements[1].z;
+        bone_data[base_offset + 7] = p_transform.origin.y;
+
+        bone_data[base_offset + 8] = p_transform.basis.elements[2].x;
+        bone_data[base_offset + 9] = p_transform.basis.elements[2].y;
+        bone_data[base_offset + 10] = p_transform.basis.elements[2].z;
+        bone_data[base_offset + 11] = p_transform.origin.z;
+
+        if (!p_skeleton.update_list.in_list()) {
+            this.skeleton_update_list.add(p_skeleton.update_list);
+        }
+    }
+
+    /**
+     * @param {Skeleton_t} p_skeleton
+     * @param {Instance_t} p_instance
+     */
+    instance_add_skeleton(p_skeleton, p_instance) {
+        p_skeleton.instances.add(p_instance);
+    }
+
+    /**
+     * @param {Skeleton_t} p_skeleton
+     * @param {Instance_t} p_instance
+     */
+    instance_remove_skeleton(p_skeleton, p_instance) {
+        p_skeleton.instances.delete(p_instance);
+    }
+
+    /**
+     * @param {number[]} p_data
+     * @param {number} p_size
+     */
+    _update_skeleton_transform_buffer(p_data, p_size) { }
+
+    /* others */
 
     /**
      * @param {Instantiable_t} p_base

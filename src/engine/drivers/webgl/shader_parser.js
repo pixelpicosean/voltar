@@ -5,6 +5,7 @@ const PRECISIONS = ["lowp", "mediump", "highp"];
 /** @type {{ [key: string]: string }} */
 const UNIFORM_TYPES = {
     "float": "1f",
+    "ivec2": "2i",
     "vec2": "2f",
     "vec3": "3f",
     "vec4": "4f",

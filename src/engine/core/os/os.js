@@ -226,6 +226,8 @@ export class OS {
 
             gl.getExtension('EXT_shader_texture_lod');
 
+            driver_config.support_float_texture = !!gl.getExtension('OES_texture_float');
+
             this.gl_ext = {
                 /* instancing API */
 
@@ -282,6 +284,8 @@ export class OS {
             driver_config.max_vertex_texture_image_units = gl.getParameter(gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS);
             driver_config.max_texture_image_units = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
             driver_config.max_texture_size = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+
+            driver_config.use_skeleton_software = !driver_config.support_float_texture || (driver_config.max_vertex_texture_image_units === 0);
         }
 
         const visual_server = new VisualServer();

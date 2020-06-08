@@ -114,6 +114,7 @@ export class Node extends VObject {
         this.is_node_2d = false;
         this.is_control = false;
         this.is_spatial = false;
+        this.is_skeleton = false;
         this.is_collision_object = false;
 
         this.data = new Data();

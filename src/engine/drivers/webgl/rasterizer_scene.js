@@ -1,5 +1,5 @@
 import { lerp, deg2rad, nearest_po2 } from 'engine/core/math/math_funcs';
-import { Vector2 } from 'engine/core/math/vector2';
+import { Vector2, Vector2Like } from 'engine/core/math/vector2';
 import { Vector3 } from 'engine/core/math/vector3';
 import { Rect2 } from 'engine/core/math/rect2';
 import { Transform } from 'engine/core/math/transform';
@@ -39,6 +39,8 @@ import {
 import {
     ARRAY_NORMAL,
     ARRAY_COLOR,
+    ARRAY_BONES,
+    ARRAY_WEIGHTS,
     ARRAY_MAX,
 } from 'engine/scene/const';
 
@@ -51,6 +53,7 @@ import {
     Shader_t,
     Material_t,
     Light_t,
+    Skeleton_t,
 
     BLEND_MODE_MIX,
     BLEND_MODE_ADD,
@@ -86,6 +89,8 @@ const MAX_LIGHTS = 255;
 export const LIGHTMODE_NORMAL = 0;
 export const LIGHTMODE_UNSHADED = 1;
 export const LIGHTMODE_LIGHTMAP = 2;
+
+const INSTANCE_BONE_BASE = 13;
 
 /**
  * @typedef MaterialInstanceConfig
@@ -505,6 +510,7 @@ const SHADER_DEF = {
     RENDER_DEPTH_DUAL_PARABOLOID: 1 << 29,
 
     LIGHT_USE_RIM: 1 << 30,
+    USE_SKELETON_SOFTWARE: 1 << 31,
 };
 
 const DEFAULT_SPATIAL_ATTRIBS = [
@@ -691,7 +697,7 @@ export class RasterizerScene {
                     0, 0, 1, 0,
                     0, 0, 0, 1,
                 ],
-                WORLD_MATRIX: [
+                world_matrix: [
                     1, 0, 0, 0,
                     0, 1, 0, 0,
                     0, 0, 1, 0,
@@ -710,6 +716,8 @@ export class RasterizerScene {
                 LIGHT_SPOT_RANGE: [0],
                 LIGHT_SPOT_ANGLE: [0],
                 light_range: [0],
+
+                skeleton_texture_size: [0, 0],
 
                 bg_color: [0, 0, 0, 1],
                 bg_energy: [1],
@@ -1858,7 +1866,7 @@ export class RasterizerScene {
         }
 
         if (!material) {
-            material = this.default_material.rid;
+            material = this.default_material.material;
         }
 
         this._add_geometry_with_material(p_geometry, p_instance, material, p_depth_pass, p_shadow_pass);
@@ -2023,6 +2031,8 @@ export class RasterizerScene {
         let prev_material = null;
         /** @type {Geometry_t} */
         let prev_geometry = null;
+        /** @type {Skeleton_t} */
+        let prev_skeleton = null;
 
         let prev_unshaded = false;
         let prev_instancing = false;
@@ -2174,15 +2184,27 @@ export class RasterizerScene {
                 rebind = true;
             }
 
-            // TODO: skeleton
+            let skeleton = e.instance.skeleton;
 
-            if (e.geometry != prev_geometry) {
-                this._setup_geometry(e);
+            if (skeleton != prev_skeleton) {
+                if (skeleton) {
+                    this.set_shader_condition(SHADER_DEF.USE_SKELETON, true);
+                    this.set_shader_condition(SHADER_DEF.USE_SKELETON_SOFTWARE, VSG.config.use_skeleton_software);
+                } else {
+                    this.set_shader_condition(SHADER_DEF.USE_SKELETON, false);
+                    this.set_shader_condition(SHADER_DEF.USE_SKELETON_SOFTWARE, false);
+                }
+
+                rebind = true;
+            }
+
+            if (e.geometry != prev_geometry || skeleton != prev_skeleton) {
+                this._setup_geometry(e, skeleton);
             }
 
             let shader_rebind = false;
             if (rebind || material != prev_material) {
-                shader_rebind = this._setup_material(material, p_alpha_pass);
+                shader_rebind = this._setup_material(material, p_alpha_pass, skeleton ? skeleton.size * 3 : 0);
             }
 
             this._set_cull(e.front_facing, material.shader.spatial.cull_mode === CULL_MODE_DISABLED, p_reverse_cull);
@@ -2243,13 +2265,14 @@ export class RasterizerScene {
                 this._setup_light(light, p_shadow_atlas, p_view_transform, accum_pass);
             }
 
-            global_uniforms.WORLD_MATRIX = e.instance.transform.as_array(global_uniforms.WORLD_MATRIX);
+            global_uniforms.world_matrix = e.instance.transform.as_array(global_uniforms.world_matrix);
 
             const mat_uniforms = this.state.current_shader.uniforms;
             for (const k in mat_uniforms) {
                 const u = mat_uniforms[k];
                 if (!u.gl_loc) continue;
                 switch (u.type) {
+                    case '2i': gl.uniform2iv(u.gl_loc, global_uniforms[k] ? global_uniforms[k] : material.params[k]); break;
                     case '1f': gl.uniform1fv(u.gl_loc, global_uniforms[k] ? global_uniforms[k] : material.params[k]); break;
                     case '2f': gl.uniform2fv(u.gl_loc, global_uniforms[k] ? global_uniforms[k] : material.params[k]); break;
                     case '3f': gl.uniform3fv(u.gl_loc, global_uniforms[k] ? global_uniforms[k] : material.params[k]); break;
@@ -2263,6 +2286,7 @@ export class RasterizerScene {
 
             prev_geometry = e.geometry;
             prev_material = e.material;
+            prev_skeleton = skeleton;
             prev_light = light;
         }
 
@@ -2539,8 +2563,9 @@ export class RasterizerScene {
 
     /**
      * @param {Element_t} p_element
+     * @param {Skeleton_t} p_skeleton
      */
-    _setup_geometry(p_element) {
+    _setup_geometry(p_element, p_skeleton) {
         const gl = this.gl;
 
         switch (p_element.instance.base_type) {
@@ -2570,6 +2595,40 @@ export class RasterizerScene {
                         }
                     }
                 }
+
+                let clear_skeleton_buffer = VSG.config.use_skeleton_software;
+
+                if (p_skeleton) {
+                    if (!VSG.config.use_skeleton_software) {
+                        gl.activeTexture(gl.TEXTURE0 + VSG.config.max_texture_image_units - 1);
+                        gl.bindTexture(gl.TEXTURE_2D, p_skeleton.gl_tex);
+                    } else {
+                        let buffer = this.storage.resources.skeleton_transform_buffer;
+
+                        if (!s.attribs[ARRAY_BONES].enabled || !s.attribs[ARRAY_WEIGHTS].enabled) {
+                            break;
+                        }
+
+                        let size = s.array_len * 12;
+
+                        let bones_offset = s.attribs[ARRAY_BONES].offset;
+                        let bones_stride = s.attribs[ARRAY_BONES].stride;
+                        let bones_weight_offset = s.attribs[ARRAY_WEIGHTS].offset;
+                        let bones_weight_stride = s.attribs[ARRAY_WEIGHTS].stride;
+
+                        {
+                            for (let i = 0; i < s.array_len; i++) {
+
+                            }
+                        }
+                    }
+                }
+
+                if (clear_skeleton_buffer) {
+                    gl.disableVertexAttribArray(INSTANCE_BONE_BASE + 0);
+                    gl.disableVertexAttribArray(INSTANCE_BONE_BASE + 1);
+                    gl.disableVertexAttribArray(INSTANCE_BONE_BASE + 2);
+                }
             } break;
             case INSTANCE_TYPE_MULTIMESH: {
             } break;
@@ -2581,8 +2640,9 @@ export class RasterizerScene {
     /**
      * @param {Material_t} p_material
      * @param {boolean} p_alpha_pass
+     * @param {number} p_skeleton_tex_size
      */
-    _setup_material(p_material, p_alpha_pass) {
+    _setup_material(p_material, p_alpha_pass, p_skeleton_tex_size = 0) {
         const gl = this.gl;
 
         this.set_shader_condition(SHADER_DEF.ENABLE_UV_INTERP, true);
@@ -2622,6 +2682,8 @@ export class RasterizerScene {
 
         let uniforms = shader.uniforms;
 
+        this.state.uniforms.skeleton_texture_size[0] = p_skeleton_tex_size;
+
         let i = 0;
         for (let k in p_material.textures) {
             let u = uniforms[k];
@@ -2640,7 +2702,7 @@ export class RasterizerScene {
 
                 if (!t) {
                     if (shader.name === "spatial") {
-                        t = this.default_material.mat.texture_hints[k];
+                        // t = this.default_material.mat.texture_hints[k];
                     }
                 }
 
@@ -2677,6 +2739,17 @@ export class RasterizerScene {
                 gl.activeTexture(gl.TEXTURE0 + i);
                 gl.uniform1i(u.gl_loc, VSG.config.max_texture_image_units - 3);
             }
+        }
+        if ((this.state.conditions & SHADER_DEF.USE_SKELETON) && !VSG.config.use_skeleton_software) {
+            let u = uniforms["bone_transforms"];
+            if (!u) {
+                u = uniforms["bone_transforms"] = {
+                    type: "1i",
+                    gl_loc: gl.getUniformLocation(shader.gl_prog, "bone_transforms"),
+                }
+            }
+            gl.activeTexture(gl.TEXTURE0 + VSG.config.max_texture_image_units - 1);
+            gl.uniform1i(u.gl_loc, VSG.config.max_texture_image_units - 1);
         }
 
         return shader_rebind;

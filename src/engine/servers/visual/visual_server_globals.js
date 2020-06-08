@@ -9,12 +9,14 @@ export const VSG = {
         pvrtc_supported: false,
 
         support_depth_texture: false,
+        support_float_texture: false,
 
         depth_internalformat: 0,
         depth_type: 0,
         depth_buffer_internalformat: 0,
 
         use_rgba_3d_shadows: false,
+        use_skeleton_software: false,
     },
 
     /** @type {import('engine/drivers/webgl/rasterizer_storage').RasterizerStorage} */
