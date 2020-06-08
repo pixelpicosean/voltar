@@ -48,10 +48,13 @@ Setup Godot project (from project settings)
 Create scenes, and save them into the `assets/scene` folder
 
 Run `node tscn/main.js` to convert project settings and scenes to `JSON`
-file, and then import these files or preload them as assets in your code. 
+file, and then import these files or preload them as assets in your code.
 (in VSCode you can press `F5`, and find configs in Jetbrains IDEs)
 
 ### Supported Godot features
+
+Most 2D features and basic 3D support (no 3D physics and particles yet).
+Custom shader supported in a level (may not work with complex shaders right now).
 
 - [x] screen stretch mode/aspect
 - [x] `CanvasLayer`
@@ -83,5 +86,13 @@ file, and then import these files or preload them as assets in your code.
 - [x] `KinematicBody2D`
 - [x] shapes, font, curve
 - [x] `Viewport`
+- [x] `Spatial`
+- [x] `Camera`
+- [x] `MeshInstance` with primitive meshes and mesh with `escn` format
+- [x] `Cube`, `Quad` and `Plane` primitive meshes
+- [x] `Skeleton` and skeleton animation
+- [x] `DirectionalLight` with shadow
+- [x] `SpotLight` (no shadow support yet)
+- [x] `OmniLight` with shadow support (not perfect but fast)
 - [ ] `RichTextLabel` (WIP)
 - [ ] `RigidBody2D` (WIP)
