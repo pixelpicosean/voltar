@@ -369,6 +369,9 @@ module.exports.NodePath = (node_path) => {
         ) {
             path_str = remove_first_n_last(path_str);
         }
+        if (path_str.endsWith(':')) {
+            path_str = path_str.substr(0, path_str.length - 1);
+        }
         return path_str;
     }
     return undefined;
