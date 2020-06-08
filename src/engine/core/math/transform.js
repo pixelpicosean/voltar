@@ -1,5 +1,5 @@
 import { Vector3, Vector3Like } from "./vector3";
-import { Basis } from "./basis";
+import { Basis, Quat } from "./basis";
 import { Plane } from "./plane";
 import { AABB } from "./aabb";
 
@@ -57,6 +57,16 @@ export class Transform {
         return out;
     }
 
+    identity() {
+        this.basis.set(
+            1, 0, 0,
+            0, 1, 0,
+            0, 0, 1
+        );
+        this.origin.set(0, 0, 0);
+        return this;
+    }
+
     /**
      * @param {number} xx
      * @param {number} xy
@@ -74,6 +84,25 @@ export class Transform {
     set(xx, xy, xz, yx, yy, yz, zx, zy, zz, x, y, z) {
         this.basis.set(xx, xy, xz, yx, yy, yz, zx, zy, zz);
         this.origin.set(x, y, z);
+        return this;
+    }
+
+    /**
+     * @param {number[]} array
+     */
+    from_array(array) {
+        this.basis.set(
+            array[0],
+            array[1],
+            array[2],
+            array[3],
+            array[4],
+            array[5],
+            array[6],
+            array[7],
+            array[8]
+        );
+        this.origin.set(array[9], array[10], array[11]);
         return this;
     }
 
@@ -263,6 +292,39 @@ export class Transform {
      */
     exact_equals(other) {
         return this.basis.exact_equals(other.basis) && this.origin.exact_equals(other.origin);
+    }
+
+    /**
+     * returns new Transform
+     * @param {Transform} p_transform
+     * @param {number} p_c
+     */
+    interpolate_with(p_transform, p_c) {
+        let src_scale = this.basis.get_scale();
+        let src_rot = this.basis.get_rotation_quat();
+        let src_loc = this.origin;
+
+        let dst_scale = p_transform.basis.get_scale();
+        let dst_rot = p_transform.basis.get_rotation_quat();
+        let dst_loc = p_transform.origin;
+
+        let i_rot = Quat.new();
+        let i_scale = Vector3.new();
+
+        let interp = Transform.new();
+        interp.basis.set_quat_scale(src_rot.slerp(dst_rot, p_c, i_rot).normalize(), src_scale.linear_interpolate(dst_scale, p_c, i_scale));
+        src_loc.linear_interpolate(dst_loc, p_c, interp.origin);
+
+        Quat.free(i_rot);
+        Vector3.free(i_scale);
+
+        Quat.free(dst_rot);
+        Vector3.free(dst_scale);
+
+        Quat.free(src_rot);
+        Vector3.free(src_scale);
+
+        return interp;
     }
 }
 

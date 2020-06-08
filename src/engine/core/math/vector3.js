@@ -135,6 +135,21 @@ export class Vector3 {
     }
 
     /**
+     * @param {Vector3Like} p_b
+     * @param {number} p_t
+     * @param {Vector3} [r_out]
+     */
+    linear_interpolate(p_b, p_t, r_out) {
+        if (!r_out) r_out = Vector3.new();
+
+        return r_out.set(
+            this.x + (p_t * (p_b.x - this.x)),
+            this.y + (p_t * (p_b.y - this.y)),
+            this.z + (p_t * (p_b.z - this.z))
+        );
+    }
+
+    /**
      * Whether this equals to another point
      *
      * @param {Vector3Like} p_b

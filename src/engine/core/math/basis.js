@@ -69,6 +69,19 @@ export class Quat {
         return this.dot(this);
     }
 
+    length() {
+        return Math.hypot(this.x, this.y, this.z, this.w);
+    }
+
+    normalize() {
+        let len_inv = 1 / this.length();
+        this.x *= len_inv;
+        this.y *= len_inv;
+        this.z *= len_inv;
+        this.w *= len_inv;
+        return this;
+    }
+
     /**
      * @param {Quat} q
      * @param {number} t
@@ -664,6 +677,9 @@ export class Basis {
         return Quat.new().set(temp[0], temp[1], temp[2], temp[3]);
     }
 
+    /**
+     * returns new Quat
+     */
     get_rotation_quat() {
         let m = this.clone().orthonormalize();
         let det = m.determinant();

@@ -7,10 +7,6 @@ import { Mesh } from "../resources/mesh";
 import { Material } from "../resources/material";
 import { GeometryInstance } from "./visual_instance";
 
-/**
- * @typedef {import('engine/drivers/webgl/rasterizer_storage').Mesh_t} Mesh_t
- */
-
 export class MeshInstance extends GeometryInstance {
     get class() { return "MeshInstance" }
 
@@ -46,7 +42,7 @@ export class MeshInstance extends GeometryInstance {
     }
 
     /**
-     * @param {Mesh_t} p_base
+     * @param {import('engine/drivers/webgl/rasterizer_storage').Mesh_t} p_base
      */
     set_base(p_base) {
         VSG.scene.instance_set_base(this.instance, p_base);
