@@ -106,6 +106,17 @@ export const wrap_angle = (a) => (a + Math_PI) % Math_PI2 - Math_PI;
 export const angle_difference = (a, b) => mod((b - a + Math_PI), Math_PI2) - Math_PI;
 
 /**
+ * @param {number} value
+ * @param {number} step
+ */
+export const stepify = (value, step) => {
+    if (step !== 0) {
+        value = Math.floor(value / step + 0.5) * step;
+    }
+    return value;
+}
+
+/**
  * @param {number} p_x
  * @param {number} p_c
  * @returns {number}
@@ -154,8 +165,7 @@ export function rad2deg(rad) {
  * @return {number}
  */
 export function nearest_po2(v) {
-    // @ts-ignore
-    v += v === 0;
+    if (v === 0) return 0;
     --v;
     v |= v >>> 1;
     v |= v >>> 2;
@@ -289,4 +299,44 @@ export function pick(ary) {
  */
 export function weighted_pick(ary) {
     return ary[~~(Math.pow(rnd.frac(), 2) * (ary.length - 1) + 0.5)];
+}
+
+const int8 = new Int8Array(4)
+const int32 = new Int32Array(int8.buffer, 0, 1)
+const float32 = new Float32Array(int8.buffer, 0, 1)
+/**
+ * @param {number} i
+ */
+const int_bits_to_float = (i) => {
+    int32[0] = i
+    return float32[0]
+}
+/**
+ * @param {number} value
+ */
+const int_to_float_color = (value) => {
+    return int_bits_to_float(value & 0xfeffffff)
+}
+
+/**
+ * Pack float color (1.0, 1.0, 1.0, 1.0) into a f32
+ * @param {number} r
+ * @param {number} g
+ * @param {number} b
+ * @param {number} a
+ */
+export function pack_color_f(r, g, b, a) {
+    var bits = (((a * 255) | 0) << 24 | ((b * 255) | 0) << 16 | ((g * 255) | 0) << 8 | ((r * 255) | 0))
+    return int_to_float_color(bits)
+}
+/**
+ * Pack u8 color (255, 255, 255, 255) into a f32
+ * @param {number} r
+ * @param {number} g
+ * @param {number} b
+ * @param {number} a
+ */
+export function pack_color_u(r, g, b, a) {
+    var bits = (a << 24 | b << 16 | g << 8 | r)
+    return int_to_float_color(bits)
 }

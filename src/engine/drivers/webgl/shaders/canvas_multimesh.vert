@@ -2,6 +2,8 @@ uniform highp mat4 projection_matrix;
 uniform highp mat3 item_matrix;
 uniform highp float TIME;
 
+/* GLOBALS */
+
 attribute highp vec2 position;
 attribute highp vec2 uv;
 attribute lowp vec4 color;
@@ -47,6 +49,9 @@ void main() {
             vec4(0.0, 0.0, 0.0, 1.0)
         )
     );
+
+    /* VERTEX_CODE_BEGIN */
+    /* VERTEX_CODE_END */
 
     gl_Position = projection_matrix * real_item_matrix * instance_matrix * vec4(position, 0.0, 1.0);
 

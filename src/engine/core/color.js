@@ -190,6 +190,18 @@ export class Color {
     }
 
     /**
+     * @param {number[]} [out]
+     */
+    as_array(out) {
+        if (!out) out = [0, 0, 0, 0]
+        out[0] = this.r;
+        out[1] = this.g;
+        out[2] = this.b;
+        out[3] = this.a;
+        return out;
+    }
+
+    /**
      * @param {ColorLike} value
      */
     equals(value) {

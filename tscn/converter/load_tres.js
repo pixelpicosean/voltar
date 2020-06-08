@@ -27,6 +27,11 @@ function normalize_res_real_url(root, filename) {
  * @param {Object<string, Tres[]>} tres_map
  */
 module.exports.load_tres = (root, filename, tres_map) => {
+    let normalized_filename = filename.replace(/\\/gm, '/');
+
+    // already loaded?
+    if (tres_map[normalized_filename]) return;
+
     const real_url = normalize_res_real_url(root, filename);
     const text_data = fs.readFileSync(real_url, 'utf8');
 
@@ -49,5 +54,5 @@ module.exports.load_tres = (root, filename, tres_map) => {
         }
     })
 
-    tres_map[filename] = sections;
+    tres_map[normalized_filename] = sections;
 }

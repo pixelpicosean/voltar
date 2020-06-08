@@ -14,14 +14,13 @@ import {
 } from '../main/node';
 import { Node2D } from './node_2d';
 import {
-    NOTIFICATION_ENTER_CANVAS,
-    NOTIFICATION_TRANSFORM_CHANGED,
     NOTIFICATION_EXIT_CANVAS,
     NOTIFICATION_VISIBILITY_CHANGED,
 } from './canvas_item';
 import { BodyState } from './const';
 import { CollisionShape2D } from './collision_shape_2d';
 import { CollisionPolygon2D } from './collision_polygon_2d';
+import { NOTIFICATION_TRANSFORM_CHANGED } from '../const';
 
 
 class Shape {

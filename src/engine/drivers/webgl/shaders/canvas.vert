@@ -1,6 +1,7 @@
 uniform highp mat4 projection_matrix;
 uniform highp float TIME;
-/* UNIFORM */
+
+/* GLOBALS */
 
 attribute highp vec2 position;
 attribute highp vec2 uv;
@@ -12,7 +13,8 @@ varying vec2 uv_interp;
 void main() {
     vec2 VERTEX = position;
 
-    /* SHADER */
+    /* VERTEX_CODE_BEGIN */
+    /* VERTEX_CODE_END */
 
     gl_Position = projection_matrix * vec4(VERTEX, 0.0, 1.0);
 

@@ -1,0 +1,162 @@
+[gd_scene load_steps=14 format=2]
+
+[ext_resource path="res://image/standalone/house_palette.png" type="Texture" id=1]
+[ext_resource path="res://mesh/tree_1.tscn" type="PackedScene" id=2]
+[ext_resource path="res://mesh/house.tscn" type="PackedScene" id=3]
+[ext_resource path="res://mesh/tree_2.tscn" type="PackedScene" id=4]
+[ext_resource path="res://mesh/road.tscn" type="PackedScene" id=5]
+[ext_resource path="res://mesh/ground.tscn" type="PackedScene" id=6]
+[ext_resource path="res://mesh/robot.tscn" type="PackedScene" id=7]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends Spatial
+
+func _ready() -> void:
+#	$animation_player.play(\"idle\")
+#	$robot/RobotScene/AnimationPlayer.play(\"wave\")
+#	yield(get_tree(), \"idle_frame\")
+#	$robot/RobotScene/AnimationPlayer.stop(false)
+	pass
+
+func _process(delta: float) -> void:
+#	$ground.rotate_y(-PI * 0.3 * delta)
+	$cube.rotate_y(PI * 0.4 * delta)
+	pass
+"
+
+[sub_resource type="QuadMesh" id=2]
+size = Vector2( 60, 20 )
+
+[sub_resource type="SpatialMaterial" id=3]
+albedo_color = Color( 0.211765, 0.494118, 0.592157, 1 )
+
+[sub_resource type="SpatialMaterial" id=4]
+albedo_texture = ExtResource( 1 )
+emission_enabled = true
+emission = Color( 0.968627, 0.568627, 0.215686, 1 )
+emission_energy = 1.0
+emission_operator = 0
+emission_on_uv2 = false
+
+[sub_resource type="CubeMesh" id=5]
+material = SubResource( 4 )
+
+[sub_resource type="Animation" id=6]
+length = 16.0
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath("camera:transform")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 8 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Transform( 1, 0, 0, 0, 0.923866, 0.382716, 0, -0.382716, 0.923866, 1.27755, 5.31346, 6.29972 ), Transform( 1, 0, 0, 0, 0.999997, -0.00225109, 0, 0.00225109, 0.999997, 5.92062, 0.685764, -2.77339 ) ]
+}
+
+[node name="spatial" type="Spatial"]
+script = SubResource( 1 )
+
+[node name="sky" type="MeshInstance" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.21218, 6.6637, -32.528 )
+mesh = SubResource( 2 )
+material/0 = SubResource( 3 )
+
+[node name="ground3" parent="." instance=ExtResource( 6 )]
+transform = Transform( 22.272, 0, 0.00554291, 0, 1, 0, -0.0247635, 0, 4.98523, 2.71073, 0, -13.7421 )
+
+[node name="ground2" parent="." instance=ExtResource( 6 )]
+transform = Transform( 14.1785, 0, 3.57744, 0, 1, 0, -9.83232, 0, 5.15878, 8.19224, 0, 4.39321 )
+
+[node name="ground4" parent="." instance=ExtResource( 6 )]
+transform = Transform( 10.7671, 0, 3.57744, 0, 1, 0, -7.46659, 0, 5.15878, -0.728258, 0, -7.26641 )
+
+[node name="sun" type="DirectionalLight" parent="."]
+transform = Transform( 0.830975, -1.73355e-07, -0.55631, 0.454793, 0.575904, 0.679336, 0.320381, -0.817517, 0.478562, -1.0075, 4.70435, -3.10366 )
+light_energy = 0.8
+shadow_enabled = true
+shadow_color = Color( 0.447059, 0.470588, 0.694118, 1 )
+directional_shadow_mode = 0
+directional_shadow_depth_range = 1
+directional_shadow_max_distance = 20.0
+
+[node name="camera" type="Camera" parent="."]
+transform = Transform( 1, 0, 0, 0, 0.923866, 0.382716, 0, -0.382716, 0.923866, 1.27755, 5.31346, 6.29972 )
+size = 2.0
+
+[node name="cube" type="MeshInstance" parent="."]
+transform = Transform( 0.353554, -0.353553, 0, 0.25, 0.25, -0.353554, 0.25, 0.25, 0.353554, 1.15197, 3.25732, -4.68754 )
+mesh = SubResource( 5 )
+material/0 = null
+
+[node name="house" parent="." instance=ExtResource( 3 )]
+transform = Transform( -0.571258, 0, 0.820771, 0, 1, 0, -0.820771, 0, -0.571258, -2.66576, 0.00432737, -2.22316 )
+
+[node name="house2" parent="." instance=ExtResource( 3 )]
+transform = Transform( -0.571258, 0, 0.820771, 0, 1, 0, -0.820771, 0, -0.571258, 1.04158, 0.00432737, -4.68456 )
+
+[node name="house3" parent="." instance=ExtResource( 3 )]
+transform = Transform( -0.571258, 0, 0.820771, 0, 1, 0, -0.820771, 0, -0.571258, 4.82801, 0.00432737, -7.24089 )
+
+[node name="house4" parent="." instance=ExtResource( 3 )]
+transform = Transform( -0.571258, 0, 0.820771, 0, 1, 0, -0.820771, 0, -0.571258, 8.82919, 0.00432737, -9.57453 )
+
+[node name="tree_1" parent="." instance=ExtResource( 2 )]
+transform = Transform( 0.268673, 0, -0.138774, 0, 0.302396, 0, 0.138774, 0, 0.268673, 0.655419, 0, -1.33656 )
+
+[node name="tree_3" parent="." instance=ExtResource( 2 )]
+transform = Transform( 0.299468, 0, 0.0419809, 0, 0.302396, 0, -0.0419809, 0, 0.299468, 4.41012, 0, -3.81237 )
+
+[node name="tree_7" parent="." instance=ExtResource( 2 )]
+transform = Transform( 0.299468, 0, 0.0419809, 0, 0.302396, 0, -0.0419809, 0, 0.299468, 0.525813, 0, 2.87419 )
+
+[node name="tree_8" parent="." instance=ExtResource( 2 )]
+transform = Transform( 0.102354, 0, -0.284547, 0, 0.302396, 0, 0.284547, 0, 0.102354, 1.85757, 0, 2.06958 )
+
+[node name="tree_9" parent="." instance=ExtResource( 2 )]
+transform = Transform( -0.216157, 0, -0.21147, 0, 0.302396, 0, 0.21147, 0, -0.216157, 3.21708, 0, 1.18174 )
+
+[node name="tree_10" parent="." instance=ExtResource( 2 )]
+transform = Transform( -0.201136, 0, 0.225805, 0, 0.302396, 0, -0.225805, 0, -0.201136, 4.57659, 0, 0.210664 )
+
+[node name="tree_11" parent="." instance=ExtResource( 2 )]
+transform = Transform( 0.0503989, 0, -0.298167, 0, 0.302396, 0, 0.298167, 0, 0.0503989, 5.86374, 0, -0.741332 )
+
+[node name="tree_12" parent="." instance=ExtResource( 2 )]
+transform = Transform( 0.295171, 0, 0.065708, 0, 0.302396, 0, -0.065708, 0, 0.295171, 7.17504, 0, -1.63302 )
+
+[node name="tree_2" parent="." instance=ExtResource( 4 )]
+transform = Transform( 0.353459, 0, 0.216201, 0, 0.414338, 0, -0.216201, 0, 0.353459, 0.89046, 0, -8.6264 )
+
+[node name="tree_6" parent="." instance=ExtResource( 2 )]
+transform = Transform( -0.0834177, 0, -0.290663, 0, 0.302396, 0, 0.290663, 0, -0.0834177, 8.18933, 0, -6.42346 )
+
+[node name="tree_5" parent="." instance=ExtResource( 4 )]
+transform = Transform( 0.304174, 0, -0.281344, 0, 0.414338, 0, 0.281344, 0, 0.304174, 5.26911, 0, -11.111 )
+
+[node name="tree_4" parent="." instance=ExtResource( 4 )]
+transform = Transform( 0.172211, 0, 0.376855, 0, 0.414338, 0, -0.376855, 0, 0.172211, -2.77099, 0, -6.28609 )
+
+[node name="road" parent="." instance=ExtResource( 5 )]
+transform = Transform( 0.825724, 0, 0.564074, 0, 1, 0, -0.564074, 0, 0.825724, -1.18758, -0.0900879, 1.94605 )
+
+[node name="road2" parent="." instance=ExtResource( 5 )]
+transform = Transform( 0.825724, 0, 0.564074, 0, 1, 0, -0.564074, 0, 0.825724, 2.04001, -0.0900879, -0.261966 )
+
+[node name="road3" parent="." instance=ExtResource( 5 )]
+transform = Transform( 0.825724, 0, 0.564074, 0, 1, 0, -0.564074, 0, 0.825724, 5.33094, -0.0900879, -2.51112 )
+
+[node name="road4" parent="." instance=ExtResource( 5 )]
+transform = Transform( 0.825724, 0, 0.564074, 0, 1, 0, -0.564074, 0, 0.825724, 8.62449, -0.09, -4.76035 )
+
+[node name="road5" parent="." instance=ExtResource( 5 )]
+transform = Transform( 0.825724, 0, 0.564074, 0, 1, 0, -0.564074, 0, 0.825724, 11.8273, -0.09, -6.94825 )
+
+[node name="robot" parent="." instance=ExtResource( 7 )]
+transform = Transform( 0.699908, 0, 0.0113371, 0, 0.7, 0, -0.0113371, 0, 0.699908, 0.332197, 0, 0.751816 )
+
+[node name="animation_player" type="AnimationPlayer" parent="."]
+anims/idle = SubResource( 6 )

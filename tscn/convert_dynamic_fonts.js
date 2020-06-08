@@ -4,7 +4,7 @@ const path = require('path');
 const ttf2woff = require('./font/ttf2woff');
 const ttf2woff2 = require('./font/ttf2woff2');
 
-const { get_list } = require('./resource_record');
+const { get_all_records } = require('./registry');
 
 /**
  * @param {string} fontname
@@ -18,7 +18,7 @@ const font_css = (fontname) =>
 }\n`
 
 module.exports.convert_dynamic_fonts = function convert_dynamic_fonts() {
-    const dy_fonts = get_list('DynamicFont');
+    const dy_fonts = get_all_records('DynamicFont');
     if (dy_fonts && dy_fonts.length > 0) {
         // make sure font folder exist
         const font_folder = path.normalize(path.join(__dirname, '../media/font'));

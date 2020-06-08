@@ -1,7 +1,11 @@
 const path = require('path');
 const opentype = require('opentype.js');
 
-const record = require('../../resource_record');
+const {
+    record_data_with_type,
+    add_to_resource_check_ignores,
+    add_non_tres_data,
+} = require('../../registry');
 
 module.exports.extra_process = (data) => {
     /** @type {string} */
@@ -14,14 +18,14 @@ module.exports.extra_process = (data) => {
     let descender = hhea.descender;
 
     // add font file to the list for be processed later
-    record.add('DynamicFont', filename);
+    record_data_with_type('DynamicFont', filename);
 
     // use font file name as key
     filename = filename
         .replace('.ttf', '').replace('.TTF', '')
         .replace('.otf', '').replace('.OTF', '')
 
-    record.add_to_resource_lookup_skip_list(filename);
+    add_to_resource_check_ignores(filename);
 
     const dynamic_font_data = {
         type: 'DynamicFontData',
@@ -31,7 +35,7 @@ module.exports.extra_process = (data) => {
         descender: descender,
     }
 
-    record.add_non_tres_data(data.attr.type, dynamic_font_data);
+    add_non_tres_data(data.attr.type, dynamic_font_data);
 
     return {
         // nodes can use the filename to retrive font info

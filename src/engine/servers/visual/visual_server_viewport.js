@@ -6,7 +6,12 @@ import { Color, ColorLike } from "engine/core/color";
 
 import { VSG } from "./visual_server_globals";
 import { Canvas } from "./visual_server_canvas";
+import { Scenario_t, Camera_t } from "./visual_server_scene";
 
+/**
+ * @typedef {import('engine/drivers/webgl/rasterizer_storage').RenderTarget_t} RenderTarget_t
+ * @typedef {import('engine/drivers/webgl/rasterizer_scene').ShadowAtlas_t} ShadowAtlas_t
+ */
 
 const VIEWPORT_UPDATE_DISABLED = 0;
 const VIEWPORT_UPDATE_ONCE = 1; //then goes to disabled, must be manually updated
@@ -53,7 +58,7 @@ export class Viewport_t {
         this.camera = null;
         this.scenario = null;
 
-        /** @type {import('engine/drivers/webgl/rasterizer_storage').RenderTarget_t} */
+        /** @type {RenderTarget_t} */
         this.render_target = null;
         this.update_mode = VIEWPORT_UPDATE_WHEN_VISIBLE;
 
@@ -119,37 +124,28 @@ export class VisualServerViewport {
         this.clear_color.copy(p_color);
     }
 
-    free_rid(rid) {
-        return false;
-    }
-
-    /**
-     * @param {Viewport_t} p_viewport
-     */
-    free(p_viewport) {
-        if (p_viewport && p_viewport._id >= 0) {
-            // TODO: free render target
-            // p_viewport.render_target.free();
-
-            for (const [_, canvas] of p_viewport.canvas_map) {
-                canvas.canvas.viewports.delete(p_viewport);
-            }
-
-            remove_items(this.active_viewports, this.active_viewports.indexOf(p_viewport), 1);
-
-            return true;
-        }
-        return false;
-    }
-
     viewport_create() {
         const viewport = new Viewport_t();
         viewport.self = viewport;
         viewport.hide_scenario = false;
         viewport.hide_canvas = false;
         viewport.render_target = VSG.storage.render_target_create();
+        viewport.shadow_atlas = VSG.scene_render.shadow_atlas_create();
         viewport.viewport_render_direct_to_screen = false;
         return viewport;
+    }
+    /**
+     * @param {Viewport_t} p_viewport
+     */
+    viewport_free(p_viewport) {
+        VSG.storage.render_target_free(p_viewport.render_target);
+
+        for (let [c] of p_viewport.canvas_map) {
+            this.viewport_remove_canvas(p_viewport, c);
+        }
+
+        this.viewport_set_scenario(p_viewport, null);
+        this.active_viewports.splice(this.active_viewports.indexOf(p_viewport), 1);
     }
     /**
      * @param {Viewport_t} p_viewport
@@ -183,16 +179,26 @@ export class VisualServerViewport {
 
     /**
      * @param {Viewport_t} p_viewport
-     * @param {Rect2} p_rect
+     * @param {boolean} p_enabled
      */
-    viewport_attach_to_screen(p_viewport, p_rect/* , p_screen */) {
+    viewport_set_vflip(p_viewport, p_enabled) {
+        p_viewport.render_target.flags.VFLIP = p_enabled;
+        VSG.storage.render_target_set_flag(p_viewport.render_target, "VFLIP", p_enabled);
+    }
+
+    /**
+     * @param {Viewport_t} p_viewport
+     * @param {Rect2} p_rect
+     * @param {number} [p_screen]
+     */
+    viewport_attach_to_screen(p_viewport, p_rect, p_screen = 0) {
         if (p_viewport.viewport_render_direct_to_screen) {
             VSG.storage.render_target_set_size(p_viewport.render_target, p_rect.width, p_rect.height);
-            // VSG.storage.render_target_set_position(p_viewport.render_target, p_rect.x, p_rect.y);
+            VSG.storage.render_target_set_position(p_viewport.render_target, p_rect.x, p_rect.y);
         }
 
         p_viewport.viewport_to_screen_rect.copy(p_rect);
-        p_viewport.viewport_to_screen = 0/* p_screen */;
+        p_viewport.viewport_to_screen = p_screen;
     }
     /**
      * @param {Viewport_t} p_viewport
@@ -204,7 +210,7 @@ export class VisualServerViewport {
         }
 
         if (!p_enable) {
-            // VSG.storage.render_target_set_position(p_viewport.render_target, 0, 0);
+            VSG.storage.render_target_set_position(p_viewport.render_target, 0, 0);
             VSG.storage.render_target_set_size(p_viewport.render_target, p_viewport.size.x, p_viewport.size.y);
         }
 
@@ -212,7 +218,7 @@ export class VisualServerViewport {
 
         if (!p_viewport.viewport_to_screen_rect.is_zero() && p_enable) {
             VSG.storage.render_target_set_size(p_viewport.render_target, p_viewport.viewport_to_screen_rect.width, p_viewport.viewport_to_screen_rect.height);
-            // VSG.storage.render_target_set_position(p_viewport.render_target, p_viewport.viewport_to_screen_rect.x, p_viewport.viewport_to_screen_rect.y);
+            VSG.storage.render_target_set_position(p_viewport.render_target, p_viewport.viewport_to_screen_rect.x, p_viewport.viewport_to_screen_rect.y);
         }
     }
     /**
@@ -220,7 +226,7 @@ export class VisualServerViewport {
      */
     viewport_detach(p_viewport) {
         if (p_viewport.viewport_render_direct_to_screen) {
-            // VSG.storage.render_target_set_position(p_viewport.render_target, 0, 0);
+            VSG.storage.render_target_set_position(p_viewport.render_target, 0, 0);
             VSG.storage.render_target_set_size(p_viewport.render_target, p_viewport.size.x, p_viewport.size.y);
         }
 
@@ -300,7 +306,26 @@ export class VisualServerViewport {
      * @param {Viewport_t} p_viewport
      * @param {boolean} p_enabled
      */
-    viewport_set_transparent_background(p_viewport, p_enabled) { }
+    viewport_set_transparent_background(p_viewport, p_enabled) {
+        VSG.storage.render_target_set_flag(p_viewport.render_target, "TRANSPARENT", p_enabled);
+        p_viewport.transparent_bg = p_enabled;
+    }
+
+    /**
+     * @param {Viewport_t} p_viewport
+     * @param {Scenario_t} p_scenario
+     */
+    viewport_set_scenario(p_viewport, p_scenario) {
+        p_viewport.scenario = p_scenario;
+    }
+
+    /**
+     * @param {Viewport_t} p_viewport
+     * @param {Camera_t} p_camera
+     */
+    viewport_attach_camera(p_viewport, p_camera) {
+        p_viewport.camera = p_camera;
+    }
 
     draw_viewports() {
         // sort viewports
@@ -312,21 +337,22 @@ export class VisualServerViewport {
                 continue;
             }
 
-            let visible = !vp.viewport_to_screen_rect.is_zero() || vp.update_mode === VIEWPORT_UPDATE_ALWAYS || vp.update_mode === VIEWPORT_UPDATE_ONCE || (vp.update_mode === VIEWPORT_UPDATE_WHEN_VISIBLE && false/* && vp.render_target.was_used */);
+            let visible = !vp.viewport_to_screen_rect.is_zero() || vp.update_mode === VIEWPORT_UPDATE_ALWAYS || vp.update_mode === VIEWPORT_UPDATE_ONCE || (vp.update_mode === VIEWPORT_UPDATE_WHEN_VISIBLE && VSG.storage.render_target_was_used(vp.render_target));
             visible = visible && vp.size.x > 1 && vp.size.y > 1;
 
             if (!visible) {
                 continue;
             }
 
+            VSG.storage.render_target_clear_used(vp.render_target);
+
             VSG.rasterizer.set_current_render_target(vp.render_target);
-            // VSG.rasterizer.set_current_render_target(null);
 
             this._draw_viewport(vp);
 
-            if (!vp.viewport_to_screen_rect.is_zero()) {
+            if (!vp.viewport_to_screen_rect.is_zero() && !vp.viewport_render_direct_to_screen) {
                 VSG.rasterizer.set_current_render_target(null);
-                VSG.rasterizer.blit_render_targets_to_screen(vp.render_target, vp.viewport_to_screen_rect, vp.viewport_to_screen);
+                VSG.rasterizer.blit_render_target_to_screen(vp.render_target, vp.viewport_to_screen_rect, vp.viewport_to_screen);
             }
         }
     }
@@ -373,23 +399,18 @@ export class VisualServerViewport {
 
     /**
      * @param {Viewport_t} p_viewport
-     * @param {any} [p_eye]
      */
-    _draw_3d(p_viewport, p_eye) {
-        if (/* p_viewport.use_arvr */false) {
-        } else {
-            VSG.scene.render_camera(p_viewport.camera, p_viewport.scenario, p_viewport.size, p_viewport.shadow_atlas);
-        }
+    _draw_3d(p_viewport) {
+        VSG.scene.render_camera(p_viewport.camera, p_viewport.scenario, p_viewport.size, p_viewport.shadow_atlas);
     }
 
     /**
      * @param {Viewport_t} p_viewport
-     * @param {any} [p_eye]
      */
-    _draw_viewport(p_viewport, p_eye) {
+    _draw_viewport(p_viewport) {
         const scenario_draw_canvas_bg = false;
 
-        const can_draw_3d = !p_viewport.disable_3d && !p_viewport.disable_3d_by_usage/* && VSG.scene.camera_owner.has(p_viewport.camera) */
+        const can_draw_3d = !p_viewport.disable_3d && !p_viewport.disable_3d_by_usage && !!p_viewport.camera;
 
         if (p_viewport.clear_mode !== VIEWPORT_CLEAR_NEVER) {
             VSG.rasterizer.clear_render_target(p_viewport.transparent_bg ? Black : this.clear_color);
@@ -399,7 +420,7 @@ export class VisualServerViewport {
         }
 
         if (!scenario_draw_canvas_bg && can_draw_3d) {
-            this._draw_3d(p_viewport, p_eye);
+            this._draw_3d(p_viewport);
         }
 
         if (!p_viewport.hide_canvas) {

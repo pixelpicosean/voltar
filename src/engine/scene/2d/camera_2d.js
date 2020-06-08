@@ -22,9 +22,9 @@ import {
 } from '../main/node';
 import { Node2D } from './node_2d';
 import {
-    NOTIFICATION_TRANSFORM_CHANGED,
     NOTIFICATION_DRAW,
 } from './canvas_item';
+import { NOTIFICATION_TRANSFORM_CHANGED } from '../const';
 
 
 export const ANCHOR_MODE_FIXED_TOP_LEFT = 0;

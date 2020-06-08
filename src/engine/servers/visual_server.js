@@ -62,6 +62,51 @@ export const MULTIMESH_CUSTOM_DATA_NONE = 0;
 export const MULTIMESH_CUSTOM_DATA_8BIT = 1;
 export const MULTIMESH_CUSTOM_DATA_FLOAT = 2;
 
+export const INSTANCE_TYPE_NONE = 0;
+export const INSTANCE_TYPE_MESH = 1;
+export const INSTANCE_TYPE_MULTIMESH = 2;
+export const INSTANCE_TYPE_IMMEDIATE = 3;
+export const INSTANCE_TYPE_PARTICLES = 4;
+export const INSTANCE_TYPE_LIGHT = 5;
+export const INSTANCE_TYPE_REFLECTION_PROBE = 6;
+export const INSTANCE_TYPE_GI_PROBE = 7;
+export const INSTANCE_TYPE_LIGHTMAP_CAPTURE = 8;
+export const INSTANCE_GEOMETRY_MASK = (1 << INSTANCE_TYPE_MESH) | (1 << INSTANCE_TYPE_MULTIMESH) | (1 << INSTANCE_TYPE_IMMEDIATE) | (1 << INSTANCE_TYPE_PARTICLES);
+
+export const LIGHT_DIRECTIONAL = 0;
+export const LIGHT_OMNI = 1;
+export const LIGHT_SPOT = 2;
+
+export const LIGHT_PARAM_ENERGY = 0;
+export const LIGHT_PARAM_INDIRECT_ENERGY = 1;
+export const LIGHT_PARAM_SPECULAR = 2;
+export const LIGHT_PARAM_RANGE = 3;
+export const LIGHT_PARAM_ATTENUATION = 4;
+export const LIGHT_PARAM_SPOT_ANGLE = 5;
+export const LIGHT_PARAM_SPOT_ATTENUATION = 6;
+export const LIGHT_PARAM_CONTACT_SHADOW_SIZE = 7;
+export const LIGHT_PARAM_SHADOW_MAX_DISTANCE = 8;
+export const LIGHT_PARAM_SHADOW_SPLIT_1_OFFSET = 9;
+export const LIGHT_PARAM_SHADOW_SPLIT_2_OFFSET = 10;
+export const LIGHT_PARAM_SHADOW_SPLIT_3_OFFSET = 11;
+export const LIGHT_PARAM_SHADOW_NORMAL_BIAS = 12;
+export const LIGHT_PARAM_SHADOW_BIAS = 13;
+export const LIGHT_PARAM_SHADOW_BIAS_SPLIT_SCALE = 14;
+
+export const SHADOW_CASTING_SETTING_OFF = 0;
+export const SHADOW_CASTING_SETTING_ON = 1;
+export const SHADOW_CASTING_SETTING_DOUBLE_SIDED = 2;
+export const SHADOW_CASTING_SETTING_SHADOWS_ONLY = 3;
+
+export const LIGHT_DIRECTIONAL_SHADOW_DEPTH_RANGE_STABLE = 0;
+export const LIGHT_DIRECTIONAL_SHADOW_DEPTH_RANGE_OPTIMIZED = 1;
+
+export const LIGHT_OMNI_SHADOW_DUAL_PARABOLOID = 0;
+export const LIGHT_OMNI_SHADOW_CUBE = 1;
+
+export const LIGHT_OMNI_SHADOW_DETAIL_VERTICAL = 0;
+export const LIGHT_OMNI_SHADOW_DETAIL_HORIZONTAL = 1;
+
 /**
  * @typedef FrameDrawnCallbacks
  * @property {any} object
@@ -144,18 +189,16 @@ export class VisualServer extends VObject {
 
         VSG.rasterizer.begin_frame(frame_step);
 
-        VSG.scene_render.update();
+        VSG.scene.update_dirty_instances();
 
         VSG.viewport.draw_viewports();
-        VSG.scene.render_probes();
-        VSG.canvas_render.update();
-
         this._draw_margins();
         VSG.rasterizer.end_frame();
 
         for (const c of this.frame_drawn_callbacks) {
             c.object[c.method].call(c.object, c.param);
         }
+        this.frame_drawn_callbacks.length = 0;
 
         this.emit_signal('frame_post_draw');
     }
@@ -188,19 +231,6 @@ export class VisualServer extends VObject {
      */
     set_default_clear_color(p_color) {
         VSG.viewport.set_default_clear_color(p_color);
-    }
-
-    free_rid(p_rid) {
-        if (VSG.storage.free_rid(p_rid))
-            return;
-        if (VSG.canvas.free_rid(p_rid))
-            return;
-        if (VSG.viewport.free_rid(p_rid))
-            return;
-        if (VSG.scene.free_rid(p_rid))
-            return;
-        if (VSG.scene_render.free_rid(p_rid))
-            return;
     }
 
     /* private */

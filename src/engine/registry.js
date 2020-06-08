@@ -42,9 +42,33 @@ export const preload_queue = {
     queue: [],
 };
 
-import resources from 'resources.json';
-/** @type {Object<string, any>} */
-export const resource_map = resources;
+// import resources from 'resources.json';
 
 /** @type {Object<string, any>} */
-export const raw_resource_map = resources;
+let resource_map_ = {};
+/** @type {Object<string, any>} */
+let raw_resource_map_ = {};
+
+/** @param {Object<string, any>} data */
+export const set_resource_map = (data) => resource_map_ = data;
+/** @param {Object<string, any>} data */
+export const set_raw_resource_map = (data) => raw_resource_map_ = data;
+
+export const get_resource_map = () => resource_map_;
+export const get_raw_resource_map = () => raw_resource_map_;
+
+/** @type {Uint8Array[]} */
+let binary_pack_list = [];
+export const set_binary_pack_list = (list) => {
+    binary_pack_list = list.map(ab => new Uint8Array(ab));
+};
+/** @param {number} idx */
+export const get_binary_pack = (idx) => binary_pack_list[idx];
+
+/** @type {any[]} */
+let json_pack_list = [];
+export const set_json_pack_list = (list) => {
+    json_pack_list = list;
+};
+/** @param {number} idx */
+export const get_json_data = (idx) => json_pack_list[idx];

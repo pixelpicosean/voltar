@@ -5,6 +5,8 @@ const {
     remove_first_n_last,
 } = require('./utils');
 
+module.exports.SubResource = (value) => value;
+module.exports.ExtResource = (value) => value;
 
 /**
  * @param {any} value
@@ -167,6 +169,30 @@ module.exports.Vector2 = (vec) => {
     return undefined;
 };
 /**
+ * @param {any} vec
+ * @returns {{ x: number, y: number, z: number }}
+ */
+module.exports.Vector3 = (vec) => {
+    if (typeof (vec) === 'object') {
+        return {
+            x: module.exports.real(vec.x),
+            y: module.exports.real(vec.y),
+            z: module.exports.real(vec.z),
+        }
+    }
+
+    if (typeof (vec) === 'string') {
+        const arr = get_function_params(vec);
+        return {
+            x: parseFloat(arr[0]),
+            y: parseFloat(arr[1]),
+            z: parseFloat(arr[2]),
+        };
+    }
+
+    return undefined;
+};
+/**
  * @param {any} color
  * @returns {{ r: number, g: number, b: number, a: number }}
  */
@@ -223,6 +249,22 @@ module.exports.Rect2 = (rect) => {
  * @returns {number[]}
  */
 module.exports.Transform2D = (xform) => {
+    if (_.isArray(xform)) {
+        return xform;
+    }
+
+    if (typeof (xform) === 'string') {
+        const arr = get_function_params(xform);
+        return arr.map(str => parseFloat(str));
+    }
+
+    return undefined;
+};
+/**
+ * @param {any} xform
+ * @returns {number[]}
+ */
+module.exports.Transform = (xform) => {
     if (_.isArray(xform)) {
         return xform;
     }
@@ -327,6 +369,9 @@ module.exports.NodePath = (node_path) => {
         ) {
             path_str = remove_first_n_last(path_str);
         }
+        if (path_str.endsWith(':')) {
+            path_str = path_str.substr(0, path_str.length - 1);
+        }
         return path_str;
     }
     return undefined;
@@ -338,11 +383,19 @@ module.exports.NodePath = (node_path) => {
  */
 module.exports.PoolIntArray = (arr) => {
     if (Array.isArray(arr)) {
-        return arr.map((value) => module.exports.int(value));
+        let result = arr.map((value) => module.exports.int(value));
+        result.__meta__ = {
+            func: 'PoolIntArray',
+        }
+        return result;
     }
 
     if (typeof (arr) === 'string') {
-        return get_function_params(arr).map(module.exports.int);
+        let result = get_function_params(arr).map(module.exports.int);
+        result.__meta__ = {
+            func: 'PoolIntArray',
+        }
+        return result;
     }
 
     return undefined;
@@ -353,11 +406,19 @@ module.exports.PoolIntArray = (arr) => {
  */
 module.exports.PoolRealArray = (arr) => {
     if (Array.isArray(arr)) {
-        return arr.map((value) => module.exports.real(value));
+        let result = arr.map((value) => module.exports.real(value));
+        result.__meta__ = {
+            func: 'PoolRealArray',
+        }
+        return result;
     }
 
     if (typeof (arr) === 'string') {
-        return get_function_params(arr).map(module.exports.real);
+        let result = get_function_params(arr).map(module.exports.real);
+        result.__meta__ = {
+            func: 'PoolRealArray',
+        }
+        return result;
     }
 
     return undefined;
@@ -374,22 +435,29 @@ module.exports.PoolColorArray = (arr) => {
         }
         // array of numbers
         else if (typeof (arr[0]) === 'number') {
-            const res = [];
+            const result = [];
             for (let i = 0; i < arr.length; i += 4) {
-                res.push({
+                result.push({
                     r: arr[i + 0],
                     g: arr[i + 1],
                     b: arr[i + 2],
                     a: arr[i + 3],
                 })
             }
-            return res;
+            result.__meta__ = {
+                func: 'PoolColorArray',
+            }
+            return result;
         }
     }
 
     if (typeof (arr) === 'string') {
         const number_arr = get_function_params(arr).map(module.exports.real);
-        return module.exports.PoolColorArray(number_arr);
+        let result = module.exports.PoolColorArray(number_arr);
+        result.__meta__ = {
+            func: 'PoolColorArray',
+        }
+        return result;
     }
 
     return undefined;
@@ -400,19 +468,88 @@ module.exports.PoolColorArray = (arr) => {
  */
 module.exports.Vector2Array = (arr) => {
     if (Array.isArray(arr)) {
-        return arr.map((value) => module.exports.Vector2(value));
+        let result = arr.map(v => parseFloat(v));
+        result.__meta__ = {
+            func: 'Vector2Array',
+        }
+        return result;
     }
 
     if (typeof (arr) === 'string') {
-        const vec_strs = arr.replace(/\[|\]/g, '').split('),').map((s, i, a) => (i < a.length - 1) ? `${s})`.trim() : s.trim());
-        for (let i = 0; i < vec_strs.length - 1; i++) {
-            vec_strs[i] += ')';
+        const result = get_function_params(arr).map(v => parseFloat(v));
+        result.__meta__ = {
+            func: 'Vector2Array',
         }
-        return vec_strs.map(vec => {
-            const vec_arr = get_function_params(vec)
-                .map(module.exports.real);
-            return { x: vec_arr[0], y: vec_arr[1] };
-        });
+        return result;
+    }
+
+    return undefined;
+};
+/**
+ * @param {any} arr
+ * @returns {number[]}
+ */
+module.exports.Vector3Array = (arr) => {
+    if (Array.isArray(arr)) {
+        let result = arr.map(v => parseFloat(v));
+        result.__meta__ = {
+            func: 'Vector3Array',
+        }
+        return result;
+    }
+
+    if (typeof (arr) === 'string') {
+        const result = get_function_params(arr).map(v => parseFloat(v));
+        result.__meta__ = {
+            func: 'Vector3Array',
+        }
+        return result;
+    }
+
+    return undefined;
+};
+/**
+ * @param {any} arr
+ * @returns {number[]}
+ */
+module.exports.FloatArray = (arr) => {
+    if (Array.isArray(arr)) {
+        let result = arr.map(v => parseFloat(v));
+        result.__meta__ = {
+            func: 'FloatArray',
+        }
+        return result;
+    }
+
+    if (typeof (arr) === 'string') {
+        const result = get_function_params(arr).map(v => parseFloat(v));
+        result.__meta__ = {
+            func: 'FloatArray',
+        }
+        return result;
+    }
+
+    return undefined;
+};
+/**
+ * @param {any} arr
+ * @returns {number[]}
+ */
+module.exports.IntArray = (arr) => {
+    if (Array.isArray(arr)) {
+        let result = arr.map(v => parseInt(v));
+        result.__meta__ = {
+            func: 'IntArray',
+        }
+        return result;
+    }
+
+    if (typeof (arr) === 'string') {
+        const result = get_function_params(arr).map(v => parseInt(v));
+        result.__meta__ = {
+            func: 'IntArray',
+        }
+        return result;
     }
 
     return undefined;
@@ -423,17 +560,26 @@ module.exports.Vector2Array = (arr) => {
  */
 module.exports.Rect2Array = (arr) => {
     if (Array.isArray(arr)) {
-        return arr.map((value) => module.exports.Rect2(value));
+        let result = arr.map((value) => module.exports.Rect2(value));
+        result.__meta__ = {
+            func: 'Rect2Array',
+        }
+        return result;
     }
 
     if (typeof (arr) === 'string') {
         const rect_strs = arr.replace(/\[|\]/g, '').split('),').map((s, i, a) => (i < a.length - 1) ? `${s})`.trim() : s.trim());
         rect_strs[0] += ')';
-        return rect_strs.map(rect => {
+        let result = rect_strs.map(rect => {
             const rect_arr = get_function_params(rect)
                 .map(module.exports.real);
             return { x: rect_arr[0], y: rect_arr[1], width: rect_arr[2], height: rect_arr[3] };
         });
+
+        result.__meta__ = {
+            func: 'Rect2Array',
+        }
+        return result;
     }
 
     return undefined;
@@ -444,7 +590,11 @@ module.exports.Rect2Array = (arr) => {
  */
 module.exports.ColorArray = (arr) => {
     if (Array.isArray(arr)) {
-        return arr.map((value) => module.exports.Color(value));
+        let result = arr.map((value) => module.exports.Color(value));
+        result.__meta__ = {
+            func: 'MethodArray',
+        }
+        return result;
     }
 
     if (typeof (arr) === 'string') {
@@ -452,11 +602,15 @@ module.exports.ColorArray = (arr) => {
         for (let i = 0; i < color_strs.length - 1; i++) {
             color_strs[i] += ' )';
         }
-        return color_strs.map(color => {
+        let result = color_strs.map(color => {
             const color_arr = get_function_params(color)
                 .map(module.exports.real);
             return { r: color_arr[0], g: color_arr[1], b: color_arr[2], a: color_arr[3] };
         });
+        result.__meta__ = {
+            func: 'ColorArray',
+        }
+        return result;
     }
 
     return undefined;
@@ -563,10 +717,14 @@ module.exports.MethodArray = (arr) => {
         return arr;
     }
 
-    return arr.map(({ args, method }) => ({
+    let result = arr.map(({ args, method }) => ({
         args: module.exports.GeneralArray(args),
         method: method.replace(/"/g, ''),
     }))
+    result.__meta__ = {
+        func: 'MethodArray',
+    }
+    return result;
 };
 
 /**
@@ -587,6 +745,10 @@ module.exports.parse_as_primitive = (str) => {
     // Remove trailing coma if any
     if (str[str.length - 1] === ',') {
         str = str.substring(0, str.length - 1);
+    }
+
+    if (str === 'null') {
+        return { type: 'null', value: null, is_valid: true };
     }
 
     // boolean?
@@ -611,8 +773,13 @@ module.exports.parse_as_primitive = (str) => {
     }
 
     // string?
-    if (str[0] === '"' && str[str.length - 1] === '"') {
-        return { type: 'string', value: remove_first_n_last(str), is_valid: true };
+    let last_c = str[str.length - 1];
+    let str_1 = str;
+    if (last_c !== ' ' && last_c !== '\n') {
+        str_1 = str.trimRight();
+    }
+    if (str_1[0] === '"' && str_1[str_1.length - 1] === '"') {
+        return { type: 'string', value: remove_first_n_last(str_1), is_valid: true };
     }
 
     // multi-line string?

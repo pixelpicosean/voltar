@@ -343,6 +343,8 @@ export class Control extends CanvasItem {
                 const parent = /** @type {Control} */(this.get_parent());
                 if (parent.is_control) {
                     this.c_data.parent = parent;
+                } else {
+                    this.c_data.parent = null;
                 }
 
                 if (this.is_set_as_toplevel()) {
@@ -1746,7 +1748,7 @@ export class Control extends CanvasItem {
     }
 
     _update_minimum_size() {
-        if (!this.is_inside_tree) {
+        if (!this.is_inside_tree()) {
             return;
         }
 

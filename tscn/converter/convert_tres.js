@@ -15,6 +15,25 @@ function optional_empty(obj) {
 }
 
 /**
+ * @param {Array} arr
+ */
+function optional_empty_array(arr) {
+    return arr
+        .filter(e => !!e)
+        .filter(e => {
+            if (Array.isArray(e)) {
+                return true;
+            }
+            if (typeof e === 'object') {
+                for (let k in e) {
+                    if (e[k] !== undefined) return true;
+                }
+                return false;
+            }
+        })
+}
+
+/**
  * @param {{ key: string, attr: any, prop: any }[]} blocks
  */
 module.exports.convert_tres = (blocks) => {
@@ -25,8 +44,8 @@ module.exports.convert_tres = (blocks) => {
     const head = sections.shift();
 
     let ext = {};
-    let sub = {};
-    const resource = [];
+    let sub = []; // we need order of sub resources, some may depend on another
+    let resource = {};
 
     for (let i = 0; i < sections.length; i++) {
         let sec = sections[i];
@@ -45,15 +64,19 @@ module.exports.convert_tres = (blocks) => {
         } else if (sec.key === 'sub_resource') {
             normalize_resource_object(sec);
 
-            sub[sec.id] = sec;
+            sub.push(sec);
             sec.key = undefined;
-            sec.id = undefined;
         } else if (sec.key === 'resource') {
             for (const key in sec.prop) {
                 const { index, prop_key } = get_array_index_and_prop_key(key);
+                // is array of data
                 if (_.isFinite(index) && _.isString(prop_key)) {
                     resource[index] = resource[index] || {};
                     resource[index][prop_key] = sec.prop[key];
+                }
+                // is just a structure with properties
+                else {
+                    resource[key] = sec.prop[key];
                 }
             }
             normalize_resource_object(resource);
@@ -64,11 +87,12 @@ module.exports.convert_tres = (blocks) => {
         const converter = require(`./res/${head.attr.type}`);
         return Object.assign({
             ext: optional_empty(ext),
-            sub: optional_empty(sub),
-        }, converter({
-            attr: head.attr,
-            prop: resource,
-        }));
+            sub: optional_empty_array(sub),
+            resource: converter({
+                attr: head.attr,
+                prop: resource,
+            }),
+        });
     } else if (head.key === 'gd_scene') {
         const nodes = [];
 
@@ -121,29 +145,31 @@ module.exports.convert_tres = (blocks) => {
             if (sec._prop && sec._prop.script/*  && sec._prop.script !== 'null' */) {
                 const ext_idx = get_function_params(sec._prop.script)[0];
                 const script_pack = ext[ext_idx];
-                if (script_pack.type === 'ReplaceNode') {
-                    sec.key = 'node';
-                    sec.attr = {
-                        type: script_pack.meta,
-                        index: sec['index'],
-                        parent: sec['parent'],
-                        name: sec['name'],
-                    };
-                    sec.prop = sec._prop;
-                    sec._prop = undefined;
-                    const converter = require(`./res/${sec.attr.type}`);
-                    const parsed_sec = converter(sec);
-                    // copy extra properties (may come from scripts)
-                    for (const k in sec.prop) {
-                        if (k === 'script') continue;
-                        if (parsed_sec[k] === undefined) {
-                            parsed_sec[k] = sec.prop[k];
+                if (script_pack) {
+                    if (script_pack.type === 'ReplaceNode') {
+                        sec.key = 'node';
+                        sec.attr = {
+                            type: script_pack.meta,
+                            index: sec['index'],
+                            parent: sec['parent'],
+                            name: sec['name'],
+                        };
+                        sec.prop = sec._prop;
+                        sec._prop = undefined;
+                        const converter = require(`./res/${sec.attr.type}`);
+                        const parsed_sec = converter(sec);
+                        // copy extra properties (may come from scripts)
+                        for (const k in sec.prop) {
+                            if (k === 'script') continue;
+                            if (parsed_sec[k] === undefined) {
+                                parsed_sec[k] = sec.prop[k];
+                            }
                         }
-                    }
-                    parsed_sec.key = undefined;
-                    parsed_sec._prop = undefined;
+                        parsed_sec.key = undefined;
+                        parsed_sec._prop = undefined;
 
-                    sec = parsed_sec;
+                        sec = parsed_sec;
+                    }
                 }
             }
 
@@ -177,7 +203,7 @@ module.exports.convert_tres = (blocks) => {
         return {
             type: 'PackedScene',
             ext: optional_empty(ext),
-            sub: optional_empty(sub),
+            sub: optional_empty_array(sub),
             nodes,
         };
     } else {

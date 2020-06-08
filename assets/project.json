@@ -3,11 +3,12 @@
         "name": "voltar"
     },
     "display": {
-        "width": 256,
-        "height": 256,
+        "width": 512,
+        "height": 512,
         "webgl2": false,
         "stretch_mode": "viewport",
-        "stretch_aspect": "keep"
+        "stretch_aspect": "keep",
+        "antialias": true
     },
     "input": {
         "special": {

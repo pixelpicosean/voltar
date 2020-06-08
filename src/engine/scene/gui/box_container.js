@@ -134,7 +134,7 @@ export class BoxContainer extends Container {
     /* private */
 
     _resort() {
-        if (!this.is_inside_tree) {
+        if (!this.is_inside_tree()) {
             return;
         }
 

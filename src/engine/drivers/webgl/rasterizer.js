@@ -2,6 +2,8 @@ import { Rect2 } from "engine/core/math/rect2";
 import { Color } from "engine/core/color";
 import { OS } from "engine/core/os/os";
 
+import { VSG } from "engine/servers/visual/visual_server_globals";
+
 import { RasterizerStorage } from "./rasterizer_storage";
 import { RasterizerCanvas } from "./rasterizer_canvas";
 import { RasterizerScene } from "./rasterizer_scene";
@@ -62,26 +64,18 @@ export class Rasterizer {
      * @param {Rect2} p_screen_rect
      * @param {number} p_screen
      */
-    blit_render_targets_to_screen(p_render_target, p_screen_rect, p_screen) {
-        // TODO: support non-fullscreen blit (for picture-in-picturga viewports)
+    blit_render_target_to_screen(p_render_target, p_screen_rect, p_screen) {
         const gl = this.gl;
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
         gl.disable(gl.BLEND);
-        gl.useProgram(this.canvas.copy_shader.gl_prog);
 
-        const texunit = this.storage.config.max_texture_image_units - 1;
-        gl.activeTexture(gl.TEXTURE0 + texunit);
-        gl.uniform1i(this.canvas.copy_shader.uniforms["TEXTURE"].gl_loc, texunit);
+        this.storage.bind_copy_shader();
+        this.storage.bind_quad_array();
+
+        gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, p_render_target.texture.gl_tex);
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.storage.resources.quadie);
-
-        gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 16, 0);
-        gl.enableVertexAttribArray(0);
-        gl.vertexAttribPointer(1, 2, gl.FLOAT, false, 16, 8);
-        gl.enableVertexAttribArray(1);
 
         gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
     }

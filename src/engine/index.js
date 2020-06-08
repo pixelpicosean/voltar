@@ -14,12 +14,21 @@ export * from 'engine/core/math/geometry';
 export * from 'engine/core/math/math_defs';
 export * from 'engine/core/math/math_funcs';
 export * from 'engine/core/math/vector2';
+export * from 'engine/core/math/vector3';
 export * from 'engine/core/math/pool_vector2_array';
 export * from 'engine/core/math/rect2';
+export * from 'engine/core/math/aabb';
 export * from 'engine/core/math/transform_2d';
+export * from 'engine/core/math/camera_matrix';
+export * from 'engine/core/math/convex';
+export * from 'engine/core/math/octree';
+export * from 'engine/core/math/plane';
+export * from 'engine/core/math/basis';
+export * from 'engine/core/math/transform';
 export * from 'engine/core/color';
 export * from 'engine/core/math/pool_color_array';
 export * from 'engine/core/self_list';
+
 
 export {
     _yield as yield,
@@ -54,6 +63,9 @@ export * from 'engine/scene/resources/style_box';
 export * from 'engine/scene/resources/theme';
 export * from 'engine/scene/resources/curve';
 export * from 'engine/scene/resources/material';
+export * from 'engine/scene/resources/mesh';
+export * from 'engine/scene/resources/primitive_meshes';
+export * from 'engine/scene/resources/world';
 
 // ------------------------------------------------------------------
 // Node
@@ -104,6 +116,13 @@ export * from 'engine/scene/gui/base_button';
 export * from 'engine/scene/gui/texture_button';
 export * from 'engine/scene/gui/range';
 export * from 'engine/scene/gui/texture_progress';
+
+export * from 'engine/scene/3d/spatial';
+export * from 'engine/scene/3d/camera';
+export * from 'engine/scene/3d/visual_instance';
+export * from 'engine/scene/3d/mesh_instance';
+export * from 'engine/scene/3d/light';
+export * from 'engine/scene/3d/skeleton';
 
 export * from 'engine/registry';
 
@@ -172,7 +191,7 @@ Main.events.connect_once('started', () => {
 import { ResourceLoader } from './core/io/resource_loader';
 import {
     scene_class_map,
-    resource_map,
+    get_resource_map,
     preload_queue,
 } from './registry';
 
@@ -199,7 +218,7 @@ export function load(...settings) {
  * @param {string} url
  */
 export function get_resource(url) {
-    return resource_map[url];
+    return get_resource_map()[url];
 }
 
 // ------------------------------------------------------------------
@@ -212,5 +231,5 @@ export * from 'engine/scene/assembler';
  * @param {string} url
  */
 export function get_packed_scene(url) {
-    return scene_class_map[url] || resource_map[url];
+    return scene_class_map[url] || get_resource_map()[url];
 }

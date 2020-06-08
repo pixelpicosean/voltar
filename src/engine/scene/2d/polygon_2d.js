@@ -1,4 +1,4 @@
-import { node_class_map, resource_map } from "engine/registry";
+import { node_class_map, get_resource_map } from "engine/registry";
 import { GDCLASS } from "engine/core/v_object";
 import { Vector2, Vector2Like } from "engine/core/math/vector2";
 import { Rect2 } from "engine/core/math/rect2";
@@ -226,7 +226,7 @@ export class Polygon2D extends Node2D {
      */
     set_texture(p_texture) {
         /** @type {ImageTexture} */
-        const texture = (typeof (p_texture) === 'string') ? resource_map[p_texture] : p_texture;
+        const texture = (typeof (p_texture) === 'string') ? get_resource_map()[p_texture] : p_texture;
         if (this._texture === texture) return;
         this._texture = texture;
         this.update();

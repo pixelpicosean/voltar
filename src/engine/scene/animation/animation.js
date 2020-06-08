@@ -1,5 +1,8 @@
-import { Vector2 } from "engine/core/math/vector2";
 import { res_class_map } from "engine/registry";
+import { Vector2 } from "engine/core/math/vector2";
+import { Vector3 } from "engine/core/math/vector3";
+import { Transform } from "engine/core/math/transform";
+import { Quat } from "engine/core/math/basis";
 
 
 export const TRACK_TYPE_VALUE = 0;      // value
@@ -23,7 +26,8 @@ export const PROP_TYPE_BOOLEAN = 1;
 export const PROP_TYPE_STRING = 2;
 export const PROP_TYPE_VECTOR = 3;
 export const PROP_TYPE_COLOR = 4;
-export const PROP_TYPE_ANY = 5;
+export const PROP_TYPE_TRANSFORM = 5;
+export const PROP_TYPE_ANY = 6;
 
 /**
  * Fetch property key from key path
@@ -95,33 +99,78 @@ export class ValueTrack extends Track {
             this.values.push(key);
         }
 
-        // Guess value type of this track
-        let first_value = data.keys.values[0];
-        switch (typeof first_value) {
-            case 'number': {
-                this.prop_type = PROP_TYPE_NUMBER;
-            } break;
-            case 'boolean': {
-                this.prop_type = PROP_TYPE_BOOLEAN;
-            } break;
-            case 'string': {
-                this.prop_type = PROP_TYPE_STRING;
-            } break;
-            case 'object': {
-                if (first_value.class === 'ImageTexture') {
+        let t = Transform.new();
+
+        if (data.value_type === 'Transform') {
+            this.prop_type = PROP_TYPE_TRANSFORM;
+            if (!this.update_mode) this.update_mode = UPDATE_CONTINUOUS;
+
+            for (let i = 0; i < this.values.length; i++) {
+                let arr = this.values[i].value;
+                t.set(
+                    arr[0],
+                    arr[1],
+                    arr[2],
+                    arr[3],
+                    arr[4],
+                    arr[5],
+                    arr[6],
+                    arr[7],
+                    arr[8],
+                    arr[9],
+                    arr[10],
+                    arr[11]
+                );
+                this.values[i].value = {
+                    loc: t.origin.clone(),
+                    rot: t.basis.get_quat(),
+                    scale: t.basis.get_scale(),
+                };
+            }
+        } else if (data.value_type === 'PackedTransform') {
+            this.prop_type = PROP_TYPE_TRANSFORM;
+            if (!this.update_mode) this.update_mode = UPDATE_CONTINUOUS;
+
+            for (let i = 0; i < this.values.length; i++) {
+                let arr = this.values[i].value;
+                this.values[i].value = {
+                    loc: new Vector3(arr[0], arr[1], arr[2]),
+                    rot: new Quat().set(arr[3], arr[4], arr[5], arr[6]),
+                    scale: new Vector3(arr[7], arr[8], arr[9]),
+                };
+            }
+        } else {
+            /* Guess value type of this track */
+
+            let first_value = data.keys.values[0];
+            switch (typeof first_value) {
+                case 'number': {
+                    this.prop_type = PROP_TYPE_NUMBER;
+                } break;
+                case 'boolean': {
+                    this.prop_type = PROP_TYPE_BOOLEAN;
+                } break;
+                case 'string': {
+                    this.prop_type = PROP_TYPE_STRING;
+                } break;
+                case 'object': {
+                    if (first_value.class === 'ImageTexture') {
+                        this.prop_type = PROP_TYPE_ANY;
+                    } else if (first_value.x !== undefined && first_value.y !== undefined) {
+                        this.prop_type = PROP_TYPE_VECTOR;
+                    } else if (first_value.r !== undefined && first_value.g !== undefined && first_value.b !== undefined && first_value.a !== undefined) {
+                        this.prop_type = PROP_TYPE_COLOR;
+                    } else {
+                        this.prop_type = PROP_TYPE_ANY;
+                    }
+                } break;
+                default: {
                     this.prop_type = PROP_TYPE_ANY;
-                } else if (first_value.x !== undefined && first_value.y !== undefined) {
-                    this.prop_type = PROP_TYPE_VECTOR;
-                } else if (first_value.r !== undefined && first_value.g !== undefined && first_value.b !== undefined && first_value.a !== undefined) {
-                    this.prop_type = PROP_TYPE_COLOR;
-                } else {
-                    this.prop_type = PROP_TYPE_ANY;
-                }
-            } break;
-            default: {
-                this.prop_type = PROP_TYPE_ANY;
-            } break;
+                } break;
+            }
         }
+
+        Transform.free(t);
 
         // Fix placeholder keys (Godot uses a placeholder key if it has same value of previous one)
         // Let's replace the placeholder key with same value of previous one, so it can be
@@ -132,13 +181,14 @@ export class ValueTrack extends Track {
                 for (let i = 1; i < this.values.length; i++) {
                     let value = this.values[i].value, previous = this.values[i - 1].value;
                     if (value === null) {
-                        value = { x: 0, y: 0 };
+                        value = { x: 0, y: 0, z: 0 };
                     }
 
                     // Usually the placeholder key of vector will be `{ x: null }`
                     if (value.x === null) {
                         value.x = previous.x;
                         value.y = previous.y;
+                        value.z = previous.z || 0;
 
                         fixed = true;
                     }
@@ -249,6 +299,7 @@ export class Animation {
         this.tracks = data.tracks.map(track_data => {
             switch (track_data.type) {
                 case 'value': return new ValueTrack().load(track_data);
+                case 'transform': return new ValueTrack().load(track_data);
                 case 'method': return new MethodTrack().load(track_data);
                 case 'bezier': return new BezierTrack().load(track_data);
                 case 'animation': return new AnimationTrack().load(track_data);

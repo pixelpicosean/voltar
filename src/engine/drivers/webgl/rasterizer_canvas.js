@@ -5,11 +5,10 @@ import {
     MARGIN_BOTTOM,
 } from 'engine/core/math/math_defs';
 import { Transform2D } from 'engine/core/math/transform_2d';
-import { identity_mat4, translate_mat4, scale_mat4 } from 'engine/core/math/transform';
+import { Transform } from 'engine/core/math/transform';
 import { ColorLike, Color } from 'engine/core/color';
 import {
     OS,
-    VIDEO_DRIVER_GLES2_LEGACY,
     VIDEO_DRIVER_GLES2,
     VIDEO_DRIVER_GLES3,
 } from 'engine/core/os/os';
@@ -40,7 +39,7 @@ import {
     CommandMultiMesh,
     CommandTransform,
 } from 'engine/servers/visual/commands';
-import { ImageTexture } from 'engine/scene/resources/texture';
+import { Texture } from 'engine/scene/resources/texture';
 import { ShaderMaterial, CANVAS_ITEM_SHADER_UNIFORMS } from 'engine/scene/resources/material';
 import {
     CanvasItemMaterial,
@@ -69,7 +68,14 @@ import {
     MULTIMESH_CUSTOM_DATA_8BIT,
     MULTIMESH_CUSTOM_DATA_FLOAT,
 } from 'engine/servers/visual_server';
+import { Rect2 } from 'engine/core/math/rect2';
+import { ARRAY_MAX } from 'engine/scene/const';
+import { parse_attributes_from_code, parse_uniforms_from_code } from './shader_parser';
 
+/**
+ * @typedef {import('./rasterizer_storage').Material_t} Material_t
+ * @typedef {import('./rasterizer_storage').Texture_t} Texture_t
+ */
 
 const ATTR_VERTEX = 0;
 const ATTR_UV = 1;
@@ -137,7 +143,7 @@ class DrawGroup_t {
         this.gl_tex = null;
         this.tex_key = '';
 
-        /** @type {import('./rasterizer_storage').Material_t} */
+        /** @type {Material_t} */
         this.material = null;
         this.uniforms = Object.create(null);
 
@@ -216,12 +222,14 @@ export class RasterizerCanvas extends VObject {
         this.storage = null;
 
         this.states = {
-            /** @type {import('./rasterizer_storage').Material_t} */
+            /** @type {Material_t} */
             material: null,
-            /** @type {import('./rasterizer_storage').Texture_t} */
+            /** @type {Texture_t} */
             texture: null,
             blend_mode: 0,
+
             canvas_texscreen_used: false,
+            using_transparent_rt: false,
 
             active_vert_slot: 0,
             active_buffer_slot: 0,
@@ -267,13 +275,15 @@ export class RasterizerCanvas extends VObject {
         this.ibs = [];
 
         this.materials = {
-            /** @type {import('./rasterizer_storage').Material_t} */
+            /** @type {Material_t} */
             flat: null,
-            /** @type {import('./rasterizer_storage').Material_t} */
+            /** @type {Material_t} */
             tile: null,
-            /** @type {import('./rasterizer_storage').Material_t} */
+            /** @type {Material_t} */
             multimesh: null,
         };
+        /** @type {{ [id: number]: { flat: Material_t, tile: Material_t, multimesh: Material_t }}} */
+        this.shader_materials = { };
     }
 
     /* API */
@@ -291,16 +301,13 @@ export class RasterizerCanvas extends VObject {
 
         const mat = new ShaderMaterial("normal");
         mat.set_shader(`
-            shader_type = canvas_item;
+            shader_type canvas_item;
             void fragment() {
                 COLOR = texture(TEXTURE, UV);
             }
         `);
-        this.materials.flat = this.init_shader_material(mat, normal_vs, normal_fs, CANVAS_ITEM_SHADER_UNIFORMS, true);
-        this.materials.tile = this.init_shader_material(mat, tile_vs, tile_fs, [
-            ...CANVAS_ITEM_SHADER_UNIFORMS,
-            { name: 'frame_uv', type: '4f' },
-        ], false);
+        this.materials.flat = this.init_shader_material(mat, normal_vs, normal_fs, true);
+        this.materials.tile = this.init_shader_material(mat, tile_vs, tile_fs, false);
 
         this.materials.multimesh = (() => {
             const shader = VSG.storage.shader_create(
@@ -329,22 +336,23 @@ export class RasterizerCanvas extends VObject {
             material.batchable = false;
             return material;
         })();
-        this.copy_shader = VSG.storage.shader_create(
+        this.copy_shader_with_section = VSG.storage.shader_create(
             `
+            uniform highp vec4 copy_section;
             attribute vec2 position;
             attribute vec2 uv;
-            varying vec2 UV;
+            varying vec2 uv_interp;
             void main() {
-                gl_Position = vec4(position, 0.0, 1.0);
-                UV = uv;
+                uv_interp = copy_section.xy + uv * copy_section.zw;
+                gl_Position = vec4((copy_section.xy + (position * 0.5 + 0.5) * copy_section.zw) * 2.0 - 1.0, 0.0, 1.0);
             }
             `,
             `
             precision mediump float;
-            uniform sampler2D TEXTURE;
-            varying vec2 UV;
+            uniform sampler2D source;
+            varying vec2 uv_interp;
             void main() {
-                gl_FragColor = texture2D(TEXTURE, UV);
+                gl_FragColor = texture2D(source, uv_interp);
             }
             `,
             [
@@ -352,7 +360,62 @@ export class RasterizerCanvas extends VObject {
                 "uv",
             ],
             [
-                { name: "TEXTURE", type: "1i" },
+                { name: "copy_section", type: "4f" },
+                { name: "source", type: "1i" },
+            ]
+        );
+        this.copy_shader_with_display_transform = VSG.storage.shader_create(
+            `
+            uniform highp mat4 display_transform;
+            attribute vec2 position;
+            attribute vec2 uv;
+            varying vec2 uv_interp;
+            void main() {
+                uv_interp = (display_transform * vec4(uv, 1.0, 1.0)).xy;
+                gl_Position = vec4(position, 0.0, 1.0);
+            }
+            `,
+            `
+            precision mediump float;
+            uniform sampler2D source;
+            varying vec2 uv_interp;
+            void main() {
+                gl_FragColor = texture2D(source, uv_interp);
+            }
+            `,
+            [
+                "position",
+                "uv",
+            ],
+            [
+                { name: "display_transform", type: "mat4" },
+                { name: "source", type: "1i" },
+            ]
+        );
+        this.copy_shader = VSG.storage.shader_create(
+            `
+            attribute vec2 position;
+            attribute vec2 uv;
+            varying vec2 uv_interp;
+            void main() {
+                uv_interp = uv;
+                gl_Position = vec4(position, 0.0, 1.0);
+            }
+            `,
+            `
+            precision mediump float;
+            uniform sampler2D source;
+            varying vec2 uv_interp;
+            void main() {
+                gl_FragColor = texture2D(source, uv_interp);
+            }
+            `,
+            [
+                "position",
+                "uv",
+            ],
+            [
+                { name: "source", type: "1i" },
             ]
         );
 
@@ -361,36 +424,26 @@ export class RasterizerCanvas extends VObject {
     get_extensions() {
         const gl = this.gl;
 
-        if (OS.get_singleton().video_driver_index === VIDEO_DRIVER_GLES2 || OS.get_singleton().video_driver_index === VIDEO_DRIVER_GLES2_LEGACY) {
+        if (OS.get_singleton().video_driver_index === VIDEO_DRIVER_GLES2) {
             this.extensions = {
                 drawBuffers: gl.getExtension('WEBGL_draw_buffers'),
                 depthTexture: gl.getExtension('WEBGL_depth_texture'),
                 loseContext: gl.getExtension('WEBGL_lose_context'),
                 anisotropicFiltering: gl.getExtension('EXT_texture_filter_anisotropic'),
                 uint32ElementIndex: gl.getExtension('OES_element_index_uint'),
-                // Floats and half-floats
-                floatTexture: gl.getExtension('OES_texture_float'),
-                floatTextureLinear: gl.getExtension('OES_texture_float_linear'),
-                textureHalfFloat: gl.getExtension('OES_texture_half_float'),
-                textureHalfFloatLinear: gl.getExtension('OES_texture_half_float_linear'),
             };
         } else if (OS.get_singleton().video_driver_index === VIDEO_DRIVER_GLES3) {
             this.extensions = {
                 anisotropicFiltering: gl.getExtension('EXT_texture_filter_anisotropic'),
-                // Floats and half-floats
-                colorBufferFloat: gl.getExtension('EXT_color_buffer_float'),
-                floatTextureLinear: gl.getExtension('OES_texture_float_linear'),
             };
         }
     }
 
     draw_window_margins(black_margin, black_image) { }
 
-    update() { }
-
     prepare() {
         this.states.material = this.materials.flat;
-        this.states.texture = this.storage.resources.white_tex.texture;
+        this.states.texture = this.storage.resources.white_tex.get_rid();
 
         this.states.active_vert_slot = 0;
         this.states.active_buffer_slot = 0;
@@ -405,10 +458,23 @@ export class RasterizerCanvas extends VObject {
     canvas_begin() {
         const gl = this.gl;
 
+        this.states.using_transparent_rt = false;
         const frame = this.storage.frame;
+        let viewport_x = 0, viewport_y = 0, viewport_width = 0, viewport_height = 0;
 
         if (frame.current_rt) {
             gl.bindFramebuffer(gl.FRAMEBUFFER, frame.current_rt.gl_fbo);
+            this.states.using_transparent_rt = frame.current_rt.flags.TRANSPARENT;
+
+            if (frame.current_rt.flags.DIRECT_TO_SCREEN) {
+                viewport_width = frame.current_rt.width;
+                viewport_height = frame.current_rt.height;
+                viewport_x = frame.current_rt.x;
+                viewport_y = OS.get_singleton().get_window_size().height - viewport_height - frame.current_rt.y;
+                gl.scissor(viewport_x, viewport_y, viewport_width, viewport_height);
+                gl.viewport(viewport_x, viewport_y, viewport_width, viewport_height);
+                gl.enable(gl.SCISSOR_TEST);
+            }
         }
 
         if (frame.clear_request) {
@@ -425,30 +491,47 @@ export class RasterizerCanvas extends VObject {
         this.reset_canvas();
 
         // update general uniform data
-        const canvas_transform = identity_mat4(this.states.uniforms.projection_matrix);
-        if (frame.current_rt) {
-            const csy = 1.0;
-            // TODO: csy = -1.0 if vflip
-            const ssize = this.storage.frame.current_rt;
-            translate_mat4(canvas_transform, canvas_transform, [-ssize.width / 2, -ssize.height / 2, 0]);
-            scale_mat4(canvas_transform, canvas_transform, [2 / ssize.width, csy * (-2) / ssize.height, 1]);
+        let canvas_transform = Transform.new();
 
-            this.states.uniforms.SCREEN_PIXEL_SIZE[0] = 1.0 / ssize.width;
-            this.states.uniforms.SCREEN_PIXEL_SIZE[1] = 1.0 / ssize.height;
+        if (frame.current_rt) {
+            let csy = 1;
+            if (frame.current_rt && frame.current_rt.flags.VFLIP) {
+                csy = -1;
+            }
+            canvas_transform.translate_n(-(frame.current_rt.width / 2), -(frame.current_rt.height / 2), 0);
+            canvas_transform.scale_n(2 / frame.current_rt.width, csy * (-2) / frame.current_rt.height, 1);
         } else {
-            const ssize = OS.get_singleton().get_window_size();
-            translate_mat4(canvas_transform, canvas_transform, [-ssize.width / 2, -ssize.height / 2, 0]);
-            scale_mat4(canvas_transform, canvas_transform, [2 / ssize.width, -2 / ssize.height, 1]);
+            let ssize = OS.get_singleton().get_window_size();
+            canvas_transform.translate_n(-ssize.width / 2, -ssize.height / 2, 0);
+            canvas_transform.scale_n(2 / ssize.width, -2 / ssize.height, 1);
         }
+
+        canvas_transform.as_array(this.states.uniforms.projection_matrix);
+
+        Transform.free(canvas_transform);
+
         this.states.uniforms.TIME[0] = frame.time[0];
 
         // reset states
         this.states.material = this.materials.flat;
-        this.states.texture = this.storage.resources.white_tex.texture;
+        this.states.texture = this.storage.resources.white_tex.get_rid();
     }
 
     canvas_end() {
         this.flush();
+
+        const gl = this.gl;
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+        for (let i = 0; i < ARRAY_MAX; i++) {
+            gl.disableVertexAttribArray(i);
+        }
+
+        if (this.storage.frame.current_rt && this.storage.frame.current_rt.flags.DIRECT_TO_SCREEN) {
+            let ssize = OS.get_singleton().get_window_size();
+            gl.viewport(0, 0, ssize.width, ssize.height);
+            gl.scissor(0, 0, ssize.width, ssize.height);
+        }
     }
 
     reset_canvas() { }
@@ -473,45 +556,61 @@ export class RasterizerCanvas extends VObject {
      * @param {ShaderMaterial} shader_material
      * @param {string} vs
      * @param {string} fs
-     * @param {{ name: string, type: string }[]} uniforms
      * @param {boolean} batchable
      */
-    init_shader_material(shader_material, vs, fs, uniforms, batchable) {
-        const gl = this.gl;
-
+    init_shader_material(shader_material, vs, fs, batchable) {
         const vs_code = vs
             // uniform
-            .replace("/* UNIFORM */", shader_material.vs_uniform_code)
+            .replace("/* GLOBALS */", shader_material.vs_uniform_code)
             // shader code
-            .replace("/* SHADER */", `{\n${shader_material.vs_code}}`)
+            .replace(/\/\* VERTEX_CODE_BEGIN \*\/([\s\S]*?)\/\* VERTEX_CODE_END \*\//, `{\n${shader_material.vs_code}\n}`)
         const fs_code = fs
             // uniform
-            .replace("/* UNIFORM */", shader_material.fs_uniform_code)
+            .replace("/* GLOBALS */", shader_material.fs_uniform_code)
             // shader code
-            .replace(/\/\* SHADER_BEGIN \*\/([\s\S]*?)\/\* SHADER_END \*\//, `{\n${shader_material.fs_code}}`)
+            .replace(/\/\* FRAGMENT_CODE_BEGIN \*\/([\s\S]*?)\/\* FRAGMENT_CODE_END \*\//, `{\n${shader_material.fs_code}\n}`)
             // translate Godot API to GLSL
             .replace(/texture\(/gm, "texture2D(")
             .replace(/FRAGCOORD/gm, "gl_FragCoord")
+
+        const vs_uniforms = parse_uniforms_from_code(vs_code)
+            .map(u => ({ type: u.type, name: u.name }))
+        const fs_uniforms = parse_uniforms_from_code(fs_code)
+            .map(u => ({ type: u.type, name: u.name }))
+        const uniforms = [];
+        for (let u of vs_uniforms) {
+            if (!uniforms.find((v) => v.name === u.name)) {
+                uniforms.push(u);
+            }
+        }
+        for (let u of fs_uniforms) {
+            if (!uniforms.find((v) => v.name === u.name)) {
+                uniforms.push(u);
+            }
+        }
+
+        const attribs = parse_attributes_from_code(vs_code)
+            .map(a => a.name)
+
         const shader = VSG.storage.shader_create(
-            vs_code, fs_code,
-            [
-                'position',
-                'uv',
-                'color',
-            ],
-            // @ts-ignore
-            [
-                ...CANVAS_ITEM_SHADER_UNIFORMS,
-                ...uniforms,
-                ...shader_material.uniforms,
-            ]
+            vs_code,
+            fs_code,
+            attribs,
+            uniforms
         );
+        shader.name = shader_material.name;
+
         const material = VSG.storage.material_create(shader, undefined, shader_material.uses_screen_texture);
         material.name = shader_material.name;
         material.batchable = batchable;
         for (let u of shader_material.uniforms) {
-            if (u.value) {
-                material.params[u.name] = u.value;
+            let shader_u = shader.uniforms[u.name];
+            if (u.value && shader_u && shader_u.gl_loc) {
+                if (Array.isArray(u.value)) {
+                    material.params[u.name] = u.value;
+                } else {
+                    material.textures[u.name] = u.value;
+                }
             }
         }
         return material;
@@ -525,10 +624,12 @@ export class RasterizerCanvas extends VObject {
         const gl = this.gl;
 
         // screen texture support
-        if (material.uses_screen_texture && !this.states.canvas_texscreen_used) {
+        if (material.shader.canvas_item.uses_screen_texture && !this.states.canvas_texscreen_used) {
             this.states.canvas_texscreen_used = true;
 
-            this.copy_screen();
+            let rect = Rect2.new();
+            this._copy_screen(rect);
+            Rect2.free(rect);
 
             const ssize = this.storage.frame.current_rt;
             this.states.uniforms.SCREEN_PIXEL_SIZE[0] = 1.0 / ssize.width;
@@ -576,41 +677,14 @@ export class RasterizerCanvas extends VObject {
             }
         }
 
-        if (material.uses_screen_texture) {
+        if (material.shader.canvas_item.uses_screen_texture) {
             if (this.storage.frame.current_rt.copy_screen_effect.gl_color) {
-                const texunit = this.storage.config.max_texture_image_units - 4;
+                const texunit = VSG.config.max_texture_image_units - 4;
                 gl.activeTexture(gl.TEXTURE0 + texunit);
                 gl.uniform1i(material.shader.uniforms["SCREEN_TEXTURE"].gl_loc, texunit);
                 gl.bindTexture(gl.TEXTURE_2D, this.storage.frame.current_rt.copy_screen_effect.gl_color);
             }
         }
-    }
-
-    copy_screen() {
-        const gl = this.gl;
-
-        gl.disable(gl.BLEND);
-
-        const current_framebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING);
-        gl.bindFramebuffer(gl.FRAMEBUFFER, this.storage.frame.current_rt.copy_screen_effect.gl_fbo);
-
-        gl.useProgram(this.copy_shader.gl_prog);
-
-        const texunit = this.storage.config.max_texture_image_units - 4;
-        gl.activeTexture(gl.TEXTURE0 + texunit);
-        gl.uniform1i(this.copy_shader.uniforms["TEXTURE"].gl_loc, texunit);
-        gl.bindTexture(gl.TEXTURE_2D, this.storage.frame.current_rt.texture.gl_tex);
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.storage.resources.quadie);
-
-        gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 16, 0);
-        gl.enableVertexAttribArray(0);
-        gl.vertexAttribPointer(1, 2, gl.FLOAT, false, 16, 8);
-        gl.enableVertexAttribArray(1);
-
-        gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
-
-        gl.bindFramebuffer(gl.FRAMEBUFFER, current_framebuffer);
     }
 
     /**
@@ -633,27 +707,27 @@ export class RasterizerCanvas extends VObject {
             if (item_material.class === "CanvasItemMaterial") {
                 blend_mode = /** @type {CanvasItemMaterial} */(item_material).blend_mode;
             } else if (item_material.class === "ShaderMaterial") {
-                const sm = /** @type {ShaderMaterial} */(item_material);
-                if (!sm.materials.flat) {
-                    sm.materials.flat = this.init_shader_material(sm, normal_vs, normal_fs, [
-                        { name: 'projection_matrix', type: 'mat4' },
-                        { name: 'TIME', type: '1f' },
-                        { name: 'SCREEN_PIXEL_SIZE', type: '2f' },
-                    ], true);
-                }
-                if (!sm.materials.tile) {
-                    sm.materials.tile = this.init_shader_material(sm, tile_vs, tile_fs, [
-                        { name: 'projection_matrix', type: 'mat4' },
-                        { name: 'frame_uv', type: '4f' },
-                        { name: 'TIME', type: '1f' },
-                        { name: 'SCREEN_PIXEL_SIZE', type: '2f' },
-                    ], false);
-                }
-                if (!sm.materials.multimesh) {
-                    sm.materials.multimesh = this.materials.multimesh;
+                let sm = /** @type {ShaderMaterial} */(item_material);
+                let mat_cache = this.shader_materials[sm.id];
+                if (!mat_cache) {
+                    mat_cache = this.shader_materials[sm.id] = {
+                        flat: null,
+                        tile: null,
+                        multimesh: null,
+                    };
                 }
 
-                materials = sm.materials;
+                if (!mat_cache.flat) {
+                    mat_cache.flat = this.init_shader_material(sm, normal_vs, normal_fs, true);
+                }
+                if (!mat_cache.tile) {
+                    mat_cache.tile = this.init_shader_material(sm, tile_vs, tile_fs, false);
+                }
+                if (!mat_cache.multimesh) {
+                    mat_cache.multimesh = this.materials.multimesh;
+                }
+
+                materials = mat_cache;
             }
         }
 
@@ -790,8 +864,8 @@ export class RasterizerCanvas extends VObject {
                                     tex_uvs[3],
                                 ];
 
-                                const u_pct = rect.source.width / rect.texture.width;
-                                const v_pct = rect.source.height / rect.texture.height;
+                                const u_pct = rect.source.width / rect.texture.get_width();
+                                const v_pct = rect.source.height / rect.texture.get_height();
 
                                 vertices[vb_idx + VTX_COMP * 0 + 2] = 0;
                                 vertices[vb_idx + VTX_COMP * 0 + 3] = 0;
@@ -805,7 +879,7 @@ export class RasterizerCanvas extends VObject {
                                 get_uvs_of_sub_rect(
                                     vertices, vb_idx,
                                     tex_uvs,
-                                    rect.texture.width, rect.texture.height,
+                                    rect.texture.get_width(), rect.texture.get_height(),
                                     rect.source.x, rect.source.y,
                                     rect.source.width, rect.source.height
                                 )
@@ -902,8 +976,8 @@ export class RasterizerCanvas extends VObject {
                     const m_t = np.margin[MARGIN_TOP];
                     const m_b = np.margin[MARGIN_BOTTOM];
 
-                    const s_w = np.source.width || np.texture.width;
-                    const s_h = np.source.height || np.texture.height;
+                    const s_w = np.source.width || np.texture.get_width();
+                    const s_h = np.source.height || np.texture.get_height();
 
                     const uv_x0 = tex ? tex.uvs[0] : -1;
                     const uv_y0 = tex ? tex.uvs[1] : -1;
@@ -1239,10 +1313,14 @@ export class RasterizerCanvas extends VObject {
                     });
 
                     // - texture
-                    const texunit = this.storage.config.max_texture_image_units - 1;
+                    const texunit = VSG.config.max_texture_image_units - 1;
                     gl.activeTexture(gl.TEXTURE0 + texunit);
                     gl.uniform1i(this.copy_shader.uniforms["TEXTURE"].gl_loc, texunit);
-                    gl.bindTexture(gl.TEXTURE_2D, mm.texture.texture.gl_tex);
+                    gl.bindTexture(gl.TEXTURE_2D, mm.texture.get_rid().gl_tex);
+
+                    if (mm.texture.get_rid().render_target) {
+                        mm.texture.get_rid().render_target.used_in_frame = true;
+                    }
 
                     let amount = Math.min(multimesh.size, multimesh.visible_instances);
                     if (amount === -1) {
@@ -1352,7 +1430,7 @@ export class RasterizerCanvas extends VObject {
     /**
      * @param {number} num_vertex
      * @param {number} num_index
-     * @param {ImageTexture} texture
+     * @param {Texture} texture
      * @param {import('./rasterizer_storage').Material_t} material
      * @param {number} blend_mode no blend mode provided = MIX
      */
@@ -1364,7 +1442,7 @@ export class RasterizerCanvas extends VObject {
         if (
             texture
             &&
-            texture.texture !== this.states.texture
+            texture.get_rid() !== this.states.texture
         ) {
             if (this.states.texture) {
                 batch_broken = true;
@@ -1400,7 +1478,7 @@ export class RasterizerCanvas extends VObject {
 
             // update states with new batch data
             if (texture) {
-                this.states.texture = texture.texture;
+                this.states.texture = texture.get_rid();
             }
             this.states.material = material;
             this.states.blend_mode = blend_mode;
@@ -1432,10 +1510,16 @@ export class RasterizerCanvas extends VObject {
         this.use_material(this.states.material, this.states.uniforms);
 
         // - texture
-        const texunit = this.storage.config.max_texture_image_units - 1;
-        gl.activeTexture(gl.TEXTURE0 + texunit);
-        gl.uniform1i(this.states.material.shader.uniforms["TEXTURE"].gl_loc, texunit);
-        gl.bindTexture(gl.TEXTURE_2D, this.states.texture.gl_tex);
+        if (this.states.material.shader.uniforms["TEXTURE"]) {
+            const texunit = VSG.config.max_texture_image_units - 1;
+            gl.activeTexture(gl.TEXTURE0 + texunit);
+            gl.uniform1i(this.states.material.shader.uniforms["TEXTURE"].gl_loc, texunit);
+            gl.bindTexture(gl.TEXTURE_2D, this.states.texture.self().gl_tex);
+        }
+
+        if (this.states.texture.self().render_target) {
+            this.states.texture.self().render_target.used_in_frame = true;
+        }
 
         // - upload vertices/indices
         const {
@@ -1493,4 +1577,41 @@ export class RasterizerCanvas extends VObject {
      * Clear the frame buffer
      */
     clear() { }
+
+    /**
+     * @param {Rect2} p_rect
+     */
+    _copy_screen(p_rect) {
+        const gl = this.gl;
+
+        gl.disable(gl.BLEND);
+
+        let w = this.storage.frame.current_rt.width;
+        let h = this.storage.frame.current_rt.height;
+        let copy_section = [
+            p_rect.x / w,
+            p_rect.y / h,
+            p_rect.width / w,
+            p_rect.height / h,
+        ];
+        let shader = p_rect.is_zero() ? this.copy_shader : this.copy_shader_with_section;
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.storage.frame.current_rt.copy_screen_effect.gl_fbo);
+
+        gl.useProgram(shader.gl_prog);
+
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, this.storage.frame.current_rt.gl_color);
+
+        if (!p_rect.is_zero()) {
+            gl.uniform4fv(shader.uniforms.copy_section.gl_loc, copy_section);
+        }
+
+        this.storage.bind_quad_array();
+
+        gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.storage.frame.current_rt.gl_fbo);
+        gl.enable(gl.BLEND);
+    }
 }

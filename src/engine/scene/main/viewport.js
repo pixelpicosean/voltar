@@ -1,4 +1,4 @@
-import { node_class_map } from "engine/registry";
+import { node_class_map, preload_queue } from "engine/registry";
 import { GDCLASS } from "engine/core/v_object";
 import { Vector2, Vector2Like } from "engine/core/math/vector2";
 import { Transform2D } from "engine/core/math/transform_2d";
@@ -44,13 +44,23 @@ import {
 } from "../gui/const";
 import {
     Control,
+    CComparator,
     NOTIFICATION_MODAL_CLOSE,
     NOTIFICATION_MOUSE_EXIT,
     NOTIFICATION_MOUSE_ENTER,
-    CComparator,
     NOTIFICATION_FOCUS_EXIT,
     NOTIFICATION_FOCUS_ENTER,
 } from "../gui/control";
+import {
+    Camera,
+    NOTIFICATION_LOST_CURRENT,
+    NOTIFICATION_BECAME_CURRENT,
+} from "../3d/camera";
+import { World } from "../resources/world";
+import {
+    NOTIFICATION_EXIT_WORLD,
+    NOTIFICATION_ENTER_WORLD,
+} from "../3d/spatial";
 import { GROUP_CALL_REALTIME } from "./scene_tree";
 
 
@@ -69,6 +79,8 @@ export const USAGE_3D = 2;
 export const USAGE_3D_NO_EFFECTS = 3;
 
 const VEC2_NEG = Object.freeze(new Vector2(-1, -1));
+
+const subdiv = [0, 1, 4, 16, 64, 256, 1024];
 
 
 class ViewportTexture extends Texture {
@@ -93,17 +105,35 @@ class ViewportTexture extends Texture {
 
         /** @type {Viewport} */
         this.vp = null;
+
+        this.proxy = VSG.storage.texture_create();
     }
     free() {
         if (this.vp) {
             this.vp.viewport_textures.delete(this);
         }
+        VSG.storage.texture_free(this.proxy);
         return super.free();
     }
 
     get_width() { return this.vp.size.width }
     get_height() { return this.vp.size.height }
     get_size() { return this.vp.size }
+
+    set_flags(value) {
+        Object.assign(this._flags, value);
+
+        if (!this.vp) {
+            return;
+        }
+
+        this.vp.texture_flags = this._flags;
+        VSG.storage.texture_set_flags(this.vp.texture_rid, this._flags);
+    }
+
+    get_rid() {
+        return this.proxy;
+    }
 
     /* private */
 
@@ -121,6 +151,11 @@ class ViewportTexture extends Texture {
         this.vp = /** @type {Viewport} */(vpn);
 
         this.vp.viewport_textures.add(this);
+
+        VSG.storage.texture_set_proxy(this.proxy, this.vp.texture_rid);
+
+        Object.assign(this.vp.texture_flags, this._flags);
+        VSG.storage.texture_set_flags(this.vp.texture_rid, this.flags);
     }
 }
 GDCLASS(ViewportTexture, Texture)
@@ -203,6 +238,11 @@ export class Viewport extends Node {
         /** @type {Viewport} */
         this.parent = null;
 
+        /** @type {Camera} */
+        this.camera = null;
+        /** @type {Camera[]} */
+        this.cameras = [];
+
         /** @type {Set<CanvasLayer>} */
         this.canvas_layers = new Set();
 
@@ -225,7 +265,7 @@ export class Viewport extends Node {
         this.last_vp_rect = new Rect2();
 
         this.transparent_bg = false;
-        this.vflip = false;
+        this.render_target_v_flip = false;
         this._render_target_clear_mode = CLEAR_MODE_ALWAYS;
         this.filter = false;
         this.gen_mipmaps = false;
@@ -235,31 +275,54 @@ export class Viewport extends Node {
         this.local_input_handled = false;
         this.handle_input_locally = true;
 
+        /** @type {World} */
+        this.world = null;
+        /** @type {World} */
+        this.own_world = null;
+
         /**
          * @type {World2D}
          */
         this._world_2d = new World2D();
 
-        this.disable_3d = true;
+        this.disable_input = false;
+        this.disable_3d = false;
         this.keep_3d_linear = false;
         this._render_target_update_mode = UPDATE_MODE_WHEN_VISIBLE;
         this.texture_rid = VSG.viewport.viewport_get_texture(this.viewport);
-        this.texture_flags = 0;
+        this.texture_flags = {
+            FILTER: false,
+            REPEAT: false,
+            MIPMAP: false,
+        };
 
-        this.usage = USAGE_2D;
+        this.usage = USAGE_3D;
 
         this.shadow_atlas_size = 0;
+        this.shadow_atlas_quadrant_subdiv = [0, 0, 0, 0];
 
-        this.default_texture = null;
+        /** @type {ViewportTexture} */
+        this.default_texture = new ViewportTexture;
+        this.default_texture.vp = this;
+
         /** @type {Set<ViewportTexture>} */
         this.viewport_textures = new Set();
+        this.viewport_textures.add(this.default_texture);
+        VSG.storage.texture_set_proxy(this.default_texture.proxy, this.texture_rid);
 
         this.gui = new GUI();
-
-        this.disable_input = false;
     }
 
     /* virtual */
+
+    _load_data(data) {
+        super._load_data(data);
+
+        if (data.size) this.set_size(data.size);
+        if (data.render_target_v_flip !== undefined) this.set_render_target_v_flip(data.render_target_v_flip);
+
+        return this;
+    }
 
     /**
      * @param {number} p_what
@@ -275,7 +338,7 @@ export class Viewport extends Node {
                 }
 
                 this.current_canvas = this.find_world_2d().canvas;
-                // VSG.viewport.viewport_set_scenario(this.viewport, this.find_world().get_scenario());
+                VSG.viewport.viewport_set_scenario(this.viewport, this.find_world().scenario);
                 VSG.viewport.viewport_attach_canvas(this.viewport, this.current_canvas);
 
                 this.find_world_2d()._register_viewport(this, Rect2.EMPTY);
@@ -285,6 +348,17 @@ export class Viewport extends Node {
                 VSG.viewport.viewport_set_active(this.viewport, true);
             } break;
             case NOTIFICATION_READY: {
+                if (this.cameras.length && !this.camera) {
+                    /** @type {Camera} */
+                    let first = null;
+                    for (let i = 0; i < this.cameras.length; i++) {
+                        if (!first || first.is_greater_than(this.cameras[i])) {
+                            first = this.cameras[i];
+                        }
+                    }
+                    if (first) first.make_current();
+                }
+
                 this.set_process_internal(true);
                 this.set_physics_process_internal(true);
             } break;
@@ -294,7 +368,7 @@ export class Viewport extends Node {
                     this._world_2d._remove_viewport(this);
                 }
 
-                // VSG.viewport.viewport_set_scenario(this.viewport, null);
+                VSG.viewport.viewport_set_scenario(this.viewport, null);
                 VSG.viewport.viewport_remove_canvas(this.viewport, this.current_canvas);
 
                 this.remove_from_group('_viewports');
@@ -324,8 +398,7 @@ export class Viewport extends Node {
     }
 
     free() {
-        // TODO: erase self from viewport textures
-        // TODO: free by VisualServer
+        VSG.viewport.viewport_free(this.viewport);
         return super.free();
     }
 
@@ -468,6 +541,22 @@ export class Viewport extends Node {
     }
 
     /**
+     * @param {boolean} p_enabled
+     */
+    set_transparent_bg(p_enabled) {
+        this.transparent_bg = p_enabled;
+        VSG.viewport.viewport_set_transparent_background(this.viewport, p_enabled);
+    }
+
+    /**
+     * @param {boolean} p_enabled
+     */
+    set_render_target_v_flip(p_enabled) {
+        this.render_target_v_flip = p_enabled;
+        VSG.viewport.viewport_set_vflip(this.viewport, p_enabled);
+    }
+
+    /**
      * @param {number} value
      */
     set_render_target_clear_mode(value) {
@@ -483,7 +572,92 @@ export class Viewport extends Node {
         this.attach_to_screen_rect.copy(p_rect);
     }
 
+    /**
+     * @param {number} p_size
+     */
+    set_shadow_atlas_size(p_size) {
+        if (this.shadow_atlas_size === p_size) {
+            return;
+        }
+
+        this.shadow_atlas_size = p_size;
+        this.viewport.shadow_atlas_size = p_size;
+        VSG.scene_render.shadow_atlas_set_size(this.viewport.shadow_atlas, this.viewport.shadow_atlas_size);
+    }
+
+    /**
+     * @param {number} p_quadrant
+     * @param {number} p_subdiv
+     */
+    set_shadow_atlas_quadrant_subdiv(p_quadrant, p_subdiv) {
+        if (this.shadow_atlas_quadrant_subdiv[p_quadrant] === p_subdiv) {
+            return;
+        }
+
+        this.shadow_atlas_quadrant_subdiv[p_quadrant] = p_subdiv;
+        VSG.scene_render.shadow_atlas_set_quadrant_subdivision(this.viewport.shadow_atlas, p_quadrant, subdiv[p_subdiv])
+    }
+
     /* private */
+
+    /**
+     * @param {Camera} camera
+     */
+    _camera_set(camera) {
+        if (this.camera === camera) return;
+
+        if (this.camera) {
+            this.camera.notification(NOTIFICATION_LOST_CURRENT);
+        }
+
+        this.camera = camera;
+
+        if (camera) {
+            VSG.viewport.viewport_attach_camera(this.viewport, camera.camera);
+        } else {
+            VSG.viewport.viewport_attach_camera(this.viewport, null);
+        }
+
+        if (camera) {
+            camera.notification(NOTIFICATION_BECAME_CURRENT);
+        }
+    }
+
+    /**
+     * @param {Camera} camera
+     */
+    _camera_add(camera) {
+        this.cameras.push(camera);
+        return this.cameras.length === 1;
+    }
+
+    /**
+     * @param {Camera} camera
+     */
+    _camera_remove(camera) {
+        let idx = this.cameras.indexOf(camera);
+        if (idx >= 0) {
+            this.cameras.splice(idx, 1);
+        }
+        if (this.camera === camera) {
+            this.camera.notification(NOTIFICATION_LOST_CURRENT);
+            this.camera = null;
+        }
+    }
+
+    /**
+     * @param {Camera} p_exclude
+     */
+    _camera_make_next_current(p_exclude) {
+        for (let i = 0; i < this.cameras.length; i++) {
+            if (this.cameras[i] === p_exclude) continue;
+            if (!this.cameras[i].is_inside_tree()) continue;
+            if (this.camera) return;
+            this.cameras[i].make_current();
+        }
+    }
+
+    _camera_transform_changed_notify() { }
 
     /**
      * @param {Control} p_control
@@ -1034,7 +1208,7 @@ export class Viewport extends Node {
     }
 
     update_worlds() {
-        if (!this.is_inside_tree) {
+        if (!this.is_inside_tree()) {
             return;
         }
 
@@ -1474,6 +1648,74 @@ export class Viewport extends Node {
         }
     }
 
+    /**
+     * @param {boolean} p_world
+     */
+    set_use_own_world(p_world) {
+        if (!!this.own_world === p_world) return;
+
+        if (this.is_inside_tree()) {
+            this._propagate_exit_world(this);
+        }
+
+        if (!p_world) {
+            this.own_world = null;
+        } else {
+            if (this.world) {
+                this.own_world = this.world.duplicate();
+            } else {
+                this.own_world = new World;
+            }
+        }
+
+        if (this.is_inside_tree()) {
+            this._propagate_enter_world(this);
+            VSG.viewport.viewport_set_scenario(this.viewport, this.find_world().scenario);
+        }
+    }
+
+    /**
+     * @param {World} world
+     */
+    set_world(world) {
+        if (this.world === world) return;
+
+        if (this.is_inside_tree()) {
+            this._propagate_exit_world(this);
+        }
+
+        if (this.own_world && this.world) {
+            this.world.disconnect('changed', this._own_world_changed, this);
+        }
+
+        this.world = world;
+
+        if (this.own_world) {
+            if (this.world) {
+                this.own_world = this.world.duplicate();
+                this.world.connect('changed', this._own_world_changed, this);
+            } else {
+                this.world = new World;
+            }
+        }
+
+        if (this.is_inside_tree()) {
+            this._propagate_enter_world(this);
+
+            VSG.viewport.viewport_set_scenario(this.viewport, this.find_world().scenario);
+        }
+    }
+
+    /**
+     * @returns {World}
+     */
+    find_world() {
+        if (this.own_world) return this.own_world;
+        else if (this.world) return this.world;
+        else if (this.parent) return this.parent.find_world();
+        else return null;
+    }
+
     get_texture() {
         return this.default_texture;
     }
@@ -1534,11 +1776,11 @@ export class Viewport extends Node {
             if (!p_node.is_inside_tree()) return;
 
             if (p_node.is_spatial || p_node.class === 'WorldEnvironment') {
-                // p_node.notification(NOTIFICATION_ENTER_WORLD);
+                p_node.notification(NOTIFICATION_ENTER_WORLD);
             } else {
                 if (p_node.class === 'Viewport') {
-                    // const v = /** @type {Viewport} */(p_node);
-                    // TODO: [World] if (!v.world || !v.own_world) return;
+                    const v = /** @type {Viewport} */(p_node);
+                    if (!v.world || !v.own_world) return;
                 }
             }
         }
@@ -1547,7 +1789,22 @@ export class Viewport extends Node {
             this._propagate_enter_world(c);
         }
     }
-    _propagate_exit_world() { }
+    /**
+     * @param {Node} p_node
+     */
+    _propagate_exit_world(p_node) {
+        if (p_node !== this) {
+            if (!p_node.is_inside_tree()) return;
+
+            if (p_node.is_spatial) {
+                p_node.notification(NOTIFICATION_EXIT_WORLD);
+            }
+        }
+
+        for (let i = 0; i < p_node.data.children.length; i++) {
+            this._propagate_exit_world(p_node.data.children[i]);
+        }
+    }
     /**
      * @param {Node} p_node
      * @param {number} p_what
@@ -1588,6 +1845,22 @@ export class Viewport extends Node {
 
     _subwindow_visibility_changed() {
         this.gui.subwindow_visibility_dirty = true;
+    }
+
+    _own_world_changed() {
+        if (this.is_inside_tree()) {
+            this._propagate_exit_world(this);
+        }
+
+        this.own_world = this.world.duplicate();
+
+        if (this.is_inside_tree()) {
+            this._propagate_enter_world(this);
+        }
+
+        if (this.is_inside_tree()) {
+            VSG.viewport.viewport_set_scenario(this.viewport, this.find_world().scenario);
+        }
     }
 }
 node_class_map['Viewport'] = GDCLASS(Viewport, Node)

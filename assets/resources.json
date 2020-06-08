@@ -1,222 +1,7410 @@
 {
-    "res://font/GROBOLD.ttf": {
-        "type": "DynamicFontData",
-        "filename": "res://font/GROBOLD.ttf",
-        "family": "GROBOLD",
-        "ascender": 800,
-        "descender": -200
+  "res://font/GROBOLD.ttf": {
+    "type": "DynamicFontData",
+    "filename": "res://font/GROBOLD.ttf",
+    "family": "GROBOLD",
+    "ascender": 800,
+    "descender": -200
+  },
+  "res://mesh/m.tres": {
+    "ext": {
+      "1": "media/house_palette.png"
     },
-    "res://scene/ui/input.tscn": {
-        "type": "PackedScene",
-        "nodes": [
-            {
-                "type": "Node2D",
-                "name": "input",
-                "elem_id": "word_input"
-            }
-        ]
-    },
-    "res://scene/demo.tscn": {
-        "type": "PackedScene",
-        "ext": {
-            "1": "monitor",
-            "2": "alien",
-            "3": "player",
-            "5": "res://font/GROBOLD.ttf"
-        },
-        "sub": {
-            "1": {
-                "type": "DynamicFont",
-                "font": "@ext#5",
-                "size": 25
-            },
-            "2": {
-                "type": "Shader",
-                "code": "shader_type canvas_item;\nvoid fragment() {\n\nvec2 uv = SCREEN_UV;\n\nvec3 color;\n\nvec4 ori_color = texture(SCREEN_TEXTURE, uv);\n\n// color separation\n\ncolor.r = texture(SCREEN_TEXTURE, vec2(uv.x + 0.01, uv.y)).x;\n\ncolor.g = texture(SCREEN_TEXTURE, vec2(uv.x + 0.000, uv.y)).y;\n\ncolor.b = texture(SCREEN_TEXTURE, vec2(uv.x - 0.01, uv.y)).z;\n\n// increase contrast\n\ncolor = clamp(color * 0.5 + 0.5 * color * color * 1.2, 0.0, 1.0);\n\n// vignetting\n\ncolor *= 0.5 + 0.5 * 16.0 * uv.x * uv.y * (1.0 - uv.x) * (1.0 - uv.y);\n\n// tinting\n\ncolor *= vec3(0.8, 1.0, 0.7);\n\n// tv lines\n\ncolor *= 0.8 + 0.2 * sin(10.0 * TIME + uv.y * 1000.0);\n\n// flickering\n\ncolor *= 0.97 + 0.03 * sin(110.0 * TIME);\n\nCOLOR = vec4(color, ori_color.a);\n}\n"
-            },
-            "3": {
-                "type": "ShaderMaterial",
-                "shader": "@sub#2"
-            }
-        },
-        "nodes": [
-            {
-                "type": "Control",
-                "name": "demo",
-                "anchor_bottom": 1,
-                "anchor_right": 1
-            },
-            {
-                "type": "ColorRect",
-                "name": "bg",
-                "parent": ".",
-                "anchor_bottom": 1,
-                "anchor_right": 1,
-                "color": {
-                    "r": 0,
-                    "g": 0,
-                    "b": 0,
-                    "a": 1
-                }
-            },
-            {
-                "type": "TextureRect",
-                "name": "monitor",
-                "parent": ".",
-                "anchor_bottom": 0.5,
-                "anchor_left": 0.5,
-                "anchor_top": 0.5,
-                "anchor_right": 0.5,
-                "margin_bottom": 130,
-                "margin_left": -129.5,
-                "margin_top": -130,
-                "margin_right": 129.5,
-                "texture": "@ext#1"
-            },
-            {
-                "type": "Sprite",
-                "name": "player",
-                "parent": "monitor",
-                "position": {
-                    "x": 128.651,
-                    "y": 181.304
-                },
-                "texture": "@ext#3"
-            },
-            {
-                "type": "Sprite",
-                "name": "alien",
-                "parent": "monitor",
-                "position": {
-                    "x": 50.6791,
-                    "y": 57.8259
-                },
-                "texture": "@ext#2"
-            },
-            {
-                "type": "Sprite",
-                "name": "alien2",
-                "parent": "monitor",
-                "position": {
-                    "x": 89.1798,
-                    "y": 57.8259
-                },
-                "texture": "@ext#2"
-            },
-            {
-                "type": "Sprite",
-                "name": "alien3",
-                "parent": "monitor",
-                "position": {
-                    "x": 127.68,
-                    "y": 57.8259
-                },
-                "texture": "@ext#2"
-            },
-            {
-                "type": "Sprite",
-                "name": "alien4",
-                "parent": "monitor",
-                "position": {
-                    "x": 166.181,
-                    "y": 57.8259
-                },
-                "texture": "@ext#2"
-            },
-            {
-                "type": "Sprite",
-                "name": "alien5",
-                "parent": "monitor",
-                "position": {
-                    "x": 203.655,
-                    "y": 57.8259
-                },
-                "texture": "@ext#2"
-            },
-            {
-                "type": "Sprite",
-                "name": "alien10",
-                "parent": "monitor",
-                "position": {
-                    "x": 51.1925,
-                    "y": 85.5464
-                },
-                "texture": "@ext#2"
-            },
-            {
-                "type": "Sprite",
-                "name": "alien9",
-                "parent": "monitor",
-                "position": {
-                    "x": 89.6931,
-                    "y": 85.5464
-                },
-                "texture": "@ext#2"
-            },
-            {
-                "type": "Sprite",
-                "name": "alien8",
-                "parent": "monitor",
-                "position": {
-                    "x": 128.194,
-                    "y": 85.5464
-                },
-                "texture": "@ext#2"
-            },
-            {
-                "type": "Sprite",
-                "name": "alien7",
-                "parent": "monitor",
-                "position": {
-                    "x": 166.694,
-                    "y": 85.5464
-                },
-                "texture": "@ext#2"
-            },
-            {
-                "type": "Sprite",
-                "name": "alien6",
-                "parent": "monitor",
-                "position": {
-                    "x": 204.168,
-                    "y": 85.5464
-                },
-                "texture": "@ext#2"
-            },
-            {
-                "type": "Label",
-                "name": "label",
-                "parent": "monitor",
-                "self_modulate": {
-                    "r": 0.333333,
-                    "g": 0.831373,
-                    "b": 0,
-                    "a": 1
-                },
-                "anchor_bottom": 0.5,
-                "anchor_left": 0.5,
-                "anchor_top": 0.5,
-                "anchor_right": 0.5,
-                "margin_bottom": 26.5,
-                "margin_left": -82,
-                "margin_top": -26.5,
-                "margin_right": 82,
-                "align": 1,
-                "autowrap": true,
-                "text": "GAME OVER",
-                "valign": 1,
-                "font": "@sub#1"
-            },
-            {
-                "type": "ColorRect",
-                "name": "cover",
-                "parent": "monitor",
-                "material": "@sub#3",
-                "margin_bottom": 201,
-                "margin_left": 18.5,
-                "margin_top": 28,
-                "margin_right": 239.5
-            }
-        ]
+    "sub": [],
+    "resource": {
+      "type": "SpatialMaterial",
+      "albedo_texture": "@ext#1"
     }
+  },
+  "res://raw_mesh/robot.escn": {
+    "type": "PackedScene",
+    "sub": [
+      {
+        "id": 4,
+        "type": "ArrayMesh",
+        "surfaces": [
+          {
+            "primitive": 4,
+            "arrays": {
+              "__type__": "b",
+              "is_2d": false,
+              "aabb": {
+                "position": {
+                  "x": -1.04912,
+                  "y": 0.00871478,
+                  "z": -1.10311
+                },
+                "size": {
+                  "x": 4.117839999999999,
+                  "y": 3.76964522,
+                  "z": 2.20622
+                }
+              },
+              "vertex": {
+                "index": 0,
+                "offset": 0,
+                "length": 283016
+              },
+              "index": {
+                "index": 0,
+                "offset": 283016,
+                "length": 9744
+              },
+              "array_len": 4162,
+              "index_array_len": 4872,
+              "attribs": [
+                {
+                  "index": 0,
+                  "type": 5126,
+                  "size": 3,
+                  "stride": 68,
+                  "offset": 0,
+                  "normalized": false
+                },
+                {
+                  "index": 1,
+                  "type": 5126,
+                  "size": 3,
+                  "stride": 68,
+                  "offset": 12,
+                  "normalized": false
+                },
+                {
+                  "index": 2,
+                  "type": 5126,
+                  "size": 4,
+                  "stride": 68,
+                  "offset": 24,
+                  "normalized": false
+                },
+                {
+                  "index": 4,
+                  "type": 5126,
+                  "size": 2,
+                  "stride": 68,
+                  "offset": 40,
+                  "normalized": false
+                },
+                {
+                  "index": 6,
+                  "type": 5121,
+                  "size": 4,
+                  "stride": 68,
+                  "offset": 48,
+                  "normalized": false
+                },
+                {
+                  "index": 7,
+                  "type": 5126,
+                  "size": 4,
+                  "stride": 68,
+                  "offset": 52,
+                  "normalized": false
+                }
+              ]
+            },
+            "morph_arrays": [],
+            "is_2d": false
+          }
+        ]
+      }
+    ],
+    "nodes": [
+      {
+        "type": "Spatial",
+        "name": "Scene"
+      },
+      {
+        "type": "Skeleton",
+        "name": "RobotScene",
+        "parent": ".",
+        "transform": [
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        "bones": [
+          {
+            "name": "Spine",
+            "parent": -1,
+            "enabled": true,
+            "rest": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              -1,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            "pose": [
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            "bound_children": []
+          },
+          {
+            "name": "Neck",
+            "parent": 0,
+            "enabled": true,
+            "rest": [
+              1,
+              2.38419e-7,
+              0,
+              -2.38419e-7,
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              -2.02743
+            ],
+            "pose": [
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            "bound_children": []
+          },
+          {
+            "name": "Shoulder.L",
+            "parent": 0,
+            "enabled": true,
+            "rest": [
+              -0.356663,
+              -3.34994e-8,
+              -0.934233,
+              -2.19447e-7,
+              1,
+              4.79209e-8,
+              0.934233,
+              2.22106e-7,
+              -0.356663,
+              0,
+              0,
+              -2.02743
+            ],
+            "pose": [
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            "bound_children": []
+          },
+          {
+            "name": "Arm",
+            "parent": 2,
+            "enabled": true,
+            "rest": [
+              0.934233,
+              1.55498e-7,
+              0.356663,
+              -1.79233e-7,
+              1,
+              3.34994e-8,
+              -0.356663,
+              -9.52221e-8,
+              0.934233,
+              -5.96046e-8,
+              4.79616e-14,
+              -0.945947
+            ],
+            "pose": [
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            "bound_children": []
+          },
+          {
+            "name": "Arm.002",
+            "parent": 3,
+            "enabled": true,
+            "rest": [
+              1,
+              0,
+              -7.44041e-15,
+              0,
+              1,
+              -7.10543e-15,
+              1.42109e-14,
+              7.10543e-15,
+              1,
+              2.88658e-14,
+              6.60024e-15,
+              -0.545166
+            ],
+            "pose": [
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            "bound_children": []
+          },
+          {
+            "name": "Arm.001",
+            "parent": 4,
+            "enabled": true,
+            "rest": [
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1,
+              1.82077e-14,
+              -3.55271e-15,
+              -0.545166
+            ],
+            "pose": [
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            "bound_children": []
+          },
+          {
+            "name": "Hand.L",
+            "parent": 5,
+            "enabled": true,
+            "rest": [
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1,
+              1.82077e-14,
+              -3.55271e-15,
+              -0.545166
+            ],
+            "pose": [
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            "bound_children": []
+          },
+          {
+            "name": "HandIK.L",
+            "parent": -1,
+            "enabled": true,
+            "rest": [
+              1.19209e-7,
+              0,
+              -1,
+              -1,
+              -4.01339e-7,
+              0,
+              -4.01339e-7,
+              1,
+              0,
+              3.5983,
+              1.69004,
+              -4.53306e-8
+            ],
+            "pose": [
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1,
+              0.989255,
+              1.40657,
+              2.12365
+            ],
+            "bound_children": []
+          },
+          {
+            "name": "Shoulder.R",
+            "parent": 0,
+            "enabled": true,
+            "rest": [
+              -0.356663,
+              -1.05794e-7,
+              0.934233,
+              -1.711e-7,
+              1,
+              4.79208e-8,
+              -0.934233,
+              -1.42755e-7,
+              -0.356663,
+              0,
+              0,
+              -2.02743
+            ],
+            "pose": [
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            "bound_children": []
+          },
+          {
+            "name": "Arm.003",
+            "parent": 8,
+            "enabled": true,
+            "rest": [
+              1.44885e-7,
+              -0.934233,
+              -0.356663,
+              1,
+              2.14215e-7,
+              -1.19209e-7,
+              1.55969e-7,
+              -0.356663,
+              0.934233,
+              5.96047e-8,
+              1.77636e-14,
+              -0.945947
+            ],
+            "pose": [
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            "bound_children": []
+          },
+          {
+            "name": "Arm.004",
+            "parent": 9,
+            "enabled": true,
+            "rest": [
+              1,
+              -3.11292e-8,
+              1.34151e-8,
+              3.11292e-8,
+              1,
+              -5.96047e-8,
+              -1.34151e-8,
+              5.96047e-8,
+              1,
+              -1.24345e-14,
+              8.51691e-8,
+              -0.545166
+            ],
+            "pose": [
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            "bound_children": []
+          },
+          {
+            "name": "Arm.005",
+            "parent": 10,
+            "enabled": true,
+            "rest": [
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              -6.00856e-15,
+              1,
+              2.66997e-14,
+              -1.15463e-14,
+              -0.545166
+            ],
+            "pose": [
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            "bound_children": []
+          },
+          {
+            "name": "Hand.R",
+            "parent": 11,
+            "enabled": true,
+            "rest": [
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              -2.18654e-15,
+              -6.00856e-15,
+              1,
+              2.4869e-14,
+              -1.15463e-14,
+              -0.545166
+            ],
+            "pose": [
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            "bound_children": []
+          },
+          {
+            "name": "HandIK.R",
+            "parent": -1,
+            "enabled": true,
+            "rest": [
+              1.19209e-7,
+              0,
+              1,
+              3.89414e-7,
+              -1,
+              0,
+              1,
+              3.89414e-7,
+              0,
+              -3.5983,
+              1.69004,
+              -4.53306e-8
+            ],
+            "pose": [
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1,
+              0.322341,
+              -1.53844,
+              1.59705
+            ],
+            "bound_children": []
+          }
+        ],
+        "bones_in_world_transform": true,
+        "bones/0/name": "Spine",
+        "bones/0/parent": -1,
+        "bones/0/rest": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          -1,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        "bones/0/pose": [
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        "bones/0/enabled": true,
+        "bones/0/bound_children": [],
+        "bones/1/name": "Neck",
+        "bones/1/parent": 0,
+        "bones/1/rest": [
+          1,
+          2.38419e-7,
+          0,
+          -2.38419e-7,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          -2.02743
+        ],
+        "bones/1/pose": [
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        "bones/1/enabled": true,
+        "bones/1/bound_children": [],
+        "bones/2/name": "Shoulder.L",
+        "bones/2/parent": 0,
+        "bones/2/rest": [
+          -0.356663,
+          -3.34994e-8,
+          -0.934233,
+          -2.19447e-7,
+          1,
+          4.79209e-8,
+          0.934233,
+          2.22106e-7,
+          -0.356663,
+          0,
+          0,
+          -2.02743
+        ],
+        "bones/2/pose": [
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        "bones/2/enabled": true,
+        "bones/2/bound_children": [],
+        "bones/3/name": "Arm",
+        "bones/3/parent": 2,
+        "bones/3/rest": [
+          0.934233,
+          1.55498e-7,
+          0.356663,
+          -1.79233e-7,
+          1,
+          3.34994e-8,
+          -0.356663,
+          -9.52221e-8,
+          0.934233,
+          -5.96046e-8,
+          4.79616e-14,
+          -0.945947
+        ],
+        "bones/3/pose": [
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        "bones/3/enabled": true,
+        "bones/3/bound_children": [],
+        "bones/4/name": "Arm.002",
+        "bones/4/parent": 3,
+        "bones/4/rest": [
+          1,
+          0,
+          -7.44041e-15,
+          0,
+          1,
+          -7.10543e-15,
+          1.42109e-14,
+          7.10543e-15,
+          1,
+          2.88658e-14,
+          6.60024e-15,
+          -0.545166
+        ],
+        "bones/4/pose": [
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        "bones/4/enabled": true,
+        "bones/4/bound_children": [],
+        "bones/5/name": "Arm.001",
+        "bones/5/parent": 4,
+        "bones/5/rest": [
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          1.82077e-14,
+          -3.55271e-15,
+          -0.545166
+        ],
+        "bones/5/pose": [
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        "bones/5/enabled": true,
+        "bones/5/bound_children": [],
+        "bones/6/name": "Hand.L",
+        "bones/6/parent": 5,
+        "bones/6/rest": [
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          1.82077e-14,
+          -3.55271e-15,
+          -0.545166
+        ],
+        "bones/6/pose": [
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        "bones/6/enabled": true,
+        "bones/6/bound_children": [],
+        "bones/7/name": "HandIK.L",
+        "bones/7/parent": -1,
+        "bones/7/rest": [
+          1.19209e-7,
+          0,
+          -1,
+          -1,
+          -4.01339e-7,
+          0,
+          -4.01339e-7,
+          1,
+          0,
+          3.5983,
+          1.69004,
+          -4.53306e-8
+        ],
+        "bones/7/pose": [
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0.989255,
+          1.40657,
+          2.12365
+        ],
+        "bones/7/enabled": true,
+        "bones/7/bound_children": [],
+        "bones/8/name": "Shoulder.R",
+        "bones/8/parent": 0,
+        "bones/8/rest": [
+          -0.356663,
+          -1.05794e-7,
+          0.934233,
+          -1.711e-7,
+          1,
+          4.79208e-8,
+          -0.934233,
+          -1.42755e-7,
+          -0.356663,
+          0,
+          0,
+          -2.02743
+        ],
+        "bones/8/pose": [
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        "bones/8/enabled": true,
+        "bones/8/bound_children": [],
+        "bones/9/name": "Arm.003",
+        "bones/9/parent": 8,
+        "bones/9/rest": [
+          1.44885e-7,
+          -0.934233,
+          -0.356663,
+          1,
+          2.14215e-7,
+          -1.19209e-7,
+          1.55969e-7,
+          -0.356663,
+          0.934233,
+          5.96047e-8,
+          1.77636e-14,
+          -0.945947
+        ],
+        "bones/9/pose": [
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        "bones/9/enabled": true,
+        "bones/9/bound_children": [],
+        "bones/10/name": "Arm.004",
+        "bones/10/parent": 9,
+        "bones/10/rest": [
+          1,
+          -3.11292e-8,
+          1.34151e-8,
+          3.11292e-8,
+          1,
+          -5.96047e-8,
+          -1.34151e-8,
+          5.96047e-8,
+          1,
+          -1.24345e-14,
+          8.51691e-8,
+          -0.545166
+        ],
+        "bones/10/pose": [
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        "bones/10/enabled": true,
+        "bones/10/bound_children": [],
+        "bones/11/name": "Arm.005",
+        "bones/11/parent": 10,
+        "bones/11/rest": [
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          -6.00856e-15,
+          1,
+          2.66997e-14,
+          -1.15463e-14,
+          -0.545166
+        ],
+        "bones/11/pose": [
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        "bones/11/enabled": true,
+        "bones/11/bound_children": [],
+        "bones/12/name": "Hand.R",
+        "bones/12/parent": 11,
+        "bones/12/rest": [
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          -2.18654e-15,
+          -6.00856e-15,
+          1,
+          2.4869e-14,
+          -1.15463e-14,
+          -0.545166
+        ],
+        "bones/12/pose": [
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        "bones/12/enabled": true,
+        "bones/12/bound_children": [],
+        "bones/13/name": "HandIK.R",
+        "bones/13/parent": -1,
+        "bones/13/rest": [
+          1.19209e-7,
+          0,
+          1,
+          3.89414e-7,
+          -1,
+          0,
+          1,
+          3.89414e-7,
+          0,
+          -3.5983,
+          1.69004,
+          -4.53306e-8
+        ],
+        "bones/13/pose": [
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0.322341,
+          -1.53844,
+          1.59705
+        ],
+        "bones/13/enabled": true,
+        "bones/13/bound_children": []
+      },
+      {
+        "type": "AnimationPlayer",
+        "name": "AnimationPlayer",
+        "parent": "RobotScene",
+        "root_node": "..",
+        "anims": {}
+      },
+      {
+        "type": "MeshInstance",
+        "name": "Robot",
+        "parent": "RobotScene",
+        "transform": [
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        "visible": true,
+        "mesh": "@sub#4",
+        "material": [],
+        "skeleton": ".."
+      }
+    ]
+  },
+  "res://raw_mesh/ground.escn": {
+    "type": "PackedScene",
+    "sub": [
+      {
+        "id": 1,
+        "type": "ArrayMesh",
+        "surfaces": [
+          {
+            "primitive": 4,
+            "arrays": {
+              "__type__": "b",
+              "is_2d": false,
+              "aabb": {
+                "position": {
+                  "x": -1,
+                  "y": 0,
+                  "z": -1
+                },
+                "size": {
+                  "x": 2,
+                  "y": 0,
+                  "z": 2
+                }
+              },
+              "vertex": {
+                "index": 0,
+                "offset": 292760,
+                "length": 192
+              },
+              "index": {
+                "index": 0,
+                "offset": 292952,
+                "length": 12
+              },
+              "array_len": 4,
+              "index_array_len": 6,
+              "attribs": [
+                {
+                  "index": 0,
+                  "type": 5126,
+                  "size": 3,
+                  "stride": 48,
+                  "offset": 0,
+                  "normalized": false
+                },
+                {
+                  "index": 1,
+                  "type": 5126,
+                  "size": 3,
+                  "stride": 48,
+                  "offset": 12,
+                  "normalized": false
+                },
+                {
+                  "index": 2,
+                  "type": 5126,
+                  "size": 4,
+                  "stride": 48,
+                  "offset": 24,
+                  "normalized": false
+                },
+                {
+                  "index": 4,
+                  "type": 5126,
+                  "size": 2,
+                  "stride": 48,
+                  "offset": 40,
+                  "normalized": false
+                }
+              ]
+            },
+            "morph_arrays": [],
+            "is_2d": false
+          }
+        ]
+      }
+    ],
+    "nodes": [
+      {
+        "type": "Spatial",
+        "name": "Scene"
+      },
+      {
+        "type": "MeshInstance",
+        "name": "Plane",
+        "parent": ".",
+        "transform": [
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        "visible": true,
+        "mesh": "@sub#1",
+        "material": []
+      }
+    ]
+  },
+  "res://raw_mesh/road.escn": {
+    "type": "PackedScene",
+    "sub": [
+      {
+        "id": 1,
+        "type": "ArrayMesh",
+        "surfaces": [
+          {
+            "primitive": 4,
+            "arrays": {
+              "__type__": "b",
+              "is_2d": false,
+              "aabb": {
+                "position": {
+                  "x": -2,
+                  "y": -0.165383,
+                  "z": -2.3094
+                },
+                "size": {
+                  "x": 4,
+                  "y": 0.2500007,
+                  "z": 4.6188
+                }
+              },
+              "vertex": {
+                "index": 0,
+                "offset": 292964,
+                "length": 6192
+              },
+              "index": {
+                "index": 0,
+                "offset": 299156,
+                "length": 564
+              },
+              "array_len": 129,
+              "index_array_len": 282,
+              "attribs": [
+                {
+                  "index": 0,
+                  "type": 5126,
+                  "size": 3,
+                  "stride": 48,
+                  "offset": 0,
+                  "normalized": false
+                },
+                {
+                  "index": 1,
+                  "type": 5126,
+                  "size": 3,
+                  "stride": 48,
+                  "offset": 12,
+                  "normalized": false
+                },
+                {
+                  "index": 2,
+                  "type": 5126,
+                  "size": 4,
+                  "stride": 48,
+                  "offset": 24,
+                  "normalized": false
+                },
+                {
+                  "index": 4,
+                  "type": 5126,
+                  "size": 2,
+                  "stride": 48,
+                  "offset": 40,
+                  "normalized": false
+                }
+              ]
+            },
+            "morph_arrays": [],
+            "is_2d": false
+          }
+        ]
+      }
+    ],
+    "nodes": [
+      {
+        "type": "Spatial",
+        "name": "Scene"
+      },
+      {
+        "type": "MeshInstance",
+        "name": "road",
+        "parent": ".",
+        "transform": [
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        "visible": true,
+        "mesh": "@sub#1",
+        "material": []
+      }
+    ]
+  },
+  "res://raw_mesh/tree_2.escn": {
+    "type": "PackedScene",
+    "sub": [
+      {
+        "id": 1,
+        "type": "ArrayMesh",
+        "surfaces": [
+          {
+            "primitive": 4,
+            "arrays": {
+              "__type__": "b",
+              "is_2d": false,
+              "aabb": {
+                "position": {
+                  "x": -1.53007,
+                  "y": -0.089548,
+                  "z": -0.711629
+                },
+                "size": {
+                  "x": 2.6684200000000002,
+                  "y": 4.193358,
+                  "z": 1.065417
+                }
+              },
+              "vertex": {
+                "index": 0,
+                "offset": 299720,
+                "length": 76320
+              },
+              "index": {
+                "index": 0,
+                "offset": 376040,
+                "length": 3180
+              },
+              "array_len": 1590,
+              "index_array_len": 1590,
+              "attribs": [
+                {
+                  "index": 0,
+                  "type": 5126,
+                  "size": 3,
+                  "stride": 48,
+                  "offset": 0,
+                  "normalized": false
+                },
+                {
+                  "index": 1,
+                  "type": 5126,
+                  "size": 3,
+                  "stride": 48,
+                  "offset": 12,
+                  "normalized": false
+                },
+                {
+                  "index": 2,
+                  "type": 5126,
+                  "size": 4,
+                  "stride": 48,
+                  "offset": 24,
+                  "normalized": false
+                },
+                {
+                  "index": 4,
+                  "type": 5126,
+                  "size": 2,
+                  "stride": 48,
+                  "offset": 40,
+                  "normalized": false
+                }
+              ]
+            },
+            "morph_arrays": [],
+            "is_2d": false
+          }
+        ]
+      }
+    ],
+    "nodes": [
+      {
+        "type": "Spatial",
+        "name": "Scene"
+      },
+      {
+        "type": "MeshInstance",
+        "name": "tree_2",
+        "parent": ".",
+        "transform": [
+          1.29214,
+          0,
+          0,
+          0,
+          1.29214,
+          0,
+          0,
+          0,
+          1.29214,
+          0,
+          0.0391939,
+          0
+        ],
+        "visible": true,
+        "mesh": "@sub#1",
+        "material": []
+      }
+    ]
+  },
+  "res://raw_mesh/house.escn": {
+    "type": "PackedScene",
+    "sub": [
+      {
+        "id": 1,
+        "type": "SpatialMaterial",
+        "albedo_color": {
+          "r": 0.903545,
+          "g": 0.903545,
+          "b": 0.903545,
+          "a": 1
+        }
+      },
+      {
+        "id": 2,
+        "type": "ArrayMesh",
+        "surfaces": [
+          {
+            "material": "@sub#1",
+            "primitive": 4,
+            "arrays": {
+              "__type__": "b",
+              "is_2d": false,
+              "aabb": {
+                "position": {
+                  "x": -2.1912,
+                  "y": 0,
+                  "z": -1.41043
+                },
+                "size": {
+                  "x": 4.3824,
+                  "y": 2.2429,
+                  "z": 2.82086
+                }
+              },
+              "vertex": {
+                "index": 0,
+                "offset": 379220,
+                "length": 15456
+              },
+              "index": {
+                "index": 0,
+                "offset": 394676,
+                "length": 744
+              },
+              "array_len": 322,
+              "index_array_len": 372,
+              "attribs": [
+                {
+                  "index": 0,
+                  "type": 5126,
+                  "size": 3,
+                  "stride": 48,
+                  "offset": 0,
+                  "normalized": false
+                },
+                {
+                  "index": 1,
+                  "type": 5126,
+                  "size": 3,
+                  "stride": 48,
+                  "offset": 12,
+                  "normalized": false
+                },
+                {
+                  "index": 2,
+                  "type": 5126,
+                  "size": 4,
+                  "stride": 48,
+                  "offset": 24,
+                  "normalized": false
+                },
+                {
+                  "index": 4,
+                  "type": 5126,
+                  "size": 2,
+                  "stride": 48,
+                  "offset": 40,
+                  "normalized": false
+                }
+              ]
+            },
+            "morph_arrays": [],
+            "is_2d": false
+          }
+        ]
+      }
+    ],
+    "nodes": [
+      {
+        "type": "Spatial",
+        "name": "Scene"
+      },
+      {
+        "type": "MeshInstance",
+        "name": "Cube",
+        "parent": ".",
+        "transform": [
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        "visible": true,
+        "mesh": "@sub#2",
+        "material": []
+      }
+    ]
+  },
+  "res://raw_mesh/tree_1.escn": {
+    "type": "PackedScene",
+    "sub": [
+      {
+        "id": 1,
+        "type": "ArrayMesh",
+        "surfaces": [
+          {
+            "primitive": 4,
+            "arrays": {
+              "__type__": "b",
+              "is_2d": false,
+              "aabb": {
+                "position": {
+                  "x": -4.39903,
+                  "y": -0.0109736,
+                  "z": -5.07957
+                },
+                "size": {
+                  "x": 8.79806,
+                  "y": 6.231493599999999,
+                  "z": 10.15914
+                }
+              },
+              "vertex": {
+                "index": 0,
+                "offset": 395420,
+                "length": 46656
+              },
+              "index": {
+                "index": 0,
+                "offset": 442076,
+                "length": 1944
+              },
+              "array_len": 972,
+              "index_array_len": 972,
+              "attribs": [
+                {
+                  "index": 0,
+                  "type": 5126,
+                  "size": 3,
+                  "stride": 48,
+                  "offset": 0,
+                  "normalized": false
+                },
+                {
+                  "index": 1,
+                  "type": 5126,
+                  "size": 3,
+                  "stride": 48,
+                  "offset": 12,
+                  "normalized": false
+                },
+                {
+                  "index": 2,
+                  "type": 5126,
+                  "size": 4,
+                  "stride": 48,
+                  "offset": 24,
+                  "normalized": false
+                },
+                {
+                  "index": 4,
+                  "type": 5126,
+                  "size": 2,
+                  "stride": 48,
+                  "offset": 40,
+                  "normalized": false
+                }
+              ]
+            },
+            "morph_arrays": [],
+            "is_2d": false
+          }
+        ]
+      }
+    ],
+    "nodes": [
+      {
+        "type": "Spatial",
+        "name": "Scene"
+      },
+      {
+        "type": "MeshInstance",
+        "name": "tree_1",
+        "parent": ".",
+        "transform": [
+          -0.445122,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          -0.445122,
+          0,
+          0,
+          0
+        ],
+        "visible": true,
+        "mesh": "@sub#1",
+        "material": []
+      }
+    ]
+  },
+  "res://raw_mesh/ebox.escn": {
+    "type": "PackedScene",
+    "sub": [
+      {
+        "id": 1,
+        "type": "ArrayMesh",
+        "surfaces": [
+          {
+            "primitive": 4,
+            "arrays": {
+              "__type__": "b",
+              "is_2d": false,
+              "aabb": {
+                "position": {
+                  "x": -0.859375,
+                  "y": -0.984375,
+                  "z": -0.851562
+                },
+                "size": {
+                  "x": 1.71875,
+                  "y": 1.96875,
+                  "z": 1.7031239999999999
+                }
+              },
+              "vertex": {
+                "index": 0,
+                "offset": 444020,
+                "length": 138336
+              },
+              "index": {
+                "index": 0,
+                "offset": 582356,
+                "length": 5808
+              },
+              "array_len": 2882,
+              "index_array_len": 2904,
+              "attribs": [
+                {
+                  "index": 0,
+                  "type": 5126,
+                  "size": 3,
+                  "stride": 48,
+                  "offset": 0,
+                  "normalized": false
+                },
+                {
+                  "index": 1,
+                  "type": 5126,
+                  "size": 3,
+                  "stride": 48,
+                  "offset": 12,
+                  "normalized": false
+                },
+                {
+                  "index": 2,
+                  "type": 5126,
+                  "size": 4,
+                  "stride": 48,
+                  "offset": 24,
+                  "normalized": false
+                },
+                {
+                  "index": 4,
+                  "type": 5126,
+                  "size": 2,
+                  "stride": 48,
+                  "offset": 40,
+                  "normalized": false
+                }
+              ]
+            },
+            "morph_arrays": [],
+            "is_2d": false
+          }
+        ]
+      }
+    ],
+    "nodes": [
+      {
+        "type": "Spatial",
+        "name": "Scene"
+      },
+      {
+        "type": "MeshInstance",
+        "name": "Suzanne",
+        "parent": ".",
+        "transform": [
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        "visible": true,
+        "mesh": "@sub#1",
+        "material": []
+      }
+    ]
+  },
+  "res://scene/ui/input.tscn": {
+    "type": "PackedScene",
+    "sub": [],
+    "nodes": [
+      {
+        "type": "Node2D",
+        "name": "input",
+        "elem_id": "word_input"
+      }
+    ]
+  },
+  "res://scene/demo.tscn": {
+    "type": "PackedScene",
+    "ext": {
+      "1": "monitor",
+      "2": "alien",
+      "3": "player",
+      "5": "res://font/GROBOLD.ttf"
+    },
+    "sub": [
+      {
+        "id": 2,
+        "type": "DynamicFont",
+        "font": "@ext#5",
+        "size": 25
+      },
+      {
+        "id": 3,
+        "type": "Shader",
+        "code": "shader_type canvas_item;\nvoid fragment() {\n\nvec2 uv = SCREEN_UV;\n\nvec3 color;\n\nvec4 ori_color = texture(SCREEN_TEXTURE, uv);\n\n// color separation\n\ncolor.r = texture(SCREEN_TEXTURE, vec2(uv.x + 0.01, uv.y)).x;\n\ncolor.g = texture(SCREEN_TEXTURE, vec2(uv.x + 0.000, uv.y)).y;\n\ncolor.b = texture(SCREEN_TEXTURE, vec2(uv.x - 0.01, uv.y)).z;\n\n// increase contrast\n\ncolor = clamp(color * 0.5 + 0.5 * color * color * 1.2, 0.0, 1.0);\n\n// vignetting\n\ncolor *= 0.5 + 0.5 * 16.0 * uv.x * uv.y * (1.0 - uv.x) * (1.0 - uv.y);\n\n// tinting\n\ncolor *= vec3(0.8, 1.0, 0.7);\n\n// tv lines\n\ncolor *= 0.8 + 0.2 * sin(10.0 * TIME + uv.y * 1000.0);\n\n// flickering\n\ncolor *= 0.97 + 0.03 * sin(110.0 * TIME);\n\nCOLOR = vec4(color, ori_color.a);\n}\n"
+      },
+      {
+        "id": 4,
+        "type": "ShaderMaterial",
+        "shader": "@sub#3"
+      }
+    ],
+    "nodes": [
+      {
+        "type": "Control",
+        "name": "demo",
+        "anchor_bottom": 1,
+        "anchor_right": 1
+      },
+      {
+        "type": "ColorRect",
+        "name": "bg",
+        "parent": ".",
+        "anchor_bottom": 1,
+        "anchor_right": 1,
+        "color": {
+          "r": 0,
+          "g": 0,
+          "b": 0,
+          "a": 1
+        }
+      },
+      {
+        "type": "TextureRect",
+        "name": "monitor",
+        "parent": ".",
+        "anchor_bottom": 0.5,
+        "anchor_left": 0.5,
+        "anchor_top": 0.5,
+        "anchor_right": 0.5,
+        "margin_bottom": 3,
+        "margin_left": -260,
+        "margin_top": -257,
+        "margin_right": -1,
+        "rect_scale": {
+          "x": 2,
+          "y": 2
+        },
+        "texture": "@ext#1"
+      },
+      {
+        "type": "Sprite",
+        "name": "player",
+        "parent": "monitor",
+        "position": {
+          "x": 128.651,
+          "y": 181.304
+        },
+        "texture": "@ext#3"
+      },
+      {
+        "type": "Sprite",
+        "name": "alien",
+        "parent": "monitor",
+        "position": {
+          "x": 50.6791,
+          "y": 57.8259
+        },
+        "texture": "@ext#2"
+      },
+      {
+        "type": "Sprite",
+        "name": "alien2",
+        "parent": "monitor",
+        "position": {
+          "x": 89.1798,
+          "y": 57.8259
+        },
+        "texture": "@ext#2"
+      },
+      {
+        "type": "Sprite",
+        "name": "alien3",
+        "parent": "monitor",
+        "position": {
+          "x": 127.68,
+          "y": 57.8259
+        },
+        "texture": "@ext#2"
+      },
+      {
+        "type": "Sprite",
+        "name": "alien4",
+        "parent": "monitor",
+        "position": {
+          "x": 166.181,
+          "y": 57.8259
+        },
+        "texture": "@ext#2"
+      },
+      {
+        "type": "Sprite",
+        "name": "alien5",
+        "parent": "monitor",
+        "position": {
+          "x": 203.655,
+          "y": 57.8259
+        },
+        "texture": "@ext#2"
+      },
+      {
+        "type": "Sprite",
+        "name": "alien10",
+        "parent": "monitor",
+        "position": {
+          "x": 51.1925,
+          "y": 85.5464
+        },
+        "texture": "@ext#2"
+      },
+      {
+        "type": "Sprite",
+        "name": "alien9",
+        "parent": "monitor",
+        "position": {
+          "x": 89.6931,
+          "y": 85.5464
+        },
+        "texture": "@ext#2"
+      },
+      {
+        "type": "Sprite",
+        "name": "alien8",
+        "parent": "monitor",
+        "position": {
+          "x": 128.194,
+          "y": 85.5464
+        },
+        "texture": "@ext#2"
+      },
+      {
+        "type": "Sprite",
+        "name": "alien7",
+        "parent": "monitor",
+        "position": {
+          "x": 166.694,
+          "y": 85.5464
+        },
+        "texture": "@ext#2"
+      },
+      {
+        "type": "Sprite",
+        "name": "alien6",
+        "parent": "monitor",
+        "position": {
+          "x": 204.168,
+          "y": 85.5464
+        },
+        "texture": "@ext#2"
+      },
+      {
+        "type": "Label",
+        "name": "label",
+        "parent": "monitor",
+        "self_modulate": {
+          "r": 0.333333,
+          "g": 0.831373,
+          "b": 0,
+          "a": 1
+        },
+        "anchor_bottom": 0.5,
+        "anchor_left": 0.5,
+        "anchor_top": 0.5,
+        "anchor_right": 0.5,
+        "margin_bottom": 26.5,
+        "margin_left": -82,
+        "margin_top": -26.5,
+        "margin_right": 82,
+        "align": 1,
+        "autowrap": true,
+        "text": "GAME OVER",
+        "valign": 1,
+        "font": "@sub#2"
+      },
+      {
+        "type": "ColorRect",
+        "name": "cover",
+        "parent": "monitor",
+        "material": "@sub#4",
+        "margin_bottom": 201,
+        "margin_left": 18.5,
+        "margin_top": 28,
+        "margin_right": 239.5
+      }
+    ]
+  },
+  "res://mesh/tree_1.tscn": {
+    "type": "PackedScene",
+    "ext": {
+      "1": "res://raw_mesh/tree_1.escn",
+      "2": "res://mesh/m.tres"
+    },
+    "sub": [],
+    "nodes": [
+      {
+        "name": "tree_1",
+        "instance": "@ext#1"
+      },
+      {
+        "index": 0,
+        "name": "tree_1",
+        "parent": ".",
+        "material": [
+          "@ext#2"
+        ]
+      }
+    ]
+  },
+  "res://mesh/house.tscn": {
+    "type": "PackedScene",
+    "ext": {
+      "1": "res://raw_mesh/house.escn",
+      "2": "res://mesh/m.tres"
+    },
+    "sub": [],
+    "nodes": [
+      {
+        "name": "house",
+        "instance": "@ext#1"
+      },
+      {
+        "index": 0,
+        "name": "Cube",
+        "parent": ".",
+        "material": [
+          "@ext#2"
+        ]
+      }
+    ]
+  },
+  "res://mesh/tree_2.tscn": {
+    "type": "PackedScene",
+    "ext": {
+      "1": "res://raw_mesh/tree_2.escn",
+      "2": "res://mesh/m.tres"
+    },
+    "sub": [],
+    "nodes": [
+      {
+        "name": "tree_2",
+        "instance": "@ext#1"
+      },
+      {
+        "index": 0,
+        "name": "tree_2",
+        "parent": ".",
+        "material": [
+          "@ext#2"
+        ]
+      }
+    ]
+  },
+  "res://mesh/road.tscn": {
+    "type": "PackedScene",
+    "ext": {
+      "1": "res://raw_mesh/road.escn",
+      "2": "res://mesh/m.tres"
+    },
+    "sub": [],
+    "nodes": [
+      {
+        "name": "road",
+        "instance": "@ext#1"
+      },
+      {
+        "index": 0,
+        "name": "road",
+        "parent": ".",
+        "material": [
+          "@ext#2"
+        ]
+      }
+    ]
+  },
+  "res://mesh/ground.tscn": {
+    "type": "PackedScene",
+    "ext": {
+      "1": "res://raw_mesh/ground.escn",
+      "2": "res://mesh/m.tres"
+    },
+    "sub": [],
+    "nodes": [
+      {
+        "name": "ground",
+        "instance": "@ext#1"
+      },
+      {
+        "index": 0,
+        "name": "Plane",
+        "parent": ".",
+        "material": [
+          "@ext#2"
+        ]
+      }
+    ]
+  },
+  "res://mesh/robot.tscn": {
+    "type": "PackedScene",
+    "ext": {
+      "1": "res://mesh/m.tres",
+      "2": "res://raw_mesh/robot.escn"
+    },
+    "sub": [
+      {
+        "id": 1,
+        "type": "Animation",
+        "name": "wave",
+        "length": 2.45833,
+        "loop": true,
+        "tracks": [
+          {
+            "type": "transform",
+            "path": ".:Spine",
+            "interp": 1,
+            "loop_wrap": true,
+            "enabled": true,
+            "keys": {
+              "times": [
+                0.00176099,
+                2.41842
+              ],
+              "transitions": [
+                1,
+                1
+              ],
+              "values": [
+                [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  1,
+                  1,
+                  1
+                ]
+              ]
+            },
+            "value_type": "PackedTransform"
+          },
+          {
+            "type": "transform",
+            "path": ".:Neck",
+            "interp": 1,
+            "loop_wrap": true,
+            "enabled": true,
+            "keys": {
+              "times": [
+                0.00176099,
+                2.41842
+              ],
+              "transitions": [
+                1,
+                1
+              ],
+              "values": [
+                [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  1,
+                  1,
+                  1
+                ]
+              ]
+            },
+            "value_type": "PackedTransform"
+          },
+          {
+            "type": "transform",
+            "path": ".:Shoulder.L",
+            "interp": 1,
+            "loop_wrap": true,
+            "enabled": true,
+            "keys": {
+              "times": [
+                0.00176099,
+                2.41842
+              ],
+              "transitions": [
+                1,
+                1
+              ],
+              "values": [
+                [
+                  0,
+                  2.84217e-14,
+                  0,
+                  0,
+                  -7.45058e-9,
+                  4.88498e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  0,
+                  2.84217e-14,
+                  0,
+                  0,
+                  -7.45058e-9,
+                  4.88498e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ]
+              ]
+            },
+            "value_type": "PackedTransform"
+          },
+          {
+            "type": "transform",
+            "path": ".:Arm",
+            "interp": 1,
+            "loop_wrap": true,
+            "enabled": true,
+            "keys": {
+              "times": [
+                0.00176099,
+                0.0434276,
+                0.0850943,
+                0.126761,
+                0.168427,
+                0.210094,
+                0.251761,
+                0.293427,
+                0.335094,
+                0.376761,
+                0.418427,
+                0.460094,
+                0.501761,
+                0.543427,
+                0.585094,
+                0.626761,
+                0.668427,
+                0.710094,
+                0.751761,
+                0.793427,
+                0.835094,
+                0.876761,
+                0.918427,
+                0.960094,
+                1.00176,
+                1.04342,
+                1.08509,
+                1.12676,
+                1.16842,
+                1.21009,
+                1.25176,
+                1.29342,
+                1.33509,
+                1.37676,
+                1.41842,
+                1.46009,
+                1.50176,
+                1.54342,
+                1.58509,
+                1.62676,
+                1.66842,
+                1.71009,
+                1.75176,
+                1.79342,
+                1.83509,
+                1.87676,
+                1.91842,
+                1.96009,
+                2.00176,
+                2.04342,
+                2.08509,
+                2.12676,
+                2.16842,
+                2.21009,
+                2.25176,
+                2.29342,
+                2.33509,
+                2.37676,
+                2.41842
+              ],
+              "transitions": [
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1
+              ],
+              "values": [
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.157767,
+                  -0.110904,
+                  2.84742e-9,
+                  0.981229,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.153141,
+                  -0.105261,
+                  2.84349e-9,
+                  0.982582,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.14583,
+                  -0.0965759,
+                  2.36476e-9,
+                  0.984585,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.13621,
+                  -0.0855989,
+                  1.88723e-9,
+                  0.986975,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.12469,
+                  -0.0731496,
+                  9.41209e-10,
+                  0.989496,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.111712,
+                  -0.0600635,
+                  2.34726e-10,
+                  0.991924,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.0978849,
+                  -0.0472025,
+                  4.68436e-10,
+                  0.994078,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.0836606,
+                  -0.0352294,
+                  -3.50694e-10,
+                  0.995871,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.0696732,
+                  -0.024737,
+                  -8.17144e-10,
+                  0.997263,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.0566664,
+                  -0.0161395,
+                  -1.19533e-9,
+                  0.998263,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.0454432,
+                  -0.00959641,
+                  -1.58787e-9,
+                  0.998921,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.0366916,
+                  -0.00494887,
+                  -1.90033e-9,
+                  0.999314,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.0312684,
+                  -0.00177244,
+                  -2.07649e-9,
+                  0.999509,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.0295795,
+                  0.000669845,
+                  -2.09457e-9,
+                  0.999562,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.0319294,
+                  0.00326815,
+                  -1.88544e-9,
+                  0.999485,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.0380973,
+                  0.00692175,
+                  -1.49997e-9,
+                  0.99925,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.0477514,
+                  0.0124095,
+                  -1.04902e-9,
+                  0.998782,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.0603117,
+                  0.0202753,
+                  -3.49955e-10,
+                  0.997974,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.075061,
+                  0.0307612,
+                  3.50401e-10,
+                  0.996704,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.0913763,
+                  0.0438647,
+                  1.17018e-9,
+                  0.99485,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.108444,
+                  0.0592212,
+                  2.11166e-9,
+                  0.992337,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.125817,
+                  0.0763992,
+                  2.82474e-9,
+                  0.989107,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.142959,
+                  0.0947338,
+                  3.30865e-9,
+                  0.985184,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.159343,
+                  0.113397,
+                  3.79865e-9,
+                  0.980689,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.174366,
+                  0.131373,
+                  4.77172e-9,
+                  0.975878,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.187413,
+                  0.147542,
+                  5.75401e-9,
+                  0.971137,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.197849,
+                  0.160722,
+                  7.70511e-9,
+                  0.966967,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.204661,
+                  0.169452,
+                  5.79629e-9,
+                  0.964054,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.207075,
+                  0.172563,
+                  5.80272e-9,
+                  0.962986,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.204817,
+                  0.169651,
+                  7.72893e-9,
+                  0.963986,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.198424,
+                  0.161456,
+                  7.70702e-9,
+                  0.966726,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.188582,
+                  0.149011,
+                  3.83779e-9,
+                  0.970687,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.176235,
+                  0.13366,
+                  5.72986e-9,
+                  0.975231,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.161956,
+                  0.116469,
+                  4.75213e-9,
+                  0.979901,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.146319,
+                  0.0984727,
+                  3.78462e-9,
+                  0.984324,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.129841,
+                  0.0805921,
+                  2.82718e-9,
+                  0.988254,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.11308,
+                  0.0636543,
+                  2.11334e-9,
+                  0.991545,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.0964695,
+                  0.0482669,
+                  1.17099e-9,
+                  0.994165,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.0803412,
+                  0.0348393,
+                  5.84321e-10,
+                  0.996158,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.0655055,
+                  0.0238129,
+                  -1.75049e-10,
+                  0.997568,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.0524651,
+                  0.0152499,
+                  -7.86979e-10,
+                  0.998506,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.041882,
+                  0.00903618,
+                  -1.36914e-9,
+                  0.999082,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.0343463,
+                  0.00479026,
+                  -1.73272e-9,
+                  0.999399,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.0302644,
+                  0.00189153,
+                  -2.01273e-9,
+                  0.99954,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.0298777,
+                  -0.000432295,
+                  -2.11825e-9,
+                  0.999553,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.0331917,
+                  -0.00301224,
+                  -2.00564e-9,
+                  0.999444,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.039896,
+                  -0.00660943,
+                  -1.82048e-9,
+                  0.999182,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.0492999,
+                  -0.0117592,
+                  -1.45706e-9,
+                  0.998715,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.0608441,
+                  -0.018779,
+                  -1.04987e-9,
+                  0.997971,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.0738019,
+                  -0.0277003,
+                  -5.83894e-10,
+                  0.996888,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.0874592,
+                  -0.0382995,
+                  -2.33899e-10,
+                  0.995432,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.101166,
+                  -0.0501478,
+                  4.68658e-10,
+                  0.993605,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.114402,
+                  -0.0626923,
+                  1.17419e-9,
+                  0.991454,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.126724,
+                  -0.0752912,
+                  1.88322e-9,
+                  0.989076,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.137612,
+                  -0.0871658,
+                  1.4159e-9,
+                  0.986643,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.146671,
+                  -0.0975608,
+                  1.89224e-9,
+                  0.984362,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.153537,
+                  -0.10574,
+                  2.84382e-9,
+                  0.982469,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.157871,
+                  -0.111032,
+                  1.89834e-9,
+                  0.981198,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.23104e-14,
+                  -7.30222e-8,
+                  0.159373,
+                  -0.112889,
+                  1.89922e-9,
+                  0.980743,
+                  1,
+                  1,
+                  1
+                ]
+              ]
+            },
+            "value_type": "PackedTransform"
+          },
+          {
+            "type": "transform",
+            "path": ".:Arm.002",
+            "interp": 1,
+            "loop_wrap": true,
+            "enabled": true,
+            "keys": {
+              "times": [
+                0.00176099,
+                0.0434276,
+                0.0850943,
+                0.126761,
+                0.168427,
+                0.210094,
+                0.251761,
+                0.293427,
+                0.335094,
+                0.376761,
+                0.418427,
+                0.460094,
+                0.501761,
+                0.543427,
+                0.585094,
+                0.626761,
+                0.668427,
+                0.710094,
+                0.751761,
+                0.793427,
+                0.835094,
+                0.876761,
+                0.918427,
+                0.960094,
+                1.00176,
+                1.04342,
+                1.08509,
+                1.12676,
+                1.16842,
+                1.21009,
+                1.25176,
+                1.29342,
+                1.33509,
+                1.37676,
+                1.41842,
+                1.46009,
+                1.50176,
+                1.54342,
+                1.58509,
+                1.62676,
+                1.66842,
+                1.71009,
+                1.75176,
+                1.79342,
+                1.83509,
+                1.87676,
+                1.91842,
+                1.96009,
+                2.00176,
+                2.04342,
+                2.08509,
+                2.12676,
+                2.16842,
+                2.21009,
+                2.25176,
+                2.29342,
+                2.33509,
+                2.37676,
+                2.41842
+              ],
+              "transitions": [
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1
+              ],
+              "values": [
+                [
+                  1.86265e-8,
+                  1.86265e-8,
+                  -2.6077e-8,
+                  0.24727,
+                  -0.173821,
+                  5.86212e-9,
+                  0.953228,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  3.1665e-8,
+                  -2.98023e-8,
+                  2.6077e-8,
+                  0.250294,
+                  -0.172039,
+                  -1.3685e-8,
+                  0.952762,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -7.54371e-8,
+                  1.49012e-8,
+                  -5.58794e-8,
+                  0.255052,
+                  -0.168908,
+                  -1.95644e-9,
+                  0.95206,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -7.96281e-8,
+                  1.86265e-8,
+                  4.84288e-8,
+                  0.261264,
+                  -0.164187,
+                  -7.83281e-9,
+                  0.951201,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.28057e-8,
+                  1.11759e-8,
+                  -4.47035e-8,
+                  0.268623,
+                  -0.157588,
+                  0,
+                  0.950267,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  1.74157e-7,
+                  -1.86265e-8,
+                  -1.39698e-7,
+                  0.276786,
+                  -0.148817,
+                  -3.92409e-9,
+                  0.949338,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.04774e-8,
+                  -2.04891e-8,
+                  -4.47035e-8,
+                  0.285167,
+                  -0.137514,
+                  -1.17819e-8,
+                  0.948562,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  1.7666e-7,
+                  -2.79397e-9,
+                  -7.63685e-8,
+                  0.29354,
+                  -0.12361,
+                  -5.89494e-9,
+                  0.947921,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.34896e-7,
+                  -2.93367e-8,
+                  -4.09782e-8,
+                  0.301461,
+                  -0.107032,
+                  3.9319e-9,
+                  0.947452,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  1.24004e-7,
+                  -2.79397e-9,
+                  2.37487e-8,
+                  0.308411,
+                  -0.0878402,
+                  -4.91624e-9,
+                  0.947189,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  7.1308e-8,
+                  1.52504e-8,
+                  4.19095e-9,
+                  0.313865,
+                  -0.0662802,
+                  -4.91644e-9,
+                  0.947151,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  1.40708e-7,
+                  -1.18162e-8,
+                  -1.55764e-7,
+                  0.317345,
+                  -0.0428028,
+                  -9.83088e-10,
+                  0.947344,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.14147e-7,
+                  3.36149e-9,
+                  -3.32948e-8,
+                  0.31861,
+                  -0.0180604,
+                  -4.17649e-9,
+                  0.947714,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  1.1507e-7,
+                  9.24047e-10,
+                  -4.65661e-10,
+                  0.317367,
+                  0.00718697,
+                  -3.43743e-9,
+                  0.948275,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.17238e-7,
+                  2.91038e-11,
+                  9.03383e-8,
+                  0.313409,
+                  0.0320791,
+                  -2.94388e-9,
+                  0.949076,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  1.29608e-7,
+                  -9.0804e-9,
+                  4.65661e-9,
+                  0.30713,
+                  0.0558013,
+                  -6.86216e-9,
+                  0.95003,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  1.33201e-7,
+                  1.49012e-8,
+                  1.53668e-8,
+                  0.298756,
+                  0.0776401,
+                  -5.87483e-9,
+                  0.951166,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.12093e-7,
+                  -2.32831e-9,
+                  -2.98023e-8,
+                  0.288686,
+                  0.0970488,
+                  0,
+                  0.952493,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -2.64263e-8,
+                  -1.86265e-8,
+                  -8.75443e-8,
+                  0.277429,
+                  0.113695,
+                  0,
+                  0.953995,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  8.11415e-8,
+                  -3.72529e-9,
+                  -8.3819e-8,
+                  0.265283,
+                  0.127348,
+                  -1.94894e-9,
+                  0.955724,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.69384e-7,
+                  -3.35276e-8,
+                  -1.86265e-9,
+                  0.252784,
+                  0.138046,
+                  -3.89014e-9,
+                  0.957624,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  1.69966e-7,
+                  -2.6077e-8,
+                  -9.68575e-8,
+                  0.240437,
+                  0.146,
+                  -1.94102e-9,
+                  0.959622,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  1.24332e-7,
+                  -1.49012e-8,
+                  2.23517e-8,
+                  0.228364,
+                  0.151328,
+                  -5.81022e-9,
+                  0.961743,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -4.37722e-8,
+                  7.45058e-9,
+                  -7.45058e-8,
+                  0.216912,
+                  0.154366,
+                  -9.66194e-9,
+                  0.963909,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  1.2666e-7,
+                  -5.21541e-8,
+                  0,
+                  0.20654,
+                  0.155615,
+                  1.92824e-9,
+                  0.965984,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -7.26432e-8,
+                  -4.47035e-8,
+                  -2.98023e-8,
+                  0.197613,
+                  0.155571,
+                  -5.77351e-9,
+                  0.967857,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  5.30854e-8,
+                  -2.23517e-8,
+                  -3.72529e-8,
+                  0.190545,
+                  0.154789,
+                  -1.92144e-9,
+                  0.969398,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  5.68107e-8,
+                  -4.47035e-8,
+                  -8.19564e-8,
+                  0.185845,
+                  0.153872,
+                  7.6774e-9,
+                  0.970456,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  1.02445e-7,
+                  1.49012e-8,
+                  0,
+                  0.184181,
+                  0.153484,
+                  7.67441e-9,
+                  0.970835,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  1.86265e-9,
+                  1.49012e-8,
+                  -2.23517e-8,
+                  0.185738,
+                  0.153848,
+                  3.8386e-9,
+                  0.97048,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -2.14204e-8,
+                  -6.70552e-8,
+                  -6.70552e-8,
+                  0.190148,
+                  0.154722,
+                  -1.92127e-9,
+                  0.969487,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  1.68569e-7,
+                  -5.96046e-8,
+                  -3.72529e-8,
+                  0.196816,
+                  0.155518,
+                  1.05829e-8,
+                  0.968028,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  5.58794e-8,
+                  -2.98023e-8,
+                  -3.72529e-8,
+                  0.205258,
+                  0.155672,
+                  5.78313e-9,
+                  0.966248,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  6.42613e-8,
+                  -2.98023e-8,
+                  -3.35276e-8,
+                  0.215099,
+                  0.154686,
+                  3.86335e-9,
+                  0.964264,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  7.45058e-9,
+                  -7.82311e-8,
+                  6.70552e-8,
+                  0.226002,
+                  0.1521,
+                  0,
+                  0.962179,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -2.14204e-8,
+                  -2.6077e-8,
+                  2.6077e-8,
+                  0.237614,
+                  0.147486,
+                  -5.82017e-9,
+                  0.960098,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  3.06172e-8,
+                  1.86265e-9,
+                  -6.33299e-8,
+                  0.249463,
+                  0.140426,
+                  5.83201e-9,
+                  0.958149,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -6.29807e-8,
+                  0,
+                  -1.71363e-7,
+                  0.261543,
+                  0.130859,
+                  1.9478e-9,
+                  0.95628,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -7.96281e-8,
+                  2.51457e-8,
+                  -1.95578e-8,
+                  0.273491,
+                  0.118597,
+                  0,
+                  0.954535,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -2.30793e-8,
+                  1.76951e-8,
+                  -7.07805e-8,
+                  0.284667,
+                  0.103484,
+                  1.95446e-9,
+                  0.953024,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  3.61688e-8,
+                  -2.56114e-9,
+                  -2.84053e-8,
+                  0.294904,
+                  0.0857188,
+                  -1.95723e-9,
+                  0.951674,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  1.66769e-7,
+                  1.35042e-8,
+                  2.7474e-8,
+                  0.303739,
+                  0.0655327,
+                  -9.79825e-10,
+                  0.950499,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  4.38085e-8,
+                  3.14321e-9,
+                  -1.05472e-7,
+                  0.310758,
+                  0.0433413,
+                  -3.92342e-9,
+                  0.9495,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -5.93163e-8,
+                  -4.75848e-9,
+                  -2.14204e-8,
+                  0.315691,
+                  0.0197308,
+                  -3.19061e-9,
+                  0.948657,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  4.94305e-9,
+                  5.89353e-9,
+                  -4.88944e-8,
+                  0.31828,
+                  -0.00460513,
+                  -3.56128e-9,
+                  0.947986,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.1627e-7,
+                  -7.5961e-9,
+                  -1.14786e-7,
+                  0.318345,
+                  -0.0288907,
+                  -5.4059e-9,
+                  0.947535,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.16946e-7,
+                  4.77303e-9,
+                  -1.79047e-7,
+                  0.316225,
+                  -0.0523878,
+                  -4.916e-9,
+                  0.947237,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  1.32153e-7,
+                  1.97906e-9,
+                  -4.42378e-8,
+                  0.31207,
+                  -0.0744364,
+                  -5.89981e-9,
+                  0.947138,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  3.20579e-8,
+                  -1.0943e-8,
+                  -1.73226e-7,
+                  0.306235,
+                  -0.0945169,
+                  -1.0815e-8,
+                  0.947252,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  6.81612e-8,
+                  -8.3819e-9,
+                  -1.84402e-7,
+                  0.299163,
+                  -0.112286,
+                  1.9657e-9,
+                  0.947572,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  1.93249e-8,
+                  1.67638e-8,
+                  -1.37836e-7,
+                  0.291331,
+                  -0.127578,
+                  -5.89397e-9,
+                  0.948077,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.41445e-7,
+                  3.91155e-8,
+                  4.09782e-8,
+                  0.2832,
+                  -0.140381,
+                  1.9633e-9,
+                  0.948731,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -5.2969e-8,
+                  1.11759e-8,
+                  3.53903e-8,
+                  0.275107,
+                  -0.150758,
+                  -1.96167e-9,
+                  0.94952,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  9.54606e-9,
+                  -3.53903e-8,
+                  -1.08033e-7,
+                  0.267331,
+                  -0.158831,
+                  -9.79901e-9,
+                  0.950425,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -7.24103e-8,
+                  -1.11759e-8,
+                  8.9407e-8,
+                  0.260362,
+                  -0.164919,
+                  -5.87386e-9,
+                  0.951322,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -4.70318e-8,
+                  -1.11759e-8,
+                  5.96046e-8,
+                  0.254505,
+                  -0.169288,
+                  9.78137e-9,
+                  0.952139,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  8.28877e-8,
+                  -1.86265e-8,
+                  -5.58794e-8,
+                  0.250036,
+                  -0.172197,
+                  -3.90983e-9,
+                  0.952801,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  9.12696e-8,
+                  1.49012e-8,
+                  5.58794e-8,
+                  0.247202,
+                  -0.173859,
+                  3.90804e-9,
+                  0.953239,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.72295e-7,
+                  -1.11759e-8,
+                  1.86265e-8,
+                  0.246218,
+                  -0.174404,
+                  5.8611e-9,
+                  0.953394,
+                  1,
+                  1,
+                  1
+                ]
+              ]
+            },
+            "value_type": "PackedTransform"
+          },
+          {
+            "type": "transform",
+            "path": ".:Arm.001",
+            "interp": 1,
+            "loop_wrap": true,
+            "enabled": true,
+            "keys": {
+              "times": [
+                0.00176099,
+                0.0434276,
+                0.0850943,
+                0.126761,
+                0.168427,
+                0.210094,
+                0.251761,
+                0.293427,
+                0.335094,
+                0.376761,
+                0.418427,
+                0.460094,
+                0.501761,
+                0.543427,
+                0.585094,
+                0.626761,
+                0.668427,
+                0.710094,
+                0.751761,
+                0.793427,
+                0.835094,
+                0.876761,
+                0.918427,
+                0.960094,
+                1.00176,
+                1.04342,
+                1.08509,
+                1.12676,
+                1.16842,
+                1.21009,
+                1.25176,
+                1.29342,
+                1.33509,
+                1.37676,
+                1.41842,
+                1.46009,
+                1.50176,
+                1.54342,
+                1.58509,
+                1.62676,
+                1.66842,
+                1.71009,
+                1.75176,
+                1.79342,
+                1.83509,
+                1.87676,
+                1.91842,
+                1.96009,
+                2.00176,
+                2.04342,
+                2.08509,
+                2.12676,
+                2.16842,
+                2.21009,
+                2.25176,
+                2.29342,
+                2.33509,
+                2.37676,
+                2.41842
+              ],
+              "transitions": [
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1
+              ],
+              "values": [
+                [
+                  -1.49012e-8,
+                  -5.96046e-8,
+                  -5.96046e-8,
+                  0.237014,
+                  -0.166612,
+                  3.30838e-8,
+                  0.957113,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  9.68575e-8,
+                  -2.98023e-8,
+                  2.98023e-8,
+                  0.243423,
+                  -0.167316,
+                  -1.94964e-9,
+                  0.95538,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  1.04308e-7,
+                  0,
+                  0,
+                  0.253548,
+                  -0.167912,
+                  1.95525e-9,
+                  0.952638,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.3411e-7,
+                  -1.49012e-7,
+                  0,
+                  0.266845,
+                  -0.167695,
+                  -1.1776e-8,
+                  0.949037,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.49012e-8,
+                  2.98023e-8,
+                  0,
+                  0.282714,
+                  -0.165854,
+                  -9.8578e-9,
+                  0.944757,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -7.45058e-9,
+                  4.47035e-8,
+                  0,
+                  0.300485,
+                  -0.161559,
+                  1.38707e-8,
+                  0.940004,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -2.01166e-7,
+                  -2.98023e-8,
+                  -5.96046e-8,
+                  0.319458,
+                  -0.154051,
+                  1.3945e-8,
+                  0.934995,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  9.68575e-8,
+                  2.08616e-7,
+                  0,
+                  0.338717,
+                  -0.142634,
+                  2.00281e-9,
+                  0.930014,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  5.58794e-8,
+                  -2.98023e-8,
+                  -5.96046e-8,
+                  0.357277,
+                  -0.126849,
+                  2.21421e-8,
+                  0.925345,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -4.09782e-8,
+                  -2.98023e-8,
+                  -8.9407e-8,
+                  0.374049,
+                  -0.106535,
+                  8.0873e-9,
+                  0.92127,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.71363e-7,
+                  -5.96046e-8,
+                  -1.3411e-7,
+                  0.387887,
+                  -0.0819116,
+                  2.02889e-9,
+                  0.91806,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.02445e-7,
+                  1.67638e-7,
+                  -5.96046e-8,
+                  0.397706,
+                  -0.0536417,
+                  -2.03358e-9,
+                  0.915943,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -2.96161e-7,
+                  1.15484e-7,
+                  2.6077e-8,
+                  0.40249,
+                  -0.0228151,
+                  -2.03537e-9,
+                  0.91514,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -8.3819e-8,
+                  -1.39698e-8,
+                  -1.49012e-8,
+                  0.401667,
+                  0.00909598,
+                  -2.16116e-9,
+                  0.915741,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  1.95578e-7,
+                  3.72529e-8,
+                  -1.71363e-7,
+                  0.395087,
+                  0.0404393,
+                  2.02957e-9,
+                  0.917753,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -2.12342e-7,
+                  -8.9407e-8,
+                  7.45058e-8,
+                  0.382993,
+                  0.0695844,
+                  -3.03321e-9,
+                  0.921127,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  1.2666e-7,
+                  4.47035e-8,
+                  -1.78814e-7,
+                  0.366092,
+                  0.0951394,
+                  2.01214e-9,
+                  0.925702,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  1.2666e-7,
+                  1.3411e-7,
+                  0,
+                  0.345355,
+                  0.1161,
+                  -1.40009e-8,
+                  0.931263,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.16067e-7,
+                  4.47035e-8,
+                  -2.38419e-7,
+                  0.321863,
+                  0.131905,
+                  -3.97342e-9,
+                  0.937553,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.42144e-7,
+                  -1.3411e-7,
+                  -2.98023e-8,
+                  0.296742,
+                  0.142449,
+                  -9.86285e-9,
+                  0.944274,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.11759e-7,
+                  -8.9407e-8,
+                  -2.98023e-8,
+                  0.271,
+                  0.147993,
+                  5.87502e-9,
+                  0.951135,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  1.19209e-7,
+                  -1.49012e-7,
+                  0,
+                  0.245386,
+                  0.149005,
+                  0,
+                  0.957906,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -4.47035e-8,
+                  1.19209e-7,
+                  5.96046e-8,
+                  0.220758,
+                  0.146288,
+                  0,
+                  0.964295,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.56462e-7,
+                  5.96046e-8,
+                  8.9407e-8,
+                  0.1978,
+                  0.140765,
+                  -7.68036e-9,
+                  0.970083,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  8.19564e-8,
+                  -5.96046e-8,
+                  2.98023e-8,
+                  0.177156,
+                  0.133475,
+                  1.91023e-9,
+                  0.97509,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -5.96046e-8,
+                  -1.49012e-7,
+                  -1.19209e-7,
+                  0.159575,
+                  0.125626,
+                  7.60916e-9,
+                  0.97916,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  0,
+                  5.96046e-8,
+                  -2.98023e-8,
+                  0.145842,
+                  0.118474,
+                  1.99124e-8,
+                  0.982188,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.49012e-8,
+                  2.98023e-8,
+                  1.78814e-7,
+                  0.137053,
+                  0.113474,
+                  1.13571e-8,
+                  0.984043,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.49012e-8,
+                  1.19209e-7,
+                  2.98023e-8,
+                  0.133964,
+                  0.111637,
+                  1.70247e-8,
+                  0.984678,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  1.63913e-7,
+                  0,
+                  3.8743e-7,
+                  0.136854,
+                  0.113357,
+                  1.79813e-8,
+                  0.984084,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -2.38419e-7,
+                  0,
+                  -2.98023e-8,
+                  0.145096,
+                  0.118063,
+                  1.89611e-9,
+                  0.982349,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.19209e-7,
+                  8.9407e-8,
+                  -2.68221e-7,
+                  0.158018,
+                  0.12486,
+                  1.04588e-8,
+                  0.97951,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -3.72529e-8,
+                  0,
+                  5.96046e-8,
+                  0.174617,
+                  0.132433,
+                  2.09996e-8,
+                  0.97569,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  7.45058e-8,
+                  8.9407e-8,
+                  2.98023e-8,
+                  0.194179,
+                  0.139641,
+                  1.91832e-8,
+                  0.970976,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.23517e-8,
+                  2.98023e-8,
+                  1.49012e-7,
+                  0.216015,
+                  0.145378,
+                  1.92919e-9,
+                  0.965507,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -6.70552e-8,
+                  -1.49012e-7,
+                  -2.08616e-7,
+                  0.239517,
+                  0.148668,
+                  1.94138e-9,
+                  0.959442,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -5.96046e-8,
+                  2.98023e-8,
+                  1.19209e-7,
+                  0.26412,
+                  0.148677,
+                  9.77293e-9,
+                  0.952962,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -5.96046e-8,
+                  1.04308e-7,
+                  -1.19209e-7,
+                  0.289037,
+                  0.144615,
+                  5.90484e-9,
+                  0.946332,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.49012e-7,
+                  -1.04308e-7,
+                  2.98023e-8,
+                  0.313611,
+                  0.135995,
+                  -1.98204e-9,
+                  0.939763,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -6.70552e-8,
+                  -1.49012e-8,
+                  1.78814e-7,
+                  0.337003,
+                  0.122509,
+                  3.99067e-9,
+                  0.933499,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.47149e-7,
+                  -5.21541e-8,
+                  1.49012e-7,
+                  0.358198,
+                  0.104116,
+                  -1.60604e-8,
+                  0.927822,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  5.21541e-8,
+                  -2.23517e-8,
+                  -2.68221e-7,
+                  0.376207,
+                  0.0811679,
+                  1.10995e-8,
+                  0.922974,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  4.93601e-8,
+                  -6.33299e-8,
+                  1.19209e-7,
+                  0.390094,
+                  0.0544062,
+                  3.03968e-9,
+                  0.919166,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -4.19095e-9,
+                  -4.84288e-8,
+                  2.08616e-7,
+                  0.399095,
+                  0.0249435,
+                  -5.08047e-9,
+                  0.91657,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.29337e-7,
+                  8.98726e-8,
+                  -1.04308e-7,
+                  0.40277,
+                  -0.00582762,
+                  -2.03505e-9,
+                  0.915282,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -3.07336e-8,
+                  8.19564e-8,
+                  8.9407e-8,
+                  0.401082,
+                  -0.0363993,
+                  -1.01748e-9,
+                  0.915319,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -9.68575e-8,
+                  1.2666e-7,
+                  1.3411e-7,
+                  0.394313,
+                  -0.0653244,
+                  7.11204e-9,
+                  0.916651,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -3.35276e-8,
+                  1.63913e-7,
+                  5.96046e-8,
+                  0.383226,
+                  -0.0914087,
+                  -1.21593e-8,
+                  0.91912,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -2.98023e-8,
+                  -2.98023e-8,
+                  0,
+                  0.368727,
+                  -0.113805,
+                  -8.07612e-9,
+                  0.922545,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -2.42144e-7,
+                  -4.47035e-8,
+                  5.96046e-8,
+                  0.351845,
+                  -0.132059,
+                  2.00999e-9,
+                  0.926696,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.00583e-7,
+                  -2.98023e-8,
+                  5.96046e-8,
+                  0.333608,
+                  -0.146091,
+                  1.8e-8,
+                  0.931323,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  5.21541e-8,
+                  0,
+                  1.78814e-7,
+                  0.314971,
+                  -0.15613,
+                  -5.96892e-9,
+                  0.936171,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  7.45058e-8,
+                  1.19209e-7,
+                  -1.49012e-7,
+                  0.296814,
+                  -0.162654,
+                  0,
+                  0.940981,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  7.45058e-8,
+                  0,
+                  -1.19209e-7,
+                  0.279918,
+                  -0.166309,
+                  -1.37899e-8,
+                  0.945509,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  7.45058e-9,
+                  -1.19209e-7,
+                  -2.98023e-8,
+                  0.26491,
+                  -0.167799,
+                  1.37311e-8,
+                  0.949561,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  7.45058e-8,
+                  0,
+                  2.98023e-8,
+                  0.252383,
+                  -0.167876,
+                  1.36822e-8,
+                  0.952954,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  4.47035e-8,
+                  2.98023e-8,
+                  -1.49012e-7,
+                  0.242875,
+                  -0.167266,
+                  -1.55947e-8,
+                  0.955528,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.19209e-7,
+                  -5.96046e-8,
+                  2.98023e-8,
+                  0.23687,
+                  -0.166593,
+                  -9.73015e-9,
+                  0.957152,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  1.11759e-7,
+                  2.98023e-8,
+                  5.96046e-8,
+                  0.234789,
+                  -0.166309,
+                  9.72444e-9,
+                  0.957714,
+                  1,
+                  1,
+                  1
+                ]
+              ]
+            },
+            "value_type": "PackedTransform"
+          },
+          {
+            "type": "transform",
+            "path": ".:Hand.L",
+            "interp": 1,
+            "loop_wrap": true,
+            "enabled": true,
+            "keys": {
+              "times": [
+                0.00176099,
+                0.0434276,
+                0.0850943,
+                0.126761,
+                0.168427,
+                0.210094,
+                0.251761,
+                0.293427,
+                0.335094,
+                0.376761,
+                0.418427,
+                0.460094,
+                0.501761,
+                0.543427,
+                0.585094,
+                0.626761,
+                0.668427,
+                0.710094,
+                0.751761,
+                0.793427,
+                0.835094,
+                0.876761,
+                0.918427,
+                0.960094,
+                1.00176,
+                1.04342,
+                1.08509,
+                1.12676,
+                1.16842,
+                1.21009,
+                1.25176,
+                1.29342,
+                1.33509,
+                1.37676,
+                1.41842,
+                1.46009,
+                1.50176,
+                1.54342,
+                1.58509,
+                1.62676,
+                1.66842,
+                1.71009,
+                1.75176,
+                1.79342,
+                1.83509,
+                1.87676,
+                1.91842,
+                1.96009,
+                2.00176,
+                2.04342,
+                2.08509,
+                2.12676,
+                2.16842,
+                2.21009,
+                2.25176,
+                2.29342,
+                2.33509,
+                2.37676,
+                2.41842
+              ],
+              "transitions": [
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1
+              ],
+              "values": [
+                [
+                  -5.96046e-8,
+                  1.49012e-7,
+                  3.35276e-8,
+                  0.142288,
+                  -0.100023,
+                  0,
+                  0.984759,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  8.9407e-8,
+                  -1.78814e-7,
+                  -1.30385e-7,
+                  0.147091,
+                  -0.101102,
+                  1.04117e-8,
+                  0.983942,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -2.98023e-8,
+                  -1.19209e-7,
+                  1.3411e-7,
+                  0.154697,
+                  -0.102448,
+                  -2.36945e-8,
+                  0.982636,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.19209e-7,
+                  2.98023e-8,
+                  -6.70552e-8,
+                  0.16472,
+                  -0.103516,
+                  -1.51914e-8,
+                  0.980893,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  5.96046e-8,
+                  -1.19209e-7,
+                  -1.63913e-7,
+                  0.176729,
+                  -0.103678,
+                  2.28362e-8,
+                  0.978784,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.49012e-7,
+                  -2.08616e-7,
+                  -3.72529e-9,
+                  0.190237,
+                  -0.102283,
+                  -1.90767e-9,
+                  0.976396,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  1.19209e-7,
+                  -4.47035e-8,
+                  6.33299e-8,
+                  0.20484,
+                  -0.098779,
+                  -1.2433e-8,
+                  0.973798,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.98023e-8,
+                  -2.98023e-8,
+                  -1.11759e-8,
+                  0.219748,
+                  -0.0925359,
+                  -2.87694e-9,
+                  0.971158,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  5.96046e-8,
+                  5.21541e-8,
+                  8.10251e-8,
+                  0.234194,
+                  -0.0831489,
+                  -2.11527e-8,
+                  0.968628,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  0,
+                  1.49012e-7,
+                  1.0489e-7,
+                  0.24734,
+                  -0.0704461,
+                  -5.78243e-9,
+                  0.966365,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -8.9407e-8,
+                  7.82311e-8,
+                  1.86265e-9,
+                  0.25829,
+                  -0.0545442,
+                  -5.79345e-9,
+                  0.964526,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  3.72529e-8,
+                  1.86265e-8,
+                  -1.04308e-7,
+                  0.266186,
+                  -0.0359025,
+                  -4.83426e-9,
+                  0.963253,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -2.64496e-7,
+                  3.91155e-8,
+                  -5.58794e-8,
+                  0.270144,
+                  -0.0153131,
+                  3.86963e-9,
+                  0.962698,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.67638e-7,
+                  -1.49012e-8,
+                  -7.82311e-8,
+                  0.269747,
+                  0.00610858,
+                  1.08809e-9,
+                  0.962912,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  4.47035e-8,
+                  1.11759e-7,
+                  -2.98023e-8,
+                  0.264965,
+                  0.0271206,
+                  -5.5558e-9,
+                  0.963877,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.78814e-7,
+                  -1.3411e-7,
+                  -4.47035e-8,
+                  0.255829,
+                  0.0464805,
+                  3.85799e-9,
+                  0.965604,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  7.45058e-8,
+                  -7.45058e-9,
+                  -5.96046e-8,
+                  0.242956,
+                  0.063139,
+                  -1.05834e-8,
+                  0.96798,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  1.49012e-7,
+                  1.04308e-7,
+                  1.04308e-7,
+                  0.227135,
+                  0.0763571,
+                  -9.59271e-9,
+                  0.970865,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  5.96046e-8,
+                  2.08616e-7,
+                  1.04308e-7,
+                  0.209212,
+                  0.0857385,
+                  -6.69257e-9,
+                  0.974104,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  1.19209e-7,
+                  1.49012e-7,
+                  2.98023e-8,
+                  0.190168,
+                  0.091289,
+                  -5.71657e-9,
+                  0.977498,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.19209e-7,
+                  2.38419e-7,
+                  -1.49012e-8,
+                  0.170756,
+                  0.0932501,
+                  9.49466e-10,
+                  0.980891,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  5.96046e-8,
+                  1.49012e-7,
+                  -3.12924e-7,
+                  0.151497,
+                  0.091993,
+                  2.74428e-8,
+                  0.984168,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  8.9407e-8,
+                  2.08616e-7,
+                  -1.49012e-7,
+                  0.133156,
+                  0.0882372,
+                  0,
+                  0.987159,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.49012e-7,
+                  -2.98023e-8,
+                  -8.9407e-8,
+                  0.116222,
+                  0.0827095,
+                  7.99803e-9,
+                  0.989774,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.98023e-8,
+                  -8.9407e-8,
+                  -1.49012e-7,
+                  0.1011,
+                  0.0761721,
+                  3.37995e-8,
+                  0.991956,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -2.23517e-7,
+                  0,
+                  -2.98023e-7,
+                  0.0883218,
+                  0.0695317,
+                  4.68631e-10,
+                  0.993662,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  1.04308e-7,
+                  1.49012e-7,
+                  3.27826e-7,
+                  0.0784247,
+                  0.0637081,
+                  3.97848e-9,
+                  0.994882,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.19209e-7,
+                  1.78814e-7,
+                  -1.19209e-7,
+                  0.0721809,
+                  0.059763,
+                  7.48351e-9,
+                  0.9956,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  0,
+                  -1.78814e-7,
+                  -2.98023e-7,
+                  0.0699954,
+                  0.0583295,
+                  -3.50705e-9,
+                  0.995841,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -5.96046e-8,
+                  1.19209e-7,
+                  0,
+                  0.07204,
+                  0.0596714,
+                  -1.09912e-8,
+                  0.995615,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  0,
+                  -1.78814e-7,
+                  1.78814e-7,
+                  0.0778932,
+                  0.063381,
+                  -1.09986e-8,
+                  0.994945,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.5332e-7,
+                  2.98023e-8,
+                  -2.98023e-7,
+                  0.0871951,
+                  0.0688987,
+                  4.19364e-8,
+                  0.993806,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -5.96046e-8,
+                  1.49012e-7,
+                  -1.49012e-7,
+                  0.0992485,
+                  0.0752721,
+                  2.25272e-8,
+                  0.992212,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  0,
+                  -5.96046e-8,
+                  -1.19209e-7,
+                  0.113562,
+                  0.0816665,
+                  -1.78708e-8,
+                  0.990169,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -2.98023e-8,
+                  2.08616e-7,
+                  -2.23517e-7,
+                  0.129648,
+                  0.0872534,
+                  -2.40441e-8,
+                  0.987714,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  5.96046e-8,
+                  -2.98023e-8,
+                  1.04308e-7,
+                  0.147094,
+                  0.0913011,
+                  3.68785e-8,
+                  0.9849,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -2.98023e-8,
+                  -5.96046e-8,
+                  1.78814e-7,
+                  0.165576,
+                  0.0932052,
+                  -2.84581e-9,
+                  0.981783,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  5.96046e-8,
+                  7.45058e-8,
+                  0.184349,
+                  0.092236,
+                  5.71058e-9,
+                  0.978523,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  1.78814e-7,
+                  -1.3411e-7,
+                  -2.98023e-8,
+                  0.202923,
+                  0.0879961,
+                  2.29194e-8,
+                  0.975233,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  0,
+                  2.98023e-8,
+                  -5.96046e-8,
+                  0.220763,
+                  0.0802529,
+                  1.91626e-9,
+                  0.97202,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.49012e-8,
+                  1.78814e-7,
+                  4.47035e-8,
+                  0.236934,
+                  0.0688689,
+                  1.05714e-8,
+                  0.969082,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.38419e-7,
+                  -1.56462e-7,
+                  -3.72529e-8,
+                  0.250666,
+                  0.0540819,
+                  1.44531e-8,
+                  0.966562,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -2.98023e-8,
+                  -4.47035e-8,
+                  -5.21541e-8,
+                  0.261211,
+                  0.036431,
+                  -2.89652e-9,
+                  0.964594,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -7.45058e-9,
+                  1.49012e-8,
+                  -9.68575e-8,
+                  0.267923,
+                  0.0167453,
+                  -1.93362e-9,
+                  0.963295,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.21072e-7,
+                  -1.65775e-7,
+                  -6.14673e-8,
+                  0.270481,
+                  -0.00391355,
+                  -6.6508e-10,
+                  0.962717,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  1.3411e-7,
+                  1.43424e-7,
+                  -5.96046e-8,
+                  0.268954,
+                  -0.0244083,
+                  -2.65997e-9,
+                  0.962844,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  4.47035e-8,
+                  3.35276e-8,
+                  -1.00583e-7,
+                  0.263433,
+                  -0.043642,
+                  -1.20802e-8,
+                  0.96369,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -2.98023e-8,
+                  1.22935e-7,
+                  -3.07336e-8,
+                  0.254587,
+                  -0.0607253,
+                  -6.27224e-9,
+                  0.965141,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  0,
+                  -2.23517e-8,
+                  4.81959e-8,
+                  0.243157,
+                  -0.0750482,
+                  -1.73345e-8,
+                  0.967079,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  1.78814e-7,
+                  2.08616e-7,
+                  6.51926e-8,
+                  0.229957,
+                  -0.0863103,
+                  -1.82543e-8,
+                  0.969366,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.98023e-8,
+                  0,
+                  -4.47035e-8,
+                  0.215786,
+                  -0.0944953,
+                  6.70804e-9,
+                  0.971858,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -8.9407e-8,
+                  2.23517e-7,
+                  -1.86265e-9,
+                  0.201377,
+                  -0.0998218,
+                  6.69044e-9,
+                  0.974414,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.08616e-7,
+                  -1.49012e-7,
+                  4.09782e-8,
+                  0.18744,
+                  -0.102717,
+                  1.04869e-8,
+                  0.976891,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  0,
+                  4.47035e-8,
+                  -2.98023e-8,
+                  0.174609,
+                  -0.103741,
+                  -1.04626e-8,
+                  0.979158,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -2.98023e-8,
+                  -1.78814e-7,
+                  7.45058e-8,
+                  0.163259,
+                  -0.103411,
+                  2.27812e-8,
+                  0.981149,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -8.9407e-8,
+                  -5.96046e-8,
+                  1.86265e-8,
+                  0.153821,
+                  -0.102316,
+                  -1.13716e-8,
+                  0.982787,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -5.96046e-8,
+                  1.19209e-7,
+                  5.96046e-8,
+                  0.14668,
+                  -0.101017,
+                  -9.46454e-9,
+                  0.984013,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -2.98023e-8,
+                  2.98023e-8,
+                  8.19564e-8,
+                  0.14218,
+                  -0.0999965,
+                  -9.45719e-9,
+                  0.984777,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  5.96046e-8,
+                  2.98023e-8,
+                  -1.04308e-7,
+                  0.140623,
+                  -0.0996076,
+                  -8.5092e-9,
+                  0.98504,
+                  1,
+                  1,
+                  1
+                ]
+              ]
+            },
+            "value_type": "PackedTransform"
+          },
+          {
+            "type": "transform",
+            "path": ".:HandIK.L",
+            "interp": 1,
+            "loop_wrap": true,
+            "enabled": true,
+            "keys": {
+              "times": [
+                0.00176099,
+                0.0434276,
+                0.0850943,
+                0.126761,
+                0.168427,
+                0.210094,
+                0.251761,
+                0.293427,
+                0.335094,
+                0.376761,
+                0.418427,
+                0.460094,
+                0.501761,
+                0.543427,
+                0.585094,
+                0.626761,
+                0.668427,
+                0.710094,
+                0.751761,
+                0.793427,
+                0.835094,
+                0.876761,
+                0.918427,
+                0.960094,
+                1.00176,
+                1.04342,
+                1.08509,
+                1.12676,
+                1.16842,
+                1.21009,
+                1.25176,
+                1.29342,
+                1.33509,
+                1.37676,
+                1.41842,
+                1.46009,
+                1.50176,
+                1.54342,
+                1.58509,
+                1.62676,
+                1.66842,
+                1.71009,
+                1.75176,
+                1.79342,
+                1.83509,
+                1.87676,
+                1.91842,
+                1.96009,
+                2.00176,
+                2.04342,
+                2.08509,
+                2.12676,
+                2.16842,
+                2.21009,
+                2.25176,
+                2.29342,
+                2.33509,
+                2.37676,
+                2.41842
+              ],
+              "transitions": [
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1
+              ],
+              "values": [
+                [
+                  0.988765,
+                  1.40657,
+                  2.12359,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  0.966804,
+                  1.40657,
+                  2.12092,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  0.931506,
+                  1.40657,
+                  2.11663,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  0.883938,
+                  1.40657,
+                  2.11085,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  0.825168,
+                  1.40657,
+                  2.1037,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  0.756261,
+                  1.40657,
+                  2.09532,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  0.678286,
+                  1.40657,
+                  2.08583,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  0.592308,
+                  1.40657,
+                  2.07538,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  0.499395,
+                  1.40657,
+                  2.06408,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  0.400614,
+                  1.40657,
+                  2.05206,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  0.297032,
+                  1.40657,
+                  2.03946,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  0.189715,
+                  1.40657,
+                  2.02641,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  0.0797315,
+                  1.40657,
+                  2.01304,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -0.0318527,
+                  1.40657,
+                  1.99946,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -0.14397,
+                  1.40657,
+                  1.98583,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -0.255555,
+                  1.40657,
+                  1.97226,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -0.365538,
+                  1.40657,
+                  1.95888,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -0.472855,
+                  1.40657,
+                  1.94583,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -0.576437,
+                  1.40657,
+                  1.93323,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -0.675218,
+                  1.40657,
+                  1.92122,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -0.768131,
+                  1.40657,
+                  1.90992,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -0.854108,
+                  1.40657,
+                  1.89946,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -0.932084,
+                  1.40657,
+                  1.88998,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.00099,
+                  1.40657,
+                  1.8816,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.05976,
+                  1.40657,
+                  1.87445,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.10733,
+                  1.40657,
+                  1.86866,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.14263,
+                  1.40657,
+                  1.86437,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.16459,
+                  1.40657,
+                  1.8617,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.17215,
+                  1.40657,
+                  1.86078,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.16508,
+                  1.40657,
+                  1.86164,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.14452,
+                  1.40657,
+                  1.86414,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.11143,
+                  1.40657,
+                  1.86817,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.06677,
+                  1.40657,
+                  1.8736,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -1.01152,
+                  1.40657,
+                  1.88032,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -0.946625,
+                  1.40657,
+                  1.88821,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -0.873057,
+                  1.40657,
+                  1.89716,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -0.79178,
+                  1.40657,
+                  1.90704,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -0.703756,
+                  1.40657,
+                  1.91775,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -0.60995,
+                  1.40657,
+                  1.92916,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -0.511325,
+                  1.40657,
+                  1.94115,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -0.408845,
+                  1.40657,
+                  1.95361,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -0.303473,
+                  1.40657,
+                  1.96643,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -0.196174,
+                  1.40657,
+                  1.97948,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -0.0879113,
+                  1.40657,
+                  1.99265,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  0.0203516,
+                  1.40657,
+                  2.00581,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  0.127651,
+                  1.40657,
+                  2.01886,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  0.233022,
+                  1.40657,
+                  2.03168,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  0.335502,
+                  1.40657,
+                  2.04414,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  0.434128,
+                  1.40657,
+                  2.05614,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  0.527934,
+                  1.40657,
+                  2.06755,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  0.615957,
+                  1.40657,
+                  2.07825,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  0.697235,
+                  1.40657,
+                  2.08814,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  0.770802,
+                  1.40657,
+                  2.09709,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  0.835696,
+                  1.40657,
+                  2.10498,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  0.890951,
+                  1.40657,
+                  2.1117,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  0.935606,
+                  1.40657,
+                  2.11713,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  0.968695,
+                  1.40657,
+                  2.12115,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  0.989255,
+                  1.40657,
+                  2.12365,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  0.996323,
+                  1.40657,
+                  2.12451,
+                  0,
+                  -3.55272e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ]
+              ]
+            },
+            "value_type": "PackedTransform"
+          },
+          {
+            "type": "transform",
+            "path": ".:Shoulder.R",
+            "interp": 1,
+            "loop_wrap": true,
+            "enabled": true,
+            "keys": {
+              "times": [
+                0.00176099,
+                2.41842
+              ],
+              "transitions": [
+                1,
+                1
+              ],
+              "values": [
+                [
+                  0,
+                  0,
+                  0,
+                  0,
+                  7.45058e-9,
+                  0,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  0,
+                  7.45058e-9,
+                  0,
+                  1,
+                  1,
+                  1,
+                  1
+                ]
+              ]
+            },
+            "value_type": "PackedTransform"
+          },
+          {
+            "type": "transform",
+            "path": ".:Arm.003",
+            "interp": 1,
+            "loop_wrap": true,
+            "enabled": true,
+            "keys": {
+              "times": [
+                0.00176099,
+                2.41842
+              ],
+              "transitions": [
+                1,
+                1
+              ],
+              "values": [
+                [
+                  2.66454e-15,
+                  1.71884e-7,
+                  -6.37848e-8,
+                  -0.126915,
+                  -0.0265917,
+                  4.81367e-9,
+                  0.991557,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.66454e-15,
+                  1.71884e-7,
+                  -6.37848e-8,
+                  -0.126915,
+                  -0.0265917,
+                  4.81367e-9,
+                  0.991557,
+                  1,
+                  1,
+                  1
+                ]
+              ]
+            },
+            "value_type": "PackedTransform"
+          },
+          {
+            "type": "transform",
+            "path": ".:Arm.004",
+            "interp": 1,
+            "loop_wrap": true,
+            "enabled": true,
+            "keys": {
+              "times": [
+                0.00176099,
+                2.41842
+              ],
+              "transitions": [
+                1,
+                1
+              ],
+              "values": [
+                [
+                  -5.58794e-9,
+                  1.60828e-7,
+                  1.88593e-8,
+                  -0.236318,
+                  -0.0495144,
+                  5.7583e-9,
+                  0.970413,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -5.58794e-9,
+                  1.60828e-7,
+                  1.88593e-8,
+                  -0.236318,
+                  -0.0495144,
+                  5.7583e-9,
+                  0.970413,
+                  1,
+                  1,
+                  1
+                ]
+              ]
+            },
+            "value_type": "PackedTransform"
+          },
+          {
+            "type": "transform",
+            "path": ".:Arm.005",
+            "interp": 1,
+            "loop_wrap": true,
+            "enabled": true,
+            "keys": {
+              "times": [
+                0.00176099,
+                2.41842
+              ],
+              "transitions": [
+                1,
+                1
+              ],
+              "values": [
+                [
+                  2.23517e-8,
+                  3.51574e-7,
+                  -1.18278e-7,
+                  -0.239241,
+                  -0.0501268,
+                  1.44069e-9,
+                  0.969665,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  2.23517e-8,
+                  3.51574e-7,
+                  -1.18278e-7,
+                  -0.239241,
+                  -0.0501268,
+                  1.44069e-9,
+                  0.969665,
+                  1,
+                  1,
+                  1
+                ]
+              ]
+            },
+            "value_type": "PackedTransform"
+          },
+          {
+            "type": "transform",
+            "path": ".:Hand.R",
+            "interp": 1,
+            "loop_wrap": true,
+            "enabled": true,
+            "keys": {
+              "times": [
+                0.00176099,
+                2.41842
+              ],
+              "transitions": [
+                1,
+                1
+              ],
+              "values": [
+                [
+                  -5.96046e-8,
+                  2.2538e-7,
+                  3.27826e-7,
+                  -0.1472,
+                  -0.030842,
+                  5.41672e-9,
+                  0.988626,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  -5.96046e-8,
+                  2.2538e-7,
+                  3.27826e-7,
+                  -0.1472,
+                  -0.030842,
+                  5.41672e-9,
+                  0.988626,
+                  1,
+                  1,
+                  1
+                ]
+              ]
+            },
+            "value_type": "PackedTransform"
+          },
+          {
+            "type": "transform",
+            "path": ".:HandIK.R",
+            "interp": 1,
+            "loop_wrap": true,
+            "enabled": true,
+            "keys": {
+              "times": [
+                0,
+                2.41842
+              ],
+              "transitions": [
+                1,
+                1
+              ],
+              "values": [
+                [
+                  0.322341,
+                  -1.53844,
+                  1.59705,
+                  0,
+                  -3.55271e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                [
+                  0.322341,
+                  -1.53844,
+                  1.59705,
+                  0,
+                  -3.55271e-15,
+                  -7.10543e-15,
+                  1,
+                  1,
+                  1,
+                  1
+                ]
+              ]
+            },
+            "value_type": "PackedTransform"
+          }
+        ]
+      }
+    ],
+    "nodes": [
+      {
+        "name": "robot",
+        "instance": "@ext#2"
+      },
+      {
+        "index": 0,
+        "name": "AnimationPlayer",
+        "parent": "RobotScene",
+        "autoplay": "wave",
+        "anims/wave": "@sub#1"
+      },
+      {
+        "index": 1,
+        "name": "Robot",
+        "parent": "RobotScene",
+        "material": [
+          "@ext#1"
+        ]
+      }
+    ]
+  },
+  "res://scene/demo_3d.tscn": {
+    "type": "PackedScene",
+    "ext": {
+      "1": "media/house_palette.png",
+      "2": "res://mesh/tree_1.tscn",
+      "3": "res://mesh/house.tscn",
+      "4": "res://mesh/tree_2.tscn",
+      "5": "res://mesh/road.tscn",
+      "6": "res://mesh/ground.tscn",
+      "7": "res://mesh/robot.tscn"
+    },
+    "sub": [
+      {
+        "id": 2,
+        "type": "QuadMesh",
+        "size": {
+          "x": 60,
+          "y": 20
+        }
+      },
+      {
+        "id": 3,
+        "type": "SpatialMaterial",
+        "albedo_color": {
+          "r": 0.211765,
+          "g": 0.494118,
+          "b": 0.592157,
+          "a": 1
+        }
+      },
+      {
+        "id": 4,
+        "type": "SpatialMaterial",
+        "albedo_texture": "@ext#1",
+        "emission_enabled": true,
+        "emission": {
+          "r": 0.968627,
+          "g": 0.568627,
+          "b": 0.215686,
+          "a": 1
+        },
+        "emission_energy": 1,
+        "emission_operator": 0
+      },
+      {
+        "id": 5,
+        "type": "CubeMesh",
+        "material": "@sub#4"
+      },
+      {
+        "id": 6,
+        "type": "Animation",
+        "length": 16,
+        "loop": true,
+        "tracks": [
+          {
+            "type": "value",
+            "path": "camera:transform",
+            "interp": 1,
+            "loop_wrap": true,
+            "enabled": true,
+            "keys": {
+              "times": [
+                0,
+                8
+              ],
+              "transitions": [
+                1,
+                1
+              ],
+              "update": 0,
+              "values": [
+                [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0.923866,
+                  0.382716,
+                  0,
+                  -0.382716,
+                  0.923866,
+                  1.27755,
+                  5.31346,
+                  6.29972
+                ],
+                [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0.999997,
+                  -0.00225109,
+                  0,
+                  0.00225109,
+                  0.999997,
+                  5.92062,
+                  0.685764,
+                  -2.77339
+                ]
+              ]
+            },
+            "value_type": "Transform"
+          }
+        ]
+      }
+    ],
+    "nodes": [
+      {
+        "type": "Spatial",
+        "name": "spatial"
+      },
+      {
+        "type": "MeshInstance",
+        "name": "sky",
+        "parent": ".",
+        "transform": [
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          1.21218,
+          6.6637,
+          -32.528
+        ],
+        "mesh": "@sub#2",
+        "material": [
+          "@sub#3"
+        ]
+      },
+      {
+        "name": "ground3",
+        "parent": ".",
+        "transform": [
+          22.272,
+          0,
+          0.00554291,
+          0,
+          1,
+          0,
+          -0.0247635,
+          0,
+          4.98523,
+          2.71073,
+          0,
+          -13.7421
+        ],
+        "instance": "@ext#6"
+      },
+      {
+        "name": "ground2",
+        "parent": ".",
+        "transform": [
+          14.1785,
+          0,
+          3.57744,
+          0,
+          1,
+          0,
+          -9.83232,
+          0,
+          5.15878,
+          8.19224,
+          0,
+          4.39321
+        ],
+        "instance": "@ext#6"
+      },
+      {
+        "name": "ground4",
+        "parent": ".",
+        "transform": [
+          10.7671,
+          0,
+          3.57744,
+          0,
+          1,
+          0,
+          -7.46659,
+          0,
+          5.15878,
+          -0.728258,
+          0,
+          -7.26641
+        ],
+        "instance": "@ext#6"
+      },
+      {
+        "type": "DirectionalLight",
+        "name": "sun",
+        "parent": ".",
+        "transform": [
+          0.830975,
+          -1.73355e-7,
+          -0.55631,
+          0.454793,
+          0.575904,
+          0.679336,
+          0.320381,
+          -0.817517,
+          0.478562,
+          -1.0075,
+          4.70435,
+          -3.10366
+        ],
+        "light_energy": 0.8,
+        "shadow_enabled": true,
+        "shadow_color": {
+          "r": 0.447059,
+          "g": 0.470588,
+          "b": 0.694118,
+          "a": 1
+        },
+        "directional_shadow_mode": 0,
+        "directional_shadow_depth_range": 1,
+        "directional_shadow_max_distance": 20
+      },
+      {
+        "type": "Camera",
+        "name": "camera",
+        "parent": ".",
+        "transform": [
+          1,
+          0,
+          0,
+          0,
+          0.923866,
+          0.382716,
+          0,
+          -0.382716,
+          0.923866,
+          1.27755,
+          5.31346,
+          6.29972
+        ],
+        "size": 2
+      },
+      {
+        "type": "MeshInstance",
+        "name": "cube",
+        "parent": ".",
+        "transform": [
+          0.353554,
+          -0.353553,
+          0,
+          0.25,
+          0.25,
+          -0.353554,
+          0.25,
+          0.25,
+          0.353554,
+          1.15197,
+          3.25732,
+          -4.68754
+        ],
+        "mesh": "@sub#5",
+        "material": []
+      },
+      {
+        "name": "house",
+        "parent": ".",
+        "transform": [
+          -0.571258,
+          0,
+          0.820771,
+          0,
+          1,
+          0,
+          -0.820771,
+          0,
+          -0.571258,
+          -2.66576,
+          0.00432737,
+          -2.22316
+        ],
+        "instance": "@ext#3"
+      },
+      {
+        "name": "house2",
+        "parent": ".",
+        "transform": [
+          -0.571258,
+          0,
+          0.820771,
+          0,
+          1,
+          0,
+          -0.820771,
+          0,
+          -0.571258,
+          1.04158,
+          0.00432737,
+          -4.68456
+        ],
+        "instance": "@ext#3"
+      },
+      {
+        "name": "house3",
+        "parent": ".",
+        "transform": [
+          -0.571258,
+          0,
+          0.820771,
+          0,
+          1,
+          0,
+          -0.820771,
+          0,
+          -0.571258,
+          4.82801,
+          0.00432737,
+          -7.24089
+        ],
+        "instance": "@ext#3"
+      },
+      {
+        "name": "house4",
+        "parent": ".",
+        "transform": [
+          -0.571258,
+          0,
+          0.820771,
+          0,
+          1,
+          0,
+          -0.820771,
+          0,
+          -0.571258,
+          8.82919,
+          0.00432737,
+          -9.57453
+        ],
+        "instance": "@ext#3"
+      },
+      {
+        "name": "tree_1",
+        "parent": ".",
+        "transform": [
+          0.268673,
+          0,
+          -0.138774,
+          0,
+          0.302396,
+          0,
+          0.138774,
+          0,
+          0.268673,
+          0.655419,
+          0,
+          -1.33656
+        ],
+        "instance": "@ext#2"
+      },
+      {
+        "name": "tree_3",
+        "parent": ".",
+        "transform": [
+          0.299468,
+          0,
+          0.0419809,
+          0,
+          0.302396,
+          0,
+          -0.0419809,
+          0,
+          0.299468,
+          4.41012,
+          0,
+          -3.81237
+        ],
+        "instance": "@ext#2"
+      },
+      {
+        "name": "tree_7",
+        "parent": ".",
+        "transform": [
+          0.299468,
+          0,
+          0.0419809,
+          0,
+          0.302396,
+          0,
+          -0.0419809,
+          0,
+          0.299468,
+          0.525813,
+          0,
+          2.87419
+        ],
+        "instance": "@ext#2"
+      },
+      {
+        "name": "tree_8",
+        "parent": ".",
+        "transform": [
+          0.102354,
+          0,
+          -0.284547,
+          0,
+          0.302396,
+          0,
+          0.284547,
+          0,
+          0.102354,
+          1.85757,
+          0,
+          2.06958
+        ],
+        "instance": "@ext#2"
+      },
+      {
+        "name": "tree_9",
+        "parent": ".",
+        "transform": [
+          -0.216157,
+          0,
+          -0.21147,
+          0,
+          0.302396,
+          0,
+          0.21147,
+          0,
+          -0.216157,
+          3.21708,
+          0,
+          1.18174
+        ],
+        "instance": "@ext#2"
+      },
+      {
+        "name": "tree_10",
+        "parent": ".",
+        "transform": [
+          -0.201136,
+          0,
+          0.225805,
+          0,
+          0.302396,
+          0,
+          -0.225805,
+          0,
+          -0.201136,
+          4.57659,
+          0,
+          0.210664
+        ],
+        "instance": "@ext#2"
+      },
+      {
+        "name": "tree_11",
+        "parent": ".",
+        "transform": [
+          0.0503989,
+          0,
+          -0.298167,
+          0,
+          0.302396,
+          0,
+          0.298167,
+          0,
+          0.0503989,
+          5.86374,
+          0,
+          -0.741332
+        ],
+        "instance": "@ext#2"
+      },
+      {
+        "name": "tree_12",
+        "parent": ".",
+        "transform": [
+          0.295171,
+          0,
+          0.065708,
+          0,
+          0.302396,
+          0,
+          -0.065708,
+          0,
+          0.295171,
+          7.17504,
+          0,
+          -1.63302
+        ],
+        "instance": "@ext#2"
+      },
+      {
+        "name": "tree_2",
+        "parent": ".",
+        "transform": [
+          0.353459,
+          0,
+          0.216201,
+          0,
+          0.414338,
+          0,
+          -0.216201,
+          0,
+          0.353459,
+          0.89046,
+          0,
+          -8.6264
+        ],
+        "instance": "@ext#4"
+      },
+      {
+        "name": "tree_6",
+        "parent": ".",
+        "transform": [
+          -0.0834177,
+          0,
+          -0.290663,
+          0,
+          0.302396,
+          0,
+          0.290663,
+          0,
+          -0.0834177,
+          8.18933,
+          0,
+          -6.42346
+        ],
+        "instance": "@ext#2"
+      },
+      {
+        "name": "tree_5",
+        "parent": ".",
+        "transform": [
+          0.304174,
+          0,
+          -0.281344,
+          0,
+          0.414338,
+          0,
+          0.281344,
+          0,
+          0.304174,
+          5.26911,
+          0,
+          -11.111
+        ],
+        "instance": "@ext#4"
+      },
+      {
+        "name": "tree_4",
+        "parent": ".",
+        "transform": [
+          0.172211,
+          0,
+          0.376855,
+          0,
+          0.414338,
+          0,
+          -0.376855,
+          0,
+          0.172211,
+          -2.77099,
+          0,
+          -6.28609
+        ],
+        "instance": "@ext#4"
+      },
+      {
+        "name": "road",
+        "parent": ".",
+        "transform": [
+          0.825724,
+          0,
+          0.564074,
+          0,
+          1,
+          0,
+          -0.564074,
+          0,
+          0.825724,
+          -1.18758,
+          -0.0900879,
+          1.94605
+        ],
+        "instance": "@ext#5"
+      },
+      {
+        "name": "road2",
+        "parent": ".",
+        "transform": [
+          0.825724,
+          0,
+          0.564074,
+          0,
+          1,
+          0,
+          -0.564074,
+          0,
+          0.825724,
+          2.04001,
+          -0.0900879,
+          -0.261966
+        ],
+        "instance": "@ext#5"
+      },
+      {
+        "name": "road3",
+        "parent": ".",
+        "transform": [
+          0.825724,
+          0,
+          0.564074,
+          0,
+          1,
+          0,
+          -0.564074,
+          0,
+          0.825724,
+          5.33094,
+          -0.0900879,
+          -2.51112
+        ],
+        "instance": "@ext#5"
+      },
+      {
+        "name": "road4",
+        "parent": ".",
+        "transform": [
+          0.825724,
+          0,
+          0.564074,
+          0,
+          1,
+          0,
+          -0.564074,
+          0,
+          0.825724,
+          8.62449,
+          -0.09,
+          -4.76035
+        ],
+        "instance": "@ext#5"
+      },
+      {
+        "name": "road5",
+        "parent": ".",
+        "transform": [
+          0.825724,
+          0,
+          0.564074,
+          0,
+          1,
+          0,
+          -0.564074,
+          0,
+          0.825724,
+          11.8273,
+          -0.09,
+          -6.94825
+        ],
+        "instance": "@ext#5"
+      },
+      {
+        "name": "robot",
+        "parent": ".",
+        "transform": [
+          0.699908,
+          0,
+          0.0113371,
+          0,
+          0.7,
+          0,
+          -0.0113371,
+          0,
+          0.699908,
+          0.332197,
+          0,
+          0.751816
+        ],
+        "instance": "@ext#7"
+      },
+      {
+        "type": "AnimationPlayer",
+        "name": "animation_player",
+        "parent": ".",
+        "anims": {
+          "idle": "@sub#6"
+        },
+        "anims/idle": "@sub#6"
+      }
+    ]
+  }
 }

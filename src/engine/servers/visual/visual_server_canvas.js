@@ -12,7 +12,7 @@ import { Vector2, Vector2Like } from 'engine/core/math/vector2';
 import { Rect2 } from 'engine/core/math/rect2';
 import { Transform2D } from 'engine/core/math/transform_2d';
 import { Color, ColorLike } from 'engine/core/color';
-import { ImageTexture } from 'engine/scene/resources/texture';
+import { Texture } from 'engine/scene/resources/texture';
 import { Material } from 'engine/scene/resources/material';
 
 import { VisualServer } from '../visual_server';
@@ -620,7 +620,7 @@ export class VisualServerCanvas {
     /**
      * @param {Item} p_item
      * @param {Rect2} p_rect
-     * @param {ImageTexture} p_texture
+     * @param {Texture} p_texture
      * @param {boolean} [p_tile=false]
      * @param {ColorLike} [p_modulate]
      * @param {boolean} [p_transpose=false]
@@ -657,7 +657,7 @@ export class VisualServerCanvas {
     /**
      * @param {Item} p_item
      * @param {Rect2} p_rect
-     * @param {ImageTexture} p_texture
+     * @param {Texture} p_texture
      * @param {Rect2} p_src_rect
      * @param {ColorLike} [p_modulate]
      * @param {boolean} [p_transpose=false]
@@ -691,7 +691,7 @@ export class VisualServerCanvas {
      * @param {Item} p_item
      * @param {Rect2} p_rect
      * @param {Rect2} p_source
-     * @param {ImageTexture} p_texture
+     * @param {Texture} p_texture
      * @param {Vector2} p_topleft
      * @param {Vector2} p_bottomright
      * @param {number} [p_x_axis_mode]
@@ -724,7 +724,7 @@ export class VisualServerCanvas {
      * @param {number[]} p_points [x, y]
      * @param {number[]} p_colors [r, g, b, a]
      * @param {number[]} [p_uvs] [u, v]
-     * @param {ImageTexture} [p_texture]
+     * @param {Texture} [p_texture]
      * @param {number[]} [p_indices]
      */
     canvas_item_add_polygon(p_item, p_points, p_colors, p_uvs, p_texture, p_indices) {
@@ -753,7 +753,7 @@ export class VisualServerCanvas {
      * @param {number[]} [p_uvs] [u, v]
      * @param {number[]} [p_bones]
      * @param {number[]} [p_weights]
-     * @param {ImageTexture} [p_texture]
+     * @param {Texture} [p_texture]
      */
     canvas_item_add_triangle_array(p_item, p_indices, p_points, p_colors, p_uvs, p_bones, p_weights, p_texture) {
         const polygon = CommandPolygon.instance();
@@ -777,7 +777,7 @@ export class VisualServerCanvas {
     /**
      * @param {Item} p_item
      * @param {any} p_mesh
-     * @param {ImageTexture} p_texture
+     * @param {Texture} p_texture
      */
     canvas_item_add_multimesh(p_item, p_mesh, p_texture) {
         const mm = CommandMultiMesh.instance();

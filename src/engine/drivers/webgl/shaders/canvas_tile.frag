@@ -7,7 +7,7 @@ uniform vec2 SCREEN_PIXEL_SIZE;
 
 uniform highp vec4 frame_uv;
 
-/* UNIFORM */
+/* GLOBALS */
 
 varying vec4 color_interp;
 varying vec2 uv_interp;
@@ -19,9 +19,9 @@ void main() {
     vec2 UV = frame_uv.xy + (frame_uv.zw - frame_uv.xy) * uv_pct;
     vec2 SCREEN_UV = gl_FragCoord.xy * SCREEN_PIXEL_SIZE;
 
-    /* SHADER_BEGIN */
+    /* FRAGMENT_CODE_BEGIN */
     COLOR = texture2D(TEXTURE, UV);
-    /* SHADER_END */
+    /* FRAGMENT_CODE_END */
 
     COLOR *= color_interp;
 

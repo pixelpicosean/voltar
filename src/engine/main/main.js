@@ -104,6 +104,14 @@ export const Main = {
 
         // read and apply global settings
 
+        let root = scene_tree.get_root();
+        let shadow_atlas_size = 2048 * 2;
+        root.set_shadow_atlas_size(shadow_atlas_size);
+        root.set_shadow_atlas_quadrant_subdiv(0, 1);
+        root.set_shadow_atlas_quadrant_subdiv(1, 2);
+        root.set_shadow_atlas_quadrant_subdiv(2, 3);
+        root.set_shadow_atlas_quadrant_subdiv(3, 4);
+
         this.events.emit_signal('started');
 
         const scene = this.global.application.main_scene.instance();

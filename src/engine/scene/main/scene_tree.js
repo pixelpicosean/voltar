@@ -1,8 +1,7 @@
 import { remove_items } from 'engine/dep/index';
 import {
-    resource_map,
     scene_class_map,
-    node_class_map,
+    get_resource_map,
 } from 'engine/registry';
 import { List } from 'engine/core/self_list';
 import { VObject, GDCLASS } from 'engine/core/v_object';
@@ -24,6 +23,9 @@ import {
 } from 'engine/core/main_loop';
 import { InputEvent } from 'engine/core/os/input_event';
 
+import { VSG } from 'engine/servers/visual/visual_server_globals';
+
+import { World } from '../resources/world';
 import { World2D } from '../resources/world_2d';
 import { Viewport } from './viewport';
 import {
@@ -35,8 +37,10 @@ import {
     NOTIFICATION_PAUSED,
     NOTIFICATION_UNPAUSED,
 } from '../main/node';
-import { NOTIFICATION_TRANSFORM_CHANGED } from '../2d/canvas_item';
-import { assemble_scene, instanciate_scene } from '../assembler';
+import { instanciate_scene } from '../assembler';
+import { NOTIFICATION_TRANSFORM_CHANGED } from '../const';
+
+import default_env from 'default_env.json';
 
 
 export class SceneTreeTimer extends VObject {
@@ -123,11 +127,14 @@ export class SceneTree extends MainLoop {
         if (!singleton) singleton = this;
 
         /** @type {Viewport} */
-        this.root = new Viewport();
+        this.root = new Viewport;
         this.root.set_name('root');
         this.root.handle_input_locally = false;
         if (!this.root.world_2d) {
-            this.root.set_world_2d(new World2D());
+            this.root.set_world_2d(new World2D);
+        }
+        if (!this.root.world) {
+            this.root.set_world(new World);
         }
 
         this.tree_version = 1;
@@ -158,6 +165,8 @@ export class SceneTree extends MainLoop {
         /** @type {Map<string, Map<string, Array>>} group -> call -> args */
         this.unique_group_calls = new Map();
         this.ugc_locked = false;
+
+        this.use_font_oversampling = false;
 
         /**
          * Currently running scene
@@ -198,6 +207,13 @@ export class SceneTree extends MainLoop {
         this.view = null;
         /** @type {HTMLElement} */
         this.container = null;
+
+        {
+            let env = VSG.scene_render.environment_create()
+                ._load_data(default_env)
+
+            this.root.world.set_fallback_environment(env);
+        }
 
         this._current_packed_scene = null;
     }
@@ -580,7 +596,7 @@ export class SceneTree extends MainLoop {
 
         next_scene = scene_class_map[path];
         if (!next_scene) {
-            next_scene = resource_map[path];
+            next_scene = get_resource_map()[path];
             next_scene_path = path;
         }
 
@@ -888,23 +904,6 @@ export class SceneTree extends MainLoop {
     }
 
     _update_root_rect() {
-        if (!OS.get_singleton().video_mode.resizable) {
-            const vec = Vector2.new();
-            this.root.set_size(
-                vec.copy(this.last_screen_size)
-                    .scale(1 / this.stretch_shrink)
-                    .floor()
-            );
-            const rect = Rect2.new(0, 0, this.last_screen_size.x, this.last_screen_size.y);
-            this.root.set_attach_to_screen_rect(rect);
-            this.root.set_size_override_stretch(false);
-            this.root.set_size_override(false, Vector2.ZERO);
-            this.root.update_canvas_items();
-            Rect2.free(rect);
-            Vector2.free(vec);
-            return;
-        }
-
         if (this.stretch_mode === STRETCH_MODE_DISABLED) {
             const vec = Vector2.new();
             this.root.set_size(

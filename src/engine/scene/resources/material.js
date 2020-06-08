@@ -1,161 +1,65 @@
 import { res_class_map } from "engine/registry";
+import { VSG } from "engine/servers/visual/visual_server_globals";
+import { parse_shader_code } from "engine/drivers/webgl/shader_parser";
 
+/**
+ * @typedef {import('engine/drivers/webgl/rasterizer_storage').Material_t} Material_t
+ * @typedef {import('engine/drivers/webgl/rasterizer_storage').Texture_t} Texture_t
+ * @typedef {import('engine/drivers/webgl/rasterizer_storage').UniformTypes} UniformTypes
+ */
+
+let mat_uid = 0;
 export class Material {
     get class() { return "Material" }
 
     constructor() {
-        this.materials = {
-            /** @type {import('engine/drivers/webgl/rasterizer_storage').Material_t} */
-            flat: null,
-            /** @type {import('engine/drivers/webgl/rasterizer_storage').Material_t} */
-            tile: null,
-            /** @type {import('engine/drivers/webgl/rasterizer_storage').Material_t} */
-            multimesh: null,
-        };
+        this.id = mat_uid++;
+
+        this.name = '';
+
+        /** @type {Material_t} */
+        this.material = null;
+        /** @type {Material} */
+        this.next_pass = null;
+        this.render_priority = 0;
     }
 }
 
 
-const UNIFORM_PRECISIONS = ["lowp", "mediump", "highp"];
-/** @type {{ [key: string]: string }} */
-const UNIFORM_TYPES = {
-    "float": "1f",
-    "vec2": "2f",
-    "vec3": "3f",
-    "vec4": "4f",
-    "mat3": "mat3",
-    "mat4": "mat4",
-    "sampler2D": "1i",
-}
-
-/**
- * @param {string} code
- */
-function parse_value(code) {
-    let idx = code.indexOf("(");
-    if (idx >= 0) {
-        return code.substring(idx + 1, code.lastIndexOf(")")).split(",")
-            .map(parseFloat);
-    } else {
-        return [parseFloat(code)];
-    }
-}
-
-/**
- * @param {string} code
- */
-function parse_uniform(code) {
-    let tokens = code.split(' ');
-    let idx = 1;
-
-    // precision
-    let precision = UNIFORM_PRECISIONS.indexOf(tokens[idx]) >= 0 ? tokens[idx] : "";
-    idx += precision ? 1 : 0;
-
-    // type
-    let type_str = tokens[idx];
-    let type = UNIFORM_TYPES[type_str];
-    idx += 1;
-
-    // name
-    let name = tokens[idx];
-
-    // default value
-    let value = null;
-    let value_match = code.match(/=[ ]{0,}([\s\S]*?);/);
-    if (value_match) {
-        value = parse_value(value_match[1]);
-    }
-
-    return {
-        type,
-        name,
-        precision,
-        value,
-        code: `uniform ${precision} ${type_str} ${name};`,
-    }
-}
-
-/**
- * Rules:
- * 1. vertex entry has to be: "void vertex()"
- * 2. fragment entry has to be: "void fragment()"
- * 3. vertex always on top and fragment on bottom if both exist
- * @param {string} code
- */
-function parse_shader_code(code) {
-    const vs_start = code.indexOf("void vertex()");
-    const fs_start = code.indexOf("void fragment()");
-
-    let type_match = code.match(/shader_type (canvas_item|spatial);/);
-    let type = type_match ? type_match[1] : "canvas_item";
-
-    let uses_screen_texture = code.indexOf("SCREEN_TEXTURE") >= 0;
-
-    // uniform
-    let uniforms = [];
-    let uniform_lines = code.match(/uniform([\s\S]*?);/gm);
-    if (uniform_lines) {
-        uniforms = uniform_lines.map(parse_uniform);
-    }
-
-    // vertex
-    let vs_code = "";
-    if (vs_start >= 0) {
-        vs_code = (fs_start >= 0) ? code.substring(vs_start, fs_start) : code.substring(vs_start);
-
-        // remove entry and its brackets
-        vs_code = vs_code.substring(vs_code.indexOf("{") + 1, vs_code.lastIndexOf("}")).trim();
-    }
-    let vs_uniform_code = uniforms.filter(({ name }) => vs_code.indexOf(name) >= 0)
-        .map(({ code }) => code)
-        .join("\n")
-
-    // fragment
-    let fs_code = "";
-    if (fs_start >= 0) {
-        fs_code = code.substring(fs_start);
-
-        // remove entry and its brackets
-        fs_code = fs_code.substring(fs_code.indexOf("{") + 1, fs_code.lastIndexOf("}")).trim();
-    }
-    let fs_uniform_code = uniforms.filter(({ name }) => fs_code.indexOf(name) >= 0)
-        .map(({ code }) => code)
-        .join("\n")
-
-    return {
-        type,
-        uses_screen_texture,
-        vs_code, vs_uniform_code,
-        fs_code, fs_uniform_code,
-        uniforms: uniforms.filter(({ name }) => vs_code.indexOf(name) >= 0 || fs_code.indexOf(name) >= 0)
-            .map((u) => ({ name: u.name, type: u.type, value: u.value })),
-    };
-}
-
+let noname_uid = 0;
 export class ShaderMaterial extends Material {
     get class() { return "ShaderMaterial" }
 
     /**
      * @param {string} [name]
      */
-    constructor(name = "unknown") {
+    constructor(name) {
         super();
 
+        if (!name) {
+            name = `noname[${noname_uid++}]`;
+        }
         this.name = name;
 
         /** @type {string} */
         this.shader_type = "canvas_item";
-        this.uses_screen_texture = false;
 
-        /** @type {{ name: string, type: import('engine/drivers/webgl/rasterizer_storage').UniformTypes, value?: number[] }[]} */
+        this.uses_screen_texture = false;
+        this.uses_custom_light = false;
+
+        /** @type {{ name: string, type: UniformTypes, value?: number[] | Texture_t }[]} */
         this.uniforms = [];
+        /** @type {{ [name: string]: Texture_t }} */
+        this.texture_hints = {};
 
         this.vs_code = "";
         this.vs_uniform_code = "";
 
         this.fs_code = "";
         this.fs_uniform_code = "";
+
+        this.lt_code = "";
+        this.global_code = "";
     }
     _load_data(data) {
         if (data.shader && data.shader.code) {
@@ -172,15 +76,25 @@ export class ShaderMaterial extends Material {
         const parsed_code = parse_shader_code(code);
 
         this.shader_type = parsed_code.type;
+
         this.uses_screen_texture = parsed_code.uses_screen_texture;
+        this.uses_custom_light = parsed_code.uses_custom_light;
 
         this.uniforms = parsed_code.uniforms;
+        for (let u of this.uniforms) {
+            if (!Array.isArray(u.value)) {
+                this.texture_hints[u.name] = u.value;
+            }
+        }
 
         this.vs_code = parsed_code.vs_code;
         this.vs_uniform_code = parsed_code.vs_uniform_code;
 
         this.fs_code = parsed_code.fs_code;
         this.fs_uniform_code = parsed_code.fs_uniform_code;
+
+        this.lt_code = parsed_code.lt_code;
+        this.global_code = parsed_code.global_code;
     }
 }
 res_class_map['ShaderMaterial'] = ShaderMaterial;
@@ -193,3 +107,90 @@ export const CANVAS_ITEM_SHADER_UNIFORMS = [
     { name: 'SCREEN_TEXTURE', type: '1i' },
     { name: 'SCREEN_PIXEL_SIZE', type: '2f' },
 ]
+
+export class SpatialMaterial extends Material {
+    constructor() {
+        super();
+
+        /** @type {Material_t} */
+        this.material = null;
+    }
+    /**
+     * @param {any} data
+     */
+    _load_data(data) {
+        /** @type {Set<string>} */
+        let features = new Set;
+
+        /** @type {{ [name: string]: number[] }} */
+        let params = {};
+        /** @type {{ [name: string]: Texture_t }} */
+        let textures = {};
+
+        for (let k in data) {
+            let v = data[k];
+            switch (k) {
+                // general
+                case 'metallic_specular': {
+                    params['m_specular'] = [v];
+                } break;
+                case 'metallic': {
+                    params['m_metallic'] = [v];
+                } break;
+                case 'roughness': {
+                    params['m_roughness'] = [v];
+                } break;
+
+                // albedo
+                case 'albedo_color': {
+                    params['m_albedo'] = [v.r, v.g, v.b, v.a];
+                    features.add('albedo');
+                } break;
+                case 'albedo_texture': {
+                    textures['m_texture_albedo'] = v.texture;
+                    features.add('albedo');
+                } break;
+
+                // emission
+                case 'emission_enabled': {
+                    features.add('emission');
+                } break;
+                case 'emission': {
+                    params['m_emission'] = [v.r, v.g, v.b, v.a];
+                } break;
+                case 'emission_energy': {
+                    params['m_emission_energy'] = [v];
+                } break;
+                case 'emission_operator': {
+                    params['m_emission_operator'] = [v];
+                } break;
+                case 'emission_texture': {
+                    textures['m_texture_emission'] = v.texture;
+                } break;
+
+                // rim
+                case 'rim_enabled': {
+                    features.add('rim');
+                } break;
+                case 'rim': {
+                    params['m_rim'] = [v];
+                } break;
+                case 'rim_tint': {
+                    params['m_rim_tint'] = [v];
+                } break;
+                case 'rim_texture': {
+                    textures['m_texture_rim'] = v.texture;
+                } break;
+            }
+        }
+
+        this.material = VSG.scene_render.metarial_instance_create({
+            features: [...features],
+            params,
+            textures,
+        });
+
+        return this;
+    }
+}
+res_class_map['SpatialMaterial'] = SpatialMaterial;

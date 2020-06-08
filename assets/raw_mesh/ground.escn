@@ -1,0 +1,28 @@
+[gd_scene load_steps=1 format=2]
+
+[sub_resource id=1 type="ArrayMesh"]
+
+resource_name = "Plane"
+surfaces/0 = {
+	"primitive":4,
+	"arrays":[
+		Vector3Array(1.0, 0.0, 1.0, -1.0, 0.0, -1.0, -1.0, 0.0, 1.0, 1.0, 0.0, -1.0),
+		Vector3Array(0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0),
+		FloatArray(1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0),
+		null, ; no Vertex Colors,
+		Vector2Array(0.444361, 0.951282, 0.294796, 0.801718, 0.294796, 0.951282, 0.444361, 0.801718),
+		null, ; No UV2,
+		null, ; No Bones,
+		null, ; No Weights,
+		IntArray(0, 2, 1, 0, 1, 3)
+	],
+	"morph_arrays":[]
+}
+
+[node type="Spatial" name="Scene"]
+
+[node name="Plane" type="MeshInstance" parent="."]
+
+mesh = SubResource(1)
+visible = true
+transform = Transform(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)

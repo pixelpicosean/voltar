@@ -2,11 +2,18 @@ import {
     preload_queue,
     res_class_map,
     scene_class_map,
-    resource_map,
-    raw_resource_map,
+    set_resource_map,
+    set_raw_resource_map,
+    get_resource_map,
+    get_raw_resource_map,
+    set_binary_pack_list,
 } from 'engine/registry';
-import { default_font_name } from 'engine/scene/resources/theme';
+
 import { ResourceLoader } from './io/resource_loader';
+import { decompress } from './io/z';
+
+import { default_font_name, Theme } from 'engine/scene/resources/theme';
+import { registered_bitmap_fonts } from 'engine/scene/resources/font';
 import { instanciate_scene } from 'engine/scene/assembler';
 import meta from 'meta.json';
 
@@ -63,8 +70,15 @@ export class Engine {
 
         // Load resources marked as preload
         preload_queue.queue.unshift([`media/${default_font_name}.fnt`]);
+        preload_queue.queue.unshift([`media/data.vt`]);
         for (const settings of preload_queue.queue) {
             loader.add.call(loader, ...settings);
+        }
+        for (const b of meta["binary_files"]) {
+            loader.add.call(loader, b);
+        }
+        for (const b of meta["json_files"]) {
+            loader.add.call(loader, b);
         }
 
         if (progress_callback) {
@@ -75,10 +89,27 @@ export class Engine {
 
         loader.load(() => {
             preload_queue.is_complete = true;
-            // Theme.set_default_font(registered_bitmap_fonts[default_font_name]);
+            Theme.set_default_font(registered_bitmap_fonts[default_font_name]);
+
+            let res_str = decompress(loader.resources['media/data.vt'].data);
+            let resources = JSON.parse(res_str);
+
+            // fetch resource map updated by loader
+            let resource_map = get_resource_map();
+            let raw_resource_map = get_raw_resource_map();
+
+            // merge resources data into our existing resources
+            resource_map = Object.assign(resource_map, resources);
+            raw_resource_map = Object.assign(raw_resource_map, resources, loader.resources);
+
+            // override
+            set_resource_map(resource_map);
+            set_raw_resource_map(raw_resource_map);
+            set_binary_pack_list(meta["json_files"].map(url => JSON.parse(decompress(raw_resource_map[url].data))));
+            set_binary_pack_list(meta["binary_files"].map(url => raw_resource_map[url].data));
 
             /** @type {string[]} */
-            const resource_lookup_skip_list = meta['resource_lookup_skip_list'];
+            const resource_check_ignores = meta['resource_check_ignores'];
 
             // create real resources from data imported from Godot
             const res_head = 'res://';
@@ -93,7 +124,7 @@ export class Engine {
 
                             if (!resource) {
                                 // is this one in our lookup skip list?
-                                if (resource_lookup_skip_list.indexOf(resource_filename) < 0) {
+                                if (resource_check_ignores.indexOf(resource_filename) < 0) {
                                     console.warn(`Resource with URL [${resource_filename}] not found`);
                                 }
                                 continue;
@@ -135,22 +166,37 @@ export class Engine {
                     }
                     if (res.sub) {
                         // create sub resource objects
-                        for (let id in res.sub) {
-                            const data = res.sub[id];
+                        for (let i = 0; i < res.sub.length; i++) {
+                            let data = res.sub[i];
+                            let id = data.id;
                             normalize_resource_object(data, res.ext, res.sub);
 
                             const ctor = res_class_map[data.type];
                             if (ctor) {
-                                res.sub[id] = (new ctor)._load_data(data);
+                                data = (new ctor)._load_data(data);
+                                res.sub[i] = data;
                             }
+                            data.__rid__ = `${id}`;
                         }
                     }
 
                     // process resource first
-                    if (res.type !== 'PackedScene') {
-                        if (res.resource) {
-                            normalize_resource_array(res.resource, res.ext || {}, res.sub || {});
+                    if (res.resource && res.resource.type) {
+                        /* { ext, sub, resource } */
+
+                        normalize_resource_object(res.resource, res.ext || {}, res.sub || []);
+
+                        const ctor = res_class_map[res.resource.type];
+                        if (ctor) {
+                            resource_map[key] = (new ctor)._load_data(res.resource);
                         }
+                    } else if (res.type != 'PackedScene') {
+                        /* the res itself is the data */
+
+                        // FIXME: pure data does not have a resource property?
+                        // if (res.resource) {
+                        //     normalize_resource_object(res.resource, res.ext || {}, res.sub || []);
+                        // }
 
                         const ctor = res_class_map[res.type];
                         if (ctor) {
@@ -164,7 +210,7 @@ export class Engine {
                 const res = resource_map[key];
                 if (key.startsWith(res_head) && res.type === 'PackedScene') {
                     // now let's replace ext/sub references inside this resource with real instances
-                    normalize_resource_array(res.nodes, res.ext || {}, res.sub || {});
+                    normalize_resource_array(res.nodes, res.ext || {}, res.sub || []);
                 }
             }
 
@@ -188,11 +234,14 @@ const ext_head = '@ext#'; const ext_offset = ext_head.length;
 /**
  * @param {string} key
  * @param {any} ext
- * @param {any} sub
+ * @param {any[]} sub
  */
 function normalize_res(key, ext, sub) {
     if (key.startsWith(sub_head)) {
-        return sub[key.substr(sub_offset)];
+        let id = key.substr(sub_offset);
+        for (let i = 0; i < sub.length; i++) {
+            if (sub[i].__rid__ === id) return sub[i];
+        }
     } else if (key.startsWith(ext_head)) {
         return ext[key.substr(ext_offset)];
     }
@@ -201,7 +250,7 @@ function normalize_res(key, ext, sub) {
 /**
  * @param {any} obj
  * @param {any} ext
- * @param {any} sub
+ * @param {any[]} sub
  */
 function normalize_resource_object(obj, ext, sub) {
     for (const k in obj) {
@@ -220,7 +269,7 @@ function normalize_resource_object(obj, ext, sub) {
 /**
  * @param {any[]} arr
  * @param {any} ext
- * @param {any} sub
+ * @param {any[]} sub
  */
 function normalize_resource_array(arr, ext, sub) {
     for (let i = 0; i < arr.length; i++) {

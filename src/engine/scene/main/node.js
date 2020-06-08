@@ -114,15 +114,16 @@ export class Node extends VObject {
         this.is_node_2d = false;
         this.is_control = false;
         this.is_spatial = false;
+        this.is_skeleton = false;
         this.is_collision_object = false;
 
         this.data = new Data();
 
         /**
          * Data loaded from `_load_data` method
-         * @type {any}
+         * @type {any[]}
          */
-        this.instance_data = null;
+        this.instance_data = [];
     }
 
     /* virtuals */
@@ -130,9 +131,20 @@ export class Node extends VObject {
     /**
      * @param {any} data
      */
-    _load_data(data) {
-        this.instance_data = data;
+    set_instance_data(data) {
+        this.instance_data[0] = data;
+    }
+    /**
+     * @param {any} data
+     */
+    push_instance_data(data) {
+        this.instance_data.push(data);
+    }
 
+    /**
+     * @param {any} data
+     */
+    _load_data(data) {
         if (data.filename !== undefined) {
             this.set_filename(data.filename);
         }
@@ -384,6 +396,13 @@ export class Node extends VObject {
         this.emit_signal('tree_entered', this);
 
         this.data.tree.node_added(this);
+
+        if (this.instance_data) {
+            for (let i = 0; i < this.instance_data.length; i++) {
+                this._load_data(this.instance_data[i]);
+            }
+            this.instance_data = null;
+        }
 
         for (const c of this.data.children) {
             if (!c.is_inside_tree()) {

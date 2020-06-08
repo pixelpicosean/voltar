@@ -3,7 +3,6 @@ import * as v from 'engine/index';
 import 'extension/2d/vector_graphic';
 
 
-import 'game/preloader'; // for scene registry side effect
 import { Preloader } from 'game/preloader';
 
 import 'game/demo/demo'; // for scene registry side effect
@@ -11,6 +10,7 @@ import { MainScene } from 'game/demo/demo';
 
 
 v.preload('media/sprites-0.json');
+v.preload('media/house_palette.png');
 
 
 import Settings from 'project.json';
