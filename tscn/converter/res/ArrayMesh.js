@@ -7,10 +7,23 @@ const {
 const pack_array_to_binary = true;
 
 
+const ARRAY_VERTEX = 0;
+const ARRAY_NORMAL = 1;
+const ARRAY_TANGENT = 2;
+const ARRAY_COLOR = 3;
+const ARRAY_TEX_UV = 4;
+const ARRAY_TEX_UV2 = 5;
+const ARRAY_BONES = 6;
+const ARRAY_WEIGHTS = 7;
+const ARRAY_INDEX = 8;
+const ARRAY_MAX = 9;
+
+
 const compress_list = [
-    // 1, // normal
-    2, // tangent
-    3, // color
+    // ARRAY_NORMAL,
+    // ARRAY_TANGENT,
+    // ARRAY_COLOR,
+    ARRAY_BONES,
 ]
 
 const GL_BYTE = 5120;
@@ -46,16 +59,6 @@ module.exports = (data) => {
 
 module.exports.is_tres = true;
 
-const ARRAY_VERTEX = 0;
-const ARRAY_NORMAL = 1;
-const ARRAY_TANGENT = 2;
-const ARRAY_COLOR = 3;
-const ARRAY_TEX_UV = 4;
-const ARRAY_TEX_UV2 = 5;
-const ARRAY_BONES = 6;
-const ARRAY_WEIGHTS = 7;
-const ARRAY_INDEX = 8;
-const ARRAY_MAX = 9;
 
 /**
  * @param {{ compressed: boolean, array: number[] }[]} p_arrays
@@ -142,10 +145,15 @@ function pack_as_binary(p_arrays, is_2d) {
                 types[i] = GL_FLOAT;
                 // compress requires half float support
             } break;
-            case ARRAY_WEIGHTS:
+            case ARRAY_WEIGHTS: {
+                elem_size = 4 * 4;
+                sizes[i] = 4;
+                types[i] = GL_FLOAT;
+            } break;
             case ARRAY_BONES: {
-                // TODO: merge weight and bone vertices
-                sizes[i] = 0;
+                elem_size = 4;
+                sizes[i] = 4;
+                types[i] = GL_UNSIGNED_BYTE;
             } break;
             case ARRAY_INDEX: {
                 // TODO: support 32bit indices
@@ -178,11 +186,14 @@ function pack_as_binary(p_arrays, is_2d) {
             if (!array) continue;
 
             let compressed = p_arrays[v].compressed;
+            let is_short = (types[v] == GL_UNSIGNED_SHORT);
             let offset = offsets[v];
 
             for (let s = 0; s < sizes[v]; s++) {
                 if (compressed) {
                     view.setUint8(start + offset + s, array[i * sizes[v] + s]);
+                } else if (is_short) {
+                    view.setUint16(start + offset + s * 4, array[i * sizes[v] + s], little_endian);
                 } else {
                     view.setFloat32(start + offset + s * 4, array[i * sizes[v] + s], little_endian);
                 }
