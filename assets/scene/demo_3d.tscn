@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=2]
+[gd_scene load_steps=12 format=2]
 
 [ext_resource path="res://image/standalone/house_palette.png" type="Texture" id=1]
 [ext_resource path="res://mesh/tree_1.tscn" type="PackedScene" id=2]
@@ -24,13 +24,7 @@ func _process(delta: float) -> void:
 	pass
 "
 
-[sub_resource type="QuadMesh" id=2]
-size = Vector2( 60, 20 )
-
-[sub_resource type="SpatialMaterial" id=3]
-albedo_color = Color( 0.211765, 0.494118, 0.592157, 1 )
-
-[sub_resource type="SpatialMaterial" id=4]
+[sub_resource type="SpatialMaterial" id=2]
 albedo_texture = ExtResource( 1 )
 emission_enabled = true
 emission = Color( 0.968627, 0.568627, 0.215686, 1 )
@@ -38,10 +32,10 @@ emission_energy = 1.0
 emission_operator = 0
 emission_on_uv2 = false
 
-[sub_resource type="CubeMesh" id=5]
-material = SubResource( 4 )
+[sub_resource type="CubeMesh" id=3]
+material = SubResource( 2 )
 
-[sub_resource type="Animation" id=6]
+[sub_resource type="Animation" id=4]
 length = 16.0
 loop = true
 tracks/0/type = "value"
@@ -59,11 +53,6 @@ tracks/0/keys = {
 
 [node name="spatial" type="Spatial"]
 script = SubResource( 1 )
-
-[node name="sky" type="MeshInstance" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.21218, 6.6637, -32.528 )
-mesh = SubResource( 2 )
-material/0 = SubResource( 3 )
 
 [node name="ground3" parent="." instance=ExtResource( 6 )]
 transform = Transform( 22.272, 0, 0.00554291, 0, 1, 0, -0.0247635, 0, 4.98523, 2.71073, 0, -13.7421 )
@@ -84,12 +73,12 @@ directional_shadow_depth_range = 1
 directional_shadow_max_distance = 20.0
 
 [node name="camera" type="Camera" parent="."]
-transform = Transform( 1, 0, 0, 0, 0.923866, 0.382716, 0, -0.382716, 0.923866, 1.27755, 5.31346, 6.29972 )
+transform = Transform( 0.976379, 1.74623e-10, -0.216065, 0.000573278, 0.999996, 0.0025906, 0.216064, -0.00265327, 0.976376, -1.27206, 0.857998, 4.58738 )
 size = 2.0
 
 [node name="cube" type="MeshInstance" parent="."]
 transform = Transform( 0.353554, -0.353553, 0, 0.25, 0.25, -0.353554, 0.25, 0.25, 0.353554, 1.15197, 3.25732, -4.68754 )
-mesh = SubResource( 5 )
+mesh = SubResource( 3 )
 material/0 = null
 
 [node name="house" parent="." instance=ExtResource( 3 )]
@@ -156,7 +145,19 @@ transform = Transform( 0.825724, 0, 0.564074, 0, 1, 0, -0.564074, 0, 0.825724, 8
 transform = Transform( 0.825724, 0, 0.564074, 0, 1, 0, -0.564074, 0, 0.825724, 11.8273, -0.09, -6.94825 )
 
 [node name="robot" parent="." instance=ExtResource( 7 )]
-transform = Transform( 0.699908, 0, 0.0113371, 0, 0.7, 0, -0.0113371, 0, 0.699908, 0.332197, 0, 0.751816 )
+transform = Transform( 0.219626, 0, 0.0435189, 0, 0.223896, 0, -0.0435189, 0, 0.219626, -1.54197, -0.00012207, 0.65091 )
+
+[node name="robot2" parent="." instance=ExtResource( 7 )]
+transform = Transform( 0.19522, 0, -0.109629, 0, 0.223896, 0, 0.109629, 0, 0.19522, 0.660888, -0.00012207, 0.0773318 )
+
+[node name="robot4" parent="." instance=ExtResource( 7 )]
+transform = Transform( 0.223896, 0, 0.000140645, 0, 0.223896, 0, -0.000140645, 0, 0.223896, -1.73655, 2.12048, -1.54737 )
+
+[node name="robot5" parent="." instance=ExtResource( 7 )]
+transform = Transform( 0.197033, 0, -0.106336, 0, 0.223896, 0, 0.106336, 0, 0.197033, 2.2359, 2.12073, -3.37623 )
+
+[node name="robot3" parent="." instance=ExtResource( 7 )]
+transform = Transform( 0.220337, 0, -0.0397601, 0, 0.223896, 0, 0.0397601, 0, 0.220337, -0.425838, -0.00012207, 1.83368 )
 
 [node name="animation_player" type="AnimationPlayer" parent="."]
-anims/idle = SubResource( 6 )
+anims/idle = SubResource( 4 )

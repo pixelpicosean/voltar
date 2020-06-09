@@ -1,6 +1,40 @@
 {
     "type": "Environment",
-    "bg_mode": 1,
+    "bg_mode": 2,
+    "sky": {
+        "id": 1,
+        "type": "ProceduralSky",
+        "radiance_size": 1,
+        "sky_top_color": {
+            "r": 0.694118,
+            "g": 0.466667,
+            "b": 0.866667,
+            "a": 1
+        },
+        "sky_horizon_color": {
+            "r": 0.388235,
+            "g": 0.443137,
+            "b": 0.537255,
+            "a": 1
+        },
+        "sky_curve": 0.25,
+        "ground_bottom_color": {
+            "r": 0.101961,
+            "g": 0.145098,
+            "b": 0.188235,
+            "a": 1
+        },
+        "ground_horizon_color": {
+            "r": 0.352941,
+            "g": 0.278431,
+            "b": 0.423529,
+            "a": 1
+        },
+        "ground_curve": 0.0360501,
+        "sun_angle_min": 0,
+        "sun_angle_max": 0,
+        "texture_size": 0
+    },
     "ambient_color": {
         "r": 1,
         "g": 1,
