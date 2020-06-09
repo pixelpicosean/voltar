@@ -211,17 +211,19 @@ export class Color {
     }
 
     /**
-     * return new Color
      * @param {ColorLike} p_b
      * @param {number} p_t
+     * @param {Color} [r_out]
      */
-    linear_interpolate(p_b, p_t) {
-        const res = Color.new(this.r, this.g, this.b, this.a);
-        res.r += (p_t * (p_b.r - this.r));
-        res.g += (p_t * (p_b.g - this.g));
-        res.b += (p_t * (p_b.b - this.b));
-        res.a += (p_t * (p_b.a - this.a));
-        return res;
+    linear_interpolate(p_b, p_t, r_out) {
+        if (!r_out) r_out = Color.new();
+        r_out.copy(this);
+
+        r_out.r += (p_t * (p_b.r - this.r));
+        r_out.g += (p_t * (p_b.g - this.g));
+        r_out.b += (p_t * (p_b.b - this.b));
+        r_out.a += (p_t * (p_b.a - this.a));
+        return r_out;
     }
 
     as_hex() {

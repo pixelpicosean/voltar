@@ -6,19 +6,19 @@ import {
     clamp,
     ease,
 } from "engine/core/math/math_funcs";
+import { Math_LN2 } from "engine/core/math/math_defs";
 import { Vector3 } from "engine/core/math/vector3";
 import { Basis } from "engine/core/math/basis";
 import { Color, ColorLike } from "engine/core/color";
 import { Resource } from "engine/core/resource";
+import { SelfList } from "engine/core/self_list";
 
 import {
     Texture,
-    PIXEL_FORMAT_RGBE9995,
     PIXEL_FORMAT_RGBA8,
 } from "./texture";
 import { VSG } from "engine/servers/visual/visual_server_globals";
 import { TEXTURE_TYPE_2D } from "engine/servers/visual_server";
-import { SelfList } from "engine/core/self_list";
 
 const HALF_PI = Math.PI / 2;
 
@@ -29,6 +29,53 @@ export const RADIANCE_SIZE_256 = 3;
 export const RADIANCE_SIZE_512 = 4;
 export const RADIANCE_SIZE_1024 = 5;
 export const RADIANCE_SIZE_2048 = 6;
+
+const RADIANCE_SIZES = [
+    32, 64, 128, 256, 512, 1024, 2048,
+];
+
+const PROC_TEX_SIZES = [
+    256, 512, 1024, 2048, 4096,
+];
+
+const color_exp = (() => {
+    const pow2to9 = 512;
+    const B = 15;
+    const N = 9;
+
+    const sharedexp = 65408;
+
+    /**
+     * @param {ColorLike} p_color
+     */
+    function color_exp(p_color) {
+        let cR = Math.max(0, Math.min(sharedexp), p_color.r);
+        let cG = Math.max(0, Math.min(sharedexp), p_color.g);
+        let cB = Math.max(0, Math.min(sharedexp), p_color.b);
+
+        let cMax = Math.max(cR, cG, cB);
+
+        let expp = Math.max(-B - 1, Math.floor(Math.log(cMax) / Math_LN2)) + 1 + B;
+
+        let sMax = Math.floor((cMax / Math.pow(2.0, expp - B - N)) + 0.5);
+
+        let exps = expp + 1;
+
+        if (0.0 <= sMax && sMax < pow2to9) {
+            exps = expp;
+        }
+
+        p_color.r = p_color.r < 0.0031308 ? 12.92 * p_color.r : 1.055 * Math.pow(p_color.r, 1 / 2.4) - 0.055;
+        p_color.g = p_color.g < 0.0031308 ? 12.92 * p_color.g : 1.055 * Math.pow(p_color.g, 1 / 2.4) - 0.055;
+        p_color.b = p_color.b < 0.0031308 ? 12.92 * p_color.b : 1.055 * Math.pow(p_color.b, 1 / 2.4) - 0.055;
+
+        p_color.r *= 255;
+        p_color.g *= 255;
+        p_color.b *= 255;
+        p_color.a *= 255;
+    }
+    return color_exp;
+})()
 
 export class Sky extends Resource {
     get class() { return "Sky" }
@@ -52,10 +99,6 @@ export class Sky extends Resource {
 }
 GDCLASS(Sky, Resource)
 
-
-const SIZE = [
-    32, 64, 128, 256, 512, 1024, 2048,
-];
 
 export class PanoramaSky extends Sky {
     get class() { return "PanoramaSky" }
@@ -107,7 +150,7 @@ export class PanoramaSky extends Sky {
 
     _radiance_changed() {
         if (this.panorama) {
-            VSG.storage.sky_set_texture(this.sky, this.panorama.get_rid(), SIZE[this.radiance_size]);
+            VSG.storage.sky_set_texture(this.sky, this.panorama.get_rid(), RADIANCE_SIZES[this.radiance_size]);
         }
     }
 }
@@ -286,13 +329,13 @@ export class ProceduralSky extends Sky {
     _radiance_changed() {
         if (this.update_queued) return;
 
-        VSG.storage.sky_set_texture(this.sky, this.texture, SIZE[this.radiance_size]);
+        VSG.storage.sky_set_texture(this.sky, this.texture, RADIANCE_SIZES[this.radiance_size]);
     }
 
     _generate_sky() {
         this.update_queued = false;
 
-        let w = SIZE[this.texture_size];
+        let w = PROC_TEX_SIZES[this.texture_size];
         let h = w / 2;
 
         let imgdata = new Uint8Array(w * h * 4);
@@ -341,18 +384,20 @@ export class ProceduralSky extends Sky {
                     /* ground */
 
                     let c = (v_angle - HALF_PI) / HALF_PI;
-                    color.copy(ground_horizon_linear).linear_interpolate(ground_bottom_linear, ease(c, this.ground_curve));
+                    ground_horizon_linear.linear_interpolate(ground_bottom_linear, ease(c, this.ground_curve), color);
                     color.r *= this.ground_energy;
                     color.g *= this.ground_energy;
                     color.b *= this.ground_energy;
                 } else {
                     let c = v_angle / HALF_PI;
-                    color.copy(sky_horizon_linear).linear_interpolate(sky_top_linear, ease(1 - c, this.sky_curve));
+                    // color.copy(sky_horizon_linear).linear_interpolate(sky_top_linear, ease(1 - c, this.sky_curve));
+                    let f = ease(1 - c, this.sky_curve);
+                    sky_horizon_linear.linear_interpolate(sky_top_linear, f, color);
                     color.r *= this.sky_energy;
                     color.g *= this.sky_energy;
                     color.b *= this.sky_energy;
 
-                    let sun_angle = rad2deg(Math.cos(clamp(sun.dot(normal), -1, 1)));
+                    let sun_angle = rad2deg(Math.acos(clamp(sun.dot(normal), -1, 1)));
 
                     if (sun_angle < this.sun_angle_min) {
                         color.blend(sun_linear);
@@ -360,9 +405,11 @@ export class ProceduralSky extends Sky {
                         let c2 = (sun_angle - this.sun_angle_min) / (this.sun_angle_max - this.sun_angle_min);
                         c2 = ease(c2, this.sun_curve);
 
-                        color.blend(sun_linear).linear_interpolate(color, c2);
+                        color.blend(sun_linear).linear_interpolate(color, c2, color);
                     }
                 }
+
+                color_exp(color);
 
                 imgdata[(j * w + i) * 4 + 0] = color.r;
                 imgdata[(j * w + i) * 4 + 1] = color.g;
