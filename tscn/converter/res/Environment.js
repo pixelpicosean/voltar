@@ -5,6 +5,8 @@ module.exports = (data) => {
         // background
         bg_mode: data.prop.background_mode,
 
+        sky: data.prop.background_sky,
+
         bg_energy: data.prop.background_energy,
         bg_color: data.prop.background_color,
 

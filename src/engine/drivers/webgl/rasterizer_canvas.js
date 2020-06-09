@@ -314,16 +314,16 @@ export class RasterizerCanvas extends VObject {
                 multimesh_vs, multimesh_fs,
                 [
                     // normal attributes
-                    'position',
-                    'uv',
-                    'color',
+                    { name: 'position', loc: 0 },
+                    { name: 'uv', loc: 1 },
+                    { name: 'color', loc: 2 },
 
                     // instance attributes
-                    'instance_xform0',
-                    'instance_xform1',
-                    'instance_xform2',
-                    'instance_color',
-                    'instance_custom_data',
+                    { name: 'instance_xform0', loc: 3 },
+                    { name: 'instance_xform1', loc: 4 },
+                    { name: 'instance_xform2', loc: 5 },
+                    { name: 'instance_color', loc: 6 },
+                    { name: 'instance_custom_data', loc: 7 },
                 ],
                 [
                     { name: 'projection_matrix', type: 'mat4' },
@@ -356,8 +356,8 @@ export class RasterizerCanvas extends VObject {
             }
             `,
             [
-                "position",
-                "uv",
+                { name: "position", loc: 0 },
+                { name: "uv", loc: 1 },
             ],
             [
                 { name: "copy_section", type: "4f" },
@@ -384,8 +384,8 @@ export class RasterizerCanvas extends VObject {
             }
             `,
             [
-                "position",
-                "uv",
+                { name: "position", loc: 0 },
+                { name: "uv", loc: 1 },
             ],
             [
                 { name: "display_transform", type: "mat4" },
@@ -411,8 +411,8 @@ export class RasterizerCanvas extends VObject {
             }
             `,
             [
-                "position",
-                "uv",
+                { name: "position", loc: 0 },
+                { name: "uv", loc: 1 },
             ],
             [
                 { name: "source", type: "1i" },
@@ -590,7 +590,7 @@ export class RasterizerCanvas extends VObject {
         }
 
         const attribs = parse_attributes_from_code(vs_code)
-            .map(a => a.name)
+            .map((a, i) => ({ name: a.name, loc: i }))
 
         const shader = VSG.storage.shader_create(
             vs_code,

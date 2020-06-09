@@ -9,6 +9,8 @@ import {
     set_binary_pack_list,
 } from 'engine/registry';
 
+import { VSG } from 'engine/servers/visual/visual_server_globals';
+
 import { ResourceLoader } from './io/resource_loader';
 import { decompress } from './io/z';
 
@@ -221,6 +223,8 @@ export class Engine {
             }
 
             complete_callback && complete_callback();
+
+            VSG.storage.update_onload_update_list();
         });
     }
 }

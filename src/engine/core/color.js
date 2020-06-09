@@ -155,6 +155,30 @@ export class Color {
         return Color.new().copy(this);
     }
 
+    to_linear() {
+        let r = this._rgb[0];
+        let g = this._rgb[1];
+        let b = this._rgb[2];
+        return Color.new().set(
+            r < 0.04045 ? r * (1.0 / 12.92) : Math.pow((r + 0.055) * (1.0 / (1 + 0.055)), 2.4),
+            g < 0.04045 ? g * (1.0 / 12.92) : Math.pow((g + 0.055) * (1.0 / (1 + 0.055)), 2.4),
+            b < 0.04045 ? b * (1.0 / 12.92) : Math.pow((b + 0.055) * (1.0 / (1 + 0.055)), 2.4),
+            this.a
+        );
+    }
+
+    to_srgb() {
+        let r = this._rgb[0];
+        let g = this._rgb[1];
+        let b = this._rgb[2];
+        return Color.new().set(
+            r < 0.0031308 ? 12.92 * r : (1.0 + 0.055) * Math.pow(r, 1.0 / 2.4) - 0.055,
+            g < 0.0031308 ? 12.92 * g : (1.0 + 0.055) * Math.pow(g, 1.0 / 2.4) - 0.055,
+            b < 0.0031308 ? 12.92 * b : (1.0 + 0.055) * Math.pow(b, 1.0 / 2.4) - 0.055,
+            this.a
+        );
+    }
+
     /**
      * @param {ColorLike} c
      */
@@ -165,6 +189,25 @@ export class Color {
         this.a *= c.a;
 
         return this;
+    }
+
+    /**
+     * @param {ColorLike} p_over
+     */
+    blend(p_over) {
+        let res_a = 0;
+        let sa = 1 - p_over.a;
+        res_a = this.a * sa + p_over.a;
+        if (res_a === 0) {
+            return this.set(0, 0, 0, 0);
+        } else {
+            return this.set(
+                (this.r * this.a * sa + p_over.r * p_over.a) / res_a,
+                (this.g * this.a * sa + p_over.g * p_over.a) / res_a,
+                (this.b * this.a * sa + p_over.b * p_over.a) / res_a,
+                res_a
+            );
+        }
     }
 
     /**

@@ -1,7 +1,9 @@
+import { res_class_map } from 'engine/registry';
 import { lerp, deg2rad, nearest_po2 } from 'engine/core/math/math_funcs';
 import { Vector2, Vector2Like } from 'engine/core/math/vector2';
 import { Vector3 } from 'engine/core/math/vector3';
 import { Rect2 } from 'engine/core/math/rect2';
+import { Basis } from 'engine/core/math/basis';
 import { Transform } from 'engine/core/math/transform';
 import { CameraMatrix } from 'engine/core/math/camera_matrix';
 import { Color } from 'engine/core/color';
@@ -37,7 +39,9 @@ import {
     SpatialMaterial,
 } from 'engine/scene/resources/material';
 import {
+    ARRAY_VERTEX,
     ARRAY_NORMAL,
+    ARRAY_TEX_UV,
     ARRAY_COLOR,
     ARRAY_BONES,
     ARRAY_WEIGHTS,
@@ -54,6 +58,7 @@ import {
     Material_t,
     Light_t,
     Skeleton_t,
+    Sky_t,
 
     BLEND_MODE_MIX,
     BLEND_MODE_ADD,
@@ -125,13 +130,10 @@ export class Environment_t {
     constructor() {
         this.bg_mode = ENV_BG_CLEAR_COLOR;
 
+        /** @type {Sky_t} */
         this.sky = null;
-        this.sky_custom_fov = [0];
-        this.sky_orientation = [
-            1, 0, 0,
-            0, 1, 0,
-            0, 0, 1,
-        ];
+        this.sky_custom_fov = 0;
+        this.sky_orientation = new Basis;
 
         this.bg_energy = [1.0];
         this.bg_color = [0, 0, 0, 1];
@@ -191,6 +193,12 @@ export class Environment_t {
                 if (typeof (value) === "object") {
                     if ("r" in value && "g" in value && "b" in value && "a" in value) {
                         this[k] = [value.r, value.g, value.b, value.a];
+                    } else {
+                        if (value.type === "ProceduralSky" || value.type === "PanoramaSky") {
+                            let sky = /** @type {import('engine/scene/resources/sky').PanoramaSky} */(new (res_class_map[value.type])());
+                            sky._load_data(value);
+                            this[k] = sky.sky;
+                        }
                     }
                 } else if (typeof (value) === "boolean") {
                     this[k] = [value ? 1 : 0];
@@ -514,14 +522,24 @@ const SHADER_DEF = {
 };
 
 const DEFAULT_SPATIAL_ATTRIBS = [
-    'position',
-    'normal',
-    'tangent',
-    'color',
-    'uv',
-    'uv2',
-    'bone_ids',
-    'bone_weights',
+    { name: 'position',     loc: 0 },
+    { name: 'normal',       loc: 1 },
+    { name: 'tangent',      loc: 2 },
+    { name: 'color',        loc: 3 },
+    { name: 'uv',           loc: 4 },
+    { name: 'uv2',          loc: 5 },
+    { name: 'bone_ids',     loc: 6 },
+    { name: 'bone_weights', loc: 7 },
+
+    { name: 'instance_xform_row_0', loc: 8 },
+    { name: 'instance_xform_row_0', loc: 9 },
+    { name: 'instance_xform_row_0', loc: 10 },
+    { name: 'instance_color',       loc: 11 },
+    { name: 'instance_custom_data', loc: 12 },
+
+    { name: 'bone_transform_row_0', loc: 13 },
+    { name: 'bone_transform_row_1', loc: 14 },
+    { name: 'bone_transform_row_2', loc: 15 },
 ]
 
 /**
@@ -619,6 +637,14 @@ const SPATIAL_FEATURES = {
 
 /* spatial shader feature end */
 
+let sky_vertices = new Float32Array(8 * 3);
+let sky_transform_arr = [
+    1, 0, 0, 0,
+    0, 1, 0, 0,
+    0, 0, 1, 0,
+    0, 0, 0, 1,
+]
+
 export class RasterizerScene {
     constructor() {
         /** @type {import('./rasterizer_storage').RasterizerStorage} */
@@ -670,6 +696,9 @@ export class RasterizerScene {
 
             /** @type {Shader_t} */
             current_shader: null,
+
+            /** @type {WebGLBuffer} */
+            sky_verts: null,
 
             /** @type {Object<string, number[]>} */
             uniforms: {
@@ -835,6 +864,13 @@ export class RasterizerScene {
 
         {
             this.effect_blur_shader = new EffectBlurShader;
+        }
+
+        {
+            this.state.sky_verts = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.state.sky_verts);
+            gl.bufferData(gl.ARRAY_BUFFER, sky_vertices, gl.DYNAMIC_DRAW);
+            gl.bindBuffer(gl.ARRAY_BUFFER, null);
         }
 
         gl.frontFace(gl.CW);
@@ -1437,19 +1473,19 @@ export class RasterizerScene {
         if (this.storage.frame.current_rt && this.storage.frame.current_rt.flags.TRANSPARENT) {
             clear_color.set(0, 0, 0, 0);
             this.storage.frame.clear_request = false;
-        } else if (!p_env || p_env.bg_mode === ENV_BG_CLEAR_COLOR || p_env.bg_mode === ENV_BG_SKY) {
+        } else if (!p_env || p_env.bg_mode[0] === ENV_BG_CLEAR_COLOR || p_env.bg_mode[0] === ENV_BG_SKY) {
             if (this.storage.frame.clear_request) {
                 clear_color.copy(this.storage.frame.clear_request_color);
                 this.storage.frame.clear_request = false;
             }
-        } else if (p_env.bg_mode === ENV_BG_CANVAS || p_env.bg_mode === ENV_BG_COLOR || p_env.bg_mode === ENV_BG_COLOR_SKY) {
+        } else if (p_env.bg_mode[0] === ENV_BG_CANVAS || p_env.bg_mode[0] === ENV_BG_COLOR || p_env.bg_mode[0] === ENV_BG_COLOR_SKY) {
             clear_color.set(p_env.bg_color[0], p_env.bg_color[1], p_env.bg_color[2], p_env.bg_color[3]);
             this.storage.frame.clear_request = false;
         } else {
             this.storage.frame.clear_request = false;
         }
 
-        if (!p_env || p_env.bg_mode !== ENV_BG_KEEP) {
+        if (!p_env || p_env.bg_mode[0] !== ENV_BG_KEEP) {
             gl.clearColor(clear_color.r, clear_color.g, clear_color.b, clear_color.a);
             gl.clear(gl.COLOR_BUFFER_BIT);
         }
@@ -1466,10 +1502,20 @@ export class RasterizerScene {
         gl.blendEquation(gl.FUNC_ADD);
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
+        /** @type {Sky_t} */
+        let sky = null;
+        /** @type {WebGLTexture} */
+        let env_radiance_tex = null;
+
         if (p_env) {
-            switch (p_env.bg_mode) {
+            switch (p_env.bg_mode[0]) {
                 case ENV_BG_COLOR_SKY:
                 case ENV_BG_SKY: {
+                    sky = p_env.sky;
+
+                    if (sky) {
+                        env_radiance_tex = sky.radiance;
+                    }
                 } break;
                 case ENV_BG_CAMERA_FEED: {
                 } break;
@@ -1483,7 +1529,11 @@ export class RasterizerScene {
         this.render_list.sort_by_key(false);
         this._render_render_list(this.render_list.elements, this.render_list.element_count, cam_transform, p_cam_projection, p_shadow_atlas, p_env, 0, 0, reverse_cull, false, false);
 
-        // TODO: draw sky
+        if (p_env && p_env.bg_mode[0] == ENV_BG_SKY && (!this.storage.frame.current_rt || !this.storage.frame.current_rt.flags.TRANSPARENT)) {
+            if (sky && sky.panorama) {
+                this._draw_sky(sky, p_cam_projection, cam_transform, false, p_env.sky_custom_fov, p_env.bg_energy[0], p_env.sky_orientation);
+            }
+        }
 
         if (this.storage.frame.current_rt && this.state.used_screen_texture) {
             // copy screen texture
@@ -2307,6 +2357,139 @@ export class RasterizerScene {
     }
 
     /**
+     * @param {Sky_t} p_sky
+     * @param {CameraMatrix} p_projection
+     * @param {Transform} p_transform
+     * @param {boolean} p_vflip
+     * @param {number} p_custom_fov
+     * @param {number} p_energy
+     * @param {Basis} p_sky_orientation
+     */
+    _draw_sky(p_sky, p_projection, p_transform, p_vflip, p_custom_fov, p_energy, p_sky_orientation) {
+        const gl = this.gl;
+
+        gl.depthMask(true);
+        gl.enable(gl.DEPTH_TEST);
+        gl.disable(gl.CULL_FACE);
+        gl.disable(gl.BLEND);
+        gl.depthFunc(gl.LEQUAL);
+
+        let camera = CameraMatrix.new();
+
+        if (p_custom_fov) {
+            let near_plane = p_projection.get_z_near();
+            let far_plane = p_projection.get_z_far();
+            let aspect = p_projection.get_aspect();
+
+            camera.set_perspective(p_custom_fov, aspect, near_plane, far_plane);
+        } else {
+            camera.copy(p_projection);
+        }
+
+        let flip_sign = p_vflip ? -1 : 1;
+
+        sky_vertices[0] = -1;
+        sky_vertices[1] = -flip_sign;
+        sky_vertices[2] = 1;
+
+        sky_vertices[3] = 0;
+        sky_vertices[4] = 1;
+        sky_vertices[5] = 0;
+
+        sky_vertices[6] = 1;
+        sky_vertices[7] = -flip_sign;
+        sky_vertices[8] = 1;
+
+        sky_vertices[9] = 1;
+        sky_vertices[10] = 1;
+        sky_vertices[11] = 0;
+
+        sky_vertices[12] = 1;
+        sky_vertices[13] = flip_sign;
+        sky_vertices[14] = 1;
+
+        sky_vertices[15] = 1;
+        sky_vertices[16] = 0;
+        sky_vertices[17] = 0;
+
+        sky_vertices[18] = -1;
+        sky_vertices[19] = flip_sign;
+        sky_vertices[20] = 1;
+
+        sky_vertices[21] = 0;
+        sky_vertices[22] = 0;
+        sky_vertices[23] = 0;
+
+        let vp_he = camera.get_viewport_half_extents();
+        let zn = p_projection.get_z_near();
+
+        let uv = Vector3.new();
+        for (let i = 0; i < 4; i++) {
+            let idx = (i * 2 + 1) * 3;
+
+            uv.set(
+                sky_vertices[idx + 0],
+                sky_vertices[idx + 1],
+                sky_vertices[idx + 2]
+            );
+
+            uv.x = (uv.x * 2 - 1) * vp_he.x;
+            uv.y = -(uv.y * 2 - 1) * vp_he.y;
+            uv.z = -zn;
+
+            p_transform.basis.xform(uv, uv).normalize();
+            uv.z = -uv.z;
+
+            sky_vertices[idx + 0] = uv.x;
+            sky_vertices[idx + 1] = uv.y;
+            sky_vertices[idx + 2] = uv.z;
+        }
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.state.sky_verts);
+        gl.bufferData(gl.ARRAY_BUFFER, sky_vertices, gl.DYNAMIC_DRAW);
+
+        gl.vertexAttribPointer(ARRAY_VERTEX, 3, gl.FLOAT, false, 3 * 2 * 4, 0);
+        gl.vertexAttribPointer(ARRAY_TEX_UV, 3, gl.FLOAT, false, 3 * 2 * 4, 3 * 4);
+        gl.enableVertexAttribArray(ARRAY_VERTEX);
+        gl.enableVertexAttribArray(ARRAY_TEX_UV);
+
+        let copy = this.storage.shaders.copy;
+        copy.set_conditional("USE_PANORAMA", true);
+        copy.set_conditional("USE_MULTIPLIER", true);
+        copy.set_conditional("USE_CUBEMAP", false);
+        copy.set_conditional("USE_COPY_SECTION", false);
+        copy.set_conditional("USE_CUSTOM_ALPHA", false);
+        copy.bind();
+
+        // set uniforms
+        copy.set_uniform_float("multiplier", p_energy);
+
+        let t = Transform.new();
+        t.basis.copy(p_sky_orientation);
+        t.affine_invert();
+        copy.set_uniform("sky_transform", t.as_array(sky_transform_arr))
+        Transform.free(t);
+
+        // set textures
+        let tex = p_sky.panorama;
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(tex.target, tex.gl_tex);
+
+        gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
+
+        gl.disableVertexAttribArray(ARRAY_VERTEX);
+        gl.disableVertexAttribArray(ARRAY_TEX_UV);
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+        copy.set_conditional("USE_PANORAMA", false);
+        copy.set_conditional("USE_MULTIPLIER", false);
+        copy.set_conditional("USE_CUBEMAP", false);
+
+        Vector3.free(uv);
+        CameraMatrix.free(camera);
+    }
+
+    /**
      * @param {boolean} p_front
      * @param {boolean} p_disabled
      * @param {boolean} p_reverse_cull
@@ -2835,15 +3018,15 @@ export class RasterizerScene {
                 } break;
             }
 
-            this.effect_blur_shader.set_uniform1f('dof_begin', p_env.dof_blur_far_distance[0]);
-            this.effect_blur_shader.set_uniform1f('dof_end', p_env.dof_blur_far_distance[0] + p_env.dof_blur_far_transition[0]);
-            this.effect_blur_shader.set_uniform1f('dof_radius', radius);
-            this.effect_blur_shader.set_uniform2f('pixel_size', 1 / vp_w, 1 / vp_h);
-            this.effect_blur_shader.set_uniform1f('camera_z_near', p_cam_projection.get_z_near());
-            this.effect_blur_shader.set_uniform1f('camera_z_far', p_cam_projection.get_z_far());
+            this.effect_blur_shader.set_uniform_float('dof_begin', p_env.dof_blur_far_distance[0]);
+            this.effect_blur_shader.set_uniform_float('dof_end', p_env.dof_blur_far_distance[0] + p_env.dof_blur_far_transition[0]);
+            this.effect_blur_shader.set_uniform_float('dof_radius', radius);
+            this.effect_blur_shader.set_uniform_vec2('pixel_size', 1 / vp_w, 1 / vp_h);
+            this.effect_blur_shader.set_uniform_float('camera_z_near', p_cam_projection.get_z_near());
+            this.effect_blur_shader.set_uniform_float('camera_z_far', p_cam_projection.get_z_far());
 
             // horizontal
-            this.effect_blur_shader.set_uniform2f('dof_dir', 1, 0);
+            this.effect_blur_shader.set_uniform_vec2('dof_dir', 1, 0);
 
             gl.activeTexture(gl.TEXTURE0);
             gl.bindTexture(gl.TEXTURE_2D, this.storage.frame.current_rt.offscreen_effects[0].gl_color);
@@ -2855,7 +3038,7 @@ export class RasterizerScene {
             this.storage._copy_screen();
 
             // vertical
-            this.effect_blur_shader.set_uniform2f('dof_dir', 0, 1);
+            this.effect_blur_shader.set_uniform_vec2('dof_dir', 0, 1);
 
             gl.activeTexture(gl.TEXTURE0);
             gl.bindTexture(gl.TEXTURE_2D, this.storage.frame.current_rt.offscreen_effects[1].gl_color);
@@ -2900,13 +3083,13 @@ export class RasterizerScene {
                 } break;
             }
 
-            this.effect_blur_shader.set_uniform1f('dof_begin', p_env.dof_blur_near_distance[0]);
-            this.effect_blur_shader.set_uniform1f('dof_end', p_env.dof_blur_near_distance[0] - p_env.dof_blur_near_transition[0]);
-            this.effect_blur_shader.set_uniform2f('dof_dir', 1, 0);
-            this.effect_blur_shader.set_uniform1f('dof_radius', radius);
-            this.effect_blur_shader.set_uniform2f('pixel_size', 1 / vp_w, 1 / vp_h);
-            this.effect_blur_shader.set_uniform1f('camera_z_near', p_cam_projection.get_z_near());
-            this.effect_blur_shader.set_uniform1f('camera_z_far', p_cam_projection.get_z_far());
+            this.effect_blur_shader.set_uniform_float('dof_begin', p_env.dof_blur_near_distance[0]);
+            this.effect_blur_shader.set_uniform_float('dof_end', p_env.dof_blur_near_distance[0] - p_env.dof_blur_near_transition[0]);
+            this.effect_blur_shader.set_uniform_vec2('dof_dir', 1, 0);
+            this.effect_blur_shader.set_uniform_float('dof_radius', radius);
+            this.effect_blur_shader.set_uniform_vec2('pixel_size', 1 / vp_w, 1 / vp_h);
+            this.effect_blur_shader.set_uniform_float('camera_z_near', p_cam_projection.get_z_near());
+            this.effect_blur_shader.set_uniform_float('camera_z_far', p_cam_projection.get_z_far());
 
             // horizontal
 
@@ -2923,13 +3106,13 @@ export class RasterizerScene {
             this.effect_blur_shader.set_conditional("DOF_NEAR_FIRST_TAP", false);
             this.effect_blur_shader.bind();
 
-            this.effect_blur_shader.set_uniform1f('dof_begin', p_env.dof_blur_near_distance[0]);
-            this.effect_blur_shader.set_uniform1f('dof_end', p_env.dof_blur_near_distance[0] - p_env.dof_blur_near_transition[0]);
-            this.effect_blur_shader.set_uniform2f('dof_dir', 0, 1);
-            this.effect_blur_shader.set_uniform1f('dof_radius', radius);
-            this.effect_blur_shader.set_uniform2f('pixel_size', 1 / vp_w, 1 / vp_h);
-            this.effect_blur_shader.set_uniform1f('camera_z_near', p_cam_projection.get_z_near());
-            this.effect_blur_shader.set_uniform1f('camera_z_far', p_cam_projection.get_z_far());
+            this.effect_blur_shader.set_uniform_float('dof_begin', p_env.dof_blur_near_distance[0]);
+            this.effect_blur_shader.set_uniform_float('dof_end', p_env.dof_blur_near_distance[0] - p_env.dof_blur_near_transition[0]);
+            this.effect_blur_shader.set_uniform_vec2('dof_dir', 0, 1);
+            this.effect_blur_shader.set_uniform_float('dof_radius', radius);
+            this.effect_blur_shader.set_uniform_vec2('pixel_size', 1 / vp_w, 1 / vp_h);
+            this.effect_blur_shader.set_uniform_float('camera_z_near', p_cam_projection.get_z_near());
+            this.effect_blur_shader.set_uniform_float('camera_z_far', p_cam_projection.get_z_far());
 
             gl.activeTexture(gl.TEXTURE0);
             gl.bindTexture(gl.TEXTURE_2D, this.storage.frame.current_rt.offscreen_effects[1].gl_color);

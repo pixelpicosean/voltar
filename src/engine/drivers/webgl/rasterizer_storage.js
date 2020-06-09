@@ -1,5 +1,5 @@
 import { SelfList, List } from "engine/core/self_list";
-import { nearest_po2, deg2rad } from "engine/core/math/math_funcs";
+import { nearest_po2, deg2rad, clamp } from "engine/core/math/math_funcs";
 import { Vector2 } from "engine/core/math/vector2";
 import { Vector3 } from "engine/core/math/vector3";
 import { AABB } from "engine/core/math/aabb";
@@ -44,6 +44,7 @@ import {
 } from "engine/servers/visual/visual_server_scene";
 import { VSG } from "engine/servers/visual/visual_server_globals";
 
+import { ARRAY_MAX } from "engine/scene/const";
 import {
     PIXEL_FORMAT_L8,
     PIXEL_FORMAT_LA8,
@@ -62,10 +63,20 @@ import {
     PIXEL_FORMAT_PVRTC4A,
     PIXEL_FORMAT_ETC,
 } from "engine/scene/resources/texture";
-import { ARRAY_MAX } from "engine/scene/const";
+import { CubemapFilterShader } from "./shaders/cubemap_filter";
+import { CopyShader } from "./shaders/copy";
 
 const SMALL_VEC2 = new Vector2(0.00001, 0.00001);
 const SMALL_VEC3 = new Vector3(0.00001, 0.00001, 0.00001);
+
+const _cube_side_enum = [
+    WebGLRenderingContext.TEXTURE_CUBE_MAP_NEGATIVE_X,
+    WebGLRenderingContext.TEXTURE_CUBE_MAP_POSITIVE_X,
+    WebGLRenderingContext.TEXTURE_CUBE_MAP_NEGATIVE_Y,
+    WebGLRenderingContext.TEXTURE_CUBE_MAP_POSITIVE_Y,
+    WebGLRenderingContext.TEXTURE_CUBE_MAP_NEGATIVE_Z,
+    WebGLRenderingContext.TEXTURE_CUBE_MAP_POSITIVE_Z,
+];
 
 /**
  * @param {number} format
@@ -368,7 +379,7 @@ export class Shader_t {
         this.data = {
             vs: '',
             fs: '',
-            /** @type {string[]} */
+            /** @type {{ name: string, loc: number }[]} */
             attrs: [],
             /** @type {{ name: string, type: UniformTypes }[]} */
             uniforms: [],
@@ -589,6 +600,16 @@ export class Skeleton_t {
     }
 }
 
+export class Sky_t {
+    constructor() {
+        /** @type {Texture_t} */
+        this.panorama = null;
+        /** @type {WebGLTexture} */
+        this.radiance = null;
+        this.radiance_size = 0;
+    }
+}
+
 export class RasterizerStorage {
     constructor() {
         /** @type {WebGLRenderingContext} */
@@ -606,6 +627,13 @@ export class RasterizerStorage {
 
         /** @type {List<MultiMesh_t>} */
         this.multimesh_update_list = new List;
+
+        this.shaders = {
+            /** @type {CopyShader} */
+            copy: null,
+            /** @type {CubemapFilterShader} */
+            cubemap_filter: null,
+        };
 
         this.resources = {
             /** @type {ImageTexture} */
@@ -629,6 +657,9 @@ export class RasterizerStorage {
             /** @type {WebGLBuffer} */
             skeleton_transform_buffer: null,
             skeleton_transform_cpu_buffer: new Float32Array(1024 * 8),
+
+            /** @type {WebGLTexture} */
+            radical_inverse_vdc_cache_tex: null,
         };
 
         /**
@@ -643,6 +674,8 @@ export class RasterizerStorage {
 
         /** @type {List<Skeleton_t>} */
         this.skeleton_update_list = new List;
+        /** @type {List<Function>} */
+        this.onload_update_list = new List;
 
         /** @type {import('./rasterizer_canvas').RasterizerCanvas} */
         this.canvas = null;
@@ -719,6 +752,44 @@ export class RasterizerStorage {
             this.resources.skeleton_transform_buffer_size = 0;
             this.resources.skeleton_transform_buffer = gl.createBuffer();
         }
+
+        {
+            this.resources.radical_inverse_vdc_cache_tex = gl.createTexture();
+
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, this.resources.radical_inverse_vdc_cache_tex);
+
+            let radical_inverse = new Uint8Array(512);
+
+            for (let i = 0; i < 512; i++) {
+                let bits = i;
+
+                bits = (bits << 16) | (bits >> 16);
+                bits = ((bits & 0x55555555) << 1) | ((bits & 0xAAAAAAAA) >> 1);
+                bits = ((bits & 0x33333333) << 2) | ((bits & 0xCCCCCCCC) >> 2);
+                bits = ((bits & 0x0F0F0F0F) << 4) | ((bits & 0xF0F0F0F0) >> 4);
+                bits = ((bits & 0x00FF00FF) << 8) | ((bits & 0xFF00FF00) >> 8);
+
+                let value = bits * 2.3283064365386963e-10;
+                radical_inverse[i] = Math.floor(clamp(value * 255, 0, 255));
+            }
+
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, 512, 1, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, radical_inverse);
+            gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+            gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+            gl.bindTexture(gl.TEXTURE_2D, null);
+        }
+
+        {
+            this.resources.mipmap_blur_fbo = gl.createFramebuffer();
+            this.resources.mipmap_blur_color = gl.createTexture();
+        }
+
+        this.shaders.copy = new CopyShader;
+        this.shaders.cubemap_filter = new CubemapFilterShader;
     }
 
     /**
@@ -744,6 +815,14 @@ export class RasterizerStorage {
     _copy_screen() {
         this.bind_quad_array();
         this.gl.drawArrays(this.gl.TRIANGLE_FAN, 0, 4);
+    }
+
+    update_onload_update_list() {
+        while (this.onload_update_list.first()) {
+            let func = this.onload_update_list.first().self();
+            func();
+            this.onload_update_list.remove(this.onload_update_list.first());
+        }
     }
 
     update_dirty_resources() {
@@ -1373,8 +1452,8 @@ export class RasterizerStorage {
     /**
      * @param {string} vs
      * @param {string} fs
-     * @param {string[]} attrs
-     * @param {{ name: string, type: UniformTypes }[]} uniforms
+     * @param {AttribDesc[]} attrs
+     * @param {UniformDesc[]} uniforms
      */
     shader_create(vs, fs, attrs, uniforms) {
         const gl = this.gl;
@@ -1406,7 +1485,7 @@ export class RasterizerStorage {
         gl.attachShader(gl_prog, gl_fs);
 
         for (let i = 0; i < attrs.length; i++) {
-            gl.bindAttribLocation(gl_prog, i, attrs[i]);
+            gl.bindAttribLocation(gl_prog, attrs[i].loc, attrs[i].name);
         }
 
         gl.linkProgram(gl_prog);
@@ -2143,6 +2222,154 @@ export class RasterizerStorage {
      * @param {number} p_size
      */
     _update_skeleton_transform_buffer(p_data, p_size) { }
+
+    /* sky API */
+
+    sky_create() {
+        return new Sky_t;
+    }
+
+    /**
+     * @param {Sky_t} p_sky
+     * @param {Texture_t} p_panorama
+     * @param {number} p_radiance_size
+     */
+    sky_set_texture(p_sky, p_panorama, p_radiance_size) {
+        const gl = this.gl;
+
+        if (p_sky.panorama) {
+            gl.deleteTexture(p_sky.radiance);
+            p_sky.radiance = null;
+        }
+
+        p_sky.panorama = p_panorama;
+        if (!p_sky.panorama) return;
+
+        let texture = p_sky.panorama;
+        if (!texture) {
+            p_sky.panorama = null;
+        }
+
+        {
+            gl.bindBuffer(gl.ARRAY_BUFFER, null);
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+            gl.disable(gl.CULL_FACE);
+            gl.disable(gl.DEPTH_TEST);
+            gl.disable(gl.SCISSOR_TEST);
+            gl.disable(gl.BLEND);
+
+            for (let i = 0; i < ARRAY_MAX; i++) {
+                gl.disableVertexAttribArray(i);
+            }
+        }
+
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(texture.target, texture.gl_tex);
+
+        gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+        gl.activeTexture(gl.TEXTURE1);
+        gl.bindTexture(gl.TEXTURE_2D, this.resources.radical_inverse_vdc_cache_tex);
+
+        gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+        gl.activeTexture(gl.TEXTURE2);
+        p_sky.radiance = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_CUBE_MAP, p_sky.radiance);
+
+        let size = Math.floor(p_radiance_size / 2);
+
+        let internal_format = gl.RGB;
+        let format = gl.RGB;
+        let type = gl.UNSIGNED_BYTE;
+
+        for (let i = 0; i < 6; i++) {
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internal_format, size, size, 0, format, type, null);
+        }
+
+        gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+
+        gl.texParameterf(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameterf(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameterf(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameterf(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.resources.mipmap_blur_fbo);
+
+        let mipmaps = 6;
+        let lod = 0;
+        let mm_level = mipmaps;
+        size = Math.floor(p_radiance_size / 2);
+        let cubemap_filter = this.shaders.cubemap_filter;
+
+        cubemap_filter.set_conditional("USE_SOURCE_PANORAMA", true);
+        cubemap_filter.set_conditional("USE_DIRECT_WRITE", true);
+        cubemap_filter.bind();
+
+        while (size >= 1) {
+            gl.activeTexture(gl.TEXTURE3);
+            gl.bindTexture(gl.TEXTURE_2D, this.resources.mipmap_blur_color);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, size, size, 0, gl.RGB, gl.UNSIGNED_BYTE, null);
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.resources.mipmap_blur_color, 0);
+
+            if (lod === 1) {
+                gl.activeTexture(gl.TEXTURE0);
+                gl.bindTexture(gl.TEXTURE_CUBE_MAP, p_sky.radiance);
+                cubemap_filter.set_conditional("USE_SOURCE_PANORAMA", false);
+                cubemap_filter.set_conditional("USE_DIRECT_WRITE", false);
+                cubemap_filter.bind();
+            }
+            gl.viewport(0, 0, size, size);
+            this.bind_quad_array();
+
+            gl.activeTexture(gl.TEXTURE2);
+
+            for (let i = 0; i < 6; i++) {
+                cubemap_filter.set_uniform_int("face_id", i);
+
+                let roughness = mm_level >= 0 ? lod / (mipmaps - 1) : 1;
+                roughness = Math.min(1.0, roughness);
+                cubemap_filter.set_uniform_float("roughness", roughness);
+
+                gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
+
+                gl.copyTexSubImage2D(_cube_side_enum[i], lod, 0, 0, 0, 0, size, size);
+            }
+
+            size >>= 1;
+
+            mm_level--;
+
+            lod++;
+        }
+
+        cubemap_filter.set_conditional("USE_SOURCE_PANORAMA", false);
+        cubemap_filter.set_conditional("USE_DIRECT_WRITE", false);
+
+        gl.activeTexture(gl.TEXTURE2);
+
+        gl.texParameterf(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameterf(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameterf(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+        gl.texParameterf(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+        gl.bindTexture(gl.TEXTURE_2D, null);
+        gl.activeTexture(gl.TEXTURE3);
+        gl.bindTexture(gl.TEXTURE_2D, null);
+        gl.activeTexture(gl.TEXTURE1);
+        gl.bindTexture(gl.TEXTURE_2D, null);
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, null);
+
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    }
 
     /* others */
 

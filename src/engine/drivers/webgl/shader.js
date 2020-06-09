@@ -4,10 +4,10 @@ export class Shader {
     /**
      * @param {string} vs
      * @param {string} fs
-     * @param {string[]} attribs
-     * @param {{ name: string, type: UniformTypes }[]} uniforms
+     * @param {AttribDesc[]} attribs
+     * @param {UniformDesc[]} uniforms
      * @param {string[]} textures
-     * @param {{ [condition: string]: number }} defines
+     * @param {string[]} defines
      */
     constructor(vs, fs, attribs, uniforms, textures, defines) {
         this.conditional = 0;
@@ -18,7 +18,10 @@ export class Shader {
         this.textures = textures;
 
         /** @type {{ [condition: string]: number }} */
-        this.defines = defines;
+        this.defines = defines.reduce((map, def, idx) => {
+            map[def] = 1 << idx;
+            return map;
+        }, { });
 
         this.current = this.base;
     }
@@ -32,12 +35,36 @@ export class Shader {
         gl.useProgram(gl_prog);
 
         // bind texture locations
-        for (let i = 0; i < this.textures.length; i++) {
+        for (let i = 0, idx = 0; i < this.textures.length; i++) {
             let u = this.current.uniforms[this.textures[i]];
+            if (!u) continue;
+
             if (!u.gl_loc) {
                 u.gl_loc = gl.getUniformLocation(gl_prog, this.textures[i]);
             }
-            gl.uniform1i(u.gl_loc, i);
+            gl.uniform1i(u.gl_loc, idx++);
+        }
+    }
+
+    /**
+     * @param {string} name
+     * @param {number[] | Float32Array} values
+     */
+    set_uniform(name, values) {
+        let u = this.current.uniforms[name];
+        if (u && u.gl_loc) {
+            switch (u.type) {
+                case "1i": VSG.storage.gl.uniform1iv(u.gl_loc, values); break;
+                case "2i": VSG.storage.gl.uniform2iv(u.gl_loc, values); break;
+
+                case "1f": VSG.storage.gl.uniform1fv(u.gl_loc, values); break;
+                case "2f": VSG.storage.gl.uniform2fv(u.gl_loc, values); break;
+                case "3f": VSG.storage.gl.uniform3fv(u.gl_loc, values); break;
+                case "4f": VSG.storage.gl.uniform4fv(u.gl_loc, values); break;
+
+                case "mat3": VSG.storage.gl.uniformMatrix3fv(u.gl_loc, false, values); break;
+                case "mat4": VSG.storage.gl.uniformMatrix4fv(u.gl_loc, false, values); break;
+            }
         }
     }
 
@@ -45,7 +72,7 @@ export class Shader {
      * @param {string} name
      * @param {number} value
      */
-    set_uniform1i(name, value) {
+    set_uniform_int(name, value) {
         let u = this.current.uniforms[name];
         if (u && u.gl_loc) {
             VSG.storage.gl.uniform1i(u.gl_loc, value);
@@ -56,7 +83,7 @@ export class Shader {
      * @param {number} x
      * @param {number} y
      */
-    set_uniform2i(name, x, y) {
+    set_uniform_ivec2(name, x, y) {
         let u = this.current.uniforms[name];
         if (u && u.gl_loc) {
             VSG.storage.gl.uniform2i(u.gl_loc, x, y);
@@ -66,7 +93,7 @@ export class Shader {
      * @param {string} name
      * @param {number} value
      */
-    set_uniform1f(name, value) {
+    set_uniform_float(name, value) {
         let u = this.current.uniforms[name];
         if (u && u.gl_loc) {
             VSG.storage.gl.uniform1f(u.gl_loc, value);
@@ -77,7 +104,7 @@ export class Shader {
      * @param {number} x
      * @param {number} y
      */
-    set_uniform2f(name, x, y) {
+    set_uniform_vec2(name, x, y) {
         let u = this.current.uniforms[name];
         if (u && u.gl_loc) {
             VSG.storage.gl.uniform2f(u.gl_loc, x, y);
@@ -89,7 +116,7 @@ export class Shader {
      * @param {number} y
      * @param {number} z
      */
-    set_uniform3f(name, x, y, z) {
+    set_uniform_vec3(name, x, y, z) {
         let u = this.current.uniforms[name];
         if (u && u.gl_loc) {
             VSG.storage.gl.uniform3f(u.gl_loc, x, y, z);
@@ -102,10 +129,32 @@ export class Shader {
      * @param {number} z
      * @param {number} w
      */
-    set_uniform4f(name, x, y, z, w) {
+    set_uniform_vec4(name, x, y, z, w) {
         let u = this.current.uniforms[name];
         if (u && u.gl_loc) {
             VSG.storage.gl.uniform4f(u.gl_loc, x, y, z, w);
+        }
+    }
+
+    /**
+     * @param {string} name
+     * @param {number[] | Float32Array} values
+     */
+    set_uniform_mat3(name, values) {
+        let u = this.current.uniforms[name];
+        if (u && u.gl_loc) {
+            VSG.storage.gl.uniformMatrix3fv(u.gl_loc, false, values);
+        }
+    }
+
+    /**
+     * @param {string} name
+     * @param {number[] | Float32Array} values
+     */
+    set_uniform_mat4(name, values) {
+        let u = this.current.uniforms[name];
+        if (u && u.gl_loc) {
+            VSG.storage.gl.uniformMatrix4fv(u.gl_loc, false, values);
         }
     }
 

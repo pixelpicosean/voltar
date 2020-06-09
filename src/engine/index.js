@@ -64,6 +64,8 @@ export * from 'engine/scene/resources/theme';
 export * from 'engine/scene/resources/curve';
 export * from 'engine/scene/resources/material';
 export * from 'engine/scene/resources/mesh';
+export * from 'engine/scene/resources/skin';
+export * from 'engine/scene/resources/sky';
 export * from 'engine/scene/resources/primitive_meshes';
 export * from 'engine/scene/resources/world';
 

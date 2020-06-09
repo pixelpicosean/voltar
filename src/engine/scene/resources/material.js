@@ -2,12 +2,6 @@ import { res_class_map } from "engine/registry";
 import { VSG } from "engine/servers/visual/visual_server_globals";
 import { parse_shader_code } from "engine/drivers/webgl/shader_parser";
 
-/**
- * @typedef {import('engine/drivers/webgl/rasterizer_storage').Material_t} Material_t
- * @typedef {import('engine/drivers/webgl/rasterizer_storage').Texture_t} Texture_t
- * @typedef {import('engine/drivers/webgl/rasterizer_storage').UniformTypes} UniformTypes
- */
-
 let mat_uid = 0;
 export class Material {
     get class() { return "Material" }
@@ -17,7 +11,7 @@ export class Material {
 
         this.name = '';
 
-        /** @type {Material_t} */
+        /** @type {import('engine/drivers/webgl/rasterizer_storage').Material_t} */
         this.material = null;
         /** @type {Material} */
         this.next_pass = null;
@@ -47,9 +41,9 @@ export class ShaderMaterial extends Material {
         this.uses_screen_texture = false;
         this.uses_custom_light = false;
 
-        /** @type {{ name: string, type: UniformTypes, value?: number[] | Texture_t }[]} */
+        /** @type {{ name: string, type: UniformTypes, value?: number[] | import('engine/drivers/webgl/rasterizer_storage').Texture_t }[]} */
         this.uniforms = [];
-        /** @type {{ [name: string]: Texture_t }} */
+        /** @type {{ [name: string]: import('engine/drivers/webgl/rasterizer_storage').Texture_t }} */
         this.texture_hints = {};
 
         this.vs_code = "";
@@ -112,7 +106,7 @@ export class SpatialMaterial extends Material {
     constructor() {
         super();
 
-        /** @type {Material_t} */
+        /** @type {import('engine/drivers/webgl/rasterizer_storage').Material_t} */
         this.material = null;
     }
     /**
@@ -124,7 +118,7 @@ export class SpatialMaterial extends Material {
 
         /** @type {{ [name: string]: number[] }} */
         let params = {};
-        /** @type {{ [name: string]: Texture_t }} */
+        /** @type {{ [name: string]: import('engine/drivers/webgl/rasterizer_storage').Texture_t }} */
         let textures = {};
 
         for (let k in data) {
