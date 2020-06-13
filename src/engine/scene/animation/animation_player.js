@@ -34,17 +34,22 @@ import {
     UPDATE_CAPTURE,
     UPDATE_DISCRETE,
     BezierTrack,
+    AnimationTrack,
 } from './animation';
 import { Transform } from 'engine/core/math/transform';
 import { Vector3 } from 'engine/core/math/vector3';
 import { Quat } from 'engine/core/math/basis';
 
 
-/**
- * @typedef NodeCache
- * @property {Node} node
- * @property {{ [name: string]: number }} bone_ids
- */
+class NodeCache {
+    constructor() {
+        /** @type {Node} */
+        this.node = null;
+        /** @type {{ [name: string]: number }} */
+        this.bone_ids = {};
+        this.animation_playing = false;
+    }
+}
 
 export const ANIMATION_PROCESS_PHYSICS = 0;
 export const ANIMATION_PROCESS_IDLE = 1;
@@ -533,6 +538,9 @@ class BezierAnim {
     }
 }
 
+/** @type {number[]} */
+let indices = [];
+
 export class AnimationPlayer extends Node {
     get class() { return 'AnimationPlayer' }
 
@@ -644,6 +652,9 @@ export class AnimationPlayer extends Node {
 
         /** @type {Map<string, BezierAnim>} */
         this.bezier_anim = null;
+
+        /** @type {Set<NodeCache>} */
+        this.playing_caches = new Set;
     }
 
     /* virtual */
@@ -1197,21 +1208,21 @@ export class AnimationPlayer extends Node {
                     }
                 } break;
                 case TRACK_TYPE_METHOD: {
-                    if (p_seeked) break;
+                    if (p_delta == 0) continue;
+                    if (!is_current) break;
+
+                    indices.length = 0;
+                    a.track_get_key_indices_in_range(i, p_time, p_delta, indices);
+
                     const t = /** @type {MethodTrack} */(track);
-                    for (let i = 0; i < t.methods.length; i++) {
-                        const k = t.methods[i];
-                        if (
-                            ((p_delta > 0) && (p_time < k.time && k.time < p_time + p_delta))
-                            ||
-                            ((p_delta < 0) && (k.time < p_time && p_time + p_delta < k.time))
-                        ) {
-                            if (can_call) {
-                                if (this.method_call_mode === ANIMATION_METHOD_CALL_DEFERRED) {
-                                    MessageQueue.get_singleton().push_call(node, k.value.method, ...k.value.args);
-                                } else {
-                                    node[k.value.method].apply(node, k.value.args);
-                                }
+                    for (let i of indices) {
+                        let k = t.methods[i];
+
+                        if (can_call) {
+                            if (this.method_call_mode === ANIMATION_METHOD_CALL_DEFERRED) {
+                                MessageQueue.get_singleton().push_call(node, k.value.method, ...k.value.args);
+                            } else {
+                                node[k.value.method].apply(node, k.value.args);
                             }
                         }
                     }
@@ -1220,14 +1231,60 @@ export class AnimationPlayer extends Node {
                     // TODO: bezier track support
                 } break;
                 case TRACK_TYPE_ANIMATION: {
-                    if (node.class !== 'AnimationPlayer') {
+                    let player = /** @type {AnimationPlayer} */(node);
+                    if (player.class != 'AnimationPlayer') {
                         continue;
                     }
-                    const player = /** @type {AnimationPlayer} */(node);
+
                     if (p_delta === 0 || p_seeked) {
                         // seek
+                        let idx = a.track_find_key(i, p_time);
+                        if (idx < 0) continue;
+
+                        let pos = a.track_get_key_time(i, idx);
+
+                        let anim_name = a.animation_track_get_key_animation(i, idx);
+                        if (anim_name == "[stop]" || !player.has_animation(anim_name)) continue;
+
+                        let anim = player.get_animation(anim_name);
+
+                        let at_anim_pos = 0;
+
+                        if (anim.loop) {
+                            at_anim_pos = posmod(p_time - pos, anim.length);
+                        } else {
+                            at_anim_pos = Math.max(anim.length, p_time - pos);
+                        }
+
+                        if (player.is_playing() || p_seeked) {
+                            player.play(anim_name);
+                            player.seek(at_anim_pos);
+                            nc.animation_playing = true;
+                            this.playing_caches.add(nc);
+                        } else {
+                            player.current_animation = anim_name;
+                            player.seek(at_anim_pos, true);
+                        }
+                    } else {
+                        indices.length = 0;
+                        a.track_get_key_indices_in_range(i, p_time, p_delta, indices);
+                        if (indices.length) {
+                            let idx = indices[indices.length - 1];
+
+                            let anim_name = a.animation_track_get_key_animation(i, idx);
+                            if (anim_name == "[stop]" || !player.has_animation(anim_name)) {
+                                if (this.playing_caches.has(nc)) {
+                                    this.playing_caches.delete(nc);
+                                    player.stop();
+                                    nc.animation_playing = false;
+                                }
+                            } else {
+                                player.play(anim_name);
+                                nc.animation_playing = true;
+                                this.playing_caches.add(nc);
+                            }
+                        }
                     }
-                    // TODO: animation track support
                 } break;
             }
         }
@@ -1263,10 +1320,8 @@ export class AnimationPlayer extends Node {
             let target_path = anim_path_without_prop(track.path);
             let nc = anim.node_cache[target_path];
             if (!nc) {
-                nc = anim.node_cache[target_path] = {
-                    node: child,
-                    bone_ids: { },
-                };
+                nc = anim.node_cache[target_path] = new NodeCache;
+                nc.node = child;
             }
             if (child.is_skeleton) {
                 nc.bone_ids[prop_name] = /** @type {import('engine/scene/3d/skeleton').Skeleton} */(child).find_bone(prop_name);

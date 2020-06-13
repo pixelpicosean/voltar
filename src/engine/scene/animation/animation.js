@@ -3,6 +3,8 @@ import { Vector2 } from "engine/core/math/vector2";
 import { Vector3 } from "engine/core/math/vector3";
 import { Transform } from "engine/core/math/transform";
 import { Quat } from "engine/core/math/basis";
+import { is_equal_approx, posmod } from "engine/core/math/math_funcs";
+import { TYPE_TRANSFORM } from "engine/servers/visual/commands";
 
 
 export const TRACK_TYPE_VALUE = 0;      // value
@@ -268,6 +270,20 @@ export class AnimationTrack extends Track {
         /** @type Key<string>[] */
         this.values = [];
     }
+    load(data) {
+        super.load(data);
+
+        this.values.length = 0;
+        for (let i = 0; i < data.keys.times.length; i++) {
+            /** @type {Key<string>} */
+            let key = new Key;
+            key.time = data.keys.times[i];
+            key.value = data.keys.values[i];
+            this.values.push(key);
+        }
+
+        return this;
+    }
 }
 
 export class Animation {
@@ -319,7 +335,203 @@ export class Animation {
         this.length = 1;
     }
 
-    // We don't provide more methods since they are not useful,
-    // so we can save some bytes here.
+    /**
+     * @param {number} p_track
+     * @param {number} p_time
+     * @param {boolean} [p_exact]
+     */
+    track_find_key(p_track, p_time, p_exact = false) {
+        let t = this.tracks[p_track];
+        switch (t.type) {
+            case TRACK_TYPE_VALUE:
+            case TRACK_TYPE_TRANSFORM:
+            case TRACK_TYPE_ANIMATION: {
+                let vt = /** @type {ValueTrack} */(t);
+                let k = this._find(vt.values, p_time);
+                if (k < 0 || k >= vt.values.length) {
+                    return -1;
+                }
+                if (vt.values[k].time !== p_time && p_exact) {
+                    return -1;
+                }
+                return k;
+            };
+            case TRACK_TYPE_METHOD: {
+                let mt = /** @type {MethodTrack} */(t);
+                let k = this._find(mt.methods, p_time);
+                if (k < 0 || k >= mt.methods.length) {
+                    return -1;
+                }
+                if (mt.methods[k].time !== p_time && p_exact) {
+                    return -1;
+                }
+                return k;
+            };
+        }
+        return -1;
+    }
+
+    /**
+     * @param {number} p_track
+     * @param {number} p_key_idx
+     */
+    track_get_key_time(p_track, p_key_idx) {
+        let t = this.tracks[p_track];
+        switch (t.type) {
+            case TRACK_TYPE_VALUE:
+            case TRACK_TYPE_TRANSFORM:
+            case TRACK_TYPE_ANIMATION: {
+                return /** @type {ValueTrack} */(t).values[p_key_idx].time;
+            };
+            case TRACK_TYPE_METHOD: {
+                return /** @type {MethodTrack} */(t).methods[p_key_idx].time;
+            };
+        }
+        return -1;
+    }
+
+    /**
+     * @param {number} p_track
+     * @param {number} p_key
+     */
+    animation_track_get_key_animation(p_track, p_key) {
+        let at = /** @type {AnimationTrack} */(this.tracks[p_track]);
+        if (at.type != TRACK_TYPE_ANIMATION) return "";
+
+        return at.values[p_key].value;
+    }
+
+    /**
+     * @param {number} p_track
+     * @param {number} p_time
+     * @param {number} p_delta
+     * @param {number[]} p_indices
+     */
+    track_get_key_indices_in_range(p_track, p_time, p_delta, p_indices) {
+        let t = this.tracks[p_track];
+
+        let from_time = p_time - p_delta;
+        let to_time = p_time;
+
+        if (from_time > to_time) {
+            let t = from_time;
+            from_time = to_time;
+            to_time = t;
+        }
+
+        if (this.loop) {
+            if (from_time > this.length || from_time < 0) {
+                from_time = posmod(from_time, this.length);
+            }
+            if (to_time > this.length || to_time < 0) {
+                to_time = posmod(to_time, this.length);
+            }
+
+            if (from_time > to_time) {
+                switch (t.type) {
+                    case TRACK_TYPE_VALUE:
+                    case TRACK_TYPE_TRANSFORM:
+                    case TRACK_TYPE_ANIMATION: {
+                        let vt = /** @type {ValueTrack} */(t);
+                        this._track_get_key_indices_in_range(vt.values, from_time, this.length, p_indices);
+                        this._track_get_key_indices_in_range(vt.values, 0, to_time, p_indices);
+                    } break;
+                    case TRACK_TYPE_METHOD: {
+                        let mt = /** @type {MethodTrack} */(t);
+                        this._track_get_key_indices_in_range(mt.methods, from_time, this.length, p_indices);
+                        this._track_get_key_indices_in_range(mt.methods, 0, to_time, p_indices);
+                    } break;
+                }
+                return;
+            } else {
+                if (from_time < 0) {
+                    from_time = 0;
+                }
+                if (from_time > this.length) {
+                    from_time = this.length;
+                }
+
+                if (to_time < 0) {
+                    to_time = 0;
+                }
+                if (to_time > this.length) {
+                    to_time = this.length;
+                }
+            }
+
+            switch (t.type) {
+                case TRACK_TYPE_VALUE:
+                case TRACK_TYPE_TRANSFORM:
+                case TRACK_TYPE_ANIMATION: {
+                    let vt = /** @type {ValueTrack} */(t);
+                    this._track_get_key_indices_in_range(vt.values, from_time, to_time, p_indices);
+                } break;
+                case TRACK_TYPE_METHOD: {
+                    let mt = /** @type {MethodTrack} */(t);
+                    this._track_get_key_indices_in_range(mt.methods, from_time, to_time, p_indices);
+                } break;
+            }
+        }
+    }
+
+    /**
+     * @template T
+     * @param {Key<T>[]} p_array
+     * @param {number} from_time
+     * @param {number} to_time
+     * @param {number[]} p_indices
+     */
+    _track_get_key_indices_in_range(p_array, from_time, to_time, p_indices) {
+        if (from_time != this.length && to_time == this.length) {
+            to_time = this.length * 1.01;
+        }
+
+        let to = this._find(p_array, to_time);
+        if (to >= 0 && p_array[to].time >= to_time) {
+            to--;
+        }
+        if (to < 0) return;
+
+        let from = this._find(p_array, from_time);
+        if (from < 0 || p_array[from].time < from_time) {
+            from++;
+        }
+
+        for (let i = from; i <= to; i++) {
+            p_indices.push(i);
+        }
+    }
+
+    /**
+     * @template T
+     * @param {Key<T>[]} p_keys
+     * @param {number} p_time
+     */
+    _find(p_keys, p_time) {
+        let len = p_keys.length;
+        if (len == 0) return -2;
+
+        let low = 0;
+        let high = len - 1;
+        let middle = 0;
+
+        while (low <= high) {
+            middle = Math.floor((low + high) / 2);
+
+            if (is_equal_approx(p_time, p_keys[middle].time)) {
+                return middle;
+            } else if (p_time < p_keys[middle].time) {
+                high = middle - 1;
+            } else {
+                low = middle + 1;
+            }
+        }
+
+        if (p_keys[middle].time > p_time) {
+            middle--;
+        }
+
+        return middle;
+    }
 }
 res_class_map['Animation'] = Animation

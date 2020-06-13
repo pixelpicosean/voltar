@@ -2,6 +2,7 @@ const _ = require('lodash');
 const {
     NodePath,
     PoolRealArray,
+    PoolStringArray,
     GeneralArray,
     MethodArray,
 } = require('../../parser/type_converters');
@@ -58,6 +59,10 @@ module.exports = (data) => {
             times = PoolRealArray(keys_data.times);
             transitions = PoolRealArray(keys_data.transitions);
             values = MethodArray(keys_data.values);
+        } else if (track_type === 'animation') {
+            times = PoolRealArray(keys_data.times);
+            transitions = PoolRealArray(keys_data.transitions);
+            values = PoolStringArray(keys_data.clips);
         } else {
             times = PoolRealArray(keys_data.times);
             transitions = PoolRealArray(keys_data.transitions);

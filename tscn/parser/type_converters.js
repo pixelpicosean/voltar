@@ -379,6 +379,29 @@ module.exports.NodePath = (node_path) => {
 
 /**
  * @param {any} arr
+ * @returns {string[]}
+ */
+module.exports.PoolStringArray = (arr) => {
+    if (Array.isArray(arr)) {
+        let result = arr.map((value) => module.exports.string(value));
+        result.__meta__ = {
+            func: 'PoolStringArray',
+        }
+        return result;
+    }
+
+    if (typeof (arr) === 'string') {
+        let result = get_function_params(arr).map(module.exports.string);
+        result.__meta__ = {
+            func: 'PoolStringArray',
+        }
+        return result;
+    }
+
+    return undefined;
+};
+/**
+ * @param {any} arr
  * @returns {number[]}
  */
 module.exports.PoolIntArray = (arr) => {
