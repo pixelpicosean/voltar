@@ -833,7 +833,7 @@ export class RasterizerScene {
             if (VSG.config.use_rgba_3d_shadows) {
                 this.directional_shadow.gl_depth = gl.createRenderbuffer();
                 gl.bindRenderbuffer(gl.RENDERBUFFER, this.directional_shadow.gl_depth);
-                gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, this.directional_shadow.size, this.directional_shadow.size);
+                gl.renderbufferStorage(gl.RENDERBUFFER, VSG.config.depth_buffer_internalformat, this.directional_shadow.size, this.directional_shadow.size);
                 gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, this.directional_shadow.gl_depth);
 
                 this.directional_shadow.gl_color = gl.createTexture();
