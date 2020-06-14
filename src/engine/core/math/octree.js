@@ -360,7 +360,7 @@ export class Octree {
      * @param {number} p_mask
      */
     cull_convex(p_convex, p_result_array, p_result_max, p_mask = 0xFFFFFFFF) {
-        if (!this.root) return 0;
+        if (!this.root || p_convex.length == 0) return 0;
 
         this.pass++;
         let result = {

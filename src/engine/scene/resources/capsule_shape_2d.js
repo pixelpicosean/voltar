@@ -46,7 +46,7 @@ export class CapsuleShape2D extends Shape2D {
      * @param {number} value
      */
     set_height(value) {
-        this._height = value;
+        this._height = value < 0 ? 0 : value;
         this._update_shape();
     }
 

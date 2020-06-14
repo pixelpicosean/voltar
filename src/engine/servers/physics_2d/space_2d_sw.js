@@ -1033,6 +1033,8 @@ export class Space2DSW {
      * @param {Space2DSW} p_self
      */
     _broadphase_pair(A, p_subindex_A, B, p_subindex_B, p_self) {
+        if (!A.test_collision_mask(B)) return null;
+
         let type_A = A.type;
         let type_B = B.type;
         if (type_A > type_B) {
@@ -1070,6 +1072,8 @@ export class Space2DSW {
      * @param {Space2DSW} p_self
      */
     _broadphase_unpair(A, p_subindex_A, B, p_subindex_B, p_data, p_self) {
+        if (!p_data) return;
+
         p_self.collision_pairs--;
         p_data.free();
     }

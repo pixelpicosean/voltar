@@ -15,6 +15,7 @@ import {
 import { Node2D } from "./node_2d";
 import { CPUParticles2D } from "./cpu_particles_2d";
 import { NOTIFICATION_TRANSFORM_CHANGED } from "../const";
+import { AnimatedSprite } from "./animated_sprite";
 
 
 export class VisibilityNotifier2D extends Node2D {
@@ -114,24 +115,41 @@ export class VisibilityNotifier2D extends Node2D {
 node_class_map['VisibilityEnabler2D'] = GDCLASS(VisibilityNotifier2D, Node2D)
 
 
+export const ENABLER_PAUSE_ANIMATIONS = 0;
+export const ENABLER_FREEZE_BODIES = 1;
+export const ENABLER_PAUSE_PARTICLES = 2;
+export const ENABLER_PARENT_PROCESS = 3;
+export const ENABLER_PARENT_PHYSICS_PROCESS = 4;
+export const ENABLER_PAUSE_ANIMATED_SPRITES = 5;
+
 export class VisibilityEnabler2D extends VisibilityNotifier2D {
     get class() { return 'VisibilityEnabler2D' }
     constructor() {
         super();
 
-        this.freeze_bodies = true;
-        this.pause_animated_sprites = true;
-        this.pause_animations = true;
-        this.pause_particles = true;
-        this.physics_process_parent = false;
-        this.process_parent = false;
-
         this.visible = false;
+        this.enabler = [
+            true,
+            true,
+            true,
+            false,
+            false,
+            true,
+        ];
 
         /**
          * @type {Map<Node, any>}
          */
         this.nodes = new Map();
+    }
+
+    /**
+     * @param {number} p_enabler
+     * @param {boolean} p_enable
+     */
+    set_enabler(p_enabler, p_enable) {
+        this.enabler[p_enabler] = p_enable;
+        return this;
     }
 
     /* virtual */
@@ -140,22 +158,22 @@ export class VisibilityEnabler2D extends VisibilityNotifier2D {
         super._load_data(data);
 
         if (data.freeze_bodies !== undefined) {
-            this.freeze_bodies = data.freeze_bodies;
+            this.set_enabler(ENABLER_FREEZE_BODIES, data.freeze_bodies);
         }
         if (data.pause_animated_sprites !== undefined) {
-            this.pause_animated_sprites = data.pause_animated_sprites;
+            this.set_enabler(ENABLER_PAUSE_ANIMATED_SPRITES, data.pause_animated_sprites);
         }
         if (data.pause_animations !== undefined) {
-            this.pause_animations = data.pause_animations;
+            this.set_enabler(ENABLER_PAUSE_ANIMATIONS, data.pause_animations);
         }
         if (data.pause_particles !== undefined) {
-            this.pause_particles = data.pause_particles;
+            this.set_enabler(ENABLER_PAUSE_PARTICLES, data.pause_particles);
         }
         if (data.physics_process_parent !== undefined) {
-            this.physics_process_parent = data.physics_process_parent;
+            this.set_enabler(ENABLER_PARENT_PHYSICS_PROCESS, data.physics_process_parent);
         }
         if (data.process_parent !== undefined) {
-            this.process_parent = data.process_parent;
+            this.set_enabler(ENABLER_PARENT_PROCESS, data.process_parent);
         }
 
         return this;
@@ -174,17 +192,17 @@ export class VisibilityEnabler2D extends VisibilityNotifier2D {
 
             this._find_nodes(from);
 
-            const parent = this.get_parent();
-            if (this.physics_process_parent && parent) {
-                parent.set_physics_process(false);
+            let parent = this.get_parent();
+            if (this.enabler[ENABLER_PARENT_PHYSICS_PROCESS] && parent) {
+                parent.connect_once('_ready', parent.set_physics_process.bind(parent, false));
             }
-            if (this.process_parent && parent) {
-                parent.set_process(false);
+            if (this.enabler[ENABLER_PARENT_PROCESS] && parent) {
+                parent.connect_once('_ready', parent.set_process.bind(parent, false));
             }
         }
 
         if (p_what === NOTIFICATION_EXIT_TREE) {
-            for (const [E_key, E_get] of this.nodes) {
+            for (let [E_key, E_get] of this.nodes) {
                 if (!this.visible) {
                     this._change_node_state(E_key, true);
                 }
@@ -201,30 +219,22 @@ export class VisibilityEnabler2D extends VisibilityNotifier2D {
     _find_nodes(p_node) {
         let add = false;
 
-        if (this.freeze_bodies) {
-            // TODO: freeze RigidBody2D
+        // TODO: freeze RigidBody2D
+
+        if (p_node.class === 'AnimationPlayer') {
+            add = true;
         }
 
-        if (this.pause_animations) {
-            if (p_node.class === 'AnimationPlayer') {
-                add = true;
-            }
+        if (p_node.class === 'AnimatedSprite') {
+            add = true;
         }
 
-        if (this.pause_animated_sprites) {
-            if (p_node.class === 'AnimatedSprite') {
-                add = true;
-            }
-        }
-
-        if (this.pause_particles) {
-            if (p_node.class === 'Particle') {
-                add = true;
-            }
+        if (p_node.class === 'Particle') {
+            add = true;
         }
 
         if (add) {
-            p_node.connect('tree_exiting', this._node_removed, this);
+            p_node.connect_once('tree_exiting', this._node_removed.bind(this, p_node));
             this.nodes.set(p_node, {});
             this._change_node_state(p_node, false);
         }
@@ -243,11 +253,12 @@ export class VisibilityEnabler2D extends VisibilityNotifier2D {
             this._change_node_state(E_key, true);
         }
 
-        if (this.physics_process_parent) {
-            this.get_parent().set_physics_process(true);
+        let parent = this.get_parent();
+        if (this.enabler[ENABLER_PARENT_PHYSICS_PROCESS] && parent) {
+            parent.set_physics_process(true);
         }
-        if (this.process_parent) {
-            this.get_parent().set_process(true);
+        if (this.enabler[ENABLER_PARENT_PROCESS] && parent) {
+            parent.set_process(true);
         }
 
         this.visible = true;
@@ -257,11 +268,12 @@ export class VisibilityEnabler2D extends VisibilityNotifier2D {
             this._change_node_state(E_key, false);
         }
 
-        if (this.physics_process_parent) {
-            this.get_parent().set_physics_process(false);
+        let parent = this.get_parent();
+        if (this.enabler[ENABLER_PARENT_PHYSICS_PROCESS] && parent) {
+            parent.set_physics_process(false);
         }
-        if (this.process_parent) {
-            this.get_parent().set_process(false);
+        if (this.enabler[ENABLER_PARENT_PROCESS] && parent) {
+            parent.set_process(false);
         }
 
         this.visible = false;
@@ -272,21 +284,32 @@ export class VisibilityEnabler2D extends VisibilityNotifier2D {
      * @param {boolean} p_enabled
      */
     _change_node_state(p_node, p_enabled) {
-        if (p_node.class === 'RigidBody2D') {
-            // TODO: sleep RigidBody2D
+        if (this.enabler[ENABLER_FREEZE_BODIES]) {
+            if (p_node.class === 'RigidBody2D') {
+                // TODO: sleep RigidBody2D
+            }
         }
-        if (p_node.class === 'AnimationPlayer') {
-            /** @type {AnimationPlayer} */(p_node).playback_active = p_enabled;
+
+        if (this.enabler[ENABLER_PAUSE_ANIMATIONS]) {
+            if (p_node.class === 'AnimationPlayer') {
+                /** @type {AnimationPlayer} */(p_node).playback_active = p_enabled;
+            }
         }
-        if (p_node.class === 'AnimatedSprite') {
-            // if (p_enabled) {
-            //     /** @type {AnimatedSprite} */ (p_node).play();
-            // } else {
-            //     /** @type {AnimatedSprite} */ (p_node).stop();
-            // }
+
+        if (this.enabler[ENABLER_PAUSE_ANIMATED_SPRITES]) {
+            if (p_node.class === 'AnimatedSprite') {
+                if (p_enabled) {
+                    /** @type {AnimatedSprite} */ (p_node).play();
+                } else {
+                    /** @type {AnimatedSprite} */ (p_node).stop();
+                }
+            }
         }
-        if (p_node.class === 'CPUParticle2D') {
-            /** @type {CPUParticles2D} */(p_node).emitting = p_enabled;
+
+        if (this.enabler[ENABLER_PAUSE_PARTICLES]) {
+            if (p_node.class === 'CPUParticle2D') {
+                /** @type {CPUParticles2D} */(p_node).emitting = p_enabled;
+            }
         }
     }
 
