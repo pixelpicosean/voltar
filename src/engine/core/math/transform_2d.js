@@ -102,13 +102,14 @@ export class Transform2D {
      * @param {Vector2Like} scale
      */
     set_scale(scale) {
-        const vec = Vector2.new();
+        let vec = Vector2.new();
         vec.set(this.a, this.b).normalize();
         this.a = vec.x * scale.x;
         this.b = vec.y * scale.x;
         vec.set(this.c, this.d).normalize();
         this.c = vec.x * scale.y;
         this.d = vec.y * scale.y;
+        Vector2.free(vec);
         return this;
     }
     /**
@@ -116,13 +117,14 @@ export class Transform2D {
      * @param {number} y
      */
     set_scale_n(x, y) {
-        const vec = Vector2.new();
+        let vec = Vector2.new();
         vec.set(this.a, this.b).normalize();
         this.a = vec.x * x;
         this.b = vec.y * x;
         vec.set(this.c, this.d).normalize();
         this.c = vec.x * y;
         this.d = vec.y * y;
+        Vector2.free(vec);
         return this;
     }
 
@@ -137,6 +139,49 @@ export class Transform2D {
         this.d = c * p_scale.y;
         this.c = -s * p_scale.y;
         this.b = s * p_scale.x;
+        return this;
+    }
+
+    get_skew() {
+        let vec = Vector2.new();
+        let vec2 = Vector2.new();
+        let det = this.basis_determinant();
+        let res = Math.acos(
+            vec.set(this.a, this.b).normalize().dot(
+                vec.set(this.c, this.d).normalize().scale(Math.sign(det))
+            )
+        ) - Math.PI * 0.5;
+        Vector2.free(vec2);
+        Vector2.free(vec);
+        return res;
+    }
+
+    /**
+     * @param {number} p_angle
+     */
+    set_skew(p_angle) {
+        let vec = Vector2.new();
+        let det = this.basis_determinant();
+        vec.set(this.a, this.b)
+            .rotate(Math.PI * 0.5 + p_angle)
+            .normalize()
+            .scale(Math.sign(det) * Math.hypot(this.c, this.d))
+        this.c = vec.x;
+        this.d = vec.y;
+        Vector2.free(vec);
+        return this;
+    }
+
+    /**
+     * @param {number} p_rot
+     * @param {Vector2Like} p_scale
+     * @param {number} p_skew
+     */
+    set_rotation_scale_and_skew(p_rot, p_scale, p_skew) {
+        this.a = Math.cos(p_rot) * p_scale.x;
+        this.d = Math.cos(p_rot + p_skew) * p_scale.y;
+        this.c = -Math.sin(p_rot + p_skew) * p_scale.y;
+        this.b = Math.sin(p_rot) * p_scale.x;
         return this;
     }
 

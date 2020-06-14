@@ -13,6 +13,7 @@ module.exports = (data) => {
         position: Vector2(data.prop.position),
         rotation: real(data.prop.rotation),
         scale: Vector2(data.prop.scale),
+        skew: real(data.prop.skew),
         z_as_relative: boolean(data.prop.z_as_relative),
         z_index: int(data.prop.z_index),
     });

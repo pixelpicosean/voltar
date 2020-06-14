@@ -41,6 +41,12 @@ export class Node2D extends CanvasItem {
     get scale() { return this.get_scale() }
     set scale(value) { this.set_scale(value) }
 
+    get skew() { return this.get_skew() }
+    set skew(value) { this.set_skew(value) }
+
+    get skew_degrees() { return rad2deg(this.get_skew()) }
+    set skew_degrees(value) { this.set_skew(deg2rad(value)) }
+
     get transform() { return this._transform }
     set transform(value) { this.set_transform(value) }
 
@@ -132,6 +138,22 @@ export class Node2D extends CanvasItem {
             this._update_xform_values();
         }
         return this._scale;
+    }
+    /**
+     * @param {number} p_angle
+     */
+    set_skew(p_angle) {
+        if (this._xform_dirty) {
+            this._update_xform_values();
+        }
+        this._skew = p_angle;
+        this._update_transform();
+    }
+    get_skew() {
+        if (this._xform_dirty) {
+            this._update_xform_values();
+        }
+        return this._skew;
     }
 
     /**
@@ -293,6 +315,7 @@ export class Node2D extends CanvasItem {
         this._position = new Vector2(0, 0);
         this._rotation = 0;
         this._scale = new Vector2(1, 1);
+        this._skew = 0;
         this._z_index = 0;
         this._z_as_relative = false;
         this._transform = new Transform2D();
@@ -310,6 +333,7 @@ export class Node2D extends CanvasItem {
         if (data.position !== undefined) this.set_position(data.position);
         if (data.rotation !== undefined) this.set_rotation(data.rotation);
         if (data.scale !== undefined) this.set_scale(data.scale);
+        if (data.skew !== undefined) this.set_skew(data.skew);
         if (data.z_index !== undefined) this.set_z_index(data.z_index);
         if (data.z_relative !== undefined) this.set_z_as_relative(data.z_relative);
 
@@ -428,7 +452,7 @@ export class Node2D extends CanvasItem {
     /* private */
 
     _update_transform() {
-        this._transform.set_rotation_and_scale(this._rotation, this._scale);
+        this._transform.set_rotation_scale_and_skew(this._rotation, this._scale, this._skew);
         this._transform.tx = this._position.x;
         this._transform.ty = this._position.y;
 
@@ -445,6 +469,7 @@ export class Node2D extends CanvasItem {
         this._position.set(this._transform.tx, this._transform.ty);
         this._rotation = this._transform.get_rotation();
         this._transform.get_scale(this._scale);
+        this._skew = this._transform.get_skew();
         this._xform_dirty = false;
     }
 }
