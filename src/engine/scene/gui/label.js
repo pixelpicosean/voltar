@@ -373,7 +373,7 @@ export class Label extends Control {
                             // Update char sprite info
                             const g = CommandRect.instance();
                             g.texture = char.texture;
-                            g.rect.set(x_ofs + char.h_align, y_ofs - font.ascent + char.v_align, g.texture.width, g.texture.height);
+                            g.rect.set(x_ofs + char.h_align, y_ofs - font.ascent + char.v_align, g.texture.get_width(), g.texture.get_height());
                             g.modulate.copy(font_color);
 
                             this.canvas_item.commands.push(g);
