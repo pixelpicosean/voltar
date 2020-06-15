@@ -4,8 +4,7 @@ import 'extension/2d/vector_graphic';
 
 
 import { Preloader } from 'game/preloader';
-
-import { MainScene } from 'game/demo/demo'; // for scene registry side effect
+import 'game/demo/demo';
 
 
 v.preload('media/sprites-0.json');
@@ -22,6 +21,6 @@ v.Main.setup(Settings, {
         stretch_aspect: v.STRETCH_ASPECT_KEEP,
     },
     application: {
-        main_scene: Preloader(MainScene),
+        main_scene: Preloader("res://scene/demo_3d.tscn"),
     },
 });

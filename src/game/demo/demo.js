@@ -1,19 +1,19 @@
 import * as v from 'engine/index';
 
-// export class MainScene extends v.Control {
-//     static instance() { return new MainScene }
+// export class Demo extends v.Control {
+//     static instance() { return new Demo }
 
 //     _ready() { }
 // }
 
-// v.attach_script('res://scene/demo.tscn', MainScene);
+// v.attach_script('res://scene/demo.tscn', Demo);
 
 
 
 
 
-export class MainScene extends v.Spatial {
-    static instance() { return new MainScene }
+export class Demo extends v.Spatial {
+    static instance() { return new Demo }
 
     _ready() {
         this.cube = this.get_node("cube");
@@ -24,4 +24,4 @@ export class MainScene extends v.Spatial {
     }
 }
 
-v.attach_script('res://scene/demo_3d.tscn', MainScene);
+v.attach_script('res://scene/demo_3d.tscn', Demo);
