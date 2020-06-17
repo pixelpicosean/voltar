@@ -17,18 +17,16 @@ module.exports.convert_scenes = (/** @type {string} */scene_root_url_p) => {
     walk.walkSync(scene_root_url, {
         listeners: {
             file: function (root, file_stats, next) {
-                if (path.extname(file_stats.name) === '.tscn') {
-                    const relative_to_root = path.relative(scene_root_url, root);
-                    const filename = `res://${(path.join(relative_to_root, file_stats.name))}`;
+                switch (path.extname(file_stats.name)) {
+                    case '.tres':
+                    case '.tscn':
+                    case '.escn': {
+                        const relative_to_root = path.relative(scene_root_url, root);
+                        const filename = `res://${(path.join(relative_to_root, file_stats.name))}`;
 
-                    load_tres(scene_root_url, filename, tres_map);
-                } else if (path.extname(file_stats.name) === '.escn') {
-                    const relative_to_root = path.relative(scene_root_url, root);
-                    const filename = `res://${(path.join(relative_to_root, file_stats.name))}`;
-
-                    load_tres(scene_root_url, filename, tres_map);
-                } else {
-                    next();
+                        load_tres(scene_root_url, filename, tres_map);
+                    } break;
+                    default: next();
                 }
             },
         },
