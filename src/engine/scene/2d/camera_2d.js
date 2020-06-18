@@ -357,13 +357,21 @@ export class Camera2D extends Node2D {
     set_offset_h(value) {
         this._offset_h = value;
         this.h_offset_changed = true;
+
+        let old_smoothed_camera_pos = this.smoothed_camera_pos.clone();
         this._update_scroll();
+        this.smoothed_camera_pos.copy(old_smoothed_camera_pos);
+        Vector2.free(old_smoothed_camera_pos);
     }
 
     set_offset_v(value) {
         this._offset_v = value;
         this.v_offset_changed = true;
+
+        let old_smoothed_camera_pos = this.smoothed_camera_pos.clone();
         this._update_scroll();
+        this.smoothed_camera_pos.copy(old_smoothed_camera_pos);
+        Vector2.free(old_smoothed_camera_pos);
     }
 
     /**
@@ -378,7 +386,11 @@ export class Camera2D extends Node2D {
      */
     set_offset_n(x, y) {
         this._offset.set(x, y);
+
+        let old_smoothed_camera_pos = this.smoothed_camera_pos.clone();
         this._update_scroll();
+        this.smoothed_camera_pos.copy(old_smoothed_camera_pos);
+        Vector2.free(old_smoothed_camera_pos);
     }
 
     /**
@@ -394,7 +406,11 @@ export class Camera2D extends Node2D {
      */
     set_rotating(p_rotating) {
         this._rotating = p_rotating;
+
+        let old_smoothed_camera_pos = this.smoothed_camera_pos.clone();
         this._update_scroll();
+        this.smoothed_camera_pos.copy(old_smoothed_camera_pos);
+        Vector2.free(old_smoothed_camera_pos);
     }
 
     /**
@@ -441,7 +457,7 @@ export class Camera2D extends Node2D {
      */
     set_zoom_n(x, y) {
         this._zoom.set(x, y);
-        const old_smoothed_camera_pos = this.smoothed_camera_pos.clone();
+        let old_smoothed_camera_pos = this.smoothed_camera_pos.clone();
         this._update_scroll();
         this.smoothed_camera_pos.copy(old_smoothed_camera_pos);
         Vector2.free(old_smoothed_camera_pos);
