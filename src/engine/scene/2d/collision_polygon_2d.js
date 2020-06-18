@@ -81,7 +81,7 @@ export class CollisionPolygon2D extends Node2D {
         this._polygon = [];
 
         /** @type {CollisionPolygon2D | import('./collision_shape_2d').CollisionShape2D} */
-        this.owner = null;
+        this.shape_owner = null;
     }
 
     /* virtual */
@@ -104,7 +104,7 @@ export class CollisionPolygon2D extends Node2D {
             case NOTIFICATION_PARENTED: {
                 this.parent = /** @type {import('./collision_object_2d').CollisionObject2D} */(this.get_parent());
                 if (this.parent.is_collision_object) {
-                    this.owner = this.parent.create_shape_owner(this);
+                    this.shape_owner = this.parent.create_shape_owner(this);
                     this._build_polygon();
                     this._update_in_shape_owner();
                 }
@@ -116,9 +116,9 @@ export class CollisionPolygon2D extends Node2D {
             } break;
             case NOTIFICATION_UNPARENTED: {
                 if (this.parent) {
-                    this.parent.remove_shape_owner(this.owner);
+                    this.parent.remove_shape_owner(this.shape_owner);
                 }
-                this.owner = null;
+                this.shape_owner = null;
                 this.parent = null;
             } break;
         }
@@ -132,7 +132,7 @@ export class CollisionPolygon2D extends Node2D {
     set_disabled(p_disabled) {
         this._disabled = p_disabled;
         if (this.parent) {
-            this.parent.shape_owner_set_disabled(this.owner, p_disabled);
+            this.parent.shape_owner_set_disabled(this.shape_owner, p_disabled);
         }
     }
 
@@ -142,7 +142,7 @@ export class CollisionPolygon2D extends Node2D {
     set_one_way_collision(p_one_way_collision) {
         this._one_way_collision = p_one_way_collision;
         if (this.parent) {
-            this.parent.shape_owner_set_one_way_collision(this.owner, p_one_way_collision);
+            this.parent.shape_owner_set_one_way_collision(this.shape_owner, p_one_way_collision);
         }
     }
 
@@ -152,7 +152,7 @@ export class CollisionPolygon2D extends Node2D {
     set_one_way_collision_margin(p_one_way_collision_margin) {
         this._one_way_collision_margin = p_one_way_collision_margin;
         if (this.parent) {
-            this.parent.shape_owner_set_one_way_collision_margin(this.owner, p_one_way_collision_margin);
+            this.parent.shape_owner_set_one_way_collision_margin(this.shape_owner, p_one_way_collision_margin);
         }
     }
 

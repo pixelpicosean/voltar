@@ -47,7 +47,7 @@ export class CollisionShape2D extends Node2D {
         this.rect = new Rect2(-10, -10, 20, 20);
 
         /** @type {CollisionShape2D | import('./collision_polygon_2d').CollisionPolygon2D} */
-        this.owner = null;
+        this.shape_owner = null;
     }
 
     /* virtual */
@@ -80,9 +80,9 @@ export class CollisionShape2D extends Node2D {
                 this.parent = /** @type {CollisionObject2D} */(this.get_parent());
                 if (this.parent.is_collision_object) {
                     // owner is also self
-                    this.owner = this.parent.create_shape_owner(this);
+                    this.shape_owner = this.parent.create_shape_owner(this);
                     if (this._shape) {
-                        this.parent.shape_owner_add_shape(this.owner, this._shape);
+                        this.parent.shape_owner_add_shape(this.shape_owner, this._shape);
                     }
                     this._update_in_shape_owner();
                 } else {
@@ -103,7 +103,7 @@ export class CollisionShape2D extends Node2D {
                 if (this.parent) {
                     this.parent.remove_shape_owner(this);
                 }
-                this.owner = null;
+                this.shape_owner = null;
                 this.parent = null;
             } break;
         }
@@ -118,9 +118,9 @@ export class CollisionShape2D extends Node2D {
         this._shape = p_shape;
         this.update();
         if (this.parent) {
-            this.parent.shape_owner_clear_shapes(this.owner);
+            this.parent.shape_owner_clear_shapes(this.shape_owner);
             if (this._shape) {
-                this.parent.shape_owner_add_shape(this.owner, this._shape);
+                this.parent.shape_owner_add_shape(this.shape_owner, this._shape);
             }
         }
     }
@@ -132,7 +132,7 @@ export class CollisionShape2D extends Node2D {
         this._disabled = p_disabled;
         this.update();
         if (this.parent) {
-            this.parent.shape_owner_set_disabled(this.owner, p_disabled);
+            this.parent.shape_owner_set_disabled(this.shape_owner, p_disabled);
         }
     }
 
@@ -143,7 +143,7 @@ export class CollisionShape2D extends Node2D {
         this._one_way_collision = p_one_way_collision;
         this.update();
         if (this.parent) {
-            this.parent.shape_owner_set_one_way_collision(this.owner, p_one_way_collision);
+            this.parent.shape_owner_set_one_way_collision(this.shape_owner, p_one_way_collision);
         }
     }
 
@@ -153,7 +153,7 @@ export class CollisionShape2D extends Node2D {
     set_one_way_collision_margin(p_one_way_collision_margin) {
         this._one_way_collision_margin = p_one_way_collision_margin;
         if (this.parent) {
-            this.parent.shape_owner_set_one_way_collision_margin(this.owner, p_one_way_collision_margin);
+            this.parent.shape_owner_set_one_way_collision_margin(this.shape_owner, p_one_way_collision_margin);
         }
     }
 
@@ -163,13 +163,13 @@ export class CollisionShape2D extends Node2D {
      * @param {boolean} [p_xform_only]
      */
     _update_in_shape_owner(p_xform_only = false) {
-        this.parent.shape_owner_set_transform(this.owner, this.get_transform());
+        this.parent.shape_owner_set_transform(this.shape_owner, this.get_transform());
         if (p_xform_only) {
             return;
         }
-        this.parent.shape_owner_set_disabled(this.owner, this._disabled);
-        this.parent.shape_owner_set_one_way_collision(this.owner, this._one_way_collision);
-        this.parent.shape_owner_set_one_way_collision_margin(this.owner, this._one_way_collision_margin);
+        this.parent.shape_owner_set_disabled(this.shape_owner, this._disabled);
+        this.parent.shape_owner_set_one_way_collision(this.shape_owner, this._one_way_collision);
+        this.parent.shape_owner_set_one_way_collision_margin(this.shape_owner, this._one_way_collision_margin);
     }
 }
 node_class_map['CollisionShape2D'] = GDCLASS(CollisionShape2D, Node2D)
