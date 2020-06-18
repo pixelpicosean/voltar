@@ -66,14 +66,7 @@ export class Transform2D {
     }
 
     get_rotation() {
-        const det = this.basis_determinant();
-        const m = this.orthonormalized();
-        if (det < 0) {
-            m.scale_basis(1, -1);
-        }
-        const rot = Math.atan2(m.b, m.a);
-        Transform2D.free(m);
-        return rot;
+        return Math.atan2(this.b, this.a);
     }
     set_rotation(value) {
         const scale = this.get_scale();
