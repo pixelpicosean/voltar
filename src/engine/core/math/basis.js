@@ -613,8 +613,8 @@ export class Basis {
         let euler = Vector3.new();
         let m12 = this.elements[1].z;
 
-        if (m12 < 1) {
-            if (m12 > -1) {
+        if (m12 < (1 - CMP_EPSILON)) {
+            if (m12 > -(1 - CMP_EPSILON)) {
                 if (this.elements[1].x === 0 && this.elements[0].y === 0 && this.elements[0].z === 0 && this.elements[2].x === 0 && this.elements[0].x === 1) {
                     euler.x = Math.atan2(-m12, this.elements[1].y);
                     euler.y = 0;
@@ -626,12 +626,12 @@ export class Basis {
                 }
             } else {
                 euler.x = Math.PI * 0.5;
-                euler.y = -Math.atan2(-this.elements[0].y, this.elements[0].x);
+                euler.y = Math.atan2(this.elements[0].y, this.elements[0].x);
                 euler.z = 0;
             }
         } else {
             euler.x = -Math.PI * 0.5;
-            euler.y = -Math.atan2(-this.elements[0].y, this.elements[0].x);
+            euler.y = -Math.atan2(this.elements[0].y, this.elements[0].x);
             euler.z = 0;
         }
 
