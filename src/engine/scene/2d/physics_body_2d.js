@@ -366,7 +366,8 @@ export class KinematicBody2D extends PhysicsBody2D {
 
         this.margin = 0.08;
 
-        this.floor_velocity = new Vector2();
+        this.floor_velocity = new Vector2;
+        this.floor_normal = new Vector2;
         /** @type {PhysicsBody2D} */
         this.on_floor_body = null;
         this.on_floor = false;
@@ -381,7 +382,7 @@ export class KinematicBody2D extends PhysicsBody2D {
         /** @type {KinematicCollision2D} */
         this.motion_cache = null;
 
-        this.last_valid_transform = new Transform2D();
+        this.last_valid_transform = new Transform2D;
     }
 
     /* virtual */
@@ -504,38 +505,40 @@ export class KinematicBody2D extends PhysicsBody2D {
 
     /**
      * @param {Vector2} p_linear_velocity
-     * @param {Vector2} [p_floor_direction]
+     * @param {Vector2} [p_up_direction]
      * @param {boolean} [p_stop_on_slope]
      * @param {number} [p_max_slides]
      * @param {number} [p_floor_max_angle]
      * @param {boolean} [p_infinite_inertia]
      */
-    move_and_slide(p_linear_velocity, p_floor_direction = Vector2.ZERO, p_stop_on_slope = false, p_max_slides = 4, p_floor_max_angle = Math.PI * 0.25, p_infinite_inertia = true) {
-        const floor_motion = this.floor_velocity.clone();
+    move_and_slide(p_linear_velocity, p_up_direction = Vector2.ZERO, p_stop_on_slope = false, p_max_slides = 4, p_floor_max_angle = Math.PI * 0.25, p_infinite_inertia = true) {
+        let body_velocity = p_linear_velocity.clone();
+        let body_velocity_normal = body_velocity.normalized();
+        let up_direction = p_up_direction.normalized();
+
+        let current_floor_velocity = this.floor_velocity.clone();
         if (this.on_floor && this.on_floor_body) {
             // this approach makes sure there is less delay between the actual body velocity
             // and the one we saved
-            const bs = this.on_floor_body.rid;
+            let bs = this.on_floor_body.rid;
             if (bs) {
-                floor_motion.copy(bs.linear_velocity);
+                current_floor_velocity.copy(bs.linear_velocity);
             }
         }
 
         // hack in order to work with calling from _process as well as from _physics_process
-        const motion = floor_motion.clone().add(p_linear_velocity).scale(Engine.get_singleton().is_in_physics_frame() ? this.get_physics_process_delta_time() : this.get_process_delta_time());
-        const lv = p_linear_velocity.clone();
+        let motion = current_floor_velocity.clone().add(body_velocity).scale(Engine.get_singleton().is_in_physics_frame() ? this.get_physics_process_delta_time() : this.get_process_delta_time());
 
         this.on_floor = false;
         this.on_floor_body = null;
         this.on_ceiling = false;
         this.on_wall = false;
         this.colliders.length = 0;
+        this.floor_normal.set(0, 0);
         this.floor_velocity.set(0, 0);
 
-        const lv_n = p_linear_velocity.normalized();
-
         while (p_max_slides) {
-            const collision = Collision.new();
+            let collision = Collision.new();
             let found_collision = false;
 
             for (let i = 0; i < 2; i++) {
@@ -555,41 +558,40 @@ export class KinematicBody2D extends PhysicsBody2D {
 
                 if (collided) {
                     found_collision = true;
-                }
 
-                if (collided) {
                     this.colliders.push(collision);
                     motion.copy(collision.remainder);
 
-                    if (p_floor_direction.is_zero()) {
+                    if (up_direction.is_zero()) {
                         // all is a wall
                         this.on_wall = true;
                     } else {
-                        const negate_floor_direction = p_floor_direction.clone().negate();
-                        if (Math.acos(collision.normal.dot(p_floor_direction)) <= p_floor_max_angle + FLOOR_ANGLE_THRESHOLD) { // floor
+                        let negate_floor_direction = up_direction.clone().negate();
+                        if (Math.acos(collision.normal.dot(up_direction)) <= p_floor_max_angle + FLOOR_ANGLE_THRESHOLD) { // floor
                             this.on_floor = true;
-                            // @ts-ignore
+                            this.floor_normal.copy(collision.normal);
                             this.on_floor_body = collision.collider;
                             this.floor_velocity.copy(collision.collider_vel);
 
                             if (p_stop_on_slope) {
-                                const vec = lv_n.clone().add(p_floor_direction);
+                                let vec = body_velocity_normal.clone().add(up_direction);
                                 if (vec.length() < 0.01 && collision.travel.length() < 1) {
-                                    const gt = this.get_global_transform().clone();
-                                    const tangent = p_floor_direction.tangent();
-                                    const proj = collision.travel.clone().project(tangent);
+                                    let gt = this.get_global_transform().clone();
+                                    let proj = collision.travel.clone().slide(up_direction);
                                     gt.tx -= proj.x;
                                     gt.ty -= proj.y;
                                     this.set_global_transform(gt);
-                                    Vector2.free(tangent);
                                     Vector2.free(proj);
-
-                                    Vector2.free(floor_motion);
-                                    Vector2.free(motion);
-                                    Vector2.free(lv_n);
-                                    Collision.free(collision);
-                                    Vector2.free(vec);
                                     Transform2D.free(gt);
+
+                                    Vector2.free(vec);
+                                    Collision.free(collision);
+                                    Vector2.free(motion);
+                                    Vector2.free(current_floor_velocity);
+                                    Vector2.free(up_direction);
+                                    Vector2.free(body_velocity_normal);
+                                    Vector2.free(body_velocity);
+
                                     return Vector2.new(0, 0);
                                 }
                             }
@@ -602,55 +604,61 @@ export class KinematicBody2D extends PhysicsBody2D {
                     }
 
                     motion.slide(collision.normal);
-                    lv.slide(collision.normal);
+                    body_velocity.slide(collision.normal);
                 }
             }
 
-            if (!found_collision) {
+            if (!found_collision || motion.is_zero()) {
                 Collision.free(collision);
                 break;
             }
+
+            Collision.free(collision);
             p_max_slides--;
-            if (motion.is_zero()) {
-                break;
-            }
         }
 
-        Vector2.free(floor_motion);
         Vector2.free(motion);
-        Vector2.free(lv_n);
+        Vector2.free(current_floor_velocity);
+        Vector2.free(up_direction);
+        Vector2.free(body_velocity_normal);
 
-        return lv;
+        return body_velocity;
     }
     /**
      * @param {Vector2} p_linear_velocity
      * @param {Vector2} p_snap
-     * @param {Vector2} [p_floor_direction]
+     * @param {Vector2} [p_up_direction]
      * @param {boolean} [p_stop_on_slope]
      * @param {number} [p_max_slides]
      * @param {number} [p_floor_max_angle]
      * @param {boolean} [p_infinite_inertia]
      */
-    move_and_slide_with_snap(p_linear_velocity, p_snap, p_floor_direction = Vector2.ZERO, p_stop_on_slope = false, p_max_slides = 4, p_floor_max_angle = Math.PI * 0.25, p_infinite_inertia = true) {
-        const was_on_floor = this.on_floor;
+    move_and_slide_with_snap(p_linear_velocity, p_snap, p_up_direction = Vector2.ZERO, p_stop_on_slope = false, p_max_slides = 4, p_floor_max_angle = Math.PI * 0.25, p_infinite_inertia = true) {
+        let up_direction = p_up_direction.normalized();
+        let was_on_floor = this.on_floor;
 
-        const ret = this.move_and_slide(p_linear_velocity, p_floor_direction, p_stop_on_slope, p_max_slides, p_floor_max_angle, p_infinite_inertia);
+        let ret = this.move_and_slide(p_linear_velocity, up_direction, p_stop_on_slope, p_max_slides, p_floor_max_angle, p_infinite_inertia);
         if (!was_on_floor || p_snap.is_zero()) {
+            Vector2.free(up_direction);
             return ret;
         }
 
-        const col = Collision.new();
-        const gt = this.get_global_transform().clone();
+        let col = Collision.new();
+        let gt = this.get_global_transform().clone();
 
-        const n_floor_dir = Vector2.new();
         if (this._move(p_snap, p_infinite_inertia, col, false, true)) {
             let apply = true;
-            if (!p_floor_direction.is_zero()) {
-                n_floor_dir.copy(p_floor_direction).normalize();
-                if (Math.acos(n_floor_dir.dot(col.normal)) < p_floor_max_angle) {
+            if (!up_direction.is_zero()) {
+                if (Math.acos(col.normal.dot(up_direction)) <= p_floor_max_angle + FLOOR_ANGLE_THRESHOLD) {
                     this.on_floor = true;
+                    this.floor_normal.copy(col.normal);
                     this.on_floor_body = col.collider_rid;
                     this.floor_velocity.copy(col.collider_vel);
+                    if (p_stop_on_slope) {
+                        col.travel
+                            .copy(up_direction)
+                            .scale(up_direction.dot(col.travel))
+                    }
                 } else {
                     apply = false;
                 }
@@ -663,9 +671,8 @@ export class KinematicBody2D extends PhysicsBody2D {
             }
         }
 
-        Collision.free(col);
         Transform2D.free(gt);
-        Vector2.free(n_floor_dir);
+        Collision.free(col);
         return ret;
     }
 
