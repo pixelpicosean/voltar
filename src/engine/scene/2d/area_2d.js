@@ -266,7 +266,7 @@ export class Area2D extends CollisionObject2D {
      */
     set_collision_layer_bit(bit, value) {
         if (value) {
-            this._collision_layer |= (1 << bit);
+            this._collision_layer |= 1 << bit;
         } else {
             this._collision_layer &= ~(1 << bit);
         }
@@ -304,7 +304,7 @@ export class Area2D extends CollisionObject2D {
      */
     set_collision_mask_bit(bit, value) {
         if (value) {
-            this._collision_mask |= (1 << bit);
+            this._collision_mask |= 1 << bit;
         } else {
             this._collision_mask &= ~(1 << bit);
         }
@@ -529,6 +529,9 @@ export class Area2D extends CollisionObject2D {
     _area_inout(p_status, p_area, p_instance, p_area_shape, p_self_shape) {
         const area_in = (p_status === AREA_BODY_ADDED);
         const obj = p_instance;
+
+        if (!p_instance) return;
+
         /** @type {Node} */
         const node = (p_instance.is_node ? p_instance : null);
         let E = this.area_map.get(p_instance);
