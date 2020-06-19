@@ -391,11 +391,11 @@ export class Node extends VObject {
 
         this.data.tree.node_added(this);
 
-        if (this.instance_data) {
+        if (this.instance_data.length) {
             for (let i = 0; i < this.instance_data.length; i++) {
                 this._load_data(this.instance_data[i]);
             }
-            this.instance_data = null;
+            this.instance_data.length = 0;
         }
 
         for (const c of this.data.children) {
