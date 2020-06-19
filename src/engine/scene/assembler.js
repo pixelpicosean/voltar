@@ -27,7 +27,8 @@ export function register_scene_class(key, ctor) {
 export function attach_script(url, scene) {
     // Add `instance` static method
     scene['instance'] = () => {
-        const node = new scene;
+        // @ts-ignore
+        const node = scene.new ? scene.new(url) : new scene;
 
         // data inherited from parent scene?
         const data = scene['@data'];
@@ -98,7 +99,7 @@ export function assemble_scene(scn, data, url) {
         // inheritance
         if (i === 0) {
             scn.set_filename(url);
-            scn.set_instance_data(node_data);
+            scn.push_instance_data(node_data);
             if (node_data.name) {
                 scn.set_name(node_data.name);
             }
@@ -121,7 +122,7 @@ export function assemble_scene(scn, data, url) {
             }
 
             if (node) {
-                node.set_instance_data(node_data);
+                node.push_instance_data(node_data);
                 parent.add_child(node);
                 if (Number.isFinite(node_data["index"])) {
                     parent.move_child(node, node_data["index"]);

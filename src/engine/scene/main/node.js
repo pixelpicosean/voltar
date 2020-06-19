@@ -131,19 +131,6 @@ export class Node extends VObject {
     /**
      * @param {any} data
      */
-    set_instance_data(data) {
-        this.instance_data[0] = data;
-    }
-    /**
-     * @param {any} data
-     */
-    push_instance_data(data) {
-        this.instance_data.push(data);
-    }
-
-    /**
-     * @param {any} data
-     */
     _load_data(data) {
         if (data.filename !== undefined) {
             this.set_filename(data.filename);
@@ -316,6 +303,13 @@ export class Node extends VObject {
     }
 
     /* private */
+
+    /**
+     * @param {any} data
+     */
+    push_instance_data(data) {
+        this.instance_data.push(data);
+    }
 
     /**
      * @param {Node} child
