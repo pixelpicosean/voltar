@@ -139,6 +139,7 @@ import { Main } from 'engine/main/main';
 import { Input as Input_t } from 'engine/main/input';
 import { InputMap as InputMap_t } from 'engine/core/input_map';
 import { OS as OS_t } from 'engine/core/os/os';
+import { ProjectSettings as ProjectSettings_t } from 'engine/core/project_settings';
 import { MessageQueue as MessageQueue_t } from 'engine/core/message_queue';
 import { Engine as Engine_t } from 'engine/core/engine';
 import { VisualServer as VisualServer_t } from 'engine/servers/visual_server';
@@ -156,6 +157,9 @@ export let InputMap = null;
 
 /** @type {OS_t} */
 export let OS = null;
+
+/** @type {ProjectSettings_t} */
+export let ProjectSettings = null;
 
 /** @type {MessageQueue_t} */
 export let MessageQueue = null;
@@ -179,6 +183,7 @@ Main.events.connect_once('started', () => {
     Input = Input_t.get_singleton();
     InputMap = InputMap_t.get_singleton();
     OS = OS_t.get_singleton();
+    ProjectSettings = ProjectSettings_t.get_singleton();
     MessageQueue = MessageQueue_t.get_singleton();
     Engine = Engine_t.get_singleton();
     VisualServer = VisualServer_t.get_singleton();
@@ -212,6 +217,7 @@ export function preload(...settings) {
  * @param  {...(string | Object)} settings
  */
 export function load(...settings) {
+    // @ts-ignore
     return new ResourceLoader().add(...settings).load();
 }
 

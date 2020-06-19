@@ -239,6 +239,20 @@ export class ProjectSettings {
             deep_merge(this, s);
         }
     }
+
+    /**
+     * @param {string} name
+     */
+    get_physics_layer_bit(name) {
+        return this.layer_map.physics[name];
+    }
+
+    /**
+     * @param {string} name
+     */
+    get_physics_layer_value(name) {
+        return 1 << this.layer_map.physics[name];
+    }
 }
 
 /** @type {ProjectSettings} */
