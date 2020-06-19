@@ -2,6 +2,7 @@ import { remove_items } from 'engine/dep/index';
 import { GDCLASS } from 'engine/core/v_object';
 import { node_class_map } from 'engine/registry';
 import { Vector2, Vector2Like } from 'engine/core/math/vector2';
+import { ProjectSettings } from 'engine/core/project_settings';
 
 import { NOTIFICATION_EXIT_TREE, Node } from '../main/node';
 import { AreaSpaceOverrideMode } from 'engine/scene/2d/const';
@@ -249,6 +250,15 @@ export class Area2D extends CollisionObject2D {
         return !!(this._collision_layer & (1 << bit));
     }
     /**
+     * Return an individual bit on the layer mask. Describes whether
+     * other areas will collide with this one on the given layer.
+     *
+     * @param {string} layer_name
+     */
+    get_collision_layer_bit_named(layer_name) {
+        return !!(this._collision_layer & (1 << ProjectSettings.get_singleton().get_physics_layer_bit(layer_name)));
+    }
+    /**
      * @param {number} layer
      */
     set_collision_layer(layer) {
@@ -275,6 +285,24 @@ export class Area2D extends CollisionObject2D {
             this.rid.collision_layer = this._collision_layer;
         }
     }
+    /**
+     * Set/clear individual bits on the layer mask. This makes
+     * getting an area in/out of only one layer easier.
+     *
+     * @param {string} layer_name
+     * @param {boolean} value
+     */
+    set_collision_layer_bit_named(layer_name, value) {
+        if (value) {
+            this._collision_layer |= ProjectSettings.get_singleton().get_physics_layer_value(layer_name);
+        } else {
+            this._collision_layer &= ~ProjectSettings.get_singleton().get_physics_layer_value(layer_name);
+        }
+
+        if (this.rid) {
+            this.rid.collision_layer = this._collision_layer;
+        }
+    }
 
     /**
      * Return an individual bit on the collision mask. Describes whether
@@ -284,6 +312,15 @@ export class Area2D extends CollisionObject2D {
      */
     get_collision_mask_bit(bit) {
         return !!(this._collision_mask & (1 << bit));
+    }
+    /**
+     * Return an individual bit on the layer mask. Describes whether
+     * other areas will collide with this one on the given layer.
+     *
+     * @param {string} layer_name
+     */
+    get_collision_mask_bit_named(layer_name) {
+        return !!(this._collision_mask & (1 << ProjectSettings.get_singleton().get_physics_layer_bit(layer_name)));
     }
     /**
      * @param {number} mask
@@ -307,6 +344,24 @@ export class Area2D extends CollisionObject2D {
             this._collision_mask |= 1 << bit;
         } else {
             this._collision_mask &= ~(1 << bit);
+        }
+
+        if (this.rid) {
+            this.rid.collision_mask = this._collision_mask;
+        }
+    }
+    /**
+     * Set/clear individual bits on the collision mask. This makes
+     * selecting the areas scanned easier.
+     *
+     * @param {string} layer_name
+     * @param {boolean} value
+     */
+    set_collision_mask_bit_named(layer_name, value) {
+        if (value) {
+            this._collision_mask |= ProjectSettings.get_singleton().get_physics_layer_value(layer_name);
+        } else {
+            this._collision_mask &= ~ProjectSettings.get_singleton().get_physics_layer_value(layer_name);
         }
 
         if (this.rid) {
