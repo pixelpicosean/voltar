@@ -32,8 +32,8 @@ export function attach_script(url, scene) {
 
         // data inherited from parent scene?
         const data = scene['@data'];
-        if (data && data.length > 1) {
-            for (let i = 0; i < data.length - 1; i++) {
+        if (data) {
+            for (let i = 0; i < data.length; i++) {
                 assemble_scene(node, data[i], '');
             }
         }
