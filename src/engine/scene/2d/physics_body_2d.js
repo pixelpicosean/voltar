@@ -384,7 +384,7 @@ export class KinematicCollision2D {
     constructor() {
         /** @type {KinematicBody2D} */
         this.owner = null;
-        this.collision = new Collision();
+        this.collision = new Collision;
         this.metadata = {};
     }
     reset() {
@@ -395,7 +395,6 @@ export class KinematicCollision2D {
     }
 }
 
-const col = new Collision();
 const motion_result = new MotionResult();
 const sep_res = (() => {
     /** @type {SeparationResult[]} */
@@ -487,16 +486,12 @@ export class KinematicBody2D extends PhysicsBody2D {
      * @param {boolean} [p_test_only]
      */
     move_and_collide(p_motion, p_infinite_inertia = true, p_exclude_raycast_shapes = true, p_test_only = false) {
-        col.reset();
+        if (!this.motion_cache) {
+            this.motion_cache = KinematicCollision2D.new();
+            this.motion_cache.owner = this;
+        }
 
-        if (this._move(p_motion, p_infinite_inertia, col, p_exclude_raycast_shapes, p_test_only)) {
-            if (!this.motion_cache) {
-                this.motion_cache = KinematicCollision2D.new();
-                this.motion_cache.owner = this;
-            }
-
-            this.motion_cache.collision = col;
-
+        if (this._move(p_motion, p_infinite_inertia, this.motion_cache.collision.reset(), p_exclude_raycast_shapes, p_test_only)) {
             return this.motion_cache;
         }
 

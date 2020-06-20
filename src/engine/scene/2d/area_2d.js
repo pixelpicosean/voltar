@@ -8,9 +8,13 @@ import { NOTIFICATION_EXIT_TREE, Node } from '../main/node';
 import { AreaSpaceOverrideMode } from 'engine/scene/2d/const';
 import { Physics2DServer, AREA_BODY_ADDED } from 'engine/servers/physics_2d/physics_2d_server';
 import { Area2DSW } from 'engine/servers/physics_2d/area_2d_sw';
+import { MotionResult } from 'engine/servers/physics_2d/state';
 
 import { CollisionObject2D } from './collision_object_2d';
-import { PhysicsBody2D } from './physics_body_2d';
+import {
+    PhysicsBody2D,
+    KinematicCollision2D,
+} from './physics_body_2d';
 
 
 class ShapePair {
@@ -72,6 +76,9 @@ class AreaState {
         this.shapes = [];
     }
 }
+
+let motion_result = new MotionResult;
+let kcol = new KinematicCollision2D;
 
 export class Area2D extends CollisionObject2D {
     get class() { return 'Area2D' }
@@ -237,6 +244,36 @@ export class Area2D extends CollisionObject2D {
      */
     overlaps_body(p_body) {
         return this.body_map.has(p_body);
+    }
+
+    /**
+     * Calculate collision result like KinematicBody2D,
+     * and return a KinematicCollision2D if is overlapping any physics body.
+     * @param {Vector2} p_motion
+     */
+    test_collision_with_body(p_motion) {
+        const gt = this.get_global_transform();
+        motion_result.reset();
+        const colliding = Physics2DServer.get_singleton().body_test_motion(/** @type {any} */(this.rid), gt, p_motion, true, 0.08, motion_result, true);
+
+        if (colliding) {
+            let col = kcol.collision;
+
+            col.collider_metadata = motion_result.collider_metadata;
+            col.collider_shape = motion_result.collider_shape;
+            col.collider_vel.copy(motion_result.collider_velocity);
+            col.collision.copy(motion_result.collision_point);
+            col.normal.copy(motion_result.collision_normal);
+            col.collider = motion_result.collider_id;
+            col.collider_rid = motion_result.collider;
+            col.travel.copy(motion_result.motion);
+            col.remainder.copy(motion_result.remainder);
+            col.local_shape = motion_result.collision_local_shape;
+
+            return kcol;
+        }
+
+        return null;
     }
 
 
