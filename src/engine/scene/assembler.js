@@ -110,28 +110,28 @@ export function assemble_scene(scn, data, url) {
         // instanciate child nodes
         if (i > 0) {
             /** @type {Node} */
-            let node = null;
-            if (node_data.instance) {
-                if (node_data.instance.ctor) {
-                    node = node_data.instance.ctor.instance();
-                } else {
-                    node = node_data.instance.instance();
-                }
-            } else if (node_data.type) {
-                node = new (node_class_map[node_data.type]);
-            }
+            let node = parent.get_node_or_null(node_data.name);
 
             if (node) {
+                node.push_instance_data(node_data);
+            } else {
+                if (node_data.instance) {
+                    if (node_data.instance.ctor) {
+                        node = node_data.instance.ctor.instance();
+                    } else {
+                        node = node_data.instance.instance();
+                    }
+                } else if (node_data.type) {
+                    node = new (node_class_map[node_data.type]);
+                }
+
                 node.push_instance_data(node_data);
                 parent.add_child(node);
                 if (Number.isFinite(node_data["index"])) {
                     parent.move_child(node, node_data["index"]);
                 }
-            } else {
-                /* inherited node */
-                node = parent.get_node(node_data.name);
-                node.push_instance_data(node_data);
             }
+
             if (node_data.name) {
                 node.set_name(node_data.name);
             }

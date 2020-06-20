@@ -420,7 +420,7 @@ export class AnimatedSprite extends Node2D {
     play(p_animation, p_backwards = false) {
         this.backwards = p_backwards;
 
-        if (p_animation && p_animation.length > 0) {
+        if (p_animation) {
             this.set_animation(p_animation);
             if (p_backwards && this._frame === 0) {
                 this.set_frame(this._frames.get_frame_count(p_animation) - 1);
