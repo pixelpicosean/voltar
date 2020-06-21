@@ -101,7 +101,11 @@ export class Node2D extends CanvasItem {
      * @param {number} value
      */
     set_rotation_degrees(value) {
+        if (this._xform_dirty) {
+            this._update_xform_values();
+        }
         this._rotation = deg2rad(value);
+        this._update_transform();
     }
     get_rotation_degrees() {
         if (this._xform_dirty) {
