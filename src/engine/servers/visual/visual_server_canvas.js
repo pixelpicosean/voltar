@@ -1000,6 +1000,7 @@ export class VisualServerCanvas {
         const modulate = Color.new().copy(ci.modulate).multiply(p_module);
 
         if (modulate.a < 0.007) {
+            Color.free(modulate);
             Rect2.free(rect);
             Transform2D.free(xform);
             return;
