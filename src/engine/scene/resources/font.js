@@ -97,7 +97,7 @@ export class DynamicFont extends VObject {
     }
 
     _load_data(data) {
-        this.size = data.size;
+        this.size = data.size || 16;
         this.set_font_data(data.font);
         return this;
     }

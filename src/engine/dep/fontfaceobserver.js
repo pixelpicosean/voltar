@@ -53,8 +53,8 @@ function A(a, b) {
     z(a)
 };
 
-function B(a, b) {
-    var c = b || {};
+function B(a, b = {}) {
+    var c = b;
     this.family = a;
     this.style = c.style || "normal";
     this.weight = c.weight || "normal";
@@ -94,11 +94,11 @@ function K() {
 function L(a, b) {
     return [a.style, a.weight, K() ? a.stretch : "", "100px", b].join(" ")
 }
-B.prototype.load = function(a, b) {
+B.prototype.load = function(a = "BESbswy", b = 3E3) {
     var c = this,
-        k = a || "BESbswy",
+        k = a,
         r = 0,
-        n = b || 3E3,
+        n = b,
         H = (new Date).getTime();
     return new Promise(function(a, b) {
         if (J() && !G()) {
