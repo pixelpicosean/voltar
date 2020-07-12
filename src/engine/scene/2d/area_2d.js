@@ -593,6 +593,7 @@ export class Area2D extends CollisionObject2D {
      */
     _body_enter_tree(p_node) {
         const st = this.body_map.get(p_node);
+        if (!st) return;
         st.in_tree = true;
         this.emit_signal('body_entered', p_node);
         for (let s of st.shapes) {
@@ -604,6 +605,7 @@ export class Area2D extends CollisionObject2D {
      */
     _body_exit_tree(p_node) {
         const st = this.body_map.get(p_node);
+        if (!st) return;
         st.in_tree = false;
         this.emit_signal('body_exited', p_node);
         for (let s of st.shapes) {
