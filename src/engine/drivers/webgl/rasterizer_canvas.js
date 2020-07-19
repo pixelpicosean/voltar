@@ -283,7 +283,7 @@ export class RasterizerCanvas extends VObject {
             multimesh: null,
         };
         /** @type {{ [id: number]: { flat: Material_t, tile: Material_t, multimesh: Material_t }}} */
-        this.shader_materials = { };
+        this.shader_materials = {};
     }
 
     /* API */
@@ -329,6 +329,7 @@ export class RasterizerCanvas extends VObject {
                     { name: 'projection_matrix', type: 'mat4' },
                     { name: 'item_matrix', type: 'mat3' },
                     { name: 'TIME', type: '1f' },
+                    { name: 'TEXTURE', type: '1i' },
                 ]
             );
             const material = VSG.storage.material_create(shader);
@@ -1315,7 +1316,7 @@ export class RasterizerCanvas extends VObject {
                     // - texture
                     const texunit = VSG.config.max_texture_image_units - 1;
                     gl.activeTexture(gl.TEXTURE0 + texunit);
-                    gl.uniform1i(this.copy_shader.uniforms["TEXTURE"].gl_loc, texunit);
+                    gl.uniform1i(this.materials.multimesh.shader.uniforms["TEXTURE"].gl_loc, texunit);
                     gl.bindTexture(gl.TEXTURE_2D, mm.texture.get_rid().gl_tex);
 
                     if (mm.texture.get_rid().render_target) {
