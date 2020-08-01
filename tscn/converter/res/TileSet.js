@@ -7,9 +7,8 @@ module.exports = (data) => {
         resource: data.prop,
     }
 
-    Object.keys(tileset.resource).forEach((index) => {
-        let tile = tileset.resource[index];
-
+    tileset.resource = Object.keys(tileset.resource).map(index => tileset.resource[index]);
+    tileset.resource.forEach(tile => {
         for (const k in tile) {
             tile.autotile = tile.autotile || {};
             if (k.startsWith('autotile/')) {
