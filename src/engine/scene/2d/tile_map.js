@@ -118,6 +118,7 @@ export class TileMap extends Node2D {
         this.used_size_cache_dirty = false;
         this.quadrant_order_dirty = false;
         this._centered_textures = false;
+        this.tilemap_pending_update = false;
 
         /** @type {TileSet} */
         this._tile_set = null;
@@ -158,7 +159,7 @@ export class TileMap extends Node2D {
                     this.collision_parent = /** @type {CollisionObject2D} */(this.get_parent());
                 }
 
-                this.pending_update = true;
+                this.tilemap_pending_update = true;
                 this._recreate_quadrants();
                 this.update_dirty_quadrants();
                 const space = this.get_world_2d().space;
@@ -662,11 +663,15 @@ export class TileMap extends Node2D {
     }
 
     update_dirty_quadrants() {
-        if (!this.pending_update) {
+        if (!this.tilemap_pending_update) {
             return;
         }
+        if (!this._tile_set) {
+            return;
+        }
+
         if (!this.is_inside_tree() || !this._tile_set) {
-            this.pending_update = false;
+            this.tilemap_pending_update = false;
             return;
         }
 
@@ -839,7 +844,7 @@ export class TileMap extends Node2D {
             this.quadrant_order_dirty = true;
         }
 
-        this.pending_update = false;
+        this.tilemap_pending_update = false;
 
         Vector2.free(tofs);
         Vector2.free(qofs);
@@ -1009,10 +1014,10 @@ export class TileMap extends Node2D {
             this.dirty_quadrant_list.add_last(q.dirty_list);
         }
 
-        if (this.pending_update) {
+        if (this.tilemap_pending_update) {
             return;
         }
-        this.pending_update = true;
+        this.tilemap_pending_update = true;
         if (!this.is_inside_tree()) {
             return;
         }
