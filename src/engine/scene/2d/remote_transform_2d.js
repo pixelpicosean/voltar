@@ -203,7 +203,9 @@ export class RemoteTransform2D extends Node2D {
     _update_cache() {
         this.cache = null;
 
-        const node = /** @type {Node2D} */(this.get_node(this._remote_path));
+        if (!this._remote_path) return;
+
+        let node = /** @type {Node2D} */(this.get_node(this._remote_path));
         if (!node || this === node || node.is_a_parent_of(this) || this.is_a_parent_of(node)) {
             return;
         }
