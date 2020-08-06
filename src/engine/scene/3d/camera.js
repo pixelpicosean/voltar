@@ -235,6 +235,7 @@ export class Camera extends Spatial {
         super._load_data(data);
 
         if (data.projection !== undefined) this.set_projection(data.projection);
+        if (data.fov !== undefined) this.set_fov(data.fov);
         if (data.size !== undefined) this.set_size(data.size);
 
         return this;
