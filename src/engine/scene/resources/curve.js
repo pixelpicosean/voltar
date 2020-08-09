@@ -641,6 +641,7 @@ export class Curve extends VObject {
 }
 res_class_map['Curve'] = Curve
 
+/** @type {Point[]} */
 const PointPool = [];
 class Point {
     static new() {
@@ -703,10 +704,18 @@ export class Curve2D extends VObject {
     _load_data(data) {
         if (data.points !== undefined) {
             const points = data.points;
-            const pc = points.length / 6;
+            let pc = 0;
+
+            let number_arr = false;
+            if (typeof points[0] === 'number') {
+                number_arr = true;
+                pc = points.length / 6;
+            } else {
+                pc = points.length;
+            }
 
             // Recycle points
-            for (const p of this.points) {
+            for (let p of this.points) {
                 Point.free(p);
             }
 
@@ -714,9 +723,15 @@ export class Curve2D extends VObject {
             this.points.length = pc;
             for (let i = 0; i < pc; i++) {
                 const p = Point.new();
-                p.in.set(points[i * 6 + 0], points[i * 6 + 1]);
-                p.out.set(points[i * 6 + 2], points[i * 6 + 3]);
-                p.pos.set(points[i * 6 + 4], points[i * 6 + 5]);
+                if (number_arr) {
+                    p.in.set(points[i * 6 + 0], points[i * 6 + 1]);
+                    p.out.set(points[i * 6 + 2], points[i * 6 + 3]);
+                    p.pos.set(points[i * 6 + 4], points[i * 6 + 5]);
+                } else {
+                    p.in.copy(points[i].in);
+                    p.out.copy(points[i].out);
+                    p.pos.copy(points[i].pos);
+                }
                 this.points[i] = p;
             }
 
