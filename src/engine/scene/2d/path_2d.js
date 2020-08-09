@@ -44,14 +44,14 @@ node_class_map['Path2D'] = GDCLASS(Path2D, Node2D)
 export class PathFollow2D extends Node2D {
     get class() { return 'PathFollow2D' }
 
-    get _offset() { return this._offset }
-    set _offset(value) { this.set_offset(value) }
+    get offset() { return this._offset }
+    set offset(value) { this.set_offset(value) }
 
-    get _h_offset() { return this._h_offset }
-    set _h_offset(value) { this.set_h_offset(value) }
+    get h_offset() { return this._h_offset }
+    set h_offset(value) { this.set_h_offset(value) }
 
-    get _v_offset() { return this._v_offset }
-    set _v_offset(value) { this.set_v_offset(value) }
+    get v_offset() { return this._v_offset }
+    set v_offset(value) { this.set_v_offset(value) }
 
     get unit_offset() { return this.get_unit_offset() }
     set unit_offset(value) { this.set_unit_offset(value) }
