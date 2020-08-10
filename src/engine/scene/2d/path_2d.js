@@ -118,8 +118,9 @@ export class PathFollow2D extends Node2D {
         switch (p_what) {
             case NOTIFICATION_ENTER_TREE: {
                 const path = /** @type {Path2D} */(this.get_parent());
-                if (path.class === 'Path2D') {
-                    this._update_transform();
+                if (path && path.class === 'Path2D') {
+                    this.path = path;
+                    this._update_transform_with_path();
                 }
             } break;
             case NOTIFICATION_EXIT_TREE: {
@@ -136,7 +137,7 @@ export class PathFollow2D extends Node2D {
     set_h_offset(p_h_offset) {
         this._h_offset = p_h_offset;
         if (this.path) {
-            this._update_transform();
+            this._update_transform_with_path();
         }
     }
 
@@ -146,7 +147,7 @@ export class PathFollow2D extends Node2D {
     set_offset(p_offset) {
         this._offset = p_offset;
         if (this.path) {
-            this._update_transform();
+            this._update_transform_with_path();
         }
     }
 
@@ -161,6 +162,8 @@ export class PathFollow2D extends Node2D {
     get_unit_offset() {
         if (this.path && this.path.curve && this.path.curve.get_baked_length()) {
             return this._offset / this.path.curve.get_baked_length();
+        } else {
+            return 0;
         }
     }
 
@@ -170,7 +173,7 @@ export class PathFollow2D extends Node2D {
     set_v_offset(p_v_offset) {
         this._v_offset = p_v_offset;
         if (this.path) {
-            this._update_transform();
+            this._update_transform_with_path();
         }
     }
 
@@ -179,18 +182,18 @@ export class PathFollow2D extends Node2D {
      */
     set_rotate(p_rotate) {
         this._rotate = p_rotate;
-        this._update_transform();
+        this._update_transform_with_path();
     }
 
 
     /* private */
 
-    _update_transform() {
+    _update_transform_with_path() {
         if (!this.path) {
             return;
         }
 
-        const c = this.path.curve;
+        let c = this.path.curve;
         if (!c) {
             return;
         }
@@ -199,17 +202,10 @@ export class PathFollow2D extends Node2D {
         if (path_length === 0) {
             return;
         }
-        let bounded_offset = this._offset;
-        if (this.loop) {
-            bounded_offset = posmod(bounded_offset, path_length);
-        } else {
-            bounded_offset = clamp(bounded_offset, 0, path_length);
-        }
-
-        const pos = c.interpolate_baked(bounded_offset, this.cubic_interp);
+        let pos = c.interpolate_baked(this._offset, this.cubic_interp).clone();
 
         if (this._rotate) {
-            let ahead = bounded_offset + this.lookahead;
+            let ahead = this._offset + this.lookahead;
 
             if (this.loop && ahead >= path_length) {
                 let point_count = c.get_point_count();
@@ -227,7 +223,7 @@ export class PathFollow2D extends Node2D {
             const tangent_to_curve = Vector2.new();
             if (ahead_pos.equals(pos)) {
                 tangent_to_curve.copy(pos)
-                    .subtract(c.interpolate_baked(bounded_offset - this.lookahead, this.cubic_interp))
+                    .subtract(c.interpolate_baked(this._offset - this.lookahead, this.cubic_interp))
                     .normalize();
             } else {
                 tangent_to_curve.copy(ahead_pos)
@@ -238,7 +234,7 @@ export class PathFollow2D extends Node2D {
             const negated = tangent_to_curve.clone().negate();
             const normal_of_curve = negated.tangent();
 
-            this._rotation = tangent_to_curve.angle();
+            this.set_rotation(tangent_to_curve.angle());
 
             pos.add(tangent_to_curve.scale(this._h_offset));
             pos.add(normal_of_curve.scale(this._v_offset));
