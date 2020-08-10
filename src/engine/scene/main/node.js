@@ -125,8 +125,8 @@ export class Node extends VObject {
          */
         this.instance_data = [];
 
-        /** @type {Set<string>} */
-        this.child_names = new Set;
+        /** @type {{ [name: string]: Node }} */
+        this.named_children = {};
     }
 
     /* virtuals */
@@ -323,8 +323,8 @@ export class Node extends VObject {
         let n = name;
         let i = 2;
         /** @type {Node} */
-        let du_named = null;
-        while (this.child_names.has(n)) {
+        let du_named = this.named_children[n];
+        while (du_named && du_named !== child) {
             n = `${name}${i++}`;
         }
 
@@ -621,8 +621,9 @@ export class Node extends VObject {
      * @param {string} p_name
      */
     _add_child_no_check(p_child, p_name) {
+        if (this.named_children[p_name] === p_child) this.named_children[p_name] = undefined;
         p_child.data.name = p_name;
-        this.child_names.add(p_name);
+        this.named_children[p_name] = p_child;
 
         p_child.data.pos = this.data.children.length;
         this.data.children.push(p_child);
@@ -707,7 +708,7 @@ export class Node extends VObject {
         p_child.notification(NOTIFICATION_UNPARENTED);
 
         remove_items(children, idx, 1);
-        this.child_names.delete(p_child.data.name);
+        this.named_children[p_child.data.name] = undefined;
 
         // update pointer and size
         child_count = children.length;
