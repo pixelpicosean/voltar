@@ -326,6 +326,7 @@ export class Node extends VObject {
         let du_named = this.named_children[n];
         while (du_named && du_named !== child) {
             n = `${name}${i++}`;
+            du_named = this.named_children[n];
         }
 
         child.data.name = n;
