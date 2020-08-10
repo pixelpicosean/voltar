@@ -38,8 +38,8 @@ function _bezier_interp_vec(t, start, control_1, control_2, end) {
     const t3 = t2 * t;
 
     return start.clone().scale(omt3)
-        .add(control_1.clone().scale(omt2).scale(t).scale(3))
-        .add(control_2.clone().scale(omt).scale(t2).scale(3))
+        .add(control_1.clone().scale(omt2 * t * 3))
+        .add(control_2.clone().scale(omt * t2 * 3))
         .add(end.clone().scale(t3));
 }
 
@@ -838,10 +838,8 @@ export class Curve2D extends VObject {
 
         const res = _bezier_interp_vec(p_offset, p0, p1, p2, p3);
 
-        Vector2.free(p0);
         Vector2.free(p1);
         Vector2.free(p2);
-        Vector2.free(p3);
 
         return res;
     }
@@ -1071,9 +1069,10 @@ export class Curve2D extends VObject {
         }
 
         let pos = this.points[0].pos.clone();
-        const pointlist = [];
+        /** @type {Vector2[]} */
+        let pointlist = [];
 
-        pointlist.push(pos); // start always from origin
+        pointlist.push(pos);
 
         for (let i = 0; i < this.points.length - 1; i++) {
             const step = 0.1; // at least 10 substeps ought to be enough?
