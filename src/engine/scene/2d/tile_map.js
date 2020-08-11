@@ -130,20 +130,20 @@ export class TileMap extends Node2D {
     _load_data(data) {
         super._load_data(data);
 
-        if (data.cell_half_offset) this.set_cell_half_offset(data.cell_half_offset);
-        if (data.cell_quadrant_size) this.set_cell_quadrant_size(data.cell_quadrant_size);
-        if (data.cell_size) this.set_cell_size(data.cell_size);
-        if (data.cell_tile_origin) this.set_cell_tile_origin(data.cell_tile_origin);
-        if (data.cell_y_sort) this.set_cell_y_sort(data.cell_y_sort);
-        if (data.centered_texture) this.set_centered_texture(data.centered_texture);
-        if (data.collision_bounce) this.set_collision_bounce(data.collision_bounce);
-        if (data.collision_friction) this.set_collision_friction(data.collision_friction);
-        if (data.collision_layer) this.set_collision_layer(data.collision_layer);
-        if (data.collision_mask) this.set_collision_mask(data.collision_mask);
-        if (data.collision_use_kinematic) this.set_collision_use_kinematic(data.collision_use_kinematic);
-        if (data.mode) this.set_mode(data.mode);
-        if (data.tile_set) this.set_tile_set(data.tile_set);
-        if (data.tile_data) this.set_tile_data(data.tile_data);
+        if (data.cell_half_offset !== undefined) this.set_cell_half_offset(data.cell_half_offset);
+        if (data.cell_quadrant_size !== undefined) this.set_cell_quadrant_size(data.cell_quadrant_size);
+        if (data.cell_size !== undefined) this.set_cell_size(data.cell_size);
+        if (data.cell_tile_origin !== undefined) this.set_cell_tile_origin(data.cell_tile_origin);
+        if (data.cell_y_sort !== undefined) this.set_cell_y_sort(data.cell_y_sort);
+        if (data.centered_textures !== undefined) this.set_centered_texture(data.centered_textures);
+        if (data.collision_bounce !== undefined) this.set_collision_bounce(data.collision_bounce);
+        if (data.collision_friction !== undefined) this.set_collision_friction(data.collision_friction);
+        if (data.collision_layer !== undefined) this.set_collision_layer(data.collision_layer);
+        if (data.collision_mask !== undefined) this.set_collision_mask(data.collision_mask);
+        if (data.collision_use_kinematic !== undefined) this.set_collision_use_kinematic(data.collision_use_kinematic);
+        if (data.mode !== undefined) this.set_mode(data.mode);
+        if (data.tile_set !== undefined) this.set_tile_set(data.tile_set);
+        if (data.tile_data !== undefined) this.set_tile_data(data.tile_data);
 
         return this;
     }
