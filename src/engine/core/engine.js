@@ -16,7 +16,7 @@ import { decompress } from './io/z';
 
 import { default_font_name, Theme } from 'engine/scene/resources/theme';
 import { registered_bitmap_fonts } from 'engine/scene/resources/font';
-import { instanciate_scene } from 'engine/scene/assembler';
+import { instanciate_scene, assemble_scene } from 'engine/scene/assembler';
 import meta from 'meta.json';
 
 /**
@@ -139,8 +139,10 @@ export class Engine {
                                 if (self_data.instance) {
                                     const idx = self_data.instance.substr(ext_offset);
                                     const parent = resource.ext[idx];
-                                    for (const d of parent.data) {
-                                        data_chain.unshift(d);
+                                    if (parent.data) {
+                                        for (const d of parent.data) {
+                                            data_chain.unshift(d);
+                                        }
                                     }
                                 }
                                 const data = {
@@ -155,8 +157,13 @@ export class Engine {
                             // is it a PackedScene, let's make it a object with `instance` factory function
                             else if (resource.type === 'PackedScene') {
                                 res.ext[id] = {
-                                    instance: () => {
-                                        return instanciate_scene(resource, resource_filename);
+                                    create_or_setup: (scn) => {
+                                        if (!scn) {
+                                            return instanciate_scene(resource, resource_filename);
+                                        } else {
+                                            assemble_scene(scn, resource, resource_filename);
+                                            return scn;
+                                        }
                                     },
                                 };
                             }

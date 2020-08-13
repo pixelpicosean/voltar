@@ -99,7 +99,23 @@ export function assemble_scene(scn, data, url) {
         // inheritance
         if (i === 0) {
             scn.set_filename(url);
-            scn.push_instance_data(node_data);
+
+            if (node_data.instance) {
+                if (node_data.instance.create_or_setup) {
+                    node_data.instance.create_or_setup(scn);
+
+                    for (let n of scn.data.children) {
+                        node_cache[`${n.name}`] = n;
+                        path_cache[`${n.name}`] = n.name;
+                    }
+                } else if (Array.isArray(node_data.instance.data)) {
+                    for (let d of node_data.instance.data) {
+                        scn.push_instance_data(d);
+                    }
+                }
+            } else {
+                scn.push_instance_data(node_data);
+            }
             if (node_data.name) {
                 scn.set_name(node_data.name);
             }
@@ -118,8 +134,8 @@ export function assemble_scene(scn, data, url) {
                 if (node_data.instance) {
                     if (node_data.instance.ctor) {
                         node = node_data.instance.ctor.instance();
-                    } else {
-                        node = node_data.instance.instance();
+                    } else if (node_data.instance.create_or_setup) {
+                        node = node_data.instance.create_or_setup();
                     }
                 } else if (node_data.type) {
                     node = new (node_class_map[node_data.type]);
@@ -166,8 +182,8 @@ export function instanciate_scene(p_data, url) {
     let node = null;
     if (node_data.type) {
         node = new (node_class_map[node_data.type]);
-    } else if (node_data.instance.instance) {
-        node = node_data.instance.instance();
+    } else if (node_data.instance.create_or_setup) {
+        node = node_data.instance.create_or_setup();
     } else {
         node = node_data.instance.ctor.instance();
     }
