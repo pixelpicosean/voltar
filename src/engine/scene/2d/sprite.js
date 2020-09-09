@@ -134,7 +134,7 @@ export class Sprite extends Node2D {
      */
     set_texture(p_texture) {
         /** @type {ImageTexture} */
-        const texture = (typeof(p_texture) === 'string') ? get_resource_map()[p_texture] : p_texture;
+        const texture = (typeof (p_texture) === 'string') ? get_resource_map()[p_texture] : p_texture;
 
         if (this._texture === texture) return;
         this._texture = texture;
@@ -317,7 +317,7 @@ export class Sprite extends Node2D {
         }
 
         const frame_size = Vector2.new(base_rect.width / this._hframes, base_rect.height / this._vframes);
-        const frame_offset = Vector2.new(this._frame % this._hframes, this._frame / this._hframes);
+        const frame_offset = Vector2.new(this._frame % this._hframes, Math.floor(this._frame / this._hframes));
         frame_offset.multiply(frame_size);
 
         r_src_rect.width = frame_size.x;
