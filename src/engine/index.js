@@ -76,6 +76,7 @@ export * from 'engine/scene/main/node';
 export * from 'engine/scene/main/viewport';
 export * from 'engine/scene/main/canvas_layer';
 export * from 'engine/scene/main/scene_tree';
+export * from 'engine/scene/main/timer';
 
 export * from 'engine/scene/animation/animation_player';
 
