@@ -112,7 +112,7 @@ export class VisibilityNotifier2D extends Node2D {
         }
     }
 }
-node_class_map['VisibilityEnabler2D'] = GDCLASS(VisibilityNotifier2D, Node2D)
+node_class_map['VisibilityNotifier2D'] = GDCLASS(VisibilityNotifier2D, Node2D)
 
 
 export const ENABLER_PAUSE_ANIMATIONS = 0;
