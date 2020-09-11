@@ -7,57 +7,105 @@ import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server";
 import { Viewport } from "../main/viewport";
 import { VisibilityNotifier2D } from "../2d/visibility_notifier_2d";
 
-
-class CellRef {
-    constructor() { this.ref = 0 }
-    inc() { this.ref++; return this.ref }
-    dec() { this.ref--; return this.ref }
-}
-
-class CellKey {
+/** @type {CellData[]} */
+const CellData_pool = [];
+class CellData {
+    static new() {
+        let d = CellData_pool.pop();
+        if (!d) d = new CellData;
+        return d;
+    }
+    /**
+     * @param {CellData} data
+     */
+    static free(data) {
+        data.x = 0;
+        data.y = 0;
+        data.notifiers = Object.create(null);
+        CellData_pool.push(data);
+    }
     constructor() {
         this.x = 0;
         this.y = 0;
-        this.key = 0;
+        /** @type {{ [id: number]: { notifier: VisibilityNotifier2D, rc: number } }} */
+        this.notifiers = Object.create(null);
     }
 }
 
-class CellData {
-    constructor() {
-        /**
-         * @type {Map<VisibilityNotifier2D, CellRef>}
-         */
-        this.notifiers = new Map();
-    }
-}
-
+/** @type {ViewportData[]} */
+const ViewportData_pool = [];
 class ViewportData {
+    static new() {
+        let d = ViewportData_pool.pop();
+        if (!d) d = new ViewportData;
+        return d;
+    }
+    /**
+     * @param {ViewportData} data
+     */
+    static free(data) {
+        data.viewport = null;
+        data.notifiers = Object.create(null);
+        data.rect.set(0, 0, 0, 0);
+        ViewportData_pool.push(data);
+    }
     constructor() {
-        /**
-         * @type {Map<VisibilityNotifier2D, number>}
-         */
-        this.notifiers = new Map();
-        this.rect = new Rect2();
+        /** @type {Viewport} */
+        this.viewport = null;
+        /** @type {{ [id: number]: { notifier: VisibilityNotifier2D, pass: number } }} */
+        this.notifiers = Object.create(null);
+        this.rect = new Rect2;
+    }
+}
+
+/** @type {NotifierData[]} */
+const NotifierData_pool = [];
+class NotifierData {
+    /**
+     * @param {VisibilityNotifier2D} notifier
+     * @param {Rect2} rect
+     */
+    static new(notifier, rect) {
+        let d = NotifierData_pool.pop();
+        if (!d) d = new NotifierData();
+        return d.set(notifier, rect);
+    }
+    /**
+     * @param {NotifierData} data
+     */
+    static free(data) {
+        data.notifier = null;
+        data.rect.set(0, 0, 0, 0);
+        NotifierData_pool.push(data);
+    }
+
+    constructor() {
+        /** @type {VisibilityNotifier2D} */
+        this.notifier = null;
+        this.rect = new Rect2;
+    }
+    /**
+     * @param {VisibilityNotifier2D} notifier
+     * @param {Rect2} rect
+     */
+    set(notifier, rect) {
+        this.notifier = notifier;
+        this.rect.copy(rect);
+        return this;
     }
 }
 
 class SpatialIndexer2D {
     constructor() {
-        /**
-         * @type {Map<CellKey, CellData>}
-         */
-        this.cells = new Map();
+        /** @type {{ [key: string]: CellData }} */
+        this.cells = Object.create(null);
         this.cell_size = 100;
 
-        /**
-         * @type {Map<VisibilityNotifier2D, Rect2>}
-         */
-        this.notifiers = new Map();
+        /** @type {{ [id: number]: NotifierData }} */
+        this.notifiers = Object.create(null);
 
-        /**
-         * @type {Map<Viewport, ViewportData>}
-         */
-        this.viewports = new Map();
+        /** @type {{ [id: number]: ViewportData }} */
+        this.viewports = Object.create(null);
 
         this.changed = false;
 
@@ -70,36 +118,44 @@ class SpatialIndexer2D {
      * @param {boolean} p_add
      */
     _notifier_update_cells(p_notifier, p_rect, p_add) {
-        const begin = Vector2.new(p_rect.x, p_rect.y);
-        begin.scale(1 / this.cell_size);
-        const end = Vector2.new(p_rect.x + p_rect.width, p_rect.y + p_rect.height);
-        end.scale(1 / this.cell_size);
+        let begin = Vector2.new(p_rect.x, p_rect.y);
+        begin.scale(1 / this.cell_size).floor();
+        let end = Vector2.new(p_rect.x + p_rect.width, p_rect.y + p_rect.height);
+        end.scale(1 / this.cell_size).floor();
         for (let i = begin.x; i <= end.x; i++) {
-            for (let j = begin.y; j < end.y; j++) {
-                /** @type {CellKey} */
-                let ck = null;
-                /** @type {CellData} */
-                let E = null;
-                for (let [_ck, cd] of this.cells) {
-                    if (_ck.x === i && _ck.y === j) {
-                        ck = _ck;
-                        E = cd;
-                        break;
-                    }
-                }
+            for (let j = begin.y; j <= end.y; j++) {
+                let key = `${i}.${j}`;
+                let data = this.cells[key];
 
                 if (p_add) {
-                    if (!E) {
-                        E = new CellData();
-                        this.cells.set(ck, E);
+                    if (!data) {
+                        data = CellData.new();
+                        data.x = i;
+                        data.y = j;
+                        this.cells[key] = data;
                     }
-                    E.notifiers.get(p_notifier).inc();
+                    if (!data.notifiers[p_notifier.instance_id]) {
+                        data.notifiers[p_notifier.instance_id] = {
+                            notifier: p_notifier,
+                            rc: 0,
+                        };
+                    }
+                    data.notifiers[p_notifier.instance_id].rc += 1;
                 } else {
-                    if (E.notifiers.get(p_notifier).dec() === 0) {
-                        E.notifiers.delete(p_notifier);
-                        if (E.notifiers.size === 0) {
-                            this.cells.delete(ck);
+                    data.notifiers[p_notifier.instance_id].rc -= 1;
+                    if (data.notifiers[p_notifier.instance_id].rc === 0) {
+                        delete data.notifiers[p_notifier.instance_id];
+                        let has_notifier = false;
+                        for (let id in data.notifiers) {
+                            if (data.notifiers[id] !== undefined) {
+                                has_notifier = true;
+                                break;
+                            }
                         }
+                        if (!has_notifier) {
+                            delete this.cells[key];
+                            CellData.free(data);
+                        };
                     }
                 }
             }
@@ -114,7 +170,7 @@ class SpatialIndexer2D {
      * @param {Rect2} p_rect
      */
     _notifier_add(p_notifier, p_rect) {
-        this.notifiers.set(p_notifier, p_rect);
+        this.notifiers[p_notifier.instance_id] = NotifierData.new(p_notifier, p_rect);
         this._notifier_update_cells(p_notifier, p_rect, true);
         this.changed = true;
     }
@@ -124,13 +180,12 @@ class SpatialIndexer2D {
      * @param {Rect2} p_rect
      */
     _notifier_update(p_notifier, p_rect) {
-        const E = this.notifiers.get(p_notifier);
-
-        if (!E) return;
+        let data = this.notifiers[p_notifier.instance_id];
+        if (!data || data.rect.equals(p_rect)) return;
 
         this._notifier_update_cells(p_notifier, p_rect, true);
-        this._notifier_update_cells(p_notifier, E, false);
-        E.copy(p_rect);
+        this._notifier_update_cells(p_notifier, data.rect, false);
+        data.rect.copy(p_rect);
         this.changed = true;
     }
 
@@ -138,16 +193,20 @@ class SpatialIndexer2D {
      * @param {VisibilityNotifier2D} p_notifier
      */
     _notifier_remove(p_notifier) {
-        const E = this.notifiers.get(p_notifier);
-        this._notifier_update_cells(p_notifier, E, false);
-        this.notifiers.delete(p_notifier);
+        let data = this.notifiers[p_notifier.instance_id];
+        this._notifier_update_cells(p_notifier, data.rect, false);
+        delete this.notifiers[p_notifier.instance_id];
+        NotifierData.free(data);
 
-        const removed = [];
-        for (const [vp, vd] of this.viewports) {
-            const G = vd.notifiers.get(p_notifier);
-            if (G !== undefined) {
-                vd.notifiers.delete(p_notifier);
-                removed.push(vp);
+        /** @type {Viewport[]} */
+        let removed = [];
+        for (let id in this.viewports) {
+            let vd = this.viewports[id];
+
+            let count = vd.notifiers[p_notifier.instance_id];
+            if (count !== undefined) {
+                delete vd.notifiers[p_notifier.instance_id];
+                removed.push(vd.viewport);
             }
         }
 
@@ -163,9 +222,10 @@ class SpatialIndexer2D {
      * @param {Rect2} p_rect
      */
     _add_viewport(p_viewport, p_rect) {
-        const vd = new ViewportData();
+        let vd = ViewportData.new();
         vd.rect.copy(p_rect);
-        this.viewports.set(p_viewport, vd);
+        vd.viewport = p_viewport;
+        this.viewports[p_viewport.instance_id] = vd;
         this.changed = true;
     }
     /**
@@ -173,10 +233,10 @@ class SpatialIndexer2D {
      * @param {Rect2} p_rect
      */
     _update_viewport(p_viewport, p_rect) {
-        const E = this.viewports.get(p_viewport);
-        if (!E) return;
-        if (E.rect.equals(p_rect)) return;
-        E.rect.copy(p_rect);
+        let vd = this.viewports[p_viewport.instance_id];
+        if (!vd || vd.rect.equals(p_rect)) return;
+
+        vd.rect.copy(p_rect);
         this.changed = true;
     }
     /**
@@ -184,16 +244,18 @@ class SpatialIndexer2D {
      */
     _remove_viewport(p_viewport) {
         /** @type {VisibilityNotifier2D[]} */
-        const removed = [];
-        for (const [k] of this.viewports.get(p_viewport).notifiers) {
-            removed.push(k);
+        let removed = [];
+        let notifiers = this.viewports[p_viewport.instance_id].notifiers;
+        for (let id in notifiers) {
+            removed.push(notifiers[id].notifier);
         }
 
         while (removed.length > 0) {
             removed.shift()._exit_viewport(p_viewport);
         }
 
-        this.viewports.delete(p_viewport);
+        ViewportData.free(this.viewports[p_viewport.instance_id]);
+        delete this.viewports[p_viewport.instance_id];
     }
 
     _update() {
@@ -201,95 +263,80 @@ class SpatialIndexer2D {
             return;
         }
 
-        const begin = Vector2.new();
-        const end = Vector2.new();
-        for (let [E_key, E_get] of this.viewports) {
-            begin.set(E_get.rect.x, E_get.rect.y);
-            begin.scale(1 / this.cell_size);
-            end.set(E_get.rect.x + E_get.rect.width, E_get.rect.y + E_get.rect.height);
-            end.scale(1 / this.cell_size);
+        let begin = Vector2.new();
+        let end = Vector2.new();
+        for (let id in this.viewports) {
+            let vd = this.viewports[id];
+            begin.set(vd.rect.x, vd.rect.y);
+            begin.scale(1 / this.cell_size).floor();
+            end.set(vd.rect.x + vd.rect.width, vd.rect.y + vd.rect.height);
+            end.scale(1 / this.cell_size).floor();
             this.pass++;
             /** @type {VisibilityNotifier2D[]} */
-            const added = [];
+            let added = [];
             /** @type {VisibilityNotifier2D[]} */
-            const removed = [];
+            let removed = [];
 
-            const visible_cells = (end.x - begin.x) * (end.y - begin.y);
+            let visible_cells = (end.x - begin.x) * (end.y - begin.y);
 
             if (visible_cells > 10000) {
-                for (let [ck, F_get] of this.cells) {
-                    if (ck.x < begin.x || ck.x > end.x) continue;
-                    if (ck.y < begin.y || ck.y > end.y) continue;
+                for (let key in this.cells) {
+                    let cell = this.cells[key];
 
-                    for (let [G_key, G_get] of F_get.notifiers) {
-                        /** @type {VisibilityNotifier2D} */
-                        let H = null;
-                        for (let [vn, _] of E_get.notifiers) {
-                            if (vn === G_key) {
-                                H = vn;
-                                break;
-                            }
-                        }
-                        if (!H) {
-                            E_get.notifiers.set(G_key, this.pass);
-                            added.push(G_key);
+                    if (cell.x < begin.x || cell.x > end.x) continue;
+                    if (cell.y < begin.y || cell.y > end.y) continue;
+
+                    for (let id in cell.notifiers) {
+                        let n_data = vd.notifiers[id];
+                        if (!n_data) {
+                            n_data = vd.notifiers[id] = {
+                                notifier: cell.notifiers[id].notifier,
+                                pass: this.pass,
+                            };
+                            added.push(n_data.notifier);
                         } else {
-                            E_get.notifiers.set(H, this.pass);
+                            n_data.pass = this.pass;
                         }
                     }
                 }
             } else {
-                for (let i = begin.x; i < end.x; i++) {
-                    for (let j = begin.y; j < end.y; j++) {
-                        /** @type {CellKey} */
-                        let ck = null;
-                        /** @type {CellData} */
-                        let F_get = null;
-                        for (let [ck_, cd] of this.cells) {
-                            if (ck_.x === i && ck_.y === j) {
-                                ck = ck;
-                                F_get = cd;
-                                break;
-                            }
-                        }
-                        if (!F_get) {
+                for (let i = begin.x; i <= end.x; i++) {
+                    for (let j = begin.y; j <= end.y; j++) {
+                        let cell = this.cells[`${i}.${j}`];
+                        if (!cell) {
                             continue;
                         }
 
-                        for (let [G_key, G_get] of F_get.notifiers) {
-                            /** @type {VisibilityNotifier2D} */
-                            let H = null;
-                            for (let [vn, _] of E_get.notifiers) {
-                                if (vn === G_key) {
-                                    H = vn;
-                                    break;
-                                }
-                            }
-                            if (!H) {
-                                E_get.notifiers.set(G_key, this.pass);
-                                added.push(G_key);
+                        for (let id in cell.notifiers) {
+                            let n_data = vd.notifiers[id];
+                            if (!n_data) {
+                                n_data = vd.notifiers[id] = {
+                                    notifier: cell.notifiers[id].notifier,
+                                    pass: this.pass,
+                                };
+                                added.push(n_data.notifier);
                             } else {
-                                E_get.notifiers.set(H, this.pass);
+                                n_data.pass = this.pass;
                             }
                         }
                     }
                 }
             }
 
-            for (let [F_key, F_get] of E_get.notifiers) {
-                if (F_get !== this.pass) {
-                    removed.push(F_key);
+            for (let id in vd.notifiers) {
+                if (vd.notifiers[id].pass !== this.pass) {
+                    removed.push(vd.notifiers[id].notifier);
                 }
             }
 
             while (added.length > 0) {
-                added.shift()._enter_viewport(E_key);
+                added.shift()._enter_viewport(vd.viewport);
             }
 
             while (removed.length > 0) {
-                const front = removed.shift();
-                E_get.notifiers.delete(front);
-                front._exit_viewport(E_key);
+                let front = removed.shift();
+                delete vd.notifiers[front.instance_id];
+                front._exit_viewport(vd.viewport);
             }
         }
         Vector2.free(end);

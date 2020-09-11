@@ -21,9 +21,6 @@ import { AnimatedSprite } from "./animated_sprite";
 export class VisibilityNotifier2D extends Node2D {
     get class() { return 'VisibilityNotifier2D' }
 
-    get rect() { return this.rect }
-    set rect(value) { this.set_rect(value) }
-
     constructor() {
         super();
 
@@ -33,6 +30,8 @@ export class VisibilityNotifier2D extends Node2D {
          * @type {Set<Viewport>}
          */
         this.viewports = new Set();
+
+        this.set_notify_transform(true);
     }
 
     /* virtual */
@@ -53,12 +52,14 @@ export class VisibilityNotifier2D extends Node2D {
     _notification(p_what) {
         switch (p_what) {
             case NOTIFICATION_ENTER_TREE: {
-                this.get_world_2d()._register_notifier(this, this.get_global_transform().xform_rect(this.rect));
+                let rect = this.get_global_transform().xform_rect(this.rect);
+                this.get_world_2d()._register_notifier(this, rect);
+                Rect2.free(rect);
             } break;
             case NOTIFICATION_TRANSFORM_CHANGED: {
-                this.get_world_2d()._update_notifier(this, this.get_global_transform().xform_rect(this.rect));
-            } break;
-            case NOTIFICATION_DRAW: {
+                let rect = this.get_global_transform().xform_rect(this.rect);
+                this.get_world_2d()._update_notifier(this, rect);
+                Rect2.free(rect);
             } break;
             case NOTIFICATION_EXIT_TREE: {
                 this.get_world_2d()._remove_notifier(this);
@@ -81,7 +82,9 @@ export class VisibilityNotifier2D extends Node2D {
     set_rect(p_rect) {
         this.rect.copy(p_rect);
         if (this.is_inside_tree()) {
-            this.get_world_2d()._update_notifier(this, this.get_global_transform().xform_rect(this.rect));
+            let rect = this.get_global_transform().xform_rect(this.rect);
+            this.get_world_2d()._update_notifier(this, rect);
+            Rect2.free(rect);
         }
     }
 
