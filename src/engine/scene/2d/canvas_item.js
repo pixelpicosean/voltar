@@ -837,36 +837,34 @@ export class CanvasItem extends Node {
      * @param {CanvasItem} [p_node]
      */
     _notify_transform(p_node) {
-        if (!this.is_inside_tree()) return;
-        let has_param = !!p_node;
-        if (!has_param) {
-            p_node = this;
-        }
-
-        if (p_node.global_invalid) {
-            return;
-        }
-
-        p_node.global_invalid = true;
-
-        if (p_node.notify_transform && !p_node.xform_change.in_list()) {
-            if (!p_node.block_transform_notify) {
-                if (p_node.is_inside_tree()) {
-                    this.get_tree().xform_change_list.add(p_node.xform_change);
-                }
-            }
-        }
-
-        for (const ci of this.children_items) {
-            if (ci.toplevel) {
-                continue;
-            }
-            this._notify_transform(ci);
-        }
-
-        if (!has_param) {
+        if (!p_node) {
+            /* `_notify_transform()` */
+            if (!this.is_inside_tree()) return;
+            this._notify_transform(this);
             if (!this.block_transform_notify && this.notify_local_transform) {
                 this.notification(NOTIFICATION_LOCAL_TRANSFORM_CHANGED);
+            }
+        } else {
+            /* `_notify_transform(node)` */
+            if (p_node.global_invalid) {
+                return;
+            }
+
+            p_node.global_invalid = true;
+
+            if (p_node.notify_transform && !p_node.xform_change.in_list()) {
+                if (!p_node.block_transform_notify) {
+                    if (p_node.is_inside_tree()) {
+                        this.get_tree().xform_change_list.add(p_node.xform_change);
+                    }
+                }
+            }
+
+            for (let ci of p_node.children_items) {
+                if (ci.toplevel) {
+                    continue;
+                }
+                this._notify_transform(ci);
             }
         }
     }
