@@ -264,7 +264,13 @@ export class CanvasItem extends Node {
         if (p_filled) {
             VSG.canvas.canvas_item_add_rect(this.canvas_item, p_rect, p_color);
         } else {
-            // TODO: draw stroke
+            VSG.canvas.canvas_item_add_polyline(this.canvas_item, [
+                p_rect.left, p_rect.top,
+                p_rect.right, p_rect.top,
+                p_rect.right, p_rect.bottom,
+                p_rect.left, p_rect.bottom,
+                p_rect.left, p_rect.top,
+            ], [p_color.r, p_color.g, p_color.b, p_color.a], p_width, p_antialiased);
         }
     }
 
