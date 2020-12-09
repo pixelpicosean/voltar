@@ -63,7 +63,7 @@ import {
     PIXEL_FORMAT_PVRTC4A,
     PIXEL_FORMAT_ETC,
 } from "engine/scene/resources/texture";
-import { CubemapFilterShader } from "./shaders/cubemap_filter";
+// import { CubemapFilterShader } from "./shaders/cubemap_filter";
 import { CopyShader } from "./shaders/copy";
 
 const SMALL_VEC2 = new Vector2(0.00001, 0.00001);
@@ -631,7 +631,7 @@ export class RasterizerStorage {
         this.shaders = {
             /** @type {CopyShader} */
             copy: null,
-            /** @type {CubemapFilterShader} */
+            /** @type {CubemapFilterShader_} */
             cubemap_filter: null,
         };
 
@@ -789,7 +789,7 @@ export class RasterizerStorage {
         }
 
         this.shaders.copy = new CopyShader;
-        this.shaders.cubemap_filter = new CubemapFilterShader;
+        // this.shaders.cubemap_filter = new CubemapFilterShader;
     }
 
     /**
@@ -1628,7 +1628,7 @@ export class RasterizerStorage {
      * @param {number} primitive
      * @param {VertAttribDef[]} attribs
      * @param {ArrayBuffer | Float32Array} vertices
-     * @param {ArrayBuffer | Uint16Array} [indices]
+     * @param {ArrayBuffer | Uint16Array} indices
      * @param {number} array_len
      * @param {number} index_array_len
      * @param {boolean} [use_3d_vertices]
@@ -2235,6 +2235,7 @@ export class RasterizerStorage {
      * @param {number} p_radiance_size
      */
     sky_set_texture(p_sky, p_panorama, p_radiance_size) {
+        /*
         const gl = this.gl;
 
         if (p_sky.panorama) {
@@ -2369,6 +2370,7 @@ export class RasterizerStorage {
 
         gl.activeTexture(gl.TEXTURE0);
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        */
     }
 
     /* others */

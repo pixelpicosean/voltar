@@ -532,8 +532,9 @@ const DEFAULT_SPATIAL_ATTRIBS = [
     { name: 'bone_weights', loc: 7 },
 
     { name: 'instance_xform_row_0', loc: 8 },
-    { name: 'instance_xform_row_0', loc: 9 },
-    { name: 'instance_xform_row_0', loc: 10 },
+    { name: 'instance_xform_row_1', loc: 9 },
+    { name: 'instance_xform_row_2', loc: 10 },
+
     { name: 'instance_color',       loc: 11 },
     { name: 'instance_custom_data', loc: 12 },
 

@@ -136,9 +136,9 @@ export class OS {
         }
         const options = {
             alpha: false,
-            antialias: settings.display.antialias,
-            depth: true,
-            stencil: true,
+            antialias: false,
+            depth: false,
+            stencil: false,
             premultipliedAlpha: false,
             preserveDrawingBuffer: false,
         };
@@ -199,32 +199,10 @@ export class OS {
                 depth_texture = {};
             }
 
-            // compressed textures
-            let s3tc = gl.getExtension("WEBGL_compressed_texture_s3tc");
-            if (s3tc) {
-                driver_config.s3tc_supported = true;
-            } else {
-                // @ts-ignore
-                s3tc = {};
-            }
+            // TODO: compressed textures
 
-            let etc1 = gl.getExtension("WEBGL_compressed_texture_etc1");
-            if (etc1) {
-                driver_config.etc1_supported = true;
-            } else {
-                // @ts-ignore
-                etc1 = {};
-            }
-
-            let pvrtc = gl.getExtension("WEBGL_compressed_texture_pvrtc");
-            if (pvrtc) {
-                driver_config.pvrtc_supported = true;
-            } else {
-                // @ts-ignore
-                pvrtc = {};
-            }
-
-            gl.getExtension('EXT_shader_texture_lod');
+            // TODO: find a way to support sky rendering without `EXT_shader_texture_lod` extension
+            // gl.getExtension('EXT_shader_texture_lod');
 
             driver_config.support_float_texture = !!gl.getExtension('OES_texture_float');
 
@@ -256,20 +234,6 @@ export class OS {
                 /* depth texture */
 
                 UNSIGNED_INT_24_8: depth_texture.UNSIGNED_INT_24_8_WEBGL,
-
-                /* compressed textures */
-
-                COMPRESSED_RGBA_S3TC_DXT1: s3tc.COMPRESSED_RGBA_S3TC_DXT1_EXT,
-                COMPRESSED_RGBA_S3TC_DXT3: s3tc.COMPRESSED_RGBA_S3TC_DXT3_EXT,
-                COMPRESSED_RGBA_S3TC_DXT5: s3tc.COMPRESSED_RGBA_S3TC_DXT5_EXT,
-                COMPRESSED_RGB_S3TC_DXT1: s3tc.COMPRESSED_RGB_S3TC_DXT1_EXT,
-
-                COMPRESSED_RGB_ETC1: etc1.COMPRESSED_RGB_ETC1_WEBGL,
-
-                COMPRESSED_RGB_PVRTC_4BPPV1: pvrtc.COMPRESSED_RGB_PVRTC_4BPPV1_IMG,
-                COMPRESSED_RGBA_PVRTC_4BPPV1: pvrtc.COMPRESSED_RGBA_PVRTC_4BPPV1_IMG,
-                COMPRESSED_RGB_PVRTC_2BPPV1: pvrtc.COMPRESSED_RGB_PVRTC_2BPPV1_IMG,
-                COMPRESSED_RGBA_PVRTC_2BPPV1: pvrtc.COMPRESSED_RGBA_PVRTC_2BPPV1_IMG,
             }
             this.gl = gl;
         }
@@ -285,6 +249,7 @@ export class OS {
             driver_config.max_texture_image_units = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
             driver_config.max_texture_size = gl.getParameter(gl.MAX_TEXTURE_SIZE);
 
+            // TODO: support huge uniform based hardware skin instead
             driver_config.use_skeleton_software = !driver_config.support_float_texture || (driver_config.max_vertex_texture_image_units === 0);
         }
 
