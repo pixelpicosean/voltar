@@ -13,7 +13,7 @@ sun_angle_max = 0.0
 texture_size = 0
 
 [resource]
-background_mode = 2
+background_mode = 1
 background_sky = SubResource( 1 )
 ambient_light_color = Color( 1, 1, 1, 1 )
 fog_color = Color( 0.894118, 0.690196, 0.717647, 1 )
@@ -22,11 +22,7 @@ fog_depth_end = 28.0
 fog_height_enabled = true
 fog_height_min = 3.0
 fog_height_max = -1.0
-dof_blur_far_enabled = true
-dof_blur_far_amount = 0.12
+dof_blur_far_distance = 27.3
 dof_blur_far_quality = 0
-dof_blur_near_distance = 6.0
-dof_blur_near_amount = 0.16
-dof_blur_near_quality = 0
 glow_intensity = 4.5
 glow_strength = 1.27

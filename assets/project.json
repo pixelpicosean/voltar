@@ -3,12 +3,10 @@
         "name": "voltar"
     },
     "display": {
-        "width": 512,
-        "height": 512,
+        "height": 1024,
         "webgl2": false,
-        "stretch_mode": "viewport",
-        "stretch_aspect": "keep",
-        "antialias": true
+        "stretch_mode": "2d",
+        "stretch_aspect": "keep_width"
     },
     "input": {
         "special": {
@@ -43,8 +41,8 @@
     },
     "layer_map": {
         "physics": {
-            "solid": 1,
-            "hero": 2
+            "solid": 0,
+            "hero": 1
         }
     }
 }

@@ -2,7 +2,7 @@
 
 "alien":
 {
-	"frame": {"x":1,"y":263,"w":34,"h":22},
+	"frame": {"x":262,"y":259,"w":34,"h":22},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":34,"h":22},
@@ -16,14 +16,6 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":259,"h":260},
 	"sourceSize": {"w":259,"h":260}
 },
-"palette":
-{
-	"frame": {"x":262,"y":259,"w":64,"h":64},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
-	"sourceSize": {"w":64,"h":64}
-},
 "particle":
 {
 	"frame": {"x":262,"y":1,"w":59,"h":256},
@@ -34,7 +26,7 @@
 },
 "player":
 {
-	"frame": {"x":37,"y":263,"w":14,"h":10},
+	"frame": {"x":298,"y":259,"w":14,"h":10},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":14,"h":10},
@@ -45,8 +37,8 @@
 	"version": "1.0",
 	"image": "sprites-0.png",
 	"format": "RGBA8888",
-	"size": {"w":327,"h":324},
+	"size": {"w":322,"h":282},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:4dd4bbba404c7d5c4db5b565fbefdb7f:adda5970432d796905cdf7416ddcfb5d:7921bf998741302c2028590beb4e1a86$"
+	"smartupdate": "$TexturePacker:SmartUpdate:55cb8f2e5060b283c3a71d85220df251:307c4edce28568a5b41e3aced908ea5e:7921bf998741302c2028590beb4e1a86$"
 }
 }
