@@ -59,6 +59,8 @@ export class Mesh extends VObject {
         this.mesh = null;
     }
 
+    _load_data(data) { return this }
+
     get_surface_count() { return 0 }
 
     /**
@@ -181,10 +183,10 @@ export class ArrayMesh extends Mesh {
         s.aabb.copy(p_arrays.aabb);
 
         let vertex_pack = get_binary_pack(p_arrays.vertex.index);
-        let vertices = vertex_pack.slice(p_arrays.vertex.offset, p_arrays.vertex.offset + p_arrays.vertex.length);
+        let vertices = vertex_pack.subarray(p_arrays.vertex.offset, p_arrays.vertex.offset + p_arrays.vertex.length);
 
         let index_pack = get_binary_pack(p_arrays.index.index);
-        let indices = index_pack.slice(p_arrays.index.offset, p_arrays.index.offset + p_arrays.index.length);
+        let indices = index_pack.subarray(p_arrays.index.offset, p_arrays.index.offset + p_arrays.index.length);
 
         VSG.storage.mesh_add_surface_from_data(this.mesh, p_primitive, p_arrays.attribs, vertices, indices, p_arrays.array_len, p_arrays.index_array_len, !is_2d, s.aabb);
 

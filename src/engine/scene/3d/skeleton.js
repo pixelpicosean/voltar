@@ -198,7 +198,9 @@ export class Skeleton extends Spatial {
                 b.parent = b_data.parent;
                 b.enabled = b_data.enabled;
                 b.rest.from_array(b_data.rest);
-                b.pose.from_array(b_data.pose);
+                if (b_data.pose) {
+                    b.pose.from_array(b_data.pose);
+                }
 
                 let children = b_data.bound_children;
                 for (let i = 0; i < children.length; i++) {

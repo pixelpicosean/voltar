@@ -1,4 +1,5 @@
 import { GDCLASS } from "engine/core/v_object";
+import { res_class_map } from "engine/registry";
 import { Resource } from "engine/core/resource";
 import { Transform } from "engine/core/math/transform";
 
@@ -40,6 +41,18 @@ export class Skin extends Resource {
         this.binds = [];
     }
 
+    _load_data(data) {
+        for (let i = 0; i < data.binds.length; i++) {
+            let b = data.binds[i];
+
+            let bind = this.binds[i] = Bind_new();
+            bind.bone = b.bone;
+            bind.name = b.name;
+            bind.pose.from_array(b.pose);
+        }
+        return this;
+    }
+
     /**
      * @param {number} p_size
      */
@@ -69,4 +82,4 @@ export class Skin extends Resource {
     }
 }
 
-GDCLASS(Skin, Resource)
+res_class_map["Skin"] = GDCLASS(Skin, Resource);

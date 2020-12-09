@@ -138,14 +138,14 @@ function parse_attr(attr_str) {
             str = str.substring(idx + 2 + value.length + 2);
         }
         // - number value without quotation mark
-        else if (_.isFinite(parseInt(first_letter_of_value))) {
+        else if (_.isFinite(parseInt(first_letter_of_value, 10))) {
             let str_after_mark = str.substring(idx + 1);
             let end_idx = str_after_mark.indexOf(' ');
             if (end_idx < 0) {
                 end_idx = str_after_mark.length;
             }
             let value = str_after_mark.substring(0, end_idx);
-            attr[key] = parseInt(value);
+            attr[key] = parseInt(value, 10);
 
             // Remove parsed attribute
             str = str.substring(idx + 2 + value.length);
@@ -229,7 +229,7 @@ module.exports.parse_block = (block) => {
 
                     if (key.indexOf('/') > 0 && key.indexOf('/') === key.lastIndexOf('/')) {
                         let after_slash = key.substr(key.indexOf('/') + 1).trimRight();
-                        let index = parseInt(after_slash);
+                        let index = parseInt(after_slash, 10);
                         if (isFinite(index)) {
                             let real_key = key.substring(0, key.indexOf('/'));
                             let rest_line = line.substr(equal_idx + 1).trim()
@@ -443,7 +443,7 @@ module.exports.parse_block = (block) => {
                         const key = line.substr(0, equal_idx).trim();
                         if (key.indexOf('/') > 0) {
                             let after_slash = key.substr(key.indexOf('/') + 1).trimRight();
-                            let index = parseInt(after_slash);
+                            let index = parseInt(after_slash, 10);
                             if (isFinite(index)) {
                                 let real_key = key.substring(0, key.indexOf('/'));
                                 let value_str = line.substr(equal_idx + 1).trim();

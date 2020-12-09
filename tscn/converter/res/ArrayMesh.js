@@ -1,6 +1,9 @@
 const {
     add_binary_resource,
 } = require('../../registry');
+const {
+    get_function_params,
+} = require('../../parser/type_converters');
 
 
 /* config */
@@ -17,6 +20,23 @@ const ARRAY_BONES = 6;
 const ARRAY_WEIGHTS = 7;
 const ARRAY_INDEX = 8;
 const ARRAY_MAX = 9;
+
+const ARRAY_COMPRESS_BASE = (ARRAY_INDEX + 1);
+const ARRAY_COMPRESS_VERTEX = 1 << (ARRAY_VERTEX + ARRAY_COMPRESS_BASE);
+const ARRAY_COMPRESS_NORMAL = 1 << (ARRAY_NORMAL + ARRAY_COMPRESS_BASE);
+const ARRAY_COMPRESS_TANGENT = 1 << (ARRAY_TANGENT + ARRAY_COMPRESS_BASE);
+const ARRAY_COMPRESS_COLOR = 1 << (ARRAY_COLOR + ARRAY_COMPRESS_BASE);
+const ARRAY_COMPRESS_TEX_UV = 1 << (ARRAY_TEX_UV + ARRAY_COMPRESS_BASE);
+const ARRAY_COMPRESS_TEX_UV2 = 1 << (ARRAY_TEX_UV2 + ARRAY_COMPRESS_BASE);
+const ARRAY_COMPRESS_BONES = 1 << (ARRAY_BONES + ARRAY_COMPRESS_BASE);
+const ARRAY_COMPRESS_WEIGHTS = 1 << (ARRAY_WEIGHTS + ARRAY_COMPRESS_BASE);
+const ARRAY_COMPRESS_INDEX = 1 << (ARRAY_INDEX + ARRAY_COMPRESS_BASE);
+
+const ARRAY_FLAG_USE_2D_VERTICES = ARRAY_COMPRESS_INDEX << 1;
+const ARRAY_FLAG_USE_16_BIT_BONES = ARRAY_COMPRESS_INDEX << 2;
+const ARRAY_USE_DYNAMIC_UPDATE = ARRAY_COMPRESS_INDEX << 3;
+
+const ARRAY_COMPRESS_DEFAULT = ARRAY_COMPRESS_NORMAL | ARRAY_COMPRESS_TANGENT | ARRAY_COMPRESS_COLOR | ARRAY_COMPRESS_TEX_UV | ARRAY_COMPRESS_TEX_UV2 | ARRAY_COMPRESS_WEIGHTS;
 
 
 const compress_list = [
@@ -35,18 +55,182 @@ const GL_FLOAT = 5126;
 module.exports = (data) => {
     let surfaces = data.prop.surfaces;
     for (let s of surfaces) {
-        let arrays = s.arrays.map((arr, i) => arr ? ({
-            compressed: compress_list.indexOf(i) >= 0,
-            array: arr,
-        }) : null)
-        let meta = s.arrays[0].__meta__;
-        if (meta && meta.func) {
-            s.is_2d = (meta.func != "Vector3Array");
-        }
-        if (pack_array_to_binary) {
-            s.arrays = pack_as_binary(arrays, s.is_2d);
+        if (s.arrays) {
+            let arrays = s.arrays.map((arr, i) => arr ? ({
+                compressed: compress_list.indexOf(i) >= 0,
+                array: arr,
+            }) : null)
+            let meta = s.arrays[0].__meta__;
+            if (meta && meta.func) {
+                s.is_2d = (meta.func != "Vector3Array");
+            }
+            if (pack_array_to_binary) {
+                s.arrays = pack_as_binary(arrays, s.is_2d);
+            } else {
+                s.arrays = arrays;
+            }
         } else {
-            s.arrays = arrays;
+            /* array_data and array_index_data as PoolByteArray */
+
+            let vertex = new Uint8Array(get_function_params(s.array_data).map(v => parseInt(v, 10)));
+            let index = new Uint8Array(get_function_params(s.array_index_data).map(v => parseInt(v, 10)));
+
+            let v_info = add_binary_resource(vertex);
+            let i_info = add_binary_resource(index);
+
+            let attribs = [];
+            let format = s.format;
+            let stride = 0;
+            for (let i = 0; i < ARRAY_MAX - 1; i++) {
+                attribs[i] = {
+                    enabled: true,
+                    index: i,
+                    type: 0,
+                    size: 0,
+                    stride: 0,
+                    offset: 0,
+                    normalized: false,
+                    integer: false,
+                };
+
+                if (!(format & (1 << i))) {
+                    attribs[i] = null;
+                    continue;
+                }
+
+                attribs[i].offset = stride;
+
+                switch (i) {
+                    case ARRAY_VERTEX: {
+                        if (format & ARRAY_FLAG_USE_2D_VERTICES) {
+                            attribs[i].size = 2;
+                        } else {
+                            attribs[i].size = 3;
+                        }
+
+                        if (format & ARRAY_COMPRESS_VERTEX) {
+                            console.log(`Warn: mesh with compressed VERTEX is not supported!`);
+                        } else {
+                            attribs[i].type = GL_FLOAT;
+                            stride += attribs[i].size * 4;
+                        }
+                    } break;
+                    case ARRAY_NORMAL: {
+                        attribs[i].size = 3;
+
+                        if (format & ARRAY_COMPRESS_NORMAL) {
+                            attribs[i].type = GL_BYTE;
+                            stride += 4;
+                            attribs[i].normalized = true;
+                        } else {
+                            attribs[i].type = GL_FLOAT;
+                            stride += 12;
+                        }
+                    } break;
+                    case ARRAY_TANGENT: {
+                        attribs[i].size = 4;
+
+                        if (format & ARRAY_COMPRESS_TANGENT) {
+                            attribs[i].type = GL_BYTE;
+                            stride += 4;
+                            attribs[i].normalized = true;
+                        } else {
+                            attribs[i].type = GL_FLOAT;
+                            stride += 16;
+                        }
+                    } break;
+                    case ARRAY_COLOR: {
+                        attribs[i].size = 4;
+
+                        if (format & ARRAY_COMPRESS_COLOR) {
+                            attribs[i].type = GL_BYTE;
+                            stride += 4;
+                            attribs[i].normalized = true;
+                        } else {
+                            attribs[i].type = GL_FLOAT;
+                            stride += 16;
+                        }
+                    } break;
+                    case ARRAY_TEX_UV: {
+                        attribs[i].size = 2;
+
+                        if (format & ARRAY_COMPRESS_TEX_UV) {
+                            console.log(`Warn: mesh with compressed UV is not supported!`);
+                        }
+                        attribs[i].type = GL_FLOAT;
+                        stride += 8;
+                    } break;
+                    case ARRAY_TEX_UV2: {
+                        attribs[i].size = 2;
+
+                        if (format & ARRAY_COMPRESS_TEX_UV2) {
+                            console.log(`Warn: mesh with compressed UV2 is not supported!`);
+                        } else {
+                            attribs[i].type = GL_FLOAT;
+                            stride += 8;
+                        }
+                    } break;
+                    case ARRAY_BONES: {
+                        attribs[i].size = 4;
+
+                        if (format & ARRAY_FLAG_USE_16_BIT_BONES) {
+                            attribs[i].type = GL_UNSIGNED_SHORT;
+                            stride += 8;
+                        } else {
+                            attribs[i].type = GL_UNSIGNED_BYTE;
+                            stride += 4;
+                        }
+                        attribs[i].integer = true;
+                    } break;
+                    case ARRAY_WEIGHTS: {
+                        attribs[i].size = 4;
+
+                        if (format & ARRAY_COMPRESS_WEIGHTS) {
+                            attribs[i].type = GL_UNSIGNED_SHORT;
+                            stride += 8;
+                            attribs[i].normalized = true;
+                        } else {
+                            attribs[i].type = GL_FLOAT;
+                            stride += 16;
+                        }
+                    } break;
+                }
+            }
+
+            for (let i = 0; i < ARRAY_MAX - 1; i++) {
+                if (!attribs[i]) continue;
+                attribs[i].stride = stride;
+            }
+
+            let aabb_params = get_function_params(s.aabb).map(parseFloat);
+
+            s.is_2d = false;
+            s.arrays = {
+                __type__: 'b',
+
+                is_2d: false,
+                aabb: {
+                    position: {
+                        x: aabb_params[0],
+                        y: aabb_params[1],
+                        z: aabb_params[2],
+                    },
+                    size: {
+                        x: aabb_params[3],
+                        y: aabb_params[4],
+                        z: aabb_params[5],
+                    },
+                },
+                vertex: v_info,
+                index: i_info,
+                array_len: s.vertex_count,
+                index_array_len: s.index_count,
+                attribs: attribs.filter(v => !!v),
+            };
+
+            s.aabb = undefined;
+            s.array_data = undefined;
+            s.array_index_data = undefined;
         }
     }
     return {

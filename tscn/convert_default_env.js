@@ -33,7 +33,7 @@ module.exports.convert_default_env = (project_url) => {
             let res = sub[k];
             if (typeof res === 'string') {
                 if (res.startsWith('ExtResource(')) {
-                    let id = parseInt(get_function_params(res)[0]);
+                    let id = parseInt(get_function_params(res)[0], 10);
                     for (let e of exts) {
                         if (e.id === id) {
                             if (e.type === "Texture") {
@@ -60,14 +60,14 @@ module.exports.convert_default_env = (project_url) => {
         let res = resource.prop[k];
         if (typeof res === 'string') {
             if (res.startsWith('SubResource(')) {
-                let id = parseInt(get_function_params(res)[0]);
+                let id = parseInt(get_function_params(res)[0], 10);
                 for (let s of subs) {
                     if (s.id === id) {
                         resource.prop[k] = s;
                     }
                 }
             } else if (res.startsWith('ExtResource(')) {
-                let id = parseInt(get_function_params(res)[0]);
+                let id = parseInt(get_function_params(res)[0], 10);
                 for (let s of exts) {
                     if (s.id === id) {
                         resource.prop[k] = s;

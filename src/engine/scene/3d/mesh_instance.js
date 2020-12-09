@@ -54,6 +54,16 @@ export class MeshInstance extends GeometryInstance {
     }
 
     /**
+     * @param {Skin} p_skin
+     */
+    set_skin(p_skin) {
+        this.skin_internal = p_skin;
+        this.skin = p_skin;
+        if (!this.is_inside_tree()) return;
+        this._resolve_skeleton_path();
+    }
+
+    /**
      * @param {import('engine/drivers/webgl/rasterizer_storage').Mesh_t} p_base
      */
     set_base(p_base) {
@@ -81,6 +91,7 @@ export class MeshInstance extends GeometryInstance {
                 this.set_surface_material(i, data.material[i]);
             }
         }
+        if (data.skin) this.set_skin(data.skin);
 
         return this;
     }

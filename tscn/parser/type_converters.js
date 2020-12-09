@@ -77,7 +77,7 @@ module.exports.int = (num) => {
 
     if (typeof (num) === 'string') {
         num = num.replace(/"/g, '');
-        return parseInt(num);
+        return parseInt(num, 10);
     }
 
     return undefined;
@@ -137,7 +137,7 @@ module.exports.get_function_params = get_function_params;
  * @param {string} key
  */
 function get_array_index_and_prop_key(key) {
-    const index = parseInt(key.substring(0, key.indexOf('/')));
+    const index = parseInt(key.substring(0, key.indexOf('/')), 10);
     const prop_key = key.substring(key.indexOf('/') + 1);
     if (Number.isFinite(index)) {
         return { index, prop_key };
@@ -560,7 +560,7 @@ module.exports.FloatArray = (arr) => {
  */
 module.exports.IntArray = (arr) => {
     if (Array.isArray(arr)) {
-        let result = arr.map(v => parseInt(v));
+        let result = arr.map(v => parseInt(v, 10));
         result.__meta__ = {
             func: 'IntArray',
         }
@@ -568,7 +568,7 @@ module.exports.IntArray = (arr) => {
     }
 
     if (typeof (arr) === 'string') {
-        const result = get_function_params(arr).map(v => parseInt(v));
+        const result = get_function_params(arr).map(v => parseInt(v, 10));
         result.__meta__ = {
             func: 'IntArray',
         }
@@ -791,7 +791,7 @@ module.exports.parse_as_primitive = (str) => {
         }
         // int?
         else {
-            return { type: 'number', value: parseInt(str), is_valid: true };
+            return { type: 'number', value: parseInt(str, 10), is_valid: true };
         }
     }
 

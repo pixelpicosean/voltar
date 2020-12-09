@@ -181,7 +181,7 @@ module.exports.convert_project_settings = (project_url) => {
         for (const k in settings.layer_names) {
             if (k.indexOf('2d_physics/layer_') >= 0) {
                 const num_str = k.replace('2d_physics/layer_', '');
-                const num = parseInt(num_str);
+                const num = parseInt(num_str, 10);
                 if (Number.isFinite(num)) {
                     layer_values[settings.layer_names[k]] = num - 1;
                 }

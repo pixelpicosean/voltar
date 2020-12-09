@@ -383,6 +383,13 @@ export class Node extends VObject {
             }
         }
 
+        if (this.instance_data.length) {
+            for (let i = 0; i < this.instance_data.length; i++) {
+                this._load_data(this.instance_data[i]);
+            }
+            this.instance_data.length = 0;
+        }
+
         this.notification(NOTIFICATION_ENTER_TREE);
 
         this._enter_tree();
@@ -390,13 +397,6 @@ export class Node extends VObject {
         this.emit_signal('tree_entered', this);
 
         this.data.tree.node_added(this);
-
-        if (this.instance_data.length) {
-            for (let i = 0; i < this.instance_data.length; i++) {
-                this._load_data(this.instance_data[i]);
-            }
-            this.instance_data.length = 0;
-        }
 
         for (const c of this.data.children) {
             if (!c.is_inside_tree()) {
