@@ -747,7 +747,7 @@ export class VisualServerCanvas {
      * Unlike same method of Godot, we accept indices array as optional parameter,
      * we will not triangulate if it is provided (could be faster).
      * @param {Item} p_item
-     * @param {number[]} [p_indices]
+     * @param {number[]} p_indices
      * @param {number[]} p_points [x, y]
      * @param {number[]} p_colors [r, g, b, a]
      * @param {number[]} [p_uvs] [u, v]

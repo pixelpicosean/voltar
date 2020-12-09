@@ -10,54 +10,37 @@ const CAPSULE = 2;
 
 const rect = new v.Rect2;
 
-/**
- * @typedef {{ type: number, extents?: v.Vector2Like, radius?: number, height?: number }} VGShape
- */
+interface VGShape {
+    type: number;
+    extents?: v.Vector2Like;
+    radius?: number;
+    height?: number;
+}
 
 export class VectorGraphic extends v.Node2D {
     static instance() { return new VectorGraphic }
 
-    constructor() {
-        super();
-
-        /**
-         * @type {VGShape}
-         */
-        this._shape = null;
-
-        this.color = new v.Color(1, 1, 1, 1);
-    }
+    _shape: VGShape = null;
+    color = new v.Color(1, 1, 1, 1);
 
     /* public */
 
-    /**
-     * @param {VGShape} p_shape
-     */
-    set_shape(p_shape) {
+    set_shape(p_shape: VGShape) {
         this._shape = p_shape;
         this.update();
     }
-    /**
-     * @param {v.ColorLike} color
-     */
-    set_color(color) {
+    set_color(color: v.ColorLike) {
         this.color.copy(color);
         this.update();
     }
-    /**
-     * @param {number} r
-     * @param {number} g
-     * @param {number} b
-     * @param {number} a
-     */
-    set_color_n(r, g, b, a) {
+    set_color_n(r: number, g: number, b: number, a: number) {
         this.color.set(r, g, b, a);
         this.update();
     }
 
     /* virtual */
 
-    _load_data(p_data) {
+    _load_data(p_data: any) {
         super._load_data(p_data);
 
         if (p_data.shape !== undefined) {
@@ -87,8 +70,7 @@ export class VectorGraphic extends v.Node2D {
                 const p1 = v.Vector2.new(0, +shape.height / 2);
 
                 const points = new v.PoolVector2Array;
-                /** @type {number[]} */
-                const indices = [];
+                const indices: number[] = [];
 
                 /* round cap */
                 const steps = Math.max(MinStepsPerHalfCircle, radius * 5 / (200 + radius * 5) * MaxStepsPerHalfCircle) | 0;

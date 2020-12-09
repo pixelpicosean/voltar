@@ -1,5 +1,6 @@
 const SPKEY = (1 << 24);
 
+// TODO: use new InputEvent.key API instead of scanCode
 const GD_KeyList = {
     'ESCAPE': SPKEY | 0x01,
     'TAB': SPKEY | 0x02,

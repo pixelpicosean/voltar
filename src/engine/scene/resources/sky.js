@@ -154,6 +154,7 @@ export class PanoramaSky extends Sky {
         }
     }
 }
+// @ts-ignore
 res_class_map["PanoramaSky"] = GDCLASS(PanoramaSky, Sky)
 
 

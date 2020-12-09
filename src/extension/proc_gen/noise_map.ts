@@ -9,12 +9,7 @@ import {
     simplex_seed,
 } from "./simplex";
 
-/**
- * @param {number} min
- * @param {number} max
- * @param {number} value
- */
-function inverse_lerp(min, max, value) {
+function inverse_lerp(min: number, max: number, value: number) {
     return (value - min) / (max - min);
 }
 
@@ -29,9 +24,8 @@ function inverse_lerp(min, max, value) {
  * @param {number} offset_x
  * @param {number} offset_y
  */
-export function generate_noise_map(width, height, scale, seed, octaves, persistence, lacunarity, offset_x, offset_y) {
-    /** @type {number[][]} */
-    let noise_map = Array(width);
+export function generate_noise_map(width: number, height: number, scale: number, seed: number, octaves: number, persistence: number, lacunarity: number, offset_x: number, offset_y: number) {
+    let noise_map: number[][] = Array(width);
     for (let i = 0; i < width; i++) noise_map[i] = Array(height);
 
     let min = Number.MAX_VALUE;
@@ -89,19 +83,11 @@ const default_palette = [
 export class NoiseMapViewer extends Node2D {
     static instance() { return new NoiseMapViewer }
 
-    constructor() {
-        super();
+    noise_map: number[][] = null;
+    cell_size = 8;
+    palette = default_palette;
 
-        this.noise_map = null;
-        this.cell_size = 8;
-        this.palette = default_palette;
-    }
-
-    /**
-     * @param {number[][]} noise_map
-     * @param {number} cell_size
-     */
-    draw(noise_map, cell_size, palette = default_palette) {
+    draw(noise_map: number[][], cell_size: number, palette = default_palette) {
         this.noise_map = noise_map;
         this.cell_size = cell_size;
         this.palette = palette;

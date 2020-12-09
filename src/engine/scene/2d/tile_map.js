@@ -704,8 +704,8 @@ export class TileMap extends Node2D {
 
             for (let i = 0; i < q.cells.length; i++) {
                 const info = q.cells[i].split('.');
-                const x = parseInt(info[0]);
-                const y = parseInt(info[1]);
+                const x = parseInt(info[0], 10);
+                const y = parseInt(info[1], 10);
 
                 const c = this.tile_map[x][y];
                 if (!c || !this._tile_set.has_tile(c.id)) {
@@ -998,7 +998,7 @@ export class TileMap extends Node2D {
             for (const y in x_map) {
                 const q = x_map[y];
                 if (q) {
-                    this._erase_quadrant(parseInt(x), parseInt(y));
+                    this._erase_quadrant(parseInt(x, 10), parseInt(y, 10));
                 }
             }
         }

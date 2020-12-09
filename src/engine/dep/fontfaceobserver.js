@@ -97,7 +97,7 @@ function L(a, b) {
 B.prototype.load = function(a = "BESbswy", b = 3E3) {
     var c = this,
         k = a,
-        r = 0,
+        r = null,
         n = b,
         H = (new Date).getTime();
     return new Promise(function(a, b) {

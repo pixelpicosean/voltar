@@ -45,7 +45,7 @@ var HowlerGlobal = function () {
     this.autoSuspend = true;
     /** @type {AudioContext} */
     this.ctx = null;
-    this._suspendTimer = 0;
+    this._suspendTimer = null;
     this._resumeAfterSuspend = false;
 
     // Set to false to disable the auto audio unlocker.
@@ -2178,7 +2178,6 @@ var Sound = function (howl) {
     // Generate a unique ID for this sound.
     this._id = ++Howler._counter;
 
-    /** @type {number} */
     this._interval = null;
     /** @type {number} */
     this._fadeTo = null;

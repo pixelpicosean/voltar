@@ -1,17 +1,12 @@
 import * as v from 'engine/index';
 
 export class Input extends v.Node2D {
-    constructor() {
-        super();
+    width = 100;
+    height = 20;
 
-        this.width = 100;
-        this.height = 20;
+    el_type = 'text';
 
-        this.el_type = 'text';
-
-        /** @type {HTMLInputElement} */
-        this.input_elem = null;
-    }
+    input_elem: HTMLInputElement = null;
 
     get_value() {
         return this.input_elem.value;
@@ -28,10 +23,7 @@ export class Input extends v.Node2D {
 
         this.input_elem.style.display = 'none';
     }
-    /**
-     * @param {string} content
-     */
-    set_placeholder(content) {
+    set_placeholder(content: string) {
         this.input_elem.placeholder = content;
     }
     clear(focus = true) {
@@ -41,10 +33,7 @@ export class Input extends v.Node2D {
     focus() {
         this.input_elem.focus();
     }
-    /**
-     * @param {number} value
-     */
-    show_value(value) {
+    show_value(value: number) {
         this.input_elem.value = `${value}`;
         this.show();
     }
@@ -60,7 +49,7 @@ export class Input extends v.Node2D {
         this.input_elem.style.fontSize = `${((this.height * 0.8) * game_scale) | 0}px`;
     }
 
-    _load_data(data) {
+    _load_data(data: any) {
         super._load_data(data);
 
         if (data.width !== undefined) this.width = data.width;
@@ -89,7 +78,7 @@ export class Input extends v.Node2D {
         this.set_process(true);
     }
 
-    _process(delta) {
+    _process(_delta: number) {
         if (this.is_visible_in_tree()) {
             this.redraw();
             this.input_elem.style.display = 'block';
