@@ -10,6 +10,7 @@ module.exports = (data) => {
         type: 'CPUParticles2D',
 
         amount: data.prop.amount,
+        direction: data.prop.direction,
         angle: data.prop.angle,
         angle_curve: data.prop.angle_curve,
         angle_random: data.prop.angle_random,

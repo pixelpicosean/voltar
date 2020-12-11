@@ -420,6 +420,7 @@ export class CPUParticles2D extends Node2D {
         super._load_data(data);
 
         if (data.amount !== undefined) this.set_amount(data.amount);
+        if (data.direction !== undefined) this.direction.copy(data.direction);
         if (data.gravity !== undefined) this.gravity.copy(data.gravity);
         if (data.lifetime !== undefined) this.lifetime = data.lifetime;
         if (data.one_shot !== undefined) this.one_shot = data.one_shot;
