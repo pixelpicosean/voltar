@@ -8,7 +8,7 @@
             "type": "node",
             "request": "launch",
             "name": "Launch Program",
-            "program": "${workspaceFolder}/tscn/main.js"
+            "program": "${workspaceFolder}/tool/import_assets.js"
         }
     ]
 }

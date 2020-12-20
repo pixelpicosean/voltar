@@ -1,12 +1,12 @@
-import { remove_items } from "engine/dep/index";
-import { Vector2 } from "engine/core/math/vector2";
-import { Rect2 } from "engine/core/math/rect2";
-import { Transform2D } from "engine/core/math/transform_2d";
-import { Color, ColorLike } from "engine/core/color";
+import { remove_items } from "engine/dep/index.js";
+import { Vector2 } from "engine/core/math/vector2.js";
+import { Rect2 } from "engine/core/math/rect2.js";
+import { Transform2D } from "engine/core/math/transform_2d.js";
+import { Color, ColorLike } from "engine/core/color.js";
 
-import { VSG } from "./visual_server_globals";
-import { Canvas } from "./visual_server_canvas";
-import { Scenario_t, Camera_t } from "./visual_server_scene";
+import { VSG } from "./visual_server_globals.js";
+import { Canvas } from "./visual_server_canvas.js";
+import { Scenario_t, Camera_t } from "./visual_server_scene.js";
 
 /**
  * @typedef {import('engine/drivers/webgl/rasterizer_storage').RenderTarget_t} RenderTarget_t

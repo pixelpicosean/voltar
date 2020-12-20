@@ -1,6 +1,6 @@
-import { node_class_map } from "engine/registry";
-import { GDCLASS } from "engine/core/v_object";
-import { Color, ColorLike } from "engine/core/color";
+import { node_class_map } from "engine/registry.js";
+import { GDCLASS } from "engine/core/v_object.js";
+import { Color, ColorLike } from "engine/core/color.js";
 
 import {
     LIGHT_DIRECTIONAL,
@@ -25,12 +25,12 @@ import {
 
     LIGHT_DIRECTIONAL_SHADOW_DEPTH_RANGE_STABLE,
     LIGHT_OMNI_SHADOW_DETAIL_HORIZONTAL,
-} from "engine/servers/visual_server";
-import { VSG } from "engine/servers/visual/visual_server_globals";
+} from "engine/servers/visual_server.js";
+import { VSG } from "engine/servers/visual/visual_server_globals.js";
 
-import { NOTIFICATION_ENTER_TREE } from "../main/node";
-import { NOTIFICATION_VISIBILITY_CHANGED_3D } from "./spatial";
-import { VisualInstance } from "./visual_instance";
+import { NOTIFICATION_ENTER_TREE } from "../main/node.js";
+import { NOTIFICATION_VISIBILITY_CHANGED_3D } from "./spatial.js";
+import { VisualInstance } from "./visual_instance.js";
 
 export class Light extends VisualInstance {
     get class() { return "Light" }

@@ -1,4 +1,4 @@
-import { rgb2hex, hex2rgb } from "engine/utils/color";
+import { rgb2hex, hex2rgb } from "engine/utils/color.js";
 
 export class ColorLike {
     constructor() {

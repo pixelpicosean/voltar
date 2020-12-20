@@ -1,9 +1,9 @@
-import { Vector2 } from "engine/core/math/vector2";
-import { Rect2 } from "engine/core/math/rect2";
-import { Transform2D } from "engine/core/math/transform_2d";
+import { Vector2 } from "engine/core/math/vector2.js";
+import { Rect2 } from "engine/core/math/rect2.js";
+import { Transform2D } from "engine/core/math/transform_2d.js";
 
-import { Shape2DSW } from "engine/servers/physics_2d/shape_2d_sw";
-import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server";
+import { Shape2DSW } from "engine/servers/physics_2d/shape_2d_sw.js";
+import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server.js";
 
 
 export class Shape2D {

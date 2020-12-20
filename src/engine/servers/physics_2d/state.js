@@ -1,12 +1,12 @@
-import { Vector2 } from "engine/core/math/vector2";
-import { Rect2 } from "engine/core/math/rect2";
-import { Transform2D } from "engine/core/math/transform_2d";
+import { Vector2 } from "engine/core/math/vector2.js";
+import { Rect2 } from "engine/core/math/rect2.js";
+import { Transform2D } from "engine/core/math/transform_2d.js";
 
 import {
     INTERSECTION_QUERY_MAX,
     CollisionObjectType,
     BodyState,
-} from "engine/scene/2d/const";
+} from "engine/scene/2d/const.js";
 
 
 export class Physics2DDirectBodyStateSW {

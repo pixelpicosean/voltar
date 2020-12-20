@@ -1,18 +1,18 @@
-import { VObject, GDCLASS } from "engine/core/v_object";
+import { VObject, GDCLASS } from "engine/core/v_object.js";
 import {
     MARGIN_LEFT,
     MARGIN_TOP,
     MARGIN_RIGHT,
     MARGIN_BOTTOM,
-} from "engine/core/math/math_defs";
-import { Color } from "engine/core/color";
+} from "engine/core/math/math_defs.js";
+import { Color } from "engine/core/color.js";
 
-import { VSG } from "./visual/visual_server_globals";
-import { VisualServerCanvas } from "./visual/visual_server_canvas";
-import { VisualServerScene } from "./visual/visual_server_scene";
-import { VisualServerViewport } from "./visual/visual_server_viewport";
+import { VSG } from "./visual/visual_server_globals.js";
+import { VisualServerCanvas } from "./visual/visual_server_canvas.js";
+import { VisualServerScene } from "./visual/visual_server_scene.js";
+import { VisualServerViewport } from "./visual/visual_server_viewport.js";
 
-import { Rasterizer } from "engine/drivers/webgl/rasterizer";
+import { Rasterizer } from "engine/drivers/webgl/rasterizer.js";
 
 
 export const NO_INDEX_ARRAY = -1;

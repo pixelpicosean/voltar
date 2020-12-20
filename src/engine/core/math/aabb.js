@@ -1,4 +1,4 @@
-import { Vector3, Vector3Like } from "./vector3";
+import { Vector3, Vector3Like } from "./vector3.js";
 
 /** @type {AABB[]} */
 const pool = [];

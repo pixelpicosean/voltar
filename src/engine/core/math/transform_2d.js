@@ -1,6 +1,6 @@
-import { Math_PI } from './math_defs';
-import { Vector2, Vector2Like } from './vector2';
-import { Rect2 } from './rect2';
+import { Math_PI } from './math_defs.js';
+import { Vector2, Vector2Like } from './vector2.js';
+import { Rect2 } from './rect2.js';
 
 
 const Math_PI2 = Math_PI * 2;

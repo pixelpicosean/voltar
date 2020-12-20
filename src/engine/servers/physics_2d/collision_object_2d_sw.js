@@ -1,11 +1,11 @@
-import { remove_items } from "engine/dep/index";
-import { Vector2 } from "engine/core/math/vector2";
-import { Rect2 } from "engine/core/math/rect2";
-import { Transform2D } from "engine/core/math/transform_2d";
-import { CollisionObjectType } from "engine/scene/2d/const";
+import { remove_items } from "engine/dep/index.js";
+import { Vector2 } from "engine/core/math/vector2.js";
+import { Rect2 } from "engine/core/math/rect2.js";
+import { Transform2D } from "engine/core/math/transform_2d.js";
+import { CollisionObjectType } from "engine/scene/2d/const.js";
 
-import { Shape2DSW } from "./shape_2d_sw";
-import { Space2DSW } from "./space_2d_sw";
+import { Shape2DSW } from "./shape_2d_sw.js";
+import { Space2DSW } from "./space_2d_sw.js";
 
 
 const IDTransform = new Transform2D;

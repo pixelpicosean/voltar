@@ -1,8 +1,8 @@
-import { SelfList, List } from "engine/core/self_list";
-import { CMP_EPSILON } from "engine/core/math/math_defs";
-import { Vector2 } from "engine/core/math/vector2";
-import { Rect2 } from "engine/core/math/rect2";
-import { Transform2D } from "engine/core/math/transform_2d";
+import { SelfList, List } from "engine/core/self_list.js";
+import { CMP_EPSILON } from "engine/core/math/math_defs.js";
+import { Vector2 } from "engine/core/math/vector2.js";
+import { Rect2 } from "engine/core/math/rect2.js";
+import { Transform2D } from "engine/core/math/transform_2d.js";
 
 import {
     Physics2DDirectSpaceStateSW,
@@ -11,23 +11,23 @@ import {
     _shape_col_cbk,
     Physics2DDirectBodyStateSW,
     SeparationResult,
-} from "engine/servers/physics_2d/state";
+} from "engine/servers/physics_2d/state.js";
 import {
     INTERSECTION_QUERY_MAX,
     CollisionObjectType,
     ShapeType,
     BodyMode,
-} from "engine/scene/2d/const";
+} from "engine/scene/2d/const.js";
 
-import { BroadPhase2D } from "./broad_phase_2d_sw";
-import { Shape2DSW } from "./shape_2d_sw";
-import { CollisionObject2DSW } from "./collision_object_2d_sw";
-import { Area2DSW } from "./area_2d_sw";
-import { Body2DSW } from "./body_2d_sw";
-import { Constraint2DSW } from "./constraint_2d_sw";
-import { Area2Pair2DSW, AreaPair2DSW } from "./area_pair_2d";
-import { BodyPair2DSW } from "./body_pair_2d";
-import { CollisionSolver2DSW } from "./collision_solver_2d_sw";
+import { BroadPhase2D } from "./broad_phase_2d_sw.js";
+import { Shape2DSW } from "./shape_2d_sw.js";
+import { CollisionObject2DSW } from "./collision_object_2d_sw.js";
+import { Area2DSW } from "./area_2d_sw.js";
+import { Body2DSW } from "./body_2d_sw.js";
+import { Constraint2DSW } from "./constraint_2d_sw.js";
+import { Area2Pair2DSW, AreaPair2DSW } from "./area_pair_2d.js";
+import { BodyPair2DSW } from "./body_pair_2d.js";
+import { CollisionSolver2DSW } from "./collision_solver_2d_sw.js";
 
 
 class ExcludedShapeSW {

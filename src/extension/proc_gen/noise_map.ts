@@ -2,7 +2,7 @@ import {
     Color,
     Rect2,
     Node2D,
-} from "engine/index";
+} from "engine/index.js";
 
 import {
     simplex2,

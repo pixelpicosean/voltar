@@ -1,11 +1,11 @@
-import { node_class_map, get_resource_map } from 'engine/registry';
-import { GDCLASS } from 'engine/core/v_object';
-import { Vector2 } from 'engine/core/math/vector2';
-import { Rect2 } from 'engine/core/math/rect2';
+import { node_class_map, get_resource_map } from 'engine/registry.js';
+import { GDCLASS } from 'engine/core/v_object.js';
+import { Vector2 } from 'engine/core/math/vector2.js';
+import { Rect2 } from 'engine/core/math/rect2.js';
 
-import { ImageTexture } from '../resources/texture';
-import { NOTIFICATION_DRAW } from '../2d/canvas_item';
-import { Control } from './control';
+import { ImageTexture } from '../resources/texture.js';
+import { NOTIFICATION_DRAW } from '../2d/canvas_item.js';
+import { Control } from './control.js';
 
 
 export const STRETCH_SCALE_ON_EXPAND = 0;

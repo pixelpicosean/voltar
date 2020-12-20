@@ -1,6 +1,6 @@
-import { remove_items } from 'engine/dep/index';
+import { remove_items } from 'engine/dep/index.js';
 
-import Tween from './tween';
+import Tween from './tween.js';
 
 /** @type {TweenManager[]} */
 const TweenManager_Pool = [];

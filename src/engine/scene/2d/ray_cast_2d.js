@@ -1,18 +1,18 @@
-import { node_class_map } from "engine/registry";
-import { GDCLASS } from "engine/core/v_object";
-import { Vector2 } from "engine/core/math/vector2";
+import { node_class_map } from "engine/registry.js";
+import { GDCLASS } from "engine/core/v_object.js";
+import { Vector2 } from "engine/core/math/vector2.js";
 
-import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server";
-import { RayResult } from "engine/servers/physics_2d/state";
-import { CollisionObject2DSW } from "engine/servers/physics_2d/collision_object_2d_sw";
+import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server.js";
+import { RayResult } from "engine/servers/physics_2d/state.js";
+import { CollisionObject2DSW } from "engine/servers/physics_2d/collision_object_2d_sw.js";
 
 import {
     NOTIFICATION_ENTER_TREE,
     NOTIFICATION_EXIT_TREE,
     NOTIFICATION_INTERNAL_PHYSICS_PROCESS,
-} from "../main/node";
-import { Node2D } from "./node_2d";
-import { CollisionObject2D } from "./collision_object_2d";
+} from "../main/node.js";
+import { Node2D } from "./node_2d.js";
+import { CollisionObject2D } from "./collision_object_2d.js";
 
 
 export class RayCast2D extends Node2D {

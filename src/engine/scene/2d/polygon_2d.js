@@ -1,15 +1,15 @@
-import { node_class_map, get_resource_map } from "engine/registry";
-import { GDCLASS } from "engine/core/v_object";
-import { Vector2, Vector2Like } from "engine/core/math/vector2";
-import { Rect2 } from "engine/core/math/rect2";
-import { Transform2D } from "engine/core/math/transform_2d";
-import { Color, ColorLike } from "engine/core/color";
+import { node_class_map, get_resource_map } from "engine/registry.js";
+import { GDCLASS } from "engine/core/v_object.js";
+import { Vector2, Vector2Like } from "engine/core/math/vector2.js";
+import { Rect2 } from "engine/core/math/rect2.js";
+import { Transform2D } from "engine/core/math/transform_2d.js";
+import { Color, ColorLike } from "engine/core/color.js";
 
-import { VSG } from "engine/servers/visual/visual_server_globals";
+import { VSG } from "engine/servers/visual/visual_server_globals.js";
 
-import { ImageTexture } from "../resources/texture";
-import { NOTIFICATION_DRAW } from "./canvas_item";
-import { Node2D } from "./node_2d";
+import { ImageTexture } from "../resources/texture.js";
+import { NOTIFICATION_DRAW } from "./canvas_item.js";
+import { Node2D } from "./node_2d.js";
 
 class Bone {
     constructor() {

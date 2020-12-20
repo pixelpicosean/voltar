@@ -1,6 +1,6 @@
-import { AABB } from "./aabb";
-import { Plane } from "./plane";
-import { Vector3Like } from "./vector3";
+import { AABB } from "./aabb.js";
+import { Plane } from "./plane.js";
+import { Vector3Like } from "./vector3.js";
 
 const OCTREE_DIVISOR = 4;
 

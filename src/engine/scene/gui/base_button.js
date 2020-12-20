@@ -1,17 +1,17 @@
-import { GDCLASS } from "engine/core/v_object";
+import { GDCLASS } from "engine/core/v_object.js";
 import {
     InputEvent,
     InputEventMouseButton,
     InputEventMouseMotion,
     BUTTON_MASK_LEFT,
-} from "engine/core/os/input_event";
-import { Resource } from "engine/core/resource";
+} from "engine/core/os/input_event.js";
+import { Resource } from "engine/core/resource.js";
 
 import {
     NOTIFICATION_DRAG_BEGIN,
     NOTIFICATION_EXIT_TREE,
-} from "../main/node";
-import { NOTIFICATION_VISIBILITY_CHANGED } from "../2d/canvas_item";
+} from "../main/node.js";
+import { NOTIFICATION_VISIBILITY_CHANGED } from "../2d/canvas_item.js";
 import {
     Control,
     NOTIFICATION_MOUSE_ENTER,
@@ -19,7 +19,7 @@ import {
     NOTIFICATION_SCROLL_BEGIN,
     NOTIFICATION_FOCUS_ENTER,
     NOTIFICATION_FOCUS_EXIT,
-} from "./control";
+} from "./control.js";
 
 
 export const ACTION_MODE_BUTTON_PRESS = 0;

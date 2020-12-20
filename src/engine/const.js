@@ -2,4 +2,4 @@
  * Engine version
  * @constant
  */
-export const ENGINE_VERSION = '4.2.0';
+export const ENGINE_VERSION = '4.3.0';

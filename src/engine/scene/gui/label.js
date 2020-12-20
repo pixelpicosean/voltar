@@ -1,5 +1,5 @@
-import { node_class_map } from "engine/registry";
-import { GDCLASS } from "engine/core/v_object";
+import { node_class_map } from "engine/registry.js";
+import { GDCLASS } from "engine/core/v_object.js";
 import {
     MARGIN_RIGHT,
     HALIGN_LEFT,
@@ -10,22 +10,22 @@ import {
     VALIGN_CENTER,
     VALIGN_BOTTOM,
     VALIGN_FILL,
-} from "engine/core/math/math_defs";
-import { Vector2, Vector2Like } from "engine/core/math/vector2";
-import { Rect2 } from "engine/core/math/rect2";
-import { Color } from "engine/core/color";
+} from "engine/core/math/math_defs.js";
+import { Vector2, Vector2Like } from "engine/core/math/vector2.js";
+import { Rect2 } from "engine/core/math/rect2.js";
+import { Color } from "engine/core/color.js";
 
-import { VSG } from "engine/servers/visual/visual_server_globals";
-import { CommandRect } from "engine/servers/visual/commands";
+import { VSG } from "engine/servers/visual/visual_server_globals.js";
+import { CommandRect } from "engine/servers/visual/commands.js";
 
-import { NOTIFICATION_DRAW } from "../2d/canvas_item";
-import { SIZE_SHRINK_CENTER, MOUSE_FILTER_IGNORE } from "./const";
+import { NOTIFICATION_DRAW } from "../2d/canvas_item.js";
+import { SIZE_SHRINK_CENTER, MOUSE_FILTER_IGNORE } from "./const.js";
 import {
     Control,
     NOTIFICATION_THEME_CHANGED,
     NOTIFICATION_RESIZED,
-} from "./control";
-import { DynamicFont, BitmapFont } from "../resources/font";
+} from "./control.js";
+import { DynamicFont, BitmapFont } from "../resources/font.js";
 
 let pos = new Vector2;
 

@@ -1,12 +1,12 @@
-import { Rect2 } from "engine/core/math/rect2";
-import { Color } from "engine/core/color";
-import { OS } from "engine/core/os/os";
+import { Rect2 } from "engine/core/math/rect2.js";
+import { Color } from "engine/core/color.js";
+import { OS } from "engine/core/os/os.js";
 
-import { VSG } from "engine/servers/visual/visual_server_globals";
+import { VSG } from "engine/servers/visual/visual_server_globals.js";
 
-import { RasterizerStorage } from "./rasterizer_storage";
-import { RasterizerCanvas } from "./rasterizer_canvas";
-import { RasterizerScene } from "./rasterizer_scene";
+import { RasterizerStorage } from "./rasterizer_storage.js";
+import { RasterizerCanvas } from "./rasterizer_canvas.js";
+import { RasterizerScene } from "./rasterizer_scene.js";
 
 
 export class Rasterizer {

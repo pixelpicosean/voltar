@@ -1,41 +1,41 @@
-import { node_class_map } from 'engine/registry';
-import { GDCLASS } from 'engine/core/v_object';
+import { node_class_map } from 'engine/registry.js';
+import { GDCLASS } from 'engine/core/v_object.js';
 import {
     rad2deg,
     deg2rad,
     clamp,
-} from 'engine/core/math/math_funcs';
+} from 'engine/core/math/math_funcs.js';
 import {
     MARGIN_LEFT,
     MARGIN_RIGHT,
     MARGIN_TOP,
     MARGIN_BOTTOM,
-} from 'engine/core/math/math_defs';
-import { Vector2, Vector2Like } from 'engine/core/math/vector2';
-import { Rect2 } from 'engine/core/math/rect2';
-import { Transform2D } from 'engine/core/math/transform_2d';
-import { Color } from 'engine/core/color';
-import { InputEvent } from 'engine/core/os/input_event';
-import { MessageQueue } from 'engine/core/message_queue';
-import { NOTIFICATION_WM_UNFOCUS_REQUEST } from 'engine/core/main_loop';
-import { VSG } from 'engine/servers/visual/visual_server_globals';
+} from 'engine/core/math/math_defs.js';
+import { Vector2, Vector2Like } from 'engine/core/math/vector2.js';
+import { Rect2 } from 'engine/core/math/rect2.js';
+import { Transform2D } from 'engine/core/math/transform_2d.js';
+import { Color } from 'engine/core/color.js';
+import { InputEvent } from 'engine/core/os/input_event.js';
+import { MessageQueue } from 'engine/core/message_queue.js';
+import { NOTIFICATION_WM_UNFOCUS_REQUEST } from 'engine/core/main_loop.js';
+import { VSG } from 'engine/servers/visual/visual_server_globals.js';
 
-import { Theme } from '../resources/theme';
-import { BitmapFont, DynamicFont } from '../resources/font';
+import { Theme } from '../resources/theme.js';
+import { BitmapFont, DynamicFont } from '../resources/font.js';
 import {
     Node,
     NOTIFICATION_ENTER_TREE,
     NOTIFICATION_POST_ENTER_TREE,
     NOTIFICATION_EXIT_TREE,
     NOTIFICATION_MOVED_IN_PARENT,
-} from '../main/node';
+} from '../main/node.js';
 import {
     CanvasItem,
     NOTIFICATION_ENTER_CANVAS,
     NOTIFICATION_EXIT_CANVAS,
     NOTIFICATION_DRAW,
     NOTIFICATION_VISIBILITY_CHANGED,
-} from '../2d/canvas_item';
+} from '../2d/canvas_item.js';
 
 import {
     GROW_DIRECTION_END,
@@ -65,7 +65,7 @@ import {
     PRESET_MODE_KEEP_HEIGHT,
     FOCUS_NONE,
     MOUSE_FILTER_STOP,
-} from './const';
+} from './const.js';
 
 
 export const NOTIFICATION_RESIZED = 40;

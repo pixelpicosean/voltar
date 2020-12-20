@@ -1,4 +1,4 @@
-import { CMP_EPSILON } from './math_defs';
+import { CMP_EPSILON } from './math_defs.js';
 
 
 /**

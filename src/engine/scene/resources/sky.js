@@ -1,24 +1,24 @@
-import { GDCLASS } from "engine/core/v_object";
-import { res_class_map, get_resource_map } from "engine/registry";
+import { GDCLASS } from "engine/core/v_object.js";
+import { res_class_map, get_resource_map } from "engine/registry.js";
 import {
     deg2rad,
     rad2deg,
     clamp,
     ease,
-} from "engine/core/math/math_funcs";
-import { Math_LN2 } from "engine/core/math/math_defs";
-import { Vector3 } from "engine/core/math/vector3";
-import { Basis } from "engine/core/math/basis";
-import { Color, ColorLike } from "engine/core/color";
-import { Resource } from "engine/core/resource";
-import { SelfList } from "engine/core/self_list";
+} from "engine/core/math/math_funcs.js";
+import { Math_LN2 } from "engine/core/math/math_defs.js";
+import { Vector3 } from "engine/core/math/vector3.js";
+import { Basis } from "engine/core/math/basis.js";
+import { Color, ColorLike } from "engine/core/color.js";
+import { Resource } from "engine/core/resource.js";
+import { SelfList } from "engine/core/self_list.js";
 
 import {
     Texture,
     PIXEL_FORMAT_RGBA8,
-} from "./texture";
-import { VSG } from "engine/servers/visual/visual_server_globals";
-import { TEXTURE_TYPE_2D } from "engine/servers/visual_server";
+} from "./texture.js";
+import { VSG } from "engine/servers/visual/visual_server_globals.js";
+import { TEXTURE_TYPE_2D } from "engine/servers/visual_server.js";
 
 const HALF_PI = Math.PI / 2;
 

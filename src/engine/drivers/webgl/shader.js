@@ -1,4 +1,4 @@
-import { VSG } from "engine/servers/visual/visual_server_globals";
+import { VSG } from "engine/servers/visual/visual_server_globals.js";
 
 export class Shader {
     /**

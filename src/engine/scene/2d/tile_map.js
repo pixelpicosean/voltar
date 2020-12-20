@@ -1,30 +1,30 @@
-import { node_class_map, get_resource_map } from "engine/registry";
-import { SelfList, List } from "engine/core/self_list";
-import { GDCLASS } from "engine/core/v_object";
-import { Vector2 } from "engine/core/math/vector2";
-import { Rect2 } from "engine/core/math/rect2";
-import { Transform2D } from "engine/core/math/transform_2d";
+import { node_class_map, get_resource_map } from "engine/registry.js";
+import { SelfList, List } from "engine/core/self_list.js";
+import { GDCLASS } from "engine/core/v_object.js";
+import { Vector2 } from "engine/core/math/vector2.js";
+import { Rect2 } from "engine/core/math/rect2.js";
+import { Transform2D } from "engine/core/math/transform_2d.js";
 
-import { Item } from "engine/servers/visual/visual_server_canvas";
-import { Space2DSW } from "engine/servers/physics_2d/space_2d_sw";
-import { Body2DSW } from "engine/servers/physics_2d/body_2d_sw";
+import { Item } from "engine/servers/visual/visual_server_canvas.js";
+import { Space2DSW } from "engine/servers/physics_2d/space_2d_sw.js";
+import { Body2DSW } from "engine/servers/physics_2d/body_2d_sw.js";
 
 import {
     NOTIFICATION_ENTER_TREE,
     NOTIFICATION_EXIT_TREE,
-} from "../main/node";
+} from "../main/node.js";
 import {
     NOTIFICATION_LOCAL_TRANSFORM_CHANGED,
-} from "./canvas_item";
-import { TileSet, AUTO_TILE, ATLAS_TILE, SINGLE_TILE } from "../resources/tile_set";
-import { Node2D } from "./node_2d";
-import { CollisionObject2D } from "./collision_object_2d";
-import { CollisionPolygon2D } from "./collision_polygon_2d";
-import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server";
-import { BodyState, BodyMode } from "./const";
-import { remove_items } from "engine/dep/index";
-import { VSG } from "engine/servers/visual/visual_server_globals";
-import { NOTIFICATION_TRANSFORM_CHANGED } from "../const";
+} from "./canvas_item.js";
+import { TileSet, AUTO_TILE, ATLAS_TILE, SINGLE_TILE } from "../resources/tile_set.js";
+import { Node2D } from "./node_2d.js";
+import { CollisionObject2D } from "./collision_object_2d.js";
+import { CollisionPolygon2D } from "./collision_polygon_2d.js";
+import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server.js";
+import { BodyState, BodyMode } from "./const.js";
+import { remove_items } from "engine/dep/index.js";
+import { VSG } from "engine/servers/visual/visual_server_globals.js";
+import { NOTIFICATION_TRANSFORM_CHANGED } from "../const.js";
 
 
 export const MODE_SQUARE = 0;

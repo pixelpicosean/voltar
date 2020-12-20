@@ -1,10 +1,10 @@
-import { node_class_map } from 'engine/registry';
-import { GDCLASS } from 'engine/core/v_object';
-import { Rect2 } from 'engine/core/math/rect2';
-import { Color, ColorLike } from 'engine/core/color';
+import { node_class_map } from 'engine/registry.js';
+import { GDCLASS } from 'engine/core/v_object.js';
+import { Rect2 } from 'engine/core/math/rect2.js';
+import { Color, ColorLike } from 'engine/core/color.js';
 
-import { NOTIFICATION_DRAW } from '../2d/canvas_item';
-import { Control } from './control';
+import { NOTIFICATION_DRAW } from '../2d/canvas_item.js';
+import { Control } from './control.js';
 
 
 export class ColorRect extends Control {

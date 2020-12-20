@@ -1,19 +1,19 @@
-import { VObject } from 'engine/core/v_object';
+import { VObject } from 'engine/core/v_object.js';
 
 import parse_uri from './parse_uri';
-import { queue, each_series } from './async';
-import Resource from './io_resource';
-import blob_middleware_factory from './middlewares/parsing/blob';
+import { queue, each_series } from './async.js';
+import Resource from './io_resource.js';
+import blob_middleware_factory from './middlewares/parsing/blob.js';
 
 import {
     loader_pre_procs,
     loader_use_procs,
     get_raw_resource_map,
-} from 'engine/registry';
+} from 'engine/registry.js';
 
 import { texture_loader } from './texture_loader';
-import { atlas_loader } from './atlas_loader';
-import { bmfont_loader } from './bmfont_loader';
+import { atlas_loader } from './atlas_loader.js';
+import { bmfont_loader } from './bmfont_loader.js';
 
 
 // some constants

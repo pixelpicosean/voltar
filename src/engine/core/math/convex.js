@@ -1,4 +1,4 @@
-import { Vector2 } from "./vector2";
+import { Vector2 } from "./vector2.js";
 
 /**
  * @param {Vector2[]} vertices

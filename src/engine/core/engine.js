@@ -7,17 +7,17 @@ import {
     get_resource_map,
     get_raw_resource_map,
     set_binary_pack_list,
-} from 'engine/registry';
+} from 'engine/registry.js';
 
-import { VSG } from 'engine/servers/visual/visual_server_globals';
+import { VSG } from 'engine/servers/visual/visual_server_globals.js';
 
-import { ResourceLoader } from './io/resource_loader';
-import { decompress } from './io/z';
+import { ResourceLoader } from './io/resource_loader.js';
+import { decompress } from './io/z.js';
 
-import { default_font_name, Theme } from 'engine/scene/resources/theme';
-import { registered_bitmap_fonts } from 'engine/scene/resources/font';
-import { instanciate_scene, assemble_scene } from 'engine/scene/assembler';
-import meta from 'meta.json';
+import { default_font_name, Theme } from 'engine/scene/resources/theme.js';
+import { registered_bitmap_fonts } from 'engine/scene/resources/font.js';
+import { instanciate_scene, assemble_scene } from 'engine/scene/assembler.js';
+import meta from 'gen/meta.json';
 
 /**
  * @typedef {(percent: number) => any} ProgressCallback
@@ -72,7 +72,7 @@ export class Engine {
 
         // Load resources marked as preload
         preload_queue.queue.unshift([`media/${default_font_name}.fnt`]);
-        preload_queue.queue.unshift([`media/data.vt`]);
+        preload_queue.queue.unshift([`media/data.tres`]);
         for (const settings of preload_queue.queue) {
             loader.add.call(loader, ...settings);
         }
@@ -93,7 +93,7 @@ export class Engine {
             preload_queue.is_complete = true;
             Theme.set_default_font(registered_bitmap_fonts[default_font_name]);
 
-            let res_str = decompress(loader.resources['media/data.vt'].data);
+            let res_str = decompress(loader.resources['media/data.tres'].data);
             let resources = JSON.parse(res_str);
 
             // fetch resource map updated by loader

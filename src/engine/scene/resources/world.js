@@ -1,5 +1,5 @@
-import { VObject } from 'engine/core/v_object';
-import { VSG } from 'engine/servers/visual/visual_server_globals';
+import { VObject } from 'engine/core/v_object.js';
+import { VSG } from 'engine/servers/visual/visual_server_globals.js';
 
 /**
  * @typedef {import('engine/drivers/webgl/rasterizer_scene').Environment_t} Environment_t

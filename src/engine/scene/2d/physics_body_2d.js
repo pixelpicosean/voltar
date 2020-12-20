@@ -1,22 +1,22 @@
-import { node_class_map } from "engine/registry";
-import { GDCLASS } from "engine/core/v_object";
-import { Vector2, Vector2Like } from "engine/core/math/vector2";
-import { Transform2D } from "engine/core/math/transform_2d";
-import { ProjectSettings } from "engine/core/project_settings";
-import { Engine } from "engine/core/engine";
-import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server";
-import { Body2DSW } from "engine/servers/physics_2d/body_2d_sw";
+import { node_class_map } from "engine/registry.js";
+import { GDCLASS } from "engine/core/v_object.js";
+import { Vector2, Vector2Like } from "engine/core/math/vector2.js";
+import { Transform2D } from "engine/core/math/transform_2d.js";
+import { ProjectSettings } from "engine/core/project_settings.js";
+import { Engine } from "engine/core/engine.js";
+import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server.js";
+import { Body2DSW } from "engine/servers/physics_2d/body_2d_sw.js";
 import {
     MotionResult,
     SeparationResult,
     Physics2DDirectBodyStateSW,
-} from "engine/servers/physics_2d/state";
+} from "engine/servers/physics_2d/state.js";
 
-import { NOTIFICATION_ENTER_TREE } from "../main/node";
-import { PhysicsMaterial } from "../resources/physics_material";
-import { BodyMode, BodyState } from "./const";
-import { NOTIFICATION_LOCAL_TRANSFORM_CHANGED } from "./canvas_item";
-import { CollisionObject2D } from "./collision_object_2d";
+import { NOTIFICATION_ENTER_TREE } from "../main/node.js";
+import { PhysicsMaterial } from "../resources/physics_material.js";
+import { BodyMode, BodyState } from "./const.js";
+import { NOTIFICATION_LOCAL_TRANSFORM_CHANGED } from "./canvas_item.js";
+import { CollisionObject2D } from "./collision_object_2d.js";
 
 
 export class PhysicsBody2D extends CollisionObject2D {

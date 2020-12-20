@@ -1,27 +1,27 @@
-import { node_class_map } from 'engine/registry';
-import { GDCLASS } from 'engine/core/v_object';
-import { Vector2 } from 'engine/core/math/vector2';
-import { Rect2 } from 'engine/core/math/rect2';
-import { MessageQueue } from 'engine/core/message_queue';
+import { node_class_map } from 'engine/registry.js';
+import { GDCLASS } from 'engine/core/v_object.js';
+import { Vector2 } from 'engine/core/math/vector2.js';
+import { Rect2 } from 'engine/core/math/rect2.js';
+import { MessageQueue } from 'engine/core/message_queue.js';
 
 import {
     NOTIFICATION_ENTER_TREE,
-} from '../main/node';
+} from '../main/node.js';
 import {
     NOTIFICATION_VISIBILITY_CHANGED,
-} from '../2d/canvas_item';
+} from '../2d/canvas_item.js';
 
 import {
     SIZE_FILL,
     SIZE_SHRINK_END,
     SIZE_SHRINK_CENTER,
     ANCHOR_BEGIN,
-} from './const';
+} from './const.js';
 import {
     Control,
     NOTIFICATION_RESIZED,
     NOTIFICATION_THEME_CHANGED,
-} from './control';
+} from './control.js';
 
 
 export const NOTIFICATION_SORT_CHILDREN = 50;

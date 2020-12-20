@@ -1,19 +1,19 @@
-import { res_class_map } from "engine/registry";
-import { pack_color_f } from "engine/core/math/math_funcs";
-import { Vector2, Vector2Like } from "engine/core/math/vector2";
-import { Vector3, Vector3Like } from "engine/core/math/vector3";
-import { AABB } from "engine/core/math/aabb";
+import { res_class_map } from "engine/registry.js";
+import { pack_color_f } from "engine/core/math/math_funcs.js";
+import { Vector2, Vector2Like } from "engine/core/math/vector2.js";
+import { Vector3, Vector3Like } from "engine/core/math/vector3.js";
+import { AABB } from "engine/core/math/aabb.js";
 
-import { VSG } from "engine/servers/visual/visual_server_globals";
+import { VSG } from "engine/servers/visual/visual_server_globals.js";
 
 import {
     ARRAY_VERTEX,
     ARRAY_NORMAL,
     ARRAY_TANGENT,
     ARRAY_TEX_UV,
-} from "../const";
-import { Material } from "./material";
-import { Mesh } from "./mesh";
+} from "../const.js";
+import { Material } from "./material.js";
+import { Mesh } from "./mesh.js";
 
 /**
  * @typedef MeshData

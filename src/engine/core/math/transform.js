@@ -1,7 +1,7 @@
-import { Vector3, Vector3Like } from "./vector3";
-import { Basis, Quat } from "./basis";
-import { Plane } from "./plane";
-import { AABB } from "./aabb";
+import { Vector3, Vector3Like } from "./vector3.js";
+import { Basis, Quat } from "./basis.js";
+import { Plane } from "./plane.js";
+import { AABB } from "./aabb.js";
 
 /** @type {Transform[]} */
 const pool = [];

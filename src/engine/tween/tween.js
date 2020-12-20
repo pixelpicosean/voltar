@@ -1,11 +1,11 @@
-import { remove_items } from 'engine/dep/index';
-import { VObject } from 'engine/core/v_object';
-import { clamp } from 'engine/core/math/math_funcs';
-import { Vector2, Vector2Like } from 'engine/core/math/vector2';
-import { Color, ColorLike } from 'engine/core/color';
+import { remove_items } from 'engine/dep/index.js';
+import { VObject } from 'engine/core/v_object.js';
+import { clamp } from 'engine/core/math/math_funcs.js';
+import { Vector2, Vector2Like } from 'engine/core/math/vector2.js';
+import { Color, ColorLike } from 'engine/core/color.js';
 
-import { flatten_key_url } from './flatten_key_url';
-import { Easing } from './easing';
+import { flatten_key_url } from './flatten_key_url.js';
+import { Easing } from './easing.js';
 
 
 /**

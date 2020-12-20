@@ -1,13 +1,13 @@
-import { Color } from "engine/core/color";
+import { Color } from "engine/core/color.js";
 import {
     MARGIN_LEFT,
     MARGIN_BOTTOM,
     MARGIN_TOP,
     MARGIN_RIGHT,
-} from "engine/core/math/math_defs";
+} from "engine/core/math/math_defs.js";
 
-import { StyleBox } from "./style_box";
-import { BitmapFont } from "./font";
+import { StyleBox } from "./style_box.js";
+import { BitmapFont } from "./font.js";
 
 
 export const default_font_name = 'mini';

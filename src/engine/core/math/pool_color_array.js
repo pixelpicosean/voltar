@@ -1,4 +1,4 @@
-import { ColorLike } from "../color";
+import { ColorLike } from "../color.js";
 
 export class PoolColorArray {
     constructor() {

@@ -1,6 +1,6 @@
-import { node_class_map } from 'engine/registry';
-import { GDCLASS } from "engine/core/v_object";
-import { MessageQueue } from 'engine/core/message_queue';
+import { node_class_map } from 'engine/registry.js';
+import { GDCLASS } from "engine/core/v_object.js";
+import { MessageQueue } from 'engine/core/message_queue.js';
 
 import {
     Node,
@@ -9,7 +9,7 @@ import {
     NOTIFICATION_INTERNAL_PROCESS,
     NOTIFICATION_INTERNAL_PHYSICS_PROCESS,
     NOTIFICATION_EXIT_TREE,
-} from "engine/scene/main/node";
+} from "engine/scene/main/node.js";
 
 import {
     Key,
@@ -35,10 +35,10 @@ import {
     UPDATE_DISCRETE,
     BezierTrack,
     AnimationTrack,
-} from './animation';
-import { Transform } from 'engine/core/math/transform';
-import { Vector3 } from 'engine/core/math/vector3';
-import { Quat } from 'engine/core/math/basis';
+} from './animation.js';
+import { Transform } from 'engine/core/math/transform.js';
+import { Vector3 } from 'engine/core/math/vector3.js';
+import { Quat } from 'engine/core/math/basis.js';
 
 
 class NodeCache {

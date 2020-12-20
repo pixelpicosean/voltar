@@ -1,4 +1,4 @@
-import { Vector2Like } from "./vector2";
+import { Vector2Like } from "./vector2.js";
 
 export class PoolVector2Array {
     constructor() {

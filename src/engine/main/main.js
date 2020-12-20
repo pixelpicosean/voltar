@@ -1,14 +1,14 @@
-import { Color } from "engine/core/color";
-import { VObject } from "engine/core/v_object";
-import { ProjectSettings } from "engine/core/project_settings";
-import { InputMap } from "engine/core/input_map";
-import { MessageQueue } from "engine/core/message_queue";
-import { OS } from "engine/core/os/os";
-import { Engine } from "engine/core/engine";
-import { SceneTree } from "engine/scene/main/scene_tree";
-import { VisualServer } from "engine/servers/visual_server";
-import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server";
-import { VSG } from "engine/servers/visual/visual_server_globals";
+import { Color } from "engine/core/color.js";
+import { VObject } from "engine/core/v_object.js";
+import { ProjectSettings } from "engine/core/project_settings.js";
+import { InputMap } from "engine/core/input_map.js";
+import { MessageQueue } from "engine/core/message_queue.js";
+import { OS } from "engine/core/os/os.js";
+import { Engine } from "engine/core/engine.js";
+import { SceneTree } from "engine/scene/main/scene_tree.js";
+import { VisualServer } from "engine/servers/visual_server.js";
+import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server.js";
+import { VSG } from "engine/servers/visual/visual_server_globals.js";
 
 
 /** @type {MessageQueue} */

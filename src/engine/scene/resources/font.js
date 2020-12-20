@@ -1,10 +1,10 @@
-import { VObject } from "engine/core/v_object";
-import { Vector2, Vector2Like } from "engine/core/math/vector2";
-import { Rect2 } from "engine/core/math/rect2";
+import { VObject } from "engine/core/v_object.js";
+import { Vector2, Vector2Like } from "engine/core/math/vector2.js";
+import { Rect2 } from "engine/core/math/rect2.js";
 import {
     res_class_map,
     get_resource_map,
-} from "engine/registry";
+} from "engine/registry.js";
 import {
     HALIGN_LEFT,
     HALIGN_FILL,
@@ -14,10 +14,10 @@ import {
     VALIGN_CENTER,
     VALIGN_BOTTOM,
     VALIGN_FILL,
-} from "engine/core/math/math_defs";
+} from "engine/core/math/math_defs.js";
 
-import { ImageTexture } from "./texture";
-import { FontFaceObserver } from "engine/dep/fontfaceobserver";
+import { ImageTexture } from "./texture.js";
+import { FontFaceObserver } from "engine/dep/fontfaceobserver.js";
 
 class DynamicFontRenderContext {
     constructor() {

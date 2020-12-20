@@ -1,10 +1,10 @@
-import { node_class_map } from 'engine/registry';
-import { GDCLASS } from 'engine/core/v_object';
+import { node_class_map } from 'engine/registry.js';
+import { GDCLASS } from 'engine/core/v_object.js';
 
-import { NOTIFICATION_ENTER_TREE } from '../main/node';
-import { Node2D } from './node_2d';
-import { Vector2 } from 'engine/core/math/vector2';
-import { NOTIFICATION_TRANSFORM_CHANGED } from '../const';
+import { NOTIFICATION_ENTER_TREE } from '../main/node.js';
+import { Node2D } from './node_2d.js';
+import { Vector2 } from 'engine/core/math/vector2.js';
+import { NOTIFICATION_TRANSFORM_CHANGED } from '../const.js';
 
 
 export class RemoteTransform2D extends Node2D {

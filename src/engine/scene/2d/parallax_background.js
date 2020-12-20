@@ -1,10 +1,10 @@
-import { node_class_map } from "engine/registry";
-import { GDCLASS } from "engine/core/v_object";
-import { Vector2, Vector2Like } from "engine/core/math/vector2";
-import { Transform2D } from "engine/core/math/transform_2d";
+import { node_class_map } from "engine/registry.js";
+import { GDCLASS } from "engine/core/v_object.js";
+import { Vector2, Vector2Like } from "engine/core/math/vector2.js";
+import { Transform2D } from "engine/core/math/transform_2d.js";
 
-import { CanvasLayer } from "../main/canvas_layer";
-import { NOTIFICATION_ENTER_TREE, NOTIFICATION_EXIT_TREE } from "../main/node";
+import { CanvasLayer } from "../main/canvas_layer.js";
+import { NOTIFICATION_ENTER_TREE, NOTIFICATION_EXIT_TREE } from "../main/node.js";
 
 
 export class ParallaxBackground extends CanvasLayer {

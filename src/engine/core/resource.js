@@ -1,4 +1,4 @@
-import { VObject, GDCLASS } from "./v_object";
+import { VObject, GDCLASS } from "./v_object.js";
 
 export class Resource extends VObject {
     get class() { return 'Resource' }

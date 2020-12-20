@@ -1,26 +1,26 @@
-import { remove_items } from 'engine/dep/index';
-import { GDCLASS } from 'engine/core/v_object';
-import { Transform2D } from 'engine/core/math/transform_2d';
+import { remove_items } from 'engine/dep/index.js';
+import { GDCLASS } from 'engine/core/v_object.js';
+import { Transform2D } from 'engine/core/math/transform_2d.js';
 
-import { Physics2DServer } from 'engine/servers/physics_2d/physics_2d_server';
-import { CollisionObject2DSW } from 'engine/servers/physics_2d/collision_object_2d_sw';
-import { Area2DSW } from 'engine/servers/physics_2d/area_2d_sw';
-import { Body2DSW } from 'engine/servers/physics_2d/body_2d_sw';
+import { Physics2DServer } from 'engine/servers/physics_2d/physics_2d_server.js';
+import { CollisionObject2DSW } from 'engine/servers/physics_2d/collision_object_2d_sw.js';
+import { Area2DSW } from 'engine/servers/physics_2d/area_2d_sw.js';
+import { Body2DSW } from 'engine/servers/physics_2d/body_2d_sw.js';
 
-import { Shape2D } from '../resources/shape_2d';
+import { Shape2D } from '../resources/shape_2d.js';
 import {
     NOTIFICATION_ENTER_TREE,
     NOTIFICATION_EXIT_TREE,
-} from '../main/node';
-import { Node2D } from './node_2d';
+} from '../main/node.js';
+import { Node2D } from './node_2d.js';
 import {
     NOTIFICATION_EXIT_CANVAS,
     NOTIFICATION_VISIBILITY_CHANGED,
-} from './canvas_item';
-import { BodyState } from './const';
-import { CollisionShape2D } from './collision_shape_2d';
-import { CollisionPolygon2D } from './collision_polygon_2d';
-import { NOTIFICATION_TRANSFORM_CHANGED } from '../const';
+} from './canvas_item.js';
+import { BodyState } from './const.js';
+import { CollisionShape2D } from './collision_shape_2d.js';
+import { CollisionPolygon2D } from './collision_polygon_2d.js';
+import { NOTIFICATION_TRANSFORM_CHANGED } from '../const.js';
 
 
 class Shape {

@@ -1,10 +1,10 @@
-import { Vector2 } from 'engine/core/math/vector2';
-import { Transform2D } from 'engine/core/math/transform_2d';
+import { Vector2 } from 'engine/core/math/vector2.js';
+import { Transform2D } from 'engine/core/math/transform_2d.js';
 import {
     AreaSpaceOverrideMode,
     AreaParameter,
     BodyState,
-} from 'engine/scene/2d/const';
+} from 'engine/scene/2d/const.js';
 
 import {
     ShapeResult,
@@ -13,8 +13,8 @@ import {
     MotionResult,
     CollCbkData,
     _shape_col_cbk,
-} from "./state";
-import { Step2DSW } from "./step_2d_sw";
+} from "./state.js";
+import { Step2DSW } from "./step_2d_sw.js";
 import {
     Shape2DSW,
     CircleShape2DSW,
@@ -22,11 +22,11 @@ import {
     SegmentShape2DSW,
     ConvexPolygonShape2DSW,
     RayShape2DSW,
-} from "./shape_2d_sw";
-import { CollisionSolver2DSW } from "./collision_solver_2d_sw";
-import { Space2DSW } from "./space_2d_sw";
-import { Area2DSW } from "./area_2d_sw";
-import { Body2DSW } from "./body_2d_sw";
+} from "./shape_2d_sw.js";
+import { CollisionSolver2DSW } from "./collision_solver_2d_sw.js";
+import { Space2DSW } from "./space_2d_sw.js";
+import { Area2DSW } from "./area_2d_sw.js";
+import { Body2DSW } from "./body_2d_sw.js";
 
 
 export const AREA_BODY_ADDED = 0;

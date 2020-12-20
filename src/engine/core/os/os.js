@@ -1,12 +1,12 @@
-import { Vector2, Vector2Like } from "engine/core/math/vector2";
+import { Vector2, Vector2Like } from "engine/core/math/vector2.js";
 import {
     MainLoop,
     NOTIFICATION_WM_MOUSE_ENTER,
     NOTIFICATION_WM_MOUSE_EXIT,
     NOTIFICATION_WM_FOCUS_IN,
     NOTIFICATION_WM_FOCUS_OUT,
-} from "engine/core/main_loop";
-import { Input } from "engine/main/input";
+} from "engine/core/main_loop.js";
+import { Input } from "engine/main/input.js";
 import {
     InputEventWithModifiers,
     InputEventMouseButton,
@@ -15,10 +15,10 @@ import {
     BUTTON_MIDDLE,
     BUTTON_RIGHT,
     InputEventKey,
-} from "./input_event";
-import { VisualServer } from "engine/servers/visual_server";
-import { VSG } from "engine/servers/visual/visual_server_globals";
-import { AudioServer } from "engine/audio/audio";
+} from "./input_event.js";
+import { VisualServer } from "engine/servers/visual_server.js";
+import { VSG } from "engine/servers/visual/visual_server_globals.js";
+import { AudioServer } from "engine/audio/audio.js";
 
 
 export const MOUSE_MODE_VISIBLE = 0;

@@ -1,4 +1,4 @@
-import Resource from "../../io_resource";
+import Resource from "../../io_resource.js";
 
 // a simple in-memory cache for resources
 /** @type {Object<string, any>} */

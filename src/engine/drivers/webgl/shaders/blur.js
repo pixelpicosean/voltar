@@ -1,4 +1,4 @@
-import { Shader } from '../shader';
+import { Shader } from '../shader.js';
 
 import vs from './blur.vert';
 import fs from './blur.frag';

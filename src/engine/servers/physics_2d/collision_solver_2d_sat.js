@@ -1,7 +1,7 @@
-import { CMP_EPSILON } from "engine/core/math/math_defs";
-import { Vector2 } from "engine/core/math/vector2";
-import { Transform2D } from "engine/core/math/transform_2d";
-import { get_closest_point_to_segment_uncapped_2d } from "engine/core/math/geometry";
+import { CMP_EPSILON } from "engine/core/math/math_defs.js";
+import { Vector2 } from "engine/core/math/vector2.js";
+import { Transform2D } from "engine/core/math/transform_2d.js";
+import { get_closest_point_to_segment_uncapped_2d } from "engine/core/math/geometry.js";
 
 import {
     Shape2DSW,
@@ -9,7 +9,7 @@ import {
     RectangleShape2DSW,
     SegmentShape2DSW,
     ConvexPolygonShape2DSW,
-} from "./shape_2d_sw";
+} from "./shape_2d_sw.js";
 
 
 /** @typedef {(A: Shape2DSW, xform_A: Transform2D, B: Shape2DSW, xform_B: Transform2D, collector: _CollectorCallback2D, motion_A: Vector2, motion_B: Vector2, margin_A: number, margin_B: number) => void} CollisionFunc */

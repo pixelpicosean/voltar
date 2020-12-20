@@ -1,4 +1,4 @@
-import * as v from 'engine/index';
+import * as v from 'engine/index.js';
 
 import 'extension/2d/vector_graphic';
 
@@ -11,7 +11,7 @@ v.preload('media/sprites-0.json');
 v.preload('media/palette.png');
 
 
-import Settings from 'project.json';
+import Settings from 'gen/project.json';
 
 v.Main.setup(Settings, {
     display: {

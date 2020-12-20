@@ -1,22 +1,22 @@
-import { remove_items } from 'engine/dep/index';
-import earcut from 'earcut';
+import { remove_items } from 'engine/dep/index.js';
+import { earcut } from 'engine/dep/earcut.js';
 import {
     CMP_EPSILON,
     MARGIN_LEFT,
     MARGIN_TOP,
     MARGIN_RIGHT,
     MARGIN_BOTTOM,
-} from 'engine/core/math/math_defs';
-import { clamp } from 'engine/core/math/math_funcs';
-import { Vector2, Vector2Like } from 'engine/core/math/vector2';
-import { Rect2 } from 'engine/core/math/rect2';
-import { Transform2D } from 'engine/core/math/transform_2d';
-import { Color, ColorLike } from 'engine/core/color';
-import { Texture } from 'engine/scene/resources/texture';
-import { Material } from 'engine/scene/resources/material';
+} from 'engine/core/math/math_defs.js';
+import { clamp } from 'engine/core/math/math_funcs.js';
+import { Vector2, Vector2Like } from 'engine/core/math/vector2.js';
+import { Rect2 } from 'engine/core/math/rect2.js';
+import { Transform2D } from 'engine/core/math/transform_2d.js';
+import { Color, ColorLike } from 'engine/core/color.js';
+import { Texture } from 'engine/scene/resources/texture.js';
+import { Material } from 'engine/scene/resources/material.js';
 
-import { VisualServer } from '../visual_server';
-import { VSG } from './visual_server_globals';
+import { VisualServer } from '../visual_server.js';
+import { VSG } from './visual_server_globals.js';
 import {
     TYPE_LINE,
     TYPE_POLYLINE,
@@ -40,7 +40,7 @@ import {
     CommandPolygon,
     CommandMultiMesh,
     CommandTransform,
-} from './commands';
+} from './commands.js';
 
 
 const white = Object.freeze(new Color(1, 1, 1, 1));

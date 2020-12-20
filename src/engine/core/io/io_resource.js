@@ -1,6 +1,5 @@
-import { VObject } from 'engine/core/v_object';
+import { VObject } from 'engine/core/v_object.js';
 import parse_uri from './parse_uri';
-import { ImageTexture } from 'engine/scene/resources/texture';
 
 let temp_anchor = null;
 

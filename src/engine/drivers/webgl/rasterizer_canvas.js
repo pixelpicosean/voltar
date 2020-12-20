@@ -3,19 +3,19 @@ import {
     MARGIN_RIGHT,
     MARGIN_TOP,
     MARGIN_BOTTOM,
-} from 'engine/core/math/math_defs';
-import { Transform2D } from 'engine/core/math/transform_2d';
-import { Transform } from 'engine/core/math/transform';
-import { ColorLike, Color } from 'engine/core/color';
+} from 'engine/core/math/math_defs.js';
+import { Transform2D } from 'engine/core/math/transform_2d.js';
+import { Transform } from 'engine/core/math/transform.js';
+import { ColorLike, Color } from 'engine/core/color.js';
 import {
     OS,
     VIDEO_DRIVER_GLES2,
     VIDEO_DRIVER_GLES3,
-} from 'engine/core/os/os';
-import { VObject } from 'engine/core/v_object';
+} from 'engine/core/os/os.js';
+import { VObject } from 'engine/core/v_object.js';
 
-import { Item } from 'engine/servers/visual/visual_server_canvas';
-import { VSG } from 'engine/servers/visual/visual_server_globals';
+import { Item } from 'engine/servers/visual/visual_server_canvas.js';
+import { VSG } from 'engine/servers/visual/visual_server_globals.js';
 import {
     TYPE_LINE,
     TYPE_POLYLINE,
@@ -38,9 +38,9 @@ import {
     CommandPolygon,
     CommandMultiMesh,
     CommandTransform,
-} from 'engine/servers/visual/commands';
-import { Texture } from 'engine/scene/resources/texture';
-import { ShaderMaterial, CANVAS_ITEM_SHADER_UNIFORMS } from 'engine/scene/resources/material';
+} from 'engine/servers/visual/commands.js';
+import { Texture } from 'engine/scene/resources/texture.js';
+import { ShaderMaterial, CANVAS_ITEM_SHADER_UNIFORMS } from 'engine/scene/resources/material.js';
 import {
     CanvasItemMaterial,
     BLEND_MODE_MIX,
@@ -48,7 +48,7 @@ import {
     BLEND_MODE_SUB,
     BLEND_MODE_MUL,
     BLEND_MODE_PREMULT_ALPHA,
-} from 'engine/scene/2d/canvas_item';
+} from 'engine/scene/2d/canvas_item.js';
 
 import normal_vs from './shaders/canvas.vert';
 import normal_fs from './shaders/canvas.frag';
@@ -67,10 +67,10 @@ import {
     MULTIMESH_CUSTOM_DATA_NONE,
     MULTIMESH_CUSTOM_DATA_8BIT,
     MULTIMESH_CUSTOM_DATA_FLOAT,
-} from 'engine/servers/visual_server';
-import { Rect2 } from 'engine/core/math/rect2';
-import { ARRAY_MAX } from 'engine/scene/const';
-import { parse_attributes_from_code, parse_uniforms_from_code } from './shader_parser';
+} from 'engine/servers/visual_server.js';
+import { Rect2 } from 'engine/core/math/rect2.js';
+import { ARRAY_MAX } from 'engine/scene/const.js';
+import { parse_attributes_from_code, parse_uniforms_from_code } from './shader_parser.js';
 
 /**
  * @typedef {import('./rasterizer_storage').Material_t} Material_t

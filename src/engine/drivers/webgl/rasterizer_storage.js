@@ -1,11 +1,11 @@
-import { SelfList, List } from "engine/core/self_list";
-import { nearest_po2, deg2rad, clamp } from "engine/core/math/math_funcs";
-import { Vector2 } from "engine/core/math/vector2";
-import { Vector3 } from "engine/core/math/vector3";
-import { AABB } from "engine/core/math/aabb";
-import { Transform } from "engine/core/math/transform";
-import { Color, ColorLike } from "engine/core/color";
-import { OS } from "engine/core/os/os";
+import { SelfList, List } from "engine/core/self_list.js";
+import { nearest_po2, deg2rad, clamp } from "engine/core/math/math_funcs.js";
+import { Vector2 } from "engine/core/math/vector2.js";
+import { Vector3 } from "engine/core/math/vector3.js";
+import { AABB } from "engine/core/math/aabb.js";
+import { Transform } from "engine/core/math/transform.js";
+import { Color, ColorLike } from "engine/core/color.js";
+import { OS } from "engine/core/os/os.js";
 
 import {
     TEXTURE_TYPE_2D,
@@ -38,13 +38,13 @@ import {
     LIGHT_OMNI_SHADOW_DETAIL_VERTICAL,
     LIGHT_DIRECTIONAL_SHADOW_DEPTH_RANGE_STABLE,
     LIGHT_OMNI_SHADOW_DUAL_PARABOLOID,
-} from "engine/servers/visual_server";
+} from "engine/servers/visual_server.js";
 import {
     Instance_t,
-} from "engine/servers/visual/visual_server_scene";
-import { VSG } from "engine/servers/visual/visual_server_globals";
+} from "engine/servers/visual/visual_server_scene.js";
+import { VSG } from "engine/servers/visual/visual_server_globals.js";
 
-import { ARRAY_MAX } from "engine/scene/const";
+import { ARRAY_MAX } from "engine/scene/const.js";
 import {
     PIXEL_FORMAT_L8,
     PIXEL_FORMAT_LA8,
@@ -62,9 +62,9 @@ import {
     PIXEL_FORMAT_PVRTC4,
     PIXEL_FORMAT_PVRTC4A,
     PIXEL_FORMAT_ETC,
-} from "engine/scene/resources/texture";
-// import { CubemapFilterShader } from "./shaders/cubemap_filter";
-import { CopyShader } from "./shaders/copy";
+} from "engine/scene/resources/texture.js";
+// import { CubemapFilterShader } from "./shaders/cubemap_filter.js";
+import { CopyShader } from "./shaders/copy.js";
 
 const SMALL_VEC2 = new Vector2(0.00001, 0.00001);
 const SMALL_VEC3 = new Vector3(0.00001, 0.00001, 0.00001);

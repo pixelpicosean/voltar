@@ -1,4 +1,4 @@
-import { Howler, Howl } from "./howler";
+import { Howler, Howl } from "./howler.js";
 
 /**
  * @typedef PlayingState

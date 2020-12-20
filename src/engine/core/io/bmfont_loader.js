@@ -1,9 +1,9 @@
-import { get_resource_map } from 'engine/registry';
+import { get_resource_map } from 'engine/registry.js';
 
-import { ImageTexture } from 'engine/scene/resources/texture';
-import { register_bitmap_font } from 'engine/scene/resources/font';
+import { ImageTexture } from 'engine/scene/resources/texture.js';
+import { register_bitmap_font } from 'engine/scene/resources/font.js';
 
-import Resource from 'engine/core/io/io_resource';
+import Resource from 'engine/core/io/io_resource.js';
 
 
 /**

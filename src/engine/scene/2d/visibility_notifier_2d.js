@@ -1,21 +1,21 @@
-import { node_class_map } from "engine/registry";
-import { GDCLASS } from "engine/core/v_object";
-import { Rect2 } from "engine/core/math/rect2";
+import { node_class_map } from "engine/registry.js";
+import { GDCLASS } from "engine/core/v_object.js";
+import { Rect2 } from "engine/core/math/rect2.js";
 
-import { AnimationPlayer } from "../animation/animation_player";
-import { Viewport } from "../main/viewport";
+import { AnimationPlayer } from "../animation/animation_player.js";
+import { Viewport } from "../main/viewport.js";
 import {
     NOTIFICATION_ENTER_TREE,
     NOTIFICATION_EXIT_TREE,
     Node,
-} from "../main/node";
+} from "../main/node.js";
 import {
     NOTIFICATION_DRAW,
-} from "./canvas_item";
-import { Node2D } from "./node_2d";
-import { CPUParticles2D } from "./cpu_particles_2d";
-import { NOTIFICATION_TRANSFORM_CHANGED } from "../const";
-import { AnimatedSprite } from "./animated_sprite";
+} from "./canvas_item.js";
+import { Node2D } from "./node_2d.js";
+import { CPUParticles2D } from "./cpu_particles_2d.js";
+import { NOTIFICATION_TRANSFORM_CHANGED } from "../const.js";
+import { AnimatedSprite } from "./animated_sprite.js";
 
 
 export class VisibilityNotifier2D extends Node2D {

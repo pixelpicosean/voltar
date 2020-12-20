@@ -1,5 +1,5 @@
-import { remove_items } from "engine/dep/index";
-import { MessageQueue } from "./message_queue";
+import { remove_items } from "engine/dep/index.js";
+import { MessageQueue } from "./message_queue.js";
 
 
 export const NOTIFICATION_PREDELETE = 1

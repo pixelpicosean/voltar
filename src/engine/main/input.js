@@ -1,16 +1,16 @@
-import { VObject, GDCLASS } from "engine/core/v_object";
-import { Vector2, Vector2Like } from "engine/core/math/vector2";
-import { OS } from "engine/core/os/os";
-import { Engine } from "engine/core/engine";
-import { MainLoop } from "engine/core/main_loop";
+import { VObject, GDCLASS } from "engine/core/v_object.js";
+import { Vector2, Vector2Like } from "engine/core/math/vector2.js";
+import { OS } from "engine/core/os/os.js";
+import { Engine } from "engine/core/engine.js";
+import { MainLoop } from "engine/core/main_loop.js";
 import {
     InputEvent,
     InputEventKey,
     InputEventMouseButton,
     InputEventMouseMotion,
     InputEventScreenDrag,
-} from "engine/core/os/input_event";
-import { InputMap } from "engine/core/input_map";
+} from "engine/core/os/input_event.js";
+import { InputMap } from "engine/core/input_map.js";
 
 
 class Action {

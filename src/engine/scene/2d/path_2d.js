@@ -1,17 +1,17 @@
-import { node_class_map } from 'engine/registry';
-import { GDCLASS } from 'engine/core/v_object';
+import { node_class_map } from 'engine/registry.js';
+import { GDCLASS } from 'engine/core/v_object.js';
 import {
     posmod,
     clamp,
-} from 'engine/core/math/math_funcs';
-import { Vector2 } from 'engine/core/math/vector2';
+} from 'engine/core/math/math_funcs.js';
+import { Vector2 } from 'engine/core/math/vector2.js';
 
 import {
     NOTIFICATION_ENTER_TREE,
     NOTIFICATION_EXIT_TREE,
-} from '../main/node';
-import { Curve2D } from '../resources/curve';
-import { Node2D } from './node_2d';
+} from '../main/node.js';
+import { Curve2D } from '../resources/curve.js';
+import { Node2D } from './node_2d.js';
 
 
 export class Path2D extends Node2D {

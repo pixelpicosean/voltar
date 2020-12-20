@@ -6,9 +6,9 @@
         {
             "label": "Import Godot",
             "type": "shell",
-            "command": "node tscn/main.js",
+            "command": "node tool/import_assets.js",
             "windows": {
-                "command": "node tscn\\main.js"
+                "command": "node tool\\import_assets.js"
             },
             "group": {
                 "kind": "build",

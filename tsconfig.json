@@ -4,11 +4,11 @@
         "noImplicitAny": true,
         "skipLibCheck": true,
         "importsNotUsedAsValues": "preserve",
-        "module": "ESNext",
-        "target": "es5",
+        "module": "ES6",
+        "target": "ES6",
         "sourceMap": true,
         "baseUrl": "./src",
-        "outDir": "./dist"
+        "outDir": "dist"
     },
     "include": [
         "src/**/*"

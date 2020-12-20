@@ -1,4 +1,4 @@
-import * as v from 'engine/index';
+import * as v from 'engine/index.js';
 
 type TargetScene = string | { instance: () => v.Node };
 

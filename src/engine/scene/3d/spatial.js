@@ -1,17 +1,17 @@
-import { node_class_map } from "engine/registry";
-import { GDCLASS } from "engine/core/v_object";
-import { SelfList } from "engine/core/self_list";
-import { Vector3, Vector3Like } from "engine/core/math/vector3";
-import { Transform } from "engine/core/math/transform";
+import { node_class_map } from "engine/registry.js";
+import { GDCLASS } from "engine/core/v_object.js";
+import { SelfList } from "engine/core/self_list.js";
+import { Vector3, Vector3Like } from "engine/core/math/vector3.js";
+import { Transform } from "engine/core/math/transform.js";
 
 import {
     Node,
     NOTIFICATION_ENTER_TREE,
     NOTIFICATION_EXIT_TREE,
-} from "../main/node";
-import { Viewport } from "../main/viewport";
-import { Basis } from "engine/core/math/basis";
-import { NOTIFICATION_TRANSFORM_CHANGED } from "../const";
+} from "../main/node.js";
+import { Viewport } from "../main/viewport.js";
+import { Basis } from "engine/core/math/basis.js";
+import { NOTIFICATION_TRANSFORM_CHANGED } from "../const.js";
 
 export const NOTIFICATION_ENTER_WORLD = 41;
 export const NOTIFICATION_EXIT_WORLD = 42;

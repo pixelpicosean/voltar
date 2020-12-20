@@ -1,18 +1,16 @@
-const path = require('path');
+const path = require("path");
 
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const { TsconfigPathsPlugin } = require("tsconfig-paths-webpack-plugin");
 
 module.exports = {
-    entry: path.resolve(__dirname, `./src/game/main.ts`),
+    entry: path.resolve(__dirname, "./src/game/main.ts"),
     module: {
         rules: [
             {
                 test: /\.ts$/,
-                use: 'ts-loader',
-                exclude: [
-                    path.resolve(__dirname, "node_modules"),
-                ],
+                loader: "ts-loader",
             },
             // Shaders
             {
@@ -20,7 +18,7 @@ module.exports = {
                 include: [
                     path.resolve(__dirname, "src"),
                 ],
-                loader: 'raw-loader',
+                loader: "raw-loader",
             },
             // binary resources packed as base64
             {
@@ -28,21 +26,24 @@ module.exports = {
                 include: [
                     path.resolve(__dirname),
                 ],
-                loader: 'base64-inline-loader',
+                loader: "base64-inline-loader",
             },
         ],
     },
     resolve: {
-        extensions: ['.ts', '.js', '.json'],
+        extensions: [".ts", ".js", ".json"],
+        plugins: [
+            new TsconfigPathsPlugin,
+        ],
     },
     output: {
-        filename: '[name].js',
-        path: path.resolve(__dirname, 'dist'),
+        filename: "[name].js",
+        path: path.resolve(__dirname, "dist"),
     },
     plugins: [
         new CleanWebpackPlugin,
         new HtmlWebpackPlugin({
-            template: path.resolve(__dirname, 'index.html'),
+            template: path.resolve(__dirname, "index.html"),
         }),
     ],
 };

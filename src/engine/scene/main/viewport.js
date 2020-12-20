@@ -1,13 +1,13 @@
-import { node_class_map, preload_queue } from "engine/registry";
-import { GDCLASS } from "engine/core/v_object";
-import { Vector2, Vector2Like } from "engine/core/math/vector2";
-import { Transform2D } from "engine/core/math/transform_2d";
-import { Rect2 } from "engine/core/math/rect2";
-import { OS } from "engine/core/os/os";
+import { node_class_map, preload_queue } from "engine/registry.js";
+import { GDCLASS } from "engine/core/v_object.js";
+import { Vector2, Vector2Like } from "engine/core/math/vector2.js";
+import { Transform2D } from "engine/core/math/transform_2d.js";
+import { Rect2 } from "engine/core/math/rect2.js";
+import { OS } from "engine/core/os/os.js";
 import {
     NOTIFICATION_WM_MOUSE_EXIT,
     NOTIFICATION_WM_FOCUS_OUT,
-} from "engine/core/main_loop";
+} from "engine/core/main_loop.js";
 import {
     InputEvent,
     InputEventMouseButton,
@@ -18,7 +18,7 @@ import {
     BUTTON_WHEEL_LEFT,
     BUTTON_WHEEL_RIGHT,
     BUTTON_MASK_LEFT,
-} from "engine/core/os/input_event";
+} from "engine/core/os/input_event.js";
 import {
     Node,
     NOTIFICATION_ENTER_TREE,
@@ -27,21 +27,21 @@ import {
     NOTIFICATION_INTERNAL_PROCESS,
     NOTIFICATION_INTERNAL_PHYSICS_PROCESS,
     NOTIFICATION_DRAG_END,
-} from "engine/scene/main/node";
-import { VSG } from "engine/servers/visual/visual_server_globals";
-import { Texture } from "engine/scene/resources/texture";
-import { World2D } from "engine/scene/resources/world_2d";
-import { CanvasItem } from "engine/scene/2d/canvas_item";
+} from "engine/scene/main/node.js";
+import { VSG } from "engine/servers/visual/visual_server_globals.js";
+import { Texture } from "engine/scene/resources/texture.js";
+import { World2D } from "engine/scene/resources/world_2d.js";
+import { CanvasItem } from "engine/scene/2d/canvas_item.js";
 
-import { CanvasLayer } from "./canvas_layer";
-import { remove_items } from "engine/dep/index";
-import { Input } from "engine/main/input";
-import { Engine } from "engine/core/engine";
+import { CanvasLayer } from "./canvas_layer.js";
+import { remove_items } from "engine/dep/index.js";
+import { Input } from "engine/main/input.js";
+import { Engine } from "engine/core/engine.js";
 import {
     FOCUS_NONE,
     MOUSE_FILTER_STOP,
     MOUSE_FILTER_IGNORE,
-} from "../gui/const";
+} from "../gui/const.js";
 import {
     Control,
     CComparator,
@@ -50,18 +50,18 @@ import {
     NOTIFICATION_MOUSE_ENTER,
     NOTIFICATION_FOCUS_EXIT,
     NOTIFICATION_FOCUS_ENTER,
-} from "../gui/control";
+} from "../gui/control.js";
 import {
     Camera,
     NOTIFICATION_LOST_CURRENT,
     NOTIFICATION_BECAME_CURRENT,
-} from "../3d/camera";
-import { World } from "../resources/world";
+} from "../3d/camera.js";
+import { World } from "../resources/world.js";
 import {
     NOTIFICATION_EXIT_WORLD,
     NOTIFICATION_ENTER_WORLD,
-} from "../3d/spatial";
-import { GROUP_CALL_REALTIME } from "./scene_tree";
+} from "../3d/spatial.js";
+import { GROUP_CALL_REALTIME } from "./scene_tree.js";
 
 
 export const UPDATE_MODE_DISABLED = 0;

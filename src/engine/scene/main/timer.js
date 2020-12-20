@@ -1,12 +1,12 @@
-import { node_class_map } from 'engine/registry';
-import { GDCLASS } from 'engine/core/v_object';
+import { node_class_map } from 'engine/registry.js';
+import { GDCLASS } from 'engine/core/v_object.js';
 
 import {
     Node,
     NOTIFICATION_READY,
     NOTIFICATION_INTERNAL_PROCESS,
     NOTIFICATION_INTERNAL_PHYSICS_PROCESS,
-} from './node';
+} from './node.js';
 
 
 export const TIMER_PROCESS_PHYSICS = 0;

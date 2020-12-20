@@ -1,4 +1,4 @@
-import { VObject, GDCLASS } from "./v_object";
+import { VObject, GDCLASS } from "./v_object.js";
 
 export const NOTIFICATION_WM_MOUSE_ENTER = 1002;
 export const NOTIFICATION_WM_MOUSE_EXIT = 1003;

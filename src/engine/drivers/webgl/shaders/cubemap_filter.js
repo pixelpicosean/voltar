@@ -1,4 +1,4 @@
-import { Shader } from '../shader';
+import { Shader } from '../shader.js';
 
 import vs from './cubemap_filter.vert';
 import fs from './cubemap_filter.frag';

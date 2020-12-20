@@ -1,21 +1,21 @@
-import { node_class_map } from "engine/registry";
-import { GDCLASS } from "engine/core/v_object";
-import { Vector2 } from "engine/core/math/vector2";
-import { Transform2D } from "engine/core/math/transform_2d";
+import { node_class_map } from "engine/registry.js";
+import { GDCLASS } from "engine/core/v_object.js";
+import { Vector2 } from "engine/core/math/vector2.js";
+import { Transform2D } from "engine/core/math/transform_2d.js";
 import {
     rad2deg,
     deg2rad,
-} from "engine/core/math/math_funcs";
+} from "engine/core/math/math_funcs.js";
 
-import { VSG } from "engine/servers/visual/visual_server_globals";
+import { VSG } from "engine/servers/visual/visual_server_globals.js";
 
 import {
     Node,
     NOTIFICATION_ENTER_TREE,
     NOTIFICATION_EXIT_TREE,
     NOTIFICATION_MOVED_IN_PARENT,
-} from "./node";
-import { Rect2 } from "engine/core/math/rect2";
+} from "./node.js";
+import { Rect2 } from "engine/core/math/rect2.js";
 
 
 export class CanvasLayer extends Node {

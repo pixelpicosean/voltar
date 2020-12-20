@@ -1,14 +1,14 @@
-import { res_class_map } from 'engine/registry';
-import { lerp, deg2rad, nearest_po2 } from 'engine/core/math/math_funcs';
-import { Vector2, Vector2Like } from 'engine/core/math/vector2';
-import { Vector3 } from 'engine/core/math/vector3';
-import { Rect2 } from 'engine/core/math/rect2';
-import { Basis } from 'engine/core/math/basis';
-import { Transform } from 'engine/core/math/transform';
-import { CameraMatrix } from 'engine/core/math/camera_matrix';
-import { Color } from 'engine/core/color';
-import { OS } from 'engine/core/os/os';
-import { copy_array_values } from 'engine/core/v_array';
+import { res_class_map } from 'engine/registry.js';
+import { lerp, deg2rad, nearest_po2 } from 'engine/core/math/math_funcs.js';
+import { Vector2, Vector2Like } from 'engine/core/math/vector2.js';
+import { Vector3 } from 'engine/core/math/vector3.js';
+import { Rect2 } from 'engine/core/math/rect2.js';
+import { Basis } from 'engine/core/math/basis.js';
+import { Transform } from 'engine/core/math/transform.js';
+import { CameraMatrix } from 'engine/core/math/camera_matrix.js';
+import { Color } from 'engine/core/color.js';
+import { OS } from 'engine/core/os/os.js';
+import { copy_array_values } from 'engine/core/v_array.js';
 
 import {
     INSTANCE_TYPE_MESH,
@@ -28,16 +28,16 @@ import {
     LIGHT_PARAM_SPOT_ATTENUATION,
     LIGHT_OMNI_SHADOW_DETAIL_HORIZONTAL,
     LIGHT_OMNI_SHADOW_CUBE,
-} from 'engine/servers/visual_server';
+} from 'engine/servers/visual_server.js';
 import {
     Instance_t,
-} from 'engine/servers/visual/visual_server_scene';
-import { VSG } from 'engine/servers/visual/visual_server_globals';
+} from 'engine/servers/visual/visual_server_scene.js';
+import { VSG } from 'engine/servers/visual/visual_server_globals.js';
 
 import {
     ShaderMaterial,
     SpatialMaterial,
-} from 'engine/scene/resources/material';
+} from 'engine/scene/resources/material.js';
 import {
     ARRAY_VERTEX,
     ARRAY_NORMAL,
@@ -46,9 +46,9 @@ import {
     ARRAY_BONES,
     ARRAY_WEIGHTS,
     ARRAY_MAX,
-} from 'engine/scene/const';
+} from 'engine/scene/const.js';
 
-import { EffectBlurShader } from './shaders/blur';
+import { EffectBlurShader } from './shaders/blur.js';
 import {
     Mesh_t,
     Surface_t,
@@ -71,12 +71,12 @@ import {
     DEPTH_DRAW_ALPHA_PREPASS,
     DEPTH_DRAW_ALWAYS,
     DEPTH_DRAW_NEVER,
-} from './rasterizer_storage';
+} from './rasterizer_storage.js';
 
 import {
     parse_uniforms_from_code,
     parse_attributes_from_code,
-} from './shader_parser';
+} from './shader_parser.js';
 
 import spatial_vs from './shaders/spatial.vert';
 import spatial_fs from './shaders/spatial.frag';

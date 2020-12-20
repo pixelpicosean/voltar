@@ -1,4 +1,4 @@
-import { VObject } from "./v_object";
+import { VObject } from "./v_object.js";
 
 const TYPE_CALL = 0;
 const TYPE_NOTIFICATION = 1;

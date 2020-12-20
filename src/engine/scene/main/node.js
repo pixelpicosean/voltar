@@ -1,13 +1,13 @@
-import { remove_items } from 'engine/dep/index';
-import { node_class_map } from 'engine/registry';
-import { MessageQueue } from 'engine/core/message_queue';
+import { remove_items } from 'engine/dep/index.js';
+import { node_class_map } from 'engine/registry.js';
+import { MessageQueue } from 'engine/core/message_queue.js';
 import {
     VObject,
     GDCLASS,
     NOTIFICATION_PREDELETE,
-} from 'engine/core/v_object';
-import { InputEvent } from 'engine/core/os/input_event';
-import { Engine } from 'engine/core/engine';
+} from 'engine/core/v_object.js';
+import { InputEvent } from 'engine/core/os/input_event.js';
+import { Engine } from 'engine/core/engine.js';
 
 
 export const PAUSE_MODE_INHERIT = 0;

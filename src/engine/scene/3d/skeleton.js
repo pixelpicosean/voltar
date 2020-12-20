@@ -1,22 +1,22 @@
-import { node_class_map } from "engine/registry";
-import { CMP_EPSILON } from "engine/core/math/math_defs";
-import { Transform } from "engine/core/math/transform";
-import { GDCLASS } from "engine/core/v_object";
-import { MessageQueue } from "engine/core/message_queue";
+import { node_class_map } from "engine/registry.js";
+import { CMP_EPSILON } from "engine/core/math/math_defs.js";
+import { Transform } from "engine/core/math/transform.js";
+import { GDCLASS } from "engine/core/v_object.js";
+import { MessageQueue } from "engine/core/message_queue.js";
 
-import { VSG } from "engine/servers/visual/visual_server_globals";
+import { VSG } from "engine/servers/visual/visual_server_globals.js";
 
 import {
     NOTIFICATION_TRANSFORM_CHANGED,
     NOTIFICATION_UPDATE_SKELETON,
-} from "../const";
-import { Skin } from "../resources/skin";
+} from "../const.js";
+import { Skin } from "../resources/skin.js";
 import {
     Spatial,
     NOTIFICATION_ENTER_WORLD,
     NOTIFICATION_EXIT_WORLD,
     NOTIFICATION_VISIBILITY_CHANGED_3D,
-} from "./spatial";
+} from "./spatial.js";
 
 export class SkinReference {
     constructor() {

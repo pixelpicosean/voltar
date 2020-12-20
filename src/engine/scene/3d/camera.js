@@ -1,18 +1,18 @@
-import { node_class_map } from "engine/registry";
-import { GDCLASS } from "engine/core/v_object";
-import { Vector2, Vector2Like } from "engine/core/math/vector2";
-import { Vector3 } from "engine/core/math/vector3";
-import { Transform } from "engine/core/math/transform";
+import { node_class_map } from "engine/registry.js";
+import { GDCLASS } from "engine/core/v_object.js";
+import { Vector2, Vector2Like } from "engine/core/math/vector2.js";
+import { Vector3 } from "engine/core/math/vector3.js";
+import { Transform } from "engine/core/math/transform.js";
 
-import { VSG } from "engine/servers/visual/visual_server_globals";
+import { VSG } from "engine/servers/visual/visual_server_globals.js";
 
 import {
     Spatial,
     NOTIFICATION_ENTER_WORLD,
     NOTIFICATION_EXIT_WORLD,
     NOTIFICATION_LOCAL_TRANSFORM_CHANGED_3D,
-} from "./spatial";
-import { NOTIFICATION_TRANSFORM_CHANGED } from "../const";
+} from "./spatial.js";
+import { NOTIFICATION_TRANSFORM_CHANGED } from "../const.js";
 
 export const PROJECTION_PERSPECTIVE = 0;
 export const PROJECTION_ORTHOGONAL = 1;

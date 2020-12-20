@@ -1,16 +1,16 @@
-import { node_class_map } from "engine/registry";
-import { GDCLASS } from "engine/core/v_object";
+import { node_class_map } from "engine/registry.js";
+import { GDCLASS } from "engine/core/v_object.js";
 
-import { VSG } from "engine/servers/visual/visual_server_globals";
+import { VSG } from "engine/servers/visual/visual_server_globals.js";
 
-import { Material } from "../resources/material";
-import { NOTIFICATION_TRANSFORM_CHANGED } from "../const";
+import { Material } from "../resources/material.js";
+import { NOTIFICATION_TRANSFORM_CHANGED } from "../const.js";
 import {
     Spatial,
     NOTIFICATION_ENTER_WORLD,
     NOTIFICATION_EXIT_WORLD,
     NOTIFICATION_VISIBILITY_CHANGED_3D,
-} from "./spatial";
+} from "./spatial.js";
 
 
 export class VisualInstance extends Spatial {

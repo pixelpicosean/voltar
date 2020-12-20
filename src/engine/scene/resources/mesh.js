@@ -1,13 +1,13 @@
 import {
     res_class_map,
     get_binary_pack,
-} from "engine/registry";
-import { VObject } from "engine/core/v_object";
-import { Vector2 } from "engine/core/math/vector2";
-import { Vector3 } from "engine/core/math/vector3";
-import { AABB } from "engine/core/math/aabb";
+} from "engine/registry.js";
+import { VObject } from "engine/core/v_object.js";
+import { Vector2 } from "engine/core/math/vector2.js";
+import { Vector3 } from "engine/core/math/vector3.js";
+import { AABB } from "engine/core/math/aabb.js";
 
-import { VSG } from "engine/servers/visual/visual_server_globals";
+import { VSG } from "engine/servers/visual/visual_server_globals.js";
 
 import {
     BLEND_SHAPE_MODE_RELATIVE,
@@ -21,8 +21,8 @@ import {
     ARRAY_WEIGHTS,
     ARRAY_BONES,
     ARRAY_INDEX,
-} from "../const";
-import { Material } from "./material";
+} from "../const.js";
+import { Material } from "./material.js";
 
 /**
  * @typedef {import("engine/drivers/webgl/rasterizer_storage").Mesh_t} Mesh_t

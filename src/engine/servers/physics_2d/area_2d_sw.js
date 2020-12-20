@@ -1,14 +1,14 @@
-import { SelfList } from "engine/core/self_list";
-import { Vector2 } from "engine/core/math/vector2";
-import { Transform2D } from "engine/core/math/transform_2d";
+import { SelfList } from "engine/core/self_list.js";
+import { Vector2 } from "engine/core/math/vector2.js";
+import { Transform2D } from "engine/core/math/transform_2d.js";
 import {
     CollisionObjectType,
     AreaSpaceOverrideMode,
     AreaParameter,
-} from "engine/scene/2d/const";
+} from "engine/scene/2d/const.js";
 
-import { CollisionObject2DSW } from "./collision_object_2d_sw";
-import { AREA_BODY_ADDED, AREA_BODY_REMOVED } from "./physics_2d_server";
+import { CollisionObject2DSW } from "./collision_object_2d_sw.js";
+import { AREA_BODY_ADDED, AREA_BODY_REMOVED } from "./physics_2d_server.js";
 
 
 class BodyKey {

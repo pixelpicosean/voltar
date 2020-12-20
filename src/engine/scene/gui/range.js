@@ -1,7 +1,7 @@
-import { remove_items } from "engine/dep/index";
-import { clamp } from "engine/core/math/math_funcs";
+import { remove_items } from "engine/dep/index.js";
+import { clamp } from "engine/core/math/math_funcs.js";
 
-import { Control } from "./control";
+import { Control } from "./control.js";
 
 
 class Shared {

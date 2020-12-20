@@ -1,11 +1,11 @@
-import { Vector2 } from "engine/core/math/vector2";
-import { Transform2D } from "engine/core/math/transform_2d";
-import { BodyMode, AreaSpaceOverrideMode } from "engine/scene/2d/const";
+import { Vector2 } from "engine/core/math/vector2.js";
+import { Transform2D } from "engine/core/math/transform_2d.js";
+import { BodyMode, AreaSpaceOverrideMode } from "engine/scene/2d/const.js";
 
-import { CollisionSolver2DSW } from "./collision_solver_2d_sw";
-import { Constraint2DSW } from "./constraint_2d_sw";
-import { Area2DSW } from "./area_2d_sw";
-import { Body2DSW } from "./body_2d_sw";
+import { CollisionSolver2DSW } from "./collision_solver_2d_sw.js";
+import { Constraint2DSW } from "./constraint_2d_sw.js";
+import { Area2DSW } from "./area_2d_sw.js";
+import { Body2DSW } from "./body_2d_sw.js";
 
 
 export class AreaPair2DSW extends Constraint2DSW {

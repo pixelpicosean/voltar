@@ -1,6 +1,6 @@
-import { node_class_map, get_resource_map } from 'engine/registry';
-import { GDCLASS } from 'engine/core/v_object';
-import { ImageTexture } from '../resources/texture';
+import { node_class_map, get_resource_map } from 'engine/registry.js';
+import { GDCLASS } from 'engine/core/v_object.js';
+import { ImageTexture } from '../resources/texture.js';
 
 import {
     BaseButton,
@@ -9,9 +9,9 @@ import {
     DRAW_HOVER_PRESSED,
     DRAW_PRESSED,
     DRAW_DISABLED,
-} from './base_button';
-import { Vector2Like, Vector2 } from 'engine/core/math/vector2';
-import { NOTIFICATION_DRAW } from '../2d/canvas_item';
+} from './base_button.js';
+import { Vector2Like, Vector2 } from 'engine/core/math/vector2.js';
+import { NOTIFICATION_DRAW } from '../2d/canvas_item.js';
 import {
     STRETCH_SCALE,
     STRETCH_TILE,
@@ -20,8 +20,8 @@ import {
     STRETCH_KEEP_ASPECT,
     STRETCH_KEEP_ASPECT_CENTERED,
     STRETCH_KEEP_ASPECT_COVERED,
-} from './texture_rect';
-import { Rect2 } from 'engine/core/math/rect2';
+} from './texture_rect.js';
+import { Rect2 } from 'engine/core/math/rect2.js';
 
 
 export class TextureButton extends BaseButton {

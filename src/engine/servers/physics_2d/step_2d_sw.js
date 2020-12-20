@@ -1,8 +1,8 @@
-import { BodyMode } from "engine/scene/2d/const";
+import { BodyMode } from "engine/scene/2d/const.js";
 
-import { Space2DSW } from "./space_2d_sw";
-import { Body2DSW } from "./body_2d_sw";
-import { Constraint2DSW } from "./constraint_2d_sw";
+import { Space2DSW } from "./space_2d_sw.js";
+import { Body2DSW } from "./body_2d_sw.js";
+import { Constraint2DSW } from "./constraint_2d_sw.js";
 
 export class Step2DSW {
     constructor() {

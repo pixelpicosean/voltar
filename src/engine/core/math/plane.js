@@ -1,5 +1,5 @@
-import { Vector3, Vector3Like } from "./vector3";
-import { CMP_EPSILON } from "./math_defs";
+import { Vector3, Vector3Like } from "./vector3.js";
+import { CMP_EPSILON } from "./math_defs.js";
 
 /** @type {Plane[]} */
 const pool = [];

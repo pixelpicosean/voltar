@@ -1,4 +1,4 @@
-import { Shader } from '../shader';
+import { Shader } from '../shader.js';
 
 import vs from './copy.vert';
 import fs from './copy.frag';

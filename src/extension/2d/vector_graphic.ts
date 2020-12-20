@@ -1,5 +1,4 @@
-import * as v from 'engine/index';
-import { node_class_map } from 'engine/index';
+import * as v from 'engine/index.js';
 
 const MaxStepsPerHalfCircle = 32;
 const MinStepsPerHalfCircle = 10;
@@ -119,4 +118,4 @@ export class VectorGraphic extends v.Node2D {
     }
 }
 
-node_class_map['VectorGraphic'] = v.GDCLASS(VectorGraphic, v.Node2D)
+v.node_class_map['VectorGraphic'] = v.GDCLASS(VectorGraphic, v.Node2D)

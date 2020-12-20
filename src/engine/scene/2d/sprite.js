@@ -1,13 +1,13 @@
-import { node_class_map, get_resource_map } from 'engine/registry';
-import { GDCLASS } from 'engine/core/v_object';
-import { Vector2, Vector2Like } from 'engine/core/math/vector2';
-import { Rect2 } from 'engine/core/math/rect2';
-import { Color } from 'engine/core/color';
-import { Engine } from 'engine/core/engine';
+import { node_class_map, get_resource_map } from 'engine/registry.js';
+import { GDCLASS } from 'engine/core/v_object.js';
+import { Vector2, Vector2Like } from 'engine/core/math/vector2.js';
+import { Rect2 } from 'engine/core/math/rect2.js';
+import { Color } from 'engine/core/color.js';
+import { Engine } from 'engine/core/engine.js';
 
-import { ImageTexture } from '../resources/texture';
-import { NOTIFICATION_DRAW } from '../2d/canvas_item';
-import { Node2D } from '../2d/node_2d';
+import { ImageTexture } from '../resources/texture.js';
+import { NOTIFICATION_DRAW } from '../2d/canvas_item.js';
+import { Node2D } from '../2d/node_2d.js';
 
 
 const white = new Color(1, 1, 1);

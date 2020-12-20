@@ -3,9 +3,9 @@ const _keyStr = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+
 /**
  * Encodes binary into base64.
  *
- * @param {string} input The input data to encode.
+ * @param input The input data to encode.
  */
-export default function encode_binary(input) {
+export default function encode_binary(input: string): string {
     let output = '';
     let inx = 0;
 

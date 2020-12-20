@@ -1,17 +1,17 @@
-import { node_class_map } from "engine/registry";
-import { GDCLASS } from "engine/core/v_object";
-import { decompose_in_convex } from "engine/core/math/convex";
-import { is_polygon_clockwise } from "engine/core/math/geometry";
-import { Vector2 } from "engine/core/math/vector2";
-import { Rect2 } from "engine/core/math/rect2";
+import { node_class_map } from "engine/registry.js";
+import { GDCLASS } from "engine/core/v_object.js";
+import { decompose_in_convex } from "engine/core/math/convex.js";
+import { is_polygon_clockwise } from "engine/core/math/geometry.js";
+import { Vector2 } from "engine/core/math/vector2.js";
+import { Rect2 } from "engine/core/math/rect2.js";
 
 import {
     NOTIFICATION_PARENTED,
     NOTIFICATION_ENTER_TREE,
     NOTIFICATION_UNPARENTED,
-} from "../main/node";
-import { ConvexPolygonShape2D } from "../resources/convex_polygon_shape_2d";
-import { Node2D } from "./node_2d";
+} from "../main/node.js";
+import { ConvexPolygonShape2D } from "../resources/convex_polygon_shape_2d.js";
+import { Node2D } from "./node_2d.js";
 
 
 /**

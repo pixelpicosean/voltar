@@ -1,22 +1,22 @@
-import { node_class_map, get_resource_map } from "engine/registry";
-import { GDCLASS } from "engine/core/v_object";
-import { clamp } from "engine/core/math/math_funcs";
+import { node_class_map, get_resource_map } from "engine/registry.js";
+import { GDCLASS } from "engine/core/v_object.js";
+import { clamp } from "engine/core/math/math_funcs.js";
 import {
     MARGIN_BOTTOM,
     MARGIN_LEFT,
     MARGIN_TOP,
     MARGIN_RIGHT,
-} from "engine/core/math/math_defs";
-import { Vector2Like, Vector2 } from "engine/core/math/vector2";
-import { Rect2 } from "engine/core/math/rect2";
-import { Color, ColorLike } from "engine/core/color";
+} from "engine/core/math/math_defs.js";
+import { Vector2Like, Vector2 } from "engine/core/math/vector2.js";
+import { Rect2 } from "engine/core/math/rect2.js";
+import { Color, ColorLike } from "engine/core/color.js";
 
-import { VSG } from "engine/servers/visual/visual_server_globals";
-import { NINE_PATCH_STRETCH } from "engine/servers/visual/commands";
+import { VSG } from "engine/servers/visual/visual_server_globals.js";
+import { NINE_PATCH_STRETCH } from "engine/servers/visual/commands.js";
 
-import { ImageTexture } from "../resources/texture";
-import { NOTIFICATION_DRAW } from "../2d/canvas_item";
-import { Range } from "./range";
+import { ImageTexture } from "../resources/texture.js";
+import { NOTIFICATION_DRAW } from "../2d/canvas_item.js";
+import { Range } from "./range.js";
 
 
 export const FILL_LEFT_TO_RIGHT = 0;

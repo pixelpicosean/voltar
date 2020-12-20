@@ -1,6 +1,3 @@
-/// <reference path="./dep.d.ts" />
-
-export { default as remove_items } from 'remove-array-items';
-
-import ismobilejs from 'ismobilejs';
-export const device = ismobilejs();
+export function remove_items(arr, index, count = 1) {
+    arr.splice(arr, index, count);
+}

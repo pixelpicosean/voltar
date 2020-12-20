@@ -1,9 +1,9 @@
-import { Vector2 } from "engine/core/math/vector2";
-import { Rect2 } from "engine/core/math/rect2";
-import { Color } from "engine/core/color";
+import { Vector2 } from "engine/core/math/vector2.js";
+import { Rect2 } from "engine/core/math/rect2.js";
+import { Color } from "engine/core/color.js";
 
-import { Texture } from "engine/scene/resources/texture";
-import { Transform2D } from "engine/core/math/transform_2d";
+import { Texture } from "engine/scene/resources/texture.js";
+import { Transform2D } from "engine/core/math/transform_2d.js";
 
 export const CANVAS_RECT_REGION = 1;
 export const CANVAS_RECT_TILE = 2;

@@ -1,17 +1,17 @@
-import { remove_items } from 'engine/dep/index';
+import { remove_items } from 'engine/dep/index.js';
 import {
     scene_class_map,
     get_resource_map,
-} from 'engine/registry';
-import { List } from 'engine/core/self_list';
-import { VObject, GDCLASS } from 'engine/core/v_object';
-import { Vector2, Vector2Like } from 'engine/core/math/vector2';
-import { Rect2 } from 'engine/core/math/rect2';
-import { is_equal_approx } from 'engine/core/math/math_funcs';
-import { OS } from 'engine/core/os/os';
-import { MessageQueue } from 'engine/core/message_queue';
-import { VisualServer } from 'engine/servers/visual_server';
-import { Physics2DServer } from 'engine/servers/physics_2d/physics_2d_server';
+} from 'engine/registry.js';
+import { List } from 'engine/core/self_list.js';
+import { VObject, GDCLASS } from 'engine/core/v_object.js';
+import { Vector2, Vector2Like } from 'engine/core/math/vector2.js';
+import { Rect2 } from 'engine/core/math/rect2.js';
+import { is_equal_approx } from 'engine/core/math/math_funcs.js';
+import { OS } from 'engine/core/os/os.js';
+import { MessageQueue } from 'engine/core/message_queue.js';
+import { VisualServer } from 'engine/servers/visual_server.js';
+import { Physics2DServer } from 'engine/servers/physics_2d/physics_2d_server.js';
 import {
     MainLoop,
     NOTIFICATION_WM_MOUSE_ENTER,
@@ -20,14 +20,14 @@ import {
     NOTIFICATION_WM_FOCUS_OUT,
     NOTIFICATION_TRANSLATION_CHANGED,
     NOTIFICATION_WM_UNFOCUS_REQUEST,
-} from 'engine/core/main_loop';
-import { InputEvent } from 'engine/core/os/input_event';
+} from 'engine/core/main_loop.js';
+import { InputEvent } from 'engine/core/os/input_event.js';
 
-import { VSG } from 'engine/servers/visual/visual_server_globals';
+import { VSG } from 'engine/servers/visual/visual_server_globals.js';
 
-import { World } from '../resources/world';
-import { World2D } from '../resources/world_2d';
-import { Viewport } from './viewport';
+import { World } from '../resources/world.js';
+import { World2D } from '../resources/world_2d.js';
+import { Viewport } from './viewport.js';
 import {
     Node,
     NOTIFICATION_INTERNAL_PHYSICS_PROCESS,
@@ -36,11 +36,11 @@ import {
     NOTIFICATION_PROCESS,
     NOTIFICATION_PAUSED,
     NOTIFICATION_UNPAUSED,
-} from '../main/node';
-import { instanciate_scene } from '../assembler';
-import { NOTIFICATION_TRANSFORM_CHANGED } from '../const';
+} from '../main/node.js';
+import { instanciate_scene } from '../assembler.js';
+import { NOTIFICATION_TRANSFORM_CHANGED } from '../const.js';
 
-import default_env from 'default_env.json';
+import default_env from 'gen/default_env.json';
 
 
 export class SceneTreeTimer extends VObject {

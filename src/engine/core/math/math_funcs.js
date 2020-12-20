@@ -3,8 +3,8 @@ import {
     DEG_TO_RAD,
     RAD_TO_DEG,
     CMP_EPSILON,
-} from './math_defs';
-import { RandomDataGenerator } from './random_pcg';
+} from './math_defs.js';
+import { RandomDataGenerator } from './random_pcg.js';
 
 const Math_PI2 = Math_PI * 2;
 

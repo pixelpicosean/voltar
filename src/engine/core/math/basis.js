@@ -1,6 +1,6 @@
-import { Vector3, Vector3Like } from './vector3';
-import { lerp } from './math_funcs';
-import { CMP_EPSILON } from './math_defs';
+import { Vector3, Vector3Like } from './vector3.js';
+import { lerp } from './math_funcs.js';
+import { CMP_EPSILON } from './math_defs.js';
 
 /** @type {Quat[]} */
 const quat_pool = [];

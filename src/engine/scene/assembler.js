@@ -2,8 +2,8 @@ import {
     node_class_map,
     scene_class_map,
     get_resource_map,
-} from 'engine/registry';
-import { Node } from './main/node';
+} from 'engine/registry.js';
+import { Node } from './main/node.js';
 
 
 // Functions

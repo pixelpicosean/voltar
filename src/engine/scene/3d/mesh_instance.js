@@ -1,17 +1,17 @@
-import { node_class_map } from "engine/registry";
-import { GDCLASS } from "engine/core/v_object";
+import { node_class_map } from "engine/registry.js";
+import { GDCLASS } from "engine/core/v_object.js";
 
-import { VSG } from "engine/servers/visual/visual_server_globals";
+import { VSG } from "engine/servers/visual/visual_server_globals.js";
 
-import { Mesh } from "../resources/mesh";
-import { Material } from "../resources/material";
-import { Skin } from "../resources/skin";
-import { NOTIFICATION_ENTER_TREE } from "../main/node";
-import { GeometryInstance } from "./visual_instance";
+import { Mesh } from "../resources/mesh.js";
+import { Material } from "../resources/material.js";
+import { Skin } from "../resources/skin.js";
+import { NOTIFICATION_ENTER_TREE } from "../main/node.js";
+import { GeometryInstance } from "./visual_instance.js";
 import {
     SkinReference,
     Skeleton,
-} from "./skeleton";
+} from "./skeleton.js";
 
 export class MeshInstance extends GeometryInstance {
     get class() { return "MeshInstance" }

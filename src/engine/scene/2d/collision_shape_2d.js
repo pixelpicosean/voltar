@@ -1,18 +1,18 @@
-import { res_class_map, node_class_map } from "engine/registry";
-import { GDCLASS } from "engine/core/v_object";
-import { Rect2 } from "engine/core/math/rect2";
+import { res_class_map, node_class_map } from "engine/registry.js";
+import { GDCLASS } from "engine/core/v_object.js";
+import { Rect2 } from "engine/core/math/rect2.js";
 
-import { Shape2D } from "../resources/shape_2d";
+import { Shape2D } from "../resources/shape_2d.js";
 import {
     NOTIFICATION_PARENTED,
     NOTIFICATION_ENTER_TREE,
     NOTIFICATION_UNPARENTED,
-} from "../main/node";
+} from "../main/node.js";
 import {
     NOTIFICATION_LOCAL_TRANSFORM_CHANGED,
-} from "./canvas_item";
-import { Node2D } from "./node_2d";
-import { CollisionObject2D } from "./collision_object_2d";
+} from "./canvas_item.js";
+import { Node2D } from "./node_2d.js";
+import { CollisionObject2D } from "./collision_object_2d.js";
 
 
 export class CollisionShape2D extends Node2D {

@@ -1,30 +1,30 @@
-import { node_class_map } from 'engine/registry';
-import { GDCLASS } from 'engine/core/v_object';
+import { node_class_map } from 'engine/registry.js';
+import { GDCLASS } from 'engine/core/v_object.js';
 import {
     MARGIN_LEFT,
     MARGIN_RIGHT,
     MARGIN_TOP,
     MARGIN_BOTTOM,
-} from 'engine/core/math/math_defs';
-import { clamp } from 'engine/core/math/math_funcs';
-import { Vector2, Vector2Like } from 'engine/core/math/vector2';
-import { Rect2 } from 'engine/core/math/rect2';
-import { Transform2D } from 'engine/core/math/transform_2d';
+} from 'engine/core/math/math_defs.js';
+import { clamp } from 'engine/core/math/math_funcs.js';
+import { Vector2, Vector2Like } from 'engine/core/math/vector2.js';
+import { Rect2 } from 'engine/core/math/rect2.js';
+import { Transform2D } from 'engine/core/math/transform_2d.js';
 
-import { Viewport } from '../main/viewport';
-import { GROUP_CALL_REALTIME } from '../main/scene_tree';
+import { Viewport } from '../main/viewport.js';
+import { GROUP_CALL_REALTIME } from '../main/scene_tree.js';
 import {
     NOTIFICATION_INTERNAL_PROCESS,
     NOTIFICATION_INTERNAL_PHYSICS_PROCESS,
     NOTIFICATION_ENTER_TREE,
     NOTIFICATION_EXIT_TREE,
     Node,
-} from '../main/node';
-import { Node2D } from './node_2d';
+} from '../main/node.js';
+import { Node2D } from './node_2d.js';
 import {
     NOTIFICATION_DRAW,
-} from './canvas_item';
-import { NOTIFICATION_TRANSFORM_CHANGED } from '../const';
+} from './canvas_item.js';
+import { NOTIFICATION_TRANSFORM_CHANGED } from '../const.js';
 
 
 export const ANCHOR_MODE_FIXED_TOP_LEFT = 0;

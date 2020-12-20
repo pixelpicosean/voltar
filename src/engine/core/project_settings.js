@@ -1,4 +1,4 @@
-import { deep_merge } from "engine/utils/deep_merge";
+import { deep_merge } from "engine/utils/deep_merge.js";
 import {
     STRETCH_MODE_DISABLED,
     STRETCH_MODE_VIEWPORT,
@@ -8,9 +8,9 @@ import {
     STRETCH_ASPECT_KEEP_WIDTH,
     STRETCH_ASPECT_KEEP_HEIGHT,
     STRETCH_ASPECT_EXPAND,
-} from "engine/scene/main/scene_tree";
-import { InputEventKey } from "./os/input_event";
-import { KEYS } from "./os/keyboard";
+} from "engine/scene/main/scene_tree.js";
+import { InputEventKey } from "./os/input_event.js";
+import { KEYS } from "./os/keyboard.js";
 
 /**
  * @typedef ApplicationSettings

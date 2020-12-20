@@ -1,4 +1,4 @@
-import * as v from 'engine/index';
+import * as v from 'engine/index.js';
 
 export class Demo extends v.Control {
     static instance() { return new Demo }

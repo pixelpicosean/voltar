@@ -1,9 +1,9 @@
-import { Vector2Like } from "./vector2";
-import { Transform } from "./transform";
-import { Plane } from "./plane";
-import { rad2deg, deg2rad } from "./math_funcs";
-import { Vector3 } from "./vector3";
-import { Rect2 } from "./rect2";
+import { Vector2Like } from "./vector2.js";
+import { Transform } from "./transform.js";
+import { Plane } from "./plane.js";
+import { rad2deg, deg2rad } from "./math_funcs.js";
+import { Vector3 } from "./vector3.js";
+import { Rect2 } from "./rect2.js";
 
 /** @type {CameraMatrix[]} */
 const pool = [];

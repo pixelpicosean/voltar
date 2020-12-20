@@ -1,27 +1,27 @@
-import { node_class_map, res_class_map } from "engine/registry";
-import { GDCLASS } from "engine/core/v_object";
-import { MessageQueue } from "engine/core/message_queue";
-import { SelfList } from "engine/core/self_list";
-import { Vector2Like } from "engine/core/math/vector2";
-import { PoolVector2Array } from "engine/core/math/pool_vector2_array";
-import { Transform2D } from "engine/core/math/transform_2d";
-import { Rect2 } from "engine/core/math/rect2";
-import { Color, ColorLike } from "engine/core/color";
+import { node_class_map, res_class_map } from "engine/registry.js";
+import { GDCLASS } from "engine/core/v_object.js";
+import { MessageQueue } from "engine/core/message_queue.js";
+import { SelfList } from "engine/core/self_list.js";
+import { Vector2Like } from "engine/core/math/vector2.js";
+import { PoolVector2Array } from "engine/core/math/pool_vector2_array.js";
+import { Transform2D } from "engine/core/math/transform_2d.js";
+import { Rect2 } from "engine/core/math/rect2.js";
+import { Color, ColorLike } from "engine/core/color.js";
 
-import { VSG } from "engine/servers/visual/visual_server_globals";
+import { VSG } from "engine/servers/visual/visual_server_globals.js";
 
-import { ImageTexture } from "../resources/texture";
-import { StyleBox } from "../resources/style_box";
-import { Material } from "../resources/material";
-import { GROUP_CALL_UNIQUE } from "../main/scene_tree";
-import { CanvasLayer } from "../main/canvas_layer";
+import { ImageTexture } from "../resources/texture.js";
+import { StyleBox } from "../resources/style_box.js";
+import { Material } from "../resources/material.js";
+import { GROUP_CALL_UNIQUE } from "../main/scene_tree.js";
+import { CanvasLayer } from "../main/canvas_layer.js";
 import {
     Node,
     NOTIFICATION_ENTER_TREE,
     NOTIFICATION_MOVED_IN_PARENT,
     NOTIFICATION_EXIT_TREE,
-} from "../main/node";
-import { NOTIFICATION_TRANSFORM_CHANGED } from "../const";
+} from "../main/node.js";
+import { NOTIFICATION_TRANSFORM_CHANGED } from "../const.js";
 
 
 export const NOTIFICATION_DRAW = 30;
