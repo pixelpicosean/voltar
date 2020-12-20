@@ -45,17 +45,17 @@ for (let k in resource_map) {
 if (compress_resources) {
     let res_str = JSON.stringify(final_resources, null, 2);
     let compressed = compress(res_str);
-    fs.writeFileSync(path.normalize(path.join(__dirname, '../media/data.vt')), compressed);
+    fs.writeFileSync(path.normalize(path.join(__dirname, '../media/data.tres')), compressed);
 } else {
-    fs.writeFileSync(path.normalize(path.join(__dirname, '../media/resources.json')), JSON.stringify(final_resources, null, 2));
+    fs.writeFileSync(path.normalize(path.join(__dirname, '../media/data.json')), JSON.stringify(final_resources, null, 4));
 }
 // - save to assets for development
-fs.writeFileSync(path.normalize(path.join(__dirname, '../assets/resources.json')), JSON.stringify(final_resources, null, 2));
+fs.writeFileSync(path.normalize(path.join(__dirname, '../src/gen/data_debug.json')), JSON.stringify(final_resources, null, 4));
 
 // 3. process and copy assets (DynamicFont, ...) to media
 console.log(`3. process assets`)
 // - default environment
-convert_default_env(path.normalize(path.join(__dirname, '../assets/default_env.tres')));
+let env = convert_default_env(path.normalize(path.join(__dirname, '../assets/default_env.tres')));
 // - bitmap font
 convert_bmfonts();
 // - dynamic font
@@ -63,12 +63,12 @@ convert_dynamic_fonts();
 // - standalone images
 copy_standalone_images();
 // - json data
-const json_files = get_json_packs()
+let json_files = get_json_packs()
     .map((pack, i) => {
         // skip empty data
         if (pack.length === 0) return undefined;
 
-        let url = `media/data${i}.vt`;
+        let url = `media/pack${i}.tres`;
         let filepath = path.normalize(path.join(__dirname, `../${url}`));
         let compressed = compress(JSON.stringify(pack));
         fs.writeFileSync(filepath, compressed);
@@ -76,9 +76,9 @@ const json_files = get_json_packs()
     })
     .filter(e => !!e)
 // - binary data
-const binary_files = get_binary_packs()
+let binary_files = get_binary_packs()
     .map((pack, i) => {
-        let url = `media/data${i}.v`;
+        let url = `media/pack${i}.res`;
         let filepath = path.normalize(path.join(__dirname, `../${url}`));
         fs.writeFileSync(filepath, pack);
         return url;
@@ -86,12 +86,13 @@ const binary_files = get_binary_packs()
 
 
 // collect meta data, and save project file
-const resource_check_ignores = get_resource_check_ignores();
-fs.writeFileSync(path.normalize(path.join(__dirname, '../src/gen/meta.json')), JSON.stringify({
+fs.writeFileSync(path.resolve(__dirname, '../src/gen/default_env.json'), JSON.stringify(env, null, 4));
+let resource_check_ignores = get_resource_check_ignores();
+fs.writeFileSync(path.resolve(__dirname, '../src/gen/meta.json'), JSON.stringify({
     resource_check_ignores,
     json_files,
     binary_files,
 }, null, 4));
-fs.writeFileSync(path.normalize(path.join(__dirname, '../src/gen/project.json')), JSON.stringify(project), null, 4);
+fs.writeFileSync(path.resolve(__dirname, '../src/gen/project.json'), JSON.stringify(project, null, 4));
 
 console.log('[finished]')

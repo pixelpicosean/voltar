@@ -77,6 +77,5 @@ module.exports.convert_default_env = (project_url) => {
         }
     }
 
-    const environment = Environment(resource);
-    fs.writeFileSync(project_url.replace(/\.tres/, '.json'), JSON.stringify(environment, null, 4));
+    return Environment(resource);
 };
