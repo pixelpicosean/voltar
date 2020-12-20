@@ -193,5 +193,5 @@ module.exports.convert_project_settings = (project_url) => {
         };
     }
 
-    fs.writeFileSync(project_url.replace(/\.godot/, '.json'), JSON.stringify(real_settings, null, 4));
+    return real_settings;
 };

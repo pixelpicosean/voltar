@@ -4,8 +4,10 @@ const fs = require('fs');
 const { convert_project_settings } = require('./convert_project_settings');
 const { convert_scenes } = require('./convert_scenes');
 const { convert_dynamic_fonts } = require('./convert_dynamic_fonts');
+const { convert_bmfonts } = require('./convert_bmfonts');
 const { convert_default_env } = require('./convert_default_env');
-const to_utf8 = require('./z/to_utf8');
+const { copy_standalone_images } = require('./copy_standalone_images');
+
 const { compress } = require('./z/z');
 
 const {
@@ -24,7 +26,7 @@ console.log(`[started]`)
 
 // 1. project settings
 console.log(`1. project settings`)
-convert_project_settings(path.normalize(path.join(__dirname, '../assets/project.godot')));
+let project = convert_project_settings(path.normalize(path.join(__dirname, '../assets/project.godot')));
 
 // 2. compile and pack scenes into `resources.json`
 console.log(`2. import scenes`)
@@ -54,8 +56,12 @@ fs.writeFileSync(path.normalize(path.join(__dirname, '../assets/resources.json')
 console.log(`3. process assets`)
 // - default environment
 convert_default_env(path.normalize(path.join(__dirname, '../assets/default_env.tres')));
+// - bitmap font
+convert_bmfonts();
 // - dynamic font
-convert_dynamic_fonts()
+convert_dynamic_fonts();
+// - standalone images
+copy_standalone_images();
 // - json data
 const json_files = get_json_packs()
     .map((pack, i) => {
@@ -77,12 +83,15 @@ const binary_files = get_binary_packs()
         fs.writeFileSync(filepath, pack);
         return url;
     })
-// - meta data
+
+
+// collect meta data, and save project file
 const resource_check_ignores = get_resource_check_ignores();
-fs.writeFileSync(path.normalize(path.join(__dirname, '../assets/meta.json')), JSON.stringify({
+fs.writeFileSync(path.normalize(path.join(__dirname, '../src/gen/meta.json')), JSON.stringify({
     resource_check_ignores,
     json_files,
     binary_files,
 }, null, 4));
+fs.writeFileSync(path.normalize(path.join(__dirname, '../src/gen/project.json')), JSON.stringify(project), null, 4);
 
 console.log('[finished]')

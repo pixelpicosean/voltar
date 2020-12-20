@@ -1,6 +1,6 @@
 const path = require('path')
-const watch = require('node-watch')
-const fs = require('fs-extra')
+const walk = require('walk');
+const fs = require('fs-extra');
 
 /**
  * @param {string[]} data
@@ -142,10 +142,10 @@ ${get_lines_with_tag(data, 'char').map((line) => force_indent(line_to_xml(line, 
 `
 }
 
-module.exports = function(gameDir) {
+module.exports.convert_bmfonts = function() {
     // convert and sync BMFont from `bitmapfont` folder to `media`
-    const bmfont_folder = path.resolve(gameDir, 'assets/bitmapfont');
-    const target_folder = path.resolve(gameDir, 'media')
+    const bmfont_folder = path.resolve(__dirname, '../assets/bitmapfont');
+    const target_folder = path.resolve(__dirname, '../media')
 
     const convert_and_save_bmfont_to_media = (/** @type {string} */font_url) => {
         // convert and save fnt file
@@ -160,22 +160,15 @@ module.exports = function(gameDir) {
         }
     }
     if (fs.existsSync(bmfont_folder)) {
-        watch(bmfont_folder, { recursive: true }, (evt, name) => {
-            if (path.extname(name) !== '.fnt') {
-                return;
-            }
-
-            if (evt === 'update') {
-                convert_and_save_bmfont_to_media(name);
-            } else if (evt === 'remove') {
-                // remove both `.fnt` and `.png` file
-                fs.removeSync(path.resolve(target_folder, path.basename(name)));
-
-                const png_url = path.resolve(target_folder, path.basename(name).replace(/\.fnt$/i, '.png'))
-                if (fs.existsSync(png_url)) {
-                    fs.removeSync(png_url);
-                }
-            }
-        })
+        walk.walkSync(bmfont_folder, {
+            listeners: {
+                file: function (root, { name }, next) {
+                    if (path.extname(name) !== '.fnt') {
+                        return next();
+                    }
+                    convert_and_save_bmfont_to_media(path.resolve(root, name));
+                },
+            },
+        });
     }
 }

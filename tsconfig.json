@@ -1,23 +1,19 @@
 {
-  "compilerOptions": {
-    "allowJs": true,
-    "module": "es6",
-    "target": "es6",
-    "importsNotUsedAsValues": "preserve",
-    "baseUrl": "./src",
-    "paths": {
-      "*": [
-        "*",
-        "../assets/*",
-        "../node_modules/*"
-      ]
+    "compilerOptions": {
+        "allowJs": true,
+        "noImplicitAny": true,
+        "skipLibCheck": true,
+        "importsNotUsedAsValues": "preserve",
+        "module": "ESNext",
+        "target": "es5",
+        "sourceMap": true,
+        "baseUrl": "./src",
+        "outDir": "./dist"
     },
-    "outDir": "/tmp"
-  },
-  "exclude": [
-    "dist",
-    "tscn",
-    "node_modules",
-    "tool"
-  ]
+    "include": [
+        "src/**/*"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
 }
