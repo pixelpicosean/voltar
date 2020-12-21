@@ -1,11 +1,11 @@
-import { VObject, GDCLASS } from "engine/core/v_object.js";
+import { VObject, GDCLASS } from "engine/core/v_object";
 import {
     MARGIN_LEFT,
     MARGIN_TOP,
     MARGIN_RIGHT,
     MARGIN_BOTTOM,
 } from "engine/core/math/math_defs.js";
-import { Color } from "engine/core/color.js";
+import { Color } from "engine/core/color";
 
 import { VSG } from "./visual/visual_server_globals.js";
 import { VisualServerCanvas } from "./visual/visual_server_canvas.js";

@@ -6,13 +6,13 @@ import {
 } from 'engine/core/math/math_defs.js';
 import { Transform2D } from 'engine/core/math/transform_2d.js';
 import { Transform } from 'engine/core/math/transform.js';
-import { ColorLike, Color } from 'engine/core/color.js';
+import { ColorLike, Color } from 'engine/core/color';
 import {
     OS,
     VIDEO_DRIVER_GLES2,
     VIDEO_DRIVER_GLES3,
 } from 'engine/core/os/os.js';
-import { VObject } from 'engine/core/v_object.js';
+import { VObject } from 'engine/core/v_object';
 
 import { Item } from 'engine/servers/visual/visual_server_canvas.js';
 import { VSG } from 'engine/servers/visual/visual_server_globals.js';

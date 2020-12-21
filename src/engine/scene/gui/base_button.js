@@ -1,11 +1,11 @@
-import { GDCLASS } from "engine/core/v_object.js";
+import { GDCLASS } from "engine/core/v_object";
 import {
     InputEvent,
     InputEventMouseButton,
     InputEventMouseMotion,
     BUTTON_MASK_LEFT,
 } from "engine/core/os/input_event.js";
-import { Resource } from "engine/core/resource.js";
+import { Resource } from "engine/core/resource";
 
 import {
     NOTIFICATION_DRAG_BEGIN,

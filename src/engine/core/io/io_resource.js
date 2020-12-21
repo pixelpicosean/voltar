@@ -1,4 +1,4 @@
-import { VObject } from 'engine/core/v_object.js';
+import { VObject } from 'engine/core/v_object';
 import parse_uri from './parse_uri';
 
 let temp_anchor = null;

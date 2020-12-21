@@ -1,6 +1,6 @@
 import { res_class_map } from "engine/registry";
-import { VObject } from "engine/core/v_object.js";
-import { Color, ColorLike } from "engine/core/color.js";
+import { VObject } from "engine/core/v_object";
+import { Color, ColorLike } from "engine/core/color";
 import { remove_items } from "engine/dep/index.ts";
 
 

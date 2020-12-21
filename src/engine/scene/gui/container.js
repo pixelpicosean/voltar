@@ -1,8 +1,8 @@
 import { node_class_map } from 'engine/registry';
-import { GDCLASS } from 'engine/core/v_object.js';
-import { Vector2 } from 'engine/core/math/vector2.js';
+import { GDCLASS } from 'engine/core/v_object';
+import { Vector2 } from 'engine/core/math/vector2';
 import { Rect2 } from 'engine/core/math/rect2.js';
-import { MessageQueue } from 'engine/core/message_queue.js';
+import { MessageQueue } from 'engine/core/message_queue';
 
 import {
     NOTIFICATION_ENTER_TREE,

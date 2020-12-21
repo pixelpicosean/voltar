@@ -1,4 +1,4 @@
-import { VObject } from 'engine/core/v_object.js';
+import { VObject } from 'engine/core/v_object';
 import { VSG } from 'engine/servers/visual/visual_server_globals.js';
 
 /**

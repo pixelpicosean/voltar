@@ -1,8 +1,8 @@
 import { remove_items } from 'engine/dep/index.ts';
-import { GDCLASS } from 'engine/core/v_object.js';
+import { GDCLASS } from 'engine/core/v_object';
 import { node_class_map } from 'engine/registry';
-import { Vector2, Vector2Like } from 'engine/core/math/vector2.js';
-import { ProjectSettings } from 'engine/core/project_settings.js';
+import { Vector2, Vector2Like } from 'engine/core/math/vector2';
+import { ProjectSettings } from 'engine/core/project_settings';
 
 import { NOTIFICATION_EXIT_TREE, Node } from '../main/node.js';
 import { AreaSpaceOverrideMode } from 'engine/scene/2d/const';

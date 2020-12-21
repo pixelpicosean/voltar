@@ -1,20 +1,16 @@
-import { VObject, GDCLASS } from "./v_object.js";
+import { VObject, GDCLASS } from "./v_object";
 
 export class Resource extends VObject {
     get class() { return 'Resource' }
-    constructor() {
-        super();
 
-        this.resource_name = '';
-        this.resource_path = '';
+    resource_name = "";
+    resource_path = "";
 
-        this.resource_local_to_scene = false;
+    resource_local_to_scene = false;
 
-        /** @type {import("engine/scene/main/node").Node} */
-        this.local_scene = null;
+    local_scene: import("engine/scene/main/node").Node = null;
 
-        this.data = null;
-    }
+    data: any = null;
 
     /* virtual */
     _setup_local_to_scene() { }
@@ -26,7 +22,7 @@ export class Resource extends VObject {
         }
         return null;
     }
-    get_rid() { return null }
+    get_rid(): any { return null }
     setup_local_to_scene() {
         this._setup_local_to_scene();
     }

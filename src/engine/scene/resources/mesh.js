@@ -2,8 +2,8 @@ import {
     res_class_map,
     get_binary_pack,
 } from "engine/registry";
-import { VObject } from "engine/core/v_object.js";
-import { Vector2 } from "engine/core/math/vector2.js";
+import { VObject } from "engine/core/v_object";
+import { Vector2 } from "engine/core/math/vector2";
 import { Vector3 } from "engine/core/math/vector3.js";
 import { AABB } from "engine/core/math/aabb.js";
 

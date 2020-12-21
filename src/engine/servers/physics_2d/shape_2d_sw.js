@@ -1,6 +1,6 @@
 import { ShapeType } from "engine/scene/2d/const";
 import { CMP_EPSILON } from "engine/core/math/math_defs.js";
-import { Vector2, Vector2Like } from "engine/core/math/vector2.js";
+import { Vector2, Vector2Like } from "engine/core/math/vector2";
 import { Rect2 } from "engine/core/math/rect2.js";
 import { Transform2D } from "engine/core/math/transform_2d.js";
 import { segment_intersects_segment_2d } from "engine/core/math/geometry.js";

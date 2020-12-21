@@ -1,10 +1,10 @@
 import { node_class_map } from 'engine/registry';
-import { GDCLASS } from 'engine/core/v_object.js';
+import { GDCLASS } from 'engine/core/v_object';
 import {
     posmod,
     clamp,
 } from 'engine/core/math/math_funcs.js';
-import { Vector2 } from 'engine/core/math/vector2.js';
+import { Vector2 } from 'engine/core/math/vector2';
 
 import {
     NOTIFICATION_ENTER_TREE,

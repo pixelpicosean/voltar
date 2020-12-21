@@ -1,4 +1,4 @@
-import { Vector2 } from "engine/core/math/vector2.js";
+import { Vector2 } from "engine/core/math/vector2";
 import { Rect2 } from "engine/core/math/rect2.js";
 
 import { VSG } from "engine/servers/visual/visual_server_globals.js";

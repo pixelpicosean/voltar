@@ -1,8 +1,8 @@
 import { res_class_map } from 'engine/registry';
-import { Vector2 } from 'engine/core/math/vector2.js';
+import { Vector2 } from 'engine/core/math/vector2';
 import { Rect2 } from 'engine/core/math/rect2.js';
 import { Transform2D } from 'engine/core/math/transform_2d.js';
-import { Color } from 'engine/core/color.js';
+import { Color } from 'engine/core/color';
 
 import { Shape2D } from './shape_2d.js';
 import { ConvexPolygonShape2D } from './convex_polygon_shape_2d.js';

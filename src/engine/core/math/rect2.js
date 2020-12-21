@@ -1,4 +1,4 @@
-import { Vector2, Vector2Like } from './vector2.js';
+import { Vector2, Vector2Like } from './vector2';
 
 /**
  * @type {Rect2[]}

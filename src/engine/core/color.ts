@@ -1,65 +1,48 @@
 import { rgb2hex, hex2rgb } from "engine/utils/color";
 
-export class ColorLike {
-    constructor() {
-        this.r = 1.0;
-        this.g = 1.0;
-        this.b = 1.0;
-        this.a = 1.0;
-    }
+export interface ColorLike {
+    r: number;
+    g: number;
+    b: number;
+    a: number;
 }
 
 const int8 = new Int8Array(4)
 const int32 = new Int32Array(int8.buffer, 0, 1)
 const float32 = new Float32Array(int8.buffer, 0, 1)
-/**
- * @param {number} i
- */
-const int_bits_to_float = (i) => {
-    int32[0] = i
-    return float32[0]
+
+const int_bits_to_float = (i: number): number => {
+    int32[0] = i;
+    return float32[0];
 }
-/**
- * @param {number} value
- */
-const int_to_float_color = (value) => {
-    return int_bits_to_float(value & 0xfeffffff)
+const int_to_float_color = (value: number): number => {
+    return int_bits_to_float(value & 0xfeffffff);
 }
 
 /**
  * Pack float color (1.0, 1.0, 1.0, 1.0) into a float32 number
- * @param {number} r
- * @param {number} g
- * @param {number} b
- * @param {number} a
  */
-const pack_color_f = (r, g, b, a) => {
-    var bits = (((a * 255) | 0) << 24 | ((b * 255) | 0) << 16 | ((g * 255) | 0) << 8 | ((r * 255) | 0))
-    return int_to_float_color(bits)
+const pack_color_f = (r: number, g: number, b: number, a: number): number => {
+    const bits = (((a * 255) | 0) << 24 | ((b * 255) | 0) << 16 | ((g * 255) | 0) << 8 | ((r * 255) | 0));
+    return int_to_float_color(bits);
 }
 /**
  * Pack uint color (255, 255, 255, 255) into a float32 number
- * @param {number} r
- * @param {number} g
- * @param {number} b
- * @param {number} a
  */
-const pack_color_u = (r, g, b, a) => {
+const pack_color_u = (r: number, g: number, b: number, a: number): number => {
     var bits = (a << 24 | b << 16 | g << 8 | r)
     return int_to_float_color(bits)
 }
 
-/** @type {Color[]} */
-const Color_Pool = [];
+const Color_Pool: Color[] = [];
 
 export class Color {
-    /** @param {number} p_hex */
-    static hex(p_hex) {
+    static hex(p_hex: number) {
         const rgb = hex2rgb(p_hex);
         return Color.new(rgb[0], rgb[1], rgb[2]);
     }
     /** @param {string} p_color */
-    static html(p_color) {
+    static html(p_color: string) {
         return Color.hex(parseInt(p_color, 16));
     }
 
@@ -74,12 +57,15 @@ export class Color {
     /**
      * @param {Color} c
      */
-    static free(c) {
+    static free(c: Color) {
         if (c) {
             Color_Pool.push(c);
         }
         return Color;
     }
+
+    _rgb: [number, number, number];
+    a = 1.0;
 
     get r() {
         return this._rgb[0];
@@ -106,24 +92,12 @@ export class Color {
         this.a = value;
     }
 
-    /**
-     * @param {number} [r]
-     * @param {number} [g]
-     * @param {number} [b]
-     * @param {number} [a]
-     */
-    constructor(r = 1.0, g = 1.0, b = 1.0, a = 1.0) {
+    constructor(r: number = 1.0, g: number = 1.0, b: number = 1.0, a: number = 1.0) {
         this._rgb = [r, g, b];
         this.a = a;
     }
 
-    /**
-     * @param {number} r
-     * @param {number} g
-     * @param {number} b
-     * @param {number} [a]
-     */
-    set(r, g, b, a = 1.0) {
+    set(r: number, g: number, b: number, a: number = 1.0) {
         this._rgb[0] = r;
         this._rgb[1] = g;
         this._rgb[2] = b;
@@ -131,19 +105,13 @@ export class Color {
 
         return this;
     }
-    /**
-     * @param {number} hex
-     */
-    set_with_hex(hex) {
+    set_with_hex(hex: number) {
         hex2rgb(hex, this._rgb);
 
         return this;
     }
 
-    /**
-     * @param {ColorLike} c
-     */
-    copy(c) {
+    copy(c: ColorLike) {
         this._rgb[0] = c.r;
         this._rgb[1] = c.g;
         this._rgb[2] = c.b;
@@ -179,10 +147,7 @@ export class Color {
         );
     }
 
-    /**
-     * @param {ColorLike} c
-     */
-    multiply(c) {
+    multiply(c: ColorLike) {
         this._rgb[0] *= c.r;
         this._rgb[1] *= c.g;
         this._rgb[2] *= c.b;
@@ -191,10 +156,7 @@ export class Color {
         return this;
     }
 
-    /**
-     * @param {ColorLike} p_over
-     */
-    blend(p_over) {
+    blend(p_over: ColorLike) {
         let res_a = 0;
         let sa = 1 - p_over.a;
         res_a = this.a * sa + p_over.a;
@@ -210,12 +172,7 @@ export class Color {
         }
     }
 
-    /**
-     * @param {ColorLike} p_b
-     * @param {number} p_t
-     * @param {Color} [r_out]
-     */
-    linear_interpolate(p_b, p_t, r_out) {
+    linear_interpolate(p_b: ColorLike, p_t: number, r_out?: Color) {
         if (!r_out) r_out = Color.new();
         r_out.copy(this);
 
@@ -234,10 +191,7 @@ export class Color {
         return pack_color_f(this.r, this.g, this.b, this.a);
     }
 
-    /**
-     * @param {number[]} [out]
-     */
-    as_array(out) {
+    as_array(out?: number[]) {
         if (!out) out = [0, 0, 0, 0]
         out[0] = this.r;
         out[1] = this.g;
@@ -246,10 +200,7 @@ export class Color {
         return out;
     }
 
-    /**
-     * @param {ColorLike} value
-     */
-    equals(value) {
+    equals(value: ColorLike) {
         return this.r === value.r
             &&
             this.g === value.g

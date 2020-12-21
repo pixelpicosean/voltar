@@ -1,7 +1,7 @@
 import { node_class_map, get_resource_map } from "engine/registry";
-import { SelfList, List } from "engine/core/self_list.js";
-import { GDCLASS } from "engine/core/v_object.js";
-import { Vector2 } from "engine/core/math/vector2.js";
+import { SelfList, List } from "engine/core/self_list";
+import { GDCLASS } from "engine/core/v_object";
+import { Vector2 } from "engine/core/math/vector2";
 import { Rect2 } from "engine/core/math/rect2.js";
 import { Transform2D } from "engine/core/math/transform_2d.js";
 

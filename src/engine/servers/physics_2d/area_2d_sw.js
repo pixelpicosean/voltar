@@ -1,5 +1,5 @@
-import { SelfList } from "engine/core/self_list.js";
-import { Vector2 } from "engine/core/math/vector2.js";
+import { SelfList } from "engine/core/self_list";
+import { Vector2 } from "engine/core/math/vector2";
 import { Transform2D } from "engine/core/math/transform_2d.js";
 import {
     CollisionObjectType,

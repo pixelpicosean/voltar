@@ -1,6 +1,6 @@
 import { node_class_map } from "engine/registry";
-import { GDCLASS } from "engine/core/v_object.js";
-import { Vector2, Vector2Like } from "engine/core/math/vector2.js";
+import { GDCLASS } from "engine/core/v_object";
+import { Vector2, Vector2Like } from "engine/core/math/vector2";
 import { Transform2D } from "engine/core/math/transform_2d.js";
 
 import { CanvasLayer } from "../main/canvas_layer.js";

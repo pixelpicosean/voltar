@@ -4,7 +4,7 @@ import {
     MARGIN_TOP,
     MARGIN_BOTTOM,
 } from "engine/core/math/math_defs.js";
-import { Vector2 } from "engine/core/math/vector2.js";
+import { Vector2 } from "engine/core/math/vector2";
 import { Item } from "engine/servers/visual/visual_server_canvas.js";
 import { Rect2 } from "engine/core/math/rect2.js";
 

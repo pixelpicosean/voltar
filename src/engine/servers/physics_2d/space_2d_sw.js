@@ -1,6 +1,6 @@
-import { SelfList, List } from "engine/core/self_list.js";
+import { SelfList, List } from "engine/core/self_list";
 import { CMP_EPSILON } from "engine/core/math/math_defs.js";
-import { Vector2 } from "engine/core/math/vector2.js";
+import { Vector2 } from "engine/core/math/vector2";
 import { Rect2 } from "engine/core/math/rect2.js";
 import { Transform2D } from "engine/core/math/transform_2d.js";
 

@@ -1,4 +1,4 @@
-import { Vector2 } from "engine/core/math/vector2.js";
+import { Vector2 } from "engine/core/math/vector2";
 import { Transform2D } from "engine/core/math/transform_2d.js";
 import { BodyMode, AreaSpaceOverrideMode } from "engine/scene/2d/const";
 

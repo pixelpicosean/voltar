@@ -1,13 +1,13 @@
 import { node_class_map, preload_queue } from "engine/registry";
-import { GDCLASS } from "engine/core/v_object.js";
-import { Vector2, Vector2Like } from "engine/core/math/vector2.js";
+import { GDCLASS } from "engine/core/v_object";
+import { Vector2, Vector2Like } from "engine/core/math/vector2";
 import { Transform2D } from "engine/core/math/transform_2d.js";
 import { Rect2 } from "engine/core/math/rect2.js";
 import { OS } from "engine/core/os/os.js";
 import {
     NOTIFICATION_WM_MOUSE_EXIT,
     NOTIFICATION_WM_FOCUS_OUT,
-} from "engine/core/main_loop.js";
+} from "engine/core/main_loop";
 import {
     InputEvent,
     InputEventMouseButton,

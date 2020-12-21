@@ -1,4 +1,4 @@
-import { Vector2Like } from "./vector2.js";
+import { Vector2Like } from "./vector2";
 import { Transform } from "./transform.js";
 import { Plane } from "./plane.js";
 import { rad2deg, deg2rad } from "./math_funcs.js";

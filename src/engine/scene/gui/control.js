@@ -1,5 +1,5 @@
 import { node_class_map } from 'engine/registry';
-import { GDCLASS } from 'engine/core/v_object.js';
+import { GDCLASS } from 'engine/core/v_object';
 import {
     rad2deg,
     deg2rad,
@@ -11,13 +11,13 @@ import {
     MARGIN_TOP,
     MARGIN_BOTTOM,
 } from 'engine/core/math/math_defs.js';
-import { Vector2, Vector2Like } from 'engine/core/math/vector2.js';
+import { Vector2, Vector2Like } from 'engine/core/math/vector2';
 import { Rect2 } from 'engine/core/math/rect2.js';
 import { Transform2D } from 'engine/core/math/transform_2d.js';
-import { Color } from 'engine/core/color.js';
+import { Color } from 'engine/core/color';
 import { InputEvent } from 'engine/core/os/input_event.js';
-import { MessageQueue } from 'engine/core/message_queue.js';
-import { NOTIFICATION_WM_UNFOCUS_REQUEST } from 'engine/core/main_loop.js';
+import { MessageQueue } from 'engine/core/message_queue';
+import { NOTIFICATION_WM_UNFOCUS_REQUEST } from 'engine/core/main_loop';
 import { VSG } from 'engine/servers/visual/visual_server_globals.js';
 
 import { Theme } from '../resources/theme.js';

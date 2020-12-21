@@ -1,6 +1,6 @@
 import { node_class_map } from 'engine/registry';
-import { GDCLASS } from "engine/core/v_object.js";
-import { MessageQueue } from 'engine/core/message_queue.js';
+import { GDCLASS } from "engine/core/v_object";
+import { MessageQueue } from 'engine/core/message_queue';
 
 import {
     Node,

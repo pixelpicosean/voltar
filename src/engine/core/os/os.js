@@ -1,11 +1,11 @@
-import { Vector2, Vector2Like } from "engine/core/math/vector2.js";
+import { Vector2, Vector2Like } from "engine/core/math/vector2";
 import {
     MainLoop,
     NOTIFICATION_WM_MOUSE_ENTER,
     NOTIFICATION_WM_MOUSE_EXIT,
     NOTIFICATION_WM_FOCUS_IN,
     NOTIFICATION_WM_FOCUS_OUT,
-} from "engine/core/main_loop.js";
+} from "engine/core/main_loop";
 import { Input } from "engine/main/input.js";
 import {
     InputEventWithModifiers,

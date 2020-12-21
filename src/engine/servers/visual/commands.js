@@ -1,6 +1,6 @@
-import { Vector2 } from "engine/core/math/vector2.js";
+import { Vector2 } from "engine/core/math/vector2";
 import { Rect2 } from "engine/core/math/rect2.js";
-import { Color } from "engine/core/color.js";
+import { Color } from "engine/core/color";
 
 import { Texture } from "engine/scene/resources/texture.js";
 import { Transform2D } from "engine/core/math/transform_2d.js";

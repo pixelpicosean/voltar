@@ -1,6 +1,6 @@
 import { node_class_map } from "engine/registry";
-import { GDCLASS } from "engine/core/v_object.js";
-import { Vector2, Vector2Like } from "engine/core/math/vector2.js";
+import { GDCLASS } from "engine/core/v_object";
+import { Vector2, Vector2Like } from "engine/core/math/vector2";
 
 import { VSG } from "engine/servers/visual/visual_server_globals.js";
 import { NOTIFICATION_ENTER_TREE, NOTIFICATION_EXIT_TREE } from "../main/node.js";

@@ -1,4 +1,4 @@
-import { VObject } from "engine/core/v_object.js";
+import { VObject } from "engine/core/v_object";
 
 export class PhysicsMaterial extends VObject {
     /**

@@ -8,10 +8,10 @@ import {
     MARGIN_BOTTOM,
 } from 'engine/core/math/math_defs.js';
 import { clamp } from 'engine/core/math/math_funcs.js';
-import { Vector2, Vector2Like } from 'engine/core/math/vector2.js';
+import { Vector2, Vector2Like } from 'engine/core/math/vector2';
 import { Rect2 } from 'engine/core/math/rect2.js';
 import { Transform2D } from 'engine/core/math/transform_2d.js';
-import { Color, ColorLike } from 'engine/core/color.js';
+import { Color, ColorLike } from 'engine/core/color';
 import { Texture } from 'engine/scene/resources/texture.js';
 import { Material } from 'engine/scene/resources/material.js';
 

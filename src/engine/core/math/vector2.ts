@@ -1,14 +1,8 @@
 import { CMP_EPSILON } from './math_defs.js';
 
-
-/**
- * @interface
- */
-export class Vector2Like {
-    constructor() {
-        this.x = 0;
-        this.y = 0;
-    }
+export interface Vector2Like {
+    x: number;
+    y: number;
 }
 
 /**
@@ -16,11 +10,7 @@ export class Vector2Like {
  * the horizontal axis and y represents the vertical axis.
  */
 export class Vector2 {
-    /**
-     * @param {number} [p_x]
-     * @param {number} [p_y]
-     */
-    static new(p_x = 0, p_y = 0) {
+    static new(p_x: number = 0, p_y: number = 0) {
         const vec = pool.pop();
         if (!vec) {
             return new Vector2(p_x, p_y);
@@ -28,63 +18,41 @@ export class Vector2 {
             return vec.set(p_x, p_y);
         }
     }
-    /**
-     * @param {Vector2} vec
-     */
-    static free(vec) {
+    static free(vec: Vector2) {
         if (vec && pool.length < 2019) {
             pool.push(vec);
         }
         return Vector2;
     }
 
+    x = 0;
+    y = 0;
+
     get width() { return this.x }
-    /**
-     * @param {number} value
-     */
-    set width(value) {
+    set width(value: number) {
         this.x = value;
     }
-    /**
-     * @param {number} value
-     */
-    set_width(value) {
+    set_width(value: number) {
         this.x = value;
     }
 
     get height() { return this.y }
-    /**
-     * @param {number} value
-     */
-    set height(value) {
+    set height(value: number) {
         this.y = value;
     }
-    /**
-     * @param {number} value
-     */
-    set_height(value) {
+    set_height(value: number) {
         this.y = value;
     }
 
-    /**
-     * @param {number} value
-     */
-    set_x(value) {
+    set_x(value: number) {
         this.x = value;
     }
 
-    /**
-     * @param {number} value
-     */
-    set_y(value) {
+    set_y(value: number) {
         this.y = value;
     }
 
-    /**
-     * @param {number} [x=0]
-     * @param {number} [y=0]
-     */
-    constructor(x = 0, y = 0) {
+    constructor(x: number = 0, y: number = 0) {
         this.x = x;
         this.y = y;
     }
@@ -97,10 +65,10 @@ export class Vector2 {
      * Sets the point to a new x and y position.
      * If y is omitted, both x and y will be set to x.
      *
-     * @param {number} [x=0] - position of the point on the x axis
-     * @param {number} [y=0] - position of the point on the y axis
+     * @param [x] - position of the point on the x axis
+     * @param [y] - position of the point on the y axis
      */
-    set(x, y) {
+    set(x: number, y: number): Vector2 {
         if (x === undefined) {
             x = 0;
         }
@@ -113,11 +81,8 @@ export class Vector2 {
     }
     /**
      * Copy value from other vector
-     *
-     * @param {Vector2Like} p_b
-     * @returns {Vector2} self for chaining
      */
-    copy(p_b) {
+    copy(p_b: Vector2Like): Vector2 {
         this.x = p_b.x;
         this.y = p_b.y;
         return this;
@@ -126,21 +91,19 @@ export class Vector2 {
     /**
      * Returns new Vector2 with same value.
      */
-    clone() {
+    clone(): Vector2 {
         return new Vector2(this.x, this.y);
     }
     /**
      * Returns new Vector2 but normalized.
      */
-    normalized() {
+    normalized(): Vector2 {
         return this.clone().normalize();
     }
     /**
      * Returns new Vector2 but clamped.
-     *
-     * @param {number} p_length
      */
-    clamped(p_length) {
+    clamped(p_length: number): Vector2 {
         const len = this.length();
         const v = this.clone();
         if (len > 0 && p_length < len) {
@@ -150,20 +113,15 @@ export class Vector2 {
     }
     /**
      * Returns new Vector2 but rotated.
-     *
-     * @param {number} p_rotation
      */
-    rotated(p_rotation) {
+    rotated(p_rotation: number): Vector2 {
         return this.clone().rotate(p_rotation);
     }
-    snapped(by) { }
 
     /**
      * Whether this equals to another point
-     *
-     * @param {Vector2Like} p_b
      */
-    equals(p_b) {
+    equals(p_b: Vector2Like): boolean {
         const a0 = this.x, a1 = this.y;
         const b0 = p_b.x, b1 = p_b.y;
         return (Math.abs(a0 - b0) <= CMP_EPSILON * Math.max(1.0, Math.abs(a0), Math.abs(b0)) &&
@@ -171,21 +129,15 @@ export class Vector2 {
     }
     /**
      * Whether this equals to another point(precisely)
-     *
-     * @param {Vector2Like} p_b
      */
-    exact_equals(p_b) {
+    exact_equals(p_b: Vector2Like): boolean {
         return (this.x === p_b.x) && (this.y === p_b.y);
     }
 
     /**
      * Add the vector by another vector or number.
-     *
-     * @param {Vector2Like|number} x
-     * @param {number} [y]
-     * @returns {Vector2} self for chaining
      */
-    add(x, y) {
+    add(x: Vector2Like | number, y?: number): Vector2 {
         if (y === undefined) {
             // @ts-ignore
             this.x += x.x;
@@ -202,12 +154,8 @@ export class Vector2 {
 
     /**
      * Subtract the vector by another vector or number.
-     *
-     * @param {Vector2Like|number} x
-     * @param {number} [y]
-     * @returns {Vector2} self for chaining
      */
-    subtract(x, y) {
+    subtract(x: Vector2Like | number, y?: number): Vector2 {
         if (y === undefined) {
             // @ts-ignore
             this.x -= x.x;
@@ -224,12 +172,8 @@ export class Vector2 {
 
     /**
      * Multiply the vector by another vector or number.
-     *
-     * @param {Vector2Like|number} x
-     * @param {number} [y]
-     * @returns {Vector2} self for chaining
      */
-    multiply(x, y) {
+    multiply(x: Vector2Like | number, y?: number): Vector2 {
         if (y === undefined) {
             // @ts-ignore
             this.x *= x.x;
@@ -246,12 +190,8 @@ export class Vector2 {
 
     /**
      * Divide x and y by another vector or number.
-     *
-     * @param {Vector2Like|number} x
-     * @param {number} [y]
-     * @returns {Vector2} self for chaining
      */
-    divide(x, y) {
+    divide(x: Vector2Like | number, y?: number): Vector2 {
         if (y === undefined) {
             // @ts-ignore
             this.x /= x.x;
@@ -268,30 +208,22 @@ export class Vector2 {
 
     /**
      * Dot multiply another vector.
-     *
-     * @param {Vector2Like} p_b
-     * @returns {number}
      */
-    dot(p_b) {
+    dot(p_b: Vector2Like): number {
         return this.x * p_b.x + this.y * p_b.y;
     }
 
     /**
      * Cross multiply another vector.
-     *
-     * @param {Vector2Like} p_b
-     * @returns {number}
      */
-    cross(p_b) {
+    cross(p_b: Vector2Like): number {
         return this.x * p_b.y - this.y * p_b.x;
     }
 
     /**
      * Change x and y components to their absolute values.
-     *
-     * @returns {Vector2}
      */
-    abs() {
+    abs(): Vector2 {
         this.x = Math.abs(this.x);
         this.y = Math.abs(this.y);
         return this;
@@ -299,10 +231,8 @@ export class Vector2 {
 
     /**
      * Ceil x and y components.
-     *
-     * @returns {Vector2}
      */
-    ceil() {
+    ceil(): Vector2 {
         this.x = Math.ceil(this.x);
         this.y = Math.ceil(this.y);
         return this;
@@ -310,10 +240,8 @@ export class Vector2 {
 
     /**
      * Floor x and y components.
-     *
-     * @returns {Vector2}
      */
-    floor() {
+    floor(): Vector2 {
         this.x = Math.floor(this.x);
         this.y = Math.floor(this.y);
         return this;
@@ -321,10 +249,8 @@ export class Vector2 {
 
     /**
      * Round to int vector.
-     *
-     * @returns {Vector2}
      */
-    round() {
+    round(): Vector2 {
         this.x = Math.round(this.x);
         this.y = Math.round(this.y);
         return this;
@@ -332,11 +258,8 @@ export class Vector2 {
 
     /**
      * Clamp the vector to specific length.
-     *
-     * @param {number} p_length
-     * @returns {Vector2}
      */
-    clamp(p_length) {
+    clamp(p_length: number): Vector2 {
         const len = this.length();
         if (len > 0 && p_length < len) {
             this.scale(p_length / len);
@@ -346,11 +269,8 @@ export class Vector2 {
 
     /**
      * Scale the vector by a number factor.
-     *
-     * @param {number} b
-     * @returns {Vector2}
      */
-    scale(b) {
+    scale(b: number): Vector2 {
         this.x *= b;
         this.y *= b;
         return this;
@@ -358,10 +278,8 @@ export class Vector2 {
 
     /**
      * Negate x and y components.
-     *
-     * @returns {Vector2}
      */
-    negate() {
+    negate(): Vector2 {
         this.x = -this.x;
         this.y = -this.y;
         return this;
@@ -369,10 +287,8 @@ export class Vector2 {
 
     /**
      * Inverse the x and y components.
-     *
-     * @returns {Vector2}
      */
-    inverse() {
+    inverse(): Vector2 {
         this.x = 1.0 / this.x;
         this.y = 1.0 / this.y;
         return this;
@@ -380,10 +296,8 @@ export class Vector2 {
 
     /**
      * Normalize this vector to unit length.
-     *
-     * @returns {Vector2}
      */
-    normalize() {
+    normalize(): Vector2 {
         const x = this.x, y = this.y;
         let len = x * x + y * y;
         if (len > 0) {
@@ -396,11 +310,8 @@ export class Vector2 {
 
     /**
      * Rotates the vector by “phi” radians.
-     *
-     * @param {number} p_rotation
-     * @returns {Vector2}
      */
-    rotate(p_rotation) {
+    rotate(p_rotation: number): Vector2 {
         const x = this.x, y = this.y;
         const c = Math.cos(p_rotation), s = Math.sin(p_rotation);
         this.x = x * c - y * s;
@@ -411,11 +322,8 @@ export class Vector2 {
     /**
      * Change this vector to be perpendicular to what it was before. (Effectively
      * roatates it 90 degrees in a clockwise direction)
-     *
-     * @method perp
-     * @return {Vector2} Self for chaining.
      */
-    perp() {
+    perp(): Vector2 {
         const x = this.x;
         this.x = this.y;
         this.y = -x;
@@ -424,10 +332,8 @@ export class Vector2 {
 
     /**
      * Returns new Vector2.
-     * @param {number} p_d
-     * @param {Vector2} p_vec
      */
-    plane_project(p_d, p_vec) {
+    plane_project(p_d: number, p_vec: Vector2) {
         const self = this.clone();
         const vec = p_vec.clone().subtract(self.scale(this.dot(p_vec) - p_d));
         Vector2.free(self);
@@ -440,7 +346,7 @@ export class Vector2 {
      * @param {Vector2} p_b
      * @returns {Vector2}
      */
-    project(p_b) {
+    project(p_b: Vector2): Vector2 {
         const amt = this.dot(p_b) / p_b.length_squared();
         this.x = amt * p_b.x;
         this.y = amt * p_b.y;
@@ -449,11 +355,8 @@ export class Vector2 {
 
     /**
      * Project to a vector which is already normalized.
-     *
-     * @param {Vector2Like} p_b
-     * @returns {Vector2}
      */
-    project_n(p_b) {
+    project_n(p_b: Vector2Like): Vector2 {
         const amt = this.dot(p_b);
         this.x = amt * p_b.x;
         this.y = amt * p_b.y;
@@ -462,11 +365,8 @@ export class Vector2 {
 
     /**
      * Reflects the vector along the given plane, specified by its normal vector.
-     *
-     * @param {Vector2} axis
-     * @returns {Vector2}
      */
-    reflect(axis) {
+    reflect(axis: Vector2): Vector2 {
         const dot = this.dot(axis);
         this.x = 2 * axis.x * dot - this.x;
         this.y = 2 * axis.y * dot - this.y;
@@ -475,30 +375,22 @@ export class Vector2 {
 
     /**
      * Bounce returns the vector “bounced off” from the given plane, specified by its normal vector.
-     *
-     * @param {Vector2} normal
-     * @returns {Vector2}
      */
-    bounce(normal) {
+    bounce(normal: Vector2): Vector2 {
         return this.reflect(normal).negate()
     }
 
     /**
      * Slide returns the component of the vector along the given plane, specified by its normal vector.
-     *
-     * @param {Vector2Like} normal
-     * @returns {Vector2}
      */
-    slide(normal) {
+    slide(normal: Vector2Like): Vector2 {
         return this.subtract(tmp_point.copy(normal).scale(this.dot(normal)))
     }
 
     /**
      * Returns the length of the vector.
-     *
-     * @returns {number}
      */
-    length() {
+    length(): number {
         const x = this.x;
         const y = this.y;
         return Math.sqrt(x * x + y * y);
@@ -507,10 +399,8 @@ export class Vector2 {
     /**
      * Returns the squared length of the vector. Prefer this function
      * over “length” if you need to sort vectors or need the squared length for some formula.
-     *
-     * @returns {number}
      */
-    length_squared() {
+    length_squared(): number {
         const x = this.x;
         const y = this.y;
         return x * x + y * y;
@@ -518,38 +408,26 @@ export class Vector2 {
 
     /**
      * Returns the result of atan2 when called with the Vector’s x and y as parameters (Math::atan2(x,y)).
-     *
-     * @returns {number}
      */
-    angle() {
+    angle(): number {
         return Math.atan2(this.y, this.x);
     }
 
     /**
      * Returns the angle in radians between the two vectors.
-     *
-     * @param {Vector2Like} b
-     * @returns {number}
      */
-    angle_to(b) {
+    angle_to(b: Vector2Like): number {
         return Math.atan2(this.cross(b), this.dot(b));
     }
 
-    /**
-     * @param {Vector2Like} b
-     * @returns {number}
-     */
-    angle_to_point(b) {
+    angle_to_point(b: Vector2Like): number {
         return Math.atan2(this.y - b.y, this.x - b.x);
     }
 
     /**
      * Returns the distance to vector “b”.
-     *
-     * @param {Vector2Like} b
-     * @returns {number}
      */
-    distance_to(b) {
+    distance_to(b: Vector2Like): number {
         const x = b.x - this.x;
         const y = b.y - this.y;
         return Math.sqrt(x * x + y * y);
@@ -558,11 +436,8 @@ export class Vector2 {
     /**
      * Returns the squared distance to vector “b”. Prefer this function
      * over “distance_to” if you need to sort vectors or need the squared distance for some formula.
-     *
-     * @param {Vector2Like} b
-     * @returns {number}
      */
-    distance_squared_to(b) {
+    distance_squared_to(b: Vector2Like): number {
         const x = b.x - this.x;
         const y = b.y - this.y;
         return x * x + y * y;
@@ -570,27 +445,23 @@ export class Vector2 {
 
     /**
      * Returns a perpendicular vector.
-     *
-     * @return {Vector2}
      */
-    tangent(r_out = Vector2.new()) {
+    tangent(r_out = Vector2.new()): Vector2 {
         return r_out.set(this.y, -this.x);
     }
 
-    aspect() {
+    aspect(): number {
         return this.x / this.y;
     }
 
-    is_zero() {
+    is_zero(): boolean {
         return this.x === 0 && this.y === 0;
     }
 
     /**
      * Returns new Vector2.
-     * @param {Vector2Like} p_b
-     * @param {number} p_t
      */
-    linear_interpolate(p_b, p_t) {
+    linear_interpolate(p_b: Vector2Like, p_t: number): Vector2 {
         const res = this.clone();
 
         res.x += (p_t * (p_b.x - this.x));
@@ -601,12 +472,8 @@ export class Vector2 {
 
     /**
      * Returns new Vector2.
-     * @param {Vector2} p_b
-     * @param {Vector2} p_pre_a
-     * @param {Vector2} p_post_b
-     * @param {number} p_t
      */
-    cubic_interpolate(p_b, p_pre_a, p_post_b, p_t) {
+    cubic_interpolate(p_b: Vector2, p_pre_a: Vector2, p_post_b: Vector2, p_t: number): Vector2 {
         const t2 = p_t * p_t;
         const t3 = t2 * p_t;
         return Vector2.new(
@@ -614,18 +481,16 @@ export class Vector2 {
             0.5 * ((this.y * 2) + (-p_pre_a.y + p_b.y) * p_t + (2 * p_pre_a.y - 5 * this.y + 4 * p_b.y - p_post_b.y) * t2 + (-p_pre_a.y + 3 * this.y - 3 * p_b.y + p_post_b.y) * t3)
         );
     }
-}
-Vector2.ZERO = Object.freeze(new Vector2());
-Vector2.ONE = Object.freeze(new Vector2(1, 1));
-Vector2.INF = Object.freeze(new Vector2(Infinity, Infinity));
-Vector2.LEFT = Object.freeze(new Vector2(-1, 0));
-Vector2.RIGHT = Object.freeze(new Vector2(1, 0));
-Vector2.UP = Object.freeze(new Vector2(0, -1));
-Vector2.DOWN = Object.freeze(new Vector2(0, 1));
 
-/**
- * @type {Vector2[]}
- */
-const pool = [];
+    static ZERO = Object.freeze(new Vector2());
+    static ONE = Object.freeze(new Vector2(1, 1));
+    static INF = Object.freeze(new Vector2(Infinity, Infinity));
+    static LEFT = Object.freeze(new Vector2(-1, 0));
+    static RIGHT = Object.freeze(new Vector2(1, 0));
+    static UP = Object.freeze(new Vector2(0, -1));
+    static DOWN = Object.freeze(new Vector2(0, 1));
+}
+
+const pool: Vector2[] = [];
 
 const tmp_point = new Vector2();

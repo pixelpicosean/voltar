@@ -1,4 +1,4 @@
-import { Color } from "engine/core/color.js";
+import { Color } from "engine/core/color";
 import {
     MARGIN_LEFT,
     MARGIN_BOTTOM,

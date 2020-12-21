@@ -1,5 +1,5 @@
 import { node_class_map } from 'engine/registry';
-import { GDCLASS } from 'engine/core/v_object.js';
+import { GDCLASS } from 'engine/core/v_object';
 import {
     MARGIN_LEFT,
     MARGIN_RIGHT,
@@ -7,7 +7,7 @@ import {
     MARGIN_BOTTOM,
 } from 'engine/core/math/math_defs.js';
 import { clamp } from 'engine/core/math/math_funcs.js';
-import { Vector2, Vector2Like } from 'engine/core/math/vector2.js';
+import { Vector2, Vector2Like } from 'engine/core/math/vector2';
 import { Rect2 } from 'engine/core/math/rect2.js';
 import { Transform2D } from 'engine/core/math/transform_2d.js';
 

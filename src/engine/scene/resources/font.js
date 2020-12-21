@@ -1,5 +1,5 @@
-import { VObject } from "engine/core/v_object.js";
-import { Vector2, Vector2Like } from "engine/core/math/vector2.js";
+import { VObject } from "engine/core/v_object";
+import { Vector2, Vector2Like } from "engine/core/math/vector2";
 import { Rect2 } from "engine/core/math/rect2.js";
 import {
     res_class_map,

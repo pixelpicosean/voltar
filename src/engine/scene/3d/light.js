@@ -1,6 +1,6 @@
 import { node_class_map } from "engine/registry";
-import { GDCLASS } from "engine/core/v_object.js";
-import { Color, ColorLike } from "engine/core/color.js";
+import { GDCLASS } from "engine/core/v_object";
+import { Color, ColorLike } from "engine/core/color";
 
 import {
     LIGHT_DIRECTIONAL,

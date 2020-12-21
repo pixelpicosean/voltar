@@ -1,5 +1,5 @@
 import { node_class_map } from "engine/registry";
-import { GDCLASS } from "engine/core/v_object.js";
+import { GDCLASS } from "engine/core/v_object";
 import {
     MARGIN_RIGHT,
     HALIGN_LEFT,
@@ -11,9 +11,9 @@ import {
     VALIGN_BOTTOM,
     VALIGN_FILL,
 } from "engine/core/math/math_defs.js";
-import { Vector2, Vector2Like } from "engine/core/math/vector2.js";
+import { Vector2, Vector2Like } from "engine/core/math/vector2";
 import { Rect2 } from "engine/core/math/rect2.js";
-import { Color } from "engine/core/color.js";
+import { Color } from "engine/core/color";
 
 import { VSG } from "engine/servers/visual/visual_server_globals.js";
 import { CommandRect } from "engine/servers/visual/commands.js";

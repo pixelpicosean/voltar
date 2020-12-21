@@ -1,6 +1,6 @@
 import { node_class_map } from "engine/registry";
-import { GDCLASS } from "engine/core/v_object.js";
-import { SelfList } from "engine/core/self_list.js";
+import { GDCLASS } from "engine/core/v_object";
+import { SelfList } from "engine/core/self_list";
 import { Vector3, Vector3Like } from "engine/core/math/vector3.js";
 import { Transform } from "engine/core/math/transform.js";
 

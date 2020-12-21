@@ -1,22 +1,8 @@
-/**
- * @template T
- */
-export class List {
-    constructor() {
-        /**
-         * @type {SelfList<T>}
-         */
-        this._first = null;
-        /**
-         * @type {SelfList<T>}
-         */
-        this._last = null;
-    }
+export class List<T> {
+    _first: SelfList<T> = null;
+    _last: SelfList<T> = null;
 
-    /**
-     * @param {SelfList<T>} p_elem
-     */
-    add(p_elem) {
+    add(p_elem: SelfList<T>) {
         p_elem._root = this;
         p_elem._next = this._first;
         p_elem._prev = null;
@@ -30,10 +16,7 @@ export class List {
         this._first = p_elem;
     }
 
-    /**
-     * @param {SelfList<T>} p_elem
-     */
-    add_last(p_elem) {
+    add_last(p_elem: SelfList<T>) {
         p_elem._root = this;
         p_elem._next = null;
         p_elem._prev = this._last;
@@ -47,10 +30,7 @@ export class List {
         this._last = p_elem;
     }
 
-    /**
-     * @param {SelfList<T>} p_elem
-     */
-    remove(p_elem) {
+    remove(p_elem: SelfList<T>) {
         if (p_elem._next) {
             p_elem._next._prev = p_elem._prev;
         }
@@ -77,50 +57,33 @@ export class List {
     }
 }
 
-/**
- * @template T
- */
-export class SelfList {
-    /**
-     * @param {T} p_self
-     */
-    constructor(p_self) {
-        /**
-         * @type {List}
-         */
-        this._root = null;
-        /**
-         * @type {T}
-         */
+export class SelfList<T> {
+    _root: List<T> = null;
+    _self: T = null;
+    _next: SelfList<T> = null;
+    _prev: SelfList<T> = null;
+
+    constructor(p_self: T) {
         this._self = p_self;
-        /**
-         * @type {SelfList<T>}
-         */
-        this._next = null;
-        /**
-         * @type {SelfList<T>}
-         */
-        this._prev = null;
     }
+
     free() {
         if (this._root) {
             this._root.remove(this);
         }
     }
 
-    /**
-     * @returns {boolean}
-     */
-    in_list() {
+    in_list(): boolean {
         return !!this._root;
     }
-    next() {
+    next(): SelfList<T> {
         return this._next;
     }
-    prev() {
+    prev(): SelfList<T> {
         return this._prev;
     }
-    self() {
+
+    self(): T {
         return this._self;
     }
 }

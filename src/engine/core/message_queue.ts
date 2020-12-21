@@ -1,20 +1,17 @@
-import { VObject } from "./v_object.js";
+import { VObject } from "./v_object";
 
 const TYPE_CALL = 0;
 const TYPE_NOTIFICATION = 1;
 const TYPE_SET = 2;
 
-/** @type {Message[]} */
-const Message_Pool = [];
+const Message_Pool: Message[] = [];
 
 class Message {
-    constructor() {
-        this.type = TYPE_CALL;
-        this.obj = null;
-        this.method = '';
-        this.args = null;
-        this.notification = -1;
-    }
+    type = TYPE_CALL;
+    obj: any = null;
+    method = "";
+    args: any = null;
+    notification = -1;
 }
 
 export class MessageQueue {
@@ -22,24 +19,13 @@ export class MessageQueue {
         return message_queue;
     }
 
+    messages: Message[] = [];
+
     constructor() {
         if (!message_queue) message_queue = this;
-
-        /**
-         * Message list
-         *
-         * @private
-         * @type {Message[]}
-         */
-        this.messages = [];
     }
 
-    /**
-     * @param {any} obj
-     * @param {string} method
-     * @param {any} [args]
-     */
-    push_call(obj, method, ...args) {
+    push_call(obj: any, method: string, ...args: any) {
         let msg = Message_Pool.pop();
         if (!msg) msg = new Message();
 
@@ -51,11 +37,7 @@ export class MessageQueue {
         this.messages.push(msg);
     }
 
-    /**
-     * @param {VObject} obj
-     * @param {number} p_notification
-     */
-    push_notification(obj, p_notification) {
+    push_notification(obj: VObject, p_notification: number) {
         let msg = Message_Pool.pop();
         if (!msg) msg = new Message();
 
@@ -67,13 +49,13 @@ export class MessageQueue {
     }
 
     flush() {
-        for (const msg of this.messages) {
+        for (let msg of this.messages) {
             switch (msg.type) {
                 case TYPE_CALL: {
                     msg.obj[msg.method](...msg.args);
                 } break;
                 case TYPE_NOTIFICATION: {
-                    /** @type {VObject} */(msg.obj).notification(msg.notification);
+                    (msg.obj as VObject).notification(msg.notification);
                 } break;
             }
             Message_Pool.push(msg);
@@ -83,5 +65,4 @@ export class MessageQueue {
     }
 }
 
-/** @type {MessageQueue} */
-let message_queue = null;
+let message_queue: MessageQueue = null;

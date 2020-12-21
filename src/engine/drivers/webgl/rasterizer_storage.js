@@ -1,10 +1,10 @@
-import { SelfList, List } from "engine/core/self_list.js";
+import { SelfList, List } from "engine/core/self_list";
 import { nearest_po2, deg2rad, clamp } from "engine/core/math/math_funcs.js";
-import { Vector2 } from "engine/core/math/vector2.js";
+import { Vector2 } from "engine/core/math/vector2";
 import { Vector3 } from "engine/core/math/vector3.js";
 import { AABB } from "engine/core/math/aabb.js";
 import { Transform } from "engine/core/math/transform.js";
-import { Color, ColorLike } from "engine/core/color.js";
+import { Color, ColorLike } from "engine/core/color";
 import { OS } from "engine/core/os/os.js";
 
 import {

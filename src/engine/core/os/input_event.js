@@ -1,6 +1,6 @@
-import { Vector2, Vector2Like } from "engine/core/math/vector2.js";
+import { Vector2, Vector2Like } from "engine/core/math/vector2";
 import { Transform2D } from "engine/core/math/transform_2d.js";
-import { InputMap } from "engine/core/input_map.js";
+import { InputMap } from "engine/core/input_map";
 
 import {
     KEY_MASK_CTRL,

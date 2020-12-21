@@ -1,5 +1,5 @@
 import { Rect2 } from "engine/core/math/rect2.js";
-import { Vector2 } from "engine/core/math/vector2.js";
+import { Vector2 } from "engine/core/math/vector2";
 import { CollisionObject2DSW } from "./collision_object_2d_sw.js";
 
 

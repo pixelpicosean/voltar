@@ -1,12 +1,12 @@
 import { remove_items } from 'engine/dep/index.ts';
 import { get_resource_map } from 'engine/registry';
-import { List } from 'engine/core/self_list.js';
-import { VObject, GDCLASS } from 'engine/core/v_object.js';
-import { Vector2, Vector2Like } from 'engine/core/math/vector2.js';
+import { List } from 'engine/core/self_list';
+import { VObject, GDCLASS } from 'engine/core/v_object';
+import { Vector2, Vector2Like } from 'engine/core/math/vector2';
 import { Rect2 } from 'engine/core/math/rect2.js';
 import { is_equal_approx } from 'engine/core/math/math_funcs.js';
 import { OS } from 'engine/core/os/os.js';
-import { MessageQueue } from 'engine/core/message_queue.js';
+import { MessageQueue } from 'engine/core/message_queue';
 import { VisualServer } from 'engine/servers/visual_server.js';
 import { Physics2DServer } from 'engine/servers/physics_2d/physics_2d_server.js';
 import {
@@ -17,7 +17,7 @@ import {
     NOTIFICATION_WM_FOCUS_OUT,
     NOTIFICATION_TRANSLATION_CHANGED,
     NOTIFICATION_WM_UNFOCUS_REQUEST,
-} from 'engine/core/main_loop.js';
+} from 'engine/core/main_loop';
 import { InputEvent } from 'engine/core/os/input_event.js';
 
 import { VSG } from 'engine/servers/visual/visual_server_globals.js';

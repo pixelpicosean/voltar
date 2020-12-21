@@ -1,5 +1,5 @@
 import { Rect2 } from "engine/core/math/rect2.js";
-import { Color } from "engine/core/color.js";
+import { Color } from "engine/core/color";
 import { OS } from "engine/core/os/os.js";
 
 import { VSG } from "engine/servers/visual/visual_server_globals.js";

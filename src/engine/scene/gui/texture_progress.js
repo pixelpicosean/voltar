@@ -1,5 +1,5 @@
 import { node_class_map, get_resource_map } from "engine/registry";
-import { GDCLASS } from "engine/core/v_object.js";
+import { GDCLASS } from "engine/core/v_object";
 import { clamp } from "engine/core/math/math_funcs.js";
 import {
     MARGIN_BOTTOM,
@@ -7,9 +7,9 @@ import {
     MARGIN_TOP,
     MARGIN_RIGHT,
 } from "engine/core/math/math_defs.js";
-import { Vector2Like, Vector2 } from "engine/core/math/vector2.js";
+import { Vector2Like, Vector2 } from "engine/core/math/vector2";
 import { Rect2 } from "engine/core/math/rect2.js";
-import { Color, ColorLike } from "engine/core/color.js";
+import { Color, ColorLike } from "engine/core/color";
 
 import { VSG } from "engine/servers/visual/visual_server_globals.js";
 import { NINE_PATCH_STRETCH } from "engine/servers/visual/commands.js";

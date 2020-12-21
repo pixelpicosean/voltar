@@ -1,6 +1,6 @@
 import { node_class_map, get_resource_map } from 'engine/registry';
-import { GDCLASS } from 'engine/core/v_object.js';
-import { Vector2 } from 'engine/core/math/vector2.js';
+import { GDCLASS } from 'engine/core/v_object';
+import { Vector2 } from 'engine/core/math/vector2';
 import { Rect2 } from 'engine/core/math/rect2.js';
 
 import { ImageTexture } from '../resources/texture.js';

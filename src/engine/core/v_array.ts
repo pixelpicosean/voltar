@@ -1,9 +1,8 @@
 /**
- * @template T
- * @param {T[]} array Array to be shuffled
+ * @param array Array to be shuffled
  * @returns The modified array
  */
-export function shuffle(array) {
+export function shuffle<T>(array: T[]) {
     const len = array.length - 1;
 
     for (let i = len; i > 0; i--) {
@@ -17,11 +16,7 @@ export function shuffle(array) {
     return array;
 }
 
-/**
- * @param {Array} from
- * @param {Array} to
- */
-export function copy_array_values(from, to) {
+export function copy_array_values<T>(from: T[], to: T[]): T[] {
     for (let i = 0, len = from.length; i < len; i++) {
         to[i] = from[i];
     }

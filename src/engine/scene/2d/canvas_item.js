@@ -1,12 +1,12 @@
 import { node_class_map, res_class_map } from "engine/registry";
-import { GDCLASS } from "engine/core/v_object.js";
-import { MessageQueue } from "engine/core/message_queue.js";
-import { SelfList } from "engine/core/self_list.js";
-import { Vector2Like } from "engine/core/math/vector2.js";
+import { GDCLASS } from "engine/core/v_object";
+import { MessageQueue } from "engine/core/message_queue";
+import { SelfList } from "engine/core/self_list";
+import { Vector2Like } from "engine/core/math/vector2";
 import { PoolVector2Array } from "engine/core/math/pool_vector2_array.js";
 import { Transform2D } from "engine/core/math/transform_2d.js";
 import { Rect2 } from "engine/core/math/rect2.js";
-import { Color, ColorLike } from "engine/core/color.js";
+import { Color, ColorLike } from "engine/core/color";
 
 import { VSG } from "engine/servers/visual/visual_server_globals.js";
 

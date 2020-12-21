@@ -1,5 +1,5 @@
 import { remove_items } from 'engine/dep/index.ts';
-import { GDCLASS } from 'engine/core/v_object.js';
+import { GDCLASS } from 'engine/core/v_object';
 import { Transform2D } from 'engine/core/math/transform_2d.js';
 
 import { Physics2DServer } from 'engine/servers/physics_2d/physics_2d_server.js';

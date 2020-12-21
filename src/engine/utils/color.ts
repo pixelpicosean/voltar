@@ -5,7 +5,7 @@
  * @param [out] If supplied, this array will be used rather than returning a new one
  * @return An array representing the [R, G, B] of the color.
  */
-export function hex2rgb(hex: number, out: number[] | Float32Array): number[] | Float32Array {
+export function hex2rgb(hex: number, out?: number[] | Float32Array): number[] | Float32Array {
     out = out || [];
 
     out[0] = ((hex >> 16) & 0xFF) / 255;

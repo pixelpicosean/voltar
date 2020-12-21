@@ -1,5 +1,5 @@
 import { Math_PI } from './math_defs.js';
-import { Vector2, Vector2Like } from './vector2.js';
+import { Vector2, Vector2Like } from './vector2';
 import { Rect2 } from './rect2.js';
 
 

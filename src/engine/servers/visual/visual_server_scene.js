@@ -1,6 +1,6 @@
-import { List, SelfList } from 'engine/core/self_list.js';
+import { List, SelfList } from 'engine/core/self_list';
 import { clamp, stepify, deg2rad } from 'engine/core/math/math_funcs.js';
-import { Vector2, Vector2Like } from 'engine/core/math/vector2.js';
+import { Vector2, Vector2Like } from 'engine/core/math/vector2';
 import { Vector3Like, Vector3 } from 'engine/core/math/vector3.js';
 import { AABB } from 'engine/core/math/aabb.js';
 import { Plane } from 'engine/core/math/plane.js';

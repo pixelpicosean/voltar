@@ -1,18 +1,9 @@
-/**
- * @template T
- */
-class Data {
-    constructor() {
-        /** @type {Element<T>} */
-        this.first = null;
-        /** @type {Element<T>} */
-        this.last = null;
-        this.size_cache = 0;
-    }
-    /**
-     * @param {Element<T>} e
-     */
-    erase(e) {
+class Data<T> {
+    first: Element<T> = null;
+    last: Element<T> = null;
+    size_cache = 0;
+
+    erase(e: Element<T>) {
         if (this.first === e) this.first = e.next;
         if (this.last === e) this.last = e.prev;
         if (e.prev) e.prev.next = e.next;
@@ -22,47 +13,29 @@ class Data {
     }
 }
 
-/**
- * @template T
- */
-export class Element {
-    constructor() {
-        /** @type {T} */
-        this.value = null;
-        /** @type {Element<T>} */
-        this.next = null;
-        /** @type {Element<T>} */
-        this.prev = null;
-        /** @type {Data<T>} */
-        this.data = null;
-    }
+export class Element<T> {
+    value: T = null;
+    next: Element<T> = null;
+    prev: Element<T> = null;
+    data: Data<T> = null;
+
     erase() {
         this.data.erase(this);
     }
 }
 
-/**
- * @template T
- */
-export class List {
-    constructor() {
-        /** @type {Data<T>} */
-        this.data = null;
-    }
+export class List<T> {
+    data: Data<T> = null;
 
     front() { return this.data ? this.data.first : null }
     back() { return this.data ? this.data.last : null }
 
-    /**
-     * @param {T} value
-     */
-    push_back(value) {
+    push_back(value: T) {
         if (!this.data) {
             this.data = new Data();
         }
 
-        /** @type {Element<T>} */
-        const n = new Element();
+        const n: Element<T> = new Element();
         n.value = value;
 
         n.prev = this.data.last;
@@ -88,10 +61,7 @@ export class List {
         }
     }
 
-    /**
-     * @param {T} value
-     */
-    find(value) {
+    find(value: T) {
         let it = this.front();
         while (it) {
             if (it.value === value) return it;
@@ -100,10 +70,7 @@ export class List {
         return null;
     }
 
-    /**
-     * @param {Element<T>} element
-     */
-    erase(element) {
+    erase(element: Element<T>) {
         if (this.data) {
             let ret = this.data.erase(element);
 

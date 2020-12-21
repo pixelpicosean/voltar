@@ -1,91 +1,70 @@
 import { deep_merge } from "engine/utils/deep_merge";
 import {
     STRETCH_MODE_DISABLED,
-    STRETCH_MODE_VIEWPORT,
-    STRETCH_MODE_2D,
     STRETCH_ASPECT_IGNORE,
-    STRETCH_ASPECT_KEEP,
-    STRETCH_ASPECT_KEEP_WIDTH,
-    STRETCH_ASPECT_KEEP_HEIGHT,
-    STRETCH_ASPECT_EXPAND,
 } from "engine/scene/main/scene_tree.js";
 import { InputEventKey } from "./os/input_event.js";
 import { KEYS } from "./os/keyboard.js";
 
-/**
- * @typedef ApplicationSettings
- * @prop {string} [name]
- * @prop {{ instance: () => import('engine/scene/main/node').Node }} [main_scene]
- * @prop {boolean} [pause_on_blur]
- * @prop {number} [min_update_step]
- */
+interface ApplicationSettings {
+    name?: string
+    main_scene?: { instance: () => import("engine/scene/main/node").Node }
+    pause_on_blur?: boolean
+    min_update_step?: number
+}
 
-/**
-  * @typedef DisplaySettings
-  * @prop {string} [view]
-  * @prop {string} [container]
-  * @prop {boolean} [webgl2]
-  * @prop {number} [width]
-  * @prop {number} [height]
-  * @prop {number} [resolution]
-  * @prop {number} [orientation]
-  * @prop {number} [background_color]
-  * @prop {boolean} [antialias]
-  * @prop {boolean} [pixel_snap]
-  * @prop {string} [scale_mode]
-  * @prop {number} [stretch_mode]
-  * @prop {number} [stretch_aspect]
-  * @prop {boolean} [resizable]
-  */
+interface DisplaySettings {
+  view?: string;
+  container?: string;
+  webgl2?: boolean;
+  width?: number;
+  height?: number;
+  resolution?: number;
+  orientation?: number;
+  background_color?: number;
+  antialias?: boolean;
+  pixel_snap?: boolean;
+  scale_mode?: string;
+  stretch_mode?: number;
+  stretch_aspect?: number;
+  resizable?: boolean;
+}
 
-/**
- * @typedef Gravity
- * @prop {number} x
- * @prop {number} y
- */
-/**
-  * @typedef PhysicsSettings
-  * @prop {number} [physics_fps]
-  * @prop {number} [sleep_threshold_linear]
-  * @prop {number} [sleep_threshold_angular]
-  * @prop {number} [time_before_sleep]
-  * @prop {number} [default_angular_damp]
-  * @prop {number} [default_linear_damp]
-  * @prop {Gravity} [gravity]
-  * @prop {number} [iteration]
-  */
+interface PhysicsSettings {
+  physics_fps?: number;
+  sleep_threshold_linear?: number;
+  sleep_threshold_angular?: number;
+  time_before_sleep?: number;
+  default_angular_damp?: number;
+  default_linear_damp?: number;
+  gravity?: { x: number, y: number };
+  iteration?: number;
+}
 
-/**
- * @typedef {Object<string, { deadzone?: number, events: any[] }>} InputSettings
- */
+type InputSettings = { [action: string]: { deadzone?: number, events: any[] } };
 
-/**
- * @typedef LayerMap
- * @prop {Object<string, number>} [physics]
- */
+interface LayerMap {
+    physics?: { [name: string]: number };
+}
 
-/**
- * @typedef Settings
- * @prop {ApplicationSettings} [application]
- * @prop {DisplaySettings} [display]
- * @prop {PhysicsSettings} [physics]
- * @prop {InputSettings} [input]
- * @prop {LayerMap} [layer_map]
- */
+interface Settings {
+    application?: ApplicationSettings;
+    display?: DisplaySettings;
+    physics?: PhysicsSettings;
+    input?: InputSettings;
+    layer_map?: LayerMap;
+}
 
-/**
- * @type {Settings}
- */
-const DefaultSettings = {
+const DefaultSettings: Settings = {
     application: {
-        name: 'Voltar',
+        name: "Voltar",
         main_scene: undefined,
         pause_on_blur: false,
         min_update_step: 1 / 10,
     },
     display: {
-        view: 'game',
-        container: 'container',
+        view: "game",
+        container: "container",
 
         width: 1024,
         height: 600,
@@ -97,7 +76,7 @@ const DefaultSettings = {
 
         antialias: false,
         pixel_snap: false,
-        scale_mode: 'linear',
+        scale_mode: "linear",
 
         stretch_mode: STRETCH_MODE_DISABLED,
         stretch_aspect: STRETCH_ASPECT_IGNORE,
@@ -122,10 +101,13 @@ const DefaultSettings = {
 export class ProjectSettings {
     static get_singleton() { return singleton }
 
-    /**
-     * @param {...Settings} settings
-     */
-    constructor(...settings) {
+    application: ApplicationSettings;
+    display: DisplaySettings;
+    physics: PhysicsSettings;
+    input: InputSettings;
+    layer_map: LayerMap;
+
+    constructor(...settings: Settings[]) {
         if (!singleton) singleton = this;
 
         this.application = DefaultSettings.application;
@@ -142,97 +124,97 @@ export class ProjectSettings {
         action = { deadzone: 0.5, events: [] };
         events = action.events;
         key = InputEventKey.instance();
-        key.scancode = KEYS['ENTER'];
+        key.scancode = KEYS["ENTER"];
         events.push(key);
         key = InputEventKey.instance();
-        key.scancode = KEYS['SPACE'];
+        key.scancode = KEYS["SPACE"];
         events.push(key);
-        this.input['ui_accept'] = action;
+        this.input["ui_accept"] = action;
 
         action = { deadzone: 0.5, events: [] };
         events = action.events;
         key = InputEventKey.instance();
-        key.scancode = KEYS['SPACE'];
+        key.scancode = KEYS["SPACE"];
         events.push(key);
-        this.input['ui_select'] = action;
+        this.input["ui_select"] = action;
 
         action = { deadzone: 0.5, events: [] };
         events = action.events;
         key = InputEventKey.instance();
-        key.scancode = KEYS['ESC'];
+        key.scancode = KEYS["ESC"];
         events.push(key);
-        this.input['ui_cancel'] = action;
+        this.input["ui_cancel"] = action;
 
         action = { deadzone: 0.5, events: [] };
         events = action.events;
         key = InputEventKey.instance();
-        key.scancode = KEYS['TAB'];
+        key.scancode = KEYS["TAB"];
         events.push(key);
-        this.input['ui_focus_next'] = action;
+        this.input["ui_focus_next"] = action;
 
         action = { deadzone: 0.5, events: [] };
         events = action.events;
         key = InputEventKey.instance();
-        key.scancode = KEYS['TAB'];
+        key.scancode = KEYS["TAB"];
         key.shift = true;
         events.push(key);
-        this.input['ui_focus_prev'] = action;
+        this.input["ui_focus_prev"] = action;
 
         action = { deadzone: 0.5, events: [] };
         events = action.events;
         key = InputEventKey.instance();
-        key.scancode = KEYS['LEFT'];
+        key.scancode = KEYS["LEFT"];
         events.push(key);
-        this.input['ui_left'] = action;
+        this.input["ui_left"] = action;
 
         action = { deadzone: 0.5, events: [] };
         events = action.events;
         key = InputEventKey.instance();
-        key.scancode = KEYS['RIGHT'];
+        key.scancode = KEYS["RIGHT"];
         events.push(key);
-        this.input['ui_right'] = action;
+        this.input["ui_right"] = action;
 
         action = { deadzone: 0.5, events: [] };
         events = action.events;
         key = InputEventKey.instance();
-        key.scancode = KEYS['UP'];
+        key.scancode = KEYS["UP"];
         events.push(key);
-        this.input['ui_up'] = action;
+        this.input["ui_up"] = action;
 
         action = { deadzone: 0.5, events: [] };
         events = action.events;
         key = InputEventKey.instance();
-        key.scancode = KEYS['DOWN'];
+        key.scancode = KEYS["DOWN"];
         events.push(key);
-        this.input['ui_down'] = action;
+        this.input["ui_down"] = action;
 
         action = { deadzone: 0.5, events: [] };
         events = action.events;
         key = InputEventKey.instance();
-        key.scancode = KEYS['PAGE_UP'];
+        key.scancode = KEYS["PAGE_UP"];
         events.push(key);
-        this.input['ui_page_up'] = action;
+        this.input["ui_page_up"] = action;
 
         action = { deadzone: 0.5, events: [] };
         events = action.events;
         key = InputEventKey.instance();
-        key.scancode = KEYS['PAGE_DOWN'];
+        key.scancode = KEYS["PAGE_DOWN"];
         events.push(key);
-        this.input['ui_page_down'] = action;
+        this.input["ui_page_down"] = action;
 
         action = { deadzone: 0.5, events: [] };
         events = action.events;
         key = InputEventKey.instance();
-        key.scancode = KEYS['HOME'];
+        key.scancode = KEYS["HOME"];
         events.push(key);
-        this.input['ui_home'] = action;
+        this.input["ui_home"] = action;
 
         action = { deadzone: 0.5, events: [] };
         events = action.events;
         key = InputEventKey.instance();
-        key.scancode = KEYS['END'];
+        key.scancode = KEYS["END"];
         events.push(key);
-        this.input['ui_end'] = action;
+        this.input["ui_end"] = action;
         // [End] pre-defined keys
 
         for (let s of settings) {
@@ -240,20 +222,13 @@ export class ProjectSettings {
         }
     }
 
-    /**
-     * @param {string} name
-     */
-    get_physics_layer_bit(name) {
+    get_physics_layer_bit(name: string): number {
         return this.layer_map.physics[name];
     }
 
-    /**
-     * @param {string} name
-     */
-    get_physics_layer_value(name) {
+    get_physics_layer_value(name: string): number {
         return 1 << this.layer_map.physics[name];
     }
 }
 
-/** @type {ProjectSettings} */
-let singleton = null;
+let singleton: ProjectSettings = null;

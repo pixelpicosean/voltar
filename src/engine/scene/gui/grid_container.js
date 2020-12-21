@@ -1,7 +1,7 @@
 import { remove_items } from "engine/dep/index.ts";
 import { node_class_map } from "engine/registry";
-import { GDCLASS } from "engine/core/v_object.js";
-import { Vector2 } from "engine/core/math/vector2.js";
+import { GDCLASS } from "engine/core/v_object";
+import { Vector2 } from "engine/core/math/vector2";
 import { Rect2 } from "engine/core/math/rect2.js";
 
 import { SIZE_EXPAND } from "./const";

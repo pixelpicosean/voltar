@@ -1,6 +1,6 @@
 import { clamp } from "./math_funcs.js";
 import { CMP_EPSILON } from "./math_defs.js";
-import { Vector2 } from "./vector2.js";
+import { Vector2 } from "./vector2";
 
 
 /**

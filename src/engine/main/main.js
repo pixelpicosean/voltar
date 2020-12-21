@@ -1,8 +1,8 @@
-import { Color } from "engine/core/color.js";
-import { VObject } from "engine/core/v_object.js";
-import { ProjectSettings } from "engine/core/project_settings.js";
-import { InputMap } from "engine/core/input_map.js";
-import { MessageQueue } from "engine/core/message_queue.js";
+import { Color } from "engine/core/color";
+import { VObject } from "engine/core/v_object";
+import { ProjectSettings } from "engine/core/project_settings";
+import { InputMap } from "engine/core/input_map";
+import { MessageQueue } from "engine/core/message_queue";
 import { OS } from "engine/core/os/os.js";
 import { Engine } from "engine/core/engine.js";
 import { SceneTree } from "engine/scene/main/scene_tree.js";

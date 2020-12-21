@@ -1,4 +1,4 @@
-import { GDCLASS } from "engine/core/v_object.js";
+import { GDCLASS } from "engine/core/v_object";
 import { res_class_map, get_resource_map } from "engine/registry";
 import {
     deg2rad,
@@ -9,9 +9,9 @@ import {
 import { Math_LN2 } from "engine/core/math/math_defs.js";
 import { Vector3 } from "engine/core/math/vector3.js";
 import { Basis } from "engine/core/math/basis.js";
-import { Color, ColorLike } from "engine/core/color.js";
-import { Resource } from "engine/core/resource.js";
-import { SelfList } from "engine/core/self_list.js";
+import { Color, ColorLike } from "engine/core/color";
+import { Resource } from "engine/core/resource";
+import { SelfList } from "engine/core/self_list";
 
 import {
     Texture,

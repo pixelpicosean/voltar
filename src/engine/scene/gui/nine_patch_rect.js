@@ -1,12 +1,12 @@
 import { node_class_map, get_resource_map } from 'engine/registry';
-import { GDCLASS } from 'engine/core/v_object.js';
+import { GDCLASS } from 'engine/core/v_object';
 import {
     MARGIN_LEFT,
     MARGIN_RIGHT,
     MARGIN_TOP,
     MARGIN_BOTTOM,
 } from 'engine/core/math/math_defs.js';
-import { Vector2 } from 'engine/core/math/vector2.js';
+import { Vector2 } from 'engine/core/math/vector2';
 import { Rect2 } from 'engine/core/math/rect2.js';
 import { VSG } from 'engine/servers/visual/visual_server_globals.js';
 

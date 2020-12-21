@@ -1,7 +1,7 @@
-import { GDCLASS } from "engine/core/v_object.js";
-import { Vector2, Vector2Like } from "engine/core/math/vector2.js";
-import { Color, ColorLike } from "engine/core/color.js";
-import { Resource } from "engine/core/resource.js";
+import { GDCLASS } from "engine/core/v_object";
+import { Vector2, Vector2Like } from "engine/core/math/vector2";
+import { Color, ColorLike } from "engine/core/color";
+import { Resource } from "engine/core/resource";
 import { Rect2 } from "engine/core/math/rect2.js";
 
 import { VSG } from "engine/servers/visual/visual_server_globals.js";

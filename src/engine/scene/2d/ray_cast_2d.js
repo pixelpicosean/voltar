@@ -1,6 +1,6 @@
 import { node_class_map } from "engine/registry";
-import { GDCLASS } from "engine/core/v_object.js";
-import { Vector2 } from "engine/core/math/vector2.js";
+import { GDCLASS } from "engine/core/v_object";
+import { Vector2 } from "engine/core/math/vector2";
 
 import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server.js";
 import { RayResult } from "engine/servers/physics_2d/state.js";

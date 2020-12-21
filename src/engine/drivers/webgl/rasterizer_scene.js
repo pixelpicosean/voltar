@@ -1,14 +1,14 @@
 import { res_class_map } from 'engine/registry';
 import { lerp, deg2rad, nearest_po2 } from 'engine/core/math/math_funcs.js';
-import { Vector2, Vector2Like } from 'engine/core/math/vector2.js';
+import { Vector2, Vector2Like } from 'engine/core/math/vector2';
 import { Vector3 } from 'engine/core/math/vector3.js';
 import { Rect2 } from 'engine/core/math/rect2.js';
 import { Basis } from 'engine/core/math/basis.js';
 import { Transform } from 'engine/core/math/transform.js';
 import { CameraMatrix } from 'engine/core/math/camera_matrix.js';
-import { Color } from 'engine/core/color.js';
+import { Color } from 'engine/core/color';
 import { OS } from 'engine/core/os/os.js';
-import { copy_array_values } from 'engine/core/v_array.js';
+import { copy_array_values } from 'engine/core/v_array';
 
 import {
     INSTANCE_TYPE_MESH,

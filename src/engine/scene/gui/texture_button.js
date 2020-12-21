@@ -1,5 +1,5 @@
 import { node_class_map, get_resource_map } from 'engine/registry';
-import { GDCLASS } from 'engine/core/v_object.js';
+import { GDCLASS } from 'engine/core/v_object';
 import { ImageTexture } from '../resources/texture.js';
 
 import {
@@ -10,7 +10,7 @@ import {
     DRAW_PRESSED,
     DRAW_DISABLED,
 } from './base_button.js';
-import { Vector2Like, Vector2 } from 'engine/core/math/vector2.js';
+import { Vector2Like, Vector2 } from 'engine/core/math/vector2';
 import { NOTIFICATION_DRAW } from '../2d/canvas_item.js';
 import {
     STRETCH_SCALE,

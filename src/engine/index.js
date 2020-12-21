@@ -6,14 +6,14 @@ export * from 'engine/dep/index.ts';
 // ------------------------------------------------------------------
 // Core
 // ------------------------------------------------------------------
-export * from 'engine/core/v_array.js';
-export * from 'engine/core/v_object.js';
+export * from 'engine/core/v_array';
+export * from 'engine/core/v_object';
 
 export * from 'engine/core/math/convex.js';
 export * from 'engine/core/math/geometry.js';
 export * from 'engine/core/math/math_defs.js';
 export * from 'engine/core/math/math_funcs.js';
-export * from 'engine/core/math/vector2.js';
+export * from 'engine/core/math/vector2';
 export * from 'engine/core/math/vector3.js';
 export * from 'engine/core/math/pool_vector2_array.js';
 export * from 'engine/core/math/rect2.js';
@@ -25,15 +25,12 @@ export * from 'engine/core/math/octree.js';
 export * from 'engine/core/math/plane.js';
 export * from 'engine/core/math/basis.js';
 export * from 'engine/core/math/transform.js';
-export * from 'engine/core/color.js';
-export * from 'engine/core/math/pool_color_array.js';
-export * from 'engine/core/self_list.js';
+export * from 'engine/core/color';
+export * from 'engine/core/math/pool_color_array';
+export * from 'engine/core/self_list';
 
 
-export {
-    _yield as yield,
-    _yield_ex as yield_ex
-} from 'engine/core/yield.js';
+export { _yield as yield } from 'engine/core/yield';
 
 export * from 'engine/utils/c';
 export * from 'engine/utils/color';
@@ -44,7 +41,7 @@ export * from 'engine/utils/trim_canvas';
 // ------------------------------------------------------------------
 // Resource
 // ------------------------------------------------------------------
-export * from 'engine/core/resource.js';
+export * from 'engine/core/resource';
 export * from 'engine/core/os/input_event.js';
 export * from 'engine/core/os/keyboard.js';
 export * from 'engine/scene/resources/tile_set.js';
@@ -132,16 +129,16 @@ export * from 'engine/registry';
 // ------------------------------------------------------------------
 // Singletons
 // ------------------------------------------------------------------
-export * from 'engine/core/project_settings.js';
+export * from 'engine/core/project_settings';
 export * from 'engine/main/main.js';
 
 import { Main } from 'engine/main/main.js';
 
 import { Input as Input_t } from 'engine/main/input.js';
-import { InputMap as InputMap_t } from 'engine/core/input_map.js';
+import { InputMap as InputMap_t } from 'engine/core/input_map';
 import { OS as OS_t } from 'engine/core/os/os.js';
-import { ProjectSettings as ProjectSettings_t } from 'engine/core/project_settings.js';
-import { MessageQueue as MessageQueue_t } from 'engine/core/message_queue.js';
+import { ProjectSettings as ProjectSettings_t } from 'engine/core/project_settings';
+import { MessageQueue as MessageQueue_t } from 'engine/core/message_queue';
 import { Engine as Engine_t } from 'engine/core/engine.js';
 import { VisualServer as VisualServer_t } from 'engine/servers/visual_server.js';
 import { Physics2DServer as Physics2DServer_t } from 'engine/servers/physics_2d/physics_2d_server.js';
