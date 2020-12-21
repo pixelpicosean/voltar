@@ -1,4 +1,4 @@
-import { node_class_map, res_class_map } from "engine/registry.js";
+import { node_class_map, res_class_map } from "engine/registry";
 import { GDCLASS } from "engine/core/v_object.js";
 import { MessageQueue } from "engine/core/message_queue.js";
 import { SelfList } from "engine/core/self_list.js";
@@ -21,7 +21,7 @@ import {
     NOTIFICATION_MOVED_IN_PARENT,
     NOTIFICATION_EXIT_TREE,
 } from "../main/node.js";
-import { NOTIFICATION_TRANSFORM_CHANGED } from "../const.js";
+import { NOTIFICATION_TRANSFORM_CHANGED } from "../const";
 
 
 export const NOTIFICATION_DRAW = 30;

@@ -64,8 +64,12 @@ module.exports.convert_tres = (blocks) => {
         } else if (sec.key === 'sub_resource') {
             normalize_resource_object(sec);
 
-            sub.push(sec);
-            sec.key = undefined;
+            // valid resource at least has one more proeprties
+            // other than `id` and `key`
+            if (Object.keys(sec).length > 2) {
+                sec.key = undefined;
+                sub.push(sec);
+            }
         } else if (sec.key === 'resource') {
             for (const key in sec.prop) {
                 const { index, prop_key } = get_array_index_and_prop_key(key);

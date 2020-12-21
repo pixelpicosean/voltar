@@ -1,7 +1,7 @@
-import { res_class_map } from "engine/registry.js";
+import { res_class_map } from "engine/registry";
 import { VObject } from "engine/core/v_object.js";
 import { Color, ColorLike } from "engine/core/color.js";
-import { remove_items } from "engine/dep/index.js";
+import { remove_items } from "engine/dep/index.ts";
 
 
 class Point {

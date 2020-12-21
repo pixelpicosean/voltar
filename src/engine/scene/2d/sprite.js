@@ -1,4 +1,4 @@
-import { node_class_map, get_resource_map } from 'engine/registry.js';
+import { node_class_map, get_resource_map } from 'engine/registry';
 import { GDCLASS } from 'engine/core/v_object.js';
 import { Vector2, Vector2Like } from 'engine/core/math/vector2.js';
 import { Rect2 } from 'engine/core/math/rect2.js';

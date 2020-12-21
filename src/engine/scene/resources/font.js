@@ -4,7 +4,7 @@ import { Rect2 } from "engine/core/math/rect2.js";
 import {
     res_class_map,
     get_resource_map,
-} from "engine/registry.js";
+} from "engine/registry";
 import {
     HALIGN_LEFT,
     HALIGN_FILL,

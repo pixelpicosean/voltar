@@ -1,4 +1,4 @@
-import { node_class_map } from 'engine/registry.js';
+import { node_class_map } from 'engine/registry';
 import { GDCLASS } from 'engine/core/v_object.js';
 import { Rect2 } from 'engine/core/math/rect2.js';
 import { Color, ColorLike } from 'engine/core/color.js';

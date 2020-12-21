@@ -1,4 +1,4 @@
-import { node_class_map } from "engine/registry.js";
+import { node_class_map } from "engine/registry";
 import { GDCLASS } from "engine/core/v_object.js";
 
 import { Control, NOTIFICATION_RESIZED, NOTIFICATION_THEME_CHANGED } from "./control.js";

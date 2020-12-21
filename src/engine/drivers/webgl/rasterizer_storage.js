@@ -44,7 +44,7 @@ import {
 } from "engine/servers/visual/visual_server_scene.js";
 import { VSG } from "engine/servers/visual/visual_server_globals.js";
 
-import { ARRAY_MAX } from "engine/scene/const.js";
+import { ARRAY_MAX } from "engine/scene/const";
 import {
     PIXEL_FORMAT_L8,
     PIXEL_FORMAT_LA8,

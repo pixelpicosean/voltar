@@ -21,7 +21,7 @@ v.Main.setup(Settings, {
         stretch_aspect: v.STRETCH_ASPECT_KEEP,
     },
     application: {
-        // main_scene: Preloader("res://scene/demo.tscn"),
-        main_scene: Preloader("res://scene/demo_3d.tscn"),
+        main_scene: Preloader("res://scene/demo.tscn"),
+        // main_scene: Preloader("res://scene/demo_3d.tscn"),
     },
 });

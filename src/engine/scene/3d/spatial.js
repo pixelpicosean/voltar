@@ -1,4 +1,4 @@
-import { node_class_map } from "engine/registry.js";
+import { node_class_map } from "engine/registry";
 import { GDCLASS } from "engine/core/v_object.js";
 import { SelfList } from "engine/core/self_list.js";
 import { Vector3, Vector3Like } from "engine/core/math/vector3.js";
@@ -11,7 +11,7 @@ import {
 } from "../main/node.js";
 import { Viewport } from "../main/viewport.js";
 import { Basis } from "engine/core/math/basis.js";
-import { NOTIFICATION_TRANSFORM_CHANGED } from "../const.js";
+import { NOTIFICATION_TRANSFORM_CHANGED } from "../const";
 
 export const NOTIFICATION_ENTER_WORLD = 41;
 export const NOTIFICATION_EXIT_WORLD = 42;

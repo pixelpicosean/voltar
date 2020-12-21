@@ -1,8 +1,8 @@
-import { remove_items } from "engine/dep/index.js";
+import { remove_items } from "engine/dep/index.ts";
 import { Vector2 } from "engine/core/math/vector2.js";
 import { Rect2 } from "engine/core/math/rect2.js";
 import { Transform2D } from "engine/core/math/transform_2d.js";
-import { CollisionObjectType } from "engine/scene/2d/const.js";
+import { CollisionObjectType } from "engine/scene/2d/const";
 
 import { Shape2DSW } from "./shape_2d_sw.js";
 import { Space2DSW } from "./space_2d_sw.js";

@@ -9,7 +9,7 @@ import {
     loader_pre_procs,
     loader_use_procs,
     get_raw_resource_map,
-} from 'engine/registry.js';
+} from 'engine/registry';
 
 import { texture_loader } from './texture_loader';
 import { atlas_loader } from './atlas_loader.js';

@@ -1,4 +1,4 @@
-import { res_class_map } from "engine/registry.js";
+import { res_class_map } from "engine/registry";
 import { VSG } from "engine/servers/visual/visual_server_globals.js";
 import { parse_shader_code } from "engine/drivers/webgl/shader_parser.js";
 

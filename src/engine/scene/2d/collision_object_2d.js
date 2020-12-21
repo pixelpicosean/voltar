@@ -1,4 +1,4 @@
-import { remove_items } from 'engine/dep/index.js';
+import { remove_items } from 'engine/dep/index.ts';
 import { GDCLASS } from 'engine/core/v_object.js';
 import { Transform2D } from 'engine/core/math/transform_2d.js';
 
@@ -17,10 +17,10 @@ import {
     NOTIFICATION_EXIT_CANVAS,
     NOTIFICATION_VISIBILITY_CHANGED,
 } from './canvas_item.js';
-import { BodyState } from './const.js';
+import { BodyState } from './const';
 import { CollisionShape2D } from './collision_shape_2d.js';
 import { CollisionPolygon2D } from './collision_polygon_2d.js';
-import { NOTIFICATION_TRANSFORM_CHANGED } from '../const.js';
+import { NOTIFICATION_TRANSFORM_CHANGED } from '../const';
 
 
 class Shape {

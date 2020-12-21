@@ -5,7 +5,7 @@ import {
     CollisionObjectType,
     AreaSpaceOverrideMode,
     AreaParameter,
-} from "engine/scene/2d/const.js";
+} from "engine/scene/2d/const";
 
 import { CollisionObject2DSW } from "./collision_object_2d_sw.js";
 import { AREA_BODY_ADDED, AREA_BODY_REMOVED } from "./physics_2d_server.js";

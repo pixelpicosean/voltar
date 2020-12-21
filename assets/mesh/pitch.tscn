@@ -1,34 +1,8 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=3 format=2]
 
 [ext_resource path="res://mesh/mat_genera.tres" type="Material" id=1]
 
-[sub_resource type="Image" id=5]
-data = {
-"data": PoolByteArray( 0, 0, 0, 255, 29, 43, 83, 255, 126, 37, 83, 255, 0, 135, 81, 255, 171, 82, 54, 255, 95, 87, 79, 255, 194, 195, 199, 255, 255, 241, 232, 255, 255, 0, 77, 255, 255, 163, 0, 255, 255, 236, 39, 255, 0, 228, 54, 255, 41, 173, 255, 255, 131, 118, 156, 255, 255, 119, 168, 255, 255, 204, 170, 255 ),
-"format": "RGBA8",
-"height": 4,
-"mipmaps": false,
-"width": 4
-}
-
-[sub_resource type="ImageTexture" id=2]
-flags = 3
-flags = 3
-image = SubResource( 5 )
-size = Vector2( 4, 4 )
-
-[sub_resource type="SpatialMaterial" id=4]
-resource_name = "palette"
-params_cull_mode = 2
-metallic = 1.0
-emission_enabled = true
-emission = Color( 0, 0, 0, 1 )
-emission_energy = 1.0
-emission_operator = 0
-emission_on_uv2 = false
-emission_texture = SubResource( 2 )
-
-[sub_resource type="ArrayMesh" id=6]
+[sub_resource type="ArrayMesh" id=1]
 resource_name = "pitch"
 surfaces/0 = {
 "aabb": AABB( -12, 0, -6, 24, 0.0050007, 12 ),
@@ -37,12 +11,11 @@ surfaces/0 = {
 "blend_shape_data": [  ],
 "format": 279,
 "index_count": 588,
-"material": SubResource( 4 ),
 "primitive": 4,
 "skeleton_aabb": [  ],
 "vertex_count": 584
 }
 
 [node name="pitch" type="MeshInstance"]
-mesh = SubResource( 6 )
+mesh = SubResource( 1 )
 material/0 = ExtResource( 1 )

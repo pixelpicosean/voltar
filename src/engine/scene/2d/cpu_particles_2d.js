@@ -1,4 +1,4 @@
-import { node_class_map, get_resource_map } from 'engine/registry.js';
+import { node_class_map, get_resource_map } from 'engine/registry';
 import { GDCLASS } from 'engine/core/v_object.js';
 import { Vector2 } from 'engine/core/math/vector2.js';
 import { Transform2D } from 'engine/core/math/transform_2d.js';
@@ -30,7 +30,7 @@ import {
     VisualServer,
 } from 'engine/servers/visual_server.js';
 import { VSG } from 'engine/servers/visual/visual_server_globals.js';
-import { NOTIFICATION_TRANSFORM_CHANGED } from '../const.js';
+import { NOTIFICATION_TRANSFORM_CHANGED } from '../const';
 
 
 const Math_PI2 = Math_PI * 2;

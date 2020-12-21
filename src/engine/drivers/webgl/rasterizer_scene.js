@@ -1,4 +1,4 @@
-import { res_class_map } from 'engine/registry.js';
+import { res_class_map } from 'engine/registry';
 import { lerp, deg2rad, nearest_po2 } from 'engine/core/math/math_funcs.js';
 import { Vector2, Vector2Like } from 'engine/core/math/vector2.js';
 import { Vector3 } from 'engine/core/math/vector3.js';
@@ -46,7 +46,7 @@ import {
     ARRAY_BONES,
     ARRAY_WEIGHTS,
     ARRAY_MAX,
-} from 'engine/scene/const.js';
+} from 'engine/scene/const';
 
 import { EffectBlurShader } from './shaders/blur.js';
 import {

@@ -13,8 +13,22 @@
         "sub": [],
         "resource": {
             "type": "SpatialMaterial",
-            "albedo_texture": "@ext#1"
+            "albedo_texture": [
+                "@ext#",
+                "1"
+            ]
         }
+    },
+    "res://scene/test_parent.tscn": {
+        "type": "PackedScene",
+        "sub": [],
+        "nodes": [
+            {
+                "type": "Node",
+                "name": "test_parent",
+                "number": 10
+            }
+        ]
     },
     "res://scene/ui/input.tscn": {
         "type": "PackedScene",
@@ -39,7 +53,10 @@
             {
                 "id": 2,
                 "type": "DynamicFont",
-                "font": "@ext#5",
+                "font": [
+                    "@ext#",
+                    "5"
+                ],
                 "size": 25
             },
             {
@@ -50,7 +67,10 @@
             {
                 "id": 4,
                 "type": "ShaderMaterial",
-                "shader": "@sub#3"
+                "shader": [
+                    "@sub#",
+                    "3"
+                ]
             }
         ],
         "nodes": [
@@ -89,7 +109,10 @@
                     "x": 2,
                     "y": 2
                 },
-                "texture": "@ext#1"
+                "texture": [
+                    "@ext#",
+                    "1"
+                ]
             },
             {
                 "type": "Sprite",
@@ -99,7 +122,10 @@
                     "x": 128.651,
                     "y": 181.304
                 },
-                "texture": "@ext#3"
+                "texture": [
+                    "@ext#",
+                    "3"
+                ]
             },
             {
                 "type": "Sprite",
@@ -109,7 +135,10 @@
                     "x": 50.6791,
                     "y": 57.8259
                 },
-                "texture": "@ext#2"
+                "texture": [
+                    "@ext#",
+                    "2"
+                ]
             },
             {
                 "type": "Sprite",
@@ -119,7 +148,10 @@
                     "x": 89.1798,
                     "y": 57.8259
                 },
-                "texture": "@ext#2"
+                "texture": [
+                    "@ext#",
+                    "2"
+                ]
             },
             {
                 "type": "Sprite",
@@ -129,7 +161,10 @@
                     "x": 127.68,
                     "y": 57.8259
                 },
-                "texture": "@ext#2"
+                "texture": [
+                    "@ext#",
+                    "2"
+                ]
             },
             {
                 "type": "Sprite",
@@ -139,7 +174,10 @@
                     "x": 166.181,
                     "y": 57.8259
                 },
-                "texture": "@ext#2"
+                "texture": [
+                    "@ext#",
+                    "2"
+                ]
             },
             {
                 "type": "Sprite",
@@ -149,7 +187,10 @@
                     "x": 203.655,
                     "y": 57.8259
                 },
-                "texture": "@ext#2"
+                "texture": [
+                    "@ext#",
+                    "2"
+                ]
             },
             {
                 "type": "Sprite",
@@ -159,7 +200,10 @@
                     "x": 51.1925,
                     "y": 85.5464
                 },
-                "texture": "@ext#2"
+                "texture": [
+                    "@ext#",
+                    "2"
+                ]
             },
             {
                 "type": "Sprite",
@@ -169,7 +213,10 @@
                     "x": 89.6931,
                     "y": 85.5464
                 },
-                "texture": "@ext#2"
+                "texture": [
+                    "@ext#",
+                    "2"
+                ]
             },
             {
                 "type": "Sprite",
@@ -179,7 +226,10 @@
                     "x": 128.194,
                     "y": 85.5464
                 },
-                "texture": "@ext#2"
+                "texture": [
+                    "@ext#",
+                    "2"
+                ]
             },
             {
                 "type": "Sprite",
@@ -189,7 +239,10 @@
                     "x": 166.694,
                     "y": 85.5464
                 },
-                "texture": "@ext#2"
+                "texture": [
+                    "@ext#",
+                    "2"
+                ]
             },
             {
                 "type": "Sprite",
@@ -199,7 +252,10 @@
                     "x": 204.168,
                     "y": 85.5464
                 },
-                "texture": "@ext#2"
+                "texture": [
+                    "@ext#",
+                    "2"
+                ]
             },
             {
                 "type": "Label",
@@ -223,13 +279,19 @@
                 "autowrap": true,
                 "text": "GAME OVER",
                 "valign": 1,
-                "font": "@sub#2"
+                "font": [
+                    "@sub#",
+                    "2"
+                ]
             },
             {
                 "type": "ColorRect",
                 "name": "cover",
                 "parent": "monitor",
-                "material": "@sub#4",
+                "material": [
+                    "@sub#",
+                    "4"
+                ],
                 "margin_bottom": 201,
                 "margin_left": 18.5,
                 "margin_top": 28,
@@ -277,7 +339,10 @@
         "resource": {
             "type": "Environment",
             "bg_mode": 1,
-            "sky": "@sub#1",
+            "sky": [
+                "@sub#",
+                "1"
+            ],
             "ambient_color": {
                 "r": 1,
                 "g": 1,
@@ -307,27 +372,12 @@
         "sub": [
             {
                 "id": 4,
-                "type": "SpatialMaterial",
-                "metallic": 1,
-                "emission_enabled": true,
-                "emission": {
-                    "r": 0,
-                    "g": 0,
-                    "b": 0,
-                    "a": 1
-                },
-                "emission_energy": 1,
-                "emission_operator": 0
-            },
-            {
-                "id": 6,
                 "type": "ArrayMesh",
                 "surfaces": [
                     {
                         "blend_shape_data": [],
                         "format": 279,
                         "index_count": 324,
-                        "material": "@sub#4",
                         "primitive": 4,
                         "skeleton_aabb": [],
                         "vertex_count": 210,
@@ -406,14 +456,13 @@
                 ]
             },
             {
-                "id": 3,
+                "id": 5,
                 "type": "ArrayMesh",
                 "surfaces": [
                     {
                         "blend_shape_data": [],
                         "format": 279,
                         "index_count": 768,
-                        "material": "@sub#4",
                         "primitive": 4,
                         "skeleton_aabb": [],
                         "vertex_count": 501,
@@ -510,9 +559,15 @@
                     1,
                     0
                 ],
-                "mesh": "@sub#6",
+                "mesh": [
+                    "@sub#",
+                    "4"
+                ],
                 "material": [
-                    "@ext#1"
+                    [
+                        "@ext#",
+                        "1"
+                    ]
                 ]
             },
             {
@@ -533,9 +588,15 @@
                     -1,
                     0
                 ],
-                "mesh": "@sub#3",
+                "mesh": [
+                    "@sub#",
+                    "5"
+                ],
                 "material": [
-                    "@ext#1"
+                    [
+                        "@ext#",
+                        "1"
+                    ]
                 ]
             }
         ]
@@ -547,28 +608,13 @@
         },
         "sub": [
             {
-                "id": 4,
-                "type": "SpatialMaterial",
-                "metallic": 1,
-                "emission_enabled": true,
-                "emission": {
-                    "r": 0,
-                    "g": 0,
-                    "b": 0,
-                    "a": 1
-                },
-                "emission_energy": 1,
-                "emission_operator": 0
-            },
-            {
-                "id": 6,
+                "id": 1,
                 "type": "ArrayMesh",
                 "surfaces": [
                     {
                         "blend_shape_data": [],
                         "format": 279,
                         "index_count": 588,
-                        "material": "@sub#4",
                         "primitive": 4,
                         "skeleton_aabb": [],
                         "vertex_count": 584,
@@ -651,9 +697,15 @@
             {
                 "type": "MeshInstance",
                 "name": "pitch",
-                "mesh": "@sub#6",
+                "mesh": [
+                    "@sub#",
+                    "1"
+                ],
                 "material": [
-                    "@ext#1"
+                    [
+                        "@ext#",
+                        "1"
+                    ]
                 ]
             }
         ]
@@ -665,20 +717,6 @@
         },
         "sub": [
             {
-                "id": 4,
-                "type": "SpatialMaterial",
-                "metallic": 1,
-                "emission_enabled": true,
-                "emission": {
-                    "r": 0,
-                    "g": 0,
-                    "b": 0,
-                    "a": 1
-                },
-                "emission_energy": 1,
-                "emission_operator": 0
-            },
-            {
                 "id": 1,
                 "type": "ArrayMesh",
                 "surfaces": [
@@ -686,7 +724,6 @@
                         "blend_shape_data": [],
                         "format": 279,
                         "index_count": 348,
-                        "material": "@sub#4",
                         "primitive": 4,
                         "skeleton_aabb": [],
                         "vertex_count": 180,
@@ -769,9 +806,15 @@
             {
                 "type": "MeshInstance",
                 "name": "soccer",
-                "mesh": "@sub#1",
+                "mesh": [
+                    "@sub#",
+                    "1"
+                ],
                 "material": [
-                    "@ext#1"
+                    [
+                        "@ext#",
+                        "1"
+                    ]
                 ]
             }
         ]
@@ -783,28 +826,13 @@
         },
         "sub": [
             {
-                "id": 3,
-                "type": "SpatialMaterial",
-                "metallic": 1,
-                "emission_enabled": true,
-                "emission": {
-                    "r": 0,
-                    "g": 0,
-                    "b": 0,
-                    "a": 1
-                },
-                "emission_energy": 1,
-                "emission_operator": 0
-            },
-            {
-                "id": 4,
+                "id": 1,
                 "type": "ArrayMesh",
                 "surfaces": [
                     {
                         "blend_shape_data": [],
                         "format": 471,
                         "index_count": 420,
-                        "material": "@sub#3",
                         "primitive": 4,
                         "skeleton_aabb": [
                             "-0.101704,0.449234,-0.308757,0.203409,0.269291,0.617525",
@@ -915,7 +943,7 @@
                 ]
             },
             {
-                "id": 5,
+                "id": 2,
                 "type": "Skin",
                 "binds": [
                     {
@@ -1263,7 +1291,7 @@
                 ]
             },
             {
-                "id": 6,
+                "id": 3,
                 "type": "Animation",
                 "name": "idle",
                 "length": 1.25,
@@ -4530,7 +4558,7 @@
                 ]
             },
             {
-                "id": 7,
+                "id": 4,
                 "type": "Animation",
                 "name": "run",
                 "length": 1.25,
@@ -9627,11 +9655,20 @@
                 "type": "MeshInstance",
                 "name": "mesh",
                 "parent": "Skeleton",
-                "mesh": "@sub#4",
-                "material": [
-                    "@ext#1"
+                "mesh": [
+                    "@sub#",
+                    "1"
                 ],
-                "skin": "@sub#5"
+                "material": [
+                    [
+                        "@ext#",
+                        "1"
+                    ]
+                ],
+                "skin": [
+                    "@sub#",
+                    "2"
+                ]
             },
             {
                 "type": "AnimationPlayer",
@@ -9639,11 +9676,15 @@
                 "parent": ".",
                 "autoplay": "run",
                 "anims": {
-                    "idle": "@sub#6",
-                    "run": "@sub#7"
-                },
-                "anims/idle": "@sub#6",
-                "anims/run": "@sub#7"
+                    "idle": [
+                        "@sub#",
+                        "3"
+                    ],
+                    "run": [
+                        "@sub#",
+                        "4"
+                    ]
+                }
             }
         ]
     },
@@ -9778,8 +9819,10 @@
             {
                 "name": "pitch",
                 "parent": ".",
-                "material": [],
-                "instance": "@ext#2"
+                "instance": [
+                    "@ext#",
+                    "2"
+                ]
             },
             {
                 "name": "goal_red",
@@ -9798,8 +9841,10 @@
                     1,
                     0.00000195505
                 ],
-                "material": [],
-                "instance": "@ext#1"
+                "instance": [
+                    "@ext#",
+                    "1"
+                ]
             },
             {
                 "name": "goal_blue",
@@ -9818,8 +9863,10 @@
                     1,
                     -0.00000195505
                 ],
-                "material": [],
-                "instance": "@ext#1"
+                "instance": [
+                    "@ext#",
+                    "1"
+                ]
             },
             {
                 "name": "soccer",
@@ -9838,8 +9885,10 @@
                     2.90224,
                     0
                 ],
-                "material": [],
-                "instance": "@ext#3"
+                "instance": [
+                    "@ext#",
+                    "3"
+                ]
             },
             {
                 "type": "AnimationPlayer",
@@ -9847,9 +9896,11 @@
                 "parent": "soccer",
                 "autoplay": "bounce",
                 "anims": {
-                    "bounce": "@sub#1"
-                },
-                "anims/bounce": "@sub#1"
+                    "bounce": [
+                        "@sub#",
+                        "1"
+                    ]
+                }
             },
             {
                 "name": "player",
@@ -9868,7 +9919,10 @@
                     0,
                     0
                 ],
-                "instance": "@ext#4"
+                "instance": [
+                    "@ext#",
+                    "4"
+                ]
             },
             {
                 "name": "player2",
@@ -9887,7 +9941,10 @@
                     0,
                     0
                 ],
-                "instance": "@ext#4"
+                "instance": [
+                    "@ext#",
+                    "4"
+                ]
             },
             {
                 "type": "Spatial",
@@ -9919,9 +9976,11 @@
                 "parent": "camera_rig",
                 "autoplay": "rotating",
                 "anims": {
-                    "rotating": "@sub#2"
-                },
-                "anims/rotating": "@sub#2"
+                    "rotating": [
+                        "@sub#",
+                        "2"
+                    ]
+                }
             },
             {
                 "type": "DirectionalLight",
@@ -9943,6 +10002,23 @@
                 ],
                 "shadow_enabled": true,
                 "directional_shadow_mode": 0
+            }
+        ]
+    },
+    "res://scene/test_child.tscn": {
+        "type": "PackedScene",
+        "ext": {
+            "1": "res://scene/test_parent.tscn"
+        },
+        "sub": [],
+        "nodes": [
+            {
+                "name": "test_child",
+                "number": 20,
+                "instance": [
+                    "@ext#",
+                    "1"
+                ]
             }
         ]
     }

@@ -1,4 +1,4 @@
-import { node_class_map } from "engine/registry.js";
+import { node_class_map } from "engine/registry";
 import { GDCLASS } from "engine/core/v_object.js";
 import {
     MARGIN_RIGHT,
@@ -19,7 +19,7 @@ import { VSG } from "engine/servers/visual/visual_server_globals.js";
 import { CommandRect } from "engine/servers/visual/commands.js";
 
 import { NOTIFICATION_DRAW } from "../2d/canvas_item.js";
-import { SIZE_SHRINK_CENTER, MOUSE_FILTER_IGNORE } from "./const.js";
+import { SIZE_SHRINK_CENTER, MOUSE_FILTER_IGNORE } from "./const";
 import {
     Control,
     NOTIFICATION_THEME_CHANGED,

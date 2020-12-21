@@ -1,4 +1,4 @@
-import { deep_merge } from "engine/utils/deep_merge.js";
+import { deep_merge } from "engine/utils/deep_merge";
 import {
     STRETCH_MODE_DISABLED,
     STRETCH_MODE_VIEWPORT,

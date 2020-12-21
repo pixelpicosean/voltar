@@ -1,6 +1,6 @@
-import { remove_items } from 'engine/dep/index.js';
+import { remove_items } from 'engine/dep/index.ts';
 import { ProjectSettings } from './project_settings.js';
-import { res_class_map } from 'engine/registry.js';
+import { res_class_map } from 'engine/registry';
 
 /**
  * make some type alias

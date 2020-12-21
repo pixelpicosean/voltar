@@ -1,6 +1,6 @@
 import { Vector2 } from "engine/core/math/vector2.js";
 import { Transform2D } from "engine/core/math/transform_2d.js";
-import { BodyMode, AreaSpaceOverrideMode } from "engine/scene/2d/const.js";
+import { BodyMode, AreaSpaceOverrideMode } from "engine/scene/2d/const";
 
 import { CollisionSolver2DSW } from "./collision_solver_2d_sw.js";
 import { Constraint2DSW } from "./constraint_2d_sw.js";

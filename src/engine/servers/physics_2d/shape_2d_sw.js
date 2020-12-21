@@ -1,4 +1,4 @@
-import { ShapeType } from "engine/scene/2d/const.js";
+import { ShapeType } from "engine/scene/2d/const";
 import { CMP_EPSILON } from "engine/core/math/math_defs.js";
 import { Vector2, Vector2Like } from "engine/core/math/vector2.js";
 import { Rect2 } from "engine/core/math/rect2.js";

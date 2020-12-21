@@ -1,4 +1,4 @@
-import { node_class_map, preload_queue } from "engine/registry.js";
+import { node_class_map, preload_queue } from "engine/registry";
 import { GDCLASS } from "engine/core/v_object.js";
 import { Vector2, Vector2Like } from "engine/core/math/vector2.js";
 import { Transform2D } from "engine/core/math/transform_2d.js";
@@ -34,14 +34,14 @@ import { World2D } from "engine/scene/resources/world_2d.js";
 import { CanvasItem } from "engine/scene/2d/canvas_item.js";
 
 import { CanvasLayer } from "./canvas_layer.js";
-import { remove_items } from "engine/dep/index.js";
+import { remove_items } from "engine/dep/index.ts";
 import { Input } from "engine/main/input.js";
 import { Engine } from "engine/core/engine.js";
 import {
     FOCUS_NONE,
     MOUSE_FILTER_STOP,
     MOUSE_FILTER_IGNORE,
-} from "../gui/const.js";
+} from "../gui/const";
 import {
     Control,
     CComparator,

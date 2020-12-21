@@ -1,9 +1,9 @@
-import { remove_items } from 'engine/dep/index.js';
+import { remove_items } from 'engine/dep/index.ts';
 import { deg2rad, clamp, lerp } from 'engine/core/math/math_funcs.js';
 import { CMP_EPSILON } from 'engine/core/math/math_defs.js';
 import { Vector2 } from 'engine/core/math/vector2.js';
 import { VObject } from 'engine/core/v_object.js';
-import { res_class_map } from 'engine/registry.js';
+import { res_class_map } from 'engine/registry';
 
 
 /**

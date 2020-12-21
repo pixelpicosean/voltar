@@ -1,4 +1,4 @@
-import { remove_items } from 'engine/dep/index.js';
+import { remove_items } from 'engine/dep/index.ts';
 import { earcut } from 'engine/dep/earcut.js';
 import {
     CMP_EPSILON,

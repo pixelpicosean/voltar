@@ -1,4 +1,4 @@
-import { remove_items } from "engine/dep/index.js";
+import { remove_items } from "engine/dep/index.ts";
 import { clamp } from "engine/core/math/math_funcs.js";
 
 import { Control } from "./control.js";

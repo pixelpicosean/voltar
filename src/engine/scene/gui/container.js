@@ -1,4 +1,4 @@
-import { node_class_map } from 'engine/registry.js';
+import { node_class_map } from 'engine/registry';
 import { GDCLASS } from 'engine/core/v_object.js';
 import { Vector2 } from 'engine/core/math/vector2.js';
 import { Rect2 } from 'engine/core/math/rect2.js';
@@ -16,7 +16,7 @@ import {
     SIZE_SHRINK_END,
     SIZE_SHRINK_CENTER,
     ANCHOR_BEGIN,
-} from './const.js';
+} from './const';
 import {
     Control,
     NOTIFICATION_RESIZED,

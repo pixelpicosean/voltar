@@ -1,4 +1,4 @@
-import { remove_items } from 'engine/dep/index.js';
+import { remove_items } from 'engine/dep/index.ts';
 import { VObject } from 'engine/core/v_object.js';
 import { clamp } from 'engine/core/math/math_funcs.js';
 import { Vector2, Vector2Like } from 'engine/core/math/vector2.js';

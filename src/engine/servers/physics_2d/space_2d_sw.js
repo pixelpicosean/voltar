@@ -17,7 +17,7 @@ import {
     CollisionObjectType,
     ShapeType,
     BodyMode,
-} from "engine/scene/2d/const.js";
+} from "engine/scene/2d/const";
 
 import { BroadPhase2D } from "./broad_phase_2d_sw.js";
 import { Shape2DSW } from "./shape_2d_sw.js";

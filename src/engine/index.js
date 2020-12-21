@@ -1,7 +1,7 @@
 // ------------------------------------------------------------------
 // 3rd party libs
 // ------------------------------------------------------------------
-export * from 'engine/dep/index.js';
+export * from 'engine/dep/index.ts';
 
 // ------------------------------------------------------------------
 // Core
@@ -35,11 +35,11 @@ export {
     _yield_ex as yield_ex
 } from 'engine/core/yield.js';
 
-export * from 'engine/utils/c.js';
-export * from 'engine/utils/color.js';
-export * from 'engine/utils/deep_merge.js';
-export * from 'engine/utils/mixin.js';
-export * from 'engine/utils/trim_canvas.js';
+export * from 'engine/utils/c';
+export * from 'engine/utils/color';
+export * from 'engine/utils/deep_merge';
+export * from 'engine/utils/mixin';
+export * from 'engine/utils/trim_canvas';
 
 // ------------------------------------------------------------------
 // Resource
@@ -80,7 +80,7 @@ export * from 'engine/scene/main/timer.js';
 
 export * from 'engine/scene/animation/animation_player.js';
 
-export * from 'engine/scene/2d/const.js';
+export * from 'engine/scene/2d/const';
 export * from 'engine/scene/2d/canvas_item.js';
 export * from 'engine/scene/2d/node_2d.js';
 export * from 'engine/scene/2d/sprite.js';
@@ -104,7 +104,7 @@ export * from 'engine/scene/2d/parallax_layer.js';
 export * from 'engine/scene/2d/y_sort.js';
 export * from 'engine/scene/2d/remote_transform_2d.js';
 
-export * from 'engine/scene/gui/const.js';
+export * from 'engine/scene/gui/const';
 export * from 'engine/scene/gui/control.js';
 export * from 'engine/scene/gui/color_rect.js';
 export * from 'engine/scene/gui/texture_rect.js';
@@ -127,7 +127,7 @@ export * from 'engine/scene/3d/mesh_instance.js';
 export * from 'engine/scene/3d/light.js';
 export * from 'engine/scene/3d/skeleton.js';
 
-export * from 'engine/registry.js';
+export * from 'engine/registry';
 
 // ------------------------------------------------------------------
 // Singletons
@@ -201,7 +201,7 @@ import {
     scene_class_map,
     get_resource_map,
     preload_queue,
-} from './registry.js';
+} from './registry';
 
 /**
  * Preload a resource before game start.
@@ -240,5 +240,5 @@ export * from 'engine/scene/assembler.js';
  * @param {string} url
  */
 export function get_packed_scene(url) {
-    return scene_class_map[url] || get_resource_map()[url];
+    return get_resource_map()[url];
 }

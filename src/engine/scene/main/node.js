@@ -1,5 +1,5 @@
-import { remove_items } from 'engine/dep/index.js';
-import { node_class_map } from 'engine/registry.js';
+import { remove_items } from 'engine/dep/index.ts';
+import { node_class_map } from 'engine/registry';
 import { MessageQueue } from 'engine/core/message_queue.js';
 import {
     VObject,

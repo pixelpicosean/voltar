@@ -119,8 +119,8 @@ module.exports.convert_scenes = (/** @type {string} */scene_root_url_p) => {
                         if (node_type && node_type !== 'Scene') {
                             break;
                         }
-                        if (_.startsWith(parent_class.instance, '@ext#')) {
-                            const instance_idx = parent_class.instance.replace('@ext#', '');
+                        if (Array.isArray(parent_class.instance) && parent_class.instance[0] === '@ext#') {
+                            const instance_idx = parent_class.instance[1];
                             parent_res = resource_map[parent_res.ext[instance_idx]];
                             parent_class = parent_res.nodes[0];
                         } else {

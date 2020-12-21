@@ -3,7 +3,7 @@ import { CMP_EPSILON } from "engine/core/math/math_defs.js";
 import { Vector2 } from "engine/core/math/vector2.js";
 import { Transform2D } from "engine/core/math/transform_2d.js";
 
-import { BodyMode, CCDMode } from "engine/scene/2d/const.js";
+import { BodyMode, CCDMode } from "engine/scene/2d/const";
 
 import { Body2DSW } from "./body_2d_sw.js";
 import { Space2DSW } from "./space_2d_sw.js";

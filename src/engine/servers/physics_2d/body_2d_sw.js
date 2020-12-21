@@ -1,4 +1,4 @@
-import { remove_items } from "engine/dep/index.js";
+import { remove_items } from "engine/dep/index.ts";
 import { SelfList } from "engine/core/self_list.js";
 import { Vector2 } from "engine/core/math/vector2.js";
 import { Transform2D } from "engine/core/math/transform_2d.js";
@@ -8,7 +8,7 @@ import {
     CollisionObjectType,
     CCDMode,
     BodyState,
-} from "engine/scene/2d/const.js";
+} from "engine/scene/2d/const";
 
 import {
     Physics2DDirectBodyStateSW,

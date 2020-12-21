@@ -2,7 +2,7 @@ import Resource from './io_resource.js';
 import {
     get_raw_resource_map,
     get_resource_map,
-} from 'engine/registry.js';
+} from 'engine/registry';
 import { ImageTexture } from 'engine/scene/resources/texture.js';
 
 

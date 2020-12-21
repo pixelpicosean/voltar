@@ -69,7 +69,7 @@ import {
     MULTIMESH_CUSTOM_DATA_FLOAT,
 } from 'engine/servers/visual_server.js';
 import { Rect2 } from 'engine/core/math/rect2.js';
-import { ARRAY_MAX } from 'engine/scene/const.js';
+import { ARRAY_MAX } from 'engine/scene/const';
 import { parse_attributes_from_code, parse_uniforms_from_code } from './shader_parser.js';
 
 /**

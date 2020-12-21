@@ -1,4 +1,4 @@
-import { node_class_map } from "engine/registry.js";
+import { node_class_map } from "engine/registry";
 import { CMP_EPSILON } from "engine/core/math/math_defs.js";
 import { Transform } from "engine/core/math/transform.js";
 import { GDCLASS } from "engine/core/v_object.js";
@@ -9,7 +9,7 @@ import { VSG } from "engine/servers/visual/visual_server_globals.js";
 import {
     NOTIFICATION_TRANSFORM_CHANGED,
     NOTIFICATION_UPDATE_SKELETON,
-} from "../const.js";
+} from "../const";
 import { Skin } from "../resources/skin.js";
 import {
     Spatial,

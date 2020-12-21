@@ -5,9 +5,9 @@ const { get_function_params } = require('../parser/type_converters');
  */
 function normalize_res_key(key) {
     if (key.startsWith('SubResource')) {
-        return `@sub#${get_function_params(key)[0]}`;
+        return ['@sub#', `${get_function_params(key)[0]}`];
     } else if (key.startsWith('ExtResource')) {
-        return `@ext#${get_function_params(key)[0]}`;
+        return ['@ext#', `${get_function_params(key)[0]}`];
     }
     if (key === 'null') return null;
     return key;

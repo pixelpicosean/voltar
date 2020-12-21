@@ -1,4 +1,4 @@
-import { res_class_map } from "engine/registry.js";
+import { res_class_map } from "engine/registry";
 import { Vector2 } from "engine/core/math/vector2.js";
 import { Vector3 } from "engine/core/math/vector3.js";
 import { Transform } from "engine/core/math/transform.js";

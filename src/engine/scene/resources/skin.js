@@ -1,5 +1,5 @@
 import { GDCLASS } from "engine/core/v_object.js";
-import { res_class_map } from "engine/registry.js";
+import { res_class_map } from "engine/registry";
 import { Resource } from "engine/core/resource.js";
 import { Transform } from "engine/core/math/transform.js";
 

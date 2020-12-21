@@ -1,4 +1,4 @@
-import { BodyMode } from "engine/scene/2d/const.js";
+import { BodyMode } from "engine/scene/2d/const";
 
 import { Space2DSW } from "./space_2d_sw.js";
 import { Body2DSW } from "./body_2d_sw.js";

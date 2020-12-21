@@ -11,7 +11,7 @@ import {
     find_keycode_name,
     KEYS,
 } from "./keyboard.js";
-import { res_class_map } from "engine/registry.js";
+import { res_class_map } from "engine/registry";
 
 
 export const BUTTON_LEFT = 1;

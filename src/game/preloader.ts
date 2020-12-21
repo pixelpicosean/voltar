@@ -1,6 +1,6 @@
 import * as v from 'engine/index.js';
 
-type TargetScene = string | { instance: () => v.Node };
+type TargetScene = string | { new(): v.Node };
 
 let main_scene: TargetScene = null;
 

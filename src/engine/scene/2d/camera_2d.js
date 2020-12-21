@@ -1,4 +1,4 @@
-import { node_class_map } from 'engine/registry.js';
+import { node_class_map } from 'engine/registry';
 import { GDCLASS } from 'engine/core/v_object.js';
 import {
     MARGIN_LEFT,
@@ -24,7 +24,7 @@ import { Node2D } from './node_2d.js';
 import {
     NOTIFICATION_DRAW,
 } from './canvas_item.js';
-import { NOTIFICATION_TRANSFORM_CHANGED } from '../const.js';
+import { NOTIFICATION_TRANSFORM_CHANGED } from '../const';
 
 
 export const ANCHOR_MODE_FIXED_TOP_LEFT = 0;

@@ -1,7 +1,7 @@
 import {
     res_class_map,
     get_binary_pack,
-} from "engine/registry.js";
+} from "engine/registry";
 import { VObject } from "engine/core/v_object.js";
 import { Vector2 } from "engine/core/math/vector2.js";
 import { Vector3 } from "engine/core/math/vector3.js";
@@ -21,7 +21,7 @@ import {
     ARRAY_WEIGHTS,
     ARRAY_BONES,
     ARRAY_INDEX,
-} from "../const.js";
+} from "../const";
 import { Material } from "./material.js";
 
 /**

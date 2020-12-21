@@ -1,4 +1,4 @@
-import { remove_items } from "engine/dep/index.js";
+import { remove_items } from "engine/dep/index.ts";
 import { MessageQueue } from "./message_queue.js";
 
 

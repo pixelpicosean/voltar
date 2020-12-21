@@ -1,4 +1,4 @@
-import { node_class_map } from 'engine/registry.js';
+import { node_class_map } from 'engine/registry';
 import { GDCLASS } from 'engine/core/v_object.js';
 import {
     rad2deg,
@@ -65,7 +65,7 @@ import {
     PRESET_MODE_KEEP_HEIGHT,
     FOCUS_NONE,
     MOUSE_FILTER_STOP,
-} from './const.js';
+} from './const';
 
 
 export const NOTIFICATION_RESIZED = 40;

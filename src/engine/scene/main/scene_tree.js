@@ -1,8 +1,5 @@
-import { remove_items } from 'engine/dep/index.js';
-import {
-    scene_class_map,
-    get_resource_map,
-} from 'engine/registry.js';
+import { remove_items } from 'engine/dep/index.ts';
+import { get_resource_map } from 'engine/registry';
 import { List } from 'engine/core/self_list.js';
 import { VObject, GDCLASS } from 'engine/core/v_object.js';
 import { Vector2, Vector2Like } from 'engine/core/math/vector2.js';
@@ -27,6 +24,7 @@ import { VSG } from 'engine/servers/visual/visual_server_globals.js';
 
 import { World } from '../resources/world.js';
 import { World2D } from '../resources/world_2d.js';
+import { PackedScene } from '../resources/packed_scene';
 import { Viewport } from './viewport.js';
 import {
     Node,
@@ -37,8 +35,7 @@ import {
     NOTIFICATION_PAUSED,
     NOTIFICATION_UNPAUSED,
 } from '../main/node.js';
-import { instanciate_scene } from '../assembler.js';
-import { NOTIFICATION_TRANSFORM_CHANGED } from '../const.js';
+import { NOTIFICATION_TRANSFORM_CHANGED } from '../const';
 
 import default_env from 'gen/default_env.json';
 
@@ -215,6 +212,7 @@ export class SceneTree extends MainLoop {
             this.root.world.set_fallback_environment(env);
         }
 
+        /** @type {PackedScene | { new(): Node }} */
         this._current_packed_scene = null;
     }
     free() {
@@ -592,34 +590,18 @@ export class SceneTree extends MainLoop {
      * @param {String} path
      */
     change_scene(path) {
-        let next_scene;
-
-        next_scene = scene_class_map[path];
-        if (!next_scene) {
-            next_scene = get_resource_map()[path];
-            next_scene_path = path;
-        }
-
+        let next_scene = get_resource_map()[path];
         this.change_scene_to(next_scene);
     }
     /**
      * Change to the given scene
      *
-     * @param {any} next_scene
+     * @param {PackedScene | { new(): Node }} next_scene
      */
     change_scene_to(next_scene) {
         this._current_packed_scene = next_scene;
 
-        /** @type {Node} */
-        let new_scene;
-        // Instance from scene with class(script)
-        if (typeof (next_scene.instance) === 'function') {
-            new_scene = next_scene.instance();
-        }
-        // Instance from pure scene data?
-        else {
-            new_scene = instanciate_scene(next_scene);
-        }
+        let new_scene = next_scene.instance ? next_scene.instance() : new next_scene;
         this.call_deferred('_change_scene', new_scene);
     }
     get_current_scene() {

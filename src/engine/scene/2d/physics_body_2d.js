@@ -1,4 +1,4 @@
-import { node_class_map } from "engine/registry.js";
+import { node_class_map } from "engine/registry";
 import { GDCLASS } from "engine/core/v_object.js";
 import { Vector2, Vector2Like } from "engine/core/math/vector2.js";
 import { Transform2D } from "engine/core/math/transform_2d.js";
@@ -14,7 +14,7 @@ import {
 
 import { NOTIFICATION_ENTER_TREE } from "../main/node.js";
 import { PhysicsMaterial } from "../resources/physics_material.js";
-import { BodyMode, BodyState } from "./const.js";
+import { BodyMode, BodyState } from "./const";
 import { NOTIFICATION_LOCAL_TRANSFORM_CHANGED } from "./canvas_item.js";
 import { CollisionObject2D } from "./collision_object_2d.js";
 

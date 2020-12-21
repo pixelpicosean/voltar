@@ -1,4 +1,4 @@
-import { node_class_map } from "engine/registry.js";
+import { node_class_map } from "engine/registry";
 import { GDCLASS } from "engine/core/v_object.js";
 import { Rect2 } from "engine/core/math/rect2.js";
 
@@ -14,7 +14,7 @@ import {
 } from "./canvas_item.js";
 import { Node2D } from "./node_2d.js";
 import { CPUParticles2D } from "./cpu_particles_2d.js";
-import { NOTIFICATION_TRANSFORM_CHANGED } from "../const.js";
+import { NOTIFICATION_TRANSFORM_CHANGED } from "../const";
 import { AnimatedSprite } from "./animated_sprite.js";
 
 

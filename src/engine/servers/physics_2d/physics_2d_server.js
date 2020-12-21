@@ -4,7 +4,7 @@ import {
     AreaSpaceOverrideMode,
     AreaParameter,
     BodyState,
-} from 'engine/scene/2d/const.js';
+} from 'engine/scene/2d/const';
 
 import {
     ShapeResult,

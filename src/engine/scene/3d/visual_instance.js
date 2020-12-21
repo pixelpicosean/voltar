@@ -1,10 +1,10 @@
-import { node_class_map } from "engine/registry.js";
+import { node_class_map } from "engine/registry";
 import { GDCLASS } from "engine/core/v_object.js";
 
 import { VSG } from "engine/servers/visual/visual_server_globals.js";
 
 import { Material } from "../resources/material.js";
-import { NOTIFICATION_TRANSFORM_CHANGED } from "../const.js";
+import { NOTIFICATION_TRANSFORM_CHANGED } from "../const";
 import {
     Spatial,
     NOTIFICATION_ENTER_WORLD,

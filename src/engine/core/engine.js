@@ -1,13 +1,14 @@
 import {
     preload_queue,
     res_class_map,
-    scene_class_map,
     set_resource_map,
     set_raw_resource_map,
     get_resource_map,
     get_raw_resource_map,
     set_binary_pack_list,
-} from 'engine/registry.js';
+    set_json_pack_list,
+    scene_class_map,
+} from 'engine/registry';
 
 import { VSG } from 'engine/servers/visual/visual_server_globals.js';
 
@@ -16,7 +17,8 @@ import { decompress } from './io/z.js';
 
 import { default_font_name, Theme } from 'engine/scene/resources/theme.js';
 import { registered_bitmap_fonts } from 'engine/scene/resources/font.js';
-import { instanciate_scene, assemble_scene } from 'engine/scene/assembler.js';
+import { PackedScene } from 'engine/scene/resources/packed_scene';
+
 import meta from 'gen/meta.json';
 
 /**
@@ -107,7 +109,7 @@ export class Engine {
             // override
             set_resource_map(resource_map);
             set_raw_resource_map(raw_resource_map);
-            set_binary_pack_list(meta["json_files"].map(url => JSON.parse(decompress(raw_resource_map[url].data))));
+            set_json_pack_list(meta["json_files"].map(url => JSON.parse(decompress(raw_resource_map[url].data))));
             set_binary_pack_list(meta["binary_files"].map(url => raw_resource_map[url].data));
 
             /** @type {string[]} */
@@ -116,10 +118,13 @@ export class Engine {
             // create real resources from data imported from Godot
             const res_head = 'res://';
             for (const key in resource_map) {
-                const res = resource_map[key];
+                let res = resource_map[key];
                 if (key.startsWith(res_head)) {
+                    res.ext = res.ext || Object.create(null);
+                    res.sub = res.sub || [];
+
                     if (res.ext) {
-                        // create ext resource objects
+                        // replace ext index with real values
                         for (let id in res.ext) {
                             const resource_filename = res.ext[id];
                             const resource = resource_map[resource_filename];
@@ -132,94 +137,63 @@ export class Engine {
                                 continue;
                             }
 
-                            // is it a registered scene?
-                            if (scene_class_map[resource_filename]) {
-                                const self_data = resource.nodes[0];
-                                const data_chain = [resource];
-                                if (self_data.instance) {
-                                    const idx = self_data.instance.substr(ext_offset);
-                                    const parent = resource.ext[idx];
-                                    if (parent.data) {
-                                        for (const d of parent.data) {
-                                            data_chain.unshift(d);
-                                        }
-                                    }
-                                }
-                                const data = {
-                                    data: data_chain,
-                                    ctor: scene_class_map[resource_filename],
-                                    filename: resource_filename,
-                                };
-                                res.ext[id] = data;
-
-                                scene_class_map[resource_filename]['@data'] = data_chain;
-                            }
-                            // is it a PackedScene, let's make it a object with `instance` factory function
-                            else if (resource.type === 'PackedScene') {
-                                res.ext[id] = {
-                                    create_or_setup: (scn) => {
-                                        if (!scn) {
-                                            return instanciate_scene(resource, resource_filename);
-                                        } else {
-                                            assemble_scene(scn, resource, resource_filename);
-                                            return scn;
-                                        }
-                                    },
-                                };
-                            }
-                            // ok, it is just a normal one
-                            else {
-                                res.ext[id] = resource;
-                            }
+                            res.ext[id] = resource;
                         }
                     }
+
                     if (res.sub) {
-                        // create sub resource objects
+                        // create sub resources if they are registered types
+                        let sub_map = Object.create(null);
+
                         for (let i = 0; i < res.sub.length; i++) {
                             let data = res.sub[i];
                             let id = data.id;
-                            normalize_resource_object(data, res.ext, res.sub);
+
+                            data = normalize_resource_object(data, res.ext, sub_map);
 
                             const ctor = res_class_map[data.type];
                             if (ctor) {
                                 data = (new ctor)._load_data(data);
-                                res.sub[i] = data;
                             }
-                            data.__rid__ = `${id}`;
+
+                            sub_map[id] = data;
                         }
+
+                        res.sub = sub_map;
                     }
 
-                    // process resource first
                     if (res.resource && res.resource.type) {
-                        /* { ext, sub, resource } */
+                        /* Resource: { ext, sub, resource } */
 
-                        normalize_resource_object(res.resource, res.ext || {}, res.sub || []);
+                        res.resource = normalize_resource_object(res.resource, res.ext, res.sub);
 
                         const ctor = res_class_map[res.resource.type];
                         if (ctor) {
                             resource_map[key] = (new ctor)._load_data(res.resource);
                         }
-                    } else if (res.type != 'PackedScene') {
-                        /* the res itself is the data */
+                    } else if (res.type === "PackedScene" && res.nodes) {
+                        /* PackedScene: { ext, sub, nodes } */
 
-                        // FIXME: pure data does not have a resource property?
-                        // if (res.resource) {
-                        //     normalize_resource_object(res.resource, res.ext || {}, res.sub || []);
-                        // }
+                        res.nodes = normalize_resource_array(res.nodes, res.ext, res.sub);
+
+                        res = new PackedScene()._load_data(res);
+                        res.filename = key;
+
+                        // find script attached
+                        let script = scene_class_map[key];
+                        if (script) {
+                            res.script = script;
+                        }
+
+                        resource_map[key] = res;
+                    } else {
+                        /* the res is pure data */
 
                         const ctor = res_class_map[res.type];
                         if (ctor) {
                             resource_map[key] = (new ctor)._load_data(res);
                         }
                     }
-                }
-            }
-
-            for (const key in resource_map) {
-                const res = resource_map[key];
-                if (key.startsWith(res_head) && res.type === 'PackedScene') {
-                    // now let's replace ext/sub references inside this resource with real instances
-                    normalize_resource_array(res.nodes, res.ext || {}, res.sub || []);
                 }
             }
 
@@ -240,55 +214,53 @@ export class Engine {
 let singleton = null;
 
 
-const sub_head = '@sub#'; const sub_offset = sub_head.length;
-const ext_head = '@ext#'; const ext_offset = ext_head.length;
-/**
- * @param {string} key
- * @param {any} ext
- * @param {any[]} sub
- */
-function normalize_res(key, ext, sub) {
-    if (key.startsWith(sub_head)) {
-        let id = key.substr(sub_offset);
-        for (let i = 0; i < sub.length; i++) {
-            if (sub[i].__rid__ === id) return sub[i];
-        }
-    } else if (key.startsWith(ext_head)) {
-        return ext[key.substr(ext_offset)];
-    }
-    return key;
-}
+const sub_head = '@sub#';
+const ext_head = '@ext#';
 /**
  * @param {any} obj
  * @param {any} ext
- * @param {any[]} sub
+ * @param {any} sub
  */
 function normalize_resource_object(obj, ext, sub) {
     for (const k in obj) {
         const value = obj[k];
-        if (typeof (value) === 'string') {
-            obj[k] = normalize_res(value, ext, sub);
-        } else if (typeof (value) === 'object') {
-            if (Array.isArray(value)) {
-                normalize_resource_array(value, ext, sub);
-            } else {
-                normalize_resource_object(value, ext, sub);
+        if (Array.isArray(value)) {
+            if (value.length > 0) {
+                if (value[0] === sub_head) {
+                    obj[k] = sub[value[1]];
+                } else if (value[0] === ext_head) {
+                    obj[k] = ext[value[1]];
+                } else {
+                    obj[k] = normalize_resource_array(value, ext, sub);
+                }
             }
+        } else if (typeof (value) === 'object') {
+            obj[k] = normalize_resource_object(value, ext, sub);
         }
     }
+    return obj;
 }
 /**
  * @param {any[]} arr
  * @param {any} ext
- * @param {any[]} sub
+ * @param {any} sub
  */
 function normalize_resource_array(arr, ext, sub) {
     for (let i = 0; i < arr.length; i++) {
         const value = arr[i];
-        if (typeof (value) === 'string') {
-            arr[i] = normalize_res(value, ext, sub);
+        if (Array.isArray(value)) {
+            if (value.length > 0) {
+                if (value[0] === sub_head) {
+                    arr[i] = sub[value[1]];
+                } else if (value[0] === ext_head) {
+                    arr[i] = ext[value[1]];
+                } else {
+                    arr[i] = normalize_resource_array(value, ext, sub);
+                }
+            }
         } else if (typeof (value) === 'object') {
-            normalize_resource_object(value, ext, sub);
+            arr[i] = normalize_resource_object(value, ext, sub);
         }
     }
+    return arr;
 }

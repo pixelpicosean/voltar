@@ -1,5 +1,5 @@
 import { GDCLASS } from "engine/core/v_object.js";
-import { res_class_map, get_resource_map } from "engine/registry.js";
+import { res_class_map, get_resource_map } from "engine/registry";
 import {
     deg2rad,
     rad2deg,

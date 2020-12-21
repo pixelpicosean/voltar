@@ -1,11 +1,11 @@
 /**
  * Converts a hex color number to an [R, G, B] array
  *
- * @param {number} hex - The number to convert
- * @param  {number[] | Float32Array} [out] If supplied, this array will be used rather than returning a new one
- * @return {number[] | Float32Array} An array representing the [R, G, B] of the color.
+ * @param hex - The number to convert
+ * @param [out] If supplied, this array will be used rather than returning a new one
+ * @return An array representing the [R, G, B] of the color.
  */
-export function hex2rgb(hex, out) {
+export function hex2rgb(hex: number, out: number[] | Float32Array): number[] | Float32Array {
     out = out || [];
 
     out[0] = ((hex >> 16) & 0xFF) / 255;
@@ -18,10 +18,10 @@ export function hex2rgb(hex, out) {
 /**
  * Converts a hex color number to a string.
  *
- * @param {number} hex_num - Number in hex
- * @return {string} The string color.
+ * @param hex_num - Number in hex
+ * @return The string color.
  */
-export function hex2string(hex_num) {
+export function hex2string(hex_num: number): string {
     let hex = hex_num.toString(16);
     hex = '000000'.substr(0, 6 - hex.length) + hex;
 
@@ -31,9 +31,9 @@ export function hex2string(hex_num) {
 /**
  * Converts a color as an [R, G, B] array to a hex number
  *
- * @param {number[] | Float32Array} rgb - rgb array
- * @return {number} The color number
+ * @param rgb - rgb array
+ * @return The color number
  */
-export function rgb2hex(rgb) {
+export function rgb2hex(rgb: [number, number, number, number?] | Float32Array): number {
     return (((rgb[0] * 255) << 16) + ((rgb[1] * 255) << 8) + (rgb[2] * 255 | 0));
 }

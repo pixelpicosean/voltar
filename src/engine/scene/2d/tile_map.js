@@ -1,4 +1,4 @@
-import { node_class_map, get_resource_map } from "engine/registry.js";
+import { node_class_map, get_resource_map } from "engine/registry";
 import { SelfList, List } from "engine/core/self_list.js";
 import { GDCLASS } from "engine/core/v_object.js";
 import { Vector2 } from "engine/core/math/vector2.js";
@@ -21,10 +21,10 @@ import { Node2D } from "./node_2d.js";
 import { CollisionObject2D } from "./collision_object_2d.js";
 import { CollisionPolygon2D } from "./collision_polygon_2d.js";
 import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server.js";
-import { BodyState, BodyMode } from "./const.js";
-import { remove_items } from "engine/dep/index.js";
+import { BodyState, BodyMode } from "./const";
+import { remove_items } from "engine/dep/index.ts";
 import { VSG } from "engine/servers/visual/visual_server_globals.js";
-import { NOTIFICATION_TRANSFORM_CHANGED } from "../const.js";
+import { NOTIFICATION_TRANSFORM_CHANGED } from "../const";
 
 
 export const MODE_SQUARE = 0;

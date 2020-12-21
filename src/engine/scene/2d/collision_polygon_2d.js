@@ -1,4 +1,4 @@
-import { node_class_map } from "engine/registry.js";
+import { node_class_map } from "engine/registry";
 import { GDCLASS } from "engine/core/v_object.js";
 import { decompose_in_convex } from "engine/core/math/convex.js";
 import { is_polygon_clockwise } from "engine/core/math/geometry.js";

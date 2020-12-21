@@ -1,0 +1,68 @@
+export enum ShapeType {
+    LINE,
+    RAY,
+    SEGMENT,
+    CIRCLE,
+    RECTANGLE,
+    CAPSULE,
+    CONVEX_POLYGON,
+    CONCAVE_POLYGON,
+    CUSTOM,
+}
+
+export enum SpaceParameter {
+    CONTACT_RECYCLE_RADIUS,
+    CONTACT_MAX_SEPARATION,
+    BODY_MAX_ALLOWED_PENETRATION,
+    BODY_LINEAR_VELOCITY_SLEEP_THRESHOLD,
+    BODY_ANGULAR_VELOCITY_SLEEP_THRESHOLD,
+    BODY_TIME_TO_SLEEP,
+    CONSTRAINT_DEFAULT_BIAS,
+}
+
+export enum AreaParameter {
+    GRAVITY,
+    GRAVITY_VECTOR,
+    GRAVITY_IS_POINT,
+    GRAVITY_DISTANCE_SCALE,
+    GRAVITY_POINT_ATTENUATION,
+    LINEAR_DAMP,
+    ANGULAR_DAMP,
+    PRIORITY,
+}
+
+export enum AreaSpaceOverrideMode {
+    DISABLED,
+    COMBINE,
+    COMBINE_REPLACE,
+    REPLACE,
+    REPLACE_COMBINE,
+}
+
+export enum CollisionObjectType {
+    AREA,
+    BODY,
+}
+
+export enum BodyMode {
+    STATIC,
+    KINEMATIC,
+    RIGID,
+    CHARACTER,
+}
+
+export enum BodyState {
+    TRANSFORM,
+    LINEAR_VELOCITY,
+    ANGULAR_VELOCITY,
+    SLEEPING,
+    CAN_SLEEP,
+}
+
+export enum CCDMode {
+    DISABLED,
+    CAST_RAY,
+    CAST_SHAPE,
+}
+
+export const INTERSECTION_QUERY_MAX = 2048;

@@ -1,4 +1,4 @@
-import { node_class_map } from 'engine/registry.js';
+import { node_class_map } from 'engine/registry';
 import { GDCLASS } from 'engine/core/v_object.js';
 import { CMP_EPSILON } from 'engine/core/math/math_defs.js';
 import { deg2rad, rad2deg } from 'engine/core/math/math_funcs.js';

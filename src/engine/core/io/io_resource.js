@@ -936,8 +936,8 @@ Resource.load_type_map = {
     webm:       Resource.LOAD_TYPE.VIDEO,
 
     // binary
-    v:          Resource.LOAD_TYPE.XHR,
-    vt:         Resource.LOAD_TYPE.XHR,
+    res:        Resource.LOAD_TYPE.XHR,
+    tres:       Resource.LOAD_TYPE.XHR,
 };
 
 Resource.xhr_type_map = {
@@ -973,8 +973,8 @@ Resource.xhr_type_map = {
     otf:        Resource.XHR_RESPONSE_TYPE.BUFFER,
 
     // binary
-    v:          Resource.XHR_RESPONSE_TYPE.BUFFER,
-    vt:         Resource.XHR_RESPONSE_TYPE.TEXT,
+    res:        Resource.XHR_RESPONSE_TYPE.BUFFER,
+    tres:       Resource.XHR_RESPONSE_TYPE.TEXT,
 };
 
 // We can't set the `src` attribute to empty string, so on abort we set it to this 1px transparent gif

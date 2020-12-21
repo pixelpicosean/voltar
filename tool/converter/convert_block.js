@@ -30,6 +30,7 @@ module.exports.convert_block = (block) => {
         };
         case 'sub_resource': {
             return Object.assign({
+                id: block.attr.id,
                 key: 'sub_resource',
             }, resource(block));
         };

@@ -1,4 +1,4 @@
-import { res_class_map } from "engine/registry.js";
+import { res_class_map } from "engine/registry";
 import { Rect2 } from "engine/core/math/rect2.js";
 
 import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server.js";

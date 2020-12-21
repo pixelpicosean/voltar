@@ -19,6 +19,7 @@ module.exports = (data) => {
         if (k.indexOf('anims/') >= 0) {
             let name = k.replace('anims/', '');
             res.anims[name] = data.prop[k];
+            data.prop[k] = undefined;
         }
     }
 

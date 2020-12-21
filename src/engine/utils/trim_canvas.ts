@@ -1,10 +1,10 @@
 /**
  * Trim transparent borders from a canvas
  *
- * @param {HTMLCanvasElement} canvas - the canvas to trim
- * @returns {{width: number, height: number, data: ImageData}} Trim data
+ * @param canvas - the canvas to trim
+ * @returns Trim data
  */
-export function trim_canvas(canvas) {
+export function trim_canvas(canvas: HTMLCanvasElement): { width: number, height: number, data: ImageData } {
     // https://gist.github.com/remy/784508
 
     let width = canvas.width;
@@ -15,7 +15,12 @@ export function trim_canvas(canvas) {
     const pixels = image_data.data;
     const len = pixels.length;
 
-    const bound = {
+    const bound: {
+        top: number,
+        left: number,
+        right: number,
+        bottom: number,
+    } = {
         top: null,
         left: null,
         right: null,

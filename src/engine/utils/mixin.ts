@@ -1,10 +1,10 @@
 /**
  * Mixes all enumerable properties and methods from a source object to a target object.
  *
- * @param {any} target The prototype or instance that properties and methods should be added to.
- * @param {any} source The source of properties and methods to mix in.
+ * @param target The prototype or instance that properties and methods should be added to.
+ * @param source The source of properties and methods to mix in.
  */
-export function mixin(target, source) {
+export function mixin(target: object, source: object) {
     if (!target || !source) return;
     // in ES8/ES2017, this would be really easy:
     // Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
@@ -21,16 +21,16 @@ export function mixin(target, source) {
     }
 }
 
-const mixins = [];
+const mixins: object[] = [];
 
 /**
  * Queues a mixin to be handled towards the end of the initialization of V, so that deprecation
  * can take effect.
  *
- * @param {any} target The prototype or instance that properties and methods should be added to.
- * @param {any} source The source of properties and methods to mix in.
+ * @param target The prototype or instance that properties and methods should be added to.
+ * @param source The source of properties and methods to mix in.
  */
-export function delay_mixin(target, source) {
+export function delay_mixin(target: object, source: object) {
     mixins.push(target, source);
 }
 
