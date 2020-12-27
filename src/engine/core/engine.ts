@@ -220,16 +220,19 @@ export class Engine {
 
             // process preload resources
             // - create textures for standalone images
-            let standalone_image_meta = meta["standalone_images"] as { pack_id: number, images: string[] };
+            let standalone_image_meta = meta["standalone_images"] as { pack_id: number, images: { key: string, flags: { FILTER?: boolean, REPEAT?: boolean, MIRROR?: boolean } }[] };
             let image_pack = get_json_data(standalone_image_meta.pack_id) as string[];
-            standalone_image_meta.images.forEach((key, i) => {
+            standalone_image_meta.images.forEach(({ key, flags }, i) => {
                 let ext = get_extname(key);
 
                 let tex = new ImageTexture;
+                tex.resource_path = key;
+                tex.resource_name = key;
+
                 let img = new Image;
                 img.src = `data:image/${ext};base64,${image_pack[i]}`; // base64
                 img.onload = () => {
-                    tex.create_from_image(img);
+                    tex.create_from_image(img, flags);
                     on_task_done(tex);
                 }
                 resource_map[key] = tex;

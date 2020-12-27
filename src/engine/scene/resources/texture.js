@@ -53,7 +53,7 @@ export class Texture extends Resource {
         this._flags = {
             FILTER: false,
             REPEAT: false,
-            MIPMAP: false,
+            MIPMAPS: false,
         };
 
         this.uvs = [0, 0, 1, 1];

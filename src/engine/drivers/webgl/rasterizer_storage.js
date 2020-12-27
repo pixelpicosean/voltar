@@ -950,6 +950,7 @@ export class RasterizerStorage {
 
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(texture.target, texture.gl_tex);
+        texture.flags = p_flags;
 
         texture.active = true;
     }

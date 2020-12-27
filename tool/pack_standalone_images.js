@@ -2,6 +2,7 @@ const path = require('path')
 const fs = require('fs');
 
 const { add_json_resource } = require('./registry');
+const { boolean } = require('./parser/type_converters');
 
 /**
  * @param {string} dir
@@ -32,7 +33,7 @@ module.exports.pack_standalone_images = function () {
     // sync images from `image/standalone` to `media`
     const folder = path.resolve(__dirname, '../assets/image/standalone');
 
-    let image_keys = [];
+    let images = [];
     let image_pack = [];
     find_files(folder, image_filter).map((url) => {
         let key = url.replace(folder, '').replace('\\', '/');
@@ -42,8 +43,26 @@ module.exports.pack_standalone_images = function () {
         key = `media/${key}`;
 
         let bitmap = fs.readFileSync(url);
+        let flags = {
+            FILTER: false,
+            REPEAT: false,
+            MIPMAPS: false,
+        };
+        let import_data_url = `${url}.import`;
+        if (fs.existsSync(import_data_url)) {
+            let import_data = fs.readFileSync(import_data_url, "utf8").split("\n");
+            for (let line of import_data) {
+                let match = line.match(/flags\/(\w*)\s*=(true|false)/);
+                if (match && match[1].toUpperCase() in flags) {
+                    flags[match[1].toUpperCase()] = boolean(match[2]);
+                }
+            }
+        }
 
-        image_keys.push(key);
+        images.push({
+            key,
+            flags,
+        });
         image_pack.push(
             Buffer.from(bitmap).toString('base64')
         );
@@ -53,6 +72,6 @@ module.exports.pack_standalone_images = function () {
 
     return {
         pack_id,
-        images: image_keys,
+        images,
     }
 }
