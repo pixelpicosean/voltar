@@ -588,12 +588,6 @@
                 "@sub#",
                 "1"
             ],
-            "ambient_color": {
-                "r": 1,
-                "g": 1,
-                "b": 1,
-                "a": 1
-            },
             "fog_color": {
                 "r": 0.894118,
                 "g": 0.690196,
@@ -10609,6 +10603,108 @@
                 ],
                 "shadow_enabled": true,
                 "directional_shadow_mode": 0
+            }
+        ]
+    },
+    "res://scene/multi_mat.tscn": {
+        "type": "PackedScene",
+        "ext": {
+            "1": "res://mesh/cube.tscn",
+            "2": "res://mesh/plane.tscn"
+        },
+        "sub": [
+            {
+                "id": 1,
+                "type": "SpatialMaterial",
+                "albedo_color": {
+                    "r": 1,
+                    "g": 0.47451,
+                    "b": 0.47451,
+                    "a": 1
+                }
+            }
+        ],
+        "nodes": [
+            {
+                "type": "Spatial",
+                "name": "spatial"
+            },
+            {
+                "type": "DirectionalLight",
+                "name": "directional_light",
+                "parent": ".",
+                "transform": [
+                    0.768678,
+                    0.578104,
+                    -0.273733,
+                    -0.123436,
+                    0.553976,
+                    0.823331,
+                    0.627613,
+                    -0.599088,
+                    0.497188,
+                    0,
+                    3.30252,
+                    0
+                ],
+                "shadow_enabled": true,
+                "directional_shadow_mode": 0
+            },
+            {
+                "type": "Camera",
+                "name": "camera",
+                "parent": ".",
+                "transform": [
+                    0.71633,
+                    -0.27765,
+                    0.640142,
+                    0,
+                    0.917422,
+                    0.397915,
+                    -0.697761,
+                    -0.285038,
+                    0.657177,
+                    4.73943,
+                    2.94605,
+                    4.86556
+                ]
+            },
+            {
+                "name": "cube",
+                "parent": ".",
+                "transform": [
+                    1,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0.5,
+                    0
+                ],
+                "material": [
+                    [
+                        "@sub#",
+                        "1"
+                    ]
+                ],
+                "instance": [
+                    "@ext#",
+                    "1"
+                ]
+            },
+            {
+                "name": "plane",
+                "parent": ".",
+                "cast_shadow": 0,
+                "instance": [
+                    "@ext#",
+                    "2"
+                ]
             }
         ]
     }

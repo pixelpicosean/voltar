@@ -35,12 +35,6 @@
         "sun_angle_max": 0,
         "texture_size": 0
     },
-    "ambient_color": {
-        "r": 1,
-        "g": 1,
-        "b": 1,
-        "a": 1
-    },
     "fog_color": {
         "r": 0.894118,
         "g": 0.690196,
