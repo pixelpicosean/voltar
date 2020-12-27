@@ -28,7 +28,13 @@ uniform highp float viewport_size;
 
 attribute highp vec3 position;
 attribute vec3 normal;
-attribute vec2 uv;
+
+#if defined(ENABLE_UV_INTERP)
+    attribute vec2 uv;
+#endif
+#if defined(ENABLE_UV2_INTERP) || defined(USE_LIGHTMAP)
+    attribute vec2 uv2;
+#endif
 
 #if defined(RENDER_DEPTH) && defined(USE_RGBA_SHADOWS)
     varying highp vec4 position_interp;
@@ -39,6 +45,10 @@ varying vec3 normal_interp;
 
 #if defined(ENABLE_UV_INTERP)
     varying vec2 uv_interp;
+#endif
+
+#if defined(ENABLE_UV2_INTERP) || defined(USE_LIGHTMAP)
+    varying vec2 uv2_interp;
 #endif
 
 #ifdef USE_SKELETON
@@ -78,6 +88,10 @@ void main() {
 
     #if defined(ENABLE_UV_INTERP)
         uv_interp = uv;
+    #endif
+
+    #if defined(ENABLE_UV2_INTERP) || defined(USE_LIGHTMAP)
+        uv2_interp = uv2;
     #endif
 
     mat4 WORLD_MATRIX = world_matrix;

@@ -15,7 +15,7 @@ import { Vector2, Vector2Like } from 'engine/core/math/vector2';
 import { Rect2 } from 'engine/core/math/rect2.js';
 import { Transform2D } from 'engine/core/math/transform_2d.js';
 import { Color } from 'engine/core/color';
-import { InputEvent } from 'engine/core/os/input_event.js';
+import { InputEvent } from 'engine/core/os/input_event';
 import { MessageQueue } from 'engine/core/message_queue';
 import { NOTIFICATION_WM_UNFOCUS_REQUEST } from 'engine/core/main_loop';
 import { VSG } from 'engine/servers/visual/visual_server_globals.js';

@@ -3,7 +3,7 @@ import { GDCLASS } from 'engine/core/v_object';
 import { Vector2, Vector2Like } from 'engine/core/math/vector2';
 import { Rect2 } from 'engine/core/math/rect2.js';
 import { Color } from 'engine/core/color';
-import { Engine } from 'engine/core/engine.js';
+import { Engine } from 'engine/core/engine';
 
 import { ImageTexture } from '../resources/texture.js';
 import { NOTIFICATION_DRAW } from '../2d/canvas_item.js';

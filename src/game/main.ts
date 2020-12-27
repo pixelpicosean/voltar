@@ -8,7 +8,6 @@ import 'game/demo/demo';
 
 
 v.preload('media/sprites-0.json');
-v.preload('media/palette.png');
 
 
 import Settings from 'gen/project.json';
@@ -21,7 +20,8 @@ v.Main.setup(Settings, {
         stretch_aspect: v.STRETCH_ASPECT_KEEP,
     },
     application: {
-        main_scene: Preloader("res://scene/demo.tscn"),
+        // main_scene: Preloader("res://scene/demo.tscn"),
         // main_scene: Preloader("res://scene/demo_3d.tscn"),
+        main_scene: Preloader("res://scene/baked_light.tscn"),
     },
 });

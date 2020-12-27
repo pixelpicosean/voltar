@@ -11,7 +11,7 @@ import {
     OS,
     VIDEO_DRIVER_GLES2,
     VIDEO_DRIVER_GLES3,
-} from 'engine/core/os/os.js';
+} from 'engine/core/os/os';
 import { VObject } from 'engine/core/v_object';
 
 import { Item } from 'engine/servers/visual/visual_server_canvas.js';

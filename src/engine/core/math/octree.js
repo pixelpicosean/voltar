@@ -375,6 +375,37 @@ export class Octree {
     }
 
     /**
+     * @param {number} p_id
+     * @param {boolean} p_pairable
+     * @param {number} p_pairable_type
+     * @param {number} p_pairable_mask
+     */
+    set_pairable(p_id, p_pairable, p_pairable_type, p_pairable_mask) {
+        let e = this.element_map[p_id];
+
+        if (p_pairable === e.pairable && e.pairable_type === p_pairable_type && e.pairable_mask === p_pairable_mask) {
+            return;
+        }
+
+        if (!e.aabb.has_no_surface()) {
+            this._remove_element(e);
+        }
+
+        e.pairable = p_pairable;
+        e.pairable_type = p_pairable_type;
+        e.pairable_mask = p_pairable_mask;
+        e.common_parent = null;
+
+        if (!e.aabb.has_no_surface()) {
+            this._ensure_valid_root(e.aabb);
+            this._insert_element(e, this.root);
+            if (this.use_pairs) {
+                this._element_check_pairs(e);
+            }
+        }
+    }
+
+    /**
      * @param {Octant} p_octant
      * @param {Vector3Like} p_from
      * @param {Vector3Like} p_to

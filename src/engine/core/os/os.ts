@@ -15,7 +15,7 @@ import {
     BUTTON_MIDDLE,
     BUTTON_RIGHT,
     InputEventKey,
-} from "./input_event.js";
+} from "./input_event";
 import { VisualServer } from "engine/servers/visual_server.js";
 import { VSG } from "engine/servers/visual/visual_server_globals.js";
 import { AudioServer } from "engine/audio/audio.js";
@@ -50,14 +50,14 @@ export class OS {
     /**
      * @param {Vector2Like} p_size
      */
-    set_window_size(p_size) {
+    set_window_size(p_size: Vector2Like) {
         this.set_window_size_n(p_size.x, p_size.y);
     }
     /**
      * @param {number} width
      * @param {number} height
      */
-    set_window_size_n(width, height) {
+    set_window_size_n(width: number, height: number) {
         this.canvas.width = width;
         this.canvas.height = height;
     }
@@ -68,51 +68,48 @@ export class OS {
     /**
      * @param {MainLoop} value
      */
-    set_main_loop(value) {
+    set_main_loop(value: MainLoop) {
         this.main_loop = value;
         this.input.main_loop = value;
     }
 
+    video_mode = {
+        width: 1024,
+        height: 600,
+        fullscreen: false,
+        resizable: false,
+    }
+
+    input: Input = null;
+    audio: AudioServer = null;
+
+
+    last_click_pos = new Vector2();
+    last_click_ms = 0;
+    last_click_button_index = 0;
+
+    main_loop: MainLoop = null;
+    video_driver_index = VIDEO_DRIVER_GLES2;
+    window_size = new Vector2;
+
+    low_processor_usage_mode = false;
+    no_window = false;
+    screen_orientation = SCREEN_LANDSCAPE;
+
+    start_date = 0;
+
+    canvas: HTMLCanvasElement = null;
+    gl: WebGLRenderingContext = null;
+    gl_ext: any = null;
+
     constructor() {
         if (!singleton) singleton = this;
 
-        this.video_mode = {
-            width: 1024,
-            height: 600,
-            fullscreen: false,
-            resizable: false,
-        }
-
-        this.input = null;
-
-
-        this.last_click_pos = new Vector2();
-        this.last_click_ms = 0;
-        this.last_click_button_index = 0;
-
-        /** @type {MainLoop} */
-        this.main_loop = null;
-        this.video_driver_index = VIDEO_DRIVER_GLES2;
-        this.window_size = new Vector2();
-
-        this.low_processor_usage_mode = false;
-        this.no_window = false;
-        this.screen_orientation = SCREEN_LANDSCAPE;
-
-        this.start_date = 0;
-
-        this.canvas = null;
-        this.gl = null;
-        this.gl_ext = null;
     }
 
     initialize_core() { }
 
-    /**
-     * @param {HTMLCanvasElement} canvas
-     * @param {import('../project_settings').ProjectSettings} settings
-     */
-    initialize(canvas, settings) {
+    initialize(canvas: HTMLCanvasElement, settings: import('../project_settings').ProjectSettings) {
         this.canvas = canvas;
         if (this.video_mode.resizable) {
             canvas.width = window.innerWidth;
@@ -146,7 +143,7 @@ export class OS {
         const driver_config = VSG.config;
 
         if (this.video_driver_index === VIDEO_DRIVER_GLES3) {
-            const gl = /** @type {WebGL2RenderingContext} */(this.canvas.getContext('webgl2', options));
+            const gl = this.canvas.getContext('webgl2', options) as WebGL2RenderingContext;
             this.gl_ext = {
                 /* instancing API */
 
@@ -155,14 +152,14 @@ export class OS {
                  * @param {number} index
                  * @param {number} divisor
                  */
-                vertexAttribDivisor: (index, divisor) => gl.vertexAttribDivisor(index, divisor),
+                vertexAttribDivisor: (index: number, divisor: number) => gl.vertexAttribDivisor(index, divisor),
                 /**
                  * @param {number} mode
                  * @param {number} first
                  * @param {number} count
                  * @param {number} primcount
                  */
-                drawArraysInstanced: (mode, first, count, primcount) => gl.drawArraysInstanced(mode, first, count, primcount),
+                drawArraysInstanced: (mode: number, first: number, count: number, primcount: number) => gl.drawArraysInstanced(mode, first, count, primcount),
                 /**
                  * @param {number} mode
                  * @param {number} count
@@ -170,7 +167,7 @@ export class OS {
                  * @param {number} offset
                  * @param {number} primcount
                  */
-                drawElementsInstanced: (mode, count, type, offset, primcount) => gl.drawElementsInstanced(mode, count, type, offset, primcount),
+                drawElementsInstanced: (mode: number, count: number, type: number, offset: number, primcount: number) => gl.drawElementsInstanced(mode, count, type, offset, primcount),
             }
             this.gl = gl;
 
@@ -183,7 +180,7 @@ export class OS {
         }
         if (!this.gl) {
             this.video_driver_index = VIDEO_DRIVER_GLES2;
-            const gl = /** @type {WebGLRenderingContext} */(this.canvas.getContext('webgl', options));
+            const gl = this.canvas.getContext('webgl', options) as WebGLRenderingContext;
 
             let instancing = gl.getExtension("ANGLE_instanced_arrays");
 
@@ -214,14 +211,14 @@ export class OS {
                  * @param {number} index
                  * @param {number} divisor
                  */
-                vertexAttribDivisor: (index, divisor) => instancing.vertexAttribDivisorANGLE(index, divisor),
+                vertexAttribDivisor: (index: number, divisor: number) => instancing.vertexAttribDivisorANGLE(index, divisor),
                 /**
                  * @param {number} mode
                  * @param {number} first
                  * @param {number} count
                  * @param {number} primcount
                  */
-                drawArraysInstanced: (mode, first, count, primcount) => instancing.drawArraysInstancedANGLE(mode, first, count, primcount),
+                drawArraysInstanced: (mode: number, first: number, count: number, primcount: number) => instancing.drawArraysInstancedANGLE(mode, first, count, primcount),
                 /**
                  * @param {number} mode
                  * @param {number} count
@@ -229,7 +226,7 @@ export class OS {
                  * @param {number} offset
                  * @param {number} primcount
                  */
-                drawElementsInstanced: (mode, count, type, offset, primcount) => instancing.drawElementsInstancedANGLE(mode, count, type, offset, primcount),
+                drawElementsInstanced: (mode: number, count: number, type: number, offset: number, primcount: number) => instancing.drawElementsInstancedANGLE(mode, count, type, offset, primcount),
 
                 /* depth texture */
 
@@ -253,9 +250,8 @@ export class OS {
             driver_config.use_skeleton_software = !driver_config.support_float_texture || (driver_config.max_vertex_texture_image_units === 0);
         }
 
-        const visual_server = new VisualServer();
-        this.input = new Input();
-
+        const visual_server = new VisualServer;
+        this.input = new Input;
         this.audio = new AudioServer;
 
 
@@ -268,7 +264,7 @@ export class OS {
 
         const mouse_pos = new Vector2();
         let cursor_inside_canvas = true;
-        const on_pointer_move = (/** @type {MouseEvent | PointerEvent} */e) => {
+        const on_pointer_move = (/** @type {MouseEvent | PointerEvent} */e: MouseEvent | PointerEvent) => {
             const input_mask = this.input.get_mouse_button_mask();
             map_position_to_canvas_local(mouse_pos, canvas, e.clientX, e.clientY);
             // FIXME: should we only care about mouse motion when cursor is inside canvas?
@@ -288,7 +284,7 @@ export class OS {
             this.input.parse_input_event(ev);
             return false;
         };
-        const on_pointer_button = (/** @type {MouseEvent | PointerEvent} */e, /** @type {boolean} */is_down) => {
+        const on_pointer_button = (/** @type {MouseEvent | PointerEvent} */e: MouseEvent | PointerEvent, /** @type {boolean} */is_down: boolean) => {
             const ev = InputEventMouseButton.instance();
             ev.pressed = is_down;
             map_position_to_canvas_local(ev.position, canvas, e.clientX, e.clientY);
@@ -348,7 +344,7 @@ export class OS {
             canvas.addEventListener('mousedown', (e) => on_pointer_button(e, true), true);
             window.addEventListener('mouseup', (e) => on_pointer_button(e, false), true);
         }
-        window.oncontextmenu = (e) => false;
+        window.oncontextmenu = (e: MouseEvent) => false;
 
         // touch events
         if (support_touch_events) {
@@ -358,10 +354,7 @@ export class OS {
             // canvas.addEventListener('touchmove', on_pointer_move, true);
         }
 
-        /**
-         * @param {KeyboardEvent} e
-         */
-        function setup_key_event(e) {
+        function setup_key_event(e: KeyboardEvent) {
             const ev = InputEventKey.instance();
             ev.echo = e.repeat;
             ev.alt = e.altKey;
@@ -444,14 +437,14 @@ export class OS {
         this.start_date = performance.now();
     }
 
-    get_ticks_msec() {
+    get_ticks_msec(): number {
         return performance.now() - this.start_date;
     }
-    get_ticks_usec() {
+    get_ticks_usec(): number {
         return this.get_ticks_msec() * 1000;
     }
 
-    can_draw() {
+    can_draw(): boolean {
         return true;
     }
 
@@ -463,36 +456,22 @@ export class OS {
     }
 }
 
-/** @type {OS} */
-let singleton = null;
+let singleton: OS = null;
 
-/**
- * @param {Vector2Like} out
- * @param {HTMLCanvasElement} canvas
- * @param {number} x
- * @param {number} y
- */
-function map_position_to_canvas_local(out, canvas, x, y) {
+function map_position_to_canvas_local(out: Vector2Like, canvas: HTMLCanvasElement, x: number, y: number) {
     const rect = canvas.getBoundingClientRect();
     out.x = (x - rect.left) * (canvas.width / rect.width);
     out.y = (y - rect.top) * (canvas.height / rect.height);
 }
 
-/**
- * @param {MouseEvent} e
- * @param {InputEventWithModifiers} ev
- */
-function dom2godot_mod(e, ev) {
+function dom2godot_mod(e: MouseEvent, ev: InputEventWithModifiers) {
     ev.shift = e.shiftKey;
     ev.alt = e.altKey;
     ev.control = e.ctrlKey;
     ev.meta = e.metaKey;
 }
 
-/**
- * @param {KeyboardEvent} event
- */
-function is_caps_locked(event) {
+function is_caps_locked(event: KeyboardEvent): boolean {
     const code = event.charCode || event.keyCode;
     if (code > 64 && code < 91 && !event.shiftKey) {
         return true;

@@ -14,10 +14,8 @@ export const KEY_MASK_GROUP_SWITCH = (1 << 30);
 
 /**
  * List of available keys.
- *
- * @type {Object<string, number>}
  */
-export const KEYS = {
+export const KEYS: { [key: string]: number } = {
     'BACKSPACE': 8,
     'TAB': 9,
     'ENTER': 13,
@@ -113,14 +111,11 @@ export const KEYS = {
 const ScancodeToKeys = Object.keys(KEYS).reduce((map, name) => {
     map[KEYS[name]] = name;
     return map;
-}, /** @type {Object<number, string>} */({}));
+}, {} as { [value: number]: string });
 ScancodeToKeys[93] = 'META'; // webkit right command
 ScancodeToKeys[224] = 'META'; // firefox command
 
-/**
- * @param {number} p_code
- */
-export function keycode_get_string(p_code) {
+export function keycode_get_string(p_code: number) {
     let codestr = '';
     if (p_code & KEY_MASK_SHIFT) {
         codestr += 'SHIFT+';
@@ -141,9 +136,6 @@ export function keycode_get_string(p_code) {
     return codestr;
 }
 
-/**
- * @param {number} p_code
- */
-export function find_keycode_name(p_code) {
+export function find_keycode_name(p_code: number) {
     return ScancodeToKeys[p_code];
 }

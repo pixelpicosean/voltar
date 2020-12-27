@@ -5,7 +5,7 @@ import { Vector3 } from "engine/core/math/vector3.js";
 import { AABB } from "engine/core/math/aabb.js";
 import { Transform } from "engine/core/math/transform.js";
 import { Color, ColorLike } from "engine/core/color";
-import { OS } from "engine/core/os/os.js";
+import { OS } from "engine/core/os/os";
 
 import {
     TEXTURE_TYPE_2D,
@@ -38,6 +38,7 @@ import {
     LIGHT_OMNI_SHADOW_DETAIL_VERTICAL,
     LIGHT_DIRECTIONAL_SHADOW_DEPTH_RANGE_STABLE,
     LIGHT_OMNI_SHADOW_DUAL_PARABOLOID,
+    INSTANCE_TYPE_LIGHTMAP_CAPTURE,
 } from "engine/servers/visual_server.js";
 import {
     Instance_t,
@@ -268,6 +269,18 @@ export class Light_t extends Instantiable_t {
         this.omni_shadow_detail = LIGHT_OMNI_SHADOW_DETAIL_VERTICAL;
 
         this.version = 0;
+    }
+}
+
+export class LightmapCapture_t extends Instantiable_t {
+    get i_type() { return INSTANCE_TYPE_LIGHTMAP_CAPTURE }
+
+    constructor() {
+        super();
+
+        this.bounds = new AABB;
+
+        this.energy = 1.0;
     }
 }
 
@@ -2136,6 +2149,28 @@ export class RasterizerStorage {
         }
 
         return AABB.new();
+    }
+
+    /* light map API */
+
+    lightmap_capture_create() {
+        return new LightmapCapture_t;
+    }
+
+    /**
+     * @param {LightmapCapture_t} p_capture
+     * @param {AABB} p_bounds
+     */
+    lightmap_capture_set_bounds(p_capture, p_bounds) {
+        p_capture.bounds.copy(p_bounds)
+        p_capture.instance_change_notify(true, false);
+    }
+
+    /**
+     * @param {LightmapCapture_t} p_capture
+     */
+    lightmap_capture_get_bounds(p_capture) {
+        return p_capture.bounds;
     }
 
     /* skeleton API */

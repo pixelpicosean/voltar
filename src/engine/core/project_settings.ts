@@ -3,8 +3,8 @@ import {
     STRETCH_MODE_DISABLED,
     STRETCH_ASPECT_IGNORE,
 } from "engine/scene/main/scene_tree.js";
-import { InputEventKey } from "./os/input_event.js";
-import { KEYS } from "./os/keyboard.js";
+import { InputEventKey } from "./os/input_event";
+import { KEYS } from "./os/keyboard";
 
 interface ApplicationSettings {
     name?: string

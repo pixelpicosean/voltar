@@ -3,7 +3,7 @@ import { GDCLASS } from "engine/core/v_object";
 
 import { Control, NOTIFICATION_RESIZED, NOTIFICATION_THEME_CHANGED } from "./control.js";
 import { Color } from "engine/core/color";
-import { InputEvent } from "engine/core/os/input_event.js";
+import { InputEvent } from "engine/core/os/input_event";
 import { NOTIFICATION_ENTER_TREE, NOTIFICATION_INTERNAL_PROCESS } from "../main/node.js";
 import { NOTIFICATION_DRAW } from "../2d/canvas_item.js";
 import { Vector2 } from "engine/core/math/vector2";

@@ -35,7 +35,7 @@ import {
     LIGHT_OMNI_SHADOW_DUAL_PARABOLOID,
 } from '../visual_server.js';
 import { VSG } from './visual_server_globals.js';
-import { Skeleton_t } from 'engine/drivers/webgl/rasterizer_storage.js';
+import { LightmapCapture_t, Skeleton_t } from 'engine/drivers/webgl/rasterizer_storage.js';
 
 /**
  * @typedef {import('engine/drivers/webgl/rasterizer_storage').Material_t} Material_t
@@ -74,10 +74,13 @@ export class Camera_t {
     }
 }
 
+let uid_Scenario = 0;
 export class Scenario_t {
     get class() { return "Scenario_t" }
 
     constructor() {
+        this.id = uid_Scenario++;
+
         /** @type {Octree<Instance_t>} */
         this.octree = new Octree(true);
 
@@ -132,10 +135,15 @@ export class Instance_t {
 
         this.depth = 0;
 
+        /** @type {Instance_t} */
+        this.lightmap_capture = null;
+        /** @type {import('engine/drivers/webgl/rasterizer_storage').Texture_t} */
+        this.lightmap = null;
+        /** @type {Color[]} */
+        this.lightmap_capture_data = [];
+
         /** @type {SelfList<Instance_t>} */
         this.dependency_item = new SelfList(this);
-
-        this.lightmap = null;
 
         this.octree_id = 0;
         /** @type {Scenario_t} */
@@ -216,6 +224,18 @@ class InstanceLightData extends InstanceBaseData {
         this.shadow_dirty = false;
 
         this.last_version = 0;
+    }
+}
+
+class InstanceLightmapCaptureData extends InstanceBaseData {
+    constructor() {
+        super();
+
+        /** @type {Instance_t[]} */
+        this.geometries = [];
+
+        /** @type {Instance_t[]} */
+        this.users = [];
     }
 }
 
@@ -365,6 +385,14 @@ export class VisualServerScene {
                 light.shadow_dirty = true;
             }
             geom.lighting_dirty = true;
+        } else if (B.base_type === INSTANCE_TYPE_LIGHTMAP_CAPTURE && ((1 << A.base_type) & INSTANCE_GEOMETRY_MASK)) {
+            let lightmap_capture = /** @type {InstanceLightmapCaptureData} */(B.base_data);
+            let geom = /** @type {InstanceGeometryData} */(A.base_data);
+
+            lightmap_capture.geometries.push(A);
+            geom.lightmap_captures.push(B);
+
+            this._instance_queue_update(A, false, false);
         }
         return null;
     }
@@ -395,6 +423,13 @@ export class VisualServerScene {
                 light.shadow_dirty = true;
             }
             geom.lighting_dirty = true;
+        } else if (B.base_type === INSTANCE_TYPE_LIGHTMAP_CAPTURE && ((1 << A.base_type) & INSTANCE_GEOMETRY_MASK)) {
+            let lightmap_capture = /** @type {InstanceLightmapCaptureData} */(B.base_data);
+            let geom = /** @type {InstanceGeometryData} */(A.base_data);
+
+            geom.lightmap_captures.splice(geom.lightmap_captures.indexOf(B), 1);
+            lightmap_capture.splice(A, 1);
+            this._instance_queue_update(A, false, false);
         }
     }
 
@@ -522,6 +557,12 @@ export class VisualServerScene {
                     }
                     light.instance = null;
                 } break;
+                case INSTANCE_TYPE_LIGHTMAP_CAPTURE: {
+                    let lightmap_capture = /** @type {InstanceLightmapCaptureData} */(p_instance.base_data);
+                    while (lightmap_capture.users.length > 0) {
+                        this.instance_set_use_lightmap(lightmap_capture.users[0], null, null);
+                    }
+                } break;
             }
 
             if (p_instance.base_data) {
@@ -562,9 +603,10 @@ export class VisualServerScene {
                     //     p_instance.blend_values.length = VSG.storage.mesh_get_blend_shape_count(p_base);
                     // }
                 } break;
-                case INSTANCE_TYPE_REFLECTION_PROBE: { } break;
-                case INSTANCE_TYPE_LIGHTMAP_CAPTURE: { } break;
-                case INSTANCE_TYPE_GI_PROBE: { } break;
+                case INSTANCE_TYPE_LIGHTMAP_CAPTURE: {
+                    let lightmap_capture = new InstanceLightmapCaptureData;
+                    p_instance.base_data = lightmap_capture;
+                } break;
             }
 
             VSG.storage.instance_add_dependency(p_base, p_instance);
@@ -633,8 +675,27 @@ export class VisualServerScene {
 
         p_instance.visible = p_visible;
 
+        if ((1 << p_instance.base_type) & INSTANCE_GEOMETRY_MASK) {
+            let geom = /** @type {InstanceGeometryData} */(p_instance.base_data);
+
+            if (geom.can_cast_shadows) {
+                for (let l of geom.lighting) {
+                    /** @type {InstanceLightData} */(l).shadow_dirty = true;
+                }
+            }
+        }
+
         switch (p_instance.base_type) {
             case INSTANCE_TYPE_LIGHT: {
+                let light = /** @type {import('engine/drivers/webgl/rasterizer_storage').Light_t} */(p_instance.base);
+                if (light.type === LIGHT_DIRECTIONAL && p_instance.octree_id && p_instance.scenario) {
+                    p_instance.scenario.octree.set_pairable(p_instance.octree_id, p_visible, 1 << INSTANCE_TYPE_LIGHT, p_visible ? INSTANCE_GEOMETRY_MASK : 0);
+                }
+            } break;
+            case INSTANCE_TYPE_LIGHTMAP_CAPTURE: {
+                if (p_instance.octree_id && p_instance.scenario) {
+                    p_instance.scenario.octree.set_pairable(p_instance.octree_id, p_visible, 1 << INSTANCE_TYPE_LIGHTMAP_CAPTURE, p_visible ? INSTANCE_GEOMETRY_MASK : 0);
+                }
             } break;
         }
     }
@@ -647,6 +708,27 @@ export class VisualServerScene {
         if (p_instance.transform.exact_equals(p_transform)) return;
         p_instance.transform.copy(p_transform);
         this._instance_queue_update(p_instance, true);
+    }
+
+    /**
+     * @param {Instance_t} p_instance
+     * @param {Instance_t} p_lightmap_instance
+     * @param {import('engine/drivers/webgl/rasterizer_storage').Texture_t} p_lightmap
+     */
+    instance_set_use_lightmap(p_instance, p_lightmap_instance, p_lightmap) {
+        if (p_instance.lightmap_capture) {
+            let lightmap_capture = /** @type {InstanceLightmapCaptureData} */(p_instance.lightmap_capture.base_data);
+            lightmap_capture.users.splice(lightmap_capture.users.indexOf(p_instance), 1);
+            p_instance.lightmap = null;
+            p_instance.lightmap_capture = null;
+        }
+
+        if (p_lightmap_instance) {
+            p_instance.lightmap_capture = p_lightmap_instance;
+            let lightmap_capture = /** @type {InstanceLightmapCaptureData} */(p_instance.lightmap_capture.base_data);
+            lightmap_capture.users.push(p_instance);
+            p_instance.lightmap = p_lightmap;
+        }
     }
 
     /**
@@ -727,7 +809,12 @@ export class VisualServerScene {
             case INSTANCE_TYPE_LIGHT: {
                 new_aabb = VSG.storage.light_get_aabb(/** @type {Light_t} */(p_instance.base));
             } break;
+            case INSTANCE_TYPE_LIGHTMAP_CAPTURE: {
+                new_aabb = VSG.storage.lightmap_capture_get_bounds(/** @type {LightmapCapture_t} */(p_instance.base));
+            } break;
         }
+        if (!new_aabb) new_aabb = AABB.new();
+
         p_instance.aabb.copy(new_aabb);
         AABB.free(new_aabb);
     }
@@ -755,6 +842,15 @@ export class VisualServerScene {
                     light.shadow_dirty = true;
                 }
             }
+
+            if (!p_instance.lightmap_capture && geom.lightmap_captures.length > 0) {
+                // @Cleanup: this is not required at runtime
+                // this._update_instance_lightmap_captures(p_instance);
+            } else {
+                if (p_instance.lightmap_capture_data.length > 0) {
+                    p_instance.lightmap_capture_data.length = 0;
+                }
+            }
         }
 
         p_instance.mirror = p_instance.transform.basis.determinant() < 0;
@@ -772,7 +868,7 @@ export class VisualServerScene {
             let pairable_mask = 0;
             let pairable = false;
 
-            if (p_instance.base_type === INSTANCE_TYPE_LIGHT) {
+            if (p_instance.base_type === INSTANCE_TYPE_LIGHT || p_instance.base_type === INSTANCE_TYPE_LIGHTMAP_CAPTURE) {
                 pairable_mask = p_instance.visible ? INSTANCE_GEOMETRY_MASK : 0;
                 pairable = true;
             }

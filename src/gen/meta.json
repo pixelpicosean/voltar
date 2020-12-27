@@ -2,8 +2,23 @@
     "resource_check_ignores": [
         "GROBOLD"
     ],
-    "json_files": [],
+    "json_files": [
+        "media/pack0.tres"
+    ],
     "binary_files": [
         "media/pack0.res"
-    ]
+    ],
+    "standalone_images": {
+        "pack_id": 0,
+        "images": [
+            "media/cube.png",
+            "media/cube2.png",
+            "media/cube3.png",
+            "media/cube4.png",
+            "media/cube5.png",
+            "media/cube6.png",
+            "media/LightMap.png",
+            "media/palette.png"
+        ]
+    }
 }

@@ -7,7 +7,7 @@ import { Basis } from 'engine/core/math/basis.js';
 import { Transform } from 'engine/core/math/transform.js';
 import { CameraMatrix } from 'engine/core/math/camera_matrix.js';
 import { Color } from 'engine/core/color';
-import { OS } from 'engine/core/os/os.js';
+import { OS } from 'engine/core/os/os';
 import { copy_array_values } from 'engine/core/v_array';
 
 import {
@@ -71,6 +71,7 @@ import {
     DEPTH_DRAW_ALPHA_PREPASS,
     DEPTH_DRAW_ALWAYS,
     DEPTH_DRAW_NEVER,
+    LightmapCapture_t,
 } from './rasterizer_storage.js';
 
 import {
@@ -576,7 +577,9 @@ const SPATIAL_FEATURES = {
                 'm_specular': [0.5],
                 'm_metallic': [0],
         },
-        texture: { },
+        texture: {
+            // 'lightmap': 'white',
+        },
     },
 
     'albedo': {
@@ -681,6 +684,8 @@ export class RasterizerScene {
 
             used_screen_texture: false,
 
+            used_lightmap: false,
+
             render_no_shadows: false,
             shadow_is_dual_paraboloid: false,
             dual_parboloid_direction: 0,
@@ -746,6 +751,8 @@ export class RasterizerScene {
                 LIGHT_SPOT_RANGE: [0],
                 LIGHT_SPOT_ANGLE: [0],
                 light_range: [0],
+
+                lightmap_energy: [1.0],
 
                 skeleton_texture_size: [0, 0],
 
@@ -2121,6 +2128,10 @@ export class RasterizerScene {
             using_fog = true;
         }
 
+        /** @type {Texture_t} */
+        let prev_lightmap = null;
+        let lightmap_energy = 1.0;
+
         for (let i = 0; i < p_element_count; i++) {
             let e = p_elements[i];
 
@@ -2133,7 +2144,10 @@ export class RasterizerScene {
 
             /** @type {LightInstance_t} */
             let light = null;
+            /** @type {Texture_t} */
+            let lightmap = null;
             let rebind_light = false;
+            let rebind_lightmap = false;
 
             if (!p_shadow && material.shader) {
                 let unshaded = material.shader.spatial.unshaded;
@@ -2213,7 +2227,25 @@ export class RasterizerScene {
                     prev_blend_mode = blend_mode;
                 }
 
-                // TODO: lightmap
+                // @Incomplete: vertex light
+
+                if (!unshaded && !accum_pass && e.instance.lightmap) {
+                    lightmap = e.instance.lightmap;
+                    lightmap_energy = 1.0;
+                    if (lightmap) {
+                        let capture = /** @type {LightmapCapture_t} */(e.instance.lightmap_capture.base);
+                        if (capture) {
+                            lightmap_energy = capture.energy;
+                        }
+                    }
+                }
+
+                if (lightmap !== prev_lightmap) {
+                    this.set_shader_condition(SHADER_DEF.USE_LIGHTMAP, !!lightmap);
+
+                    rebind = true;
+                    rebind_lightmap = true;
+                }
             }
 
             let depth_prepass = false;
@@ -2258,6 +2290,13 @@ export class RasterizerScene {
                 shader_rebind = this._setup_material(material, p_alpha_pass, skeleton ? skeleton.size * 3 : 0);
             }
 
+            if (rebind_lightmap) {
+                if (lightmap) {
+                    gl.activeTexture(gl.TEXTURE0 + VSG.config.max_texture_image_units - 4);
+                    gl.bindTexture(gl.TEXTURE_2D, lightmap.gl_tex);
+                }
+            }
+
             this._set_cull(e.front_facing, material.shader.spatial.cull_mode === CULL_MODE_DISABLED, p_reverse_cull);
 
             if (i === 0 || shader_rebind) {
@@ -2282,6 +2321,7 @@ export class RasterizerScene {
                     }
 
                     rebind_light = true;
+                    rebind_lightmap = true;
 
                     if (using_fog) {
                         copy_array_values(p_env.fog_color, global_uniforms.fog_color_base);
@@ -2316,6 +2356,10 @@ export class RasterizerScene {
                 this._setup_light(light, p_shadow_atlas, p_view_transform, accum_pass);
             }
 
+            if (rebind_lightmap && lightmap) {
+                global_uniforms.lightmap_energy[0] = lightmap_energy;
+            }
+
             global_uniforms.world_matrix = e.instance.transform.as_array(global_uniforms.world_matrix);
 
             const mat_uniforms = this.state.current_shader.uniforms;
@@ -2339,6 +2383,7 @@ export class RasterizerScene {
             prev_material = e.material;
             prev_skeleton = skeleton;
             prev_light = light;
+            prev_lightmap = lightmap;
         }
 
         this._setup_light_type(null, null);
@@ -2834,6 +2879,7 @@ export class RasterizerScene {
         let shader_rebind = this.bind_scene_shader(p_material);
 
         let shader = this.state.current_shader;
+        let uniforms = shader.uniforms;
 
         if (shader.spatial.uses_screen_texture && this.storage.frame.current_rt) {
             gl.activeTexture(gl.TEXTURE0 + VSG.config.max_texture_image_units - 4);
@@ -2843,6 +2889,42 @@ export class RasterizerScene {
         if (shader.spatial.uses_depth_texture && this.storage.frame.current_rt) {
             gl.activeTexture(gl.TEXTURE0 + VSG.config.max_texture_image_units - 4);
             gl.bindTexture(gl.TEXTURE_2D, this.storage.frame.current_rt.copy_screen_effect.gl_depth);
+        }
+
+        if (this.state.conditions & SHADER_DEF.LIGHT_MODE_DIRECTIONAL) {
+            let u = uniforms["light_directional_shadow"];
+            if (u) {
+                gl.activeTexture(gl.TEXTURE0 + VSG.config.max_texture_image_units - 3);
+                gl.uniform1i(u.gl_loc, VSG.config.max_texture_image_units - 3);
+            }
+        } else if (this.state.conditions & SHADER_DEF.LIGHT_MODE_OMNI || this.state.conditions & SHADER_DEF.LIGHT_MODE_SPOT) {
+            let u = uniforms["light_shadow_atlas"];
+            if (u) {
+                gl.activeTexture(gl.TEXTURE0 + VSG.config.max_texture_image_units - 3);
+                gl.uniform1i(u.gl_loc, VSG.config.max_texture_image_units - 3);
+            }
+        }
+        if ((this.state.conditions & SHADER_DEF.USE_SKELETON) && !VSG.config.use_skeleton_software) {
+            let u = uniforms["bone_transforms"];
+            if (!u) {
+                u = uniforms["bone_transforms"] = {
+                    type: "1i",
+                    gl_loc: gl.getUniformLocation(shader.gl_prog, "bone_transforms"),
+                }
+            }
+            gl.activeTexture(gl.TEXTURE0 + VSG.config.max_texture_image_units - 1);
+            gl.uniform1i(u.gl_loc, VSG.config.max_texture_image_units - 1);
+        }
+        if (this.state.conditions & SHADER_DEF.USE_LIGHTMAP) {
+            let u = uniforms["lightmap"];
+            if (!u) {
+                u = uniforms["lightmap"] = {
+                    type: "1i",
+                    gl_loc: gl.getUniformLocation(shader.gl_prog, "lightmap"),
+                }
+            }
+            gl.activeTexture(gl.TEXTURE0 + VSG.config.max_texture_image_units - 4);
+            gl.uniform1i(u.gl_loc, VSG.config.max_texture_image_units - 4);
         }
 
         if (shader.spatial.no_depth_test || shader.spatial.uses_depth_texture) {
@@ -2864,14 +2946,17 @@ export class RasterizerScene {
             } break;
         }
 
-        let uniforms = shader.uniforms;
-
         this.state.uniforms.skeleton_texture_size[0] = p_skeleton_tex_size;
 
         let i = 0;
         for (let k in p_material.textures) {
             let u = uniforms[k];
-            if (!u) continue;
+            if (!u) {
+                u = uniforms[k] = {
+                    type: "1i",
+                    gl_loc: gl.getUniformLocation(shader.gl_prog, k),
+                };
+            }
 
             gl.uniform1i(u.gl_loc, i);
             gl.activeTexture(gl.TEXTURE0 + i);
@@ -2911,30 +2996,6 @@ export class RasterizerScene {
 
         // set built-in texture slots
         // TODO: make extra texture bindings automatic
-        if (this.state.conditions & SHADER_DEF.LIGHT_MODE_DIRECTIONAL) {
-            let u = uniforms["light_directional_shadow"];
-            if (u) {
-                gl.activeTexture(gl.TEXTURE0 + i);
-                gl.uniform1i(u.gl_loc, VSG.config.max_texture_image_units - 3);
-            }
-        } else if (this.state.conditions & SHADER_DEF.LIGHT_MODE_OMNI || this.state.conditions & SHADER_DEF.LIGHT_MODE_SPOT) {
-            let u = uniforms["light_shadow_atlas"];
-            if (u) {
-                gl.activeTexture(gl.TEXTURE0 + i);
-                gl.uniform1i(u.gl_loc, VSG.config.max_texture_image_units - 3);
-            }
-        }
-        if ((this.state.conditions & SHADER_DEF.USE_SKELETON) && !VSG.config.use_skeleton_software) {
-            let u = uniforms["bone_transforms"];
-            if (!u) {
-                u = uniforms["bone_transforms"] = {
-                    type: "1i",
-                    gl_loc: gl.getUniformLocation(shader.gl_prog, "bone_transforms"),
-                }
-            }
-            gl.activeTexture(gl.TEXTURE0 + VSG.config.max_texture_image_units - 1);
-            gl.uniform1i(u.gl_loc, VSG.config.max_texture_image_units - 1);
-        }
 
         return shader_rebind;
     }

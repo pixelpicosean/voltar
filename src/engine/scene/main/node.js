@@ -6,8 +6,8 @@ import {
     GDCLASS,
     NOTIFICATION_PREDELETE,
 } from 'engine/core/v_object';
-import { InputEvent } from 'engine/core/os/input_event.js';
-import { Engine } from 'engine/core/engine.js';
+import { InputEvent } from 'engine/core/os/input_event';
+import { Engine } from 'engine/core/engine';
 
 
 export const PAUSE_MODE_INHERIT = 0;

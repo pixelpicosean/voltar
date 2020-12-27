@@ -6,7 +6,7 @@ const { convert_scenes } = require('./convert_scenes');
 const { convert_dynamic_fonts } = require('./convert_dynamic_fonts');
 const { convert_bmfonts } = require('./convert_bmfonts');
 const { convert_default_env } = require('./convert_default_env');
-const { copy_standalone_images } = require('./copy_standalone_images');
+const { pack_standalone_images } = require('./pack_standalone_images');
 
 const { compress } = require('./z/z');
 
@@ -61,7 +61,7 @@ convert_bmfonts();
 // - dynamic font
 convert_dynamic_fonts();
 // - standalone images
-copy_standalone_images();
+let standalone_image_pack_info = pack_standalone_images();
 // - json data
 let json_files = get_json_packs()
     .map((pack, i) => {
@@ -90,8 +90,11 @@ fs.writeFileSync(path.resolve(__dirname, '../src/gen/default_env.json'), JSON.st
 let resource_check_ignores = get_resource_check_ignores();
 fs.writeFileSync(path.resolve(__dirname, '../src/gen/meta.json'), JSON.stringify({
     resource_check_ignores,
+
     json_files,
     binary_files,
+
+    standalone_images: standalone_image_pack_info,
 }, null, 4));
 fs.writeFileSync(path.resolve(__dirname, '../src/gen/project.json'), JSON.stringify(project, null, 4));
 

@@ -1,0 +1,29 @@
+[gd_scene load_steps=4 format=2]
+
+[sub_resource type="SpatialMaterial" id=1]
+vertex_color_use_as_albedo = true
+
+[sub_resource type="ArrayMesh" id=2]
+lightmap_size_hint = Vector2( 164, 164 )
+surfaces/0 = {
+"aabb": AABB( -4, 0, -4, 8, 1e-05, 8.00001 ),
+"array_data": PoolByteArray( 0, 0, 128, 192, 0, 0, 0, 0, 0, 0, 128, 64, 0, 0, 0, 0, 0, 0, 128, 63, 0, 0, 0, 128, 0, 0, 128, 63, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 128, 63, 0, 0, 0, 0, 0, 0, 128, 63, 12, 206, 71, 59, 12, 206, 71, 59, 0, 0, 128, 64, 0, 0, 0, 0, 0, 0, 128, 192, 0, 0, 0, 0, 0, 0, 128, 63, 0, 0, 0, 128, 0, 0, 128, 63, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 128, 63, 0, 0, 128, 63, 0, 0, 0, 0, 50, 56, 127, 63, 50, 56, 127, 63, 0, 0, 128, 64, 0, 0, 0, 0, 0, 0, 128, 64, 0, 0, 0, 0, 0, 0, 128, 63, 0, 0, 0, 128, 0, 0, 128, 63, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 128, 63, 0, 0, 128, 63, 0, 0, 128, 63, 50, 56, 127, 63, 12, 206, 71, 59, 0, 0, 128, 192, 0, 0, 0, 0, 0, 0, 128, 192, 0, 0, 0, 0, 0, 0, 128, 63, 0, 0, 0, 128, 0, 0, 128, 63, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 128, 63, 0, 0, 0, 0, 0, 0, 0, 0, 12, 206, 71, 59, 50, 56, 127, 63 ),
+"array_index_data": PoolByteArray( 0, 0, 1, 0, 2, 0, 0, 0, 3, 0, 1, 0 ),
+"blend_shape_data": [  ],
+"format": 311,
+"index_count": 6,
+"material": SubResource( 1 ),
+"primitive": 4,
+"skeleton_aabb": [  ],
+"vertex_count": 4
+}
+
+[sub_resource type="SpatialMaterial" id=3]
+ao_enabled = true
+ao_light_affect = 0.0
+ao_on_uv2 = true
+ao_texture_channel = 0
+
+[node name="plane" type="MeshInstance"]
+mesh = SubResource( 2 )
+material/0 = SubResource( 3 )

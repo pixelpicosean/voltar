@@ -61,12 +61,12 @@ module.exports.get_resource_check_ignores = function() {
 /* general JSON data API */
 
 let json_data = [];
-module.exports.add_json_resource = function(any) {
-    json_data.push(any);
+module.exports.add_json_resource = function(data) {
+    json_data.push(data);
     return json_data.length - 1;
 }
 module.exports.get_json_packs = function() {
-    return [json_data];
+    return json_data;
 }
 
 /* binary file API */

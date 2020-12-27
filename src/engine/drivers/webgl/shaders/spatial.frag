@@ -6,6 +6,11 @@ uniform highp mat4 CAMERA_MATRIX;
 
 uniform highp float TIME;
 
+#ifdef USE_LIGHTMAP
+    uniform mediump sampler2D lightmap; // texunit: -4
+    uniform mediump float lightmap_energy;
+#endif
+
 uniform vec4 bg_color;
 uniform float bg_energy;
 
@@ -62,6 +67,10 @@ varying vec3 normal_interp;
 
 #if defined(ENABLE_UV_INTERP)
     varying vec2 uv_interp;
+#endif
+
+#if defined(ENABLE_UV2_INTERP) || defined(USE_LIGHTMAP)
+    varying vec2 uv2_interp;
 #endif
 
 /* light */
@@ -355,6 +364,10 @@ void main() {
                 specular_light *= env.x * F + env.y;
             #endif
         }
+
+        #ifdef USE_LIGHTMAP
+            ambient_light = texture2D(lightmap, uv2_interp).rgb * lightmap_energy;
+        #endif
     #endif // BASE PASS
 
     //

@@ -44,6 +44,16 @@ export class World extends VObject {
     /**
      * @param {Environment_t} p_environment
      */
+    set_environment(p_environment) {
+        if (this.environment === p_environment) return;
+
+        this.environment = p_environment;
+        this.scenario.environment = p_environment;
+    }
+
+    /**
+     * @param {Environment_t} p_environment
+     */
     set_fallback_environment(p_environment) {
         if (this.fallback_environment === p_environment) return;
 

@@ -4,7 +4,7 @@ import {
     InputEventMouseButton,
     InputEventMouseMotion,
     BUTTON_MASK_LEFT,
-} from "engine/core/os/input_event.js";
+} from "engine/core/os/input_event";
 import { Resource } from "engine/core/resource";
 
 import {

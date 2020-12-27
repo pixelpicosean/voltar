@@ -3,7 +3,7 @@ import { GDCLASS } from "engine/core/v_object";
 import { Vector2, Vector2Like } from "engine/core/math/vector2";
 import { Transform2D } from "engine/core/math/transform_2d.js";
 import { Rect2 } from "engine/core/math/rect2.js";
-import { OS } from "engine/core/os/os.js";
+import { OS } from "engine/core/os/os";
 import {
     NOTIFICATION_WM_MOUSE_EXIT,
     NOTIFICATION_WM_FOCUS_OUT,
@@ -18,7 +18,7 @@ import {
     BUTTON_WHEEL_LEFT,
     BUTTON_WHEEL_RIGHT,
     BUTTON_MASK_LEFT,
-} from "engine/core/os/input_event.js";
+} from "engine/core/os/input_event";
 import {
     Node,
     NOTIFICATION_ENTER_TREE,
@@ -36,7 +36,7 @@ import { CanvasItem } from "engine/scene/2d/canvas_item.js";
 import { CanvasLayer } from "./canvas_layer.js";
 import { remove_items } from "engine/dep/index.ts";
 import { Input } from "engine/main/input.js";
-import { Engine } from "engine/core/engine.js";
+import { Engine } from "engine/core/engine";
 import {
     FOCUS_NONE,
     MOUSE_FILTER_STOP,

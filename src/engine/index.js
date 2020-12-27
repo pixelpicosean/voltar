@@ -42,8 +42,8 @@ export * from 'engine/utils/trim_canvas';
 // Resource
 // ------------------------------------------------------------------
 export * from 'engine/core/resource';
-export * from 'engine/core/os/input_event.js';
-export * from 'engine/core/os/keyboard.js';
+export * from 'engine/core/os/input_event';
+export * from 'engine/core/os/keyboard';
 export * from 'engine/scene/resources/tile_set.js';
 export * from 'engine/scene/resources/texture.js';
 export * from 'engine/scene/resources/shape_2d.js';
@@ -123,6 +123,8 @@ export * from 'engine/scene/3d/visual_instance.js';
 export * from 'engine/scene/3d/mesh_instance.js';
 export * from 'engine/scene/3d/light.js';
 export * from 'engine/scene/3d/skeleton.js';
+export * from 'engine/scene/3d/world_environment';
+export * from 'engine/scene/3d/baked_lightmap';
 
 export * from 'engine/registry';
 
@@ -136,10 +138,10 @@ import { Main } from 'engine/main/main.js';
 
 import { Input as Input_t } from 'engine/main/input.js';
 import { InputMap as InputMap_t } from 'engine/core/input_map';
-import { OS as OS_t } from 'engine/core/os/os.js';
+import { OS as OS_t } from 'engine/core/os/os';
 import { ProjectSettings as ProjectSettings_t } from 'engine/core/project_settings';
 import { MessageQueue as MessageQueue_t } from 'engine/core/message_queue';
-import { Engine as Engine_t } from 'engine/core/engine.js';
+import { Engine as Engine_t } from 'engine/core/engine';
 import { VisualServer as VisualServer_t } from 'engine/servers/visual_server.js';
 import { Physics2DServer as Physics2DServer_t } from 'engine/servers/physics_2d/physics_2d_server.js';
 import { SceneTree as SceneTree_t } from 'engine/scene/main/scene_tree.js';

@@ -3,7 +3,7 @@
   "version": "4.3.0",
   "private": true,
   "scripts": {
-    "compress": "precompress ./dist",
+    "compress": "precompress dist",
     "import_assets": "node tool/import_assets.js",
     "start": "webpack-cli serve --config webpack.dev.js",
     "build": "webpack-cli --config webpack.prod.js && node tool/copy_media_to_dist.js",

@@ -119,6 +119,7 @@ export class ResourceLoader extends VObject {
 
         this._queue.pause();
 
+        /** @type {{ [key: string]: any }} */
         this.resources = {};
 
         // Add default before middleware

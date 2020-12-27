@@ -29,7 +29,7 @@ export class VisualInstance extends Spatial {
     }
 
     /**
-     * @param {import('engine/drivers/webgl/rasterizer_storage').Mesh_t} p_base
+     * @param {import('engine/drivers/webgl/rasterizer_storage').Instantiable_t} p_base
      */
     set_base(p_base) {
         VSG.scene.instance_set_base(this.instance, p_base);

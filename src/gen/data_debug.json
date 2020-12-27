@@ -19,14 +19,259 @@
             ]
         }
     },
-    "res://scene/test_parent.tscn": {
+    "res://mesh/plane.tscn": {
         "type": "PackedScene",
-        "sub": [],
+        "sub": [
+            {
+                "id": 1,
+                "type": "SpatialMaterial"
+            },
+            {
+                "id": 2,
+                "type": "ArrayMesh",
+                "surfaces": [
+                    {
+                        "blend_shape_data": [],
+                        "format": 311,
+                        "index_count": 6,
+                        "material": [
+                            "@sub#",
+                            "1"
+                        ],
+                        "primitive": 4,
+                        "skeleton_aabb": [],
+                        "vertex_count": 4,
+                        "is_2d": false,
+                        "arrays": {
+                            "__type__": "b",
+                            "is_2d": false,
+                            "aabb": {
+                                "position": {
+                                    "x": -4,
+                                    "y": 0,
+                                    "z": -4
+                                },
+                                "size": {
+                                    "x": 8,
+                                    "y": 0.00001,
+                                    "z": 8.00001
+                                }
+                            },
+                            "vertex": {
+                                "index": 0,
+                                "offset": 0,
+                                "length": 224
+                            },
+                            "index": {
+                                "index": 0,
+                                "offset": 224,
+                                "length": 12
+                            },
+                            "array_len": 4,
+                            "index_array_len": 6,
+                            "attribs": [
+                                {
+                                    "enabled": true,
+                                    "index": 0,
+                                    "type": 5126,
+                                    "size": 3,
+                                    "stride": 56,
+                                    "offset": 0,
+                                    "normalized": false,
+                                    "integer": false
+                                },
+                                {
+                                    "enabled": true,
+                                    "index": 1,
+                                    "type": 5126,
+                                    "size": 3,
+                                    "stride": 56,
+                                    "offset": 12,
+                                    "normalized": false,
+                                    "integer": false
+                                },
+                                {
+                                    "enabled": true,
+                                    "index": 2,
+                                    "type": 5126,
+                                    "size": 4,
+                                    "stride": 56,
+                                    "offset": 24,
+                                    "normalized": false,
+                                    "integer": false
+                                },
+                                {
+                                    "enabled": true,
+                                    "index": 4,
+                                    "type": 5126,
+                                    "size": 2,
+                                    "stride": 56,
+                                    "offset": 40,
+                                    "normalized": false,
+                                    "integer": false
+                                },
+                                {
+                                    "enabled": true,
+                                    "index": 5,
+                                    "type": 5126,
+                                    "size": 2,
+                                    "stride": 56,
+                                    "offset": 48,
+                                    "normalized": false,
+                                    "integer": false
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            {
+                "id": 3,
+                "type": "SpatialMaterial"
+            }
+        ],
         "nodes": [
             {
-                "type": "Node",
-                "name": "test_parent",
-                "number": 10
+                "type": "MeshInstance",
+                "name": "plane",
+                "mesh": [
+                    "@sub#",
+                    "2"
+                ],
+                "material": [
+                    [
+                        "@sub#",
+                        "3"
+                    ]
+                ]
+            }
+        ]
+    },
+    "res://mesh/cube.tscn": {
+        "type": "PackedScene",
+        "sub": [
+            {
+                "id": 1,
+                "type": "SpatialMaterial"
+            },
+            {
+                "id": 2,
+                "type": "ArrayMesh",
+                "surfaces": [
+                    {
+                        "blend_shape_data": [],
+                        "format": 311,
+                        "index_count": 36,
+                        "material": [
+                            "@sub#",
+                            "1"
+                        ],
+                        "primitive": 4,
+                        "skeleton_aabb": [],
+                        "vertex_count": 24,
+                        "is_2d": false,
+                        "arrays": {
+                            "__type__": "b",
+                            "is_2d": false,
+                            "aabb": {
+                                "position": {
+                                    "x": -0.5,
+                                    "y": -0.5,
+                                    "z": -0.5
+                                },
+                                "size": {
+                                    "x": 1.00001,
+                                    "y": 1.00001,
+                                    "z": 1
+                                }
+                            },
+                            "vertex": {
+                                "index": 0,
+                                "offset": 236,
+                                "length": 1344
+                            },
+                            "index": {
+                                "index": 0,
+                                "offset": 1580,
+                                "length": 72
+                            },
+                            "array_len": 24,
+                            "index_array_len": 36,
+                            "attribs": [
+                                {
+                                    "enabled": true,
+                                    "index": 0,
+                                    "type": 5126,
+                                    "size": 3,
+                                    "stride": 56,
+                                    "offset": 0,
+                                    "normalized": false,
+                                    "integer": false
+                                },
+                                {
+                                    "enabled": true,
+                                    "index": 1,
+                                    "type": 5126,
+                                    "size": 3,
+                                    "stride": 56,
+                                    "offset": 12,
+                                    "normalized": false,
+                                    "integer": false
+                                },
+                                {
+                                    "enabled": true,
+                                    "index": 2,
+                                    "type": 5126,
+                                    "size": 4,
+                                    "stride": 56,
+                                    "offset": 24,
+                                    "normalized": false,
+                                    "integer": false
+                                },
+                                {
+                                    "enabled": true,
+                                    "index": 4,
+                                    "type": 5126,
+                                    "size": 2,
+                                    "stride": 56,
+                                    "offset": 40,
+                                    "normalized": false,
+                                    "integer": false
+                                },
+                                {
+                                    "enabled": true,
+                                    "index": 5,
+                                    "type": 5126,
+                                    "size": 2,
+                                    "stride": 56,
+                                    "offset": 48,
+                                    "normalized": false,
+                                    "integer": false
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            {
+                "id": 3,
+                "type": "SpatialMaterial"
+            }
+        ],
+        "nodes": [
+            {
+                "type": "MeshInstance",
+                "name": "cube",
+                "mesh": [
+                    "@sub#",
+                    "2"
+                ],
+                "material": [
+                    [
+                        "@sub#",
+                        "3"
+                    ]
+                ]
             }
         ]
     },
@@ -364,6 +609,368 @@
             "dof_blur_far_quality": 0
         }
     },
+    "res://scene/baked_light.tscn": {
+        "type": "PackedScene",
+        "ext": {
+            "1": "res://mesh/cube.tscn",
+            "2": "res://mesh/plane.tscn",
+            "3": "media/LightMap.png",
+            "4": "media/cube3.png",
+            "5": "media/cube4.png",
+            "6": "media/cube.png",
+            "7": "media/cube2.png",
+            "8": "media/cube5.png",
+            "9": "media/cube6.png"
+        },
+        "sub": [
+            {
+                "id": 1,
+                "type": "Environment",
+                "bg_mode": 1
+            },
+            {
+                "id": 2,
+                "type": "BakedLightmapData",
+                "bounds": {
+                    "position": {
+                        "x": -5,
+                        "y": -1.13565,
+                        "z": -5
+                    },
+                    "size": {
+                        "x": 10,
+                        "y": 2.2713,
+                        "z": 10
+                    }
+                },
+                "users": [
+                    {
+                        "path": "../scene/plane",
+                        "lightmap": [
+                            "@ext#",
+                            "3"
+                        ],
+                        "instance_index": -1
+                    },
+                    {
+                        "path": "../scene/cube",
+                        "lightmap": [
+                            "@ext#",
+                            "6"
+                        ],
+                        "instance_index": -1
+                    },
+                    {
+                        "path": "../scene/cube2",
+                        "lightmap": [
+                            "@ext#",
+                            "7"
+                        ],
+                        "instance_index": -1
+                    },
+                    {
+                        "path": "../scene/cube3",
+                        "lightmap": [
+                            "@ext#",
+                            "4"
+                        ],
+                        "instance_index": -1
+                    },
+                    {
+                        "path": "../scene/cube4",
+                        "lightmap": [
+                            "@ext#",
+                            "5"
+                        ],
+                        "instance_index": -1
+                    },
+                    {
+                        "path": "../scene/cube5",
+                        "lightmap": [
+                            "@ext#",
+                            "8"
+                        ],
+                        "instance_index": -1
+                    },
+                    {
+                        "path": "../scene/cube7",
+                        "lightmap": [
+                            "@ext#",
+                            "9"
+                        ],
+                        "instance_index": -1
+                    }
+                ]
+            }
+        ],
+        "nodes": [
+            {
+                "type": "Spatial",
+                "name": "baked_light"
+            },
+            {
+                "type": "WorldEnvironment",
+                "name": "world_environment",
+                "parent": ".",
+                "environment": [
+                    "@sub#",
+                    "1"
+                ]
+            },
+            {
+                "type": "BakedLightmap",
+                "name": "baked_lightmap",
+                "parent": ".",
+                "transform": [
+                    1,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0.483548,
+                    0
+                ],
+                "light_data": [
+                    "@sub#",
+                    "2"
+                ],
+                "bake_quality": 2,
+                "bake_mode": 1,
+                "bake_energy": 5.46,
+                "bake_extents": {
+                    "x": 5,
+                    "y": 1.13565,
+                    "z": 5
+                },
+                "image_path": "res://image/standalone"
+            },
+            {
+                "type": "Spatial",
+                "name": "scene",
+                "parent": "."
+            },
+            {
+                "name": "plane",
+                "parent": "scene",
+                "use_in_baked_light": true,
+                "instance": [
+                    "@ext#",
+                    "2"
+                ]
+            },
+            {
+                "name": "cube",
+                "parent": "scene",
+                "transform": [
+                    1,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0.5,
+                    0
+                ],
+                "use_in_baked_light": true,
+                "instance": [
+                    "@ext#",
+                    "1"
+                ]
+            },
+            {
+                "name": "cube2",
+                "parent": "scene",
+                "transform": [
+                    0.850637,
+                    0,
+                    0.525754,
+                    0,
+                    1,
+                    0,
+                    -0.525754,
+                    0,
+                    0.850637,
+                    -1.51136,
+                    0.5,
+                    -0.128998
+                ],
+                "use_in_baked_light": true,
+                "instance": [
+                    "@ext#",
+                    "1"
+                ]
+            },
+            {
+                "name": "cube3",
+                "parent": "scene",
+                "transform": [
+                    0.533821,
+                    0,
+                    0.845597,
+                    0,
+                    1,
+                    0,
+                    -0.845597,
+                    0,
+                    0.533821,
+                    -1.31777,
+                    0.5,
+                    -1.43608
+                ],
+                "use_in_baked_light": true,
+                "instance": [
+                    "@ext#",
+                    "1"
+                ]
+            },
+            {
+                "name": "cube4",
+                "parent": "scene",
+                "transform": [
+                    0.498896,
+                    0,
+                    -0.866662,
+                    0,
+                    1,
+                    0,
+                    0.866662,
+                    0,
+                    0.498896,
+                    0.773742,
+                    0.5,
+                    0.952961
+                ],
+                "use_in_baked_light": true,
+                "instance": [
+                    "@ext#",
+                    "1"
+                ]
+            },
+            {
+                "name": "cube5",
+                "parent": "scene",
+                "transform": [
+                    0.979233,
+                    0,
+                    0.202736,
+                    0,
+                    1,
+                    0,
+                    -0.202736,
+                    0,
+                    0.979233,
+                    -0.0187244,
+                    0.5,
+                    -1.14212
+                ],
+                "use_in_baked_light": true,
+                "instance": [
+                    "@ext#",
+                    "1"
+                ]
+            },
+            {
+                "name": "no_bakelight",
+                "parent": "scene",
+                "transform": [
+                    0.471713,
+                    0,
+                    -0.165792,
+                    0,
+                    0.5,
+                    0,
+                    0.165792,
+                    0,
+                    0.471713,
+                    -1.3085,
+                    0.189854,
+                    1.0013
+                ],
+                "instance": [
+                    "@ext#",
+                    "1"
+                ]
+            },
+            {
+                "name": "cube7",
+                "parent": "scene",
+                "transform": [
+                    0.471713,
+                    0,
+                    -0.165792,
+                    0,
+                    0.5,
+                    0,
+                    0.165792,
+                    0,
+                    0.471713,
+                    -0.0449997,
+                    0.189854,
+                    1.43645
+                ],
+                "use_in_baked_light": true,
+                "instance": [
+                    "@ext#",
+                    "1"
+                ]
+            },
+            {
+                "type": "Camera",
+                "name": "camera",
+                "parent": ".",
+                "transform": [
+                    0.938782,
+                    0.179741,
+                    -0.293909,
+                    0,
+                    0.853115,
+                    0.521724,
+                    0.344513,
+                    -0.489785,
+                    0.800888,
+                    -1.5839,
+                    3.6915,
+                    3.79293
+                ]
+            },
+            {
+                "type": "OmniLight",
+                "name": "omni_light",
+                "parent": ".",
+                "transform": [
+                    1,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    0,
+                    1,
+                    -0.981827,
+                    2.00569,
+                    1.17495
+                ],
+                "light_color": {
+                    "r": 0.92549,
+                    "g": 0.572549,
+                    "b": 0.262745,
+                    "a": 1
+                },
+                "omni_range": 3.43052,
+                "omni_attenuation": 2.2974
+            }
+        ]
+    },
     "res://mesh/goal.tscn": {
         "type": "PackedScene",
         "ext": {
@@ -399,12 +1006,12 @@
                             },
                             "vertex": {
                                 "index": 0,
-                                "offset": 0,
+                                "offset": 1652,
                                 "length": 10080
                             },
                             "index": {
                                 "index": 0,
-                                "offset": 10080,
+                                "offset": 11732,
                                 "length": 648
                             },
                             "array_len": 210,
@@ -484,12 +1091,12 @@
                             },
                             "vertex": {
                                 "index": 0,
-                                "offset": 10728,
+                                "offset": 12380,
                                 "length": 24048
                             },
                             "index": {
                                 "index": 0,
-                                "offset": 34776,
+                                "offset": 36428,
                                 "length": 1536
                             },
                             "array_len": 501,
@@ -636,12 +1243,12 @@
                             },
                             "vertex": {
                                 "index": 0,
-                                "offset": 36312,
+                                "offset": 37964,
                                 "length": 28032
                             },
                             "index": {
                                 "index": 0,
-                                "offset": 64344,
+                                "offset": 65996,
                                 "length": 1176
                             },
                             "array_len": 584,
@@ -745,12 +1352,12 @@
                             },
                             "vertex": {
                                 "index": 0,
-                                "offset": 65520,
+                                "offset": 67172,
                                 "length": 8640
                             },
                             "index": {
                                 "index": 0,
-                                "offset": 74160,
+                                "offset": 75812,
                                 "length": 696
                             },
                             "array_len": 180,
@@ -866,12 +1473,12 @@
                             },
                             "vertex": {
                                 "index": 0,
-                                "offset": 74856,
+                                "offset": 76508,
                                 "length": 27064
                             },
                             "index": {
                                 "index": 0,
-                                "offset": 101920,
+                                "offset": 103572,
                                 "length": 840
                             },
                             "array_len": 398,
@@ -10002,23 +10609,6 @@
                 ],
                 "shadow_enabled": true,
                 "directional_shadow_mode": 0
-            }
-        ]
-    },
-    "res://scene/test_child.tscn": {
-        "type": "PackedScene",
-        "ext": {
-            "1": "res://scene/test_parent.tscn"
-        },
-        "sub": [],
-        "nodes": [
-            {
-                "name": "test_child",
-                "number": 20,
-                "instance": [
-                    "@ext#",
-                    "1"
-                ]
             }
         ]
     }
