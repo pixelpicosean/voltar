@@ -22,3 +22,7 @@ material/0 = SubResource( 1 )
 
 [node name="plane" parent="." instance=ExtResource( 2 )]
 cast_shadow = 0
+
+[node name="spot_light" type="SpotLight" parent="."]
+transform = Transform( 0.679428, 3.54689e-08, -0.733742, 0.733742, -4.75705e-08, 0.679428, -1.08058e-08, -1, -5.83457e-08, -1.64133, 2.42199, 1.0668e-07 )
+visible = false

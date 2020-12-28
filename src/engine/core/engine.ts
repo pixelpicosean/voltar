@@ -92,6 +92,7 @@ export class Engine {
 
             let res_str = decompress(loader.resources['media/data.tres'].data);
             let resources = JSON.parse(res_str);
+            loader.resources['media/data.tres'] = undefined;
 
             // fetch resource map updated by loader
             let resource_map = get_resource_map();
@@ -104,8 +105,18 @@ export class Engine {
             // override
             set_resource_map(resource_map);
             set_raw_resource_map(raw_resource_map);
-            set_json_pack_list(meta["json_files"].map((url: string) => JSON.parse(decompress(raw_resource_map[url].data))));
-            set_binary_pack_list(meta["binary_files"].map((url: string) => raw_resource_map[url].data));
+            set_json_pack_list(meta["json_files"].map((url: string) => {
+                let raw = raw_resource_map[url].data;
+                raw_resource_map[url] = undefined;
+                loader.resources[url] = undefined;
+                return JSON.parse(decompress(raw));
+            }));
+            set_binary_pack_list(meta["binary_files"].map((url: string) => {
+                let raw = raw_resource_map[url].data;
+                raw_resource_map[url] = undefined;
+                loader.resources[url] = undefined;
+                return raw;
+            }));
 
             let process_queue: any[] = [];
             const register_task = (e: any) => {
@@ -216,6 +227,8 @@ export class Engine {
                 complete_callback && complete_callback();
 
                 VSG.storage.update_onload_update_list();
+
+                loader.resources = null;
             }
 
             // process preload resources
@@ -239,6 +252,9 @@ export class Engine {
 
                 register_task(tex);
             });
+
+            // no longer need raw image data
+            image_pack.length = 0;
 
             // no tasks to process
             if (process_queue.length === 0) {

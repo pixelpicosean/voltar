@@ -404,10 +404,6 @@ class RenderList_t {
 
         this.elements.length = 0;
         this.base_elements.length = this.max_elements;
-
-        for (let i = 0; i < this.max_elements; i++) {
-            this.base_elements[i] = new Element_t;
-        }
     }
 
     clear() {
@@ -418,6 +414,10 @@ class RenderList_t {
     add_alpha_element() {
         if (this.element_count + this.alpha_element_count >= this.max_elements) return null;
 
+        if (!this.base_elements[this.element_count]) {
+            this.base_elements[this.element_count] = new Element_t;
+        }
+
         let idx = this.max_elements - this.alpha_element_count - 1;
         this.elements[idx] = this.base_elements[this.element_count];
         this.alpha_element_count++;
@@ -426,6 +426,10 @@ class RenderList_t {
 
     add_element() {
         if (this.element_count + this.alpha_element_count >= this.max_elements) return null;
+
+        if (!this.base_elements[this.element_count]) {
+            this.base_elements[this.element_count] = new Element_t;
+        }
 
         this.elements[this.element_count] = this.base_elements[this.element_count];
         return this.elements[this.element_count++];
