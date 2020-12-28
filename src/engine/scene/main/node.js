@@ -1,4 +1,7 @@
-import { remove_items } from 'engine/dep/index.ts';
+import {
+    insert_item,
+    remove_item,
+} from 'engine/dep/index';
 import { node_class_map } from 'engine/registry';
 import { MessageQueue } from 'engine/core/message_queue';
 import {
@@ -8,6 +11,7 @@ import {
 } from 'engine/core/v_object';
 import { InputEvent } from 'engine/core/os/input_event';
 import { Engine } from 'engine/core/engine';
+import { Element as List$Element, List } from 'engine/core/list';
 
 
 export const PAUSE_MODE_INHERIT = 0;
@@ -37,9 +41,20 @@ const this_stack = [];
 /** @type {number[]} */
 const that_stack = [];
 
+class GroupData {
+    constructor() {
+        this.persistent = false;
+        /** @type {import('./scene_tree').Group} */
+        this.group = null;
+    }
+}
+
 class Data {
     constructor() {
         this.filename = '';
+
+        this.instance_state = null;
+        this.inherited_state = null;
 
         /** @type {Node} */
         this.parent = null;
@@ -47,9 +62,6 @@ class Data {
         this.owner = null;
         /** @type {Node[]} */
         this.children = [];
-        /** @type {Set<string>} */
-        this.grouped = new Set();
-
         this.pos = -1;
         this.depth = -1;
         this.name = '';
@@ -62,11 +74,16 @@ class Data {
         /** @type {import('./viewport').Viewport} */
         this.viewport = null;
 
+        /** @type {{ [name: string]: GroupData }} */
+        this.grouped = Object.create(null);
+        /** @type {List$Element<Node>} */
+        this.OW = null;
+        /** @type {List<Node>} */
+        this.owned = new List;
+
         this.pause_mode = PAUSE_MODE_INHERIT;
         /** @type {Node} */
         this.pause_owner = null;
-        /** @type {Node[]} */
-        this.owned = [];
 
         this.physics_process = false;
         this.idle_process = false;
@@ -93,23 +110,12 @@ export class Node extends VObject {
 
     get class() { return 'Node' }
 
-    get filename() { return this.data.filename }
-    set filename(value) { this.data.filename = value }
-
-    get name() { return this.data.name }
-    set name(value) { this.set_name(value) }
-
-    get owner() { return this.data.owner }
-    set owner(value) { this.set_owner(value) }
-
-    get pause_mode() { return this.data.pause_mode }
-    set pause_mode(value) { this.set_pause_mode(value) }
-
     constructor() {
         super();
 
         // Flags to avoid call of `instanceof` for better performance
         this.is_node = true;
+        this.is_viewport = false;
         this.is_canvas_item = false;
         this.is_node_2d = false;
         this.is_control = false;
@@ -117,16 +123,7 @@ export class Node extends VObject {
         this.is_skeleton = false;
         this.is_collision_object = false;
 
-        this.data = new Data();
-
-        /**
-         * Data loaded from `_load_data` method
-         * @type {any[]}
-         */
-        this.instance_data = [];
-
-        /** @type {{ [name: string]: Node }} */
-        this.named_children = {};
+        this.data = new Data;
     }
 
     /* virtuals */
@@ -186,13 +183,14 @@ export class Node extends VObject {
     set_filename(name) {
         this.data.filename = name;
     }
+    get_filename() {
+        return this.data.filename;
+    }
 
     /**
      * @param {string} p_name
      */
     set_name(p_name) {
-        if (this.data.name === p_name) return;
-
         this.data.name = p_name;
         if (this.data.parent) {
             this.data.parent._validate_child_name(this);
@@ -206,13 +204,15 @@ export class Node extends VObject {
             this.get_tree().tree_changed();
         }
     }
+    get_name() { return this.data.name }
 
     /**
      * @param {Node} p_owner
      */
     set_owner(p_owner) {
         if (this.data.owner) {
-            this.owner.data.owned.splice(this.owner.data.owned.indexOf(this), 1);
+            this.owner.data.owned.erase(this.data.OW);
+            this.data.OW = null;
             this.data.owner = null;
         }
 
@@ -232,6 +232,7 @@ export class Node extends VObject {
 
         this._set_owner_no_check(p_owner);
     }
+    get_owner() { return this.data.owner }
 
     /**
      * @param {number} mode
@@ -249,6 +250,7 @@ export class Node extends VObject {
             return;
         }
 
+        /** @type {Node} */
         let owner = null;
 
         if (this.data.pause_mode === PAUSE_MODE_INHERIT) {
@@ -261,6 +263,8 @@ export class Node extends VObject {
 
         this._propagate_pause_owner(owner);
     }
+
+    get_pause_mode() { return this.data.pause_mode }
 
     /**
      * @param {Node} p_node
@@ -315,23 +319,23 @@ export class Node extends VObject {
     }
 
     /**
-     * @param {Node} child
+     * @param {Node} p_child
      */
-    _validate_child_name(child) {
-        const name = child.data.name;
+    _validate_child_name(p_child) {
+        let unique = true;
 
-        let n = name;
-        let i = 2;
-        /** @type {Node} */
-        let du_named = this.named_children[n];
-        while (du_named && du_named !== child) {
-            n = `${name}${i++}`;
-            du_named = this.named_children[n];
+        for (let c of this.data.children) {
+            if (c === p_child) continue;
+            if (c.data.name === p_child.data.name) {
+                unique = false;
+                break;
+            }
         }
 
-        child.data.name = n;
+        if (!unique) {
+            p_child.data.name = `@${p_child.data.name}@${node_hrcr_count++}`;
+        }
     }
-    _generate_serial_child_name(p_child, name) { }
 
     /**
      * @param {number} p_notification
@@ -352,7 +356,7 @@ export class Node extends VObject {
             MessageQueue.get_singleton().push_notification(this, p_notification);
         }
 
-        for (const c of this.data.children) {
+        for (let c of this.data.children) {
             c._propagate_deferred_notification(p_notification, p_reverse);
         }
 
@@ -368,37 +372,27 @@ export class Node extends VObject {
             this.data.depth = 1;
         }
 
-        if (this.class === 'Viewport') {
-            this.data.viewport = /** @type {import('./viewport').Viewport} */(/** @type {unknown} */(this));
-        } else {
+        this.data.viewport = this.is_viewport ? this : null;
+        if (!this.data.viewport && this.data.parent) {
             this.data.viewport = this.data.parent.data.viewport;
         }
 
         this.data.inside_tree = true;
 
         // add to group
-        if (this.data.grouped && this.data.grouped.size > 0) {
-            for (let g of this.data.grouped) {
-                this.data.tree.add_to_group(g, this);
-            }
-        }
-
-        if (this.instance_data.length) {
-            for (let i = 0; i < this.instance_data.length; i++) {
-                this._load_data(this.instance_data[i]);
-            }
-            this.instance_data.length = 0;
+        for (let g in this.data.grouped) {
+            this.data.grouped[g].group = this.data.tree.add_to_group(g, this);
         }
 
         this.notification(NOTIFICATION_ENTER_TREE);
 
         this._enter_tree();
 
-        this.emit_signal('tree_entered', this);
+        this.emit_signal('tree_entered');
 
         this.data.tree.node_added(this);
 
-        for (const c of this.data.children) {
+        for (let c of this.data.children) {
             if (!c.is_inside_tree()) {
                 c._propagate_enter_tree();
             }
@@ -406,7 +400,7 @@ export class Node extends VObject {
     }
     _propagate_ready() {
         this.data.ready_notified = true;
-        for (const c of this.data.children) {
+        for (let c of this.data.children) {
             c._propagate_ready();
         }
 
@@ -419,13 +413,13 @@ export class Node extends VObject {
         }
     }
     _propagate_exit_tree() {
-        for (const c of this.data.children) {
-            c._propagate_exit_tree();
+        for (let i = this.data.children.length - 1; i >= 0; i--) {
+            this.data.children[i]._propagate_exit_tree();
         }
 
         this._exit_tree();
 
-        this.emit_signal('tree_exiting', this);
+        this.emit_signal('tree_exiting');
 
         this.notification(NOTIFICATION_EXIT_TREE, true);
 
@@ -434,10 +428,9 @@ export class Node extends VObject {
         }
 
         // exit groups
-        if (this.data.grouped && this.data.grouped.size > 0) {
-            for (const g of this.data.grouped) {
-                this.data.tree.remove_from_group(g, this);
-            }
+        for (let g in this.data.grouped) {
+            this.data.tree.remove_from_group(g, this);
+            this.data.grouped[g].group = null;
         }
 
         this.data.viewport = null;
@@ -452,10 +445,10 @@ export class Node extends VObject {
         this.data.depth = -1;
     }
     _propagate_after_exit_tree() {
-        for (const c of this.data.children) {
+        for (let c of this.data.children) {
             c._propagate_after_exit_tree();
         }
-        this.emit_signal('tree_exited', this);
+        this.emit_signal('tree_exited');
     }
     _propagate_validate_owner() {
         if (this.data.owner) {
@@ -471,7 +464,7 @@ export class Node extends VObject {
             }
 
             if (!found) {
-                remove_items(this.data.owner.data.owned, this.data.owner.data.owned.indexOf(this), 1);
+                this.data.owner.data.owned.erase(this.data.OW);
                 this.data.owner = null;
             }
         }
@@ -502,7 +495,7 @@ export class Node extends VObject {
      * @param {string} p_name
      */
     _get_child_by_name(p_name) {
-        for (const c of this.data.children) {
+        for (let c of this.data.children) {
             if (c.data.name === p_name) return c;
         }
         return null;
@@ -563,14 +556,32 @@ export class Node extends VObject {
                     this.data.pause_owner = this;
                 }
 
-                // TODO: add to input handling groups
+                if (this.data.input) {
+                    this.add_to_group(`_vp_input${this.get_viewport().instance_id}`);
+                }
+                if (this.data.unhandled_input) {
+                    this.add_to_group(`_vp_unhandled_input${this.get_viewport().instance_id}`);
+                }
+                if (this.data.unhandled_key_input) {
+                    this.add_to_group(`_vp_unhandled_key_input${this.get_viewport().instance_id}`);
+                }
 
                 this.get_tree().node_count++;
+                orphan_node_count--;
             } break;
             case NOTIFICATION_EXIT_TREE: {
                 this.get_tree().node_count--;
+                orphan_node_count++;
 
-                // TODO: remove from input handling groups
+                if (this.data.input) {
+                    this.remove_from_group(`_vp_input${this.get_viewport().instance_id}`);
+                }
+                if (this.data.unhandled_input) {
+                    this.remove_from_group(`_vp_unhandled_input${this.get_viewport().instance_id}`);
+                }
+                if (this.data.unhandled_key_input) {
+                    this.remove_from_group(`_vp_unhandled_key_input${this.get_viewport().instance_id}`);
+                }
 
                 this.data.pause_owner = null;
                 this.data.path_cache = null;
@@ -585,10 +596,10 @@ export class Node extends VObject {
                 this.data.is_constructor = false;
             } break;
             case NOTIFICATION_PREDELETE: {
-                this.owner = null;
+                this.set_owner(null);
 
-                while (this.data.owned.length) {
-                    this.data.owned[0].owner = null;
+                while (this.data.owned.size()) {
+                    this.data.owned.front().value.set_owner(null);
                 }
 
                 if (this.data.parent) {
@@ -597,7 +608,9 @@ export class Node extends VObject {
 
                 const children = this.data.children;
                 while (children.length > 0) {
-                    this.remove_child(children[children.length - 1]);
+                    let child = children[children.length - 1];
+                    this.remove_child(child);
+                    // @Memory: restore this child node
                 }
             } break;
         }
@@ -608,11 +621,11 @@ export class Node extends VObject {
      * @param {Node} p_by_owner
      */
     _propagate_replace_owner(p_owner, p_by_owner) {
-        if (this.owner === p_owner) {
-            this.owner = p_by_owner;
+        if (this.get_owner() === p_owner) {
+            this.set_owner(p_by_owner);
         }
 
-        for (const c of this.data.children) {
+        for (let c of this.data.children) {
             c._propagate_replace_owner(p_owner, p_by_owner);
         }
     }
@@ -622,10 +635,7 @@ export class Node extends VObject {
      * @param {string} p_name
      */
     _add_child_no_check(p_child, p_name) {
-        if (this.named_children[p_name] === p_child) this.named_children[p_name] = undefined;
         p_child.data.name = p_name;
-        this.named_children[p_name] = p_child;
-
         p_child.data.pos = this.data.children.length;
         this.data.children.push(p_child);
         p_child.data.parent = this;
@@ -647,7 +657,8 @@ export class Node extends VObject {
         }
 
         this.data.owner = p_owner;
-        p_owner.data.owned.push(this);
+        p_owner.data.owned.push_back(this);
+        this.data.OW = this.data.owner.data.owned.back();
     }
     /**
      * @param {string} p_name
@@ -660,15 +671,6 @@ export class Node extends VObject {
      * @param {Node} p_child
      */
     add_child(p_child) {
-        // TODO: replace the checks with assertion
-        if (p_child === this) {
-            return;
-        }
-
-        if (p_child === this.data.parent) {
-            return;
-        }
-
         this._validate_child_name(p_child);
         this._add_child_no_check(p_child, p_child.data.name);
     }
@@ -679,7 +681,7 @@ export class Node extends VObject {
     add_child_below_node(p_node, p_child) {
         this.add_child(p_child);
 
-        if (this.is_a_parent_of(p_node)) {
+        if (p_node.data.parent === this) {
             this.move_child(p_child, p_node.get_position_in_parent() + 1);
         } else {
             console.warn(`Cannot move under node ${p_node.name} as ${p_child.name} does not share a parent.`);
@@ -708,8 +710,7 @@ export class Node extends VObject {
         this.remove_child_notify(p_child);
         p_child.notification(NOTIFICATION_UNPARENTED);
 
-        remove_items(children, idx, 1);
-        this.named_children[p_child.data.name] = undefined;
+        remove_item(children, idx);
 
         // update pointer and size
         child_count = children.length;
@@ -730,19 +731,20 @@ export class Node extends VObject {
         }
     }
     remove_and_skip() {
-        const new_owner = this.owner;
-        const children = [];
+        let new_owner = this.get_owner();
+        /** @type {List<Node>} */
+        let children = new List;
 
         while (true) {
             let clear = true;
-            for (const c_node of this.data.children) {
-                if (!c_node.owner) {
+            for (let c_node of this.data.children) {
+                if (!c_node.get_owner()) {
                     continue;
                 }
 
                 this.remove_child(c_node);
                 c_node._propagate_replace_owner(this, null);
-                children.push(c_node);
+                children.push_back(c_node);
                 clear = false;
                 break;
             }
@@ -752,10 +754,11 @@ export class Node extends VObject {
             }
         }
 
-        while (children.length > 0) {
-            const c_node = children.shift();
+        while (!children.empty()) {
+            let c_node = children.front().value;
             this.data.parent.add_child(c_node);
             c_node._propagate_replace_owner(null, new_owner);
+            children.pop_front();
         }
 
         this.data.parent.remove_child(this);
@@ -775,12 +778,14 @@ export class Node extends VObject {
      * @param {string} path
      */
     has_node(path) {
-        return !!this.get_node(path);
+        return !!this.get_node_or_null(path);
     }
     /**
      * @param {string} path
      */
     get_node_or_null(path) {
+        if (!path) return null;
+
         const list = path.split('/');
 
         // Find the base node
@@ -837,7 +842,7 @@ export class Node extends VObject {
             return ret;
         }
         if (p_recursive) {
-            for (const c of this.data.children) {
+            for (let c of this.data.children) {
                 ret = c.find_node(p_mask, true, p_owned);
                 if (ret) {
                     return ret;
@@ -847,15 +852,8 @@ export class Node extends VObject {
         return null;
     }
 
-    /**
-     * @returns {import("./node").Node}
-     */
     get_parent() {
         return this.data.parent;
-    }
-    find_parent() {
-        // TODO: find_parent
-        return null;
     }
 
     get_tree() {
@@ -888,6 +886,7 @@ export class Node extends VObject {
         /** @type {Node} */
         let n = this;
 
+        /** @type {string[]} */
         let path = [];
 
         while (n) {
@@ -899,57 +898,55 @@ export class Node extends VObject {
 
         this.data.path_cache = path.join('/');
     }
-    get_path_to() {
-        // TODO
-    }
 
     /**
      * @param {string} p_identifier
      * @param {boolean} [p_persistent]
      */
     add_to_group(p_identifier, p_persistent = false) {
-        if (!this.data.grouped) {
-            this.data.grouped = new Set();
-        }
-
-        if (this.data.grouped.has(p_identifier)) {
+        if (p_identifier in this.data.grouped) {
             return;
         }
 
+        let gd = new GroupData;
+
         if (this.data.tree) {
-            this.data.tree.add_to_group(p_identifier, this);
+            gd.group = this.data.tree.add_to_group(p_identifier, this);
+        } else {
+            gd.group = null;
         }
 
-        this.data.grouped.add(p_identifier);
+        gd.persistent = p_persistent;
 
-        return this;
+        this.data.grouped[p_identifier] = gd;
     }
     /**
      * @param {string} p_identifier
      */
     remove_from_group(p_identifier) {
-        if (!this.data.grouped) {
-            return this;
-        }
-
         if (this.data.tree) {
             this.data.tree.remove_from_group(p_identifier, this);
         }
 
-        if (this.data.grouped.has(p_identifier)) {
-            this.data.grouped.delete(p_identifier);
-        }
-
-        return this;
+        delete this.data.grouped[p_identifier];
     }
     /**
      * @param {string} p_identifier
      */
     is_in_group(p_identifier) {
-        return this.data.grouped && this.data.grouped.has(p_identifier);
+        return p_identifier in this.data.grouped;
     }
     get_groups() {
-        return this.data.grouped;
+        return Object.keys(this.data.grouped);
+    }
+    get_persistent_group_count() {
+        let count = 0;
+        for (let g in this.data.grouped) {
+            if (this.data.grouped[g].persistent) {
+                count += 1;
+            }
+        }
+        return count;
     }
 
     /**
@@ -968,8 +965,8 @@ export class Node extends VObject {
         const motion_from = Math.min(p_pos, p_child.data.pos);
         const motion_to = Math.max(p_pos, p_child.data.pos);
 
-        remove_items(this.data.children, p_child.data.pos, 1);
-        this.data.children.splice(p_pos, 0, p_child);
+        remove_item(this.data.children, p_child.data.pos);
+        insert_item(this.data.children, p_pos, p_child);
 
         if (this.data.tree) {
             this.data.tree.tree_changed();
@@ -982,8 +979,11 @@ export class Node extends VObject {
         for (let i = motion_from; i <= motion_to; i++) {
             this.data.children[i].notification(NOTIFICATION_MOVED_IN_PARENT);
         }
-
-        // TODO: group changed
+        for (let g in this.data.grouped) {
+            if (this.data.grouped[g] && this.data.grouped[g].group) {
+                this.data.grouped[g].group.changed = true;
+            }
+        }
     }
 
     raise() {
@@ -1008,7 +1008,19 @@ export class Node extends VObject {
      */
     move_child_notify(p_child) { }
 
-    get_owned_by() { }
+    /**
+     * @param {Node} p_by
+     * @param {List<Node>} p_owned
+     */
+    get_owned_by(p_by, p_owned) {
+        if (this.data.owner === p_by) {
+            p_owned.push_back(this);
+        }
+
+        for (let c of this.data.children) {
+            c.get_owned_by(p_by, p_owned);
+        }
+    }
 
     get_index() {
         return this.data.pos;
@@ -1021,7 +1033,7 @@ export class Node extends VObject {
     propagate_notification(p_notification) {
         this.notification(p_notification);
 
-        for (const c of this.data.children) {
+        for (let c of this.data.children) {
             c.propagate_notification(p_notification);
         }
     }
@@ -1040,7 +1052,7 @@ export class Node extends VObject {
             }
         }
 
-        for (const c of this.data.children) {
+        for (let c of this.data.children) {
             c.propagate_call(p_method, p_args, p_parent_first);
         }
 
@@ -1070,8 +1082,6 @@ export class Node extends VObject {
         } else {
             this.remove_from_group('physics_process');
         }
-
-        return this;
     }
     get_physics_process_delta_time() {
         if (this.data.tree) {
@@ -1114,17 +1124,19 @@ export class Node extends VObject {
      * @param {boolean} p_process
      */
     set_physics_process_internal(p_process) {
-        this.data.physics_process_internal = !!p_process;
+        if (this.data.physics_process_internal === p_process) {
+            return;
+        }
+
+        this.data.physics_process_internal = p_process;
 
         if (this.data.physics_process_internal) {
             this.add_to_group('physics_process_internal', false);
         } else {
             this.remove_from_group('physics_process_internal');
         }
-
-        return this;
     }
-    is_physics_process_internal() {
+    is_physics_processing_internal() {
         return this.data.physics_process_internal;
     }
 
@@ -1143,13 +1155,19 @@ export class Node extends VObject {
             this.remove_from_group('idle_process_internal');
         }
     }
-    is_process_internal() {
+    is_processing_internal() {
         return this.data.idle_process_internal;
     }
 
-    /** @param {number} value */
+    /**
+     * @param {number} value
+     */
     set_process_priority(value) {
-        this._process_priority = value;
+        this.data.process_priority = value;
+
+        if (!this.data.tree) {
+            return;
+        }
 
         if (this.data.idle_process) {
             this.data.tree.make_group_changed('idle_process')
@@ -1163,6 +1181,9 @@ export class Node extends VObject {
         if (this.data.physics_process_internal) {
             this.data.tree.make_group_changed('physics_process_internal')
         }
+    }
+    get_process_priority() {
+        return this.data.process_priority;
     }
 
     /**
@@ -1287,6 +1308,15 @@ export class Node extends VObject {
             Engine.get_singleton().get_main_loop().queue_delete(this);
         }
     }
+    free() {
+        this.data.grouped = Object.create(null);
+        this.data.owned.clear();
+        this.data.children = [];
+
+        super.free();
+
+        orphan_node_count--;
+    }
 
     is_owned_by_parent() {
         return this.data.parent_owned;
@@ -1297,3 +1327,6 @@ export class Node extends VObject {
     }
 }
 node_class_map['Node'] = GDCLASS(Node, VObject)
+
+let orphan_node_count = 0;
+let node_hrcr_count = 1;

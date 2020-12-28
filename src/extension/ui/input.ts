@@ -63,7 +63,7 @@ export class Input extends v.Node2D {
         this.input_elem = document.createElement('input');
         document.body.appendChild(this.input_elem);
 
-        this.input_elem.name = this.name;
+        this.input_elem.name = this.get_name();
         this.input_elem.type = this.el_type;
         this.input_elem.className = 'scene_input';
         this.input_elem.style.display = 'block';

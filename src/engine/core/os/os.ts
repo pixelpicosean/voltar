@@ -405,8 +405,8 @@ export class OS {
                 this.canvas.style.height = `${window.innerHeight}px`;
             } else {
                 // adjust the canvas style, to fit the window
-                const window_size = Vector2.new(window.innerWidth, window.innerHeight);
-                const game_size = Vector2.new(this.video_mode.width, this.video_mode.height);
+                const window_size = Vector2.create(window.innerWidth, window.innerHeight);
+                const game_size = Vector2.create(this.video_mode.width, this.video_mode.height);
                 const window_aspect = window_size.aspect();
                 const game_aspect = game_size.aspect();
                 VSG.canvas_render.resize(game_size.x, game_size.y);

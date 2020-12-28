@@ -1,5 +1,6 @@
 import { node_class_map } from "engine/registry";
 import { GDCLASS } from "engine/core/v_object";
+import { Element as List$Element, List } from "engine/core/list";
 import { SelfList } from "engine/core/self_list";
 import { Vector3, Vector3Like } from "engine/core/math/vector3.js";
 import { Transform } from "engine/core/math/transform.js";
@@ -44,14 +45,20 @@ export class Spatial extends Node {
 
             dirty: TRANSFORM_DIRTY_NONE,
 
-            /** @type {Spatial} */
-            parent: null,
+            /** @type {Viewport} */
+            viewport: null,
 
             toplevel_active: false,
             toplevel: false,
             inside_world: false,
 
             children_lock: 0,
+            /** @type {Spatial} */
+            parent: null,
+            /** @type {List<Spatial>} */
+            children: new List,
+            /** @type {List$Element<Spatial>} */
+            C: null,
 
             ignore_notification: false,
             notify_local_transform: false,
@@ -59,7 +66,36 @@ export class Spatial extends Node {
 
             visible: true,
             disable_scale: false,
+        };
+    }
+
+    get_parent_spatial() {
+        return this.d_data.parent;
+    }
+
+    /**
+     * @param {boolean} p_enabled
+     */
+    set_as_top_level(p_enabled) {
+        if (this.d_data.toplevel === p_enabled) {
+            return;
         }
+        if (this.is_inside_tree()) {
+            if (p_enabled) {
+                this.set_transform(this.get_global_transform());
+            } else if (this.d_data.parent) {
+                this.set_transform(this.d_data.parent.get_global_transform().affine_inverse().append(this.get_global_transform()));
+            }
+
+            this.d_data.toplevel = p_enabled;
+            this.d_data.toplevel_active = p_enabled;
+        } else {
+            this.d_data.toplevel = p_enabled;
+        }
+    }
+
+    is_set_as_top_level() {
+        return this.d_data.toplevel;
     }
 
     /**
@@ -289,7 +325,7 @@ export class Spatial extends Node {
      * @param {Transform} p_transform
      */
     set_global_transform(p_transform) {
-        let xform = Transform.new();
+        let xform = Transform.create();
         if (this.d_data.parent && !this.d_data.toplevel_active) {
             let p = this.d_data.parent;
             xform.copy(p.get_global_transform()).affine_invert().append(p_transform);
@@ -305,7 +341,7 @@ export class Spatial extends Node {
      * @param {Vector3Like} origin
      */
     set_global_transform_v(basis, origin) {
-        let xform = Transform.new();
+        let xform = Transform.create();
         xform.set(
             basis.elements[0].x,
             basis.elements[0].y,
@@ -339,7 +375,7 @@ export class Spatial extends Node {
      * @param {number} z
      */
     set_global_transform_n(xx, xy, xz, yx, yy, yz, zx, zy, zz, x, y, z) {
-        let xform = Transform.new();
+        let xform = Transform.create();
         xform.set(
             xx, xy, xz,
             yx, yy, yz,
@@ -386,7 +422,7 @@ export class Spatial extends Node {
     }
 
     set_identity() {
-        let t = Transform.new();
+        let t = Transform.create();
         this.set_transform(t);
         Transform.free(t);
     }
@@ -488,14 +524,17 @@ export class Spatial extends Node {
      * @param {Spatial} p_origin
      */
     _propagate_transform_changed(p_origin) {
-        if (!this.is_inside_tree()) return;
+        if (!this.is_inside_tree()) {
+            return;
+        }
 
-        for (let i = 0, children = this.data.children; i < children.length; i++) {
-            let c = /** @type {Spatial} */(children[i]);
-            if (!c.is_spatial) continue;
-            if (c.d_data.toplevel_active) continue;
+        this.d_data.children_lock++;
 
-            c._propagate_transform_changed(p_origin);
+        for (let E = this.d_data.children.front(); E; E = E.next) {
+            if (E.value.d_data.toplevel_active) {
+                continue;
+            }
+            E.value._propagate_transform_changed(p_origin);
         }
 
         if (this.d_data.notify_transform && !this.d_data.ignore_notification && !this.xform_change.in_list()) {
@@ -503,17 +542,19 @@ export class Spatial extends Node {
         }
 
         this.d_data.dirty |= TRANSFORM_DIRTY_GLOBAL;
+
+        this.d_data.children_lock--;
     }
 
     _propagate_visibility_changed() {
         this.notification(NOTIFICATION_VISIBILITY_CHANGED_3D);
         this.emit_signal("visibility_changed");
 
-        for (let i = 0, children = this.data.children; i < children.length; i++) {
-            let c = /** @type {Spatial} */(children[i]);
-            if (c.is_spatial) continue;
-
-            if (!c.d_data.visible) continue;
+        for (let E = this.d_data.children.front(); E; E = E.next) {
+            let c = E.value;
+            if (!c.is_spatial || !c.d_data.visible) {
+                continue;
+            }
 
             c._propagate_visibility_changed();
         }
@@ -521,6 +562,8 @@ export class Spatial extends Node {
 
     _update_local_transform() {
         this.d_data.local_transform.basis.set_euler_scale(this.d_data.rotation, this.d_data.scale);
+
+        this.d_data.dirty &= ~TRANSFORM_DIRTY_LOCAL;
     }
 
     _notify_dirty() {
@@ -536,8 +579,18 @@ export class Spatial extends Node {
         switch (p_what) {
             case NOTIFICATION_ENTER_TREE: {
                 let p = this.get_parent();
-                if (p && p.is_spatial) {
-                    this.d_data.parent = /** @type {Spatial} */(p);
+                if (p) {
+                    if (p.is_spatial) {
+                        this.d_data.parent = /** @type {Spatial} */(p);
+                    } else {
+                        this.d_data.parent = null;
+                    }
+                }
+
+                if (this.d_data.parent) {
+                    this.d_data.C = this.d_data.parent.d_data.children.push_back(this);
+                } else {
+                    this.d_data.C = null;
                 }
 
                 if (this.d_data.toplevel) {
@@ -561,16 +614,22 @@ export class Spatial extends Node {
                 if (this.xform_change.in_list()) {
                     this.get_tree().xform_change_list.remove(this.xform_change);
                 }
+                if (this.d_data.C) {
+                    this.d_data.parent.d_data.children.erase(this.d_data.C);
+                }
                 this.d_data.parent = null;
+                this.d_data.C = null;
                 this.d_data.toplevel_active = false;
             } break;
             case NOTIFICATION_ENTER_WORLD: {
                 this.d_data.inside_world = true;
-                this.data.viewport = null;
+                this.d_data.viewport = null;
                 let parent = this.get_parent();
-                while (parent && !this.data.viewport) {
-                    if (parent.class === "Viewport") {
-                        this.data.viewport = /** @type {Viewport} */(parent);
+                while (parent && !this.d_data.viewport) {
+                    if (parent.is_viewport) {
+                        this.d_data.viewport = /** @type {Viewport} */(parent);
+                    } else {
+                        this.d_data.viewport = null;
                     }
                     parent = parent.get_parent();
                 }
@@ -580,7 +639,7 @@ export class Spatial extends Node {
             case NOTIFICATION_EXIT_WORLD: {
                 this._exit_world();
 
-                this.data.viewport = null;
+                this.d_data.viewport = null;
                 this.d_data.inside_world = false;
             } break;
         }

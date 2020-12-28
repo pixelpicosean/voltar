@@ -6,10 +6,10 @@ import Tween from './tween.js';
 const TweenManager_Pool = [];
 
 export default class TweenManager {
-    static new() {
+    static create() {
         const t = TweenManager_Pool.pop();
         if (!t) {
-            return new TweenManager();
+            return new TweenManager;
         } else {
             return t;
         }
@@ -55,7 +55,7 @@ export default class TweenManager {
             add = false;
         }
 
-        let t = new Tween();
+        let t = new Tween;
         if (add) {
             this.tweens.push(t);
         }

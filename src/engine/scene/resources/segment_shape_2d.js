@@ -8,55 +8,41 @@ import { Shape2D } from "./shape_2d.js";
 
 
 export class SegmentShape2D extends Shape2D {
-    get a() {
-        return this._a;
-    }
-    set a(value) {
-        this._a.copy(value);
+    /**
+     * @param {Vector2Like} value
+     */
+    set_a(value) {
+        this.a.copy(value);
         this._update_shape();
     }
     /**
-     * @param {Vector2Like|number} x
+     * @param {number} x
      * @param {number} y
      */
-    set_a(x, y = undefined) {
-        if (y !== undefined) {
-            // @ts-ignore
-            this._a.set(x, y);
-        } else {
-            // @ts-ignore
-            this._a.copy(x);
-        }
-        return this;
+    set_a_n(x, y) {
+        this.a.set(x, y);
     }
 
-    get b() {
-        return this._b;
-    }
-    set b(value) {
-        this._b.copy(value);
+    /**
+     * @param {Vector2Like} value
+     */
+    set_b(value) {
+        this.b.copy(value);
         this._update_shape();
     }
     /**
-     * @param {Vector2Like|number} x
+     * @param {number} x
      * @param {number} y
      */
-    set_b(x, y = undefined) {
-        if (y !== undefined) {
-            // @ts-ignore
-            this._b.set(x, y);
-        } else {
-            // @ts-ignore
-            this._b.copy(x);
-        }
-        return this;
+    set_b_n(x, y) {
+        this.b.set(x, y);
     }
 
     constructor() {
         super(Physics2DServer.get_singleton().segment_shape_create());
 
-        this._a = new Vector2();
-        this._b = new Vector2();
+        this.a = new Vector2();
+        this.b = new Vector2();
         this._update_shape();
     }
     _load_data(p_data) {
@@ -70,10 +56,10 @@ export class SegmentShape2D extends Shape2D {
     }
 
     get_rect() {
-        return Rect2.new(this._a.x, this._a.y).expand_to(this._b);
+        return Rect2.create(this.a.x, this.a.y).expand_to(this.b);
     }
     _update_shape() {
-        const r = Rect2.new(this._a.x, this._a.y, this._b.x, this._b.y);
+        const r = Rect2.create(this.a.x, this.a.y, this.b.x, this.b.y);
         this.get_rid().set_data(r);
         Rect2.free(r);
     }
@@ -81,47 +67,27 @@ export class SegmentShape2D extends Shape2D {
 res_class_map['SegmentShape2D'] = SegmentShape2D
 
 export class RayShape2D extends Shape2D {
-    get length() {
-        return this._length;
-    }
-    /**
-     * @param {number} value
-     */
-    set length(value) {
-        this._length = value;
-        this._update_shape();
-    }
     /**
      * @param {number} value
      */
     set_length(value) {
         this.length = value;
-        return this;
-    }
-
-    get slips_on_slope() {
-        return this._slips_on_slope;
-    }
-    /**
-     * @param {boolean} value
-     */
-    set slips_on_slope(value) {
-        this._slips_on_slope = value;
         this._update_shape();
     }
+
     /**
      * @param {boolean} value
      */
     set_slips_on_slope(value) {
         this.slips_on_slope = value;
-        return this;
+        this._update_shape();
     }
 
     constructor() {
         super(Physics2DServer.get_singleton().ray_shape_create());
 
-        this._length = 20;
-        this._slips_on_slope = false;
+        this.length = 20;
+        this.slips_on_slope = false;
         this._update_shape();
     }
     _load_data(p_data) {
@@ -135,16 +101,16 @@ export class RayShape2D extends Shape2D {
     }
 
     get_rect() {
-        const rect = Rect2.new();
-        const vec = Vector2.new(0, this._length);
+        const rect = Rect2.create();
+        const vec = Vector2.create(0, this.length);
         rect.expand_to(vec).grow_to(0.707 * 4);
         Vector2.free(vec);
         return rect;
     }
     _update_shape() {
         this.get_rid().set_data({
-            length: this._length,
-            slips_on_slope: this._slips_on_slope,
+            length: this.length,
+            slips_on_slope: this.slips_on_slope,
         })
     }
 }

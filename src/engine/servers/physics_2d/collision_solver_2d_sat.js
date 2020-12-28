@@ -499,7 +499,7 @@ class SeparatorAxisTest2D {
  * @param {Vector2} m_b
  */
 const TEST_POINT = (separator, cast_A, cast_B, p_motion_A, p_motion_B, m_a, m_b) => {
-    const vec = Vector2.new();
+    const vec = Vector2.create();
     const result = (
         (!separator.test_axis((vec.copy(m_a).subtract(m_b).normalize())))
         ||
@@ -976,7 +976,7 @@ const _collision_circle_convex_polygon = (cast_A, cast_B, with_margin) => {
         }
 
         // poly faces and poly points vs circle
-        const point = Vector2.new();
+        const point = Vector2.create();
         for (let i = 0, len = p_convex_B.get_point_count(); i < len; i++) {
             const A_origin = p_transform_A.get_origin();
             if (TEST_POINT(separator, cast_A, cast_B, p_motion_A, p_motion_B, A_origin, p_transform_B.xform(p_convex_B._points[i].pos, point))) {
@@ -1181,7 +1181,7 @@ const _collision_rectangle_convex_polygon = (cast_A, cast_B, with_margin) => {
             return;
         }
 
-        const vec = Vector2.new();
+        const vec = Vector2.create();
 
         // box faces
         if (!separator.test_axis(vec.set(p_transform_A.a, p_transform_A.b).normalize())) {
@@ -1195,7 +1195,7 @@ const _collision_rectangle_convex_polygon = (cast_A, cast_B, with_margin) => {
         }
 
         // convex faces
-        const boxinv = Transform2D.new();
+        const boxinv = Transform2D.create();
         if (with_margin) {
             boxinv.copy(p_transform_A).affine_inverse();
         }

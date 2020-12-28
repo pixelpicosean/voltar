@@ -90,6 +90,7 @@ export class Item {
         this.sort_y = false;
         this.modulate = new Color(1, 1, 1, 1);
         this.self_modulate = new Color(1, 1, 1, 1);
+        this.use_parent_material = false;
         this.index = 0;
         this.children_order_dirty = true;
         this.ysort_children_count = -1;
@@ -132,13 +133,13 @@ export class Item {
             return this.rect;
         }
 
-        const xf = Transform2D.new();
+        const xf = Transform2D.create();
         let found_xform = false;
         let first = true;
 
         const cmd = this.commands;
 
-        const r = Rect2.new();
+        const r = Rect2.create();
         for (let i = 0; i < s; i++) {
             const c = cmd[i];
             r.set(0, 0, 0, 0);
@@ -152,7 +153,7 @@ export class Item {
                 } break;
                 case TYPE_POLYLINE: {
                     const pline = /** @type {CommandPolyLine} */(c);
-                    const vec = Vector2.new();
+                    const vec = Vector2.create();
                     const tri = pline.triangles;
                     for (let j = 0, len = Math.floor(tri.length / 2); j < len; j++) {
                         if (j === 0) {
@@ -537,8 +538,8 @@ export class VisualServerCanvas {
             }
         }
 
-        const t = Vector2.new();
-        const tangent = Vector2.new();
+        const t = Vector2.create();
+        const tangent = Vector2.create();
         for (let i = 0, len = Math.floor(p_points.length / 2); i < len; i++) {
             const index = i * 2;
 
@@ -929,7 +930,7 @@ export class VisualServerCanvas {
                 const ci2 = p_canvas.child_items[i];
                 this._render_canvas_item_tree(ci2, p_transform, p_clip_rect, p_canvas.modulate, null);
 
-                const xform2 = Transform2D.new();
+                const xform2 = Transform2D.create();
                 if (ci2.mirror.x !== 0) {
                     xform2.copy(p_transform).translate(ci2.mirror.x, 0);
                     this._render_canvas_item_tree(ci2, xform2, p_clip_rect, p_canvas.modulate, null);
@@ -997,7 +998,7 @@ export class VisualServerCanvas {
         global_rect.x += p_clip_rect.x;
         global_rect.y += p_clip_rect.y;
 
-        const modulate = Color.new().copy(ci.modulate).multiply(p_module);
+        const modulate = Color.create().copy(ci.modulate).multiply(p_module);
 
         if (modulate.a < 0.007) {
             Color.free(modulate);
@@ -1023,7 +1024,7 @@ export class VisualServerCanvas {
         if (ci.sort_y) {
             if (ci.ysort_children_count === -1) {
                 ci.ysort_children_count = 0;
-                const xform = Transform2D.new();
+                const xform = Transform2D.create();
                 ci.ysort_children_count = this._collect_ysort_children(ci, xform, null, ci.ysort_children_count);
                 Transform2D.free(xform);
             }
@@ -1037,7 +1038,7 @@ export class VisualServerCanvas {
                 }
             }
 
-            const xform = Transform2D.new();
+            const xform = Transform2D.create();
             this._collect_ysort_children(ci, xform, child_items, 0);
             Transform2D.free(xform);
 
@@ -1058,7 +1059,7 @@ export class VisualServerCanvas {
             }
             if (ci.sort_y) {
                 const xf = xform.clone().append(item.ysort_xform);
-                const mo = Color.new().copy(modulate);
+                const mo = Color.create().copy(modulate);
                 this._render_canvas_item(item, xf, p_clip_rect, /* mo.multiply(item.ysort_modulate) */null, p_z, z_list, z_last_list, /** @type {Item} */(ci.final_clip_owner));
                 Color.free(mo);
                 Transform2D.free(xf);

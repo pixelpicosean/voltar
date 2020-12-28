@@ -86,7 +86,7 @@ class Particle {
 
         this.seed = 0;
     }
-    static new() {
+    static create() {
         const p = ParticlePool.pop();
         if (p) {
             return p;
@@ -144,7 +144,7 @@ export class CPUParticles2D extends Node2D {
             this.particles.length = p_amount;
         } else if (len < p_amount) {
             for (let i = len; i < p_amount; i++) {
-                this.particles.push(Particle.new());
+                this.particles.push(Particle.create());
             }
         }
 
@@ -532,7 +532,7 @@ export class CPUParticles2D extends Node2D {
             if (!this.local_coords) {
                 const pc = this.particles.length;
 
-                const t = Transform2D.new();
+                const t = Transform2D.create();
 
                 const ptr = this.particle_data;
                 let ptr_idx = 0;
@@ -693,8 +693,8 @@ export class CPUParticles2D extends Node2D {
             }
         }
 
-        const emission_xform = Transform2D.new();
-        const velocity_xform = Transform2D.new();
+        const emission_xform = Transform2D.create();
+        const velocity_xform = Transform2D.create();
         if (!this.local_coords) {
             emission_xform.copy(this.get_global_transform());
             velocity_xform.copy(emission_xform);
@@ -771,7 +771,7 @@ export class CPUParticles2D extends Node2D {
                 p.anim_offset_rand = randf();
 
                 let angle1_rad = Math.atan2(this.direction.y, this.direction.x) + (randf() * 2 - 1) * Math_PI * this.spread / 180;
-                const rot = Vector2.new(Math.cos(angle1_rad), Math.sin(angle1_rad));
+                const rot = Vector2.create(Math.cos(angle1_rad), Math.sin(angle1_rad));
                 p.velocity.copy(rot).scale(this.parameters[PARAM_INITIAL_LINEAR_VELOCITY] * lerp(1, randf(), this.randomness[PARAM_INITIAL_LINEAR_VELOCITY]));
 
                 let base_angle = (this.parameters[PARAM_ANGLE] + tex_angle) * lerp(1, p.angle_rand, this.randomness[PARAM_ANGLE]);
@@ -786,7 +786,7 @@ export class CPUParticles2D extends Node2D {
                 p.lifetime = this.lifetime * (1 - randf() * this.lifetime_randomness);
                 p.base_color.set(1, 1, 1, 1);
 
-                const vec = Vector2.new();
+                const vec = Vector2.create();
                 switch (this.emission_shape) {
                     case EMISSION_SHAPE_POINT: {
                     } break;
@@ -894,7 +894,7 @@ export class CPUParticles2D extends Node2D {
                 }
 
                 const force = this.gravity.clone();
-                const pos = Vector2.new(p.transform.tx, p.transform.ty);
+                const pos = Vector2.create(p.transform.tx, p.transform.ty);
 
                 // Apply linear acceleration
                 if (p.velocity.length_squared() > 0) {
@@ -912,7 +912,7 @@ export class CPUParticles2D extends Node2D {
                     force.add(diff_n.scale((this.parameters[PARAM_RADIAL_ACCEL] + tex_radial_accel) * lerp(1, randf(), this.randomness[PARAM_RADIAL_ACCEL])));
                 }
                 // Apply tangential acceleration
-                const yx = Vector2.new(diff.y, diff.x);
+                const yx = Vector2.create(diff.y, diff.x);
                 if (yx.length_squared() > 0) {
                     yx.multiply(-1, 1).normalize()
                         .scale((this.parameters[PARAM_TANGENTIAL_ACCEL] + tex_tangential_accel) * lerp(1, randf(), this.randomness[PARAM_TANGENTIAL_ACCEL]))
@@ -924,7 +924,7 @@ export class CPUParticles2D extends Node2D {
                 const orbit_amount = (this.parameters[PARAM_ORBIT_VELOCITY] + tex_orbit_velocity) * lerp(1, randf(), this.randomness[PARAM_ORBIT_VELOCITY]);
                 if (orbit_amount !== 0) {
                     const ang = orbit_amount * local_delta * Math_PI * 2;
-                    const rot = Transform2D.new();
+                    const rot = Transform2D.create();
                     rot.rotate(-ang);
                     const x_diff = rot.basis_xform(diff);
                     p.transform.tx -= diff.x;
@@ -1131,7 +1131,7 @@ export class CPUParticles2D extends Node2D {
             }
         }
 
-        const tt = Transform2D.new();
+        const tt = Transform2D.create();
 
         for (let i = 0; i < pc; i++) {
             const idx = order ? order[i] : i;
@@ -1186,7 +1186,7 @@ export class CPUParticles2D extends Node2D {
         const w = this._texture.get_width();
         const h = this._texture.get_height();
 
-        const color = Color.new(1, 1, 1, 1);
+        const color = Color.create(1, 1, 1, 1);
         const c_8bit = color.as_rgba8();
         Color.free(color);
 

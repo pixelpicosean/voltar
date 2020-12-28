@@ -9,13 +9,10 @@ import { Shape2D } from "./shape_2d.js";
 export class RectangleShape2D extends Shape2D {
     get type() { return 0 }
 
-    get extents() { return this._extents }
-    set extents(value) { this.set_extents_n(value.x, value.y) }
-
     constructor() {
         super(Physics2DServer.get_singleton().rectangle_shape_create());
 
-        this._extents = new Vector2(10, 10);
+        this.extents = new Vector2(10, 10);
         this._update_shape();
     }
 
@@ -41,7 +38,7 @@ export class RectangleShape2D extends Shape2D {
      * @param {number} y
      */
     set_extents_n(x, y) {
-        this._extents.set(x, y);
+        this.extents.set(x, y);
         this._update_shape();
     }
 
@@ -49,18 +46,18 @@ export class RectangleShape2D extends Shape2D {
      * @param {Rect2} [p_rect]
      * @returns {Rect2}
      */
-    get_rect(p_rect = Rect2.new()) {
-        p_rect.x = -this._extents.width;
-        p_rect.y = -this._extents.height;
-        p_rect.width = this._extents.width * 2;
-        p_rect.height = this._extents.height * 2;
+    get_rect(p_rect = Rect2.create()) {
+        p_rect.x = -this.extents.width;
+        p_rect.y = -this.extents.height;
+        p_rect.width = this.extents.width * 2;
+        p_rect.height = this.extents.height * 2;
         return p_rect;
     }
 
     /* private */
 
     _update_shape() {
-        this.shape.set_data(this._extents);
+        this.shape.set_data(this.extents);
     }
 }
 res_class_map['RectangleShape2D'] = RectangleShape2D

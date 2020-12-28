@@ -216,7 +216,7 @@ export class Camera2D extends Node2D {
                 this._update_scroll();
             } break;
             case NOTIFICATION_TRANSFORM_CHANGED: {
-                if (!this.is_process_internal() && !this.is_physics_process_internal()) {
+                if (!this.is_processing_internal() && !this.is_physics_processing_internal()) {
                     this._update_scroll();
                 }
             } break;
@@ -291,7 +291,7 @@ export class Camera2D extends Node2D {
 
     align() {
         const rect = this.viewport.get_visible_rect();
-        const screen_size = Vector2.new(rect.width, rect.height);
+        const screen_size = Vector2.create(rect.width, rect.height);
 
         const current_camera_pos = this.get_global_transform().get_origin();
         if (this._anchor_mode === ANCHOR_MODE_DRAG_CENTER) {
@@ -480,8 +480,8 @@ export class Camera2D extends Node2D {
             Transform2D.free(xform);
 
             const rect = this.viewport.get_visible_rect();
-            const screen_size = Vector2.new(rect.width, rect.height);
-            const screen_offset = (this._anchor_mode === ANCHOR_MODE_DRAG_CENTER ? (screen_size.clone().scale(0.5)) : Vector2.new(0, 0));
+            const screen_size = Vector2.create(rect.width, rect.height);
+            const screen_offset = (this._anchor_mode === ANCHOR_MODE_DRAG_CENTER ? (screen_size.clone().scale(0.5)) : Vector2.create(0, 0));
 
             this.get_tree().call_group_flags(GROUP_CALL_REALTIME, this.group_name, '_camera_moved', xform, screen_offset);
 
@@ -512,14 +512,14 @@ export class Camera2D extends Node2D {
 
     get_camera_transform() {
         if (!this.get_tree()) {
-            return Transform2D.new();
+            return Transform2D.create();
         }
 
         const rect = this.viewport.get_visible_rect();
-        const screen_size = Vector2.new(rect.width, rect.height);
+        const screen_size = Vector2.create(rect.width, rect.height);
 
         const new_camera_pos = this.get_global_transform().get_origin();
-        const ret_camera_pos = Vector2.new();
+        const ret_camera_pos = Vector2.create();
 
         if (!this.first) {
             if (this._anchor_mode === ANCHOR_MODE_DRAG_CENTER) {
@@ -556,8 +556,8 @@ export class Camera2D extends Node2D {
                 this.camera_pos.copy(new_camera_pos);
             }
 
-            const screen_offset = (this._anchor_mode === ANCHOR_MODE_DRAG_CENTER ? (screen_size.clone().scale(0.5).multiply(this._zoom)) : Vector2.new(0, 0));
-            const screen_rect = Rect2.new(
+            const screen_offset = (this._anchor_mode === ANCHOR_MODE_DRAG_CENTER ? (screen_size.clone().scale(0.5).multiply(this._zoom)) : Vector2.create(0, 0));
+            const screen_rect = Rect2.create(
                 -screen_offset.x + this.camera_pos.x, -screen_offset.y + this.camera_pos.y,
                 screen_size.x * this._zoom.x, screen_size.y * this._zoom.y
             );
@@ -594,14 +594,14 @@ export class Camera2D extends Node2D {
             this.first = false;
         }
 
-        const screen_offset = (this._anchor_mode === ANCHOR_MODE_DRAG_CENTER ? (screen_size.clone().scale(0.5).multiply(this._zoom)) : Vector2.new(0, 0));
+        const screen_offset = (this._anchor_mode === ANCHOR_MODE_DRAG_CENTER ? (screen_size.clone().scale(0.5).multiply(this._zoom)) : Vector2.create(0, 0));
 
         let angle = this.get_global_transform().get_rotation();
         if (this._rotating) {
             screen_offset.rotate(angle);
         }
 
-        const screen_rect = Rect2.new(
+        const screen_rect = Rect2.create(
             -screen_offset.x + ret_camera_pos.x, -screen_offset.y + ret_camera_pos.y,
             screen_size.x * this._zoom.x, screen_size.y * this._zoom.y
         );
@@ -628,7 +628,7 @@ export class Camera2D extends Node2D {
             screen_rect.y + screen_rect.height * 0.5
         );
 
-        const xform = Transform2D.new();
+        const xform = Transform2D.create();
         if (this._rotating) {
             xform.set_rotation(angle);
         }

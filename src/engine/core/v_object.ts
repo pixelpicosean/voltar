@@ -64,6 +64,11 @@ export class VObject {
 
     _events: Map<string | Symbol, EventListener[]> = new Map();
 
+    /**
+     * This method is called to reset it while reuse recylced instances.
+     */
+    _init() { }
+
     _notification(what: number) { }
 
     _notificationv(what: number, reversed: boolean) { }

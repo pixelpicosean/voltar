@@ -60,6 +60,11 @@ export class List<T> {
             this.erase(this.data.last);
         }
     }
+    pop_front() {
+        if (this.data && this.data.first) {
+            this.erase(this.data.first);
+        }
+    }
 
     find(value: T) {
         let it = this.front();
@@ -88,4 +93,68 @@ export class List<T> {
             this.erase(this.front());
         }
     }
+
+    clone() {
+        let list = new List<T>();
+        let it = this.front();
+        while (it) {
+            list.push_back(it.value);
+            it = it.next;
+        }
+        return list;
+    }
+
+    empty(): boolean {
+        return (!this.data || !this.data.size_cache);
+    }
+
+    size(): number {
+        return this.data ? this.data.size_cache : 0;
+    }
+
+    sort(func: (a: Element<T>, b: Element<T>) => number) {
+        let s = this.size();
+
+        if (s < 2) return;
+
+        let buffer: Element<T>[] = array_create(s);
+
+        let idx = 0;
+        for (let E = this.front(); E; E = E.next) {
+            buffer[idx] = E;
+            idx++;
+        }
+        buffer.sort(func);
+
+        this.data.first = buffer[0];
+        buffer[0].prev = null;
+        buffer[0].next = buffer[1];
+
+        this.data.last = buffer[s - 1];
+        buffer[s - 1].prev = buffer[s - 2]
+        buffer[s - 1].next = null;
+
+        for (let i = 1; i < s - 1; i++) {
+            buffer[i].prev = buffer[i - 1];
+            buffer[i].next = buffer[i + 1];
+        }
+
+        array_free(buffer);
+    }
+}
+
+let array_pool: { [len: number]: any[][] } = Object.create(null);
+function array_create<T>(len: number): T[] {
+    let pool = array_pool[len];
+    if (pool) {
+        return pool.pop();
+    }
+    return [];
+}
+function array_free<T>(arr: T[]) {
+    let pool = array_pool[arr.length];
+    if (!pool) {
+        pool = [];
+    }
+    pool.push(arr);
 }

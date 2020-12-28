@@ -45,7 +45,7 @@ class RC {
 /** @type {PosBin[]} */
 const PosBinPool = [];
 class PosBin {
-    static new() {
+    static create() {
         const p = PosBinPool.pop();
         if (!p) {
             return new PosBin();
@@ -258,9 +258,9 @@ export class BroadPhase2D {
         const pos = p_from.clone().scale(1 / this.cell_size).floor();
         const end = p_to.clone().scale(1 / this.cell_size).floor();
 
-        const step = Vector2.new(Math.sign(dir.x), Math.sign(dir.y));
+        const step = Vector2.create(Math.sign(dir.x), Math.sign(dir.y));
 
-        const max = Vector2.new();
+        const max = Vector2.create();
 
         if (dir.x < 0) {
             max.x = (Math.floor(pos.x) * this.cell_size - p_from.x) / dir.x;
@@ -411,7 +411,7 @@ export class BroadPhase2D {
      */
     _enter_grid(p_elem, p_rect, p_static) {
         // use magic number to avoid floating point issues
-        const sz = Vector2.new(
+        const sz = Vector2.create(
             p_rect.width / this.cell_size * LARGE_ELEMENT_FI,
             p_rect.height / this.cell_size * LARGE_ELEMENT_FI
         )
@@ -440,8 +440,8 @@ export class BroadPhase2D {
             return;
         }
 
-        const from = Vector2.new(Math.floor(p_rect.x / this.cell_size), Math.floor(p_rect.y / this.cell_size));
-        const to = Vector2.new(Math.floor((p_rect.x + p_rect.width) / this.cell_size), Math.floor((p_rect.y + p_rect.height) / this.cell_size));
+        const from = Vector2.create(Math.floor(p_rect.x / this.cell_size), Math.floor(p_rect.y / this.cell_size));
+        const to = Vector2.create(Math.floor((p_rect.x + p_rect.width) / this.cell_size), Math.floor((p_rect.y + p_rect.height) / this.cell_size));
 
         for (let i = from.x; i <= to.x; i++) {
             for (let j = from.y; j <= to.y; j++) {
@@ -463,7 +463,7 @@ export class BroadPhase2D {
                 let entered = false;
 
                 if (!pb) {
-                    pb = PosBin.new();
+                    pb = PosBin.create();
                     pb.key.set(i, j);
                     pb.next = r.get(j);
                     r.set(j, pb);
@@ -538,7 +538,7 @@ export class BroadPhase2D {
      */
     _exit_grid(p_elem, p_rect, p_static) {
         // use magic number to avoid floating point issues
-        const sz = Vector2.new(
+        const sz = Vector2.create(
             p_rect.width / this.cell_size * LARGE_ELEMENT_FI,
             p_rect.height / this.cell_size * LARGE_ELEMENT_FI
         )
@@ -557,8 +557,8 @@ export class BroadPhase2D {
             return;
         }
 
-        const from = Vector2.new(Math.floor(p_rect.x / this.cell_size), Math.floor(p_rect.y / this.cell_size));
-        const to = Vector2.new(Math.floor((p_rect.x + p_rect.width) / this.cell_size), Math.floor((p_rect.y + p_rect.height) / this.cell_size));
+        const from = Vector2.create(Math.floor(p_rect.x / this.cell_size), Math.floor(p_rect.y / this.cell_size));
+        const to = Vector2.create(Math.floor((p_rect.x + p_rect.width) / this.cell_size), Math.floor((p_rect.y + p_rect.height) / this.cell_size));
 
         for (let i = from.x; i <= to.x; i++) {
             for (let j = from.y; j <= to.y; j++) {

@@ -16,7 +16,7 @@ export class Rect2 {
      * @param {number} p_width
      * @param {number} p_height
      */
-    static new(p_x = 0, p_y = 0, p_width = 0, p_height = 0) {
+    static create(p_x = 0, p_y = 0, p_width = 0, p_height = 0) {
         const r = pool.pop();
         if (!r) {
             return new Rect2(p_x, p_y, p_width, p_height);
@@ -126,7 +126,7 @@ export class Rect2 {
      * Returns new Rect2 with same value.
      */
     clone() {
-        return Rect2.new(this.x, this.y, this.width, this.height);
+        return Rect2.create(this.x, this.y, this.width, this.height);
     }
 
     /**
@@ -310,8 +310,8 @@ export class Rect2 {
      * @param {Vector2} p_vector
      */
     expand_to(p_vector) {
-        const begin = Vector2.new(this.x, this.y);
-        const end = Vector2.new(this.x + this.width, this.y + this.height);
+        const begin = Vector2.create(this.x, this.y);
+        const end = Vector2.create(this.x + this.width, this.y + this.height);
 
         if (p_vector.x < begin.x) {
             begin.x = p_vector.x;

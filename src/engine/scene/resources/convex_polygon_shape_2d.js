@@ -12,19 +12,16 @@ import { Shape2D } from "./shape_2d.js";
 
 
 export class ConvexPolygonShape2D extends Shape2D {
-    get points() { return this._points }
-    set points(p_points) { this.set_points(p_points) }
-
     constructor() {
         super(Physics2DServer.get_singleton().convex_polygon_shape_create());
 
         /**
          * @type {Vector2[]}
          */
-        this._points = [];
+        this.points = [];
         const pcount = 3;
         for (let i = pcount - 1; i >= 0; i--) {
-            this._points.push(Vector2.new(Math.sin(i * Math.PI * 2 / pcount), -Math.cos(i * Math.PI * 2 / pcount)).scale(10));
+            this.points.push(Vector2.create(Math.sin(i * Math.PI * 2 / pcount), -Math.cos(i * Math.PI * 2 / pcount)).scale(10));
         }
 
         this._update_shape();
@@ -44,19 +41,19 @@ export class ConvexPolygonShape2D extends Shape2D {
      * @param {Vector2Like[]} p_points
      */
     set_points(p_points) {
-        const self_len = this._points.length;
+        const self_len = this.points.length;
         const new_len = p_points.length;
         if (self_len > new_len) {
             for (let i = 0; i < self_len - new_len; i++) {
-                Vector2.free(this._points.pop());
+                Vector2.free(this.points.pop());
             }
         } else if (self_len < new_len) {
             for (let i = 0; i < new_len - self_len; i++) {
-                this._points.push(Vector2.new());
+                this.points.push(Vector2.create());
             }
         }
         for (let i = 0; i < new_len; i++) {
-            this._points[i].copy(p_points[i]);
+            this.points[i].copy(p_points[i]);
         }
         this._update_shape();
     }
@@ -65,14 +62,14 @@ export class ConvexPolygonShape2D extends Shape2D {
      * @param {Rect2} [p_rect]
      * @returns {Rect2}
      */
-    get_rect(p_rect = Rect2.new()) {
+    get_rect(p_rect = Rect2.create()) {
         p_rect.set(0, 0, 0, 0);
-        for (let i = 0, len = this._points.length; i < len; i++) {
+        for (let i = 0, len = this.points.length; i < len; i++) {
             if (i === 0) {
-                p_rect.x = this._points[i].x;
-                p_rect.y = this._points[i].y;
+                p_rect.x = this.points[i].x;
+                p_rect.y = this.points[i].y;
             } else {
-                p_rect.expand_to(this._points[i]);
+                p_rect.expand_to(this.points[i]);
             }
         }
         return p_rect;
@@ -84,7 +81,7 @@ export class ConvexPolygonShape2D extends Shape2D {
      */
     set_points_in_pool_vec2(p_points) {
         const p_len = Math.floor(p_points.length / 2);
-        const points = this._points;
+        const points = this.points;
         points.length = 0;
 
         for (let i = 0; i < p_len; i++) {
@@ -107,7 +104,7 @@ export class ConvexPolygonShape2D extends Shape2D {
     /* private */
 
     _update_shape() {
-        let final_points = this._points;
+        let final_points = this.points;
         // needs to be counter clockwise
         if (is_polygon_clockwise(final_points)) {
             final_points = final_points.reverse();

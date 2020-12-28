@@ -171,7 +171,7 @@ export class TextureProgress extends Range {
                     }
                     if (this._texture_progress) {
                         const s = this._texture_progress.get_size();
-                        const region = Rect2.new();
+                        const region = Rect2.create();
                         switch (this._fill_mode) {
                             case FILL_LEFT_TO_RIGHT: {
                                 region.set(0, 0, s.x * this.ratio, s.y);
@@ -257,7 +257,7 @@ export class TextureProgress extends Range {
     }
 
     get_minimum_size() {
-        const size = Vector2.new();
+        const size = Vector2.create();
         if (this._nine_patch_stretch) {
             return size.set(
                 this.stretch_margin[MARGIN_LEFT] + this.stretch_margin[MARGIN_RIGHT],
@@ -429,11 +429,11 @@ export class TextureProgress extends Range {
     draw_nine_patch_stretched(p_texture, p_mode, p_ratio, p_modulate) {
         const texture_size = p_texture.get_size();
 
-        const topleft = Vector2.new(this.stretch_margin[MARGIN_LEFT], this.stretch_margin[MARGIN_TOP]);
-        const bottomright = Vector2.new(this.stretch_margin[MARGIN_RIGHT], this.stretch_margin[MARGIN_BOTTOM])
+        const topleft = Vector2.create(this.stretch_margin[MARGIN_LEFT], this.stretch_margin[MARGIN_TOP]);
+        const bottomright = Vector2.create(this.stretch_margin[MARGIN_RIGHT], this.stretch_margin[MARGIN_BOTTOM])
 
-        const src_rect = Rect2.new(0, 0, texture_size.x, texture_size.y);
-        const dst_rect = Rect2.new(0, 0, this.rect_size.x, this.rect_size.y);
+        const src_rect = Rect2.create(0, 0, texture_size.x, texture_size.y);
+        const dst_rect = Rect2.create(0, 0, this.rect_size.x, this.rect_size.y);
 
         if (p_ratio < 1) {
             let width_total = 0;

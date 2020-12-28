@@ -48,7 +48,7 @@ export class MarginContainer extends Container {
 
                 const s = this.rect_size.clone();
 
-                const rect = Rect2.new();
+                const rect = Rect2.create();
                 for (const node of this.data.children) {
                     const c = /** @type {Container} */(node);
 
@@ -81,12 +81,12 @@ export class MarginContainer extends Container {
         const margin_right = this.get_constant('margin_right');
         const margin_bottom = this.get_constant('margin_bottom');
 
-        const max = Vector2.new();
+        const max = Vector2.create();
 
         for (const node of this.data.children) {
             const c = /** @type {Container} */(node);
 
-            if (!c.is_control || c.is_set_as_toplevel() || !c._visible) {
+            if (!c.is_control || c.is_set_as_toplevel() || !c.visible) {
                 continue;
             }
 

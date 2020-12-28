@@ -352,18 +352,18 @@ export class ProceduralSky extends Sky {
         sun_linear.g *= this.sun_energy;
         sun_linear.b *= this.sun_energy;
 
-        let sun = Vector3.new(0, 0, -1);
+        let sun = Vector3.create(0, 0, -1);
 
-        let axis = Vector3.new();
-        let basis = Basis.new();
+        let axis = Vector3.create();
+        let basis = Basis.create();
 
         basis.set_axis_angle(axis.set(1, 0, 0), deg2rad(this.sun_latitude)).xform(sun, sun);
         basis.set_axis_angle(axis.set(0, 1, 0), deg2rad(this.sun_longitude)).xform(sun, sun);
 
         sun.normalize();
 
-        let normal = Vector3.new();
-        let color = Color.new();
+        let normal = Vector3.create();
+        let color = Color.create();
 
         for (let i = 0; i < w; i++) {
             let u = i / (w - 1);

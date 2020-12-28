@@ -1,6 +1,7 @@
 import { node_class_map, res_class_map } from "engine/registry";
 import { GDCLASS } from "engine/core/v_object";
 import { MessageQueue } from "engine/core/message_queue";
+import { List, Element as List$Element } from "engine/core/list";
 import { SelfList } from "engine/core/self_list";
 import { Vector2Like } from "engine/core/math/vector2";
 import { PoolVector2Array } from "engine/core/math/pool_vector2_array.js";
@@ -68,28 +69,6 @@ res_class_map['CanvasItemMaterial'] = CanvasItemMaterial;
 export class CanvasItem extends Node {
     get class() { return 'CanvasItem' }
 
-    get modulate() { return this._modulate }
-    set modulate(value) { this.set_modulate(value) }
-
-    get self_modulate() { return this._self_modulate }
-    set self_modulate(value) { this.set_self_modulate(value) }
-
-    get show_behind_parent() { return this._show_behind_parent }
-    set show_behind_parent(value) { this.set_show_behind_parent(value) }
-
-    get show_on_top() { return !this._show_behind_parent }
-    set show_on_top(value) { this.set_show_behind_parent(!value) }
-
-    get use_parent_material() { return this._use_parent_material }
-    set use_parent_material(value) { this.set_use_parent_material(value) }
-
-    get visible() { return this._visible }
-    set visible(value) { this.set_visible(value) }
-
-    /** @type {Material} */
-    get material() { return this._material }
-    set material(p_mat) { this.set_material(p_mat) }
-
     constructor() {
         super();
 
@@ -106,31 +85,29 @@ export class CanvasItem extends Node {
         /** @type {CanvasLayer} */
         this.canvas_layer = null;
 
-        this._modulate = new Color(1, 1, 1, 1);
-        this._self_modulate = new Color(1, 1, 1, 1);
+        this.modulate = new Color(1, 1, 1, 1);
+        this.self_modulate = new Color(1, 1, 1, 1);
 
-        /**
-         * @type {Set<CanvasItem>}
-         */
-        this.children_items = new Set();
-
-        this.light_mask = 1;
+        /** @type {List<CanvasItem>} */
+        this.children_items = new List;
+        /** @type {List$Element<CanvasItem>} */
+        this.C = null;
 
         this.first_draw = false;
-        this._visible = true;
+        this.visible = true;
         this.pending_update = false;
         this.toplevel = false;
         this.drawing = false;
         this.block_transform_notify = false;
-        this._show_behind_parent = false;
-        this._use_parent_material = true;
+        this.show_behind_parent = false;
+        this.use_parent_material = true;
         this.notify_local_transform = false;
         this.notify_transform = false;
 
         /** @type {Material} */
-        this._material = null;
+        this.material = null;
 
-        this._global_transform = new Transform2D();
+        this.global_transform = new Transform2D;
         this.global_invalid = true;
     }
     free() {
@@ -172,9 +149,11 @@ export class CanvasItem extends Node {
         switch (p_what) {
             case NOTIFICATION_ENTER_TREE: {
                 this.first_draw = true;
-                const ci = /** @type {CanvasItem} */(this.get_parent());
-                if (ci && ci.is_canvas_item) {
-                    ci.children_items.add(this);
+                let ci = /** @type {CanvasItem} */(this.get_parent());
+                if (!ci.is_canvas_item) ci = null;
+
+                if (ci) {
+                    this.C = ci.children_items.push_back(this);
                 }
                 this._enter_canvas();
                 if (!this.block_transform_notify && !this.xform_change.in_list()) {
@@ -198,9 +177,10 @@ export class CanvasItem extends Node {
                     this.get_tree().xform_change_list.remove(this.xform_change);
                 }
                 this._exit_canvas();
-                const ci = /** @type {CanvasItem} */(this.get_parent());
-                if (ci.is_canvas_item) {
-                    ci.children_items.delete(this);
+                if (this.C) {
+                    let ci = /** @type {CanvasItem} */(this.get_parent());
+                    ci.children_items.erase(this.C);
+                    this.C = null;
                 }
                 this.global_invalid = true;
             } break;
@@ -324,7 +304,7 @@ export class CanvasItem extends Node {
      * @param {Vector2Like} p_scale
      */
     draw_set_transform(p_offset, p_rot, p_scale) {
-        const xform = Transform2D.new();
+        const xform = Transform2D.create();
         const cr = Math.cos(p_rot);
         const sr = Math.sin(p_rot);
         xform.a = cr;
@@ -407,7 +387,7 @@ export class CanvasItem extends Node {
 
     get_canvas_layer() {
         if (this.canvas_layer) {
-            return this.canvas_layer._layer;
+            return this.canvas_layer.layer;
         } else {
             return 0;
         }
@@ -418,7 +398,7 @@ export class CanvasItem extends Node {
             return null;
         }
 
-        const parent = this.get_parent();
+        let parent = this.get_parent();
         return (parent.is_canvas_item) ? /** @type {CanvasItem} */(parent) : null;
     }
 
@@ -426,7 +406,7 @@ export class CanvasItem extends Node {
      * return new Transform2D
      */
     get_transform() {
-        return Transform2D.new();
+        return Transform2D.create();
     }
 
     get_global_transform() {
@@ -434,16 +414,16 @@ export class CanvasItem extends Node {
             const pi = this.get_parent_item();
             const xform = this.get_transform();
             if (pi) {
-                this._global_transform.copy(pi.get_global_transform()).append(xform);
+                this.global_transform.copy(pi.get_global_transform()).append(xform);
             } else {
-                this._global_transform.copy(xform);
+                this.global_transform.copy(xform);
             }
             Transform2D.free(xform);
 
             this.global_invalid = false;
         }
 
-        return this._global_transform;
+        return this.global_transform;
     }
 
     /**
@@ -509,7 +489,7 @@ export class CanvasItem extends Node {
     }
 
     get_world_2d() {
-        const viewport = this.get_toplevel().get_viewport();
+        let viewport = this.get_toplevel().get_viewport();
         if (viewport) {
             return viewport.find_world_2d();
         } else {
@@ -518,7 +498,7 @@ export class CanvasItem extends Node {
     }
 
     get_anchorable_rect() {
-        return Rect2.new();
+        return Rect2.create();
     }
 
     get_global_mouse_position() {
@@ -622,7 +602,7 @@ export class CanvasItem extends Node {
         let p = this;
 
         while (p) {
-            if (!p._visible) {
+            if (!p.visible) {
                 return false;
             }
             p = p.get_parent_item();
@@ -631,11 +611,11 @@ export class CanvasItem extends Node {
         return true;
     }
     show() {
-        if (this._visible) {
+        if (this.visible) {
             return;
         }
 
-        this._visible = true;
+        this.visible = true;
         VSG.canvas.canvas_item_set_visible(this.canvas_item, true);
 
         if (!this.is_inside_tree()) {
@@ -645,11 +625,11 @@ export class CanvasItem extends Node {
         this._propagate_visibility_changed(true);
     }
     hide() {
-        if (!this._visible) {
+        if (!this.visible) {
             return;
         }
 
-        this._visible = false;
+        this.visible = false;
         VSG.canvas.canvas_item_set_visible(this.canvas_item, false);
 
         if (!this.is_inside_tree()) {
@@ -663,11 +643,11 @@ export class CanvasItem extends Node {
      * @param {boolean} value
      */
     set_show_behind_parent(value) {
-        if (this._show_behind_parent === value) {
+        if (this.show_behind_parent === value) {
             return;
         }
-        this._show_behind_parent = value;
-        VSG.canvas.canvas_item_set_draw_behind_parent(this.canvas_item, this._show_behind_parent);
+        this.show_behind_parent = value;
+        VSG.canvas.canvas_item_set_draw_behind_parent(this.canvas_item, this.show_behind_parent);
     }
 
     /**
@@ -679,13 +659,13 @@ export class CanvasItem extends Node {
     set_modulate_n(r, g, b, a = 1.0) {
         // r, g, b, a
         if (Number.isFinite(g)) {
-            this._modulate.set(r, g, b, a);
+            this.modulate.set(r, g, b, a);
         }
         // hex
         else {
-            this._modulate.set_with_hex(r);
+            this.modulate.set_with_hex(r);
         }
-        VSG.canvas.canvas_item_set_modulate(this.canvas_item, this._modulate);
+        VSG.canvas.canvas_item_set_modulate(this.canvas_item, this.modulate);
     }
     /**
      * @param {ColorLike} color
@@ -703,13 +683,13 @@ export class CanvasItem extends Node {
     set_self_modulate_n(r, g, b, a = 1.0) {
         // r, g, b, a
         if (g !== undefined) {
-            this._self_modulate.set(/** @type {number} */(r), g, b, a);
+            this.self_modulate.set(/** @type {number} */(r), g, b, a);
         }
         // hex
         else {
-            this._self_modulate.set_with_hex(r);
+            this.self_modulate.set_with_hex(r);
         }
-        VSG.canvas.canvas_item_set_self_modulate(this.canvas_item, this._self_modulate);
+        VSG.canvas.canvas_item_set_self_modulate(this.canvas_item, this.self_modulate);
     }
     /**
      * @param {ColorLike} color
@@ -722,14 +702,15 @@ export class CanvasItem extends Node {
      * @param {boolean} p_value
      */
     set_use_parent_material(p_value) {
-        this._use_parent_material = p_value;
+        this.use_parent_material = p_value;
+        this.canvas_item.use_parent_material = p_value;
     }
 
     /**
      * @param {Material} p_mat
      */
     set_material(p_mat) {
-        this._material = p_mat;
+        this.material = p_mat;
         VSG.canvas.canvas_item_set_material(this.canvas_item, this.material);
     }
 
@@ -750,10 +731,10 @@ export class CanvasItem extends Node {
             this.emit_signal('hide');
         }
 
-        for (const child of this.data.children) {
-            const c = /** @type {CanvasItem} */(child);
+        for (let child of this.data.children) {
+            let c = /** @type {CanvasItem} */(child.is_canvas_item ? child : null);
 
-            if (c.is_canvas_item && c._visible) {
+            if (c && c.visible) {
                 c._propagate_visibility_changed(p_visible);
             }
         }
@@ -772,11 +753,11 @@ export class CanvasItem extends Node {
                 this.first_draw = false;
             }
             this.drawing = true;
-            CanvasItem.current_item_drawn = this;
+            current_item_drawn = this;
             this.notification(NOTIFICATION_DRAW);
             this.emit_signal('draw');
             this._draw();
-            CanvasItem.current_item_drawn = null;
+            current_item_drawn = null;
             this.drawing = false;
         }
         this.pending_update = false;
@@ -791,16 +772,17 @@ export class CanvasItem extends Node {
             this.canvas_layer = null;
 
             while (n) {
-                if (n instanceof CanvasLayer) {
-                    this.canvas_layer = /** @type {CanvasLayer} */(n);
+                this.canvas_layer = (n instanceof CanvasLayer) ? n : null;
+                if (this.canvas_layer) {
                     break;
                 }
-                if (n.class === 'Viewport') {
+                if (n.is_viewport) {
                     break;
                 }
                 n = n.get_parent();
             }
 
+            /** @type {import('engine/servers/visual/visual_server_canvas').Canvas} */
             let canvas = null;
             if (this.canvas_layer) {
                 canvas = this.canvas_layer.canvas;
@@ -866,7 +848,8 @@ export class CanvasItem extends Node {
                 }
             }
 
-            for (let ci of p_node.children_items) {
+            for (let E = p_node.children_items.front(); E; E = E.next) {
+                let ci = E.value;
                 if (ci.toplevel) {
                     continue;
                 }
@@ -895,7 +878,7 @@ export class CanvasItem extends Node {
     }
 
     get_current_item_drawn() {
-        return CanvasItem.current_item_drawn;
+        return current_item_drawn;
     }
 }
 node_class_map['CanvasItem'] = GDCLASS(CanvasItem, Node)
@@ -903,4 +886,4 @@ node_class_map['CanvasItem'] = GDCLASS(CanvasItem, Node)
 /**
  * @type {CanvasItem}
  */
-CanvasItem.current_item_drawn = null;
+let current_item_drawn = null;

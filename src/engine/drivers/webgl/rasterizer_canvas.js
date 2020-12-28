@@ -492,7 +492,7 @@ export class RasterizerCanvas extends VObject {
         this.reset_canvas();
 
         // update general uniform data
-        let canvas_transform = Transform.new();
+        let canvas_transform = Transform.create();
 
         if (frame.current_rt) {
             let csy = 1;
@@ -628,7 +628,7 @@ export class RasterizerCanvas extends VObject {
         if (material.shader.canvas_item.uses_screen_texture && !this.states.canvas_texscreen_used) {
             this.states.canvas_texscreen_used = true;
 
-            let rect = Rect2.new();
+            let rect = Rect2.create();
             this._copy_screen(rect);
             Rect2.free(rect);
 
@@ -692,9 +692,9 @@ export class RasterizerCanvas extends VObject {
      * @param {Item} p_item
      */
     _canvas_item_render_commands(p_item) {
-        const color = Color.new();
+        const color = Color.create();
 
-        const full_xform = Transform2D.new();
+        const full_xform = Transform2D.create();
         /** @type {Transform2D} */
         let extra_xform = null;
 

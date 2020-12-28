@@ -162,7 +162,7 @@ export class GridContainer extends Container {
 
                 valid_controls_index = 0;
 
-                const rect = Rect2.new();
+                const rect = Rect2.create();
                 for (const node of this.data.children) {
                     const c = /** @type {Container} */(node);
 
@@ -244,7 +244,7 @@ export class GridContainer extends Container {
             Vector2.free(ms);
         }
 
-        const ms = Vector2.new(0, 0);
+        const ms = Vector2.create(0, 0);
 
         for (let k of col_minw) {
             if (k !== undefined) {

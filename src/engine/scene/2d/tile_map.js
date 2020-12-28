@@ -82,32 +82,32 @@ export class TileMap extends Node2D {
     constructor() {
         super();
 
-        this._mode = MODE_SQUARE;
+        this.mode = MODE_SQUARE;
 
-        this._collision_layer = 1;
-        this._collision_mask = 1;
+        this.collision_layer = 1;
+        this.collision_mask = 1;
 
-        this._collision_friction = 1;
-        this._collision_bounce = 0;
+        this.collision_friction = 1;
+        this.collision_bounce = 0;
 
         this.cell_clip_uv = false;
-        this._cell_custom_transform = new Transform2D(64, 0, 0, 64, 0, 0);
-        this._cell_half_offset = HALF_OFFSET_DISABLED;
-        this._cell_quadrant_size = 16;
-        this._cell_size = new Vector2(64, 64);
-        this._cell_tile_origin = TILE_ORIGIN_TOP_LEFT;
-        this._cell_y_sort = false;
+        this.cell_custom_transform = new Transform2D(64, 0, 0, 64, 0, 0);
+        this.cell_half_offset = HALF_OFFSET_DISABLED;
+        this.cell_quadrant_size = 16;
+        this.cell_size = new Vector2(64, 64);
+        this.cell_tile_origin = TILE_ORIGIN_TOP_LEFT;
+        this.cell_y_sort = false;
 
-        this._collision_use_parent = false;
+        this.collision_use_parent = false;
         /** @type {CollisionObject2D} */
         this.collision_parent = null;
-        this._collision_use_kinematic = false;
+        this.collision_use_kinematic = false;
 
-        /** @type {Object<number, Object<number, Cell>>} */
-        this.tile_map = {};
+        /** @type {{ [pos_key: string]: Cell }} */
+        this.tile_map = Object.create(null);
 
-        /** @type {Object<number, Object<number, Quadrant>>} */
-        this.quadrant_map = {};
+        /** @type {{ [pos_key: string]: Quadrant }} */
+        this.quadrant_map = Object.create(null);
 
         /** @type {List<Quadrant>} */
         this.dirty_quadrant_list = new List;
@@ -117,11 +117,11 @@ export class TileMap extends Node2D {
         this.used_size_cache = new Rect2;
         this.used_size_cache_dirty = false;
         this.quadrant_order_dirty = false;
-        this._centered_textures = false;
+        this.centered_textures = false;
         this.tilemap_pending_update = false;
 
         /** @type {TileSet} */
-        this._tile_set = null;
+        this.tile_set = null;
 
         this.set_notify_transform(true);
         this.set_notify_local_transform(false);
@@ -154,28 +154,26 @@ export class TileMap extends Node2D {
     _notification(p_what) {
         switch (p_what) {
             case NOTIFICATION_ENTER_TREE: {
-                if (this._collision_use_parent) {
+                if (this.collision_use_parent) {
                     this._clear_quadrants();
-                    this.collision_parent = /** @type {CollisionObject2D} */(this.get_parent());
+                    let c = this.get_parent();
+                    this.collision_parent = c.is_collision_object ? c : null;
                 }
 
                 this.tilemap_pending_update = true;
                 this._recreate_quadrants();
                 this.update_dirty_quadrants();
-                const space = this.get_world_2d().space;
+                let space = this.get_world_2d().space;
                 this._update_quadrant_transform();
                 this._update_quadrant_space(space);
             } break;
             case NOTIFICATION_EXIT_TREE: {
                 this._update_quadrant_space(null);
-                for (const x in this.quadrant_map) {
-                    const x_map = this.quadrant_map[x];
-                    for (const y in x_map) {
-                        const q = x_map[y];
-
-                        if (this.collision_parent) {
-                            this.collision_parent.remove_shape_owner(q.shape_owner);
-                        }
+                for (let key in this.quadrant_map) {
+                    let q = this.quadrant_map[key];
+                    if (this.collision_parent) {
+                        this.collision_parent.remove_shape_owner(q.shape_owner);
+                        q.shape_owner = null;
                     }
                 }
 
@@ -185,7 +183,7 @@ export class TileMap extends Node2D {
                 this._update_quadrant_transform();
             } break;
             case NOTIFICATION_LOCAL_TRANSFORM_CHANGED: {
-                if (this._collision_use_parent) {
+                if (this.collision_use_parent) {
                     this._recreate_quadrants();
                 }
             } break;
@@ -194,59 +192,43 @@ export class TileMap extends Node2D {
 
     clear() {
         this._clear_quadrants();
-        this.tile_map = {};
+        this.tile_map = Object.create(null);
         this.used_size_cache_dirty = true;
     }
 
-    get mode() {
-        return this._mode;
-    }
-    set mode(value) {
-        this.set_mode(value);
-    }
     /**
      * @param {number} value
      */
     set_mode(value) {
         this._clear_quadrants();
-        this._mode = value;
+        this.mode = value;
         this._recreate_quadrants();
     }
 
-    get cell_half_offset() { return this._cell_half_offset }
-    set cell_half_offset(p_value) { this.set_cell_half_offset(p_value) }
     /**
      * @param {number} p_value
      */
     set_cell_half_offset(p_value) {
         this._clear_quadrants();
-        this._cell_half_offset = p_value;
+        this.cell_half_offset = p_value;
         this._recreate_quadrants();
     }
 
-    get cell_tile_origin() { return this._cell_tile_origin }
-    set cell_tile_origin(p_value) { this.set_cell_tile_origin(p_value) }
     /**
      * @param {number} p_value
      */
     set_cell_tile_origin(p_value) {
         this._clear_quadrants();
-        this._cell_tile_origin = p_value;
+        this.cell_tile_origin = p_value;
         this._recreate_quadrants();
     }
 
-    get cell_size() {
-        return this._cell_size;
-    }
-    set cell_size(value) {
-        this.set_cell_size(value);
-    }
     /**
      * @param {Vector2} value
      */
     set_cell_size(value) {
         this._clear_quadrants();
-        this._cell_size.copy(value);
+        this.cell_size.copy(value);
         this._recreate_quadrants();
         return this;
     }
@@ -256,58 +238,40 @@ export class TileMap extends Node2D {
      */
     set_cell_size_n(x, y) {
         this._clear_quadrants();
-        this._cell_size.set(x, y);
+        this.cell_size.set(x, y);
         this._recreate_quadrants();
         return this;
     }
 
-    get cell_quadrant_size() {
-        return this._cell_quadrant_size;
-    }
-    set cell_quadrant_size(value) {
-        this.set_cell_quadrant_size(value);
-    }
     /**
      * @param {number} p_size
      */
     set_cell_quadrant_size(p_size) {
         this._clear_quadrants();
-        this._cell_quadrant_size = p_size;
+        this.cell_quadrant_size = p_size;
         this._recreate_quadrants();
         return this;
     }
 
-    get cell_custom_transform() {
-        return this._cell_custom_transform;
-    }
-    set cell_custom_transform(value) {
-        this.set_cell_custom_transform(value);
-    }
     /**
      * @param {Transform2D} value
      */
     set_cell_custom_transform(value) {
         this._clear_quadrants();
-        this._cell_custom_transform.copy(value);
+        this.cell_custom_transform.copy(value);
         this._recreate_quadrants();
         return this;
     }
 
-    get tile_set() {
-        return this._tile_set;
-    }
-    set tile_set(value) {
-        this.set_tile_set(value);
-    }
     /**
      * @param {string|TileSet} value
      */
     set_tile_set(value) {
         /** @type {TileSet} */
-        const tile_set = (typeof (value) === 'string') ? get_resource_map()[value] : value;
+        let tile_set = (typeof (value) === 'string') ? get_resource_map()[value] : value;
 
         this._clear_quadrants();
-        this._tile_set = tile_set;
+        this.tile_set = tile_set;
 
         if (!tile_set) {
             this.clear();
@@ -316,43 +280,33 @@ export class TileMap extends Node2D {
         this._recreate_quadrants();
     }
 
-    get collision_layer() { return this._collision_layer }
-    set collision_layer(p_layer) { this.set_collision_layer(p_layer) }
     /**
      * @param {number} p_layer
      */
     set_collision_layer(p_layer) {
-        this._collision_layer = p_layer;
+        this.collision_layer = p_layer;
 
-        if (!this._collision_use_parent) {
-            for (const x in this.quadrant_map) {
-                const x_map = this.quadrant_map[x];
-                for (const y in x_map) {
-                    const q = x_map[y];
-                    if (q) {
-                        q.body.collision_layer = p_layer;
-                    }
+        if (!this.collision_use_parent) {
+            for (let qk in this.quadrant_map) {
+                let q = this.quadrant_map[qk];
+                if (q) {
+                    q.body.collision_layer = p_layer;
                 }
             }
         }
     }
 
-    get collision_mask() { return this._collision_mask }
-    set collision_mask(p_layer) { this.set_collision_mask(p_layer) }
     /**
      * @param {number} p_layer
      */
     set_collision_mask(p_layer) {
-        this._collision_mask = p_layer;
+        this.collision_mask = p_layer;
 
-        if (!this._collision_use_parent) {
-            for (const x in this.quadrant_map) {
-                const x_map = this.quadrant_map[x];
-                for (const y in x_map) {
-                    const q = x_map[y];
-                    if (q) {
-                        q.body.collision_mask = p_layer;
-                    }
+        if (!this.collision_use_parent) {
+            for (let qk in this.quadrant_map) {
+                let q = this.quadrant_map[qk];
+                if (q) {
+                    q.body.collision_mask = p_layer;
                 }
             }
         }
@@ -362,14 +316,14 @@ export class TileMap extends Node2D {
      * @param {number} p_bit
      */
     get_collision_layer_bit(p_bit) {
-        return this._collision_layer & (1 << p_bit);
+        return this.collision_layer & (1 << p_bit);
     }
     /**
      * @param {number} p_bit
      * @param {number} p_value
      */
     set_collision_layer_bit(p_bit, p_value) {
-        let layer = this._collision_layer;
+        let layer = this.collision_layer;
         if (p_value) {
             layer |= 1 << p_bit;
         } else {
@@ -382,14 +336,14 @@ export class TileMap extends Node2D {
      * @param {number} p_bit
      */
     get_collision_mask_bit(p_bit) {
-        return this._collision_mask & (1 << p_bit);
+        return this.collision_mask & (1 << p_bit);
     }
     /**
      * @param {number} p_bit
      * @param {number} p_value
      */
     set_collision_mask_bit(p_bit, p_value) {
-        let mask = this._collision_mask;
+        let mask = this.collision_mask;
         if (p_value) {
             mask |= 1 << p_bit;
         } else {
@@ -398,32 +352,29 @@ export class TileMap extends Node2D {
         this.set_collision_mask(mask);
     }
 
-    get collision_use_kinematic() { return this._collision_use_kinematic }
-    set collision_use_kinematic(value) { this.set_collision_use_kinematic(value) }
     /**
      * @param {boolean} p_value
      */
     set_collision_use_kinematic(p_value) {
         this._clear_quadrants();
-        this._collision_use_kinematic = p_value;
+        this.collision_use_kinematic = p_value;
         this._recreate_quadrants();
     }
 
-    get collision_use_parent() { return this._collision_use_parent }
-    set collision_use_parent(value) { this.set_collision_use_parent(value) }
     /**
      * @param {boolean} p_value
      */
     set_collision_use_parent(p_value) {
-        if (this._collision_use_parent === p_value) return;
+        if (this.collision_use_parent === p_value) return;
 
         this._clear_quadrants();
 
-        this._collision_use_parent = p_value;
-        this.set_notify_local_transform(this._collision_use_parent);
+        this.collision_use_parent = p_value;
+        this.set_notify_local_transform(this.collision_use_parent);
 
-        if (this._collision_use_parent && this.is_inside_tree()) {
-            this.collision_parent = /** @type {CollisionObject2D} */(this.get_parent());
+        if (this.collision_use_parent && this.is_inside_tree()) {
+            let parent = this.get_parent();
+            this.collision_parent = parent.is_collision_object ? parent : null;
         } else {
             this.collision_parent = null;
         }
@@ -431,60 +382,46 @@ export class TileMap extends Node2D {
         this._recreate_quadrants();
     }
 
-    get collision_friction() { return this._collision_friction }
-    set collision_friction(value) { this.set_collision_friction(value) }
     /**
      * @param {number} p_value
      */
     set_collision_friction(p_value) {
-        this._collision_friction = p_value;
-        if (!this._collision_use_parent) {
-            for (const x in this.quadrant_map) {
-                const x_map = this.quadrant_map[x];
-                for (const y in x_map) {
-                    const q = x_map[y];
-                    if (q) {
-                        q.body.friction = p_value;
-                    }
+        this.collision_friction = p_value;
+        if (!this.collision_use_parent) {
+            for (let qk in this.quadrant_map) {
+                let q = this.quadrant_map[qk];
+                if (q) {
+                    q.body.friction = p_value;
                 }
             }
         }
     }
 
-    get collision_bounce() { return this._collision_bounce }
-    set collision_bounce(value) { this.set_collision_bounce(value) }
     /**
      * @param {number} p_value
      */
     set_collision_bounce(p_value) {
-        this._collision_bounce = p_value;
-        if (!this._collision_use_parent) {
-            for (const x in this.quadrant_map) {
-                const x_map = this.quadrant_map[x];
-                for (const y in x_map) {
-                    const q = x_map[y];
-                    if (q) {
-                        q.body.bounce = p_value;
-                    }
+        this.collision_bounce = p_value;
+        if (!this.collision_use_parent) {
+            for (let qk in this.quadrant_map) {
+                let q = this.quadrant_map[qk];
+                if (q) {
+                    q.body.bounce = p_value;
                 }
             }
         }
     }
 
-    get cell_y_sort() { return this._cell_y_sort }
-    set cell_y_sort(value) { this.set_cell_y_sort(value) }
     /**
      * @param {boolean} p_value
      */
     set_cell_y_sort(p_value) {
         this._clear_quadrants();
-        this._cell_y_sort = p_value
+        this.cell_y_sort = p_value
         VSG.canvas.canvas_item_set_sort_children_by_y(this.canvas_item, p_value);
         this._recreate_quadrants();
     }
 
-    get centered_texture() { return this._centered_texture }
-    set centered_texture(value) { this.set_centered_texture(value) }
     /**
      * @param {boolean} p_value
      */
@@ -505,23 +442,24 @@ export class TileMap extends Node2D {
      * @param {number} [p_autotile_coord_y]
      */
     set_cell(p_x, p_y, p_tile, p_flip_x = false, p_flip_y = false, p_transpose = false, p_autotile_coord_x = 0, p_autotile_coord_y = 0) {
-        this.tile_map[p_x] = this.tile_map[p_x] || {};
+        let pk = `${p_x},${p_y}`;
 
-        let E = this.tile_map[p_x][p_y];
+        let E = this.tile_map[pk];
         if (!E && p_tile === INVALID_CELL) {
             return;
         }
 
-        const qk_x = Math.floor(p_x / this._cell_quadrant_size);
-        const qk_y = Math.floor(p_y / this._cell_quadrant_size);
+        const qk_x = Math.floor(p_x / this.cell_quadrant_size);
+        const qk_y = Math.floor(p_y / this.cell_quadrant_size);
+        let qk = `${qk_x},${qk_y}`;
+
         if (p_tile === INVALID_CELL) {
             // erase existing
-            this.tile_map[p_x] === this.tile_map[p_x] || {};
-            delete this.tile_map[p_x][p_y];
-            const q = this.quadrant_map[qk_x][qk_y];
-            remove_items(q.cells, q.cells.indexOf(`${p_x}.${p_y}`), 1);
+            delete this.tile_map[pk];
+            const q = this.quadrant_map[qk];
+            remove_items(q.cells, q.cells.indexOf(pk), 1);
             if (q.cells.length === 0) {
-                this._erase_quadrant(qk_x, qk_y);
+                this._erase_quadrant(qk);
             } else {
                 this._make_quadrant_dirty(q);
             }
@@ -529,19 +467,17 @@ export class TileMap extends Node2D {
             return;
         }
 
-        this.quadrant_map[qk_x] = this.quadrant_map[qk_x] || {};
-        let q = this.quadrant_map[qk_x][qk_y];
+        let q = this.quadrant_map[qk];
 
         if (!E) {
             E = new Cell;
-            this.tile_map[p_x] = this.tile_map[p_x] || {};
-            this.tile_map[p_x][p_y] = E;
+            this.tile_map[pk] = E;
             E._x = p_x;
             E._y = p_y;
             if (!q) {
                 q = this._create_quadrant(qk_x, qk_y);
             }
-            q.cells.push(`${p_x}.${p_y}`);
+            q.cells.push(pk);
         } else {
             if (
                 E.id === p_tile
@@ -572,14 +508,25 @@ export class TileMap extends Node2D {
     }
 
     /**
+     * @param {number} p_x
+     * @param {number} p_y
+     */
+    get_cell(p_x, p_y) {
+        let pk = `${p_x},${p_y}`;
+        let E = this.tile_map[pk];
+        if (!E) return -1;
+        return E.id;
+    }
+
+    /**
      * Returns new Transform2D
      */
     get_cell_transform() {
-        const out = Transform2D.new();
+        const out = Transform2D.create();
         out.reset();
 
-        const cell_size_x = this._cell_size.x;
-        const cell_size_y = this._cell_size.y;
+        const cell_size_x = this.cell_size.x;
+        const cell_size_y = this.cell_size.y;
 
         switch (this.mode) {
             case MODE_SQUARE: {
@@ -597,7 +544,7 @@ export class TileMap extends Node2D {
                 out.d = cell_size_y * 0.5;
             } break;
             case MODE_CUSTOM: {
-                out.copy(this._cell_custom_transform);
+                out.copy(this.cell_custom_transform);
             } break;
         }
 
@@ -608,19 +555,19 @@ export class TileMap extends Node2D {
      * Returns new Vector2.
      */
     get_cell_draw_offset() {
-        const out = Vector2.new();
+        const out = Vector2.create();
 
         switch (this.mode) {
             case MODE_SQUARE: {
             } break;
             case MODE_ISOMETRIC: {
-                out.set(-this._cell_size.x * 0.5, 0);
+                out.set(-this.cell_size.x * 0.5, 0);
             } break;
             case MODE_CUSTOM: {
-                out.x = Math.min(this._cell_custom_transform.a, out.x);
-                out.y = Math.min(this._cell_custom_transform.b, out.y);
-                out.x = Math.min(this._cell_custom_transform.c, out.x);
-                out.y = Math.min(this._cell_custom_transform.d, out.y);
+                out.x = Math.min(this.cell_custom_transform.a, out.x);
+                out.y = Math.min(this.cell_custom_transform.b, out.y);
+                out.x = Math.min(this.cell_custom_transform.c, out.x);
+                out.y = Math.min(this.cell_custom_transform.d, out.y);
             } break;
         }
 
@@ -630,7 +577,7 @@ export class TileMap extends Node2D {
     get_used_rect() {
         if (this.used_size_cache_dirty) {
             let first = true;
-            const vec = Vector2.new();
+            const vec = Vector2.create();
             for (const x in this.tile_map) {
                 const x_map = this.tile_map[x];
                 for (const y in x_map) {
@@ -666,32 +613,28 @@ export class TileMap extends Node2D {
         if (!this.tilemap_pending_update) {
             return;
         }
-        if (!this._tile_set) {
-            return;
-        }
-
-        if (!this.is_inside_tree() || !this._tile_set) {
+        if (!this.is_inside_tree() || !this.tile_set) {
             this.tilemap_pending_update = false;
             return;
         }
 
         const ps = Physics2DServer.get_singleton();
         const tofs = this.get_cell_draw_offset();
-        const qofs = Vector2.new();
+        const qofs = Vector2.create();
 
-        const xform = Transform2D.new();
+        const xform = Transform2D.create();
 
         const vs = VSG.canvas;
 
-        while (this.dirty_quadrant_list._first) {
-            const q = this.dirty_quadrant_list._first._self;
+        while (this.dirty_quadrant_list.first()) {
+            const q = this.dirty_quadrant_list.first().self();
 
-            for (const E of q.canvas_items) {
+            for (let E of q.canvas_items) {
                 E.free();
             }
             q.canvas_items.length = 0;
 
-            if (!this._collision_use_parent) {
+            if (!this.collision_use_parent) {
                 ps.body_clear_shapes(q.body);
             } else if (this.collision_parent) {
                 this.collision_parent.shape_owner_clear_shapes(q.shape_owner);
@@ -708,10 +651,10 @@ export class TileMap extends Node2D {
                 const y = parseInt(info[1], 10);
 
                 const c = this.tile_map[x][y];
-                if (!c || !this._tile_set.has_tile(c.id)) {
+                if (!c || !this.tile_set.has_tile(c.id)) {
                     continue;
                 }
-                const tile = this._tile_set.get_tile(c.id);
+                const tile = this.tile_set.get_tile(c.id);
 
                 // draw
                 const tex = tile.texture;
@@ -757,7 +700,7 @@ export class TileMap extends Node2D {
                     r.y += (r.height + spacing) * c.autotile_coord_y;
                 }
 
-                const s = Vector2.new();
+                const s = Vector2.create();
                 if (r.is_zero()) {
                     s.x = tex.get_width();
                     s.y = tex.get_height();
@@ -766,7 +709,7 @@ export class TileMap extends Node2D {
                     s.y = r.height;
                 }
 
-                const rect = Rect2.new();
+                const rect = Rect2.create();
                 rect.x = offset.x;
                 rect.y = offset.y;
                 rect.width = s.x + 0.00001;
@@ -775,12 +718,12 @@ export class TileMap extends Node2D {
                 if (c.transpose) {
                     let tmp = tile_ofs.x; tile_ofs.x = tile_ofs.y; tile_ofs.y = tmp;
                     if (this._centered_texture) {
-                        rect.x += this._cell_size.x * 0.5 - rect.width * 0.5;
-                        rect.y += this._cell_size.y * 0.5 - rect.height * 0.5;
+                        rect.x += this.cell_size.x * 0.5 - rect.width * 0.5;
+                        rect.y += this.cell_size.y * 0.5 - rect.height * 0.5;
                     }
                 } else if (this._centered_texture) {
-                    rect.x += this._cell_size.x * 0.5 - rect.width * 0.5;
-                    rect.y += this._cell_size.y * 0.5 - rect.height * 0.5;
+                    rect.x += this.cell_size.x * 0.5 - rect.width * 0.5;
+                    rect.y += this.cell_size.y * 0.5 - rect.height * 0.5;
                 }
 
                 if (c.flip_h) {
@@ -796,7 +739,7 @@ export class TileMap extends Node2D {
                 rect.x += tile_ofs.x;
                 rect.y += tile_ofs.y;
 
-                const modulate = this._self_modulate.clone().multiply(tile.modulate);
+                const modulate = this.self_modulate.clone().multiply(tile.modulate);
 
                 if (r.is_zero()) {
                     tex.draw_rect(canvas_item, rect, false, modulate, c.transpose);
@@ -814,7 +757,7 @@ export class TileMap extends Node2D {
                 for (const sd of tile.shapes_data) {
                     if (sd.shape) {
                         if (tile.tile_mode === SINGLE_TILE || (sd.autotile_coord.x == c.autotile_coord_x && sd.autotile_coord.y === c.autotile_coord_y)) {
-                            const xform = Transform2D.new();
+                            const xform = Transform2D.create();
                             xform.tx = Math.floor(offset.x);
                             xform.ty = Math.floor(offset.y);
 
@@ -824,7 +767,7 @@ export class TileMap extends Node2D {
                             const un_t = sd.shape_transform.untranslated();
                             xform.append(un_t);
 
-                            if (!this._collision_use_parent) {
+                            if (!this.collision_use_parent) {
                                 ps.body_add_shape(q.body, sd.shape.shape, xform);
                                 ps.body_set_shape_as_one_way_collision(q.body, shape_idx, sd.one_way_collision, sd.one_way_collision_margin)
                             } else if (this.collision_parent) {
@@ -879,38 +822,37 @@ export class TileMap extends Node2D {
             this.set_cell(x, y, v, flip_h, flip_v, transpose, coord_x, coord_y);
         }
     }
-    _get_tile_data() { }
 
     /**
      * @param {number} x
      * @param {number} y
      */
     _create_quadrant(x, y) {
-        const xform = Transform2D.new();
+        const xform = Transform2D.create();
         const q = new Quadrant;
-        const q_size = this._cell_quadrant_size;
+        const q_size = this.cell_quadrant_size;
         const pos = this.map_to_world(x * q_size, y * q_size);
         const cell_draw_offset = this.get_cell_draw_offset();
         q.pos.copy(pos).add(cell_draw_offset);
-        if (this._cell_tile_origin === TILE_ORIGIN_CENTER) {
-            q.pos.add(this._cell_size.x * 0.5, this._cell_size.y * 0.5);
-        } else if (this._cell_tile_origin === TILE_ORIGIN_BOTTOM_LEFT) {
-            q.pos.y += this._cell_size.y;
+        if (this.cell_tile_origin === TILE_ORIGIN_CENTER) {
+            q.pos.add(this.cell_size.x * 0.5, this.cell_size.y * 0.5);
+        } else if (this.cell_tile_origin === TILE_ORIGIN_BOTTOM_LEFT) {
+            q.pos.y += this.cell_size.y;
         }
 
         xform.set_origin(q.pos);
 
-        if (!this._collision_use_parent) {
+        if (!this.collision_use_parent) {
             const ps = Physics2DServer.get_singleton();
 
             q.body = ps.body_create();
-            q.body.mode = this._collision_use_kinematic ? BodyMode.KINEMATIC : BodyMode.STATIC;
+            q.body.mode = this.collision_use_kinematic ? BodyMode.KINEMATIC : BodyMode.STATIC;
 
             q.body.instance = this;
-            q.body.collision_layer = this._collision_layer;
-            q.body.collision_mask = this._collision_mask;
-            q.body.friction = this._collision_friction;
-            q.body.bounce = this._collision_bounce;
+            q.body.collision_layer = this.collision_layer;
+            q.body.collision_mask = this.collision_mask;
+            q.body.friction = this.collision_friction;
+            q.body.bounce = this.collision_bounce;
 
             if (this.is_inside_tree()) {
                 const g_xform = this.get_global_transform().clone();
@@ -936,20 +878,17 @@ export class TileMap extends Node2D {
         Vector2.free(pos);
         Transform2D.free(xform);
 
-        this.quadrant_map[x] = this.quadrant_map[x] || {};
-        this.quadrant_map[x][y] = q;
+        this.quadrant_map[`${x},${y}`] = q;
         return q;
     }
 
     /**
-     * @param {number} x
-     * @param {number} y
+     * @param {string} qk
      */
-    _erase_quadrant(x, y) {
-        this.quadrant_map[x] = this.quadrant_map[x] || {};
-        const q = this.quadrant_map[x][y];
+    _erase_quadrant(qk) {
+        const q = this.quadrant_map[qk];
 
-        if (!this._collision_use_parent) {
+        if (!this.collision_use_parent) {
             q.body.shapes.length = 0;
             Physics2DServer.get_singleton().body_set_space(q.body, null);
         } else if (this.collision_parent) {
@@ -963,46 +902,41 @@ export class TileMap extends Node2D {
             this.dirty_quadrant_list.remove(q.dirty_list);
         }
 
-        delete this.quadrant_map[x][y];
+        delete this.quadrant_map[key];
         this.rect_cache_dirty = true;
     }
 
     _recreate_quadrants() {
         this._clear_quadrants();
 
-        for (const x in this.tile_map) {
-            const x_map = this.tile_map[x];
-            for (const y in x_map) {
-                const cell = x_map[y];
-                const _x = cell._x;
-                const _y = cell._y;
-                const qk_x = Math.floor(_x / this._cell_quadrant_size);
-                const qk_y = Math.floor(_y / this._cell_quadrant_size);
+        for (let pk in this.tile_map) {
+            let cell = this.tile_map[pk];
+            let _x = cell._x;
+            let _y = cell._y;
 
-                this.quadrant_map[qk_x] = this.quadrant_map[qk_x] || {};
-                let Q = this.quadrant_map[qk_x][qk_y];
-                if (!Q) {
-                    Q = this._create_quadrant(qk_x, qk_y);
-                    this.dirty_quadrant_list.add_last(Q.dirty_list);
-                }
+            let qk_x = Math.floor(_x / this.cell_quadrant_size);
+            let qk_y = Math.floor(_y / this.cell_quadrant_size);
+            let qk = `${qk_x},${qk_y}`;
 
-                Q.cells.push(`${_x}.${_y}`)
-                this._make_quadrant_dirty(Q, false);
+            let Q = this.quadrant_map[qk];
+            if (!Q) {
+                Q = this._create_quadrant(qk_x, qk_y);
+                this.dirty_quadrant_list.add(Q.dirty_list);
             }
+
+            Q.cells.push(pk);
+            this._make_quadrant_dirty(Q, false);
         }
         this.update_dirty_quadrants();
     }
     _clear_quadrants() {
-        for (const x in this.quadrant_map) {
-            const x_map = this.quadrant_map[x];
-            for (const y in x_map) {
-                const q = x_map[y];
-                if (q) {
-                    this._erase_quadrant(parseInt(x, 10), parseInt(y, 10));
-                }
+        for (let qk in this.quadrant_map) {
+            let q = this.quadrant_map[qk];
+            if (q) {
+                this._erase_quadrant(qk);
             }
         }
-        this.quadrant_map = {};
+        this.quadrant_map = Object.create(null);
     }
 
     /**
@@ -1034,8 +968,8 @@ export class TileMap extends Node2D {
      * @param {Vector2} p_sc
      */
     _fix_cell_transform(xform, p_cell, p_offset, p_sc) {
-        const s = p_sc.clone();
-        const offset = p_offset.clone();
+        let s = p_sc.clone();
+        let offset = p_offset.clone();
 
         if (p_cell.transpose) {
             let num = 0;
@@ -1056,7 +990,7 @@ export class TileMap extends Node2D {
             offset.y = s.y - offset.y;
         }
 
-        if (this._centered_textures) {
+        if (this.centered_textures) {
             offset.x += this.cell_size.x * 0.5 - s.x * 0.5;
             offset.y += this.cell_size.y * 0.5 - s.y * 0.5;
         }
@@ -1076,22 +1010,22 @@ export class TileMap extends Node2D {
      */
     map_to_world(x, y, ignore_ofs = false) {
         const cell_mat = this.get_cell_transform();
-        const ret = Vector2.new(x, y);
+        const ret = Vector2.create(x, y);
         cell_mat.xform(ret, ret);
         if (!ignore_ofs) {
-            switch (this._cell_half_offset) {
+            switch (this.cell_half_offset) {
                 case HALF_OFFSET_X:
                 case HALF_OFFSET_NEGATIVE_X: {
                     if (Math.abs(y) & 1) {
-                        ret.x += cell_mat.a * (this._cell_half_offset === HALF_OFFSET_X ? 0.5 : -0.5);
-                        ret.y += cell_mat.b * (this._cell_half_offset === HALF_OFFSET_X ? 0.5 : -0.5);
+                        ret.x += cell_mat.a * (this.cell_half_offset === HALF_OFFSET_X ? 0.5 : -0.5);
+                        ret.y += cell_mat.b * (this.cell_half_offset === HALF_OFFSET_X ? 0.5 : -0.5);
                     }
                 } break;
                 case HALF_OFFSET_Y:
                 case HALF_OFFSET_NEGATIVE_Y: {
                     if (Math.abs(x) & 1) {
-                        ret.x += cell_mat.c * (this._cell_half_offset === HALF_OFFSET_Y ? 0.5 : -0.5);
-                        ret.y += cell_mat.d * (this._cell_half_offset === HALF_OFFSET_Y ? 0.5 : -0.5);
+                        ret.x += cell_mat.c * (this.cell_half_offset === HALF_OFFSET_Y ? 0.5 : -0.5);
+                        ret.y += cell_mat.d * (this.cell_half_offset === HALF_OFFSET_Y ? 0.5 : -0.5);
                     }
                 } break;
                 case HALF_OFFSET_DISABLED: {
@@ -1109,10 +1043,10 @@ export class TileMap extends Node2D {
      */
     world_to_map(x, y) {
         const xform = this.get_cell_transform().affine_inverse();
-        const ret = Vector2.new(x, y);
+        const ret = Vector2.create(x, y);
         xform.xform(ret, ret);
 
-        switch (this._cell_half_offset) {
+        switch (this.cell_half_offset) {
             case HALF_OFFSET_X: {
                 if (Math.floor(ret.y) & 1) {
                     ret.x -= 0.5;
@@ -1150,25 +1084,22 @@ export class TileMap extends Node2D {
             return;
         }
 
-        const global_transform = this.get_global_transform();
-        const xform = Transform2D.new();
-        const xform2 = Transform2D.new();
+        let global_transform = this.get_global_transform();
+
+        let xform = Transform2D.create();
+        let xform2 = Transform2D.create();
 
         const ps = Physics2DServer.get_singleton();
 
-        for (const x in this.quadrant_map) {
-            const x_map = this.quadrant_map[x];
-            for (const y in x_map) {
-                const q = x_map[y];
+        for (let key in this.quadrant_map) {
+            let q = this.quadrant_map[key];
 
-                xform.identity();
-                xform.set_origin(q.pos);
+            xform.identity();
+            xform.set_origin(q.pos);
 
-                if (!this._collision_use_parent) {
-                    xform2.copy(xform);
-                    xform.copy(global_transform).append(xform2);
-                    ps.body_set_state(q.body, BodyState.TRANSFORM, xform);
-                }
+            if (!this.collision_use_parent) {
+                xform2.copy(global_transform).append(xform);
+                ps.body_set_state(q.body, BodyState.TRANSFORM, xform2);
             }
         }
 
@@ -1180,14 +1111,12 @@ export class TileMap extends Node2D {
      * @param {Space2DSW} p_space
      */
     _update_quadrant_space(p_space) {
-        if (!this._collision_use_parent) {
+        if (!this.collision_use_parent) {
             const ps = Physics2DServer.get_singleton();
-            for (const x in this.quadrant_map) {
-                const x_map = this.quadrant_map[x];
-                for (const y in this.quadrant_map[x]) {
-                    const q = x_map[y];
-                    ps.body_set_space(q.body, p_space);
-                }
+
+            for (let key in this.quadrant_map) {
+                let q = this.quadrant_map[key];
+                ps.body_set_space(q.body, p_space);
             }
         }
     }

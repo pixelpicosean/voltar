@@ -1,9 +1,9 @@
+import { res_class_map } from 'engine/registry';
 import { remove_items } from 'engine/dep/index.ts';
 import { deg2rad, clamp, lerp } from 'engine/core/math/math_funcs.js';
+import { VObject } from 'engine/core/v_object';
 import { CMP_EPSILON } from 'engine/core/math/math_defs.js';
 import { Vector2 } from 'engine/core/math/vector2';
-import { VObject } from 'engine/core/v_object';
-import { res_class_map } from 'engine/registry';
 
 
 /**
@@ -60,7 +60,7 @@ class C_Point {
      * @param {TangentMode} [p_left_mode]
      * @param {TangentMode} [p_right_mode]
      */
-    static new(
+    static create(
         p_pos,
         p_left = 0,
         p_right = 0,
@@ -264,7 +264,7 @@ export class Curve extends VObject {
         const p = this._points[p_index];
         this.remove_point(p_index);
 
-        const pos = Vector2.new(offset, p.pos.y);
+        const pos = Vector2.create(offset, p.pos.y);
         let i = this.add_point(pos);
         this._points[i].left_tangent = p.left_tangent;
         this._points[i].right_tangent = p.right_tangent;
@@ -474,7 +474,7 @@ export class Curve extends VObject {
      * @param {number} i
      */
     update_auto_tangents(i) {
-        const v = Vector2.new();
+        const v = Vector2.create();
 
         const p = this._points[i];
 
@@ -532,7 +532,7 @@ export class Curve extends VObject {
 
         this._points.length = input.length / ELEMS;
 
-        const vec = Vector2.new();
+        const vec = Vector2.create();
         for (let j = 0; j < this._points.length; j++) {
             const p = this._points[j] = new C_Point(vec.set(0, 0));
             const i = j * ELEMS;
@@ -624,7 +624,7 @@ export class Curve extends VObject {
      * @param {number} p_max
      */
     ensure_default_setup(p_min, p_max) {
-        const vec = Vector2.new();
+        const vec = Vector2.create();
         if (this._points.length === 0 && this._min_value === 0 && this._max_value === 1) {
             this.add_point(vec.set(0, 1));
             this.add_point(vec.set(1, 1));
@@ -644,7 +644,7 @@ res_class_map['Curve'] = Curve
 /** @type {Point[]} */
 const PointPool = [];
 class Point {
-    static new() {
+    static create() {
         const p = PointPool.pop();
         if (p) {
             return p;
@@ -722,7 +722,7 @@ export class Curve2D extends VObject {
             // Add new ones
             this.points.length = pc;
             for (let i = 0; i < pc; i++) {
-                const p = Point.new();
+                const p = Point.create();
                 if (number_arr) {
                     p.in.set(points[i * 6 + 0], points[i * 6 + 1]);
                     p.out.set(points[i * 6 + 2], points[i * 6 + 3]);
@@ -932,10 +932,10 @@ export class Curve2D extends VObject {
         const nearest = new Vector2();
         let nearest_dist = -1;
 
-        const origin = Vector2.new();
-        const direction = Vector2.new();
-        const proj = Vector2.new();
-        const tmp = Vector2.new();
+        const origin = Vector2.create();
+        const direction = Vector2.create();
+        const proj = Vector2.create();
+        const tmp = Vector2.create();
         for (let i = 0; i < pc - 1; i++) {
             origin.copy(r[i]);
             direction.copy(r[i + 1]).subtract(origin).scale(1 / this._bake_interval);
@@ -978,10 +978,10 @@ export class Curve2D extends VObject {
         let nearest_dist = -1;
         let offset = 0;
 
-        const origin = Vector2.new();
-        const direction = Vector2.new();
-        const proj = Vector2.new();
-        const tmp = Vector2.new();
+        const origin = Vector2.create();
+        const direction = Vector2.create();
+        const proj = Vector2.create();
+        const tmp = Vector2.create();
         for (let i = 0; i < pc - 1; i++) {
             origin.copy(r[i]);
             direction.copy(r[i + 1]).subtract(origin).scale(1 / this._bake_interval);

@@ -21,7 +21,7 @@ export class Vector3 {
      * @param {number} [p_y]
      * @param {number} [p_z]
      */
-    static new(p_x = 0, p_y = 0, p_z = 0) {
+    static create(p_x = 0, p_y = 0, p_z = 0) {
         const vec = pool.pop();
         if (!vec) {
             return new Vector3(p_x, p_y, p_z);
@@ -125,7 +125,7 @@ export class Vector3 {
      * Returns new Vector3 with same value.
      */
     clone() {
-        return new Vector3(this.x, this.y, this.z);
+        return Vector3.create(this.x, this.y, this.z);
     }
     /**
      * Returns new Vector3 but normalized.
@@ -140,7 +140,7 @@ export class Vector3 {
      * @param {Vector3} [r_out]
      */
     linear_interpolate(p_b, p_t, r_out) {
-        if (!r_out) r_out = Vector3.new();
+        if (!r_out) r_out = Vector3.create();
 
         return r_out.set(
             this.x + (p_t * (p_b.x - this.x)),
@@ -313,7 +313,7 @@ export class Vector3 {
      * @param {Vector3Like} p_b
      */
     cross(p_b) {
-        return Vector3.new(
+        return Vector3.create(
             (this.y * p_b.z) - (this.z * p_b.y),
             (this.z * p_b.x) - (this.x * p_b.z),
             (this.x * p_b.y) - (this.y * p_b.x)

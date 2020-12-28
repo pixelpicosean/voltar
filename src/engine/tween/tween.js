@@ -204,7 +204,7 @@ const Tween_Pool = [];
 
 // TODO: better easing support (https://github.com/rezoner/ease)
 export default class Tween extends VObject {
-    static new() {
+    static create() {
         const t = Tween_Pool.pop();
         if (!t) {
             return new Tween();

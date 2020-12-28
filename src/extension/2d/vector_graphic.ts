@@ -65,8 +65,8 @@ export class VectorGraphic extends v.Node2D {
             case CAPSULE: {
                 const radius = shape.radius;
 
-                const p0 = v.Vector2.new(0, -shape.height / 2);
-                const p1 = v.Vector2.new(0, +shape.height / 2);
+                const p0 = v.Vector2.create(0, -shape.height / 2);
+                const p1 = v.Vector2.create(0, +shape.height / 2);
 
                 const points = new v.PoolVector2Array;
                 const indices: number[] = [];
@@ -76,7 +76,7 @@ export class VectorGraphic extends v.Node2D {
                 const angle_per_step = Math.PI / steps;
                 points.resize(steps * 2 + 2);
                 let start_angle = Math.PI;
-                const vec = v.Vector2.new();
+                const vec = v.Vector2.create();
                 for (let i = 0; i < steps + 1; i++) {
                     points.set(i, vec.set(radius, 0).rotate(start_angle + angle_per_step * i).add(p0));
                 }

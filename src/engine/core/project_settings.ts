@@ -28,6 +28,7 @@ interface DisplaySettings {
   stretch_mode?: number;
   stretch_aspect?: number;
   resizable?: boolean;
+  fxaa?: boolean;
 }
 
 interface PhysicsSettings {
@@ -81,6 +82,8 @@ const DefaultSettings: Settings = {
         stretch_mode: STRETCH_MODE_DISABLED,
         stretch_aspect: STRETCH_ASPECT_IGNORE,
         resizable: false,
+
+        fxaa: false,
     },
     physics: {
         physics_fps: 60,

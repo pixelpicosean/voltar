@@ -1476,7 +1476,7 @@ export class RasterizerScene {
 
         // clear color
 
-        let clear_color = Color.new(0, 0, 0, 1);
+        let clear_color = Color.create(0, 0, 0, 1);
 
         if (this.storage.frame.current_rt && this.storage.frame.current_rt.flags.TRANSPARENT) {
             clear_color.set(0, 0, 0, 0);
@@ -1585,8 +1585,8 @@ export class RasterizerScene {
         let bias = 0;
         let normal_bias = 0;
 
-        let light_projection = CameraMatrix.new();
-        let light_transform = Transform.new();
+        let light_projection = CameraMatrix.create();
+        let light_transform = Transform.create();
 
         this.state.current_shader = null;
         this.state.prev_conditions = -1;
@@ -2420,7 +2420,7 @@ export class RasterizerScene {
         gl.disable(gl.BLEND);
         gl.depthFunc(gl.LEQUAL);
 
-        let camera = CameraMatrix.new();
+        let camera = CameraMatrix.create();
 
         if (p_custom_fov) {
             let near_plane = p_projection.get_z_near();
@@ -2469,7 +2469,7 @@ export class RasterizerScene {
         let vp_he = camera.get_viewport_half_extents();
         let zn = p_projection.get_z_near();
 
-        let uv = Vector3.new();
+        let uv = Vector3.create();
         for (let i = 0; i < 4; i++) {
             let idx = (i * 2 + 1) * 3;
 
@@ -2510,7 +2510,7 @@ export class RasterizerScene {
         // set uniforms
         copy.set_uniform_float("multiplier", p_energy);
 
-        let t = Transform.new();
+        let t = Transform.create();
         t.basis.copy(p_sky_orientation);
         t.affine_invert();
         copy.set_uniform("sky_transform", t.as_array(sky_transform_arr))
@@ -2656,7 +2656,7 @@ export class RasterizerScene {
         // specific parameters
         switch (light.type) {
             case LIGHT_DIRECTIONAL: {
-                let direction = Vector3.new(0, 0, -1);
+                let direction = Vector3.create(0, 0, -1);
                 p_light.transform.basis.xform(direction, direction);
                 p_view_transform.basis.xform_inv(direction, direction);
                 direction.normalize();
@@ -2669,7 +2669,7 @@ export class RasterizerScene {
                     let shadow_count = 1;
                     let split_offsets = uniforms.light_split_offsets;
 
-                    let matrix = CameraMatrix.new();
+                    let matrix = CameraMatrix.create();
 
                     for (let k = 0; k < shadow_count; k++) {
                         let x = p_light.directional_rect.x;
@@ -2682,12 +2682,12 @@ export class RasterizerScene {
                         let _modelview = p_view_transform.inverse()
                             .append(p_light.shadow_transforms[k].transform)
                             .affine_invert()
-                        let modelview = CameraMatrix.new().set_transform(_modelview);
+                        let modelview = CameraMatrix.create().set_transform(_modelview);
 
-                        let bias = CameraMatrix.new();
+                        let bias = CameraMatrix.create();
                         bias.set_light_bias();
-                        let rectm = CameraMatrix.new();
-                        let atlas_rect = Rect2.new(
+                        let rectm = CameraMatrix.create();
+                        let atlas_rect = Rect2.create(
                             x / this.directional_shadow.size,
                             y / this.directional_shadow.size,
                             width / this.directional_shadow.size,
@@ -2765,7 +2765,7 @@ export class RasterizerScene {
                 uniforms.LIGHT_POSITION = position.as_array(uniforms.LIGHT_POSITION);
 
                 let direction = p_view_transform.inverse()
-                    .basis.xform(p_light.transform.basis.xform(Vector3.new(0, 0, -1)))
+                    .basis.xform(p_light.transform.basis.xform(Vector3.create(0, 0, -1)))
                     .normalize()
                 uniforms.LIGHT_DIRECTION = direction.as_array(uniforms.LIGHT_DIRECTION);
 

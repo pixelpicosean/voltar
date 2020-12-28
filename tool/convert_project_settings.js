@@ -120,6 +120,11 @@ module.exports.convert_project_settings = (project_url) => {
             display.antialias = use_antialias > 0;
         }
 
+        let use_fxaa = boolean(settings.rendering['quality/filters/use_fxaa']);
+        if (use_fxaa !== undefined) {
+            display.fxaa = use_fxaa;
+        }
+
         real_settings.display = display;
     }
     if (settings.physics) {

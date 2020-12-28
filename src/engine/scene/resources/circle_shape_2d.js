@@ -9,13 +9,10 @@ import { Shape2D } from "./shape_2d.js";
 export class CircleShape2D extends Shape2D {
     get type() { return 1 }
 
-    get radius() { return this._radius }
-    set radius(value) { this.set_radius(value) }
-
     constructor() {
         super(Physics2DServer.get_singleton().circle_shape_create());
 
-        this._radius = 10;
+        this.radius = 10;
         this._update_shape();
     }
 
@@ -32,7 +29,7 @@ export class CircleShape2D extends Shape2D {
      * @param {number} value
      */
     set_radius(value) {
-        this._radius = value;
+        this.radius = value;
         this._update_shape();
     }
 
@@ -41,16 +38,16 @@ export class CircleShape2D extends Shape2D {
      * @returns {Rect2}
      */
     get_rect(p_rect = new Rect2()) {
-        p_rect.x = -this._radius;
-        p_rect.y = -this._radius;
-        p_rect.width = p_rect.height = this._radius * 2;
+        p_rect.x = -this.radius;
+        p_rect.y = -this.radius;
+        p_rect.width = p_rect.height = this.radius * 2;
         return p_rect;
     }
 
     /* private */
 
     _update_shape() {
-        this.shape.set_data(this._radius);
+        this.shape.set_data(this.radius);
     }
 }
 res_class_map['CircleShape2D'] = CircleShape2D

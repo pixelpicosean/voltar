@@ -27,7 +27,7 @@ const intersections = [
 ]
 
 export class CameraMatrix {
-    static new() {
+    static create() {
         let obj = pool.pop();
         if (!obj) obj = new CameraMatrix;
         return obj.set_identity();
@@ -92,7 +92,7 @@ export class CameraMatrix {
     }
 
     clone() {
-        return CameraMatrix.new().copy(this);
+        return CameraMatrix.create().copy(this);
     }
 
     is_orthogonal() {
@@ -103,7 +103,7 @@ export class CameraMatrix {
      * @param {CameraMatrix} p_matrix
      */
     append(p_matrix) {
-        let new_m = CameraMatrix.new();
+        let new_m = CameraMatrix.create();
 
         for (let j = 0; j < 4; j++) {
             for (let i = 0; i < 4; i++) {
@@ -212,7 +212,7 @@ export class CameraMatrix {
      * @returns new CameraMatrix
      */
     inverse() {
-        return CameraMatrix.new().copy(this).invert();
+        return CameraMatrix.create().copy(this).invert();
     }
 
     set_identity() {
@@ -436,7 +436,7 @@ export class CameraMatrix {
     }
 
     get_fov() {
-        let right_plane = Plane.new().set(
+        let right_plane = Plane.create().set(
             this.matrix[0][3] - this.matrix[0][0],
             this.matrix[1][3] - this.matrix[1][0],
             this.matrix[2][3] - this.matrix[2][0],
@@ -449,7 +449,7 @@ export class CameraMatrix {
             Plane.free(right_plane);
             return res;
         } else {
-            let left_plane = Plane.new().set(
+            let left_plane = Plane.create().set(
                 this.matrix[0][3] + this.matrix[0][0],
                 this.matrix[1][3] + this.matrix[1][0],
                 this.matrix[2][3] + this.matrix[2][0],
@@ -467,7 +467,7 @@ export class CameraMatrix {
     }
 
     get_z_far() {
-        let new_plane = Plane.new().set(
+        let new_plane = Plane.create().set(
             this.matrix[0][3] - this.matrix[0][2],
             this.matrix[1][3] - this.matrix[1][2],
             this.matrix[2][3] - this.matrix[2][2],
@@ -481,7 +481,7 @@ export class CameraMatrix {
     }
 
     get_z_near() {
-        let new_plane = Plane.new().set(
+        let new_plane = Plane.create().set(
             this.matrix[0][3] + this.matrix[0][2],
             this.matrix[1][3] + this.matrix[1][2],
             this.matrix[2][3] + this.matrix[2][2],
@@ -501,7 +501,7 @@ export class CameraMatrix {
     }
 
     get_viewport_half_extents() {
-        let near_plane = Plane.new().set(
+        let near_plane = Plane.create().set(
             this.matrix[0][3] + this.matrix[0][2],
             this.matrix[1][3] + this.matrix[1][2],
             this.matrix[2][3] + this.matrix[2][2],
@@ -509,7 +509,7 @@ export class CameraMatrix {
         );
         near_plane.normalize();
 
-        let right_plane = Plane.new().set(
+        let right_plane = Plane.create().set(
             this.matrix[0][3] - this.matrix[0][0],
             this.matrix[1][3] - this.matrix[1][0],
             this.matrix[2][3] - this.matrix[2][0],
@@ -517,7 +517,7 @@ export class CameraMatrix {
         );
         right_plane.normalize();
 
-        let top_plane = Plane.new().set(
+        let top_plane = Plane.create().set(
             this.matrix[0][3] - this.matrix[0][1],
             this.matrix[1][3] - this.matrix[1][1],
             this.matrix[2][3] - this.matrix[2][1],
@@ -525,7 +525,7 @@ export class CameraMatrix {
         );
         top_plane.normalize();
 
-        let res = Vector3.new();
+        let res = Vector3.create();
         near_plane.intersect_3(right_plane, top_plane, res);
 
         Plane.free(near_plane);
@@ -542,7 +542,7 @@ export class CameraMatrix {
     get_endpoints(p_transform, p_points) {
         let planes = this.get_projection_planes(Transform.IDENTITY);
 
-        let point = Vector3.new();
+        let point = Vector3.create();
         for (let i = 0; i < 8; i++) {
             planes[intersections[i][0]].intersect_3(
                 planes[intersections[i][1]],
@@ -564,7 +564,7 @@ export class CameraMatrix {
         let planes = [];
 
         let m = this.matrix;
-        let new_plane = Plane.new();
+        let new_plane = Plane.create();
 
         // near plane
         new_plane.set(

@@ -49,7 +49,7 @@ import { LightmapCapture_t, Skeleton_t } from 'engine/drivers/webgl/rasterizer_s
  * @typedef {import('engine/drivers/webgl/rasterizer_scene').ShadowAtlas_t} ShadowAtlas_t
  */
 
-const MAX_INSTANCE_CULL = 65535;
+const MAX_INSTANCE_CULL = 65536;
 const MAX_LIGHTS_CULLED = 4096;
 
 export const CAMERA_PERSPECTIVE = 0;
@@ -428,7 +428,7 @@ export class VisualServerScene {
             let geom = /** @type {InstanceGeometryData} */(A.base_data);
 
             geom.lightmap_captures.splice(geom.lightmap_captures.indexOf(B), 1);
-            lightmap_capture.splice(A, 1);
+            lightmap_capture.geometries.splice(A, 1);
             this._instance_queue_update(A, false, false);
         }
     }
@@ -440,7 +440,7 @@ export class VisualServerScene {
      * @param {ShadowAtlas_t} shadow_atlas
      */
     render_camera(camera, scenario, viewport_size, shadow_atlas) {
-        let camera_matrix = CameraMatrix.new();
+        let camera_matrix = CameraMatrix.create();
         let ortho = false;
 
         switch (camera.type) {
@@ -813,7 +813,7 @@ export class VisualServerScene {
                 new_aabb = VSG.storage.lightmap_capture_get_bounds(/** @type {LightmapCapture_t} */(p_instance.base));
             } break;
         }
-        if (!new_aabb) new_aabb = AABB.new();
+        if (!new_aabb) new_aabb = AABB.create();
 
         p_instance.aabb.copy(new_aabb);
         AABB.free(new_aabb);
@@ -873,7 +873,7 @@ export class VisualServerScene {
                 pairable = true;
             }
 
-            p_instance.octree_id = p_instance.scenario.octree.create(p_instance, new_aabb, pairable, base_type, pairable_mask);
+            p_instance.octree_id = p_instance.scenario.octree.create(p_instance, new_aabb, 0, pairable, base_type, pairable_mask);
         } else {
             p_instance.scenario.octree.move(p_instance.octree_id, new_aabb);
         }
@@ -915,12 +915,13 @@ export class VisualServerScene {
 
         let planes = p_cam_projection.get_projection_planes(p_cam_transform);
 
-        let near_plane = Plane.new().set_point_and_normal(
+        let near_plane = Plane.create().set_point_and_normal(
             p_cam_transform.origin,
             p_cam_transform.basis.get_axis(2).normalize().negate()
         );
         let z_far = p_cam_projection.get_z_far();
 
+        this.instance_cull_result.length = 0;
         this.instance_cull_count = p_scenario.octree.cull_convex(planes, this.instance_cull_result, MAX_INSTANCE_CULL);
         this.light_cull_count = 0;
 
@@ -1026,7 +1027,7 @@ export class VisualServerScene {
                 {
                     let cam_xf = p_cam_transform.clone();
                     let zn = p_cam_projection.get_z_near();
-                    let p = Plane.new().set_point_and_normal(
+                    let p = Plane.create().set_point_and_normal(
                         cam_xf.basis.get_axis(2).scale(-zn).add(cam_xf.origin),
                         cam_xf.basis.get_axis(2).negate()
                     );
@@ -1139,7 +1140,7 @@ export class VisualServerScene {
                 if (depth_range_mode === LIGHT_DIRECTIONAL_SHADOW_DEPTH_RANGE_OPTIMIZED) {
                     let planes = p_cam_projection.get_projection_planes(p_cam_transform);
                     let cull_count = p_scenario.octree.cull_convex(planes, this.instance_shadow_cull_result, MAX_INSTANCE_CULL, INSTANCE_GEOMETRY_MASK);
-                    let base = Plane.new().set_point_and_normal(p_cam_transform.origin, p_cam_transform.basis.get_axis(2).negate());
+                    let base = Plane.create().set_point_and_normal(p_cam_transform.origin, p_cam_transform.basis.get_axis(2).negate());
 
                     let found_items = false;
                     let z_max = -1e20;
@@ -1188,7 +1189,7 @@ export class VisualServerScene {
 
                 let first_radius = 0;
                 for (let i = 0; i < splits; i++) {
-                    let camera_matrix = CameraMatrix.new();
+                    let camera_matrix = CameraMatrix.create();
 
                     let aspect = p_cam_projection.get_aspect();
 
@@ -1252,7 +1253,7 @@ export class VisualServerScene {
                     {
                         // camera viewport stuff
 
-                        let center = Vector3.new();
+                        let center = Vector3.create();
 
                         for (let j = 0; j < 8; j++) {
                             center.add(endpoints[j]);
@@ -1307,9 +1308,9 @@ export class VisualServerScene {
 
                     let cull_count = p_scenario.octree.cull_convex(light_frustum_planes, this.instance_shadow_cull_result, MAX_INSTANCE_CULL, INSTANCE_GEOMETRY_MASK);
 
-                    let near_plane = Plane.new().set_point_and_normal(light_transform.origin, light_transform.basis.get_axis(2).negate());
+                    let near_plane = Plane.create().set_point_and_normal(light_transform.origin, light_transform.basis.get_axis(2).negate());
 
-                    let tmp_plane = Plane.new();
+                    let tmp_plane = Plane.create();
                     for (let j = 0; j < cull_count; j++) {
                         let instance = this.instance_shadow_cull_result[j];
                         let base_data = /** @type {InstanceGeometryData} */(instance.base_data);
@@ -1331,14 +1332,14 @@ export class VisualServerScene {
                     Plane.free(tmp_plane);
 
                     {
-                        let ortho_camera = CameraMatrix.new();
+                        let ortho_camera = CameraMatrix.create();
 
                         let half_x = (x_max_cam - x_min_cam) * 0.5;
                         let half_y = (y_max_cam - y_min_cam) * 0.5;
 
                         ortho_camera.set_orthogonal_d(-half_x, half_x, -half_y, half_y, 0, z_max - z_min_cam);
 
-                        let ortho_transform = Transform.new();
+                        let ortho_transform = Transform.create();
                         ortho_transform.basis.copy(transform.basis);
                         ortho_transform.origin
                             .copy(x_vec.scale(x_min_cam + half_x))
@@ -1375,21 +1376,21 @@ export class VisualServerScene {
                         let z = i === 0 ? -1 : 1;
                         /** @type {Plane[]} */
                         let planes = Array(5);
-                        let vec = Vector3.new();
-                        planes[0] = light_transform.xform_plane(Plane.new().set(0, 0, z, radius));
+                        let vec = Vector3.create();
+                        planes[0] = light_transform.xform_plane(Plane.create().set(0, 0, z, radius));
                         vec.set(1, 0, z).normalize();
-                        planes[1] = light_transform.xform_plane(Plane.new().set(vec.x, vec.y, vec.z, radius));
+                        planes[1] = light_transform.xform_plane(Plane.create().set(vec.x, vec.y, vec.z, radius));
                         vec.set(-1, 0, z).normalize();
-                        planes[2] = light_transform.xform_plane(Plane.new().set(vec.x, vec.y, vec.z, radius));
+                        planes[2] = light_transform.xform_plane(Plane.create().set(vec.x, vec.y, vec.z, radius));
                         vec.set(0, 1, z).normalize();
-                        planes[3] = light_transform.xform_plane(Plane.new().set(vec.x, vec.y, vec.z, radius));
+                        planes[3] = light_transform.xform_plane(Plane.create().set(vec.x, vec.y, vec.z, radius));
                         vec.set(0, -1, z).normalize();
-                        planes[4] = light_transform.xform_plane(Plane.new().set(vec.x, vec.y, vec.z, radius));
+                        planes[4] = light_transform.xform_plane(Plane.create().set(vec.x, vec.y, vec.z, radius));
                         Vector3.free(vec);
 
                         let cull_count = p_scenario.octree.cull_convex(planes, this.instance_shadow_cull_result, MAX_INSTANCE_CULL, INSTANCE_GEOMETRY_MASK);
 
-                        let near_plane = Plane.new().set_point_and_normal(light_transform.origin, light_transform.basis.get_axis(2).scale(z));
+                        let near_plane = Plane.create().set_point_and_normal(light_transform.origin, light_transform.basis.get_axis(2).scale(z));
 
                         for (let j = 0; j < cull_count; j++) {
                             let instance = this.instance_shadow_cull_result[j];
@@ -1406,7 +1407,7 @@ export class VisualServerScene {
                             }
                         }
 
-                        let cm = CameraMatrix.new();
+                        let cm = CameraMatrix.create();
                         VSG.scene_render.light_instance_set_shadow_transform(
                             light.instance,
                             cm, light_transform,
@@ -1421,13 +1422,13 @@ export class VisualServerScene {
                 let radius = light_base.param[LIGHT_PARAM_RANGE];
                 let angle = light_base.param[LIGHT_PARAM_SPOT_ANGLE];
 
-                let cm = CameraMatrix.new();
+                let cm = CameraMatrix.create();
                 cm.set_perspective(angle * 2, 1, 0.01, radius);
 
                 let planes = cm.get_projection_planes(light_transform);
                 let cull_count = p_scenario.octree.cull_convex(planes, this.instance_shadow_cull_result, MAX_INSTANCE_CULL, INSTANCE_GEOMETRY_MASK);
 
-                let near_plane = Plane.new().set_point_and_normal(light_transform.origin, light_transform.basis.get_axis(2).negate());
+                let near_plane = Plane.create().set_point_and_normal(light_transform.origin, light_transform.basis.get_axis(2).negate());
                 for (let j = 0; j < cull_count; j++) {
                     let instance = this.instance_shadow_cull_result[j];
                     let base_data = /** @type {InstanceGeometryData} */(instance.base_data);

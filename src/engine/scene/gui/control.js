@@ -1,5 +1,6 @@
 import { node_class_map } from 'engine/registry';
 import { GDCLASS } from 'engine/core/v_object';
+import { Element } from 'engine/core/list';
 import {
     rad2deg,
     deg2rad,
@@ -85,79 +86,74 @@ export class Control extends CanvasItem {
     get class() { return 'Control' }
 
     get anchor_bottom() { return this.c_data.anchor[MARGIN_BOTTOM] }
-    set anchor_bottom(value) { this.set_anchor(MARGIN_BOTTOM, value) }
+    /** @param {number} value */
+    set_anchor_bottom(value) { this.set_anchor(MARGIN_BOTTOM, value) }
 
     get anchor_left() { return this.c_data.anchor[MARGIN_LEFT] }
-    set anchor_left(value) { this.set_anchor(MARGIN_LEFT, value) }
+    /** @param {number} value */
+    set_anchor_left(value) { this.set_anchor(MARGIN_LEFT, value) }
 
     get anchor_top() { return this.c_data.anchor[MARGIN_TOP] }
-    set anchor_top(value) { this.set_anchor(MARGIN_TOP, value) }
+    /** @param {number} value */
+    set_anchor_top(value) { this.set_anchor(MARGIN_TOP, value) }
 
     get anchor_right() { return this.c_data.anchor[MARGIN_RIGHT] }
-    set anchor_right(value) { this.set_anchor(MARGIN_RIGHT, value) }
+    /** @param {number} value */
+    set_anchor_right(value) { this.set_anchor(MARGIN_RIGHT, value) }
 
     get margin_bottom() { return this.c_data.margin[MARGIN_BOTTOM] }
-    set margin_bottom(value) { this.set_margin(MARGIN_BOTTOM, value) }
+    /** @param {number} value */
+    set_margin_bottom(value) { this.set_margin(MARGIN_BOTTOM, value) }
 
     get margin_left() { return this.c_data.margin[MARGIN_LEFT] }
-    set margin_left(value) { this.set_margin(MARGIN_LEFT, value) }
+    /** @param {number} value */
+    set_margin_left(value) { this.set_margin(MARGIN_LEFT, value) }
 
     get margin_top() { return this.c_data.margin[MARGIN_TOP] }
-    set margin_top(value) { this.set_margin(MARGIN_TOP, value) }
+    /** @param {number} value */
+    set_margin_top(value) { this.set_margin(MARGIN_TOP, value) }
 
     get margin_right() { return this.c_data.margin[MARGIN_RIGHT] }
-    set margin_right(value) { this.set_margin(MARGIN_RIGHT, value) }
+    /** @param {number} value */
+    set_margin_right(value) { this.set_margin(MARGIN_RIGHT, value) }
 
     get mouse_default_cursor_shape() { return this.cursor }
-    set mouse_default_cursor_shape(value) { this.cursor = value }
+    /** @param {number} value */
+    set_mouse_default_cursor_shape(value) { this.cursor = value }
 
     get rect_min_size() { return this.c_data.custom_minimum_size }
-    set rect_min_size(value) { this.set_rect_min_size(value) }
 
     get rect_clip_content() { return this.c_data.clip_contents }
-    set rect_clip_content(value) { this.set_rect_clip_content(value) }
 
     get rect_position() { return this.c_data.pos_cache }
-    set rect_position(value) { this.set_rect_position(value) }
 
     get rect_global_position() { return this.get_global_transform().get_origin() }
-    set rect_global_position(value) { this.set_rect_global_position(value) }
 
     get rect_size() { return this.c_data.size_cache }
-    set rect_size(value) { this.set_rect_size(value) }
 
     get rect_rotation() { return rad2deg(this.c_data.rotation) }
-    set rect_rotation(value) { this.set_rect_rotation(value) }
 
     get grow_horizontal() { return this.c_data.h_grow }
-    set grow_horizontal(value) { this.set_grow_horizontal(value) }
 
     get grow_vertical() { return this.c_data.v_grow }
-    set grow_vertical(value) { this.set_grow_vertical(value) }
 
     get rect_pivot_offset() { return this.c_data.pivot_offset }
-    set rect_pivot_offset(value) { this.set_rect_pivot_offset(value) }
 
     get rect_scale() { return this.c_data.scale }
-    set rect_scale(value) { this.set_rect_scale(value) }
 
     get size_flags_horizontal() { return this.c_data.h_size_flags }
-    set size_flags_horizontal(value) { this.set_size_flags_horizontal(value) }
 
     get size_flags_vertical() { return this.c_data.v_size_flags }
-    set size_flags_vertical(value) { this.set_size_flags_vertical(value) }
 
     get size_flags_stretch_ratio() { return this.c_data.expand }
-    set size_flags_stretch_ratio(value) { this.set_size_flags_stretch_ratio(value) }
 
     get theme() { return this.c_data.theme }
-    set theme(value) { this.set_theme(value) }
 
     get focus_mode() { return this.c_data.focus_mode }
-    set focus_mode(value) { this.set_focus_mode(value) }
 
     get mouse_filter() { return this.c_data.mouse_filter }
-    set mouse_filter(value) { this.c_data.mouse_filter = value }
+    /** @param {number} value */
+    set_mouse_filter(value) { this.c_data.mouse_filter = value }
 
     constructor() {
         super();
@@ -165,12 +161,12 @@ export class Control extends CanvasItem {
         this.is_control = true;
 
         this.c_data = {
-            pos_cache: new Vector2(),
-            size_cache: new Vector2(),
-            minimum_size_cache: new Vector2(),
+            pos_cache: new Vector2,
+            size_cache: new Vector2,
+            minimum_size_cache: new Vector2,
             minimum_size_valid: false,
 
-            last_minimum_size: new Vector2(),
+            last_minimum_size: new Vector2,
             updating_last_minimum_size: false,
 
             margin: [0, 0, 0, 0],
@@ -181,14 +177,14 @@ export class Control extends CanvasItem {
 
             rotation: 0,
             scale: new Vector2(1, 1),
-            pivot_offset: new Vector2(0, 0),
+            pivot_offset: new Vector2,
 
             pending_resize: false,
 
             h_size_flags: SIZE_FILL,
             v_size_flags: SIZE_FILL,
             expand: 1,
-            custom_minimum_size: new Vector2(),
+            custom_minimum_size: new Vector2,
 
             pass_on_modal_close_click: true,
 
@@ -199,42 +195,46 @@ export class Control extends CanvasItem {
             block_minimum_size_adjust: false,
             disable_visibility_clip: false,
 
-            /**
-             * @type {Control}
-             */
+            /** @type {Control} */
             parent: null,
             drag_owner: null,
             modal_exclusive: false,
             modal_frame: 0,
+            /** @type {Theme} */
             theme: null,
-            /**
-             * @type {Control}
-             */
+            /** @type {Control} */
             theme_owner: null,
 
             tooltip: '',
             default_cursor: '',
 
+            /** @type {Element<Control>} */
             MI: null,
+            /** @type {Element<Control>} */
             SI: null,
+            /** @type {Element<Control>} */
             RI: null,
 
-            /**
-             * @type {CanvasItem}
-             */
+            /** @type {CanvasItem} */
             parent_canvas_item: null,
 
+            /** @type {Control} */
             modal_prev_focus_owner: null,
 
-            focus_neighbour: [null, null, null, null],
-            focus_next: null,
-            focus_prev: null,
+            focus_neighbour: ["", "", "", ""],
+            focus_next: "",
+            focus_prev: "",
 
-            icon_override: undefined,
-            style_override: undefined,
-            font_override: undefined,
-            color_override: undefined,
-            constant_override: undefined,
+            /** @type {{ [name: string]: ImageTexture }} */
+            icon_override: Object.create(null),
+            /** @type {{ [name: string]: StyleBox }} */
+            style_override: Object.create(null),
+            /** @type {{ [name: string]: DynamicFont }} */
+            font_override: Object.create(null),
+            /** @type {{ [name: string]: Color }} */
+            color_override: Object.create(null),
+            /** @type {{ [name: string]: number }} */
+            constant_override: Object.create(null),
         };
     }
 
@@ -293,10 +293,10 @@ export class Control extends CanvasItem {
         }
 
         if (data.mouse_filter !== undefined) {
-            this.mouse_filter = data.mouse_filter;
+            this.set_mouse_filter(data.mouse_filter);
         }
         if (data.mouse_default_cursor_shape !== undefined) {
-            this.mouse_default_cursor_shape = data.mouse_default_cursor_shape;
+            this.set_mouse_default_cursor_shape(data.mouse_default_cursor_shape);
         }
 
         if (data.size_flags_horizontal !== undefined) {
@@ -316,13 +316,27 @@ export class Control extends CanvasItem {
      * @param {CanvasItem} child
      */
     add_child_notify(child) {
-        // TODO: change child's theme if we have any
+        let child_c = /** @type {Control} */(child);
+        if (!child_c.is_control) {
+            return;
+        }
+
+        if (!child_c.c_data.theme && this.c_data.theme_owner) {
+            this._propagate_theme_changed(child_c, this.c_data.theme_owner);
+        }
     }
     /**
      * @param {CanvasItem} child
      */
     remove_child_notify(child) {
-        // TODO: unset child's theme owner
+        let child_c = /** @type {Control} */(child);
+        if (!child_c.is_control) {
+            return;
+        }
+
+        if (!child_c.c_data.theme_owner && !child_c.c_data.theme) {
+            this._propagate_theme_changed(child_c, null);
+        }
     }
 
     /**
@@ -366,7 +380,7 @@ export class Control extends CanvasItem {
 
                         if (!parent) break;
 
-                        const ci = /** @type {CanvasItem} */(parent.is_canvas_item ? parent : null);
+                        let ci = /** @type {CanvasItem} */(parent.is_canvas_item ? parent : null);
                         if (ci && ci.is_set_as_toplevel()) {
                             subwindow = true;
                             break;
@@ -447,7 +461,7 @@ export class Control extends CanvasItem {
             } break;
             case NOTIFICATION_DRAW: {
                 this._update_canvas_item_transform();
-                const rect = Rect2.new(0, 0, this.rect_size.x, this.rect_size.y);
+                const rect = Rect2.create(0, 0, this.rect_size.x, this.rect_size.y);
                 VSG.canvas.canvas_item_set_custom_rect(this.canvas_item, !this.c_data.disable_visibility_clip, rect);
                 VSG.canvas.canvas_item_set_clip(this.canvas_item, this.c_data.clip_contents);
             } break;
@@ -623,7 +637,7 @@ export class Control extends CanvasItem {
      * @param {number} y
      */
     set_rect_min_size_n(x, y) {
-        const size = Vector2.new(x, y);
+        const size = Vector2.create(x, y);
         this.set_rect_min_size(size);
         Vector2.free(size);
     }
@@ -664,7 +678,7 @@ export class Control extends CanvasItem {
 
     get_minimum_size() {
         const s = this._get_minimum_size();
-        return s || Vector2.new(0, 0);
+        return s || Vector2.create(0, 0);
     }
     /**
      * returns new Vector2
@@ -1075,7 +1089,7 @@ export class Control extends CanvasItem {
         this._size_changed();
     }
     get_begin() {
-        return Vector2.new(this.c_data.margin[0], this.c_data.margin[1]);
+        return Vector2.create(this.c_data.margin[0], this.c_data.margin[1]);
     }
 
     /**
@@ -1094,7 +1108,7 @@ export class Control extends CanvasItem {
         this._size_changed();
     }
     get_end() {
-        return Vector2.new(this.c_data.margin[2], this.c_data.margin[3]);
+        return Vector2.create(this.c_data.margin[2], this.c_data.margin[3]);
     }
 
     /**
@@ -1110,7 +1124,7 @@ export class Control extends CanvasItem {
      * @param {boolean} [p_keep_margins=false]
      */
     set_rect_position_n(x, y, p_keep_margins = false) {
-        const rect = Rect2.new(x, y, this.c_data.size_cache.x, this.c_data.size_cache.y);
+        const rect = Rect2.create(x, y, this.c_data.size_cache.x, this.c_data.size_cache.y);
         if (p_keep_margins) {
             this._compute_anchors(rect, this.c_data.margin, this.c_data.anchor);
         } else {
@@ -1139,11 +1153,11 @@ export class Control extends CanvasItem {
      * @param {boolean} [p_keep_margins=false]
      */
     set_rect_global_position_n(x, y, p_keep_margins = false) {
-        const inv = Transform2D.new();
+        const inv = Transform2D.create();
         if (this.c_data.parent_canvas_item) {
             inv.copy(this.c_data.parent_canvas_item.get_global_transform()).affine_inverse();
         }
-        const point = Vector2.new(x, y)
+        const point = Vector2.create(x, y)
         this.set_rect_position(inv.xform(point, point), p_keep_margins);
         Vector2.free(point);
         Transform2D.free(inv);
@@ -1174,7 +1188,7 @@ export class Control extends CanvasItem {
      * @param {number} y
      */
     set_rect_size_n(x, y, p_keep_margins = false) {
-        const new_size = Vector2.new(x, y);
+        const new_size = Vector2.create(x, y);
         const min = this.get_combined_minimum_size();
         if (new_size.x < min.x) {
             new_size.x = min.x;
@@ -1183,7 +1197,7 @@ export class Control extends CanvasItem {
             new_size.y = min.y;
         }
 
-        const rect = Rect2.new(
+        const rect = Rect2.create(
             this.c_data.pos_cache.x,
             this.c_data.pos_cache.y,
             new_size.x,
@@ -1201,7 +1215,7 @@ export class Control extends CanvasItem {
     }
 
     get_rect() {
-        return Rect2.new(
+        return Rect2.create(
             this.c_data.pos_cache.x,
             this.c_data.pos_cache.y,
             this.c_data.size_cache.x,
@@ -1210,7 +1224,7 @@ export class Control extends CanvasItem {
     }
     get_global_rect() {
         const pos = this.rect_global_position;
-        const rect = Rect2.new(
+        const rect = Rect2.create(
             pos.x,
             pos.y,
             this.c_data.size_cache.x,
@@ -1226,7 +1240,7 @@ export class Control extends CanvasItem {
         return gr;
     }
     get_anchorable_rect() {
-        return Rect2.new(0, 0, this.c_data.size_cache.x, this.c_data.size_cache.y);
+        return Rect2.create(0, 0, this.c_data.size_cache.x, this.c_data.size_cache.y);
     }
 
     /**
@@ -1495,7 +1509,7 @@ export class Control extends CanvasItem {
             return ret;
         }
 
-        const rect = Rect2.new(0, 0, this.rect_size.x, this.rect_size.y);
+        const rect = Rect2.create(0, 0, this.rect_size.x, this.rect_size.y);
         ret = rect.has_point(p_point);
         return ret;
     }
@@ -1505,7 +1519,7 @@ export class Control extends CanvasItem {
      */
     get_parent_anchorable_rect() {
         if (!this.is_inside_tree()) {
-            return Rect2.new();
+            return Rect2.create();
         }
 
         if (this.c_data.parent_canvas_item) {
@@ -1520,7 +1534,7 @@ export class Control extends CanvasItem {
      */
     get_parent_area_size() {
         const rect = this.get_parent_anchorable_rect();
-        const size = Vector2.new(rect.width, rect.height);
+        const size = Vector2.create(rect.width, rect.height);
         Rect2.free(rect);
         return size;
     }
@@ -1667,8 +1681,8 @@ export class Control extends CanvasItem {
             margin_pos[i] = this.c_data.margin[i] + (this.c_data.anchor[i] * ((i % 2 === 0) ? parent_rect.width : parent_rect.height));
         }
 
-        const new_pos_cache = Vector2.new(margin_pos[0], margin_pos[1]);
-        const new_size_cache = Vector2.new(margin_pos[2], margin_pos[3]).subtract(new_pos_cache);
+        const new_pos_cache = Vector2.create(margin_pos[0], margin_pos[1]);
+        const new_size_cache = Vector2.create(margin_pos[2], margin_pos[3]).subtract(new_pos_cache);
 
         const minimum_size = this.get_combined_minimum_size();
 
@@ -1737,9 +1751,9 @@ export class Control extends CanvasItem {
      * returns new Transform2D
      */
     _get_internal_transform() {
-        const rot_scale = Transform2D.new();
+        const rot_scale = Transform2D.create();
         rot_scale.set_rotation_and_scale(this.c_data.rotation, this.c_data.scale);
-        const offset = Transform2D.new();
+        const offset = Transform2D.create();
         offset.set_origin_n(-this.c_data.pivot_offset.x, -this.c_data.pivot_offset.y);
         rot_scale.append(offset);
         offset.affine_inverse().append(rot_scale);
@@ -1803,12 +1817,12 @@ export class Control extends CanvasItem {
 node_class_map['Control'] = GDCLASS(Control, CanvasItem)
 
 /**
- * @param {Control} p_a
- * @param {Control} p_b
+ * @param {Element<Control>} p_a
+ * @param {Element<Control>} p_b
  */
 export function CComparator(p_a, p_b) {
-    if (p_a.get_canvas_layer() === p_b.get_canvas_layer()) {
-        return p_b.is_greater_than(p_a) ? -1 : 1;
+    if (p_a.value.get_canvas_layer() === p_b.value.get_canvas_layer()) {
+        return p_b.value.is_greater_than(p_a.value) ? -1 : 1;
     }
-    return p_a.get_canvas_layer() - p_b.get_canvas_layer();
+    return p_a.value.get_canvas_layer() - p_b.value.get_canvas_layer();
 }

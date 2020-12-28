@@ -277,7 +277,7 @@ export class Node2D extends CanvasItem {
      * @param {number} ty
      */
     set_global_transform_n(a, b, c, d, tx, ty) {
-        const mat = Transform2D.new(a, b, c, d, tx, ty);
+        const mat = Transform2D.create(a, b, c, d, tx, ty);
         this.set_global_transform(mat);
         Transform2D.free(mat);
     }
@@ -360,12 +360,12 @@ export class Node2D extends CanvasItem {
      */
     get_relative_transform_to_parent(p_parent) {
         if (p_parent === this) {
-            return Transform2D.new();
+            return Transform2D.create();
         }
 
         const parent_2d = /** @type {Node2D} */(this.get_parent());
         if (!parent_2d.is_node_2d) {
-            return Transform2D.new();
+            return Transform2D.create();
         }
 
         if (p_parent === parent_2d) {
@@ -407,7 +407,7 @@ export class Node2D extends CanvasItem {
      */
     move_local_x(p_delta, p_scaled = false) {
         const t = this._transform;
-        const m = Vector2.new(t.a, t.b);
+        const m = Vector2.create(t.a, t.b);
         if (!p_scaled) {
             m.normalize();
         }
@@ -421,7 +421,7 @@ export class Node2D extends CanvasItem {
      */
     move_local_y(p_delta, p_scaled = false) {
         const t = this._transform;
-        const m = Vector2.new(t.c, t.d);
+        const m = Vector2.create(t.c, t.d);
         if (!p_scaled) {
             m.normalize();
         }

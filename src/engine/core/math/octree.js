@@ -1,6 +1,9 @@
-import { AABB } from "./aabb.js";
-import { Plane } from "./plane.js";
-import { Vector3Like } from "./vector3.js";
+import { List } from "../list";
+import { AABB } from "./aabb";
+import { CMP_EPSILON } from "./math_defs";
+import { clamp } from "./math_funcs";
+import { Plane } from "./plane";
+import { Vector3, Vector3Like } from "./vector3";
 
 const OCTREE_DIVISOR = 4;
 
@@ -30,41 +33,37 @@ function Element_free(e) {
     el_pool.push(e);
 }
 
-/**
- * @template T
- */
 class Element {
     constructor() {
+        /** @type {Octree} */
+        this.octree = null;
+
+        this.userdata = null;
+        this.subindex = 0;
+        this.pairable = false;
+        this.pairable_mask = 0;
+        this.pairable_type = 0;
+
+        this.last_pass = 0;
         this.id = 0;
+        /** @type {Octant} */
+        this.common_parent = null;
 
         this.aabb = new AABB;
         this.container_aabb = new AABB;
 
-        /** @type {T} */
-        this.userdata = null;
+        /** @type {List<PairData>} */
+        this.pair_list = new List;
 
-        this.last_pass = 0;
-
-        this.pairable = false;
-        this.pairable_type = 0;
-        this.pairable_mask = 0;
-        /** @type {PairData<T>[]} */
-        this.pair_list = [];
-
-        /** @type {Octree} */
-        this.octree = null;
-
-        /** @type {Octant} */
-        this.common_parent = null;
-
-        /** @type {{ octant: Octant, E: Element }[]} */
-        this.octant_owners = [];
+        /** @type {List<{ octant: Octant, E: import('../list').Element }>} */
+        this.octant_owners = new List;
     }
     reset() {
         this.id = 0;
         this.aabb.set(0, 0, 0, 0, 0, 0);
         this.container_aabb.set(0, 0, 0, 0, 0, 0);
 
+        this.subindex = 0;
         this.userdata = null;
 
         this.last_pass = 0;
@@ -74,8 +73,16 @@ class Element {
         this.pairable_mask = 0;
 
         this.octree = null;
+        this.common_parent = null;
 
         return this;
+    }
+
+    moving() {
+        for (let F = this.octant_owners.front(); F;) {
+            F.value.octant.dirty = true;
+            F = F.next;
+        }
     }
 }
 
@@ -93,23 +100,51 @@ function Octant_free(ot) {
     ot_pool.push(ot);
 }
 
-/**
- * @template T
- */
 class PairData {
     constructor() {
-        this.intersect = false;
-        /** @type {Element<T>} */
+        /** @type {Element} */
         this.A = null;
-        /** @type {Element<T>} */
+        /** @type {Element} */
         this.B = null;
         /** @type {any} */
         this.ud = null;
 
-        this.rc = 0;
+        /** @type {import('../list').Element} */
+        this.eA = null;
+        /** @type {import('../list').Element} */
+        this.eB = null;
+
+        this.refcount = 0;
+        this.intersect = false;
     }
 }
 
+class CachedList {
+    constructor() {
+        /** @type {AABB[]} */
+        this.aabbs = [];
+        /** @type {Element[]} */
+        this.elements = [];
+    }
+
+    /**
+     * @param {List<Element>} eles
+     */
+    update(eles) {
+        this.aabbs.length = 0;
+        this.elements.length = 0;
+
+        let E = eles.front();
+        while (E) {
+            let e = E.value;
+            this.aabbs.push(e.aabb);
+            this.elements.push(e);
+            E = E.next;
+        }
+    }
+}
+
+/** @template T */
 class Octant {
     constructor() {
         this.aabb = new AABB;
@@ -126,10 +161,15 @@ class Octant {
         this.children_count = 0;
         this.parent_index = -1;
 
-        /** @type {Element[]} */
-        this.elements = [];
-        /** @type {Element[]} */
-        this.pairable_elements = [];
+        /** @type {List<Element>} */
+        this.elements = new List;
+        /** @type {List<Element>} */
+        this.pairable_elements = new List;
+
+        this.clist = new CachedList;
+        this.clist_pairable = new CachedList;
+
+        this.dirty = true;
     }
     reset() {
         this.aabb.set(0, 0, 0, 0, 0, 0);
@@ -140,27 +180,36 @@ class Octant {
         this.children_count = 0;
         this.parent_index = -1;
 
-        this.elements.length = 0;
-        this.pairable_elements.length = 0;
+        this.elements = new List;
+        this.pairable_elements = new List;
+
+        this.dirty = true;
 
         return this;
     }
+
+    update_cached_lists() {
+        if (!this.dirty) return;
+
+        this.clist_pairable.update(this.pairable_elements);
+        this.clist.update(this.elements);
+        this.dirty = false;
+    }
 }
 
-/**
- * @template T
- */
+/** @template T */
 export class Octree {
     /**
      * @param {boolean} use_pairs
      * @param {number} [unit_size]
      */
     constructor(use_pairs, unit_size = 1.0) {
-        this.last_element_id = 0;
-        this.pass = 0;
+        this.last_element_id = 1;
+        this.pass = 1;
 
         this.octant_count = 0;
         this.pair_count = 0;
+        this.octant_elements_limit = 0;
 
         this.use_pairs = use_pairs;
         this.unit_size = unit_size;
@@ -168,9 +217,9 @@ export class Octree {
         /** @type {Octant} */
         this.root = null;
 
-        /** @type {Element[]} */
-        this.element_map = [];
-        /** @type {{ [key: string]: PairData<T> }} */
+        /** @type {{ [id: number]: Element } */
+        this.element_map = {};
+        /** @type {{ [key: string]: PairData }} */
         this.pair_map = {};
 
         /** @type {(ud: any, a_id: number, a_ud: any, b_id: number, b_ud: any) => any} */
@@ -183,14 +232,14 @@ export class Octree {
 
     /**
      * @param {T} p_userdata
+     * @param {AABB} p_aabb
      */
-    create(p_userdata, p_aabb = new AABB, p_pairable = false, p_pairable_type = 0, p_pairable_mask = 1) {
-        let e = this.element_map[this.last_element_id] = Element_new();
-
-        this.last_element_id++;
+    create(p_userdata, p_aabb, p_subindex = 0, p_pairable = false, p_pairable_type = 0, p_pairable_mask = 1) {
+        let e = this.element_map[this.last_element_id++] = Element_new();
 
         e.aabb.copy(p_aabb);
         e.userdata = p_userdata;
+        e.subindex = p_subindex;
         e.last_pass = 0;
         e.octree = this;
         e.pairable = p_pairable;
@@ -206,7 +255,7 @@ export class Octree {
             }
         }
 
-        return e.id;
+        return this.last_element_id - 1;
     }
 
     /**
@@ -230,6 +279,9 @@ export class Octree {
                 e.common_parent = null;
                 e.aabb = p_aabb;
                 this._insert_element(e, this.root);
+                if (this.use_pairs) {
+                    this._element_check_pairs(e);
+                }
             }
 
             return;
@@ -241,21 +293,28 @@ export class Octree {
 
         if (e.container_aabb.encloses(p_aabb)) {
             e.aabb.copy(p_aabb);
+            if (this.use_pairs) {
+                this._element_check_pairs(e);
+            }
+
+            e.moving();
+
             return;
         }
 
-        let combined = e.aabb.merge(p_aabb);
+        let combined = e.aabb.merged(p_aabb);
         this._ensure_valid_root(combined);
 
-        this.pass++;
-
+        let owners = e.octant_owners.clone();
         let common_parent = e.common_parent;
+
+        this.pass++;
 
         while (common_parent && !common_parent.aabb.encloses(p_aabb)) {
             common_parent = common_parent.parent;
         }
 
-        e.octant_owners.length = 0;
+        e.octant_owners.clear();
         e.common_parent = null;
         e.aabb.copy(p_aabb);
 
@@ -263,25 +322,28 @@ export class Octree {
 
         this.pass++;
 
-        for (let i = 0; i < e.octant_owners.length; i++) {
-            let owner = e.octant_owners[i];
-            let o = owner.octant;
+        for (let F = owners.front(); F;) {
+            let o = F.value.octant;
+            let N = F.next;
 
             if (this.use_pairs && e.pairable) {
-                o.pairable_elements.splice(o.pairable_elements.indexOf(owner.E), 1);
+                o.pairable_elements.erase(F.value.E);
             } else {
-                o.elements.splice(o.elements.indexOf(owner.E), 1);
+                o.elements.erase(F.value.E);
             }
 
-            if (this._remove_element_from_octant(e, o, common_parent.parent)) {
-                e.octant_owners.splice(i, 1);
-                i--;
+            o.dirty = true;
+
+            if (this._remove_element_pair_and_remove_empty_octants(e, o, common_parent.parent)) {
+                owners.erase(F);
             }
+
+            F = N;
         }
 
         if (this.use_pairs) {
-            for (let i = 0; i < e.octant_owners.length; i++) {
-                let o = e.octant_owners[i].octant;
+            for (let F = owners.front(); F; F = F.next) {
+                let o = F.value.octant;
 
                 this.pass++;
                 for (let i = 0; i < 8; i++) {
@@ -318,15 +380,17 @@ export class Octree {
      * @param {Vector3Like} p_to
      * @param {T[]} p_result_array
      * @param {number} p_result_max
-     * @param {number} p_mask
+     * @param {number[]} [p_subindex_array]
+     * @param {number} [p_mask]
      */
-    cull_segment(p_from, p_to, p_result_array, p_result_max, p_mask = 0xFFFFFFFF) {
+    cull_segment(p_from, p_to, p_result_array, p_result_max, p_subindex_array, p_mask = 0xFFFFFFFF) {
         if (!this.root) return 0;
 
         this.pass++;
         let result = {
             index: 0,
             array: p_result_array,
+            subindex_array: p_subindex_array,
             mask: p_mask,
         };
         this._cull_segment(this.root, p_from, p_to, p_result_max, result);
@@ -338,15 +402,17 @@ export class Octree {
      * @param {AABB} p_aabb
      * @param {T[]} p_result_array
      * @param {number} p_result_max
-     * @param {number} p_mask
+     * @param {number[]} [p_subindex_array]
+     * @param {number} [p_mask]
      */
-    cull_aabb(p_aabb, p_result_array, p_result_max, p_mask = 0xFFFFFFFF) {
+    cull_aabb(p_aabb, p_result_array, p_result_max, p_subindex_array, p_mask = 0xFFFFFFFF) {
         if (!this.root) return 0;
 
         this.pass++;
         let result = {
             index: 0,
             array: p_result_array,
+            subindex_array: p_subindex_array,
             mask: p_mask,
         };
         this._cull_aabb(this.root, p_aabb, p_result_max, result);
@@ -362,21 +428,43 @@ export class Octree {
     cull_convex(p_convex, p_result_array, p_result_max, p_mask = 0xFFFFFFFF) {
         if (!this.root || p_convex.length == 0) return 0;
 
+        let convex_points = compute_convex_mesh_points(p_convex);
+        if (convex_points.length === 0) return 0;
+
         this.pass++;
-        let result = {
-            index: 0,
+        let cdata = {
             planes: p_convex,
-            array: p_result_array,
+            points: convex_points,
+            result_array: p_result_array,
             result_max: p_result_max,
+            result_idx: 0,
             mask: p_mask,
         };
-        this._cull_convex(this.root, result);
-        return result.index;
+        this._cull_convex(this.root, cdata);
+
+        // recycle Vector3 objects
+        for (let p of convex_points) {
+            pool_Vector3.push(p);
+        }
+
+        return cdata.result_idx;
+    }
+
+    /**
+     * TODO: load balance value from project settings
+     * @param {number} p_bal
+     */
+    set_balance(p_bal) {
+        let v = clamp(p_bal, 0, 1);
+        v *= v;
+        v *= v;
+        v *= 8096;
+        this.octant_elements_limit = Math.floor(v);
     }
 
     /**
      * @param {number} p_id
-     * @param {boolean} p_pairable
+     * @param {boolean} p_id
      * @param {number} p_pairable_type
      * @param {number} p_pairable_mask
      */
@@ -409,21 +497,30 @@ export class Octree {
      * @param {Octant} p_octant
      * @param {Vector3Like} p_from
      * @param {Vector3Like} p_to
-     * @param {{ array: T[], index: number, mask: number }} result
+     * @param {{ array: T[], subindex_array: number[], index: number, mask: number }} result
      */
     _cull_segment(p_octant, p_from, p_to, p_result_max, result) {
         if (p_result_max === result.index) return;
 
-        if (p_octant.elements.length > 0) {
-            for (let e of p_octant.elements) {
+        if (!p_octant.elements.empty()) {
+            p_octant.update_cached_lists();
+
+            let num_elements = p_octant.clist.elements.length;
+            for (let n = 0; n < num_elements; n++) {
+                let aabb = p_octant.clist.aabbs[n];
+                let e = p_octant.clist.elements[n];
+
                 if (e.last_pass === this.pass || (this.use_pairs && !(e.pairable_type & result.mask))) {
                     continue;
                 }
                 e.last_pass = this.pass;
 
-                if (e.aabb.intersects_segment(p_from, p_to)) {
+                if (aabb.intersects_segment(p_from, p_to)) {
                     if (result.index < p_result_max) {
                         result.array[result.index] = e.userdata;
+                        if (result.subindex_array) {
+                            result.subindex_array[result.index] = e.subindex;
+                        }
                         result.index++;
                     } else {
                         return;
@@ -432,16 +529,25 @@ export class Octree {
             }
         }
 
-        if (this.use_pairs && p_octant.pairable_elements.length > 0) {
-            for (let e of p_octant.pairable_elements) {
+        if (this.use_pairs && !p_octant.pairable_elements.empty()) {
+            p_octant.update_cached_lists();
+
+            let num_elements = p_octant.clist_pairable.elements.length;
+            for (let n = 0; n < num_elements; n++) {
+                let aabb = p_octant.clist_pairable.aabbs[n];
+                let e = p_octant.clist_pairable.elements[n];
+
                 if (e.last_pass === this.pass || (this.use_pairs && !(e.pairable_type & result.mask))) {
                     continue;
                 }
                 e.last_pass = this.pass;
 
-                if (e.aabb.intersects_segment(p_from, p_to)) {
+                if (aabb.intersects_segment(p_from, p_to)) {
                     if (result.index < p_result_max) {
                         result.array[result.index] = e.userdata;
+                        if (result.subindex_array) {
+                            result.subindex_array[result.index] = e.subindex;
+                        }
                         result.index++;
                     } else {
                         return;
@@ -461,21 +567,30 @@ export class Octree {
      * @param {Octant} p_octant
      * @param {AABB} p_aabb
      * @param {number} p_result_max
-     * @param {{ array: T[], index: number, mask: number }} result
+     * @param {{ array: T[], subindex_array: number[], index: number, mask: number }} result
      */
     _cull_aabb(p_octant, p_aabb, p_result_max, result) {
         if (p_result_max === result.index) return;
 
-        if (p_octant.elements.length > 0) {
-            for (let e of p_octant.elements) {
-                if (e.last_pass === this.pass || (this.use_pairs && !(e.pairable_type & result.mask))) {
-                    continue;
-                }
-                e.last_pass = this.pass;
+        if (!p_octant.elements.empty()) {
+            p_octant.update_cached_lists();
 
-                if (p_aabb.intersects_inclusive(e.aabb)) {
+            let num_elements = p_octant.clist.elements.length;
+            for (let n = 0; n < num_elements; n++) {
+                let aabb = p_octant.clist.aabbs[n];
+                let e = p_octant.clist.elements[n];
+
+                if (p_aabb.intersects_inclusive(aabb)) {
+                    if (e.last_pass === this.pass || (this.use_pairs && !(e.pairable_type & result.mask))) {
+                        continue;
+                    }
+                    e.last_pass = this.pass;
+
                     if (result.index < p_result_max) {
                         result.array[result.index] = e.userdata;
+                        if (result.subindex_array) {
+                            result.subindex_array[result.index] = e.subindex;
+                        }
                         result.index++;
                     } else {
                         return;
@@ -484,16 +599,25 @@ export class Octree {
             }
         }
 
-        if (this.use_pairs && p_octant.pairable_elements.length > 0) {
-            for (let e of p_octant.pairable_elements) {
-                if (e.last_pass === this.pass || (this.use_pairs && !(e.pairable_type & result.mask))) {
-                    continue;
-                }
-                e.last_pass = this.pass;
+        if (this.use_pairs && !p_octant.pairable_elements.empty()) {
+            p_octant.update_cached_lists();
 
-                if (p_aabb.intersects_inclusive(e.aabb)) {
+            let num_elements = p_octant.clist_pairable.elements.length;
+            for (let n = 0; n < num_elements; n++) {
+                let aabb = p_octant.clist_pairable.aabbs[n];
+                let e = p_octant.clist_pairable.elements[n];
+
+                if (p_aabb.intersects_inclusive(aabb)) {
+                    if (e.last_pass === this.pass || (this.use_pairs && !(e.pairable_type & result.mask))) {
+                        continue;
+                    }
+                    e.last_pass = this.pass;
+
                     if (result.index < p_result_max) {
                         result.array[result.index] = e.userdata;
+                        if (result.subindex_array) {
+                            result.subindex_array[result.index] = e.subindex;
+                        }
                         result.index++;
                     } else {
                         return;
@@ -511,22 +635,28 @@ export class Octree {
 
     /**
      * @param {Octant} p_octant
-     * @param {{ array: T[], index: number, result_max: number, planes: Plane[], mask: number }} p_cull
+     * @param {{ result_array: T[], result_idx: number, result_max: number, planes: Plane[], mask: number }} p_cull
      */
     _cull_convex(p_octant, p_cull) {
-        if (p_cull.result_max === p_cull.index) return;
+        if (p_cull.result_max === p_cull.result_idx) return;
 
-        if (p_octant.elements.length > 0) {
-            for (let e of p_octant.elements) {
-                if (e.last_pass === this.pass || (this.use_pairs && !(e.pairable_type & p_cull.mask))) {
-                    continue;
-                }
-                e.last_pass = this.pass;
+        if (!p_octant.elements.empty()) {
+            p_octant.update_cached_lists();
 
-                if (e.aabb.intersects_convex_shape(p_cull.planes)) {
-                    if (p_cull.index < p_cull.result_max) {
-                        p_cull.array[p_cull.index] = e.userdata;
-                        p_cull.index++;
+            let num_elements = p_octant.clist.elements.length;
+            for (let n = 0; n < num_elements; n++) {
+                let aabb = p_octant.clist.aabbs[n];
+                let e = p_octant.clist.elements[n];
+
+                if (aabb.intersects_convex_shape(p_cull.planes, p_cull.points)) {
+                    if (e.last_pass === this.pass || (this.use_pairs && !(e.pairable_type & p_cull.mask))) {
+                        continue;
+                    }
+                    e.last_pass = this.pass;
+
+                    if (p_cull.result_idx < p_cull.result_max) {
+                        p_cull.result_array[p_cull.result_idx] = e.userdata;
+                        p_cull.result_idx++;
                     } else {
                         return;
                     }
@@ -534,17 +664,23 @@ export class Octree {
             }
         }
 
-        if (this.use_pairs && p_octant.pairable_elements.length > 0) {
-            for (let e of p_octant.pairable_elements) {
-                if (e.last_pass === this.pass || (this.use_pairs && !(e.pairable_type & p_cull.mask))) {
-                    continue;
-                }
-                e.last_pass = this.pass;
+        if (this.use_pairs && !p_octant.pairable_elements.empty()) {
+            p_octant.update_cached_lists();
 
-                if (e.aabb.intersects_convex_shape(p_cull.planes)) {
-                    if (p_cull.index < p_cull.result_max) {
-                        p_cull.array[p_cull.index] = e.userdata;
-                        p_cull.index++;
+            let num_elements = p_octant.clist_pairable.elements.length;
+            for (let n = 0; n < num_elements; n++) {
+                let aabb = p_octant.clist_pairable.aabbs[n];
+                let e = p_octant.clist_pairable.elements[n];
+
+                if (aabb.intersects_convex_shape(p_cull.planes, p_cull.points)) {
+                    if (e.last_pass === this.pass || (this.use_pairs && !(e.pairable_type & p_cull.mask))) {
+                        continue;
+                    }
+                    e.last_pass = this.pass;
+
+                    if (p_cull.result_idx < p_cull.result_max) {
+                        p_cull.result_array[p_cull.result_idx] = e.userdata;
+                        p_cull.result_idx++;
                     } else {
                         return;
                     }
@@ -553,7 +689,7 @@ export class Octree {
         }
 
         for (let i = 0; i < 8; i++) {
-            if (p_octant.children[i] && p_octant.children[i].aabb.intersects_convex_shape(p_cull.planes)) {
+            if (p_octant.children[i] && p_octant.children[i].aabb.intersects_convex_shape(p_cull.planes, p_cull.points)) {
                 this._cull_convex(p_octant.children[i], p_cull);
             }
         }
@@ -563,10 +699,8 @@ export class Octree {
      * @param {AABB} p_aabb
      */
     _ensure_valid_root(p_aabb) {
-        let base = AABB.new();
-
         if (!this.root) {
-            base.set(
+            let base = new AABB().set(
                 0, 0, 0,
                 this.unit_size, this.unit_size, this.unit_size
             );
@@ -588,7 +722,7 @@ export class Octree {
 
             this.octant_count++;
         } else {
-            base.copy(this.root.aabb);
+            let base = new AABB().copy(this.root.aabb);
 
             while (!base.encloses(p_aabb)) {
                 let gp = Octant_new();
@@ -614,28 +748,44 @@ export class Octree {
         }
     }
 
+
+
     /**
-     * @param {Element<T>} p_element
+     * @param {Element} p_element
      * @param {Octant} p_octant
      */
     _insert_element(p_element, p_octant) {
         let element_size = p_element.aabb.get_longest_axis_size() * 1.01;
 
-        if (p_octant.aabb.size.x / OCTREE_DIVISOR < element_size) {
+        let can_split = true;
+
+        if (p_element.pairable) {
+            if (p_octant.pairable_elements.size() < this.octant_elements_limit) {
+                can_split = false;
+            }
+        } else {
+            if (p_octant.elements.size() < this.octant_elements_limit) {
+                can_split = false;
+            }
+        }
+
+        if (!can_split || (p_octant.aabb.size.x / OCTREE_DIVISOR < element_size)) {
             let owner = {
                 octant: p_octant,
                 E: null,
             };
 
             if (this.use_pairs && p_element.pairable) {
-                p_octant.pairable_elements.push(p_element);
+                p_octant.pairable_elements.push_back(p_element);
                 owner.E = p_element;
             } else {
-                p_octant.elements.push(p_element);
+                p_octant.elements.push_back(p_element);
                 owner.E = p_element;
             }
 
-            p_element.octant_owners.push(owner);
+            p_octant.dirty = true;
+
+            p_element.octant_owners.push_back(owner);
 
             if (!p_element.common_parent) {
                 p_element.common_parent = p_octant;
@@ -686,6 +836,8 @@ export class Octree {
                         this.octant_count++;
                         splits++;
                     }
+
+                    AABB.free(aabb);
                 }
             }
 
@@ -695,34 +847,35 @@ export class Octree {
         }
 
         if (this.use_pairs) {
-            for (let e of p_octant.pairable_elements) {
-                this._pair_reference(p_element, e);
+            let E = p_octant.pairable_elements.front();
+            while (E) {
+                this._pair_reference(p_element, E.value);
+                E = E.next;
             }
 
             if (p_element.pairable) {
-                for (let e of p_octant.elements) {
-                    this._pair_reference(p_element, e);
+                E = p_octant.elements.front();
+                while (E) {
+                    this._pair_reference(p_element, E.value);
+                    E = E.next;
                 }
             }
         }
     }
 
     /**
-     * @param {Element<T>} p_element
+     * @param {Element} p_element
      */
     _remove_element(p_element) {
         this.pass++;
 
-        let owners = p_element.octant_owners;
-        for (let owner of owners) {
-            owner.octant.elements.splice(owner.octant.elements.indexOf(owner.E), 1);
-            this._remove_element_from_octant(p_element, owner.octant);
-        }
+        let I = p_element.octant_owners.front();
+        for (; I; I = I.next) {
+            let o = I.value.octant;
 
-        if (this.use_pairs) {
-            for (let owner of owners) {
-                let o = owner.octant;
-
+            if (!this.use_pairs) {
+                o.elements.erase(I.value.E);
+            } else {
                 this.pass++;
                 for (let i = 0; i < 8; i++) {
                     if (o.children[i]) {
@@ -731,23 +884,28 @@ export class Octree {
                 }
 
                 if (p_element.pairable) {
-                    o.pairable_elements.splice(o.pairable_elements.indexOf(owner.E), 1);
+                    o.pairable_elements.erase(I.value.E);
                 } else {
-                    o.elements.splice(o.elements.indexOf(owner.E), 1);
+                    o.elements.erase(I.value.E);
                 }
+
+                o.dirty = true;
+
+                this._remove_element_pair_and_remove_empty_octants(p_element, o);
             }
         }
 
-        p_element.octant_owners.length = 0;
+        p_element.octant_owners.clear();
     }
 
     /**
-     * @param {Element<T>} p_element
+     * @param {Element} p_element
      * @param {Octant} p_octant
      * @param {Octant} [p_limit]
      */
-    _remove_element_from_octant(p_element, p_octant, p_limit = null) {
+    _remove_element_pair_and_remove_empty_octants(p_element, p_octant, p_limit = null) {
         let octant_removed = false;
+
         while (true) {
             if (p_octant == p_limit) {
                 return octant_removed;
@@ -756,12 +914,16 @@ export class Octree {
             let unpaired = false;
 
             if (this.use_pairs && p_octant.last_pass !== this.pass) {
-                for (let e of p_octant.pairable_elements) {
-                    this._pair_unreference(p_element, e);
+                let E = p_octant.pairable_elements.front();
+                while (E) {
+                    this._pair_unreference(p_element, E.value);
+                    E = E.next;
                 }
                 if (p_element.pairable) {
-                    for (let e of p_octant.elements) {
-                        this._pair_unreference(p_element, e);
+                    E = p_octant.elements.front();
+                    while (E) {
+                        this._pair_unreference(p_element, E.value);
+                        E = E.next;
                     }
                 }
                 p_octant.last_pass = this.pass;
@@ -772,7 +934,7 @@ export class Octree {
 
             let parent = p_octant.parent;
 
-            if (p_octant.children_count === 0 && p_octant.elements.length === 0) {
+            if (p_octant.children_count === 0 && p_octant.elements.empty()) {
                 // erase octant
 
                 if (p_octant === this.root) {
@@ -807,12 +969,12 @@ export class Octree {
         if (intersect !== p_pair.intersect) {
             if (intersect) {
                 if (this.pair_callback) {
-                    p_pair.ud = this.pair_callback(this.pair_callback_userdata, p_pair.A.id, p_pair.A.userdata, p_pair.B.id, p_pair.B.userdata);
+                    p_pair.ud = this.pair_callback(this.pair_callback_userdata, p_pair.A.id, p_pair.A.userdata, p_pair.A.subindex, p_pair.B.id, p_pair.B.userdata, p_pair.B.subindex);
                 }
                 this.pair_count++;
             } else {
                 if (this.unpair_callback) {
-                    this.unpair_callback(this.pair_callback_userdata, p_pair.A.id, p_pair.A.userdata, p_pair.B.id, p_pair.B.userdata);
+                    this.unpair_callback(this.pair_callback_userdata, p_pair.A.id, p_pair.A.userdata, p_pair.A.subindex, p_pair.B.id, p_pair.B.userdata, p_pair.B.subindex);
                 }
                 this.pair_count--;
             }
@@ -822,8 +984,8 @@ export class Octree {
     }
 
     /**
-     * @param {Element<T>} p_A
-     * @param {Element<T>} p_B
+     * @param {Element} p_A
+     * @param {Element} p_B
      */
     _pair_reference(p_A, p_B) {
         if (p_A === p_B || (p_A.userdata === p_B.userdata && p_A.userdata)) {
@@ -838,37 +1000,37 @@ export class Octree {
             return;
         }
 
-        let key = `${p_A.id}.${p_B.id}`;
+        let key = create_pair_key(p_A.id, p_B.id);
         let e = this.pair_map[key];
 
         if (!e) {
             e = new PairData;
-            e.rc = 1;
+            e.refcount = 1;
             e.A = p_A;
             e.B = p_B;
             e.intersect = false;
             this.pair_map[key] = e;
-            p_A.pair_list.push(e);
-            p_B.pair_list.push(e);
+            e.eA = p_A.pair_list.push_back(e);
+            e.eB = p_B.pair_list.push_back(e);
         } else {
-            e.rc++;
+            e.refcount++;
         }
     }
 
     /**
-     * @param {Element<T>} p_A
-     * @param {Element<T>} p_B
+     * @param {Element} p_A
+     * @param {Element} p_B
      */
     _pair_unreference(p_A, p_B) {
         if (p_A == p_B) return;
 
-        let key = `${p_A.id}.${p_B.id}`;
+        let key = create_pair_key(p_A.id, p_B.id);
         let e = this.pair_map[key];
         if (!e) return;
 
-        e.rc--;
+        e.refcount--;
 
-        if (e.rc === 0) {
+        if (e.refcount === 0) {
             if (e.intersect) {
                 if (this.unpair_callback) {
                     this.unpair_callback(this.pair_callback_userdata, p_A.id, p_A.userdata, p_B.id, p_B.userdata);
@@ -883,39 +1045,60 @@ export class Octree {
                 p_B = t;
             }
 
-            p_A.pair_list.splice(p_A.pair_list.indexOf(e), 1);
-            p_B.pair_list.splice(p_A.pair_list.indexOf(e), 1);
+            p_A.pair_list.erase(e.eA);
+            p_B.pair_list.erase(e.eB);
             this.pair_map[key] = null;
         }
     }
 
     /**
-     * @param {Element<T>} p_element
+     * @param {Element} p_element
      */
     _element_check_pairs(p_element) {
-        for (let e of p_element.pair_list) {
-            this._pair_check(e);
+        let E = p_element.pair_list.front();
+        while (E) {
+            this._pair_check(E.value);
+            E = E.next;
         }
     }
 
     /**
-     * @param {Element<T>} p_element
      * @param {Octant} p_octant
      */
-    _pair_element(p_element, p_octant) {
-        for (let e of p_octant.pairable_elements) {
-            if (e.last_pass !== this.pass) {
-                this._pair_reference(p_element, e);
-                e.last_pass = this.pass;
+    _remove_tree(p_octant) {
+        if (!p_octant) return;
+
+        for (let i = 0; i < 8; i++) {
+            if (p_octant.children[i]) {
+                this._remove_tree(p_octant.children[i]);
             }
         }
 
+        Octant_free(p_octant);
+    }
+
+    /**
+     * @param {Element} p_element
+     * @param {Octant} p_octant
+     */
+    _pair_element(p_element, p_octant) {
+        let E = p_octant.pairable_elements.front();
+        while (E) {
+            if (E.value.last_pass !== this.pass) {
+                this._pair_reference(p_element, E.value);
+                E.value.last_pass = this.pass;
+            }
+            E = E.next;
+        }
+
         if (p_element.pairable) {
-            for (let e of p_octant.elements) {
-                if (e.last_pass !== this.pass) {
-                    this._pair_reference(p_element, e);
-                    e.last_pass = this.pass;
+            E = p_octant.elements.front();
+            while (E) {
+                if (E.value.last_pass !== this.pass) {
+                    this._pair_reference(p_element, E.value);
+                    E.value.last_pass = this.pass;
                 }
+                E = E.next;
             }
         }
         p_octant.last_pass = this.pass;
@@ -931,25 +1114,30 @@ export class Octree {
         }
     }
     /**
-     * @param {Element<T>} p_element
+     * @param {Element} p_element
      * @param {Octant} p_octant
      */
     _unpair_element(p_element, p_octant) {
-        for (let e of p_octant.pairable_elements) {
-            if (e.last_pass !== this.pass) {
-                this._pair_unreference(p_element, e);
-                e.last_pass = this.pass;
+        let E = p_octant.pairable_elements.front();
+        while (E) {
+            if (E.value.last_pass !== this.pass) {
+                this._pair_unreference(p_element, E.value);
+                E.value.last_pass = this.pass;
             }
+            E = E.next;
         }
 
         if (p_element.pairable) {
-            for (let e of p_octant.elements) {
-                if (e.last_pass !== this.pass) {
-                    this._pair_unreference(p_element, e);
-                    e.last_pass = this.pass;
+            E = p_octant.elements.front();
+            while (E) {
+                if (E.value.last_pass !== this.pass) {
+                    this._pair_unreference(p_element, E.value);
+                    E.value.last_pass = this.pass;
                 }
+                E = E.next;
             }
         }
+
         p_octant.last_pass = this.pass;
 
         if (p_octant.children_count === 0) {
@@ -964,7 +1152,7 @@ export class Octree {
     }
 
     _optimize() {
-        while (this.root && this.root.children_count < 2 && !this.root.elements.length) {
+        while (this.root && this.root.children_count < 2 && !this.root.elements.size() && !(this.use_pairs && this.root.pairable_elements.size())) {
             /** @type {Octant} */
             let new_root = null;
             if (this.root.children_count === 1) {
@@ -984,4 +1172,52 @@ export class Octree {
             this.root = new_root;
         }
     }
+}
+
+/** @type {Vector3[]} */
+let pool_Vector3 = [];
+
+/**
+ * TODO: move `compute_convex_mesh_points` to geometry module
+ * @param {Plane[]} planes
+ */
+function compute_convex_mesh_points(planes) {
+    /** @type {Vector3[]} */
+    let points = [];
+
+    for (let i = planes.length - 1; i >= 0; i--) {
+        for (let j = i - 1; j >= 0; j--) {
+            for (let k = j - 1; k >= 0; k--) {
+                let convex_shape_point = pool_Vector3.pop();
+                if (!convex_shape_point) convex_shape_point = new Vector3;
+
+                if (planes[i].intersect_3(planes[j], planes[k], convex_shape_point)) {
+                    let excluded = false;
+                    for (let n = 0; n < planes.length; n++) {
+                        if (n !== i && n !== j && n !== k) {
+                            let dp = planes[n].normal.dot(convex_shape_point);
+                            if (dp - planes[n].d > CMP_EPSILON) {
+                                excluded = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!excluded) {
+                        points.push(convex_shape_point);
+                    }
+                }
+            }
+        }
+    }
+
+    return points;
+}
+
+/**
+ * @param {number} a_id
+ * @param {number} b_id
+ */
+function create_pair_key(a_id, b_id) {
+    return (a_id <= b_id) ? `${a_id}.${b_id}` : `${b_id}.${a_id}`;
 }

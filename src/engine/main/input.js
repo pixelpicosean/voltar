@@ -149,7 +149,7 @@ export class Input extends VObject {
      * @param {Vector2Like} p_pos
      */
     set_mouse_position(p_pos) {
-        const tmp = Vector2.new(p_pos.x, p_pos.y);
+        const tmp = Vector2.create(p_pos.x, p_pos.y);
         this.mouse_speed_track.update(tmp.subtract(this.mouse_pos));
         Vector2.free(tmp);
         this.mouse_pos.x = p_pos.x;

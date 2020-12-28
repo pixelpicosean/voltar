@@ -392,7 +392,7 @@ export class Space2DSW {
             r_result.collider_id = null;
             r_result.collider_shape = 0;
         }
-        const body_aabb = Rect2.new();
+        const body_aabb = Rect2.create();
 
         let shapes_found = false;
 
@@ -536,7 +536,7 @@ export class Space2DSW {
                     break;
                 }
 
-                const recover_motion = Vector2.new();
+                const recover_motion = Vector2.create();
 
                 for (let i = 0; i < cbk.amount; i++) {
                     recover_motion.add(
@@ -857,7 +857,7 @@ export class Space2DSW {
      * @param {number} p_margin
      */
     test_body_ray_separation(p_body, p_transform, p_infinite_inertia, r_recover_motion, r_results, p_result_max, p_margin) {
-        const body_aabb = Rect2.new();
+        const body_aabb = Rect2.create();
 
         let shapes_found = false;
 
@@ -905,7 +905,7 @@ export class Space2DSW {
             const cbkres = _shape_col_cbk;
 
             do {
-                const recover_motion = Vector2.new();
+                const recover_motion = Vector2.create();
 
                 let collided = false;
 

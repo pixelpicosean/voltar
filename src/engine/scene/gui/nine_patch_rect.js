@@ -108,13 +108,13 @@ export class NinePatchRect extends Control {
         if (p_what === NOTIFICATION_DRAW) {
             if (!this._texture) return;
 
-            const rect = Rect2.new(0, 0, this.rect_size.x, this.rect_size.y);
+            const rect = Rect2.create(0, 0, this.rect_size.x, this.rect_size.y);
             const src_rect = this._region_rect.clone();
 
             this._texture.get_rect_region(rect, src_rect, rect, src_rect);
 
-            const topleft = Vector2.new(this.margin[MARGIN_LEFT], this.margin[MARGIN_TOP]);
-            const bottomright = Vector2.new(this.margin[MARGIN_RIGHT], this.margin[MARGIN_BOTTOM]);
+            const topleft = Vector2.create(this.margin[MARGIN_LEFT], this.margin[MARGIN_TOP]);
+            const bottomright = Vector2.create(this.margin[MARGIN_RIGHT], this.margin[MARGIN_BOTTOM]);
             VSG.canvas.canvas_item_add_nine_patch(this.canvas_item, rect, src_rect, this._texture, topleft, bottomright, this._axis_stretch_horizontal, this._axis_stretch_vertical, this._draw_center);
             Vector2.free(bottomright);
             Vector2.free(topleft);
@@ -125,7 +125,7 @@ export class NinePatchRect extends Control {
     }
 
     get_minimum_size() {
-        return Vector2.new(
+        return Vector2.create(
             this.margin[MARGIN_LEFT] + this.margin[MARGIN_RIGHT],
             this.margin[MARGIN_TOP] + this.margin[MARGIN_BOTTOM]
         )
@@ -184,7 +184,7 @@ export class NinePatchRect extends Control {
      * @param {number} h
      */
     set_region_rect_n(x, y, w, h) {
-        const rect = Rect2.new(x, y, w, h);
+        const rect = Rect2.create(x, y, w, h);
         this.set_region_rect(rect);
         Rect2.free(rect);
     }

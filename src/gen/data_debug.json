@@ -603,823 +603,6 @@
             "dof_blur_far_quality": 0
         }
     },
-    "res://scene/baked_light.tscn": {
-        "type": "PackedScene",
-        "ext": {
-            "1": "res://mesh/cube.tscn",
-            "2": "res://mesh/plane.tscn",
-            "3": "media/LightMap.png",
-            "4": "media/cube3.png",
-            "5": "media/cube4.png",
-            "6": "media/cube.png",
-            "7": "media/cube2.png",
-            "8": "media/cube5.png",
-            "9": "media/cube6.png"
-        },
-        "sub": [
-            {
-                "id": 1,
-                "type": "Environment",
-                "bg_mode": 1
-            },
-            {
-                "id": 2,
-                "type": "BakedLightmapData",
-                "bounds": {
-                    "position": {
-                        "x": -5,
-                        "y": -1.13565,
-                        "z": -5
-                    },
-                    "size": {
-                        "x": 10,
-                        "y": 2.2713,
-                        "z": 10
-                    }
-                },
-                "users": [
-                    {
-                        "path": "../scene/plane",
-                        "lightmap": [
-                            "@ext#",
-                            "3"
-                        ],
-                        "instance_index": -1
-                    },
-                    {
-                        "path": "../scene/cube",
-                        "lightmap": [
-                            "@ext#",
-                            "6"
-                        ],
-                        "instance_index": -1
-                    },
-                    {
-                        "path": "../scene/cube2",
-                        "lightmap": [
-                            "@ext#",
-                            "7"
-                        ],
-                        "instance_index": -1
-                    },
-                    {
-                        "path": "../scene/cube3",
-                        "lightmap": [
-                            "@ext#",
-                            "4"
-                        ],
-                        "instance_index": -1
-                    },
-                    {
-                        "path": "../scene/cube4",
-                        "lightmap": [
-                            "@ext#",
-                            "5"
-                        ],
-                        "instance_index": -1
-                    },
-                    {
-                        "path": "../scene/cube5",
-                        "lightmap": [
-                            "@ext#",
-                            "8"
-                        ],
-                        "instance_index": -1
-                    },
-                    {
-                        "path": "../scene/cube7",
-                        "lightmap": [
-                            "@ext#",
-                            "9"
-                        ],
-                        "instance_index": -1
-                    }
-                ]
-            }
-        ],
-        "nodes": [
-            {
-                "type": "Spatial",
-                "name": "baked_light"
-            },
-            {
-                "type": "WorldEnvironment",
-                "name": "world_environment",
-                "parent": ".",
-                "environment": [
-                    "@sub#",
-                    "1"
-                ]
-            },
-            {
-                "type": "BakedLightmap",
-                "name": "baked_lightmap",
-                "parent": ".",
-                "transform": [
-                    1,
-                    0,
-                    0,
-                    0,
-                    1,
-                    0,
-                    0,
-                    0,
-                    1,
-                    0,
-                    0.483548,
-                    0
-                ],
-                "light_data": [
-                    "@sub#",
-                    "2"
-                ],
-                "bake_quality": 2,
-                "bake_mode": 1,
-                "bake_energy": 5.46,
-                "bake_extents": {
-                    "x": 5,
-                    "y": 1.13565,
-                    "z": 5
-                },
-                "image_path": "res://image/standalone"
-            },
-            {
-                "type": "Spatial",
-                "name": "scene",
-                "parent": "."
-            },
-            {
-                "name": "plane",
-                "parent": "scene",
-                "use_in_baked_light": true,
-                "instance": [
-                    "@ext#",
-                    "2"
-                ]
-            },
-            {
-                "name": "cube",
-                "parent": "scene",
-                "transform": [
-                    1,
-                    0,
-                    0,
-                    0,
-                    1,
-                    0,
-                    0,
-                    0,
-                    1,
-                    0,
-                    0.5,
-                    0
-                ],
-                "use_in_baked_light": true,
-                "instance": [
-                    "@ext#",
-                    "1"
-                ]
-            },
-            {
-                "name": "cube2",
-                "parent": "scene",
-                "transform": [
-                    0.850637,
-                    0,
-                    0.525754,
-                    0,
-                    1,
-                    0,
-                    -0.525754,
-                    0,
-                    0.850637,
-                    -1.51136,
-                    0.5,
-                    -0.128998
-                ],
-                "use_in_baked_light": true,
-                "instance": [
-                    "@ext#",
-                    "1"
-                ]
-            },
-            {
-                "name": "cube3",
-                "parent": "scene",
-                "transform": [
-                    0.533821,
-                    0,
-                    0.845597,
-                    0,
-                    1,
-                    0,
-                    -0.845597,
-                    0,
-                    0.533821,
-                    -1.31777,
-                    0.5,
-                    -1.43608
-                ],
-                "use_in_baked_light": true,
-                "instance": [
-                    "@ext#",
-                    "1"
-                ]
-            },
-            {
-                "name": "cube4",
-                "parent": "scene",
-                "transform": [
-                    0.498896,
-                    0,
-                    -0.866662,
-                    0,
-                    1,
-                    0,
-                    0.866662,
-                    0,
-                    0.498896,
-                    0.773742,
-                    0.5,
-                    0.952961
-                ],
-                "use_in_baked_light": true,
-                "instance": [
-                    "@ext#",
-                    "1"
-                ]
-            },
-            {
-                "name": "cube5",
-                "parent": "scene",
-                "transform": [
-                    0.979233,
-                    0,
-                    0.202736,
-                    0,
-                    1,
-                    0,
-                    -0.202736,
-                    0,
-                    0.979233,
-                    -0.0187244,
-                    0.5,
-                    -1.14212
-                ],
-                "use_in_baked_light": true,
-                "instance": [
-                    "@ext#",
-                    "1"
-                ]
-            },
-            {
-                "name": "no_bakelight",
-                "parent": "scene",
-                "transform": [
-                    0.471713,
-                    0,
-                    -0.165792,
-                    0,
-                    0.5,
-                    0,
-                    0.165792,
-                    0,
-                    0.471713,
-                    -1.3085,
-                    0.189854,
-                    1.0013
-                ],
-                "instance": [
-                    "@ext#",
-                    "1"
-                ]
-            },
-            {
-                "name": "cube7",
-                "parent": "scene",
-                "transform": [
-                    0.471713,
-                    0,
-                    -0.165792,
-                    0,
-                    0.5,
-                    0,
-                    0.165792,
-                    0,
-                    0.471713,
-                    -0.0449997,
-                    0.189854,
-                    1.43645
-                ],
-                "use_in_baked_light": true,
-                "instance": [
-                    "@ext#",
-                    "1"
-                ]
-            },
-            {
-                "type": "Camera",
-                "name": "camera",
-                "parent": ".",
-                "transform": [
-                    0.938782,
-                    0.179741,
-                    -0.293909,
-                    0,
-                    0.853115,
-                    0.521724,
-                    0.344513,
-                    -0.489785,
-                    0.800888,
-                    -1.5839,
-                    3.6915,
-                    3.79293
-                ]
-            },
-            {
-                "type": "OmniLight",
-                "name": "omni_light",
-                "parent": ".",
-                "transform": [
-                    1,
-                    0,
-                    0,
-                    0,
-                    1,
-                    0,
-                    0,
-                    0,
-                    1,
-                    -0.981827,
-                    2.00569,
-                    1.17495
-                ],
-                "light_color": {
-                    "r": 0.92549,
-                    "g": 0.572549,
-                    "b": 0.262745,
-                    "a": 1
-                },
-                "omni_range": 3.43052,
-                "omni_attenuation": 2.2974
-            }
-        ]
-    },
-    "res://mesh/goal.tscn": {
-        "type": "PackedScene",
-        "ext": {
-            "1": "res://mesh/mat_genera.tres"
-        },
-        "sub": [
-            {
-                "id": 4,
-                "type": "ArrayMesh",
-                "surfaces": [
-                    {
-                        "blend_shape_data": [],
-                        "format": 279,
-                        "index_count": 324,
-                        "primitive": 4,
-                        "skeleton_aabb": [],
-                        "vertex_count": 210,
-                        "is_2d": false,
-                        "arrays": {
-                            "__type__": "b",
-                            "is_2d": false,
-                            "aabb": {
-                                "position": {
-                                    "x": -20,
-                                    "y": -1,
-                                    "z": -0.0500001
-                                },
-                                "size": {
-                                    "x": 40,
-                                    "y": 2,
-                                    "z": 0.10001
-                                }
-                            },
-                            "vertex": {
-                                "index": 0,
-                                "offset": 1652,
-                                "length": 10080
-                            },
-                            "index": {
-                                "index": 0,
-                                "offset": 11732,
-                                "length": 648
-                            },
-                            "array_len": 210,
-                            "index_array_len": 324,
-                            "attribs": [
-                                {
-                                    "enabled": true,
-                                    "index": 0,
-                                    "type": 5126,
-                                    "size": 3,
-                                    "stride": 48,
-                                    "offset": 0,
-                                    "normalized": false,
-                                    "integer": false
-                                },
-                                {
-                                    "enabled": true,
-                                    "index": 1,
-                                    "type": 5126,
-                                    "size": 3,
-                                    "stride": 48,
-                                    "offset": 12,
-                                    "normalized": false,
-                                    "integer": false
-                                },
-                                {
-                                    "enabled": true,
-                                    "index": 2,
-                                    "type": 5126,
-                                    "size": 4,
-                                    "stride": 48,
-                                    "offset": 24,
-                                    "normalized": false,
-                                    "integer": false
-                                },
-                                {
-                                    "enabled": true,
-                                    "index": 4,
-                                    "type": 5126,
-                                    "size": 2,
-                                    "stride": 48,
-                                    "offset": 40,
-                                    "normalized": false,
-                                    "integer": false
-                                }
-                            ]
-                        }
-                    }
-                ]
-            },
-            {
-                "id": 5,
-                "type": "ArrayMesh",
-                "surfaces": [
-                    {
-                        "blend_shape_data": [],
-                        "format": 279,
-                        "index_count": 768,
-                        "primitive": 4,
-                        "skeleton_aabb": [],
-                        "vertex_count": 501,
-                        "is_2d": false,
-                        "arrays": {
-                            "__type__": "b",
-                            "is_2d": false,
-                            "aabb": {
-                                "position": {
-                                    "x": -1.94,
-                                    "y": 0,
-                                    "z": -1.04
-                                },
-                                "size": {
-                                    "x": 3.88,
-                                    "y": 1.94,
-                                    "z": 1.04001
-                                }
-                            },
-                            "vertex": {
-                                "index": 0,
-                                "offset": 12380,
-                                "length": 24048
-                            },
-                            "index": {
-                                "index": 0,
-                                "offset": 36428,
-                                "length": 1536
-                            },
-                            "array_len": 501,
-                            "index_array_len": 768,
-                            "attribs": [
-                                {
-                                    "enabled": true,
-                                    "index": 0,
-                                    "type": 5126,
-                                    "size": 3,
-                                    "stride": 48,
-                                    "offset": 0,
-                                    "normalized": false,
-                                    "integer": false
-                                },
-                                {
-                                    "enabled": true,
-                                    "index": 1,
-                                    "type": 5126,
-                                    "size": 3,
-                                    "stride": 48,
-                                    "offset": 12,
-                                    "normalized": false,
-                                    "integer": false
-                                },
-                                {
-                                    "enabled": true,
-                                    "index": 2,
-                                    "type": 5126,
-                                    "size": 4,
-                                    "stride": 48,
-                                    "offset": 24,
-                                    "normalized": false,
-                                    "integer": false
-                                },
-                                {
-                                    "enabled": true,
-                                    "index": 4,
-                                    "type": 5126,
-                                    "size": 2,
-                                    "stride": 48,
-                                    "offset": 40,
-                                    "normalized": false,
-                                    "integer": false
-                                }
-                            ]
-                        }
-                    }
-                ]
-            }
-        ],
-        "nodes": [
-            {
-                "type": "MeshInstance",
-                "name": "goal",
-                "transform": [
-                    0.1,
-                    0,
-                    0,
-                    0,
-                    1,
-                    0,
-                    0,
-                    0,
-                    2,
-                    0,
-                    1,
-                    0
-                ],
-                "mesh": [
-                    "@sub#",
-                    "4"
-                ],
-                "material": [
-                    [
-                        "@ext#",
-                        "1"
-                    ]
-                ]
-            },
-            {
-                "type": "MeshInstance",
-                "name": "net",
-                "parent": ".",
-                "transform": [
-                    10,
-                    0,
-                    0,
-                    0,
-                    1,
-                    0,
-                    0,
-                    0,
-                    0.5,
-                    0,
-                    -1,
-                    0
-                ],
-                "mesh": [
-                    "@sub#",
-                    "5"
-                ],
-                "material": [
-                    [
-                        "@ext#",
-                        "1"
-                    ]
-                ]
-            }
-        ]
-    },
-    "res://mesh/pitch.tscn": {
-        "type": "PackedScene",
-        "ext": {
-            "1": "res://mesh/mat_genera.tres"
-        },
-        "sub": [
-            {
-                "id": 1,
-                "type": "ArrayMesh",
-                "surfaces": [
-                    {
-                        "blend_shape_data": [],
-                        "format": 279,
-                        "index_count": 588,
-                        "primitive": 4,
-                        "skeleton_aabb": [],
-                        "vertex_count": 584,
-                        "is_2d": false,
-                        "arrays": {
-                            "__type__": "b",
-                            "is_2d": false,
-                            "aabb": {
-                                "position": {
-                                    "x": -12,
-                                    "y": 0,
-                                    "z": -6
-                                },
-                                "size": {
-                                    "x": 24,
-                                    "y": 0.0050007,
-                                    "z": 12
-                                }
-                            },
-                            "vertex": {
-                                "index": 0,
-                                "offset": 37964,
-                                "length": 28032
-                            },
-                            "index": {
-                                "index": 0,
-                                "offset": 65996,
-                                "length": 1176
-                            },
-                            "array_len": 584,
-                            "index_array_len": 588,
-                            "attribs": [
-                                {
-                                    "enabled": true,
-                                    "index": 0,
-                                    "type": 5126,
-                                    "size": 3,
-                                    "stride": 48,
-                                    "offset": 0,
-                                    "normalized": false,
-                                    "integer": false
-                                },
-                                {
-                                    "enabled": true,
-                                    "index": 1,
-                                    "type": 5126,
-                                    "size": 3,
-                                    "stride": 48,
-                                    "offset": 12,
-                                    "normalized": false,
-                                    "integer": false
-                                },
-                                {
-                                    "enabled": true,
-                                    "index": 2,
-                                    "type": 5126,
-                                    "size": 4,
-                                    "stride": 48,
-                                    "offset": 24,
-                                    "normalized": false,
-                                    "integer": false
-                                },
-                                {
-                                    "enabled": true,
-                                    "index": 4,
-                                    "type": 5126,
-                                    "size": 2,
-                                    "stride": 48,
-                                    "offset": 40,
-                                    "normalized": false,
-                                    "integer": false
-                                }
-                            ]
-                        }
-                    }
-                ]
-            }
-        ],
-        "nodes": [
-            {
-                "type": "MeshInstance",
-                "name": "pitch",
-                "mesh": [
-                    "@sub#",
-                    "1"
-                ],
-                "material": [
-                    [
-                        "@ext#",
-                        "1"
-                    ]
-                ]
-            }
-        ]
-    },
-    "res://mesh/soccer.tscn": {
-        "type": "PackedScene",
-        "ext": {
-            "1": "res://mesh/mat_genera.tres"
-        },
-        "sub": [
-            {
-                "id": 1,
-                "type": "ArrayMesh",
-                "surfaces": [
-                    {
-                        "blend_shape_data": [],
-                        "format": 279,
-                        "index_count": 348,
-                        "primitive": 4,
-                        "skeleton_aabb": [],
-                        "vertex_count": 180,
-                        "is_2d": false,
-                        "arrays": {
-                            "__type__": "b",
-                            "is_2d": false,
-                            "aabb": {
-                                "position": {
-                                    "x": -0.250374,
-                                    "y": -0.250374,
-                                    "z": -0.250374
-                                },
-                                "size": {
-                                    "x": 0.500747,
-                                    "y": 0.500747,
-                                    "z": 0.500747
-                                }
-                            },
-                            "vertex": {
-                                "index": 0,
-                                "offset": 67172,
-                                "length": 8640
-                            },
-                            "index": {
-                                "index": 0,
-                                "offset": 75812,
-                                "length": 696
-                            },
-                            "array_len": 180,
-                            "index_array_len": 348,
-                            "attribs": [
-                                {
-                                    "enabled": true,
-                                    "index": 0,
-                                    "type": 5126,
-                                    "size": 3,
-                                    "stride": 48,
-                                    "offset": 0,
-                                    "normalized": false,
-                                    "integer": false
-                                },
-                                {
-                                    "enabled": true,
-                                    "index": 1,
-                                    "type": 5126,
-                                    "size": 3,
-                                    "stride": 48,
-                                    "offset": 12,
-                                    "normalized": false,
-                                    "integer": false
-                                },
-                                {
-                                    "enabled": true,
-                                    "index": 2,
-                                    "type": 5126,
-                                    "size": 4,
-                                    "stride": 48,
-                                    "offset": 24,
-                                    "normalized": false,
-                                    "integer": false
-                                },
-                                {
-                                    "enabled": true,
-                                    "index": 4,
-                                    "type": 5126,
-                                    "size": 2,
-                                    "stride": 48,
-                                    "offset": 40,
-                                    "normalized": false,
-                                    "integer": false
-                                }
-                            ]
-                        }
-                    }
-                ]
-            }
-        ],
-        "nodes": [
-            {
-                "type": "MeshInstance",
-                "name": "soccer",
-                "mesh": [
-                    "@sub#",
-                    "1"
-                ],
-                "material": [
-                    [
-                        "@ext#",
-                        "1"
-                    ]
-                ]
-            }
-        ]
-    },
     "res://mesh/player.tscn": {
         "type": "PackedScene",
         "ext": {
@@ -1467,12 +650,12 @@
                             },
                             "vertex": {
                                 "index": 0,
-                                "offset": 76508,
+                                "offset": 1652,
                                 "length": 27064
                             },
                             "index": {
                                 "index": 0,
-                                "offset": 103572,
+                                "offset": 28716,
                                 "length": 840
                             },
                             "array_len": 398,
@@ -10286,6 +9469,1389 @@
                         "4"
                     ]
                 }
+            }
+        ]
+    },
+    "res://scene/baked_light.tscn": {
+        "type": "PackedScene",
+        "ext": {
+            "1": "res://mesh/cube.tscn",
+            "2": "res://mesh/plane.tscn",
+            "3": "media/LightMap.png",
+            "4": "media/cube3.png",
+            "5": "media/cube4.png",
+            "6": "media/cube.png",
+            "7": "media/cube2.png",
+            "8": "media/cube5.png",
+            "9": "media/cube6.png",
+            "10": "res://mesh/player.tscn",
+            "11": "media/cube7.png"
+        },
+        "sub": [
+            {
+                "id": 1,
+                "type": "Environment",
+                "bg_mode": 1
+            },
+            {
+                "id": 2,
+                "type": "BakedLightmapData",
+                "bounds": {
+                    "position": {
+                        "x": -5,
+                        "y": -1.13565,
+                        "z": -5
+                    },
+                    "size": {
+                        "x": 10,
+                        "y": 2.2713,
+                        "z": 10
+                    }
+                },
+                "users": [
+                    {
+                        "path": "../scene/plane",
+                        "lightmap": [
+                            "@ext#",
+                            "3"
+                        ],
+                        "instance_index": -1
+                    },
+                    {
+                        "path": "../scene/cube",
+                        "lightmap": [
+                            "@ext#",
+                            "6"
+                        ],
+                        "instance_index": -1
+                    },
+                    {
+                        "path": "../scene/cube2",
+                        "lightmap": [
+                            "@ext#",
+                            "7"
+                        ],
+                        "instance_index": -1
+                    },
+                    {
+                        "path": "../scene/cube3",
+                        "lightmap": [
+                            "@ext#",
+                            "4"
+                        ],
+                        "instance_index": -1
+                    },
+                    {
+                        "path": "../scene/cube4",
+                        "lightmap": [
+                            "@ext#",
+                            "5"
+                        ],
+                        "instance_index": -1
+                    },
+                    {
+                        "path": "../scene/cube5",
+                        "lightmap": [
+                            "@ext#",
+                            "8"
+                        ],
+                        "instance_index": -1
+                    },
+                    {
+                        "path": "../scene/no_bakelight",
+                        "lightmap": [
+                            "@ext#",
+                            "9"
+                        ],
+                        "instance_index": -1
+                    },
+                    {
+                        "path": "../scene/cube7",
+                        "lightmap": [
+                            "@ext#",
+                            "11"
+                        ],
+                        "instance_index": -1
+                    }
+                ]
+            },
+            {
+                "id": 3,
+                "type": "Animation",
+                "name": "loop",
+                "length": 13.5,
+                "tracks": [
+                    {
+                        "type": "value",
+                        "path": ".:transform",
+                        "interp": 1,
+                        "loop_wrap": true,
+                        "enabled": true,
+                        "keys": {
+                            "times": [
+                                0,
+                                2.4,
+                                2.5,
+                                2.7,
+                                3.3,
+                                3.8,
+                                4,
+                                4.9,
+                                5.5,
+                                5.9,
+                                6.3,
+                                6.7,
+                                7.2,
+                                7.5,
+                                7.9,
+                                9.6,
+                                9.9,
+                                10.8,
+                                11.8,
+                                12.5,
+                                13,
+                                13.2,
+                                13.5
+                            ],
+                            "transitions": [
+                                2,
+                                1,
+                                2,
+                                -2,
+                                -2,
+                                -2,
+                                -2,
+                                1,
+                                0.5,
+                                0.594604,
+                                -2,
+                                -2,
+                                2,
+                                0.5,
+                                -2,
+                                0.5,
+                                0.784584,
+                                1,
+                                0.5,
+                                2,
+                                0.5,
+                                1,
+                                1
+                            ],
+                            "update": 0,
+                            "values": [
+                                [
+                                    0.938782,
+                                    0.179741,
+                                    -0.293909,
+                                    0,
+                                    0.853114,
+                                    0.521724,
+                                    0.344513,
+                                    -0.489785,
+                                    0.800888,
+                                    -1.5839,
+                                    3.6915,
+                                    3.79293
+                                ],
+                                [
+                                    0.938782,
+                                    0.0535905,
+                                    -0.340319,
+                                    0,
+                                    0.987827,
+                                    0.155555,
+                                    0.344513,
+                                    -0.146032,
+                                    0.927354,
+                                    -0.724683,
+                                    0.473652,
+                                    1.4516
+                                ],
+                                [
+                                    0.938782,
+                                    0.150402,
+                                    -0.309949,
+                                    -7.45058e-9,
+                                    0.899672,
+                                    0.436566,
+                                    0.344513,
+                                    -0.40984,
+                                    0.844596,
+                                    -0.730647,
+                                    0.363714,
+                                    1.46785
+                                ],
+                                [
+                                    0.938782,
+                                    0.0535905,
+                                    -0.340319,
+                                    0,
+                                    0.987827,
+                                    0.155555,
+                                    0.344513,
+                                    -0.146032,
+                                    0.927354,
+                                    -0.724683,
+                                    0.473652,
+                                    1.4516
+                                ],
+                                [
+                                    0.938782,
+                                    0,
+                                    -0.344512,
+                                    0,
+                                    1,
+                                    0,
+                                    0.344512,
+                                    0,
+                                    0.938782,
+                                    -0.570164,
+                                    0.403024,
+                                    1.03055
+                                ],
+                                [
+                                    0.987264,
+                                    0,
+                                    0.159089,
+                                    0,
+                                    1,
+                                    0,
+                                    -0.159089,
+                                    0,
+                                    0.987264,
+                                    -0.570164,
+                                    0.403024,
+                                    1.03055
+                                ],
+                                [
+                                    0.987264,
+                                    0,
+                                    0.159089,
+                                    0,
+                                    1,
+                                    0,
+                                    -0.159089,
+                                    0,
+                                    0.987264,
+                                    -0.570164,
+                                    0.403024,
+                                    1.03055
+                                ],
+                                [
+                                    0.62347,
+                                    0,
+                                    -0.781847,
+                                    0,
+                                    1,
+                                    0,
+                                    0.781847,
+                                    0,
+                                    0.62347,
+                                    -0.570164,
+                                    0.403024,
+                                    1.03055
+                                ],
+                                [
+                                    0.588783,
+                                    -0.0760307,
+                                    -0.804707,
+                                    0.128069,
+                                    0.991765,
+                                    1.13281e-8,
+                                    0.798081,
+                                    -0.103058,
+                                    0.593672,
+                                    -0.119946,
+                                    0.605126,
+                                    0.69241
+                                ],
+                                [
+                                    -0.199366,
+                                    -0.027379,
+                                    -0.979543,
+                                    0.0864331,
+                                    0.995222,
+                                    -0.045409,
+                                    0.976106,
+                                    -0.0937179,
+                                    -0.196047,
+                                    0.111401,
+                                    0.87914,
+                                    0.641221
+                                ],
+                                [
+                                    0.764032,
+                                    -0.0997753,
+                                    -0.637417,
+                                    0.0502534,
+                                    0.994171,
+                                    -0.0953826,
+                                    0.643218,
+                                    0.040843,
+                                    0.764593,
+                                    -0.00408554,
+                                    1.01126,
+                                    0.590032
+                                ],
+                                [
+                                    0.986327,
+                                    0.0275295,
+                                    0.162484,
+                                    -0.00175252,
+                                    0.987645,
+                                    -0.156697,
+                                    -0.164791,
+                                    0.15427,
+                                    0.974189,
+                                    -0.00408554,
+                                    1.04056,
+                                    0.493275
+                                ],
+                                [
+                                    0.944932,
+                                    -0.0572231,
+                                    0.322226,
+                                    0,
+                                    0.984595,
+                                    0.174851,
+                                    -0.327267,
+                                    -0.165222,
+                                    0.930375,
+                                    -0.00408554,
+                                    1.10359,
+                                    0.304418
+                                ],
+                                [
+                                    0.944932,
+                                    0,
+                                    0.327267,
+                                    0,
+                                    1,
+                                    0,
+                                    -0.327267,
+                                    0,
+                                    0.944932,
+                                    -0.0102019,
+                                    1.20461,
+                                    0.286757
+                                ],
+                                [
+                                    0.619245,
+                                    0,
+                                    0.785198,
+                                    0,
+                                    1,
+                                    0,
+                                    -0.785198,
+                                    0,
+                                    0.619245,
+                                    -0.0102019,
+                                    1.20461,
+                                    0.286757
+                                ],
+                                [
+                                    0.18402,
+                                    0,
+                                    0.982923,
+                                    0,
+                                    1,
+                                    0,
+                                    -0.982923,
+                                    0,
+                                    0.18402,
+                                    -0.194252,
+                                    1.20461,
+                                    -0.160257
+                                ],
+                                [
+                                    0.18402,
+                                    -0.748389,
+                                    0.637222,
+                                    0,
+                                    0.648293,
+                                    0.761391,
+                                    -0.982923,
+                                    -0.140111,
+                                    0.119299,
+                                    -0.439686,
+                                    1.20461,
+                                    -0.271544
+                                ],
+                                [
+                                    0.149898,
+                                    -0.752789,
+                                    0.640968,
+                                    0,
+                                    0.648293,
+                                    0.761391,
+                                    -0.988702,
+                                    -0.114131,
+                                    0.0971776,
+                                    -0.471535,
+                                    1.20461,
+                                    -0.31231
+                                ],
+                                [
+                                    0.149898,
+                                    -0.752789,
+                                    0.640968,
+                                    0,
+                                    0.648293,
+                                    0.761391,
+                                    -0.988702,
+                                    -0.114131,
+                                    0.0971776,
+                                    -0.471535,
+                                    1.20461,
+                                    -0.31231
+                                ],
+                                [
+                                    0.149898,
+                                    -0.988602,
+                                    0.014058,
+                                    0,
+                                    0.0142186,
+                                    0.999899,
+                                    -0.988702,
+                                    -0.149882,
+                                    0.00213134,
+                                    -0.833996,
+                                    1.42845,
+                                    -0.339726
+                                ],
+                                [
+                                    -0.962326,
+                                    -0.214466,
+                                    0.167135,
+                                    -0.155061,
+                                    0.937813,
+                                    0.310586,
+                                    -0.223351,
+                                    0.272968,
+                                    -0.935736,
+                                    -0.664902,
+                                    0.411967,
+                                    -0.347194
+                                ],
+                                [
+                                    -0.962326,
+                                    -0.144734,
+                                    0.230177,
+                                    -0.155061,
+                                    0.987527,
+                                    -0.0273275,
+                                    -0.223351,
+                                    -0.0619894,
+                                    -0.972765,
+                                    -0.655489,
+                                    0.254593,
+                                    -0.19687
+                                ],
+                                [
+                                    -0.962326,
+                                    -0.144734,
+                                    0.230177,
+                                    -0.155061,
+                                    0.987527,
+                                    -0.0273275,
+                                    -0.223351,
+                                    -0.0619894,
+                                    -0.972765,
+                                    -0.655489,
+                                    0.254593,
+                                    -0.19687
+                                ]
+                            ]
+                        },
+                        "value_type": "Transform"
+                    },
+                    {
+                        "type": "value",
+                        "path": "../scene/player:translation",
+                        "interp": 1,
+                        "loop_wrap": true,
+                        "enabled": true,
+                        "keys": {
+                            "times": [
+                                0,
+                                3.8,
+                                10.4,
+                                11.3,
+                                12.1,
+                                13.5
+                            ],
+                            "transitions": [
+                                1,
+                                1,
+                                1,
+                                1,
+                                1,
+                                1
+                            ],
+                            "update": 0,
+                            "values": [
+                                {
+                                    "x": -0.656027,
+                                    "y": 0,
+                                    "z": -1.32917
+                                },
+                                {
+                                    "x": -0.656027,
+                                    "y": 0,
+                                    "z": -1.32917
+                                },
+                                {
+                                    "x": -0.656027,
+                                    "y": 0,
+                                    "z": -0.360749
+                                },
+                                {
+                                    "x": -0.716609,
+                                    "y": 0,
+                                    "z": -0.197612
+                                },
+                                {
+                                    "x": -0.666732,
+                                    "y": 0,
+                                    "z": -0.0921983
+                                },
+                                {
+                                    "x": -0.666732,
+                                    "y": 0,
+                                    "z": -0.0921983
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "type": "value",
+                        "path": "../scene/player:rotation_degrees",
+                        "interp": 1,
+                        "loop_wrap": true,
+                        "enabled": true,
+                        "keys": {
+                            "times": [
+                                10.4,
+                                11.3,
+                                12.1,
+                                13.5
+                            ],
+                            "transitions": [
+                                1,
+                                1,
+                                1,
+                                1
+                            ],
+                            "update": 0,
+                            "values": [
+                                {
+                                    "x": 0,
+                                    "y": 80.572,
+                                    "z": 0
+                                },
+                                {
+                                    "x": 0,
+                                    "y": 66.639,
+                                    "z": 0
+                                },
+                                {
+                                    "x": 0,
+                                    "y": 100.203,
+                                    "z": 0
+                                },
+                                {
+                                    "x": 0,
+                                    "y": 100.203,
+                                    "z": 0
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        ],
+        "nodes": [
+            {
+                "type": "Spatial",
+                "name": "baked_light"
+            },
+            {
+                "type": "WorldEnvironment",
+                "name": "world_environment",
+                "parent": ".",
+                "environment": [
+                    "@sub#",
+                    "1"
+                ]
+            },
+            {
+                "type": "BakedLightmap",
+                "name": "baked_lightmap",
+                "parent": ".",
+                "transform": [
+                    1,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0.483548,
+                    0
+                ],
+                "light_data": [
+                    "@sub#",
+                    "2"
+                ],
+                "bake_quality": 2,
+                "bake_mode": 1,
+                "bake_energy": 5.46,
+                "bake_extents": {
+                    "x": 5,
+                    "y": 1.13565,
+                    "z": 5
+                },
+                "image_path": "res://image/standalone"
+            },
+            {
+                "type": "Spatial",
+                "name": "scene",
+                "parent": "."
+            },
+            {
+                "name": "plane",
+                "parent": "scene",
+                "use_in_baked_light": true,
+                "instance": [
+                    "@ext#",
+                    "2"
+                ]
+            },
+            {
+                "name": "cube",
+                "parent": "scene",
+                "transform": [
+                    1,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0.5,
+                    0
+                ],
+                "use_in_baked_light": true,
+                "instance": [
+                    "@ext#",
+                    "1"
+                ]
+            },
+            {
+                "name": "cube2",
+                "parent": "scene",
+                "transform": [
+                    0.850637,
+                    0,
+                    0.525754,
+                    0,
+                    1,
+                    0,
+                    -0.525754,
+                    0,
+                    0.850637,
+                    -1.51136,
+                    0.5,
+                    -0.128998
+                ],
+                "use_in_baked_light": true,
+                "instance": [
+                    "@ext#",
+                    "1"
+                ]
+            },
+            {
+                "name": "cube3",
+                "parent": "scene",
+                "transform": [
+                    0.533821,
+                    0,
+                    0.845597,
+                    0,
+                    1,
+                    0,
+                    -0.845597,
+                    0,
+                    0.533821,
+                    -1.31777,
+                    0.5,
+                    -1.43608
+                ],
+                "use_in_baked_light": true,
+                "instance": [
+                    "@ext#",
+                    "1"
+                ]
+            },
+            {
+                "name": "cube4",
+                "parent": "scene",
+                "transform": [
+                    0.498896,
+                    0,
+                    -0.866662,
+                    0,
+                    1,
+                    0,
+                    0.866662,
+                    0,
+                    0.498896,
+                    0.773742,
+                    0.5,
+                    0.952961
+                ],
+                "use_in_baked_light": true,
+                "instance": [
+                    "@ext#",
+                    "1"
+                ]
+            },
+            {
+                "name": "cube5",
+                "parent": "scene",
+                "transform": [
+                    0.979233,
+                    0,
+                    0.202736,
+                    0,
+                    1,
+                    0,
+                    -0.202736,
+                    0,
+                    0.979233,
+                    -0.0187244,
+                    0.5,
+                    -1.14212
+                ],
+                "use_in_baked_light": true,
+                "instance": [
+                    "@ext#",
+                    "1"
+                ]
+            },
+            {
+                "name": "no_bakelight",
+                "parent": "scene",
+                "transform": [
+                    0.471713,
+                    0,
+                    -0.165792,
+                    0,
+                    0.5,
+                    0,
+                    0.165792,
+                    0,
+                    0.471713,
+                    -1.3085,
+                    0.189854,
+                    1.0013
+                ],
+                "use_in_baked_light": true,
+                "instance": [
+                    "@ext#",
+                    "1"
+                ]
+            },
+            {
+                "name": "cube7",
+                "parent": "scene",
+                "transform": [
+                    0.471713,
+                    0,
+                    -0.165792,
+                    0,
+                    0.5,
+                    0,
+                    0.165792,
+                    0,
+                    0.471713,
+                    -0.0449997,
+                    0.189854,
+                    1.43645
+                ],
+                "use_in_baked_light": true,
+                "instance": [
+                    "@ext#",
+                    "1"
+                ]
+            },
+            {
+                "name": "player",
+                "parent": "scene",
+                "transform": [
+                    -0.0347297,
+                    0,
+                    0.196962,
+                    0,
+                    0.2,
+                    0,
+                    -0.196962,
+                    0,
+                    -0.0347297,
+                    -0.656027,
+                    0,
+                    -1.32917
+                ],
+                "instance": [
+                    "@ext#",
+                    "10"
+                ]
+            },
+            {
+                "type": "OmniLight",
+                "name": "omni_light",
+                "parent": ".",
+                "transform": [
+                    1,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    0,
+                    1,
+                    -0.981827,
+                    2.00569,
+                    1.17495
+                ],
+                "light_color": {
+                    "r": 0.92549,
+                    "g": 0.572549,
+                    "b": 0.262745,
+                    "a": 1
+                },
+                "omni_range": 3.43052,
+                "omni_attenuation": 2.2974
+            },
+            {
+                "type": "SpotLight",
+                "name": "spot_light",
+                "parent": ".",
+                "transform": [
+                    1,
+                    0,
+                    0,
+                    0,
+                    0.524016,
+                    0.851709,
+                    0,
+                    -0.851709,
+                    0.524016,
+                    -0.769308,
+                    1.10247,
+                    -0.243775
+                ],
+                "light_color": {
+                    "r": 0.960784,
+                    "g": 0.811765,
+                    "b": 0.498039,
+                    "a": 1
+                },
+                "light_energy": 0.2
+            },
+            {
+                "type": "Camera",
+                "name": "camera",
+                "parent": ".",
+                "transform": [
+                    0.938782,
+                    0.179741,
+                    -0.293909,
+                    -7.45058e-9,
+                    0.853114,
+                    0.521724,
+                    0.344513,
+                    -0.489785,
+                    0.800888,
+                    -1.5839,
+                    3.6915,
+                    3.79293
+                ]
+            },
+            {
+                "type": "AnimationPlayer",
+                "name": "animator",
+                "parent": "camera",
+                "autoplay": "loop",
+                "anims": {
+                    "loop": [
+                        "@sub#",
+                        "3"
+                    ]
+                }
+            }
+        ]
+    },
+    "res://mesh/goal.tscn": {
+        "type": "PackedScene",
+        "ext": {
+            "1": "res://mesh/mat_genera.tres"
+        },
+        "sub": [
+            {
+                "id": 4,
+                "type": "ArrayMesh",
+                "surfaces": [
+                    {
+                        "blend_shape_data": [],
+                        "format": 279,
+                        "index_count": 324,
+                        "primitive": 4,
+                        "skeleton_aabb": [],
+                        "vertex_count": 210,
+                        "is_2d": false,
+                        "arrays": {
+                            "__type__": "b",
+                            "is_2d": false,
+                            "aabb": {
+                                "position": {
+                                    "x": -20,
+                                    "y": -1,
+                                    "z": -0.0500001
+                                },
+                                "size": {
+                                    "x": 40,
+                                    "y": 2,
+                                    "z": 0.10001
+                                }
+                            },
+                            "vertex": {
+                                "index": 0,
+                                "offset": 29556,
+                                "length": 10080
+                            },
+                            "index": {
+                                "index": 0,
+                                "offset": 39636,
+                                "length": 648
+                            },
+                            "array_len": 210,
+                            "index_array_len": 324,
+                            "attribs": [
+                                {
+                                    "enabled": true,
+                                    "index": 0,
+                                    "type": 5126,
+                                    "size": 3,
+                                    "stride": 48,
+                                    "offset": 0,
+                                    "normalized": false,
+                                    "integer": false
+                                },
+                                {
+                                    "enabled": true,
+                                    "index": 1,
+                                    "type": 5126,
+                                    "size": 3,
+                                    "stride": 48,
+                                    "offset": 12,
+                                    "normalized": false,
+                                    "integer": false
+                                },
+                                {
+                                    "enabled": true,
+                                    "index": 2,
+                                    "type": 5126,
+                                    "size": 4,
+                                    "stride": 48,
+                                    "offset": 24,
+                                    "normalized": false,
+                                    "integer": false
+                                },
+                                {
+                                    "enabled": true,
+                                    "index": 4,
+                                    "type": 5126,
+                                    "size": 2,
+                                    "stride": 48,
+                                    "offset": 40,
+                                    "normalized": false,
+                                    "integer": false
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            {
+                "id": 5,
+                "type": "ArrayMesh",
+                "surfaces": [
+                    {
+                        "blend_shape_data": [],
+                        "format": 279,
+                        "index_count": 768,
+                        "primitive": 4,
+                        "skeleton_aabb": [],
+                        "vertex_count": 501,
+                        "is_2d": false,
+                        "arrays": {
+                            "__type__": "b",
+                            "is_2d": false,
+                            "aabb": {
+                                "position": {
+                                    "x": -1.94,
+                                    "y": 0,
+                                    "z": -1.04
+                                },
+                                "size": {
+                                    "x": 3.88,
+                                    "y": 1.94,
+                                    "z": 1.04001
+                                }
+                            },
+                            "vertex": {
+                                "index": 0,
+                                "offset": 40284,
+                                "length": 24048
+                            },
+                            "index": {
+                                "index": 0,
+                                "offset": 64332,
+                                "length": 1536
+                            },
+                            "array_len": 501,
+                            "index_array_len": 768,
+                            "attribs": [
+                                {
+                                    "enabled": true,
+                                    "index": 0,
+                                    "type": 5126,
+                                    "size": 3,
+                                    "stride": 48,
+                                    "offset": 0,
+                                    "normalized": false,
+                                    "integer": false
+                                },
+                                {
+                                    "enabled": true,
+                                    "index": 1,
+                                    "type": 5126,
+                                    "size": 3,
+                                    "stride": 48,
+                                    "offset": 12,
+                                    "normalized": false,
+                                    "integer": false
+                                },
+                                {
+                                    "enabled": true,
+                                    "index": 2,
+                                    "type": 5126,
+                                    "size": 4,
+                                    "stride": 48,
+                                    "offset": 24,
+                                    "normalized": false,
+                                    "integer": false
+                                },
+                                {
+                                    "enabled": true,
+                                    "index": 4,
+                                    "type": 5126,
+                                    "size": 2,
+                                    "stride": 48,
+                                    "offset": 40,
+                                    "normalized": false,
+                                    "integer": false
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        ],
+        "nodes": [
+            {
+                "type": "MeshInstance",
+                "name": "goal",
+                "transform": [
+                    0.1,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    0,
+                    2,
+                    0,
+                    1,
+                    0
+                ],
+                "mesh": [
+                    "@sub#",
+                    "4"
+                ],
+                "material": [
+                    [
+                        "@ext#",
+                        "1"
+                    ]
+                ]
+            },
+            {
+                "type": "MeshInstance",
+                "name": "net",
+                "parent": ".",
+                "transform": [
+                    10,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0.5,
+                    0,
+                    -1,
+                    0
+                ],
+                "mesh": [
+                    "@sub#",
+                    "5"
+                ],
+                "material": [
+                    [
+                        "@ext#",
+                        "1"
+                    ]
+                ]
+            }
+        ]
+    },
+    "res://mesh/pitch.tscn": {
+        "type": "PackedScene",
+        "ext": {
+            "1": "res://mesh/mat_genera.tres"
+        },
+        "sub": [
+            {
+                "id": 1,
+                "type": "ArrayMesh",
+                "surfaces": [
+                    {
+                        "blend_shape_data": [],
+                        "format": 279,
+                        "index_count": 588,
+                        "primitive": 4,
+                        "skeleton_aabb": [],
+                        "vertex_count": 584,
+                        "is_2d": false,
+                        "arrays": {
+                            "__type__": "b",
+                            "is_2d": false,
+                            "aabb": {
+                                "position": {
+                                    "x": -12,
+                                    "y": 0,
+                                    "z": -6
+                                },
+                                "size": {
+                                    "x": 24,
+                                    "y": 0.0050007,
+                                    "z": 12
+                                }
+                            },
+                            "vertex": {
+                                "index": 0,
+                                "offset": 65868,
+                                "length": 28032
+                            },
+                            "index": {
+                                "index": 0,
+                                "offset": 93900,
+                                "length": 1176
+                            },
+                            "array_len": 584,
+                            "index_array_len": 588,
+                            "attribs": [
+                                {
+                                    "enabled": true,
+                                    "index": 0,
+                                    "type": 5126,
+                                    "size": 3,
+                                    "stride": 48,
+                                    "offset": 0,
+                                    "normalized": false,
+                                    "integer": false
+                                },
+                                {
+                                    "enabled": true,
+                                    "index": 1,
+                                    "type": 5126,
+                                    "size": 3,
+                                    "stride": 48,
+                                    "offset": 12,
+                                    "normalized": false,
+                                    "integer": false
+                                },
+                                {
+                                    "enabled": true,
+                                    "index": 2,
+                                    "type": 5126,
+                                    "size": 4,
+                                    "stride": 48,
+                                    "offset": 24,
+                                    "normalized": false,
+                                    "integer": false
+                                },
+                                {
+                                    "enabled": true,
+                                    "index": 4,
+                                    "type": 5126,
+                                    "size": 2,
+                                    "stride": 48,
+                                    "offset": 40,
+                                    "normalized": false,
+                                    "integer": false
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        ],
+        "nodes": [
+            {
+                "type": "MeshInstance",
+                "name": "pitch",
+                "mesh": [
+                    "@sub#",
+                    "1"
+                ],
+                "material": [
+                    [
+                        "@ext#",
+                        "1"
+                    ]
+                ]
+            }
+        ]
+    },
+    "res://mesh/soccer.tscn": {
+        "type": "PackedScene",
+        "ext": {
+            "1": "res://mesh/mat_genera.tres"
+        },
+        "sub": [
+            {
+                "id": 1,
+                "type": "ArrayMesh",
+                "surfaces": [
+                    {
+                        "blend_shape_data": [],
+                        "format": 279,
+                        "index_count": 348,
+                        "primitive": 4,
+                        "skeleton_aabb": [],
+                        "vertex_count": 180,
+                        "is_2d": false,
+                        "arrays": {
+                            "__type__": "b",
+                            "is_2d": false,
+                            "aabb": {
+                                "position": {
+                                    "x": -0.250374,
+                                    "y": -0.250374,
+                                    "z": -0.250374
+                                },
+                                "size": {
+                                    "x": 0.500747,
+                                    "y": 0.500747,
+                                    "z": 0.500747
+                                }
+                            },
+                            "vertex": {
+                                "index": 0,
+                                "offset": 95076,
+                                "length": 8640
+                            },
+                            "index": {
+                                "index": 0,
+                                "offset": 103716,
+                                "length": 696
+                            },
+                            "array_len": 180,
+                            "index_array_len": 348,
+                            "attribs": [
+                                {
+                                    "enabled": true,
+                                    "index": 0,
+                                    "type": 5126,
+                                    "size": 3,
+                                    "stride": 48,
+                                    "offset": 0,
+                                    "normalized": false,
+                                    "integer": false
+                                },
+                                {
+                                    "enabled": true,
+                                    "index": 1,
+                                    "type": 5126,
+                                    "size": 3,
+                                    "stride": 48,
+                                    "offset": 12,
+                                    "normalized": false,
+                                    "integer": false
+                                },
+                                {
+                                    "enabled": true,
+                                    "index": 2,
+                                    "type": 5126,
+                                    "size": 4,
+                                    "stride": 48,
+                                    "offset": 24,
+                                    "normalized": false,
+                                    "integer": false
+                                },
+                                {
+                                    "enabled": true,
+                                    "index": 4,
+                                    "type": 5126,
+                                    "size": 2,
+                                    "stride": 48,
+                                    "offset": 40,
+                                    "normalized": false,
+                                    "integer": false
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        ],
+        "nodes": [
+            {
+                "type": "MeshInstance",
+                "name": "soccer",
+                "mesh": [
+                    "@sub#",
+                    "1"
+                ],
+                "material": [
+                    [
+                        "@ext#",
+                        "1"
+                    ]
+                ]
             }
         ]
     },

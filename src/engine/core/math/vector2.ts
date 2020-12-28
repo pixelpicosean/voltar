@@ -10,7 +10,7 @@ export interface Vector2Like {
  * the horizontal axis and y represents the vertical axis.
  */
 export class Vector2 {
-    static new(p_x: number = 0, p_y: number = 0) {
+    static create(p_x: number = 0, p_y: number = 0) {
         const vec = pool.pop();
         if (!vec) {
             return new Vector2(p_x, p_y);
@@ -446,7 +446,7 @@ export class Vector2 {
     /**
      * Returns a perpendicular vector.
      */
-    tangent(r_out = Vector2.new()): Vector2 {
+    tangent(r_out = Vector2.create()): Vector2 {
         return r_out.set(this.y, -this.x);
     }
 
@@ -476,7 +476,7 @@ export class Vector2 {
     cubic_interpolate(p_b: Vector2, p_pre_a: Vector2, p_post_b: Vector2, p_t: number): Vector2 {
         const t2 = p_t * p_t;
         const t3 = t2 * p_t;
-        return Vector2.new(
+        return Vector2.create(
             0.5 * ((this.x * 2) + (-p_pre_a.x + p_b.x) * p_t + (2 * p_pre_a.x - 5 * this.x + 4 * p_b.x - p_post_b.x) * t2 + (-p_pre_a.x + 3 * this.x - 3 * p_b.x + p_post_b.x) * t3),
             0.5 * ((this.y * 2) + (-p_pre_a.y + p_b.y) * p_t + (2 * p_pre_a.y - 5 * this.y + 4 * p_b.y - p_post_b.y) * t2 + (-p_pre_a.y + 3 * this.y - 3 * p_b.y + p_post_b.y) * t3)
         );

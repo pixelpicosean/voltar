@@ -60,6 +60,14 @@
                 }
             },
             {
+                "key": "media/cube7.png",
+                "flags": {
+                    "FILTER": true,
+                    "REPEAT": false,
+                    "MIPMAPS": false
+                }
+            },
+            {
                 "key": "media/LightMap.png",
                 "flags": {
                     "FILTER": true,

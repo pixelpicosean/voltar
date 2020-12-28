@@ -211,7 +211,7 @@ export class Physics2DDirectBodyStateSW {
     static get singleton() {
         return Physics2DDirectBodyStateSW_singleton;
     }
-    static new() {
+    static create() {
         Physics2DDirectBodyStateSW_singleton = new Physics2DDirectBodyStateSW()
         return Physics2DDirectBodyStateSW_singleton;
     }
@@ -389,8 +389,8 @@ export class Physics2DDirectSpaceStateSW {
         // closest point to ray origin, sort and stop evaluating results when beyond first collision
 
         let collided = false;
-        const res_point = Vector2.new();
-        const res_normal = Vector2.new();
+        const res_point = Vector2.create();
+        const res_normal = Vector2.create();
         let res_shape = 0;
         /** @type {import('./collision_object_2d_sw').CollisionObject2DSW} */
         let res_obj = null;
@@ -544,7 +544,7 @@ export class Physics2DDirectSpaceStateSW {
             return 0;
         }
 
-        const aabb = Rect2.new(
+        const aabb = Rect2.create(
             p_point.x - 0.00001,
             p_point.y - 0.00001,
             0.00002,

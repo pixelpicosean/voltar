@@ -101,7 +101,7 @@ export class ValueTrack extends Track {
             this.values.push(key);
         }
 
-        let t = Transform.new();
+        let t = Transform.create();
 
         if (data.value_type === 'Transform') {
             this.prop_type = PROP_TYPE_TRANSFORM;

@@ -10,7 +10,7 @@ import { VisibilityNotifier2D } from "../2d/visibility_notifier_2d.js";
 /** @type {CellData[]} */
 const CellData_pool = [];
 class CellData {
-    static new() {
+    static create() {
         let d = CellData_pool.pop();
         if (!d) d = new CellData;
         return d;
@@ -35,7 +35,7 @@ class CellData {
 /** @type {ViewportData[]} */
 const ViewportData_pool = [];
 class ViewportData {
-    static new() {
+    static create() {
         let d = ViewportData_pool.pop();
         if (!d) d = new ViewportData;
         return d;
@@ -65,7 +65,7 @@ class NotifierData {
      * @param {VisibilityNotifier2D} notifier
      * @param {Rect2} rect
      */
-    static new(notifier, rect) {
+    static create(notifier, rect) {
         let d = NotifierData_pool.pop();
         if (!d) d = new NotifierData();
         return d.set(notifier, rect);
@@ -118,9 +118,9 @@ class SpatialIndexer2D {
      * @param {boolean} p_add
      */
     _notifier_update_cells(p_notifier, p_rect, p_add) {
-        let begin = Vector2.new(p_rect.x, p_rect.y);
+        let begin = Vector2.create(p_rect.x, p_rect.y);
         begin.scale(1 / this.cell_size).floor();
-        let end = Vector2.new(p_rect.x + p_rect.width, p_rect.y + p_rect.height);
+        let end = Vector2.create(p_rect.x + p_rect.width, p_rect.y + p_rect.height);
         end.scale(1 / this.cell_size).floor();
         for (let i = begin.x; i <= end.x; i++) {
             for (let j = begin.y; j <= end.y; j++) {
@@ -129,7 +129,7 @@ class SpatialIndexer2D {
 
                 if (p_add) {
                     if (!data) {
-                        data = CellData.new();
+                        data = CellData.create();
                         data.x = i;
                         data.y = j;
                         this.cells[key] = data;
@@ -170,7 +170,7 @@ class SpatialIndexer2D {
      * @param {Rect2} p_rect
      */
     _notifier_add(p_notifier, p_rect) {
-        this.notifiers[p_notifier.instance_id] = NotifierData.new(p_notifier, p_rect);
+        this.notifiers[p_notifier.instance_id] = NotifierData.create(p_notifier, p_rect);
         this._notifier_update_cells(p_notifier, p_rect, true);
         this.changed = true;
     }
@@ -222,7 +222,7 @@ class SpatialIndexer2D {
      * @param {Rect2} p_rect
      */
     _add_viewport(p_viewport, p_rect) {
-        let vd = ViewportData.new();
+        let vd = ViewportData.create();
         vd.rect.copy(p_rect);
         vd.viewport = p_viewport;
         this.viewports[p_viewport.instance_id] = vd;
@@ -263,8 +263,8 @@ class SpatialIndexer2D {
             return;
         }
 
-        let begin = Vector2.new();
-        let end = Vector2.new();
+        let begin = Vector2.create();
+        let end = Vector2.create();
         for (let id in this.viewports) {
             let vd = this.viewports[id];
             begin.set(vd.rect.x, vd.rect.y);

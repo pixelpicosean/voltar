@@ -70,7 +70,7 @@ export class BoxContainer extends Container {
     }
 
     get_minimum_size() {
-        const minimum = Vector2.new(0, 0);
+        const minimum = Vector2.create(0, 0);
         const sep = this.get_constant('separation');
 
         let first = true;
@@ -78,7 +78,7 @@ export class BoxContainer extends Container {
         for (const node of this.data.children) {
             const c = /** @type {Container} */(node);
 
-            if (!c.is_control || c.is_toplevel_control() || !c._visible) {
+            if (!c.is_control || c.is_toplevel_control() || !c.visible) {
                 continue;
             }
 
@@ -278,7 +278,7 @@ export class BoxContainer extends Container {
 
             let size = to - from;
 
-            const rect = Rect2.new();
+            const rect = Rect2.create();
 
             if (this.vertical) {
                 rect.x = 0;

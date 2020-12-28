@@ -117,7 +117,7 @@ export class PrimitiveMesh extends Mesh {
 
         let v = data.vertices;
         let pc = Math.floor(v.length / VERT_LENGTH);
-        let vec = Vector3.new();
+        let vec = Vector3.create();
         for (let i = 0; i < pc; i++) {
             if (i === 0) {
                 this.aabb.position.set(v[0], v[1], v[2]);

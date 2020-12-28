@@ -43,7 +43,7 @@ export class SkinReference {
 }
 
 class Bone {
-    static new() {
+    static create() {
         let b = Bone_pool.pop();
         if (!b) b = new Bone;
         return b.init();
@@ -151,7 +151,7 @@ export class Skeleton extends Spatial {
             let len = this.bones.length;
             let order = this.process_order;
 
-            let pose = Transform.new();
+            let pose = Transform.create();
 
             for (let i = 0; i < len; i++) {
                 let b = this.bones[order[i]];
@@ -192,7 +192,7 @@ export class Skeleton extends Spatial {
             for (let i = 0; i < data.bones.length; i++) {
                 let b_data = data.bones[i];
 
-                let b = Bone.new();
+                let b = Bone.create();
 
                 b.name = b_data.name;
                 b.parent = b_data.parent;
@@ -230,8 +230,8 @@ export class Skeleton extends Spatial {
 
             let len = this.bones.length;
 
-            let pose = Transform.new();
-            let t = Transform.new();
+            let pose = Transform.create();
+            let t = Transform.create();
             for (let i = 0; i < len; i++) {
                 let b = this.bones[this.process_order[i]];
 
@@ -340,7 +340,7 @@ export class Skeleton extends Spatial {
                     skin_ref.skeleton_version = this.version;
                 }
 
-                let xform = Transform.new();
+                let xform = Transform.create();
                 for (let i = 0; i < bind_count; i++) {
                     let bone_index = skin_ref.skin_bone_indices[i];
                     xform.copy(this.bones[bone_index].pose_global).append(skin.binds[i].pose);

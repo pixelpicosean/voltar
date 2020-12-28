@@ -1,4 +1,4 @@
-import { remove_items } from 'engine/dep/index.ts';
+import { remove_item } from 'engine/dep/index.ts';
 import { get_resource_map } from 'engine/registry';
 import { List } from 'engine/core/self_list';
 import { VObject, GDCLASS } from 'engine/core/v_object';
@@ -18,7 +18,9 @@ import {
     NOTIFICATION_TRANSLATION_CHANGED,
     NOTIFICATION_WM_UNFOCUS_REQUEST,
 } from 'engine/core/main_loop';
+import { memdelete } from 'engine/core/os/memory';
 import { InputEvent } from 'engine/core/os/input_event';
+import { ProjectSettings } from 'engine/core/project_settings';
 
 import { VSG } from 'engine/servers/visual/visual_server_globals.js';
 
@@ -41,7 +43,7 @@ import default_env from 'gen/default_env.json';
 
 
 export class SceneTreeTimer extends VObject {
-    static new() {
+    static create() {
         const p = SceneTreeTimer.pool.pop();
         if (!p) return new SceneTreeTimer();
         else return p;
@@ -102,7 +104,7 @@ let next_scene_path = '';
 export class SceneTree extends MainLoop {
     get class() { return 'SceneTree' }
 
-    get_paused() {
+    is_paused() {
         return this.paused;
     }
     set_paused(p_enabled) {
@@ -123,9 +125,8 @@ export class SceneTree extends MainLoop {
 
         if (!singleton) singleton = this;
 
-        /** @type {Viewport} */
         this.root = new Viewport;
-        this.root.set_name('root');
+        this.root.set_name("root");
         this.root.handle_input_locally = false;
         if (!this.root.world_2d) {
             this.root.set_world_2d(new World2D);
@@ -133,6 +134,8 @@ export class SceneTree extends MainLoop {
         if (!this.root.world) {
             this.root.set_world(new World);
         }
+
+        this.root.set_use_fxaa(ProjectSettings.get_singleton().display.fxaa);
 
         this.tree_version = 1;
         this.physics_process_time = 1;
@@ -172,7 +175,7 @@ export class SceneTree extends MainLoop {
         this.current_scene = null;
 
         /** @type {List<Node>} */
-        this.xform_change_list = new List();
+        this.xform_change_list = new List;
 
         /** @type {Function[]} */
         this.idle_callbacks = [];
@@ -181,11 +184,10 @@ export class SceneTree extends MainLoop {
          * @type {Map<string, Group>}
          * @private
          */
-        this.group_map = new Map();
+        this.group_map = new Map;
 
         /**
-         * @type {Array<Node>}
-         * @private
+         * @type {Node[]}
          */
         this.delete_queue = [];
 
@@ -219,11 +221,10 @@ export class SceneTree extends MainLoop {
         if (this.root) {
             this.root._set_tree(null);
             this.root._propagate_after_exit_tree();
-            this.root.free();
+            memdelete(this.root);
         }
         if (singleton === this) singleton = null;
         super.free();
-        return true;
     }
 
     is_paused() {
@@ -235,7 +236,7 @@ export class SceneTree extends MainLoop {
      * @param {boolean} [p_process_pause]
      */
     create_timer(p_delay_sec, p_process_pause = true) {
-        const stt = SceneTreeTimer.new();
+        const stt = SceneTreeTimer.create();
         stt.process_pause = p_process_pause;
         stt.time_left = p_delay_sec;
         this.timers.push(stt);
@@ -257,7 +258,7 @@ export class SceneTree extends MainLoop {
     add_to_group(p_group, p_node) {
         let E = this.group_map.get(p_group);
         if (!E) {
-            E = new Group();
+            E = new Group;
             this.group_map.set(p_group, E);
         }
 
@@ -279,7 +280,7 @@ export class SceneTree extends MainLoop {
             return;
         }
 
-        remove_items(E.nodes, E.nodes.indexOf(p_node), 1);
+        remove_item(E.nodes, E.nodes.indexOf(p_node));
         if (E.nodes.length === 0) {
             this.group_map.delete(p_group);
         }
@@ -344,7 +345,7 @@ export class SceneTree extends MainLoop {
                     return;
                 }
             } else {
-                call_pack = new Map();
+                call_pack = new Map;
                 this.unique_group_calls.set(p_group, call_pack);
             }
 
@@ -432,7 +433,7 @@ export class SceneTree extends MainLoop {
 
         this.call_lock++;
 
-        for (const n of g.nodes) {
+        for (let n of g.nodes) {
             if (this.call_lock && this.call_skip.has(n)) {
                 continue;
             }
@@ -654,7 +655,13 @@ export class SceneTree extends MainLoop {
      * @param {Node} p_node
      */
     node_removed(p_node) {
+        if (this.current_scene === p_node) {
+            this.current_scene = null;
+        }
         this.emit_signal('node_removed', p_node);
+        if (this.call_lock > 0) {
+            this.call_skip.add(p_node);
+        }
     }
     /**
      * @param {Node} p_node
@@ -718,7 +725,6 @@ export class SceneTree extends MainLoop {
 
     init() {
         this.initialized = true;
-
         this.root._set_tree(this);
         super.init();
     }
@@ -827,8 +833,11 @@ export class SceneTree extends MainLoop {
         if (this.root) {
             this.root._set_tree(null);
             this.root._propagate_after_exit_tree();
+            memdelete(this.root);
             this.root = null;
         }
+
+        this.timers = [];
     }
     /**
      * @param {InputEvent} p_event
@@ -879,21 +888,20 @@ export class SceneTree extends MainLoop {
     /* private */
 
     _flush_delete_queue() {
-        for (const n of this.delete_queue) {
-            n.free();
+        while (this.delete_queue.length > 0) {
+            memdelete(this.delete_queue.shift());
         }
-        this.delete_queue.length = 0;
     }
 
     _update_root_rect() {
         if (this.stretch_mode === STRETCH_MODE_DISABLED) {
-            const vec = Vector2.new();
+            const vec = Vector2.create();
             this.root.set_size(
                 vec.copy(this.last_screen_size)
                     .scale(1 / this.stretch_shrink)
                     .floor()
             );
-            const rect = Rect2.new(0, 0, this.last_screen_size.x, this.last_screen_size.y);
+            const rect = Rect2.create(0, 0, this.last_screen_size.x, this.last_screen_size.y);
             this.root.set_attach_to_screen_rect(rect);
             this.root.set_size_override_stretch(false);
             this.root.set_size_override(false, Vector2.ZERO);
@@ -904,11 +912,11 @@ export class SceneTree extends MainLoop {
         }
 
         // actual screen video mode
-        const video_mode = Vector2.new(OS.get_singleton().get_window_size().width, OS.get_singleton().get_window_size().height);
+        const video_mode = Vector2.create(OS.get_singleton().get_window_size().width, OS.get_singleton().get_window_size().height);
         const desired_res = this.stretch_min.clone();
 
-        const viewport_size = Vector2.new();
-        const screen_size = Vector2.new();
+        const viewport_size = Vector2.create();
+        const screen_size = Vector2.create();
 
         const viewport_aspect = desired_res.aspect();
         const video_mode_aspect = video_mode.aspect();
@@ -948,8 +956,8 @@ export class SceneTree extends MainLoop {
         screen_size.floor();
         viewport_size.floor();
 
-        const margin = Vector2.new();
-        const offset = Vector2.new();
+        const margin = Vector2.create();
+        const offset = Vector2.create();
         // black bars and margin
         if (this.stretch_aspect !== STRETCH_ASPECT_EXPAND && screen_size.x < video_mode.x) {
             margin.x = Math.round((video_mode.x - screen_size.x) / 2);
@@ -968,7 +976,7 @@ export class SceneTree extends MainLoop {
             } break;
             case STRETCH_MODE_2D: {
                 let shrink_size = screen_size.clone().divide(this.stretch_shrink).floor();
-                let rect = Rect2.new(margin.x, margin.y, screen_size.x, screen_size.y);
+                let rect = Rect2.create(margin.x, margin.y, screen_size.x, screen_size.y);
                 this.root.set_size(shrink_size);
                 this.root.set_attach_to_screen_rect(rect);
                 this.root.set_size_override_stretch(true);
@@ -979,7 +987,7 @@ export class SceneTree extends MainLoop {
             } break;
             case STRETCH_MODE_VIEWPORT: {
                 let shrink_size = screen_size.clone().divide(this.stretch_shrink).floor();
-                let rect = Rect2.new(margin.x, margin.y, screen_size.x, screen_size.y);
+                let rect = Rect2.create(margin.x, margin.y, screen_size.x, screen_size.y);
                 this.root.set_size(shrink_size);
                 this.root.set_attach_to_screen_rect(rect);
                 this.root.set_size_override_stretch(false);
@@ -1010,7 +1018,7 @@ export class SceneTree extends MainLoop {
             call_pack.clear();
         }
         // we better not clear it since group is kinda stable during the game
-        // this.unique_group_calls.clear();
+        this.unique_group_calls.clear();
 
         this.ugc_locked = false;
     }
@@ -1021,7 +1029,7 @@ export class SceneTree extends MainLoop {
      */
     _change_scene(p_to) {
         if (this.current_scene) {
-            this.current_scene.free();
+            memdelete(this.current_scene);
             this.current_scene = null;
         }
 

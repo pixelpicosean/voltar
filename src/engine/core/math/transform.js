@@ -7,7 +7,7 @@ import { AABB } from "./aabb.js";
 const pool = [];
 
 export class Transform {
-    static new() {
+    static create() {
         let b = pool.pop();
         if (!b) b = new Transform;
         return b.set(
@@ -116,7 +116,7 @@ export class Transform {
     }
 
     clone() {
-        return Transform.new().copy(this);
+        return Transform.create().copy(this);
     }
 
     affine_invert() {
@@ -131,7 +131,7 @@ export class Transform {
      * @returns new Transform
      */
     affine_inverse() {
-        return Transform.new().copy(this).affine_invert();
+        return Transform.create().copy(this).affine_invert();
     }
 
     invert() {
@@ -144,7 +144,7 @@ export class Transform {
      * @returns new Transform
      */
     inverse() {
-        return Transform.new().copy(this).invert();
+        return Transform.create().copy(this).invert();
     }
 
     /**
@@ -162,7 +162,7 @@ export class Transform {
      * @param {number} z
      */
     translate_n(x, y, z) {
-        let vec = Vector3.new(x, y, z);
+        let vec = Vector3.create(x, y, z);
         this.origin.x += this.basis.elements[0].dot(vec);
         this.origin.y += this.basis.elements[1].dot(vec);
         this.origin.z += this.basis.elements[2].dot(vec);
@@ -184,7 +184,7 @@ export class Transform {
      * @param {Vector3} [out]
      */
     xform(vec, out) {
-        if (!out) out = Vector3.new();
+        if (!out) out = Vector3.create();
         return out.set(
             this.basis.row_dot(0, vec) + this.origin.x,
             this.basis.row_dot(1, vec) + this.origin.y,
@@ -197,8 +197,8 @@ export class Transform {
      * @param {Vector3} [out]
      */
     xform_inv(vec, out) {
-        if (!out) out = Vector3.new();
-        let v = Vector3.new().copy(vec).subtract(this.origin);
+        if (!out) out = Vector3.create();
+        let v = Vector3.create().copy(vec).subtract(this.origin);
         out.set(
             this.basis.elements[0].x * v.x + this.basis.elements[1].x * v.y + this.basis.elements[2].x * v.z,
             this.basis.elements[0].y * v.x + this.basis.elements[1].y * v.y + this.basis.elements[2].y * v.z,
@@ -213,7 +213,7 @@ export class Transform {
      * @param {Plane} [out]
      */
     xform_plane(p_plane, out) {
-        if (!out) out = Plane.new();
+        if (!out) out = Plane.create();
 
         let point = p_plane.normal.clone().scale(p_plane.d);
         let point_dir = point.clone().add(p_plane.normal);
@@ -238,7 +238,7 @@ export class Transform {
      * @param {AABB} [out]
      */
     xform_aabb(p_aabb, out) {
-        if (!out) out = AABB.new();
+        if (!out) out = AABB.create();
         let min = [p_aabb.position.x, p_aabb.position.y, p_aabb.position.z];
         let max_v = p_aabb.position.clone().add(p_aabb.size);
         let max = [max_v.x, max_v.y, max_v.z];
@@ -284,7 +284,7 @@ export class Transform {
     }
 
     orthonormalized() {
-        return Transform.new().copy(this).orthonormalize();
+        return Transform.create().copy(this).orthonormalize();
     }
 
     /**
@@ -308,10 +308,10 @@ export class Transform {
         let dst_rot = p_transform.basis.get_rotation_quat();
         let dst_loc = p_transform.origin;
 
-        let i_rot = Quat.new();
-        let i_scale = Vector3.new();
+        let i_rot = Quat.create();
+        let i_scale = Vector3.create();
 
-        let interp = Transform.new();
+        let interp = Transform.create();
         interp.basis.set_quat_scale(src_rot.slerp(dst_rot, p_c, i_rot).normalize(), src_scale.linear_interpolate(dst_scale, p_c, i_scale));
         src_loc.linear_interpolate(dst_loc, p_c, interp.origin);
 

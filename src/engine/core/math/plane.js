@@ -5,7 +5,7 @@ import { CMP_EPSILON } from "./math_defs.js";
 const pool = [];
 
 export class Plane {
-    static new() {
+    static create() {
         let obj = pool.pop();
         if (!obj) obj = new Plane;
         obj.set(0, 0, 0, 0);
@@ -59,7 +59,7 @@ export class Plane {
     }
 
     clone() {
-        return Plane.new().copy(this);
+        return Plane.create().copy(this);
     }
 
     normalize() {

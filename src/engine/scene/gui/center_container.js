@@ -33,7 +33,7 @@ export class CenterContainer extends Container {
      */
     _notification(p_what) {
         if (p_what === NOTIFICATION_SORT_CHILDREN) {
-            const rect = Rect2.new();
+            const rect = Rect2.create();
             for (const node of this.data.children) {
                 const c = /** @type {Container} */(node);
 
@@ -59,7 +59,7 @@ export class CenterContainer extends Container {
      * returns new Vector2
      */
     get_minimum_size() {
-        const ms = Vector2.new(0, 0);
+        const ms = Vector2.create(0, 0);
 
         if (this._use_top_left) {
             return ms;
@@ -68,7 +68,7 @@ export class CenterContainer extends Container {
         for (const node of this.data.children) {
             const c = /** @type {Container} */(node);
 
-            if (!c.is_control || c.is_set_as_toplevel() || !c._visible) {
+            if (!c.is_control || c.is_set_as_toplevel() || !c.visible) {
                 continue;
             }
 

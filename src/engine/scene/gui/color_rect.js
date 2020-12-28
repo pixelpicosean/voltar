@@ -10,13 +10,10 @@ import { Control } from './control.js';
 export class ColorRect extends Control {
     get class() { return 'ColorRect' }
 
-    get color() { return this._color }
-    set color(value) { this.set_color(value) }
-
     constructor() {
         super();
 
-        this._color = new Color(1, 1, 1);
+        this.color = new Color(1, 1, 1);
     }
 
     /* virtual */
@@ -34,8 +31,8 @@ export class ColorRect extends Control {
      */
     _notification(p_what) {
         if (p_what === NOTIFICATION_DRAW) {
-            const rect = Rect2.new(0, 0, this.rect_size.x, this.rect_size.y)
-            this.draw_rect(rect, this._color);
+            const rect = Rect2.create(0, 0, this.rect_size.x, this.rect_size.y)
+            this.draw_rect(rect, this.color);
             Rect2.free(rect);
         }
     }
@@ -50,9 +47,9 @@ export class ColorRect extends Control {
      */
     set_color_n(r, g, b, a) {
         if (g === undefined) {
-            this._color.set_with_hex(r);
+            this.color.set_with_hex(r);
         } else {
-            this._color.set(r, g, b, a);
+            this.color.set(r, g, b, a);
         }
         this.update();
     }
@@ -60,7 +57,7 @@ export class ColorRect extends Control {
      * @param {ColorLike} color
      */
     set_color(color) {
-        this._color.copy(color);
+        this.color.copy(color);
         this.update();
     }
 }

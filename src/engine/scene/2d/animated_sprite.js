@@ -391,7 +391,7 @@ export class AnimatedSprite extends Node2D {
                 if (Engine.get_singleton().use_pixel_snap) {
                     ofs.floor();
                 }
-                const dst_rect = Rect2.new(ofs.x, ofs.y, s.x, s.y);
+                const dst_rect = Rect2.create(ofs.x, ofs.y, s.x, s.y);
 
                 if (this._flip_h) {
                     dst_rect.width = -dst_rect.width;
@@ -400,7 +400,7 @@ export class AnimatedSprite extends Node2D {
                     dst_rect.height = -dst_rect.height;
                 }
 
-                const src_rect = Rect2.new(0, 0, s.x, s.y);
+                const src_rect = Rect2.create(0, 0, s.x, s.y);
                 texture.draw_rect_region(this.canvas_item, dst_rect, src_rect, White, false);
 
                 Rect2.free(src_rect);

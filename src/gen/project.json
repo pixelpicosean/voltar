@@ -6,7 +6,8 @@
         "height": 1024,
         "webgl2": false,
         "stretch_mode": "2d",
-        "stretch_aspect": "keep_width"
+        "stretch_aspect": "keep_width",
+        "fxaa": true
     },
     "input": {
         "special": {

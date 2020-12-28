@@ -39,14 +39,14 @@ const Color_Pool: Color[] = [];
 export class Color {
     static hex(p_hex: number) {
         const rgb = hex2rgb(p_hex);
-        return Color.new(rgb[0], rgb[1], rgb[2]);
+        return Color.create(rgb[0], rgb[1], rgb[2]);
     }
     /** @param {string} p_color */
     static html(p_color: string) {
         return Color.hex(parseInt(p_color, 16));
     }
 
-    static new(r = 1.0, g = 1.0, b = 1.0, a = 1.0) {
+    static create(r = 1.0, g = 1.0, b = 1.0, a = 1.0) {
         const c = Color_Pool.pop();
         if (!c) {
             return new Color(r, g, b, a);
@@ -120,14 +120,14 @@ export class Color {
         return this;
     }
     clone() {
-        return Color.new().copy(this);
+        return Color.create().copy(this);
     }
 
     to_linear() {
         let r = this._rgb[0];
         let g = this._rgb[1];
         let b = this._rgb[2];
-        return Color.new().set(
+        return Color.create().set(
             r < 0.04045 ? r * (1.0 / 12.92) : Math.pow((r + 0.055) * (1.0 / (1 + 0.055)), 2.4),
             g < 0.04045 ? g * (1.0 / 12.92) : Math.pow((g + 0.055) * (1.0 / (1 + 0.055)), 2.4),
             b < 0.04045 ? b * (1.0 / 12.92) : Math.pow((b + 0.055) * (1.0 / (1 + 0.055)), 2.4),
@@ -139,7 +139,7 @@ export class Color {
         let r = this._rgb[0];
         let g = this._rgb[1];
         let b = this._rgb[2];
-        return Color.new().set(
+        return Color.create().set(
             r < 0.0031308 ? 12.92 * r : (1.0 + 0.055) * Math.pow(r, 1.0 / 2.4) - 0.055,
             g < 0.0031308 ? 12.92 * g : (1.0 + 0.055) * Math.pow(g, 1.0 / 2.4) - 0.055,
             b < 0.0031308 ? 12.92 * b : (1.0 + 0.055) * Math.pow(b, 1.0 / 2.4) - 0.055,
@@ -173,7 +173,7 @@ export class Color {
     }
 
     linear_interpolate(p_b: ColorLike, p_t: number, r_out?: Color) {
-        if (!r_out) r_out = Color.new();
+        if (!r_out) r_out = Color.create();
         r_out.copy(this);
 
         r_out.r += (p_t * (p_b.r - this.r));

@@ -21,7 +21,7 @@ export class Transform2D {
      * @param {number} [tx=0] - x translation
      * @param {number} [ty=0] - y translation
      */
-    static new(a = 1, b = 0, c = 0, d = 1, tx = 0, ty = 0) {
+    static create(a = 1, b = 0, c = 0, d = 1, tx = 0, ty = 0) {
         const m = pool.pop();
         if (m) {
             return m.set(a, b, c, d, tx, ty);
@@ -44,7 +44,7 @@ export class Transform2D {
      * @param {Vector2} [out]
      */
     get_origin(out) {
-        out = out || Vector2.new();
+        out = out || Vector2.create();
         return out.set(this.tx, this.ty);
     }
     /**
@@ -86,7 +86,7 @@ export class Transform2D {
      */
     get_scale(out) {
         const basis_determinant = Math.sign(this.a * this.d - this.b * this.c);
-        out = out || Vector2.new();
+        out = out || Vector2.create();
         out.x = Math.sqrt(this.a * this.a + this.b * this.b)
         out.y = Math.sqrt(this.c * this.c + this.d * this.d) * basis_determinant;
         return out;
@@ -95,7 +95,7 @@ export class Transform2D {
      * @param {Vector2Like} scale
      */
     set_scale(scale) {
-        let vec = Vector2.new();
+        let vec = Vector2.create();
         vec.set(this.a, this.b).normalize();
         this.a = vec.x * scale.x;
         this.b = vec.y * scale.x;
@@ -110,7 +110,7 @@ export class Transform2D {
      * @param {number} y
      */
     set_scale_n(x, y) {
-        let vec = Vector2.new();
+        let vec = Vector2.create();
         vec.set(this.a, this.b).normalize();
         this.a = vec.x * x;
         this.b = vec.y * x;
@@ -136,8 +136,8 @@ export class Transform2D {
     }
 
     get_skew() {
-        let vec = Vector2.new();
-        let vec2 = Vector2.new();
+        let vec = Vector2.create();
+        let vec2 = Vector2.create();
         let det = this.basis_determinant();
         let res = Math.acos(
             vec.set(this.a, this.b).normalize().dot(
@@ -153,7 +153,7 @@ export class Transform2D {
      * @param {number} p_angle
      */
     set_skew(p_angle) {
-        let vec = Vector2.new();
+        let vec = Vector2.create();
         let det = this.basis_determinant();
         vec.set(this.a, this.b)
             .rotate(Math.PI * 0.5 + p_angle)
@@ -361,9 +361,9 @@ export class Transform2D {
      */
     get_elements(p_row) {
         switch (p_row) {
-            case 0: return Vector2.new(this.a, this.b);
-            case 1: return Vector2.new(this.c, this.d);
-            case 2: return Vector2.new(this.tx, this.ty);
+            case 0: return Vector2.create(this.a, this.b);
+            case 1: return Vector2.create(this.c, this.d);
+            case 2: return Vector2.create(this.tx, this.ty);
         }
     }
 
@@ -372,9 +372,9 @@ export class Transform2D {
      */
     get_axis(p_axis) {
         switch (p_axis) {
-            case 0: return Vector2.new(this.a, this.b);
-            case 1: return Vector2.new(this.c, this.d);
-            case 2: return Vector2.new(this.tx, this.ty);
+            case 0: return Vector2.create(this.a, this.b);
+            case 1: return Vector2.create(this.c, this.d);
+            case 2: return Vector2.create(this.tx, this.ty);
         }
     }
 
@@ -407,7 +407,7 @@ export class Transform2D {
      * @return {Vector2} The new point, transformed through this matrix
      */
     basis_xform(p_vec, r_out) {
-        r_out = r_out || Vector2.new();
+        r_out = r_out || Vector2.create();
         const x = (this.a * p_vec.x) + (this.c * p_vec.y);
         const y = (this.b * p_vec.x) + (this.d * p_vec.y);
         return r_out.set(x, y);
@@ -419,7 +419,7 @@ export class Transform2D {
      * @return {Vector2} The new point, inverse-transformed through this matrix
      */
     basis_xform_inv(p_vec, r_out) {
-        r_out = r_out || Vector2.new();
+        r_out = r_out || Vector2.create();
         const x = (this.a * p_vec.x) + (this.b * p_vec.y);
         const y = (this.c * p_vec.x) + (this.d * p_vec.y);
         return r_out.set(x, y);
@@ -434,7 +434,7 @@ export class Transform2D {
      * @return {Vector2} The new point, transformed through this matrix
      */
     xform(p_vec, r_out) {
-        r_out = r_out || Vector2.new();
+        r_out = r_out || Vector2.create();
         const x = (this.a * p_vec.x) + (this.c * p_vec.y) + this.tx;
         const y = (this.b * p_vec.x) + (this.d * p_vec.y) + this.ty;
         return r_out.set(x, y);
@@ -449,7 +449,7 @@ export class Transform2D {
      * @return {Vector2} The new point, inverse-transformed through this matrix
      */
     xform_inv(p_vec, r_out) {
-        r_out = r_out || Vector2.new();
+        r_out = r_out || Vector2.create();
         const x = this.a * (p_vec.x - this.tx) + this.b * (p_vec.y - this.ty);
         const y = this.c * (p_vec.x - this.tx) + this.d * (p_vec.y - this.ty);
         return r_out.set(x, y);
@@ -460,15 +460,15 @@ export class Transform2D {
      * @param {Rect2} [r_out]
      */
     xform_rect(p_rect, r_out) {
-        r_out = r_out || Rect2.new();
-        const x = Vector2.new(this.a * p_rect.width, this.b * p_rect.width);
-        const y = Vector2.new(this.c * p_rect.height, this.d * p_rect.height);
-        const pos = Vector2.new(p_rect.x, p_rect.y);
+        r_out = r_out || Rect2.create();
+        const x = Vector2.create(this.a * p_rect.width, this.b * p_rect.width);
+        const y = Vector2.create(this.c * p_rect.height, this.d * p_rect.height);
+        const pos = Vector2.create(p_rect.x, p_rect.y);
         this.xform(pos, pos);
 
         r_out.x = pos.x;
         r_out.y = pos.y;
-        const vec = Vector2.new();
+        const vec = Vector2.create();
         r_out.expand_to(vec.copy(pos).add(x));
         r_out.expand_to(vec.copy(pos).add(y));
         r_out.expand_to(vec.copy(pos).add(x).add(y));
@@ -486,11 +486,11 @@ export class Transform2D {
      * @param {Rect2} [r_out]
      */
     xform_inv_rect(p_rect, r_out) {
-        r_out = r_out || Rect2.new();
-        const ends_0 = Vector2.new(p_rect.x, p_rect.y);
-        const ends_1 = Vector2.new(p_rect.x, p_rect.y + p_rect.height);
-        const ends_2 = Vector2.new(p_rect.x + p_rect.width, p_rect.y + p_rect.height);
-        const ends_3 = Vector2.new(p_rect.x + p_rect.width, p_rect.y);
+        r_out = r_out || Rect2.create();
+        const ends_0 = Vector2.create(p_rect.x, p_rect.y);
+        const ends_1 = Vector2.create(p_rect.x, p_rect.y + p_rect.height);
+        const ends_2 = Vector2.create(p_rect.x + p_rect.width, p_rect.y + p_rect.height);
+        const ends_3 = Vector2.create(p_rect.x + p_rect.width, p_rect.y);
 
         this.xform_inv(ends_0, ends_0);
         this.xform_inv(ends_1, ends_1);
@@ -612,8 +612,8 @@ export class Transform2D {
     }
 
     orthonormalize() {
-        const x = Vector2.new(this.a, this.b);
-        const y = Vector2.new(this.c, this.d);
+        const x = Vector2.create(this.a, this.b);
+        const y = Vector2.create(this.c, this.d);
 
         x.normalize();
         this.a = x.x;
@@ -759,7 +759,7 @@ export class Transform2D {
      * @return {Transform2D} A copy of this matrix. Good for chaining method calls.
      */
     clone() {
-        return Transform2D.new(
+        return Transform2D.create(
             this.a,
             this.b,
             this.c,

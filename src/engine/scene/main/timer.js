@@ -15,12 +15,6 @@ export const TIMER_PROCESS_IDLE = 1;
 export class Timer extends Node {
     get class() { return 'Timer' }
 
-    get process_mode() { return this._process_mode }
-    set process_mode(value) { this.set_process_mode(value) }
-
-    get paused() { return this._paused }
-    set paused(value) { this.set_paused(value) }
-
     constructor() {
         super();
 
@@ -28,8 +22,8 @@ export class Timer extends Node {
         this.autostart = false;
         this.one_shot = false;
         this.processing = false;
-        this._paused = false;
-        this._process_mode = TIMER_PROCESS_IDLE;
+        this.paused = false;
+        this.process_mode = TIMER_PROCESS_IDLE;
         this.time_left = -1;
     }
 
@@ -56,7 +50,7 @@ export class Timer extends Node {
                 }
             } break;
             case NOTIFICATION_INTERNAL_PROCESS: {
-                if (this.process_mode === TIMER_PROCESS_PHYSICS || !this.is_process_internal()) {
+                if (!this.processing || this.process_mode === TIMER_PROCESS_PHYSICS || !this.is_processing_internal()) {
                     return;
                 }
                 this.time_left -= this.get_process_delta_time();
@@ -72,7 +66,7 @@ export class Timer extends Node {
                 }
             } break;
             case NOTIFICATION_INTERNAL_PHYSICS_PROCESS: {
-                if (this.process_mode === TIMER_PROCESS_IDLE || !this.is_physics_process_internal()) {
+                if (!this.processing || this.process_mode === TIMER_PROCESS_IDLE || !this.is_physics_processing_internal()) {
                     return;
                 }
                 this.time_left -= this.get_physics_process_delta_time();
@@ -119,13 +113,13 @@ export class Timer extends Node {
 
         switch (this.process_mode) {
             case TIMER_PROCESS_PHYSICS: {
-                if (this.is_physics_process_internal()) {
+                if (this.is_physics_processing_internal()) {
                     this.set_physics_process_internal(false);
                     this.set_process_internal(true);
                 }
             } break;
             case TIMER_PROCESS_IDLE: {
-                if (this.is_process_internal()) {
+                if (this.is_processing_internal()) {
                     this.set_process_internal(false);
                     this.set_physics_process_internal(true);
                 }

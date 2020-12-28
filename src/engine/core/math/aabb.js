@@ -4,10 +4,18 @@ import { Vector3, Vector3Like } from "./vector3.js";
 const pool = [];
 
 export class AABB {
-    static new() {
+    /**
+     * @param {number} [x]
+     * @param {number} [y]
+     * @param {number} [z]
+     * @param {number} [w]
+     * @param {number} [h]
+     * @param {number} [d]
+     */
+    static create(x = 0, y = 0, z = 0, w = 0, h = 0, d = 0) {
         let obj = pool.pop();
         if (!obj) obj = new AABB;
-        obj.set(0, 0, 0, 0, 0, 0);
+        obj.set(x, y, z, w, h, d);
         return obj;
     }
 
@@ -18,6 +26,7 @@ export class AABB {
         if (aabb && pool.length < 2020) {
             pool.push(aabb);
         }
+        return AABB;
     }
 
     constructor() {
@@ -49,7 +58,7 @@ export class AABB {
     }
 
     clone() {
-        return AABB.new().copy(this);
+        return AABB.create().copy(this);
     }
 
     /**
@@ -131,14 +140,14 @@ export class AABB {
      */
     get_endpoint(idx) {
         switch (idx) {
-            case 0: return Vector3.new(this.position.x, this.position.y, this.position.z);
-            case 1: return Vector3.new(this.position.x, this.position.y, this.position.z + this.size.z);
-            case 2: return Vector3.new(this.position.x, this.position.y + this.size.y, this.position.z);
-            case 3: return Vector3.new(this.position.x, this.position.y + this.size.y, this.position.z + this.size.z);
-            case 4: return Vector3.new(this.position.x + this.size.x, this.position.y, this.position.z);
-            case 5: return Vector3.new(this.position.x + this.size.x, this.position.y, this.position.z + this.size.z);
-            case 6: return Vector3.new(this.position.x + this.size.x, this.position.y + this.size.y, this.position.z);
-            case 7: return Vector3.new(this.position.x + this.size.x, this.position.y + this.size.y, this.position.z + this.size.z);
+            case 0: return Vector3.create(this.position.x, this.position.y, this.position.z);
+            case 1: return Vector3.create(this.position.x, this.position.y, this.position.z + this.size.z);
+            case 2: return Vector3.create(this.position.x, this.position.y + this.size.y, this.position.z);
+            case 3: return Vector3.create(this.position.x, this.position.y + this.size.y, this.position.z + this.size.z);
+            case 4: return Vector3.create(this.position.x + this.size.x, this.position.y, this.position.z);
+            case 5: return Vector3.create(this.position.x + this.size.x, this.position.y, this.position.z + this.size.z);
+            case 6: return Vector3.create(this.position.x + this.size.x, this.position.y + this.size.y, this.position.z);
+            case 7: return Vector3.create(this.position.x + this.size.x, this.position.y + this.size.y, this.position.z + this.size.z);
         }
     }
 
@@ -148,7 +157,7 @@ export class AABB {
     get_support(p_normal) {
         let half_extents = this.size.clone().scale(0.5);
         let ofs = this.position.clone().add(half_extents);
-        let result = Vector3.new(
+        let result = Vector3.create(
             (p_normal.x > 0) ? -half_extents.x : half_extents.x,
             (p_normal.y > 0) ? -half_extents.y : half_extents.y,
             (p_normal.z > 0) ? -half_extents.z : half_extents.z
@@ -177,7 +186,7 @@ export class AABB {
     /**
      * @param {AABB} aabb
      */
-    merge(aabb) {
+    merged(aabb) {
         return this.clone().merge_with(aabb);
     }
 
@@ -185,9 +194,9 @@ export class AABB {
      * @param {AABB} aabb
      */
     merge_with(aabb) {
-        let beg_1 = Vector3.new(), beg_2 = Vector3.new();
-        let end_1 = Vector3.new(), end_2 = Vector3.new();
-        let min = Vector3.new(), max = Vector3.new();
+        let beg_1 = Vector3.create(), beg_2 = Vector3.create();
+        let end_1 = Vector3.create(), end_2 = Vector3.create();
+        let min = Vector3.create(), max = Vector3.create();
 
         beg_1.copy(this.position);
         beg_2.copy(aabb.position);
@@ -256,14 +265,14 @@ export class AABB {
         let dst_min = p_aabb.position;
         let dst_max = p_aabb.position.add(p_aabb.size);
 
-        let min = Vector3.new(), max = Vector3.new();
+        let min = Vector3.create(), max = Vector3.create();
 
         if (src_min.x > dst_max.x || src_max.x < dst_min.x) {
             Vector3.free(src_max);
             Vector3.free(dst_max);
             Vector3.free(min);
             Vector3.free(max);
-            return AABB.new();
+            return AABB.create();
         } else {
             min.x = (src_min.x > dst_min.x) ? src_min.x : dst_min.x;
             max.x = (src_max.x < dst_max.x) ? src_max.x : dst_max.x;
@@ -274,7 +283,7 @@ export class AABB {
             Vector3.free(dst_max);
             Vector3.free(min);
             Vector3.free(max);
-            return AABB.new();
+            return AABB.create();
         } else {
             min.y = (src_min.y > dst_min.y) ? src_min.y : dst_min.y;
             max.y = (src_max.y < dst_max.y) ? src_max.y : dst_max.y;
@@ -285,13 +294,13 @@ export class AABB {
             Vector3.free(dst_max);
             Vector3.free(min);
             Vector3.free(max);
-            return AABB.new();
+            return AABB.create();
         } else {
             min.z = (src_min.z > dst_min.z) ? src_min.z : dst_min.z;
             max.z = (src_max.z < dst_max.z) ? src_max.z : dst_max.z;
         }
 
-        let result = AABB.new();
+        let result = AABB.create();
         result.position.copy(min)
         result.size.copy(max).subtract(min);
 
@@ -412,12 +421,13 @@ export class AABB {
 
     /**
      * @param {import('./plane').Plane[]} p_planes
+     * @param {Vector3[]} p_points
      */
-    intersects_convex_shape(p_planes) {
+    intersects_convex_shape(p_planes, p_points) {
         let half_extents = this.size.clone().scale(0.5);
         let ofs = this.position.clone().add(half_extents);
 
-        let point = Vector3.new();
+        let point = Vector3.create();
 
         for (let i = 0; i < p_planes.length; i++) {
             let p = p_planes[i];
@@ -430,6 +440,60 @@ export class AABB {
                 Vector3.free(ofs);
                 Vector3.free(half_extents);
                 Vector3.free(point);
+                return false;
+            }
+        }
+
+        // reset bad_point_counts_xxx
+        bad_point_counts_negative[0] = bad_point_counts_positive[0] = 0;
+        bad_point_counts_negative[1] = bad_point_counts_positive[1] = 0;
+        bad_point_counts_negative[2] = bad_point_counts_positive[2] = 0;
+
+        // - x
+        for (let i = 0; i < p_points.length; i++) {
+            if (p_points[i].x > ofs.x + half_extents.x) {
+                bad_point_counts_positive[0]++;
+            }
+            if (p_points[i].x < ofs.x - half_extents.x) {
+                bad_point_counts_negative[0]++;
+            }
+
+            if (bad_point_counts_negative[0] === p_points.length) {
+                return false;
+            }
+            if (bad_point_counts_positive[0] === p_points.length) {
+                return false;
+            }
+        }
+        // - y
+        for (let i = 0; i < p_points.length; i++) {
+            if (p_points[i].y > ofs.y + half_extents.y) {
+                bad_point_counts_positive[1]++;
+            }
+            if (p_points[i].y < ofs.y - half_extents.y) {
+                bad_point_counts_negative[1]++;
+            }
+
+            if (bad_point_counts_negative[1] === p_points.length) {
+                return false;
+            }
+            if (bad_point_counts_positive[1] === p_points.length) {
+                return false;
+            }
+        }
+        // - z
+        for (let i = 0; i < p_points.length; i++) {
+            if (p_points[i].z > ofs.z + half_extents.z) {
+                bad_point_counts_positive[2]++;
+            }
+            if (p_points[i].z < ofs.z - half_extents.z) {
+                bad_point_counts_negative[2]++;
+            }
+
+            if (bad_point_counts_negative[2] === p_points.length) {
+                return false;
+            }
+            if (bad_point_counts_positive[2] === p_points.length) {
                 return false;
             }
         }
@@ -468,3 +532,6 @@ export class AABB {
         Vector3.free(normal_abs);
     }
 }
+
+const bad_point_counts_positive = [0, 0, 0];
+const bad_point_counts_negative = [0, 0, 0];

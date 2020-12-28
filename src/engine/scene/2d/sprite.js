@@ -52,7 +52,7 @@ export class Sprite extends Node2D {
     set vframes(value) { this.set_vframes(value) }
 
     get frame_coords() {
-        return Vector2.new(this._frame % this._hframes, this._frame / this._hframes).floor();
+        return Vector2.create(this._frame % this._hframes, this._frame / this._hframes).floor();
     }
     set frame_coords(p_coord) {
         this.set_frame(Math.floor(p_coord.y * this._hframes + p_coord.x));
@@ -115,8 +115,8 @@ export class Sprite extends Node2D {
                     break;
                 }
 
-                const src_rect = Rect2.new();
-                const dst_rect = Rect2.new();
+                const src_rect = Rect2.create();
+                const dst_rect = Rect2.create();
 
                 this._get_rects(src_rect, dst_rect);
                 this._texture.draw_rect_region(this.canvas_item, dst_rect, src_rect, white, false);
@@ -210,10 +210,10 @@ export class Sprite extends Node2D {
 
     get_rect() {
         if (!this._texture || !this._texture.get_rid()) {
-            return Rect2.new(0, 0, 1, 1);
+            return Rect2.create(0, 0, 1, 1);
         }
 
-        const s = Vector2.new(0, 0);
+        const s = Vector2.create(0, 0);
 
         if (this._region_enabled) {
             s.set(this._region_rect.width, this._region_rect.height);
@@ -224,7 +224,7 @@ export class Sprite extends Node2D {
         s.x /= this._hframes;
         s.y /= this._vframes;
 
-        const ofs = Vector2.new(0, 0);
+        const ofs = Vector2.create(0, 0);
         if (this._centered) {
             ofs.x -= s.x / 2;
             ofs.y -= s.y / 2;
@@ -233,7 +233,7 @@ export class Sprite extends Node2D {
             s.set(1, 1);
         }
 
-        const rect = Rect2.new(ofs.x, ofs.y, s.x, s.y);
+        const rect = Rect2.create(ofs.x, ofs.y, s.x, s.y);
         Vector2.free(s);
         Vector2.free(ofs);
 
@@ -303,7 +303,7 @@ export class Sprite extends Node2D {
      * @param {Rect2} r_dst_rect
      */
     _get_rects(r_src_rect, r_dst_rect) {
-        const base_rect = Rect2.new();
+        const base_rect = Rect2.create();
 
         let r_filter_clip = false;
 
@@ -316,8 +316,8 @@ export class Sprite extends Node2D {
             base_rect.height = this._texture.get_height();
         }
 
-        const frame_size = Vector2.new(base_rect.width / this._hframes, base_rect.height / this._vframes);
-        const frame_offset = Vector2.new(this._frame % this._hframes, Math.floor(this._frame / this._hframes));
+        const frame_size = Vector2.create(base_rect.width / this._hframes, base_rect.height / this._vframes);
+        const frame_offset = Vector2.create(this._frame % this._hframes, Math.floor(this._frame / this._hframes));
         frame_offset.multiply(frame_size);
 
         r_src_rect.width = frame_size.x;

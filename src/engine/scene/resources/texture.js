@@ -40,17 +40,11 @@ const white = Object.freeze(new Color(1, 1, 1, 1));
 
 export class Texture extends Resource {
     get class() { return 'Texture' }
-    get flags() {
-        return this._flags;
-    }
-    set flags(value) {
-        this.set_flags(value);
-    }
 
     constructor() {
         super();
 
-        this._flags = {
+        this.flags = {
             FILTER: false,
             REPEAT: false,
             MIPMAPS: false,
@@ -63,7 +57,7 @@ export class Texture extends Resource {
      * @param {ImageFlags} value
      */
     set_flags(value) {
-        Object.assign(this._flags, value);
+        Object.assign(this.flags, value);
     }
 
     /** @return {DOMImageData | RawImageData} */
@@ -93,7 +87,7 @@ export class Texture extends Resource {
      * @param {boolean} [p_transpose]
      */
     draw(p_canvas_item, p_pos, p_modulate = white, p_transpose = false) {
-        const rect = Rect2.new(p_pos.x, p_pos.y, this.get_width(), this.get_height());
+        const rect = Rect2.create(p_pos.x, p_pos.y, this.get_width(), this.get_height());
         VSG.canvas.canvas_item_add_texture_rect(p_canvas_item, rect, this, false, p_modulate, p_transpose);
         Rect2.free(rect);
     }
@@ -160,7 +154,7 @@ export class ImageTexture extends Texture {
      * returns new Vector2.
      */
     get_size() {
-        return Vector2.new(this.width, this.height);
+        return Vector2.create(this.width, this.height);
     }
 
     /**
@@ -203,7 +197,7 @@ export class ImageTexture extends Texture {
      * @param {number} p_height
      */
     create_from_region(p_texture, p_x, p_y, p_width, p_height) {
-        this._flags = p_texture._flags;
+        this.flags = p_texture.flags;
         this.x = p_x;
         this.y = p_y;
         this.width = p_width;

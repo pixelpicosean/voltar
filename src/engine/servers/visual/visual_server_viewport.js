@@ -179,6 +179,23 @@ export class VisualServerViewport {
 
     /**
      * @param {Viewport_t} p_viewport
+     * @param {boolean} p_keep_linear
+     */
+    viewport_set_keep_3d_linear(p_viewport, p_keep_linear) {
+        p_viewport.keep_3d_linear = p_keep_linear;
+        VSG.storage.render_target_set_flag(p_viewport.render_target, "KEEP_3D_LINEAR", p_keep_linear);
+    }
+
+    /**
+     * @param {Viewport_t} p_viewport
+     * @param {boolean} p_fxaa
+     */
+    viewport_set_use_fxaa(p_viewport, p_fxaa) {
+        p_viewport.render_target.use_fxaa = p_fxaa;
+    }
+
+    /**
+     * @param {Viewport_t} p_viewport
      * @param {boolean} p_enabled
      */
     viewport_set_vflip(p_viewport, p_enabled) {
@@ -377,10 +394,10 @@ export class VisualServerViewport {
         xf.append(p_canvas_data.transform);
 
         if (scale !== 1 && !VSG.canvas.disable_scale) {
-            const pivot = Vector2.new(p_rect.width * 0.5, p_rect.height * 0.5);
-            const xfpivot = Transform2D.new();
+            const pivot = Vector2.create(p_rect.width * 0.5, p_rect.height * 0.5);
+            const xfpivot = Transform2D.create();
             xfpivot.set_origin(pivot);
-            const xfscale = Transform2D.new();
+            const xfscale = Transform2D.create();
             xfscale.scale(scale, scale);
 
             const inv = xfpivot.clone().affine_inverse();

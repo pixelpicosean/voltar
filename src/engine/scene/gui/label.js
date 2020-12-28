@@ -165,7 +165,7 @@ export class Label extends Control {
     }
 
     get_minimum_size() {
-        const size = Vector2.new();
+        const size = Vector2.create();
         const min_style = this.get_stylebox('normal').get_minimum_size(tmp_vec);
 
         const f = this.get_font('font');

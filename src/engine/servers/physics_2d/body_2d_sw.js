@@ -589,7 +589,7 @@ export class Body2DSW extends CollisionObject2DSW {
             this.area_linear_damp = this.linear_damp;
         }
 
-        const motion = Vector2.new();
+        const motion = Vector2.create();
         let do_motion = false;
 
         if (this.mode === BodyMode.KINEMATIC) {
@@ -684,7 +684,7 @@ export class Body2DSW extends CollisionObject2DSW {
         const angle = this.transform.get_rotation() + total_angular_velocity * p_step;
         const pos = this.transform.get_origin().add(total_linear_velocity.scale(p_step));
 
-        const t = Transform2D.new().rotate(angle).translate(pos.x, pos.y);
+        const t = Transform2D.create().rotate(angle).translate(pos.x, pos.y);
         this._set_transform(t, this.continuous_cd_mode === CCDMode.DISABLED);
         this._set_inv_transform(this.transform.inverse());
 
@@ -709,7 +709,7 @@ export class Body2DSW extends CollisionObject2DSW {
             Vector2.free(origin);
             return motion;
         }
-        return Vector2.new(0, 0);
+        return Vector2.create(0, 0);
     }
 
     call_queries() {

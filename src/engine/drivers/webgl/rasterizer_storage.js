@@ -309,15 +309,19 @@ export class RenderTarget_t {
         this.height = 0;
 
         this.flags = {
-            DIRECT_TO_SCREEN: false,
-            TRANSPARENT: false,
-            NO_SAMPLING: false,
             VFLIP: false,
-            NO_3D: false,
+            TRANSPARENT: false,
             NO_3D_EFFECTS: false,
+            NO_3D: false,
+            NO_SAMPLING: false,
+            KEEP_3D_LINEAR: false,
+            DIRECT_TO_SCREEN: false,
         };
 
         this.used_in_frame = false;
+
+        this.use_fxaa = false;
+
         this.used_dof_blur_near = false;
         this.offscreen_effects_allocated = false;
 
@@ -1272,9 +1276,14 @@ export class RasterizerStorage {
 
         rt.flags[flag] = p_enable;
 
-        if (flag === "TRANSPARENT") {
-            this._render_target_clear(rt);
-            this._render_target_allocate(rt);
+        switch (flag) {
+            case "TRANSPARENT":
+            case "NO_3D":
+            case "NO_SAMPLING":
+            case "NO_3D_EFFECTS": {
+                this._render_target_clear(rt);
+                this._render_target_allocate(rt);
+            } break;
         }
     }
 
@@ -1708,7 +1717,7 @@ export class RasterizerStorage {
         if (!p_aabb) {
             if (use_3d_vertices) {
                 let aabb = surface.aabb;
-                let vec = Vector3.new();
+                let vec = Vector3.create();
                 aabb.set(0, 0, 0, 0, 0, 0);
                 let vert_length = Math.floor(stride / 4);
                 for (let i = 0; i < array_len; i++) {
@@ -1767,7 +1776,7 @@ export class RasterizerStorage {
      * @param {Mesh_t} mesh
      */
     mesh_get_aabb(mesh) {
-        let aabb = AABB.new();
+        let aabb = AABB.create();
         for (let i = 0; i < mesh.surfaces.length; i++) {
             if (i === 0) {
                 aabb.copy(mesh.surfaces[i].aabb);
@@ -1873,7 +1882,7 @@ export class RasterizerStorage {
             multimesh.data = new_float32array(format_floats * instances);
             const data = multimesh.data;
 
-            const c = Color.new();
+            const c = Color.create();
             const c_8bit = c.set(1, 1, 1, 1).as_rgba8();
             const d_8bit = c.set(0, 0, 0, 0).as_rgba8();
             Color.free(c);
@@ -2134,22 +2143,22 @@ export class RasterizerStorage {
             case LIGHT_SPOT: {
                 let len = p_light.param[LIGHT_PARAM_RANGE];
                 let size = Math.tan(deg2rad(p_light.param[LIGHT_PARAM_SPOT_ANGLE])) * len;
-                let aabb = AABB.new();
+                let aabb = AABB.create();
                 aabb.set(-size, -size, -len, size * 2, size * 2, len);
                 return aabb;
             };
             case LIGHT_OMNI: {
                 let r = p_light.param[LIGHT_PARAM_RANGE];
-                let aabb = AABB.new();
+                let aabb = AABB.create();
                 aabb.set(-r, -r, -r, r*2, r*2, r*2);
                 return aabb;
             };
             case LIGHT_DIRECTIONAL: {
-                return AABB.new();
+                return AABB.create();
             };
         }
 
-        return AABB.new();
+        return AABB.create();
     }
 
     /* light map API */

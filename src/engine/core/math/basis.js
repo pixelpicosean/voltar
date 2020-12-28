@@ -6,7 +6,7 @@ import { CMP_EPSILON } from './math_defs.js';
 const quat_pool = [];
 
 export class Quat {
-    static new() {
+    static create() {
         let b = quat_pool.pop();
         if (!b) b = new Quat;
         return b.set(0, 0, 0, 1);
@@ -55,7 +55,7 @@ export class Quat {
     }
 
     clone() {
-        return Quat.new().copy(this);
+        return Quat.create().copy(this);
     }
 
     /**
@@ -89,7 +89,7 @@ export class Quat {
      */
     slerp(q, t, out) {
         let to1 = out;
-        if (!to1) to1 = Quat.new();
+        if (!to1) to1 = Quat.create();
 
         let omega = 0, cosom = 0, sinom = 0, scale0 = 0, scale1 = 0;
 
@@ -233,7 +233,7 @@ export class Quat {
 const basis_pool = [];
 
 export class Basis {
-    static new() {
+    static create() {
         let b = basis_pool.pop();
         if (!b) b = new Basis;
         return b.set(
@@ -324,15 +324,15 @@ export class Basis {
 
         c = Math.cos(p_euler.x);
         s = Math.sin(p_euler.x);
-        let xmat = Basis.new().set(1.0, 0.0, 0.0, 0.0, c, -s, 0.0, s, c);
+        let xmat = Basis.create().set(1.0, 0.0, 0.0, 0.0, c, -s, 0.0, s, c);
 
         c = Math.cos(p_euler.y);
         s = Math.sin(p_euler.y);
-        let ymat = Basis.new().set(c, 0.0, s, 0.0, 1.0, 0.0, -s, 0.0, c);
+        let ymat = Basis.create().set(c, 0.0, s, 0.0, 1.0, 0.0, -s, 0.0, c);
 
         c = Math.cos(p_euler.z);
         s = Math.sin(p_euler.z);
-        let zmat = Basis.new().set(c, -s, 0.0, s, c, 0.0, 0.0, 0.0, 1.0);
+        let zmat = Basis.create().set(c, -s, 0.0, s, c, 0.0, 0.0, 0.0, 1.0);
 
         return this.copy(ymat).append(xmat).append(zmat);
     }
@@ -342,7 +342,7 @@ export class Basis {
      * @param {number} p_phi
      */
     set_axis_angle(p_axis, p_phi) {
-        let axis_sq = Vector3.new(
+        let axis_sq = Vector3.create(
             p_axis.x * p_axis.x,
             p_axis.y * p_axis.y,
             p_axis.z * p_axis.z
@@ -379,9 +379,9 @@ export class Basis {
      */
     get_axis(p_axis) {
         switch (p_axis) {
-            case 0: return Vector3.new(this.elements[0].x, this.elements[1].x, this.elements[2].x);
-            case 1: return Vector3.new(this.elements[0].y, this.elements[1].y, this.elements[2].y);
-            case 2: return Vector3.new(this.elements[0].z, this.elements[1].z, this.elements[2].z);
+            case 0: return Vector3.create(this.elements[0].x, this.elements[1].x, this.elements[2].x);
+            case 1: return Vector3.create(this.elements[0].y, this.elements[1].y, this.elements[2].y);
+            case 2: return Vector3.create(this.elements[0].z, this.elements[1].z, this.elements[2].z);
         }
     }
 
@@ -434,7 +434,7 @@ export class Basis {
     }
 
     clone() {
-        return Basis.new().copy(this);
+        return Basis.create().copy(this);
     }
 
     /**
@@ -454,7 +454,7 @@ export class Basis {
     get_scale() {
         let det = this.determinant();
         let det_sign = det < 0 ? -1 : 1;
-        return Vector3.new(
+        return Vector3.create(
             Math.hypot(this.elements[0].x, this.elements[1].x, this.elements[2].x),
             Math.hypot(this.elements[0].y, this.elements[1].y, this.elements[2].y),
             Math.hypot(this.elements[0].z, this.elements[1].z, this.elements[2].z)
@@ -468,7 +468,7 @@ export class Basis {
         let m = this.clone().orthonormalize();
         let det = m.determinant();
         if (det < 0) {
-            let s = Vector3.new(-1, -1, -1);
+            let s = Vector3.create(-1, -1, -1);
             m.scale(s);
             Vector3.free(s);
         }
@@ -580,7 +580,7 @@ export class Basis {
      * @param {number} p_phi
      */
     rotate(p_axis, p_phi) {
-        let b = Basis.new().set_axis_angle(p_axis, p_phi).append(this);
+        let b = Basis.create().set_axis_angle(p_axis, p_phi).append(this);
         this.copy(b);
         Basis.free(b);
         return this;
@@ -590,7 +590,7 @@ export class Basis {
      * @param {Vector3Like} p_euler
      */
     rotate_euler(p_euler) {
-        let b = Basis.new().set_euler(p_euler).append(this);
+        let b = Basis.create().set_euler(p_euler).append(this);
         this.copy(b);
         Basis.free(b);
         return this;
@@ -600,7 +600,7 @@ export class Basis {
      * @param {Quat} p_quat
      */
     rotate_quat(p_quat) {
-        let b = Basis.new().set_quat(p_quat).append(this);
+        let b = Basis.create().set_quat(p_quat).append(this);
         this.copy(b);
         Basis.free(b);
         return this;
@@ -610,7 +610,7 @@ export class Basis {
      * @returns new Vector3
      */
     get_euler() {
-        let euler = Vector3.new();
+        let euler = Vector3.create();
         let m12 = this.elements[1].z;
 
         if (m12 < (1 - CMP_EPSILON)) {
@@ -674,7 +674,7 @@ export class Basis {
             temp[j] = (m[j][i] - m[i][j]) * s;
             temp[k] = (m[k][i] - m[i][k]) * s;
         }
-        return Quat.new().set(temp[0], temp[1], temp[2], temp[3]);
+        return Quat.create().set(temp[0], temp[1], temp[2], temp[3]);
     }
 
     /**
@@ -719,7 +719,7 @@ export class Basis {
         let from = this.get_quat();
         let to = target.get_quat();
 
-        let b = Basis.new().set_quat(from.slerp(to, t));
+        let b = Basis.create().set_quat(from.slerp(to, t));
         b.elements[0].scale(lerp(this.elements[0].length(), target.elements[0].length(), t));
         b.elements[1].scale(lerp(this.elements[1].length(), target.elements[1].length(), t));
         b.elements[2].scale(lerp(this.elements[2].length(), target.elements[2].length(), t));
@@ -755,7 +755,7 @@ export class Basis {
      * @param {Vector3} [r_out]
      */
     xform(p_vector, r_out) {
-        if (!r_out) r_out = Vector3.new();
+        if (!r_out) r_out = Vector3.create();
         let x = this.elements[0].dot(p_vector);
         let y = this.elements[1].dot(p_vector);
         let z = this.elements[2].dot(p_vector);
@@ -770,7 +770,7 @@ export class Basis {
      * @param {Vector3} [r_out]
      */
     xform_inv(p_vector, r_out) {
-        if (!r_out) r_out = Vector3.new();
+        if (!r_out) r_out = Vector3.create();
         let x = this.elements[0].x * p_vector.x + this.elements[1].x * p_vector.y + this.elements[2].x * p_vector.z;
         let y = this.elements[0].y * p_vector.x + this.elements[1].y * p_vector.y + this.elements[2].y * p_vector.z;
         let z = this.elements[0].z * p_vector.x + this.elements[1].z * p_vector.y + this.elements[2].z * p_vector.z;

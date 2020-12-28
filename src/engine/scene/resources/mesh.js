@@ -153,7 +153,7 @@ export class ArrayMesh extends Mesh {
         // AABB
         if (!is_2d) {
             let vertices = p_arrays[ARRAY_VERTEX].array;
-            let vec = Vector3.new();
+            let vec = Vector3.create();
             for (let i = 0, len = Math.floor(vertices.length / 3); i < len; i += 3) {
                 if (i === 0) {
                     s.aabb.position.set(vertices[i+0], vertices[i+1], vertices[i+2]);
