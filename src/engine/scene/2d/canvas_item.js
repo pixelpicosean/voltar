@@ -112,7 +112,7 @@ export class CanvasItem extends Node {
     }
 
     _free() {
-        VSG.canvas.free_item(this.canvas_item);
+        VSG.canvas.item_free(this.canvas_item);
         super._free();
     }
 

@@ -1,4 +1,5 @@
-import { remove_items } from 'engine/dep/index.ts';
+import { remove_item } from 'engine/dep/index.ts';
+import { Element } from 'engine/core/list';
 import { earcut } from 'engine/dep/earcut.js';
 import {
     CMP_EPSILON,
@@ -43,8 +44,6 @@ import {
 } from './commands.js';
 
 
-const white = Object.freeze(new Color(1, 1, 1, 1));
-
 let uid = 0;
 
 const TYPE_ITEM = 0;
@@ -53,13 +52,34 @@ const TYPE_CANVAS = 1;
 const CANVAS_ITEM_Z_MIN = -4096;
 const CANVAS_ITEM_Z_MAX = 4096;
 
+class CopyBackBuffer {
+    constructor() {
+        this.rect = new Rect2;
+        this.screen_rect = new Rect2;
+        this.full = false;
+    }
+    _predelete() {
+        return true;
+    }
+    _free() { }
+}
+
+class ViewportRender {
+    constructor() {
+        /** @type {VisualServer} */
+        this.owner = null;
+        this.udata = null;
+        this.rect = new Rect2;
+    }
+}
+
 export class Item {
     constructor() {
         this._id = uid++;
 
         this.type = TYPE_ITEM;
 
-        this.xform = new Transform2D();
+        this.xform = new Transform2D;
         this.clip = false;
         this.visible = true;
         this.behind = false;
@@ -68,23 +88,35 @@ export class Item {
         this.commands = [];
         this.custom_rect = false;
         this.rect_dirty = true;
-        this.rect = new Rect2();
+        this.rect = new Rect2;
         /** @type {Material} */
         this.material = null;
         this.skeleton = null;
 
+        /** @type {Item} */
+        this.next = null;
+
+        /** @type {CopyBackBuffer} */
+        this.copy_back_buffer = null;
+
         this.final_modulate = new Color(1, 1, 1, 1);
-        this.final_transform = new Transform2D();
-        this.final_clip_rect = new Rect2();
+        this.final_transform = new Transform2D;
+        this.final_clip_rect = new Rect2;
         /** @type {Item} */
         this.final_clip_owner = null;
         /** @type {Item} */
         this.material_owner = null;
+        /** @type {ViewportRender} */
+        this.vp_render = null;
+
         this.distance_field = false;
-        this.light_masked = false;
 
-        this.global_rect_cache = new Rect2();
+        this.global_rect_cache = new Rect2;
 
+        /** @type {Item | Canvas} */
+        this.parent = null;
+        /** @type {Element<Item>} */
+        this.E = null;
         this.z_index = 0;
         this.z_relative = true;
         this.sort_y = false;
@@ -94,17 +126,13 @@ export class Item {
         this.index = 0;
         this.children_order_dirty = true;
         this.ysort_children_count = -1;
-        this.ysort_xform = new Transform2D();
-        this.ysort_pos = new Vector2();
+        this.ysort_modulate = new Color(1, 1, 1, 1);
+        this.ysort_xform = new Transform2D;
+        this.ysort_pos = new Vector2;
+        this.ysort_index = 0;
 
-        this.mirror = new Vector2();
-
-        /** @type {Item | Canvas} */
-        this.parent = null;
         /** @type {Item[]} */
         this.child_items = [];
-        /** @type {Item} */
-        this.next = null;
 
         /** @type {((item: Item) => void)[]} */
         this.free_listeners = [];
@@ -115,13 +143,16 @@ export class Item {
     }
     _free() {
         this.clear();
+        if (this.copy_back_buffer) {
+            this.copy_back_buffer._free();
+        }
 
         for (let i = 0; i < this.free_listeners.length; i++) {
             this.free_listeners[i](this);
         }
         this.free_listeners.length = 0;
 
-        free_Item(this);
+        Item_free(this);
     }
 
     get_rect() {
@@ -130,35 +161,35 @@ export class Item {
         }
 
         // must update rect
-        const s = this.commands.length;
+        let s = this.commands.length;
         if (s === 0) {
             this.rect.set(0, 0, 0, 0);
             this.rect_dirty = false;
             return this.rect;
         }
 
-        const xf = Transform2D.create();
+        let xf = Transform2D.create();
         let found_xform = false;
         let first = true;
 
-        const cmd = this.commands;
+        let cmd = this.commands;
 
-        const r = Rect2.create();
+        let r = Rect2.create();
         for (let i = 0; i < s; i++) {
-            const c = cmd[i];
+            let c = cmd[i];
             r.set(0, 0, 0, 0);
 
             switch (c.type) {
                 case TYPE_LINE: {
-                    const line = /** @type {CommandLine} */(c);
+                    let line = /** @type {CommandLine} */(c);
                     r.x = line.from.x;
                     r.y = line.from.y;
                     r.expand_to(line.to);
                 } break;
                 case TYPE_POLYLINE: {
-                    const pline = /** @type {CommandPolyLine} */(c);
-                    const vec = Vector2.create();
-                    const tri = pline.triangles;
+                    let pline = /** @type {CommandPolyLine} */(c);
+                    let vec = Vector2.create();
+                    let tri = pline.triangles;
                     for (let j = 0, len = Math.floor(tri.length / 2); j < len; j++) {
                         if (j === 0) {
                             r.x = tri[j * 2];
@@ -170,21 +201,21 @@ export class Item {
                     Vector2.free(vec);
                 } break;
                 case TYPE_CIRCLE: {
-                    const circle = /** @type {CommandCircle} */(c);
+                    let circle = /** @type {CommandCircle} */(c);
                     r.x = -circle.radius + circle.pos.x;
                     r.y = -circle.radius + circle.pos.y;
                     r.width = r.height = circle.radius * 2;
                 } break;
                 case TYPE_RECT: {
-                    const crect = /** @type {CommandRect} */(c);
+                    let crect = /** @type {CommandRect} */(c);
                     r.copy(crect.rect);
                 } break;
                 case TYPE_NINEPATCH: {
-                    const style = /** @type {CommandNinePatch} */(c);
+                    let style = /** @type {CommandNinePatch} */(c);
                     r.copy(style.rect);
                 } break;
                 case TYPE_TRANSFORM: {
-                    const transform = /** @type {CommandTransform} */(c);
+                    let transform = /** @type {CommandTransform} */(c);
                     xf.copy(transform.xform);
                     found_xform = true;
                 } break;
@@ -214,23 +245,6 @@ export class Item {
         return this.rect;
     }
 
-    /**
-     * @param {Item} p_item
-     */
-    find_item(p_item) {
-        return this.child_items.indexOf(p_item);
-    }
-
-    /**
-     * @param {Item} p_item
-     */
-    erase_item(p_item) {
-        const idx = this.find_item(p_item);
-        if (idx >= 0) {
-            remove_items(this.child_items, idx, 1);
-        }
-    }
-
     clear() {
         for (let c of this.commands) {
             c._free();
@@ -246,7 +260,7 @@ export class Item {
 
 /** @type {Item[]} */
 const Item_pool = [];
-function create_Item() {
+function Item_create() {
     let item = Item_pool.pop();
     if (!item) {
         item = new Item();
@@ -256,7 +270,7 @@ function create_Item() {
 /**
  * @param {Item} item
  */
-function free_Item(item) {
+function Item_free(item) {
     if (item) Item_pool.push(item);
 }
 
@@ -265,15 +279,17 @@ const z_list = new Array(z_range);
 const z_last_list = new Array(z_range);
 function get_z_list(reset = false) {
     if (reset) {
-        z_list.length = 0;
-        z_list.length = z_range;
+        for (let i = 0; i < z_list.length; i++) {
+            z_list[i] = null;
+        }
     }
     return z_list;
 }
 function get_z_last_list(reset = false) {
     if (reset) {
-        z_last_list.length = 0;
-        z_last_list.length = z_range;
+        for (let i = 0; i < z_last_list.length; i++) {
+            z_last_list[i] = null;
+        }
     }
     return z_last_list;
 }
@@ -300,17 +316,25 @@ function item_sort(p_left, p_right) {
     }
 }
 
+class ChildItem {
+    constructor() {
+        this.mirror = new Vector2;
+        /** @type {Item} */
+        this.item = null;
+    }
+}
+
 export class Canvas {
     constructor() {
-        this.type = TYPE_CANVAS;
-
         this._id = uid++;
 
+        this.type = TYPE_CANVAS;
+
         /** @type {Set<import('./visual_server_viewport').Viewport_t>} */
-        this.viewports = new Set();
+        this.viewports = new Set;
 
         this.children_order_dirty = true;
-        /** @type {Item[]} */
+        /** @type {ChildItem[]} */
         this.child_items = [];
         this.modulate = new Color(1, 1, 1, 1);
         this.parent = null;
@@ -321,47 +345,39 @@ export class Canvas {
      * @param {Item} p_item
      */
     find_item(p_item) {
-        return this.child_items.indexOf(p_item);
+        for (let i = 0; i < this.child_items.length; i++) {
+            if (this.child_items[i].item === p_item) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     /**
      * @param {Item} p_item
      */
     erase_item(p_item) {
-        const idx = this.find_item(p_item);
+        let idx = this.find_item(p_item);
         if (idx >= 0) {
-            remove_items(this.child_items, idx, 1);
+            remove_item(this.child_items, idx);
         }
     }
 }
 
 export class VisualServerCanvas {
-    get width() { return this.view.width }
-    get height() { return this.view.height }
-
     constructor() {
-        this.resolution = 1;
-        this.transparent = false;
-        this.preserve_drawing_buffer = false;
-        this.clear_before_render = true;
+        /** @type {Set<Canvas>} */
+        this.canvas_owner = new Set;
+        /** @type {Set<Item>} */
+        this.canvas_item_owner = new Set;
 
         this.disable_scale = false;
+        this.snap_2d_transforms = false;
 
+        /** @type {Item[]} */
         this.z_last = null;
+        /** @type {Item[]} */
         this.z_last_list = null;
-
-        this.screen = new Rect2();
-    }
-
-    /**
-     * @param {HTMLCanvasElement} canvas
-     */
-    initialize(canvas) {
-        this.view = canvas;
-    }
-
-    free_rid(rid) {
-        return false;
     }
 
     /**
@@ -370,7 +386,8 @@ export class VisualServerCanvas {
      * @param {Vector2Like} p_mirroring
      */
     canvas_set_item_mirroring(p_canvas, p_item, p_mirroring) {
-        p_item.mirror.copy(p_mirroring);
+        let idx = p_canvas.find_item(p_item);
+        p_canvas.child_items[idx].mirror.copy(p_mirroring);
     }
     /**
      * @param {Canvas} p_canvas
@@ -397,9 +414,9 @@ export class VisualServerCanvas {
     }
 
 
-    canvas_create() { return new Canvas() }
+    canvas_create() { return new Canvas }
 
-    canvas_item_create() { return new Item() }
+    canvas_item_create() { return new Item }
 
     /**
      * @param {Item} p_item
@@ -407,16 +424,35 @@ export class VisualServerCanvas {
      */
     canvas_item_set_parent(p_item, p_parent) {
         if (p_item.parent) {
-            p_item.parent.erase_item(p_item);
+            if (p_item.parent.type === TYPE_CANVAS) {
+                /** @type {Canvas} */(p_item.parent).erase_item(p_item);
+            } else if (p_item.parent.type === TYPE_ITEM) {
+                let item_owner = /** @type {Item} */(p_item.parent);
+                item_owner.child_items.splice(item_owner.child_items.indexOf(p_item), 1);
+
+                if (item_owner.sort_y) {
+                    this._mark_ysort_dirty(item_owner, this.canvas_item_owner);
+                }
+            }
             p_item.parent = null;
         }
 
         if (p_parent) {
-            p_parent.child_items.push(p_item);
-            p_parent.children_order_dirty = true;
+            if (p_parent.type === TYPE_CANVAS) {
+                let canvas = /** @type {Canvas} */(p_parent);
+                // @Incomplete: recycling
+                let ci = new ChildItem;
+                ci.item = p_item;
+                canvas.child_items.push(ci);
+                canvas.children_order_dirty = true;
+            } else if (p_parent.type === TYPE_ITEM) {
+                let item_owner = /** @type {Item} */(p_parent);
+                item_owner.child_items.push(p_item);
+                item_owner.children_order_dirty = true;
 
-            if (p_parent.type === TYPE_ITEM) {
-                this._mark_ysort_dirty(/** @type {Item} */(p_parent));
+                if (item_owner.sort_y) {
+                    this._mark_ysort_dirty(item_owner, this.canvas_item_owner);
+                }
             }
         }
 
@@ -430,9 +466,7 @@ export class VisualServerCanvas {
     canvas_item_set_visible(p_item, p_visible) {
         p_item.visible = p_visible;
 
-        if (p_item.parent) {
-            this._mark_ysort_dirty(/** @type {Item} */(p_item.parent));
-        }
+        this._mark_ysort_dirty(p_item, this.canvas_item_owner);
     }
 
     /**
@@ -457,7 +491,13 @@ export class VisualServerCanvas {
     canvas_item_set_clip(p_item, p_clip) {
         p_item.clip = p_clip;
     }
-    canvas_item_set_distance_field_mode() { }
+    /**
+     * @param {Item} p_item
+     * @param {boolean} p_enable
+     */
+    canvas_item_set_distance_field_mode(p_item, p_enable) {
+        p_item.distance_field = p_enable;
+    }
     /**
      * @param {Item} p_item
      * @param {boolean} p_custom_rect
@@ -490,9 +530,6 @@ export class VisualServerCanvas {
         canvas_item.behind = behind;
     }
 
-    canvas_item_set_default_texture_filter() { }
-    canvas_item_set_default_texture_repeat() { }
-
     /**
      * @param {Item} p_item
      * @param {Vector2Like} p_from
@@ -502,7 +539,7 @@ export class VisualServerCanvas {
      * @param {boolean} p_antialiased
      */
     canvas_item_add_line(p_item, p_from, p_to, p_color, p_width, p_antialiased) {
-        const line = CommandLine.instance();
+        let line = CommandLine.instance();
         line.color.copy(p_color);
         line.from.copy(p_from);
         line.to.copy(p_to);
@@ -520,7 +557,7 @@ export class VisualServerCanvas {
      * @param {boolean} [p_antialiased]
      */
     canvas_item_add_polyline(p_item, p_points, p_colors, p_width = 1.0, p_antialiased = false) {
-        const pline = CommandPolyLine.instance();
+        let pline = CommandPolyLine.instance();
 
         pline.antialiased = p_antialiased;
 
@@ -542,16 +579,16 @@ export class VisualServerCanvas {
             }
         }
 
-        const t = Vector2.create();
-        const tangent = Vector2.create();
+        let t = Vector2.create();
+        let tangent = Vector2.create();
         for (let i = 0, len = Math.floor(p_points.length / 2); i < len; i++) {
-            const index = i * 2;
+            let index = i * 2;
 
             if (i === len - 1) {
                 t.x = prev_x;
                 t.y = prev_y;
             } else {
-                const _t = t.set(
+                let _t = t.set(
                     p_points[(i + 1) * 2 + 0] - p_points[index + 0],
                     p_points[(i + 1) * 2 + 1] - p_points[index + 1]
                 )
@@ -600,7 +637,7 @@ export class VisualServerCanvas {
      * @param {ColorLike} p_color
      */
     canvas_item_add_rect(p_item, p_rect, p_color) {
-        const rect = CommandRect.instance();
+        let rect = CommandRect.instance();
         rect.modulate.copy(p_color);
         rect.rect.copy(p_rect);
         p_item.rect_dirty = true;
@@ -614,7 +651,7 @@ export class VisualServerCanvas {
      * @param {ColorLike} p_color
      */
     canvas_item_add_circle(p_item, p_pos, p_radius, p_color) {
-        const circle = CommandCircle.instance();
+        let circle = CommandCircle.instance();
         circle.color.copy(p_color);
         circle.pos.copy(p_pos);
         circle.radius = p_radius;
@@ -630,8 +667,8 @@ export class VisualServerCanvas {
      * @param {ColorLike} [p_modulate]
      * @param {boolean} [p_transpose=false]
      */
-    canvas_item_add_texture_rect(p_item, p_rect, p_texture, p_tile = false, p_modulate = white, p_transpose = false) {
-        const rect = CommandRect.instance();
+    canvas_item_add_texture_rect(p_item, p_rect, p_texture, p_tile = false, p_modulate = WHITE, p_transpose = false) {
+        let rect = CommandRect.instance();
         rect.modulate.copy(p_modulate);
         rect.rect.copy(p_rect);
         rect.flags = 0;
@@ -651,7 +688,7 @@ export class VisualServerCanvas {
         }
         if (p_transpose) {
             rect.flags |= CANVAS_RECT_TRANSPOSE;
-            const t = rect.rect.height;
+            let t = rect.rect.height;
             rect.rect.height = rect.rect.width;
             rect.rect.width = t;
         }
@@ -667,8 +704,8 @@ export class VisualServerCanvas {
      * @param {ColorLike} [p_modulate]
      * @param {boolean} [p_transpose=false]
      */
-    canvas_item_add_texture_rect_region(p_item, p_rect, p_texture, p_src_rect, p_modulate = white, p_transpose = false) {
-        const rect = CommandRect.instance();
+    canvas_item_add_texture_rect_region(p_item, p_rect, p_texture, p_src_rect, p_modulate = WHITE, p_transpose = false) {
+        let rect = CommandRect.instance();
         rect.modulate.copy(p_modulate);
         rect.rect.copy(p_rect);
         rect.texture = p_texture;
@@ -685,7 +722,7 @@ export class VisualServerCanvas {
         }
         if (p_transpose) {
             rect.flags |= CANVAS_RECT_TRANSPOSE;
-            const t = rect.rect.height;
+            let t = rect.rect.height;
             rect.rect.height = rect.rect.width;
             rect.rect.width = t;
         }
@@ -704,8 +741,8 @@ export class VisualServerCanvas {
      * @param {boolean} [p_draw_center=true]
      * @param {ColorLike} [p_modulate=white]
      */
-    canvas_item_add_nine_patch(p_item, p_rect, p_source, p_texture, p_topleft, p_bottomright, p_x_axis_mode = NINE_PATCH_STRETCH, p_y_axis_mode = NINE_PATCH_STRETCH, p_draw_center = true, p_modulate = white) {
-        const style = CommandNinePatch.instance();
+    canvas_item_add_nine_patch(p_item, p_rect, p_source, p_texture, p_topleft, p_bottomright, p_x_axis_mode = NINE_PATCH_STRETCH, p_y_axis_mode = NINE_PATCH_STRETCH, p_draw_center = true, p_modulate = WHITE) {
+        let style = CommandNinePatch.instance();
         style.texture = p_texture;
         style.rect.copy(p_rect);
         style.source.copy(p_source);
@@ -721,7 +758,6 @@ export class VisualServerCanvas {
 
         p_item.commands.push(style);
     }
-    canvas_item_add_primitive() { }
     /**
      * Unlike same method of Godot, we accept indices array as optional parameter,
      * we will not triangulate if it is provided (could be faster).
@@ -733,7 +769,7 @@ export class VisualServerCanvas {
      * @param {number[]} [p_indices]
      */
     canvas_item_add_polygon(p_item, p_points, p_colors, p_uvs, p_texture, p_indices) {
-        const polygon = CommandPolygon.instance();
+        let polygon = CommandPolygon.instance();
         polygon.texture = p_texture;
         polygon.points = p_points.slice();
         polygon.colors = p_colors.slice();
@@ -761,7 +797,7 @@ export class VisualServerCanvas {
      * @param {Texture} [p_texture]
      */
     canvas_item_add_triangle_array(p_item, p_indices, p_points, p_colors, p_uvs, p_bones, p_weights, p_texture) {
-        const polygon = CommandPolygon.instance();
+        let polygon = CommandPolygon.instance();
         polygon.texture = p_texture;
         polygon.points = p_points.slice();
         polygon.colors = p_colors.slice();
@@ -778,14 +814,13 @@ export class VisualServerCanvas {
 
         p_item.commands.push(polygon);
     }
-    canvas_item_add_mesh() { }
     /**
      * @param {Item} p_item
      * @param {any} p_mesh
      * @param {Texture} p_texture
      */
     canvas_item_add_multimesh(p_item, p_mesh, p_texture) {
-        const mm = CommandMultiMesh.instance();
+        let mm = CommandMultiMesh.instance();
         mm.multimesh = p_mesh;
         mm.texture = p_texture;
 
@@ -797,20 +832,18 @@ export class VisualServerCanvas {
      * @param {number[]} p_transform
      */
     canvas_item_add_set_transform(p_item, p_transform) {
-        const tr = CommandTransform.instance();
+        let tr = CommandTransform.instance();
         tr.xform.from_array(p_transform);
 
         p_item.commands.push(tr);
     }
-    canvas_item_add_particles() { }
-    canvas_item_add_clip_ignore() { }
     /**
      * @param {Item} p_item
      * @param {boolean} p_enabled
      */
     canvas_item_set_sort_children_by_y(p_item, p_enabled) {
         p_item.sort_y = p_enabled;
-        this._mark_ysort_dirty(p_item);
+        this._mark_ysort_dirty(p_item, this.canvas_item_owner);
     }
     /**
      * @param {Item} p_item
@@ -826,8 +859,6 @@ export class VisualServerCanvas {
     canvas_item_set_z_as_relative_to_parent(p_item, p_enable) {
         p_item.z_relative = p_enable;
     }
-
-    canvas_item_attach_skeleton() { }
 
     /**
      * @param {Item} p_item
@@ -855,32 +886,42 @@ export class VisualServerCanvas {
     /**
      * @param {Canvas | Item} p_item
      */
-    free_item(p_item) {
+    item_free(p_item) {
         if (p_item.type === TYPE_CANVAS) {
-            const canvas = /** @type {Canvas} */(p_item);
+            let canvas = /** @type {Canvas} */(p_item);
 
-            // TODO: delete viewports
+            for (let vp of canvas.viewports) {
+                vp.canvas_map.delete(canvas);
+            }
+            canvas.viewports.clear();
 
-            for (const c of canvas.child_items) {
-                c.parent = null;
+            for (let c of canvas.child_items) {
+                c.item.parent = null;
             }
 
             canvas._id = NaN; // as invalid
+            // @Incomplete: canvas._free();
         } else if (p_item.type === TYPE_ITEM) {
-            const item = /** @type {Item} */(p_item);
+            let item = /** @type {Item} */(p_item);
 
             if (item.parent) {
-                item.parent.erase_item(item);
-
-                if (item.parent.type === TYPE_ITEM) {
-                    this._mark_ysort_dirty(/** @type {Item} */(item.parent));
+                if (item.parent.type === TYPE_CANVAS) {
+                    let canvas = /** @type {Canvas} */(item.parent);
+                    canvas.erase_item(item);
+                } else if (item.parent.type === TYPE_ITEM) {
+                    let item_owner = /** @type {Item} */(item.parent);
+                    item_owner.child_items.splice(item_owner.child_items.indexOf(item), 1);
+                    if (item_owner.sort_y) {
+                        this._mark_ysort_dirty(item_owner, this.canvas_item_owner);
+                    }
                 }
             }
-            for (const c of item.child_items) {
+            for (let c of item.child_items) {
                 c.parent = null;
             }
 
             item._id = NaN; // as invalid
+            // @Incomplete: item._free();
         } else {
             return false;
         }
@@ -891,11 +932,10 @@ export class VisualServerCanvas {
     /**
      * @param {Canvas} p_canvas
      * @param {Transform2D} p_transform
-     * @param {any} p_lights
-     * @param {any} p_masked_lights
      * @param {Rect2} p_clip_rect
+     * @param {number} p_canvas_layer_id
      */
-    render_canvas(p_canvas, p_transform, p_lights, p_masked_lights, p_clip_rect) {
+    render_canvas(p_canvas, p_transform, p_clip_rect, p_canvas_layer_id) {
         VSG.canvas_render.canvas_begin();
 
         if (p_canvas.children_order_dirty) {
@@ -919,7 +959,7 @@ export class VisualServerCanvas {
             get_z_last_list(true);
 
             for (let i = 0; i < l; i++) {
-                this._render_canvas_item(ci[i], p_transform, p_clip_rect, WHITE, 0, z_list, z_last_list, null);
+                this._render_canvas_item(ci[i].item, p_transform, p_clip_rect, WHITE, 0, z_list, z_last_list, null, null);
             }
 
             for (let i = 0; i < z_range; i++) {
@@ -927,25 +967,25 @@ export class VisualServerCanvas {
                     continue;
                 }
 
-                VSG.canvas_render.canvas_render_items(z_list[i], CANVAS_ITEM_Z_MIN + i, p_canvas.modulate, null, p_transform);
+                VSG.canvas_render.canvas_render_items(z_list[i], CANVAS_ITEM_Z_MIN + i, p_canvas.modulate, p_transform);
             }
         } else {
             for (let i = 0; i < l; i++) {
-                const ci2 = p_canvas.child_items[i];
-                this._render_canvas_item_tree(ci2, p_transform, p_clip_rect, p_canvas.modulate, null);
+                let ci2 = p_canvas.child_items[i];
+                this._render_canvas_item_tree(ci2.item, p_transform, p_clip_rect, p_canvas.modulate);
 
-                const xform2 = Transform2D.create();
+                let xform2 = Transform2D.create();
                 if (ci2.mirror.x !== 0) {
                     xform2.copy(p_transform).translate(ci2.mirror.x, 0);
-                    this._render_canvas_item_tree(ci2, xform2, p_clip_rect, p_canvas.modulate, null);
+                    this._render_canvas_item_tree(ci2.item, xform2, p_clip_rect, p_canvas.modulate);
                 }
                 if (ci2.mirror.y !== 0) {
                     xform2.copy(p_transform).translate(0, ci2.mirror.y);
-                    this._render_canvas_item_tree(ci2, xform2, p_clip_rect, p_canvas.modulate, null);
+                    this._render_canvas_item_tree(ci2.item, xform2, p_clip_rect, p_canvas.modulate);
                 }
                 if (ci2.mirror.x !== 0 && ci2.mirror.y !== 0) {
                     xform2.copy(p_transform).translate(ci2.mirror.x, ci2.mirror.y);
-                    this._render_canvas_item_tree(ci2, xform2, p_clip_rect, p_canvas.modulate, null);
+                    this._render_canvas_item_tree(ci2.item, xform2, p_clip_rect, p_canvas.modulate);
                 }
                 Transform2D.free(xform2);
             }
@@ -961,16 +1001,15 @@ export class VisualServerCanvas {
      * @param {Transform2D} p_transform
      * @param {Rect2} p_clip_rect
      * @param {ColorLike} p_module
-     * @param {any} p_lights
      */
-    _render_canvas_item_tree(p_canvas_item, p_transform, p_clip_rect, p_module, p_lights) {
+    _render_canvas_item_tree(p_canvas_item, p_transform, p_clip_rect, p_module) {
         this._render_canvas_item(p_canvas_item, p_transform, p_clip_rect, WHITE, 0, get_z_list(true), get_z_last_list(true), null);
 
         for (let i = 0; i < z_range; i++) {
             if (!z_list[i]) {
                 continue;
             }
-            VSG.canvas_render.canvas_render_items(z_list[i], CANVAS_ITEM_Z_MIN + i, p_module, null, p_transform);
+            VSG.canvas_render.canvas_render_items(z_list[i], CANVAS_ITEM_Z_MIN + i, p_module, p_transform);
         }
     }
 
@@ -978,14 +1017,15 @@ export class VisualServerCanvas {
      * @param {Item} p_canvas_item
      * @param {Transform2D} p_transform
      * @param {Rect2} p_clip_rect
-     * @param {ColorLike} p_module
+     * @param {Color} p_modulate
      * @param {number} p_z
      * @param {Item[]} z_list
      * @param {Item[]} z_last_list
      * @param {Item} p_canvas_clip
+     * @param {Item} p_material_owner
      */
-    _render_canvas_item(p_canvas_item, p_transform, p_clip_rect, p_module, p_z, z_list, z_last_list, p_canvas_clip) {
-        const ci = p_canvas_item;
+    _render_canvas_item(p_canvas_item, p_transform, p_clip_rect, p_modulate, p_z, z_list, z_last_list, p_canvas_clip, p_material_owner) {
+        let ci = p_canvas_item;
 
         if (!ci.visible) {
             return;
@@ -996,23 +1036,38 @@ export class VisualServerCanvas {
             ci.children_order_dirty = false;
         }
 
-        const rect = ci.get_rect().clone();
-        const xform = p_transform.clone().append(ci.xform);
-        const global_rect = xform.xform_rect(rect, rect);
+        let rect = ci.get_rect().clone();
+        let xform = ci.xform.clone();
+        if (this.snap_2d_transforms) {
+            xform.tx = Math.floor(xform.tx);
+            xform.ty = Math.floor(xform.ty);
+        }
+        let xx = xform.clone();
+        xform.copy(p_transform).append(xx);
+        Transform2D.free(xx);
+
+        let global_rect = xform.xform_rect(rect, rect);
         global_rect.x += p_clip_rect.x;
         global_rect.y += p_clip_rect.y;
 
-        const modulate = Color.create().copy(ci.modulate).multiply(p_module);
+        if (ci.use_parent_material && p_material_owner) {
+            ci.material_owner = p_material_owner;
+        } else {
+            p_material_owner = ci;
+            ci.material_owner = null;
+        }
+
+        let modulate = ci.modulate.clone().multiply(p_modulate);
 
         if (modulate.a < 0.007) {
             Color.free(modulate);
-            Rect2.free(rect);
             Transform2D.free(xform);
+            Rect2.free(rect);
             return;
         }
 
         let child_item_count = ci.child_items.length;
-        const child_items = ci.child_items;
+        let child_items = ci.child_items;
 
         if (ci.clip) {
             if (p_canvas_clip) {
@@ -1028,22 +1083,24 @@ export class VisualServerCanvas {
         if (ci.sort_y) {
             if (ci.ysort_children_count === -1) {
                 ci.ysort_children_count = 0;
-                const xform = Transform2D.create();
-                ci.ysort_children_count = this._collect_ysort_children(ci, xform, null, ci.ysort_children_count);
+                let xform = Transform2D.create();
+                ci.ysort_children_count = this._collect_ysort_children(ci, xform, p_material_owner, WHITE, null, 0);
                 Transform2D.free(xform);
             }
 
             child_item_count = ci.ysort_children_count;
             if (child_items.length < child_item_count) {
-                child_items.push(create_Item());
+                while (child_items.length < child_item_count) {
+                    child_items.push(Item_create());
+                }
             } else {
                 for (let i = child_items.length - 1; i >= child_item_count; i--) {
-                    free_Item(child_items.pop());
+                    Item_free(child_items.pop());
                 }
             }
 
-            const xform = Transform2D.create();
-            this._collect_ysort_children(ci, xform, child_items, 0);
+            let xform = Transform2D.create();
+            this._collect_ysort_children(ci, xform, p_material_owner, WHITE, child_items, 0);
             Transform2D.free(xform);
 
             child_items.sort(item_sort);
@@ -1056,27 +1113,31 @@ export class VisualServerCanvas {
         }
 
         for (let i = 0; i < child_item_count; i++) {
-            const item = child_items[i];
+            let item = child_items[i];
 
             if (!item.behind || (ci.sort_y && item.sort_y)) {
                 continue;
             }
             if (ci.sort_y) {
-                const xf = xform.clone().append(item.ysort_xform);
-                const mo = Color.create().copy(modulate);
-                this._render_canvas_item(item, xf, p_clip_rect, /* mo.multiply(item.ysort_modulate) */null, p_z, z_list, z_last_list, /** @type {Item} */(ci.final_clip_owner));
+                let xf = xform.clone().append(item.ysort_xform);
+                let mo = modulate.clone().multiply(item.ysort_modulate);
+                this._render_canvas_item(item, xf, p_clip_rect, mo, p_z, z_list, z_last_list, ci.final_clip_owner, item.material_owner);
                 Color.free(mo);
                 Transform2D.free(xf);
             } else {
-                this._render_canvas_item(item, xform, p_clip_rect, modulate, p_z, z_list, z_last_list, /** @type {Item} */(ci.final_clip_owner));
+                this._render_canvas_item(item, xform, p_clip_rect, modulate, p_z, z_list, z_last_list, ci.final_clip_owner, p_material_owner);
             }
         }
 
-        if (ci.update_when_visible) {
-            VisualServer.changes++;
+        if (ci.copy_back_buffer) {
+            xform.xform_rect(ci.copy_back_buffer.screen_rect, ci.copy_back_buffer.screen_rect).clip_by(p_clip_rect);
         }
 
-        if (ci.commands.length > 0 && p_clip_rect.intersects(global_rect)) {
+        if (ci.update_when_visible) {
+            VisualServer.get_singleton().redraw_request();
+        }
+
+        if ((ci.commands.length > 0 && p_clip_rect.intersects(global_rect)) || ci.vp_render || ci.copy_back_buffer) {
             // something to draw?
             ci.final_transform.copy(xform);
             ci.final_modulate.copy(modulate).multiply(ci.self_modulate);
@@ -1084,7 +1145,7 @@ export class VisualServerCanvas {
             ci.global_rect_cache.x -= p_clip_rect.x;
             ci.global_rect_cache.y -= p_clip_rect.y;
 
-            const zidx = p_z - CANVAS_ITEM_Z_MIN;
+            let zidx = p_z - CANVAS_ITEM_Z_MIN;
 
             if (z_last_list[zidx]) {
                 z_last_list[zidx].next = ci;
@@ -1098,15 +1159,19 @@ export class VisualServerCanvas {
         }
 
         for (let i = 0; i < child_item_count; i++) {
-            const item = child_items[i];
+            let item = child_items[i];
 
             if (item.behind || (ci.sort_y && item.sort_y)) {
                 continue;
             }
             if (ci.sort_y) {
-                this._render_canvas_item(item, xform.clone().append(item.ysort_xform), p_clip_rect, modulate, p_z, z_list, z_last_list, /** @type {Item} */(ci.final_clip_owner));
+                let xx = xform.clone().append(item.ysort_xform);
+                let mm = modulate.clone().multiply(item.ysort_modulate);
+                this._render_canvas_item(item, xx, p_clip_rect, mm, p_z, z_list, z_last_list, ci.final_clip_owner, item.material_owner);
+                Color.free(mm);
+                Transform2D.free(xx);
             } else {
-                this._render_canvas_item(item, xform, p_clip_rect, modulate, p_z, z_list, z_last_list, /** @type {Item} */(ci.final_clip_owner));
+                this._render_canvas_item(item, xform, p_clip_rect, modulate, p_z, z_list, z_last_list, ci.final_clip_owner, p_material_owner);
             }
         }
 
@@ -1117,44 +1182,49 @@ export class VisualServerCanvas {
 
     /**
      * @param {Item} ysort_owner
+     * @param {Set<Item>} canvas_item_owner
      */
-    _mark_ysort_dirty(ysort_owner) {
+    _mark_ysort_dirty(ysort_owner, canvas_item_owner) {
         do {
             ysort_owner.ysort_children_count = -1;
-            if (ysort_owner.parent && ysort_owner.parent.type === TYPE_ITEM) {
-                ysort_owner = /** @type {Item} */(ysort_owner.parent);
-            } else {
-                ysort_owner = null;
-            }
+            ysort_owner = canvas_item_owner.has(ysort_owner.parent) ? ysort_owner.parent : null;
         } while (ysort_owner && ysort_owner.sort_y);
     }
 
     /**
      * @param {Item} p_canvas_item
      * @param {Transform2D} p_transform
+     * @param {Item} p_material_owner
+     * @param {Color} p_modulate
      * @param {Item[]} r_items
      * @param {number} r_index
      */
-    _collect_ysort_children(p_canvas_item, p_transform, r_items, r_index) {
-        const child_item_count = p_canvas_item.child_items.length;
-        const child_items = p_canvas_item.child_items;
+    _collect_ysort_children(p_canvas_item, p_transform, p_material_owner, p_modulate, r_items, r_index) {
+        let child_item_count = p_canvas_item.child_items.length;
+        let child_items = p_canvas_item.child_items;
         for (let i = 0; i < child_item_count; i++) {
-            const item = child_items[i];
+            let item = child_items[i];
 
             if (item.visible && item.final_modulate.a > 0.001) {
                 if (r_items) {
                     r_items[r_index] = item;
+                    item.ysort_modulate.copy(p_modulate);
                     item.ysort_xform.copy(p_transform);
-                    const origin = item.xform.get_origin();
+                    let origin = item.xform.get_origin();
                     p_transform.xform(origin, item.ysort_pos);
                     Vector2.free(origin);
+                    item.material_owner = item.use_parent_material ? p_material_owner : null;
+                    item.ysort_index = r_index;
                 }
 
                 r_index++;
 
                 if (item.sort_y) {
-                    const xform = p_transform.clone().append(item.xform);
-                    r_index = this._collect_ysort_children(item, xform, r_items, r_index);
+                    let xform = p_transform.clone().append(item.xform);
+                    let mm = p_modulate.clone().multiply(item.modulate);
+                    r_index = this._collect_ysort_children(item, xform, item.use_parent_material ? p_material_owner : item, mm, r_items, r_index);
+                    Color.free(mm);
+                    Transform2D.free(xform);
                 }
             }
         }

@@ -69,7 +69,7 @@ export class CanvasLayer extends Node {
                 if (this.custom_viewport) {
                     this.vp = this.custom_viewport;
                 } else {
-                    this.vp = this.get_viewport();
+                    this.vp = super.get_viewport();
                 }
 
                 this.vp._canvas_layer_add(this);

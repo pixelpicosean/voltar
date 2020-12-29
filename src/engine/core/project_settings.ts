@@ -24,6 +24,7 @@ interface DisplaySettings {
     background_color?: number;
     antialias?: boolean;
     pixel_snap?: boolean;
+    snap_2d_transform?: boolean;
     scale_mode?: string;
     stretch_mode?: number;
     stretch_aspect?: number;
@@ -78,6 +79,7 @@ const DefaultSettings: Settings = {
 
         antialias: false,
         pixel_snap: false,
+        snap_2d_transform: false,
         scale_mode: "linear",
 
         stretch_mode: STRETCH_MODE_DISABLED,

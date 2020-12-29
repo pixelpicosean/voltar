@@ -132,10 +132,10 @@ export class VisualServer extends VObject {
 
         this.changes = 0;
 
-        VSG.canvas = new VisualServerCanvas();
-        VSG.viewport = new VisualServerViewport();
-        VSG.scene = new VisualServerScene();
-        VSG.rasterizer = new Rasterizer();
+        VSG.canvas = new VisualServerCanvas;
+        VSG.viewport = new VisualServerViewport;
+        VSG.scene = new VisualServerScene;
+        VSG.rasterizer = new Rasterizer;
         VSG.storage = VSG.rasterizer.get_storage();
         VSG.canvas_render = VSG.rasterizer.get_canvas();
         VSG.scene_render = VSG.rasterizer.get_scene();

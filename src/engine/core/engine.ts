@@ -37,6 +37,7 @@ export class Engine {
     time_scale = 1.0;
 
     use_pixel_snap = false;
+    snap_2d_transform = false;
 
     /* private */
 

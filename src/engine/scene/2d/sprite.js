@@ -9,8 +9,7 @@ import { ImageTexture } from '../resources/texture.js';
 import { NOTIFICATION_DRAW } from '../2d/canvas_item.js';
 import { Node2D } from '../2d/node_2d.js';
 
-
-const white = new Color(1, 1, 1);
+const WHITE = new Color(1, 1, 1);
 
 export class Sprite extends Node2D {
     get class() { return 'Sprite' }
@@ -29,12 +28,12 @@ export class Sprite extends Node2D {
         super();
 
         this.centered = true;
-        this.offset = new Vector2(0, 0);
+        this.offset = new Vector2;
         this.flip_h = false;
         this.flip_v = false;
         this.region_enabled = false;
         this.region_filter_clip = false;
-        this.region_rect = new Rect2();
+        this.region_rect = new Rect2;
 
         this.frame = 0;
 
@@ -86,7 +85,7 @@ export class Sprite extends Node2D {
                 const dst_rect = Rect2.create();
 
                 this._get_rects(src_rect, dst_rect);
-                this.texture.draw_rect_region(this.canvas_item, dst_rect, src_rect, white, false);
+                this.texture.draw_rect_region(this.canvas_item, dst_rect, src_rect, WHITE, false);
 
                 Rect2.free(src_rect);
                 Rect2.free(dst_rect);

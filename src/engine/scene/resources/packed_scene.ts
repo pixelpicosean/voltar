@@ -4,7 +4,7 @@ import {
 
     get_resource_map,
 } from "engine/registry";
-import { Node } from "../main/node";
+import { Node } from "../main/node.js";
 
 type Dictionary = { [key: string]: any };
 

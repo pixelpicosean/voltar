@@ -98,6 +98,7 @@ export const Main = {
 
         this.engine.set_main_loop(scene_tree);
         this.engine.use_pixel_snap = this.global.display.pixel_snap;
+        this.engine.snap_2d_transform = this.global.display.snap_2d_transform;
 
         // TODO: autoload first pass, load constants
         // TODO: autoload second pass, instantiate nodes into global constants

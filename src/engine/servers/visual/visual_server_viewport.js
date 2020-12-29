@@ -32,14 +32,14 @@ const VIEWPORT_CLEAR_ONLY_NEXT_FRAME = 2;
 
 const Black = new Color(0, 0, 0, 0);
 
-const clip_rect = new Rect2();
+const clip_rect = new Rect2;
 
 
 class CanvasData {
     constructor() {
         /** @type {import('./visual_server_canvas').Canvas} */
         this.canvas = null;
-        this.transform = new Transform2D();
+        this.transform = new Transform2D;
         this.layer = 0;
         this.sublayer = 0;
     }
@@ -54,7 +54,7 @@ export class Viewport_t {
         this.self = null;
         this.parent = null;
 
-        this.size = new Vector2();
+        this.size = new Vector2;
         this.camera = null;
         this.scenario = null;
 
@@ -63,7 +63,7 @@ export class Viewport_t {
         this.update_mode = VIEWPORT_UPDATE_WHEN_VISIBLE;
 
         this.viewport_to_screen = 0;
-        this.viewport_to_screen_rect = new Rect2();
+        this.viewport_to_screen_rect = new Rect2;
         this.viewport_render_direct_to_screen = false;
 
         this.hide_scenario = false;
@@ -84,9 +84,9 @@ export class Viewport_t {
 
         this.transparent_bg = false;
 
-        this.global_transform = new Transform2D();
+        this.global_transform = new Transform2D;
         /** @type {Map<Canvas, CanvasData>} */
-        this.canvas_map = new Map();
+        this.canvas_map = new Map;
     }
 
     get_id() {
@@ -114,7 +114,7 @@ export class VisualServerViewport {
         /** @type {Viewport_t[]} */
         this.active_viewports = [];
 
-        this.clear_color = new Color();
+        this.clear_color = new Color;
     }
 
     /**
@@ -125,7 +125,7 @@ export class VisualServerViewport {
     }
 
     viewport_create() {
-        const viewport = new Viewport_t();
+        const viewport = new Viewport_t;
         viewport.self = viewport;
         viewport.hide_scenario = false;
         viewport.hide_canvas = false;
@@ -425,9 +425,9 @@ export class VisualServerViewport {
      * @param {Viewport_t} p_viewport
      */
     _draw_viewport(p_viewport) {
-        const scenario_draw_canvas_bg = false;
+        let scenario_draw_canvas_bg = false;
 
-        const can_draw_3d = !p_viewport.disable_3d && !p_viewport.disable_3d_by_usage && !!p_viewport.camera;
+        let can_draw_3d = !p_viewport.disable_3d && !p_viewport.disable_3d_by_usage && !!p_viewport.camera;
 
         if (p_viewport.clear_mode !== VIEWPORT_CLEAR_NEVER) {
             VSG.rasterizer.clear_render_target(p_viewport.transparent_bg ? Black : this.clear_color);
@@ -443,14 +443,14 @@ export class VisualServerViewport {
         if (!p_viewport.hide_canvas) {
             clip_rect.set(0, 0, p_viewport.size.width, p_viewport.size.height);
 
-            VSG.rasterizer.restore_render_target();
+            VSG.rasterizer.restore_render_target(!scenario_draw_canvas_bg && can_draw_3d);
 
             VSG.canvas_render.prepare();
 
-            const map_list = [...p_viewport.canvas_map.entries()].sort(canvas_sort)
-            for (const [canvas, c] of map_list) {
-                const xform = this._canvas_get_transform(p_viewport, canvas, c, clip_rect);
-                VSG.canvas.render_canvas(canvas, xform, null, null, clip_rect);
+            let map_list = [...p_viewport.canvas_map.entries()].sort(canvas_sort);
+            for (let [canvas, c] of map_list) {
+                let xform = this._canvas_get_transform(p_viewport, canvas, c, clip_rect);
+                VSG.canvas.render_canvas(canvas, xform, clip_rect, c.layer);
                 Transform2D.free(xform);
             }
         }

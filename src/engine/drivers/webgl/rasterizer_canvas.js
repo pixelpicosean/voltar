@@ -541,12 +541,11 @@ export class RasterizerCanvas extends VObject {
      * @param {import('engine/servers/visual/visual_server_canvas').Item} p_item_list
      * @param {number} p_z
      * @param {ColorLike} p_modulate
-     * @param {any} p_light
      * @param {Transform2D} p_base_transform
      */
-    canvas_render_items(p_item_list, p_z, p_modulate, p_light, p_base_transform) {
+    canvas_render_items(p_item_list, p_z, p_modulate, p_base_transform) {
         while (p_item_list) {
-            this._canvas_item_render_commands(p_item_list);
+            this._canvas_item_render_commands(p_item_list, p_modulate, p_base_transform);
             p_item_list = /** @type {Item} */(p_item_list.next);
         }
     }
@@ -690,11 +689,13 @@ export class RasterizerCanvas extends VObject {
 
     /**
      * @param {Item} p_item
+     * @param {Color} p_modulate
+     * @param {Transform2D} p_transform
      */
-    _canvas_item_render_commands(p_item) {
-        const color = Color.create();
+    _canvas_item_render_commands(p_item, p_modulate, p_transform) {
+        let color = Color.create();
 
-        const full_xform = Transform2D.create();
+        let full_xform = Transform2D.create();
         /** @type {Transform2D} */
         let extra_xform = null;
 
@@ -732,7 +733,7 @@ export class RasterizerCanvas extends VObject {
             }
         }
 
-        for (const cmd of p_item.commands) {
+        for (let cmd of p_item.commands) {
             switch (cmd.type) {
                 case TYPE_LINE: {
                     const line = /** @type {CommandLine} */(cmd);
@@ -750,7 +751,7 @@ export class RasterizerCanvas extends VObject {
                     let ib_idx = this.states.i_index;
 
                     // vertex
-                    const wt = extra_xform ? full_xform.copy(p_item.final_transform).append(extra_xform) : p_item.final_transform;
+                    const wt = extra_xform ? full_xform.copy(p_item.final_transform).append(p_transform).append(extra_xform) : full_xform.copy(p_item.final_transform).append(p_transform);
                     const a = wt.a;
                     const b = wt.b;
                     const c = wt.c;
@@ -793,7 +794,7 @@ export class RasterizerCanvas extends VObject {
                     vertices[vb_idx + VTX_COMP * 3 + 3] = -1;
 
                     // - color
-                    const color_num = color.copy(line.color).multiply(p_item.final_modulate).as_rgba8();
+                    const color_num = color.copy(line.color).multiply(p_item.final_modulate).multiply(p_modulate).as_rgba8();
                     vertices[vb_idx + VTX_COMP * 0 + 4] = color_num;
                     vertices[vb_idx + VTX_COMP * 1 + 4] = color_num;
                     vertices[vb_idx + VTX_COMP * 2 + 4] = color_num;
@@ -827,7 +828,7 @@ export class RasterizerCanvas extends VObject {
                     let ib_idx = this.states.i_index;
 
                     // vertex
-                    const wt = extra_xform ? full_xform.copy(p_item.final_transform).append(extra_xform) : p_item.final_transform;
+                    const wt = extra_xform ? full_xform.copy(p_item.final_transform).append(p_transform).append(extra_xform) : full_xform.copy(p_item.final_transform).append(p_transform);
                     const a = wt.a;
                     const b = wt.b;
                     const c = wt.c;
@@ -925,7 +926,7 @@ export class RasterizerCanvas extends VObject {
                     }
 
                     // - color
-                    const color_num = color.copy(rect.modulate).multiply(p_item.final_modulate).as_rgba8();
+                    const color_num = color.copy(rect.modulate).multiply(p_item.final_modulate).multiply(p_modulate).as_rgba8();
                     vertices[vb_idx + VTX_COMP * 0 + 4] = color_num;
                     vertices[vb_idx + VTX_COMP * 1 + 4] = color_num;
                     vertices[vb_idx + VTX_COMP * 2 + 4] = color_num;
@@ -959,7 +960,7 @@ export class RasterizerCanvas extends VObject {
                     let ib_idx = this.states.i_index;
 
                     // vertex
-                    const wt = extra_xform ? full_xform.copy(p_item.final_transform).append(extra_xform) : p_item.final_transform;
+                    const wt = extra_xform ? full_xform.copy(p_item.final_transform).append(p_transform).append(extra_xform) : full_xform.copy(p_item.final_transform).append(p_transform);
                     const a = wt.a;
                     const b = wt.b;
                     const c = wt.c;
@@ -1095,7 +1096,7 @@ export class RasterizerCanvas extends VObject {
                     vertices[vb_idx + VTX_COMP * 15 + 3] = uv_y1;
 
                     // - color
-                    const color_num = color.copy(np.color).multiply(p_item.final_modulate).as_rgba8();
+                    const color_num = color.copy(np.color).multiply(p_item.final_modulate).multiply(p_modulate).as_rgba8();
                     vertices[vb_idx + VTX_COMP * 0 + 4] = color_num;
                     vertices[vb_idx + VTX_COMP * 1 + 4] = color_num;
                     vertices[vb_idx + VTX_COMP * 2 + 4] = color_num;
@@ -1141,7 +1142,7 @@ export class RasterizerCanvas extends VObject {
                     let ib_idx = this.states.i_index;
 
                     // vertex
-                    const wt = extra_xform ? full_xform.copy(p_item.final_transform).append(extra_xform) : p_item.final_transform;
+                    const wt = extra_xform ? full_xform.copy(p_item.final_transform).append(p_transform).append(extra_xform) : full_xform.copy(p_item.final_transform).append(p_transform);
                     const a = wt.a;
                     const b = wt.b;
                     const c = wt.c;
@@ -1170,7 +1171,7 @@ export class RasterizerCanvas extends VObject {
                             vertices[vb_idx + VTX_COMP * i + 3] = -1;
                         }
                         // color
-                        vertices[vb_idx + VTX_COMP * i + 4] = s_color ? s_color_num : color.set(color[i * 4], color[i * 4 + 1], color[i * 4 + 2], color[i * 4 + 3]).multiply(p_item.final_modulate).as_rgba8();
+                        vertices[vb_idx + VTX_COMP * i + 4] = s_color ? s_color_num : color.set(color[i * 4], color[i * 4 + 1], color[i * 4 + 2], color[i * 4 + 3]).multiply(p_item.final_modulate).multiply(p_modulate).as_rgba8();
                     }
 
                     // index
@@ -1186,7 +1187,7 @@ export class RasterizerCanvas extends VObject {
                     const radius = circle.radius;
                     const tex = circle.texture || this.storage.resources.white_tex;
 
-                    const wt = extra_xform ? full_xform.copy(p_item.final_transform).append(extra_xform) : p_item.final_transform;
+                    const wt = extra_xform ? full_xform.copy(p_item.final_transform).append(p_transform).append(extra_xform) : full_xform.copy(p_item.final_transform).append(p_transform);
                     const a = wt.a;
                     const b = wt.b;
                     const c = wt.c;
@@ -1215,7 +1216,7 @@ export class RasterizerCanvas extends VObject {
                     const x0 = circle.pos.x;
                     const y0 = circle.pos.y;
 
-                    const color_num = color.copy(circle.color).multiply(p_item.final_modulate).as_rgba8();
+                    const color_num = color.copy(circle.color).multiply(p_item.final_modulate).multiply(p_modulate).as_rgba8();
 
                     for (let i = 0; i < steps; i++) {
                         const x = Math.cos(angle_per_step * i) * radius + x0;
@@ -1257,7 +1258,7 @@ export class RasterizerCanvas extends VObject {
                     let ib_idx = this.states.i_index;
 
                     // vertex
-                    const wt = extra_xform ? full_xform.copy(p_item.final_transform).append(extra_xform) : p_item.final_transform;
+                    const wt = extra_xform ? full_xform.copy(p_item.final_transform).append(p_transform).append(extra_xform) : full_xform.copy(p_item.final_transform).append(p_transform);
                     const a = wt.a;
                     const b = wt.b;
                     const c = wt.c;
@@ -1268,7 +1269,7 @@ export class RasterizerCanvas extends VObject {
                     const points = pline.triangles;
                     const colors = pline.triangle_colors;
                     const s_color = (colors.length === 4);
-                    const s_color_num = s_color ? color.set(colors[0], colors[1], colors[2], colors[3]).multiply(p_item.final_modulate).as_rgba8() : 0;
+                    const s_color_num = s_color ? color.set(colors[0], colors[1], colors[2], colors[3]).multiply(p_item.final_modulate).multiply(p_modulate).as_rgba8() : 0;
 
                     for (let i = 0, len = vert_count; i < len; i++) {
                         // position
@@ -1308,7 +1309,7 @@ export class RasterizerCanvas extends VObject {
                     const gl_ext = this.gl_ext;
 
                     // - material
-                    const xform = extra_xform ? full_xform.copy(p_item.final_transform).append(extra_xform) : p_item.final_transform;
+                    const xform = extra_xform ? full_xform.copy(p_item.final_transform).append(p_transform).append(extra_xform) : full_xform.copy(p_item.final_transform).append(p_transform);
                     this.use_material(this.materials.multimesh, {
                         item_matrix: xform.to_array(true),
                     });

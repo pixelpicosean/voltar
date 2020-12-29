@@ -107,6 +107,10 @@ module.exports.convert_project_settings = (project_url) => {
         if (pixel_snap !== undefined) {
             display.pixel_snap = pixel_snap;
         }
+        let snap_2d_transform = boolean(settings.rendering['quality/2d/use_transform_snap']);
+        if (snap_2d_transform !== undefined) {
+            display.snap_2d_transform = snap_2d_transform;
+        }
 
         // filter
         let use_nearest = boolean(settings.rendering['quality/filters/use_nearest_mipmap_filter']);
