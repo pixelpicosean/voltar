@@ -28,6 +28,12 @@ export class VisualInstance extends Spatial {
         this.set_notify_transform(true);
     }
 
+    free() {
+        VSG.scene.instance_free(this.instance);
+
+        super.free();
+    }
+
     /**
      * @param {import('engine/drivers/webgl/rasterizer_storage').Instantiable_t} p_base
      */
@@ -88,15 +94,8 @@ export class GeometryInstance extends VisualInstance {
 
         this.extra_cull_margin = 0;
 
-        this.lod_min_distance = 0;
-        this.lod_max_distance = 0;
-        this.lod_min_hysteresis = 0;
-        this.lod_max_hysteresis = 0;
-
         /** @type {Material} */
         this.material_override = null;
-
-        this.use_in_baked_light = false;
     }
 
     _load_data(data) {

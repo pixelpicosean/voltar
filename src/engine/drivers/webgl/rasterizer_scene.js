@@ -136,10 +136,15 @@ export class Environment_t {
         this.sky_custom_fov = 0;
         this.sky_orientation = new Basis;
 
-        this.bg_energy = [1.0];
         this.bg_color = [0, 0, 0, 1];
-        this.ambient_energy = [1.0];
+        this.bg_energy = [1.0];
+        this.sky_ambient = [0];
+
         this.ambient_color = [0, 0, 0, 1];
+        this.ambient_energy = [1.0];
+        this.ambient_sky_contribution = [0.0];
+
+        this.canvas_max_layer = 0;
 
         this.fog_enabled = [0];
         this.fog_color = [0.5, 0.5, 0.5, 1.0];
@@ -305,9 +310,9 @@ export class LightInstance_t {
  */
 const sort_by_key = (a, b) => {
     if (a.depth_layer + a.priority === b.depth_layer + b.priority) {
-        return (a.geometry_index + a.light_index*3 + a.light_type1*5 + a.light_type2*4 + a.light_mode*6 + a.material_index*2)
+        return (a.geometry_index + a.light_index*3 + a.skeleton*7 + a.light_type1*6 + a.light_type2*5 + a.light_mode*4 + a.material_index*2)
             -
-            (b.geometry_index + b.light_index*3 + b.light_type1*5 + b.light_type2*4 + b.light_mode*6 + b.material_index*2)
+            (b.geometry_index + b.light_index*3 + b.skeleton*7 + b.light_type1*6 + b.light_type2*5 + b.light_mode*4 + b.material_index*2)
     } else {
         return (a.depth_layer + a.priority) - (b.depth_layer + b.priority);
     }
@@ -355,13 +360,17 @@ class Element_t {
         this.use_accum_ptr = { value: false };
         this.front_facing = true;
 
+        // union: depth key
         this.depth_layer = 0;
         this.priority = 0;
+
+        // union: sort key
         this.geometry_index = 0;
+        this.skeleton = 0;
         this.material_index = 0;
         this.light_index = 0;
-        this.light_type1 = 0;
         this.light_type2 = 0;
+        this.light_type1 = 0;
         this.light_mode = 0;
     }
     /**
@@ -889,6 +898,23 @@ export class RasterizerScene {
     }
 
     iteration() { }
+
+    /**
+     * @param {LightInstance_t} light_instance
+     */
+    free_light_instance(light_instance) {
+        // remove from shadow atlases
+        for (let shadow_atlas of light_instance.shadow_atlases) {
+            let key = shadow_atlas.shadow_owners.get(light_instance);
+            let q = (key >> QUADRANT_SHIFT) & 0x3;
+            let s = key & SHADOW_INDEX_MASK;
+
+            shadow_atlas.quadrants[q].shadows[s] = null;
+            shadow_atlas.shadow_owners.delete(light_instance);
+        }
+
+        // @Incomplete: memdelete(light_instance);
+    }
 
     environment_create() {
         return new Environment_t;

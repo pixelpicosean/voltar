@@ -14,32 +14,33 @@ interface ApplicationSettings {
 }
 
 interface DisplaySettings {
-  view?: string;
-  container?: string;
-  webgl2?: boolean;
-  width?: number;
-  height?: number;
-  resolution?: number;
-  orientation?: number;
-  background_color?: number;
-  antialias?: boolean;
-  pixel_snap?: boolean;
-  scale_mode?: string;
-  stretch_mode?: number;
-  stretch_aspect?: number;
-  resizable?: boolean;
-  fxaa?: boolean;
+    view?: string;
+    container?: string;
+    webgl2?: boolean;
+    width?: number;
+    height?: number;
+    resolution?: number;
+    orientation?: number;
+    background_color?: number;
+    antialias?: boolean;
+    pixel_snap?: boolean;
+    scale_mode?: string;
+    stretch_mode?: number;
+    stretch_aspect?: number;
+    resizable?: boolean;
+    fxaa?: boolean;
+    render_tree_balance?: number;
 }
 
 interface PhysicsSettings {
-  physics_fps?: number;
-  sleep_threshold_linear?: number;
-  sleep_threshold_angular?: number;
-  time_before_sleep?: number;
-  default_angular_damp?: number;
-  default_linear_damp?: number;
-  gravity?: { x: number, y: number };
-  iteration?: number;
+    physics_fps?: number;
+    sleep_threshold_linear?: number;
+    sleep_threshold_angular?: number;
+    time_before_sleep?: number;
+    default_angular_damp?: number;
+    default_linear_damp?: number;
+    gravity?: { x: number, y: number };
+    iteration?: number;
 }
 
 type InputSettings = { [action: string]: { deadzone?: number, events: any[] } };
@@ -84,6 +85,8 @@ const DefaultSettings: Settings = {
         resizable: false,
 
         fxaa: false,
+
+        render_tree_balance: 0,
     },
     physics: {
         physics_fps: 60,

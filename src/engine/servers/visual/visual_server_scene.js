@@ -1,4 +1,6 @@
-import { List, SelfList } from 'engine/core/self_list';
+import { List as SelfList$List, SelfList } from 'engine/core/self_list';
+import { memdelete } from 'engine/core/os/memory';
+import { List, Element as List$Element } from 'engine/core/list';
 import { clamp, stepify, deg2rad } from 'engine/core/math/math_funcs.js';
 import { Vector2, Vector2Like } from 'engine/core/math/vector2';
 import { Vector3Like, Vector3 } from 'engine/core/math/vector3.js';
@@ -7,6 +9,9 @@ import { Plane } from 'engine/core/math/plane.js';
 import { Transform } from 'engine/core/math/transform.js';
 import { CameraMatrix } from 'engine/core/math/camera_matrix.js';
 import { Octree } from 'engine/core/math/octree.js';
+import { ProjectSettings } from 'engine/core/project_settings';
+
+import { LightmapCapture_t, Skeleton_t } from 'engine/drivers/webgl/rasterizer_storage.js';
 
 import {
     INSTANCE_TYPE_NONE,
@@ -33,9 +38,11 @@ import {
     SHADOW_CASTING_SETTING_SHADOWS_ONLY,
     LIGHT_OMNI,
     LIGHT_OMNI_SHADOW_DUAL_PARABOLOID,
+    VisualServer,
+    SHADOW_CASTING_SETTING_OFF,
+    SHADOW_CASTING_SETTING_ON,
 } from '../visual_server.js';
 import { VSG } from './visual_server_globals.js';
-import { LightmapCapture_t, Skeleton_t } from 'engine/drivers/webgl/rasterizer_storage.js';
 
 /**
  * @typedef {import('engine/drivers/webgl/rasterizer_storage').Material_t} Material_t
@@ -84,8 +91,8 @@ export class Scenario_t {
         /** @type {Octree<Instance_t>} */
         this.octree = new Octree(true);
 
-        /** @type {Instance_t[]} */
-        this.directional_lights = [];
+        /** @type {List<Instance_t>} */
+        this.directional_lights = new List;
 
         /** @type {Environment_t} */
         this.environment = null;
@@ -93,8 +100,8 @@ export class Scenario_t {
         /** @type {Environment_t} */
         this.fallback_environment = null;
 
-        /** @type {List<Instance_t>} */
-        this.instances = new List;
+        /** @type {SelfList$List<Instance_t>} */
+        this.instances = new SelfList$List;
     }
 }
 
@@ -126,11 +133,12 @@ export class Instance_t {
         /** @type {number[]} */
         this.blend_values = [];
 
-        this.cast_shadows = 0;
+        this.cast_shadows = SHADOW_CASTING_SETTING_ON;
 
         this.mirror = false;
         this.receive_shadows = true;
         this.visible = true;
+        this.baked_light = false;
         this.redraw_if_visible = false;
 
         this.depth = 0;
@@ -139,8 +147,6 @@ export class Instance_t {
         this.lightmap_capture = null;
         /** @type {import('engine/drivers/webgl/rasterizer_storage').Texture_t} */
         this.lightmap = null;
-        /** @type {Color[]} */
-        this.lightmap_capture_data = [];
 
         /** @type {SelfList<Instance_t>} */
         this.dependency_item = new SelfList(this);
@@ -159,6 +165,8 @@ export class Instance_t {
 
         this.aabb = new AABB;
         this.transformed_aabb = new AABB;
+        /** @type {AABB} */
+        this.custom_aabb = null;
         this.extra_margin = 0;
         /** @type {import('engine/scene/3d/spatial').Spatial} */
         this.object = null;
@@ -166,10 +174,16 @@ export class Instance_t {
         this.last_render_pass = 0;
         this.last_frame_pass = 0;
 
+        this.version = 0;
+
         /** @type {InstanceBaseData} */
         this.base_data = null;
+    }
 
-        this.version = 0;
+    free() {
+        // @Incomplete: require full featured memory system
+        if (this.base_data) memdelete(this.base_data);
+        if (this.custom_aabb) memdelete(this.custom_aabb);
     }
 
     base_removed() {
@@ -192,19 +206,23 @@ class InstanceGeometryData extends InstanceBaseData {
     constructor() {
         super();
 
-        /** @type {Instance_t[]} */
-        this.lighting = [];
+        /** @type {List<Instance_t>} */
+        this.lighting = new List;
         this.lighting_dirty = false;
         this.can_cast_shadows = true;
         this.material_is_animated = true;
 
-        this.reflection_probes = [];
-        this.reflection_dirty = true;
+        /** @type {List<Instance_t>} */
+        this.lightmap_captures = new List;
+    }
+}
 
-        this.gi_probes = [];
-        this.gi_probes_dirty = true;
-
-        this.lightmap_captures = [];
+class InstanceLightData$PairInfo {
+    constructor() {
+        /** @type {Instance_t} */
+        this.geometry = null;
+        /** @type {List$Element<Instance_t>} */
+        this.L = null;
     }
 }
 
@@ -214,16 +232,26 @@ class InstanceLightData extends InstanceBaseData {
 
         /** @type {LightInstance_t} */
         this.instance = null;
-
-        /** @type {Instance_t} */
+        this.last_version = 0;
+        /** @type {List$Element<Instance_t>} */
         this.D = null;
 
-        /** @type {Instance_t[]} */
-        this.geometries = [];
+        this.shadow_dirty = true;
 
-        this.shadow_dirty = false;
+        /** @type {List<InstanceLightData$PairInfo>} */
+        this.geometries = new List;
 
-        this.last_version = 0;
+        /** @type {Instance_t} */
+        this.baked_light = null;
+    }
+}
+
+class InstanceLightmapCaptureData$PairInfo {
+    constructor() {
+        /** @type {Instance_t} */
+        this.geometry = null;
+        /** @type {List$Element<Instance_t>} */
+        this.L = null;
     }
 }
 
@@ -231,8 +259,8 @@ class InstanceLightmapCaptureData extends InstanceBaseData {
     constructor() {
         super();
 
-        /** @type {Instance_t[]} */
-        this.geometries = [];
+        /** @type {List<InstanceLightmapCaptureData$PairInfo>} */
+        this.geometries = new List;
 
         /** @type {Instance_t[]} */
         this.users = [];
@@ -257,8 +285,8 @@ export class VisualServerScene {
     constructor() {
         this.render_pass = 0;
 
-        /** @type {List<Instance_t>} */
-        this._instance_update_list = new List;
+        /** @type {SelfList$List<Instance_t>} */
+        this._instance_update_list = new SelfList$List;
 
         this.instance_cull_count = 0;
         /** @type {Instance_t[]} */
@@ -353,6 +381,8 @@ export class VisualServerScene {
     scenario_create() {
         let s = new Scenario_t;
 
+        s.octree.set_balance(ProjectSettings.get_singleton().display.render_tree_balance);
+
         s.octree.pair_callback = this._instance_pair.bind(this);
         s.octree.unpair_callback = this._instance_unpair.bind(this);
 
@@ -360,14 +390,24 @@ export class VisualServerScene {
     }
 
     /**
-     * FIXME: remove these we don't need GI and reflection
+     * @param {Scenario_t} s
+     */
+    scenario_free(s) {
+        while (s.instances.first()) {
+            this.instance_set_scenario(s.instances.first().self(), null);
+        }
+    }
+
+    /**
      * @param {any} self
      * @param {number} id_A
      * @param {Instance_t} A
+     * @param {number} sub_A
      * @param {number} id_B
      * @param {Instance_t} B
+     * @param {number} sub_B
      */
-    _instance_pair(self, id_A, A, id_B, B) {
+    _instance_pair(self, id_A, A, sub_A, id_B, B, sub_B) {
         if (A.base_type > B.base_type) {
             let t = A;
             A = B;
@@ -378,27 +418,35 @@ export class VisualServerScene {
             let light = /** @type {InstanceLightData} */(B.base_data);
             let geom = /** @type {InstanceGeometryData} */(A.base_data);
 
-            light.geometries.push(A);
-            geom.lighting.push(B);
+            let pinfo = new InstanceLightData$PairInfo;
+            pinfo.geometry = A;
+            pinfo.L = geom.lighting.push_back(B);
+
+            let E = light.geometries.push_back(pinfo);
 
             if (geom.can_cast_shadows) {
                 light.shadow_dirty = true;
             }
             geom.lighting_dirty = true;
+
+            return E;
         } else if (B.base_type === INSTANCE_TYPE_LIGHTMAP_CAPTURE && ((1 << A.base_type) & INSTANCE_GEOMETRY_MASK)) {
             let lightmap_capture = /** @type {InstanceLightmapCaptureData} */(B.base_data);
             let geom = /** @type {InstanceGeometryData} */(A.base_data);
 
-            lightmap_capture.geometries.push(A);
-            geom.lightmap_captures.push(B);
+            let pinfo = new InstanceLightmapCaptureData$PairInfo;
+            pinfo.geometry = A;
+            pinfo.L = geom.lightmap_captures.push_back(B);
 
+            let E = lightmap_capture.geometries.push_back(pinfo);
             this._instance_queue_update(A, false, false);
+
+            return E;
         }
         return null;
     }
 
     /**
-     * FIXME: remove these we don't need GI and reflection
      * @param {any} self
      * @param {number} id_A
      * @param {Instance_t} A
@@ -417,7 +465,10 @@ export class VisualServerScene {
             let light = /** @type {InstanceLightData} */(B.base_data);
             let geom = /** @type {InstanceGeometryData} */(A.base_data);
 
-            light.geometries.splice(light.geometries.indexOf(A), 1);
+            let E = /** @type {List$Element<InstanceLightData$PairInfo>} */(udata);
+
+            geom.lighting.erase(E.value.L);
+            light.geometries.erase(E);
 
             if (geom.can_cast_shadows) {
                 light.shadow_dirty = true;
@@ -427,8 +478,10 @@ export class VisualServerScene {
             let lightmap_capture = /** @type {InstanceLightmapCaptureData} */(B.base_data);
             let geom = /** @type {InstanceGeometryData} */(A.base_data);
 
-            geom.lightmap_captures.splice(geom.lightmap_captures.indexOf(B), 1);
-            lightmap_capture.geometries.splice(A, 1);
+            let E = /** @type {List$Element<InstanceLightmapCaptureData$PairInfo>} */(udata);
+
+            geom.lightmap_captures.erase(E.value.L);
+            lightmap_capture.geometries.erase(E);
             this._instance_queue_update(A, false, false);
         }
     }
@@ -502,12 +555,23 @@ export class VisualServerScene {
      */
     instances_cull_convex(p_convex, p_scenario) { }
 
-    free_rid(rid) {
-        return false;
-    }
-
     instance_create() {
         return new Instance_t;
+    }
+
+    /**
+     * @param {Instance_t} p_instance
+     */
+    instance_free(p_instance) {
+        this.update_dirty_instances();
+
+        this.instance_set_use_lightmap(p_instance, null, null);
+        this.instance_set_scenario(p_instance, null);
+        this.instance_set_base(p_instance, null);
+        this.instance_geometry_set_material_override(p_instance, null);
+        this.instance_attach_skeleton(p_instance, null);
+
+        this.update_dirty_instances();
     }
 
     /**
@@ -542,6 +606,9 @@ export class VisualServerScene {
         let scenario = p_instance.scenario;
 
         if (p_instance.base_type !== INSTANCE_TYPE_NONE) {
+            // free anything related to that base
+            p_instance.base.instance_list.remove(p_instance.dependency_item);
+
             if (scenario && p_instance.octree_id) {
                 scenario.octree.erase(p_instance.octree_id);
                 p_instance.octree_id = 0;
@@ -550,12 +617,12 @@ export class VisualServerScene {
             switch (p_instance.base_type) {
                 case INSTANCE_TYPE_LIGHT: {
                     let light = /** @type {InstanceLightData} */(p_instance.base_data);
-                    let idx = scenario.directional_lights.indexOf(light.D);
-                    if (scenario && idx >= 0) {
-                        scenario.directional_lights.splice(idx, 1);
+                    if (p_instance.scenario && light.D) {
+                        p_instance.scenario.directional_lights.erase(light.D);
                         light.D = null;
                     }
-                    light.instance = null;
+
+                    VSG.scene_render.free_light_instance(light.instance);
                 } break;
                 case INSTANCE_TYPE_LIGHTMAP_CAPTURE: {
                     let lightmap_capture = /** @type {InstanceLightmapCaptureData} */(p_instance.base_data);
@@ -566,6 +633,7 @@ export class VisualServerScene {
             }
 
             if (p_instance.base_data) {
+                // @Incomplete: memdelete(p_instance.base_data);
                 p_instance.base_data = null;
             }
 
@@ -585,8 +653,7 @@ export class VisualServerScene {
                     let light = new InstanceLightData;
 
                     if (scenario && light_inst.type === LIGHT_DIRECTIONAL) {
-                        scenario.directional_lights.push(p_instance);
-                        light.D = p_instance;
+                        light.D = scenario.directional_lights.push_back(p_instance);
                     }
 
                     light.instance = VSG.scene_render.light_instance_create(light_inst);
@@ -599,6 +666,7 @@ export class VisualServerScene {
                 case INSTANCE_TYPE_PARTICLES: {
                     let geom = new InstanceGeometryData;
                     p_instance.base_data = geom;
+                    // @Incomplete: shape blending
                     // if (p_instance.base_type === INSTANCE_TYPE_MESH) {
                     //     p_instance.blend_values.length = VSG.storage.mesh_get_blend_shape_count(p_base);
                     // }
@@ -635,9 +703,8 @@ export class VisualServerScene {
             switch (p_instance.base_type) {
                 case INSTANCE_TYPE_LIGHT: {
                     let light = /** @type {InstanceLightData} */(p_instance.base_data);
-                    let idx = p_instance.scenario.directional_lights.indexOf(light.D);
-                    if (idx >= 0) {
-                        p_instance.scenario.directional_lights.splice(idx, 1);
+                    if (light.D) {
+                        p_instance.scenario.directional_lights.erase(light.D);
                         light.D = null;
                     }
                 } break;
@@ -656,8 +723,7 @@ export class VisualServerScene {
                     let light = /** @type {InstanceLightData} */(p_instance.base_data);
                     let light_inst = /** @type {Light_t} */(p_instance.base);
                     if (light_inst.type === LIGHT_DIRECTIONAL) {
-                        p_scenario.directional_lights.push(p_instance);
-                        light.D = p_instance;
+                        light.D = p_scenario.directional_lights.push_back(p_instance);
                     }
                 } break;
             }
@@ -679,8 +745,9 @@ export class VisualServerScene {
             let geom = /** @type {InstanceGeometryData} */(p_instance.base_data);
 
             if (geom.can_cast_shadows) {
-                for (let l of geom.lighting) {
-                    /** @type {InstanceLightData} */(l).shadow_dirty = true;
+                for (let E = geom.lighting.front(); E; E = E.next) {
+                    let light = /** @type {InstanceLightData} */(E.value.base_data);
+                    light.shadow_dirty = true;
                 }
             }
         }
@@ -688,7 +755,7 @@ export class VisualServerScene {
         switch (p_instance.base_type) {
             case INSTANCE_TYPE_LIGHT: {
                 let light = /** @type {import('engine/drivers/webgl/rasterizer_storage').Light_t} */(p_instance.base);
-                if (light.type === LIGHT_DIRECTIONAL && p_instance.octree_id && p_instance.scenario) {
+                if (light.type !== LIGHT_DIRECTIONAL && p_instance.octree_id && p_instance.scenario) {
                     p_instance.scenario.octree.set_pairable(p_instance.octree_id, p_visible, 1 << INSTANCE_TYPE_LIGHT, p_visible ? INSTANCE_GEOMETRY_MASK : 0);
                 }
             } break;
@@ -725,9 +792,31 @@ export class VisualServerScene {
 
         if (p_lightmap_instance) {
             p_instance.lightmap_capture = p_lightmap_instance;
+
             let lightmap_capture = /** @type {InstanceLightmapCaptureData} */(p_instance.lightmap_capture.base_data);
             lightmap_capture.users.push(p_instance);
             p_instance.lightmap = p_lightmap;
+        }
+    }
+
+    /**
+     * @param {Instance_t} p_instance
+     * @param {AABB} p_aabb
+     */
+    instance_set_custom_aabb(p_instance, p_aabb) {
+        if (!p_aabb.is_equal_approx(AABB.EMPTY)) {
+            if (!p_instance.custom_aabb) {
+                p_instance.custom_aabb = p_aabb.clone();
+            }
+        } else {
+            if (p_instance.custom_aabb) {
+                AABB.free(p_instance.custom_aabb);
+                p_instance.custom_aabb = null;
+            }
+        }
+
+        if (p_instance.scenario) {
+            this._instance_queue_update(p_instance, true, false);
         }
     }
 
@@ -780,6 +869,33 @@ export class VisualServerScene {
                 let new_mat_count = VSG.storage.mesh_get_surface_count(/** @type {Mesh_t} */(p_instance.base));
                 p_instance.materials.length = new_mat_count;
             }
+
+            if ((1 << p_instance.base_type) & INSTANCE_GEOMETRY_MASK) {
+                let geom = /** @type {InstanceGeometryData} */(p_instance.base_data);
+
+                let can_cast_shadows = true;
+                let is_animated = false;
+
+                if (p_instance.cast_shadows === SHADOW_CASTING_SETTING_OFF) {
+                    can_cast_shadows = false;
+                } else if (p_instance.material_override) {
+                    can_cast_shadows = VSG.storage.material_casts_shadows(p_instance.material_override);
+                    // @Incomplete: is_animated = VSG.storage.material_is_animated(p_instance.material_override);
+                } else {
+                    // @Incomplete: check whether materials can cast shadows
+                }
+
+                if (can_cast_shadows !== geom.can_cast_shadows) {
+                    for (let E = geom.lighting.front(); E; E = E.next) {
+                        let light = /** @type {InstanceLightData} */(E.value.base_data);
+                        light.shadow_dirty = true;
+                    }
+
+                    geom.can_cast_shadows = can_cast_shadows;
+                }
+
+                geom.material_is_animated = is_animated;
+            }
         }
 
         this._instance_update_list.remove(p_instance.update_item);
@@ -815,6 +931,10 @@ export class VisualServerScene {
         }
         if (!new_aabb) new_aabb = AABB.create();
 
+        if (p_instance.extra_margin) {
+            new_aabb.grow_by(p_instance.extra_margin);
+        }
+
         p_instance.aabb.copy(new_aabb);
         AABB.free(new_aabb);
     }
@@ -829,6 +949,7 @@ export class VisualServerScene {
             let light = /** @type {InstanceLightData} */(p_instance.base_data);
 
             VSG.scene_render.light_instance_set_transform(light.instance, p_instance.transform);
+            light.shadow_dirty = true;
         }
 
         if (p_instance.aabb.has_no_surface()) return;
@@ -837,18 +958,9 @@ export class VisualServerScene {
             let geom = /** @type {InstanceGeometryData} */(p_instance.base_data);
 
             if (geom.can_cast_shadows) {
-                for (let e of geom.lighting) {
-                    let light = /** @type {InstanceLightData} */(e.base_data);
+                for (let E = geom.lighting.front(); E; E = E.next) {
+                    let light = /** @type {InstanceLightData} */(E.value.base_data);
                     light.shadow_dirty = true;
-                }
-            }
-
-            if (!p_instance.lightmap_capture && geom.lightmap_captures.length > 0) {
-                // @Cleanup: this is not required at runtime
-                // this._update_instance_lightmap_captures(p_instance);
-            } else {
-                if (p_instance.lightmap_capture_data.length > 0) {
-                    p_instance.lightmap_capture_data.length = 0;
                 }
             }
         }
@@ -934,7 +1046,8 @@ export class VisualServerScene {
             } else if (inst.base_type === INSTANCE_TYPE_LIGHT && inst.visible) {
                 if (this.light_cull_count < MAX_LIGHTS_CULLED) {
                     let light = /** @type {InstanceLightData} */(inst.base_data);
-                    if (light.geometries.length > 0) {
+
+                    if (!light.geometries.empty()) {
                         // do not add this light if no geometry is affected by it
                         this.light_cull_result[this.light_cull_count] = inst;
                         this.light_instance_cull_result[this.light_cull_count] = light.instance;
@@ -947,13 +1060,17 @@ export class VisualServerScene {
             } else if (((1 << inst.base_type) & INSTANCE_GEOMETRY_MASK) && inst.visible && inst.cast_shadows !== SHADOW_CASTING_SETTING_SHADOWS_ONLY) {
                 keep = true;
 
+                if (inst.redraw_if_visible) {
+                    VisualServer.get_singleton().redraw_request();
+                }
+
                 let geom = /** @type {InstanceGeometryData} */(inst.base_data);
                 if (geom.lighting_dirty) {
                     let l = 0;
-                    inst.light_instances.length = geom.lighting.length;
+                    inst.light_instances.length = geom.lighting.size();
 
-                    for (let e of geom.lighting) {
-                        let light = /** @type {InstanceLightData} */(e.base_data);
+                    for (let E = geom.lighting.front(); E; E = E.next) {
+                        let light = /** @type {InstanceLightData} */(E.value.base_data);
                         inst.light_instances[l++] = light.instance;
                     }
 
@@ -982,22 +1099,21 @@ export class VisualServerScene {
         let start = this.light_cull_count;
 
         // - directional
-        let lights_with_shadow = Array(p_scenario.directional_lights.length);
+        let lights_with_shadow = Array(p_scenario.directional_lights.size());
         let directional_shadow_count = 0;
 
-        for (let i = 0; i < p_scenario.directional_lights.length; i++) {
+        for (let E = p_scenario.directional_lights.front(); E; E = E.next) {
             if (this.light_cull_count + this.directional_light_count >= MAX_LIGHTS_CULLED) {
                 break;
             }
-            let E = p_scenario.directional_lights[i];
-            if (!E.visible) continue;
+            if (!E.value.visible) continue;
 
-            let light = /** @type {InstanceLightData} */(E.base_data);
+            let light = /** @type {InstanceLightData} */(E.value.base_data);
 
             if (light) {
-                let e = /** @type {Light_t} */(E.base);
+                let e = /** @type {Light_t} */(E.value.base);
                 if (p_shadow_atlas && e.shadow) {
-                    lights_with_shadow[directional_shadow_count++] = E;
+                    lights_with_shadow[directional_shadow_count++] = E.value;
                 }
                 directional_lights[start + this.directional_light_count++] = light.instance;
             }
@@ -1115,10 +1231,10 @@ export class VisualServerScene {
     _light_instance_update_shadow(p_instance, p_cam_transform, p_cam_projection, p_cam_ortho, p_shadow_atlas, p_scenario) {
         let light = /** @type {InstanceLightData} */(p_instance.base_data);
 
-        let animated_material_found = false;
-
         let light_transform = p_instance.transform.clone();
         light_transform.orthonormalize();
+
+        let animated_material_found = false;
 
         let light_base = /** @type {Light_t} */(p_instance.base);
 
@@ -1153,6 +1269,10 @@ export class VisualServerScene {
                             continue;
                         }
 
+                        if (geo.material_is_animated) {
+                            animated_material_found = true;
+                        }
+
                         instance.transformed_aabb.project_range_in_plane(base, res);
 
                         if (res.max > z_max) {
@@ -1174,6 +1294,7 @@ export class VisualServerScene {
 
                 let range = max_distance - min_distance;
 
+                // @Incomplete: support parallel 2/4 splits shadow modes
                 let splits = 1;
 
                 let distances = [min_distance, 0, 0, 0, 0];
@@ -1185,6 +1306,7 @@ export class VisualServerScene {
 
                 let texture_size = VSG.scene_render.get_directional_light_shadow_size(light.instance);
 
+                // @Incomplete: support shadow blend splits
                 let overlap = false;
 
                 let first_radius = 0;

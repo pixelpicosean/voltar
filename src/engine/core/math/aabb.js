@@ -533,5 +533,7 @@ export class AABB {
     }
 }
 
+AABB.EMPTY = new AABB;
+
 const bad_point_counts_positive = [0, 0, 0];
 const bad_point_counts_negative = [0, 0, 0];

@@ -125,6 +125,11 @@ module.exports.convert_project_settings = (project_url) => {
             display.fxaa = use_fxaa;
         }
 
+        let render_tree_balance = real(settings.rendering['quality/spatial_partitioning/render_tree_balance']);
+        if (render_tree_balance !== undefined) {
+            display.render_tree_balance = render_tree_balance;
+        }
+
         real_settings.display = display;
     }
     if (settings.physics) {

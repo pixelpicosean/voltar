@@ -416,6 +416,14 @@ export class Material_t {
 
         this.render_priority = 0;
 
+        /** @type {SelfList<Material_t>} */
+        this.list = new SelfList(this);
+        /** @type {SelfList<Material_t>} */
+        this.dirty_list = new SelfList(this);
+
+        this.can_cast_shadow_cache = false;
+        this.is_animated_cache = false;
+
         /** @type {Material_t} */
         this.next_pass = null;
 
@@ -453,6 +461,8 @@ export class Material_t {
         m.batchable = this.batchable;
         m.render_priority = this.render_priority;
         m.next_pass = this.next_pass;
+        m.can_cast_shadow_cache = this.can_cast_shadow_cache;
+        m.is_animated_cache = this.is_animated_cache;
 
         m.shader = this.shader;
 
@@ -644,6 +654,9 @@ export class RasterizerStorage {
 
         /** @type {List<MultiMesh_t>} */
         this.multimesh_update_list = new List;
+
+        /** @type {List<Material_t>} */
+        this._material_dirty_list = new List;
 
         this.shaders = {
             /** @type {CopyShader} */
@@ -1600,11 +1613,40 @@ export class RasterizerStorage {
      * @param {Object<string, number[]>} param
      */
     material_set_param(mt, param) {
-        for (const k in param) {
+        for (let k in param) {
             for (let i = 0; i < mt.params[k].length; i++) {
                 mt.params[k][i] = param[k][i];
             }
         }
+    }
+
+    /**
+     * @param {Material_t} mt
+     * @returns {boolean}
+     */
+    material_casts_shadows(mt) {
+        if (mt.dirty_list.in_list()) {
+            this._update_material(mt);
+        }
+
+        let casts_shadows = mt.can_cast_shadow_cache;
+
+        if (!casts_shadows && mt.next_pass) {
+            casts_shadows = this.material_casts_shadows(mt.next_pass);
+        }
+
+        return casts_shadows;
+    }
+
+    /**
+     * @param {Material_t} mt
+     */
+    _update_material(mt) {
+        if (mt.dirty_list.in_list()) {
+            this._material_dirty_list.remove(mt.dirty_list);
+        }
+
+        // @Incomplete: update shader/material
     }
 
     /* Mesh API */

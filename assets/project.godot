@@ -21,7 +21,7 @@ _global_script_class_icons={
 [application]
 
 config/name="voltar"
-run/main_scene="res://scene/baked_light.tscn"
+run/main_scene="res://scene/multi_mat.tscn"
 config/icon="res://icon.png"
 
 [display]

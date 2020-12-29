@@ -10,6 +10,7 @@ albedo_color = Color( 1, 0.47451, 0.47451, 1 )
 
 [node name="directional_light" type="DirectionalLight" parent="."]
 transform = Transform( 0.768678, 0.578104, -0.273733, -0.123436, 0.553976, 0.823331, 0.627613, -0.599088, 0.497188, 0, 3.30252, 0 )
+visible = false
 shadow_enabled = true
 directional_shadow_mode = 0
 
@@ -25,4 +26,3 @@ cast_shadow = 0
 
 [node name="spot_light" type="SpotLight" parent="."]
 transform = Transform( 0.679428, 3.54689e-08, -0.733742, 0.733742, -4.75705e-08, 0.679428, -1.08058e-08, -1, -5.83457e-08, -1.64133, 2.42199, 1.0668e-07 )
-visible = false

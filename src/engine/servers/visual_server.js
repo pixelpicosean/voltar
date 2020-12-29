@@ -233,6 +233,10 @@ export class VisualServer extends VObject {
         VSG.viewport.set_default_clear_color(p_color);
     }
 
+    redraw_request() {
+        this.changes++;
+    }
+
     /* private */
 
     _draw_margins() {
