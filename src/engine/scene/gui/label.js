@@ -57,60 +57,27 @@ class WordCache {
 export class Label extends Control {
     get class() { return 'Label' }
 
-    get align() { return this._align }
-    set align(value) { this.set_align(value) }
-
-    get autowrap() { return this._autowrap }
-    set autowrap(value) { this.set_autowrap(value) }
-
-    get clip_text() { return this._clip_text }
-    set clip_text(value) { this.set_clip_text(value) }
-
-    get lines_skipped() { return this._lines_skipped }
-    set lines_skipped(value) { this.set_lines_skipped(value) }
-
-    get max_lines_visible() { return this._max_lines_visible }
-    set max_lines_visible(value) { this.set_max_lines_visible(value) }
-
-    get percent_visible() { return this._percent_visible }
-    set percent_visible(value) { this.set_percent_visible(value) }
-
-    get text() { return this._text }
-    set text(value) { this.set_text(value) }
-
-    get uppercase() { return this._uppercase }
-    set uppercase(value) { this.set_uppercase(value) }
-
-    get valign() { return this._valign }
-    set valign(value) { this.set_valign(value) }
-
-    get visible_characters() { return this._visible_characters }
-    set visible_characters(value) { this.set_visible_characters(value) }
-
     constructor() {
         super();
 
-        this._align = HALIGN_LEFT;
-        this._autowrap = false;
+        this.align = HALIGN_LEFT;
+        this.autowrap = false;
         this.line_count = 0;
-        this._clip_text = false;
+        this.clip_text = false;
         this.minsize = new Vector2();
-        this._lines_skipped = 0;
-        this._max_lines_visible = -1;
-        this._percent_visible = 1;
-        /**
-         * @type {string}
-         */
-        this._text = '';
-        this._uppercase = false;
-        this._valign = VALIGN_TOP;
-        this._visible_characters = -1;
+        this.lines_skipped = 0;
+        this.max_lines_visible = -1;
+        this.percent_visible = 1;
+        this.text = '';
+        this.uppercase = false;
+        this.valign = VALIGN_TOP;
+        this.visible_characters = -1;
 
         this.word_cache_dirty = false;
         this.word_cache = null;
         this.total_char_cache = 0;
 
-        this.mouse_filter = MOUSE_FILTER_IGNORE;
+        this.set_mouse_filter(MOUSE_FILTER_IGNORE);
 
         this.set_size_flags_vertical(SIZE_SHRINK_CENTER);
     }
@@ -170,12 +137,12 @@ export class Label extends Control {
 
         const f = this.get_font('font');
         if (f.type === 'DynamicFont') {
-            if (this._autowrap) {
-                return size.copy(min_style).add(1, this._clip_text ? 1 : this.minsize.y);
+            if (this.autowrap) {
+                return size.copy(min_style).add(1, this.clip_text ? 1 : this.minsize.y);
             } else {
                 const font = /** @type {DynamicFont} */(f);
-                const width = this._autowrap ? (this.rect_size.x - min_style.x) : this.get_longest_line_width();
-                const s = font.get_text_size(this._text, width, this.get_constant('line_spacing'));
+                const width = this.autowrap ? (this.rect_size.x - min_style.x) : this.get_longest_line_width();
+                const s = font.get_text_size(this.text, width, this.get_constant('line_spacing'));
                 return size.set(
                     s.width,
                     s.height
@@ -187,11 +154,11 @@ export class Label extends Control {
             this.regenerate_word_cache();
         }
 
-        if (this._autowrap) {
-            return size.copy(min_style).add(1, this._clip_text ? 1 : this.minsize.y);
+        if (this.autowrap) {
+            return size.copy(min_style).add(1, this.clip_text ? 1 : this.minsize.y);
         } else {
             size.copy(this.minsize);
-            if (this._clip_text) {
+            if (this.clip_text) {
                 size.x = 1;
             }
             return size.add(min_style);
@@ -205,7 +172,7 @@ export class Label extends Control {
         // TODO: translation support
 
         if (p_what === NOTIFICATION_DRAW) {
-            if (this._clip_text) {
+            if (this.clip_text) {
                 VSG.canvas.canvas_item_set_clip(this.canvas_item, true);
             }
 
@@ -214,7 +181,7 @@ export class Label extends Control {
             }
 
             /** @type {string} */
-            const text = this._text;
+            const text = this.text;
             const size = this.rect_size;
             const style = this.get_stylebox('normal');
             const font_color = this.get_color('font_color');
@@ -236,8 +203,8 @@ export class Label extends Control {
                 lines_visible = this.line_count;
             }
 
-            if (this._max_lines_visible >= 0 && lines_visible > this._max_lines_visible) {
-                lines_visible = this._max_lines_visible;
+            if (this.max_lines_visible >= 0 && lines_visible > this.max_lines_visible) {
+                lines_visible = this.max_lines_visible;
             }
 
             if (font.type === 'DynamicFont') {
@@ -247,18 +214,18 @@ export class Label extends Control {
                     this.canvas_item,
                     text,
                     size,
-                    this._align,
-                    this._valign,
+                    this.align,
+                    this.valign,
                     line_spacing,
                     lines_visible,
-                    this._autowrap ? (size.x - style.get_minimum_size(tmp_vec).x) : this.get_longest_line_width()
+                    this.autowrap ? (size.x - style.get_minimum_size(tmp_vec).x) : this.get_longest_line_width()
                 );
                 texture.draw(this.canvas_item, Vector2.ZERO);
                 return;
             }
 
             if (lines_visible > 0) {
-                switch (this._valign) {
+                switch (this.valign) {
                     case VALIGN_TOP: {
                         // nothing
                     } break;
@@ -287,12 +254,12 @@ export class Label extends Control {
             }
 
             let line = 0;
-            let line_to = this._lines_skipped + (lines_visible > 0 ? lines_visible : 1);
+            let line_to = this.lines_skipped + (lines_visible > 0 ? lines_visible : 1);
             while (wc) {
                 if (line >= line_to) {
                     break;
                 }
-                if (line < this._lines_skipped) {
+                if (line < this.lines_skipped) {
                     while (wc && wc.char_pos >= 0) {
                         wc = wc.next;
                     }
@@ -327,7 +294,7 @@ export class Label extends Control {
 
                 let x_ofs = 0;
 
-                switch (this._align) {
+                switch (this.align) {
                     case HALIGN_FILL:
                     case HALIGN_LEFT: {
                         x_ofs = style.get_offset(tmp_vec8).x;
@@ -341,7 +308,7 @@ export class Label extends Control {
                 }
 
                 let y_ofs = style.get_offset(tmp_vec9).y;
-                y_ofs += (line - this._lines_skipped) * font_h + font.ascent;
+                y_ofs += (line - this.lines_skipped) * font_h + font.ascent;
                 y_ofs += vbegin + line * vsep;
 
                 font = /** @type {BitmapFont} */(font);
@@ -354,16 +321,16 @@ export class Label extends Control {
                     if (from.space_count) {
                         // spacing
                         x_ofs += space_w * from.space_count;
-                        if (can_fill && this._align === HALIGN_FILL && spaces) {
+                        if (can_fill && this.align === HALIGN_FILL && spaces) {
                             x_ofs += Math.floor((size.x - (taken + space_w * spaces)) / spaces);
                         }
                     }
 
                     for (let i = 0; i < from.word_len; i++) {
-                        if (this._visible_characters < 0 || chars_total < this._visible_characters) {
+                        if (this.visible_characters < 0 || chars_total < this.visible_characters) {
                             let c = text[i + pos];
                             let n = text[i + pos + 1];
-                            if (this._uppercase) {
+                            if (this.uppercase) {
                                 c = c.toUpperCase();
                                 n = n.toUpperCase();
                             }
@@ -406,7 +373,7 @@ export class Label extends Control {
         const f = this.get_font('font');
         if (f.type === 'DynamicFont') {
             let font = /** @type {DynamicFont} */(f);
-            return font.get_text_size(this._text, -1, this.get_constant('line_spacing')).width;
+            return font.get_text_size(this.text, -1, this.get_constant('line_spacing')).width;
         }
 
         const font = /** @type {BitmapFont} */(f);
@@ -414,10 +381,10 @@ export class Label extends Control {
         let max_line_width = 0;
         let line_width = 0;
 
-        for (let i = 0; i < this._text.length; i++) {
+        for (let i = 0; i < this.text.length; i++) {
             /** @type {string} */
-            let current = this._text[i];
-            if (this._uppercase) {
+            let current = this.text[i];
+            if (this.uppercase) {
                 current = current.toUpperCase();
             }
 
@@ -429,7 +396,7 @@ export class Label extends Control {
                     line_width = 0;
                 }
             } else {
-                let char_width = Math.ceil(font.get_char_size(tmp_vec5, current, this._text[i + 1]).x);
+                let char_width = Math.ceil(font.get_char_size(tmp_vec5, current, this.text[i + 1]).x);
                 line_width += char_width;
             }
         }
@@ -472,8 +439,8 @@ export class Label extends Control {
             lines_visible = this.line_count;
         }
 
-        if (this._max_lines_visible >= 0 && lines_visible > this._max_lines_visible) {
-            lines_visible = this._max_lines_visible;
+        if (this.max_lines_visible >= 0 && lines_visible > this.max_lines_visible) {
+            lines_visible = this.max_lines_visible;
         }
 
         return lines_visible;
@@ -487,10 +454,10 @@ export class Label extends Control {
         this.word_cache = null;
 
         /** @type {string} */
-        const text = this._text;
+        const text = this.text;
 
         const style = this.get_stylebox('normal');
-        const width = this._autowrap ? (this.rect_size.x - style.get_minimum_size(tmp_vec3).x) : this.get_longest_line_width();
+        const width = this.autowrap ? (this.rect_size.x - style.get_minimum_size(tmp_vec3).x) : this.get_longest_line_width();
         const f = this.get_font('font');
 
         if (f.type === "DynamicFont") {
@@ -517,7 +484,7 @@ export class Label extends Control {
             // always a space at the end, so the algorithm works
             let current = i < text.length ? text[i] : ' ';
 
-            if (this._uppercase) {
+            if (this.uppercase) {
                 current = current.toUpperCase();
             }
 
@@ -569,7 +536,7 @@ export class Label extends Control {
                 this.total_char_cache++;
             }
 
-            if ((this._autowrap && (line_width >= width) && ((last && last.char_pos >= 0) || separatable)) || insert_newline) {
+            if ((this.autowrap && (line_width >= width) && ((last && last.char_pos >= 0) || separatable)) || insert_newline) {
                 if (separatable) {
                     if (current_word_size > 0) {
                         const wc = new WordCache();
@@ -607,17 +574,17 @@ export class Label extends Control {
             }
         }
 
-        if (!this._autowrap) {
+        if (!this.autowrap) {
             this.minsize.x = width;
         }
 
-        if (this._max_lines_visible > 0 && this.line_count > this._max_lines_visible) {
-            this.minsize.y = (font.height * this._max_lines_visible) + (line_spacing * (this._max_lines_visible - 1));
+        if (this.max_lines_visible > 0 && this.line_count > this.max_lines_visible) {
+            this.minsize.y = (font.height * this.max_lines_visible) + (line_spacing * (this.max_lines_visible - 1));
         } else {
             this.minsize.y = (font.height * this.line_count) + (line_spacing * (this.line_count - 1));
         }
 
-        if (!this._autowrap || !this._clip_text) {
+        if (!this.autowrap || !this.clip_text) {
             this.minimum_size_changed();
         }
         this.word_cache_dirty = false;
@@ -627,7 +594,7 @@ export class Label extends Control {
      * @param {boolean} value
      */
     set_autowrap(value) {
-        this._autowrap = value;
+        this.autowrap = value;
         this.word_cache_dirty = true;
         this.update();
     }
@@ -636,7 +603,7 @@ export class Label extends Control {
      * @param {boolean} value
      */
     set_uppercase(value) {
-        this._uppercase = value;
+        this.uppercase = value;
         this.word_cache_dirty = true;
         this.update();
     }
@@ -645,13 +612,13 @@ export class Label extends Control {
      * @param {string} value
      */
     set_text(value) {
-        if (this._text === value) {
+        if (this.text === value) {
             return;
         }
-        this._text = value;
+        this.text = value;
         this.word_cache_dirty = true;
-        if (this._percent_visible < 1) {
-            this._visible_characters = this.get_total_character_count() * this._percent_visible;
+        if (this.percent_visible < 1) {
+            this.visible_characters = this.get_total_character_count() * this.percent_visible;
         }
         this.update();
     }
@@ -660,7 +627,7 @@ export class Label extends Control {
      * @param {boolean} value
      */
     set_clip_text(value) {
-        this._clip_text = value;
+        this.clip_text = value;
         this.update();
         this.minimum_size_changed();
     }
@@ -669,9 +636,9 @@ export class Label extends Control {
      * @param {number} value
      */
     set_visible_characters(value) {
-        this._visible_characters = value;
+        this.visible_characters = value;
         if (this.get_total_character_count() > 0) {
-            this._percent_visible = value / this.total_char_cache;
+            this.percent_visible = value / this.total_char_cache;
         }
         this.update();
     }
@@ -681,11 +648,11 @@ export class Label extends Control {
      */
     set_percent_visible(value) {
         if (value < 0 || value >= 1) {
-            this._percent_visible = 1;
-            this._visible_characters = -1;
+            this.percent_visible = 1;
+            this.visible_characters = -1;
         } else {
-            this._percent_visible = value;
-            this._visible_characters = this.get_total_character_count() * this._percent_visible;
+            this.percent_visible = value;
+            this.visible_characters = this.get_total_character_count() * this.percent_visible;
         }
         this.update();
     }
@@ -694,7 +661,7 @@ export class Label extends Control {
      * @param {number} p_align
      */
     set_align(p_align) {
-        this._align = p_align;
+        this.align = p_align;
         this.update();
     }
 
@@ -702,7 +669,7 @@ export class Label extends Control {
      * @param {number} p_align
      */
     set_valign(p_align) {
-        this._valign = p_align;
+        this.valign = p_align;
         this.update();
     }
 
@@ -710,7 +677,7 @@ export class Label extends Control {
      * @param {number} p_lines
      */
     set_lines_skipped(p_lines) {
-        this._lines_skipped = p_lines;
+        this.lines_skipped = p_lines;
         this.update();
     }
 
@@ -718,7 +685,7 @@ export class Label extends Control {
      * @param {number} p_lines
      */
     set_max_lines_visible(p_lines) {
-        this._max_lines_visible = p_lines;
+        this.max_lines_visible = p_lines;
         this.update();
     }
 }

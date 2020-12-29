@@ -15,13 +15,10 @@ import {
 export class GridContainer extends Container {
     get class() { return 'GridContainer' }
 
-    get columns() { return this._columns }
-    set columns(value) { this.set_columns(value) }
-
     constructor() {
         super();
 
-        this._columns = 1;
+        this.columns = 1;
     }
 
     /* virtual */
@@ -270,7 +267,7 @@ export class GridContainer extends Container {
      * @param {number} value
      */
     set_columns(value) {
-        this._columns = value;
+        this.columns = value;
         this.queue_sort();
         this.minimum_size_changed();
     }

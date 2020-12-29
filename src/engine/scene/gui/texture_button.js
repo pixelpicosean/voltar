@@ -27,42 +27,24 @@ import { Rect2 } from 'engine/core/math/rect2.js';
 export class TextureButton extends BaseButton {
     get class() { return 'TextureButton' }
 
-    get texture_normal() { return this._texture_normal }
-    set texture_normal(p_value) { this.set_texture_normal(p_value) }
-
-    get texture_pressed() { return this._texture_pressed }
-    set texture_pressed(p_value) { this.set_texture_pressed(p_value) }
-
-    get texture_hover() { return this._texture_hover }
-    set texture_hover(p_value) { this.set_texture_hover(p_value) }
-
-    get texture_disabled() { return this._texture_disabled }
-    set texture_disabled(p_value) { this.set_texture_disabled(p_value) }
-
-    get expand() { return this._expand }
-    set expand(value) { this.set_expand(value) }
-
-    get stretch_mode() { return this._stretch_mode }
-    set stretch_mode(value) { this.set_stretch_mode(value) }
-
     constructor() {
         super();
 
-        this._expand = false;
-        this._stretch_mode = STRETCH_SCALE;
+        this.expand = false;
+        this.stretch_mode = STRETCH_SCALE;
 
-        this._texture_region = new Rect2();
-        this._position_rect = new Rect2();
-        this._tile = false;
+        this.texture_region = new Rect2();
+        this.position_rect = new Rect2();
+        this.tile = false;
 
         /** @type {ImageTexture} */
-        this._texture_normal = null;
+        this.texture_normal = null;
         /** @type {ImageTexture} */
-        this._texture_pressed = null;
+        this.texture_pressed = null;
         /** @type {ImageTexture} */
-        this._texture_hover = null;
+        this.texture_hover = null;
         /** @type {ImageTexture} */
-        this._texture_disabled = null;
+        this.texture_disabled = null;
     }
 
     /* virtual */
@@ -106,34 +88,34 @@ export class TextureButton extends BaseButton {
 
                 switch (draw_mode) {
                     case DRAW_NORMAL: {
-                        texdraw = this._texture_normal;
+                        texdraw = this.texture_normal;
                     } break;
                     case DRAW_HOVER_PRESSED:
                     case DRAW_PRESSED: {
-                        if (this._texture_pressed) {
-                            texdraw = this._texture_pressed;
-                        } else if (this._texture_hover) {
-                            texdraw = this._texture_hover;
-                        } else if (this._texture_normal) {
-                            texdraw = this._texture_normal;
+                        if (this.texture_pressed) {
+                            texdraw = this.texture_pressed;
+                        } else if (this.texture_hover) {
+                            texdraw = this.texture_hover;
+                        } else if (this.texture_normal) {
+                            texdraw = this.texture_normal;
                         }
                     } break;
                     case DRAW_HOVER: {
-                        if (this._texture_hover) {
-                            texdraw = this._texture_hover;
+                        if (this.texture_hover) {
+                            texdraw = this.texture_hover;
                         } else {
-                            if (this._texture_pressed && this.pressed) {
-                                texdraw = this._texture_pressed;
-                            } else if (this._texture_normal) {
-                                texdraw = this._texture_normal;
+                            if (this.texture_pressed && this.pressed) {
+                                texdraw = this.texture_pressed;
+                            } else if (this.texture_normal) {
+                                texdraw = this.texture_normal;
                             }
                         }
                     } break;
                     case DRAW_DISABLED: {
-                        if (this._texture_disabled) {
-                            texdraw = this._texture_disabled;
-                        } else if (this._texture_normal) {
-                            texdraw = this._texture_normal;
+                        if (this.texture_disabled) {
+                            texdraw = this.texture_disabled;
+                        } else if (this.texture_normal) {
+                            texdraw = this.texture_normal;
                         }
                     } break;
                 }
@@ -141,16 +123,16 @@ export class TextureButton extends BaseButton {
                 if (texdraw) {
                     const ofs = Vector2.create(0, 0);
                     const size = texdraw.get_size().clone();
-                    this._texture_region.set(0, 0, size.x, size.y);
-                    this._tile = false;
-                    if (this._expand) {
-                        switch (this._stretch_mode) {
+                    this.texture_region.set(0, 0, size.x, size.y);
+                    this.tile = false;
+                    if (this.expand) {
+                        switch (this.stretch_mode) {
                             case STRETCH_SCALE: {
                                 size.copy(this.rect_size);
                             } break;
                             case STRETCH_TILE: {
                                 size.copy(this.rect_size);
-                                this._tile = true;
+                                this.tile = true;
                             } break;
                             case STRETCH_KEEP_CENTERED: {
                                 ofs.set(
@@ -170,7 +152,7 @@ export class TextureButton extends BaseButton {
                                     tex_height = texdraw.get_height() * tex_width / texdraw.get_width();
                                 }
 
-                                if (this._stretch_mode === STRETCH_KEEP_ASPECT_CENTERED) {
+                                if (this.stretch_mode === STRETCH_KEEP_ASPECT_CENTERED) {
                                     ofs.x = (size.x - tex_width) * 0.5;
                                     ofs.y = (size.y - tex_height) * 0.5;
                                 }
@@ -183,7 +165,7 @@ export class TextureButton extends BaseButton {
                                 const scale_size = Vector2.create(size.x / tex_size.x, size.y / tex_size.y);
                                 const scale = scale_size.x > scale_size.y ? scale_size.x : scale_size.y;
                                 scale_size.scale(scale);
-                                this._texture_region.set(
+                                this.texture_region.set(
                                     Math.abs((scale_size.x - size.x) / scale),
                                     Math.abs((scale_size.y - size.y) / scale),
                                     size.x / scale,
@@ -195,11 +177,11 @@ export class TextureButton extends BaseButton {
                         }
                     }
 
-                    this._position_rect.set(ofs.x, ofs.y, size.x, size.y);
-                    if (this._tile) {
-                        this.draw_texture_rect(texdraw, this._position_rect, this._tile);
+                    this.position_rect.set(ofs.x, ofs.y, size.x, size.y);
+                    if (this.tile) {
+                        this.draw_texture_rect(texdraw, this.position_rect, this.tile);
                     } else {
-                        this.draw_texture_rect_region(texdraw, this._position_rect, this._texture_region);
+                        this.draw_texture_rect_region(texdraw, this.position_rect, this.texture_region);
                     }
 
                     // TODO: focus support
@@ -215,18 +197,18 @@ export class TextureButton extends BaseButton {
         const rscale = super.get_minimum_size();
 
         if (!this.expand) {
-            if (!this._texture_normal) {
-                if (!this._texture_pressed) {
-                    if (!this._texture_hover) {
+            if (!this.texture_normal) {
+                if (!this.texture_pressed) {
+                    if (!this.texture_hover) {
                         rscale.set(0, 0);
                     } else {
-                        rscale.copy(this._texture_hover.get_size());
+                        rscale.copy(this.texture_hover.get_size());
                     }
                 } else {
-                    rscale.copy(this._texture_pressed.get_size());
+                    rscale.copy(this.texture_pressed.get_size());
                 }
             } else {
-                rscale.copy(this._texture_normal.get_size());
+                rscale.copy(this.texture_normal.get_size());
             }
         }
 
@@ -247,7 +229,7 @@ export class TextureButton extends BaseButton {
      * @param {string|ImageTexture} p_texture
      */
     set_texture_normal(p_texture) {
-        this._texture_normal = (typeof (p_texture) === 'string') ? get_resource_map()[p_texture] : p_texture;
+        this.texture_normal = (typeof (p_texture) === 'string') ? get_resource_map()[p_texture] : p_texture;
         this.minimum_size_changed();
         this.update();
     }
@@ -256,7 +238,7 @@ export class TextureButton extends BaseButton {
      * @param {string|ImageTexture} p_texture
      */
     set_texture_hover(p_texture) {
-        this._texture_hover = (typeof (p_texture) === 'string') ? get_resource_map()[p_texture] : p_texture;
+        this.texture_hover = (typeof (p_texture) === 'string') ? get_resource_map()[p_texture] : p_texture;
         this.minimum_size_changed();
         this.update();
     }
@@ -265,7 +247,7 @@ export class TextureButton extends BaseButton {
      * @param {string|ImageTexture} p_texture
      */
     set_texture_pressed(p_texture) {
-        this._texture_pressed = (typeof (p_texture) === 'string') ? get_resource_map()[p_texture] : p_texture;
+        this.texture_pressed = (typeof (p_texture) === 'string') ? get_resource_map()[p_texture] : p_texture;
         this.minimum_size_changed();
         this.update();
     }
@@ -274,7 +256,7 @@ export class TextureButton extends BaseButton {
      * @param {string|ImageTexture} p_texture
      */
     set_texture_disabled(p_texture) {
-        this._texture_disabled = (typeof (p_texture) === 'string') ? get_resource_map()[p_texture] : p_texture;
+        this.texture_disabled = (typeof (p_texture) === 'string') ? get_resource_map()[p_texture] : p_texture;
         this.minimum_size_changed();
         this.update();
     }
@@ -283,7 +265,7 @@ export class TextureButton extends BaseButton {
      * @param {boolean} value
      */
     set_expand(value) {
-        this._expand = value;
+        this.expand = value;
         this.minimum_size_changed();
         this.update();
     }
@@ -292,7 +274,7 @@ export class TextureButton extends BaseButton {
      * @param {number} value
      */
     set_stretch_mode(value) {
-        this._stretch_mode = value;
+        this.stretch_mode = value;
         this.update();
     }
 }

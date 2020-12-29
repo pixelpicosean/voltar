@@ -37,20 +37,20 @@ export class Polygon2D extends Node2D {
         super();
 
         /** @type {number[]} */
-        this._polygon = [];
+        this.polygon = [];
         /** @type {number[]} */
-        this._uv = [];
+        this.uv = [];
         /** @type {number[]} */
         this.vertex_colors = [];
-        this._polygons = [];
-        this._internal_vertices = 0;
+        this.polygons = [];
+        this.internal_vertices = 0;
 
         /** @type {Bone[]} */
         this.bone_weights = [];
 
-        this._color = new Color(1, 1, 1);
+        this.color = new Color(1, 1, 1);
         /** @type {ImageTexture} */
-        this._texture = null;
+        this.texture = null;
         this.texture_scale = new Vector2(1, 1);
         this.texture_offset = new Vector2;
         this.tex_tile = true;
@@ -94,23 +94,23 @@ export class Polygon2D extends Node2D {
     _notification(p_what) {
         switch (p_what) {
             case NOTIFICATION_DRAW: {
-                if (this._polygon.length < 3) {
+                if (this.polygon.length < 3) {
                     return;
                 }
 
                 // TODO: handle skeleton
 
-                let len = Math.floor(this._polygon.length / 2);
-                if ((this.invert || this._polygons.length === 0) && this._internal_vertices > 0) {
-                    len -= this._internal_vertices;
+                let len = Math.floor(this.polygon.length / 2);
+                if ((this.invert || this.polygons.length === 0) && this.internal_vertices > 0) {
+                    len -= this.internal_vertices;
                 }
 
                 if (len <= 0) return;
 
                 const points = Array(len * 2);
                 for (let i = 0; i < len * 2; i += 2) {
-                    points[i+0] = this._polygon[i+0] + this.offset.x;
-                    points[i+1] = this._polygon[i+1] + this.offset.y;
+                    points[i+0] = this.polygon[i+0] + this.offset.x;
+                    points[i+1] = this.polygon[i+1] + this.offset.y;
                 }
 
                 if (this.invert) {
@@ -119,23 +119,23 @@ export class Polygon2D extends Node2D {
 
                 /** @type {number[]} */
                 let uvs = [];
-                if (this._texture) {
+                if (this.texture) {
                     let texmat = Transform2D.create();
 
                     texmat.set_origin(this.texture_offset);
                     texmat.set_rotation_and_scale(this.texture_rotation, this.texture_scale);
-                    let tex_size = this._texture.get_size();
+                    let tex_size = this.texture.get_size();
 
                     uvs.length = len * 2;
 
-                    let tex_uvs = this._texture.uvs;
+                    let tex_uvs = this.texture.uvs;
                     let tex_uv_w = tex_uvs[2] - tex_uvs[0];
                     let tex_uv_h = tex_uvs[3] - tex_uvs[1];
 
                     let vec = Vector2.create();
-                    if (this._uv.length === points.length) {
+                    if (this.uv.length === points.length) {
                         for (let i = 0; i < len * 2; i += 2) {
-                            texmat.xform(vec.set(this._uv[i+0], this._uv[i+1]), vec);
+                            texmat.xform(vec.set(this.uv[i+0], this.uv[i+1]), vec);
                             uvs[i+0] = (vec.x / tex_size.x) % tex_uv_w + tex_uvs[0];
                             uvs[i+1] = (vec.y / tex_size.y) % tex_uv_h + tex_uvs[1];
                         }
@@ -158,15 +158,15 @@ export class Polygon2D extends Node2D {
                     colors = this.vertex_colors;
                 } else {
                     colors = [
-                        this._color.r,
-                        this._color.g,
-                        this._color.b,
-                        this._color.a,
+                        this.color.r,
+                        this.color.g,
+                        this.color.b,
+                        this.color.a,
                     ];
                 }
 
-                if (this.invert || this._polygons.length === 0) {
-                    VSG.canvas.canvas_item_add_triangle_array(this.canvas_item, null, points, colors, uvs, [], [], this._texture);
+                if (this.invert || this.polygons.length === 0) {
+                    VSG.canvas.canvas_item_add_triangle_array(this.canvas_item, null, points, colors, uvs, [], [], this.texture);
                 } else { }
             } break;
         }
@@ -178,7 +178,7 @@ export class Polygon2D extends Node2D {
      * @param {number[]} p_polygon
      */
     set_polygon(p_polygon) {
-        this._polygon = p_polygon;
+        this.polygon = p_polygon;
         this.rect_cache_dirty = true;
         this.update();
     }
@@ -187,14 +187,14 @@ export class Polygon2D extends Node2D {
      * @param {number} p_count
      */
     set_internal_vertex_count(p_count) {
-        this._internal_vertices = p_count;
+        this.internal_vertices = p_count;
     }
 
     /**
      * @param {number[]} p_uv
      */
     set_uv(p_uv) {
-        this._uv = p_uv;
+        this.uv = p_uv;
         this.update();
     }
 
@@ -202,14 +202,14 @@ export class Polygon2D extends Node2D {
      * @param {any[]} p_polygons
      */
     set_polygons(p_polygons) {
-        this._polygons = p_polygons;
+        this.polygons = p_polygons;
     }
 
     /**
      * @param {ColorLike} p_color
      */
     set_color(p_color) {
-        this._color.copy(p_color);
+        this.color.copy(p_color);
         this.update();
     }
 
@@ -227,8 +227,8 @@ export class Polygon2D extends Node2D {
     set_texture(p_texture) {
         /** @type {ImageTexture} */
         const texture = (typeof (p_texture) === 'string') ? get_resource_map()[p_texture] : p_texture;
-        if (this._texture === texture) return;
-        this._texture = texture;
+        if (this.texture === texture) return;
+        this.texture = texture;
         this.update();
     }
 

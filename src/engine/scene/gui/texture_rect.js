@@ -20,33 +20,18 @@ export const STRETCH_KEEP_ASPECT_COVERED = 7;
 export class TextureRect extends Control {
     get class() { return 'TextureRect' }
 
-    get expand() { return this._expand }
-    set expand(value) { this.set_expand(value) }
-
-    get flip_h() { return this._flip_h }
-    set flip_h(value) { this.set_flip_h(value) }
-
-    get flip_v() { return this._flip_v }
-    set flip_v(value) { this.set_flip_v(value) }
-
-    get stretch_mode() { return this._stretch_mode }
-    set stretch_mode(value) { this.set_stretch_mode(value) }
-
-    get texture() { return this._texture }
-    set texture(value) { this.set_texture(value) }
-
     constructor() {
         super();
 
-        this._expand = false;
-        this._flip_h = false;
-        this._flip_v = false;
-        this._stretch_mode = STRETCH_SCALE_ON_EXPAND;
+        this.expand = false;
+        this.flip_h = false;
+        this.flip_v = false;
+        this.stretch_mode = STRETCH_SCALE_ON_EXPAND;
 
         /**
          * @type {ImageTexture}
          */
-        this._texture = null;
+        this.texture = null;
     }
 
     /* virtual */
@@ -74,8 +59,8 @@ export class TextureRect extends Control {
     }
 
     get_minimum_size() {
-        if (!this._expand && this._texture) {
-            return this._texture.get_size();
+        if (!this.expand && this.texture) {
+            return this.texture.get_size();
         } else {
             return Vector2.create(0, 0);
         }
@@ -86,7 +71,7 @@ export class TextureRect extends Control {
      */
     _notification(p_what) {
         if (p_what === NOTIFICATION_DRAW) {
-            if (!this._texture) {
+            if (!this.texture) {
                 return;
             }
 
@@ -96,9 +81,9 @@ export class TextureRect extends Control {
             const region = Rect2.create();
             let tile = false;
 
-            switch (this._stretch_mode) {
+            switch (this.stretch_mode) {
                 case STRETCH_SCALE_ON_EXPAND: {
-                    size = this._expand ? this.rect_size.clone() : this._texture.get_size();
+                    size = this.expand ? this.rect_size.clone() : this.texture.get_size();
                 } break;
                 case STRETCH_SCALE: {
                     size = this.rect_size.clone();
@@ -108,26 +93,26 @@ export class TextureRect extends Control {
                     tile = true;
                 } break;
                 case STRETCH_KEEP: {
-                    size = this._texture.get_size();
+                    size = this.texture.get_size();
                 } break;
                 case STRETCH_KEEP_CENTERED: {
                     offset.copy(this.rect_size)
-                        .subtract(this._texture.get_width(), this._texture.get_height())
+                        .subtract(this.texture.get_width(), this.texture.get_height())
                         .scale(0.5)
-                    size = this._texture.get_size();
+                    size = this.texture.get_size();
                 } break;
                 case STRETCH_KEEP_ASPECT_CENTERED:
                 case STRETCH_KEEP_ASPECT: {
                     size = this.rect_size.clone();
-                    let tex_width = this._texture.get_width() * size.y / this._texture.get_height();
+                    let tex_width = this.texture.get_width() * size.y / this.texture.get_height();
                     let tex_height = size.y;
 
                     if (tex_width > size.x) {
                         tex_width = size.x;
-                        tex_height = this._texture.get_height() * tex_width / this._texture.get_width();
+                        tex_height = this.texture.get_height() * tex_width / this.texture.get_width();
                     }
 
-                    if (this._stretch_mode === STRETCH_KEEP_ASPECT_CENTERED) {
+                    if (this.stretch_mode === STRETCH_KEEP_ASPECT_CENTERED) {
                         offset.x += (size.x - tex_width) * 0.5;
                         offset.y += (size.y - tex_height) * 0.5;
                     }
@@ -138,7 +123,7 @@ export class TextureRect extends Control {
                 case STRETCH_KEEP_ASPECT_COVERED: {
                     size = this.rect_size.clone();
 
-                    const tex_size = this._texture.get_size();
+                    const tex_size = this.texture.get_size();
                     const scale = Math.max(size.x / tex_size.x, size.y / tex_size.y);
                     tex_size.scale(scale);
 
@@ -151,14 +136,14 @@ export class TextureRect extends Control {
                 } break;
             }
 
-            size.x *= this._flip_h ? -1 : 1;
-            size.y *= this._flip_v ? -1 : 1;
+            size.x *= this.flip_h ? -1 : 1;
+            size.y *= this.flip_v ? -1 : 1;
 
             const rect = Rect2.create(offset.x, offset.y, size.x, size.y);
             if (region.has_no_area()) {
-                this.draw_texture_rect(this._texture, rect, tile);
+                this.draw_texture_rect(this.texture, rect, tile);
             } else {
-                this.draw_texture_rect_region(this._texture, rect, region);
+                this.draw_texture_rect_region(this.texture, rect, region);
             }
             Rect2.free(rect);
 
@@ -177,7 +162,7 @@ export class TextureRect extends Control {
         /** @type {ImageTexture} */
         const texture = (typeof (p_texture) === 'string') ? get_resource_map()[p_texture] : p_texture;
 
-        this._texture = texture;
+        this.texture = texture;
         this.update();
         this.minimum_size_changed();
     }
@@ -186,7 +171,7 @@ export class TextureRect extends Control {
      * @param {boolean} value
      */
     set_expand(value) {
-        this._expand = value;
+        this.expand = value;
         this.update();
         this.minimum_size_changed();
     }
@@ -195,7 +180,7 @@ export class TextureRect extends Control {
      * @param {number} value
      */
     set_stretch_mode(value) {
-        this._stretch_mode = value;
+        this.stretch_mode = value;
         this.update();
     }
 
@@ -203,14 +188,14 @@ export class TextureRect extends Control {
      * @param {boolean} value
      */
     set_flip_h(value) {
-        this._flip_h = value;
+        this.flip_h = value;
         this.update();
     }
     /**
      * @param {boolean} value
      */
     set_flip_v(value) {
-        this._flip_v = value;
+        this.flip_v = value;
         this.update();
     }
 }

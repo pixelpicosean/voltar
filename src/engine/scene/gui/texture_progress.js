@@ -34,75 +34,38 @@ const corners = [ -0.125, -0.375, -0.625, -0.875, 0.125, 0.375, 0.625, 0.875, 1.
 export class TextureProgress extends Range {
     get class() { return 'TextureProgress' }
 
-    get fill_mode() { return this._fill_mode }
-    set fill_mode(value) { this.set_fill_mode(value) }
-
-    get nine_patch_stretch() { return this._nine_patch_stretch }
-    set nine_patch_stretch(value) { this.set_nine_patch_stretch(value) }
-
-    get radial_center_offset() { return this._radial_center_offset }
-    set radial_center_offset(value) { this.set_radial_center_offset(value) }
-
-    get radial_fill_degrees() { return this._radial_fill_degrees }
-    set radial_fill_degrees(value) { this.set_radial_fill_degrees(value) }
-
-    get radial_initial_angle() { return this._radial_initial_angle }
-    set radial_initial_angle(value) { this.set_radial_initial_angle(value) }
-
     get stretch_margin_bottom() { return this.stretch_margin[MARGIN_BOTTOM] }
-    set stretch_margin_bottom(value) { this.set_stretch_margin(MARGIN_BOTTOM, value) }
 
     get stretch_margin_left() { return this.stretch_margin[MARGIN_LEFT] }
-    set stretch_margin_left(value) { this.set_stretch_margin(MARGIN_LEFT, value) }
 
     get stretch_margin_top() { return this.stretch_margin[MARGIN_TOP] }
-    set stretch_margin_top(value) { this.set_stretch_margin(MARGIN_TOP, value) }
 
     get stretch_margin_right() { return this.stretch_margin[MARGIN_RIGHT] }
-    set stretch_margin_right(value) { this.set_stretch_margin(MARGIN_RIGHT, value) }
-
-    get texture_over() { return this._texture_over }
-    set texture_over(value) { this.set_texture_over(value) }
-
-    get texture_progress() { return this._texture_progress }
-    set texture_progress(value) { this.set_texture_progress(value) }
-
-    get texture_under() { return this._texture_under }
-    set texture_under(value) { this.set_texture_under(value) }
-
-    get tint_over() { return this._tint_over }
-    set tint_over(value) { this.set_tint_over(value) }
-
-    get tint_progress() { return this._tint_progress }
-    set tint_progress(value) { this.set_tint_progress(value) }
-
-    get tint_under() { return this._tint_under }
-    set tint_under(value) { this.set_tint_under(value) }
 
     constructor() {
         super();
 
-        this._fill_mode = FILL_LEFT_TO_RIGHT;
-        this._nine_patch_stretch = false;
+        this.fill_mode = FILL_LEFT_TO_RIGHT;
+        this.nine_patch_stretch = false;
 
         /** @type {ImageTexture} */
-        this._texture_over = null;
+        this.texture_over = null;
 
         /** @type {ImageTexture} */
-        this._texture_progress = null;
+        this.texture_progress = null;
 
         /** @type {ImageTexture} */
-        this._texture_under = null;
+        this.texture_under = null;
 
-        this._radial_initial_angle = 0;
-        this._radial_center_offset = new Vector2();
-        this._radial_fill_degrees = 360;
+        this.radial_initial_angle = 0;
+        this.radial_center_offset = new Vector2();
+        this.radial_fill_degrees = 360;
 
         this.stretch_margin = [0, 0, 0, 0];
 
-        this._tint_under = new Color(1, 1, 1);
-        this._tint_progress = new Color(1, 1, 1);
-        this._tint_over = new Color(1, 1, 1);
+        this.tint_under = new Color(1, 1, 1);
+        this.tint_progress = new Color(1, 1, 1);
+        this.tint_over = new Color(1, 1, 1);
     }
 
     /* virtual */
@@ -124,13 +87,13 @@ export class TextureProgress extends Range {
             this.set_radial_fill_degrees(data.radial_fill_degrees);
 
         if (data.stretch_margin_bottom !== undefined)
-            this.stretch_margin_bottom = data.stretch_margin_bottom;
+            this.set_stretch_margin_bottom(data.stretch_margin_bottom);
         if (data.stretch_margin_left !== undefined)
-            this.stretch_margin_left = data.stretch_margin_left;
+            this.set_stretch_margin_left(data.stretch_margin_left);
         if (data.stretch_margin_top !== undefined)
-            this.stretch_margin_top = data.stretch_margin_top;
+            this.set_stretch_margin_top(data.stretch_margin_top);
         if (data.stretch_margin_right !== undefined)
-            this.stretch_margin_right = data.stretch_margin_right;
+            this.set_stretch_margin_right(data.stretch_margin_right);
 
         if (data.texture_under !== undefined)
             this.set_texture_under(data.texture_under);
@@ -155,56 +118,56 @@ export class TextureProgress extends Range {
     _notification(p_what) {
         switch (p_what) {
             case NOTIFICATION_DRAW: {
-                if (this._nine_patch_stretch && (this._fill_mode === FILL_LEFT_TO_RIGHT || this._fill_mode === FILL_RIGHT_TO_LEFT || this._fill_mode === FILL_TOP_TO_BOTTOM || this._fill_mode === FILL_BOTTOM_TO_TOP)) {
-                    if (this._texture_under) {
-                        this.draw_nine_patch_stretched(this._texture_under, FILL_LEFT_TO_RIGHT, 1.0, this._tint_under);
+                if (this.nine_patch_stretch && (this.fill_mode === FILL_LEFT_TO_RIGHT || this.fill_mode === FILL_RIGHT_TO_LEFT || this.fill_mode === FILL_TOP_TO_BOTTOM || this.fill_mode === FILL_BOTTOM_TO_TOP)) {
+                    if (this.texture_under) {
+                        this.draw_nine_patch_stretched(this.texture_under, FILL_LEFT_TO_RIGHT, 1.0, this.tint_under);
                     }
-                    if (this._texture_progress) {
-                        this.draw_nine_patch_stretched(this._texture_progress, this._fill_mode, this.ratio, this._tint_progress);
+                    if (this.texture_progress) {
+                        this.draw_nine_patch_stretched(this.texture_progress, this.fill_mode, this.ratio, this.tint_progress);
                     }
-                    if (this._texture_over) {
-                        this.draw_nine_patch_stretched(this._texture_over, FILL_LEFT_TO_RIGHT, 1.0, this._tint_over);
+                    if (this.texture_over) {
+                        this.draw_nine_patch_stretched(this.texture_over, FILL_LEFT_TO_RIGHT, 1.0, this.tint_over);
                     }
                 } else {
-                    if (this._texture_under) {
-                        this.draw_texture(this._texture_under, Vector2.ZERO, this._tint_under);
+                    if (this.texture_under) {
+                        this.draw_texture(this.texture_under, Vector2.ZERO, this.tint_under);
                     }
-                    if (this._texture_progress) {
-                        const s = this._texture_progress.get_size();
+                    if (this.texture_progress) {
+                        const s = this.texture_progress.get_size();
                         const region = Rect2.create();
-                        switch (this._fill_mode) {
+                        switch (this.fill_mode) {
                             case FILL_LEFT_TO_RIGHT: {
                                 region.set(0, 0, s.x * this.ratio, s.y);
-                                this.draw_texture_rect_region(this._texture_progress, region, region, this._tint_progress);
+                                this.draw_texture_rect_region(this.texture_progress, region, region, this.tint_progress);
                             } break;
                             case FILL_RIGHT_TO_LEFT: {
                                 region.set(s.x - s.x * this.ratio, 0, s.x * this.ratio, s.y);
-                                this.draw_texture_rect_region(this._texture_progress, region, region, this._tint_progress);
+                                this.draw_texture_rect_region(this.texture_progress, region, region, this.tint_progress);
                             } break;
                             case FILL_TOP_TO_BOTTOM: {
                                 region.set(0, 0, s.x, s.y * this.ratio);
-                                this.draw_texture_rect_region(this._texture_progress, region, region, this._tint_progress);
+                                this.draw_texture_rect_region(this.texture_progress, region, region, this.tint_progress);
                             } break;
                             case FILL_BOTTOM_TO_TOP: {
                                 region.set(0, s.y - s.y * this.ratio, s.x, s.y * this.ratio);
-                                this.draw_texture_rect_region(this._texture_progress, region, region, this._tint_progress);
+                                this.draw_texture_rect_region(this.texture_progress, region, region, this.tint_progress);
                             } break;
                             case FILL_CLOCKWISE:
                             case FILL_COUNTER_CLOCKWISE:
                             case FILL_CLOCKWISE_AND_COUNTER_CLOCKWISE: {
-                                const val = this.ratio * this._radial_fill_degrees / 360;
+                                const val = this.ratio * this.radial_fill_degrees / 360;
                                 if (val === 1) {
                                     region.set(0, 0, s.x, s.y);
-                                    this.draw_texture_rect_region(this._texture_progress, region, region, this._tint_progress);
+                                    this.draw_texture_rect_region(this.texture_progress, region, region, this.tint_progress);
                                 } else if (val !== 0) {
                                     // TODO: draw circle progress
                                     break;
 
                                     const pts = [];
-                                    const direction = (this._fill_mode === FILL_COUNTER_CLOCKWISE) ? -1 : 1;
+                                    const direction = (this.fill_mode === FILL_COUNTER_CLOCKWISE) ? -1 : 1;
                                     let start = 0.0;
-                                    if (this._fill_mode === FILL_CLOCKWISE_AND_COUNTER_CLOCKWISE) {
-                                        start = this._radial_initial_angle / 360 - val * 0.5;
+                                    if (this.fill_mode === FILL_CLOCKWISE_AND_COUNTER_CLOCKWISE) {
+                                        start = this.radial_initial_angle / 360 - val * 0.5;
                                     } else {
                                         start = this.radial_initial_angle / 360;
                                     }
@@ -226,21 +189,21 @@ export class TextureProgress extends Range {
                             } break;
                             case FILL_BILINEAR_LEFT_AND_RIGHT: {
                                 region.set(s.x * 0.5 - s.x * this.ratio * 0.5, 0, s.x * this.ratio, s.y);
-                                this.draw_texture_rect_region(this._texture_progress, region, region, this._tint_progress);
+                                this.draw_texture_rect_region(this.texture_progress, region, region, this.tint_progress);
                             } break;
                             case FILL_BILINEAR_TOP_AND_BOTTOM: {
                                 region.set(0, s.y * 0.5 - s.y * this.ratio * 0.5, s.x, s.y * this.ratio);
-                                this.draw_texture_rect_region(this._texture_progress, region, region, this._tint_progress);
+                                this.draw_texture_rect_region(this.texture_progress, region, region, this.tint_progress);
                             } break;
                             default: {
                                 region.set(0, 0, s.x * this.ratio, s.y);
-                                this.draw_texture_rect_region(this._texture_progress, region, region, this._tint_progress);
+                                this.draw_texture_rect_region(this.texture_progress, region, region, this.tint_progress);
                             } break;
                         }
                         Rect2.free(region);
                     }
-                    if (this._texture_over) {
-                        this.draw_texture(this._texture_over, Vector2.ZERO, this._tint_over);
+                    if (this.texture_over) {
+                        this.draw_texture(this.texture_over, Vector2.ZERO, this.tint_over);
                     }
                 }
             } break;
@@ -258,17 +221,17 @@ export class TextureProgress extends Range {
 
     get_minimum_size() {
         const size = Vector2.create();
-        if (this._nine_patch_stretch) {
+        if (this.nine_patch_stretch) {
             return size.set(
                 this.stretch_margin[MARGIN_LEFT] + this.stretch_margin[MARGIN_RIGHT],
                 this.stretch_margin[MARGIN_TOP] + this.stretch_margin[MARGIN_BOTTOM]
             );
-        } else if (this._texture_under) {
-            return size.set(this._texture_under.width, this._texture_under.height);
-        } else if (this._texture_over) {
-            return size.set(this._texture_over.width, this._texture_over.height);
-        } else if (this._texture_progress) {
-            return size.set(this._texture_progress.width, this._texture_progress.height);
+        } else if (this.texture_under) {
+            return size.set(this.texture_under.width, this.texture_under.height);
+        } else if (this.texture_over) {
+            return size.set(this.texture_over.width, this.texture_over.height);
+        } else if (this.texture_progress) {
+            return size.set(this.texture_progress.width, this.texture_progress.height);
         }
         return size.set(1, 1);
     }
@@ -279,7 +242,7 @@ export class TextureProgress extends Range {
      * @param {number} p_fill
      */
     set_fill_mode(p_fill) {
-        this._fill_mode = p_fill;
+        this.fill_mode = p_fill;
         this.update();
     }
 
@@ -287,7 +250,7 @@ export class TextureProgress extends Range {
      * @param {boolean} value
      */
     set_nine_patch_stretch(value) {
-        this._nine_patch_stretch = value;
+        this.nine_patch_stretch = value;
         this.update();
         this.minimum_size_changed();
     }
@@ -303,7 +266,7 @@ export class TextureProgress extends Range {
      * @param {number} y
      */
     set_radial_center_offset_n(x, y) {
-        this._radial_center_offset.set(x, y);
+        this.radial_center_offset.set(x, y);
         this.update();
     }
 
@@ -311,7 +274,7 @@ export class TextureProgress extends Range {
      * @param {number} value
      */
     set_radial_fill_degrees(value) {
-        this._radial_fill_degrees = clamp(value, 0, 360);
+        this.radial_fill_degrees = clamp(value, 0, 360);
         this.update();
     }
 
@@ -325,7 +288,7 @@ export class TextureProgress extends Range {
         while (value < 0) {
             value += 360;
         }
-        this._radial_initial_angle = value;
+        this.radial_initial_angle = value;
         this.update();
     }
 
@@ -342,9 +305,9 @@ export class TextureProgress extends Range {
      */
     set_tint_over_n(r, g, b) {
         if (g !== undefined) {
-            this._tint_over.set(r, g, b);
+            this.tint_over.set(r, g, b);
         } else {
-            this._tint_over.set_with_hex(r);
+            this.tint_over.set_with_hex(r);
         }
         this.update();
     }
@@ -362,9 +325,9 @@ export class TextureProgress extends Range {
      */
     set_tint_progress_n(r, g, b) {
         if (g !== undefined) {
-            this._tint_progress.set(r, g, b);
+            this.tint_progress.set(r, g, b);
         } else {
-            this._tint_progress.set_with_hex(r);
+            this.tint_progress.set_with_hex(r);
         }
         this.update();
     }
@@ -382,9 +345,9 @@ export class TextureProgress extends Range {
      */
     set_tint_under_n(r, g, b) {
         if (g !== undefined) {
-            this._tint_under.set(r, g, b);
+            this.tint_under.set(r, g, b);
         } else {
-            this._tint_under.set_with_hex(r);
+            this.tint_under.set_with_hex(r);
         }
         this.update();
     }
@@ -393,9 +356,9 @@ export class TextureProgress extends Range {
      * @param {string | ImageTexture} p_texture
      */
     set_texture_over(p_texture) {
-        this._texture_over = (typeof (p_texture) === 'string') ? get_resource_map()[p_texture] : p_texture;
+        this.texture_over = (typeof (p_texture) === 'string') ? get_resource_map()[p_texture] : p_texture;
         this.update();
-        if (!this._texture_under) {
+        if (!this.texture_under) {
             this.minimum_size_changed();
         }
     }
@@ -404,7 +367,7 @@ export class TextureProgress extends Range {
      * @param {string | ImageTexture} p_texture
      */
     set_texture_progress(p_texture) {
-        this._texture_progress = (typeof (p_texture) === 'string') ? get_resource_map()[p_texture] : p_texture;
+        this.texture_progress = (typeof (p_texture) === 'string') ? get_resource_map()[p_texture] : p_texture;
         this.update();
         this.minimum_size_changed();
     }
@@ -413,7 +376,7 @@ export class TextureProgress extends Range {
      * @param {string | ImageTexture} p_texture
      */
     set_texture_under(p_texture) {
-        this._texture_under = (typeof (p_texture) === 'string') ? get_resource_map()[p_texture] : p_texture;
+        this.texture_under = (typeof (p_texture) === 'string') ? get_resource_map()[p_texture] : p_texture;
         this.update();
         this.minimum_size_changed();
     }
@@ -440,7 +403,7 @@ export class TextureProgress extends Range {
             let width_texture = 0;
             let first_section_size = 0;
             let last_section_size = 0;
-            switch (this._fill_mode) {
+            switch (this.fill_mode) {
                 case FILL_LEFT_TO_RIGHT:
                 case FILL_RIGHT_TO_LEFT: {
                     width_total = dst_rect.width;
@@ -471,7 +434,7 @@ export class TextureProgress extends Range {
             first_section_size = Math.min(first_section_size, width_filled);
             width_texture = Math.min(width_texture, first_section_size + middle_section_size + last_section_size);
 
-            switch (this._fill_mode) {
+            switch (this.fill_mode) {
                 case FILL_LEFT_TO_RIGHT: {
                     src_rect.width = width_texture;
                     dst_rect.width = width_filled;

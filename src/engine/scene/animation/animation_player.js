@@ -548,7 +548,10 @@ export class AnimationPlayer extends Node {
      * If playing the current animation, otherwise the last played one.
      */
     get assigned_animation() { return this.playback.assigned }
-    set assigned_animation(p_anim) {
+    /**
+     * @param {string} p_anim
+     */
+    set_assigned_animation(p_anim) {
         if (this.is_playing()) {
             this.play(p_anim);
         } else {
@@ -562,7 +565,10 @@ export class AnimationPlayer extends Node {
      * The name of current animation.
      */
     get current_animation() { return (this.is_playing() ? this.playback.assigned : '') }
-    set current_animation(p_anim) {
+    /**
+     * @param {string} p_anim
+     */
+    set_current_animation(p_anim) {
         if (p_anim === '[stop]' || p_anim.length === 0) {
             this.stop();
         } else if (!this.is_playing() || this.playback.assigned !== p_anim) {
@@ -576,36 +582,40 @@ export class AnimationPlayer extends Node {
 
     get current_animation_position() { return this.playback.current.pos }
 
-    get playback_process_mode() { return this._playback_process_mode }
-    set playback_process_mode(p_mode) {
-        if (this._playback_process_mode === p_mode) {
+    /**
+     * @param {string} p_anim
+     */
+    set_playback_process_mode(p_mode) {
+        if (this.playback_process_mode === p_mode) {
             return;
         }
         const pr = this.processing;
         if (pr) {
             this._set_process(false);
         }
-        this._playback_process_mode = p_mode;
+        this.playback_process_mode = p_mode;
         if (pr) {
             this._set_process(true);
         }
     }
 
-    get root_node() { return this._root_node }
-    set root_node(value) {
-        this._root_node = value;
+    /**
+     * @param {string} value
+     */
+    set_root_node(value) {
+        this.root_node = value;
         this.clear_caches();
     }
 
     /**
      * If true, updates animations in response to process-related notifications.
+     * @param {boolean} value
      */
-    get playback_active() { return this._playback_active }
-    set playback_active(value) {
-        if (this._playback_active === value) {
+    set_playback_active(value) {
+        if (this.playback_active === value) {
             return;
         }
-        this._playback_active = value;
+        this.playback_active = value;
         this._set_process(this.processing, true);
     }
 
@@ -620,7 +630,7 @@ export class AnimationPlayer extends Node {
 
         this.autoplay = '';
         this.playback_speed = 1;
-        this._root_node = '..';
+        this.root_node = '..';
 
         /** @type {string[]} */
         this.queued = [];
@@ -630,9 +640,9 @@ export class AnimationPlayer extends Node {
         this.end_notify = false;
 
         this.processing = false;
-        this._playback_active = true;
+        this.playback_active = true;
 
-        this._playback_process_mode = ANIMATION_PROCESS_IDLE;
+        this.playback_process_mode = ANIMATION_PROCESS_IDLE;
         this.method_call_mode = ANIMATION_METHOD_CALL_IMMEDIATE;
 
         /**
@@ -678,7 +688,7 @@ export class AnimationPlayer extends Node {
         }
 
         if (data.root_node !== undefined) {
-            this.root_node = data.root_node;
+            this.set_root_node(data.root_node);
         }
         if (data.playback_speed !== undefined) {
             this.playback_speed = data.playback_speed;
@@ -709,7 +719,7 @@ export class AnimationPlayer extends Node {
                 }
             } break;
             case NOTIFICATION_INTERNAL_PROCESS: {
-                if (this._playback_process_mode === ANIMATION_PROCESS_PHYSICS) {
+                if (this.playback_process_mode === ANIMATION_PROCESS_PHYSICS) {
                     break;
                 }
 
@@ -718,7 +728,7 @@ export class AnimationPlayer extends Node {
                 }
             } break;
             case NOTIFICATION_INTERNAL_PHYSICS_PROCESS: {
-                if (this._playback_process_mode === ANIMATION_PROCESS_IDLE) {
+                if (this.playback_process_mode === ANIMATION_PROCESS_IDLE) {
                     break;
                 }
 
@@ -1034,12 +1044,12 @@ export class AnimationPlayer extends Node {
             return;
         }
 
-        switch (this._playback_process_mode) {
+        switch (this.playback_process_mode) {
             case ANIMATION_PROCESS_PHYSICS: {
-                this.set_physics_process_internal(p_process && this._playback_active);
+                this.set_physics_process_internal(p_process && this.playback_active);
             } break;
             case ANIMATION_PROCESS_IDLE: {
-                this.set_process_internal(p_process && this._playback_active);
+                this.set_process_internal(p_process && this.playback_active);
             } break;
             case ANIMATION_PROCESS_MANUAL: {
             } break;
@@ -1300,7 +1310,7 @@ export class AnimationPlayer extends Node {
         }
 
         /** @type {Node} */
-        let parent = this.get_node(this._root_node);
+        let parent = this.get_node(this.root_node);
 
         if (!parent) {
             return;

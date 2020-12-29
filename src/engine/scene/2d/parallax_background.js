@@ -10,34 +10,19 @@ import { NOTIFICATION_ENTER_TREE, NOTIFICATION_EXIT_TREE } from "../main/node.js
 export class ParallaxBackground extends CanvasLayer {
     get class() { return 'ParallaxBackground' }
 
-    get scroll_base_offset() { return this._scroll_base_offset }
-    set scroll_base_offset(value) { this.set_scroll_base_offset(value) }
-
-    get scroll_base_scale() { return this._scroll_base_scale }
-    set scroll_base_scale(value) { this.set_scroll_base_scale(value) }
-
-    get scroll_limit_begin() { return this._scroll_limit_begin }
-    set scroll_limit_begin(value) { this.set_scroll_limit_begin(value) }
-
-    get scroll_limit_end() { return this._scroll_limit_end }
-    set scroll_limit_end(value) { this.set_scroll_limit_end(value) }
-
-    get scroll_offset() { return this._scroll_offset }
-    set scroll_offset(value) { this.set_scroll_offset(value) }
-
     constructor() {
         super();
 
         this.scroll_ignore_camera_zoom = false;
-        this._scroll_base_offset = new Vector2();
-        this._scroll_base_scale = new Vector2(1, 1);
-        this._scroll_limit_begin = new Vector2();
-        this._scroll_limit_end = new Vector2();
-        this._scroll_offset = new Vector2();
+        this.scroll_base_offset = new Vector2;
+        this.scroll_base_scale = new Vector2(1, 1);
+        this.scroll_limit_begin = new Vector2;
+        this.scroll_limit_end = new Vector2;
+        this.scroll_offset = new Vector2;
 
         this.scroll_scale = 1.0;
-        this.screen_offset = new Vector2();
-        this.final_offset = new Vector2();
+        this.screen_offset = new Vector2;
+        this.final_offset = new Vector2;
 
         this.group_name = '';
 
@@ -99,7 +84,7 @@ export class ParallaxBackground extends CanvasLayer {
      * @param {number} y
      */
     set_scroll_offset_n(x, y) {
-        this._scroll_offset.set(x, y);
+        this.scroll_offset.set(x, y);
         this._update_scroll();
     }
 
@@ -114,7 +99,7 @@ export class ParallaxBackground extends CanvasLayer {
      * @param {number} y
      */
     set_scroll_base_offset_n(x, y) {
-        this._scroll_base_offset.set(x, y);
+        this.scroll_base_offset.set(x, y);
         this._update_scroll();
     }
 
@@ -129,7 +114,7 @@ export class ParallaxBackground extends CanvasLayer {
      * @param {number} y
      */
     set_scroll_base_scale_n(x, y) {
-        this._scroll_base_scale.set(x, y);
+        this.scroll_base_scale.set(x, y);
     }
 
     /**
@@ -143,7 +128,7 @@ export class ParallaxBackground extends CanvasLayer {
      * @param {number} y
      */
     set_scroll_limit_begin_n(x, y) {
-        this._scroll_limit_begin.set(x, y);
+        this.scroll_limit_begin.set(x, y);
         this._update_scroll();
     }
 
@@ -158,7 +143,7 @@ export class ParallaxBackground extends CanvasLayer {
      * @param {number} y
      */
     set_scroll_limit_end_n(x, y) {
-        this._scroll_limit_end.set(x, y);
+        this.scroll_limit_end.set(x, y);
         this._update_scroll();
     }
 
@@ -169,23 +154,23 @@ export class ParallaxBackground extends CanvasLayer {
             return;
         }
 
-        const ofs = this._scroll_offset.clone().multiply(this._scroll_base_scale).add(this._scroll_base_offset);
+        const ofs = this.scroll_offset.clone().multiply(this.scroll_base_scale).add(this.scroll_base_offset);
         const vps = this.get_viewport_size();
 
         ofs.negate();
-        if (this._scroll_limit_begin.x < this._scroll_limit_end.x) {
-            if (ofs.x < this._scroll_limit_begin.x) {
-                ofs.x = this._scroll_limit_begin.x;
-            } else if (ofs.x + vps.x > this._scroll_limit_end.x) {
-                ofs.x = this._scroll_limit_end.x - vps.x;
+        if (this.scroll_limit_begin.x < this.scroll_limit_end.x) {
+            if (ofs.x < this.scroll_limit_begin.x) {
+                ofs.x = this.scroll_limit_begin.x;
+            } else if (ofs.x + vps.x > this.scroll_limit_end.x) {
+                ofs.x = this.scroll_limit_end.x - vps.x;
             }
         }
 
-        if (this._scroll_limit_begin.y < this._scroll_limit_end.y) {
-            if (ofs.y < this._scroll_limit_begin.y) {
-                ofs.y = this._scroll_limit_begin.y;
-            } else if (ofs.y + vps.y > this._scroll_limit_end.y) {
-                ofs.y = this._scroll_limit_end.y - vps.y;
+        if (this.scroll_limit_begin.y < this.scroll_limit_end.y) {
+            if (ofs.y < this.scroll_limit_begin.y) {
+                ofs.y = this.scroll_limit_begin.y;
+            } else if (ofs.y + vps.y > this.scroll_limit_end.y) {
+                ofs.y = this.scroll_limit_end.y - vps.y;
             }
         }
         ofs.negate();

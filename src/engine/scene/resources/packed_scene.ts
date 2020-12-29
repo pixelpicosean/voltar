@@ -75,7 +75,7 @@ res_class_map["PackedScene"] = PackedScene;
 
 function build_node_path_table(table: NodePathTable, nodes: Node[], root: string) {
     for (let n of nodes) {
-        let self_path = root ? `${root}/${n.get_name()}` : n.get_name();
+        let self_path = root ? `${root}/${n.name}` : n.name;
         table[self_path] = n;
         if (n.data.children.length > 0) {
             build_node_path_table(table, n.data.children, self_path);

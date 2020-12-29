@@ -9,13 +9,10 @@ import { Container, NOTIFICATION_SORT_CHILDREN } from "./container.js";
 export class CenterContainer extends Container {
     get class() { return 'CenterContainer' }
 
-    get use_top_left() { return this._use_top_left }
-    set use_top_left(value) { this.set_use_top_left(value) }
-
     constructor() {
         super();
 
-        this._use_top_left = false;
+        this.use_top_left = false;
     }
 
     /* virtual */
@@ -43,8 +40,8 @@ export class CenterContainer extends Container {
 
                 const minsize = c.get_combined_minimum_size();
                 rect.set(
-                    Math.floor(this._use_top_left ? (-minsize.x * 0.5) : ((this.rect_size.x - minsize.x) * 0.5)),
-                    Math.floor(this._use_top_left ? (-minsize.y * 0.5) : ((this.rect_size.y - minsize.y) * 0.5)),
+                    Math.floor(this.use_top_left ? (-minsize.x * 0.5) : ((this.rect_size.x - minsize.x) * 0.5)),
+                    Math.floor(this.use_top_left ? (-minsize.y * 0.5) : ((this.rect_size.y - minsize.y) * 0.5)),
                     minsize.x,
                     minsize.y
                 )
@@ -61,7 +58,7 @@ export class CenterContainer extends Container {
     get_minimum_size() {
         const ms = Vector2.create(0, 0);
 
-        if (this._use_top_left) {
+        if (this.use_top_left) {
             return ms;
         }
 
@@ -86,7 +83,7 @@ export class CenterContainer extends Container {
      * @param {boolean} value
      */
     set_use_top_left(value) {
-        this._use_top_left = value;
+        this.use_top_left = value;
         this.queue_sort();
     }
 }

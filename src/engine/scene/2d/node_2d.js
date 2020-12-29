@@ -14,48 +14,6 @@ import { CanvasItem } from './canvas_item.js';
 export class Node2D extends CanvasItem {
     get class() { return 'Node2D' }
 
-    get global_position() { return this.get_global_position() }
-    set global_position(value) { this.set_global_position(value) }
-
-    get global_rotation() { return this.get_global_rotation() }
-    set global_rotation(value) { this.set_global_rotation(value) }
-
-    get global_rotation_degrees() { return this.get_global_rotation_degrees() }
-    set global_rotation_degrees(value) { this.set_global_rotation_degrees(value) }
-
-    get global_scale() { return this.get_global_scale() }
-    set global_scale(value) { this.set_global_scale(value) }
-
-    get global_transform() { return this.get_global_transform() }
-    set global_transform(value) { this.set_global_transform(value) }
-
-    get position() { return this.get_position() }
-    set position(value) { this.set_position(value) }
-
-    get rotation() { return this.get_rotation() }
-    set rotation(value) { this.set_rotation(value) }
-
-    get rotation_degrees() { return this.get_rotation_degrees() }
-    set rotation_degrees(value) { this.set_rotation_degrees(value) }
-
-    get scale() { return this.get_scale() }
-    set scale(value) { this.set_scale(value) }
-
-    get skew() { return this.get_skew() }
-    set skew(value) { this.set_skew(value) }
-
-    get skew_degrees() { return rad2deg(this.get_skew()) }
-    set skew_degrees(value) { this.set_skew(deg2rad(value)) }
-
-    get transform() { return this._transform }
-    set transform(value) { this.set_transform(value) }
-
-    get z_as_relative() { return this._z_as_relative }
-    set z_as_relative(value) { this.set_z_as_relative(value) }
-
-    get z_index() { return this._z_index }
-    set z_index(value) { this.set_z_index(value) }
-
     /**
      * @param {number} x
      * @param {number} y
@@ -73,7 +31,7 @@ export class Node2D extends CanvasItem {
     set_position(position) {
         this.set_position_n(position.x, position.y);
     }
-    get_position() {
+    get position() {
         if (this._xform_dirty) {
             this._update_xform_values();
         }
@@ -90,7 +48,7 @@ export class Node2D extends CanvasItem {
         this._rotation = value;
         this._update_transform();
     }
-    get_rotation() {
+    get rotation() {
         if (this._xform_dirty) {
             this._update_xform_values();
         }
@@ -107,7 +65,7 @@ export class Node2D extends CanvasItem {
         this._rotation = deg2rad(value);
         this._update_transform();
     }
-    get_rotation_degrees() {
+    get rotation_degrees() {
         if (this._xform_dirty) {
             this._update_xform_values();
         }
@@ -137,7 +95,7 @@ export class Node2D extends CanvasItem {
     set_scale(scale) {
         this.set_scale_n(scale.x, scale.y);
     }
-    get_scale() {
+    get scale() {
         if (this._xform_dirty) {
             this._update_xform_values();
         }
@@ -153,7 +111,7 @@ export class Node2D extends CanvasItem {
         this._skew = p_angle;
         this._update_transform();
     }
-    get_skew() {
+    get skew() {
         if (this._xform_dirty) {
             this._update_xform_values();
         }
@@ -187,6 +145,9 @@ export class Node2D extends CanvasItem {
         this.set_transform_n(mat.a, mat.b, mat.c, mat.d, mat.tx, mat.ty);
     }
 
+    /**
+     * Returns a new Transform2D
+     */
     get_transform() {
         return this._transform.clone();
     }
@@ -299,15 +260,15 @@ export class Node2D extends CanvasItem {
      * @param {number} value
      */
     set_z_index(value) {
-        this._z_index = value;
-        VSG.canvas.canvas_item_set_z_index(this.canvas_item, this._z_index);
+        this.z_index = value;
+        VSG.canvas.canvas_item_set_z_index(this.canvas_item, this.z_index);
     }
 
     /**
      * @param {boolean} value
      */
     set_z_as_relative(value) {
-        this._z_as_relative = value;
+        this.z_as_relative = value;
         VSG.canvas.canvas_item_set_z_as_relative_to_parent(this.canvas_item, value);
     }
 
@@ -320,9 +281,9 @@ export class Node2D extends CanvasItem {
         this._rotation = 0;
         this._scale = new Vector2(1, 1);
         this._skew = 0;
-        this._z_index = 0;
-        this._z_as_relative = false;
-        this._transform = new Transform2D();
+        this.z_index = 0;
+        this.z_as_relative = false;
+        this._transform = new Transform2D;
 
         /* private */
 

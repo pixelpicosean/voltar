@@ -51,28 +51,20 @@ class Shared {
 
 export class Range extends Control {
     get allow_greater() { return this.shared.allow_greater }
-    set allow_greater(val) { this.set_allow_greater(val) }
 
     get allow_lesser() { return this.shared.allow_lesser }
-    set allow_lesser(val) { this.set_allow_lesser(val) }
 
     get exp_edit() { return this.shared.exp_ratio }
-    set exp_edit(val) { this.set_exp_edit(val) }
 
     get value() { return this.shared.val }
-    set value(val) { this.set_value(val) }
 
     get min_value() { return this.shared.min }
-    set min_value(val) { this.set_min_value(val) }
 
     get max_value() { return this.shared.max }
-    set max_value(val) { this.set_max_value(val) }
 
     get step() { return this.shared.step }
-    set step(val) { this.set_step(val) }
 
     get page() { return this.shared.page }
-    set page(val) { this.set_page(val) }
 
     get ratio() {
         if (this.shared.exp_ratio && this.min_value >= 0) {
@@ -87,7 +79,6 @@ export class Range extends Control {
             return clamp((value - this.min_value) / (this.max_value - this.min_value), 0, 1);
         }
     }
-    set ratio(val) { this.set_ratio(val) }
 
     constructor() {
         super();

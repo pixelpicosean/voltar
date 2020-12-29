@@ -18,28 +18,16 @@ import { CollisionObject2D } from "./collision_object_2d.js";
 export class CollisionShape2D extends Node2D {
     get class() { return 'CollisionShape2D' }
 
-    get disabled() { return this._disabled }
-    set disabled(value) { this.set_disabled(value) }
-
-    get one_way_collision() { return this._one_way_collision }
-    set one_way_collision(value) { this.set_one_way_collision(value) }
-
-    get one_way_collision_margin() { return this._one_way_collision_margin }
-    set one_way_collision_margin(value) { this.set_one_way_collision_margin(value) }
-
-    get shape() { return this._shape }
-    set shape(value) { this.set_shape(value) }
-
     constructor() {
         super();
 
         /**
          * @type {Shape2D}
          */
-        this._shape = null;
-        this._disabled = false;
-        this._one_way_collision = false;
-        this._one_way_collision_margin = 1.0;
+        this.shape = null;
+        this.disabled = false;
+        this.one_way_collision = false;
+        this.one_way_collision_margin = 1.0;
         /**
          * @type {import('./collision_object_2d').CollisionObject2D}
          */
@@ -59,13 +47,13 @@ export class CollisionShape2D extends Node2D {
             this.set_shape(p_data.shape);
         }
         if (p_data.disabled !== undefined) {
-            this._disabled = p_data.disabled;
+            this.set_disabled(p_data.disabled);
         }
         if (p_data.one_way_collision !== undefined) {
-            this._one_way_collision = p_data.one_way_collision;
+            this.set_one_way_collision(p_data.one_way_collision);
         }
         if (p_data.one_way_collision_margin !== undefined) {
-            this._one_way_collision_margin = p_data.one_way_collision_margin;
+            this.set_one_way_collision_margin(p_data.one_way_collision_margin);
         }
 
         return this;
@@ -81,8 +69,8 @@ export class CollisionShape2D extends Node2D {
                 if (this.parent.is_collision_object) {
                     // owner is also self
                     this.shape_owner = this.parent.create_shape_owner(this);
-                    if (this._shape) {
-                        this.parent.shape_owner_add_shape(this.shape_owner, this._shape);
+                    if (this.shape) {
+                        this.parent.shape_owner_add_shape(this.shape_owner, this.shape);
                     }
                     this._update_in_shape_owner();
                 } else {
@@ -115,12 +103,12 @@ export class CollisionShape2D extends Node2D {
      * @param {Shape2D} p_shape
      */
     set_shape(p_shape) {
-        this._shape = p_shape;
+        this.shape = p_shape;
         this.update();
         if (this.parent) {
             this.parent.shape_owner_clear_shapes(this.shape_owner);
-            if (this._shape) {
-                this.parent.shape_owner_add_shape(this.shape_owner, this._shape);
+            if (this.shape) {
+                this.parent.shape_owner_add_shape(this.shape_owner, this.shape);
             }
         }
     }
@@ -129,7 +117,7 @@ export class CollisionShape2D extends Node2D {
      * @param {boolean} p_disabled
      */
     set_disabled(p_disabled) {
-        this._disabled = p_disabled;
+        this.disabled = p_disabled;
         this.update();
         if (this.parent) {
             this.parent.shape_owner_set_disabled(this.shape_owner, p_disabled);
@@ -140,7 +128,7 @@ export class CollisionShape2D extends Node2D {
      * @param {boolean} p_one_way_collision
      */
     set_one_way_collision(p_one_way_collision) {
-        this._one_way_collision = p_one_way_collision;
+        this.one_way_collision = p_one_way_collision;
         this.update();
         if (this.parent) {
             this.parent.shape_owner_set_one_way_collision(this.shape_owner, p_one_way_collision);
@@ -151,7 +139,7 @@ export class CollisionShape2D extends Node2D {
      * @param {number} p_one_way_collision_margin
      */
     set_one_way_collision_margin(p_one_way_collision_margin) {
-        this._one_way_collision_margin = p_one_way_collision_margin;
+        this.one_way_collision_margin = p_one_way_collision_margin;
         if (this.parent) {
             this.parent.shape_owner_set_one_way_collision_margin(this.shape_owner, p_one_way_collision_margin);
         }
@@ -167,9 +155,9 @@ export class CollisionShape2D extends Node2D {
         if (p_xform_only) {
             return;
         }
-        this.parent.shape_owner_set_disabled(this.shape_owner, this._disabled);
-        this.parent.shape_owner_set_one_way_collision(this.shape_owner, this._one_way_collision);
-        this.parent.shape_owner_set_one_way_collision_margin(this.shape_owner, this._one_way_collision_margin);
+        this.parent.shape_owner_set_disabled(this.shape_owner, this.disabled);
+        this.parent.shape_owner_set_one_way_collision(this.shape_owner, this.one_way_collision);
+        this.parent.shape_owner_set_one_way_collision_margin(this.shape_owner, this.one_way_collision_margin);
     }
 }
 node_class_map['CollisionShape2D'] = GDCLASS(CollisionShape2D, Node2D)

@@ -122,34 +122,286 @@ export class Control extends CanvasItem {
     set_mouse_default_cursor_shape(value) { this.cursor = value }
 
     get rect_min_size() { return this.c_data.custom_minimum_size }
+    /**
+     * @param {Vector2Like} value
+     */
+    set_rect_min_size(value) {
+        if (this.c_data.custom_minimum_size.equals(value)) {
+            return;
+        }
+
+        this.c_data.custom_minimum_size.copy(value);
+        this.minimum_size_changed();
+    }
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
+    set_rect_min_size_n(x, y) {
+        const size = Vector2.create(x, y);
+        this.set_rect_min_size(size);
+        Vector2.free(size);
+    }
 
     get rect_clip_content() { return this.c_data.clip_contents }
+    /**
+     * @param {boolean} value
+     */
+    set_rect_clip_content(value) {
+        this.c_data.rect_clip_content = value;
+        this.update();
+    }
 
     get rect_position() { return this.c_data.pos_cache }
+    /**
+     * @param {Vector2Like} value
+     * @param {boolean} [p_keep_margins=false]
+     */
+    set_rect_position(value, p_keep_margins = false) {
+        this.set_rect_position_n(value.x, value.y, p_keep_margins);
+    }
+    /**
+     * @param {number} x
+     * @param {number} y
+     * @param {boolean} [p_keep_margins=false]
+     */
+    set_rect_position_n(x, y, p_keep_margins = false) {
+        const rect = Rect2.create(x, y, this.c_data.size_cache.x, this.c_data.size_cache.y);
+        if (p_keep_margins) {
+            this._compute_anchors(rect, this.c_data.margin, this.c_data.anchor);
+        } else {
+            this._compute_margins(rect, this.c_data.anchor, this.c_data.margin);
+        }
+        this._size_changed();
+        Rect2.free(rect);
+    }
+    /**
+     * @param {Vector2Like} value
+     */
+    set_position(value) {
+        this.set_rect_position_n(value.x, value.y);
+    }
 
     get rect_global_position() { return this.get_global_transform().get_origin() }
+    /**
+     * @param {Vector2Like} value
+     * @param {boolean} [p_keep_margins=false]
+     */
+    set_rect_global_position(value, p_keep_margins = false) {
+        this.set_rect_global_position_n(value.x, value.y, p_keep_margins);
+    }
+    /**
+     * @param {number} x
+     * @param {number} y
+     * @param {boolean} [p_keep_margins=false]
+     */
+    set_rect_global_position_n(x, y, p_keep_margins = false) {
+        const inv = Transform2D.create();
+        if (this.c_data.parent_canvas_item) {
+            inv.copy(this.c_data.parent_canvas_item.get_global_transform()).affine_inverse();
+        }
+        const point = Vector2.create(x, y)
+        this.set_rect_position(inv.xform(point, point), p_keep_margins);
+        Vector2.free(point);
+        Transform2D.free(inv);
+    }
+    /**
+     * @param {Vector2Like} value
+     */
+    set_global_position(value) {
+        this.set_rect_global_position_n(value.x, value.y);
+    }
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
+    set_global_position_n(x, y) {
+        this.set_rect_global_position_n(x, y);
+    }
 
     get rect_size() { return this.c_data.size_cache }
+    /**
+     * @param {Vector2Like} value
+     * @param {boolean} [p_keep_margins=false]
+     */
+    set_rect_size(value, p_keep_margins = false) {
+        this.set_rect_size_n(value.x, value.y, p_keep_margins);
+    }
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
+    set_rect_size_n(x, y, p_keep_margins = false) {
+        const new_size = Vector2.create(x, y);
+        const min = this.get_combined_minimum_size();
+        if (new_size.x < min.x) {
+            new_size.x = min.x;
+        }
+        if (new_size.y < min.y) {
+            new_size.y = min.y;
+        }
+
+        const rect = Rect2.create(
+            this.c_data.pos_cache.x,
+            this.c_data.pos_cache.y,
+            new_size.x,
+            new_size.y
+        )
+        if (p_keep_margins) {
+            this._compute_anchors(rect, this.c_data.margin, this.c_data.anchor);
+        } else {
+            this._compute_margins(rect, this.c_data.anchor, this.c_data.margin);
+        }
+        this._size_changed();
+        Rect2.free(rect);
+        Vector2.free(new_size);
+        Vector2.free(min);
+    }
 
     get rect_rotation() { return rad2deg(this.c_data.rotation) }
+    /**
+     * @param {number} value
+     */
+    set_rect_rotation(value) {
+        this.c_data.rotation = deg2rad(value);
+        this.update();
+        this._notify_transform();
+    }
 
     get grow_horizontal() { return this.c_data.h_grow }
+    /**
+     * @param {number} value
+     */
+    set_grow_horizontal(value) {
+        this.c_data.h_grow = value;
+        this._size_changed();
+    }
 
     get grow_vertical() { return this.c_data.v_grow }
+    /**
+     * @param {number} value
+     */
+    set_grow_vertical(value) {
+        this.c_data.v_grow = value;
+        this._size_changed();
+    }
 
     get rect_pivot_offset() { return this.c_data.pivot_offset }
+    /**
+     * @param {Vector2Like} value
+     */
+    set_rect_pivot_offset(value) {
+        this.set_rect_pivot_offset_n(value.x, value.y);
+    }
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
+    set_rect_pivot_offset_n(x, y) {
+        this.c_data.pivot_offset.set(x, y);
+        this.update();
+        this._notify_transform();
+    }
 
     get rect_scale() { return this.c_data.scale }
+    /**
+     * @param {Vector2Like} value
+     */
+    set_rect_scale(value) {
+        this.set_rect_scale_n(value.x, value.y);
+    }
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
+    set_rect_scale_n(x, y) {
+        this.c_data.scale.set(x, y);
+        this.update();
+        this._notify_transform();
+    }
+    /**
+     * @param {Vector2Like} value
+     */
+    set_scale(value) {
+        this.set_rect_scale_n(value.x, value.y);
+    }
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
+    set_scale_n(x, y) {
+        this.set_rect_scale_n(x, y);
+    }
 
     get size_flags_horizontal() { return this.c_data.h_size_flags }
+    /**
+     * @param {number} value
+     */
+    set_size_flags_horizontal(value) {
+        if (this.c_data.h_size_flags === value) {
+            return;
+        }
+        this.c_data.h_size_flags = value;
+        this.emit_signal('size_flags_changed');
+    }
 
     get size_flags_vertical() { return this.c_data.v_size_flags }
+    /**
+     * @param {number} value
+     */
+    set_size_flags_vertical(value) {
+        if (this.c_data.v_size_flags === value) {
+            return;
+        }
+        this.c_data.v_size_flags = value;
+        this.emit_signal('size_flags_changed');
+    }
 
     get size_flags_stretch_ratio() { return this.c_data.expand }
+    /**
+     * @param {number} value
+     */
+    set_size_flags_stretch_ratio(value) {
+        if (this.c_data.expand === value) {
+            return;
+        }
+        this.c_data.expand = value;
+        this.emit_signal('size_flags_changed');
+    }
 
     get theme() { return this.c_data.theme }
+    /**
+     * @param {Theme} p_theme
+     */
+    set_theme(p_theme) {
+        if (this.c_data.theme === p_theme) {
+            return;
+        }
+
+        this.c_data.theme = p_theme;
+        if (p_theme) {
+            this.c_data.theme_owner = this;
+            this._propagate_theme_changed(this, this);
+        } else {
+            const parent = /** @type {Control} */(this.get_parent());
+            if (parent.is_control && parent.c_data.theme_owner) {
+                this._propagate_theme_changed(this, parent.c_data.theme_owner);
+            } else {
+                this._propagate_theme_changed(this, null);
+            }
+        }
+    }
 
     get focus_mode() { return this.c_data.focus_mode }
+    /**
+     * @param {number} p_focus_mode
+     */
+    set_focus_mode(p_focus_mode) {
+        if (this.is_inside_tree() && p_focus_mode === FOCUS_NONE && this.c_data.focus_mode !== FOCUS_NONE && this.has_focus()) {
+            this.release_focus();
+        }
+        this.c_data.focus_mode = p_focus_mode;
+    }
 
     get mouse_filter() { return this.c_data.mouse_filter }
     /** @param {number} value */
@@ -557,108 +809,6 @@ export class Control extends CanvasItem {
     }
 
     /* public */
-
-    /**
-     * @param {number} value
-     */
-    set_anchor_bottom(value) {
-        this.set_anchor(MARGIN_BOTTOM, value);
-    }
-
-    /**
-     * @param {number} value
-     */
-    set_anchor_left(value) {
-        this.set_anchor(MARGIN_LEFT, value);
-        return this;
-    }
-
-    /**
-     * @param {number} value
-     */
-    set_anchor_top(value) {
-        this.set_anchor(MARGIN_TOP, value);
-        return this;
-    }
-
-    /**
-     * @param {number} value
-     */
-    set_anchor_right(value) {
-        this.set_anchor(MARGIN_RIGHT, value);
-        return this;
-    }
-
-    /**
-     * @param {number} value
-     */
-    set_margin_bottom(value) {
-        this.set_margin(MARGIN_BOTTOM, value);
-        return this;
-    }
-
-    /**
-     * @param {number} value
-     */
-    set_margin_left(value) {
-        this.set_margin(MARGIN_LEFT, value);
-        return this;
-    }
-
-    /**
-     * @param {number} value
-     */
-    set_margin_top(value) {
-        this.set_margin(MARGIN_TOP, value);
-        return this;
-    }
-
-    /**
-     * @param {number} value
-     */
-    set_margin_right(value) {
-        this.set_margin(MARGIN_RIGHT, value);
-        return this;
-    }
-
-    /**
-     * @param {Vector2Like} value
-     */
-    set_rect_min_size(value) {
-        if (this.c_data.custom_minimum_size.equals(value)) {
-            return;
-        }
-
-        this.c_data.custom_minimum_size.copy(value);
-        this.minimum_size_changed();
-    }
-    /**
-     * @param {number} x
-     * @param {number} y
-     */
-    set_rect_min_size_n(x, y) {
-        const size = Vector2.create(x, y);
-        this.set_rect_min_size(size);
-        Vector2.free(size);
-    }
-
-    /**
-     * @param {boolean} value
-     */
-    set_rect_clip_content(value) {
-        this.c_data.rect_clip_content = value;
-        this.update();
-    }
-
-    /**
-     * @param {number} p_focus_mode
-     */
-    set_focus_mode(p_focus_mode) {
-        if (this.is_inside_tree() && p_focus_mode === FOCUS_NONE && this.c_data.focus_mode !== FOCUS_NONE && this.has_focus()) {
-            this.release_focus();
-        }
-        this.c_data.focus_mode = p_focus_mode;
-    }
 
     has_focus() {
         return this.is_inside_tree() && this.get_viewport()._gui_control_has_focus(this);
@@ -1111,109 +1261,6 @@ export class Control extends CanvasItem {
         return Vector2.create(this.c_data.margin[2], this.c_data.margin[3]);
     }
 
-    /**
-     * @param {Vector2Like} value
-     * @param {boolean} [p_keep_margins=false]
-     */
-    set_rect_position(value, p_keep_margins = false) {
-        this.set_rect_position_n(value.x, value.y, p_keep_margins);
-    }
-    /**
-     * @param {number} x
-     * @param {number} y
-     * @param {boolean} [p_keep_margins=false]
-     */
-    set_rect_position_n(x, y, p_keep_margins = false) {
-        const rect = Rect2.create(x, y, this.c_data.size_cache.x, this.c_data.size_cache.y);
-        if (p_keep_margins) {
-            this._compute_anchors(rect, this.c_data.margin, this.c_data.anchor);
-        } else {
-            this._compute_margins(rect, this.c_data.anchor, this.c_data.margin);
-        }
-        this._size_changed();
-        Rect2.free(rect);
-    }
-    /**
-     * @param {Vector2Like} value
-     */
-    set_position(value) {
-        this.set_rect_position_n(value.x, value.y);
-    }
-
-    /**
-     * @param {Vector2Like} value
-     * @param {boolean} [p_keep_margins=false]
-     */
-    set_rect_global_position(value, p_keep_margins = false) {
-        this.set_rect_global_position_n(value.x, value.y, p_keep_margins);
-    }
-    /**
-     * @param {number} x
-     * @param {number} y
-     * @param {boolean} [p_keep_margins=false]
-     */
-    set_rect_global_position_n(x, y, p_keep_margins = false) {
-        const inv = Transform2D.create();
-        if (this.c_data.parent_canvas_item) {
-            inv.copy(this.c_data.parent_canvas_item.get_global_transform()).affine_inverse();
-        }
-        const point = Vector2.create(x, y)
-        this.set_rect_position(inv.xform(point, point), p_keep_margins);
-        Vector2.free(point);
-        Transform2D.free(inv);
-    }
-    /**
-     * @param {Vector2Like} value
-     */
-    set_global_position(value) {
-        this.set_rect_global_position_n(value.x, value.y);
-    }
-    /**
-     * @param {number} x
-     * @param {number} y
-     */
-    set_global_position_n(x, y) {
-        this.set_rect_global_position_n(x, y);
-    }
-
-    /**
-     * @param {Vector2Like} value
-     * @param {boolean} [p_keep_margins=false]
-     */
-    set_rect_size(value, p_keep_margins = false) {
-        this.set_rect_size_n(value.x, value.y, p_keep_margins);
-    }
-    /**
-     * @param {number} x
-     * @param {number} y
-     */
-    set_rect_size_n(x, y, p_keep_margins = false) {
-        const new_size = Vector2.create(x, y);
-        const min = this.get_combined_minimum_size();
-        if (new_size.x < min.x) {
-            new_size.x = min.x;
-        }
-        if (new_size.y < min.y) {
-            new_size.y = min.y;
-        }
-
-        const rect = Rect2.create(
-            this.c_data.pos_cache.x,
-            this.c_data.pos_cache.y,
-            new_size.x,
-            new_size.y
-        )
-        if (p_keep_margins) {
-            this._compute_anchors(rect, this.c_data.margin, this.c_data.anchor);
-        } else {
-            this._compute_margins(rect, this.c_data.anchor, this.c_data.margin);
-        }
-        this._size_changed();
-        Rect2.free(rect);
-        Vector2.free(new_size);
-        Vector2.free(min);
-    }
-
     get_rect() {
         return Rect2.create(
             this.c_data.pos_cache.x,
@@ -1291,133 +1338,6 @@ export class Control extends CanvasItem {
         }
 
         this.drop_data(p_point, p_data);
-    }
-
-    /**
-     * @param {number} value
-     */
-    set_rect_rotation(value) {
-        this.c_data.rotation = deg2rad(value);
-        this.update();
-        this._notify_transform();
-    }
-
-    /**
-     * @param {number} value
-     */
-    set_grow_horizontal(value) {
-        this.c_data.h_grow = value;
-        this._size_changed();
-    }
-
-    /**
-     * @param {number} value
-     */
-    set_grow_vertical(value) {
-        this.c_data.v_grow = value;
-        this._size_changed();
-    }
-
-    /**
-     * @param {Vector2Like} value
-     */
-    set_rect_pivot_offset(value) {
-        this.set_rect_pivot_offset_n(value.x, value.y);
-    }
-    /**
-     * @param {number} x
-     * @param {number} y
-     */
-    set_rect_pivot_offset_n(x, y) {
-        this.c_data.pivot_offset.set(x, y);
-        this.update();
-        this._notify_transform();
-    }
-
-    /**
-     * @param {Vector2Like} value
-     */
-    set_rect_scale(value) {
-        this.set_rect_scale_n(value.x, value.y);
-    }
-    /**
-     * @param {number} x
-     * @param {number} y
-     */
-    set_rect_scale_n(x, y) {
-        this.c_data.scale.set(x, y);
-        this.update();
-        this._notify_transform();
-    }
-    /**
-     * @param {Vector2Like} value
-     */
-    set_scale(value) {
-        this.set_rect_scale_n(value.x, value.y);
-    }
-    /**
-     * @param {number} x
-     * @param {number} y
-     */
-    set_scale_n(x, y) {
-        this.set_rect_scale_n(x, y);
-    }
-
-    /**
-     * @param {Theme} p_theme
-     */
-    set_theme(p_theme) {
-        if (this.c_data.theme === p_theme) {
-            return;
-        }
-
-        this.c_data.theme = p_theme;
-        if (p_theme) {
-            this.c_data.theme_owner = this;
-            this._propagate_theme_changed(this, this);
-        } else {
-            const parent = /** @type {Control} */(this.get_parent());
-            if (parent.is_control && parent.c_data.theme_owner) {
-                this._propagate_theme_changed(this, parent.c_data.theme_owner);
-            } else {
-                this._propagate_theme_changed(this, null);
-            }
-        }
-    }
-
-    show_model() { }
-
-    /**
-     * @param {number} value
-     */
-    set_size_flags_horizontal(value) {
-        if (this.c_data.h_size_flags === value) {
-            return;
-        }
-        this.c_data.h_size_flags = value;
-        this.emit_signal('size_flags_changed');
-    }
-
-    /**
-     * @param {number} value
-     */
-    set_size_flags_vertical(value) {
-        if (this.c_data.v_size_flags === value) {
-            return;
-        }
-        this.c_data.v_size_flags = value;
-        this.emit_signal('size_flags_changed');
-    }
-
-    /**
-     * @param {number} value
-     */
-    set_size_flags_stretch_ratio(value) {
-        if (this.c_data.expand === value) {
-            return;
-        }
-        this.c_data.expand = value;
-        this.emit_signal('size_flags_changed');
     }
 
     minimum_size_changed() {

@@ -11,27 +11,18 @@ import { ParallaxBackground } from "./parallax_background.js";
 export class ParallaxLayer extends Node2D {
     get class() { return 'ParallaxLayer' }
 
-    get motion_mirroring() { return this._motion_mirroring }
-    set motion_mirroring(value) { this.set_motion_mirroring(value) }
-
-    get motion_offset() { return this._motion_offset }
-    set motion_offset(value) { this.set_motion_offset(value) }
-
-    get motion_scale() { return this._motion_scale }
-    set motion_scale(value) { this.set_motion_scale(value) }
-
     constructor() {
         super();
 
-        this._motion_mirroring = new Vector2();
-        this._motion_offset = new Vector2();
-        this._motion_scale = new Vector2(1, 1);
+        this.motion_mirroring = new Vector2;
+        this.motion_offset = new Vector2;
+        this.motion_scale = new Vector2(1, 1);
 
-        this.orig_offset = new Vector2();
-        this.orig_scale = new Vector2();
-        this.screen_offset = new Vector2();
+        this.orig_offset = new Vector2;
+        this.orig_scale = new Vector2;
+        this.screen_offset = new Vector2;
 
-        this._mirror_scale = new Vector2();
+        this.mirror_scale = new Vector2;
     }
 
     /* virtual */
@@ -82,12 +73,12 @@ export class ParallaxLayer extends Node2D {
      * @param {number} y
      */
     set_motion_mirroring_n(x, y) {
-        this._motion_mirroring.set(x, y);
-        if (this._motion_mirroring.x < 0) {
-            this._motion_mirroring.x = 0;
+        this.motion_mirroring.set(x, y);
+        if (this.motion_mirroring.x < 0) {
+            this.motion_mirroring.x = 0;
         }
-        if (this._motion_mirroring.y < 0) {
-            this._motion_mirroring.y = 0;
+        if (this.motion_mirroring.y < 0) {
+            this.motion_mirroring.y = 0;
         }
         this._update_mirroring();
     }
@@ -103,7 +94,7 @@ export class ParallaxLayer extends Node2D {
      * @param {number} y
      */
     set_motion_offset_n(x, y) {
-        this._motion_offset.set(x, y);
+        this.motion_offset.set(x, y);
         const pb = /** @type {ParallaxBackground} */(/** @type {unknown} */(this.get_parent()));
         if (pb.class === 'ParallaxBackground' && this.is_inside_tree()) {
             this.set_base_offset_and_scale(pb.final_offset, pb.scroll_scale, this.screen_offset);
@@ -121,7 +112,7 @@ export class ParallaxLayer extends Node2D {
      * @param {number} y
      */
     set_motion_scale_n(x, y) {
-        this._motion_scale.set(x, y);
+        this.motion_scale.set(x, y);
         const pb = /** @type {ParallaxBackground} */(/** @type {unknown} */(this.get_parent()));
         if (pb.class === 'ParallaxBackground' && this.is_inside_tree()) {
             this.set_base_offset_and_scale(pb.final_offset, pb.scroll_scale, this.screen_offset);
@@ -142,19 +133,19 @@ export class ParallaxLayer extends Node2D {
             return;
         }
 
-        const offset_scale = this._motion_offset.clone().scale(p_scale);
+        const offset_scale = this.motion_offset.clone().scale(p_scale);
         const orig_offset_scale = this.orig_offset.clone().scale(p_scale);
-        const new_ofs = p_offset.clone().subtract(this.screen_offset).multiply(this._motion_scale)
+        const new_ofs = p_offset.clone().subtract(this.screen_offset).multiply(this.motion_scale)
             .add(this.screen_offset)
             .add(offset_scale)
             .add(orig_offset_scale)
 
-        if (this._motion_mirroring.x) {
-            const den = this._motion_mirroring.x * p_scale;
+        if (this.motion_mirroring.x) {
+            const den = this.motion_mirroring.x * p_scale;
             new_ofs.x -= den * Math.ceil(new_ofs.x / den);
         }
-        if (this._motion_mirroring.y) {
-            const den = this._motion_mirroring.y * p_scale;
+        if (this.motion_mirroring.y) {
+            const den = this.motion_mirroring.y * p_scale;
             new_ofs.y -= den * Math.ceil(new_ofs.y / den);
         }
 
@@ -174,7 +165,7 @@ export class ParallaxLayer extends Node2D {
         const pb = /** @type {ParallaxBackground} */(/** @type {unknown} */(this.get_parent()));
         if (pb.class === 'ParallaxBackground') {
             const c = pb.canvas;
-            const mirror_scale = this.get_scale().clone().multiply(this._motion_mirroring);
+            const mirror_scale = this.get_scale().clone().multiply(this.motion_mirroring);
             VSG.canvas.canvas_set_item_mirroring(c, this.canvas_item, mirror_scale);
             Vector2.free(mirror_scale);
         }

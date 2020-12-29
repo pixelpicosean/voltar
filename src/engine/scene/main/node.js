@@ -112,6 +112,92 @@ export class Node extends VObject {
 
     get class() { return 'Node' }
 
+    get filename() { return this.data.filename }
+    /**
+     * @param {string} name
+     */
+    set_filename(name) {
+        this.data.filename = name;
+    }
+
+    get name() { return this.data.name }
+    /**
+     * @param {string} p_name
+     */
+    set_name(p_name) {
+        this.data.name = p_name;
+        if (this.data.parent) {
+            this.data.parent._validate_child_name(this);
+        }
+
+        this.propagate_notification(NOTIFICATION_PATH_CHANGED);
+
+        if (this.is_inside_tree()) {
+            this.emit_signal('renamed');
+            this.get_tree().node_renamed(this);
+            this.get_tree().tree_changed();
+        }
+    }
+
+    get owner() { return this.data.owner }
+    /**
+     * @param {Node} p_owner
+     */
+    set_owner(p_owner) {
+        if (this.data.owner) {
+            this.owner.data.owned.erase(this.data.OW);
+            this.data.OW = null;
+            this.data.owner = null;
+        }
+
+        if (!p_owner) {
+            return;
+        }
+
+        let check = this.get_parent();
+
+        while (check) {
+            if (check === p_owner) {
+                break;
+            }
+
+            check = check.data.parent;
+        }
+
+        this._set_owner_no_check(p_owner);
+    }
+
+    get pause_mode() { return this.data.pause_mode }
+    /**
+     * @param {number} mode
+     */
+    set_pause_mode(mode) {
+        if (this.data.pause_mode === mode) {
+            return;
+        }
+        const prev_inherits = this.data.pause_mode === PAUSE_MODE_INHERIT;
+        this.data.pause_mode = mode;
+        if (!this.is_inside_tree()) {
+            return;
+        }
+        if ((this.data.pause_mode === PAUSE_MODE_INHERIT) === prev_inherits) {
+            return;
+        }
+
+        /** @type {Node} */
+        let owner = null;
+
+        if (this.data.pause_mode === PAUSE_MODE_INHERIT) {
+            if (this.data.parent) {
+                owner = this.data.parent.data.pause_owner;
+            }
+        } else {
+            owner = this;
+        }
+
+        this._propagate_pause_owner(owner);
+    }
+
     constructor() {
         super();
 
@@ -188,95 +274,6 @@ export class Node extends VObject {
     }
 
     /* public */
-
-    /**
-     * @param {string} name
-     */
-    set_filename(name) {
-        this.data.filename = name;
-    }
-    get_filename() {
-        return this.data.filename;
-    }
-
-    /**
-     * @param {string} p_name
-     */
-    set_name(p_name) {
-        this.data.name = p_name;
-        if (this.data.parent) {
-            this.data.parent._validate_child_name(this);
-        }
-
-        this.propagate_notification(NOTIFICATION_PATH_CHANGED);
-
-        if (this.is_inside_tree()) {
-            this.emit_signal('renamed');
-            this.get_tree().node_renamed(this);
-            this.get_tree().tree_changed();
-        }
-    }
-    get_name() { return this.data.name }
-
-    /**
-     * @param {Node} p_owner
-     */
-    set_owner(p_owner) {
-        if (this.data.owner) {
-            this.owner.data.owned.erase(this.data.OW);
-            this.data.OW = null;
-            this.data.owner = null;
-        }
-
-        if (!p_owner) {
-            return;
-        }
-
-        let check = this.get_parent();
-
-        while (check) {
-            if (check === p_owner) {
-                break;
-            }
-
-            check = check.data.parent;
-        }
-
-        this._set_owner_no_check(p_owner);
-    }
-    get_owner() { return this.data.owner }
-
-    /**
-     * @param {number} mode
-     */
-    set_pause_mode(mode) {
-        if (this.data.pause_mode === mode) {
-            return;
-        }
-        const prev_inherits = this.data.pause_mode === PAUSE_MODE_INHERIT;
-        this.data.pause_mode = mode;
-        if (!this.is_inside_tree()) {
-            return;
-        }
-        if ((this.data.pause_mode === PAUSE_MODE_INHERIT) === prev_inherits) {
-            return;
-        }
-
-        /** @type {Node} */
-        let owner = null;
-
-        if (this.data.pause_mode === PAUSE_MODE_INHERIT) {
-            if (this.data.parent) {
-                owner = this.data.parent.data.pause_owner;
-            }
-        } else {
-            owner = this;
-        }
-
-        this._propagate_pause_owner(owner);
-    }
-
-    get_pause_mode() { return this.data.pause_mode }
 
     /**
      * @param {Node} p_node

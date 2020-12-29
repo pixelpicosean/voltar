@@ -30,14 +30,11 @@ class MinSizeCache {
 export class BoxContainer extends Container {
     get class() { return 'BoxContainer' }
 
-    get alignment() { return this._alignment }
-    set alignment(value) { this.set_alignment(value) }
-
     constructor(vertical = false) {
         super();
 
         this.vertical = vertical;
-        this._alignment = ALIGN_BEGIN;
+        this.alignment = ALIGN_BEGIN;
     }
 
     /* virtual */
@@ -127,7 +124,7 @@ export class BoxContainer extends Container {
      * @param {number} value
      */
     set_alignment(value) {
-        this._alignment = value;
+        this.alignment = value;
         this._resort();
     }
 
@@ -239,7 +236,7 @@ export class BoxContainer extends Container {
 
         let ofs = 0;
         if (!has_stretched) {
-            switch (this._alignment) {
+            switch (this.alignment) {
                 case ALIGN_BEGIN: {
                 } break;
                 case ALIGN_CENTER: {

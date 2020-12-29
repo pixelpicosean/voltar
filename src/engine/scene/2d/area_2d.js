@@ -83,42 +83,6 @@ let kcol = new KinematicCollision2D;
 export class Area2D extends CollisionObject2D {
     get class() { return 'Area2D' }
 
-    get collision_layer() { return this._collision_layer }
-    set collision_layer(value) { this.set_collision_layer(value) }
-
-    get collision_mask() { return this._collision_mask }
-    set collision_mask(value) { this.set_collision_mask(value) }
-
-    get gravity() { return this._gravity }
-    set gravity(value) { this.set_gravity(value) }
-
-    get gravity_distance_scale() { return this._gravity_distance_scale }
-    set gravity_distance_scale(value) { this.set_gravity_distance_scale(value) }
-
-    get gravity_point() { return this._gravity_point }
-    set gravity_point(value) { this.set_gravity_point(value) }
-
-    get gravity_vec() { return this._gravity_vec }
-    set gravity_vec(value) { this.set_gravity_vec(value) }
-
-    get linear_damp() { return this._linear_damp }
-    set linear_damp(value) { this.set_linear_damp(value) }
-
-    get angular_damp() { return this._angular_damp }
-    set angular_damp(value) { this.set_angular_damp(value) }
-
-    get monitorable() { return this._monitorable }
-    set monitorable(value) { this.set_monitorable(value) }
-
-    get monitoring() { return this._monitoring }
-    set monitoring(value) { this.set_monitoring(value) }
-
-    get priority() { return this._priority }
-    set priority(value) { this.set_priority(value) }
-
-    get space_override() { return this._space_override }
-    set space_override(value) { this.set_space_override(value) }
-
     constructor() {
         super(Physics2DServer.get_singleton().area_create(), true);
 
@@ -127,19 +91,19 @@ export class Area2D extends CollisionObject2D {
          */
         this.rid;
 
-        this._space_override = AreaSpaceOverrideMode.DISABLED;
-        this._gravity_vec = new Vector2(0, 1);
-        this._gravity = 98;
-        this._gravity_point = false;
-        this._gravity_distance_scale = 0;
-        this._linear_damp = 0.1;
-        this._angular_damp = 1;
-        this._collision_mask = 1;
-        this._collision_layer = 1;
-        this._priority = 0;
-        this._monitoring = false;
-        this._monitorable = false;
-        this._first_shape = null;
+        this.space_override = AreaSpaceOverrideMode.DISABLED;
+        this.gravity_vec = new Vector2(0, 1);
+        this.gravity = 98;
+        this.gravity_point = false;
+        this.gravity_distance_scale = 0;
+        this.linear_damp = 0.1;
+        this.angular_damp = 1;
+        this.collision_mask = 1;
+        this.collision_layer = 1;
+        this.priority = 0;
+        this.monitoring = false;
+        this.monitorable = false;
+        this.first_shape = null;
 
         /**
          * @type {Map<import('./physics_body_2d').PhysicsBody2D, BodyState>}
@@ -151,8 +115,8 @@ export class Area2D extends CollisionObject2D {
          */
         this.area_map = new Map();
 
-        this._gravity = 98;
-        this._gravity_vec = new Vector2(0, 1);
+        this.gravity = 98;
+        this.gravity_vec = new Vector2(0, 1);
 
         this.set_monitoring(true);
         this.set_monitorable(true);
@@ -284,7 +248,7 @@ export class Area2D extends CollisionObject2D {
      * @param {number} bit
      */
     get_collision_layer_bit(bit) {
-        return !!(this._collision_layer & (1 << bit));
+        return !!(this.collision_layer & (1 << bit));
     }
     /**
      * Return an individual bit on the layer mask. Describes whether
@@ -293,15 +257,15 @@ export class Area2D extends CollisionObject2D {
      * @param {string} layer_name
      */
     get_collision_layer_bit_named(layer_name) {
-        return !!(this._collision_layer & (1 << ProjectSettings.get_singleton().get_physics_layer_bit(layer_name)));
+        return !!(this.collision_layer & (1 << ProjectSettings.get_singleton().get_physics_layer_bit(layer_name)));
     }
     /**
      * @param {number} layer
      */
     set_collision_layer(layer) {
-        this._collision_layer = layer;
+        this.collision_layer = layer;
         if (this.rid) {
-            this.rid.collision_layer = this._collision_layer;
+            this.rid.collision_layer = this.collision_layer;
         }
     }
     /**
@@ -313,13 +277,13 @@ export class Area2D extends CollisionObject2D {
      */
     set_collision_layer_bit(bit, value) {
         if (value) {
-            this._collision_layer |= 1 << bit;
+            this.collision_layer |= 1 << bit;
         } else {
-            this._collision_layer &= ~(1 << bit);
+            this.collision_layer &= ~(1 << bit);
         }
 
         if (this.rid) {
-            this.rid.collision_layer = this._collision_layer;
+            this.rid.collision_layer = this.collision_layer;
         }
     }
     /**
@@ -331,13 +295,13 @@ export class Area2D extends CollisionObject2D {
      */
     set_collision_layer_bit_named(layer_name, value) {
         if (value) {
-            this._collision_layer |= ProjectSettings.get_singleton().get_physics_layer_value(layer_name);
+            this.collision_layer |= ProjectSettings.get_singleton().get_physics_layer_value(layer_name);
         } else {
-            this._collision_layer &= ~ProjectSettings.get_singleton().get_physics_layer_value(layer_name);
+            this.collision_layer &= ~ProjectSettings.get_singleton().get_physics_layer_value(layer_name);
         }
 
         if (this.rid) {
-            this.rid.collision_layer = this._collision_layer;
+            this.rid.collision_layer = this.collision_layer;
         }
     }
 
@@ -348,7 +312,7 @@ export class Area2D extends CollisionObject2D {
      * @param {number} bit
      */
     get_collision_mask_bit(bit) {
-        return !!(this._collision_mask & (1 << bit));
+        return !!(this.collision_mask & (1 << bit));
     }
     /**
      * Return an individual bit on the layer mask. Describes whether
@@ -357,16 +321,16 @@ export class Area2D extends CollisionObject2D {
      * @param {string} layer_name
      */
     get_collision_mask_bit_named(layer_name) {
-        return !!(this._collision_mask & (1 << ProjectSettings.get_singleton().get_physics_layer_bit(layer_name)));
+        return !!(this.collision_mask & (1 << ProjectSettings.get_singleton().get_physics_layer_bit(layer_name)));
     }
     /**
      * @param {number} mask
      */
     set_collision_mask(mask) {
-        this._collision_mask = mask;
+        this.collision_mask = mask;
 
         if (this.rid) {
-            this.rid.collision_mask = this._collision_mask;
+            this.rid.collision_mask = this.collision_mask;
         }
     }
     /**
@@ -378,13 +342,13 @@ export class Area2D extends CollisionObject2D {
      */
     set_collision_mask_bit(bit, value) {
         if (value) {
-            this._collision_mask |= 1 << bit;
+            this.collision_mask |= 1 << bit;
         } else {
-            this._collision_mask &= ~(1 << bit);
+            this.collision_mask &= ~(1 << bit);
         }
 
         if (this.rid) {
-            this.rid.collision_mask = this._collision_mask;
+            this.rid.collision_mask = this.collision_mask;
         }
     }
     /**
@@ -396,13 +360,13 @@ export class Area2D extends CollisionObject2D {
      */
     set_collision_mask_bit_named(layer_name, value) {
         if (value) {
-            this._collision_mask |= ProjectSettings.get_singleton().get_physics_layer_value(layer_name);
+            this.collision_mask |= ProjectSettings.get_singleton().get_physics_layer_value(layer_name);
         } else {
-            this._collision_mask &= ~ProjectSettings.get_singleton().get_physics_layer_value(layer_name);
+            this.collision_mask &= ~ProjectSettings.get_singleton().get_physics_layer_value(layer_name);
         }
 
         if (this.rid) {
-            this.rid.collision_mask = this._collision_mask;
+            this.rid.collision_mask = this.collision_mask;
         }
     }
 
@@ -410,31 +374,31 @@ export class Area2D extends CollisionObject2D {
      * @param {number} value
      */
     set_gravity(value) {
-        this._gravity = value;
-        this.rid.gravity = this._gravity;
+        this.gravity = value;
+        this.rid.gravity = this.gravity;
     }
 
     /**
      * @param {Vector2Like} value
      */
     set_gravity_vec(value) {
-        this._gravity_vec.copy(value);
-        this.rid.gravity_vector.copy(this._gravity_vec);
+        this.gravity_vec.copy(value);
+        this.rid.gravity_vector.copy(this.gravity_vec);
     }
     /**
      * @param {number} x
      * @param {number} y
      */
     set_gravity_vec_n(x, y) {
-        this._gravity_vec.set(x, y);
-        this.rid.gravity_vector.copy(this._gravity_vec);
+        this.gravity_vec.set(x, y);
+        this.rid.gravity_vector.copy(this.gravity_vec);
     }
 
     /**
      * @param {number} p_gravity_distance_scale
      */
     set_gravity_distance_scale(p_gravity_distance_scale) {
-        this._gravity_distance_scale = p_gravity_distance_scale;
+        this.gravity_distance_scale = p_gravity_distance_scale;
         this.rid.gravity_distance_scale = p_gravity_distance_scale;
     }
 
@@ -442,7 +406,7 @@ export class Area2D extends CollisionObject2D {
      * @param {boolean} p_gravity_point
      */
     set_gravity_point(p_gravity_point) {
-        this._gravity_point = p_gravity_point;
+        this.gravity_point = p_gravity_point;
         this.rid.gravity_is_point = p_gravity_point;
     }
 
@@ -450,13 +414,13 @@ export class Area2D extends CollisionObject2D {
      * @param {boolean} value
      */
     set_monitoring(value) {
-        if (value === this._monitoring) {
+        if (value === this.monitoring) {
             return;
         }
 
-        this._monitoring = value;
+        this.monitoring = value;
 
-        if (this._monitoring) {
+        if (this.monitoring) {
             Physics2DServer.get_singleton().area_set_monitor_callback(this.rid, this, this._body_inout);
             Physics2DServer.get_singleton().area_set_area_monitor_callback(this.rid, this, this._area_inout);
         } else {
@@ -470,20 +434,20 @@ export class Area2D extends CollisionObject2D {
      * @param {boolean} p_enable
      */
     set_monitorable(p_enable) {
-        if (p_enable === this._monitorable) {
+        if (p_enable === this.monitorable) {
             return;
         }
 
-        this._monitorable = p_enable;
+        this.monitorable = p_enable;
 
-        Physics2DServer.get_singleton().area_set_monitorable(this.rid, this._monitorable);
+        Physics2DServer.get_singleton().area_set_monitorable(this.rid, this.monitorable);
     }
 
     /**
      * @param {number} p_linear_damp
      */
     set_linear_damp(p_linear_damp) {
-        this._linear_damp = p_linear_damp;
+        this.linear_damp = p_linear_damp;
         this.rid.linear_damp = p_linear_damp;
     }
 
@@ -491,7 +455,7 @@ export class Area2D extends CollisionObject2D {
      * @param {number} p_angular_damp
      */
     set_angular_damp(p_angular_damp) {
-        this._angular_damp = p_angular_damp;
+        this.angular_damp = p_angular_damp;
         this.rid.angular_damp = p_angular_damp;
     }
 
@@ -499,7 +463,7 @@ export class Area2D extends CollisionObject2D {
      * @param {number} p_priority
      */
     set_priority(p_priority) {
-        this._priority = p_priority;
+        this.priority = p_priority;
         this.rid.priority = p_priority;
     }
 
@@ -507,7 +471,7 @@ export class Area2D extends CollisionObject2D {
      * @param {number} p_space_override
      */
     set_space_override(p_space_override) {
-        this._space_override = p_space_override;
+        this.space_override = p_space_override;
         this.rid.space_override_mode = p_space_override;
     }
 

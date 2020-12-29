@@ -35,10 +35,8 @@ export class BaseButton extends Control {
     get class() { return 'BaseButton' }
 
     get disabled() { return this.status.disabled }
-    set disabled(value) { this.set_disabled(value) }
 
     get pressed() { return this.toggle_mode ? this.status.pressed : this.status.press_attempt }
-    set pressed(value) { this.set_pressed(value) }
 
     constructor() {
         super();

@@ -6,7 +6,7 @@ export class Demo extends v.Spatial {
 
     async _ready() {
         this.get_tree().create_timer(15).connect_once("timeout", () => {
-            this.get_tree().reload_current_scene();
+            this.get_tree().change_scene("res://scene/demo.tscn");
         });
 
         this.sentry = this.get_node("scene/player") as v.Spatial;

@@ -13,19 +13,6 @@ import {
 import { ConvexPolygonShape2D } from "../resources/convex_polygon_shape_2d.js";
 import { Node2D } from "./node_2d.js";
 
-
-/**
- * @param {Vector2[]} arr
- */
-function vec2_arr_2_num_arr(arr) {
-    const res = /** @type {number[]} */(new Array(arr.length * 2));
-    for (let i = 0, len = arr.length; i < len; i++) {
-        res[i * 2 + 0] = arr[i].x;
-        res[i * 2 + 1] = arr[i].y;
-    }
-    return res;
-}
-
 /**
  * @param {number[]} arr
  */
@@ -48,37 +35,22 @@ export const BuildMode = {
 export class CollisionPolygon2D extends Node2D {
     get class() { return 'CollisionPolygon2D' }
 
-    get build_mode() { return this._build_mode }
-    set build_mode(value) { this.set_build_mode(value) }
-
-    get disabled() { return this._disabled }
-    set disabled(value) { this.set_disabled(value) }
-
-    get one_way_collision() { return this._one_way_collision }
-    set one_way_collision(value) { this.set_one_way_collision(value) }
-
-    get one_way_collision_margin() { return this._one_way_collision_margin }
-    set one_way_collision_margin(value) { this.set_one_way_collision_margin(value) }
-
-    get polygon() { return this._polygon }
-    set polygon(value) { this.set_polygon(value) }
-
     constructor() {
         super();
 
-        this._disabled = false;
-        this._one_way_collision = false;
-        this._one_way_collision_margin = 1.0;
+        this.disabled = false;
+        this.one_way_collision = false;
+        this.one_way_collision_margin = 1.0;
         /**
          * @type {import('./collision_object_2d').CollisionObject2D}
          */
         this.parent = null;
         this.aabb = new Rect2(-10, -10, 20, 20);
-        this._build_mode = BuildMode.SOLIDS;
+        this.build_mode = BuildMode.SOLIDS;
         /**
          * @type {Vector2[]}
          */
-        this._polygon = [];
+        this.polygon = [];
 
         /** @type {CollisionPolygon2D | import('./collision_shape_2d').CollisionShape2D} */
         this.shape_owner = null;
@@ -130,7 +102,7 @@ export class CollisionPolygon2D extends Node2D {
      * @param {boolean} p_disabled
      */
     set_disabled(p_disabled) {
-        this._disabled = p_disabled;
+        this.disabled = p_disabled;
         if (this.parent) {
             this.parent.shape_owner_set_disabled(this.shape_owner, p_disabled);
         }
@@ -140,7 +112,7 @@ export class CollisionPolygon2D extends Node2D {
      * @param {boolean} p_one_way_collision
      */
     set_one_way_collision(p_one_way_collision) {
-        this._one_way_collision = p_one_way_collision;
+        this.one_way_collision = p_one_way_collision;
         if (this.parent) {
             this.parent.shape_owner_set_one_way_collision(this.shape_owner, p_one_way_collision);
         }
@@ -150,7 +122,7 @@ export class CollisionPolygon2D extends Node2D {
      * @param {number} p_one_way_collision_margin
      */
     set_one_way_collision_margin(p_one_way_collision_margin) {
-        this._one_way_collision_margin = p_one_way_collision_margin;
+        this.one_way_collision_margin = p_one_way_collision_margin;
         if (this.parent) {
             this.parent.shape_owner_set_one_way_collision_margin(this.shape_owner, p_one_way_collision_margin);
         }
@@ -160,7 +132,7 @@ export class CollisionPolygon2D extends Node2D {
      * @param {Vector2[]} p_polygon
      */
     set_polygon(p_polygon) {
-        this._polygon = p_polygon;
+        this.polygon = p_polygon;
 
         {
             for (let i = 0; i < p_polygon.length; i++) {
@@ -180,8 +152,8 @@ export class CollisionPolygon2D extends Node2D {
             }
         }
 
-        if (is_polygon_clockwise(this._polygon)) {
-            this._polygon.reverse();
+        if (is_polygon_clockwise(this.polygon)) {
+            this.polygon.reverse();
         }
 
         if (this.parent) {
@@ -193,7 +165,7 @@ export class CollisionPolygon2D extends Node2D {
      * @param {BuildMode} p_build_mode
      */
     set_build_mode(p_build_mode) {
-        this._build_mode = p_build_mode;
+        this.build_mode = p_build_mode;
         if (this.parent) {
             this._build_polygon();
         }
@@ -209,19 +181,19 @@ export class CollisionPolygon2D extends Node2D {
         if (p_xform_only) {
             return;
         }
-        this.parent.shape_owner_set_disabled(this, this._disabled);
-        this.parent.shape_owner_set_one_way_collision(this, this._one_way_collision);
-        this.parent.shape_owner_set_one_way_collision_margin(this, this._one_way_collision_margin);
+        this.parent.shape_owner_set_disabled(this, this.disabled);
+        this.parent.shape_owner_set_one_way_collision(this, this.one_way_collision);
+        this.parent.shape_owner_set_one_way_collision_margin(this, this.one_way_collision_margin);
     }
 
     _build_polygon() {
         this.parent.shape_owner_clear_shapes(this);
 
-        if (this._polygon.length === 0) {
+        if (this.polygon.length === 0) {
             return;
         }
 
-        const solids = (this._build_mode === BuildMode.SOLIDS);
+        const solids = (this.build_mode === BuildMode.SOLIDS);
 
         if (solids) {
             // decompose concave into multiple convex polygons and add them
@@ -237,7 +209,7 @@ export class CollisionPolygon2D extends Node2D {
     }
 
     _decompose_in_convex() {
-        return decompose_in_convex(this._polygon).map(arr => arr.reverse());
+        return decompose_in_convex(this.polygon).map(arr => arr.reverse());
     }
 }
 node_class_map['CollisionPolygon2D'] = GDCLASS(CollisionPolygon2D, Node2D)

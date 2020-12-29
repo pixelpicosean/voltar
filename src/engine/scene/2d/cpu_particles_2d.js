@@ -113,25 +113,20 @@ const hue_rot_mat = basis();
 export class CPUParticles2D extends Node2D {
     get class() { return 'CPUParticles2D' }
 
-    /** @type {boolean} */
-    get emitting() { return this._emitting }
-    set emitting(value) { this.set_emitting(value) }
     /**
      * @param {boolean} p_emitting
      */
     set_emitting(p_emitting) {
-        if (this._emitting === p_emitting) {
+        if (this.emitting === p_emitting) {
             return;
         }
 
-        this._emitting = p_emitting;
-        if (this._emitting) {
+        this.emitting = p_emitting;
+        if (this.emitting) {
             this.set_process_internal(true);
         }
     }
 
-    get amount() { return this._amount }
-    set amount(value) { this.set_amount(value) }
     /**
      * @param {number} p_amount
      */
@@ -158,15 +153,13 @@ export class CPUParticles2D extends Node2D {
         this.particle_order.length = p_amount;
     }
 
-    get texture() { return this._texture }
-    set texture(value) { this.set_texture(value) }
     /**
      * @param {string | ImageTexture} p_texture
      */
     set_texture(p_texture) {
         /** @type {ImageTexture} */
         const texture = (typeof (p_texture) === 'string') ? get_resource_map()[p_texture] : p_texture;
-        this._texture = texture;
+        this.texture = texture;
         this._update_mesh_texture();
     }
 
@@ -283,9 +276,9 @@ export class CPUParticles2D extends Node2D {
     constructor() {
         super();
 
-        this._emitting = true;
+        this.emitting = true;
 
-        this._amount = 8;
+        this.amount = 8;
         this.lifetime = 1;
         this.lifetime_randomness = 0;
 
@@ -313,7 +306,7 @@ export class CPUParticles2D extends Node2D {
         this.color_ramp = null;
 
         /** @type {ImageTexture} */
-        this._texture = null;
+        this.texture = null;
 
         /** @type {Color[]} */
         this.emission_colors = [];
@@ -504,7 +497,7 @@ export class CPUParticles2D extends Node2D {
      */
     _notification(p_what) {
         if (p_what === NOTIFICATION_ENTER_TREE) {
-            this.set_process_internal(this._emitting);
+            this.set_process_internal(this.emitting);
         }
 
         if (p_what === NOTIFICATION_EXIT_TREE) {
@@ -512,7 +505,7 @@ export class CPUParticles2D extends Node2D {
         }
 
         if (p_what === NOTIFICATION_DRAW) {
-            if (this._emitting && this.time === 0) {
+            if (this.emitting && this.time === 0) {
                 this._update_internal();
             }
 
@@ -520,7 +513,7 @@ export class CPUParticles2D extends Node2D {
                 return;
             }
 
-            VSG.canvas.canvas_item_add_multimesh(this.canvas_item, this.multimesh, this._texture);
+            VSG.canvas.canvas_item_add_multimesh(this.canvas_item, this.multimesh, this.texture);
         }
 
         if (p_what === NOTIFICATION_INTERNAL_PROCESS) {
@@ -708,7 +701,7 @@ export class CPUParticles2D extends Node2D {
         for (let i = 0; i < pcount; i++) {
             const p = parray[i];
 
-            if (!this._emitting && !p.active) {
+            if (!this.emitting && !p.active) {
                 continue;
             }
 
@@ -750,7 +743,7 @@ export class CPUParticles2D extends Node2D {
             }
 
             if (restart) {
-                if (!this._emitting) {
+                if (!this.emitting) {
                     p.active = false;
                     continue;
                 }
@@ -1053,7 +1046,7 @@ export class CPUParticles2D extends Node2D {
         }
 
         const delta = this.get_process_delta_time();
-        if (this._emitting) {
+        if (this.emitting) {
             this.inactive_time = 0;
         } else {
             this.inactive_time += delta;
@@ -1184,18 +1177,18 @@ export class CPUParticles2D extends Node2D {
     }
 
     _update_mesh_texture() {
-        const w = this._texture.get_width();
-        const h = this._texture.get_height();
+        const w = this.texture.get_width();
+        const h = this.texture.get_height();
 
         const color = Color.create(1, 1, 1, 1);
         const c_8bit = color.as_rgba8();
         Color.free(color);
 
         const vertices = new Float32Array([
-            -w * 0.5, -h * 0.5,    this._texture.uvs[0], this._texture.uvs[1],   c_8bit,
-            +w * 0.5, -h * 0.5,    this._texture.uvs[2], this._texture.uvs[1],   c_8bit,
-            +w * 0.5, +h * 0.5,    this._texture.uvs[2], this._texture.uvs[3],   c_8bit,
-            -w * 0.5, +h * 0.5,    this._texture.uvs[0], this._texture.uvs[3],   c_8bit,
+            -w * 0.5, -h * 0.5,    this.texture.uvs[0], this.texture.uvs[1],   c_8bit,
+            +w * 0.5, -h * 0.5,    this.texture.uvs[2], this.texture.uvs[1],   c_8bit,
+            +w * 0.5, +h * 0.5,    this.texture.uvs[2], this.texture.uvs[3],   c_8bit,
+            -w * 0.5, +h * 0.5,    this.texture.uvs[0], this.texture.uvs[3],   c_8bit,
         ]);
         const indices = new Uint16Array([0, 1, 2, 2, 3, 0]);
 

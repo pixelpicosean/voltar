@@ -10,10 +10,6 @@ import { Container, NOTIFICATION_SORT_CHILDREN } from "./container.js";
 export class MarginContainer extends Container {
     get class() { return 'MarginContainer' }
 
-    constructor() {
-        super();
-    }
-
     /* virtual */
 
     _load_data(data) {

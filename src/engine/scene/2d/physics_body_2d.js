@@ -22,14 +22,10 @@ import { CollisionObject2D } from "./collision_object_2d.js";
 export class PhysicsBody2D extends CollisionObject2D {
     get class() { return 'PhysicsBody2D' }
 
-    get collision_layer() { return this._collision_layer }
-    set collision_layer(value) { this.set_collision_layer(value) }
-
-    get collision_mask() { return this._collision_mask }
-    set collision_mask(value) { this.set_collision_mask(value) }
-
-    get layers() { return this._collision_layer }
-    set layers(p_mask) {
+    /**
+     * @param {number} p_mask
+     */
+    set_layers(p_mask) {
         this.set_collision_layer(p_mask);
         this.set_collision_mask(p_mask);
     }
@@ -40,8 +36,8 @@ export class PhysicsBody2D extends CollisionObject2D {
     constructor(p_mode) {
         super(Physics2DServer.get_singleton().body_create(), false);
 
-        this._collision_layer = 1;
-        this._collision_mask = 1;
+        this.collision_layer = 1;
+        this.collision_mask = 1;
 
         /**
          * @type {Body2DSW}
@@ -76,7 +72,7 @@ export class PhysicsBody2D extends CollisionObject2D {
      * @param {number} bit
      */
     get_collision_layer_bit(bit) {
-        return !!(this._collision_layer & (1 << bit));
+        return !!(this.collision_layer & (1 << bit));
     }
     /**
      * Return an individual bit on the layer mask. Describes whether
@@ -85,15 +81,15 @@ export class PhysicsBody2D extends CollisionObject2D {
      * @param {string} layer_name
      */
     get_collision_layer_bit_named(layer_name) {
-        return !!(this._collision_layer & (1 << ProjectSettings.get_singleton().get_physics_layer_bit(layer_name)));
+        return !!(this.collision_layer & (1 << ProjectSettings.get_singleton().get_physics_layer_bit(layer_name)));
     }
     /**
      * @param {number} layer
      */
     set_collision_layer(layer) {
-        this._collision_layer = layer;
+        this.collision_layer = layer;
         if (this.rid) {
-            this.rid.collision_layer = this._collision_layer;
+            this.rid.collision_layer = this.collision_layer;
         }
     }
     /**
@@ -105,13 +101,13 @@ export class PhysicsBody2D extends CollisionObject2D {
      */
     set_collision_layer_bit(bit, value) {
         if (value) {
-            this._collision_layer |= 1 << bit;
+            this.collision_layer |= 1 << bit;
         } else {
-            this._collision_layer &= ~(1 << bit);
+            this.collision_layer &= ~(1 << bit);
         }
 
         if (this.rid) {
-            this.rid.collision_layer = this._collision_layer;
+            this.rid.collision_layer = this.collision_layer;
         }
     }
     /**
@@ -123,13 +119,13 @@ export class PhysicsBody2D extends CollisionObject2D {
      */
     set_collision_layer_bit_named(layer_name, value) {
         if (value) {
-            this._collision_layer |= ProjectSettings.get_singleton().get_physics_layer_value(layer_name);
+            this.collision_layer |= ProjectSettings.get_singleton().get_physics_layer_value(layer_name);
         } else {
-            this._collision_layer &= ~ProjectSettings.get_singleton().get_physics_layer_value(layer_name);
+            this.collision_layer &= ~ProjectSettings.get_singleton().get_physics_layer_value(layer_name);
         }
 
         if (this.rid) {
-            this.rid.collision_layer = this._collision_layer;
+            this.rid.collision_layer = this.collision_layer;
         }
     }
 
@@ -140,7 +136,7 @@ export class PhysicsBody2D extends CollisionObject2D {
      * @param {number} bit
      */
     get_collision_mask_bit(bit) {
-        return !!(this._collision_mask & (1 << bit));
+        return !!(this.collision_mask & (1 << bit));
     }
     /**
      * Return an individual bit on the layer mask. Describes whether
@@ -149,16 +145,16 @@ export class PhysicsBody2D extends CollisionObject2D {
      * @param {string} layer_name
      */
     get_collision_mask_bit_named(layer_name) {
-        return !!(this._collision_mask & (1 << ProjectSettings.get_singleton().get_physics_layer_bit(layer_name)));
+        return !!(this.collision_mask & (1 << ProjectSettings.get_singleton().get_physics_layer_bit(layer_name)));
     }
     /**
      * @param {number} mask
      */
     set_collision_mask(mask) {
-        this._collision_mask = mask;
+        this.collision_mask = mask;
 
         if (this.rid) {
-            this.rid.collision_mask = this._collision_mask;
+            this.rid.collision_mask = this.collision_mask;
         }
     }
     /**
@@ -170,13 +166,13 @@ export class PhysicsBody2D extends CollisionObject2D {
      */
     set_collision_mask_bit(bit, value) {
         if (value) {
-            this._collision_mask |= 1 << bit;
+            this.collision_mask |= 1 << bit;
         } else {
-            this._collision_mask &= ~(1 << bit);
+            this.collision_mask &= ~(1 << bit);
         }
 
         if (this.rid) {
-            this.rid.collision_mask = this._collision_mask;
+            this.rid.collision_mask = this.collision_mask;
         }
     }
     /**
@@ -188,13 +184,13 @@ export class PhysicsBody2D extends CollisionObject2D {
      */
     set_collision_mask_bit_named(layer_name, value) {
         if (value) {
-            this._collision_mask |= ProjectSettings.get_singleton().get_physics_layer_value(layer_name);
+            this.collision_mask |= ProjectSettings.get_singleton().get_physics_layer_value(layer_name);
         } else {
-            this._collision_mask &= ~ProjectSettings.get_singleton().get_physics_layer_value(layer_name);
+            this.collision_mask &= ~ProjectSettings.get_singleton().get_physics_layer_value(layer_name);
         }
 
         if (this.rid) {
-            this.rid.collision_mask = this._collision_mask;
+            this.rid.collision_mask = this.collision_mask;
         }
     }
 }

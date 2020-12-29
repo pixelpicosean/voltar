@@ -9,9 +9,6 @@ import {
     NOTIFICATION_EXIT_TREE,
     Node,
 } from "../main/node.js";
-import {
-    NOTIFICATION_DRAW,
-} from "./canvas_item.js";
 import { Node2D } from "./node_2d.js";
 import { CPUParticles2D } from "./cpu_particles_2d.js";
 import { NOTIFICATION_TRANSFORM_CHANGED } from "../const";

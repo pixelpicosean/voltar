@@ -153,49 +153,43 @@ res_class_map['SpriteFrames'] = SpriteFrames;
 export class AnimatedSprite extends Node2D {
     get class() { return 'AnimatedSprite' }
 
-    get frames() { return this._frames }
-    set frames(value) { this.set_frames(value) }
     /**
      * @param {SpriteFrames} p_frames
      */
     set_frames(p_frames) {
-        this._frames = p_frames;
+        this.frames = p_frames;
         if (p_frames) {
-            this.set_frame(this._frame);
+            this.set_frame(this.frame);
         } else {
-            this._frame = 0;
+            this.frame = 0;
         }
 
         this._reset_timeout();
         this.update();
     }
 
-    get animation() { return this._animation }
-    set animation(value) { this.set_animation(value) }
     /**
      * @param {string} anim
      */
     set_animation(anim) {
-        if (this._animation === anim) {
+        if (this.animation === anim) {
             return;
         }
 
-        this._animation = anim;
+        this.animation = anim;
         this._reset_timeout();
         this.set_frame(0);
         this.update();
     }
 
-    get frame() { return this._frame }
-    set frame(value) { this.set_frame(value) }
     /**
      * @param {number} frame
      */
     set_frame(frame) {
-        if (!this._frames) return;
+        if (!this.frames) return;
 
-        if (this._frames.has_animation(this._animation)) {
-            const limit = this._frames.get_frame_count(this._animation);
+        if (this.frames.has_animation(this.animation)) {
+            const limit = this.frames.get_frame_count(this.animation);
             if (frame >= limit) {
                 frame = limit - 1;
             }
@@ -205,47 +199,39 @@ export class AnimatedSprite extends Node2D {
             frame = 0;
         }
 
-        if (frame === this._frame) {
+        if (frame === this.frame) {
             return;
         }
 
-        this._frame = frame;
+        this.frame = frame;
         this._reset_timeout();
         this.update();
         this.emit_signal('frame_changed');
     }
 
-    get speed_scale() { return this._speed_scale }
-    set speed_scale(value) { this.set_speed_scale(value) }
     /** @param {number} value */
     set_speed_scale(value) {
         const elapsed = this._get_frame_duration() - this.timeout;
-        this._speed_scale = Math.max(value, 0);
+        this.speed_scale = Math.max(value, 0);
 
         this._reset_timeout();
         this.timeout -= elapsed;
     }
 
-    get playing() { return this._playing }
-    set playing(value) { this.set_playing(value) }
     /**
      * @param {boolean} value
      */
     set_playing(value) {
-        this._playing = true;
+        this.playing = true;
         this._set_playing(value);
     }
 
-    get centered() { return this._centered }
-    set centered(value) { this.set_centered(value) }
     /** @param {boolean} value */
     set_centered(value) {
-        this._centered = value;
+        this.centered = value;
         this.update();
     }
 
-    get offset() { return this._offset }
-    set offset(value) { this.set_offset(value) }
     /**
      * @param {Vector2Like} value
      */
@@ -255,23 +241,19 @@ export class AnimatedSprite extends Node2D {
      * @param {number} y
      */
     set_offset_n(x, y) {
-        this._offset.set(x, y);
+        this.offset.set(x, y);
         this.update();
     }
 
-    get flip_h() { return this._flip_h }
-    set flip_h(value) { this.set_flip_h(value) }
     /** @param {boolean} value */
     set_flip_h(value) {
-        this._flip_h = value;
+        this.flip_h = value;
         this.update();
     }
 
-    get flip_v() { return this._flip_v }
-    set flip_v(value) { this.set_flip_v(value) }
     /** @param {boolean} value */
     set_flip_v(value) {
-        this._flip_v = value;
+        this.flip_v = value;
         this.update();
     }
 
@@ -279,21 +261,21 @@ export class AnimatedSprite extends Node2D {
         super();
 
         /** @type {SpriteFrames} */
-        this._frames = null;
-        this._playing = false;
+        this.frames = null;
+        this.playing = false;
         this.backwards = false;
-        this._animation = 'default';
-        this._frame = 0;
-        this._speed_scale = 1;
+        this.animation = 'default';
+        this.frame = 0;
+        this.speed_scale = 1;
 
-        this._centered = true;
-        this._offset = new Vector2;
+        this.centered = true;
+        this.offset = new Vector2;
 
         this.is_over = false;
         this.timeout = 0;
 
-        this._flip_h = false;
-        this._flip_v = false;
+        this.flip_h = false;
+        this.flip_v = false;
     }
 
     /* virtual */
@@ -304,15 +286,15 @@ export class AnimatedSprite extends Node2D {
     _load_data(data) {
         super._load_data(data);
 
-        if (data.frames !== undefined) this.frames = data.frames;
-        if (data.animation !== undefined) this.animation = data.animation;
-        if (data.frame !== undefined) this.frame = data.frame;
-        if (data.playing !== undefined) this.playing = data.playing;
-        if (data.speed_scale !== undefined) this._speed_scale = data.speed_scale;
-        if (data.centered !== undefined) this.centered = data.centered;
-        if (data.offset !== undefined) this.offset = data.offset;
-        if (data.flip_h !== undefined) this.flip_h = data.flip_h;
-        if (data.flip_v !== undefined) this.flip_v = data.flip_v;
+        if (data.frames !== undefined) this.set_frames(data.frames);
+        if (data.animation !== undefined) this.set_animation(data.animation);
+        if (data.frame !== undefined) this.set_frame(data.frame);
+        if (data.playing !== undefined) this.set_playing(data.playing);
+        if (data.speed_scale !== undefined) this.set_speed_scale(data.speed_scale);
+        if (data.centered !== undefined) this.set_centered(data.centered);
+        if (data.offset !== undefined) this.set_offset(data.offset);
+        if (data.flip_h !== undefined) this.set_flip_h(data.flip_h);
+        if (data.flip_v !== undefined) this.set_flip_v(data.flip_v);
 
         return this;
     }
@@ -322,11 +304,11 @@ export class AnimatedSprite extends Node2D {
     _notification(p_what) {
         switch (p_what) {
             case NOTIFICATION_INTERNAL_PROCESS: {
-                if (!this._frames) return;
-                if (!this._frames.has_animation(this._animation)) return;
-                if (this._frame < 0) return;
+                if (!this.frames) return;
+                if (!this.frames.has_animation(this.animation)) return;
+                if (this.frame < 0) return;
 
-                const speed = this._frames.get_animation_speed(this._animation) * this._speed_scale;
+                const speed = this.frames.get_animation_speed(this.animation) * this.speed_scale;
                 if (speed === 0) return;
 
                 let remaining = this.get_process_delta_time();
@@ -335,21 +317,21 @@ export class AnimatedSprite extends Node2D {
                     if (this.timeout <= 0) {
                         this.timeout = this._get_frame_duration();
 
-                        const fc = this._frames.get_frame_count(this._animation);
-                        if ((!this.backwards && this._frame >= fc - 1) || (this.backwards && this._frame <= 0)) {
-                            if (this._frames.get_animation_loop(this._animation)) {
+                        const fc = this.frames.get_frame_count(this.animation);
+                        if ((!this.backwards && this.frame >= fc - 1) || (this.backwards && this.frame <= 0)) {
+                            if (this.frames.get_animation_loop(this.animation)) {
                                 if (this.backwards) {
-                                    this._frame = fc - 1;
+                                    this.frame = fc - 1;
                                 } else {
-                                    this._frame = 0;
+                                    this.frame = 0;
                                 }
 
                                 this.emit_signal('animation_finished');
                             } else {
                                 if (this.backwards) {
-                                    this._frame = 0;
+                                    this.frame = 0;
                                 } else {
-                                    this._frame = fc - 1;
+                                    this.frame = fc - 1;
                                 }
 
                                 if (!this.is_over) {
@@ -359,9 +341,9 @@ export class AnimatedSprite extends Node2D {
                             }
                         } else {
                             if (this.backwards) {
-                                this._frame -= 1;
+                                this.frame -= 1;
                             } else {
-                                this._frame += 1;
+                                this.frame += 1;
                             }
                         }
 
@@ -375,16 +357,16 @@ export class AnimatedSprite extends Node2D {
                 }
             } break;
             case NOTIFICATION_DRAW: {
-                if (!this._frames) return;
-                if (this._frame < 0) return;
-                if (!this._frames.has_animation(this._animation)) return;
+                if (!this.frames) return;
+                if (this.frame < 0) return;
+                if (!this.frames.has_animation(this.animation)) return;
 
-                const texture = this._frames.get_frame(this._animation, this._frame);
+                const texture = this.frames.get_frame(this.animation, this.frame);
                 if (!texture) return;
 
                 const s = texture.get_size();
-                const ofs = this._offset.clone();
-                if (this._centered) {
+                const ofs = this.offset.clone();
+                if (this.centered) {
                     ofs.subtract(s.x * 0.5, s.y * 0.5);
                 }
 
@@ -393,10 +375,10 @@ export class AnimatedSprite extends Node2D {
                 }
                 const dst_rect = Rect2.create(ofs.x, ofs.y, s.x, s.y);
 
-                if (this._flip_h) {
+                if (this.flip_h) {
                     dst_rect.width = -dst_rect.width;
                 }
-                if (this._flip_v) {
+                if (this.flip_v) {
                     dst_rect.height = -dst_rect.height;
                 }
 
@@ -422,8 +404,8 @@ export class AnimatedSprite extends Node2D {
 
         if (p_animation) {
             this.set_animation(p_animation);
-            if (p_backwards && this._frame === 0) {
-                this.set_frame(this._frames.get_frame_count(p_animation) - 1);
+            if (p_backwards && this.frame === 0) {
+                this.set_frame(this.frames.get_frame_count(p_animation) - 1);
             }
         }
         this._set_playing(true);
@@ -439,17 +421,17 @@ export class AnimatedSprite extends Node2D {
      * @param {boolean} playing
      */
     _set_playing(playing) {
-        if (this._playing === playing) {
+        if (this.playing === playing) {
             return;
         }
-        this._playing = playing;
+        this.playing = playing;
         this._reset_timeout();
         this.set_process_internal(playing);
     }
 
     _get_frame_duration() {
-        if (this._frames && this._frames.has_animation(this._animation)) {
-            const speed = this._frames.get_animation_speed(this._animation) * this._speed_scale;
+        if (this.frames && this.frames.has_animation(this.animation)) {
+            const speed = this.frames.get_animation_speed(this.animation) * this.speed_scale;
             if (speed > 0) {
                 return 1 / speed;
             }
@@ -458,7 +440,7 @@ export class AnimatedSprite extends Node2D {
     }
 
     _reset_timeout() {
-        if (!this._playing) {
+        if (!this.playing) {
             return;
         }
 

@@ -18,19 +18,10 @@ import { CollisionObject2D } from "./collision_object_2d.js";
 export class RayCast2D extends Node2D {
     get class() { return 'RayCast2D' }
 
-    get collision_mask() { return this._collision_mask }
-    set collision_mask(value) { this.set_collision_mask(value) }
-
-    get _enabled() { return this._enabled }
-    set _enabled(value) { this.set_enabled(value) }
-
-    get _exclude_parent() { return this._exclude_parent }
-    set _exclude_parent(value) { this.set_exclude_parent(value) }
-
     constructor() {
         super();
 
-        this._enabled = false;
+        this.enabled = false;
         this.collided = false;
         this.against = null;
         this.against_shape = 0;
@@ -38,8 +29,8 @@ export class RayCast2D extends Node2D {
         this.collision_normal = new Vector2();
         /** @type {Set<CollisionObject2DSW>} */
         this.exclude = new Set();
-        this._collision_mask = 1;
-        this._exclude_parent = false;
+        this.collision_mask = 1;
+        this.exclude_parent = false;
 
         this.cast_to = new Vector2(0, 50);
 
@@ -62,7 +53,7 @@ export class RayCast2D extends Node2D {
             this.collide_with_bodies = data.collide_with_bodies;
         }
         if (data.collision_mask !== undefined) {
-            this._collision_mask = data.collision_mask;
+            this.set_collision_mask(data.collision_mask);
         }
         if (data.enabled !== undefined) {
             this.set_enabled(data.enabled);
@@ -80,7 +71,7 @@ export class RayCast2D extends Node2D {
     _notification(p_what) {
         switch (p_what) {
             case NOTIFICATION_ENTER_TREE: {
-                if (this._enabled) {
+                if (this.enabled) {
                     this.set_physics_process_internal(true);
                 } else {
                     this.set_physics_process_internal(false);
@@ -88,7 +79,7 @@ export class RayCast2D extends Node2D {
 
                 const parent = /** @type {CollisionObject2D} */(this.get_parent());
                 if (parent.is_collision_object) {
-                    if (this._exclude_parent) {
+                    if (this.exclude_parent) {
                         this.exclude.add(parent.rid);
                     } else {
                         this.exclude.delete(parent.rid);
@@ -96,12 +87,12 @@ export class RayCast2D extends Node2D {
                 }
             } break;
             case NOTIFICATION_EXIT_TREE: {
-                if (this._enabled) {
+                if (this.enabled) {
                     this.set_physics_process_internal(false);
                 }
             } break;
             case NOTIFICATION_INTERNAL_PHYSICS_PROCESS: {
-                if (!this._enabled) break;
+                if (!this.enabled) break;
                 this._update_raycast_state();
             }
         }
@@ -116,13 +107,13 @@ export class RayCast2D extends Node2D {
      * @param {number} bit
      */
     get_collision_mask_bit(bit) {
-        return !!(this._collision_mask & (1 << bit));
+        return !!(this.collision_mask & (1 << bit));
     }
     /**
      * @param {number} mask
      */
     set_collision_mask(mask) {
-        this._collision_mask = mask;
+        this.collision_mask = mask;
     }
     /**
      * Set/clear individual bits on the collision mask. This makes
@@ -133,9 +124,9 @@ export class RayCast2D extends Node2D {
      */
     set_collision_mask_bit(bit, value) {
         if (value) {
-            this._collision_mask |= (1 << bit);
+            this.collision_mask |= (1 << bit);
         } else {
-            this._collision_mask &= ~(1 << bit);
+            this.collision_mask &= ~(1 << bit);
         }
     }
 
@@ -143,7 +134,7 @@ export class RayCast2D extends Node2D {
      * @param {boolean} p_enabled
      */
     set_enabled(p_enabled) {
-        this._enabled = p_enabled;
+        this.enabled = p_enabled;
         if (this.is_inside_tree()) {
             this.set_physics_process_internal(p_enabled);
         }
@@ -156,11 +147,11 @@ export class RayCast2D extends Node2D {
      * @param {boolean} p_exclude_parent_body
      */
     set_exclude_parent(p_exclude_parent_body) {
-        if (this._exclude_parent === p_exclude_parent_body) {
+        if (this.exclude_parent === p_exclude_parent_body) {
             return;
         }
 
-        this._exclude_parent = p_exclude_parent_body;
+        this.exclude_parent = p_exclude_parent_body;
 
         if (!this.is_inside_tree()) {
             return;
@@ -209,7 +200,7 @@ export class RayCast2D extends Node2D {
         const rr = new RayResult();
 
         const origin = gt.get_origin();
-        if (dss.intersect_ray(origin, gt.xform(to, to), rr, this.exclude, this._collision_mask, this.collide_with_bodies, this.collide_with_areas)) {
+        if (dss.intersect_ray(origin, gt.xform(to, to), rr, this.exclude, this.collision_mask, this.collide_with_bodies, this.collide_with_areas)) {
             this.collided = true;
             this.against = rr.collider_id;
             this.collision_point.copy(rr.position);
