@@ -9,7 +9,7 @@ import {
     NOTIFICATION_INTERNAL_PROCESS,
     NOTIFICATION_INTERNAL_PHYSICS_PROCESS,
     NOTIFICATION_EXIT_TREE,
-} from "engine/scene/main/node.js";
+} from "engine/scene/main/node";
 
 import {
     Key,

@@ -11,7 +11,7 @@ import {
     DRAW_DISABLED,
 } from './base_button.js';
 import { Vector2Like, Vector2 } from 'engine/core/math/vector2';
-import { NOTIFICATION_DRAW } from '../2d/canvas_item.js';
+import { NOTIFICATION_DRAW } from '../2d/canvas_item';
 import {
     STRETCH_SCALE,
     STRETCH_TILE,

@@ -12,11 +12,11 @@ export const node_class_map: { [name: string]: any } = {};
  */
 export const res_class_map: { [name: string]: typeof ResourceInterface } = {};
 
-type PackedScene = { instance: () => import('engine/scene/main/node.js').Node };
+type PackedSceneClass = { new(): import('engine/scene/main/node').Node, instance(): import('engine/scene/main/node').Node };
 /**
  * Scene class looking table
  */
-export const scene_class_map: { [name: string]: PackedScene } = Object.create(null);
+export const scene_class_map: { [name: string]: PackedSceneClass } = Object.create(null);
 
 export const loader_pre_procs: (() => ((res: import("engine/core/io/io_resource").default, next: Function) => void))[] = [];
 export const loader_use_procs: (() => ((res: import("engine/core/io/io_resource").default, next: Function) => void))[] = [];

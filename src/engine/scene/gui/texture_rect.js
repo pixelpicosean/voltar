@@ -4,7 +4,7 @@ import { Vector2 } from 'engine/core/math/vector2';
 import { Rect2 } from 'engine/core/math/rect2.js';
 
 import { ImageTexture } from '../resources/texture.js';
-import { NOTIFICATION_DRAW } from '../2d/canvas_item.js';
+import { NOTIFICATION_DRAW } from '../2d/canvas_item';
 import { Control } from './control.js';
 
 

@@ -36,7 +36,7 @@ import {
     NOTIFICATION_PROCESS,
     NOTIFICATION_PAUSED,
     NOTIFICATION_UNPAUSED,
-} from '../main/node.js';
+} from '../main/node';
 import { NOTIFICATION_TRANSFORM_CHANGED } from '../const';
 
 import default_env from 'gen/default_env.json';

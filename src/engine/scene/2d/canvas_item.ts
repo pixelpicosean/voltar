@@ -21,7 +21,7 @@ import {
     NOTIFICATION_ENTER_TREE,
     NOTIFICATION_MOVED_IN_PARENT,
     NOTIFICATION_EXIT_TREE,
-} from "../main/node.js";
+} from "../main/node";
 import { NOTIFICATION_TRANSFORM_CHANGED } from "../const";
 
 
@@ -44,22 +44,9 @@ const white = Object.freeze(new Color(1, 1, 1, 1));
 export class CanvasItemMaterial extends Material {
     get class() { return "CanvasItemMaterial" }
 
-    /**
-     * @param {number} p_mode
-     */
-    set_blend_mode(p_mode) {
-        this.blend_mode = p_mode;
-    }
-    get_blend_mode() {
-        return this.blend_mode;
-    }
+    blend_mode = BLEND_MODE_MIX;
 
-    constructor() {
-        super();
-
-        this.blend_mode = BLEND_MODE_MIX;
-    }
-    _load_data(data) {
+    _load_data(data: any) {
         if (data.blend_mode !== undefined) this.blend_mode = data.blend_mode;
         return this;
     }
@@ -69,47 +56,36 @@ res_class_map['CanvasItemMaterial'] = CanvasItemMaterial;
 export class CanvasItem extends Node {
     get class() { return 'CanvasItem' }
 
-    constructor() {
-        super();
+    is_canvas_item = true;
 
-        this.is_canvas_item = true;
+    xform_change: SelfList<Node> = new SelfList(this);
 
-        /**
-         * @type {SelfList<Node>}
-         */
-        this.xform_change = new SelfList(this);
+    canvas_item = VSG.canvas.canvas_item_create();
+    group = "";
 
-        this.canvas_item = VSG.canvas.canvas_item_create();
-        this.group = '';
+    canvas_layer: CanvasLayer = null;
 
-        /** @type {CanvasLayer} */
-        this.canvas_layer = null;
+    modulate = new Color(1, 1, 1, 1);
+    self_modulate = new Color(1, 1, 1, 1);
 
-        this.modulate = new Color(1, 1, 1, 1);
-        this.self_modulate = new Color(1, 1, 1, 1);
+    children_items: List<CanvasItem> = new List;
+    C: List$Element<CanvasItem> = null;
 
-        /** @type {List<CanvasItem>} */
-        this.children_items = new List;
-        /** @type {List$Element<CanvasItem>} */
-        this.C = null;
+    first_draw = false;
+    visible = true;
+    pending_update = false;
+    toplevel = false;
+    drawing = false;
+    block_transform_notify = false;
+    show_behind_parent = false;
+    use_parent_material = true;
+    notify_local_transform = false;
+    notify_transform = false;
 
-        this.first_draw = false;
-        this.visible = true;
-        this.pending_update = false;
-        this.toplevel = false;
-        this.drawing = false;
-        this.block_transform_notify = false;
-        this.show_behind_parent = false;
-        this.use_parent_material = true;
-        this.notify_local_transform = false;
-        this.notify_transform = false;
+    material: Material = null;
 
-        /** @type {Material} */
-        this.material = null;
-
-        this.global_transform = new Transform2D;
-        this.global_invalid = true;
-    }
+    global_transform = new Transform2D;
+    global_invalid = true;
 
     _free() {
         VSG.canvas.item_free(this.canvas_item);
@@ -121,7 +97,7 @@ export class CanvasItem extends Node {
     /**
      * @param {any} data
      */
-    _load_data(data) {
+    _load_data(data: any) {
         super._load_data(data);
 
         if (data.modulate !== undefined) {
@@ -146,11 +122,11 @@ export class CanvasItem extends Node {
     /**
      * @param {number} p_what
      */
-    _notification(p_what) {
+    _notification(p_what: number) {
         switch (p_what) {
             case NOTIFICATION_ENTER_TREE: {
                 this.first_draw = true;
-                let ci = /** @type {CanvasItem} */(this.get_parent());
+                let ci: CanvasItem = this.get_parent() as CanvasItem;
                 if (!ci.is_canvas_item) ci = null;
 
                 if (ci) {
@@ -179,7 +155,7 @@ export class CanvasItem extends Node {
                 }
                 this._exit_canvas();
                 if (this.C) {
-                    let ci = /** @type {CanvasItem} */(this.get_parent());
+                    let ci: CanvasItem = this.get_parent() as CanvasItem;
                     ci.children_items.erase(this.C);
                     this.C = null;
                 }
@@ -202,7 +178,7 @@ export class CanvasItem extends Node {
      * @param {number} p_width
      * @param {boolean} [p_antialiased]
      */
-    draw_line(p_from, p_to, p_color, p_width = 1.0, p_antialiased = false) {
+    draw_line(p_from: Vector2Like, p_to: Vector2Like, p_color: ColorLike, p_width: number = 1.0, p_antialiased: boolean = false) {
         VSG.canvas.canvas_item_add_line(this.canvas_item, p_from, p_to, p_color, p_width, p_antialiased);
     }
 
@@ -212,7 +188,7 @@ export class CanvasItem extends Node {
      * @param {number} [p_width]
      * @param {boolean} [p_antialiased]
      */
-    draw_polyline(p_points, p_color, p_width = 1.0, p_antialiased = false) {
+    draw_polyline(p_points: PoolVector2Array | number[], p_color: ColorLike, p_width: number = 1.0, p_antialiased: boolean = false) {
         if (Array.isArray(p_points)) {
             VSG.canvas.canvas_item_add_polyline(this.canvas_item, p_points, [p_color.r, p_color.g, p_color.b, p_color.a], p_width, p_antialiased);
         } else {
@@ -226,7 +202,7 @@ export class CanvasItem extends Node {
      * @param {number} [p_width]
      * @param {boolean} [p_antialiased]
      */
-    draw_polyline_colors(p_points, p_colors, p_width = 1.0, p_antialiased = false) {
+    draw_polyline_colors(p_points: PoolVector2Array | number[], p_colors: number[], p_width: number = 1.0, p_antialiased: boolean = false) {
         if (Array.isArray(p_points)) {
             VSG.canvas.canvas_item_add_polyline(this.canvas_item, p_points, p_colors, p_width, p_antialiased);
         } else {
@@ -241,7 +217,7 @@ export class CanvasItem extends Node {
      * @param {number} [p_width=1]
      * @param {boolean} [p_antialiased=false]
      */
-    draw_rect(p_rect, p_color, p_filled = true, p_width = 1.0, p_antialiased = false) {
+    draw_rect(p_rect: Rect2, p_color: ColorLike, p_filled: boolean = true, p_width: number = 1.0, p_antialiased: boolean = false) {
         if (p_filled) {
             VSG.canvas.canvas_item_add_rect(this.canvas_item, p_rect, p_color);
         } else {
@@ -260,7 +236,7 @@ export class CanvasItem extends Node {
      * @param {number} p_radius
      * @param {ColorLike} p_color
      */
-    draw_circle(p_pos, p_radius, p_color) {
+    draw_circle(p_pos: Vector2Like, p_radius: number, p_color: ColorLike) {
         VSG.canvas.canvas_item_add_circle(this.canvas_item, p_pos, p_radius, p_color);
     }
 
@@ -274,7 +250,7 @@ export class CanvasItem extends Node {
      * @param {number} [p_width]
      * @param {boolean} [p_antialiased]
      */
-    draw_arc(p_center, p_radius, p_start_angle, p_end_angle, p_point_count, p_color, p_width = 1.0, p_antialiased = false) {
+    draw_arc(p_center: Vector2Like, p_radius: number, p_start_angle: number, p_end_angle: number, p_point_count: number, p_color: ColorLike, p_width: number = 1.0, p_antialiased: boolean = false) {
         const points = new Array(p_point_count);
         const delta_angle = p_end_angle - p_start_angle;
         for (let i = 0; i < p_point_count; i++) {
@@ -292,7 +268,7 @@ export class CanvasItem extends Node {
      * @param {StyleBox} p_style_box
      * @param {Rect2} p_rect
      */
-    draw_style_box(p_style_box, p_rect) {
+    draw_style_box(p_style_box: StyleBox, p_rect: Rect2) {
         p_style_box.draw(this.canvas_item, p_rect);
     }
 
@@ -304,7 +280,7 @@ export class CanvasItem extends Node {
      * @param {number} p_rot
      * @param {Vector2Like} p_scale
      */
-    draw_set_transform(p_offset, p_rot, p_scale) {
+    draw_set_transform(p_offset: Vector2Like, p_rot: number, p_scale: Vector2Like) {
         const xform = Transform2D.create();
         const cr = Math.cos(p_rot);
         const sr = Math.sin(p_rot);
@@ -321,7 +297,7 @@ export class CanvasItem extends Node {
     /**
      * @param {Transform2D | number[]} p_matrix
      */
-    draw_set_transform_matrix(p_matrix) {
+    draw_set_transform_matrix(p_matrix: Transform2D | number[]) {
         if (Array.isArray(p_matrix)) {
             VSG.canvas.canvas_item_add_set_transform(this.canvas_item, p_matrix);
         } else {
@@ -334,7 +310,7 @@ export class CanvasItem extends Node {
      * @param {Vector2Like} p_pos
      * @param {ColorLike} [p_modulate=white]
      */
-    draw_texture(p_texture, p_pos, p_modulate = white) {
+    draw_texture(p_texture: ImageTexture, p_pos: Vector2Like, p_modulate: ColorLike = white) {
         p_texture.draw(this.canvas_item, p_pos, p_modulate, false);
     }
 
@@ -345,7 +321,7 @@ export class CanvasItem extends Node {
      * @param {ColorLike} [p_modulate=white]
      * @param {boolean} [p_transpose=false]
      */
-    draw_texture_rect(p_texture, p_rect, p_tile = false, p_modulate = white, p_transpose = false) {
+    draw_texture_rect(p_texture: ImageTexture, p_rect: Rect2, p_tile: boolean = false, p_modulate: ColorLike = white, p_transpose: boolean = false) {
         p_texture.draw_rect(this.canvas_item, p_rect, p_tile, p_modulate, p_transpose);
     }
 
@@ -356,7 +332,7 @@ export class CanvasItem extends Node {
      * @param {ColorLike} [p_modulate=white]
      * @param {boolean} [p_transpose=false]
      */
-    draw_texture_rect_region(p_texture, p_rect, p_src_rect, p_modulate = white, p_transpose = false) {
+    draw_texture_rect_region(p_texture: ImageTexture, p_rect: Rect2, p_src_rect: Rect2, p_modulate: ColorLike = white, p_transpose: boolean = false) {
         p_texture.draw_rect_region(this.canvas_item, p_rect, p_src_rect, p_modulate, p_transpose);
     }
 
@@ -367,7 +343,7 @@ export class CanvasItem extends Node {
      * @param {ImageTexture} [p_texture]
      * @param {number[]} [p_indices]
      */
-    draw_polygon(p_points, p_colors, p_uvs = null, p_texture = null, p_indices) {
+    draw_polygon(p_points: PoolVector2Array | number[], p_colors: Color, p_uvs: PoolVector2Array | number[] = null, p_texture: ImageTexture = null, p_indices: number[]) {
         const points = Array.isArray(p_points) ? p_points : p_points.data;
         const uvs = p_uvs ? Array.isArray(p_uvs) ? p_uvs : p_uvs.data : null;
         VSG.canvas.canvas_item_add_polygon(this.canvas_item, points, [p_colors.r, p_colors.g, p_colors.b, p_colors.a], uvs, p_texture, p_indices);
@@ -380,7 +356,7 @@ export class CanvasItem extends Node {
      * @param {ImageTexture} [p_texture]
      * @param {number[]} [p_indices]
      */
-    draw_colored_polygon(p_points, p_color, p_uvs = null, p_texture = null, p_indices) {
+    draw_colored_polygon(p_points: PoolVector2Array | number[], p_color: Color, p_uvs: PoolVector2Array | number[] = null, p_texture: ImageTexture = null, p_indices: number[]) {
         const points = Array.isArray(p_points) ? p_points : p_points.data;
         const uvs = p_uvs ? Array.isArray(p_uvs) ? p_uvs : p_uvs.data : null;
         VSG.canvas.canvas_item_add_polygon(this.canvas_item, points, [p_color.r, p_color.g, p_color.b, p_color.a], uvs, p_texture, p_indices);
@@ -394,13 +370,13 @@ export class CanvasItem extends Node {
         }
     }
 
-    get_parent_item() {
+    get_parent_item(): CanvasItem {
         if (this.toplevel) {
             return null;
         }
 
         let parent = this.get_parent();
-        return (parent.is_canvas_item) ? /** @type {CanvasItem} */(parent) : null;
+        return (parent.is_canvas_item) ? (parent as CanvasItem) : null;
     }
 
     /**
@@ -412,7 +388,7 @@ export class CanvasItem extends Node {
 
     get_global_transform() {
         if (this.global_invalid) {
-            const pi = this.get_parent_item();
+            const pi: CanvasItem = this.get_parent_item();
             const xform = this.get_transform();
             if (pi) {
                 this.global_transform.copy(pi.get_global_transform()).append(xform);
@@ -443,11 +419,11 @@ export class CanvasItem extends Node {
     /**
      * @returns {Transform2D}
      */
-    get_canvas_transform() {
+    get_canvas_transform(): Transform2D {
         if (this.canvas_layer) {
             return this.canvas_layer.transform;
         } else if (this.get_parent().is_canvas_item) {
-            const c = /** @type {CanvasItem} */(this.get_parent());
+            const c: CanvasItem = this.get_parent() as CanvasItem;
             return c.get_canvas_transform();
         } else {
             return this.get_viewport().canvas_transform;
@@ -481,10 +457,9 @@ export class CanvasItem extends Node {
     }
 
     get_toplevel() {
-        /** @type {CanvasItem} */
-        let ci = this;
+        let ci: CanvasItem = this;
         while (!ci.toplevel && ci.get_parent().is_canvas_item) {
-            ci = /** @type {CanvasItem} */(ci.get_parent());
+            ci = ci.get_parent() as CanvasItem;
         }
         return ci;
     }
@@ -536,7 +511,7 @@ export class CanvasItem extends Node {
     /**
      * @param {boolean} p_enable
      */
-    set_notify_local_transform(p_enable) {
+    set_notify_local_transform(p_enable: boolean) {
         this.notify_local_transform = p_enable;
     }
     is_local_transform_notification_enabled() {
@@ -546,7 +521,7 @@ export class CanvasItem extends Node {
     /**
      * @param {boolean} p_enable
      */
-    set_notify_transform(p_enable) {
+    set_notify_transform(p_enable: boolean) {
         if (this.notify_transform === p_enable) {
             return;
         }
@@ -564,7 +539,7 @@ export class CanvasItem extends Node {
     /**
      * @param {boolean} p_toplevel
      */
-    set_as_toplevel(p_toplevel) {
+    set_as_toplevel(p_toplevel: boolean) {
         if (this.toplevel === p_toplevel) {
             return;
         }
@@ -586,7 +561,7 @@ export class CanvasItem extends Node {
     /**
      * @param {boolean} p_visible
      */
-    set_visible(p_visible) {
+    set_visible(p_visible: boolean) {
         if (p_visible) {
             this.show();
         } else {
@@ -599,8 +574,7 @@ export class CanvasItem extends Node {
             return false;
         }
 
-        /** @type {CanvasItem} */
-        let p = this;
+        let p: CanvasItem = this;
 
         while (p) {
             if (!p.visible) {
@@ -643,7 +617,7 @@ export class CanvasItem extends Node {
     /**
      * @param {boolean} value
      */
-    set_show_behind_parent(value) {
+    set_show_behind_parent(value: boolean) {
         if (this.show_behind_parent === value) {
             return;
         }
@@ -657,7 +631,7 @@ export class CanvasItem extends Node {
      * @param {number} [b] blue channel
      * @param {number} [a=1.0] alpha channel
      */
-    set_modulate_n(r, g, b, a = 1.0) {
+    set_modulate_n(r: number, g: number, b: number, a: number = 1.0) {
         // r, g, b, a
         if (Number.isFinite(g)) {
             this.modulate.set(r, g, b, a);
@@ -671,7 +645,7 @@ export class CanvasItem extends Node {
     /**
      * @param {ColorLike} color
      */
-    set_modulate(color) {
+    set_modulate(color: ColorLike) {
         this.set_modulate_n(color.r, color.g, color.b, color.a);
     }
 
@@ -681,7 +655,7 @@ export class CanvasItem extends Node {
      * @param {number} [b] blue channel
      * @param {number} [a=1.0] alpha channel
      */
-    set_self_modulate_n(r, g, b, a = 1.0) {
+    set_self_modulate_n(r: number, g: number, b: number, a: number = 1.0) {
         // r, g, b, a
         if (g !== undefined) {
             this.self_modulate.set(/** @type {number} */(r), g, b, a);
@@ -695,14 +669,14 @@ export class CanvasItem extends Node {
     /**
      * @param {ColorLike} color
      */
-    set_self_modulate(color) {
+    set_self_modulate(color: ColorLike) {
         this.set_self_modulate_n(color.r, color.g, color.b, color.a);
     }
 
     /**
      * @param {boolean} p_value
      */
-    set_use_parent_material(p_value) {
+    set_use_parent_material(p_value: boolean) {
         this.use_parent_material = p_value;
         this.canvas_item.use_parent_material = p_value;
     }
@@ -710,7 +684,7 @@ export class CanvasItem extends Node {
     /**
      * @param {Material} p_mat
      */
-    set_material(p_mat) {
+    set_material(p_mat: Material) {
         this.material = p_mat;
         VSG.canvas.canvas_item_set_material(this.canvas_item, this.material);
     }
@@ -720,7 +694,7 @@ export class CanvasItem extends Node {
     /**
      * @param {boolean} p_visible
      */
-    _propagate_visibility_changed(p_visible) {
+    _propagate_visibility_changed(p_visible: boolean) {
         if (p_visible && this.first_draw) {
             this.first_draw = false;
         }
@@ -733,7 +707,7 @@ export class CanvasItem extends Node {
         }
 
         for (let child of this.data.children) {
-            let c = /** @type {CanvasItem} */(child.is_canvas_item ? child : null);
+            let c: CanvasItem = (child.is_canvas_item ? child : null) as CanvasItem;
 
             if (c && c.visible) {
                 c._propagate_visibility_changed(p_visible);
@@ -765,10 +739,10 @@ export class CanvasItem extends Node {
     }
 
     _enter_canvas() {
-        const ci = /** @type {CanvasItem} */(this.get_parent());
+        const  ci: CanvasItem = this.get_parent() as CanvasItem;
         if (!ci.is_canvas_item || this.toplevel) {
             /** @type {Node} */
-            let n = this;
+            let n: Node = this;
 
             this.canvas_layer = null;
 
@@ -784,7 +758,7 @@ export class CanvasItem extends Node {
             }
 
             /** @type {import('engine/servers/visual/visual_server_canvas').Canvas} */
-            let canvas = null;
+            let canvas: import('engine/servers/visual/visual_server_canvas').Canvas = null;
             if (this.canvas_layer) {
                 canvas = this.canvas_layer.canvas;
             } else {
@@ -822,10 +796,7 @@ export class CanvasItem extends Node {
         this.group = '';
     }
 
-    /**
-     * @param {CanvasItem} [p_node]
-     */
-    _notify_transform(p_node) {
+    _notify_transform(p_node?: CanvasItem) {
         if (!p_node) {
             /* `_notify_transform()` */
             if (!this.is_inside_tree()) return;
@@ -887,4 +858,4 @@ node_class_map['CanvasItem'] = GDCLASS(CanvasItem, Node)
 /**
  * @type {CanvasItem}
  */
-let current_item_drawn = null;
+let current_item_drawn: CanvasItem = null;

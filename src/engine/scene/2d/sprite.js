@@ -6,8 +6,8 @@ import { Color } from 'engine/core/color';
 import { Engine } from 'engine/core/engine';
 
 import { ImageTexture } from '../resources/texture.js';
-import { NOTIFICATION_DRAW } from '../2d/canvas_item.js';
-import { Node2D } from '../2d/node_2d.js';
+import { NOTIFICATION_DRAW } from '../2d/canvas_item';
+import { Node2D } from '../2d/node_2d';
 
 const WHITE = new Color(1, 1, 1);
 

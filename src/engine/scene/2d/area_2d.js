@@ -4,7 +4,7 @@ import { node_class_map } from 'engine/registry';
 import { Vector2, Vector2Like } from 'engine/core/math/vector2';
 import { ProjectSettings } from 'engine/core/project_settings';
 
-import { NOTIFICATION_EXIT_TREE, Node } from '../main/node.js';
+import { NOTIFICATION_EXIT_TREE, Node } from '../main/node';
 import { AreaSpaceOverrideMode } from 'engine/scene/2d/const';
 import { Physics2DServer, AREA_BODY_ADDED } from 'engine/servers/physics_2d/physics_2d_server.js';
 import { Area2DSW } from 'engine/servers/physics_2d/area_2d_sw.js';

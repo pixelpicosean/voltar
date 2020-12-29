@@ -9,7 +9,7 @@ import {
     Node,
     NOTIFICATION_ENTER_TREE,
     NOTIFICATION_EXIT_TREE,
-} from "../main/node.js";
+} from "../main/node";
 import { Viewport } from "../main/viewport.js";
 import { Basis } from "engine/core/math/basis.js";
 import { NOTIFICATION_TRANSFORM_CHANGED } from "../const";

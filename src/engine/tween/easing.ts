@@ -7,159 +7,83 @@
  */
 export const Easing = {
     Linear: {
-        /**
-         * @param {number} k
-         * @returns {number}
-         */
-        None: function(k) {
+        None: function(k: number): number {
             return k;
         },
     },
 
     Quadratic: {
-        /**
-         * @param {number} k
-         * @returns {number}
-         */
-        In: function(k) {
+        In: function(k: number): number {
             return k * k;
         },
-        /**
-         * @param {number} k
-         * @returns {number}
-         */
-        Out: function(k) {
+        Out: function(k: number): number {
             return k * (2 - k);
         },
-        /**
-         * @param {number} k
-         * @returns {number}
-         */
-        InOut: function(k) {
+        InOut: function(k: number): number {
             if ((k *= 2) < 1) {return 0.5 * k * k;}
             return -0.5 * (--k * (k - 2) - 1);
         },
     },
 
     Cubic: {
-        /**
-         * @param {number} k
-         * @returns {number}
-         */
-        In: function(k) {
+        In: function(k: number): number {
             return k * k * k;
         },
-        /**
-         * @param {number} k
-         * @returns {number}
-         */
-        Out: function(k) {
+        Out: function(k: number): number {
             return --k * k * k + 1;
         },
-        /**
-         * @param {number} k
-         * @returns {number}
-         */
-        InOut: function(k) {
+        InOut: function(k: number): number {
             if ((k *= 2) < 1) {return 0.5 * k * k * k;}
             return 0.5 * ((k -= 2) * k * k + 2);
         },
     },
 
     Quartic: {
-        /**
-         * @param {number} k
-         * @returns {number}
-         */
-        In: function(k) {
+        In: function(k: number): number {
             return k * k * k * k;
         },
-        /**
-         * @param {number} k
-         * @returns {number}
-         */
-        Out: function(k) {
+        Out: function(k: number): number {
             return 1 - (--k * k * k * k);
         },
-        /**
-         * @param {number} k
-         * @returns {number}
-         */
-        InOut: function(k) {
+        InOut: function(k: number): number {
             if ((k *= 2) < 1) {return 0.5 * k * k * k * k;}
             return -0.5 * ((k -= 2) * k * k * k - 2);
         },
     },
 
     Quintic: {
-        /**
-         * @param {number} k
-         * @returns {number}
-         */
-        In: function(k) {
+        In: function(k: number): number {
             return k * k * k * k * k;
         },
-        /**
-         * @param {number} k
-         * @returns {number}
-         */
-        Out: function(k) {
+        Out: function(k: number): number {
             return --k * k * k * k * k + 1;
         },
-        /**
-         * @param {number} k
-         * @returns {number}
-         */
-        InOut: function(k) {
+        InOut: function(k: number): number {
             if ((k *= 2) < 1) {return 0.5 * k * k * k * k * k;}
             return 0.5 * ((k -= 2) * k * k * k * k + 2);
         },
     },
 
     Sinusoidal: {
-        /**
-         * @param {number} k
-         * @returns {number}
-         */
-        In: function(k) {
+        In: function(k: number): number {
             return 1 - Math.cos(k * Math.PI / 2);
         },
-        /**
-         * @param {number} k
-         * @returns {number}
-         */
-        Out: function(k) {
+        Out: function(k: number): number {
             return Math.sin(k * Math.PI / 2);
         },
-        /**
-         * @param {number} k
-         * @returns {number}
-         */
-        InOut: function(k) {
+        InOut: function(k: number): number {
             return 0.5 * (1 - Math.cos(Math.PI * k));
         },
     },
 
     Exponential: {
-        /**
-         * @param {number} k
-         * @returns {number}
-         */
-        In: function(k) {
+        In: function(k: number): number {
             return k === 0 ? 0 : Math.pow(1024, k - 1);
         },
-        /**
-         * @param {number} k
-         * @returns {number}
-         */
-        Out: function(k) {
+        Out: function(k: number): number {
             return k === 1 ? 1 : 1 - Math.pow(2, -10 * k);
         },
-        /**
-         * @param {number} k
-         * @returns {number}
-         */
-        InOut: function(k) {
+        InOut: function(k: number): number {
             if (k === 0) {return 0;}
             if (k === 1) {return 1;}
             if ((k *= 2) < 1) {return 0.5 * Math.pow(1024, k - 1);}
@@ -168,36 +92,20 @@ export const Easing = {
     },
 
     Circular: {
-        /**
-         * @param {number} k
-         * @returns {number}
-         */
-        In: function(k) {
+        In: function(k: number): number {
             return 1 - Math.sqrt(1 - k * k);
         },
-        /**
-         * @param {number} k
-         * @returns {number}
-         */
-        Out: function(k) {
+        Out: function(k: number): number {
             return Math.sqrt(1 - (--k * k));
         },
-        /**
-         * @param {number} k
-         * @returns {number}
-         */
-        InOut: function(k) {
+        InOut: function(k: number): number {
             if ((k *= 2) < 1) {return -0.5 * (Math.sqrt(1 - k * k) - 1);}
             return 0.5 * (Math.sqrt(1 - (k -= 2) * k) + 1);
         },
     },
 
     Elastic: {
-        /**
-         * @param {number} k
-         * @returns {number}
-         */
-        In: function(k) {
+        In: function(k: number): number {
             var s, a = 0.1,
                 p = 0.4;
             if (k === 0) {return 0;}
@@ -209,11 +117,7 @@ export const Easing = {
             else {s = p * Math.asin(1 / a) / (2 * Math.PI);}
             return -(a * Math.pow(2, 10 * (k -= 1)) * Math.sin((k - s) * (2 * Math.PI) / p));
         },
-        /**
-         * @param {number} k
-         * @returns {number}
-         */
-        Out: function(k) {
+        Out: function(k: number): number {
             var s, a = 0.1,
                 p = 0.4;
             if (k === 0) {return 0;}
@@ -225,11 +129,7 @@ export const Easing = {
             else {s = p * Math.asin(1 / a) / (2 * Math.PI);}
             return (a * Math.pow(2, -10 * k) * Math.sin((k - s) * (2 * Math.PI) / p) + 1);
         },
-        /**
-         * @param {number} k
-         * @returns {number}
-         */
-        InOut: function(k) {
+        InOut: function(k: number): number {
             var s, a = 0.1,
                 p = 0.4;
             if (k === 0) {return 0;}
@@ -245,27 +145,15 @@ export const Easing = {
     },
 
     Back: {
-        /**
-         * @param {number} k
-         * @returns {number}
-         */
-        In: function(k) {
+        In: function(k: number): number {
             var s = 1.70158;
             return k * k * ((s + 1) * k - s);
         },
-        /**
-         * @param {number} k
-         * @returns {number}
-         */
-        Out: function(k) {
+        Out: function(k: number): number {
             var s = 1.70158;
             return --k * k * ((s + 1) * k + s) + 1;
         },
-        /**
-         * @param {number} k
-         * @returns {number}
-         */
-        InOut: function(k) {
+        InOut: function(k: number): number {
             var s = 1.70158 * 1.525;
             if ((k *= 2) < 1) {return 0.5 * (k * k * ((s + 1) * k - s));}
             return 0.5 * ((k -= 2) * k * ((s + 1) * k + s) + 2);
@@ -273,18 +161,10 @@ export const Easing = {
     },
 
     Bounce: {
-        /**
-         * @param {number} k
-         * @returns {number}
-         */
-        In: function(k) {
+        In: function(k: number): number {
             return 1 - Easing.Bounce.Out(1 - k);
         },
-        /**
-         * @param {number} k
-         * @returns {number}
-         */
-        Out: function(k) {
+        Out: function(k: number): number {
             if (k < (1 / 2.75)) {
                 return 7.5625 * k * k;
             }
@@ -298,11 +178,7 @@ export const Easing = {
                 return 7.5625 * (k -= (2.625 / 2.75)) * k + 0.984375;
             }
         },
-        /**
-         * @param {number} k
-         * @returns {number}
-         */
-        InOut: function(k) {
+        InOut: function(k: number): number {
             if (k < 0.5) {return Easing.Bounce.In(k * 2) * 0.5;}
             return Easing.Bounce.Out(k * 2 - 1) * 0.5 + 0.5;
         },
@@ -313,7 +189,7 @@ export const Easing = {
  * Interpolation functions.
  */
 export const Interpolation = {
-    Linear: function(v, k) {
+    Linear: function(v: number[], k: number) {
         var m = v.length - 1,
             f = m * k,
             i = Math.floor(f),
@@ -323,7 +199,7 @@ export const Interpolation = {
         return fn(v[i], v[i + 1 > m ? m : i + 1], f - i);
     },
 
-    Bezier: function(v, k) {
+    Bezier: function(v: number[], k: number) {
         var b = 0,
             n = v.length - 1,
             pw = Math.pow,
@@ -336,7 +212,7 @@ export const Interpolation = {
         return b;
     },
 
-    CatmullRom: function(v, k) {
+    CatmullRom: function(v: number[], k: number) {
         var m = v.length - 1,
             f = m * k,
             i = Math.floor(f),
@@ -353,26 +229,26 @@ export const Interpolation = {
     },
 
     Utils: {
-        Linear: function(p0, p1, t) {
+        Linear: function(p0: number, p1: number, t: number) {
             return (p1 - p0) * t + p0;
         },
 
-        Bernstein: function(n, i) {
+        Bernstein: function(n: number, i: number) {
             var fc = Interpolation.Utils.Factorial;
             return fc(n) / fc(i) / fc(n - i);
         },
 
         Factorial: (function() {
-            var a = [1];
-            return function(n) {
-                var s = 1, i;
+            let a = [1];
+            return function(n: number) {
+                let s = 1, i = 0;
                 if (a[n]) {return a[n];}
                 for (i = n; i > 1; i--) {s *= i;}
                 return a[n] = s;
             };
         })(),
 
-        CatmullRom: function(p0, p1, p2, p3, t) {
+        CatmullRom: function(p0: number, p1: number, p2: number, p3: number, t: number) {
             var v0 = (p2 - p0) * 0.5,
                 v1 = (p3 - p1) * 0.5,
                 t2 = t * t,

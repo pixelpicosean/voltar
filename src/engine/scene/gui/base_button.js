@@ -10,8 +10,8 @@ import { Resource } from "engine/core/resource";
 import {
     NOTIFICATION_DRAG_BEGIN,
     NOTIFICATION_EXIT_TREE,
-} from "../main/node.js";
-import { NOTIFICATION_VISIBILITY_CHANGED } from "../2d/canvas_item.js";
+} from "../main/node";
+import { NOTIFICATION_VISIBILITY_CHANGED } from "../2d/canvas_item";
 import {
     Control,
     NOTIFICATION_MOUSE_ENTER,

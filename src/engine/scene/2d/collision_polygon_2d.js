@@ -9,9 +9,9 @@ import {
     NOTIFICATION_PARENTED,
     NOTIFICATION_ENTER_TREE,
     NOTIFICATION_UNPARENTED,
-} from "../main/node.js";
+} from "../main/node";
 import { ConvexPolygonShape2D } from "../resources/convex_polygon_shape_2d.js";
-import { Node2D } from "./node_2d.js";
+import { Node2D } from "./node_2d";
 
 /**
  * @param {number[]} arr

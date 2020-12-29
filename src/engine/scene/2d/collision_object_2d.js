@@ -11,12 +11,12 @@ import { Shape2D } from '../resources/shape_2d.js';
 import {
     NOTIFICATION_ENTER_TREE,
     NOTIFICATION_EXIT_TREE,
-} from '../main/node.js';
-import { Node2D } from './node_2d.js';
+} from '../main/node';
+import { Node2D } from './node_2d';
 import {
     NOTIFICATION_EXIT_CANVAS,
     NOTIFICATION_VISIBILITY_CHANGED,
-} from './canvas_item.js';
+} from './canvas_item';
 import { BodyState } from './const';
 import { CollisionShape2D } from './collision_shape_2d.js';
 import { CollisionPolygon2D } from './collision_polygon_2d.js';

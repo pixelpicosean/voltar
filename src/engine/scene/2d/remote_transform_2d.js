@@ -1,8 +1,8 @@
 import { node_class_map } from 'engine/registry';
 import { GDCLASS } from 'engine/core/v_object';
 
-import { NOTIFICATION_ENTER_TREE } from '../main/node.js';
-import { Node2D } from './node_2d.js';
+import { NOTIFICATION_ENTER_TREE } from '../main/node';
+import { Node2D } from './node_2d';
 import { Vector2 } from 'engine/core/math/vector2';
 import { NOTIFICATION_TRANSFORM_CHANGED } from '../const';
 

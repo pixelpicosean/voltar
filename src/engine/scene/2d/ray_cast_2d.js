@@ -10,8 +10,8 @@ import {
     NOTIFICATION_ENTER_TREE,
     NOTIFICATION_EXIT_TREE,
     NOTIFICATION_INTERNAL_PHYSICS_PROCESS,
-} from "../main/node.js";
-import { Node2D } from "./node_2d.js";
+} from "../main/node";
+import { Node2D } from "./node_2d";
 import { CollisionObject2D } from "./collision_object_2d.js";
 
 

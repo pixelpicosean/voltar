@@ -12,12 +12,12 @@ import { Body2DSW } from "engine/servers/physics_2d/body_2d_sw.js";
 import {
     NOTIFICATION_ENTER_TREE,
     NOTIFICATION_EXIT_TREE,
-} from "../main/node.js";
+} from "../main/node";
 import {
     NOTIFICATION_LOCAL_TRANSFORM_CHANGED,
-} from "./canvas_item.js";
+} from "./canvas_item";
 import { TileSet, AUTO_TILE, ATLAS_TILE, SINGLE_TILE } from "../resources/tile_set.js";
-import { Node2D } from "./node_2d.js";
+import { Node2D } from "./node_2d";
 import { CollisionObject2D } from "./collision_object_2d.js";
 import { CollisionPolygon2D } from "./collision_polygon_2d.js";
 import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server.js";

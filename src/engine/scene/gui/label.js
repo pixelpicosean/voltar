@@ -18,7 +18,7 @@ import { Color } from "engine/core/color";
 import { VSG } from "engine/servers/visual/visual_server_globals.js";
 import { CommandRect } from "engine/servers/visual/commands.js";
 
-import { NOTIFICATION_DRAW } from "../2d/canvas_item.js";
+import { NOTIFICATION_DRAW } from "../2d/canvas_item";
 import { SIZE_SHRINK_CENTER, MOUSE_FILTER_IGNORE } from "./const";
 import {
     Control,

@@ -8,8 +8,8 @@ import { Color, ColorLike } from "engine/core/color";
 import { VSG } from "engine/servers/visual/visual_server_globals.js";
 
 import { ImageTexture } from "../resources/texture.js";
-import { NOTIFICATION_DRAW } from "./canvas_item.js";
-import { Node2D } from "./node_2d.js";
+import { NOTIFICATION_DRAW } from "./canvas_item";
+import { Node2D } from "./node_2d";
 
 class Bone {
     constructor() {

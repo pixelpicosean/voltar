@@ -1,20 +1,14 @@
-import { remove_items } from 'engine/dep/index.ts';
+import { remove_item } from 'engine/dep/index';
 import { VObject } from 'engine/core/v_object';
 import { clamp } from 'engine/core/math/math_funcs.js';
 import { Vector2, Vector2Like } from 'engine/core/math/vector2';
 import { Color, ColorLike } from 'engine/core/color';
 
-import { flatten_key_url } from './flatten_key_url.js';
-import { Easing } from './easing.js';
+import { flatten_key_url } from './flatten_key_url';
+import { Easing } from './easing';
 
-
-/**
- * @typedef {string | number | boolean | Vector2Like | ColorLike} Tweenable
- */
-
-/**
- * @typedef {'Linear.None' | 'Quadratic.In' | 'Quadratic.Out' | 'Quadratic.InOut' | 'Cubic.In' | 'Cubic.Out' | 'Cubic.InOut' | 'Quartic.In' | 'Quartic.Out' | 'Quartic.InOut' | 'Quintic.In' | 'Quintic.Out' | 'Quintic.InOut' | 'Sinusoidal.In' | 'Sinusoidal.Out' | 'Sinusoidal.InOut' | 'Exponential.In' | 'Exponential.Out' | 'Exponential.InOut' | 'Circular.In' | 'Circular.Out' | 'Circular.InOut' | 'Elastic.In' | 'Elastic.Out' | 'Elastic.InOut' | 'Back.In' | 'Back.Out' | 'Back.InOut' | 'Bounce.In' | 'Bounce.Out' | 'Bounce.InOut'} EasingKey
- */
+type Tweenable = string | number | boolean | Vector2Like | ColorLike;
+type EasingKey = 'Linear.None' | 'Quadratic.In' | 'Quadratic.Out' | 'Quadratic.InOut' | 'Cubic.In' | 'Cubic.Out' | 'Cubic.InOut' | 'Quartic.In' | 'Quartic.Out' | 'Quartic.InOut' | 'Quintic.In' | 'Quintic.Out' | 'Quintic.InOut' | 'Sinusoidal.In' | 'Sinusoidal.Out' | 'Sinusoidal.InOut' | 'Exponential.In' | 'Exponential.Out' | 'Exponential.InOut' | 'Circular.In' | 'Circular.Out' | 'Circular.InOut' | 'Elastic.In' | 'Elastic.Out' | 'Elastic.InOut' | 'Back.In' | 'Back.Out' | 'Back.InOut' | 'Bounce.In' | 'Bounce.Out' | 'Bounce.InOut';
 
 
 // InterpolateType
@@ -34,12 +28,7 @@ const STRING = 2;
 const VECTOR2 = 3;
 const COLOR = 4;
 
-/**
- * @param {any} obj
- * @param {string[]} key
- * @returns {any}
- */
-function get_property(obj, key) {
+function get_property(obj: any, key: string[]): any {
     let idx = 0, res = obj;
     while (idx < key.length) {
         res = res[key[idx]];
@@ -47,12 +36,7 @@ function get_property(obj, key) {
     }
     return res;
 }
-/**
- * @param {any} obj
- * @param {string} key
- * @param {any} value
- */
-function set_property(obj, key, value) {
+function set_property(obj: any, key: string, value: any) {
     let idx = 0, res = obj;
     while (idx < key.length - 1) {
         res = res[key[idx]];
@@ -60,12 +44,7 @@ function set_property(obj, key, value) {
     }
     res[key[key.length - 1]] = value;
 }
-/**
- * @param {any} obj
- * @param {string} key
- * @param {Vector2Like} value
- */
-function set_vec_property(obj, key, value) {
+function set_vec_property(obj: any, key: string, value: Vector2Like) {
     let idx = 0, res = obj;
     while (idx < key.length - 1) {
         res = res[key[idx]];
@@ -75,12 +54,7 @@ function set_vec_property(obj, key, value) {
     res.x = value.x;
     res.y = value.y;
 }
-/**
- * @param {any} obj
- * @param {string} key
- * @param {ColorLike} value
- */
-function set_color_property(obj, key, value) {
+function set_color_property(obj: any, key: string, value: ColorLike) {
     let idx = 0, res = obj;
     while (idx < key.length - 1) {
         res = res[key[idx]];
@@ -98,13 +72,13 @@ const _tmp_vec2 = new Vector2;
 /**
  * @type {Array<Vector2>}
  */
-const VECTOR_ARR = [];
+const VECTOR_ARR: Array<Vector2> = [];
 /**
  * @param {number} x
  * @param {number} y
  * @returns {Vector2}
  */
-const create_vector = (x, y) => {
+const create_vector = (x: number, y: number): Vector2 => {
     let vec = VECTOR_ARR.pop();
     if (!vec) vec = new Vector2(x, y);
     vec.set(x, y);
@@ -116,7 +90,7 @@ const _tmp_color = new Color;
 /**
  * @type {Array<Color>}
  */
-const COLOR_ARR = [];
+const COLOR_ARR: Array<Color> = [];
 /**
  * @param {number} r
  * @param {number} g
@@ -124,7 +98,7 @@ const COLOR_ARR = [];
  * @param {number} a
  * @returns {Color}
  */
-const create_color = (r, g, b, a) => {
+const create_color = (r: number, g: number, b: number, a: number): Color => {
     let color = COLOR_ARR.pop();
     if (!color) color = new Color(r, g, b, a);
     color.set(r, g, b, a);
@@ -132,19 +106,33 @@ const create_color = (r, g, b, a) => {
 };
 
 
-/**
- * @template T
- * @template {keyof T} K
- * @template {Tweenable} S
- */
-class InterpolateData {
-    constructor() {
-        this._init();
-    }
-    /**
-     * @returns {InterpolateData}
-     */
-    _init() {
+class InterpolateData<T, K extends keyof T, S extends Tweenable> {
+    active = false;
+    finish = false;
+
+    duration = 0.0;
+    delay = 0.0;
+    elapsed = 0.0;
+
+    type = 0;
+    val_type = NUMBER;
+    easing = Easing.Linear.None;
+
+    obj: T = null;
+    key: K = undefined;
+    flat_key: string[] = null;
+    target_obj: T = null;
+    target_key: S = undefined;
+    flat_target_key: string[] = null;
+
+    initial_val: S = undefined;
+    delta_val: S = undefined;
+    final_val: S = undefined;
+
+    call_deferred = false;
+    args: any[] = null;
+
+    _init(): InterpolateData<T, K, S> {
         this.active = false;
         this.finish = false;
 
@@ -156,23 +144,15 @@ class InterpolateData {
         this.val_type = NUMBER;
         this.easing = Easing.Linear.None;
 
-        /** @type {T} */
         this.obj = null;
-        /** @type {K} */
         this.key = undefined;
         this.flat_key = null;
-        /** @type {T} */
         this.target_obj = null;
-        /** @type {S} */
         this.target_key = undefined;
-        /** @type {string[]} */
         this.flat_target_key = null;
 
-        /** @type {S} */
         this.initial_val = undefined;
-        /** @type {S} */
         this.delta_val = undefined;
-        /** @type {S} */
         this.final_val = undefined;
 
         this.call_deferred = false;
@@ -182,40 +162,25 @@ class InterpolateData {
     }
 }
 
-/**
- * @type {InterpolateData<any, any, any>[]}
- */
-const Interpolate_Pool = [];
-/**
- * @template T
- * @template {keyof T} K
- * @template {Tweenable} S
- *
- * @returns {InterpolateData<T, K, S>}
- */
-const create_interpolate = () => {
+const Interpolate_Pool: InterpolateData<any, any, any>[] = [];
+const Interpolate_create = <T, K extends keyof T, S extends Tweenable>(): InterpolateData<T, K, S> => {
     let data = Interpolate_Pool.pop();
-    if (!data) data = new InterpolateData();
+    if (!data) data = new InterpolateData;
     return data._init();
 };
 
-/** @type {Tween[]} */
-const Tween_Pool = [];
+const pool_Tween: Tween[] = [];
 
-// TODO: better easing support (https://github.com/rezoner/ease)
 export default class Tween extends VObject {
     static create() {
-        const t = Tween_Pool.pop();
+        const t = pool_Tween.pop();
         if (!t) {
-            return new Tween();
+            return new Tween;
         } else {
             return t;
         }
     }
-    /**
-     * @param {Tween} t
-     */
-    static free(t) {
+    static free(t: Tween) {
         if (t) {
             t.is_removed = false;
             t.autoplay = false;
@@ -226,39 +191,26 @@ export default class Tween extends VObject {
                 Interpolate_Pool.push(i);
             }
             t.interpolates.length = 0;
-            t.setter_cache = {};
+            t.setter_cache = Object.create(null);
         }
         return Tween;
     }
 
-    constructor() {
-        super();
+    is_removed = false;
 
-        this.is_removed = false;
+    autoplay = false;
+    active = false;
+    repeat = false;
+    speed_scale = 1;
 
-        this.autoplay = false;
-        this.active = false;
-        this.repeat = false;
-        this.speed_scale = 1;
+    interpolates: InterpolateData<any, any, any>[] = [];
+    setter_cache: { [prop: string]: (value: any) => void } = Object.create(null);
 
-        /**
-         * @type {InterpolateData<any, any, any>[]}
-         */
-        this.interpolates = [];
-        this.setter_cache = {};
-    }
-
-    /**
-     * @param {boolean} active
-     */
-    set_active(active) {
+    set_active(active: boolean) {
         this.active = active;
         return this;
     }
-    /**
-     * @param {number} scale
-     */
-    set_speed_scale(scale) {
+    set_speed_scale(scale: number) {
         this.speed_scale = scale;
         return this;
     }
@@ -270,17 +222,11 @@ export default class Tween extends VObject {
         this.active = true;
         return this;
     }
-    /**
-     * @template T
-     * @template {keyof T} K
-     * @param {T} obj Target
-     * @param {K} key Key
-     */
-    reset(obj, key) {
+    reset<T, K extends keyof T>(obj: T, key: K) {
         let i = 0, data;
         for (i = 0; i < this.interpolates.length; i++) {
             data = this.interpolates[i];
-            if (data.obj === obj && (data.key === key || /** @type {string} */(/** @type {unknown} */(key)).length === 0)) {
+            if (data.obj === obj && (data.key === key || (key as string).length === 0)) {
                 data.elapsed = 0;
                 data.finish = false;
                 if (data.delay === 0) {
@@ -290,8 +236,6 @@ export default class Tween extends VObject {
         }
         return this;
     }
-    /**
-     */
     reset_all() {
         let i = 0, data;
         for (i = 0; i < this.interpolates.length; i++) {
@@ -305,17 +249,11 @@ export default class Tween extends VObject {
         return this;
     }
 
-    /**
-     * @template T
-     * @template {keyof T} K
-     * @param {T} obj Target
-     * @param {K} key Key
-     */
-    stop(obj, key) {
+    stop<T, K extends keyof T>(obj: T, key: K) {
         let i = 0, data;
         for (i = 0; i < this.interpolates.length; i++) {
             data = this.interpolates[i];
-            if (data.obj === obj && (data.key === key || /** @type {string} */(/** @type {unknown} */(key)).length === 0)) {
+            if (data.obj === obj && (data.key === key || (key as string).length === 0)) {
                 data.active = false;
             }
         }
@@ -330,19 +268,13 @@ export default class Tween extends VObject {
         }
         return this;
     }
-    /**
-     * @template T
-     * @template {keyof T} K
-     * @param {T} obj Target
-     * @param {K} key Key
-     */
-    resume(obj, key) {
+    resume<T, K extends keyof T>(obj: T, key: K) {
         this.active = true;
 
         let i = 0, data;
         for (i = 0; i < this.interpolates.length; i++) {
             data = this.interpolates[i];
-            if (data.obj === obj && (data.key === key || /** @type {string} */(/** @type {unknown} */(key)).length === 0)) {
+            if (data.obj === obj && (data.key === key || (key as string).length === 0)) {
                 data.active = true;
             }
         }
@@ -358,19 +290,12 @@ export default class Tween extends VObject {
         return this;
     }
 
-    /**
-     * @template T
-     * @template {keyof T} K
-     * @param {T} obj Target
-     * @param {K} key Key
-     * @param {boolean} [first_only]
-     */
-    remove(obj, key, first_only = true) {
+    remove<T, K extends keyof T>(obj: T, key: K, first_only: boolean = true) {
         let i = 0, data;
         for (i = 0; i < this.interpolates.length; i++) {
             data = this.interpolates[i];
-            if (data.obj === obj && (data.key === key || /** @type {string} */(/** @type {unknown} */(key)).length === 0)) {
-                remove_items(this.interpolates, i--, 1);
+            if (data.obj === obj && (data.key === key || (key as string).length === 0)) {
+                remove_item(this.interpolates, i--);
                 Interpolate_Pool.push(data);
                 if (first_only) {
                     break;
@@ -390,11 +315,8 @@ export default class Tween extends VObject {
         return this;
     }
 
-    /**
-     * @param {number} p_time
-     */
-    seek(p_time) {
-        let i = 0, data;
+    seek(p_time: number) {
+        let i = 0, data: InterpolateData<any, any, any> = null;
         for (i = 0; i < this.interpolates.length; i++) {
             data = this.interpolates[i];
 
@@ -442,22 +364,20 @@ export default class Tween extends VObject {
 
     /**
      * Animate a property of an object
-     * @template T
-     * @template {keyof T} K
-     * @template {Tweenable} S
-     * @param {T} obj Target
-     * @param {K} property Property to be animated
-     * @param {S} initial_val Initial value
-     * @param {S} final_val Initial value
-     * @param {number} duration Duration of this animation
-     * @param {EasingKey} p_easing Easing function
-     * @param {number} [delay] Time before start
+     * @param obj Target
+     * @param property Property to be animated
+     * @param initial_val Initial value
+     * @param final_val Initial value
+     * @param duration Duration of this animation
+     * @param p_easing Easing function
+     * @param [delay] Time before start
      */
-    interpolate_property(obj, property, initial_val, final_val, duration, p_easing, delay = 0) {
+    interpolate_property<T, K extends keyof T, S extends Tweenable>(obj: T, property: K, initial_val: S, final_val: S, duration: number, p_easing: EasingKey, delay: number = 0) {
         let easing = p_easing.split('.');
-        let easing_func = Easing[easing[0]][easing[1]];
+        // @ts-ignore
+        let easing_func: (k: number) => number = Easing[easing[0]][easing[1]];
 
-        let data = create_interpolate();
+        let data = Interpolate_create<T, K, S>();
         data.active = true;
         data.type = INTER_PROPERTY;
         data.finish = false;
@@ -465,7 +385,7 @@ export default class Tween extends VObject {
 
         data.obj = obj;
         data.key = property;
-        data.flat_key = flatten_key_url(/** @type {string} */(/** @type {unknown} */(property)));
+        data.flat_key = flatten_key_url(property as string);
         data.initial_val = initial_val;
         data.final_val = final_val;
         data.duration = duration;
@@ -487,6 +407,7 @@ export default class Tween extends VObject {
                     data.initial_val = create_vector(initial_val.x, initial_val.y);
                     // @ts-ignore
                     data.final_val = create_vector(final_val.x, final_val.y);
+                    // @ts-ignore
                     data.delta_val = create_vector(0, 0);
                     data.val_type = VECTOR2;
                 } else if (('r' in initial_val) && ('g' in initial_val) && ('b' in initial_val) && ('a' in initial_val)) {
@@ -494,11 +415,13 @@ export default class Tween extends VObject {
                     data.initial_val = create_color(initial_val.r, initial_val.g, initial_val.b, initial_val.a);
                     // @ts-ignore
                     data.final_val = create_color(final_val.r, final_val.g, final_val.b, final_val.a);
+                    // @ts-ignore
                     data.delta_val = create_color(1, 1, 1, 1);
                     data.val_type = COLOR;
                 }
                 break;
         }
+        // @ts-ignore
         const setter = obj[`set_${property}`];
         if (typeof setter === 'function') {
             // @ts-ignore
@@ -515,22 +438,20 @@ export default class Tween extends VObject {
     }
     /**
      * Animate a method of an object
-     * @template T
-     * @template {keyof T} K
-     * @template {Tweenable} S
-     * @param {T} obj Target
-     * @param {K} method Method to be animated
-     * @param {S} initial_val Initial value
-     * @param {S} final_val Initial value
-     * @param {number} duration Duration of this animation
-     * @param {EasingKey} p_easing Easing function
-     * @param {number} [delay] Time before start
+     * @param obj Target
+     * @param method Method to be animated
+     * @param initial_val Initial value
+     * @param final_val Initial value
+     * @param duration Duration of this animation
+     * @param p_easing Easing function
+     * @param [delay] Time before start
      */
-    interpolate_method(obj, method, initial_val, final_val, duration, p_easing, delay = 0) {
+    interpolate_method<T, K extends keyof T, S extends Tweenable>(obj: T, method: K, initial_val: S, final_val: S, duration: number, p_easing: EasingKey, delay: number = 0) {
         let easing = p_easing.split('.');
-        let easing_func = Easing[easing[0]][easing[1]];
+        // @ts-ignore
+        let easing_func: (k: number) => number = Easing[easing[0]][easing[1]];
 
-        let data = create_interpolate();
+        let data = Interpolate_create<T, K, S>();
         data.active = true;
         data.type = INTER_METHOD;
         data.finish = false;
@@ -538,7 +459,7 @@ export default class Tween extends VObject {
 
         data.obj = obj;
         data.key = method;
-        data.flat_key = [method];
+        data.flat_key = [method as string];
         data.initial_val = initial_val;
         data.final_val = final_val;
         data.duration = duration;
@@ -560,6 +481,7 @@ export default class Tween extends VObject {
                     data.initial_val = create_vector(initial_val.x, initial_val.y);
                     // @ts-ignore
                     data.final_val = create_vector(final_val.x, final_val.y);
+                    // @ts-ignore
                     data.delta_val = create_vector(0, 0);
                     data.val_type = VECTOR2;
                 } else if (('r' in initial_val) && ('g' in initial_val) && ('b' in initial_val) && ('a' in initial_val)) {
@@ -567,6 +489,7 @@ export default class Tween extends VObject {
                     data.initial_val = create_color(initial_val.r, initial_val.g, initial_val.b, initial_val.a);
                     // @ts-ignore
                     data.final_val = create_color(final_val.r, final_val.g, final_val.b, final_val.a);
+                    // @ts-ignore
                     data.delta_val = create_color(1, 1, 1, 1);
                     data.val_type = COLOR;
                 }
@@ -582,15 +505,13 @@ export default class Tween extends VObject {
     }
     /**
      * Invoke a method after duration
-     * @template T
-     * @template {keyof T} K
-     * @param {T} obj Target
-     * @param {number} duration Duration of this animation
-     * @param {K} callback Function to call after the duration
-     * @param {any} [args] Arguments to be passed to the callback
+     * @param obj Target
+     * @param duration Duration of this animation
+     * @param callback Function to call after the duration
+     * @param [args] Arguments to be passed to the callback
      */
-    interpolate_callback(obj, duration, callback, args) {
-        let data = create_interpolate();
+    interpolate_callback<T, K extends keyof T>(obj: T, duration: number, callback: K, args: any) {
+        let data = Interpolate_create<T, K, any>();
         data.active = true;
         data.type = INTER_CALLBACK;
         data.finish = false;
@@ -609,15 +530,13 @@ export default class Tween extends VObject {
     }
     /**
      * Invoke a method after duration, but from the deferred queue
-     * @template T
-     * @template {keyof T} K
-     * @param {T} obj Target
-     * @param {number} duration Duration of this animation
-     * @param {K} callback Function to call after the duration
-     * @param {any} [args] Arguments to be passed to the callback
+     * @param obj Target
+     * @param duration Duration of this animation
+     * @param callback Function to call after the duration
+     * @param [args] Arguments to be passed to the callback
      */
-    interpolate_deferred_callback(obj, duration, callback, args) {
-        let data = create_interpolate();
+    interpolate_deferred_callback<T, K extends keyof T>(obj: T, duration: number, callback: K, args: any) {
+        let data = Interpolate_create<T, K, any>();
         data.active = true;
         data.type = INTER_CALLBACK;
         data.finish = false;
@@ -636,23 +555,21 @@ export default class Tween extends VObject {
     }
     /**
      * Follow a property of another object
-     * @template T
-     * @template {keyof T} K
-     * @template {Tweenable} S
-     * @param {T} obj Target
-     * @param {K} property Property to be animated
-     * @param {S} initial_val Initial value
-     * @param {T} target Object to follow
-     * @param {K} property Property of the followed object
-     * @param {number} duration Duration of this animation
-     * @param {EasingKey} p_easing Easing function
-     * @param {number} [delay] Time before start
+     * @param obj Target
+     * @param property Property to be animated
+     * @param initial_val Initial value
+     * @param target Object to follow
+     * @param property Property of the followed object
+     * @param duration Duration of this animation
+     * @param p_easing Easing function
+     * @param [delay] Time before start
      */
-    follow_property(obj, property, initial_val, target, target_property, duration, p_easing, delay = 0) {
+    follow_property<T, K extends keyof T, S extends Tweenable>(obj: T, property: K, initial_val: S, target: T, target_property: K, duration: number, p_easing: EasingKey, delay: number = 0) {
         let easing = p_easing.split('.');
-        let easing_func = Easing[easing[0]][easing[1]];
+        // @ts-ignore
+        let easing_func: (k: number) => number = Easing[easing[0]][easing[1]];
 
-        let data = create_interpolate();
+        let data = Interpolate_create<T, K, S>();
         data.active = true;
         data.type = FOLLOW_PROPERTY;
         data.finish = false;
@@ -660,11 +577,12 @@ export default class Tween extends VObject {
 
         data.obj = obj;
         data.key = property;
-        data.flat_key = flatten_key_url(/** @type {string} */(/** @type {unknown} */(property)));
+        data.flat_key = flatten_key_url(property as string);
         data.initial_val = initial_val;
         data.target_obj = target;
+        // @ts-ignore
         data.target_key = target_property;
-        data.flat_target_key = flatten_key_url(/** @type {string} */(/** @type {unknown} */(target_property)));
+        data.flat_target_key = flatten_key_url(target_property as string);
         data.duration = duration;
         data.easing = easing_func;
         data.delay = delay;
@@ -682,7 +600,9 @@ export default class Tween extends VObject {
                 if (('x' in initial_val) && ('y' in initial_val)) {
                     // @ts-ignore
                     data.initial_val = create_vector(initial_val.x, initial_val.y);
+                    // @ts-ignore
                     data.final_val = create_vector(0, 0);
+                    // @ts-ignore
                     data.delta_val = create_vector(0, 0);
                     data.val_type = VECTOR2;
                 } else if (('r' in initial_val) && ('g' in initial_val) && ('b' in initial_val) && ('a' in initial_val)) {
@@ -690,11 +610,13 @@ export default class Tween extends VObject {
                     data.initial_val = create_color(initial_val.r, initial_val.g, initial_val.b, initial_val.a);
                     // @ts-ignore
                     data.final_val = create_color(final_val.r, final_val.g, final_val.b, final_val.a);
+                    // @ts-ignore
                     data.delta_val = create_color(1, 1, 1, 1);
                     data.val_type = COLOR;
                 }
                 break;
         }
+        // @ts-ignore
         const setter = obj[`set_${property}`];
         if (typeof setter === 'function') {
             // @ts-ignore
@@ -706,23 +628,21 @@ export default class Tween extends VObject {
     }
     /**
      * Follow a method return value of another object
-     * @template T
-     * @template {keyof T} K
-     * @template {Tweenable} S
-     * @param {T} obj Target
-     * @param {K} method Method to be called
-     * @param {S} initial_val Initial value
-     * @param {T} target Object to follow
-     * @param {K} target_method Method of the followed object
-     * @param {number} duration Duration of this animation
-     * @param {EasingKey} p_easing Easing function
-     * @param {number} [delay] Time before start
+     * @param obj Target
+     * @param method Method to be called
+     * @param initial_val Initial value
+     * @param target Object to follow
+     * @param target_method Method of the followed object
+     * @param duration Duration of this animation
+     * @param p_easing Easing function
+     * @param [delay] Time before start
      */
-    follow_method(obj, method, initial_val, target, target_method, duration, p_easing, delay = 0) {
+    follow_method<T, K extends keyof T, S extends Tweenable>(obj: T, method: K, initial_val: S, target: T, target_method: K, duration: number, p_easing: EasingKey, delay: number = 0) {
         let easing = p_easing.split('.');
-        let easing_func = Easing[easing[0]][easing[1]];
+        // @ts-ignore
+        let easing_func: (k: number) => number = Easing[easing[0]][easing[1]];
 
-        let data = create_interpolate();
+        let data = Interpolate_create<T, K, S>();
         data.active = true;
         data.type = FOLLOW_METHOD;
         data.finish = false;
@@ -730,12 +650,12 @@ export default class Tween extends VObject {
 
         data.obj = obj;
         data.key = method;
-        data.flat_key = [method];
+        data.flat_key = [method as string];
         data.initial_val = initial_val;
         data.target_obj = target;
         // @ts-ignore
         data.target_key = target_method;
-        data.flat_target_key = [/** @type {string} */(/** @type {unknown} */(target_method))];
+        data.flat_target_key = [target_method as string];
         data.duration = duration;
         data.easing = easing_func;
         data.delay = delay;
@@ -753,7 +673,9 @@ export default class Tween extends VObject {
                 if (('x' in initial_val) && ('y' in initial_val)) {
                     // @ts-ignore
                     data.initial_val = create_vector(initial_val.x, initial_val.y);
+                    // @ts-ignore
                     data.final_val = create_vector(0, 0);
+                    // @ts-ignore
                     data.delta_val = create_vector(0, 0);
                     data.val_type = VECTOR2;
                 } else if (('r' in initial_val) && ('g' in initial_val) && ('b' in initial_val) && ('a' in initial_val)) {
@@ -761,6 +683,7 @@ export default class Tween extends VObject {
                     data.initial_val = create_color(initial_val.r, initial_val.g, initial_val.b, initial_val.a);
                     // @ts-ignore
                     data.final_val = create_color(final_val.r, final_val.g, final_val.b, final_val.a);
+                    // @ts-ignore
                     data.delta_val = create_color(1, 1, 1, 1);
                     data.val_type = COLOR;
                 }
@@ -772,25 +695,21 @@ export default class Tween extends VObject {
     }
     /**
      * Animate a property from value of another object to a final value
-     * @template T
-     * @template {keyof T} K
-     * @template T2
-     * @template {keyof T2} K2
-     * @template {Tweenable} S
-     * @param {T} obj Target
-     * @param {K} property Property to be animated
-     * @param {T2} initial Object to fetch initial value from
-     * @param {K2} initial_property Property of the initial object
-     * @param {S} final_val Initial value
-     * @param {number} duration Duration of this animation
-     * @param {EasingKey} p_easing Easing function
-     * @param {number} [delay] Time before start
+     * @param obj Target
+     * @param property Property to be animated
+     * @param initial Object to fetch initial value from
+     * @param initial_property Property of the initial object
+     * @param final_val Initial value
+     * @param duration Duration of this animation
+     * @param p_easing Easing function
+     * @param [delay] Time before start
      */
-    targeting_property(obj, property, initial, initial_property, final_val, duration, p_easing, delay = 0) {
+    targeting_property<T, K extends keyof T, T2, K2 extends keyof T2, S extends Tweenable>(obj: T, property: K, initial: T2, initial_property: K2, final_val: S, duration: number, p_easing: EasingKey, delay: number = 0) {
         let easing = p_easing.split('.');
-        let easing_func = Easing[easing[0]][easing[1]];
+        // @ts-ignore
+        let easing_func: (k: number) => number = Easing[easing[0]][easing[1]];
 
-        let data = create_interpolate();
+        let data = Interpolate_create<T, K, S>();
         data.active = true;
         data.type = TARGETING_PROPERTY;
         data.finish = false;
@@ -798,12 +717,13 @@ export default class Tween extends VObject {
 
         data.obj = obj;
         data.key = property;
-        data.flat_key = flatten_key_url(/** @type {string} */(/** @type {unknown} */(property)));
+        data.flat_key = flatten_key_url(property as string);
         data.final_val = final_val;
+        // @ts-ignore
         data.target_obj = initial;
         // @ts-ignore
         data.target_key = initial_property;
-        data.flat_target_key = flatten_key_url(/** @type {string} */(/** @type {unknown} */(initial_property)));
+        data.flat_target_key = flatten_key_url(initial_property as string);
         data.duration = duration;
         data.easing = easing_func;
         data.delay = delay;
@@ -824,6 +744,7 @@ export default class Tween extends VObject {
                     data.initial_val = create_vector(initial_val.x, initial_val.y);
                     // @ts-ignore
                     data.final_val = create_vector(final_val.x, final_val.y);
+                    // @ts-ignore
                     data.delta_val = create_vector(0, 0);
                     data.val_type = VECTOR2;
                 } else if (('r' in initial_val) && ('g' in initial_val) && ('b' in initial_val) && ('a' in initial_val)) {
@@ -831,11 +752,13 @@ export default class Tween extends VObject {
                     data.initial_val = create_color(initial_val.r, initial_val.g, initial_val.b, initial_val.a);
                     // @ts-ignore
                     data.final_val = create_color(final_val.r, final_val.g, final_val.b, final_val.a);
+                    // @ts-ignore
                     data.delta_val = create_color(1, 1, 1, 1);
                     data.val_type = COLOR;
                 }
                 break;
         }
+        // @ts-ignore
         const setter = obj[`set_${property}`];
         if (typeof setter === 'function') {
             // @ts-ignore
@@ -851,25 +774,21 @@ export default class Tween extends VObject {
     }
     /**
      * Animate a method from return of another object's method to a final value
-     * @template T
-     * @template {keyof T} K
-     * @template T2
-     * @template {keyof T2} K2
-     * @template {Tweenable} S
-     * @param {T} obj Target
-     * @param {K} method Method to be animated
-     * @param {T2} initial Object to fetch initial value from
-     * @param {K2} initial_method Method of the initial object
-     * @param {S} final_val Initial value
-     * @param {number} duration Duration of this animation
-     * @param {EasingKey} p_easing Easing function
-     * @param {number} [delay] Time before start
+     * @param obj Target
+     * @param method Method to be animated
+     * @param initial Object to fetch initial value from
+     * @param initial_method Method of the initial object
+     * @param final_val Initial value
+     * @param duration Duration of this animation
+     * @param p_easing Easing function
+     * @param [delay] Time before start
      */
-    targeting_method(obj, method, initial, initial_method, final_val, duration, p_easing, delay = 0) {
+    targeting_method<T, K extends keyof T, T2, K2 extends keyof T2, S extends Tweenable>(obj: T, method: K, initial: T2, initial_method: K2, final_val: S, duration: number, p_easing: EasingKey, delay: number = 0) {
         let easing = p_easing.split('.');
-        let easing_func = Easing[easing[0]][easing[1]];
+        // @ts-ignore
+        let easing_func: (k: number) => number = Easing[easing[0]][easing[1]];
 
-        let data = create_interpolate();
+        let data = Interpolate_create<T, K, S>();
         data.active = true;
         data.type = TARGETING_METHOD;
         data.finish = false;
@@ -877,16 +796,18 @@ export default class Tween extends VObject {
 
         data.obj = obj;
         data.key = method;
-        data.flat_key = [method]
+        data.flat_key = [method as string]
         data.final_val = final_val;
+        // @ts-ignore
         data.target_obj = initial;
         // @ts-ignore
         data.target_key = initial_method;
-        data.flat_target_key = [/** @type {string} */(/** @type {unknown} */(initial_method))];
+        data.flat_target_key = [initial_method as string];
         data.duration = duration;
         data.easing = easing_func;
         data.delay = delay;
-        let initial_val = initial[/** @type {string} */(/** @type {unknown} */(initial_method))]();
+        // @ts-ignore
+        let initial_val = initial[initial_method as string]();
         switch (typeof (final_val)) {
             case 'number':
                 data.val_type = NUMBER;
@@ -903,6 +824,7 @@ export default class Tween extends VObject {
                     data.initial_val = create_vector(initial_val.x, initial_val.y);
                     // @ts-ignore
                     data.final_val = create_vector(final_val.x, final_val.y);
+                    // @ts-ignore
                     data.delta_val = create_vector(0, 0);
                     data.val_type = VECTOR2;
                 } else if (('r' in initial_val) && ('g' in initial_val) && ('b' in initial_val) && ('a' in initial_val)) {
@@ -910,6 +832,7 @@ export default class Tween extends VObject {
                     data.initial_val = create_color(initial_val.r, initial_val.g, initial_val.b, initial_val.a);
                     // @ts-ignore
                     data.final_val = create_color(final_val.r, final_val.g, final_val.b, final_val.a);
+                    // @ts-ignore
                     data.delta_val = create_color(1, 1, 1, 1);
                     data.val_type = COLOR;
                 }
@@ -939,16 +862,12 @@ export default class Tween extends VObject {
         this.repeat = false;
         this.speed_scale = 1;
 
-        this.initial_val = null;
-        this.delta_val = null;
-        this.final_val = null;
-
         return this;
     }
     /**
      * @param {number} p_delta
      */
-    _propagate_process(p_delta) {
+    _propagate_process(p_delta: number) {
         if (this.speed_scale === 0 || this.interpolates.length === 0) {
             return;
         }
@@ -973,7 +892,7 @@ export default class Tween extends VObject {
             for (i = 0; i < this.interpolates.length; i++) {
                 data = this.interpolates[i];
                 if (data.finish) {
-                    remove_items(this.interpolates, i--, 1);
+                    remove_item(this.interpolates, i--);
                     Interpolate_Pool.push(data);
                 }
             }
@@ -1036,12 +955,7 @@ export default class Tween extends VObject {
         }
     }
 
-    /**
-     * @template T
-     * @template {keyof T} K
-     * @param {InterpolateData<T, K, any>} p_data
-     */
-    _get_initial_val(p_data) {
+    _get_initial_val<T, K extends keyof T>(p_data: InterpolateData<T, K, any>) {
         switch (p_data.type) {
             case INTER_PROPERTY:
             case INTER_METHOD:
@@ -1056,6 +970,7 @@ export default class Tween extends VObject {
                 if (p_data.type === TARGETING_PROPERTY) {
                     initial_val = get_property(obj, p_data.flat_target_key);
                 } else {
+                    // @ts-ignore
                     initial_val = obj[p_data.target_key]();
                 }
                 if (p_data.val_type === VECTOR2 || p_data.val_type === COLOR) {
@@ -1069,10 +984,7 @@ export default class Tween extends VObject {
 
         return p_data.delta_val;
     }
-    /**
-     * @param {InterpolateData<any, any, any>} p_data
-     */
-    _get_delta_val(p_data) {
+    _get_delta_val(p_data: InterpolateData<any, any, any>) {
         switch (p_data.type) {
             case INTER_PROPERTY:
             case INTER_METHOD:
@@ -1085,7 +997,7 @@ export default class Tween extends VObject {
                 if (p_data.type === FOLLOW_PROPERTY) {
                     final_val = get_property(obj, p_data.flat_target_key);
                 } else {
-                    final_val = obj[/** @type {string} */(/** @type {unknown} */(p_data.flat_target_key))]();
+                    final_val = obj[p_data.flat_target_key[0]]();
                 }
                 if (p_data.val_type === VECTOR2 || p_data.val_type === COLOR) {
                     p_data.final_val.copy(final_val);
@@ -1106,13 +1018,7 @@ export default class Tween extends VObject {
 
         return p_data.initial_val;
     }
-    /**
-     * @template {Tweenable} T
-     * @param {T} initial_val
-     * @param {T} final_val
-     * @param {InterpolateData<any, any, T>} data
-     */
-    _calc_delta_val(initial_val, final_val, data) {
+    _calc_delta_val<T extends Tweenable>(initial_val: T, final_val: T, data: InterpolateData<any, any, T>) {
         switch (data.val_type) {
             case BOOL:
                 // @ts-ignore
@@ -1146,10 +1052,7 @@ export default class Tween extends VObject {
         return true;
     }
 
-    /**
-     * @param {InterpolateData<any, any, any>} data
-     */
-    _run_equation(data) {
+    _run_equation(data: InterpolateData<any, any, any>) {
         let initial_val = this._get_initial_val(data);
         let delta_val = this._get_delta_val(data);
 
@@ -1178,24 +1081,20 @@ export default class Tween extends VObject {
                 return undefined;
         }
     }
-    /**
-     * @template {Tweenable} T
-     * @param {InterpolateData<any, any, T>} data
-     */
-    _apply_tween_value(data, value) {
+    _apply_tween_value<T extends Tweenable>(data: InterpolateData<any, any, T>, value: T) {
         switch (data.type) {
             case INTER_PROPERTY:
             case FOLLOW_PROPERTY:
             case TARGETING_PROPERTY: {
-                const setter = this.setter_cache[data.flat_key];
+                const setter = this.setter_cache[data.flat_key[0]];
                 if (setter) {
                     setter.call(data.obj, value);
                 } else if (data.val_type === VECTOR2) {
-                    set_vec_property(data.obj, data.flat_key, value);
+                    set_vec_property(data.obj, data.flat_key[0], value as Vector2Like);
                 } else if (data.val_type === COLOR) {
-                    set_color_property(data.obj, data.flat_key, value);
+                    set_color_property(data.obj, data.flat_key[0], value as ColorLike);
                 } else {
-                    set_property(data.obj, data.flat_key, value);
+                    set_property(data.obj, data.flat_key[0], value);
                 }
             } break;
 

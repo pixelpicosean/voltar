@@ -6,7 +6,7 @@ import {
     NOTIFICATION_READY,
     NOTIFICATION_INTERNAL_PROCESS,
     NOTIFICATION_INTERNAL_PHYSICS_PROCESS,
-} from './node.js';
+} from './node';
 
 
 export const TIMER_PROCESS_PHYSICS = 0;

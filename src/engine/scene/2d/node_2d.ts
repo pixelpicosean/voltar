@@ -7,28 +7,21 @@ import { Transform2D } from 'engine/core/math/transform_2d.js';
 
 import { VSG } from 'engine/servers/visual/visual_server_globals.js';
 
-import { Node } from '../main/node.js';
-import { CanvasItem } from './canvas_item.js';
+import { Node } from '../main/node';
+import { CanvasItem } from './canvas_item';
 
 
 export class Node2D extends CanvasItem {
     get class() { return 'Node2D' }
 
-    /**
-     * @param {number} x
-     * @param {number} y
-     */
-    set_position_n(x, y) {
+    set_position_n(x: number, y: number) {
         if (this._xform_dirty) {
             this._update_xform_values();
         }
         this._position.set(x, y);
         this._update_transform();
     }
-    /**
-     * @param {Vector2Like} position
-     */
-    set_position(position) {
+    set_position(position: Vector2Like) {
         this.set_position_n(position.x, position.y);
     }
     get position() {
@@ -41,7 +34,7 @@ export class Node2D extends CanvasItem {
     /**
      * @param {number} value
      */
-    set_rotation(value) {
+    set_rotation(value: number) {
         if (this._xform_dirty) {
             this._update_xform_values();
         }
@@ -58,7 +51,7 @@ export class Node2D extends CanvasItem {
     /**
      * @param {number} value
      */
-    set_rotation_degrees(value) {
+    set_rotation_degrees(value: number) {
         if (this._xform_dirty) {
             this._update_xform_values();
         }
@@ -76,7 +69,7 @@ export class Node2D extends CanvasItem {
      * @param {number} x
      * @param {number} y
      */
-    set_scale_n(x, y) {
+    set_scale_n(x: number, y: number) {
         if (this._xform_dirty) {
             this._update_xform_values();
         }
@@ -92,7 +85,7 @@ export class Node2D extends CanvasItem {
     /**
      * @param {Vector2Like} scale
      */
-    set_scale(scale) {
+    set_scale(scale: Vector2Like) {
         this.set_scale_n(scale.x, scale.y);
     }
     get scale() {
@@ -104,7 +97,7 @@ export class Node2D extends CanvasItem {
     /**
      * @param {number} p_angle
      */
-    set_skew(p_angle) {
+    set_skew(p_angle: number) {
         if (this._xform_dirty) {
             this._update_xform_values();
         }
@@ -126,7 +119,7 @@ export class Node2D extends CanvasItem {
      * @param {number} tx
      * @param {number} ty
      */
-    set_transform_n(a, b, c, d, tx, ty) {
+    set_transform_n(a: number, b: number, c: number, d: number, tx: number, ty: number) {
         this._transform.set(a, b, c, d, tx, ty);
         this._xform_dirty = true;
 
@@ -141,7 +134,7 @@ export class Node2D extends CanvasItem {
     /**
      * @param {Transform2D} mat
      */
-    set_transform(mat) {
+    set_transform(mat: Transform2D) {
         this.set_transform_n(mat.a, mat.b, mat.c, mat.d, mat.tx, mat.ty);
     }
 
@@ -156,7 +149,7 @@ export class Node2D extends CanvasItem {
      * @param {number} x
      * @param {number} y
      */
-    set_global_position_n(x, y) {
+    set_global_position_n(x: number, y: number) {
         const pi = this.get_parent_item();
         if (pi) {
             const inv = pi.get_global_transform().clone().affine_inverse();
@@ -169,7 +162,7 @@ export class Node2D extends CanvasItem {
     /**
      * @param {Vector2Like} value
      */
-    set_global_position(value) {
+    set_global_position(value: Vector2Like) {
         this.set_global_position_n(value.x, value.y);
     }
     /**
@@ -182,7 +175,7 @@ export class Node2D extends CanvasItem {
     /**
      * @param {number} value
      */
-    set_global_rotation(value) {
+    set_global_rotation(value: number) {
         const pi = this.get_parent_item();
         if (pi) {
             const parent_global_rot = pi.get_global_transform().get_rotation();
@@ -198,7 +191,7 @@ export class Node2D extends CanvasItem {
     /**
      * @param {number} value
      */
-    set_global_rotation_degrees(value) {
+    set_global_rotation_degrees(value: number) {
         this.set_global_rotation(deg2rad(value));
     }
     get_global_rotation_degrees() {
@@ -209,7 +202,7 @@ export class Node2D extends CanvasItem {
      * @param {number} x
      * @param {number} y
      */
-    set_global_scale_n(x, y) {
+    set_global_scale_n(x: number, y: number) {
         const pi = this.get_parent_item();
         if (pi) {
             const parent_global_scale = pi.get_global_transform().get_scale();
@@ -222,7 +215,7 @@ export class Node2D extends CanvasItem {
     /**
      * @param {Vector2Like} value
      */
-    set_global_scale(value) {
+    set_global_scale(value: Vector2Like) {
         this.set_global_scale_n(value.x, value.y);
     }
     get_global_scale() {
@@ -237,7 +230,7 @@ export class Node2D extends CanvasItem {
      * @param {number} tx
      * @param {number} ty
      */
-    set_global_transform_n(a, b, c, d, tx, ty) {
+    set_global_transform_n(a: number, b: number, c: number, d: number, tx: number, ty: number) {
         const mat = Transform2D.create(a, b, c, d, tx, ty);
         this.set_global_transform(mat);
         Transform2D.free(mat);
@@ -245,7 +238,7 @@ export class Node2D extends CanvasItem {
     /**
      * @param {Transform2D} p_transform
      */
-    set_global_transform(p_transform) {
+    set_global_transform(p_transform: Transform2D) {
         const pi = this.get_parent_item();
         if (pi) {
             const mat = pi.get_global_transform().clone().affine_inverse().append(p_transform);
@@ -259,7 +252,7 @@ export class Node2D extends CanvasItem {
     /**
      * @param {number} value
      */
-    set_z_index(value) {
+    set_z_index(value: number) {
         this.z_index = value;
         VSG.canvas.canvas_item_set_z_index(this.canvas_item, this.z_index);
     }
@@ -267,32 +260,28 @@ export class Node2D extends CanvasItem {
     /**
      * @param {boolean} value
      */
-    set_z_as_relative(value) {
+    set_z_as_relative(value: boolean) {
         this.z_as_relative = value;
         VSG.canvas.canvas_item_set_z_as_relative_to_parent(this.canvas_item, value);
     }
 
-    constructor() {
-        super();
+    is_node_2d = true;
 
-        this.is_node_2d = true;
+    _position = new Vector2;
+    _rotation = 0;
+    _scale = new Vector2(1, 1);
+    _skew = 0;
+    z_index = 0;
+    z_as_relative = false;
+    _transform = new Transform2D;
 
-        this._position = new Vector2(0, 0);
-        this._rotation = 0;
-        this._scale = new Vector2(1, 1);
-        this._skew = 0;
-        this.z_index = 0;
-        this.z_as_relative = false;
-        this._transform = new Transform2D;
+    /* private */
 
-        /* private */
-
-        this._xform_dirty = false;
-    }
+    _xform_dirty = false;
 
     /* virtual */
 
-    _load_data(data) {
+    _load_data(data: any) {
         super._load_data(data);
 
         if (data.position !== undefined) this.set_position(data.position);
@@ -308,7 +297,7 @@ export class Node2D extends CanvasItem {
     /**
      * @param {Vector2} p_pos
      */
-    get_angle_to(p_pos) {
+    get_angle_to(p_pos: Vector2) {
         const vec = this.to_local(p_pos).multiply(this._scale);
         const angle = vec.angle();
         Vector2.free(vec);
@@ -319,12 +308,12 @@ export class Node2D extends CanvasItem {
      * @param {Node} p_parent
      * @returns {Transform2D}
      */
-    get_relative_transform_to_parent(p_parent) {
+    get_relative_transform_to_parent(p_parent: Node): Transform2D {
         if (p_parent === this) {
             return Transform2D.create();
         }
 
-        const parent_2d = /** @type {Node2D} */(this.get_parent());
+        let parent_2d: Node2D = this.get_parent() as Node2D;
         if (!parent_2d.is_node_2d) {
             return Transform2D.create();
         }
@@ -339,26 +328,26 @@ export class Node2D extends CanvasItem {
     /**
      * @param {number} p_radians
      */
-    rotate(p_radians) {
+    rotate(p_radians: number) {
         this._rotation += p_radians;
     }
     /**
      * @param {Vector2} p_pos
      */
-    look_at(p_pos) {
+    look_at(p_pos: Vector2) {
         this.rotate(this.get_angle_to(p_pos));
     }
 
     /**
      * @param {Vector2Like} p_amount
      */
-    translate(p_amount) {
+    translate(p_amount: Vector2Like) {
         this.set_position_n(this._position.x + p_amount.x, this._position.y + p_amount.y);
     }
     /**
      * @param {Vector2Like} p_amount
      */
-    global_translate(p_amount) {
+    global_translate(p_amount: Vector2Like) {
         const global_position = this.get_global_position();
         this.set_global_position_n(global_position.x + p_amount.x, global_position.y + p_amount.y);
     }
@@ -366,7 +355,7 @@ export class Node2D extends CanvasItem {
      * @param {number} p_delta
      * @param {boolean} [p_scaled]
      */
-    move_local_x(p_delta, p_scaled = false) {
+    move_local_x(p_delta: number, p_scaled: boolean = false) {
         const t = this._transform;
         const m = Vector2.create(t.a, t.b);
         if (!p_scaled) {
@@ -380,7 +369,7 @@ export class Node2D extends CanvasItem {
      * @param {number} p_delta
      * @param {boolean} [p_scaled]
      */
-    move_local_y(p_delta, p_scaled = false) {
+    move_local_y(p_delta: number, p_scaled: boolean = false) {
         const t = this._transform;
         const m = Vector2.create(t.c, t.d);
         if (!p_scaled) {
@@ -394,14 +383,14 @@ export class Node2D extends CanvasItem {
     /**
      * @param {Vector2Like} p_amount
      */
-    apply_scale(p_amount) {
+    apply_scale(p_amount: Vector2Like) {
         this.set_scale_n(this._scale.x * p_amount.x, this._scale.y * p_amount.y);
     }
 
     /**
      * @param {Vector2} p_global
      */
-    to_local(p_global) {
+    to_local(p_global: Vector2) {
         const inv = this.get_global_transform().clone().affine_inverse();
         const vec = inv.xform(p_global.clone());
         Transform2D.free(inv);
@@ -410,7 +399,7 @@ export class Node2D extends CanvasItem {
     /**
      * @param {Vector2} p_global
      */
-    to_global(p_global) {
+    to_global(p_global: Vector2) {
         return this.get_global_transform().xform(p_global.clone());
     }
 

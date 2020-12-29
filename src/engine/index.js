@@ -69,7 +69,7 @@ export * from 'engine/scene/resources/world.js';
 // ------------------------------------------------------------------
 // Node
 // ------------------------------------------------------------------
-export * from 'engine/scene/main/node.js';
+export * from 'engine/scene/main/node';
 export * from 'engine/scene/main/viewport.js';
 export * from 'engine/scene/main/canvas_layer.js';
 export * from 'engine/scene/main/scene_tree.js';
@@ -78,8 +78,8 @@ export * from 'engine/scene/main/timer.js';
 export * from 'engine/scene/animation/animation_player.js';
 
 export * from 'engine/scene/2d/const';
-export * from 'engine/scene/2d/canvas_item.js';
-export * from 'engine/scene/2d/node_2d.js';
+export * from 'engine/scene/2d/canvas_item';
+export * from 'engine/scene/2d/node_2d';
 export * from 'engine/scene/2d/sprite.js';
 export * from 'engine/scene/2d/animated_sprite.js';
 export * from 'engine/scene/2d/path_2d.js';
@@ -232,7 +232,7 @@ export function get_resource(url) {
 // ------------------------------------------------------------------
 // Node assemble functions
 // ------------------------------------------------------------------
-export * from 'engine/scene/assembler.js';
+export * from 'engine/scene/assembler';
 
 /**
  * Get the packed scene class or data

@@ -15,7 +15,7 @@ import { VSG } from "engine/servers/visual/visual_server_globals.js";
 import { NINE_PATCH_STRETCH } from "engine/servers/visual/commands.js";
 
 import { ImageTexture } from "../resources/texture.js";
-import { NOTIFICATION_DRAW } from "../2d/canvas_item.js";
+import { NOTIFICATION_DRAW } from "../2d/canvas_item";
 import { Range } from "./range.js";
 
 

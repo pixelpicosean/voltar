@@ -4,7 +4,7 @@ import { Vector2, Vector2Like } from "engine/core/math/vector2";
 import { Transform2D } from "engine/core/math/transform_2d.js";
 
 import { CanvasLayer } from "../main/canvas_layer.js";
-import { NOTIFICATION_ENTER_TREE, NOTIFICATION_EXIT_TREE } from "../main/node.js";
+import { NOTIFICATION_ENTER_TREE, NOTIFICATION_EXIT_TREE } from "../main/node";
 
 
 export class ParallaxBackground extends CanvasLayer {

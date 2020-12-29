@@ -28,11 +28,11 @@ import {
     NOTIFICATION_INTERNAL_PROCESS,
     NOTIFICATION_INTERNAL_PHYSICS_PROCESS,
     NOTIFICATION_DRAG_END,
-} from "engine/scene/main/node.js";
+} from "engine/scene/main/node";
 import { VSG } from "engine/servers/visual/visual_server_globals.js";
 import { Texture } from "engine/scene/resources/texture.js";
 import { World2D } from "engine/scene/resources/world_2d.js";
-import { CanvasItem } from "engine/scene/2d/canvas_item.js";
+import { CanvasItem } from "engine/scene/2d/canvas_item";
 
 import { CanvasLayer } from "./canvas_layer.js";
 import { Input } from "engine/main/input.js";

@@ -8,8 +8,8 @@ import {
     NOTIFICATION_ENTER_TREE,
     NOTIFICATION_EXIT_TREE,
     Node,
-} from "../main/node.js";
-import { Node2D } from "./node_2d.js";
+} from "../main/node";
+import { Node2D } from "./node_2d";
 import { CPUParticles2D } from "./cpu_particles_2d.js";
 import { NOTIFICATION_TRANSFORM_CHANGED } from "../const";
 import { AnimatedSprite } from "./animated_sprite.js";

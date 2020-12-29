@@ -6,7 +6,7 @@ import { VSG } from "engine/servers/visual/visual_server_globals.js";
 import { Mesh } from "../resources/mesh.js";
 import { Material } from "../resources/material.js";
 import { Skin } from "../resources/skin.js";
-import { NOTIFICATION_ENTER_TREE } from "../main/node.js";
+import { NOTIFICATION_ENTER_TREE } from "../main/node";
 import { GeometryInstance } from "./visual_instance.js";
 import {
     SkinReference,

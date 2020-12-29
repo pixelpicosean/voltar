@@ -28,7 +28,7 @@ import {
 } from "engine/servers/visual_server.js";
 import { VSG } from "engine/servers/visual/visual_server_globals.js";
 
-import { NOTIFICATION_ENTER_TREE } from "../main/node.js";
+import { NOTIFICATION_ENTER_TREE } from "../main/node";
 import { NOTIFICATION_VISIBILITY_CHANGED_3D } from "./spatial.js";
 import { VisualInstance } from "./visual_instance.js";
 

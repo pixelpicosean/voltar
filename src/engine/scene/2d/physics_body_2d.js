@@ -12,10 +12,10 @@ import {
     Physics2DDirectBodyStateSW,
 } from "engine/servers/physics_2d/state.js";
 
-import { NOTIFICATION_ENTER_TREE } from "../main/node.js";
+import { NOTIFICATION_ENTER_TREE } from "../main/node";
 import { PhysicsMaterial } from "../resources/physics_material.js";
 import { BodyMode, BodyState } from "./const";
-import { NOTIFICATION_LOCAL_TRANSFORM_CHANGED } from "./canvas_item.js";
+import { NOTIFICATION_LOCAL_TRANSFORM_CHANGED } from "./canvas_item";
 import { CollisionObject2D } from "./collision_object_2d.js";
 
 

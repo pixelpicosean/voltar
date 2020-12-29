@@ -29,14 +29,14 @@ import {
     NOTIFICATION_POST_ENTER_TREE,
     NOTIFICATION_EXIT_TREE,
     NOTIFICATION_MOVED_IN_PARENT,
-} from '../main/node.js';
+} from '../main/node';
 import {
     CanvasItem,
     NOTIFICATION_ENTER_CANVAS,
     NOTIFICATION_EXIT_CANVAS,
     NOTIFICATION_DRAW,
     NOTIFICATION_VISIBILITY_CHANGED,
-} from '../2d/canvas_item.js';
+} from '../2d/canvas_item';
 
 import {
     GROW_DIRECTION_END,

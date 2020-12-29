@@ -6,10 +6,10 @@ import { MessageQueue } from 'engine/core/message_queue';
 
 import {
     NOTIFICATION_ENTER_TREE,
-} from '../main/node.js';
+} from '../main/node';
 import {
     NOTIFICATION_VISIBILITY_CHANGED,
-} from '../2d/canvas_item.js';
+} from '../2d/canvas_item';
 
 import {
     SIZE_FILL,

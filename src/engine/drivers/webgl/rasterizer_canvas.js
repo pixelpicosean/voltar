@@ -48,7 +48,7 @@ import {
     BLEND_MODE_SUB,
     BLEND_MODE_MUL,
     BLEND_MODE_PREMULT_ALPHA,
-} from 'engine/scene/2d/canvas_item.js';
+} from 'engine/scene/2d/canvas_item';
 
 import normal_vs from './shaders/canvas.vert';
 import normal_fs from './shaders/canvas.frag';

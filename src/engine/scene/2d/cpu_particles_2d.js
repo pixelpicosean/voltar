@@ -15,14 +15,14 @@ import {
     NOTIFICATION_ENTER_TREE,
     NOTIFICATION_EXIT_TREE,
     NOTIFICATION_INTERNAL_PROCESS,
-} from '../main/node.js';
+} from '../main/node';
 import { ImageTexture } from '../resources/texture.js';
 import { Curve } from '../resources/curve.js';
 import { Gradient } from '../resources/gradient.js';
 import {
     NOTIFICATION_DRAW,
-} from './canvas_item.js';
-import { Node2D } from './node_2d.js';
+} from './canvas_item';
+import { Node2D } from './node_2d';
 import {
     MULTIMESH_TRANSFORM_2D,
     MULTIMESH_COLOR_8BIT,

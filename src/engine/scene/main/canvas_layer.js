@@ -14,7 +14,7 @@ import {
     NOTIFICATION_ENTER_TREE,
     NOTIFICATION_EXIT_TREE,
     NOTIFICATION_MOVED_IN_PARENT,
-} from "./node.js";
+} from "./node";
 import { Rect2 } from "engine/core/math/rect2.js";
 
 

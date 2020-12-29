@@ -38,72 +38,56 @@ export const NOTIFICATION_INTERNAL_PROCESS = 25;
 export const NOTIFICATION_INTERNAL_PHYSICS_PROCESS = 26;
 export const NOTIFICATION_POST_ENTER_TREE = 27;
 
-/** @type {number[]} */
-const this_stack = [];
-/** @type {number[]} */
-const that_stack = [];
+const this_stack: number[] = [];
+const that_stack: number[] = [];
 
 class GroupData {
-    constructor() {
-        this.persistent = false;
-        /** @type {import('./scene_tree').Group} */
-        this.group = null;
-    }
+    persistent = false;
+    group: import('./scene_tree').Group = null;
 }
 
 class Data {
-    constructor() {
-        this.filename = '';
+    filename = '';
 
-        this.instance_state = null;
-        this.inherited_state = null;
+    instance_state: any = null;
+    inherited_state: any = null;
 
-        /** @type {Node} */
-        this.parent = null;
-        /** @type {Node} */
-        this.owner = null;
-        /** @type {Node[]} */
-        this.children = [];
-        this.pos = -1;
-        this.depth = -1;
-        this.name = '';
-        /** @type {import('./scene_tree').SceneTree} */
-        this.tree = null;
-        this.inside_tree = false;
-        this.ready_notified = false;
-        this.ready_first = true;
+    parent: Node = null;
+    owner: Node = null;
+    children: Node[] = [];
+    pos = -1;
+    depth = -1;
+    name = '';
+    tree: import('./scene_tree').SceneTree = null;
+    inside_tree = false;
+    ready_notified = false;
+    ready_first = true;
 
-        /** @type {import('./viewport').Viewport} */
-        this.viewport = null;
+    viewport: import('./viewport').Viewport = null;
 
-        /** @type {{ [name: string]: GroupData }} */
-        this.grouped = Object.create(null);
-        /** @type {List$Element<Node>} */
-        this.OW = null;
-        /** @type {List<Node>} */
-        this.owned = new List;
+    grouped: { [name: string]: GroupData; } = Object.create(null);
+    OW: List$Element<Node> = null;
+    owned: List<Node> = new List;
 
-        this.pause_mode = PAUSE_MODE_INHERIT;
-        /** @type {Node} */
-        this.pause_owner = null;
+    pause_mode = PAUSE_MODE_INHERIT;
+    pause_owner: Node = null;
 
-        this.physics_process = false;
-        this.idle_process = false;
-        this.process_priority = 0;
+    physics_process = false;
+    idle_process = false;
+    process_priority = 0;
 
-        this.physics_process_internal = false;
-        this.idle_process_internal = false;
+    physics_process_internal = false;
+    idle_process_internal = false;
 
-        this.input = false;
-        this.unhandled_input = false;
-        this.unhandled_key_input = false;
+    input = false;
+    unhandled_input = false;
+    unhandled_key_input = false;
 
-        this.parent_owned = false;
-        this.in_constructor = false;
-        this.use_placeholder = false;
+    parent_owned = false;
+    in_constructor = false;
+    use_placeholder = false;
 
-        this.path_cache = null;
-    }
+    path_cache: string = null;
 }
 
 
@@ -113,18 +97,12 @@ export class Node extends VObject {
     get class() { return 'Node' }
 
     get filename() { return this.data.filename }
-    /**
-     * @param {string} name
-     */
-    set_filename(name) {
+    set_filename(name: string) {
         this.data.filename = name;
     }
 
     get name() { return this.data.name }
-    /**
-     * @param {string} p_name
-     */
-    set_name(p_name) {
+    set_name(p_name: string) {
         this.data.name = p_name;
         if (this.data.parent) {
             this.data.parent._validate_child_name(this);
@@ -143,7 +121,7 @@ export class Node extends VObject {
     /**
      * @param {Node} p_owner
      */
-    set_owner(p_owner) {
+    set_owner(p_owner: Node) {
         if (this.data.owner) {
             this.owner.data.owned.erase(this.data.OW);
             this.data.OW = null;
@@ -171,7 +149,7 @@ export class Node extends VObject {
     /**
      * @param {number} mode
      */
-    set_pause_mode(mode) {
+    set_pause_mode(mode: number) {
         if (this.data.pause_mode === mode) {
             return;
         }
@@ -185,7 +163,7 @@ export class Node extends VObject {
         }
 
         /** @type {Node} */
-        let owner = null;
+        let owner: Node = null;
 
         if (this.data.pause_mode === PAUSE_MODE_INHERIT) {
             if (this.data.parent) {
@@ -198,28 +176,24 @@ export class Node extends VObject {
         this._propagate_pause_owner(owner);
     }
 
-    constructor() {
-        super();
+    // Flags to avoid call of `instanceof` for better performance
+    is_node = true;
+    is_viewport = false;
+    is_canvas_item = false;
+    is_node_2d = false;
+    is_control = false;
+    is_spatial = false;
+    is_skeleton = false;
+    is_collision_object = false;
 
-        // Flags to avoid call of `instanceof` for better performance
-        this.is_node = true;
-        this.is_viewport = false;
-        this.is_canvas_item = false;
-        this.is_node_2d = false;
-        this.is_control = false;
-        this.is_spatial = false;
-        this.is_skeleton = false;
-        this.is_collision_object = false;
-
-        this.data = new Data;
-    }
+    data = new Data;
 
     /* virtuals */
 
     /**
      * @param {any} data
      */
-    _load_data(data) {
+    _load_data(data: any) {
         if (data.filename !== undefined) {
             this.set_filename(data.filename);
         }
@@ -244,23 +218,23 @@ export class Node extends VObject {
     /**
      * @param {InputEvent} event
      */
-    _input(event) { }
+    _input(event: InputEvent) { }
     /**
      * @param {InputEvent} event
      */
-    _unhandled_input(event) { }
+    _unhandled_input(event: InputEvent) { }
     /**
      * @param {InputEvent} event
      */
-    _unhandled_key_input(event) { }
+    _unhandled_key_input(event: InputEvent) { }
     /**
      * @param {number} delta
      */
-    _process(delta) { }
+    _process(delta: number) { }
     /**
      * @param {number} delta
      */
-    _physics_process(delta) { }
+    _physics_process(delta: number) { }
     _exit_tree() { }
 
     _free() {
@@ -278,12 +252,12 @@ export class Node extends VObject {
     /**
      * @param {Node} p_node
      */
-    is_greater_than(p_node) {
+    is_greater_than(p_node: Node) {
         this_stack.length = this.data.depth;
         that_stack.length = p_node.data.depth;
 
         /** @type {Node} */
-        let n = this;
+        let n: Node = this;
         let idx = this.data.depth - 1;
         while (n) {
             this_stack[idx--] = n.data.pos;
@@ -321,16 +295,9 @@ export class Node extends VObject {
     /* private */
 
     /**
-     * @param {any} data
-     */
-    push_instance_data(data) {
-        this.instance_data.push(data);
-    }
-
-    /**
      * @param {Node} p_child
      */
-    _validate_child_name(p_child) {
+    _validate_child_name(p_child: Node) {
         let unique = true;
 
         for (let c of this.data.children) {
@@ -346,21 +313,14 @@ export class Node extends VObject {
         }
     }
 
-    /**
-     * @param {number} p_notification
-     */
-    _propagate_reverse_notification(p_notification) {
+    _propagate_reverse_notification(p_notification: number) {
         for (let i = this.data.children.length; i >= 0; i--) {
             this.data.children[i]._propagate_reverse_notification(p_notification);
         }
 
         this.notification(p_notification, true);
     }
-    /**
-     * @param {number} p_notification
-     * @param {boolean} p_reverse
-     */
-    _propagate_deferred_notification(p_notification, p_reverse) {
+    _propagate_deferred_notification(p_notification: number, p_reverse: boolean) {
         if (!p_reverse) {
             MessageQueue.get_singleton().push_notification(this, p_notification);
         }
@@ -381,7 +341,8 @@ export class Node extends VObject {
             this.data.depth = 1;
         }
 
-        this.data.viewport = this.is_viewport ? this : null;
+        // @ts-ignore
+        this.data.viewport = this.is_viewport ? (this as import('./viewport').Viewport) : null;
         if (!this.data.viewport && this.data.parent) {
             this.data.viewport = this.data.parent.data.viewport;
         }
@@ -486,11 +447,11 @@ export class Node extends VObject {
     /**
      * @param {Node} p_owner
      */
-    _propagate_pause_owner(p_owner) {
+    _propagate_pause_owner(p_owner: Node) {
         if (this !== p_owner && this.data.pause_mode !== PAUSE_MODE_INHERIT) {
             return;
         }
-        this.pause_owner = p_owner;
+        this.data.pause_owner = p_owner;
         for (let c of this.data.children) {
             c._propagate_pause_owner(p_owner);
         }
@@ -503,7 +464,7 @@ export class Node extends VObject {
     /**
      * @param {string} p_name
      */
-    _get_child_by_name(p_name) {
+    _get_child_by_name(p_name: string) {
         for (let c of this.data.children) {
             if (c.data.name === p_name) return c;
         }
@@ -513,7 +474,7 @@ export class Node extends VObject {
     /**
      * @param {import('./scene_tree').SceneTree} p_tree
      */
-    _set_tree(p_tree) {
+    _set_tree(p_tree: import('./scene_tree').SceneTree) {
         let tree_changed_a = null;
         let tree_changed_b = null;
 
@@ -546,7 +507,7 @@ export class Node extends VObject {
      * @virtual
      * @param {number} p_notification
      */
-    _notification(p_notification) {
+    _notification(p_notification: number) {
         switch (p_notification) {
             case NOTIFICATION_PROCESS: {
                 this._process(this.get_process_delta_time());
@@ -629,8 +590,8 @@ export class Node extends VObject {
      * @param {Node} p_owner
      * @param {Node} p_by_owner
      */
-    _propagate_replace_owner(p_owner, p_by_owner) {
-        if (this.get_owner() === p_owner) {
+    _propagate_replace_owner(p_owner: Node, p_by_owner: Node) {
+        if (this.owner === p_owner) {
             this.set_owner(p_by_owner);
         }
 
@@ -643,7 +604,7 @@ export class Node extends VObject {
      * @param {Node} p_child
      * @param {string} p_name
      */
-    _add_child_no_check(p_child, p_name) {
+    _add_child_no_check(p_child: Node, p_name: string) {
         p_child.data.name = p_name;
         p_child.data.pos = this.data.children.length;
         this.data.children.push(p_child);
@@ -660,7 +621,7 @@ export class Node extends VObject {
     /**
      * @param {Node} p_owner
      */
-    _set_owner_no_check(p_owner) {
+    _set_owner_no_check(p_owner: Node) {
         if (this.data.owner === p_owner) {
             return;
         }
@@ -672,14 +633,14 @@ export class Node extends VObject {
     /**
      * @param {string} p_name
      */
-    _set_name_no_check(p_name) {
+    _set_name_no_check(p_name: string) {
         this.data.name = p_name;
     }
 
     /**
      * @param {Node} p_child
      */
-    add_child(p_child) {
+    add_child(p_child: Node) {
         this._validate_child_name(p_child);
         this._add_child_no_check(p_child, p_child.data.name);
     }
@@ -687,7 +648,7 @@ export class Node extends VObject {
      * @param {Node} p_node
      * @param {Node} p_child
      */
-    add_child_below_node(p_node, p_child) {
+    add_child_below_node(p_node: Node, p_child: Node) {
         this.add_child(p_child);
 
         if (p_node.data.parent === this) {
@@ -699,7 +660,7 @@ export class Node extends VObject {
     /**
      * @param {Node} p_child
      */
-    remove_child(p_child) {
+    remove_child(p_child: Node) {
         const children = this.data.children;
         let child_count = children.length;
         let idx = -1;
@@ -740,14 +701,14 @@ export class Node extends VObject {
         }
     }
     remove_and_skip() {
-        let new_owner = this.get_owner();
+        let new_owner = this.owner;
         /** @type {List<Node>} */
-        let children = new List;
+        let children: List<Node> = new List;
 
         while (true) {
             let clear = true;
             for (let c_node of this.data.children) {
-                if (!c_node.get_owner()) {
+                if (!c_node.owner) {
                     continue;
                 }
 
@@ -779,26 +740,26 @@ export class Node extends VObject {
     /**
      * @param {number} p_index
      */
-    get_child(p_index) {
+    get_child(p_index: number) {
         return this.data.children[p_index];
     }
 
     /**
      * @param {string} path
      */
-    has_node(path) {
+    has_node(path: string) {
         return !!this.get_node_or_null(path);
     }
     /**
      * @param {string} path
      */
-    get_node_or_null(path) {
+    get_node_or_null(path: string) {
         if (!path) return null;
 
         const list = path.split('/');
 
         // Find the base node
-        let node = /** @type {Node} */ (this);
+        let node: Node = /** @type {Node} */ (this);
 
         let i = 0, l = list.length, name;
 
@@ -832,7 +793,7 @@ export class Node extends VObject {
     /**
      * @param {string} path
      */
-    get_node(path) {
+    get_node(path: string) {
         const node = this.get_node_or_null(path);
         if (!node) {
             console.error(`Node not found: ${path}`);
@@ -844,7 +805,7 @@ export class Node extends VObject {
      * @param {boolean} [p_recursive]
      * @param {boolean} [p_owned]
      */
-    find_node(p_mask, p_recursive = true, p_owned = true) {
+    find_node(p_mask: string, p_recursive: boolean = true, p_owned: boolean = true) {
         // TODO: support Godot like `find_node` behavior
         let ret = this._get_child_by_name(p_mask);
         if (ret) {
@@ -876,7 +837,7 @@ export class Node extends VObject {
     /**
      * @param {Node} p_node
      */
-    is_a_parent_of(p_node) {
+    is_a_parent_of(p_node: Node) {
         let p = p_node.data.parent;
         while (p) {
             if (p === this) {
@@ -893,10 +854,10 @@ export class Node extends VObject {
         }
 
         /** @type {Node} */
-        let n = this;
+        let n: Node = this;
 
         /** @type {string[]} */
-        let path = [];
+        let path: string[] = [];
 
         while (n) {
             path.push(n.name);
@@ -912,7 +873,7 @@ export class Node extends VObject {
      * @param {string} p_identifier
      * @param {boolean} [p_persistent]
      */
-    add_to_group(p_identifier, p_persistent = false) {
+    add_to_group(p_identifier: string, p_persistent: boolean = false) {
         if (p_identifier in this.data.grouped) {
             return;
         }
@@ -932,7 +893,7 @@ export class Node extends VObject {
     /**
      * @param {string} p_identifier
      */
-    remove_from_group(p_identifier) {
+    remove_from_group(p_identifier: string) {
         if (this.data.tree) {
             this.data.tree.remove_from_group(p_identifier, this);
         }
@@ -942,7 +903,7 @@ export class Node extends VObject {
     /**
      * @param {string} p_identifier
      */
-    is_in_group(p_identifier) {
+    is_in_group(p_identifier: string) {
         return p_identifier in this.data.grouped;
     }
     get_groups() {
@@ -962,7 +923,7 @@ export class Node extends VObject {
      * @param {Node} p_child
      * @param {number} p_pos
      */
-    move_child(p_child, p_pos) {
+    move_child(p_child: Node, p_pos: number) {
         if (p_pos === this.data.children.length) {
             p_pos--;
         }
@@ -1005,23 +966,23 @@ export class Node extends VObject {
     /**
      * @param {Node} p_child
      */
-    add_child_notify(p_child) { }
+    add_child_notify(p_child: Node) { }
 
     /**
      * @param {Node} p_child
      */
-    remove_child_notify(p_child) { }
+    remove_child_notify(p_child: Node) { }
 
     /**
      * @param {Node} p_child
      */
-    move_child_notify(p_child) { }
+    move_child_notify(p_child: Node) { }
 
     /**
      * @param {Node} p_by
      * @param {List<Node>} p_owned
      */
-    get_owned_by(p_by, p_owned) {
+    get_owned_by(p_by: Node, p_owned: List<Node>) {
         if (this.data.owner === p_by) {
             p_owned.push_back(this);
         }
@@ -1039,7 +1000,7 @@ export class Node extends VObject {
     /**
      * @param {number} p_notification
      */
-    propagate_notification(p_notification) {
+    propagate_notification(p_notification: number) {
         this.notification(p_notification);
 
         for (let c of this.data.children) {
@@ -1052,11 +1013,14 @@ export class Node extends VObject {
     * @param {Array} [p_args]
     * @param {boolean} [p_parent_first]
     */
-    propagate_call(p_method, p_args, p_parent_first = false) {
+    propagate_call(p_method: string, p_args: Array<any>, p_parent_first: boolean = false) {
+        // @ts-ignore
         if (p_parent_first && this[p_method]) {
             if (p_args) {
+                // @ts-ignore
                 this[p_method].apply(this, p_args);
             } else {
+                // @ts-ignore
                 this[p_method]();
             }
         }
@@ -1065,10 +1029,13 @@ export class Node extends VObject {
             c.propagate_call(p_method, p_args, p_parent_first);
         }
 
+        // @ts-ignore
         if (!p_parent_first && this[p_method]) {
             if (p_args) {
+                // @ts-ignore
                 this[p_method].apply(this, p_args);
             } else {
+                // @ts-ignore
                 this[p_method]();
             }
         }
@@ -1079,7 +1046,7 @@ export class Node extends VObject {
     /**
      * @param {boolean} p_process
      */
-    set_physics_process(p_process) {
+    set_physics_process(p_process: boolean) {
         if (this.data.physics_process === p_process) {
             return;
         }
@@ -1106,7 +1073,7 @@ export class Node extends VObject {
     /**
      * @param {boolean} p_process
      */
-    set_process(p_process) {
+    set_process(p_process: boolean) {
         if (this.data.idle_process === p_process) {
             return;
         }
@@ -1132,7 +1099,7 @@ export class Node extends VObject {
     /**
      * @param {boolean} p_process
      */
-    set_physics_process_internal(p_process) {
+    set_physics_process_internal(p_process: boolean) {
         if (this.data.physics_process_internal === p_process) {
             return;
         }
@@ -1152,7 +1119,7 @@ export class Node extends VObject {
     /**
      * @param {boolean} p_process
      */
-    set_process_internal(p_process) {
+    set_process_internal(p_process: boolean) {
         if (this.data.idle_process_internal === p_process) {
             return;
         }
@@ -1171,7 +1138,7 @@ export class Node extends VObject {
     /**
      * @param {number} value
      */
-    set_process_priority(value) {
+    set_process_priority(value: number) {
         this.data.process_priority = value;
 
         if (!this.data.tree) {
@@ -1198,7 +1165,7 @@ export class Node extends VObject {
     /**
      * @param {boolean} p_enable
      */
-    set_process_input(p_enable) {
+    set_process_input(p_enable: boolean) {
         if (this.data.input === p_enable) {
             return;
         }
@@ -1221,7 +1188,7 @@ export class Node extends VObject {
     /**
      * @param {boolean} p_enable
      */
-    set_process_unhandled_input(p_enable) {
+    set_process_unhandled_input(p_enable: boolean) {
         if (this.data.unhandled_input === p_enable) {
             return;
         }
@@ -1244,7 +1211,7 @@ export class Node extends VObject {
     /**
      * @param {boolean} p_enable
      */
-    set_process_unhandled_key_input(p_enable) {
+    set_process_unhandled_key_input(p_enable: boolean) {
         if (this.data.unhandled_key_input === p_enable) {
             return;
         }
@@ -1296,7 +1263,7 @@ export class Node extends VObject {
     /**
      * @param {number} p_what
      */
-    can_process_notification(p_what) {
+    can_process_notification(p_what: number) {
         switch (p_what) {
             case NOTIFICATION_PROCESS: return this.data.idle_process;
             case NOTIFICATION_PHYSICS_PROCESS: return this.data.physics_process;

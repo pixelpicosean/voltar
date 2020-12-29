@@ -19,11 +19,11 @@ import {
     NOTIFICATION_ENTER_TREE,
     NOTIFICATION_EXIT_TREE,
     Node,
-} from '../main/node.js';
-import { Node2D } from './node_2d.js';
+} from '../main/node';
+import { Node2D } from './node_2d';
 import {
     NOTIFICATION_DRAW,
-} from './canvas_item.js';
+} from './canvas_item';
 import { NOTIFICATION_TRANSFORM_CHANGED } from '../const';
 
 

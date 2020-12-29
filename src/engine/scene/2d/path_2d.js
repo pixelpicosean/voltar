@@ -5,9 +5,9 @@ import { Vector2 } from 'engine/core/math/vector2';
 import {
     NOTIFICATION_ENTER_TREE,
     NOTIFICATION_EXIT_TREE,
-} from '../main/node.js';
+} from '../main/node';
 import { Curve2D } from '../resources/curve.js';
-import { Node2D } from './node_2d.js';
+import { Node2D } from './node_2d';
 
 
 export class Path2D extends Node2D {

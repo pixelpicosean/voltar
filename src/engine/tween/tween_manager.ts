@@ -1,56 +1,42 @@
-import { remove_items } from 'engine/dep/index.ts';
+import { remove_item } from 'engine/dep/index';
 
-import Tween from './tween.js';
-
-/** @type {TweenManager[]} */
-const TweenManager_Pool = [];
+import Tween from './tween';
 
 export default class TweenManager {
     static create() {
-        const t = TweenManager_Pool.pop();
+        const t = pool_TweenManager.pop();
         if (!t) {
             return new TweenManager;
         } else {
             return t;
         }
     }
-    /**
-     * @param {TweenManager} t
-     */
-    static free(t) {
+    static free(t: TweenManager) {
         if (t) {
-            for (const tween of t.tweens) {
+            for (let tween of t.tweens) {
                 Tween.free(tween);
             }
             t.tweens.length = 0;
-            TweenManager_Pool.push(t);
+            pool_TweenManager.push(t);
         }
         return TweenManager;
     }
-    constructor() {
-        /** @type {Tween[]} */
-        this.tweens = [];
-    }
-    /**
-     * @param {Tween} tween
-     */
-    add(tween) {
+
+    tweens: Tween[] = [];
+
+    add(tween: Tween) {
         this.tweens.push(tween);
         return tween;
     }
-    /**
-     * @param {Tween} tween
-     */
-    remove(tween) {
+    remove(tween: Tween) {
         tween.active = false;
         tween.is_removed = true;
     }
     /**
      * Create a tween instance
-     *
-     * @param {boolean} [add] Whether add to update list
+     * @param [add] Whether add to update list
      */
-    create(add) {
+    create(add: boolean) {
         if (add === undefined) {
             add = false;
         }
@@ -64,7 +50,7 @@ export default class TweenManager {
     }
     stop_all() {
         /** @type {Tween} */
-        let tween = null;
+        let tween: Tween = null;
         for (let i = 0; i < this.tweens.length; i++) {
             tween = this.tweens[i];
 
@@ -75,12 +61,8 @@ export default class TweenManager {
         this.tweens.length = 0;
     }
 
-    /**
-     * @param {number} delta
-     */
-    _process(delta) {
-        /** @type {Tween} */
-        let tween = null;
+    _process(delta: number) {
+        let tween: Tween = null;
         for (let i = 0; i < this.tweens.length; i++) {
             tween = this.tweens[i];
 
@@ -88,7 +70,7 @@ export default class TweenManager {
                 tween._propagate_process(delta);
 
                 if (tween.is_removed) {
-                    remove_items(this.tweens, i--, 1);
+                    remove_item(this.tweens, i--);
 
                     tween.clear_events();
                     tween.remove_all();
@@ -98,3 +80,5 @@ export default class TweenManager {
         }
     }
 }
+
+const pool_TweenManager: TweenManager[] = [];
