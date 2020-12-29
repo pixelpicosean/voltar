@@ -326,19 +326,6 @@
                 "anchor_right": 1
             },
             {
-                "type": "ColorRect",
-                "name": "bg",
-                "parent": ".",
-                "anchor_bottom": 1,
-                "anchor_right": 1,
-                "color": {
-                    "r": 0,
-                    "g": 0,
-                    "b": 0,
-                    "a": 1
-                }
-            },
-            {
                 "type": "TextureRect",
                 "name": "monitor",
                 "parent": ".",
@@ -9489,12 +9476,12 @@
         },
         "sub": [
             {
-                "id": 1,
+                "id": 2,
                 "type": "Environment",
                 "bg_mode": 1
             },
             {
-                "id": 2,
+                "id": 3,
                 "type": "BakedLightmapData",
                 "bounds": {
                     "position": {
@@ -9576,9 +9563,8 @@
                 ]
             },
             {
-                "id": 3,
+                "id": 4,
                 "type": "Animation",
-                "name": "loop",
                 "length": 13.5,
                 "tracks": [
                     {
@@ -10082,7 +10068,7 @@
                 "parent": ".",
                 "environment": [
                     "@sub#",
-                    "1"
+                    "2"
                 ]
             },
             {
@@ -10105,7 +10091,7 @@
                 ],
                 "light_data": [
                     "@sub#",
-                    "2"
+                    "3"
                 ],
                 "bake_quality": 2,
                 "bake_mode": 1,
@@ -10394,7 +10380,7 @@
                 "anims": {
                     "loop": [
                         "@sub#",
-                        "3"
+                        "4"
                     ]
                 }
             }
@@ -11180,7 +11166,7 @@
         },
         "sub": [
             {
-                "id": 1,
+                "id": 2,
                 "type": "SpatialMaterial",
                 "albedo_color": {
                     "r": 1,
@@ -11256,7 +11242,7 @@
                 "material": [
                     [
                         "@sub#",
-                        "1"
+                        "2"
                     ]
                 ],
                 "instance": [
