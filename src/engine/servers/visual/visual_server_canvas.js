@@ -109,7 +109,11 @@ export class Item {
         /** @type {((item: Item) => void)[]} */
         this.free_listeners = [];
     }
-    free() {
+
+    _predelete() {
+        return true;
+    }
+    _free() {
         this.clear();
 
         for (let i = 0; i < this.free_listeners.length; i++) {
@@ -229,7 +233,7 @@ export class Item {
 
     clear() {
         for (let c of this.commands) {
-            c.free();
+            c._free();
         }
         this.commands.length = 0;
         this.clip = false;

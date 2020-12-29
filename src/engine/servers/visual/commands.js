@@ -59,7 +59,13 @@ export class Command {
         this.texture = null;
         return this;
     }
-    free() { pool_map[this.type].push(this) }
+
+    _predelete() {
+        return true;
+    }
+    _free() {
+        pool_map[this.type].push(this);
+    }
 }
 
 export class CommandLine extends Command {

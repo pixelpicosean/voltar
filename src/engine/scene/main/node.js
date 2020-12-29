@@ -7,6 +7,8 @@ import { MessageQueue } from 'engine/core/message_queue';
 import {
     VObject,
     GDCLASS,
+
+    NOTIFICATION_POSTINITIALIZE,
     NOTIFICATION_PREDELETE,
 } from 'engine/core/v_object';
 import { InputEvent } from 'engine/core/os/input_event';
@@ -97,7 +99,7 @@ class Data {
         this.unhandled_key_input = false;
 
         this.parent_owned = false;
-        this.is_constructor = false;
+        this.in_constructor = false;
         this.use_placeholder = false;
 
         this.path_cache = null;
@@ -174,6 +176,16 @@ export class Node extends VObject {
      */
     _physics_process(delta) { }
     _exit_tree() { }
+
+    _free() {
+        this.data.grouped = Object.create(null);
+        this.data.owned.clear();
+        this.data.children.length = 0;
+
+        orphan_node_count--;
+
+        super._free();
+    }
 
     /* public */
 
@@ -592,8 +604,8 @@ export class Node extends VObject {
             case NOTIFICATION_READY: {
                 this._ready();
             } break;
-            case /* POSTINITIALIZE */0: {
-                this.data.is_constructor = false;
+            case NOTIFICATION_POSTINITIALIZE: {
+                this.data.in_constructor = false;
             } break;
             case NOTIFICATION_PREDELETE: {
                 this.set_owner(null);
@@ -606,11 +618,11 @@ export class Node extends VObject {
                     this.data.parent.remove_child(this);
                 }
 
-                const children = this.data.children;
+                let children = this.data.children;
                 while (children.length > 0) {
                     let child = children[children.length - 1];
                     this.remove_child(child);
-                    // @Memory: restore this child node
+                    // @Memory: recycle child nodes
                 }
             } break;
         }
@@ -645,7 +657,7 @@ export class Node extends VObject {
             p_child._set_tree(this.data.tree);
         }
 
-        p_child.data.parent_owned = this.data.is_constructor;
+        p_child.data.parent_owned = this.data.in_constructor;
         this.add_child_notify(p_child);
     }
     /**
@@ -1307,15 +1319,6 @@ export class Node extends VObject {
         } else {
             Engine.get_singleton().get_main_loop().queue_delete(this);
         }
-    }
-    free() {
-        this.data.grouped = Object.create(null);
-        this.data.owned.clear();
-        this.data.children = [];
-
-        super.free();
-
-        orphan_node_count--;
     }
 
     is_owned_by_parent() {

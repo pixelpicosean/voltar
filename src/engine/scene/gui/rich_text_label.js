@@ -78,6 +78,10 @@ class Item {
         // TODO: recycle
         this.subitems.length = 0;
     }
+
+    _predelete() {
+        return true;
+    }
 }
 
 class ItemFrame extends Item {
@@ -285,7 +289,7 @@ class ItemCustomFX extends ItemFX {
         this.char_fx_transform = null;
         this.custom_effect = null;
     }
-    free() {
+    _free() {
         this._clear_children();
 
         this.char_fx_transform = null;

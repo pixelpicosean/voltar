@@ -21,11 +21,11 @@ export class World extends VObject {
         this.fallback_environment = null;
     }
 
-    free() {
+    _free() {
         VSG.scene.free_rid(this.scenario);
         this.scenario = null;
 
-        return super.free();
+        super._free();
     }
 
     duplicate() {

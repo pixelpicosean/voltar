@@ -74,9 +74,9 @@ export class PrimitiveMesh extends Mesh {
         return 1;
     }
 
-    free() {
+    _free() {
         VSG.storage.mesh_free(this.mesh);
-        return super.free();
+        super._free();
     }
 
     /**

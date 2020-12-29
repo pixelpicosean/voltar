@@ -17,7 +17,11 @@ export class Constraint2DSW {
          */
         this.island_list_next = null;
     }
-    free() { }
+
+    _predelete() {
+        return true;
+    }
+    _free() { }
 
     /**
      * @param {number} p_step

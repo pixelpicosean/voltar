@@ -222,10 +222,10 @@ export class Octree {
         /** @type {{ [key: string]: PairData }} */
         this.pair_map = {};
 
-        /** @type {(ud: any, a_id: number, a_ud: any, b_id: number, b_ud: any) => any} */
-        this.pair_callback = (ud, a_id, a_ud, b_id, b_ud) => { };
-        /** @type {(ud: any, a_id: number, a_ud: any, b_id: number, b_ud: any) => void} */
-        this.unpair_callback = (ud, a_id, a_ud, b_id, b_ud) => { };
+        /** @type {(ud: any, a_id: number, a_ud: any, a_sub: number, b_id: number, b_ud: any, b_sub: number, pair_ud: any) => any} */
+        this.pair_callback = (ud, a_id, a_ud, a_sub, b_id, b_ud, b_sub, pair_ud) => { };
+        /** @type {(ud: any, a_id: number, a_ud: any, a_sub: number, b_id: number, b_ud: any, b_sub: number, pair_ud: any) => void} */
+        this.unpair_callback = (ud, a_id, a_ud, a_sub, b_id, b_ud, b_sub, pair_ud) => { };
         this.pair_callback_userdata = null;
         this.unpair_callback_userdata = null;
     }
@@ -969,12 +969,12 @@ export class Octree {
         if (intersect !== p_pair.intersect) {
             if (intersect) {
                 if (this.pair_callback) {
-                    p_pair.ud = this.pair_callback(this.pair_callback_userdata, p_pair.A.id, p_pair.A.userdata, p_pair.A.subindex, p_pair.B.id, p_pair.B.userdata, p_pair.B.subindex);
+                    p_pair.ud = this.pair_callback(this.pair_callback_userdata, p_pair.A.id, p_pair.A.userdata, p_pair.A.subindex, p_pair.B.id, p_pair.B.userdata, p_pair.B.subindex, p_pair.ud);
                 }
                 this.pair_count++;
             } else {
                 if (this.unpair_callback) {
-                    this.unpair_callback(this.pair_callback_userdata, p_pair.A.id, p_pair.A.userdata, p_pair.A.subindex, p_pair.B.id, p_pair.B.userdata, p_pair.B.subindex);
+                    this.unpair_callback(this.pair_callback_userdata, p_pair.A.id, p_pair.A.userdata, p_pair.A.subindex, p_pair.B.id, p_pair.B.userdata, p_pair.B.subindex, p_pair.ud);
                 }
                 this.pair_count--;
             }
@@ -1033,7 +1033,7 @@ export class Octree {
         if (e.refcount === 0) {
             if (e.intersect) {
                 if (this.unpair_callback) {
-                    this.unpair_callback(this.pair_callback_userdata, p_A.id, p_A.userdata, p_B.id, p_B.userdata);
+                    this.unpair_callback(this.pair_callback_userdata, p_A.id, p_A.userdata, p_A.subindex, p_B.id, p_B.userdata, p_B.subindex, e.ud);
                 }
 
                 this.pair_count--;

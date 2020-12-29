@@ -408,10 +408,11 @@ export class CPUParticles2D extends Node2D {
         this.set_param(PARAM_ANIM_SPEED, 0);
         this.set_param(PARAM_ANIM_OFFSET, 0);
     }
-    free() {
+
+    _free() {
         VSG.storage.mesh_free(this.mesh);
         VSG.storage.multimesh_free(this.multimesh);
-        return super.free();
+        super._free();
     }
 
     /* virtual */

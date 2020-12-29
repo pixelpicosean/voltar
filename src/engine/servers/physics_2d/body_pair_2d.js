@@ -95,9 +95,12 @@ export class BodyPair2DSW extends Constraint2DSW {
         p_A.add_constraint(this, 0);
         p_B.add_constraint(this, 1);
     }
-    free() {
+
+    _free() {
         this._arr[0].remove_constraint(this);
         this._arr[1].remove_constraint(this);
+
+        super._free();
     }
 
     /**

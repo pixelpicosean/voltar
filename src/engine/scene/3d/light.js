@@ -156,10 +156,9 @@ export class Light extends VisualInstance {
 
     /* virtual methods */
 
-    free() {
+    _free() {
         VSG.scene.instance_set_base(this.instance, null);
-
-        return super.free();
+        super._free();
     }
 
     _load_data(data) {

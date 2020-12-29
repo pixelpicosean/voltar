@@ -180,7 +180,10 @@ export class Instance_t {
         this.base_data = null;
     }
 
-    free() {
+    _predelete() {
+        return true;
+    }
+    _free() {
         // @Incomplete: require full featured memory system
         if (this.base_data) memdelete(this.base_data);
         if (this.custom_aabb) memdelete(this.custom_aabb);
@@ -450,11 +453,13 @@ export class VisualServerScene {
      * @param {any} self
      * @param {number} id_A
      * @param {Instance_t} A
+     * @param {number} sub_A
      * @param {number} id_B
      * @param {Instance_t} B
+     * @param {number} sub_B
      * @param {any} udata
      */
-    _instance_unpair(self, id_A, A, id_B, B, udata) {
+    _instance_unpair(self, id_A, A, sub_A, id_B, B, sub_B, udata) {
         if (A.base_type > B.base_type) {
             let t = A;
             A = B;

@@ -67,7 +67,10 @@ export class SelfList<T> {
         this._self = p_self;
     }
 
-    free() {
+    _predelete(): boolean {
+        return true;
+    }
+    _free() {
         if (this._root) {
             this._root.remove(this);
         }

@@ -29,7 +29,8 @@ export class AreaPair2DSW extends Constraint2DSW {
             p_body.set_active(true);
         }
     }
-    free() {
+
+    _free() {
         if (this.colliding) {
             if (this.area.space_override_mode !== AreaSpaceOverrideMode.DISABLED) {
                 this.body.remove_area(this.area);
@@ -41,6 +42,8 @@ export class AreaPair2DSW extends Constraint2DSW {
 
         this.body.remove_constraint(this);
         this.area.remove_constraint(this);
+
+        super._free();
     }
     /**
      * @param {number} p_step
@@ -101,7 +104,8 @@ export class Area2Pair2DSW extends Constraint2DSW {
         this.area_a.add_constraint(this);
         this.area_b.add_constraint(this);
     }
-    free() {
+
+    _free() {
         if (this.colliding) {
             if (this.area_b.has_area_monitor_callback()) {
                 this.area_b.remove_area_from_query(this.area_a, this.shape_a, this.shape_b);
@@ -114,6 +118,8 @@ export class Area2Pair2DSW extends Constraint2DSW {
 
         this.area_a.remove_constraint(this);
         this.area_b.remove_constraint(this);
+
+        super._free();
     }
     /**
      * @param {number} p_step

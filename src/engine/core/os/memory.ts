@@ -1,6 +1,13 @@
 import { node_class_map } from "engine/registry";
 
-import { VObject } from "../v_object";
+interface VtObjectInterface {
+    class: string;
+
+    _init(): void;
+
+    _predelete(): boolean;
+    _free(): void;
+}
 
 // @Incomplete: move this option to global settings
 const RECYCLE_OBJECTS = false;
@@ -17,7 +24,7 @@ export function memnew(m_class: string) {
         pool = Pool[m_class] = [];
     }
 
-    let inst = pool.pop();
+    let inst: VtObjectInterface = pool.pop();
 
     if (!inst) {
         let ctor = node_class_map[m_class];
@@ -29,8 +36,12 @@ export function memnew(m_class: string) {
     return inst;
 }
 
-export function memdelete(obj: VObject) {
-    obj.free();
+export function memdelete(obj: VtObjectInterface) {
+    if (!obj._predelete()) {
+        return;
+    }
+
+    obj._free();
 
     if (!RECYCLE_OBJECTS) return;
 
@@ -41,4 +52,4 @@ export function memdelete(obj: VObject) {
     pool.push(obj);
 }
 
-const Pool: { [m_class: string]: VObject[] } = Object.create(null);
+const Pool: { [m_class: string]: VtObjectInterface[] } = Object.create(null);

@@ -217,14 +217,15 @@ export class SceneTree extends MainLoop {
         /** @type {PackedScene | { new(): Node }} */
         this._current_packed_scene = null;
     }
-    free() {
+
+    _free() {
         if (this.root) {
             this.root._set_tree(null);
             this.root._propagate_after_exit_tree();
             memdelete(this.root);
         }
         if (singleton === this) singleton = null;
-        super.free();
+        super._free();
     }
 
     is_paused() {
@@ -867,7 +868,7 @@ export class SceneTree extends MainLoop {
         this._call_idle_callbacks();
 
         // recycle input events not consumed yet
-        p_event.free();
+        p_event._free();
     }
     /**
      * @param {string} p_text

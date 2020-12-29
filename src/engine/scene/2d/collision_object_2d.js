@@ -98,9 +98,9 @@ export class CollisionObject2D extends Node2D {
     }
 
     /* virtual */
-    free() {
+    _free() {
         Physics2DServer.get_singleton().free_rid(this.rid);
-        return super.free();
+        super._free();
     }
 
     /**

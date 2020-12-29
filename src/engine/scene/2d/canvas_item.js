@@ -110,9 +110,10 @@ export class CanvasItem extends Node {
         this.global_transform = new Transform2D;
         this.global_invalid = true;
     }
-    free() {
+
+    _free() {
         VSG.canvas.free_item(this.canvas_item);
-        return super.free();
+        super._free();
     }
 
     /* virtual */

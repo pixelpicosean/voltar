@@ -28,10 +28,9 @@ export class VisualInstance extends Spatial {
         this.set_notify_transform(true);
     }
 
-    free() {
+    _free() {
         VSG.scene.instance_free(this.instance);
-
-        super.free();
+        super._free();
     }
 
     /**

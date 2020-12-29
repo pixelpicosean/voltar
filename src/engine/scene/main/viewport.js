@@ -108,12 +108,13 @@ class ViewportTexture extends Texture {
 
         this.proxy = VSG.storage.texture_create();
     }
-    free() {
+
+    _free() {
         if (this.vp) {
             this.vp.viewport_textures.delete(this);
         }
         VSG.storage.texture_free(this.proxy);
-        super.free();
+        super._free();
     }
 
     get_width() { return this.vp.size.width }
@@ -383,9 +384,9 @@ export class Viewport extends Node {
         }
     }
 
-    free() {
+    _free() {
         VSG.viewport.viewport_free(this.viewport);
-        return super.free();
+        super._free();
     }
 
     /* public */
@@ -1552,7 +1553,7 @@ export class Viewport extends Node {
                     mb.button_index = i + 1;
                     mb.pressed = false;
                     this.gui.mouse_focus._gui_input_(mb);
-                    mb.free();
+                    mb._free();
                 }
             }
 
@@ -1571,7 +1572,7 @@ export class Viewport extends Node {
                     mb.button_index = i + 1;
                     mb.pressed = true;
                     this.gui.mouse_focus._gui_input_(mb);
-                    mb.free();
+                    mb._free();
                 }
             }
         }

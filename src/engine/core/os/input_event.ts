@@ -67,7 +67,11 @@ export class InputEvent {
         Object.assign(this, data);
         return this;
     }
-    free() {
+
+    _predelete() {
+        return true;
+    }
+    _free() {
         pool_map[this.class].push(this);
     }
 

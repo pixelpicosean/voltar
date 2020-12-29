@@ -140,13 +140,14 @@ export class VisualServer extends VObject {
         VSG.canvas_render = VSG.rasterizer.get_canvas();
         VSG.scene_render = VSG.rasterizer.get_scene();
     }
-    free() {
+
+    _free() {
         VSG.canvas = null;
         VSG.viewport = null;
         VSG.rasterizer = null;
         VSG.scene = null;
 
-        return super.free();
+        super._free();
     }
 
     /* black bars */

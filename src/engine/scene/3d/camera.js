@@ -226,9 +226,9 @@ export class Camera extends Spatial {
 
     /* virtual methods */
 
-    free() {
+    _free() {
         VSG.scene.free_rid(this.camera);
-        return super.free();
+        super._free();
     }
 
     _load_data(data) {

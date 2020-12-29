@@ -1,8 +1,10 @@
 import { remove_items } from "engine/dep/index";
 import { MessageQueue } from "./message_queue";
+import { memdelete } from "./os/memory";
 
 
-export const NOTIFICATION_PREDELETE = 1
+export const NOTIFICATION_POSTINITIALIZE = 0;
+export const NOTIFICATION_PREDELETE = 1;
 
 /**
  * Representation of a single event listener.
@@ -68,6 +70,21 @@ export class VObject {
      * This method is called to reset it while reuse recylced instances.
      */
     _init() { }
+
+    /**
+     * @returns Whether `_free()` should be called
+     */
+    _predelete(): boolean {
+        this.notification(NOTIFICATION_PREDELETE, true);
+        return true;
+    }
+
+    /**
+     * Decontructor, we may not really need this one as of GC
+     */
+    _free() {
+        this.instance_id = 0;
+    }
 
     _notification(what: number) { }
 
@@ -225,9 +242,7 @@ export class VObject {
     }
 
     free() {
-        this.instance_id = 0;
-        this.notification(NOTIFICATION_PREDELETE, true);
-        return true;
+        memdelete(this);
     }
 
     /**
