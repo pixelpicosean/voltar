@@ -49,13 +49,15 @@ export class CameraMatrix {
             [0, 0, 1, 0],
             [0, 0, 0, 1],
         ];
+
+        this._array = this.matrix.slice();
     }
 
     /**
      * @param {number[]} [out]
      */
     as_array(out) {
-        if (!out) out = Array(16);
+        out = out || this._array;
         let m = this.matrix;
         out[ 0] = m[0][0];
         out[ 1] = m[0][1];

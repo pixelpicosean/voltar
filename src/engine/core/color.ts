@@ -66,6 +66,7 @@ export class Color {
 
     _rgb: [number, number, number];
     a = 1.0;
+    _array: [number, number, number, number] = [1, 1, 1, 1];
 
     get r() {
         return this._rgb[0];
@@ -192,7 +193,7 @@ export class Color {
     }
 
     as_array(out?: number[]) {
-        if (!out) out = [0, 0, 0, 0]
+        out = out || this._array;
         out[0] = this.r;
         out[1] = this.g;
         out[2] = this.b;

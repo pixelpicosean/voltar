@@ -31,13 +31,15 @@ export class Transform {
     constructor() {
         this.basis = new Basis;
         this.origin = new Vector3;
+
+        this._array = [];
     }
 
     /**
      * @param {number[]} [out]
      */
     as_array(out) {
-        if (!out) out = Array(16);
+        out = out || this._array;
         out[0] = this.basis.elements[0].x;
         out[1] = this.basis.elements[1].x;
         out[2] = this.basis.elements[2].x;

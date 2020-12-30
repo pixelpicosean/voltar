@@ -72,19 +72,20 @@ export class Vector3 {
         this.y = y;
         /** @type {number} */
         this.z = z;
+
+        /** @type {[number, number, number]} */
+        this._array = [x, y, z];
     }
 
     /**
-     * @param {number[]} [out]
+     * @param {[number, number, number]} [r_out]
      */
-    as_array(out) {
-        if (out) {
-            out[0] = this.x;
-            out[1] = this.y;
-            out[2] = this.z;
-            return out;
-        }
-        return [this.x, this.y, this.z];
+    as_array(r_out) {
+        r_out = r_out || this._array;
+        r_out[0] = this.x;
+        r_out[1] = this.y;
+        r_out[2] = this.z;
+        return r_out;
     }
 
     /**

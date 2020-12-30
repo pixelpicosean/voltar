@@ -1,14 +1,13 @@
 import { res_class_map } from 'engine/registry';
+import { Color } from 'engine/core/color';
 import { lerp, deg2rad, nearest_po2 } from 'engine/core/math/math_funcs.js';
-import { Vector2, Vector2Like } from 'engine/core/math/vector2';
+import { Vector2 } from 'engine/core/math/vector2';
 import { Vector3 } from 'engine/core/math/vector3.js';
 import { Rect2 } from 'engine/core/math/rect2.js';
 import { Basis } from 'engine/core/math/basis.js';
 import { Transform } from 'engine/core/math/transform.js';
 import { CameraMatrix } from 'engine/core/math/camera_matrix.js';
-import { Color } from 'engine/core/color';
 import { OS } from 'engine/core/os/os';
-import { copy_array_values } from 'engine/core/v_array';
 
 import {
     INSTANCE_TYPE_MESH,
@@ -81,6 +80,8 @@ import {
 
 import spatial_vs from './shaders/spatial.vert';
 import spatial_fs from './shaders/spatial.frag';
+
+const UNIFORM_EPSILON = 0.00000001;
 
 export const ENV_BG_CLEAR_COLOR = 0;
 export const ENV_BG_COLOR = 1;
@@ -692,9 +693,6 @@ export class RasterizerScene {
         this.render_light_instance_count = 0;
 
         this.state = {
-            cull_disabled: false,
-            cull_front: false,
-
             used_screen_texture: false,
 
             used_lightmap: false,
@@ -719,7 +717,7 @@ export class RasterizerScene {
             /** @type {WebGLBuffer} */
             sky_verts: null,
 
-            /** @type {Object<string, number[]>} */
+            /** @type {{ [name: string]: number[] }} */
             uniforms: {
                 CAMERA_MATRIX: [
                     1, 0, 0, 0,
@@ -806,9 +804,22 @@ export class RasterizerScene {
                 fog_height_max: [0],
                 fog_height_curve: [1],
             },
+            /** @type {{ [name: string]: UniformState }} */
+            uniform_states: {},
 
             conditions: 0,
             prev_conditions: 0,
+
+            gl: {
+                CULL_FACE: false,
+                CULL_FRONT: false,
+
+                DEPTH_TEST: false,
+                depthMask: false,
+                depthFunc: 0,
+
+                BLEND: false,
+            },
         };
 
         /** @type {EffectBlurShader} */
@@ -824,6 +835,14 @@ export class RasterizerScene {
         this.current_material_index = 0;
         this.current_geometry_index = 0;
         this.current_shader_index = 0;
+
+        // record states of all global uniforms
+        for (let name in this.state.uniforms) {
+            this.state.uniform_states[name] = {
+                value: this.state.uniforms[name],
+                changed: true,
+            };
+        }
     }
 
     /**
@@ -1154,6 +1173,7 @@ export class RasterizerScene {
             gl.viewport(0, 0, shadow_atlas.size, shadow_atlas.size);
 
             gl.depthMask(true);
+            this.state.gl.depthMask = true;
 
             gl.clearDepth(0.0);
             gl.clear(gl.DEPTH_BUFFER_BIT);
@@ -1498,8 +1518,11 @@ export class RasterizerScene {
         }
 
         gl.depthMask(true);
+        this.state.gl.depthMask = true;
         gl.depthFunc(gl.LEQUAL);
+        this.state.gl.depthFunc = gl.LEQUAL;
         gl.enable(gl.DEPTH_TEST);
+        this.state.gl.DEPTH_TEST = true;
 
         gl.clearDepth(1.0);
         gl.clear(gl.DEPTH_BUFFER_BIT);
@@ -1542,8 +1565,8 @@ export class RasterizerScene {
 
         /** @type {Sky_t} */
         let sky = null;
-        /** @type {WebGLTexture} */
-        let env_radiance_tex = null;
+        // /** @type {WebGLTexture} */
+        // let env_radiance_tex = null;
 
         if (p_env) {
             switch (p_env.bg_mode[0]) {
@@ -2134,15 +2157,21 @@ export class RasterizerScene {
 
         let prev_blend_mode = -2;
 
-        this.state.cull_front = false;
-        this.state.cull_disabled = false;
-        gl.cullFace(gl.BACK);
-        gl.enable(gl.CULL_FACE);
+        if (this.state.gl.CULL_FRONT) {
+            gl.cullFace(gl.BACK);
+            this.state.gl.CULL_FRONT = false;
+        }
+        if (!this.state.gl.CULL_FACE) {
+            gl.enable(gl.CULL_FACE);
+            this.state.gl.CULL_FACE = true;
+        }
 
         if (p_alpha_pass) {
             gl.enable(gl.BLEND);
+            this.state.gl.BLEND = true;
         } else {
             gl.disable(gl.BLEND);
+            this.state.gl.BLEND = false;
         }
 
         let fog_max_distance = 0;
@@ -2162,11 +2191,13 @@ export class RasterizerScene {
         let prev_lightmap = null;
         let lightmap_energy = 1.0;
 
+        mark_uniforms_outdated(this.state.uniform_states);
+
         for (let i = 0; i < p_element_count; i++) {
             let e = p_elements[i];
 
             let material = e.material;
-            let global_uniforms = this.state.uniforms;
+            let uniform_states = this.state.uniform_states;
 
             let rebind = false;
             let accum_pass = e.use_accum;
@@ -2223,8 +2254,10 @@ export class RasterizerScene {
                 if (prev_blend_mode != blend_mode) {
                     if (prev_blend_mode == -1 && blend_mode != -1) {
                         gl.enable(gl.BLEND);
+                        this.state.gl.BLEND = true;
                     } else if (blend_mode == -1 && prev_blend_mode != -1) {
                         gl.disable(gl.BLEND);
+                        this.state.gl.BLEND = false;
                     }
 
                     switch (blend_mode) {
@@ -2320,6 +2353,10 @@ export class RasterizerScene {
                 shader_rebind = this._setup_material(material, p_alpha_pass, skeleton ? skeleton.size * 3 : 0);
             }
 
+            if (shader_rebind) {
+                mark_uniforms_outdated(uniform_states);
+            }
+
             if (rebind_lightmap) {
                 if (lightmap) {
                     gl.activeTexture(gl.TEXTURE0 + VSG.config.max_texture_image_units - 4);
@@ -2331,55 +2368,58 @@ export class RasterizerScene {
 
             if (i === 0 || shader_rebind) {
                 if (p_shadow) {
-                    global_uniforms.light_bias[0] = p_shadow_bias;
-                    global_uniforms.light_normal_bias[0] = p_shadow_normal_bias;
+                    this.set_uniform_n("light_bias",        p_shadow_bias);
+                    this.set_uniform_n("light_normal_bias", p_shadow_normal_bias);
                     if (this.state.shadow_is_dual_paraboloid) {
-                        global_uniforms.shadow_dual_paraboloid_render_side[0] = this.state.dual_parboloid_direction;
-                        global_uniforms.shadow_dual_paraboloid_render_zfar[0] = this.state.dual_parboloid_zfar;
+                        this.set_uniform_n("shadow_dual_paraboloid_render_side", this.state.dual_parboloid_direction);
+                        this.set_uniform_n("shadow_dual_paraboloid_render_zfar", this.state.dual_parboloid_zfar);
                     }
                 } else {
                     if (p_env) {
-                        global_uniforms.bg_energy = p_env.bg_energy;
-                        global_uniforms.bg_color = p_env.bg_color;
-                        global_uniforms.ambient_color = p_env.ambient_color;
-                        global_uniforms.ambient_energy = p_env.ambient_energy;
+                        this.set_uniform_v("bg_energy",         p_env.bg_energy);
+                        this.set_uniform_v("bg_color",          p_env.bg_color);
+                        this.set_uniform_v("ambient_color",     p_env.ambient_color);
+                        this.set_uniform_v("ambient_energy",    p_env.ambient_energy);
                     } else {
-                        global_uniforms.bg_energy[0] = 1.0;
-                        global_uniforms.bg_color = this.state.default_bg.as_array(global_uniforms.bg_color);
-                        global_uniforms.ambient_color = this.state.default_ambient.as_array(global_uniforms.ambient_color);
-                        global_uniforms.ambient_energy[0] = 1.0;
+                        this.set_uniform_n("bg_energy",         1.0);
+                        this.set_uniform_v("bg_color",          this.state.default_bg.as_array());
+                        this.set_uniform_v("ambient_color",     this.state.default_ambient.as_array());
+                        this.set_uniform_n("ambient_energy",    1.0);
                     }
 
                     rebind_light = true;
                     rebind_lightmap = true;
 
                     if (using_fog) {
-                        copy_array_values(p_env.fog_color, global_uniforms.fog_color_base);
-                        copy_array_values(p_env.fog_sun_color, global_uniforms.fog_sun_color_amount);
-                        global_uniforms.fog_sun_color_amount[3] = p_env.fog_sun_amount[0];
+                        this.set_uniform_v("fog_color_base", p_env.fog_color);
+                        this.set_uniform_n4(
+                            "fog_sun_color_amount",
+                            p_env.fog_sun_color[0],
+                            p_env.fog_sun_color[1],
+                            p_env.fog_sun_color[2],
+                            p_env.fog_sun_amount[0]
+                        );
 
-                        copy_array_values(p_env.fog_transmit_enabled, global_uniforms.fog_transmit_enabled);
-                        copy_array_values(p_env.fog_transmit_curve, global_uniforms.fog_transmit_curve);
+                        this.set_uniform_v("fog_transmit_enabled",  p_env.fog_transmit_enabled);
+                        this.set_uniform_v("fog_transmit_curve",    p_env.fog_transmit_curve);
 
-                        copy_array_values(p_env.fog_depth_begin, global_uniforms.fog_depth_begin);
-                        copy_array_values(p_env.fog_depth_curve, global_uniforms.fog_depth_curve);
-                        global_uniforms.fog_max_distance[0] = fog_max_distance;
+                        this.set_uniform_v("fog_depth_begin",       p_env.fog_depth_begin);
+                        this.set_uniform_v("fog_depth_curve",       p_env.fog_depth_curve);
+                        this.set_uniform_n("fog_max_distance",      fog_max_distance);
 
-                        copy_array_values(p_env.fog_height_min, global_uniforms.fog_height_min);
-                        copy_array_values(p_env.fog_height_max, global_uniforms.fog_height_max);
-                        copy_array_values(p_env.fog_height_curve, global_uniforms.fog_height_curve);
+                        this.set_uniform_v("fog_height_min",        p_env.fog_height_min);
+                        this.set_uniform_v("fog_height_max",        p_env.fog_height_max);
+                        this.set_uniform_v("fog_height_curve",      p_env.fog_height_curve);
                     }
                 }
 
-                global_uniforms.CAMERA_MATRIX = p_view_transform.as_array(global_uniforms.CAMERA_MATRIX);
-                global_uniforms.INV_CAMERA_MATRIX = view_transform_inverse.as_array(global_uniforms.INV_CAMERA_MATRIX);
-                global_uniforms.PROJECTION_MATRIX = p_projection.as_array(global_uniforms.PROJECTION_MATRIX);
-                global_uniforms.INV_PROJECTION_MATRIX = projection_inverse.as_array(global_uniforms.INV_PROJECTION_MATRIX);
-                global_uniforms.TIME[0] = this.storage.frame.time[0];
-                global_uniforms.VIEWPORT_SIZE[0] = this.state.viewport_size.x;
-                global_uniforms.VIEWPORT_SIZE[1] = this.state.viewport_size.y;
-                global_uniforms.SCREEN_PIXEL_SIZE[0] = this.state.screen_pixel_size.x;
-                global_uniforms.SCREEN_PIXEL_SIZE[1] = this.state.screen_pixel_size.y;
+                this.set_uniform_v("CAMERA_MATRIX",           p_view_transform.as_array());
+                this.set_uniform_v("INV_CAMERA_MATRIX",       view_transform_inverse.as_array());
+                this.set_uniform_v("PROJECTION_MATRIX",       p_projection.as_array());
+                this.set_uniform_v("INV_PROJECTION_MATRIX",   projection_inverse.as_array());
+                this.set_uniform_v("TIME",                    this.storage.frame.time);
+                this.set_uniform_v("VIEWPORT_SIZE",           this.state.viewport_size.as_array());
+                this.set_uniform_v("SCREEN_PIXEL_SIZE",       this.state.screen_pixel_size.as_array());
             }
 
             if (rebind_light && light) {
@@ -2387,24 +2427,45 @@ export class RasterizerScene {
             }
 
             if (rebind_lightmap && lightmap) {
-                global_uniforms.lightmap_energy[0] = lightmap_energy;
+                this.set_uniform_n("lightmap_energy", lightmap_energy);
             }
 
-            global_uniforms.world_matrix = e.instance.transform.as_array(global_uniforms.world_matrix);
+            this.set_uniform_v("world_matrix", e.instance.transform.as_array());
 
-            const mat_uniforms = this.state.current_shader.uniforms;
+            let mat_uniforms = this.state.current_shader.uniforms;
             for (const k in mat_uniforms) {
-                const u = mat_uniforms[k];
+                let u = mat_uniforms[k];
+
+                // uniform not exist in the shader
                 if (!u.gl_loc) continue;
-                switch (u.type) {
-                    case '2i': gl.uniform2iv(u.gl_loc, global_uniforms[k] ? global_uniforms[k] : material.params[k]); break;
-                    case '1f': gl.uniform1fv(u.gl_loc, global_uniforms[k] ? global_uniforms[k] : material.params[k]); break;
-                    case '2f': gl.uniform2fv(u.gl_loc, global_uniforms[k] ? global_uniforms[k] : material.params[k]); break;
-                    case '3f': gl.uniform3fv(u.gl_loc, global_uniforms[k] ? global_uniforms[k] : material.params[k]); break;
-                    case '4f': gl.uniform4fv(u.gl_loc, global_uniforms[k] ? global_uniforms[k] : material.params[k]); break;
-                    case 'mat3': gl.uniformMatrix3fv(u.gl_loc, false, global_uniforms[k] ? global_uniforms[k] : material.params[k]); break;
-                    case 'mat4': gl.uniformMatrix4fv(u.gl_loc, false, global_uniforms[k] ? global_uniforms[k] : material.params[k]); break;
+
+                // bypass all texture slot bindings
+                if (u.type === "1i") continue;
+
+                let state = uniform_states[k];
+                // this uniform not recorded yet?
+                if (!state) {
+                    state = uniform_states[k] = {
+                        value: material.params[k].slice(),
+                        changed: true,
+                    };
                 }
+
+                // no need to upload if it's not changed yet
+                if (!state.changed) continue;
+
+                switch (u.type) {
+                    case "2i": gl.uniform2iv(u.gl_loc, state.value); break;
+                    case "1f": gl.uniform1fv(u.gl_loc, state.value); break;
+                    case "2f": gl.uniform2fv(u.gl_loc, state.value); break;
+                    case "3f": gl.uniform3fv(u.gl_loc, state.value); break;
+                    case "4f": gl.uniform4fv(u.gl_loc, state.value); break;
+                    case "mat3": gl.uniformMatrix3fv(u.gl_loc, false, state.value); break;
+                    case "mat4": gl.uniformMatrix4fv(u.gl_loc, false, state.value); break;
+                }
+
+                // now it's synced with GPU
+                state.changed = false;
             }
 
             this._render_geometry(e);
@@ -2444,11 +2505,26 @@ export class RasterizerScene {
     _draw_sky(p_sky, p_projection, p_transform, p_vflip, p_custom_fov, p_energy, p_sky_orientation) {
         const gl = this.gl;
 
-        gl.depthMask(true);
-        gl.enable(gl.DEPTH_TEST);
-        gl.disable(gl.CULL_FACE);
-        gl.disable(gl.BLEND);
-        gl.depthFunc(gl.LEQUAL);
+        if (!this.state.gl.depthMask) {
+            gl.depthMask(true);
+            this.state.gl.depthMask = true;
+        }
+        if (!this.state.gl.DEPTH_TEST) {
+            gl.enable(gl.DEPTH_TEST);
+            this.state.gl.DEPTH_TEST = true;
+        }
+        if (this.state.gl.CULL_FACE) {
+            gl.disable(gl.CULL_FACE);
+            this.state.gl.CULL_FACE = false;
+        }
+        if (this.state.gl.BLEND) {
+            gl.disable(gl.BLEND);
+            this.state.gl.BLEND = false;
+        }
+        if (this.state.gl.depthFunc !== gl.LEQUAL) {
+            gl.depthFunc(gl.LEQUAL);
+            this.state.gl.depthFunc = gl.LEQUAL;
+        }
 
         let camera = CameraMatrix.create();
 
@@ -2578,19 +2654,19 @@ export class RasterizerScene {
             front = !front;
         }
 
-        if (p_disabled !== this.state.cull_disabled) {
+        if (p_disabled !== this.state.gl.CULL_FACE) {
             if (p_disabled) {
                 gl.disable(gl.CULL_FACE);
             } else {
                 gl.enable(gl.CULL_FACE);
             }
 
-            this.state.cull_disabled = p_disabled;
+            this.state.gl.CULL_FACE = p_disabled;
         }
 
-        if (front !== this.state.cull_front) {
+        if (front !== this.state.gl.CULL_FRONT) {
             gl.cullFace(front ? gl.FRONT : gl.BACK);
-            this.state.cull_front = front;
+            this.state.gl.CULL_FRONT = front;
         }
     }
 
@@ -2663,8 +2739,6 @@ export class RasterizerScene {
      * @param {boolean} accum_pass
      */
     _setup_light(p_light, shadow_atlas, p_view_transform, accum_pass) {
-        let uniforms = this.state.uniforms;
-
         let light = p_light.light;
 
         // common parameters
@@ -2672,16 +2746,18 @@ export class RasterizerScene {
         let specular = light.param[LIGHT_PARAM_SPECULAR];
         let sign = (light.negative && !accum_pass) ? -1 : 1;
 
-        uniforms.LIGHT_SPECULAR[0] = specular;
+        this.set_uniform_n("LIGHT_SPECULAR", specular);
 
-        uniforms.LIGHT_COLOR = light.color.as_array(uniforms.LIGHT_COLOR);
+        let light_color = light.color.as_array();
         let sign_energy_PI = sign * energy * Math.PI;
-        uniforms.LIGHT_COLOR[0] *= sign_energy_PI;
-        uniforms.LIGHT_COLOR[1] *= sign_energy_PI;
-        uniforms.LIGHT_COLOR[2] *= sign_energy_PI;
-        uniforms.LIGHT_COLOR[3] *= sign_energy_PI;
+        this.set_uniform_n4("LIGHT_COLOR",
+            light_color[0] * sign_energy_PI,
+            light_color[1] * sign_energy_PI,
+            light_color[2] * sign_energy_PI,
+            light_color[3] * sign_energy_PI
+        );
 
-        uniforms.shadow_color = light.shadow_color.as_array(uniforms.shadow_color);
+        this.set_uniform_v("shadow_color", light.shadow_color.as_array());
 
         // specific parameters
         switch (light.type) {
@@ -2691,13 +2767,13 @@ export class RasterizerScene {
                 p_view_transform.basis.xform_inv(direction, direction);
                 direction.normalize();
 
-                uniforms.LIGHT_DIRECTION = direction.as_array(uniforms.LIGHT_DIRECTION);
+                this.set_uniform_v("LIGHT_DIRECTION", direction.as_array());
 
                 Vector3.free(direction);
 
                 if (!this.state.render_no_shadows && light.shadow && this.directional_shadow.gl_depth) {
                     let shadow_count = 1;
-                    let split_offsets = uniforms.light_split_offsets;
+                    let split_offsets = this.get_uniform_v("light_split_offsets");
 
                     let matrix = CameraMatrix.create();
 
@@ -2736,10 +2812,9 @@ export class RasterizerScene {
                         CameraMatrix.free(bias);
                     }
 
-                    uniforms.shadow_pixel_size[0] = 1 / this.directional_shadow.size;
-                    uniforms.shadow_pixel_size[1] = 1 / this.directional_shadow.size;
-                    uniforms.light_shadow_matrix = matrix.as_array(uniforms.light_shadow_matrix);
-                    uniforms.light_split_offsets = split_offsets;
+                    this.set_uniform_n2("shadow_pixel_size", 1 / this.directional_shadow.size, 1 / this.directional_shadow.size);
+                    this.set_uniform_v("light_shadow_matrix", matrix.as_array());
+                    this.set_uniform_v("light_split_offsets", split_offsets, true);
 
                     CameraMatrix.free(matrix);
                 }
@@ -2747,10 +2822,10 @@ export class RasterizerScene {
             case LIGHT_OMNI: {
                 let position = p_view_transform.xform_inv(p_light.transform.origin);
 
-                uniforms.LIGHT_POSITION = position.as_array(uniforms.LIGHT_POSITION);
+                this.set_uniform_v("LIGHT_POSITION", position.as_array());
 
-                uniforms.light_range[0] = light.param[LIGHT_PARAM_RANGE];
-                uniforms.LIGHT_ATTENUATION[0] = light.param[LIGHT_PARAM_ATTENUATION];
+                this.set_uniform_n("light_range", light.param[LIGHT_PARAM_RANGE]);
+                this.set_uniform_n("LIGHT_ATTENUATION", light.param[LIGHT_PARAM_ATTENUATION]);
 
                 if (!this.state.render_no_shadows && light.shadow && shadow_atlas && shadow_atlas.shadow_owners.has(p_light)) {
                     let key = shadow_atlas.shadow_owners.get(p_light);
@@ -2779,36 +2854,38 @@ export class RasterizerScene {
 
                     let proj = p_view_transform.inverse().append(p_light.transform).invert();
 
-                    uniforms.shadow_pixel_size[0] = 1 / shadow_atlas.size;
-                    uniforms.shadow_pixel_size[1] = 1 / shadow_atlas.size;
-                    uniforms.light_shadow_matrix = proj.as_array(uniforms.light_shadow_matrix);
-                    uniforms.light_clamp[0] = x / atlas_size;
-                    uniforms.light_clamp[1] = y / atlas_size;
-                    uniforms.light_clamp[2] = width / atlas_size;
-                    uniforms.light_clamp[3] = height / atlas_size;
-                    // uniforms.light_clamp = [0, 0, 0.5, 0.25];
+                    this.set_uniform_n2("shadow_pixel_size", 1 / shadow_atlas.size, 1 / shadow_atlas.size);
+                    this.set_uniform_v("light_shadow_matrix", proj.as_array());
+                    this.set_uniform_n4(
+                        "light_clamp",
+                        x / atlas_size,
+                        y / atlas_size,
+                        width / atlas_size,
+                        height / atlas_size
+                    );
+                    // this.set_uniform_f4("light_clamp", 0, 0, 0.5, 0.25);
                 }
             } break;
             case LIGHT_SPOT: {
                 let position = p_view_transform.xform_inv(p_light.transform.origin);
 
-                uniforms.LIGHT_POSITION = position.as_array(uniforms.LIGHT_POSITION);
+                this.set_uniform_v("LIGHT_POSITION", position.as_array());
 
                 let direction = p_view_transform.inverse()
                     .basis.xform(p_light.transform.basis.xform(Vector3.create(0, 0, -1)))
                     .normalize()
-                uniforms.LIGHT_DIRECTION = direction.as_array(uniforms.LIGHT_DIRECTION);
+                this.set_uniform_v("LIGHT_DIRECTION", direction.as_array());
 
                 let attenuation = light.param[LIGHT_PARAM_ATTENUATION];
                 let range = light.param[LIGHT_PARAM_RANGE];
                 let spot_attenuation = light.param[LIGHT_PARAM_SPOT_ATTENUATION];
                 let angle = light.param[LIGHT_PARAM_SPOT_ANGLE];
                 angle = Math.cos(deg2rad(angle));
-                uniforms.LIGHT_ATTENUATION[0] = attenuation;
-                uniforms.LIGHT_SPOT_ATTENUATION[0] = spot_attenuation;
-                uniforms.LIGHT_SPOT_RANGE[0] = spot_attenuation;
-                uniforms.LIGHT_SPOT_ANGLE[0] = angle;
-                uniforms.light_range[0] = range;
+                this.set_uniform_n("LIGHT_ATTENUATION",         attenuation);
+                this.set_uniform_n("LIGHT_SPOT_ATTENUATION",    spot_attenuation);
+                this.set_uniform_n("LIGHT_SPOT_RANGE",          spot_attenuation);
+                this.set_uniform_n("LIGHT_SPOT_ANGLE",          angle);
+                this.set_uniform_n("light_range",               range);
 
                 Vector3.free(direction);
                 Vector3.free(position);
@@ -2958,25 +3035,36 @@ export class RasterizerScene {
         }
 
         if (shader.spatial.no_depth_test || shader.spatial.uses_depth_texture) {
-            gl.disable(gl.DEPTH_TEST);
+            if (this.state.gl.DEPTH_TEST) {
+                gl.disable(gl.DEPTH_TEST);
+                this.state.gl.DEPTH_TEST = false;
+            }
         } else {
-            gl.enable(gl.DEPTH_TEST);
+            if (!this.state.gl.DEPTH_TEST) {
+                gl.enable(gl.DEPTH_TEST);
+                this.state.gl.DEPTH_TEST = true;
+            }
         }
 
+        let enable_depth_mask = this.state.gl.depthMask;
         switch (shader.spatial.depth_draw_mode) {
             case DEPTH_DRAW_ALPHA_PREPASS:
             case DEPTH_DRAW_OPAQUE: {
-                gl.depthMask(!p_alpha_pass && !shader.spatial.uses_depth_texture);
+                enable_depth_mask = !p_alpha_pass && !shader.spatial.uses_depth_texture;
             } break;
             case DEPTH_DRAW_ALWAYS: {
-                gl.depthMask(true);
+                enable_depth_mask = true;
             } break;
             case DEPTH_DRAW_NEVER: {
-                gl.depthMask(false);
+                enable_depth_mask = false;
             } break;
         }
+        if (this.state.gl.depthMask !== enable_depth_mask) {
+            gl.depthMask(enable_depth_mask);
+            this.state.gl.depthMask = enable_depth_mask;
+        }
 
-        this.state.uniforms.skeleton_texture_size[0] = p_skeleton_tex_size;
+        this.set_uniform_n2("skeleton_texture_size", p_skeleton_tex_size, 0);
 
         let i = 0;
         for (let k in p_material.textures) {
@@ -2997,12 +3085,6 @@ export class RasterizerScene {
             if (!t) {
                 if (p_material.origin) {
                     t = p_material.origin.textures[k];
-                }
-
-                if (!t) {
-                    if (shader.name === "spatial") {
-                        // t = this.default_material.mat.texture_hints[k];
-                    }
                 }
 
                 if (!t) {
@@ -3234,4 +3316,178 @@ export class RasterizerScene {
         gl.bindFramebuffer(gl.FRAMEBUFFER, this.storage.frame.current_rt.gl_fbo);
         this.storage._copy_screen();
     }
+
+    /**
+     * @param {string} name
+     * @param {number} value
+     * @param {boolean} [force_changed]
+     */
+    set_uniform_n(name, value, force_changed = false) {
+        let state = this.state.uniform_states[name];
+        if (!state) {
+            state = this.state.uniform_states[name] = {
+                changed: true,
+                value: [value],
+            };
+            return;
+        }
+
+        if (Math.abs(state.value[0] - value) > UNIFORM_EPSILON) {
+            state.value[0] = value;
+            state.changed = true;
+        }
+
+        if (force_changed) {
+            state.changed = true;
+        }
+    }
+    /**
+     * @param {string} name
+     * @param {number} v0
+     * @param {number} v1
+     * @param {boolean} [force_changed]
+     */
+    set_uniform_n2(name, v0, v1, force_changed = false) {
+        let state = this.state.uniform_states[name];
+        if (!state) {
+            state = this.state.uniform_states[name] = {
+                changed: true,
+                value: [v0, v1],
+            };
+            return;
+        }
+
+        if (Math.abs(state.value[0] - v0) > UNIFORM_EPSILON) {
+            state.value[0] = v0;
+            state.changed = true;
+        }
+        if (Math.abs(state.value[1] - v1) > UNIFORM_EPSILON) {
+            state.value[1] = v1;
+            state.changed = true;
+        }
+
+        if (force_changed) {
+            state.changed = true;
+        }
+    }
+    /**
+     * @param {string} name
+     * @param {number} v0
+     * @param {number} v1
+     * @param {number} v2
+     * @param {boolean} [force_changed]
+     */
+    set_uniform_n3(name, v0, v1, v2, force_changed = false) {
+        let state = this.state.uniform_states[name];
+        if (!state) {
+            state = this.state.uniform_states[name] = {
+                changed: true,
+                value: [v0, v1, v2],
+            };
+            return;
+        }
+
+        if (Math.abs(state.value[0] - v0) > UNIFORM_EPSILON) {
+            state.value[0] = v0;
+            state.changed = true;
+        }
+        if (Math.abs(state.value[1] - v1) > UNIFORM_EPSILON) {
+            state.value[1] = v1;
+            state.changed = true;
+        }
+        if (Math.abs(state.value[2] - v2) > UNIFORM_EPSILON) {
+            state.value[2] = v2;
+            state.changed = true;
+        }
+
+        if (force_changed) {
+            state.changed = true;
+        }
+    }
+    /**
+     * @param {string} name
+     * @param {number} v0
+     * @param {number} v1
+     * @param {number} v2
+     * @param {number} v3
+     * @param {boolean} [force_changed]
+     */
+    set_uniform_n4(name, v0, v1, v2, v3, force_changed = false) {
+        let state = this.state.uniform_states[name];
+        if (!state) {
+            state = this.state.uniform_states[name] = {
+                changed: true,
+                value: [v0, v1, v2, v3],
+            };
+            return;
+        }
+
+        if (Math.abs(state.value[0] - v0) > UNIFORM_EPSILON) {
+            state.value[0] = v0;
+            state.changed = true;
+        }
+        if (Math.abs(state.value[1] - v1) > UNIFORM_EPSILON) {
+            state.value[1] = v1;
+            state.changed = true;
+        }
+        if (Math.abs(state.value[2] - v2) > UNIFORM_EPSILON) {
+            state.value[2] = v2;
+            state.changed = true;
+        }
+        if (Math.abs(state.value[3] - v3) > UNIFORM_EPSILON) {
+            state.value[3] = v3;
+            state.changed = true;
+        }
+
+        if (force_changed) {
+            state.changed = true;
+        }
+    }
+    /**
+     * @param {string} name
+     * @param {number[]} value
+     * @param {boolean} [force_changed]
+     */
+    set_uniform_v(name, value, force_changed = false) {
+        let state = this.state.uniform_states[name];
+        if (!state) {
+            state = this.state.uniform_states[name] = {
+                changed: true,
+                value: value.slice(),
+            };
+            return;
+        }
+
+        for (let i = 0; i < value.length; i++) {
+            if (Math.abs(state.value[i] - value[i]) > UNIFORM_EPSILON) {
+                state.value[i] = value[i];
+                state.changed = true;
+            }
+        }
+
+        if (force_changed) {
+            state.changed = true;
+        }
+    }
+    /**
+     * @param {string} name
+     */
+    get_uniform_v(name) {
+        let state = this.state.uniform_states[name];
+        return state ? state.value : null;
+    }
 }
+
+/**
+ * @typedef {{ changed: boolean, value: number[] }} UniformState
+ */
+
+/**
+ * @param {{ [name: string]: UniformState }} table
+ */
+function mark_uniforms_outdated(table) {
+    for (let name in table) {
+        table[name].changed = true;
+    }
+}
+

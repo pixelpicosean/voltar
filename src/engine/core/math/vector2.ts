@@ -27,6 +27,7 @@ export class Vector2 {
 
     x = 0;
     y = 0;
+    _array: [number, number] = [0, 0];
 
     get width() { return this.x }
     set width(value: number) {
@@ -57,8 +58,11 @@ export class Vector2 {
         this.y = y;
     }
 
-    as_array() {
-        return [this.x, this.y];
+    as_array(r_out?: [number, number]) {
+        r_out = r_out || this._array;
+        r_out[0] = this.x;
+        r_out[1] = this.y;
+        return r_out;
     }
 
     /**
