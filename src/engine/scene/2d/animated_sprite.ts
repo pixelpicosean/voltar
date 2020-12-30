@@ -1,5 +1,5 @@
 import { node_class_map, res_class_map } from 'engine/registry';
-import { remove_items } from 'engine/dep/index.ts';
+import { remove_items } from 'engine/dep/index';
 import { GDCLASS } from 'engine/core/v_object';
 import { Vector2, Vector2Like } from 'engine/core/math/vector2';
 import { Rect2 } from 'engine/core/math/rect2.js';
@@ -15,26 +15,16 @@ import { Node2D } from './node_2d';
 const White = new Color(1, 1, 1, 1);
 
 class Anim {
-    constructor() {
-        this.speed = 5;
-        this.loop = true;
-        /**
-         * @type {ImageTexture[]}
-         */
-        this.frames = [];
-        this.name = '';
-    }
+    speed = 5;
+    loop = true;
+    frames: ImageTexture[] = [];
+    name = '';
 }
 
 class SpriteFrames {
-    constructor() {
-        /** @type {Object<string, Anim>} */
-        this.animations = Object.create(null);
-    }
-    /**
-     * @param {any} data
-     */
-    _load_data(data) {
+    animations: { [s: string]: Anim } = Object.create(null);
+
+    _load_data(data: any) {
         if (!data.animations) return this;
 
         for (const def of data.animations) {
@@ -53,7 +43,7 @@ class SpriteFrames {
     /**
      * @param {string} anim
      */
-    add_animation(anim) {
+    add_animation(anim: string) {
         const a = new Anim();
         a.name = anim;
         this.animations[anim] = a;
@@ -61,20 +51,20 @@ class SpriteFrames {
     /**
      * @param {string} anim
      */
-    has_animation(anim) {
+    has_animation(anim: string) {
         return anim in this.animations;
     }
     /**
      * @param {string} anim
      */
-    remove_animation(anim) {
+    remove_animation(anim: string) {
         delete this.animations[anim];
     }
     /**
     * @param {string} prev
     * @param {string} next
     */
-    rename_animation(prev, next) {
+    rename_animation(prev: string, next: string) {
         const a = this.animations[prev];
         a.name = next;
         delete this.animations[prev];
@@ -85,13 +75,13 @@ class SpriteFrames {
      * @param {string} anim
      * @param {number} fps
      */
-    set_animation_speed(anim, fps) {
+    set_animation_speed(anim: string, fps: number) {
         this.animations[anim].speed = fps;
     }
     /**
      * @param {string} anim
      */
-    get_animation_speed(anim) {
+    get_animation_speed(anim: string) {
         return this.animations[anim].speed;
     }
 
@@ -99,27 +89,27 @@ class SpriteFrames {
      * @param {string} anim
      * @param {boolean} loop
      */
-    set_animation_loop(anim, loop) {
+    set_animation_loop(anim: string, loop: boolean) {
         this.animations[anim].loop = loop;
     }
     /**
      * @param {string} anim
      */
-    get_animation_loop(anim) {
+    get_animation_loop(anim: string) {
         return this.animations[anim].loop;
     }
 
     /**
      * @param {string} anim
      */
-    get_frame_count(anim) {
+    get_frame_count(anim: string) {
         return this.animations[anim].frames.length;
     }
     /**
      * @param {string} anim
      * @param {number} idx
      */
-    get_frame(anim, idx) {
+    get_frame(anim: string, idx: number) {
         return this.animations[anim].frames[idx];
     }
     /**
@@ -127,20 +117,20 @@ class SpriteFrames {
      * @param {number} idx
      * @param {ImageTexture} texture
      */
-    set_frame(anim, idx, texture) {
+    set_frame(anim: string, idx: number, texture: ImageTexture) {
         this.animations[anim].frames[idx] = texture;
     }
     /**
      * @param {string} anim
      * @param {number} idx
      */
-    remove_frame(anim, idx) {
+    remove_frame(anim: string, idx: number) {
         remove_items(this.animations[anim].frames, idx, 1);
     }
     /**
      * @param {string} anim
      */
-    clear(anim) {
+    clear(anim: string) {
         this.animations[anim].frames.length = 0;
     }
     clear_all() {
@@ -153,10 +143,7 @@ res_class_map['SpriteFrames'] = SpriteFrames;
 export class AnimatedSprite extends Node2D {
     get class() { return 'AnimatedSprite' }
 
-    /**
-     * @param {SpriteFrames} p_frames
-     */
-    set_frames(p_frames) {
+    set_frames(p_frames: SpriteFrames) {
         this.frames = p_frames;
         if (p_frames) {
             this.set_frame(this.frame);
@@ -171,7 +158,7 @@ export class AnimatedSprite extends Node2D {
     /**
      * @param {string} anim
      */
-    set_animation(anim) {
+    set_animation(anim: string) {
         if (this.animation === anim) {
             return;
         }
@@ -185,7 +172,7 @@ export class AnimatedSprite extends Node2D {
     /**
      * @param {number} frame
      */
-    set_frame(frame) {
+    set_frame(frame: number) {
         if (!this.frames) return;
 
         if (this.frames.has_animation(this.animation)) {
@@ -210,7 +197,7 @@ export class AnimatedSprite extends Node2D {
     }
 
     /** @param {number} value */
-    set_speed_scale(value) {
+    set_speed_scale(value: number) {
         const elapsed = this._get_frame_duration() - this.timeout;
         this.speed_scale = Math.max(value, 0);
 
@@ -221,13 +208,13 @@ export class AnimatedSprite extends Node2D {
     /**
      * @param {boolean} value
      */
-    set_playing(value) {
+    set_playing(value: boolean) {
         this.playing = true;
         this._set_playing(value);
     }
 
     /** @param {boolean} value */
-    set_centered(value) {
+    set_centered(value: boolean) {
         this.centered = value;
         this.update();
     }
@@ -235,55 +222,47 @@ export class AnimatedSprite extends Node2D {
     /**
      * @param {Vector2Like} value
      */
-    set_offset(value) { this.set_offset_n(value.x, value.y) }
+    set_offset(value: Vector2Like) { this.set_offset_n(value.x, value.y) }
     /**
      * @param {number} x
      * @param {number} y
      */
-    set_offset_n(x, y) {
+    set_offset_n(x: number, y: number) {
         this.offset.set(x, y);
         this.update();
     }
 
     /** @param {boolean} value */
-    set_flip_h(value) {
+    set_flip_h(value: boolean) {
         this.flip_h = value;
         this.update();
     }
 
     /** @param {boolean} value */
-    set_flip_v(value) {
+    set_flip_v(value: boolean) {
         this.flip_v = value;
         this.update();
     }
 
-    constructor() {
-        super();
+    frames: SpriteFrames = null;
+    playing = false;
+    backwards = false;
+    animation = 'default';
+    frame = 0;
+    speed_scale = 1;
 
-        /** @type {SpriteFrames} */
-        this.frames = null;
-        this.playing = false;
-        this.backwards = false;
-        this.animation = 'default';
-        this.frame = 0;
-        this.speed_scale = 1;
+    centered = true;
+    offset = new Vector2;
 
-        this.centered = true;
-        this.offset = new Vector2;
+    is_over = false;
+    timeout = 0;
 
-        this.is_over = false;
-        this.timeout = 0;
-
-        this.flip_h = false;
-        this.flip_v = false;
-    }
+    flip_h = false;
+    flip_v = false;
 
     /* virtual */
 
-    /**
-     * @param {any} data
-     */
-    _load_data(data) {
+    _load_data(data: any) {
         super._load_data(data);
 
         if (data.frames !== undefined) this.set_frames(data.frames);
@@ -301,7 +280,7 @@ export class AnimatedSprite extends Node2D {
     /**
      * @param {number} p_what
      */
-    _notification(p_what) {
+    _notification(p_what: number) {
         switch (p_what) {
             case NOTIFICATION_INTERNAL_PROCESS: {
                 if (!this.frames) return;
@@ -399,7 +378,7 @@ export class AnimatedSprite extends Node2D {
      * @param {string} [p_animation]
      * @param {boolean} [p_backwards]
      */
-    play(p_animation, p_backwards = false) {
+    play(p_animation: string, p_backwards: boolean = false) {
         this.backwards = p_backwards;
 
         if (p_animation) {
@@ -420,7 +399,7 @@ export class AnimatedSprite extends Node2D {
     /**
      * @param {boolean} playing
      */
-    _set_playing(playing) {
+    _set_playing(playing: boolean) {
         if (this.playing === playing) {
             return;
         }

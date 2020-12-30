@@ -1,6 +1,7 @@
 import { node_class_map } from "engine/registry";
 import { GDCLASS } from "engine/core/v_object";
 import { Vector2 } from "engine/core/math/vector2";
+import { Rect2 } from "engine/core/math/rect2.js";
 import { Transform2D } from "engine/core/math/transform_2d.js";
 import {
     rad2deg,
@@ -15,42 +16,37 @@ import {
     NOTIFICATION_EXIT_TREE,
     NOTIFICATION_MOVED_IN_PARENT,
 } from "./node";
-import { Rect2 } from "engine/core/math/rect2.js";
 
+type Viewport = import("./viewport").Viewport;
+type Viewport_t = import("engine/servers/visual/visual_server_viewport.js").Viewport_t;
 
 export class CanvasLayer extends Node {
     get class() { return 'CanvasLayer' }
 
-    constructor() {
-        super();
+    locrotscale_dirty = false;
+    offset = new Vector2;
+    rotation = 0;
+    scale = new Vector2(1, 1);
 
-        this.locrotscale_dirty = false;
-        this.offset = new Vector2;
-        this.rotation = 0;
-        this.scale = new Vector2(1, 1);
+    layer = 1;
+    transform = new Transform2D;
+    canvas = VSG.canvas.canvas_create();
 
-        this.layer = 1;
-        this.transform = new Transform2D;
-        this.canvas = VSG.canvas.canvas_create();
+    // @Incomplete: custom viewport
+    custom_viewport: Viewport = null;
+    custom_viewport_id = 0;
 
-        // @Incomplete: custom viewport
-        /** @type {import('./viewport').Viewport} */
-        this.custom_viewport = null;
-        this.custom_viewport_id = 0;
+    viewport: Viewport_t = null;
+    vp: Viewport = null;
 
-        this.viewport = null;
-        /** @type {import('./viewport').Viewport} */
-        this.vp = null;
+    follow_viewport_enable = false;
+    follow_viewport_scale = 1.0;
 
-        this.follow_viewport_enable = false;
-        this.follow_viewport_scale = 1.0;
-
-        this.sort_index = 0;
-    }
+    sort_index = 0;
 
     /* virtual */
 
-    _load_data(data) {
+    _load_data(data: any) {
         super._load_data(data);
 
         if (data.transform !== undefined) {
@@ -63,7 +59,7 @@ export class CanvasLayer extends Node {
     /**
      * @param {number} p_what
      */
-    _notification(p_what) {
+    _notification(p_what: number) {
         switch (p_what) {
             case NOTIFICATION_ENTER_TREE: {
                 if (this.custom_viewport) {
@@ -99,7 +95,7 @@ export class CanvasLayer extends Node {
     /**
      * @param {number} p_layer
      */
-    set_layer(p_layer) {
+    set_layer(p_layer: number) {
         this.layer = p_layer;
         if (this.viewport) {
             VSG.viewport.viewport_set_canvas_stacking(this.viewport, this.canvas, this.layer, this.get_position_in_parent());
@@ -109,14 +105,14 @@ export class CanvasLayer extends Node {
     /**
      * @param {Vector2} value
      */
-    set_offset(value) {
+    set_offset(value: Vector2) {
         this.set_offset_n(value.x, value.y);
     }
     /**
      * @param {number} x
      * @param {number} y
      */
-    set_offset_n(x, y) {
+    set_offset_n(x: number, y: number) {
         if (this.locrotscale_dirty) {
             this._update_locrotscale();
         }
@@ -137,7 +133,7 @@ export class CanvasLayer extends Node {
     /**
      * @param {number} value
      */
-    set_rotation(value) {
+    set_rotation(value: number) {
         if (this.locrotscale_dirty) {
             this._update_locrotscale();
         }
@@ -147,7 +143,7 @@ export class CanvasLayer extends Node {
     /**
      * @param {number} value
      */
-    set_rotation_degrees(value) {
+    set_rotation_degrees(value: number) {
         this.rotation = deg2rad(value);
     }
     get_rotation() {
@@ -163,14 +159,14 @@ export class CanvasLayer extends Node {
     /**
      * @param {Vector2} value
      */
-    set_scale(value) {
+    set_scale(value: Vector2) {
         this.set_scale_n(value.x, value.y);
     }
     /**
      * @param {number} x
      * @param {number} y
      */
-    set_scale_n(x, y) {
+    set_scale_n(x: number, y: number) {
         if (this.locrotscale_dirty) {
             this._update_locrotscale();
         }
@@ -187,7 +183,7 @@ export class CanvasLayer extends Node {
     /**
      * @param {boolean} p_enabled
      */
-    set_follow_viewport_enable(p_enabled) {
+    set_follow_viewport_enable(p_enabled: boolean) {
         if (this.follow_viewport_enable === p_enabled) {
             return;
         }
@@ -199,7 +195,7 @@ export class CanvasLayer extends Node {
     /**
     * @param {number} p_scale
     */
-    set_follow_viewport_scale(p_scale) {
+    set_follow_viewport_scale(p_scale: number) {
         this.follow_viewport_scale = p_scale;
         this._update_follow_viewport();
     }
@@ -207,7 +203,7 @@ export class CanvasLayer extends Node {
     /**
      * @param {Node} p_viewport
      */
-    set_custom_viewport(p_viewport) {
+    set_custom_viewport(p_viewport: Node) {
         if (this.is_inside_tree()) {
             this.vp._canvas_layer_remove(this);
             VSG.viewport.viewport_remove_canvas(this.viewport, this.canvas);
@@ -215,7 +211,7 @@ export class CanvasLayer extends Node {
         }
 
         if (p_viewport.class === 'Viewport') {
-            this.custom_viewport = /** @type {import('./viewport').Viewport} */(p_viewport);
+            this.custom_viewport = p_viewport as Viewport;
         } else {
             this.custom_viewport = null;
         }
@@ -239,7 +235,7 @@ export class CanvasLayer extends Node {
     /**
      * @param {Transform2D} p_xform
      */
-    set_transform(p_xform) {
+    set_transform(p_xform: Transform2D) {
         this.transform.copy(p_xform);
         this.locrotscale_dirty = true;
         if (this.viewport) {
@@ -273,7 +269,7 @@ export class CanvasLayer extends Node {
         this.transform.set_rotation_and_scale(this.rotation, this.scale);
         this.transform.set_origin(this.offset);
         if (this.viewport) {
-            VSG.canvas.viewport_set_canvas_transform(this.viewport, this.canvas, this.transform);
+            VSG.viewport.viewport_set_canvas_transform(this.viewport, this.canvas, this.transform);
         }
     }
     _update_follow_viewport(p_force_exit = false) {

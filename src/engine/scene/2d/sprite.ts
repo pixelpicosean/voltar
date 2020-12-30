@@ -6,8 +6,8 @@ import { Color } from 'engine/core/color';
 import { Engine } from 'engine/core/engine';
 
 import { ImageTexture } from '../resources/texture.js';
-import { NOTIFICATION_DRAW } from '../2d/canvas_item';
-import { Node2D } from '../2d/node_2d';
+import { NOTIFICATION_DRAW } from './canvas_item';
+import { Node2D } from './node_2d';
 
 const WHITE = new Color(1, 1, 1);
 
@@ -17,39 +17,27 @@ export class Sprite extends Node2D {
     get frame_coords() {
         return Vector2.create(this.frame % this.hframes, this.frame / this.hframes).floor();
     }
-    /**
-     * @param {Vector2Like} p_coord
-     */
-    set_frame_coords(p_coord) {
-        this.set_frame(Math.floor(p_coord.y * this.hframes + p_coord.x));
-    }
 
-    constructor() {
-        super();
+    centered = true;
+    offset = new Vector2;
+    flip_h = false;
+    flip_v = false;
+    region_enabled = false;
+    region_filter_clip = false;
+    region_rect = new Rect2;
 
-        this.centered = true;
-        this.offset = new Vector2;
-        this.flip_h = false;
-        this.flip_v = false;
-        this.region_enabled = false;
-        this.region_filter_clip = false;
-        this.region_rect = new Rect2;
+    frame = 0;
 
-        this.frame = 0;
+    hframes = 1;
+    vframes = 1;
 
-        this.hframes = 1;
-        this.vframes = 1;
+    texture: ImageTexture = null;
 
-        /** @type {ImageTexture} */
-        this.texture = null;
-
-        /** @type {ImageTexture} */
-        this.normal_map = null;
-    }
+    normal_map: ImageTexture = null;
 
     /* virtual */
 
-    _load_data(data) {
+    _load_data(data: any) {
         super._load_data(data);
 
         if (data.centered !== undefined) this.set_centered(data.centered);
@@ -74,7 +62,7 @@ export class Sprite extends Node2D {
     /**
      * @param {number} p_what
      */
-    _notification(p_what) {
+    _notification(p_what: number) {
         switch (p_what) {
             case NOTIFICATION_DRAW: {
                 if (!this.texture) {
@@ -98,9 +86,9 @@ export class Sprite extends Node2D {
     /**
      * @param {string | ImageTexture} p_texture
      */
-    set_texture(p_texture) {
+    set_texture(p_texture: string | ImageTexture) {
         /** @type {ImageTexture} */
-        const texture = (typeof (p_texture) === 'string') ? get_resource_map()[p_texture] : p_texture;
+        const texture: ImageTexture = (typeof (p_texture) === 'string') ? get_resource_map()[p_texture] : p_texture;
 
         if (this.texture === texture) return;
         this.texture = texture;
@@ -110,7 +98,7 @@ export class Sprite extends Node2D {
     /**
      * @param {ImageTexture} p_texture
      */
-    set_normal_map(p_texture) {
+    set_normal_map(p_texture: ImageTexture) {
         this.normal_map = p_texture;
         this.update();
     }
@@ -118,7 +106,7 @@ export class Sprite extends Node2D {
     /**
      * @param {boolean} p_center
      */
-    set_centered(p_center) {
+    set_centered(p_center: boolean) {
         this.centered = p_center;
         this.update();
         this.item_rect_changed();
@@ -127,7 +115,7 @@ export class Sprite extends Node2D {
     /**
      * @param {Vector2Like} p_offset
      */
-    set_offset(p_offset) {
+    set_offset(p_offset: Vector2Like) {
         this.offset.copy(p_offset);
         this.update();
         this.item_rect_changed();
@@ -136,7 +124,7 @@ export class Sprite extends Node2D {
      * @param {number} p_offset_x
      * @param {number} p_offset_y
      */
-    set_offset_n(p_offset_x, p_offset_y) {
+    set_offset_n(p_offset_x: number, p_offset_y: number) {
         this.offset.set(p_offset_x, p_offset_y);
         this.update();
         this.item_rect_changed();
@@ -145,14 +133,14 @@ export class Sprite extends Node2D {
     /**
      * @param {boolean} p_flip
      */
-    set_flip_h(p_flip) {
+    set_flip_h(p_flip: boolean) {
         this.flip_h = p_flip;
         this.update();
     }
     /**
      * @param {boolean} p_flip
      */
-    set_flip_v(p_flip) {
+    set_flip_v(p_flip: boolean) {
         this.flip_v = p_flip;
         this.update();
     }
@@ -160,7 +148,7 @@ export class Sprite extends Node2D {
     /**
      * @param {number} p_amount
      */
-    set_vframes(p_amount) {
+    set_vframes(p_amount: number) {
         this.vframes = p_amount;
         this.update();
         this.item_rect_changed();
@@ -168,7 +156,7 @@ export class Sprite extends Node2D {
     /**
      * @param {number} p_amount
      */
-    set_hframes(p_amount) {
+    set_hframes(p_amount: number) {
         this.hframes = p_amount;
         this.update();
         this.item_rect_changed();
@@ -209,7 +197,7 @@ export class Sprite extends Node2D {
     /**
      * @param {boolean} p_enabled
      */
-    set_region_enabled(p_enabled) {
+    set_region_enabled(p_enabled: boolean) {
         if (this.region_enabled) return;
         this.region_enabled = p_enabled;
         this.update();
@@ -218,7 +206,7 @@ export class Sprite extends Node2D {
     /**
      * @param {Rect2} p_rect
      */
-    set_region_rect(p_rect) {
+    set_region_rect(p_rect: Rect2) {
         if (this.region_rect.equals(p_rect)) return;
         this.region_rect.copy(p_rect);
         if (this.region_enabled) {
@@ -229,7 +217,7 @@ export class Sprite extends Node2D {
     /**
      * @param {boolean} p_enabled
      */
-    set_region_filter_clip(p_enabled) {
+    set_region_filter_clip(p_enabled: boolean) {
         this.region_filter_clip = p_enabled;
         this.update();
     }
@@ -237,7 +225,7 @@ export class Sprite extends Node2D {
     /**
      * @param {number} p_frame
      */
-    set_frame(p_frame) {
+    set_frame(p_frame: number) {
         if (this.frame === p_frame) {
             this.item_rect_changed();
         }
@@ -247,10 +235,7 @@ export class Sprite extends Node2D {
         this.emit_signal('frame_changed');
     }
 
-    /**
-     * @param {Vector2Like} p_coord
-     */
-    set_frame_coords(p_coord) {
+    set_frame_coords(p_coord: Vector2Like) {
         this.set_frame(Math.floor(p_coord.y * this.hframes + p_coord.x));
     }
 
@@ -258,7 +243,7 @@ export class Sprite extends Node2D {
      * @param {number} x
      * @param {number} y
      */
-    set_frame_coords_n(x, y) {
+    set_frame_coords_n(x: number, y: number) {
         this.set_frame(Math.floor(y * this.hframes + x));
     }
 
@@ -268,7 +253,7 @@ export class Sprite extends Node2D {
      * @param {Rect2} r_src_rect
      * @param {Rect2} r_dst_rect
      */
-    _get_rects(r_src_rect, r_dst_rect) {
+    _get_rects(r_src_rect: Rect2, r_dst_rect: Rect2) {
         const base_rect = Rect2.create();
 
         let r_filter_clip = false;

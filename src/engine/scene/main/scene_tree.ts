@@ -1,4 +1,4 @@
-import { remove_item } from 'engine/dep/index.ts';
+import { remove_item } from 'engine/dep/index';
 import { get_resource_map } from 'engine/registry';
 import { List } from 'engine/core/self_list';
 import { VObject, GDCLASS } from 'engine/core/v_object';
@@ -27,7 +27,7 @@ import { VSG } from 'engine/servers/visual/visual_server_globals.js';
 import { World } from '../resources/world.js';
 import { World2D } from '../resources/world_2d.js';
 import { PackedScene } from '../resources/packed_scene';
-import { Viewport } from './viewport.js';
+import { Viewport } from './viewport';
 import {
     Node,
     NOTIFICATION_INTERNAL_PHYSICS_PROCESS,
@@ -36,7 +36,7 @@ import {
     NOTIFICATION_PROCESS,
     NOTIFICATION_PAUSED,
     NOTIFICATION_UNPAUSED,
-} from '../main/node';
+} from './node';
 import { NOTIFICATION_TRANSFORM_CHANGED } from '../const';
 
 import default_env from 'gen/default_env.json';
@@ -44,28 +44,22 @@ import default_env from 'gen/default_env.json';
 
 export class SceneTreeTimer extends VObject {
     static create() {
-        const p = SceneTreeTimer.pool.pop();
-        if (!p) return new SceneTreeTimer();
+        let p = pool_SceneTreeTimer.pop();
+        if (!p) return new SceneTreeTimer;
         else return p;
     }
-    /**
-     * @param {SceneTreeTimer} t
-     */
-    static free(t) {
+
+    static free(t: SceneTreeTimer) {
         if (t) {
             t.disconnect_all();
-            SceneTreeTimer.pool.push(t);
+            pool_SceneTreeTimer.push(t);
         }
     }
-    constructor() {
-        super();
 
-        this.time_left = 0;
-        this.process_pause = true;
-    }
+    time_left = 0;
+    process_pause = true;
 }
-/** @type {SceneTreeTimer[]} */
-SceneTreeTimer.pool = [];
+const pool_SceneTreeTimer: SceneTreeTimer[] = [];
 
 export const STRETCH_MODE_DISABLED = 0;
 export const STRETCH_MODE_2D = 1;
@@ -84,13 +78,8 @@ export const GROUP_CALL_UNIQUE = 4;
 export const GROUP_CALL_MULTILEVEL = 8;
 
 export class Group {
-    constructor() {
-        /**
-         * @type {Node[]}
-         */
-        this.nodes = [];
-        this.changed = false;
-    }
+    nodes: Node[] = [];
+    changed = false;
 }
 
 let next_scene_path = '';
@@ -107,7 +96,7 @@ export class SceneTree extends MainLoop {
     is_paused() {
         return this.paused;
     }
-    set_paused(p_enabled) {
+    set_paused(p_enabled: boolean) {
         if (p_enabled === this.paused) {
             return;
         }
@@ -119,6 +108,55 @@ export class SceneTree extends MainLoop {
     }
 
     static get_singleton() { return singleton }
+
+    root: Viewport = null;
+    tree_version = 1;
+    physics_process_time = 1;
+    idle_process_time = 1;
+
+    initialized = false;
+    input_handled = false;
+    paused = false;
+
+    current_frame = 0;
+    current_event = 0;
+
+    call_lock = 0;
+    call_skip = new Set<Node>();
+    root_lock = 0;
+
+    node_count = 0;
+
+    stretch_mode = STRETCH_MODE_DISABLED;
+    stretch_aspect = STRETCH_ASPECT_IGNORE;
+    stretch_min = new Vector2;
+    stretch_shrink = 1;
+    last_screen_size: Vector2;
+
+    /** @type {Map<string, Map<string, Array>>} group -> call -> args */
+    unique_group_calls: Map<string, Map<string, Array<any>>> = new Map;
+    ugc_locked = false;
+
+    use_font_oversampling = false;
+
+    /** Currently running scene */
+    current_scene: Node = null;
+
+    xform_change_list: List<Node> = new List;
+
+    idle_callbacks: Function[] = [];
+
+    group_map: Map<string, Group> = new Map;
+
+    delete_queue: Node[] = [];
+
+    timers: SceneTreeTimer[] = [];
+
+    world_2d = new World2D;
+
+    view: HTMLCanvasElement = null;
+    container: HTMLElement = null;
+    _current_packed_scene: PackedScene | { new(): Node; } = null;
 
     constructor() {
         super();
@@ -137,85 +175,18 @@ export class SceneTree extends MainLoop {
 
         this.root.set_use_fxaa(ProjectSettings.get_singleton().display.fxaa);
 
-        this.tree_version = 1;
-        this.physics_process_time = 1;
-        this.idle_process_time = 1;
-
-        this.initialized = false;
-        this.input_handled = false;
-        this.paused = false;
-
-        this.current_frame = 0;
-        this.current_event = 0;
-
-        this.call_lock = 0;
-        /** @type {Set<Node>} */
-        this.call_skip = new Set();
-        this.root_lock = 0;
-
-        this.node_count = 0;
-
-        this.stretch_mode = STRETCH_MODE_DISABLED;
-        this.stretch_aspect = STRETCH_ASPECT_IGNORE;
-        this.stretch_min = new Vector2();
-        this.stretch_shrink = 1;
         this.last_screen_size = OS.get_singleton().get_window_size().clone();
         this._update_root_rect();
 
-        /** @type {Map<string, Map<string, Array>>} group -> call -> args */
-        this.unique_group_calls = new Map();
-        this.ugc_locked = false;
-
-        this.use_font_oversampling = false;
-
-        /**
-         * Currently running scene
-         * @type {Node}
-         */
-        this.current_scene = null;
-
-        /** @type {List<Node>} */
-        this.xform_change_list = new List;
-
-        /** @type {Function[]} */
-        this.idle_callbacks = [];
-
-        /**
-         * @type {Map<string, Group>}
-         * @private
-         */
-        this.group_map = new Map;
-
-        /**
-         * @type {Node[]}
-         */
-        this.delete_queue = [];
-
-        /**
-         * @type {SceneTreeTimer[]}
-         * @private
-         */
-        this.timers = [];
-
-        this.world_2d = new World2D();
-
-
         this.init = this.init.bind(this);
 
-        /** @type {HTMLCanvasElement} */
-        this.view = null;
-        /** @type {HTMLElement} */
-        this.container = null;
-
         {
-            let env = VSG.scene_render.environment_create()
+            let env = VSG.scene_render
+                .environment_create()
                 ._load_data(default_env)
 
             this.root.world.set_fallback_environment(env);
         }
-
-        /** @type {PackedScene | { new(): Node }} */
-        this._current_packed_scene = null;
     }
 
     _free() {
@@ -228,15 +199,7 @@ export class SceneTree extends MainLoop {
         super._free();
     }
 
-    is_paused() {
-        return this.paused;
-    }
-
-    /**
-     * @param {number} p_delay_sec
-     * @param {boolean} [p_process_pause]
-     */
-    create_timer(p_delay_sec, p_process_pause = true) {
+    create_timer(p_delay_sec: number, p_process_pause: boolean = true) {
         const stt = SceneTreeTimer.create();
         stt.process_pause = p_process_pause;
         stt.time_left = p_delay_sec;
@@ -244,19 +207,12 @@ export class SceneTree extends MainLoop {
         return stt;
     }
 
-    /**
-     * @param {Node} node
-     */
-    queue_delete(node) {
+    queue_delete(node: Node) {
         node.is_queued_for_deletion = true;
         this.delete_queue.push(node);
     }
 
-    /**
-     * @param {string} p_group
-     * @param {Node} p_node
-     */
-    add_to_group(p_group, p_node) {
+    add_to_group(p_group: string, p_node: Node) {
         let E = this.group_map.get(p_group);
         if (!E) {
             E = new Group;
@@ -275,7 +231,7 @@ export class SceneTree extends MainLoop {
      * @param {string} p_group
      * @param {Node} p_node
      */
-    remove_from_group(p_group, p_node) {
+    remove_from_group(p_group: string, p_node: Node) {
         const E = this.group_map.get(p_group);
         if (!E) {
             return;
@@ -289,13 +245,13 @@ export class SceneTree extends MainLoop {
     /**
      * @param {string} p_identifier
      */
-    has_group(p_identifier) {
+    has_group(p_identifier: string) {
         return this.group_map.has(p_identifier);
     }
     /**
      * @param {string} p_group
      */
-    make_group_changed(p_group) {
+    make_group_changed(p_group: string) {
         const E = this.group_map.get(p_group);
         if (E) {
             E.changed = true;
@@ -305,7 +261,7 @@ export class SceneTree extends MainLoop {
      * @param {string} p_group
      * @param {Array<Node>} [p_list]
      */
-    get_nodes_in_group(p_group, p_list = []) {
+    get_nodes_in_group(p_group: string, p_list: Array<Node> = []) {
         p_list.length = 0;
 
         const E = this.group_map.get(p_group);
@@ -330,7 +286,7 @@ export class SceneTree extends MainLoop {
      * @param {string} p_function
      * @param {any} p_args
      */
-    call_group_flags(p_call_flags, p_group, p_function, ...p_args) {
+    call_group_flags(p_call_flags: number, p_group: string, p_function: string, ...p_args: any) {
         const g = this.group_map.get(p_group);
         if (!g) {
             return;
@@ -368,6 +324,7 @@ export class SceneTree extends MainLoop {
 
                 if (p_call_flags & GROUP_CALL_REALTIME) {
                     if (p_function in node) {
+                        // @ts-ignore
                         node[p_function](...p_args);
                     }
                 } else {
@@ -384,6 +341,7 @@ export class SceneTree extends MainLoop {
 
                 if (p_call_flags & GROUP_CALL_REALTIME) {
                     if (p_function in node) {
+                        // @ts-ignore
                         node[p_function](...p_args);
                     }
                 } else {
@@ -400,7 +358,7 @@ export class SceneTree extends MainLoop {
      * @param {Group} g
      * @param {boolean} [p_use_priority]
      */
-    _update_group_order(g, p_use_priority = false) {
+    _update_group_order(g: Group, p_use_priority: boolean = false) {
         if (!g.changed) {
             return;
         }
@@ -421,7 +379,7 @@ export class SceneTree extends MainLoop {
      * @param {string} p_group
      * @param {number} p_notification
      */
-    _notify_group_pause(p_group, p_notification) {
+    _notify_group_pause(p_group: string, p_notification: number) {
         const g = this.group_map.get(p_group);
         if (!g) {
             return;
@@ -460,14 +418,14 @@ export class SceneTree extends MainLoop {
      * @param {string} p_method
      * @param {any} p_args
      */
-    call_group(p_group, p_method, ...p_args) {
+    call_group(p_group: string, p_method: string, ...p_args: any) {
         this.call_group_flags(0, p_group, p_method, ...p_args);
     }
     /**
      * @param {string} p_group
      * @param {number} p_notification
      */
-    notify_group(p_group, p_notification) {
+    notify_group(p_group: string, p_notification: number) {
         this.notify_group_flags(0, p_group, p_notification);
     }
     /**
@@ -475,7 +433,7 @@ export class SceneTree extends MainLoop {
      * @param {string} p_name
      * @param {*} p_value
      */
-    set_group(p_group, p_name, p_value) {
+    set_group(p_group: string, p_name: string, p_value: any) {
         this.set_group_flags(0, p_group, p_name, p_value);
     }
     /**
@@ -484,7 +442,7 @@ export class SceneTree extends MainLoop {
      * @param {string} p_name
      * @param {*} p_value
      */
-    set_group_flags(p_call_flags, p_group, p_name, p_value) {
+    set_group_flags(p_call_flags: number, p_group: string, p_name: string, p_value: any) {
         // TODO: set_group_flags
     }
     /**
@@ -492,7 +450,7 @@ export class SceneTree extends MainLoop {
      * @param {string} p_group
      * @param {number} p_notification
      */
-    notify_group_flags(p_call_flags, p_group, p_notification) {
+    notify_group_flags(p_call_flags: number, p_group: string, p_notification: number) {
         const g = this.group_map.get(p_group);
         if (!g) {
             return;
@@ -546,7 +504,7 @@ export class SceneTree extends MainLoop {
      * @param {string} p_method
      * @param {*} p_input
      */
-    _call_input_pause(p_group, p_method, p_input) {
+    _call_input_pause(p_group: string, p_method: string, p_input: any) {
         const g = this.group_map.get(p_group);
         if (!g) {
             return;
@@ -573,6 +531,7 @@ export class SceneTree extends MainLoop {
                 continue;
             }
 
+            // @ts-ignore
             n[p_method](p_input);
         }
 
@@ -591,7 +550,7 @@ export class SceneTree extends MainLoop {
      *
      * @param {String} path
      */
-    change_scene(path) {
+    change_scene(path: string) {
         let next_scene = get_resource_map()[path];
         this.change_scene_to(next_scene);
     }
@@ -600,10 +559,10 @@ export class SceneTree extends MainLoop {
      *
      * @param {PackedScene | { new(): Node }} next_scene
      */
-    change_scene_to(next_scene) {
+    change_scene_to(next_scene: PackedScene | { new(): Node; }) {
         this._current_packed_scene = next_scene;
 
-        let new_scene = next_scene.instance ? next_scene.instance() : new next_scene;
+        let new_scene = (next_scene as PackedScene).instance ? (next_scene as PackedScene).instance() : new (next_scene as { new(): Node });
         this.call_deferred('_change_scene', new_scene);
     }
     get_current_scene() {
@@ -615,17 +574,9 @@ export class SceneTree extends MainLoop {
     /**
      * @param {Node} p_current
      */
-    add_current_scene(p_current) {
+    add_current_scene(p_current: Node) {
         this.current_scene = p_current;
         this.root.add_child(p_current);
-    }
-
-    /**
-     * @param {number} scale
-     */
-    set_time_scale(scale) {
-        this.time_scale = Math.max(0, scale);
-        return this;
     }
 
     /**
@@ -634,7 +585,7 @@ export class SceneTree extends MainLoop {
      * @param {Vector2Like} minsize
      * @param {number} p_shrink
      */
-    set_screen_stretch(mode, aspect, minsize, p_shrink = 1) {
+    set_screen_stretch(mode: number, aspect: number, minsize: Vector2Like, p_shrink: number = 1) {
         this.stretch_mode = mode;
         this.stretch_aspect = aspect;
         this.stretch_min.copy(minsize);
@@ -649,13 +600,13 @@ export class SceneTree extends MainLoop {
     /**
      * @param {Node} p_node
      */
-    node_added(p_node) {
+    node_added(p_node: Node) {
         this.emit_signal('node_added', p_node);
     }
     /**
      * @param {Node} p_node
      */
-    node_removed(p_node) {
+    node_removed(p_node: Node) {
         if (this.current_scene === p_node) {
             this.current_scene = null;
         }
@@ -667,13 +618,13 @@ export class SceneTree extends MainLoop {
     /**
      * @param {Node} p_node
      */
-    node_renamed(p_node) {
+    node_renamed(p_node: Node) {
         this.emit_signal('node_renamed', p_node);
     }
 
     flush_transform_notifications() {
         /** @type {Node} */
-        let node = null;
+        let node: Node = null;
         let n = this.xform_change_list.first();
         while (n) {
             node = n.self();
@@ -697,7 +648,7 @@ export class SceneTree extends MainLoop {
     /**
      * @param {number} p_notification
      */
-    _notification(p_notification) {
+    _notification(p_notification: number) {
         switch (p_notification) {
             case NOTIFICATION_WM_MOUSE_ENTER:
             case NOTIFICATION_WM_MOUSE_EXIT:
@@ -732,7 +683,7 @@ export class SceneTree extends MainLoop {
     /**
      * @param {number} p_time
      */
-    iteration(p_time) {
+    iteration(p_time: number) {
         this.root_lock++;
 
         this.current_frame++;
@@ -758,7 +709,7 @@ export class SceneTree extends MainLoop {
     /**
      * @param {number} p_time
      */
-    idle(p_time) {
+    idle(p_time: number) {
         this.root_lock++;
 
         super.idle(p_time);
@@ -790,7 +741,7 @@ export class SceneTree extends MainLoop {
             const L = this.timers[this.timers.length - 1]; // last element
             let E = this.timers[0];
             /** @type {SceneTreeTimer} */
-            let N = null;
+            let N: SceneTreeTimer = null;
             for (let i = 0; E; i++) {
                 E = this.timers[i];
                 if (this.timers.length > i + 1) {
@@ -843,7 +794,7 @@ export class SceneTree extends MainLoop {
     /**
      * @param {InputEvent} p_event
      */
-    input_event(p_event) {
+    input_event(p_event: InputEvent) {
         this.current_event++;
         this.root_lock++;
 
@@ -873,7 +824,7 @@ export class SceneTree extends MainLoop {
     /**
      * @param {string} p_text
      */
-    input_text(p_text) {
+    input_text(p_text: string) {
         this.root_lock++;
         this.call_group_flags(GROUP_CALL_REALTIME, '_viewports', '_vp_input_text', p_text);
         this.root_lock--;
@@ -881,7 +832,7 @@ export class SceneTree extends MainLoop {
     /**
      * @param {string[]} p_files
      */
-    drop_files(p_files) {
+    drop_files(p_files: string[]) {
         this.emit_signal('files_dropped', p_files);
         super.drop_files(p_files);
     }
@@ -1028,7 +979,7 @@ export class SceneTree extends MainLoop {
     /**
      * @param {Node} p_to
      */
-    _change_scene(p_to) {
+    _change_scene(p_to: Node) {
         if (this.current_scene) {
             memdelete(this.current_scene);
             this.current_scene = null;
@@ -1048,11 +999,11 @@ export class SceneTree extends MainLoop {
     /**
      * @param {Function} p_callback
      */
-    add_idle_callback(p_callback) {
+    add_idle_callback(p_callback: Function) {
         this.idle_callbacks.push(p_callback);
     }
 }
 GDCLASS(SceneTree, MainLoop)
 
 /** @type {SceneTree} */
-let singleton = null;
+let singleton: SceneTree = null;

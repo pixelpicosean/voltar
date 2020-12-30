@@ -4,7 +4,6 @@ import { Vector3 } from "engine/core/math/vector3.js";
 import { Transform } from "engine/core/math/transform.js";
 import { Quat } from "engine/core/math/basis.js";
 import { is_equal_approx, posmod } from "engine/core/math/math_funcs.js";
-import { TYPE_TRANSFORM } from "engine/servers/visual/commands.js";
 
 
 export const TRACK_TYPE_VALUE = 0;      // value
@@ -33,38 +32,29 @@ export const PROP_TYPE_ANY = 6;
 
 /**
  * Fetch property key from key path
- * @param {string} path
- * @returns {string}
  */
-function prop_key_from_path(path) {
+function prop_key_from_path(path: string): string {
     return path.split(':')[1];
 }
 
-/**
- * @template T
- */
-export class Key {
-    constructor() {
-        this.transition = 1;
-        this.time = 0;
-        /** @type {T} */
-        this.value = undefined;
-    }
+export class Key<T> {
+    transition = 1;
+    time = 0;
+    value: T = undefined;
 }
 
 export class Track {
-    constructor() {
-        this.type = TRACK_TYPE_VALUE;
-        this.interp = INTERPOLATION_LINEAR;
+    type = TRACK_TYPE_VALUE;
+    interp = INTERPOLATION_LINEAR;
 
-        this.path = '';
-        this.prop_key = '';
-        this.prop_type = PROP_TYPE_ANY;
+    path = '';
+    prop_key = '';
+    prop_type = PROP_TYPE_ANY;
 
-        this.loop_wrap = true;
-        this.enabled = true;
-    }
-    load(data) {
+    loop_wrap = true;
+    enabled = true;
+
+    load(data: any) {
         this.path = data.path;
         this.prop_key = prop_key_from_path(data.path);
 
@@ -76,18 +66,14 @@ export class Track {
 }
 
 export class ValueTrack extends Track {
-    constructor() {
-        super();
+    type = TRACK_TYPE_VALUE;
 
-        this.type = TRACK_TYPE_VALUE;
+    update_mode = UPDATE_CONTINUOUS;
+    update_on_seek = false;
 
-        this.update_mode = UPDATE_CONTINUOUS;
-        this.update_on_seek = false;
+    values: Key<any>[] = [];
 
-        /** @type {Key<any>[]} */
-        this.values = [];
-    }
-    load(data) {
+    load(data: any) {
         super.load(data);
 
         this.update_mode = data.keys.update;
@@ -226,21 +212,17 @@ export class ValueTrack extends Track {
 }
 
 export class MethodTrack extends Track {
-    constructor() {
-        super();
+    type = TRACK_TYPE_METHOD;
 
-        this.type = TRACK_TYPE_METHOD;
+    methods: Key<{ method: string, args: Array<any> | undefined }>[] = [];
 
-        /** @type Key<{method: string, args: Array<any>|undefined}>[] */
-        this.methods = [];
-    }
-    load(data) {
+    load(data: any) {
         super.load(data);
 
         this.methods.length = 0;
         for (let i = 0; i < data.keys.times.length; i++) {
             /** @type {Key<{method: string, args: Array<any>|undefined}>} */
-            let key = new Key();
+            let key: Key<{ method: string; args: Array<any> | undefined; }> = new Key();
             key.time = data.keys.times[i];
             key.value = data.keys.values[i];
             this.methods.push(key);
@@ -251,32 +233,23 @@ export class MethodTrack extends Track {
 }
 
 export class BezierTrack extends Track {
-    constructor() {
-        super();
+    type = TRACK_TYPE_BEZIER;
 
-        this.type = TRACK_TYPE_BEZIER;
-
-        /** @type Key<{in_handle: Vector2, out_handle: Vector2, value: number}>[] */
-        this.values = [];
-    }
+    values: Key<{ in_handle: Vector2; out_handle: Vector2; value: number; }>[] = [];
 }
 
 export class AnimationTrack extends Track {
-    constructor() {
-        super();
+    type = TRACK_TYPE_ANIMATION;
 
-        this.type = TRACK_TYPE_ANIMATION;
+    values: Key<string>[] = [];
 
-        /** @type Key<string>[] */
-        this.values = [];
-    }
-    load(data) {
+    load(data: any) {
         super.load(data);
 
         this.values.length = 0;
         for (let i = 0; i < data.keys.times.length; i++) {
             /** @type {Key<string>} */
-            let key = new Key;
+            let key: Key<string> = new Key;
             key.time = data.keys.times[i];
             key.value = data.keys.values[i];
             this.values.push(key);
@@ -287,18 +260,15 @@ export class AnimationTrack extends Track {
 }
 
 export class Animation {
-    constructor() {
-        this.name = '';
+    name = '';
 
-        this.length = 1;
-        this.loop = false;
-        this.step = 0.1;
+    length = 1;
+    loop = false;
+    step = 0.1;
 
-        /** @type {Track[]} */
-        this.tracks = null;
-    }
+    tracks: Track[] = null;
 
-    _load_data(data) {
+    _load_data(data: any) {
         if (data.name !== undefined) {
             this.name = data.name;
         }
@@ -312,7 +282,7 @@ export class Animation {
             this.step = data.step;
         }
 
-        this.tracks = data.tracks.map(track_data => {
+        this.tracks = data.tracks.map((track_data: any) => {
             switch (track_data.type) {
                 case 'value': return new ValueTrack().load(track_data);
                 case 'transform': return new ValueTrack().load(track_data);
@@ -340,13 +310,13 @@ export class Animation {
      * @param {number} p_time
      * @param {boolean} [p_exact]
      */
-    track_find_key(p_track, p_time, p_exact = false) {
+    track_find_key(p_track: number, p_time: number, p_exact: boolean = false) {
         let t = this.tracks[p_track];
         switch (t.type) {
             case TRACK_TYPE_VALUE:
             case TRACK_TYPE_TRANSFORM:
             case TRACK_TYPE_ANIMATION: {
-                let vt = /** @type {ValueTrack} */(t);
+                let vt = t as ValueTrack;
                 let k = this._find(vt.values, p_time);
                 if (k < 0 || k >= vt.values.length) {
                     return -1;
@@ -357,7 +327,7 @@ export class Animation {
                 return k;
             };
             case TRACK_TYPE_METHOD: {
-                let mt = /** @type {MethodTrack} */(t);
+                let mt = t as MethodTrack;
                 let k = this._find(mt.methods, p_time);
                 if (k < 0 || k >= mt.methods.length) {
                     return -1;
@@ -375,16 +345,16 @@ export class Animation {
      * @param {number} p_track
      * @param {number} p_key_idx
      */
-    track_get_key_time(p_track, p_key_idx) {
+    track_get_key_time(p_track: number, p_key_idx: number) {
         let t = this.tracks[p_track];
         switch (t.type) {
             case TRACK_TYPE_VALUE:
             case TRACK_TYPE_TRANSFORM:
             case TRACK_TYPE_ANIMATION: {
-                return /** @type {ValueTrack} */(t).values[p_key_idx].time;
+                return (t as ValueTrack).values[p_key_idx].time;
             };
             case TRACK_TYPE_METHOD: {
-                return /** @type {MethodTrack} */(t).methods[p_key_idx].time;
+                return (t as MethodTrack).methods[p_key_idx].time;
             };
         }
         return -1;
@@ -394,8 +364,8 @@ export class Animation {
      * @param {number} p_track
      * @param {number} p_key
      */
-    animation_track_get_key_animation(p_track, p_key) {
-        let at = /** @type {AnimationTrack} */(this.tracks[p_track]);
+    animation_track_get_key_animation(p_track: number, p_key: number) {
+        let at = this.tracks[p_track] as AnimationTrack;
         if (at.type != TRACK_TYPE_ANIMATION) return "";
 
         return at.values[p_key].value;
@@ -407,7 +377,7 @@ export class Animation {
      * @param {number} p_delta
      * @param {number[]} p_indices
      */
-    track_get_key_indices_in_range(p_track, p_time, p_delta, p_indices) {
+    track_get_key_indices_in_range(p_track: number, p_time: number, p_delta: number, p_indices: number[]) {
         let t = this.tracks[p_track];
 
         let from_time = p_time - p_delta;
@@ -432,12 +402,12 @@ export class Animation {
                     case TRACK_TYPE_VALUE:
                     case TRACK_TYPE_TRANSFORM:
                     case TRACK_TYPE_ANIMATION: {
-                        let vt = /** @type {ValueTrack} */(t);
+                        let vt = t as ValueTrack;
                         this._track_get_key_indices_in_range(vt.values, from_time, this.length, p_indices);
                         this._track_get_key_indices_in_range(vt.values, 0, to_time, p_indices);
                     } break;
                     case TRACK_TYPE_METHOD: {
-                        let mt = /** @type {MethodTrack} */(t);
+                        let mt = t as MethodTrack;
                         this._track_get_key_indices_in_range(mt.methods, from_time, this.length, p_indices);
                         this._track_get_key_indices_in_range(mt.methods, 0, to_time, p_indices);
                     } break;
@@ -463,11 +433,11 @@ export class Animation {
                 case TRACK_TYPE_VALUE:
                 case TRACK_TYPE_TRANSFORM:
                 case TRACK_TYPE_ANIMATION: {
-                    let vt = /** @type {ValueTrack} */(t);
+                    let vt = t as ValueTrack;
                     this._track_get_key_indices_in_range(vt.values, from_time, to_time, p_indices);
                 } break;
                 case TRACK_TYPE_METHOD: {
-                    let mt = /** @type {MethodTrack} */(t);
+                    let mt = t as MethodTrack;
                     this._track_get_key_indices_in_range(mt.methods, from_time, to_time, p_indices);
                 } break;
             }
@@ -481,7 +451,7 @@ export class Animation {
      * @param {number} to_time
      * @param {number[]} p_indices
      */
-    _track_get_key_indices_in_range(p_array, from_time, to_time, p_indices) {
+    _track_get_key_indices_in_range<T>(p_array: Key<T>[], from_time: number, to_time: number, p_indices: number[]) {
         if (from_time != this.length && to_time == this.length) {
             to_time = this.length * 1.01;
         }
@@ -507,7 +477,7 @@ export class Animation {
      * @param {Key<T>[]} p_keys
      * @param {number} p_time
      */
-    _find(p_keys, p_time) {
+    _find<T>(p_keys: Key<T>[], p_time: number) {
         let len = p_keys.length;
         if (len == 0) return -2;
 

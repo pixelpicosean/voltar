@@ -6,13 +6,14 @@ import { Transform } from "engine/core/math/transform.js";
 
 import { VSG } from "engine/servers/visual/visual_server_globals.js";
 
+import { NOTIFICATION_TRANSFORM_CHANGED } from "../const";
+import { Viewport } from "../main/viewport";
+
 import {
     Spatial,
     NOTIFICATION_ENTER_WORLD,
     NOTIFICATION_EXIT_WORLD,
-    NOTIFICATION_LOCAL_TRANSFORM_CHANGED_3D,
-} from "./spatial.js";
-import { NOTIFICATION_TRANSFORM_CHANGED } from "../const";
+} from "./spatial";
 
 export const PROJECTION_PERSPECTIVE = 0;
 export const PROJECTION_ORTHOGONAL = 1;
@@ -27,35 +28,35 @@ export const NOTIFICATION_LOST_CURRENT = 51;
 export class Camera extends Spatial {
     get class() { return "Camera" }
 
+    viewport: Viewport = null;
+    scenario_id: import('engine/servers/visual/visual_server_scene').Scenario_t = null;
+    environment = 0;
+
+    camera = VSG.scene.camera_create();
+
+    size = 1;
+    fov = 0;
+    frustum_offset = new Vector2;
+    near = 0;
+    far = 0;
+
+    current = false;
+
+    force_change = false;
+
+    mode = PROJECTION_PERSPECTIVE;
+
+    keep_aspect = KEEP_ASPECT_HEIGHT;
+
+    layers = 0xFFFFF;
+
+    v_offset = 0;
+    h_offset = 0;
+
     constructor() {
         super();
 
-        this.viewport = null;
-        /** @type {import('engine/servers/visual/visual_server_scene').Scenario_t} */
-        this.scenario_id = null;
-        this.environment = 0;
-
-        this.camera = VSG.scene.camera_create();
-
-        this.size = 1;
-        this.fov = 0;
-        this.frustum_offset = new Vector2;
-        this.near = 0;
-        this.far = 0;
-
-        this.current = false;
-
-        this.force_change = false;
-
-        this.mode = PROJECTION_PERSPECTIVE;
         this.set_perspective(70.0, 0.05, 100.0);
-
-        this.keep_aspect = KEEP_ASPECT_HEIGHT;
-
-        this.layers = 0xFFFFF;
-
-        this.v_offset = 0;
-        this.h_offset = 0;
 
         VSG.scene.camera_set_cull_mask(this.camera, this.layers);
 
@@ -66,7 +67,7 @@ export class Camera extends Spatial {
     /**
      * @param {boolean} p_enabled
      */
-    set_disable_scale(p_enabled) {
+    set_disable_scale(p_enabled: boolean) {
         this.d_data.disable_scale = p_enabled;
     }
 
@@ -75,7 +76,7 @@ export class Camera extends Spatial {
      * @param {number} z_near
      * @param {number} z_far
      */
-    set_perspective(fov_degrees, z_near, z_far) {
+    set_perspective(fov_degrees: number, z_near: number, z_far: number) {
         if (!this.force_change && this.fov === fov_degrees && this.near === z_near && this.far === z_far && this.mode === PROJECTION_PERSPECTIVE) {
             return;
         }
@@ -94,7 +95,7 @@ export class Camera extends Spatial {
      * @param {number} z_near
      * @param {number} z_far
      */
-    set_orthogonal(size, z_near, z_far) {
+    set_orthogonal(size: number, z_near: number, z_far: number) {
         if (!this.force_change && this.size === size && this.near === z_near && this.far === z_far && this.mode === PROJECTION_ORTHOGONAL) {
             return;
         }
@@ -115,7 +116,7 @@ export class Camera extends Spatial {
      * @param {number} z_near
      * @param {number} z_far
      */
-    set_frustum(size, offset, z_near, z_far) {
+    set_frustum(size: number, offset: Vector2Like, z_near: number, z_far: number) {
         if (!this.force_change && this.size === size && this.frustum_offset.equals(offset) && this.near === z_near && this.far === z_far && this.mode === PROJECTION_FRUSTUM) {
             return;
         }
@@ -134,7 +135,7 @@ export class Camera extends Spatial {
     /**
      * @param {number} p_mode
      */
-    set_projection(p_mode) {
+    set_projection(p_mode: number) {
         if (p_mode === PROJECTION_PERSPECTIVE || p_mode === PROJECTION_ORTHOGONAL || p_mode === PROJECTION_FRUSTUM) {
             this.mode = p_mode;
             this._update_camera_mode();
@@ -163,7 +164,7 @@ export class Camera extends Spatial {
     /**
      * @param {boolean} current
      */
-    set_current(current) {
+    set_current(current: boolean) {
         if (current) {
             this.make_current();
         } else {
@@ -187,7 +188,7 @@ export class Camera extends Spatial {
     /**
      * @param {number} p_fov
      */
-    set_fov(p_fov) {
+    set_fov(p_fov: number) {
         this.fov = p_fov;
         this._update_camera_mode();
     }
@@ -195,7 +196,7 @@ export class Camera extends Spatial {
     /**
      * @param {number} p_znear
      */
-    set_near(p_znear) {
+    set_near(p_znear: number) {
         this.near = p_znear;
         this._update_camera_mode();
     }
@@ -203,7 +204,7 @@ export class Camera extends Spatial {
     /**
      * @param {number} p_zfar
      */
-    set_far(p_zfar) {
+    set_far(p_zfar: number) {
         this.far = p_zfar;
         this._update_camera_mode();
     }
@@ -211,7 +212,7 @@ export class Camera extends Spatial {
     /**
      * @param {Vector2Like} p_offset
      */
-    set_frustum_offset(p_offset) {
+    set_frustum_offset(p_offset: Vector2Like) {
         this.frustum_offset.copy(p_offset);
         this._update_camera_mode();
     }
@@ -219,7 +220,7 @@ export class Camera extends Spatial {
     /**
      * @param {number} p_size
      */
-    set_size(p_size) {
+    set_size(p_size: number) {
         this.size = p_size;
         this._update_camera_mode();
     }
@@ -227,11 +228,11 @@ export class Camera extends Spatial {
     /* virtual methods */
 
     _free() {
-        VSG.scene.free_rid(this.camera);
+        // VSG.scene.camera_free(this.camera);
         super._free();
     }
 
-    _load_data(data) {
+    _load_data(data: any) {
         super._load_data(data);
 
         if (data.projection !== undefined) this.set_projection(data.projection);
@@ -244,7 +245,7 @@ export class Camera extends Spatial {
     /**
      * @param {number} p_what
      */
-    _notification(p_what) {
+    _notification(p_what: number) {
         switch (p_what) {
             case NOTIFICATION_ENTER_WORLD: {
                 this.viewport = this.get_viewport();

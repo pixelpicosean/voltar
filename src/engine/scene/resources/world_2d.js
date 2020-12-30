@@ -4,7 +4,7 @@ import { Rect2 } from "engine/core/math/rect2.js";
 import { VSG } from "engine/servers/visual/visual_server_globals.js";
 import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server.js";
 
-import { Viewport } from "../main/viewport.js";
+import { Viewport } from "../main/viewport";
 import { VisibilityNotifier2D } from "../2d/visibility_notifier_2d.js";
 
 /** @type {CellData[]} */

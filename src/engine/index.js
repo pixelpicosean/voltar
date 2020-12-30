@@ -70,20 +70,20 @@ export * from 'engine/scene/resources/world.js';
 // Node
 // ------------------------------------------------------------------
 export * from 'engine/scene/main/node';
-export * from 'engine/scene/main/viewport.js';
-export * from 'engine/scene/main/canvas_layer.js';
-export * from 'engine/scene/main/scene_tree.js';
-export * from 'engine/scene/main/timer.js';
+export * from 'engine/scene/main/viewport';
+export * from 'engine/scene/main/canvas_layer';
+export * from 'engine/scene/main/scene_tree';
+export * from 'engine/scene/main/timer';
 
-export * from 'engine/scene/animation/animation_player.js';
+export * from 'engine/scene/animation/animation_player';
 
 export * from 'engine/scene/2d/const';
 export * from 'engine/scene/2d/canvas_item';
 export * from 'engine/scene/2d/node_2d';
-export * from 'engine/scene/2d/sprite.js';
-export * from 'engine/scene/2d/animated_sprite.js';
+export * from 'engine/scene/2d/sprite';
+export * from 'engine/scene/2d/animated_sprite';
 export * from 'engine/scene/2d/path_2d.js';
-export * from 'engine/scene/2d/cpu_particles_2d.js';
+export * from 'engine/scene/2d/cpu_particles_2d';
 export * from 'engine/scene/2d/polygon_2d.js';
 
 export * from 'engine/scene/2d/collision_object_2d.js';
@@ -98,7 +98,7 @@ export * from 'engine/scene/2d/visibility_notifier_2d.js';
 export * from 'engine/scene/2d/tile_map.js';
 export * from 'engine/scene/2d/parallax_background.js';
 export * from 'engine/scene/2d/parallax_layer.js';
-export * from 'engine/scene/2d/y_sort.js';
+export * from 'engine/scene/2d/y_sort';
 export * from 'engine/scene/2d/remote_transform_2d.js';
 
 export * from 'engine/scene/gui/const';
@@ -117,12 +117,12 @@ export * from 'engine/scene/gui/texture_button.js';
 export * from 'engine/scene/gui/range.js';
 export * from 'engine/scene/gui/texture_progress.js';
 
-export * from 'engine/scene/3d/spatial.js';
-export * from 'engine/scene/3d/camera.js';
-export * from 'engine/scene/3d/visual_instance.js';
-export * from 'engine/scene/3d/mesh_instance.js';
-export * from 'engine/scene/3d/light.js';
-export * from 'engine/scene/3d/skeleton.js';
+export * from 'engine/scene/3d/spatial';
+export * from 'engine/scene/3d/camera';
+export * from 'engine/scene/3d/visual_instance';
+export * from 'engine/scene/3d/mesh_instance';
+export * from 'engine/scene/3d/light';
+export * from 'engine/scene/3d/skeleton';
 export * from 'engine/scene/3d/world_environment';
 export * from 'engine/scene/3d/baked_lightmap';
 
@@ -144,7 +144,7 @@ import { MessageQueue as MessageQueue_t } from 'engine/core/message_queue';
 import { Engine as Engine_t } from 'engine/core/engine';
 import { VisualServer as VisualServer_t } from 'engine/servers/visual_server.js';
 import { Physics2DServer as Physics2DServer_t } from 'engine/servers/physics_2d/physics_2d_server.js';
-import { SceneTree as SceneTree_t } from 'engine/scene/main/scene_tree.js';
+import { SceneTree as SceneTree_t } from 'engine/scene/main/scene_tree';
 import { AudioServer as AudioServer_t } from 'engine/audio/audio.js';
 
 export { VSG } from 'engine/servers/visual/visual_server_globals.js';

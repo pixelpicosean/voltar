@@ -10,19 +10,18 @@ import {
     NOTIFICATION_ENTER_WORLD,
     NOTIFICATION_EXIT_WORLD,
     NOTIFICATION_VISIBILITY_CHANGED_3D,
-} from "./spatial.js";
+} from "./spatial";
 
 
 export class VisualInstance extends Spatial {
     get class() { return "VisualInstance" }
 
+    base: import('engine/drivers/webgl/rasterizer_storage').Instantiable_t = null;
+    instance = VSG.scene.instance_create();
+    layers = 1;
+
     constructor() {
         super();
-
-        /** @type {import('engine/drivers/webgl/rasterizer_storage').Mesh_t} */
-        this.base = null;
-        this.instance = VSG.scene.instance_create();
-        this.layers = 1;
 
         VSG.scene.instance_attach_object_instance(this.instance, this);
         this.set_notify_transform(true);
@@ -33,17 +32,14 @@ export class VisualInstance extends Spatial {
         super._free();
     }
 
-    /**
-     * @param {import('engine/drivers/webgl/rasterizer_storage').Instantiable_t} p_base
-     */
-    set_base(p_base) {
+    set_base(p_base: import('engine/drivers/webgl/rasterizer_storage').Instantiable_t) {
         VSG.scene.instance_set_base(this.instance, p_base);
         this.base = p_base;
     }
 
     /* virtual method */
 
-    _load_data(data) {
+    _load_data(data: any) {
         super._load_data(data);
 
         if (data.layers) {
@@ -56,7 +52,7 @@ export class VisualInstance extends Spatial {
     /**
      * @param {number} p_what
      */
-    _notification(p_what) {
+    _notification(p_what: number) {
         switch (p_what) {
             case NOTIFICATION_ENTER_WORLD: {
                 VSG.scene.instance_set_scenario(this.instance, this.get_world().scenario);
@@ -86,18 +82,13 @@ node_class_map["VisualInstance"] = GDCLASS(VisualInstance, Spatial);
 export class GeometryInstance extends VisualInstance {
     get class() { return "GeometryInstance" }
 
-    constructor() {
-        super();
+    cast_shadow = 1;
 
-        this.cast_shadow = 1;
+    extra_cull_margin = 0;
 
-        this.extra_cull_margin = 0;
+    material_override: Material = null;
 
-        /** @type {Material} */
-        this.material_override = null;
-    }
-
-    _load_data(data) {
+    _load_data(data: any) {
         super._load_data(data);
 
         if (data.material_override) {
@@ -110,7 +101,7 @@ export class GeometryInstance extends VisualInstance {
     /**
      * @param {Material} p_material
      */
-    set_material_override(p_material) {
+    set_material_override(p_material: Material) {
         this.material_override = p_material;
         VSG.scene.instance_geometry_set_material_override(this.instance, p_material ? p_material.material : null);
     }

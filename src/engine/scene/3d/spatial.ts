@@ -10,7 +10,7 @@ import {
     NOTIFICATION_ENTER_TREE,
     NOTIFICATION_EXIT_TREE,
 } from "../main/node";
-import { Viewport } from "../main/viewport.js";
+import { Viewport } from "../main/viewport";
 import { Basis } from "engine/core/math/basis.js";
 import { NOTIFICATION_TRANSFORM_CHANGED } from "../const";
 
@@ -29,45 +29,36 @@ const DEG_2_RAD = Math.PI / 180;
 export class Spatial extends Node {
     get class() { return "Spatial" }
 
-    constructor() {
-        super();
+    is_spatial = true;
 
-        this.is_spatial = true;
+    xform_change: SelfList<Node> = new SelfList(this);
 
-        /** @type {SelfList<Node>} */
-        this.xform_change = new SelfList(this);
+    d_data = {
+        global_transform: new Transform,
+        local_transform: new Transform,
+        rotation: new Vector3,
+        scale: new Vector3(1, 1, 1),
 
-        this.d_data = {
-            global_transform: new Transform,
-            local_transform: new Transform,
-            rotation: new Vector3,
-            scale: new Vector3(1, 1, 1),
+        dirty: TRANSFORM_DIRTY_NONE,
 
-            dirty: TRANSFORM_DIRTY_NONE,
+        viewport: null as Viewport,
 
-            /** @type {Viewport} */
-            viewport: null,
+        toplevel_active: false,
+        toplevel: false,
+        inside_world: false,
 
-            toplevel_active: false,
-            toplevel: false,
-            inside_world: false,
+        children_lock: 0,
+        parent: null as Spatial,
+        children: new List as List<Spatial>,
+        C: null as List$Element<Spatial>,
 
-            children_lock: 0,
-            /** @type {Spatial} */
-            parent: null,
-            /** @type {List<Spatial>} */
-            children: new List,
-            /** @type {List$Element<Spatial>} */
-            C: null,
+        ignore_notification: false,
+        notify_local_transform: false,
+        notify_transform: false,
 
-            ignore_notification: false,
-            notify_local_transform: false,
-            notify_transform: false,
-
-            visible: true,
-            disable_scale: false,
-        };
-    }
+        visible: true,
+        disable_scale: false,
+    };
 
     get_parent_spatial() {
         return this.d_data.parent;
@@ -76,7 +67,7 @@ export class Spatial extends Node {
     /**
      * @param {boolean} p_enabled
      */
-    set_as_top_level(p_enabled) {
+    set_as_top_level(p_enabled: boolean) {
         if (this.d_data.toplevel === p_enabled) {
             return;
         }
@@ -101,7 +92,7 @@ export class Spatial extends Node {
     /**
      * @param {Vector3Like} offset
      */
-    translate(offset) {
+    translate(offset: Vector3Like) {
         let t = this.get_transform();
         t.translate(offset);
         this.set_transform(t);
@@ -112,7 +103,7 @@ export class Spatial extends Node {
      * @param {number} y
      * @param {number} z
      */
-    translate_n(x, y, z) {
+    translate_n(x: number, y: number, z: number) {
         let t = this.get_transform();
         t.translate_n(x, y, z);
         this.set_transform(t);
@@ -121,19 +112,19 @@ export class Spatial extends Node {
     /**
      * @param {Vector3Like} offset
      */
-    translate_object_local(offset) { }
+    translate_object_local(offset: Vector3Like) { }
 
     /**
      * @param {number} x
      * @param {number} y
      * @param {number} z
      */
-    translate_object_local_n(x, y, z) { }
+    translate_object_local_n(x: number, y: number, z: number) { }
 
     /**
      * @param {number} p_angle
      */
-    rotate_x(p_angle) {
+    rotate_x(p_angle: number) {
         let t = this.get_transform();
         t.basis.rotate(Vector3.RIGHT, p_angle);
         this.set_transform(t);
@@ -142,7 +133,7 @@ export class Spatial extends Node {
     /**
      * @param {number} p_angle
      */
-    rotate_y(p_angle) {
+    rotate_y(p_angle: number) {
         let t = this.get_transform();
         t.basis.rotate(Vector3.UP, p_angle);
         this.set_transform(t);
@@ -151,7 +142,7 @@ export class Spatial extends Node {
     /**
      * @param {number} p_angle
      */
-    rotate_z(p_angle) {
+    rotate_z(p_angle: number) {
         let t = this.get_transform();
         t.basis.rotate(Vector3.BACK, p_angle);
         this.set_transform(t);
@@ -160,7 +151,7 @@ export class Spatial extends Node {
     /**
      * @param {Vector3Like} p_translation
      */
-    set_translation(p_translation) {
+    set_translation(p_translation: Vector3Like) {
         this.set_translation_n(p_translation.x, p_translation.y, p_translation.z);
     }
 
@@ -169,7 +160,7 @@ export class Spatial extends Node {
      * @param {number} y
      * @param {number} z
      */
-    set_translation_n(x, y, z) {
+    set_translation_n(x: number, y: number, z: number) {
         this.d_data.local_transform.origin.set(x, y, z);
         this._propagate_transform_changed(this);
         if (this.d_data.notify_local_transform) {
@@ -180,7 +171,7 @@ export class Spatial extends Node {
     /**
      * @param {Vector3Like} p_rotation
      */
-    set_rotation(p_rotation) {
+    set_rotation(p_rotation: Vector3Like) {
         this.set_rotation_n(p_rotation.x, p_rotation.y, p_rotation.z);
     }
 
@@ -189,7 +180,7 @@ export class Spatial extends Node {
      * @param {number} y
      * @param {number} z
      */
-    set_rotation_n(x, y, z) {
+    set_rotation_n(x: number, y: number, z: number) {
         if (this.d_data.dirty & TRANSFORM_DIRTY_VECTORS) {
             let scale = this.d_data.local_transform.basis.get_scale();
             this.d_data.scale.copy(scale);
@@ -210,7 +201,7 @@ export class Spatial extends Node {
     /**
      * @param {Vector3Like} p_rotation
      */
-    set_rotation_degrees(p_rotation) {
+    set_rotation_degrees(p_rotation: Vector3Like) {
         this.set_rotation_n(p_rotation.x * DEG_2_RAD, p_rotation.y * DEG_2_RAD, p_rotation.z * DEG_2_RAD);
     }
 
@@ -219,14 +210,14 @@ export class Spatial extends Node {
      * @param {number} y
      * @param {number} z
      */
-    set_rotation_degrees_n(x, y, z) {
+    set_rotation_degrees_n(x: number, y: number, z: number) {
         this.set_rotation_n(x * DEG_2_RAD, y * DEG_2_RAD, z * DEG_2_RAD);
     }
 
     /**
      * @param {Vector3Like} p_scale
      */
-    set_scale(p_scale) {
+    set_scale(p_scale: Vector3Like) {
         this.set_scale_n(p_scale.x, p_scale.y, p_scale.z);
     }
 
@@ -235,7 +226,7 @@ export class Spatial extends Node {
      * @param {number} y
      * @param {number} z
      */
-    set_scale_n(x, y, z) {
+    set_scale_n(x: number, y: number, z: number) {
         if (this.d_data.dirty & TRANSFORM_DIRTY_VECTORS) {
             let rotation = this.d_data.local_transform.basis.get_rotation();
             this.d_data.rotation.copy(rotation);
@@ -256,7 +247,7 @@ export class Spatial extends Node {
     /**
      * @param {Transform} p_transform
      */
-    set_transform(p_transform) {
+    set_transform(p_transform: Transform) {
         this.set_transform_n(
             p_transform.basis.elements[0].x,
             p_transform.basis.elements[0].y,
@@ -276,7 +267,7 @@ export class Spatial extends Node {
     /**
      * @param {number[]} data
      */
-    set_transform_v(data) {
+    set_transform_v(data: number[]) {
         this.d_data.local_transform.set(
             data[0],
             data[1],
@@ -312,7 +303,7 @@ export class Spatial extends Node {
      * @param {number} y
      * @param {number} z
      */
-    set_transform_n(xx, xy, xz, yx, yy, yz, zx, zy, zz, x, y, z) {
+    set_transform_n(xx: number, xy: number, xz: number, yx: number, yy: number, yz: number, zx: number, zy: number, zz: number, x: number, y: number, z: number) {
         this.d_data.local_transform.set(xx, xy, xz, yx, yy, yz, zx, zy, zz, x, y, z);
         this.d_data.dirty |= TRANSFORM_DIRTY_VECTORS;
         this._propagate_transform_changed(this);
@@ -324,7 +315,7 @@ export class Spatial extends Node {
     /**
      * @param {Transform} p_transform
      */
-    set_global_transform(p_transform) {
+    set_global_transform(p_transform: Transform) {
         let xform = Transform.create();
         if (this.d_data.parent && !this.d_data.toplevel_active) {
             let p = this.d_data.parent;
@@ -340,7 +331,7 @@ export class Spatial extends Node {
      * @param {Basis} basis
      * @param {Vector3Like} origin
      */
-    set_global_transform_v(basis, origin) {
+    set_global_transform_v(basis: Basis, origin: Vector3Like) {
         let xform = Transform.create();
         xform.set(
             basis.elements[0].x,
@@ -374,7 +365,7 @@ export class Spatial extends Node {
      * @param {number} y
      * @param {number} z
      */
-    set_global_transform_n(xx, xy, xz, yx, yy, yz, zx, zy, zz, x, y, z) {
+    set_global_transform_n(xx: number, xy: number, xz: number, yx: number, yy: number, yz: number, zx: number, zy: number, zz: number, x: number, y: number, z: number) {
         let xform = Transform.create();
         xform.set(
             xx, xy, xz,
@@ -430,21 +421,21 @@ export class Spatial extends Node {
     /**
      * @param {boolean} enable
      */
-    set_notify_transform(enable) {
+    set_notify_transform(enable: boolean) {
         this.d_data.notify_transform = enable;
     }
 
     /**
      * @param {boolean} p_visible
      */
-    set_visible(p_visible) {
+    set_visible(p_visible: boolean) {
         if (p_visible) this.show();
         else this.hide();
     }
 
     is_visibile_in_tree() {
         /** @type {Spatial} */
-        let s = this;
+        let s: Spatial = this;
 
         while (s) {
             if (!s.d_data.visible) {
@@ -491,7 +482,7 @@ export class Spatial extends Node {
 
     /* virtual methods */
 
-    _load_data(data) {
+    _load_data(data: any) {
         super._load_data(data);
 
         if (data.visible !== undefined) this.set_visible(data.visible);
@@ -523,7 +514,7 @@ export class Spatial extends Node {
     /**
      * @param {Spatial} p_origin
      */
-    _propagate_transform_changed(p_origin) {
+    _propagate_transform_changed(p_origin: Spatial) {
         if (!this.is_inside_tree()) {
             return;
         }
@@ -575,13 +566,13 @@ export class Spatial extends Node {
     /**
      * @param {number} p_what
      */
-    _notification(p_what) {
+    _notification(p_what: number) {
         switch (p_what) {
             case NOTIFICATION_ENTER_TREE: {
                 let p = this.get_parent();
                 if (p) {
                     if (p.is_spatial) {
-                        this.d_data.parent = /** @type {Spatial} */(p);
+                        this.d_data.parent = p as Spatial;
                     } else {
                         this.d_data.parent = null;
                     }
@@ -627,7 +618,7 @@ export class Spatial extends Node {
                 let parent = this.get_parent();
                 while (parent && !this.d_data.viewport) {
                     if (parent.is_viewport) {
-                        this.d_data.viewport = /** @type {Viewport} */(parent);
+                        this.d_data.viewport = parent as Viewport;
                     } else {
                         this.d_data.viewport = null;
                     }

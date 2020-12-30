@@ -33,22 +33,17 @@ import {
     UPDATE_CONTINUOUS,
     UPDATE_CAPTURE,
     UPDATE_DISCRETE,
-    BezierTrack,
-    AnimationTrack,
-} from './animation.js';
+} from './animation';
 import { Transform } from 'engine/core/math/transform.js';
 import { Vector3 } from 'engine/core/math/vector3.js';
 import { Quat } from 'engine/core/math/basis.js';
+import { Skeleton } from '../3d/skeleton';
 
 
 class NodeCache {
-    constructor() {
-        /** @type {Node} */
-        this.node = null;
-        /** @type {{ [name: string]: number }} */
-        this.bone_ids = {};
-        this.animation_playing = false;
-    }
+    node: Node = null;
+    bone_ids: { [name: string]: number; } = {};
+    animation_playing = false;
 }
 
 export const ANIMATION_PROCESS_PHYSICS = 0;
@@ -62,7 +57,7 @@ export const ANIMATION_METHOD_CALL_IMMEDIATE = 1;
  * @param {number} p_x
  * @param {number} p_y
  */
-function posmod(p_x, p_y) {
+function posmod(p_x: number, p_y: number) {
     return (p_x >= 0) ? (p_x % p_y) : (p_y - (-p_x) % p_y);
 }
 
@@ -70,7 +65,7 @@ function posmod(p_x, p_y) {
  * @param {number} x
  * @param {number} c
  */
-function ease(x, c) {
+function ease(x: number, c: number) {
     if (x < 0)
         x = 0;
     else if (x > 1.0)
@@ -98,7 +93,7 @@ const CMP_EPSILON = 0.00001;
  * @param {number} a
  * @param {number} b
  */
-function equals(a, b) {
+function equals(a: number, b: number) {
     return Math.abs(a - b) < CMP_EPSILON;
 }
 
@@ -107,7 +102,7 @@ function equals(a, b) {
  * @param {number} b
  * @param {number} c
  */
-function interpolate_number(a, b, c) {
+function interpolate_number(a: number, b: number, c: number) {
     return a * (1.0 - c) + b * c;
 }
 /**
@@ -117,7 +112,7 @@ function interpolate_number(a, b, c) {
  * @param {number} post_b
  * @param {number} c
  */
-function cubic_interpolate_number(pre_a, a, b, post_b, c) {
+function cubic_interpolate_number(pre_a: number, a: number, b: number, post_b: number, c: number) {
     return interpolate_number(a, b, c);
 }
 
@@ -126,7 +121,7 @@ function cubic_interpolate_number(pre_a, a, b, post_b, c) {
  * @param {Key<T>[]} keys
  * @param {number} time
  */
-function find_track_key(keys, time) {
+function find_track_key<T>(keys: Key<T>[], time: number) {
     let len = keys.length;
     if (len === 0) {
         return -2;
@@ -155,13 +150,13 @@ function find_track_key(keys, time) {
 /**
  * @param {string} path
  */
-function anim_path_without_prop(path) {
+function anim_path_without_prop(path: string) {
     return path.split(':')[0];
 }
 /**
  * @param {string} path
  */
-function anim_prop(path) {
+function anim_prop(path: string) {
     return path.split(':')[1];
 }
 /**
@@ -170,7 +165,7 @@ function anim_prop(path) {
  * @param {string} key
  * @param {any} value
  */
-function apply_immediate_value(nc, type, key, value) {
+function apply_immediate_value(nc: NodeCache, type: number, key: string, value: any) {
     const node = nc.node;
 
     switch (type) {
@@ -178,24 +173,32 @@ function apply_immediate_value(nc, type, key, value) {
         case PROP_TYPE_BOOLEAN:
         case PROP_TYPE_STRING:
         case PROP_TYPE_ANY: {
+            // @ts-ignore
             node[key] = value;
         } break;
         case PROP_TYPE_VECTOR: {
+            // @ts-ignore
             node[key].x = value.x;
+            // @ts-ignore
             node[key].y = value.y;
+            // @ts-ignore
             node[key].z = value.z;
         } break;
         case PROP_TYPE_COLOR: {
+            // @ts-ignore
             node[key].r = value.r;
+            // @ts-ignore
             node[key].g = value.g;
+            // @ts-ignore
             node[key].b = value.b;
+            // @ts-ignore
             node[key].a = value.a;
         } break;
         case PROP_TYPE_TRANSFORM: {
             if (node.is_skeleton) {
                 interp_xform.origin.copy(value.loc);
                 interp_xform.basis.set_quat_scale(value.rot, value.scale);
-                /** @type {import('engine/scene/3d/skeleton').Skeleton} */(node).set_bone_pose(nc.bone_ids[key], interp_xform);
+                (node as Skeleton).set_bone_pose(nc.bone_ids[key], interp_xform);
             }
         } break;
     }
@@ -212,7 +215,7 @@ let interp_scale = new Vector3;
  * @param {Function} setter
  * @param {any} value
  */
-function apply_immediate_value_with_setter(nc, type, setter, value) {
+function apply_immediate_value_with_setter(nc: NodeCache, type: number, setter: Function, value: any) {
     if (type === PROP_TYPE_TRANSFORM) {
         interp_xform.origin.copy(value.loc);
         interp_xform.basis.set_quat_scale(value.rot, value.scale);
@@ -229,26 +232,35 @@ function apply_immediate_value_with_setter(nc, type, setter, value) {
  * @param {any} value_b
  * @param {number} c
  */
-function apply_interpolate_value(nc, type, key, value_a, value_b, c) {
+function apply_interpolate_value(nc: NodeCache, type: number, key: string, value_a: any, value_b: any, c: number) {
     const node = nc.node;
     switch (type) {
         case PROP_TYPE_BOOLEAN:
         case PROP_TYPE_STRING:
         case PROP_TYPE_ANY: {
+            // @ts-ignore
             node[key] = value_a;
         } break;
         case PROP_TYPE_NUMBER: {
+            // @ts-ignore
             node[key] = interpolate_number(value_a, value_b, c);
         } break;
         case PROP_TYPE_VECTOR: {
+            // @ts-ignore
             node[key].x = interpolate_number(value_a.x, value_b.x, c);
+            // @ts-ignore
             node[key].y = interpolate_number(value_a.y, value_b.y, c);
+            // @ts-ignore
             node[key].z = interpolate_number(value_a.z, value_b.z, c);
         } break;
         case PROP_TYPE_COLOR: {
+            // @ts-ignore
             node[key].r = interpolate_number(value_a.r, value_b.r, c);
+            // @ts-ignore
             node[key].g = interpolate_number(value_a.g, value_b.g, c);
+            // @ts-ignore
             node[key].b = interpolate_number(value_a.b, value_b.b, c);
+            // @ts-ignore
             node[key].a = interpolate_number(value_a.a, value_b.a, c);
         } break;
         case PROP_TYPE_TRANSFORM: {
@@ -265,7 +277,7 @@ function apply_interpolate_value(nc, type, key, value_a, value_b, c) {
 
                 interp_xform.origin.copy(interp_loc);
                 interp_xform.basis.set_quat_scale(interp_rot, interp_scale);
-                /** @type {import('engine/scene/3d/skeleton').Skeleton} */(node).set_bone_pose(nc.bone_ids[key], interp_xform);
+                (node as Skeleton).set_bone_pose(nc.bone_ids[key], interp_xform);
             }
         } break;
     }
@@ -281,7 +293,7 @@ const interp_color = { r: 0, g: 0, b: 0, a: 0 };
  * @param {any} value_b
  * @param {number} c
  */
-function apply_interpolate_value_with_setter(nc, type, setter, value_a, value_b, c) {
+function apply_interpolate_value_with_setter(nc: NodeCache, type: number, setter: Function, value_a: any, value_b: any, c: number) {
     switch (type) {
         case PROP_TYPE_NUMBER: {
             setter.call(nc.node, interpolate_number(value_a, value_b, c));
@@ -330,7 +342,7 @@ function apply_interpolate_value_with_setter(nc, type, setter, value_a, value_b,
  * @param {boolean} loop_wrap
  * @param {Object<string, Function>} setter_cache
  */
-function interpolate_track_on_node(nc, anim, track, time, interp, loop_wrap, setter_cache) {
+function interpolate_track_on_node(nc: NodeCache, anim: Animation, track: ValueTrack, time: number, interp: number, loop_wrap: boolean, setter_cache: { [s: string]: Function; }) {
     let keys = track.values;
     let len = find_track_key(keys, anim.length) + 1;
 
@@ -475,7 +487,7 @@ function interpolate_track_on_node(nc, anim, track, time, interp, loop_wrap, set
  * @param {number} time
  * @param {boolean} loop_wrap
  */
-function immediate_track_on_node(nc, anim, track, time, loop_wrap) {
+function immediate_track_on_node(nc: NodeCache, anim: Animation, track: ValueTrack, time: number, loop_wrap: boolean) {
     let keys = track.values;
     let idx = find_track_key(keys, time);
 
@@ -487,59 +499,47 @@ function immediate_track_on_node(nc, anim, track, time, loop_wrap) {
 }
 
 class AnimationData {
-    constructor() {
-        this.name = '';
-        this.next = '';
+    name = '';
+    next = '';
 
-        /** @type {{ [path: string]: NodeCache }} */
-        this.node_cache = {};
-        /** @type {Object<string, Function>} */
-        this.setter_cache = {};
-        this.node_cache_size = 0; // Remember to update size with `node_cache`
+    node_cache: { [path: string]: NodeCache; } = {};
+    setter_cache: { [s: string]: Function; } = {};
+    node_cache_size = 0; // Remember to update size with `node_cache`
 
-        /** @type {Animation} */
-        this.animation = null;
-    }
+    animation: Animation = null;
 }
 class PlaybackData {
-    constructor() {
-        /** @type {AnimationData} */
-        this.from = null;
-        this.pos = 0;
-        this.speed_scale = 1.0;
-    }
+    from: AnimationData = null;
+    pos = 0;
+    speed_scale = 1.0;
 }
 class Blend {
+    data = new PlaybackData;
+    blend_time = 0;
+    blend_left = 0;
+
     constructor(time = 0, left = 0) {
-        this.data = new PlaybackData();
-        this.blend_time = 0;
-        this.blend_left = 0;
+        this.blend_time = time;
+        this.blend_left = left;
     }
 }
 class Playback {
-    constructor() {
-        /** @type {Blend[]} */
-        this.blend = [];
-        /** @type {PlaybackData} */
-        this.current = new PlaybackData();
-        this.assigned = '';
-        this.seeked = false;
-        this.started = false;
-    }
+    blend: Blend[] = [];
+    current = new PlaybackData;
+    assigned = '';
+    seeked = false;
+    started = false;
 }
 
 class BezierAnim {
-    constructor() {
-        /** @type {string[]} */
-        this.bezier_property = [];
-        this.bezier_accum = 0;
-        this.object = null;
-        this.accum_pass = 0;
-    }
+    bezier_property: string[] = [];
+    bezier_accum = 0;
+    object: any = null;
+    accum_pass = 0;
 }
 
 /** @type {number[]} */
-let indices = [];
+let indices: number[] = [];
 
 export class AnimationPlayer extends Node {
     get class() { return 'AnimationPlayer' }
@@ -551,7 +551,7 @@ export class AnimationPlayer extends Node {
     /**
      * @param {string} p_anim
      */
-    set_assigned_animation(p_anim) {
+    set_assigned_animation(p_anim: string) {
         if (this.is_playing()) {
             this.play(p_anim);
         } else {
@@ -568,7 +568,7 @@ export class AnimationPlayer extends Node {
     /**
      * @param {string} p_anim
      */
-    set_current_animation(p_anim) {
+    set_current_animation(p_anim: string) {
         if (p_anim === '[stop]' || p_anim.length === 0) {
             this.stop();
         } else if (!this.is_playing() || this.playback.assigned !== p_anim) {
@@ -582,10 +582,7 @@ export class AnimationPlayer extends Node {
 
     get current_animation_position() { return this.playback.current.pos }
 
-    /**
-     * @param {string} p_anim
-     */
-    set_playback_process_mode(p_mode) {
+    set_playback_process_mode(p_mode: number) {
         if (this.playback_process_mode === p_mode) {
             return;
         }
@@ -602,7 +599,7 @@ export class AnimationPlayer extends Node {
     /**
      * @param {string} value
      */
-    set_root_node(value) {
+    set_root_node(value: string) {
         this.root_node = value;
         this.clear_caches();
     }
@@ -611,7 +608,7 @@ export class AnimationPlayer extends Node {
      * If true, updates animations in response to process-related notifications.
      * @param {boolean} value
      */
-    set_playback_active(value) {
+    set_playback_active(value: boolean) {
         if (this.playback_active === value) {
             return;
         }
@@ -619,57 +616,41 @@ export class AnimationPlayer extends Node {
         this._set_process(this.processing, true);
     }
 
-    constructor() {
-        super();
+    accum_pass = 1;
+    /**
+     * The default time in which to blend animations.
+     */
+    playback_default_blend_time = 0;
 
-        this.accum_pass = 1;
-        /**
-         * The default time in which to blend animations.
-         */
-        this.playback_default_blend_time = 0;
+    autoplay = '';
+    playback_speed = 1;
+    root_node = '..';
 
-        this.autoplay = '';
-        this.playback_speed = 1;
-        this.root_node = '..';
+    queued: string[] = [];
 
-        /** @type {string[]} */
-        this.queued = [];
+    playing = false;
+    end_reached = false;
+    end_notify = false;
 
-        this.playing = false;
-        this.end_reached = false;
-        this.end_notify = false;
+    processing = false;
+    playback_active = true;
 
-        this.processing = false;
-        this.playback_active = true;
+    playback_process_mode = ANIMATION_PROCESS_IDLE;
+    method_call_mode = ANIMATION_METHOD_CALL_IMMEDIATE;
 
-        this.playback_process_mode = ANIMATION_PROCESS_IDLE;
-        this.method_call_mode = ANIMATION_METHOD_CALL_IMMEDIATE;
+    anims: { [s: string]: Animation; } = Object.create(null);
+    animation_set: { [s: string]: AnimationData; } = Object.create(null);
+    blend_times: { [s: string]: number; } = Object.create(null);
 
-        /**
-         * @type {Object<string, Animation>}
-         */
-        this.anims = {};
-        /**
-         * @type {Object<string, AnimationData>}
-         */
-        this.animation_set = {};
-        /**
-         * @type {Object<string, number>}
-         */
-        this.blend_times = {};
+    playback = new Playback;
 
-        this.playback = new Playback();
+    bezier_anim: Map<string, BezierAnim> = null;
 
-        /** @type {Map<string, BezierAnim>} */
-        this.bezier_anim = null;
-
-        /** @type {Set<NodeCache>} */
-        this.playing_caches = new Set;
-    }
+    playing_caches: Set<NodeCache> = new Set<NodeCache>();
 
     /* virtual */
 
-    _load_data(data) {
+    _load_data(data: any) {
         super._load_data(data);
 
         if (data.anims !== undefined) {
@@ -703,7 +684,7 @@ export class AnimationPlayer extends Node {
     /**
      * @param {number} p_what
      */
-    _notification(p_what) {
+    _notification(p_what: number) {
         switch (p_what) {
             case NOTIFICATION_ENTER_TREE: {
                 if (!this.processing) {
@@ -753,7 +734,7 @@ export class AnimationPlayer extends Node {
      * @param {Animation} animation
      * @returns {boolean}
      */
-    add_animation(name, animation) {
+    add_animation(name: string, animation: Animation): boolean {
         let ad = new AnimationData();
         ad.animation = animation;
         ad.name = name;
@@ -769,7 +750,7 @@ export class AnimationPlayer extends Node {
      *
      * @param {number} time
      */
-    advance(time) {
+    advance(time: number) {
         this._animation_process(time);
     }
 
@@ -779,7 +760,7 @@ export class AnimationPlayer extends Node {
      * @param {string} animation
      * @returns {string}
      */
-    animation_get_next(animation) {
+    animation_get_next(animation: string): string {
         return this.animation_set[animation].next || '';
     }
 
@@ -789,7 +770,7 @@ export class AnimationPlayer extends Node {
      * @param {string} animation
      * @param {string} next
      */
-    animation_set_next(animation, next) {
+    animation_set_next(animation: string, next: string) {
         let anim = this.animation_set[animation];
         if (anim) {
             anim.next = next;
@@ -817,7 +798,7 @@ export class AnimationPlayer extends Node {
      * @param {Animation} animation
      * @returns {string}
      */
-    find_animation(animation) {
+    find_animation(animation: Animation): string {
         return animation.name;
     }
 
@@ -825,7 +806,7 @@ export class AnimationPlayer extends Node {
      * @param {string} name
      * @returns {Animation}
      */
-    get_animation(name) {
+    get_animation(name: string): Animation {
         return this.anims[name];
     }
     /**
@@ -834,7 +815,7 @@ export class AnimationPlayer extends Node {
      * @param {string[]} [animations] output array
      * @returns {string[]}
      */
-    get_animation_list(animations) {
+    get_animation_list(animations: string[]): string[] {
         if (animations === undefined) {
             return Object.keys(this.animation_set);
         }
@@ -852,14 +833,14 @@ export class AnimationPlayer extends Node {
      * @param {string} animation2
      * @returns {number}
      */
-    get_blend_time(animation1, animation2) {
+    get_blend_time(animation1: string, animation2: string): number {
         return this.blend_times[`${animation1}->${animation2}`] || 0;
     }
 
     /**
      * @param {string} name
      */
-    has_animation(name) {
+    has_animation(name: string) {
         return !!this.animation_set[name];
     }
 
@@ -872,7 +853,7 @@ export class AnimationPlayer extends Node {
      * @param {boolean} [from_end]
      * @returns {this}
      */
-    play(name = '', custom_blend = -1, custom_scale = 1.0, from_end = false) {
+    play(name: string = '', custom_blend: number = -1, custom_scale: number = 1.0, from_end: boolean = false): this {
         if (name.length === 0) {
             name = this.playback.assigned;
         }
@@ -960,7 +941,7 @@ export class AnimationPlayer extends Node {
      * @param {string} name
      * @param {number} custom_blend
      */
-    play_backwards(name = '', custom_blend = -1) {
+    play_backwards(name: string = '', custom_blend: number = -1) {
         return this.play(name, custom_blend, -1, true);
     }
     /**
@@ -968,7 +949,7 @@ export class AnimationPlayer extends Node {
      *
      * @param {string} name
      */
-    queue(name) {
+    queue(name: string) {
         if (!this.is_playing()) {
             this.play(name);
         } else {
@@ -984,7 +965,7 @@ export class AnimationPlayer extends Node {
      * @param {number} time
      * @param {boolean} [update]
      */
-    seek(time, update = false) {
+    seek(time: number, update: boolean = false) {
         if (!this.playback.current.from) {
             if (this.playback.assigned) {
                 this.playback.current.from = this.animation_set[this.playback.assigned];
@@ -1005,7 +986,7 @@ export class AnimationPlayer extends Node {
      * @param {string} animation2
      * @param {number} time
      */
-    set_blend_time(animation1, animation2, time) {
+    set_blend_time(animation1: string, animation2: string, time: number) {
         if (equals(time, 0)) {
             delete this.blend_times[`${animation1}->${animation2}`];
         } else {
@@ -1018,7 +999,7 @@ export class AnimationPlayer extends Node {
      *
      * @param {boolean} [reset]
      */
-    stop(reset = true) {
+    stop(reset: boolean = true) {
         this._stop_playing_caches();
 
         const c = this.playback;
@@ -1039,7 +1020,7 @@ export class AnimationPlayer extends Node {
      * @param {boolean} p_process
      * @param {boolean} [p_force]
      */
-    _set_process(p_process, p_force = false) {
+    _set_process(p_process: boolean, p_force: boolean = false) {
         if (this.processing === p_process && !p_force) {
             return;
         }
@@ -1066,7 +1047,7 @@ export class AnimationPlayer extends Node {
      * Update animation
      * @param {number} delta Delta time since last frame
      */
-    _animation_process(delta) {
+    _animation_process(delta: number) {
         if (this.playback.current.from) {
             this.end_reached = false;
             this.end_notify = false;
@@ -1104,7 +1085,7 @@ export class AnimationPlayer extends Node {
      * @param {number} delta Delta time since last frame
      * @param {boolean} started
      */
-    _animation_process2(delta, started) {
+    _animation_process2(delta: number, started: boolean) {
         const c = this.playback;
 
         this._animation_process_data(c.current, delta, 1.0, c.seeked && !equals(delta, 0), started);
@@ -1131,7 +1112,7 @@ export class AnimationPlayer extends Node {
      * @param {boolean} seeked
      * @param {boolean} started
      */
-    _animation_process_data(cd, delta, blend, seeked, started) {
+    _animation_process_data(cd: PlaybackData, delta: number, blend: number, seeked: boolean, started: boolean) {
         delta = delta * this.playback_speed * cd.speed_scale;
         let next_pos = cd.pos + delta;
 
@@ -1187,7 +1168,7 @@ export class AnimationPlayer extends Node {
      * @param {boolean} p_seeked
      * @param {boolean} p_started
      */
-    _animation_process_animation(p_anim, p_time, p_delta, p_interp, is_current, p_seeked, p_started) {
+    _animation_process_animation(p_anim: AnimationData, p_time: number, p_delta: number, p_interp: number, is_current: boolean, p_seeked: boolean, p_started: boolean) {
         this._ensure_node_caches(p_anim);
 
         const a = p_anim.animation;
@@ -1208,7 +1189,7 @@ export class AnimationPlayer extends Node {
 
             switch (track.type) {
                 case TRACK_TYPE_VALUE: {
-                    const t = /** @type {ValueTrack} */(track);
+                    const t = track as ValueTrack;
                     const update_mode = t.update_mode;
 
                     if (update_mode === UPDATE_CONTINUOUS || update_mode === UPDATE_CAPTURE || (equals(p_delta, 0) && update_mode === UPDATE_DISCRETE)) { // delta == 0 means seek
@@ -1224,7 +1205,7 @@ export class AnimationPlayer extends Node {
                     indices.length = 0;
                     a.track_get_key_indices_in_range(i, p_time, p_delta, indices);
 
-                    const t = /** @type {MethodTrack} */(track);
+                    const t = track as MethodTrack;
                     for (let i of indices) {
                         let k = t.methods[i];
 
@@ -1232,6 +1213,7 @@ export class AnimationPlayer extends Node {
                             if (this.method_call_mode === ANIMATION_METHOD_CALL_DEFERRED) {
                                 MessageQueue.get_singleton().push_call(node, k.value.method, ...k.value.args);
                             } else {
+                                // @ts-ignore
                                 node[k.value.method].apply(node, k.value.args);
                             }
                         }
@@ -1241,7 +1223,7 @@ export class AnimationPlayer extends Node {
                     // TODO: bezier track support
                 } break;
                 case TRACK_TYPE_ANIMATION: {
-                    let player = /** @type {AnimationPlayer} */(node);
+                    let player = node as AnimationPlayer;
                     if (player.class != 'AnimationPlayer') {
                         continue;
                     }
@@ -1272,7 +1254,7 @@ export class AnimationPlayer extends Node {
                             nc.animation_playing = true;
                             this.playing_caches.add(nc);
                         } else {
-                            player.current_animation = anim_name;
+                            player.set_current_animation(anim_name);
                             player.seek(at_anim_pos, true);
                         }
                     } else {
@@ -1303,14 +1285,14 @@ export class AnimationPlayer extends Node {
     /**
      * @param {AnimationData} anim
      */
-    _ensure_node_caches(anim) {
+    _ensure_node_caches(anim: AnimationData) {
         // Already cached?
         if (anim.node_cache_size === anim.animation.tracks.length) {
             return;
         }
 
         /** @type {Node} */
-        let parent = this.get_node(this.root_node);
+        let parent: Node = this.get_node(this.root_node);
 
         if (!parent) {
             return;
@@ -1334,8 +1316,9 @@ export class AnimationPlayer extends Node {
                 nc.node = child;
             }
             if (child.is_skeleton) {
-                nc.bone_ids[prop_name] = /** @type {import('engine/scene/3d/skeleton').Skeleton} */(child).find_bone(prop_name);
+                nc.bone_ids[prop_name] = (child as Skeleton).find_bone(prop_name);
             } else {
+                // @ts-ignore
                 let prop_setter = child[`set_${prop_name}`];
                 if (typeof (prop_setter) === 'function') {
                     anim.setter_cache[track.path] = prop_setter;

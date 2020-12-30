@@ -7,32 +7,22 @@ import { MessageQueue } from "engine/core/message_queue";
 import { VSG } from "engine/servers/visual/visual_server_globals.js";
 
 import {
-    NOTIFICATION_TRANSFORM_CHANGED,
     NOTIFICATION_UPDATE_SKELETON,
 } from "../const";
 import { Skin } from "../resources/skin.js";
 import {
     Spatial,
-    NOTIFICATION_ENTER_WORLD,
-    NOTIFICATION_EXIT_WORLD,
-    NOTIFICATION_VISIBILITY_CHANGED_3D,
-} from "./spatial.js";
+} from "./spatial";
 
 export class SkinReference {
-    constructor() {
-        /** @type {Skeleton} */
-        this.skeleton_node = null;
+    skeleton_node: Skeleton = null;
 
-        /** @type {import('engine/drivers/webgl/rasterizer_storage').Skeleton_t} */
-        this.skeleton = null;
-        /** @type {Skin} */
-        this.skin = null;
+    skeleton: import('engine/drivers/webgl/rasterizer_storage').Skeleton_t = null;
+    skin: Skin = null;
 
-        this.bind_count = 0;
-        this.skeleton_version = 0;
-        /** @type {number[]} */
-        this.skin_bone_indices = [];
-    }
+    bind_count = 0;
+    skeleton_version = 0;
+    skin_bone_indices: number[] = [];
 
     _skin_changed() {
         if (this.skeleton_node) {
@@ -49,21 +39,30 @@ class Bone {
         return b.init();
     }
     /** @param {Bone} b */
-    static free(b) {
+    static free(b: Bone) {
         Bone_pool.push(b);
     }
-    constructor() {
-        this.rest = new Transform;
-        this.custom_pose = new Transform;
-        this.pose = new Transform;
-        this.pose_global = new Transform;
-        this.global_pose_override = new Transform;
 
-        /** @type {Spatial[]} */
-        this.nodes_bound = [];
+    rest = new Transform;
+    custom_pose = new Transform;
+    pose = new Transform;
+    pose_global = new Transform;
+    global_pose_override = new Transform;
 
-        this.init();
-    }
+    nodes_bound: Spatial[] = [];
+
+    name = '';
+
+    enabled = true;
+    parent = -1;
+    sort_index = 0;
+
+    disable_rest = false;
+
+    custom_pose_enable = false;
+    global_pose_override_amount = 0;
+    global_pose_override_rest = false;
+
     init() {
         this.name = '';
 
@@ -88,35 +87,24 @@ class Bone {
     }
 }
 /** @type {Bone[]} */
-const Bone_pool = [];
+const Bone_pool: Bone[] = [];
 
 export class Skeleton extends Spatial {
     get class() { return "Skeleton" }
 
-    constructor() {
-        super();
+    is_skeleton = true;
 
-        this.is_skeleton = true;
+    skin_bindings: SkinReference[] = [];
 
-        /** @type {SkinReference[]} */
-        this.skin_bindings = [];
+    bones: Bone[] = [];
+    process_order: number[] = [];
+    process_order_dirty = false;
 
-        /** @type {Bone[]} */
-        this.bones = [];
-        /** @type {number[]} */
-        this.process_order = [];
-        this.process_order_dirty = false;
+    dirty = false;
 
-        this.dirty = false;
+    version = 0;
 
-        this.version = 0;
-    }
-
-    /**
-     * @param {number} p_bone
-     * @param {Transform} p_pose
-     */
-    set_bone_pose(p_bone, p_pose) {
+    set_bone_pose(p_bone: number, p_pose: Transform) {
         this.bones[p_bone].pose.copy(p_pose);
         if (this.is_inside_tree()) {
             this._make_dirty();
@@ -126,7 +114,7 @@ export class Skeleton extends Spatial {
     /**
      * @param {string} p_name
      */
-    find_bone(p_name) {
+    find_bone(p_name: string) {
         for (let i = 0; i < this.bones.length; i++) {
             if (this.bones[i].name === p_name) return i;
         }
@@ -136,7 +124,7 @@ export class Skeleton extends Spatial {
     /**
      * @param {Skin} p_skin
      */
-    register_skin(p_skin) {
+    register_skin(p_skin: Skin) {
         for (let E of this.skin_bindings) {
             if (E.skin === p_skin) {
                 return E;
@@ -185,7 +173,7 @@ export class Skeleton extends Spatial {
 
     /* virtual method */
 
-    _load_data(data) {
+    _load_data(data: any) {
         super._load_data(data);
 
         if (data.bones) {
@@ -204,7 +192,7 @@ export class Skeleton extends Spatial {
 
                 let children = b_data.bound_children;
                 for (let i = 0; i < children.length; i++) {
-                    let node = /** @type {Spatial} */(this.get_node_or_null(children[i]));
+                    let node = this.get_node_or_null(children[i]) as Spatial;
                     if (node && b.nodes_bound.indexOf(node) < 0) {
                         b.nodes_bound.push(node);
                     }
@@ -224,7 +212,7 @@ export class Skeleton extends Spatial {
     /**
      * @param {number} p_what
      */
-    _notification(p_what) {
+    _notification(p_what: number) {
         if (p_what === NOTIFICATION_UPDATE_SKELETON) {
             this._update_process_order();
 

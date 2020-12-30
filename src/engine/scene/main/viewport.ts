@@ -34,7 +34,7 @@ import { Texture } from "engine/scene/resources/texture.js";
 import { World2D } from "engine/scene/resources/world_2d.js";
 import { CanvasItem } from "engine/scene/2d/canvas_item";
 
-import { CanvasLayer } from "./canvas_layer.js";
+import { CanvasLayer } from "./canvas_layer";
 import { Input } from "engine/main/input.js";
 import { Engine } from "engine/core/engine";
 import {
@@ -55,13 +55,14 @@ import {
     Camera,
     NOTIFICATION_LOST_CURRENT,
     NOTIFICATION_BECAME_CURRENT,
-} from "../3d/camera.js";
+} from "../3d/camera";
 import { World } from "../resources/world.js";
 import {
     NOTIFICATION_EXIT_WORLD,
     NOTIFICATION_ENTER_WORLD,
-} from "../3d/spatial.js";
-import { GROUP_CALL_REALTIME } from "./scene_tree.js";
+} from "../3d/spatial";
+import { GROUP_CALL_REALTIME } from "./scene_tree";
+import { Label } from "../gui/label.js";
 
 
 export const UPDATE_MODE_DISABLED = 0;
@@ -87,7 +88,7 @@ class ViewportTexture extends Texture {
     /**
      * @param {string} path
      */
-    set_viewport_path(path) {
+    set_viewport_path(path: string) {
         if (this.viewport_path === path) {
             return;
         }
@@ -97,17 +98,12 @@ class ViewportTexture extends Texture {
         }
     }
 
-    constructor() {
-        super();
+    resource_local_to_scene = true;
+    viewport_path = '';
 
-        this.resource_local_to_scene = true;
-        this.viewport_path = '';
+    vp: Viewport = null;
 
-        /** @type {Viewport} */
-        this.vp = null;
-
-        this.proxy = VSG.storage.texture_create();
-    }
+    proxy = VSG.storage.texture_create();
 
     _free() {
         if (this.vp) {
@@ -122,7 +118,7 @@ class ViewportTexture extends Texture {
     get_size() { return this.vp.size }
     has_alpha() { return false }
 
-    set_flags(value) {
+    set_flags(value: { REPEAT: boolean, FILTER: boolean, MIPMAPS: boolean }) {
         Object.assign(this.flags, value);
 
         if (!this.vp) {
@@ -150,7 +146,7 @@ class ViewportTexture extends Texture {
         }
 
         const vpn = local_scene.get_node(this.resource_path);
-        this.vp = /** @type {Viewport} */(vpn);
+        this.vp = vpn as Viewport;
 
         this.vp.viewport_textures.add(this);
 
@@ -164,145 +160,132 @@ GDCLASS(ViewportTexture, Texture)
 
 
 class GUI {
-    constructor() {
-        this.key_event_accepted = false;
-        /** @type {Control} */
-        this.mouse_focus = null;
-        /** @type {Control} */
-        this.last_mouse_focus = null;
-        this.mouse_click_grabber = null;
-        this.mouse_focus_mask = 0;
-        /** @type {Control} */
-        this.key_focus = null;
-        /** @type {Control} */
-        this.mouse_over = null;
-        /** @type {Control} */
-        this.tooltip = null;
-        /** @type {Control} */
-        this.tooltip_popup = null;
-        this.tooltip_label = null;
-        this.tooltip_pos = new Vector2;
-        this.last_mouse_pos = new Vector2;
-        this.drag_accum = new Vector2;
-        this.drag_attempted = false;
-        this.drag_data = false;
-        /** @type {Control} */
-        this.drag_preview = null;
-        this.tooltip_timer = -1;
-        this.tooltip_delay = 0.5;
-        /** @type {List<Control>} */
-        this.modal_stack = new List;
-        this.focus_inv_xform = new Transform2D;
-        this.subwindow_order_dirty = false;
-        this.subwindow_visibility_dirty = false;
-        /** @type {List<Control>} */
-        this.subwindows = new List;
-        /** @type {List<Control>} */
-        this.all_known_subwindows = new List;
-        this.roots_order_dirty = false;
-        /** @type {List<Control>} */
-        this.roots = new List;
-        this.canvas_sort_index = 0;
-        this.dragging = false;
-    }
+    key_event_accepted = false;
+    mouse_focus: Control = null;
+    last_mouse_focus: Control = null;
+    mouse_click_grabber: Control = null;
+    mouse_focus_mask = 0;
+    key_focus: Control = null;
+    mouse_over: Control = null;
+    tooltip: Control = null;
+    tooltip_popup: Control = null;
+    tooltip_label: Label = null;
+    tooltip_pos = new Vector2;
+    last_mouse_pos = new Vector2;
+    drag_accum = new Vector2;
+    drag_attempted = false;
+    drag_data = false;
+    drag_preview: Control = null;
+    tooltip_timer = -1;
+    tooltip_delay = 0.5;
+    modal_stack: List<Control> = new List;
+    focus_inv_xform = new Transform2D;
+    subwindow_order_dirty = false;
+    subwindow_visibility_dirty = false;
+    subwindows: List<Control> = new List;
+    all_known_subwindows: List<Control> = new List;
+    roots_order_dirty = false;
+    roots: List<Control> = new List;
+    canvas_sort_index = 0;
+    dragging = false;
 }
 
 
 export class Viewport extends Node {
     get class() { return 'Viewport' }
 
+    is_viewport = true;
+
+    input_group = `_vp_input${this.instance_id}`;
+    gui_input_group = `_vp_gui_input${this.instance_id}`;
+    unhandled_input_group = `_vp_unhandled_input${this.instance_id}`;
+    unhandled_key_input_group = `_vp_unhandled_key_input${this.instance_id}`;
+
+    /** @type {Viewport} */
+    parent: Viewport = null;
+
+    /** @type {Camera} */
+    camera: Camera = null;
+    /** @type {Set<Camera>} */
+    cameras: Set<Camera> = new Set;
+    /** @type {Set<CanvasLayer>} */
+    canvas_layers: Set<CanvasLayer> = new Set;
+
+    viewport = VSG.viewport.viewport_create();
+    current_canvas: import('engine/servers/visual/visual_server_canvas').Canvas = null;
+
+    override_canvas_transform = false;
+
+    canvas_transform_override = new Transform2D;
+    canvas_transform = new Transform2D;
+    global_canvas_transform = new Transform2D;
+    stretch_transform = new Transform2D;
+
+    size = new Vector2;
+    attach_to_screen_rect = new Rect2;
+    render_direct_to_screen = false;
+
+    size_override = false;
+    size_override_stretch = false;
+    size_override_size = new Vector2(1, 1);
+    size_override_margin = new Vector2;
+
+    last_vp_rect = new Rect2;
+
+    transparent_bg = false;
+    render_target_v_flip = false;
+    render_target_clear_mode = CLEAR_MODE_ALWAYS;
+    filter = false;
+    gen_mipmaps = false;
+
+    snap_controls_to_pixels = true;
+
+    local_input_handled = false;
+    handle_input_locally = true;
+
+    /** @type {World2D} */
+    world_2d: World2D = new World2D;
+    /** @type {World} */
+    world: World = null;
+    /** @type {World} */
+    own_world: World = null;
+
+    disable_input = false;
+    disable_3d = false;
+    keep_3d_linear = false;
+    render_target_update_mode = UPDATE_MODE_WHEN_VISIBLE;
+    texture_rid = VSG.viewport.viewport_get_texture(this.viewport);
+    texture_flags = {
+        FILTER: false,
+        REPEAT: false,
+        MIPMAPS: false,
+    };
+
+    usage = USAGE_3D;
+    use_fxaa = false;
+
+    shadow_atlas_size = 0;
+    shadow_atlas_quadrant_subdiv = [0, 0, 0, 0];
+
+    /** @type {ViewportTexture} */
+    default_texture: ViewportTexture = new ViewportTexture;
+
+    /** @type {Set<ViewportTexture>} */
+    viewport_textures: Set<ViewportTexture> = new Set;
+
+    gui = new GUI;
+
     constructor() {
         super();
 
-        this.is_viewport = true;
-
-        this.input_group = `_vp_input${this.instance_id}`;
-        this.gui_input_group = `_vp_gui_input${this.instance_id}`;
-        this.unhandled_input_group = `_vp_unhandled_input${this.instance_id}`;
-        this.unhandled_key_input_group = `_vp_unhandled_key_input${this.instance_id}`;
-
-        /** @type {Viewport} */
-        this.parent = null;
-
-        /** @type {Camera} */
-        this.camera = null;
-        /** @type {Set<Camera>} */
-        this.cameras = new Set;
-        /** @type {Set<CanvasLayer>} */
-        this.canvas_layers = new Set;
-
-        this.viewport = VSG.viewport.viewport_create();
-        /** @type {import('engine/servers/visual/visual_server_canvas').Canvas} */
-        this.current_canvas = null;
-
-        this.override_canvas_transform = false;
-
-        this.canvas_transform_override = new Transform2D;
-        this.canvas_transform = new Transform2D;
-        this.global_canvas_transform = new Transform2D;
-        this.stretch_transform = new Transform2D;
-
-        this.size = new Vector2;
-        this.attach_to_screen_rect = new Rect2;
-        this.render_direct_to_screen = false;
-
-        this.size_override = false;
-        this.size_override_stretch = false;
-        this.size_override_size = new Vector2(1, 1);
-        this.size_override_margin = new Vector2;
-
-        this.last_vp_rect = new Rect2;
-
-        this.transparent_bg = false;
-        this.render_target_v_flip = false;
-        this.render_target_clear_mode = CLEAR_MODE_ALWAYS;
-        this.filter = false;
-        this.gen_mipmaps = false;
-
-        this.snap_controls_to_pixels = true;
-
-        this.local_input_handled = false;
-        this.handle_input_locally = true;
-
-        /** @type {World2D} */
-        this.world_2d = new World2D;
-        /** @type {World} */
-        this.world = null;
-        /** @type {World} */
-        this.own_world = null;
-
-        this.disable_input = false;
-        this.disable_3d = false;
-        this.keep_3d_linear = false;
-        this.render_target_update_mode = UPDATE_MODE_WHEN_VISIBLE;
-        this.texture_rid = VSG.viewport.viewport_get_texture(this.viewport);
-        this.texture_flags = {
-            FILTER: false,
-            REPEAT: false,
-            MIPMAPS: false,
-        };
-
-        this.usage = USAGE_3D;
-        this.use_fxaa = false;
-
-        this.shadow_atlas_size = 0;
-        this.shadow_atlas_quadrant_subdiv = [0, 0, 0, 0];
-
-        /** @type {ViewportTexture} */
-        this.default_texture = new ViewportTexture;
-        this.default_texture.vp = this;
-
-        /** @type {Set<ViewportTexture>} */
-        this.viewport_textures = new Set;
-        this.viewport_textures.add(this.default_texture);
         VSG.storage.texture_set_proxy(this.default_texture.proxy, this.texture_rid);
-
-        this.gui = new GUI;
+        this.default_texture.vp = this;
+        this.viewport_textures.add(this.default_texture);
     }
 
     /* virtual */
 
-    _load_data(data) {
+    _load_data(data: any) {
         super._load_data(data);
 
         if (data.size) this.set_size(data.size);
@@ -314,7 +297,7 @@ export class Viewport extends Node {
     /**
      * @param {number} p_what
      */
-    _notification(p_what) {
+    _notification(p_what: number) {
         switch (p_what) {
             case NOTIFICATION_ENTER_TREE: {
                 if (this.get_parent()) {
@@ -337,7 +320,7 @@ export class Viewport extends Node {
             case NOTIFICATION_READY: {
                 if (this.cameras.size && !this.camera) {
                     /** @type {Camera} */
-                    let first = null;
+                    let first: Camera = null;
                     for (let e of this.cameras) {
                         if (!first || first.is_greater_than(e)) {
                             first = e;
@@ -408,7 +391,7 @@ export class Viewport extends Node {
     /**
      * @param {InputEvent} p_event
      */
-    input(p_event) {
+    input(p_event: InputEvent) {
         this.local_input_handled = false;
 
         if (!this.is_input_handled()) {
@@ -422,7 +405,7 @@ export class Viewport extends Node {
     /**
      * @param {InputEvent} p_event
      */
-    unhandled_input(p_event) {
+    unhandled_input(p_event: InputEvent) {
         this.get_tree()._call_input_pause(this.unhandled_input_group, '_unhandled_input', p_event);
         if (!this.get_tree().input_handled && p_event.class === 'InputKeyEvent') {
             this.get_tree()._call_input_pause(this.unhandled_key_input_group, '_unhandled_key_input', p_event);
@@ -445,7 +428,7 @@ export class Viewport extends Node {
         Transform2D.free(xform);
         return pos;
     }
-    warp_mouse(p_pos) { }
+    warp_mouse(p_pos: Vector2Like) { }
 
     get_viewport_rid() {
         return this.viewport;
@@ -461,7 +444,7 @@ export class Viewport extends Node {
     /**
      * @param {Vector2Like} p_size
      */
-    set_size(p_size) {
+    set_size(p_size: Vector2Like) {
         if (this.size.x === Math.floor(p_size.x) && this.size.y === Math.floor(p_size.y)) {
             return;
         }
@@ -476,7 +459,7 @@ export class Viewport extends Node {
     /**
      * @param {Transform2D} p_xform
      */
-    set_canvas_transform(p_xform) {
+    set_canvas_transform(p_xform: Transform2D) {
         this.canvas_transform.copy(p_xform);
         VSG.viewport.viewport_set_canvas_transform(this.viewport, this.find_world_2d().canvas, this.canvas_transform);
     }
@@ -484,7 +467,7 @@ export class Viewport extends Node {
     /**
      * @param {Transform2D} p_xform
      */
-    set_global_canvas_transform(p_xform) {
+    set_global_canvas_transform(p_xform: Transform2D) {
         this.global_canvas_transform.copy(p_xform);
         this._update_global_transform();
     }
@@ -492,7 +475,7 @@ export class Viewport extends Node {
     /**
      * @param {World2D} p_world_2d
      */
-    set_world_2d(p_world_2d) {
+    set_world_2d(p_world_2d: World2D) {
         if (this.world_2d === p_world_2d) {
             return;
         }
@@ -522,7 +505,7 @@ export class Viewport extends Node {
     /**
      * @param {number} value
      */
-    set_render_target_update_mode(value) {
+    set_render_target_update_mode(value: number) {
         this.render_target_update_mode = value;
         VSG.viewport.viewport_set_update_mode(this.viewport, value);
     }
@@ -530,7 +513,7 @@ export class Viewport extends Node {
     /**
      * @param {boolean} p_enabled
      */
-    set_transparent_bg(p_enabled) {
+    set_transparent_bg(p_enabled: boolean) {
         this.transparent_bg = p_enabled;
         VSG.viewport.viewport_set_transparent_background(this.viewport, p_enabled);
     }
@@ -538,7 +521,7 @@ export class Viewport extends Node {
     /**
      * @param {boolean} p_enabled
      */
-    set_render_target_v_flip(p_enabled) {
+    set_render_target_v_flip(p_enabled: boolean) {
         this.render_target_v_flip = p_enabled;
         VSG.viewport.viewport_set_vflip(this.viewport, p_enabled);
     }
@@ -546,7 +529,7 @@ export class Viewport extends Node {
     /**
      * @param {number} value
      */
-    set_render_target_clear_mode(value) {
+    set_render_target_clear_mode(value: number) {
         this.render_target_clear_mode = value;
         VSG.viewport.viewport_set_clear_mode(this.viewport, value);
     }
@@ -554,7 +537,7 @@ export class Viewport extends Node {
     /**
      * @param {Rect2} p_rect
      */
-    set_attach_to_screen_rect(p_rect) {
+    set_attach_to_screen_rect(p_rect: Rect2) {
         VSG.viewport.viewport_attach_to_screen(this.viewport, p_rect);
         this.attach_to_screen_rect.copy(p_rect);
     }
@@ -562,7 +545,7 @@ export class Viewport extends Node {
     /**
      * @param {number} p_size
      */
-    set_shadow_atlas_size(p_size) {
+    set_shadow_atlas_size(p_size: number) {
         if (this.shadow_atlas_size === p_size) {
             return;
         }
@@ -576,7 +559,7 @@ export class Viewport extends Node {
      * @param {number} p_quadrant
      * @param {number} p_subdiv
      */
-    set_shadow_atlas_quadrant_subdiv(p_quadrant, p_subdiv) {
+    set_shadow_atlas_quadrant_subdiv(p_quadrant: number, p_subdiv: number) {
         if (this.shadow_atlas_quadrant_subdiv[p_quadrant] === p_subdiv) {
             return;
         }
@@ -590,7 +573,7 @@ export class Viewport extends Node {
     /**
      * @param {Camera} camera
      */
-    _camera_set(camera) {
+    _camera_set(camera: Camera) {
         if (this.camera === camera) return;
 
         if (this.camera) {
@@ -613,7 +596,7 @@ export class Viewport extends Node {
     /**
      * @param {Camera} camera
      */
-    _camera_add(camera) {
+    _camera_add(camera: Camera) {
         this.cameras.add(camera);
         return this.cameras.size === 1;
     }
@@ -621,7 +604,7 @@ export class Viewport extends Node {
     /**
      * @param {Camera} camera
      */
-    _camera_remove(camera) {
+    _camera_remove(camera: Camera) {
         this.cameras.delete(camera);
         if (this.camera === camera) {
             this.camera.notification(NOTIFICATION_LOST_CURRENT);
@@ -632,7 +615,7 @@ export class Viewport extends Node {
     /**
      * @param {Camera} p_exclude
      */
-    _camera_make_next_current(p_exclude) {
+    _camera_make_next_current(p_exclude: Camera) {
         for (let c of this.cameras) {
             if (c === p_exclude) continue;
             if (!c.is_inside_tree()) continue;
@@ -647,8 +630,8 @@ export class Viewport extends Node {
      * @param {Control} p_control
      * @param {InputEvent} p_input
      */
-    _gui_call_input(p_control, p_input) {
-        const mb = /** @type {InputEventMouseButton} */(p_input);
+    _gui_call_input(p_control: Control, p_input: InputEvent) {
+        const mb = p_input as InputEventMouseButton;
         let cant_stop_me_now = (
             mb.class === 'InputEventMouseButton'
             &&
@@ -699,14 +682,14 @@ export class Viewport extends Node {
             }
 
             p_input = p_input.xformed_by(ci.get_transform());
-            ci = /** @type {Control} */(ci.get_parent_item());
+            ci = ci.get_parent_item() as Control;
         }
     }
     /**
      * @param {Control} p_control
      * @param {number} p_what
      */
-    _gui_call_notification(p_control, p_what) {
+    _gui_call_notification(p_control: Control, p_what: number) {
         let ci = p_control;
         while (ci) {
             if (ci.is_control) {
@@ -730,7 +713,7 @@ export class Viewport extends Node {
                 break;
             }
 
-            ci = /** @type {Control} */(ci.get_parent_item());
+            ci = ci.get_parent_item() as Control;
         }
     }
 
@@ -768,7 +751,7 @@ export class Viewport extends Node {
     /**
      * @param {Vector2Like} p_global
      */
-    _gui_find_control(p_global) {
+    _gui_find_control(p_global: Vector2Like) {
         this._gui_prepare_subwindows();
 
         for (let E = this.gui.subwindows.back(); E; E = E.prev) {
@@ -776,7 +759,7 @@ export class Viewport extends Node {
             if (!sw.is_visible_in_tree()) continue;
 
             /** @type {Transform2D} */
-            let xform = null;
+            let xform: Transform2D = null;
             let pci = sw.get_parent_item();
             if (pci) {
                 xform = pci.get_global_transform_with_canvas();
@@ -799,7 +782,7 @@ export class Viewport extends Node {
             if (!sw.is_visible_in_tree()) continue;
 
             /** @type {Transform2D} */
-            let xform = null;
+            let xform: Transform2D = null;
             let pci = sw.get_parent_item();
             if (pci) {
                 xform = pci.get_global_transform_with_canvas();
@@ -817,14 +800,8 @@ export class Viewport extends Node {
 
         return null;
     }
-    /**
-     * @param {CanvasItem} p_node
-     * @param {Vector2Like} p_global
-     * @param {Transform2D} p_xform
-     * @param {Transform2D} r_inv_xform
-     */
-    _gui_find_control_at_pos(p_node, p_global, p_xform, r_inv_xform) {
-        if (p_node.class === 'Viewport') {
+    _gui_find_control_at_pos(p_node: CanvasItem, p_global: Vector2Like, p_xform: Transform2D, r_inv_xform: Transform2D): Control {
+        if (p_node.is_viewport) {
             return null;
         }
 
@@ -840,7 +817,7 @@ export class Viewport extends Node {
             return null;
         }
 
-        const c = /** @type {Control} */(p_node);
+        const c: Control = p_node as Control;
         const matrix_inv = matrix.clone().affine_inverse();
         const xform_global = matrix_inv.xform(p_global);
         // const has = c._has_point_(xform_global);
@@ -850,7 +827,7 @@ export class Viewport extends Node {
                     continue;
                 }
 
-                const ci = /** @type {CanvasItem} */(p_node.data.children[i]);
+                const ci = p_node.data.children[i] as CanvasItem;
                 if (!ci.is_canvas_item || ci.is_set_as_toplevel()) {
                     continue;
                 }
@@ -897,11 +874,11 @@ export class Viewport extends Node {
     /**
      * @param {InputEvent} p_event
      */
-    _gui_input_event(p_event) {
+    _gui_input_event(p_event: InputEvent) {
         const gui = this.gui;
 
         if (p_event.class === 'InputEventMouseButton') {
-            let mb = /** @type {InputEventMouseButton} */(p_event);
+            let mb = p_event as InputEventMouseButton;
             gui.key_event_accepted = false;
 
             const mpos = mb.position;
@@ -985,7 +962,7 @@ export class Viewport extends Node {
                             break;
                         }
 
-                        ci = /** @type {Control} */(ci.get_parent_item());
+                        ci = ci.get_parent_item() as Control;
                     }
                 }
 
@@ -1060,7 +1037,7 @@ export class Viewport extends Node {
         }
 
         if (p_event.class === 'InputEventMouseMotion') {
-            let mm = /** @type {InputEventMouseMotion} */(p_event);
+            let mm = p_event as InputEventMouseMotion;
 
             gui.key_event_accepted = false;
             const mpos = mm.position.clone();
@@ -1068,7 +1045,7 @@ export class Viewport extends Node {
             gui.last_mouse_pos.copy(mpos);
 
             /** @type {Control} */
-            let over = null;
+            let over: Control = null;
 
             if (!gui.drag_attempted && gui.mouse_focus && mm.button_mask & BUTTON_MASK_LEFT) {
                 // TODO
@@ -1142,7 +1119,8 @@ export class Viewport extends Node {
                             if (tooltip === gui.tooltip_label.text) {
                                 is_tooltip_shown = true;
                             }
-                        } else if (tooltip === /** @type {any} */(gui.tooltip_popup).get_tooltip_text()) {
+                        // @ts-ignore
+                        } else if (tooltip === gui.tooltip_popup.get_tooltip_text()) {
                             is_tooltip_shown = true;
                         }
 
@@ -1220,7 +1198,7 @@ export class Viewport extends Node {
     /**
      * @param {boolean} p_fxaa
      */
-    set_use_fxaa(p_fxaa) {
+    set_use_fxaa(p_fxaa: boolean) {
         if (p_fxaa === this.use_fxaa) {
             return;
         }
@@ -1231,7 +1209,7 @@ export class Viewport extends Node {
     /**
      * @param {boolean} p_disable
      */
-    set_disable_3d(p_disable) {
+    set_disable_3d(p_disable: boolean) {
         this.disable_3d = p_disable;
         this.viewport.disable_3d = p_disable;
     }
@@ -1239,7 +1217,7 @@ export class Viewport extends Node {
     /**
      * @param {boolean} p_linear
      */
-    set_keep_3d_linear(p_linear) {
+    set_keep_3d_linear(p_linear: boolean) {
         this.keep_3d_linear = p_linear;
         VSG.viewport.viewport_set_keep_3d_linear(this.viewport, this.keep_3d_linear);
     }
@@ -1260,7 +1238,7 @@ export class Viewport extends Node {
     /**
      * @param {InputEvent} p_ev
      */
-    _vp_input(p_ev) {
+    _vp_input(p_ev: InputEvent) {
         if (this.disable_input) return;
         if (this.attach_to_screen_rect.is_zero()) return;
 
@@ -1270,11 +1248,11 @@ export class Viewport extends Node {
     /**
      * @param {string} p_text
      */
-    _vp_input_text(p_text) { }
+    _vp_input_text(p_text: string) { }
     /**
      * @param {InputEvent} p_ev
      */
-    _vp_unhandled_input(p_ev) {
+    _vp_unhandled_input(p_ev: InputEvent) {
         if (this.disable_input) return;
         if (this.attach_to_screen_rect.is_zero()) return;
 
@@ -1284,7 +1262,7 @@ export class Viewport extends Node {
     /**
      * @param {InputEvent} ev
      */
-    _make_input_local(ev) {
+    _make_input_local(ev: InputEvent) {
         const vp_ofs = this._get_window_offset().clone().negate();
         const pre_xform = this._get_input_pre_xform();
         const ai = this.get_final_transform().affine_inverse().append(pre_xform);
@@ -1298,7 +1276,7 @@ export class Viewport extends Node {
     /**
      * @param {Control} p_control
      */
-    _gui_add_root_control(p_control) {
+    _gui_add_root_control(p_control: Control) {
         this.gui.roots_order_dirty = true;
         return this.gui.roots.push_back(p_control);
     }
@@ -1306,7 +1284,7 @@ export class Viewport extends Node {
     /**
      * @param {Control} p_control
      */
-    _gui_add_subwindow_control(p_control) {
+    _gui_add_subwindow_control(p_control: Control) {
         p_control.connect('visibility_changed', this._subwindow_visibility_changed, this);
 
         if (p_control.is_visible_in_tree()) {
@@ -1323,14 +1301,14 @@ export class Viewport extends Node {
     /**
      * @param {Element<Control>} MI
      */
-    _gui_remove_modal_control(MI) {
+    _gui_remove_modal_control(MI: Element<Control>) {
         this.gui.modal_stack.erase(MI);
     }
     /**
      * @param {Element<Control>} MI
      * @param {Control} p_prev_focus_owner
      */
-    _gui_remove_from_modal_stack(MI, p_prev_focus_owner) {
+    _gui_remove_from_modal_stack(MI: Element<Control>, p_prev_focus_owner: Control) {
         let next = MI.next;
 
         this.gui.modal_stack.erase(MI);
@@ -1353,13 +1331,13 @@ export class Viewport extends Node {
     /**
      * @param {Element<Control>} RI
      */
-    _gui_remove_root_control(RI) {
+    _gui_remove_root_control(RI: Element<Control>) {
         this.gui.roots.erase(RI);
     }
     /**
      * @param {Element<Control>} SI
      */
-    _gui_remove_subwindow_control(SI) {
+    _gui_remove_subwindow_control(SI: Element<Control>) {
         let control = SI.value;
 
         control.disconnect("visibility_changed", this._subwindow_visibility_changed, this);
@@ -1372,12 +1350,7 @@ export class Viewport extends Node {
         this.gui.all_known_subwindows.erase(SI);
     }
 
-    /**
-     * @param {Control} p_control
-     * @param {Vector2} p_pos
-     * @param {{ from: Control }} [r_which]
-     */
-    _gui_get_tooltip(p_control, p_pos, r_which) {
+    _gui_get_tooltip(p_control: Control, p_pos: Vector2, r_which?: { from: Control; }) {
         const pos = p_pos.clone();
         let tooltip = '';
 
@@ -1422,7 +1395,7 @@ export class Viewport extends Node {
     /**
      * @param {Control} p_control
      */
-    _gui_remove_control(p_control) {
+    _gui_remove_control(p_control: Control) {
         const gui = this.gui;
         if (gui.mouse_focus === p_control) {
             gui.mouse_focus = null;
@@ -1447,7 +1420,7 @@ export class Viewport extends Node {
     /**
      * @param {Control} p_control
      */
-    _gui_hid_control(p_control) {
+    _gui_hid_control(p_control: Control) {
         if (this.gui.mouse_focus === p_control) {
             this._drop_mouse_focus();
         }
@@ -1469,13 +1442,13 @@ export class Viewport extends Node {
     /**
      * @param {Control} p_control
      */
-    _gui_is_modal_on_top(p_control) {
+    _gui_is_modal_on_top(p_control: Control) {
         return (this.gui.modal_stack.size() && this.gui.modal_stack.back().value === p_control);
     }
     /**
      * @param {Control} p_control
      */
-    _gui_show_modal(p_control) {
+    _gui_show_modal(p_control: Control) {
         let node = this.gui.modal_stack.push_back(p_control);
         if (this.gui.key_focus) {
             p_control.c_data.modal_prev_focus_owner = this.gui.key_focus;
@@ -1500,7 +1473,7 @@ export class Viewport extends Node {
     /**
      * @param {Control} p_control
      */
-    _gui_unfocus_control(p_control) {
+    _gui_unfocus_control(p_control: Control) {
         if (this.gui.key_focus === p_control) {
             this.gui.key_focus.release_focus();
         }
@@ -1508,13 +1481,13 @@ export class Viewport extends Node {
     /**
      * @param {Control} p_control
      */
-    _gui_control_has_focus(p_control) {
+    _gui_control_has_focus(p_control: Control) {
         return this.gui.key_focus === p_control;
     }
     /**
      * @param {Control} p_control
      */
-    _gui_control_grab_focus(p_control) {
+    _gui_control_grab_focus(p_control: Control) {
         if (this.gui.key_focus && this.gui.key_focus === p_control) {
             return;
         }
@@ -1526,7 +1499,7 @@ export class Viewport extends Node {
     /**
      * @param {Control} p_control
      */
-    _gui_grab_click_focus(p_control) {
+    _gui_grab_click_focus(p_control: Control) {
         this.gui.mouse_click_grabber = p_control;
         this.call_deferred('_post_gui_grab_click_focus');
     }
@@ -1591,7 +1564,8 @@ export class Viewport extends Node {
     _get_window_offset() {
         const parent = this.get_parent();
         if (parent && 'get_global_position' in parent) {
-            return /** @type {Vector2} */(/** @type {any} */(parent).get_global_position());
+            // @ts-ignore
+            return parent.get_global_position();
         }
         return Vector2.ZERO;
     }
@@ -1601,13 +1575,13 @@ export class Viewport extends Node {
      * @param {Vector2} p_at_pos
      * @param {boolean} p_just_check
      */
-    _gui_drop(p_at_control, p_at_pos, p_just_check) {
+    _gui_drop(p_at_control: Control, p_at_pos: Vector2, p_just_check: boolean) {
         let at_pos = p_at_pos.clone();
 
         /** @type {CanvasItem} */
-        let ci = p_at_control;
+        let ci: CanvasItem = p_at_control;
         while (ci) {
-            const control = /** @type {Control} */(ci);
+            const control: Control = ci as Control;
             if (ci.is_control) {
                 if (control._can_drop_data_(at_pos, this.gui.drag_data)) {
                     if (!p_just_check) {
@@ -1641,13 +1615,13 @@ export class Viewport extends Node {
     /**
      * @param {CanvasLayer} p_layer
      */
-    _canvas_layer_add(p_layer) {
+    _canvas_layer_add(p_layer: CanvasLayer) {
         this.canvas_layers.add(p_layer);
     }
     /**
      * @param {CanvasLayer} p_layer
      */
-    _canvas_layer_remove(p_layer) {
+    _canvas_layer_remove(p_layer: CanvasLayer) {
         this.canvas_layers.delete(p_layer);
     }
 
@@ -1663,14 +1637,14 @@ export class Viewport extends Node {
     /**
      * @param {Node} p_node
      */
-    _update_canvas_items(p_node) {
+    _update_canvas_items(p_node: Node) {
         if (p_node !== this) {
-            const vp = /** @type {Viewport} */(p_node);
+            const vp: Viewport = p_node as Viewport;
             if (vp.is_viewport) {
                 return;
             }
 
-            const ci = /** @type {CanvasItem} */(p_node);
+            const ci: CanvasItem = p_node as CanvasItem;
             if (ci.is_canvas_item) {
                 ci.update();
             }
@@ -1704,7 +1678,7 @@ export class Viewport extends Node {
     /**
      * @returns {World2D}
      */
-    find_world_2d() {
+    find_world_2d(): World2D {
         if (this.world_2d) {
             return this.world_2d;
         } else if (this.parent) {
@@ -1717,7 +1691,7 @@ export class Viewport extends Node {
     /**
      * @param {boolean} p_world
      */
-    set_use_own_world(p_world) {
+    set_use_own_world(p_world: boolean) {
         if (!!this.own_world === p_world) return;
 
         if (this.is_inside_tree()) {
@@ -1743,7 +1717,7 @@ export class Viewport extends Node {
     /**
      * @param {World} world
      */
-    set_world(world) {
+    set_world(world: World) {
         if (this.world === world) return;
 
         if (this.is_inside_tree()) {
@@ -1775,7 +1749,7 @@ export class Viewport extends Node {
     /**
      * @returns {World}
      */
-    find_world() {
+    find_world(): World {
         if (this.own_world) return this.own_world;
         else if (this.world) return this.world;
         else if (this.parent) return this.parent.find_world();
@@ -1795,7 +1769,7 @@ export class Viewport extends Node {
      * @param {Vector2Like} p_size
      * @param {Vector2Like} [p_margin]
      */
-    set_size_override(p_enabled, p_size = VEC2_NEG, p_margin = Vector2.ZERO) {
+    set_size_override(p_enabled: boolean, p_size: Vector2Like = VEC2_NEG, p_margin: Vector2Like = Vector2.ZERO) {
         if (this.size_override === p_enabled && this.size_override_size.equals(p_size)) {
             return;
         }
@@ -1819,7 +1793,7 @@ export class Viewport extends Node {
     /**
      * @param {boolean} p_enabled
      */
-    set_size_override_stretch(p_enabled) {
+    set_size_override_stretch(p_enabled: boolean) {
         if (p_enabled === this.size_override_stretch) {
             return;
         }
@@ -1841,7 +1815,7 @@ export class Viewport extends Node {
     /**
      * @param {Node} p_node
      */
-    _propagate_enter_world(p_node) {
+    _propagate_enter_world(p_node: Node) {
         if (p_node !== this) {
             if (!p_node.is_inside_tree()) return;
 
@@ -1849,7 +1823,7 @@ export class Viewport extends Node {
                 p_node.notification(NOTIFICATION_ENTER_WORLD);
             } else {
                 if (p_node.is_viewport) {
-                    let v = /** @type {Viewport} */(p_node);
+                    let v: Viewport = p_node as Viewport;
                     if (v.world || v.own_world) return;
                 }
             }
@@ -1862,7 +1836,7 @@ export class Viewport extends Node {
     /**
      * @param {Node} p_node
      */
-    _propagate_exit_world(p_node) {
+    _propagate_exit_world(p_node: Node) {
         if (p_node !== this) {
             if (!p_node.is_inside_tree()) return;
 
@@ -1870,7 +1844,7 @@ export class Viewport extends Node {
                 p_node.notification(NOTIFICATION_EXIT_WORLD);
             } else {
                 if (p_node.is_viewport) {
-                    let v = /** @type {Viewport} */(p_node);
+                    let v: Viewport = p_node as Viewport;
                     if (v.world || v.own_world) return;
                 }
             }
@@ -1884,7 +1858,7 @@ export class Viewport extends Node {
      * @param {Node} p_node
      * @param {number} p_what
      */
-    _propagate_viewport_notification(p_node, p_what) {
+    _propagate_viewport_notification(p_node: Node, p_what: number) {
         p_node.notification(p_what);
         for (let c of p_node.data.children) {
             if (c.is_viewport) {

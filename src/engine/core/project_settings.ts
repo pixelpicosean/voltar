@@ -2,7 +2,7 @@ import { deep_merge } from "engine/utils/deep_merge";
 import {
     STRETCH_MODE_DISABLED,
     STRETCH_ASPECT_IGNORE,
-} from "engine/scene/main/scene_tree.js";
+} from "engine/scene/main/scene_tree";
 import { InputEventKey } from "./os/input_event";
 import { KEYS } from "./os/keyboard";
 

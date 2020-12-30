@@ -11,8 +11,8 @@ import { Vector2, Vector2Like } from 'engine/core/math/vector2';
 import { Rect2 } from 'engine/core/math/rect2.js';
 import { Transform2D } from 'engine/core/math/transform_2d.js';
 
-import { Viewport } from '../main/viewport.js';
-import { GROUP_CALL_REALTIME } from '../main/scene_tree.js';
+import { Viewport } from '../main/viewport';
+import { GROUP_CALL_REALTIME } from '../main/scene_tree';
 import {
     NOTIFICATION_INTERNAL_PROCESS,
     NOTIFICATION_INTERNAL_PHYSICS_PROCESS,

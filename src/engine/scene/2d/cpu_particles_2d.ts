@@ -35,10 +35,7 @@ import { NOTIFICATION_TRANSFORM_CHANGED } from '../const';
 
 const Math_PI2 = Math_PI * 2;
 
-/**
- * @param {number} value
- */
-const validate_frac = (value) => (value < 0) ? 0 : ((value > 1) ? 1 : value);
+const validate_frac = (value: number) => (value < 0) ? 0 : ((value > 1) ? 1 : value);
 
 export const DRAW_ORDER_INDEX = 0;
 export const DRAW_ORDER_LIFETIME = 1;
@@ -69,23 +66,22 @@ export const EMISSION_SHAPE_POINTS = 3;
 export const EMISSION_SHAPE_DIRECTED_POINTS = 4;
 
 class Particle {
-    constructor() {
-        this.transform = new Transform2D;
-        this.color = new Color;
-        this.custom = [0, 0, 0, 0];
-        this.rotation = 0;
-        this.velocity = new Vector2;
-        this.active = false;
-        this.angle_rand = 0;
-        this.scale_rand = 0;
-        this.hue_rot_rand = 0;
-        this.anim_offset_rand = 0;
-        this.time = 0;
-        this.lifetime = 0;
-        this.base_color = new Color;
+    transform = new Transform2D;
+    color = new Color;
+    custom = [0, 0, 0, 0];
+    rotation = 0;
+    velocity = new Vector2;
+    active = false;
+    angle_rand = 0;
+    scale_rand = 0;
+    hue_rot_rand = 0;
+    anim_offset_rand = 0;
+    time = 0;
+    lifetime = 0;
+    base_color = new Color;
 
-        this.seed = 0;
-    }
+    seed = 0;
+
     static create() {
         const p = ParticlePool.pop();
         if (p) {
@@ -96,7 +92,7 @@ class Particle {
     }
 }
 /** @type {Particle[]} */
-const ParticlePool = [];
+const ParticlePool: Particle[] = [];
 
 const basis = (m00 = 1, m01 = 0, m02 = 0, m10 = 0, m11 = 1, m12 = 0, m20 = 0, m21 = 0, m22 = 1) => ([
     [m00, m01, m02],
@@ -116,7 +112,7 @@ export class CPUParticles2D extends Node2D {
     /**
      * @param {boolean} p_emitting
      */
-    set_emitting(p_emitting) {
+    set_emitting(p_emitting: boolean) {
         if (this.emitting === p_emitting) {
             return;
         }
@@ -130,7 +126,7 @@ export class CPUParticles2D extends Node2D {
     /**
      * @param {number} p_amount
      */
-    set_amount(p_amount) {
+    set_amount(p_amount: number) {
         const len = this.particles.length;
         if (len > p_amount) {
             for (let i = p_amount; i < len; i++) {
@@ -156,9 +152,9 @@ export class CPUParticles2D extends Node2D {
     /**
      * @param {string | ImageTexture} p_texture
      */
-    set_texture(p_texture) {
+    set_texture(p_texture: string | ImageTexture) {
         /** @type {ImageTexture} */
-        const texture = (typeof (p_texture) === 'string') ? get_resource_map()[p_texture] : p_texture;
+        const texture: ImageTexture = (typeof (p_texture) === 'string') ? get_resource_map()[p_texture] : p_texture;
         this.texture = texture;
         this._update_mesh_texture();
     }
@@ -166,214 +162,206 @@ export class CPUParticles2D extends Node2D {
     get angle() { return this.parameters[PARAM_ANGLE] }
     set angle(value) { this.parameters[PARAM_ANGLE] = value }
     /** @param {number} value */
-    set_angle(value) { this.parameters[PARAM_ANGLE] = value }
+    set_angle(value: number) { this.parameters[PARAM_ANGLE] = value }
 
     get angle_random() { return this.randomness[PARAM_ANGLE] }
     set angle_random(value) { this.randomness[PARAM_ANGLE] = value }
     /** @param {number} value */
-    set_angle_random(value) { this.randomness[PARAM_ANGLE] = value }
+    set_angle_random(value: number) { this.randomness[PARAM_ANGLE] = value }
 
     get angular_velocity() { return this.parameters[PARAM_ANGULAR_VELOCITY] }
     set angular_velocity(value) { this.parameters[PARAM_ANGULAR_VELOCITY] = value }
     /** @param {number} value */
-    set_angular_velocity(value) { this.parameters[PARAM_ANGULAR_VELOCITY] = value }
+    set_angular_velocity(value: number) { this.parameters[PARAM_ANGULAR_VELOCITY] = value }
 
     get angular_velocity_random() { return this.randomness[PARAM_ANGULAR_VELOCITY] }
     set angular_velocity_random(value) { this.randomness[PARAM_ANGULAR_VELOCITY] = value }
     /** @param {number} value */
-    set_angular_velocity_random(value) { this.randomness[PARAM_ANGULAR_VELOCITY] = value }
+    set_angular_velocity_random(value: number) { this.randomness[PARAM_ANGULAR_VELOCITY] = value }
 
     get anim_offset() { return this.parameters[PARAM_ANIM_OFFSET] }
     set anim_offset(value) { this.parameters[PARAM_ANIM_OFFSET] = value }
     /** @param {number} value */
-    set_anim_offset(value) { this.parameters[PARAM_ANIM_OFFSET] = value }
+    set_anim_offset(value: number) { this.parameters[PARAM_ANIM_OFFSET] = value }
 
     get anim_offset_random() { return this.randomness[PARAM_ANIM_OFFSET] }
     set anim_offset_random(value) { this.randomness[PARAM_ANIM_OFFSET] = value }
     /** @param {number} value */
-    set_anim_offset_random(value) { this.randomness[PARAM_ANIM_OFFSET] = value }
+    set_anim_offset_random(value: number) { this.randomness[PARAM_ANIM_OFFSET] = value }
 
     get anim_speed() { return this.parameters[PARAM_ANIM_SPEED] }
     set anim_speed(value) { this.parameters[PARAM_ANIM_SPEED] = value }
     /** @param {number} value */
-    set_anim_speed(value) { this.parameters[PARAM_ANIM_SPEED] = value }
+    set_anim_speed(value: number) { this.parameters[PARAM_ANIM_SPEED] = value }
 
     get anim_speed_random() { return this.randomness[PARAM_ANIM_SPEED] }
     set anim_speed_random(value) { this.randomness[PARAM_ANIM_SPEED] = value }
     /** @param {number} value */
-    set_anim_speed_random(value) { this.randomness[PARAM_ANIM_SPEED] = value }
+    set_anim_speed_random(value: number) { this.randomness[PARAM_ANIM_SPEED] = value }
 
     get damping() { return this.parameters[PARAM_DAMPING] }
     set damping(value) { this.parameters[PARAM_DAMPING] = value }
     /** @param {number} value */
-    set_damping(value) { this.parameters[PARAM_DAMPING] = value }
+    set_damping(value: number) { this.parameters[PARAM_DAMPING] = value }
 
     get damping_random() { return this.randomness[PARAM_DAMPING] }
     set damping_random(value) { this.randomness[PARAM_DAMPING] = value }
     /** @param {number} value */
-    set_damping_random(value) { this.randomness[PARAM_DAMPING] = value }
+    set_damping_random(value: number) { this.randomness[PARAM_DAMPING] = value }
 
     get hue_variation() { return this.parameters[PARAM_HUE_VARIATION] }
     set hue_variation(value) { this.parameters[PARAM_HUE_VARIATION] = value }
     /** @param {number} value */
-    set_hue_variation(value) { this.parameters[PARAM_HUE_VARIATION] = value }
+    set_hue_variation(value: number) { this.parameters[PARAM_HUE_VARIATION] = value }
 
     get hue_variation_random() { return this.randomness[PARAM_HUE_VARIATION] }
     set hue_variation_random(value) { this.randomness[PARAM_HUE_VARIATION] = value }
     /** @param {number} value */
-    set_hue_variation_random(value) { this.randomness[PARAM_HUE_VARIATION] = value }
+    set_hue_variation_random(value: number) { this.randomness[PARAM_HUE_VARIATION] = value }
 
     get linear_accel() { return this.parameters[PARAM_LINEAR_ACCEL] }
     set linear_accel(value) { this.parameters[PARAM_LINEAR_ACCEL] = value }
     /** @param {number} value */
-    set_linear_accel(value) { this.parameters[PARAM_LINEAR_ACCEL] = value }
+    set_linear_accel(value: number) { this.parameters[PARAM_LINEAR_ACCEL] = value }
 
     get linear_accel_random() { return this.randomness[PARAM_LINEAR_ACCEL] }
     set linear_accel_random(value) { this.randomness[PARAM_LINEAR_ACCEL] = value }
     /** @param {number} value */
-    set_linear_accel_random(value) { this.randomness[PARAM_LINEAR_ACCEL] = value }
+    set_linear_accel_random(value: number) { this.randomness[PARAM_LINEAR_ACCEL] = value }
 
     get radial_accel() { return this.parameters[PARAM_RADIAL_ACCEL] }
     set radial_accel(value) { this.parameters[PARAM_RADIAL_ACCEL] = value }
     /** @param {number} value */
-    set_radial_accel(value) { this.parameters[PARAM_RADIAL_ACCEL] = value }
+    set_radial_accel(value: number) { this.parameters[PARAM_RADIAL_ACCEL] = value }
 
     get radial_accel_random() { return this.randomness[PARAM_RADIAL_ACCEL] }
     set radial_accel_random(value) { this.randomness[PARAM_RADIAL_ACCEL] = value }
     /** @param {number} value */
-    set_radial_accel_random(value) { this.randomness[PARAM_RADIAL_ACCEL] = value }
+    set_radial_accel_random(value: number) { this.randomness[PARAM_RADIAL_ACCEL] = value }
 
     get scale_amount() { return this.parameters[PARAM_SCALE] }
     set scale_amount(value) { this.parameters[PARAM_SCALE] = value }
     /** @param {number} value */
-    set_scale_amount(value) { this.parameters[PARAM_SCALE] = value }
+    set_scale_amount(value: number) { this.parameters[PARAM_SCALE] = value }
 
     get scale_amount_random() { return this.randomness[PARAM_SCALE] }
     set scale_amount_random(value) { this.randomness[PARAM_SCALE] = value }
     /** @param {number} value */
-    set_scale_amount_random(value) { this.randomness[PARAM_SCALE] = value }
+    set_scale_amount_random(value: number) { this.randomness[PARAM_SCALE] = value }
 
     get tangential_accel() { return this.parameters[PARAM_TANGENTIAL_ACCEL] }
     set tangential_accel(value) { this.parameters[PARAM_TANGENTIAL_ACCEL] = value }
     /** @param {number} value */
-    set_tangential_accel(value) { this.parameters[PARAM_TANGENTIAL_ACCEL] = value }
+    set_tangential_accel(value: number) { this.parameters[PARAM_TANGENTIAL_ACCEL] = value }
 
     get tangential_accel_random() { return this.randomness[PARAM_TANGENTIAL_ACCEL] }
     set tangential_accel_random(value) { this.randomness[PARAM_TANGENTIAL_ACCEL] = value }
     /** @param {number} value */
-    set_tangential_accel_random(value) { this.randomness[PARAM_TANGENTIAL_ACCEL] = value }
+    set_tangential_accel_random(value: number) { this.randomness[PARAM_TANGENTIAL_ACCEL] = value }
 
     get initial_velocity() { return this.parameters[PARAM_INITIAL_LINEAR_VELOCITY] }
     set initial_velocity(value) { this.parameters[PARAM_INITIAL_LINEAR_VELOCITY] = value }
     /** @param {number} value */
-    set_initial_velocity(value) { this.parameters[PARAM_INITIAL_LINEAR_VELOCITY] = value }
+    set_initial_velocity(value: number) { this.parameters[PARAM_INITIAL_LINEAR_VELOCITY] = value }
 
     get initial_velocity_random() { return this.randomness[PARAM_INITIAL_LINEAR_VELOCITY] }
     set initial_velocity_random(value) { this.randomness[PARAM_INITIAL_LINEAR_VELOCITY] = value }
     /** @param {number} value */
-    set_initial_velocity_random(value) { this.randomness[PARAM_INITIAL_LINEAR_VELOCITY] = value }
+    set_initial_velocity_random(value: number) { this.randomness[PARAM_INITIAL_LINEAR_VELOCITY] = value }
 
-    constructor() {
+    emitting = true;
+
+    amount = 8;
+    lifetime = 1;
+    lifetime_randomness = 0;
+
+    local_coords = true;
+    one_shot = false;
+    explosiveness = false;
+    flatness = 0;
+    preprocess = 0;
+    fract_delta = true;
+
+    randomness_ratio = 0;
+    explosiveness_ratio = 0;
+
+    /** @type {number[]} */
+    parameters: number[] = new Array(PARAM_MAX);
+    /** @type {Curve[]} */
+    curve_parameters: Curve[] = new Array(PARAM_MAX);
+    /** @type {number[]} */
+    randomness: number[] = new Array(PARAM_MAX);
+    /** @type {boolean[]} */
+    flags: boolean[] = new Array(FLAG_MAX);
+
+    color = new Color(1, 1, 1, 1);
+    /** @type {Gradient} */
+    color_ramp: Gradient = null;
+
+    /** @type {ImageTexture} */
+    texture: ImageTexture = null;
+
+    /** @type {Color[]} */
+    emission_colors: Color[] = [];
+    /** @type {Vector2[]} */
+    emission_normals: Vector2[] = [];
+    /** @type {Vector2[]} */
+    emission_points: Vector2[] = [];
+    emission_rect_extents = new Vector2(1, 1);
+    emission_shape = EMISSION_SHAPE_POINT;
+    emission_sphere_radius = 1;
+
+    fixed_fps = 0;
+
+    speed_scale = 1;
+
+    direction = new Vector2();
+    spread = 45;
+
+    gravity = new Vector2(0, 98);
+
+    /** @type {Curve} */
+    angle_curve: Curve = null;
+    /** @type {Curve} */
+    angular_velocity_curve: Curve = null;
+    /** @type {Curve} */
+    anim_offset_curve: Curve = null;
+    /** @type {Curve} */
+    anim_speed_curve: Curve = null;
+    /** @type {Curve} */
+    damping_curve: Curve = null;
+    /** @type {Curve} */
+    hue_variation_curve: Curve = null;
+    /** @type {Curve} */
+    linear_accel_curve: Curve = null;
+    /** @type {Curve} */
+    radial_accel_curve: Curve = null;
+    /** @type {Curve} */
+    scale_amount_curve: Curve = null;
+    /** @type {Curve} */
+    tangential_accel_curve: Curve = null;
+
+    inv_emission_transform = new Transform2D;
+
+    draw_order = DRAW_ORDER_INDEX;
+
+    time = 0;
+    inactive_time = 0;
+    frame_remainder = 0;
+    cycle = 0;
+    redraw = false;
+
+    mesh = VSG.storage.mesh_create();
+    multimesh = VSG.storage.multimesh_create();
+
+    particles: Particle[] = [];
+    particle_data: number[] = [];
+    particle_order: number[] = [];
+
+    constructor(){
         super();
 
-        this.emitting = true;
-
-        this.amount = 8;
-        this.lifetime = 1;
-        this.lifetime_randomness = 0;
-
-        this.local_coords = true;
-        this.one_shot = false;
-        this.explosiveness = false;
-        this.flatness = 0;
-        this.preprocess = 0;
-        this.fract_delta = true;
-
-        this.randomness_ratio = 0;
-        this.explosiveness_ratio = 0;
-
-        /** @type {number[]} */
-        this.parameters = new Array(PARAM_MAX);
-        /** @type {Curve[]} */
-        this.curve_parameters = new Array(PARAM_MAX);
-        /** @type {number[]} */
-        this.randomness = new Array(PARAM_MAX);
-        /** @type {boolean[]} */
-        this.flags = new Array(FLAG_MAX);
-
-        this.color = new Color(1, 1, 1, 1);
-        /** @type {Gradient} */
-        this.color_ramp = null;
-
-        /** @type {ImageTexture} */
-        this.texture = null;
-
-        /** @type {Color[]} */
-        this.emission_colors = [];
-        /** @type {Vector2[]} */
-        this.emission_normals = [];
-        /** @type {Vector2[]} */
-        this.emission_points = [];
-        this.emission_rect_extents = new Vector2(1, 1);
-        this.emission_shape = EMISSION_SHAPE_POINT;
-        this.emission_sphere_radius = 1;
-
-        this.fixed_fps = 0;
-
-        this.speed_scale = 1;
-
-        this.direction = new Vector2();
-        this.spread = 45;
-
-        this.gravity = new Vector2(0, 98);
-
-        /** @type {Curve} */
-        this.angle_curve = null;
-        /** @type {Curve} */
-        this.angular_velocity_curve = null;
-        /** @type {Curve} */
-        this.anim_offset_curve = null;
-        /** @type {Curve} */
-        this.anim_speed_curve = null;
-        /** @type {Curve} */
-        this.damping_curve = null;
-        /** @type {Curve} */
-        this.hue_variation_curve = null;
-        /** @type {Curve} */
-        this.linear_accel_curve = null;
-        /** @type {Curve} */
-        this.radial_accel_curve = null;
-        /** @type {Curve} */
-        this.scale_amount_curve = null;
-        /** @type {Curve} */
-        this.tangential_accel_curve = null;
-
-        this.inv_emission_transform = new Transform2D;
-
-        this.draw_order = DRAW_ORDER_INDEX;
-
-        this.time = 0;
-        this.inactive_time = 0;
-        this.frame_remainder = 0;
-        this.cycle = 0;
-        this.redraw = false;
-
-        this.mesh = VSG.storage.mesh_create();
-        this.multimesh = VSG.storage.multimesh_create();
         VSG.storage.multimesh_set_mesh(this.multimesh, this.mesh);
-
-        /**
-         * @type {Particle[]}
-         */
-        this.particles = [];
-        /**
-         * @type {number[]}
-         */
-        this.particle_data = [];
-        /**
-         * @type {number[]}
-         */
-        this.particle_order = [];
 
         // initialize
         for (let i = 0; i < PARAM_MAX; i++) {
@@ -410,7 +398,7 @@ export class CPUParticles2D extends Node2D {
 
     /* virtual */
 
-    _load_data(data) {
+    _load_data(data: any) {
         super._load_data(data);
 
         if (data.amount !== undefined) this.set_amount(data.amount);
@@ -430,8 +418,6 @@ export class CPUParticles2D extends Node2D {
         if (data.flatness !== undefined) this.flatness = data.flatness;
         if (data.fract_delta !== undefined) this.fract_delta = data.fract_delta;
         if (data.draw_order !== undefined) this.draw_order = data.draw_order;
-
-        if (data.blend_mode !== undefined) this.blend_mode = data.blend_mode;
 
         if (data.color !== undefined) this.color.copy(data.color);
         if (data.color_ramp !== undefined) this.color_ramp = data.color_ramp;
@@ -495,7 +481,7 @@ export class CPUParticles2D extends Node2D {
     /**
      * @param {number} p_what
      */
-    _notification(p_what) {
+    _notification(p_what: number) {
         if (p_what === NOTIFICATION_ENTER_TREE) {
             this.set_process_internal(this.emitting);
         }
@@ -579,13 +565,13 @@ export class CPUParticles2D extends Node2D {
      * @param {number} p_param
      * @param {number} p_value
      */
-    set_param(p_param, p_value) {
+    set_param(p_param: number, p_value: number) {
         this.parameters[p_param] = p_value;
     }
     /**
      * @param {number} p_param
      */
-    get_param(p_param) {
+    get_param(p_param: number) {
         return this.parameters[p_param];
     }
 
@@ -593,13 +579,13 @@ export class CPUParticles2D extends Node2D {
      * @param {number} p_param
      * @param {number} p_value
      */
-    set_param_randomness(p_param, p_value) {
+    set_param_randomness(p_param: number, p_value: number) {
         this.randomness[p_param] = p_value;
     }
     /**
      * @param {number} p_param
      */
-    get_param_randomness(p_param) {
+    get_param_randomness(p_param: number) {
         return this.randomness[p_param];
     }
 
@@ -608,7 +594,7 @@ export class CPUParticles2D extends Node2D {
      * @param {number} p_min
      * @param {number} p_max
      */
-    _adjust_curve_range(p_curve, p_min, p_max) {
+    _adjust_curve_range(p_curve: Curve, p_min: number, p_max: number) {
         if (!p_curve) {
             return;
         }
@@ -620,7 +606,7 @@ export class CPUParticles2D extends Node2D {
      * @param {number} p_param
      * @param {Curve} p_curve
      */
-    set_param_curve(p_param, p_curve) {
+    set_param_curve(p_param: number, p_curve: Curve) {
         this.curve_parameters[p_param] = p_curve;
 
         switch (p_param) {
@@ -664,14 +650,14 @@ export class CPUParticles2D extends Node2D {
     /**
      * @param {number} p_param
      */
-    get_param_curve(p_param) {
+    get_param_curve(p_param: number) {
         return this.curve_parameters[p_param];
     }
 
     /**
      * @param {number} p_delta
      */
-    _particles_process(p_delta) {
+    _particles_process(p_delta: number) {
         p_delta *= this.speed_scale;
 
         let pcount = this.particles.length;
@@ -1112,7 +1098,7 @@ export class CPUParticles2D extends Node2D {
         let ptr_idx = 0;
 
         /** @type {number[]} */
-        let order = null;
+        let order: number[] = null;
 
         if (this.draw_order !== DRAW_ORDER_INDEX) {
             order = this.particle_order;
@@ -1205,7 +1191,7 @@ export class CPUParticles2D extends Node2D {
     /**
      * @param {boolean} p_redraw
      */
-    _set_redraw(p_redraw) {
+    _set_redraw(p_redraw: boolean) {
         if (this.redraw === p_redraw) {
             return;
         }

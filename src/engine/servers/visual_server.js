@@ -10,7 +10,7 @@ import { Color } from "engine/core/color";
 import { VSG } from "./visual/visual_server_globals.js";
 import { VisualServerCanvas } from "./visual/visual_server_canvas.js";
 import { VisualServerScene } from "./visual/visual_server_scene.js";
-import { VisualServerViewport } from "./visual/visual_server_viewport.js";
+import { VisualServerViewport } from "./visual/visual_server_viewport";
 
 import { Rasterizer } from "engine/drivers/webgl/rasterizer.js";
 

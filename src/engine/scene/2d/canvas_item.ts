@@ -14,8 +14,8 @@ import { VSG } from "engine/servers/visual/visual_server_globals.js";
 import { ImageTexture } from "../resources/texture.js";
 import { StyleBox } from "../resources/style_box.js";
 import { Material } from "../resources/material.js";
-import { GROUP_CALL_UNIQUE } from "../main/scene_tree.js";
-import { CanvasLayer } from "../main/canvas_layer.js";
+import { GROUP_CALL_UNIQUE } from "../main/scene_tree";
+import { CanvasLayer } from "../main/canvas_layer";
 import {
     Node,
     NOTIFICATION_ENTER_TREE,
@@ -39,7 +39,7 @@ export const BLEND_MODE_MUL = 3;
 export const BLEND_MODE_PREMULT_ALPHA = 4;
 export const BLEND_MODE_DISABLE = 5;
 
-const white = Object.freeze(new Color(1, 1, 1, 1));
+const WHITE = new Color(1, 1, 1, 1);
 
 export class CanvasItemMaterial extends Material {
     get class() { return "CanvasItemMaterial" }
@@ -310,7 +310,7 @@ export class CanvasItem extends Node {
      * @param {Vector2Like} p_pos
      * @param {ColorLike} [p_modulate=white]
      */
-    draw_texture(p_texture: ImageTexture, p_pos: Vector2Like, p_modulate: ColorLike = white) {
+    draw_texture(p_texture: ImageTexture, p_pos: Vector2Like, p_modulate: ColorLike = WHITE) {
         p_texture.draw(this.canvas_item, p_pos, p_modulate, false);
     }
 
@@ -321,7 +321,7 @@ export class CanvasItem extends Node {
      * @param {ColorLike} [p_modulate=white]
      * @param {boolean} [p_transpose=false]
      */
-    draw_texture_rect(p_texture: ImageTexture, p_rect: Rect2, p_tile: boolean = false, p_modulate: ColorLike = white, p_transpose: boolean = false) {
+    draw_texture_rect(p_texture: ImageTexture, p_rect: Rect2, p_tile: boolean = false, p_modulate: ColorLike = WHITE, p_transpose: boolean = false) {
         p_texture.draw_rect(this.canvas_item, p_rect, p_tile, p_modulate, p_transpose);
     }
 
@@ -332,7 +332,7 @@ export class CanvasItem extends Node {
      * @param {ColorLike} [p_modulate=white]
      * @param {boolean} [p_transpose=false]
      */
-    draw_texture_rect_region(p_texture: ImageTexture, p_rect: Rect2, p_src_rect: Rect2, p_modulate: ColorLike = white, p_transpose: boolean = false) {
+    draw_texture_rect_region(p_texture: ImageTexture, p_rect: Rect2, p_src_rect: Rect2, p_modulate: ColorLike = WHITE, p_transpose: boolean = false) {
         p_texture.draw_rect_region(this.canvas_item, p_rect, p_src_rect, p_modulate, p_transpose);
     }
 

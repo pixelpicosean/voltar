@@ -231,7 +231,7 @@ export class VObject {
      *
      * @param [event] The event name.
      */
-    disconnect_all(event: string | symbol): VObject {
+    disconnect_all(event?: string | symbol): VObject {
         if (!event) {
             this._events.clear();
         } else {

@@ -2,17 +2,18 @@ import { node_class_map } from "engine/registry";
 import { GDCLASS } from "engine/core/v_object";
 import { Rect2 } from "engine/core/math/rect2.js";
 
-import { AnimationPlayer } from "../animation/animation_player.js";
-import { Viewport } from "../main/viewport.js";
+import { AnimationPlayer } from "../animation/animation_player";
+import { Viewport } from "../main/viewport";
 import {
     NOTIFICATION_ENTER_TREE,
     NOTIFICATION_EXIT_TREE,
     Node,
 } from "../main/node";
-import { Node2D } from "./node_2d";
-import { CPUParticles2D } from "./cpu_particles_2d.js";
 import { NOTIFICATION_TRANSFORM_CHANGED } from "../const";
-import { AnimatedSprite } from "./animated_sprite.js";
+
+import { Node2D } from "./node_2d";
+import { CPUParticles2D } from "./cpu_particles_2d";
+import { AnimatedSprite } from "./animated_sprite";
 
 
 export class VisibilityNotifier2D extends Node2D {

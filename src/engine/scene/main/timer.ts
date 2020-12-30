@@ -15,21 +15,17 @@ export const TIMER_PROCESS_IDLE = 1;
 export class Timer extends Node {
     get class() { return 'Timer' }
 
-    constructor() {
-        super();
-
-        this.wait_time = 1;
-        this.autostart = false;
-        this.one_shot = false;
-        this.processing = false;
-        this.paused = false;
-        this.process_mode = TIMER_PROCESS_IDLE;
-        this.time_left = -1;
-    }
+    wait_time = 1;
+    autostart = false;
+    one_shot = false;
+    processing = false;
+    paused = false;
+    process_mode = TIMER_PROCESS_IDLE;
+    time_left = -1;
 
     /* virtual */
 
-    _load_data(data) {
+    _load_data(data: any) {
         if (data.wait_time !== undefined) this.wait_time = data.wait_time;
         if (data.autostart !== undefined) this.autostart = data.autostart;
         if (data.one_shot !== undefined) this.one_shot = data.one_shot;
@@ -38,10 +34,7 @@ export class Timer extends Node {
         return super._load_data(data);
     }
 
-    /**
-     * @param {number} p_what
-     */
-    _notification(p_what) {
+    _notification(p_what: number) {
         switch (p_what) {
             case NOTIFICATION_READY: {
                 if (this.autostart) {
@@ -106,7 +99,7 @@ export class Timer extends Node {
     /**
      * @param {number} p_mode
      */
-    set_process_mode(p_mode) {
+    set_process_mode(p_mode: number) {
         if (this.process_mode === p_mode) {
             return;
         }
@@ -131,7 +124,7 @@ export class Timer extends Node {
     /**
      * @param {boolean} paused
      */
-    set_paused(paused) {
+    set_paused(paused: boolean) {
         if (this.paused === paused) {
             return;
         }
@@ -145,7 +138,7 @@ export class Timer extends Node {
     /**
      * @param {boolean} p_process
      */
-    _set_process(p_process) {
+    _set_process(p_process: boolean) {
         switch (this.process_mode) {
             case TIMER_PROCESS_PHYSICS: {
                 this.set_physics_process_internal(p_process && !this.paused);
