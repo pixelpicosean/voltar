@@ -27,6 +27,7 @@ import {
     LIGHT_PARAM_SPOT_ATTENUATION,
     LIGHT_OMNI_SHADOW_DETAIL_HORIZONTAL,
     LIGHT_OMNI_SHADOW_CUBE,
+    VisualServer,
 } from 'engine/servers/visual_server.js';
 import {
     Instance_t,
@@ -805,7 +806,9 @@ export class RasterizerScene {
                 fog_height_curve: [1],
             },
             /** @type {{ [name: string]: UniformState }} */
-            uniform_states: {},
+            uniform_states: Object.create(null),
+            /** @type {{ [slot: number]: TextureState }} */
+            texture_states: Object.create(null),
 
             conditions: 0,
             prev_conditions: 0,
@@ -1913,8 +1916,7 @@ export class RasterizerScene {
         gl.depthFunc(gl.LEQUAL);
         gl.colorMask(true, true, true, true);
 
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, p_texture);
+        this.bind_texture(0, p_texture);
 
         gl.viewport(0, 0, this.storage.frame.current_rt.width, this.storage.frame.current_rt.height);
 
@@ -2192,6 +2194,7 @@ export class RasterizerScene {
         let lightmap_energy = 1.0;
 
         mark_uniforms_outdated(this.state.uniform_states);
+        mark_textures_outdated(this.state.texture_states);
 
         for (let i = 0; i < p_element_count; i++) {
             let e = p_elements[i];
@@ -2354,13 +2357,14 @@ export class RasterizerScene {
             }
 
             if (shader_rebind) {
-                mark_uniforms_outdated(uniform_states);
+                mark_uniforms_outdated(this.state.uniform_states);
+                mark_textures_outdated(this.state.texture_states);
             }
 
             if (rebind_lightmap) {
                 if (lightmap) {
-                    gl.activeTexture(gl.TEXTURE0 + VSG.config.max_texture_image_units - 4);
-                    gl.bindTexture(gl.TEXTURE_2D, lightmap.gl_tex);
+                    this.bind_texture(VSG.config.max_texture_image_units - 4, lightmap.gl_tex);
+                    this.set_uniform_n("lightmap", VSG.config.max_texture_image_units - 4);
                 }
             }
 
@@ -2433,20 +2437,17 @@ export class RasterizerScene {
             this.set_uniform_v("world_matrix", e.instance.transform.as_array());
 
             let mat_uniforms = this.state.current_shader.uniforms;
-            for (const k in mat_uniforms) {
-                let u = mat_uniforms[k];
+            for (let name in mat_uniforms) {
+                let u = mat_uniforms[name];
 
                 // uniform not exist in the shader
                 if (!u.gl_loc) continue;
 
-                // bypass all texture slot bindings
-                if (u.type === "1i") continue;
-
-                let state = uniform_states[k];
+                let state = uniform_states[name];
                 // this uniform not recorded yet?
                 if (!state) {
-                    state = uniform_states[k] = {
-                        value: material.params[k].slice(),
+                    state = uniform_states[name] = {
+                        value: material.params[name].slice(),
                         changed: true,
                     };
                 }
@@ -2455,8 +2456,9 @@ export class RasterizerScene {
                 if (!state.changed) continue;
 
                 switch (u.type) {
+                    case "1i": gl.uniform1i(u.gl_loc, state.value[0]); break;
                     case "2i": gl.uniform2iv(u.gl_loc, state.value); break;
-                    case "1f": gl.uniform1fv(u.gl_loc, state.value); break;
+                    case "1f": gl.uniform1f(u.gl_loc, state.value[0]); break;
                     case "2f": gl.uniform2fv(u.gl_loc, state.value); break;
                     case "3f": gl.uniform3fv(u.gl_loc, state.value); break;
                     case "4f": gl.uniform4fv(u.gl_loc, state.value); break;
@@ -2695,12 +2697,12 @@ export class RasterizerScene {
 
                 if (!this.state.render_no_shadows && p_light.light.shadow) {
                     this.set_shader_condition(SHADER_DEF.USE_SHADOW, true);
-                    gl.activeTexture(gl.TEXTURE0 + VSG.config.max_texture_image_units - 3);
                     if (VSG.config.use_rgba_3d_shadows) {
-                        gl.bindTexture(gl.TEXTURE_2D, this.directional_shadow.gl_color);
+                        this.bind_texture(VSG.config.max_texture_image_units - 3, this.directional_shadow.gl_color);
                     } else {
-                        gl.bindTexture(gl.TEXTURE_2D, this.directional_shadow.gl_depth);
+                        this.bind_texture(VSG.config.max_texture_image_units - 3, this.directional_shadow.gl_depth);
                     }
+                    this.set_uniform_n("light_directional_shadow", VSG.config.max_texture_image_units - 3);
                 }
             } break;
             case LIGHT_OMNI: {
@@ -2708,12 +2710,12 @@ export class RasterizerScene {
 
                 if (!this.state.render_no_shadows && shadow_atlas && p_light.light.shadow) {
                     this.set_shader_condition(SHADER_DEF.USE_SHADOW, true);
-                    gl.activeTexture(gl.TEXTURE0 + VSG.config.max_texture_image_units - 3);
                     if (VSG.config.use_rgba_3d_shadows) {
-                        gl.bindTexture(gl.TEXTURE_2D, shadow_atlas.gl_color);
+                        this.bind_texture(VSG.config.max_texture_image_units - 3, shadow_atlas.gl_color);
                     } else {
-                        gl.bindTexture(gl.TEXTURE_2D, shadow_atlas.gl_depth);
+                        this.bind_texture(VSG.config.max_texture_image_units - 3, shadow_atlas.gl_depth);
                     }
+                    this.set_uniform_n("light_shadow_atlas", VSG.config.max_texture_image_units - 3);
                 }
             } break;
             case LIGHT_SPOT: {
@@ -2721,12 +2723,12 @@ export class RasterizerScene {
 
                 if (!this.state.render_no_shadows && shadow_atlas && p_light.light.shadow) {
                     this.set_shader_condition(SHADER_DEF.USE_SHADOW, true);
-                    gl.activeTexture(gl.TEXTURE0 + VSG.config.max_texture_image_units - 3);
                     if (VSG.config.use_rgba_3d_shadows) {
-                        gl.bindTexture(gl.TEXTURE_2D, shadow_atlas.gl_color);
+                        this.bind_texture(VSG.config.max_texture_image_units - 3, shadow_atlas.gl_color);
                     } else {
-                        gl.bindTexture(gl.TEXTURE_2D, shadow_atlas.gl_depth);
+                        this.bind_texture(VSG.config.max_texture_image_units - 3, shadow_atlas.gl_depth);
                     }
+                    this.set_uniform_n("light_shadow_atlas", VSG.config.max_texture_image_units - 3);
                 }
             } break;
         }
@@ -2936,27 +2938,27 @@ export class RasterizerScene {
 
                 if (p_skeleton) {
                     if (!VSG.config.use_skeleton_software) {
-                        gl.activeTexture(gl.TEXTURE0 + VSG.config.max_texture_image_units - 1);
-                        gl.bindTexture(gl.TEXTURE_2D, p_skeleton.gl_tex);
+                        this.bind_texture(VSG.config.max_texture_image_units - 1, p_skeleton.gl_tex);
+                        this.set_uniform_n("bone_transforms", VSG.config.max_texture_image_units - 1);
                     } else {
-                        let buffer = this.storage.resources.skeleton_transform_buffer;
+                        // let buffer = this.storage.resources.skeleton_transform_buffer;
 
-                        if (!s.attribs[ARRAY_BONES].enabled || !s.attribs[ARRAY_WEIGHTS].enabled) {
-                            break;
-                        }
+                        // if (!s.attribs[ARRAY_BONES].enabled || !s.attribs[ARRAY_WEIGHTS].enabled) {
+                        //     break;
+                        // }
 
-                        let size = s.array_len * 12;
+                        // let size = s.array_len * 12;
 
-                        let bones_offset = s.attribs[ARRAY_BONES].offset;
-                        let bones_stride = s.attribs[ARRAY_BONES].stride;
-                        let bones_weight_offset = s.attribs[ARRAY_WEIGHTS].offset;
-                        let bones_weight_stride = s.attribs[ARRAY_WEIGHTS].stride;
+                        // let bones_offset = s.attribs[ARRAY_BONES].offset;
+                        // let bones_stride = s.attribs[ARRAY_BONES].stride;
+                        // let bones_weight_offset = s.attribs[ARRAY_WEIGHTS].offset;
+                        // let bones_weight_stride = s.attribs[ARRAY_WEIGHTS].stride;
 
-                        {
-                            for (let i = 0; i < s.array_len; i++) {
+                        // {
+                        //     for (let i = 0; i < s.array_len; i++) {
 
-                            }
-                        }
+                        //     }
+                        // }
                     }
                 }
 
@@ -2986,52 +2988,15 @@ export class RasterizerScene {
         let shader_rebind = this.bind_scene_shader(p_material);
 
         let shader = this.state.current_shader;
-        let uniforms = shader.uniforms;
 
         if (shader.spatial.uses_screen_texture && this.storage.frame.current_rt) {
-            gl.activeTexture(gl.TEXTURE0 + VSG.config.max_texture_image_units - 4);
-            gl.bindTexture(gl.TEXTURE_2D, this.storage.frame.current_rt.copy_screen_effect.gl_color);
+            this.bind_texture(VSG.config.max_texture_image_units - 4, this.storage.frame.current_rt.copy_screen_effect.gl_color);
+            this.set_uniform_n("SCREEN_TEXTURE", VSG.config.max_texture_image_units - 4);
         }
 
         if (shader.spatial.uses_depth_texture && this.storage.frame.current_rt) {
-            gl.activeTexture(gl.TEXTURE0 + VSG.config.max_texture_image_units - 4);
-            gl.bindTexture(gl.TEXTURE_2D, this.storage.frame.current_rt.copy_screen_effect.gl_depth);
-        }
-
-        if (this.state.conditions & SHADER_DEF.LIGHT_MODE_DIRECTIONAL) {
-            let u = uniforms["light_directional_shadow"];
-            if (u) {
-                gl.activeTexture(gl.TEXTURE0 + VSG.config.max_texture_image_units - 3);
-                gl.uniform1i(u.gl_loc, VSG.config.max_texture_image_units - 3);
-            }
-        } else if (this.state.conditions & SHADER_DEF.LIGHT_MODE_OMNI || this.state.conditions & SHADER_DEF.LIGHT_MODE_SPOT) {
-            let u = uniforms["light_shadow_atlas"];
-            if (u) {
-                gl.activeTexture(gl.TEXTURE0 + VSG.config.max_texture_image_units - 3);
-                gl.uniform1i(u.gl_loc, VSG.config.max_texture_image_units - 3);
-            }
-        }
-        if ((this.state.conditions & SHADER_DEF.USE_SKELETON) && !VSG.config.use_skeleton_software) {
-            let u = uniforms["bone_transforms"];
-            if (!u) {
-                u = uniforms["bone_transforms"] = {
-                    type: "1i",
-                    gl_loc: gl.getUniformLocation(shader.gl_prog, "bone_transforms"),
-                }
-            }
-            gl.activeTexture(gl.TEXTURE0 + VSG.config.max_texture_image_units - 1);
-            gl.uniform1i(u.gl_loc, VSG.config.max_texture_image_units - 1);
-        }
-        if (this.state.conditions & SHADER_DEF.USE_LIGHTMAP) {
-            let u = uniforms["lightmap"];
-            if (!u) {
-                u = uniforms["lightmap"] = {
-                    type: "1i",
-                    gl_loc: gl.getUniformLocation(shader.gl_prog, "lightmap"),
-                }
-            }
-            gl.activeTexture(gl.TEXTURE0 + VSG.config.max_texture_image_units - 4);
-            gl.uniform1i(u.gl_loc, VSG.config.max_texture_image_units - 4);
+            this.bind_texture(VSG.config.max_texture_image_units - 4, this.storage.frame.current_rt.copy_screen_effect.gl_depth);
+            this.set_uniform_n("DEPTH_TEXTURE", VSG.config.max_texture_image_units - 4);
         }
 
         if (shader.spatial.no_depth_test || shader.spatial.uses_depth_texture) {
@@ -3066,48 +3031,27 @@ export class RasterizerScene {
 
         this.set_uniform_n2("skeleton_texture_size", p_skeleton_tex_size, 0);
 
+        // bind material specific textures
         let i = 0;
-        for (let k in p_material.textures) {
-            let u = uniforms[k];
-            if (!u) {
-                u = uniforms[k] = {
-                    type: "1i",
-                    gl_loc: gl.getUniformLocation(shader.gl_prog, k),
-                };
+        for (let name in p_material.textures) {
+            let tex = get_material_texture(p_material, name, this.storage.resources.white_tex.get_rid());
+
+            if (tex.redraw_if_visible) {
+                VisualServer.get_singleton().redraw_request();
             }
 
-            gl.uniform1i(u.gl_loc, i);
-            gl.activeTexture(gl.TEXTURE0 + i);
-            i++;
-
-            let t = p_material.textures[k];
-
-            if (!t) {
-                if (p_material.origin) {
-                    t = p_material.origin.textures[k];
-                }
-
-                if (!t) {
-                    gl.bindTexture(gl.TEXTURE_2D, this.storage.resources.white_tex.get_rid().gl_tex);
-                }
-
-                continue;
+            if (tex.render_target) {
+                tex.render_target.used_in_frame = true;
             }
 
-            // TODO: request proxy texture redraw
-
-            if (t.render_target) {
-                t.render_target.used_in_frame = true;
-            }
-
-            gl.bindTexture(gl.TEXTURE_2D, t.gl_tex);
+            this.bind_texture(i, tex.gl_tex);
+            this.set_uniform_n(name, i);
             if (i === 0) {
-                this.state.current_main_tex = t.gl_tex;
+                this.state.current_main_tex = tex.gl_tex;
             }
-        }
 
-        // set built-in texture slots
-        // TODO: make extra texture bindings automatic
+            i += 1;
+        }
 
         return shader_rebind;
     }
@@ -3476,10 +3420,36 @@ export class RasterizerScene {
         let state = this.state.uniform_states[name];
         return state ? state.value : null;
     }
+
+    /**
+     * @param {WebGLTexture} texture
+     * @param {number} slot
+     * @param {string} name
+     */
+    bind_texture(slot, texture) {
+        const gl = this.gl;
+
+        let state = this.state.texture_states[slot];
+        if (!state) {
+            state = this.state.texture_states[slot] = {
+                slot,
+                texture,
+            };
+            return;
+        }
+
+        if (state.texture !== texture) {
+            state.texture = texture;
+
+            gl.activeTexture(gl.TEXTURE0 + slot);
+            gl.bindTexture(gl.TEXTURE_2D, texture);
+        }
+    }
 }
 
 /**
  * @typedef {{ changed: boolean, value: number[] }} UniformState
+ * @typedef {{ slot: number, texture: WebGLTexture }} TextureState
  */
 
 /**
@@ -3491,3 +3461,24 @@ function mark_uniforms_outdated(table) {
     }
 }
 
+/**
+ * @param {{ [slot: number]: TextureState }} table
+ */
+function mark_textures_outdated(table) {
+    for (let slot in table) {
+        table[slot].texture = null;
+    }
+}
+
+/**
+ * @param {Material_t} material
+ * @param {string} name
+ * @param {Texture_t} fallback
+ */
+function get_material_texture(material, name, fallback) {
+    return material.textures[name]
+        ||
+        (material.origin && material.origin.textures[name])
+        ||
+        fallback;
+}
