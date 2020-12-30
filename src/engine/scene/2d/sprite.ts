@@ -5,7 +5,7 @@ import { Rect2 } from 'engine/core/math/rect2.js';
 import { Color } from 'engine/core/color';
 import { Engine } from 'engine/core/engine';
 
-import { ImageTexture } from '../resources/texture.js';
+import { ImageTexture } from '../resources/texture';
 import { NOTIFICATION_DRAW } from './canvas_item';
 import { Node2D } from './node_2d';
 

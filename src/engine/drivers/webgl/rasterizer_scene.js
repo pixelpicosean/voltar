@@ -28,16 +28,16 @@ import {
     LIGHT_OMNI_SHADOW_DETAIL_HORIZONTAL,
     LIGHT_OMNI_SHADOW_CUBE,
     VisualServer,
-} from 'engine/servers/visual_server.js';
+} from 'engine/servers/visual_server';
 import {
     Instance_t,
-} from 'engine/servers/visual/visual_server_scene.js';
-import { VSG } from 'engine/servers/visual/visual_server_globals.js';
+} from 'engine/servers/visual/visual_server_scene';
+import { VSG } from 'engine/servers/visual/visual_server_globals';
 
 import {
     ShaderMaterial,
     SpatialMaterial,
-} from 'engine/scene/resources/material.js';
+} from 'engine/scene/resources/material';
 import {
     ARRAY_VERTEX,
     ARRAY_NORMAL,

@@ -4,7 +4,7 @@ import { Vector2, Vector2Like } from "engine/core/math/vector2";
 import { Vector3 } from "engine/core/math/vector3.js";
 import { Transform } from "engine/core/math/transform.js";
 
-import { VSG } from "engine/servers/visual/visual_server_globals.js";
+import { VSG } from "engine/servers/visual/visual_server_globals";
 
 import { NOTIFICATION_TRANSFORM_CHANGED } from "../const";
 import { Viewport } from "../main/viewport";

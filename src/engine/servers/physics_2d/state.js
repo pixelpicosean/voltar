@@ -7,6 +7,7 @@ import {
     CollisionObjectType,
     BodyState,
 } from "engine/scene/2d/const";
+import { Node2D } from "engine/scene/2d/node_2d";
 
 
 export class Physics2DDirectBodyStateSW {
@@ -353,10 +354,10 @@ function _can_collide_with(p_object, p_collision_mask, p_collide_with_bodies, p_
 
 export class RayResult {
     constructor() {
-        this.position = new Vector2();
-        this.normal = new Vector2();
+        this.position = new Vector2;
+        this.normal = new Vector2;
         this.rid = null;
-        this.collider_id = null;
+        /** @type {Node2D} */
         this.collider = null;
         this.shape = 0;
         this.metadata = null;
@@ -439,7 +440,6 @@ export class Physics2DDirectSpaceStateSW {
             return false;
         }
 
-        r_result.collider_id = res_obj.instance;
         r_result.collider = res_obj.instance;
         r_result.normal.copy(res_normal);
         r_result.metadata = res_obj.get_shape_metadata(res_shape);

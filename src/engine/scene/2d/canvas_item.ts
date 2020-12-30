@@ -9,11 +9,11 @@ import { Transform2D } from "engine/core/math/transform_2d.js";
 import { Rect2 } from "engine/core/math/rect2.js";
 import { Color, ColorLike } from "engine/core/color";
 
-import { VSG } from "engine/servers/visual/visual_server_globals.js";
+import { VSG } from "engine/servers/visual/visual_server_globals";
 
-import { ImageTexture } from "../resources/texture.js";
-import { StyleBox } from "../resources/style_box.js";
-import { Material } from "../resources/material.js";
+import { ImageTexture } from "../resources/texture";
+import { StyleBox } from "../resources/style_box";
+import { Material } from "../resources/material";
 import { GROUP_CALL_UNIQUE } from "../main/scene_tree";
 import { CanvasLayer } from "../main/canvas_layer";
 import {

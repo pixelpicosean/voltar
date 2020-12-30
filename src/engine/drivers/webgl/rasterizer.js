@@ -2,7 +2,7 @@ import { Rect2 } from "engine/core/math/rect2.js";
 import { Color } from "engine/core/color";
 import { OS } from "engine/core/os/os";
 
-import { VSG } from "engine/servers/visual/visual_server_globals.js";
+import { VSG } from "engine/servers/visual/visual_server_globals";
 
 import { RasterizerStorage } from "./rasterizer_storage.js";
 import { RasterizerCanvas } from "./rasterizer_canvas.js";

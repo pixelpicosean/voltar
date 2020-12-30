@@ -12,17 +12,17 @@ import {
 } from 'engine/registry';
 import { get_extname } from 'engine/utils/string';
 
-import { VSG } from 'engine/servers/visual/visual_server_globals.js';
+import { VSG } from 'engine/servers/visual/visual_server_globals';
 
 import { ResourceLoader } from './io/resource_loader.js';
 import { decompress } from './io/z.js';
 
-import { default_font_name, Theme } from 'engine/scene/resources/theme.js';
-import { registered_bitmap_fonts } from 'engine/scene/resources/font.js';
+import { default_font_name, Theme } from 'engine/scene/resources/theme';
+import { registered_bitmap_fonts } from 'engine/scene/resources/font';
 import { PackedScene } from 'engine/scene/resources/packed_scene';
 
 import meta from 'gen/meta.json';
-import { ImageTexture } from 'engine/scene/resources/texture.js';
+import { ImageTexture } from 'engine/scene/resources/texture';
 
 type ProgressCallback = (percent: number) => any;
 type CompleteCallback = Function;

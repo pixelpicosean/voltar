@@ -19,10 +19,10 @@ import { Color } from 'engine/core/color';
 import { InputEvent } from 'engine/core/os/input_event';
 import { MessageQueue } from 'engine/core/message_queue';
 import { NOTIFICATION_WM_UNFOCUS_REQUEST } from 'engine/core/main_loop';
-import { VSG } from 'engine/servers/visual/visual_server_globals.js';
+import { VSG } from 'engine/servers/visual/visual_server_globals';
 
-import { Theme } from '../resources/theme.js';
-import { BitmapFont, DynamicFont } from '../resources/font.js';
+import { Theme } from '../resources/theme';
+import { BitmapFont, DynamicFont } from '../resources/font';
 import {
     Node,
     NOTIFICATION_ENTER_TREE,

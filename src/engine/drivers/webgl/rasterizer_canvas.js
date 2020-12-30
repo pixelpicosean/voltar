@@ -14,8 +14,8 @@ import {
 } from 'engine/core/os/os';
 import { VObject } from 'engine/core/v_object';
 
-import { Item } from 'engine/servers/visual/visual_server_canvas.js';
-import { VSG } from 'engine/servers/visual/visual_server_globals.js';
+import { Item } from 'engine/servers/visual/visual_server_canvas';
+import { VSG } from 'engine/servers/visual/visual_server_globals';
 import {
     TYPE_LINE,
     TYPE_POLYLINE,
@@ -38,9 +38,9 @@ import {
     CommandPolygon,
     CommandMultiMesh,
     CommandTransform,
-} from 'engine/servers/visual/commands.js';
-import { Texture } from 'engine/scene/resources/texture.js';
-import { ShaderMaterial, CANVAS_ITEM_SHADER_UNIFORMS } from 'engine/scene/resources/material.js';
+} from 'engine/servers/visual/commands';
+import { Texture } from 'engine/scene/resources/texture';
+import { ShaderMaterial, CANVAS_ITEM_SHADER_UNIFORMS } from 'engine/scene/resources/material';
 import {
     CanvasItemMaterial,
     BLEND_MODE_MIX,
@@ -67,7 +67,7 @@ import {
     MULTIMESH_CUSTOM_DATA_NONE,
     MULTIMESH_CUSTOM_DATA_8BIT,
     MULTIMESH_CUSTOM_DATA_FLOAT,
-} from 'engine/servers/visual_server.js';
+} from 'engine/servers/visual_server';
 import { Rect2 } from 'engine/core/math/rect2.js';
 import { ARRAY_MAX } from 'engine/scene/const';
 import { parse_attributes_from_code, parse_uniforms_from_code } from './shader_parser.js';

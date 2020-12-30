@@ -4,12 +4,12 @@ import { Transform } from "engine/core/math/transform.js";
 import { GDCLASS } from "engine/core/v_object";
 import { MessageQueue } from "engine/core/message_queue";
 
-import { VSG } from "engine/servers/visual/visual_server_globals.js";
+import { VSG } from "engine/servers/visual/visual_server_globals";
 
 import {
     NOTIFICATION_UPDATE_SKELETON,
 } from "../const";
-import { Skin } from "../resources/skin.js";
+import { Skin } from "../resources/skin";
 import {
     Spatial,
 } from "./spatial";

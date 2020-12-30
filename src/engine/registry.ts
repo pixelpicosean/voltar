@@ -1,5 +1,5 @@
-class ResourceInterface {
-    _load_data(data: any): void { }
+interface ResourceInterface {
+    _load_data(data: any): any;
 }
 
 /**
@@ -10,7 +10,7 @@ export const node_class_map: { [name: string]: any } = {};
 /**
  * Resource class looking table
  */
-export const res_class_map: { [name: string]: typeof ResourceInterface } = {};
+export const res_class_map: { [name: string]: { new(): ResourceInterface } } = {};
 
 type PackedSceneClass = { new(): import('engine/scene/main/node').Node, instance(): import('engine/scene/main/node').Node };
 /**

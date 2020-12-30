@@ -8,7 +8,7 @@ import {
     deg2rad,
 } from "engine/core/math/math_funcs.js";
 
-import { VSG } from "engine/servers/visual/visual_server_globals.js";
+import { VSG } from "engine/servers/visual/visual_server_globals";
 
 import {
     Node,

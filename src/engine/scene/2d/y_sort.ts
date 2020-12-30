@@ -1,6 +1,6 @@
 import { node_class_map } from 'engine/registry';
 import { GDCLASS } from 'engine/core/v_object';
-import { VSG } from 'engine/servers/visual/visual_server_globals.js';
+import { VSG } from 'engine/servers/visual/visual_server_globals';
 
 import { Node2D } from './node_2d';
 

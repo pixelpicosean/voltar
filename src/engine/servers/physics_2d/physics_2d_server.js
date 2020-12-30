@@ -177,6 +177,11 @@ export class Physics2DServer {
     }
     /**
      * @param {Space2DSW} p_space
+     */
+    space_free(p_space) { }
+
+    /**
+     * @param {Space2DSW} p_space
      * @param {boolean} p_active
      */
     space_set_active(p_space, p_active) {
@@ -320,7 +325,7 @@ export class Physics2DServer {
 
     /**
      * @param {Area2DSW} p_area
-     * @param {import('engine/scene/2d/area_2d').Area2D} id
+     * @param {import('engine/scene/2d/node_2d').Node2D} id
      */
     area_attach_object_instance(p_area, id) {
         p_area.instance = id;
@@ -634,7 +639,6 @@ export class Physics2DServer {
 
         this.is_initialized = true;
     }
-    free_rid(rid) { }
 
     /**
      * @param {boolean} p_active

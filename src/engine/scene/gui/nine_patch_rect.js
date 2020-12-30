@@ -8,9 +8,9 @@ import {
 } from 'engine/core/math/math_defs.js';
 import { Vector2 } from 'engine/core/math/vector2';
 import { Rect2 } from 'engine/core/math/rect2.js';
-import { VSG } from 'engine/servers/visual/visual_server_globals.js';
+import { VSG } from 'engine/servers/visual/visual_server_globals';
 
-import { ImageTexture } from '../resources/texture.js';
+import { ImageTexture } from '../resources/texture';
 import { NOTIFICATION_DRAW } from '../2d/canvas_item';
 import { Control } from './control.js';
 

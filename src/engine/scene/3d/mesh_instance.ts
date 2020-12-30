@@ -1,11 +1,11 @@
 import { node_class_map } from "engine/registry";
 import { GDCLASS } from "engine/core/v_object";
 
-import { VSG } from "engine/servers/visual/visual_server_globals.js";
+import { VSG } from "engine/servers/visual/visual_server_globals";
 
-import { Mesh } from "../resources/mesh.js";
-import { Material } from "../resources/material.js";
-import { Skin } from "../resources/skin.js";
+import { Mesh } from "../resources/mesh";
+import { Material } from "../resources/material";
+import { Skin } from "../resources/skin";
 import { NOTIFICATION_ENTER_TREE } from "../main/node";
 import { GeometryInstance } from "./visual_instance";
 import {

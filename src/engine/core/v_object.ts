@@ -262,19 +262,15 @@ export class VObject {
     }
 }
 
-/**
- * @param {Function} m_class
- * @param {Function} m_inherits
- */
-export function GDCLASS(m_class: Function, m_inherits: Function) {
+export function GDCLASS<T, K>(m_class: T, m_inherits: K) {
+    // @ts-ignore
     const self_notification = m_class.prototype._notification;
     if (self_notification && m_inherits) {
+        // @ts-ignore
         const inherits_notification = m_inherits.prototype._notification;
+        // @ts-ignore
         const inherits_notificationv = m_inherits.prototype._notificationv;
-        /**
-         * @param {number} what
-         * @param {boolean} reversed
-         */
+        // @ts-ignore
         m_class.prototype._notificationv = function _notificationv(what: number, reversed: boolean) {
             if (!reversed) {
                 inherits_notificationv.call(this, what, reversed);

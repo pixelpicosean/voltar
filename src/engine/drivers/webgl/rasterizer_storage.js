@@ -39,11 +39,11 @@ import {
     LIGHT_DIRECTIONAL_SHADOW_DEPTH_RANGE_STABLE,
     LIGHT_OMNI_SHADOW_DUAL_PARABOLOID,
     INSTANCE_TYPE_LIGHTMAP_CAPTURE,
-} from "engine/servers/visual_server.js";
+} from "engine/servers/visual_server";
 import {
     Instance_t,
-} from "engine/servers/visual/visual_server_scene.js";
-import { VSG } from "engine/servers/visual/visual_server_globals.js";
+} from "engine/servers/visual/visual_server_scene";
+import { VSG } from "engine/servers/visual/visual_server_globals";
 
 import { ARRAY_MAX } from "engine/scene/const";
 import {
@@ -63,7 +63,7 @@ import {
     PIXEL_FORMAT_PVRTC4,
     PIXEL_FORMAT_PVRTC4A,
     PIXEL_FORMAT_ETC,
-} from "engine/scene/resources/texture.js";
+} from "engine/scene/resources/texture";
 // import { CubemapFilterShader } from "./shaders/cubemap_filter.js";
 import { CopyShader } from "./shaders/copy.js";
 

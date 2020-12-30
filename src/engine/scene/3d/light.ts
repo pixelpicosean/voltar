@@ -25,8 +25,8 @@ import {
 
     LIGHT_DIRECTIONAL_SHADOW_DEPTH_RANGE_STABLE,
     LIGHT_OMNI_SHADOW_DETAIL_HORIZONTAL,
-} from "engine/servers/visual_server.js";
-import { VSG } from "engine/servers/visual/visual_server_globals.js";
+} from "engine/servers/visual_server";
+import { VSG } from "engine/servers/visual/visual_server_globals";
 
 import { NOTIFICATION_ENTER_TREE } from "../main/node";
 import { NOTIFICATION_VISIBILITY_CHANGED_3D } from "./spatial";
@@ -55,7 +55,7 @@ export class Light extends VisualInstance {
     shadow_reverse_cull_face = false;
     shadow_mode = 0;
 
-    light: import("engine/servers/visual/visual_server_scene").Light_t;
+    light: import("engine/drivers/webgl/rasterizer_storage").Light_t;
 
     constructor(p_type: number) {
         super();

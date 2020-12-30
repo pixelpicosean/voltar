@@ -1,9 +1,9 @@
 import { node_class_map } from "engine/registry";
 import { GDCLASS } from "engine/core/v_object";
 
-import { VSG } from "engine/servers/visual/visual_server_globals.js";
+import { VSG } from "engine/servers/visual/visual_server_globals";
 
-import { Material } from "../resources/material.js";
+import { Material } from "../resources/material";
 import { NOTIFICATION_TRANSFORM_CHANGED } from "../const";
 import {
     Spatial,

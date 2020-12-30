@@ -16,9 +16,9 @@ import {
     NOTIFICATION_EXIT_TREE,
     NOTIFICATION_INTERNAL_PROCESS,
 } from '../main/node';
-import { ImageTexture } from '../resources/texture.js';
-import { Curve } from '../resources/curve.js';
-import { Gradient } from '../resources/gradient.js';
+import { ImageTexture } from '../resources/texture';
+import { Curve } from '../resources/curve';
+import { Gradient } from '../resources/gradient';
 import {
     NOTIFICATION_DRAW,
 } from './canvas_item';
@@ -28,8 +28,8 @@ import {
     MULTIMESH_COLOR_8BIT,
     MULTIMESH_CUSTOM_DATA_FLOAT,
     VisualServer,
-} from 'engine/servers/visual_server.js';
-import { VSG } from 'engine/servers/visual/visual_server_globals.js';
+} from 'engine/servers/visual_server';
+import { VSG } from 'engine/servers/visual/visual_server_globals';
 import { NOTIFICATION_TRANSFORM_CHANGED } from '../const';
 
 

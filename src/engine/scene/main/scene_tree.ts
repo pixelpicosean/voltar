@@ -7,7 +7,7 @@ import { Rect2 } from 'engine/core/math/rect2.js';
 import { is_equal_approx } from 'engine/core/math/math_funcs.js';
 import { OS } from 'engine/core/os/os';
 import { MessageQueue } from 'engine/core/message_queue';
-import { VisualServer } from 'engine/servers/visual_server.js';
+import { VisualServer } from 'engine/servers/visual_server';
 import { Physics2DServer } from 'engine/servers/physics_2d/physics_2d_server.js';
 import {
     MainLoop,
@@ -22,10 +22,10 @@ import { memdelete } from 'engine/core/os/memory';
 import { InputEvent } from 'engine/core/os/input_event';
 import { ProjectSettings } from 'engine/core/project_settings';
 
-import { VSG } from 'engine/servers/visual/visual_server_globals.js';
+import { VSG } from 'engine/servers/visual/visual_server_globals';
 
-import { World } from '../resources/world.js';
-import { World2D } from '../resources/world_2d.js';
+import { World } from '../resources/world';
+import { World2D } from '../resources/world_2d';
 import { PackedScene } from '../resources/packed_scene';
 import { Viewport } from './viewport';
 import {

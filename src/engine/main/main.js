@@ -6,9 +6,9 @@ import { MessageQueue } from "engine/core/message_queue";
 import { OS } from "engine/core/os/os";
 import { Engine } from "engine/core/engine";
 import { SceneTree } from "engine/scene/main/scene_tree";
-import { VisualServer } from "engine/servers/visual_server.js";
+import { VisualServer } from "engine/servers/visual_server";
 import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server.js";
-import { VSG } from "engine/servers/visual/visual_server_globals.js";
+import { VSG } from "engine/servers/visual/visual_server_globals";
 
 
 /** @type {MessageQueue} */

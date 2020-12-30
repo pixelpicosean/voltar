@@ -15,8 +15,8 @@ import { Vector2, Vector2Like } from "engine/core/math/vector2";
 import { Rect2 } from "engine/core/math/rect2.js";
 import { Color } from "engine/core/color";
 
-import { VSG } from "engine/servers/visual/visual_server_globals.js";
-import { CommandRect } from "engine/servers/visual/commands.js";
+import { VSG } from "engine/servers/visual/visual_server_globals";
+import { CommandRect } from "engine/servers/visual/commands";
 
 import { NOTIFICATION_DRAW } from "../2d/canvas_item";
 import { SIZE_SHRINK_CENTER, MOUSE_FILTER_IGNORE } from "./const";
@@ -25,7 +25,7 @@ import {
     NOTIFICATION_THEME_CHANGED,
     NOTIFICATION_RESIZED,
 } from "./control.js";
-import { DynamicFont, BitmapFont } from "../resources/font.js";
+import { DynamicFont, BitmapFont } from "../resources/font";
 
 let pos = new Vector2;
 

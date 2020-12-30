@@ -11,10 +11,10 @@ import { Vector2Like, Vector2 } from "engine/core/math/vector2";
 import { Rect2 } from "engine/core/math/rect2.js";
 import { Color, ColorLike } from "engine/core/color";
 
-import { VSG } from "engine/servers/visual/visual_server_globals.js";
-import { NINE_PATCH_STRETCH } from "engine/servers/visual/commands.js";
+import { VSG } from "engine/servers/visual/visual_server_globals";
+import { NINE_PATCH_STRETCH } from "engine/servers/visual/commands";
 
-import { ImageTexture } from "../resources/texture.js";
+import { ImageTexture } from "../resources/texture";
 import { NOTIFICATION_DRAW } from "../2d/canvas_item";
 import { Range } from "./range.js";
 
