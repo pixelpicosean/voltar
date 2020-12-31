@@ -24,6 +24,8 @@ import { PackedScene } from 'engine/scene/resources/packed_scene';
 import meta from 'gen/meta.json';
 import { ImageTexture } from 'engine/scene/resources/texture';
 
+type SceneTree = import('engine/scene/main/scene_tree').SceneTree;
+
 type ProgressCallback = (percent: number) => any;
 type CompleteCallback = Function;
 
@@ -46,8 +48,17 @@ export class Engine {
     idle_frames = 0;
 
     frames_drawn = 0;
+    frame_delay = 0;
+    frame_ticks = 0;
+    frame_step = 0.0;
 
-    main_loop: import('engine/scene/main/scene_tree').SceneTree = null;
+    ips = 60;
+    fps = 1.0;
+    target_fps = 0;
+
+    physics_interpolation_fraction = 0.0;
+
+    main_loop: SceneTree = null;
 
     _progress_callback: (progress: number, full: number) => any = null;
 

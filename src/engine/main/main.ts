@@ -9,6 +9,7 @@ import { SceneTree } from "engine/scene/main/scene_tree";
 import { VisualServer } from "engine/servers/visual_server";
 import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server.js";
 import { VSG } from "engine/servers/visual/visual_server_globals";
+import { MainTimerSync } from "./main_timer.sync";
 
 
 let message_queue: MessageQueue = null;
@@ -18,6 +19,12 @@ let os: OS = null;
 let physics_2d_server: Physics2DServer = null;
 
 let scene_tree: SceneTree = null;
+
+let main_timer_sync = new MainTimerSync;
+let fixed_fps = -1;
+
+let physics_process_max = 0;
+let idle_process_max = 0;
 
 export const Main = {
     last_ticks: 0,
@@ -82,6 +89,8 @@ export const Main = {
     },
 
     start() {
+        main_timer_sync.init(os.get_ticks_usec());
+
         scene_tree = new SceneTree;
         scene_tree.init();
         scene_tree.stretch_mode = this.global.display.stretch_mode;
@@ -116,61 +125,95 @@ export const Main = {
         console.log(`[Voltar] driver: ${this.global.display.webgl2 ? 'WebGL2' : 'WebGL'}, antialias: ${this.global.display.antialias ? 'ON' : 'OFF'}`)
     },
 
-    /**
-     * @param {number} timestamp
-     */
     iteration(timestamp: number) {
         this.iterating++;
 
-        let step = 0;
-        if (this.last_ticks > 0) {
-            step = (timestamp - this.last_ticks) * 0.001;
-        }
-        this.last_ticks = timestamp;
+        let ticks = OS.get_singleton().get_ticks_usec();
+        Engine.get_singleton().frame_ticks = ticks;
+        main_timer_sync.set_cpu_ticks_usec(ticks);
+        main_timer_sync.set_fixed_fps(fixed_fps);
 
-        // limit step to not larger than min update step
-        step = Math.min(step, this.global.application.min_update_step);
+        let ticks_elapsed = ticks - this.last_ticks;
+
+        let physics_fps = Engine.get_singleton().ips;
+        let frame_slice = 1.0 / physics_fps;
 
         const time_scale = Engine.get_singleton().time_scale;
-        const scaled_step = step * time_scale;
 
-        const max_physics_steps = 1;
-        const frame_slice = scaled_step / max_physics_steps;
+        let advance = main_timer_sync.advance(frame_slice, physics_fps);
+        let step = advance.idle_step;
+        let scaled_step = step * time_scale;
+
+        Engine.get_singleton().frame_step = step;
+        Engine.get_singleton().physics_interpolation_fraction = advance.interpolation_fraction;
+
+        let physics_process_ticks = 0;
+        let idle_process_ticks = 0;
+
+        this.frame += ticks_elapsed;
+
+        this.last_ticks = ticks;
+
+        const max_physics_steps = 8;
+        if (fixed_fps === -1 && advance.physics_steps > max_physics_steps) {
+            step -= (advance.physics_steps - max_physics_steps) * frame_slice;
+            advance.physics_steps = max_physics_steps;
+        }
 
         Engine.get_singleton().in_physics_frame = true;
-        for (let iters = 0; iters < max_physics_steps; iters++) {
+
+        for (let iters = 0; iters < advance.physics_steps; iters++) {
+            let physics_begin = os.get_ticks_usec();
+
+            // @Incomplete: PhysicsServer.get_singleton().flush_queries();
+
             Physics2DServer.get_singleton().sync();
             Physics2DServer.get_singleton().flush_queries();
 
-            SceneTree.get_singleton().iteration(frame_slice);
+            SceneTree.get_singleton().iteration(frame_slice * time_scale);
 
-            MessageQueue.get_singleton().flush();
+            message_queue.flush();
+
+            // @Incomplete: PhysicsServer.get_singleton().step(frame_slice * time_scale);
 
             Physics2DServer.get_singleton().end_sync();
-            Physics2DServer.get_singleton().step(frame_slice);
+            Physics2DServer.get_singleton().step(frame_slice * time_scale);
 
-            MessageQueue.get_singleton().flush();
+            message_queue.flush();
 
+            physics_process_ticks = Math.max(physics_process_ticks, os.get_ticks_usec() - physics_begin);
+            physics_process_max = Math.max(os.get_ticks_usec() - physics_begin, physics_process_max);
             Engine.get_singleton().physics_frames++;
         }
+
         Engine.get_singleton().in_physics_frame = false;
 
-        SceneTree.get_singleton().idle(scaled_step);
-        MessageQueue.get_singleton().flush();
+        let idle_begin = os.get_ticks_usec();
+
+        SceneTree.get_singleton().idle(step * time_scale);
+        message_queue.flush();
 
         VisualServer.get_singleton().sync();
 
         if (OS.get_singleton().can_draw() && !this.disable_render_loop) {
-            // TODO: force_redraw_requested && is_in_low_processor_usage_mode()
+            // @Iincomplete: force_redraw_requested && is_in_low_processor_usage_mode()
             VisualServer.get_singleton().draw(scaled_step);
             Engine.get_singleton().frames_drawn++;
             this.force_redraw_requested = false;
         }
 
+        idle_process_ticks = os.get_ticks_usec() - idle_begin;
+        idle_process_max = Math.max(idle_process_ticks, idle_process_max);
+
+        // @Incomplete: update audio server
+
         this.frames++;
         Engine.get_singleton().idle_frames++;
         if (this.frame > 1000000) {
-            // TODO: calculation FPS
+            Engine.get_singleton().fps = this.frames;
+            idle_process_max = 0;
+            physics_process_max = 0;
+
             this.frame %= 1000000;
             this.frames = 0;
         }

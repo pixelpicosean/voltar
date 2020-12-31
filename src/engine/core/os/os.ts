@@ -438,10 +438,10 @@ export class OS {
     }
 
     get_ticks_msec(): number {
-        return performance.now() - this.start_date;
+        return Math.floor(performance.now() - this.start_date);
     }
     get_ticks_usec(): number {
-        return this.get_ticks_msec() * 1000;
+        return Math.floor((performance.now() - this.start_date) * 1000);
     }
 
     can_draw(): boolean {
