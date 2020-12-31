@@ -9,7 +9,7 @@ import { SceneTree } from "engine/scene/main/scene_tree";
 import { VisualServer } from "engine/servers/visual_server";
 import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server.js";
 import { VSG } from "engine/servers/visual/visual_server_globals";
-import { MainTimerSync } from "./main_timer.sync";
+import { MainTimerSync } from "./main_timer_sync";
 
 
 let message_queue: MessageQueue = null;
