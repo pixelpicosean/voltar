@@ -34,9 +34,9 @@ import {
     UPDATE_CAPTURE,
     UPDATE_DISCRETE,
 } from './animation';
-import { Transform } from 'engine/core/math/transform.js';
-import { Vector3 } from 'engine/core/math/vector3.js';
-import { Quat } from 'engine/core/math/basis.js';
+import { Transform } from 'engine/core/math/transform';
+import { Vector3 } from 'engine/core/math/vector3';
+import { Quat } from 'engine/core/math/basis';
 import { Skeleton } from '../3d/skeleton';
 
 

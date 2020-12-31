@@ -1,7 +1,7 @@
 import { remove_items } from "engine/dep/index";
 import { Vector2 } from "engine/core/math/vector2";
-import { Rect2 } from "engine/core/math/rect2.js";
-import { Transform2D } from "engine/core/math/transform_2d.js";
+import { Rect2 } from "engine/core/math/rect2";
+import { Transform2D } from "engine/core/math/transform_2d";
 import { Color, ColorLike } from "engine/core/color";
 
 import { VSG } from "./visual_server_globals";

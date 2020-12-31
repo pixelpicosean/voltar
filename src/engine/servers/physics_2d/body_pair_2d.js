@@ -1,7 +1,7 @@
-import { clamp } from "engine/core/math/math_funcs.js";
-import { CMP_EPSILON } from "engine/core/math/math_defs.js";
+import { clamp } from "engine/core/math/math_funcs";
+import { CMP_EPSILON } from "engine/core/math/math_defs";
 import { Vector2 } from "engine/core/math/vector2";
-import { Transform2D } from "engine/core/math/transform_2d.js";
+import { Transform2D } from "engine/core/math/transform_2d";
 
 import { BodyMode, CCDMode } from "engine/scene/2d/const";
 

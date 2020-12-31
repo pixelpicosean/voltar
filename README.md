@@ -41,7 +41,7 @@ Setup Godot project (from project settings)
 
 Create scenes, and save them into the `assets/scene` folder
 
-Run `node tscn/main.js` to convert project settings and scenes to `JSON`
+Run `node tscn/main` to convert project settings and scenes to `JSON`
 file, and then import these files or preload them as assets in your code.
 (in VSCode you can press `F5`, and find configs in Jetbrains IDEs)
 

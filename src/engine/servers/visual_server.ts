@@ -4,7 +4,7 @@ import {
     MARGIN_TOP,
     MARGIN_RIGHT,
     MARGIN_BOTTOM,
-} from "engine/core/math/math_defs.js";
+} from "engine/core/math/math_defs";
 import { Color } from "engine/core/color";
 
 import { VSG } from "./visual/visual_server_globals";
@@ -12,7 +12,7 @@ import { VisualServerCanvas } from "./visual/visual_server_canvas";
 import { VisualServerScene } from "./visual/visual_server_scene";
 import { VisualServerViewport } from "./visual/visual_server_viewport";
 
-import { Rasterizer } from "engine/drivers/webgl/rasterizer.js";
+import { Rasterizer } from "engine/drivers/webgl/rasterizer";
 
 
 export const NO_INDEX_ARRAY = -1;

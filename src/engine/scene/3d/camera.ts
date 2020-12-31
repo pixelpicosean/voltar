@@ -1,8 +1,8 @@
 import { node_class_map } from "engine/registry";
 import { GDCLASS } from "engine/core/v_object";
 import { Vector2, Vector2Like } from "engine/core/math/vector2";
-import { Vector3 } from "engine/core/math/vector3.js";
-import { Transform } from "engine/core/math/transform.js";
+import { Vector3 } from "engine/core/math/vector3";
+import { Transform } from "engine/core/math/transform";
 
 import { VSG } from "engine/servers/visual/visual_server_globals";
 

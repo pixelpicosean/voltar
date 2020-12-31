@@ -1,17 +1,17 @@
 import { List as SelfList$List, SelfList } from 'engine/core/self_list';
 import { memdelete } from 'engine/core/os/memory';
 import { List, Element as List$Element } from 'engine/core/list';
-import { clamp, stepify, deg2rad } from 'engine/core/math/math_funcs.js';
+import { clamp, stepify, deg2rad } from 'engine/core/math/math_funcs';
 import { Vector2, Vector2Like } from 'engine/core/math/vector2';
-import { Vector3Like, Vector3 } from 'engine/core/math/vector3.js';
-import { AABB } from 'engine/core/math/aabb.js';
-import { Plane } from 'engine/core/math/plane.js';
-import { Transform } from 'engine/core/math/transform.js';
-import { CameraMatrix } from 'engine/core/math/camera_matrix.js';
-import { Octree } from 'engine/core/math/octree.js';
+import { Vector3Like, Vector3 } from 'engine/core/math/vector3';
+import { AABB } from 'engine/core/math/aabb';
+import { Plane } from 'engine/core/math/plane';
+import { Transform } from 'engine/core/math/transform';
+import { CameraMatrix } from 'engine/core/math/camera_matrix';
+import { Octree } from 'engine/core/math/octree';
 import { ProjectSettings } from 'engine/core/project_settings';
 
-import { LightmapCapture_t, Skeleton_t } from 'engine/drivers/webgl/rasterizer_storage.js';
+import { LightmapCapture_t, Skeleton_t } from 'engine/drivers/webgl/rasterizer_storage';
 
 import {
     INSTANCE_TYPE_NONE,

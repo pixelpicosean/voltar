@@ -1,6 +1,6 @@
 import { res_class_map, node_class_map } from "engine/registry";
 import { GDCLASS } from "engine/core/v_object";
-import { Rect2 } from "engine/core/math/rect2.js";
+import { Rect2 } from "engine/core/math/rect2";
 
 import { Shape2D } from "../resources/shape_2d";
 import {

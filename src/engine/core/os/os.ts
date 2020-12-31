@@ -6,7 +6,7 @@ import {
     NOTIFICATION_WM_FOCUS_IN,
     NOTIFICATION_WM_FOCUS_OUT,
 } from "engine/core/main_loop";
-import { Input } from "engine/main/input.js";
+import { Input } from "engine/main/input";
 import {
     InputEventWithModifiers,
     InputEventMouseButton,

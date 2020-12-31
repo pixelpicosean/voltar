@@ -1,6 +1,6 @@
 import { VObject } from "engine/core/v_object";
 import { Vector2, Vector2Like } from "engine/core/math/vector2";
-import { Rect2 } from "engine/core/math/rect2.js";
+import { Rect2 } from "engine/core/math/rect2";
 import {
     res_class_map,
     get_resource_map,
@@ -14,7 +14,7 @@ import {
     VALIGN_CENTER,
     VALIGN_BOTTOM,
     VALIGN_FILL,
-} from "engine/core/math/math_defs.js";
+} from "engine/core/math/math_defs";
 
 import { ImageTexture } from "./texture";
 import { FontFaceObserver } from "engine/dep/fontfaceobserver.js";

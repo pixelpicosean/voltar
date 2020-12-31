@@ -5,10 +5,10 @@ import {
     rad2deg,
     clamp,
     ease,
-} from "engine/core/math/math_funcs.js";
-import { Math_LN2 } from "engine/core/math/math_defs.js";
-import { Vector3 } from "engine/core/math/vector3.js";
-import { Basis } from "engine/core/math/basis.js";
+} from "engine/core/math/math_funcs";
+import { Math_LN2 } from "engine/core/math/math_defs";
+import { Vector3 } from "engine/core/math/vector3";
+import { Basis } from "engine/core/math/basis";
 import { Color, ColorLike } from "engine/core/color";
 import { Resource } from "engine/core/resource";
 import { SelfList } from "engine/core/self_list";

@@ -1,5 +1,5 @@
 import { Vector2, Vector2Like } from "engine/core/math/vector2";
-import { Transform2D } from "../math/transform_2d.js";
+import { Transform2D } from "../math/transform_2d";
 import { InputMap } from "engine/core/input_map";
 
 import {

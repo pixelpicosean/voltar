@@ -1,8 +1,8 @@
 import { res_class_map } from "engine/registry";
-import { pack_color_f } from "engine/core/math/math_funcs.js";
+import { pack_color_f } from "engine/core/math/math_funcs";
 import { Vector2, Vector2Like } from "engine/core/math/vector2";
-import { Vector3, Vector3Like } from "engine/core/math/vector3.js";
-import { AABB } from "engine/core/math/aabb.js";
+import { Vector3, Vector3Like } from "engine/core/math/vector3";
+import { AABB } from "engine/core/math/aabb";
 
 import { VSG } from "engine/servers/visual/visual_server_globals";
 

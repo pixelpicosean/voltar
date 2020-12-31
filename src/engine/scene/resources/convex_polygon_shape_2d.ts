@@ -1,10 +1,10 @@
 import { res_class_map } from "engine/registry";
 import { Vector2, Vector2Like } from "engine/core/math/vector2";
-import { Rect2 } from "engine/core/math/rect2.js";
+import { Rect2 } from "engine/core/math/rect2";
 import {
     is_polygon_clockwise,
     convex_hull_2d,
-} from "engine/core/math/geometry.js";
+} from "engine/core/math/geometry";
 
 import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server.js";
 

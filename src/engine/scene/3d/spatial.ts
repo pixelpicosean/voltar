@@ -2,8 +2,8 @@ import { node_class_map } from "engine/registry";
 import { GDCLASS } from "engine/core/v_object";
 import { Element as List$Element, List } from "engine/core/list";
 import { SelfList } from "engine/core/self_list";
-import { Vector3, Vector3Like } from "engine/core/math/vector3.js";
-import { Transform } from "engine/core/math/transform.js";
+import { Vector3, Vector3Like } from "engine/core/math/vector3";
+import { Transform } from "engine/core/math/transform";
 
 import {
     Node,
@@ -11,7 +11,7 @@ import {
     NOTIFICATION_EXIT_TREE,
 } from "../main/node";
 import { Viewport } from "../main/viewport";
-import { Basis } from "engine/core/math/basis.js";
+import { Basis } from "engine/core/math/basis";
 import { NOTIFICATION_TRANSFORM_CHANGED } from "../const";
 
 export const NOTIFICATION_ENTER_WORLD = 41;

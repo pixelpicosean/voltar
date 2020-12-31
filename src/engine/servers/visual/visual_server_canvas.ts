@@ -1,17 +1,17 @@
 import { remove_item } from 'engine/dep/index';
 import { Element } from 'engine/core/list';
-import { earcut } from 'engine/dep/earcut.js';
+import { earcut } from 'engine/dep/earcut';
 import {
     CMP_EPSILON,
     MARGIN_LEFT,
     MARGIN_TOP,
     MARGIN_RIGHT,
     MARGIN_BOTTOM,
-} from 'engine/core/math/math_defs.js';
-import { clamp } from 'engine/core/math/math_funcs.js';
+} from 'engine/core/math/math_defs';
+import { clamp } from 'engine/core/math/math_funcs';
 import { Vector2, Vector2Like } from 'engine/core/math/vector2';
-import { Rect2 } from 'engine/core/math/rect2.js';
-import { Transform2D } from 'engine/core/math/transform_2d.js';
+import { Rect2 } from 'engine/core/math/rect2';
+import { Transform2D } from 'engine/core/math/transform_2d';
 import { Color, ColorLike } from 'engine/core/color';
 import { Texture } from 'engine/scene/resources/texture';
 import { Material } from 'engine/scene/resources/material';
@@ -221,7 +221,7 @@ export class Item {
                 this.rect.copy(r);
                 first = false;
             } else {
-                this.rect.merge_to(r);
+                this.rect.merge_with(r);
             }
         }
         Rect2.free(r);
@@ -964,7 +964,7 @@ export class VisualServerCanvas {
 
     /* private */
 
-    _render_canvas_item_tree(p_canvas_item: Item, p_transform: Transform2D, p_clip_rect: Rect2, p_module: ColorLike) {
+    _render_canvas_item_tree(p_canvas_item: Item, p_transform: Transform2D, p_clip_rect: Rect2, p_module: Color) {
         this._render_canvas_item(p_canvas_item, p_transform, p_clip_rect, WHITE, 0, get_z_list(true), get_z_last_list(true), null, null);
 
         for (let i = 0; i < z_range; i++) {

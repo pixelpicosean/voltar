@@ -1,5 +1,5 @@
 import { Vector2 } from "engine/core/math/vector2";
-import { Rect2 } from "engine/core/math/rect2.js";
+import { Rect2 } from "engine/core/math/rect2";
 
 import { VSG } from "engine/servers/visual/visual_server_globals";
 import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server.js";
@@ -346,10 +346,10 @@ export class World2D {
     constructor() {
         Physics2DServer.get_singleton().space_set_active(this.space, true);
         // @Incomplete: load data from `project.godot`
-        this.space.default_area.gravity = 98;
-        this.space.default_area.gravity_vector = new Vector2(0, 1);
-        this.space.default_area.linear_damp = 0.1;
-        this.space.default_area.angular_damp = 1;
+        this.space.area.gravity = 98;
+        this.space.area.gravity_vector = new Vector2(0, 1);
+        this.space.area.linear_damp = 0.1;
+        this.space.area.angular_damp = 1;
     }
 
     _free() {

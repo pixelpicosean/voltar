@@ -1,6 +1,6 @@
 import { node_class_map } from "engine/registry";
-import { CMP_EPSILON } from "engine/core/math/math_defs.js";
-import { Transform } from "engine/core/math/transform.js";
+import { CMP_EPSILON } from "engine/core/math/math_defs";
+import { Transform } from "engine/core/math/transform";
 import { GDCLASS } from "engine/core/v_object";
 import { MessageQueue } from "engine/core/message_queue";
 

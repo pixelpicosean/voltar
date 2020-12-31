@@ -2,7 +2,7 @@ import { GDCLASS } from "engine/core/v_object";
 import { Vector2, Vector2Like } from "engine/core/math/vector2";
 import { Color, ColorLike } from "engine/core/color";
 import { Resource } from "engine/core/resource";
-import { Rect2 } from "engine/core/math/rect2.js";
+import { Rect2 } from "engine/core/math/rect2";
 
 import { VSG } from "engine/servers/visual/visual_server_globals";
 import { Item } from "engine/servers/visual/visual_server_canvas";
@@ -26,10 +26,10 @@ export const PIXEL_FORMAT_PVRTC4 = 13;
 export const PIXEL_FORMAT_PVRTC4A = 14;
 export const PIXEL_FORMAT_ETC = 15;
 
-type DOMImageData = HTMLImageElement | HTMLCanvasElement | HTMLVideoElement;
-type RawImageData = Uint8Array | Uint16Array | Float32Array;
+export type DOMImageData = HTMLImageElement | HTMLCanvasElement | HTMLVideoElement;
+export type RawImageData = Uint8Array | Uint16Array | Float32Array;
 
-interface ImageFlags {
+export interface ImageFlags {
     FILTER?: boolean;
     REPEAT?: boolean;
     MIPMAP?: boolean;

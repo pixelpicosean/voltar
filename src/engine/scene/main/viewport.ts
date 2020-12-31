@@ -2,8 +2,8 @@ import { node_class_map } from "engine/registry";
 import { GDCLASS } from "engine/core/v_object";
 import { Element, List } from "engine/core/list";
 import { Vector2, Vector2Like } from "engine/core/math/vector2";
-import { Transform2D } from "engine/core/math/transform_2d.js";
-import { Rect2 } from "engine/core/math/rect2.js";
+import { Transform2D } from "engine/core/math/transform_2d";
+import { Rect2 } from "engine/core/math/rect2";
 import { OS } from "engine/core/os/os";
 import {
     NOTIFICATION_WM_MOUSE_EXIT,
@@ -35,7 +35,7 @@ import { World2D } from "engine/scene/resources/world_2d";
 import { CanvasItem } from "engine/scene/2d/canvas_item";
 
 import { CanvasLayer } from "./canvas_layer";
-import { Input } from "engine/main/input.js";
+import { Input } from "engine/main/input";
 import { Engine } from "engine/core/engine";
 import {
     FOCUS_NONE,
@@ -50,7 +50,7 @@ import {
     NOTIFICATION_MOUSE_ENTER,
     NOTIFICATION_FOCUS_EXIT,
     NOTIFICATION_FOCUS_ENTER,
-} from "../gui/control.js";
+} from "../gui/control";
 import {
     Camera,
     NOTIFICATION_LOST_CURRENT,
@@ -62,8 +62,8 @@ import {
     NOTIFICATION_ENTER_WORLD,
 } from "../3d/spatial";
 import { GROUP_CALL_REALTIME } from "./scene_tree";
-import { Label } from "../gui/label.js";
 
+type Label = import("../gui/label").Label;
 
 export const UPDATE_MODE_DISABLED = 0;
 export const UPDATE_MODE_ONCE = 1;

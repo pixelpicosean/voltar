@@ -1,7 +1,7 @@
 import { res_class_map } from 'engine/registry';
 import { Vector2 } from 'engine/core/math/vector2';
-import { Rect2 } from 'engine/core/math/rect2.js';
-import { Transform2D } from 'engine/core/math/transform_2d.js';
+import { Rect2 } from 'engine/core/math/rect2';
+import { Transform2D } from 'engine/core/math/transform_2d';
 import { Color } from 'engine/core/color';
 
 import { Shape2D } from './shape_2d';

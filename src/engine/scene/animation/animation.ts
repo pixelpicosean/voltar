@@ -1,9 +1,9 @@
 import { res_class_map } from "engine/registry";
 import { Vector2 } from "engine/core/math/vector2";
-import { Vector3 } from "engine/core/math/vector3.js";
-import { Transform } from "engine/core/math/transform.js";
-import { Quat } from "engine/core/math/basis.js";
-import { is_equal_approx, posmod } from "engine/core/math/math_funcs.js";
+import { Vector3 } from "engine/core/math/vector3";
+import { Transform } from "engine/core/math/transform";
+import { Quat } from "engine/core/math/basis";
+import { is_equal_approx, posmod } from "engine/core/math/math_funcs";
 
 
 export const TRACK_TYPE_VALUE = 0;      // value

@@ -5,11 +5,11 @@ import {
     MARGIN_RIGHT,
     MARGIN_TOP,
     MARGIN_BOTTOM,
-} from 'engine/core/math/math_defs.js';
-import { clamp } from 'engine/core/math/math_funcs.js';
+} from 'engine/core/math/math_defs';
+import { clamp } from 'engine/core/math/math_funcs';
 import { Vector2, Vector2Like } from 'engine/core/math/vector2';
-import { Rect2 } from 'engine/core/math/rect2.js';
-import { Transform2D } from 'engine/core/math/transform_2d.js';
+import { Rect2 } from 'engine/core/math/rect2';
+import { Transform2D } from 'engine/core/math/transform_2d';
 
 import { Viewport } from '../main/viewport';
 import { GROUP_CALL_REALTIME } from '../main/scene_tree';

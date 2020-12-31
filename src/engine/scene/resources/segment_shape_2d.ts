@@ -1,6 +1,6 @@
 import { res_class_map } from "engine/registry";
 import { Vector2, Vector2Like } from "engine/core/math/vector2";
-import { Rect2 } from "engine/core/math/rect2.js";
+import { Rect2 } from "engine/core/math/rect2";
 
 import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server.js";
 
@@ -102,7 +102,7 @@ export class RayShape2D extends Shape2D {
     get_rect() {
         const rect = Rect2.create();
         const vec = Vector2.create(0, this.length);
-        rect.expand_to(vec).grow_to(0.707 * 4);
+        rect.expand_to(vec).grow_by(0.707 * 4);
         Vector2.free(vec);
         return rect;
     }

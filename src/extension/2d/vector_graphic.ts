@@ -1,4 +1,4 @@
-import * as v from 'engine/index.js';
+import * as v from 'engine/index';
 
 const MaxStepsPerHalfCircle = 32;
 const MinStepsPerHalfCircle = 10;

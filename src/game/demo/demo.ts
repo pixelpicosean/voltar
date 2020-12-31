@@ -1,4 +1,4 @@
-import * as v from 'engine/index.js';
+import * as v from 'engine/index';
 
 export class Demo extends v.Spatial {
     sentry: v.Spatial;

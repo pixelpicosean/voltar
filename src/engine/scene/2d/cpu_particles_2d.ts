@@ -1,15 +1,15 @@
 import { node_class_map, get_resource_map } from 'engine/registry';
 import { GDCLASS } from 'engine/core/v_object';
 import { Vector2 } from 'engine/core/math/vector2';
-import { Transform2D } from 'engine/core/math/transform_2d.js';
+import { Transform2D } from 'engine/core/math/transform_2d';
 import { Color } from 'engine/core/color';
 import {
     lerp,
     deg2rad,
     randf,
     rand_range_i,
-} from 'engine/core/math/math_funcs.js';
-import { Math_PI } from 'engine/core/math/math_defs.js';
+} from 'engine/core/math/math_funcs';
+import { Math_PI } from 'engine/core/math/math_defs';
 
 import {
     NOTIFICATION_ENTER_TREE,

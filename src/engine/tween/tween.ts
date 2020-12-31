@@ -1,6 +1,6 @@
 import { remove_item } from 'engine/dep/index';
 import { VObject } from 'engine/core/v_object';
-import { clamp } from 'engine/core/math/math_funcs.js';
+import { clamp } from 'engine/core/math/math_funcs';
 import { Vector2, Vector2Like } from 'engine/core/math/vector2';
 import { Color, ColorLike } from 'engine/core/color';
 

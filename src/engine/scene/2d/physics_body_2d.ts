@@ -1,7 +1,7 @@
 import { node_class_map } from "engine/registry";
 import { GDCLASS } from "engine/core/v_object";
 import { Vector2, Vector2Like } from "engine/core/math/vector2";
-import { Transform2D } from "engine/core/math/transform_2d.js";
+import { Transform2D } from "engine/core/math/transform_2d";
 import { ProjectSettings } from "engine/core/project_settings";
 import { Engine } from "engine/core/engine";
 import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server.js";

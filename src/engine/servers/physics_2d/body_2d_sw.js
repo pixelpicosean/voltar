@@ -1,11 +1,11 @@
 import { remove_items } from "engine/dep/index.ts";
 import { SelfList } from "engine/core/self_list";
 import { Vector2 } from "engine/core/math/vector2";
-import { Transform2D } from "engine/core/math/transform_2d.js";
+import { Transform2D } from "engine/core/math/transform_2d";
 
 import {
     BodyMode,
-    CollisionObjectType,
+    CollisionObject2DSW$Type,
     CCDMode,
     BodyState,
 } from "engine/scene/2d/const";
@@ -109,7 +109,7 @@ export class Body2DSW extends CollisionObject2DSW {
     }
 
     constructor() {
-        super(CollisionObjectType.BODY);
+        super(CollisionObject2DSW$Type.BODY);
 
         this.mode = BodyMode.RIGID;
 
@@ -566,7 +566,7 @@ export class Body2DSW extends CollisionObject2DSW {
             return;
         }
 
-        const def_area = this.space.default_area;
+        const def_area = this.space.area;
 
         const ac = this.areas.length;
         let stopped = false;

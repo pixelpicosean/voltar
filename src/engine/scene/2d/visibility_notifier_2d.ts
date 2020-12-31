@@ -1,6 +1,6 @@
 import { node_class_map } from "engine/registry";
 import { GDCLASS } from "engine/core/v_object";
-import { Rect2 } from "engine/core/math/rect2.js";
+import { Rect2 } from "engine/core/math/rect2";
 
 import { AnimationPlayer } from "../animation/animation_player";
 import { Viewport } from "../main/viewport";

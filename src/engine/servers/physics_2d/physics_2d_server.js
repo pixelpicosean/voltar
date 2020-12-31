@@ -1,5 +1,5 @@
 import { Vector2 } from 'engine/core/math/vector2';
-import { Transform2D } from 'engine/core/math/transform_2d.js';
+import { Transform2D } from 'engine/core/math/transform_2d';
 import {
     AreaSpaceOverrideMode,
     AreaParameter,
@@ -169,7 +169,7 @@ export class Physics2DServer {
     space_create() {
         const space = new Space2DSW();
         const area = this.area_create();
-        space.default_area = area;
+        space.area = area;
         area.space = space;
         area.priority = -1;
 

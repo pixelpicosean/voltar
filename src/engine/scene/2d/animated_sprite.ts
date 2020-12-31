@@ -2,7 +2,7 @@ import { node_class_map, res_class_map } from 'engine/registry';
 import { remove_items } from 'engine/dep/index';
 import { GDCLASS } from 'engine/core/v_object';
 import { Vector2, Vector2Like } from 'engine/core/math/vector2';
-import { Rect2 } from 'engine/core/math/rect2.js';
+import { Rect2 } from 'engine/core/math/rect2';
 import { Color } from 'engine/core/color';
 import { Engine } from 'engine/core/engine';
 

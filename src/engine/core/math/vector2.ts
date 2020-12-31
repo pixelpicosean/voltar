@@ -1,4 +1,4 @@
-import { CMP_EPSILON } from './math_defs.js';
+import { CMP_EPSILON } from './math_defs';
 
 export interface Vector2Like {
     x: number;

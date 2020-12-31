@@ -1,4 +1,4 @@
-import { Rect2 } from "engine/core/math/rect2.js";
+import { Rect2 } from "engine/core/math/rect2";
 import { Vector2 } from "engine/core/math/vector2";
 import { CollisionObject2DSW } from "./collision_object_2d_sw.js";
 
@@ -130,6 +130,11 @@ export class BroadPhase2D {
          */
         this.hash_table = new Map();
     }
+
+    _predelete() {
+        return true;
+    }
+    _free() { }
 
     /**
      *

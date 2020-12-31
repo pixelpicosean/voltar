@@ -1,12 +1,12 @@
 import { node_class_map } from "engine/registry";
 import { GDCLASS } from "engine/core/v_object";
 import { Vector2 } from "engine/core/math/vector2";
-import { Rect2 } from "engine/core/math/rect2.js";
-import { Transform2D } from "engine/core/math/transform_2d.js";
+import { Rect2 } from "engine/core/math/rect2";
+import { Transform2D } from "engine/core/math/transform_2d";
 import {
     rad2deg,
     deg2rad,
-} from "engine/core/math/math_funcs.js";
+} from "engine/core/math/math_funcs";
 
 import { VSG } from "engine/servers/visual/visual_server_globals";
 

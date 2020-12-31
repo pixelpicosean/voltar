@@ -50,7 +50,7 @@ interface LayerMap {
     physics?: { [name: string]: number };
 }
 
-interface Settings {
+export interface Settings {
     application?: ApplicationSettings;
     display?: DisplaySettings;
     physics?: PhysicsSettings;

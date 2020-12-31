@@ -18,6 +18,7 @@ export enum SpaceParameter {
     BODY_ANGULAR_VELOCITY_SLEEP_THRESHOLD,
     BODY_TIME_TO_SLEEP,
     CONSTRAINT_DEFAULT_BIAS,
+    TEST_MOTION_MIN_CONTACT_DEPTH,
 }
 
 export enum AreaParameter {
@@ -39,7 +40,7 @@ export enum AreaSpaceOverrideMode {
     REPLACE_COMBINE,
 }
 
-export enum CollisionObjectType {
+export enum CollisionObject2DSW$Type {
     AREA,
     BODY,
 }

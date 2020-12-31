@@ -4,7 +4,7 @@ import {
     MARGIN_BOTTOM,
     MARGIN_TOP,
     MARGIN_RIGHT,
-} from "engine/core/math/math_defs.js";
+} from "engine/core/math/math_defs";
 
 import { StyleBox } from "./style_box";
 import { BitmapFont } from "./font";

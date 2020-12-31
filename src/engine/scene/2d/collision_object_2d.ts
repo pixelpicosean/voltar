@@ -1,6 +1,6 @@
 import { remove_items } from 'engine/dep/index';
 import { GDCLASS } from 'engine/core/v_object';
-import { Transform2D } from 'engine/core/math/transform_2d.js';
+import { Transform2D } from 'engine/core/math/transform_2d';
 
 import { Physics2DServer } from 'engine/servers/physics_2d/physics_2d_server.js';
 import { CollisionObject2DSW } from 'engine/servers/physics_2d/collision_object_2d_sw.js';

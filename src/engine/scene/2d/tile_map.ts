@@ -3,8 +3,8 @@ import { remove_items } from "engine/dep/index";
 import { SelfList, List } from "engine/core/self_list";
 import { GDCLASS } from "engine/core/v_object";
 import { Vector2 } from "engine/core/math/vector2";
-import { Rect2 } from "engine/core/math/rect2.js";
-import { Transform2D } from "engine/core/math/transform_2d.js";
+import { Rect2 } from "engine/core/math/rect2";
+import { Transform2D } from "engine/core/math/transform_2d";
 
 import { Item } from "engine/servers/visual/visual_server_canvas";
 import { Space2DSW } from "engine/servers/physics_2d/space_2d_sw.js";

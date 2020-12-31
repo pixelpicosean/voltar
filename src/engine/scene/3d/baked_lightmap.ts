@@ -5,7 +5,7 @@ import { VSG } from "engine/servers/visual/visual_server_globals";
 
 import { ImageTexture } from "../resources/texture";
 import { VisualInstance } from "./visual_instance";
-import { AABB } from "engine/core/math/aabb.js";
+import { AABB } from "engine/core/math/aabb";
 import { NOTIFICATION_EXIT_TREE, NOTIFICATION_READY } from "../main/node";
 
 interface User {
