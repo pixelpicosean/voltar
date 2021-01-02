@@ -112,6 +112,18 @@ export class Transform2D {
         return this;
     }
 
+    set_rotation_and_pos(p_rot: number, p_pos: Vector2Like) {
+        const cr = Math.cos(p_rot);
+        const sr = Math.sin(p_rot);
+        this.a = cr;
+        this.b = sr;
+        this.c = -sr;
+        this.d = cr;
+        this.tx = p_pos.x;
+        this.ty = p_pos.y;
+        return this;
+    }
+
     set_rotation_and_scale(p_rot: number, p_scale: Vector2Like) {
         const c = Math.cos(p_rot);
         const s = Math.sin(p_rot);

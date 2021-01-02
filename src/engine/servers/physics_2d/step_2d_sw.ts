@@ -1,32 +1,32 @@
+import { OS } from "engine/core/os/os";
+
 import { BodyMode } from "engine/scene/2d/const";
 
-import { Space2DSW } from "./space_2d_sw.js";
-import { Body2DSW } from "./body_2d_sw.js";
-import { Constraint2DSW } from "./constraint_2d_sw.js";
+type SelfList<T> = import("engine/core/self_list").SelfList<T>;
+type SelfList$List<T> = import("engine/core/self_list").List<T>;
+
+type Area2DSW = import("./area_2d_sw").Area2DSW;
+type Body2DSW = import("./body_2d_sw").Body2DSW;
+type Space2DSW = import("./space_2d_sw").Space2DSW;
+type Constraint2DSW = import("./constraint_2d_sw").Constraint2DSW;
 
 export class Step2DSW {
-    constructor() {
-        this._step = 1;
+    _step = 1;
+    _predelete() {
+        return true;
     }
+    _free() { }
 
-    /**
-     * @param {Space2DSW} p_space
-     * @param {number} p_delta
-     * @param {number} p_iterations
-     */
-    step(p_space, p_delta, p_iterations) {
+    step(p_space: Space2DSW, p_delta: number, p_iterations: number) {
         p_space.setup(); // update inertias, etc
 
-        const body_list = p_space.active_list;
+        let body_list: SelfList$List<Body2DSW> = p_space.active_list;
 
         /* INTEGRATE FORCES */
 
-        let profile_begtime = performance.now();
-        let profile_endtime = 0;
-
         let active_count = 0;
 
-        let b = body_list.first();
+        let b: SelfList<Body2DSW> = body_list.first();
         while (b) {
             b.self().integrate_forces(p_delta);
             b = b.next();
@@ -37,22 +37,18 @@ export class Step2DSW {
 
         /* GENERATE CONSTRAINT ISLANDS */
 
-        /** @type {Body2DSW} */
-        let island_list = null;
-        /** @type {Constraint2DSW} */
-        let constraint_island_list = null;
+        let island_list: Body2DSW = null;
+        let constraint_island_list: Constraint2DSW = null;
         b = body_list.first();
 
         let island_count = 0;
 
         while (b) {
-            const body = b.self();
+            let body: Body2DSW = b.self();
 
             if (body.island_step !== this._step) {
-                /** @type {{ value: Body2DSW }} */
-                let island = { value: null };
-                /** @type {{ value: Constraint2DSW }} */
-                let constraint_island = { value: null };
+                let island: { value: Body2DSW } = { value: null };
+                let constraint_island: { value: Constraint2DSW } = { value: null };
                 this._populate_island(body, island, constraint_island);
 
                 island.value.island_list_next = island_list;
@@ -69,7 +65,7 @@ export class Step2DSW {
 
         p_space.island_count = island_count;
 
-        const aml = p_space.area_moved_list;
+        let aml: SelfList$List<Area2DSW> = p_space.area_moved_list;
 
         while (aml.first()) {
             for (let c of aml.first().self().constraints) {
@@ -87,12 +83,11 @@ export class Step2DSW {
         /* SETUP CONSTRAINT ISLANDS */
 
         {
-            let ci = constraint_island_list;
-            /** @type {Constraint2DSW} */
-            let prev_ci = null;
+            let ci: Constraint2DSW = constraint_island_list;
+            let prev_ci: Constraint2DSW = null;
             while (ci) {
                 if (this._setup_island(ci, p_delta)) {
-                    let next = ci.island_next;
+                    let next: Constraint2DSW = ci.island_next;
 
                     if (next) {
                         next.island_list_next = ci.island_list_next;
@@ -109,6 +104,8 @@ export class Step2DSW {
                             constraint_island_list = ci.island_list_next;
                         }
                     }
+                } else {
+                    prev_ci = ci;
                 }
 
                 ci = ci.island_list_next;
@@ -118,7 +115,7 @@ export class Step2DSW {
         /* SOLVE CONSTRAINT ISLANDS */
 
         {
-            let ci = constraint_island_list;
+            let ci: Constraint2DSW = constraint_island_list;
             while (ci) {
                 this._solve_island(ci, p_iterations, p_delta);
                 ci = ci.island_list_next;
@@ -129,7 +126,7 @@ export class Step2DSW {
 
         b = body_list.first();
         while (b) {
-            const n = b.next();
+            let n = b.next();
             b.self().integrate_velocities(p_delta);
             b = n; // in case it shuts itself down
         }
@@ -137,7 +134,7 @@ export class Step2DSW {
         /* SLEEP / WAKE UP ISLANDS */
 
         {
-            let bi = island_list;
+            let bi: Body2DSW = island_list;
             while (bi) {
                 this._check_suspend(bi, p_delta);
                 bi = bi.island_list_next;
@@ -148,12 +145,7 @@ export class Step2DSW {
         this._step++;
     }
 
-    /**
-     * @param {Body2DSW} p_body
-     * @param {{ value: Body2DSW }} p_island
-     * @param {{ value: Constraint2DSW }} p_constraint_island
-     */
-    _populate_island(p_body, p_island, p_constraint_island) {
+    _populate_island(p_body: Body2DSW, p_island: { value: Body2DSW; }, p_constraint_island: { value: Constraint2DSW; }) {
         p_body.island_step = this._step;
         p_body.island_next = p_island.value;
         p_island.value = p_body;
@@ -170,7 +162,7 @@ export class Step2DSW {
                 if (i === E) {
                     continue;
                 }
-                const b = c._bodies[i];
+                let b: Body2DSW = c._bodies[i];
                 if (b.island_step === this._step || b.mode === BodyMode.STATIC || b.mode === BodyMode.KINEMATIC) {
                     continue; // no go
                 }
@@ -178,17 +170,13 @@ export class Step2DSW {
             }
         }
     }
-    /**
-     * @param {Constraint2DSW} p_island
-     * @param {number} p_delta
-     */
-    _setup_island(p_island, p_delta) {
+
+    _setup_island(p_island: Constraint2DSW, p_delta: number) {
         let ci = p_island;
-        /** @type {Constraint2DSW} */
-        let prev_ci = null;
+        let prev_ci: Constraint2DSW = null;
         let removed_root = false;
         while (ci) {
-            const process = ci.setup(p_delta);
+            let process = ci.setup(p_delta);
 
             if (!process) {
                 if (prev_ci) {
@@ -205,35 +193,42 @@ export class Step2DSW {
 
         return removed_root;
     }
-    /**
-     * @param {Constraint2DSW} p_island
-     * @param {number} p_iterations
-     * @param {number} p_delta
-     */
-    _solve_island(p_island, p_iterations, p_delta) {
+
+    _solve_island(p_island: Constraint2DSW, p_iterations: number, p_delta: number) {
         for (let i = 0; i < p_iterations; i++) {
-            let ci = p_island;
+            let ci: Constraint2DSW = p_island;
             while (ci) {
                 ci.solve(p_delta);
                 ci = ci.island_next;
             }
         }
     }
-    /**
-     * @param {Body2DSW} p_island
-     * @param {number} p_delta
-     */
-    _check_suspend(p_island, p_delta) {
+
+    _check_suspend(p_island: Body2DSW, p_delta: number) {
         let can_sleep = true;
 
-        let b = p_island;
+        let b: Body2DSW = p_island;
         while (b) {
             if (b.mode === BodyMode.STATIC || b.mode === BodyMode.KINEMATIC) {
                 b = b.island_next;
                 continue;
             }
 
-            const active = b.active;
+            if (!b.sleep_test(p_delta)) {
+                can_sleep = false;
+            }
+
+            b = b.island_next;
+        }
+
+        b = p_island;
+        while (b) {
+            if (b.mode === BodyMode.STATIC || b.mode === BodyMode.KINEMATIC) {
+                b = b.island_next;
+                continue;
+            }
+
+            let active = b.active;
 
             if (active === can_sleep) {
                 b.set_active(!can_sleep);

@@ -34,6 +34,54 @@ export function clamp(x: number, a: number, b: number): number {
 }
 
 /**
+ * Returns the floating-point remainder of numer/denom (rounded to nearest)
+ */
+export function remainder(numer: number, denom: number): number {
+    return numer - Math.round(numer / denom) * denom;
+}
+
+const primes = [
+    5,
+    13,
+    23,
+    47,
+    97,
+    193,
+    389,
+    769,
+    1543,
+    3079,
+    6151,
+    12289,
+    24593,
+    49157,
+    98317,
+    196613,
+    393241,
+    786433,
+    1572869,
+    3145739,
+    6291469,
+    12582917,
+    25165843,
+    50331653,
+    100663319,
+    201326611,
+    402653189,
+    805306457,
+    1610612741,
+    0,
+];
+export function larger_prime(p_val: number): number {
+    let idx = 0;
+    while (true) {
+        if (primes[idx] > p_val)
+            return primes[idx];
+        idx++;
+    }
+}
+
+/**
  * Bring the value between min and max.
  *
  * Values larger than `max` are wrapped back to `min`

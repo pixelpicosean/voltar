@@ -1,6 +1,8 @@
-import { remove_items } from "engine/dep/index.ts";
+import { remove_item, remove_items } from "engine/dep/index";
 import { SelfList } from "engine/core/self_list";
-import { Vector2 } from "engine/core/math/vector2";
+import { Math_TAU } from "engine/core/math/math_defs";
+import { Vector2, Vector2Like } from "engine/core/math/vector2";
+import { remainder } from "engine/core/math/math_funcs";
 import { Transform2D } from "engine/core/math/transform_2d";
 
 import {
@@ -8,85 +10,56 @@ import {
     CollisionObject2DSW$Type,
     CCDMode,
     BodyState,
+    AreaSpaceOverrideMode,
 } from "engine/scene/2d/const";
 
-import {
-    Physics2DDirectBodyStateSW,
-} from "./state.js";
-import { CollisionObject2DSW } from "./collision_object_2d_sw.js";
+import { CollisionObject2DSW } from "./collision_object_2d_sw";
+
+type Node2D = import("engine/scene/2d/node_2d").Node2D;
+
+type Area2DSW = import("./area_2d_sw").Area2DSW;
+type Constraint2DSW = import("./constraint_2d_sw").Constraint2DSW;
+type Space2DSW = import('./space_2d_sw').Space2DSW;
 
 
-class AreaCMP { }
+class AreaCMP {
+    area: Area2DSW;
+    ref_count = 1;
+
+    constructor(p_area: Area2DSW) {
+        this.area = p_area;
+    }
+}
+function sort_AreaCMP(a: AreaCMP, b: AreaCMP): number {
+    if (a.area === b.area) return 0;
+    else return a.area.priority - b.area.priority;
+}
 
 class Contact {
-    constructor() {
-        this.local_pos = new Vector2();
-        this.local_normal = new Vector2();
-        this.depth = 0;
-        this.local_shape = 0;
-        this.collider_pos = new Vector2();
-        this.collider_shape = 0;
-        this.collider_instance = null;
-        this.collider = null;
-        this.collider_velocity_at_pos = new Vector2();
-    }
+    local_pos = new Vector2;
+    local_normal = new Vector2;
+    depth = 0;
+    local_shape = 0;
+    collider_pos = new Vector2;
+    collider_shape = 0;
+    collider_instance: Node2D = null;
+    collider: Body2DSW = null;
+    collider_velocity_at_pos = new Vector2;
 }
 
 class ForceIntegrationCallback {
-    constructor() {
-        this.id = null;
-        this.method = null;
-        this.callback_udata = null;;
-    }
+    id: any;
+    method: Function;
+    callback_udata: any;
 }
 
 export class Body2DSW extends CollisionObject2DSW {
-    get inv_mass() {
-        return this._inv_mass;
-    }
-    /**
-     * @param {number} p_value
-     */
-    set inv_mass(p_value) {
-        this._inv_mass = p_value;
-    }
-    /**
-     * @param {number} p_value
-     */
-    set_inv_mass(p_value) {
-        this.inv_mass = p_value;
-        return this;
-    }
-
-    get inv_inertia() {
-        return this._inv_inertia;
-    }
-    /**
-     * @param {number} p_value
-     */
-    set inv_inertia(p_value) {
-        this._inv_inertia = p_value;
-    }
-    /**
-     * @param {number} p_value
-     */
-    set_inv_inertia(p_value) {
-        this.inv_inertia = p_value;
-        return this;
-    }
-
-    get active() {
-        return this._active;
-    }
-    /**
-     * @param {boolean} p_enable
-     */
-    set active(p_enable) {
-        if (this._active === p_enable) {
+    set_active(p_enable: boolean) {
+        if (this.active === p_enable) {
             return;
         }
 
-        this._active = p_enable;
+        this.active = p_enable;
         if (!p_enable) {
             if (this.space) {
                 this.space.body_remove_from_active_list(this.active_list);
@@ -100,94 +73,100 @@ export class Body2DSW extends CollisionObject2DSW {
             }
         }
     }
-    /**
-     * @param {boolean} p_enable
-     */
-    set_active(p_enable) {
-        this.active = p_enable;
-        return this;
-    }
+
+    mode = BodyMode.RIGID;
+
+    biased_linear_velocity = new Vector2;
+    biased_angular_velocity = 0;
+
+    linear_velocity = new Vector2;
+    angular_velocity = 0;
+
+    linear_damp = -1;
+    angular_damp = -1;
+    gravity_scale = 1;
+
+    mass = 1;
+    inertia = 1;
+    bounce = 0;
+    friction = 1;
+
+    _inv_mass = 1;
+    _inv_inertia = 0;
+    user_inertia = false;
+
+    gravity = new Vector2;
+    area_linear_damp = 0;
+    area_angular_damp = 0;
+
+    still_time = 0;
+
+    applied_force = new Vector2;
+    applied_torque = 0;
+
+    active_list: SelfList<Body2DSW> = new SelfList(this);
+    inertia_update_list: SelfList<Body2DSW> = new SelfList(this);
+    direct_state_query_list: SelfList<Body2DSW> = new SelfList(this);
+
+    exceptions: Set<CollisionObject2DSW> = new Set;
+    continuous_cd_mode = CCDMode.DISABLED;
+    omit_force_integration = false;
+    active = true;
+    can_sleep = false;
+    first_time_kinematic = false;
+    first_integration = false;
+    new_transform = new Transform2D;
+
+    constraint_map: Map<Constraint2DSW, number> = new Map;
+
+    areas: AreaCMP[] = [];
+
+    contacts: Contact[] = [];
+    contact_count = 0;
+
+    fi_callback: ForceIntegrationCallback = null;
+
+    island_step = 0;
+    island_next: Body2DSW = null;
+    island_list_next: Body2DSW = null;
 
     constructor() {
         super(CollisionObject2DSW$Type.BODY);
 
-        this.mode = BodyMode.RIGID;
+        this._set_static(false);
+    }
+    _free() {
+        if (this.fi_callback) this.fi_callback = null;
+        super._free();
+    }
 
-        this.biased_linear_velocity = new Vector2();
-        this.biased_angular_velocity = 0;
+    add_area(p_area: Area2DSW) {
+        let found = false;
+        for (let a of this.areas) {
+            if (a.area === p_area) {
+                a.ref_count += 1;
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            this.areas.push(new AreaCMP(p_area));
+        }
+    }
+    remove_area(p_area: Area2DSW) {
+        for (let i = 0; i < this.areas.length; i++) {
+            let a = this.areas[i];
 
-        this.linear_velocity = new Vector2();
-        this.angular_velocity = 0;
+            if (a.area === p_area) {
+                a.ref_count -= 1;
 
-        this.linear_damp = -1;
-        this.angular_damp = -1;
-        this.gravity_scale = 1;
+                if (a.ref_count < 1) {
+                    remove_item(this.areas, i);
+                }
 
-        this.mass = 1;
-        this.bounce = 0;
-        this.friction = 1;
-
-        this._inv_mass = 1;
-        this._inv_inertia = 0;
-        this.user_inertia = false;
-
-        this.gravity = new Vector2();
-        this.area_linear_damp = 0;
-        this.area_angular_damp = 0;
-
-        this.still_time = 0;
-
-        this.applied_force = new Vector2();
-        this.applied_torque = 0;
-
-        /**
-         * @type {SelfList<Body2DSW>}
-         */
-        this.active_list = new SelfList(this);
-        /**
-         * @type {SelfList<Body2DSW>}
-         */
-        this.inertia_update_list = new SelfList(this);
-        /**
-         * @type {SelfList<Body2DSW>}
-         */
-        this.direct_state_query_list = new SelfList(this);
-
-        /** @type {Set<CollisionObject2DSW>} */
-        this.exceptions = new Set();
-        this.continuous_cd_mode = CCDMode.DISABLED;
-        this.omit_force_integration = false;
-        this._active = true;
-        this.can_sleep = false;
-        this.first_time_kinematic = false;
-        this.first_integration = false;
-        this.new_transform = new Transform2D();
-
-        /**
-         * @type {Map<import('./constraint_2d_sw').Constraint2DSW, number>}
-         */
-        this.constraint_map = new Map();
-
-        /**
-         * @type {AreaCMP[]}
-         */
-        this.areas = [];
-
-        /**
-         * @type {Contact[]}
-         */
-        this.contacts = [];
-        this.contact_count = 0;
-
-        this.fi_callback = null;
-
-        this.island_step = 0;
-        /** @type {Body2DSW} */
-        this.island_next = null;
-        /** @type {Body2DSW} */
-        this.island_list_next = null;
-
-        this.static = false;
+                break;
+            }
+        }
     }
 
     _update_inertia() {
@@ -200,50 +179,42 @@ export class Body2DSW extends CollisionObject2DSW {
         this.wakeup_neighbours();
     }
 
-    /**
-     * @param {import('./area_2d_sw').Area2DSW} p_area
-     */
-    _compute_area_gravity_and_dampenings(p_area) {
+    _compute_area_gravity_and_dampenings(p_area: Area2DSW) {
         if (p_area.gravity_is_point) {
-            // TODO: support gravity_is_point
+            let origin = this.transform.get_origin();
+            let v = p_area.transform.xform(p_area.gravity_vector).subtract(origin);
+            let scale = p_area.gravity / Math.pow(v.length() * p_area.gravity_distance_scale + 1, 2);
+            this.gravity.copy(v.normalize().scale(scale));
+            Vector2.free(v);
+            Vector2.free(origin);
         } else {
-            this.gravity.add(p_area.gravity_vector.clone().scale(p_area.gravity));
+            let v = p_area.gravity_vector.clone().scale(p_area.gravity);
+            this.gravity.add(v);
+            Vector2.free(v);
         }
 
         this.area_linear_damp += p_area.linear_damp;
         this.area_angular_damp += p_area.angular_damp;
     }
 
-    set_force_integration_callback(p_id, p_method, p_udata = {}) { }
-
-    /**
-     * @param {import('./area_2d_sw').Area2DSW} p_area
-     */
-    add_area(p_area) {
-        const index = this.areas.indexOf(p_area);
-        if (index < 0) {
-            // FIXME: use "ordered_insert" instead
-            this.areas.push(p_area);
+    set_force_integration_callback(p_id: any, p_method: Function, p_udata: any) {
+        if (this.fi_callback) {
+            // @Incomplete: this.fi_callback._free();
+            this.fi_callback = null;
         }
-    }
-    /**
-     * @param {import('./area_2d_sw').Area2DSW} p_area
-     */
-    remove_area(p_area) {
-        const index = this.areas.indexOf(p_area);
-        if (index >= 0) {
-            remove_items(this.areas, index, 1);
+
+        if (p_id) {
+            this.fi_callback = new ForceIntegrationCallback;
+            this.fi_callback.id = p_id;
+            this.fi_callback.method = p_method;
+            this.fi_callback.callback_udata = p_udata;
         }
     }
 
-    /**
-     * @param {number} p_size
-     */
-    set_max_contacts_reported(p_size) {
+    set_max_contacts_reported(p_size: number) {
         this.contacts.length = p_size;
         for (let i = 0; i < p_size; i++) {
-            // TODO: cache the contacts
-            if (!this.contacts[i]) this.contacts[i] = new Contact();
+            if (!this.contacts[i]) this.contacts[i] = new Contact;
         }
         this.contact_count = 0;
         if (this.mode === BodyMode.KINEMATIC && p_size) this.set_active(true);
@@ -256,18 +227,8 @@ export class Body2DSW extends CollisionObject2DSW {
     can_report_contacts() {
         return this.contacts.length > 0;
     }
-    /**
-     * @param {Vector2} p_local_pos
-     * @param {Vector2} p_local_normal
-     * @param {number} p_depth
-     * @param {number} p_local_shape
-     * @param {Vector2} p_collider_pos
-     * @param {number} p_collider_shape
-     * @param {any} p_collider_instance
-     * @param {any} p_collider
-     * @param {Vector2} p_collider_velocity_at_pos
-     */
-    add_contact(p_local_pos, p_local_normal, p_depth, p_local_shape, p_collider_pos, p_collider_shape, p_collider_instance, p_collider, p_collider_velocity_at_pos) {
+
+    add_contact(p_local_pos: Vector2, p_local_normal: Vector2, p_depth: number, p_local_shape: number, p_collider_pos: Vector2, p_collider_shape: number, p_collider_instance: any, p_collider: any, p_collider_velocity_at_pos: Vector2) {
         const c_max = this.contacts.length;
 
         if (c_max === 0) {
@@ -312,61 +273,50 @@ export class Body2DSW extends CollisionObject2DSW {
     /**
      * @param {CollisionObject2DSW} p_exception
      */
-    add_exception(p_exception) {
+    add_exception(p_exception: CollisionObject2DSW) {
         this.exceptions.add(p_exception);
     }
     /**
      * @param {CollisionObject2DSW} p_exception
      */
-    remove_exception(p_exception) {
+    remove_exception(p_exception: CollisionObject2DSW) {
         this.exceptions.delete(p_exception);
     }
     /**
      * @param {CollisionObject2DSW} p_exception
      */
-    has_exception(p_exception) {
+    has_exception(p_exception: CollisionObject2DSW) {
         return this.exceptions.has(p_exception);
     }
 
-    /**
-     * @param {import('./constraint_2d_sw').Constraint2DSW} p_constraint
-     * @param {number} p_pos
-     */
-    add_constraint(p_constraint, p_pos) {
+    add_constraint(p_constraint: Constraint2DSW, p_pos: number) {
         this.constraint_map.set(p_constraint, p_pos);
     }
-    /**
-     * @param {import('./constraint_2d_sw').Constraint2DSW} p_constraint
-     */
-    remove_constraint(p_constraint) {
+    remove_constraint(p_constraint: Constraint2DSW) {
         this.constraint_map.delete(p_constraint);
     }
     get_constraint() {
         return this.constraint_map;
     }
 
-    /**
-     * @param {Vector2} p_impulse
-     */
-    apply_central_impulse(p_impulse) {
+    apply_central_impulse(p_impulse: Vector2) {
         this.linear_velocity.x += p_impulse.x * this._inv_mass;
         this.linear_velocity.y += p_impulse.y * this._inv_mass;
     }
-    /**
-     * @param {Vector2} p_offset
-     * @param {Vector2} p_impulse
-     */
-    apply_impulse(p_offset, p_impulse) {
+    apply_impulse(p_offset: Vector2, p_impulse: Vector2) {
         this.linear_velocity.x += p_impulse.x * this._inv_mass;
         this.linear_velocity.y += p_impulse.y * this._inv_mass;
 
         this.angular_velocity += this._inv_inertia * p_offset.cross(p_impulse);
     }
+    apply_torque_impulse(p_torque: number) {
+        this.angular_velocity += this._inv_inertia * p_torque;
+    }
     /**
      * @param {Vector2} p_pos
      * @param {Vector2} p_impulse
      */
-    apply_bias_impulse(p_pos, p_impulse) {
+    apply_bias_impulse(p_pos: Vector2, p_impulse: Vector2) {
         this.biased_linear_velocity.x += p_impulse.x * this._inv_mass;
         this.biased_linear_velocity.y += p_impulse.y * this._inv_mass;
 
@@ -380,45 +330,50 @@ export class Body2DSW extends CollisionObject2DSW {
         this.set_active(true);
     }
 
-    /**
-     * @param {BodyMode} p_mode
-     */
-    set_mode(p_mode) {
+    set_mode(p_mode: BodyMode) {
         const prev = this.mode;
         this.mode = p_mode;
 
         switch (p_mode) {
             case BodyMode.STATIC:
             case BodyMode.KINEMATIC: {
-                this._set_inv_transform(this.transform.clone().affine_inverse());
+                let inv_xform = this.transform.clone().affine_inverse();
+                this._set_inv_transform(inv_xform);
+                this._inv_mass = 0;
+                this._inv_inertia = 0;
                 this._set_static(p_mode === BodyMode.STATIC);
                 this.set_active(p_mode === BodyMode.KINEMATIC && this.contacts.length > 0);
-                this._inv_mass = 0;
                 this.linear_velocity.set(0, 0);
                 this.angular_velocity = 0;
                 if (this.mode === BodyMode.KINEMATIC && prev !== this.mode) {
                     this.first_time_kinematic = true;
                 }
+                Transform2D.free(inv_xform);
             } break;
             case BodyMode.RIGID: {
                 this._inv_mass = this.mass > 0 ? (1 / this.mass) : 0;
+                this._inv_inertia = this.inertia > 0 ? (1 / this.inertia) : 0;
                 this._set_static(false);
+                this.set_active(true);
             } break;
             case BodyMode.CHARACTER: {
                 this._inv_mass = this.mass > 0 ? (1 / this.mass) : 0;
+                this._inv_inertia = 0;
                 this._set_static(false);
+                this.set_active(true);
+                this.angular_velocity = 0;
             } break;
+        }
+
+        if (p_mode === BodyMode.RIGID && this._inv_inertia === 0) {
+            this._update_inertia();
         }
     }
     get_mode() {
         return this.mode;
     }
 
-    /**
-     * @param {number} p_state
-     * @param {any} p_value
-     */
-    set_state(p_state, p_value) {
+    set_state(p_state: number, p_value: any) {
         switch (p_state) {
             case BodyState.TRANSFORM: {
                 if (this.mode === BodyMode.KINEMATIC) {
@@ -438,8 +393,7 @@ export class Body2DSW extends CollisionObject2DSW {
                     this.wakeup_neighbours();
                     Transform2D.free(inv_transform);
                 } else {
-                    /** @type {Transform2D} */
-                    const t = p_value;
+                    const t: Transform2D = p_value;
                     t.orthonormalize();
                     this.new_transform.copy(this.transform);
                     if (t.equals(this.new_transform)) {
@@ -464,16 +418,13 @@ export class Body2DSW extends CollisionObject2DSW {
                 if (this.mode === BodyMode.STATIC || this.mode === BodyMode.KINEMATIC) {
                     break;
                 }
-                /** @type {boolean} */
-                let do_sleep = p_value;
+                let do_sleep: boolean = p_value;
                 if (do_sleep) {
                     this.linear_velocity.set(0, 0);
                     this.angular_velocity = 0;
                     this.set_active(false);
                 } else {
-                    if (this.mode !== BodyMode.STATIC) {
-                        this.set_active(true);
-                    }
+                    this.set_active(true);
                 }
             } break;
             case BodyState.CAN_SLEEP: {
@@ -487,7 +438,7 @@ export class Body2DSW extends CollisionObject2DSW {
     /**
      * @param {number} p_state
      */
-    get_state(p_state) {
+    get_state(p_state: number) {
         switch (p_state) {
             case BodyState.TRANSFORM: {
                 return this.transform;
@@ -507,15 +458,19 @@ export class Body2DSW extends CollisionObject2DSW {
         }
     }
 
-    add_central_force(p_force) { }
-    add_force(p_force) { }
+    add_central_force(p_force: Vector2) {
+        this.applied_force.add(p_force);
+    }
+    add_force(p_offset: Vector2, p_force: Vector2) {
+        this.applied_force.add(p_force);
+        this.applied_torque += p_offset.cross(p_force);
+    }
 
-    add_torque(p_torque) { }
+    add_torque(p_torque: number) {
+        this.applied_torque += p_torque;
+    }
 
-    /**
-     * @param {import('./space_2d_sw').Space2DSW} p_space
-     */
-    set_space(p_space) {
+    set_space(p_space: Space2DSW) {
         if (this.space) {
             this.wakeup_neighbours();
 
@@ -545,7 +500,43 @@ export class Body2DSW extends CollisionObject2DSW {
     update_inertias() {
         // update shapes and motions
         switch (this.mode) {
-            case BodyMode.RIGID: { } break;
+            case BodyMode.RIGID: {
+                if (this.user_inertia) {
+                    this._inv_inertia = this.inertia > 0 ? (1 / this.inertia) : 0;
+                    break;
+                }
+                let total_area = 0;
+
+                for (let shape of this.shapes) {
+                    total_area += shape.aabb_cache.get_area();
+                }
+
+                this.inertia = 0;
+
+                for (let shape of this.shapes) {
+                    if (shape.disabled) {
+                        continue;
+                    }
+
+                    let area = shape.aabb_cache.get_area();
+
+                    let mass = area * this.mass / total_area;
+
+                    let origin = shape.xform.get_origin();
+                    let scale = shape.xform.get_scale();
+                    this.inertia += shape.shape.get_moment_of_inertia(mass, scale) + mass * origin.length_squared();
+                    Vector2.free(scale);
+                    Vector2.free(origin);
+                }
+
+                this._inv_inertia = this.inertia > 0 ? (1 / this.inertia) : 0;
+
+                if (this.mass) {
+                    this._inv_mass = 1 / this.mass;
+                } else {
+                    this._inv_mass = 0;
+                }
+            } break;
             case BodyMode.KINEMATIC:
             case BodyMode.STATIC: {
                 this._inv_inertia = 0;
@@ -558,15 +549,12 @@ export class Body2DSW extends CollisionObject2DSW {
         }
     }
 
-    /**
-     * @param {number} p_step
-     */
-    integrate_forces(p_step) {
+    integrate_forces(p_step: number) {
         if (this.mode === BodyMode.STATIC) {
             return;
         }
 
-        const def_area = this.space.area;
+        let def_area = this.space.area;
 
         const ac = this.areas.length;
         let stopped = false;
@@ -574,7 +562,26 @@ export class Body2DSW extends CollisionObject2DSW {
         this.area_angular_damp = 0;
         this.area_linear_damp = 0;
         if (ac) {
-            // TODO
+            this.areas.sort(sort_AreaCMP);
+            const aa = this.areas;
+            for (let i = ac - 1; i >= 0 && !stopped; i--) {
+                let mode = aa[i].area.space_override_mode;
+                switch (mode) {
+                    case AreaSpaceOverrideMode.COMBINE:
+                    case AreaSpaceOverrideMode.COMBINE_REPLACE: {
+                        this._compute_area_gravity_and_dampenings(aa[i].area);
+                        stopped = mode === AreaSpaceOverrideMode.COMBINE_REPLACE;
+                    } break;
+                    case AreaSpaceOverrideMode.REPLACE:
+                    case AreaSpaceOverrideMode.REPLACE_COMBINE: {
+                        this.gravity.set(0, 0);
+                        this.area_angular_damp = 0;
+                        this.area_linear_damp = 0;
+                        this._compute_area_gravity_and_dampenings(aa[i].area);
+                        stopped = mode === AreaSpaceOverrideMode.REPLACE;
+                    } break;
+                }
+            }
         }
         if (!stopped) {
             this._compute_area_gravity_and_dampenings(def_area);
@@ -589,19 +596,19 @@ export class Body2DSW extends CollisionObject2DSW {
             this.area_linear_damp = this.linear_damp;
         }
 
-        const motion = Vector2.create();
+        let motion = Vector2.create();
         let do_motion = false;
 
         if (this.mode === BodyMode.KINEMATIC) {
-            const new_origin = this.new_transform.get_origin();
-            const origin = this.transform.get_origin();
+            let new_origin = this.new_transform.get_origin();
+            let origin = this.transform.get_origin();
 
             // compute motion, angular and etc. velocities from prev transform
             motion.copy(new_origin).subtract(origin);
             this.linear_velocity.copy(motion).scale(1 / p_step);
 
-            const rot = this.new_transform.get_rotation() - this.transform.get_rotation();
-            this.angular_velocity = rot / p_step;
+            let rot = this.new_transform.get_rotation() - this.transform.get_rotation();
+            this.angular_velocity = remainder(rot, Math_TAU) / p_step;
 
             do_motion = true;
 
@@ -611,7 +618,7 @@ export class Body2DSW extends CollisionObject2DSW {
             if (!this.omit_force_integration && !this.first_integration) {
                 // overridden by direct state query
 
-                const force = this.gravity.clone().scale(this.mass);
+                let force = this.gravity.clone().scale(this.mass);
                 force.add(this.applied_force);
                 let torque = this.applied_torque;
 
@@ -650,15 +657,13 @@ export class Body2DSW extends CollisionObject2DSW {
             this._update_shapes_with_motion(motion);
         }
 
-        this.def_area = null; // clear the area, so it is set in the next frame
+        def_area = null; // clear the area, so it is set in the next frame
         this.contact_count = 0;
 
         Vector2.free(motion);
     }
-    /**
-     * @param {number} p_step
-     */
-    integrate_velocities(p_step) {
+
+    integrate_velocities(p_step: number) {
         if (this.mode === BodyMode.STATIC) {
             return;
         }
@@ -684,20 +689,23 @@ export class Body2DSW extends CollisionObject2DSW {
         const angle = this.transform.get_rotation() + total_angular_velocity * p_step;
         const pos = this.transform.get_origin().add(total_linear_velocity.scale(p_step));
 
-        const t = Transform2D.create().rotate(angle).translate(pos.x, pos.y);
+        let t = Transform2D.create().set_rotation_and_pos(angle, pos);
         this._set_transform(t, this.continuous_cd_mode === CCDMode.DISABLED);
-        this._set_inv_transform(this.transform.inverse());
+        let inv_transform = this.transform.clone().invert();
+        this._set_inv_transform(inv_transform);
 
         if (this.continuous_cd_mode !== CCDMode.DISABLED) {
             this.new_transform.copy(this.transform);
         }
 
+        Transform2D.free(inv_transform);
         Vector2.free(total_linear_velocity);
         Vector2.free(pos);
         Transform2D.free(t);
     }
 
-    get_motion() {
+    /** Returns new Vector2 */
+    get_motion(): Vector2 {
         if (this.mode > BodyMode.KINEMATIC) {
             const origin = this.transform.get_origin();
             const motion = this.new_transform.get_origin().subtract(origin);
@@ -753,7 +761,7 @@ export class Body2DSW extends CollisionObject2DSW {
         }
     }
 
-    sleep_test(p_step) {
+    sleep_test(p_step: number) {
         if (this.mode === BodyMode.STATIC || this.mode === BodyMode.KINEMATIC)
             return true; //
         else if (this.mode === BodyMode.CHARACTER)
@@ -771,4 +779,161 @@ export class Body2DSW extends CollisionObject2DSW {
             return false;
         }
     }
+}
+
+export class Physics2DDirectBodyStateSW {
+    get_total_gravity(): Vector2 {
+        return this.body.gravity;
+    }
+    get_total_linear_damp(): number {
+        return this.body.area_linear_damp;
+    }
+    get_total_angular_damp(): number {
+        return this.body.area_angular_damp;
+    }
+
+    get_inverse_mass(): number {
+        return this.body._inv_mass;
+    }
+
+    get_inverse_inertia(): number {
+        return this.body._inv_inertia;
+    }
+
+    set_linear_velocity(velocity: Vector2) {
+        return this.body.linear_velocity.copy(velocity);
+    }
+
+    get_linear_velocity(): Vector2 {
+        return this.body.linear_velocity;
+    }
+
+    set_angular_velocity(velocity: number) {
+        this.body.angular_velocity = velocity;
+    }
+
+    get_angular_velocity(): number {
+        return this.body.angular_velocity;
+    }
+
+    set_transform(transform: Transform2D) {
+        this.body.set_state(BodyState.TRANSFORM, transform);
+    }
+    get_transform(): Transform2D {
+        return this.body.transform;
+    }
+
+    add_central_force(force: Vector2) {
+        this.body.add_central_force(force);
+    }
+    add_force(offset: Vector2, force: Vector2) {
+        this.body.add_force(offset, force);
+    }
+    add_torque(torque: number) {
+        this.body.add_torque(torque);
+    }
+    apply_central_impulse(impulse: Vector2) {
+        this.body.apply_central_impulse(impulse);
+    }
+    apply_torque_impulse(torque: number) {
+        this.body.apply_torque_impulse(torque);
+    }
+    apply_impulse(offset: Vector2, impulse: Vector2) {
+        this.body.apply_impulse(offset, impulse);
+    }
+
+    set_sleep_state(p_enable: boolean) {
+        this.body.active = !p_enable;
+    }
+    is_sleeping(): boolean {
+        return !this.body.active;
+    }
+
+    get_contact_count(): number {
+        return this.body.contact_count;
+    }
+
+    get_contact_local_position(contact_idx: number): Vector2 {
+        return this.body.contacts[contact_idx].local_pos;
+    }
+    get_contact_local_normal(contact_idx: number): Vector2 {
+        return this.body.contacts[contact_idx].local_normal;
+    }
+    get_contact_local_shape(contact_idx: number): number {
+        return this.body.contacts[contact_idx].local_shape;
+    }
+
+    get_contact_collider(contact_idx: number): Body2DSW {
+        return this.body.contacts[contact_idx].collider;
+    }
+    get_contact_collider_id(contact_idx: number): Node2D {
+        return this.body.contacts[contact_idx].collider_instance;
+    }
+    get_contact_collider_position(contact_idx: number): Vector2 {
+        return this.body.contacts[contact_idx].collider_pos;
+    }
+    get_contact_collider_shape(contact_idx: number): number {
+        return this.body.contacts[contact_idx].collider_shape;
+    }
+    get_contact_collider_shape_metadata(contact_idx: number): any {
+        let other: Body2DSW = this.body.contacts[contact_idx].collider;
+
+        let sidx = this.body.contacts[contact_idx].collider_shape;
+        if (sidx < 0 || sidx >= other.shapes.length) {
+            return null;
+        }
+
+        return other.get_shape_metadata(sidx);
+    }
+    get_contact_collider_velocity_at_position(contact_idx: number): Vector2 {
+        return this.body.contacts[contact_idx].collider_velocity_at_pos;
+    }
+
+    get_step(): number {
+        return this.step;
+    }
+
+    get_space_state() {
+        return this.body.space.direct_access;
+    }
+
+    body: Body2DSW = null;
+    step = 0;
+
+    constructor() {
+        Physics2DDirectBodyStateSW.singleton = this;
+        this.body = null;
+    }
+    _predelete() {
+        return true;
+    }
+    _free() { }
+
+    integrate_forces() {
+        let step = this.step;
+        let gravity = this.get_total_gravity();
+        let lv = this.get_linear_velocity().clone();
+        lv.add(gravity.x * step, gravity.y * step);
+
+        let av = this.get_angular_velocity();
+
+        let damp = 1 - step * this.get_total_linear_damp();
+
+        if (damp < 0) damp = 0;
+
+        lv.scale(damp);
+
+        damp = 1 - step * this.get_total_angular_damp();
+
+        if (damp < 0) damp = 0;
+
+        av *= damp;
+
+        this.set_linear_velocity(lv);
+        this.set_angular_velocity(av);
+
+        Vector2.free(lv);
+    }
+
+    static singleton: Physics2DDirectBodyStateSW = null;
 }

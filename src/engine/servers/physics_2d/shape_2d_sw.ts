@@ -112,7 +112,6 @@ export class Shape2DSW {
         return 0;
     }
     set_data(p_data: any) { }
-    get_data() { }
 
     /**
      * @param {ShapeOwner2DSW} p_owner
@@ -218,7 +217,7 @@ export class SegmentShape2DSW extends Shape2DSW {
     }
 
     /**
-     * @param {Transform2D} p_xform
+     * Returns a new Vector2
      */
     get_xformed_normal(p_xform: Transform2D) {
         const aa = p_xform.xform(this.a);
@@ -322,9 +321,6 @@ export class SegmentShape2DSW extends Shape2DSW {
         Vector2.free(n);
         Rect2.free(aabb);
     }
-    get_data() {
-        return Rect2.create(this.a.x, this.a.y, this.b.x, this.b.y);
-    }
 
     /**
      * @param {Vector2} p_normal
@@ -424,19 +420,10 @@ export class RayShape2DSW extends Shape2DSW {
         return 0;
     }
 
-    /**
-     * @param {{ length: number, slips_on_slope: boolean }} p_data
-     */
     set_data({ length, slips_on_slope }: { length: number; slips_on_slope: boolean; }) {
         this.length = length;
         this.slips_on_slope = slips_on_slope;
         this.configure(0, 0, 0.001, length);
-    }
-    get_data() {
-        return {
-            length: this.length,
-            slips_on_slope: this.slips_on_slope,
-        };
     }
 
     /**
@@ -538,15 +525,9 @@ export class CircleShape2DSW extends Shape2DSW {
         return (this.radius * this.radius) * (p_scale.x * 0.5 + p_scale.y * 0.5);
     }
 
-    /**
-     * @param {number} p_data
-     */
     set_data(p_data: number) {
         this.radius = p_data;
         this.configure(-p_data, -p_data, p_data * 2, p_data * 2);
-    }
-    get_data() {
-        return this.radius;
     }
 
     /**
@@ -678,15 +659,9 @@ export class RectangleShape2DSW extends Shape2DSW {
         return res;
     }
 
-    /**
-     * @param {Vector2} p_data
-     */
     set_data(p_data: Vector2) {
         this.half_extents.copy(p_data);
         this.configure(-p_data.x, -p_data.y, p_data.x * 2, p_data.y * 2);
-    }
-    get_data() {
-        return this.half_extents;
     }
 
     /**
@@ -724,9 +699,7 @@ export class RectangleShape2DSW extends Shape2DSW {
     }
 
     /**
-     * @param {Transform2D} p_xform
-     * @param {Transform2D} p_xform_inv
-     * @param {Vector2} p_circle
+     * Returns new Vector2
      */
     get_circle_axis(p_xform: Transform2D, p_xform_inv: Transform2D, p_circle: Vector2) {
         const local_v = p_xform_inv.xform(p_circle);
@@ -738,11 +711,7 @@ export class RectangleShape2DSW extends Shape2DSW {
         return p_xform.xform(he, he).subtract(p_circle).normalize();
     }
     /**
-     * @param {Transform2D} p_xform
-     * @param {Transform2D} p_xform_inv
-     * @param {RectangleShape2DSW} p_B
-     * @param {Transform2D} p_B_xform
-     * @param {Transform2D} p_B_xform_inv
+     * Returns new Vector2
      */
     get_box_axis(p_xform: Transform2D, p_xform_inv: Transform2D, p_B: RectangleShape2DSW, p_B_xform: Transform2D, p_B_xform_inv: Transform2D) {
         const a = Vector2.create();
@@ -791,6 +760,179 @@ RectangleShape2DSW.prototype.project_range_castv = Shape2DSW.prototype.__default
 // @ts-ignore
 RectangleShape2DSW.prototype.project_range_cast = Shape2DSW.prototype.__default_project_range_cast;
 
+export class CapsuleShape2DSW extends Shape2DSW {
+    get type() {
+        return ShapeType.CAPSULE;
+    }
+
+    radius = 0;
+    height = 0;
+
+    /**
+     * @param {Vector2} p_normal
+     * @param {Transform2D} p_transform
+     * @param {{min: number, max: number}} r_result
+     * @return {{min: number, max: number}}
+     */
+    project_rangev(p_normal: Vector2, p_transform: Transform2D, r_result: { min: number; max: number; }): { min: number; max: number; } {
+        return this.project_range(p_normal, p_transform, r_result);
+    }
+    get_supports(p_normal: Vector2, r_supports: Vector2[]): number {
+        let n = p_normal.clone();
+        let r_amount = 0;
+
+        let d = n.y;
+
+        if (Math.abs(d) < (1 - _SEGMENT_IS_VALID_SUPPORT_THRESHOLD)) {
+            n.y = 0;
+            n.normalize();
+            n.scale(this.radius);
+
+            r_amount = 2;
+            r_supports[0].copy(n);
+            r_supports[0].y += this.height * 0.5;
+            r_supports[1].copy(n);
+            r_supports[1].y -= this.height * 0.5;
+        } else {
+            let h = (d > 0) ? this.height : -this.height;
+
+            n.scale(this.radius);
+            n.y += h * 0.5;
+            r_amount = 1;
+            r_supports[0].copy(n);
+        }
+
+        Vector2.free(n);
+        return r_amount;
+    }
+    contains_point(p_point: Vector2): boolean {
+        let p = p_point.clone();
+        p.y = Math.abs(p.y);
+        p.y -= this.height * 0.5;
+        if (p.y < 0) {
+            p.y = 0;
+        }
+
+        Vector2.free(p);
+        return p.length_squared() < this.radius * this.radius;
+    }
+    intersect_segment(p_begin: Vector2, p_end: Vector2, r_point: Vector2, r_normal: Vector2): boolean {
+        let d = 1e10;
+        let n = p_end.clone().subtract(p_begin).normalize();
+        let collided = false;
+
+        let begin = Vector2.create();
+        let end = Vector2.create();
+        let line_vec = Vector2.create();
+        let point = Vector2.create();
+        let pointf = Vector2.create();
+        for (let i = 0; i < 2; i++) {
+            begin.copy(p_begin);
+            end.copy(p_end);
+            let ofs = (i === 0) ? -this.height * 0.5 : this.height * 0.5;
+            begin.y += ofs;
+            end.y += ofs;
+
+            line_vec.copy(end).subtract(begin);
+
+            let a = line_vec.dot(line_vec);
+            let b = 2 * begin.dot(line_vec);
+            let c = begin.dot(begin) - this.radius * this.radius;
+
+            let sqrtterm = b * b - 4 * a * c;
+
+            if (sqrtterm < 0) {
+                continue;
+            }
+
+            sqrtterm = Math.sqrt(sqrtterm);
+            let res = (-b - sqrtterm) / (2 * a);
+
+            if (res < 0 || res > 1 + CMP_EPSILON) {
+                continue;
+            }
+
+            point.copy(begin).subtract(line_vec.scale(res));
+            pointf.set(point.x, point.y - ofs);
+            let pd = n.dot(pointf);
+            if (pd < d) {
+                r_point.copy(pointf);
+                r_normal.copy(point).normalize();
+                d = pd;
+                collided = true;
+            }
+        }
+        Vector2.free(pointf);
+        Vector2.free(point);
+        Vector2.free(line_vec);
+        Vector2.free(end);
+        Vector2.free(begin);
+
+        let rpos = Vector2.create();
+        let rnorm = Vector2.create();
+        let rect = Rect2.create(-this.radius, -this.height * 0.5, this.radius * 2, this.height);
+        if (rect.intersects_segment(p_begin, p_end, rpos, rnorm)) {
+            let pd = n.dot(rpos);
+            if (pd < d) {
+                r_point.copy(rpos);
+                r_normal.copy(rnorm);
+                d = pd;
+                collided = true;
+            }
+        }
+        Rect2.free(rect);
+        Vector2.free(rnorm);
+        Vector2.free(rpos);
+
+        Vector2.free(n);
+
+        return collided;
+    }
+    get_moment_of_inertia(p_mass: number, p_scale: Vector2): number {
+        let he2 = Vector2.create(this.radius * 2, this.height + this.radius * 2).multiply(p_scale);
+        let res = p_mass * he2.dot(he2) / 12.0;
+        Vector2.free(he2);
+        return res;
+    }
+    set_data(p_data: Vector2) {
+        this.radius = p_data.x;
+        this.height = p_data.y;
+        this.configure(-this.radius, -(this.height * 0.5 + this.radius), this.radius * 2, (this.height * 0.5 + this.radius) * 2);
+    }
+
+    project_range(p_normal: Vector2, p_transform: Transform2D, r_result: { min: number; max: number; }): { min: number; max: number; } {
+        if (!r_result) {
+            r_result = { min: 0, max: 0 };
+        }
+        r_result.min = Number.MAX_VALUE;
+        r_result.max = -Number.MAX_VALUE;
+
+        let n = p_transform.basis_xform_inv(p_normal).normalize();
+        let h = (n.y > 0) ? this.height : -this.height;
+
+        n.scale(this.radius);
+        n.y += h * 0.5;
+
+        let nn = Vector2.create();
+        r_result.max = p_normal.dot(p_transform.xform(n, nn));
+        r_result.min = p_normal.dot(p_transform.xform(n.negate(), nn));
+        Vector2.free(nn);
+
+        if (r_result.max < r_result.min) {
+            let tmp = r_result.max;
+            r_result.max = r_result.min;
+            r_result.min = tmp;
+        }
+
+        Vector2.free(n);
+
+        return r_result;
+    }
+}
+CapsuleShape2DSW.prototype.project_range_castv = Shape2DSW.prototype.__default_project_range_cast;
+// @ts-ignore
+CapsuleShape2DSW.prototype.project_range_cast = Shape2DSW.prototype.__default_project_range_cast;
+
 class Point {
     pos = new Vector2;
     normal = new Vector2;
@@ -832,8 +974,7 @@ export class ConvexPolygonShape2DSW extends Shape2DSW {
         return this._points[p_idx].normal;
     }
     /**
-     * @param {Transform2D} p_xform
-     * @param {number} p_idx
+     * Returns a new Vector2
      */
     get_xformed_segment_normal(p_xform: Transform2D, p_idx: number) {
         const a = this._points[p_idx].pos.clone();
@@ -990,9 +1131,6 @@ export class ConvexPolygonShape2DSW extends Shape2DSW {
         }
 
         this.configure(aabb.x, aabb.y, aabb.width, aabb.height);
-    }
-    get_data() {
-        return this._points.map(p => new Point(p.pos.x, p.pos.y, p.normal.x, p.normal.y));
     }
 
     /**

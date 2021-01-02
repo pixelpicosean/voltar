@@ -143,7 +143,7 @@ import { ProjectSettings as ProjectSettings_t } from 'engine/core/project_settin
 import { MessageQueue as MessageQueue_t } from 'engine/core/message_queue';
 import { Engine as Engine_t } from 'engine/core/engine';
 import { VisualServer as VisualServer_t } from 'engine/servers/visual_server';
-import { Physics2DServer as Physics2DServer_t } from 'engine/servers/physics_2d/physics_2d_server.js';
+import { Physics2DServer as Physics2DServer_t } from 'engine/servers/physics_2d/physics_2d_server';
 import { SceneTree as SceneTree_t } from 'engine/scene/main/scene_tree';
 import { AudioServer as AudioServer_t } from 'engine/audio/audio.js';
 

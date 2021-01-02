@@ -12,23 +12,26 @@ import {
     SpaceParameter,
 } from "engine/scene/2d/const";
 
+import { Area2DSW } from "./area_2d_sw";
+import { Area2Pair2DSW, AreaPair2DSW } from "./area_pair_2d";
+import { Body2DSW, Physics2DDirectBodyStateSW } from "./body_2d_sw";
+import { BodyPair2DSW } from "./body_pair_2d";
+import { BroadPhase2D } from "./broad_phase_2d_sw";
+import { CollisionObject2DSW } from "./collision_object_2d_sw";
+import { CollisionSolver2DSW } from "./collision_solver_2d_sw";
+import { Shape2DSW } from "./shape_2d_sw";
+import { Constraint2DSW } from "./constraint_2d_sw";
 import {
-    Physics2DDirectSpaceStateSW,
+    ShapeResult,
     MotionResult,
-    CollCbkData,
-    _shape_col_cbk,
-    Physics2DDirectBodyStateSW,
     SeparationResult,
-} from "./state.js";
-import { Area2DSW } from "./area_2d_sw.js";
-import { Area2Pair2DSW, AreaPair2DSW } from "./area_pair_2d.js";
-import { Body2DSW } from "./body_2d_sw.js";
-import { BodyPair2DSW } from "./body_pair_2d.js";
-import { BroadPhase2D } from "./broad_phase_2d_sw.js";
-import { CollisionObject2DSW } from "./collision_object_2d_sw.js";
-import { CollisionSolver2DSW } from "./collision_solver_2d_sw.js";
-import { Shape2DSW } from "./shape_2d_sw.js";
-import { Constraint2DSW } from "./constraint_2d_sw.js";
+
+    CollCbkData,
+
+    _shape_col_cbk,
+} from "./state";
+
+type Node2D = import("engine/scene/2d/node_2d").Node2D;
 
 
 class ExcludedShapeSW {
@@ -1079,6 +1082,434 @@ export class Space2DSW {
 
         p_self.collision_pairs--;
         p_data._free();
+    }
+}
+
+class RayResult {
+    position = new Vector2;
+    normal = new Vector2;
+    rid: CollisionObject2DSW = null;
+    collider: Node2D = null;
+    shape = 0;
+    metadata: any = null;
+}
+
+class ShapeRestInfo {
+    point = new Vector2;
+    normal = new Vector2;
+    rid: CollisionObject2DSW = null;
+    collider: Node2D = null;
+    shape = 0;
+    linear_velocity = new Vector2;
+    metadata: any = null;
+}
+
+export class Physics2DDirectSpaceStateSW {
+    space: Space2DSW = null;
+
+    _predelete() {
+        return true;
+    }
+    _free() { }
+
+    intersect_ray(p_from: Vector2, p_to: Vector2, r_result: RayResult, p_exclude: Set<CollisionObject2DSW> = new Set, p_collision_mask: number = 0xFFFFFFFF, p_collide_with_bodies: boolean = true, p_collide_with_areas: boolean = false) {
+        let begin = p_from.clone();
+        let end = p_to.clone();
+        let normal = end.clone().subtract(begin).normalize();
+
+        let amount = this.space.broadphase.cull_segment(begin, end, this.space.intersection_query_results, INTERSECTION_QUERY_MAX, this.space.intersection_query_subindex_results);
+
+        let collided = false;
+        let res_point = Vector2.create();
+        let res_normal = Vector2.create();
+        let res_shape = 0;
+        let res_obj: CollisionObject2DSW = null;
+        let min_d = 1e10;
+
+        let inv_xform = Transform2D.create();
+        let local_from = Vector2.create();
+        let local_to = Vector2.create();
+        let shape_point = Vector2.create();
+        let shape_normal = Vector2.create();
+        let xform = Transform2D.create();
+        for (let i = 0; i < amount; i++) {
+            if (!_can_collide_with(this.space.intersection_query_results[i], p_collision_mask, p_collide_with_bodies, p_collide_with_areas)) {
+                continue;
+            }
+
+            if (p_exclude.has(this.space.intersection_query_results[i])) {
+                continue;
+            }
+
+            let col_obj = this.space.intersection_query_results[i];
+
+            let shape_idx = this.space.intersection_query_subindex_results[i];
+            inv_xform.copy(col_obj.get_shape_inv_transform(shape_idx)).append(col_obj.inv_transform);
+
+            inv_xform.xform(begin, local_from);
+            inv_xform.xform(end, local_to);
+
+            let shape = col_obj.get_shape(shape_idx);
+
+            shape_point.set(0, 0);
+            shape_normal.set(0, 0);
+
+            if (shape.intersect_segment(local_from, local_to, shape_point, shape_normal)) {
+                xform.copy(col_obj.transform).append(col_obj.get_shape_transform(shape_idx));
+                xform.xform(shape_point, shape_point);
+
+                let ld = normal.dot(shape_point);
+
+                if (ld < min_d) {
+                    min_d = ld;
+                    res_point.copy(shape_point);
+                    inv_xform.basis_xform_inv(shape_normal, res_normal).normalize();
+                    res_shape = shape_idx;
+                    res_obj = col_obj;
+                    collided = true;
+                }
+            }
+        }
+        Transform2D.free(xform);
+        Vector2.free(shape_normal);
+        Vector2.free(shape_point);
+        Vector2.free(local_to);
+        Vector2.free(local_from);
+        Transform2D.free(inv_xform);
+
+        if (!collided) {
+            Vector2.free(res_point);
+            Vector2.free(res_normal);
+
+            Vector2.free(normal);
+            Vector2.free(end);
+            Vector2.free(begin);
+
+            return false;
+        }
+
+        r_result.collider = res_obj.instance;
+        r_result.normal.copy(res_normal);
+        r_result.metadata = res_obj.get_shape_metadata(res_shape);
+        r_result.position.copy(res_point);
+        r_result.rid = res_obj.self;
+        r_result.shape = res_shape;
+
+        Vector2.free(res_point);
+        Vector2.free(res_normal);
+
+        Vector2.free(normal);
+        Vector2.free(end);
+        Vector2.free(begin);
+
+        return true;
+    }
+
+    intersect_point(p_point: Vector2, r_result: ShapeResult[], p_result_max: number, p_exclude: CollisionObject2DSW[] = undefined, p_collision_mask: number = 0xFFFFFFFF, p_collide_with_bodies: boolean = true, p_collide_with_areas: boolean = false, p_pick_point: boolean = false) {
+        this._intersect_point_impl(p_point, r_result, p_result_max, p_exclude, p_collision_mask, p_collide_with_bodies, p_collide_with_areas, p_pick_point);
+    }
+
+    intersect_shape(p_shape: Shape2DSW, p_xform: Transform2D, p_motion: Vector2, p_margin: number, r_result: ShapeResult[], p_result_max: number, p_exclude: CollisionObject2DSW[] = undefined, p_collision_mask: number = 0xFFFFFFFF, p_collide_with_bodies: boolean = true, p_collide_with_areas: boolean = false) {
+        if (p_result_max <= 0) return 0;
+
+        let aabb = p_xform.xform_rect(p_shape.aabb);
+        aabb.grow_by(p_margin);
+
+        let amount = this.space.broadphase.cull_aabb(aabb, this.space.intersection_query_results, INTERSECTION_QUERY_MAX, this.space.intersection_query_subindex_results);
+
+        let cc = 0;
+
+        for (let i = 0; i < amount; i++) {
+            if (cc >= p_result_max) {
+                break;
+            }
+
+            if (!_can_collide_with(this.space.intersection_query_results[i], p_collision_mask, p_collide_with_bodies, p_collide_with_areas)) {
+                continue;
+            }
+
+            if (p_exclude.indexOf(this.space.intersection_query_results[i]) >= 0) {
+                continue;
+            }
+
+            let col_obj = this.space.intersection_query_results[i];
+            let shape_idx = this.space.intersection_query_subindex_results[i];
+
+            r_result[cc].collider = col_obj.instance;
+            r_result[cc].rid = col_obj.self;
+            r_result[cc].shape = shape_idx;
+            r_result[cc].metadata = col_obj.get_shape_metadata(shape_idx);
+
+            cc++;
+        }
+
+        Rect2.free(aabb);
+
+        return cc;
+    }
+
+    cast_motion(p_shape: Shape2DSW, p_xform: Transform2D, p_motion: Vector2, p_margin: number, p_closest: { safe: number, unsafe: number }, p_result_max: number, p_exclude: CollisionObject2DSW[] = undefined, p_collision_mask: number = 0xFFFFFFFF, p_collide_with_bodies: boolean = true, p_collide_with_areas: boolean = false) {
+        let aabb = p_xform.xform_rect(p_shape.aabb);
+        let ext = Rect2.create(aabb.x + p_motion.x, aabb.y + p_motion.y, aabb.width, aabb.height);
+        aabb.merge_with(ext);
+        Rect2.free(ext);
+        aabb.grow_by(p_margin);
+
+        let amount = this.space.broadphase.cull_aabb(aabb, this.space.intersection_query_results, INTERSECTION_QUERY_MAX, this.space.intersection_query_subindex_results);
+
+        let best_safe = 1;
+        let best_unsafe = 1;
+
+        let col_obj_xform = Transform2D.create();
+        for (let i = 0; i < amount; i++) {
+            if (!_can_collide_with(this.space.intersection_query_results[i], p_collision_mask, p_collide_with_bodies, p_collide_with_areas)) {
+                continue;
+            }
+
+            if (p_exclude.indexOf(this.space.intersection_query_results[i]) >= 0) {
+                continue;
+            }
+
+            let col_obj = this.space.intersection_query_results[i];
+            let shape_idx = this.space.intersection_query_subindex_results[i];
+
+            col_obj_xform.copy(col_obj.transform).append(col_obj.get_shape_transform(shape_idx));
+            if (!CollisionSolver2DSW.solve(p_shape, p_xform, p_motion, col_obj.get_shape(shape_idx), col_obj_xform, Vector2.ZERO, null, null, null, p_margin)) {
+                continue;
+            }
+
+            if (CollisionSolver2DSW.solve(p_shape, p_xform, Vector2.ZERO, col_obj.get_shape(shape_idx), col_obj_xform, Vector2.ZERO, null, null, null, p_margin)) {
+                Transform2D.free(col_obj_xform);
+
+                Rect2.free(aabb);
+                return false;
+            }
+
+            let low = 0;
+            let hi = 1;
+            let mnormal = p_motion.normalized();
+
+            let motion_with_ofs = Vector2.create();
+            for (let j = 0; j < 8; j++) {
+                let ofs = (low + hi) * 0.5;
+
+                seps[0].copy(mnormal);
+                motion_with_ofs.copy(p_motion).scale(ofs);
+                let collided = CollisionSolver2DSW.solve(p_shape, p_xform, motion_with_ofs, col_obj.get_shape(shape_idx), col_obj_xform, Vector2.ZERO, null, null, seps, p_margin);
+
+                if (collided) {
+                    hi = ofs;
+                } else {
+                    low = ofs;
+                }
+            }
+            Vector2.free(motion_with_ofs);
+
+            Vector2.free(mnormal);
+
+            if (low < best_safe) {
+                best_safe = low;
+                best_unsafe = hi;
+            }
+        }
+        Transform2D.free(col_obj_xform);
+
+        p_closest.safe = best_safe;
+        p_closest.unsafe = best_unsafe;
+
+        Rect2.free(aabb);
+
+        return true;
+    }
+
+    collide_shape(p_shape: Shape2DSW, p_shape_xform: Transform2D, p_motion: Vector2, p_margin: number, r_results: Vector2[], p_result_max: number, r_result: { count: number }, p_exclude: CollisionObject2DSW[] = undefined, p_collision_mask: number = 0xFFFFFFFF, p_collide_with_bodies: boolean = true, p_collide_with_areas: boolean = false) {
+        if (p_result_max <= 0) return 0;
+
+        let aabb = p_shape_xform.xform_rect(p_shape.aabb);
+        let ext = Rect2.create(aabb.x + p_motion.x, aabb.y + p_motion.y, aabb.width, aabb.height);
+        aabb.merge_with(ext);
+        Rect2.free(ext);
+        aabb.grow_by(p_margin);
+
+        let amount = this.space.broadphase.cull_aabb(aabb, this.space.intersection_query_results, INTERSECTION_QUERY_MAX, this.space.intersection_query_subindex_results);
+
+        let collided = false;
+        r_result.count = 0;
+
+        cbk.reset();
+        cbk.max = p_result_max;
+        cbk.amount = 0;
+        cbk.passed = 0;
+        cbk.ptr = r_results;
+        let cbkres = _shape_col_cbk;
+
+        for (let i = 0; i < amount; i++) {
+            if (!_can_collide_with(this.space.intersection_query_results[i], p_collision_mask, p_collide_with_bodies, p_collide_with_areas)) {
+                continue;
+            }
+
+            let col_obj = this.space.intersection_query_results[i];
+            let shape_idx = this.space.intersection_query_subindex_results[i];
+
+            if (p_exclude.indexOf(col_obj) >= 0) {
+                continue;
+            }
+
+            cbk.valid_dir.set(0, 0);
+            cbk.valid_depth = 0;
+
+            let local_xform = col_obj.transform.clone().append(col_obj.get_shape_transform(shape_idx));
+            if (CollisionSolver2DSW.solve(p_shape, p_shape_xform, p_motion, col_obj.get_shape(shape_idx), local_xform, Vector2.ZERO, cbkres, cbk, null, p_margin)) {
+                collided = cbk.amount > 0;
+            }
+            Transform2D.free(local_xform);
+        }
+
+        r_result.count = cbk.amount;
+
+        Rect2.free(aabb);
+
+        return collided;
+    }
+
+    rest_info(p_shape: Shape2DSW, p_shape_xform: Transform2D, p_motion: Vector2, p_margin: number, r_info: ShapeRestInfo, p_exclude: CollisionObject2DSW[] = undefined, p_collision_mask: number = 0xFFFFFFFF, p_collide_with_bodies: boolean = true, p_collide_with_areas: boolean = false) {
+        let aabb = p_shape_xform.xform_rect(p_shape.aabb);
+        let ext = Rect2.create(aabb.x + p_motion.x, aabb.y + p_motion.y, aabb.width, aabb.height);
+        aabb.merge_with(ext);
+        Rect2.free(ext);
+        aabb.grow_by(p_margin);
+
+        let amount = this.space.broadphase.cull_aabb(aabb, this.space.intersection_query_results, INTERSECTION_QUERY_MAX, this.space.intersection_query_subindex_results);
+
+        rcd.reset();
+        rcd.best_len = 0;
+        rcd.best_object = null;
+        rcd.best_shape = 0;
+        rcd.min_allowed_depth = this.space.test_motion_min_contact_depth;
+
+        for (let i = 0; i < amount; i++) {
+            if (!_can_collide_with(this.space.intersection_query_results[i], p_collision_mask, p_collide_with_bodies, p_collide_with_areas)) {
+                continue;
+            }
+
+            let col_obj = this.space.intersection_query_results[i];
+            let shape_idx = this.space.intersection_query_subindex_results[i];
+
+            if (p_exclude.indexOf(col_obj) >= 0) {
+                continue;
+            }
+
+            rcd.valid_dir.set(0, 0);
+            rcd.valid_depth = 0;
+            rcd.object = col_obj;
+            rcd.shape = shape_idx;
+            rcd.local_shape = 0;
+
+            let local_xform = col_obj.transform.clone().append(col_obj.get_shape_transform(shape_idx));
+            let sc = CollisionSolver2DSW.solve(p_shape, p_shape_xform, p_motion, col_obj.get_shape(shape_idx), local_xform, Vector2.ZERO, _rest_cbk_result, rcd, null, p_margin);
+            Transform2D.free(local_xform);
+            if (!sc) {
+                continue;
+            }
+        }
+
+        if (rcd.best_len === 0 || !rcd.best_object) {
+            Rect2.free(aabb);
+            return false;
+        }
+
+        r_info.collider = rcd.best_object.instance;
+        r_info.shape = rcd.best_shape;
+        r_info.normal.copy(rcd.best_normal);
+        r_info.point.copy(rcd.best_contact);
+        r_info.rid = rcd.best_object.self;
+        r_info.metadata = rcd.best_object.get_shape_metadata(rcd.best_shape);
+        if (rcd.best_object.type === CollisionObject2DSW$Type.BODY) {
+            let body: Body2DSW = rcd.best_object as Body2DSW;
+            let origin = body.transform.get_origin();
+            let rel_vec = r_info.point.clone().subtract(origin);
+            r_info.linear_velocity.set(
+                -body.angular_velocity * rel_vec.y,
+                body.angular_velocity * rel_vec.x
+            ).add(body.linear_velocity);
+            Vector2.free(rel_vec);
+            Vector2.free(origin);
+        } else {
+            r_info.linear_velocity.set(0, 0);
+        }
+
+        Rect2.free(aabb);
+
+        return true;
+    }
+
+    _intersect_point_impl(p_point: Vector2, r_results: ShapeResult[], p_result_max: number, p_exclude: CollisionObject2DSW[], p_collision_mask: number, p_collide_with_bodies: boolean, p_collide_with_areas: boolean, p_pick_point: boolean, p_filter_by_canvas: boolean = false, p_canvas_instance_id: number = -1): number {
+        if (p_result_max <= 0) {
+            return 0;
+        }
+
+        let aabb = Rect2.create(
+            p_point.x - 0.00001,
+            p_point.y - 0.00001,
+            0.00002,
+            0.00002
+        );
+
+        let space = this.space;
+
+        let amount = space.broadphase.cull_aabb(aabb, space.intersection_query_results, INTERSECTION_QUERY_MAX, space.intersection_query_subindex_results);
+
+        let cc = 0;
+
+        let local_point = Vector2.create();
+        for (let i = 0; i < amount; i++) {
+            if (!_can_collide_with(space.intersection_query_results[i], p_collision_mask, p_collide_with_bodies, p_collide_with_areas)) {
+                continue;
+            }
+
+            if (p_exclude.indexOf(space.intersection_query_results[i]) >= 0) {
+                continue;
+            }
+
+            let col_obj = space.intersection_query_results[i];
+
+            if (p_pick_point && !col_obj.pickable) {
+                continue;
+            }
+
+            if (p_filter_by_canvas && col_obj.canvas_instance.instance_id !== p_canvas_instance_id) {
+                continue;
+            }
+
+            let shape_idx = space.intersection_query_subindex_results[i];
+
+            let shape = col_obj.get_shape(shape_idx);
+
+            let combined_xform = col_obj.transform.clone().append(col_obj.get_shape_transform(shape_idx));
+            combined_xform.affine_inverse()
+                .xform(p_point, local_point);
+            Transform2D.free(combined_xform);
+
+            if (!shape.contains_point(local_point)) {
+                continue;
+            }
+
+            if (cc >= p_result_max) {
+                continue;
+            }
+
+            r_results[cc].collider = col_obj.instance;
+            r_results[cc].rid = col_obj;
+            r_results[cc].shape = shape_idx;
+            r_results[cc].metadata = col_obj.get_shape_metadata(shape_idx);
+
+            cc++;
+        }
+        Vector2.free(local_point);
+
+        Rect2.free(aabb);
+
+        return cc;
     }
 }
 

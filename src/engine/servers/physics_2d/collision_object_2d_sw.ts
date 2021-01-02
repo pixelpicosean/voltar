@@ -1,4 +1,4 @@
-import { remove_item, remove_items } from "engine/dep/index";
+import { remove_item } from "engine/dep/index";
 import { SelfList } from "engine/core/self_list.js";
 import { Vector2 } from "engine/core/math/vector2";
 import { Rect2 } from "engine/core/math/rect2";
@@ -8,8 +8,10 @@ import { CollisionObject2DSW$Type } from "engine/scene/2d/const";
 
 import { Shape2DSW } from "./shape_2d_sw.js";
 import { Space2DSW } from "./space_2d_sw.js";
+import { Physics2DServer } from "./physics_2d_server.js";
 
 type Node2D = import('engine/scene/2d/node_2d').Node2D;
+type CanvasLayer = import('engine/scene/main/canvas_layer').CanvasLayer;
 
 
 const IDTransform = new Transform2D;
@@ -46,7 +48,7 @@ export class CollisionObject2DSW {
     type: CollisionObject2DSW$Type;
     self = this;
     instance: Node2D = null;
-    canvas_instance: Node2D = null;
+    canvas_instance: CanvasLayer = null;
     pickable = true;
 
     shapes: Shape[] = [];
@@ -62,6 +64,10 @@ export class CollisionObject2DSW {
     constructor(p_type: CollisionObject2DSW$Type) {
         this.type = p_type;
     }
+    _predelete() {
+        return true;
+    }
+    _free() { }
 
     _update_shapes() {
         if (!this.space) {
@@ -185,7 +191,7 @@ export class CollisionObject2DSW {
         p_shape.add_owner(this);
 
         if (!this.pending_shape_update_list.in_list()) {
-            // @Incomplete
+            Physics2DServer.get_singleton().pending_shape_update_list.add(this.pending_shape_update_list);
         }
     }
     set_shape(p_index: number, p_shape: Shape2DSW) {
@@ -195,7 +201,7 @@ export class CollisionObject2DSW {
         p_shape.add_owner(this);
 
         if (!this.pending_shape_update_list.in_list()) {
-            // @Incomplete
+            Physics2DServer.get_singleton().pending_shape_update_list.add(this.pending_shape_update_list);
         }
     }
     /**
@@ -207,7 +213,7 @@ export class CollisionObject2DSW {
         this.shapes[p_index].xform_inv.copy(p_transform).affine_inverse();
 
         if (!this.pending_shape_update_list.in_list()) {
-            // @Incomplete
+            Physics2DServer.get_singleton().pending_shape_update_list.add(this.pending_shape_update_list);
         }
     }
     /**
@@ -262,11 +268,11 @@ export class CollisionObject2DSW {
             this.space.broadphase.remove(shape.bpid);
             shape.bpid = 0;
             if (!this.pending_shape_update_list.in_list()) {
-                // @Incomplete
+                Physics2DServer.get_singleton().pending_shape_update_list.add(this.pending_shape_update_list);
             }
         } else if (!p_disabled && shape.bpid === 0) {
             if (!this.pending_shape_update_list.in_list()) {
-                // @Incomplete
+                Physics2DServer.get_singleton().pending_shape_update_list.add(this.pending_shape_update_list);
             }
         }
     }
@@ -320,7 +326,7 @@ export class CollisionObject2DSW {
         remove_item(this.shapes, p_index);
 
         if (!this.pending_shape_update_list.in_list()) {
-            // @Incomplete
+            Physics2DServer.get_singleton().pending_shape_update_list.add(this.pending_shape_update_list);
         }
     }
 
