@@ -789,15 +789,16 @@ export class Space2DSW {
                         rcd.valid_depth = 0;
                     }
 
-                    Transform2D.free(col_obj_shape_xform);
-
                     rcd.object = col_obj;
                     rcd.shape = shape_idx;
                     rcd.local_shape = j;
                     let sc = CollisionSolver2DSW.solve(body_shape.shape, body_shape_xform, Vector2.ZERO, against_shape.shape, col_obj_shape_xform, Vector2.ZERO, _rest_cbk_result, rcd, null, p_margin);
                     if (!sc) {
+                        Transform2D.free(col_obj_shape_xform);
                         continue;
                     }
+
+                    Transform2D.free(col_obj_shape_xform);
                 }
 
                 Transform2D.free(body_shape_xform);
@@ -1085,14 +1086,34 @@ export class Space2DSW {
     }
 }
 
-class RayResult {
+export class RayResult {
     position = new Vector2;
     normal = new Vector2;
     rid: CollisionObject2DSW = null;
     collider: Node2D = null;
     shape = 0;
     metadata: any = null;
+
+    reset(): RayResult {
+        this.position.set(0, 0);
+        this.normal.set(0, 0);
+        this.rid = null;
+        this.collider = null;
+        this.shape = 0;
+        this.metadata = null;
+        return this;
+    }
+
+    static create() {
+        let rr = pool_RayResult.pop();
+        if (!rr) return new RayResult;
+        return rr.reset();
+    }
+    static free(rr: RayResult) {
+        pool_RayResult.push(rr);
+    }
 }
+let pool_RayResult: RayResult[] = [];
 
 class ShapeRestInfo {
     point = new Vector2;
@@ -1102,7 +1123,28 @@ class ShapeRestInfo {
     shape = 0;
     linear_velocity = new Vector2;
     metadata: any = null;
+
+    reset(): ShapeRestInfo {
+        this.point.set(0, 0);
+        this.normal.set(0, 0);
+        this.rid = null;
+        this.collider = null;
+        this.shape = 0;
+        this.linear_velocity.set(0, 0);
+        this.metadata = null;
+        return this;
+    }
+
+    static create() {
+        let rr = pool_ShapeRestInfo.pop();
+        if (!rr) return new ShapeRestInfo;
+        return rr.reset();
+    }
+    static free(rr: ShapeRestInfo) {
+        pool_ShapeRestInfo.push(rr);
+    }
 }
+let pool_ShapeRestInfo: ShapeRestInfo[] = [];
 
 export class Physics2DDirectSpaceStateSW {
     space: Space2DSW = null;

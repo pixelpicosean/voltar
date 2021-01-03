@@ -2,7 +2,7 @@ import { Vector2 } from "engine/core/math/vector2";
 import { Rect2 } from "engine/core/math/rect2";
 
 import { VSG } from "engine/servers/visual/visual_server_globals";
-import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server.js";
+import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server";
 
 import { Viewport } from "../main/viewport";
 import { VisibilityNotifier2D } from "../2d/visibility_notifier_2d";

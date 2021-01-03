@@ -4,13 +4,12 @@ import { Vector2, Vector2Like } from "engine/core/math/vector2";
 import { Transform2D } from "engine/core/math/transform_2d";
 import { ProjectSettings } from "engine/core/project_settings";
 import { Engine } from "engine/core/engine";
-import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server.js";
-import { Body2DSW } from "engine/servers/physics_2d/body_2d_sw.js";
+import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server";
+import { Body2DSW } from "engine/servers/physics_2d/body_2d_sw";
 import {
     MotionResult,
     SeparationResult,
-    Physics2DDirectBodyStateSW,
-} from "engine/servers/physics_2d/state.js";
+} from "engine/servers/physics_2d/state";
 
 import { NOTIFICATION_ENTER_TREE } from "../main/node";
 import { PhysicsMaterial } from "../resources/physics_material";
@@ -20,6 +19,8 @@ import { NOTIFICATION_LOCAL_TRANSFORM_CHANGED } from "./canvas_item";
 import { CollisionObject2D } from "./collision_object_2d";
 import { Node2D } from "./node_2d";
 
+type CollisionObject2DSW = import("engine/servers/physics_2d/collision_object_2d_sw").CollisionObject2DSW;
+type Physics2DDirectBodyStateSW = import("engine/servers/physics_2d/body_2d_sw").Physics2DDirectBodyStateSW;
 
 export class PhysicsBody2D extends CollisionObject2D {
     get class() { return 'PhysicsBody2D' }
@@ -299,8 +300,8 @@ class Collision {
     collision = new Vector2;
     normal = new Vector2;
     collider_vel = new Vector2;
-    collider: StaticBody2D | KinematicBody2D = null;
-    collider_rid: Node2D = null;
+    collider: Node2D = null;
+    collider_rid: CollisionObject2DSW = null;
     collider_shape = 0;
     collider_metadata: any = null;
     remainder = new Vector2;
@@ -369,11 +370,11 @@ export class KinematicCollision2D {
     }
 }
 
-const motion_result = new MotionResult();
+const motion_result = new MotionResult;
 const sep_res = (() => {
     /** @type {SeparationResult[]} */
-    const arr: SeparationResult[] = new Array(8);
-    for (let i = 0; i < 8; i++) arr[i] = new SeparationResult();
+    const arr: SeparationResult[] = Array(8);
+    for (let i = 0; i < 8; i++) arr[i] = new SeparationResult;
     return arr;
 })()
 const get_sep_res = () => {
@@ -390,7 +391,7 @@ export class KinematicBody2D extends PhysicsBody2D {
 
     floor_velocity = new Vector2;
     floor_normal = new Vector2;
-    on_floor_body: PhysicsBody2D = null;
+    on_floor_body: CollisionObject2DSW = null;
     on_floor = false;
     on_ceiling = false;
     on_wall = false;
@@ -521,12 +522,7 @@ export class KinematicBody2D extends PhysicsBody2D {
     }
 
     /**
-     * @param {Vector2} p_linear_velocity
-     * @param {Vector2} [p_up_direction]
-     * @param {boolean} [p_stop_on_slope]
-     * @param {number} [p_max_slides]
-     * @param {number} [p_floor_max_angle]
-     * @param {boolean} [p_infinite_inertia]
+     * Returns a new Vector2
      */
     move_and_slide(p_linear_velocity: Vector2, p_up_direction: Vector2 = Vector2.ZERO, p_stop_on_slope: boolean = false, p_max_slides: number = 4, p_floor_max_angle: number = Math.PI * 0.25, p_infinite_inertia: boolean = true) {
         let body_velocity = p_linear_velocity.clone();
@@ -537,9 +533,9 @@ export class KinematicBody2D extends PhysicsBody2D {
         if (this.on_floor && this.on_floor_body) {
             // this approach makes sure there is less delay between the actual body velocity
             // and the one we saved
-            let bs = this.on_floor_body.rid;
+            let bs = Physics2DServer.get_singleton().body_get_direct_state(this.on_floor_body as Body2DSW);
             if (bs) {
-                current_floor_velocity.copy(bs.linear_velocity);
+                current_floor_velocity.copy(bs.get_linear_velocity());
             }
         }
 
@@ -587,7 +583,7 @@ export class KinematicBody2D extends PhysicsBody2D {
                         if (Math.acos(collision.normal.dot(up_direction)) <= p_floor_max_angle + FLOOR_ANGLE_THRESHOLD) { // floor
                             this.on_floor = true;
                             this.floor_normal.copy(collision.normal);
-                            this.on_floor_body = collision.collider;
+                            this.on_floor_body = collision.collider_rid;
                             this.floor_velocity.copy(collision.collider_vel);
 
                             if (p_stop_on_slope) {
@@ -669,7 +665,7 @@ export class KinematicBody2D extends PhysicsBody2D {
                 if (Math.acos(col.normal.dot(up_direction)) <= p_floor_max_angle + FLOOR_ANGLE_THRESHOLD) {
                     this.on_floor = true;
                     this.floor_normal.copy(col.normal);
-                    this.on_floor_body = col.collider_rid as PhysicsBody2D;
+                    this.on_floor_body = col.collider_rid;
                     this.floor_velocity.copy(col.collider_vel);
                     if (p_stop_on_slope) {
                         col.travel
@@ -742,9 +738,6 @@ export class KinematicBody2D extends PhysicsBody2D {
         return inst;
     }
 
-    /**
-     * @param {Physics2DDirectBodyStateSW} p_state
-     */
     _direct_state_changed(p_state: Physics2DDirectBodyStateSW) {
         if (!this.sync_to_physics) {
             return;

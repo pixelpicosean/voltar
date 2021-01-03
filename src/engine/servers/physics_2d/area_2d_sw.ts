@@ -7,7 +7,7 @@ import {
     AreaParameter,
 } from "engine/scene/2d/const";
 
-import { AREA_BODY_ADDED, AREA_BODY_REMOVED } from "./physics_2d_server.js";
+import { AREA_BODY_ADDED, AREA_BODY_REMOVED } from "./physics_2d_server";
 import { CollisionObject2DSW } from "./collision_object_2d_sw";
 
 type Node2D = import("engine/scene/2d/node_2d").Node2D;

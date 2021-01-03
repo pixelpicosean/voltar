@@ -16,7 +16,7 @@ import {
 type CallbackResult = import("./collision_solver_2d_sw").CallbackResult;
 type CollisionFunc = (A: Shape2DSW, xform_A: Transform2D, B: Shape2DSW, xform_B: Transform2D, collector: _CollectorCallback2D, motion_A: Vector2, motion_B: Vector2, margin_A: number, margin_B: number) => void;
 
-const create_vec_array = (n: number) => {
+function create_vec_array(n: number) {
     /** @type {Vector2[]} */
     const array: Vector2[] = Array(n);
     for (let i = 0; i < n; i++) {
@@ -24,10 +24,7 @@ const create_vec_array = (n: number) => {
     }
     return array;
 }
-/**
- * @param {Vector2[]} arr
- */
-const reset_vec_array = (arr: Vector2[]) => {
+function reset_vec_array(arr: Vector2[]) {
     for (let v of arr) v.set(0, 0);
     return arr;
 }
@@ -35,6 +32,17 @@ const reset_vec_array = (arr: Vector2[]) => {
 const max_supports = 2;
 const supports_vec_1 = create_vec_array(max_supports);
 const supports_vec_2 = create_vec_array(max_supports);
+
+const res_A = { min: 0, max: 0 };
+function get_res_A() {
+    res_A.min = res_A.max = 0;
+    return res_A;
+}
+const res_B = { min: 0, max: 0 };
+function get_res_B() {
+    res_B.min = res_B.max = 0;
+    return res_B;
+}
 
 
 class _CollectorCallback2D {
@@ -213,8 +221,8 @@ function _generate_contacts_from_supports(p_points_A: Vector2[], p_point_count_A
         points_B = p_points_A;
     }
 
-    const version_A = (pointcount_A > 3 ? 3 : pointcount_A) - 1;
-    const version_B = (pointcount_B > 3 ? 3 : pointcount_B) - 1;
+    const version_A = (pointcount_A > 2 ? 2 : pointcount_A) - 1;
+    const version_B = (pointcount_B > 2 ? 2 : pointcount_B) - 1;
 
     const contacts_func = generate_contacts_func_table[version_A][version_B];
     contacts_func(points_A, pointcount_A, points_B, pointcount_B, p_collector);
@@ -259,13 +267,13 @@ class SeparatorAxisTest2D<ShapeA, ShapeB> {
         this.callback = p_collector;
         return this;
     }
-    test_previous_axis() {
+    test_previous_axis(): boolean {
         if (this.callback && this.callback.sep_axis && !this.callback.sep_axis[0].is_zero()) {
             return this.test_axis(this.callback.sep_axis[0]);
         }
         return true;
     }
-    test_cast() {
+    test_cast(): boolean {
         if (this.cast_A) {
             let na = this.motion_A.normalized();
             if (!this.test_axis(na)) {
@@ -302,7 +310,7 @@ class SeparatorAxisTest2D<ShapeA, ShapeB> {
 
         return true;
     }
-    test_axis(p_axis: Vector2) {
+    test_axis(p_axis: Vector2): boolean {
         let axis = p_axis.clone();
 
         if (
@@ -313,23 +321,23 @@ class SeparatorAxisTest2D<ShapeA, ShapeB> {
             axis.set(0, 1);
         }
 
-        let res_A = { min: 0, max: 0 };
-        let res_B = { min: 0, max: 0 };
+        let res_A = get_res_A();
+        let res_B = get_res_B();
 
         if (this.cast_A) {
             // @ts-ignore
-            this.shape_A.project_range_cast(this.motion_A, axis, this.transform_A, res_A);
+            (this.shape_A as unknown as Shape2DSW).project_range_cast(this.motion_A, axis, this.transform_A, res_A);
         } else {
             // @ts-ignore
-            this.shape_A.project_range(axis, this.transform_A, res_A);
+            (this.shape_A as unknown as Shape2DSW).project_range(axis, this.transform_A, res_A);
         }
 
         if (this.cast_B) {
             // @ts-ignore
-            this.shape_B.project_range_cast(this.motion_B, axis, this.transform_B, res_B);
+            (this.shape_B as unknown as Shape2DSW).project_range_cast(this.motion_B, axis, this.transform_B, res_B);
         } else {
             // @ts-ignore
-            this.shape_B.project_range(axis, this.transform_B, res_B);
+            (this.shape_B as unknown as Shape2DSW).project_range(axis, this.transform_B, res_B);
         }
 
         if (this.with_margin) {
@@ -388,14 +396,13 @@ class SeparatorAxisTest2D<ShapeA, ShapeB> {
 
         let negate_best_axis = this.best_axis.clone().negate();
         let negate_best_axis_inv = Vector2.create();
+
         let supports_A = reset_vec_array(supports_vec_1);
         let support_count_A = 0;
         if (this.cast_A) {
-            // @ts-ignore
-            support_count_A = this.shape_A.get_supports_transformed_cast(this.motion_A, negate_best_axis, this.transform_A, supports_A);
+            support_count_A = (this.shape_A as unknown as Shape2DSW).get_supports_transformed_cast(this.motion_A, negate_best_axis, this.transform_A, supports_A, support_count_A);
         } else {
-            // @ts-ignore
-            support_count_A = this.shape_A.get_supports(this.transform_A.basis_xform_inv(negate_best_axis, negate_best_axis_inv).normalize(), supports_A);
+            support_count_A = (this.shape_A as unknown as Shape2DSW).get_supports(this.transform_A.basis_xform_inv(negate_best_axis, negate_best_axis_inv).normalize(), supports_A, support_count_A);
             for (let i = 0; i < support_count_A; i++) {
                 this.transform_A.xform(supports_A[i], supports_A[i]);
             }
@@ -410,11 +417,9 @@ class SeparatorAxisTest2D<ShapeA, ShapeB> {
         let supports_B = reset_vec_array(supports_vec_2);
         let support_count_B = 0;
         if (this.cast_B) {
-            // @ts-ignore
-            support_count_B = this.shape_B.get_supports_transformed_cast(this.motion_B, best_axis, this.transform_B, supports_B);
+            support_count_B = (this.shape_B as unknown as Shape2DSW).get_supports_transformed_cast(this.motion_B, this.best_axis, this.transform_B, supports_B, support_count_B);
         } else {
-            // @ts-ignore
-            support_count_B = this.shape_B.get_supports(this.transform_B.basis_xform_inv(this.best_axis, negate_best_axis_inv).normalize(), supports_B);
+            support_count_B = (this.shape_B as unknown as Shape2DSW).get_supports(this.transform_B.basis_xform_inv(this.best_axis, negate_best_axis_inv).normalize(), supports_B, support_count_B);
             for (let i = 0; i < support_count_B; i++) {
                 this.transform_B.xform(supports_B[i], supports_B[i]);
             }
@@ -832,20 +837,8 @@ const _collision_circle_circle = (cast_A: boolean, cast_B: boolean, with_margin:
     return solve;
 }
 const _collision_circle_rectangle = (cast_A: boolean, cast_B: boolean, with_margin: boolean) => {
-    /** @type {SeparatorAxisTest2D<CircleShape2DSW, RectangleShape2DSW>} */
     const separator: SeparatorAxisTest2D<CircleShape2DSW, RectangleShape2DSW> = new SeparatorAxisTest2D(cast_A, cast_B, with_margin);
 
-    /**
-     * @param {CircleShape2DSW} p_circle_A
-     * @param {Transform2D} p_transform_A
-     * @param {RectangleShape2DSW} p_rectangle_B
-     * @param {Transform2D} p_transform_B
-     * @param {_CollectorCallback2D} p_collector
-     * @param {Vector2} p_motion_A
-     * @param {Vector2} p_motion_B
-     * @param {number} p_margin_A
-     * @param {number} p_margin_B
-     */
     const solve = (p_circle_A: CircleShape2DSW, p_transform_A: Transform2D, p_rectangle_B: RectangleShape2DSW, p_transform_B: Transform2D, p_collector: _CollectorCallback2D, p_motion_A: Vector2, p_motion_B: Vector2, p_margin_A: number, p_margin_B: number) => {
         separator.init(p_circle_A, p_transform_A, p_rectangle_B, p_transform_B, p_collector, p_motion_A, p_motion_B, p_margin_A, p_margin_B);
 

@@ -83,10 +83,10 @@ export class MainTimerSync {
         ret.idle_step = p_idle_step;
 
         this.time_accum += ret.idle_step;
-        ret.physics_steps = this.time_accum * p_iterations_per_second;
+        ret.physics_steps = Math.floor(this.time_accum * p_iterations_per_second);
 
-        let min_typical_steps = this.typical_physics_steps[0];
-        let max_typical_steps = min_typical_steps + 1;
+        let min_typical_steps = Math.floor(this.typical_physics_steps[0]);
+        let max_typical_steps = Math.floor(min_typical_steps + 1);
 
         let update_typical = false;
 

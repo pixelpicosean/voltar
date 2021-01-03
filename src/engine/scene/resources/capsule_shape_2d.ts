@@ -1,7 +1,8 @@
 import { res_class_map } from "engine/registry";
+import { Vector2 } from "engine/core/math/vector2";
 import { Rect2 } from "engine/core/math/rect2";
 
-import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server.js";
+import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server";
 
 import { Shape2D } from "./shape_2d";
 
@@ -50,7 +51,9 @@ export class CapsuleShape2D extends Shape2D {
     /* private */
 
     _update_shape() {
-        this.shape.set_data(this.radius);
+        let data = Vector2.create(this.radius, this.height);
+        this.shape.set_data(data);
+        Vector2.free(data);
     }
 }
 res_class_map['CapsuleShape2D'] = CapsuleShape2D

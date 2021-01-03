@@ -18,7 +18,7 @@ import {
 } from "./node";
 
 type Viewport = import("./viewport").Viewport;
-type Viewport_t = import("engine/servers/visual/visual_server_viewport.js").Viewport_t;
+type Viewport_t = import("engine/servers/visual/visual_server_viewport").Viewport_t;
 
 export class CanvasLayer extends Node {
     get class() { return 'CanvasLayer' }

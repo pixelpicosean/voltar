@@ -5,6 +5,7 @@ import 'extension/2d/vector_graphic';
 
 import { Preloader } from 'game/preloader';
 import 'game/demo/demo';
+import 'game/demo/platformer';
 
 
 v.preload('media/sprites-0.json');
@@ -23,6 +24,7 @@ v.Main.setup(Settings, {
         // main_scene: Preloader("res://scene/demo.tscn"),
         // main_scene: Preloader("res://scene/demo_3d.tscn"),
         // main_scene: Preloader("res://scene/multi_mat.tscn"),
-        main_scene: Preloader("res://scene/baked_light.tscn"),
+        // main_scene: Preloader("res://scene/baked_light.tscn"),
+        main_scene: Preloader("res://scene/platformer.tscn"),
     },
 });

@@ -1,4 +1,4 @@
-import { res_class_map, node_class_map } from "engine/registry";
+import { node_class_map } from "engine/registry";
 import { GDCLASS } from "engine/core/v_object";
 import { Rect2 } from "engine/core/math/rect2";
 
@@ -8,21 +8,23 @@ import {
     NOTIFICATION_ENTER_TREE,
     NOTIFICATION_UNPARENTED,
 } from "../main/node";
+
 import {
     NOTIFICATION_LOCAL_TRANSFORM_CHANGED,
 } from "./canvas_item";
 import { Node2D } from "./node_2d";
-import { CollisionObject2D } from "./collision_object_2d";
+
+type CollisionObject2D = import('./collision_object_2d').CollisionObject2D;
 
 
 export class CollisionShape2D extends Node2D {
-    get class() { return 'CollisionShape2D' }
+    get class() { return "CollisionShape2D" }
 
     shape: Shape2D = null;
     disabled = false;
     one_way_collision = false;
     one_way_collision_margin = 1.0;
-    parent: import('./collision_object_2d').CollisionObject2D = null;
+    parent: CollisionObject2D = null;
     rect = new Rect2(-10, -10, 20, 20);
 
     shape_owner: Node2D = null;
@@ -48,9 +50,6 @@ export class CollisionShape2D extends Node2D {
         return this;
     }
 
-    /**
-     * @param {number} p_what
-     */
     _notification(p_what: number) {
         switch (p_what) {
             case NOTIFICATION_PARENTED: {
@@ -88,9 +87,6 @@ export class CollisionShape2D extends Node2D {
 
     /* public */
 
-    /**
-     * @param {Shape2D} p_shape
-     */
     set_shape(p_shape: Shape2D) {
         this.shape = p_shape;
         this.update();
@@ -102,9 +98,6 @@ export class CollisionShape2D extends Node2D {
         }
     }
 
-    /**
-     * @param {boolean} p_disabled
-     */
     set_disabled(p_disabled: boolean) {
         this.disabled = p_disabled;
         this.update();
@@ -113,9 +106,6 @@ export class CollisionShape2D extends Node2D {
         }
     }
 
-    /**
-     * @param {boolean} p_one_way_collision
-     */
     set_one_way_collision(p_one_way_collision: boolean) {
         this.one_way_collision = p_one_way_collision;
         this.update();
@@ -124,9 +114,6 @@ export class CollisionShape2D extends Node2D {
         }
     }
 
-    /**
-     * @param {number} p_one_way_collision_margin
-     */
     set_one_way_collision_margin(p_one_way_collision_margin: number) {
         this.one_way_collision_margin = p_one_way_collision_margin;
         if (this.parent) {
@@ -136,9 +123,6 @@ export class CollisionShape2D extends Node2D {
 
     /* private */
 
-    /**
-     * @param {boolean} [p_xform_only]
-     */
     _update_in_shape_owner(p_xform_only: boolean = false) {
         this.parent.shape_owner_set_transform(this.shape_owner, this.get_transform());
         if (p_xform_only) {

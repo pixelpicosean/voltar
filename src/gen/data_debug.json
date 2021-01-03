@@ -286,6 +286,651 @@
             }
         ]
     },
+    "res://scene/platformer.tscn": {
+        "type": "PackedScene",
+        "ext": {
+            "1": "monitor",
+            "2": "alien",
+            "3": "media/palette.png"
+        },
+        "sub": [
+            {
+                "id": 1,
+                "type": "ConvexPolygonShape2D",
+                "points": [
+                    32,
+                    32,
+                    0,
+                    32,
+                    0,
+                    0,
+                    32,
+                    0
+                ]
+            },
+            {
+                "id": 2,
+                "type": "ConvexPolygonShape2D",
+                "points": [
+                    32,
+                    32,
+                    0,
+                    32,
+                    0,
+                    0,
+                    32,
+                    0
+                ]
+            },
+            {
+                "id": 3,
+                "type": "TileSet",
+                "resource": [
+                    {
+                        "name": "oneway",
+                        "texture": [
+                            "@ext#",
+                            "1"
+                        ],
+                        "tex_offset": {
+                            "x": 0,
+                            "y": 0
+                        },
+                        "modulate": {
+                            "r": 1,
+                            "g": 1,
+                            "b": 1,
+                            "a": 1
+                        },
+                        "region": {
+                            "x": 32,
+                            "y": 32,
+                            "width": 32,
+                            "height": 32
+                        },
+                        "tile_mode": 0,
+                        "occluder_offset": {
+                            "x": 0,
+                            "y": 0
+                        },
+                        "navigation_offset": {
+                            "x": 0,
+                            "y": 0
+                        },
+                        "shape_offset": {
+                            "x": 0,
+                            "y": 0
+                        },
+                        "shape_transform": [
+                            1,
+                            0,
+                            0,
+                            1,
+                            0,
+                            0
+                        ],
+                        "shape": [
+                            "@sub#",
+                            "1"
+                        ],
+                        "shape_one_way": true,
+                        "shape_one_way_margin": 1,
+                        "shapes": [
+                            {
+                                "autotile_coord": {
+                                    "x": 0,
+                                    "y": 0
+                                },
+                                "one_way": true,
+                                "one_way_margin": 1,
+                                "shape": [
+                                    "@sub#",
+                                    "1"
+                                ],
+                                "shape_transform": [
+                                    1,
+                                    0,
+                                    0,
+                                    1,
+                                    0,
+                                    0
+                                ]
+                            }
+                        ],
+                        "z_index": 0
+                    },
+                    {
+                        "name": "solid",
+                        "texture": [
+                            "@ext#",
+                            "1"
+                        ],
+                        "tex_offset": {
+                            "x": 0,
+                            "y": 0
+                        },
+                        "modulate": {
+                            "r": 1,
+                            "g": 1,
+                            "b": 1,
+                            "a": 1
+                        },
+                        "region": {
+                            "x": 96,
+                            "y": 224,
+                            "width": 32,
+                            "height": 32
+                        },
+                        "tile_mode": 0,
+                        "occluder_offset": {
+                            "x": 0,
+                            "y": 0
+                        },
+                        "navigation_offset": {
+                            "x": 0,
+                            "y": 0
+                        },
+                        "shape_offset": {
+                            "x": 0,
+                            "y": 0
+                        },
+                        "shape_transform": [
+                            1,
+                            0,
+                            0,
+                            1,
+                            0,
+                            0
+                        ],
+                        "shape": [
+                            "@sub#",
+                            "2"
+                        ],
+                        "shape_one_way": false,
+                        "shape_one_way_margin": 1,
+                        "shapes": [
+                            {
+                                "autotile_coord": {
+                                    "x": 0,
+                                    "y": 0
+                                },
+                                "one_way": false,
+                                "one_way_margin": 1,
+                                "shape": [
+                                    "@sub#",
+                                    "2"
+                                ],
+                                "shape_transform": [
+                                    1,
+                                    0,
+                                    0,
+                                    1,
+                                    0,
+                                    0
+                                ]
+                            }
+                        ],
+                        "z_index": 0
+                    }
+                ]
+            },
+            {
+                "id": 10,
+                "type": "CapsuleShape2D"
+            },
+            {
+                "id": 7,
+                "type": "RectangleShape2D",
+                "extents": {
+                    "x": 308.087,
+                    "y": 10
+                }
+            },
+            {
+                "id": 8,
+                "type": "RectangleShape2D",
+                "extents": {
+                    "x": 100,
+                    "y": 10
+                }
+            },
+            {
+                "id": 9,
+                "type": "RectangleShape2D",
+                "extents": {
+                    "x": 11.8089,
+                    "y": 183.638
+                }
+            }
+        ],
+        "nodes": [
+            {
+                "type": "Node2D",
+                "name": "platformer"
+            },
+            {
+                "type": "TileMap",
+                "name": "tile_map",
+                "parent": ".",
+                "position": {
+                    "x": 0,
+                    "y": 1018
+                },
+                "cell_size": {
+                    "x": 32,
+                    "y": 32
+                },
+                "tile_set": [
+                    "@sub#",
+                    "3"
+                ],
+                "tile_data": [
+                    655364,
+                    1,
+                    0,
+                    655387,
+                    1,
+                    0,
+                    720900,
+                    1,
+                    0,
+                    720923,
+                    1,
+                    0,
+                    786436,
+                    1,
+                    0,
+                    786459,
+                    1,
+                    0,
+                    851972,
+                    1,
+                    0,
+                    851995,
+                    1,
+                    0,
+                    917508,
+                    1,
+                    0,
+                    917531,
+                    1,
+                    0,
+                    983044,
+                    1,
+                    0,
+                    983067,
+                    1,
+                    0,
+                    1048580,
+                    1,
+                    0,
+                    1048603,
+                    1,
+                    0,
+                    1114116,
+                    1,
+                    0,
+                    1114139,
+                    1,
+                    0,
+                    1179652,
+                    1,
+                    0,
+                    1179675,
+                    1,
+                    0,
+                    1245188,
+                    1,
+                    0,
+                    1245211,
+                    1,
+                    0,
+                    1310724,
+                    1,
+                    0,
+                    1310728,
+                    0,
+                    0,
+                    1310729,
+                    0,
+                    0,
+                    1310730,
+                    0,
+                    0,
+                    1310731,
+                    0,
+                    0,
+                    1310732,
+                    0,
+                    0,
+                    1310739,
+                    1,
+                    0,
+                    1310740,
+                    1,
+                    0,
+                    1310741,
+                    1,
+                    0,
+                    1310742,
+                    1,
+                    0,
+                    1310743,
+                    1,
+                    0,
+                    1310747,
+                    1,
+                    0,
+                    1376260,
+                    1,
+                    0,
+                    1376283,
+                    1,
+                    0,
+                    1441796,
+                    1,
+                    0,
+                    1441819,
+                    1,
+                    0,
+                    1507332,
+                    1,
+                    0,
+                    1507355,
+                    1,
+                    0,
+                    1572868,
+                    1,
+                    0,
+                    1572869,
+                    1,
+                    0,
+                    1572870,
+                    1,
+                    0,
+                    1572871,
+                    1,
+                    0,
+                    1572872,
+                    1,
+                    0,
+                    1572873,
+                    1,
+                    0,
+                    1572874,
+                    1,
+                    0,
+                    1572875,
+                    1,
+                    0,
+                    1572876,
+                    1,
+                    0,
+                    1572877,
+                    1,
+                    0,
+                    1572878,
+                    1,
+                    0,
+                    1572879,
+                    1,
+                    0,
+                    1572880,
+                    1,
+                    0,
+                    1572881,
+                    1,
+                    0,
+                    1572882,
+                    1,
+                    0,
+                    1572883,
+                    1,
+                    0,
+                    1572884,
+                    1,
+                    0,
+                    1572885,
+                    1,
+                    0,
+                    1572886,
+                    1,
+                    0,
+                    1572887,
+                    1,
+                    0,
+                    1572888,
+                    1,
+                    0,
+                    1572889,
+                    1,
+                    0,
+                    1572890,
+                    1,
+                    0,
+                    1572891,
+                    1,
+                    0
+                ],
+                "collision_mask": 0,
+                "format": 1
+            },
+            {
+                "type": "KinematicBody2D",
+                "name": "player",
+                "parent": ".",
+                "position": {
+                    "x": 400,
+                    "y": 668
+                },
+                "collision_layer": 2
+            },
+            {
+                "type": "Sprite",
+                "name": "sprite",
+                "parent": "player",
+                "scale": {
+                    "x": 1.32,
+                    "y": 2
+                },
+                "texture": [
+                    "@ext#",
+                    "2"
+                ]
+            },
+            {
+                "type": "CollisionShape2D",
+                "name": "collider",
+                "parent": "player",
+                "shape": [
+                    "@sub#",
+                    "10"
+                ]
+            },
+            {
+                "type": "StaticBody2D",
+                "name": "floor",
+                "parent": ".",
+                "position": {
+                    "x": 513.913,
+                    "y": 835.61
+                },
+                "collision_mask": 0
+            },
+            {
+                "type": "Sprite",
+                "name": "sprite",
+                "parent": "floor",
+                "scale": {
+                    "x": 153.5,
+                    "y": 3.99998
+                },
+                "texture": [
+                    "@ext#",
+                    "3"
+                ]
+            },
+            {
+                "type": "CollisionShape2D",
+                "name": "collision_shape_2d",
+                "parent": "floor",
+                "shape": [
+                    "@sub#",
+                    "7"
+                ],
+                "scale": {
+                    "x": 1,
+                    "y": 1
+                }
+            },
+            {
+                "type": "StaticBody2D",
+                "name": "oneway",
+                "parent": ".",
+                "position": {
+                    "x": 400,
+                    "y": 700
+                },
+                "collision_mask": 0
+            },
+            {
+                "type": "Sprite",
+                "name": "sprite",
+                "parent": "oneway",
+                "scale": {
+                    "x": 50,
+                    "y": 5.00003
+                },
+                "texture": [
+                    "@ext#",
+                    "3"
+                ]
+            },
+            {
+                "type": "CollisionShape2D",
+                "name": "collision_shape_2d",
+                "parent": "oneway",
+                "shape": [
+                    "@sub#",
+                    "8"
+                ],
+                "scale": {
+                    "x": 1,
+                    "y": 1
+                },
+                "one_way_collision": true,
+                "one_way_collision_margin": 5
+            },
+            {
+                "type": "StaticBody2D",
+                "name": "solid",
+                "parent": ".",
+                "position": {
+                    "x": 700,
+                    "y": 700
+                },
+                "collision_mask": 0
+            },
+            {
+                "type": "Sprite",
+                "name": "sprite",
+                "parent": "solid",
+                "scale": {
+                    "x": 49.9999,
+                    "y": 5.00003
+                },
+                "texture": [
+                    "@ext#",
+                    "3"
+                ]
+            },
+            {
+                "type": "CollisionShape2D",
+                "name": "collision_shape_2d",
+                "parent": "solid",
+                "shape": [
+                    "@sub#",
+                    "8"
+                ],
+                "scale": {
+                    "x": 1,
+                    "y": 1
+                }
+            },
+            {
+                "type": "StaticBody2D",
+                "name": "wall_l",
+                "parent": ".",
+                "position": {
+                    "x": 199.201,
+                    "y": 662.385
+                },
+                "collision_mask": 0
+            },
+            {
+                "type": "Sprite",
+                "name": "sprite",
+                "parent": "wall_l",
+                "scale": {
+                    "x": 5.82448,
+                    "y": 90.2175
+                },
+                "texture": [
+                    "@ext#",
+                    "3"
+                ]
+            },
+            {
+                "type": "CollisionShape2D",
+                "name": "collision_shape_2d",
+                "parent": "wall_l",
+                "shape": [
+                    "@sub#",
+                    "9"
+                ],
+                "scale": {
+                    "x": 1,
+                    "y": 1
+                }
+            },
+            {
+                "type": "StaticBody2D",
+                "name": "wall_r",
+                "parent": ".",
+                "position": {
+                    "x": 831.681,
+                    "y": 662.385
+                },
+                "collision_mask": 0
+            },
+            {
+                "type": "Sprite",
+                "name": "sprite",
+                "parent": "wall_r",
+                "scale": {
+                    "x": 5.82448,
+                    "y": 90.2175
+                },
+                "texture": [
+                    "@ext#",
+                    "3"
+                ]
+            },
+            {
+                "type": "CollisionShape2D",
+                "name": "collision_shape_2d",
+                "parent": "wall_r",
+                "shape": [
+                    "@sub#",
+                    "9"
+                ],
+                "scale": {
+                    "x": 1,
+                    "y": 1
+                }
+            }
+        ]
+    },
     "res://scene/demo.tscn": {
         "type": "PackedScene",
         "ext": {

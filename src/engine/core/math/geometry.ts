@@ -117,26 +117,26 @@ export function get_closest_points_between_segments(p1: Vector2, q1: Vector2, p2
 }
 
 /**
- * @param {Vector2} p_point
- * @param {Vector2[]} p_segment
+ * Returns a new Vector2
  */
 export function get_closest_point_to_segment_uncapped_2d(p_point: Vector2, p_segment: Vector2[]) {
     const p = p_point.clone().subtract(p_segment[0]);
     const n = p_segment[1].clone().subtract(p_segment[0]);
-    const l = n.length();
-    if (l < 1e-10) {
-        Vector2.free(p);
+    const l2 = n.length_squared();
+    if (l2 < 1e-20) {
         Vector2.free(n);
+        Vector2.free(p);
 
-        return p_segment[0];
+        return p_segment[0].clone();
     }
-    n.scale(1 / l);
 
-    const d = n.dot(p);
+    const d = n.dot(p) / l2;
 
-    Vector2.free(p);
+    const ret = p_segment[0].clone().add(n.scale(d));
+
     Vector2.free(n);
-    return p_segment[0].clone().add(n.scale(d));
+    Vector2.free(p);
+    return ret;
 }
 
 /**

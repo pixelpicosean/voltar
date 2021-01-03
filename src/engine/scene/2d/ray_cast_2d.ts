@@ -2,9 +2,9 @@ import { node_class_map } from "engine/registry";
 import { GDCLASS } from "engine/core/v_object";
 import { Vector2 } from "engine/core/math/vector2";
 
-import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server.js";
-import { RayResult } from "engine/servers/physics_2d/state.js";
-import { CollisionObject2DSW } from "engine/servers/physics_2d/collision_object_2d_sw.js";
+import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server";
+import { CollisionObject2DSW } from "engine/servers/physics_2d/collision_object_2d_sw";
+import { RayResult } from "engine/servers/physics_2d/space_2d_sw";
 
 import {
     NOTIFICATION_ENTER_TREE,
@@ -183,18 +183,18 @@ export class RayCast2D extends Node2D {
     /* private */
 
     _update_raycast_state() {
-        const dss = Physics2DServer.get_singleton().space_get_direct_state(this.get_world_2d().space);
+        let dss = Physics2DServer.get_singleton().space_get_direct_state(this.get_world_2d().space);
 
-        const gt = this.get_global_transform().clone();
+        let gt = this.get_global_transform().clone();
 
-        const to = this.cast_to.clone();
+        let to = this.cast_to.clone();
         if (to.is_zero()) {
             to.set(0, 0.01);
         }
 
-        const rr = new RayResult();
+        let rr = RayResult.create();
 
-        const origin = gt.get_origin();
+        let origin = gt.get_origin();
         if (dss.intersect_ray(origin, gt.xform(to, to), rr, this.exclude, this.collision_mask, this.collide_with_bodies, this.collide_with_areas)) {
             this.collided = true;
             this.against = rr.collider;
@@ -207,6 +207,8 @@ export class RayCast2D extends Node2D {
             this.against_shape = 0;
         }
         Vector2.free(origin);
+
+        RayResult.free(rr);
     }
 }
 node_class_map['RayCast2D'] = GDCLASS(RayCast2D, Node2D)

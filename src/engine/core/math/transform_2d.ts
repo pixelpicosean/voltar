@@ -3,8 +3,6 @@ import { Vector2, Vector2Like } from './vector2';
 import { Rect2 } from './rect2';
 
 
-const Math_PI2 = Math_PI * 2;
-
 /**
  * The Matrix class as an object, which makes it a lot faster,
  * here is a representation of it :
@@ -29,11 +27,8 @@ export class Transform2D {
             return new Transform2D(a, b, c, d, tx, ty);
         }
     }
-    /**
-     * @param {Transform2D} m
-     */
     static free(m: Transform2D) {
-        if (m && pool.length < 2019) {
+        if (m && pool.length < 2021) {
             pool.push(m);
         }
         return Transform2D;
@@ -46,18 +41,11 @@ export class Transform2D {
         out = out || Vector2.create();
         return out.set(this.tx, this.ty);
     }
-    /**
-     * @param {Vector2Like} value
-     */
     set_origin(value: Vector2Like) {
         this.tx = value.x;
         this.ty = value.y;
         return this;
     }
-    /**
-     * @param {number} x
-     * @param {number} y
-     */
     set_origin_n(x: number, y: number) {
         this.tx = x;
         this.ty = y;
@@ -346,7 +334,7 @@ export class Transform2D {
     /**
      * @param p_vec The origin
      * @param r_out The point that the new position is assigned to (allowed to be same as input)
-     * @return The new point, inverse-transformed through this matrix
+     * @return Return a new Vector2
      */
     basis_xform_inv(p_vec: Vector2Like, r_out?: Vector2): Vector2 {
         r_out = r_out || Vector2.create();
@@ -361,7 +349,7 @@ export class Transform2D {
      *
      * @param p_vec - The origin
      * @param r_out - The point that the new position is assigned to (allowed to be same as input)
-     * @return The new point, transformed through this matrix
+     * @return Return a new Vector2
      */
     xform(p_vec: Vector2Like, r_out?: Vector2): Vector2 {
         r_out = r_out || Vector2.create();
@@ -678,7 +666,7 @@ export class Transform2D {
     /**
      * Creates a new Matrix object with the same values as this one.
      *
-     * @return {Transform2D} A copy of this matrix. Good for chaining method calls.
+     * @return A copy of this matrix. Good for chaining method calls.
      */
     clone(): Transform2D {
         return Transform2D.create(

@@ -8,7 +8,7 @@ import { is_equal_approx } from 'engine/core/math/math_funcs';
 import { OS } from 'engine/core/os/os';
 import { MessageQueue } from 'engine/core/message_queue';
 import { VisualServer } from 'engine/servers/visual_server';
-import { Physics2DServer } from 'engine/servers/physics_2d/physics_2d_server.js';
+import { Physics2DServer } from 'engine/servers/physics_2d/physics_2d_server';
 import {
     MainLoop,
     NOTIFICATION_WM_MOUSE_ENTER,

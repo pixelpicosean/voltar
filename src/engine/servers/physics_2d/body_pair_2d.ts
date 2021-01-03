@@ -146,7 +146,8 @@ export class BodyPair2DSW extends Constraint2DSW {
         if (B.continuous_cd_mode === CCDMode.CAST_SHAPE) {
             motion_B = B.get_motion();
         }
-        // faster to set than to check..
+
+        let prev_collided = this.collided;
 
         this.collided = CollisionSolver2DSW.solve(shape_A_ptr, xform_A, motion_A, shape_B_ptr, xform_B, motion_B, _add_contact, this, [this.sep_axis]);
         if (!this.collided) {
@@ -189,7 +190,7 @@ export class BodyPair2DSW extends Constraint2DSW {
             return false;
         }
 
-        {
+        if (!prev_collided) {
             if (A.is_shape_one_way_collision(this.shape_A)) {
                 let direction = xform_A.get_axis(1).normalize();
                 let valid = false;
@@ -265,7 +266,7 @@ export class BodyPair2DSW extends Constraint2DSW {
             }
         }
 
-        const max_peneration = this.space.contact_max_allowed_penetration;
+        let max_peneration = this.space.contact_max_allowed_penetration;
 
         let bias = 0.3;
         if (shape_A_ptr.custom_bias || shape_B_ptr.custom_bias) {
@@ -280,7 +281,7 @@ export class BodyPair2DSW extends Constraint2DSW {
 
         this.cc = 0;
 
-        const inv_dt = 1 / p_step;
+        let inv_dt = 1 / p_step;
 
         let do_process = false;
 
@@ -388,6 +389,7 @@ export class BodyPair2DSW extends Constraint2DSW {
         Transform2D.free(xform_A);
         Transform2D.free(xform_Au);
         Vector2.free(offset_A);
+
         return do_process;
     }
 
@@ -484,7 +486,7 @@ export class BodyPair2DSW extends Constraint2DSW {
         // happened before
         let s = get_vec_arr_2();
         let xformed_mnormal = Vector2.create();
-        p_A.get_shape(p_shape_A).get_supports(p_xform_A.basis_xform(mnormal, xformed_mnormal).normalize(), s);
+        p_A.get_shape(p_shape_A).get_supports(p_xform_A.basis_xform(mnormal, xformed_mnormal).normalize(), s, 0);
         let from = p_xform_A.xform(s[0], s[0]);
         let to = from.clone().add(motion);
 

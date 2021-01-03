@@ -2,31 +2,46 @@ import { remove_items } from 'engine/dep/index';
 import { GDCLASS } from 'engine/core/v_object';
 import { Transform2D } from 'engine/core/math/transform_2d';
 
-import { Physics2DServer } from 'engine/servers/physics_2d/physics_2d_server.js';
-import { CollisionObject2DSW } from 'engine/servers/physics_2d/collision_object_2d_sw.js';
-import { Area2DSW } from 'engine/servers/physics_2d/area_2d_sw.js';
-import { Body2DSW } from 'engine/servers/physics_2d/body_2d_sw.js';
+import { Physics2DServer } from 'engine/servers/physics_2d/physics_2d_server';
+import { CollisionObject2DSW } from 'engine/servers/physics_2d/collision_object_2d_sw';
+import { Area2DSW } from 'engine/servers/physics_2d/area_2d_sw';
+import { Body2DSW } from 'engine/servers/physics_2d/body_2d_sw';
 
 import { Shape2D } from '../resources/shape_2d';
 import {
     NOTIFICATION_ENTER_TREE,
     NOTIFICATION_EXIT_TREE,
 } from '../main/node';
-import { Node2D } from './node_2d';
+import { NOTIFICATION_TRANSFORM_CHANGED } from '../const';
+
 import {
     NOTIFICATION_EXIT_CANVAS,
     NOTIFICATION_VISIBILITY_CHANGED,
 } from './canvas_item';
+import { Node2D } from './node_2d';
 import { BodyState } from './const';
-import { CollisionShape2D } from './collision_shape_2d';
-import { CollisionPolygon2D } from './collision_polygon_2d';
-import { NOTIFICATION_TRANSFORM_CHANGED } from '../const';
 
 
 class Shape {
     shape: Shape2D = null;
     index = 0;
+    reset(): Shape {
+        this.shape = null;
+        this.index = 0;
+        return this;
+    }
+
+    static create() {
+        let s = pool_Shape.pop();
+        if (!s) return new Shape;
+        return s.reset();
+    }
+    static free(s: Shape) {
+        pool_Shape.push(s);
+    }
 }
+const pool_Shape: Shape[] = [];
+
 class ShapeData {
     owner: Node2D = null;
     xform = new Transform2D;
@@ -34,7 +49,27 @@ class ShapeData {
     disabled = false;
     one_way_collision = false;
     one_way_collision_margin = 0;
+
+    reset(): ShapeData {
+        this.owner = null;
+        this.xform.identity();
+        this.shapes = [];
+        this.disabled = false;
+        this.one_way_collision = false;
+        this.one_way_collision_margin = 0;
+        return this;
+    }
+
+    static create() {
+        let s = pool_ShapeData.pop();
+        if (!s) return new ShapeData;
+        return s.reset();
+    }
+    static free(s: ShapeData) {
+        pool_ShapeData.push(s);
+    }
 }
+const pool_ShapeData: ShapeData[] = [];
 
 export enum CollisionObjectTypes {
     NONE,
@@ -149,7 +184,7 @@ export class CollisionObject2D extends Node2D {
     /* public */
 
     create_shape_owner(p_owner: Node2D) {
-        const sd = new ShapeData;
+        let sd = new ShapeData;
         sd.owner = p_owner;
         this.shapes.set(p_owner, sd);
         return p_owner;
@@ -162,12 +197,8 @@ export class CollisionObject2D extends Node2D {
         return this.shapes.keys();
     }
 
-    /**
-     * @param {CollisionShape2D|CollisionPolygon2D} p_owner
-     * @param {Transform2D} p_transform
-     */
     shape_owner_set_transform(p_owner: Node2D, p_transform: Transform2D) {
-        const sd = this.shapes.get(p_owner);
+        let sd = this.shapes.get(p_owner);
         sd.xform.copy(p_transform);
         for (let s of sd.shapes) {
             if (this.area) {
@@ -201,60 +232,43 @@ export class CollisionObject2D extends Node2D {
             }
         }
     }
-    /**
-     * @param {CollisionShape2D|CollisionPolygon2D} p_owner
-     */
     is_shape_owner_disabled(p_owner: Node2D) {
         return this.shapes.get(p_owner).disabled;
     }
 
-    /**
-     * @param {CollisionShape2D|CollisionPolygon2D} p_owner
-     * @param {boolean} p_enable
-     */
     shape_owner_set_one_way_collision(p_owner: Node2D, p_enable: boolean) {
         if (this.area) {
             return;
         }
 
-        const sd = this.shapes.get(p_owner);
+        let sd = this.shapes.get(p_owner);
         sd.one_way_collision = p_enable;
         for (let s of sd.shapes) {
             Physics2DServer.get_singleton().body_set_shape_as_one_way_collision(this.rid as Body2DSW, s.index, sd.one_way_collision, sd.one_way_collision_margin);
         }
     }
-    /**
-     * @param {CollisionShape2D|CollisionPolygon2D} p_owner
-     */
     is_shape_owner_one_way_collision(p_owner: Node2D) {
         return this.shapes.get(p_owner).one_way_collision;
     }
 
-    /**
-     * @param {CollisionShape2D|CollisionPolygon2D} p_owner
-     * @param {number} p_margin
-     */
     shape_owner_set_one_way_collision_margin(p_owner: Node2D, p_margin: number) {
         if (this.area) {
             return;
         }
 
-        const sd = this.shapes.get(p_owner);
+        let sd = this.shapes.get(p_owner);
         sd.one_way_collision_margin = p_margin;
         for (let s of sd.shapes) {
             Physics2DServer.get_singleton().body_set_shape_as_one_way_collision(this.rid as Body2DSW, s.index, sd.one_way_collision, sd.one_way_collision_margin);
         }
     }
-    /**
-     * @param {CollisionShape2D|CollisionPolygon2D} p_owner
-     */
     get_shape_owner_one_way_collision_margin(p_owner: Node2D) {
         return this.shapes.get(p_owner).one_way_collision_margin;
     }
 
     shape_owner_add_shape(p_owner: Node2D, p_shape: Shape2D) {
-        const sd = this.shapes.get(p_owner);
-        const s = new Shape;
+        let sd = this.shapes.get(p_owner);
+        let s = new Shape;
         s.index = this.total_subshapes;
         s.shape = p_shape;
         if (this.area) {
@@ -277,7 +291,7 @@ export class CollisionObject2D extends Node2D {
     }
 
     shape_owner_remove_shape(p_owner: Node2D, p_shape: number) {
-        const index_to_remove = this.shapes.get(p_owner).shapes[p_shape].index;
+        let index_to_remove = this.shapes.get(p_owner).shapes[p_shape].index;
         if (this.area) {
             Physics2DServer.get_singleton().area_remove_shape(this.rid as Area2DSW, index_to_remove);
         } else {
@@ -302,9 +316,6 @@ export class CollisionObject2D extends Node2D {
         }
     }
 
-    /**
-     * @param {number} p_shape_index
-     */
     shape_find_owner(p_shape_index: number) {
         for (let [owner, sd] of this.shapes) {
             for (let s of sd.shapes) {

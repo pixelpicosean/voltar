@@ -174,9 +174,6 @@ export class Physics2DServer {
         if (!singleton) singleton = this;
     }
 
-    line_shape_create() {
-        // return new LineShape2DSW;
-    }
     ray_shape_create() {
         return new RayShape2DSW;
     }
@@ -374,6 +371,10 @@ export class Physics2DServer {
     body_set_state(p_body: Body2DSW, p_state: BodyState, p_var: any) {
         p_body.set_state(p_state, p_var);
     }
+    body_get_direct_state(p_body: Body2DSW): Physics2DDirectBodyStateSW {
+        this.direct_state.body = p_body;
+        return this.direct_state;
+    }
     body_add_shape(p_body: Body2DSW, p_shape: Shape2DSW, p_transform: Transform2D) {
         p_body.add_shape(p_shape, p_transform);
     }
@@ -469,7 +470,7 @@ export class Physics2DServer {
         Vector2.free(axis);
         Vector2.free(v);
     }
-    body_set_force_integration_callback(p_body: Body2DSW, p_method: Function, p_scope: any, p_params: any) {
+    body_set_force_integration_callback(p_body: Body2DSW, p_method: Function, p_scope: any, p_params?: any) {
         if (p_body.fi_callback) {
             p_body.fi_callback = null;
         }

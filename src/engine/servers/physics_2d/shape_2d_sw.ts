@@ -8,7 +8,13 @@ import { segment_intersects_segment_2d } from "engine/core/math/geometry";
 
 const _SEGMENT_IS_VALID_SUPPORT_THRESHOLD = 0.99998;
 
-const tmp_vec = new Vector2();
+const tmp_vec = new Vector2;
+const support_vec2 = [new Vector2, new Vector2];
+function get_support_vec2() {
+    support_vec2[0].set(0, 0);
+    support_vec2[1].set(0, 0);
+    return support_vec2;
+}
 
 
 interface ShapeOwner2DSW {
@@ -74,22 +80,12 @@ export class Shape2DSW {
     project_range_castv(p_cast: Vector2, p_normal: Vector2, p_transform: Transform2D, r_result: { min: number; max: number; }): { min: number; max: number; } {
         return null;
     }
-    /**
-     * @param {Vector2} p_normal
-     * @param {Vector2} [out]
-     * @returns {Vector2}
-     */
-    get_support(p_normal: Vector2, out: Vector2 = Vector2.create()): Vector2 {
-        const res = [out, tmp_vec.set(0, 0)];
-        this.get_supports(p_normal, res);
-        return out;
+    get_support(p_normal: Vector2): Vector2 {
+        let res = get_support_vec2();
+        this.get_supports(p_normal, res, 0);
+        return res[0].clone();
     }
-    /**
-     * @param {Vector2} p_normal
-     * @param {Vector2[]} p_supports
-     * @returns {number}
-     */
-    get_supports(p_normal: Vector2, p_supports: Vector2[]): number {
+    get_supports(p_normal: Vector2, p_supports: Vector2[], r_amount: number): number {
         return 0;
     }
 
@@ -135,46 +131,45 @@ export class Shape2DSW {
             this.owners.set(p_owner, co - 1);
         }
     }
-    /**
-     * @param {ShapeOwner2DSW} p_owner
-     */
     is_owner(p_owner: ShapeOwner2DSW) {
         return this.owners.has(p_owner);
     }
 
-    /**
-     * @param {Vector2} p_cast
-     * @param {Vector2} p_normal
-     * @param {Transform2D} p_xform
-     * @param {Vector2[]} r_supports
-     * @returns {number}
-     */
-    get_supports_transformed_cast(p_cast: Vector2, p_normal: Vector2, p_xform: Transform2D, r_supports: Vector2[]): number {
-        let r_amount = this.get_supports(p_xform.xform_inv(p_normal).normalize(), r_supports);
+    get_supports_transformed_cast(p_cast: Vector2, p_normal: Vector2, p_xform: Transform2D, r_supports: Vector2[], r_amount: number): number {
+        let inv_normal = p_xform.xform_inv(p_normal).normalize();
+
+        r_amount = this.get_supports(inv_normal, r_supports, r_amount);
         for (let i = 0; i < r_amount; i++) {
             p_xform.xform(r_supports[i], r_supports[i]);
         }
 
         if (r_amount === 1) {
-            if (Math.abs(p_normal.dot(p_cast.normalized())) < (1 - _SEGMENT_IS_VALID_SUPPORT_THRESHOLD)) {
+            let cast_n = p_cast.normalized();
+            if (Math.abs(p_normal.dot(cast_n)) < (1 - _SEGMENT_IS_VALID_SUPPORT_THRESHOLD)) {
                 r_amount = 2;
                 r_supports[1].copy(r_supports[0]).add(p_cast);
             } else if (p_cast.dot(p_normal) > 0) {
                 r_supports[0].add(p_cast);
             }
+            Vector2.free(cast_n);
         } else {
-            if (Math.abs(p_normal.dot(p_cast.normalized())) < (1 - _SEGMENT_IS_VALID_SUPPORT_THRESHOLD)) {
-                if (r_supports[1].clone().subtract(r_supports[0]).dot(p_cast) > 0) {
+            let cast_n = p_cast.normalized();
+            if (Math.abs(p_normal.dot(cast_n)) < (1 - _SEGMENT_IS_VALID_SUPPORT_THRESHOLD)) {
+                let s_1_minus_0 = r_supports[1].clone().subtract(r_supports[0]);
+                if (s_1_minus_0.dot(p_cast) > 0) {
                     r_supports[1].add(p_cast);
                 } else {
                     r_supports[0].add(p_cast);
                 }
+                Vector2.free(s_1_minus_0);
             } else if (p_cast.dot(p_normal) > 0) {
                 r_supports[0].add(p_cast);
                 r_supports[1].add(p_cast);
             }
+            Vector2.free(cast_n);
         }
 
+        Vector2.free(inv_normal);
         return r_amount;
     }
 
@@ -228,34 +223,24 @@ export class SegmentShape2DSW extends Shape2DSW {
         return res;
     }
 
-    /**
-     * @param {Vector2} p_normal
-     * @param {Transform2D} p_transform
-     * @param {{min: number, max: number}} r_result
-     * @return {{min: number, max: number}}
-     */
     project_rangev(p_normal: Vector2, p_transform: Transform2D, r_result: { min: number; max: number; }): { min: number; max: number; } {
         return this.project_range(p_normal, p_transform, r_result);
     }
-    /**
-     * @param {Vector2} p_normal
-     * @param {Vector2[]} r_supports
-     * @returns {number}
-     */
-    get_supports(p_normal: Vector2, r_supports: Vector2[]): number {
+    get_supports(p_normal: Vector2, r_supports: Vector2[], r_amount: number): number {
         if (Math.abs(p_normal.dot(this.normal)) > _SEGMENT_IS_VALID_SUPPORT_THRESHOLD) {
             r_supports[0].copy(this.a);
             r_supports[1].copy(this.b);
             return 2;
         }
 
-        const sub = this.b.clone().subtract(this.a);
-        const dp = p_normal.dot(sub);
+        let sub = this.b.clone().subtract(this.a);
+        let dp = p_normal.dot(sub);
         if (dp > 0) {
             r_supports[0].copy(this.b);
         } else {
             r_supports[0].copy(this.a);
         }
+        Vector2.free(sub);
         return 1;
     }
 
@@ -379,12 +364,7 @@ export class RayShape2DSW extends Shape2DSW {
 
         return r_result;
     }
-    /**
-     * @param {Vector2} p_normal
-     * @param {Vector2[]} r_supports
-     * @returns {number}
-     */
-    get_supports(p_normal: Vector2, r_supports: Vector2[]): number {
+    get_supports(p_normal: Vector2, r_supports: Vector2[], r_amount: number): number {
         if (p_normal.y > 0) {
             r_supports[0].set(0, this.length);
         } else {
@@ -458,20 +438,9 @@ export class CircleShape2DSW extends Shape2DSW {
 
     radius = 0;
 
-    /**
-     * @param {Vector2} p_normal
-     * @param {Transform2D} p_transform
-     * @param {{min: number, max: number}} r_result
-     * @return {{min: number, max: number}}
-     */
     project_rangev(p_normal: Vector2, p_transform: Transform2D, r_result: { min: number; max: number; }): { min: number; max: number; } {
         return this.project_range(p_normal, p_transform, r_result);
     }
-    /**
-     * @param {Vector2} p_normal
-     * @param {Vector2[]} r_supports
-     * @returns {number}
-     */
     get_supports(p_normal: Vector2, r_supports: Vector2[]): number {
         r_supports[0].copy(p_normal).scale(this.radius);
         return 1;
@@ -549,6 +518,7 @@ export class CircleShape2DSW extends Shape2DSW {
         r_result.min = d - (this.radius) * scale;
         r_result.max = d + (this.radius) * scale;
 
+        Vector2.free(local_normal);
         Vector2.free(origin);
 
         return r_result;
@@ -565,26 +535,16 @@ export class RectangleShape2DSW extends Shape2DSW {
 
     half_extents = new Vector2;
 
-    /**
-     * @param {Vector2} p_normal
-     * @param {Transform2D} p_transform
-     * @param {{min: number, max: number}} r_result
-     * @return {{min: number, max: number}}
-     */
     project_rangev(p_normal: Vector2, p_transform: Transform2D, r_result: { min: number; max: number; }): { min: number; max: number; } {
         return this.project_range(p_normal, p_transform, r_result);
     }
-    /**
-     * @param {Vector2} p_normal
-     * @param {Vector2[]} r_supports
-     * @returns {number}
-     */
-    get_supports(p_normal: Vector2, r_supports: Vector2[]): number {
-        const ag = Vector2.create();
+    get_supports(p_normal: Vector2, r_supports: Vector2[], r_amount: number): number {
+        let ag = Vector2.create();
 
         for (let i = 0; i < 2; i++) {
             if (i === 0) {
-                ag.x = 1;
+                ag.set(1, 0);
+
                 const dp = ag.dot(p_normal);
                 if (Math.abs(dp) < _SEGMENT_IS_VALID_SUPPORT_THRESHOLD) {
                     continue;
@@ -600,7 +560,8 @@ export class RectangleShape2DSW extends Shape2DSW {
 
                 return 2;
             } else {
-                ag.y = 1;
+                ag.set(0, 1);
+
                 const dp = ag.dot(p_normal);
                 if (Math.abs(dp) < _SEGMENT_IS_VALID_SUPPORT_THRESHOLD) {
                     continue;
@@ -622,6 +583,8 @@ export class RectangleShape2DSW extends Shape2DSW {
             (p_normal.x < 0) ? -this.half_extents.x : this.half_extents.x,
             (p_normal.y < 0) ? -this.half_extents.y : this.half_extents.y
         );
+
+        Vector2.free(ag);
 
         return 1;
     }
@@ -671,11 +634,11 @@ export class RectangleShape2DSW extends Shape2DSW {
      * @return {{min: number, max: number}}
      */
     project_range(p_normal: Vector2, p_transform: Transform2D, r_result: { min: number; max: number; }): { min: number; max: number; } {
-        if (r_result === undefined) {
+        if (!r_result) {
             r_result = { min: 0, max: 0 };
         }
-        r_result.min = Number.MAX_VALUE;
-        r_result.max = -Number.MAX_VALUE;
+        r_result.max = -1e20;
+        r_result.min = 1e20;
 
         const local_normal = Vector2.create();
         for (let i = 0; i < 4; i++) {
@@ -777,9 +740,8 @@ export class CapsuleShape2DSW extends Shape2DSW {
     project_rangev(p_normal: Vector2, p_transform: Transform2D, r_result: { min: number; max: number; }): { min: number; max: number; } {
         return this.project_range(p_normal, p_transform, r_result);
     }
-    get_supports(p_normal: Vector2, r_supports: Vector2[]): number {
+    get_supports(p_normal: Vector2, r_supports: Vector2[], r_amount: number): number {
         let n = p_normal.clone();
-        let r_amount = 0;
 
         let d = n.y;
 
@@ -989,21 +951,10 @@ export class ConvexPolygonShape2DSW extends Shape2DSW {
         return normal;
     }
 
-    /**
-     * @param {Vector2} p_normal
-     * @param {Transform2D} p_transform
-     * @param {{min: number, max: number}} r_result
-     * @return {{min: number, max: number}}
-     */
     project_rangev(p_normal: Vector2, p_transform: Transform2D, r_result: { min: number; max: number; }): { min: number; max: number; } {
         return this.project_range(p_normal, p_transform, r_result);
     }
-    /**
-     * @param {Vector2} p_normal
-     * @param {Vector2[]} r_supports
-     * @returns {number}
-     */
-    get_supports(p_normal: Vector2, r_supports: Vector2[]): number {
+    get_supports(p_normal: Vector2, r_supports: Vector2[], r_amount: number): number {
         let support_idx = -1;
         let d = -1e10;
 
