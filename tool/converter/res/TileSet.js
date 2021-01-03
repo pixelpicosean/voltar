@@ -25,6 +25,9 @@ module.exports = (data) => {
                 tile[k] = undefined;
             }
         }
+
+        tile.occluder_offset = undefined;
+        tile.navigation_offset = undefined;
     })
 
     return tileset;

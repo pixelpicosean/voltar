@@ -1058,9 +1058,6 @@ export class ConvexPolygonShape2DSW extends Shape2DSW {
         return res;
     }
 
-    /**
-     * @param {Vector2[]} p_data
-     */
     set_data(p_data: Vector2[]) {
         const point_count = p_data.length;
         for (let i = 0; i < point_count; i++) {
@@ -1074,7 +1071,7 @@ export class ConvexPolygonShape2DSW extends Shape2DSW {
         Vector2.free(t);
         Vector2.free(n);
 
-        const aabb = Rect2.create();
+        let aabb = Rect2.create();
         aabb.x = this._points[0].pos.x;
         aabb.y = this._points[0].pos.y;
         for (let i = 1; i < point_count; i++) {
@@ -1082,6 +1079,8 @@ export class ConvexPolygonShape2DSW extends Shape2DSW {
         }
 
         this.configure(aabb.x, aabb.y, aabb.width, aabb.height);
+
+        Rect2.free(aabb);
     }
 
     /**

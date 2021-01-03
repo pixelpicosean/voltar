@@ -290,8 +290,7 @@
         "type": "PackedScene",
         "ext": {
             "1": "monitor",
-            "2": "alien",
-            "3": "media/palette.png"
+            "2": "alien"
         },
         "sub": [
             {
@@ -349,14 +348,6 @@
                             "height": 32
                         },
                         "tile_mode": 0,
-                        "occluder_offset": {
-                            "x": 0,
-                            "y": 0
-                        },
-                        "navigation_offset": {
-                            "x": 0,
-                            "y": 0
-                        },
                         "shape_offset": {
                             "x": 0,
                             "y": 0
@@ -374,7 +365,7 @@
                             "1"
                         ],
                         "shape_one_way": true,
-                        "shape_one_way_margin": 1,
+                        "shape_one_way_margin": 4,
                         "shapes": [
                             {
                                 "autotile_coord": {
@@ -382,7 +373,7 @@
                                     "y": 0
                                 },
                                 "one_way": true,
-                                "one_way_margin": 1,
+                                "one_way_margin": 4,
                                 "shape": [
                                     "@sub#",
                                     "1"
@@ -422,14 +413,6 @@
                             "height": 32
                         },
                         "tile_mode": 0,
-                        "occluder_offset": {
-                            "x": 0,
-                            "y": 0
-                        },
-                        "navigation_offset": {
-                            "x": 0,
-                            "y": 0
-                        },
                         "shape_offset": {
                             "x": 0,
                             "y": 0
@@ -477,30 +460,6 @@
             {
                 "id": 10,
                 "type": "CapsuleShape2D"
-            },
-            {
-                "id": 7,
-                "type": "RectangleShape2D",
-                "extents": {
-                    "x": 308.087,
-                    "y": 10
-                }
-            },
-            {
-                "id": 8,
-                "type": "RectangleShape2D",
-                "extents": {
-                    "x": 100,
-                    "y": 10
-                }
-            },
-            {
-                "id": 9,
-                "type": "RectangleShape2D",
-                "extents": {
-                    "x": 11.8089,
-                    "y": 183.638
-                }
             }
         ],
         "nodes": [
@@ -512,10 +471,6 @@
                 "type": "TileMap",
                 "name": "tile_map",
                 "parent": ".",
-                "position": {
-                    "x": 0,
-                    "y": 1018
-                },
                 "cell_size": {
                     "x": 32,
                     "y": 32
@@ -720,8 +675,8 @@
                 "name": "player",
                 "parent": ".",
                 "position": {
-                    "x": 400,
-                    "y": 668
+                    "x": 511,
+                    "y": 530
                 },
                 "collision_layer": 2
             },
@@ -746,188 +701,6 @@
                     "@sub#",
                     "10"
                 ]
-            },
-            {
-                "type": "StaticBody2D",
-                "name": "floor",
-                "parent": ".",
-                "position": {
-                    "x": 513.913,
-                    "y": 835.61
-                },
-                "collision_mask": 0
-            },
-            {
-                "type": "Sprite",
-                "name": "sprite",
-                "parent": "floor",
-                "scale": {
-                    "x": 153.5,
-                    "y": 3.99998
-                },
-                "texture": [
-                    "@ext#",
-                    "3"
-                ]
-            },
-            {
-                "type": "CollisionShape2D",
-                "name": "collision_shape_2d",
-                "parent": "floor",
-                "shape": [
-                    "@sub#",
-                    "7"
-                ],
-                "scale": {
-                    "x": 1,
-                    "y": 1
-                }
-            },
-            {
-                "type": "StaticBody2D",
-                "name": "oneway",
-                "parent": ".",
-                "position": {
-                    "x": 400,
-                    "y": 700
-                },
-                "collision_mask": 0
-            },
-            {
-                "type": "Sprite",
-                "name": "sprite",
-                "parent": "oneway",
-                "scale": {
-                    "x": 50,
-                    "y": 5.00003
-                },
-                "texture": [
-                    "@ext#",
-                    "3"
-                ]
-            },
-            {
-                "type": "CollisionShape2D",
-                "name": "collision_shape_2d",
-                "parent": "oneway",
-                "shape": [
-                    "@sub#",
-                    "8"
-                ],
-                "scale": {
-                    "x": 1,
-                    "y": 1
-                },
-                "one_way_collision": true,
-                "one_way_collision_margin": 5
-            },
-            {
-                "type": "StaticBody2D",
-                "name": "solid",
-                "parent": ".",
-                "position": {
-                    "x": 700,
-                    "y": 700
-                },
-                "collision_mask": 0
-            },
-            {
-                "type": "Sprite",
-                "name": "sprite",
-                "parent": "solid",
-                "scale": {
-                    "x": 49.9999,
-                    "y": 5.00003
-                },
-                "texture": [
-                    "@ext#",
-                    "3"
-                ]
-            },
-            {
-                "type": "CollisionShape2D",
-                "name": "collision_shape_2d",
-                "parent": "solid",
-                "shape": [
-                    "@sub#",
-                    "8"
-                ],
-                "scale": {
-                    "x": 1,
-                    "y": 1
-                }
-            },
-            {
-                "type": "StaticBody2D",
-                "name": "wall_l",
-                "parent": ".",
-                "position": {
-                    "x": 199.201,
-                    "y": 662.385
-                },
-                "collision_mask": 0
-            },
-            {
-                "type": "Sprite",
-                "name": "sprite",
-                "parent": "wall_l",
-                "scale": {
-                    "x": 5.82448,
-                    "y": 90.2175
-                },
-                "texture": [
-                    "@ext#",
-                    "3"
-                ]
-            },
-            {
-                "type": "CollisionShape2D",
-                "name": "collision_shape_2d",
-                "parent": "wall_l",
-                "shape": [
-                    "@sub#",
-                    "9"
-                ],
-                "scale": {
-                    "x": 1,
-                    "y": 1
-                }
-            },
-            {
-                "type": "StaticBody2D",
-                "name": "wall_r",
-                "parent": ".",
-                "position": {
-                    "x": 831.681,
-                    "y": 662.385
-                },
-                "collision_mask": 0
-            },
-            {
-                "type": "Sprite",
-                "name": "sprite",
-                "parent": "wall_r",
-                "scale": {
-                    "x": 5.82448,
-                    "y": 90.2175
-                },
-                "texture": [
-                    "@ext#",
-                    "3"
-                ]
-            },
-            {
-                "type": "CollisionShape2D",
-                "name": "collision_shape_2d",
-                "parent": "wall_r",
-                "shape": [
-                    "@sub#",
-                    "9"
-                ],
-                "scale": {
-                    "x": 1,
-                    "y": 1
-                }
             }
         ]
     },

@@ -30,7 +30,6 @@ import {
 } from "./canvas_item";
 import { Node2D } from "./node_2d";
 import { CollisionObject2D } from "./collision_object_2d";
-import { CollisionPolygon2D } from "./collision_polygon_2d";
 import { BodyState, BodyMode } from "./const";
 
 

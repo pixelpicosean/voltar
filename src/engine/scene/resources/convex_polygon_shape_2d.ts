@@ -17,7 +17,7 @@ export class ConvexPolygonShape2D extends Shape2D {
     constructor() {
         super(Physics2DServer.get_singleton().convex_polygon_shape_create());
 
-        const pcount = 3;
+        let pcount = 3;
         for (let i = pcount - 1; i >= 0; i--) {
             this.points.push(Vector2.create(Math.sin(i * Math.PI * 2 / pcount), -Math.cos(i * Math.PI * 2 / pcount)).scale(10));
         }
@@ -32,9 +32,6 @@ export class ConvexPolygonShape2D extends Shape2D {
 
     /* public */
 
-    /**
-     * @param {Vector2Like[]} p_points
-     */
     set_points(p_points: Vector2Like[]) {
         const self_len = this.points.length;
         const new_len = p_points.length;
@@ -53,10 +50,6 @@ export class ConvexPolygonShape2D extends Shape2D {
         this._update_shape();
     }
 
-    /**
-     * @param {Rect2} [p_rect]
-     * @returns {Rect2}
-     */
     get_rect(p_rect: Rect2 = Rect2.create()): Rect2 {
         p_rect.set(0, 0, 0, 0);
         for (let i = 0, len = this.points.length; i < len; i++) {
@@ -72,24 +65,20 @@ export class ConvexPolygonShape2D extends Shape2D {
 
     /**
      * Load points from Godot PoolVector2Array data (array of numbers)
-     * @param {number[]} p_points
      */
     set_points_in_pool_vec2(p_points: number[]) {
-        const p_len = Math.floor(p_points.length / 2);
-        const points = this.points;
+        let p_len = Math.floor(p_points.length / 2);
+        let points = this.points;
         points.length = 0;
 
         for (let i = 0; i < p_len; i++) {
             points.push(new Vector2(p_points[i * 2], p_points[i * 2 + 1]));
         }
         this.points = points;
-
+        this._update_shape();
         return this;
     }
 
-    /**
-     * @param {Vector2[]} p_points
-     */
     set_point_cloud(p_points: Vector2[]) {
         const hull = convex_hull_2d(p_points);
         this.points = hull;
